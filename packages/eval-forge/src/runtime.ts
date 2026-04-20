@@ -1,8 +1,14 @@
-import { getGrader } from "./graders.js";
-import { computeAllMetrics } from "./metrics.js";
-import type { EvalSuiteDef, EvalExecutor, EvalCaseResult, EvalRunReport, EvalCase } from "./types.js";
+import { getGrader } from './graders.js';
+import { computeAllMetrics } from './metrics.js';
+import type {
+  EvalCase,
+  EvalCaseResult,
+  EvalExecutor,
+  EvalRunReport,
+  EvalSuiteDef,
+} from './types.js';
 
-export type { EvalSuiteDef, EvalExecutor, EvalCaseResult, EvalRunReport, EvalCase };
+export type { EvalCase, EvalCaseResult, EvalExecutor, EvalRunReport, EvalSuiteDef };
 
 /**
  * Persistence sink invoked by `runEvalSuite` after each completed run.
@@ -40,7 +46,7 @@ export async function runEvalSuite(
 ): Promise<EvalRunReport> {
   const {
     runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    triggeredBy = "api",
+    triggeredBy = 'api',
     maxConcurrency = 5,
     traceStore,
     onCaseComplete,
@@ -55,10 +61,10 @@ export async function runEvalSuite(
   let completedCount = 0;
 
   const runOne = async (c: EvalCase): Promise<EvalCaseResult> => {
-    const expectedOutcome = c.expectedOutcome ?? "pass";
+    const expectedOutcome = c.expectedOutcome ?? 'pass';
     try {
       const result = await executor(c.input, c.id, c.domain);
-      const trace = traceStore?.get(c.traceId ?? result.traceId ?? "");
+      const trace = traceStore?.get(c.traceId ?? result.traceId ?? '');
       const grader = getGrader(c.graderType);
       const graderResult = await grader({
         graderType: c.graderType,
@@ -131,35 +137,37 @@ export async function runEvalSuite(
   const workerCount = Math.max(1, Math.min(maxConcurrency, totalCount));
   const workers: Promise<void>[] = [];
   for (let w = 0; w < workerCount; w++) {
-    workers.push((async () => {
-      while (true) {
-        const idx = nextIndex++;
-        if (idx >= totalCount) return;
-        const c = suite.cases[idx]!;
-        const result = await runOne(c);
-        caseResults[idx] = result;
-        if (onCaseComplete) {
-          completedCount += 1;
-          try {
-            await onCaseComplete(result, { completed: completedCount, total: totalCount });
-          } catch {
-            // Progress callbacks must never block eval execution.
+    workers.push(
+      (async () => {
+        while (true) {
+          const idx = nextIndex++;
+          if (idx >= totalCount) return;
+          const c = suite.cases[idx]!;
+          const result = await runOne(c);
+          caseResults[idx] = result;
+          if (onCaseComplete) {
+            completedCount += 1;
+            try {
+              await onCaseComplete(result, { completed: completedCount, total: totalCount });
+            } catch {
+              // Progress callbacks must never block eval execution.
+            }
           }
         }
-      }
-    })());
+      })(),
+    );
   }
   await Promise.all(workers);
 
   const passed = caseResults.filter((r) => r.passed).length;
   const failed = caseResults.length - passed;
   const passRate = caseResults.length > 0 ? passed / caseResults.length : 0;
-  const avgScore = caseResults.length > 0
-    ? caseResults.reduce((s, r) => s + r.score, 0) / caseResults.length
-    : 0;
-  const avgLatencyMs = caseResults.length > 0
-    ? caseResults.reduce((s, r) => s + r.latencyMs, 0) / caseResults.length
-    : 0;
+  const avgScore =
+    caseResults.length > 0 ? caseResults.reduce((s, r) => s + r.score, 0) / caseResults.length : 0;
+  const avgLatencyMs =
+    caseResults.length > 0
+      ? caseResults.reduce((s, r) => s + r.latencyMs, 0) / caseResults.length
+      : 0;
   const totalCostUsd = caseResults.reduce((s, r) => s + r.costUsd, 0);
   const totalTokensUsed = caseResults.reduce((s, r) => s + r.tokensUsed, 0);
   const metrics = computeAllMetrics(caseResults);
@@ -189,7 +197,7 @@ export async function runEvalSuite(
   if (evalRunSink) {
     try {
       const result = evalRunSink(report);
-      if (result && typeof (result as Promise<void>).catch === "function") {
+      if (result && typeof (result as Promise<void>).catch === 'function') {
         (result as Promise<void>).catch(() => {});
       }
     } catch {
@@ -206,7 +214,7 @@ export function checkRunRegression(
   thresholdPct = 5,
 ): {
   hasRegression: boolean;
-  severity: "none" | "minor" | "major" | "critical";
+  severity: 'none' | 'minor' | 'major' | 'critical';
   regressionNotes: string[];
   improvementNotes: string[];
   passRateDelta: number;
@@ -247,11 +255,11 @@ export function checkRunRegression(
       regressionNotes.push(`Case "${cur.label}" regressed from pass to fail`);
   }
 
-  let severity: "none" | "minor" | "major" | "critical" = "none";
+  let severity: 'none' | 'minor' | 'major' | 'critical' = 'none';
   if (regressionNotes.length > 0) {
-    if (passRateDelta < -0.15 || regressionNotes.length >= 4) severity = "critical";
-    else if (passRateDelta < -0.1 || regressionNotes.length >= 2) severity = "major";
-    else severity = "minor";
+    if (passRateDelta < -0.15 || regressionNotes.length >= 4) severity = 'critical';
+    else if (passRateDelta < -0.1 || regressionNotes.length >= 2) severity = 'major';
+    else severity = 'minor';
   }
 
   return {

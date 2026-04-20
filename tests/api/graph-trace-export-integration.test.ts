@@ -19,43 +19,38 @@
  *   └── N_FAR (aegis)        edge NEAR_1→FAR (depth 2 reach)
  */
 
-import request from "supertest";
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-} from "express";
-import { vi, beforeAll, afterAll, describe, it, expect } from "vitest";
+import express, { type NextFunction, type Request, type Response } from 'express';
+import request from 'supertest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
-const TEST_USER = { id: "test-user-1", isAdmin: false, orgs: [{ orgId: 1 }] };
+const TEST_USER = { id: 'test-user-1', isAdmin: false, orgs: [{ orgId: 1 }] };
 
-const mockAuthMiddleware = () =>
-  (req: Request, res: Response, next: NextFunction) => {
-    res.locals.userId = TEST_USER.id;
-    res.locals.role = "ops";
-    (req as Request & { user?: typeof TEST_USER }).user = TEST_USER;
-    next();
-  };
+const mockAuthMiddleware = () => (req: Request, res: Response, next: NextFunction) => {
+  res.locals.userId = TEST_USER.id;
+  res.locals.role = 'ops';
+  (req as Request & { user?: typeof TEST_USER }).user = TEST_USER;
+  next();
+};
 
-vi.mock(
-  "../../artifacts/api-server/src/middlewares/auth",
-  () => ({
-    authMiddleware: mockAuthMiddleware,
-    requireRole: (..._roles: string[]) =>
-      (_req: Request, _res: Response, next: NextFunction) => next(),
-    denyIfReadOnly: () =>
-      (_req: Request, _res: Response, next: NextFunction) => next(),
-    parseIdParam: (id: string) => {
-      const n = parseInt(id, 10);
-      if (isNaN(n)) throw Object.assign(new Error("Invalid ID"), { status: 400 });
-      return n;
-    },
-    InvalidIdError: class InvalidIdError extends Error {
-      status = 400;
-      constructor(msg: string) { super(msg); }
-    },
-  }),
-);
+vi.mock('../../artifacts/api-server/src/middlewares/auth', () => ({
+  authMiddleware: mockAuthMiddleware,
+  requireRole:
+    (..._roles: string[]) =>
+    (_req: Request, _res: Response, next: NextFunction) =>
+      next(),
+  denyIfReadOnly: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  parseIdParam: (id: string) => {
+    const n = parseInt(id, 10);
+    if (isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
+    return n;
+  },
+  InvalidIdError: class InvalidIdError extends Error {
+    status = 400;
+    constructor(msg: string) {
+      super(msg);
+    }
+  },
+}));
 
 function buildApp() {
   const app = express();
@@ -117,12 +112,12 @@ interface ExportPayload {
   stats: { nodeCount: number; edgeCount: number; evidenceCount: number };
 }
 
-describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
+describe('Integration — GET /graph/entities/:id/subgraph/export', () => {
   let app: express.Express;
   const RUN_TAG = `it-trace-export-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
   const FIXTURE_ENTITY_TYPE = `fixture_${RUN_TAG}`;
   const PROVENANCE_ID = `task-1206:${RUN_TAG}`;
-  const PROVENANCE_TYPE = "integration_test";
+  const PROVENANCE_TYPE = 'integration_test';
   const PROVENANCE_LABEL = `Trace export fixture ${RUN_TAG}`;
   const ACTION_ID = `action-${RUN_TAG}`;
   const DOC_ID = `doc-${RUN_TAG}`;
@@ -130,14 +125,14 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
   const EVIDENCE_SOURCE_LABEL = `Evidence source ${RUN_TAG}`;
 
   const seeded = {
-    hub: "",
-    near1: "",
-    near2: "",
-    far: "",
-    edgeHubNear1: "",
-    edgeHubNear2: "",
-    edgeNear1Far: "",
-    evidenceId: "",
+    hub: '',
+    near1: '',
+    near2: '',
+    far: '',
+    edgeHubNear1: '',
+    edgeHubNear2: '',
+    edgeNear1Far: '',
+    evidenceId: '',
     edgeIds: [] as string[],
     nodeIds: [] as string[],
   };
@@ -146,18 +141,16 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
     app = buildApp();
     // Importing the graph router pulls in the entire api-server route tree on
     // a cold start, so the hook timeout is bumped to 60s below.
-    const router = (await import("../../artifacts/api-server/src/routes/graph")).default;
+    const router = (await import('../../artifacts/api-server/src/routes/graph')).default;
     app.use(router);
 
-    const { db, cstNodes, cstEdges, cstEdgeEvidence } = await import(
-      "@szl-holdings/db"
-    );
+    const { db, cstNodes, cstEdges, cstEdgeEvidence } = await import('@szl-holdings/db');
 
     const insertedNodes = await db
       .insert(cstNodes)
       .values([
         {
-          domain: "terra",
+          domain: 'terra',
           entityType: FIXTURE_ENTITY_TYPE,
           name: `${RUN_TAG}-HUB`,
           provenanceSourceId: PROVENANCE_ID,
@@ -167,7 +160,7 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
           relatedDocumentIds: [DOC_ID],
         },
         {
-          domain: "terra",
+          domain: 'terra',
           entityType: FIXTURE_ENTITY_TYPE,
           name: `${RUN_TAG}-NEAR_1`,
           provenanceSourceId: PROVENANCE_ID,
@@ -175,7 +168,7 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
           provenanceSourceLabel: PROVENANCE_LABEL,
         },
         {
-          domain: "vessels",
+          domain: 'vessels',
           entityType: FIXTURE_ENTITY_TYPE,
           name: `${RUN_TAG}-NEAR_2`,
           provenanceSourceId: PROVENANCE_ID,
@@ -183,7 +176,7 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
           provenanceSourceLabel: PROVENANCE_LABEL,
         },
         {
-          domain: "aegis",
+          domain: 'aegis',
           entityType: FIXTURE_ENTITY_TYPE,
           name: `${RUN_TAG}-FAR`,
           provenanceSourceId: PROVENANCE_ID,
@@ -258,10 +251,8 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
   }, 60000);
 
   afterAll(async () => {
-    const { db, cstNodes, cstEdges, cstEdgeEvidence } = await import(
-      "@szl-holdings/db"
-    );
-    const { inArray } = await import("drizzle-orm");
+    const { db, cstNodes, cstEdges, cstEdgeEvidence } = await import('@szl-holdings/db');
+    const { inArray } = await import('drizzle-orm');
     if (seeded.evidenceId) {
       await db.delete(cstEdgeEvidence).where(inArray(cstEdgeEvidence.id, [seeded.evidenceId]));
     }
@@ -273,20 +264,20 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
     }
   });
 
-  describe("JSON format", () => {
-    it("returns enriched per-node provenance, linked event ids, and per-edge evidence", async () => {
+  describe('JSON format', () => {
+    it('returns enriched per-node provenance, linked event ids, and per-edge evidence', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
-        .query({ format: "json", depth: 2 });
+        .query({ format: 'json', depth: 2 });
 
       expect(res.status).toBe(200);
-      expect(res.headers["content-type"]).toMatch(/application\/json/);
+      expect(res.headers['content-type']).toMatch(/application\/json/);
 
       const payload: ExportPayload = JSON.parse(res.text) as ExportPayload;
 
       expect(payload.origin.id).toBe(seeded.hub);
       expect(payload.depth).toBe(2);
-      expect(typeof payload.generatedAt).toBe("string");
+      expect(typeof payload.generatedAt).toBe('string');
       expect(payload.stats).toMatchObject({
         nodeCount: 4,
         edgeCount: 3,
@@ -294,9 +285,7 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
       });
 
       const nodes = payload.nodes;
-      expect(nodes.map((n) => n.id).sort()).toEqual(
-        [...seeded.nodeIds].sort(),
-      );
+      expect(nodes.map((n) => n.id).sort()).toEqual([...seeded.nodeIds].sort());
 
       const hubNode = nodes.find((n) => n.id === seeded.hub);
       expect(hubNode).toBeTruthy();
@@ -305,12 +294,10 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
         sourceType: PROVENANCE_TYPE,
         sourceLabel: PROVENANCE_LABEL,
       });
-      expect(typeof hubNode!.provenance.lastUpdatedAt).toBe("string");
+      expect(typeof hubNode!.provenance.lastUpdatedAt).toBe('string');
       expect(hubNode!.linkedEvents.actionIds).toContain(ACTION_ID);
       expect(hubNode!.linkedEvents.documentIds).toContain(DOC_ID);
-      expect(hubNode!.linkedEvents.all).toEqual(
-        expect.arrayContaining([ACTION_ID, DOC_ID]),
-      );
+      expect(hubNode!.linkedEvents.all).toEqual(expect.arrayContaining([ACTION_ID, DOC_ID]));
       expect(hubNode!.distance).toBe(0);
 
       const farNode = nodes.find((n) => n.id === seeded.far);
@@ -348,28 +335,32 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
       expect(payload.truncated).toBe(false);
     });
 
-    it("sets a Content-Disposition filename matching trace-{slug}-{timestamp}.json", async () => {
+    it('sets a Content-Disposition filename matching trace-{slug}-{timestamp}.json', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
-        .query({ format: "json" });
+        .query({ format: 'json' });
 
       expect(res.status).toBe(200);
-      const disposition = res.headers["content-disposition"];
+      const disposition = res.headers['content-disposition'];
       expect(disposition).toBeTruthy();
 
-      const match = /attachment; filename="(trace-[a-z0-9-]+-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d+Z)\.json"/.exec(
-        disposition,
-      );
-      expect(match, `Content-Disposition did not match expected pattern: ${disposition}`).toBeTruthy();
+      const match =
+        /attachment; filename="(trace-[a-z0-9-]+-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d+Z)\.json"/.exec(
+          disposition,
+        );
+      expect(
+        match,
+        `Content-Disposition did not match expected pattern: ${disposition}`,
+      ).toBeTruthy();
 
       const expectedSlugFragment = `${RUN_TAG}-hub`.toLowerCase();
       expect(match![1]).toContain(expectedSlugFragment);
     });
 
-    it("flips truncated=true when maxNodes is too small to fit the BFS frontier", async () => {
+    it('flips truncated=true when maxNodes is too small to fit the BFS frontier', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
-        .query({ format: "json", depth: 2, maxNodes: 2 });
+        .query({ format: 'json', depth: 2, maxNodes: 2 });
 
       expect(res.status).toBe(200);
       const payload = JSON.parse(res.text);
@@ -378,14 +369,14 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
     });
   });
 
-  describe("CSV format", () => {
-    it("emits NODES, EDGES, and EVIDENCE sections with provenance columns", async () => {
+  describe('CSV format', () => {
+    it('emits NODES, EDGES, and EVIDENCE sections with provenance columns', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
-        .query({ format: "csv", depth: 2 });
+        .query({ format: 'csv', depth: 2 });
 
       expect(res.status).toBe(200);
-      expect(res.headers["content-type"]).toMatch(/text\/csv/);
+      expect(res.headers['content-type']).toMatch(/text\/csv/);
 
       const body = res.text;
 
@@ -398,9 +389,9 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
       expect(body).toMatch(/^# evidence_count,1/m);
 
       // Section markers.
-      const nodesIdx = body.indexOf("# NODES");
-      const edgesIdx = body.indexOf("# EDGES");
-      const evidenceIdx = body.indexOf("# EVIDENCE");
+      const nodesIdx = body.indexOf('# NODES');
+      const edgesIdx = body.indexOf('# EDGES');
+      const evidenceIdx = body.indexOf('# EVIDENCE');
       expect(nodesIdx).toBeGreaterThan(-1);
       expect(edgesIdx).toBeGreaterThan(nodesIdx);
       expect(evidenceIdx).toBeGreaterThan(edgesIdx);
@@ -411,7 +402,7 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
 
       // NODES header includes the provenance + linked-event columns.
       expect(nodesBlock).toContain(
-        "id,canonical_id,entity_type,name,domain,hop_distance,confidence,sensitivity_tier,is_active,freshness,labels,description,provenance_source_id,provenance_source_type,provenance_source_label,last_updated_at,linked_event_ids",
+        'id,canonical_id,entity_type,name,domain,hop_distance,confidence,sensitivity_tier,is_active,freshness,labels,description,provenance_source_id,provenance_source_type,provenance_source_label,last_updated_at,linked_event_ids',
       );
       // The hub row carries our provenance + linked events.
       expect(nodesBlock).toContain(seeded.hub);
@@ -422,14 +413,14 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
 
       // EDGES header includes source + evidence count.
       expect(edgesBlock).toContain(
-        "id,from_node_id,to_node_id,relationship_type,confidence,active,created_at,updated_at,source_id,source_type,source_label,evidence_count",
+        'id,from_node_id,to_node_id,relationship_type,confidence,active,created_at,updated_at,source_id,source_type,source_label,evidence_count',
       );
       expect(edgesBlock).toContain(seeded.edgeHubNear1);
       expect(edgesBlock).toContain(`${RUN_TAG}_hub_to_near1`);
 
       // EVIDENCE section has the seeded row with payload.
       expect(evidenceBlock).toContain(
-        "edge_id,evidence_id,evidence_type,source_id,source_label,confidence,recorded_by,recorded_at,payload",
+        'edge_id,evidence_id,evidence_type,source_id,source_label,confidence,recorded_by,recorded_at,payload',
       );
       expect(evidenceBlock).toContain(seeded.evidenceId);
       expect(evidenceBlock).toContain(EVIDENCE_TYPE);
@@ -437,81 +428,83 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
       expect(evidenceBlock).toContain(`evidence-${RUN_TAG}`);
     });
 
-    it("sets a Content-Disposition filename matching trace-{slug}-{timestamp}.csv", async () => {
+    it('sets a Content-Disposition filename matching trace-{slug}-{timestamp}.csv', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
-        .query({ format: "csv" });
+        .query({ format: 'csv' });
 
       expect(res.status).toBe(200);
-      const disposition = res.headers["content-disposition"];
+      const disposition = res.headers['content-disposition'];
       expect(disposition).toBeTruthy();
-      const match = /attachment; filename="(trace-[a-z0-9-]+-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d+Z)\.csv"/.exec(
-        disposition,
-      );
-      expect(match, `Content-Disposition did not match expected pattern: ${disposition}`).toBeTruthy();
+      const match =
+        /attachment; filename="(trace-[a-z0-9-]+-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d+Z)\.csv"/.exec(
+          disposition,
+        );
+      expect(
+        match,
+        `Content-Disposition did not match expected pattern: ${disposition}`,
+      ).toBeTruthy();
     });
   });
 
-  describe("validation", () => {
-    it("returns 404 for an unknown UUID", async () => {
-      const fakeUuid = "00000000-0000-0000-0000-000000000000";
-      const res = await request(app).get(
-        `/graph/entities/${fakeUuid}/subgraph/export`,
-      );
+  describe('validation', () => {
+    it('returns 404 for an unknown UUID', async () => {
+      const fakeUuid = '00000000-0000-0000-0000-000000000000';
+      const res = await request(app).get(`/graph/entities/${fakeUuid}/subgraph/export`);
       expect(res.status).toBe(404);
-      expect(res.body).toHaveProperty("error");
+      expect(res.body).toHaveProperty('error');
     });
 
-    it("rejects unsupported format values with 400", async () => {
+    it('rejects unsupported format values with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
-        .query({ format: "xml" });
+        .query({ format: 'xml' });
       expect(res.status).toBe(400);
     });
 
-    it("rejects depth below the allowed range with 400", async () => {
+    it('rejects depth below the allowed range with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
         .query({ depth: 0 });
       expect(res.status).toBe(400);
     });
 
-    it("rejects depth above the allowed range with 400", async () => {
+    it('rejects depth above the allowed range with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
         .query({ depth: 99 });
       expect(res.status).toBe(400);
     });
 
-    it("rejects non-numeric depth with 400", async () => {
+    it('rejects non-numeric depth with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
-        .query({ depth: "deep" });
+        .query({ depth: 'deep' });
       expect(res.status).toBe(400);
     });
 
-    it("rejects maxNodes below the allowed range with 400", async () => {
+    it('rejects maxNodes below the allowed range with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
         .query({ maxNodes: 1 });
       expect(res.status).toBe(400);
     });
 
-    it("rejects maxNodes above the allowed range with 400", async () => {
+    it('rejects maxNodes above the allowed range with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
         .query({ maxNodes: 9999 });
       expect(res.status).toBe(400);
     });
 
-    it("rejects perHopLimit below the allowed range with 400", async () => {
+    it('rejects perHopLimit below the allowed range with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
         .query({ perHopLimit: 0 });
       expect(res.status).toBe(400);
     });
 
-    it("rejects perHopLimit above the allowed range with 400", async () => {
+    it('rejects perHopLimit above the allowed range with 400', async () => {
       const res = await request(app)
         .get(`/graph/entities/${seeded.hub}/subgraph/export`)
         .query({ perHopLimit: 9999 });
@@ -522,7 +515,7 @@ describe("Integration — GET /graph/entities/:id/subgraph/export", () => {
 
 afterAll(async () => {
   try {
-    const { pool } = await import("@szl-holdings/db");
+    const { pool } = await import('@szl-holdings/db');
     await pool.end();
   } catch {
     // pool may already be closed by a sibling test file

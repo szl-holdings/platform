@@ -14,9 +14,10 @@
  * from the same session lookup. Routes can use req.user (the canonical AuthenticatedUser
  * from auth.ts) for RBAC checks without needing a second lookup.
  */
-import { type Request, type Response, type NextFunction } from "express";
-import { getSessionToken, getSessionUser } from "../lib/auth";
-import type { RoleName } from "@szl-holdings/db";
+
+import type { RoleName } from '@szl-holdings/db';
+import type { NextFunction, Request, Response } from 'express';
+import { getSessionToken, getSessionUser } from '../lib/auth';
 
 export interface OidcUser {
   id: number;
@@ -46,7 +47,7 @@ export async function authMiddleware(
 ): Promise<void> {
   req.isAuthenticated = function (this: Request) {
     return this.oidcUser != null;
-  } as Request["isAuthenticated"];
+  } as Request['isAuthenticated'];
 
   const token = getSessionToken(req);
   if (!token) {

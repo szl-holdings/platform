@@ -1,13 +1,13 @@
 import {
-  db,
-  approvalRequestsTable,
-  approvalCommentsTable,
-  approvalAuditTrailTable,
-  type InsertApprovalRequest,
   type ApprovalRequest,
   type ApprovalStatus,
-} from "@szl-holdings/db";
-import { eq, and, desc, inArray } from "drizzle-orm";
+  approvalAuditTrailTable,
+  approvalCommentsTable,
+  approvalRequestsTable,
+  db,
+  type InsertApprovalRequest,
+} from '@szl-holdings/db';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 
 export type { ApprovalRequest, ApprovalStatus };
 
@@ -18,7 +18,7 @@ export interface CreateApprovalParams {
   title: string;
   description?: string;
   actionClass?: string;
-  priority?: "low" | "medium" | "high" | "critical";
+  priority?: 'low' | 'medium' | 'high' | 'critical';
   requestedById?: number | null;
   requestedByRole?: string;
   assignedApproverId?: number | null;
@@ -34,7 +34,7 @@ export interface ReviewApprovalParams {
   approvalId: number;
   actorId?: number | null;
   actorRole?: string;
-  decision: "approved" | "rejected" | "revised";
+  decision: 'approved' | 'rejected' | 'revised';
   note?: string;
   correlationId?: string;
   serviceAttribution?: string;
@@ -59,10 +59,10 @@ export interface EscalateApprovalParams {
 }
 
 export class ApprovalAccessDeniedError extends Error {
-  readonly code = "APPROVAL_ACCESS_DENIED";
+  readonly code = 'APPROVAL_ACCESS_DENIED';
   constructor(approvalId: number) {
     super(`Cross-tenant access denied for approval ${approvalId}`);
-    this.name = "ApprovalAccessDeniedError";
+    this.name = 'ApprovalAccessDeniedError';
   }
 }
 
@@ -117,11 +117,10 @@ async function writeAuditEntry(params: {
       toStatus: params.toStatus ?? null,
       note: params.note ?? null,
       correlationId: params.correlationId ?? null,
-      serviceAttribution: params.serviceAttribution ?? "approvals",
+      serviceAttribution: params.serviceAttribution ?? 'approvals',
       metadata: params.metadata ?? {},
     });
-  } catch {
-  }
+  } catch {}
 }
 
 export async function createApprovalRequest(
@@ -129,34 +128,37 @@ export async function createApprovalRequest(
 ): Promise<ApprovalRequest> {
   const expiresAt = params.expiresAt ?? new Date(Date.now() + 48 * 60 * 60 * 1000);
 
-  const [approval] = await db.insert(approvalRequestsTable).values({
-    orgId: params.orgId ?? null,
-    resourceType: params.resourceType,
-    resourceId: params.resourceId,
-    title: params.title,
-    description: params.description ?? null,
-    actionClass: params.actionClass ?? "general",
-    priority: params.priority ?? "medium",
-    status: "pending",
-    requestedById: params.requestedById ?? null,
-    requestedByRole: params.requestedByRole ?? null,
-    assignedApproverId: params.assignedApproverId ?? null,
-    requiredApproverRole: params.requiredApproverRole ?? null,
-    expiresAt,
-    correlationId: params.correlationId ?? null,
-    serviceAttribution: params.serviceAttribution ?? null,
-    payload: params.payload ?? {},
-    metadata: params.metadata ?? {},
-  }).returning();
+  const [approval] = await db
+    .insert(approvalRequestsTable)
+    .values({
+      orgId: params.orgId ?? null,
+      resourceType: params.resourceType,
+      resourceId: params.resourceId,
+      title: params.title,
+      description: params.description ?? null,
+      actionClass: params.actionClass ?? 'general',
+      priority: params.priority ?? 'medium',
+      status: 'pending',
+      requestedById: params.requestedById ?? null,
+      requestedByRole: params.requestedByRole ?? null,
+      assignedApproverId: params.assignedApproverId ?? null,
+      requiredApproverRole: params.requiredApproverRole ?? null,
+      expiresAt,
+      correlationId: params.correlationId ?? null,
+      serviceAttribution: params.serviceAttribution ?? null,
+      payload: params.payload ?? {},
+      metadata: params.metadata ?? {},
+    })
+    .returning();
 
   await writeAuditEntry({
     approvalId: approval.id,
     orgId: params.orgId,
     actorId: params.requestedById,
     actorRole: params.requestedByRole,
-    action: "created",
+    action: 'created',
     fromStatus: undefined,
-    toStatus: "pending",
+    toStatus: 'pending',
     correlationId: params.correlationId,
     serviceAttribution: params.serviceAttribution,
   });
@@ -173,27 +175,30 @@ export async function createApprovalRequest(
   return approval;
 }
 
-export async function reviewApproval(
-  params: ReviewApprovalParams,
-): Promise<ApprovalRequest> {
+export async function reviewApproval(params: ReviewApprovalParams): Promise<ApprovalRequest> {
   const [existing] = await db
     .select()
     .from(approvalRequestsTable)
     .where(eq(approvalRequestsTable.id, params.approvalId));
 
   if (!existing) {
-    throw Object.assign(new Error(`Approval ${params.approvalId} not found`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Approval ${params.approvalId} not found`), {
+      code: 'NOT_FOUND',
+    });
   }
 
-  if (params.expectedOrgId != null && existing.orgId != null && existing.orgId !== params.expectedOrgId) {
+  if (
+    params.expectedOrgId != null &&
+    existing.orgId != null &&
+    existing.orgId !== params.expectedOrgId
+  ) {
     throw new ApprovalAccessDeniedError(params.approvalId);
   }
 
-  if (existing.status !== "pending" && existing.status !== "escalated") {
-    throw Object.assign(
-      new Error(`Cannot review approval in status: ${existing.status}`),
-      { code: "INVALID_TRANSITION" },
-    );
+  if (existing.status !== 'pending' && existing.status !== 'escalated') {
+    throw Object.assign(new Error(`Cannot review approval in status: ${existing.status}`), {
+      code: 'INVALID_TRANSITION',
+    });
   }
 
   const now = new Date();
@@ -202,10 +207,10 @@ export async function reviewApproval(
     updatedAt: now,
   };
 
-  if (params.decision === "approved") {
+  if (params.decision === 'approved') {
     updateFields.approvedById = params.actorId ?? null;
     updateFields.approvedAt = now;
-  } else if (params.decision === "rejected") {
+  } else if (params.decision === 'rejected') {
     updateFields.rejectedById = params.actorId ?? null;
     updateFields.rejectedAt = now;
   }
@@ -232,33 +237,36 @@ export async function reviewApproval(
   return updated;
 }
 
-export async function escalateApproval(
-  params: EscalateApprovalParams,
-): Promise<ApprovalRequest> {
+export async function escalateApproval(params: EscalateApprovalParams): Promise<ApprovalRequest> {
   const [existing] = await db
     .select()
     .from(approvalRequestsTable)
     .where(eq(approvalRequestsTable.id, params.approvalId));
 
   if (!existing) {
-    throw Object.assign(new Error(`Approval ${params.approvalId} not found`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Approval ${params.approvalId} not found`), {
+      code: 'NOT_FOUND',
+    });
   }
 
-  if (params.expectedOrgId != null && existing.orgId != null && existing.orgId !== params.expectedOrgId) {
+  if (
+    params.expectedOrgId != null &&
+    existing.orgId != null &&
+    existing.orgId !== params.expectedOrgId
+  ) {
     throw new ApprovalAccessDeniedError(params.approvalId);
   }
 
-  if (existing.status !== "pending") {
-    throw Object.assign(
-      new Error(`Cannot escalate approval in status: ${existing.status}`),
-      { code: "INVALID_TRANSITION" },
-    );
+  if (existing.status !== 'pending') {
+    throw Object.assign(new Error(`Cannot escalate approval in status: ${existing.status}`), {
+      code: 'INVALID_TRANSITION',
+    });
   }
 
   const [updated] = await db
     .update(approvalRequestsTable)
     .set({
-      status: "escalated",
+      status: 'escalated',
       escalatedAt: new Date(),
       escalatedToId: params.escalatedToId ?? null,
       escalationReason: params.reason,
@@ -272,9 +280,9 @@ export async function escalateApproval(
     orgId: existing.orgId,
     actorId: params.actorId,
     actorRole: params.actorRole,
-    action: "escalated",
-    fromStatus: "pending",
-    toStatus: "escalated",
+    action: 'escalated',
+    fromStatus: 'pending',
+    toStatus: 'escalated',
     note: params.reason,
     correlationId: params.correlationId,
     serviceAttribution: params.serviceAttribution,
@@ -283,24 +291,25 @@ export async function escalateApproval(
   return updated;
 }
 
-export async function addApprovalComment(
-  params: AddApprovalCommentParams,
-): Promise<void> {
-  const [inserted] = await db.insert(approvalCommentsTable).values({
-    approvalId: params.approvalId,
-    orgId: params.orgId ?? null,
-    authorId: params.authorId ?? null,
-    authorRole: params.authorRole ?? null,
-    body: params.body,
-    isInternal: params.isInternal ?? false,
-  }).returning();
+export async function addApprovalComment(params: AddApprovalCommentParams): Promise<void> {
+  const [inserted] = await db
+    .insert(approvalCommentsTable)
+    .values({
+      approvalId: params.approvalId,
+      orgId: params.orgId ?? null,
+      authorId: params.authorId ?? null,
+      authorRole: params.authorRole ?? null,
+      body: params.body,
+      isInternal: params.isInternal ?? false,
+    })
+    .returning();
 
   await writeAuditEntry({
     approvalId: params.approvalId,
     orgId: params.orgId,
     actorId: params.authorId,
     actorRole: params.authorRole,
-    action: "comment",
+    action: 'comment',
     note: params.body,
     metadata: {
       commentId: inserted?.id,
@@ -333,15 +342,15 @@ export async function listApprovalsByResource(
     .orderBy(desc(approvalRequestsTable.createdAt));
 }
 
-export async function listPendingApprovals(options: {
-  orgId?: number;
-  assignedApproverId?: number;
-  requiredApproverRole?: string;
-  limit?: number;
-} = {}): Promise<ApprovalRequest[]> {
-  const conditions = [
-    inArray(approvalRequestsTable.status, ["pending", "escalated"]),
-  ];
+export async function listPendingApprovals(
+  options: {
+    orgId?: number;
+    assignedApproverId?: number;
+    requiredApproverRole?: string;
+    limit?: number;
+  } = {},
+): Promise<ApprovalRequest[]> {
+  const conditions = [inArray(approvalRequestsTable.status, ['pending', 'escalated'])];
 
   if (options.orgId != null) {
     conditions.push(eq(approvalRequestsTable.orgId, options.orgId));
@@ -361,14 +370,20 @@ export async function listPendingApprovals(options: {
     .limit(options.limit ?? 100);
 }
 
-export async function listApprovals(options: {
-  orgId?: number;
-  statuses?: Array<"pending" | "approved" | "rejected" | "revised" | "escalated" | "expired" | "withdrawn">;
-  limit?: number;
-} = {}): Promise<ApprovalRequest[]> {
+export async function listApprovals(
+  options: {
+    orgId?: number;
+    statuses?: Array<
+      'pending' | 'approved' | 'rejected' | 'revised' | 'escalated' | 'expired' | 'withdrawn'
+    >;
+    limit?: number;
+  } = {},
+): Promise<ApprovalRequest[]> {
   const conditions = [] as Array<ReturnType<typeof eq>>;
   if (options.statuses && options.statuses.length > 0) {
-    conditions.push(inArray(approvalRequestsTable.status, options.statuses) as ReturnType<typeof eq>);
+    conditions.push(
+      inArray(approvalRequestsTable.status, options.statuses) as ReturnType<typeof eq>,
+    );
   }
   if (options.orgId != null) {
     conditions.push(eq(approvalRequestsTable.orgId, options.orgId));
@@ -405,11 +420,7 @@ export async function expireStaleApprovals(): Promise<number> {
   const stale = await db
     .select({ id: approvalRequestsTable.id, orgId: approvalRequestsTable.orgId })
     .from(approvalRequestsTable)
-    .where(
-      and(
-        eq(approvalRequestsTable.status, "pending"),
-      ),
-    );
+    .where(and(eq(approvalRequestsTable.status, 'pending')));
 
   let expired = 0;
   for (const row of stale) {
@@ -420,15 +431,15 @@ export async function expireStaleApprovals(): Promise<number> {
     if (full?.expiresAt && full.expiresAt < now) {
       await db
         .update(approvalRequestsTable)
-        .set({ status: "expired", updatedAt: now })
+        .set({ status: 'expired', updatedAt: now })
         .where(eq(approvalRequestsTable.id, row.id));
       await writeAuditEntry({
         approvalId: row.id,
         orgId: row.orgId,
-        action: "expired",
-        fromStatus: "pending",
-        toStatus: "expired",
-        serviceAttribution: "approvals:scheduler",
+        action: 'expired',
+        fromStatus: 'pending',
+        toStatus: 'expired',
+        serviceAttribution: 'approvals:scheduler',
       });
       expired++;
     }

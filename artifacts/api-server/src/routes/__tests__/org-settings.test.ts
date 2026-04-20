@@ -10,9 +10,9 @@
  *  - GET    /gdpr/export                          — returns valid JSON user export
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express, { type Request, type Response, type NextFunction } from "express";
-import request from "supertest";
+import express, { type NextFunction, type Request, type Response } from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Shared mutable state
@@ -28,29 +28,29 @@ let _currentUser = makeOrgAdminUser();
 function makeOrgAdminUser() {
   return {
     id: 10,
-    displayName: "Admin Alice",
-    email: "alice@test.example",
-    roles: ["member"],
-    orgs: [{ orgId: 5, orgSlug: "acme-corp", orgName: "Acme Corp", role: "admin" }],
+    displayName: 'Admin Alice',
+    email: 'alice@test.example',
+    roles: ['member'],
+    orgs: [{ orgId: 5, orgSlug: 'acme-corp', orgName: 'Acme Corp', role: 'admin' }],
   };
 }
 
 function makeMemberUser() {
   return {
     id: 20,
-    displayName: "Bob Member",
-    email: "bob@test.example",
-    roles: ["member"],
-    orgs: [{ orgId: 5, orgSlug: "acme-corp", orgName: "Acme Corp", role: "member" }],
+    displayName: 'Bob Member',
+    email: 'bob@test.example',
+    roles: ['member'],
+    orgs: [{ orgId: 5, orgSlug: 'acme-corp', orgName: 'Acme Corp', role: 'member' }],
   };
 }
 
 function makePlatformAdminUser() {
   return {
     id: 10,
-    displayName: "Platform Admin",
-    email: "admin@test.example",
-    roles: ["admin"],
+    displayName: 'Platform Admin',
+    email: 'admin@test.example',
+    roles: ['admin'],
     orgs: [],
   };
 }
@@ -65,7 +65,7 @@ let _poolQueryQueue: { rows: unknown[] }[] = [];
 // Module mocks
 // ---------------------------------------------------------------------------
 
-vi.mock("@szl-holdings/db", () => {
+vi.mock('@szl-holdings/db', () => {
   const col = (name: string) => ({ _colName: name });
 
   const poolMock = {
@@ -117,132 +117,132 @@ vi.mock("@szl-holdings/db", () => {
     },
     pool: poolMock,
     organizationsTable: {
-      id: col("id"),
-      name: col("name"),
-      slug: col("slug"),
-      domain: col("domain"),
-      logoUrl: col("logo_url"),
-      orgType: col("org_type"),
-      plan: col("plan"),
-      status: col("status"),
-      isActive: col("is_active"),
-      createdAt: col("created_at"),
-      updatedAt: col("updated_at"),
+      id: col('id'),
+      name: col('name'),
+      slug: col('slug'),
+      domain: col('domain'),
+      logoUrl: col('logo_url'),
+      orgType: col('org_type'),
+      plan: col('plan'),
+      status: col('status'),
+      isActive: col('is_active'),
+      createdAt: col('created_at'),
+      updatedAt: col('updated_at'),
     },
     orgMembersTable: {
-      id: col("id"),
-      orgId: col("org_id"),
-      userId: col("user_id"),
-      role: col("role"),
-      joinedAt: col("joined_at"),
+      id: col('id'),
+      orgId: col('org_id'),
+      userId: col('user_id'),
+      role: col('role'),
+      joinedAt: col('joined_at'),
     },
     usersTable: {
-      id: col("id"),
-      displayName: col("display_name"),
-      email: col("email"),
-      avatarUrl: col("avatar_url"),
-      bio: col("bio"),
-      isActive: col("is_active"),
-      lastLoginAt: col("last_login_at"),
-      platformRole: col("platform_role"),
-      createdAt: col("created_at"),
-      updatedAt: col("updated_at"),
+      id: col('id'),
+      displayName: col('display_name'),
+      email: col('email'),
+      avatarUrl: col('avatar_url'),
+      bio: col('bio'),
+      isActive: col('is_active'),
+      lastLoginAt: col('last_login_at'),
+      platformRole: col('platform_role'),
+      createdAt: col('created_at'),
+      updatedAt: col('updated_at'),
     },
     notificationPreferencesTable: {
-      id: col("id"),
-      userId: col("user_id"),
-      emailEnabled: col("email_enabled"),
-      smsEnabled: col("sms_enabled"),
-      slackEnabled: col("slack_enabled"),
-      inAppEnabled: col("in_app_enabled"),
-      updatedAt: col("updated_at"),
+      id: col('id'),
+      userId: col('user_id'),
+      emailEnabled: col('email_enabled'),
+      smsEnabled: col('sms_enabled'),
+      slackEnabled: col('slack_enabled'),
+      inAppEnabled: col('in_app_enabled'),
+      updatedAt: col('updated_at'),
     },
     auditEventsTable: {
-      userId: col("user_id"),
-      action: col("action"),
-      entityType: col("entity_type"),
-      entityId: col("entity_id"),
-      ipAddress: col("ip_address"),
-      newValues: col("new_values"),
+      userId: col('user_id'),
+      action: col('action'),
+      entityType: col('entity_type'),
+      entityId: col('entity_id'),
+      ipAddress: col('ip_address'),
+      newValues: col('new_values'),
     },
     sessionsTable: {
-      id: col("id"),
-      userId: col("user_id"),
-      createdAt: col("created_at"),
-      expiresAt: col("expires_at"),
-      ipAddress: col("ip_address"),
-      userAgent: col("user_agent"),
+      id: col('id'),
+      userId: col('user_id'),
+      createdAt: col('created_at'),
+      expiresAt: col('expires_at'),
+      ipAddress: col('ip_address'),
+      userAgent: col('user_agent'),
     },
     notificationsTable: {
-      userId: col("user_id"),
-      type: col("type"),
-      channel: col("channel"),
-      title: col("title"),
-      message: col("message"),
+      userId: col('user_id'),
+      type: col('type'),
+      channel: col('channel'),
+      title: col('title'),
+      message: col('message'),
     },
     apiKeysTable: {
-      id: col("id"),
-      userId: col("user_id"),
-      name: col("name"),
-      createdAt: col("created_at"),
+      id: col('id'),
+      userId: col('user_id'),
+      name: col('name'),
+      createdAt: col('created_at'),
     },
   };
 });
 
-vi.mock("drizzle-orm", () => ({
-  eq: (col: unknown, val: unknown) => ({ op: "eq", col, val }),
-  and: (...conds: unknown[]) => ({ op: "and", conds }),
-  or: (...conds: unknown[]) => ({ op: "or", conds }),
-  ne: (col: unknown, val: unknown) => ({ op: "ne", col, val }),
-  gte: (col: unknown, val: unknown) => ({ op: "gte", col, val }),
-  gt: (col: unknown, val: unknown) => ({ op: "gt", col, val }),
-  lt: (col: unknown, val: unknown) => ({ op: "lt", col, val }),
-  lte: (col: unknown, val: unknown) => ({ op: "lte", col, val }),
-  isNull: (col: unknown) => ({ op: "isNull", col }),
-  isNotNull: (col: unknown) => ({ op: "isNotNull", col }),
-  not: (expr: unknown) => ({ op: "not", expr }),
-  desc: (col: unknown) => ({ op: "desc", col }),
-  asc: (col: unknown) => ({ op: "asc", col }),
+vi.mock('drizzle-orm', () => ({
+  eq: (col: unknown, val: unknown) => ({ op: 'eq', col, val }),
+  and: (...conds: unknown[]) => ({ op: 'and', conds }),
+  or: (...conds: unknown[]) => ({ op: 'or', conds }),
+  ne: (col: unknown, val: unknown) => ({ op: 'ne', col, val }),
+  gte: (col: unknown, val: unknown) => ({ op: 'gte', col, val }),
+  gt: (col: unknown, val: unknown) => ({ op: 'gt', col, val }),
+  lt: (col: unknown, val: unknown) => ({ op: 'lt', col, val }),
+  lte: (col: unknown, val: unknown) => ({ op: 'lte', col, val }),
+  isNull: (col: unknown) => ({ op: 'isNull', col }),
+  isNotNull: (col: unknown) => ({ op: 'isNotNull', col }),
+  not: (expr: unknown) => ({ op: 'not', expr }),
+  desc: (col: unknown) => ({ op: 'desc', col }),
+  asc: (col: unknown) => ({ op: 'asc', col }),
   sql: Object.assign(
-    (strings: TemplateStringsArray, ...values: unknown[]) => ({ op: "sql", strings, values }),
-    { raw: (s: string) => s }
+    (strings: TemplateStringsArray, ...values: unknown[]) => ({ op: 'sql', strings, values }),
+    { raw: (s: string) => s },
   ),
-  count: () => ({ op: "count" }),
-  inArray: (col: unknown, vals: unknown) => ({ op: "inArray", col, vals }),
+  count: () => ({ op: 'count' }),
+  inArray: (col: unknown, vals: unknown) => ({ op: 'inArray', col, vals }),
 }));
 
-vi.mock("../../middlewares/auth", () => ({
+vi.mock('../../middlewares/auth', () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
     (req as any).user = _currentUser;
     next();
   },
 }));
 
-vi.mock("../../middlewares/rate-limiters", () => ({
+vi.mock('../../middlewares/rate-limiters', () => ({
   writeLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
   readLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
   gdprLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
-vi.mock("@szl-holdings/audit", () => ({
-  hashIp: () => "hashed-ip",
+vi.mock('@szl-holdings/audit', () => ({
+  hashIp: () => 'hashed-ip',
   queryAuditEvents: vi.fn(async () => []),
 }));
 
-vi.mock("../../lib/email", () => ({
+vi.mock('../../lib/email', () => ({
   sendEmail: vi.fn(() => Promise.resolve({ success: true })),
-  buildPasswordResetEmail: vi.fn(() => "<html>reset</html>"),
+  buildPasswordResetEmail: vi.fn(() => '<html>reset</html>'),
 }));
 
-vi.mock("../../lib/logger", () => ({
+vi.mock('../../lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("../../lib/activity-logger", () => ({
+vi.mock('../../lib/activity-logger', () => ({
   logActivity: vi.fn(async () => {}),
 }));
 
-vi.mock("../contact", () => ({
+vi.mock('../contact', () => ({
   hashEmail: (email: string) => `hashed:${email}`,
 }));
 
@@ -255,7 +255,7 @@ let _gdprApp: express.Application | null = null;
 
 async function getApp(): Promise<express.Application> {
   if (_app) return _app;
-  const { default: orgSettingsRouter } = await import("../org-settings.js");
+  const { default: orgSettingsRouter } = await import('../org-settings.js');
   _app = express();
   _app.use(express.json());
   _app.use(orgSettingsRouter);
@@ -264,7 +264,7 @@ async function getApp(): Promise<express.Application> {
 
 async function getGdprApp(): Promise<express.Application> {
   if (_gdprApp) return _gdprApp;
-  const { default: gdprRouter } = await import("../gdpr.js");
+  const { default: gdprRouter } = await import('../gdpr.js');
   _gdprApp = express();
   _gdprApp.use(express.json());
   _gdprApp.use(gdprRouter);
@@ -277,47 +277,47 @@ async function getGdprApp(): Promise<express.Application> {
 
 const ORG = {
   id: 5,
-  name: "Acme Corp",
-  slug: "acme-corp",
-  domain: "acme.example",
+  name: 'Acme Corp',
+  slug: 'acme-corp',
+  domain: 'acme.example',
   logoUrl: null,
-  orgType: "enterprise",
-  plan: "professional",
-  status: "active",
+  orgType: 'enterprise',
+  plan: 'professional',
+  status: 'active',
   isActive: true,
-  createdAt: new Date("2026-01-01"),
-  updatedAt: new Date("2026-04-01"),
+  createdAt: new Date('2026-01-01'),
+  updatedAt: new Date('2026-04-01'),
 };
 
 const ADMIN_MEMBERSHIP = {
   id: 1,
   orgId: 5,
   userId: 10,
-  role: "admin",
-  joinedAt: new Date("2026-01-01"),
+  role: 'admin',
+  joinedAt: new Date('2026-01-01'),
 };
 
 const MEMBER_MEMBERSHIP = {
   id: 2,
   orgId: 5,
   userId: 20,
-  role: "member",
-  joinedAt: new Date("2026-02-01"),
+  role: 'member',
+  joinedAt: new Date('2026-02-01'),
 };
 
 const OWNER_MEMBERSHIP = {
   id: 3,
   orgId: 5,
   userId: 30,
-  role: "owner",
-  joinedAt: new Date("2026-01-01"),
+  role: 'owner',
+  joinedAt: new Date('2026-01-01'),
 };
 
 // ---------------------------------------------------------------------------
 // List Members
 // ---------------------------------------------------------------------------
 
-describe("GET /orgs/:orgSlug/members — list members", () => {
+describe('GET /orgs/:orgSlug/members — list members', () => {
   beforeEach(() => {
     _selectQueue = [];
     _insertReturnQueue = [];
@@ -327,14 +327,14 @@ describe("GET /orgs/:orgSlug/members — list members", () => {
     _currentUser = makeOrgAdminUser();
   });
 
-  it("returns members for an org admin", async () => {
+  it('returns members for an org admin', async () => {
     const memberRow = {
       memberId: 1,
       userId: 10,
-      role: "admin",
-      joinedAt: new Date("2026-01-01"),
-      displayName: "Admin Alice",
-      email: "alice@test.example",
+      role: 'admin',
+      joinedAt: new Date('2026-01-01'),
+      displayName: 'Admin Alice',
+      email: 'alice@test.example',
       avatarUrl: null,
       isActive: true,
       lastLoginAt: null,
@@ -343,28 +343,28 @@ describe("GET /orgs/:orgSlug/members — list members", () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP], [memberRow]];
 
     const app = await getApp();
-    const res = await request(app).get("/orgs/acme-corp/members");
+    const res = await request(app).get('/orgs/acme-corp/members');
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.members)).toBe(true);
     expect(res.body.total).toBe(1);
   });
 
-  it("returns 404 when org does not exist", async () => {
+  it('returns 404 when org does not exist', async () => {
     _selectQueue = [[]];
 
     const app = await getApp();
-    const res = await request(app).get("/orgs/ghost-org/members");
+    const res = await request(app).get('/orgs/ghost-org/members');
 
     expect(res.status).toBe(404);
   });
 
-  it("returns 403 when user is not an org member", async () => {
+  it('returns 403 when user is not an org member', async () => {
     _currentUser = { ..._currentUser, orgs: [] };
     _selectQueue = [[ORG], []];
 
     const app = await getApp();
-    const res = await request(app).get("/orgs/acme-corp/members");
+    const res = await request(app).get('/orgs/acme-corp/members');
 
     expect(res.status).toBe(403);
   });
@@ -374,7 +374,7 @@ describe("GET /orgs/:orgSlug/members — list members", () => {
 // Remove Member
 // ---------------------------------------------------------------------------
 
-describe("DELETE /orgs/:orgSlug/members/:userId — remove member", () => {
+describe('DELETE /orgs/:orgSlug/members/:userId — remove member', () => {
   beforeEach(() => {
     _selectQueue = [];
     _insertReturnQueue = [];
@@ -384,67 +384,67 @@ describe("DELETE /orgs/:orgSlug/members/:userId — remove member", () => {
     _currentUser = makeOrgAdminUser();
   });
 
-  it("removes a member successfully and returns 204", async () => {
+  it('removes a member successfully and returns 204', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP], [MEMBER_MEMBERSHIP]];
     _insertReturnQueue = [[]];
 
     const app = await getApp();
-    const res = await request(app).delete("/orgs/acme-corp/members/20");
+    const res = await request(app).delete('/orgs/acme-corp/members/20');
 
     expect(res.status).toBe(204);
   });
 
-  it("returns 404 when org does not exist", async () => {
+  it('returns 404 when org does not exist', async () => {
     _selectQueue = [[]];
 
     const app = await getApp();
-    const res = await request(app).delete("/orgs/ghost-org/members/20");
+    const res = await request(app).delete('/orgs/ghost-org/members/20');
 
     expect(res.status).toBe(404);
   });
 
-  it("returns 403 when caller is a regular member (non-admin)", async () => {
+  it('returns 403 when caller is a regular member (non-admin)', async () => {
     _currentUser = makeMemberUser();
     _selectQueue = [[ORG], [MEMBER_MEMBERSHIP]];
 
     const app = await getApp();
-    const res = await request(app).delete("/orgs/acme-corp/members/30");
+    const res = await request(app).delete('/orgs/acme-corp/members/30');
 
     expect(res.status).toBe(403);
   });
 
-  it("returns 400 when caller tries to remove themselves", async () => {
+  it('returns 400 when caller tries to remove themselves', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP]];
 
     const app = await getApp();
-    const res = await request(app).delete("/orgs/acme-corp/members/10");
+    const res = await request(app).delete('/orgs/acme-corp/members/10');
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/cannot remove yourself/i);
   });
 
-  it("returns 403 when trying to remove the org owner", async () => {
+  it('returns 403 when trying to remove the org owner', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP], [OWNER_MEMBERSHIP]];
 
     const app = await getApp();
-    const res = await request(app).delete("/orgs/acme-corp/members/30");
+    const res = await request(app).delete('/orgs/acme-corp/members/30');
 
     expect(res.status).toBe(403);
     expect(res.body.error).toMatch(/cannot remove the organization owner/i);
   });
 
-  it("returns 404 when target user is not a member", async () => {
+  it('returns 404 when target user is not a member', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP], []];
 
     const app = await getApp();
-    const res = await request(app).delete("/orgs/acme-corp/members/999");
+    const res = await request(app).delete('/orgs/acme-corp/members/999');
 
     expect(res.status).toBe(404);
   });
 
-  it("returns 400 for an invalid (non-numeric) userId", async () => {
+  it('returns 400 for an invalid (non-numeric) userId', async () => {
     const app = await getApp();
-    const res = await request(app).delete("/orgs/acme-corp/members/not-a-number");
+    const res = await request(app).delete('/orgs/acme-corp/members/not-a-number');
 
     expect(res.status).toBe(400);
   });
@@ -454,7 +454,7 @@ describe("DELETE /orgs/:orgSlug/members/:userId — remove member", () => {
 // Update Member Role
 // ---------------------------------------------------------------------------
 
-describe("PUT /orgs/:orgSlug/members/:userId/role — update member role", () => {
+describe('PUT /orgs/:orgSlug/members/:userId/role — update member role', () => {
   beforeEach(() => {
     _selectQueue = [];
     _insertReturnQueue = [];
@@ -464,26 +464,24 @@ describe("PUT /orgs/:orgSlug/members/:userId/role — update member role", () =>
     _currentUser = makeOrgAdminUser();
   });
 
-  it("updates a member role to admin and returns updated record", async () => {
-    const updatedMembership = { ...MEMBER_MEMBERSHIP, role: "admin" };
+  it('updates a member role to admin and returns updated record', async () => {
+    const updatedMembership = { ...MEMBER_MEMBERSHIP, role: 'admin' };
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP], [MEMBER_MEMBERSHIP]];
     _updateReturnQueue = [[updatedMembership]];
     _insertReturnQueue = [[]];
 
     const app = await getApp();
-    const res = await request(app)
-      .put("/orgs/acme-corp/members/20/role")
-      .send({ role: "admin" });
+    const res = await request(app).put('/orgs/acme-corp/members/20/role').send({ role: 'admin' });
 
     expect(res.status).toBe(200);
-    expect(res.body.role).toBe("admin");
+    expect(res.body.role).toBe('admin');
   });
 
-  it("returns 400 for an invalid role value", async () => {
+  it('returns 400 for an invalid role value', async () => {
     const app = await getApp();
     const res = await request(app)
-      .put("/orgs/acme-corp/members/20/role")
-      .send({ role: "superuser" });
+      .put('/orgs/acme-corp/members/20/role')
+      .send({ role: 'superuser' });
 
     expect(res.status).toBe(400);
   });
@@ -492,33 +490,27 @@ describe("PUT /orgs/:orgSlug/members/:userId/role — update member role", () =>
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP], [OWNER_MEMBERSHIP]];
 
     const app = await getApp();
-    const res = await request(app)
-      .put("/orgs/acme-corp/members/30/role")
-      .send({ role: "member" });
+    const res = await request(app).put('/orgs/acme-corp/members/30/role').send({ role: 'member' });
 
     expect(res.status).toBe(403);
     expect(res.body.error).toMatch(/cannot change the role of the organization owner/i);
   });
 
-  it("returns 404 when the target user is not a member", async () => {
+  it('returns 404 when the target user is not a member', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP], []];
 
     const app = await getApp();
-    const res = await request(app)
-      .put("/orgs/acme-corp/members/999/role")
-      .send({ role: "viewer" });
+    const res = await request(app).put('/orgs/acme-corp/members/999/role').send({ role: 'viewer' });
 
     expect(res.status).toBe(404);
   });
 
-  it("returns 403 when a plain member tries to change roles", async () => {
+  it('returns 403 when a plain member tries to change roles', async () => {
     _currentUser = makeMemberUser();
     _selectQueue = [[ORG], [MEMBER_MEMBERSHIP]];
 
     const app = await getApp();
-    const res = await request(app)
-      .put("/orgs/acme-corp/members/10/role")
-      .send({ role: "viewer" });
+    const res = await request(app).put('/orgs/acme-corp/members/10/role').send({ role: 'viewer' });
 
     expect(res.status).toBe(403);
   });
@@ -528,7 +520,7 @@ describe("PUT /orgs/:orgSlug/members/:userId/role — update member role", () =>
 // Org Notification Preferences
 // ---------------------------------------------------------------------------
 
-describe("GET /orgs/:orgSlug/notification-prefs — get org notification settings", () => {
+describe('GET /orgs/:orgSlug/notification-prefs — get org notification settings', () => {
   beforeEach(() => {
     _selectQueue = [];
     _insertReturnQueue = [];
@@ -538,14 +530,18 @@ describe("GET /orgs/:orgSlug/notification-prefs — get org notification setting
     _currentUser = makeOrgAdminUser();
   });
 
-  it("returns stored notification prefs when row exists", async () => {
+  it('returns stored notification prefs when row exists', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP]];
-    _poolQueryQueue = [{
-      rows: [{ email_enabled: true, sms_enabled: true, slack_enabled: false, in_app_enabled: true }],
-    }];
+    _poolQueryQueue = [
+      {
+        rows: [
+          { email_enabled: true, sms_enabled: true, slack_enabled: false, in_app_enabled: true },
+        ],
+      },
+    ];
 
     const app = await getApp();
-    const res = await request(app).get("/orgs/acme-corp/notification-prefs");
+    const res = await request(app).get('/orgs/acme-corp/notification-prefs');
 
     expect(res.status).toBe(200);
     expect(res.body.emailEnabled).toBe(true);
@@ -554,12 +550,12 @@ describe("GET /orgs/:orgSlug/notification-prefs — get org notification setting
     expect(res.body.inAppEnabled).toBe(true);
   });
 
-  it("returns defaults when no notification prefs row exists", async () => {
+  it('returns defaults when no notification prefs row exists', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP]];
     _poolQueryQueue = [{ rows: [] }];
 
     const app = await getApp();
-    const res = await request(app).get("/orgs/acme-corp/notification-prefs");
+    const res = await request(app).get('/orgs/acme-corp/notification-prefs');
 
     expect(res.status).toBe(200);
     expect(res.body.emailEnabled).toBe(true);
@@ -567,27 +563,27 @@ describe("GET /orgs/:orgSlug/notification-prefs — get org notification setting
     expect(res.body.inAppEnabled).toBe(true);
   });
 
-  it("returns 403 when user is not an org member", async () => {
+  it('returns 403 when user is not an org member', async () => {
     _currentUser = { ..._currentUser, orgs: [] };
     _selectQueue = [[ORG], []];
 
     const app = await getApp();
-    const res = await request(app).get("/orgs/acme-corp/notification-prefs");
+    const res = await request(app).get('/orgs/acme-corp/notification-prefs');
 
     expect(res.status).toBe(403);
   });
 
-  it("returns 404 when org does not exist", async () => {
+  it('returns 404 when org does not exist', async () => {
     _selectQueue = [[]];
 
     const app = await getApp();
-    const res = await request(app).get("/orgs/ghost-org/notification-prefs");
+    const res = await request(app).get('/orgs/ghost-org/notification-prefs');
 
     expect(res.status).toBe(404);
   });
 });
 
-describe("PUT /orgs/:orgSlug/notification-prefs — partial update merges with existing", () => {
+describe('PUT /orgs/:orgSlug/notification-prefs — partial update merges with existing', () => {
   beforeEach(() => {
     _selectQueue = [];
     _insertReturnQueue = [];
@@ -597,16 +593,20 @@ describe("PUT /orgs/:orgSlug/notification-prefs — partial update merges with e
     _currentUser = makeOrgAdminUser();
   });
 
-  it("merges partial update with existing values — only smsEnabled changes", async () => {
+  it('merges partial update with existing values — only smsEnabled changes', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP]];
     _poolQueryQueue = [
-      { rows: [{ email_enabled: true, sms_enabled: false, slack_enabled: false, in_app_enabled: true }] },
+      {
+        rows: [
+          { email_enabled: true, sms_enabled: false, slack_enabled: false, in_app_enabled: true },
+        ],
+      },
       { rows: [] },
     ];
 
     const app = await getApp();
     const res = await request(app)
-      .put("/orgs/acme-corp/notification-prefs")
+      .put('/orgs/acme-corp/notification-prefs')
       .send({ smsEnabled: true });
 
     expect(res.status).toBe(200);
@@ -616,16 +616,13 @@ describe("PUT /orgs/:orgSlug/notification-prefs — partial update merges with e
     expect(res.body.inAppEnabled).toBe(true);
   });
 
-  it("merges when no existing row — uses defaults for unset fields", async () => {
+  it('merges when no existing row — uses defaults for unset fields', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP]];
-    _poolQueryQueue = [
-      { rows: [] },
-      { rows: [] },
-    ];
+    _poolQueryQueue = [{ rows: [] }, { rows: [] }];
 
     const app = await getApp();
     const res = await request(app)
-      .put("/orgs/acme-corp/notification-prefs")
+      .put('/orgs/acme-corp/notification-prefs')
       .send({ slackEnabled: true });
 
     expect(res.status).toBe(200);
@@ -635,16 +632,20 @@ describe("PUT /orgs/:orgSlug/notification-prefs — partial update merges with e
     expect(res.body.inAppEnabled).toBe(true);
   });
 
-  it("allows all fields to be updated at once", async () => {
+  it('allows all fields to be updated at once', async () => {
     _selectQueue = [[ORG], [ADMIN_MEMBERSHIP]];
     _poolQueryQueue = [
-      { rows: [{ email_enabled: true, sms_enabled: false, slack_enabled: false, in_app_enabled: true }] },
+      {
+        rows: [
+          { email_enabled: true, sms_enabled: false, slack_enabled: false, in_app_enabled: true },
+        ],
+      },
       { rows: [] },
     ];
 
     const app = await getApp();
     const res = await request(app)
-      .put("/orgs/acme-corp/notification-prefs")
+      .put('/orgs/acme-corp/notification-prefs')
       .send({ emailEnabled: false, smsEnabled: true, slackEnabled: true, inAppEnabled: false });
 
     expect(res.status).toBe(200);
@@ -654,24 +655,24 @@ describe("PUT /orgs/:orgSlug/notification-prefs — partial update merges with e
     expect(res.body.inAppEnabled).toBe(false);
   });
 
-  it("returns 403 when a non-admin member tries to update notification prefs", async () => {
+  it('returns 403 when a non-admin member tries to update notification prefs', async () => {
     _currentUser = makeMemberUser();
     _selectQueue = [[ORG], [MEMBER_MEMBERSHIP]];
 
     const app = await getApp();
     const res = await request(app)
-      .put("/orgs/acme-corp/notification-prefs")
+      .put('/orgs/acme-corp/notification-prefs')
       .send({ smsEnabled: true });
 
     expect(res.status).toBe(403);
   });
 
-  it("returns 404 when org does not exist", async () => {
+  it('returns 404 when org does not exist', async () => {
     _selectQueue = [[]];
 
     const app = await getApp();
     const res = await request(app)
-      .put("/orgs/unknown-org/notification-prefs")
+      .put('/orgs/unknown-org/notification-prefs')
       .send({ emailEnabled: true });
 
     expect(res.status).toBe(404);
@@ -682,7 +683,7 @@ describe("PUT /orgs/:orgSlug/notification-prefs — partial update merges with e
 // GDPR Export
 // ---------------------------------------------------------------------------
 
-describe("GET /gdpr/export — GDPR data export", () => {
+describe('GET /gdpr/export — GDPR data export', () => {
   beforeEach(() => {
     _selectQueue = [];
     _insertReturnQueue = [];
@@ -692,26 +693,26 @@ describe("GET /gdpr/export — GDPR data export", () => {
     _currentUser = makeOrgAdminUser();
   });
 
-  it("returns valid JSON with all required top-level keys", async () => {
+  it('returns valid JSON with all required top-level keys', async () => {
     const userRow = {
       id: 10,
-      displayName: "Admin Alice",
-      email: "alice@test.example",
+      displayName: 'Admin Alice',
+      email: 'alice@test.example',
       avatarUrl: null,
       bio: null,
-      platformRole: "member",
+      platformRole: 'member',
       isActive: true,
-      createdAt: new Date("2026-01-01"),
+      createdAt: new Date('2026-01-01'),
       lastLoginAt: null,
     };
 
     _selectQueue = [[userRow], [], []];
 
     const app = await getGdprApp();
-    const res = await request(app).get("/gdpr/export");
+    const res = await request(app).get('/gdpr/export');
 
     expect(res.status).toBe(200);
-    expect(res.headers["content-type"]).toMatch(/application\/json/);
+    expect(res.headers['content-type']).toMatch(/application\/json/);
 
     const body = res.body as Record<string, unknown>;
     expect(body.exportedAt).toBeTruthy();
@@ -723,33 +724,33 @@ describe("GET /gdpr/export — GDPR data export", () => {
     expect(body.dataProcessingBasis).toBeDefined();
   });
 
-  it("response includes a Content-Disposition attachment header", async () => {
-    _selectQueue = [[{ id: 10, displayName: "Alice", email: "alice@test.example" }], [], []];
+  it('response includes a Content-Disposition attachment header', async () => {
+    _selectQueue = [[{ id: 10, displayName: 'Alice', email: 'alice@test.example' }], [], []];
 
     const app = await getGdprApp();
-    const res = await request(app).get("/gdpr/export");
+    const res = await request(app).get('/gdpr/export');
 
     expect(res.status).toBe(200);
-    expect(res.headers["content-disposition"]).toMatch(/attachment/);
-    expect(res.headers["content-disposition"]).toMatch(/user-data-export/);
+    expect(res.headers['content-disposition']).toMatch(/attachment/);
+    expect(res.headers['content-disposition']).toMatch(/user-data-export/);
   });
 
-  it("includes dataProcessingBasis with legalBasis field", async () => {
-    _selectQueue = [[{ id: 10, displayName: "Alice", email: "alice@test.example" }], [], []];
+  it('includes dataProcessingBasis with legalBasis field', async () => {
+    _selectQueue = [[{ id: 10, displayName: 'Alice', email: 'alice@test.example' }], [], []];
 
     const app = await getGdprApp();
-    const res = await request(app).get("/gdpr/export");
+    const res = await request(app).get('/gdpr/export');
 
     const basis = (res.body as { dataProcessingBasis: { legalBasis: string } }).dataProcessingBasis;
     expect(basis.legalBasis).toBeDefined();
-    expect(typeof basis.legalBasis).toBe("string");
+    expect(typeof basis.legalBasis).toBe('string');
   });
 
-  it("handles missing user gracefully and still returns export structure", async () => {
+  it('handles missing user gracefully and still returns export structure', async () => {
     _selectQueue = [[], [], []];
 
     const app = await getGdprApp();
-    const res = await request(app).get("/gdpr/export");
+    const res = await request(app).get('/gdpr/export');
 
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;

@@ -4,7 +4,7 @@
  * Provides Reciprocal Rank Fusion (RRF) for fusing multiple ranked lists.
  * RRF is the default reranker for hybrid queries.
  */
-import type { RetrievalChunk } from "@szl-holdings/shared-contracts";
+import type { RetrievalChunk } from '@szl-holdings/shared-contracts';
 
 const RRF_K = 60;
 
@@ -12,10 +12,7 @@ const RRF_K = 60;
  * Reciprocal Rank Fusion over multiple ranked lists.
  * Each list is a ranked array of chunks (highest score first).
  */
-export function reciprocalRankFusion(
-  rankedLists: RetrievalChunk[][],
-  topK = 10,
-): RetrievalChunk[] {
+export function reciprocalRankFusion(rankedLists: RetrievalChunk[][], topK = 10): RetrievalChunk[] {
   const scoreMap = new Map<string, { chunk: RetrievalChunk; rrf: number }>();
 
   for (const list of rankedLists) {
@@ -39,9 +36,6 @@ export function reciprocalRankFusion(
 /**
  * Filter chunks below a minimum score threshold.
  */
-export function applyScoreThreshold(
-  chunks: RetrievalChunk[],
-  minScore: number,
-): RetrievalChunk[] {
+export function applyScoreThreshold(chunks: RetrievalChunk[], minScore: number): RetrievalChunk[] {
   return chunks.filter((c) => c.score >= minScore);
 }

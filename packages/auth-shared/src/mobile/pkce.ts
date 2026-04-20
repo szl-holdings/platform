@@ -9,7 +9,7 @@
  * Reference: RFC 7636 §4.1–4.2
  */
 
-import { randomBytes, createHash } from "crypto";
+import { createHash, randomBytes } from 'crypto';
 
 /** Length of the PKCE code verifier in bytes (43–128 chars after base64url). */
 const VERIFIER_BYTES = 32;
@@ -19,7 +19,7 @@ const VERIFIER_BYTES = 32;
  * Returns a base64url-encoded value (no `+`, `/`, or `=` padding).
  */
 export function generateCodeVerifier(): string {
-  return randomBytes(VERIFIER_BYTES).toString("base64url");
+  return randomBytes(VERIFIER_BYTES).toString('base64url');
 }
 
 /**
@@ -28,13 +28,13 @@ export function generateCodeVerifier(): string {
  * `challenge = BASE64URL(SHA256(ASCII(verifier)))`
  */
 export function deriveCodeChallenge(verifier: string): string {
-  return createHash("sha256").update(verifier).digest("base64url");
+  return createHash('sha256').update(verifier).digest('base64url');
 }
 
 export interface PkceChallenge {
   verifier: string;
   challenge: string;
-  method: "S256";
+  method: 'S256';
 }
 
 /** Generates a fresh PKCE verifier + challenge pair. */
@@ -43,6 +43,6 @@ export function generatePkceChallenge(): PkceChallenge {
   return {
     verifier,
     challenge: deriveCodeChallenge(verifier),
-    method: "S256",
+    method: 'S256',
   };
 }

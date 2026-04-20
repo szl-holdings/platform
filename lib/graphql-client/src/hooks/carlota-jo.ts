@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from '@apollo/client';
 
 export const GET_CARLOTA_SERVICES = gql`
   query GetCarlotaServices($category: String, $isActive: Boolean, $limit: Int) {
@@ -69,11 +69,19 @@ export const CREATE_CARLOTA_INQUIRY = gql`
   }
 `;
 
-export function useCarlotaServices(variables?: { category?: string; isActive?: boolean; limit?: number }) {
+export function useCarlotaServices(variables?: {
+  category?: string;
+  isActive?: boolean;
+  limit?: number;
+}) {
   return useQuery(GET_CARLOTA_SERVICES, { variables });
 }
 
-export function useCarlotaReservations(variables?: { status?: string; limit?: number; offset?: number }) {
+export function useCarlotaReservations(variables?: {
+  status?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_CARLOTA_RESERVATIONS, { variables });
 }
 
@@ -81,7 +89,11 @@ export function useCarlotaReservation(confirmationId: string) {
   return useQuery(GET_CARLOTA_RESERVATION, { variables: { confirmationId } });
 }
 
-export function useCarlotaInquiries(variables?: { status?: string; limit?: number; offset?: number }) {
+export function useCarlotaInquiries(variables?: {
+  status?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_CARLOTA_INQUIRIES, { variables });
 }
 

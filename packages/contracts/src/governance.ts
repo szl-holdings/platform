@@ -4,7 +4,7 @@
  * These are the wire types shared across cognitive-runtime, approvals-inbox,
  * run-ledger, api-server and the Command UI surface.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 // ─── Approval Interrupt ───────────────────────────────────────────────────────
 
@@ -16,9 +16,9 @@ export const ApprovalInterruptSpecSchema = z.object({
   /** Policy rule ID or short description of why approval is required. */
   policyReason: z.string().min(1).max(512),
   /** Brief summary of supporting evidence for this decision point. */
-  evidenceSummary: z.string().max(1024).default(""),
+  evidenceSummary: z.string().max(1024).default(''),
   /** Operator-facing suggestion: 'approve' | 'deny' | 'escalate'. */
-  suggestedDecision: z.enum(["approve", "deny", "escalate"]).default("approve"),
+  suggestedDecision: z.enum(['approve', 'deny', 'escalate']).default('approve'),
   /** Unix epoch ms when this approval request expires. */
   expiresAt: z.number().int().positive(),
 });
@@ -36,7 +36,7 @@ export const ApprovalRequestSchema = z.object({
   stepName: z.string(),
   checkpointRef: z.string().optional(),
   interrupt: ApprovalInterruptSpecSchema,
-  status: z.enum(["pending", "approved", "denied", "escalated", "timed_out"]).default("pending"),
+  status: z.enum(['pending', 'approved', 'denied', 'escalated', 'timed_out']).default('pending'),
   requestedAt: z.number().int().positive(),
   expiresAt: z.number().int().positive(),
   resolvedAt: z.number().int().positive().optional(),
@@ -49,7 +49,7 @@ export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 export const ApprovalDecisionSchema = z.object({
   decisionId: z.string().uuid(),
   requestId: z.string().uuid(),
-  verdict: z.enum(["approve", "deny", "escalate"]),
+  verdict: z.enum(['approve', 'deny', 'escalate']),
   actor: z.string().min(1),
   reason: z.string().min(1).max(2048),
   decidedAt: z.number().int().positive(),
@@ -64,7 +64,7 @@ export const LedgerToolCallSchema = z.object({
   toolId: z.string(),
   stepId: z.string(),
   latencyMs: z.number().int().nonnegative(),
-  outcome: z.enum(["success", "failure", "skipped"]),
+  outcome: z.enum(['success', 'failure', 'skipped']),
   error: z.string().optional(),
 });
 export type LedgerToolCall = z.infer<typeof LedgerToolCallSchema>;
@@ -80,7 +80,7 @@ export type LedgerSource = z.infer<typeof LedgerSourceSchema>;
 export const LedgerApprovalEventSchema = z.object({
   requestId: z.string(),
   stepId: z.string(),
-  verdict: z.enum(["approve", "deny", "escalate", "timed_out", "pending"]),
+  verdict: z.enum(['approve', 'deny', 'escalate', 'timed_out', 'pending']),
   actor: z.string().optional(),
   decidedAt: z.number().int().optional(),
 });
@@ -88,7 +88,7 @@ export type LedgerApprovalEvent = z.infer<typeof LedgerApprovalEventSchema>;
 
 export const LedgerPolicyOutcomeSchema = z.object({
   policyId: z.string(),
-  result: z.enum(["pass", "require-approval", "block", "pending"]),
+  result: z.enum(['pass', 'require-approval', 'block', 'pending']),
   tier: z.string().optional(),
   reason: z.string().optional(),
 });
@@ -130,7 +130,7 @@ export const RunLedgerEntrySchema = z.object({
   startedAt: z.number().int(),
   completedAt: z.number().int().optional(),
   totalDurationMs: z.number().int().nonnegative().optional(),
-  gateStatus: z.enum(["complete", "degraded", "blocked", "pending"]).default("pending"),
+  gateStatus: z.enum(['complete', 'degraded', 'blocked', 'pending']).default('pending'),
   gateResult: z.unknown().optional(),
   createdAt: z.number().int(),
 });
@@ -147,7 +147,7 @@ export const QualityGateFailingGateSchema = z.object({
 export type QualityGateFailingGate = z.infer<typeof QualityGateFailingGateSchema>;
 
 export const QualityGateResultSchema = z.object({
-  status: z.enum(["complete", "degraded", "blocked"]),
+  status: z.enum(['complete', 'degraded', 'blocked']),
   failingGates: z.array(QualityGateFailingGateSchema).default([]),
   recommendedNextAction: z.string(),
   evaluatedAt: z.number().int(),
@@ -157,7 +157,7 @@ export type QualityGateResult = z.infer<typeof QualityGateResultSchema>;
 // ─── API request/response shapes ──────────────────────────────────────────────
 
 export const approvalDecideBodySchema = z.object({
-  verdict: z.enum(["approve", "deny", "escalate"]),
+  verdict: z.enum(['approve', 'deny', 'escalate']),
   actor: z.string().min(1).max(128),
   reason: z.string().min(1).max(2048),
   /** Optional caller-supplied idempotency key. When provided, repeated calls
@@ -167,7 +167,7 @@ export const approvalDecideBodySchema = z.object({
 export type ApprovalDecideBody = z.infer<typeof approvalDecideBodySchema>;
 
 export const approvalsListQuerySchema = z.object({
-  status: z.enum(["pending", "approved", "denied", "escalated", "timed_out"]).optional(),
+  status: z.enum(['pending', 'approved', 'denied', 'escalated', 'timed_out']).optional(),
   tenantId: z.string().optional(),
   profileId: z.string().optional(),
   limit: z.coerce.number().int().positive().max(200).default(50),
@@ -178,7 +178,7 @@ export type ApprovalsListQuery = z.infer<typeof approvalsListQuerySchema>;
 export const runsLedgerQuerySchema = z.object({
   traceId: z.string().optional(),
   tenantId: z.string().optional(),
-  gateStatus: z.enum(["complete", "degraded", "blocked", "pending"]).optional(),
+  gateStatus: z.enum(['complete', 'degraded', 'blocked', 'pending']).optional(),
   limit: z.coerce.number().int().positive().max(200).default(50),
   offset: z.coerce.number().int().nonnegative().default(0),
 });

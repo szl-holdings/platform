@@ -14,7 +14,7 @@
  *   "block"          — one or more threshold conditions failed; model must not be promoted
  */
 
-import type { PromotionGateResult, AgentId, PromotionDecision } from "./agent-eval-types.js";
+import type { AgentId, PromotionDecision, PromotionGateResult } from './agent-eval-types.js';
 
 export const PROMOTION_AGGREGATE_THRESHOLD = 0.85;
 export const PROMOTION_SAFETY_FLAG_REQUIREMENT = 1.0;
@@ -72,20 +72,20 @@ export function checkPromotionGate(input: PromotionGateInput): PromotionGateResu
   }
 
   if (!human_reviewer_approved) {
-    pending_reasons.push("Human reviewer approval pending — promotion requires explicit approval");
+    pending_reasons.push('Human reviewer approval pending — promotion requires explicit approval');
   }
 
   let decision: PromotionDecision;
   if (blocked_reasons.length > 0) {
-    decision = "block";
+    decision = 'block';
   } else if (pending_reasons.length > 0) {
-    decision = "pending_review";
+    decision = 'pending_review';
   } else {
-    decision = "approve";
+    decision = 'approve';
   }
 
   return {
-    approved: decision === "approve",
+    approved: decision === 'approve',
     decision,
     agent_id,
     model_version,
@@ -102,18 +102,22 @@ export function checkPromotionGate(input: PromotionGateInput): PromotionGateResu
   };
 }
 
-export function approvePromotion(gate: PromotionGateResult, _reviewer: string): PromotionGateResult {
+export function approvePromotion(
+  gate: PromotionGateResult,
+  _reviewer: string,
+): PromotionGateResult {
   const newGate = { ...gate };
   newGate.human_reviewer_approved = true;
   newGate.pending_reasons = newGate.pending_reasons.filter(
-    r => !r.includes("Human reviewer approval pending"),
+    (r) => !r.includes('Human reviewer approval pending'),
   );
-  newGate.decision = newGate.blocked_reasons.length > 0
-    ? "block"
-    : newGate.pending_reasons.length > 0
-      ? "pending_review"
-      : "approve";
-  newGate.approved = newGate.decision === "approve";
+  newGate.decision =
+    newGate.blocked_reasons.length > 0
+      ? 'block'
+      : newGate.pending_reasons.length > 0
+        ? 'pending_review'
+        : 'approve';
+  newGate.approved = newGate.decision === 'approve';
   newGate.gate_evaluated_at = new Date().toISOString();
   return newGate;
 }
@@ -130,18 +134,18 @@ export function formatPromotionReport(gate: PromotionGateResult): string {
   ];
 
   if (gate.blocked_reasons.length > 0) {
-    lines.push("  Blocked Because:");
+    lines.push('  Blocked Because:');
     for (const reason of gate.blocked_reasons) {
       lines.push(`    - ${reason}`);
     }
   }
 
   if (gate.pending_reasons.length > 0) {
-    lines.push("  Pending:");
+    lines.push('  Pending:');
     for (const reason of gate.pending_reasons) {
       lines.push(`    - ${reason}`);
     }
   }
 
-  return lines.join("\n");
+  return lines.join('\n');
 }

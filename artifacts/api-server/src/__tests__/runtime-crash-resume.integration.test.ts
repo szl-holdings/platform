@@ -24,15 +24,15 @@
  * Skipped automatically when `DATABASE_URL` is not set.
  */
 
-import { spawn, type ChildProcess } from "child_process";
-import { fileURLToPath } from "url";
-import path from "path";
+import { type ChildProcess, spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-import { describe, it, expect, afterAll } from "vitest";
+import { afterAll, describe, expect, it } from 'vitest';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const CHILD_SCRIPT = path.join(HERE, "helpers", "checkpoint-crash-child.ts");
-const TSX_BIN = path.resolve(HERE, "../../../../node_modules/.bin/tsx");
+const CHILD_SCRIPT = path.join(HERE, 'helpers', 'checkpoint-crash-child.ts');
+const TSX_BIN = path.resolve(HERE, '../../../../node_modules/.bin/tsx');
 
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 const describeIfDb = HAS_DB ? describe : describe.skip;
@@ -46,27 +46,25 @@ interface ChildHandle {
 async function spawnCrashChild(tag: string, timeoutMs = 30_000): Promise<ChildHandle> {
   const child = spawn(TSX_BIN, [CHILD_SCRIPT], {
     env: { ...process.env, CHECKPOINT_RUN_TAG: tag },
-    stdio: ["pipe", "pipe", "pipe"],
+    stdio: ['pipe', 'pipe', 'pipe'],
   });
 
-  let stderrBuf = "";
-  child.stderr?.on("data", (chunk: Buffer) => {
-    stderrBuf += chunk.toString("utf8");
+  let stderrBuf = '';
+  child.stderr?.on('data', (chunk: Buffer) => {
+    stderrBuf += chunk.toString('utf8');
   });
 
   const ready = await new Promise<{ runId: string; ref: string }>((resolve, reject) => {
-    let stdoutBuf = "";
+    let stdoutBuf = '';
     const timer = setTimeout(() => {
       reject(
-        new Error(
-          `crash-child did not emit READY within ${timeoutMs}ms. stderr=${stderrBuf}`,
-        ),
+        new Error(`crash-child did not emit READY within ${timeoutMs}ms. stderr=${stderrBuf}`),
       );
     }, timeoutMs);
     timer.unref?.();
 
-    child.stdout?.on("data", (chunk: Buffer) => {
-      stdoutBuf += chunk.toString("utf8");
+    child.stdout?.on('data', (chunk: Buffer) => {
+      stdoutBuf += chunk.toString('utf8');
       const m = stdoutBuf.match(/READY (\S+) (\S+)/);
       if (m) {
         clearTimeout(timer);
@@ -74,7 +72,7 @@ async function spawnCrashChild(tag: string, timeoutMs = 30_000): Promise<ChildHa
       }
     });
 
-    child.once("exit", (code, signal) => {
+    child.once('exit', (code, signal) => {
       clearTimeout(timer);
       reject(
         new Error(
@@ -82,7 +80,7 @@ async function spawnCrashChild(tag: string, timeoutMs = 30_000): Promise<ChildHa
         ),
       );
     });
-    child.once("error", (err) => {
+    child.once('error', (err) => {
       clearTimeout(timer);
       reject(err);
     });
@@ -97,13 +95,13 @@ function killChildHard(child: ChildProcess): Promise<void> {
       resolve();
       return;
     }
-    child.once("exit", () => resolve());
-    child.kill("SIGKILL");
+    child.once('exit', () => resolve());
+    child.kill('SIGKILL');
     setTimeout(() => resolve(), 2000).unref?.();
   });
 }
 
-describeIfDb("runtime crash → resume from orchestration_checkpoints", () => {
+describeIfDb('runtime crash → resume from orchestration_checkpoints', () => {
   const tag = `t${Date.now().toString(36)}`;
   const agentId = `agent-${tag}`;
   let originalCheckpointBackend: unknown;
@@ -114,11 +112,11 @@ describeIfDb("runtime crash → resume from orchestration_checkpoints", () => {
     // affected by our PostgresCheckpointStore swap.
     try {
       const { defaultCheckpointStore, InMemoryCheckpointStore } = await import(
-        "@workspace/cognitive-runtime"
+        '@workspace/cognitive-runtime'
       );
       defaultCheckpointStore.setBackend(
-        (originalCheckpointBackend as Parameters<typeof defaultCheckpointStore.setBackend>[0])
-          ?? new InMemoryCheckpointStore(),
+        (originalCheckpointBackend as Parameters<typeof defaultCheckpointStore.setBackend>[0]) ??
+          new InMemoryCheckpointStore(),
       );
     } catch {
       /* ignore — non-fatal */
@@ -126,9 +124,9 @@ describeIfDb("runtime crash → resume from orchestration_checkpoints", () => {
 
     // Best-effort cleanup of any rows we wrote, regardless of outcome.
     try {
-      const { db } = await import("@szl-holdings/db");
-      const { orchestrationCheckpointsTable } = await import("@szl-holdings/db/schema");
-      const { eq } = await import("drizzle-orm");
+      const { db } = await import('@szl-holdings/db');
+      const { orchestrationCheckpointsTable } = await import('@szl-holdings/db/schema');
+      const { eq } = await import('drizzle-orm');
       await db
         .delete(orchestrationCheckpointsTable)
         .where(eq(orchestrationCheckpointsTable.agentId, agentId));
@@ -142,133 +140,120 @@ describeIfDb("runtime crash → resume from orchestration_checkpoints", () => {
     }
   });
 
-  it(
-    "kills the orchestrator mid-run with SIGKILL and resumes from the persisted checkpoint",
-    async () => {
-      // ── Step 1: spawn a real cognitive-runtime run inside a child ─────────
-      const { child, runId, ref } = await spawnCrashChild(tag);
-      observedRunId = runId;
-      expect(ref).toMatch(/^ckpt-/);
-      expect(runId).toBeTruthy();
+  it('kills the orchestrator mid-run with SIGKILL and resumes from the persisted checkpoint', async () => {
+    // ── Step 1: spawn a real cognitive-runtime run inside a child ─────────
+    const { child, runId, ref } = await spawnCrashChild(tag);
+    observedRunId = runId;
+    expect(ref).toMatch(/^ckpt-/);
+    expect(runId).toBeTruthy();
 
-      // ── Step 2: SIGKILL — simulate a real crash. No flush, no stop() ────
-      await killChildHard(child);
-      expect(child.signalCode).toBe("SIGKILL");
+    // ── Step 2: SIGKILL — simulate a real crash. No flush, no stop() ────
+    await killChildHard(child);
+    expect(child.signalCode).toBe('SIGKILL');
 
-      // ── Step 3: verify the row is durable in Postgres (write-behind
-      //           flush actually fired in the child — we never called
-      //           flush() ourselves) ────────────────────────────────────────
-      const { db } = await import("@szl-holdings/db");
-      const { orchestrationCheckpointsTable } = await import("@szl-holdings/db/schema");
-      const { eq } = await import("drizzle-orm");
+    // ── Step 3: verify the row is durable in Postgres (write-behind
+    //           flush actually fired in the child — we never called
+    //           flush() ourselves) ────────────────────────────────────────
+    const { db } = await import('@szl-holdings/db');
+    const { orchestrationCheckpointsTable } = await import('@szl-holdings/db/schema');
+    const { eq } = await import('drizzle-orm');
 
-      const rows = await db
-        .select()
-        .from(orchestrationCheckpointsTable)
-        .where(eq(orchestrationCheckpointsTable.ref, ref));
-      expect(rows.length).toBe(1);
-      expect(rows[0]!.runId).toBe(runId);
-      expect((rows[0] as { stepIndex: number }).stepIndex).toBeGreaterThanOrEqual(2);
+    const rows = await db
+      .select()
+      .from(orchestrationCheckpointsTable)
+      .where(eq(orchestrationCheckpointsTable.ref, ref));
+    expect(rows.length).toBe(1);
+    expect(rows[0]!.runId).toBe(runId);
+    expect((rows[0] as { stepIndex: number }).stepIndex).toBeGreaterThanOrEqual(2);
 
-      // ── Step 4: hydrate a fresh PostgresCheckpointStore (production-
-      //           shaped flush window) and bind it to the singleton ────────
-      const {
-        PostgresCheckpointStore,
-        defaultCheckpointStore,
-        run: runCognitiveLoop,
-      } = await import("@workspace/cognitive-runtime");
+    // ── Step 4: hydrate a fresh PostgresCheckpointStore (production-
+    //           shaped flush window) and bind it to the singleton ────────
+    const {
+      PostgresCheckpointStore,
+      defaultCheckpointStore,
+      run: runCognitiveLoop,
+    } = await import('@workspace/cognitive-runtime');
 
-      originalCheckpointBackend = defaultCheckpointStore.getBackend();
+    originalCheckpointBackend = defaultCheckpointStore.getBackend();
 
-      const store = new PostgresCheckpointStore({
-        db: db as unknown as Parameters<typeof PostgresCheckpointStore>[0]["db"],
-        table: orchestrationCheckpointsTable,
-        flushIntervalMs: 1000, // production default — same ≤1s budget
-      });
-      const hydrated = await store.hydrate();
-      expect(hydrated).toBeGreaterThanOrEqual(1);
+    const store = new PostgresCheckpointStore({
+      db: db as unknown as Parameters<typeof PostgresCheckpointStore>[0]['db'],
+      table: orchestrationCheckpointsTable,
+      flushIntervalMs: 1000, // production default — same ≤1s budget
+    });
+    const hydrated = await store.hydrate();
+    expect(hydrated).toBeGreaterThanOrEqual(1);
 
-      const recovered = store.load(ref);
-      expect(
-        recovered,
-        "checkpoint must be hydrated from Postgres after crash",
-      ).toBeDefined();
-      expect(recovered!.runId).toBe(runId);
-      expect(recovered!.stepIndex).toBeGreaterThanOrEqual(2);
-      expect(recovered!.snapshot.planId).toBeTruthy();
-      // Snapshot persisted by the crashed orchestrator must contain the
-      // step results executed before the kill — proving zero data loss.
-      expect(recovered!.snapshot.stepResults.length).toBeGreaterThanOrEqual(3);
+    const recovered = store.load(ref);
+    expect(recovered, 'checkpoint must be hydrated from Postgres after crash').toBeDefined();
+    expect(recovered!.runId).toBe(runId);
+    expect(recovered!.stepIndex).toBeGreaterThanOrEqual(2);
+    expect(recovered!.snapshot.planId).toBeTruthy();
+    // Snapshot persisted by the crashed orchestrator must contain the
+    // step results executed before the kill — proving zero data loss.
+    expect(recovered!.snapshot.stepResults.length).toBeGreaterThanOrEqual(3);
 
-      defaultCheckpointStore.setBackend(store);
+    defaultCheckpointStore.setBackend(store);
 
-      // ── Step 5: resume the orchestrator from the persisted ref ──────────
-      const executedStepIds: string[] = [];
-      const result = await runCognitiveLoop(
-        recovered!.objective,
-        {
-          agentId,
-          domain: "test",
-          maxRetries: 0,
-          maxVerifyRevisions: 0,
-          checkpointEveryNSteps: 100, // avoid extra checkpoints during resume
-          guardianEnabled: false,
-          verifierEnabled: false,
-          reflectionEnabled: false,
-          resumeFromCheckpoint: ref,
+    // ── Step 5: resume the orchestrator from the persisted ref ──────────
+    const executedStepIds: string[] = [];
+    const result = await runCognitiveLoop(
+      recovered!.objective,
+      {
+        agentId,
+        domain: 'test',
+        maxRetries: 0,
+        maxVerifyRevisions: 0,
+        checkpointEveryNSteps: 100, // avoid extra checkpoints during resume
+        guardianEnabled: false,
+        verifierEnabled: false,
+        reflectionEnabled: false,
+        resumeFromCheckpoint: ref,
+      },
+      {
+        stepExecutor: async (step) => {
+          executedStepIds.push(step.stepId);
+          return { resumed: true, stepId: step.stepId };
         },
-        {
-          stepExecutor: async (step) => {
-            executedStepIds.push(step.stepId);
-            return { resumed: true, stepId: step.stepId };
-          },
-        },
-      );
+      },
+    );
 
-      // ── Step 6: prove resume happened — only the unexecuted suffix ran ─
-      // The child completed plan-step indices 0, 1, 2 before SIGKILL, so
-      // the resumed run must execute exactly indices 3 and 4 (Verify and
-      // Reflect from the baseline 5-step plan).
-      const recoveredStepIds = recovered!.snapshot.stepResults.map(
-        (s) => s.stepId,
-      );
-      const expectedResumedStepIds = recovered!.snapshot.phases
-        .filter((p) => p.phase === "plan")
-        .flatMap((p) => {
-          const out = p.output as { plan?: { executionOrder?: string[] } } | undefined;
-          return out?.plan?.executionOrder ?? [];
-        })
-        .filter((id) => !recoveredStepIds.includes(id));
+    // ── Step 6: prove resume happened — only the unexecuted suffix ran ─
+    // The child completed plan-step indices 0, 1, 2 before SIGKILL, so
+    // the resumed run must execute exactly indices 3 and 4 (Verify and
+    // Reflect from the baseline 5-step plan).
+    const recoveredStepIds = recovered!.snapshot.stepResults.map((s) => s.stepId);
+    const expectedResumedStepIds = recovered!.snapshot.phases
+      .filter((p) => p.phase === 'plan')
+      .flatMap((p) => {
+        const out = p.output as { plan?: { executionOrder?: string[] } } | undefined;
+        return out?.plan?.executionOrder ?? [];
+      })
+      .filter((id) => !recoveredStepIds.includes(id));
 
-      expect(executedStepIds).toEqual(expectedResumedStepIds);
-      expect(executedStepIds.length).toBeGreaterThanOrEqual(2);
-      expect(result.success).toBe(true);
-      expect(result.run.status).toBe("completed");
-      // Snapshot results + newly executed = full plan length
-      expect(result.run.stepResults.length).toBe(
-        recoveredStepIds.length + executedStepIds.length,
-      );
+    expect(executedStepIds).toEqual(expectedResumedStepIds);
+    expect(executedStepIds.length).toBeGreaterThanOrEqual(2);
+    expect(result.success).toBe(true);
+    expect(result.run.status).toBe('completed');
+    // Snapshot results + newly executed = full plan length
+    expect(result.run.stepResults.length).toBe(recoveredStepIds.length + executedStepIds.length);
 
-      // Resume must not re-run perceive/orient/plan — they appear at most
-      // once each (loaded from snapshot, never re-invoked).
-      const phaseCounts = new Map<string, number>();
-      for (const p of result.run.phases) {
-        phaseCounts.set(p.phase, (phaseCounts.get(p.phase) ?? 0) + 1);
-      }
-      expect(phaseCounts.get("perceive") ?? 0).toBeLessThanOrEqual(1);
-      expect(phaseCounts.get("orient") ?? 0).toBeLessThanOrEqual(1);
-      expect(phaseCounts.get("plan") ?? 0).toBeLessThanOrEqual(1);
-      expect(phaseCounts.get("execute") ?? 0).toBeGreaterThanOrEqual(1);
+    // Resume must not re-run perceive/orient/plan — they appear at most
+    // once each (loaded from snapshot, never re-invoked).
+    const phaseCounts = new Map<string, number>();
+    for (const p of result.run.phases) {
+      phaseCounts.set(p.phase, (phaseCounts.get(p.phase) ?? 0) + 1);
+    }
+    expect(phaseCounts.get('perceive') ?? 0).toBeLessThanOrEqual(1);
+    expect(phaseCounts.get('orient') ?? 0).toBeLessThanOrEqual(1);
+    expect(phaseCounts.get('plan') ?? 0).toBeLessThanOrEqual(1);
+    expect(phaseCounts.get('execute') ?? 0).toBeGreaterThanOrEqual(1);
 
-      await store.stop();
-    },
-    90_000,
-  );
+    await store.stop();
+  }, 90_000);
 });
 
 if (!HAS_DB) {
   // eslint-disable-next-line no-console
-  console.warn(
-    "[runtime-crash-resume] DATABASE_URL not set — integration test suite skipped",
-  );
+  console.warn('[runtime-crash-resume] DATABASE_URL not set — integration test suite skipped');
 }

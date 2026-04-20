@@ -5,11 +5,11 @@
  * workflow transition. Each event is append-only and tamper-evident.
  */
 
-import { randomUUID } from "crypto";
-import type { OrchestratorAuditEvent } from "./types.js";
+import { randomUUID } from 'crypto';
+import type { OrchestratorAuditEvent } from './types.js';
 
 export interface AuditEmitter {
-  emit(event: Omit<OrchestratorAuditEvent, "eventId" | "occurredAt">): OrchestratorAuditEvent;
+  emit(event: Omit<OrchestratorAuditEvent, 'eventId' | 'occurredAt'>): OrchestratorAuditEvent;
   list(runId?: string): OrchestratorAuditEvent[];
   clear(): void;
 }
@@ -17,7 +17,7 @@ export interface AuditEmitter {
 export class InMemoryAuditEmitter implements AuditEmitter {
   private readonly events: OrchestratorAuditEvent[] = [];
 
-  emit(event: Omit<OrchestratorAuditEvent, "eventId" | "occurredAt">): OrchestratorAuditEvent {
+  emit(event: Omit<OrchestratorAuditEvent, 'eventId' | 'occurredAt'>): OrchestratorAuditEvent {
     const full: OrchestratorAuditEvent = {
       ...event,
       eventId: randomUUID(),

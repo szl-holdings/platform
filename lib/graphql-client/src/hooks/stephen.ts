@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from '@apollo/client';
 
 export const GET_STEPHEN_CONTENT_BLOCKS = gql`
   query GetStephenContentBlocks($type: String, $featured: Boolean, $limit: Int, $offset: Int) {
@@ -54,11 +54,20 @@ export const CREATE_STEPHEN_BOOKING = gql`
   }
 `;
 
-export function useStephenContentBlocks(variables?: { type?: string; featured?: boolean; limit?: number; offset?: number }) {
+export function useStephenContentBlocks(variables?: {
+  type?: string;
+  featured?: boolean;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_STEPHEN_CONTENT_BLOCKS, { variables });
 }
 
-export function useStephenCaseStudies(variables?: { featured?: boolean; limit?: number; offset?: number }) {
+export function useStephenCaseStudies(variables?: {
+  featured?: boolean;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_STEPHEN_CASE_STUDIES, { variables });
 }
 

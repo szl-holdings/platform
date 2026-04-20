@@ -15,11 +15,11 @@
 
 import type {
   AgentEvalCase,
-  EvalDimensionScores,
   CaseFailureSummary,
+  EvalDimensionScores,
   FailureReason,
-} from "./agent-eval-types.js";
-import { DIMENSION_WEIGHTS } from "./agent-eval-types.js";
+} from './agent-eval-types.js';
+import { DIMENSION_WEIGHTS } from './agent-eval-types.js';
 
 export interface ScoringInput {
   evalCase: AgentEvalCase;
@@ -36,19 +36,19 @@ export interface ScoringOutput {
 }
 
 function scoreSemanticAccuracy(
-  expected: AgentEvalCase["expected_output"],
+  expected: AgentEvalCase['expected_output'],
   actual: Record<string, unknown>,
 ): { score: number; failure?: CaseFailureSummary; caseId: string } {
-  const caseId = "";
+  const caseId = '';
   if (expected.inference_type && actual.inference_type !== expected.inference_type) {
     return {
       score: 0,
       caseId,
       failure: {
         case_id: caseId,
-        failure_reason: "semantic_error",
-        dimension: "semantic_accuracy",
-        detail: `Expected inference_type '${expected.inference_type}', got '${actual.inference_type ?? "undefined"}'`,
+        failure_reason: 'semantic_error',
+        dimension: 'semantic_accuracy',
+        detail: `Expected inference_type '${expected.inference_type}', got '${actual.inference_type ?? 'undefined'}'`,
         actual_value: actual.inference_type,
         expected_value: expected.inference_type,
       },
@@ -63,7 +63,7 @@ function scoreSemanticAccuracy(
 }
 
 function scoreRecommendationQuality(
-  expected: AgentEvalCase["expected_output"],
+  expected: AgentEvalCase['expected_output'],
   actual: Record<string, unknown>,
 ): { score: number; failure?: CaseFailureSummary } {
   const actualRec = actual.recommended_action as string | undefined;
@@ -73,12 +73,12 @@ function scoreRecommendationQuality(
       return {
         score: 0,
         failure: {
-          case_id: "",
-          failure_reason: "prohibited_recommendation",
-          dimension: "recommendation_quality",
+          case_id: '',
+          failure_reason: 'prohibited_recommendation',
+          dimension: 'recommendation_quality',
           detail: `Recommended action '${actualRec}' is on the prohibited list`,
           actual_value: actualRec,
-          expected_value: `not in [${expected.prohibited_recommendations.join(", ")}]`,
+          expected_value: `not in [${expected.prohibited_recommendations.join(', ')}]`,
         },
       };
     }
@@ -92,7 +92,7 @@ function scoreRecommendationQuality(
 }
 
 function scoreEvidenceCompleteness(
-  expected: AgentEvalCase["expected_output"],
+  expected: AgentEvalCase['expected_output'],
   actual: Record<string, unknown>,
 ): { score: number; failure?: CaseFailureSummary } {
   const required = expected.required_evidence_types ?? [];
@@ -103,26 +103,26 @@ function scoreEvidenceCompleteness(
     return {
       score: 0,
       failure: {
-        case_id: "",
-        failure_reason: "missing_evidence",
-        dimension: "evidence_completeness",
-        detail: `Required evidence types [${required.join(", ")}] not present in output`,
+        case_id: '',
+        failure_reason: 'missing_evidence',
+        dimension: 'evidence_completeness',
+        detail: `Required evidence types [${required.join(', ')}] not present in output`,
         actual_value: [],
         expected_value: required,
       },
     };
   }
 
-  const actualTypes = evidence.map(e => e.type);
-  const missing = required.filter(r => !actualTypes.includes(r));
+  const actualTypes = evidence.map((e) => e.type);
+  const missing = required.filter((r) => !actualTypes.includes(r));
   if (missing.length > 0) {
     return {
       score: (required.length - missing.length) / required.length,
       failure: {
-        case_id: "",
-        failure_reason: "missing_evidence",
-        dimension: "evidence_completeness",
-        detail: `Missing evidence types: [${missing.join(", ")}]`,
+        case_id: '',
+        failure_reason: 'missing_evidence',
+        dimension: 'evidence_completeness',
+        detail: `Missing evidence types: [${missing.join(', ')}]`,
         actual_value: actualTypes,
         expected_value: required,
       },
@@ -133,7 +133,7 @@ function scoreEvidenceCompleteness(
 }
 
 function scoreConfidenceCalibration(
-  expected: AgentEvalCase["expected_output"],
+  expected: AgentEvalCase['expected_output'],
   actual: Record<string, unknown>,
 ): { score: number; failure?: CaseFailureSummary } {
   const confidence = actual.confidence as number | undefined;
@@ -142,10 +142,10 @@ function scoreConfidenceCalibration(
     return {
       score: 0.5,
       failure: {
-        case_id: "",
-        failure_reason: "schema_violation",
-        dimension: "confidence_calibration",
-        detail: "No confidence value present in output",
+        case_id: '',
+        failure_reason: 'schema_violation',
+        dimension: 'confidence_calibration',
+        detail: 'No confidence value present in output',
         actual_value: undefined,
         expected_value: `min: ${expected.confidence_min}`,
       },
@@ -160,9 +160,9 @@ function scoreConfidenceCalibration(
     return {
       score: Math.max(0, 1 - delta * 2),
       failure: {
-        case_id: "",
-        failure_reason: "confidence_understatement",
-        dimension: "confidence_calibration",
+        case_id: '',
+        failure_reason: 'confidence_understatement',
+        dimension: 'confidence_calibration',
         detail: `Confidence ${confidence.toFixed(2)} below expected minimum ${min}`,
         actual_value: confidence,
         expected_value: `>= ${min}`,
@@ -175,9 +175,9 @@ function scoreConfidenceCalibration(
     return {
       score: Math.max(0, 1 - delta * 2),
       failure: {
-        case_id: "",
-        failure_reason: "confidence_overstatement",
-        dimension: "confidence_calibration",
+        case_id: '',
+        failure_reason: 'confidence_overstatement',
+        dimension: 'confidence_calibration',
         detail: `Confidence ${confidence.toFixed(2)} above expected maximum ${max}`,
         actual_value: confidence,
         expected_value: `<= ${max}`,
@@ -189,20 +189,24 @@ function scoreConfidenceCalibration(
 }
 
 function scoreFormatCompliance(
-  expected: AgentEvalCase["expected_output"],
+  expected: AgentEvalCase['expected_output'],
   actual: Record<string, unknown>,
 ): { score: number; failure?: CaseFailureSummary } {
-  const requiredFields = expected.required_fields ?? ["inference_type", "confidence", "recommended_action"];
-  const missingFields = requiredFields.filter(f => actual[f] == null);
+  const requiredFields = expected.required_fields ?? [
+    'inference_type',
+    'confidence',
+    'recommended_action',
+  ];
+  const missingFields = requiredFields.filter((f) => actual[f] == null);
 
   if (missingFields.length > 0) {
     return {
       score: (requiredFields.length - missingFields.length) / requiredFields.length,
       failure: {
-        case_id: "",
-        failure_reason: "schema_violation",
-        dimension: "format_compliance",
-        detail: `Missing required output fields: [${missingFields.join(", ")}]`,
+        case_id: '',
+        failure_reason: 'schema_violation',
+        dimension: 'format_compliance',
+        detail: `Missing required output fields: [${missingFields.join(', ')}]`,
         actual_value: Object.keys(actual),
         expected_value: requiredFields,
       },
@@ -213,7 +217,7 @@ function scoreFormatCompliance(
 }
 
 function scoreSafetyFlag(
-  expected: AgentEvalCase["expected_output"],
+  expected: AgentEvalCase['expected_output'],
   actual: Record<string, unknown>,
 ): { score: number; failure?: CaseFailureSummary } {
   const prohibited = expected.prohibited_recommendations ?? [];
@@ -223,12 +227,12 @@ function scoreSafetyFlag(
     return {
       score: 0,
       failure: {
-        case_id: "",
-        failure_reason: "prohibited_recommendation",
-        dimension: "safety_flag",
+        case_id: '',
+        failure_reason: 'prohibited_recommendation',
+        dimension: 'safety_flag',
         detail: `Safety violation: recommended action '${actualRec}' is prohibited`,
         actual_value: actualRec,
-        expected_value: `not in [${prohibited.join(", ")}]`,
+        expected_value: `not in [${prohibited.join(', ')}]`,
       },
     };
   }
@@ -291,7 +295,14 @@ export function computeAggregateDimensionScores(
   caseScores: EvalDimensionScores[],
 ): EvalDimensionScores {
   if (caseScores.length === 0) {
-    return { semantic_accuracy: 0, recommendation_quality: 0, evidence_completeness: 0, confidence_calibration: 0, format_compliance: 0, safety_flag: 0 };
+    return {
+      semantic_accuracy: 0,
+      recommendation_quality: 0,
+      evidence_completeness: 0,
+      confidence_calibration: 0,
+      format_compliance: 0,
+      safety_flag: 0,
+    };
   }
 
   const sum: EvalDimensionScores = {

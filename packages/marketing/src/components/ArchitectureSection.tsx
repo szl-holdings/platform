@@ -1,13 +1,13 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { ShieldCheck, FileCheck, GitBranch, BarChart3, Zap, Radio } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { motion, useInView } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
+import { BarChart3, FileCheck, GitBranch, Radio, ShieldCheck, Zap } from 'lucide-react';
+import { useRef } from 'react';
 
-const BG = "hsl(214,16%,4%)";
-const SURFACE = "hsla(0,0%,100%,0.035)";
-const BORDER = "hsla(0,0%,100%,0.07)";
-const TEXT = "hsl(38,8%,92%)";
-const TEXT_SEC = "hsl(214,7%,55%)";
+const BG = 'hsl(214,16%,4%)';
+const SURFACE = 'hsla(0,0%,100%,0.035)';
+const BORDER = 'hsla(0,0%,100%,0.07)';
+const TEXT = 'hsl(38,8%,92%)';
+const TEXT_SEC = 'hsl(214,7%,55%)';
 
 export interface ArchitectureLayer {
   tier: string;
@@ -23,12 +23,41 @@ export interface TrustPoint {
 }
 
 const DEFAULT_PRIMITIVES: TrustPoint[] = [
-  { icon: Radio, label: "Event Fabric", description: "Cross-domain signal backbone. Every alert, filing, and telemetry stream shares a common routing layer." },
-  { icon: BarChart3, label: "Decision Simulation", description: "Probabilistic risk modeling before any action. Operators see outcomes and confidence intervals, not just recommendations." },
-  { icon: ShieldCheck, label: "Covenant Policy", description: "Human-in-the-loop governance enforced at the platform layer. AI cannot execute without explicit approval." },
-  { icon: FileCheck, label: "Proof Chain", description: "Immutable record of every AI output — model identity, source citations, confidence score, and actor attribution." },
-  { icon: GitBranch, label: "Outcome Graph", description: "Full decision lifecycle tracking. The platform learns from every completed loop." },
-  { icon: Zap, label: "Workflow Engine", description: "Durable multi-step process orchestration with checkpoint recovery and agent coordination." },
+  {
+    icon: Radio,
+    label: 'Event Fabric',
+    description:
+      'Cross-domain signal backbone. Every alert, filing, and telemetry stream shares a common routing layer.',
+  },
+  {
+    icon: BarChart3,
+    label: 'Decision Simulation',
+    description:
+      'Probabilistic risk modeling before any action. Operators see outcomes and confidence intervals, not just recommendations.',
+  },
+  {
+    icon: ShieldCheck,
+    label: 'Covenant Policy',
+    description:
+      'Human-in-the-loop governance enforced at the platform layer. AI cannot execute without explicit approval.',
+  },
+  {
+    icon: FileCheck,
+    label: 'Proof Chain',
+    description:
+      'Immutable record of every AI output — model identity, source citations, confidence score, and actor attribution.',
+  },
+  {
+    icon: GitBranch,
+    label: 'Outcome Graph',
+    description: 'Full decision lifecycle tracking. The platform learns from every completed loop.',
+  },
+  {
+    icon: Zap,
+    label: 'Workflow Engine',
+    description:
+      'Durable multi-step process orchestration with checkpoint recovery and agent coordination.',
+  },
 ];
 
 export interface ArchitectureSectionProps {
@@ -41,14 +70,14 @@ export interface ArchitectureSectionProps {
 }
 
 export function ArchitectureSection({
-  headline = "Six primitives. Not features.",
-  subheadline = "Architectural constraints that run across every domain pack — not add-ons or configuration options.",
+  headline = 'Six primitives. Not features.',
+  subheadline = 'Architectural constraints that run across every domain pack — not add-ons or configuration options.',
   trustPoints = DEFAULT_PRIMITIVES,
-  accentColor = "hsl(191,92%,44%)",
-  trustFootnote = "Advisory-only AI with mandatory human approval gates. Immutable Proof Chain on every decision. SOC 2 controls, certification targeted for 2026.",
+  accentColor = 'hsl(191,92%,44%)',
+  trustFootnote = 'Advisory-only AI with mandatory human approval gates. Immutable Proof Chain on every decision. SOC 2 controls, certification targeted for 2026.',
 }: ArchitectureSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
     <section ref={ref} style={{ background: BG }} className="py-24 px-4">
@@ -59,7 +88,10 @@ export function ArchitectureSection({
           transition={{ duration: 0.5 }}
           className="text-center mb-14"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: TEXT }}>
+          <h2
+            className="text-3xl sm:text-4xl font-bold tracking-tight mb-4"
+            style={{ color: TEXT }}
+          >
             {headline}
           </h2>
           <p className="text-base max-w-2xl mx-auto" style={{ color: TEXT_SEC }}>

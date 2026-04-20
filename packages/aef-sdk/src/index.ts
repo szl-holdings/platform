@@ -1,15 +1,20 @@
-export { AefClient, createAefClient, getDefaultClient } from "./client.js";
-export { resolveConfig } from "./config.js";
-export type { AefClientConfig } from "./config.js";
+export { AefClient, createAefClient, getDefaultClient } from './client.js';
+export type { AefClientConfig } from './config.js';
+export { resolveConfig } from './config.js';
 export {
-  AefError,
-  AefUnavailableError,
   AefAuthError,
+  AefError,
   AefPolicyError,
-  AefTimeoutError,
   AefRateLimitError,
-} from "./errors.js";
-export { useAefSearch, useAefEmbed } from "./hooks.js";
-export type { UseAefSearchOptions, UseAefSearchReturn, UseAefSearchState, UseAefEmbedOptions } from "./hooks.js";
+  AefTimeoutError,
+  AefUnavailableError,
+} from './errors.js';
+export type {
+  UseAefEmbedOptions,
+  UseAefSearchOptions,
+  UseAefSearchReturn,
+  UseAefSearchState,
+} from './hooks.js';
+export { useAefEmbed, useAefSearch } from './hooks.js';
 
-export const AEF_SDK_VERSION = "0.1.0" as const;
+export const AEF_SDK_VERSION = '0.1.0' as const;

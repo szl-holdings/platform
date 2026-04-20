@@ -1,5 +1,5 @@
-import * as React from "react";
-import { cn } from "../utils";
+import * as React from 'react';
+import { cn } from '../utils';
 
 export interface CaseStudyMetric {
   label: string;
@@ -19,7 +19,7 @@ export interface CaseStudyCardProps {
   href?: string;
   onClick?: () => void;
   accentColor?: string;
-  variant?: "light" | "dark";
+  variant?: 'light' | 'dark';
   featured?: boolean;
   className?: string;
 }
@@ -34,23 +34,23 @@ export function CaseStudyCard({
   tags,
   href,
   onClick,
-  accentColor = "hsl(215 45% 32%)",
-  variant = "light",
+  accentColor = 'hsl(215 45% 32%)',
+  variant = 'light',
   featured = false,
   className,
 }: CaseStudyCardProps) {
-  const isDark = variant === "dark";
+  const isDark = variant === 'dark';
 
   const content = (
     <div
       className={cn(
-        "group rounded-2xl overflow-hidden border transition-all duration-300 h-full flex flex-col",
+        'group rounded-2xl overflow-hidden border transition-all duration-300 h-full flex flex-col',
         isDark
-          ? "bg-white/3 border-white/8 hover:border-white/16 hover:bg-white/5"
-          : "bg-white border-neutral-200 hover:border-neutral-300 hover:shadow-lg hover:shadow-black/5",
-        className
+          ? 'bg-white/3 border-white/8 hover:border-white/16 hover:bg-white/5'
+          : 'bg-white border-neutral-200 hover:border-neutral-300 hover:shadow-lg hover:shadow-black/5',
+        className,
       )}
-      style={featured ? { outline: `2px solid ${accentColor}`, outlineOffset: "-1px" } : undefined}
+      style={featured ? { outline: `2px solid ${accentColor}`, outlineOffset: '-1px' } : undefined}
     >
       {image && (
         <div className="aspect-[16/9] overflow-hidden shrink-0 relative">
@@ -82,13 +82,16 @@ export function CaseStudyCard({
               </span>
             )}
             {client && industry && (
-              <span className={cn("text-[10px]", isDark ? "text-white/20" : "text-neutral-300")}>
+              <span className={cn('text-[10px]', isDark ? 'text-white/20' : 'text-neutral-300')}>
                 ·
               </span>
             )}
             {client && (
               <span
-                className={cn("text-[10px] font-medium", isDark ? "text-white/40" : "text-neutral-400")}
+                className={cn(
+                  'text-[10px] font-medium',
+                  isDark ? 'text-white/40' : 'text-neutral-400',
+                )}
               >
                 {client}
               </span>
@@ -98,8 +101,8 @@ export function CaseStudyCard({
 
         <h3
           className={cn(
-            "text-base font-bold leading-snug mb-2",
-            isDark ? "text-white" : "text-neutral-900"
+            'text-base font-bold leading-snug mb-2',
+            isDark ? 'text-white' : 'text-neutral-900',
           )}
         >
           {title}
@@ -107,8 +110,8 @@ export function CaseStudyCard({
 
         <p
           className={cn(
-            "text-sm leading-relaxed mb-5 flex-1 line-clamp-3",
-            isDark ? "text-white/50" : "text-neutral-500"
+            'text-sm leading-relaxed mb-5 flex-1 line-clamp-3',
+            isDark ? 'text-white/50' : 'text-neutral-500',
           )}
         >
           {summary}
@@ -117,28 +120,30 @@ export function CaseStudyCard({
         {metrics && metrics.length > 0 && (
           <div
             className={cn(
-              "grid grid-cols-3 gap-3 mb-5 p-3 rounded-xl",
-              isDark ? "bg-white/5" : "bg-neutral-50"
+              'grid grid-cols-3 gap-3 mb-5 p-3 rounded-xl',
+              isDark ? 'bg-white/5' : 'bg-neutral-50',
             )}
           >
             {metrics.slice(0, 3).map((m, i) => (
               <div key={i} className="text-center">
                 <p
-                  className={cn("text-base font-bold", isDark ? "text-white" : "text-neutral-900")}
+                  className={cn('text-base font-bold', isDark ? 'text-white' : 'text-neutral-900')}
                 >
                   {m.value}
                 </p>
                 {m.delta && (
                   <p
                     className={cn(
-                      "text-[9px] font-semibold",
-                      m.positive ? "text-emerald-500" : "text-red-500"
+                      'text-[9px] font-semibold',
+                      m.positive ? 'text-emerald-500' : 'text-red-500',
                     )}
                   >
                     {m.delta}
                   </p>
                 )}
-                <p className={cn("text-[9px] mt-0.5", isDark ? "text-white/30" : "text-neutral-400")}>
+                <p
+                  className={cn('text-[9px] mt-0.5', isDark ? 'text-white/30' : 'text-neutral-400')}
+                >
                   {m.label}
                 </p>
               </div>
@@ -152,8 +157,8 @@ export function CaseStudyCard({
               <span
                 key={tag}
                 className={cn(
-                  "text-[10px] font-medium px-2 py-0.5 rounded-full",
-                  isDark ? "bg-white/8 text-white/40" : "bg-neutral-100 text-neutral-400"
+                  'text-[10px] font-medium px-2 py-0.5 rounded-full',
+                  isDark ? 'bg-white/8 text-white/40' : 'bg-neutral-100 text-neutral-400',
                 )}
               >
                 {tag}

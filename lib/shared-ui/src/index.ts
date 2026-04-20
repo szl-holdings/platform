@@ -1,828 +1,952 @@
-export { NewsletterSubscribe, type NewsletterSubscribeProps, type NewsletterSubscribeVariant } from "./newsletter-subscribe";
-export { TimeSeriesChart, type TimeSeriesChartProps } from "./analytics/index";
-export { FunnelChart, type FunnelChartProps } from "./analytics/index";
-export { CohortMatrix, type CohortMatrixProps } from "./analytics/index";
-export { AnomalyFeed, type AnomalyFeedProps } from "./analytics/index";
-export { MetricsDashboard, MetricSummaryRow, type MetricsDashboardProps, type MetricSummaryRowProps, type DashboardWidgetConfig, type DashboardWidgetType } from "./analytics/index";
+export { default as AppObservabilityPage } from './AppObservabilityPage';
+export { type AuthGateProps, default as AuthGate } from './AuthGate';
 export {
-  ParticleField,
-  PulseMetricCard,
-  PulseThroughputChart,
-  PulseHeader,
-  PulseHealthGrid,
-  PulseEventFeed,
-  generatePulseEvent,
-  PulseFlowDiagram,
-  PulseTechStack,
-  type PulseEvent,
-} from "./pulse";
+  AutonomyDial,
+  type AutonomyDialProps,
+} from './AutonomyDial';
 export {
-  colors,
-  typography,
-  spacing,
-  effects,
-  motion,
-  breakpoints,
-  zIndex,
-  iconography,
-} from "./tokens";
+  AdminAuditTrail,
+  type AdminAuditTrailProps,
+  type AuditActionType,
+  type AuditActorType,
+  type AuditTrailEntry,
+} from './admin-audit-trail';
 export {
+  AgentInsightsWidget,
+  type AgentRun,
+  type KnowledgeEntry as AgentKnowledgeEntry,
+} from './agent-insights-widget';
+export {
+  ActionTypeBadge,
+  ApprovalBadge,
+  AuditTrailDrawer,
+  ConfidenceBand,
+  DecisionCard,
+  type DecisionCardProps,
+  DegradedModeBanner,
+  EnvironmentLabel,
+  type EvidenceItem as AlloyEvidenceItem,
+  EvidencePanel,
+  HumanReviewBadge,
+  PriorityBadge,
+  RiskBadge,
+  SafeFallbackState,
+} from './alloy-decision-card';
+export {
+  AmbientBar,
+  type AmbientBarProps,
+  type AmbientIntelligenceConfig,
+  type AmbientSignal,
+  useAmbientIntelligence,
+} from './ambient-intelligence';
+export {
+  AnomalyFeed,
+  type AnomalyFeedProps,
+  CohortMatrix,
+  type CohortMatrixProps,
+  type DashboardWidgetConfig,
+  type DashboardWidgetType,
+  FunnelChart,
+  type FunnelChartProps,
+  MetricSummaryRow,
+  type MetricSummaryRowProps,
+  MetricsDashboard,
+  type MetricsDashboardProps,
+  TimeSeriesChart,
+  type TimeSeriesChartProps,
+} from './analytics/index';
+export { AnalyticsProvider, useAnalytics } from './analytics-provider';
+export { AnimatedCounter, type AnimatedCounterProps } from './animated-counter';
+export {
+  ambientDrift,
+  cardReveal,
   fadeIn,
-  fadeInUp,
   fadeInDown,
   fadeInLeft,
   fadeInRight,
-  scaleIn,
-  slideUp,
-  slideInRight,
+  fadeInUp,
+  hoverLift,
+  hoverLiftSlight,
+  hoverScale,
+  navReveal,
+  nodePulse,
   panelReveal,
+  parallaxFast,
+  parallaxMedium,
+  parallaxSlow,
+  pulseSubtle,
+  scaleIn,
+  scrollReveal,
+  scrollRevealLeft,
+  scrollRevealRight,
+  sectionReveal,
+  shimmer,
+  signalPulse,
+  slideInRight,
+  slideUp,
   staggerContainer,
   staggerContainerFast,
   staggerItem,
   staggerItemFast,
   staggerItemLeft,
-  scrollReveal,
-  scrollRevealLeft,
-  scrollRevealRight,
-  hoverLift,
-  hoverLiftSlight,
-  hoverScale,
-  navReveal,
-  shimmer,
-  pulseSubtle,
-  nodePulse,
-  signalPulse,
-  ambientDrift,
-  sectionReveal,
-  cardReveal,
-  parallaxSlow,
-  parallaxMedium,
-  parallaxFast,
-} from "./animations";
+} from './animations';
 export {
-  cn,
-  formatDate,
-  formatDateTime,
-  formatTime,
-  formatCurrency,
-  formatNumber,
-  getApiUrl,
-  resolveTimeZone,
-  toAlpha,
-  type FormatDateOptions,
-  type FormatDateTimeOptions,
-} from "./utils";
+  ApiError,
+  type ApiFetchOptions,
+  type AuthClearedReason,
+  type AuthTokens,
+  apiFetch,
+  clearAuthTokens,
+  type GraphQLRequestOptions,
+  getAccessToken,
+  getAuthTokens,
+  graphqlRequest,
+  hydrateAuthTokensFromSecureStorage,
+  installAuthClearedRedirect,
+  isAuthError,
+  onAuthCleared,
+  type PaginatedResponse,
+  type PaginationMeta,
+  refreshAccessToken,
+  registerSecureTokenStorage,
+  setAuthTokens,
+} from './api-fetch';
 export {
-  surfaceCard,
-  premiumCard,
-  glassCard,
-  premiumButton,
-  premiumBadge,
-  dataUI,
+  type AppMode as PlatformAppMode,
+  AppModeBanner,
+  type AppModeBannerProps,
+  AppModeProvider,
+  useAppMode,
+} from './app-mode-banner';
+export {
+  AtlasArtifactCard,
+  type AtlasArtifactCardProps,
+  type AtlasArtifactFull,
+  type AtlasArtifactMeta,
+  AtlasArtifactPanel,
+  type AtlasArtifactPanelProps,
+  type AtlasArtifactSection,
+  AtlasArtifactViewer,
+  type AtlasArtifactViewerProps,
+  type AtlasExportFormat,
+  type AtlasTemplateType,
+} from './atlas-artifact-panel';
+export {
+  APPROVED_CTAS,
+  APPROVED_STATUSES,
+  type ApprovedCTA,
+  type CommandModeSignal,
+  CommandModeSignalCard,
+  type CommandModeSignalLevel,
+  type CommandModeStatus,
+  CommandModeSurface,
+  type CommandModeSurfaceProps,
+  StatusBadge,
+  type StatusBadgeProps,
+} from './command-mode';
+export {
+  type CompanyKPI,
+  CompanyKPIDashboard,
+  type CompanyKPIDashboardProps,
+  DEMO_COMPANY_KPIS,
+} from './company-kpi-dashboard';
+export {
   dashboardLayout,
-  setupLayout,
+  dataUI,
   emptyState,
-  statCard,
+  glassCard,
   hierarchy,
-} from "./components";
+  premiumBadge,
+  premiumButton,
+  premiumCard,
+  setupLayout,
+  statCard,
+  surfaceCard,
+} from './components';
 export {
-  szlHoldingsTheme,
-  vesselsTheme,
-  carlotaJoTheme,
-  carlotaJoLuxuryTheme,
-  stephenLutarTheme,
-  stephenTheme,
-  alloyCreativeTheme,
-  terraTheme,
-  lyteTheme,
-  aegisTheme,
-  alloyTheme,
-  firestormTheme,
-  incaTheme,
-  mspTheme,
-  dreamscapeTheme,
-  brandThemes,
-  getBrandTheme,
-  getBrandGradientCSS,
-  getBrandSurface,
-  getBrandAccentCSS,
-  type BrandTheme,
-  type BrandSlug,
-} from "./themes";
-export { LANE_ACCENT_HEX, type LaneName } from "./lane-colors";
-export { PowerBiEmbed, type PowerBiEmbedConfig } from "./powerbi-embed";
+  ConstellationGraph,
+  type ConstellationGraphEdge,
+  type ConstellationGraphNode,
+  type ConstellationGraphProps,
+  type ConstellationGraphResponse,
+  type ConstellationGraphStats,
+} from './constellation-graph';
+export { ContactModal, type ContactModalProps, useContactModal } from './contact-modal';
 export {
-  kpiRibbon,
-  chartContainer,
-  dataTableShell,
-  statusPill,
-  alertBanner,
-  modalDrawer,
-  skeletonLoader,
-  premiumFormElements,
-} from "./premium-components";
+  ContextualFeedback,
+  ContextualFeedbackBar,
+  type ContextualFeedbackBarProps,
+  type ContextualFeedbackProps,
+} from './contextual-feedback';
 export {
-  IntelligencePhilosophy,
-  IntelligenceMaturityBadge,
-  LensTag,
-} from "./intelligence-philosophy";
-export { LensBar, LensBarGrid, PostureScore } from "./lens-bar";
+  CookieBanner,
+  type CookieBannerProps,
+  type CookieConsentState,
+  useCookieConsent,
+} from './cookie-banner';
 export {
-  DOCTRINE_LAYER_COLORS,
-  DOCTRINE_LAYER_DESCRIPTIONS,
-  DOCTRINE_APP_MAP,
-  DOCTRINE_LAYER_ORDER,
-  getDoctrineConfig,
-  getAppsByLayer,
-  formatLayerLabel,
-  type DoctrineLayerConfig,
-  type DoctrineLayer,
-  type DoctrineContextModel,
-  type ExplainabilityModel,
-  type NormalizedEvent,
-} from "./doctrine-layer";
+  type ActionDraft,
+  type ActionDraftPriority,
+  type ActionDraftStatus,
+  type ActionDraftType,
+  CortexActionDrafts,
+  type CortexActionDraftsProps,
+} from './cortex-action-drafts';
 export {
-  DoctrineLayerBadge,
-  LayerPill,
-  type DoctrineLayerBadgeProps,
-} from "./doctrine-layer-badge";
-export { ExplainabilityPanel, ExplainabilityToggle } from "./explainability-panel";
+  CortexEntityGraph,
+  type CortexEntityGraphProps,
+  type EntityGraphEdge,
+  type EntityGraphMeta,
+  type EntityGraphNode,
+} from './cortex-entity-graph';
 export {
-  SiteHeader,
-  type NavItem,
-  type SiteHeaderProps,
-} from "./design-system/SiteHeader";
+  type CortexFeedStats,
+  CortexIntelligenceFeed,
+  type CortexIntelligenceFeedProps,
+  type CortexSignal,
+  type IntelligenceSignal,
+} from './cortex-intelligence-feed';
 export {
-  SiteFooter,
-  type FooterLinkGroup,
-  type SiteFooterProps,
-} from "./design-system/SiteFooter";
+  type CortexIntent,
+  type CortexResult,
+  CortexVoice,
+  type CortexVoiceProps,
+  CortexVoiceTrigger,
+  useCortexVoice,
+} from './cortex-voice';
 export {
-  HeroBlock,
-  type HeroBadge,
-  type HeroAction,
-  type HeroBlockProps,
-} from "./design-system/HeroBlock";
+  CortexWhatIf,
+  type CortexWhatIfProps,
+  type WhatIfCascade,
+  type WhatIfResult,
+} from './cortex-what-if';
+export { CrdtEntityPanel, type CrdtEntityPanelProps } from './crdt-entity-panel';
 export {
-  CTAGroup,
-  type CTAItem,
-  type CTAGroupProps,
-} from "./design-system/CTAGroup";
+  CorrelationFeed,
+  type CorrelationFeedProps,
+  type CrossDomainCorrelation,
+} from './cross-domain-correlation';
 export {
-  FeatureGrid,
-  type Feature,
-  type FeatureGridProps,
-} from "./design-system/FeatureGrid";
+  DecisionCenter,
+  type DecisionCenterProps,
+  RecommendationCard,
+  type RecommendationCardProps,
+} from './DecisionCenter';
+export { ActionLoop, DataProvenance, RoleSelector } from './data-provenance';
+export { type DataState, DataStateBadge, DataStateBanner } from './data-state-badge';
 export {
-  VentureCard,
-  type VentureStatus,
-  type VentureMetric,
-  type VentureCardData,
-  type VentureCardProps,
-} from "./design-system/VentureCard";
+  type AiRecommendation as DecisionAiRecommendation,
+  type Alternative as DecisionAlternative,
+  DecisionReceiptBadge,
+  DecisionReceiptCard,
+  type DecisionReceiptCardProps,
+  type DecisionReceiptData,
+} from './decision-receipt-card';
 export {
-  ServiceCard,
-  type ServiceCardProps,
-} from "./design-system/ServiceCard";
+  type DecisionItem,
+  DecisionShieldPanel,
+  type DecisionShieldPanelProps,
+  type DecisionShieldSummary,
+  useDecisionShield,
+} from './decision-shield';
+export {
+  type DemoMode,
+  DemoModeProvider,
+  type DemoModeState,
+  DemoModeSwitcher,
+  MODE_COLORS,
+  MODE_DESCRIPTIONS,
+  MODE_ICONS,
+  MODE_LABELS,
+  useDemoMode,
+} from './demo-mode';
+export { ErrorState, type ErrorStateProps } from './design-system';
+export {
+  AccessDenied,
+  type AccessDeniedProps,
+} from './design-system/AccessDenied';
+export {
+  AlertCard,
+  type AlertCardProps,
+  type AlertSeverity,
+} from './design-system/AlertCard';
+export {
+  ApprovalStack,
+  type ApprovalStackProps,
+  type ApprovalStateKey,
+  type Approver,
+} from './design-system/ApprovalStack';
 export {
   ArticleCard,
   type ArticleCardProps,
-} from "./design-system/ArticleCard";
+} from './design-system/ArticleCard';
+export {
+  AuditDrawer,
+  type AuditDrawerProps,
+  type AuditEntry,
+} from './design-system/AuditDrawer';
 export {
   CaseStudyCard,
-  type CaseStudyMetric,
   type CaseStudyCardProps,
-} from "./design-system/CaseStudyCard";
+  type CaseStudyMetric,
+} from './design-system/CaseStudyCard';
 export {
-  KPIStrip,
-  type KPIItem,
-  type KPIStripProps,
-} from "./design-system/KPIStrip";
-export {
-  MetricCard,
-  type MetricCardProps,
-} from "./design-system/MetricCard";
-export {
-  WatchlistTable,
-  type WatchlistColumn,
-  type WatchlistTableProps,
-} from "./design-system/WatchlistTable";
+  ChartContainer,
+  type ChartContainerProps,
+} from './design-system/ChartContainer';
 export {
   ConfidenceBadge,
   type ConfidenceBadgeLevel,
   type ConfidenceBadgeProps,
-} from "./design-system/ConfidenceBadge";
+} from './design-system/ConfidenceBadge';
 export {
-  PressureBadge,
-  type PressureLevel,
-  type PressureBadgeProps,
-} from "./design-system/PressureBadge";
-export {
-  ReviewStateBadge,
-  type ReviewState,
-  type ReviewStateBadgeProps,
-} from "./design-system/ReviewStateBadge";
-export {
-  Timeline,
-  type TimelineEntry,
-  type TimelineProps,
-} from "./design-system/Timeline";
-export {
-  InquiryForm,
-  type InquiryType,
-  type InquiryTypeConfig,
-  type InquiryFormProps,
-} from "./design-system/InquiryForm";
+  CTAGroup,
+  type CTAGroupProps,
+  type CTAItem,
+} from './design-system/CTAGroup';
 export {
   DashboardShell,
-  type DashboardShellTheme,
   type DashboardShellProps,
-} from "./design-system/DashboardShell";
-export {
-  SidebarNav,
-  type SidebarNavItem,
-  type SidebarNavSection,
-  type SidebarNavProps,
-} from "./design-system/SidebarNav";
+  type DashboardShellTheme,
+} from './design-system/DashboardShell';
 export {
   DataTable,
   type DataTableColumn,
   type DataTableProps,
-} from "./design-system/DataTable";
+} from './design-system/DataTable';
 export {
-  AlertCard,
-  type AlertSeverity,
-  type AlertCardProps,
-} from "./design-system/AlertCard";
+  EvidenceDrawer,
+  type EvidenceDrawerProps,
+  type EvidenceSource,
+} from './design-system/EvidenceDrawer';
+export {
+  type ExportFormat,
+  ExportPanel,
+  type ExportPanelProps,
+} from './design-system/ExportPanel';
+export {
+  type Feature,
+  FeatureGrid,
+  type FeatureGridProps,
+} from './design-system/FeatureGrid';
+export {
+  GraphQLDataPanel,
+  type GraphQLDataPanelProps,
+  type GraphQLDataSection,
+} from './design-system/GraphQLDataPanel';
+export {
+  type HeroAction,
+  type HeroBadge,
+  HeroBlock,
+  type HeroBlockProps,
+} from './design-system/HeroBlock';
+export {
+  InquiryForm,
+  type InquiryFormProps,
+  type InquiryType,
+  type InquiryTypeConfig,
+} from './design-system/InquiryForm';
+export {
+  type KPIItem,
+  KPIStrip,
+  type KPIStripProps,
+} from './design-system/KPIStrip';
 export {
   LoadingSkeleton,
   type LoadingSkeletonProps,
-} from "./design-system/LoadingSkeleton";
+} from './design-system/LoadingSkeleton';
 export {
-  AccessDenied,
-  type AccessDeniedProps,
-} from "./design-system/AccessDenied";
+  MetricCard,
+  type MetricCardProps,
+} from './design-system/MetricCard';
 export {
-  AuditDrawer,
-  type AuditEntry,
-  type AuditDrawerProps,
-} from "./design-system/AuditDrawer";
+  PressureBadge,
+  type PressureBadgeProps,
+  type PressureLevel,
+} from './design-system/PressureBadge';
 export {
-  EvidenceDrawer,
-  type EvidenceSource,
-  type EvidenceDrawerProps,
-} from "./design-system/EvidenceDrawer";
+  type ReviewState,
+  ReviewStateBadge,
+  type ReviewStateBadgeProps,
+} from './design-system/ReviewStateBadge';
 export {
-  ChartContainer,
-  type ChartContainerProps,
-} from "./design-system/ChartContainer";
+  ServiceCard,
+  type ServiceCardProps,
+} from './design-system/ServiceCard';
 export {
-  ExportPanel,
-  type ExportFormat,
-  type ExportPanelProps,
-} from "./design-system/ExportPanel";
+  SidebarNav,
+  type SidebarNavItem,
+  type SidebarNavProps,
+  type SidebarNavSection,
+} from './design-system/SidebarNav';
 export {
-  ApprovalStack,
-  type ApprovalStateKey,
-  type Approver,
-  type ApprovalStackProps,
-} from "./design-system/ApprovalStack";
+  type FooterLinkGroup,
+  SiteFooter,
+  type SiteFooterProps,
+} from './design-system/SiteFooter';
 export {
-  GraphQLDataPanel,
-  type GraphQLDataSection,
-  type GraphQLDataPanelProps,
-} from "./design-system/GraphQLDataPanel";
+  type NavItem,
+  SiteHeader,
+  type SiteHeaderProps,
+} from './design-system/SiteHeader';
 export {
-  CommandModeSignalCard,
-  CommandModeSurface,
-  StatusBadge,
-  APPROVED_CTAS,
-  APPROVED_STATUSES,
-  type CommandModeSignalLevel,
-  type CommandModeStatus,
-  type CommandModeSignal,
-  type CommandModeSurfaceProps,
-  type StatusBadgeProps,
-  type ApprovedCTA,
-} from "./command-mode";
-export { default as AppObservabilityPage } from "./AppObservabilityPage";
-export { apiFetch, graphqlRequest, ApiError, isAuthError, setAuthTokens, getAuthTokens, getAccessToken, clearAuthTokens, onAuthCleared, refreshAccessToken, installAuthClearedRedirect, registerSecureTokenStorage, hydrateAuthTokensFromSecureStorage, type AuthTokens, type AuthClearedReason, type PaginationMeta, type PaginatedResponse, type ApiFetchOptions, type GraphQLRequestOptions } from "./api-fetch";
-export { useNotificationCenter, type LiveNotification, type ApiNotification, type NotificationCenterState } from "./notification-center";
-export { AgentInsightsWidget, type KnowledgeEntry as AgentKnowledgeEntry, type AgentRun } from "./agent-insights-widget";
-export { ExplainabilityDrawer, useExplainability, ExplainButton, type ExplainabilityMetadata, type ExplainabilityDrawerProps } from "./explainability";
-export { DemoModeProvider, useDemoMode, DemoModeSwitcher, type DemoMode, type DemoModeState, MODE_LABELS, MODE_DESCRIPTIONS, MODE_ICONS, MODE_COLORS } from "./demo-mode";
-export { SandboxModeProvider, useSandboxMode, SandboxModeBanner, SandboxToggle, type SandboxModeState } from "./sandbox-mode";
-export { AppModeBanner, AppModeProvider, useAppMode, type AppMode as PlatformAppMode, type AppModeBannerProps } from "./app-mode-banner";
-export { ProductionConfirmProvider, useProductionConfirm, useDestructiveAction, type ConfirmOptions } from "./production-confirm";
-export { PrivateAppGuard, type PrivateAppGuardProps } from "./PrivateAppGuard";
-export { useRole, RoleGate, type UserRoles, type AppRole } from "./use-role";
-export { default as AuthGate, type AuthGateProps } from "./AuthGate";
-export { EcosystemMap, ECOSYSTEM_NODES, LAYER_CONFIG, CONNECTION_PAIRS, type EcosystemNode, type EcosystemMapProps } from "./ecosystem-map";
-export { CompanyKPIDashboard, DEMO_COMPANY_KPIS, type CompanyKPI, type CompanyKPIDashboardProps } from "./company-kpi-dashboard";
-export { DataStateBadge, DataStateBanner, type DataState } from "./data-state-badge";
-export { EmptyState, type EmptyStateProps } from "./EmptyState";
-export { ErrorState, type ErrorStateProps } from "./design-system";
-export { PageDataSkeleton, InlineDataSkeleton } from "./page-data-skeleton";
-export { useRealtimeChannel, type RealtimeConnectionStatus, type RealtimeTransport, type RealtimeChannelMessage, type UseRealtimeChannelOptions, type UseRealtimeChannelResult } from "./use-realtime-channel";
-export { usePresence, useRealtimePresence, type PresenceUser, type PresenceState, type UsePresenceOptions, type UsePresenceResult } from "./use-presence";
-export { RealtimeStatusIndicator } from "./realtime-status-indicator";
+  Timeline,
+  type TimelineEntry,
+  type TimelineProps,
+} from './design-system/Timeline';
 export {
-  DocumentEditor,
-  createEmptyDocument,
+  VentureCard,
+  type VentureCardData,
+  type VentureCardProps,
+  type VentureMetric,
+  type VentureStatus,
+} from './design-system/VentureCard';
+export {
+  type WatchlistColumn,
+  WatchlistTable,
+  type WatchlistTableProps,
+} from './design-system/WatchlistTable';
+export {
+  DigitalTwinCard,
+  type PredictedState,
+  type TwinAlert,
+  type TwinCardProps,
+} from './digital-twin-card';
+export {
+  DOCTRINE_APP_MAP,
+  DOCTRINE_LAYER_COLORS,
+  DOCTRINE_LAYER_DESCRIPTIONS,
+  DOCTRINE_LAYER_ORDER,
+  type DoctrineContextModel,
+  type DoctrineLayer,
+  type DoctrineLayerConfig,
+  type ExplainabilityModel,
+  formatLayerLabel,
+  getAppsByLayer,
+  getDoctrineConfig,
+  type NormalizedEvent,
+} from './doctrine-layer';
+export {
+  DoctrineLayerBadge,
+  type DoctrineLayerBadgeProps,
+  LayerPill,
+} from './doctrine-layer-badge';
+export {
   applyMergeFields,
-  MERGE_FIELD_SUGGESTIONS,
-  DocumentEnginePanel,
   BatchPdfPanel,
-  SigningDashboard,
-  EmbeddedSigner,
+  createEmptyDocument,
   DOCUMENT_TEMPLATES,
-  getTemplatesByApp,
+  DocumentEditor,
+  DocumentEnginePanel,
+  EmbeddedSigner,
   getTemplateBySlug,
-} from "./document-engine";
+  getTemplatesByApp,
+  MERGE_FIELD_SUGGESTIONS,
+  SigningDashboard,
+} from './document-engine';
+export { EmptyState, type EmptyStateProps } from './EmptyState';
 export {
-  SEVERITY_CONFIG,
-  CONFIDENCE_CONFIG,
-  FRESHNESS_CONFIG,
-  type SignalSeverity,
-  type SignalSource,
-  type ConfidenceLevel,
-  type FreshnessWindow,
-  type WorkflowState,
-  type ActionType,
-  type BusinessImpact,
-  type SZLSignal,
-  type SZLRisk,
-  type SZLAction,
-  type SZLOutcome,
-  type DataProvenanceInfo,
-} from "./ontology";
-export { DataProvenance, ActionLoop, RoleSelector } from "./data-provenance";
+  CONNECTION_PAIRS,
+  ECOSYSTEM_NODES,
+  EcosystemMap,
+  type EcosystemMapProps,
+  type EcosystemNode,
+  LAYER_CONFIG,
+} from './ecosystem-map';
 export {
-  ReceiptDrawer,
-  ProvenanceBadge,
-  ExecutiveTrustSummaryPanel,
-  ProvenanceViewer,
-  type ReceiptDrawerProps,
-  type ProvenanceBadgeProps,
-  type ExecutiveTrustSummaryPanelProps,
-  type ProvenanceViewerProps,
-} from "./receipt-graph";
-export { LanguageSwitcher, type LanguageSwitcherProps, type SupportedLocale } from "./language-switcher";
-export { useUserPreferences, type UserPreferences, type UseUserPreferencesResult, PREFERENCES_NAMESPACE } from "./use-user-preferences";
-export { ContactModal, useContactModal, type ContactModalProps } from "./contact-modal";
-export { WelcomeOverlay, useWelcomeState, type WelcomeOverlayProps, type WelcomeFeature } from "./WelcomeOverlay";
-export {
-  TenantBrandProvider,
-  useTenantBrand,
-  useTenantCSSVars,
-  mergeBranding,
-  DEFAULT_BRAND,
-  type TenantBranding,
-  type TenantBrandConfig,
-  type TenantBrandProviderProps,
-} from "./use-tenant-brand";
-export { NpsSurvey, NpsSurveyOverlay, useNpsSurvey, type NpsSurveyProps, type NpsSurveyOverlayProps } from "./nps-survey";
-export { ContextualFeedback, ContextualFeedbackBar, type ContextualFeedbackProps, type ContextualFeedbackBarProps } from "./contextual-feedback";
-export { PackBanner, PACK_ACCENT_COLORS, type PackBannerProps, type PackVariant } from "./pack-banner";
-export { CookieBanner, useCookieConsent, type CookieBannerProps, type CookieConsentState } from "./cookie-banner";
-export { StatusBanner, useStatusBanner, type StatusBannerProps, type StatusBannerConfig, type StatusLevel } from "./status-banner";
-export {
-  ConfidenceBand,
-  EvidencePanel,
-  ApprovalBadge,
-  HumanReviewBadge,
-  RiskBadge,
-  PriorityBadge,
-  ActionTypeBadge,
-  EnvironmentLabel,
-  DegradedModeBanner,
-  SafeFallbackState,
-  DecisionCard,
-  AuditTrailDrawer,
-  type EvidenceItem as AlloyEvidenceItem,
-  type DecisionCardProps,
-} from "./alloy-decision-card";
-export {
-  OutcomeFeedbackBar,
-  OutcomeFeedbackCard,
-  OutcomeDashboard,
-  InlineFeedbackBar,
-  type OutcomeDecision,
-  type OutcomeFeedbackProps,
-  type OutcomeFeedbackBarProps,
-  type OutcomeDashboardProps,
-  type InlineFeedbackBarProps,
-} from "./outcome-feedback";
-
-export {
-  AtlasArtifactCard,
-  AtlasArtifactViewer,
-  AtlasArtifactPanel,
-  type AtlasArtifactMeta,
-  type AtlasArtifactFull,
-  type AtlasArtifactSection,
-  type AtlasArtifactCardProps,
-  type AtlasArtifactViewerProps,
-  type AtlasArtifactPanelProps,
-  type AtlasTemplateType,
-  type AtlasExportFormat,
-} from "./atlas-artifact-panel";
-
-export { FeatureFlagGate, type FeatureFlagGateProps } from "./feature-flag-gate";
-export { AnalyticsProvider, useAnalytics } from "./analytics-provider";
-export { useFeatureFlag, type FeatureFlag } from "./hooks";
-
-export {
-  OperationalStatusBadge,
-  OperationalRiskBadge,
-  OperationalApprovalBadge,
-  OperationalOwnerChip,
-  OperationalEvidencePanel,
-  OperationalAuditTimeline,
-  OperationalEscalationPanel,
-  OperationalDetailPane,
-  OperationalQueueRow,
-  getStatusConfig,
-  getRiskConfig,
-  getApprovalConfig,
-  riskScoreToLevel,
-  severityToRiskLevel,
-  isTerminalStatus,
-  formatAgo,
-  formatDuration,
-  STATUS_CONFIGS,
-  RISK_CONFIGS,
-  APPROVAL_CONFIGS,
-  type OperationalStatus,
-  type RiskLevel,
-  type ApprovalState,
-  type ActorType,
-  type OperationalOwner,
-  type EvidenceItem as OperationalEvidenceItem,
-  type AuditHistoryEntry,
-  type EscalationPath,
-  type NextAction,
-  type OperationalEntity,
-  type StatusConfig,
-} from "./operational-primitives";
-export { DigitalTwinCard, type TwinCardProps, type TwinAlert, type PredictedState } from "./digital-twin-card";
-export {
-  KnowledgeGraphViz,
-  HierarchicalGraphViz,
-  TimelineGraphViz,
-  UnifiedKnowledgeGraphViz,
-  GraphLegend,
-  NodeDetailPanel,
-  GraphStatsCard,
-  type GraphVizNode,
-  type GraphVizEdge,
-  type KnowledgeGraphData,
-  type KnowledgeGraphVizProps,
-  type HierarchicalGraphVizProps,
-  type TimelineGraphVizProps,
-  type UnifiedKnowledgeGraphVizProps,
-  type GraphLayout,
-  type GraphLegendProps,
-  type NodeDetailPanelProps,
-  type GraphStatsCardProps,
-} from "./knowledge-graph-viz";
-
-export {
-  EcosystemNav,
-  useEcosystemNotifications,
-  trackRecentItem,
-  type EcosystemApp,
-  type EcosystemNotification,
-  type EcosystemNavProps,
   type BreadcrumbItem,
+  type EcosystemApp,
+  EcosystemNav,
+  type EcosystemNavProps,
+  type EcosystemNotification,
   type RecentItem,
-} from "./ecosystem-nav";
-
+  trackRecentItem,
+  useEcosystemNotifications,
+} from './ecosystem-nav';
 export {
-  ProbabilityDensityPlot,
-  CumulativeDistributionCurve,
-  TornadoDiagram,
-  ScenarioComparisonMatrix,
-  ConfidenceBandChart,
-  SimulationResultCard,
-  SimulationProgressTracker,
-  type HistogramBucket,
-  type CDFPoint,
-  type DistributionStats,
-  type TornadoEntry,
-  type ScenarioComparisonItem,
-} from "./monte-carlo-viz";
-
-export {
-  SyncStatusBadge,
-  SyncStatusBar,
-  type SyncStatusBadgeProps,
-  type SyncStatusBarProps,
-  type SyncState,
-} from "./sync-status-badge";
-
-export {
-  useWebSyncStatus,
-  type WebSyncStatusOptions,
-  type WebSyncStatus,
-} from "./use-web-sync-status";
-
-export {
-  useCrdtEntity,
-  type UseCrdtEntityOptions,
-  type UseCrdtEntityResult,
-  type CrdtMergeEvent,
-  type EntitySchema as CrdtEntitySchema,
-  type FieldSchema as CrdtFieldSchema,
-} from "./use-crdt-entity";
-
-export { MergeNotification, type MergeNotificationProps } from "./merge-notification";
-
-export { CrdtEntityPanel, type CrdtEntityPanelProps } from "./crdt-entity-panel";
-export {
-  registerWebPush,
-  unregisterWebPush,
-  checkWebPushSupport,
-  registerServiceWorker,
-  getVapidPublicKey,
-  type WebPushRegistrationOptions,
-} from "./web-push-registration";
-
-export {
-  AmbientBar,
-  useAmbientIntelligence,
-  type AmbientSignal,
-  type AmbientBarProps,
-  type AmbientIntelligenceConfig,
-} from "./ambient-intelligence";
-
-export {
-  EnergyPulse,
-  useEnergyHeartbeat,
-  type EnergyMetrics,
   type EnergyHeartbeatConfig,
+  type EnergyMetrics,
+  EnergyPulse,
   type EnergyPulseProps,
-} from "./energy-heartbeat";
-
-export {
-  DecisionShieldPanel,
-  useDecisionShield,
-  type DecisionItem,
-  type DecisionShieldSummary,
-  type DecisionShieldPanelProps,
-} from "./decision-shield";
-
-export {
-  StakeholderLensProvider,
-  StakeholderLensSwitcher,
-  StakeholderContent,
-  useStakeholderLens,
-  STAKEHOLDER_VIEWS,
-  type StakeholderView,
-  type StakeholderLensConfig,
-  type StakeholderLensSwitcherProps,
-} from "./stakeholder-lens";
-
-export {
-  CorrelationFeed,
-  type CrossDomainCorrelation,
-  type CorrelationFeedProps,
-} from "./cross-domain-correlation";
-
-export {
-  CortexVoice,
-  CortexVoiceTrigger,
-  useCortexVoice,
-  type CortexVoiceProps,
-  type CortexIntent,
-  type CortexResult,
-} from "./cortex-voice";
-
-export {
-  MorningBriefingCard,
-  BriefingHistory,
-  DEMO_BRIEFING_HISTORY,
-  type DailyBriefing,
-  type BriefingSignal,
-} from "./morning-briefing";
-
-export {
-  SessionPresenceBar,
-  EntityCommentThread,
-  MultiplayerSessionBanner,
-  type SessionParticipant,
-  type SessionComment,
-  type MultiplayerSessionProps,
-} from "./multiplayer-session";
-
-export { MicroFeedbackWidget, type MicroFeedbackWidgetProps, type FeedbackPayload, type FeedbackSentiment } from "./micro-feedback-widget";
-
-export {
-  CortexIntelligenceFeed,
-  type CortexIntelligenceFeedProps,
-  type IntelligenceSignal,
-  type CortexFeedStats,
-  type CortexSignal,
-} from "./cortex-intelligence-feed";
-
-export {
-  CortexEntityGraph,
-  type CortexEntityGraphProps,
-  type EntityGraphNode,
-  type EntityGraphEdge,
-  type EntityGraphMeta,
-} from "./cortex-entity-graph";
-
-export {
-  ConstellationGraph,
-  type ConstellationGraphProps,
-  type ConstellationGraphNode,
-  type ConstellationGraphEdge,
-  type ConstellationGraphStats,
-  type ConstellationGraphResponse,
-} from "./constellation-graph";
-
-export {
-  CortexActionDrafts,
-  type CortexActionDraftsProps,
-  type ActionDraft,
-  type ActionDraftType,
-  type ActionDraftStatus,
-  type ActionDraftPriority,
-} from "./cortex-action-drafts";
-
-export {
-  CortexWhatIf,
-  type CortexWhatIfProps,
-  type WhatIfResult,
-  type WhatIfCascade,
-} from "./cortex-what-if";
-export {
-  SettingsShell,
-  SettingsPage,
-  SettingsSectionPanel,
-  SettingsRow,
-  SettingsCard,
-  SETTINGS_SECTIONS_CONFIG,
-  type SettingsSection,
-  type SettingsShellProps,
-  type SettingsPageProps,
-  type SettingsSectionPanelProps,
-  type SettingsRowProps,
-  type SettingsCardProps,
-} from "./settings-shell";
-export {
-  setUserPref,
-  getUserPref,
-  useUserPrefs,
-  useUserPref,
-  useSidebarCollapsed,
-  useNotificationSound,
-  type UserPrefs,
-} from "./use-user-prefs";
-export {
-  OnboardingWizard,
-  GettingStartedChecklist,
-  OnboardingReplayButton,
-  useOnboardingState,
-  useChecklistState,
-  ProductTour,
-  useProductTour,
-  OnboardingChecklist,
-  HelpTip,
-  ChangelogPage,
-  useOnboardingAnalytics,
-  ActivationBanner,
-  SetupAlert,
-  PaywallGate,
-  TrialBanner,
-  useActivationState,
-  markActivationEvent,
-  type OnboardingStep,
-  type OnboardingChecklistItem,
-  type OnboardingConfig,
-  type OnboardingWizardProps,
-  type GettingStartedChecklistProps,
-  type ProductTourStep,
-  type ProductTourProps,
-  type ChecklistItem,
-  type OnboardingChecklistProps,
-  type HelpTipProps,
-  type ChangelogEntry,
-  type ActivationStep,
-  type ActivationBannerProps,
-  type SetupAlertProps,
-  type PaywallGateProps,
-  type TrialBannerProps,
-  type ActivationState,
-  type ActivationStateOptions,
-} from "./onboarding";
-export { LiveClock, type LiveClockProps } from "./live-clock";
-export { AnimatedCounter, type AnimatedCounterProps } from "./animated-counter";
-export { useInterval } from "./use-interval";
-
-export {
-  ProofPanel,
-  ProofPanelBadge,
-  ProofPanelRow,
-  type ProofPanelData,
-  type ProofPanelProps,
-  type ProvenanceSourceClass,
-  type ProofReviewState,
-  type ProofExportSafetyState,
-  type ProofInputSource,
-} from "./proof-panel";
-
-export {
-  PolicyResult,
-  PolicyResultBanner,
-  PolicyTimelineEntry,
-  type PolicyDecisionRecord,
-  type PolicyResultProps,
-  type PolicyEffect,
-} from "./policy-result";
-
-export {
-  SimulationCockpit,
-  SimulationCockpitCompact,
-  type SimulationCockpitProps,
-  type SimulationScenario,
-  type ScenarioRange,
-  type SensitivityDriver,
-  type PredictedVsActual,
-} from "./simulation-cockpit";
-
-export {
-  AdminAuditTrail,
-  type AdminAuditTrailProps,
-  type AuditTrailEntry,
-  type AuditActorType,
-  type AuditActionType,
-} from "./admin-audit-trail";
-
-export {
-  DecisionReceiptCard,
-  DecisionReceiptBadge,
-  type DecisionReceiptData,
-  type DecisionReceiptCardProps,
-  type AiRecommendation as DecisionAiRecommendation,
-  type Alternative as DecisionAlternative,
-} from "./decision-receipt-card";
-
-// ─── OS Layer ────────────────────────────────────────────────────────────────
-export {
-  AUTONOMY_LABELS,
-  AUTONOMY_DESCRIPTIONS,
-  POLICY_VERDICT_LABELS,
-  POLICY_VERDICT_DESCRIPTIONS,
-  type AutonomyMode,
-  type PolicyVerdict,
-  type PolicyVerdictDetail,
-  type EvidenceRecord,
-  type SourceHealthStatus,
-  type SourceHealthRecord,
-  type RecommendationAction,
-  type Recommendation,
-  type RunStatus,
-  type RunEffort,
-  type ToolCall,
-  type Run,
-  type AuditAction,
-  type OSAuditEntry,
-} from "./os-layer";
-export {
-  PolicyVerdictBadge,
-  type PolicyVerdictBadgeProps,
-} from "./PolicyVerdictBadge";
-export {
-  AutonomyDial,
-  type AutonomyDialProps,
-} from "./AutonomyDial";
-export {
-  SourceHealthStrip,
-  SourceHealthPill,
-  FreshnessPill,
-  type SourceHealthStripProps,
-  type SourceHealthPillProps,
-  type FreshnessPillProps,
-} from "./SourceHealthStrip";
-export {
-  DecisionCenter,
-  RecommendationCard,
-  type DecisionCenterProps,
-  type RecommendationCardProps,
-} from "./DecisionCenter";
-export {
-  RunConsole,
-  RunDetailPanel,
-  EvalsStrip,
-  type RunConsoleProps,
-  type RunDetailProps,
-  type EvalsStripProps,
-  type EvalResult,
-} from "./RunConsole";
+  useEnergyHeartbeat,
+} from './energy-heartbeat';
 export {
   EvidenceExplorer,
   type EvidenceExplorerProps,
   type EvidenceSignalDomain,
-} from "./evidence-explorer";
+} from './evidence-explorer';
+export {
+  ExplainabilityDrawer,
+  type ExplainabilityDrawerProps,
+  type ExplainabilityMetadata,
+  ExplainButton,
+  useExplainability,
+} from './explainability';
+export { ExplainabilityPanel, ExplainabilityToggle } from './explainability-panel';
+export { FeatureFlagGate, type FeatureFlagGateProps } from './feature-flag-gate';
+export { type FeatureFlag, useFeatureFlag } from './hooks';
+export {
+  IntelligenceMaturityBadge,
+  IntelligencePhilosophy,
+  LensTag,
+} from './intelligence-philosophy';
+export {
+  type GraphLayout,
+  GraphLegend,
+  type GraphLegendProps,
+  GraphStatsCard,
+  type GraphStatsCardProps,
+  type GraphVizEdge,
+  type GraphVizNode,
+  HierarchicalGraphViz,
+  type HierarchicalGraphVizProps,
+  type KnowledgeGraphData,
+  KnowledgeGraphViz,
+  type KnowledgeGraphVizProps,
+  NodeDetailPanel,
+  type NodeDetailPanelProps,
+  TimelineGraphViz,
+  type TimelineGraphVizProps,
+  UnifiedKnowledgeGraphViz,
+  type UnifiedKnowledgeGraphVizProps,
+} from './knowledge-graph-viz';
+export { LANE_ACCENT_HEX, type LaneName } from './lane-colors';
+export {
+  LanguageSwitcher,
+  type LanguageSwitcherProps,
+  type SupportedLocale,
+} from './language-switcher';
+export { LensBar, LensBarGrid, PostureScore } from './lens-bar';
+export { LiveClock, type LiveClockProps } from './live-clock';
+export { MergeNotification, type MergeNotificationProps } from './merge-notification';
+export {
+  type FeedbackPayload,
+  type FeedbackSentiment,
+  MicroFeedbackWidget,
+  type MicroFeedbackWidgetProps,
+} from './micro-feedback-widget';
+export {
+  type CDFPoint,
+  ConfidenceBandChart,
+  CumulativeDistributionCurve,
+  type DistributionStats,
+  type HistogramBucket,
+  ProbabilityDensityPlot,
+  type ScenarioComparisonItem,
+  ScenarioComparisonMatrix,
+  SimulationProgressTracker,
+  SimulationResultCard,
+  TornadoDiagram,
+  type TornadoEntry,
+} from './monte-carlo-viz';
+export {
+  BriefingHistory,
+  type BriefingSignal,
+  type DailyBriefing,
+  DEMO_BRIEFING_HISTORY,
+  MorningBriefingCard,
+} from './morning-briefing';
+export {
+  EntityCommentThread,
+  MultiplayerSessionBanner,
+  type MultiplayerSessionProps,
+  type SessionComment,
+  type SessionParticipant,
+  SessionPresenceBar,
+} from './multiplayer-session';
+export {
+  NewsletterSubscribe,
+  type NewsletterSubscribeProps,
+  type NewsletterSubscribeVariant,
+} from './newsletter-subscribe';
+export {
+  type ApiNotification,
+  type LiveNotification,
+  type NotificationCenterState,
+  useNotificationCenter,
+} from './notification-center';
+export {
+  NpsSurvey,
+  NpsSurveyOverlay,
+  type NpsSurveyOverlayProps,
+  type NpsSurveyProps,
+  useNpsSurvey,
+} from './nps-survey';
+export {
+  ActivationBanner,
+  type ActivationBannerProps,
+  type ActivationState,
+  type ActivationStateOptions,
+  type ActivationStep,
+  type ChangelogEntry,
+  ChangelogPage,
+  type ChecklistItem,
+  GettingStartedChecklist,
+  type GettingStartedChecklistProps,
+  HelpTip,
+  type HelpTipProps,
+  markActivationEvent,
+  OnboardingChecklist,
+  type OnboardingChecklistItem,
+  type OnboardingChecklistProps,
+  type OnboardingConfig,
+  OnboardingReplayButton,
+  type OnboardingStep,
+  OnboardingWizard,
+  type OnboardingWizardProps,
+  PaywallGate,
+  type PaywallGateProps,
+  ProductTour,
+  type ProductTourProps,
+  type ProductTourStep,
+  SetupAlert,
+  type SetupAlertProps,
+  TrialBanner,
+  type TrialBannerProps,
+  useActivationState,
+  useChecklistState,
+  useOnboardingAnalytics,
+  useOnboardingState,
+  useProductTour,
+} from './onboarding';
+export {
+  type ActionType,
+  type BusinessImpact,
+  CONFIDENCE_CONFIG,
+  type ConfidenceLevel,
+  type DataProvenanceInfo,
+  FRESHNESS_CONFIG,
+  type FreshnessWindow,
+  SEVERITY_CONFIG,
+  type SignalSeverity,
+  type SignalSource,
+  type SZLAction,
+  type SZLOutcome,
+  type SZLRisk,
+  type SZLSignal,
+  type WorkflowState,
+} from './ontology';
+export {
+  type ActorType,
+  APPROVAL_CONFIGS,
+  type ApprovalState,
+  type AuditHistoryEntry,
+  type EscalationPath,
+  type EvidenceItem as OperationalEvidenceItem,
+  formatAgo,
+  formatDuration,
+  getApprovalConfig,
+  getRiskConfig,
+  getStatusConfig,
+  isTerminalStatus,
+  type NextAction,
+  OperationalApprovalBadge,
+  OperationalAuditTimeline,
+  OperationalDetailPane,
+  type OperationalEntity,
+  OperationalEscalationPanel,
+  OperationalEvidencePanel,
+  type OperationalOwner,
+  OperationalOwnerChip,
+  OperationalQueueRow,
+  OperationalRiskBadge,
+  type OperationalStatus,
+  OperationalStatusBadge,
+  RISK_CONFIGS,
+  type RiskLevel,
+  riskScoreToLevel,
+  STATUS_CONFIGS,
+  type StatusConfig,
+  severityToRiskLevel,
+} from './operational-primitives';
+// ─── OS Layer ────────────────────────────────────────────────────────────────
+export {
+  AUTONOMY_DESCRIPTIONS,
+  AUTONOMY_LABELS,
+  type AuditAction,
+  type AutonomyMode,
+  type EvidenceRecord,
+  type OSAuditEntry,
+  POLICY_VERDICT_DESCRIPTIONS,
+  POLICY_VERDICT_LABELS,
+  type PolicyVerdict,
+  type PolicyVerdictDetail,
+  type Recommendation,
+  type RecommendationAction,
+  type Run,
+  type RunEffort,
+  type RunStatus,
+  type SourceHealthRecord,
+  type SourceHealthStatus,
+  type ToolCall,
+} from './os-layer';
+export {
+  InlineFeedbackBar,
+  type InlineFeedbackBarProps,
+  OutcomeDashboard,
+  type OutcomeDashboardProps,
+  type OutcomeDecision,
+  OutcomeFeedbackBar,
+  type OutcomeFeedbackBarProps,
+  OutcomeFeedbackCard,
+  type OutcomeFeedbackProps,
+} from './outcome-feedback';
+export {
+  PolicyVerdictBadge,
+  type PolicyVerdictBadgeProps,
+} from './PolicyVerdictBadge';
+export { PrivateAppGuard, type PrivateAppGuardProps } from './PrivateAppGuard';
+export {
+  PACK_ACCENT_COLORS,
+  PackBanner,
+  type PackBannerProps,
+  type PackVariant,
+} from './pack-banner';
+export { InlineDataSkeleton, PageDataSkeleton } from './page-data-skeleton';
+export {
+  type PolicyDecisionRecord,
+  type PolicyEffect,
+  PolicyResult,
+  PolicyResultBanner,
+  type PolicyResultProps,
+  PolicyTimelineEntry,
+} from './policy-result';
+export { PowerBiEmbed, type PowerBiEmbedConfig } from './powerbi-embed';
+export {
+  alertBanner,
+  chartContainer,
+  dataTableShell,
+  kpiRibbon,
+  modalDrawer,
+  premiumFormElements,
+  skeletonLoader,
+  statusPill,
+} from './premium-components';
+export {
+  type ConfirmOptions,
+  ProductionConfirmProvider,
+  useDestructiveAction,
+  useProductionConfirm,
+} from './production-confirm';
+export {
+  type ProofExportSafetyState,
+  type ProofInputSource,
+  ProofPanel,
+  ProofPanelBadge,
+  type ProofPanelData,
+  type ProofPanelProps,
+  ProofPanelRow,
+  type ProofReviewState,
+  type ProvenanceSourceClass,
+} from './proof-panel';
+export {
+  generatePulseEvent,
+  ParticleField,
+  type PulseEvent,
+  PulseEventFeed,
+  PulseFlowDiagram,
+  PulseHeader,
+  PulseHealthGrid,
+  PulseMetricCard,
+  PulseTechStack,
+  PulseThroughputChart,
+} from './pulse';
+export {
+  type EvalResult,
+  EvalsStrip,
+  type EvalsStripProps,
+  RunConsole,
+  type RunConsoleProps,
+  RunDetailPanel,
+  type RunDetailProps,
+} from './RunConsole';
+export { RealtimeStatusIndicator } from './realtime-status-indicator';
+export {
+  ExecutiveTrustSummaryPanel,
+  type ExecutiveTrustSummaryPanelProps,
+  ProvenanceBadge,
+  type ProvenanceBadgeProps,
+  ProvenanceViewer,
+  type ProvenanceViewerProps,
+  ReceiptDrawer,
+  type ReceiptDrawerProps,
+} from './receipt-graph';
+export {
+  FreshnessPill,
+  type FreshnessPillProps,
+  SourceHealthPill,
+  type SourceHealthPillProps,
+  SourceHealthStrip,
+  type SourceHealthStripProps,
+} from './SourceHealthStrip';
+export {
+  SandboxModeBanner,
+  SandboxModeProvider,
+  type SandboxModeState,
+  SandboxToggle,
+  useSandboxMode,
+} from './sandbox-mode';
+export {
+  SETTINGS_SECTIONS_CONFIG,
+  SettingsCard,
+  type SettingsCardProps,
+  SettingsPage,
+  type SettingsPageProps,
+  SettingsRow,
+  type SettingsRowProps,
+  type SettingsSection,
+  SettingsSectionPanel,
+  type SettingsSectionPanelProps,
+  SettingsShell,
+  type SettingsShellProps,
+} from './settings-shell';
+export {
+  type PredictedVsActual,
+  type ScenarioRange,
+  type SensitivityDriver,
+  SimulationCockpit,
+  SimulationCockpitCompact,
+  type SimulationCockpitProps,
+  type SimulationScenario,
+} from './simulation-cockpit';
+export {
+  STAKEHOLDER_VIEWS,
+  StakeholderContent,
+  type StakeholderLensConfig,
+  StakeholderLensProvider,
+  StakeholderLensSwitcher,
+  type StakeholderLensSwitcherProps,
+  type StakeholderView,
+  useStakeholderLens,
+} from './stakeholder-lens';
+export {
+  StatusBanner,
+  type StatusBannerConfig,
+  type StatusBannerProps,
+  type StatusLevel,
+  useStatusBanner,
+} from './status-banner';
+export {
+  type SyncState,
+  SyncStatusBadge,
+  type SyncStatusBadgeProps,
+  SyncStatusBar,
+  type SyncStatusBarProps,
+} from './sync-status-badge';
+export {
+  aegisTheme,
+  alloyCreativeTheme,
+  alloyTheme,
+  type BrandSlug,
+  type BrandTheme,
+  brandThemes,
+  carlotaJoLuxuryTheme,
+  carlotaJoTheme,
+  dreamscapeTheme,
+  firestormTheme,
+  getBrandAccentCSS,
+  getBrandGradientCSS,
+  getBrandSurface,
+  getBrandTheme,
+  incaTheme,
+  lyteTheme,
+  mspTheme,
+  stephenLutarTheme,
+  stephenTheme,
+  szlHoldingsTheme,
+  terraTheme,
+  vesselsTheme,
+} from './themes';
+export {
+  breakpoints,
+  colors,
+  effects,
+  iconography,
+  motion,
+  spacing,
+  typography,
+  zIndex,
+} from './tokens';
+export {
+  type CrdtMergeEvent,
+  type EntitySchema as CrdtEntitySchema,
+  type FieldSchema as CrdtFieldSchema,
+  type UseCrdtEntityOptions,
+  type UseCrdtEntityResult,
+  useCrdtEntity,
+} from './use-crdt-entity';
+export { useInterval } from './use-interval';
+export {
+  type PresenceState,
+  type PresenceUser,
+  type UsePresenceOptions,
+  type UsePresenceResult,
+  usePresence,
+  useRealtimePresence,
+} from './use-presence';
+export {
+  type RealtimeChannelMessage,
+  type RealtimeConnectionStatus,
+  type RealtimeTransport,
+  type UseRealtimeChannelOptions,
+  type UseRealtimeChannelResult,
+  useRealtimeChannel,
+} from './use-realtime-channel';
+export { type AppRole, RoleGate, type UserRoles, useRole } from './use-role';
+export {
+  DEFAULT_BRAND,
+  mergeBranding,
+  type TenantBrandConfig,
+  type TenantBranding,
+  TenantBrandProvider,
+  type TenantBrandProviderProps,
+  useTenantBrand,
+  useTenantCSSVars,
+} from './use-tenant-brand';
+export {
+  PREFERENCES_NAMESPACE,
+  type UserPreferences,
+  type UseUserPreferencesResult,
+  useUserPreferences,
+} from './use-user-preferences';
+export {
+  getUserPref,
+  setUserPref,
+  type UserPrefs,
+  useNotificationSound,
+  useSidebarCollapsed,
+  useUserPref,
+  useUserPrefs,
+} from './use-user-prefs';
+export {
+  useWebSyncStatus,
+  type WebSyncStatus,
+  type WebSyncStatusOptions,
+} from './use-web-sync-status';
+export {
+  cn,
+  type FormatDateOptions,
+  type FormatDateTimeOptions,
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  formatNumber,
+  formatTime,
+  getApiUrl,
+  resolveTimeZone,
+  toAlpha,
+} from './utils';
+export {
+  useWelcomeState,
+  type WelcomeFeature,
+  WelcomeOverlay,
+  type WelcomeOverlayProps,
+} from './WelcomeOverlay';
+export {
+  checkWebPushSupport,
+  getVapidPublicKey,
+  registerServiceWorker,
+  registerWebPush,
+  unregisterWebPush,
+  type WebPushRegistrationOptions,
+} from './web-push-registration';

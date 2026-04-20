@@ -1,6 +1,6 @@
-import React, { type ReactNode, useState, useEffect } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode, useEffect, useState } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 /**
  * CommandBar — persistent command/search surface for the AEEP shell.
@@ -20,11 +20,11 @@ export interface CommandBarProps {
 }
 
 export function CommandBar({
-  placeholder = "Search or run a command…",
+  placeholder = 'Search or run a command…',
   onOpen,
   onClose,
   open = false,
-  shortcut = "⌘K",
+  shortcut = '⌘K',
   actions,
   className,
 }: CommandBarProps) {
@@ -32,19 +32,19 @@ export function CommandBar({
 
   useEffect(() => {
     function handler(e: KeyboardEvent) {
-      const isMac = navigator.platform.includes("Mac");
+      const isMac = navigator.platform.includes('Mac');
       const trigger = isMac ? e.metaKey : e.ctrlKey;
-      if (trigger && e.key === "k") {
+      if (trigger && e.key === 'k') {
         e.preventDefault();
         open ? onClose?.() : onOpen?.();
       }
     }
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [open, onOpen, onClose]);
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <button
         type="button"
         onFocus={() => setFocused(true)}
@@ -52,21 +52,24 @@ export function CommandBar({
         onClick={onOpen}
         className="flex items-center gap-2 rounded-md text-sm transition-colors"
         style={{
-          height: "32px",
-          padding: "0 12px",
+          height: '32px',
+          padding: '0 12px',
           background: color.bg.overlay,
           border: `1px solid ${focused ? color.border.focus : color.border.default}`,
           color: color.text.secondary,
-          cursor: "pointer",
-          minWidth: "200px",
-          maxWidth: "360px",
-          textAlign: "left",
+          cursor: 'pointer',
+          minWidth: '200px',
+          maxWidth: '360px',
+          textAlign: 'left',
         }}
         aria-label="Open command palette"
         aria-keyshortcuts="Meta+k Control+k"
       >
-        <span style={{ fontSize: "13px" }}>⌕</span>
-        <span className="flex-1 text-left" style={{ fontSize: "13px", color: color.text.placeholder }}>
+        <span style={{ fontSize: '13px' }}>⌕</span>
+        <span
+          className="flex-1 text-left"
+          style={{ fontSize: '13px', color: color.text.placeholder }}
+        >
           {placeholder}
         </span>
         <kbd
@@ -74,8 +77,8 @@ export function CommandBar({
           style={{
             background: color.border.subtle,
             color: color.text.muted,
-            fontSize: "10px",
-            fontFamily: "inherit",
+            fontSize: '10px',
+            fontFamily: 'inherit',
           }}
         >
           {shortcut}

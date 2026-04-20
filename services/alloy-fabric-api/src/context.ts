@@ -1,7 +1,7 @@
-import { InMemoryStorageBundle } from "@workspace/aef-storage-adapters";
-import { PolicyEngine, TenantBoundaryEnforcer } from "@workspace/aef-policy-guard";
-import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
-import { createDefaultProfileRegistry } from "@workspace/aef-domain-profiles";
+import { createDefaultProfileRegistry } from '@workspace/aef-domain-profiles';
+import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
+import { PolicyEngine, TenantBoundaryEnforcer } from '@workspace/aef-policy-guard';
+import { InMemoryStorageBundle } from '@workspace/aef-storage-adapters';
 
 export const profileRegistry = createDefaultProfileRegistry();
 
@@ -12,12 +12,15 @@ export const policyEngine = new PolicyEngine();
 // Tenants pre-registered at boot time. In production these are provisioned by the
 // tenant management plane. Auto-registration MUST NOT occur in any request path.
 const BOOT_TENANTS: Set<string> = new Set([
-  "szl-smoke-test",
-  "szl-dev",
-  "smoke-test-tenant",
-  ...(process.env["AEF_SMOKE_TENANT"] ? [process.env["AEF_SMOKE_TENANT"]] : []),
-  ...(process.env["AEF_BOOT_TENANTS"]
-    ? process.env["AEF_BOOT_TENANTS"].split(",").map((t) => t.trim()).filter(Boolean)
+  'szl-smoke-test',
+  'szl-dev',
+  'smoke-test-tenant',
+  ...(process.env['AEF_SMOKE_TENANT'] ? [process.env['AEF_SMOKE_TENANT']] : []),
+  ...(process.env['AEF_BOOT_TENANTS']
+    ? process.env['AEF_BOOT_TENANTS']
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
     : []),
 ]);
 
@@ -48,11 +51,26 @@ function seedVector(text: string, dims: number): number[] {
 }
 
 const SEED_DIMS = 768;
-const SEED_MODEL = "aef-embed-cpu-v1";
+const SEED_MODEL = 'aef-embed-cpu-v1';
 const SEED_DOCS = [
-  { chunkId: "seed-maritime-1", sourceId: "seed-doc-maritime", text: "Maritime law governs navigation and shipping on international waters.", contentType: "text/plain" },
-  { chunkId: "seed-maritime-2", sourceId: "seed-doc-maritime", text: "Force majeure clauses in maritime contracts excuse non-performance due to unforeseeable events.", contentType: "text/plain" },
-  { chunkId: "seed-maritime-3", sourceId: "seed-doc-maritime", text: "The law of the sea defines territorial waters and exclusive economic zones.", contentType: "text/plain" },
+  {
+    chunkId: 'seed-maritime-1',
+    sourceId: 'seed-doc-maritime',
+    text: 'Maritime law governs navigation and shipping on international waters.',
+    contentType: 'text/plain',
+  },
+  {
+    chunkId: 'seed-maritime-2',
+    sourceId: 'seed-doc-maritime',
+    text: 'Force majeure clauses in maritime contracts excuse non-performance due to unforeseeable events.',
+    contentType: 'text/plain',
+  },
+  {
+    chunkId: 'seed-maritime-3',
+    sourceId: 'seed-doc-maritime',
+    text: 'The law of the sea defines territorial waters and exclusive economic zones.',
+    contentType: 'text/plain',
+  },
 ];
 
 /**
@@ -60,9 +78,7 @@ const SEED_DOCS = [
  * Idempotent — safe to call multiple times.
  */
 export async function seedBootData(): Promise<void> {
-  const seedTenants = [...BOOT_TENANTS].filter(
-    (t) => t.includes("smoke") || t.includes("dev"),
-  );
+  const seedTenants = [...BOOT_TENANTS].filter((t) => t.includes('smoke') || t.includes('dev'));
   const now = new Date().toISOString();
 
   for (const tenantId of seedTenants) {
@@ -72,7 +88,7 @@ export async function seedBootData(): Promise<void> {
         text: doc.text,
         title: doc.chunkId,
         contentType: doc.contentType,
-        sourceType: "seed",
+        sourceType: 'seed',
       };
 
       try {
@@ -96,7 +112,9 @@ export async function seedBootData(): Promise<void> {
         });
       } catch {
         // Seed failures are non-fatal — log and continue
-        process.stderr.write(`[AEF] boot seed failed chunkId=${doc.chunkId} tenantId=${tenantId}\n`);
+        process.stderr.write(
+          `[AEF] boot seed failed chunkId=${doc.chunkId} tenantId=${tenantId}\n`,
+        );
       }
     }
   }

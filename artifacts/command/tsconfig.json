@@ -14,7 +14,11 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/pages/*": ["./src/pages/*", "./src/operations/pages/*", "./src/infrastructure/pages/*"],
-      "@/components/*": ["./src/components/*", "./src/operations/components/*", "./src/infrastructure/components/*"],
+      "@/components/*": [
+        "./src/components/*",
+        "./src/operations/components/*",
+        "./src/infrastructure/components/*"
+      ],
       "@/lib/*": ["./src/lib/*", "./src/operations/lib/*", "./src/infrastructure/lib/*"],
       "@lyte/*": ["./src/operations/*"],
       "@imp/*": ["./src/infrastructure/*"]

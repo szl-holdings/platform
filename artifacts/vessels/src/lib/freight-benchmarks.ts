@@ -1,16 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { useQuery } from '@tanstack/react-query';
 
 // Vessel-class keys exposed by the live freight benchmark feed.
 export type VesselClassKey =
-  | "VLCC"
-  | "Suezmax"
-  | "Aframax"
-  | "Capesize"
-  | "Panamax"
-  | "Supramax"
-  | "Handysize"
-  | "LNG Carrier";
+  | 'VLCC'
+  | 'Suezmax'
+  | 'Aframax'
+  | 'Capesize'
+  | 'Panamax'
+  | 'Supramax'
+  | 'Handysize'
+  | 'LNG Carrier';
 
 export interface FreightBenchmark {
   key: string;
@@ -48,7 +48,7 @@ export interface FreightBenchmarkSnapshot {
   methodology: string;
   refreshIntervalSeconds: number;
   nextRefreshAt: string;
-  upstreamStatus?: "live" | "stale" | "unavailable";
+  upstreamStatus?: 'live' | 'stale' | 'unavailable';
   upstreamLatestIndex?: number | null;
   upstreamPriorIndex?: number | null;
   upstreamYearAgoIndex?: number | null;
@@ -61,8 +61,8 @@ export interface FreightBenchmarkSnapshot {
 
 export function useFreightBenchmarks() {
   return useQuery<FreightBenchmarkSnapshot>({
-    queryKey: ["vessels", "freight", "benchmarks"],
-    queryFn: () => apiFetch<FreightBenchmarkSnapshot>("/vessels/freight/benchmarks"),
+    queryKey: ['vessels', 'freight', 'benchmarks'],
+    queryFn: () => apiFetch<FreightBenchmarkSnapshot>('/vessels/freight/benchmarks'),
     staleTime: 60_000,
     refetchInterval: 5 * 60_000,
     refetchOnWindowFocus: false,
@@ -70,15 +70,15 @@ export function useFreightBenchmarks() {
 }
 
 export function formatAsOf(iso: string | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return '—';
   try {
     const d = new Date(iso);
     return d.toLocaleString(undefined, {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short",
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
     });
   } catch {
     return iso;
@@ -120,17 +120,36 @@ export function compareVoyageToBenchmark(
 // vessel class. Returns null when nothing reasonable matches. Preserved
 // from the previous static benchmark module so callers that need to
 // guess a class from a cargo string can still do so.
-export function inferVesselClassFromCargo(cargoType: string | null | undefined): VesselClassKey | null {
+export function inferVesselClassFromCargo(
+  cargoType: string | null | undefined,
+): VesselClassKey | null {
   if (!cargoType) return null;
   const c = cargoType.toLowerCase();
 
-  if (c.includes("lng") || c.includes("liquefied natural gas")) return "LNG Carrier";
-  if (c.includes("crude")) return "VLCC";
-  if (c.includes("fuel oil") || c.includes("refined") || c.includes("gasoline") || c.includes("diesel") || c.includes("naphtha") || c.includes("jet")) return "Aframax";
-  if (c.includes("iron ore") || c.includes("coal")) return "Capesize";
-  if (c.includes("grain") || c.includes("wheat") || c.includes("corn") || c.includes("soy") || c.includes("bauxite") || c.includes("cement")) return "Panamax";
-  if (c.includes("steel") || c.includes("scrap") || c.includes("fertilizer") || c.includes("sugar")) return "Supramax";
-  if (c.includes("bulk") || c.includes("aggregate") || c.includes("salt")) return "Handysize";
+  if (c.includes('lng') || c.includes('liquefied natural gas')) return 'LNG Carrier';
+  if (c.includes('crude')) return 'VLCC';
+  if (
+    c.includes('fuel oil') ||
+    c.includes('refined') ||
+    c.includes('gasoline') ||
+    c.includes('diesel') ||
+    c.includes('naphtha') ||
+    c.includes('jet')
+  )
+    return 'Aframax';
+  if (c.includes('iron ore') || c.includes('coal')) return 'Capesize';
+  if (
+    c.includes('grain') ||
+    c.includes('wheat') ||
+    c.includes('corn') ||
+    c.includes('soy') ||
+    c.includes('bauxite') ||
+    c.includes('cement')
+  )
+    return 'Panamax';
+  if (c.includes('steel') || c.includes('scrap') || c.includes('fertilizer') || c.includes('sugar'))
+    return 'Supramax';
+  if (c.includes('bulk') || c.includes('aggregate') || c.includes('salt')) return 'Handysize';
 
   return null;
 }

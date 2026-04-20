@@ -13,17 +13,17 @@
  */
 
 export const ARTIFACT_PORTS = {
-  "api-server":          8080,
-  "szl-holdings":        21130,
-  "aegis":               3002,
-  "vessels":             8099,
-  "terra":               6099,
-  "carlota-jo":          3101,
-  "command":             5000,
-  "pulse":               5201,
-  "szl-demo-video":      8765,
-  "szl-holdings-mobile": 8085,
-  "mockup-sandbox":      8008,
+  'api-server': 8080,
+  'szl-holdings': 21130,
+  aegis: 3002,
+  vessels: 8099,
+  terra: 6099,
+  'carlota-jo': 3101,
+  command: 5000,
+  pulse: 5201,
+  'szl-demo-video': 8765,
+  'szl-holdings-mobile': 8085,
+  'mockup-sandbox': 8008,
 };
 
 /**
@@ -33,6 +33,7 @@ export const ARTIFACT_PORTS = {
  */
 export function artifactUrl(slug) {
   const port = ARTIFACT_PORTS[slug];
-  if (!port) throw new Error(`Unknown artifact slug: "${slug}". Add it to scripts/lib/artifact-ports.js.`);
+  if (!port)
+    throw new Error(`Unknown artifact slug: "${slug}". Add it to scripts/lib/artifact-ports.js.`);
   return `http://localhost:${port}`;
 }

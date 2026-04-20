@@ -1,6 +1,6 @@
-import * as React from "react";
-import { X, Sparkles, ChevronRight } from "lucide-react";
-import { cn } from "./utils";
+import { ChevronRight, Sparkles, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from './utils';
 
 export interface WelcomeFeature {
   icon: React.ComponentType<{ className?: string }>;
@@ -23,7 +23,7 @@ function useWelcomeState(appId: string) {
   const key = `szl_welcome_dismissed_${appId}`;
   const [dismissed, setDismissed] = React.useState(() => {
     try {
-      return localStorage.getItem(key) === "true";
+      return localStorage.getItem(key) === 'true';
     } catch {
       return false;
     }
@@ -31,7 +31,7 @@ function useWelcomeState(appId: string) {
 
   const dismiss = React.useCallback(() => {
     try {
-      localStorage.setItem(key, "true");
+      localStorage.setItem(key, 'true');
     } catch {}
     setDismissed(true);
   }, [key]);
@@ -45,7 +45,7 @@ export function WelcomeOverlay({
   subtitle,
   description,
   features,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
   icon: AppIcon,
   onDismiss,
 }: WelcomeOverlayProps) {
@@ -84,7 +84,7 @@ export function WelcomeOverlay({
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${accentColor}15` }}
               >
-                {(AppIcon as any)({ className: "w-6 h-6", style: { color: accentColor } })}
+                {(AppIcon as any)({ className: 'w-6 h-6', style: { color: accentColor } })}
               </div>
             ) : (
               <div
@@ -99,7 +99,9 @@ export function WelcomeOverlay({
                 Welcome to {appName}
               </h2>
               {subtitle && (
-                <p className="text-xs text-muted-foreground mt-0.5 font-medium uppercase tracking-wide">{subtitle}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 font-medium uppercase tracking-wide">
+                  {subtitle}
+                </p>
               )}
             </div>
           </div>
@@ -118,11 +120,15 @@ export function WelcomeOverlay({
                     className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
                     style={{ backgroundColor: `${accentColor}15` }}
                   >
-                    {(Icon as any)({ className: "w-3.5 h-3.5", style: { color: accentColor } })}
+                    {(Icon as any)({ className: 'w-3.5 h-3.5', style: { color: accentColor } })}
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-foreground leading-tight">{feature.title}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{feature.description}</p>
+                    <p className="text-xs font-semibold text-foreground leading-tight">
+                      {feature.title}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight">
+                      {feature.description}
+                    </p>
                   </div>
                 </div>
               );

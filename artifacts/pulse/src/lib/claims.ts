@@ -13,25 +13,20 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import {
-  makeClaimResolver,
-  metricDisplay,
-  type ClaimValue,
-} from "@szl-holdings/domain-claims";
+import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/domain-claims';
 
 export type { ClaimValue };
 export { metricDisplay };
 
-const resolveClaim = makeClaimResolver("pulse/claims");
+const resolveClaim = makeClaimResolver('pulse/claims');
 
 export const PULSE_FALLBACK_BRIEFING = resolveClaim(
-  "pulse-fallback-briefing",
-  "Synthesized briefing"
+  'pulse-fallback-briefing',
+  'Synthesized briefing',
 );
 
 /**
  * Convenience constant: the bare label string ("[Synthesized]") to render on
  * any fallback briefing card so the reader sees a clear provenance signal.
  */
-export const PULSE_SYNTHESIZED_LABEL =
-  PULSE_FALLBACK_BRIEFING.label ?? "[Synthesized]";
+export const PULSE_SYNTHESIZED_LABEL = PULSE_FALLBACK_BRIEFING.label ?? '[Synthesized]';

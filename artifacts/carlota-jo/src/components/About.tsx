@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 export default function About() {
   return (
@@ -8,7 +8,7 @@ export default function About() {
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7 }}
             className="lg:col-span-5"
           >
@@ -28,28 +28,28 @@ export default function About() {
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, delay: 0.1 }}
             className="lg:col-span-7"
           >
             <p className="text-[#f5f0e8]/60 text-base font-light leading-relaxed mb-6">
-              Carlota Jo Consulting is a principal advisory practice. Every engagement is led by
-              the founding advisor from intake through execution — not delegated to associates
-              or junior consultants.
+              Carlota Jo Consulting is a principal advisory practice. Every engagement is led by the
+              founding advisor from intake through execution — not delegated to associates or junior
+              consultants.
             </p>
             <p className="text-[#f5f0e8]/55 text-base font-light leading-relaxed mb-8">
-              We work with boards, leadership teams, and investors navigating complex
-              strategic decisions: capital allocation, governance reform, market entry,
-              operational transformation, and sensitive stakeholder situations.
+              We work with boards, leadership teams, and investors navigating complex strategic
+              decisions: capital allocation, governance reform, market entry, operational
+              transformation, and sensitive stakeholder situations.
             </p>
 
             <div className="border-t border-[#f5f0e8]/8 pt-8 space-y-5">
               {[
-                "Board and governance advisory",
-                "Capital strategy and allocation",
-                "Operational transformation",
-                "M&A and transaction support",
-                "Senior stakeholder engagement",
+                'Board and governance advisory',
+                'Capital strategy and allocation',
+                'Operational transformation',
+                'M&A and transaction support',
+                'Senior stakeholder engagement',
               ].map((item) => (
                 <div key={item} className="flex items-center gap-4">
                   <div className="w-4 h-[1px] bg-[#c8a96a]/40 shrink-0" />

@@ -17,9 +17,9 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { createServer } from 'node:http';
-import { readFile, stat, mkdir, rm, readdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
@@ -71,10 +71,16 @@ function staticServer(root) {
       const url = new URL(req.url, 'http://localhost');
       let filePath = path.join(root, decodeURIComponent(url.pathname));
       if (!filePath.startsWith(root)) {
-        res.writeHead(403); res.end(); return;
+        res.writeHead(403);
+        res.end();
+        return;
       }
       let st;
-      try { st = await stat(filePath); } catch { st = null; }
+      try {
+        st = await stat(filePath);
+      } catch {
+        st = null;
+      }
       if (st && st.isDirectory()) {
         filePath = path.join(filePath, 'index.html');
       }
@@ -175,7 +181,7 @@ async function recordVideo({ port }) {
       value: async () => {
         if (started) return;
         started = true;
-        // @ts-ignore
+        // @ts-expect-error
         await window.__captureStart?.();
       },
     });
@@ -184,7 +190,7 @@ async function recordVideo({ port }) {
       value: async () => {
         if (stoppedFlag) return;
         stoppedFlag = true;
-        // @ts-ignore
+        // @ts-expect-error
         await window.__captureStop?.();
       },
     });
@@ -233,17 +239,28 @@ async function encode(rawPath, { startMs, stopMs }) {
   console.log(`[render] Encoding 1920x1080 MP4 (~${totalSec.toFixed(1)}s)…`);
   await run('ffmpeg', [
     '-y',
-    '-ss', '0.4',
-    '-i', rawPath,
-    '-t', String(totalSec),
-    '-vf', 'scale=1920:1080:flags=lanczos,fps=30,format=yuv420p',
-    '-c:v', 'libx264',
-    '-profile:v', 'high',
-    '-level', '4.2',
-    '-preset', 'slow',
-    '-crf', '18',
-    '-pix_fmt', 'yuv420p',
-    '-movflags', '+faststart',
+    '-ss',
+    '0.4',
+    '-i',
+    rawPath,
+    '-t',
+    String(totalSec),
+    '-vf',
+    'scale=1920:1080:flags=lanczos,fps=30,format=yuv420p',
+    '-c:v',
+    'libx264',
+    '-profile:v',
+    'high',
+    '-level',
+    '4.2',
+    '-preset',
+    'slow',
+    '-crf',
+    '18',
+    '-pix_fmt',
+    'yuv420p',
+    '-movflags',
+    '+faststart',
     '-an',
     mp4Wide,
   ]);
@@ -251,17 +268,28 @@ async function encode(rawPath, { startMs, stopMs }) {
   console.log('[render] Encoding 1080x1080 square MP4 (center crop)…');
   await run('ffmpeg', [
     '-y',
-    '-ss', '0.4',
-    '-i', rawPath,
-    '-t', String(totalSec),
-    '-vf', 'crop=1080:1080:(in_w-1080)/2:(in_h-1080)/2,scale=1080:1080:flags=lanczos,fps=30,format=yuv420p',
-    '-c:v', 'libx264',
-    '-profile:v', 'high',
-    '-level', '4.2',
-    '-preset', 'slow',
-    '-crf', '18',
-    '-pix_fmt', 'yuv420p',
-    '-movflags', '+faststart',
+    '-ss',
+    '0.4',
+    '-i',
+    rawPath,
+    '-t',
+    String(totalSec),
+    '-vf',
+    'crop=1080:1080:(in_w-1080)/2:(in_h-1080)/2,scale=1080:1080:flags=lanczos,fps=30,format=yuv420p',
+    '-c:v',
+    'libx264',
+    '-profile:v',
+    'high',
+    '-level',
+    '4.2',
+    '-preset',
+    'slow',
+    '-crf',
+    '18',
+    '-pix_fmt',
+    'yuv420p',
+    '-movflags',
+    '+faststart',
     '-an',
     mp4Square,
   ]);
@@ -275,10 +303,19 @@ async function rezipDeliverables() {
   console.log('[render] Re-zipping deliverables/szl-demo-video.zip…');
   // The `zip` CLI is not installed in this environment, so use python3's
   // built-in zipfile module (always present).
-  await run('python3', [
-    '-m', 'zipfile', '-c', 'szl-demo-video.zip',
-    'linkedin-4-17.mp4', 'linkedin-4-17-square.mp4', 'README.md',
-  ], { cwd: DELIVERABLES_DIR });
+  await run(
+    'python3',
+    [
+      '-m',
+      'zipfile',
+      '-c',
+      'szl-demo-video.zip',
+      'linkedin-4-17.mp4',
+      'linkedin-4-17-square.mp4',
+      'README.md',
+    ],
+    { cwd: DELIVERABLES_DIR },
+  );
   return zipPath;
 }
 

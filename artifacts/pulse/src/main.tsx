@@ -1,11 +1,11 @@
-import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { initSentry, initAnalytics } from "@szl-holdings/observability/react";
-import App from "./App";
-import "./index.css";
+import { initAnalytics, initSentry } from '@szl-holdings/observability/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
 
-initSentry({ appSlug: "pulse", tracesSampleRate: 0.1 });
-initAnalytics({ appSlug: "pulse" });
+initSentry({ appSlug: 'pulse', tracesSampleRate: 0.1 });
+initAnalytics({ appSlug: 'pulse' });
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,8 +16,8 @@ const queryClient = new QueryClient({
   },
 });
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <App />
-  </QueryClientProvider>
+  </QueryClientProvider>,
 );

@@ -1,19 +1,19 @@
-import * as React from "react";
-import { cn } from "../utils";
+import type * as React from 'react';
+import { cn } from '../utils';
 
 export interface CTAItem {
   label: string;
   sublabel?: string;
   href?: string;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: 'primary' | 'secondary' | 'ghost';
   external?: boolean;
   icon?: React.ReactNode;
 }
 
 export interface CTAGroupProps {
   items: CTAItem[];
-  layout?: "row" | "column" | "grid";
+  layout?: 'row' | 'column' | 'grid';
   className?: string;
   accentColor?: string;
   onTrack?: (item: CTAItem) => void;
@@ -21,24 +21,24 @@ export interface CTAGroupProps {
 
 export function CTAGroup({
   items,
-  layout = "row",
+  layout = 'row',
   className,
-  accentColor = "hsl(215 45% 32%)",
+  accentColor = 'hsl(215 45% 32%)',
   onTrack,
 }: CTAGroupProps) {
   return (
     <div
       className={cn(
-        "flex flex-wrap gap-3",
-        layout === "column" && "flex-col items-start",
-        layout === "grid" && "grid grid-cols-2 sm:grid-cols-4",
-        className
+        'flex flex-wrap gap-3',
+        layout === 'column' && 'flex-col items-start',
+        layout === 'grid' && 'grid grid-cols-2 sm:grid-cols-4',
+        className,
       )}
     >
       {items.map((item, i) => {
-        const Tag = item.href ? "a" : "button";
-        const isPrimary = (item.variant ?? "primary") === "primary";
-        const isSecondary = item.variant === "secondary";
+        const Tag = item.href ? 'a' : 'button';
+        const isPrimary = (item.variant ?? 'primary') === 'primary';
+        const isSecondary = item.variant === 'secondary';
         return (
           <Tag
             key={i}
@@ -47,14 +47,14 @@ export function CTAGroup({
               onTrack?.(item);
               item.onClick?.();
             }}
-            target={item.external ? "_blank" : undefined}
-            rel={item.external ? "noopener noreferrer" : undefined}
+            target={item.external ? '_blank' : undefined}
+            rel={item.external ? 'noopener noreferrer' : undefined}
             className={cn(
-              "inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 group",
-              isPrimary && "text-white hover:opacity-90 shadow-sm",
+              'inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 group',
+              isPrimary && 'text-white hover:opacity-90 shadow-sm',
               isSecondary &&
-                "border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:text-neutral-900 hover:bg-neutral-50",
-              item.variant === "ghost" && "text-neutral-500 hover:text-neutral-900"
+                'border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:text-neutral-900 hover:bg-neutral-50',
+              item.variant === 'ghost' && 'text-neutral-500 hover:text-neutral-900',
             )}
             style={isPrimary ? { backgroundColor: accentColor } : undefined}
           >

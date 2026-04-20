@@ -1,11 +1,11 @@
-import type { IncomingMessage, Server } from "http";
-import { WebSocketServer, WebSocket } from "ws";
-import { createHmac, timingSafeEqual, randomBytes } from "crypto";
-import { LRUCache } from "lru-cache";
-import { logger } from "./logger";
-import { db, sessionsTable, usersTable, changeEventsTable } from "@szl-holdings/db";
-import { eq, gt, and, isNull } from "drizzle-orm";
-import { getOrCreateDoc, pruneRegistry } from "@szl-holdings/crdt-sync";
+import { getOrCreateDoc, pruneRegistry } from '@szl-holdings/crdt-sync';
+import { changeEventsTable, db, sessionsTable, usersTable } from '@szl-holdings/db';
+import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
+import { and, eq, gt, isNull } from 'drizzle-orm';
+import type { IncomingMessage, Server } from 'http';
+import { LRUCache } from 'lru-cache';
+import { WebSocket, WebSocketServer } from 'ws';
+import { logger } from './logger';
 
 export interface ChannelMessage {
   channel: string;
@@ -40,7 +40,7 @@ interface SubscribedClient {
   authenticatedAt: number;
 }
 
-const CRDT_SYNC_CHANNEL = "crdt-sync";
+const CRDT_SYNC_CHANNEL = 'crdt-sync';
 const crdtRoomClients = new Map<string, Set<string>>();
 
 function addCrdtRoom(clientId: string, room: string): void {
@@ -55,18 +55,18 @@ function removeCrdtRooms(clientId: string): void {
   }
 }
 
-function broadcastCrdtDelta(
-  senderClientId: string,
-  room: string,
-  payload: string
-): void {
+function broadcastCrdtDelta(senderClientId: string, room: string, payload: string): void {
   const roomClients = crdtRoomClients.get(room);
   if (!roomClients) return;
   for (const clientId of roomClients) {
     if (clientId === senderClientId) continue;
     const client = clients.get(clientId);
     if (client && client.ws.readyState === WebSocket.OPEN) {
-      try { client.ws.send(payload); } catch { /* ignore */ }
+      try {
+        client.ws.send(payload);
+      } catch {
+        /* ignore */
+      }
     }
   }
 }
@@ -95,14 +95,20 @@ function recordHistory(msg: ChannelMessage): void {
 }
 
 export function getMessagesSince(channel: string, sinceSeq: number, limit = 100): ChannelMessage[] {
-  return messageHistory
-    .filter((m) => m.channel === channel && m.seq > sinceSeq)
-    .slice(-limit);
+  return messageHistory.filter((m) => m.channel === channel && m.seq > sinceSeq).slice(-limit);
 }
 
-const presenceMap = new Map<string, Map<string, { userId: string; displayName?: string; since: number }>>();
+const presenceMap = new Map<
+  string,
+  Map<string, { userId: string; displayName?: string; since: number }>
+>();
 
-function addPresence(channel: string, clientId: string, userId: string, displayName?: string): void {
+function addPresence(
+  channel: string,
+  clientId: string,
+  userId: string,
+  displayName?: string,
+): void {
   if (!presenceMap.has(channel)) presenceMap.set(channel, new Map());
   presenceMap.get(channel)!.set(clientId, { userId, displayName, since: Date.now() });
   broadcastPresence(channel);
@@ -117,7 +123,9 @@ function removePresence(clientId: string): void {
   }
 }
 
-export function getPresence(channel: string): Array<{ userId: string; displayName?: string; since: number }> {
+export function getPresence(
+  channel: string,
+): Array<{ userId: string; displayName?: string; since: number }> {
   const map = presenceMap.get(channel);
   if (!map) return [];
   return Array.from(map.values());
@@ -126,70 +134,135 @@ export function getPresence(channel: string): Array<{ userId: string; displayNam
 function broadcastPresence(channel: string): void {
   const presence = getPresence(channel);
   const payload = JSON.stringify({
-    type: "presence",
+    type: 'presence',
     channel,
     data: { count: presence.length, users: presence },
     timestamp: Date.now(),
   });
   for (const client of clients.values()) {
     if (client.channels.has(channel) && client.ws.readyState === WebSocket.OPEN) {
-      try { client.ws.send(payload); } catch { /* ignore */ }
+      try {
+        client.ws.send(payload);
+      } catch {
+        /* ignore */
+      }
     }
   }
 }
 
 export const SENSITIVE_CHANNELS = new Set([
-  "aegis-incidents",
-  "aegis:alert-feed",
-  "workflow-runs",
-  "bookings",
-  "lyte-metrics",
-  "lyte:metrics-stream",
-  "vessel-positions",
-  "vessels:fleet-positions",
-  "terra-signals",
-  "nexus:intelligence-feed",
-  "monte-carlo:progress",
+  'aegis-incidents',
+  'aegis:alert-feed',
+  'workflow-runs',
+  'bookings',
+  'lyte-metrics',
+  'lyte:metrics-stream',
+  'vessel-positions',
+  'vessels:fleet-positions',
+  'terra-signals',
+  'nexus:intelligence-feed',
+  'monte-carlo:progress',
 ]);
 
 export const PUBLIC_CHANNELS = new Set([
-  "health",
-  "notifications",
-  "feature-flags",
+  'health',
+  'notifications',
+  'feature-flags',
   CRDT_SYNC_CHANNEL,
 ]);
 
 const CHANNEL_ALLOWED_ROLES: Record<string, Set<string>> = {
-  "aegis-incidents": new Set(["founder_admin", "platform_admin", "operator", "analyst", "ops_manager"]),
-  "aegis:alert-feed": new Set(["founder_admin", "platform_admin", "operator", "analyst", "ops_manager"]),
-  "workflow-runs": new Set(["founder_admin", "platform_admin", "operator", "ops_manager"]),
-  "bookings": new Set(["founder_admin", "platform_admin", "service_coordinator", "sales_delivery_user"]),
-  "lyte-metrics": new Set(["founder_admin", "platform_admin", "operator", "ops_manager", "analyst"]),
-  "lyte:metrics-stream": new Set(["founder_admin", "platform_admin", "operator", "ops_manager", "analyst"]),
-  "vessel-positions": new Set(["founder_admin", "platform_admin", "maritime_ops_user", "ops_manager", "operator"]),
-  "vessels:fleet-positions": new Set(["founder_admin", "platform_admin", "maritime_ops_user", "ops_manager", "operator"]),
-  "terra-signals": new Set(["founder_admin", "platform_admin", "sales_delivery_user", "analyst", "ops_manager"]),
-  "nexus:intelligence-feed": new Set(["founder_admin", "platform_admin", "analyst", "ops_manager"]),
-  "monte-carlo:progress": new Set(["founder_admin", "platform_admin", "super_admin", "admin", "operator", "analyst", "ops_manager"]),
+  'aegis-incidents': new Set([
+    'founder_admin',
+    'platform_admin',
+    'operator',
+    'analyst',
+    'ops_manager',
+  ]),
+  'aegis:alert-feed': new Set([
+    'founder_admin',
+    'platform_admin',
+    'operator',
+    'analyst',
+    'ops_manager',
+  ]),
+  'workflow-runs': new Set(['founder_admin', 'platform_admin', 'operator', 'ops_manager']),
+  bookings: new Set([
+    'founder_admin',
+    'platform_admin',
+    'service_coordinator',
+    'sales_delivery_user',
+  ]),
+  'lyte-metrics': new Set([
+    'founder_admin',
+    'platform_admin',
+    'operator',
+    'ops_manager',
+    'analyst',
+  ]),
+  'lyte:metrics-stream': new Set([
+    'founder_admin',
+    'platform_admin',
+    'operator',
+    'ops_manager',
+    'analyst',
+  ]),
+  'vessel-positions': new Set([
+    'founder_admin',
+    'platform_admin',
+    'maritime_ops_user',
+    'ops_manager',
+    'operator',
+  ]),
+  'vessels:fleet-positions': new Set([
+    'founder_admin',
+    'platform_admin',
+    'maritime_ops_user',
+    'ops_manager',
+    'operator',
+  ]),
+  'terra-signals': new Set([
+    'founder_admin',
+    'platform_admin',
+    'sales_delivery_user',
+    'analyst',
+    'ops_manager',
+  ]),
+  'nexus:intelligence-feed': new Set(['founder_admin', 'platform_admin', 'analyst', 'ops_manager']),
+  'monte-carlo:progress': new Set([
+    'founder_admin',
+    'platform_admin',
+    'super_admin',
+    'admin',
+    'operator',
+    'analyst',
+    'ops_manager',
+  ]),
 };
 
-const INTERNAL_TOKEN = process.env["ALLOY_INTERNAL_TOKEN"];
-const _rawSessionSecret = process.env["SESSION_SECRET"];
+const INTERNAL_TOKEN = process.env['ALLOY_INTERNAL_TOKEN'];
+const _rawSessionSecret = process.env['SESSION_SECRET'];
 if (!_rawSessionSecret) {
-  logger.warn("SESSION_SECRET is not set — WS ticket signing will use a per-process ephemeral secret. Set SESSION_SECRET in production.");
+  logger.warn(
+    'SESSION_SECRET is not set — WS ticket signing will use a per-process ephemeral secret. Set SESSION_SECRET in production.',
+  );
 }
-const SESSION_SECRET_VAL = _rawSessionSecret ?? randomBytes(64).toString("hex");
+const SESSION_SECRET_VAL = _rawSessionSecret ?? randomBytes(64).toString('hex');
 const WS_TICKET_TTL_MS = 5 * 60 * 1000;
 
 function signTicket(payload: string): string {
-  return createHmac("sha256", SESSION_SECRET_VAL).update(payload).digest("hex");
+  return createHmac('sha256', SESSION_SECRET_VAL).update(payload).digest('hex');
 }
 
-export function issueWsTicket(userId: number | string, platformRole: string, tenantId?: string): string {
+export function issueWsTicket(
+  userId: number | string,
+  platformRole: string,
+  tenantId?: string,
+): string {
   const expiry = Date.now() + WS_TICKET_TTL_MS;
-  const payload = `${userId}:${expiry}:${platformRole}:${tenantId ?? ""}`;
+  const payload = `${userId}:${expiry}:${platformRole}:${tenantId ?? ''}`;
   const sig = signTicket(payload);
-  return Buffer.from(`${payload}:${sig}`).toString("base64url");
+  return Buffer.from(`${payload}:${sig}`).toString('base64url');
 }
 
 interface TicketClaims {
@@ -200,17 +273,17 @@ interface TicketClaims {
 
 function verifyWsTicket(ticket: string): TicketClaims | null {
   try {
-    const decoded = Buffer.from(ticket, "base64url").toString("utf8");
-    const parts = decoded.split(":");
+    const decoded = Buffer.from(ticket, 'base64url').toString('utf8');
+    const parts = decoded.split(':');
     if (parts.length < 4) return null;
     const sig = parts.pop()!;
     const tenantId = parts.pop() ?? null;
-    const payload = parts.join(":");
+    const payload = parts.join(':');
     const expected = signTicket(payload);
     const expiry = parseInt(parts[1]!, 10);
     if (Date.now() > expiry) return null;
-    const sigBuffer = Buffer.from(sig, "hex");
-    const expectedBuffer = Buffer.from(expected, "hex");
+    const sigBuffer = Buffer.from(sig, 'hex');
+    const expectedBuffer = Buffer.from(expected, 'hex');
     if (sigBuffer.length !== expectedBuffer.length) return null;
     if (!timingSafeEqual(sigBuffer, expectedBuffer)) return null;
     return { userId: parts[0]!, platformRole: parts[2]!, tenantId: tenantId || null };
@@ -236,8 +309,8 @@ async function resolveToken(token: string): Promise<ResolvedAuth> {
   if (INTERNAL_TOKEN && token === INTERNAL_TOKEN) {
     return {
       authorized: true,
-      platformRole: "founder_admin",
-      userId: "0",
+      platformRole: 'founder_admin',
+      userId: '0',
       tenantId: null,
       isInternalAgent: true,
       sessionVersion: null,
@@ -280,12 +353,7 @@ async function resolveToken(token: string): Promise<ResolvedAuth> {
       })
       .from(sessionsTable)
       .innerJoin(usersTable, eq(usersTable.id, sessionsTable.userId))
-      .where(
-        and(
-          eq(sessionsTable.token, token),
-          gt(sessionsTable.expiresAt, new Date())
-        )
-      )
+      .where(and(eq(sessionsTable.token, token), gt(sessionsTable.expiresAt, new Date())))
       .limit(1);
     if (row) {
       return {
@@ -341,7 +409,7 @@ function sendToClient(clientId: string, client: SubscribedClient, payload: strin
   try {
     client.ws.send(payload, (err) => {
       if (err) {
-        logger.warn({ clientId, err }, "WS send error — buffering");
+        logger.warn({ clientId, err }, 'WS send error — buffering');
         client.isSlowConsumer = true;
         if (client.sendBuffer.length < MAX_BUFFER_SIZE) {
           client.sendBuffer.push(payload);
@@ -370,22 +438,25 @@ function drainBuffer(clientId: string, client: SubscribedClient): void {
   }
   if (allSent && client.sendBuffer.length === 0) {
     client.isSlowConsumer = false;
-    logger.debug({ clientId }, "WS client buffer drained — resumed normal delivery");
+    logger.debug({ clientId }, 'WS client buffer drained — resumed normal delivery');
   }
 }
 
 let totalPublished = 0;
 let totalConnections = 0;
 const publishedPerChannel = new LRUCache<string, number>({ max: 2000 });
-const GLOBAL_ADMIN_ROLES = new Set(["founder_admin", "platform_admin"]);
+const GLOBAL_ADMIN_ROLES = new Set(['founder_admin', 'platform_admin']);
 
 export function initWebSocket(server: Server): void {
-  wss = new WebSocketServer({ server, path: "/ws" });
+  wss = new WebSocketServer({ server, path: '/ws' });
 
-  wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+  wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     if (clients.size >= MAX_WS_CLIENTS) {
-      logger.warn({ clientCount: clients.size, maxClients: MAX_WS_CLIENTS }, "WebSocket: max client limit reached, rejecting connection");
-      ws.close(1013, "Server overloaded — try again later");
+      logger.warn(
+        { clientCount: clients.size, maxClients: MAX_WS_CLIENTS },
+        'WebSocket: max client limit reached, rejecting connection',
+      );
+      ws.close(1013, 'Server overloaded — try again later');
       return;
     }
 
@@ -410,11 +481,17 @@ export function initWebSocket(server: Server): void {
     };
     clients.set(clientId, client);
 
-    logger.debug({ clientId, ip: req.socket.remoteAddress }, "WebSocket client connected");
+    logger.debug({ clientId, ip: req.socket.remoteAddress }, 'WebSocket client connected');
 
-    ws.on("message", async (raw) => {
+    ws.on('message', async (raw) => {
       if (isRateLimited(client)) {
-        ws.send(JSON.stringify({ type: "error", code: "rate_limited", message: "Too many messages — slow down" }));
+        ws.send(
+          JSON.stringify({
+            type: 'error',
+            code: 'rate_limited',
+            message: 'Too many messages — slow down',
+          }),
+        );
         return;
       }
 
@@ -427,22 +504,40 @@ export function initWebSocket(server: Server): void {
           displayName?: string;
         };
 
-        if (msg.type === "subscribe" && msg.channel) {
+        if (msg.type === 'subscribe' && msg.channel) {
           const isSensitive = SENSITIVE_CHANNELS.has(msg.channel);
 
           if (isSensitive) {
             const token = msg.token;
             if (!token) {
-              ws.send(JSON.stringify({ type: "error", code: "unauthorized", message: `Channel ${msg.channel} requires auth` }));
+              ws.send(
+                JSON.stringify({
+                  type: 'error',
+                  code: 'unauthorized',
+                  message: `Channel ${msg.channel} requires auth`,
+                }),
+              );
               return;
             }
             const auth = await resolveToken(token);
             if (!auth.authorized) {
-              ws.send(JSON.stringify({ type: "error", code: "unauthorized", message: `Invalid or expired token for channel ${msg.channel}` }));
+              ws.send(
+                JSON.stringify({
+                  type: 'error',
+                  code: 'unauthorized',
+                  message: `Invalid or expired token for channel ${msg.channel}`,
+                }),
+              );
               return;
             }
             if (!isRoleAllowedForChannel(auth.platformRole, msg.channel)) {
-              ws.send(JSON.stringify({ type: "error", code: "forbidden", message: `Your role does not have access to channel ${msg.channel}` }));
+              ws.send(
+                JSON.stringify({
+                  type: 'error',
+                  code: 'forbidden',
+                  message: `Your role does not have access to channel ${msg.channel}`,
+                }),
+              );
               return;
             }
             client.platformRole = auth.platformRole;
@@ -451,9 +546,8 @@ export function initWebSocket(server: Server): void {
             client.isInternalAgent = auth.isInternalAgent;
             client.sessionVersionAtConnect = auth.sessionVersion;
             client.authenticatedAt = Date.now();
-            const parsedUid = Number.parseInt(auth.userId ?? "", 10);
-            client.numericUserId =
-              Number.isFinite(parsedUid) && parsedUid > 0 ? parsedUid : null;
+            const parsedUid = Number.parseInt(auth.userId ?? '', 10);
+            client.numericUserId = Number.isFinite(parsedUid) && parsedUid > 0 ? parsedUid : null;
           }
 
           client.channels.add(msg.channel);
@@ -465,39 +559,38 @@ export function initWebSocket(server: Server): void {
           const sinceSeq = msg.sinceSeq ?? 0;
           const missed = sinceSeq > 0 ? getMessagesSince(msg.channel, sinceSeq, 50) : [];
 
-          ws.send(JSON.stringify({
-            type: "subscribed",
-            channel: msg.channel,
-            currentSeq: globalSeq,
-            missedMessages: missed,
-          }));
+          ws.send(
+            JSON.stringify({
+              type: 'subscribed',
+              channel: msg.channel,
+              currentSeq: globalSeq,
+              missedMessages: missed,
+            }),
+          );
 
-          logger.debug({ clientId, channel: msg.channel }, "Client subscribed");
-
-        } else if (msg.type === "unsubscribe" && msg.channel) {
+          logger.debug({ clientId, channel: msg.channel }, 'Client subscribed');
+        } else if (msg.type === 'unsubscribe' && msg.channel) {
           client.channels.delete(msg.channel);
           removePresenceForChannel(clientId, msg.channel);
-          ws.send(JSON.stringify({ type: "unsubscribed", channel: msg.channel }));
-
-        } else if (msg.type === "ping") {
+          ws.send(JSON.stringify({ type: 'unsubscribed', channel: msg.channel }));
+        } else if (msg.type === 'ping') {
           client.lastPing = Date.now();
-          ws.send(JSON.stringify({ type: "pong", timestamp: Date.now() }));
-
-        } else if (msg.type === "catchup" && msg.channel && msg.sinceSeq !== undefined) {
+          ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+        } else if (msg.type === 'catchup' && msg.channel && msg.sinceSeq !== undefined) {
           const missed = getMessagesSince(msg.channel, msg.sinceSeq, 100);
-          ws.send(JSON.stringify({ type: "catchup_response", channel: msg.channel, messages: missed }));
-
-        } else if (msg.type === "crdt:subscribe" && (msg as unknown as { room?: string }).room) {
+          ws.send(
+            JSON.stringify({ type: 'catchup_response', channel: msg.channel, messages: missed }),
+          );
+        } else if (msg.type === 'crdt:subscribe' && (msg as unknown as { room?: string }).room) {
           const room = (msg as unknown as { room: string }).room;
           client.crdtRooms.add(room);
           addCrdtRoom(clientId, room);
           if (!client.channels.has(CRDT_SYNC_CHANNEL)) {
             client.channels.add(CRDT_SYNC_CHANNEL);
           }
-          ws.send(JSON.stringify({ type: "crdt:subscribed", room, timestamp: Date.now() }));
-          logger.debug({ clientId, room }, "[crdt] Client subscribed to CRDT room");
-
-        } else if (msg.type === "crdt:unsubscribe" && (msg as unknown as { room?: string }).room) {
+          ws.send(JSON.stringify({ type: 'crdt:subscribed', room, timestamp: Date.now() }));
+          logger.debug({ clientId, room }, '[crdt] Client subscribed to CRDT room');
+        } else if (msg.type === 'crdt:unsubscribe' && (msg as unknown as { room?: string }).room) {
           const room = (msg as unknown as { room: string }).room;
           client.crdtRooms.delete(room);
           const roomSet = crdtRoomClients.get(room);
@@ -505,9 +598,8 @@ export function initWebSocket(server: Server): void {
             roomSet.delete(clientId);
             if (roomSet.size === 0) crdtRoomClients.delete(room);
           }
-          ws.send(JSON.stringify({ type: "crdt:unsubscribed", room }));
-
-        } else if (msg.type === "crdt:delta") {
+          ws.send(JSON.stringify({ type: 'crdt:unsubscribed', room }));
+        } else if (msg.type === 'crdt:delta') {
           const crdtMsg = msg as {
             type: string;
             room?: string;
@@ -518,9 +610,19 @@ export function initWebSocket(server: Server): void {
             clock?: Record<string, number>;
             appSource?: string;
           };
-          const room = crdtMsg.room ?? (crdtMsg.entityType && crdtMsg.entityId ? `${crdtMsg.entityType}:${crdtMsg.entityId}` : null);
+          const room =
+            crdtMsg.room ??
+            (crdtMsg.entityType && crdtMsg.entityId
+              ? `${crdtMsg.entityType}:${crdtMsg.entityId}`
+              : null);
           if (!room || !crdtMsg.entityType || !crdtMsg.entityId || !crdtMsg.delta) {
-            ws.send(JSON.stringify({ type: "error", code: "invalid_crdt_delta", message: "room, entityType, entityId, and delta are required" }));
+            ws.send(
+              JSON.stringify({
+                type: 'error',
+                code: 'invalid_crdt_delta',
+                message: 'room, entityType, entityId, and delta are required',
+              }),
+            );
           } else {
             const actorId = String(client.userId ?? clientId);
             try {
@@ -532,13 +634,13 @@ export function initWebSocket(server: Server): void {
                 actorId,
                 timestamp: Date.now(),
                 clock: crdtMsg.clock ?? {},
-                fields: crdtMsg.delta as Record<string, import("@szl-holdings/crdt-sync").LwwField>,
+                fields: crdtMsg.delta as Record<string, import('@szl-holdings/crdt-sync').LwwField>,
               };
               doc.applyDelta(deltaForEngine);
               pruneRegistry();
 
               const broadcast = JSON.stringify({
-                type: "crdt:delta",
+                type: 'crdt:delta',
                 room,
                 entityType: crdtMsg.entityType,
                 entityId: crdtMsg.entityId,
@@ -549,46 +651,57 @@ export function initWebSocket(server: Server): void {
               });
               broadcastCrdtDelta(clientId, room, broadcast);
 
-              db.insert(changeEventsTable).values({
-                entityType: crdtMsg.entityType,
-                entityId: crdtMsg.entityId,
-                actorId,
-                delta: crdtMsg.delta,
-                crdtClock: crdtMsg.clock ?? {},
-                appSource: crdtMsg.appSource,
-              }).then(() => {
-                logger.debug({ room, actorId }, "[crdt] Delta persisted to change_events");
-              }).catch((err: unknown) => {
-                logger.error({ err }, "[crdt] Failed to persist delta to change_events");
-              });
+              db.insert(changeEventsTable)
+                .values({
+                  entityType: crdtMsg.entityType,
+                  entityId: crdtMsg.entityId,
+                  actorId,
+                  delta: crdtMsg.delta,
+                  crdtClock: crdtMsg.clock ?? {},
+                  appSource: crdtMsg.appSource,
+                })
+                .then(() => {
+                  logger.debug({ room, actorId }, '[crdt] Delta persisted to change_events');
+                })
+                .catch((err: unknown) => {
+                  logger.error({ err }, '[crdt] Failed to persist delta to change_events');
+                });
 
-              ws.send(JSON.stringify({ type: "crdt:ack", room, timestamp: Date.now() }));
+              ws.send(JSON.stringify({ type: 'crdt:ack', room, timestamp: Date.now() }));
             } catch (err) {
-              logger.error({ err, room }, "[crdt] Error processing delta");
-              ws.send(JSON.stringify({ type: "error", code: "crdt_error", message: "Failed to process delta" }));
+              logger.error({ err, room }, '[crdt] Error processing delta');
+              ws.send(
+                JSON.stringify({
+                  type: 'error',
+                  code: 'crdt_error',
+                  message: 'Failed to process delta',
+                }),
+              );
             }
           }
         }
       } catch {
-        ws.send(JSON.stringify({ type: "error", message: "Invalid message format" }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
       }
     });
 
-    ws.on("close", () => {
+    ws.on('close', () => {
       clients.delete(clientId);
       removePresence(clientId);
       removeCrdtRooms(clientId);
-      logger.debug({ clientId }, "WebSocket client disconnected");
+      logger.debug({ clientId }, 'WebSocket client disconnected');
     });
 
-    ws.on("error", (err) => {
-      logger.warn({ clientId, err }, "WebSocket client error");
+    ws.on('error', (err) => {
+      logger.warn({ clientId, err }, 'WebSocket client error');
       clients.delete(clientId);
       removePresence(clientId);
       removeCrdtRooms(clientId);
     });
 
-    ws.send(JSON.stringify({ type: "connected", clientId, timestamp: Date.now(), serverSeq: globalSeq }));
+    ws.send(
+      JSON.stringify({ type: 'connected', clientId, timestamp: Date.now(), serverSeq: globalSeq }),
+    );
   });
 
   const HEARTBEAT_INTERVAL_MS = 30_000;
@@ -604,14 +717,14 @@ export function initWebSocket(server: Server): void {
     const now = Date.now();
     for (const [clientId, client] of clients) {
       if (now - client.lastPing > STALE_CLIENT_TIMEOUT_MS) {
-        logger.debug({ clientId }, "Terminating stale WebSocket client");
+        logger.debug({ clientId }, 'Terminating stale WebSocket client');
         client.ws.terminate();
         clients.delete(clientId);
         removePresence(clientId);
         continue;
       }
       if (client.ws.readyState === WebSocket.OPEN) {
-        client.ws.send(JSON.stringify({ type: "ping", timestamp: now }));
+        client.ws.send(JSON.stringify({ type: 'ping', timestamp: now }));
       }
     }
   }, HEARTBEAT_INTERVAL_MS);
@@ -632,7 +745,7 @@ export function initWebSocket(server: Server): void {
   drainInterval.unref();
   sessionRevalidateInterval.unref();
 
-  logger.info("WebSocket server initialized at /ws");
+  logger.info('WebSocket server initialized at /ws');
 }
 
 /**
@@ -670,21 +783,21 @@ export async function revalidateAuthenticatedClients(): Promise<void> {
         .limit(1);
 
       let revoked = false;
-      let reason = "";
+      let reason = '';
 
       if (!user) {
         revoked = true;
-        reason = "user_missing";
+        reason = 'user_missing';
       } else if (!user.isActive) {
         revoked = true;
-        reason = "user_inactive";
+        reason = 'user_inactive';
       } else if (
         client.sessionVersionAtConnect != null &&
         user.sessionVersion != null &&
         user.sessionVersion !== client.sessionVersionAtConnect
       ) {
         revoked = true;
-        reason = "session_version_mismatch";
+        reason = 'session_version_mismatch';
       } else {
         const [activeSession] = await db
           .select({ id: sessionsTable.id })
@@ -699,21 +812,21 @@ export async function revalidateAuthenticatedClients(): Promise<void> {
           .limit(1);
         if (!activeSession) {
           revoked = true;
-          reason = "no_active_session";
+          reason = 'no_active_session';
         }
       }
 
       if (revoked) {
         logger.info(
           { clientId, userId, reason },
-          "[ws] Closing WebSocket — underlying session revoked",
+          '[ws] Closing WebSocket — underlying session revoked',
         );
         try {
           client.ws.send(
             JSON.stringify({
-              type: "error",
-              code: "session_revoked",
-              message: "Session revoked — please re-authenticate",
+              type: 'error',
+              code: 'session_revoked',
+              message: 'Session revoked — please re-authenticate',
               reason,
             }),
           );
@@ -721,7 +834,7 @@ export async function revalidateAuthenticatedClients(): Promise<void> {
           /* ignore — closing anyway */
         }
         try {
-          client.ws.close(4001, "session_revoked");
+          client.ws.close(4001, 'session_revoked');
         } catch {
           /* ignore */
         }
@@ -732,7 +845,7 @@ export async function revalidateAuthenticatedClients(): Promise<void> {
     } catch (err) {
       logger.warn(
         { err, clientId },
-        "[ws] Session re-validation failed — leaving client connected (fail-open on db error)",
+        '[ws] Session re-validation failed — leaving client connected (fail-open on db error)',
       );
     }
   }
@@ -746,7 +859,12 @@ function removePresenceForChannel(clientId: string, channel: string): void {
   }
 }
 
-export function publish(channel: string, event: string, data: unknown, tenantId?: string | null): void {
+export function publish(
+  channel: string,
+  event: string,
+  data: unknown,
+  tenantId?: string | null,
+): void {
   if (!wss) return;
 
   totalPublished++;
@@ -764,16 +882,17 @@ export function publish(channel: string, event: string, data: unknown, tenantId?
 
   recordHistory(message);
 
-  const payload = JSON.stringify({ type: "message", ...message });
+  const payload = JSON.stringify({ type: 'message', ...message });
 
   for (const [clientId, client] of clients) {
     if (!client.channels.has(channel)) continue;
 
     if (tenantId != null) {
-      const isGlobalAdmin = client.tenantId === null && GLOBAL_ADMIN_ROLES.has(client.platformRole ?? "");
+      const isGlobalAdmin =
+        client.tenantId === null && GLOBAL_ADMIN_ROLES.has(client.platformRole ?? '');
       if (!isGlobalAdmin && client.tenantId !== tenantId) continue;
-    } else if (channel === "monte-carlo:progress") {
-      const isGlobalAdmin = GLOBAL_ADMIN_ROLES.has(client.platformRole ?? "");
+    } else if (channel === 'monte-carlo:progress') {
+      const isGlobalAdmin = GLOBAL_ADMIN_ROLES.has(client.platformRole ?? '');
       if (!isGlobalAdmin) continue;
     }
 
@@ -829,23 +948,23 @@ export function getWsStats() {
 }
 
 export const WS_CHANNELS = {
-  HEALTH: "health",
+  HEALTH: 'health',
   CRDT_SYNC: CRDT_SYNC_CHANNEL,
-  INCIDENTS: "incidents",
-  AEGIS_INCIDENTS: "aegis-incidents",
-  AEGIS_ALERT_FEED: "aegis:alert-feed",
-  METRICS: "metrics",
-  NOTIFICATIONS: "notifications",
-  FEATURE_FLAGS: "feature-flags",
-  JOB_QUEUE: "job-queue",
-  WORKFLOW_RUNS: "workflow-runs",
-  VESSEL_POSITIONS: "vessel-positions",
-  VESSELS_FLEET_POSITIONS: "vessels:fleet-positions",
-  TERRA_SIGNALS: "terra-signals",
-  LYTE_METRICS: "lyte-metrics",
-  LYTE_METRICS_STREAM: "lyte:metrics-stream",
-  LYTE_SIGNAL_NEW: "lyte:signal:new",
-  BOOKINGS: "bookings",
-  NEXUS_INTELLIGENCE_FEED: "nexus:intelligence-feed",
-  MONTE_CARLO_PROGRESS: "monte-carlo:progress",
+  INCIDENTS: 'incidents',
+  AEGIS_INCIDENTS: 'aegis-incidents',
+  AEGIS_ALERT_FEED: 'aegis:alert-feed',
+  METRICS: 'metrics',
+  NOTIFICATIONS: 'notifications',
+  FEATURE_FLAGS: 'feature-flags',
+  JOB_QUEUE: 'job-queue',
+  WORKFLOW_RUNS: 'workflow-runs',
+  VESSEL_POSITIONS: 'vessel-positions',
+  VESSELS_FLEET_POSITIONS: 'vessels:fleet-positions',
+  TERRA_SIGNALS: 'terra-signals',
+  LYTE_METRICS: 'lyte-metrics',
+  LYTE_METRICS_STREAM: 'lyte:metrics-stream',
+  LYTE_SIGNAL_NEW: 'lyte:signal:new',
+  BOOKINGS: 'bookings',
+  NEXUS_INTELLIGENCE_FEED: 'nexus:intelligence-feed',
+  MONTE_CARLO_PROGRESS: 'monte-carlo:progress',
 } as const;

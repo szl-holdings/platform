@@ -6,12 +6,12 @@
  * corrected agent will have relevant past corrections injected into the
  * system prompt.
  */
-import { db } from "@szl-holdings/db";
-import { alloyAgentCorrections } from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
+import { alloyAgentCorrections, db } from '@szl-holdings/db';
+import { desc, eq } from 'drizzle-orm';
 
 const logger = {
-  warn: (obj: Record<string, unknown>, msg: string) => console.warn("[agent-corrections]", msg, obj),
+  warn: (obj: Record<string, unknown>, msg: string) =>
+    console.warn('[agent-corrections]', msg, obj),
 };
 
 export interface CorrectionRecord {
@@ -20,22 +20,39 @@ export interface CorrectionRecord {
   originalOutput: string;
   correctedOutput: string;
   validationNotes?: string;
-  validationStatus: "APPROVED_WITH_NOTES" | "REJECTED";
+  validationStatus: 'APPROVED_WITH_NOTES' | 'REJECTED';
   query: string;
 }
 
 function extractKeywords(text: string): string[] {
-  const stopWords = new Set(["the", "a", "an", "is", "in", "on", "at", "to", "for", "of", "and", "or", "but", "with"]);
+  const stopWords = new Set([
+    'the',
+    'a',
+    'an',
+    'is',
+    'in',
+    'on',
+    'at',
+    'to',
+    'for',
+    'of',
+    'and',
+    'or',
+    'but',
+    'with',
+  ]);
   return text
     .toLowerCase()
     .split(/\W+/)
-    .filter(w => w.length > 3 && !stopWords.has(w))
+    .filter((w) => w.length > 3 && !stopWords.has(w))
     .slice(0, 12);
 }
 
-export async function storeCorrection(record: CorrectionRecord & { orgId?: number | null }): Promise<void> {
+export async function storeCorrection(
+  record: CorrectionRecord & { orgId?: number | null },
+): Promise<void> {
   try {
-    const keywords = extractKeywords(`${record.query} ${record.validationNotes ?? ""}`);
+    const keywords = extractKeywords(`${record.query} ${record.validationNotes ?? ''}`);
     await db.insert(alloyAgentCorrections).values({
       sourceAgentId: record.sourceAgentId,
       validatorAgentId: record.validatorAgentId,
@@ -47,7 +64,7 @@ export async function storeCorrection(record: CorrectionRecord & { orgId?: numbe
       topicKeywords: keywords,
     });
   } catch (err) {
-    logger.warn({ err }, "storeCorrection DB write failed — correction not persisted");
+    logger.warn({ err }, 'storeCorrection DB write failed — correction not persisted');
   }
 }
 
@@ -66,24 +83,27 @@ export async function getRelevantCorrections(
       .limit(30);
 
     const scored = recent
-      .map(r => {
-        const overlap = keywords.filter(kw => r.topicKeywords.includes(kw)).length;
+      .map((r) => {
+        const overlap = keywords.filter((kw) => r.topicKeywords.includes(kw)).length;
         return { record: r, score: overlap };
       })
-      .filter(s => s.score > 0)
+      .filter((s) => s.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 
-    if (scored.length === 0) return "";
+    if (scored.length === 0) return '';
 
     const lines = scored.map(({ record: r }) => {
-      const status = r.validationStatus === "REJECTED" ? "REJECTED" : "REVISED";
-      return `[Sentinel ${status}] ${r.validationNotes?.slice(0, 200) ?? "Output required revision"}`;
+      const status = r.validationStatus === 'REJECTED' ? 'REJECTED' : 'REVISED';
+      return `[Sentinel ${status}] ${r.validationNotes?.slice(0, 200) ?? 'Output required revision'}`;
     });
 
-    return `## Past Sentinel Corrections for Similar Queries\nNote: These corrections were applied to your previous outputs on similar topics. Incorporate these lessons:\n${lines.join("\n")}`;
+    return `## Past Sentinel Corrections for Similar Queries\nNote: These corrections were applied to your previous outputs on similar topics. Incorporate these lessons:\n${lines.join('\n')}`;
   } catch (err) {
-    logger.warn({ err }, "getRelevantCorrections DB read failed — returning empty correction context");
-    return "";
+    logger.warn(
+      { err },
+      'getRelevantCorrections DB read failed — returning empty correction context',
+    );
+    return '';
   }
 }

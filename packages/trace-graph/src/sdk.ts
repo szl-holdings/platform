@@ -1,8 +1,14 @@
-import { randomUUID } from "crypto";
-import type { TraceRecord, TraceSpan, ToolCallRecord, RetrievalRecord, MemoryIORecord } from "./schema.js";
-import { TraceWriter } from "./writer.js";
-import { defaultTraceStore } from "./store.js";
-import { defaultQueryEngine, type TraceQueryEngine } from "./query.js";
+import { randomUUID } from 'crypto';
+import { defaultQueryEngine, type TraceQueryEngine } from './query.js';
+import type {
+  MemoryIORecord,
+  RetrievalRecord,
+  ToolCallRecord,
+  TraceRecord,
+  TraceSpan,
+} from './schema.js';
+import { defaultTraceStore } from './store.js';
+import { TraceWriter } from './writer.js';
 
 export interface TraceContext {
   traceId: string;
@@ -61,14 +67,21 @@ export class TraceSession {
       parentSpanId: options.parentSpanId,
       name: options.name,
       startedAt: now,
-      status: "pending",
+      status: 'pending',
       attributes: options.attributes ?? {},
     };
     this.activeSpans.set(spanId, { span, startedAt: process.hrtime.bigint() });
     return spanId;
   }
 
-  endSpan(spanId: string, opts: { status?: TraceSpan["status"]; errorMessage?: string; attributes?: Record<string, unknown> } = {}): void {
+  endSpan(
+    spanId: string,
+    opts: {
+      status?: TraceSpan['status'];
+      errorMessage?: string;
+      attributes?: Record<string, unknown>;
+    } = {},
+  ): void {
     const entry = this.activeSpans.get(spanId);
     if (!entry) return;
     const latencyMs = Number(process.hrtime.bigint() - entry.startedAt) / 1e6;
@@ -77,7 +90,7 @@ export class TraceSession {
       ...entry.span,
       endedAt: now,
       latencyMs,
-      status: opts.status ?? "ok",
+      status: opts.status ?? 'ok',
       errorMessage: opts.errorMessage,
       attributes: { ...entry.span.attributes, ...(opts.attributes ?? {}) },
     };
@@ -103,19 +116,19 @@ export class TraceSession {
 
   linkEntity(entityId: string, role?: string): void {
     this.queryEngine.linkEntityToTrace(this.traceId, entityId);
-    const trace = this.writer["store"]["get"]?.(this.traceId);
+    const trace = this.writer['store']['get']?.(this.traceId);
     if (trace) {
       const links: Array<{ entityId: string; role: string }> =
-        (trace.metadata?.["entityLinks"] as Array<{ entityId: string; role: string }>) ?? [];
-      links.push({ entityId, role: role ?? "touched" });
+        (trace.metadata?.['entityLinks'] as Array<{ entityId: string; role: string }>) ?? [];
+      links.push({ entityId, role: role ?? 'touched' });
       trace.metadata = { ...trace.metadata, entityLinks: links };
-      this.writer["store"]["save"]?.(trace);
+      this.writer['store']['save']?.(trace);
     }
   }
 
-  complete(params: Parameters<TraceWriter["completeTrace"]>[1] = {}): TraceRecord {
+  complete(params: Parameters<TraceWriter['completeTrace']>[1] = {}): TraceRecord {
     for (const [spanId] of this.activeSpans) {
-      this.endSpan(spanId, { status: "ok" });
+      this.endSpan(spanId, { status: 'ok' });
     }
     return this.writer.completeTrace(this.traceId, params);
   }
@@ -123,9 +136,9 @@ export class TraceSession {
   fail(code: string, message: string): TraceRecord {
     this.recordError(code, message);
     for (const [spanId] of this.activeSpans) {
-      this.endSpan(spanId, { status: "error", errorMessage: message });
+      this.endSpan(spanId, { status: 'error', errorMessage: message });
     }
-    return this.writer.completeTrace(this.traceId, { status: "failed" });
+    return this.writer.completeTrace(this.traceId, { status: 'failed' });
   }
 }
 
@@ -141,7 +154,7 @@ export class TraceSdk {
     this.queryEngine = queryEngine;
   }
 
-  startSession(ctx: Omit<TraceContext, "traceId"> & { traceId?: string }): TraceSession {
+  startSession(ctx: Omit<TraceContext, 'traceId'> & { traceId?: string }): TraceSession {
     const traceId = ctx.traceId ?? randomUUID();
     return new TraceSession({ ...ctx, traceId }, this.writer, this.queryEngine);
   }
@@ -159,7 +172,7 @@ export class TraceSdk {
       try {
         const result = await fn(...args);
         success = true;
-        session.endSpan(spanId, { status: "ok" });
+        session.endSpan(spanId, { status: 'ok' });
         session.recordToolCall({
           toolId,
           toolName,
@@ -171,13 +184,13 @@ export class TraceSdk {
         return result;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        session.endSpan(spanId, { status: "error", errorMessage: msg });
+        session.endSpan(spanId, { status: 'error', errorMessage: msg });
         session.recordToolCall({
           toolId,
           toolName,
           latencyMs: Date.now() - start,
           success: false,
-          errorCode: "TOOL_ERROR",
+          errorCode: 'TOOL_ERROR',
           retries: 0,
           approvalRequired: false,
         });
@@ -196,7 +209,7 @@ export class TraceSdk {
       const start = Date.now();
       try {
         const { result, tokens, cost } = await fn();
-        session.endSpan(spanId, { status: "ok", attributes: { tokens, cost } });
+        session.endSpan(spanId, { status: 'ok', attributes: { tokens, cost } });
         session.recordToolCall({
           toolId: `model:${model}`,
           toolName: model,
@@ -210,7 +223,7 @@ export class TraceSdk {
         return result;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        session.endSpan(spanId, { status: "error", errorMessage: msg });
+        session.endSpan(spanId, { status: 'error', errorMessage: msg });
         throw err;
       }
     };

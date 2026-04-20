@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
 
 export const GET_ALLOY_WORKFLOWS = gql`
   query GetAlloyWorkflows($limit: Int, $offset: Int) {
@@ -96,7 +96,11 @@ export function useAlloyWorkflows(variables?: { limit?: number; offset?: number 
   return useQuery(GET_ALLOY_WORKFLOWS, { variables });
 }
 
-export function useAlloyWorkflowRuns(variables?: { workflowId?: string; limit?: number; offset?: number }) {
+export function useAlloyWorkflowRuns(variables?: {
+  workflowId?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_ALLOY_WORKFLOW_RUNS, { variables });
 }
 

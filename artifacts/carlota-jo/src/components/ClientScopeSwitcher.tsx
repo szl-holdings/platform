@@ -1,30 +1,30 @@
-import { useEffect, useState } from "react";
-import { Users } from "lucide-react";
+import { Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const API = import.meta.env.BASE_URL + "api";
-const GOLD = "var(--color-gold)";
+const API = import.meta.env.BASE_URL + 'api';
+const GOLD = 'var(--color-gold)';
 
 export type AdvisoryClient = { id: string; name: string; industry: string };
 
 const FALLBACK_CLIENTS: AdvisoryClient[] = [
-  { id: "luminary-brands", name: "Luminary Brands", industry: "Consumer Brand / DTC" },
-  { id: "vertex-capital", name: "Vertex Capital Partners", industry: "Private Equity / M&A" },
-  { id: "aurelius-pe", name: "Aurelius Private Equity", industry: "PE Portfolio Operations" },
-  { id: "oasis-wellness", name: "Oasis Wellness", industry: "Wellness / Consumer Health" },
+  { id: 'luminary-brands', name: 'Luminary Brands', industry: 'Consumer Brand / DTC' },
+  { id: 'vertex-capital', name: 'Vertex Capital Partners', industry: 'Private Equity / M&A' },
+  { id: 'aurelius-pe', name: 'Aurelius Private Equity', industry: 'PE Portfolio Operations' },
+  { id: 'oasis-wellness', name: 'Oasis Wellness', industry: 'Wellness / Consumer Health' },
 ];
 
 export function readClientIdFromUrl(): string | null {
-  if (typeof window === "undefined") return null;
-  const v = new URLSearchParams(window.location.search).get("clientId");
+  if (typeof window === 'undefined') return null;
+  const v = new URLSearchParams(window.location.search).get('clientId');
   return v && v.trim() ? v : null;
 }
 
 export function writeClientIdToUrl(clientId: string | null) {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   const url = new URL(window.location.href);
-  if (clientId) url.searchParams.set("clientId", clientId);
-  else url.searchParams.delete("clientId");
-  window.history.replaceState({}, "", url.toString());
+  if (clientId) url.searchParams.set('clientId', clientId);
+  else url.searchParams.delete('clientId');
+  window.history.replaceState({}, '', url.toString());
 }
 
 export function useClientScope(): {
@@ -43,7 +43,7 @@ export function useClientScope(): {
     let cancelled = false;
     async function loadScope() {
       try {
-        const res = await fetch(`${API}/carlota/my-scope`, { credentials: "include" });
+        const res = await fetch(`${API}/carlota/my-scope`, { credentials: 'include' });
         if (!res.ok) {
           if (!cancelled) setScopeLoaded(true);
           return;
@@ -55,13 +55,13 @@ export function useClientScope(): {
         setIsAdmin(admin);
         if (admin) {
           // Admins keep manual control via URL.
-          if (typeof data.autoClientId === "string" && !readClientIdFromUrl()) {
+          if (typeof data.autoClientId === 'string' && !readClientIdFromUrl()) {
             setClientIdState(data.autoClientId);
             writeClientIdToUrl(data.autoClientId);
           }
         } else {
           // Non-admins: lock to derived clientId, ignore any URL param.
-          const auto = typeof data.autoClientId === "string" ? data.autoClientId : null;
+          const auto = typeof data.autoClientId === 'string' ? data.autoClientId : null;
           setClientIdState(auto);
           writeClientIdToUrl(auto);
         }
@@ -71,7 +71,9 @@ export function useClientScope(): {
       }
     }
     void loadScope();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -79,17 +81,21 @@ export function useClientScope(): {
     let cancelled = false;
     async function loadClients() {
       try {
-        const res = await fetch(`${API}/carlota/clients`, { credentials: "include" });
+        const res = await fetch(`${API}/carlota/clients`, { credentials: 'include' });
         if (!res.ok) return;
         const json = await res.json();
         const list = json.data?.clients;
         if (!cancelled && Array.isArray(list) && list.length > 0) {
           setClients(list as AdvisoryClient[]);
         }
-      } catch { /* keep fallback */ }
+      } catch {
+        /* keep fallback */
+      }
     }
     void loadClients();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isAdmin]);
 
   const setClientId = (id: string | null) => {
@@ -105,42 +111,42 @@ export default function ClientScopeSwitcher({
   clientId,
   onChange,
   clients,
-  variant = "light",
+  variant = 'light',
 }: {
   clientId: string | null;
   onChange: (id: string | null) => void;
   clients: AdvisoryClient[];
-  variant?: "light" | "dark";
+  variant?: 'light' | 'dark';
 }) {
-  const isDark = variant === "dark";
+  const isDark = variant === 'dark';
   return (
     <label
       style={{
-        display: "inline-flex",
-        alignItems: "center",
+        display: 'inline-flex',
+        alignItems: 'center',
         gap: 8,
-        padding: "6px 10px",
+        padding: '6px 10px',
         borderRadius: 100,
-        background: isDark ? "rgba(255,255,255,0.06)" : "#fff",
-        border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "var(--color-stone-200, #E8E2D6)"}`,
+        background: isDark ? 'rgba(255,255,255,0.06)' : '#fff',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'var(--color-stone-200, #E8E2D6)'}`,
         fontSize: 12,
-        color: isDark ? "#F5F0E8" : "#1A1A14",
+        color: isDark ? '#F5F0E8' : '#1A1A14',
       }}
       title="Scope advisory tool data to a specific client"
     >
-      <Users size={13} color={isDark ? "#A0AEC0" : "#A89878"} />
-      <span style={{ color: isDark ? "#A0AEC0" : "#6B5E47", fontSize: 11 }}>Client view</span>
+      <Users size={13} color={isDark ? '#A0AEC0' : '#A89878'} />
+      <span style={{ color: isDark ? '#A0AEC0' : '#6B5E47', fontSize: 11 }}>Client view</span>
       <select
-        value={clientId ?? ""}
-        onChange={(e) => onChange(e.target.value === "" ? null : e.target.value)}
+        value={clientId ?? ''}
+        onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
         style={{
-          background: "transparent",
-          border: "none",
-          outline: "none",
-          color: isDark ? "#F5F0E8" : "#1A1A14",
+          background: 'transparent',
+          border: 'none',
+          outline: 'none',
+          color: isDark ? '#F5F0E8' : '#1A1A14',
           fontSize: 12,
           fontWeight: 600,
-          cursor: "pointer",
+          cursor: 'pointer',
           padding: 0,
         }}
       >
@@ -156,19 +162,26 @@ export default function ClientScopeSwitcher({
           type="button"
           onClick={() => onChange(null)}
           style={{
-            border: "none",
-            background: "transparent",
-            color: isDark ? "#A0AEC0" : "#A89878",
+            border: 'none',
+            background: 'transparent',
+            color: isDark ? '#A0AEC0' : '#A89878',
             fontSize: 11,
-            cursor: "pointer",
+            cursor: 'pointer',
             padding: 0,
-            textDecoration: "underline",
+            textDecoration: 'underline',
           }}
         >
           clear
         </button>
       )}
-      <span style={{ width: 6, height: 6, borderRadius: 3, background: clientId ? GOLD : (isDark ? "#4A7A63" : "#A89878") }} />
+      <span
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          background: clientId ? GOLD : isDark ? '#4A7A63' : '#A89878',
+        }}
+      />
     </label>
   );
 }

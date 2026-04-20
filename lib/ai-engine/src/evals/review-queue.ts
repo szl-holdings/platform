@@ -6,11 +6,11 @@
  * Decisions feed back into quality metrics via the Outcome Graph.
  */
 
-import type { AITrace } from "./trace-capture.js";
+import type { AITrace } from './trace-capture.js';
 
-export type ReviewVerdict = "approved" | "rejected" | "flagged" | "escalated" | "deferred";
+export type ReviewVerdict = 'approved' | 'rejected' | 'flagged' | 'escalated' | 'deferred';
 
-export type ReviewPriority = "low" | "medium" | "high" | "critical";
+export type ReviewPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface ReviewQueueItem {
   reviewId: string;
@@ -33,7 +33,7 @@ export interface ReviewQueueItem {
   reviewedBy?: number;
   reviewNotes?: string;
   escalatedTo?: string;
-  status: "pending" | "in_review" | "resolved" | "escalated";
+  status: 'pending' | 'in_review' | 'resolved' | 'escalated';
   enqueuedAt: string;
   reviewedAt?: string;
   metadata?: Record<string, unknown>;
@@ -69,12 +69,12 @@ export function registerReviewQueueSink(sink: ReviewQueueWriteSink): void {
 }
 
 function computePriority(trace: AITrace): ReviewPriority {
-  if (trace.riskLevel === "critical") return "critical";
-  if (trace.riskLevel === "high") return "high";
-  if (trace.confidence < 0.4) return "high";
-  if (trace.confidence < 0.55) return "medium";
-  if (trace.costEstimateUsd > 0.50) return "medium";
-  return "low";
+  if (trace.riskLevel === 'critical') return 'critical';
+  if (trace.riskLevel === 'high') return 'high';
+  if (trace.confidence < 0.4) return 'high';
+  if (trace.confidence < 0.55) return 'medium';
+  if (trace.costEstimateUsd > 0.5) return 'medium';
+  return 'low';
 }
 
 export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
@@ -90,7 +90,7 @@ export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
     model: trace.model,
     confidence: trace.confidence,
     riskLevel: trace.riskLevel,
-    reviewReason: input.overrideReason ?? trace.reviewReason ?? "Flagged for review",
+    reviewReason: input.overrideReason ?? trace.reviewReason ?? 'Flagged for review',
     priority: input.priority ?? computePriority(trace),
     inputSummary: trace.inputSummary,
     outputSummary: trace.outputSummary,
@@ -98,7 +98,7 @@ export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
     latencyMs: trace.latencyMs,
     evalScore: trace.evalScore,
     evalPassed: trace.evalPassed,
-    status: "pending",
+    status: 'pending',
     enqueuedAt: new Date().toISOString(),
     metadata: trace.metadata,
   };
@@ -108,7 +108,11 @@ export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
 
   if (reviewQueueSink?.onEnqueue) {
     reviewQueueSink.onEnqueue(item).catch((err) => {
-      console.error("[ai-engine/review-queue] onEnqueue sink failed for reviewId=%s: %s", item.reviewId, err instanceof Error ? err.message : String(err));
+      console.error(
+        '[ai-engine/review-queue] onEnqueue sink failed for reviewId=%s: %s',
+        item.reviewId,
+        err instanceof Error ? err.message : String(err),
+      );
     });
   }
 
@@ -116,29 +120,31 @@ export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
 }
 
 export function getReviewItem(reviewId: string): ReviewQueueItem | undefined {
-  return queue.find(i => i.reviewId === reviewId);
+  return queue.find((i) => i.reviewId === reviewId);
 }
 
-export function listReviewQueue(options: {
-  orgId?: number;
-  domain?: string;
-  status?: ReviewQueueItem["status"];
-  priority?: ReviewPriority;
-  verdict?: ReviewVerdict;
-  since?: Date;
-  until?: Date;
-  limit?: number;
-  offset?: number;
-} = {}): ReviewQueueItem[] {
+export function listReviewQueue(
+  options: {
+    orgId?: number;
+    domain?: string;
+    status?: ReviewQueueItem['status'];
+    priority?: ReviewPriority;
+    verdict?: ReviewVerdict;
+    since?: Date;
+    until?: Date;
+    limit?: number;
+    offset?: number;
+  } = {},
+): ReviewQueueItem[] {
   let results = queue;
 
-  if (options.orgId != null) results = results.filter(i => i.orgId === options.orgId);
-  if (options.domain) results = results.filter(i => i.domain === options.domain);
-  if (options.status) results = results.filter(i => i.status === options.status);
-  if (options.priority) results = results.filter(i => i.priority === options.priority);
-  if (options.verdict) results = results.filter(i => i.verdict === options.verdict);
-  if (options.since) results = results.filter(i => new Date(i.enqueuedAt) >= options.since!);
-  if (options.until) results = results.filter(i => new Date(i.enqueuedAt) <= options.until!);
+  if (options.orgId != null) results = results.filter((i) => i.orgId === options.orgId);
+  if (options.domain) results = results.filter((i) => i.domain === options.domain);
+  if (options.status) results = results.filter((i) => i.status === options.status);
+  if (options.priority) results = results.filter((i) => i.priority === options.priority);
+  if (options.verdict) results = results.filter((i) => i.verdict === options.verdict);
+  if (options.since) results = results.filter((i) => new Date(i.enqueuedAt) >= options.since!);
+  if (options.until) results = results.filter((i) => new Date(i.enqueuedAt) <= options.until!);
 
   const offset = options.offset ?? 0;
   const limit = options.limit ?? 50;
@@ -146,7 +152,7 @@ export function listReviewQueue(options: {
 }
 
 export function recordReviewDecision(input: ReviewDecisionInput): ReviewQueueItem | null {
-  const item = queue.find(i => i.reviewId === input.reviewId);
+  const item = queue.find((i) => i.reviewId === input.reviewId);
   if (!item) return null;
 
   item.verdict = input.verdict;
@@ -154,11 +160,15 @@ export function recordReviewDecision(input: ReviewDecisionInput): ReviewQueueIte
   item.reviewNotes = input.reviewNotes;
   item.escalatedTo = input.escalatedTo;
   item.reviewedAt = new Date().toISOString();
-  item.status = input.verdict === "escalated" ? "escalated" : "resolved";
+  item.status = input.verdict === 'escalated' ? 'escalated' : 'resolved';
 
   if (reviewQueueSink?.onDecision) {
     reviewQueueSink.onDecision(item).catch((err) => {
-      console.error("[ai-engine/review-queue] onDecision sink failed for reviewId=%s: %s", item.reviewId, err instanceof Error ? err.message : String(err));
+      console.error(
+        '[ai-engine/review-queue] onDecision sink failed for reviewId=%s: %s',
+        item.reviewId,
+        err instanceof Error ? err.message : String(err),
+      );
     });
   }
 
@@ -166,13 +176,17 @@ export function recordReviewDecision(input: ReviewDecisionInput): ReviewQueueIte
 }
 
 export function markInReview(reviewId: string): boolean {
-  const item = queue.find(i => i.reviewId === reviewId);
-  if (!item || item.status !== "pending") return false;
-  item.status = "in_review";
+  const item = queue.find((i) => i.reviewId === reviewId);
+  if (!item || item.status !== 'pending') return false;
+  item.status = 'in_review';
 
   if (reviewQueueSink?.onClaim) {
     reviewQueueSink.onClaim(reviewId).catch((err) => {
-      console.error("[ai-engine/review-queue] onClaim sink failed for reviewId=%s: %s", reviewId, err instanceof Error ? err.message : String(err));
+      console.error(
+        '[ai-engine/review-queue] onClaim sink failed for reviewId=%s: %s',
+        reviewId,
+        err instanceof Error ? err.message : String(err),
+      );
     });
   }
 
@@ -181,7 +195,7 @@ export function markInReview(reviewId: string): boolean {
 
 export function hydrateReviewQueue(items: ReviewQueueItem[]): void {
   for (const item of items) {
-    if (!queue.find(q => q.reviewId === item.reviewId)) {
+    if (!queue.find((q) => q.reviewId === item.reviewId)) {
       queue.push(item);
     }
   }
@@ -202,7 +216,7 @@ export interface ReviewQueueStats {
 }
 
 export function getReviewQueueStats(orgId?: number): ReviewQueueStats {
-  const items = orgId != null ? queue.filter(i => i.orgId === orgId) : queue;
+  const items = orgId != null ? queue.filter((i) => i.orgId === orgId) : queue;
 
   const byPriority: Record<ReviewPriority, number> = { low: 0, medium: 0, high: 0, critical: 0 };
   const byDomain: Record<string, number> = {};
@@ -218,15 +232,14 @@ export function getReviewQueueStats(orgId?: number): ReviewQueueStats {
 
   return {
     total: items.length,
-    pending: items.filter(i => i.status === "pending").length,
-    inReview: items.filter(i => i.status === "in_review").length,
-    resolved: items.filter(i => i.status === "resolved").length,
-    escalated: items.filter(i => i.status === "escalated").length,
+    pending: items.filter((i) => i.status === 'pending').length,
+    inReview: items.filter((i) => i.status === 'in_review').length,
+    resolved: items.filter((i) => i.status === 'resolved').length,
+    escalated: items.filter((i) => i.status === 'escalated').length,
     byPriority,
     byDomain,
-    avgConfidence: items.length > 0
-      ? items.reduce((s, i) => s + i.confidence, 0) / items.length
-      : 0,
+    avgConfidence:
+      items.length > 0 ? items.reduce((s, i) => s + i.confidence, 0) / items.length : 0,
     verdictBreakdown,
   };
 }

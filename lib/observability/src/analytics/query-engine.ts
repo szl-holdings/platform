@@ -1,11 +1,11 @@
+import { buildMetricQueryResult, generateBuckets } from './aggregation-pipeline.js';
 import type {
-  MetricQueryParams,
-  BulkQueryParams,
-  MetricQueryResult,
   AnalyticsGranularity,
+  BulkQueryParams,
   MetricDataPoint,
-} from "./types.js";
-import { buildMetricQueryResult, generateBuckets } from "./aggregation-pipeline.js";
+  MetricQueryParams,
+  MetricQueryResult,
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Default granularity selection based on time range
@@ -15,11 +15,11 @@ export function selectGranularity(from: Date, to: Date): AnalyticsGranularity {
   const rangeMs = to.getTime() - from.getTime();
   const hours = rangeMs / (1000 * 60 * 60);
 
-  if (hours <= 2) return "minute";
-  if (hours <= 48) return "hour";
-  if (hours <= 336) return "day";  // 14 days
-  if (hours <= 2160) return "week"; // 90 days
-  return "month";
+  if (hours <= 2) return 'minute';
+  if (hours <= 48) return 'hour';
+  if (hours <= 336) return 'day'; // 14 days
+  if (hours <= 2160) return 'week'; // 90 days
+  return 'month';
 }
 
 // ---------------------------------------------------------------------------
@@ -38,11 +38,21 @@ export function parseTimeRange(range: string): { from: Date; to: Date } {
 
   let ms = 0;
   switch (unit) {
-    case "m": ms = value * 60 * 1000; break;
-    case "h": ms = value * 60 * 60 * 1000; break;
-    case "d": ms = value * 24 * 60 * 60 * 1000; break;
-    case "w": ms = value * 7 * 24 * 60 * 60 * 1000; break;
-    case "M": ms = value * 30 * 24 * 60 * 60 * 1000; break;
+    case 'm':
+      ms = value * 60 * 1000;
+      break;
+    case 'h':
+      ms = value * 60 * 60 * 1000;
+      break;
+    case 'd':
+      ms = value * 24 * 60 * 60 * 1000;
+      break;
+    case 'w':
+      ms = value * 7 * 24 * 60 * 60 * 1000;
+      break;
+    case 'M':
+      ms = value * 30 * 24 * 60 * 60 * 1000;
+      break;
   }
 
   return { from: new Date(now.getTime() - ms), to: now };
@@ -83,23 +93,37 @@ export function evictCache(metricId?: string): void {
 
 export function queryMetric(
   params: MetricQueryParams,
-  rawDataPoints: MetricDataPoint[]
+  rawDataPoints: MetricDataPoint[],
 ): MetricQueryResult {
   const granularity = params.granularity ?? selectGranularity(params.from, params.to);
 
   const filtered = rawDataPoints.filter(
-    dp => dp.timestamp >= params.from && dp.timestamp <= params.to
+    (dp) => dp.timestamp >= params.from && dp.timestamp <= params.to,
   );
 
   if (params.dimensions) {
-    const filtered2 = filtered.filter(dp => {
+    const filtered2 = filtered.filter((dp) => {
       if (!dp.dimensions) return false;
       return Object.entries(params.dimensions!).every(([k, v]) => dp.dimensions?.[k] === v);
     });
-    return buildMetricQueryResult(params.metricId, params.domain ?? "", granularity, params.from, params.to, filtered2);
+    return buildMetricQueryResult(
+      params.metricId,
+      params.domain ?? '',
+      granularity,
+      params.from,
+      params.to,
+      filtered2,
+    );
   }
 
-  return buildMetricQueryResult(params.metricId, params.domain ?? "", granularity, params.from, params.to, filtered);
+  return buildMetricQueryResult(
+    params.metricId,
+    params.domain ?? '',
+    granularity,
+    params.from,
+    params.to,
+    filtered,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -108,21 +132,23 @@ export function queryMetric(
 
 export function bulkQueryMetrics(
   params: BulkQueryParams,
-  dataSource: (metricId: string) => MetricDataPoint[]
+  dataSource: (metricId: string) => MetricDataPoint[],
 ): Record<string, MetricQueryResult> {
   const granularity = params.granularity ?? selectGranularity(params.from, params.to);
   const results: Record<string, MetricQueryResult> = {};
 
   for (const metricId of params.metrics) {
     const rawPoints = dataSource(metricId);
-    const filtered = rawPoints.filter(dp => dp.timestamp >= params.from && dp.timestamp <= params.to);
+    const filtered = rawPoints.filter(
+      (dp) => dp.timestamp >= params.from && dp.timestamp <= params.to,
+    );
     results[metricId] = buildMetricQueryResult(
       metricId,
-      params.domain ?? "",
+      params.domain ?? '',
       granularity,
       params.from,
       params.to,
-      filtered
+      filtered,
     );
   }
 
@@ -137,12 +163,12 @@ export interface ComparisonQueryResult {
   current: MetricQueryResult;
   previous: MetricQueryResult;
   changePercent: number;
-  trend: "up" | "down" | "stable";
+  trend: 'up' | 'down' | 'stable';
 }
 
 export function compareMetricPeriods(
   params: MetricQueryParams,
-  dataSource: (from: Date, to: Date) => MetricDataPoint[]
+  dataSource: (from: Date, to: Date) => MetricDataPoint[],
 ): ComparisonQueryResult {
   const granularity = params.granularity ?? selectGranularity(params.from, params.to);
   const rangeDuration = params.to.getTime() - params.from.getTime();
@@ -150,17 +176,37 @@ export function compareMetricPeriods(
   const prevFrom = new Date(params.from.getTime() - rangeDuration);
   const prevTo = new Date(params.to.getTime() - rangeDuration);
 
-  const currentData = dataSource(params.from, params.to).filter(dp => dp.timestamp >= params.from && dp.timestamp <= params.to);
-  const prevData = dataSource(prevFrom, prevTo).filter(dp => dp.timestamp >= prevFrom && dp.timestamp <= prevTo);
+  const currentData = dataSource(params.from, params.to).filter(
+    (dp) => dp.timestamp >= params.from && dp.timestamp <= params.to,
+  );
+  const prevData = dataSource(prevFrom, prevTo).filter(
+    (dp) => dp.timestamp >= prevFrom && dp.timestamp <= prevTo,
+  );
 
-  const current = buildMetricQueryResult(params.metricId, params.domain ?? "", granularity, params.from, params.to, currentData);
-  const previous = buildMetricQueryResult(params.metricId, params.domain ?? "", granularity, prevFrom, prevTo, prevData);
+  const current = buildMetricQueryResult(
+    params.metricId,
+    params.domain ?? '',
+    granularity,
+    params.from,
+    params.to,
+    currentData,
+  );
+  const previous = buildMetricQueryResult(
+    params.metricId,
+    params.domain ?? '',
+    granularity,
+    prevFrom,
+    prevTo,
+    prevData,
+  );
 
-  const changePercent = previous.currentValue !== 0
-    ? ((current.currentValue - previous.currentValue) / previous.currentValue) * 100
-    : 0;
+  const changePercent =
+    previous.currentValue !== 0
+      ? ((current.currentValue - previous.currentValue) / previous.currentValue) * 100
+      : 0;
 
-  const trend: "up" | "down" | "stable" = changePercent > 5 ? "up" : changePercent < -5 ? "down" : "stable";
+  const trend: 'up' | 'down' | 'stable' =
+    changePercent > 5 ? 'up' : changePercent < -5 ? 'down' : 'stable';
 
   return { current, previous, changePercent, trend };
 }
@@ -188,8 +234,8 @@ export function toGraphQLResponse(result: MetricQueryResult): GraphQLMetricRespo
     currentValue: result.currentValue,
     previousValue: result.previousValue ?? null,
     changePercent: result.changePercent ?? null,
-    trend: result.trend ?? "stable",
-    dataPoints: result.dataPoints.map(dp => ({
+    trend: result.trend ?? 'stable',
+    dataPoints: result.dataPoints.map((dp) => ({
       timestamp: dp.timestamp.toISOString(),
       value: dp.value,
       sampleCount: dp.sampleCount,

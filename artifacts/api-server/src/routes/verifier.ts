@@ -1,31 +1,31 @@
-import { randomUUID } from "node:crypto";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { Router, type IRouter, type Request } from "express";
+import { randomUUID } from 'node:crypto';
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  verify,
   defaultVerifierStore,
   VerifierContextSchema,
   VerifierOutputSchema,
-  VerifierTargetSchema,
   type VerifierStoreQuery,
-} from "@workspace/verifier";
-import { authMiddleware, requireRole } from "../middlewares/auth";
+  VerifierTargetSchema,
+  verify,
+} from '@workspace/verifier';
+import { type IRouter, type Request, Router } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess,
-  sendCreated,
   handleRouteError,
-  sendNotFound,
   sendBadRequest,
-} from "../lib/api-response";
-import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+  sendCreated,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-const ALLOWED_TARGET_TYPES = new Set(["plan", "plan_step", "skill_run", "action", "output"]);
-const ALLOWED_OUTCOMES = new Set(["pass", "fail", "warn", "blocked"]);
+const ALLOWED_TARGET_TYPES = new Set(['plan', 'plan_step', 'skill_run', 'action', 'output']);
+const ALLOWED_OUTCOMES = new Set(['pass', 'fail', 'warn', 'blocked']);
 
-const PRIVILEGED_ROLES = new Set(["admin", "super_admin"]);
+const PRIVILEGED_ROLES = new Set(['admin', 'super_admin']);
 
 /**
  * Resolve the org-scope for a request.
@@ -44,7 +44,7 @@ function resolveOrgScope(req: Request): { orgIds: number[] | undefined } {
   if (!user) return { orgIds: [] };
 
   const isPrivileged = user.roles.some((r) => PRIVILEGED_ROLES.has(r));
-  const wantsAllOrgs = String(req.query["allOrgs"] ?? "") === "true";
+  const wantsAllOrgs = String(req.query['allOrgs'] ?? '') === 'true';
   if (isPrivileged && wantsAllOrgs) return { orgIds: undefined };
 
   return { orgIds: user.orgs.map((o) => o.orgId) };
@@ -58,67 +58,74 @@ function resolveSaveOrgId(req: Request, requested: number | null | undefined): n
   if (!user) return null;
   const memberOrgIds = new Set(user.orgs.map((o) => o.orgId));
   // Honor a caller-supplied org id only if the caller is a member.
-  if (typeof requested === "number" && memberOrgIds.has(requested)) return requested;
+  if (typeof requested === 'number' && memberOrgIds.has(requested)) return requested;
   // Otherwise default to the caller's first membership (deterministic).
   return user.orgs[0]?.orgId ?? null;
 }
 
-router.post("/verifier", authMiddleware(), validateBody(bodyShape({
-      "context": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "output": z.unknown().optional(),
-      "persist": z.unknown().optional(),
-      "target": z.unknown().optional(),
-    })), async (req, res) => {
-  try {
-    const body = req.body as {
-      target?: unknown;
-      output?: unknown;
-      context?: unknown;
-      persist?: boolean;
-    };
-    const outputParse = VerifierOutputSchema.safeParse(body.output ?? {});
-    if (!outputParse.success) {
-      sendBadRequest(res, `Invalid output: ${outputParse.error.message}`);
-      return;
-    }
-    const ctxParse = VerifierContextSchema.safeParse(body.context ?? {});
-    if (!ctxParse.success) {
-      sendBadRequest(res, `Invalid context: ${ctxParse.error.message}`);
-      return;
-    }
-
-    // Target is optional — when omitted, generate a synthetic "output"
-    // target so we can use the unified 3-arg engine signature.
-    let target;
-    if (body.target !== undefined) {
-      const t = VerifierTargetSchema.safeParse(body.target);
-      if (!t.success) {
-        sendBadRequest(res, `Invalid target: ${t.error.message}`);
+router.post(
+  '/verifier',
+  authMiddleware(),
+  validateBody(
+    bodyShape({
+      context: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      output: z.unknown().optional(),
+      persist: z.unknown().optional(),
+      target: z.unknown().optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const body = req.body as {
+        target?: unknown;
+        output?: unknown;
+        context?: unknown;
+        persist?: boolean;
+      };
+      const outputParse = VerifierOutputSchema.safeParse(body.output ?? {});
+      if (!outputParse.success) {
+        sendBadRequest(res, `Invalid output: ${outputParse.error.message}`);
         return;
       }
-      target = t.data;
-    } else {
-      target = { targetType: "output" as const, targetId: randomUUID() };
+      const ctxParse = VerifierContextSchema.safeParse(body.context ?? {});
+      if (!ctxParse.success) {
+        sendBadRequest(res, `Invalid context: ${ctxParse.error.message}`);
+        return;
+      }
+
+      // Target is optional — when omitted, generate a synthetic "output"
+      // target so we can use the unified 3-arg engine signature.
+      let target;
+      if (body.target !== undefined) {
+        const t = VerifierTargetSchema.safeParse(body.target);
+        if (!t.success) {
+          sendBadRequest(res, `Invalid target: ${t.error.message}`);
+          return;
+        }
+        target = t.data;
+      } else {
+        target = { targetType: 'output' as const, targetId: randomUUID() };
+      }
+
+      // Stamp the owning org so persisted records can be tenant-scoped on
+      // read. Honors caller-supplied context.orgId only when the caller is
+      // a member of that org; otherwise falls back to their first org.
+      const stampedOrgId = resolveSaveOrgId(req, ctxParse.data.orgId ?? null);
+      const scopedContext = { ...ctxParse.data, orgId: stampedOrgId };
+
+      const decision = verify(outputParse.data, target, scopedContext);
+      if (body.persist !== false) {
+        await defaultVerifierStore.save(decision);
+      }
+      sendCreated(res, decision);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to verify output');
     }
+  },
+);
 
-    // Stamp the owning org so persisted records can be tenant-scoped on
-    // read. Honors caller-supplied context.orgId only when the caller is
-    // a member of that org; otherwise falls back to their first org.
-    const stampedOrgId = resolveSaveOrgId(req, ctxParse.data.orgId ?? null);
-    const scopedContext = { ...ctxParse.data, orgId: stampedOrgId };
-
-    const decision = verify(outputParse.data, target, scopedContext);
-    if (body.persist !== false) {
-      await defaultVerifierStore.save(decision);
-    }
-    sendCreated(res, decision);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to verify output");
-  }
-});
-
-router.get("/verifier", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get('/verifier', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query: VerifierStoreQuery = {};
     if (req.query.targetType) {
@@ -127,7 +134,7 @@ router.get("/verifier", authMiddleware(), validateQuery(listQuerySchema), async 
         sendBadRequest(res, `Invalid targetType: ${t}`);
         return;
       }
-      query.targetType = t as VerifierStoreQuery["targetType"];
+      query.targetType = t as VerifierStoreQuery['targetType'];
     }
     if (req.query.targetId) query.targetId = String(req.query.targetId);
     if (req.query.traceId) query.traceId = String(req.query.traceId);
@@ -138,17 +145,17 @@ router.get("/verifier", authMiddleware(), validateQuery(listQuerySchema), async 
         sendBadRequest(res, `Invalid outcome: ${o}`);
         return;
       }
-      query.outcome = o as VerifierStoreQuery["outcome"];
+      query.outcome = o as VerifierStoreQuery['outcome'];
     }
 
-    const limit = parseInt((req.query.limit as string) ?? "50", 10);
-    const offset = parseInt((req.query.offset as string) ?? "0", 10);
+    const limit = parseInt((req.query.limit as string) ?? '50', 10);
+    const offset = parseInt((req.query.offset as string) ?? '0', 10);
     if (isNaN(limit) || limit < 1 || limit > 500) {
-      sendBadRequest(res, "limit must be between 1 and 500");
+      sendBadRequest(res, 'limit must be between 1 and 500');
       return;
     }
     if (isNaN(offset) || offset < 0) {
-      sendBadRequest(res, "offset must be >= 0");
+      sendBadRequest(res, 'offset must be >= 0');
       return;
     }
     query.limit = limit;
@@ -160,11 +167,11 @@ router.get("/verifier", authMiddleware(), validateQuery(listQuerySchema), async 
     const { items, total } = await defaultVerifierStore.list(query);
     sendSuccess(res, { items, total, limit, offset });
   } catch (err) {
-    handleRouteError(res, err, "Failed to list verifier results");
+    handleRouteError(res, err, 'Failed to list verifier results');
   }
 });
 
-router.get("/verifier/target/:targetType/:targetId", authMiddleware(), async (req, res) => {
+router.get('/verifier/target/:targetType/:targetId', authMiddleware(), async (req, res) => {
   try {
     const targetType = String(req.params.targetType);
     const targetId = String(req.params.targetId);
@@ -174,52 +181,53 @@ router.get("/verifier/target/:targetType/:targetId", authMiddleware(), async (re
     }
     const { orgIds } = resolveOrgScope(req);
     const latest = await defaultVerifierStore.latestForTarget(
-      targetType as "plan" | "plan_step" | "skill_run" | "action" | "output",
+      targetType as 'plan' | 'plan_step' | 'skill_run' | 'action' | 'output',
       targetId,
       { orgIds },
     );
     if (!latest) {
       // Return 404 (not 403) on cross-org access to avoid leaking existence.
-      sendNotFound(res, "No verifier result for target");
+      sendNotFound(res, 'No verifier result for target');
       return;
     }
     sendSuccess(res, latest);
   } catch (err) {
-    handleRouteError(res, err, "Failed to get verifier result for target");
+    handleRouteError(res, err, 'Failed to get verifier result for target');
   }
 });
 
-router.get("/verifier/:id", authMiddleware(), async (req, res) => {
+router.get('/verifier/:id', authMiddleware(), async (req, res) => {
   try {
     const { orgIds } = resolveOrgScope(req);
     const decision = await defaultVerifierStore.get(String(req.params.id), { orgIds });
     if (!decision) {
       // 404 (not 403) on cross-org miss — do not leak record existence.
-      sendNotFound(res, "Verifier result not found");
+      sendNotFound(res, 'Verifier result not found');
       return;
     }
     sendSuccess(res, decision);
   } catch (err) {
-    handleRouteError(res, err, "Failed to get verifier result");
+    handleRouteError(res, err, 'Failed to get verifier result');
   }
 });
 
 router.delete(
-  "/verifier/:id", validateBody(bodyShape({})),
+  '/verifier/:id',
+  validateBody(bodyShape({})),
   authMiddleware(),
-  requireRole("admin", "super_admin"),
+  requireRole('admin', 'super_admin'),
   async (req, res) => {
     try {
       const id = String(req.params.id);
       const { orgIds } = resolveOrgScope(req);
       const deleted = await defaultVerifierStore.delete(id, { orgIds });
       if (!deleted) {
-        sendNotFound(res, "Verifier result not found");
+        sendNotFound(res, 'Verifier result not found');
         return;
       }
       sendSuccess(res, { deleted: id });
     } catch (err) {
-      handleRouteError(res, err, "Failed to delete verifier result");
+      handleRouteError(res, err, 'Failed to delete verifier result');
     }
   },
 );

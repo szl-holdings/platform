@@ -13,4 +13,4 @@
  *   @szl-holdings/auth-shared/mobile   — mobile adapter (Expo / React Native)
  */
 
-export * from "./types.js";
+export * from './types.js';

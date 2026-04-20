@@ -1,6 +1,6 @@
-import * as React from "react";
-import { X, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
-import { cn } from "../utils";
+import { ChevronLeft, ChevronRight, Sparkles, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../utils';
 
 export interface ProductTourStep {
   id: string;
@@ -10,7 +10,7 @@ export interface ProductTourStep {
   icon?: React.ComponentType<{ className?: string }>;
   accentColor?: string;
   tip?: string;
-  placement?: "top" | "bottom" | "left" | "right" | "center";
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'center';
 }
 
 export interface ProductTourProps {
@@ -36,45 +36,45 @@ function getTargetRect(selector: string | undefined): DOMRect | null {
 
 function computeTooltipPosition(
   targetRect: DOMRect | null,
-  placement: ProductTourStep["placement"],
+  placement: ProductTourStep['placement'],
 ) {
-  if (!targetRect || placement === "center") {
+  if (!targetRect || placement === 'center') {
     return {
-      position: "fixed" as const,
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
+      position: 'fixed' as const,
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
     };
   }
 
   const gap = 12;
-  const style: React.CSSProperties = { position: "fixed" };
+  const style: React.CSSProperties = { position: 'fixed' };
 
   switch (placement) {
-    case "bottom":
+    case 'bottom':
       style.top = targetRect.bottom + gap;
       style.left = targetRect.left + targetRect.width / 2;
-      style.transform = "translateX(-50%)";
+      style.transform = 'translateX(-50%)';
       break;
-    case "top":
+    case 'top':
       style.bottom = window.innerHeight - targetRect.top + gap;
       style.left = targetRect.left + targetRect.width / 2;
-      style.transform = "translateX(-50%)";
+      style.transform = 'translateX(-50%)';
       break;
-    case "left":
+    case 'left':
       style.top = targetRect.top + targetRect.height / 2;
       style.right = window.innerWidth - targetRect.left + gap;
-      style.transform = "translateY(-50%)";
+      style.transform = 'translateY(-50%)';
       break;
-    case "right":
+    case 'right':
       style.top = targetRect.top + targetRect.height / 2;
       style.left = targetRect.right + gap;
-      style.transform = "translateY(-50%)";
+      style.transform = 'translateY(-50%)';
       break;
     default:
       style.top = targetRect.bottom + gap;
       style.left = targetRect.left + targetRect.width / 2;
-      style.transform = "translateX(-50%)";
+      style.transform = 'translateX(-50%)';
   }
 
   return style;
@@ -86,7 +86,7 @@ export function ProductTour({
   onComplete,
   onDismiss,
   onStepChange,
-  accentColor: defaultAccent = "#8b7ac8",
+  accentColor: defaultAccent = '#8b7ac8',
   open = true,
 }: ProductTourProps) {
   const [currentStep, setCurrentStep] = React.useState(0);
@@ -115,17 +115,17 @@ export function ProductTour({
       setTargetRect(rect);
       if (rect) {
         const el = document.querySelector(step.target!);
-        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     };
 
     updateRect();
-    window.addEventListener("resize", updateRect);
-    window.addEventListener("scroll", updateRect, true);
+    window.addEventListener('resize', updateRect);
+    window.addEventListener('scroll', updateRect, true);
 
     return () => {
-      window.removeEventListener("resize", updateRect);
-      window.removeEventListener("scroll", updateRect, true);
+      window.removeEventListener('resize', updateRect);
+      window.removeEventListener('scroll', updateRect, true);
     };
   }, [step?.target, visible, currentStep]);
 
@@ -157,13 +157,13 @@ export function ProductTour({
 
   React.useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleDismiss();
-      if (e.key === "ArrowRight") handleNext();
-      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === 'Escape') handleDismiss();
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowLeft') handlePrev();
     };
     if (visible) {
-      window.addEventListener("keydown", handleKey);
-      return () => window.removeEventListener("keydown", handleKey);
+      window.addEventListener('keydown', handleKey);
+      return () => window.removeEventListener('keydown', handleKey);
     }
     return undefined;
   }, [visible, handleDismiss, handleNext, handlePrev]);
@@ -173,7 +173,7 @@ export function ProductTour({
   const accent = step.accentColor || defaultAccent;
   const Icon = step.icon;
   const isLast = currentStep === steps.length - 1;
-  const tooltipStyle = computeTooltipPosition(targetRect, step.placement || "bottom");
+  const tooltipStyle = computeTooltipPosition(targetRect, step.placement || 'bottom');
   const spotlightPad = 8;
 
   return (
@@ -182,7 +182,7 @@ export function ProductTour({
         className="fixed inset-0 z-[9998] pointer-events-auto"
         width="100%"
         height="100%"
-        style={{ transition: "opacity 0.3s" }}
+        style={{ transition: 'opacity 0.3s' }}
         onClick={handleDismiss}
       >
         <defs>
@@ -217,21 +217,21 @@ export function ProductTour({
             width: targetRect.width + spotlightPad * 2,
             height: targetRect.height + spotlightPad * 2,
             boxShadow: `0 0 0 3px ${accent}50, 0 0 20px ${accent}30`,
-            transition: "all 0.3s ease",
+            transition: 'all 0.3s ease',
           }}
         />
       )}
 
       <div
         className={cn(
-          "z-[10000] w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl overflow-hidden pointer-events-auto",
-          visible ? "opacity-100 scale-100" : "opacity-0 scale-95",
+          'z-[10000] w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl overflow-hidden pointer-events-auto',
+          visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
         )}
         style={{
           ...tooltipStyle,
-          transition: "opacity 0.3s, transform 0.3s",
+          transition: 'opacity 0.3s, transform 0.3s',
           boxShadow: `0 0 40px ${accent}15, 0 20px 40px rgba(0,0,0,0.4)`,
-          maxWidth: "380px",
+          maxWidth: '380px',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -269,12 +269,8 @@ export function ProductTour({
             </button>
           </div>
 
-          <h3 className="text-base font-display font-bold text-foreground mb-1.5">
-            {step.title}
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {step.description}
-          </p>
+          <h3 className="text-base font-display font-bold text-foreground mb-1.5">{step.title}</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
 
           {step.tip && (
             <div
@@ -298,10 +294,9 @@ export function ProductTour({
                   onClick={() => setCurrentStep(i)}
                   className="transition-all rounded-full"
                   style={{
-                    width: i === currentStep ? "16px" : "6px",
-                    height: "6px",
-                    backgroundColor:
-                      i === currentStep ? accent : `${accent}30`,
+                    width: i === currentStep ? '16px' : '6px',
+                    height: '6px',
+                    backgroundColor: i === currentStep ? accent : `${accent}30`,
                   }}
                   aria-label={`Go to step ${i + 1}`}
                 />
@@ -324,8 +319,7 @@ export function ProductTour({
                   background: `linear-gradient(135deg, ${accent}, ${accent}cc)`,
                 }}
               >
-                {isLast ? "Finish" : "Next"}{" "}
-                {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
+                {isLast ? 'Finish' : 'Next'} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>

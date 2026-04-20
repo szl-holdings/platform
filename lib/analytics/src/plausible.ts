@@ -1,4 +1,4 @@
-import type { AnalyticsEventName, EventProperties } from "./events";
+import type { AnalyticsEventName, EventProperties } from './events';
 
 export interface PlausibleConfig {
   domain?: string;
@@ -20,27 +20,33 @@ export function configurePlausible(config: PlausibleConfig): void {
 }
 
 function isLocalhost(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   return (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname.startsWith("192.168.")
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.')
   );
 }
 
 function hasPlausible(): boolean {
-  return typeof window !== "undefined" && typeof (window as unknown as Record<string, unknown>)["plausible"] === "function";
+  return (
+    typeof window !== 'undefined' &&
+    typeof (window as unknown as Record<string, unknown>)['plausible'] === 'function'
+  );
 }
 
 function hasGtag(): boolean {
-  return typeof window !== "undefined" && typeof (window as unknown as Record<string, unknown>)["gtag"] === "function";
+  return (
+    typeof window !== 'undefined' &&
+    typeof (window as unknown as Record<string, unknown>)['gtag'] === 'function'
+  );
 }
 
 export function trackEvent(
   eventName: AnalyticsEventName | string,
-  properties?: EventProperties
+  properties?: EventProperties,
 ): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   if (!_config.enabled) return;
   if (isLocalhost() && !_config.trackLocalhost) {
     if (_config.debugMode) {
@@ -55,18 +61,24 @@ export function trackEvent(
 
   if (hasPlausible()) {
     try {
-      (window as unknown as Record<string, (...args: unknown[]) => void>)["plausible"]!(eventName, { props: properties });
+      (window as unknown as Record<string, (...args: unknown[]) => void>)['plausible']!(eventName, {
+        props: properties,
+      });
     } catch (e) {
-      console.warn("[analytics] Plausible error:", e);
+      console.warn('[analytics] Plausible error:', e);
     }
     return;
   }
 
   if (_config.fallbackToGtag && hasGtag()) {
     try {
-      (window as unknown as Record<string, (...args: unknown[]) => void>)["gtag"]!("event", eventName, properties);
+      (window as unknown as Record<string, (...args: unknown[]) => void>)['gtag']!(
+        'event',
+        eventName,
+        properties,
+      );
     } catch (e) {
-      console.warn("[analytics] gtag error:", e);
+      console.warn('[analytics] gtag error:', e);
     }
     return;
   }
@@ -76,12 +88,10 @@ export function trackEvent(
   }
 }
 
-export function trackPageView(properties?: {
-  url?: string;
-  referrer?: string;
-}): void {
-  trackEvent("page_view", {
-    url: properties?.url ?? (typeof window !== "undefined" ? window.location.href : undefined),
-    referrer: properties?.referrer ?? (typeof document !== "undefined" ? document.referrer : undefined),
+export function trackPageView(properties?: { url?: string; referrer?: string }): void {
+  trackEvent('page_view', {
+    url: properties?.url ?? (typeof window !== 'undefined' ? window.location.href : undefined),
+    referrer:
+      properties?.referrer ?? (typeof document !== 'undefined' ? document.referrer : undefined),
   });
 }

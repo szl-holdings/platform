@@ -2,15 +2,15 @@ import {
   promptRegistry as baseRegistry,
   loadActivePrompt,
   loadPromptVersion,
-  renderTemplate,
   type PromptDefinition,
-  type PromptVersion,
   type PromptVariable,
-} from "@szl-holdings/prompt-registry";
-import { PromptRefResolutionError } from "./ref.js";
-import type { PromptRef } from "./ref.js";
+  type PromptVersion,
+  renderTemplate,
+} from '@szl-holdings/prompt-registry';
+import type { PromptRef } from './ref.js';
+import { PromptRefResolutionError } from './ref.js';
 
-export type { PromptDefinition, PromptVersion, PromptVariable };
+export type { PromptDefinition, PromptVariable, PromptVersion };
 
 export interface ResolvedPrompt {
   promptId: string;
@@ -18,14 +18,17 @@ export interface ResolvedPrompt {
   version: number;
   rendered: string;
   systemPrompt?: string;
-  modelHints: PromptVersion["modelHints"];
+  modelHints: PromptVersion['modelHints'];
 }
 
-export function resolvePrompt(promptRef: PromptRef, variables: Record<string, unknown> = {}): ResolvedPrompt {
+export function resolvePrompt(
+  promptRef: PromptRef,
+  variables: Record<string, unknown> = {},
+): ResolvedPrompt {
   const { id, versionConstraint } = promptRef;
 
   try {
-    if (!versionConstraint || versionConstraint === "active" || versionConstraint === "latest") {
+    if (!versionConstraint || versionConstraint === 'active' || versionConstraint === 'latest') {
       const result = loadActivePrompt(id, variables);
       return {
         promptId: id,
@@ -37,7 +40,7 @@ export function resolvePrompt(promptRef: PromptRef, variables: Record<string, un
       };
     }
 
-    const versionId = versionConstraint.startsWith("v")
+    const versionId = versionConstraint.startsWith('v')
       ? `${id}@${versionConstraint}`
       : versionConstraint;
 
@@ -82,7 +85,7 @@ export function registerPrompt(params: {
   template: string;
   systemPrompt?: string;
   variables?: PromptVariable[];
-  modelHints?: PromptVersion["modelHints"];
+  modelHints?: PromptVersion['modelHints'];
   tags?: string[];
   createdBy?: string;
 }): PromptDefinition {

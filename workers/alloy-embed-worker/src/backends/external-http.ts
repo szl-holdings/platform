@@ -1,4 +1,9 @@
-import type { EmbeddingBackend, EmbeddingBackendDescriptor, RawEmbedRequest, RawEmbedResponse } from "./interface.js";
+import type {
+  EmbeddingBackend,
+  EmbeddingBackendDescriptor,
+  RawEmbedRequest,
+  RawEmbedResponse,
+} from './interface.js';
 
 export interface ExternalHttpBackendConfig {
   backendId: string;
@@ -18,19 +23,19 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
 
   constructor(config: ExternalHttpBackendConfig) {
     this.cfg = {
-      embedPath: "/embed",
-      healthPath: "/health",
-      apiKey: "",
+      embedPath: '/embed',
+      healthPath: '/health',
+      apiKey: '',
       ...config,
     };
     this.descriptor = {
       backendId: config.backendId,
       displayName: config.displayName,
-      kind: "external-http",
+      kind: 'external-http',
       supportedModels: [config.model],
       maxTokens: config.maxTokens,
-      defaultPooling: "mean",
-      defaultTruncation: "reject",
+      defaultPooling: 'mean',
+      defaultTruncation: 'reject',
     };
   }
 
@@ -38,15 +43,15 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
     const start = Date.now();
     const url = `${this.cfg.baseUrl}${this.cfg.embedPath}`;
 
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (this.cfg.apiKey) {
-      headers["Authorization"] = `Bearer ${this.cfg.apiKey}`;
+      headers['Authorization'] = `Bearer ${this.cfg.apiKey}`;
     }
 
     let response: Response;
     try {
       response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify({
           texts: req.texts,
@@ -56,12 +61,16 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
         }),
       });
     } catch (err) {
-      throw new Error(`ExternalHttpEmbeddingBackend[${this.cfg.backendId}]: network error: ${String(err)}`);
+      throw new Error(
+        `ExternalHttpEmbeddingBackend[${this.cfg.backendId}]: network error: ${String(err)}`,
+      );
     }
 
     if (!response.ok) {
-      const body = await response.text().catch(() => "<unreadable>");
-      throw new Error(`ExternalHttpEmbeddingBackend[${this.cfg.backendId}]: HTTP ${response.status}: ${body}`);
+      const body = await response.text().catch(() => '<unreadable>');
+      throw new Error(
+        `ExternalHttpEmbeddingBackend[${this.cfg.backendId}]: HTTP ${response.status}: ${body}`,
+      );
     }
 
     const data = (await response.json()) as {

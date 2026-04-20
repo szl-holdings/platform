@@ -12,20 +12,20 @@
  * Source of truth: ontology.md § Entity Snapshots
  */
 
-import type { Domain } from "./domains.js";
-import type { BaseEntity, EntityType } from "./entities.js";
+import type { Domain } from './domains.js';
+import type { BaseEntity, EntityType } from './entities.js';
 
 // ---------------------------------------------------------------------------
 // Snapshot Reasons
 // ---------------------------------------------------------------------------
 
 export const SNAPSHOT_REASONS = [
-  "pre_action",    // captured before a consequential action
-  "post_action",   // captured after a consequential action
-  "scheduled",     // periodic freshness check / world model refresh
-  "triggered",     // triggered by a signal or event
-  "replay",        // captured for incident replay
-  "calibration",   // captured to feed the learning loop
+  'pre_action', // captured before a consequential action
+  'post_action', // captured after a consequential action
+  'scheduled', // periodic freshness check / world model refresh
+  'triggered', // triggered by a signal or event
+  'replay', // captured for incident replay
+  'calibration', // captured to feed the learning loop
 ] as const;
 
 export type SnapshotReason = (typeof SNAPSHOT_REASONS)[number];
@@ -48,10 +48,10 @@ export interface EntitySnapshot<T extends BaseEntity = BaseEntity> {
   orgId: string;
   domain: Domain;
   capturedAt: Date;
-  capturedBy: "system" | "agent" | "human";
+  capturedBy: 'system' | 'agent' | 'human';
   reason: SnapshotReason;
   entity: T;
-  policyVersion: string;           // frozen policy version at capture time
+  policyVersion: string; // frozen policy version at capture time
   simulationRef?: string | undefined; // linked Monte Carlo simulation run ID
   correlationId?: string | undefined; // correlation ID of the triggering signal/action
   metadata?: Record<string, unknown> | undefined;

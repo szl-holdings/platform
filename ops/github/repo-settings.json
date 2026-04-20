@@ -36,18 +36,38 @@
     { "name": "bug", "color": "d73a4a", "description": "Something isn't working" },
     { "name": "enhancement", "color": "0075ca", "description": "New feature or capability" },
     { "name": "documentation", "color": "0075ca", "description": "Documentation improvements" },
-    { "name": "security", "color": "e11d48", "description": "Security issue — use responsible disclosure for vulnerabilities" },
+    {
+      "name": "security",
+      "color": "e11d48",
+      "description": "Security issue — use responsible disclosure for vulnerabilities"
+    },
     { "name": "infrastructure", "color": "7c3aed", "description": "IaC, CI/CD, deployment" },
     { "name": "design", "color": "f59e0b", "description": "UI/UX changes" },
     { "name": "lyte", "color": "0ea5e9", "description": "Lyte Business Observability platform" },
     { "name": "aegis", "color": "ef4444", "description": "Aegis Defense & Intelligence platform" },
-    { "name": "vessels", "color": "06b6d4", "description": "Vessels Maritime Intelligence platform" },
-    { "name": "terra", "color": "10b981", "description": "Terra Real Estate Intelligence platform" },
+    {
+      "name": "vessels",
+      "color": "06b6d4",
+      "description": "Vessels Maritime Intelligence platform"
+    },
+    {
+      "name": "terra",
+      "color": "10b981",
+      "description": "Terra Real Estate Intelligence platform"
+    },
     { "name": "carlota-jo", "color": "8b5cf6", "description": "Carlota Jo Advisory platform" },
     { "name": "alloy", "color": "f97316", "description": "Alloy Execution Fabric" },
-    { "name": "mobile", "color": "14b8a6", "description": "Mobile applications (Expo/React Native)" },
+    {
+      "name": "mobile",
+      "color": "14b8a6",
+      "description": "Mobile applications (Expo/React Native)"
+    },
     { "name": "api", "color": "6366f1", "description": "API server" },
-    { "name": "breaking-change", "color": "b91c1c", "description": "Breaking change requiring major version increment" },
+    {
+      "name": "breaking-change",
+      "color": "b91c1c",
+      "description": "Breaking change requiring major version increment"
+    },
     { "name": "needs-triage", "color": "94a3b8", "description": "Awaiting prioritization" }
   ]
 }

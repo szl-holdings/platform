@@ -1,7 +1,7 @@
-import { randomUUID } from "crypto";
-import { logger } from "./logger.js";
-import { serverTelemetry } from "@szl-holdings/observability";
-import type { WsPublishFn } from "./job-queue.js";
+import { serverTelemetry } from '@szl-holdings/observability';
+import { randomUUID } from 'crypto';
+import type { WsPublishFn } from './job-queue.js';
+import { logger } from './logger.js';
 
 /**
  * Job status lifecycle:
@@ -17,8 +17,15 @@ import type { WsPublishFn } from "./job-queue.js";
  * (with backoff) until maxRetries is exhausted, then → dead_letter. Use
  * dead_letter for terminal failure visibility and DLQ dashboard queries.
  */
-export type JobStatus = "pending" | "running" | "completed" | "failed" | "dead_letter" | "cancelled" | "waiting";
-export type JobPriority = "critical" | "high" | "normal" | "low";
+export type JobStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'dead_letter'
+  | 'cancelled'
+  | 'waiting';
+export type JobPriority = 'critical' | 'high' | 'normal' | 'low';
 
 const PRIORITY_VALUES: Record<JobPriority, number> = {
   critical: 10,
@@ -72,7 +79,10 @@ export interface QueueConfig {
 }
 
 export type AnyPool = {
-  query: (text: string, values?: unknown[]) => Promise<{ rows: Record<string, unknown>[]; rowCount: number | null }>;
+  query: (
+    text: string,
+    values?: unknown[],
+  ) => Promise<{ rows: Record<string, unknown>[]; rowCount: number | null }>;
 };
 
 const DEFAULT_QUEUE_CONFIGS: Record<string, QueueConfig> = {
@@ -103,7 +113,7 @@ export class DurableJobQueue {
 
   private async getPool(): Promise<AnyPool> {
     if (!this.pool) {
-      const dbModule = await import("@szl-holdings/db");
+      const dbModule = await import('@szl-holdings/db');
       this.pool = dbModule.pool as unknown as AnyPool;
     }
     return this.pool;
@@ -119,7 +129,7 @@ export class DurableJobQueue {
 
   register<T>(type: string, handler: JobHandler<T>): void {
     this.handlers.set(type, handler as JobHandler);
-    logger.debug({ type }, "DurableJobQueue: handler registered");
+    logger.debug({ type }, 'DurableJobQueue: handler registered');
   }
 
   async enqueue<T>(
@@ -130,14 +140,14 @@ export class DurableJobQueue {
     const pool = await this.getPool();
 
     const jobId = `${type}-${Date.now()}-${randomUUID().slice(0, 8)}`;
-    const queue = options.queue ?? "default";
-    const priorityStr = options.priority ?? "normal";
+    const queue = options.queue ?? 'default';
+    const priorityStr = options.priority ?? 'normal';
     const priorityValue = PRIORITY_VALUES[priorityStr] ?? 50;
     const maxRetries = options.maxRetries ?? 3;
     const retryDelayMs = options.retryDelayMs ?? 1000;
     const scheduledAt = options.scheduledAt ?? new Date();
     const dependsOn = options.dependsOn ?? [];
-    const status: JobStatus = dependsOn.length > 0 ? "waiting" : "pending";
+    const status: JobStatus = dependsOn.length > 0 ? 'waiting' : 'pending';
 
     const result = await pool.query(
       `INSERT INTO durable_jobs
@@ -146,18 +156,26 @@ export class DurableJobQueue {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
        RETURNING *`,
       [
-        jobId, type, queue, priorityValue,
-        JSON.stringify(payload), status, maxRetries, retryDelayMs,
-        scheduledAt, options.parentJobId ?? null,
-        JSON.stringify(dependsOn), JSON.stringify(options.metadata ?? {}),
+        jobId,
+        type,
+        queue,
+        priorityValue,
+        JSON.stringify(payload),
+        status,
+        maxRetries,
+        retryDelayMs,
+        scheduledAt,
+        options.parentJobId ?? null,
+        JSON.stringify(dependsOn),
+        JSON.stringify(options.metadata ?? {}),
       ],
     );
 
     const job = this.rawRowToJob<T>(result.rows[0]!);
 
-    logger.debug({ jobId, type, queue, priority: priorityStr }, "DurableJobQueue: job enqueued");
+    logger.debug({ jobId, type, queue, priority: priorityStr }, 'DurableJobQueue: job enqueued');
 
-    this.publishFn?.("job-queue", "enqueued", { id: jobId, type, queue, status });
+    this.publishFn?.('job-queue', 'enqueued', { id: jobId, type, queue, status });
 
     if (this.isRunning) {
       setImmediate(() => this.pollQueue(queue));
@@ -177,8 +195,8 @@ export class DurableJobQueue {
       const intervalMs = config.pollIntervalMs ?? 2000;
       const timer = setInterval(() => {
         if (!this.isShuttingDown) {
-          this.pollQueue(queueName).catch(err => {
-            logger.warn({ err, queue: queueName }, "DurableJobQueue: poll error");
+          this.pollQueue(queueName).catch((err) => {
+            logger.warn({ err, queue: queueName }, 'DurableJobQueue: poll error');
           });
         }
       }, intervalMs);
@@ -186,12 +204,15 @@ export class DurableJobQueue {
     }
 
     this.heartbeatTimer = setInterval(() => {
-      this.updateHeartbeats().catch(err => {
-        logger.warn({ err }, "DurableJobQueue: heartbeat update failed");
+      this.updateHeartbeats().catch((err) => {
+        logger.warn({ err }, 'DurableJobQueue: heartbeat update failed');
       });
     }, 15_000);
 
-    logger.info({ workerId: this.workerId, queues: [...this.queueConfigs.keys()] }, "DurableJobQueue: started");
+    logger.info(
+      { workerId: this.workerId, queues: [...this.queueConfigs.keys()] },
+      'DurableJobQueue: started',
+    );
   }
 
   private async recoverStaleJobs(): Promise<void> {
@@ -206,10 +227,10 @@ export class DurableJobQueue {
 
       const recovered = result.rowCount ?? 0;
       if (recovered > 0) {
-        logger.info({ recovered }, "DurableJobQueue: recovered orphaned running jobs on startup");
+        logger.info({ recovered }, 'DurableJobQueue: recovered orphaned running jobs on startup');
       }
     } catch (err) {
-      logger.warn({ err }, "DurableJobQueue: stale job recovery failed (non-fatal)");
+      logger.warn({ err }, 'DurableJobQueue: stale job recovery failed (non-fatal)');
     }
   }
 
@@ -240,14 +261,14 @@ export class DurableJobQueue {
            )`,
       );
     } catch (err) {
-      logger.warn({ err }, "DurableJobQueue: waiting job resolution failed (non-fatal)");
+      logger.warn({ err }, 'DurableJobQueue: waiting job resolution failed (non-fatal)');
     }
   }
 
   private async pollQueue(queueName: string): Promise<void> {
     if (this.isShuttingDown) return;
 
-    const config = this.queueConfigs.get(queueName) ?? DEFAULT_QUEUE_CONFIGS["default"]!;
+    const config = this.queueConfigs.get(queueName) ?? DEFAULT_QUEUE_CONFIGS['default']!;
     const currentConcurrency = this.queueConcurrency.get(queueName) ?? 0;
 
     if (currentConcurrency >= config.concurrency) return;
@@ -285,19 +306,21 @@ export class DurableJobQueue {
 
         this.queueConcurrency.set(queueName, (this.queueConcurrency.get(queueName) ?? 0) + 1);
 
-        const execution = this.executeJob(job, runId, pool)
-          .finally(() => {
-            this.queueConcurrency.set(queueName, Math.max(0, (this.queueConcurrency.get(queueName) ?? 1) - 1));
-            this.activeJobs.delete(job.id);
-            if (!this.isShuttingDown) {
-              setImmediate(() => this.pollQueue(queueName));
-            }
-          });
+        const execution = this.executeJob(job, runId, pool).finally(() => {
+          this.queueConcurrency.set(
+            queueName,
+            Math.max(0, (this.queueConcurrency.get(queueName) ?? 1) - 1),
+          );
+          this.activeJobs.delete(job.id);
+          if (!this.isShuttingDown) {
+            setImmediate(() => this.pollQueue(queueName));
+          }
+        });
 
         this.activeJobs.set(job.id, execution);
       }
     } catch (err) {
-      logger.warn({ err, queue: queueName }, "DurableJobQueue: poll failed");
+      logger.warn({ err, queue: queueName }, 'DurableJobQueue: poll failed');
     }
   }
 
@@ -308,7 +331,7 @@ export class DurableJobQueue {
        RETURNING id`,
       [job.id, job.retryCount + 1, this.workerId],
     );
-    return result.rows[0]!["id"] as number;
+    return result.rows[0]!['id'] as number;
   }
 
   private async executeJob(job: DurableJob, runId: number, pool: AnyPool): Promise<void> {
@@ -316,7 +339,13 @@ export class DurableJobQueue {
     const start = Date.now();
 
     if (!handler) {
-      await this.handleFailure(job, runId, pool, new Error(`No handler registered for job type: ${job.type}`), start);
+      await this.handleFailure(
+        job,
+        runId,
+        pool,
+        new Error(`No handler registered for job type: ${job.type}`),
+        start,
+      );
       return;
     }
 
@@ -328,10 +357,9 @@ export class DurableJobQueue {
         logger.info({ jobId: job.id, jobType: job.type, ...data }, `[job] ${msg}`);
       },
       heartbeat: async () => {
-        await pool.query(
-          `UPDATE durable_jobs SET last_heartbeat_at = NOW() WHERE job_id = $1`,
-          [job.id],
-        );
+        await pool.query(`UPDATE durable_jobs SET last_heartbeat_at = NOW() WHERE job_id = $1`, [
+          job.id,
+        ]);
       },
     };
 
@@ -350,17 +378,17 @@ export class DurableJobQueue {
         [durationMs, runId],
       );
 
-      logger.debug({ jobId: job.id, type: job.type, durationMs }, "DurableJobQueue: job completed");
+      logger.debug({ jobId: job.id, type: job.type, durationMs }, 'DurableJobQueue: job completed');
 
       serverTelemetry.recordBusinessEvent({
-        type: "job_completed",
+        type: 'job_completed',
         domain: job.type,
         durationMs,
         success: true,
         metadata: { jobId: job.id, queue: job.queue },
       });
 
-      this.publishFn?.("job-queue", "completed", { id: job.id, type: job.type, durationMs });
+      this.publishFn?.('job-queue', 'completed', { id: job.id, type: job.type, durationMs });
 
       await this.resolveWaitingJobs();
     } catch (err) {
@@ -385,7 +413,7 @@ export class DurableJobQueue {
     );
 
     if (newRetryCount <= job.maxRetries) {
-      const backoffMs = Math.min(job.retryDelayMs * Math.pow(2, newRetryCount - 1), 300_000);
+      const backoffMs = Math.min(job.retryDelayMs * 2 ** (newRetryCount - 1), 300_000);
       const retryAt = new Date(Date.now() + backoffMs);
 
       await pool.query(
@@ -396,10 +424,13 @@ export class DurableJobQueue {
         [newRetryCount, retryAt, errorMsg, job.id],
       );
 
-      logger.warn({ jobId: job.id, type: job.type, attempt: newRetryCount, backoffMs, err }, "DurableJobQueue: job failed, retrying");
+      logger.warn(
+        { jobId: job.id, type: job.type, attempt: newRetryCount, backoffMs, err },
+        'DurableJobQueue: job failed, retrying',
+      );
 
       serverTelemetry.recordBusinessEvent({
-        type: "job_retry",
+        type: 'job_retry',
         domain: job.type,
         success: false,
         metadata: { jobId: job.id, attempt: newRetryCount, error: errorMsg },
@@ -414,19 +445,35 @@ export class DurableJobQueue {
         `INSERT INTO dead_letter_queue
            (original_job_id, type, queue, payload, error, retry_count, max_retries, failed_at, first_failed_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-        [job.id, job.type, job.queue, JSON.stringify(job.payload), errorMsg, newRetryCount - 1, job.maxRetries],
+        [
+          job.id,
+          job.type,
+          job.queue,
+          JSON.stringify(job.payload),
+          errorMsg,
+          newRetryCount - 1,
+          job.maxRetries,
+        ],
       );
 
-      logger.error({ jobId: job.id, type: job.type, err }, "DurableJobQueue: job dead-lettered after max retries");
+      logger.error(
+        { jobId: job.id, type: job.type, err },
+        'DurableJobQueue: job dead-lettered after max retries',
+      );
 
       serverTelemetry.recordBusinessEvent({
-        type: "job_failed",
+        type: 'job_failed',
         domain: job.type,
         success: false,
-        metadata: { jobId: job.id, error: errorMsg, retries: newRetryCount - 1, deadLettered: true },
+        metadata: {
+          jobId: job.id,
+          error: errorMsg,
+          retries: newRetryCount - 1,
+          deadLettered: true,
+        },
       });
 
-      this.publishFn?.("job-queue", "dead_letter", { id: job.id, type: job.type, error: errorMsg });
+      this.publishFn?.('job-queue', 'dead_letter', { id: job.id, type: job.type, error: errorMsg });
 
       await this.resolveWaitingJobs();
     }
@@ -453,7 +500,10 @@ export class DurableJobQueue {
     deadLetter: number;
     waiting: number;
     byQueue: Record<string, { pending: number; running: number }>;
-    byType: Record<string, { total: number; completed: number; failed: number; avgDurationMs: number }>;
+    byType: Record<
+      string,
+      { total: number; completed: number; failed: number; avgDurationMs: number }
+    >;
     throughputPerMinute: number;
     failureRate: number;
   }> {
@@ -484,24 +534,27 @@ export class DurableJobQueue {
 
     const statusMap: Record<string, number> = {};
     for (const row of statusResult.rows) {
-      statusMap[row["status"] as string] = parseInt(row["count"] as string, 10);
+      statusMap[row['status'] as string] = parseInt(row['count'] as string, 10);
     }
 
     const byQueue: Record<string, { pending: number; running: number }> = {};
     for (const row of queueResult.rows) {
-      const q = row["queue"] as string;
+      const q = row['queue'] as string;
       if (!byQueue[q]) byQueue[q] = { pending: 0, running: 0 };
-      const st = row["status"] as "pending" | "running";
-      byQueue[q]![st] = parseInt(row["count"] as string, 10);
+      const st = row['status'] as 'pending' | 'running';
+      byQueue[q]![st] = parseInt(row['count'] as string, 10);
     }
 
-    const byType: Record<string, { total: number; completed: number; failed: number; avgDurationMs: number }> = {};
+    const byType: Record<
+      string,
+      { total: number; completed: number; failed: number; avgDurationMs: number }
+    > = {};
     for (const row of typeResult.rows) {
-      byType[row["type"] as string] = {
-        total: parseInt(row["total"] as string, 10),
-        completed: parseInt(row["completed"] as string, 10),
-        failed: parseInt(row["failed"] as string, 10),
-        avgDurationMs: parseFloat((row["avg_duration_ms"] as string | null) ?? "0"),
+      byType[row['type'] as string] = {
+        total: parseInt(row['total'] as string, 10),
+        completed: parseInt(row['completed'] as string, 10),
+        failed: parseInt(row['failed'] as string, 10),
+        avgDurationMs: parseFloat((row['avg_duration_ms'] as string | null) ?? '0'),
       };
     }
 
@@ -510,20 +563,26 @@ export class DurableJobQueue {
     const failureRate = total24h > 0 ? (failed24h / total24h) * 100 : 0;
 
     return {
-      pending: statusMap["pending"] ?? 0,
-      running: statusMap["running"] ?? 0,
-      completed: statusMap["completed"] ?? 0,
-      failed: statusMap["failed"] ?? 0,
-      deadLetter: statusMap["dead_letter"] ?? 0,
-      waiting: statusMap["waiting"] ?? 0,
+      pending: statusMap['pending'] ?? 0,
+      running: statusMap['running'] ?? 0,
+      completed: statusMap['completed'] ?? 0,
+      failed: statusMap['failed'] ?? 0,
+      deadLetter: statusMap['dead_letter'] ?? 0,
+      waiting: statusMap['waiting'] ?? 0,
       byQueue,
       byType,
-      throughputPerMinute: parseInt((throughputResult.rows[0]?.["count"] as string | undefined) ?? "0", 10),
+      throughputPerMinute: parseInt(
+        (throughputResult.rows[0]?.['count'] as string | undefined) ?? '0',
+        10,
+      ),
       failureRate,
     };
   }
 
-  async getRecentJobs(limit = 20, filter?: { status?: JobStatus; type?: string; queue?: string }): Promise<DurableJob[]> {
+  async getRecentJobs(
+    limit = 20,
+    filter?: { status?: JobStatus; type?: string; queue?: string },
+  ): Promise<DurableJob[]> {
     const pool = await this.getPool();
 
     let query = `SELECT * FROM durable_jobs WHERE 1=1`;
@@ -547,7 +606,7 @@ export class DurableJobQueue {
     params.push(limit);
 
     const result = await pool.query(query, params);
-    return result.rows.map(r => this.rawRowToJob(r));
+    return result.rows.map((r) => this.rawRowToJob(r));
   }
 
   async getDeadLetterQueue(limit = 50): Promise<unknown[]> {
@@ -570,15 +629,11 @@ export class DurableJobQueue {
     }
     const dlq = result.rows[0]!;
 
-    const newJob = await this.enqueue(
-      dlq["type"] as string,
-      dlq["payload"],
-      {
-        queue: dlq["queue"] as string,
-        maxRetries: dlq["max_retries"] as number,
-        metadata: { replayedFrom: originalJobId },
-      },
-    );
+    const newJob = await this.enqueue(dlq['type'] as string, dlq['payload'], {
+      queue: dlq['queue'] as string,
+      maxRetries: dlq['max_retries'] as number,
+      metadata: { replayedFrom: originalJobId },
+    });
 
     await pool.query(
       `UPDATE dead_letter_queue SET resolved_at = NOW(), resolution = $1 WHERE original_job_id = $2`,
@@ -604,10 +659,7 @@ export class DurableJobQueue {
 
   async getJob(jobId: string): Promise<DurableJob | null> {
     const pool = await this.getPool();
-    const result = await pool.query(
-      `SELECT * FROM durable_jobs WHERE job_id = $1`,
-      [jobId],
-    );
+    const result = await pool.query(`SELECT * FROM durable_jobs WHERE job_id = $1`, [jobId]);
     if (result.rows.length === 0) return null;
     return this.rawRowToJob(result.rows[0]!);
   }
@@ -627,51 +679,64 @@ export class DurableJobQueue {
     const start = Date.now();
 
     while (this.activeJobs.size > 0 && Date.now() - start < maxWaitMs) {
-      logger.info({ remaining: this.activeJobs.size }, "DurableJobQueue: draining active jobs...");
+      logger.info({ remaining: this.activeJobs.size }, 'DurableJobQueue: draining active jobs...');
       await Promise.race([
         Promise.allSettled([...this.activeJobs.values()]),
-        new Promise<void>(r => setTimeout(r, 1000)),
+        new Promise<void>((r) => setTimeout(r, 1000)),
       ]);
     }
 
     if (this.activeJobs.size > 0) {
-      logger.warn({ remaining: this.activeJobs.size }, "DurableJobQueue: shutdown with remaining jobs — they will be recovered on next startup");
+      logger.warn(
+        { remaining: this.activeJobs.size },
+        'DurableJobQueue: shutdown with remaining jobs — they will be recovered on next startup',
+      );
     }
 
-    logger.info("DurableJobQueue: shutdown complete");
+    logger.info('DurableJobQueue: shutdown complete');
   }
 
   private rawRowToJob<T = unknown>(row: Record<string, unknown>): DurableJob<T> {
-    const id = (row["job_id"] ?? row["jobId"]) as string;
-    const payloadRaw = row["payload"];
-    const payload = typeof payloadRaw === "string" ? JSON.parse(payloadRaw) as T : payloadRaw as T;
-    const dependsOnRaw = row["depends_on"] ?? row["dependsOn"];
+    const id = (row['job_id'] ?? row['jobId']) as string;
+    const payloadRaw = row['payload'];
+    const payload =
+      typeof payloadRaw === 'string' ? (JSON.parse(payloadRaw) as T) : (payloadRaw as T);
+    const dependsOnRaw = row['depends_on'] ?? row['dependsOn'];
     const dependsOn = Array.isArray(dependsOnRaw)
-      ? dependsOnRaw as string[]
-      : typeof dependsOnRaw === "string"
-        ? JSON.parse(dependsOnRaw) as string[]
+      ? (dependsOnRaw as string[])
+      : typeof dependsOnRaw === 'string'
+        ? (JSON.parse(dependsOnRaw) as string[])
         : [];
-    const metaRaw = row["metadata"];
-    const metadata = typeof metaRaw === "string" ? JSON.parse(metaRaw) as Record<string, unknown> : (metaRaw as Record<string, unknown> | null) ?? {};
+    const metaRaw = row['metadata'];
+    const metadata =
+      typeof metaRaw === 'string'
+        ? (JSON.parse(metaRaw) as Record<string, unknown>)
+        : ((metaRaw as Record<string, unknown> | null) ?? {});
 
     return {
       id,
-      type: row["type"] as string,
-      queue: (row["queue"] as string | null) ?? "default",
-      priority: (row["priority"] as number | null) ?? 50,
+      type: row['type'] as string,
+      queue: (row['queue'] as string | null) ?? 'default',
+      priority: (row['priority'] as number | null) ?? 50,
       payload,
-      status: row["status"] as JobStatus,
-      retryCount: (row["retry_count"] as number | null) ?? (row["retryCount"] as number | null) ?? 0,
-      maxRetries: (row["max_retries"] as number | null) ?? (row["maxRetries"] as number | null) ?? 3,
-      retryDelayMs: (row["retry_delay_ms"] as number | null) ?? (row["retryDelayMs"] as number | null) ?? 1000,
-      scheduledAt: new Date((row["scheduled_at"] ?? row["scheduledAt"]) as string),
-      startedAt: row["started_at"] ? new Date(row["started_at"] as string) : undefined,
-      completedAt: row["completed_at"] ? new Date(row["completed_at"] as string) : undefined,
-      error: (row["error"] as string | null) ?? undefined,
-      parentJobId: (row["parent_job_id"] as string | null) ?? (row["parentJobId"] as string | null) ?? undefined,
+      status: row['status'] as JobStatus,
+      retryCount:
+        (row['retry_count'] as number | null) ?? (row['retryCount'] as number | null) ?? 0,
+      maxRetries:
+        (row['max_retries'] as number | null) ?? (row['maxRetries'] as number | null) ?? 3,
+      retryDelayMs:
+        (row['retry_delay_ms'] as number | null) ?? (row['retryDelayMs'] as number | null) ?? 1000,
+      scheduledAt: new Date((row['scheduled_at'] ?? row['scheduledAt']) as string),
+      startedAt: row['started_at'] ? new Date(row['started_at'] as string) : undefined,
+      completedAt: row['completed_at'] ? new Date(row['completed_at'] as string) : undefined,
+      error: (row['error'] as string | null) ?? undefined,
+      parentJobId:
+        (row['parent_job_id'] as string | null) ??
+        (row['parentJobId'] as string | null) ??
+        undefined,
       dependsOn,
       metadata,
-      createdAt: new Date((row["created_at"] ?? row["createdAt"]) as string),
+      createdAt: new Date((row['created_at'] ?? row['createdAt']) as string),
     };
   }
 }

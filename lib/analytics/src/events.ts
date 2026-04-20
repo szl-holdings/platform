@@ -1,16 +1,16 @@
 export const ANALYTICS_EVENTS = [
-  "page_view",
-  "cta_click",
-  "form_submit",
-  "demo_request",
-  "access_request",
-  "private_inquiry_submit",
-  "sign_in",
-  "sign_up",
-  "dashboard_view",
-  "article_view",
-  "checkout_started",
-  "checkout_completed",
+  'page_view',
+  'cta_click',
+  'form_submit',
+  'demo_request',
+  'access_request',
+  'private_inquiry_submit',
+  'sign_in',
+  'sign_up',
+  'dashboard_view',
+  'article_view',
+  'checkout_started',
+  'checkout_completed',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number];

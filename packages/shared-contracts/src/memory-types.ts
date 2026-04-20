@@ -20,7 +20,7 @@
  * - `governance` — Policy-sensitive data; profile versions, approval records, overrides.
  *                  Writes to this scope require policy approval in strict mode.
  */
-export type MemoryScope = "working" | "episodic" | "semantic" | "governance";
+export type MemoryScope = 'working' | 'episodic' | 'semantic' | 'governance';
 
 export interface MemoryEntry<T = unknown> {
   memoryId: string;

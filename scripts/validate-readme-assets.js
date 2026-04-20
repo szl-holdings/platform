@@ -20,16 +20,14 @@
  *   --readme <path>   Path to the root README to validate (default: README.md)
  */
 
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
 
 const ROOT = process.cwd();
 const args = process.argv.slice(2);
-const readmeArgIndex = args.indexOf("--readme");
+const readmeArgIndex = args.indexOf('--readme');
 const README_PATH =
-  readmeArgIndex !== -1 && args[readmeArgIndex + 1]
-    ? args[readmeArgIndex + 1]
-    : "README.md";
+  readmeArgIndex !== -1 && args[readmeArgIndex + 1] ? args[readmeArgIndex + 1] : 'README.md';
 
 const errors = [];
 
@@ -40,13 +38,13 @@ const errors = [];
 function stripCodeBlocks(content) {
   // Remove fenced code blocks (``` or ~~~), optionally indented up to 3 spaces,
   // with optional language specifier after the fence marker.
-  content = content.replace(/^ {0,3}(`{3,})[^\n]*\n[\s\S]*?^ {0,3}\1/gm, "");
-  content = content.replace(/^ {0,3}(~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1/gm, "");
+  content = content.replace(/^ {0,3}(`{3,})[^\n]*\n[\s\S]*?^ {0,3}\1/gm, '');
+  content = content.replace(/^ {0,3}(~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1/gm, '');
   // Remove indented code blocks (4+ spaces or tab at line start)
-  content = content.replace(/^( {4}|\t).+/gm, "");
+  content = content.replace(/^( {4}|\t).+/gm, '');
   // Remove inline code spans (single or double backticks)
-  content = content.replace(/``[^`]+``/g, "``");
-  content = content.replace(/`[^`\n]+`/g, "``");
+  content = content.replace(/``[^`]+``/g, '``');
+  content = content.replace(/`[^`\n]+`/g, '``');
   return content;
 }
 
@@ -67,7 +65,7 @@ function checkLocalPath(ref, fromFile) {
   const actual = realCasePath(resolved);
   if (actual !== resolved) {
     errors.push(
-      `CASE MISMATCH: referenced as "${relative}" but actual path is "${path.relative(ROOT, actual)}" (from ${fromFile})`
+      `CASE MISMATCH: referenced as "${relative}" but actual path is "${path.relative(ROOT, actual)}" (from ${fromFile})`,
     );
   }
 }
@@ -104,7 +102,7 @@ function extractImageRefs(content) {
   const mdImgRe = /!\[[^\]]*\]\(([^)]+)\)/g;
   let m;
   while ((m = mdImgRe.exec(content)) !== null) {
-    refs.push(m[1].split(" ")[0].trim());
+    refs.push(m[1].split(' ')[0].trim());
   }
 
   const htmlImgRe = /<img\s[^>]*src=["']([^"']+)["'][^>]*>/gi;
@@ -124,12 +122,12 @@ function extractLocalMdLinks(content) {
   const mdLinkRe = /\[([^\]]*)\]\(([^)]+)\)/g;
   let m;
   while ((m = mdLinkRe.exec(content)) !== null) {
-    const href = m[2].split(" ")[0].trim();
+    const href = m[2].split(' ')[0].trim();
     if (
-      !href.startsWith("http") &&
-      !href.startsWith("#") &&
-      href.endsWith(".md") &&
-      !href.includes("://")
+      !href.startsWith('http') &&
+      !href.startsWith('#') &&
+      href.endsWith('.md') &&
+      !href.includes('://')
     ) {
       links.push(href);
     }
@@ -147,10 +145,10 @@ function checkBadgeWorkflows(content, fromFile) {
   let m;
   while ((m = badgeWorkflowRe.exec(content)) !== null) {
     const workflowFile = m[1];
-    const workflowPath = path.join(ROOT, ".github", "workflows", workflowFile);
+    const workflowPath = path.join(ROOT, '.github', 'workflows', workflowFile);
     if (!fs.existsSync(workflowPath)) {
       errors.push(
-        `MISSING WORKFLOW: badge references ".github/workflows/${workflowFile}" which does not exist (from ${fromFile})`
+        `MISSING WORKFLOW: badge references ".github/workflows/${workflowFile}" which does not exist (from ${fromFile})`,
       );
     }
   }
@@ -172,27 +170,22 @@ function scanMarkdownFile(filePath, fromFile) {
     return;
   }
 
-  const rawContent = fs.readFileSync(absPath, "utf8");
+  const rawContent = fs.readFileSync(absPath, 'utf8');
   const content = stripCodeBlocks(rawContent);
   const imageRefs = extractImageRefs(content);
 
   for (const ref of imageRefs) {
-    if (ref.startsWith("http://localhost") || ref.startsWith("http://127.")) {
+    if (ref.startsWith('http://localhost') || ref.startsWith('http://127.')) {
+      errors.push(`LOCALHOST URL: "${ref}" in ${filePath} — local URLs will not render on GitHub`);
+      continue;
+    }
+    if (ref.includes('replit.com') && (ref.includes('/blob/') || ref.includes('temp-upload'))) {
       errors.push(
-        `LOCALHOST URL: "${ref}" in ${filePath} — local URLs will not render on GitHub`
+        `EXTERNAL TEMP URL: "${ref}" in ${filePath} — Replit temp/blob URLs are not stable`,
       );
       continue;
     }
-    if (
-      ref.includes("replit.com") &&
-      (ref.includes("/blob/") || ref.includes("temp-upload"))
-    ) {
-      errors.push(
-        `EXTERNAL TEMP URL: "${ref}" in ${filePath} — Replit temp/blob URLs are not stable`
-      );
-      continue;
-    }
-    if (!ref.startsWith("http")) {
+    if (!ref.startsWith('http')) {
       checkLocalPath(ref, filePath);
     }
   }
@@ -212,7 +205,7 @@ if (!fs.existsSync(absReadme)) {
 scanMarkdownFile(README_PATH, null);
 
 // Follow direct local .md links from the root README (depth 1 only)
-const rootRaw = fs.readFileSync(absReadme, "utf8");
+const rootRaw = fs.readFileSync(absReadme, 'utf8');
 const rootContent = stripCodeBlocks(rootRaw);
 const linkedMdFiles = extractLocalMdLinks(rootContent);
 
@@ -229,17 +222,17 @@ for (const link of linkedMdFiles) {
 }
 
 if (errors.length > 0) {
-  console.error("\nREADME asset validation FAILED:\n");
+  console.error('\nREADME asset validation FAILED:\n');
   for (const e of errors) {
     console.error(`  x ${e}`);
   }
   console.error(
-    `\n${errors.length} error(s) found. Fix the issues above and re-run: pnpm readme:check\n`
+    `\n${errors.length} error(s) found. Fix the issues above and re-run: pnpm readme:check\n`,
   );
   process.exit(1);
 } else {
   console.log(
-    `\nREADME asset validation passed (${README_PATH}). No broken images or missing badge workflows found.\n`
+    `\nREADME asset validation passed (${README_PATH}). No broken images or missing badge workflows found.\n`,
   );
   process.exit(0);
 }

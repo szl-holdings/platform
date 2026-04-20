@@ -1,14 +1,14 @@
-import type { Router, Request, Response } from "express";
-import { IngestRequestSchema } from "@workspace/aef-contracts";
-import { getRequestId } from "../middleware/request-id.js";
-import { getTenantId } from "../middleware/tenant.js";
-import { storageBundle, tenantEnforcer, policyEngine, defaultLedgerStore } from "../context.js";
-import { logger } from "../logger.js";
-import type { PolicyContext } from "@workspace/aef-policy-guard";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
+import { IngestRequestSchema } from '@workspace/aef-contracts';
+import type { PolicyContext } from '@workspace/aef-policy-guard';
+import type { Request, Response, Router } from 'express';
+import { defaultLedgerStore, policyEngine, storageBundle, tenantEnforcer } from '../context.js';
+import { logger } from '../logger.js';
+import { getRequestId } from '../middleware/request-id.js';
+import { getTenantId } from '../middleware/tenant.js';
 
 const EMBED_DIMS = 768;
-const EMBED_MODEL = "aef-embed-cpu-v1";
+const EMBED_MODEL = 'aef-embed-cpu-v1';
 
 /**
  * Deterministic CPU embedding — unit-length vector for cosine ANN search.
@@ -29,16 +29,16 @@ function splitIntoChunks(text: string, chunkSize: number, chunkOverlap: number):
   const stride = Math.max(1, chunkSize - chunkOverlap);
   const chunks: string[] = [];
   for (let i = 0; i < words.length; i += stride) {
-    chunks.push(words.slice(i, i + chunkSize).join(" "));
+    chunks.push(words.slice(i, i + chunkSize).join(' '));
   }
   return chunks;
 }
 
 export function registerIngestRoute(router: Router): void {
-  router.post("/v1/ingest", async (req: Request, res: Response) => {
+  router.post('/v1/ingest', async (req: Request, res: Response) => {
     const parsed = IngestRequestSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "validation_error", issues: parsed.error.issues });
+      res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });
       return;
     }
 
@@ -52,7 +52,7 @@ export function registerIngestRoute(router: Router): void {
     const tenantDecision = tenantEnforcer.enforce(policyCtx);
     if (tenantDecision !== null && !tenantDecision.allow) {
       res.status(403).json({
-        error: "tenant_not_registered",
+        error: 'tenant_not_registered',
         reasons: tenantDecision.reasons,
         appliedRuleIds: tenantDecision.appliedRuleIds,
       });
@@ -60,7 +60,7 @@ export function registerIngestRoute(router: Router): void {
     }
     const policyDecision = policyEngine.evaluate(policyCtx);
     if (!policyDecision.allow) {
-      res.status(403).json({ error: "policy_denied", reasons: policyDecision.reasons });
+      res.status(403).json({ error: 'policy_denied', reasons: policyDecision.reasons });
       return;
     }
 
@@ -71,7 +71,7 @@ export function registerIngestRoute(router: Router): void {
       chunksProduced: number;
       chunksIndexed: number;
       vectorsIndexed: number;
-      status: "indexed" | "failed";
+      status: 'indexed' | 'failed';
       error?: string;
     }
     const results: DocResult[] = [];
@@ -181,7 +181,11 @@ export function registerIngestRoute(router: Router): void {
             scoreBreakdown: { chunksIndexed, vectorsIndexed },
           });
         } catch (ledgerErr) {
-          logger.error("ingest ledger write failed", { sourceId: doc.sourceId, reqId, err: String(ledgerErr) });
+          logger.error('ingest ledger write failed', {
+            sourceId: doc.sourceId,
+            reqId,
+            err: String(ledgerErr),
+          });
         }
 
         results.push({
@@ -189,16 +193,16 @@ export function registerIngestRoute(router: Router): void {
           chunksProduced: chunks.length,
           chunksIndexed,
           vectorsIndexed,
-          status: "indexed",
+          status: 'indexed',
         });
       } catch (err) {
-        logger.error("ingest failed", { sourceId: doc.sourceId, reqId, err: String(err) });
+        logger.error('ingest failed', { sourceId: doc.sourceId, reqId, err: String(err) });
         results.push({
           sourceId: doc.sourceId,
           chunksProduced: 0,
           chunksIndexed: 0,
           vectorsIndexed: 0,
-          status: "failed",
+          status: 'failed',
           error: String(err),
         });
       }
@@ -207,7 +211,7 @@ export function registerIngestRoute(router: Router): void {
     res.status(202).json({
       requestId: reqId,
       tenantId,
-      status: "queued",
+      status: 'queued',
       results,
       totalChunksIndexed: results.reduce((s, r) => s + r.chunksIndexed, 0),
       totalVectorsIndexed: results.reduce((s, r) => s + r.vectorsIndexed, 0),

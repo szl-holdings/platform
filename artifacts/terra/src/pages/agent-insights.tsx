@@ -1,16 +1,21 @@
-import { AgentInsightsWidget } from "@szl-holdings/shared-ui/agent-insights-widget";
-import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { AgentInsightsWidget } from '@szl-holdings/shared-ui/agent-insights-widget';
+import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widget';
+import { Brain, Building2, Radio, Zap } from 'lucide-react';
 
-import { Brain, Zap, Radio, Building2 } from "lucide-react";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
-
-const ACCENT = "#f59e0b";
+const ACCENT = '#f59e0b';
 
 function GlobalFeedStats() {
-  const { data } = useStandardQuery<{ stats: { knowledge: { byDomain?: Record<string, number> }; eventBus: { totalPublished?: number } }; globalFeed: { correlations: unknown[] } }>({
-    queryKey: ["agent-os-global-feed-terra"],
+  const { data } = useStandardQuery<{
+    stats: {
+      knowledge: { byDomain?: Record<string, number> };
+      eventBus: { totalPublished?: number };
+    };
+    globalFeed: { correlations: unknown[] };
+  }>({
+    queryKey: ['agent-os-global-feed-terra'],
     queryFn: async () => {
-      const r = await fetch("/api/agent-os/feed?limit=20");
+      const r = await fetch('/api/agent-os/feed?limit=20');
       return r.json();
     },
     refetchInterval: 60000,
@@ -23,16 +28,39 @@ function GlobalFeedStats() {
   return (
     <div className="grid grid-cols-3 gap-4 mb-6">
       {[
-        { label: "Market Findings", value: knowledge?.byDomain?.["terra"] ?? 0, icon: Building2, color: "text-amber-400", bg: "bg-amber-500/10" },
-        { label: "Cross-Domain Signals", value: globalFeed?.correlations?.length ?? 0, icon: Zap, color: "text-purple-400", bg: "bg-purple-500/10" },
-        { label: "Events Published", value: eventBus?.totalPublished ?? 0, icon: Radio, color: "text-sky-400", bg: "bg-sky-500/10" },
+        {
+          label: 'Market Findings',
+          value: knowledge?.byDomain?.['terra'] ?? 0,
+          icon: Building2,
+          color: 'text-amber-400',
+          bg: 'bg-amber-500/10',
+        },
+        {
+          label: 'Cross-Domain Signals',
+          value: globalFeed?.correlations?.length ?? 0,
+          icon: Zap,
+          color: 'text-purple-400',
+          bg: 'bg-purple-500/10',
+        },
+        {
+          label: 'Events Published',
+          value: eventBus?.totalPublished ?? 0,
+          icon: Radio,
+          color: 'text-sky-400',
+          bg: 'bg-sky-500/10',
+        },
       ].map(({ label, value, icon: Icon, color, bg }) => (
-        <div key={label} className="bg-background border border-border rounded-xl p-4 flex items-center gap-3">
+        <div
+          key={label}
+          className="bg-background border border-border rounded-xl p-4 flex items-center gap-3"
+        >
           <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
             <Icon className={`w-4 h-4 ${color}`} />
           </div>
           <div>
-            <div className="text-lg font-bold">{typeof value === "number" ? value.toLocaleString() : value}</div>
+            <div className="text-lg font-bold">
+              {typeof value === 'number' ? value.toLocaleString() : value}
+            </div>
             <div className="text-[10px] text-muted-foreground">{label}</div>
           </div>
         </div>
@@ -50,25 +78,17 @@ export default function AgentInsightsPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold">Autonomous Market Intelligence</h1>
-          <p className="text-xs text-muted-foreground">Real estate market insights gathered autonomously while you were away</p>
+          <p className="text-xs text-muted-foreground">
+            Real estate market insights gathered autonomously while you were away
+          </p>
         </div>
       </div>
 
       <GlobalFeedStats />
 
-      <AgentInsightsWidget
-        domain="terra"
-        apiBase="/api"
-        accentColor={ACCENT}
-        compact={false}
-      />
+      <AgentInsightsWidget domain="terra" apiBase="/api" accentColor={ACCENT} compact={false} />
 
-      <AgentInsightsWidget
-        domain="terra"
-        apiBase="/api"
-        accentColor="#ef4444"
-        compact={false}
-      />
+      <AgentInsightsWidget domain="terra" apiBase="/api" accentColor="#ef4444" compact={false} />
 
       <div className="flex justify-end pt-1">
         <MicroFeedbackWidget

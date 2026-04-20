@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const EvidenceEntrySchema = z.object({
   entryId: z.string().min(1),
@@ -29,7 +29,9 @@ export const EvidenceEntrySchema = z.object({
   // Governance-depth extensions: per-stage timings, backend attribution, score decomposition, approval artifacts
   stageTimings: z.record(z.number().nonnegative()).optional(),
   backendId: z.string().optional(),
-  approvalDecision: z.object({ approvalRequestId: z.string(), verdict: z.string(), decidedAt: z.string() }).optional(),
+  approvalDecision: z
+    .object({ approvalRequestId: z.string(), verdict: z.string(), decidedAt: z.string() })
+    .optional(),
   scoreBreakdown: z.record(z.number()).optional(),
 });
 

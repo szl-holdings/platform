@@ -1,7 +1,7 @@
-import { computeLiveMetrics } from "../data/vessels-thresholds";
+import { computeLiveMetrics } from '../data/vessels-thresholds';
 
-const STORAGE_KEY = "vessels_brief_signal";
-const AUTO_FIRED_KEY = "vessels_auto_brief_fired";
+const STORAGE_KEY = 'vessels_brief_signal';
+const AUTO_FIRED_KEY = 'vessels_auto_brief_fired';
 
 export interface BriefSignal {
   query: string;
@@ -11,7 +11,7 @@ export interface BriefSignal {
   autonomous?: boolean;
 }
 
-export function fireBriefSignal(signal: Omit<BriefSignal, "firedAt">) {
+export function fireBriefSignal(signal: Omit<BriefSignal, 'firedAt'>) {
   const payload: BriefSignal = { ...signal, firedAt: new Date().toISOString() };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -37,7 +37,7 @@ export function getAutonomousSignal(): BriefSignal | null {
     const { maxHormuzProbability, avgSuspicionScore, hormuzZone } = computeLiveMetrics();
 
     if (maxHormuzProbability >= 80 && hormuzZone) {
-      localStorage.setItem(AUTO_FIRED_KEY, "hormuz-probability");
+      localStorage.setItem(AUTO_FIRED_KEY, 'hormuz-probability');
       return {
         query: `Generate a maritime intelligence brief for: ${hormuzZone.name} — ${hormuzZone.severity} disruption zone with ${hormuzZone.probability72h}% probability of impact in the next 72 hours. ${hormuzZone.affectedVessels} commercial vessels affected. Aggregate cargo value ${hormuzZone.cargoValue}. Provide situation summary, affected parties, dollar impact estimate, and 3 recommended actions for charterers and P&I clubs.`,
         context: `Autonomous rule trigger — ${hormuzZone.name} disruption probability exceeded 80% threshold (live value: ${maxHormuzProbability}%)`,
@@ -48,7 +48,7 @@ export function getAutonomousSignal(): BriefSignal | null {
     }
 
     if (avgSuspicionScore >= 85) {
-      localStorage.setItem(AUTO_FIRED_KEY, "dark-fleet-suspicion");
+      localStorage.setItem(AUTO_FIRED_KEY, 'dark-fleet-suspicion');
       return {
         query: `Generate a maritime intelligence brief for: Dark fleet monitoring alert — average vessel suspicion score is ${avgSuspicionScore}/100 across active monitoring, exceeding the 85/100 high-risk threshold. Multiple vessels with extended AIS gaps detected. Provide a sanctions compliance briefing, insurance implications, and 3 recommended actions for compliance officers and P&I underwriters.`,
         context: `Autonomous rule trigger — dark fleet average suspicion score ${avgSuspicionScore}/100 exceeded threshold 85/100 (live value from active vessel monitoring)`,

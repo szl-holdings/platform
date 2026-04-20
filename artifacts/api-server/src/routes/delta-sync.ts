@@ -1,26 +1,22 @@
-import { Router, type IRouter } from "express";
-import { validateQuery, listQuerySchema } from "../lib/validation.js";
-import { db } from "@szl-holdings/db";
-import {
-  firestormIncidentsTable,
-  firestormAlertsTable,
-  firestormAssetsTable,
-  firestormFindingsTable,
-} from "@szl-holdings/db";
-import {
-  vesselsFleetsTable,
-  vesselsTable,
-  vesselsPositionsTable,
-  vesselsAlertsTable,
-  vesselsEventsTable,
-} from "@szl-holdings/db";
 import {
   alloySignals,
   alloyWorkflows,
-} from "@szl-holdings/db";
-import { gte, gt, eq, or, and, asc } from "drizzle-orm";
-import { authMiddleware } from "../middlewares/auth";
-import { sendSuccess, handleRouteError } from "../lib/api-response";
+  db,
+  firestormAlertsTable,
+  firestormAssetsTable,
+  firestormFindingsTable,
+  firestormIncidentsTable,
+  vesselsAlertsTable,
+  vesselsEventsTable,
+  vesselsFleetsTable,
+  vesselsPositionsTable,
+  vesselsTable,
+} from '@szl-holdings/db';
+import { and, asc, eq, gt, gte, or } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
+import { listQuerySchema, validateQuery } from '../lib/validation.js';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -49,15 +45,15 @@ interface EntityCursorEntry {
 type PerEntityCursor = Record<string, EntityCursorEntry>;
 
 function encodeCursor(cursors: PerEntityCursor): string {
-  return Buffer.from(JSON.stringify(cursors)).toString("base64");
+  return Buffer.from(JSON.stringify(cursors)).toString('base64');
 }
 
 function decodeCursor(cursor: string | undefined): PerEntityCursor | null {
   if (!cursor) return null;
   try {
-    const raw = Buffer.from(cursor, "base64").toString("utf-8");
+    const raw = Buffer.from(cursor, 'base64').toString('utf-8');
     const parsed = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) return null;
+    if (typeof parsed !== 'object' || parsed === null) return null;
     return parsed as PerEntityCursor;
   } catch {
     return null;
@@ -74,10 +70,7 @@ function makeEntityCondition(
   const entry = cursor?.[entityType];
   if (!entry) return gte(tsCol, since);
   const entryTs = new Date(entry.ts);
-  return or(
-    gt(tsCol, entryTs),
-    and(eq(tsCol, entryTs), gt(idCol, entry.id as number)),
-  )!;
+  return or(gt(tsCol, entryTs), and(eq(tsCol, entryTs), gt(idCol, entry.id as number)))!;
 }
 
 type ChangeRecord = {
@@ -106,7 +99,7 @@ function buildNextCursor(
   return { hasMore: true, nextCursor: encodeCursor(cursors) };
 }
 
-router.get("/aegis/sync", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get('/aegis/sync', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const snapshotTime = Date.now();
     const cursor = decodeCursor(req.query.cursor as string | undefined);
@@ -118,36 +111,88 @@ router.get("/aegis/sync", authMiddleware(), validateQuery(listQuerySchema), asyn
       db
         .select()
         .from(firestormIncidentsTable)
-        .where(makeEntityCondition("incident", firestormIncidentsTable.updatedAt, firestormIncidentsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'incident',
+            firestormIncidentsTable.updatedAt,
+            firestormIncidentsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(firestormIncidentsTable.updatedAt), asc(firestormIncidentsTable.id))
         .limit(perType),
 
       db
         .select()
         .from(firestormAlertsTable)
-        .where(makeEntityCondition("alert", firestormAlertsTable.createdAt, firestormAlertsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'alert',
+            firestormAlertsTable.createdAt,
+            firestormAlertsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(firestormAlertsTable.createdAt), asc(firestormAlertsTable.id))
         .limit(perType),
 
       db
         .select()
         .from(firestormFindingsTable)
-        .where(makeEntityCondition("finding", firestormFindingsTable.updatedAt, firestormFindingsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'finding',
+            firestormFindingsTable.updatedAt,
+            firestormFindingsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(firestormFindingsTable.updatedAt), asc(firestormFindingsTable.id))
         .limit(perType),
 
       db
         .select()
         .from(firestormAssetsTable)
-        .where(makeEntityCondition("asset", firestormAssetsTable.updatedAt, firestormAssetsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'asset',
+            firestormAssetsTable.updatedAt,
+            firestormAssetsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(firestormAssetsTable.updatedAt), asc(firestormAssetsTable.id))
         .limit(perType),
     ]);
 
-    const incidentRecords: ChangeRecord[] = incidents.map((r) => ({ id: r.id, entityType: "incident", updatedAt: r.updatedAt?.toISOString() ?? new Date().toISOString(), data: r as Record<string, unknown> }));
-    const alertRecords: ChangeRecord[] = alerts.map((r) => ({ id: r.id, entityType: "alert", updatedAt: r.createdAt.toISOString(), data: r as Record<string, unknown> }));
-    const findingRecords: ChangeRecord[] = findings.map((r) => ({ id: r.id, entityType: "finding", updatedAt: r.updatedAt?.toISOString() ?? new Date().toISOString(), data: r as Record<string, unknown> }));
-    const assetRecords: ChangeRecord[] = assets.map((r) => ({ id: r.id, entityType: "asset", updatedAt: r.updatedAt?.toISOString() ?? new Date().toISOString(), data: r as Record<string, unknown> }));
+    const incidentRecords: ChangeRecord[] = incidents.map((r) => ({
+      id: r.id,
+      entityType: 'incident',
+      updatedAt: r.updatedAt?.toISOString() ?? new Date().toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const alertRecords: ChangeRecord[] = alerts.map((r) => ({
+      id: r.id,
+      entityType: 'alert',
+      updatedAt: r.createdAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const findingRecords: ChangeRecord[] = findings.map((r) => ({
+      id: r.id,
+      entityType: 'finding',
+      updatedAt: r.updatedAt?.toISOString() ?? new Date().toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const assetRecords: ChangeRecord[] = assets.map((r) => ({
+      id: r.id,
+      entityType: 'asset',
+      updatedAt: r.updatedAt?.toISOString() ?? new Date().toISOString(),
+      data: r as Record<string, unknown>,
+    }));
 
     const changes = [...incidentRecords, ...alertRecords, ...findingRecords, ...assetRecords];
     changes.sort((a, b) => {
@@ -157,14 +202,14 @@ router.get("/aegis/sync", authMiddleware(), validateQuery(listQuerySchema), asyn
     });
 
     const { hasMore, nextCursor } = buildNextCursor([
-      { entityType: "incident", records: incidentRecords, hitLimit: incidents.length >= perType },
-      { entityType: "alert", records: alertRecords, hitLimit: alerts.length >= perType },
-      { entityType: "finding", records: findingRecords, hitLimit: findings.length >= perType },
-      { entityType: "asset", records: assetRecords, hitLimit: assets.length >= perType },
+      { entityType: 'incident', records: incidentRecords, hitLimit: incidents.length >= perType },
+      { entityType: 'alert', records: alertRecords, hitLimit: alerts.length >= perType },
+      { entityType: 'finding', records: findingRecords, hitLimit: findings.length >= perType },
+      { entityType: 'asset', records: assetRecords, hitLimit: assets.length >= perType },
     ]);
 
     sendSuccess(res, {
-      domain: "aegis",
+      domain: 'aegis',
       since: since.getTime(),
       changes,
       hasMore,
@@ -178,11 +223,11 @@ router.get("/aegis/sync", authMiddleware(), validateQuery(listQuerySchema), asyn
       },
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch Aegis delta-sync");
+    handleRouteError(res, err, 'Failed to fetch Aegis delta-sync');
   }
 });
 
-router.get("/vessels/sync", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get('/vessels/sync', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const snapshotTime = Date.now();
     const cursor = decodeCursor(req.query.cursor as string | undefined);
@@ -194,46 +239,111 @@ router.get("/vessels/sync", authMiddleware(), validateQuery(listQuerySchema), as
       db
         .select()
         .from(vesselsFleetsTable)
-        .where(makeEntityCondition("fleet", vesselsFleetsTable.updatedAt, vesselsFleetsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'fleet',
+            vesselsFleetsTable.updatedAt,
+            vesselsFleetsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(vesselsFleetsTable.updatedAt), asc(vesselsFleetsTable.id))
         .limit(perType),
 
       db
         .select()
         .from(vesselsTable)
-        .where(makeEntityCondition("vessel", vesselsTable.updatedAt, vesselsTable.id, cursor, since))
+        .where(
+          makeEntityCondition('vessel', vesselsTable.updatedAt, vesselsTable.id, cursor, since),
+        )
         .orderBy(asc(vesselsTable.updatedAt), asc(vesselsTable.id))
         .limit(perType),
 
       db
         .select()
         .from(vesselsPositionsTable)
-        .where(makeEntityCondition("position", vesselsPositionsTable.recordedAt, vesselsPositionsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'position',
+            vesselsPositionsTable.recordedAt,
+            vesselsPositionsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(vesselsPositionsTable.recordedAt), asc(vesselsPositionsTable.id))
         .limit(perType),
 
       db
         .select()
         .from(vesselsAlertsTable)
-        .where(makeEntityCondition("vessel-alert", vesselsAlertsTable.triggeredAt, vesselsAlertsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'vessel-alert',
+            vesselsAlertsTable.triggeredAt,
+            vesselsAlertsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(vesselsAlertsTable.triggeredAt), asc(vesselsAlertsTable.id))
         .limit(perType),
 
       db
         .select()
         .from(vesselsEventsTable)
-        .where(makeEntityCondition("vessel-event", vesselsEventsTable.createdAt, vesselsEventsTable.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'vessel-event',
+            vesselsEventsTable.createdAt,
+            vesselsEventsTable.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(vesselsEventsTable.createdAt), asc(vesselsEventsTable.id))
         .limit(perType),
     ]);
 
-    const fleetRecords: ChangeRecord[] = fleets.map((r) => ({ id: r.id, entityType: "fleet", updatedAt: r.updatedAt.toISOString(), data: r as Record<string, unknown> }));
-    const vesselRecords: ChangeRecord[] = vessels.map((r) => ({ id: r.id, entityType: "vessel", updatedAt: r.updatedAt.toISOString(), data: r as Record<string, unknown> }));
-    const positionRecords: ChangeRecord[] = positions.map((r) => ({ id: r.id, entityType: "position", updatedAt: r.recordedAt.toISOString(), data: r as Record<string, unknown> }));
-    const alertRecords: ChangeRecord[] = alerts.map((r) => ({ id: r.id, entityType: "vessel-alert", updatedAt: r.triggeredAt.toISOString(), data: r as Record<string, unknown> }));
-    const eventRecords: ChangeRecord[] = events.map((r) => ({ id: r.id, entityType: "vessel-event", updatedAt: r.createdAt.toISOString(), data: r as Record<string, unknown> }));
+    const fleetRecords: ChangeRecord[] = fleets.map((r) => ({
+      id: r.id,
+      entityType: 'fleet',
+      updatedAt: r.updatedAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const vesselRecords: ChangeRecord[] = vessels.map((r) => ({
+      id: r.id,
+      entityType: 'vessel',
+      updatedAt: r.updatedAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const positionRecords: ChangeRecord[] = positions.map((r) => ({
+      id: r.id,
+      entityType: 'position',
+      updatedAt: r.recordedAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const alertRecords: ChangeRecord[] = alerts.map((r) => ({
+      id: r.id,
+      entityType: 'vessel-alert',
+      updatedAt: r.triggeredAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const eventRecords: ChangeRecord[] = events.map((r) => ({
+      id: r.id,
+      entityType: 'vessel-event',
+      updatedAt: r.createdAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
 
-    const changes = [...fleetRecords, ...vesselRecords, ...positionRecords, ...alertRecords, ...eventRecords];
+    const changes = [
+      ...fleetRecords,
+      ...vesselRecords,
+      ...positionRecords,
+      ...alertRecords,
+      ...eventRecords,
+    ];
     changes.sort((a, b) => {
       const tDiff = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
       if (tDiff !== 0) return tDiff;
@@ -241,15 +351,15 @@ router.get("/vessels/sync", authMiddleware(), validateQuery(listQuerySchema), as
     });
 
     const { hasMore, nextCursor } = buildNextCursor([
-      { entityType: "fleet", records: fleetRecords, hitLimit: fleets.length >= perType },
-      { entityType: "vessel", records: vesselRecords, hitLimit: vessels.length >= perType },
-      { entityType: "position", records: positionRecords, hitLimit: positions.length >= perType },
-      { entityType: "vessel-alert", records: alertRecords, hitLimit: alerts.length >= perType },
-      { entityType: "vessel-event", records: eventRecords, hitLimit: events.length >= perType },
+      { entityType: 'fleet', records: fleetRecords, hitLimit: fleets.length >= perType },
+      { entityType: 'vessel', records: vesselRecords, hitLimit: vessels.length >= perType },
+      { entityType: 'position', records: positionRecords, hitLimit: positions.length >= perType },
+      { entityType: 'vessel-alert', records: alertRecords, hitLimit: alerts.length >= perType },
+      { entityType: 'vessel-event', records: eventRecords, hitLimit: events.length >= perType },
     ]);
 
     sendSuccess(res, {
-      domain: "vessels",
+      domain: 'vessels',
       since: since.getTime(),
       changes,
       hasMore,
@@ -264,11 +374,11 @@ router.get("/vessels/sync", authMiddleware(), validateQuery(listQuerySchema), as
       },
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch Vessels delta-sync");
+    handleRouteError(res, err, 'Failed to fetch Vessels delta-sync');
   }
 });
 
-router.get("/alloy/sync", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get('/alloy/sync', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const snapshotTime = Date.now();
     const cursor = decodeCursor(req.query.cursor as string | undefined);
@@ -280,20 +390,40 @@ router.get("/alloy/sync", authMiddleware(), validateQuery(listQuerySchema), asyn
       db
         .select()
         .from(alloySignals)
-        .where(makeEntityCondition("signal", alloySignals.updatedAt, alloySignals.id, cursor, since))
+        .where(
+          makeEntityCondition('signal', alloySignals.updatedAt, alloySignals.id, cursor, since),
+        )
         .orderBy(asc(alloySignals.updatedAt), asc(alloySignals.id))
         .limit(perType),
 
       db
         .select()
         .from(alloyWorkflows)
-        .where(makeEntityCondition("workflow", alloyWorkflows.updatedAt, alloyWorkflows.id, cursor, since))
+        .where(
+          makeEntityCondition(
+            'workflow',
+            alloyWorkflows.updatedAt,
+            alloyWorkflows.id,
+            cursor,
+            since,
+          ),
+        )
         .orderBy(asc(alloyWorkflows.updatedAt), asc(alloyWorkflows.id))
         .limit(perType),
     ]);
 
-    const signalRecords: ChangeRecord[] = signals.map((r) => ({ id: r.id, entityType: "signal", updatedAt: r.updatedAt.toISOString(), data: r as Record<string, unknown> }));
-    const workflowRecords: ChangeRecord[] = workflows.map((r) => ({ id: r.id, entityType: "workflow", updatedAt: r.updatedAt.toISOString(), data: r as Record<string, unknown> }));
+    const signalRecords: ChangeRecord[] = signals.map((r) => ({
+      id: r.id,
+      entityType: 'signal',
+      updatedAt: r.updatedAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
+    const workflowRecords: ChangeRecord[] = workflows.map((r) => ({
+      id: r.id,
+      entityType: 'workflow',
+      updatedAt: r.updatedAt.toISOString(),
+      data: r as Record<string, unknown>,
+    }));
 
     const changes = [...signalRecords, ...workflowRecords];
     changes.sort((a, b) => {
@@ -303,12 +433,12 @@ router.get("/alloy/sync", authMiddleware(), validateQuery(listQuerySchema), asyn
     });
 
     const { hasMore, nextCursor } = buildNextCursor([
-      { entityType: "signal", records: signalRecords, hitLimit: signals.length >= perType },
-      { entityType: "workflow", records: workflowRecords, hitLimit: workflows.length >= perType },
+      { entityType: 'signal', records: signalRecords, hitLimit: signals.length >= perType },
+      { entityType: 'workflow', records: workflowRecords, hitLimit: workflows.length >= perType },
     ]);
 
     sendSuccess(res, {
-      domain: "alloy",
+      domain: 'alloy',
       since: since.getTime(),
       changes,
       hasMore,
@@ -320,7 +450,7 @@ router.get("/alloy/sync", authMiddleware(), validateQuery(listQuerySchema), asyn
       },
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch Alloy delta-sync");
+    handleRouteError(res, err, 'Failed to fetch Alloy delta-sync');
   }
 });
 

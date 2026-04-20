@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { isRetryable, categorizeError, AgentRunError } from "./errors.js";
-import type { RunErrorCategory } from "./errors.js";
+import { z } from 'zod';
+import type { RunErrorCategory } from './errors.js';
+import { AgentRunError, categorizeError, isRetryable } from './errors.js';
 
 export const RetryPolicySchema = z.object({
   maxAttempts: z.number().int().min(1).max(10).default(3),
@@ -9,7 +9,15 @@ export const RetryPolicySchema = z.object({
   backoffMultiplier: z.number().min(1).max(10).default(2),
   retryableCategories: z
     .array(
-      z.enum(["timeout", "validation", "provider", "policy", "approval_rejected", "approval_timeout", "unknown"]),
+      z.enum([
+        'timeout',
+        'validation',
+        'provider',
+        'policy',
+        'approval_rejected',
+        'approval_timeout',
+        'unknown',
+      ]),
     )
     .optional(),
 });
@@ -88,7 +96,7 @@ export async function withRetry<T>(
 
   throw new AgentRunError({
     message: `Step exhausted all ${policy.maxAttempts} retry attempt(s)`,
-    category: "unknown",
+    category: 'unknown',
     runId,
     stepId,
     retryable: false,

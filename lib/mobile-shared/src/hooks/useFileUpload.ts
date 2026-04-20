@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
-import { Platform } from "react-native";
-import { getDomainBaseUrl } from "../env";
+import { useCallback, useState } from 'react';
+import { Platform } from 'react-native';
+import { getDomainBaseUrl } from '../env';
 
-export type UploadStatus = "idle" | "requesting" | "uploading" | "registering" | "done" | "error";
+export type UploadStatus = 'idle' | 'requesting' | 'uploading' | 'registering' | 'done' | 'error';
 
-export type FileCategory = "document" | "image" | "video" | "audio" | "archive" | "other";
+export type FileCategory = 'document' | 'image' | 'video' | 'audio' | 'archive' | 'other';
 
 export interface UploadProgressEvent {
   loaded: number;
@@ -80,12 +80,9 @@ function buildAuthHeaders(token: string | null): Record<string, string> {
 
 export function fromImagePickerResult(asset: ImagePickerAsset): FileToUpload {
   const rawUri = asset.uri;
-  const ext = rawUri.split(".").pop()?.toLowerCase() || "jpg";
-  const mimeType =
-    asset.mimeType ?? `image/${ext === "jpg" ? "jpeg" : ext}`;
-  const name =
-    asset.fileName ??
-    `photo_${Date.now()}.${ext}`;
+  const ext = rawUri.split('.').pop()?.toLowerCase() || 'jpg';
+  const mimeType = asset.mimeType ?? `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+  const name = asset.fileName ?? `photo_${Date.now()}.${ext}`;
   return {
     uri: rawUri,
     name,
@@ -98,42 +95,38 @@ export function fromDocumentPickerResult(asset: DocumentPickerAsset): FileToUplo
   return {
     uri: asset.uri,
     name: asset.name,
-    type: asset.mimeType ?? "application/octet-stream",
+    type: asset.mimeType ?? 'application/octet-stream',
     size: asset.size ?? undefined,
   };
 }
 
 function inferCategory(mimeType: string, explicit?: FileCategory): FileCategory {
   if (explicit) return explicit;
-  if (mimeType.startsWith("image/")) return "image";
-  if (mimeType.startsWith("video/")) return "video";
-  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('video/')) return 'video';
+  if (mimeType.startsWith('audio/')) return 'audio';
   if (
-    mimeType === "application/pdf" ||
-    mimeType.includes("word") ||
-    mimeType.includes("spreadsheet") ||
-    mimeType.includes("presentation") ||
-    mimeType.includes("text/")
+    mimeType === 'application/pdf' ||
+    mimeType.includes('word') ||
+    mimeType.includes('spreadsheet') ||
+    mimeType.includes('presentation') ||
+    mimeType.includes('text/')
   )
-    return "document";
-  if (
-    mimeType.includes("zip") ||
-    mimeType.includes("tar") ||
-    mimeType.includes("gzip")
-  )
-    return "archive";
-  return "other";
+    return 'document';
+  if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('gzip'))
+    return 'archive';
+  return 'other';
 }
 
 function getApiBase(): string {
-  return getDomainBaseUrl() ?? "";
+  return getDomainBaseUrl() ?? '';
 }
 
 export function useFileUpload(options: FileUploadOptions = {}) {
   const { onProgress, getAuthToken } = options;
   const apiBase = options.apiBase ?? getApiBase();
 
-  const [status, setStatus] = useState<UploadStatus>("idle");
+  const [status, setStatus] = useState<UploadStatus>('idle');
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -148,7 +141,7 @@ export function useFileUpload(options: FileUploadOptions = {}) {
 
   const upload = useCallback(
     async (file: FileToUpload): Promise<UploadedFile | null> => {
-      setStatus("requesting");
+      setStatus('requesting');
       setError(null);
       setProgress(0);
       setUploadedFile(null);
@@ -158,21 +151,18 @@ export function useFileUpload(options: FileUploadOptions = {}) {
         const token = await resolveAuthToken(getAuthToken);
         const authHeaders = buildAuthHeaders(token);
 
-        const urlRes = await fetch(
-          `${apiBase}/api/storage/uploads/request-url`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...authHeaders,
-            },
-            body: JSON.stringify({
-              name: file.name,
-              size: fileSize,
-              contentType: file.type,
-            }),
+        const urlRes = await fetch(`${apiBase}/api/storage/uploads/request-url`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
           },
-        );
+          body: JSON.stringify({
+            name: file.name,
+            size: fileSize,
+            contentType: file.type,
+          }),
+        });
 
         if (!urlRes.ok) {
           throw new Error(`Failed to get upload URL: ${urlRes.status}`);
@@ -183,10 +173,10 @@ export function useFileUpload(options: FileUploadOptions = {}) {
           objectPath: string;
         };
 
-        setStatus("uploading");
+        setStatus('uploading');
         updateProgress(10);
 
-        if (Platform.OS === "web") {
+        if (Platform.OS === 'web') {
           const blob = await fetch(file.uri).then((r) => r.blob());
           updateProgress(30);
 
@@ -206,63 +196,52 @@ export function useFileUpload(options: FileUploadOptions = {}) {
               if (xhr.status >= 200 && xhr.status < 300) resolve();
               else reject(new Error(`Upload failed: ${xhr.status}`));
             };
-            xhr.onerror = () => reject(new Error("Upload network error"));
-            xhr.open("PUT", uploadURL);
-            xhr.setRequestHeader("Content-Type", file.type);
+            xhr.onerror = () => reject(new Error('Upload network error'));
+            xhr.open('PUT', uploadURL);
+            xhr.setRequestHeader('Content-Type', file.type);
             xhr.send(blob);
           });
         } else {
-          const FileSystem = await import("expo-file-system").catch(() => null);
+          const FileSystem = await import('expo-file-system').catch(() => null);
           if (!FileSystem) {
-            throw new Error("expo-file-system not available");
+            throw new Error('expo-file-system not available');
           }
 
           const uploadTask = FileSystem.createUploadTask(
             uploadURL,
             file.uri,
             {
-              httpMethod: "PUT",
-              headers: { "Content-Type": file.type },
+              httpMethod: 'PUT',
+              headers: { 'Content-Type': file.type },
               uploadType: (FileSystem as any).FileSystemUploadType?.BINARY_CONTENT ?? 1,
             },
             (uploadProgress: { totalBytesSent: number; totalBytesExpectedToSend: number }) => {
-              const { totalBytesExpectedToSend, totalBytesSent } =
-                uploadProgress;
+              const { totalBytesExpectedToSend, totalBytesSent } = uploadProgress;
               if (totalBytesExpectedToSend > 0) {
-                const pct =
-                  10 +
-                  Math.round((totalBytesSent / totalBytesExpectedToSend) * 75);
+                const pct = 10 + Math.round((totalBytesSent / totalBytesExpectedToSend) * 75);
                 updateProgress(pct, {
                   loaded: totalBytesSent,
                   total: totalBytesExpectedToSend,
-                  percent: Math.round(
-                    (totalBytesSent / totalBytesExpectedToSend) * 100,
-                  ),
+                  percent: Math.round((totalBytesSent / totalBytesExpectedToSend) * 100),
                 });
               }
             },
           );
 
           const uploadResult = await uploadTask.uploadAsync();
-          if (
-            !uploadResult ||
-            uploadResult.status < 200 ||
-            uploadResult.status >= 300
-          ) {
-            throw new Error(
-              `Upload failed: ${uploadResult?.status ?? "unknown"}`,
-            );
+          if (!uploadResult || uploadResult.status < 200 || uploadResult.status >= 300) {
+            throw new Error(`Upload failed: ${uploadResult?.status ?? 'unknown'}`);
           }
         }
         updateProgress(88);
-        setStatus("registering");
+        setStatus('registering');
 
         const category = inferCategory(file.type, options.category);
 
         const registerRes = await fetch(`${apiBase}/api/files`, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             ...authHeaders,
           },
           body: JSON.stringify({
@@ -288,13 +267,13 @@ export function useFileUpload(options: FileUploadOptions = {}) {
           (body as UploadedFile);
 
         updateProgress(100);
-        setStatus("done");
+        setStatus('done');
         setUploadedFile(result);
         return result;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Upload failed";
+        const msg = err instanceof Error ? err.message : 'Upload failed';
         setError(msg);
-        setStatus("error");
+        setStatus('error');
         return null;
       }
     },
@@ -302,7 +281,7 @@ export function useFileUpload(options: FileUploadOptions = {}) {
   );
 
   const reset = useCallback(() => {
-    setStatus("idle");
+    setStatus('idle');
     setProgress(0);
     setError(null);
     setUploadedFile(null);

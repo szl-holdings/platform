@@ -1,4 +1,4 @@
-import type { PolicyRule, PolicyContext, PolicyDecision } from "./types.js";
+import type { PolicyContext, PolicyDecision, PolicyRule } from './types.js';
 
 export class PolicyEngine {
   private rules: PolicyRule[];
@@ -33,7 +33,7 @@ export class PolicyEngine {
 
       appliedRuleIds.push(rule.ruleId);
 
-      if (rule.action === "deny") {
+      if (rule.action === 'deny') {
         denied = true;
         reasons.push(
           rule.description
@@ -42,7 +42,7 @@ export class PolicyEngine {
         );
       }
 
-      if (rule.action === "redact" && rule.redactFields.length > 0) {
+      if (rule.action === 'redact' && rule.redactFields.length > 0) {
         for (const field of rule.redactFields) {
           if (!redactions.includes(field)) {
             redactions.push(field);
@@ -53,9 +53,7 @@ export class PolicyEngine {
 
       if (rule.requireProvenance && !context.hasProvenance) {
         denied = true;
-        reasons.push(
-          `Rule '${rule.ruleId}' requires provenance but none was provided`,
-        );
+        reasons.push(`Rule '${rule.ruleId}' requires provenance but none was provided`);
       }
     }
 
@@ -69,7 +67,7 @@ export class PolicyEngine {
     }
 
     if (appliedRuleIds.length === 0) {
-      reasons.push("No rules matched; default-allow");
+      reasons.push('No rules matched; default-allow');
     }
 
     return {

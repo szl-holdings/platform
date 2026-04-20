@@ -24,9 +24,7 @@ export function registerNarrativeMeshEntry(entry: NarrativeMeshEntry): void {
   index.set(entry.narrativeId, entry);
 }
 
-export function getNarrativeMeshEntry(
-  narrativeId: string,
-): NarrativeMeshEntry | undefined {
+export function getNarrativeMeshEntry(narrativeId: string): NarrativeMeshEntry | undefined {
   return index.get(narrativeId);
 }
 

@@ -8,8 +8,8 @@
  * Idempotent: skips apps that already have at least one row.
  */
 
-import { db, deploymentsTable } from "@szl-holdings/db";
-import { eq, and } from "drizzle-orm";
+import { db, deploymentsTable } from '@szl-holdings/db';
+import { and, eq } from 'drizzle-orm';
 
 interface AppSeed {
   appId: string;
@@ -18,21 +18,29 @@ interface AppSeed {
 }
 
 const APPS: AppSeed[] = [
-  { appId: "api-server", appName: "API Server", versions: ["v1.0.0", "v1.1.0", "v1.2.0"] },
-  { appId: "command", appName: "Unified Command", versions: ["v1.0.0", "v1.1.0"] },
-  { appId: "szl-holdings", appName: "SZL Holdings Dashboard", versions: ["v1.0.0", "v1.1.0"] },
-  { appId: "szl-holdings-mobile", appName: "CORTEX — Mobile Command", versions: ["v1.0.0"] },
-  { appId: "pulse", appName: "Pulse — AI Executive Briefing", versions: ["v1.0.0", "v1.1.0"] },
-  { appId: "aegis", appName: "Aegis — Defense & Intelligence", versions: ["v1.0.0", "v1.0.1"] },
-  { appId: "vessels", appName: "Vessels Maritime Intelligence", versions: ["v1.0.0", "v1.1.0"] },
-  { appId: "terra", appName: "Terra — Real Estate Intelligence", versions: ["v1.0.0", "v1.1.0"] },
-  { appId: "sentra", appName: "Sentra — Cyber Resilience", versions: ["v1.0.0"] },
-  { appId: "prism-counsel", appName: "PRISM Counsel — Legal Command", versions: ["v1.0.0", "v1.0.1"] },
-  { appId: "lyte-command-center", appName: "Lyte — Decision Intelligence", versions: ["v1.0.0", "v1.1.0"] },
-  { appId: "carlota-jo", appName: "Carlota Jo Consulting", versions: ["v1.0.0"] },
+  { appId: 'api-server', appName: 'API Server', versions: ['v1.0.0', 'v1.1.0', 'v1.2.0'] },
+  { appId: 'command', appName: 'Unified Command', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'szl-holdings', appName: 'SZL Holdings Dashboard', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'szl-holdings-mobile', appName: 'CORTEX — Mobile Command', versions: ['v1.0.0'] },
+  { appId: 'pulse', appName: 'Pulse — AI Executive Briefing', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'aegis', appName: 'Aegis — Defense & Intelligence', versions: ['v1.0.0', 'v1.0.1'] },
+  { appId: 'vessels', appName: 'Vessels Maritime Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'terra', appName: 'Terra — Real Estate Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'sentra', appName: 'Sentra — Cyber Resilience', versions: ['v1.0.0'] },
+  {
+    appId: 'prism-counsel',
+    appName: 'PRISM Counsel — Legal Command',
+    versions: ['v1.0.0', 'v1.0.1'],
+  },
+  {
+    appId: 'lyte-command-center',
+    appName: 'Lyte — Decision Intelligence',
+    versions: ['v1.0.0', 'v1.1.0'],
+  },
+  { appId: 'carlota-jo', appName: 'Carlota Jo Consulting', versions: ['v1.0.0'] },
 ];
 
-const ENVIRONMENTS: Array<"production" | "staging"> = ["production", "staging"];
+const ENVIRONMENTS: Array<'production' | 'staging'> = ['production', 'staging'];
 const NOW = Date.now();
 // Space versions ~1 day apart so the timeline reads naturally in the UI.
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -46,12 +54,7 @@ async function seed(): Promise<void> {
       const existing = await db
         .select({ id: deploymentsTable.id })
         .from(deploymentsTable)
-        .where(
-          and(
-            eq(deploymentsTable.appId, app.appId),
-            eq(deploymentsTable.environment, env),
-          ),
-        )
+        .where(and(eq(deploymentsTable.appId, app.appId), eq(deploymentsTable.environment, env)))
         .limit(1);
 
       if (existing.length > 0) {
@@ -68,10 +71,12 @@ async function seed(): Promise<void> {
           appName: app.appName,
           version,
           environment: env,
-          status: (isLast ? "active" : "inactive") as "active" | "inactive",
+          status: (isLast ? 'active' : 'inactive') as 'active' | 'inactive',
           deployedAt,
-          deployedBy: "system",
-          notes: isLast ? `Initial seed — current ${env} version.` : `Initial seed — historical ${env} version.`,
+          deployedBy: 'system',
+          notes: isLast
+            ? `Initial seed — current ${env} version.`
+            : `Initial seed — historical ${env} version.`,
         };
       });
 
@@ -80,12 +85,14 @@ async function seed(): Promise<void> {
     }
   }
 
-  console.log(`[seed-deployments] Inserted ${inserted} rows, skipped ${skipped} (app, env) pairs already populated.`);
+  console.log(
+    `[seed-deployments] Inserted ${inserted} rows, skipped ${skipped} (app, env) pairs already populated.`,
+  );
 }
 
 seed()
   .then(() => process.exit(0))
   .catch((err) => {
-    console.error("[seed-deployments] Failed:", err);
+    console.error('[seed-deployments] Failed:', err);
     process.exit(1);
   });

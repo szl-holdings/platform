@@ -1,6 +1,6 @@
-import { CheckCircle } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { CheckCircle } from 'lucide-react';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 
 export default function BookingSuccess() {
   return (
@@ -11,14 +11,11 @@ export default function BookingSuccess() {
           <div className="w-20 h-20 mx-auto mb-8 border border-gold-500/30 flex items-center justify-center">
             <CheckCircle size={32} className="text-gold-400" strokeWidth={1.5} />
           </div>
-          <h1 className="font-serif text-3xl text-cream-50 mb-4">
-            Payment Successful
-          </h1>
+          <h1 className="font-serif text-3xl text-cream-50 mb-4">Payment Successful</h1>
           <p className="text-sm text-cream-300/50 mb-8 leading-relaxed">
-            Your payment has been processed successfully. A confirmation email
-            with all engagement details will be sent to your registered address
-            shortly. Our advisory team will reach out within one business day to
-            begin the onboarding process.
+            Your payment has been processed successfully. A confirmation email with all engagement
+            details will be sent to your registered address shortly. Our advisory team will reach
+            out within one business day to begin the onboarding process.
           </p>
           <a
             href={import.meta.env.BASE_URL}

@@ -1,10 +1,15 @@
-import { m } from "framer-motion";
-import { Radio, DollarSign, Brain, Network, Shield, Rocket } from "lucide-react";
-import pillarsData from "@/data/pillars.json";
-import siteData from "@/data/site.json";
+import { m } from 'framer-motion';
+import { Brain, DollarSign, Network, Radio, Rocket, Shield } from 'lucide-react';
+import pillarsData from '@/data/pillars.json';
+import siteData from '@/data/site.json';
 
 const iconMap: Record<string, React.ElementType> = {
-  Radio, DollarSign, Brain, Network, Shield, Rocket,
+  Radio,
+  DollarSign,
+  Brain,
+  Network,
+  Shield,
+  Rocket,
 };
 
 export function Pillars() {
@@ -19,7 +24,9 @@ export function Pillars() {
           viewport={{ once: true }}
           className="mb-16"
         >
-          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">Innovation</p>
+          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">
+            Innovation
+          </p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight">
               {pillars.title}

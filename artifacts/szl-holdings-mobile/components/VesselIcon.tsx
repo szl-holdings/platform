@@ -1,1 +1,1 @@
-export { VesselIcon, featherIcon } from "./fleet/VesselIcon";
+export { featherIcon, VesselIcon } from './fleet/VesselIcon';

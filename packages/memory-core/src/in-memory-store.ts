@@ -4,11 +4,11 @@
  * Reference implementation of the memory store interface.
  * Production deployments replace this with a Redis-backed or DB-backed adapter.
  */
-import type { MemoryEntry, MemoryScope } from "@szl-holdings/shared-contracts";
+import type { MemoryEntry, MemoryScope } from '@szl-holdings/shared-contracts';
 
 export interface MemoryStore {
   get<T = unknown>(scope: MemoryScope, key: string): MemoryEntry<T> | undefined;
-  set<T = unknown>(entry: Omit<MemoryEntry<T>, "lastAccessedAt">): void;
+  set<T = unknown>(entry: Omit<MemoryEntry<T>, 'lastAccessedAt'>): void;
   delete(scope: MemoryScope, key: string): boolean;
   keys(scope: MemoryScope): string[];
   expireStale(): number;
@@ -34,7 +34,7 @@ export class InMemoryStore implements MemoryStore {
     return updated;
   }
 
-  set<T = unknown>(entry: Omit<MemoryEntry<T>, "lastAccessedAt">): void {
+  set<T = unknown>(entry: Omit<MemoryEntry<T>, 'lastAccessedAt'>): void {
     this.store.set(this.storeKey(entry.scope, entry.key), {
       ...entry,
       lastAccessedAt: new Date().toISOString(),

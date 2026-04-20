@@ -13,42 +13,50 @@
  * Run: pnpm --filter @workspace/ontology test
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from 'vitest';
 import {
-  DOMAINS,
   ALL_ENTITY_TYPES,
+  DOMAIN_LABELS,
+  DOMAINS,
+  ENTITY_LINK_TYPES,
+  ENTITY_TYPE_DOMAINS,
+  EVIDENCE_SOURCE_TYPES,
+  EXPORT_SAFETY_STATES,
   FRESHNESS_LEVELS,
   POLICY_STATES,
-  SIGNAL_TYPES,
-  SIGNAL_SOURCES,
-  SIGNAL_SEVERITIES,
-  ENTITY_LINK_TYPES,
-  SNAPSHOT_REASONS,
   PROOF_SOURCE_CLASSES,
   REVIEW_STATES,
-  EXPORT_SAFETY_STATES,
-  EVIDENCE_SOURCE_TYPES,
-  ENTITY_TYPE_DOMAINS,
+  SIGNAL_SEVERITIES,
+  SIGNAL_SOURCES,
   SIGNAL_TYPE_DOMAINS,
-  DOMAIN_LABELS,
-} from "../index.js";
+  SIGNAL_TYPES,
+  SNAPSHOT_REASONS,
+} from '../index.js';
 
 // ---------------------------------------------------------------------------
 // Domains — as claimed in ontology.md § Domains
 // ---------------------------------------------------------------------------
-describe("Domains", () => {
+describe('Domains', () => {
   const DOC_CLAIMED_DOMAINS = [
-    "platform", "vessels", "terra", "security", "counsel",
-    "carlota", "pulse", "command", "lyte", "sentra",
+    'platform',
+    'vessels',
+    'terra',
+    'security',
+    'counsel',
+    'carlota',
+    'pulse',
+    'command',
+    'lyte',
+    'sentra',
   ] as const;
 
-  it("all doc-claimed domains exist in DOMAINS", () => {
+  it('all doc-claimed domains exist in DOMAINS', () => {
     for (const domain of DOC_CLAIMED_DOMAINS) {
       expect(DOMAINS).toContain(domain);
     }
   });
 
-  it("every domain has a label", () => {
+  it('every domain has a label', () => {
     for (const domain of DOMAINS) {
       expect(DOMAIN_LABELS[domain]).toBeTruthy();
     }
@@ -58,10 +66,10 @@ describe("Domains", () => {
 // ---------------------------------------------------------------------------
 // Freshness Levels — as claimed in ontology.md § Freshness Levels
 // ---------------------------------------------------------------------------
-describe("FreshnessLevel", () => {
-  const DOC_CLAIMED = ["live", "recent", "stale", "expired"] as const;
+describe('FreshnessLevel', () => {
+  const DOC_CLAIMED = ['live', 'recent', 'stale', 'expired'] as const;
 
-  it("all doc-claimed freshness levels exist", () => {
+  it('all doc-claimed freshness levels exist', () => {
     for (const level of DOC_CLAIMED) {
       expect(FRESHNESS_LEVELS).toContain(level);
     }
@@ -71,10 +79,10 @@ describe("FreshnessLevel", () => {
 // ---------------------------------------------------------------------------
 // Policy States — as claimed in ontology.md § Policy State
 // ---------------------------------------------------------------------------
-describe("PolicyState", () => {
-  const DOC_CLAIMED = ["cleared", "conditional", "blocked", "flagged", "pending"] as const;
+describe('PolicyState', () => {
+  const DOC_CLAIMED = ['cleared', 'conditional', 'blocked', 'flagged', 'pending'] as const;
 
-  it("all doc-claimed policy states exist", () => {
+  it('all doc-claimed policy states exist', () => {
     for (const state of DOC_CLAIMED) {
       expect(POLICY_STATES).toContain(state);
     }
@@ -84,31 +92,48 @@ describe("PolicyState", () => {
 // ---------------------------------------------------------------------------
 // Entity Types — as claimed in ontology.md § Core Entity Types
 // ---------------------------------------------------------------------------
-describe("EntityType", () => {
+describe('EntityType', () => {
   const DOC_CLAIMED_PLATFORM = [
-    "signal", "recommendation", "action", "approval", "workflow",
-    "evidence", "outcome", "policy", "audit_event", "agent_run",
-    "org", "agent", "model",
+    'signal',
+    'recommendation',
+    'action',
+    'approval',
+    'workflow',
+    'evidence',
+    'outcome',
+    'policy',
+    'audit_event',
+    'agent_run',
+    'org',
+    'agent',
+    'model',
   ] as const;
 
   const DOC_CLAIMED_DOMAIN = [
-    "vessel", "voyage", "property", "deal", "incident",
-    "threat", "matter", "engagement", "brief",
+    'vessel',
+    'voyage',
+    'property',
+    'deal',
+    'incident',
+    'threat',
+    'matter',
+    'engagement',
+    'brief',
   ] as const;
 
-  it("all doc-claimed platform entity types exist", () => {
+  it('all doc-claimed platform entity types exist', () => {
     for (const type of DOC_CLAIMED_PLATFORM) {
       expect(ALL_ENTITY_TYPES).toContain(type);
     }
   });
 
-  it("all doc-claimed domain entity types exist", () => {
+  it('all doc-claimed domain entity types exist', () => {
     for (const type of DOC_CLAIMED_DOMAIN) {
       expect(ALL_ENTITY_TYPES).toContain(type);
     }
   });
 
-  it("every entity type has a domain assignment", () => {
+  it('every entity type has a domain assignment', () => {
     for (const type of ALL_ENTITY_TYPES) {
       const domains = ENTITY_TYPE_DOMAINS[type];
       expect(domains).toBeDefined();
@@ -120,30 +145,46 @@ describe("EntityType", () => {
 // ---------------------------------------------------------------------------
 // Signal Types — as claimed in ontology.md § Signals
 // ---------------------------------------------------------------------------
-describe("SignalType", () => {
+describe('SignalType', () => {
   const DOC_CLAIMED = [
     // Vessels
-    "ais_dark", "ais_position", "sanctions_hit", "voyage_anomaly",
-    "port_arrival", "cargo_discrepancy",
+    'ais_dark',
+    'ais_position',
+    'sanctions_hit',
+    'voyage_anomaly',
+    'port_arrival',
+    'cargo_discrepancy',
     // Terra
-    "distress_filing", "ownership_change", "lien_filed",
-    "tax_delinquency", "foreclosure_filing",
+    'distress_filing',
+    'ownership_change',
+    'lien_filed',
+    'tax_delinquency',
+    'foreclosure_filing',
     // Security
-    "threat_indicator", "cve_published", "incident_detected", "ttp_observed",
+    'threat_indicator',
+    'cve_published',
+    'incident_detected',
+    'ttp_observed',
     // Counsel
-    "court_filing", "matter_deadline", "settlement_offer",
+    'court_filing',
+    'matter_deadline',
+    'settlement_offer',
     // Platform
-    "policy_violation", "freshness_degraded", "agent_drift",
-    "cross_domain_alert", "approval_overdue", "workflow_stalled",
+    'policy_violation',
+    'freshness_degraded',
+    'agent_drift',
+    'cross_domain_alert',
+    'approval_overdue',
+    'workflow_stalled',
   ] as const;
 
-  it("all doc-claimed signal types exist", () => {
+  it('all doc-claimed signal types exist', () => {
     for (const type of DOC_CLAIMED) {
       expect(SIGNAL_TYPES).toContain(type);
     }
   });
 
-  it("every signal type has a domain assignment", () => {
+  it('every signal type has a domain assignment', () => {
     for (const type of SIGNAL_TYPES) {
       const domains = SIGNAL_TYPE_DOMAINS[type];
       expect(domains).toBeDefined();
@@ -155,10 +196,10 @@ describe("SignalType", () => {
 // ---------------------------------------------------------------------------
 // Signal Severity — as claimed in ontology.md § Signals
 // ---------------------------------------------------------------------------
-describe("SignalSeverity", () => {
-  const DOC_CLAIMED = ["critical", "high", "medium", "low", "info"] as const;
+describe('SignalSeverity', () => {
+  const DOC_CLAIMED = ['critical', 'high', 'medium', 'low', 'info'] as const;
 
-  it("all doc-claimed severities exist", () => {
+  it('all doc-claimed severities exist', () => {
     for (const sev of DOC_CLAIMED) {
       expect(SIGNAL_SEVERITIES).toContain(sev);
     }
@@ -168,14 +209,22 @@ describe("SignalSeverity", () => {
 // ---------------------------------------------------------------------------
 // Entity Link Types — as claimed in ontology.md § Entity Links
 // ---------------------------------------------------------------------------
-describe("EntityLinkType", () => {
+describe('EntityLinkType', () => {
   const DOC_CLAIMED = [
-    "triggers", "supports", "approved_by", "part_of", "related_to",
-    "caused_by", "escalated_to", "supersedes", "correlated_with",
-    "owned_by", "assigned_to",
+    'triggers',
+    'supports',
+    'approved_by',
+    'part_of',
+    'related_to',
+    'caused_by',
+    'escalated_to',
+    'supersedes',
+    'correlated_with',
+    'owned_by',
+    'assigned_to',
   ] as const;
 
-  it("all doc-claimed link types exist", () => {
+  it('all doc-claimed link types exist', () => {
     for (const type of DOC_CLAIMED) {
       expect(ENTITY_LINK_TYPES).toContain(type);
     }
@@ -185,10 +234,10 @@ describe("EntityLinkType", () => {
 // ---------------------------------------------------------------------------
 // Snapshot Reasons — as claimed in ontology.md § Entity Snapshots
 // ---------------------------------------------------------------------------
-describe("SnapshotReason", () => {
-  const DOC_CLAIMED = ["pre_action", "post_action", "scheduled", "triggered", "replay"] as const;
+describe('SnapshotReason', () => {
+  const DOC_CLAIMED = ['pre_action', 'post_action', 'scheduled', 'triggered', 'replay'] as const;
 
-  it("all doc-claimed snapshot reasons exist", () => {
+  it('all doc-claimed snapshot reasons exist', () => {
     for (const reason of DOC_CLAIMED) {
       expect(SNAPSHOT_REASONS).toContain(reason);
     }
@@ -198,47 +247,57 @@ describe("SnapshotReason", () => {
 // ---------------------------------------------------------------------------
 // Proof / Evidence — as claimed in policy-model.md
 // ---------------------------------------------------------------------------
-describe("ProofSourceClass", () => {
+describe('ProofSourceClass', () => {
   const DOC_CLAIMED = [
-    "llm_generated", "human_authored", "system_computed",
-    "external_ingested", "hybrid",
+    'llm_generated',
+    'human_authored',
+    'system_computed',
+    'external_ingested',
+    'hybrid',
   ] as const;
 
-  it("all doc-claimed source classes exist", () => {
+  it('all doc-claimed source classes exist', () => {
     for (const cls of DOC_CLAIMED) {
       expect(PROOF_SOURCE_CLASSES).toContain(cls);
     }
   });
 });
 
-describe("ReviewState", () => {
-  const DOC_CLAIMED = ["unreviewed", "approved", "flagged", "retracted"] as const;
+describe('ReviewState', () => {
+  const DOC_CLAIMED = ['unreviewed', 'approved', 'flagged', 'retracted'] as const;
 
-  it("all doc-claimed review states exist", () => {
+  it('all doc-claimed review states exist', () => {
     for (const state of DOC_CLAIMED) {
       expect(REVIEW_STATES).toContain(state);
     }
   });
 });
 
-describe("ExportSafetyState", () => {
-  const DOC_CLAIMED = ["safe", "restricted", "pending_review", "blocked"] as const;
+describe('ExportSafetyState', () => {
+  const DOC_CLAIMED = ['safe', 'restricted', 'pending_review', 'blocked'] as const;
 
-  it("all doc-claimed export safety states exist", () => {
+  it('all doc-claimed export safety states exist', () => {
     for (const state of DOC_CLAIMED) {
       expect(EXPORT_SAFETY_STATES).toContain(state);
     }
   });
 });
 
-describe("EvidenceSourceType", () => {
+describe('EvidenceSourceType', () => {
   const DOC_CLAIMED = [
-    "ais_record", "sanctions_entry", "court_document", "property_record",
-    "threat_feed_entry", "audit_log_entry", "simulation_result",
-    "agent_output", "human_annotation", "external_api_response",
+    'ais_record',
+    'sanctions_entry',
+    'court_document',
+    'property_record',
+    'threat_feed_entry',
+    'audit_log_entry',
+    'simulation_result',
+    'agent_output',
+    'human_annotation',
+    'external_api_response',
   ] as const;
 
-  it("all doc-claimed evidence source types exist", () => {
+  it('all doc-claimed evidence source types exist', () => {
     for (const type of DOC_CLAIMED) {
       expect(EVIDENCE_SOURCE_TYPES).toContain(type);
     }

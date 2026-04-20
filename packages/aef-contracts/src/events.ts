@@ -1,16 +1,16 @@
-import { z } from "zod";
-import { TenantIdSchema } from "./tenant.js";
+import { z } from 'zod';
+import { TenantIdSchema } from './tenant.js';
 
 export const AefEventKindSchema = z.enum([
-  "aef.embed.completed",
-  "aef.rerank.completed",
-  "aef.search.completed",
-  "aef.ingest.completed",
-  "aef.index.rebuild.started",
-  "aef.index.rebuild.completed",
-  "aef.index.verify.completed",
-  "aef.policy.denied",
-  "aef.evals.run.completed",
+  'aef.embed.completed',
+  'aef.rerank.completed',
+  'aef.search.completed',
+  'aef.ingest.completed',
+  'aef.index.rebuild.started',
+  'aef.index.rebuild.completed',
+  'aef.index.verify.completed',
+  'aef.policy.denied',
+  'aef.evals.run.completed',
 ]);
 export type AefEventKind = z.infer<typeof AefEventKindSchema>;
 

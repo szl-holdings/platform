@@ -29,7 +29,7 @@
  * fail steps 1–5 because the fresh stores would be empty after "restart".
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Mocks — must be hoisted before importing modules that consume them.
@@ -43,32 +43,32 @@ import { describe, it, expect, vi } from "vitest";
 //   db.insert(linksTable).values([...]).onConflictDoNothing()      → append
 type Row = Record<string, unknown>;
 type TableState =
-  | { kind: "keyed"; idField: string; rows: Map<string, Row> }
-  | { kind: "log"; rows: Row[] };
+  | { kind: 'keyed'; idField: string; rows: Map<string, Row> }
+  | { kind: 'log'; rows: Row[] };
 
 const fakeTables = {
   signals: {
-    table: { signalId: { name: "signalId" }, receivedAt: { name: "receivedAt" } },
-    state: { kind: "keyed", idField: "signalId", rows: new Map() } as TableState,
+    table: { signalId: { name: 'signalId' }, receivedAt: { name: 'receivedAt' } },
+    state: { kind: 'keyed', idField: 'signalId', rows: new Map() } as TableState,
   },
   evidence: {
-    table: { evidenceId: { name: "evidenceId" }, observedAt: { name: "observedAt" } },
-    state: { kind: "keyed", idField: "evidenceId", rows: new Map() } as TableState,
+    table: { evidenceId: { name: 'evidenceId' }, observedAt: { name: 'observedAt' } },
+    state: { kind: 'keyed', idField: 'evidenceId', rows: new Map() } as TableState,
   },
   evidenceLinks: {
-    table: { evidenceId: { name: "evidenceId" }, entityId: { name: "entityId" } },
-    state: { kind: "log", rows: [] } as TableState,
+    table: { evidenceId: { name: 'evidenceId' }, entityId: { name: 'entityId' } },
+    state: { kind: 'log', rows: [] } as TableState,
   },
   recommendations: {
     table: {
-      recommendationId: { name: "recommendationId" },
-      generatedAt: { name: "generatedAt" },
+      recommendationId: { name: 'recommendationId' },
+      generatedAt: { name: 'generatedAt' },
     },
-    state: { kind: "keyed", idField: "recommendationId", rows: new Map() } as TableState,
+    state: { kind: 'keyed', idField: 'recommendationId', rows: new Map() } as TableState,
   },
   entities: {
-    table: { entityId: { name: "entityId" }, snapshotAt: { name: "snapshotAt" } },
-    state: { kind: "keyed", idField: "entityId", rows: new Map() } as TableState,
+    table: { entityId: { name: 'entityId' }, snapshotAt: { name: 'snapshotAt' } },
+    state: { kind: 'keyed', idField: 'entityId', rows: new Map() } as TableState,
   },
 };
 
@@ -76,7 +76,7 @@ function lookupState(t: unknown): TableState {
   for (const v of Object.values(fakeTables)) {
     if (v.table === t) return v.state;
   }
-  throw new Error("[fake-db] unknown table reference");
+  throw new Error('[fake-db] unknown table reference');
 }
 
 const fakeDb = {
@@ -88,9 +88,7 @@ const fakeDb = {
           orderBy() {
             return {
               async limit() {
-                return state.kind === "keyed"
-                  ? Array.from(state.rows.values())
-                  : [...state.rows];
+                return state.kind === 'keyed' ? Array.from(state.rows.values()) : [...state.rows];
               },
             };
           },
@@ -103,7 +101,7 @@ const fakeDb = {
     return {
       values(row: Row | Row[]) {
         const apply = () => {
-          if (state.kind === "keyed") {
+          if (state.kind === 'keyed') {
             const rows = Array.isArray(row) ? row : [row];
             for (const r of rows) {
               const id = r[state.idField] as string;
@@ -127,12 +125,12 @@ const fakeDb = {
   },
 };
 
-vi.mock("@szl-holdings/db", () => ({
+vi.mock('@szl-holdings/db', () => ({
   db: fakeDb,
   pool: {},
 }));
 
-vi.mock("@szl-holdings/db/schema", () => ({
+vi.mock('@szl-holdings/db/schema', () => ({
   meshSignalsTable: fakeTables.signals.table,
   meshEvidenceItemsTable: fakeTables.evidence.table,
   meshEvidenceEntityLinksTable: fakeTables.evidenceLinks.table,
@@ -141,26 +139,23 @@ vi.mock("@szl-holdings/db/schema", () => ({
 }));
 
 // Bypass auth + rate-limit middleware for the public-API integration test.
-vi.mock("../middlewares/auth", () => ({
+vi.mock('../middlewares/auth', () => ({
   authMiddleware: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
-vi.mock("../middlewares/sliding-window-limiter", () => ({
+vi.mock('../middlewares/sliding-window-limiter', () => ({
   perUserApiSlidingLimiter: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
-
 
 // ---------------------------------------------------------------------------
 // Imports — after mocks
 // ---------------------------------------------------------------------------
 
-const express = (await import("express")).default;
-const request = (await import("supertest")).default;
+const express = (await import('express')).default;
+const request = (await import('supertest')).default;
 
-const {
-  defaultSignalBus,
-  PostgresSignalBusStore,
-  SignalBus,
-} = await import("@szl-holdings/signal-mesh");
+const { defaultSignalBus, PostgresSignalBusStore, SignalBus } = await import(
+  '@szl-holdings/signal-mesh'
+);
 
 const {
   defaultEvidenceStore,
@@ -171,18 +166,16 @@ const {
   PostgresEntityRegistry,
   InMemoryEvidenceStore,
   InMemoryRecommendationStore,
-} = await import("@szl-holdings/evidence-graph");
+} = await import('@szl-holdings/evidence-graph');
 
-const { defaultEntityRegistry, InMemoryEntityRegistry } = await import("@workspace/ontology");
+const { defaultEntityRegistry, InMemoryEntityRegistry } = await import('@workspace/ontology');
 
 // Import the mesh seed module directly (bypass `@workspace/demo-seed`'s
 // barrel index, which transitively imports a constellation seeder we don't
 // need for this restart test).
-const { seedSignalMesh } = await import(
-  "../../../../packages/demo-seed/src/seed-signal-mesh"
-);
+const { seedSignalMesh } = await import('../../../../packages/demo-seed/src/seed-signal-mesh');
 
-const { default: evidenceGraphRouter } = await import("../routes/evidence-graph");
+const { default: evidenceGraphRouter } = await import('../routes/evidence-graph');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -264,9 +257,11 @@ function buildApp() {
   const app = express();
   app.use(express.json());
   app.use(evidenceGraphRouter);
-  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    res.status(500).json({ error: err.message });
-  });
+  app.use(
+    (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      res.status(500).json({ error: err.message });
+    },
+  );
   return app;
 }
 
@@ -274,8 +269,8 @@ function buildApp() {
 // Test
 // ---------------------------------------------------------------------------
 
-describe("signal mesh — survives a simulated API server restart (Task #1923)", () => {
-  it("seed → flush → restart → hydrate keeps signals/evidence/recommendations/entities readable", async () => {
+describe('signal mesh — survives a simulated API server restart (Task #1923)', () => {
+  it('seed → flush → restart → hydrate keeps signals/evidence/recommendations/entities readable', async () => {
     // ---- Boot 1: wire durable stores, seed the mesh, flush to fake DB ----
     const beforeStores = await bootDurablePersistence({ hydrate: false });
 
@@ -300,11 +295,19 @@ describe("signal mesh — survives a simulated API server restart (Task #1923)",
     await flushAll(beforeStores);
 
     // The fake DB must now hold every record we just published.
-    expect(fakeTables.signals.state.kind).toBe("keyed");
-    expect((fakeTables.signals.state as { rows: Map<string, Row> }).rows.size).toBe(beforeSignals.length);
-    expect((fakeTables.evidence.state as { rows: Map<string, Row> }).rows.size).toBe(beforeEvidence.length);
-    expect((fakeTables.recommendations.state as { rows: Map<string, Row> }).rows.size).toBe(beforeRecs.length);
-    expect((fakeTables.entities.state as { rows: Map<string, Row> }).rows.size).toBe(beforeEntities.length);
+    expect(fakeTables.signals.state.kind).toBe('keyed');
+    expect((fakeTables.signals.state as { rows: Map<string, Row> }).rows.size).toBe(
+      beforeSignals.length,
+    );
+    expect((fakeTables.evidence.state as { rows: Map<string, Row> }).rows.size).toBe(
+      beforeEvidence.length,
+    );
+    expect((fakeTables.recommendations.state as { rows: Map<string, Row> }).rows.size).toBe(
+      beforeRecs.length,
+    );
+    expect((fakeTables.entities.state as { rows: Map<string, Row> }).rows.size).toBe(
+      beforeEntities.length,
+    );
     expect((fakeTables.evidenceLinks.state as { rows: Row[] }).rows.length).toBeGreaterThan(0);
 
     await Promise.all([
@@ -352,7 +355,9 @@ describe("signal mesh — survives a simulated API server restart (Task #1923)",
     // persists the full snapshot including activeSignalIds + activeRecommendationIds).
     const recoveredEntity = defaultEntityRegistry.get(beforeEntityWithSignals.entityId);
     expect(recoveredEntity).toBeDefined();
-    expect(recoveredEntity?.activeSignalIds.length).toBe(beforeEntityWithSignals.activeSignalIds.length);
+    expect(recoveredEntity?.activeSignalIds.length).toBe(
+      beforeEntityWithSignals.activeSignalIds.length,
+    );
     expect(recoveredEntity?.activeRecommendationIds.length).toBe(
       beforeEntityWithSignals.activeRecommendationIds.length,
     );
@@ -368,12 +373,12 @@ describe("signal mesh — survives a simulated API server restart (Task #1923)",
     // ---- Verify the same data is reachable through the public HTTP API ----
     const app = buildApp();
 
-    const signalsRes = await request(app).get("/evidence-graph/signals?limit=10000");
+    const signalsRes = await request(app).get('/evidence-graph/signals?limit=10000');
     expect(signalsRes.status).toBe(200);
     expect(signalsRes.body.signals.length).toBe(beforeSignals.length);
     expect(signalsRes.body.busCount).toBe(beforeSignals.length);
 
-    const recsRes = await request(app).get("/evidence-graph/recommendations?limit=10000");
+    const recsRes = await request(app).get('/evidence-graph/recommendations?limit=10000');
     expect(recsRes.status).toBe(200);
     expect(recsRes.body.recommendations.length).toBe(beforeRecs.length);
 
@@ -382,7 +387,7 @@ describe("signal mesh — survives a simulated API server restart (Task #1923)",
     expect(recDetailRes.body.chain.recommendation.recommendationId).toBe(beforeRecId);
     expect(recDetailRes.body.chain.evidenceItems.length).toBeGreaterThan(0);
 
-    const entitiesRes = await request(app).get("/evidence-graph/entities");
+    const entitiesRes = await request(app).get('/evidence-graph/entities');
     expect(entitiesRes.status).toBe(200);
     expect(entitiesRes.body.entities.length).toBe(beforeEntities.length);
 
@@ -393,7 +398,7 @@ describe("signal mesh — survives a simulated API server restart (Task #1923)",
     expect(whyRes.body.why.entityId).toBe(beforeEntityWithSignals.entityId);
     expect(whyRes.body.why.entitySnapshot).not.toBeNull();
 
-    const statusRes = await request(app).get("/evidence-graph/status");
+    const statusRes = await request(app).get('/evidence-graph/status');
     expect(statusRes.status).toBe(200);
     expect(statusRes.body.counts.signals).toBe(beforeSignals.length);
     expect(statusRes.body.counts.evidenceItems).toBe(beforeEvidence.length);

@@ -1,518 +1,777 @@
-import { pgTable, text, serial, timestamp, integer, boolean, jsonb, numeric, index } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-zod';
 
-export const dosEditorialPillarsTable = pgTable("dos_editorial_pillars", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  description: text("description"),
-  color: text("color"),
-  isFavorite: boolean("is_favorite").notNull().default(false),
-  sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosEditorialPillarsTable = pgTable('dos_editorial_pillars', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  color: text('color'),
+  isFavorite: boolean('is_favorite').notNull().default(false),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosAuthorProfilesTable = pgTable("dos_author_profiles", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  title: text("title"),
-  bioShort: text("bio_short"),
-  bioLong: text("bio_long"),
-  avatarUrl: text("avatar_url"),
-  linkedinUrl: text("linkedin_url"),
-  xUrl: text("x_url"),
-  websiteUrl: text("website_url"),
-  isDefault: boolean("is_default").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosAuthorProfilesTable = pgTable('dos_author_profiles', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  title: text('title'),
+  bioShort: text('bio_short'),
+  bioLong: text('bio_long'),
+  avatarUrl: text('avatar_url'),
+  linkedinUrl: text('linkedin_url'),
+  xUrl: text('x_url'),
+  websiteUrl: text('website_url'),
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosSiteSettingsTable = pgTable("dos_site_settings", {
-  id: serial("id").primaryKey(),
-  key: text("key").notNull().unique(),
-  value: text("value"),
-  category: text("category", { enum: ["company", "social", "integration", "publishing", "author", "cta"] }).notNull().default("company"),
-  label: text("label"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosSiteSettingsTable = pgTable('dos_site_settings', {
+  id: serial('id').primaryKey(),
+  key: text('key').notNull().unique(),
+  value: text('value'),
+  category: text('category', {
+    enum: ['company', 'social', 'integration', 'publishing', 'author', 'cta'],
+  })
+    .notNull()
+    .default('company'),
+  label: text('label'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosArticlesTable = pgTable("dos_articles", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  subtitle: text("subtitle"),
-  slug: text("slug").notNull().unique(),
-  pillarId: integer("pillar_id").references(() => dosEditorialPillarsTable.id, { onDelete: "set null" }),
-  authorId: integer("author_id").references(() => dosAuthorProfilesTable.id, { onDelete: "set null" }),
-  articleType: text("article_type", {
-    enum: ["flagship-essay", "founder-memo", "founder-note", "framework", "contrarian-pov", "operator-checklist", "trend-analysis", "case-story", "case-study", "short-authority", "myth-vs-reality", "buyer-guide", "industry-brief", "playbook"]
-  }).notNull().default("flagship-essay"),
-  targetAudience: text("target_audience"),
-  thesis: text("thesis"),
-  summary: text("summary"),
-  excerpt: text("excerpt"),
-  bodyMarkdown: text("body_markdown"),
-  bodyHtml: text("body_html"),
-  coverImageUrl: text("cover_image_url"),
-  readTimeMinutes: integer("read_time_minutes"),
-  seoTitle: text("seo_title"),
-  seoDescription: text("seo_description"),
-  ogTitle: text("og_title"),
-  ogDescription: text("og_description"),
-  ogImageUrl: text("og_image_url"),
-  canonicalUrl: text("canonical_url"),
-  tags: jsonb("tags").$type<string[]>().default([]),
-  keywords: jsonb("keywords").$type<string[]>().default([]),
-  ctaType: text("cta_type", { enum: ["subscribe", "contact", "offer", "demo", "download", "custom"] }),
-  ctaText: text("cta_text"),
-  ctaUrl: text("cta_url"),
-  status: text("status", { enum: ["draft", "in-review", "approved", "published", "archived"] }).notNull().default("draft"),
-  siteStatus: text("site_status", { enum: ["draft", "ready", "published"] }).notNull().default("draft"),
-  xStatus: text("x_status", { enum: ["none", "draft", "ready", "queued", "sent", "failed"] }).notNull().default("none"),
-  mediumStatus: text("medium_status", { enum: ["none", "draft", "ready", "published"] }).notNull().default("none"),
-  substackStatus: text("substack_status", { enum: ["none", "draft", "ready", "published"] }).notNull().default("none"),
-  approvedForAutoSend: boolean("approved_for_auto_send").notNull().default(false),
-  reviewRequired: boolean("review_required").notNull().default(true),
-  externalUrlSite: text("external_url_site"),
-  externalUrlX: text("external_url_x"),
-  externalUrlMedium: text("external_url_medium"),
-  externalUrlSubstack: text("external_url_substack"),
-  publishedSiteAt: timestamp("published_site_at"),
-  publishedXAt: timestamp("published_x_at"),
-  publishedMediumAt: timestamp("published_medium_at"),
-  publishedSubstackAt: timestamp("published_substack_at"),
-  publishTargetDate: timestamp("publish_target_date"),
-  nextRecommendedAction: text("next_recommended_action"),
-  campaignId: integer("campaign_id").references(() => dosCampaignsTable.id, { onDelete: "set null" }),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => [
-  index("dos_articles_status_idx").on(table.status),
-  index("dos_articles_pillar_idx").on(table.pillarId),
-  index("dos_articles_slug_idx").on(table.slug),
-]);
+export const dosArticlesTable = pgTable(
+  'dos_articles',
+  {
+    id: serial('id').primaryKey(),
+    title: text('title').notNull(),
+    subtitle: text('subtitle'),
+    slug: text('slug').notNull().unique(),
+    pillarId: integer('pillar_id').references(() => dosEditorialPillarsTable.id, {
+      onDelete: 'set null',
+    }),
+    authorId: integer('author_id').references(() => dosAuthorProfilesTable.id, {
+      onDelete: 'set null',
+    }),
+    articleType: text('article_type', {
+      enum: [
+        'flagship-essay',
+        'founder-memo',
+        'founder-note',
+        'framework',
+        'contrarian-pov',
+        'operator-checklist',
+        'trend-analysis',
+        'case-story',
+        'case-study',
+        'short-authority',
+        'myth-vs-reality',
+        'buyer-guide',
+        'industry-brief',
+        'playbook',
+      ],
+    })
+      .notNull()
+      .default('flagship-essay'),
+    targetAudience: text('target_audience'),
+    thesis: text('thesis'),
+    summary: text('summary'),
+    excerpt: text('excerpt'),
+    bodyMarkdown: text('body_markdown'),
+    bodyHtml: text('body_html'),
+    coverImageUrl: text('cover_image_url'),
+    readTimeMinutes: integer('read_time_minutes'),
+    seoTitle: text('seo_title'),
+    seoDescription: text('seo_description'),
+    ogTitle: text('og_title'),
+    ogDescription: text('og_description'),
+    ogImageUrl: text('og_image_url'),
+    canonicalUrl: text('canonical_url'),
+    tags: jsonb('tags').$type<string[]>().default([]),
+    keywords: jsonb('keywords').$type<string[]>().default([]),
+    ctaType: text('cta_type', {
+      enum: ['subscribe', 'contact', 'offer', 'demo', 'download', 'custom'],
+    }),
+    ctaText: text('cta_text'),
+    ctaUrl: text('cta_url'),
+    status: text('status', { enum: ['draft', 'in-review', 'approved', 'published', 'archived'] })
+      .notNull()
+      .default('draft'),
+    siteStatus: text('site_status', { enum: ['draft', 'ready', 'published'] })
+      .notNull()
+      .default('draft'),
+    xStatus: text('x_status', { enum: ['none', 'draft', 'ready', 'queued', 'sent', 'failed'] })
+      .notNull()
+      .default('none'),
+    mediumStatus: text('medium_status', { enum: ['none', 'draft', 'ready', 'published'] })
+      .notNull()
+      .default('none'),
+    substackStatus: text('substack_status', { enum: ['none', 'draft', 'ready', 'published'] })
+      .notNull()
+      .default('none'),
+    approvedForAutoSend: boolean('approved_for_auto_send').notNull().default(false),
+    reviewRequired: boolean('review_required').notNull().default(true),
+    externalUrlSite: text('external_url_site'),
+    externalUrlX: text('external_url_x'),
+    externalUrlMedium: text('external_url_medium'),
+    externalUrlSubstack: text('external_url_substack'),
+    publishedSiteAt: timestamp('published_site_at'),
+    publishedXAt: timestamp('published_x_at'),
+    publishedMediumAt: timestamp('published_medium_at'),
+    publishedSubstackAt: timestamp('published_substack_at'),
+    publishTargetDate: timestamp('publish_target_date'),
+    nextRecommendedAction: text('next_recommended_action'),
+    campaignId: integer('campaign_id').references(() => dosCampaignsTable.id, {
+      onDelete: 'set null',
+    }),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('dos_articles_status_idx').on(table.status),
+    index('dos_articles_pillar_idx').on(table.pillarId),
+    index('dos_articles_slug_idx').on(table.slug),
+  ],
+);
 
-export const dosArticleVersionsTable = pgTable("dos_article_versions", {
-  id: serial("id").primaryKey(),
-  articleId: integer("article_id").notNull().references(() => dosArticlesTable.id, { onDelete: "cascade" }),
-  versionNumber: integer("version_number").notNull().default(1),
-  title: text("title"),
-  bodyMarkdown: text("body_markdown"),
-  changeNote: text("change_note"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosArticleVersionsTable = pgTable('dos_article_versions', {
+  id: serial('id').primaryKey(),
+  articleId: integer('article_id')
+    .notNull()
+    .references(() => dosArticlesTable.id, { onDelete: 'cascade' }),
+  versionNumber: integer('version_number').notNull().default(1),
+  title: text('title'),
+  bodyMarkdown: text('body_markdown'),
+  changeNote: text('change_note'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosNewslettersTable = pgTable("dos_newsletters", {
-  id: serial("id").primaryKey(),
-  issueNumber: integer("issue_number"),
-  title: text("title").notNull(),
-  subtitle: text("subtitle"),
-  slug: text("slug").notNull().unique(),
-  templateType: text("template_type", {
-    enum: ["weekly-briefing", "founder-note", "strategy-memo", "build-in-public", "resource-roundup", "industry-pulse", "product-insight"]
-  }).notNull().default("weekly-briefing"),
-  pillarId: integer("pillar_id").references(() => dosEditorialPillarsTable.id, { onDelete: "set null" }),
-  authorId: integer("author_id").references(() => dosAuthorProfilesTable.id, { onDelete: "set null" }),
-  introNote: text("intro_note"),
-  mainStoryMarkdown: text("main_story_markdown"),
-  mainStoryHtml: text("main_story_html"),
-  secondaryLinks: jsonb("secondary_links").$type<Array<{ title: string; url: string; description?: string }>>().default([]),
-  ctaBlock: text("cta_block"),
-  founderSignoff: text("founder_signoff"),
-  emailVersion: text("email_version"),
-  webVersion: text("web_version"),
-  summaryVersion: text("summary_version"),
-  status: text("status", { enum: ["draft", "in-review", "approved", "published", "archived"] }).notNull().default("draft"),
-  substackStatus: text("substack_status", { enum: ["none", "draft", "ready", "published"] }).notNull().default("none"),
-  substackUrl: text("substack_url"),
-  publishedAt: timestamp("published_at"),
-  campaignId: integer("campaign_id").references(() => dosCampaignsTable.id, { onDelete: "set null" }),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosNewslettersTable = pgTable('dos_newsletters', {
+  id: serial('id').primaryKey(),
+  issueNumber: integer('issue_number'),
+  title: text('title').notNull(),
+  subtitle: text('subtitle'),
+  slug: text('slug').notNull().unique(),
+  templateType: text('template_type', {
+    enum: [
+      'weekly-briefing',
+      'founder-note',
+      'strategy-memo',
+      'build-in-public',
+      'resource-roundup',
+      'industry-pulse',
+      'product-insight',
+    ],
+  })
+    .notNull()
+    .default('weekly-briefing'),
+  pillarId: integer('pillar_id').references(() => dosEditorialPillarsTable.id, {
+    onDelete: 'set null',
+  }),
+  authorId: integer('author_id').references(() => dosAuthorProfilesTable.id, {
+    onDelete: 'set null',
+  }),
+  introNote: text('intro_note'),
+  mainStoryMarkdown: text('main_story_markdown'),
+  mainStoryHtml: text('main_story_html'),
+  secondaryLinks: jsonb('secondary_links')
+    .$type<Array<{ title: string; url: string; description?: string }>>()
+    .default([]),
+  ctaBlock: text('cta_block'),
+  founderSignoff: text('founder_signoff'),
+  emailVersion: text('email_version'),
+  webVersion: text('web_version'),
+  summaryVersion: text('summary_version'),
+  status: text('status', { enum: ['draft', 'in-review', 'approved', 'published', 'archived'] })
+    .notNull()
+    .default('draft'),
+  substackStatus: text('substack_status', { enum: ['none', 'draft', 'ready', 'published'] })
+    .notNull()
+    .default('none'),
+  substackUrl: text('substack_url'),
+  publishedAt: timestamp('published_at'),
+  campaignId: integer('campaign_id').references(() => dosCampaignsTable.id, {
+    onDelete: 'set null',
+  }),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosCarouselProjectsTable = pgTable("dos_carousel_projects", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  slug: text("slug").notNull().unique(),
-  topic: text("topic"),
-  hook: text("hook"),
-  pillarId: integer("pillar_id").references(() => dosEditorialPillarsTable.id, { onDelete: "set null" }),
-  linkedinShortCaption: text("linkedin_short_caption"),
-  linkedinLongCaption: text("linkedin_long_caption"),
-  xThreadAdaptation: text("x_thread_adaptation"),
-  instagramCaption: text("instagram_caption"),
-  newsletterTeaser: text("newsletter_teaser"),
-  articleExcerpt: text("article_excerpt"),
-  visualDirectionNotes: text("visual_direction_notes"),
-  aiCarouselsImportBlock: text("ai_carousels_import_block"),
-  ctaText: text("cta_text"),
-  ctaUrl: text("cta_url"),
-  status: text("status", { enum: ["idea", "draft", "ready", "exported", "published", "archived"] }).notNull().default("idea"),
-  articleId: integer("article_id").references(() => dosArticlesTable.id, { onDelete: "set null" }),
-  newsletterId: integer("newsletter_id").references(() => dosNewslettersTable.id, { onDelete: "set null" }),
-  campaignId: integer("campaign_id").references(() => dosCampaignsTable.id, { onDelete: "set null" }),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosCarouselProjectsTable = pgTable('dos_carousel_projects', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(),
+  topic: text('topic'),
+  hook: text('hook'),
+  pillarId: integer('pillar_id').references(() => dosEditorialPillarsTable.id, {
+    onDelete: 'set null',
+  }),
+  linkedinShortCaption: text('linkedin_short_caption'),
+  linkedinLongCaption: text('linkedin_long_caption'),
+  xThreadAdaptation: text('x_thread_adaptation'),
+  instagramCaption: text('instagram_caption'),
+  newsletterTeaser: text('newsletter_teaser'),
+  articleExcerpt: text('article_excerpt'),
+  visualDirectionNotes: text('visual_direction_notes'),
+  aiCarouselsImportBlock: text('ai_carousels_import_block'),
+  ctaText: text('cta_text'),
+  ctaUrl: text('cta_url'),
+  status: text('status', { enum: ['idea', 'draft', 'ready', 'exported', 'published', 'archived'] })
+    .notNull()
+    .default('idea'),
+  articleId: integer('article_id').references(() => dosArticlesTable.id, { onDelete: 'set null' }),
+  newsletterId: integer('newsletter_id').references(() => dosNewslettersTable.id, {
+    onDelete: 'set null',
+  }),
+  campaignId: integer('campaign_id').references(() => dosCampaignsTable.id, {
+    onDelete: 'set null',
+  }),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosCarouselSlidesTable = pgTable("dos_carousel_slides", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull().references(() => dosCarouselProjectsTable.id, { onDelete: "cascade" }),
-  slideNumber: integer("slide_number").notNull(),
-  slideType: text("slide_type", { enum: ["intro", "content", "outro"] }).notNull().default("content"),
-  tagline: text("tagline"),
-  title: text("title"),
-  paragraph: text("paragraph"),
-  callToAction: text("call_to_action"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosCarouselSlidesTable = pgTable('dos_carousel_slides', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id')
+    .notNull()
+    .references(() => dosCarouselProjectsTable.id, { onDelete: 'cascade' }),
+  slideNumber: integer('slide_number').notNull(),
+  slideType: text('slide_type', { enum: ['intro', 'content', 'outro'] })
+    .notNull()
+    .default('content'),
+  tagline: text('tagline'),
+  title: text('title'),
+  paragraph: text('paragraph'),
+  callToAction: text('call_to_action'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosXPostsTable = pgTable("dos_x_posts", {
-  id: serial("id").primaryKey(),
-  sourceType: text("source_type", { enum: ["article", "newsletter", "carousel", "standalone", "campaign"] }),
-  sourceId: integer("source_id"),
-  postType: text("post_type", { enum: ["single", "thread", "reply-chain", "teaser", "cta", "recap", "authority", "contrarian", "founder-pov"] }).notNull().default("single"),
-  body: text("body").notNull(),
-  threadJson: jsonb("thread_json").$type<Array<{ body: string; mediaUrl?: string }>>(),
-  status: text("status", { enum: ["draft", "in-review", "approved", "approved-for-auto-send", "queued", "scheduled", "sent", "failed", "cancelled", "archived"] }).notNull().default("draft"),
-  scheduledFor: timestamp("scheduled_for"),
-  sentAt: timestamp("sent_at"),
-  externalPostId: text("external_post_id"),
-  externalPostUrl: text("external_post_url"),
-  campaignId: integer("campaign_id").references(() => dosCampaignsTable.id, { onDelete: "set null" }),
-  errorMessage: text("error_message"),
-  retryCount: integer("retry_count").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => [
-  index("dos_x_posts_status_idx").on(table.status),
-  index("dos_x_posts_scheduled_idx").on(table.scheduledFor),
-]);
+export const dosXPostsTable = pgTable(
+  'dos_x_posts',
+  {
+    id: serial('id').primaryKey(),
+    sourceType: text('source_type', {
+      enum: ['article', 'newsletter', 'carousel', 'standalone', 'campaign'],
+    }),
+    sourceId: integer('source_id'),
+    postType: text('post_type', {
+      enum: [
+        'single',
+        'thread',
+        'reply-chain',
+        'teaser',
+        'cta',
+        'recap',
+        'authority',
+        'contrarian',
+        'founder-pov',
+      ],
+    })
+      .notNull()
+      .default('single'),
+    body: text('body').notNull(),
+    threadJson: jsonb('thread_json').$type<Array<{ body: string; mediaUrl?: string }>>(),
+    status: text('status', {
+      enum: [
+        'draft',
+        'in-review',
+        'approved',
+        'approved-for-auto-send',
+        'queued',
+        'scheduled',
+        'sent',
+        'failed',
+        'cancelled',
+        'archived',
+      ],
+    })
+      .notNull()
+      .default('draft'),
+    scheduledFor: timestamp('scheduled_for'),
+    sentAt: timestamp('sent_at'),
+    externalPostId: text('external_post_id'),
+    externalPostUrl: text('external_post_url'),
+    campaignId: integer('campaign_id').references(() => dosCampaignsTable.id, {
+      onDelete: 'set null',
+    }),
+    errorMessage: text('error_message'),
+    retryCount: integer('retry_count').notNull().default(0),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('dos_x_posts_status_idx').on(table.status),
+    index('dos_x_posts_scheduled_idx').on(table.scheduledFor),
+  ],
+);
 
-export const dosCampaignsTable = pgTable("dos_campaigns", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  description: text("description"),
-  status: text("status", { enum: ["draft", "active", "paused", "completed", "archived"] }).notNull().default("draft"),
-  startDate: timestamp("start_date"),
-  endDate: timestamp("end_date"),
-  owner: text("owner"),
-  notes: text("notes"),
-  totalClicks: integer("total_clicks").notNull().default(0),
-  totalConversions: integer("total_conversions").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosCampaignsTable = pgTable('dos_campaigns', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  status: text('status', { enum: ['draft', 'active', 'paused', 'completed', 'archived'] })
+    .notNull()
+    .default('draft'),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  owner: text('owner'),
+  notes: text('notes'),
+  totalClicks: integer('total_clicks').notNull().default(0),
+  totalConversions: integer('total_conversions').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosCampaignLinksTable = pgTable("dos_campaign_links", {
-  id: serial("id").primaryKey(),
-  campaignId: integer("campaign_id").notNull().references(() => dosCampaignsTable.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  source: text("source").notNull(),
-  medium: text("medium").notNull(),
-  campaign: text("campaign").notNull(),
-  content: text("content"),
-  term: text("term"),
-  destination: text("destination").notNull(),
-  fullUrl: text("full_url").notNull(),
-  clicks: integer("clicks").notNull().default(0),
-  conversions: integer("conversions").notNull().default(0),
-  owner: text("owner"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosCampaignLinksTable = pgTable('dos_campaign_links', {
+  id: serial('id').primaryKey(),
+  campaignId: integer('campaign_id')
+    .notNull()
+    .references(() => dosCampaignsTable.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  source: text('source').notNull(),
+  medium: text('medium').notNull(),
+  campaign: text('campaign').notNull(),
+  content: text('content'),
+  term: text('term'),
+  destination: text('destination').notNull(),
+  fullUrl: text('full_url').notNull(),
+  clicks: integer('clicks').notNull().default(0),
+  conversions: integer('conversions').notNull().default(0),
+  owner: text('owner'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosLeadsTable = pgTable("dos_leads", {
-  id: serial("id").primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  company: text("company"),
-  role: text("role"),
-  interestArea: text("interest_area"),
-  budget: text("budget"),
-  message: text("message"),
-  consent: boolean("consent").notNull().default(false),
-  source: text("source"),
-  medium: text("medium"),
-  campaign: text("campaign"),
-  content: text("content"),
-  landingPage: text("landing_page"),
-  stage: text("stage", { enum: ["new", "qualified", "warm", "needs-followup", "proposal-candidate", "closed-won", "closed-lost"] }).notNull().default("new"),
-  score: integer("score").notNull().default(0),
-  tags: jsonb("tags").$type<string[]>().default([]),
-  owner: text("owner"),
-  nextFollowUp: timestamp("next_follow_up"),
-  lastAction: text("last_action"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => [
-  index("dos_leads_stage_idx").on(table.stage),
-  index("dos_leads_email_idx").on(table.email),
-]);
+export const dosLeadsTable = pgTable(
+  'dos_leads',
+  {
+    id: serial('id').primaryKey(),
+    name: text('name'),
+    email: text('email').notNull(),
+    company: text('company'),
+    role: text('role'),
+    interestArea: text('interest_area'),
+    budget: text('budget'),
+    message: text('message'),
+    consent: boolean('consent').notNull().default(false),
+    source: text('source'),
+    medium: text('medium'),
+    campaign: text('campaign'),
+    content: text('content'),
+    landingPage: text('landing_page'),
+    stage: text('stage', {
+      enum: [
+        'new',
+        'qualified',
+        'warm',
+        'needs-followup',
+        'proposal-candidate',
+        'closed-won',
+        'closed-lost',
+      ],
+    })
+      .notNull()
+      .default('new'),
+    score: integer('score').notNull().default(0),
+    tags: jsonb('tags').$type<string[]>().default([]),
+    owner: text('owner'),
+    nextFollowUp: timestamp('next_follow_up'),
+    lastAction: text('last_action'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('dos_leads_stage_idx').on(table.stage),
+    index('dos_leads_email_idx').on(table.email),
+  ],
+);
 
-export const dosLeadNotesTable = pgTable("dos_lead_notes", {
-  id: serial("id").primaryKey(),
-  leadId: integer("lead_id").notNull().references(() => dosLeadsTable.id, { onDelete: "cascade" }),
-  note: text("note").notNull(),
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosLeadNotesTable = pgTable('dos_lead_notes', {
+  id: serial('id').primaryKey(),
+  leadId: integer('lead_id')
+    .notNull()
+    .references(() => dosLeadsTable.id, { onDelete: 'cascade' }),
+  note: text('note').notNull(),
+  createdBy: text('created_by'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosDistributionTargetsTable = pgTable("dos_distribution_targets", {
-  id: serial("id").primaryKey(),
-  contentType: text("content_type", { enum: ["article", "newsletter", "carousel"] }).notNull(),
-  contentId: integer("content_id").notNull(),
-  channel: text("channel", { enum: ["site", "x", "medium", "substack", "linktree", "carousel", "newsletter", "linkedin", "founder-notes"] }).notNull(),
-  plannedDate: timestamp("planned_date"),
-  actualDate: timestamp("actual_date"),
-  status: text("status", { enum: ["planned", "in-progress", "ready", "published", "skipped"] }).notNull().default("planned"),
-  externalUrl: text("external_url"),
-  owner: text("owner"),
-  notes: text("notes"),
-  performanceNotes: text("performance_notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosDistributionTargetsTable = pgTable('dos_distribution_targets', {
+  id: serial('id').primaryKey(),
+  contentType: text('content_type', { enum: ['article', 'newsletter', 'carousel'] }).notNull(),
+  contentId: integer('content_id').notNull(),
+  channel: text('channel', {
+    enum: [
+      'site',
+      'x',
+      'medium',
+      'substack',
+      'linktree',
+      'carousel',
+      'newsletter',
+      'linkedin',
+      'founder-notes',
+    ],
+  }).notNull(),
+  plannedDate: timestamp('planned_date'),
+  actualDate: timestamp('actual_date'),
+  status: text('status', { enum: ['planned', 'in-progress', 'ready', 'published', 'skipped'] })
+    .notNull()
+    .default('planned'),
+  externalUrl: text('external_url'),
+  owner: text('owner'),
+  notes: text('notes'),
+  performanceNotes: text('performance_notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosPublicationUrlsTable = pgTable("dos_publication_urls", {
-  id: serial("id").primaryKey(),
-  contentType: text("content_type", { enum: ["article", "newsletter", "carousel", "x-post"] }).notNull(),
-  contentId: integer("content_id").notNull(),
-  platform: text("platform", { enum: ["site", "x", "medium", "substack", "linkedin", "other"] }).notNull(),
-  externalUrl: text("external_url").notNull(),
-  publishedAt: timestamp("published_at"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosPublicationUrlsTable = pgTable('dos_publication_urls', {
+  id: serial('id').primaryKey(),
+  contentType: text('content_type', {
+    enum: ['article', 'newsletter', 'carousel', 'x-post'],
+  }).notNull(),
+  contentId: integer('content_id').notNull(),
+  platform: text('platform', {
+    enum: ['site', 'x', 'medium', 'substack', 'linkedin', 'other'],
+  }).notNull(),
+  externalUrl: text('external_url').notNull(),
+  publishedAt: timestamp('published_at'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosContentCalendarItemsTable = pgTable("dos_content_calendar_items", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  contentType: text("content_type", { enum: ["article", "newsletter", "carousel", "x-post", "campaign", "other"] }).notNull(),
-  contentId: integer("content_id"),
-  pillarId: integer("pillar_id").references(() => dosEditorialPillarsTable.id, { onDelete: "set null" }),
-  campaignId: integer("campaign_id").references(() => dosCampaignsTable.id, { onDelete: "set null" }),
-  channel: text("channel"),
-  status: text("status", { enum: ["idea", "planned", "in-progress", "ready", "published", "repurpose", "archived", "cancelled"] }).notNull().default("idea"),
-  scheduledDate: timestamp("scheduled_date"),
-  owner: text("owner"),
-  notes: text("notes"),
-  destinationUrl: text("destination_url"),
-  targetAudience: text("target_audience"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosContentCalendarItemsTable = pgTable('dos_content_calendar_items', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  contentType: text('content_type', {
+    enum: ['article', 'newsletter', 'carousel', 'x-post', 'campaign', 'other'],
+  }).notNull(),
+  contentId: integer('content_id'),
+  pillarId: integer('pillar_id').references(() => dosEditorialPillarsTable.id, {
+    onDelete: 'set null',
+  }),
+  campaignId: integer('campaign_id').references(() => dosCampaignsTable.id, {
+    onDelete: 'set null',
+  }),
+  channel: text('channel'),
+  status: text('status', {
+    enum: [
+      'idea',
+      'planned',
+      'in-progress',
+      'ready',
+      'published',
+      'repurpose',
+      'archived',
+      'cancelled',
+    ],
+  })
+    .notNull()
+    .default('idea'),
+  scheduledDate: timestamp('scheduled_date'),
+  owner: text('owner'),
+  notes: text('notes'),
+  destinationUrl: text('destination_url'),
+  targetAudience: text('target_audience'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosCtaBlocksTable = pgTable("dos_cta_blocks", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  type: text("type", { enum: ["subscribe", "contact", "offer", "demo", "download", "custom"] }).notNull(),
-  headline: text("headline"),
-  body: text("body"),
-  buttonText: text("button_text"),
-  buttonUrl: text("button_url"),
-  isDefault: boolean("is_default").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosCtaBlocksTable = pgTable('dos_cta_blocks', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  type: text('type', {
+    enum: ['subscribe', 'contact', 'offer', 'demo', 'download', 'custom'],
+  }).notNull(),
+  headline: text('headline'),
+  body: text('body'),
+  buttonText: text('button_text'),
+  buttonUrl: text('button_url'),
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosPageViewsTable = pgTable("dos_page_views", {
-  id: serial("id").primaryKey(),
-  path: text("path").notNull(),
-  referrer: text("referrer"),
-  utmSource: text("utm_source"),
-  utmMedium: text("utm_medium"),
-  utmCampaign: text("utm_campaign"),
-  utmContent: text("utm_content"),
-  utmTerm: text("utm_term"),
-  sessionId: text("session_id"),
-  userAgent: text("user_agent"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosPageViewsTable = pgTable('dos_page_views', {
+  id: serial('id').primaryKey(),
+  path: text('path').notNull(),
+  referrer: text('referrer'),
+  utmSource: text('utm_source'),
+  utmMedium: text('utm_medium'),
+  utmCampaign: text('utm_campaign'),
+  utmContent: text('utm_content'),
+  utmTerm: text('utm_term'),
+  sessionId: text('session_id'),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosAnalyticsEventsTable = pgTable("dos_analytics_events", {
-  id: serial("id").primaryKey(),
-  eventType: text("event_type", { enum: ["page_view", "cta_click", "subscribe", "form_start", "form_submit", "download", "share", "scroll_depth"] }).notNull(),
-  path: text("path"),
-  target: text("target"),
-  value: text("value"),
-  sessionId: text("session_id"),
-  utmSource: text("utm_source"),
-  utmMedium: text("utm_medium"),
-  utmCampaign: text("utm_campaign"),
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosAnalyticsEventsTable = pgTable('dos_analytics_events', {
+  id: serial('id').primaryKey(),
+  eventType: text('event_type', {
+    enum: [
+      'page_view',
+      'cta_click',
+      'subscribe',
+      'form_start',
+      'form_submit',
+      'download',
+      'share',
+      'scroll_depth',
+    ],
+  }).notNull(),
+  path: text('path'),
+  target: text('target'),
+  value: text('value'),
+  sessionId: text('session_id'),
+  utmSource: text('utm_source'),
+  utmMedium: text('utm_medium'),
+  utmCampaign: text('utm_campaign'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosIntegrationStatusTable = pgTable("dos_integration_status", {
-  id: serial("id").primaryKey(),
-  provider: text("provider").notNull().unique(),
-  authMode: text("auth_mode", { enum: ["oauth2", "api-key", "bearer-token", "manual", "none"] }).notNull(),
-  status: text("status", { enum: ["connected", "disconnected", "error", "mock"] }).notNull().default("disconnected"),
-  lastSuccess: timestamp("last_success"),
-  lastFailure: timestamp("last_failure"),
-  lastError: text("last_error"),
-  config: jsonb("config"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosIntegrationStatusTable = pgTable('dos_integration_status', {
+  id: serial('id').primaryKey(),
+  provider: text('provider').notNull().unique(),
+  authMode: text('auth_mode', {
+    enum: ['oauth2', 'api-key', 'bearer-token', 'manual', 'none'],
+  }).notNull(),
+  status: text('status', { enum: ['connected', 'disconnected', 'error', 'mock'] })
+    .notNull()
+    .default('disconnected'),
+  lastSuccess: timestamp('last_success'),
+  lastFailure: timestamp('last_failure'),
+  lastError: text('last_error'),
+  config: jsonb('config'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosAutomationRunsTable = pgTable("dos_automation_runs", {
-  id: serial("id").primaryKey(),
-  jobName: text("job_name").notNull(),
-  jobType: text("job_type", { enum: ["content-ideation", "derivative-generation", "x-queue", "repurposing", "weekly-report", "custom", "carousel-ideas", "thought-leadership", "daily-summary"] }).notNull(),
-  status: text("status", { enum: ["running", "completed", "failed", "cancelled"] }).notNull().default("running"),
-  startedAt: timestamp("started_at").notNull().defaultNow(),
-  completedAt: timestamp("completed_at"),
-  summary: text("summary"),
-  output: jsonb("output").$type<Record<string, unknown>>(),
-  itemsCreated: integer("items_created").notNull().default(0),
-  itemsFailed: integer("items_failed").notNull().default(0),
-  errorLog: text("error_log"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosAutomationRunsTable = pgTable('dos_automation_runs', {
+  id: serial('id').primaryKey(),
+  jobName: text('job_name').notNull(),
+  jobType: text('job_type', {
+    enum: [
+      'content-ideation',
+      'derivative-generation',
+      'x-queue',
+      'repurposing',
+      'weekly-report',
+      'custom',
+      'carousel-ideas',
+      'thought-leadership',
+      'daily-summary',
+    ],
+  }).notNull(),
+  status: text('status', { enum: ['running', 'completed', 'failed', 'cancelled'] })
+    .notNull()
+    .default('running'),
+  startedAt: timestamp('started_at').notNull().defaultNow(),
+  completedAt: timestamp('completed_at'),
+  summary: text('summary'),
+  output: jsonb('output').$type<Record<string, unknown>>(),
+  itemsCreated: integer('items_created').notNull().default(0),
+  itemsFailed: integer('items_failed').notNull().default(0),
+  errorLog: text('error_log'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosLinktreeConfigTable = pgTable("dos_linktree_config", {
-  id: serial("id").primaryKey(),
-  label: text("label").notNull(),
-  destination: text("destination").notNull(),
-  campaignTag: text("campaign_tag"),
-  contentTag: text("content_tag"),
-  sortOrder: integer("sort_order").notNull().default(0),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosLinktreeConfigTable = pgTable('dos_linktree_config', {
+  id: serial('id').primaryKey(),
+  label: text('label').notNull(),
+  destination: text('destination').notNull(),
+  campaignTag: text('campaign_tag'),
+  contentTag: text('content_tag'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosViralityScoresTable = pgTable("dos_virality_scores", {
-  id: serial("id").primaryKey(),
-  articleId: integer("article_id").references(() => dosArticlesTable.id, { onDelete: "cascade" }),
-  contentTitle: text("content_title").notNull(),
-  contentType: text("content_type", { enum: ["article", "newsletter", "x-post", "carousel"] }).notNull().default("article"),
-  predictedScore: integer("predicted_score").notNull().default(0),
-  engagementProbability: integer("engagement_probability").notNull().default(0),
-  reachEstimate: integer("reach_estimate").notNull().default(0),
-  conversionProbability: integer("conversion_probability").notNull().default(0),
-  trendAlignment: integer("trend_alignment").notNull().default(0),
-  audienceResonance: integer("audience_resonance").notNull().default(0),
-  competitiveGap: integer("competitive_gap").notNull().default(0),
-  recommendations: jsonb("recommendations").$type<string[]>(),
-  signals: jsonb("signals").$type<Record<string, unknown>>(),
-  scoredAt: timestamp("scored_at").notNull().defaultNow(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+export const dosViralityScoresTable = pgTable('dos_virality_scores', {
+  id: serial('id').primaryKey(),
+  articleId: integer('article_id').references(() => dosArticlesTable.id, { onDelete: 'cascade' }),
+  contentTitle: text('content_title').notNull(),
+  contentType: text('content_type', { enum: ['article', 'newsletter', 'x-post', 'carousel'] })
+    .notNull()
+    .default('article'),
+  predictedScore: integer('predicted_score').notNull().default(0),
+  engagementProbability: integer('engagement_probability').notNull().default(0),
+  reachEstimate: integer('reach_estimate').notNull().default(0),
+  conversionProbability: integer('conversion_probability').notNull().default(0),
+  trendAlignment: integer('trend_alignment').notNull().default(0),
+  audienceResonance: integer('audience_resonance').notNull().default(0),
+  competitiveGap: integer('competitive_gap').notNull().default(0),
+  recommendations: jsonb('recommendations').$type<string[]>(),
+  signals: jsonb('signals').$type<Record<string, unknown>>(),
+  scoredAt: timestamp('scored_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const dosAudienceSegmentsTable = pgTable("dos_audience_segments", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  description: text("description"),
-  size: integer("size").notNull().default(0),
-  growthRate: integer("growth_rate").notNull().default(0),
-  engagementScore: integer("engagement_score").notNull().default(0),
-  psychographics: jsonb("psychographics").$type<Record<string, unknown>>(),
-  topContentTypes: jsonb("top_content_types").$type<string[]>(),
-  topTopics: jsonb("top_topics").$type<string[]>(),
-  peakEngagementHour: integer("peak_engagement_hour"),
-  preferredPlatforms: jsonb("preferred_platforms").$type<string[]>(),
-  avgReadTime: integer("avg_read_time"),
-  conversionRate: integer("conversion_rate").notNull().default(0),
-  revenueContribution: integer("revenue_contribution").notNull().default(0),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosAudienceSegmentsTable = pgTable('dos_audience_segments', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  size: integer('size').notNull().default(0),
+  growthRate: integer('growth_rate').notNull().default(0),
+  engagementScore: integer('engagement_score').notNull().default(0),
+  psychographics: jsonb('psychographics').$type<Record<string, unknown>>(),
+  topContentTypes: jsonb('top_content_types').$type<string[]>(),
+  topTopics: jsonb('top_topics').$type<string[]>(),
+  peakEngagementHour: integer('peak_engagement_hour'),
+  preferredPlatforms: jsonb('preferred_platforms').$type<string[]>(),
+  avgReadTime: integer('avg_read_time'),
+  conversionRate: integer('conversion_rate').notNull().default(0),
+  revenueContribution: integer('revenue_contribution').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosAbTestsTable = pgTable("dos_ab_tests", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  contentId: integer("content_id"),
-  contentType: text("content_type", { enum: ["article", "newsletter", "x-post", "carousel"] }).notNull().default("article"),
-  testType: text("test_type", { enum: ["headline", "image", "cta", "format", "send-time"] }).notNull().default("headline"),
-  status: text("status", { enum: ["running", "paused", "winner-declared", "draft"] }).notNull().default("draft"),
-  variants: jsonb("variants").$type<Record<string, unknown>[]>(),
-  trafficSplit: jsonb("traffic_split").$type<Record<string, number>>(),
-  winnerVariantId: text("winner_variant_id"),
-  significanceLevel: integer("significance_level").notNull().default(95),
-  currentSignificance: integer("current_significance").notNull().default(0),
-  totalImpressions: integer("total_impressions").notNull().default(0),
-  startedAt: timestamp("started_at"),
-  concludedAt: timestamp("concluded_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosAbTestsTable = pgTable('dos_ab_tests', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  contentId: integer('content_id'),
+  contentType: text('content_type', { enum: ['article', 'newsletter', 'x-post', 'carousel'] })
+    .notNull()
+    .default('article'),
+  testType: text('test_type', { enum: ['headline', 'image', 'cta', 'format', 'send-time'] })
+    .notNull()
+    .default('headline'),
+  status: text('status', { enum: ['running', 'paused', 'winner-declared', 'draft'] })
+    .notNull()
+    .default('draft'),
+  variants: jsonb('variants').$type<Record<string, unknown>[]>(),
+  trafficSplit: jsonb('traffic_split').$type<Record<string, number>>(),
+  winnerVariantId: text('winner_variant_id'),
+  significanceLevel: integer('significance_level').notNull().default(95),
+  currentSignificance: integer('current_significance').notNull().default(0),
+  totalImpressions: integer('total_impressions').notNull().default(0),
+  startedAt: timestamp('started_at'),
+  concludedAt: timestamp('concluded_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosMonetizationRulesTable = pgTable("dos_monetization_rules", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  ruleType: text("rule_type", { enum: ["sponsorship", "affiliate", "digital-product", "ad-inventory", "rate-card"] }).notNull().default("sponsorship"),
-  targetSegmentId: integer("target_segment_id").references(() => dosAudienceSegmentsTable.id, { onDelete: "set null" }),
-  baseRate: integer("base_rate").notNull().default(0),
-  currentRate: integer("current_rate").notNull().default(0),
-  demandScore: integer("demand_score").notNull().default(50),
-  placementConfig: jsonb("placement_config").$type<Record<string, unknown>>(),
-  revenueAttributed: integer("revenue_attributed").notNull().default(0),
-  isActive: boolean("is_active").notNull().default(true),
-  lastAdjustedAt: timestamp("last_adjusted_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosMonetizationRulesTable = pgTable('dos_monetization_rules', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  ruleType: text('rule_type', {
+    enum: ['sponsorship', 'affiliate', 'digital-product', 'ad-inventory', 'rate-card'],
+  })
+    .notNull()
+    .default('sponsorship'),
+  targetSegmentId: integer('target_segment_id').references(() => dosAudienceSegmentsTable.id, {
+    onDelete: 'set null',
+  }),
+  baseRate: integer('base_rate').notNull().default(0),
+  currentRate: integer('current_rate').notNull().default(0),
+  demandScore: integer('demand_score').notNull().default(50),
+  placementConfig: jsonb('placement_config').$type<Record<string, unknown>>(),
+  revenueAttributed: integer('revenue_attributed').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  lastAdjustedAt: timestamp('last_adjusted_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosSeoKeywordsTable = pgTable("dos_seo_keywords", {
-  id: serial("id").primaryKey(),
-  keyword: text("keyword").notNull(),
-  searchVolume: integer("search_volume").notNull().default(0),
-  difficulty: integer("difficulty").notNull().default(0),
-  currentRank: integer("current_rank"),
-  targetRank: integer("target_rank"),
-  trend: text("trend", { enum: ["rising", "stable", "declining"] }).notNull().default("stable"),
-  category: text("category", { enum: ["target", "gap", "competitor", "topical-authority"] }).notNull().default("target"),
-  opportunityScore: integer("opportunity_score").notNull().default(0),
-  linkedArticleId: integer("linked_article_id").references(() => dosArticlesTable.id, { onDelete: "set null" }),
-  competitorRanks: jsonb("competitor_ranks").$type<Record<string, number>>(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosSeoKeywordsTable = pgTable('dos_seo_keywords', {
+  id: serial('id').primaryKey(),
+  keyword: text('keyword').notNull(),
+  searchVolume: integer('search_volume').notNull().default(0),
+  difficulty: integer('difficulty').notNull().default(0),
+  currentRank: integer('current_rank'),
+  targetRank: integer('target_rank'),
+  trend: text('trend', { enum: ['rising', 'stable', 'declining'] })
+    .notNull()
+    .default('stable'),
+  category: text('category', { enum: ['target', 'gap', 'competitor', 'topical-authority'] })
+    .notNull()
+    .default('target'),
+  opportunityScore: integer('opportunity_score').notNull().default(0),
+  linkedArticleId: integer('linked_article_id').references(() => dosArticlesTable.id, {
+    onDelete: 'set null',
+  }),
+  competitorRanks: jsonb('competitor_ranks').$type<Record<string, number>>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosTrendSignalsTable = pgTable("dos_trend_signals", {
-  id: serial("id").primaryKey(),
-  topic: text("topic").notNull(),
-  platform: text("platform", { enum: ["x", "linkedin", "reddit", "news", "google-trends", "industry"] }).notNull().default("x"),
-  velocityScore: integer("velocity_score").notNull().default(0),
-  sentimentScore: integer("sentiment_score").notNull().default(50),
-  hoursToMainstream: integer("hours_to_mainstream"),
-  contentOpportunity: text("content_opportunity"),
-  relatedKeywords: jsonb("related_keywords").$type<string[]>(),
-  samplePosts: jsonb("sample_posts").$type<string[]>(),
-  status: text("status", { enum: ["emerging", "rising", "peak", "declining"] }).notNull().default("emerging"),
-  actionTaken: boolean("action_taken").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosTrendSignalsTable = pgTable('dos_trend_signals', {
+  id: serial('id').primaryKey(),
+  topic: text('topic').notNull(),
+  platform: text('platform', {
+    enum: ['x', 'linkedin', 'reddit', 'news', 'google-trends', 'industry'],
+  })
+    .notNull()
+    .default('x'),
+  velocityScore: integer('velocity_score').notNull().default(0),
+  sentimentScore: integer('sentiment_score').notNull().default(50),
+  hoursToMainstream: integer('hours_to_mainstream'),
+  contentOpportunity: text('content_opportunity'),
+  relatedKeywords: jsonb('related_keywords').$type<string[]>(),
+  samplePosts: jsonb('sample_posts').$type<string[]>(),
+  status: text('status', { enum: ['emerging', 'rising', 'peak', 'declining'] })
+    .notNull()
+    .default('emerging'),
+  actionTaken: boolean('action_taken').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const dosContentLifecycleTable = pgTable("dos_content_lifecycle", {
-  id: serial("id").primaryKey(),
-  articleId: integer("article_id").references(() => dosArticlesTable.id, { onDelete: "cascade" }),
-  contentTitle: text("content_title").notNull(),
-  lifecycleStage: text("lifecycle_stage", { enum: ["ideation", "creation", "review", "published", "distributing", "evergreen", "declining", "archived"] }).notNull().default("ideation"),
-  contentHealthScore: integer("content_health_score").notNull().default(0),
-  isEvergreen: boolean("is_evergreen").notNull().default(false),
-  totalViews: integer("total_views").notNull().default(0),
-  monthlyViews: integer("monthly_views").notNull().default(0),
-  lastViewedAt: timestamp("last_viewed_at"),
-  redistributionCount: integer("redistribution_count").notNull().default(0),
-  lastRedistributedAt: timestamp("last_redistributed_at"),
-  recommendedAction: text("recommended_action", { enum: ["redistribute", "update", "archive", "none", "promote"] }).notNull().default("none"),
-  revenueGenerated: integer("revenue_generated").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const dosContentLifecycleTable = pgTable('dos_content_lifecycle', {
+  id: serial('id').primaryKey(),
+  articleId: integer('article_id').references(() => dosArticlesTable.id, { onDelete: 'cascade' }),
+  contentTitle: text('content_title').notNull(),
+  lifecycleStage: text('lifecycle_stage', {
+    enum: [
+      'ideation',
+      'creation',
+      'review',
+      'published',
+      'distributing',
+      'evergreen',
+      'declining',
+      'archived',
+    ],
+  })
+    .notNull()
+    .default('ideation'),
+  contentHealthScore: integer('content_health_score').notNull().default(0),
+  isEvergreen: boolean('is_evergreen').notNull().default(false),
+  totalViews: integer('total_views').notNull().default(0),
+  monthlyViews: integer('monthly_views').notNull().default(0),
+  lastViewedAt: timestamp('last_viewed_at'),
+  redistributionCount: integer('redistribution_count').notNull().default(0),
+  lastRedistributedAt: timestamp('last_redistributed_at'),
+  recommendedAction: text('recommended_action', {
+    enum: ['redistribute', 'update', 'archive', 'none', 'promote'],
+  })
+    .notNull()
+    .default('none'),
+  revenueGenerated: integer('revenue_generated').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 // ─── Typed insert schemas (drizzle-zod) ──────────────────────────────────────
@@ -524,16 +783,31 @@ const BASE_OMIT_NO_UPDATED = { id: true, createdAt: true } as const;
 
 export const insertDosArticleSchema = createInsertSchema(dosArticlesTable).omit(BASE_OMIT);
 export const insertDosNewsletterSchema = createInsertSchema(dosNewslettersTable).omit(BASE_OMIT);
-export const insertDosCarouselProjectSchema = createInsertSchema(dosCarouselProjectsTable).omit(BASE_OMIT);
-export const insertDosCarouselSlideSchema = createInsertSchema(dosCarouselSlidesTable).omit(BASE_OMIT_NO_UPDATED);
+export const insertDosCarouselProjectSchema =
+  createInsertSchema(dosCarouselProjectsTable).omit(BASE_OMIT);
+export const insertDosCarouselSlideSchema =
+  createInsertSchema(dosCarouselSlidesTable).omit(BASE_OMIT_NO_UPDATED);
 export const insertDosXPostSchema = createInsertSchema(dosXPostsTable).omit(BASE_OMIT);
 export const insertDosCampaignSchema = createInsertSchema(dosCampaignsTable).omit(BASE_OMIT);
-export const insertDosCampaignLinkSchema = createInsertSchema(dosCampaignLinksTable).omit(BASE_OMIT_NO_UPDATED);
-export const insertDosLeadNoteSchema = createInsertSchema(dosLeadNotesTable).omit(BASE_OMIT_NO_UPDATED);
-export const insertDosEditorialPillarSchema = createInsertSchema(dosEditorialPillarsTable).omit(BASE_OMIT);
+export const insertDosCampaignLinkSchema =
+  createInsertSchema(dosCampaignLinksTable).omit(BASE_OMIT_NO_UPDATED);
+export const insertDosLeadNoteSchema =
+  createInsertSchema(dosLeadNotesTable).omit(BASE_OMIT_NO_UPDATED);
+export const insertDosEditorialPillarSchema =
+  createInsertSchema(dosEditorialPillarsTable).omit(BASE_OMIT);
 export const insertDosCtaBlockSchema = createInsertSchema(dosCtaBlocksTable).omit(BASE_OMIT);
-export const insertDosContentCalendarItemSchema = createInsertSchema(dosContentCalendarItemsTable).omit(BASE_OMIT);
-export const insertDosDistributionTargetSchema = createInsertSchema(dosDistributionTargetsTable).omit(BASE_OMIT);
-export const insertDosAuthorProfileSchema = createInsertSchema(dosAuthorProfilesTable).omit(BASE_OMIT);
-export const insertDosAutomationRunSchema = createInsertSchema(dosAutomationRunsTable).omit({ id: true, createdAt: true, startedAt: true } as const);
-export const insertDosIntegrationStatusSchema = createInsertSchema(dosIntegrationStatusTable).omit(BASE_OMIT);
+export const insertDosContentCalendarItemSchema = createInsertSchema(
+  dosContentCalendarItemsTable,
+).omit(BASE_OMIT);
+export const insertDosDistributionTargetSchema = createInsertSchema(
+  dosDistributionTargetsTable,
+).omit(BASE_OMIT);
+export const insertDosAuthorProfileSchema =
+  createInsertSchema(dosAuthorProfilesTable).omit(BASE_OMIT);
+export const insertDosAutomationRunSchema = createInsertSchema(dosAutomationRunsTable).omit({
+  id: true,
+  createdAt: true,
+  startedAt: true,
+} as const);
+export const insertDosIntegrationStatusSchema =
+  createInsertSchema(dosIntegrationStatusTable).omit(BASE_OMIT);

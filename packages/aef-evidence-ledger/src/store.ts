@@ -1,4 +1,4 @@
-import type { EvidenceEntry, LedgerQueryOptions } from "./types.js";
+import type { EvidenceEntry, LedgerQueryOptions } from './types.js';
 
 export interface LedgerStore {
   append(entry: EvidenceEntry): void;
@@ -74,11 +74,21 @@ export class MutableLedgerStore implements LedgerStore {
     return this.backend;
   }
 
-  append(entry: EvidenceEntry): void { this.backend.append(entry); }
-  get(entryId: string): EvidenceEntry | undefined { return this.backend.get(entryId); }
-  query(options: LedgerQueryOptions): EvidenceEntry[] { return this.backend.query(options); }
-  count(): number { return this.backend.count(); }
-  clear(): void { this.backend.clear(); }
+  append(entry: EvidenceEntry): void {
+    this.backend.append(entry);
+  }
+  get(entryId: string): EvidenceEntry | undefined {
+    return this.backend.get(entryId);
+  }
+  query(options: LedgerQueryOptions): EvidenceEntry[] {
+    return this.backend.query(options);
+  }
+  count(): number {
+    return this.backend.count();
+  }
+  clear(): void {
+    this.backend.clear();
+  }
 }
 
 export const defaultLedgerStore: MutableLedgerStore = new MutableLedgerStore();

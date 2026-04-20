@@ -17,56 +17,69 @@
  * unreachable in normal operation once this middleware is applied.
  */
 
-import type { Request, Response, NextFunction } from "express";
-import { isFlagEnabled } from "./platform-flags";
-import { logger } from "./logger";
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from './logger';
+import { isFlagEnabled } from './platform-flags';
 
 function sendJson(res: Response, status: number, body: object): void {
   res.status(status).json(body);
 }
 
-export async function requireStripeLive(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function requireStripeLive(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
   try {
-    const enabled = await isFlagEnabled("live_stripe_billing_enabled");
+    const enabled = await isFlagEnabled('live_stripe_billing_enabled');
 
     if (!enabled) {
-      logger.debug({ path: req.path }, "[stripe-gate] live_stripe_billing_enabled is OFF — returning demo response");
+      logger.debug(
+        { path: req.path },
+        '[stripe-gate] live_stripe_billing_enabled is OFF — returning demo response',
+      );
       sendJson(res, 200, {
         demo: true,
         sessionId: `demo_session_${Date.now()}`,
         url: null,
         message:
-          "Demo mode: live_stripe_billing_enabled flag is OFF. Enable the flag and configure STRIPE_SECRET_KEY (sk_live_*) to activate live payments.",
+          'Demo mode: live_stripe_billing_enabled flag is OFF. Enable the flag and configure STRIPE_SECRET_KEY (sk_live_*) to activate live payments.',
       });
       return;
     }
 
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) {
-      logger.error({ path: req.path }, "[stripe-gate] live_stripe_billing_enabled is ON but STRIPE_SECRET_KEY is not set");
+      logger.error(
+        { path: req.path },
+        '[stripe-gate] live_stripe_billing_enabled is ON but STRIPE_SECRET_KEY is not set',
+      );
       sendJson(res, 503, {
-        error: "STRIPE_SECRET_KEY is not configured. Set a sk_live_* key to enable live billing.",
-        code: "STRIPE_KEY_MISSING",
+        error: 'STRIPE_SECRET_KEY is not configured. Set a sk_live_* key to enable live billing.',
+        code: 'STRIPE_KEY_MISSING',
       });
       return;
     }
 
-    if (!key.startsWith("sk_live_")) {
-      logger.error({ path: req.path }, "[stripe-gate] live_stripe_billing_enabled is ON but STRIPE_SECRET_KEY is a test-mode key");
+    if (!key.startsWith('sk_live_')) {
+      logger.error(
+        { path: req.path },
+        '[stripe-gate] live_stripe_billing_enabled is ON but STRIPE_SECRET_KEY is a test-mode key',
+      );
       sendJson(res, 503, {
         error:
-          "live_stripe_billing_enabled is ON but STRIPE_SECRET_KEY is not a live-mode key (sk_live_*). Deactivate the flag or supply a live key.",
-        code: "STRIPE_KEY_NOT_LIVE",
+          'live_stripe_billing_enabled is ON but STRIPE_SECRET_KEY is not a live-mode key (sk_live_*). Deactivate the flag or supply a live key.',
+        code: 'STRIPE_KEY_NOT_LIVE',
       });
       return;
     }
 
     next();
   } catch (err) {
-    logger.error({ err }, "[stripe-gate] Failed to evaluate Stripe live gate — failing closed");
+    logger.error({ err }, '[stripe-gate] Failed to evaluate Stripe live gate — failing closed');
     sendJson(res, 503, {
-      error: "Billing gate evaluation failed. Please try again.",
-      code: "STRIPE_GATE_ERROR",
+      error: 'Billing gate evaluation failed. Please try again.',
+      code: 'STRIPE_GATE_ERROR',
     });
   }
 }

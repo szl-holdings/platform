@@ -7,32 +7,33 @@
  * registered at "/lyte" never intercepts these public read endpoints. Paths are
  * also whitelisted in global-auth-enforcer.ts.
  */
-import { Router, type IRouter } from "express";
+
 import {
   db,
-  lyteDriftItemsTable,
-  lyteDriftHistoryTable,
-  lytePressureCellsTable,
-  lyteDebtItemsTable,
-  lyteDebtScoreHistoryTable,
-  lyteReplayScenariosTable,
   lyteBoardMetricsTable,
   lyteBoardRisksTable,
-} from "@szl-holdings/db";
-import { asc, eq } from "drizzle-orm";
-import { authMiddleware } from "../middlewares/auth";
+  lyteDebtItemsTable,
+  lyteDebtScoreHistoryTable,
+  lyteDriftHistoryTable,
+  lyteDriftItemsTable,
+  lytePressureCellsTable,
+  lyteReplayScenariosTable,
+} from '@szl-holdings/db';
+import { asc, eq } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 const noAuth = authMiddleware({ required: false });
 
-router.get("/lyte/ownership-drift", noAuth, async (_req, res) => {
+router.get('/lyte/ownership-drift', noAuth, async (_req, res) => {
   try {
     const [items, history] = await Promise.all([
       db.select().from(lyteDriftItemsTable).orderBy(asc(lyteDriftItemsTable.orderIdx)),
       db.select().from(lyteDriftHistoryTable).orderBy(asc(lyteDriftHistoryTable.orderIdx)),
     ]);
     res.json({
-      items: items.map(i => ({
+      items: items.map((i) => ({
         id: i.id,
         title: i.title,
         program: i.program,
@@ -45,18 +46,21 @@ router.get("/lyte/ownership-drift", noAuth, async (_req, res) => {
         impact: i.impact,
         proofRef: i.proofRef,
       })),
-      history: history.map(h => ({ date: h.date, count: h.count })),
+      history: history.map((h) => ({ date: h.date, count: h.count })),
     });
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
 });
 
-router.get("/lyte/pressure-map", noAuth, async (_req, res) => {
+router.get('/lyte/pressure-map', noAuth, async (_req, res) => {
   try {
-    const cells = await db.select().from(lytePressureCellsTable).orderBy(asc(lytePressureCellsTable.orderIdx));
+    const cells = await db
+      .select()
+      .from(lytePressureCellsTable)
+      .orderBy(asc(lytePressureCellsTable.orderIdx));
     res.json({
-      cells: cells.map(c => ({
+      cells: cells.map((c) => ({
         team: c.team,
         workflow: c.workflow,
         account: c.account,
@@ -74,14 +78,14 @@ router.get("/lyte/pressure-map", noAuth, async (_req, res) => {
   }
 });
 
-router.get("/lyte/action-debt", noAuth, async (_req, res) => {
+router.get('/lyte/action-debt', noAuth, async (_req, res) => {
   try {
     const [items, history] = await Promise.all([
       db.select().from(lyteDebtItemsTable).orderBy(asc(lyteDebtItemsTable.orderIdx)),
       db.select().from(lyteDebtScoreHistoryTable).orderBy(asc(lyteDebtScoreHistoryTable.orderIdx)),
     ]);
     res.json({
-      items: items.map(i => ({
+      items: items.map((i) => ({
         id: i.id,
         title: i.title,
         team: i.team,
@@ -95,18 +99,26 @@ router.get("/lyte/action-debt", noAuth, async (_req, res) => {
         proofRef: i.proofRef,
         status: i.status,
       })),
-      history: history.map(h => ({ date: h.date, critical: h.critical, high: h.high, medium: h.medium })),
+      history: history.map((h) => ({
+        date: h.date,
+        critical: h.critical,
+        high: h.high,
+        medium: h.medium,
+      })),
     });
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
 });
 
-router.get("/lyte/decision-replay", noAuth, async (_req, res) => {
+router.get('/lyte/decision-replay', noAuth, async (_req, res) => {
   try {
-    const scenarios = await db.select().from(lyteReplayScenariosTable).orderBy(asc(lyteReplayScenariosTable.orderIdx));
+    const scenarios = await db
+      .select()
+      .from(lyteReplayScenariosTable)
+      .orderBy(asc(lyteReplayScenariosTable.orderIdx));
     res.json({
-      scenarios: scenarios.map(s => ({
+      scenarios: scenarios.map((s) => ({
         id: s.id,
         title: s.title,
         decision: s.decision,
@@ -120,11 +132,15 @@ router.get("/lyte/decision-replay", noAuth, async (_req, res) => {
   }
 });
 
-router.get("/lyte/decision-replay/:id", noAuth, async (req, res) => {
+router.get('/lyte/decision-replay/:id', noAuth, async (req, res) => {
   try {
-    const rows = await db.select().from(lyteReplayScenariosTable).where(eq(lyteReplayScenariosTable.id, req.params.id!)).limit(1);
+    const rows = await db
+      .select()
+      .from(lyteReplayScenariosTable)
+      .where(eq(lyteReplayScenariosTable.id, req.params.id!))
+      .limit(1);
     if (rows.length === 0) {
-      res.status(404).json({ error: "Scenario not found" });
+      res.status(404).json({ error: 'Scenario not found' });
       return;
     }
     const s = rows[0]!;
@@ -143,14 +159,14 @@ router.get("/lyte/decision-replay/:id", noAuth, async (req, res) => {
   }
 });
 
-router.get("/lyte/board-view", noAuth, async (_req, res) => {
+router.get('/lyte/board-view', noAuth, async (_req, res) => {
   try {
     const [metrics, risks] = await Promise.all([
       db.select().from(lyteBoardMetricsTable).orderBy(asc(lyteBoardMetricsTable.orderIdx)),
       db.select().from(lyteBoardRisksTable).orderBy(asc(lyteBoardRisksTable.orderIdx)),
     ]);
     res.json({
-      metrics: metrics.map(m => ({
+      metrics: metrics.map((m) => ({
         label: m.label,
         value: m.value,
         delta: m.delta,
@@ -158,7 +174,7 @@ router.get("/lyte/board-view", noAuth, async (_req, res) => {
         context: m.context,
         good: m.good,
       })),
-      risks: risks.map(r => ({
+      risks: risks.map((r) => ({
         id: r.id,
         title: r.title,
         severity: r.severity,

@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { creativeApi, type AlloyCampaign } from "@/alloy/lib/creative-api";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type AlloyCampaign, creativeApi } from '@/alloy/lib/creative-api';
 
 export type Campaign = {
   id: number;
@@ -38,13 +38,13 @@ function toCampaign(c: AlloyCampaign): Campaign {
     progress: (meta.progress as number) ?? 0,
     budget: (meta.budget as string) ?? undefined,
     director: (meta.director as string) ?? undefined,
-    kpis: (meta.kpis as Campaign["kpis"]) ?? [],
+    kpis: (meta.kpis as Campaign['kpis']) ?? [],
   };
 }
 
 export function useCampaigns() {
   return useQuery({
-    queryKey: ["creative-campaigns"],
+    queryKey: ['creative-campaigns'],
     queryFn: async () => {
       const rows = await creativeApi.campaigns.list();
       return rows.map(toCampaign);
@@ -54,10 +54,10 @@ export function useCampaigns() {
 
 export function useCampaign(id: string) {
   return useQuery({
-    queryKey: ["creative-campaign", id],
+    queryKey: ['creative-campaign', id],
     queryFn: async () => {
       const numId = parseInt(id, 10);
-      if (isNaN(numId)) throw new Error("Invalid campaign ID");
+      if (isNaN(numId)) throw new Error('Invalid campaign ID');
       const row = await creativeApi.campaigns.get(numId);
       return toCampaign(row);
     },
@@ -70,22 +70,22 @@ export function useCreateCampaign() {
   return useMutation({
     mutationFn: async (data: Partial<Campaign>) => {
       const row = await creativeApi.campaigns.create({
-        name: data.name || "Untitled",
-        clientName: data.client || data.clientName || "Unknown",
-        category: data.category || "commercial",
-        status: data.status || "concept",
+        name: data.name || 'Untitled',
+        clientName: data.client || data.clientName || 'Unknown',
+        category: data.category || 'commercial',
+        status: data.status || 'concept',
         deadline: data.deadline || new Date(Date.now() + 30 * 86400000).toISOString(),
         metadata: {
           progress: 0,
-          budget: data.budget || "$0",
-          director: data.director || "",
+          budget: data.budget || '$0',
+          director: data.director || '',
           kpis: data.kpis || [],
-          client: data.client || data.clientName || "Unknown",
+          client: data.client || data.clientName || 'Unknown',
         },
       });
       return toCampaign(row);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["creative-campaigns"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['creative-campaigns'] }),
   });
 }
 
@@ -116,8 +116,8 @@ export function useUpdateCampaign() {
       return toCampaign(row);
     },
     onSuccess: (_, v) => {
-      queryClient.invalidateQueries({ queryKey: ["creative-campaigns"] });
-      queryClient.invalidateQueries({ queryKey: ["creative-campaign", String(v.id)] });
+      queryClient.invalidateQueries({ queryKey: ['creative-campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['creative-campaign', String(v.id)] });
     },
   });
 }

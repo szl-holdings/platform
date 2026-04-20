@@ -1,6 +1,6 @@
-import { randomUUID } from "crypto";
-import type { Evidence, EvidenceKind } from "./types.js";
-import { defaultTraceStore } from "@workspace/trace-graph/store";
+import { defaultTraceStore } from '@workspace/trace-graph/store';
+import { randomUUID } from 'crypto';
+import type { Evidence, EvidenceKind } from './types.js';
 
 function registryTraceId(tenantOrgId: number): string {
   return `alloy-evidence-registry:${tenantOrgId}`;
@@ -19,8 +19,8 @@ function saveRegistry(tenantOrgId: number, registry: Record<string, Evidence>): 
   defaultTraceStore.save({
     traceId,
     runId: `alloy-evidence-registry:${tenantOrgId}`,
-    model: "alloy.evidence.registry",
-    status: "running",
+    model: 'alloy.evidence.registry',
+    status: 'running',
     startedAt: existing?.startedAt ?? now,
     toolCalls: existing?.toolCalls ?? [],
     retrieval: existing?.retrieval ?? [],
@@ -42,7 +42,7 @@ function saveRegistry(tenantOrgId: number, registry: Record<string, Evidence>): 
 }
 
 function requireTenant(tenantOrgId: unknown): number {
-  if (typeof tenantOrgId !== "number" || !Number.isFinite(tenantOrgId)) {
+  if (typeof tenantOrgId !== 'number' || !Number.isFinite(tenantOrgId)) {
     throw new Error(
       `[alloy/evidence] tenantOrgId is required and must be a finite number. Received: ${JSON.stringify(tenantOrgId)}`,
     );
@@ -101,15 +101,17 @@ export function listEvidence(ids: string[] | undefined, tenantOrgId: number): Ev
   const tenant = requireTenant(tenantOrgId);
   const registry = loadRegistry(tenant);
   if (ids && ids.length > 0) {
-    return ids.map(id => {
-      const ev = registry[id];
-      if (!ev) return undefined;
-      return _checkFreshness(id, ev, tenant, registry);
-    }).filter(Boolean) as Evidence[];
+    return ids
+      .map((id) => {
+        const ev = registry[id];
+        if (!ev) return undefined;
+        return _checkFreshness(id, ev, tenant, registry);
+      })
+      .filter(Boolean) as Evidence[];
   }
-  return Object.entries(registry).map(([id, ev]) =>
-    _checkFreshness(id, ev, tenant, registry)
-  ).filter(Boolean) as Evidence[];
+  return Object.entries(registry)
+    .map(([id, ev]) => _checkFreshness(id, ev, tenant, registry))
+    .filter(Boolean) as Evidence[];
 }
 
 function _checkFreshness(
@@ -151,6 +153,6 @@ export function markEvidenceStale(id: string, tenantOrgId: number): boolean {
 
 export function computeEvidenceFreshnessScore(evidence: Evidence[]): number {
   if (evidence.length === 0) return 0;
-  const freshCount = evidence.filter(e => !e.freshness.isStale).length;
+  const freshCount = evidence.filter((e) => !e.freshness.isStale).length;
   return freshCount / evidence.length;
 }

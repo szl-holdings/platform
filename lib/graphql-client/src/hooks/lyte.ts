@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
 
 export const GET_LYTE_INCIDENTS = gql`
   query GetLyteIncidents($status: String, $severity: String, $limit: Int, $offset: Int) {
@@ -75,11 +75,21 @@ export const LYTE_INCIDENT_UPDATED = gql`
   }
 `;
 
-export function useLyteIncidents(variables?: { status?: string; severity?: string; limit?: number; offset?: number }) {
+export function useLyteIncidents(variables?: {
+  status?: string;
+  severity?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_LYTE_INCIDENTS, { variables });
 }
 
-export function useLyteSignals(variables?: { severity?: string; status?: string; limit?: number; offset?: number }) {
+export function useLyteSignals(variables?: {
+  severity?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_LYTE_SIGNALS, { variables });
 }
 

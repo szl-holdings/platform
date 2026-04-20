@@ -1,25 +1,29 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 const steps = [
   {
-    number: "01",
-    title: "Intake and alignment",
-    description: "A discreet initial conversation to understand the challenge, the stakes, and what success looks like. No templates. No sales process.",
+    number: '01',
+    title: 'Intake and alignment',
+    description:
+      'A discreet initial conversation to understand the challenge, the stakes, and what success looks like. No templates. No sales process.',
   },
   {
-    number: "02",
-    title: "Structured diagnosis",
-    description: "We conduct a rigorous assessment — examining the situation from multiple vantage points before forming a view.",
+    number: '02',
+    title: 'Structured diagnosis',
+    description:
+      'We conduct a rigorous assessment — examining the situation from multiple vantage points before forming a view.',
   },
   {
-    number: "03",
-    title: "Strategic development",
-    description: "Working directly alongside leadership to develop options, test assumptions, and build a clear path forward.",
+    number: '03',
+    title: 'Strategic development',
+    description:
+      'Working directly alongside leadership to develop options, test assumptions, and build a clear path forward.',
   },
   {
-    number: "04",
-    title: "Implementation support",
-    description: "We stay engaged through execution — advising on sequencing, stakeholder management, and course correction as needed.",
+    number: '04',
+    title: 'Implementation support',
+    description:
+      'We stay engaged through execution — advising on sequencing, stakeholder management, and course correction as needed.',
   },
 ];
 
@@ -31,7 +35,7 @@ export default function Approach() {
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-5"
           >
@@ -47,9 +51,9 @@ export default function Approach() {
               <em>No noise.</em>
             </h2>
             <p className="text-[#f5f0e8]/55 text-base font-light leading-relaxed">
-              We work with a small number of clients at any time to ensure
-              every engagement receives the full attention of the principal.
-              Our process is deliberate, structured, and entirely confidential.
+              We work with a small number of clients at any time to ensure every engagement receives
+              the full attention of the principal. Our process is deliberate, structured, and
+              entirely confidential.
             </p>
           </motion.div>
 
@@ -59,7 +63,7 @@ export default function Approach() {
                 key={step.number}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
+                viewport={{ once: true, margin: '-60px' }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 className="py-7"
               >

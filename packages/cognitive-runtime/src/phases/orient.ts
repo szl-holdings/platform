@@ -1,8 +1,8 @@
-import { randomUUID } from "crypto";
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
-import type { MemoryStore } from "@workspace/memory-fabric";
-import type { PhaseResult, WorldModelUpdate } from "../types.js";
-import type { PerceiveOutput } from "./perceive.js";
+import type { MemoryStore } from '@workspace/memory-fabric';
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import { randomUUID } from 'crypto';
+import type { PhaseResult, WorldModelUpdate } from '../types.js';
+import type { PerceiveOutput } from './perceive.js';
 
 export interface OrientPhaseOptions {
   memoryStore?: MemoryStore;
@@ -34,7 +34,7 @@ export async function orientPhase(
 
   const orientationId = `orient-${randomUUID()}`;
 
-  const entities: WorldModelUpdate["entities"] = [];
+  const entities: WorldModelUpdate['entities'] = [];
   const detectedAnomalies: string[] = [];
   const missingContextKeys: string[] = [];
   let noveltyScore = 0;
@@ -42,33 +42,33 @@ export async function orientPhase(
   let uncertaintyScore = 0;
 
   for (const signal of perceptOutput.raw.rawSignals) {
-    if (signal["entityId"]) {
+    if (signal['entityId']) {
       entities.push({
-        entityId: signal["entityId"] as string,
-        entityType: (signal["entityType"] ?? "unknown") as string,
-        attributes: (signal as Record<string, unknown>),
-        confidence: typeof signal["confidence"] === "number" ? signal["confidence"] : 0.8,
+        entityId: signal['entityId'] as string,
+        entityType: (signal['entityType'] ?? 'unknown') as string,
+        attributes: signal as Record<string, unknown>,
+        confidence: typeof signal['confidence'] === 'number' ? signal['confidence'] : 0.8,
       });
     }
 
-    if (signal["risk"] && typeof signal["risk"] === "number") {
-      riskScore = Math.max(riskScore, signal["risk"] as number);
+    if (signal['risk'] && typeof signal['risk'] === 'number') {
+      riskScore = Math.max(riskScore, signal['risk'] as number);
     }
-    if (signal["anomaly"]) {
-      detectedAnomalies.push(String(signal["anomaly"]));
+    if (signal['anomaly']) {
+      detectedAnomalies.push(String(signal['anomaly']));
     }
-    if (signal["novelty"] && typeof signal["novelty"] === "number") {
-      noveltyScore = Math.max(noveltyScore, signal["novelty"] as number);
+    if (signal['novelty'] && typeof signal['novelty'] === 'number') {
+      noveltyScore = Math.max(noveltyScore, signal['novelty'] as number);
     }
   }
 
   if (perceptOutput.signalCount === 0) {
     uncertaintyScore = 0.3;
-    missingContextKeys.push("input_signals");
+    missingContextKeys.push('input_signals');
   }
 
   if (!opts.domain) {
-    missingContextKeys.push("domain");
+    missingContextKeys.push('domain');
     uncertaintyScore = Math.min(1, uncertaintyScore + 0.2);
   }
 
@@ -89,35 +89,35 @@ export async function orientPhase(
   const orientMemId = `orient-wm-${randomUUID()}`;
   memoryStore.put({
     id: orientMemId,
-    tier: "semantic",
+    tier: 'semantic',
     key: `world-model:${orientationId}`,
     value: worldModelUpdate,
     summary: `World model orientation from ${perceptOutput.signalCount} signals. Risk=${riskScore.toFixed(2)}, Novelty=${noveltyScore.toFixed(2)}.`,
     provenance: {
-      source: "cognitive-runtime:orient",
+      source: 'cognitive-runtime:orient',
       sourceId: opts.traceId,
       author: opts.agentId,
-      method: "agent",
+      method: 'agent',
       createdAt: new Date().toISOString(),
     },
     freshness: { lastUpdatedAt: new Date().toISOString(), isStale: false },
     confidence: 1 - uncertaintyScore,
-    retention: { policy: "workflow-scoped", pinned: false },
-    sensitivity: "internal",
+    retention: { policy: 'workflow-scoped', pinned: false },
+    sensitivity: 'internal',
     linkedEntities: entities.map((e) => e.entityId),
     linkedTraces: [opts.traceId],
     linkedActions: [],
-    tags: ["world-model", "orientation", opts.domain ?? "unknown"].filter(Boolean),
+    tags: ['world-model', 'orientation', opts.domain ?? 'unknown'].filter(Boolean),
     domain: opts.domain ?? MEMORY_DOMAIN_UNKNOWN,
     metadata: { orientationId, objective: opts.objective },
   });
 
   const summary =
-    `Oriented on ${entities.length} entit${entities.length === 1 ? "y" : "ies"}. ` +
+    `Oriented on ${entities.length} entit${entities.length === 1 ? 'y' : 'ies'}. ` +
     `Risk=${riskScore.toFixed(2)}, Novelty=${noveltyScore.toFixed(2)}, ` +
     `Uncertainty=${uncertaintyScore.toFixed(2)}. ` +
-    (detectedAnomalies.length > 0 ? `Anomalies: ${detectedAnomalies.join(", ")}. ` : "") +
-    (missingContextKeys.length > 0 ? `Missing context: ${missingContextKeys.join(", ")}.` : "");
+    (detectedAnomalies.length > 0 ? `Anomalies: ${detectedAnomalies.join(', ')}. ` : '') +
+    (missingContextKeys.length > 0 ? `Missing context: ${missingContextKeys.join(', ')}.` : '');
 
   const output: OrientOutput = {
     orientationId,
@@ -134,8 +134,8 @@ export async function orientPhase(
 
   const completedAt = Date.now();
   return {
-    phase: "orient",
-    status: "ok",
+    phase: 'orient',
+    status: 'ok',
     startedAt,
     completedAt,
     durationMs: completedAt - startedAt,

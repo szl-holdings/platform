@@ -1,14 +1,10 @@
-import { Router, type IRouter } from "express";
-import { authMiddleware } from "../middlewares/auth";
-import { validateQuery, listQuerySchema } from "../lib/validation.js";
-import {
-  db,
-  carlotaReservationsTable,
-} from "@szl-holdings/db";
-import { desc, eq } from "drizzle-orm";
+import { carlotaReservationsTable, db } from '@szl-holdings/db';
+import { desc, eq } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { listQuerySchema, validateQuery } from '../lib/validation.js';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
-
 
 /* -----------------------------------------------------------------------
  * Booking admin routes — require authentication.
@@ -16,16 +12,16 @@ const router: IRouter = Router();
 
 router.use(authMiddleware());
 
-router.get("/booking/health", (_req, res) => {
+router.get('/booking/health', (_req, res) => {
   res.json({
-    service: "booking",
-    status: "ok",
-    providerMode: "live",
+    service: 'booking',
+    status: 'ok',
+    providerMode: 'live',
     timestamp: new Date().toISOString(),
   });
 });
 
-router.get("/booking/appointments", async (_req, res) => {
+router.get('/booking/appointments', async (_req, res) => {
   const data = await db
     .select()
     .from(carlotaReservationsTable)
@@ -36,10 +32,10 @@ router.get("/booking/appointments", async (_req, res) => {
   });
 });
 
-router.get("/booking/appointments/:id", async (req, res) => {
+router.get('/booking/appointments/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid ID" });
+    res.status(400).json({ error: 'Invalid ID' });
     return;
   }
   const [row] = await db
@@ -47,15 +43,15 @@ router.get("/booking/appointments/:id", async (req, res) => {
     .from(carlotaReservationsTable)
     .where(eq(carlotaReservationsTable.id, id));
   if (!row) {
-    res.status(404).json({ error: "Appointment not found" });
+    res.status(404).json({ error: 'Appointment not found' });
     return;
   }
   res.json({ data: mapReservation(row) });
 });
 
-router.get("/booking/search", validateQuery(listQuerySchema), async (req, res) => {
-  const query = (req.query.q as string) || "";
-  const { ilike, or } = await import("drizzle-orm");
+router.get('/booking/search', validateQuery(listQuerySchema), async (req, res) => {
+  const query = (req.query.q as string) || '';
+  const { ilike, or } = await import('drizzle-orm');
   const results = query
     ? await db
         .select()
@@ -83,11 +79,13 @@ function mapReservation(row: typeof carlotaReservationsTable.$inferSelect) {
     date: row.date,
     time: row.time,
     duration: 60,
-    status: (row.status === "canceled"
-      ? "cancelled"
-      : row.status) as "confirmed" | "pending" | "cancelled" | "completed",
-    advisor: "Carlota J. Méndez",
-    notes: row.notes ?? "",
+    status: (row.status === 'canceled' ? 'cancelled' : row.status) as
+      | 'confirmed'
+      | 'pending'
+      | 'cancelled'
+      | 'completed',
+    advisor: 'Carlota J. Méndez',
+    notes: row.notes ?? '',
   };
 }
 

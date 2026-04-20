@@ -1,8 +1,8 @@
-import type { Request, Response, NextFunction } from "express";
-import { createHash } from "crypto";
-import { LRUCache } from "lru-cache";
-import { logger } from "../lib/logger";
-import { sendError } from "../lib/api-response";
+import { createHash } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
+import { LRUCache } from 'lru-cache';
+import { sendError } from '../lib/api-response';
+import { logger } from '../lib/logger';
 
 interface IdempotencyRecord {
   key: string;
@@ -30,20 +30,20 @@ function cleanupExpired(): void {
 setInterval(cleanupExpired, 60 * 60 * 1000).unref();
 
 function fingerprintBody(body: unknown): string {
-  if (body == null || (typeof body === "object" && Object.keys(body).length === 0)) return "empty";
+  if (body == null || (typeof body === 'object' && Object.keys(body).length === 0)) return 'empty';
   try {
-    return createHash("sha256").update(JSON.stringify(body)).digest("hex");
+    return createHash('sha256').update(JSON.stringify(body)).digest('hex');
   } catch {
-    return "unparseable";
+    return 'unparseable';
   }
 }
 
 function makeStoreKey(req: Request, idempotencyKey: string): string {
-  const userId = (req.user?.id ?? "anon").toString();
+  const userId = (req.user?.id ?? 'anon').toString();
   return `${userId}:${req.method}:${req.path}:${idempotencyKey}`;
 }
 
-const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 export function idempotencyMiddleware(req: Request, res: Response, next: NextFunction): void {
   if (!MUTATION_METHODS.has(req.method)) {
@@ -51,15 +51,29 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
     return;
   }
 
-  const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined;
+  const idempotencyKey = req.headers['x-idempotency-key'] as string | undefined;
 
   if (!idempotencyKey) {
-    sendError(res, "X-Idempotency-Key header is required for this mutation endpoint", 400, "IDEMPOTENCY_KEY_REQUIRED");
+    sendError(
+      res,
+      'X-Idempotency-Key header is required for this mutation endpoint',
+      400,
+      'IDEMPOTENCY_KEY_REQUIRED',
+    );
     return;
   }
 
-  if (typeof idempotencyKey !== "string" || idempotencyKey.length < 8 || idempotencyKey.length > 128) {
-    sendError(res, "X-Idempotency-Key must be a string between 8 and 128 characters", 400, "INVALID_IDEMPOTENCY_KEY");
+  if (
+    typeof idempotencyKey !== 'string' ||
+    idempotencyKey.length < 8 ||
+    idempotencyKey.length > 128
+  ) {
+    sendError(
+      res,
+      'X-Idempotency-Key must be a string between 8 and 128 characters',
+      400,
+      'INVALID_IDEMPOTENCY_KEY',
+    );
     return;
   }
 
@@ -69,13 +83,18 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
 
   if (existing) {
     if (existing.bodyFingerprint !== requestFingerprint) {
-      sendError(res, "The idempotency key was used with a different request body. Use a new key for a different request.", 409, "IDEMPOTENCY_BODY_MISMATCH");
+      sendError(
+        res,
+        'The idempotency key was used with a different request body. Use a new key for a different request.',
+        409,
+        'IDEMPOTENCY_BODY_MISMATCH',
+      );
       return;
     }
 
-    logger.debug({ idempotencyKey, path: req.path }, "Idempotency replay");
-    res.set("X-Idempotency-Replayed", "true");
-    res.set("X-Idempotency-Created-At", new Date(existing.createdAt).toISOString());
+    logger.debug({ idempotencyKey, path: req.path }, 'Idempotency replay');
+    res.set('X-Idempotency-Replayed', 'true');
+    res.set('X-Idempotency-Created-At', new Date(existing.createdAt).toISOString());
     res.status(existing.statusCode).json(existing.body);
     return;
   }
@@ -84,8 +103,8 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
   res.json = (body: unknown): Response => {
     if (res.statusCode < 500 && idempotencyKey) {
       const responseHeaders: Record<string, string> = {};
-      const correlationId = res.getHeader("X-Correlation-Id");
-      if (correlationId) responseHeaders["X-Correlation-Id"] = String(correlationId);
+      const correlationId = res.getHeader('X-Correlation-Id');
+      if (correlationId) responseHeaders['X-Correlation-Id'] = String(correlationId);
 
       store.set(storeKey, {
         key: idempotencyKey,
@@ -104,8 +123,12 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
   next();
 }
 
-export function optionalIdempotencyMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined;
+export function optionalIdempotencyMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  const idempotencyKey = req.headers['x-idempotency-key'] as string | undefined;
 
   if (!idempotencyKey) {
     next();
@@ -113,7 +136,12 @@ export function optionalIdempotencyMiddleware(req: Request, res: Response, next:
   }
 
   if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
-    sendError(res, "X-Idempotency-Key must be a string between 8 and 128 characters", 400, "INVALID_IDEMPOTENCY_KEY");
+    sendError(
+      res,
+      'X-Idempotency-Key must be a string between 8 and 128 characters',
+      400,
+      'INVALID_IDEMPOTENCY_KEY',
+    );
     return;
   }
 
@@ -123,13 +151,18 @@ export function optionalIdempotencyMiddleware(req: Request, res: Response, next:
 
   if (existing) {
     if (existing.bodyFingerprint !== requestFingerprint) {
-      sendError(res, "The idempotency key was used with a different request body. Use a new key for a different request.", 409, "IDEMPOTENCY_BODY_MISMATCH");
+      sendError(
+        res,
+        'The idempotency key was used with a different request body. Use a new key for a different request.',
+        409,
+        'IDEMPOTENCY_BODY_MISMATCH',
+      );
       return;
     }
 
-    logger.debug({ idempotencyKey, path: req.path }, "Idempotency replay");
-    res.set("X-Idempotency-Replayed", "true");
-    res.set("X-Idempotency-Created-At", new Date(existing.createdAt).toISOString());
+    logger.debug({ idempotencyKey, path: req.path }, 'Idempotency replay');
+    res.set('X-Idempotency-Replayed', 'true');
+    res.set('X-Idempotency-Created-At', new Date(existing.createdAt).toISOString());
     res.status(existing.statusCode).json(existing.body);
     return;
   }

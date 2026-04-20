@@ -1,4 +1,6 @@
-import React, { useCallback, useMemo, useState } from "react";
+import { useQueries } from '@tanstack/react-query';
+import type React from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -8,13 +10,12 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { useQueries } from "@tanstack/react-query";
+} from 'react-native';
 
 export interface NotificationItem {
   id: string;
-  domain: "aegis" | "vessels" | "terra" | "lyte" | "szl" | "carlota" | "stephen" | string;
-  severity: "critical" | "high" | "medium" | "low" | "info";
+  domain: 'aegis' | 'vessels' | 'terra' | 'lyte' | 'szl' | 'carlota' | 'stephen' | string;
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
   title: string;
   body?: string;
   timestamp: string;
@@ -31,11 +32,11 @@ export interface NotificationFetcher {
 }
 
 const SEV_COLORS: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "#3b82f6",
-  info: "#6b7280",
+  critical: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#3b82f6',
+  info: '#6b7280',
 };
 
 const SEV_ORDER: Record<string, number> = {
@@ -49,7 +50,7 @@ const SEV_ORDER: Record<string, number> = {
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
+  if (mins < 1) return 'just now';
   if (mins < 60) return `${mins}m ago`;
   const hours = Math.floor(mins / 60);
   return hours < 24 ? `${hours}h ago` : `${Math.floor(hours / 24)}d ago`;
@@ -69,22 +70,22 @@ interface NotificationHubProps {
 
 export function NotificationHub({
   fetchers,
-  accentColor = "#c9a84c",
-  backgroundColor = "#0a0a0a",
-  surfaceColor = "#111",
-  textColor = "#fff",
-  dimColor = "#6b7280",
-  borderColor = "rgba(255,255,255,0.08)",
+  accentColor = '#c9a84c',
+  backgroundColor = '#0a0a0a',
+  surfaceColor = '#111',
+  textColor = '#fff',
+  dimColor = '#6b7280',
+  borderColor = 'rgba(255,255,255,0.08)',
   onDeepLink,
   trigger,
 }: NotificationHubProps) {
   const [visible, setVisible] = useState(false);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
-  const [domainFilter, setDomainFilter] = useState<string>("All");
+  const [domainFilter, setDomainFilter] = useState<string>('All');
 
   const allQueries = useQueries({
     queries: fetchers.map((f) => ({
-      queryKey: ["notification-hub", f.domain],
+      queryKey: ['notification-hub', f.domain],
       queryFn: f.fetch,
       staleTime: 30_000,
       refetchInterval: 60_000,
@@ -99,14 +100,14 @@ export function NotificationHub({
     return items.sort(
       (a, b) =>
         SEV_ORDER[a.severity] - SEV_ORDER[b.severity] ||
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
     // allQueries reference is stable between renders (useQueries memoizes the array)
   }, [allQueries]);
 
   const filteredItems = useMemo(() => {
     const domainFiltered =
-      domainFilter === "All" ? allItems : allItems.filter((i) => i.domain === domainFilter);
+      domainFilter === 'All' ? allItems : allItems.filter((i) => i.domain === domainFilter);
     return domainFiltered.map((i) => ({ ...i, read: i.read || readIds.has(i.id) }));
   }, [allItems, domainFilter, readIds]);
 
@@ -125,7 +126,7 @@ export function NotificationHub({
     setReadIds((prev) => new Set([...prev, id]));
   }, []);
 
-  const domainLabels = ["All", ...fetchers.map((f) => f.domain)];
+  const domainLabels = ['All', ...fetchers.map((f) => f.domain)];
 
   return (
     <>
@@ -139,14 +140,14 @@ export function NotificationHub({
             <Text style={{ fontSize: 18 }}>🔔</Text>
             {unreadCount > 0 && (
               <View style={[styles.badge, { backgroundColor: accentColor }]}>
-                <Text style={styles.badgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
+                <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
               </View>
             )}
           </View>
         )}
         {!trigger && unreadCount > 0 && (
           <View style={[styles.externalBadge, { backgroundColor: accentColor }]}>
-            <Text style={styles.badgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
+            <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -162,8 +163,15 @@ export function NotificationHub({
             <View style={styles.headerLeft}>
               <Text style={[styles.headerTitle, { color: textColor }]}>Notifications</Text>
               {unreadCount > 0 && (
-                <View style={[styles.countBadge, { backgroundColor: `${accentColor}20`, borderColor: `${accentColor}40` }]}>
-                  <Text style={[styles.countBadgeText, { color: accentColor }]}>{unreadCount} unread</Text>
+                <View
+                  style={[
+                    styles.countBadge,
+                    { backgroundColor: `${accentColor}20`, borderColor: `${accentColor}40` },
+                  ]}
+                >
+                  <Text style={[styles.countBadgeText, { color: accentColor }]}>
+                    {unreadCount} unread
+                  </Text>
                 </View>
               )}
             </View>
@@ -195,12 +203,8 @@ export function NotificationHub({
                   style={[
                     styles.filterChip,
                     {
-                      backgroundColor: isActive
-                        ? (f?.color ?? accentColor) + "20"
-                        : surfaceColor,
-                      borderColor: isActive
-                        ? (f?.color ?? accentColor) + "50"
-                        : borderColor,
+                      backgroundColor: isActive ? (f?.color ?? accentColor) + '20' : surfaceColor,
+                      borderColor: isActive ? (f?.color ?? accentColor) + '50' : borderColor,
                     },
                   ]}
                 >
@@ -227,7 +231,12 @@ export function NotificationHub({
           <FlatList
             data={filteredItems}
             keyExtractor={(i) => i.id}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40, paddingTop: 8, gap: 8 }}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 40,
+              paddingTop: 8,
+              gap: 8,
+            }}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyState}>
@@ -259,12 +268,25 @@ export function NotificationHub({
                   <View style={styles.notifTop}>
                     <View style={styles.notifMeta}>
                       <View style={[styles.sevDot, { backgroundColor: sevColor }]} />
-                      <View style={[styles.sevBadge, { backgroundColor: `${sevColor}15`, borderColor: `${sevColor}30` }]}>
+                      <View
+                        style={[
+                          styles.sevBadge,
+                          { backgroundColor: `${sevColor}15`, borderColor: `${sevColor}30` },
+                        ]}
+                      >
                         <Text style={[styles.sevText, { color: sevColor }]}>
                           {item.severity.toUpperCase()}
                         </Text>
                       </View>
-                      <View style={[styles.domainChip, { backgroundColor: `${f?.color ?? accentColor}15`, borderColor: `${f?.color ?? accentColor}30` }]}>
+                      <View
+                        style={[
+                          styles.domainChip,
+                          {
+                            backgroundColor: `${f?.color ?? accentColor}15`,
+                            borderColor: `${f?.color ?? accentColor}30`,
+                          },
+                        ]}
+                      >
                         <Text style={[styles.domainText, { color: f?.color ?? accentColor }]}>
                           {f?.label ?? item.domain}
                         </Text>
@@ -299,63 +321,63 @@ export function NotificationHub({
 
 const styles = StyleSheet.create({
   triggerWrap: {
-    position: "relative",
+    position: 'relative',
   },
   bellButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   badge: {
-    position: "absolute",
+    position: 'absolute',
     top: -4,
     right: -4,
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 4,
   },
   badgeText: {
     fontSize: 10,
-    fontWeight: "700",
-    color: "#000",
+    fontWeight: '700',
+    color: '#000',
   },
   externalBadge: {
-    position: "absolute",
+    position: 'absolute',
     top: -4,
     right: -4,
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 4,
   },
   modal: {
     flex: 1,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 14,
     borderBottomWidth: 1,
   },
   headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   countBadge: {
     paddingHorizontal: 8,
@@ -365,11 +387,11 @@ const styles = StyleSheet.create({
   },
   countBadgeText: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   markAllBtn: {
@@ -378,14 +400,14 @@ const styles = StyleSheet.create({
   },
   markAllText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   closeBtn: {
     padding: 4,
   },
   closeText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   filterBar: {
     borderBottomWidth: 1,
@@ -399,11 +421,11 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   loadingRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -418,13 +440,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   notifTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   notifMeta: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
     flex: 1,
   },
@@ -441,7 +463,7 @@ const styles = StyleSheet.create({
   },
   sevText: {
     fontSize: 8,
-    fontWeight: "700",
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
   domainChip: {
@@ -452,14 +474,14 @@ const styles = StyleSheet.create({
   },
   domainText: {
     fontSize: 9,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   timeText: {
     fontSize: 11,
   },
   notifTitle: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: '600',
     lineHeight: 18,
   },
   notifBody: {
@@ -468,11 +490,11 @@ const styles = StyleSheet.create({
   },
   deepLinkHint: {
     fontSize: 11,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   emptyState: {
     paddingTop: 60,
-    alignItems: "center",
+    alignItems: 'center',
     gap: 12,
   },
   emptyText: {

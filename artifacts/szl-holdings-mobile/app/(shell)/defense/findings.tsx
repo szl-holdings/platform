@@ -1,1 +1,1 @@
-export { default } from "./(tabs)/findings";
+export { default } from './(tabs)/findings';

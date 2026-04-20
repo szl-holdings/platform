@@ -15,35 +15,35 @@
  *   DELETE /api/alloy/policy-compiler/test-cases/:externalId
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db, alloyPolicyVersions, alloyPolicyTestCases } from "@szl-holdings/db";
-import { and, asc, eq, max } from "drizzle-orm";
-import { bodyShape } from "@szl-holdings/contracts/common";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { alloyPolicyTestCases, alloyPolicyVersions, db } from '@szl-holdings/db';
+import { and, asc, eq, max } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
 import {
-  sendSuccess,
-  sendCreated,
-  sendBadRequest,
-  sendNotFound,
   handleRouteError,
-} from "../lib/api-response";
-import { validateBody } from "../lib/validation";
-import { authMiddleware } from "../middlewares/auth";
+  sendBadRequest,
+  sendCreated,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const requireAuth = authMiddleware({ required: true });
 
 const router: IRouter = Router();
 
-const DEFAULT_STUDIO = "default";
+const DEFAULT_STUDIO = 'default';
 
 function studioIdFromQuery(req: Request): string {
-  const raw = req.query["studioId"];
-  if (typeof raw === "string" && raw.trim().length > 0) return raw.trim().slice(0, 64);
+  const raw = req.query['studioId'];
+  if (typeof raw === 'string' && raw.trim().length > 0) return raw.trim().slice(0, 64);
   return DEFAULT_STUDIO;
 }
 
 function studioIdFromBody(body: Record<string, unknown>): string {
-  const raw = body["studioId"];
-  if (typeof raw === "string" && raw.trim().length > 0) return raw.trim().slice(0, 64);
+  const raw = body['studioId'];
+  if (typeof raw === 'string' && raw.trim().length > 0) return raw.trim().slice(0, 64);
   return DEFAULT_STUDIO;
 }
 
@@ -51,7 +51,7 @@ function uid(): string {
   return Math.random().toString(36).slice(2, 11) + Date.now().toString(36);
 }
 
-router.get("/alloy/policy-compiler/state", async (req: Request, res: Response) => {
+router.get('/alloy/policy-compiler/state', async (req: Request, res: Response) => {
   try {
     const studioId = studioIdFromQuery(req);
     const [versions, testCases] = await Promise.all([
@@ -68,12 +68,12 @@ router.get("/alloy/policy-compiler/state", async (req: Request, res: Response) =
     ]);
     sendSuccess(res, { studioId, versions, testCases });
   } catch (err) {
-    handleRouteError(res, err, "alloy-policy-compiler:state");
+    handleRouteError(res, err, 'alloy-policy-compiler:state');
   }
 });
 
 router.post(
-  "/alloy/policy-compiler/versions",
+  '/alloy/policy-compiler/versions',
   requireAuth,
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
@@ -81,15 +81,15 @@ router.post(
       const body = req.body as Record<string, unknown>;
       const studioId = studioIdFromBody(body);
 
-      const input = typeof body["input"] === "string" ? body["input"] : null;
-      const policy = body["policy"];
-      const author = typeof body["author"] === "string" ? body["author"] : null;
-      const authorId = typeof body["authorId"] === "string" ? body["authorId"] : null;
-      const message = typeof body["message"] === "string" ? body["message"] : "";
-      const signers = Array.isArray(body["signers"]) ? body["signers"] : [];
+      const input = typeof body['input'] === 'string' ? body['input'] : null;
+      const policy = body['policy'];
+      const author = typeof body['author'] === 'string' ? body['author'] : null;
+      const authorId = typeof body['authorId'] === 'string' ? body['authorId'] : null;
+      const message = typeof body['message'] === 'string' ? body['message'] : '';
+      const signers = Array.isArray(body['signers']) ? body['signers'] : [];
 
-      if (!input || !policy || typeof policy !== "object" || !author || !authorId) {
-        sendBadRequest(res, "input, policy, author, and authorId are required");
+      if (!input || !policy || typeof policy !== 'object' || !author || !authorId) {
+        sendBadRequest(res, 'input, policy, author, and authorId are required');
         return;
       }
 
@@ -99,9 +99,10 @@ router.post(
         .where(eq(alloyPolicyVersions.studioId, studioId));
 
       const versionNumber = (maxVersion ?? 0) + 1;
-      const externalId = typeof body["externalId"] === "string" && body["externalId"].length > 0
-        ? body["externalId"]
-        : `polver_${uid()}`;
+      const externalId =
+        typeof body['externalId'] === 'string' && body['externalId'].length > 0
+          ? body['externalId']
+          : `polver_${uid()}`;
 
       const [row] = await db
         .insert(alloyPolicyVersions)
@@ -120,24 +121,27 @@ router.post(
 
       sendCreated(res, row);
     } catch (err) {
-      handleRouteError(res, err, "alloy-policy-compiler:create-version");
+      handleRouteError(res, err, 'alloy-policy-compiler:create-version');
     }
   },
 );
 
 router.post(
-  "/alloy/policy-compiler/versions/:externalId/sign",
+  '/alloy/policy-compiler/versions/:externalId/sign',
   requireAuth,
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const externalId = req.params["externalId"];
-      if (!externalId) { sendBadRequest(res, "externalId is required"); return; }
+      const externalId = req.params['externalId'];
+      if (!externalId) {
+        sendBadRequest(res, 'externalId is required');
+        return;
+      }
       const body = req.body as Record<string, unknown>;
-      const name = typeof body["name"] === "string" ? body["name"] : null;
-      const role = typeof body["role"] === "string" ? body["role"] : null;
+      const name = typeof body['name'] === 'string' ? body['name'] : null;
+      const role = typeof body['role'] === 'string' ? body['role'] : null;
       if (!name || !role) {
-        sendBadRequest(res, "name and role are required");
+        sendBadRequest(res, 'name and role are required');
         return;
       }
 
@@ -147,7 +151,10 @@ router.post(
         .where(eq(alloyPolicyVersions.externalId, externalId))
         .limit(1);
 
-      if (!existing) { sendNotFound(res, "PolicyVersion"); return; }
+      if (!existing) {
+        sendNotFound(res, 'PolicyVersion');
+        return;
+      }
 
       const currentSigners = Array.isArray(existing.signers)
         ? (existing.signers as Array<{ name: string; role: string; signedAt: number }>)
@@ -166,29 +173,31 @@ router.post(
 
       sendSuccess(res, updated);
     } catch (err) {
-      handleRouteError(res, err, "alloy-policy-compiler:sign-version");
+      handleRouteError(res, err, 'alloy-policy-compiler:sign-version');
     }
   },
 );
 
 router.post(
-  "/alloy/policy-compiler/test-cases",
+  '/alloy/policy-compiler/test-cases',
   requireAuth,
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
       const body = req.body as Record<string, unknown>;
       const studioId = studioIdFromBody(body);
-      const name = typeof body["name"] === "string" ? body["name"] : null;
-      const context = body["context"];
-      const expectedOutcome = typeof body["expectedOutcome"] === "string" ? body["expectedOutcome"] : null;
-      if (!name || !expectedOutcome || !context || typeof context !== "object") {
-        sendBadRequest(res, "name, context, and expectedOutcome are required");
+      const name = typeof body['name'] === 'string' ? body['name'] : null;
+      const context = body['context'];
+      const expectedOutcome =
+        typeof body['expectedOutcome'] === 'string' ? body['expectedOutcome'] : null;
+      if (!name || !expectedOutcome || !context || typeof context !== 'object') {
+        sendBadRequest(res, 'name, context, and expectedOutcome are required');
         return;
       }
-      const externalId = typeof body["externalId"] === "string" && body["externalId"].length > 0
-        ? body["externalId"]
-        : `polte_${uid()}`;
+      const externalId =
+        typeof body['externalId'] === 'string' && body['externalId'].length > 0
+          ? body['externalId']
+          : `polte_${uid()}`;
 
       const [row] = await db
         .insert(alloyPolicyTestCases)
@@ -203,18 +212,21 @@ router.post(
 
       sendCreated(res, row);
     } catch (err) {
-      handleRouteError(res, err, "alloy-policy-compiler:create-test-case");
+      handleRouteError(res, err, 'alloy-policy-compiler:create-test-case');
     }
   },
 );
 
 router.delete(
-  "/alloy/policy-compiler/test-cases/:externalId",
+  '/alloy/policy-compiler/test-cases/:externalId',
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const externalId = req.params["externalId"];
-      if (!externalId) { sendBadRequest(res, "externalId is required"); return; }
+      const externalId = req.params['externalId'];
+      if (!externalId) {
+        sendBadRequest(res, 'externalId is required');
+        return;
+      }
       const studioId = studioIdFromQuery(req);
       const deleted = await db
         .delete(alloyPolicyTestCases)
@@ -225,10 +237,13 @@ router.delete(
           ),
         )
         .returning();
-      if (deleted.length === 0) { sendNotFound(res, "PolicyTestCase"); return; }
+      if (deleted.length === 0) {
+        sendNotFound(res, 'PolicyTestCase');
+        return;
+      }
       sendSuccess(res, { deleted: true, externalId });
     } catch (err) {
-      handleRouteError(res, err, "alloy-policy-compiler:delete-test-case");
+      handleRouteError(res, err, 'alloy-policy-compiler:delete-test-case');
     }
   },
 );

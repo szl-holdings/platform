@@ -19,7 +19,7 @@
 
 'use strict';
 
-const https  = require('https');
+const https = require('https');
 const { URL } = require('url');
 
 const { POSTS } = require('./posts.cjs');
@@ -69,23 +69,25 @@ function addCanonicalNote(body, canonicalUrl) {
 
 function jsonRequest(method, urlStr, token, body) {
   return new Promise((resolve, reject) => {
-    const parsed  = new URL(urlStr);
+    const parsed = new URL(urlStr);
     const payload = JSON.stringify(body);
     const options = {
       hostname: parsed.hostname,
-      path:     parsed.pathname + (parsed.search || ''),
+      path: parsed.pathname + (parsed.search || ''),
       method,
       headers: {
-        Authorization:  `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'Accept':       'application/json',
+        Accept: 'application/json',
         ...(body ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
       },
     };
 
     const req = https.request(options, (res) => {
       let data = '';
-      res.on('data', (chunk) => { data += chunk; });
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
       res.on('end', () => {
         try {
           resolve({ status: res.statusCode, body: JSON.parse(data) });
@@ -104,9 +106,9 @@ function jsonRequest(method, urlStr, token, body) {
 // ── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  const token         = requireEnv('MEDIUM_INTEGRATION_TOKEN');
+  const token = requireEnv('MEDIUM_INTEGRATION_TOKEN');
   const publicationId = requireEnv('MEDIUM_PUBLICATION_ID');
-  const substackUrl   = requireEnv('SUBSTACK_PUBLICATION_URL');
+  const substackUrl = requireEnv('SUBSTACK_PUBLICATION_URL');
 
   // Fetch the authenticated user to confirm token validity
   const meRes = await jsonRequest('GET', 'https://api.medium.com/v1/me', token);
@@ -125,26 +127,26 @@ async function main() {
     // Prefer an explicit canonicalUrl on the post object (set after Substack
     // publishes and the real permalink is known); fall back to slug derivation.
     const canonicalUrl = post.canonicalUrl || substackCanonical(substackUrl, post.title);
-    const content      = addCanonicalNote(post.body, canonicalUrl);
+    const content = addCanonicalNote(post.body, canonicalUrl);
 
     console.log(`  → [${post.id}] "${post.title}"`);
     console.log(`       canonical: ${canonicalUrl}`);
 
     const payload = {
-      title:         post.title,
+      title: post.title,
       contentFormat: 'markdown',
       content,
-      tags:          (post.mediumTags || []).slice(0, 5),
+      tags: (post.mediumTags || []).slice(0, 5),
       publishStatus: 'draft',
       canonicalUrl,
     };
 
-    const url    = `https://api.medium.com/v1/publications/${publicationId}/posts`;
+    const url = `https://api.medium.com/v1/publications/${publicationId}/posts`;
     const result = await jsonRequest('POST', url, token, payload);
 
     if (result.status === 200 || result.status === 201) {
       const draft = result.body.data ?? result.body;
-      const draftId  = draft.id  ?? '(unknown)';
+      const draftId = draft.id ?? '(unknown)';
       const draftUrl = draft.url ?? `https://medium.com/p/${draftId}`;
       console.log(`     ✓ draft created  id=${draftId}`);
       console.log(`       ${draftUrl}`);

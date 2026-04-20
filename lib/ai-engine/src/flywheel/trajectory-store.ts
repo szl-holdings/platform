@@ -12,9 +12,9 @@
  *   4. Inject: Golden runs are used as few-shot examples in future prompts
  */
 
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
-export type TrajectoryStatus = "captured" | "scored" | "golden" | "filtered_out";
+export type TrajectoryStatus = 'captured' | 'scored' | 'golden' | 'filtered_out';
 
 export interface AgentRoutingStep {
   agentId: string;
@@ -70,55 +70,67 @@ export interface QualityDimensions {
   overallScore: number;
 }
 
-function computeContentHash(trajectory: Pick<OrchestrateTrajectory, "query" | "finalSynthesis" | "capturedAt">): string {
+function computeContentHash(
+  trajectory: Pick<OrchestrateTrajectory, 'query' | 'finalSynthesis' | 'capturedAt'>,
+): string {
   const payload = `${trajectory.query}:${trajectory.finalSynthesis}:${trajectory.capturedAt}`;
-  return createHash("sha256").update(payload).digest("hex").slice(0, 16);
+  return createHash('sha256').update(payload).digest('hex').slice(0, 16);
 }
 
 function scoreTrajectory(trajectory: OrchestrateTrajectory): QualityDimensions {
-  const coherence = Math.min(1, (
+  const coherence = Math.min(
+    1,
     (trajectory.averageConfidence / 100) * 0.5 +
-    (trajectory.validationPassed ? 0.3 : 0) +
-    (trajectory.finalSynthesis.length > 200 ? 0.2 : trajectory.finalSynthesis.length / 1000)
-  ));
+      (trajectory.validationPassed ? 0.3 : 0) +
+      (trajectory.finalSynthesis.length > 200 ? 0.2 : trajectory.finalSynthesis.length / 1000),
+  );
 
   const agentCount = trajectory.agentRouting.length;
-  const successfulAgents = trajectory.agentRouting.filter(a => a.success).length;
+  const successfulAgents = trajectory.agentRouting.filter((a) => a.success).length;
   const agentCoordination = agentCount > 0 ? successfulAgents / agentCount : 0;
 
-  const completeness = Math.min(1, (
-    (agentCoordination * 0.4) +
-    (trajectory.finalSynthesis.length > 500 ? 0.3 : trajectory.finalSynthesis.length / 1666) +
-    (trajectory.toolCalls.length > 0 ? 0.2 : 0) +
-    (trajectory.intermediateOutputs.length > 0 ? 0.1 : 0)
-  ));
+  const completeness = Math.min(
+    1,
+    agentCoordination * 0.4 +
+      (trajectory.finalSynthesis.length > 500 ? 0.3 : trajectory.finalSynthesis.length / 1666) +
+      (trajectory.toolCalls.length > 0 ? 0.2 : 0) +
+      (trajectory.intermediateOutputs.length > 0 ? 0.1 : 0),
+  );
 
-  const tokenEfficiency = trajectory.totalTokens > 0 ? Math.min(1, 5000 / trajectory.totalTokens) : 0;
+  const tokenEfficiency =
+    trajectory.totalTokens > 0 ? Math.min(1, 5000 / trajectory.totalTokens) : 0;
   const latencyEfficiency = Math.min(1, 10000 / Math.max(1, trajectory.totalLatencyMs));
-  const efficiency = (tokenEfficiency * 0.5 + latencyEfficiency * 0.5);
+  const efficiency = tokenEfficiency * 0.5 + latencyEfficiency * 0.5;
 
-  const toolSuccessRate = trajectory.toolCalls.length > 0
-    ? trajectory.toolCalls.filter(t => t.success).length / trajectory.toolCalls.length
-    : 1;
-  const safetyScore = Math.min(1, (
+  const toolSuccessRate =
+    trajectory.toolCalls.length > 0
+      ? trajectory.toolCalls.filter((t) => t.success).length / trajectory.toolCalls.length
+      : 1;
+  const safetyScore = Math.min(
+    1,
     (trajectory.validationPassed ? 0.5 : 0.2) +
-    (toolSuccessRate * 0.3) +
-    (trajectory.isHighStakes && trajectory.validationPassed ? 0.2 : trajectory.isHighStakes ? 0 : 0.2)
-  ));
+      toolSuccessRate * 0.3 +
+      (trajectory.isHighStakes && trajectory.validationPassed
+        ? 0.2
+        : trajectory.isHighStakes
+          ? 0
+          : 0.2),
+  );
 
-  const overallScore = (
+  const overallScore =
     coherence * 0.25 +
     completeness * 0.25 +
     efficiency * 0.15 +
     safetyScore * 0.25 +
-    agentCoordination * 0.10
-  );
+    agentCoordination * 0.1;
 
   return { coherence, completeness, efficiency, safetyScore, agentCoordination, overallScore };
 }
 
 function buildFewShotExample(trajectory: OrchestrateTrajectory): string {
-  const agentList = trajectory.agentRouting.map(a => `${a.agentName} (${a.domain}, confidence: ${a.confidence}%)`).join(", ");
+  const agentList = trajectory.agentRouting
+    .map((a) => `${a.agentName} (${a.domain}, confidence: ${a.confidence}%)`)
+    .join(', ');
   return `## Example Query & Response
 Query: "${trajectory.query.slice(0, 200)}"
 Agents Engaged: ${agentList}
@@ -153,7 +165,7 @@ export class TrajectoryStore {
     const capturedAt = new Date().toISOString();
     const trajectory: OrchestrateTrajectory = {
       trajectoryId: `traj_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      contentHash: "",
+      contentHash: '',
       query: data.query,
       agentRouting: data.agentRouting,
       toolCalls: data.toolCalls ?? [],
@@ -164,18 +176,22 @@ export class TrajectoryStore {
       totalLatencyMs: data.totalLatencyMs,
       isHighStakes: data.isHighStakes,
       validationPassed: data.validationPassed,
-      validationNotes: data.validationNotes ?? "",
+      validationNotes: data.validationNotes ?? '',
       userFeedbackScore: null,
       qualityScore: null,
       qualityDimensions: null,
-      status: "captured",
+      status: 'captured',
       goldenRunRank: null,
       fewShotExample: null,
       capturedAt,
       orgId: data.orgId ?? null,
       metadata: data.metadata ?? {},
     };
-    trajectory.contentHash = computeContentHash({ query: trajectory.query, finalSynthesis: trajectory.finalSynthesis, capturedAt });
+    trajectory.contentHash = computeContentHash({
+      query: trajectory.query,
+      finalSynthesis: trajectory.finalSynthesis,
+      capturedAt,
+    });
 
     this.trajectories.push(trajectory);
     if (this.trajectories.length > MAX_TRAJECTORIES) {
@@ -190,24 +206,26 @@ export class TrajectoryStore {
     const dims = scoreTrajectory(trajectory);
     trajectory.qualityDimensions = dims;
     trajectory.qualityScore = dims.overallScore;
-    trajectory.status = "scored";
+    trajectory.status = 'scored';
 
     if (dims.overallScore >= GOLDEN_RUN_THRESHOLD) {
       trajectory.fewShotExample = buildFewShotExample(trajectory);
-      trajectory.status = "golden";
+      trajectory.status = 'golden';
       this.goldenRuns.push(trajectory);
       this.goldenRuns.sort((a, b) => (b.qualityScore ?? 0) - (a.qualityScore ?? 0));
       if (this.goldenRuns.length > MAX_GOLDEN_RUNS) {
         this.goldenRuns.splice(MAX_GOLDEN_RUNS);
       }
-      this.goldenRuns.forEach((r, i) => { r.goldenRunRank = i + 1; });
+      this.goldenRuns.forEach((r, i) => {
+        r.goldenRunRank = i + 1;
+      });
     } else {
-      trajectory.status = "filtered_out";
+      trajectory.status = 'filtered_out';
     }
   }
 
   addUserFeedback(trajectoryId: string, score: number): boolean {
-    const traj = this.trajectories.find(t => t.trajectoryId === trajectoryId);
+    const traj = this.trajectories.find((t) => t.trajectoryId === trajectoryId);
     if (!traj) return false;
 
     traj.userFeedbackScore = Math.max(-1, Math.min(1, score));
@@ -215,9 +233,9 @@ export class TrajectoryStore {
       const feedbackBoost = traj.userFeedbackScore * 0.1;
       traj.qualityScore = Math.max(0, Math.min(1, traj.qualityScore + feedbackBoost));
 
-      if (traj.qualityScore >= GOLDEN_RUN_THRESHOLD && traj.status !== "golden") {
+      if (traj.qualityScore >= GOLDEN_RUN_THRESHOLD && traj.status !== 'golden') {
         traj.fewShotExample = buildFewShotExample(traj);
-        traj.status = "golden";
+        traj.status = 'golden';
         this.goldenRuns.push(traj);
         this.goldenRuns.sort((a, b) => (b.qualityScore ?? 0) - (a.qualityScore ?? 0));
         if (this.goldenRuns.length > MAX_GOLDEN_RUNS) this.goldenRuns.splice(MAX_GOLDEN_RUNS);
@@ -228,13 +246,13 @@ export class TrajectoryStore {
 
   getGoldenRunsContext(maxExamples = 3, domainFilter?: string): string {
     const runs = domainFilter
-      ? this.goldenRuns.filter(r => r.agentRouting.some(a => a.domain === domainFilter))
+      ? this.goldenRuns.filter((r) => r.agentRouting.some((a) => a.domain === domainFilter))
       : this.goldenRuns;
 
     const top = runs.slice(0, maxExamples);
-    if (top.length === 0) return "";
+    if (top.length === 0) return '';
 
-    return `## High-Quality Reference Examples (from ${this.goldenRuns.length} golden runs)\n\n${top.map(r => r.fewShotExample).join("\n")}`;
+    return `## High-Quality Reference Examples (from ${this.goldenRuns.length} golden runs)\n\n${top.map((r) => r.fewShotExample).join('\n')}`;
   }
 
   getStats(): {
@@ -243,14 +261,25 @@ export class TrajectoryStore {
     avgQualityScore: number;
     avgConfidence: number;
   } {
-    const scored = this.trajectories.filter(t => t.qualityScore !== null);
-    const avgQuality = scored.length > 0 ? scored.reduce((s, t) => s + (t.qualityScore ?? 0), 0) / scored.length : 0;
-    const avgConf = this.trajectories.length > 0 ? this.trajectories.reduce((s, t) => s + t.averageConfidence, 0) / this.trajectories.length : 0;
-    return { totalCaptured: this.trajectories.length, totalGolden: this.goldenRuns.length, avgQualityScore: avgQuality, avgConfidence: avgConf };
+    const scored = this.trajectories.filter((t) => t.qualityScore !== null);
+    const avgQuality =
+      scored.length > 0 ? scored.reduce((s, t) => s + (t.qualityScore ?? 0), 0) / scored.length : 0;
+    const avgConf =
+      this.trajectories.length > 0
+        ? this.trajectories.reduce((s, t) => s + t.averageConfidence, 0) / this.trajectories.length
+        : 0;
+    return {
+      totalCaptured: this.trajectories.length,
+      totalGolden: this.goldenRuns.length,
+      avgQualityScore: avgQuality,
+      avgConfidence: avgConf,
+    };
   }
 
   getTrajectories(limit = 50, status?: TrajectoryStatus): OrchestrateTrajectory[] {
-    const filtered = status ? this.trajectories.filter(t => t.status === status) : this.trajectories;
+    const filtered = status
+      ? this.trajectories.filter((t) => t.status === status)
+      : this.trajectories;
     return filtered.slice(-limit).reverse();
   }
 

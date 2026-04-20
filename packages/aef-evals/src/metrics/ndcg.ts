@@ -4,11 +4,7 @@ function dcg(relevanceGains: number[]): number {
   }, 0);
 }
 
-export function computeNdcgAtK(
-  retrievedIds: string[],
-  relevantIds: string[],
-  k: number,
-): number {
+export function computeNdcgAtK(retrievedIds: string[], relevantIds: string[], k: number): number {
   const topK = retrievedIds.slice(0, k);
   const relevantSet = new Set(relevantIds);
 

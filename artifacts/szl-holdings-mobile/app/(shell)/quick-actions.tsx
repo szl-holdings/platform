@@ -1,102 +1,95 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
-import { useColors } from "@/hooks/useColors";
-import { QuickActionDeck } from "@/components/QuickActionDeck";
+import { Feather } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { QuickActionDeck } from '@/components/QuickActionDeck';
+import { useColors } from '@/hooks/useColors';
 
-const ACCENT = "#c9a84c";
-const PURPLE = "#8b7ac8";
+const ACCENT = '#c9a84c';
+const PURPLE = '#8b7ac8';
 
 // ── Priority signals ───────────────────────────────────────────────────────────
 
 const PRIORITY_SIGNALS = [
   {
-    id: "s1",
-    domain: "Carlota",
-    domainColor: "#c2a55a",
-    title: "CRM Pipeline Disconnected",
-    detail: "Real-time data stale 3h42m — client dashboards degraded",
-    severity: "critical" as const,
-    action: "Reconnect",
+    id: 's1',
+    domain: 'Carlota',
+    domainColor: '#c2a55a',
+    title: 'CRM Pipeline Disconnected',
+    detail: 'Real-time data stale 3h42m — client dashboards degraded',
+    severity: 'critical' as const,
+    action: 'Reconnect',
   },
   {
-    id: "s2",
-    domain: "Lyte",
-    domainColor: "#f59e0b",
-    title: "API P95 Latency Breach",
-    detail: "2.4s vs 2.0s target — SLA penalty risk",
-    severity: "high" as const,
-    action: "Add Index",
+    id: 's2',
+    domain: 'Lyte',
+    domainColor: '#f59e0b',
+    title: 'API P95 Latency Breach',
+    detail: '2.4s vs 2.0s target — SLA penalty risk',
+    severity: 'high' as const,
+    action: 'Add Index',
   },
   {
-    id: "s3",
-    domain: "Aegis",
-    domainColor: "#6366f1",
-    title: "Bundle Size Warning",
-    detail: "1.34MB vs 900KB budget — MITRE module over-eager",
-    severity: "medium" as const,
-    action: "Review",
+    id: 's3',
+    domain: 'Aegis',
+    domainColor: '#6366f1',
+    title: 'Bundle Size Warning',
+    detail: '1.34MB vs 900KB budget — MITRE module over-eager',
+    severity: 'medium' as const,
+    action: 'Review',
   },
 ];
 
 const AWAITING_APPROVAL = [
   {
-    id: "p1",
-    domain: "Portfolio",
+    id: 'p1',
+    domain: 'Portfolio',
     domainColor: ACCENT,
-    title: "Wire Transfer Authorization",
-    amount: "$2,400,000",
-    requester: "CFO Office",
-    due: "Today 5:00 PM",
-    urgency: "critical" as const,
+    title: 'Wire Transfer Authorization',
+    amount: '$2,400,000',
+    requester: 'CFO Office',
+    due: 'Today 5:00 PM',
+    urgency: 'critical' as const,
   },
   {
-    id: "p2",
-    domain: "Aegis",
-    domainColor: "#6366f1",
-    title: "Critical CVE Patch Deploy",
-    requester: "Aegis SOC",
-    due: "Within 2 hours",
-    urgency: "critical" as const,
+    id: 'p2',
+    domain: 'Aegis',
+    domainColor: '#6366f1',
+    title: 'Critical CVE Patch Deploy',
+    requester: 'Aegis SOC',
+    due: 'Within 2 hours',
+    urgency: 'critical' as const,
   },
   {
-    id: "p3",
-    domain: "Terra",
-    domainColor: "#4d7c0f",
-    title: "LP Q1 Report — CFO Sign-off",
-    requester: "Finance Lead",
-    due: "Apr 20",
-    urgency: "high" as const,
+    id: 'p3',
+    domain: 'Terra',
+    domainColor: '#4d7c0f',
+    title: 'LP Q1 Report — CFO Sign-off',
+    requester: 'Finance Lead',
+    due: 'Apr 20',
+    urgency: 'high' as const,
   },
 ];
 
 const BUSINESS_HEALTH = {
   score: 76,
-  label: "Moderate",
-  color: "#f59e0b",
-  delta: "+3 pts",
-  atRisk: "$8.4M",
-  protected: "$1.54M",
+  label: 'Moderate',
+  color: '#f59e0b',
+  delta: '+3 pts',
+  atRisk: '$8.4M',
+  protected: '$1.54M',
 };
 
-type Tab = "approvals" | "signals" | "deck";
-type TabIcon = "check-circle" | "alert-triangle" | "layers";
+type Tab = 'approvals' | 'signals' | 'deck';
+type TabIcon = 'check-circle' | 'alert-triangle' | 'layers';
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 
 function severityColor(s: string) {
-  if (s === "critical") return "#ef4444";
-  if (s === "high") return "#f97316";
-  if (s === "medium") return "#f59e0b";
-  return "#22c55e";
+  if (s === 'critical') return '#ef4444';
+  if (s === 'high') return '#f97316';
+  if (s === 'medium') return '#f59e0b';
+  return '#22c55e';
 }
 
 // ── sub-views ─────────────────────────────────────────────────────────────────
@@ -106,8 +99,8 @@ function BusinessHealthStrip({ colors }: { colors: ReturnType<typeof useColors> 
   return (
     <View
       style={{
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingVertical: 12,
         paddingHorizontal: 16,
         marginHorizontal: 16,
@@ -119,24 +112,67 @@ function BusinessHealthStrip({ colors }: { colors: ReturnType<typeof useColors> 
       }}
     >
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: h.color, letterSpacing: 0.5, textTransform: "uppercase" }}>
+        <Text
+          style={{
+            fontSize: 11,
+            fontFamily: 'Inter_600SemiBold',
+            color: h.color,
+            letterSpacing: 0.5,
+            textTransform: 'uppercase',
+          }}
+        >
           Business Health
         </Text>
-        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 2 }}>
-          <Text style={{ fontSize: 26, fontFamily: "Inter_700Bold", color: h.color, letterSpacing: -0.5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 2 }}>
+          <Text
+            style={{
+              fontSize: 26,
+              fontFamily: 'Inter_700Bold',
+              color: h.color,
+              letterSpacing: -0.5,
+            }}
+          >
             {h.score}
           </Text>
-          <Text style={{ fontSize: 13, fontFamily: "Inter_400Regular", color: h.color, opacity: 0.6 }}>/100 · {h.delta}</Text>
+          <Text
+            style={{ fontSize: 13, fontFamily: 'Inter_400Regular', color: h.color, opacity: 0.6 }}
+          >
+            /100 · {h.delta}
+          </Text>
         </View>
       </View>
-      <View style={{ alignItems: "flex-end", gap: 4 }}>
-        <View style={{ alignItems: "flex-end" }}>
-          <Text style={{ fontSize: 9, fontFamily: "Inter_600SemiBold", color: "#ef4444", textTransform: "uppercase", letterSpacing: 0.3 }}>At Risk</Text>
-          <Text style={{ fontSize: 14, fontFamily: "Inter_700Bold", color: "#ef4444" }}>{h.atRisk}</Text>
+      <View style={{ alignItems: 'flex-end', gap: 4 }}>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text
+            style={{
+              fontSize: 9,
+              fontFamily: 'Inter_600SemiBold',
+              color: '#ef4444',
+              textTransform: 'uppercase',
+              letterSpacing: 0.3,
+            }}
+          >
+            At Risk
+          </Text>
+          <Text style={{ fontSize: 14, fontFamily: 'Inter_700Bold', color: '#ef4444' }}>
+            {h.atRisk}
+          </Text>
         </View>
-        <View style={{ alignItems: "flex-end" }}>
-          <Text style={{ fontSize: 9, fontFamily: "Inter_600SemiBold", color: "#22c55e", textTransform: "uppercase", letterSpacing: 0.3 }}>Protected</Text>
-          <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#22c55e" }}>{h.protected}</Text>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text
+            style={{
+              fontSize: 9,
+              fontFamily: 'Inter_600SemiBold',
+              color: '#22c55e',
+              textTransform: 'uppercase',
+              letterSpacing: 0.3,
+            }}
+          >
+            Protected
+          </Text>
+          <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#22c55e' }}>
+            {h.protected}
+          </Text>
         </View>
       </View>
     </View>
@@ -152,8 +188,8 @@ function SignalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
           <View
             key={signal.id}
             style={{
-              flexDirection: "row",
-              alignItems: "flex-start",
+              flexDirection: 'row',
+              alignItems: 'flex-start',
               gap: 12,
               paddingVertical: 14,
               paddingHorizontal: 14,
@@ -166,24 +202,71 @@ function SignalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
               marginBottom: 10,
             }}
           >
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: sc, marginTop: 4, flexShrink: 0 }} />
+            <View
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: sc,
+                marginTop: 4,
+                flexShrink: 0,
+              }}
+            />
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.foreground }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: 'Inter_600SemiBold',
+                    color: colors.foreground,
+                  }}
+                >
                   {signal.title}
                 </Text>
-                <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4, backgroundColor: `${signal.domainColor}20` }}>
-                  <Text style={{ fontSize: 9, fontFamily: "Inter_600SemiBold", color: signal.domainColor }}>{signal.domain}</Text>
+                <View
+                  style={{
+                    paddingHorizontal: 6,
+                    paddingVertical: 1,
+                    borderRadius: 4,
+                    backgroundColor: `${signal.domainColor}20`,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 9,
+                      fontFamily: 'Inter_600SemiBold',
+                      color: signal.domainColor,
+                    }}
+                  >
+                    {signal.domain}
+                  </Text>
                 </View>
               </View>
-              <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.mutedForeground, lineHeight: 16 }}>
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontFamily: 'Inter_400Regular',
+                  color: colors.mutedForeground,
+                  lineHeight: 16,
+                }}
+              >
                 {signal.detail}
               </Text>
             </View>
             <TouchableOpacity
-              style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 7, backgroundColor: `${sc}18`, borderWidth: 1, borderColor: `${sc}35`, flexShrink: 0 }}
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 7,
+                backgroundColor: `${sc}18`,
+                borderWidth: 1,
+                borderColor: `${sc}35`,
+                flexShrink: 0,
+              }}
             >
-              <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: sc }}>{signal.action}</Text>
+              <Text style={{ fontSize: 10, fontFamily: 'Inter_600SemiBold', color: sc }}>
+                {signal.action}
+              </Text>
             </TouchableOpacity>
           </View>
         );
@@ -211,60 +294,147 @@ function ApprovalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
               borderRadius: 12,
               backgroundColor: colors.card,
               borderWidth: 1,
-              borderColor: isApproved ? "#22c55e30" : isRejected ? "#ef444430" : colors.border,
+              borderColor: isApproved ? '#22c55e30' : isRejected ? '#ef444430' : colors.border,
               marginBottom: 10,
               opacity: isApproved || isRejected ? 0.6 : 1,
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4, backgroundColor: `${item.domainColor}20` }}>
-                <Text style={{ fontSize: 9, fontFamily: "Inter_600SemiBold", color: item.domainColor }}>{item.domain}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <View
+                style={{
+                  paddingHorizontal: 6,
+                  paddingVertical: 1,
+                  borderRadius: 4,
+                  backgroundColor: `${item.domainColor}20`,
+                }}
+              >
+                <Text
+                  style={{ fontSize: 9, fontFamily: 'Inter_600SemiBold', color: item.domainColor }}
+                >
+                  {item.domain}
+                </Text>
               </View>
-              <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4, backgroundColor: `${uc}18` }}>
-                <Text style={{ fontSize: 9, fontFamily: "Inter_600SemiBold", color: uc, textTransform: "uppercase" }}>{item.urgency}</Text>
+              <View
+                style={{
+                  paddingHorizontal: 6,
+                  paddingVertical: 1,
+                  borderRadius: 4,
+                  backgroundColor: `${uc}18`,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 9,
+                    fontFamily: 'Inter_600SemiBold',
+                    color: uc,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {item.urgency}
+                </Text>
               </View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginLeft: "auto" }}>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 'auto' }}
+              >
                 <Feather name="clock" size={9} color={colors.mutedForeground} />
-                <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: item.due.includes("Today") || item.due.includes("hours") ? "#f59e0b" : colors.mutedForeground }}>
+                <Text
+                  style={{
+                    fontSize: 10,
+                    fontFamily: 'Inter_400Regular',
+                    color:
+                      item.due.includes('Today') || item.due.includes('hours')
+                        ? '#f59e0b'
+                        : colors.mutedForeground,
+                  }}
+                >
                   {item.due}
                 </Text>
               </View>
             </View>
 
-            <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.foreground, marginBottom: 4 }}>
+            <Text
+              style={{
+                fontSize: 13,
+                fontFamily: 'Inter_600SemiBold',
+                color: colors.foreground,
+                marginBottom: 4,
+              }}
+            >
               {item.title}
             </Text>
             {item.amount && (
-              <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: ACCENT, marginBottom: 4 }}>
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontFamily: 'Inter_700Bold',
+                  color: ACCENT,
+                  marginBottom: 4,
+                }}
+              >
                 {item.amount}
               </Text>
             )}
-            <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.mutedForeground, marginBottom: 12 }}>
+            <Text
+              style={{
+                fontSize: 11,
+                fontFamily: 'Inter_400Regular',
+                color: colors.mutedForeground,
+                marginBottom: 12,
+              }}
+            >
               Requested by {item.requester}
             </Text>
 
             {!isApproved && !isRejected && (
-              <View style={{ flexDirection: "row", gap: 8 }}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
-                  onPress={() => setApprovedIds(prev => [...prev, item.id])}
-                  style={{ flex: 1, paddingVertical: 9, borderRadius: 8, backgroundColor: "#22c55e", alignItems: "center" }}
+                  onPress={() => setApprovedIds((prev) => [...prev, item.id])}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 9,
+                    borderRadius: 8,
+                    backgroundColor: '#22c55e',
+                    alignItems: 'center',
+                  }}
                 >
-                  <Text style={{ fontSize: 12, fontFamily: "Inter_700Bold", color: "#fff" }}>Approve</Text>
+                  <Text style={{ fontSize: 12, fontFamily: 'Inter_700Bold', color: '#fff' }}>
+                    Approve
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setRejectedIds(prev => [...prev, item.id])}
-                  style={{ flex: 1, paddingVertical: 9, borderRadius: 8, backgroundColor: "transparent", borderWidth: 1, borderColor: "#ef444440", alignItems: "center" }}
+                  onPress={() => setRejectedIds((prev) => [...prev, item.id])}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 9,
+                    borderRadius: 8,
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderColor: '#ef444440',
+                    alignItems: 'center',
+                  }}
                 >
-                  <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#ef4444" }}>Deny</Text>
+                  <Text style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', color: '#ef4444' }}>
+                    Deny
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
 
             {(isApproved || isRejected) && (
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Feather name={isApproved ? "check-circle" : "x-circle"} size={14} color={isApproved ? "#22c55e" : "#ef4444"} />
-                <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: isApproved ? "#22c55e" : "#ef4444" }}>
-                  {isApproved ? "Approved" : "Denied"}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather
+                  name={isApproved ? 'check-circle' : 'x-circle'}
+                  size={14}
+                  color={isApproved ? '#22c55e' : '#ef4444'}
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: 'Inter_600SemiBold',
+                    color: isApproved ? '#22c55e' : '#ef4444',
+                  }}
+                >
+                  {isApproved ? 'Approved' : 'Denied'}
                 </Text>
               </View>
             )}
@@ -280,25 +450,34 @@ function ApprovalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
 export default function QuickActionsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const [tab, setTab] = useState<Tab>("approvals");
+  const [tab, setTab] = useState<Tab>('approvals');
 
   const TAB_CONFIG: { id: Tab; label: string; icon: TabIcon; badge?: number }[] = [
-    { id: "approvals", label: "Approvals", icon: "check-circle", badge: AWAITING_APPROVAL.length },
-    { id: "signals", label: "Signals", icon: "alert-triangle", badge: PRIORITY_SIGNALS.filter(s => s.severity === "critical").length },
-    { id: "deck", label: "Swipe Deck", icon: "layers" },
+    { id: 'approvals', label: 'Approvals', icon: 'check-circle', badge: AWAITING_APPROVAL.length },
+    {
+      id: 'signals',
+      label: 'Signals',
+      icon: 'alert-triangle',
+      badge: PRIORITY_SIGNALS.filter((s) => s.severity === 'critical').length,
+    },
+    { id: 'deck', label: 'Swipe Deck', icon: 'layers' },
   ];
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, borderBottomColor: colors.border }]}>
+      <View
+        style={[styles.header, { paddingTop: insets.top + 12, borderBottomColor: colors.border }]}
+      >
         <View>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Command Deck</Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
             Priority actions & business signals
           </Text>
         </View>
-        <View style={[styles.accentDot, { backgroundColor: `${PURPLE}20`, borderColor: `${PURPLE}40` }]}>
+        <View
+          style={[styles.accentDot, { backgroundColor: `${PURPLE}20`, borderColor: `${PURPLE}40` }]}
+        >
           <Feather name="zap" size={16} color={PURPLE} />
         </View>
       </View>
@@ -309,8 +488,13 @@ export default function QuickActionsScreen() {
       </View>
 
       {/* Tab bar */}
-      <View style={[styles.tabBar, { backgroundColor: colors.card, borderColor: colors.border, marginHorizontal: 16 }]}>
-        {TAB_CONFIG.map(t => (
+      <View
+        style={[
+          styles.tabBar,
+          { backgroundColor: colors.card, borderColor: colors.border, marginHorizontal: 16 },
+        ]}
+      >
+        {TAB_CONFIG.map((t) => (
           <TouchableOpacity
             key={t.id}
             onPress={() => setTab(t.id)}
@@ -319,13 +503,31 @@ export default function QuickActionsScreen() {
               tab === t.id && { backgroundColor: `${PURPLE}18`, borderColor: `${PURPLE}35` },
             ]}
           >
-            <Feather name={t.icon} size={11} color={tab === t.id ? PURPLE : colors.mutedForeground} />
-            <Text style={[styles.tabLabel, { color: tab === t.id ? PURPLE : colors.mutedForeground }]}>
+            <Feather
+              name={t.icon}
+              size={11}
+              color={tab === t.id ? PURPLE : colors.mutedForeground}
+            />
+            <Text
+              style={[styles.tabLabel, { color: tab === t.id ? PURPLE : colors.mutedForeground }]}
+            >
               {t.label}
             </Text>
             {t.badge != null && t.badge > 0 && (
-              <View style={[styles.tabBadge, { backgroundColor: tab === t.id ? `${PURPLE}25` : `${colors.border}` }]}>
-                <Text style={[styles.tabBadgeText, { color: tab === t.id ? PURPLE : colors.mutedForeground }]}>{t.badge}</Text>
+              <View
+                style={[
+                  styles.tabBadge,
+                  { backgroundColor: tab === t.id ? `${PURPLE}25` : `${colors.border}` },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tabBadgeText,
+                    { color: tab === t.id ? PURPLE : colors.mutedForeground },
+                  ]}
+                >
+                  {t.badge}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
@@ -334,9 +536,9 @@ export default function QuickActionsScreen() {
 
       {/* Content */}
       <View style={[styles.body, { paddingBottom: insets.bottom + 16 }]}>
-        {tab === "approvals" && <ApprovalsView colors={colors} />}
-        {tab === "signals" && <SignalsView colors={colors} />}
-        {tab === "deck" && (
+        {tab === 'approvals' && <ApprovalsView colors={colors} />}
+        {tab === 'signals' && <SignalsView colors={colors} />}
+        {tab === 'deck' && (
           <View style={{ flex: 1 }}>
             <QuickActionDeck />
           </View>
@@ -349,21 +551,21 @@ export default function QuickActionsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 14,
     borderBottomWidth: 1,
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: -0.3,
   },
   headerSub: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     marginTop: 2,
     letterSpacing: 0.2,
   },
@@ -372,11 +574,11 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabBar: {
-    flexDirection: "row",
+    flexDirection: 'row',
     borderWidth: 1,
     borderRadius: 12,
     padding: 3,
@@ -385,18 +587,18 @@ const styles = StyleSheet.create({
   },
   tabBtn: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 4,
     paddingVertical: 7,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: "transparent",
+    borderColor: 'transparent',
   },
   tabLabel: {
     fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
   },
   tabBadge: {
     paddingHorizontal: 5,
@@ -405,7 +607,7 @@ const styles = StyleSheet.create({
   },
   tabBadgeText: {
     fontSize: 9,
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
   },
   body: {
     flex: 1,

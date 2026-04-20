@@ -1,6 +1,6 @@
-import { z, type ZodTypeAny } from "zod";
-import type { ToolManifest } from "@workspace/tool-mesh";
-import { AgentToolsError } from "./errors.js";
+import type { ToolManifest } from '@workspace/tool-mesh';
+import type { ZodTypeAny, z } from 'zod';
+import { AgentToolsError } from './errors.js';
 
 export type ToolHandler<TInput, TOutput> = (
   input: TInput,
@@ -24,7 +24,7 @@ export function defineTool<
   handler: ToolHandler<z.infer<TInputSchema>, z.infer<TOutputSchema>>;
 }): TypedTool<z.infer<TInputSchema>, z.infer<TOutputSchema>> {
   if (!params.manifest.id) {
-    throw new AgentToolsError("Tool manifest must have an id");
+    throw new AgentToolsError('Tool manifest must have an id');
   }
   if (!params.inputSchema) {
     throw new AgentToolsError(`Tool '${params.manifest.id}' must define an inputSchema`);
@@ -42,12 +42,12 @@ export function defineTool<
 
 export function isTypedTool(value: unknown): value is TypedTool {
   return (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value !== null &&
-    "manifest" in value &&
-    "inputSchema" in value &&
-    "outputSchema" in value &&
-    "handler" in value &&
-    typeof (value as TypedTool).handler === "function"
+    'manifest' in value &&
+    'inputSchema' in value &&
+    'outputSchema' in value &&
+    'handler' in value &&
+    typeof (value as TypedTool).handler === 'function'
   );
 }

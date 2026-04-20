@@ -1,7 +1,7 @@
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
-import type { EvidenceEntry, LedgerQueryOptions } from "./types.js";
-import type { LedgerStore } from "./store.js";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import type { LedgerStore } from './store.js';
+import type { EvidenceEntry, LedgerQueryOptions } from './types.js';
 
 function matchesQuery(entry: EvidenceEntry, options: LedgerQueryOptions): boolean {
   if (options.requestId !== undefined && entry.requestId !== options.requestId) return false;
@@ -25,18 +25,18 @@ export class FilesystemLedgerStore implements LedgerStore {
       mkdirSync(dir, { recursive: true });
     }
     if (!existsSync(filePath)) {
-      writeFileSync(filePath, "", "utf8");
+      writeFileSync(filePath, '', 'utf8');
     }
     this.buildIndex();
   }
 
   private buildIndex(): void {
-    const content = readFileSync(this.filePath, "utf8");
-    const lines = content.split("\n").filter((l) => l.trim().length > 0);
+    const content = readFileSync(this.filePath, 'utf8');
+    const lines = content.split('\n').filter((l) => l.trim().length > 0);
     for (const line of lines) {
       try {
         const entry = JSON.parse(line) as EvidenceEntry;
-        if (typeof entry.entryId === "string") {
+        if (typeof entry.entryId === 'string') {
           this.index.set(entry.entryId, this.index.size);
         }
       } catch {
@@ -46,8 +46,8 @@ export class FilesystemLedgerStore implements LedgerStore {
   }
 
   private readAll(): EvidenceEntry[] {
-    const content = readFileSync(this.filePath, "utf8");
-    const lines = content.split("\n").filter((l) => l.trim().length > 0);
+    const content = readFileSync(this.filePath, 'utf8');
+    const lines = content.split('\n').filter((l) => l.trim().length > 0);
     const entries: EvidenceEntry[] = [];
     for (const line of lines) {
       try {
@@ -64,7 +64,7 @@ export class FilesystemLedgerStore implements LedgerStore {
     if (this.index.has(entry.entryId)) {
       throw new Error(`Ledger entry already exists: ${entry.entryId}`);
     }
-    appendFileSync(this.filePath, JSON.stringify(entry) + "\n", "utf8");
+    appendFileSync(this.filePath, JSON.stringify(entry) + '\n', 'utf8');
     this.index.set(entry.entryId, this.index.size);
   }
 
@@ -85,7 +85,7 @@ export class FilesystemLedgerStore implements LedgerStore {
   }
 
   clear(): void {
-    writeFileSync(this.filePath, "", "utf8");
+    writeFileSync(this.filePath, '', 'utf8');
     this.index.clear();
   }
 }

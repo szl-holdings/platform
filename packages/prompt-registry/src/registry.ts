@@ -1,12 +1,12 @@
-import { createLogger } from "./logger.js";
+import { createLogger } from './logger.js';
 
-const logger = createLogger("prompt-registry:registry");
+const logger = createLogger('prompt-registry:registry');
 
-export type PromptStatus = "draft" | "review" | "active" | "deprecated" | "archived";
+export type PromptStatus = 'draft' | 'review' | 'active' | 'deprecated' | 'archived';
 
 export interface PromptVariable {
   name: string;
-  type: "string" | "number" | "boolean" | "array" | "object";
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
   description: string;
   required: boolean;
   defaultValue?: unknown;
@@ -75,12 +75,14 @@ class PromptRegistry {
     template: string;
     systemPrompt?: string;
     variables?: PromptVariable[];
-    modelHints?: PromptVersion["modelHints"];
+    modelHints?: PromptVersion['modelHints'];
     tags?: string[];
     createdBy?: string;
   }): PromptDefinition {
     if (this.prompts.has(params.id)) {
-      throw new Error(`Prompt '${params.id}' already exists — use addVersion() to add a new version`);
+      throw new Error(
+        `Prompt '${params.id}' already exists — use addVersion() to add a new version`,
+      );
     }
 
     const version: PromptVersion = {
@@ -90,7 +92,7 @@ class PromptRegistry {
       systemPrompt: params.systemPrompt,
       variables: params.variables ?? [],
       modelHints: params.modelHints ?? {},
-      status: "draft",
+      status: 'draft',
       createdAt: new Date().toISOString(),
       createdBy: params.createdBy,
       tags: params.tags ?? [],
@@ -110,7 +112,7 @@ class PromptRegistry {
     };
 
     this.prompts.set(params.id, prompt);
-    logger.info({ id: params.id, version: 1 }, "Prompt created");
+    logger.info({ id: params.id, version: 1 }, 'Prompt created');
     return prompt;
   }
 
@@ -120,7 +122,7 @@ class PromptRegistry {
       template: string;
       systemPrompt?: string;
       variables?: PromptVariable[];
-      modelHints?: PromptVersion["modelHints"];
+      modelHints?: PromptVersion['modelHints'];
       changelog?: string;
       createdBy?: string;
       tags?: string[];
@@ -129,15 +131,16 @@ class PromptRegistry {
     const prompt = this.prompts.get(id);
     if (!prompt) throw new Error(`Prompt '${id}' not found`);
 
-    const nextVersion = Math.max(...prompt.versions.map(v => v.version)) + 1;
+    const nextVersion = Math.max(...prompt.versions.map((v) => v.version)) + 1;
     const version: PromptVersion = {
       versionId: makeVersionId(id, nextVersion),
       version: nextVersion,
       template: params.template,
       systemPrompt: params.systemPrompt,
       variables: params.variables ?? prompt.versions[prompt.versions.length - 1]?.variables ?? [],
-      modelHints: params.modelHints ?? prompt.versions[prompt.versions.length - 1]?.modelHints ?? {},
-      status: "draft",
+      modelHints:
+        params.modelHints ?? prompt.versions[prompt.versions.length - 1]?.modelHints ?? {},
+      status: 'draft',
       createdAt: new Date().toISOString(),
       createdBy: params.createdBy,
       changelog: params.changelog,
@@ -146,7 +149,7 @@ class PromptRegistry {
 
     prompt.versions.push(version);
     prompt.updatedAt = new Date().toISOString();
-    logger.info({ id, version: nextVersion }, "Prompt version added");
+    logger.info({ id, version: nextVersion }, 'Prompt version added');
     return version;
   }
 
@@ -154,23 +157,23 @@ class PromptRegistry {
     const prompt = this.prompts.get(id);
     if (!prompt) throw new Error(`Prompt '${id}' not found`);
 
-    const version = prompt.versions.find(v => v.versionId === versionId);
+    const version = prompt.versions.find((v) => v.versionId === versionId);
     if (!version) throw new Error(`Version '${versionId}' not found`);
 
-    const previousActive = prompt.versions.find(v => v.versionId === prompt.activeVersionId);
-    if (previousActive) previousActive.status = "deprecated";
+    const previousActive = prompt.versions.find((v) => v.versionId === prompt.activeVersionId);
+    if (previousActive) previousActive.status = 'deprecated';
 
-    version.status = "active";
+    version.status = 'active';
     prompt.activeVersionId = versionId;
     prompt.updatedAt = new Date().toISOString();
-    logger.info({ id, versionId }, "Prompt promoted to active");
+    logger.info({ id, versionId }, 'Prompt promoted to active');
     return prompt;
   }
 
   setStatus(id: string, versionId: string, status: PromptStatus): void {
     const prompt = this.prompts.get(id);
     if (!prompt) throw new Error(`Prompt '${id}' not found`);
-    const version = prompt.versions.find(v => v.versionId === versionId);
+    const version = prompt.versions.find((v) => v.versionId === versionId);
     if (!version) throw new Error(`Version '${versionId}' not found`);
     version.status = status;
     prompt.updatedAt = new Date().toISOString();
@@ -179,9 +182,13 @@ class PromptRegistry {
   updateEvalMetadata(id: string, versionId: string, evalMetadata: PromptEvalMetadata): void {
     const prompt = this.prompts.get(id);
     if (!prompt) throw new Error(`Prompt '${id}' not found`);
-    const version = prompt.versions.find(v => v.versionId === versionId);
+    const version = prompt.versions.find((v) => v.versionId === versionId);
     if (!version) throw new Error(`Version '${versionId}' not found`);
-    version.evalMetadata = { ...version.evalMetadata, ...evalMetadata, lastEvalAt: new Date().toISOString() };
+    version.evalMetadata = {
+      ...version.evalMetadata,
+      ...evalMetadata,
+      lastEvalAt: new Date().toISOString(),
+    };
   }
 
   get(id: string): PromptDefinition | undefined {
@@ -191,28 +198,32 @@ class PromptRegistry {
   getActiveVersion(id: string): PromptVersion | undefined {
     const prompt = this.prompts.get(id);
     if (!prompt || !prompt.activeVersionId) return undefined;
-    return prompt.versions.find(v => v.versionId === prompt.activeVersionId);
+    return prompt.versions.find((v) => v.versionId === prompt.activeVersionId);
   }
 
   getVersion(id: string, versionId: string): PromptVersion | undefined {
-    return this.prompts.get(id)?.versions.find(v => v.versionId === versionId);
+    return this.prompts.get(id)?.versions.find((v) => v.versionId === versionId);
   }
 
   getEffectiveStatus(prompt: PromptDefinition): PromptStatus {
     if (prompt.activeVersionId) {
-      const activeVersion = prompt.versions.find(v => v.versionId === prompt.activeVersionId);
+      const activeVersion = prompt.versions.find((v) => v.versionId === prompt.activeVersionId);
       if (activeVersion) return activeVersion.status;
     }
     const latest = prompt.versions[prompt.versions.length - 1];
-    return latest?.status ?? "draft";
+    return latest?.status ?? 'draft';
   }
 
-  list(filters: { domain?: string; routeClass?: string; status?: PromptStatus; tags?: string[] } = {}): PromptDefinition[] {
+  list(
+    filters: { domain?: string; routeClass?: string; status?: PromptStatus; tags?: string[] } = {},
+  ): PromptDefinition[] {
     let results = Array.from(this.prompts.values());
-    if (filters.domain) results = results.filter(p => p.domain === filters.domain);
-    if (filters.routeClass) results = results.filter(p => p.routeClass === filters.routeClass);
-    if (filters.status) results = results.filter(p => this.getEffectiveStatus(p) === filters.status);
-    if (filters.tags?.length) results = results.filter(p => filters.tags!.some(t => p.tags.includes(t)));
+    if (filters.domain) results = results.filter((p) => p.domain === filters.domain);
+    if (filters.routeClass) results = results.filter((p) => p.routeClass === filters.routeClass);
+    if (filters.status)
+      results = results.filter((p) => this.getEffectiveStatus(p) === filters.status);
+    if (filters.tags?.length)
+      results = results.filter((p) => filters.tags!.some((t) => p.tags.includes(t)));
     return results;
   }
 

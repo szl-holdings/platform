@@ -6,14 +6,14 @@
  *
  * All values are sourced from the colour token system defined in `index.ts`.
  */
-import { color } from "./index.js";
+import { color } from './index.js';
 
 export const domainAccents = {
-  lyte:    color.accent.blue,
+  lyte: color.accent.blue,
   vessels: color.accent.blue,
-  terra:   color.accent.green,
-  aegis:   color.accent.violet,
-  prism:   color.accent.violet,
+  terra: color.accent.green,
+  aegis: color.accent.violet,
+  prism: color.accent.violet,
   carlota: color.accent.blue,
 } as const;
 

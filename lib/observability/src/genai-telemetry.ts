@@ -6,18 +6,18 @@
  */
 
 export type GenAISpanKind =
-  | "model_call"
-  | "tool_call"
-  | "agent_step"
-  | "retrieval"
-  | "approval"
-  | "artifact_job"
-  | "execution_run";
+  | 'model_call'
+  | 'tool_call'
+  | 'agent_step'
+  | 'retrieval'
+  | 'approval'
+  | 'artifact_job'
+  | 'execution_run';
 
-export type GenAISpanStatus = "ok" | "error" | "pending" | "cancelled";
+export type GenAISpanStatus = 'ok' | 'error' | 'pending' | 'cancelled';
 
 export interface GenAIModelCallSpan {
-  kind: "model_call";
+  kind: 'model_call';
   spanId: string;
   traceId: string;
   parentSpanId?: string;
@@ -40,7 +40,7 @@ export interface GenAIModelCallSpan {
 }
 
 export interface GenAIToolCallSpan {
-  kind: "tool_call";
+  kind: 'tool_call';
   spanId: string;
   traceId: string;
   parentSpanId?: string;
@@ -50,7 +50,7 @@ export interface GenAIToolCallSpan {
   latencyMs: number;
   status: GenAISpanStatus;
   error?: string;
-  riskLevel?: "low" | "medium" | "high" | "critical";
+  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
   policyApplied?: string;
   approvalRequired?: boolean;
   correlationId?: string;
@@ -58,14 +58,14 @@ export interface GenAIToolCallSpan {
 }
 
 export interface GenAIAgentStepSpan {
-  kind: "agent_step";
+  kind: 'agent_step';
   spanId: string;
   traceId: string;
   parentSpanId?: string;
   agentId: string;
   agentDomain: string;
   stepIndex: number;
-  stepType: "think" | "plan" | "tool_select" | "execute" | "summarize" | "escalate";
+  stepType: 'think' | 'plan' | 'tool_select' | 'execute' | 'summarize' | 'escalate';
   inputSummary?: string;
   outputSummary?: string;
   latencyMs: number;
@@ -76,7 +76,7 @@ export interface GenAIAgentStepSpan {
 }
 
 export interface GenAIRetrievalSpan {
-  kind: "retrieval";
+  kind: 'retrieval';
   spanId: string;
   traceId: string;
   parentSpanId?: string;
@@ -93,7 +93,7 @@ export interface GenAIRetrievalSpan {
 }
 
 export interface GenAIApprovalSpan {
-  kind: "approval";
+  kind: 'approval';
   spanId: string;
   traceId: string;
   parentSpanId?: string;
@@ -102,14 +102,14 @@ export interface GenAIApprovalSpan {
   requiredApprovalLevel: string;
   approvedByUserId?: number;
   approvalDelayMs?: number;
-  outcome: "approved" | "rejected" | "pending" | "auto_approved" | "escalated";
+  outcome: 'approved' | 'rejected' | 'pending' | 'auto_approved' | 'escalated';
   overrideApplied?: boolean;
   correlationId?: string;
   timestamp: number;
 }
 
 export interface GenAIArtifactJobSpan {
-  kind: "artifact_job";
+  kind: 'artifact_job';
   spanId: string;
   traceId: string;
   parentSpanId?: string;
@@ -126,7 +126,7 @@ export interface GenAIArtifactJobSpan {
 }
 
 export interface GenAIExecutionRunSpan {
-  kind: "execution_run";
+  kind: 'execution_run';
   spanId: string;
   traceId: string;
   parentSpanId?: string;
@@ -167,20 +167,20 @@ export interface LangfuseTrace {
 
 export interface LangfuseObservation {
   traceId: string;
-  type: "SPAN" | "GENERATION" | "EVENT";
+  type: 'SPAN' | 'GENERATION' | 'EVENT';
   name: string;
   startTime: string;
   endTime?: string;
   input?: unknown;
   output?: unknown;
   metadata?: Record<string, unknown>;
-  level?: "DEBUG" | "DEFAULT" | "WARNING" | "ERROR";
+  level?: 'DEBUG' | 'DEFAULT' | 'WARNING' | 'ERROR';
   model?: string;
   usage?: {
     input?: number;
     output?: number;
     total?: number;
-    unit?: "TOKENS" | "CHARACTERS" | "MILLISECONDS";
+    unit?: 'TOKENS' | 'CHARACTERS' | 'MILLISECONDS';
   };
   statusMessage?: string;
 }
@@ -204,7 +204,10 @@ export interface GenAITelemetrySnapshot {
     p95LatencyMs: number;
     errorRate: number;
     fallbackRate: number;
-    byModel: Record<string, { count: number; totalTokens: number; totalCostUsd: number; avgLatencyMs: number }>;
+    byModel: Record<
+      string,
+      { count: number; totalTokens: number; totalCostUsd: number; avgLatencyMs: number }
+    >;
   };
   toolCalls: {
     count: number;
@@ -269,8 +272,7 @@ class GenAITelemetryCollector {
     for (const handler of this.handlers) {
       try {
         void handler(span);
-      } catch {
-      }
+      } catch {}
     }
   }
 
@@ -278,9 +280,9 @@ class GenAITelemetryCollector {
     this.handlers.push(handler);
   }
 
-  recordModelCall(params: Omit<GenAIModelCallSpan, "kind" | "spanId">): GenAIModelCallSpan {
+  recordModelCall(params: Omit<GenAIModelCallSpan, 'kind' | 'spanId'>): GenAIModelCallSpan {
     const span: GenAIModelCallSpan = {
-      kind: "model_call",
+      kind: 'model_call',
       spanId: generateSpanId(),
       ...params,
     };
@@ -288,9 +290,9 @@ class GenAITelemetryCollector {
     return span;
   }
 
-  recordToolCall(params: Omit<GenAIToolCallSpan, "kind" | "spanId">): GenAIToolCallSpan {
+  recordToolCall(params: Omit<GenAIToolCallSpan, 'kind' | 'spanId'>): GenAIToolCallSpan {
     const span: GenAIToolCallSpan = {
-      kind: "tool_call",
+      kind: 'tool_call',
       spanId: generateSpanId(),
       ...params,
     };
@@ -298,9 +300,9 @@ class GenAITelemetryCollector {
     return span;
   }
 
-  recordAgentStep(params: Omit<GenAIAgentStepSpan, "kind" | "spanId">): GenAIAgentStepSpan {
+  recordAgentStep(params: Omit<GenAIAgentStepSpan, 'kind' | 'spanId'>): GenAIAgentStepSpan {
     const span: GenAIAgentStepSpan = {
-      kind: "agent_step",
+      kind: 'agent_step',
       spanId: generateSpanId(),
       ...params,
     };
@@ -308,9 +310,9 @@ class GenAITelemetryCollector {
     return span;
   }
 
-  recordRetrieval(params: Omit<GenAIRetrievalSpan, "kind" | "spanId">): GenAIRetrievalSpan {
+  recordRetrieval(params: Omit<GenAIRetrievalSpan, 'kind' | 'spanId'>): GenAIRetrievalSpan {
     const span: GenAIRetrievalSpan = {
-      kind: "retrieval",
+      kind: 'retrieval',
       spanId: generateSpanId(),
       ...params,
     };
@@ -318,9 +320,9 @@ class GenAITelemetryCollector {
     return span;
   }
 
-  recordApproval(params: Omit<GenAIApprovalSpan, "kind" | "spanId">): GenAIApprovalSpan {
+  recordApproval(params: Omit<GenAIApprovalSpan, 'kind' | 'spanId'>): GenAIApprovalSpan {
     const span: GenAIApprovalSpan = {
-      kind: "approval",
+      kind: 'approval',
       spanId: generateSpanId(),
       ...params,
     };
@@ -328,9 +330,9 @@ class GenAITelemetryCollector {
     return span;
   }
 
-  recordArtifactJob(params: Omit<GenAIArtifactJobSpan, "kind" | "spanId">): GenAIArtifactJobSpan {
+  recordArtifactJob(params: Omit<GenAIArtifactJobSpan, 'kind' | 'spanId'>): GenAIArtifactJobSpan {
     const span: GenAIArtifactJobSpan = {
-      kind: "artifact_job",
+      kind: 'artifact_job',
       spanId: generateSpanId(),
       ...params,
     };
@@ -338,9 +340,11 @@ class GenAITelemetryCollector {
     return span;
   }
 
-  recordExecutionRun(params: Omit<GenAIExecutionRunSpan, "kind" | "spanId">): GenAIExecutionRunSpan {
+  recordExecutionRun(
+    params: Omit<GenAIExecutionRunSpan, 'kind' | 'spanId'>,
+  ): GenAIExecutionRunSpan {
     const span: GenAIExecutionRunSpan = {
-      kind: "execution_run",
+      kind: 'execution_run',
       spanId: generateSpanId(),
       ...params,
     };
@@ -350,11 +354,11 @@ class GenAITelemetryCollector {
 
   getSpans(windowMs = 300_000): GenAISpan[] {
     const cutoff = Date.now() - windowMs;
-    return this.spans.filter(s => s.timestamp >= cutoff);
+    return this.spans.filter((s) => s.timestamp >= cutoff);
   }
 
   getSpansByTrace(traceId: string): GenAISpan[] {
-    return this.spans.filter(s => s.traceId === traceId);
+    return this.spans.filter((s) => s.traceId === traceId);
   }
 
   getSnapshot(windowMs = 300_000): GenAITelemetrySnapshot {
@@ -372,41 +376,47 @@ class GenAITelemetryCollector {
 
     for (const s of recent) byKind[s.kind]++;
 
-    const modelSpans = recent.filter((s): s is GenAIModelCallSpan => s.kind === "model_call");
-    const toolSpans = recent.filter((s): s is GenAIToolCallSpan => s.kind === "tool_call");
-    const agentSpans = recent.filter((s): s is GenAIAgentStepSpan => s.kind === "agent_step");
-    const retrievalSpans = recent.filter((s): s is GenAIRetrievalSpan => s.kind === "retrieval");
-    const approvalSpans = recent.filter((s): s is GenAIApprovalSpan => s.kind === "approval");
-    const artifactSpans = recent.filter((s): s is GenAIArtifactJobSpan => s.kind === "artifact_job");
-    const runSpans = recent.filter((s): s is GenAIExecutionRunSpan => s.kind === "execution_run");
+    const modelSpans = recent.filter((s): s is GenAIModelCallSpan => s.kind === 'model_call');
+    const toolSpans = recent.filter((s): s is GenAIToolCallSpan => s.kind === 'tool_call');
+    const agentSpans = recent.filter((s): s is GenAIAgentStepSpan => s.kind === 'agent_step');
+    const retrievalSpans = recent.filter((s): s is GenAIRetrievalSpan => s.kind === 'retrieval');
+    const approvalSpans = recent.filter((s): s is GenAIApprovalSpan => s.kind === 'approval');
+    const artifactSpans = recent.filter(
+      (s): s is GenAIArtifactJobSpan => s.kind === 'artifact_job',
+    );
+    const runSpans = recent.filter((s): s is GenAIExecutionRunSpan => s.kind === 'execution_run');
 
-    const avgMs = (arr: number[]) => arr.length > 0 ? Math.round(arr.reduce((s, v) => s + v, 0) / arr.length) : 0;
+    const avgMs = (arr: number[]) =>
+      arr.length > 0 ? Math.round(arr.reduce((s, v) => s + v, 0) / arr.length) : 0;
     const p95 = (arr: number[]) => {
       if (arr.length === 0) return 0;
       const sorted = [...arr].sort((a, b) => a - b);
       return sorted[Math.floor(sorted.length * 0.95)] ?? 0;
     };
 
-    const byModel: GenAITelemetrySnapshot["modelCalls"]["byModel"] = {};
+    const byModel: GenAITelemetrySnapshot['modelCalls']['byModel'] = {};
     for (const s of modelSpans) {
-      if (!byModel[s.model]) byModel[s.model] = { count: 0, totalTokens: 0, totalCostUsd: 0, avgLatencyMs: 0 };
+      if (!byModel[s.model])
+        byModel[s.model] = { count: 0, totalTokens: 0, totalCostUsd: 0, avgLatencyMs: 0 };
       byModel[s.model]!.count++;
       byModel[s.model]!.totalTokens += s.totalTokens;
       byModel[s.model]!.totalCostUsd += s.costEstimateUsd;
     }
     for (const [, v] of Object.entries(byModel)) {
-      const modelKey = Object.keys(byModel).find(k => byModel[k] === v) ?? "";
-      v.avgLatencyMs = avgMs(modelSpans.filter(s => s.model === modelKey).map(s => s.latencyMs));
+      const modelKey = Object.keys(byModel).find((k) => byModel[k] === v) ?? '';
+      v.avgLatencyMs = avgMs(
+        modelSpans.filter((s) => s.model === modelKey).map((s) => s.latencyMs),
+      );
     }
 
-    const byTool: GenAITelemetrySnapshot["toolCalls"]["byTool"] = {};
+    const byTool: GenAITelemetrySnapshot['toolCalls']['byTool'] = {};
     for (const s of toolSpans) {
       if (!byTool[s.toolName]) byTool[s.toolName] = { count: 0, errorRate: 0 };
       byTool[s.toolName]!.count++;
     }
     for (const [toolName, v] of Object.entries(byTool)) {
-      const toolAll = toolSpans.filter(s => s.toolName === toolName);
-      const toolErrors = toolAll.filter(s => s.status === "error").length;
+      const toolAll = toolSpans.filter((s) => s.toolName === toolName);
+      const toolErrors = toolAll.filter((s) => s.status === 'error').length;
       v.errorRate = toolAll.length > 0 ? toolErrors / toolAll.length : 0;
     }
 
@@ -425,56 +435,92 @@ class GenAITelemetryCollector {
         count: modelSpans.length,
         totalTokens: modelSpans.reduce((s, v) => s + v.totalTokens, 0),
         totalCostUsd: modelSpans.reduce((s, v) => s + v.costEstimateUsd, 0),
-        avgLatencyMs: avgMs(modelSpans.map(s => s.latencyMs)),
-        p95LatencyMs: p95(modelSpans.map(s => s.latencyMs)),
-        errorRate: modelSpans.length > 0 ? modelSpans.filter(s => s.status === "error").length / modelSpans.length : 0,
-        fallbackRate: modelSpans.length > 0 ? modelSpans.filter(s => s.usedFallback).length / modelSpans.length : 0,
+        avgLatencyMs: avgMs(modelSpans.map((s) => s.latencyMs)),
+        p95LatencyMs: p95(modelSpans.map((s) => s.latencyMs)),
+        errorRate:
+          modelSpans.length > 0
+            ? modelSpans.filter((s) => s.status === 'error').length / modelSpans.length
+            : 0,
+        fallbackRate:
+          modelSpans.length > 0
+            ? modelSpans.filter((s) => s.usedFallback).length / modelSpans.length
+            : 0,
         byModel,
       },
       toolCalls: {
         count: toolSpans.length,
-        avgLatencyMs: avgMs(toolSpans.map(s => s.latencyMs)),
-        errorRate: toolSpans.length > 0 ? toolSpans.filter(s => s.status === "error").length / toolSpans.length : 0,
-        highRiskCount: toolSpans.filter(s => s.riskLevel === "high" || s.riskLevel === "critical").length,
-        approvalRequired: toolSpans.filter(s => s.approvalRequired).length,
+        avgLatencyMs: avgMs(toolSpans.map((s) => s.latencyMs)),
+        errorRate:
+          toolSpans.length > 0
+            ? toolSpans.filter((s) => s.status === 'error').length / toolSpans.length
+            : 0,
+        highRiskCount: toolSpans.filter((s) => s.riskLevel === 'high' || s.riskLevel === 'critical')
+          .length,
+        approvalRequired: toolSpans.filter((s) => s.approvalRequired).length,
         byTool,
       },
       agentSteps: {
         count: agentSpans.length,
-        avgLatencyMs: avgMs(agentSpans.map(s => s.latencyMs)),
+        avgLatencyMs: avgMs(agentSpans.map((s) => s.latencyMs)),
         byDomain,
         byStepType,
       },
       retrievals: {
         count: retrievalSpans.length,
-        avgLatencyMs: avgMs(retrievalSpans.map(s => s.latencyMs)),
-        avgChunksRetrieved: retrievalSpans.length > 0 ? retrievalSpans.reduce((s, v) => s + v.chunksRetrieved, 0) / retrievalSpans.length : 0,
-        avgChunksUsed: retrievalSpans.length > 0 ? retrievalSpans.reduce((s, v) => s + v.chunksUsed, 0) / retrievalSpans.length : 0,
-        avgTopScore: retrievalSpans.length > 0 ? retrievalSpans.reduce((s, v) => s + (v.topScore ?? 0), 0) / retrievalSpans.length : 0,
+        avgLatencyMs: avgMs(retrievalSpans.map((s) => s.latencyMs)),
+        avgChunksRetrieved:
+          retrievalSpans.length > 0
+            ? retrievalSpans.reduce((s, v) => s + v.chunksRetrieved, 0) / retrievalSpans.length
+            : 0,
+        avgChunksUsed:
+          retrievalSpans.length > 0
+            ? retrievalSpans.reduce((s, v) => s + v.chunksUsed, 0) / retrievalSpans.length
+            : 0,
+        avgTopScore:
+          retrievalSpans.length > 0
+            ? retrievalSpans.reduce((s, v) => s + (v.topScore ?? 0), 0) / retrievalSpans.length
+            : 0,
       },
       approvals: {
         count: approvalSpans.length,
-        avgDelayMs: avgMs(approvalSpans.filter(s => s.approvalDelayMs != null).map(s => s.approvalDelayMs!)),
-        approved: approvalSpans.filter(s => s.outcome === "approved" || s.outcome === "auto_approved").length,
-        rejected: approvalSpans.filter(s => s.outcome === "rejected").length,
-        overrides: approvalSpans.filter(s => s.overrideApplied).length,
-        pending: approvalSpans.filter(s => s.outcome === "pending").length,
+        avgDelayMs: avgMs(
+          approvalSpans.filter((s) => s.approvalDelayMs != null).map((s) => s.approvalDelayMs!),
+        ),
+        approved: approvalSpans.filter(
+          (s) => s.outcome === 'approved' || s.outcome === 'auto_approved',
+        ).length,
+        rejected: approvalSpans.filter((s) => s.outcome === 'rejected').length,
+        overrides: approvalSpans.filter((s) => s.overrideApplied).length,
+        pending: approvalSpans.filter((s) => s.outcome === 'pending').length,
       },
       artifactJobs: {
         count: artifactSpans.length,
-        avgLatencyMs: avgMs(artifactSpans.map(s => s.latencyMs)),
-        errorRate: artifactSpans.length > 0 ? artifactSpans.filter(s => s.status === "error").length / artifactSpans.length : 0,
+        avgLatencyMs: avgMs(artifactSpans.map((s) => s.latencyMs)),
+        errorRate:
+          artifactSpans.length > 0
+            ? artifactSpans.filter((s) => s.status === 'error').length / artifactSpans.length
+            : 0,
       },
       executionRuns: {
         count: runSpans.length,
-        avgLatencyMs: avgMs(runSpans.map(s => s.latencyMs)),
-        avgRetries: runSpans.length > 0 ? runSpans.reduce((s, v) => s + (v.retryCount ?? 0), 0) / runSpans.length : 0,
-        errorRate: runSpans.length > 0 ? runSpans.filter(s => s.status === "error").length / runSpans.length : 0,
+        avgLatencyMs: avgMs(runSpans.map((s) => s.latencyMs)),
+        avgRetries:
+          runSpans.length > 0
+            ? runSpans.reduce((s, v) => s + (v.retryCount ?? 0), 0) / runSpans.length
+            : 0,
+        errorRate:
+          runSpans.length > 0
+            ? runSpans.filter((s) => s.status === 'error').length / runSpans.length
+            : 0,
       },
     };
   }
 
-  exportLangfuseTrace(traceId: string, name: string, metadata?: Record<string, unknown>): {
+  exportLangfuseTrace(
+    traceId: string,
+    name: string,
+    metadata?: Record<string, unknown>,
+  ): {
     trace: LangfuseTrace;
     observations: LangfuseObservation[];
   } {
@@ -487,62 +533,77 @@ class GenAITelemetryCollector {
       createdAt: new Date().toISOString(),
     };
 
-    const observations: LangfuseObservation[] = spans.map(span => {
+    const observations: LangfuseObservation[] = spans.map((span) => {
       const base = {
         traceId,
         startTime: new Date(span.timestamp).toISOString(),
-        metadata: { spanId: span.spanId, correlationId: ("correlationId" in span ? span.correlationId : undefined) },
+        metadata: {
+          spanId: span.spanId,
+          correlationId: 'correlationId' in span ? span.correlationId : undefined,
+        },
       };
 
-      if (span.kind === "model_call") {
+      if (span.kind === 'model_call') {
         return {
           ...base,
-          type: "GENERATION" as const,
+          type: 'GENERATION' as const,
           name: `model_call:${span.model}`,
           endTime: new Date(span.timestamp + span.latencyMs).toISOString(),
           model: span.model,
-          usage: { input: span.promptTokens, output: span.completionTokens, total: span.totalTokens, unit: "TOKENS" as const },
-          level: span.status === "error" ? "ERROR" as const : "DEFAULT" as const,
+          usage: {
+            input: span.promptTokens,
+            output: span.completionTokens,
+            total: span.totalTokens,
+            unit: 'TOKENS' as const,
+          },
+          level: span.status === 'error' ? ('ERROR' as const) : ('DEFAULT' as const),
           ...(span.error !== undefined ? { statusMessage: span.error } : {}),
         };
       }
 
-      if (span.kind === "tool_call") {
+      if (span.kind === 'tool_call') {
         return {
           ...base,
-          type: "SPAN" as const,
+          type: 'SPAN' as const,
           name: `tool_call:${span.toolName}`,
           endTime: new Date(span.timestamp + span.latencyMs).toISOString(),
           input: span.toolInput,
           output: span.toolOutput,
-          level: span.status === "error" ? "ERROR" as const : "DEFAULT" as const,
+          level: span.status === 'error' ? ('ERROR' as const) : ('DEFAULT' as const),
         };
       }
 
-      if (span.kind === "retrieval") {
+      if (span.kind === 'retrieval') {
         return {
           ...base,
-          type: "SPAN" as const,
+          type: 'SPAN' as const,
           name: `retrieval:${span.engine}`,
           endTime: new Date(span.timestamp + span.latencyMs).toISOString(),
           input: { query: span.query },
-          output: { chunksRetrieved: span.chunksRetrieved, chunksUsed: span.chunksUsed, topScore: span.topScore },
-          level: span.status === "error" ? "ERROR" as const : "DEFAULT" as const,
+          output: {
+            chunksRetrieved: span.chunksRetrieved,
+            chunksUsed: span.chunksUsed,
+            topScore: span.topScore,
+          },
+          level: span.status === 'error' ? ('ERROR' as const) : ('DEFAULT' as const),
         };
       }
 
       return {
         ...base,
-        type: "EVENT" as const,
+        type: 'EVENT' as const,
         name: `${span.kind}:${span.spanId}`,
-        level: "DEFAULT" as const,
+        level: 'DEFAULT' as const,
       };
     });
 
     return { trace, observations };
   }
 
-  perAppDashboard(appSlug: string, windowMs = 300_000): {
+  perAppDashboard(
+    appSlug: string,
+    windowMs = 300_000,
+  ): {
     appSlug: string;
     windowMs: number;
     snapshot: GenAITelemetrySnapshot;
@@ -551,12 +612,12 @@ class GenAITelemetryCollector {
     const snapshot = this.getSnapshot(windowMs);
     const recent = this.getSpans(windowMs);
     const recentErrors = recent
-      .filter(s => ("error" in s) && s.error)
+      .filter((s) => 'error' in s && s.error)
       .slice(-20)
-      .map(s => ({
+      .map((s) => ({
         spanId: s.spanId,
         kind: s.kind,
-        error: ("error" in s && s.error) ? s.error : "unknown",
+        error: 'error' in s && s.error ? s.error : 'unknown',
         timestamp: s.timestamp,
       }));
 

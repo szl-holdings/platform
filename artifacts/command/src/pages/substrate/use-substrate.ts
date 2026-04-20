@@ -12,51 +12,51 @@
  *   All data comes from the substrate gateway. If the gateway is unreachable,
  *   views render an offline/empty state — no silent mock injection.
  */
-import { useMemo, useEffect, useState, useCallback, useRef } from "react";
-import { SubstrateClient } from "@szl/substrate-client";
-import { connectRunEvents } from "@szl/substrate-client/streaming";
+
+import { SubstrateClient } from '@szl/substrate-client';
+import { connectRunEvents } from '@szl/substrate-client/streaming';
 import type {
-  PipelineRunSummary,
   ApprovalActionResponse,
   CounterfactualResponse,
+  PipelineRunSummary,
+  RunEvent,
   StageResultSummary,
-} from "@szl/substrate-client/types";
-import type { RunEvent } from "@szl/substrate-client/types";
-import {
-  MOCK_RUNS,
-  MOCK_PENDING_APPROVALS,
-  MOCK_COUNTERFACTUAL,
-} from "./mock-data";
+} from '@szl/substrate-client/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MOCK_COUNTERFACTUAL, MOCK_PENDING_APPROVALS, MOCK_RUNS } from './mock-data';
 import type {
-  SubstrateRun,
-  PendingApproval,
-  CounterfactualDiff,
   ApprovalVerdict,
-  RunStage,
-  Vertical,
+  CounterfactualDiff,
+  PendingApproval,
   RetrieverSource,
   RetrieverSourceMeta,
-} from "./types";
+  RunStage,
+  SubstrateRun,
+  Vertical,
+} from './types';
 
-const RETRIEVER_SOURCES: RetrieverSource[] = ["adapter", "synthetic", "inline", "dry-run"];
+const RETRIEVER_SOURCES: RetrieverSource[] = ['adapter', 'synthetic', 'inline', 'dry-run'];
 
 function extractRetrieverSource(stages: StageResultSummary[]): RetrieverSourceMeta | null {
-  const retrieve = stages.find((s) => s.stageType === "Retrieve");
-  if (!retrieve || typeof retrieve.output !== "object" || retrieve.output === null) return null;
+  const retrieve = stages.find((s) => s.stageType === 'Retrieve');
+  if (!retrieve || typeof retrieve.output !== 'object' || retrieve.output === null) return null;
   const out = retrieve.output as { retrieverSource?: string; retrieverAdapterId?: string | null };
-  if (!out.retrieverSource || !RETRIEVER_SOURCES.includes(out.retrieverSource as RetrieverSource)) return null;
-  return { source: out.retrieverSource as RetrieverSource, adapterId: out.retrieverAdapterId ?? null };
+  if (!out.retrieverSource || !RETRIEVER_SOURCES.includes(out.retrieverSource as RetrieverSource))
+    return null;
+  return {
+    source: out.retrieverSource as RetrieverSource,
+    adapterId: out.retrieverAdapterId ?? null,
+  };
 }
 
 export const GATEWAY_URL =
-  (import.meta.env.VITE_SUBSTRATE_GATEWAY_URL as string | undefined) ??
-  "http://localhost:3700";
+  (import.meta.env.VITE_SUBSTRATE_GATEWAY_URL as string | undefined) ?? 'http://localhost:3700';
 
 /** When true, mock data is the initial/fallback state. Controlled by VITE_SUBSTRATE_DEMO_MODE=true. */
 export const DEMO_MODE =
-  (import.meta.env.VITE_SUBSTRATE_DEMO_MODE as string | undefined) === "true";
+  (import.meta.env.VITE_SUBSTRATE_DEMO_MODE as string | undefined) === 'true';
 
-export type GatewayStatus = "connecting" | "live" | "offline";
+export type GatewayStatus = 'connecting' | 'live' | 'offline';
 
 // ─── Client ──────────────────────────────────────────────────────────────────
 
@@ -66,35 +66,35 @@ export function useSubstrateClient(): SubstrateClient {
 
 // ─── Type mapping ─────────────────────────────────────────────────────────────
 
-const SDK_STATUS_MAP: Record<string, SubstrateRun["status"]> = {
-  running: "running",
-  completed: "completed",
-  failed: "failed",
-  "pending-approval": "awaiting-approval",
-  "dry-run-complete": "completed",
-  cancelled: "failed",
+const SDK_STATUS_MAP: Record<string, SubstrateRun['status']> = {
+  running: 'running',
+  completed: 'completed',
+  failed: 'failed',
+  'pending-approval': 'awaiting-approval',
+  'dry-run-complete': 'completed',
+  cancelled: 'failed',
 };
 
 function sdkStageToLocal(sr: StageResultSummary): RunStage {
   return {
     id: sr.stageId,
     name: sr.stageType,
-    kind: "signal",
-    status: sr.status === "completed"
-      ? "completed"
-      : sr.status === "failed"
-      ? "failed"
-      : sr.status === "running" || sr.status === "pending-approval"
-      ? "running"
-      : "pending",
+    kind: 'signal',
+    status:
+      sr.status === 'completed'
+        ? 'completed'
+        : sr.status === 'failed'
+          ? 'failed'
+          : sr.status === 'running' || sr.status === 'pending-approval'
+            ? 'running'
+            : 'pending',
     startedAt: null,
     completedAt: null,
     durationMs: null,
     confidence: sr.confidence ?? null,
     input: null,
-    output: (sr.output && typeof sr.output === "object")
-      ? (sr.output as Record<string, unknown>)
-      : null,
+    output:
+      sr.output && typeof sr.output === 'object' ? (sr.output as Record<string, unknown>) : null,
     redacted: false,
     policyResult: null,
     evidenceRefs: [],
@@ -115,45 +115,34 @@ export function mapPipelineSummaryToRun(
   const meta = summary.metadata as Record<string, unknown>;
 
   const vertical: Vertical =
-    base?.vertical ??
-    (typeof meta?.vertical === "string" ? (meta.vertical as Vertical) : "alloy");
+    base?.vertical ?? (typeof meta?.vertical === 'string' ? (meta.vertical as Vertical) : 'alloy');
 
   return {
     id: summary.runId,
     workflow: summary.workflowName,
     vertical,
-    tenant:
-      base?.tenant ??
-      (typeof meta?.tenant === "string" ? meta.tenant : "Unknown"),
-    status: SDK_STATUS_MAP[summary.status] ?? "running",
-    currentStage:
-      summary.currentStageId ?? base?.currentStage ?? "—",
+    tenant: base?.tenant ?? (typeof meta?.tenant === 'string' ? meta.tenant : 'Unknown'),
+    status: SDK_STATUS_MAP[summary.status] ?? 'running',
+    currentStage: summary.currentStageId ?? base?.currentStage ?? '—',
     confidence: summary.finalConfidence ?? base?.confidence ?? 0,
-    policyStatus: base?.policyStatus ?? "pending",
-    riskLevel: base?.riskLevel ?? "medium",
+    policyStatus: base?.policyStatus ?? 'pending',
+    riskLevel: base?.riskLevel ?? 'medium',
     approver: base?.approver ?? null,
     startedAt: summary.startedAt,
     ageMs: Date.now() - new Date(summary.startedAt).getTime(),
-    stages:
-      base?.stages ??
-      summary.stageResults.map(sdkStageToLocal),
+    stages: base?.stages ?? summary.stageResults.map(sdkStageToLocal),
     approvalHistory: base?.approvalHistory ?? [],
     checkpoints: base?.checkpoints ?? [],
     traceSpans: base?.traceSpans ?? [],
     modelAdapter:
-      base?.modelAdapter ??
-      (typeof meta?.modelAdapter === "string" ? meta.modelAdapter : "gpt-4o"),
+      base?.modelAdapter ?? (typeof meta?.modelAdapter === 'string' ? meta.modelAdapter : 'gpt-4o'),
     policyProfile:
       base?.policyProfile ??
-      (typeof meta?.policyProfile === "string" ? meta.policyProfile : "default"),
-    agentId:
-      base?.agentId ??
-      (typeof meta?.agentId === "string" ? meta.agentId : "substrate"),
+      (typeof meta?.policyProfile === 'string' ? meta.policyProfile : 'default'),
+    agentId: base?.agentId ?? (typeof meta?.agentId === 'string' ? meta.agentId : 'substrate'),
     objectiveText:
-      base?.objectiveText ??
-      (typeof meta?.objective === "string" ? meta.objective : ""),
-    retriever:
-      extractRetrieverSource(summary.stageResults) ?? base?.retriever ?? null,
+      base?.objectiveText ?? (typeof meta?.objective === 'string' ? meta.objective : ''),
+    retriever: extractRetrieverSource(summary.stageResults) ?? base?.retriever ?? null,
   };
 }
 
@@ -175,7 +164,7 @@ function mapCounterfactualResponse(
         recommendation: sd.stageType,
         confidence: sd.baseline?.confidence ?? 0,
         keyEvidence: [],
-        policyResult: sd.baseline?.status === "failed" ? ("fail" as const) : ("pass" as const),
+        policyResult: sd.baseline?.status === 'failed' ? ('fail' as const) : ('pass' as const),
         requiresApproval: false,
       },
       counterfactual: {
@@ -183,7 +172,7 @@ function mapCounterfactualResponse(
         confidence: sd.counterfactual?.confidence ?? 0,
         keyEvidence: [],
         policyResult:
-          sd.counterfactual?.status === "failed" ? ("fail" as const) : ("pass" as const),
+          sd.counterfactual?.status === 'failed' ? ('fail' as const) : ('pass' as const),
         requiresApproval: sd.decisionChanged,
       },
       changed: sd.differ,
@@ -193,10 +182,8 @@ function mapCounterfactualResponse(
 
 // ─── Streaming ────────────────────────────────────────────────────────────────
 
-export function useRunStream(
-  onEvent: (event: RunEvent) => void,
-): GatewayStatus {
-  const [status, setStatus] = useState<GatewayStatus>("connecting");
+export function useRunStream(onEvent: (event: RunEvent) => void): GatewayStatus {
+  const [status, setStatus] = useState<GatewayStatus>('connecting');
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
 
@@ -206,19 +193,19 @@ export function useRunStream(
     const disconnect = connectRunEvents(`${GATEWAY_URL}/mcp/sse`, {
       onEvent: (e) => {
         if (!mounted) return;
-        setStatus("live");
+        setStatus('live');
         onEventRef.current(e);
       },
       onError: () => {
-        if (mounted) setStatus("offline");
+        if (mounted) setStatus('offline');
       },
       onClose: () => {
-        if (mounted) setStatus("offline");
+        if (mounted) setStatus('offline');
       },
     });
 
     const connectTimeout = setTimeout(() => {
-      if (mounted && status === "connecting") setStatus("offline");
+      if (mounted && status === 'connecting') setStatus('offline');
     }, 5_000);
 
     return () => {
@@ -248,19 +235,19 @@ export function useRuns(): {
   const handleEvent = useCallback(
     (event: RunEvent) => {
       const types = new Set([
-        "run_started",
-        "stage_complete",
-        "run_complete",
-        "run_failed",
-        "approval_required",
+        'run_started',
+        'stage_complete',
+        'run_complete',
+        'run_failed',
+        'approval_required',
       ] as const);
 
       if (!types.has(event.type as never)) return;
 
       const runId =
         event.runId ??
-        (typeof (event.data as Record<string, unknown>)?.runId === "string"
-          ? (event.data as Record<string, unknown>).runId as string
+        (typeof (event.data as Record<string, unknown>)?.runId === 'string'
+          ? ((event.data as Record<string, unknown>).runId as string)
           : undefined);
 
       if (!runId) return;
@@ -289,12 +276,10 @@ export function useRuns(): {
 
   /** In DEMO_MODE offline: simulate age increments (replaces the removed setInterval) */
   useEffect(() => {
-    if (!DEMO_MODE || gatewayStatus !== "offline") return undefined;
+    if (!DEMO_MODE || gatewayStatus !== 'offline') return undefined;
     const tick = setInterval(() => {
       setRuns((prev) =>
-        prev.map((r) =>
-          r.status === "running" ? { ...r, ageMs: r.ageMs + 5_000 } : r,
-        ),
+        prev.map((r) => (r.status === 'running' ? { ...r, ageMs: r.ageMs + 5_000 } : r)),
       );
     }, 5_000);
     return () => clearInterval(tick);
@@ -331,9 +316,7 @@ export function useRunDetail(runId: string): {
       .getRun(runId)
       .then((summary) => {
         if (cancelled) return;
-        const base = DEMO_MODE
-          ? MOCK_RUNS.find((r) => r.id === runId)
-          : undefined;
+        const base = DEMO_MODE ? MOCK_RUNS.find((r) => r.id === runId) : undefined;
         setRun(mapPipelineSummaryToRun(summary, base));
       })
       .catch(() => {
@@ -387,17 +370,17 @@ export function usePendingApprovals(): {
               id: entry.id,
               runId: entry.recommendationId,
               workflow: entry.domain,
-              vertical: "alloy" as const,
+              vertical: 'alloy' as const,
               tenant: entry.surface,
-              riskLevel: "medium" as const,
+              riskLevel: 'medium' as const,
               policyId: entry.proofRef,
-              policyName: "Policy Gate",
-              action: "Action pending review",
+              policyName: 'Policy Gate',
+              action: 'Action pending review',
               requestedAt: new Date(entry.timestamp).toISOString(),
               requestedBy: entry.actor,
               ageMs: Date.now() - entry.timestamp,
-              objectiveText: "",
-              evidenceSummary: entry.note ?? "",
+              objectiveText: '',
+              evidenceSummary: entry.note ?? '',
             }
           );
         });
@@ -440,24 +423,21 @@ export async function submitVerdict(
 ): Promise<ApprovalActionResponse | null> {
   const recommendationId = approval.runId;
   try {
-    if (verdict === "approved") {
+    if (verdict === 'approved') {
       return await client.approve({
         recommendationId,
-        actor: "command-center",
+        actor: 'command-center',
         note: justification,
         domain: approval.vertical,
       });
     }
     // "rejected" and "escalated" both route through reject().
     // Escalated decisions use a tagged note so the proof record is distinguishable.
-    const note =
-      verdict === "escalated"
-        ? `[ESCALATED] ${justification}`
-        : justification;
+    const note = verdict === 'escalated' ? `[ESCALATED] ${justification}` : justification;
     return await client.reject({
       recommendationId,
       note,
-      actor: verdict === "escalated" ? "command-center-escalate" : "command-center",
+      actor: verdict === 'escalated' ? 'command-center-escalate' : 'command-center',
       domain: approval.vertical,
     });
   } catch {
@@ -484,12 +464,19 @@ export async function runCounterfactual(
     return mapCounterfactualResponse(
       res,
       runId,
-      modelAdapterId ?? "default",
-      policyId ?? "default",
+      modelAdapterId ?? 'default',
+      policyId ?? 'default',
     );
   } catch {
     return DEMO_MODE
       ? MOCK_COUNTERFACTUAL
-      : { runId: "", originalRunId: runId, modelAdapter: modelAdapterId ?? "", policyProfile: policyId ?? "", replayedAt: new Date().toISOString(), stages: [] };
+      : {
+          runId: '',
+          originalRunId: runId,
+          modelAdapter: modelAdapterId ?? '',
+          policyProfile: policyId ?? '',
+          replayedAt: new Date().toISOString(),
+          stages: [],
+        };
   }
 }

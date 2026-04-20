@@ -1,16 +1,16 @@
 import React, {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useState,
-  type ReactNode,
-} from "react";
+} from 'react';
 
 export interface AppNotification {
   id: number;
   userId?: number;
-  type: "info" | "success" | "warning" | "error" | "action_required";
+  type: 'info' | 'success' | 'warning' | 'error' | 'action_required';
   channel?: string;
   title: string;
   message: string;
@@ -66,31 +66,31 @@ export function NotificationProvider({
   const [isLoading, setIsLoading] = useState(false);
 
   const makeRequest = useCallback(
-    async (path: string, method = "GET", body?: unknown): Promise<Response> => {
+    async (path: string, method = 'GET', body?: unknown): Promise<Response> => {
       const authToken = await getAuthToken();
       return fetch(`${apiBase}${path}`, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
     },
-    [apiBase, getAuthToken]
+    [apiBase, getAuthToken],
   );
 
   const refresh = useCallback(async () => {
     if (!enabled) return;
     setIsLoading(true);
     try {
-      const res = await makeRequest("/notifications");
+      const res = await makeRequest('/notifications');
       if (res.ok) {
         const json = await res.json();
         setNotifications(json.data ?? json ?? []);
       }
     } catch (err) {
-      console.warn("[NotificationProvider] Failed to fetch:", err);
+      console.warn('[NotificationProvider] Failed to fetch:', err);
     } finally {
       setIsLoading(false);
     }
@@ -99,46 +99,46 @@ export function NotificationProvider({
   const markRead = useCallback(
     async (id: number) => {
       try {
-        const res = await makeRequest(`/notifications/${id}/read`, "PATCH");
+        const res = await makeRequest(`/notifications/${id}/read`, 'PATCH');
         if (res.ok) {
           setNotifications((prev) =>
             prev.map((n) =>
-              n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n
-            )
+              n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n,
+            ),
           );
         }
       } catch (err) {
-        console.warn("[NotificationProvider] Failed to mark read:", err);
+        console.warn('[NotificationProvider] Failed to mark read:', err);
       }
     },
-    [makeRequest]
+    [makeRequest],
   );
 
   const markAllRead = useCallback(async () => {
     try {
-      const res = await makeRequest("/notifications/read-all", "PATCH");
+      const res = await makeRequest('/notifications/read-all', 'PATCH');
       if (res.ok) {
         setNotifications((prev) =>
-          prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() }))
+          prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() })),
         );
       }
     } catch (err) {
-      console.warn("[NotificationProvider] Failed to mark all read:", err);
+      console.warn('[NotificationProvider] Failed to mark all read:', err);
     }
   }, [makeRequest]);
 
   const deleteNotification = useCallback(
     async (id: number) => {
       try {
-        const res = await makeRequest(`/notifications/${id}`, "DELETE");
+        const res = await makeRequest(`/notifications/${id}`, 'DELETE');
         if (res.ok) {
           setNotifications((prev) => prev.filter((n) => n.id !== id));
         }
       } catch (err) {
-        console.warn("[NotificationProvider] Failed to delete:", err);
+        console.warn('[NotificationProvider] Failed to delete:', err);
       }
     },
-    [makeRequest]
+    [makeRequest],
   );
 
   useEffect(() => {
@@ -157,7 +157,15 @@ export function NotificationProvider({
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, isLoading, refresh, markRead, markAllRead, deleteNotification }}
+      value={{
+        notifications,
+        unreadCount,
+        isLoading,
+        refresh,
+        markRead,
+        markAllRead,
+        deleteNotification,
+      }}
     >
       {children}
     </NotificationContext.Provider>

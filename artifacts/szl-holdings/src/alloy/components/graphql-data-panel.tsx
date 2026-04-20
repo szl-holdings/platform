@@ -1,5 +1,5 @@
-import { GraphQLDataPanel } from "@szl-holdings/shared-ui/design-system";
-import { useAlloyWorkflows, useAlloySignals } from "@szl-holdings/graphql-client/hooks";
+import { useAlloySignals, useAlloyWorkflows } from '@szl-holdings/graphql-client/hooks';
+import { GraphQLDataPanel } from '@szl-holdings/shared-ui/design-system';
 
 export function AlloyGraphQLPanel() {
   const { data: workflowsData, loading: wLoading } = useAlloyWorkflows({ limit: 3 });
@@ -11,9 +11,15 @@ export function AlloyGraphQLPanel() {
       loading={wLoading && sLoading}
       sections={[
         {
-          label: "Active Workflows",
+          label: 'Active Workflows',
           items: workflowsData?.alloyWorkflows ?? [],
-          renderItem: (w: { id: string; name: string; type: string; status: string; priority: string }) => (
+          renderItem: (w: {
+            id: string;
+            name: string;
+            type: string;
+            status: string;
+            priority: string;
+          }) => (
             <div key={w.id} className="flex items-center justify-between text-xs">
               <span className="text-zinc-300 truncate max-w-[200px]">{w.name}</span>
               <span className="text-zinc-500">{w.status}</span>
@@ -21,12 +27,20 @@ export function AlloyGraphQLPanel() {
           ),
         },
         {
-          label: "Recent Signals",
+          label: 'Recent Signals',
           items: signalsData?.alloySignals ?? [],
-          renderItem: (s: { id: string; source: string; severity: string; status: string; domain: string }) => (
+          renderItem: (s: {
+            id: string;
+            source: string;
+            severity: string;
+            status: string;
+            domain: string;
+          }) => (
             <div key={s.id} className="flex items-center justify-between text-xs">
               <span className="text-zinc-300">{s.source}</span>
-              <span className="text-zinc-500">{s.severity} · {s.domain}</span>
+              <span className="text-zinc-500">
+                {s.severity} · {s.domain}
+              </span>
             </div>
           ),
         },

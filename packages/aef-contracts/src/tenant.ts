@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const TenantIdSchema = z.string().min(1).brand("TenantId");
+export const TenantIdSchema = z.string().min(1).brand('TenantId');
 export type TenantId = z.infer<typeof TenantIdSchema>;
 
 export const TenantIdentitySchema = z.object({
@@ -16,7 +16,7 @@ export type TenantIdentity = z.infer<typeof TenantIdentitySchema>;
 export const ProfileDescriptorSchema = z.object({
   profileId: z.string().min(1),
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  domain: z.enum(["maritime", "legal", "real-estate", "cyber", "compliance", "general"]),
+  domain: z.enum(['maritime', 'legal', 'real-estate', 'cyber', 'compliance', 'general']),
   displayName: z.string(),
   description: z.string().optional(),
   promptTransformHook: z.string().optional(),

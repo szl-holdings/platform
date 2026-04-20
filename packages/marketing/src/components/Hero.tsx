@@ -1,11 +1,11 @@
-import { useEffect, useRef, type ReactNode } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { motion } from 'framer-motion';
+import { ArrowRight, ChevronRight } from 'lucide-react';
+import { type ReactNode, useEffect, useRef } from 'react';
 
-const BG = "hsl(214,16%,4%)";
-const ACCENT = "hsl(191,92%,44%)";
-const TEXT = "hsl(38,8%,92%)";
-const TEXT_SEC = "hsl(214,7%,55%)";
+const BG = 'hsl(214,16%,4%)';
+const ACCENT = 'hsl(191,92%,44%)';
+const TEXT = 'hsl(38,8%,92%)';
+const TEXT_SEC = 'hsl(214,7%,55%)';
 
 interface HeroAction {
   label: string;
@@ -44,7 +44,7 @@ export function Hero({
 }: HeroProps) {
   return (
     <section
-      style={{ background: BG, position: "relative", overflow: "hidden" }}
+      style={{ background: BG, position: 'relative', overflow: 'hidden' }}
       className="min-h-[88vh] flex flex-col items-center justify-center pt-28 pb-20 px-4 text-center"
     >
       {backgroundCanvas && (
@@ -130,7 +130,7 @@ export function Hero({
                 <HeroButtonPrimary key={i} action={action} accentColor={accentColor} />
               ) : (
                 <HeroButtonSecondary key={i} action={action} accentColor={accentColor} />
-              )
+              ),
             )}
           </motion.div>
         )}

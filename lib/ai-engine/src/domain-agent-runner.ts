@@ -1,9 +1,14 @@
-import type { DomainAgentConfig, StructuredToolCall, StructuredToolResult, ToolDefinition } from "./types.js";
+import type {
+  DomainAgentConfig,
+  StructuredToolCall,
+  StructuredToolResult,
+  ToolDefinition,
+} from './types.js';
 
 export const MAX_TOOL_ROUNDS = 6;
 
 export interface ConversationMessage {
-  role: "system" | "user" | "assistant" | "tool";
+  role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
   toolCallId?: string;
   toolName?: string;
@@ -18,24 +23,29 @@ export interface NativeToolCall {
 export interface StructuredCompletionResult {
   content: string | null;
   toolCalls: NativeToolCall[];
-  stopReason: "stop" | "tool_calls" | "max_tokens" | "other";
+  stopReason: 'stop' | 'tool_calls' | 'max_tokens' | 'other';
 }
 
 export interface ChatInterface {
   chatCompletion(
-    messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,
+    messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
     options?: { model?: string; maxTokens?: number },
   ): Promise<{ content: string }>;
 
   streamChatCompletion(
-    messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,
+    messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
     options?: { model?: string; maxTokens?: number },
   ): AsyncIterable<string>;
 
   chatCompletionWithTools?(
-    messages: Array<{ role: "system" | "user" | "assistant" | "tool"; content: string; toolCallId?: string; name?: string }>,
+    messages: Array<{
+      role: 'system' | 'user' | 'assistant' | 'tool';
+      content: string;
+      toolCallId?: string;
+      name?: string;
+    }>,
     tools: Array<{
-      type: "function";
+      type: 'function';
       function: { name: string; description: string; parameters: Record<string, unknown> };
     }>,
     options?: { model?: string; maxTokens?: number },
@@ -57,20 +67,24 @@ async function generateConversationSummary(
   agentId: string,
 ): Promise<string | null> {
   try {
-    const { openai } = await import("./providers/openai/index.js");
+    const { openai } = await import('./providers/openai/index.js');
     const dialogue = messages
-      .filter(m => m.role !== "system")
+      .filter((m) => m.role !== 'system')
       .slice(-20)
-      .map(m => `${m.role.toUpperCase()}: ${m.content.slice(0, 300)}`)
-      .join("\n");
+      .map((m) => `${m.role.toUpperCase()}: ${m.content.slice(0, 300)}`)
+      .join('\n');
     if (!dialogue.trim()) return null;
 
     const result = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       max_completion_tokens: 400,
       messages: [
-        { role: "system", content: "Summarize this conversation in 2-3 sentences, capturing the key topics, decisions made, and any unresolved questions. Be concise." },
-        { role: "user", content: dialogue },
+        {
+          role: 'system',
+          content:
+            'Summarize this conversation in 2-3 sentences, capturing the key topics, decisions made, and any unresolved questions. Be concise.',
+        },
+        { role: 'user', content: dialogue },
       ],
     });
     return result.choices[0]?.message?.content ?? null;
@@ -80,16 +94,19 @@ async function generateConversationSummary(
 }
 
 function extractTopics(messages: ConversationMessage[]): string[] {
-  const text = messages.map(m => m.content).join(" ").toLowerCase();
+  const text = messages
+    .map((m) => m.content)
+    .join(' ')
+    .toLowerCase();
   const topics: string[] = [];
   const domainKeywords: Record<string, string[]> = {
-    security: ["threat", "vulnerability", "attack", "breach", "malware"],
-    maritime: ["vessel", "ship", "fleet", "port", "ais"],
-    infrastructure: ["azure", "kubernetes", "server", "deploy"],
-    analytics: ["metric", "anomaly", "performance", "signal"],
+    security: ['threat', 'vulnerability', 'attack', 'breach', 'malware'],
+    maritime: ['vessel', 'ship', 'fleet', 'port', 'ais'],
+    infrastructure: ['azure', 'kubernetes', 'server', 'deploy'],
+    analytics: ['metric', 'anomaly', 'performance', 'signal'],
   };
   for (const [domain, keywords] of Object.entries(domainKeywords)) {
-    if (keywords.some(kw => text.includes(kw))) topics.push(domain);
+    if (keywords.some((kw) => text.includes(kw))) topics.push(domain);
   }
   return topics;
 }
@@ -102,24 +119,27 @@ async function persistConversationSummary(
   messageCount: number,
 ): Promise<void> {
   try {
-    const { db, alloyConversationSummaries } = await import("@szl-holdings/db");
-    await db.insert(alloyConversationSummaries).values({
-      conversationId,
-      agentId,
-      summary,
-      topics,
-      messageCount,
-    }).onConflictDoUpdate({
-      target: alloyConversationSummaries.conversationId,
-      set: { summary, topics, messageCount },
-    });
+    const { db, alloyConversationSummaries } = await import('@szl-holdings/db');
+    await db
+      .insert(alloyConversationSummaries)
+      .values({
+        conversationId,
+        agentId,
+        summary,
+        topics,
+        messageCount,
+      })
+      .onConflictDoUpdate({
+        target: alloyConversationSummaries.conversationId,
+        set: { summary, topics, messageCount },
+      });
   } catch {}
 }
 
 async function getRelevantConversationSummaries(agentId: string, query: string): Promise<string> {
   try {
-    const { db, alloyConversationSummaries } = await import("@szl-holdings/db");
-    const { eq, desc } = await import("drizzle-orm");
+    const { db, alloyConversationSummaries } = await import('@szl-holdings/db');
+    const { eq, desc } = await import('drizzle-orm');
     const recent = await db
       .select()
       .from(alloyConversationSummaries)
@@ -127,24 +147,27 @@ async function getRelevantConversationSummaries(agentId: string, query: string):
       .orderBy(desc(alloyConversationSummaries.createdAt))
       .limit(20);
 
-    if (recent.length === 0) return "";
+    if (recent.length === 0) return '';
 
-    const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 3);
+    const queryTerms = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 3);
     const scored = recent
-      .map(r => {
-        const haystack = `${r.summary} ${r.topics.join(" ")}`.toLowerCase();
-        const matches = queryTerms.filter(t => haystack.includes(t)).length;
+      .map((r) => {
+        const haystack = `${r.summary} ${r.topics.join(' ')}`.toLowerCase();
+        const matches = queryTerms.filter((t) => haystack.includes(t)).length;
         return { record: r, score: matches };
       })
-      .filter(s => s.score > 0)
+      .filter((s) => s.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
 
-    if (scored.length === 0) return "";
-    const lines = scored.map(s => `- ${s.record.summary}`).join("\n");
+    if (scored.length === 0) return '';
+    const lines = scored.map((s) => `- ${s.record.summary}`).join('\n');
     return `## Related Past Conversations\n${lines}`;
   } catch {
-    return "";
+    return '';
   }
 }
 
@@ -160,7 +183,7 @@ async function cleanExpiredConversations(): Promise<void> {
   }
 
   for (const { id, conv } of expired) {
-    if (conv.messages.filter(m => m.role !== "system").length >= 2) {
+    if (conv.messages.filter((m) => m.role !== 'system').length >= 2) {
       void (async () => {
         const summary = await generateConversationSummary(conv.messages, conv.agentId);
         if (summary) {
@@ -170,7 +193,7 @@ async function cleanExpiredConversations(): Promise<void> {
             conv.agentId,
             summary,
             topics,
-            conv.messages.filter(m => m.role !== "system").length,
+            conv.messages.filter((m) => m.role !== 'system').length,
           );
         }
       })();
@@ -178,7 +201,11 @@ async function cleanExpiredConversations(): Promise<void> {
   }
 }
 
-export function getOrCreateConversation(conversationId: string, systemPrompt: string, agentId = "unknown"): ConversationMessage[] {
+export function getOrCreateConversation(
+  conversationId: string,
+  systemPrompt: string,
+  agentId = 'unknown',
+): ConversationMessage[] {
   void cleanExpiredConversations();
 
   const existing = conversationStore.get(conversationId);
@@ -188,7 +215,7 @@ export function getOrCreateConversation(conversationId: string, systemPrompt: st
   }
 
   if (conversationStore.size >= MAX_CONVERSATIONS) {
-    let oldestKey = "";
+    let oldestKey = '';
     let oldestTime = Infinity;
     for (const [k, v] of conversationStore) {
       if (v.lastAccess < oldestTime) {
@@ -198,7 +225,7 @@ export function getOrCreateConversation(conversationId: string, systemPrompt: st
     }
     if (oldestKey) {
       const oldest = conversationStore.get(oldestKey);
-      if (oldest && oldest.messages.filter(m => m.role !== "system").length >= 2) {
+      if (oldest && oldest.messages.filter((m) => m.role !== 'system').length >= 2) {
         void (async () => {
           const summary = await generateConversationSummary(oldest.messages, oldest.agentId);
           if (summary) {
@@ -208,7 +235,7 @@ export function getOrCreateConversation(conversationId: string, systemPrompt: st
               oldest.agentId,
               summary,
               topics,
-              oldest.messages.filter(m => m.role !== "system").length,
+              oldest.messages.filter((m) => m.role !== 'system').length,
             );
           }
         })();
@@ -217,17 +244,17 @@ export function getOrCreateConversation(conversationId: string, systemPrompt: st
     }
   }
 
-  const messages: ConversationMessage[] = [{ role: "system", content: systemPrompt }];
+  const messages: ConversationMessage[] = [{ role: 'system', content: systemPrompt }];
   conversationStore.set(conversationId, { messages, lastAccess: Date.now(), agentId });
   return messages;
 }
 
 function toOpenAIToolSchema(tools: ToolDefinition[]): Array<{
-  type: "function";
+  type: 'function';
   function: { name: string; description: string; parameters: Record<string, unknown> };
 }> {
-  return tools.map(t => ({
-    type: "function" as const,
+  return tools.map((t) => ({
+    type: 'function' as const,
     function: {
       name: t.name,
       description: t.description,
@@ -238,7 +265,7 @@ function toOpenAIToolSchema(tools: ToolDefinition[]): Array<{
 
 async function executeToolChain(
   toolCalls: NativeToolCall[],
-  executeTool: DomainAgentConfig["executeTool"],
+  executeTool: DomainAgentConfig['executeTool'],
 ): Promise<StructuredToolResult[]> {
   const results: StructuredToolResult[] = [];
   for (const toolCall of toolCalls) {
@@ -269,9 +296,12 @@ function textFallbackParseToolCalls(responseText: string): NativeToolCall[] {
   const trimmed = responseText.trim();
 
   try {
-    if (trimmed.startsWith("[")) {
+    if (trimmed.startsWith('[')) {
       const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed) && parsed.every((p: unknown) => typeof (p as Record<string, unknown>).tool === "string")) {
+      if (
+        Array.isArray(parsed) &&
+        parsed.every((p: unknown) => typeof (p as Record<string, unknown>).tool === 'string')
+      ) {
         return parsed.map((p: Record<string, unknown>, idx: number) => ({
           id: `tc-${Date.now()}-${idx}`,
           name: p.tool as string,
@@ -284,16 +314,19 @@ function textFallbackParseToolCalls(responseText: string): NativeToolCall[] {
   const jsonMatch = responseText.match(/\{[\s\S]*?"tool"\s*:\s*"[^"]+"/);
   if (jsonMatch) {
     try {
-      const braceStart = responseText.indexOf("{", jsonMatch.index);
+      const braceStart = responseText.indexOf('{', jsonMatch.index);
       let depth = 0;
       let end = braceStart;
       for (let i = braceStart; i < responseText.length; i++) {
-        if (responseText[i] === "{") depth++;
-        if (responseText[i] === "}") depth--;
-        if (depth === 0) { end = i + 1; break; }
+        if (responseText[i] === '{') depth++;
+        if (responseText[i] === '}') depth--;
+        if (depth === 0) {
+          end = i + 1;
+          break;
+        }
       }
       const parsed = JSON.parse(responseText.slice(braceStart, end)) as Record<string, unknown>;
-      if (typeof parsed.tool === "string") {
+      if (typeof parsed.tool === 'string') {
         calls.push({
           id: `tc-${Date.now()}-0`,
           name: parsed.tool,
@@ -312,20 +345,16 @@ export class DomainAgentRunner {
     private readonly modelConfig: { model: string; maxCompletionTokens: number },
   ) {}
 
-  async chat(
-    userMessage: string,
-    conversationId: string,
-    ai: ChatInterface,
-  ): Promise<string> {
-    const agentId = (this.config as { agentId?: string }).agentId ?? "unknown";
+  async chat(userMessage: string, conversationId: string, ai: ChatInterface): Promise<string> {
+    const agentId = (this.config as { agentId?: string }).agentId ?? 'unknown';
     const messages = getOrCreateConversation(conversationId, this.config.systemPrompt, agentId);
 
     const pastContext = await getRelevantConversationSummaries(agentId, userMessage);
 
-    messages.push({ role: "user", content: userMessage });
+    messages.push({ role: 'user', content: userMessage });
 
     const hasTools = this.config.tools.length > 0;
-    const supportsNativeTools = hasTools && typeof ai.chatCompletionWithTools === "function";
+    const supportsNativeTools = hasTools && typeof ai.chatCompletionWithTools === 'function';
 
     if (supportsNativeTools) {
       return this._chatWithNativeTools(messages, ai, pastContext);
@@ -339,24 +368,24 @@ export class DomainAgentRunner {
     pastContext?: string,
   ): Promise<string> {
     const toolSchema = toOpenAIToolSchema(this.config.tools);
-    const systemPrompt = this.config.systemPrompt + (pastContext ? `\n\n${pastContext}` : "");
+    const systemPrompt = this.config.systemPrompt + (pastContext ? `\n\n${pastContext}` : '');
 
     const buildNativeMessages = () => [
-      { role: "system" as const, content: systemPrompt },
+      { role: 'system' as const, content: systemPrompt },
       ...messages
-        .filter(m => m.role !== "system")
+        .filter((m) => m.role !== 'system')
         .slice(-20)
-        .map(m => {
-          if (m.role === "tool") {
+        .map((m) => {
+          if (m.role === 'tool') {
             return {
-              role: "tool" as const,
+              role: 'tool' as const,
               content: m.content,
               toolCallId: m.toolCallId,
               name: m.toolName,
             };
           }
           return {
-            role: m.role as "user" | "assistant",
+            role: m.role as 'user' | 'assistant',
             content: m.content,
           };
         }),
@@ -366,27 +395,26 @@ export class DomainAgentRunner {
     while (rounds < MAX_TOOL_ROUNDS) {
       rounds++;
 
-      const result = await ai.chatCompletionWithTools!(
-        buildNativeMessages(),
-        toolSchema,
-        { model: this.modelConfig.model, maxTokens: this.modelConfig.maxCompletionTokens },
-      );
+      const result = await ai.chatCompletionWithTools!(buildNativeMessages(), toolSchema, {
+        model: this.modelConfig.model,
+        maxTokens: this.modelConfig.maxCompletionTokens,
+      });
 
       if (result.toolCalls.length === 0) {
-        const finalContent = result.content ?? "Analysis complete.";
-        messages.push({ role: "assistant", content: finalContent });
+        const finalContent = result.content ?? 'Analysis complete.';
+        messages.push({ role: 'assistant', content: finalContent });
         return finalContent;
       }
 
       if (result.content) {
-        messages.push({ role: "assistant", content: result.content });
+        messages.push({ role: 'assistant', content: result.content });
       }
 
       const toolResults = await executeToolChain(result.toolCalls, this.config.executeTool);
 
       for (const toolCall of result.toolCalls) {
         messages.push({
-          role: "assistant",
+          role: 'assistant',
           content: `[native_tool_call:${toolCall.name}]`,
           toolCallId: toolCall.id,
           toolName: toolCall.name,
@@ -395,7 +423,7 @@ export class DomainAgentRunner {
 
       for (const toolResult of toolResults) {
         messages.push({
-          role: "tool",
+          role: 'tool',
           content: toolResult.content,
           toolCallId: toolResult.toolCallId,
           toolName: toolResult.toolName,
@@ -403,8 +431,9 @@ export class DomainAgentRunner {
       }
     }
 
-    const fallback = "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";
-    messages.push({ role: "assistant", content: fallback });
+    const fallback =
+      "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";
+    messages.push({ role: 'assistant', content: fallback });
     return fallback;
   }
 
@@ -413,23 +442,30 @@ export class DomainAgentRunner {
     ai: ChatInterface,
     pastContext?: string,
   ): Promise<string> {
-    const toolDescriptions = this.config.tools.length > 0
-      ? `\n\nYou have access to these tools:\n${this.config.tools.map(t =>
-          `- ${t.name}: ${t.description}\n  Parameters: ${JSON.stringify(t.parameters)}`
-        ).join("\n")}\n\nTo use a single tool: {"tool": "tool_name", "args": {...}}\nTo use multiple tools: [{"tool": "tool1", "args": {...}}, {"tool": "tool2", "args": {...}}]\nAfter tool results, provide your final answer.`
-      : "";
+    const toolDescriptions =
+      this.config.tools.length > 0
+        ? `\n\nYou have access to these tools:\n${this.config.tools
+            .map(
+              (t) => `- ${t.name}: ${t.description}\n  Parameters: ${JSON.stringify(t.parameters)}`,
+            )
+            .join(
+              '\n',
+            )}\n\nTo use a single tool: {"tool": "tool_name", "args": {...}}\nTo use multiple tools: [{"tool": "tool1", "args": {...}}, {"tool": "tool2", "args": {...}}]\nAfter tool results, provide your final answer.`
+        : '';
 
-    const systemMessage = this.config.systemPrompt + toolDescriptions + (pastContext ? `\n\n${pastContext}` : "");
+    const systemMessage =
+      this.config.systemPrompt + toolDescriptions + (pastContext ? `\n\n${pastContext}` : '');
     const buildChatMessages = () => [
-      { role: "system" as const, content: systemMessage },
+      { role: 'system' as const, content: systemMessage },
       ...messages
-        .filter(m => m.role !== "system")
+        .filter((m) => m.role !== 'system')
         .slice(-20)
-        .map(m => ({
-          role: (m.role === "tool" ? "user" : m.role) as "user" | "assistant",
-          content: m.role === "tool"
-            ? `[Tool Result - ${m.toolName ?? "unknown"}]: ${m.content}`
-            : m.content,
+        .map((m) => ({
+          role: (m.role === 'tool' ? 'user' : m.role) as 'user' | 'assistant',
+          content:
+            m.role === 'tool'
+              ? `[Tool Result - ${m.toolName ?? 'unknown'}]: ${m.content}`
+              : m.content,
         })),
     ];
 
@@ -446,17 +482,17 @@ export class DomainAgentRunner {
       const toolCalls = textFallbackParseToolCalls(responseText);
 
       if (toolCalls.length === 0) {
-        messages.push({ role: "assistant", content: responseText });
+        messages.push({ role: 'assistant', content: responseText });
         return responseText;
       }
 
       const toolResults = await executeToolChain(toolCalls, this.config.executeTool);
 
-      messages.push({ role: "assistant", content: responseText });
+      messages.push({ role: 'assistant', content: responseText });
 
       for (const toolResult of toolResults) {
         messages.push({
-          role: "tool",
+          role: 'tool',
           content: toolResult.content,
           toolCallId: toolResult.toolCallId,
           toolName: toolResult.toolName,
@@ -464,8 +500,9 @@ export class DomainAgentRunner {
       }
     }
 
-    const fallback = "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";
-    messages.push({ role: "assistant", content: fallback });
+    const fallback =
+      "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";
+    messages.push({ role: 'assistant', content: fallback });
     return fallback;
   }
 }

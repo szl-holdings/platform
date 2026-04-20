@@ -1,38 +1,43 @@
-import React, { useState, useCallback, useEffect } from "react";
+import { useSyncEngine } from '@szl-holdings/mobile-shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, FlatList,
-  RefreshControl, ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { VesselIcon, featherIcon } from "@/components/VesselIcon";
-import { useColors } from "@/hooks/useColors";
-import { api, type FleetException, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/fleet/api";
-import { vesselsWs, type AlertUpdate } from "@/lib/fleet/websocket";
-import { scheduleLocalAlert } from "@/lib/notifications";
-import { useSyncEngine } from "@szl-holdings/mobile-shared";
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { featherIcon, VesselIcon } from '@/components/VesselIcon';
+import { useColors } from '@/hooks/useColors';
+import { api, CACHE_KEYS, cacheGetStale, cacheSet, type FleetException } from '@/lib/fleet/api';
+import { type AlertUpdate, vesselsWs } from '@/lib/fleet/websocket';
+import { scheduleLocalAlert } from '@/lib/notifications';
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "#64748b",
-  watch: "#f59e0b",
+  critical: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#64748b',
+  watch: '#f59e0b',
 };
 
 const EXCEPTION_ICON_MAP: Record<string, string> = {
-  ais_dark: "eye-off",
-  sanctions_match: "shield-off",
-  route_deviation: "navigation",
-  delay_risk: "clock",
-  port_congestion: "anchor",
-  weather_disruption: "wind",
-  maintenance_risk: "tool",
-  fuel_anomaly: "zap",
-  schedule_variance: "calendar",
-  security_alert: "alert-triangle",
-  overdue_arrival: "clock",
-  inspection_failure: "x-circle",
+  ais_dark: 'eye-off',
+  sanctions_match: 'shield-off',
+  route_deviation: 'navigation',
+  delay_risk: 'clock',
+  port_congestion: 'anchor',
+  weather_disruption: 'wind',
+  maintenance_risk: 'tool',
+  fuel_anomaly: 'zap',
+  schedule_variance: 'calendar',
+  security_alert: 'alert-triangle',
+  overdue_arrival: 'clock',
+  inspection_failure: 'x-circle',
 };
 
 function timeAgo(dateStr: string): string {
@@ -44,10 +49,18 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetException; onAcknowledge?: (id: string) => void; isAcknowledging?: boolean }) {
+function AlertCard({
+  alert,
+  onAcknowledge,
+  isAcknowledging,
+}: {
+  alert: FleetException;
+  onAcknowledge?: (id: string) => void;
+  isAcknowledging?: boolean;
+}) {
   const colors = useColors();
   const sc = SEVERITY_COLORS[alert.severity] || colors.textFaint;
-  const iconName = featherIcon(EXCEPTION_ICON_MAP[alert.exceptionType] ?? "alert-circle");
+  const iconName = featherIcon(EXCEPTION_ICON_MAP[alert.exceptionType] ?? 'alert-circle');
   const impact = alert.estimatedImpactUsd ? parseFloat(alert.estimatedImpactUsd) : 0;
 
   return (
@@ -57,9 +70,13 @@ function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetExce
           <VesselIcon name={iconName} size={14} color={sc} />
         </View>
         <View style={styles.cardTitleRow}>
-          <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={2}>{alert.title}</Text>
+          <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={2}>
+            {alert.title}
+          </Text>
         </View>
-        <View style={[styles.severityBadge, { backgroundColor: `${sc}15`, borderColor: `${sc}30` }]}>
+        <View
+          style={[styles.severityBadge, { backgroundColor: `${sc}15`, borderColor: `${sc}30` }]}
+        >
           <Text style={[styles.severityText, { color: sc }]}>{alert.severity.toUpperCase()}</Text>
         </View>
       </View>
@@ -77,9 +94,14 @@ function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetExce
 
       <View style={styles.cardFooter}>
         <View style={styles.cardFooterLeft}>
-          <View style={[styles.typePill, { backgroundColor: colors.primaryDim, borderColor: colors.primaryBorder }]}>
+          <View
+            style={[
+              styles.typePill,
+              { backgroundColor: colors.primaryDim, borderColor: colors.primaryBorder },
+            ]}
+          >
             <Text style={[styles.typeText, { color: colors.primary }]}>
-              {alert.exceptionType?.replace(/_/g, " ")}
+              {alert.exceptionType?.replace(/_/g, ' ')}
             </Text>
           </View>
           {impact > 0 && (
@@ -91,14 +113,19 @@ function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetExce
           )}
         </View>
         <View style={styles.cardFooterRight}>
-          <Text style={[styles.timeText, { color: colors.textFaint }]}>{timeAgo(alert.detectedAt ?? "")}</Text>
+          <Text style={[styles.timeText, { color: colors.textFaint }]}>
+            {timeAgo(alert.detectedAt ?? '')}
+          </Text>
           {onAcknowledge && (
             <TouchableOpacity
               onPress={() => onAcknowledge(alert.id)}
               disabled={isAcknowledging}
-              style={[styles.ackBtn, { borderColor: `${sc}40`, opacity: isAcknowledging ? 0.5 : 1 }]}
+              style={[
+                styles.ackBtn,
+                { borderColor: `${sc}40`, opacity: isAcknowledging ? 0.5 : 1 },
+              ]}
             >
-              <Text style={[styles.ackText, { color: sc }]}>{isAcknowledging ? "…" : "ACK"}</Text>
+              <Text style={[styles.ackText, { color: sc }]}>{isAcknowledging ? '…' : 'ACK'}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -110,7 +137,7 @@ function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetExce
 export default function AlertsScreen() {
   const colors = useColors();
   const queryClient = useQueryClient();
-  const [severityFilter, setSeverityFilter] = useState("all");
+  const [severityFilter, setSeverityFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
   const [cachedAlerts, setCachedAlerts] = useState<FleetException[]>([]);
 
@@ -120,13 +147,13 @@ export default function AlertsScreen() {
     mutationFn: async (id: string) => {
       const base = process.env.EXPO_PUBLIC_DOMAIN
         ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
-        : "/api";
+        : '/api';
       const url = `${base}/vessels/exceptions/${id}/acknowledge`;
 
       if (!syncEngine.isOnline) {
         await syncEngine.enqueue({
-          domain: "vessels",
-          method: "POST",
+          domain: 'vessels',
+          method: 'POST',
           url,
           idempotencyKey: `vessels-acknowledge-exception-${id}`,
         });
@@ -134,31 +161,35 @@ export default function AlertsScreen() {
       }
 
       const res = await fetch(url, {
-        method: "POST",
-        headers: { "X-Idempotency-Key": `vessels-acknowledge-exception-${id}` },
+        method: 'POST',
+        headers: { 'X-Idempotency-Key': `vessels-acknowledge-exception-${id}` },
       });
-      if (!res.ok) throw new Error("Acknowledge failed");
+      if (!res.ok) throw new Error('Acknowledge failed');
     },
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["fleet-exceptions-mobile"] });
-      const prev = queryClient.getQueryData<FleetException[]>(["fleet-exceptions-mobile"]);
-      queryClient.setQueryData<FleetException[]>(["fleet-exceptions-mobile"], old =>
-        (old ?? []).filter(a => String(a.id) !== String(id))
+      await queryClient.cancelQueries({ queryKey: ['fleet-exceptions-mobile'] });
+      const prev = queryClient.getQueryData<FleetException[]>(['fleet-exceptions-mobile']);
+      queryClient.setQueryData<FleetException[]>(['fleet-exceptions-mobile'], (old) =>
+        (old ?? []).filter((a) => String(a.id) !== String(id)),
       );
       return { prev };
     },
     onError: (_err, _id, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(["fleet-exceptions-mobile"], ctx.prev);
+      if (ctx?.prev) queryClient.setQueryData(['fleet-exceptions-mobile'], ctx.prev);
     },
     onSettled: () => {
       if (syncEngine.isOnline) {
-        queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] });
+        queryClient.invalidateQueries({ queryKey: ['fleet-exceptions-mobile'] });
       }
     },
   });
 
-  const { data: alerts = [], isLoading, refetch } = useQuery({
-    queryKey: ["fleet-exceptions-mobile"],
+  const {
+    data: alerts = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['fleet-exceptions-mobile'],
     queryFn: async () => {
       try {
         const data = await api.getExceptions();
@@ -173,33 +204,38 @@ export default function AlertsScreen() {
   });
 
   useEffect(() => {
-    cacheGetStale<FleetException[]>(CACHE_KEYS.ALERTS).then(d => { if (d) setCachedAlerts(d); });
+    cacheGetStale<FleetException[]>(CACHE_KEYS.ALERTS).then((d) => {
+      if (d) setCachedAlerts(d);
+    });
   }, []);
 
   useEffect(() => {
     const onAlert = (upd: AlertUpdate) => {
-      queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] });
-      if (upd.severity === "critical") {
+      queryClient.invalidateQueries({ queryKey: ['fleet-exceptions-mobile'] });
+      if (upd.severity === 'critical') {
         scheduleLocalAlert({
-          title: "CRITICAL: Maritime Alert",
+          title: 'CRITICAL: Maritime Alert',
           body: upd.title,
           data: { vesselId: upd.vesselId, severity: upd.severity },
         });
       }
     };
     const onResolved = () => {
-      queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] });
+      queryClient.invalidateQueries({ queryKey: ['fleet-exceptions-mobile'] });
     };
-    vesselsWs.on("alert_created", onAlert);
-    vesselsWs.on("alert_resolved", onResolved);
+    vesselsWs.on('alert_created', onAlert);
+    vesselsWs.on('alert_resolved', onResolved);
     return () => {
-      vesselsWs.off("alert_created", onAlert);
-      vesselsWs.off("alert_resolved", onResolved);
+      vesselsWs.off('alert_created', onAlert);
+      vesselsWs.off('alert_resolved', onResolved);
     };
   }, [queryClient]);
 
   const displayAlerts = alerts.length > 0 ? alerts : cachedAlerts;
-  const filtered = severityFilter === "all" ? displayAlerts : displayAlerts.filter(a => a.severity === severityFilter);
+  const filtered =
+    severityFilter === 'all'
+      ? displayAlerts
+      : displayAlerts.filter((a) => a.severity === severityFilter);
   const sorted = [...filtered].sort((a, b) => {
     const order: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3, watch: 2 };
     return (order[a.severity] ?? 4) - (order[b.severity] ?? 4);
@@ -220,16 +256,23 @@ export default function AlertsScreen() {
   }, [refetch]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={["top"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View>
           <Text style={[styles.title, { color: colors.text }]}>Alerts & Anomalies</Text>
           <Text style={[styles.sub, { color: colors.textFaint }]}>
-            {critical > 0 && `${critical} critical · `}{high > 0 && `${high} high · `}{displayAlerts.length} total
+            {critical > 0 && `${critical} critical · `}
+            {high > 0 && `${high} high · `}
+            {displayAlerts.length} total
           </Text>
         </View>
         {critical > 0 && (
-          <View style={[styles.critBadge, { backgroundColor: colors.redDim, borderColor: `${colors.red}30` }]}>
+          <View
+            style={[
+              styles.critBadge,
+              { backgroundColor: colors.redDim, borderColor: `${colors.red}30` },
+            ]}
+          >
             <VesselIcon name="alert-triangle" size={12} color={colors.red} />
             <Text style={[styles.critText, { color: colors.red }]}>{critical}</Text>
           </View>
@@ -239,13 +282,16 @@ export default function AlertsScreen() {
       <FlatList
         horizontal
         data={[
-          { id: "all", label: `All (${displayAlerts.length})` },
-          { id: "critical", label: `Critical (${severityCounts.critical || 0})` },
-          { id: "high", label: `High (${severityCounts.high || 0})` },
-          { id: "medium", label: `Medium (${(severityCounts.medium || 0) + (severityCounts.watch || 0)})` },
-          { id: "low", label: `Low (${severityCounts.low || 0})` },
+          { id: 'all', label: `All (${displayAlerts.length})` },
+          { id: 'critical', label: `Critical (${severityCounts.critical || 0})` },
+          { id: 'high', label: `High (${severityCounts.high || 0})` },
+          {
+            id: 'medium',
+            label: `Medium (${(severityCounts.medium || 0) + (severityCounts.watch || 0)})`,
+          },
+          { id: 'low', label: `Low (${severityCounts.low || 0})` },
         ]}
-        keyExtractor={i => i.id}
+        keyExtractor={(i) => i.id}
         showsHorizontalScrollIndicator={false}
         style={styles.filterBar}
         contentContainerStyle={styles.filterContent}
@@ -255,12 +301,17 @@ export default function AlertsScreen() {
             style={[
               styles.filterBtn,
               {
-                backgroundColor: severityFilter === item.id ? colors.primaryDim : "transparent",
+                backgroundColor: severityFilter === item.id ? colors.primaryDim : 'transparent',
                 borderColor: severityFilter === item.id ? colors.primaryBorder : colors.border,
               },
             ]}
           >
-            <Text style={[styles.filterText, { color: severityFilter === item.id ? colors.primary : colors.textDim }]}>
+            <Text
+              style={[
+                styles.filterText,
+                { color: severityFilter === item.id ? colors.primary : colors.textDim },
+              ]}
+            >
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -274,10 +325,16 @@ export default function AlertsScreen() {
       ) : (
         <FlatList
           data={sorted}
-          keyExtractor={a => String(a.id)}
+          keyExtractor={(a) => String(a.id)}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+            />
+          }
           renderItem={({ item }) => (
             <AlertCard
               alert={item}
@@ -301,47 +358,83 @@ export default function AlertsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
-  title: { fontSize: 20, fontWeight: "700" as const, fontFamily: "Inter_700Bold" },
-  sub: { fontSize: 11, marginTop: 2, fontFamily: "Inter_400Regular" },
+  title: { fontSize: 20, fontWeight: '700' as const, fontFamily: 'Inter_700Bold' },
+  sub: { fontSize: 11, marginTop: 2, fontFamily: 'Inter_400Regular' },
   critBadge: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
   },
-  critText: { fontSize: 12, fontWeight: "700" as const, fontFamily: "Inter_700Bold" },
+  critText: { fontSize: 12, fontWeight: '700' as const, fontFamily: 'Inter_700Bold' },
   filterBar: { marginTop: 12 },
   filterContent: { paddingHorizontal: 16, gap: 8 },
   filterBtn: {
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
   },
-  filterText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  filterText: { fontSize: 11, fontFamily: 'Inter_500Medium' },
   listContent: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 100 },
   card: { padding: 14, borderRadius: 12, borderWidth: 1 },
-  cardHeader: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 8 },
-  cardIcon: { width: 32, height: 32, borderRadius: 8, justifyContent: "center", alignItems: "center" },
-  cardTitleRow: { flex: 1 },
-  cardTitle: { fontSize: 13, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold", lineHeight: 18 },
-  severityBadge: {
-    paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8, borderWidth: 1,
+  cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8 },
+  cardIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  severityText: { fontSize: 9, fontWeight: "700" as const, letterSpacing: 0.5, fontFamily: "Inter_700Bold" },
-  vesselRow: { flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 6 },
-  vesselText: { fontSize: 11, fontFamily: "Inter_400Regular" },
-  cardDesc: { fontSize: 12, lineHeight: 16, marginBottom: 10, fontFamily: "Inter_400Regular" },
-  cardFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  cardFooterLeft: { flexDirection: "row", gap: 6, flexWrap: "wrap", flex: 1 },
-  cardFooterRight: { flexDirection: "row", alignItems: "center", gap: 8, marginLeft: 8 },
+  cardTitleRow: { flex: 1 },
+  cardTitle: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    fontFamily: 'Inter_600SemiBold',
+    lineHeight: 18,
+  },
+  severityBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  severityText: {
+    fontSize: 9,
+    fontWeight: '700' as const,
+    letterSpacing: 0.5,
+    fontFamily: 'Inter_700Bold',
+  },
+  vesselRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 6 },
+  vesselText: { fontSize: 11, fontFamily: 'Inter_400Regular' },
+  cardDesc: { fontSize: 12, lineHeight: 16, marginBottom: 10, fontFamily: 'Inter_400Regular' },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cardFooterLeft: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1 },
+  cardFooterRight: { flexDirection: 'row', alignItems: 'center', gap: 8, marginLeft: 8 },
   typePill: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8, borderWidth: 1 },
-  typeText: { fontSize: 9, fontFamily: "Inter_500Medium" },
+  typeText: { fontSize: 9, fontFamily: 'Inter_500Medium' },
   impactPill: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
-  impactText: { fontSize: 9, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
-  timeText: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  impactText: { fontSize: 9, fontWeight: '600' as const, fontFamily: 'Inter_600SemiBold' },
+  timeText: { fontSize: 10, fontFamily: 'Inter_400Regular' },
   ackBtn: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
-  ackText: { fontSize: 9, fontWeight: "700" as const, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
-  loadingState: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyState: { alignItems: "center", paddingVertical: 60, gap: 8 },
-  emptyTitle: { fontSize: 16, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
-  emptyText: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  ackText: {
+    fontSize: 9,
+    fontWeight: '700' as const,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
+  },
+  loadingState: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyState: { alignItems: 'center', paddingVertical: 60, gap: 8 },
+  emptyTitle: { fontSize: 16, fontWeight: '600' as const, fontFamily: 'Inter_600SemiBold' },
+  emptyText: { fontSize: 13, fontFamily: 'Inter_400Regular' },
 });

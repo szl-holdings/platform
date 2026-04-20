@@ -1,5 +1,5 @@
-import { useDesignSystem } from "../providers/DesignSystemProvider.js";
-import { densityConfig, type DensityMode } from "../tokens/index.js";
+import { useDesignSystem } from '../providers/DesignSystemProvider.js';
+import { type DensityMode, densityConfig } from '../tokens/index.js';
 
 export interface DensityValues {
   mode: DensityMode;

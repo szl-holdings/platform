@@ -1,18 +1,24 @@
 import {
   db,
-  worldlineSourceRegistryTable,
+  type InsertWorldlineSource,
+  type WorldlineFetchLog,
+  type WorldlineFreshnessCadence,
+  type WorldlineSource,
+  type WorldlineSourceStatus,
+  type WorldlineSourceType,
   worldlineFetchLogsTable,
   worldlineSignalPublicationsTable,
-  type InsertWorldlineSource,
-  type WorldlineSource,
-  type WorldlineFetchLog,
-  type WorldlineSourceType,
-  type WorldlineFreshnessCadence,
-  type WorldlineSourceStatus,
-} from "@szl-holdings/db";
-import { eq, and, desc, sql } from "drizzle-orm";
+  worldlineSourceRegistryTable,
+} from '@szl-holdings/db';
+import { and, desc, eq, sql } from 'drizzle-orm';
 
-export type { WorldlineSource, WorldlineFetchLog, WorldlineSourceType, WorldlineFreshnessCadence, WorldlineSourceStatus };
+export type {
+  WorldlineFetchLog,
+  WorldlineFreshnessCadence,
+  WorldlineSource,
+  WorldlineSourceStatus,
+  WorldlineSourceType,
+};
 
 export interface RegisterSourceParams {
   orgId?: number | null;
@@ -30,7 +36,7 @@ export interface RegisterSourceParams {
 }
 
 export interface FetchResult {
-  status: "success" | "partial" | "failed" | "skipped";
+  status: 'success' | 'partial' | 'failed' | 'skipped';
   recordsReceived: number;
   recordsNormalized: number;
   recordsRejected: number;
@@ -86,7 +92,7 @@ export async function registerSource(params: RegisterSourceParams): Promise<Worl
         name: params.name,
         description: params.description ?? null,
         sourceType: params.sourceType,
-        freshnessCadence: params.freshnessCadence ?? "daily",
+        freshnessCadence: params.freshnessCadence ?? 'daily',
         confidenceBaseline: params.confidenceBaseline ?? 0.7,
         connectionConfig: params.connectionConfig ?? {},
         normalizationConfig: params.normalizationConfig ?? {},
@@ -98,22 +104,25 @@ export async function registerSource(params: RegisterSourceParams): Promise<Worl
     return updated;
   }
 
-  const [source] = await db.insert(worldlineSourceRegistryTable).values({
-    orgId: params.orgId ?? null,
-    slug: params.slug,
-    name: params.name,
-    description: params.description ?? null,
-    sourceType: params.sourceType,
-    domain: params.domain,
-    status: "pending_setup",
-    freshnessCadence: params.freshnessCadence ?? "daily",
-    confidenceBaseline: params.confidenceBaseline ?? 0.7,
-    connectionConfig: params.connectionConfig ?? {},
-    normalizationConfig: params.normalizationConfig ?? {},
-    isEnabled: true,
-    createdBy: params.createdBy ?? null,
-    metadata: params.metadata ?? {},
-  }).returning();
+  const [source] = await db
+    .insert(worldlineSourceRegistryTable)
+    .values({
+      orgId: params.orgId ?? null,
+      slug: params.slug,
+      name: params.name,
+      description: params.description ?? null,
+      sourceType: params.sourceType,
+      domain: params.domain,
+      status: 'pending_setup',
+      freshnessCadence: params.freshnessCadence ?? 'daily',
+      confidenceBaseline: params.confidenceBaseline ?? 0.7,
+      connectionConfig: params.connectionConfig ?? {},
+      normalizationConfig: params.normalizationConfig ?? {},
+      isEnabled: true,
+      createdBy: params.createdBy ?? null,
+      metadata: params.metadata ?? {},
+    })
+    .returning();
 
   return source;
 }
@@ -130,29 +139,32 @@ export async function recordFetch(
     .where(eq(worldlineSourceRegistryTable.id, sourceId));
 
   if (!source) {
-    throw Object.assign(new Error(`Worldline source ${sourceId} not found`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Worldline source ${sourceId} not found`), { code: 'NOT_FOUND' });
   }
 
   const now = new Date();
   const freshness = computeFreshnessScore(
-    result.status === "success" ? now : source.lastSuccessAt,
+    result.status === 'success' ? now : source.lastSuccessAt,
     source.freshnessCadence as WorldlineFreshnessCadence,
   );
 
-  const [log] = await db.insert(worldlineFetchLogsTable).values({
-    sourceId,
-    orgId: orgId ?? null,
-    status: result.status,
-    recordsReceived: result.recordsReceived,
-    recordsNormalized: result.recordsNormalized,
-    recordsRejected: result.recordsRejected,
-    confidenceScore: result.confidenceScore ?? (source.confidenceBaseline ?? 0.7),
-    freshnessScore: freshness,
-    latencyMs: result.latencyMs ?? null,
-    errorMessage: result.errorMessage ?? null,
-    completedAt: now,
-    correlationId: correlationId ?? null,
-  }).returning();
+  const [log] = await db
+    .insert(worldlineFetchLogsTable)
+    .values({
+      sourceId,
+      orgId: orgId ?? null,
+      status: result.status,
+      recordsReceived: result.recordsReceived,
+      recordsNormalized: result.recordsNormalized,
+      recordsRejected: result.recordsRejected,
+      confidenceScore: result.confidenceScore ?? source.confidenceBaseline ?? 0.7,
+      freshnessScore: freshness,
+      latencyMs: result.latencyMs ?? null,
+      errorMessage: result.errorMessage ?? null,
+      completedAt: now,
+      correlationId: correlationId ?? null,
+    })
+    .returning();
 
   const stateUpdate: Partial<typeof worldlineSourceRegistryTable.$inferInsert> = {
     lastFetchedAt: now,
@@ -161,20 +173,22 @@ export async function recordFetch(
     updatedAt: now,
   };
 
-  if (result.status === "success" || result.status === "partial") {
+  if (result.status === 'success' || result.status === 'partial') {
     stateUpdate.lastSuccessAt = now;
     stateUpdate.consecutiveFailures = 0;
-    stateUpdate.totalRecordsIngested = (source.totalRecordsIngested ?? 0) + result.recordsNormalized;
-    stateUpdate.status = "active";
-  } else if (result.status === "failed") {
+    stateUpdate.totalRecordsIngested =
+      (source.totalRecordsIngested ?? 0) + result.recordsNormalized;
+    stateUpdate.status = 'active';
+  } else if (result.status === 'failed') {
     stateUpdate.lastErrorAt = now;
-    stateUpdate.lastErrorMessage = result.errorMessage ?? "Unknown error";
+    stateUpdate.lastErrorMessage = result.errorMessage ?? 'Unknown error';
     const failures = (source.consecutiveFailures ?? 0) + 1;
     stateUpdate.consecutiveFailures = failures;
-    stateUpdate.status = failures >= 3 ? "degraded" : source.status;
+    stateUpdate.status = failures >= 3 ? 'degraded' : source.status;
   }
 
-  await db.update(worldlineSourceRegistryTable)
+  await db
+    .update(worldlineSourceRegistryTable)
     .set(stateUpdate)
     .where(eq(worldlineSourceRegistryTable.id, sourceId));
 
@@ -215,12 +229,9 @@ export async function getSourceBySlug(
   return row;
 }
 
-export async function listSources(options: {
-  orgId?: number;
-  domain?: string;
-  status?: WorldlineSourceStatus;
-  limit?: number;
-} = {}): Promise<WorldlineSource[]> {
+export async function listSources(
+  options: { orgId?: number; domain?: string; status?: WorldlineSourceStatus; limit?: number } = {},
+): Promise<WorldlineSource[]> {
   const conditions = [];
   if (options.orgId != null) conditions.push(eq(worldlineSourceRegistryTable.orgId, options.orgId));
   if (options.domain) conditions.push(eq(worldlineSourceRegistryTable.domain, options.domain));
@@ -236,10 +247,7 @@ export async function listSources(options: {
   return q;
 }
 
-export async function getFetchHistory(
-  sourceId: number,
-  limit = 50,
-): Promise<WorldlineFetchLog[]> {
+export async function getFetchHistory(sourceId: number, limit = 50): Promise<WorldlineFetchLog[]> {
   return db
     .select()
     .from(worldlineFetchLogsTable)
@@ -255,14 +263,13 @@ export function scoreFreshness(
   return computeFreshnessScore(lastSuccessAt, cadence);
 }
 
+export type { CreateOverlayParams, OverlayQueryOptions } from './signal-overlays.js';
 export {
   createSignalOverlay,
-  querySignalOverlays,
-  getActiveOverlaysForEntity,
   expireOverlay,
   expireStaleOverlays,
+  getActiveOverlaysForEntity,
   getOverlayById,
+  querySignalOverlays,
   scoreOverlayTrust,
-} from "./signal-overlays.js";
-
-export type { CreateOverlayParams, OverlayQueryOptions } from "./signal-overlays.js";
+} from './signal-overlays.js';

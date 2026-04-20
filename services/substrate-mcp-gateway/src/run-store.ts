@@ -10,7 +10,7 @@
  * runs that survive restart.
  */
 
-import type { PipelineRun } from "@szl/substrate/types";
+import type { PipelineRun } from '@szl/substrate/types';
 
 const _runs = new Map<string, PipelineRun>();
 

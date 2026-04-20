@@ -6,7 +6,7 @@
  * fall back to the device's local zone (`Intl.DateTimeFormat` default).
  */
 
-import { getUserTimeZone } from "./hooks/useUserPreferences";
+import { getUserTimeZone } from './hooks/useUserPreferences';
 
 function resolveZone(explicit?: string | null): string | undefined {
   if (explicit) return explicit;
@@ -20,12 +20,12 @@ function resolveZone(explicit?: string | null): string | undefined {
 export function formatInUserTimeZone(
   date: Date | string | number | null | undefined,
   options: Intl.DateTimeFormatOptions = {},
-  locale: string | string[] = "en-US",
+  locale: string | string[] = 'en-US',
   explicitZone?: string | null,
 ): string {
-  if (date === null || date === undefined || date === "") return "";
+  if (date === null || date === undefined || date === '') return '';
   const d = date instanceof Date ? date : new Date(date);
-  if (Number.isNaN(d.getTime())) return "";
+  if (Number.isNaN(d.getTime())) return '';
   const timeZone = resolveZone(explicitZone);
   try {
     return new Intl.DateTimeFormat(locale, { ...options, timeZone }).format(d);
@@ -49,8 +49,8 @@ export function getResolvedUserTimeZone(): string | undefined {
  */
 export function getDeviceTimeZone(): string {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   } catch {
-    return "UTC";
+    return 'UTC';
   }
 }

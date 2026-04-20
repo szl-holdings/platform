@@ -1,23 +1,14 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import rateLimit from "express-rate-limit";
-import {
-  db,
-  terraPropertiesTable,
-} from "@szl-holdings/db";
-import { eq, or, sql } from "drizzle-orm";
-import { sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import {
-  exportPropertyTwin,
-  exportPropertySimulation,
-} from "@szl-holdings/openusd-export";
-import type {
-  PropertyUsdState,
-  PropertySimulationParams,
-} from "@szl-holdings/openusd-export";
-import { validateBody } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, terraPropertiesTable } from '@szl-holdings/db';
+import type { PropertySimulationParams, PropertyUsdState } from '@szl-holdings/openusd-export';
+import { exportPropertySimulation, exportPropertyTwin } from '@szl-holdings/openusd-export';
+import { eq, or, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
+import { handleRouteError, sendBadRequest, sendNotFound } from '../lib/api-response';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -26,14 +17,14 @@ const twinRateLimit = rateLimit({
   max: 120,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Digital twin rate limit exceeded." },
+  message: { error: 'Digital twin rate limit exceeded.' },
   validate: { xForwardedForHeader: false, ip: false },
 });
 
 // ─── Property Digital Twin Export ─────────────────────────────────────────────
 
 router.get(
-  "/terra/:propertyId/digital-twin",
+  '/terra/:propertyId/digital-twin',
   twinRateLimit,
   authMiddleware({ required: false }),
   async (req, res) => {
@@ -46,8 +37,8 @@ router.get(
         .where(
           or(
             eq(terraPropertiesTable.externalId, propertyId),
-            sql`CAST(${terraPropertiesTable.id} AS TEXT) = ${propertyId}`
-          )!
+            sql`CAST(${terraPropertiesTable.id} AS TEXT) = ${propertyId}`,
+          )!,
         )
         .limit(1);
 
@@ -66,12 +57,12 @@ router.get(
           property.latitude && property.longitude
             ? { lat: Number(property.latitude), lon: Number(property.longitude) }
             : undefined,
-        simulationScenario: "baseline",
+        simulationScenario: 'baseline',
         metadata: {
           internalId: String(property.id),
-          ownerName: property.ownerName ?? "",
+          ownerName: property.ownerName ?? '',
           ownerType: property.ownerType,
-          source: "terra_properties",
+          source: 'terra_properties',
           city: property.city,
           state: property.state,
         },
@@ -79,41 +70,41 @@ router.get(
 
       const result = exportPropertyTwin(state);
 
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Content-Disposition", `attachment; filename="property-${propertyId}.usda"`);
-      res.setHeader("X-SZL-Export-Type", "property_digital_twin");
-      res.setHeader("X-SZL-Prim-Count", String(result.primCount));
-      res.setHeader("X-SZL-Export-At", result.exportedAt);
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="property-${propertyId}.usda"`);
+      res.setHeader('X-SZL-Export-Type', 'property_digital_twin');
+      res.setHeader('X-SZL-Prim-Count', String(result.primCount));
+      res.setHeader('X-SZL-Export-At', result.exportedAt);
       if (result.warnings.length > 0) {
-        res.setHeader("X-SZL-Warnings", result.warnings.join("; "));
+        res.setHeader('X-SZL-Warnings', result.warnings.join('; '));
       }
       res.status(200).send(result.usdaContent);
     } catch (err) {
-      handleRouteError(res, err, "Failed to export property digital twin");
+      handleRouteError(res, err, 'Failed to export property digital twin');
     }
-  }
+  },
 );
 
 // ─── Property Financial Simulation ────────────────────────────────────────────
 
 const VALID_PROPERTY_SCENARIOS = [
-  "baseline",
-  "stress_test",
-  "vacancy_spike",
-  "cap_rate_compression",
-  "rate_shock",
+  'baseline',
+  'stress_test',
+  'vacancy_spike',
+  'cap_rate_compression',
+  'rate_shock',
 ] as const;
 type PropertyScenario = (typeof VALID_PROPERTY_SCENARIOS)[number];
 
 router.post(
-  "/terra/:propertyId/simulate",
+  '/terra/:propertyId/simulate',
   twinRateLimit,
   authMiddleware({ required: false }),
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const { propertyId } = req.params;
-      const rawScenario = (req.body?.scenario as string | undefined) ?? "stress_test";
+      const rawScenario = (req.body?.scenario as string | undefined) ?? 'stress_test';
       const interestRateDelta = req.body?.interestRateDelta as number | undefined;
       const vacancyRateDelta = req.body?.vacancyRateDelta as number | undefined;
       const noiDelta = req.body?.noiDelta as number | undefined;
@@ -122,7 +113,7 @@ router.post(
       if (!VALID_PROPERTY_SCENARIOS.includes(rawScenario as PropertyScenario)) {
         sendBadRequest(
           res,
-          `Invalid scenario. Valid values: ${VALID_PROPERTY_SCENARIOS.join(", ")}`
+          `Invalid scenario. Valid values: ${VALID_PROPERTY_SCENARIOS.join(', ')}`,
         );
         return;
       }
@@ -135,8 +126,8 @@ router.post(
         .where(
           or(
             eq(terraPropertiesTable.externalId, propertyId),
-            sql`CAST(${terraPropertiesTable.id} AS TEXT) = ${propertyId}`
-          )!
+            sql`CAST(${terraPropertiesTable.id} AS TEXT) = ${propertyId}`,
+          )!,
         )
         .limit(1);
 
@@ -158,9 +149,9 @@ router.post(
         simulationScenario: scenario,
         metadata: {
           internalId: String(property.id),
-          ownerName: property.ownerName ?? "",
+          ownerName: property.ownerName ?? '',
           ownerType: property.ownerType,
-          source: "terra_properties",
+          source: 'terra_properties',
         },
       };
 
@@ -200,36 +191,34 @@ router.post(
         },
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to run property simulation");
+      handleRouteError(res, err, 'Failed to run property simulation');
     }
-  }
+  },
 );
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function normalizePropertyType(
-  raw: string | null | undefined
-): PropertyUsdState["propertyType"] {
-  const map: Record<string, PropertyUsdState["propertyType"]> = {
-    commercial: "commercial",
-    office: "commercial",
-    retail: "commercial",
-    hospitality: "commercial",
-    other: "commercial",
-    residential: "residential",
-    multifamily: "residential",
-    industrial: "industrial",
-    mixed_use: "mixed_use",
-    "mixed-use": "mixed_use",
-    land: "land",
+function normalizePropertyType(raw: string | null | undefined): PropertyUsdState['propertyType'] {
+  const map: Record<string, PropertyUsdState['propertyType']> = {
+    commercial: 'commercial',
+    office: 'commercial',
+    retail: 'commercial',
+    hospitality: 'commercial',
+    other: 'commercial',
+    residential: 'residential',
+    multifamily: 'residential',
+    industrial: 'industrial',
+    mixed_use: 'mixed_use',
+    'mixed-use': 'mixed_use',
+    land: 'land',
   };
-  return map[raw ?? ""] ?? "commercial";
+  return map[raw ?? ''] ?? 'commercial';
 }
 
 function buildFinancialProjection(
   base: PropertyUsdState,
   scenario: PropertyScenario,
-  params: PropertySimulationParams
+  params: PropertySimulationParams,
 ): Record<string, unknown> {
   const baseValuation = base.currentValuation ?? 0;
   const baseNoi = base.noi ?? 0;
@@ -245,35 +234,32 @@ function buildFinancialProjection(
   const notes: string[] = [];
 
   switch (scenario) {
-    case "stress_test":
+    case 'stress_test':
       projectedNoi = baseNoi + (params.noiDelta ?? -baseNoi * 0.1);
       projectedOccupancy = Math.max(0, baseOccupancy - (params.vacancyRateDelta ?? 0.05));
       if (params.marketCapRateDelta !== undefined) {
         projectedCapRate = baseCapRate + params.marketCapRateDelta;
         projectedValuation = projectedNoi / Math.max(0.001, projectedCapRate);
       }
-      notes.push("Stress-test scenario: NOI and occupancy reduced, cap rate expanded.");
+      notes.push('Stress-test scenario: NOI and occupancy reduced, cap rate expanded.');
       break;
-    case "vacancy_spike":
+    case 'vacancy_spike':
       projectedOccupancy = Math.max(0, baseOccupancy - (params.vacancyRateDelta ?? 0.2));
       projectedNoi = baseNoi * (projectedOccupancy / Math.max(0.001, baseOccupancy));
       projectedValuation = projectedCapRate > 0 ? projectedNoi / projectedCapRate : 0;
-      notes.push("Vacancy spike: NOI adjusted proportionally to occupancy drop.");
+      notes.push('Vacancy spike: NOI adjusted proportionally to occupancy drop.');
       break;
-    case "cap_rate_compression":
+    case 'cap_rate_compression':
       projectedCapRate = Math.max(0.01, baseCapRate + (params.marketCapRateDelta ?? -0.01));
       projectedValuation = baseNoi / Math.max(0.001, projectedCapRate);
-      notes.push("Cap rate compression: valuation adjusted to reflect tightened market.");
+      notes.push('Cap rate compression: valuation adjusted to reflect tightened market.');
       break;
-    case "rate_shock":
-      projectedDscr = Math.max(
-        0.5,
-        baseDscr - (params.interestRateDelta ?? 0.015) * 0.15
-      );
-      notes.push("Rate shock: DSCR reduced based on interest rate delta.");
+    case 'rate_shock':
+      projectedDscr = Math.max(0.5, baseDscr - (params.interestRateDelta ?? 0.015) * 0.15);
+      notes.push('Rate shock: DSCR reduced based on interest rate delta.');
       break;
     default:
-      notes.push("Baseline: no adjustments applied.");
+      notes.push('Baseline: no adjustments applied.');
   }
 
   const valuationDelta = projectedValuation - baseValuation;
@@ -299,9 +285,7 @@ function buildFinancialProjection(
     delta: {
       valuationChange: valuationDelta,
       valuationChangePct:
-        baseValuation > 0
-          ? Math.round((valuationDelta / baseValuation) * 10000) / 100
-          : null,
+        baseValuation > 0 ? Math.round((valuationDelta / baseValuation) * 10000) / 100 : null,
       noiChange: noiAfter - noiBefore,
     },
     notes,

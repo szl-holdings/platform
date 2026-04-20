@@ -9,7 +9,7 @@
  * cleanup failures cause test runs to surface the problem explicitly.
  */
 
-type TableName = "vesselsFleetsTable" | "carlotaInquiriesTable";
+type TableName = 'vesselsFleetsTable' | 'carlotaInquiriesTable';
 
 /** De-duplicated set of records waiting for deletion, keyed as "table:id". */
 const _pending = new Set<string>();
@@ -19,7 +19,7 @@ function makeKey(table: TableName, id: number): string {
 }
 
 function parseKey(key: string): { table: TableName; id: number } {
-  const sep = key.indexOf(":");
+  const sep = key.indexOf(':');
   return { table: key.slice(0, sep) as TableName, id: parseInt(key.slice(sep + 1), 10) };
 }
 
@@ -47,9 +47,9 @@ export async function flushCleanup(): Promise<void> {
   const keys = [..._pending]; // snapshot — registry is not cleared until commit
 
   // These imports throw if the DB module is unavailable; let that propagate.
-  const { db } = await import("@szl-holdings/db");
-  const schema = (await import("@szl-holdings/db/schema")) as Record<string, unknown>;
-  const { eq } = await import("drizzle-orm");
+  const { db } = await import('@szl-holdings/db');
+  const schema = (await import('@szl-holdings/db/schema')) as Record<string, unknown>;
+  const { eq } = await import('drizzle-orm');
 
   type TxClient = { delete: (t: unknown) => { where: (c: unknown) => Promise<unknown> } };
   type DbWithTx = { transaction: (fn: (tx: TxClient) => Promise<void>) => Promise<void> };
@@ -64,7 +64,7 @@ export async function flushCleanup(): Promise<void> {
       if (!table) {
         throw new Error(`[cleanup-registry] Unknown table "${tableName}" — add it to TableName`);
       }
-      const col = (table as Record<string, unknown>)["id"];
+      const col = (table as Record<string, unknown>)['id'];
       await tx.delete(table).where(eq(col, id));
     }
   });

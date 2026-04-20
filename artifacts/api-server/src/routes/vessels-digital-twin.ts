@@ -1,26 +1,20 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import rateLimit from "express-rate-limit";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  vesselsTable,
+  vesselsCargoTable,
   vesselsPositionsTable,
   vesselsRoutesTable,
-  vesselsCargoTable,
-} from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
-import { sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import {
-  exportVesselTwin,
-  exportRouteSimulation,
-} from "@szl-holdings/openusd-export";
-import type {
-  VesselUsdState,
-  RouteSimulationParams,
-} from "@szl-holdings/openusd-export";
-import { validateBody } from "../lib/validation";
+  vesselsTable,
+} from '@szl-holdings/db';
+import type { RouteSimulationParams, VesselUsdState } from '@szl-holdings/openusd-export';
+import { exportRouteSimulation, exportVesselTwin } from '@szl-holdings/openusd-export';
+import { desc, eq } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
+import { handleRouteError, sendBadRequest, sendNotFound } from '../lib/api-response';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -29,14 +23,14 @@ const twinRateLimit = rateLimit({
   max: 120,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Digital twin rate limit exceeded." },
+  message: { error: 'Digital twin rate limit exceeded.' },
   validate: { xForwardedForHeader: false, ip: false },
 });
 
 // ─── Vessel Digital Twin Export ───────────────────────────────────────────────
 
 router.get(
-  "/vessels/:imo/digital-twin",
+  '/vessels/:imo/digital-twin',
   twinRateLimit,
   authMiddleware({ required: false }),
   async (req, res) => {
@@ -90,58 +84,62 @@ router.get(
         speedKnots: latestPos?.speed ? Number(latestPos.speed) : undefined,
         destination: activeRoute?.destinationPort ?? undefined,
         eta: activeRoute?.arrivalAt?.toISOString() ?? undefined,
-        routeWaypoints: Array.isArray((activeRoute as { waypoints?: unknown } | undefined)?.waypoints)
+        routeWaypoints: Array.isArray(
+          (activeRoute as { waypoints?: unknown } | undefined)?.waypoints,
+        )
           ? (activeRoute!.waypoints as Array<{ lat: number; lon: number; name?: string }>)
           : [],
         deadweightTonnage: vessel.grossTonnage ? Number(vessel.grossTonnage) : undefined,
         flagState: vessel.flag ?? undefined,
         cargoStatus: activeCargo ? `${activeCargo.cargoType} — ${activeCargo.status}` : undefined,
-        simulationScenario: "live_state",
+        simulationScenario: 'live_state',
         metadata: {
           vesselId: String(vessel.id),
-          mmsi: vessel.mmsi ?? "",
+          mmsi: vessel.mmsi ?? '',
           status: vessel.status,
-          yearBuilt: vessel.yearBuilt ? String(vessel.yearBuilt) : "",
+          yearBuilt: vessel.yearBuilt ? String(vessel.yearBuilt) : '',
         },
       };
 
       const result = exportVesselTwin(state);
 
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Content-Disposition", `attachment; filename="vessel-${imo}.usda"`);
-      res.setHeader("X-SZL-Export-Type", "vessel_digital_twin");
-      res.setHeader("X-SZL-Prim-Count", String(result.primCount));
-      res.setHeader("X-SZL-Export-At", result.exportedAt);
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="vessel-${imo}.usda"`);
+      res.setHeader('X-SZL-Export-Type', 'vessel_digital_twin');
+      res.setHeader('X-SZL-Prim-Count', String(result.primCount));
+      res.setHeader('X-SZL-Export-At', result.exportedAt);
       if (result.warnings.length > 0) {
-        res.setHeader("X-SZL-Warnings", result.warnings.join("; "));
+        res.setHeader('X-SZL-Warnings', result.warnings.join('; '));
       }
       res.status(200).send(result.usdaContent);
     } catch (err) {
-      handleRouteError(res, err, "Failed to export vessel digital twin");
+      handleRouteError(res, err, 'Failed to export vessel digital twin');
     }
-  }
+  },
 );
 
 // ─── Vessel Route Simulation Export ───────────────────────────────────────────
 
-const VALID_VESSEL_SCENARIOS = ["normal", "storm_diversion", "chokepoint_delay", "emergency_deviation"] as const;
+const VALID_VESSEL_SCENARIOS = [
+  'normal',
+  'storm_diversion',
+  'chokepoint_delay',
+  'emergency_deviation',
+] as const;
 type VesselScenario = (typeof VALID_VESSEL_SCENARIOS)[number];
 
 router.post(
-  "/vessels/:imo/simulate",
+  '/vessels/:imo/simulate',
   twinRateLimit,
   authMiddleware({ required: false }),
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const { imo } = req.params;
-      const rawScenario = (req.body?.scenario as string | undefined) ?? "normal";
+      const rawScenario = (req.body?.scenario as string | undefined) ?? 'normal';
 
       if (!VALID_VESSEL_SCENARIOS.includes(rawScenario as VesselScenario)) {
-        sendBadRequest(
-          res,
-          `Invalid scenario. Valid values: ${VALID_VESSEL_SCENARIOS.join(", ")}`
-        );
+        sendBadRequest(res, `Invalid scenario. Valid values: ${VALID_VESSEL_SCENARIOS.join(', ')}`);
         return;
       }
 
@@ -195,12 +193,14 @@ router.post(
         cargoStatus: activeCargo ? `${activeCargo.cargoType} — ${activeCargo.status}` : undefined,
         metadata: {
           vesselId: String(vessel.id),
-          mmsi: vessel.mmsi ?? "",
+          mmsi: vessel.mmsi ?? '',
           status: vessel.status,
         },
       };
 
-      const waypoints = Array.isArray((activeRoute as { waypoints?: unknown } | undefined)?.waypoints)
+      const waypoints = Array.isArray(
+        (activeRoute as { waypoints?: unknown } | undefined)?.waypoints,
+      )
         ? (activeRoute!.waypoints as Array<{ lat: number; lon: number; name?: string }>)
         : [];
 
@@ -245,37 +245,29 @@ router.post(
         },
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to run vessel route simulation");
+      handleRouteError(res, err, 'Failed to run vessel route simulation');
     }
-  }
+  },
 );
 
 function buildProjectedVesselState(
   base: VesselUsdState,
-  scenario: VesselScenario
+  scenario: VesselScenario,
 ): Record<string, unknown> {
   const etaDeltaHours =
-    scenario === "storm_diversion"
+    scenario === 'storm_diversion'
       ? 36
-      : scenario === "chokepoint_delay"
-      ? 18
-      : scenario === "emergency_deviation"
-      ? 12
-      : 0;
+      : scenario === 'chokepoint_delay'
+        ? 18
+        : scenario === 'emergency_deviation'
+          ? 12
+          : 0;
 
   const speedMultiplier =
-    scenario === "storm_diversion"
-      ? 0.75
-      : scenario === "emergency_deviation"
-      ? 0.85
-      : 1.0;
+    scenario === 'storm_diversion' ? 0.75 : scenario === 'emergency_deviation' ? 0.85 : 1.0;
 
   const fuelDeltaPct =
-    scenario === "storm_diversion"
-      ? -12
-      : scenario === "chokepoint_delay"
-      ? -5
-      : 0;
+    scenario === 'storm_diversion' ? -12 : scenario === 'chokepoint_delay' ? -5 : 0;
 
   return {
     scenario,
@@ -285,11 +277,11 @@ function buildProjectedVesselState(
     etaDeltaHours,
     projectedFuelLevelPct: Math.max(0, (base.fuelLevelPercent ?? 60) + fuelDeltaPct),
     routeRiskLevel:
-      scenario === "storm_diversion" || scenario === "emergency_deviation"
-        ? "high"
-        : scenario === "chokepoint_delay"
-        ? "medium"
-        : "low",
+      scenario === 'storm_diversion' || scenario === 'emergency_deviation'
+        ? 'high'
+        : scenario === 'chokepoint_delay'
+          ? 'medium'
+          : 'low',
     simulationNotes: getSimulationNotes(scenario),
     generatedAt: new Date().toISOString(),
   };
@@ -297,14 +289,14 @@ function buildProjectedVesselState(
 
 function getSimulationNotes(scenario: VesselScenario): string {
   switch (scenario) {
-    case "storm_diversion":
-      return "Route diverted to avoid storm system — alternate waypoints applied, ETA extended.";
-    case "chokepoint_delay":
-      return "Queuing delay at chokepoint — ETA extended by estimated congestion clearance time.";
-    case "emergency_deviation":
-      return "Emergency course deviation — reduced speed, distress protocol active.";
+    case 'storm_diversion':
+      return 'Route diverted to avoid storm system — alternate waypoints applied, ETA extended.';
+    case 'chokepoint_delay':
+      return 'Queuing delay at chokepoint — ETA extended by estimated congestion clearance time.';
+    case 'emergency_deviation':
+      return 'Emergency course deviation — reduced speed, distress protocol active.';
     default:
-      return "Normal operations — no scenario adjustments applied.";
+      return 'Normal operations — no scenario adjustments applied.';
   }
 }
 

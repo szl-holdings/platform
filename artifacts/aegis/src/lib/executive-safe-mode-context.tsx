@@ -1,7 +1,7 @@
-import { createContext, useContext, useState } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
 
-const LS_KEY = "executiveSafeMode";
+const LS_KEY = 'executiveSafeMode';
 
 interface ExecutiveSafeModeContextValue {
   safeMode: boolean;
@@ -16,7 +16,7 @@ export const ExecutiveSafeModeContext = createContext<ExecutiveSafeModeContextVa
 export function ExecutiveSafeModeProvider({ children }: { children: ReactNode }) {
   const [safeMode, setSafeModeState] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(LS_KEY) === "true";
+      return localStorage.getItem(LS_KEY) === 'true';
     } catch {
       return false;
     }
@@ -26,8 +26,7 @@ export function ExecutiveSafeModeProvider({ children }: { children: ReactNode })
     setSafeModeState(value);
     try {
       localStorage.setItem(LS_KEY, String(value));
-    } catch {
-    }
+    } catch {}
   }
 
   return (

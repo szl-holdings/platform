@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
-import type { PlanGraph, PlanStep } from "./types.js";
+import { randomUUID } from 'crypto';
+import type { PlanGraph, PlanStep } from './types.js';
 
 export interface FallbackOptions {
   /** number of fallback plans to generate (0..5) */
@@ -14,10 +14,7 @@ export interface FallbackOptions {
  * strictness) so the orchestrator can choose a different trade-off when the
  * primary plan is blocked / over-budget / fails verification.
  */
-export function generateFallbackPlans(
-  primary: PlanGraph,
-  opts: FallbackOptions,
-): PlanGraph[] {
+export function generateFallbackPlans(primary: PlanGraph, opts: FallbackOptions): PlanGraph[] {
   const count = Math.max(0, Math.min(5, opts.count));
   if (count === 0) return [];
   const strategies: Array<(p: PlanGraph) => PlanGraph> = [
@@ -68,9 +65,9 @@ function cheaperFallback(p: PlanGraph): PlanGraph {
     route: {
       ...s.route,
       estimatedCostUsd: s.route.estimatedCostUsd * 0.5,
-      selectedBy: "cost",
+      selectedBy: 'cost',
     },
-    metadata: { ...s.metadata, fallbackKind: "cheaper" },
+    metadata: { ...s.metadata, fallbackKind: 'cheaper' },
   }));
 }
 
@@ -81,9 +78,9 @@ function safeFallback(p: PlanGraph): PlanGraph {
     requiredApproval: s.requiredApproval || s.estimatedRisk >= 0.25,
     approvalReason:
       s.requiredApproval || s.estimatedRisk >= 0.25
-        ? s.approvalReason ?? "safe-fallback policy"
+        ? (s.approvalReason ?? 'safe-fallback policy')
         : s.approvalReason,
-    metadata: { ...s.metadata, fallbackKind: "safer" },
+    metadata: { ...s.metadata, fallbackKind: 'safer' },
   }));
 }
 
@@ -92,7 +89,7 @@ function fasterFallback(p: PlanGraph): PlanGraph {
   return withSteps(p, (s) => ({
     ...s,
     dependsOn: s.estimatedRisk >= 0.5 ? s.dependsOn : [],
-    metadata: { ...s.metadata, fallbackKind: "faster" },
+    metadata: { ...s.metadata, fallbackKind: 'faster' },
   }));
 }
 
@@ -101,9 +98,9 @@ function moreEvidenceFallback(p: PlanGraph): PlanGraph {
     ...s,
     requiredEvidence:
       s.requiredEvidence.length === 0
-        ? ["citation", "verifier-pass"]
-        : Array.from(new Set([...s.requiredEvidence, "citation"])),
-    metadata: { ...s.metadata, fallbackKind: "more-evidence" },
+        ? ['citation', 'verifier-pass']
+        : Array.from(new Set([...s.requiredEvidence, 'citation'])),
+    metadata: { ...s.metadata, fallbackKind: 'more-evidence' },
   }));
 }
 
@@ -112,7 +109,7 @@ function isolatedFallback(p: PlanGraph): PlanGraph {
   return withSteps(p, (s) => ({
     ...s,
     requiredApproval: true,
-    approvalReason: s.approvalReason ?? "isolated-fallback policy",
-    metadata: { ...s.metadata, fallbackKind: "isolated" },
+    approvalReason: s.approvalReason ?? 'isolated-fallback policy',
+    metadata: { ...s.metadata, fallbackKind: 'isolated' },
   }));
 }

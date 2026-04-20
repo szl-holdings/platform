@@ -1,5 +1,5 @@
-import type { ConstellationAdapter } from "./adapter.ts";
-import type { CstDomain } from "./types.ts";
+import type { ConstellationAdapter } from './adapter.ts';
+import type { CstDomain } from './types.ts';
 
 const _adapters = new Map<CstDomain, ConstellationAdapter>();
 

@@ -12,57 +12,75 @@
  *  8. Billing analytics      — GET  /metering/analytics
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
 import {
+  billingLineItemsTable,
+  costAllocationsTable,
   db,
+  invoicesTable,
   meteringEventsTable,
-  usageAggregatesTable,
-  rateCardsTable,
-  rateCardTiersTable,
-  rateCardAssignmentsTable,
+  organizationsTable,
   quotaConfigsTable,
   quotaViolationsTable,
-  costAllocationsTable,
-  billingLineItemsTable,
-  organizationsTable,
-  invoicesTable,
-  subscriptionsTable,
+  rateCardAssignmentsTable,
+  rateCardsTable,
+  rateCardTiersTable,
   revenueEventsTable,
-} from "@szl-holdings/db";
+  subscriptionsTable,
+  usageAggregatesTable,
+} from '@szl-holdings/db';
 import {
-  eq, desc, asc, and, gte, lte, sql, sum, count, avg, isNull, ne, inArray,
-} from "drizzle-orm";
+  and,
+  asc,
+  avg,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNull,
+  lte,
+  ne,
+  sql,
+  sum,
+} from 'drizzle-orm';
+import type { RequestHandler } from 'express';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import {
-  sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError,
-} from "../../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/auth";
-import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
-import { logger } from "../../lib/logger";
-import rateLimit from "express-rate-limit";
-import type { RequestHandler } from "express";
-
+  handleRouteError,
+  sendBadRequest,
+  sendError,
+  sendNotFound,
+  sendSuccess,
+} from '../../lib/api-response';
+import { logger } from '../../lib/logger';
+import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
+import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
 
 export const meteringRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false,
-  message: { error: "Metering rate limit exceeded." },
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Metering rate limit exceeded.' },
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
-const READ_ROLES = ["admin", "super_admin", "ops", "analyst"] as const;
+const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
+const READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
 
-export function periodBounds(period: "month" | "day" | "year" = "month", refDate = new Date()) {
+export function periodBounds(period: 'month' | 'day' | 'year' = 'month', refDate = new Date()) {
   const y = refDate.getUTCFullYear();
   const m = refDate.getUTCMonth();
   const d = refDate.getUTCDate();
 
-  if (period === "day") {
+  if (period === 'day') {
     return {
       start: new Date(Date.UTC(y, m, d)),
       end: new Date(Date.UTC(y, m, d + 1)),
     };
   }
-  if (period === "year") {
+  if (period === 'year') {
     return {
       start: new Date(Date.UTC(y, 0, 1)),
       end: new Date(Date.UTC(y + 1, 0, 1)),
@@ -76,22 +94,33 @@ export function periodBounds(period: "month" | "day" | "year" = "month", refDate
 
 export function computeCharge(
   quantity: number,
-  card: { pricingModel: string; unitAmount: string | null; flatAmount: string | null; freeUnits: number },
-  tiers: Array<{ fromUnit: number; toUnit: number | null; unitAmount: string; flatAmount: string | null; order: number }>,
+  card: {
+    pricingModel: string;
+    unitAmount: string | null;
+    flatAmount: string | null;
+    freeUnits: number;
+  },
+  tiers: Array<{
+    fromUnit: number;
+    toUnit: number | null;
+    unitAmount: string;
+    flatAmount: string | null;
+    order: number;
+  }>,
 ): number {
-  const ua = parseFloat(card.unitAmount ?? "0");
-  const fa = parseFloat(card.flatAmount ?? "0");
+  const ua = parseFloat(card.unitAmount ?? '0');
+  const fa = parseFloat(card.flatAmount ?? '0');
   const free = card.freeUnits ?? 0;
   const billable = Math.max(0, quantity - free);
 
   switch (card.pricingModel) {
-    case "flat_rate":
+    case 'flat_rate':
       return fa;
 
-    case "per_unit":
+    case 'per_unit':
       return billable * ua;
 
-    case "tiered": {
+    case 'tiered': {
       let total = fa;
       let remaining = billable;
       for (const tier of tiers.sort((a, b) => a.order - b.order)) {
@@ -107,7 +136,7 @@ export function computeCharge(
       return total;
     }
 
-    case "volume": {
+    case 'volume': {
       const sorted = tiers.sort((a, b) => a.order - b.order);
       const applicableTier = [...sorted].reverse().find((t) => billable >= t.fromUnit);
       if (!applicableTier) return fa;
@@ -116,13 +145,13 @@ export function computeCharge(
       return fa + tierFa + billable * tierUa;
     }
 
-    case "package": {
+    case 'package': {
       const packageSize = free || 1;
       const packages = Math.ceil(billable / packageSize);
       return fa + packages * ua;
     }
 
-    case "commitment":
+    case 'commitment':
       return fa;
 
     default:
@@ -132,7 +161,7 @@ export function computeCharge(
 
 export async function recomputeAggregate(orgId: number, featureKey: string, product: string) {
   const now = new Date();
-  const { start, end } = periodBounds("month", now);
+  const { start, end } = periodBounds('month', now);
 
   const [row] = await db
     .select({
@@ -156,10 +185,10 @@ export async function recomputeAggregate(orgId: number, featureKey: string, prod
       orgId,
       featureKey,
       product,
-      periodType: "month",
+      periodType: 'month',
       periodStart: start,
       periodEnd: end,
-      totalQuantity: row?.totalQty ?? "0",
+      totalQuantity: row?.totalQty ?? '0',
       eventCount: row?.eventCount ?? 0,
       uniqueUsers: row?.uniqueUsers ?? 0,
     })
@@ -171,7 +200,7 @@ export async function recomputeAggregate(orgId: number, featureKey: string, prod
         usageAggregatesTable.periodStart,
       ],
       set: {
-        totalQuantity: row?.totalQty ?? "0",
+        totalQuantity: row?.totalQty ?? '0',
         eventCount: row?.eventCount ?? 0,
         uniqueUsers: row?.uniqueUsers ?? 0,
         computedAt: new Date(),
@@ -179,7 +208,11 @@ export async function recomputeAggregate(orgId: number, featureKey: string, prod
     });
 }
 
-export async function checkAndEnforceQuota(orgId: number, featureKey: string, quantity: number): Promise<{ allowed: boolean; reason?: string; violation?: string }> {
+export async function checkAndEnforceQuota(
+  orgId: number,
+  featureKey: string,
+  quantity: number,
+): Promise<{ allowed: boolean; reason?: string; violation?: string }> {
   const [quota] = await db
     .select()
     .from(quotaConfigsTable)
@@ -195,7 +228,8 @@ export async function checkAndEnforceQuota(orgId: number, featureKey: string, qu
   if (!quota) return { allowed: true };
 
   const now = new Date();
-  const period = quota.periodType === "billing_cycle" ? "month" : quota.periodType as "day" | "month";
+  const period =
+    quota.periodType === 'billing_cycle' ? 'month' : (quota.periodType as 'day' | 'month');
   const { start } = periodBounds(period, now);
 
   const [agg] = await db
@@ -209,7 +243,7 @@ export async function checkAndEnforceQuota(orgId: number, featureKey: string, qu
       ),
     );
 
-  const currentUsage = parseFloat(agg?.total ?? "0");
+  const currentUsage = parseFloat(agg?.total ?? '0');
   const projected = currentUsage + quantity;
 
   if (quota.hardLimit !== null) {
@@ -218,18 +252,18 @@ export async function checkAndEnforceQuota(orgId: number, featureKey: string, qu
       await db.insert(quotaViolationsTable).values({
         orgId,
         featureKey,
-        violationType: "hard",
+        violationType: 'hard',
         action: quota.hardLimitAction,
         currentUsage: String(currentUsage),
         limitValue: quota.hardLimit,
         metadata: { quantity, projected },
       });
 
-      if (quota.hardLimitAction === "block") {
+      if (quota.hardLimitAction === 'block') {
         return {
           allowed: false,
           reason: `Hard usage limit reached for '${featureKey}'. Current: ${currentUsage}, Limit: ${hard}.`,
-          violation: "hard",
+          violation: 'hard',
         };
       }
     }
@@ -241,7 +275,7 @@ export async function checkAndEnforceQuota(orgId: number, featureKey: string, qu
       await db.insert(quotaViolationsTable).values({
         orgId,
         featureKey,
-        violationType: "soft",
+        violationType: 'soft',
         action: quota.softLimitAction,
         currentUsage: String(currentUsage),
         limitValue: quota.softLimit,

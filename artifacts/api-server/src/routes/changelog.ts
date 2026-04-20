@@ -1,17 +1,17 @@
-import { Router, type Request, type Response } from "express";
-import { db, changelogEntriesTable } from "@szl-holdings/db";
-import { desc, eq } from "drizzle-orm";
-import { logger } from "../lib/logger";
-import { sendCreated, sendError, sendBadRequest, sendForbidden } from "../lib/api-response";
+import { changelogEntriesTable, db } from '@szl-holdings/db';
+import { desc, eq } from 'drizzle-orm';
+import { type Request, type Response, Router } from 'express';
+import { sendBadRequest, sendCreated, sendError, sendForbidden } from '../lib/api-response';
+import { logger } from '../lib/logger';
 
 const changelogRouter = Router();
 
-changelogRouter.get("/changelog", async (_req: Request, res: Response) => {
+changelogRouter.get('/changelog', async (_req: Request, res: Response) => {
   try {
     const entries = await db
       .select()
       .from(changelogEntriesTable)
-      .where(eq(changelogEntriesTable.published, "true"))
+      .where(eq(changelogEntriesTable.published, 'true'))
       .orderBy(desc(changelogEntriesTable.date))
       .limit(50);
 
@@ -27,17 +27,22 @@ changelogRouter.get("/changelog", async (_req: Request, res: Response) => {
       })),
     });
   } catch (err) {
-    logger.error({ err }, "[changelog] Failed to fetch entries");
-    sendError(res, "Failed to fetch changelog");
+    logger.error({ err }, '[changelog] Failed to fetch entries');
+    sendError(res, 'Failed to fetch changelog');
   }
 });
 
-changelogRouter.post("/changelog", async (req: Request, res: Response) => {
+changelogRouter.post('/changelog', async (req: Request, res: Response) => {
   try {
     const user = (req as Request & { user?: { roles?: string[] } }).user;
     const userRoles = user?.roles ?? [];
-    if (!user || (!userRoles.includes("platform_owner") && !userRoles.includes("super_admin") && !userRoles.includes("admin"))) {
-      sendForbidden(res, "Admin access required");
+    if (
+      !user ||
+      (!userRoles.includes('platform_owner') &&
+        !userRoles.includes('super_admin') &&
+        !userRoles.includes('admin'))
+    ) {
+      sendForbidden(res, 'Admin access required');
       return;
     }
 
@@ -51,15 +56,20 @@ changelogRouter.post("/changelog", async (req: Request, res: Response) => {
     };
 
     if (!version || !title || !body) {
-      sendBadRequest(res, "version, title, and body are required");
+      sendBadRequest(res, 'version, title, and body are required');
       return;
     }
 
-    type ChangelogCategory = "feature" | "improvement" | "bugfix" | "security" | "breaking";
-    const validCategories: ReadonlySet<string> = new Set(["feature", "improvement", "bugfix", "security", "breaking"]);
-    const resolvedCategory: ChangelogCategory = category && validCategories.has(category)
-      ? (category as ChangelogCategory)
-      : "feature";
+    type ChangelogCategory = 'feature' | 'improvement' | 'bugfix' | 'security' | 'breaking';
+    const validCategories: ReadonlySet<string> = new Set([
+      'feature',
+      'improvement',
+      'bugfix',
+      'security',
+      'breaking',
+    ]);
+    const resolvedCategory: ChangelogCategory =
+      category && validCategories.has(category) ? (category as ChangelogCategory) : 'feature';
 
     const [entry] = await db
       .insert(changelogEntriesTable)
@@ -75,8 +85,8 @@ changelogRouter.post("/changelog", async (req: Request, res: Response) => {
 
     sendCreated(res, { entry });
   } catch (err) {
-    logger.error({ err }, "[changelog] Failed to create entry");
-    sendError(res, "Failed to create changelog entry");
+    logger.error({ err }, '[changelog] Failed to create entry');
+    sendError(res, 'Failed to create changelog entry');
   }
 });
 

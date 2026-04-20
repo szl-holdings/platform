@@ -2,12 +2,12 @@
  * Alloy Repository — typed access to workflow, run, and signal tables.
  */
 import {
-  db,
-  alloyWorkflowsTable,
-  alloyWorkflowRunsTable,
   alloySignalsTable,
-} from "@szl-holdings/db";
-import { eq, desc, and } from "drizzle-orm";
+  alloyWorkflowRunsTable,
+  alloyWorkflowsTable,
+  db,
+} from '@szl-holdings/db';
+import { and, desc, eq } from 'drizzle-orm';
 
 export class AlloyRepository {
   async findWorkflowById(id: number) {

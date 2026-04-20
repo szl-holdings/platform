@@ -13,7 +13,7 @@
 
 // Use the Zod-validated Signal contract directly to avoid the pre-existing
 // name collision between `signal.ts` and `signals.ts` re-exports in ontology.
-import type { Signal } from "@workspace/ontology/signal";
+import type { Signal } from '@workspace/ontology/signal';
 
 export type SignalHandler = (signal: Signal) => void | Promise<void>;
 
@@ -60,8 +60,8 @@ export class SignalBus {
     for (const s of tail) this.buffer.push(s);
   }
 
-  on(type: Signal["type"] | "*", handler: SignalHandler): SignalSubscription {
-    if (type === "*") {
+  on(type: Signal['type'] | '*', handler: SignalHandler): SignalSubscription {
+    if (type === '*') {
       this.wildcardHandlers.add(handler);
       return { unsubscribe: () => this.wildcardHandlers.delete(handler) };
     }
@@ -79,7 +79,7 @@ export class SignalBus {
       try {
         this.store.persist(signal);
       } catch (e) {
-        console.error("[SignalBus] store persist error:", e);
+        console.error('[SignalBus] store persist error:', e);
       }
     }
 
@@ -88,25 +88,27 @@ export class SignalBus {
       for (const h of typed) {
         try {
           const r = h(signal);
-          if (r instanceof Promise) r.catch((e: unknown) => console.error("[SignalBus] handler error:", e));
+          if (r instanceof Promise)
+            r.catch((e: unknown) => console.error('[SignalBus] handler error:', e));
         } catch (e) {
-          console.error("[SignalBus] sync handler error:", e);
+          console.error('[SignalBus] sync handler error:', e);
         }
       }
     }
     for (const h of this.wildcardHandlers) {
       try {
         const r = h(signal);
-        if (r instanceof Promise) r.catch((e: unknown) => console.error("[SignalBus] wildcard handler error:", e));
+        if (r instanceof Promise)
+          r.catch((e: unknown) => console.error('[SignalBus] wildcard handler error:', e));
       } catch (e) {
-        console.error("[SignalBus] sync wildcard handler error:", e);
+        console.error('[SignalBus] sync wildcard handler error:', e);
       }
     }
   }
 
   snapshot(filter?: {
-    domain?: Signal["domain"];
-    type?: Signal["type"];
+    domain?: Signal['domain'];
+    type?: Signal['type'];
     tenantId?: string;
     limit?: number;
   }): Signal[] {

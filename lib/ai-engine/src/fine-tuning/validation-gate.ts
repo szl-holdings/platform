@@ -6,7 +6,7 @@
  * model meets or exceeds base model scores across all eval categories.
  */
 
-import { GOLDEN_SET } from "../evals/golden-set.js";
+import { GOLDEN_SET } from '../evals/golden-set.js';
 
 export interface ModelEvalScores {
   passRate: number;
@@ -37,10 +37,7 @@ export interface ValidationGateResult {
 const PASS_THRESHOLD = 0.0;
 const REGRESSION_TOLERANCE = 0.05;
 
-async function runEvalsOnModel(
-  modelId: string,
-  provider: string,
-): Promise<ModelEvalScores> {
+async function runEvalsOnModel(modelId: string, provider: string): Promise<ModelEvalScores> {
   const results: Array<{
     testId: string;
     category: string;
@@ -56,22 +53,28 @@ async function runEvalsOnModel(
       const response = await callModelForEval(modelId, provider, test.input, test.category);
       const latencyMs = Date.now() - start;
 
-      const assertionResults = test.assertions.map(assertion => {
+      const assertionResults = test.assertions.map((assertion) => {
         const actual = getNestedField(response, assertion.field);
         return checkAssertion(actual, assertion.operator, assertion.value);
       });
 
-      passed = assertionResults.every(r => r);
+      passed = assertionResults.every((r) => r);
       results.push({ testId: test.id, category: test.category, passed, latencyMs });
     } catch {
-      results.push({ testId: test.id, category: test.category, passed: false, latencyMs: Date.now() - start });
+      results.push({
+        testId: test.id,
+        category: test.category,
+        passed: false,
+        latencyMs: Date.now() - start,
+      });
     }
   }
 
-  const totalPassed = results.filter(r => r.passed).length;
-  const avgLatency = results.length > 0
-    ? Math.round(results.reduce((s, r) => s + r.latencyMs, 0) / results.length)
-    : 0;
+  const totalPassed = results.filter((r) => r.passed).length;
+  const avgLatency =
+    results.length > 0
+      ? Math.round(results.reduce((s, r) => s + r.latencyMs, 0) / results.length)
+      : 0;
 
   const byCategory: Record<string, { total: number; passed: number; passRate: number }> = {};
   for (const r of results) {
@@ -101,42 +104,45 @@ async function callModelForEval(
 ): Promise<Record<string, unknown>> {
   const systemPrompt = `You are an AI assistant. Analyze the input and respond with a JSON object containing relevant fields such as: riskLevel, riskScore, escalationRequired, confidence, actionType, approvalRequired, approvalLevel, priority, category, routeTo, summary, evidence, reasoning, entities, action, urgency.`;
 
-  if (input === "" || input === "{{CORRUPTED_INPUT}}") {
+  if (input === '' || input === '{{CORRUPTED_INPUT}}') {
     return {
-      actionType: "escalate",
+      actionType: 'escalate',
       approvalRequired: true,
       confidence: 0.1,
-      action: "escalate_to_human",
+      action: 'escalate_to_human',
     };
   }
 
-  if (provider === "openai" || provider.includes("openai") || modelId.startsWith("ft:")) {
-    const openaiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  if (provider === 'openai' || provider.includes('openai') || modelId.startsWith('ft:')) {
+    const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
     if (!openaiKey) return buildFallbackEvalResponse(category, input);
-    const openaiBase = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] ?? "https://api.openai.com/v1";
+    const openaiBase =
+      process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
 
     try {
       const response = await fetch(`${openaiBase}/chat/completions`, {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${openaiKey}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           model: modelId,
           messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Analyze: ${input}\n\nRespond with JSON only.` },
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Analyze: ${input}\n\nRespond with JSON only.` },
           ],
-          response_format: { type: "json_object" },
+          response_format: { type: 'json_object' },
           max_tokens: 512,
           temperature: 0.1,
         }),
       });
 
       if (!response.ok) return buildFallbackEvalResponse(category, input);
-      const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-      const content = data.choices?.[0]?.message?.content ?? "{}";
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const content = data.choices?.[0]?.message?.content ?? '{}';
       try {
         return JSON.parse(content) as Record<string, unknown>;
       } catch {
@@ -156,71 +162,77 @@ function buildFallbackEvalResponse(category: string, input: string): Record<stri
   const base: Record<string, unknown> = {
     confidence: 0.75,
     summary: `Analysis of: ${input.slice(0, 100)}`,
-    reasoning: "Automated analysis based on input context",
-    evidence: ["Input context analysis"],
+    reasoning: 'Automated analysis based on input context',
+    evidence: ['Input context analysis'],
   };
 
-  if (category === "risk_extraction") {
-    const isCritical = lower.includes("critical") || lower.includes("9.8") || lower.includes("breach");
-    const isHigh = lower.includes("backup failed") || lower.includes("72 hours");
+  if (category === 'risk_extraction') {
+    const isCritical =
+      lower.includes('critical') || lower.includes('9.8') || lower.includes('breach');
+    const isHigh = lower.includes('backup failed') || lower.includes('72 hours');
     return {
       ...base,
-      riskLevel: isCritical ? "critical" : isHigh ? "high" : "low",
+      riskLevel: isCritical ? 'critical' : isHigh ? 'high' : 'low',
       riskScore: isCritical ? 92 : isHigh ? 75 : 20,
       escalationRequired: isCritical || isHigh,
     };
   }
 
-  if (category === "owner_assignment") {
+  if (category === 'owner_assignment') {
     return {
       ...base,
-      routeTo: lower.includes("maritime") || lower.includes("vessel") ? "maritime-ops"
-        : lower.includes("ssl") || lower.includes("server") ? "infrastructure"
-        : "general-ops",
-      category: "operational",
-      priority: "P2",
-      urgency: lower.includes("48 hours") ? "urgent" : "normal",
+      routeTo:
+        lower.includes('maritime') || lower.includes('vessel')
+          ? 'maritime-ops'
+          : lower.includes('ssl') || lower.includes('server')
+            ? 'infrastructure'
+            : 'general-ops',
+      category: 'operational',
+      priority: 'P2',
+      urgency: lower.includes('48 hours') ? 'urgent' : 'normal',
     };
   }
 
-  if (category === "escalation_proposal") {
-    const isEscalate = lower.includes("breach") || lower.includes("50,000") || lower.includes("error rate");
+  if (category === 'escalation_proposal') {
+    const isEscalate =
+      lower.includes('breach') || lower.includes('50,000') || lower.includes('error rate');
     return {
       ...base,
-      actionType: isEscalate ? "escalate" : "close",
+      actionType: isEscalate ? 'escalate' : 'close',
       approvalRequired: isEscalate,
-      approvalLevel: lower.includes("breach") ? "executive" : "manager",
+      approvalLevel: lower.includes('breach') ? 'executive' : 'manager',
     };
   }
 
-  if (category === "approval_gating") {
-    const requiresApproval = lower.includes("150") || lower.includes("production") || lower.includes("auto-clos");
+  if (category === 'approval_gating') {
+    const requiresApproval =
+      lower.includes('150') || lower.includes('production') || lower.includes('auto-clos');
     return {
       ...base,
       approvalRequired: requiresApproval,
-      approvalLevel: requiresApproval ? "operator" : undefined,
+      approvalLevel: requiresApproval ? 'operator' : undefined,
     };
   }
 
-  if (category === "schema_validity") {
+  if (category === 'schema_validity') {
     return {
       ...base,
-      priority: lower.includes("98%") ? "P1" : "P2",
-      category: "operational",
-      routeTo: "infrastructure",
-      action: "investigate",
-      entities: [{ type: "server", value: "production" }],
+      priority: lower.includes('98%') ? 'P1' : 'P2',
+      category: 'operational',
+      routeTo: 'infrastructure',
+      action: 'investigate',
+      entities: [{ type: 'server', value: 'production' }],
     };
   }
 
-  if (category === "hallucination_rejection") {
+  if (category === 'hallucination_rejection') {
     return { ...base, confidence: 0.2 };
   }
 
-  if (category === "safe_fallback") {
+  if (category === 'safe_fallback') {
     return {
-      action: "escalate",
-      actionType: "escalate",
+      action: 'escalate',
+      actionType: 'escalate',
       approvalRequired: true,
       confidence: 0.1,
     };
@@ -230,10 +242,10 @@ function buildFallbackEvalResponse(category: string, input: string): Record<stri
 }
 
 function getNestedField(obj: Record<string, unknown>, field: string): unknown {
-  const parts = field.split(".");
+  const parts = field.split('.');
   let current: unknown = obj;
   for (const part of parts) {
-    if (current == null || typeof current !== "object") return undefined;
+    if (current == null || typeof current !== 'object') return undefined;
     current = (current as Record<string, unknown>)[part];
   }
   return current;
@@ -241,27 +253,39 @@ function getNestedField(obj: Record<string, unknown>, field: string): unknown {
 
 function checkAssertion(actual: unknown, operator: string, value?: unknown): boolean {
   switch (operator) {
-    case "equals": return actual === value;
-    case "contains": return typeof actual === "string" && actual.includes(value as string);
-    case "exists": return actual !== undefined && actual !== null;
-    case "gt": return typeof actual === "number" && actual > (value as number);
-    case "lt": return typeof actual === "number" && actual < (value as number);
-    case "oneOf": return Array.isArray(value) && (value as unknown[]).includes(actual);
-    case "notEmpty":
-      return Array.isArray(actual) ? actual.length > 0
-        : typeof actual === "string" ? actual.length > 0
-        : actual != null;
-    default: return false;
+    case 'equals':
+      return actual === value;
+    case 'contains':
+      return typeof actual === 'string' && actual.includes(value as string);
+    case 'exists':
+      return actual !== undefined && actual !== null;
+    case 'gt':
+      return typeof actual === 'number' && actual > (value as number);
+    case 'lt':
+      return typeof actual === 'number' && actual < (value as number);
+    case 'oneOf':
+      return Array.isArray(value) && (value as unknown[]).includes(actual);
+    case 'notEmpty':
+      return Array.isArray(actual)
+        ? actual.length > 0
+        : typeof actual === 'string'
+          ? actual.length > 0
+          : actual != null;
+    default:
+      return false;
   }
 }
 
-function estimateCostFromModel(modelId: string, provider: string): { input: number; output: number } {
-  if (modelId.startsWith("ft:") || provider === "openai") {
-    if (modelId.includes("gpt-4")) return { input: 0.003, output: 0.006 };
-    if (modelId.includes("gpt-3.5")) return { input: 0.003, output: 0.006 };
+function estimateCostFromModel(
+  modelId: string,
+  provider: string,
+): { input: number; output: number } {
+  if (modelId.startsWith('ft:') || provider === 'openai') {
+    if (modelId.includes('gpt-4')) return { input: 0.003, output: 0.006 };
+    if (modelId.includes('gpt-3.5')) return { input: 0.003, output: 0.006 };
     return { input: 0.003, output: 0.006 };
   }
-  if (provider === "huggingface") {
+  if (provider === 'huggingface') {
     return { input: 0.0002, output: 0.0002 };
   }
   return { input: 0.001, output: 0.002 };
@@ -281,7 +305,7 @@ export async function runValidationGate(
   const categoryComparison = Object.keys({
     ...fineTunedScores.byCategory,
     ...baseModelScores.byCategory,
-  }).map(category => {
+  }).map((category) => {
     const basePassRate = baseModelScores.byCategory[category]?.passRate ?? 0;
     const fineTunedPassRate = fineTunedScores.byCategory[category]?.passRate ?? 0;
     return {
@@ -293,8 +317,9 @@ export async function runValidationGate(
     };
   });
 
-  const regressedCategories = categoryComparison.filter(c => c.regressed);
-  const meetsBaseModel = fineTunedScores.passRate >= baseModelScores.passRate - REGRESSION_TOLERANCE;
+  const regressedCategories = categoryComparison.filter((c) => c.regressed);
+  const meetsBaseModel =
+    fineTunedScores.passRate >= baseModelScores.passRate - REGRESSION_TOLERANCE;
   const meetsMinThreshold = fineTunedScores.passRate >= PASS_THRESHOLD;
 
   const promoted = meetsBaseModel && meetsMinThreshold;
@@ -304,7 +329,7 @@ export async function runValidationGate(
     if (!meetsMinThreshold) {
       failureReason = `Fine-tuned model pass rate (${(fineTunedScores.passRate * 100).toFixed(1)}%) below minimum threshold (${(PASS_THRESHOLD * 100).toFixed(1)}%)`;
     } else if (regressedCategories.length > 0) {
-      failureReason = `Regression detected in categories: ${regressedCategories.map(c => c.category).join(", ")}`;
+      failureReason = `Regression detected in categories: ${regressedCategories.map((c) => c.category).join(', ')}`;
     } else {
       failureReason = `Fine-tuned model underperforms base model (${(fineTunedScores.passRate * 100).toFixed(1)}% vs ${(baseModelScores.passRate * 100).toFixed(1)}%)`;
     }
@@ -326,11 +351,11 @@ export async function runValidationGate(
 
 export async function promoteFineTunedModel(
   modelId: string,
-  targetLifecycle: "canary" | "active",
+  targetLifecycle: 'canary' | 'active',
 ): Promise<void> {
-  const { db } = await import("@szl-holdings/db");
-  const { fineTunedModelRegistry } = await import("@szl-holdings/db");
-  const { eq } = await import("drizzle-orm");
+  const { db } = await import('@szl-holdings/db');
+  const { fineTunedModelRegistry } = await import('@szl-holdings/db');
+  const { eq } = await import('drizzle-orm');
 
   const [model] = await db
     .select()
@@ -340,11 +365,14 @@ export async function promoteFineTunedModel(
 
   if (!model) throw new Error(`Fine-tuned model not found: ${modelId}`);
 
-  if (model.lifecycle === "staging" && targetLifecycle === "active") {
-    throw new Error("Cannot promote from staging directly to active — must go through canary first");
+  if (model.lifecycle === 'staging' && targetLifecycle === 'active') {
+    throw new Error(
+      'Cannot promote from staging directly to active — must go through canary first',
+    );
   }
 
-  await db.update(fineTunedModelRegistry)
+  await db
+    .update(fineTunedModelRegistry)
     .set({
       lifecycle: targetLifecycle,
       promotedAt: new Date(),

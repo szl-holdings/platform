@@ -1,13 +1,21 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
-import { useColors } from "@/hooks/useColors";
-import { useSyncEngine } from "@szl-holdings/mobile-shared";
-import { OfflineQueuePanel, loadAllQueued } from "@/components/OfflineQueuePanel";
+import { Feather } from '@expo/vector-icons';
+import { useSyncEngine } from '@szl-holdings/mobile-shared';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { loadAllQueued, OfflineQueuePanel } from '@/components/OfflineQueuePanel';
+import { useColors } from '@/hooks/useColors';
 
-const ACCENT = "#c9a84c";
-const AMBER = "#f59e0b";
+const ACCENT = '#c9a84c';
+const AMBER = '#f59e0b';
 
 export function useOfflineQueueCount(): number {
   const [count, setCount] = useState(0);
@@ -55,39 +63,25 @@ export function OfflineQueueLauncherTab({ count, isOffline }: OfflineQueueLaunch
       >
         <View style={styles.tabInner}>
           <View style={styles.iconWrap}>
-            <Feather
-              name={isOffline ? "wifi-off" : "upload-cloud"}
-              size={20}
-              color={accent}
-            />
+            <Feather name={isOffline ? 'wifi-off' : 'upload-cloud'} size={20} color={accent} />
             <View style={[styles.badge, { backgroundColor: accent }]}>
-              <Text style={styles.badgeText}>{count > 99 ? "99+" : String(count)}</Text>
+              <Text style={styles.badgeText}>{count > 99 ? '99+' : String(count)}</Text>
             </View>
           </View>
-          <Text
-            style={[
-              styles.label,
-              { color: accent, fontFamily: "Inter_600SemiBold" },
-            ]}
-          >
+          <Text style={[styles.label, { color: accent, fontFamily: 'Inter_600SemiBold' }]}>
             Queue
           </Text>
         </View>
       </TouchableOpacity>
 
-      <Modal
-        visible={open}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setOpen(false)}
-      >
+      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           <Pressable
             style={[
               styles.sheet,
               {
-                backgroundColor: colors.background ?? "#070a14",
-                borderColor: colors.border ?? "#1e2433",
+                backgroundColor: colors.background ?? '#070a14',
+                borderColor: colors.border ?? '#1e2433',
                 paddingBottom: (insets.bottom || 12) + 12,
               },
             ]}
@@ -96,12 +90,8 @@ export function OfflineQueueLauncherTab({ count, isOffline }: OfflineQueueLaunch
             <View style={styles.sheetHandle} />
             <View style={styles.sheetHeader}>
               <View style={styles.sheetTitleRow}>
-                <Feather
-                  name={isOffline ? "wifi-off" : "upload-cloud"}
-                  size={16}
-                  color={accent}
-                />
-                <Text style={[styles.sheetTitle, { color: colors.foreground ?? "#e5e7eb" }]}>
+                <Feather name={isOffline ? 'wifi-off' : 'upload-cloud'} size={16} color={accent} />
+                <Text style={[styles.sheetTitle, { color: colors.foreground ?? '#e5e7eb' }]}>
                   Offline Queue
                 </Text>
               </View>
@@ -109,10 +99,10 @@ export function OfflineQueueLauncherTab({ count, isOffline }: OfflineQueueLaunch
                 onPress={() => setOpen(false)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Feather name="x" size={20} color={colors.mutedForeground ?? "#6b7280"} />
+                <Feather name="x" size={20} color={colors.mutedForeground ?? '#6b7280'} />
               </TouchableOpacity>
             </View>
-            <Text style={[styles.sheetSubtitle, { color: colors.mutedForeground ?? "#6b7280" }]}>
+            <Text style={[styles.sheetSubtitle, { color: colors.mutedForeground ?? '#6b7280' }]}>
               Actions queued while offline will sync automatically when connectivity returns.
               Discard any you no longer want submitted.
             </Text>
@@ -141,31 +131,31 @@ export function OfflineQueueLauncher() {
 const styles = StyleSheet.create({
   tab: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   tabInner: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: 3,
     paddingHorizontal: 4,
   },
   iconWrap: {
-    position: "relative",
+    position: 'relative',
   },
   badge: {
-    position: "absolute",
+    position: 'absolute',
     top: -5,
     right: -8,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
     paddingHorizontal: 3,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   badgeText: {
-    color: "#070a14",
+    color: '#070a14',
     fontSize: 9,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
   },
   label: {
     fontSize: 10,
@@ -173,8 +163,8 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'flex-end',
   },
   sheet: {
     borderTopWidth: 1,
@@ -184,30 +174,30 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 18,
     paddingHorizontal: 16,
     paddingTop: 8,
-    maxHeight: "80%",
+    maxHeight: '80%',
   },
   sheetHandle: {
-    alignSelf: "center",
+    alignSelf: 'center',
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#2a3142",
+    backgroundColor: '#2a3142',
     marginBottom: 10,
   },
   sheetHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 6,
   },
   sheetTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   sheetTitle: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 0.2,
   },
   sheetSubtitle: {

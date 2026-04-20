@@ -1,5 +1,5 @@
-import { useCallback, useRef } from "react";
-import { getDomainBaseUrl } from "../env";
+import { useCallback, useRef } from 'react';
+import { getDomainBaseUrl } from '../env';
 
 export interface EmbeddingSearchResult {
   content: string;
@@ -16,7 +16,7 @@ export interface EmbeddingSearchOptions {
 }
 
 function getApiBase(): string {
-  return getDomainBaseUrl() ?? "";
+  return getDomainBaseUrl() ?? '';
 }
 
 export function useEmbeddingSearch(options: EmbeddingSearchOptions = {}) {
@@ -28,11 +28,10 @@ export function useEmbeddingSearch(options: EmbeddingSearchOptions = {}) {
       if (!query.trim()) return [];
       try {
         const params = new URLSearchParams({ q: query, limit: String(limit) });
-        if (domain) params.set("domains", domain);
-        const res = await fetch(
-          `${apiBaseRef.current}/api/rag/search?${params.toString()}`,
-          { headers: { Accept: "application/json" } },
-        );
+        if (domain) params.set('domains', domain);
+        const res = await fetch(`${apiBaseRef.current}/api/rag/search?${params.toString()}`, {
+          headers: { Accept: 'application/json' },
+        });
         if (!res.ok) return [];
         const json = (await res.json()) as
           | { results?: EmbeddingSearchResult[]; data?: EmbeddingSearchResult[] }
@@ -46,17 +45,13 @@ export function useEmbeddingSearch(options: EmbeddingSearchOptions = {}) {
     [domain, limit],
   );
 
-  const buildContextString = useCallback(
-    (results: EmbeddingSearchResult[]): string => {
-      if (results.length === 0) return "";
-      const lines = results.map(
-        (r, i) =>
-          `[${i + 1}] ${r.source ? `(${r.source}) ` : ""}${r.content}`,
-      );
-      return `Relevant context:\n${lines.join("\n")}`;
-    },
-    [],
-  );
+  const buildContextString = useCallback((results: EmbeddingSearchResult[]): string => {
+    if (results.length === 0) return '';
+    const lines = results.map(
+      (r, i) => `[${i + 1}] ${r.source ? `(${r.source}) ` : ''}${r.content}`,
+    );
+    return `Relevant context:\n${lines.join('\n')}`;
+  }, []);
 
   return { search, buildContextString };
 }

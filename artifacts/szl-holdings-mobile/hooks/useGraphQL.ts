@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 export interface Incident {
   id: string;
@@ -19,7 +19,9 @@ export function useIncidentSubscription(options?: { active?: boolean }) {
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   return { incidents, loading, refetch: () => Promise.resolve() };

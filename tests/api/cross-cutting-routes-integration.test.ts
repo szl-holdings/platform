@@ -7,46 +7,43 @@
  * /domains/:domain/graph end-to-end.
  */
 
-import request from "supertest";
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-} from "express";
-import { vi, beforeAll, afterAll, describe, it, expect } from "vitest";
+import express, { type NextFunction, type Request, type Response } from 'express';
+import request from 'supertest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 // ── Shared mock constants ────────────────────────────────────────────────────
 const TEST_USER = {
-  id: "test-user-1",
-  email: "test-user-1@szl.test",
-  displayName: "Test User",
+  id: 'test-user-1',
+  email: 'test-user-1@szl.test',
+  displayName: 'Test User',
   isAdmin: false,
   orgs: [{ orgId: 1 }],
 };
 
 // Header used by tests to opt-in to "no credentials presented" so we can
 // exercise the 401 path even though the middleware itself is mocked.
-const NO_AUTH_HEADER = "x-test-no-auth";
+const NO_AUTH_HEADER = 'x-test-no-auth';
 // Header used by tests to override the principal's canonical role so we can
 // exercise role-based authorization (denyIfReadOnly + requireRole) paths.
-const TEST_ROLE_HEADER = "x-test-role";
+const TEST_ROLE_HEADER = 'x-test-role';
 
-const READ_ONLY_ROLES = new Set(["executive_viewer", "anonymous_visitor"]);
+const READ_ONLY_ROLES = new Set(['executive_viewer', 'anonymous_visitor']);
 
 function rolesFromReq(req: Request): string[] {
   const header = req.headers[TEST_ROLE_HEADER];
   const role = Array.isArray(header) ? header[0] : header;
-  return [role && role.length > 0 ? role : "ops"];
+  return [role && role.length > 0 ? role : 'ops'];
 }
 
-const mockAuthMiddleware = (options: { required?: boolean } = {}) =>
+const mockAuthMiddleware =
+  (options: { required?: boolean } = {}) =>
   (req: Request, res: Response, next: NextFunction) => {
-    const noAuth = req.headers[NO_AUTH_HEADER] === "1";
+    const noAuth = req.headers[NO_AUTH_HEADER] === '1';
     if (noAuth) {
       if (options.required) {
         res.status(401).json({
-          error: "Authentication required",
-          code: "UNAUTHORIZED",
+          error: 'Authentication required',
+          code: 'UNAUTHORIZED',
         });
         return;
       }
@@ -64,52 +61,54 @@ const mockAuthMiddleware = (options: { required?: boolean } = {}) =>
     next();
   };
 
-vi.mock(
-  "../../artifacts/api-server/src/middlewares/auth",
-  () => ({
-    authMiddleware: mockAuthMiddleware,
-    requireRole: (...allowed: string[]) =>
-      (req: Request, res: Response, next: NextFunction) => {
-        const user = (req as Request & { user?: { roles?: string[] } }).user;
-        if (!user) {
-          res.status(401).json({ error: "Authentication required", code: "UNAUTHORIZED" });
-          return;
-        }
-        const roles = user.roles ?? [];
-        if (roles.includes("super_admin") || roles.includes("admin")) {
-          next();
-          return;
-        }
-        if (allowed.some((r) => roles.includes(r))) {
-          next();
-          return;
-        }
-        res.status(403).json({ error: "Insufficient permissions", code: "FORBIDDEN" });
-      },
-    denyIfReadOnly: () =>
-      (req: Request, res: Response, next: NextFunction) => {
-        const user = (req as Request & { user?: { roles?: string[] } }).user;
-        if (!user) {
-          res.status(401).json({ error: "Authentication required", code: "UNAUTHORIZED" });
-          return;
-        }
-        if ((user.roles ?? []).some((r) => READ_ONLY_ROLES.has(r))) {
-          res.status(403).json({ error: "Read-only access — write operations are not permitted", code: "FORBIDDEN" });
-          return;
-        }
+vi.mock('../../artifacts/api-server/src/middlewares/auth', () => ({
+  authMiddleware: mockAuthMiddleware,
+  requireRole:
+    (...allowed: string[]) =>
+    (req: Request, res: Response, next: NextFunction) => {
+      const user = (req as Request & { user?: { roles?: string[] } }).user;
+      if (!user) {
+        res.status(401).json({ error: 'Authentication required', code: 'UNAUTHORIZED' });
+        return;
+      }
+      const roles = user.roles ?? [];
+      if (roles.includes('super_admin') || roles.includes('admin')) {
         next();
-      },
-    parseIdParam: (id: string) => {
-      const n = parseInt(id, 10);
-      if (isNaN(n)) throw Object.assign(new Error("Invalid ID"), { status: 400 });
-      return n;
+        return;
+      }
+      if (allowed.some((r) => roles.includes(r))) {
+        next();
+        return;
+      }
+      res.status(403).json({ error: 'Insufficient permissions', code: 'FORBIDDEN' });
     },
-    InvalidIdError: class InvalidIdError extends Error {
-      status = 400;
-      constructor(msg: string) { super(msg); }
-    },
-  }),
-);
+  denyIfReadOnly: () => (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as Request & { user?: { roles?: string[] } }).user;
+    if (!user) {
+      res.status(401).json({ error: 'Authentication required', code: 'UNAUTHORIZED' });
+      return;
+    }
+    if ((user.roles ?? []).some((r) => READ_ONLY_ROLES.has(r))) {
+      res.status(403).json({
+        error: 'Read-only access — write operations are not permitted',
+        code: 'FORBIDDEN',
+      });
+      return;
+    }
+    next();
+  },
+  parseIdParam: (id: string) => {
+    const n = parseInt(id, 10);
+    if (isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
+    return n;
+  },
+  InvalidIdError: class InvalidIdError extends Error {
+    status = 400;
+    constructor(msg: string) {
+      super(msg);
+    }
+  },
+}));
 
 function buildApp() {
   const app = express();
@@ -118,36 +117,36 @@ function buildApp() {
 }
 
 const KNOWN_DOMAINS = [
-  "terra",
-  "prism",
-  "vessels",
-  "aegis",
-  "lyte",
-  "imperium",
-  "carlota-jo",
-  "platform",
+  'terra',
+  'prism',
+  'vessels',
+  'aegis',
+  'lyte',
+  'imperium',
+  'carlota-jo',
+  'platform',
 ];
 
 // ── /briefings ────────────────────────────────────────────────────────────────
-describe("Integration — /briefings", () => {
+describe('Integration — /briefings', () => {
   let app: express.Express;
 
   beforeAll(async () => {
     app = buildApp();
-    const router = (await import("../../artifacts/api-server/src/routes/briefings")).default;
+    const router = (await import('../../artifacts/api-server/src/routes/briefings')).default;
     app.use(router);
   });
 
-  it("GET /briefings returns the executive brief envelope from real DB", async () => {
-    const res = await request(app).get("/briefings");
+  it('GET /briefings returns the executive brief envelope from real DB', async () => {
+    const res = await request(app).get('/briefings');
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("generatedAt");
-    expect(typeof res.body.generatedAt).toBe("string");
+    expect(res.body).toHaveProperty('generatedAt');
+    expect(typeof res.body.generatedAt).toBe('string');
     expect(new Date(res.body.generatedAt).toISOString()).toBe(res.body.generatedAt);
-    expect(typeof res.body.totalEntities).toBe("number");
-    expect(typeof res.body.totalEdges).toBe("number");
-    expect(typeof res.body.crossDomainLinks).toBe("number");
-    expect(typeof res.body.overallHealthScore).toBe("number");
+    expect(typeof res.body.totalEntities).toBe('number');
+    expect(typeof res.body.totalEdges).toBe('number');
+    expect(typeof res.body.crossDomainLinks).toBe('number');
+    expect(typeof res.body.overallHealthScore).toBe('number');
     expect(Array.isArray(res.body.domains)).toBe(true);
     expect(Array.isArray(res.body.highlights)).toBe(true);
     expect(Array.isArray(res.body.alerts)).toBe(true);
@@ -157,98 +156,98 @@ describe("Integration — /briefings", () => {
     }
   });
 
-  it("GET /briefings/terra returns the per-domain snapshot from real DB", async () => {
-    const res = await request(app).get("/briefings/terra");
+  it('GET /briefings/terra returns the per-domain snapshot from real DB', async () => {
+    const res = await request(app).get('/briefings/terra');
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ domain: "terra" });
-    expect(typeof res.body.entityCount).toBe("number");
-    expect(typeof res.body.activeCount).toBe("number");
-    expect(typeof res.body.edgeCount).toBe("number");
-    expect(typeof res.body.avgConfidence).toBe("number");
-    expect(typeof res.body.staleFraction).toBe("number");
-    expect(typeof res.body.healthScore).toBe("number");
+    expect(res.body).toMatchObject({ domain: 'terra' });
+    expect(typeof res.body.entityCount).toBe('number');
+    expect(typeof res.body.activeCount).toBe('number');
+    expect(typeof res.body.edgeCount).toBe('number');
+    expect(typeof res.body.avgConfidence).toBe('number');
+    expect(typeof res.body.staleFraction).toBe('number');
+    expect(typeof res.body.healthScore).toBe('number');
     expect(Array.isArray(res.body.topEntityTypes)).toBe(true);
-    expect(typeof res.body.summary).toBe("string");
+    expect(typeof res.body.summary).toBe('string');
   });
 
-  it("GET /briefings/:domain rejects unknown domain with 400", async () => {
-    const res = await request(app).get("/briefings/not-a-real-domain");
+  it('GET /briefings/:domain rejects unknown domain with 400', async () => {
+    const res = await request(app).get('/briefings/not-a-real-domain');
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
     expect(res.body.error).toMatch(/Unknown domain/);
   });
 
-  it("POST /briefings/generate returns a freshly-generated brief flagged forced", async () => {
-    const res = await request(app).post("/briefings/generate");
+  it('POST /briefings/generate returns a freshly-generated brief flagged forced', async () => {
+    const res = await request(app).post('/briefings/generate');
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("forced", true);
-    expect(res.body).toHaveProperty("generatedAt");
+    expect(res.body).toHaveProperty('forced', true);
+    expect(res.body).toHaveProperty('generatedAt');
     expect(Array.isArray(res.body.domains)).toBe(true);
   });
 });
 
 // ── /drift ────────────────────────────────────────────────────────────────────
-describe("Integration — /drift", () => {
+describe('Integration — /drift', () => {
   let app: express.Express;
 
   beforeAll(async () => {
     app = buildApp();
-    const router = (await import("../../artifacts/api-server/src/routes/drift")).default;
+    const router = (await import('../../artifacts/api-server/src/routes/drift')).default;
     app.use(router);
   });
 
-  it("GET /drift returns the drift summary envelope from real DB", async () => {
-    const res = await request(app).get("/drift");
+  it('GET /drift returns the drift summary envelope from real DB', async () => {
+    const res = await request(app).get('/drift');
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("measuredAt");
-    expect(typeof res.body.overallDriftScore).toBe("number");
-    expect(["healthy", "degraded", "critical"]).toContain(res.body.status);
+    expect(res.body).toHaveProperty('measuredAt');
+    expect(typeof res.body.overallDriftScore).toBe('number');
+    expect(['healthy', 'degraded', 'critical']).toContain(res.body.status);
     expect(Array.isArray(res.body.domains)).toBe(true);
     expect(Array.isArray(res.body.topAlerts)).toBe(true);
     for (const d of res.body.domains) {
-      expect(typeof d.domain).toBe("string");
-      expect(typeof d.driftScore).toBe("number");
-      expect(["healthy", "degraded", "critical"]).toContain(d.status);
+      expect(typeof d.domain).toBe('string');
+      expect(typeof d.driftScore).toBe('number');
+      expect(['healthy', 'degraded', 'critical']).toContain(d.status);
       expect(Array.isArray(d.freshnessWindows)).toBe(true);
       const windows = d.freshnessWindows.map((w: { windowHours: number }) => w.windowHours);
       expect(windows).toEqual([1, 6, 24, 72]);
     }
   });
 
-  it("GET /drift/terra returns the per-domain drift breakdown from real DB", async () => {
-    const res = await request(app).get("/drift/terra");
+  it('GET /drift/terra returns the per-domain drift breakdown from real DB', async () => {
+    const res = await request(app).get('/drift/terra');
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ domain: "terra" });
-    expect(typeof res.body.totalEntities).toBe("number");
-    expect(typeof res.body.avgConfidence).toBe("number");
-    expect(typeof res.body.confidenceDrift).toBe("number");
-    expect(typeof res.body.driftScore).toBe("number");
-    expect(["healthy", "degraded", "critical"]).toContain(res.body.status);
+    expect(res.body).toMatchObject({ domain: 'terra' });
+    expect(typeof res.body.totalEntities).toBe('number');
+    expect(typeof res.body.avgConfidence).toBe('number');
+    expect(typeof res.body.confidenceDrift).toBe('number');
+    expect(typeof res.body.driftScore).toBe('number');
+    expect(['healthy', 'degraded', 'critical']).toContain(res.body.status);
   });
 
-  it("GET /drift/:domain rejects unknown domain with 400", async () => {
-    const res = await request(app).get("/drift/not-a-real-domain");
+  it('GET /drift/:domain rejects unknown domain with 400', async () => {
+    const res = await request(app).get('/drift/not-a-real-domain');
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("GET /drift/history exposes recent snapshots (after at least one /drift call)", async () => {
-    await request(app).get("/drift");
-    const res = await request(app).get("/drift/history");
+  it('GET /drift/history exposes recent snapshots (after at least one /drift call)', async () => {
+    await request(app).get('/drift');
+    const res = await request(app).get('/drift/history');
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("snapshots");
+    expect(res.body).toHaveProperty('snapshots');
     expect(Array.isArray(res.body.snapshots)).toBe(true);
-    expect(typeof res.body.count).toBe("number");
+    expect(typeof res.body.count).toBe('number');
     expect(res.body.count).toBeGreaterThan(0);
   });
 
-  it("POST /drift/reset clears history and returns a reset envelope", async () => {
-    await request(app).get("/drift");
-    const reset = await request(app).post("/drift/reset");
+  it('POST /drift/reset clears history and returns a reset envelope', async () => {
+    await request(app).get('/drift');
+    const reset = await request(app).post('/drift/reset');
     expect(reset.status).toBe(200);
     expect(reset.body).toMatchObject({ reset: true });
 
-    const after = await request(app).get("/drift/history");
+    const after = await request(app).get('/drift/history');
     expect(after.status).toBe(200);
     expect(after.body.count).toBe(0);
     expect(after.body.snapshots).toEqual([]);
@@ -256,91 +255,81 @@ describe("Integration — /drift", () => {
 });
 
 // ── /deployments ──────────────────────────────────────────────────────────────
-describe("Integration — /deployments", () => {
+describe('Integration — /deployments', () => {
   let app: express.Express;
   const APP_ID = `it-app-${Date.now()}`;
-  const ENV = "staging";
+  const ENV = 'staging';
 
   beforeAll(async () => {
     app = buildApp();
-    const router = (await import("../../artifacts/api-server/src/routes/deployments")).default;
+    const router = (await import('../../artifacts/api-server/src/routes/deployments')).default;
     app.use(router);
   });
 
-  it("GET /deployments returns an envelope with deployments[]", async () => {
-    const res = await request(app).get("/deployments").query({ environment: ENV });
+  it('GET /deployments returns an envelope with deployments[]', async () => {
+    const res = await request(app).get('/deployments').query({ environment: ENV });
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.deployments)).toBe(true);
-    expect(res.body).toHaveProperty("environment", ENV);
-    expect(typeof res.body.count).toBe("number");
+    expect(res.body).toHaveProperty('environment', ENV);
+    expect(typeof res.body.count).toBe('number');
   });
 
-  it("POST /deployments rejects missing required fields with 400", async () => {
-    const res = await request(app)
-      .post("/deployments")
-      .send({ appId: APP_ID });
+  it('POST /deployments rejects missing required fields with 400', async () => {
+    const res = await request(app).post('/deployments').send({ appId: APP_ID });
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments registers an active deployment and returns 201", async () => {
-    const res = await request(app)
-      .post("/deployments")
-      .send({
-        appId: APP_ID,
-        appName: "Integration Test App",
-        version: "1.0.0",
-        environment: ENV,
-        commitSha: "abc1234",
-      });
+  it('POST /deployments registers an active deployment and returns 201', async () => {
+    const res = await request(app).post('/deployments').send({
+      appId: APP_ID,
+      appName: 'Integration Test App',
+      version: '1.0.0',
+      environment: ENV,
+      commitSha: 'abc1234',
+    });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({
       appId: APP_ID,
-      version: "1.0.0",
+      version: '1.0.0',
       environment: ENV,
-      status: "active",
+      status: 'active',
     });
-    expect(typeof res.body.deployedAt).toBe("string");
+    expect(typeof res.body.deployedAt).toBe('string');
   });
 
-  it("GET /deployments/:appId returns the active deployment for that app", async () => {
-    const res = await request(app)
-      .get(`/deployments/${APP_ID}`)
-      .query({ environment: ENV });
+  it('GET /deployments/:appId returns the active deployment for that app', async () => {
+    const res = await request(app).get(`/deployments/${APP_ID}`).query({ environment: ENV });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       appId: APP_ID,
-      version: "1.0.0",
-      status: "active",
+      version: '1.0.0',
+      status: 'active',
     });
   });
 
-  it("GET /deployments/:appId 404s when no active deployment exists for env", async () => {
+  it('GET /deployments/:appId 404s when no active deployment exists for env', async () => {
     const res = await request(app)
       .get(`/deployments/${APP_ID}-missing`)
       .query({ environment: ENV });
     expect(res.status).toBe(404);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments registers a second version (status update) and supersedes the first", async () => {
-    const res = await request(app)
-      .post("/deployments")
-      .send({
-        appId: APP_ID,
-        appName: "Integration Test App",
-        version: "1.1.0",
-        environment: ENV,
-      });
+  it('POST /deployments registers a second version (status update) and supersedes the first', async () => {
+    const res = await request(app).post('/deployments').send({
+      appId: APP_ID,
+      appName: 'Integration Test App',
+      version: '1.1.0',
+      environment: ENV,
+    });
     expect(res.status).toBe(201);
-    expect(res.body.version).toBe("1.1.0");
-    expect(res.body.status).toBe("active");
+    expect(res.body.version).toBe('1.1.0');
+    expect(res.body.status).toBe('active');
 
-    const active = await request(app)
-      .get(`/deployments/${APP_ID}`)
-      .query({ environment: ENV });
+    const active = await request(app).get(`/deployments/${APP_ID}`).query({ environment: ENV });
     expect(active.status).toBe(200);
-    expect(active.body.version).toBe("1.1.0");
+    expect(active.body.version).toBe('1.1.0');
 
     const history = await request(app)
       .get(`/deployments/${APP_ID}/history`)
@@ -348,187 +337,177 @@ describe("Integration — /deployments", () => {
     expect(history.status).toBe(200);
     expect(history.body.count).toBeGreaterThanOrEqual(2);
     const versionsInHistory = history.body.history.map((r: { version: string }) => r.version);
-    expect(versionsInHistory).toContain("1.0.0");
-    expect(versionsInHistory).toContain("1.1.0");
+    expect(versionsInHistory).toContain('1.0.0');
+    expect(versionsInHistory).toContain('1.1.0');
     const oldRecord = history.body.history.find(
-      (r: { version: string; status: string }) => r.version === "1.0.0",
+      (r: { version: string; status: string }) => r.version === '1.0.0',
     );
-    expect(oldRecord.status).toBe("inactive");
+    expect(oldRecord.status).toBe('inactive');
   });
 
-  it("POST /deployments/:appId/rollback rolls back to the previous version", async () => {
+  it('POST /deployments/:appId/rollback rolls back to the previous version', async () => {
     const res = await request(app)
       .post(`/deployments/${APP_ID}/rollback`)
       .send({ environment: ENV });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ rolledBack: true });
-    expect(res.body.current.version).toBe("1.0.0");
-    expect(res.body.current.status).toBe("active");
-    expect(res.body.previous.version).toBe("1.1.0");
-    expect(res.body.previous.status).toBe("rolled-back");
+    expect(res.body.current.version).toBe('1.0.0');
+    expect(res.body.current.status).toBe('active');
+    expect(res.body.previous.version).toBe('1.1.0');
+    expect(res.body.previous.status).toBe('rolled-back');
 
-    const active = await request(app)
-      .get(`/deployments/${APP_ID}`)
-      .query({ environment: ENV });
+    const active = await request(app).get(`/deployments/${APP_ID}`).query({ environment: ENV });
     expect(active.status).toBe(200);
-    expect(active.body.version).toBe("1.0.0");
+    expect(active.body.version).toBe('1.0.0');
   });
 
-  it("POST /deployments/:appId/rollback rejects when no history exists", async () => {
+  it('POST /deployments/:appId/rollback rejects when no history exists', async () => {
     const res = await request(app)
       .post(`/deployments/${APP_ID}-never-deployed/rollback`)
       .send({ environment: ENV });
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments returns 401 when the request is unauthenticated", async () => {
+  it('POST /deployments returns 401 when the request is unauthenticated', async () => {
     const res = await request(app)
-      .post("/deployments")
-      .set(NO_AUTH_HEADER, "1")
+      .post('/deployments')
+      .set(NO_AUTH_HEADER, '1')
       .send({
         appId: `${APP_ID}-unauth`,
-        appName: "Unauthed Attempt",
-        version: "9.9.9",
+        appName: 'Unauthed Attempt',
+        version: '9.9.9',
         environment: ENV,
       });
     expect(res.status).toBe(401);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments/:appId/rollback returns 401 when the request is unauthenticated", async () => {
+  it('POST /deployments/:appId/rollback returns 401 when the request is unauthenticated', async () => {
     const res = await request(app)
       .post(`/deployments/${APP_ID}/rollback`)
-      .set(NO_AUTH_HEADER, "1")
+      .set(NO_AUTH_HEADER, '1')
       .send({ environment: ENV });
     expect(res.status).toBe(401);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments returns 403 when called by a read-only role (executive_viewer)", async () => {
+  it('POST /deployments returns 403 when called by a read-only role (executive_viewer)', async () => {
     const res = await request(app)
-      .post("/deployments")
-      .set(TEST_ROLE_HEADER, "executive_viewer")
+      .post('/deployments')
+      .set(TEST_ROLE_HEADER, 'executive_viewer')
       .send({
         appId: `${APP_ID}-readonly`,
-        appName: "Read-Only Attempt",
-        version: "9.9.9",
+        appName: 'Read-Only Attempt',
+        version: '9.9.9',
         environment: ENV,
       });
     expect(res.status).toBe(403);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments returns 403 when called by an analyst (not in allowed roles)", async () => {
+  it('POST /deployments returns 403 when called by an analyst (not in allowed roles)', async () => {
     const res = await request(app)
-      .post("/deployments")
-      .set(TEST_ROLE_HEADER, "analyst")
+      .post('/deployments')
+      .set(TEST_ROLE_HEADER, 'analyst')
       .send({
         appId: `${APP_ID}-analyst`,
-        appName: "Analyst Attempt",
-        version: "9.9.9",
+        appName: 'Analyst Attempt',
+        version: '9.9.9',
         environment: ENV,
       });
     expect(res.status).toBe(403);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments/:appId/rollback returns 403 when called by a read-only role", async () => {
+  it('POST /deployments/:appId/rollback returns 403 when called by a read-only role', async () => {
     const res = await request(app)
       .post(`/deployments/${APP_ID}/rollback`)
-      .set(TEST_ROLE_HEADER, "executive_viewer")
+      .set(TEST_ROLE_HEADER, 'executive_viewer')
       .send({ environment: ENV });
     expect(res.status).toBe(403);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments/:appId/rollback returns 403 when called by analyst", async () => {
+  it('POST /deployments/:appId/rollback returns 403 when called by analyst', async () => {
     const res = await request(app)
       .post(`/deployments/${APP_ID}/rollback`)
-      .set(TEST_ROLE_HEADER, "analyst")
+      .set(TEST_ROLE_HEADER, 'analyst')
       .send({ environment: ENV });
     expect(res.status).toBe(403);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
   });
 
-  it("POST /deployments succeeds (201) for the exec role", async () => {
+  it('POST /deployments succeeds (201) for the exec role', async () => {
     const execAppId = `${APP_ID}-exec`;
-    const res = await request(app)
-      .post("/deployments")
-      .set(TEST_ROLE_HEADER, "exec")
-      .send({
-        appId: execAppId,
-        appName: "Exec Allowed App",
-        version: "1.0.0",
-        environment: ENV,
-      });
+    const res = await request(app).post('/deployments').set(TEST_ROLE_HEADER, 'exec').send({
+      appId: execAppId,
+      appName: 'Exec Allowed App',
+      version: '1.0.0',
+      environment: ENV,
+    });
     expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({ appId: execAppId, status: "active" });
+    expect(res.body).toMatchObject({ appId: execAppId, status: 'active' });
   });
 
-  it("POST /deployments succeeds (201) for the admin role", async () => {
+  it('POST /deployments succeeds (201) for the admin role', async () => {
     const adminAppId = `${APP_ID}-admin`;
-    const res = await request(app)
-      .post("/deployments")
-      .set(TEST_ROLE_HEADER, "admin")
-      .send({
-        appId: adminAppId,
-        appName: "Admin Allowed App",
-        version: "1.0.0",
-        environment: ENV,
-      });
+    const res = await request(app).post('/deployments').set(TEST_ROLE_HEADER, 'admin').send({
+      appId: adminAppId,
+      appName: 'Admin Allowed App',
+      version: '1.0.0',
+      environment: ENV,
+    });
     expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({ appId: adminAppId, status: "active" });
+    expect(res.body).toMatchObject({ appId: adminAppId, status: 'active' });
   });
 
-  it("POST /deployments/:appId/rollback succeeds (200) for an allowed role (admin)", async () => {
+  it('POST /deployments/:appId/rollback succeeds (200) for an allowed role (admin)', async () => {
     const rbAppId = `${APP_ID}-admin-rb`;
     const v1 = await request(app)
-      .post("/deployments")
-      .set(TEST_ROLE_HEADER, "admin")
-      .send({ appId: rbAppId, appName: "RB App", version: "1.0.0", environment: ENV });
+      .post('/deployments')
+      .set(TEST_ROLE_HEADER, 'admin')
+      .send({ appId: rbAppId, appName: 'RB App', version: '1.0.0', environment: ENV });
     expect(v1.status).toBe(201);
     const v2 = await request(app)
-      .post("/deployments")
-      .set(TEST_ROLE_HEADER, "admin")
-      .send({ appId: rbAppId, appName: "RB App", version: "1.1.0", environment: ENV });
+      .post('/deployments')
+      .set(TEST_ROLE_HEADER, 'admin')
+      .send({ appId: rbAppId, appName: 'RB App', version: '1.1.0', environment: ENV });
     expect(v2.status).toBe(201);
 
     const rb = await request(app)
       .post(`/deployments/${rbAppId}/rollback`)
-      .set(TEST_ROLE_HEADER, "admin")
+      .set(TEST_ROLE_HEADER, 'admin')
       .send({ environment: ENV });
     expect(rb.status).toBe(200);
     expect(rb.body).toMatchObject({ rolledBack: true });
-    expect(rb.body.current.version).toBe("1.0.0");
+    expect(rb.body.current.version).toBe('1.0.0');
   });
 
-  it("POST /deployments records the authenticated principal as deployedBy and ignores client-supplied value", async () => {
+  it('POST /deployments records the authenticated principal as deployedBy and ignores client-supplied value', async () => {
     const auditAppId = `${APP_ID}-audit`;
-    const res = await request(app)
-      .post("/deployments")
-      .send({
-        appId: auditAppId,
-        appName: "Audit Trail App",
-        version: "2.0.0",
-        environment: ENV,
-        // Client tries to spoof — server must overwrite with the real principal.
-        deployedBy: "spoofed-attacker",
-      });
+    const res = await request(app).post('/deployments').send({
+      appId: auditAppId,
+      appName: 'Audit Trail App',
+      version: '2.0.0',
+      environment: ENV,
+      // Client tries to spoof — server must overwrite with the real principal.
+      deployedBy: 'spoofed-attacker',
+    });
     expect(res.status).toBe(201);
-    expect(res.body.deployedBy).not.toBe("spoofed-attacker");
+    expect(res.body.deployedBy).not.toBe('spoofed-attacker');
     expect(res.body.deployedBy).toBe(TEST_USER.email);
   });
 
   it("enriches deployments with the deployer's user profile (name + avatar) when a matching user exists", async () => {
-    const { db, usersTable } = await import("@szl-holdings/db");
-    const { eq } = await import("drizzle-orm");
+    const { db, usersTable } = await import('@szl-holdings/db');
+    const { eq } = await import('drizzle-orm');
 
     // Seed a user that matches the test principal's email so the enrichment
     // join in /deployments can resolve a profile.
     const email = TEST_USER.email;
-    const displayName = "Enriched Test User";
-    const avatarUrl = "https://example.invalid/avatar.png";
+    const displayName = 'Enriched Test User';
+    const avatarUrl = 'https://example.invalid/avatar.png';
 
     await db.delete(usersTable).where(eq(usersTable.email, email));
     const [seeded] = await db
@@ -539,14 +518,12 @@ describe("Integration — /deployments", () => {
 
     try {
       const enrichedAppId = `${APP_ID}-enriched`;
-      const created = await request(app)
-        .post("/deployments")
-        .send({
-          appId: enrichedAppId,
-          appName: "Enriched App",
-          version: "1.0.0",
-          environment: ENV,
-        });
+      const created = await request(app).post('/deployments').send({
+        appId: enrichedAppId,
+        appName: 'Enriched App',
+        version: '1.0.0',
+        environment: ENV,
+      });
       expect(created.status).toBe(201);
       expect(created.body.deployedByUser).toMatchObject({
         id: seeded!.id,
@@ -555,11 +532,9 @@ describe("Integration — /deployments", () => {
         avatarUrl,
       });
 
-      const list = await request(app).get("/deployments").query({ environment: ENV });
+      const list = await request(app).get('/deployments').query({ environment: ENV });
       expect(list.status).toBe(200);
-      const found = list.body.deployments.find(
-        (d: { appId: string }) => d.appId === enrichedAppId,
-      );
+      const found = list.body.deployments.find((d: { appId: string }) => d.appId === enrichedAppId);
       expect(found).toBeTruthy();
       expect(found.deployedByUser?.displayName).toBe(displayName);
       expect(found.deployedByUser?.avatarUrl).toBe(avatarUrl);
@@ -573,14 +548,12 @@ describe("Integration — /deployments", () => {
       // Rollback response must also carry enriched user info on both
       // previous and current rows so the UI can label "Rolled back by X /
       // originally shipped by Y" without a second fetch.
-      const second = await request(app)
-        .post("/deployments")
-        .send({
-          appId: enrichedAppId,
-          appName: "Enriched App",
-          version: "2.0.0",
-          environment: ENV,
-        });
+      const second = await request(app).post('/deployments').send({
+        appId: enrichedAppId,
+        appName: 'Enriched App',
+        version: '2.0.0',
+        environment: ENV,
+      });
       expect(second.status).toBe(201);
 
       const rolled = await request(app)
@@ -604,15 +577,13 @@ describe("Integration — /deployments", () => {
     }
   });
 
-  it("persists registry across a simulated API server restart", async () => {
+  it('persists registry across a simulated API server restart', async () => {
     // Simulate a process restart by reloading the route module and rebuilding
     // the Express app. Drizzle's pg pool is module-scoped and would be
     // re-instantiated; the database row store must outlive that restart.
     vi.resetModules();
     const freshApp = buildApp();
-    const freshRouter = (
-      await import("../../artifacts/api-server/src/routes/deployments")
-    ).default;
+    const freshRouter = (await import('../../artifacts/api-server/src/routes/deployments')).default;
     freshApp.use(freshRouter);
 
     const active = await request(freshApp)
@@ -621,8 +592,8 @@ describe("Integration — /deployments", () => {
     expect(active.status).toBe(200);
     expect(active.body.appId).toBe(APP_ID);
     // After the rollback step, the active version is 1.0.0.
-    expect(active.body.version).toBe("1.0.0");
-    expect(active.body.status).toBe("active");
+    expect(active.body.version).toBe('1.0.0');
+    expect(active.body.status).toBe('active');
 
     const history = await request(freshApp)
       .get(`/deployments/${APP_ID}/history`)
@@ -632,30 +603,30 @@ describe("Integration — /deployments", () => {
     // re-activation of 1.0.0 — all three rows must have survived the restart.
     expect(history.body.count).toBeGreaterThanOrEqual(3);
     const versions = history.body.history.map((r: { version: string }) => r.version);
-    expect(versions).toContain("1.0.0");
-    expect(versions).toContain("1.1.0");
+    expect(versions).toContain('1.0.0');
+    expect(versions).toContain('1.1.0');
     const rolledBack = history.body.history.find(
       (r: { version: string; status: string }) =>
-        r.version === "1.1.0" && r.status === "rolled-back",
+        r.version === '1.1.0' && r.status === 'rolled-back',
     );
     expect(rolledBack).toBeTruthy();
   });
 });
 
 // ── /domains/:domain/graph ────────────────────────────────────────────────────
-describe("Integration — /domains/:domain/graph", () => {
+describe('Integration — /domains/:domain/graph', () => {
   let app: express.Express;
 
   beforeAll(async () => {
     app = buildApp();
-    const router = (await import("../../artifacts/api-server/src/routes/domains")).default;
+    const router = (await import('../../artifacts/api-server/src/routes/domains')).default;
     app.use(router);
   });
 
-  it("GET /domains/terra/graph returns the graph projection envelope from real DB", async () => {
-    const res = await request(app).get("/domains/terra/graph");
+  it('GET /domains/terra/graph returns the graph projection envelope from real DB', async () => {
+    const res = await request(app).get('/domains/terra/graph');
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ domain: "terra" });
+    expect(res.body).toMatchObject({ domain: 'terra' });
     expect(Array.isArray(res.body.nodes)).toBe(true);
     expect(Array.isArray(res.body.edges)).toBe(true);
     expect(res.body.stats).toMatchObject({
@@ -669,22 +640,18 @@ describe("Integration — /domains/:domain/graph", () => {
     );
   });
 
-  it("GET /domains/terra/graph respects limit and offset query params", async () => {
-    const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ limit: 5, offset: 0 });
+  it('GET /domains/terra/graph respects limit and offset query params', async () => {
+    const res = await request(app).get('/domains/terra/graph').query({ limit: 5, offset: 0 });
     expect(res.status).toBe(200);
     expect(res.body.nodes.length).toBeLessThanOrEqual(5);
   });
 
-  it("GET /domains/terra/graph paginates: page1 + page2 cover unique nodes and stats.nodeCount stays the total", async () => {
+  it('GET /domains/terra/graph paginates: page1 + page2 cover unique nodes and stats.nodeCount stays the total', async () => {
     // Pulls two consecutive pages of 1 node each and asserts:
     //  1. The two pages don't return the same node id (offset advanced)
     //  2. stats.nodeCount is the *total* (count(*)), unaffected by limit/offset
     //     so the client can compute "loaded vs. total" from it.
-    const page1 = await request(app)
-      .get("/domains/terra/graph")
-      .query({ limit: 1, offset: 0 });
+    const page1 = await request(app).get('/domains/terra/graph').query({ limit: 1, offset: 0 });
     expect(page1.status).toBe(200);
     if (page1.body.stats.nodeCount < 2) {
       // Not enough data to exercise pagination on this fixture — skip the
@@ -692,9 +659,7 @@ describe("Integration — /domains/:domain/graph", () => {
       expect(page1.body.nodes.length).toBeLessThanOrEqual(1);
       return;
     }
-    const page2 = await request(app)
-      .get("/domains/terra/graph")
-      .query({ limit: 1, offset: 1 });
+    const page2 = await request(app).get('/domains/terra/graph').query({ limit: 1, offset: 1 });
     expect(page2.status).toBe(200);
     expect(page1.body.nodes.length).toBe(1);
     expect(page2.body.nodes.length).toBe(1);
@@ -705,55 +670,51 @@ describe("Integration — /domains/:domain/graph", () => {
     expect(page1.body.stats.nodeCount).toBeGreaterThanOrEqual(2);
   });
 
-  it("GET /domains/terra/graph rejects out-of-range limit with 400", async () => {
-    const tooBig = await request(app).get("/domains/terra/graph").query({ limit: 9999 });
+  it('GET /domains/terra/graph rejects out-of-range limit with 400', async () => {
+    const tooBig = await request(app).get('/domains/terra/graph').query({ limit: 9999 });
     expect(tooBig.status).toBe(400);
-    expect(tooBig.body).toHaveProperty("error");
+    expect(tooBig.body).toHaveProperty('error');
 
-    const negativeOffset = await request(app)
-      .get("/domains/terra/graph")
-      .query({ offset: -1 });
+    const negativeOffset = await request(app).get('/domains/terra/graph').query({ offset: -1 });
     expect(negativeOffset.status).toBe(400);
   });
 
-  it("GET /domains/terra/graph?includeCross=false hides cross-domain edges", async () => {
-    const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ includeCross: "false" });
+  it('GET /domains/terra/graph?includeCross=false hides cross-domain edges', async () => {
+    const res = await request(app).get('/domains/terra/graph').query({ includeCross: 'false' });
     expect(res.status).toBe(200);
     expect(res.body.stats.crossDomainEdgeCount).toBe(0);
   });
 
-  it("GET /domains/terra/graph returns nodes that all belong to the requested domain", async () => {
-    const res = await request(app).get("/domains/terra/graph");
+  it('GET /domains/terra/graph returns nodes that all belong to the requested domain', async () => {
+    const res = await request(app).get('/domains/terra/graph');
     expect(res.status).toBe(200);
     for (const node of res.body.nodes) {
       // Domain isn't projected onto the response shape, but the node ids are
       // sourced from the domain-filtered query, so an empty/non-throwing
       // response is the correctness guarantee here.
-      expect(typeof node.id).toBe("string");
-      expect(typeof node.entityType).toBe("string");
+      expect(typeof node.id).toBe('string');
+      expect(typeof node.entityType).toBe('string');
     }
   });
 
-  it("GET /domains/aegis/graph (explicit per-domain handler) returns the same envelope shape", async () => {
-    const res = await request(app).get("/domains/aegis/graph");
+  it('GET /domains/aegis/graph (explicit per-domain handler) returns the same envelope shape', async () => {
+    const res = await request(app).get('/domains/aegis/graph');
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ domain: "aegis" });
+    expect(res.body).toMatchObject({ domain: 'aegis' });
     expect(Array.isArray(res.body.nodes)).toBe(true);
     expect(Array.isArray(res.body.edges)).toBe(true);
   });
 
-  it("GET /domains/:domain/graph (generic fallback) accepts other known domains", async () => {
-    const res = await request(app).get("/domains/imperium/graph");
+  it('GET /domains/:domain/graph (generic fallback) accepts other known domains', async () => {
+    const res = await request(app).get('/domains/imperium/graph');
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ domain: "imperium" });
+    expect(res.body).toMatchObject({ domain: 'imperium' });
   });
 
-  it("GET /domains/:domain/graph rejects unknown domain with 400", async () => {
-    const res = await request(app).get("/domains/not-a-real-domain/graph");
+  it('GET /domains/:domain/graph rejects unknown domain with 400', async () => {
+    const res = await request(app).get('/domains/not-a-real-domain/graph');
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
+    expect(res.body).toHaveProperty('error');
     expect(res.body.error).toMatch(/Unknown domain/);
   });
 });
@@ -801,18 +762,18 @@ describe("Integration — /domains/:domain/graph", () => {
 //     T1 -> T3    terra internal, edge.active=false
 //                 (route does NOT filter on edge.active, so it must
 //                  still appear in the count.)
-describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)", () => {
+describe('Integration — /domains/:domain/graph (multi-domain seeded fixture)', () => {
   let app: express.Express;
   const RUN_TAG = `it-x-domain-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
   const FIXTURE_ENTITY_TYPE = `fixture_${RUN_TAG}`;
   const PROVENANCE_ID = `task-1094:${RUN_TAG}`;
 
   const seeded: {
-    terra: string[];        // active terra nodes [T1, T2, T3]
+    terra: string[]; // active terra nodes [T1, T2, T3]
     terraInactive: string[]; // [T_INACTIVE]
-    vessels: string[];       // [V1, V2]
-    aegis: string[];         // [A1, A2]
-    carlotaJo: string[];     // [C1]
+    vessels: string[]; // [V1, V2]
+    aegis: string[]; // [A1, A2]
+    carlotaJo: string[]; // [C1]
     edgeIds: string[];
   } = {
     terra: [],
@@ -825,23 +786,69 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
 
   beforeAll(async () => {
     app = buildApp();
-    const router = (await import("../../artifacts/api-server/src/routes/domains")).default;
+    const router = (await import('../../artifacts/api-server/src/routes/domains')).default;
     app.use(router);
 
-    const { db, cstNodes, cstEdges } = await import("@szl-holdings/db");
+    const { db, cstNodes, cstEdges } = await import('@szl-holdings/db');
 
     const insertedNodes = await db
       .insert(cstNodes)
       .values([
-        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T1`,         provenanceSourceId: PROVENANCE_ID },
-        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T2`,         provenanceSourceId: PROVENANCE_ID },
-        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T3`,         provenanceSourceId: PROVENANCE_ID },
-        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T_INACTIVE`, provenanceSourceId: PROVENANCE_ID, isActive: false },
-        { domain: "vessels",    entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-V1`,         provenanceSourceId: PROVENANCE_ID },
-        { domain: "vessels",    entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-V2`,         provenanceSourceId: PROVENANCE_ID },
-        { domain: "aegis",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-A1`,         provenanceSourceId: PROVENANCE_ID },
-        { domain: "aegis",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-A2`,         provenanceSourceId: PROVENANCE_ID },
-        { domain: "carlota-jo", entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-C1`,         provenanceSourceId: PROVENANCE_ID },
+        {
+          domain: 'terra',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-T1`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
+        {
+          domain: 'terra',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-T2`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
+        {
+          domain: 'terra',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-T3`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
+        {
+          domain: 'terra',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-T_INACTIVE`,
+          provenanceSourceId: PROVENANCE_ID,
+          isActive: false,
+        },
+        {
+          domain: 'vessels',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-V1`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
+        {
+          domain: 'vessels',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-V2`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
+        {
+          domain: 'aegis',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-A1`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
+        {
+          domain: 'aegis',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-A2`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
+        {
+          domain: 'carlota-jo',
+          entityType: FIXTURE_ENTITY_TYPE,
+          name: `${RUN_TAG}-C1`,
+          provenanceSourceId: PROVENANCE_ID,
+        },
       ])
       .returning({ id: cstNodes.id, name: cstNodes.name, domain: cstNodes.domain });
 
@@ -865,23 +872,99 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     const insertedEdges = await db
       .insert(cstEdges)
       .values([
-        { fromNodeId: T1, toNodeId: T2,         relationshipType: `${RUN_TAG}_t_internal_a`,   sourceId: PROVENANCE_ID },
-        { fromNodeId: T2, toNodeId: T3,         relationshipType: `${RUN_TAG}_t_internal_b`,   sourceId: PROVENANCE_ID },
-        { fromNodeId: T1, toNodeId: V1,         relationshipType: `${RUN_TAG}_t_to_v`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: V2, toNodeId: T3,         relationshipType: `${RUN_TAG}_v_to_t`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: V1, toNodeId: V2,         relationshipType: `${RUN_TAG}_v_internal`,     sourceId: PROVENANCE_ID },
-        { fromNodeId: A1, toNodeId: T1,         relationshipType: `${RUN_TAG}_a_to_t`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: T2, toNodeId: A2,         relationshipType: `${RUN_TAG}_t_to_a`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: A1, toNodeId: A2,         relationshipType: `${RUN_TAG}_a_internal`,     sourceId: PROVENANCE_ID },
-        { fromNodeId: V1, toNodeId: A1,         relationshipType: `${RUN_TAG}_v_to_a`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: A2, toNodeId: V2,         relationshipType: `${RUN_TAG}_a_to_v`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: C1, toNodeId: T3,         relationshipType: `${RUN_TAG}_c_to_t`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: A1, toNodeId: C1,         relationshipType: `${RUN_TAG}_a_to_c`,         sourceId: PROVENANCE_ID },
-        { fromNodeId: T1, toNodeId: T_INACTIVE, relationshipType: `${RUN_TAG}_t_to_inactive`,  sourceId: PROVENANCE_ID },
-        { fromNodeId: A2, toNodeId: T_INACTIVE, relationshipType: `${RUN_TAG}_a_to_inactive`,  sourceId: PROVENANCE_ID },
+        {
+          fromNodeId: T1,
+          toNodeId: T2,
+          relationshipType: `${RUN_TAG}_t_internal_a`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: T2,
+          toNodeId: T3,
+          relationshipType: `${RUN_TAG}_t_internal_b`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: T1,
+          toNodeId: V1,
+          relationshipType: `${RUN_TAG}_t_to_v`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: V2,
+          toNodeId: T3,
+          relationshipType: `${RUN_TAG}_v_to_t`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: V1,
+          toNodeId: V2,
+          relationshipType: `${RUN_TAG}_v_internal`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: A1,
+          toNodeId: T1,
+          relationshipType: `${RUN_TAG}_a_to_t`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: T2,
+          toNodeId: A2,
+          relationshipType: `${RUN_TAG}_t_to_a`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: A1,
+          toNodeId: A2,
+          relationshipType: `${RUN_TAG}_a_internal`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: V1,
+          toNodeId: A1,
+          relationshipType: `${RUN_TAG}_v_to_a`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: A2,
+          toNodeId: V2,
+          relationshipType: `${RUN_TAG}_a_to_v`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: C1,
+          toNodeId: T3,
+          relationshipType: `${RUN_TAG}_c_to_t`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: A1,
+          toNodeId: C1,
+          relationshipType: `${RUN_TAG}_a_to_c`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: T1,
+          toNodeId: T_INACTIVE,
+          relationshipType: `${RUN_TAG}_t_to_inactive`,
+          sourceId: PROVENANCE_ID,
+        },
+        {
+          fromNodeId: A2,
+          toNodeId: T_INACTIVE,
+          relationshipType: `${RUN_TAG}_a_to_inactive`,
+          sourceId: PROVENANCE_ID,
+        },
         // Inactive edge (active=false). The route does NOT filter on
         // edge.active, so it must still be counted.
-        { fromNodeId: T1, toNodeId: T3,         relationshipType: `${RUN_TAG}_t_internal_inactive`, sourceId: PROVENANCE_ID, active: false },
+        {
+          fromNodeId: T1,
+          toNodeId: T3,
+          relationshipType: `${RUN_TAG}_t_internal_inactive`,
+          sourceId: PROVENANCE_ID,
+          active: false,
+        },
       ])
       .returning({ id: cstEdges.id });
 
@@ -889,8 +972,8 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   afterAll(async () => {
-    const { db, cstNodes, cstEdges } = await import("@szl-holdings/db");
-    const { inArray } = await import("drizzle-orm");
+    const { db, cstNodes, cstEdges } = await import('@szl-holdings/db');
+    const { inArray } = await import('drizzle-orm');
     if (seeded.edgeIds.length > 0) {
       await db.delete(cstEdges).where(inArray(cstEdges.id, seeded.edgeIds));
     }
@@ -907,12 +990,12 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── terra (explicit per-domain handler) ───────────────────────────────────
-  it("terra graph (isActive=true) reports 3 nodes, 9 edges, 6 cross-domain, 3 internal", async () => {
+  it('terra graph (isActive=true) reports 3 nodes, 9 edges, 6 cross-domain, 3 internal', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
+      .get('/domains/terra/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true' });
     expect(res.status).toBe(200);
-    expect(res.body.domain).toBe("terra");
+    expect(res.body.domain).toBe('terra');
 
     const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
     expect(returnedIds).toEqual([...seeded.terra].sort());
@@ -936,12 +1019,12 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── vessels (explicit per-domain handler) ─────────────────────────────────
-  it("vessels graph (isActive=true) reports 2 nodes, 5 edges, 4 cross-domain, 1 internal", async () => {
+  it('vessels graph (isActive=true) reports 2 nodes, 5 edges, 4 cross-domain, 1 internal', async () => {
     const res = await request(app)
-      .get("/domains/vessels/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
+      .get('/domains/vessels/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true' });
     expect(res.status).toBe(200);
-    expect(res.body.domain).toBe("vessels");
+    expect(res.body.domain).toBe('vessels');
 
     const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
     expect(returnedIds).toEqual([...seeded.vessels].sort());
@@ -956,12 +1039,12 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── aegis (explicit per-domain handler) ───────────────────────────────────
-  it("aegis graph (isActive=true) reports 2 nodes, 7 edges, 6 cross-domain, 1 internal", async () => {
+  it('aegis graph (isActive=true) reports 2 nodes, 7 edges, 6 cross-domain, 1 internal', async () => {
     const res = await request(app)
-      .get("/domains/aegis/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
+      .get('/domains/aegis/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true' });
     expect(res.status).toBe(200);
-    expect(res.body.domain).toBe("aegis");
+    expect(res.body.domain).toBe('aegis');
 
     const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
     expect(returnedIds).toEqual([...seeded.aegis].sort());
@@ -976,12 +1059,12 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── carlota-jo (generic fallback handler) ─────────────────────────────────
-  it("carlota-jo graph via generic fallback reports 1 node, 2 edges, 2 cross-domain, 0 internal", async () => {
+  it('carlota-jo graph via generic fallback reports 1 node, 2 edges, 2 cross-domain, 0 internal', async () => {
     const res = await request(app)
-      .get("/domains/carlota-jo/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
+      .get('/domains/carlota-jo/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true' });
     expect(res.status).toBe(200);
-    expect(res.body.domain).toBe("carlota-jo");
+    expect(res.body.domain).toBe('carlota-jo');
 
     const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
     expect(returnedIds).toEqual([...seeded.carlotaJo].sort());
@@ -995,12 +1078,12 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── inactive node coverage ────────────────────────────────────────────────
-  it("terra graph with isActive=false returns ONLY inactive nodes and their edges", async () => {
+  it('terra graph with isActive=false returns ONLY inactive nodes and their edges', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "false" });
+      .get('/domains/terra/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'false' });
     expect(res.status).toBe(200);
-    expect(res.body.domain).toBe("terra");
+    expect(res.body.domain).toBe('terra');
 
     const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
     expect(returnedIds).toEqual([...seeded.terraInactive].sort());
@@ -1014,12 +1097,12 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     expect(res.body.stats.internalEdgeCount).toBe(0);
   });
 
-  it("terra graph defaults to active-only (matches isActive=true)", async () => {
+  it('terra graph defaults to active-only (matches isActive=true)', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
+      .get('/domains/terra/graph')
       .query({ entityType: FIXTURE_ENTITY_TYPE });
     expect(res.status).toBe(200);
-    expect(res.body.domain).toBe("terra");
+    expect(res.body.domain).toBe('terra');
 
     // Default behavior should match isActive=true: only the 3 active terra nodes
     const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
@@ -1030,12 +1113,12 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     expect(res.body.stats.internalEdgeCount).toBe(3);
   });
 
-  it("terra graph with isActive=all opts out of the filter and includes BOTH active and inactive terra nodes", async () => {
+  it('terra graph with isActive=all opts out of the filter and includes BOTH active and inactive terra nodes', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "all" });
+      .get('/domains/terra/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'all' });
     expect(res.status).toBe(200);
-    expect(res.body.domain).toBe("terra");
+    expect(res.body.domain).toBe('terra');
 
     const expected = [...seeded.terra, ...seeded.terraInactive].sort();
     const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
@@ -1051,10 +1134,10 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── includeCross=false ────────────────────────────────────────────────────
-  it("includeCross=false on terra graph drops both inbound and outbound cross-domain edges", async () => {
+  it('includeCross=false on terra graph drops both inbound and outbound cross-domain edges', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", includeCross: "false" });
+      .get('/domains/terra/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true', includeCross: 'false' });
     expect(res.status).toBe(200);
     expect(res.body.stats.nodeCount).toBe(3);
     expect(res.body.stats.crossDomainEdgeCount).toBe(0);
@@ -1063,10 +1146,10 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     expect(res.body.stats.internalEdgeCount).toBe(3);
   });
 
-  it("includeCross=false on aegis graph leaves only the single internal edge", async () => {
+  it('includeCross=false on aegis graph leaves only the single internal edge', async () => {
     const res = await request(app)
-      .get("/domains/aegis/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", includeCross: "false" });
+      .get('/domains/aegis/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true', includeCross: 'false' });
     expect(res.status).toBe(200);
     expect(res.body.stats.nodeCount).toBe(2);
     expect(res.body.stats.crossDomainEdgeCount).toBe(0);
@@ -1075,10 +1158,10 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── activeEdgesOnly ───────────────────────────────────────────────────────
-  it("activeEdgesOnly=true on terra graph excludes the inactive T1->T3 edge and tightens internal count", async () => {
+  it('activeEdgesOnly=true on terra graph excludes the inactive T1->T3 edge and tightens internal count', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", activeEdgesOnly: "true" });
+      .get('/domains/terra/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true', activeEdgesOnly: 'true' });
     expect(res.status).toBe(200);
     expect(res.body.stats.nodeCount).toBe(3);
 
@@ -1091,15 +1174,13 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     expect(edges.every((e) => e.active === true)).toBe(true);
   });
 
-  it("activeEdgesOnly=true with includeCross=false on terra graph drops the inactive internal edge too", async () => {
-    const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({
-        entityType: FIXTURE_ENTITY_TYPE,
-        isActive: "true",
-        includeCross: "false",
-        activeEdgesOnly: "true",
-      });
+  it('activeEdgesOnly=true with includeCross=false on terra graph drops the inactive internal edge too', async () => {
+    const res = await request(app).get('/domains/terra/graph').query({
+      entityType: FIXTURE_ENTITY_TYPE,
+      isActive: 'true',
+      includeCross: 'false',
+      activeEdgesOnly: 'true',
+    });
     expect(res.status).toBe(200);
     expect(res.body.stats.nodeCount).toBe(3);
     expect(res.body.stats.crossDomainEdgeCount).toBe(0);
@@ -1111,10 +1192,10 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     expect(edges.every((e) => e.active === true)).toBe(true);
   });
 
-  it("activeEdgesOnly=false (default) on terra graph still includes the inactive edge", async () => {
+  it('activeEdgesOnly=false (default) on terra graph still includes the inactive edge', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", activeEdgesOnly: "false" });
+      .get('/domains/terra/graph')
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: 'true', activeEdgesOnly: 'false' });
     expect(res.status).toBe(200);
     expect(res.body.stats.edgeCount).toBe(9);
     const edges = res.body.edges as Array<{ id: string; active: boolean }>;
@@ -1122,9 +1203,9 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
   });
 
   // ── domain isolation ──────────────────────────────────────────────────────
-  it("returned terra nodes never leak in vessels/aegis/carlota-jo nodes", async () => {
+  it('returned terra nodes never leak in vessels/aegis/carlota-jo nodes', async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
+      .get('/domains/terra/graph')
       .query({ entityType: FIXTURE_ENTITY_TYPE });
     expect(res.status).toBe(200);
     const foreign = new Set([...seeded.vessels, ...seeded.aegis, ...seeded.carlotaJo]);
@@ -1137,7 +1218,7 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
 // ── Teardown ─────────────────────────────────────────────────────────────────
 afterAll(async () => {
   try {
-    const { pool } = await import("@szl-holdings/db");
+    const { pool } = await import('@szl-holdings/db');
     await pool.end();
   } catch {
     // pool may already be closed by another test file

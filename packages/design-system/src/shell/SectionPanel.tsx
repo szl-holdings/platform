@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface SectionPanelProps {
   title?: string;
@@ -21,13 +21,13 @@ export function SectionPanel({
 }: SectionPanelProps) {
   return (
     <section
-      className={cn("rounded-lg border", className)}
+      className={cn('rounded-lg border', className)}
       style={{ background: color.bg.surface, borderColor: color.border.subtle }}
     >
       {(title || actions) && (
         <div
           className="flex items-center justify-between gap-4 px-4 border-b"
-          style={{ height: "44px", borderColor: color.border.subtle }}
+          style={{ height: '44px', borderColor: color.border.subtle }}
         >
           <div className="flex flex-col">
             {title && (
@@ -36,13 +36,13 @@ export function SectionPanel({
               </span>
             )}
             {subtitle && (
-              <span style={{ fontSize: "11px", color: color.text.muted }}>{subtitle}</span>
+              <span style={{ fontSize: '11px', color: color.text.muted }}>{subtitle}</span>
             )}
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className={noPadding ? "" : "p-4"}>{children}</div>
+      <div className={noPadding ? '' : 'p-4'}>{children}</div>
     </section>
   );
 }

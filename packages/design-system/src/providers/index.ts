@@ -1,1 +1,1 @@
-export * from "./DesignSystemProvider.js";
+export * from './DesignSystemProvider.js';

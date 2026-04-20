@@ -1,14 +1,14 @@
-import * as Sentry from "@sentry/react";
+import * as Sentry from '@sentry/react';
 
-const SENTRY_INIT_KEY = "__szl_sentry_initialized";
+const SENTRY_INIT_KEY = '__szl_sentry_initialized';
 
 function isSentryInitialized(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   return !!(window as unknown as Record<string, unknown>)[SENTRY_INIT_KEY];
 }
 
 function markSentryInitialized(): void {
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     (window as unknown as Record<string, unknown>)[SENTRY_INIT_KEY] = true;
   }
 }
@@ -25,21 +25,21 @@ interface SentryConfig {
 }
 
 export function initSentry(config: SentryConfig) {
-  if (isSentryInitialized() || typeof window === "undefined") return;
+  if (isSentryInitialized() || typeof window === 'undefined') return;
   markSentryInitialized();
 
   const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
   const dsn = config.dsn || env.VITE_SENTRY_DSN;
   if (!dsn) {
-    console.debug("[Sentry] DSN not configured — error tracking disabled.");
+    console.debug('[Sentry] DSN not configured — error tracking disabled.');
     setupGlobalHandlers(config.appSlug);
     return;
   }
 
   Sentry.init({
     dsn,
-    environment: config.environment || env.MODE || "development",
-    release: config.release || `${config.appSlug}@${env.VITE_APP_VERSION || "0.0.0"}`,
+    environment: config.environment || env.MODE || 'development',
+    release: config.release || `${config.appSlug}@${env.VITE_APP_VERSION || '0.0.0'}`,
     sampleRate: config.sampleRate ?? 1.0,
     tracesSampleRate: config.tracesSampleRate ?? 0.2,
     replaysSessionSampleRate: config.replaysSessionSampleRate ?? 0.1,
@@ -50,27 +50,25 @@ export function initSentry(config: SentryConfig) {
     ],
     beforeSend(event) {
       if (env.DEV) {
-        console.debug("[Sentry] Would send event:", event.event_id);
+        console.debug('[Sentry] Would send event:', event.event_id);
       }
       return event;
     },
   });
 
-  Sentry.setTag("app", config.appSlug);
+  Sentry.setTag('app', config.appSlug);
   setupGlobalHandlers(config.appSlug);
 }
 
 function setupGlobalHandlers(appSlug: string) {
-  window.addEventListener("error", (event) => {
+  window.addEventListener('error', (event) => {
     const error = event.error || new Error(event.message);
-    reportError(error, { source: "global_error_handler", app: appSlug });
+    reportError(error, { source: 'global_error_handler', app: appSlug });
   });
 
-  window.addEventListener("unhandledrejection", (event) => {
-    const reason = event.reason instanceof Error
-      ? event.reason
-      : new Error(String(event.reason));
-    reportError(reason, { source: "unhandled_rejection", app: appSlug });
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+    reportError(reason, { source: 'unhandled_rejection', app: appSlug });
   });
 }
 
@@ -78,7 +76,7 @@ export function reportError(error: Error, context?: Record<string, string>) {
   if (isSentryInitialized() && Sentry.isInitialized()) {
     Sentry.captureException(error, { ...(context !== undefined ? { tags: context } : {}) });
   }
-  console.error("[ErrorTracking]", error.message, context);
+  console.error('[ErrorTracking]', error.message, context);
 }
 
 export function setUser(user: { id: string; email?: string; username?: string }) {
@@ -95,7 +93,12 @@ export function clearUser() {
 
 export function addBreadcrumb(message: string, category?: string, data?: Record<string, unknown>) {
   if (Sentry.isInitialized()) {
-    Sentry.addBreadcrumb({ message, ...(category !== undefined ? { category } : {}), ...(data !== undefined ? { data } : {}), level: "info" });
+    Sentry.addBreadcrumb({
+      message,
+      ...(category !== undefined ? { category } : {}),
+      ...(data !== undefined ? { data } : {}),
+      level: 'info',
+    });
   }
 }
 

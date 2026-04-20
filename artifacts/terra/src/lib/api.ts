@@ -1,4 +1,4 @@
-import { apiFetch, graphqlRequest } from "@szl-holdings/shared-ui/api-fetch";
+import { apiFetch, graphqlRequest } from '@szl-holdings/shared-ui/api-fetch';
 
 export async function gqlFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
   return graphqlRequest<T>(query, variables);
@@ -66,7 +66,7 @@ export interface TerraExchange {
   deferredGain: number;
   qi: string;
   qiContact: string;
-  status: "identification" | "exchange" | "completed" | "failed";
+  status: 'identification' | 'exchange' | 'completed' | 'failed';
   identificationDeadline: string;
   exchangeDeadline: string;
   identifiedProperties: Array<Record<string, unknown>>;
@@ -88,10 +88,10 @@ export interface TerraTaxAppeal {
   annualTax: number;
   potentialSavings: number;
   appealDeadline: string;
-  appealStatus: "eligible" | "filed" | "hearing" | "won" | "lost" | "not-eligible";
+  appealStatus: 'eligible' | 'filed' | 'hearing' | 'won' | 'lost' | 'not-eligible';
   juris: string;
   comparables: Array<Record<string, unknown>>;
-  appealStrength: "strong" | "moderate" | "weak";
+  appealStrength: 'strong' | 'moderate' | 'weak';
   notes: string;
   isDemo: boolean;
 }
@@ -117,7 +117,7 @@ export interface TerraConstructionProject {
   startDate: string;
   projectedCompletion: string;
   revisedCompletion?: string;
-  status: "on-track" | "behind" | "at-risk" | "complete";
+  status: 'on-track' | 'behind' | 'at-risk' | 'complete';
   gc: string;
   architect: string;
   milestones: Array<Record<string, unknown>>;
@@ -129,14 +129,14 @@ export interface TerraConstructionProject {
 export interface TerraTenantApplication {
   id: string;
   name: string;
-  type: "individual" | "entity";
+  type: 'individual' | 'entity';
   targetUnit: string;
   proposedRent: number;
   leaseTermMonths: number;
   submittedDate: string;
-  status: "pending" | "approved" | "conditional" | "declined";
+  status: 'pending' | 'approved' | 'conditional' | 'declined';
   overallScore: number;
-  recommendation: "approve" | "conditional" | "decline";
+  recommendation: 'approve' | 'conditional' | 'decline';
   creditScore: number;
   annualIncome: number;
   incomeVerified: boolean;
@@ -377,7 +377,7 @@ export interface PortfolioVarianceRecord {
   year: number;
   type: string;
   requested: string;
-  result: "approved" | "denied" | "withdrawn";
+  result: 'approved' | 'denied' | 'withdrawn';
   conditions: string;
 }
 
@@ -402,7 +402,7 @@ export interface PortfolioMicroMarket {
   id: string;
   name: string;
   borough: string;
-  trajectory: "accelerating" | "gentrifying" | "stable" | "declining" | "distressed";
+  trajectory: 'accelerating' | 'gentrifying' | 'stable' | 'declining' | 'distressed';
   momentumScore: number;
   priceChangePct: number;
   permitActivity: number;
@@ -418,7 +418,7 @@ export interface PortfolioMicroMarket {
 
 export interface PortfolioMotivationFactor {
   factor: string;
-  impact: "positive" | "negative" | "neutral";
+  impact: 'positive' | 'negative' | 'neutral';
   weight: number;
   description: string;
 }
@@ -428,14 +428,14 @@ export interface PortfolioSellerProfile {
   address: string;
   neighborhood: string;
   ownerName: string;
-  ownerType: "individual" | "LLC" | "estate" | "institutional";
+  ownerType: 'individual' | 'LLC' | 'estate' | 'institutional';
   debtLoad: number;
   estimatedEquity: number;
   daysInDistress: number;
   priorOffers: number;
   listingExpiry: string | null;
   acceptanceScore: number;
-  acceptanceCategory: "very-likely" | "likely" | "possible" | "unlikely";
+  acceptanceCategory: 'very-likely' | 'likely' | 'possible' | 'unlikely';
   suggestedDiscount: number;
   factors: PortfolioMotivationFactor[];
   aiInsight: string;
@@ -484,112 +484,225 @@ export interface PortfolioSpatialProperty {
 
 export const api = {
   marketIntelligence: (market?: string) =>
-    apiFetch<any>(`/terra/market-intelligence${market ? `?market=${encodeURIComponent(market)}` : ""}`),
+    apiFetch<any>(
+      `/terra/market-intelligence${market ? `?market=${encodeURIComponent(market)}` : ''}`,
+    ),
   reitFilings: (type?: string) =>
-    apiFetch<any>(`/terra/reit-filings${type ? `?type=${encodeURIComponent(type)}` : ""}`),
+    apiFetch<any>(`/terra/reit-filings${type ? `?type=${encodeURIComponent(type)}` : ''}`),
   demographics: (market?: string) =>
-    apiFetch<any>(`/terra/demographics${market ? `?market=${encodeURIComponent(market)}` : ""}`),
+    apiFetch<any>(`/terra/demographics${market ? `?market=${encodeURIComponent(market)}` : ''}`),
   propertyRisk: (propertyId?: string) =>
-    apiFetch<any>(`/terra/property-risk${propertyId ? `?propertyId=${propertyId}` : ""}`),
-  employmentOutlook: () => apiFetch<any>("/terra/employment-outlook"),
-  sectorPerformance: () => apiFetch<any>("/terra/sector-performance"),
+    apiFetch<any>(`/terra/property-risk${propertyId ? `?propertyId=${propertyId}` : ''}`),
+  employmentOutlook: () => apiFetch<any>('/terra/employment-outlook'),
+  sectorPerformance: () => apiFetch<any>('/terra/sector-performance'),
   live: {
     censusHousing: (msa?: string) =>
-      apiFetch<any>(`/terra/live/census-housing${msa ? `?msa=${msa}` : ""}`),
-    hudFairMarketRents: () => apiFetch<any>("/terra/live/hud-fair-market-rents"),
-    mortgageRates: () => apiFetch<any>("/terra/live/mortgage-rates"),
-    blsConstruction: () => apiFetch<any>("/terra/live/bls-construction"),
+      apiFetch<any>(`/terra/live/census-housing${msa ? `?msa=${msa}` : ''}`),
+    hudFairMarketRents: () => apiFetch<any>('/terra/live/hud-fair-market-rents'),
+    mortgageRates: () => apiFetch<any>('/terra/live/mortgage-rates'),
+    blsConstruction: () => apiFetch<any>('/terra/live/bls-construction'),
     femaNri: (state?: string) =>
-      apiFetch<any>(`/terra/live/fema-nri${state ? `?state=${state}` : ""}`),
+      apiFetch<any>(`/terra/live/fema-nri${state ? `?state=${state}` : ''}`),
   },
   leases: {
-    list: () => apiFetch<{ leases: TerraLease[]; dataMode: string }>("/terra/leases"),
-    create: (data: Omit<TerraLease, "id" | "extractedAt" | "isDemo"> & { isDemo?: boolean }) =>
-      apiFetch<{ lease: TerraLease }>("/terra/leases", { method: "POST", body: JSON.stringify(data) }),
-    upload: async (file: File): Promise<{ lease: TerraLease; extraction: { method: string; confidence: number; missingFields: string[] } }> => {
+    list: () => apiFetch<{ leases: TerraLease[]; dataMode: string }>('/terra/leases'),
+    create: (data: Omit<TerraLease, 'id' | 'extractedAt' | 'isDemo'> & { isDemo?: boolean }) =>
+      apiFetch<{ lease: TerraLease }>('/terra/leases', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    upload: async (
+      file: File,
+    ): Promise<{
+      lease: TerraLease;
+      extraction: { method: string; confidence: number; missingFields: string[] };
+    }> => {
       const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/terra/leases/upload", {
-        method: "POST",
+      formData.append('file', file);
+      const res = await fetch('/api/terra/leases/upload', {
+        method: 'POST',
         body: formData,
-        credentials: "include",
+        credentials: 'include',
       });
       if (!res.ok) {
-        const errBody = await res.json().catch(() => ({ error: "Upload failed" }));
+        const errBody = await res.json().catch(() => ({ error: 'Upload failed' }));
         throw new Error((errBody as { error?: string }).error ?? `HTTP ${res.status}`);
       }
       return res.json();
     },
     remove: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/terra/leases/${id}`, { method: "DELETE" }),
+      apiFetch<{ deleted: boolean }>(`/terra/leases/${id}`, { method: 'DELETE' }),
   },
   proForma: {
-    list: () => apiFetch<{ projects: TerraProFormaProject[]; dataMode: string }>("/terra/pro-forma-projects"),
-    create: (data: { projectName: string; propertyType?: string; inputs: Record<string, unknown>; results?: Record<string, unknown> }) =>
-      apiFetch<{ project: TerraProFormaProject }>("/terra/pro-forma-projects", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<{ projectName: string; inputs: Record<string, unknown>; results: Record<string, unknown> }>) =>
-      apiFetch<{ updated: boolean }>(`/terra/pro-forma-projects/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    list: () =>
+      apiFetch<{ projects: TerraProFormaProject[]; dataMode: string }>('/terra/pro-forma-projects'),
+    create: (data: {
+      projectName: string;
+      propertyType?: string;
+      inputs: Record<string, unknown>;
+      results?: Record<string, unknown>;
+    }) =>
+      apiFetch<{ project: TerraProFormaProject }>('/terra/pro-forma-projects', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (
+      id: string,
+      data: Partial<{
+        projectName: string;
+        inputs: Record<string, unknown>;
+        results: Record<string, unknown>;
+      }>,
+    ) =>
+      apiFetch<{ updated: boolean }>(`/terra/pro-forma-projects/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     remove: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/terra/pro-forma-projects/${id}`, { method: "DELETE" }),
+      apiFetch<{ deleted: boolean }>(`/terra/pro-forma-projects/${id}`, { method: 'DELETE' }),
   },
   exchanges1031: {
-    list: () => apiFetch<{ exchanges: TerraExchange[]; dataMode: string }>("/terra/exchanges-1031"),
-    create: (data: Omit<TerraExchange, "id" | "isDemo"> & { isDemo?: boolean }) =>
-      apiFetch<{ exchange: TerraExchange }>("/terra/exchanges-1031", { method: "POST", body: JSON.stringify(data) }),
+    list: () => apiFetch<{ exchanges: TerraExchange[]; dataMode: string }>('/terra/exchanges-1031'),
+    create: (data: Omit<TerraExchange, 'id' | 'isDemo'> & { isDemo?: boolean }) =>
+      apiFetch<{ exchange: TerraExchange }>('/terra/exchanges-1031', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
     update: (id: string, data: Partial<TerraExchange>) =>
-      apiFetch<{ updated: boolean }>(`/terra/exchanges-1031/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      apiFetch<{ updated: boolean }>(`/terra/exchanges-1031/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     remove: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/terra/exchanges-1031/${id}`, { method: "DELETE" }),
+      apiFetch<{ deleted: boolean }>(`/terra/exchanges-1031/${id}`, { method: 'DELETE' }),
   },
   taxAppeals: {
-    list: () => apiFetch<{ properties: TerraTaxAppeal[]; dataMode: string }>("/terra/tax-appeals"),
-    create: (data: Omit<TerraTaxAppeal, "id" | "isDemo"> & { isDemo?: boolean }) =>
-      apiFetch<{ property: TerraTaxAppeal }>("/terra/tax-appeals", { method: "POST", body: JSON.stringify(data) }),
+    list: () => apiFetch<{ properties: TerraTaxAppeal[]; dataMode: string }>('/terra/tax-appeals'),
+    create: (data: Omit<TerraTaxAppeal, 'id' | 'isDemo'> & { isDemo?: boolean }) =>
+      apiFetch<{ property: TerraTaxAppeal }>('/terra/tax-appeals', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
     update: (id: string, data: Partial<TerraTaxAppeal>) =>
-      apiFetch<{ updated: boolean }>(`/terra/tax-appeals/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      apiFetch<{ updated: boolean }>(`/terra/tax-appeals/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     remove: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/terra/tax-appeals/${id}`, { method: "DELETE" }),
+      apiFetch<{ deleted: boolean }>(`/terra/tax-appeals/${id}`, { method: 'DELETE' }),
   },
   waterfall: {
-    list: () => apiFetch<{ structures: TerraWaterfallStructure[]; dataMode: string }>("/terra/waterfall-structures"),
-    create: (data: { name: string; description?: string; inputs: Record<string, unknown>; results?: Record<string, unknown> }) =>
-      apiFetch<{ structure: TerraWaterfallStructure }>("/terra/waterfall-structures", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<{ name: string; inputs: Record<string, unknown>; results: Record<string, unknown> }>) =>
-      apiFetch<{ updated: boolean }>(`/terra/waterfall-structures/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    list: () =>
+      apiFetch<{ structures: TerraWaterfallStructure[]; dataMode: string }>(
+        '/terra/waterfall-structures',
+      ),
+    create: (data: {
+      name: string;
+      description?: string;
+      inputs: Record<string, unknown>;
+      results?: Record<string, unknown>;
+    }) =>
+      apiFetch<{ structure: TerraWaterfallStructure }>('/terra/waterfall-structures', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (
+      id: string,
+      data: Partial<{
+        name: string;
+        inputs: Record<string, unknown>;
+        results: Record<string, unknown>;
+      }>,
+    ) =>
+      apiFetch<{ updated: boolean }>(`/terra/waterfall-structures/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     remove: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/terra/waterfall-structures/${id}`, { method: "DELETE" }),
+      apiFetch<{ deleted: boolean }>(`/terra/waterfall-structures/${id}`, { method: 'DELETE' }),
   },
   construction: {
-    list: () => apiFetch<{ projects: TerraConstructionProject[]; dataMode: string }>("/terra/construction-projects"),
-    create: (data: Omit<TerraConstructionProject, "id" | "isDemo"> & { isDemo?: boolean }) =>
-      apiFetch<{ project: TerraConstructionProject }>("/terra/construction-projects", { method: "POST", body: JSON.stringify(data) }),
+    list: () =>
+      apiFetch<{ projects: TerraConstructionProject[]; dataMode: string }>(
+        '/terra/construction-projects',
+      ),
+    create: (data: Omit<TerraConstructionProject, 'id' | 'isDemo'> & { isDemo?: boolean }) =>
+      apiFetch<{ project: TerraConstructionProject }>('/terra/construction-projects', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
     update: (id: string, data: Partial<TerraConstructionProject>) =>
-      apiFetch<{ updated: boolean }>(`/terra/construction-projects/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      apiFetch<{ updated: boolean }>(`/terra/construction-projects/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     remove: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/terra/construction-projects/${id}`, { method: "DELETE" }),
+      apiFetch<{ deleted: boolean }>(`/terra/construction-projects/${id}`, { method: 'DELETE' }),
   },
   tenantApplications: {
-    list: () => apiFetch<{ applicants: TerraTenantApplication[]; dataMode: string }>("/terra/tenant-applications"),
-    create: (data: Omit<TerraTenantApplication, "id" | "isDemo"> & { isDemo?: boolean }) =>
-      apiFetch<{ applicant: TerraTenantApplication }>("/terra/tenant-applications", { method: "POST", body: JSON.stringify(data) }),
+    list: () =>
+      apiFetch<{ applicants: TerraTenantApplication[]; dataMode: string }>(
+        '/terra/tenant-applications',
+      ),
+    create: (data: Omit<TerraTenantApplication, 'id' | 'isDemo'> & { isDemo?: boolean }) =>
+      apiFetch<{ applicant: TerraTenantApplication }>('/terra/tenant-applications', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
     update: (id: string, data: Partial<TerraTenantApplication>) =>
-      apiFetch<{ updated: boolean }>(`/terra/tenant-applications/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+      apiFetch<{ updated: boolean }>(`/terra/tenant-applications/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
     remove: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/terra/tenant-applications/${id}`, { method: "DELETE" }),
+      apiFetch<{ deleted: boolean }>(`/terra/tenant-applications/${id}`, { method: 'DELETE' }),
   },
   properties: {
-    climateRisk: (id: string) => apiFetch<{ data: ClimateRiskData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/climate-risk`),
-    zoning: (id: string) => apiFetch<{ data: ZoningData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/zoning`),
-    neighborhoodMomentum: (id: string) => apiFetch<{ data: NeighborhoodMomentumData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/neighborhood-momentum`),
-    sellerMotivation: (id: string) => apiFetch<{ data: SellerMotivationData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/seller-motivation`),
-    spatialWalkthrough: (id: string) => apiFetch<{ data: SpatialWalkthroughData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/spatial-walkthrough`),
-    waterfall: (id: string) => apiFetch<{ data: PropertyWaterfallData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/waterfall`),
+    climateRisk: (id: string) =>
+      apiFetch<{ data: ClimateRiskData; propertyId: string; dataMode: string }>(
+        `/terra/properties/${id}/climate-risk`,
+      ),
+    zoning: (id: string) =>
+      apiFetch<{ data: ZoningData; propertyId: string; dataMode: string }>(
+        `/terra/properties/${id}/zoning`,
+      ),
+    neighborhoodMomentum: (id: string) =>
+      apiFetch<{ data: NeighborhoodMomentumData; propertyId: string; dataMode: string }>(
+        `/terra/properties/${id}/neighborhood-momentum`,
+      ),
+    sellerMotivation: (id: string) =>
+      apiFetch<{ data: SellerMotivationData; propertyId: string; dataMode: string }>(
+        `/terra/properties/${id}/seller-motivation`,
+      ),
+    spatialWalkthrough: (id: string) =>
+      apiFetch<{ data: SpatialWalkthroughData; propertyId: string; dataMode: string }>(
+        `/terra/properties/${id}/spatial-walkthrough`,
+      ),
+    waterfall: (id: string) =>
+      apiFetch<{ data: PropertyWaterfallData; propertyId: string; dataMode: string }>(
+        `/terra/properties/${id}/waterfall`,
+      ),
   },
   portfolio: {
-    climateRisk: () => apiFetch<{ properties: PortfolioClimateProperty[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/climate-risk`),
-    zoning: () => apiFetch<{ parcels: PortfolioZoningParcel[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/zoning`),
-    neighborhoodMomentum: () => apiFetch<{ neighborhoods: PortfolioMicroMarket[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/neighborhood-momentum`),
-    sellerMotivation: () => apiFetch<{ sellers: PortfolioSellerProfile[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/seller-motivation`),
-    spatialWalkthrough: () => apiFetch<{ property: PortfolioSpatialProperty; dataMode: string; generatedAt: string }>(`/terra/portfolio/spatial-walkthrough`),
+    climateRisk: () =>
+      apiFetch<{ properties: PortfolioClimateProperty[]; dataMode: string; generatedAt: string }>(
+        `/terra/portfolio/climate-risk`,
+      ),
+    zoning: () =>
+      apiFetch<{ parcels: PortfolioZoningParcel[]; dataMode: string; generatedAt: string }>(
+        `/terra/portfolio/zoning`,
+      ),
+    neighborhoodMomentum: () =>
+      apiFetch<{ neighborhoods: PortfolioMicroMarket[]; dataMode: string; generatedAt: string }>(
+        `/terra/portfolio/neighborhood-momentum`,
+      ),
+    sellerMotivation: () =>
+      apiFetch<{ sellers: PortfolioSellerProfile[]; dataMode: string; generatedAt: string }>(
+        `/terra/portfolio/seller-motivation`,
+      ),
+    spatialWalkthrough: () =>
+      apiFetch<{ property: PortfolioSpatialProperty; dataMode: string; generatedAt: string }>(
+        `/terra/portfolio/spatial-walkthrough`,
+      ),
   },
 };

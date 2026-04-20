@@ -1,7 +1,4 @@
-export type ServiceStatus =
-  | "LIVE_CONFIGURED"
-  | "MOCKED_DEMO_MODE"
-  | "MANUAL_REQUIRED";
+export type ServiceStatus = 'LIVE_CONFIGURED' | 'MOCKED_DEMO_MODE' | 'MANUAL_REQUIRED';
 
 export interface ServiceHealthReport {
   name: string;
@@ -16,9 +13,9 @@ export interface ServiceHealthReport {
   responseTimeMs: number | null;
   lastSuccessfulCheck: string | null;
   consecutiveFailures: number;
-  retryState: "idle" | "retrying" | "failed";
+  retryState: 'idle' | 'retrying' | 'failed';
   enabled: boolean;
-  circuitState: "closed" | "open" | "half-open";
+  circuitState: 'closed' | 'open' | 'half-open';
   latencyP50Ms: number | null;
   latencyP95Ms: number | null;
   latencyP99Ms: number | null;
@@ -47,7 +44,7 @@ export interface ResilientFetchOptions {
 }
 
 interface CircuitBreakerState {
-  state: "closed" | "open" | "half-open";
+  state: 'closed' | 'open' | 'half-open';
   failureCount: number;
   lastFailure: number;
   nextProbeAt: number;
@@ -74,7 +71,7 @@ export abstract class ServiceAdapter {
   private _totalRequests: number = 0;
 
   private _circuit: CircuitBreakerState = {
-    state: "closed",
+    state: 'closed',
     failureCount: 0,
     lastFailure: 0,
     nextProbeAt: 0,
@@ -91,9 +88,9 @@ export abstract class ServiceAdapter {
 
   get status(): ServiceStatus {
     const missing = this.missingEnvVars;
-    if (missing.length === 0) return "LIVE_CONFIGURED";
-    if (this.supportsMockMode) return "MOCKED_DEMO_MODE";
-    return "MANUAL_REQUIRED";
+    if (missing.length === 0) return 'LIVE_CONFIGURED';
+    if (this.supportsMockMode) return 'MOCKED_DEMO_MODE';
+    return 'MANUAL_REQUIRED';
   }
 
   get supportsMockMode(): boolean {
@@ -102,22 +99,22 @@ export abstract class ServiceAdapter {
 
   get presentEnvVars(): string[] {
     return this.requiredEnvVars.filter(
-      (v) => process.env[v] !== undefined && process.env[v] !== "",
+      (v) => process.env[v] !== undefined && process.env[v] !== '',
     );
   }
 
   get missingEnvVars(): string[] {
     return this.requiredEnvVars.filter(
-      (v) => process.env[v] === undefined || process.env[v] === "",
+      (v) => process.env[v] === undefined || process.env[v] === '',
     );
   }
 
   get isLive(): boolean {
-    return this.status === "LIVE_CONFIGURED";
+    return this.status === 'LIVE_CONFIGURED';
   }
 
   get isDemoMode(): boolean {
-    return this.status === "MOCKED_DEMO_MODE";
+    return this.status === 'MOCKED_DEMO_MODE';
   }
 
   get lastChecked(): string | null {
@@ -136,10 +133,10 @@ export abstract class ServiceAdapter {
     this._enabled = enabled;
   }
 
-  get retryState(): "idle" | "retrying" | "failed" {
-    if (this._consecutiveFailures >= 3) return "failed";
-    if (this._consecutiveFailures > 0) return "retrying";
-    return "idle";
+  get retryState(): 'idle' | 'retrying' | 'failed' {
+    if (this._consecutiveFailures >= 3) return 'failed';
+    if (this._consecutiveFailures > 0) return 'retrying';
+    return 'idle';
   }
 
   async runHealthCheck(): Promise<ConnectionTestResult> {
@@ -155,15 +152,15 @@ export abstract class ServiceAdapter {
         status: this.status,
         testedAt: this._lastChecked,
         responseTimeMs: elapsed,
-        message: "Connector disabled by user",
+        message: 'Connector disabled by user',
         error: null,
       };
     }
 
-    if (this.status === "MANUAL_REQUIRED") {
+    if (this.status === 'MANUAL_REQUIRED') {
       const elapsed = Date.now() - start;
       this._lastResponseTimeMs = elapsed;
-      this._lastError = "Missing required configuration";
+      this._lastError = 'Missing required configuration';
       this._consecutiveFailures++;
       return {
         name: this.name,
@@ -171,8 +168,8 @@ export abstract class ServiceAdapter {
         status: this.status,
         testedAt: this._lastChecked,
         responseTimeMs: elapsed,
-        message: "Not configured — missing required environment variables",
-        error: "Missing required configuration",
+        message: 'Not configured — missing required environment variables',
+        error: 'Missing required configuration',
       };
     }
 
@@ -191,7 +188,7 @@ export abstract class ServiceAdapter {
         status: this.status,
         testedAt: this._lastChecked,
         responseTimeMs: elapsed,
-        message: this.isLive ? "Connection verified" : "Running in demo mode",
+        message: this.isLive ? 'Connection verified' : 'Running in demo mode',
         error: null,
       };
     } catch (err) {
@@ -207,7 +204,7 @@ export abstract class ServiceAdapter {
         status: this.status,
         testedAt: this._lastChecked,
         responseTimeMs: elapsed,
-        message: "Connection test failed",
+        message: 'Connection test failed',
         error: errorMsg,
       };
     }
@@ -227,7 +224,10 @@ export abstract class ServiceAdapter {
     const elapsed = now - this._rateLimiter.lastRefill;
     const refill = Math.floor((elapsed / 60_000) * this.rateLimitPerMinute);
     if (refill > 0) {
-      this._rateLimiter.tokens = Math.min(this.rateLimitPerMinute, this._rateLimiter.tokens + refill);
+      this._rateLimiter.tokens = Math.min(
+        this.rateLimitPerMinute,
+        this._rateLimiter.tokens + refill,
+      );
       this._rateLimiter.lastRefill = now;
     }
   }
@@ -241,25 +241,25 @@ export abstract class ServiceAdapter {
 
   private _recordCircuitSuccess(): void {
     this._circuit.failureCount = 0;
-    this._circuit.state = "closed";
+    this._circuit.state = 'closed';
   }
 
   private _recordCircuitFailure(): void {
     this._circuit.failureCount++;
     this._circuit.lastFailure = Date.now();
     if (this._circuit.failureCount >= this.circuitBreakerThreshold) {
-      this._circuit.state = "open";
+      this._circuit.state = 'open';
       this._circuit.nextProbeAt = Date.now() + this.circuitBreakerCooldownMs;
     }
   }
 
   private _isCircuitOpen(): boolean {
-    if (this._circuit.state === "closed") return false;
-    if (this._circuit.state === "open" && Date.now() >= this._circuit.nextProbeAt) {
-      this._circuit.state = "half-open";
+    if (this._circuit.state === 'closed') return false;
+    if (this._circuit.state === 'open' && Date.now() >= this._circuit.nextProbeAt) {
+      this._circuit.state = 'half-open';
       return false;
     }
-    return this._circuit.state === "open";
+    return this._circuit.state === 'open';
   }
 
   private _recordLatency(ms: number): void {
@@ -275,11 +275,15 @@ export abstract class ServiceAdapter {
     return sorted[Math.max(0, idx)];
   }
 
-  protected log(level: "info" | "warn" | "error", msg: string, data?: Record<string, unknown>): void {
+  protected log(
+    level: 'info' | 'warn' | 'error',
+    msg: string,
+    data?: Record<string, unknown>,
+  ): void {
     const entry = { adapter: this.name, circuit: this._circuit.state, ...data };
-    if (typeof console !== "undefined") {
-      if (level === "error") console.error(`[${this.name}] ${msg}`, JSON.stringify(entry));
-      else if (level === "warn") console.warn(`[${this.name}] ${msg}`, JSON.stringify(entry));
+    if (typeof console !== 'undefined') {
+      if (level === 'error') console.error(`[${this.name}] ${msg}`, JSON.stringify(entry));
+      else if (level === 'warn') console.warn(`[${this.name}] ${msg}`, JSON.stringify(entry));
       else console.log(`[${this.name}] ${msg}`, JSON.stringify(entry));
     }
   }
@@ -291,20 +295,26 @@ export abstract class ServiceAdapter {
       baseDelayMs = 500,
       maxDelayMs = 10_000,
       headers = {},
-      method = "GET",
+      method = 'GET',
       body,
       acceptStatuses = [],
     } = opts;
 
-    const urlHost = (() => { try { return new URL(url).host; } catch { return url; } })();
+    const urlHost = (() => {
+      try {
+        return new URL(url).host;
+      } catch {
+        return url;
+      }
+    })();
 
     if (this._isCircuitOpen()) {
-      this.log("warn", `Circuit breaker OPEN — request blocked`, { url: urlHost });
+      this.log('warn', `Circuit breaker OPEN — request blocked`, { url: urlHost });
       throw new Error(`Circuit breaker OPEN for ${this.name} — cooling down`);
     }
 
     if (!this._consumeToken()) {
-      this.log("warn", `Rate limit exceeded`, { url: urlHost, limit: this.rateLimitPerMinute });
+      this.log('warn', `Rate limit exceeded`, { url: urlHost, limit: this.rateLimitPerMinute });
       throw new Error(`Rate limit exceeded for ${this.name} (${this.rateLimitPerMinute}/min)`);
     }
 
@@ -312,7 +322,7 @@ export abstract class ServiceAdapter {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       if (attempt > 0) {
         const jitter = Math.random() * 0.3 + 0.85;
-        const delay = Math.min(maxDelayMs, baseDelayMs * Math.pow(2, attempt - 1) * jitter);
+        const delay = Math.min(maxDelayMs, baseDelayMs * 2 ** (attempt - 1) * jitter);
         await new Promise((r) => setTimeout(r, delay));
         if (this._isCircuitOpen()) {
           throw new Error(`Circuit breaker OPEN for ${this.name} — cooling down`);
@@ -323,7 +333,7 @@ export abstract class ServiceAdapter {
       try {
         const res = await fetch(url, {
           method,
-          headers: { "User-Agent": `SZL-${this.name}/1.0`, ...headers },
+          headers: { 'User-Agent': `SZL-${this.name}/1.0`, ...headers },
           body,
           signal: AbortSignal.timeout(timeoutMs),
         });
@@ -333,26 +343,52 @@ export abstract class ServiceAdapter {
 
         if (res.ok || acceptStatuses.includes(res.status)) {
           this._recordCircuitSuccess();
-          this.log("info", `OK`, { url: urlHost, status: res.status, latencyMs: elapsed, attempt });
+          this.log('info', `OK`, { url: urlHost, status: res.status, latencyMs: elapsed, attempt });
           return res;
         }
 
-        if (res.status >= 400 && res.status < 500 && res.status !== 429 && res.status !== 401 && res.status !== 403) {
-          this.log("info", `Client error (non-retryable)`, { url: urlHost, status: res.status, latencyMs: elapsed, attempt });
+        if (
+          res.status >= 400 &&
+          res.status < 500 &&
+          res.status !== 429 &&
+          res.status !== 401 &&
+          res.status !== 403
+        ) {
+          this.log('info', `Client error (non-retryable)`, {
+            url: urlHost,
+            status: res.status,
+            latencyMs: elapsed,
+            attempt,
+          });
           return res;
         }
 
         if (res.status === 401 || res.status === 403) {
           this._recordCircuitFailure();
-          this.log("warn", `Auth failure — circuit notified`, { url: urlHost, status: res.status, attempt, latencyMs: elapsed });
+          this.log('warn', `Auth failure — circuit notified`, {
+            url: urlHost,
+            status: res.status,
+            attempt,
+            latencyMs: elapsed,
+          });
           return res;
         }
 
         if (res.status === 429) {
           this._rateLimiter.tokens = 0;
-          this.log("warn", `Rate limited by upstream`, { url: urlHost, status: 429, attempt, latencyMs: elapsed });
+          this.log('warn', `Rate limited by upstream`, {
+            url: urlHost,
+            status: 429,
+            attempt,
+            latencyMs: elapsed,
+          });
         } else {
-          this.log("warn", `HTTP ${res.status} — will retry`, { url: urlHost, status: res.status, attempt, latencyMs: elapsed });
+          this.log('warn', `HTTP ${res.status} — will retry`, {
+            url: urlHost,
+            status: res.status,
+            attempt,
+            latencyMs: elapsed,
+          });
         }
 
         lastError = new Error(`HTTP ${res.status} from ${this.name}`);
@@ -360,12 +396,20 @@ export abstract class ServiceAdapter {
         const elapsed = Date.now() - start;
         this._recordLatency(elapsed);
         lastError = err instanceof Error ? err : new Error(String(err));
-        this.log("error", `Request failed`, { url: urlHost, attempt, latencyMs: elapsed, error: lastError.message });
+        this.log('error', `Request failed`, {
+          url: urlHost,
+          attempt,
+          latencyMs: elapsed,
+          error: lastError.message,
+        });
       }
     }
 
     this._recordCircuitFailure();
-    this.log("error", `All retries exhausted — circuit failure recorded`, { url: urlHost, circuitFailures: this._circuit.failureCount });
+    this.log('error', `All retries exhausted — circuit failure recorded`, {
+      url: urlHost,
+      circuitFailures: this._circuit.failureCount,
+    });
     throw lastError ?? new Error(`All retries exhausted for ${this.name}`);
   }
 

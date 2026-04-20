@@ -12,53 +12,56 @@
  *   node scripts/qa/audit-mocks.js
  */
 
-import { readFileSync, readdirSync, statSync } from "fs";
-import { join, extname, relative } from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { readdirSync, readFileSync, statSync } from 'fs';
+import { dirname, extname, join, relative } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, "../..");
+const ROOT = join(__dirname, '../..');
 
 const MOCK_PATTERNS = [
-  { pattern: /const MOCK_[A-Z]/, label: "MOCK_ constant", severity: "warning" },
-  { pattern: /\bMOCK_DATA\b/, label: "MOCK_DATA reference", severity: "warning" },
-  { pattern: /\/\*\s*MOCK\s*\*\//, label: "MOCK comment", severity: "info" },
-  { pattern: /TODO:.*mock/i, label: "TODO mock", severity: "info" },
-  { pattern: /FIXME:.*mock/i, label: "FIXME mock", severity: "warning" },
-  { pattern: /\/\/.*placeholder.*data|\/\*.*placeholder.*data/i, label: "Placeholder data comment", severity: "info" },
-  { pattern: /hardcoded.*data/i, label: "Hardcoded data comment", severity: "warning" },
-  { pattern: /fake.*data/i, label: "Fake data comment", severity: "info" },
+  { pattern: /const MOCK_[A-Z]/, label: 'MOCK_ constant', severity: 'warning' },
+  { pattern: /\bMOCK_DATA\b/, label: 'MOCK_DATA reference', severity: 'warning' },
+  { pattern: /\/\*\s*MOCK\s*\*\//, label: 'MOCK comment', severity: 'info' },
+  { pattern: /TODO:.*mock/i, label: 'TODO mock', severity: 'info' },
+  { pattern: /FIXME:.*mock/i, label: 'FIXME mock', severity: 'warning' },
+  {
+    pattern: /\/\/.*placeholder.*data|\/\*.*placeholder.*data/i,
+    label: 'Placeholder data comment',
+    severity: 'info',
+  },
+  { pattern: /hardcoded.*data/i, label: 'Hardcoded data comment', severity: 'warning' },
+  { pattern: /fake.*data/i, label: 'Fake data comment', severity: 'info' },
 ];
 
 const ALLOWED_MOCK_PATHS = [
-  "scripts/qa",
-  "scripts/seed",
-  "__tests__",
-  ".test.",
-  ".spec.",
-  "demo-",
-  "/demo/",
-  "mock-",
-  "/mocks/",
-  "seed-",
-  "fixtures",
-  "storybook",
-  "mockup-sandbox",
-  "admin/seeder",
+  'scripts/qa',
+  'scripts/seed',
+  '__tests__',
+  '.test.',
+  '.spec.',
+  'demo-',
+  '/demo/',
+  'mock-',
+  '/mocks/',
+  'seed-',
+  'fixtures',
+  'storybook',
+  'mockup-sandbox',
+  'admin/seeder',
 ];
 
 const SCAN_DIRS = [
-  "artifacts/api-server/src/routes",
-  "artifacts/szl-holdings/src/pages",
-  "artifacts/lyte-command-center/src/pages",
-  "artifacts/terra/src/pages",
-  "artifacts/aegis/src/pages",
-  "artifacts/vessels/src/pages",
-  "artifacts/carlota-jo/src/pages",
+  'artifacts/api-server/src/routes',
+  'artifacts/szl-holdings/src/pages',
+  'artifacts/lyte-command-center/src/pages',
+  'artifacts/terra/src/pages',
+  'artifacts/aegis/src/pages',
+  'artifacts/vessels/src/pages',
+  'artifacts/carlota-jo/src/pages',
 ];
 
-const SCAN_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
+const SCAN_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx']);
 
 function isAllowedMockPath(filePath) {
   return ALLOWED_MOCK_PATHS.some((p) => filePath.includes(p));
@@ -71,7 +74,7 @@ function walkDir(dir) {
     for (const entry of entries) {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (!["node_modules", ".git", "dist", "build", ".cache"].includes(entry.name)) {
+        if (!['node_modules', '.git', 'dist', 'build', '.cache'].includes(entry.name)) {
           files.push(...walkDir(fullPath));
         }
       } else if (SCAN_EXTENSIONS.has(extname(entry.name))) {
@@ -90,13 +93,13 @@ function auditFile(filePath) {
 
   let content;
   try {
-    content = readFileSync(filePath, "utf8");
+    content = readFileSync(filePath, 'utf8');
   } catch {
     return [];
   }
 
   const findings = [];
-  const lines = content.split("\n");
+  const lines = content.split('\n');
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -111,8 +114,8 @@ function auditFile(filePath) {
 }
 
 function main() {
-  console.log("\nSZL Holdings — Mock Audit");
-  console.log("Scanning for mock/demo data patterns in production paths...\n");
+  console.log('\nSZL Holdings — Mock Audit');
+  console.log('Scanning for mock/demo data patterns in production paths...\n');
 
   const allFindings = [];
 
@@ -124,8 +127,8 @@ function main() {
     }
   }
 
-  const warnings = allFindings.filter((f) => f.severity === "warning");
-  const infos = allFindings.filter((f) => f.severity === "info");
+  const warnings = allFindings.filter((f) => f.severity === 'warning');
+  const infos = allFindings.filter((f) => f.severity === 'info');
 
   if (warnings.length > 0) {
     console.log(`WARNINGS (${warnings.length}):`);
@@ -133,7 +136,7 @@ function main() {
       console.warn(`  [WARN] ${f.file}:${f.line} — ${f.label}`);
       console.warn(`         ${f.text}`);
     }
-    console.log("");
+    console.log('');
   }
 
   if (infos.length > 0) {
@@ -141,17 +144,19 @@ function main() {
     for (const f of infos) {
       console.log(`  [INFO] ${f.file}:${f.line} — ${f.label}`);
     }
-    console.log("");
+    console.log('');
   }
 
   if (allFindings.length === 0) {
-    console.log("PASS — No mock/demo data patterns found in production paths.");
+    console.log('PASS — No mock/demo data patterns found in production paths.');
     process.exit(0);
   } else if (warnings.length === 0) {
     console.log(`PASS — ${infos.length} informational notes found, no hard failures.`);
     process.exit(0);
   } else {
-    console.error(`WARN — ${warnings.length} warning(s), ${infos.length} info(s). Review before deploying.`);
+    console.error(
+      `WARN — ${warnings.length} warning(s), ${infos.length} info(s). Review before deploying.`,
+    );
     process.exit(0); // warnings don't fail — they're advisory
   }
 }

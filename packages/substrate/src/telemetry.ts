@@ -8,8 +8,8 @@
  * Uses the existing cognitive-observability package as the collector backend.
  */
 
-import type { AnyStage, PipelineRun, StageResult, ExecutionMode } from "./types.js";
-import type { RoutingDecision as BudgetRoutingDecision } from "./budget-router.js";
+import type { RoutingDecision as BudgetRoutingDecision } from './budget-router.js';
+import type { AnyStage, ExecutionMode, PipelineRun, StageResult } from './types.js';
 
 // ─── Span Interface ───────────────────────────────────────────────────────────
 // Minimal span contract compatible with OTel W3C trace context
@@ -21,7 +21,7 @@ export interface SubstrateSpan {
   name: string;
   startTimeMs: number;
   endTimeMs?: number;
-  status: "ok" | "error" | "unset";
+  status: 'ok' | 'error' | 'unset';
   attributes: Record<string, string | number | boolean>;
   events: Array<{ name: string; timeMs: number; attributes?: Record<string, unknown> }>;
 }
@@ -104,13 +104,13 @@ export class SubstrateTelemetry {
       traceId: this.traceId,
       name: `substrate.pipeline.${run.workflowName}`,
       startTimeMs: Date.now(),
-      status: "unset",
+      status: 'unset',
       attributes: {
-        "substrate.workflow.id": this.workflowId,
-        "substrate.workflow.name": run.workflowName,
-        "substrate.run.id": this.runId,
-        "substrate.mode": this.mode,
-        "substrate.runtime": "typescript",
+        'substrate.workflow.id': this.workflowId,
+        'substrate.workflow.name': run.workflowName,
+        'substrate.run.id': this.runId,
+        'substrate.mode': this.mode,
+        'substrate.runtime': 'typescript',
       },
       events: [],
     };
@@ -122,7 +122,11 @@ export class SubstrateTelemetry {
     metrics.byWorkflow[this.workflowId] ??= { runs: 0, failures: 0 };
     metrics.byWorkflow[this.workflowId]!.runs++;
 
-    this.emitToCollector("pipeline_started", { runId: this.runId, workflowId: this.workflowId, mode: this.mode });
+    this.emitToCollector('pipeline_started', {
+      runId: this.runId,
+      workflowId: this.workflowId,
+      mode: this.mode,
+    });
     return span;
   }
 
@@ -130,13 +134,14 @@ export class SubstrateTelemetry {
     const span = spanStore.find((s) => s.spanId === this.pipelineSpanId);
     if (span) {
       span.endTimeMs = Date.now();
-      span.status = run.status === "completed" || run.status === "dry-run-complete" ? "ok" : "error";
-      span.attributes["substrate.final.confidence"] = run.finalConfidence ?? 0;
-      span.attributes["substrate.duration.ms"] = durationMs;
-      span.attributes["substrate.status"] = run.status;
+      span.status =
+        run.status === 'completed' || run.status === 'dry-run-complete' ? 'ok' : 'error';
+      span.attributes['substrate.final.confidence'] = run.finalConfidence ?? 0;
+      span.attributes['substrate.duration.ms'] = durationMs;
+      span.attributes['substrate.status'] = run.status;
     }
 
-    if (run.status === "failed") {
+    if (run.status === 'failed') {
       metrics.pipelineFailures++;
       metrics.byWorkflow[this.workflowId]!.failures++;
     }
@@ -149,7 +154,7 @@ export class SubstrateTelemetry {
       metrics.confidenceSamples++;
     }
 
-    this.emitToCollector("pipeline_completed", {
+    this.emitToCollector('pipeline_completed', {
       runId: this.runId,
       status: run.status,
       durationMs,
@@ -166,16 +171,16 @@ export class SubstrateTelemetry {
       ...(this.pipelineSpanId !== null ? { parentSpanId: this.pipelineSpanId } : {}),
       name: `substrate.stage.${stage.type.toLowerCase()}.${stage.id}`,
       startTimeMs: Date.now(),
-      status: "unset",
+      status: 'unset',
       attributes: {
-        "substrate.stage.id": stage.id,
-        "substrate.stage.type": stage.type,
-        "substrate.stage.name": stage.name,
-        "substrate.stage.runtime": stage.runtime,
-        "substrate.stage.attempt": attempt,
-        "substrate.workflow.id": this.workflowId,
-        "substrate.run.id": this.runId,
-        "substrate.mode": this.mode,
+        'substrate.stage.id': stage.id,
+        'substrate.stage.type': stage.type,
+        'substrate.stage.name': stage.name,
+        'substrate.stage.runtime': stage.runtime,
+        'substrate.stage.attempt': attempt,
+        'substrate.workflow.id': this.workflowId,
+        'substrate.run.id': this.runId,
+        'substrate.mode': this.mode,
         ...Object.fromEntries(
           Object.entries(stage.otelTags).map(([k, v]) => [`substrate.stage.tag.${k}`, v]),
         ),
@@ -196,22 +201,22 @@ export class SubstrateTelemetry {
     const span = spanStore.find((s) => s.spanId === spanId);
     if (span) {
       span.endTimeMs = Date.now();
-      span.status = result.status === "completed" ? "ok" : "error";
-      span.attributes["substrate.stage.status"] = result.status;
-      span.attributes["substrate.stage.confidence"] = result.confidence ?? -1;
-      span.attributes["substrate.stage.duration.ms"] = result.durationMs;
+      span.status = result.status === 'completed' ? 'ok' : 'error';
+      span.attributes['substrate.stage.status'] = result.status;
+      span.attributes['substrate.stage.confidence'] = result.confidence ?? -1;
+      span.attributes['substrate.stage.duration.ms'] = result.durationMs;
       if (result.routingDecision) {
-        span.attributes["substrate.stage.routing"] = result.routingDecision;
+        span.attributes['substrate.stage.routing'] = result.routingDecision;
       }
     }
 
-    if (result.status === "failed" || result.status === "timed-out") {
+    if (result.status === 'failed' || result.status === 'timed-out') {
       metrics.stageFailures++;
       metrics.byStageType[stage.type]!.failures++;
     }
 
-    if (result.routingDecision === "escalated-model") metrics.stageEscalations++;
-    if (result.routingDecision === "escalated-human") metrics.humanEscalations++;
+    if (result.routingDecision === 'escalated-model') metrics.stageEscalations++;
+    if (result.routingDecision === 'escalated-human') metrics.humanEscalations++;
   }
 
   // ── Events ──
@@ -219,17 +224,21 @@ export class SubstrateTelemetry {
   addEvent(spanId: string, name: string, attributes?: Record<string, unknown>): void {
     const span = spanStore.find((s) => s.spanId === spanId);
     if (span) {
-      span.events.push({ name, timeMs: Date.now(), ...(attributes !== undefined ? { attributes } : {}) });
+      span.events.push({
+        name,
+        timeMs: Date.now(),
+        ...(attributes !== undefined ? { attributes } : {}),
+      });
     }
   }
 
   recordRoutingDecision(stage: AnyStage, decision: BudgetRoutingDecision, spanId: string): void {
-    this.addEvent(spanId, "substrate.routing.decision", {
+    this.addEvent(spanId, 'substrate.routing.decision', {
       action: decision.action,
       reason: decision.reason,
       stageId: stage.id,
     });
-    this.emitToCollector("routing_decision", {
+    this.emitToCollector('routing_decision', {
       stageId: stage.id,
       stageType: stage.type,
       action: decision.action,
@@ -237,11 +246,11 @@ export class SubstrateTelemetry {
   }
 
   recordPolicyOutcome(stage: AnyStage, outcome: string, spanId: string): void {
-    this.addEvent(spanId, "substrate.policy.outcome", { stageId: stage.id, outcome });
+    this.addEvent(spanId, 'substrate.policy.outcome', { stageId: stage.id, outcome });
   }
 
   recordApprovalRequest(stage: AnyStage, approvalId: string, spanId: string): void {
-    this.addEvent(spanId, "substrate.approval.requested", { stageId: stage.id, approvalId });
+    this.addEvent(spanId, 'substrate.approval.requested', { stageId: stage.id, approvalId });
   }
 
   // ── Collector bridge ──
@@ -251,8 +260,8 @@ export class SubstrateTelemetry {
     // We use latency_ms as a proxy metric for pipeline events; the labels carry semantics.
     Promise.resolve()
       .then(async () => {
-        const { globalCollector } = await import("@workspace/cognitive-observability");
-        globalCollector.recordKnown("latency_ms", 0, {
+        const { globalCollector } = await import('@workspace/cognitive-observability');
+        globalCollector.recordKnown('latency_ms', 0, {
           substrate_event: eventType,
           workflowId: this.workflowId,
           runId: this.runId,

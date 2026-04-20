@@ -1,6 +1,12 @@
-import manifestRaw from "@/data/capability-manifest.json";
+import manifestRaw from '@/data/capability-manifest.json';
 
-export type CapabilityStatus = "live" | "working_demo" | "partial" | "stub" | "broken" | "undocumented";
+export type CapabilityStatus =
+  | 'live'
+  | 'working_demo'
+  | 'partial'
+  | 'stub'
+  | 'broken'
+  | 'undocumented';
 
 export interface Capability {
   id: string;
@@ -53,7 +59,7 @@ export function useCapabilityManifest() {
       if (c.status in counts) counts[c.status as keyof typeof counts]++;
     }
     const readinessScore = Math.round(
-      ((counts.live * 1.0 + counts.working_demo * 0.75 + counts.partial * 0.4) / caps.length) * 100
+      ((counts.live * 1.0 + counts.working_demo * 0.75 + counts.partial * 0.4) / caps.length) * 100,
     );
     return {
       product,
@@ -70,29 +76,96 @@ export function useCapabilityManifest() {
       acc.total++;
       return acc;
     },
-    { total: 0, live: 0, working_demo: 0, partial: 0, stub: 0, broken: 0, undocumented: 0 }
+    { total: 0, live: 0, working_demo: 0, partial: 0, stub: 0, broken: 0, undocumented: 0 },
   );
 
-  const provenClaims = capabilities.filter((c) => c.status === "live" || c.status === "working_demo");
-  const flaggedClaims = capabilities.filter((c) => c.status === "stub" || c.status === "broken" || c.status === "undocumented");
+  const provenClaims = capabilities.filter(
+    (c) => c.status === 'live' || c.status === 'working_demo',
+  );
+  const flaggedClaims = capabilities.filter(
+    (c) => c.status === 'stub' || c.status === 'broken' || c.status === 'undocumented',
+  );
 
   return { capabilities, products, totals, provenClaims, flaggedClaims, meta };
 }
 
-export const PRODUCT_DISPLAY: Record<string, { label: string; color: string; href: string; appStatus: string }> = {
-  "Lyte (Business Observability)": { label: "Lyte", color: "#d4a054", href: "/lyte", appStatus: "Beta" },
-  "Aegis (Defense & Intelligence)": { label: "Aegis", color: "#c45a4a", href: "/solutions/aegis", appStatus: "Beta" },
-  "Vessels (Maritime Intelligence)": { label: "Vessels", color: "#4a90b8", href: "/solutions/vessels", appStatus: "Partial" },
-  "Terra (Real Estate Intelligence)": { label: "Terra", color: "#c8953c", href: "/solutions/terra", appStatus: "Beta" },
-  "Carlota Jo (Private Advisory)": { label: "Carlota Jo", color: "#a0a0c0", href: "/carlota-jo", appStatus: "GA" },
-  "API Server": { label: "API Server", color: "#6aaa72", href: "/developers", appStatus: "GA" },
-  "SZL Holdings Corporate": { label: "Corporate", color: "#8b7ac8", href: "/", appStatus: "Beta" },
-  "Sentra (Cyber Resilience)": { label: "Sentra", color: "#ef8c3a", href: "/solutions/aegis", appStatus: "Beta" },
-  "Command (Unified Command Portal)": { label: "Command", color: "#5b8dd4", href: "/command", appStatus: "Partial" },
-  "Pulse (AI Executive Briefing)": { label: "Pulse", color: "#e0709a", href: "/pulse", appStatus: "Partial" },
-  "SZL Holdings Mobile": { label: "Mobile", color: "#7ecfc0", href: "/mobile", appStatus: "Beta" },
-  "Packages (Marketplace)": { label: "Packages", color: "#a8c070", href: "/developers", appStatus: "GA" },
-  "Infrastructure / Security": { label: "Infrastructure", color: "#808090", href: "/trust-center", appStatus: "Partial" },
-  "Counsel (Legal Matter Command)": { label: "Counsel", color: "#6aaa72", href: "/solutions/prism-counsel", appStatus: "Beta" },
-  "PRISM Counsel (Legal Command)": { label: "PRISM Counsel", color: "#70b890", href: "/solutions/prism-counsel", appStatus: "Beta" },
+export const PRODUCT_DISPLAY: Record<
+  string,
+  { label: string; color: string; href: string; appStatus: string }
+> = {
+  'Lyte (Business Observability)': {
+    label: 'Lyte',
+    color: '#d4a054',
+    href: '/lyte',
+    appStatus: 'Beta',
+  },
+  'Aegis (Defense & Intelligence)': {
+    label: 'Aegis',
+    color: '#c45a4a',
+    href: '/solutions/aegis',
+    appStatus: 'Beta',
+  },
+  'Vessels (Maritime Intelligence)': {
+    label: 'Vessels',
+    color: '#4a90b8',
+    href: '/solutions/vessels',
+    appStatus: 'Partial',
+  },
+  'Terra (Real Estate Intelligence)': {
+    label: 'Terra',
+    color: '#c8953c',
+    href: '/solutions/terra',
+    appStatus: 'Beta',
+  },
+  'Carlota Jo (Private Advisory)': {
+    label: 'Carlota Jo',
+    color: '#a0a0c0',
+    href: '/carlota-jo',
+    appStatus: 'GA',
+  },
+  'API Server': { label: 'API Server', color: '#6aaa72', href: '/developers', appStatus: 'GA' },
+  'SZL Holdings Corporate': { label: 'Corporate', color: '#8b7ac8', href: '/', appStatus: 'Beta' },
+  'Sentra (Cyber Resilience)': {
+    label: 'Sentra',
+    color: '#ef8c3a',
+    href: '/solutions/aegis',
+    appStatus: 'Beta',
+  },
+  'Command (Unified Command Portal)': {
+    label: 'Command',
+    color: '#5b8dd4',
+    href: '/command',
+    appStatus: 'Partial',
+  },
+  'Pulse (AI Executive Briefing)': {
+    label: 'Pulse',
+    color: '#e0709a',
+    href: '/pulse',
+    appStatus: 'Partial',
+  },
+  'SZL Holdings Mobile': { label: 'Mobile', color: '#7ecfc0', href: '/mobile', appStatus: 'Beta' },
+  'Packages (Marketplace)': {
+    label: 'Packages',
+    color: '#a8c070',
+    href: '/developers',
+    appStatus: 'GA',
+  },
+  'Infrastructure / Security': {
+    label: 'Infrastructure',
+    color: '#808090',
+    href: '/trust-center',
+    appStatus: 'Partial',
+  },
+  'Counsel (Legal Matter Command)': {
+    label: 'Counsel',
+    color: '#6aaa72',
+    href: '/solutions/prism-counsel',
+    appStatus: 'Beta',
+  },
+  'PRISM Counsel (Legal Command)': {
+    label: 'PRISM Counsel',
+    color: '#70b890',
+    href: '/solutions/prism-counsel',
+    appStatus: 'Beta',
+  },
 };

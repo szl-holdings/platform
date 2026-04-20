@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiFetch } from "@/lib/apiClient";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useEffect, useState } from 'react';
+import { apiFetch } from '@/lib/apiClient';
 
 export interface AlertPreferences {
   alerts_approvals_enabled: boolean;
@@ -14,24 +14,30 @@ export const DEFAULT_ALERT_PREFERENCES: AlertPreferences = {
   alerts_approvals_enabled: true,
   alerts_run_failures_enabled: true,
   alerts_quiet_hours_enabled: false,
-  alerts_quiet_hours_start: "22:00",
-  alerts_quiet_hours_end: "07:00",
+  alerts_quiet_hours_start: '22:00',
+  alerts_quiet_hours_end: '07:00',
 };
 
-const CACHE_KEY = "cortex_alert_preferences_v1";
+const CACHE_KEY = 'cortex_alert_preferences_v1';
 
 const HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 function sanitize(raw: Partial<AlertPreferences> | null | undefined): AlertPreferences {
   const out: AlertPreferences = { ...DEFAULT_ALERT_PREFERENCES };
-  if (!raw || typeof raw !== "object") return out;
-  if (typeof raw.alerts_approvals_enabled === "boolean") out.alerts_approvals_enabled = raw.alerts_approvals_enabled;
-  if (typeof raw.alerts_run_failures_enabled === "boolean") out.alerts_run_failures_enabled = raw.alerts_run_failures_enabled;
-  if (typeof raw.alerts_quiet_hours_enabled === "boolean") out.alerts_quiet_hours_enabled = raw.alerts_quiet_hours_enabled;
-  if (typeof raw.alerts_quiet_hours_start === "string" && HHMM_RE.test(raw.alerts_quiet_hours_start)) {
+  if (!raw || typeof raw !== 'object') return out;
+  if (typeof raw.alerts_approvals_enabled === 'boolean')
+    out.alerts_approvals_enabled = raw.alerts_approvals_enabled;
+  if (typeof raw.alerts_run_failures_enabled === 'boolean')
+    out.alerts_run_failures_enabled = raw.alerts_run_failures_enabled;
+  if (typeof raw.alerts_quiet_hours_enabled === 'boolean')
+    out.alerts_quiet_hours_enabled = raw.alerts_quiet_hours_enabled;
+  if (
+    typeof raw.alerts_quiet_hours_start === 'string' &&
+    HHMM_RE.test(raw.alerts_quiet_hours_start)
+  ) {
     out.alerts_quiet_hours_start = raw.alerts_quiet_hours_start;
   }
-  if (typeof raw.alerts_quiet_hours_end === "string" && HHMM_RE.test(raw.alerts_quiet_hours_end)) {
+  if (typeof raw.alerts_quiet_hours_end === 'string' && HHMM_RE.test(raw.alerts_quiet_hours_end)) {
     out.alerts_quiet_hours_end = raw.alerts_quiet_hours_end;
   }
   return out;
@@ -87,7 +93,9 @@ async function loadFromCache(): Promise<AlertPreferences | null> {
 
 async function loadFromServer(): Promise<AlertPreferences | null> {
   try {
-    const data = await apiFetch<Partial<AlertPreferences> & Record<string, unknown>>("/api/preferences");
+    const data = await apiFetch<Partial<AlertPreferences> & Record<string, unknown>>(
+      '/api/preferences',
+    );
     return sanitize(data);
   } catch {
     return null;
@@ -95,7 +103,9 @@ async function loadFromServer(): Promise<AlertPreferences | null> {
 }
 
 export function useAlertPreferences(): CachedPrefs {
-  const [prefs, setLocalPrefs] = useState<AlertPreferences>(memoryCache ?? DEFAULT_ALERT_PREFERENCES);
+  const [prefs, setLocalPrefs] = useState<AlertPreferences>(
+    memoryCache ?? DEFAULT_ALERT_PREFERENCES,
+  );
   const [loaded, setLoaded] = useState(memoryCache !== null);
   const [saving, setSaving] = useState(false);
 
@@ -136,9 +146,9 @@ export function useAlertPreferences(): CachedPrefs {
     publish(merged);
     setSaving(true);
     try {
-      await apiFetch("/api/preferences", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+      await apiFetch('/api/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(next),
       });
     } catch {

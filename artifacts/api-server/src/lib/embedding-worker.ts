@@ -1,5 +1,5 @@
-import { processEmbeddingTasks } from "@szl-holdings/ai-engine/embedding-pipeline";
-import { logger } from "./logger";
+import { processEmbeddingTasks } from '@szl-holdings/ai-engine/embedding-pipeline';
+import { logger } from './logger';
 
 const POLL_INTERVAL_MS = 30_000;
 const IDLE_INTERVAL_MS = 60_000;
@@ -15,21 +15,26 @@ async function runOnce(): Promise<void> {
     const { processed, failed } = await processEmbeddingTasks(BATCH_SIZE);
     consecutiveErrors = 0;
     if (processed > 0 || failed > 0) {
-      logger.info({ processed, failed }, "[embedding-worker] Batch complete");
+      logger.info({ processed, failed }, '[embedding-worker] Batch complete');
     }
     const nextDelay = processed > 0 ? POLL_INTERVAL_MS : IDLE_INTERVAL_MS;
     scheduleNext(nextDelay);
   } catch (err) {
     consecutiveErrors++;
     const backoff = Math.min(POLL_INTERVAL_MS * 2 ** consecutiveErrors, MAX_BACKOFF_MS);
-    logger.warn({ err, consecutiveErrors, backoffMs: backoff }, "[embedding-worker] Error — backing off");
+    logger.warn(
+      { err, consecutiveErrors, backoffMs: backoff },
+      '[embedding-worker] Error — backing off',
+    );
     scheduleNext(backoff);
   }
 }
 
 function scheduleNext(delayMs: number): void {
   if (stopped) return;
-  timer = setTimeout(() => { void runOnce(); }, delayMs);
+  timer = setTimeout(() => {
+    void runOnce();
+  }, delayMs);
   timer.unref();
 }
 
@@ -42,12 +47,12 @@ function scheduleNext(delayMs: number): void {
  */
 export function startEmbeddingWorker(runImmediately = false): void {
   if (!stopped) {
-    logger.debug("[embedding-worker] Already running — start call is a no-op");
+    logger.debug('[embedding-worker] Already running — start call is a no-op');
     return;
   }
   stopped = false;
   consecutiveErrors = 0;
-  logger.info("[embedding-worker] Starting automatic embedding task processor");
+  logger.info('[embedding-worker] Starting automatic embedding task processor');
   if (runImmediately) {
     void runOnce();
   } else {
@@ -56,7 +61,11 @@ export function startEmbeddingWorker(runImmediately = false): void {
 }
 
 /** Returns current worker health snapshot for health-check and monitoring use. */
-export function getWorkerStatus(): { running: boolean; consecutiveErrors: number; pollIntervalMs: number } {
+export function getWorkerStatus(): {
+  running: boolean;
+  consecutiveErrors: number;
+  pollIntervalMs: number;
+} {
   return { running: !stopped, consecutiveErrors, pollIntervalMs: POLL_INTERVAL_MS };
 }
 
@@ -66,5 +75,5 @@ export function stopEmbeddingWorker(): void {
     clearTimeout(timer);
     timer = null;
   }
-  logger.info("[embedding-worker] Stopped");
+  logger.info('[embedding-worker] Stopped');
 }

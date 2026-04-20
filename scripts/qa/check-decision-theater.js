@@ -37,10 +37,16 @@ class PrismEventBus {
     if (this.history.length > 1000) this.history.length = 1000;
     this.counters.set(full.type, (this.counters.get(full.type) ?? 0) + 1);
     for (const sub of this.subscriptions.values()) {
-      const typeMatch = sub.eventTypes === "*" || sub.eventTypes.includes(full.type);
-      const domainMatch = !sub.domains || sub.domains === "*" || sub.domains.includes(full.domain) || sub.domains.includes("global");
+      const typeMatch = sub.eventTypes === '*' || sub.eventTypes.includes(full.type);
+      const domainMatch =
+        !sub.domains ||
+        sub.domains === '*' ||
+        sub.domains.includes(full.domain) ||
+        sub.domains.includes('global');
       if (typeMatch && domainMatch) {
-        try { await Promise.resolve(sub.handler(full)); } catch {}
+        try {
+          await Promise.resolve(sub.handler(full));
+        } catch {}
       }
     }
     return full;
@@ -48,7 +54,7 @@ class PrismEventBus {
 
   getHistory({ correlationId } = {}) {
     let results = this.history;
-    if (correlationId) results = results.filter(e => e.correlationId === correlationId);
+    if (correlationId) results = results.filter((e) => e.correlationId === correlationId);
     return results;
   }
 
@@ -72,7 +78,9 @@ class CovenantPolicyEngine {
     this.policies = new Map();
   }
 
-  register(policy) { this.policies.set(policy.id, policy); }
+  register(policy) {
+    this.policies.set(policy.id, policy);
+  }
 
   evaluate(request) {
     const startedAt = Date.now();
@@ -80,38 +88,46 @@ class CovenantPolicyEngine {
     const now = Date.now();
 
     const applicablePolicies = Array.from(this.policies.values())
-      .filter(p => {
+      .filter((p) => {
         if (p.expiresAt != null && p.expiresAt < now) return false;
-        const roleMatch = p.roles.length === 0 || request.subject.roles.some(r => p.roles.includes(r));
+        const roleMatch =
+          p.roles.length === 0 || request.subject.roles.some((r) => p.roles.includes(r));
         const domainMatch =
           p.domains.length === 0 ||
           !request.resource.domain ||
           p.domains.includes(request.resource.domain) ||
-          p.domains.includes("global");
+          p.domains.includes('global');
         const permissionMatch = p.permissions.includes(request.action);
         return roleMatch && domainMatch && permissionMatch;
       })
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
-    let effect = "deny";
+    let effect = 'deny';
     let reason;
     const matchedPolicies = [];
 
     for (const policy of applicablePolicies) {
       matchedPolicies.push(policy.id);
-      if (policy.effect === "deny") { effect = "deny"; reason = `Denied by policy: ${policy.name}`; break; }
-      if (policy.effect === "allow") { effect = "allow"; reason = `Allowed by policy: ${policy.name}`; }
+      if (policy.effect === 'deny') {
+        effect = 'deny';
+        reason = `Denied by policy: ${policy.name}`;
+        break;
+      }
+      if (policy.effect === 'allow') {
+        effect = 'allow';
+        reason = `Allowed by policy: ${policy.name}`;
+      }
     }
 
     if (matchedPolicies.length === 0) {
-      effect = "deny";
-      reason = "No applicable policy found (default deny)";
+      effect = 'deny';
+      reason = 'No applicable policy found (default deny)';
     }
 
     return {
       requestId,
       effect,
-      allowed: effect === "allow",
+      allowed: effect === 'allow',
       matchedPolicies,
       reason,
       evaluatedAt: startedAt,
@@ -127,18 +143,23 @@ class CovenantPolicyEngine {
 // 3. Monte Carlo engine — inline port of lib/monte-carlo
 // ---------------------------------------------------------------------------
 function randomNormal(mean, stdDev) {
-  let u = 0, v = 0;
+  let u = 0,
+    v = 0;
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
   return mean + Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v) * stdDev;
 }
 
 function randomGamma(shape) {
-  if (shape < 1) return randomGamma(1 + shape) * Math.pow(Math.random(), 1 / shape);
-  const d = shape - 1 / 3, c = 1 / Math.sqrt(9 * d);
+  if (shape < 1) return randomGamma(1 + shape) * Math.random() ** (1 / shape);
+  const d = shape - 1 / 3,
+    c = 1 / Math.sqrt(9 * d);
   while (true) {
     let x, v;
-    do { x = randomNormal(0, 1); v = 1 + c * x; } while (v <= 0);
+    do {
+      x = randomNormal(0, 1);
+      v = 1 + c * x;
+    } while (v <= 0);
     v = v * v * v;
     const u = Math.random();
     if (u < 1 - 0.0331 * (x * x) * (x * x)) return d * v;
@@ -147,45 +168,57 @@ function randomGamma(shape) {
 }
 
 function randomBeta(alpha, beta) {
-  const x = randomGamma(alpha), y = randomGamma(beta);
+  const x = randomGamma(alpha),
+    y = randomGamma(beta);
   return x / (x + y);
 }
 
 function randomPoisson(lambda) {
   const L = Math.exp(-lambda);
-  let k = 0, p = 1;
-  do { k++; p *= Math.random(); } while (p > L);
+  let k = 0,
+    p = 1;
+  do {
+    k++;
+    p *= Math.random();
+  } while (p > L);
   return k - 1;
 }
 
 function sample(dist) {
   switch (dist.type) {
-    case "normal": return randomNormal(dist.mean, dist.stdDev);
-    case "log_normal": {
-      const lnMean = Math.log(dist.mean * dist.mean / Math.sqrt(dist.stdDev ** 2 + dist.mean ** 2));
+    case 'normal':
+      return randomNormal(dist.mean, dist.stdDev);
+    case 'log_normal': {
+      const lnMean = Math.log(
+        (dist.mean * dist.mean) / Math.sqrt(dist.stdDev ** 2 + dist.mean ** 2),
+      );
       const lnStd = Math.sqrt(Math.log(1 + (dist.stdDev / dist.mean) ** 2));
       return Math.exp(randomNormal(lnMean, lnStd));
     }
-    case "uniform": return dist.min + Math.random() * (dist.max - dist.min);
-    case "triangular": {
+    case 'uniform':
+      return dist.min + Math.random() * (dist.max - dist.min);
+    case 'triangular': {
       const u = Math.random();
       const fc = (dist.mode - dist.min) / (dist.max - dist.min);
       if (u < fc) return dist.min + Math.sqrt(u * (dist.max - dist.min) * (dist.mode - dist.min));
       return dist.max - Math.sqrt((1 - u) * (dist.max - dist.min) * (dist.max - dist.mode));
     }
-    case "beta": {
+    case 'beta': {
       const raw = randomBeta(dist.alpha, dist.beta);
       return (dist.min ?? 0) + raw * ((dist.max ?? 1) - (dist.min ?? 0));
     }
-    case "poisson": return randomPoisson(dist.lambda);
-    case "constant": return dist.value;
-    default: return 0;
+    case 'poisson':
+      return randomPoisson(dist.lambda);
+    case 'constant':
+      return dist.value;
+    default:
+      return 0;
   }
 }
 
 function percentile(sorted, p) {
   if (sorted.length === 0) return 0;
-  const idx = Math.max(0, Math.ceil(sorted.length * p / 100) - 1);
+  const idx = Math.max(0, Math.ceil((sorted.length * p) / 100) - 1);
   return sorted[idx];
 }
 
@@ -196,24 +229,28 @@ function stdDev(values, mean) {
 
 // VESSELS_VOYAGE_COST scenario definition (mirrors lib/monte-carlo/src/scenarios.ts)
 const VESSELS_VOYAGE_COST = {
-  id: "vessels/voyage-cost",
-  title: "Voyage Cost Simulation",
-  description: "Simulates total voyage cost including fuel, weather delays, port fees, and piracy risk premium.",
-  domain: "vessels",
+  id: 'vessels/voyage-cost',
+  title: 'Voyage Cost Simulation',
+  description:
+    'Simulates total voyage cost including fuel, weather delays, port fees, and piracy risk premium.',
+  domain: 'vessels',
   inputs: [
-    { id: "fuelPricePerTon",       distribution: { type: "normal",     mean: 620,  stdDev: 80 } },
-    { id: "fuelConsumptionTons",   distribution: { type: "triangular", min: 28, mode: 34, max: 42 } },
-    { id: "voyageDays",            distribution: { type: "normal",     mean: 18,   stdDev: 3 } },
-    { id: "portFees",              distribution: { type: "triangular", min: 40, mode: 65, max: 120 } },
-    { id: "weatherDelayDays",      distribution: { type: "poisson",    lambda: 1.5 } },
-    { id: "piracyRiskPremiumPct",  distribution: { type: "beta",       alpha: 2, beta: 10, min: 0, max: 0.08 } },
-    { id: "cargoValue",            distribution: { type: "log_normal", mean: 8,    stdDev: 2 } },
+    { id: 'fuelPricePerTon', distribution: { type: 'normal', mean: 620, stdDev: 80 } },
+    { id: 'fuelConsumptionTons', distribution: { type: 'triangular', min: 28, mode: 34, max: 42 } },
+    { id: 'voyageDays', distribution: { type: 'normal', mean: 18, stdDev: 3 } },
+    { id: 'portFees', distribution: { type: 'triangular', min: 40, mode: 65, max: 120 } },
+    { id: 'weatherDelayDays', distribution: { type: 'poisson', lambda: 1.5 } },
+    {
+      id: 'piracyRiskPremiumPct',
+      distribution: { type: 'beta', alpha: 2, beta: 10, min: 0, max: 0.08 },
+    },
+    { id: 'cargoValue', distribution: { type: 'log_normal', mean: 8, stdDev: 2 } },
   ],
   outputs: [
-    { id: "totalVoyageCost",   label: "Total Voyage Cost ($000)" },
-    { id: "fuelCostShare",     label: "Fuel Cost Share" },
-    { id: "costPerDay",        label: "Cost per Day ($000)" },
-    { id: "totalDays",         label: "Total Transit Days" },
+    { id: 'totalVoyageCost', label: 'Total Voyage Cost ($000)' },
+    { id: 'fuelCostShare', label: 'Fuel Cost Share' },
+    { id: 'costPerDay', label: 'Cost per Day ($000)' },
+    { id: 'totalDays', label: 'Total Transit Days' },
   ],
   calculate(inputs) {
     const totalDays = inputs.voyageDays + inputs.weatherDelayDays;
@@ -267,21 +304,27 @@ function runSimulation(scenario, iterations) {
     };
   }
 
-  return { scenarioId: scenario.id, iterations, validIterations, durationMs: performance.now() - start, metrics };
+  return {
+    scenarioId: scenario.id,
+    iterations,
+    validIterations,
+    durationMs: performance.now() - start,
+    metrics,
+  };
 }
 
 // ---------------------------------------------------------------------------
 // MARITIME_RESPONSE_POLICY (mirrors useDecisionEngine.ts)
 // ---------------------------------------------------------------------------
 const MARITIME_RESPONSE_POLICY = {
-  id: "maritime-critical-response-v2",
-  name: "Maritime Critical Response Protocol",
-  version: "2.0.0",
-  roles: ["super_admin", "admin", "exec", "ops", "compliance"],
-  domains: ["aegis", "vessels", "global"],
-  permissions: ["execute", "approve"],
+  id: 'maritime-critical-response-v2',
+  name: 'Maritime Critical Response Protocol',
+  version: '2.0.0',
+  roles: ['super_admin', 'admin', 'exec', 'ops', 'compliance'],
+  domains: ['aegis', 'vessels', 'global'],
+  permissions: ['execute', 'approve'],
   conditions: [],
-  effect: "allow",
+  effect: 'allow',
   priority: 100,
 };
 
@@ -291,28 +334,60 @@ const MARITIME_RESPONSE_POLICY = {
 function checkPrismEventBus() {
   const bus = new PrismEventBus();
   const received = [];
-  bus.subscribe("test-sub", ["domain_signal", "cross_domain_correlation"], (evt) => {
-    received.push(evt);
-  }, ["aegis", "vessels", "global"]);
+  bus.subscribe(
+    'test-sub',
+    ['domain_signal', 'cross_domain_correlation'],
+    (evt) => {
+      received.push(evt);
+    },
+    ['aegis', 'vessels', 'global'],
+  );
 
   const correlationId = `test-${Date.now()}`;
 
   return Promise.all([
-    bus.publish({ type: "domain_signal", domain: "aegis", sourceId: "sensor-01", severity: "critical", correlationId, payload: { title: "SSH intrusion" } }),
-    bus.publish({ type: "domain_signal", domain: "vessels", sourceId: "ais-monitor", severity: "high", correlationId, payload: { title: "AIS dark" } }),
-    bus.publish({ type: "cross_domain_correlation", domain: "global", sourceId: "correlation-engine", severity: "critical", correlationId, payload: { confidence: 0.87 } }),
+    bus.publish({
+      type: 'domain_signal',
+      domain: 'aegis',
+      sourceId: 'sensor-01',
+      severity: 'critical',
+      correlationId,
+      payload: { title: 'SSH intrusion' },
+    }),
+    bus.publish({
+      type: 'domain_signal',
+      domain: 'vessels',
+      sourceId: 'ais-monitor',
+      severity: 'high',
+      correlationId,
+      payload: { title: 'AIS dark' },
+    }),
+    bus.publish({
+      type: 'cross_domain_correlation',
+      domain: 'global',
+      sourceId: 'correlation-engine',
+      severity: 'critical',
+      correlationId,
+      payload: { confidence: 0.87 },
+    }),
   ]).then(([aegisEvt, vesselsEvt, corrEvt]) => {
     const history = bus.getHistory({ correlationId });
     const stats = bus.getStats();
     const checks = [
-      { label: "Published 3 events",       ok: stats.totalPublished === 3 },
-      { label: "History has 3 events",      ok: history.length === 3 },
-      { label: "Subscriber received 3",     ok: received.length === 3 },
-      { label: "Aegis signal has ID",        ok: typeof aegisEvt.id === "string" && aegisEvt.id.startsWith("evt-") },
-      { label: "Correlation ID preserved",  ok: corrEvt.correlationId === correlationId },
-      { label: "Stats byType populated",    ok: stats.byType["domain_signal"] === 2 && stats.byType["cross_domain_correlation"] === 1 },
+      { label: 'Published 3 events', ok: stats.totalPublished === 3 },
+      { label: 'History has 3 events', ok: history.length === 3 },
+      { label: 'Subscriber received 3', ok: received.length === 3 },
+      {
+        label: 'Aegis signal has ID',
+        ok: typeof aegisEvt.id === 'string' && aegisEvt.id.startsWith('evt-'),
+      },
+      { label: 'Correlation ID preserved', ok: corrEvt.correlationId === correlationId },
+      {
+        label: 'Stats byType populated',
+        ok: stats.byType['domain_signal'] === 2 && stats.byType['cross_domain_correlation'] === 1,
+      },
     ];
-    return { section: "PrismEventBus", checks };
+    return { section: 'PrismEventBus', checks };
   });
 }
 
@@ -321,61 +396,72 @@ async function checkCovenantPolicy() {
   engine.register(MARITIME_RESPONSE_POLICY);
 
   const allowDecision = engine.evaluate({
-    subject: { userId: "user-jvandenberg", roles: ["exec", "ops"], tenantId: "szl-holdings" },
-    resource: { type: "incident-response", id: "test-001", domain: "vessels", actionClass: "emergency_response" },
-    action: "execute",
+    subject: { userId: 'user-jvandenberg', roles: ['exec', 'ops'], tenantId: 'szl-holdings' },
+    resource: {
+      type: 'incident-response',
+      id: 'test-001',
+      domain: 'vessels',
+      actionClass: 'emergency_response',
+    },
+    action: 'execute',
   });
 
   const denyDecision = engine.evaluate({
-    subject: { userId: "user-stranger", roles: ["viewer"], tenantId: "szl-holdings" },
-    resource: { type: "incident-response", id: "test-002", domain: "vessels" },
-    action: "execute",
+    subject: { userId: 'user-stranger', roles: ['viewer'], tenantId: 'szl-holdings' },
+    resource: { type: 'incident-response', id: 'test-002', domain: 'vessels' },
+    action: 'execute',
   });
 
   const checks = [
-    { label: "exec+ops role → ALLOW",              ok: allowDecision.allowed === true },
-    { label: "ALLOW effect matches",                ok: allowDecision.effect === "allow" },
-    { label: "Policy matched maritime-critical-v2", ok: allowDecision.matchedPolicies[0] === "maritime-critical-response-v2" },
-    { label: "viewer role → DENY",                  ok: denyDecision.allowed === false },
-    { label: "DENY has no matched policies",         ok: denyDecision.matchedPolicies.length === 0 },
-    { label: "DENY reason is default-deny",          ok: denyDecision.reason?.includes("default deny") },
-    { label: "Decision has requestId",               ok: typeof allowDecision.requestId === "string" },
-    { label: "Evaluation time < 100ms",              ok: allowDecision.durationMs < 100 },
+    { label: 'exec+ops role → ALLOW', ok: allowDecision.allowed === true },
+    { label: 'ALLOW effect matches', ok: allowDecision.effect === 'allow' },
+    {
+      label: 'Policy matched maritime-critical-v2',
+      ok: allowDecision.matchedPolicies[0] === 'maritime-critical-response-v2',
+    },
+    { label: 'viewer role → DENY', ok: denyDecision.allowed === false },
+    { label: 'DENY has no matched policies', ok: denyDecision.matchedPolicies.length === 0 },
+    { label: 'DENY reason is default-deny', ok: denyDecision.reason?.includes('default deny') },
+    { label: 'Decision has requestId', ok: typeof allowDecision.requestId === 'string' },
+    { label: 'Evaluation time < 100ms', ok: allowDecision.durationMs < 100 },
   ];
 
-  return { section: "CovenantPolicyEngine", checks };
+  return { section: 'CovenantPolicyEngine', checks };
 }
 
 async function checkMonteCarlo() {
   const ITERATIONS = 5000;
   const result = runSimulation(VESSELS_VOYAGE_COST, ITERATIONS);
-  const cost = result.metrics["totalVoyageCost"];
-  const fuelShare = result.metrics["fuelCostShare"];
-  const totalDays = result.metrics["totalDays"];
+  const cost = result.metrics['totalVoyageCost'];
+  const fuelShare = result.metrics['fuelCostShare'];
+  const totalDays = result.metrics['totalDays'];
 
   const checks = [
-    { label: `Ran ${ITERATIONS} iterations`,                    ok: result.iterations === ITERATIONS },
-    { label: "Valid iterations > 4900",                         ok: result.validIterations > 4900 },
-    { label: "Completed in < 5000ms",                           ok: result.durationMs < 5000 },
-    { label: "Total cost mean $200K–$2000K range",             ok: cost.mean > 200 && cost.mean < 2000 },
-    { label: "P5 < mean < P95 (cost)",                          ok: cost.p5 < cost.mean && cost.mean < cost.p95 },
-    { label: "Cost stdDev > 0 (variance exists)",               ok: cost.stdDev > 0 },
-    { label: "Fuel share mean 0.5–0.99",                        ok: fuelShare.mean > 0.5 && fuelShare.mean < 0.99 },
-    { label: "Total days mean 15–25 days",                      ok: totalDays.mean > 15 && totalDays.mean < 25 },
-    { label: "All cost values finite",                           ok: isFinite(cost.mean) && isFinite(cost.p5) && isFinite(cost.p95) },
-    { label: "totalVoyageCost n ≈ 5000",                        ok: cost.n > 4900 },
+    { label: `Ran ${ITERATIONS} iterations`, ok: result.iterations === ITERATIONS },
+    { label: 'Valid iterations > 4900', ok: result.validIterations > 4900 },
+    { label: 'Completed in < 5000ms', ok: result.durationMs < 5000 },
+    { label: 'Total cost mean $200K–$2000K range', ok: cost.mean > 200 && cost.mean < 2000 },
+    { label: 'P5 < mean < P95 (cost)', ok: cost.p5 < cost.mean && cost.mean < cost.p95 },
+    { label: 'Cost stdDev > 0 (variance exists)', ok: cost.stdDev > 0 },
+    { label: 'Fuel share mean 0.5–0.99', ok: fuelShare.mean > 0.5 && fuelShare.mean < 0.99 },
+    { label: 'Total days mean 15–25 days', ok: totalDays.mean > 15 && totalDays.mean < 25 },
+    {
+      label: 'All cost values finite',
+      ok: isFinite(cost.mean) && isFinite(cost.p5) && isFinite(cost.p95),
+    },
+    { label: 'totalVoyageCost n ≈ 5000', ok: cost.n > 4900 },
   ];
 
   return {
-    section: "Monte Carlo (VESSELS_VOYAGE_COST)",
+    section: 'Monte Carlo (VESSELS_VOYAGE_COST)',
     checks,
     summary: {
-      "mean ($000)": cost.mean.toFixed(1),
-      "p5 ($000)":   cost.p5.toFixed(1),
-      "p50 ($000)":  cost.p50.toFixed(1),
-      "p95 ($000)":  cost.p95.toFixed(1),
-      "stdDev":      cost.stdDev.toFixed(1),
-      "durationMs":  result.durationMs.toFixed(0),
+      'mean ($000)': cost.mean.toFixed(1),
+      'p5 ($000)': cost.p5.toFixed(1),
+      'p50 ($000)': cost.p50.toFixed(1),
+      'p95 ($000)': cost.p95.toFixed(1),
+      stdDev: cost.stdDev.toFixed(1),
+      durationMs: result.durationMs.toFixed(0),
     },
   };
 }
@@ -384,8 +470,8 @@ async function checkMonteCarlo() {
 // MAIN
 // ---------------------------------------------------------------------------
 async function main() {
-  console.log("\nSZL Holdings — Decision Theater End-to-End Simulation Check");
-  console.log("═".repeat(60));
+  console.log('\nSZL Holdings — Decision Theater End-to-End Simulation Check');
+  console.log('═'.repeat(60));
 
   const results = await Promise.all([
     checkPrismEventBus(),
@@ -415,19 +501,19 @@ async function main() {
     }
   }
 
-  console.log("\n" + "═".repeat(60));
+  console.log('\n' + '═'.repeat(60));
   console.log(`Results: ${totalPassed} passed, ${totalFailed} failed`);
 
   if (totalFailed > 0) {
-    console.error("\nFAIL — Decision Theater simulation has issues\n");
+    console.error('\nFAIL — Decision Theater simulation has issues\n');
     process.exit(1);
   } else {
-    console.log("\nPASS — Decision Theater simulation verified end-to-end\n");
+    console.log('\nPASS — Decision Theater simulation verified end-to-end\n');
     process.exit(0);
   }
 }
 
 main().catch((err) => {
-  console.error("Unexpected error:", err);
+  console.error('Unexpected error:', err);
   process.exit(1);
 });

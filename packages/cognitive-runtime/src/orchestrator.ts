@@ -1,45 +1,43 @@
-import { randomUUID } from "crypto";
-import { TraceWriter, defaultTraceStore } from "@workspace/trace-graph";
-import type { TraceStore } from "@workspace/trace-graph";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
-import type { MemoryStore } from "@workspace/memory-fabric";
-import { defaultSelfModelStore } from "@workspace/self-model";
-import type { SelfModelStore } from "@workspace/self-model";
-import { globalCollector } from "@workspace/cognitive-observability";
-import { AgentRun, type RunStatus as AgentRunStatus } from "@workspace/agents-core/run";
-import { emitStepLog } from "@workspace/agents-core/step-log";
-import { extractApprovalInterrupt, raiseApprovalInterrupt } from "./approval-interrupt.js";
-import { RunLedgerBuilder, defaultRunLedgerStore } from "@workspace/run-ledger";
-import { evaluateQualityGate, type QualityGateProfile } from "@workspace/run-ledger/quality-gate";
-
+import { AgentRun, type RunStatus as AgentRunStatus } from '@workspace/agents-core/run';
+import { emitStepLog } from '@workspace/agents-core/step-log';
+import { globalCollector } from '@workspace/cognitive-observability';
+import type { MemoryStore } from '@workspace/memory-fabric';
+import { defaultMemoryStore } from '@workspace/memory-fabric';
+import type { PlanGraph } from '@workspace/planner';
+import { defaultRunLedgerStore, RunLedgerBuilder } from '@workspace/run-ledger';
+import { evaluateQualityGate, type QualityGateProfile } from '@workspace/run-ledger/quality-gate';
+import type { SelfModelStore } from '@workspace/self-model';
+import { defaultSelfModelStore } from '@workspace/self-model';
+import type { TraceStore } from '@workspace/trace-graph';
+import { defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
+import { extractApprovalInterrupt, raiseApprovalInterrupt } from './approval-interrupt.js';
 import {
-  CognitiveContextSchema,
-  type CognitiveContext,
-  type CognitiveLoopRun,
-  type PhaseResult,
-  CognitiveLoopError,
-} from "./types.js";
-import {
+  type CheckpointStore,
   defaultCheckpointStore,
   loadCheckpoint,
   saveCheckpoint,
-  type CheckpointStore,
-} from "./checkpoint.js";
-
-import { perceivePhase } from "./phases/perceive.js";
-import type { PerceiveInput } from "./types.js";
-import { orientPhase } from "./phases/orient.js";
-import type { OrientOutput } from "./phases/orient.js";
-import { planPhase, type PlanRevisionContext } from "./phases/plan.js";
-import { executePhase, GuardianDecisionEngine, type StepExecutorFn } from "./phases/execute.js";
-import type { ExecutePhaseOutput } from "./phases/execute.js";
-import { verifyPhase } from "./phases/verify.js";
-import type { VerifyPhaseOutput } from "./phases/verify.js";
-import { reflectPhase } from "./phases/reflect.js";
-import type { ReflectPhaseOutput } from "./phases/reflect.js";
-import { updateSelfModelPhase, updateMemoryPhase } from "./phases/update.js";
-import type { UpdatePhaseOptions } from "./phases/update.js";
-import type { PlanGraph } from "@workspace/planner";
+} from './checkpoint.js';
+import type { ExecutePhaseOutput } from './phases/execute.js';
+import { executePhase, GuardianDecisionEngine, type StepExecutorFn } from './phases/execute.js';
+import type { OrientOutput } from './phases/orient.js';
+import { orientPhase } from './phases/orient.js';
+import { perceivePhase } from './phases/perceive.js';
+import { type PlanRevisionContext, planPhase } from './phases/plan.js';
+import type { ReflectPhaseOutput } from './phases/reflect.js';
+import { reflectPhase } from './phases/reflect.js';
+import type { UpdatePhaseOptions } from './phases/update.js';
+import { updateMemoryPhase, updateSelfModelPhase } from './phases/update.js';
+import type { VerifyPhaseOutput } from './phases/verify.js';
+import { verifyPhase } from './phases/verify.js';
+import type { PerceiveInput } from './types.js';
+import {
+  type CognitiveContext,
+  CognitiveContextSchema,
+  CognitiveLoopError,
+  type CognitiveLoopRun,
+  type PhaseResult,
+} from './types.js';
 
 export interface CognitiveRuntimeOptions {
   traceStore?: TraceStore;
@@ -81,7 +79,7 @@ export async function run(
   const agentRunOptions: ConstructorParameters<typeof AgentRun>[1] = {
     runId,
     agentId: ctx.agentId,
-    surface: "cognitive-runtime",
+    surface: 'cognitive-runtime',
     metadata: { sessionId: ctx.sessionId, traceId, ...ctx.metadata },
   };
   if (ctx.domain !== undefined) {
@@ -89,14 +87,20 @@ export async function run(
   }
   const agentRun = new AgentRun(objective, agentRunOptions);
 
-  function mapToAgentRunStatus(status: CognitiveLoopRun["status"]): AgentRunStatus {
+  function mapToAgentRunStatus(status: CognitiveLoopRun['status']): AgentRunStatus {
     switch (status) {
-      case "running": return "running";
-      case "pending_approval": return "pending_approval";
-      case "completed": return "completed";
-      case "failed": return "failed";
-      case "guardian_blocked": return "failed";
-      default: return "idle";
+      case 'running':
+        return 'running';
+      case 'pending_approval':
+        return 'pending_approval';
+      case 'completed':
+        return 'completed';
+      case 'failed':
+        return 'failed';
+      case 'guardian_blocked':
+        return 'failed';
+      default:
+        return 'idle';
     }
   }
 
@@ -104,8 +108,8 @@ export async function run(
     runId,
     objective,
     context: ctx,
-    status: "running",
-    currentPhase: "perceive",
+    status: 'running',
+    currentPhase: 'perceive',
     phases: [],
     startedAt: globalStartedAt,
     traceId,
@@ -127,7 +131,7 @@ export async function run(
   // Drive AgentRun lifecycle (status -> running, emits run.start step-log entry)
   void agentRun.start();
 
-  globalCollector.recordKnown("token_count", 0, { agentId: ctx.agentId, phase: "start" });
+  globalCollector.recordKnown('token_count', 0, { agentId: ctx.agentId, phase: 'start' });
 
   function recordPhase(result: PhaseResult): void {
     loopRun.phases.push(result);
@@ -138,7 +142,7 @@ export async function run(
       endedAt: result.completedAt
         ? new Date(result.completedAt).toISOString()
         : new Date().toISOString(),
-      status: result.status === "ok" || result.status === "skipped" ? "ok" : "error",
+      status: result.status === 'ok' || result.status === 'skipped' ? 'ok' : 'error',
       attributes: { ...result.metadata, phase: result.phase, durationMs: result.durationMs },
     });
 
@@ -149,10 +153,10 @@ export async function run(
       runId,
       stepId: `phase:${result.phase}`,
       stepName: result.phase,
-      level: result.status === "error" ? "error" : "info",
+      level: result.status === 'error' ? 'error' : 'info',
       message:
-        result.status === "error"
-          ? `Phase '${result.phase}' failed: ${result.error ?? "unknown error"}`
+        result.status === 'error'
+          ? `Phase '${result.phase}' failed: ${result.error ?? 'unknown error'}`
           : `Phase '${result.phase}' ${result.status} in ${result.durationMs}ms`,
       durationMs: result.durationMs,
       data: {
@@ -172,9 +176,9 @@ export async function run(
     // Mirror loopRun.status -> AgentRun via lifecycle calls. start() was already
     // invoked above; only complete/fail need to be relayed.
     const target = mapToAgentRunStatus(loopRun.status);
-    if (target === "completed" && agentRun.status !== "completed") {
+    if (target === 'completed' && agentRun.status !== 'completed') {
       void agentRun.complete(`Cognitive loop ${loopRun.status} (phases: ${loopRun.phases.length})`);
-    } else if ((target === "failed") && agentRun.status !== "failed") {
+    } else if (target === 'failed' && agentRun.status !== 'failed') {
       void agentRun.fail(loopRun.error ?? new Error(`Cognitive loop status: ${loopRun.status}`));
     }
   }
@@ -204,7 +208,7 @@ export async function run(
       failedSteps: 0,
       blockedSteps: 0,
       totalDurationMs: 0,
-      summary: "No execution output",
+      summary: 'No execution output',
       output: undefined,
     };
     const durationMs = Date.now() - globalStartedAt;
@@ -212,13 +216,13 @@ export async function run(
 
     try {
       // Phase 7: UPDATE SELF MODEL
-      loopRun.currentPhase = "update_self_model";
+      loopRun.currentPhase = 'update_self_model';
       const selfModelResult = await updateSelfModelPhase(emptyExec, verifyOut, reflectOut, opts);
       recordPhase(selfModelResult);
       loopRun.selfModelVersion = selfModelResult.output.selfModelVersion;
 
       // Phase 8: UPDATE MEMORY
-      loopRun.currentPhase = "update_memory";
+      loopRun.currentPhase = 'update_memory';
       const memoryResult = await updateMemoryPhase(emptyExec, verifyOut, reflectOut, opts);
       recordPhase(memoryResult);
       loopRun.memoryIds.push(...memoryResult.output.memoryIdsWritten);
@@ -240,7 +244,7 @@ export async function run(
       loopRun.memoryIds = [...ckpt.snapshot.memoryIds];
       resumeFromStepIndex = ckpt.stepIndex + 1;
 
-      const planPhaseResult = ckpt.snapshot.phases.find((p) => p.phase === "plan");
+      const planPhaseResult = ckpt.snapshot.phases.find((p) => p.phase === 'plan');
       if (planPhaseResult?.output) {
         resumedPlan = (planPhaseResult.output as { plan?: PlanGraph }).plan;
       }
@@ -259,10 +263,10 @@ export async function run(
 
     if (!resumedPlan) {
       // ─── PHASE 1: PERCEIVE ─────────────────────────────────────────────────
-      loopRun.currentPhase = "perceive";
+      loopRun.currentPhase = 'perceive';
       const perceptInput: PerceiveInput = ctx.perceiveInput ?? {
         rawSignals: [],
-        priority: "normal",
+        priority: 'normal',
       };
 
       const perceptResult = await perceivePhase(perceptInput, {
@@ -276,7 +280,7 @@ export async function run(
       loopRun.memoryIds.push(...perceptResult.output.storedMemoryIds);
 
       // ─── PHASE 2: ORIENT ───────────────────────────────────────────────────
-      loopRun.currentPhase = "orient";
+      loopRun.currentPhase = 'orient';
       const orientResult = await orientPhase(perceptResult.output, {
         memoryStore,
         traceId,
@@ -289,7 +293,7 @@ export async function run(
       orientOutput = orientResult.output;
 
       // ─── PHASE 3: PLAN (initial) ───────────────────────────────────────────
-      loopRun.currentPhase = "plan";
+      loopRun.currentPhase = 'plan';
       const planResult = await planPhase(objective, orientResult.output, {
         agentId: ctx.agentId,
         sessionId: ctx.sessionId,
@@ -304,12 +308,8 @@ export async function run(
       });
       recordPhase(planResult);
 
-      if (planResult.status === "error") {
-        throw new CognitiveLoopError(
-          planResult.error ?? "Plan creation failed",
-          "plan",
-          runId,
-        );
+      if (planResult.status === 'error') {
+        throw new CognitiveLoopError(planResult.error ?? 'Plan creation failed', 'plan', runId);
       }
 
       loopRun.planId = planResult.output!.planId;
@@ -319,21 +319,19 @@ export async function run(
         nodes: plan.steps.map((s) => ({
           nodeId: s.stepId,
           label: s.title,
-          nodeType: "task" as const,
-          status: "pending" as const,
+          nodeType: 'task' as const,
+          status: 'pending' as const,
           dependsOn: s.dependsOn,
           metadata: { riskLevel: s.riskLevel, routeClass: s.route.routeClass },
         })),
-        edges: plan.steps.flatMap((s) =>
-          s.dependsOn.map((dep) => ({ from: dep, to: s.stepId })),
-        ),
-        version: "1.0",
+        edges: plan.steps.flatMap((s) => s.dependsOn.map((dep) => ({ from: dep, to: s.stepId }))),
+        version: '1.0',
         createdAt: new Date().toISOString(),
       });
     }
 
     if (!plan) {
-      throw new CognitiveLoopError("No plan available — cannot execute", "plan", runId);
+      throw new CognitiveLoopError('No plan available — cannot execute', 'plan', runId);
     }
 
     // ─── Enforce incoming approval decision BEFORE any execution ─────────────
@@ -344,13 +342,16 @@ export async function run(
     const incomingDecision = ctx.metadata?.approvalDecision as
       | { verdict: string; actor?: string; reason?: string; decisionId?: string }
       | undefined;
-    if (incomingDecision && (incomingDecision.verdict === "deny" || incomingDecision.verdict === "escalate")) {
-      loopRun.status = "failed";
-      loopRun.currentPhase = "failed";
+    if (
+      incomingDecision &&
+      (incomingDecision.verdict === 'deny' || incomingDecision.verdict === 'escalate')
+    ) {
+      loopRun.status = 'failed';
+      loopRun.currentPhase = 'failed';
       loopRun.error =
-        `Approval ${incomingDecision.verdict}ed by ${incomingDecision.actor ?? "operator"}: ` +
-        (incomingDecision.reason ?? "no reason given");
-      tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+        `Approval ${incomingDecision.verdict}ed by ${incomingDecision.actor ?? 'operator'}: ` +
+        (incomingDecision.reason ?? 'no reason given');
+      tryCompleteTrace(traceWriter, traceId, 'error', loopRun.error);
       syncRunStatus();
       await finalize(lastExecuteOutput, undefined, undefined);
       return terminalResult(loopRun, globalStartedAt, false, loopRun.error);
@@ -364,7 +365,7 @@ export async function run(
       const isFirstIteration = iteration === 0;
 
       // ─── PHASE 4: EXECUTE ──────────────────────────────────────────────────
-      loopRun.currentPhase = "execute";
+      loopRun.currentPhase = 'execute';
       const executeResult = await executePhase(plan, {
         ctx,
         guardian,
@@ -412,26 +413,34 @@ export async function run(
         loopRun.metadata?.pendingApproval === true ||
         executeResult.metadata?.pendingApproval === true;
       if (isPendingApproval) {
-        loopRun.status = "pending_approval";
-        loopRun.currentPhase = "guardian_blocked";
+        loopRun.status = 'pending_approval';
+        loopRun.currentPhase = 'guardian_blocked';
         loopRun.error = executeResult.error;
-        tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+        tryCompleteTrace(traceWriter, traceId, 'error', loopRun.error);
         syncRunStatus();
         await finalize(lastExecuteOutput, undefined, undefined);
-        return terminalResult(loopRun, globalStartedAt, false,
-          `Run halted — step requires human approval: ${loopRun.error}`);
+        return terminalResult(
+          loopRun,
+          globalStartedAt,
+          false,
+          `Run halted — step requires human approval: ${loopRun.error}`,
+        );
       }
 
       // Guardian block (hard deny) — terminal
-      if (executeResult.status === "blocked") {
-        loopRun.status = "guardian_blocked";
-        loopRun.currentPhase = "guardian_blocked";
+      if (executeResult.status === 'blocked') {
+        loopRun.status = 'guardian_blocked';
+        loopRun.currentPhase = 'guardian_blocked';
         loopRun.error = executeResult.error;
-        tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+        tryCompleteTrace(traceWriter, traceId, 'error', loopRun.error);
         syncRunStatus();
         await finalize(lastExecuteOutput, undefined, undefined);
-        return terminalResult(loopRun, globalStartedAt, false,
-          `Run blocked by guardian: ${loopRun.error}`);
+        return terminalResult(
+          loopRun,
+          globalStartedAt,
+          false,
+          `Run blocked by guardian: ${loopRun.error}`,
+        );
       }
 
       loopRun.output = executeResult.output.output;
@@ -442,7 +451,7 @@ export async function run(
         break;
       }
 
-      loopRun.currentPhase = "verify";
+      loopRun.currentPhase = 'verify';
       const verifyResult = await verifyPhase(executeResult.output, {
         traceId,
         planId: loopRun.planId,
@@ -455,16 +464,16 @@ export async function run(
       loopRun.verifyRevisions = iteration;
 
       // Hard verifier block — terminal failure
-      if (verifyResult.status === "blocked") {
-        loopRun.status = "failed";
-        loopRun.currentPhase = "failed";
+      if (verifyResult.status === 'blocked') {
+        loopRun.status = 'failed';
+        loopRun.currentPhase = 'failed';
         loopRun.error = verifyResult.error;
-        tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+        tryCompleteTrace(traceWriter, traceId, 'error', loopRun.error);
         syncRunStatus();
 
         if (ctx.reflectionEnabled) {
           // ─── PHASE 6: REFLECT (on failure) ───────────────────────────────
-          loopRun.currentPhase = "reflect";
+          loopRun.currentPhase = 'reflect';
           const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
           recordPhase(reflectResult);
           loopRun.reflectionId = reflectResult.output.reflectionId;
@@ -472,8 +481,12 @@ export async function run(
         }
 
         await finalize(lastExecuteOutput, lastVerifyOutput, lastReflectOutput);
-        return terminalResult(loopRun, globalStartedAt, false,
-          `Run failed — verifier block: ${loopRun.error}`);
+        return terminalResult(
+          loopRun,
+          globalStartedAt,
+          false,
+          `Run failed — verifier block: ${loopRun.error}`,
+        );
       }
 
       // Passed → exit loop
@@ -484,14 +497,14 @@ export async function run(
       // Revision requested — reflect and replan if budget allows
       if (verifyResult.output.needsRevision && iteration < maxIterations - 1 && orientOutput) {
         // ─── PHASE 6: REFLECT (mid-loop revision) ─────────────────────────
-        loopRun.currentPhase = "reflect";
+        loopRun.currentPhase = 'reflect';
         const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
         recordPhase(reflectResult);
         loopRun.reflectionId = reflectResult.output.reflectionId;
         lastReflectOutput = reflectResult.output;
 
         // ─── PHASE 3 (REVISION): REPLAN with feedback ─────────────────────
-        loopRun.currentPhase = "plan";
+        loopRun.currentPhase = 'plan';
         const revisionCtx: PlanRevisionContext = {
           revision: iteration + 1,
           verifierFindings: verifyResult.output.reasoning.slice(0, 300),
@@ -513,7 +526,7 @@ export async function run(
         recordPhase(replanResult);
         loopRun.planRevisions = (loopRun.planRevisions ?? 0) + 1;
 
-        if (replanResult.status === "error" || !replanResult.output) {
+        if (replanResult.status === 'error' || !replanResult.output) {
           break; // Can't replan — stop and exit with current output
         }
 
@@ -530,21 +543,17 @@ export async function run(
     // ─── VERIFIER GATE: fail run if budget exhausted without approval ────────
     // If the last verify result was not approved and we've run out of revision
     // budget, the run must not complete successfully.
-    if (
-      lastVerifyOutput &&
-      !lastVerifyOutput.passed &&
-      lastVerifyOutput.action !== "approve"
-    ) {
-      loopRun.status = "failed";
-      loopRun.currentPhase = "failed";
+    if (lastVerifyOutput && !lastVerifyOutput.passed && lastVerifyOutput.action !== 'approve') {
+      loopRun.status = 'failed';
+      loopRun.currentPhase = 'failed';
       loopRun.error =
         `Verifier did not approve after ${loopRun.verifyRevisions + 1} attempt(s): ` +
         `${lastVerifyOutput.reasoning.slice(0, 200)}`;
-      tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+      tryCompleteTrace(traceWriter, traceId, 'error', loopRun.error);
       syncRunStatus();
 
       if (ctx.reflectionEnabled && !lastReflectOutput) {
-        loopRun.currentPhase = "reflect";
+        loopRun.currentPhase = 'reflect';
         const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
         recordPhase(reflectResult);
         loopRun.reflectionId = reflectResult.output.reflectionId;
@@ -552,13 +561,16 @@ export async function run(
       }
 
       await finalize(lastExecuteOutput, lastVerifyOutput, lastReflectOutput);
-      return terminalResult(loopRun, globalStartedAt, false,
-        `Run failed — verifier budget exhausted: ${loopRun.error}`);
+      return terminalResult(
+        loopRun,
+        globalStartedAt,
+        false,
+        `Run failed — verifier budget exhausted: ${loopRun.error}`,
+      );
     }
 
     // ─── PHASE 6: REFLECT (final, if not already done mid-loop) ──────────────
-    const traceStatus: "ok" | "error" =
-      (lastExecuteOutput?.failedSteps ?? 0) > 0 ? "error" : "ok";
+    const traceStatus: 'ok' | 'error' = (lastExecuteOutput?.failedSteps ?? 0) > 0 ? 'error' : 'ok';
     tryCompleteTrace(
       traceWriter,
       traceId,
@@ -569,7 +581,7 @@ export async function run(
     );
 
     if (ctx.reflectionEnabled && !lastReflectOutput) {
-      loopRun.currentPhase = "reflect";
+      loopRun.currentPhase = 'reflect';
       const reflectResult = await reflectPhase({ traceId, traceStore, memoryStore });
       recordPhase(reflectResult);
       loopRun.reflectionId = reflectResult.output.reflectionId;
@@ -580,8 +592,8 @@ export async function run(
     await finalize(lastExecuteOutput, lastVerifyOutput, lastReflectOutput);
 
     // ─── COMPLETE ─────────────────────────────────────────────────────────────
-    loopRun.currentPhase = "complete";
-    loopRun.status = "completed";
+    loopRun.currentPhase = 'complete';
+    loopRun.status = 'completed';
     const completedAt = Date.now();
     loopRun.completedAt = completedAt;
     loopRun.durationMs = completedAt - globalStartedAt;
@@ -596,11 +608,11 @@ export async function run(
     // agents are held to stricter completion/latency standards.
     const gateProfileOverride: Partial<QualityGateProfile> = (() => {
       switch (ctx.agentTier) {
-        case "autonomous":
+        case 'autonomous':
           return { completionThreshold: 0.8, toolFailureRateThreshold: 0.2 };
-        case "operator":
+        case 'operator':
           return { completionThreshold: 0.7, toolFailureRateThreshold: 0.3 };
-        case "analyst":
+        case 'analyst':
           return { completionThreshold: 0.6, toolFailureRateThreshold: 0.4 };
         default:
           return {};
@@ -625,14 +637,17 @@ export async function run(
         });
       }
 
-      for (const stepResult of (lastExecuteOutput?.stepResults ?? [])) {
+      for (const stepResult of lastExecuteOutput?.stepResults ?? []) {
         ledgerBuilder.addToolCall({
-          toolId: stepResult.toolId ?? "default",
+          toolId: stepResult.toolId ?? 'default',
           stepId: stepResult.stepId,
           latencyMs: stepResult.durationMs ?? 0,
           outcome:
-            stepResult.status === "completed" ? "success" :
-            stepResult.status === "skipped" ? "skipped" : "failure",
+            stepResult.status === 'completed'
+              ? 'success'
+              : stepResult.status === 'skipped'
+                ? 'skipped'
+                : 'failure',
           ...(stepResult.error !== undefined && { error: stepResult.error }),
         });
       }
@@ -655,16 +670,16 @@ export async function run(
       // A run is only marked "completed" when ALL quality gates pass.
       // Both "blocked" and "degraded" outcomes are terminal failures — the
       // caller must not treat the output as consumable in either case.
-      if (gateResult.status === "blocked") {
-        loopRun.status = "failed";
+      if (gateResult.status === 'blocked') {
+        loopRun.status = 'failed';
         loopRun.error =
-          `Quality gate blocked: ${gateResult.failingGates.map((g) => g.gate).join(", ")}. ` +
+          `Quality gate blocked: ${gateResult.failingGates.map((g) => g.gate).join(', ')}. ` +
           gateResult.recommendedNextAction;
-      } else if (gateResult.status === "degraded") {
-        loopRun.status = "failed";
+      } else if (gateResult.status === 'degraded') {
+        loopRun.status = 'failed';
         loopRun.error =
           `Quality gate degraded — run did not meet completion criteria: ` +
-          `${gateResult.failingGates.map((g) => g.gate).join(", ")}. ` +
+          `${gateResult.failingGates.map((g) => g.gate).join(', ')}. ` +
           gateResult.recommendedNextAction;
       }
     } catch {
@@ -674,36 +689,36 @@ export async function run(
     syncRunStatus();
 
     globalCollector.recordKnown(
-      "agent_reliability_score",
+      'agent_reliability_score',
       (lastExecuteOutput?.failedSteps ?? 0) === 0 ? 1 : 0,
       { agentId: ctx.agentId, runId },
     );
 
-    const gateStatus = (loopRun.metadata?.gateStatus as string | undefined) ?? "pending";
+    const gateStatus = (loopRun.metadata?.gateStatus as string | undefined) ?? 'pending';
     return {
       run: loopRun,
-      success: loopRun.status === "completed",
+      success: loopRun.status === 'completed',
       summary:
         `Cognitive loop ${loopRun.status} in ${loopRun.durationMs}ms. ` +
-        `Phases: ${loopRun.phases.map((p) => p.phase).join(" → ")}. ` +
+        `Phases: ${loopRun.phases.map((p) => p.phase).join(' → ')}. ` +
         `Plan revisions: ${loopRun.planRevisions}. Verify revisions: ${loopRun.verifyRevisions}. ` +
         `Gate: ${gateStatus}.`,
     };
   } catch (err) {
     const completedAt = Date.now();
-    loopRun.status = "failed";
-    loopRun.currentPhase = "failed";
+    loopRun.status = 'failed';
+    loopRun.currentPhase = 'failed';
     loopRun.completedAt = completedAt;
     loopRun.durationMs = completedAt - globalStartedAt;
     loopRun.error = err instanceof Error ? err.message : String(err);
 
-    tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+    tryCompleteTrace(traceWriter, traceId, 'error', loopRun.error);
     syncRunStatus();
 
     // Guaranteed finalization even on unexpected errors
     await finalize(lastExecuteOutput, lastVerifyOutput, lastReflectOutput);
 
-    globalCollector.recordKnown("agent_reliability_score", 0, { agentId: ctx.agentId, runId });
+    globalCollector.recordKnown('agent_reliability_score', 0, { agentId: ctx.agentId, runId });
 
     return {
       run: loopRun,
@@ -728,18 +743,17 @@ function terminalResult(
 function tryCompleteTrace(
   writer: TraceWriter,
   traceId: string,
-  status: "ok" | "error",
+  status: 'ok' | 'error',
   error?: string,
 ): void {
   try {
     writer.completeTrace(traceId, {
-      status: status === "ok" ? "completed" : "failed",
+      status: status === 'ok' ? 'completed' : 'failed',
     });
     if (error) {
-      writer.recordError(traceId, "cognitive_runtime_error", error);
+      writer.recordError(traceId, 'cognitive_runtime_error', error);
     }
   } catch {
     // ignore — trace may not have been persisted
   }
 }
-

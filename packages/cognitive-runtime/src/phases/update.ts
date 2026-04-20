@@ -1,12 +1,12 @@
-import { randomUUID } from "crypto";
-import { defaultSelfModelStore, updateAfterRun } from "@workspace/self-model";
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
-import type { SelfModelStore } from "@workspace/self-model";
-import type { MemoryStore, MemoryEntry } from "@workspace/memory-fabric";
-import type { PhaseResult } from "../types.js";
-import type { ReflectPhaseOutput } from "./reflect.js";
-import type { ExecutePhaseOutput } from "./execute.js";
-import type { VerifyPhaseOutput } from "./verify.js";
+import type { MemoryEntry, MemoryStore } from '@workspace/memory-fabric';
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import type { SelfModelStore } from '@workspace/self-model';
+import { defaultSelfModelStore, updateAfterRun } from '@workspace/self-model';
+import { randomUUID } from 'crypto';
+import type { PhaseResult } from '../types.js';
+import type { ExecutePhaseOutput } from './execute.js';
+import type { ReflectPhaseOutput } from './reflect.js';
+import type { VerifyPhaseOutput } from './verify.js';
 
 export interface UpdatePhaseOptions {
   agentId: string;
@@ -50,12 +50,11 @@ export async function updateSelfModelPhase(
     executeOutput.blockedSteps === 0 &&
     (verifyOutput?.passed ?? true);
 
-  const status: "success" | "partial" | "failure" =
-    overallSuccess
-      ? "success"
-      : executeOutput.completedSteps > 0
-        ? "partial"
-        : "failure";
+  const status: 'success' | 'partial' | 'failure' = overallSuccess
+    ? 'success'
+    : executeOutput.completedSteps > 0
+      ? 'partial'
+      : 'failure';
 
   let selfModelUpdated = false;
   let selfModelVersion: number | undefined;
@@ -74,11 +73,11 @@ export async function updateSelfModelPhase(
         summary:
           `Run ${opts.runId}: ${executeOutput.completedSteps} steps completed, ` +
           `${executeOutput.failedSteps} failed. ` +
-          (reflectOutput ? `Lesson: ${reflectOutput.lesson.slice(0, 80)}` : ""),
+          (reflectOutput ? `Lesson: ${reflectOutput.lesson.slice(0, 80)}` : ''),
         durationMs: opts.durationMs,
         errorCode:
-          status === "failure"
-            ? (executeOutput.stepResults.find((r) => r.status === "failed")?.error ?? undefined)
+          status === 'failure'
+            ? (executeOutput.stepResults.find((r) => r.status === 'failed')?.error ?? undefined)
             : undefined,
       },
       selfModelStore,
@@ -99,15 +98,15 @@ export async function updateSelfModelPhase(
     driftScore,
     helpRequested,
     summary:
-      `Self-model ${selfModelUpdated ? `updated to v${selfModelVersion}` : "not found/updated"}. ` +
-      `Confidence=${confidenceAfter?.toFixed(3) ?? "N/A"}, Drift=${driftScore?.toFixed(3) ?? "N/A"}.` +
-      (helpRequested ? " Help request triggered." : ""),
+      `Self-model ${selfModelUpdated ? `updated to v${selfModelVersion}` : 'not found/updated'}. ` +
+      `Confidence=${confidenceAfter?.toFixed(3) ?? 'N/A'}, Drift=${driftScore?.toFixed(3) ?? 'N/A'}.` +
+      (helpRequested ? ' Help request triggered.' : ''),
   };
 
   const completedAt = Date.now();
   return {
-    phase: "update_self_model",
-    status: "ok",
+    phase: 'update_self_model',
+    status: 'ok',
     startedAt,
     completedAt,
     durationMs: completedAt - startedAt,
@@ -132,12 +131,11 @@ export async function updateMemoryPhase(
     executeOutput.blockedSteps === 0 &&
     (verifyOutput?.passed ?? true);
 
-  const status: "success" | "partial" | "failure" =
-    overallSuccess
-      ? "success"
-      : executeOutput.completedSteps > 0
-        ? "partial"
-        : "failure";
+  const status: 'success' | 'partial' | 'failure' = overallSuccess
+    ? 'success'
+    : executeOutput.completedSteps > 0
+      ? 'partial'
+      : 'failure';
 
   const memoryIdsWritten: string[] = [];
 
@@ -145,7 +143,7 @@ export async function updateMemoryPhase(
   const episodicId = `episodic-run-${opts.runId}-${randomUUID()}`;
   const episodicEntry: MemoryEntry = {
     id: episodicId,
-    tier: "episodic",
+    tier: 'episodic',
     key: `run:${opts.runId}`,
     value: {
       runId: opts.runId,
@@ -161,20 +159,20 @@ export async function updateMemoryPhase(
     },
     summary: `Cognitive run ${opts.runId} (${status}): "${opts.objective.slice(0, 80)}"`,
     provenance: {
-      source: "cognitive-runtime:update_memory",
+      source: 'cognitive-runtime:update_memory',
       sourceId: opts.traceId,
       author: opts.agentId,
-      method: "agent",
+      method: 'agent',
       createdAt: new Date().toISOString(),
     },
     freshness: { lastUpdatedAt: new Date().toISOString(), isStale: false },
     confidence: overallSuccess ? 1.0 : 0.6,
-    retention: { policy: "persistent", pinned: false },
-    sensitivity: "internal",
+    retention: { policy: 'persistent', pinned: false },
+    sensitivity: 'internal',
     linkedEntities: [],
     linkedTraces: [opts.traceId],
     linkedActions: [],
-    tags: ["cognitive-run", status, opts.domain ?? "unknown"].filter(Boolean),
+    tags: ['cognitive-run', status, opts.domain ?? 'unknown'].filter(Boolean),
     domain: opts.domain ?? MEMORY_DOMAIN_UNKNOWN,
     metadata: { runId: opts.runId },
   };
@@ -187,7 +185,7 @@ export async function updateMemoryPhase(
     lessonId = `semantic-lesson-${opts.runId}-${randomUUID()}`;
     const lessonEntry: MemoryEntry = {
       id: lessonId,
-      tier: "semantic",
+      tier: 'semantic',
       key: `lesson:${opts.traceId}`,
       value: {
         lesson: reflectOutput.lesson,
@@ -200,20 +198,22 @@ export async function updateMemoryPhase(
       },
       summary: `Learned lesson from run ${opts.runId}: ${reflectOutput.lesson.slice(0, 100)}`,
       provenance: {
-        source: "cognitive-runtime:update_memory",
+        source: 'cognitive-runtime:update_memory',
         sourceId: opts.traceId,
         author: opts.agentId,
-        method: "agent",
+        method: 'agent',
         createdAt: new Date().toISOString(),
       },
       freshness: { lastUpdatedAt: new Date().toISOString(), isStale: false },
       confidence: reflectOutput.qualityScore,
-      retention: { policy: "persistent", pinned: false },
-      sensitivity: "internal",
+      retention: { policy: 'persistent', pinned: false },
+      sensitivity: 'internal',
       linkedEntities: [],
       linkedTraces: [opts.traceId],
       linkedActions: [],
-      tags: ["lesson", "reflection", opts.domain ?? "unknown", reflectOutput.failureMode].filter(Boolean),
+      tags: ['lesson', 'reflection', opts.domain ?? 'unknown', reflectOutput.failureMode].filter(
+        Boolean,
+      ),
       domain: opts.domain ?? MEMORY_DOMAIN_UNKNOWN,
       metadata: { reflectionId: reflectOutput.reflectionId, runId: opts.runId },
     };
@@ -227,13 +227,14 @@ export async function updateMemoryPhase(
     lessonId,
     summary:
       `Wrote ${memoryIdsWritten.length} memory entries: 1 episodic run record` +
-      (lessonId ? `, 1 semantic lesson` : "") + `.`,
+      (lessonId ? `, 1 semantic lesson` : '') +
+      `.`,
   };
 
   const completedAt = Date.now();
   return {
-    phase: "update_memory",
-    status: "ok",
+    phase: 'update_memory',
+    status: 'ok',
     startedAt,
     completedAt,
     durationMs: completedAt - startedAt,
@@ -260,7 +261,12 @@ export async function updatePhase(
   reflectOutput: ReflectPhaseOutput | undefined,
   opts: UpdatePhaseOptions,
 ): Promise<PhaseResult & { output: UpdatePhaseOutput }> {
-  const selfModelResult = await updateSelfModelPhase(executeOutput, verifyOutput, reflectOutput, opts);
+  const selfModelResult = await updateSelfModelPhase(
+    executeOutput,
+    verifyOutput,
+    reflectOutput,
+    opts,
+  );
   const memoryResult = await updateMemoryPhase(executeOutput, verifyOutput, reflectOutput, opts);
 
   const output: UpdatePhaseOutput = {
@@ -270,13 +276,13 @@ export async function updatePhase(
     driftScore: selfModelResult.output.driftScore,
     helpRequested: selfModelResult.output.helpRequested,
     memoryIdsWritten: memoryResult.output.memoryIdsWritten,
-    summary: selfModelResult.output.summary + " " + memoryResult.output.summary,
+    summary: selfModelResult.output.summary + ' ' + memoryResult.output.summary,
   };
 
   const completedAt = Date.now();
   return {
-    phase: "update_self_model",
-    status: "ok",
+    phase: 'update_self_model',
+    status: 'ok',
     startedAt: selfModelResult.startedAt,
     completedAt,
     durationMs: completedAt - selfModelResult.startedAt,

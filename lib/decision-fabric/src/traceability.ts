@@ -7,14 +7,14 @@
  */
 
 import {
+  type CorrelationLink,
+  type DecisionRecord,
   db,
   decisionRecordsTable,
-  type DecisionRecord,
-  type CorrelationLink,
-} from "@szl-holdings/db";
-import { and, desc, eq } from "drizzle-orm";
-import { getCorrelatedEvents } from "./correlation";
-import { listDecisions } from "./decision-records";
+} from '@szl-holdings/db';
+import { and, desc, eq } from 'drizzle-orm';
+import { getCorrelatedEvents } from './correlation';
+import { listDecisions } from './decision-records';
 
 export interface RecommendationTrace {
   recommendationId: string;
@@ -23,7 +23,7 @@ export interface RecommendationTrace {
   predictedOutcome: Record<string, unknown> | null;
   actualOutcome: Record<string, unknown> | null;
   predictionError: number | null;
-  status: DecisionRecord["status"] | null;
+  status: DecisionRecord['status'] | null;
 }
 
 export interface TraceOptions {
@@ -83,7 +83,9 @@ export async function traceDecisionDownstream(
 
   const events: CorrelationLink[] = [];
   if (decision.correlationId) {
-    events.push(...(await getCorrelatedEvents(decision.correlationId, { orgId: options.orgId ?? null })));
+    events.push(
+      ...(await getCorrelatedEvents(decision.correlationId, { orgId: options.orgId ?? null })),
+    );
   }
   return { decision, events };
 }

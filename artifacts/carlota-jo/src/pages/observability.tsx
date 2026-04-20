@@ -1,7 +1,6 @@
-import AppObservabilityPage from "@szl-holdings/shared-ui/AppObservabilityPage";
-  import { carlotaJoConfig } from "@szl-holdings/observability/configs";
+import { carlotaJoConfig } from '@szl-holdings/observability/configs';
+import AppObservabilityPage from '@szl-holdings/shared-ui/AppObservabilityPage';
 
-  export default function ObservabilityPage() {
-    return <AppObservabilityPage config={carlotaJoConfig} />;
-  }
-  
+export default function ObservabilityPage() {
+  return <AppObservabilityPage config={carlotaJoConfig} />;
+}

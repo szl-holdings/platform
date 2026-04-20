@@ -1,1 +1,9 @@
-export { logActivityFromRequest as logActivity, createAuditMiddleware, queryAuditTrail, queryAuditEvents, type LogActivityParams, type AuditAction, type AuditEntityType } from "@szl-holdings/audit";
+export {
+  type AuditAction,
+  type AuditEntityType,
+  createAuditMiddleware,
+  type LogActivityParams,
+  logActivityFromRequest as logActivity,
+  queryAuditEvents,
+  queryAuditTrail,
+} from '@szl-holdings/audit';

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useWebSocket } from "@szl-holdings/mobile-shared";
-import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
+import { useWebSocket } from '@szl-holdings/mobile-shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
+import { AUTH_TOKEN_KEY } from '@/context/AuthContext';
 
 interface IncidentSnapshot {
   id: number;
@@ -14,7 +14,7 @@ interface IncidentSnapshot {
 }
 
 interface IncidentEvent {
-  type: "incident_created" | "incident_updated" | "incident_closed";
+  type: 'incident_created' | 'incident_updated' | 'incident_closed';
   incident?: IncidentSnapshot;
 }
 
@@ -26,12 +26,12 @@ export function useAegisWebSocket() {
     let cancelled = false;
     (async () => {
       try {
-        if (typeof window !== "undefined" && window.localStorage) {
+        if (typeof window !== 'undefined' && window.localStorage) {
           const t = window.localStorage.getItem(AUTH_TOKEN_KEY);
           if (!cancelled) setToken(t);
           return;
         }
-        const SecureStore = (await import("expo-secure-store")).default;
+        const SecureStore = (await import('expo-secure-store')).default;
         const t = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
         if (!cancelled) setToken(t);
       } catch {
@@ -43,52 +43,42 @@ export function useAegisWebSocket() {
     };
   }, []);
 
-  const domain = process.env.EXPO_PUBLIC_DOMAIN ?? "";
-  const url = domain
-    ? `wss://${domain}/api/aegis/ws`
-    : "";
+  const domain = process.env.EXPO_PUBLIC_DOMAIN ?? '';
+  const url = domain ? `wss://${domain}/api/aegis/ws` : '';
 
   const handleMessage = useCallback(
     (data: unknown) => {
       const event = data as IncidentEvent;
       if (!event?.type) return;
 
-      if (event.type === "incident_created" && event.incident) {
+      if (event.type === 'incident_created' && event.incident) {
         const snapshot = event.incident;
-        qc.setQueryData<IncidentSnapshot[]>(
-          ["aegis-incidents"],
-          (prev) => {
-            if (!prev) return [snapshot];
-            const exists = prev.some((i) => i.id === snapshot.id);
-            return exists ? prev : [snapshot, ...prev];
-          }
-        );
+        qc.setQueryData<IncidentSnapshot[]>(['aegis-incidents'], (prev) => {
+          if (!prev) return [snapshot];
+          const exists = prev.some((i) => i.id === snapshot.id);
+          return exists ? prev : [snapshot, ...prev];
+        });
       } else if (
-        (event.type === "incident_updated" || event.type === "incident_closed") &&
+        (event.type === 'incident_updated' || event.type === 'incident_closed') &&
         event.incident
       ) {
         const snapshot = event.incident;
-        qc.setQueryData<IncidentSnapshot[]>(
-          ["aegis-incidents"],
-          (prev) => {
-            if (!prev) return prev;
-            return prev.map((i) =>
-              i.id === snapshot.id ? { ...i, ...snapshot } : i
-            );
-          }
-        );
+        qc.setQueryData<IncidentSnapshot[]>(['aegis-incidents'], (prev) => {
+          if (!prev) return prev;
+          return prev.map((i) => (i.id === snapshot.id ? { ...i, ...snapshot } : i));
+        });
       }
 
-      qc.invalidateQueries({ queryKey: ["aegis-incidents"] });
+      qc.invalidateQueries({ queryKey: ['aegis-incidents'] });
     },
-    [qc]
+    [qc],
   );
 
   return useWebSocket({
     url,
-    channel: "aegis-incidents",
+    channel: 'aegis-incidents',
     token: token ?? undefined,
     onMessage: handleMessage,
-    enabled: token !== undefined && url !== "",
+    enabled: token !== undefined && url !== '',
   });
 }

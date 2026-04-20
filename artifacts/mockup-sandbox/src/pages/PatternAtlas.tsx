@@ -1,11 +1,19 @@
-import { useState, useEffect } from "react";
-import { nexusApi } from "../lib/api";
-import type { PatternFamily } from "../lib/types";
-import { GitBranch, Loader, AlertCircle, ChevronRight } from "lucide-react";
+import { AlertCircle, ChevronRight, GitBranch, Loader } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { nexusApi } from '../lib/api';
+import type { PatternFamily } from '../lib/types';
 
 const FAMILY_COLORS = [
-  "#00d4ff", "#a855f7", "#00ff88", "#ffb700", "#f472b6",
-  "#22d3ee", "#fb923c", "#34d399", "#818cf8", "#e879f9",
+  '#00d4ff',
+  '#a855f7',
+  '#00ff88',
+  '#ffb700',
+  '#f472b6',
+  '#22d3ee',
+  '#fb923c',
+  '#34d399',
+  '#818cf8',
+  '#e879f9',
 ];
 
 export default function PatternAtlas() {
@@ -15,9 +23,16 @@ export default function PatternAtlas() {
   const [selected, setSelected] = useState<PatternFamily | null>(null);
 
   useEffect(() => {
-    nexusApi.listPatterns()
-      .then((data) => { setPatterns(data); setLoading(false); })
-      .catch((err) => { setError(err.message); setLoading(false); });
+    nexusApi
+      .listPatterns()
+      .then((data) => {
+        setPatterns(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -57,11 +72,11 @@ export default function PatternAtlas() {
                 key={family.id}
                 className="rounded-xl border cursor-pointer transition-all overflow-hidden"
                 style={{
-                  borderColor: isSelected ? color : "#1a2535",
+                  borderColor: isSelected ? color : '#1a2535',
                   background: isSelected
                     ? `linear-gradient(135deg, ${color}08 0%, transparent 60%)`
-                    : "transparent",
-                  backgroundColor: isSelected ? undefined : "#0d1520",
+                    : 'transparent',
+                  backgroundColor: isSelected ? undefined : '#0d1520',
                 }}
                 onClick={() => setSelected(isSelected ? null : family)}
               >
@@ -74,7 +89,10 @@ export default function PatternAtlas() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-sm font-semibold" style={{ color: isSelected ? color : undefined }}>
+                      <h3
+                        className="text-sm font-semibold"
+                        style={{ color: isSelected ? color : undefined }}
+                      >
                         {family.name}
                       </h3>
                       <div className="flex items-center gap-1.5">
@@ -88,7 +106,7 @@ export default function PatternAtlas() {
                           className="w-3.5 h-3.5 transition-transform"
                           style={{
                             color,
-                            transform: isSelected ? "rotate(90deg)" : "rotate(0deg)",
+                            transform: isSelected ? 'rotate(90deg)' : 'rotate(0deg)',
                           }}
                         />
                       </div>
@@ -110,11 +128,11 @@ export default function PatternAtlas() {
                 </div>
 
                 {isSelected && (
-                  <div
-                    className="px-5 pb-4 pt-2 border-t"
-                    style={{ borderColor: `${color}20` }}
-                  >
-                    <div className="text-[10px] font-mono uppercase tracking-widest mb-1.5" style={{ color }}>
+                  <div className="px-5 pb-4 pt-2 border-t" style={{ borderColor: `${color}20` }}>
+                    <div
+                      className="text-[10px] font-mono uppercase tracking-widest mb-1.5"
+                      style={{ color }}
+                    >
                       What NEXUS does natively from this pattern
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">

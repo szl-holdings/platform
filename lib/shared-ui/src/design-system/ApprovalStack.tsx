@@ -1,7 +1,6 @@
-import * as React from "react";
-import { cn } from "../utils";
-import { toAlpha } from "../utils";
-import { colors, effects } from "../tokens";
+import * as React from 'react';
+import { colors, effects } from '../tokens';
+import { cn, toAlpha } from '../utils';
 
 export type ApprovalStateKey = keyof typeof colors.reviewState;
 
@@ -29,12 +28,17 @@ function ApproverAvatar({ approver, accentColor }: { approver: Approver; accentC
   const token = colors.reviewState[approver.state];
   const initials =
     approver.initials ??
-    approver.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+    approver.name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
 
   return (
     <div
       className="relative shrink-0"
-      title={`${approver.name}${approver.role ? ` — ${approver.role}` : ""}: ${token.label}`}
+      title={`${approver.name}${approver.role ? ` — ${approver.role}` : ''}: ${token.label}`}
     >
       <div
         className="w-8 h-8 rounded-full flex items-center justify-center border-2 text-xs font-semibold"
@@ -42,13 +46,13 @@ function ApproverAvatar({ approver, accentColor }: { approver: Approver; accentC
           background: approver.avatarUrl
             ? undefined
             : accentColor
-            ? toAlpha(accentColor, 0.10)
-            : colors.surface.glass,
+              ? toAlpha(accentColor, 0.1)
+              : colors.surface.glass,
           borderColor: token.border,
           color: colors.text.primary,
           backgroundImage: approver.avatarUrl ? `url(${approver.avatarUrl})` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       >
         {!approver.avatarUrl && initials}
@@ -66,20 +70,20 @@ function ApproverAvatar({ approver, accentColor }: { approver: Approver; accentC
 }
 
 export function ApprovalStack({
-  title = "Approval Status",
+  title = 'Approval Status',
   approvers,
   required,
   accentColor,
   compact = false,
   className,
 }: ApprovalStackProps) {
-  const approved = approvers.filter((a) => a.state === "approved").length;
+  const approved = approvers.filter((a) => a.state === 'approved').length;
   const total = required ?? approvers.length;
   const progress = total > 0 ? (approved / total) * 100 : 0;
 
   return (
     <div
-      className={cn("rounded-xl border", compact ? "p-3" : "p-4", className)}
+      className={cn('rounded-xl border', compact ? 'p-3' : 'p-4', className)}
       style={{
         background: effects.surface.card.background,
         border: effects.surface.card.border,
@@ -106,9 +110,7 @@ export function ApprovalStack({
           style={{
             width: `${progress}%`,
             background:
-              progress === 100
-                ? colors.semantic.success
-                : accentColor ?? colors.semantic.info,
+              progress === 100 ? colors.semantic.success : (accentColor ?? colors.semantic.info),
           }}
         />
       </div>
@@ -119,9 +121,15 @@ export function ApprovalStack({
             const token = colors.reviewState[approver.state];
             return (
               <div key={approver.id} className="flex items-center gap-2.5">
-                <ApproverAvatar approver={approver} {...(accentColor !== undefined ? { accentColor } : {})} />
+                <ApproverAvatar
+                  approver={approver}
+                  {...(accentColor !== undefined ? { accentColor } : {})}
+                />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-medium truncate" style={{ color: colors.text.primary }}>
+                  <p
+                    className="text-[12px] font-medium truncate"
+                    style={{ color: colors.text.primary }}
+                  >
                     {approver.name}
                   </p>
                   {approver.role && (
@@ -147,7 +155,11 @@ export function ApprovalStack({
       ) : (
         <div className="flex items-center gap-1">
           {approvers.map((approver) => (
-            <ApproverAvatar key={approver.id} approver={approver} {...(accentColor !== undefined ? { accentColor } : {})} />
+            <ApproverAvatar
+              key={approver.id}
+              approver={approver}
+              {...(accentColor !== undefined ? { accentColor } : {})}
+            />
           ))}
         </div>
       )}
@@ -164,7 +176,7 @@ export function ApprovalStack({
               >
                 <span className="font-medium" style={{ color: colors.text.primary }}>
                   {approver.name}:
-                </span>{" "}
+                </span>{' '}
                 {approver.note}
               </div>
             ))}

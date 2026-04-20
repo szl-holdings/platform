@@ -1,6 +1,15 @@
-import * as React from "react";
-import { X, ChevronRight, ChevronLeft, CheckCircle2, Circle, Sparkles, Trophy, RotateCcw } from "lucide-react";
-import { cn } from "../utils";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Circle,
+  RotateCcw,
+  Sparkles,
+  Trophy,
+  X,
+} from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -9,7 +18,7 @@ export interface OnboardingStep {
   title: string;
   description: string;
   targetSelector?: string;
-  placement?: "top" | "bottom" | "left" | "right" | "center";
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'center';
   icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   action?: {
     label: string;
@@ -68,7 +77,7 @@ export function useOnboardingState(appId: string) {
     try {
       localStorage.setItem(key, JSON.stringify({ completed: true }));
     } catch {}
-    setState(s => ({ ...s, completed: true, active: false }));
+    setState((s) => ({ ...s, completed: true, active: false }));
   }, [key]);
 
   const replay = React.useCallback(() => {
@@ -82,11 +91,11 @@ export function useOnboardingState(appId: string) {
     try {
       localStorage.setItem(key, JSON.stringify({ completed: true }));
     } catch {}
-    setState(s => ({ ...s, completed: true, active: false }));
+    setState((s) => ({ ...s, completed: true, active: false }));
   }, [key]);
 
   const setStep = React.useCallback((step: number) => {
-    setState(s => ({ ...s, currentStep: step }));
+    setState((s) => ({ ...s, currentStep: step }));
   }, []);
 
   return { ...state, markCompleted, replay, dismiss, setStep };
@@ -103,22 +112,25 @@ export function useChecklistState(appId: string, initialItems: OnboardingCheckli
     return [];
   });
 
-  const toggleItem = React.useCallback((id: string) => {
-    setCompletedIds(prev => {
-      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      try {
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  }, [key]);
+  const toggleItem = React.useCallback(
+    (id: string) => {
+      setCompletedIds((prev) => {
+        const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+        try {
+          localStorage.setItem(key, JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+    },
+    [key],
+  );
 
-  const items = initialItems.map(item => ({
+  const items = initialItems.map((item) => ({
     ...item,
     completed: item.completed ?? completedIds.includes(item.id),
   }));
 
-  const completedCount = items.filter(i => i.completed).length;
+  const completedCount = items.filter((i) => i.completed).length;
   const allCompleted = completedCount === items.length;
 
   return { items, completedIds, toggleItem, completedCount, allCompleted };
@@ -144,7 +156,7 @@ function SpotlightOverlay({
     if (el) {
       const r = el.getBoundingClientRect();
       setRect(r);
-      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } else {
       setRect(null);
     }
@@ -155,7 +167,7 @@ function SpotlightOverlay({
       {rect ? (
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ mixBlendMode: "multiply" }}
+          style={{ mixBlendMode: 'multiply' }}
         >
           <defs>
             <mask id="spotlight-mask">
@@ -170,12 +182,7 @@ function SpotlightOverlay({
               />
             </mask>
           </defs>
-          <rect
-            width="100%"
-            height="100%"
-            fill="rgba(0,0,0,0.65)"
-            mask="url(#spotlight-mask)"
-          />
+          <rect width="100%" height="100%" fill="rgba(0,0,0,0.65)" mask="url(#spotlight-mask)" />
         </svg>
       ) : (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -204,17 +211,21 @@ function StepCard({
   onSkip: () => void;
   accentColor: string;
 }) {
-  const [position, setPosition] = React.useState({ top: "50%", left: "50%", transform: "translate(-50%, -50%)" });
+  const [position, setPosition] = React.useState({
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+  });
   const cardRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!step.targetSelector || step.placement === "center") {
-      setPosition({ top: "50%", left: "50%", transform: "translate(-50%, -50%)" });
+    if (!step.targetSelector || step.placement === 'center') {
+      setPosition({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
       return;
     }
     const el = document.querySelector(step.targetSelector);
     if (!el) {
-      setPosition({ top: "50%", left: "50%", transform: "translate(-50%, -50%)" });
+      setPosition({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
       return;
     }
     const rect = el.getBoundingClientRect();
@@ -223,34 +234,46 @@ function StepCard({
     const padding = 16;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    let top = "50%";
-    let left = "50%";
-    let transform = "translate(-50%, -50%)";
-    const placement = step.placement || "bottom";
-    if (placement === "bottom") {
+    let top = '50%';
+    let left = '50%';
+    let transform = 'translate(-50%, -50%)';
+    const placement = step.placement || 'bottom';
+    if (placement === 'bottom') {
       const t = rect.bottom + padding;
-      const l = Math.min(Math.max(rect.left + rect.width / 2 - cardWidth / 2, padding), vw - cardWidth - padding);
+      const l = Math.min(
+        Math.max(rect.left + rect.width / 2 - cardWidth / 2, padding),
+        vw - cardWidth - padding,
+      );
       top = `${t}px`;
       left = `${l}px`;
-      transform = "none";
-    } else if (placement === "top") {
+      transform = 'none';
+    } else if (placement === 'top') {
       const t = rect.top - cardHeight - padding;
-      const l = Math.min(Math.max(rect.left + rect.width / 2 - cardWidth / 2, padding), vw - cardWidth - padding);
+      const l = Math.min(
+        Math.max(rect.left + rect.width / 2 - cardWidth / 2, padding),
+        vw - cardWidth - padding,
+      );
       top = `${Math.max(t, padding)}px`;
       left = `${l}px`;
-      transform = "none";
-    } else if (placement === "right") {
-      const t = Math.min(Math.max(rect.top + rect.height / 2 - cardHeight / 2, padding), vh - cardHeight - padding);
+      transform = 'none';
+    } else if (placement === 'right') {
+      const t = Math.min(
+        Math.max(rect.top + rect.height / 2 - cardHeight / 2, padding),
+        vh - cardHeight - padding,
+      );
       const l = rect.right + padding;
       top = `${t}px`;
       left = `${Math.min(l, vw - cardWidth - padding)}px`;
-      transform = "none";
-    } else if (placement === "left") {
-      const t = Math.min(Math.max(rect.top + rect.height / 2 - cardHeight / 2, padding), vh - cardHeight - padding);
+      transform = 'none';
+    } else if (placement === 'left') {
+      const t = Math.min(
+        Math.max(rect.top + rect.height / 2 - cardHeight / 2, padding),
+        vh - cardHeight - padding,
+      );
       const l = rect.left - cardWidth - padding;
       top = `${t}px`;
       left = `${Math.max(l, padding)}px`;
-      transform = "none";
+      transform = 'none';
     }
     setPosition({ top, left, transform });
   }, [step.targetSelector, step.placement]);
@@ -268,10 +291,13 @@ function StepCard({
         left: position.left,
         transform: position.transform,
         boxShadow: `0 0 40px ${accentColor}25, 0 20px 40px rgba(0,0,0,0.5)`,
-        maxWidth: "calc(100vw - 32px)",
+        maxWidth: 'calc(100vw - 32px)',
       }}
     >
-      <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60)` }} />
+      <div
+        className="h-0.5 w-full"
+        style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60)` }}
+      />
 
       <div className="p-5">
         <div className="flex items-start gap-3 mb-3">
@@ -327,8 +353,8 @@ function StepCard({
                 key={i}
                 className="rounded-full transition-all duration-200"
                 style={{
-                  width: i === currentIndex ? "16px" : "6px",
-                  height: "6px",
+                  width: i === currentIndex ? '16px' : '6px',
+                  height: '6px',
                   background: i === currentIndex ? accentColor : `${accentColor}30`,
                 }}
               />
@@ -348,7 +374,7 @@ function StepCard({
               className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-all hover:opacity-90"
               style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}
             >
-              {isLast ? "Finish" : "Next"} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
+              {isLast ? 'Finish' : 'Next'} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
@@ -366,7 +392,7 @@ export interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ config, onComplete, onSkip }: OnboardingWizardProps) {
-  const { appId, accentColor = "#8b5cf6", steps } = config;
+  const { appId, accentColor = '#8b5cf6', steps } = config;
   const { active, currentStep, markCompleted, dismiss, setStep } = useOnboardingState(appId);
 
   const handleNext = React.useCallback(() => {
@@ -392,7 +418,9 @@ export function OnboardingWizard({ config, onComplete, onSkip }: OnboardingWizar
   const step = steps[currentStep]!;
 
   return (
-    <SpotlightOverlay {...(step.targetSelector !== undefined ? { targetSelector: step.targetSelector } : {})}>
+    <SpotlightOverlay
+      {...(step.targetSelector !== undefined ? { targetSelector: step.targetSelector } : {})}
+    >
       <StepCard
         step={step}
         currentIndex={currentStep}
@@ -421,15 +449,20 @@ export function GettingStartedChecklist({
   appId,
   appName,
   items,
-  accentColor = "#8b5cf6",
+  accentColor = '#8b5cf6',
   onReplayTour,
   collapsed: defaultCollapsed = false,
 }: GettingStartedChecklistProps) {
-  const { items: stateItems, toggleItem, completedCount, allCompleted } = useChecklistState(appId, items);
+  const {
+    items: stateItems,
+    toggleItem,
+    completedCount,
+    allCompleted,
+  } = useChecklistState(appId, items);
   const [collapsed, setCollapsed] = React.useState(defaultCollapsed);
   const [dismissed, setDismissed] = React.useState(() => {
     try {
-      return localStorage.getItem(`szl_checklist_dismissed_${appId}`) === "true";
+      return localStorage.getItem(`szl_checklist_dismissed_${appId}`) === 'true';
     } catch {
       return false;
     }
@@ -437,7 +470,7 @@ export function GettingStartedChecklist({
 
   const handleDismiss = React.useCallback(() => {
     try {
-      localStorage.setItem(`szl_checklist_dismissed_${appId}`, "true");
+      localStorage.setItem(`szl_checklist_dismissed_${appId}`, 'true');
     } catch {}
     setDismissed(true);
   }, [appId]);
@@ -455,7 +488,7 @@ export function GettingStartedChecklist({
       }}
     >
       <button
-        onClick={() => setCollapsed(c => !c)}
+        onClick={() => setCollapsed((c) => !c)}
         className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/5 transition-colors text-left"
       >
         <div
@@ -469,18 +502,26 @@ export function GettingStartedChecklist({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[11px] font-semibold text-foreground/80 leading-none">Getting Started</div>
+          <div className="text-[11px] font-semibold text-foreground/80 leading-none">
+            Getting Started
+          </div>
           <div className="text-[10px] text-muted-foreground mt-0.5">
-            {allCompleted ? "All done!" : `${completedCount} of ${items.length} complete`}
+            {allCompleted ? 'All done!' : `${completedCount} of ${items.length} complete`}
           </div>
         </div>
         <ChevronRight
-          className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform", !collapsed && "rotate-90")}
+          className={cn(
+            'w-3.5 h-3.5 text-muted-foreground transition-transform',
+            !collapsed && 'rotate-90',
+          )}
         />
       </button>
 
       <div className="px-3 pb-0.5">
-        <div className="h-0.5 rounded-full overflow-hidden" style={{ background: `${accentColor}18` }}>
+        <div
+          className="h-0.5 rounded-full overflow-hidden"
+          style={{ background: `${accentColor}18` }}
+        >
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{ width: `${progress}%`, background: accentColor }}
@@ -490,7 +531,7 @@ export function GettingStartedChecklist({
 
       {!collapsed && (
         <div className="px-3 pb-3 pt-2 space-y-1">
-          {stateItems.map(item => (
+          {stateItems.map((item) => (
             <button
               key={item.id}
               onClick={() => toggleItem(item.id)}
@@ -506,8 +547,8 @@ export function GettingStartedChecklist({
               <div className="min-w-0">
                 <div
                   className={cn(
-                    "text-[11px] font-medium leading-tight",
-                    item.completed ? "line-through text-muted-foreground/50" : "text-foreground/80"
+                    'text-[11px] font-medium leading-tight',
+                    item.completed ? 'line-through text-muted-foreground/50' : 'text-foreground/80',
                   )}
                 >
                   {item.label}
@@ -528,7 +569,7 @@ export function GettingStartedChecklist({
             >
               <Trophy className="w-3.5 h-3.5 shrink-0" style={{ color: accentColor } as any} />
               <span className="text-[11px] font-semibold" style={{ color: accentColor }}>
-                You're all set! 
+                You're all set!
               </span>
             </div>
           )}
@@ -559,7 +600,7 @@ export function GettingStartedChecklist({
 
 export function OnboardingReplayButton({
   onClick,
-  accentColor = "#8b5cf6",
+  accentColor = '#8b5cf6',
 }: {
   onClick: () => void;
   accentColor?: string;

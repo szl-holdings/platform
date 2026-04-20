@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * check-docs-sync.js
  *
@@ -33,9 +34,9 @@
  * Always exits 0 (warn-only).
  */
 
-import { readdirSync, readFileSync, statSync, appendFileSync } from 'fs';
-import { join, dirname } from 'path';
 import { execSync } from 'child_process';
+import { appendFileSync, readdirSync, readFileSync, statSync } from 'fs';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,9 +46,9 @@ const ROOT = join(__dirname, '..', '..');
 // ─── tolerance bands ──────────────────────────────────────────────────────────
 // Adjust these if the codebase grows at a pace that creates too much noise.
 const TOLERANCE = {
-  routeFiles: 10,  // flag if stated count differs by more than this many files
-  schemaFiles: 5,  // tighter — each schema file represents a domain boundary
-  pgTables: 20,    // tables grow quickly; flag only meaningful drift
+  routeFiles: 10, // flag if stated count differs by more than this many files
+  schemaFiles: 5, // tighter — each schema file represents a domain boundary
+  pgTables: 20, // tables grow quickly; flag only meaningful drift
 };
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -85,10 +86,10 @@ function listDirs(dir) {
 
 function countPgTables() {
   try {
-    const out = execSync(
-      'grep -r "= pgTable" lib/db/src/schema/ --include="*.ts" | wc -l',
-      { cwd: ROOT, encoding: 'utf8' }
-    );
+    const out = execSync('grep -r "= pgTable" lib/db/src/schema/ --include="*.ts" | wc -l', {
+      cwd: ROOT,
+      encoding: 'utf8',
+    });
     return parseInt(out.trim(), 10);
   } catch {
     return null;
@@ -194,12 +195,20 @@ if (docRouteFileCount === null) {
   if (diff > TOLERANCE.routeFiles) {
     warn(
       'Route file count mismatch',
-      'API-SPEC.md states ' + docRouteFileCount + ', codebase has ' + live.routeFileCount +
-        ' (+' + (live.routeFileCount - docRouteFileCount) + ')'
+      'API-SPEC.md states ' +
+        docRouteFileCount +
+        ', codebase has ' +
+        live.routeFileCount +
+        ' (+' +
+        (live.routeFileCount - docRouteFileCount) +
+        ')',
     );
     info('Update API-SPEC.md route file count to ' + live.routeFileCount);
   } else {
-    pass('Route file count roughly matches', 'doc: ' + docRouteFileCount + ', actual: ' + live.routeFileCount);
+    pass(
+      'Route file count roughly matches',
+      'doc: ' + docRouteFileCount + ', actual: ' + live.routeFileCount,
+    );
   }
 }
 console.log();
@@ -213,18 +222,28 @@ if (docSchemaFileCount === null) {
   if (diff > TOLERANCE.schemaFiles) {
     warn(
       'Schema file count mismatch',
-      'DATA-MODEL.md states ' + docSchemaFileCount + ', codebase has ' + live.schemaFileCount +
-        ' (+' + (live.schemaFileCount - docSchemaFileCount) + ')'
+      'DATA-MODEL.md states ' +
+        docSchemaFileCount +
+        ', codebase has ' +
+        live.schemaFileCount +
+        ' (+' +
+        (live.schemaFileCount - docSchemaFileCount) +
+        ')',
     );
     info('Update DATA-MODEL.md schema file count to ' + live.schemaFileCount);
   } else {
-    pass('Schema file count roughly matches', 'doc: ' + docSchemaFileCount + ', actual: ' + live.schemaFileCount);
+    pass(
+      'Schema file count roughly matches',
+      'doc: ' + docSchemaFileCount + ', actual: ' + live.schemaFileCount,
+    );
   }
 }
 console.log();
 
 // 3. pgTable count
-console.log('[ pgTable declarations \u2014 DATA-MODEL.md & ARCHITECTURE.md vs lib/db/src/schema/ ]');
+console.log(
+  '[ pgTable declarations \u2014 DATA-MODEL.md & ARCHITECTURE.md vs lib/db/src/schema/ ]',
+);
 if (live.pgTableCount === null) {
   warn('Could not count pgTable declarations (grep failed)');
 } else {
@@ -233,12 +252,24 @@ if (live.pgTableCount === null) {
     if (diff > TOLERANCE.pgTables) {
       warn(
         'Table count mismatch in DATA-MODEL.md',
-        'states ' + docPgTableCountDataModel + ' pgTable declarations, codebase has ' + live.pgTableCount +
-          ' (+' + (live.pgTableCount - docPgTableCountDataModel) + ')'
+        'states ' +
+          docPgTableCountDataModel +
+          ' pgTable declarations, codebase has ' +
+          live.pgTableCount +
+          ' (+' +
+          (live.pgTableCount - docPgTableCountDataModel) +
+          ')',
       );
-      info('Update DATA-MODEL.md table counts to reflect ' + live.pgTableCount + ' total pgTable declarations');
+      info(
+        'Update DATA-MODEL.md table counts to reflect ' +
+          live.pgTableCount +
+          ' total pgTable declarations',
+      );
     } else {
-      pass('DATA-MODEL.md table count roughly matches', 'doc: ' + docPgTableCountDataModel + ', actual: ' + live.pgTableCount);
+      pass(
+        'DATA-MODEL.md table count roughly matches',
+        'doc: ' + docPgTableCountDataModel + ', actual: ' + live.pgTableCount,
+      );
     }
   } else {
     warn('Could not parse pgTable count from DATA-MODEL.md');
@@ -249,12 +280,20 @@ if (live.pgTableCount === null) {
     if (diff > TOLERANCE.pgTables) {
       warn(
         'Table count mismatch in ARCHITECTURE.md',
-        'states ' + docPgTableCountArch + ' tables, codebase has ' + live.pgTableCount +
-          ' (+' + (live.pgTableCount - docPgTableCountArch) + ')'
+        'states ' +
+          docPgTableCountArch +
+          ' tables, codebase has ' +
+          live.pgTableCount +
+          ' (+' +
+          (live.pgTableCount - docPgTableCountArch) +
+          ')',
       );
       info('Update ARCHITECTURE.md table count to ' + live.pgTableCount);
     } else {
-      pass('ARCHITECTURE.md table count roughly matches', 'doc: ' + docPgTableCountArch + ', actual: ' + live.pgTableCount);
+      pass(
+        'ARCHITECTURE.md table count roughly matches',
+        'doc: ' + docPgTableCountArch + ', actual: ' + live.pgTableCount,
+      );
     }
   }
 }
@@ -275,15 +314,12 @@ if (docArtifactRefs.length === 0) {
   if (inDocNotCode.length > 0) {
     warn(
       'PRODUCT-SURFACES.md references artifact dirs that do not exist in codebase (may be planned/roadmap)',
-      inDocNotCode.join(', ')
+      inDocNotCode.join(', '),
     );
     info('If planned: leave as-is. If removed: delete from PRODUCT-SURFACES.md.');
   }
   if (inCodeNotDoc.length > 0) {
-    warn(
-      'New artifact dirs not yet mentioned in PRODUCT-SURFACES.md',
-      inCodeNotDoc.join(', ')
-    );
+    warn('New artifact dirs not yet mentioned in PRODUCT-SURFACES.md', inCodeNotDoc.join(', '));
     info('Consider adding these surfaces to PRODUCT-SURFACES.md once they are production-ready');
   }
   if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
@@ -291,8 +327,15 @@ if (docArtifactRefs.length === 0) {
   }
 
   console.log();
-  info('Artifact dirs in codebase (' + live.artifactDirs.length + '): ' + live.artifactDirs.join(', '));
-  info('Artifact refs in PRODUCT-SURFACES.md (' + docArtifactRefs.length + '): ' + docArtifactRefs.join(', '));
+  info(
+    'Artifact dirs in codebase (' + live.artifactDirs.length + '): ' + live.artifactDirs.join(', '),
+  );
+  info(
+    'Artifact refs in PRODUCT-SURFACES.md (' +
+      docArtifactRefs.length +
+      '): ' +
+      docArtifactRefs.join(', '),
+  );
 }
 console.log();
 

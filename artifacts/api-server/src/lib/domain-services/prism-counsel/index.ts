@@ -1,4 +1,4 @@
-import { domainEventBus } from "../../domain-events/index.js";
+import { domainEventBus } from '../../domain-events/index.js';
 
 // ─── Port Interfaces ───────────────────────────────────────────────────────────
 
@@ -47,7 +47,7 @@ export interface SettlementForecast {
   low: number;
   mid: number;
   high: number;
-  confidence: "high" | "medium" | "low";
+  confidence: 'high' | 'medium' | 'low';
   drivers: string[];
 }
 
@@ -57,40 +57,40 @@ export function forecastSettlement(matter: {
   healthScore?: number | null;
   matterType?: string | null;
 }): SettlementForecast {
-  const damages = parseFloat(matter.totalDamages ?? "0") || 0;
+  const damages = parseFloat(matter.totalDamages ?? '0') || 0;
   const drivers: string[] = [];
 
   let lowMultiplier = 0.3;
   let highMultiplier = 0.8;
-  let confidence: SettlementForecast["confidence"] = "medium";
+  let confidence: SettlementForecast['confidence'] = 'medium';
 
   if (matter.healthScore && matter.healthScore >= 80) {
     lowMultiplier = 0.2;
     highMultiplier = 0.5;
-    drivers.push("Strong case health score");
-    confidence = "high";
+    drivers.push('Strong case health score');
+    confidence = 'high';
   } else if (matter.healthScore && matter.healthScore < 50) {
     lowMultiplier = 0.4;
     highMultiplier = 0.9;
-    drivers.push("Weak case health — higher settlement pressure");
-    confidence = "low";
+    drivers.push('Weak case health — higher settlement pressure');
+    confidence = 'low';
   }
 
-  if (matter.stage === "trial") {
+  if (matter.stage === 'trial') {
     lowMultiplier *= 1.1;
     highMultiplier *= 1.1;
-    drivers.push("Trial stage increases settlement range");
+    drivers.push('Trial stage increases settlement range');
   }
 
-  if (matter.matterType === "class_action") {
+  if (matter.matterType === 'class_action') {
     lowMultiplier *= 1.2;
     highMultiplier *= 1.3;
-    drivers.push("Class action dynamics expand range");
+    drivers.push('Class action dynamics expand range');
   }
 
   return {
     low: Math.round(damages * lowMultiplier),
-    mid: Math.round(damages * (lowMultiplier + highMultiplier) / 2),
+    mid: Math.round((damages * (lowMultiplier + highMultiplier)) / 2),
     high: Math.round(damages * highMultiplier),
     confidence,
     drivers,
@@ -104,30 +104,33 @@ export function calculateDefensibilityScore(matter: {
 }): number {
   let score = matter.healthScore ?? 50;
 
-  if (matter.stage === "discovery") score -= 5;
-  if (matter.stage === "trial") score -= 10;
-  if (matter.stage === "appeal") score += 5;
-  if (matter.matterType === "class_action") score -= 10;
+  if (matter.stage === 'discovery') score -= 5;
+  if (matter.stage === 'trial') score -= 10;
+  if (matter.stage === 'appeal') score += 5;
+  if (matter.matterType === 'class_action') score -= 10;
 
   return Math.min(Math.max(score, 0), 100);
 }
 
 // ─── Deadline Pressure Calculation ───────────────────────────────────────────
 
-export function calculateDeadlinePressure(deadlines: Array<{
-  dueDate?: string | null;
-  priority?: string | null;
-  status?: string | null;
-}>): number {
+export function calculateDeadlinePressure(
+  deadlines: Array<{
+    dueDate?: string | null;
+    priority?: string | null;
+    status?: string | null;
+  }>,
+): number {
   const now = Date.now();
   let pressure = 0;
 
   for (const deadline of deadlines) {
-    if (deadline.status === "completed" || deadline.status === "dismissed") continue;
+    if (deadline.status === 'completed' || deadline.status === 'dismissed') continue;
     if (!deadline.dueDate) continue;
 
     const daysUntil = (new Date(deadline.dueDate).getTime() - now) / (1000 * 60 * 60 * 24);
-    const priorityWeight = { critical: 4, high: 3, medium: 2, low: 1 }[deadline.priority ?? "medium"] ?? 2;
+    const priorityWeight =
+      { critical: 4, high: 3, medium: 2, low: 1 }[deadline.priority ?? 'medium'] ?? 2;
 
     if (daysUntil < 0) pressure += priorityWeight * 10;
     else if (daysUntil < 7) pressure += priorityWeight * 8;
@@ -156,7 +159,11 @@ export async function getPcDeadlines(storage: PrismCounselStoragePort, matterId:
   return storage.listDeadlines(matterId);
 }
 
-export async function getPcUpcomingDeadlines(storage: PrismCounselStoragePort, orgId: number, days: number) {
+export async function getPcUpcomingDeadlines(
+  storage: PrismCounselStoragePort,
+  orgId: number,
+  days: number,
+) {
   return storage.listUpcomingDeadlines(orgId, days);
 }
 
@@ -176,7 +183,11 @@ export async function getPcProofChainEntries(storage: PrismCounselStoragePort, m
   return storage.listProofChainEntries(matterId);
 }
 
-export async function getPcApprovalRequests(storage: PrismCounselStoragePort, orgId: number, status?: string) {
+export async function getPcApprovalRequests(
+  storage: PrismCounselStoragePort,
+  orgId: number,
+  status?: string,
+) {
   return storage.listApprovalRequests(orgId, status);
 }
 
@@ -192,53 +203,83 @@ export async function getPcConnectorAccounts(storage: PrismCounselStoragePort, o
   return storage.listConnectorAccounts(orgId);
 }
 
-export async function getPcDataProductScores(storage: PrismCounselStoragePort, orgId: number, matterId?: number) {
+export async function getPcDataProductScores(
+  storage: PrismCounselStoragePort,
+  orgId: number,
+  matterId?: number,
+) {
   return storage.listDataProductScores(orgId, matterId);
 }
 
-export async function getPcServiceMetrics(storage: PrismCounselStoragePort, orgId: number, service?: string) {
+export async function getPcServiceMetrics(
+  storage: PrismCounselStoragePort,
+  orgId: number,
+  service?: string,
+) {
   return storage.listServiceMetrics(orgId, service);
 }
 
-export async function approvePcRequest(storage: PrismCounselStoragePort, requestId: number, actorId: number) {
-  const result = await storage.approveRequest(requestId, actorId) as Record<string, unknown>;
-  domainEventBus.publish("prism-counsel.approval-resolved", {
+export async function approvePcRequest(
+  storage: PrismCounselStoragePort,
+  requestId: number,
+  actorId: number,
+) {
+  const result = (await storage.approveRequest(requestId, actorId)) as Record<string, unknown>;
+  domainEventBus.publish('prism-counsel.approval-resolved', {
     requestId,
     matterId: result.matterId as number,
-    decision: "approved",
+    decision: 'approved',
     actorId,
   });
   return result;
 }
 
-export async function rejectPcRequest(storage: PrismCounselStoragePort, requestId: number, actorId: number) {
-  const result = await storage.rejectRequest(requestId, actorId) as Record<string, unknown>;
-  domainEventBus.publish("prism-counsel.approval-resolved", {
+export async function rejectPcRequest(
+  storage: PrismCounselStoragePort,
+  requestId: number,
+  actorId: number,
+) {
+  const result = (await storage.rejectRequest(requestId, actorId)) as Record<string, unknown>;
+  domainEventBus.publish('prism-counsel.approval-resolved', {
     requestId,
     matterId: result.matterId as number,
-    decision: "rejected",
+    decision: 'rejected',
     actorId,
   });
   return result;
 }
 
-export async function acceptPcRecommendation(storage: PrismCounselStoragePort, recommendationId: number, actorId: number) {
-  const result = await storage.acceptRecommendation(recommendationId, actorId) as Record<string, unknown>;
-  domainEventBus.publish("prism-counsel.recommendation-acted", {
+export async function acceptPcRecommendation(
+  storage: PrismCounselStoragePort,
+  recommendationId: number,
+  actorId: number,
+) {
+  const result = (await storage.acceptRecommendation(recommendationId, actorId)) as Record<
+    string,
+    unknown
+  >;
+  domainEventBus.publish('prism-counsel.recommendation-acted', {
     recommendationId,
     matterId: result.matterId as number,
-    action: "accepted",
+    action: 'accepted',
     actorId,
   });
   return result;
 }
 
-export async function dismissPcRecommendation(storage: PrismCounselStoragePort, recommendationId: number, actorId: number) {
-  const result = await storage.dismissRecommendation(recommendationId, actorId) as Record<string, unknown>;
-  domainEventBus.publish("prism-counsel.recommendation-acted", {
+export async function dismissPcRecommendation(
+  storage: PrismCounselStoragePort,
+  recommendationId: number,
+  actorId: number,
+) {
+  const result = (await storage.dismissRecommendation(recommendationId, actorId)) as Record<
+    string,
+    unknown
+  >;
+  domainEventBus.publish('prism-counsel.recommendation-acted', {
     recommendationId,
     matterId: result.matterId as number,
-    action: "dismissed",
+    action: 'dismissed',
     actorId,
   });
   return result;

@@ -1,12 +1,12 @@
 import {
   db,
-  worldlineSignalOverlaysTable,
   type OverlaySignalType,
   type SourceTrustClass,
   type SpatialTwinCategory,
-} from "@szl-holdings/db";
-import { eq, and, desc, sql } from "drizzle-orm";
-import { randomUUID } from "crypto";
+  worldlineSignalOverlaysTable,
+} from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, desc, eq, sql } from 'drizzle-orm';
 
 export type { OverlaySignalType, SourceTrustClass };
 
@@ -24,7 +24,7 @@ export interface CreateOverlayParams {
   payload: Record<string, unknown>;
   confidenceScore?: number;
   causalLinkage?: Array<{ targetEntityId: string; linkType: string; strength: number }>;
-  severity?: "info" | "warning" | "critical";
+  severity?: 'info' | 'warning' | 'critical';
   metadata?: Record<string, unknown>;
 }
 
@@ -32,35 +32,40 @@ export interface OverlayQueryOptions {
   orgId?: number;
   signalType?: OverlaySignalType;
   sourceTrustClass?: SourceTrustClass;
-  severity?: "info" | "warning" | "critical";
+  severity?: 'info' | 'warning' | 'critical';
   isActive?: boolean;
   entityId?: string;
   twinCategory?: SpatialTwinCategory;
   limit?: number;
 }
 
-export async function createSignalOverlay(params: CreateOverlayParams): Promise<typeof worldlineSignalOverlaysTable.$inferSelect> {
+export async function createSignalOverlay(
+  params: CreateOverlayParams,
+): Promise<typeof worldlineSignalOverlaysTable.$inferSelect> {
   const overlayId = `overlay-${randomUUID()}`;
 
-  const [overlay] = await db.insert(worldlineSignalOverlaysTable).values({
-    orgId: params.orgId ?? null,
-    overlayId,
-    signalType: params.signalType,
-    sourceId: params.sourceId ?? null,
-    sourceTrustClass: params.sourceTrustClass ?? "inferred",
-    signalTimestamp: params.signalTimestamp,
-    expiresAt: params.expiresAt ?? null,
-    coordinates: params.coordinates ?? null,
-    boundingRegion: params.boundingRegion ?? null,
-    affectedEntityIds: params.affectedEntityIds ?? [],
-    affectedTwinCategories: params.affectedTwinCategories ?? [],
-    payload: params.payload,
-    confidenceScore: params.confidenceScore ?? 0.7,
-    causalLinkage: params.causalLinkage ?? [],
-    severity: params.severity ?? "info",
-    isActive: true,
-    metadata: params.metadata ?? {},
-  }).returning();
+  const [overlay] = await db
+    .insert(worldlineSignalOverlaysTable)
+    .values({
+      orgId: params.orgId ?? null,
+      overlayId,
+      signalType: params.signalType,
+      sourceId: params.sourceId ?? null,
+      sourceTrustClass: params.sourceTrustClass ?? 'inferred',
+      signalTimestamp: params.signalTimestamp,
+      expiresAt: params.expiresAt ?? null,
+      coordinates: params.coordinates ?? null,
+      boundingRegion: params.boundingRegion ?? null,
+      affectedEntityIds: params.affectedEntityIds ?? [],
+      affectedTwinCategories: params.affectedTwinCategories ?? [],
+      payload: params.payload,
+      confidenceScore: params.confidenceScore ?? 0.7,
+      causalLinkage: params.causalLinkage ?? [],
+      severity: params.severity ?? 'info',
+      isActive: true,
+      metadata: params.metadata ?? {},
+    })
+    .returning();
 
   return overlay;
 }
@@ -71,10 +76,14 @@ export async function querySignalOverlays(
   const conditions = [];
 
   if (options.orgId != null) conditions.push(eq(worldlineSignalOverlaysTable.orgId, options.orgId));
-  if (options.signalType) conditions.push(eq(worldlineSignalOverlaysTable.signalType, options.signalType));
-  if (options.sourceTrustClass) conditions.push(eq(worldlineSignalOverlaysTable.sourceTrustClass, options.sourceTrustClass));
-  if (options.severity) conditions.push(eq(worldlineSignalOverlaysTable.severity, options.severity));
-  if (options.isActive != null) conditions.push(eq(worldlineSignalOverlaysTable.isActive, options.isActive));
+  if (options.signalType)
+    conditions.push(eq(worldlineSignalOverlaysTable.signalType, options.signalType));
+  if (options.sourceTrustClass)
+    conditions.push(eq(worldlineSignalOverlaysTable.sourceTrustClass, options.sourceTrustClass));
+  if (options.severity)
+    conditions.push(eq(worldlineSignalOverlaysTable.severity, options.severity));
+  if (options.isActive != null)
+    conditions.push(eq(worldlineSignalOverlaysTable.isActive, options.isActive));
 
   if (options.entityId) {
     conditions.push(
@@ -111,9 +120,13 @@ export async function getActiveOverlaysForEntity(
 }
 
 export async function expireOverlay(overlayId: string, orgId?: number): Promise<boolean> {
-  const cond = orgId != null
-    ? and(eq(worldlineSignalOverlaysTable.overlayId, overlayId), eq(worldlineSignalOverlaysTable.orgId, orgId))
-    : eq(worldlineSignalOverlaysTable.overlayId, overlayId);
+  const cond =
+    orgId != null
+      ? and(
+          eq(worldlineSignalOverlaysTable.overlayId, overlayId),
+          eq(worldlineSignalOverlaysTable.orgId, orgId),
+        )
+      : eq(worldlineSignalOverlaysTable.overlayId, overlayId);
 
   const result = await db
     .update(worldlineSignalOverlaysTable)
@@ -149,7 +162,10 @@ export async function getOverlayById(
   return row ?? null;
 }
 
-export function scoreOverlayTrust(sourceTrustClass: SourceTrustClass, baseConfidence: number): number {
+export function scoreOverlayTrust(
+  sourceTrustClass: SourceTrustClass,
+  baseConfidence: number,
+): number {
   const trustMultipliers: Record<SourceTrustClass, number> = {
     authoritative: 1.0,
     verified: 0.9,

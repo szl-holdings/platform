@@ -1,11 +1,16 @@
-import { logger } from "./logger.js";
-import { knowledgeStore, createKnowledgeEntry, persistAgentRun, type KnowledgeDomain } from "./knowledge-store.js";
-import { agentEventBus, type AgentEventType } from "./event-bus.js";
-import { services } from "@szl-holdings/services";
-import type { ChatMessage } from "@szl-holdings/services";
-import { serverTelemetry } from "@szl-holdings/observability";
-import { db, agentKnowledgeTable, agentRunsTable } from "@szl-holdings/db";
-import { lt } from "drizzle-orm";
+import { agentKnowledgeTable, agentRunsTable, db } from '@szl-holdings/db';
+import { serverTelemetry } from '@szl-holdings/observability';
+import type { ChatMessage } from '@szl-holdings/services';
+import { services } from '@szl-holdings/services';
+import { lt } from 'drizzle-orm';
+import { type AgentEventType, agentEventBus } from './event-bus.js';
+import {
+  createKnowledgeEntry,
+  type KnowledgeDomain,
+  knowledgeStore,
+  persistAgentRun,
+} from './knowledge-store.js';
+import { logger } from './logger.js';
 
 export interface AgentSchedule {
   agentId: string;
@@ -26,7 +31,7 @@ export interface AgentRunRecord {
   domain: KnowledgeDomain;
   startedAt: number;
   completedAt?: number;
-  status: "running" | "completed" | "failed";
+  status: 'running' | 'completed' | 'failed';
   summary?: string;
   knowledgeEntryIds: string[];
   eventsPublished: string[];
@@ -35,7 +40,7 @@ export interface AgentRunRecord {
 }
 
 async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function runAgentAnalysis(
@@ -46,28 +51,30 @@ async function runAgentAnalysis(
 ): Promise<string> {
   const ai = services.ai;
   const messages: ChatMessage[] = [
-    { role: "system", content: systemPrompt },
-    { role: "user", content: userPrompt },
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt },
   ];
   let lastErr: unknown;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const result = await ai.chatCompletion(messages, { model: "gpt-4o-mini", maxTokens: 800 });
+      const result = await ai.chatCompletion(messages, { model: 'gpt-4o-mini', maxTokens: 800 });
       return result.content;
     } catch (err) {
       lastErr = err;
       if (attempt < maxRetries) {
-        const backoffMs = Math.pow(2, attempt) * 500;
-        logger.warn({ err, attempt, backoffMs }, "Agent analysis attempt failed, retrying");
+        const backoffMs = 2 ** attempt * 500;
+        logger.warn({ err, attempt, backoffMs }, 'Agent analysis attempt failed, retrying');
         await sleep(backoffMs);
       }
     }
   }
-  logger.error({ err: lastErr }, "Agent analysis failed after all retries");
-  return "Unable to generate analysis at this time.";
+  logger.error({ err: lastErr }, 'Agent analysis failed after all retries');
+  return 'Unable to generate analysis at this time.';
 }
 
-function parseFindingsFromText(text: string): Array<{ title: string; severity: string; summary: string; tags: string[] }> {
+function parseFindingsFromText(
+  text: string,
+): Array<{ title: string; severity: string; summary: string; tags: string[] }> {
   const findings: Array<{ title: string; severity: string; summary: string; tags: string[] }> = [];
   const blocks = text.split(/FINDING:/i).slice(1);
 
@@ -78,12 +85,16 @@ function parseFindingsFromText(text: string): Array<{ title: string; severity: s
     const tagsMatch = block.match(/TAGS:\s*([^\n]+)/i);
 
     if (titleMatch && summaryMatch) {
-      const severity = severityMatch?.[1]?.trim().toLowerCase() ?? "medium";
-      const tags = tagsMatch?.[1]?.split(",").map(t => t.trim()).filter(Boolean) ?? [];
+      const severity = severityMatch?.[1]?.trim().toLowerCase() ?? 'medium';
+      const tags =
+        tagsMatch?.[1]
+          ?.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean) ?? [];
       findings.push({
-        title: titleMatch[1]?.trim() ?? "Finding",
-        severity: ["low", "medium", "high", "critical"].includes(severity) ? severity : "medium",
-        summary: summaryMatch[1]?.trim() ?? "",
+        title: titleMatch[1]?.trim() ?? 'Finding',
+        severity: ['low', 'medium', 'high', 'critical'].includes(severity) ? severity : 'medium',
+        summary: summaryMatch[1]?.trim() ?? '',
         tags,
       });
     }
@@ -91,10 +102,10 @@ function parseFindingsFromText(text: string): Array<{ title: string; severity: s
 
   if (findings.length === 0 && text.length > 20) {
     findings.push({
-      title: "Autonomous Scan Complete",
-      severity: "info",
+      title: 'Autonomous Scan Complete',
+      severity: 'info',
       summary: text.slice(0, 300),
-      tags: ["scan", "automated"],
+      tags: ['scan', 'automated'],
     });
   }
 
@@ -117,7 +128,10 @@ export class AgentScheduler {
     this.schedules.set(schedule.agentId, schedule);
     const now = Date.now();
     schedule.nextRunAt = now + schedule.intervalMs;
-    logger.info({ agentId: schedule.agentId, intervalMs: schedule.intervalMs }, "Agent schedule registered");
+    logger.info(
+      { agentId: schedule.agentId, intervalMs: schedule.intervalMs },
+      'Agent schedule registered',
+    );
   }
 
   start(defaultSchedules: AgentSchedule[] = []) {
@@ -132,12 +146,12 @@ export class AgentScheduler {
       if (!schedule.enabled) continue;
       const initialDelay = Math.random() * Math.min(schedule.intervalMs, 60000);
       setTimeout(() => {
-        this.runAgent(agentId).catch(err => {
-          logger.error({ err, agentId }, "Initial agent run failed");
+        this.runAgent(agentId).catch((err) => {
+          logger.error({ err, agentId }, 'Initial agent run failed');
         });
         const timer = setInterval(() => {
-          this.runAgent(agentId).catch(err => {
-            logger.error({ err, agentId }, "Scheduled agent run failed");
+          this.runAgent(agentId).catch((err) => {
+            logger.error({ err, agentId }, 'Scheduled agent run failed');
           });
         }, schedule.intervalMs);
         timer.unref();
@@ -146,25 +160,25 @@ export class AgentScheduler {
     }
 
     this.cleanupTimer = setInterval(() => {
-      this.pruneOldDbRecords().catch(err => {
-        logger.warn({ err }, "Agent scheduler: DB cleanup failed");
+      this.pruneOldDbRecords().catch((err) => {
+        logger.warn({ err }, 'Agent scheduler: DB cleanup failed');
       });
     }, DB_CLEANUP_INTERVAL_MS);
     this.cleanupTimer.unref();
 
-    logger.info({ agentCount: this.schedules.size }, "Agent scheduler started");
+    logger.info({ agentCount: this.schedules.size }, 'Agent scheduler started');
   }
 
   startDurableMode() {
     if (this.isRunning) return;
     this.isRunning = true;
     this.cleanupTimer = setInterval(() => {
-      this.pruneOldDbRecords().catch(err => {
-        logger.warn({ err }, "Agent scheduler: DB cleanup failed");
+      this.pruneOldDbRecords().catch((err) => {
+        logger.warn({ err }, 'Agent scheduler: DB cleanup failed');
       });
     }, DB_CLEANUP_INTERVAL_MS);
     this.cleanupTimer.unref();
-    logger.info({ agentCount: this.schedules.size }, "Agent scheduler started in durable mode");
+    logger.info({ agentCount: this.schedules.size }, 'Agent scheduler started in durable mode');
   }
 
   stop() {
@@ -177,7 +191,7 @@ export class AgentScheduler {
       this.cleanupTimer = null;
     }
     this.isRunning = false;
-    logger.info("Agent scheduler stopped");
+    logger.info('Agent scheduler stopped');
   }
 
   private async pruneOldDbRecords(): Promise<void> {
@@ -190,10 +204,13 @@ export class AgentScheduler {
       const deletedKnowledge = knowledgeResult.rowCount ?? 0;
       const deletedRuns = runsResult.rowCount ?? 0;
       if (deletedKnowledge > 0 || deletedRuns > 0) {
-        logger.info({ deletedKnowledge, deletedRuns, maxAgeDays: DB_CLEANUP_MAX_AGE_DAYS }, "Agent scheduler: pruned old DB records");
+        logger.info(
+          { deletedKnowledge, deletedRuns, maxAgeDays: DB_CLEANUP_MAX_AGE_DAYS },
+          'Agent scheduler: pruned old DB records',
+        );
       }
     } catch (err) {
-      logger.warn({ err }, "Agent scheduler: DB pruning error (non-fatal)");
+      logger.warn({ err }, 'Agent scheduler: DB pruning error (non-fatal)');
     }
   }
 
@@ -202,7 +219,7 @@ export class AgentScheduler {
     if (!schedule) throw new Error(`Agent schedule not found: ${agentId}`);
 
     if (this.activeAgents.has(agentId)) {
-      logger.warn({ agentId }, "Agent run skipped — previous run still in progress");
+      logger.warn({ agentId }, 'Agent run skipped — previous run still in progress');
       const skipped: AgentRunRecord = {
         runId: `skipped-${agentId}-${Date.now()}`,
         agentId,
@@ -210,8 +227,8 @@ export class AgentScheduler {
         startedAt: Date.now(),
         completedAt: Date.now(),
         durationMs: 0,
-        status: "failed",
-        error: "Skipped: previous run still in progress",
+        status: 'failed',
+        error: 'Skipped: previous run still in progress',
         knowledgeEntryIds: [],
         eventsPublished: [],
       };
@@ -226,7 +243,7 @@ export class AgentScheduler {
       agentId,
       domain: schedule.domain,
       startedAt: Date.now(),
-      status: "running",
+      status: 'running',
       knowledgeEntryIds: [],
       eventsPublished: [],
     };
@@ -239,7 +256,7 @@ export class AgentScheduler {
     schedule.lastRunAt = Date.now();
     schedule.nextRunAt = Date.now() + schedule.intervalMs;
 
-    logger.info({ runId, agentId, domain: schedule.domain }, "Agent run started");
+    logger.info({ runId, agentId, domain: schedule.domain }, 'Agent run started');
 
     try {
       const prompt = await schedule.analysisPrompt();
@@ -249,18 +266,25 @@ export class AgentScheduler {
 
       for (const finding of findings) {
         const severityToConfidence: Record<string, number> = {
-          critical: 0.95, high: 0.85, medium: 0.75, low: 0.65, info: 0.6,
+          critical: 0.95,
+          high: 0.85,
+          medium: 0.75,
+          low: 0.65,
+          info: 0.6,
         };
         const confidence = severityToConfidence[finding.severity] ?? 0.75;
 
         const entry = createKnowledgeEntry({
-          type: finding.severity === "critical" || finding.severity === "high" ? "alert" : "observation",
+          type:
+            finding.severity === 'critical' || finding.severity === 'high'
+              ? 'alert'
+              : 'observation',
           domain: schedule.domain,
           sourceAgent: agentId,
           title: finding.title,
           summary: finding.summary,
           confidence,
-          tags: [...finding.tags, schedule.domain, "autonomous"],
+          tags: [...finding.tags, schedule.domain, 'autonomous'],
           data: { severity: finding.severity, rawFinding: finding },
           ttlMs: 6 * 60 * 60 * 1000,
         });
@@ -270,27 +294,32 @@ export class AgentScheduler {
         const correlations = knowledgeStore.findCorrelations(entry);
         if (correlations.length > 0) {
           const correlationEntry = createKnowledgeEntry({
-            type: "correlation",
-            domain: "global",
-            sourceAgent: "correlation-engine",
+            type: 'correlation',
+            domain: 'global',
+            sourceAgent: 'correlation-engine',
             title: `Cross-domain signal: ${entry.title}`,
-            summary: `Finding from ${schedule.domain} correlates with ${correlations.length} signal(s) from ${correlations.map(c => c.domain).join(", ")}.`,
+            summary: `Finding from ${schedule.domain} correlates with ${correlations.length} signal(s) from ${correlations.map((c) => c.domain).join(', ')}.`,
             confidence: Math.min(0.9, confidence + 0.1),
-            tags: ["correlation", "cross-domain", schedule.domain, ...correlations.map(c => c.domain)],
+            tags: [
+              'correlation',
+              'cross-domain',
+              schedule.domain,
+              ...correlations.map((c) => c.domain),
+            ],
             data: {
               primaryEntryId: entry.id,
-              correlatedEntryIds: correlations.map(c => c.id),
-              domains: [schedule.domain, ...correlations.map(c => c.domain)],
+              correlatedEntryIds: correlations.map((c) => c.id),
+              domains: [schedule.domain, ...correlations.map((c) => c.domain)],
             },
             ttlMs: 4 * 60 * 60 * 1000,
           });
           record.knowledgeEntryIds.push(correlationEntry.id);
 
           const correlationEvent = await agentEventBus.publish({
-            type: "correlation_found",
-            sourceAgent: "correlation-engine",
+            type: 'correlation_found',
+            sourceAgent: 'correlation-engine',
             sourceDomain: schedule.domain,
-            severity: "medium",
+            severity: 'medium',
             payload: {
               primaryEntry: entry,
               correlatedEntries: correlations,
@@ -300,24 +329,28 @@ export class AgentScheduler {
           record.eventsPublished.push(correlationEvent.id);
         }
 
-        const severityMap: Record<string, "info" | "low" | "medium" | "high" | "critical"> = {
-          info: "info", low: "low", medium: "medium", high: "high", critical: "critical",
+        const severityMap: Record<string, 'info' | 'low' | 'medium' | 'high' | 'critical'> = {
+          info: 'info',
+          low: 'low',
+          medium: 'medium',
+          high: 'high',
+          critical: 'critical',
         };
-        const eventSeverity = severityMap[finding.severity] ?? "medium";
+        const eventSeverity = severityMap[finding.severity] ?? 'medium';
         const eventTypeMap: Record<KnowledgeDomain, AgentEventType> = {
-          vessels: "route_anomaly",
-          firestorm: "threat_identified",
-          lyte: "health_degraded",
-          inca: "insight_generated",
-          terra: "alert_raised",
-          msp: "alert_raised",
-          dreamscape: "insight_generated",
-          "readiness-report": "insight_generated",
-          global: "cross_domain_signal",
+          vessels: 'route_anomaly',
+          firestorm: 'threat_identified',
+          lyte: 'health_degraded',
+          inca: 'insight_generated',
+          terra: 'alert_raised',
+          msp: 'alert_raised',
+          dreamscape: 'insight_generated',
+          'readiness-report': 'insight_generated',
+          global: 'cross_domain_signal',
         };
 
         const event = await agentEventBus.publish({
-          type: eventTypeMap[schedule.domain] ?? "insight_generated",
+          type: eventTypeMap[schedule.domain] ?? 'insight_generated',
           sourceAgent: agentId,
           sourceDomain: schedule.domain,
           severity: eventSeverity,
@@ -332,10 +365,10 @@ export class AgentScheduler {
       }
 
       const completedEvent = await agentEventBus.publish({
-        type: "scheduled_run_complete",
+        type: 'scheduled_run_complete',
         sourceAgent: agentId,
         sourceDomain: schedule.domain,
-        severity: "info",
+        severity: 'info',
         payload: {
           runId,
           findingsCount: findings.length,
@@ -346,15 +379,24 @@ export class AgentScheduler {
       record.eventsPublished.push(completedEvent.id);
 
       const totalFindings = findings.length;
-      record.status = "completed";
+      record.status = 'completed';
       record.completedAt = Date.now();
       record.durationMs = record.completedAt - record.startedAt;
       record.summary = `Completed scan: ${totalFindings} finding(s) identified.`;
 
-      logger.info({ runId, agentId, domain: schedule.domain, findings: totalFindings, durationMs: record.durationMs }, "Agent run completed");
+      logger.info(
+        {
+          runId,
+          agentId,
+          domain: schedule.domain,
+          findings: totalFindings,
+          durationMs: record.durationMs,
+        },
+        'Agent run completed',
+      );
 
       serverTelemetry.recordBusinessEvent({
-        type: "workflow_completed",
+        type: 'workflow_completed',
         domain: schedule.domain,
         durationMs: record.durationMs,
         success: true,
@@ -364,24 +406,26 @@ export class AgentScheduler {
 
       persistAgentRun(record).catch(() => {});
     } catch (err) {
-      record.status = "failed";
+      record.status = 'failed';
       record.completedAt = Date.now();
       record.durationMs = record.completedAt - record.startedAt;
       record.error = err instanceof Error ? err.message : String(err);
 
-      agentEventBus.publish({
-        type: "scheduled_run_failed",
-        sourceAgent: agentId,
-        sourceDomain: schedule.domain,
-        severity: "low",
-        payload: { runId, error: record.error },
-        correlationId: runId,
-      }).catch(() => {});
+      agentEventBus
+        .publish({
+          type: 'scheduled_run_failed',
+          sourceAgent: agentId,
+          sourceDomain: schedule.domain,
+          severity: 'low',
+          payload: { runId, error: record.error },
+          correlationId: runId,
+        })
+        .catch(() => {});
 
-      logger.error({ err, runId, agentId }, "Agent run failed");
+      logger.error({ err, runId, agentId }, 'Agent run failed');
 
       serverTelemetry.recordBusinessEvent({
-        type: "workflow_failed",
+        type: 'workflow_failed',
         domain: schedule.domain,
         durationMs: record.durationMs,
         success: false,
@@ -397,18 +441,26 @@ export class AgentScheduler {
   }
 
   getSchedules(): AgentSchedule[] {
-    return Array.from(this.schedules.values()).map(s => ({ ...s, analysisPrompt: undefined as unknown as AgentSchedule["analysisPrompt"] }));
+    return Array.from(this.schedules.values()).map((s) => ({
+      ...s,
+      analysisPrompt: undefined as unknown as AgentSchedule['analysisPrompt'],
+    }));
   }
 
-  getRunHistory(options: { agentId?: string; domain?: string; limit?: number } = {}): AgentRunRecord[] {
+  getRunHistory(
+    options: { agentId?: string; domain?: string; limit?: number } = {},
+  ): AgentRunRecord[] {
     let results = this.runHistory;
-    if (options.agentId) results = results.filter(r => r.agentId === options.agentId);
-    if (options.domain) results = results.filter(r => r.domain === options.domain);
+    if (options.agentId) results = results.filter((r) => r.agentId === options.agentId);
+    if (options.domain) results = results.filter((r) => r.domain === options.domain);
     return results.slice(0, options.limit ?? 50);
   }
 
   getStats() {
-    const byAgent: Record<string, { total: number; succeeded: number; failed: number; lastRun?: number; avgDurationMs: number }> = {};
+    const byAgent: Record<
+      string,
+      { total: number; succeeded: number; failed: number; lastRun?: number; avgDurationMs: number }
+    > = {};
 
     for (const record of this.runHistory) {
       if (!byAgent[record.agentId]) {
@@ -416,11 +468,12 @@ export class AgentScheduler {
       }
       const stat = byAgent[record.agentId]!;
       stat.total++;
-      if (record.status === "completed") stat.succeeded++;
-      if (record.status === "failed") stat.failed++;
+      if (record.status === 'completed') stat.succeeded++;
+      if (record.status === 'failed') stat.failed++;
       if (!stat.lastRun || record.startedAt > stat.lastRun) stat.lastRun = record.startedAt;
       if (record.durationMs) {
-        stat.avgDurationMs = (stat.avgDurationMs * (stat.total - 1) + record.durationMs) / stat.total;
+        stat.avgDurationMs =
+          (stat.avgDurationMs * (stat.total - 1) + record.durationMs) / stat.total;
       }
     }
 
@@ -429,7 +482,7 @@ export class AgentScheduler {
       agentCount: this.schedules.size,
       totalRuns: this.runHistory.length,
       byAgent,
-      schedules: this.getSchedules().map(s => ({
+      schedules: this.getSchedules().map((s) => ({
         agentId: s.agentId,
         name: s.name,
         domain: s.domain,

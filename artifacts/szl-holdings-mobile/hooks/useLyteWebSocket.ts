@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 export interface LyteSignal {
   id: string;
@@ -16,8 +16,7 @@ export function useLyteWebSocket(options: UseLyteWebSocketOptions = {}) {
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
-  return { connected: false, wsStatus: "disconnected" as const };
+  return { connected: false, wsStatus: 'disconnected' as const };
 }

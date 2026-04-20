@@ -12,11 +12,11 @@
  *   - middlewares/global-auth-enforcer.ts → "/api/analytics-engine/events"
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { randomBytes } from "crypto";
-import { db } from "@szl-holdings/db";
-import { analyticsEventsTable } from "@szl-holdings/db/schema";
-import { logger } from "../lib/logger";
+import { db } from '@szl-holdings/db';
+import { analyticsEventsTable } from '@szl-holdings/db/schema';
+import { randomBytes } from 'crypto';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { logger } from '../lib/logger';
 
 const router: IRouter = Router();
 
@@ -40,17 +40,26 @@ interface IngestPayload {
   };
 }
 
-router.post("/analytics-engine/events", async (req: Request, res: Response) => {
+router.post('/analytics-engine/events', async (req: Request, res: Response) => {
   try {
     const body = (req.body ?? {}) as IngestPayload;
-    const { eventName, domain, sourceApp, properties, dimensions, numericValue, occurredAt, context } = body;
+    const {
+      eventName,
+      domain,
+      sourceApp,
+      properties,
+      dimensions,
+      numericValue,
+      occurredAt,
+      context,
+    } = body;
 
     if (!eventName || !domain || !sourceApp) {
-      res.status(400).json({ error: "eventName, domain, and sourceApp are required" });
+      res.status(400).json({ error: 'eventName, domain, and sourceApp are required' });
       return;
     }
 
-    const eventId = `evt_${randomBytes(12).toString("hex")}`;
+    const eventId = `evt_${randomBytes(12).toString('hex')}`;
     await db.insert(analyticsEventsTable).values({
       eventId,
       eventName,
@@ -73,23 +82,23 @@ router.post("/analytics-engine/events", async (req: Request, res: Response) => {
 
     res.status(202).json({ ok: true, eventId });
   } catch (err) {
-    logger.error({ err }, "[analytics-engine-public] Failed to ingest event");
-    res.status(500).json({ error: "Failed to record event" });
+    logger.error({ err }, '[analytics-engine-public] Failed to ingest event');
+    res.status(500).json({ error: 'Failed to record event' });
   }
 });
 
-router.post("/analytics-engine/events/batch", async (req: Request, res: Response) => {
+router.post('/analytics-engine/events/batch', async (req: Request, res: Response) => {
   try {
     const { events } = (req.body ?? {}) as { events?: IngestPayload[] };
     if (!Array.isArray(events) || events.length === 0) {
-      res.status(400).json({ error: "events array is required" });
+      res.status(400).json({ error: 'events array is required' });
       return;
     }
 
     const rows = events
       .filter((e) => e.eventName && e.domain && e.sourceApp)
       .map((e) => ({
-        eventId: `evt_${randomBytes(12).toString("hex")}`,
+        eventId: `evt_${randomBytes(12).toString('hex')}`,
         eventName: e.eventName!,
         domain: e.domain!,
         sourceApp: e.sourceApp!,
@@ -114,8 +123,8 @@ router.post("/analytics-engine/events/batch", async (req: Request, res: Response
 
     res.status(202).json({ ok: true, recorded: rows.length });
   } catch (err) {
-    logger.error({ err }, "[analytics-engine-public] Failed to ingest batch events");
-    res.status(500).json({ error: "Failed to record events" });
+    logger.error({ err }, '[analytics-engine-public] Failed to ingest batch events');
+    res.status(500).json({ error: 'Failed to record events' });
   }
 });
 

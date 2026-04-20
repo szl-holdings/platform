@@ -1,7 +1,15 @@
-export type TrendDirection = "up" | "down" | "neutral";
-export type SeverityLevel = "critical" | "high" | "medium" | "low" | "info";
-export type PriorityLevel = "critical" | "high" | "medium" | "low";
-export type DomainId = "aegis" | "vessels" | "szl" | "lyte" | "prism" | "terra" | "carlota" | "stephen";
+export type TrendDirection = 'up' | 'down' | 'neutral';
+export type SeverityLevel = 'critical' | 'high' | 'medium' | 'low' | 'info';
+export type PriorityLevel = 'critical' | 'high' | 'medium' | 'low';
+export type DomainId =
+  | 'aegis'
+  | 'vessels'
+  | 'szl'
+  | 'lyte'
+  | 'prism'
+  | 'terra'
+  | 'carlota'
+  | 'stephen';
 
 export interface DomainKpi {
   label: string;

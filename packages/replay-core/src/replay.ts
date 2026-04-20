@@ -1,4 +1,4 @@
-import type { ReplaySnapshot } from "./snapshot.ts";
+import type { ReplaySnapshot } from './snapshot.ts';
 
 export type AgentExecutor = (
   input: Record<string, unknown>,
@@ -50,7 +50,10 @@ export interface ReplayRunConfig {
   maxConcurrency?: number;
   timeoutMs?: number;
   compareGroundTruth?: boolean;
-  groundTruthComparator?: (output: Record<string, unknown>, groundTruth: Record<string, unknown>) => number;
+  groundTruthComparator?: (
+    output: Record<string, unknown>,
+    groundTruth: Record<string, unknown>,
+  ) => number;
 }
 
 export interface ReplayRunReport {
@@ -68,7 +71,10 @@ export interface ReplayRunReport {
   results: ReplayResult[];
 }
 
-function defaultGroundTruthComparator(output: Record<string, unknown>, groundTruth: Record<string, unknown>): number {
+function defaultGroundTruthComparator(
+  output: Record<string, unknown>,
+  groundTruth: Record<string, unknown>,
+): number {
   const outKeys = Object.keys(output);
   const gtKeys = Object.keys(groundTruth);
   if (gtKeys.length === 0) return 1.0;
@@ -86,7 +92,11 @@ export async function replaySnapshot(
   executor: AgentExecutor,
   config: ReplayRunConfig = {},
 ): Promise<ReplayResult> {
-  const { timeoutMs = 30000, compareGroundTruth = true, groundTruthComparator = defaultGroundTruthComparator } = config;
+  const {
+    timeoutMs = 30000,
+    compareGroundTruth = true,
+    groundTruthComparator = defaultGroundTruthComparator,
+  } = config;
 
   const start = Date.now();
   const errors: string[] = [];
@@ -94,7 +104,7 @@ export async function replaySnapshot(
 
   try {
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Replay timed out after ${timeoutMs}ms`)), timeoutMs)
+      setTimeout(() => reject(new Error(`Replay timed out after ${timeoutMs}ms`)), timeoutMs),
     );
 
     const inputs = snapshot.agentInputs[0] ?? {};
@@ -144,26 +154,27 @@ export async function replayScenario(
 ): Promise<ReplayRunReport> {
   const { maxConcurrency = 3 } = config;
   const runId = `replay-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const scenarioId = snapshots[0]?.scenarioId ?? "unknown";
+  const scenarioId = snapshots[0]?.scenarioId ?? 'unknown';
   const startedAt = new Date().toISOString();
   const results: ReplayResult[] = [];
 
   for (let i = 0; i < snapshots.length; i += maxConcurrency) {
     const batch = snapshots.slice(i, i + maxConcurrency);
-    const batchResults = await Promise.all(batch.map(s => replaySnapshot(s, executor, config)));
+    const batchResults = await Promise.all(batch.map((s) => replaySnapshot(s, executor, config)));
     results.push(...batchResults);
   }
 
-  const successful = results.filter(r => !r.errors?.length).length;
+  const successful = results.filter((r) => !r.errors?.length).length;
   const failed = results.length - successful;
   const avgLatencyMs = results.reduce((sum, r) => sum + r.latencyMs, 0) / (results.length || 1);
   const totalCostUsd = results.reduce((sum, r) => sum + (r.costUsd ?? 0), 0);
   const totalTokensUsed = results.reduce((sum, r) => sum + (r.tokensUsed ?? 0), 0);
 
-  const withGroundTruth = results.filter(r => r.groundTruthMatch !== undefined);
-  const groundTruthMatchRate = withGroundTruth.length > 0
-    ? withGroundTruth.filter(r => r.groundTruthMatch).length / withGroundTruth.length
-    : undefined;
+  const withGroundTruth = results.filter((r) => r.groundTruthMatch !== undefined);
+  const groundTruthMatchRate =
+    withGroundTruth.length > 0
+      ? withGroundTruth.filter((r) => r.groundTruthMatch).length / withGroundTruth.length
+      : undefined;
 
   return {
     runId,
@@ -182,13 +193,9 @@ export async function replayScenario(
 }
 
 export function replayFromTrace(input: TraceReplayInput): DeterministicReplayResult {
-  const {
-    traceId,
-    capturedToolOutputs = {},
-    capturedModelOutputs = {},
-  } = input;
+  const { traceId, capturedToolOutputs = {}, capturedModelOutputs = {} } = input;
 
-  const steps: DeterministicReplayResult["steps"] = [];
+  const steps: DeterministicReplayResult['steps'] = [];
   const errors: string[] = [];
   let sequenceIndex = 0;
   let matchedStepCount = 0;
@@ -197,11 +204,21 @@ export function replayFromTrace(input: TraceReplayInput): DeterministicReplayRes
   const worldModel = input.worldModelSnapshot ?? {};
 
   if (Object.keys(selfModel).length > 0) {
-    steps.push({ kind: "self_model_restore", name: "self-model", sequenceIndex: sequenceIndex++, data: selfModel });
+    steps.push({
+      kind: 'self_model_restore',
+      name: 'self-model',
+      sequenceIndex: sequenceIndex++,
+      data: selfModel,
+    });
     matchedStepCount++;
   }
   if (Object.keys(worldModel).length > 0) {
-    steps.push({ kind: "world_model_restore", name: "world-model", sequenceIndex: sequenceIndex++, data: { ref: input.worldModelSnapshot } });
+    steps.push({
+      kind: 'world_model_restore',
+      name: 'world-model',
+      sequenceIndex: sequenceIndex++,
+      data: { ref: input.worldModelSnapshot },
+    });
     matchedStepCount++;
   }
 
@@ -210,7 +227,7 @@ export function replayFromTrace(input: TraceReplayInput): DeterministicReplayRes
     if (matched) matchedStepCount++;
     else errors.push(`Missing captured output for tool: ${toolId}`);
     steps.push({
-      kind: "tool_replay",
+      kind: 'tool_replay',
       name: toolId,
       sequenceIndex: sequenceIndex++,
       data: { toolId, output, replayed: matched },
@@ -222,7 +239,7 @@ export function replayFromTrace(input: TraceReplayInput): DeterministicReplayRes
     if (matched) matchedStepCount++;
     else errors.push(`Missing captured output for model: ${modelId}`);
     steps.push({
-      kind: "model_replay",
+      kind: 'model_replay',
       name: modelId,
       sequenceIndex: sequenceIndex++,
       data: { modelId, output, replayed: matched },

@@ -16,41 +16,36 @@
  * Supports multi-hop traversal for cross-domain reasoning.
  */
 
-import { db } from "@szl-holdings/db";
-import {
-  entitiesTable,
-  entityRelationshipsTable,
-} from "@szl-holdings/db";
-import { eq, and, inArray, sql, or } from "drizzle-orm";
-import { pool } from "@szl-holdings/db";
+import { db, entitiesTable, entityRelationshipsTable, pool } from '@szl-holdings/db';
+import { and, eq, inArray, or, sql } from 'drizzle-orm';
 
 export type OntologyEntityType =
-  | "person"
-  | "organization"
-  | "vessel"
-  | "property"
-  | "case"
-  | "threat"
-  | "signal"
-  | "asset"
-  | "port"
-  | "jurisdiction";
+  | 'person'
+  | 'organization'
+  | 'vessel'
+  | 'property'
+  | 'case'
+  | 'threat'
+  | 'signal'
+  | 'asset'
+  | 'port'
+  | 'jurisdiction';
 
 export type RelationshipType =
-  | "owns"
-  | "operates"
-  | "litigates"
-  | "threatens"
-  | "located_at"
-  | "connected_to"
-  | "sanctioned_by"
-  | "employed_by"
-  | "directs"
-  | "invests_in"
-  | "registered_in"
-  | "affiliated_with"
-  | "monitors"
-  | "exposes";
+  | 'owns'
+  | 'operates'
+  | 'litigates'
+  | 'threatens'
+  | 'located_at'
+  | 'connected_to'
+  | 'sanctioned_by'
+  | 'employed_by'
+  | 'directs'
+  | 'invests_in'
+  | 'registered_in'
+  | 'affiliated_with'
+  | 'monitors'
+  | 'exposes';
 
 export interface OntologyEntity {
   id: string;
@@ -68,7 +63,7 @@ export interface OntologyRelationship {
   fromEntityId: string;
   toEntityId: string;
   type: RelationshipType;
-  strength: "weak" | "moderate" | "strong";
+  strength: 'weak' | 'moderate' | 'strong';
   metadata: Record<string, unknown>;
   createdAt: string;
 }
@@ -93,7 +88,7 @@ export interface EvidenceLink {
   toEntity: string;
   relationshipType: RelationshipType;
   domain: string;
-  significance: "low" | "medium" | "high" | "critical";
+  significance: 'low' | 'medium' | 'high' | 'critical';
   description: string;
 }
 
@@ -158,7 +153,7 @@ export interface TemporalEdge {
   createdAt: string;
   ageMs: number;
   temporalWeight: number;
-  strength: OntologyRelationship["strength"];
+  strength: OntologyRelationship['strength'];
 }
 
 export interface SubgraphExtraction {
@@ -179,36 +174,36 @@ export interface SubgraphExtraction {
 
 function mapEntityType(dbType: string): OntologyEntityType {
   const mapping: Record<string, OntologyEntityType> = {
-    person: "person",
-    organization: "organization",
-    vessel: "vessel",
-    property: "property",
-    case: "case",
-    incident: "threat",
-    alert: "signal",
-    asset: "asset",
-    port: "port",
-    risk_item: "threat",
-    workflow: "asset",
-    task: "asset",
-    control: "asset",
-    recommendation: "signal",
+    person: 'person',
+    organization: 'organization',
+    vessel: 'vessel',
+    property: 'property',
+    case: 'case',
+    incident: 'threat',
+    alert: 'signal',
+    asset: 'asset',
+    port: 'port',
+    risk_item: 'threat',
+    workflow: 'asset',
+    task: 'asset',
+    control: 'asset',
+    recommendation: 'signal',
   };
-  return mapping[dbType] ?? "asset";
+  return mapping[dbType] ?? 'asset';
 }
 
-function mapRelationshipStrength(strength: string | null): OntologyRelationship["strength"] {
-  if (strength === "strong") return "strong";
-  if (strength === "weak") return "weak";
-  return "moderate";
+function mapRelationshipStrength(strength: string | null): OntologyRelationship['strength'] {
+  if (strength === 'strong') return 'strong';
+  if (strength === 'weak') return 'weak';
+  return 'moderate';
 }
 
-function assessSignificance(rel: OntologyRelationship): EvidenceLink["significance"] {
-  const highSig: RelationshipType[] = ["litigates", "threatens", "sanctioned_by", "exposes"];
-  const medSig: RelationshipType[] = ["owns", "operates", "directs", "invests_in"];
-  if (highSig.includes(rel.type)) return "high";
-  if (medSig.includes(rel.type)) return "medium";
-  return "low";
+function assessSignificance(rel: OntologyRelationship): EvidenceLink['significance'] {
+  const highSig: RelationshipType[] = ['litigates', 'threatens', 'sanctioned_by', 'exposes'];
+  const medSig: RelationshipType[] = ['owns', 'operates', 'directs', 'invests_in'];
+  if (highSig.includes(rel.type)) return 'high';
+  if (medSig.includes(rel.type)) return 'medium';
+  return 'low';
 }
 
 function buildEvidenceDescription(relType: RelationshipType, from: string, to: string): string {
@@ -232,8 +227,8 @@ function buildEvidenceDescription(relType: RelationshipType, from: string, to: s
 }
 
 function strengthToWeight(strength: string | null): number {
-  if (strength === "strong") return 1.0;
-  if (strength === "weak") return 0.3;
+  if (strength === 'strong') return 1.0;
+  if (strength === 'weak') return 0.3;
   return 0.6;
 }
 
@@ -296,16 +291,32 @@ export class OntologyEngine {
     this.cacheExpiry.set(entity.id, Date.now() + this.CACHE_TTL_MS);
   }
 
-  async upsertEntity(entity: Omit<OntologyEntity, "id" | "lastUpdated"> & { externalId?: string }): Promise<OntologyEntity & { wasCreated: boolean }> {
+  async upsertEntity(
+    entity: Omit<OntologyEntity, 'id' | 'lastUpdated'> & { externalId?: string },
+  ): Promise<OntologyEntity & { wasCreated: boolean }> {
     const dbType = entity.type as string;
-    const validTypes = ["person", "organization", "asset", "vessel", "port", "workflow", "task", "alert", "case", "incident", "control", "risk_item", "recommendation"];
-    const mappedType = validTypes.includes(dbType) ? dbType : "asset";
+    const validTypes = [
+      'person',
+      'organization',
+      'asset',
+      'vessel',
+      'port',
+      'workflow',
+      'task',
+      'alert',
+      'case',
+      'incident',
+      'control',
+      'risk_item',
+      'recommendation',
+    ];
+    const mappedType = validTypes.includes(dbType) ? dbType : 'asset';
 
     const insertedAt = new Date();
     const [row] = await db
       .insert(entitiesTable)
       .values({
-        entityType: mappedType as typeof entitiesTable.$inferInsert["entityType"],
+        entityType: mappedType as (typeof entitiesTable.$inferInsert)['entityType'],
         name: entity.name,
         sourceApp: entity.domain,
         externalId: entity.externalId ?? null,
@@ -348,7 +359,7 @@ export class OntologyEngine {
     this.setCache(result);
 
     console.debug(
-      `[OntologyEngine] upsertEntity ${wasCreated ? "created" : "merged"} ${entity.domain}/${entity.type}:${entity.name} (id=${row!.id})`,
+      `[OntologyEngine] upsertEntity ${wasCreated ? 'created' : 'merged'} ${entity.domain}/${entity.type}:${entity.name} (id=${row!.id})`,
     );
 
     return { ...result, wasCreated };
@@ -358,7 +369,7 @@ export class OntologyEngine {
     fromEntityId: string,
     toEntityId: string,
     type: RelationshipType,
-    strength: OntologyRelationship["strength"] = "moderate",
+    strength: OntologyRelationship['strength'] = 'moderate',
     metadata: Record<string, unknown> = {},
   ): Promise<OntologyRelationship> {
     const [row] = await db
@@ -389,10 +400,7 @@ export class OntologyEngine {
       return this.entityCache.get(entityId) ?? null;
     }
 
-    const [row] = await db
-      .select()
-      .from(entitiesTable)
-      .where(eq(entitiesTable.id, entityId));
+    const [row] = await db.select().from(entitiesTable).where(eq(entitiesTable.id, entityId));
 
     if (!row) return null;
 
@@ -412,29 +420,35 @@ export class OntologyEngine {
     return entity;
   }
 
-  async searchEntities(query: string, types?: OntologyEntityType[], limit = 20): Promise<OntologyEntity[]> {
+  async searchEntities(
+    query: string,
+    types?: OntologyEntityType[],
+    limit = 20,
+  ): Promise<OntologyEntity[]> {
     const rows = await db
       .select()
       .from(entitiesTable)
       .where(
         sql`to_tsvector('english', ${entitiesTable.name}) @@ plainto_tsquery('english', ${query})
-            OR ${entitiesTable.name} ILIKE ${"%" + query + "%"}`
+            OR ${entitiesTable.name} ILIKE ${'%' + query + '%'}`,
       )
       .limit(limit);
 
-    return rows.map(row => {
-      const meta = (row.metadata as Record<string, unknown>) ?? {};
-      return {
-        id: row.id,
-        type: (meta.ontologyType as OntologyEntityType) ?? mapEntityType(row.entityType),
-        name: row.name,
-        domain: row.sourceApp,
-        metadata: meta,
-        tags: row.tags ?? [],
-        riskScore: meta.riskScore as number | undefined,
-        lastUpdated: row.updatedAt.toISOString(),
-      };
-    }).filter(e => !types || types.includes(e.type));
+    return rows
+      .map((row) => {
+        const meta = (row.metadata as Record<string, unknown>) ?? {};
+        return {
+          id: row.id,
+          type: (meta.ontologyType as OntologyEntityType) ?? mapEntityType(row.entityType),
+          name: row.name,
+          domain: row.sourceApp,
+          metadata: meta,
+          tags: row.tags ?? [],
+          riskScore: meta.riskScore as number | undefined,
+          lastUpdated: row.updatedAt.toISOString(),
+        };
+      })
+      .filter((e) => !types || types.includes(e.type));
   }
 
   async traverseGraph(
@@ -507,7 +521,11 @@ export class OntologyEngine {
           relationshipType: relationship.type,
           domain: neighbor.domain,
           significance: assessSignificance(relationship),
-          description: buildEvidenceDescription(relationship.type, fromEntity?.name ?? "Unknown", toEntity?.name ?? "Unknown"),
+          description: buildEvidenceDescription(
+            relationship.type,
+            fromEntity?.name ?? 'Unknown',
+            toEntity?.name ?? 'Unknown',
+          ),
         });
 
         if (fromEntity && toEntity && fromEntity.domain !== toEntity.domain) {
@@ -547,7 +565,8 @@ export class OntologyEngine {
       const result = await pool.query<{
         path_ids: string[];
         hop_count: number;
-      }>(`
+      }>(
+        `
         WITH RECURSIVE graph_bfs AS (
           SELECT
             $1::uuid AS origin_id,
@@ -570,7 +589,9 @@ export class OntologyEngine {
         WHERE path[array_length(path, 1)] = target_id
         ORDER BY hop_count ASC
         LIMIT 1
-      `, [fromEntityId, toEntityId, maxHops]);
+      `,
+        [fromEntityId, toEntityId, maxHops],
+      );
 
       if (result.rows.length > 0) {
         const row = result.rows[0]!;
@@ -588,10 +609,12 @@ export class OntologyEngine {
           const relRows = await db
             .select()
             .from(entityRelationshipsTable)
-            .where(and(
-              eq(entityRelationshipsTable.fromEntityId, fromId),
-              eq(entityRelationshipsTable.toEntityId, toId),
-            ))
+            .where(
+              and(
+                eq(entityRelationshipsTable.fromEntityId, fromId),
+                eq(entityRelationshipsTable.toEntityId, toId),
+              ),
+            )
             .limit(1);
 
           if (relRows[0]) {
@@ -616,7 +639,10 @@ export class OntologyEngine {
         };
       }
     } catch (err) {
-      console.warn("[OntologyEngine] Recursive CTE shortest path failed, falling back:", err instanceof Error ? err.message : err);
+      console.warn(
+        '[OntologyEngine] Recursive CTE shortest path failed, falling back:',
+        err instanceof Error ? err.message : err,
+      );
     }
 
     return this.shortestPathInMemory(fromEntityId, toEntityId, maxHops);
@@ -627,7 +653,9 @@ export class OntologyEngine {
     toEntityId: string,
     maxHops: number,
   ): Promise<ShortestPathResult> {
-    const queue: Array<{ id: string; path: string[] }> = [{ id: fromEntityId, path: [fromEntityId] }];
+    const queue: Array<{ id: string; path: string[] }> = [
+      { id: fromEntityId, path: [fromEntityId] },
+    ];
     const visited = new Set<string>([fromEntityId]);
 
     while (queue.length > 0) {
@@ -637,10 +665,12 @@ export class OntologyEngine {
       const rels = await db
         .select()
         .from(entityRelationshipsTable)
-        .where(or(
-          eq(entityRelationshipsTable.fromEntityId, current.id),
-          eq(entityRelationshipsTable.toEntityId, current.id),
-        ))
+        .where(
+          or(
+            eq(entityRelationshipsTable.fromEntityId, current.id),
+            eq(entityRelationshipsTable.toEntityId, current.id),
+          ),
+        )
         .limit(50);
 
       for (const rel of rels) {
@@ -654,7 +684,13 @@ export class OntologyEngine {
             const e = await this.getEntity(id);
             if (e) entities.push(e);
           }
-          return { path: entities, hops: newPath.length - 1, edges: [], totalWeight: 0, found: true };
+          return {
+            path: entities,
+            hops: newPath.length - 1,
+            edges: [],
+            totalWeight: 0,
+            found: true,
+          };
         }
 
         visited.add(nextId);
@@ -677,25 +713,41 @@ export class OntologyEngine {
     const start = Date.now();
 
     const entityRows = await db
-      .select({ id: entitiesTable.id, name: entitiesTable.name, entityType: entitiesTable.entityType, sourceApp: entitiesTable.sourceApp })
+      .select({
+        id: entitiesTable.id,
+        name: entitiesTable.name,
+        entityType: entitiesTable.entityType,
+        sourceApp: entitiesTable.sourceApp,
+      })
       .from(entitiesTable)
       .where(domainFilter ? eq(entitiesTable.sourceApp, domainFilter) : sql`TRUE`)
       .limit(limit);
 
     if (entityRows.length === 0) {
-      return { communities: new Map(), totalEntities: 0, totalCommunities: 0, largestCommunitySize: 0, durationMs: Date.now() - start };
+      return {
+        communities: new Map(),
+        totalEntities: 0,
+        totalCommunities: 0,
+        largestCommunitySize: 0,
+        durationMs: Date.now() - start,
+      };
     }
 
-    const entityIds = entityRows.map(e => e.id);
-    const labels = new Map<string, string>(entityRows.map(e => [e.id, e.id]));
+    const entityIds = entityRows.map((e) => e.id);
+    const labels = new Map<string, string>(entityRows.map((e) => [e.id, e.id]));
 
     const relRows = await db
-      .select({ fromEntityId: entityRelationshipsTable.fromEntityId, toEntityId: entityRelationshipsTable.toEntityId })
+      .select({
+        fromEntityId: entityRelationshipsTable.fromEntityId,
+        toEntityId: entityRelationshipsTable.toEntityId,
+      })
       .from(entityRelationshipsTable)
-      .where(and(
-        inArray(entityRelationshipsTable.fromEntityId, entityIds),
-        inArray(entityRelationshipsTable.toEntityId, entityIds),
-      ))
+      .where(
+        and(
+          inArray(entityRelationshipsTable.fromEntityId, entityIds),
+          inArray(entityRelationshipsTable.toEntityId, entityIds),
+        ),
+      )
       .limit(5000);
 
     const adjacency = new Map<string, string[]>();
@@ -746,7 +798,7 @@ export class OntologyEngine {
       });
     }
 
-    const sizes = [...communities.values()].map(m => m.length);
+    const sizes = [...communities.values()].map((m) => m.length);
     return {
       communities,
       totalEntities: entityRows.length,
@@ -760,14 +812,11 @@ export class OntologyEngine {
    * Influence scoring — PageRank-inspired weighted degree centrality.
    * Uses in-degree, out-degree, and strength-weighted edges.
    */
-  async computeInfluenceScores(
-    entityIds?: string[],
-    limit = 100,
-  ): Promise<InfluenceScoreResult[]> {
+  async computeInfluenceScores(entityIds?: string[], limit = 100): Promise<InfluenceScoreResult[]> {
     let targetIds = entityIds;
     if (!targetIds || targetIds.length === 0) {
       const rows = await db.select({ id: entitiesTable.id }).from(entitiesTable).limit(limit);
-      targetIds = rows.map(r => r.id);
+      targetIds = rows.map((r) => r.id);
     }
 
     if (targetIds.length === 0) return [];
@@ -780,10 +829,12 @@ export class OntologyEngine {
         relationshipType: entityRelationshipsTable.relationshipType,
       })
       .from(entityRelationshipsTable)
-      .where(or(
-        inArray(entityRelationshipsTable.fromEntityId, targetIds),
-        inArray(entityRelationshipsTable.toEntityId, targetIds),
-      ))
+      .where(
+        or(
+          inArray(entityRelationshipsTable.fromEntityId, targetIds),
+          inArray(entityRelationshipsTable.toEntityId, targetIds),
+        ),
+      )
       .limit(10000);
 
     const inDegree = new Map<string, number>();
@@ -813,20 +864,24 @@ export class OntologyEngine {
       .from(entitiesTable)
       .where(inArray(entitiesTable.id, targetIds));
 
-    const nameMap = new Map(entityRows.map(e => [e.id, e.name]));
+    const nameMap = new Map(entityRows.map((e) => [e.id, e.name]));
 
-    const maxWeighted = Math.max(1, ...targetIds.map(id => weightedDegree.get(id) ?? 0));
-    const results: InfluenceScoreResult[] = targetIds.map(id => ({
-      entityId: id,
-      entityName: nameMap.get(id) ?? id,
-      influenceScore: (weightedDegree.get(id) ?? 0) / maxWeighted,
-      inDegree: inDegree.get(id) ?? 0,
-      outDegree: outDegree.get(id) ?? 0,
-      weightedDegree: weightedDegree.get(id) ?? 0,
-      rank: 0,
-    })).sort((a, b) => b.influenceScore - a.influenceScore);
+    const maxWeighted = Math.max(1, ...targetIds.map((id) => weightedDegree.get(id) ?? 0));
+    const results: InfluenceScoreResult[] = targetIds
+      .map((id) => ({
+        entityId: id,
+        entityName: nameMap.get(id) ?? id,
+        influenceScore: (weightedDegree.get(id) ?? 0) / maxWeighted,
+        inDegree: inDegree.get(id) ?? 0,
+        outDegree: outDegree.get(id) ?? 0,
+        weightedDegree: weightedDegree.get(id) ?? 0,
+        rank: 0,
+      }))
+      .sort((a, b) => b.influenceScore - a.influenceScore);
 
-    results.forEach((r, idx) => { r.rank = idx + 1; });
+    results.forEach((r, idx) => {
+      r.rank = idx + 1;
+    });
     return results;
   }
 
@@ -849,15 +904,17 @@ export class OntologyEngine {
     const relRows = await db
       .select()
       .from(entityRelationshipsTable)
-      .where(or(
-        eq(entityRelationshipsTable.fromEntityId, entityId),
-        eq(entityRelationshipsTable.toEntityId, entityId),
-      ))
+      .where(
+        or(
+          eq(entityRelationshipsTable.fromEntityId, entityId),
+          eq(entityRelationshipsTable.toEntityId, entityId),
+        ),
+      )
       .limit(200);
 
     const now = Date.now();
     const temporalEdges: TemporalEdge[] = relRows
-      .map(rel => {
+      .map((rel) => {
         const ageMs = now - rel.createdAt.getTime();
         const temporalWeight = computeTemporalWeight(rel.createdAt.toISOString());
         return {
@@ -871,13 +928,13 @@ export class OntologyEngine {
           strength: mapRelationshipStrength(rel.strength),
         };
       })
-      .filter(e => e.temporalWeight >= minTemporalWeight)
+      .filter((e) => e.temporalWeight >= minTemporalWeight)
       .sort((a, b) => b.temporalWeight - a.temporalWeight);
 
     const buckets = new Map<string, { edgeCount: number; totalWeight: number }>();
     for (const edge of temporalEdges) {
       const date = new Date(edge.createdAt);
-      const period = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const period = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const bucket = buckets.get(period) ?? { edgeCount: 0, totalWeight: 0 };
       bucket.edgeCount++;
       bucket.totalWeight += edge.temporalWeight;
@@ -885,14 +942,19 @@ export class OntologyEngine {
     }
 
     const temporalClusters = [...buckets.entries()]
-      .map(([period, b]) => ({ period, edgeCount: b.edgeCount, avgWeight: b.totalWeight / b.edgeCount }))
+      .map(([period, b]) => ({
+        period,
+        edgeCount: b.edgeCount,
+        avgWeight: b.totalWeight / b.edgeCount,
+      }))
       .sort((a, b) => b.period.localeCompare(a.period))
       .slice(0, 12);
 
-    const recentEdges = temporalEdges.filter(e => e.ageMs < 7 * 24 * 60 * 60 * 1000);
-    const recentActivity = recentEdges.length > 0
-      ? `${recentEdges.length} relationship(s) in the last 7 days (avg temporal weight: ${(recentEdges.reduce((s, e) => s + e.temporalWeight, 0) / recentEdges.length).toFixed(2)})`
-      : "No recent relationship activity in the last 7 days";
+    const recentEdges = temporalEdges.filter((e) => e.ageMs < 7 * 24 * 60 * 60 * 1000);
+    const recentActivity =
+      recentEdges.length > 0
+        ? `${recentEdges.length} relationship(s) in the last 7 days (avg temporal weight: ${(recentEdges.reduce((s, e) => s + e.temporalWeight, 0) / recentEdges.length).toFixed(2)})`
+        : 'No recent relationship activity in the last 7 days';
 
     return { entity, temporalEdges, recentActivity, temporalClusters };
   }
@@ -910,7 +972,7 @@ export class OntologyEngine {
   ): Promise<SubgraphExtraction> {
     const visitedIds = new Set<string>([centerEntityId]);
     const entityMap = new Map<string, OntologyEntity>();
-    const edgeList: SubgraphExtraction["edges"] = [];
+    const edgeList: SubgraphExtraction['edges'] = [];
     let frontier = [centerEntityId];
 
     const center = await this.getEntity(centerEntityId);
@@ -922,10 +984,12 @@ export class OntologyEngine {
       const relRows = await db
         .select()
         .from(entityRelationshipsTable)
-        .where(or(
-          inArray(entityRelationshipsTable.fromEntityId, frontier),
-          inArray(entityRelationshipsTable.toEntityId, frontier),
-        ))
+        .where(
+          or(
+            inArray(entityRelationshipsTable.fromEntityId, frontier),
+            inArray(entityRelationshipsTable.toEntityId, frontier),
+          ),
+        )
         .limit(maxNodes * 3);
 
       const nextFrontier: string[] = [];
@@ -947,7 +1011,7 @@ export class OntologyEngine {
         const strengthW = strengthToWeight(rel.strength);
         const temporalW = computeTemporalWeight(rel.createdAt.toISOString());
         const meta = (rel.metadata as Record<string, unknown>) ?? {};
-        const confScore = typeof meta.confidence === "number" ? meta.confidence : 0.7;
+        const confScore = typeof meta.confidence === 'number' ? meta.confidence : 0.7;
 
         if (confScore < minConfidence) continue;
 
@@ -969,7 +1033,7 @@ export class OntologyEngine {
       fromEntityId: e.from,
       toEntityId: e.to,
       type: e.type,
-      strength: e.weight > 0.7 ? "strong" : e.weight > 0.4 ? "moderate" : "weak",
+      strength: e.weight > 0.7 ? 'strong' : e.weight > 0.4 ? 'moderate' : 'weak',
       metadata: { temporalWeight: e.temporalWeight, confidenceScore: e.confidenceScore },
       createdAt: new Date().toISOString(),
     }));
@@ -984,13 +1048,26 @@ export class OntologyEngine {
     };
   }
 
-  private assessRiskImplications(type: RelationshipType, from: OntologyEntity, to: OntologyEntity): string[] {
+  private assessRiskImplications(
+    type: RelationshipType,
+    from: OntologyEntity,
+    to: OntologyEntity,
+  ): string[] {
     const implications: string[] = [];
-    if (type === "litigates") implications.push(`Active litigation in ${from.domain} may impact ${to.domain} exposure`);
-    if (type === "threatens") implications.push(`Threat actor in ${from.domain} poses cross-domain risk to ${to.domain}`);
-    if (type === "owns" && from.domain !== to.domain) implications.push(`Ownership bridge between ${from.domain} and ${to.domain} creates correlated risk`);
-    if (type === "sanctioned_by") implications.push(`Sanctions designation creates compliance risk across ${from.domain} and ${to.domain}`);
-    if (type === "exposes") implications.push(`Material exposure detected across ${from.domain} → ${to.domain} boundary`);
+    if (type === 'litigates')
+      implications.push(`Active litigation in ${from.domain} may impact ${to.domain} exposure`);
+    if (type === 'threatens')
+      implications.push(`Threat actor in ${from.domain} poses cross-domain risk to ${to.domain}`);
+    if (type === 'owns' && from.domain !== to.domain)
+      implications.push(
+        `Ownership bridge between ${from.domain} and ${to.domain} creates correlated risk`,
+      );
+    if (type === 'sanctioned_by')
+      implications.push(
+        `Sanctions designation creates compliance risk across ${from.domain} and ${to.domain}`,
+      );
+    if (type === 'exposes')
+      implications.push(`Material exposure detected across ${from.domain} → ${to.domain} boundary`);
     return implications;
   }
 
@@ -999,22 +1076,54 @@ export class OntologyEngine {
     incoming: Array<{ rel: OntologyRelationship; source: OntologyEntity }>;
   }> {
     const [outgoingRels, incomingRels] = await Promise.all([
-      db.select().from(entityRelationshipsTable).where(eq(entityRelationshipsTable.fromEntityId, entityId)),
-      db.select().from(entityRelationshipsTable).where(eq(entityRelationshipsTable.toEntityId, entityId)),
+      db
+        .select()
+        .from(entityRelationshipsTable)
+        .where(eq(entityRelationshipsTable.fromEntityId, entityId)),
+      db
+        .select()
+        .from(entityRelationshipsTable)
+        .where(eq(entityRelationshipsTable.toEntityId, entityId)),
     ]);
 
     const outgoing = await Promise.all(
-      outgoingRels.map(async rel => {
+      outgoingRels.map(async (rel) => {
         const target = await this.getEntity(rel.toEntityId);
-        return target ? { rel: { id: rel.id, fromEntityId: rel.fromEntityId, toEntityId: rel.toEntityId, type: rel.relationshipType as RelationshipType, strength: mapRelationshipStrength(rel.strength), metadata: (rel.metadata as Record<string, unknown>) ?? {}, createdAt: rel.createdAt.toISOString() }, target } : null;
-      })
+        return target
+          ? {
+              rel: {
+                id: rel.id,
+                fromEntityId: rel.fromEntityId,
+                toEntityId: rel.toEntityId,
+                type: rel.relationshipType as RelationshipType,
+                strength: mapRelationshipStrength(rel.strength),
+                metadata: (rel.metadata as Record<string, unknown>) ?? {},
+                createdAt: rel.createdAt.toISOString(),
+              },
+              target,
+            }
+          : null;
+      }),
     );
 
     const incoming = await Promise.all(
-      incomingRels.map(async rel => {
+      incomingRels.map(async (rel) => {
         const source = await this.getEntity(rel.fromEntityId);
-        return source ? { rel: { id: rel.id, fromEntityId: rel.fromEntityId, toEntityId: rel.toEntityId, type: rel.relationshipType as RelationshipType, strength: mapRelationshipStrength(rel.strength), metadata: (rel.metadata as Record<string, unknown>) ?? {}, createdAt: rel.createdAt.toISOString() }, source } : null;
-      })
+        return source
+          ? {
+              rel: {
+                id: rel.id,
+                fromEntityId: rel.fromEntityId,
+                toEntityId: rel.toEntityId,
+                type: rel.relationshipType as RelationshipType,
+                strength: mapRelationshipStrength(rel.strength),
+                metadata: (rel.metadata as Record<string, unknown>) ?? {},
+                createdAt: rel.createdAt.toISOString(),
+              },
+              source,
+            }
+          : null;
+      }),
     );
 
     return {
@@ -1030,7 +1139,7 @@ export class OntologyEngine {
       .where(eq(entitiesTable.sourceApp, domain))
       .limit(limit);
 
-    return rows.map(row => {
+    return rows.map((row) => {
       const meta = (row.metadata as Record<string, unknown>) ?? {};
       return {
         id: row.id,
@@ -1053,8 +1162,16 @@ export class OntologyEngine {
     crossDomainLinks: number;
   }> {
     const [entityRows, relRows] = await Promise.all([
-      db.select({ sourceApp: entitiesTable.sourceApp, entityType: entitiesTable.entityType }).from(entitiesTable),
-      db.select({ fromEntityId: entityRelationshipsTable.fromEntityId, toEntityId: entityRelationshipsTable.toEntityId }).from(entityRelationshipsTable).limit(10000),
+      db
+        .select({ sourceApp: entitiesTable.sourceApp, entityType: entitiesTable.entityType })
+        .from(entitiesTable),
+      db
+        .select({
+          fromEntityId: entityRelationshipsTable.fromEntityId,
+          toEntityId: entityRelationshipsTable.toEntityId,
+        })
+        .from(entityRelationshipsTable)
+        .limit(10000),
     ]);
 
     const entitiesByDomain: Record<string, number> = {};

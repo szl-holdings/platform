@@ -6,12 +6,19 @@ const POSTS = [
   {
     id: 1,
     week: 1,
-    pillar: "Founder Journey",
+    pillar: 'Founder Journey',
     title: "Why I'm Building SZL Holdings in Public",
-    subtitle: "A command-platform group for defense, maritime, real estate, and the AI layer underneath all of it.",
-    tags: ["founder", "ai", "startups", "building-in-public"],
-    mediumTags: ["Startup", "Artificial Intelligence", "Entrepreneurship", "Building In Public", "Technology"],
-    readTime: "6 min",
+    subtitle:
+      'A command-platform group for defense, maritime, real estate, and the AI layer underneath all of it.',
+    tags: ['founder', 'ai', 'startups', 'building-in-public'],
+    mediumTags: [
+      'Startup',
+      'Artificial Intelligence',
+      'Entrepreneurship',
+      'Building In Public',
+      'Technology',
+    ],
+    readTime: '6 min',
     body: `
 I've spent the last few years building something that doesn't fit cleanly into a single category. It isn't a SaaS product. It isn't a consultancy. It isn't a fund. It's closer to what used to be called an *operating group* — a small portfolio of AI-native command platforms that share a spine.
 
@@ -73,17 +80,24 @@ Next post drops Friday: *The Case for Vertical Command Platforms (and Why Horizo
 Welcome aboard.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 2,
     week: 1,
-    pillar: "AI Platform Engineering",
-    title: "The Case for Vertical Command Platforms",
-    subtitle: "Horizontal AI is eating itself. The next decade of software belongs to operator-grade, domain-specific command surfaces.",
-    tags: ["ai", "vertical-saas", "platforms"],
-    mediumTags: ["Artificial Intelligence", "SaaS", "Enterprise Software", "Product Design", "Technology"],
-    readTime: "8 min",
+    pillar: 'AI Platform Engineering',
+    title: 'The Case for Vertical Command Platforms',
+    subtitle:
+      'Horizontal AI is eating itself. The next decade of software belongs to operator-grade, domain-specific command surfaces.',
+    tags: ['ai', 'vertical-saas', 'platforms'],
+    mediumTags: [
+      'Artificial Intelligence',
+      'SaaS',
+      'Enterprise Software',
+      'Product Design',
+      'Technology',
+    ],
+    readTime: '8 min',
     body: `
 There's a fight happening right now that most people are watching from the wrong angle.
 
@@ -151,18 +165,25 @@ I'll write about each of those as they happen, with live examples from inside th
 If this resonates, forward it to the operator or investor in your life who's still on the "AI will do it all" side of the aisle. And subscribe — next week I'm going inside Aegis.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 2 — AEGIS ARC ─────────────
   {
     id: 3,
     week: 2,
-    pillar: "Defense & Intelligence",
-    title: "Inside Aegis: Building a Command Surface for Modern Defense",
-    subtitle: "What it takes to ship software that survives accreditation, briefings, and 3am alerts.",
-    tags: ["defense", "aegis", "command-platforms"],
-    mediumTags: ["Defense Technology", "Artificial Intelligence", "National Security", "Product Design", "Government"],
-    readTime: "9 min",
+    pillar: 'Defense & Intelligence',
+    title: 'Inside Aegis: Building a Command Surface for Modern Defense',
+    subtitle:
+      'What it takes to ship software that survives accreditation, briefings, and 3am alerts.',
+    tags: ['defense', 'aegis', 'command-platforms'],
+    mediumTags: [
+      'Defense Technology',
+      'Artificial Intelligence',
+      'National Security',
+      'Product Design',
+      'Government',
+    ],
+    readTime: '9 min',
     body: `
 Aegis is the SZL platform for unified defense and intelligence command. If you want the short version: it's what a modern J2/J3 shop should have been using for the last ten years — fused signals, structured analyst workflows, AI-assisted tradecraft, and a command surface that doesn't look like it was designed in 2004.
 
@@ -225,17 +246,24 @@ If you're in a program office, a prime, an allied service, or an investor focuse
 Next post: how Vessels is doing the same thing for the global shipping industry — a market that's two decades behind defense on tooling and waking up fast.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 4,
     week: 2,
-    pillar: "AI Platform Engineering",
-    title: "Evals Are the Product",
-    subtitle: "Why the eval harness is the most underrated piece of any production AI system — and what mine looks like.",
-    tags: ["ai", "evals", "engineering"],
-    mediumTags: ["Artificial Intelligence", "Software Engineering", "Machine Learning", "Product Development", "Testing"],
-    readTime: "7 min",
+    pillar: 'AI Platform Engineering',
+    title: 'Evals Are the Product',
+    subtitle:
+      'Why the eval harness is the most underrated piece of any production AI system — and what mine looks like.',
+    tags: ['ai', 'evals', 'engineering'],
+    mediumTags: [
+      'Artificial Intelligence',
+      'Software Engineering',
+      'Machine Learning',
+      'Product Development',
+      'Testing',
+    ],
+    readTime: '7 min',
     body: `
 Here is the single highest-leverage piece of advice I can give anyone shipping AI features into production: **the eval harness is the product.**
 
@@ -306,18 +334,19 @@ You will thank yourself in six months. And your buyers — whoever they are — 
 Next post: why the shipping industry is a software desert, and how Vessels is closing the gap.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 3 — VESSELS ARC ─────────────
   {
     id: 5,
     week: 3,
-    pillar: "Maritime",
-    title: "The Shipping Industry Is a Software Desert",
-    subtitle: "90% of global trade runs on software built before the iPhone. Vessels is the correction.",
-    tags: ["maritime", "shipping", "vessels"],
-    mediumTags: ["Logistics", "Supply Chain", "Maritime", "Enterprise Software", "Technology"],
-    readTime: "7 min",
+    pillar: 'Maritime',
+    title: 'The Shipping Industry Is a Software Desert',
+    subtitle:
+      '90% of global trade runs on software built before the iPhone. Vessels is the correction.',
+    tags: ['maritime', 'shipping', 'vessels'],
+    mediumTags: ['Logistics', 'Supply Chain', 'Maritime', 'Enterprise Software', 'Technology'],
+    readTime: '7 min',
     body: `
 If you want to see what the enterprise software market looked like in 2005, go visit a shipping company.
 
@@ -375,17 +404,18 @@ If you're in maritime — operator, broker, agent, class, flag, charterer, shipo
 Next post: what I got wrong about B2B sales in my first year running a portfolio.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 6,
     week: 3,
-    pillar: "Founder Journey",
-    title: "What I Got Wrong About B2B Sales in Year One",
-    subtitle: "Five expensive lessons from pitching command platforms to buyers who don't buy the way you think they do.",
-    tags: ["founder", "sales", "b2b"],
-    mediumTags: ["Sales", "Entrepreneurship", "Startup", "Business Strategy", "Leadership"],
-    readTime: "7 min",
+    pillar: 'Founder Journey',
+    title: 'What I Got Wrong About B2B Sales in Year One',
+    subtitle:
+      "Five expensive lessons from pitching command platforms to buyers who don't buy the way you think they do.",
+    tags: ['founder', 'sales', 'b2b'],
+    mediumTags: ['Sales', 'Entrepreneurship', 'Startup', 'Business Strategy', 'Leadership'],
+    readTime: '7 min',
     body: `
 I walked into year one of SZL Holdings thinking I knew how B2B software got sold. I had read the books, worked with good salespeople, and shipped enough product to believe the product-led motion applied to almost everything.
 
@@ -442,18 +472,25 @@ If you're running a similar motion and want to compare notes, reply. These lesso
 Next post: inside Terra — why I think the next decade of real estate returns is won by operators with better data.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 4 — TERRA ARC ─────────────
   {
     id: 7,
     week: 4,
-    pillar: "Real Estate Intelligence",
-    title: "Inside Terra: Real Estate Intelligence for the Next Decade",
-    subtitle: "The operators who win the next cycle will have data surfaces the incumbents can't match.",
-    tags: ["real-estate", "terra", "intelligence"],
-    mediumTags: ["Real Estate", "Artificial Intelligence", "Investing", "Data Science", "Technology"],
-    readTime: "8 min",
+    pillar: 'Real Estate Intelligence',
+    title: 'Inside Terra: Real Estate Intelligence for the Next Decade',
+    subtitle:
+      "The operators who win the next cycle will have data surfaces the incumbents can't match.",
+    tags: ['real-estate', 'terra', 'intelligence'],
+    mediumTags: [
+      'Real Estate',
+      'Artificial Intelligence',
+      'Investing',
+      'Data Science',
+      'Technology',
+    ],
+    readTime: '8 min',
     body: `
 Real estate is a data industry that has been in denial about being a data industry for thirty years.
 
@@ -516,17 +553,23 @@ If you're a GP, an asset manager, or an LP curious about what the next generatio
 Next post: the Command Portal — what it looks like when you unify six command platforms into one operator cockpit.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 8,
     week: 4,
-    pillar: "Portfolio Deep-Dives",
+    pillar: 'Portfolio Deep-Dives',
     title: "Command Portal: The Operator's Cockpit",
-    subtitle: "What happens when six vertical command platforms share one unified surface.",
-    tags: ["command-portal", "platforms", "product"],
-    mediumTags: ["Product Design", "Enterprise Software", "Artificial Intelligence", "UX", "Technology"],
-    readTime: "7 min",
+    subtitle: 'What happens when six vertical command platforms share one unified surface.',
+    tags: ['command-portal', 'platforms', 'product'],
+    mediumTags: [
+      'Product Design',
+      'Enterprise Software',
+      'Artificial Intelligence',
+      'UX',
+      'Technology',
+    ],
+    readTime: '7 min',
     body: `
 The Command Portal is the part of SZL Holdings that's hardest to explain in a sentence, and the part that matters most.
 
@@ -591,18 +634,19 @@ Next month I'll do a full portfolio deep-dive on Prism Counsel, which is the leg
 Next post: how I hire, and why the first five hires in a multi-product group are completely different from the first five in a single product.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 5 ─────────────
   {
     id: 9,
     week: 5,
-    pillar: "Founder Journey",
-    title: "The First Five Hires in a Multi-Product Group",
-    subtitle: "Why the standard early-stage hiring playbook breaks when you're running more than one product at once.",
-    tags: ["hiring", "founder", "team"],
-    mediumTags: ["Hiring", "Startup", "Leadership", "Team Building", "Entrepreneurship"],
-    readTime: "6 min",
+    pillar: 'Founder Journey',
+    title: 'The First Five Hires in a Multi-Product Group',
+    subtitle:
+      "Why the standard early-stage hiring playbook breaks when you're running more than one product at once.",
+    tags: ['hiring', 'founder', 'team'],
+    mediumTags: ['Hiring', 'Startup', 'Leadership', 'Team Building', 'Entrepreneurship'],
+    readTime: '6 min',
     body: `
 The early-stage hiring playbook — hire two generalist engineers, a designer, a founding salesperson, and a chief of staff — is one of the best pieces of startup advice ever written. It is also actively wrong for what I'm doing.
 
@@ -664,17 +708,24 @@ I'll write more team-building posts as the group scales. Next one I'm queueing: 
 Next post: evals part two — what I actually look for in a production regression suite.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 10,
     week: 5,
-    pillar: "AI Platform Engineering",
-    title: "What Actually Breaks in Production AI",
-    subtitle: "Ten months of incidents, categorized. The real failure modes nobody puts in the keynote.",
-    tags: ["ai", "reliability", "engineering"],
-    mediumTags: ["Artificial Intelligence", "Software Engineering", "DevOps", "Machine Learning", "Reliability"],
-    readTime: "7 min",
+    pillar: 'AI Platform Engineering',
+    title: 'What Actually Breaks in Production AI',
+    subtitle:
+      'Ten months of incidents, categorized. The real failure modes nobody puts in the keynote.',
+    tags: ['ai', 'reliability', 'engineering'],
+    mediumTags: [
+      'Artificial Intelligence',
+      'Software Engineering',
+      'DevOps',
+      'Machine Learning',
+      'Reliability',
+    ],
+    readTime: '7 min',
     body: `
 I keep a running log of every AI-related production incident across the SZL portfolio. Ten months in, here's the distribution. It does not look like what the frontier-AI conference talks tell you.
 
@@ -765,18 +816,25 @@ If you're building anywhere in this stack, the single best investment you can ma
 Next post: inside Prism Counsel — the legal and compliance platform.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 6 ─────────────
   {
     id: 11,
     week: 6,
-    pillar: "Portfolio Deep-Dives",
-    title: "Inside Prism Counsel: The Quiet Backbone",
-    subtitle: "Legal and compliance tooling that doesn't look glamorous and moves more revenue than anything else in the portfolio.",
-    tags: ["prism-counsel", "legal-tech", "compliance"],
-    mediumTags: ["Legal Tech", "Compliance", "Artificial Intelligence", "Enterprise Software", "LegalTech"],
-    readTime: "7 min",
+    pillar: 'Portfolio Deep-Dives',
+    title: 'Inside Prism Counsel: The Quiet Backbone',
+    subtitle:
+      "Legal and compliance tooling that doesn't look glamorous and moves more revenue than anything else in the portfolio.",
+    tags: ['prism-counsel', 'legal-tech', 'compliance'],
+    mediumTags: [
+      'Legal Tech',
+      'Compliance',
+      'Artificial Intelligence',
+      'Enterprise Software',
+      'LegalTech',
+    ],
+    readTime: '7 min',
     body: `
 Prism Counsel is the least-glamorous product in the SZL portfolio and the one that most often closes deals for the others. This post is about why.
 
@@ -824,17 +882,24 @@ If you're building in legal tech, the advice I'd give: stop pitching "ChatGPT fo
 Next post: what I look for in the first term sheet — and what I walk away from.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 12,
     week: 6,
-    pillar: "Founder Journey",
-    title: "What I Look for in a Term Sheet",
-    subtitle: "The parts of the deal that matter most, the ones that look fine and aren't, and the ones I walk from.",
-    tags: ["founder", "fundraising", "term-sheet"],
-    mediumTags: ["Fundraising", "Venture Capital", "Startup", "Entrepreneurship", "Business Strategy"],
-    readTime: "7 min",
+    pillar: 'Founder Journey',
+    title: 'What I Look for in a Term Sheet',
+    subtitle:
+      "The parts of the deal that matter most, the ones that look fine and aren't, and the ones I walk from.",
+    tags: ['founder', 'fundraising', 'term-sheet'],
+    mediumTags: [
+      'Fundraising',
+      'Venture Capital',
+      'Startup',
+      'Entrepreneurship',
+      'Business Strategy',
+    ],
+    readTime: '7 min',
     body: `
 I've now sat on both sides of a term sheet enough times to know what matters and what doesn't. Here is the short, honest list — the parts I optimize for, the parts that look fine but aren't, and the structural issues that make me walk regardless of valuation.
 
@@ -883,18 +948,25 @@ I'll write more fundraising posts as the year goes on. If you're a founder appro
 Next post: Vessels port-call intelligence, the deep technical dive.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 7 ─────────────
   {
     id: 13,
     week: 7,
-    pillar: "Maritime",
-    title: "How We Rebuilt Port-Call Intelligence From the PDF Up",
-    subtitle: "The single most painful workflow in maritime operations, and the one that pays back the fastest when you fix it.",
-    tags: ["maritime", "vessels", "port-calls"],
-    mediumTags: ["Maritime", "Logistics", "Artificial Intelligence", "Supply Chain", "Data Engineering"],
-    readTime: "8 min",
+    pillar: 'Maritime',
+    title: 'How We Rebuilt Port-Call Intelligence From the PDF Up',
+    subtitle:
+      'The single most painful workflow in maritime operations, and the one that pays back the fastest when you fix it.',
+    tags: ['maritime', 'vessels', 'port-calls'],
+    mediumTags: [
+      'Maritime',
+      'Logistics',
+      'Artificial Intelligence',
+      'Supply Chain',
+      'Data Engineering',
+    ],
+    readTime: '8 min',
     body: `
 If you want to understand why maritime is a software desert, sit with an operator during a port call.
 
@@ -964,17 +1036,17 @@ If you run port calls and want to see the walkthrough, reply.
 Next post: the founder's weekly operating rhythm, in detail.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 14,
     week: 7,
-    pillar: "Founder Journey",
-    title: "My Weekly Operating Rhythm, In Detail",
-    subtitle: "Six products, a small team, and a calendar that has to not eat itself.",
-    tags: ["founder", "operations", "productivity"],
-    mediumTags: ["Productivity", "Leadership", "Entrepreneurship", "Startup", "Time Management"],
-    readTime: "6 min",
+    pillar: 'Founder Journey',
+    title: 'My Weekly Operating Rhythm, In Detail',
+    subtitle: 'Six products, a small team, and a calendar that has to not eat itself.',
+    tags: ['founder', 'operations', 'productivity'],
+    mediumTags: ['Productivity', 'Leadership', 'Entrepreneurship', 'Startup', 'Time Management'],
+    readTime: '6 min',
     body: `
 People keep asking how I run six products with a small team and not lose my mind. The honest answer is: I don't always succeed, but I have a weekly rhythm that works more often than not. Here it is in full. Steal what's useful.
 
@@ -1039,18 +1111,24 @@ The second most common failure: too many product-changing decisions. I notice it
 Next post: how I think about defensibility in vertical AI.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 8 ─────────────
   {
     id: 15,
     week: 8,
-    pillar: "AI Platform Engineering",
-    title: "Defensibility in Vertical AI",
-    subtitle: "Where the moat actually sits when the models commoditize.",
-    tags: ["ai", "strategy", "moats"],
-    mediumTags: ["Artificial Intelligence", "Business Strategy", "SaaS", "Venture Capital", "Product"],
-    readTime: "7 min",
+    pillar: 'AI Platform Engineering',
+    title: 'Defensibility in Vertical AI',
+    subtitle: 'Where the moat actually sits when the models commoditize.',
+    tags: ['ai', 'strategy', 'moats'],
+    mediumTags: [
+      'Artificial Intelligence',
+      'Business Strategy',
+      'SaaS',
+      'Venture Capital',
+      'Product',
+    ],
+    readTime: '7 min',
     body: `
 Everybody is writing about AI moats right now. Most of it is wrong.
 
@@ -1114,17 +1192,18 @@ This is not a complicated framework. It's the one I wish more founders and inves
 Next post: the monetization ladder — free, paid, consulting, and when to open each rung.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 16,
     week: 8,
-    pillar: "Founder Journey",
-    title: "The Monetization Ladder",
-    subtitle: "Free, paid, consulting, enterprise — when to open each rung and when to keep it closed.",
-    tags: ["founder", "monetization", "pricing"],
-    mediumTags: ["Pricing Strategy", "SaaS", "Business Strategy", "Entrepreneurship", "Revenue"],
-    readTime: "6 min",
+    pillar: 'Founder Journey',
+    title: 'The Monetization Ladder',
+    subtitle:
+      'Free, paid, consulting, enterprise — when to open each rung and when to keep it closed.',
+    tags: ['founder', 'monetization', 'pricing'],
+    mediumTags: ['Pricing Strategy', 'SaaS', 'Business Strategy', 'Entrepreneurship', 'Revenue'],
+    readTime: '6 min',
     body: `
 Monetization in a multi-product group is not a single pricing decision. It's a ladder. Each rung serves a different customer and a different function. Open them in the wrong order and you leave money on the table or, worse, accidentally train your audience to expect the wrong thing.
 
@@ -1208,18 +1287,19 @@ Rung 7: closed — year-two, earliest.
 Next post: what cross-posting from Substack to Medium actually does for reach.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 9 ─────────────
   {
     id: 17,
     week: 9,
-    pillar: "Founder Journey",
-    title: "Cross-Posting Strategy: Substack, Medium, LinkedIn, X",
-    subtitle: "What each surface actually does, which posts belong where, and how the portfolio compounds.",
-    tags: ["writing", "distribution", "content"],
-    mediumTags: ["Content Marketing", "Writing", "Social Media", "Personal Branding", "Marketing"],
-    readTime: "6 min",
+    pillar: 'Founder Journey',
+    title: 'Cross-Posting Strategy: Substack, Medium, LinkedIn, X',
+    subtitle:
+      'What each surface actually does, which posts belong where, and how the portfolio compounds.',
+    tags: ['writing', 'distribution', 'content'],
+    mediumTags: ['Content Marketing', 'Writing', 'Social Media', 'Personal Branding', 'Marketing'],
+    readTime: '6 min',
     body: `
 I publish the same way I ship product: one source of truth, multiple surfaces, each with its own job. Here's how the cross-posting works for this newsletter.
 
@@ -1292,17 +1372,24 @@ Medium is the surface that compounds quietly. Substack is the surface where the 
 Next post: inside Forge — the client delivery platform.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 18,
     week: 9,
-    pillar: "Portfolio Deep-Dives",
-    title: "Forge: Client Delivery as a Product",
-    subtitle: "Professional services are a $2T category. The delivery systems inside them are still built on SharePoint.",
-    tags: ["forge", "services", "delivery"],
-    mediumTags: ["Consulting", "Professional Services", "Product Management", "Enterprise Software", "Artificial Intelligence"],
-    readTime: "7 min",
+    pillar: 'Portfolio Deep-Dives',
+    title: 'Forge: Client Delivery as a Product',
+    subtitle:
+      'Professional services are a $2T category. The delivery systems inside them are still built on SharePoint.',
+    tags: ['forge', 'services', 'delivery'],
+    mediumTags: [
+      'Consulting',
+      'Professional Services',
+      'Product Management',
+      'Enterprise Software',
+      'Artificial Intelligence',
+    ],
+    readTime: '7 min',
     body: `
 Professional services — consulting, advisory, implementation, managed services — is a $2 trillion global category. The delivery systems inside it are mostly built on SharePoint, Google Drive, and heroics.
 
@@ -1370,18 +1457,19 @@ I'm not selling to the Big Four. They'll build versions of this internally, badl
 Next post: the investor update, in public, Q1 edition.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 10 ─────────────
   {
     id: 19,
     week: 10,
-    pillar: "Founder Journey",
-    title: "Q1 Investor Update, In Public",
-    subtitle: "The same numbers I send investors, published openly, with the good parts and the bad parts.",
-    tags: ["founder", "investors", "metrics"],
-    mediumTags: ["Startup", "Venture Capital", "Metrics", "Entrepreneurship", "Transparency"],
-    readTime: "6 min",
+    pillar: 'Founder Journey',
+    title: 'Q1 Investor Update, In Public',
+    subtitle:
+      'The same numbers I send investors, published openly, with the good parts and the bad parts.',
+    tags: ['founder', 'investors', 'metrics'],
+    mediumTags: ['Startup', 'Venture Capital', 'Metrics', 'Entrepreneurship', 'Transparency'],
+    readTime: '6 min',
     body: `
 One of the things I promised at the start of this newsletter: I'd publish the investor update in public. Here's Q1, in the same shape I send it to the cap table, with the numbers that are real marked as real and the ones I'm still stabilizing marked as such.
 
@@ -1449,17 +1537,24 @@ If you're reading this:
 Replies are read. The next investor update will be public in the same format after Q2.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 20,
     week: 10,
-    pillar: "AI Platform Engineering",
-    title: "How I Decide What Becomes an Agent",
-    subtitle: "The decision tree for when a workflow should be a UI, a one-shot generation, or a fully agentic loop.",
-    tags: ["ai", "agents", "product"],
-    mediumTags: ["Artificial Intelligence", "Agents", "Product Design", "Software Engineering", "Automation"],
-    readTime: "7 min",
+    pillar: 'AI Platform Engineering',
+    title: 'How I Decide What Becomes an Agent',
+    subtitle:
+      'The decision tree for when a workflow should be a UI, a one-shot generation, or a fully agentic loop.',
+    tags: ['ai', 'agents', 'product'],
+    mediumTags: [
+      'Artificial Intelligence',
+      'Agents',
+      'Product Design',
+      'Software Engineering',
+      'Automation',
+    ],
+    readTime: '7 min',
     body: `
 Every team building production AI has this conversation: "should this be an agent?" It's usually asked too late, too vaguely, and with too much enthusiasm. Here's how I actually decide, with the tree I use.
 
@@ -1548,18 +1643,19 @@ When you do build an agent, scaffold it as ruthlessly as possible: tool allowlis
 Next post: the state of the maritime commercial market, from inside Vessels.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 11 ─────────────
   {
     id: 21,
     week: 11,
-    pillar: "Maritime",
-    title: "State of the Commercial Maritime Market, Q1",
-    subtitle: "Freight, bunkers, compliance pressure, and what operators are actually doing about it.",
-    tags: ["maritime", "market", "commercial"],
-    mediumTags: ["Maritime", "Logistics", "Shipping", "Market Analysis", "Supply Chain"],
-    readTime: "8 min",
+    pillar: 'Maritime',
+    title: 'State of the Commercial Maritime Market, Q1',
+    subtitle:
+      'Freight, bunkers, compliance pressure, and what operators are actually doing about it.',
+    tags: ['maritime', 'market', 'commercial'],
+    mediumTags: ['Maritime', 'Logistics', 'Shipping', 'Market Analysis', 'Supply Chain'],
+    readTime: '8 min',
     body: `
 From inside Vessels I get a useful view into what's actually happening in commercial maritime, across tanker, dry bulk, and container segments. Here's the Q1 picture.
 
@@ -1619,17 +1715,24 @@ If you're an operator and this reads right or wrong, reply. These posts compound
 Next post: what I learned from the one pilot we lost in Q1.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 22,
     week: 11,
-    pillar: "Founder Journey",
-    title: "What I Learned From the One Pilot We Lost",
-    subtitle: "A structured post-mortem on the engagement that didn't make it to production, and what I'd do differently.",
-    tags: ["founder", "lessons", "post-mortem"],
-    mediumTags: ["Startup", "Lessons Learned", "Entrepreneurship", "Business Strategy", "Product Management"],
-    readTime: "6 min",
+    pillar: 'Founder Journey',
+    title: 'What I Learned From the One Pilot We Lost',
+    subtitle:
+      "A structured post-mortem on the engagement that didn't make it to production, and what I'd do differently.",
+    tags: ['founder', 'lessons', 'post-mortem'],
+    mediumTags: [
+      'Startup',
+      'Lessons Learned',
+      'Entrepreneurship',
+      'Business Strategy',
+      'Product Management',
+    ],
+    readTime: '6 min',
     body: `
 In my Q1 investor update I mentioned one pilot that churned in month two of a three-month engagement. I promised a full post-mortem. Here it is.
 
@@ -1686,18 +1789,19 @@ If you run pilots in your business, stress-test every one of them against a sing
 Next post: the CORTEX mobile story.
 
 — S
-`.trim()
+`.trim(),
   },
   // ───────────── WEEK 12 ─────────────
   {
     id: 23,
     week: 12,
-    pillar: "Portfolio Deep-Dives",
-    title: "CORTEX: Why Command Platforms Need a Mobile Surface",
-    subtitle: "Operators don't stay at a desk. The mobile command app is where the next generation of trust lives.",
-    tags: ["cortex", "mobile", "product"],
-    mediumTags: ["Mobile", "Product Design", "Enterprise Software", "UX", "Technology"],
-    readTime: "6 min",
+    pillar: 'Portfolio Deep-Dives',
+    title: 'CORTEX: Why Command Platforms Need a Mobile Surface',
+    subtitle:
+      "Operators don't stay at a desk. The mobile command app is where the next generation of trust lives.",
+    tags: ['cortex', 'mobile', 'product'],
+    mediumTags: ['Mobile', 'Product Design', 'Enterprise Software', 'UX', 'Technology'],
+    readTime: '6 min',
     body: `
 Most enterprise software still assumes the operator is at a desk. Command platforms especially. That assumption is wrong for the users who matter most.
 
@@ -1742,17 +1846,17 @@ CORTEX is live, in internal use across the portfolio, in external beta with two 
 Next post: the 90-day review — what I got right, what I got wrong, what's next.
 
 — S
-`.trim()
+`.trim(),
   },
   {
     id: 24,
     week: 13,
-    pillar: "Founder Journey",
-    title: "90 Days of Building in Public",
+    pillar: 'Founder Journey',
+    title: '90 Days of Building in Public',
     subtitle: "The review. What I got right, what I got wrong, and what's next.",
-    tags: ["founder", "review", "reflection"],
-    mediumTags: ["Building In Public", "Startup", "Entrepreneurship", "Reflection", "Leadership"],
-    readTime: "6 min",
+    tags: ['founder', 'review', 'reflection'],
+    mediumTags: ['Building In Public', 'Startup', 'Entrepreneurship', 'Reflection', 'Leadership'],
+    readTime: '6 min',
     body: `
 Ninety days ago I started writing this newsletter in public, with a thesis, a calendar, and a set of promises. This is the review.
 
@@ -1809,29 +1913,29 @@ The work is early. The thesis is holding. The next 90 days matter more than the 
 Keep reading. Keep replying. Forward this to one person who should be in the room.
 
 — S
-`.trim()
-  }
+`.trim(),
+  },
 ];
 
 // Merge expansion appendices into posts that need to clear the 800-word floor.
-const EXPANSIONS = require("./expansions.cjs");
+const EXPANSIONS = require('./expansions.cjs');
 const TITLE_TO_KEY = {
-  "The Shipping Industry Is a Software Desert": "shipping-software-desert",
-  "What I Got Wrong About B2B Sales in Year One": "what-i-got-wrong-about-b2b",
-  "The First Five Hires in a Multi-Product Group": "first-five-hires",
-  "Inside Prism Counsel: The Quiet Backbone": "inside-prism-counsel",
-  "What I Look for in a Term Sheet": "what-i-look-for-in-term-sheet",
-  "My Weekly Operating Rhythm, In Detail": "weekly-operating-rhythm",
-  "Defensibility in Vertical AI": "defensibility-vertical-ai",
-  "The Monetization Ladder": "monetization-ladder",
-  "Cross-Posting Strategy: Substack, Medium, LinkedIn, X": "cross-posting-strategy",
-  "Forge: Client Delivery as a Product": "forge-client-delivery",
-  "Q1 Investor Update, In Public": "q1-investor-update",
-  "How I Decide What Becomes an Agent": "how-i-decide-what-becomes-an-agent",
-  "State of the Commercial Maritime Market, Q1": "state-of-maritime-q1",
-  "What I Learned From the One Pilot We Lost": "lost-pilot",
-  "CORTEX: Why Command Platforms Need a Mobile Surface": "cortex-mobile-surface",
-  "90 Days of Building in Public": "ninety-days-building-public"
+  'The Shipping Industry Is a Software Desert': 'shipping-software-desert',
+  'What I Got Wrong About B2B Sales in Year One': 'what-i-got-wrong-about-b2b',
+  'The First Five Hires in a Multi-Product Group': 'first-five-hires',
+  'Inside Prism Counsel: The Quiet Backbone': 'inside-prism-counsel',
+  'What I Look for in a Term Sheet': 'what-i-look-for-in-term-sheet',
+  'My Weekly Operating Rhythm, In Detail': 'weekly-operating-rhythm',
+  'Defensibility in Vertical AI': 'defensibility-vertical-ai',
+  'The Monetization Ladder': 'monetization-ladder',
+  'Cross-Posting Strategy: Substack, Medium, LinkedIn, X': 'cross-posting-strategy',
+  'Forge: Client Delivery as a Product': 'forge-client-delivery',
+  'Q1 Investor Update, In Public': 'q1-investor-update',
+  'How I Decide What Becomes an Agent': 'how-i-decide-what-becomes-an-agent',
+  'State of the Commercial Maritime Market, Q1': 'state-of-maritime-q1',
+  'What I Learned From the One Pilot We Lost': 'lost-pilot',
+  'CORTEX: Why Command Platforms Need a Mobile Surface': 'cortex-mobile-surface',
+  '90 Days of Building in Public': 'ninety-days-building-public',
 };
 for (const post of POSTS) {
   const key = TITLE_TO_KEY[post.title];
@@ -1841,10 +1945,10 @@ for (const post of POSTS) {
 }
 
 // Word-count enforcement: every essay must be 800–1,500 words.
-const _wcReport = POSTS.map(p => ({ title: p.title, wc: p.body.trim().split(/\s+/).length }));
-const _failures = _wcReport.filter(r => r.wc < 800 || r.wc > 1500);
+const _wcReport = POSTS.map((p) => ({ title: p.title, wc: p.body.trim().split(/\s+/).length }));
+const _failures = _wcReport.filter((r) => r.wc < 800 || r.wc > 1500);
 if (_failures.length) {
-  const lines = _failures.map(r => `  - ${r.wc} words: ${r.title}`).join("\n");
+  const lines = _failures.map((r) => `  - ${r.wc} words: ${r.title}`).join('\n');
   throw new Error(`Posts outside required 800–1500 word range:\n${lines}`);
 }
 

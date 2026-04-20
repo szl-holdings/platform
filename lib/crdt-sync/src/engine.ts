@@ -1,4 +1,12 @@
-import type { CrdtDelta, CrdtState, EntitySchema, LwwField, MergeResult, UpdateCallback, VectorClock } from "./types.js";
+import type {
+  CrdtDelta,
+  CrdtState,
+  EntitySchema,
+  LwwField,
+  MergeResult,
+  UpdateCallback,
+  VectorClock,
+} from './types.js';
 
 function clockDominates(a: VectorClock, b: VectorClock): boolean {
   for (const [actor, tick] of Object.entries(b)) {
@@ -109,7 +117,11 @@ export class CrdtDoc {
 
     if (remote && anyMerged) {
       for (const cb of this.subscribers) {
-        try { cb(delta, true); } catch { /* ignore */ }
+        try {
+          cb(delta, true);
+        } catch {
+          /* ignore */
+        }
       }
     }
 
@@ -142,7 +154,7 @@ const docRegistry = new Map<string, CrdtDoc>();
 export function getOrCreateDoc(
   entityType: string,
   entityId: string,
-  schema?: EntitySchema
+  schema?: EntitySchema,
 ): CrdtDoc {
   const key = `${entityType}:${entityId}`;
   let doc = docRegistry.get(key);

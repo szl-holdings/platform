@@ -1,4 +1,4 @@
-import { BarChart3, Trophy, Zap, Target, ArrowUp, ArrowDown, Clock, Cpu } from "lucide-react";
+import { ArrowDown, ArrowUp, BarChart3, Clock, Cpu, Target, Trophy, Zap } from 'lucide-react';
 
 interface BenchmarkResult {
   model: string;
@@ -15,21 +15,88 @@ interface BenchmarkResult {
 }
 
 const results: BenchmarkResult[] = [
-  { model: "SZL-LLM-7B", mmlu: 72.4, humanEval: 68.2, gsm8k: 74.1, hellaSwag: 82.3, truthfulQA: 51.2, avgScore: 69.6, latencyP50: "45ms", latencyP99: "128ms", throughput: "2,400 tok/s", cost: "$0.0004/1K" },
-  { model: "SZL-Code-13B", mmlu: 78.1, humanEval: 82.4, gsm8k: 81.3, hellaSwag: 86.7, truthfulQA: 54.8, avgScore: 76.7, latencyP50: "78ms", latencyP99: "210ms", throughput: "1,200 tok/s", cost: "$0.0012/1K" },
-  { model: "GPT-4 Turbo", mmlu: 86.4, humanEval: 87.1, gsm8k: 92.0, hellaSwag: 95.3, truthfulQA: 59.4, avgScore: 84.0, latencyP50: "320ms", latencyP99: "890ms", throughput: "800 tok/s", cost: "$0.01/1K" },
-  { model: "Claude 3 Opus", mmlu: 86.8, humanEval: 84.9, gsm8k: 95.0, hellaSwag: 95.4, truthfulQA: 62.1, avgScore: 84.8, latencyP50: "280ms", latencyP99: "750ms", throughput: "900 tok/s", cost: "$0.015/1K" },
-  { model: "Llama 3 70B", mmlu: 82.0, humanEval: 81.7, gsm8k: 83.0, hellaSwag: 87.5, truthfulQA: 55.2, avgScore: 77.9, latencyP50: "120ms", latencyP99: "340ms", throughput: "1,800 tok/s", cost: "$0.0008/1K" },
+  {
+    model: 'SZL-LLM-7B',
+    mmlu: 72.4,
+    humanEval: 68.2,
+    gsm8k: 74.1,
+    hellaSwag: 82.3,
+    truthfulQA: 51.2,
+    avgScore: 69.6,
+    latencyP50: '45ms',
+    latencyP99: '128ms',
+    throughput: '2,400 tok/s',
+    cost: '$0.0004/1K',
+  },
+  {
+    model: 'SZL-Code-13B',
+    mmlu: 78.1,
+    humanEval: 82.4,
+    gsm8k: 81.3,
+    hellaSwag: 86.7,
+    truthfulQA: 54.8,
+    avgScore: 76.7,
+    latencyP50: '78ms',
+    latencyP99: '210ms',
+    throughput: '1,200 tok/s',
+    cost: '$0.0012/1K',
+  },
+  {
+    model: 'GPT-4 Turbo',
+    mmlu: 86.4,
+    humanEval: 87.1,
+    gsm8k: 92.0,
+    hellaSwag: 95.3,
+    truthfulQA: 59.4,
+    avgScore: 84.0,
+    latencyP50: '320ms',
+    latencyP99: '890ms',
+    throughput: '800 tok/s',
+    cost: '$0.01/1K',
+  },
+  {
+    model: 'Claude 3 Opus',
+    mmlu: 86.8,
+    humanEval: 84.9,
+    gsm8k: 95.0,
+    hellaSwag: 95.4,
+    truthfulQA: 62.1,
+    avgScore: 84.8,
+    latencyP50: '280ms',
+    latencyP99: '750ms',
+    throughput: '900 tok/s',
+    cost: '$0.015/1K',
+  },
+  {
+    model: 'Llama 3 70B',
+    mmlu: 82.0,
+    humanEval: 81.7,
+    gsm8k: 83.0,
+    hellaSwag: 87.5,
+    truthfulQA: 55.2,
+    avgScore: 77.9,
+    latencyP50: '120ms',
+    latencyP99: '340ms',
+    throughput: '1,800 tok/s',
+    cost: '$0.0008/1K',
+  },
 ];
 
 function ScoreCell({ value, max }: { value: number; max: number }) {
   const pct = (value / max) * 100;
-  const color = pct >= 90 ? "text-emerald-400" : pct >= 75 ? "text-blue-400" : pct >= 60 ? "text-amber-400" : "text-red-400";
+  const color =
+    pct >= 90
+      ? 'text-emerald-400'
+      : pct >= 75
+        ? 'text-blue-400'
+        : pct >= 60
+          ? 'text-amber-400'
+          : 'text-red-400';
   return <span className={`font-mono text-sm ${color}`}>{value.toFixed(1)}</span>;
 }
 
 export default function Benchmarking() {
-  const bestAvg = Math.max(...results.map(r => r.avgScore));
+  const bestAvg = Math.max(...results.map((r) => r.avgScore));
 
   return (
     <div className="p-6 space-y-6">
@@ -37,7 +104,9 @@ export default function Benchmarking() {
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <Trophy className="w-6 h-6 text-amber-400" /> AI Model Benchmarking
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Head-to-head model evaluation — accuracy, latency, and throughput benchmarks</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Head-to-head model evaluation — accuracy, latency, and throughput benchmarks
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -47,7 +116,9 @@ export default function Benchmarking() {
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="text-xs text-muted-foreground">Best Average Score</div>
-          <div className="text-2xl font-display font-bold text-emerald-400 mt-1">{bestAvg.toFixed(1)}</div>
+          <div className="text-2xl font-display font-bold text-emerald-400 mt-1">
+            {bestAvg.toFixed(1)}
+          </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="text-xs text-muted-foreground">SZL Best Model</div>
@@ -77,17 +148,38 @@ export default function Benchmarking() {
           </thead>
           <tbody className="divide-y divide-border">
             {results.map((r) => (
-              <tr key={r.model} className={`hover:bg-muted/30 transition-colors ${r.model.startsWith("SZL") ? "bg-primary/5" : ""}`}>
+              <tr
+                key={r.model}
+                className={`hover:bg-muted/30 transition-colors ${r.model.startsWith('SZL') ? 'bg-primary/5' : ''}`}
+              >
                 <td className="p-4">
-                  <span className={`text-sm font-semibold ${r.model.startsWith("SZL") ? "text-primary" : ""}`}>{r.model}</span>
+                  <span
+                    className={`text-sm font-semibold ${r.model.startsWith('SZL') ? 'text-primary' : ''}`}
+                  >
+                    {r.model}
+                  </span>
                 </td>
-                <td className="p-4 text-center"><ScoreCell value={r.mmlu} max={100} /></td>
-                <td className="p-4 text-center"><ScoreCell value={r.humanEval} max={100} /></td>
-                <td className="p-4 text-center"><ScoreCell value={r.gsm8k} max={100} /></td>
-                <td className="p-4 text-center"><ScoreCell value={r.hellaSwag} max={100} /></td>
-                <td className="p-4 text-center"><ScoreCell value={r.truthfulQA} max={100} /></td>
                 <td className="p-4 text-center">
-                  <span className={`font-mono text-sm font-bold ${r.avgScore === bestAvg ? "text-emerald-400" : ""}`}>{r.avgScore.toFixed(1)}</span>
+                  <ScoreCell value={r.mmlu} max={100} />
+                </td>
+                <td className="p-4 text-center">
+                  <ScoreCell value={r.humanEval} max={100} />
+                </td>
+                <td className="p-4 text-center">
+                  <ScoreCell value={r.gsm8k} max={100} />
+                </td>
+                <td className="p-4 text-center">
+                  <ScoreCell value={r.hellaSwag} max={100} />
+                </td>
+                <td className="p-4 text-center">
+                  <ScoreCell value={r.truthfulQA} max={100} />
+                </td>
+                <td className="p-4 text-center">
+                  <span
+                    className={`font-mono text-sm font-bold ${r.avgScore === bestAvg ? 'text-emerald-400' : ''}`}
+                  >
+                    {r.avgScore.toFixed(1)}
+                  </span>
                 </td>
                 <td className="p-4 text-center text-xs text-muted-foreground">{r.latencyP50}</td>
                 <td className="p-4 text-center text-xs text-muted-foreground">{r.throughput}</td>
@@ -103,17 +195,26 @@ export default function Benchmarking() {
         <div className="space-y-3">
           {results.map((r) => (
             <div key={r.model} className="flex items-center gap-4">
-              <span className={`text-sm w-32 ${r.model.startsWith("SZL") ? "text-primary font-semibold" : "text-muted-foreground"}`}>{r.model}</span>
+              <span
+                className={`text-sm w-32 ${r.model.startsWith('SZL') ? 'text-primary font-semibold' : 'text-muted-foreground'}`}
+              >
+                {r.model}
+              </span>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-muted-foreground w-12">Score</span>
                   <div className="flex-1 bg-muted rounded-full h-2">
-                    <div className={`h-2 rounded-full ${r.model.startsWith("SZL") ? "bg-primary" : "bg-muted-foreground/40"}`} style={{ width: `${(r.avgScore / 100) * 100}%` }} />
+                    <div
+                      className={`h-2 rounded-full ${r.model.startsWith('SZL') ? 'bg-primary' : 'bg-muted-foreground/40'}`}
+                      style={{ width: `${(r.avgScore / 100) * 100}%` }}
+                    />
                   </div>
                   <span className="text-xs font-mono w-12 text-right">{r.avgScore.toFixed(1)}</span>
                 </div>
               </div>
-              <span className="text-xs font-mono text-muted-foreground w-24 text-right">{r.cost}</span>
+              <span className="text-xs font-mono text-muted-foreground w-24 text-right">
+                {r.cost}
+              </span>
             </div>
           ))}
         </div>

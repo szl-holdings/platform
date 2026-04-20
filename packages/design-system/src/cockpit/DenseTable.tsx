@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
-import { cn } from "../utils";
-import { v } from "../tokens/vars.js";
+import { ChevronDown, ChevronsUpDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
+import { v } from '../tokens/vars.js';
+import { cn } from '../utils';
 
 export interface ColumnDef<T> {
   key: string;
@@ -9,7 +9,7 @@ export interface ColumnDef<T> {
   accessor: (row: T) => React.ReactNode;
   sortable?: boolean;
   width?: string;
-  align?: "left" | "center" | "right";
+  align?: 'left' | 'center' | 'right';
   mono?: boolean;
 }
 
@@ -25,7 +25,7 @@ export interface DenseTableProps<T> {
   caption?: string;
 }
 
-type SortDir = "asc" | "desc" | null;
+type SortDir = 'asc' | 'desc' | null;
 
 export function DenseTable<T>({
   columns,
@@ -33,8 +33,8 @@ export function DenseTable<T>({
   rowKey,
   onRowClick,
   stickyHeader = true,
-  maxHeight = "400px",
-  emptyMessage = "No data",
+  maxHeight = '400px',
+  emptyMessage = 'No data',
   className,
   caption,
 }: DenseTableProps<T>) {
@@ -43,11 +43,11 @@ export function DenseTable<T>({
 
   function handleSort(key: string) {
     if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : d === "desc" ? null : "asc"));
-      if (sortDir === "desc") setSortKey(null);
+      setSortDir((d) => (d === 'asc' ? 'desc' : d === 'desc' ? null : 'asc'));
+      if (sortDir === 'desc') setSortKey(null);
     } else {
       setSortKey(key);
-      setSortDir("asc");
+      setSortDir('asc');
     }
   }
 
@@ -55,49 +55,50 @@ export function DenseTable<T>({
     if (!sortKey || sortDir === null) return 0;
     const col = columns.find((c) => c.key === sortKey);
     if (!col) return 0;
-    const av = String(col.accessor(a) ?? "");
-    const bv = String(col.accessor(b) ?? "");
-    return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    const av = String(col.accessor(a) ?? '');
+    const bv = String(col.accessor(b) ?? '');
+    return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
   });
 
   function SortIcon({ col }: { col: ColumnDef<T> }) {
     if (!col.sortable) return null;
     if (sortKey !== col.key || sortDir === null)
       return <ChevronsUpDown className="h-3 w-3 opacity-30" />;
-    if (sortDir === "asc") return <ChevronUp style={{ color: v.accentBlue }} className="h-3 w-3" />;
+    if (sortDir === 'asc') return <ChevronUp style={{ color: v.accentBlue }} className="h-3 w-3" />;
     return <ChevronDown style={{ color: v.accentBlue }} className="h-3 w-3" />;
   }
 
   return (
     <div
       style={{ borderColor: v.borderDefault, maxHeight }}
-      className={cn("rounded-lg border overflow-hidden", className)}
+      className={cn('rounded-lg border overflow-hidden', className)}
     >
       <div className="overflow-auto h-full">
         <table className="w-full border-collapse text-xs">
-          {caption && (
-            <caption className="sr-only">{caption}</caption>
-          )}
-          <thead className={cn(stickyHeader && "sticky top-0 z-10")}>
-            <tr style={{ borderColor: v.borderDefault, backgroundColor: v.bgSurface }} className="border-b">
+          {caption && <caption className="sr-only">{caption}</caption>}
+          <thead className={cn(stickyHeader && 'sticky top-0 z-10')}>
+            <tr
+              style={{ borderColor: v.borderDefault, backgroundColor: v.bgSurface }}
+              className="border-b"
+            >
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
                   style={{ width: col.width, color: v.textMuted }}
                   className={cn(
-                    "px-3 py-2 text-[10px] font-semibold uppercase tracking-wider",
-                    col.align === "center" && "text-center",
-                    col.align === "right" && "text-right",
-                    col.sortable && "cursor-pointer select-none transition-colors"
+                    'px-3 py-2 text-[10px] font-semibold uppercase tracking-wider',
+                    col.align === 'center' && 'text-center',
+                    col.align === 'right' && 'text-right',
+                    col.sortable && 'cursor-pointer select-none transition-colors',
                   )}
                   onClick={() => col.sortable && handleSort(col.key)}
                 >
                   <div
                     className={cn(
-                      "inline-flex items-center gap-1",
-                      col.align === "center" && "justify-center",
-                      col.align === "right" && "justify-end"
+                      'inline-flex items-center gap-1',
+                      col.align === 'center' && 'justify-center',
+                      col.align === 'right' && 'justify-end',
                     )}
                   >
                     {col.header}
@@ -124,8 +125,8 @@ export function DenseTable<T>({
                   key={rowKey(row)}
                   onClick={() => onRowClick?.(row)}
                   className={cn(
-                    "bg-transparent transition-colors duration-100",
-                    onRowClick && "cursor-pointer"
+                    'bg-transparent transition-colors duration-100',
+                    onRowClick && 'cursor-pointer',
                   )}
                 >
                   {columns.map((col) => (
@@ -133,10 +134,10 @@ export function DenseTable<T>({
                       key={col.key}
                       style={{ color: v.textPrimary }}
                       className={cn(
-                        "px-3 py-2",
-                        col.align === "center" && "text-center",
-                        col.align === "right" && "text-right",
-                        col.mono && "font-mono tabular-nums"
+                        'px-3 py-2',
+                        col.align === 'center' && 'text-center',
+                        col.align === 'right' && 'text-right',
+                        col.mono && 'font-mono tabular-nums',
                       )}
                     >
                       {col.accessor(row)}

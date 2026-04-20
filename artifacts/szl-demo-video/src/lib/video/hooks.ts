@@ -1,6 +1,6 @@
 // Video player hook - handles recording lifecycle, scene advancement, and looping
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
@@ -79,7 +79,7 @@ export function useVideoPlayer(options: UseVideoPlayerOptions): UseVideoPlayerRe
           globalStartRef.current = Date.now();
         }
       } else {
-        setCurrentScene(prev => prev + 1);
+        setCurrentScene((prev) => prev + 1);
       }
     }, currentDuration);
 
@@ -101,7 +101,7 @@ export function useSceneTimer(events: Array<{ time: number; callback: () => void
   const callbacksRef = useRef<Array<() => void>>([]);
 
   useEffect(() => {
-    callbacksRef.current = events.map(e => e.callback);
+    callbacksRef.current = events.map((e) => e.callback);
   }, [events]);
 
   const scheduleKey = events.map((event, i) => `${i}:${event.time}`).join('|');
@@ -119,7 +119,7 @@ export function useSceneTimer(events: Array<{ time: number; callback: () => void
     });
 
     return () => {
-      timers.forEach(timer => clearTimeout(timer));
+      timers.forEach((timer) => clearTimeout(timer));
     };
   }, [scheduleKey]);
 }

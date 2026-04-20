@@ -1,51 +1,51 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
+import { planPoolSize, planShards } from '../scenario-pool.js';
 import {
   aggregateScenarioShards,
   runScenarioSimulation,
-  simulateScenarioShard,
   type ScenarioShardSamples,
-} from "../scenario-simulation.js";
-import { planPoolSize, planShards } from "../scenario-pool.js";
-import { VESSELS_VOYAGE_COST, TERRA_PROPERTY_RETURNS } from "../scenarios.js";
+  simulateScenarioShard,
+} from '../scenario-simulation.js';
+import { TERRA_PROPERTY_RETURNS, VESSELS_VOYAGE_COST } from '../scenarios.js';
 
-describe("planShards", () => {
-  it("splits iterations evenly across shards summing to total", () => {
+describe('planShards', () => {
+  it('splits iterations evenly across shards summing to total', () => {
     const shards = planShards(10_000, 4);
     expect(shards).toHaveLength(4);
     expect(shards.reduce((s, n) => s + n, 0)).toBe(10_000);
     expect(Math.max(...shards) - Math.min(...shards)).toBeLessThanOrEqual(1);
   });
 
-  it("distributes the remainder so all shards receive ±1 iteration", () => {
+  it('distributes the remainder so all shards receive ±1 iteration', () => {
     const shards = planShards(10_003, 4);
     expect(shards.reduce((s, n) => s + n, 0)).toBe(10_003);
     expect(Math.max(...shards) - Math.min(...shards)).toBeLessThanOrEqual(1);
   });
 
-  it("collapses to one shard for tiny work", () => {
+  it('collapses to one shard for tiny work', () => {
     expect(planShards(1, 4)).toEqual([1]);
     expect(planShards(0, 4)).toEqual([0]);
   });
 });
 
-describe("planPoolSize", () => {
-  it("never exceeds the configured maxWorkers cap", () => {
+describe('planPoolSize', () => {
+  it('never exceeds the configured maxWorkers cap', () => {
     expect(planPoolSize(1_000_000, { maxWorkers: 4 })).toBeLessThanOrEqual(4);
   });
 
-  it("collapses to 1 worker for small iteration counts", () => {
+  it('collapses to 1 worker for small iteration counts', () => {
     expect(planPoolSize(100, { maxWorkers: 4, parallelThreshold: 5_000 })).toBe(1);
   });
 
-  it("scales workers with iteration count up to the cap", () => {
+  it('scales workers with iteration count up to the cap', () => {
     const size = planPoolSize(40_000, { maxWorkers: 4, parallelThreshold: 5_000 });
     expect(size).toBeGreaterThanOrEqual(1);
     expect(size).toBeLessThanOrEqual(4);
   });
 });
 
-describe("aggregateScenarioShards", () => {
-  it("merging shards yields the same totals as a single combined run", () => {
+describe('aggregateScenarioShards', () => {
+  it('merging shards yields the same totals as a single combined run', () => {
     // With deterministic shard sample arrays, merging must be exact (not just
     // close), because all the math is just concat + percentile/mean/var.
     const scenario = VESSELS_VOYAGE_COST;
@@ -54,9 +54,7 @@ describe("aggregateScenarioShards", () => {
 
     const merged = aggregateScenarioShards(scenario, [shardA, shardB], 12);
     expect(merged.iterations).toBe(5_000);
-    expect(merged.validIterations).toBe(
-      shardA.validIterations + shardB.validIterations,
-    );
+    expect(merged.validIterations).toBe(shardA.validIterations + shardB.validIterations);
     expect(merged.durationMs).toBe(12);
 
     // Sanity: a primary metric exists and has p5 <= p50 <= p95.
@@ -93,7 +91,7 @@ describe("aggregateScenarioShards", () => {
     expect(merged.inputSensitivity).toEqual(single.inputSensitivity);
   });
 
-  it("sharded simulation produces statistics within numerical noise of single-worker", () => {
+  it('sharded simulation produces statistics within numerical noise of single-worker', () => {
     // Run a large simulation in one shot, and the same total iterations
     // split across 4 shards. The statistics should match within Monte Carlo
     // noise (a few percent on the mean for 20k iterations).
@@ -116,7 +114,7 @@ describe("aggregateScenarioShards", () => {
     expect(Math.abs(a.stdDev - b.stdDev)).toBeLessThan(Math.max(1, Math.abs(a.stdDev) * 0.15));
   });
 
-  it("handles empty shard list without throwing", () => {
+  it('handles empty shard list without throwing', () => {
     const scenario = VESSELS_VOYAGE_COST;
     const empty = aggregateScenarioShards(scenario, [], 0);
     expect(empty.iterations).toBe(0);

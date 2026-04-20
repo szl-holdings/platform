@@ -14,26 +14,26 @@
  *   POST /tenant-health/:orgId/compute — force recompute for org
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  tenantHealthScorecardsTable,
+  meteringEventsTable,
   organizationsTable,
   orgMembersTable,
-  usageAggregatesTable,
-  meteringEventsTable,
   quotaViolationsTable,
   subscriptionsTable,
-} from "@szl-holdings/db";
-import { eq, desc, asc, and, gte, lte, sql, count, avg } from "drizzle-orm";
-import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { assertTenantAccess } from "../middlewares/tenant-scope";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  tenantHealthScorecardsTable,
+  usageAggregatesTable,
+} from '@szl-holdings/db';
+import { and, asc, avg, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { handleRouteError, sendNotFound, sendSuccess } from '../lib/api-response';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
+import { assertTenantAccess } from '../middlewares/tenant-scope';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
-const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
+const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
 
 function periodBounds(refDate = new Date()) {
   const y = refDate.getUTCFullYear();
@@ -69,7 +69,7 @@ function computeHealthScore(signals: {
   slaAdherencePct: number;
   errorRatePct: number;
   billingStatus: string;
-}): { score: number; tier: "critical" | "at_risk" | "healthy" | "champion" } {
+}): { score: number; tier: 'critical' | 'at_risk' | 'healthy' | 'champion' } {
   const userRatio = signals.totalUsers > 0 ? signals.activeUsers / signals.totalUsers : 0;
   const userScore = Math.min(userRatio * 100, 100);
 
@@ -89,29 +89,32 @@ function computeHealthScore(signals: {
   const billingScore = billingScoreMap[signals.billingStatus] ?? 60;
 
   const score =
-    userScore * 0.30 +
+    userScore * 0.3 +
     adoptionScore * 0.25 +
-    slaScore * 0.20 +
+    slaScore * 0.2 +
     errorScore * 0.15 +
-    billingScore * 0.10;
+    billingScore * 0.1;
 
   const rounded = Math.round(score * 10) / 10;
 
   const tier =
-    rounded >= 80 ? "champion"
-    : rounded >= 60 ? "healthy"
-    : rounded >= 40 ? "at_risk"
-    : "critical";
+    rounded >= 80 ? 'champion' : rounded >= 60 ? 'healthy' : rounded >= 40 ? 'at_risk' : 'critical';
 
   return { score: rounded, tier };
 }
 
-async function computeForOrg(orgId: number): Promise<typeof tenantHealthScorecardsTable.$inferSelect> {
+async function computeForOrg(
+  orgId: number,
+): Promise<typeof tenantHealthScorecardsTable.$inferSelect> {
   const now = new Date();
   const { start, end } = periodBounds(now);
   const { start: prevStart, end: prevEnd } = prevPeriodBounds(now);
 
-  const [orgRow] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, orgId)).limit(1);
+  const [orgRow] = await db
+    .select()
+    .from(organizationsTable)
+    .where(eq(organizationsTable.id, orgId))
+    .limit(1);
   if (!orgRow) throw new Error(`Org ${orgId} not found`);
 
   // Total members
@@ -126,32 +129,33 @@ async function computeForOrg(orgId: number): Promise<typeof tenantHealthScorecar
   const [activeUsersRow] = await db
     .select({ unique: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId})::int` })
     .from(meteringEventsTable)
-    .where(and(
-      eq(meteringEventsTable.orgId, orgId),
-      gte(meteringEventsTable.occurredAt, start),
-      lte(meteringEventsTable.occurredAt, end),
-    ));
+    .where(
+      and(
+        eq(meteringEventsTable.orgId, orgId),
+        gte(meteringEventsTable.occurredAt, start),
+        lte(meteringEventsTable.occurredAt, end),
+      ),
+    );
   const activeUsers = activeUsersRow?.unique ?? 0;
 
   // Session count (total events this month)
   const [sessionRow] = await db
     .select({ total: sql<number>`COUNT(*)::int` })
     .from(meteringEventsTable)
-    .where(and(
-      eq(meteringEventsTable.orgId, orgId),
-      gte(meteringEventsTable.occurredAt, start),
-      lte(meteringEventsTable.occurredAt, end),
-    ));
+    .where(
+      and(
+        eq(meteringEventsTable.orgId, orgId),
+        gte(meteringEventsTable.occurredAt, start),
+        lte(meteringEventsTable.occurredAt, end),
+      ),
+    );
   const sessionCount = sessionRow?.total ?? 0;
 
   // Distinct feature keys used (feature adoption)
   const distinctFeatures = await db
     .selectDistinct({ featureKey: meteringEventsTable.featureKey })
     .from(meteringEventsTable)
-    .where(and(
-      eq(meteringEventsTable.orgId, orgId),
-      gte(meteringEventsTable.occurredAt, start),
-    ));
+    .where(and(eq(meteringEventsTable.orgId, orgId), gte(meteringEventsTable.occurredAt, start)));
 
   // Platform-wide distinct features (denominator for adoption %)
   const allPlatformFeatures = await db
@@ -159,48 +163,51 @@ async function computeForOrg(orgId: number): Promise<typeof tenantHealthScorecar
     .from(meteringEventsTable)
     .where(gte(meteringEventsTable.occurredAt, prevStart));
 
-  const featureAdoptionPct = allPlatformFeatures.length > 0
-    ? Math.round((distinctFeatures.length / allPlatformFeatures.length) * 100)
-    : 0;
+  const featureAdoptionPct =
+    allPlatformFeatures.length > 0
+      ? Math.round((distinctFeatures.length / allPlatformFeatures.length) * 100)
+      : 0;
 
   // Quota violations (proxy for support issues)
   const [violationRow] = await db
     .select({ total: count() })
     .from(quotaViolationsTable)
-    .where(and(
-      eq(quotaViolationsTable.orgId, orgId),
-      gte(quotaViolationsTable.occurredAt, start),
-    ));
+    .where(and(eq(quotaViolationsTable.orgId, orgId), gte(quotaViolationsTable.occurredAt, start)));
   const supportTicketVolume = violationRow?.total ?? 0;
 
   // SLA adherence: hard violations indicate SLA breaches
   const [hardViolations] = await db
     .select({ total: count() })
     .from(quotaViolationsTable)
-    .where(and(
-      eq(quotaViolationsTable.orgId, orgId),
-      eq(quotaViolationsTable.violationType, "hard"),
-      gte(quotaViolationsTable.occurredAt, start),
-    ));
+    .where(
+      and(
+        eq(quotaViolationsTable.orgId, orgId),
+        eq(quotaViolationsTable.violationType, 'hard'),
+        gte(quotaViolationsTable.occurredAt, start),
+      ),
+    );
   const hardCount = hardViolations?.total ?? 0;
-  const slaAdherencePct = sessionCount > 0
-    ? Math.max(0, Math.round((1 - hardCount / Math.max(sessionCount, 1)) * 100))
-    : 100;
+  const slaAdherencePct =
+    sessionCount > 0
+      ? Math.max(0, Math.round((1 - hardCount / Math.max(sessionCount, 1)) * 100))
+      : 100;
 
   // Billing status from org plan + subscription
-  const [sub] = await db.select().from(subscriptionsTable)
+  const [sub] = await db
+    .select()
+    .from(subscriptionsTable)
     .where(eq(subscriptionsTable.orgId, orgId))
     .orderBy(desc(subscriptionsTable.createdAt))
     .limit(1);
 
-  let billingStatus: "current" | "overdue" | "churned" | "trial" | "unknown" = "unknown";
+  let billingStatus: 'current' | 'overdue' | 'churned' | 'trial' | 'unknown' = 'unknown';
   if (sub) {
-    if (sub.status === "active") billingStatus = "current";
-    else if (sub.status === "trialing") billingStatus = "trial";
-    else if (sub.status === "past_due") billingStatus = "overdue";
-    else if (sub.status === "canceled") billingStatus = "churned";
-  } else if (orgRow.plan === "free") {
-    billingStatus = "trial";
+    if (sub.status === 'active') billingStatus = 'current';
+    else if (sub.status === 'trialing') billingStatus = 'trial';
+    else if (sub.status === 'past_due') billingStatus = 'overdue';
+    else if (sub.status === 'canceled') billingStatus = 'churned';
+  } else if (orgRow.plan === 'free') {
+    billingStatus = 'trial';
   }
 
   // Error rate from quota violations vs total events
@@ -211,40 +218,62 @@ async function computeForOrg(orgId: number): Promise<typeof tenantHealthScorecar
 
   // Compute health score
   const { score: healthScore, tier: healthTier } = computeHealthScore({
-    activeUsers, totalUsers, featureAdoptionPct, slaAdherencePct, errorRatePct, billingStatus,
+    activeUsers,
+    totalUsers,
+    featureAdoptionPct,
+    slaAdherencePct,
+    errorRatePct,
+    billingStatus,
   });
 
   // Prior period for delta
   const [prevActiveRow] = await db
     .select({ unique: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId})::int` })
     .from(meteringEventsTable)
-    .where(and(
-      eq(meteringEventsTable.orgId, orgId),
-      gte(meteringEventsTable.occurredAt, prevStart),
-      lte(meteringEventsTable.occurredAt, prevEnd),
-    ));
+    .where(
+      and(
+        eq(meteringEventsTable.orgId, orgId),
+        gte(meteringEventsTable.occurredAt, prevStart),
+        lte(meteringEventsTable.occurredAt, prevEnd),
+      ),
+    );
   const prevActiveUsers = prevActiveRow?.unique ?? 0;
 
-  const [prevScorecard] = await db.select().from(tenantHealthScorecardsTable)
-    .where(and(
-      eq(tenantHealthScorecardsTable.orgId, orgId),
-      eq(tenantHealthScorecardsTable.periodStart, prevStart),
-    ))
+  const [prevScorecard] = await db
+    .select()
+    .from(tenantHealthScorecardsTable)
+    .where(
+      and(
+        eq(tenantHealthScorecardsTable.orgId, orgId),
+        eq(tenantHealthScorecardsTable.periodStart, prevStart),
+      ),
+    )
     .limit(1);
 
-  const healthScoreDelta = prevScorecard ? Math.round((healthScore - prevScorecard.healthScore) * 10) / 10 : null;
+  const healthScoreDelta = prevScorecard
+    ? Math.round((healthScore - prevScorecard.healthScore) * 10) / 10
+    : null;
   const activeUsersDelta = activeUsers - prevActiveUsers;
 
   const signalBreakdown = {
-    userActivity: { activeUsers, totalUsers, userRatio: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0 },
-    featureAdoption: { used: distinctFeatures.length, total: allPlatformFeatures.length, pct: featureAdoptionPct },
+    userActivity: {
+      activeUsers,
+      totalUsers,
+      userRatio: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0,
+    },
+    featureAdoption: {
+      used: distinctFeatures.length,
+      total: allPlatformFeatures.length,
+      pct: featureAdoptionPct,
+    },
     support: { ticketVolume: supportTicketVolume, hardViolations: hardCount },
     sla: { adherencePct: slaAdherencePct },
     billing: { status: billingStatus, plan: orgRow.plan },
     errors: { ratePct: errorRatePct, totalEvents: sessionCount },
   };
 
-  const [scorecard] = await db.insert(tenantHealthScorecardsTable)
+  const [scorecard] = await db
+    .insert(tenantHealthScorecardsTable)
     .values({
       orgId,
       computedAt: now,
@@ -295,16 +324,16 @@ async function computeForOrg(orgId: number): Promise<typeof tenantHealthScorecar
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/tenant-health",
+  '/tenant-health',
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const tier = req.query.tier as string | undefined;
-      const sortBy = (req.query.sortBy as string) || "healthScore";
-      const sortDir = (req.query.sortDir as string) === "asc" ? "asc" : "desc";
-      const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
+      const sortBy = (req.query.sortBy as string) || 'healthScore';
+      const sortDir = (req.query.sortDir as string) === 'asc' ? 'asc' : 'desc';
+      const limit = Math.min(parseInt(String(req.query.limit ?? '50'), 10), 200);
 
       const { start } = periodBounds();
 
@@ -321,18 +350,30 @@ router.get(
         })
         .from(tenantHealthScorecardsTable)
         .innerJoin(organizationsTable, eq(tenantHealthScorecardsTable.orgId, organizationsTable.id))
-        .where(and(
-          eq(tenantHealthScorecardsTable.periodStart, start),
-          tier ? eq(tenantHealthScorecardsTable.healthTier, tier as "critical" | "at_risk" | "healthy" | "champion") : undefined,
-        ))
+        .where(
+          and(
+            eq(tenantHealthScorecardsTable.periodStart, start),
+            tier
+              ? eq(
+                  tenantHealthScorecardsTable.healthTier,
+                  tier as 'critical' | 'at_risk' | 'healthy' | 'champion',
+                )
+              : undefined,
+          ),
+        )
         .orderBy(
-          sortDir === "asc"
+          sortDir === 'asc'
             ? asc(tenantHealthScorecardsTable.healthScore)
             : desc(tenantHealthScorecardsTable.healthScore),
         )
         .limit(limit);
 
-      const combined = rows.map(r => ({ ...r.scorecard, orgName: r.org.name, orgSlug: r.org.slug, plan: r.org.plan }));
+      const combined = rows.map((r) => ({
+        ...r.scorecard,
+        orgName: r.org.name,
+        orgSlug: r.org.slug,
+        plan: r.org.plan,
+      }));
 
       sendSuccess(res, {
         scorecards: combined,
@@ -340,7 +381,7 @@ router.get(
         total: combined.length,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to list tenant health scorecards");
+      handleRouteError(res, err, 'Failed to list tenant health scorecards');
     }
   },
 );
@@ -350,7 +391,7 @@ router.get(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/tenant-health/benchmarks",
+  '/tenant-health/benchmarks',
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
   async (req: Request, res: Response) => {
@@ -361,7 +402,9 @@ router.get(
         .select({
           avgHealthScore: avg(tenantHealthScorecardsTable.healthScore),
           avgActiveUsers: avg(sql<number>`${tenantHealthScorecardsTable.activeUsers}::float`),
-          avgFeatureAdoption: avg(sql<number>`${tenantHealthScorecardsTable.featureAdoptionPct}::float`),
+          avgFeatureAdoption: avg(
+            sql<number>`${tenantHealthScorecardsTable.featureAdoptionPct}::float`,
+          ),
           avgSlaAdherence: avg(sql<number>`${tenantHealthScorecardsTable.slaAdherencePct}::float`),
           avgErrorRate: avg(sql<number>`${tenantHealthScorecardsTable.errorRatePct}::float`),
           totalOrgs: count(),
@@ -394,10 +437,10 @@ router.get(
         .where(eq(tenantHealthScorecardsTable.periodStart, start))
         .groupBy(tenantHealthScorecardsTable.healthTier);
 
-      const tierBreakdown = Object.fromEntries(tierCounts.map(r => [r.tier, r.cnt]));
+      const tierBreakdown = Object.fromEntries(tierCounts.map((r) => [r.tier, r.cnt]));
 
-      const round1 = (v: unknown) => Math.round(parseFloat(String(v ?? "0")) * 10) / 10;
-      const round0 = (v: unknown) => Math.round(parseFloat(String(v ?? "0")));
+      const round1 = (v: unknown) => Math.round(parseFloat(String(v ?? '0')) * 10) / 10;
+      const round0 = (v: unknown) => Math.round(parseFloat(String(v ?? '0')));
 
       sendSuccess(res, {
         benchmarks: {
@@ -408,28 +451,30 @@ router.get(
           avgErrorRatePct: round1(aggs?.avgErrorRate),
           totalOrgs: aggs?.totalOrgs ?? 0,
         },
-        percentiles: percentiles ? {
-          healthScore: {
-            p25: round1(percentiles.p25),
-            p50: round1(percentiles.p50),
-            p75: round1(percentiles.p75),
-            p90: round1(percentiles.p90),
-          },
-          activeUsers: {
-            p25: round0(percentiles.p25ActiveUsers),
-            p50: round0(percentiles.p50ActiveUsers),
-            p75: round0(percentiles.p75ActiveUsers),
-          },
-          featureAdoption: {
-            p25: round0(percentiles.p25FeatureAdoption),
-            p75: round0(percentiles.p75FeatureAdoption),
-          },
-        } : null,
+        percentiles: percentiles
+          ? {
+              healthScore: {
+                p25: round1(percentiles.p25),
+                p50: round1(percentiles.p50),
+                p75: round1(percentiles.p75),
+                p90: round1(percentiles.p90),
+              },
+              activeUsers: {
+                p25: round0(percentiles.p25ActiveUsers),
+                p50: round0(percentiles.p50ActiveUsers),
+                p75: round0(percentiles.p75ActiveUsers),
+              },
+              featureAdoption: {
+                p25: round0(percentiles.p25FeatureAdoption),
+                p75: round0(percentiles.p75FeatureAdoption),
+              },
+            }
+          : null,
         tierBreakdown,
         period: { start },
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get benchmarks");
+      handleRouteError(res, err, 'Failed to get benchmarks');
     }
   },
 );
@@ -438,52 +483,55 @@ router.get(
 // GET /tenant-health/:orgId — single org scorecard
 // ─────────────────────────────────────────────────────────────────────────────
 
-router.get(
-  "/tenant-health/:orgId",
-  authMiddleware(),
-  async (req: Request, res: Response) => {
-    try {
-      const orgId = parseIdParam(req.params.orgId as string);
-      if (!assertTenantAccess(req, res, orgId)) return;
+router.get('/tenant-health/:orgId', authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = parseIdParam(req.params.orgId as string);
+    if (!assertTenantAccess(req, res, orgId)) return;
 
-      const { start } = periodBounds();
+    const { start } = periodBounds();
 
-      const [existing] = await db.select().from(tenantHealthScorecardsTable)
-        .where(and(
+    const [existing] = await db
+      .select()
+      .from(tenantHealthScorecardsTable)
+      .where(
+        and(
           eq(tenantHealthScorecardsTable.orgId, orgId),
           eq(tenantHealthScorecardsTable.periodStart, start),
-        ))
-        .limit(1);
+        ),
+      )
+      .limit(1);
 
-      const scorecard = existing ?? await computeForOrg(orgId);
+    const scorecard = existing ?? (await computeForOrg(orgId));
 
-      const history = await db.select().from(tenantHealthScorecardsTable)
-        .where(eq(tenantHealthScorecardsTable.orgId, orgId))
-        .orderBy(desc(tenantHealthScorecardsTable.periodStart))
-        .limit(6);
+    const history = await db
+      .select()
+      .from(tenantHealthScorecardsTable)
+      .where(eq(tenantHealthScorecardsTable.orgId, orgId))
+      .orderBy(desc(tenantHealthScorecardsTable.periodStart))
+      .limit(6);
 
-      sendSuccess(res, { scorecard, history });
-    } catch (err) {
-      handleRouteError(res, err, "Failed to get tenant health scorecard");
-    }
-  },
-);
+    sendSuccess(res, { scorecard, history });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to get tenant health scorecard');
+  }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /tenant-health/:orgId/compute — force recompute
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.post(
-  "/tenant-health/:orgId/compute",
+  '/tenant-health/:orgId/compute',
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  validateBody(bodyShape({})), async (req: Request, res: Response) => {
+  validateBody(bodyShape({})),
+  async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId as string);
       const scorecard = await computeForOrg(orgId);
       sendSuccess(res, scorecard);
     } catch (err) {
-      handleRouteError(res, err, "Failed to compute tenant health");
+      handleRouteError(res, err, 'Failed to compute tenant health');
     }
   },
 );

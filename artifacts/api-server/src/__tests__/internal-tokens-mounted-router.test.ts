@@ -9,49 +9,47 @@
  *
  * This test exercises that contract via `req.originalUrl`.
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import express from "express";
-import request from "supertest";
-import {
-  verifyInternalHeader,
-  resetInternalTokenRegistry,
-} from "../lib/internal-tokens";
+
+import express from 'express';
+import request from 'supertest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { resetInternalTokenRegistry, verifyInternalHeader } from '../lib/internal-tokens';
 
 const SCOPED = JSON.stringify([
   {
-    name: "internal-runner",
-    token: "scoped-secret-xyz",
-    scopes: ["internal:write"],
-    pathPrefixes: ["/api/internal/"],
+    name: 'internal-runner',
+    token: 'scoped-secret-xyz',
+    scopes: ['internal:write'],
+    pathPrefixes: ['/api/internal/'],
   },
 ]);
 
-describe("verifyInternalHeader under a mounted router (GAP-016 reviewer fix)", () => {
+describe('verifyInternalHeader under a mounted router (GAP-016 reviewer fix)', () => {
   let prevScoped: string | undefined;
 
   beforeEach(() => {
-    prevScoped = process.env["INTERNAL_SERVICE_TOKENS"];
-    process.env["INTERNAL_SERVICE_TOKENS"] = SCOPED;
+    prevScoped = process.env['INTERNAL_SERVICE_TOKENS'];
+    process.env['INTERNAL_SERVICE_TOKENS'] = SCOPED;
     resetInternalTokenRegistry();
   });
 
   afterEach(() => {
-    if (prevScoped === undefined) delete process.env["INTERNAL_SERVICE_TOKENS"];
-    else process.env["INTERNAL_SERVICE_TOKENS"] = prevScoped;
+    if (prevScoped === undefined) delete process.env['INTERNAL_SERVICE_TOKENS'];
+    else process.env['INTERNAL_SERVICE_TOKENS'] = prevScoped;
     resetInternalTokenRegistry();
   });
 
-  it("accepts a path-scoped token when the prefix matches the externally-visible URL via req.originalUrl", async () => {
+  it('accepts a path-scoped token when the prefix matches the externally-visible URL via req.originalUrl', async () => {
     const app = express();
     const router = express.Router();
-    router.get("/foo", (req, res) => {
+    router.get('/foo', (req, res) => {
       // Inside a mounted router, req.path = "/foo", but originalUrl = "/api/internal/foo".
       const matchByPath = verifyInternalHeader(
-        req.headers["x-internal-token"] as string | undefined,
+        req.headers['x-internal-token'] as string | undefined,
         req.path,
       );
       const matchByOriginal = verifyInternalHeader(
-        req.headers["x-internal-token"] as string | undefined,
+        req.headers['x-internal-token'] as string | undefined,
         req.originalUrl || req.url,
       );
       res.json({
@@ -59,11 +57,11 @@ describe("verifyInternalHeader under a mounted router (GAP-016 reviewer fix)", (
         viaOriginalUrl: matchByOriginal !== null,
       });
     });
-    app.use("/api/internal", router);
+    app.use('/api/internal', router);
 
     const resp = await request(app)
-      .get("/api/internal/foo")
-      .set("x-internal-token", "scoped-secret-xyz");
+      .get('/api/internal/foo')
+      .set('x-internal-token', 'scoped-secret-xyz');
 
     expect(resp.status).toBe(200);
     // Demonstrates the bug we fixed: req.path strips the mount → false.
@@ -72,21 +70,21 @@ describe("verifyInternalHeader under a mounted router (GAP-016 reviewer fix)", (
     expect(resp.body.viaOriginalUrl).toBe(true);
   });
 
-  it("still rejects a scoped token when the externally-visible URL is outside its pathPrefixes", async () => {
+  it('still rejects a scoped token when the externally-visible URL is outside its pathPrefixes', async () => {
     const app = express();
     const router = express.Router();
-    router.get("/bar", (req, res) => {
+    router.get('/bar', (req, res) => {
       const match = verifyInternalHeader(
-        req.headers["x-internal-token"] as string | undefined,
+        req.headers['x-internal-token'] as string | undefined,
         req.originalUrl || req.url,
       );
       res.json({ matched: match !== null });
     });
-    app.use("/api/public", router);
+    app.use('/api/public', router);
 
     const resp = await request(app)
-      .get("/api/public/bar")
-      .set("x-internal-token", "scoped-secret-xyz");
+      .get('/api/public/bar')
+      .set('x-internal-token', 'scoped-secret-xyz');
 
     expect(resp.status).toBe(200);
     expect(resp.body.matched).toBe(false);

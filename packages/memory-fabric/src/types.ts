@@ -1,21 +1,21 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const MemoryTypeSchema = z.enum([
-  "working",
-  "session",
-  "episodic",
-  "semantic",
-  "workflow",
-  "entity",
-  "artifact",
-  "operator-feedback",
-  "executive",
-  "skill",
+  'working',
+  'session',
+  'episodic',
+  'semantic',
+  'workflow',
+  'entity',
+  'artifact',
+  'operator-feedback',
+  'executive',
+  'skill',
 ]);
 
 export const MemoryTierSchema = MemoryTypeSchema;
 
-export const SensitivityLevelSchema = z.enum(["public", "internal", "confidential", "restricted"]);
+export const SensitivityLevelSchema = z.enum(['public', 'internal', 'confidential', 'restricted']);
 
 /**
  * Canonical fallback domain for memory entries that genuinely don't belong
@@ -25,7 +25,7 @@ export const SensitivityLevelSchema = z.enum(["public", "internal", "confidentia
  * than passing `""` or omitting the field — `MemoryEntrySchema` rejects empty
  * strings so the runtime guarantee that "every memory has a domain tag" holds.
  */
-export const MEMORY_DOMAIN_UNKNOWN = "unknown" as const;
+export const MEMORY_DOMAIN_UNKNOWN = 'unknown' as const;
 
 /**
  * Known product/operational domains that the executive briefing engine and
@@ -36,16 +36,16 @@ export const MEMORY_DOMAIN_UNKNOWN = "unknown" as const;
  * `domain` is a non-empty string.
  */
 export const KNOWN_MEMORY_DOMAINS = [
-  "vessels",
-  "aegis",
-  "terra",
-  "lyte",
-  "prism",
-  "carlota",
-  "sentra",
-  "szl-holdings",
-  "platform",
-  "consolidated",
+  'vessels',
+  'aegis',
+  'terra',
+  'lyte',
+  'prism',
+  'carlota',
+  'sentra',
+  'szl-holdings',
+  'platform',
+  'consolidated',
   MEMORY_DOMAIN_UNKNOWN,
 ] as const;
 
@@ -59,13 +59,13 @@ export type KnownMemoryDomain = (typeof KNOWN_MEMORY_DOMAINS)[number];
  */
 export const MemoryDomainSchema = z
   .string()
-  .min(1, "memory.domain is required — pass MEMORY_DOMAIN_UNKNOWN if truly unscoped");
+  .min(1, 'memory.domain is required — pass MEMORY_DOMAIN_UNKNOWN if truly unscoped');
 
 export const MemoryProvenanceSchema = z.object({
   source: z.string(),
   sourceId: z.string().optional(),
   author: z.string().optional(),
-  method: z.enum(["agent", "human", "import", "derived"]).default("agent"),
+  method: z.enum(['agent', 'human', 'import', 'derived']).default('agent'),
   createdAt: z.string().datetime(),
 });
 
@@ -83,13 +83,17 @@ export const MemoryEntrySchema = z.object({
     isStale: z.boolean().default(false),
   }),
   confidence: z.number().min(0).max(1).default(1),
-  retention: z.object({
-    policy: z.enum(["ephemeral", "session-scoped", "workflow-scoped", "persistent", "archival"]).default("persistent"),
-    expiresAt: z.string().datetime().optional(),
-    maxAgeDays: z.number().positive().optional(),
-    pinned: z.boolean().default(false),
-  }).default({ policy: "persistent" }),
-  sensitivity: SensitivityLevelSchema.default("internal"),
+  retention: z
+    .object({
+      policy: z
+        .enum(['ephemeral', 'session-scoped', 'workflow-scoped', 'persistent', 'archival'])
+        .default('persistent'),
+      expiresAt: z.string().datetime().optional(),
+      maxAgeDays: z.number().positive().optional(),
+      pinned: z.boolean().default(false),
+    })
+    .default({ policy: 'persistent' }),
+  sensitivity: SensitivityLevelSchema.default('internal'),
   linkedEntities: z.array(z.string()).default([]),
   linkedTraces: z.array(z.string()).default([]),
   linkedActions: z.array(z.string()).default([]),

@@ -2,14 +2,14 @@ export interface TemporalMarker {
   markerId: string;
   label: string;
   timestamp: string;
-  eventType: "orchestration" | "decision" | "milestone" | "deadline" | "anomaly";
+  eventType: 'orchestration' | 'decision' | 'milestone' | 'deadline' | 'anomaly';
   metadata: Record<string, unknown>;
 }
 
 export interface TemporalPattern {
   patternId: string;
   description: string;
-  frequency: "hourly" | "daily" | "weekly" | "irregular";
+  frequency: 'hourly' | 'daily' | 'weekly' | 'irregular';
   lastOccurrence: string;
   occurrenceCount: number;
   predictedNext: string | null;
@@ -19,10 +19,10 @@ export interface ProspectiveMemoryItem {
   intentionId: string;
   description: string;
   triggerCondition: string;
-  triggerType: "temporal" | "contextual" | "event";
+  triggerType: 'temporal' | 'contextual' | 'event';
   scheduledFor: string | null;
   contextCue: string | null;
-  status: "pending" | "triggered" | "expired" | "completed";
+  status: 'pending' | 'triggered' | 'expired' | 'completed';
   action: string;
   createdAt: string;
   expiresAt: string;
@@ -35,15 +35,19 @@ export interface TemporalDiscount {
   delayedValue: number;
   delayDays: number;
   discountedValue: number;
-  recommendation: "take_immediate" | "wait_for_delayed" | "indifferent";
+  recommendation: 'take_immediate' | 'wait_for_delayed' | 'indifferent';
   timestamp: string;
 }
 
 export interface EpisodicFutureSimulation {
   simulationId: string;
   scenario: string;
-  timeHorizon: "hours" | "days" | "weeks";
-  predictedOutcomes: Array<{ outcome: string; probability: number; impact: "positive" | "neutral" | "negative" }>;
+  timeHorizon: 'hours' | 'days' | 'weeks';
+  predictedOutcomes: Array<{
+    outcome: string;
+    probability: number;
+    impact: 'positive' | 'neutral' | 'negative';
+  }>;
   strategicImplication: string;
   timestamp: string;
 }
@@ -55,7 +59,7 @@ export interface TemporalAwarenessState {
   averageOrchestrationInterval: number;
   recentMarkers: TemporalMarker[];
   detectedPatterns: TemporalPattern[];
-  timeOfDay: "morning" | "afternoon" | "evening" | "night";
+  timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
   dayOfWeek: string;
   isBusinessHours: boolean;
   uptimeMs: number;
@@ -64,11 +68,11 @@ export interface TemporalAwarenessState {
   futureSimulations: EpisodicFutureSimulation[];
 }
 
-function classifyTimeOfDay(hour: number): TemporalAwarenessState["timeOfDay"] {
-  if (hour >= 6 && hour < 12) return "morning";
-  if (hour >= 12 && hour < 17) return "afternoon";
-  if (hour >= 17 && hour < 21) return "evening";
-  return "night";
+function classifyTimeOfDay(hour: number): TemporalAwarenessState['timeOfDay'] {
+  if (hour >= 6 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
 }
 
 function isBusinessHours(date: Date): boolean {
@@ -77,13 +81,13 @@ function isBusinessHours(date: Date): boolean {
   return day >= 1 && day <= 5 && hour >= 8 && hour < 18;
 }
 
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export interface AgentTemporalEvolution {
   agentId: string;
   domain: string;
   samples: Array<{ timestamp: number; successRate: number; confidence: number; latencyMs: number }>;
-  trend: "improving" | "declining" | "stable" | "volatile";
+  trend: 'improving' | 'declining' | 'stable' | 'volatile';
   selfReflection: string;
 }
 
@@ -103,7 +107,11 @@ class TemporalAwarenessEngine {
   private static readonly MAX_DISCOUNTS = 20;
   private static readonly MAX_SIMULATIONS = 15;
 
-  recordMarker(label: string, eventType: TemporalMarker["eventType"], metadata: Record<string, unknown> = {}): TemporalMarker {
+  recordMarker(
+    label: string,
+    eventType: TemporalMarker['eventType'],
+    metadata: Record<string, unknown> = {},
+  ): TemporalMarker {
     const marker: TemporalMarker = {
       markerId: `tm_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       label,
@@ -117,10 +125,13 @@ class TemporalAwarenessEngine {
       this.markers.splice(0, this.markers.length - TemporalAwarenessEngine.MAX_MARKERS);
     }
 
-    if (eventType === "orchestration") {
+    if (eventType === 'orchestration') {
       this.orchestrationTimestamps.push(Date.now());
       if (this.orchestrationTimestamps.length > TemporalAwarenessEngine.MAX_TIMESTAMPS) {
-        this.orchestrationTimestamps.splice(0, this.orchestrationTimestamps.length - TemporalAwarenessEngine.MAX_TIMESTAMPS);
+        this.orchestrationTimestamps.splice(
+          0,
+          this.orchestrationTimestamps.length - TemporalAwarenessEngine.MAX_TIMESTAMPS,
+        );
       }
     }
 
@@ -131,7 +142,7 @@ class TemporalAwarenessEngine {
 
   scheduleIntention(input: {
     description: string;
-    triggerType: ProspectiveMemoryItem["triggerType"];
+    triggerType: ProspectiveMemoryItem['triggerType'];
     scheduledFor?: string;
     contextCue?: string;
     action: string;
@@ -141,13 +152,14 @@ class TemporalAwarenessEngine {
     const item: ProspectiveMemoryItem = {
       intentionId: `intent_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       description: input.description,
-      triggerCondition: input.triggerType === "temporal"
-        ? `At ${input.scheduledFor ?? "unspecified time"}`
-        : `When context matches: ${input.contextCue ?? "unspecified cue"}`,
+      triggerCondition:
+        input.triggerType === 'temporal'
+          ? `At ${input.scheduledFor ?? 'unspecified time'}`
+          : `When context matches: ${input.contextCue ?? 'unspecified cue'}`,
       triggerType: input.triggerType,
       scheduledFor: input.scheduledFor ?? null,
       contextCue: input.contextCue ?? null,
-      status: "pending",
+      status: 'pending',
       action: input.action,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + ttl).toISOString(),
@@ -155,7 +167,9 @@ class TemporalAwarenessEngine {
 
     this.prospective.push(item);
     if (this.prospective.length > TemporalAwarenessEngine.MAX_PROSPECTIVE) {
-      this.prospective = this.prospective.filter(p => p.status === "pending").slice(-TemporalAwarenessEngine.MAX_PROSPECTIVE);
+      this.prospective = this.prospective
+        .filter((p) => p.status === 'pending')
+        .slice(-TemporalAwarenessEngine.MAX_PROSPECTIVE);
     }
 
     return item;
@@ -166,26 +180,29 @@ class TemporalAwarenessEngine {
     const triggered: ProspectiveMemoryItem[] = [];
 
     for (const item of this.prospective) {
-      if (item.status !== "pending") continue;
+      if (item.status !== 'pending') continue;
 
       if (new Date(item.expiresAt) < now) {
-        item.status = "expired";
+        item.status = 'expired';
         continue;
       }
 
-      if (item.triggerType === "temporal" && item.scheduledFor) {
+      if (item.triggerType === 'temporal' && item.scheduledFor) {
         if (new Date(item.scheduledFor) <= now) {
-          item.status = "triggered";
+          item.status = 'triggered';
           triggered.push(item);
         }
       }
 
-      if (item.triggerType === "contextual" && item.contextCue && contextQuery) {
-        const cueWords = item.contextCue.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      if (item.triggerType === 'contextual' && item.contextCue && contextQuery) {
+        const cueWords = item.contextCue
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 3);
         const queryLower = contextQuery.toLowerCase();
-        const matchCount = cueWords.filter(w => queryLower.includes(w)).length;
+        const matchCount = cueWords.filter((w) => queryLower.includes(w)).length;
         if (matchCount >= Math.ceil(cueWords.length * 0.4) && cueWords.length > 0) {
-          item.status = "triggered";
+          item.status = 'triggered';
           triggered.push(item);
         }
       }
@@ -204,13 +221,13 @@ class TemporalAwarenessEngine {
     const k = input.discountRate ?? 0.05;
     const discountedValue = input.delayedValue / (1 + k * input.delayDays);
 
-    let recommendation: TemporalDiscount["recommendation"];
+    let recommendation: TemporalDiscount['recommendation'];
     if (discountedValue > input.immediateValue * 1.1) {
-      recommendation = "wait_for_delayed";
+      recommendation = 'wait_for_delayed';
     } else if (input.immediateValue > discountedValue * 1.1) {
-      recommendation = "take_immediate";
+      recommendation = 'take_immediate';
     } else {
-      recommendation = "indifferent";
+      recommendation = 'indifferent';
     }
 
     const discount: TemporalDiscount = {
@@ -234,55 +251,55 @@ class TemporalAwarenessEngine {
 
   simulateFuture(input: {
     scenario: string;
-    timeHorizon: EpisodicFutureSimulation["timeHorizon"];
+    timeHorizon: EpisodicFutureSimulation['timeHorizon'];
     currentState: { confidence: number; conflictCount: number; agentHealth: string };
   }): EpisodicFutureSimulation {
-    const outcomes: EpisodicFutureSimulation["predictedOutcomes"] = [];
+    const outcomes: EpisodicFutureSimulation['predictedOutcomes'] = [];
 
     if (input.currentState.confidence > 70) {
       outcomes.push({
-        outcome: "Continued high performance with stable routing",
+        outcome: 'Continued high performance with stable routing',
         probability: 0.6,
-        impact: "positive",
+        impact: 'positive',
       });
       outcomes.push({
-        outcome: "Gradual confidence drift without recalibration",
+        outcome: 'Gradual confidence drift without recalibration',
         probability: 0.25,
-        impact: "negative",
+        impact: 'negative',
       });
     } else {
       outcomes.push({
-        outcome: "Performance recovery through learning adaptation",
+        outcome: 'Performance recovery through learning adaptation',
         probability: 0.4,
-        impact: "positive",
+        impact: 'positive',
       });
       outcomes.push({
-        outcome: "Continued degradation requiring human intervention",
+        outcome: 'Continued degradation requiring human intervention',
         probability: 0.35,
-        impact: "negative",
+        impact: 'negative',
       });
     }
 
     if (input.currentState.conflictCount > 2) {
       outcomes.push({
-        outcome: "Agent conflicts escalate to systematic disagreement",
+        outcome: 'Agent conflicts escalate to systematic disagreement',
         probability: 0.3,
-        impact: "negative",
+        impact: 'negative',
       });
     }
 
     outcomes.push({
-      outcome: "Novel cross-domain insight emerges from current patterns",
+      outcome: 'Novel cross-domain insight emerges from current patterns',
       probability: 0.15,
-      impact: "positive",
+      impact: 'positive',
     });
 
-    const bestOutcome = outcomes.find(o => o.impact === "positive" && o.probability > 0.3);
-    const worstOutcome = outcomes.find(o => o.impact === "negative" && o.probability > 0.3);
+    const bestOutcome = outcomes.find((o) => o.impact === 'positive' && o.probability > 0.3);
+    const worstOutcome = outcomes.find((o) => o.impact === 'negative' && o.probability > 0.3);
 
     const strategicImplication = bestOutcome
-      ? `Best path: ${bestOutcome.outcome} (${(bestOutcome.probability * 100).toFixed(0)}%). ${worstOutcome ? `Watch for: ${worstOutcome.outcome}.` : ""}`
-      : "No high-probability positive outcome — consider strategy adjustment.";
+      ? `Best path: ${bestOutcome.outcome} (${(bestOutcome.probability * 100).toFixed(0)}%). ${worstOutcome ? `Watch for: ${worstOutcome.outcome}.` : ''}`
+      : 'No high-probability positive outcome — consider strategy adjustment.';
 
     const sim: EpisodicFutureSimulation = {
       simulationId: `future_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -324,38 +341,42 @@ class TemporalAwarenessEngine {
     }
 
     const avgInterval = intervals.reduce((s, i) => s + i, 0) / intervals.length;
-    const stdDev = Math.sqrt(intervals.reduce((s, i) => s + (i - avgInterval) ** 2, 0) / intervals.length);
+    const stdDev = Math.sqrt(
+      intervals.reduce((s, i) => s + (i - avgInterval) ** 2, 0) / intervals.length,
+    );
     const cv = stdDev / Math.max(1, avgInterval);
 
     if (cv < 0.5) {
-      let frequency: TemporalPattern["frequency"] = "irregular";
-      if (avgInterval < 2 * 3600 * 1000) frequency = "hourly";
-      else if (avgInterval < 48 * 3600 * 1000) frequency = "daily";
-      else if (avgInterval < 10 * 24 * 3600 * 1000) frequency = "weekly";
+      let frequency: TemporalPattern['frequency'] = 'irregular';
+      if (avgInterval < 2 * 3600 * 1000) frequency = 'hourly';
+      else if (avgInterval < 48 * 3600 * 1000) frequency = 'daily';
+      else if (avgInterval < 10 * 24 * 3600 * 1000) frequency = 'weekly';
 
       const predictedNext = new Date(Date.now() + avgInterval).toISOString();
 
-      this.patterns.set("orchestration_cadence", {
-        patternId: "orchestration_cadence",
+      this.patterns.set('orchestration_cadence', {
+        patternId: 'orchestration_cadence',
         description: `Orchestrations occur at ~${frequency} intervals (avg ${(avgInterval / 60000).toFixed(0)} min apart)`,
         frequency,
-        lastOccurrence: new Date(this.orchestrationTimestamps[this.orchestrationTimestamps.length - 1]!).toISOString(),
+        lastOccurrence: new Date(
+          this.orchestrationTimestamps[this.orchestrationTimestamps.length - 1]!,
+        ).toISOString(),
         occurrenceCount: this.orchestrationTimestamps.length,
         predictedNext,
       });
     }
 
-    const hours = this.orchestrationTimestamps.map(t => new Date(t).getHours());
+    const hours = this.orchestrationTimestamps.map((t) => new Date(t).getHours());
     const hourCounts: Record<number, number> = {};
     for (const h of hours) {
       hourCounts[h] = (hourCounts[h] ?? 0) + 1;
     }
     const peakHour = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0];
     if (peakHour && peakHour[1] > this.orchestrationTimestamps.length * 0.2) {
-      this.patterns.set("peak_usage", {
-        patternId: "peak_usage",
-        description: `Peak usage at hour ${peakHour[0]} (${peakHour[1]} orchestrations, ${(peakHour[1] / this.orchestrationTimestamps.length * 100).toFixed(0)}% of total)`,
-        frequency: "daily",
+      this.patterns.set('peak_usage', {
+        patternId: 'peak_usage',
+        description: `Peak usage at hour ${peakHour[0]} (${peakHour[1]} orchestrations, ${((peakHour[1] / this.orchestrationTimestamps.length) * 100).toFixed(0)}% of total)`,
+        frequency: 'daily',
         lastOccurrence: new Date().toISOString(),
         occurrenceCount: Number(peakHour[1]),
         predictedNext: null,
@@ -363,10 +384,16 @@ class TemporalAwarenessEngine {
     }
   }
 
-  recordAgentPerformance(agentId: string, domain: string, successRate: number, confidence: number, latencyMs: number): void {
+  recordAgentPerformance(
+    agentId: string,
+    domain: string,
+    successRate: number,
+    confidence: number,
+    latencyMs: number,
+  ): void {
     let evo = this.agentEvolution.get(agentId);
     if (!evo) {
-      evo = { agentId, domain, samples: [], trend: "stable", selfReflection: "" };
+      evo = { agentId, domain, samples: [], trend: 'stable', selfReflection: '' };
       this.agentEvolution.set(agentId, evo);
     }
     evo.samples.push({ timestamp: Date.now(), successRate, confidence, latencyMs });
@@ -377,23 +404,27 @@ class TemporalAwarenessEngine {
     evo.selfReflection = this.generateSelfReflection(evo);
   }
 
-  private computeTrend(samples: AgentTemporalEvolution["samples"]): AgentTemporalEvolution["trend"] {
-    if (samples.length < 3) return "stable";
+  private computeTrend(
+    samples: AgentTemporalEvolution['samples'],
+  ): AgentTemporalEvolution['trend'] {
+    if (samples.length < 3) return 'stable';
     const recentHalf = samples.slice(-Math.floor(samples.length / 2));
     const olderHalf = samples.slice(0, Math.floor(samples.length / 2));
     const recentAvg = recentHalf.reduce((s, x) => s + x.successRate, 0) / recentHalf.length;
     const olderAvg = olderHalf.reduce((s, x) => s + x.successRate, 0) / olderHalf.length;
     const diff = recentAvg - olderAvg;
-    const stdDev = Math.sqrt(recentHalf.reduce((s, x) => s + (x.successRate - recentAvg) ** 2, 0) / recentHalf.length);
-    if (stdDev > 0.25) return "volatile";
-    if (diff > 0.05) return "improving";
-    if (diff < -0.05) return "declining";
-    return "stable";
+    const stdDev = Math.sqrt(
+      recentHalf.reduce((s, x) => s + (x.successRate - recentAvg) ** 2, 0) / recentHalf.length,
+    );
+    if (stdDev > 0.25) return 'volatile';
+    if (diff > 0.05) return 'improving';
+    if (diff < -0.05) return 'declining';
+    return 'stable';
   }
 
   private generateSelfReflection(evo: AgentTemporalEvolution): string {
     const n = evo.samples.length;
-    if (n === 0) return "No data yet.";
+    if (n === 0) return 'No data yet.';
     const latest = evo.samples[n - 1]!;
     const avgRate = evo.samples.reduce((s, x) => s + x.successRate, 0) / n;
     const avgConf = evo.samples.reduce((s, x) => s + x.confidence, 0) / n;
@@ -405,14 +436,20 @@ class TemporalAwarenessEngine {
       `Latency: ${latest.latencyMs.toFixed(0)}ms (avg: ${avgLat.toFixed(0)}ms).`,
       `Performance trend: ${evo.trend}.`,
     ];
-    if (evo.trend === "declining") {
-      parts.push("Self-reflection: Performance degradation detected. May need prompt tuning, model upgrade, or domain knowledge refresh.");
-    } else if (evo.trend === "improving") {
-      parts.push("Self-reflection: Positive trajectory — learning from interactions is bearing fruit.");
-    } else if (evo.trend === "volatile") {
-      parts.push("Self-reflection: High variance in outcomes. Consider query complexity analysis and specialization boundaries.");
+    if (evo.trend === 'declining') {
+      parts.push(
+        'Self-reflection: Performance degradation detected. May need prompt tuning, model upgrade, or domain knowledge refresh.',
+      );
+    } else if (evo.trend === 'improving') {
+      parts.push(
+        'Self-reflection: Positive trajectory — learning from interactions is bearing fruit.',
+      );
+    } else if (evo.trend === 'volatile') {
+      parts.push(
+        'Self-reflection: High variance in outcomes. Consider query complexity analysis and specialization boundaries.',
+      );
     }
-    return parts.join(" ");
+    return parts.join(' ');
   }
 
   getAgentEvolution(agentId?: string): AgentTemporalEvolution[] {
@@ -436,7 +473,7 @@ class TemporalAwarenessEngine {
       dayOfWeek: DAY_NAMES[now.getDay()]!,
       isBusinessHours: isBusinessHours(now),
       uptimeMs: Date.now() - this.sessionStart,
-      prospectiveMemory: this.prospective.filter(p => p.status === "pending").slice(-10),
+      prospectiveMemory: this.prospective.filter((p) => p.status === 'pending').slice(-10),
       recentDiscounts: this.discounts.slice(-5).reverse(),
       futureSimulations: this.simulations.slice(-3).reverse(),
     };
@@ -446,7 +483,7 @@ class TemporalAwarenessEngine {
     const state = this.getState();
     const lines = [
       `## Temporal Awareness`,
-      `Time: ${state.dayOfWeek} ${state.timeOfDay} (${state.isBusinessHours ? "business hours" : "off-hours"})`,
+      `Time: ${state.dayOfWeek} ${state.timeOfDay} (${state.isBusinessHours ? 'business hours' : 'off-hours'})`,
       `Session: ${(state.sessionDuration / 60000).toFixed(0)} min | Orchestrations: ${state.orchestrationCount}`,
     ];
 
@@ -458,12 +495,14 @@ class TemporalAwarenessEngine {
     if (timeSinceLast > 0 && state.averageOrchestrationInterval > 0) {
       const ratio = timeSinceLast / state.averageOrchestrationInterval;
       if (ratio > 3) {
-        lines.push(`⚠ Unusually long gap since last orchestration (${(timeSinceLast / 60000).toFixed(0)} min — ${ratio.toFixed(1)}× average)`);
+        lines.push(
+          `⚠ Unusually long gap since last orchestration (${(timeSinceLast / 60000).toFixed(0)} min — ${ratio.toFixed(1)}× average)`,
+        );
       }
     }
 
     if (state.detectedPatterns.length > 0) {
-      lines.push(`Patterns: ${state.detectedPatterns.map(p => p.description).join("; ")}`);
+      lines.push(`Patterns: ${state.detectedPatterns.map((p) => p.description).join('; ')}`);
     }
 
     const pendingIntentions = state.prospectiveMemory;
@@ -471,7 +510,7 @@ class TemporalAwarenessEngine {
       lines.push(`Prospective memory: ${pendingIntentions.length} pending intention(s)`);
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 }
 

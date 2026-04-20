@@ -1,4 +1,4 @@
-import type { RetentionPolicy } from "./types.js";
+import type { RetentionPolicy } from './types.js';
 
 export class RetentionRegistry {
   private readonly policies = new Map<string, RetentionPolicy>();

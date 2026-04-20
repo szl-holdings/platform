@@ -1,4 +1,4 @@
-import type { DoctrineLayer, NormalizedEvent } from "./types.js";
+import type { DoctrineLayer, NormalizedEvent } from './types.js';
 
 const MAX_EVENTS = 500;
 
@@ -10,7 +10,9 @@ class DoctrineEventBus {
   private appListeners: Map<string, Set<EventListener>> = new Map();
   private layerListeners: Map<DoctrineLayer, Set<EventListener>> = new Map();
 
-  emit(event: Omit<NormalizedEvent, "id" | "timestamp"> & { id?: string; timestamp?: number }): NormalizedEvent {
+  emit(
+    event: Omit<NormalizedEvent, 'id' | 'timestamp'> & { id?: string; timestamp?: number },
+  ): NormalizedEvent {
     const normalized: NormalizedEvent = {
       ...event,
       id: event.id ?? `evt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -36,14 +38,13 @@ class DoctrineEventBus {
   }
 
   private _persistToApi(event: NormalizedEvent): void {
-    if (typeof fetch === "undefined") return;
-    fetch("/api/doctrine/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
+    if (typeof fetch === 'undefined') return;
+    fetch('/api/doctrine/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(event),
-    }).catch(() => {
-    });
+    }).catch(() => {});
   }
 
   subscribe(listener: EventListener): () => void {
@@ -71,8 +72,8 @@ class DoctrineEventBus {
     limit?: number;
     sourceApp?: string;
     layer?: DoctrineLayer;
-    severity?: NormalizedEvent["severity"];
-    type?: NormalizedEvent["type"];
+    severity?: NormalizedEvent['severity'];
+    type?: NormalizedEvent['type'];
     since?: number;
   }): NormalizedEvent[] {
     let results = [...this.events];
@@ -126,14 +127,14 @@ class DoctrineEventBus {
         (e) =>
           e !== event &&
           Math.abs(e.timestamp - event.timestamp) <= 60_000 &&
-          e.severity === event.severity
+          e.severity === event.severity,
       );
 
       if (window.length >= minApps - 1) {
         const key = [event, ...window]
           .map((e) => e.sourceApp)
           .sort()
-          .join("|");
+          .join('|');
 
         if (!groups.has(key)) {
           const allEvents = [event, ...window];
@@ -165,7 +166,7 @@ export interface CorrelatedEventGroup {
   events: NormalizedEvent[];
   sourceApps: string[];
   layers: DoctrineLayer[];
-  severity: NormalizedEvent["severity"];
+  severity: NormalizedEvent['severity'];
   windowMs: number;
   detectedAt: number;
 }
@@ -174,81 +175,81 @@ export const doctrineEventBus = new DoctrineEventBus();
 
 export function seedDoctrineEvents() {
   const apps: Array<{ id: string; layer: DoctrineLayer }> = [
-    { id: "vessels", layer: "OBSERVE" },
-    { id: "firestorm", layer: "UNDERSTAND" },
-    { id: "inca", layer: "UNDERSTAND" },
-    { id: "lyte", layer: "DECIDE" },
-    { id: "alloy", layer: "EXECUTE" },
-    { id: "msp", layer: "OBSERVE" },
-    { id: "carlota-jo", layer: "EXECUTE" },
-    { id: "terra", layer: "OBSERVE" },
-    { id: "dreamscape", layer: "EXECUTE" },
-    { id: "szl-holdings", layer: "OBSERVE" },
+    { id: 'vessels', layer: 'OBSERVE' },
+    { id: 'firestorm', layer: 'UNDERSTAND' },
+    { id: 'inca', layer: 'UNDERSTAND' },
+    { id: 'lyte', layer: 'DECIDE' },
+    { id: 'alloy', layer: 'EXECUTE' },
+    { id: 'msp', layer: 'OBSERVE' },
+    { id: 'carlota-jo', layer: 'EXECUTE' },
+    { id: 'terra', layer: 'OBSERVE' },
+    { id: 'dreamscape', layer: 'EXECUTE' },
+    { id: 'szl-holdings', layer: 'OBSERVE' },
   ];
 
   const templates: Array<{
-    type: NormalizedEvent["type"];
-    severity: NormalizedEvent["severity"];
+    type: NormalizedEvent['type'];
+    severity: NormalizedEvent['severity'];
     titles: string[];
   }> = [
     {
-      type: "observation",
-      severity: "info",
+      type: 'observation',
+      severity: 'info',
       titles: [
-        "Telemetry baseline established",
-        "Signal correlation active",
-        "Entity graph refreshed",
-        "Watchlist scan complete",
+        'Telemetry baseline established',
+        'Signal correlation active',
+        'Entity graph refreshed',
+        'Watchlist scan complete',
       ],
     },
     {
-      type: "anomaly",
-      severity: "warning",
+      type: 'anomaly',
+      severity: 'warning',
       titles: [
-        "Behavioral drift detected",
-        "Anomalous pattern identified",
-        "Threshold exceeded — monitoring",
-        "Signal spike above baseline",
+        'Behavioral drift detected',
+        'Anomalous pattern identified',
+        'Threshold exceeded — monitoring',
+        'Signal spike above baseline',
       ],
     },
     {
-      type: "alert",
-      severity: "critical",
+      type: 'alert',
+      severity: 'critical',
       titles: [
-        "Critical threshold breached",
-        "Incident escalated",
-        "High-severity alert triggered",
-        "Immediate attention required",
+        'Critical threshold breached',
+        'Incident escalated',
+        'High-severity alert triggered',
+        'Immediate attention required',
       ],
     },
     {
-      type: "recommendation",
-      severity: "info",
+      type: 'recommendation',
+      severity: 'info',
       titles: [
-        "Optimization opportunity identified",
-        "Proactive recommendation generated",
-        "Risk mitigation suggestion available",
-        "Playbook recommendation ready",
+        'Optimization opportunity identified',
+        'Proactive recommendation generated',
+        'Risk mitigation suggestion available',
+        'Playbook recommendation ready',
       ],
     },
     {
-      type: "workflow",
-      severity: "info",
+      type: 'workflow',
+      severity: 'info',
       titles: [
-        "Approval workflow initiated",
-        "Escalation routed to owner",
-        "Automated response triggered",
-        "SLA checkpoint reached",
+        'Approval workflow initiated',
+        'Escalation routed to owner',
+        'Automated response triggered',
+        'SLA checkpoint reached',
       ],
     },
     {
-      type: "execution",
-      severity: "info",
+      type: 'execution',
+      severity: 'info',
       titles: [
-        "Automation executed successfully",
-        "Connector sync completed",
-        "DAG run completed",
-        "Retry succeeded after failure",
+        'Automation executed successfully',
+        'Connector sync completed',
+        'DAG run completed',
+        'Retry succeeded after failure',
       ],
     },
   ];

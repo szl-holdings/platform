@@ -1,53 +1,69 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { validateQuery, listQuerySchema } from "../../lib/validation.js";
 import {
+  billingLineItemsTable,
+  costAllocationsTable,
   db,
+  invoicesTable,
   meteringEventsTable,
-  usageAggregatesTable,
-  rateCardsTable,
-  rateCardTiersTable,
-  rateCardAssignmentsTable,
+  organizationsTable,
   quotaConfigsTable,
   quotaViolationsTable,
-  costAllocationsTable,
-  billingLineItemsTable,
-  organizationsTable,
-  invoicesTable,
-  subscriptionsTable,
+  rateCardAssignmentsTable,
+  rateCardsTable,
+  rateCardTiersTable,
   revenueEventsTable,
-} from "@szl-holdings/db";
+  subscriptionsTable,
+  usageAggregatesTable,
+} from '@szl-holdings/db';
 import {
-  eq, desc, asc, and, gte, lte, sql, sum, count, avg, isNull, ne, inArray,
-} from "drizzle-orm";
+  and,
+  asc,
+  avg,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNull,
+  lte,
+  ne,
+  sql,
+  sum,
+} from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
 import {
-  sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError,
-} from "../../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/auth";
-import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
-import { logger } from "../../lib/logger";
-import { periodBounds, meteringRateLimit } from "./shared";
+  handleRouteError,
+  sendBadRequest,
+  sendError,
+  sendNotFound,
+  sendSuccess,
+} from '../../lib/api-response';
+import { logger } from '../../lib/logger';
+import { listQuerySchema, validateQuery } from '../../lib/validation.js';
+import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
+import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
+import { meteringRateLimit, periodBounds } from './shared';
 
 const router: IRouter = Router();
-const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
-const READ_ROLES = ["admin", "super_admin", "ops", "analyst"] as const;
+const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
+const READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 8. BILLING ANALYTICS
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/metering/analytics/overview",
+  '/metering/analytics/overview',
   authMiddleware(),
   requireRole(...READ_ROLES),
   async (req: Request, res: Response) => {
     try {
       const now = new Date();
-      const { start: monthStart } = periodBounds("month", now);
+      const { start: monthStart } = periodBounds('month', now);
       const { start: prevMonthStart, end: prevMonthEnd } = periodBounds(
-        "month",
+        'month',
         new Date(now.getFullYear(), now.getMonth() - 1, 1),
       );
-      const { start: yearStart } = periodBounds("year", now);
+      const { start: yearStart } = periodBounds('year', now);
 
       const [invoiceStats] = await db
         .select({
@@ -56,19 +72,14 @@ router.get(
           avgInvoice: sql<string>`COALESCE(AVG(${invoicesTable.amount}::numeric), 0)`,
         })
         .from(invoicesTable)
-        .where(eq(invoicesTable.status, "paid"));
+        .where(eq(invoicesTable.status, 'paid'));
 
       const [mrrRow] = await db
         .select({
           mrr: sql<string>`COALESCE(SUM(${invoicesTable.amount}::numeric), 0)`,
         })
         .from(invoicesTable)
-        .where(
-          and(
-            eq(invoicesTable.status, "paid"),
-            gte(invoicesTable.createdAt, monthStart),
-          ),
-        );
+        .where(and(eq(invoicesTable.status, 'paid'), gte(invoicesTable.createdAt, monthStart)));
 
       const [prevMrrRow] = await db
         .select({
@@ -77,7 +88,7 @@ router.get(
         .from(invoicesTable)
         .where(
           and(
-            eq(invoicesTable.status, "paid"),
+            eq(invoicesTable.status, 'paid'),
             gte(invoicesTable.createdAt, prevMonthStart),
             lte(invoicesTable.createdAt, prevMonthEnd),
           ),
@@ -88,31 +99,27 @@ router.get(
           arr: sql<string>`COALESCE(SUM(${invoicesTable.amount}::numeric), 0)`,
         })
         .from(invoicesTable)
-        .where(
-          and(
-            eq(invoicesTable.status, "paid"),
-            gte(invoicesTable.createdAt, yearStart),
-          ),
-        );
+        .where(and(eq(invoicesTable.status, 'paid'), gte(invoicesTable.createdAt, yearStart)));
 
       const [activeSubsRow] = await db
         .select({ count: sql<number>`COUNT(*)::int` })
         .from(subscriptionsTable)
-        .where(eq(subscriptionsTable.status, "active"));
+        .where(eq(subscriptionsTable.status, 'active'));
 
       const [canceledRow] = await db
         .select({ count: sql<number>`COUNT(*)::int` })
         .from(subscriptionsTable)
         .where(
           and(
-            eq(subscriptionsTable.status, "canceled"),
+            eq(subscriptionsTable.status, 'canceled'),
             gte(subscriptionsTable.canceledAt!, monthStart),
           ),
         );
 
-      const currentMrr = parseFloat(mrrRow?.mrr ?? "0");
-      const prevMrr = parseFloat(prevMrrRow?.mrr ?? "0");
-      const mrrGrowth = prevMrr > 0 ? Math.round(((currentMrr - prevMrr) / prevMrr) * 10000) / 100 : null;
+      const currentMrr = parseFloat(mrrRow?.mrr ?? '0');
+      const prevMrr = parseFloat(prevMrrRow?.mrr ?? '0');
+      const mrrGrowth =
+        prevMrr > 0 ? Math.round(((currentMrr - prevMrr) / prevMrr) * 10000) / 100 : null;
 
       const eventVolumeRows = await db
         .select({
@@ -128,12 +135,16 @@ router.get(
         .limit(20);
 
       sendSuccess(res, {
-        mrr: { current: Math.round(currentMrr * 100) / 100, previous: Math.round(prevMrr * 100) / 100, growth: mrrGrowth },
-        arr: Math.round(parseFloat(arrRow?.arr ?? "0") * 100) / 100,
+        mrr: {
+          current: Math.round(currentMrr * 100) / 100,
+          previous: Math.round(prevMrr * 100) / 100,
+          growth: mrrGrowth,
+        },
+        arr: Math.round(parseFloat(arrRow?.arr ?? '0') * 100) / 100,
         revenue: {
-          total: Math.round(parseFloat(invoiceStats?.totalRevenue ?? "0") * 100) / 100,
+          total: Math.round(parseFloat(invoiceStats?.totalRevenue ?? '0') * 100) / 100,
           invoiceCount: invoiceStats?.invoiceCount ?? 0,
-          avgInvoice: Math.round(parseFloat(invoiceStats?.avgInvoice ?? "0") * 100) / 100,
+          avgInvoice: Math.round(parseFloat(invoiceStats?.avgInvoice ?? '0') * 100) / 100,
         },
         subscriptions: {
           active: activeSubsRow?.count ?? 0,
@@ -148,19 +159,19 @@ router.get(
         asOf: now.toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get billing analytics");
+      handleRouteError(res, err, 'Failed to get billing analytics');
     }
   },
 );
 
 router.get(
-  "/metering/analytics/revenue-trend",
+  '/metering/analytics/revenue-trend',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const months = Math.min(parseInt(String(req.query.months ?? "12"), 10), 24);
+      const months = Math.min(parseInt(String(req.query.months ?? '12'), 10), 24);
       const now = new Date();
 
       const trend: Array<{
@@ -173,7 +184,7 @@ router.get(
 
       for (let i = months - 1; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const { start, end } = periodBounds("month", d);
+        const { start, end } = periodBounds('month', d);
 
         const [row] = await db
           .select({
@@ -183,7 +194,7 @@ router.get(
           .from(invoicesTable)
           .where(
             and(
-              eq(invoicesTable.status, "paid"),
+              eq(invoicesTable.status, 'paid'),
               gte(invoicesTable.createdAt, start),
               lte(invoicesTable.createdAt, end),
             ),
@@ -192,28 +203,30 @@ router.get(
         trend.push({
           year: d.getFullYear(),
           month: d.getMonth() + 1,
-          label: d.toLocaleString("en-US", { month: "short", year: "numeric" }),
-          revenue: Math.round(parseFloat(row?.revenue ?? "0") * 100) / 100,
+          label: d.toLocaleString('en-US', { month: 'short', year: 'numeric' }),
+          revenue: Math.round(parseFloat(row?.revenue ?? '0') * 100) / 100,
           invoiceCount: row?.invoiceCount ?? 0,
         });
       }
 
       sendSuccess(res, { months, trend });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get revenue trend");
+      handleRouteError(res, err, 'Failed to get revenue trend');
     }
   },
 );
 
 router.get(
-  "/metering/analytics/tenant-leaderboard",
+  '/metering/analytics/tenant-leaderboard',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const limit = Math.min(parseInt(String(req.query.limit ?? "20"), 10), 100);
-      const since = req.query.since ? new Date(req.query.since as string) : new Date(new Date().getFullYear(), 0, 1);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '20'), 10), 100);
+      const since = req.query.since
+        ? new Date(req.query.since as string)
+        : new Date(new Date().getFullYear(), 0, 1);
 
       const rows = await db
         .select({
@@ -225,12 +238,7 @@ router.get(
         })
         .from(invoicesTable)
         .innerJoin(organizationsTable, eq(invoicesTable.orgId, organizationsTable.id))
-        .where(
-          and(
-            eq(invoicesTable.status, "paid"),
-            gte(invoicesTable.createdAt, since),
-          ),
-        )
+        .where(and(eq(invoicesTable.status, 'paid'), gte(invoicesTable.createdAt, since)))
         .groupBy(invoicesTable.orgId, organizationsTable.name, organizationsTable.slug)
         .orderBy(sql`SUM(${invoicesTable.amount}::numeric) DESC`)
         .limit(limit);
@@ -246,13 +254,13 @@ router.get(
         })),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get tenant leaderboard");
+      handleRouteError(res, err, 'Failed to get tenant leaderboard');
     }
   },
 );
 
 router.get(
-  "/metering/analytics/cohort",
+  '/metering/analytics/cohort',
   authMiddleware(),
   requireRole(...READ_ROLES),
   async (req: Request, res: Response) => {
@@ -272,40 +280,66 @@ router.get(
         .innerJoin(organizationsTable, eq(subscriptionsTable.orgId, organizationsTable.id))
         .orderBy(sql`TO_CHAR(${subscriptionsTable.createdAt}, 'YYYY-MM')`);
 
-      const cohorts = rows.reduce<Record<string, {
-        cohortMonth: string;
-        total: number;
-        active: number;
-        churned: number;
-        avgMonthsActive: number;
-        tenants: Array<{ orgId: number; orgName: string; status: string; monthsActive: number }>;
-      }>>((acc, r) => {
+      const cohorts = rows.reduce<
+        Record<
+          string,
+          {
+            cohortMonth: string;
+            total: number;
+            active: number;
+            churned: number;
+            avgMonthsActive: number;
+            tenants: Array<{
+              orgId: number;
+              orgName: string;
+              status: string;
+              monthsActive: number;
+            }>;
+          }
+        >
+      >((acc, r) => {
         const cm = r.cohortMonth;
         if (!acc[cm]) {
-          acc[cm] = { cohortMonth: cm, total: 0, active: 0, churned: 0, avgMonthsActive: 0, tenants: [] };
+          acc[cm] = {
+            cohortMonth: cm,
+            total: 0,
+            active: 0,
+            churned: 0,
+            avgMonthsActive: 0,
+            tenants: [],
+          };
         }
         acc[cm]!.total++;
-        if (r.status === "active") acc[cm]!.active++;
-        if (r.status === "canceled") acc[cm]!.churned++;
-        acc[cm]!.tenants.push({ orgId: r.orgId, orgName: r.orgName, status: r.status, monthsActive: r.monthsActive });
+        if (r.status === 'active') acc[cm]!.active++;
+        if (r.status === 'canceled') acc[cm]!.churned++;
+        acc[cm]!.tenants.push({
+          orgId: r.orgId,
+          orgName: r.orgName,
+          status: r.status,
+          monthsActive: r.monthsActive,
+        });
         return acc;
       }, {});
 
       for (const cohort of Object.values(cohorts)) {
-        cohort.avgMonthsActive = cohort.tenants.length > 0
-          ? Math.round(cohort.tenants.reduce((s, t) => s + t.monthsActive, 0) / cohort.tenants.length * 10) / 10
-          : 0;
+        cohort.avgMonthsActive =
+          cohort.tenants.length > 0
+            ? Math.round(
+                (cohort.tenants.reduce((s, t) => s + t.monthsActive, 0) / cohort.tenants.length) *
+                  10,
+              ) / 10
+            : 0;
       }
 
       sendSuccess(res, {
         cohorts: Object.values(cohorts).sort((a, b) => a.cohortMonth.localeCompare(b.cohortMonth)),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get cohort analysis");
+      handleRouteError(res, err, 'Failed to get cohort analysis');
     }
   },
 );
 
-
-
-export function register(r: IRouter): void { r.use(router); }
+export function register(r: IRouter): void {
+  r.use(router);
+}

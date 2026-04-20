@@ -14,24 +14,24 @@
  * through the evidence graph read API.
  */
 
-import type { FreshnessLevel } from "./entities.js";
-import { z } from "zod";
-import { randomUUID } from "node:crypto";
-import { EntityRefSchema, ProvenanceSchema, SignalDomainSchema } from "./signal.js";
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+import type { FreshnessLevel } from './entities.js';
+import { EntityRefSchema, ProvenanceSchema, SignalDomainSchema } from './signal.js';
 
 // ─── Interface-based Evidence Reference (Proof Chain) ────────────────────────
 
 export const EVIDENCE_SOURCE_TYPES = [
-  "ais_record",
-  "sanctions_entry",
-  "court_document",
-  "property_record",
-  "threat_feed_entry",
-  "audit_log_entry",
-  "simulation_result",
-  "agent_output",
-  "human_annotation",
-  "external_api_response",
+  'ais_record',
+  'sanctions_entry',
+  'court_document',
+  'property_record',
+  'threat_feed_entry',
+  'audit_log_entry',
+  'simulation_result',
+  'agent_output',
+  'human_annotation',
+  'external_api_response',
 ] as const;
 
 export type EvidenceSourceType = (typeof EVIDENCE_SOURCE_TYPES)[number];
@@ -49,35 +49,25 @@ export interface EvidenceRef {
   sourceType: EvidenceSourceType;
   url?: string | undefined;
   extractedAt: Date;
-  confidence: number;       // 0..1
+  confidence: number; // 0..1
   freshness: FreshnessLevel;
 }
 
 export const PROOF_SOURCE_CLASSES = [
-  "llm_generated",
-  "human_authored",
-  "system_computed",
-  "external_ingested",
-  "hybrid",
+  'llm_generated',
+  'human_authored',
+  'system_computed',
+  'external_ingested',
+  'hybrid',
 ] as const;
 
 export type ProofSourceClass = (typeof PROOF_SOURCE_CLASSES)[number];
 
-export const REVIEW_STATES = [
-  "unreviewed",
-  "approved",
-  "flagged",
-  "retracted",
-] as const;
+export const REVIEW_STATES = ['unreviewed', 'approved', 'flagged', 'retracted'] as const;
 
 export type ReviewState = (typeof REVIEW_STATES)[number];
 
-export const EXPORT_SAFETY_STATES = [
-  "safe",
-  "restricted",
-  "pending_review",
-  "blocked",
-] as const;
+export const EXPORT_SAFETY_STATES = ['safe', 'restricted', 'pending_review', 'blocked'] as const;
 
 export type ExportSafetyState = (typeof EXPORT_SAFETY_STATES)[number];
 
@@ -99,7 +89,7 @@ export interface ProofEntry {
   reviewState: ReviewState;
   exportSafetyState: ExportSafetyState;
   actorId: string;
-  actorType: "human" | "agent" | "system";
+  actorType: 'human' | 'agent' | 'system';
   orgId: string;
   createdAt: Date;
   reviewedAt?: Date | undefined;
@@ -109,16 +99,16 @@ export interface ProofEntry {
 // ─── Zod-validated Evidence Item (Signal Mesh) ───────────────────────────────
 
 export const EvidenceTypeSchema = z.enum([
-  "signal",
-  "historical-pattern",
-  "external-data",
-  "model-inference",
-  "regulatory-rule",
-  "operator-knowledge",
-  "threshold-trigger",
-  "correlation-cluster",
-  "anomaly-detection",
-  "market-data",
+  'signal',
+  'historical-pattern',
+  'external-data',
+  'model-inference',
+  'regulatory-rule',
+  'operator-knowledge',
+  'threshold-trigger',
+  'correlation-cluster',
+  'anomaly-detection',
+  'market-data',
 ]);
 export type EvidenceType = z.infer<typeof EvidenceTypeSchema>;
 
@@ -148,44 +138,44 @@ export const EvidenceItemSchema = z.object({
   provenance: ProvenanceSchema.optional(),
   tags: z.array(z.string()).default([]),
 
-  schemaVersion: z.string().default("evidence/1.0"),
+  schemaVersion: z.string().default('evidence/1.0'),
 });
 export type EvidenceItem = z.infer<typeof EvidenceItemSchema>;
 
-export type EvidenceItemInput = Omit<EvidenceItem, "evidenceId" | "schemaVersion">;
+export type EvidenceItemInput = Omit<EvidenceItem, 'evidenceId' | 'schemaVersion'>;
 
 export function createEvidenceItem(input: EvidenceItemInput): EvidenceItem {
   return EvidenceItemSchema.parse({
     ...input,
     evidenceId: randomUUID(),
-    schemaVersion: "evidence/1.0",
+    schemaVersion: 'evidence/1.0',
   });
 }
 
 export const RecommendationActionSchema = z.enum([
-  "acknowledge",
-  "escalate",
-  "execute",
-  "defer",
-  "dismiss",
-  "monitor",
-  "review",
-  "approve",
-  "reroute",
-  "notify",
-  "investigate",
-  "quarantine",
+  'acknowledge',
+  'escalate',
+  'execute',
+  'defer',
+  'dismiss',
+  'monitor',
+  'review',
+  'approve',
+  'reroute',
+  'notify',
+  'investigate',
+  'quarantine',
 ]);
 export type RecommendationAction = z.infer<typeof RecommendationActionSchema>;
 
 export const RecommendationStatusSchema = z.enum([
-  "pending",
-  "accepted",
-  "rejected",
-  "expired",
-  "executing",
-  "completed",
-  "failed",
+  'pending',
+  'accepted',
+  'rejected',
+  'expired',
+  'executing',
+  'completed',
+  'failed',
 ]);
 export type RecommendationStatus = z.infer<typeof RecommendationStatusSchema>;
 
@@ -212,13 +202,15 @@ export const RecommendationSchema = z.object({
   signalIds: z.array(z.string()).default([]),
   entityRefs: z.array(EntityRefSchema).default([]),
 
-  status: RecommendationStatusSchema.default("pending"),
-  policyEvaluation: z.object({
-    outcome: z.enum(["allow", "require-approval", "block", "pending"]).default("pending"),
-    policyIds: z.array(z.string()).default([]),
-    reason: z.string().optional(),
-    evaluatedAt: z.string().datetime().optional(),
-  }).default({ outcome: "pending", policyIds: [] }),
+  status: RecommendationStatusSchema.default('pending'),
+  policyEvaluation: z
+    .object({
+      outcome: z.enum(['allow', 'require-approval', 'block', 'pending']).default('pending'),
+      policyIds: z.array(z.string()).default([]),
+      reason: z.string().optional(),
+      evaluatedAt: z.string().datetime().optional(),
+    })
+    .default({ outcome: 'pending', policyIds: [] }),
 
   tenantId: z.string().optional(),
   generatedBy: z.string().optional(),
@@ -229,12 +221,12 @@ export const RecommendationSchema = z.object({
   resolvedAt: z.string().datetime().optional(),
 
   tags: z.array(z.string()).default([]),
-  schemaVersion: z.string().default("recommendation/1.0"),
+  schemaVersion: z.string().default('recommendation/1.0'),
 });
 export type Recommendation = z.infer<typeof RecommendationSchema>;
 
 export type RecommendationPolicyStatus = {
-  outcome: "allow" | "require-approval" | "block" | "pending";
+  outcome: 'allow' | 'require-approval' | 'block' | 'pending';
   policyIds?: string[];
   reason?: string;
   evaluatedAt?: string;
@@ -242,9 +234,7 @@ export type RecommendationPolicyStatus = {
 
 export type RecommendationInput = Omit<
   Recommendation,
-  | "recommendationId"
-  | "schemaVersion"
-  | "status"
+  'recommendationId' | 'schemaVersion' | 'status'
 > & {
   /**
    * Policy status at recommendation construction time.
@@ -260,6 +250,6 @@ export function createRecommendation(input: RecommendationInput): Recommendation
   return RecommendationSchema.parse({
     ...input,
     recommendationId: randomUUID(),
-    schemaVersion: "recommendation/1.0",
+    schemaVersion: 'recommendation/1.0',
   });
 }

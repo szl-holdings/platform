@@ -1,4 +1,4 @@
-import { getEnv } from "@szl-holdings/env";
+import { getEnv } from '@szl-holdings/env';
 
 export interface AuthIdentity {
   externalId: string;
@@ -15,11 +15,11 @@ export interface AuthProvider {
 }
 
 export class DevAuthProvider implements AuthProvider {
-  name = "dev";
+  name = 'dev';
 
   async verifyIdentity(credential: string): Promise<AuthIdentity | null> {
-    if (getEnv().NODE_ENV === "production") return null;
-    if (!credential.startsWith("dev:")) return null;
+    if (getEnv().NODE_ENV === 'production') return null;
+    if (!credential.startsWith('dev:')) return null;
     const username = credential.slice(4);
     if (!username || username.length < 1) return null;
     return {
@@ -31,7 +31,7 @@ export class DevAuthProvider implements AuthProvider {
   }
 
   isConfigured(): boolean {
-    return getEnv().NODE_ENV !== "production";
+    return getEnv().NODE_ENV !== 'production';
   }
 }
 

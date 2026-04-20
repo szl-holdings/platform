@@ -1,18 +1,18 @@
-import type { EvidenceRef } from "./decision-objects.js";
+import type { EvidenceRef } from './decision-objects.js';
 
 export type EvidenceSourceType =
-  | "alert"
-  | "incident"
-  | "playbook"
-  | "approval"
-  | "analyst_note"
-  | "asset_metadata"
-  | "user_metadata"
-  | "control_doc"
-  | "retention_policy"
-  | "incident_timeline"
-  | "prior_decision"
-  | "retrieval";
+  | 'alert'
+  | 'incident'
+  | 'playbook'
+  | 'approval'
+  | 'analyst_note'
+  | 'asset_metadata'
+  | 'user_metadata'
+  | 'control_doc'
+  | 'retention_policy'
+  | 'incident_timeline'
+  | 'prior_decision'
+  | 'retrieval';
 
 export interface EvidenceIndexEntry {
   id: string;
@@ -23,7 +23,7 @@ export interface EvidenceIndexEntry {
   title: string;
   content: string;
   tags: string[];
-  freshness: "current" | "recent" | "stale" | "unknown";
+  freshness: 'current' | 'recent' | 'stale' | 'unknown';
   timestamp: string;
   objectId: string | null;
   relevanceBoost: number;
@@ -43,26 +43,31 @@ export interface EvidenceQuery {
 export interface EvidenceQueryResult {
   entries: Array<EvidenceIndexEntry & { score: number }>;
   totalIndexed: number;
-  method: "semantic" | "keyword" | "hybrid";
+  method: 'semantic' | 'keyword' | 'hybrid';
   confidenceDowngraded: boolean;
   confidenceDowngradeReason: string | null;
   weakRetrievalWarning: string | null;
   latencyMs: number;
 }
 
-function scoreFreshness(timestamp: string | null): { freshness: EvidenceIndexEntry["freshness"]; boost: number } {
-  if (!timestamp) return { freshness: "unknown", boost: 0.7 };
+function scoreFreshness(timestamp: string | null): {
+  freshness: EvidenceIndexEntry['freshness'];
+  boost: number;
+} {
+  if (!timestamp) return { freshness: 'unknown', boost: 0.7 };
   const ageMs = Date.now() - new Date(timestamp).getTime();
   const ageHours = ageMs / (1000 * 60 * 60);
-  if (ageHours < 24) return { freshness: "current", boost: 1.0 };
-  if (ageHours < 72) return { freshness: "recent", boost: 0.85 };
-  if (ageHours < 720) return { freshness: "stale", boost: 0.6 };
-  return { freshness: "stale", boost: 0.4 };
+  if (ageHours < 24) return { freshness: 'current', boost: 1.0 };
+  if (ageHours < 72) return { freshness: 'recent', boost: 0.85 };
+  if (ageHours < 720) return { freshness: 'stale', boost: 0.6 };
+  return { freshness: 'stale', boost: 0.4 };
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
   if (a.length !== b.length) return 0;
-  let dot = 0, magA = 0, magB = 0;
+  let dot = 0,
+    magA = 0,
+    magB = 0;
   for (let i = 0; i < a.length; i++) {
     dot += a[i]! * b[i]!;
     magA += a[i]! * a[i]!;
@@ -72,29 +77,159 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 const SECURITY_VOCAB = [
-  "lateral","movement","exploit","malware","ransomware","phishing","exfiltration","intrusion",
-  "alert","incident","critical","high","medium","low","severity","threat","attack","adversary",
-  "apt","c2","beacon","credential","compromise","access","privilege","escalation","persistence",
-  "discovery","collection","command","control","execution","defense","evasion","reconnaissance",
-  "network","host","endpoint","server","domain","user","account","service","application",
-  "firewall","detection","response","remediation","isolation","containment","recovery","patch",
-  "vulnerability","cve","ioc","ttp","mitre","sigma","yara","siem","edr","xdr","soar",
-  "compliance","audit","policy","control","risk","assessment","finding","gap","review",
-  "analyst","investigation","case","memory","evidence","decision","recommendation","action",
-  "approved","pending","rejected","active","closed","open","confirmed","monitoring",
-  "asset","infrastructure","cloud","on-prem","production","staging","development","environment",
-  "retention","policy","classification","restricted","confidential","sensitive","public",
-  "owner","assigned","operator","manager","soc","ciso","board","executive","brief",
-  "playbook","workflow","procedure","runbook","step","phase","timeline","event","log",
-  "hardening","configuration","baseline","benchmark","cis","nist","iso","gdpr","hipaa","pci",
-  "encryption","authentication","authorization","token","certificate","key","hash","signature",
-  "anomaly","behavior","baseline","deviation","pattern","correlation","signal","noise",
+  'lateral',
+  'movement',
+  'exploit',
+  'malware',
+  'ransomware',
+  'phishing',
+  'exfiltration',
+  'intrusion',
+  'alert',
+  'incident',
+  'critical',
+  'high',
+  'medium',
+  'low',
+  'severity',
+  'threat',
+  'attack',
+  'adversary',
+  'apt',
+  'c2',
+  'beacon',
+  'credential',
+  'compromise',
+  'access',
+  'privilege',
+  'escalation',
+  'persistence',
+  'discovery',
+  'collection',
+  'command',
+  'control',
+  'execution',
+  'defense',
+  'evasion',
+  'reconnaissance',
+  'network',
+  'host',
+  'endpoint',
+  'server',
+  'domain',
+  'user',
+  'account',
+  'service',
+  'application',
+  'firewall',
+  'detection',
+  'response',
+  'remediation',
+  'isolation',
+  'containment',
+  'recovery',
+  'patch',
+  'vulnerability',
+  'cve',
+  'ioc',
+  'ttp',
+  'mitre',
+  'sigma',
+  'yara',
+  'siem',
+  'edr',
+  'xdr',
+  'soar',
+  'compliance',
+  'audit',
+  'policy',
+  'control',
+  'risk',
+  'assessment',
+  'finding',
+  'gap',
+  'review',
+  'analyst',
+  'investigation',
+  'case',
+  'memory',
+  'evidence',
+  'decision',
+  'recommendation',
+  'action',
+  'approved',
+  'pending',
+  'rejected',
+  'active',
+  'closed',
+  'open',
+  'confirmed',
+  'monitoring',
+  'asset',
+  'infrastructure',
+  'cloud',
+  'on-prem',
+  'production',
+  'staging',
+  'development',
+  'environment',
+  'retention',
+  'policy',
+  'classification',
+  'restricted',
+  'confidential',
+  'sensitive',
+  'public',
+  'owner',
+  'assigned',
+  'operator',
+  'manager',
+  'soc',
+  'ciso',
+  'board',
+  'executive',
+  'brief',
+  'playbook',
+  'workflow',
+  'procedure',
+  'runbook',
+  'step',
+  'phase',
+  'timeline',
+  'event',
+  'log',
+  'hardening',
+  'configuration',
+  'baseline',
+  'benchmark',
+  'cis',
+  'nist',
+  'iso',
+  'gdpr',
+  'hipaa',
+  'pci',
+  'encryption',
+  'authentication',
+  'authorization',
+  'token',
+  'certificate',
+  'key',
+  'hash',
+  'signature',
+  'anomaly',
+  'behavior',
+  'baseline',
+  'deviation',
+  'pattern',
+  'correlation',
+  'signal',
+  'noise',
 ];
 
 function buildTfIdfEmbedding(text: string): number[] {
   const lower = text.toLowerCase();
   const wordCounts: Record<string, number> = {};
-  const words = lower.split(/\W+/).filter(w => w.length > 2);
+  const words = lower.split(/\W+/).filter((w) => w.length > 2);
   for (const w of words) wordCounts[w] = (wordCounts[w] ?? 0) + 1;
   const total = words.length || 1;
   const vec = new Array<number>(SECURITY_VOCAB.length);
@@ -104,7 +239,7 @@ function buildTfIdfEmbedding(text: string): number[] {
     vec[i] = tf;
   }
   const mag = Math.sqrt(vec.reduce((s, v) => s + v * v, 0));
-  return mag > 0 ? vec.map(v => v / mag) : vec;
+  return mag > 0 ? vec.map((v) => v / mag) : vec;
 }
 
 function buildQueryEmbedding(query: string): number[] {
@@ -113,9 +248,9 @@ function buildQueryEmbedding(query: string): number[] {
 
 async function generateNeuralEmbedding(text: string): Promise<number[] | null> {
   try {
-    const { openai } = await import("../providers/openai/index.js");
+    const { openai } = await import('../providers/openai/index.js');
     const response = await openai.embeddings.create({
-      model: "text-embedding-3-small",
+      model: 'text-embedding-3-small',
       input: text.slice(0, 8000),
     });
     return response.data[0]?.embedding ?? null;
@@ -126,32 +261,36 @@ async function generateNeuralEmbedding(text: string): Promise<number[] | null> {
 
 async function persistEntryToDb(entry: EvidenceIndexEntry): Promise<void> {
   try {
-    const { db, alloyEvidenceIndex } = await import("@szl-holdings/db");
-    await db.insert(alloyEvidenceIndex).values({
-      id: entry.id,
-      caseId: entry.caseId,
-      incidentId: entry.incidentId,
-      source: entry.source,
-      sourceType: entry.sourceType,
-      title: entry.title,
-      content: entry.content.slice(0, 4000),
-      tags: entry.tags,
-      freshness: entry.freshness,
-      entryTimestamp: entry.timestamp,
-      objectId: entry.objectId,
-      relevanceBoost: entry.relevanceBoost,
-      embedding: entry.embedding ? (entry.embedding as unknown as Record<string, unknown>) : null,
-    }).onConflictDoUpdate({
-      target: alloyEvidenceIndex.id,
-      set: {
+    const { db, alloyEvidenceIndex } = await import('@szl-holdings/db');
+    await db
+      .insert(alloyEvidenceIndex)
+      .values({
+        id: entry.id,
+        caseId: entry.caseId,
+        incidentId: entry.incidentId,
+        source: entry.source,
+        sourceType: entry.sourceType,
+        title: entry.title,
         content: entry.content.slice(0, 4000),
+        tags: entry.tags,
         freshness: entry.freshness,
+        entryTimestamp: entry.timestamp,
+        objectId: entry.objectId,
         relevanceBoost: entry.relevanceBoost,
         embedding: entry.embedding ? (entry.embedding as unknown as Record<string, unknown>) : null,
-      },
-    });
-  } catch {
-  }
+      })
+      .onConflictDoUpdate({
+        target: alloyEvidenceIndex.id,
+        set: {
+          content: entry.content.slice(0, 4000),
+          freshness: entry.freshness,
+          relevanceBoost: entry.relevanceBoost,
+          embedding: entry.embedding
+            ? (entry.embedding as unknown as Record<string, unknown>)
+            : null,
+        },
+      });
+  } catch {}
 }
 
 export class EvidencePipeline {
@@ -168,28 +307,35 @@ export class EvidencePipeline {
   async hydrateFromDb(retryCount = 0): Promise<void> {
     if (this._hydrated) return;
     try {
-      const { db, alloyEvidenceIndex } = await import("@szl-holdings/db");
+      const { db, alloyEvidenceIndex } = await import('@szl-holdings/db');
       if (!alloyEvidenceIndex?.entryTimestamp) {
-        console.warn("[evidence-pipeline] Schema missing entryTimestamp column — deferring hydration");
+        console.warn(
+          '[evidence-pipeline] Schema missing entryTimestamp column — deferring hydration',
+        );
         if (retryCount < 3) {
           setTimeout(() => this.hydrateFromDb(retryCount + 1), 5000 * (retryCount + 1));
         }
         return;
       }
-      const { desc, sql: rawSql } = await import("drizzle-orm");
+      const { desc, sql: rawSql } = await import('drizzle-orm');
       const tableCheck = await db.execute(rawSql`
         SELECT EXISTS (
           SELECT 1 FROM information_schema.tables
           WHERE table_name = 'alloy_evidence_index'
         ) AS table_exists
       `);
-      const exists = (tableCheck as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
+      const exists =
+        (tableCheck as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
       if (!exists) {
-        console.warn(`[evidence-pipeline] alloy_evidence_index table not found (attempt ${retryCount + 1}/4) — will retry`);
+        console.warn(
+          `[evidence-pipeline] alloy_evidence_index table not found (attempt ${retryCount + 1}/4) — will retry`,
+        );
         if (retryCount < 3) {
           setTimeout(() => this.hydrateFromDb(retryCount + 1), 5000 * (retryCount + 1));
         } else {
-          console.warn("[evidence-pipeline] alloy_evidence_index table not found after 4 attempts — giving up");
+          console.warn(
+            '[evidence-pipeline] alloy_evidence_index table not found after 4 attempts — giving up',
+          );
           this._hydrated = true;
         }
         return;
@@ -211,13 +357,15 @@ export class EvidencePipeline {
           title: row.title,
           content: row.content,
           tags: row.tags,
-          freshness: row.freshness as EvidenceIndexEntry["freshness"],
+          freshness: row.freshness as EvidenceIndexEntry['freshness'],
           timestamp: row.entryTimestamp ?? new Date().toISOString(),
           objectId: row.objectId,
           relevanceBoost: row.relevanceBoost,
-          embedding: row.embedding ? (row.embedding as number[]) : buildTfIdfEmbedding(`${row.title} ${row.content}`),
+          embedding: row.embedding
+            ? (row.embedding as number[])
+            : buildTfIdfEmbedding(`${row.title} ${row.content}`),
         };
-        const existing = this.index.findIndex(e => e.id === entry.id);
+        const existing = this.index.findIndex((e) => e.id === entry.id);
         if (existing >= 0) {
           this.index[existing] = entry;
         } else {
@@ -226,7 +374,7 @@ export class EvidencePipeline {
       }
       console.log(`[evidence-pipeline] Hydrated ${rows.length} entries from DB`);
     } catch (err) {
-      console.warn("[evidence-pipeline] Hydration failed:", err);
+      console.warn('[evidence-pipeline] Hydration failed:', err);
     }
   }
 
@@ -246,19 +394,21 @@ export class EvidencePipeline {
       caseId: null,
       incidentId: null,
       source: `Alert: ${data.title}`,
-      sourceType: "alert",
+      sourceType: 'alert',
       title: data.title,
       content: [
         `ALERT: ${data.title}`,
         `Severity: ${data.severity} | Status: ${data.status} | Source: ${data.source}`,
-        data.description || "",
-        data.metadata ? `Metadata: ${JSON.stringify(data.metadata).slice(0, 500)}` : "",
-      ].filter(Boolean).join("\n"),
-      tags: ["alert", data.severity, data.source, data.status],
+        data.description || '',
+        data.metadata ? `Metadata: ${JSON.stringify(data.metadata).slice(0, 500)}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['alert', data.severity, data.source, data.status],
       freshness,
       timestamp: data.createdAt,
       objectId: String(data.id),
-      relevanceBoost: data.severity === "critical" ? 1.3 : data.severity === "high" ? 1.1 : 1.0,
+      relevanceBoost: data.severity === 'critical' ? 1.3 : data.severity === 'high' ? 1.1 : 1.0,
     };
     this.addOrUpdate(entry);
     return entry;
@@ -277,47 +427,57 @@ export class EvidencePipeline {
     assignedAnalyst: string | null;
   }): EvidenceIndexEntry {
     const { freshness } = scoreFreshness(data.detectedAt);
-    const timelineStr = data.timeline ? JSON.stringify(data.timeline).slice(0, 800) : "";
+    const timelineStr = data.timeline ? JSON.stringify(data.timeline).slice(0, 800) : '';
     const entry: EvidenceIndexEntry = {
       id: `incident_${data.id}`,
       caseId: null,
       incidentId: String(data.id),
       source: `Incident #${data.id}: ${data.title}`,
-      sourceType: "incident",
+      sourceType: 'incident',
       title: data.title,
       content: [
         `INCIDENT #${data.id}: ${data.title}`,
         `Severity: ${data.severity} | Status: ${data.status}`,
         `Detected: ${data.detectedAt}`,
-        data.attackTechnique ? `Attack Technique: ${data.attackTechnique}` : "",
-        data.description || "",
-        data.notes ? `Notes: ${data.notes}` : "",
-        timelineStr ? `Timeline: ${timelineStr}` : "",
-        data.assignedAnalyst ? `Analyst: ${data.assignedAnalyst}` : "",
-      ].filter(Boolean).join("\n"),
-      tags: ["incident", data.severity, data.status, data.attackTechnique || ""].filter(Boolean),
+        data.attackTechnique ? `Attack Technique: ${data.attackTechnique}` : '',
+        data.description || '',
+        data.notes ? `Notes: ${data.notes}` : '',
+        timelineStr ? `Timeline: ${timelineStr}` : '',
+        data.assignedAnalyst ? `Analyst: ${data.assignedAnalyst}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['incident', data.severity, data.status, data.attackTechnique || ''].filter(Boolean),
       freshness,
       timestamp: data.detectedAt,
       objectId: String(data.id),
-      relevanceBoost: data.severity === "critical" ? 1.3 : 1.1,
+      relevanceBoost: data.severity === 'critical' ? 1.3 : 1.1,
     };
     this.addOrUpdate(entry);
     return entry;
   }
 
-  ingestIncidentTimeline(incidentId: string | number, timeline: Array<{ event: string; at: string; actor?: string; detail?: string }>): EvidenceIndexEntry {
+  ingestIncidentTimeline(
+    incidentId: string | number,
+    timeline: Array<{ event: string; at: string; actor?: string; detail?: string }>,
+  ): EvidenceIndexEntry {
     const latestEvent = timeline.at(-1);
     const { freshness } = scoreFreshness(latestEvent?.at || null);
-    const content = timeline.map(t => `[${t.at}] ${t.event}${t.actor ? ` (by ${t.actor})` : ""}${t.detail ? `: ${t.detail}` : ""}`).join("\n");
+    const content = timeline
+      .map(
+        (t) =>
+          `[${t.at}] ${t.event}${t.actor ? ` (by ${t.actor})` : ''}${t.detail ? `: ${t.detail}` : ''}`,
+      )
+      .join('\n');
     const entry: EvidenceIndexEntry = {
       id: `timeline_${incidentId}`,
       caseId: null,
       incidentId: String(incidentId),
       source: `Incident Timeline #${incidentId}`,
-      sourceType: "incident_timeline",
+      sourceType: 'incident_timeline',
       title: `Incident #${incidentId} Timeline (${timeline.length} events)`,
       content: `INCIDENT TIMELINE #${incidentId}\n${content}`,
-      tags: ["timeline", "incident"],
+      tags: ['timeline', 'incident'],
       freshness,
       timestamp: latestEvent?.at || new Date().toISOString(),
       objectId: String(incidentId),
@@ -340,17 +500,19 @@ export class EvidencePipeline {
       caseId: null,
       incidentId: null,
       source: `Playbook: ${data.name}`,
-      sourceType: "playbook",
+      sourceType: 'playbook',
       title: data.name,
       content: [
         `PLAYBOOK: ${data.name}`,
-        data.description || "",
-        data.triggerConditions ? `Trigger Conditions: ${data.triggerConditions}` : "",
-        data.category ? `Category: ${data.category}` : "",
-        data.steps ? `Steps: ${JSON.stringify(data.steps).slice(0, 1000)}` : "",
-      ].filter(Boolean).join("\n"),
-      tags: ["playbook", data.category || ""].filter(Boolean),
-      freshness: "current",
+        data.description || '',
+        data.triggerConditions ? `Trigger Conditions: ${data.triggerConditions}` : '',
+        data.category ? `Category: ${data.category}` : '',
+        data.steps ? `Steps: ${JSON.stringify(data.steps).slice(0, 1000)}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['playbook', data.category || ''].filter(Boolean),
+      freshness: 'current',
       timestamp: new Date().toISOString(),
       objectId: String(data.id),
       relevanceBoost: 1.15,
@@ -376,17 +538,19 @@ export class EvidencePipeline {
       caseId: null,
       incidentId: null,
       source: `Approval Record: ${data.decisionId}`,
-      sourceType: "approval",
+      sourceType: 'approval',
       title: `Approval: ${data.action}`,
       content: [
         `APPROVAL RECORD`,
         `Action: ${data.action}`,
         `Status: ${data.status}`,
-        data.riskLevel ? `Risk Level: ${data.riskLevel}` : "",
-        data.approvedBy ? `Approved By: ${data.approvedBy} at ${data.approvedAt}` : "",
-        data.rationale ? `Rationale: ${data.rationale}` : "",
-      ].filter(Boolean).join("\n"),
-      tags: ["approval", data.status, data.riskLevel || ""].filter(Boolean),
+        data.riskLevel ? `Risk Level: ${data.riskLevel}` : '',
+        data.approvedBy ? `Approved By: ${data.approvedBy} at ${data.approvedAt}` : '',
+        data.rationale ? `Rationale: ${data.rationale}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['approval', data.status, data.riskLevel || ''].filter(Boolean),
       freshness,
       timestamp: data.createdAt,
       objectId: data.id,
@@ -411,10 +575,10 @@ export class EvidencePipeline {
       caseId: data.caseId,
       incidentId: data.incidentId,
       source: `Analyst Note by ${data.author}`,
-      sourceType: "analyst_note",
-      title: `Analyst Note (${data.noteType || "general"})`,
+      sourceType: 'analyst_note',
+      title: `Analyst Note (${data.noteType || 'general'})`,
       content: `ANALYST NOTE [${data.createdAt}] by ${data.author}\n${data.content}`,
-      tags: ["analyst_note", data.noteType || "general", data.author],
+      tags: ['analyst_note', data.noteType || 'general', data.author],
       freshness,
       timestamp: data.createdAt,
       objectId: data.id,
@@ -441,7 +605,7 @@ export class EvidencePipeline {
       caseId: null,
       incidentId: null,
       source: `Asset: ${data.name}`,
-      sourceType: "asset_metadata",
+      sourceType: 'asset_metadata',
       title: `Asset Metadata: ${data.name}`,
       content: [
         `ASSET: ${data.name}`,
@@ -449,10 +613,12 @@ export class EvidencePipeline {
         `Environment: ${data.environment} | Exposure: ${data.exposureLevel}`,
         `Risk Score: ${data.riskScore}`,
         `Critical Findings: ${data.criticalFindings} | High Findings: ${data.highFindings}`,
-        data.tags ? `Tags: ${JSON.stringify(data.tags)}` : "",
-      ].filter(Boolean).join("\n"),
-      tags: ["asset", data.assetType, data.environment, data.exposureLevel],
-      freshness: "current",
+        data.tags ? `Tags: ${JSON.stringify(data.tags)}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['asset', data.assetType, data.environment, data.exposureLevel],
+      freshness: 'current',
       timestamp: new Date().toISOString(),
       objectId: String(data.id),
       relevanceBoost: Number(data.riskScore) > 7 ? 1.2 : 1.0,
@@ -476,21 +642,23 @@ export class EvidencePipeline {
       caseId: null,
       incidentId: null,
       source: `Control: ${data.controlId}`,
-      sourceType: "control_doc",
+      sourceType: 'control_doc',
       title: `${data.framework} - ${data.controlId}: ${data.name}`,
       content: [
         `CONTROL DOCUMENT`,
         `ID: ${data.controlId} | Framework: ${data.framework}`,
         `Name: ${data.name}`,
         `Category: ${data.category} | Status: ${data.status}`,
-        data.description || "",
-        data.evidenceNotes ? `Evidence Notes: ${data.evidenceNotes}` : "",
-      ].filter(Boolean).join("\n"),
-      tags: ["control", data.framework, data.category, data.status],
-      freshness: "current",
+        data.description || '',
+        data.evidenceNotes ? `Evidence Notes: ${data.evidenceNotes}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['control', data.framework, data.category, data.status],
+      freshness: 'current',
       timestamp: new Date().toISOString(),
       objectId: String(data.id),
-      relevanceBoost: data.status === "not_implemented" ? 1.2 : 1.0,
+      relevanceBoost: data.status === 'not_implemented' ? 1.2 : 1.0,
     };
     this.addOrUpdate(entry);
     return entry;
@@ -510,17 +678,21 @@ export class EvidencePipeline {
       caseId: null,
       incidentId: null,
       source: `User/Owner: ${data.name}`,
-      sourceType: "user_metadata",
+      sourceType: 'user_metadata',
       title: `${data.name} — ${data.role}`,
       content: [
         `OWNER/USER: ${data.name}`,
         `Role: ${data.role}`,
         data.department ? `Department: ${data.department}` : null,
         data.accessLevel ? `Access Level: ${data.accessLevel}` : null,
-        data.associatedAssets?.length ? `Associated Assets: ${data.associatedAssets.join(", ")}` : null,
-      ].filter(Boolean).join("\n"),
-      tags: ["owner", "user", data.role, ...(data.tags ?? [])],
-      freshness: "current",
+        data.associatedAssets?.length
+          ? `Associated Assets: ${data.associatedAssets.join(', ')}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['owner', 'user', data.role, ...(data.tags ?? [])],
+      freshness: 'current',
       timestamp: new Date().toISOString(),
       objectId: data.id,
       relevanceBoost: 0.8,
@@ -541,11 +713,11 @@ export class EvidencePipeline {
       caseId: null,
       incidentId: null,
       source: `Retention Policy: ${data.name}`,
-      sourceType: "retention_policy",
+      sourceType: 'retention_policy',
       title: data.name,
       content: `RETENTION POLICY: ${data.name}\nClass: ${data.policyClass}\n${data.content}`,
-      tags: ["policy", data.policyClass],
-      freshness: "current",
+      tags: ['policy', data.policyClass],
+      freshness: 'current',
       timestamp: data.effectiveDate || new Date().toISOString(),
       objectId: data.id,
       relevanceBoost: 1.0,
@@ -569,7 +741,7 @@ export class EvidencePipeline {
       caseId: data.caseId,
       incidentId: null,
       source: `Prior Decision: ${data.decisionType}`,
-      sourceType: "prior_decision",
+      sourceType: 'prior_decision',
       title: `Prior ${data.decisionType}: ${data.summary.slice(0, 80)}`,
       content: [
         `PRIOR DECISION [${data.createdAt}]`,
@@ -577,9 +749,11 @@ export class EvidencePipeline {
         `Summary: ${data.summary}`,
         `Action: ${data.recommendedAction}`,
         `Confidence: ${Math.round(data.confidence * 100)}%`,
-        data.caseId ? `Case: ${data.caseId}` : "",
-      ].filter(Boolean).join("\n"),
-      tags: ["prior_decision", data.decisionType, data.caseId || ""].filter(Boolean),
+        data.caseId ? `Case: ${data.caseId}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      tags: ['prior_decision', data.decisionType, data.caseId || ''].filter(Boolean),
       freshness,
       timestamp: data.createdAt,
       objectId: data.objectId,
@@ -591,9 +765,11 @@ export class EvidencePipeline {
 
   private addOrUpdate(entry: EvidenceIndexEntry): void {
     if (!entry.embedding || entry.embedding.length === 0) {
-      entry.embedding = buildTfIdfEmbedding(`${entry.title} ${entry.content} ${entry.tags.join(" ")}`);
+      entry.embedding = buildTfIdfEmbedding(
+        `${entry.title} ${entry.content} ${entry.tags.join(' ')}`,
+      );
     }
-    const idx = this.index.findIndex(e => e.id === entry.id);
+    const idx = this.index.findIndex((e) => e.id === entry.id);
     if (idx >= 0) {
       this.index[idx] = entry;
     } else {
@@ -610,14 +786,14 @@ export class EvidencePipeline {
     const neural = await generateNeuralEmbedding(textForEmbedding);
     if (neural) {
       entry.embedding = neural;
-      const inMemory = this.index.find(e => e.id === entry.id);
+      const inMemory = this.index.find((e) => e.id === entry.id);
       if (inMemory) inMemory.embedding = neural;
     }
     await persistEntryToDb(entry);
   }
 
   setEmbedding(entryId: string, embedding: number[]): void {
-    const entry = this.index.find(e => e.id === entryId);
+    const entry = this.index.find((e) => e.id === entryId);
     if (entry) entry.embedding = embedding;
   }
 
@@ -628,7 +804,8 @@ export class EvidencePipeline {
    * Callers should always prefer this over querySync() for best ranking quality.
    */
   async query(params: EvidenceQuery): Promise<EvidenceQueryResult> {
-    const neuralEmbedding = params.embedding ?? (await generateNeuralEmbedding(params.query)) ?? undefined;
+    const neuralEmbedding =
+      params.embedding ?? (await generateNeuralEmbedding(params.query)) ?? undefined;
     return this.querySync({ ...params, embedding: neuralEmbedding });
   }
 
@@ -646,7 +823,7 @@ export class EvidencePipeline {
     let pool = this.index;
 
     if (sourceTypes && sourceTypes.length > 0) {
-      pool = pool.filter(e => sourceTypes.includes(e.sourceType));
+      pool = pool.filter((e) => sourceTypes.includes(e.sourceType));
     }
 
     const semanticResults = this.querySemantic(pool, queryEmbedding, maxResults * 2);
@@ -667,17 +844,24 @@ export class EvidencePipeline {
       }
     }
 
-    let results = [...merged.values()]
-      .filter(r => r.score >= minRelevance)
+    const results = [...merged.values()]
+      .filter((r) => r.score >= minRelevance)
       .sort((a, b) => {
-        const caseBias = (caseId ? (b.caseId === caseId ? 0.1 : 0) - (a.caseId === caseId ? 0.1 : 0) : 0);
-        const incidentBias = (incidentId ? (b.incidentId === incidentId ? 0.1 : 0) - (a.incidentId === incidentId ? 0.1 : 0) : 0);
-        return (b.score + caseBias + incidentBias) - (a.score + caseBias + incidentBias);
+        const caseBias = caseId
+          ? (b.caseId === caseId ? 0.1 : 0) - (a.caseId === caseId ? 0.1 : 0)
+          : 0;
+        const incidentBias = incidentId
+          ? (b.incidentId === incidentId ? 0.1 : 0) - (a.incidentId === incidentId ? 0.1 : 0)
+          : 0;
+        return b.score + caseBias + incidentBias - (a.score + caseBias + incidentBias);
       })
       .slice(0, maxResults);
 
-    const avgScore = results.length > 0 ? results.reduce((s, r) => s + r.score, 0) / results.length : 0;
-    const weakRetrieval = results.length < EvidencePipeline.MIN_RESULTS_FOR_CONFIDENCE || avgScore < EvidencePipeline.WEAK_RETRIEVAL_THRESHOLD;
+    const avgScore =
+      results.length > 0 ? results.reduce((s, r) => s + r.score, 0) / results.length : 0;
+    const weakRetrieval =
+      results.length < EvidencePipeline.MIN_RESULTS_FOR_CONFIDENCE ||
+      avgScore < EvidencePipeline.WEAK_RETRIEVAL_THRESHOLD;
 
     let confidenceDowngraded = false;
     let confidenceDowngradeReason: string | null = null;
@@ -697,7 +881,11 @@ export class EvidencePipeline {
     return {
       entries: results,
       totalIndexed: this.index.length,
-      method: params.embedding ? "hybrid" : (this.index.some(e => e.embedding && e.embedding.length > 200) ? "hybrid" : "keyword"),
+      method: params.embedding
+        ? 'hybrid'
+        : this.index.some((e) => e.embedding && e.embedding.length > 200)
+          ? 'hybrid'
+          : 'keyword',
       confidenceDowngraded,
       confidenceDowngradeReason,
       weakRetrievalWarning,
@@ -712,33 +900,44 @@ export class EvidencePipeline {
     return this.query(params);
   }
 
-  private querySemantic(pool: EvidenceIndexEntry[], embedding: number[], topK: number): Array<EvidenceIndexEntry & { score: number }> {
+  private querySemantic(
+    pool: EvidenceIndexEntry[],
+    embedding: number[],
+    topK: number,
+  ): Array<EvidenceIndexEntry & { score: number }> {
     return pool
-      .filter(e => e.embedding)
-      .map(e => ({ ...e, score: cosineSimilarity(embedding, e.embedding!) }))
+      .filter((e) => e.embedding)
+      .map((e) => ({ ...e, score: cosineSimilarity(embedding, e.embedding!) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
   }
 
-  private queryKeyword(pool: EvidenceIndexEntry[], query: string, topK: number): Array<EvidenceIndexEntry & { score: number }> {
-    const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+  private queryKeyword(
+    pool: EvidenceIndexEntry[],
+    query: string,
+    topK: number,
+  ): Array<EvidenceIndexEntry & { score: number }> {
+    const terms = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 2);
     if (terms.length === 0) return [];
     return pool
-      .map(e => {
-        const haystack = `${e.title} ${e.content} ${e.tags.join(" ")}`.toLowerCase();
-        const matched = terms.filter(t => haystack.includes(t)).length;
+      .map((e) => {
+        const haystack = `${e.title} ${e.content} ${e.tags.join(' ')}`.toLowerCase();
+        const matched = terms.filter((t) => haystack.includes(t)).length;
         return { ...e, score: terms.length > 0 ? matched / terms.length : 0 };
       })
-      .filter(e => e.score > 0)
+      .filter((e) => e.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
   }
 
   toEvidenceRefs(results: Array<EvidenceIndexEntry & { score: number }>): EvidenceRef[] {
-    return results.map(r => ({
+    return results.map((r) => ({
       refId: r.id,
       source: r.source,
-      sourceType: r.sourceType as EvidenceRef["sourceType"],
+      sourceType: r.sourceType as EvidenceRef['sourceType'],
       content: r.content.slice(0, 600),
       relevanceScore: Math.min(r.score, 1),
       freshness: r.freshness,
@@ -748,11 +947,11 @@ export class EvidencePipeline {
   }
 
   getByCase(caseId: string): EvidenceIndexEntry[] {
-    return this.index.filter(e => e.caseId === caseId);
+    return this.index.filter((e) => e.caseId === caseId);
   }
 
   getByIncident(incidentId: string): EvidenceIndexEntry[] {
-    return this.index.filter(e => e.incidentId === incidentId);
+    return this.index.filter((e) => e.incidentId === incidentId);
   }
 
   getStats() {
@@ -760,16 +959,20 @@ export class EvidencePipeline {
     for (const e of this.index) {
       byType[e.sourceType] = (byType[e.sourceType] || 0) + 1;
     }
-    const withNeuralEmbeddings = this.index.filter(e => e.embedding && e.embedding.length > 200).length;
+    const withNeuralEmbeddings = this.index.filter(
+      (e) => e.embedding && e.embedding.length > 200,
+    ).length;
     return {
       totalEntries: this.index.length,
-      withEmbeddings: this.index.filter(e => e.embedding).length,
+      withEmbeddings: this.index.filter((e) => e.embedding).length,
       withNeuralEmbeddings,
       bySourceType: byType,
     };
   }
 
-  clear(): void { this.index = []; }
+  clear(): void {
+    this.index = [];
+  }
 }
 
 export const evidencePipeline = new EvidencePipeline();

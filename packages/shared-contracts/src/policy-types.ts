@@ -14,9 +14,9 @@
  *                          Used in evidence envelopes and audit trails to record
  *                          operator-bypassed policy decisions.
  */
-export type PolicyVerdict = "allowed" | "requires-approval" | "blocked" | "override";
-export type PolicyTier = "low" | "medium" | "high" | "critical";
-export type ApprovalStatus = "none" | "pending" | "approved" | "rejected" | "escalated";
+export type PolicyVerdict = 'allowed' | 'requires-approval' | 'blocked' | 'override';
+export type PolicyTier = 'low' | 'medium' | 'high' | 'critical';
+export type ApprovalStatus = 'none' | 'pending' | 'approved' | 'rejected' | 'escalated';
 
 export interface PolicyRule {
   policyId: string;

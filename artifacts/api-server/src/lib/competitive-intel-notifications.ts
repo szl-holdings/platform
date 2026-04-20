@@ -17,25 +17,25 @@
  *   APP_URL / VITE_APP_URL             — used to build the Atlas link
  */
 
-import { logger } from "./logger";
-import { sendEmail, hasEmailProviderConfigured } from "./email";
 import {
+  type IntelAlert,
   isLaneMuted,
   markAlertsNotified,
-  type IntelAlert,
-} from "../jobs/competitive-intel-monitor";
+} from '../jobs/competitive-intel-monitor';
+import { hasEmailProviderConfigured, sendEmail } from './email';
+import { logger } from './logger';
 
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 const SLACK_CHANNEL =
   process.env.COMPETITIVE_INTEL_SLACK_CHANNEL ||
   process.env.SLACK_ALERT_CHANNEL ||
-  "#competitive-intel";
+  '#competitive-intel';
 
 function emailRecipients(): string[] {
-  const raw = process.env.COMPETITIVE_INTEL_EMAIL_RECIPIENTS || "";
+  const raw = process.env.COMPETITIVE_INTEL_EMAIL_RECIPIENTS || '';
   return raw
-    .split(",")
+    .split(',')
     .map((s) => s.trim())
     .filter((s) => /.+@.+\..+/.test(s));
 }
@@ -44,7 +44,9 @@ function appUrl(): string {
   return (
     process.env.APP_URL ||
     process.env.VITE_APP_URL ||
-    (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://szlholdings.com")
+    (process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : 'https://szlholdings.com')
   );
 }
 
@@ -58,15 +60,15 @@ function atlasLink(laneId: string): string {
 export function shouldNotify(alert: IntelAlert): boolean {
   if (alert.dismissed) return false;
   if (alert.notifiedAt) return false;
-  if (alert.source !== "rss") return false;
-  if (alert.recommendation !== "counter" && alert.recommendation !== "adopt") return false;
+  if (alert.source !== 'rss') return false;
+  if (alert.recommendation !== 'counter' && alert.recommendation !== 'adopt') return false;
   if (isLaneMuted(alert.laneId)) return false;
   return true;
 }
 
 function slackTextFor(alert: IntelAlert): string {
-  const emoji = alert.recommendation === "counter" ? ":crossed_swords:" : ":sparkles:";
-  const recLabel = alert.recommendation === "counter" ? "COUNTER" : "ADOPT";
+  const emoji = alert.recommendation === 'counter' ? ':crossed_swords:' : ':sparkles:';
+  const recLabel = alert.recommendation === 'counter' ? 'COUNTER' : 'ADOPT';
   return [
     `${emoji} *Competitor move — ${recLabel}* · _${alert.laneId}_`,
     `*${alert.champion}:* ${alert.title}`,
@@ -75,34 +77,34 @@ function slackTextFor(alert: IntelAlert): string {
     `<${alert.link}|Read source> · <${atlasLink(alert.laneId)}|Open Atlas lane>`,
   ]
     .filter(Boolean)
-    .join("\n");
+    .join('\n');
 }
 
 async function postSlack(text: string): Promise<boolean> {
   try {
     if (SLACK_WEBHOOK_URL) {
       const res = await fetch(SLACK_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       });
       if (!res.ok) {
-        logger.warn({ status: res.status }, "[competitive-intel-notify] Slack webhook failed");
+        logger.warn({ status: res.status }, '[competitive-intel-notify] Slack webhook failed');
         return false;
       }
       return true;
     }
     if (SLACK_BOT_TOKEN) {
-      const res = await fetch("https://slack.com/api/chat.postMessage", {
-        method: "POST",
+      const res = await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
         },
         body: JSON.stringify({ channel: SLACK_CHANNEL, text }),
       });
       if (!res.ok) {
-        logger.warn({ status: res.status }, "[competitive-intel-notify] Slack bot HTTP failed");
+        logger.warn({ status: res.status }, '[competitive-intel-notify] Slack bot HTTP failed');
         return false;
       }
       let body: { ok?: boolean; error?: string } = {};
@@ -112,29 +114,33 @@ async function postSlack(text: string): Promise<boolean> {
         return false;
       }
       if (!body.ok) {
-        logger.warn({ slackError: body.error }, "[competitive-intel-notify] Slack bot rejected");
+        logger.warn({ slackError: body.error }, '[competitive-intel-notify] Slack bot rejected');
         return false;
       }
       return true;
     }
     return false;
   } catch (err) {
-    logger.warn({ err }, "[competitive-intel-notify] Slack post threw");
+    logger.warn({ err }, '[competitive-intel-notify] Slack post threw');
     return false;
   }
 }
 
 function buildEmailDigest(alerts: IntelAlert[]): { subject: string; html: string; text: string } {
-  const counter = alerts.filter((a) => a.recommendation === "counter");
-  const adopt = alerts.filter((a) => a.recommendation === "adopt");
-  const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const counter = alerts.filter((a) => a.recommendation === 'counter');
+  const adopt = alerts.filter((a) => a.recommendation === 'adopt');
+  const date = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
   const subject =
     `[Competitive Atlas] ${alerts.length} new ` +
-    (alerts.length === 1 ? "competitor move" : "competitor moves") +
+    (alerts.length === 1 ? 'competitor move' : 'competitor moves') +
     ` — ${counter.length} counter / ${adopt.length} adopt`;
 
   const renderRow = (a: IntelAlert) => {
-    const recColor = a.recommendation === "counter" ? "#dc2626" : "#0ea5e9";
+    const recColor = a.recommendation === 'counter' ? '#dc2626' : '#0ea5e9';
     return `
       <div style="border-left:3px solid ${recColor};padding:12px 16px;margin:12px 0;background:#f9fafb;border-radius:4px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${recColor};margin-bottom:4px;">
@@ -152,8 +158,8 @@ function buildEmailDigest(alerts: IntelAlert[]): { subject: string; html: string
 <div style="max-width:640px;margin:0 auto;padding:32px 16px;">
   <div style="background:#fff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
     <h2 style="font-size:18px;font-weight:700;color:#111827;margin:0 0 4px;">Competitive Atlas — ${date}</h2>
-    <p style="font-size:13px;color:#6b7280;margin:0 0 20px;">${alerts.length} new competitor move${alerts.length === 1 ? "" : "s"} detected. ${counter.length} counter · ${adopt.length} adopt.</p>
-    ${alerts.map(renderRow).join("")}
+    <p style="font-size:13px;color:#6b7280;margin:0 0 20px;">${alerts.length} new competitor move${alerts.length === 1 ? '' : 's'} detected. ${counter.length} counter · ${adopt.length} adopt.</p>
+    ${alerts.map(renderRow).join('')}
     <div style="font-size:11px;color:#9ca3af;margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;">
       SZL Holdings · You're receiving this because you're on COMPETITIVE_INTEL_EMAIL_RECIPIENTS. Mute lanes from the Competitive Atlas to stop notifications for that lane.
     </div>
@@ -169,7 +175,7 @@ function buildEmailDigest(alerts: IntelAlert[]): { subject: string; html: string
       (a) =>
         `[${a.recommendation.toUpperCase()}] ${a.laneId} · ${a.champion}: ${a.title}\n${a.summary}\nWhy: ${a.recommendationReason}\nSource: ${a.link}\n`,
     ),
-  ].join("\n");
+  ].join('\n');
 
   return { subject, html, text };
 }
@@ -182,12 +188,17 @@ async function dispatchEmailDigest(alerts: IntelAlert[]): Promise<number> {
   let sent = 0;
   await Promise.allSettled(
     recipients.map(async (to) => {
-      const result = await sendEmail({ to, subject: digest.subject, html: digest.html, text: digest.text });
+      const result = await sendEmail({
+        to,
+        subject: digest.subject,
+        html: digest.html,
+        text: digest.text,
+      });
       if (result.success) sent++;
       else
         logger.warn(
           { to, error: result.error },
-          "[competitive-intel-notify] Email digest delivery failed",
+          '[competitive-intel-notify] Email digest delivery failed',
         );
     }),
   );
@@ -234,8 +245,8 @@ export async function notifyNewAlerts(alerts: IntelAlert[]): Promise<NotifyResul
       continue;
     }
     if (a.notifiedAt) continue;
-    if (a.source !== "rss") continue;
-    if (a.recommendation !== "counter" && a.recommendation !== "adopt") continue;
+    if (a.source !== 'rss') continue;
+    if (a.recommendation !== 'counter' && a.recommendation !== 'adopt') continue;
     if (isLaneMuted(a.laneId)) {
       result.laneMutesSkipped++;
       continue;
@@ -244,7 +255,7 @@ export async function notifyNewAlerts(alerts: IntelAlert[]): Promise<NotifyResul
   }
 
   if (eligible.length === 0) {
-    logger.info(result, "[competitive-intel-notify] No eligible alerts to push");
+    logger.info(result, '[competitive-intel-notify] No eligible alerts to push');
     return result;
   }
 
@@ -268,8 +279,13 @@ export async function notifyNewAlerts(alerts: IntelAlert[]): Promise<NotifyResul
     // workflow logs even without Slack creds.
     for (const a of eligible) {
       logger.info(
-        { laneId: a.laneId, champion: a.champion, recommendation: a.recommendation, title: a.title },
-        "[competitive-intel-notify] (no-op: no Slack creds) would post",
+        {
+          laneId: a.laneId,
+          champion: a.champion,
+          recommendation: a.recommendation,
+          title: a.title,
+        },
+        '[competitive-intel-notify] (no-op: no Slack creds) would post',
       );
     }
   }
@@ -304,10 +320,10 @@ export async function notifyNewAlerts(alerts: IntelAlert[]): Promise<NotifyResul
   if (result.deliveryFailed > 0) {
     logger.warn(
       result,
-      "[competitive-intel-notify] Some competitor-move alerts could not be delivered — will retry next cycle",
+      '[competitive-intel-notify] Some competitor-move alerts could not be delivered — will retry next cycle',
     );
   } else {
-    logger.info(result, "[competitive-intel-notify] Dispatched competitor-move notifications");
+    logger.info(result, '[competitive-intel-notify] Dispatched competitor-move notifications');
   }
   return result;
 }

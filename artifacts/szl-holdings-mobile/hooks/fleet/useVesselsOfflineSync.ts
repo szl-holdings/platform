@@ -1,23 +1,21 @@
-import { useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Platform } from "react-native";
-import { useOfflineSync, useOfflineQueue } from "@szl-holdings/mobile-shared/hooks";
-import type { UseOfflineSyncResult } from "@szl-holdings/mobile-shared/hooks";
+import type { UseOfflineSyncResult } from '@szl-holdings/mobile-shared/hooks';
+import { useOfflineQueue, useOfflineSync } from '@szl-holdings/mobile-shared/hooks';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { Platform } from 'react-native';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : null;
 
-const TOKEN_KEY = "auth_token";
+const TOKEN_KEY = 'auth_token';
 
 async function getAuthToken(): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return typeof window !== "undefined"
-      ? window.localStorage.getItem(TOKEN_KEY)
-      : null;
+  if (Platform.OS === 'web') {
+    return typeof window !== 'undefined' ? window.localStorage.getItem(TOKEN_KEY) : null;
   }
   try {
-    const SecureStore = await import("expo-secure-store");
+    const SecureStore = await import('expo-secure-store');
     return await SecureStore.getItemAsync(TOKEN_KEY);
   } catch {
     return null;
@@ -29,7 +27,7 @@ export interface VesselsOfflineSyncResult extends UseOfflineSyncResult {
     vesselId: number;
     title: string;
     description?: string;
-    severity: "watch" | "warning" | "critical";
+    severity: 'watch' | 'warning' | 'critical';
   }) => Promise<void>;
   queueComplianceDecision: (params: {
     vesselId: number;
@@ -44,18 +42,18 @@ export function useVesselsOfflineSync(): VesselsOfflineSyncResult {
   const qc = useQueryClient();
 
   const { enqueue, queueLength, conflictCount } = useOfflineQueue({
-    domain: "vessels",
+    domain: 'vessels',
     getToken: getAuthToken,
     onReplay: (replayed) => {
       if (replayed > 0) {
-        qc.invalidateQueries({ queryKey: ["vessels"] });
-        qc.invalidateQueries({ queryKey: ["vessels-events"] });
-        qc.invalidateQueries({ queryKey: ["vessels-alerts"] });
+        qc.invalidateQueries({ queryKey: ['vessels'] });
+        qc.invalidateQueries({ queryKey: ['vessels-events'] });
+        qc.invalidateQueries({ queryKey: ['vessels-alerts'] });
       }
     },
     onConflict: (count) => {
       if (count > 0) {
-        qc.invalidateQueries({ queryKey: ["vessels-conflicts"] });
+        qc.invalidateQueries({ queryKey: ['vessels-conflicts'] });
       }
     },
   });
@@ -64,16 +62,15 @@ export function useVesselsOfflineSync(): VesselsOfflineSyncResult {
     if (!API_BASE) return;
     const token = await getAuthToken();
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
 
-    const watermarkKey = "vessels:sync-watermark";
+    const watermarkKey = 'vessels:sync-watermark';
     let sinceTs = 0;
     try {
-      const stored = typeof window !== "undefined"
-        ? window.localStorage.getItem(watermarkKey)
-        : null;
+      const stored =
+        typeof window !== 'undefined' ? window.localStorage.getItem(watermarkKey) : null;
       if (stored) sinceTs = Number(stored);
     } catch {}
 
@@ -102,22 +99,22 @@ export function useVesselsOfflineSync(): VesselsOfflineSyncResult {
 
       if (latestServerTime) {
         try {
-          if (typeof window !== "undefined") {
+          if (typeof window !== 'undefined') {
             window.localStorage.setItem(watermarkKey, String(latestServerTime));
           }
         } catch {}
       }
       if (hasChanges) {
-        qc.invalidateQueries({ queryKey: ["vessels"] });
-        qc.invalidateQueries({ queryKey: ["vessels-fleets"] });
-        qc.invalidateQueries({ queryKey: ["vessels-positions"] });
-        qc.invalidateQueries({ queryKey: ["vessels-events"] });
+        qc.invalidateQueries({ queryKey: ['vessels'] });
+        qc.invalidateQueries({ queryKey: ['vessels-fleets'] });
+        qc.invalidateQueries({ queryKey: ['vessels-positions'] });
+        qc.invalidateQueries({ queryKey: ['vessels-events'] });
       }
     } catch {}
   }, [qc]);
 
   const syncResult = useOfflineSync({
-    domain: "vessels",
+    domain: 'vessels',
     getQueueCount: async () => queueLength,
     getConflictCount: async () => conflictCount,
     onSync: handleSync,
@@ -129,23 +126,23 @@ export function useVesselsOfflineSync(): VesselsOfflineSyncResult {
       vesselId: number;
       title: string;
       description?: string;
-      severity: "watch" | "warning" | "critical";
+      severity: 'watch' | 'warning' | 'critical';
     }) => {
       if (!API_BASE) return;
       await enqueue({
-        method: "POST",
+        method: 'POST',
         url: `${API_BASE}/vessels/events`,
         body: {
           vesselId: params.vesselId,
-          eventType: "ais_dark",
+          eventType: 'ais_dark',
           title: params.title,
           description: params.description,
           severity: params.severity,
-          status: "open",
+          status: 'open',
         },
       });
     },
-    [enqueue]
+    [enqueue],
   );
 
   const queueComplianceDecision = useCallback(
@@ -158,7 +155,7 @@ export function useVesselsOfflineSync(): VesselsOfflineSyncResult {
     }) => {
       if (!API_BASE) return;
       await enqueue({
-        method: "POST",
+        method: 'POST',
         url: `${API_BASE}/vessels/command-workflows`,
         body: {
           vesselId: params.vesselId,
@@ -166,11 +163,11 @@ export function useVesselsOfflineSync(): VesselsOfflineSyncResult {
           workflowType: params.workflowType,
           notes: params.notes,
           assignedTo: params.assignedTo,
-          status: "pending",
+          status: 'pending',
         },
       });
     },
-    [enqueue]
+    [enqueue],
   );
 
   return {

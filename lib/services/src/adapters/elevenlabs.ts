@@ -1,4 +1,4 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface ElevenLabsVoice {
   id: string;
@@ -15,38 +15,38 @@ export interface TTSResult {
 
 const MOCK_VOICES: ElevenLabsVoice[] = [
   {
-    id: "voice_001",
-    name: "Rachel",
-    category: "premade",
-    previewUrl: "https://api.elevenlabs.io/v1/voices/mock/preview",
+    id: 'voice_001',
+    name: 'Rachel',
+    category: 'premade',
+    previewUrl: 'https://api.elevenlabs.io/v1/voices/mock/preview',
   },
   {
-    id: "voice_002",
-    name: "Adam",
-    category: "premade",
-    previewUrl: "https://api.elevenlabs.io/v1/voices/mock/preview",
+    id: 'voice_002',
+    name: 'Adam',
+    category: 'premade',
+    previewUrl: 'https://api.elevenlabs.io/v1/voices/mock/preview',
   },
 ];
 
 export class ElevenLabsAdapter extends ServiceAdapter {
-  readonly name = "elevenlabs";
-  readonly description = "ElevenLabs AI voice synthesis and text-to-speech";
-  readonly requiredEnvVars = ["ELEVENLABS_API_KEY"];
+  readonly name = 'elevenlabs';
+  readonly description = 'ElevenLabs AI voice synthesis and text-to-speech';
+  readonly requiredEnvVars = ['ELEVENLABS_API_KEY'];
 
   private get apiKey(): string | undefined {
-    return process.env["ELEVENLABS_API_KEY"];
+    return process.env['ELEVENLABS_API_KEY'];
   }
 
   protected async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
-    if (!result.connected) throw new Error("ElevenLabs connection verification failed");
+    if (!result.connected) throw new Error('ElevenLabs connection verification failed');
   }
 
   async testConnection(): Promise<{ connected: boolean; tier?: string }> {
     if (!this.isLive) return { connected: false };
     try {
-      const response = await fetch("https://api.elevenlabs.io/v1/user", {
-        headers: { "xi-api-key": this.apiKey! },
+      const response = await fetch('https://api.elevenlabs.io/v1/user', {
+        headers: { 'xi-api-key': this.apiKey! },
       });
       if (!response.ok) return { connected: false };
       const data = (await response.json()) as { subscription: { tier: string } };
@@ -59,8 +59,8 @@ export class ElevenLabsAdapter extends ServiceAdapter {
   async listVoices(): Promise<ElevenLabsVoice[]> {
     if (!this.isLive) return [...MOCK_VOICES];
     try {
-      const response = await fetch("https://api.elevenlabs.io/v1/voices", {
-        headers: { "xi-api-key": this.apiKey! },
+      const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+        headers: { 'xi-api-key': this.apiKey! },
       });
       if (!response.ok) return [...MOCK_VOICES];
       const data = (await response.json()) as {
@@ -85,13 +85,13 @@ export class ElevenLabsAdapter extends ServiceAdapter {
   async textToSpeech(text: string, voiceId?: string): Promise<TTSResult> {
     if (!this.isLive) {
       return {
-        audioUrl: "https://api.elevenlabs.io/v1/mock/audio.mp3",
+        audioUrl: 'https://api.elevenlabs.io/v1/mock/audio.mp3',
         characterCount: text.length,
         mock: true,
       };
     }
     return {
-      audioUrl: `https://api.elevenlabs.io/v1/text-to-speech/${voiceId ?? "default"}/stream`,
+      audioUrl: `https://api.elevenlabs.io/v1/text-to-speech/${voiceId ?? 'default'}/stream`,
       characterCount: text.length,
       mock: false,
     };

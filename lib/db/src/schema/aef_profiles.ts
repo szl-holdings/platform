@@ -1,4 +1,4 @@
-import { pgTable, text, jsonb, boolean, timestamp, primaryKey } from "drizzle-orm/pg-core";
+import { boolean, jsonb, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 
 /**
  * profile_registry_pointers
@@ -14,15 +14,15 @@ import { pgTable, text, jsonb, boolean, timestamp, primaryKey } from "drizzle-or
  * `TenantProfilePointer.history` shape.
  */
 export const profileRegistryPointersTable = pgTable(
-  "profile_registry_pointers",
+  'profile_registry_pointers',
   {
-    tenantId: text("tenant_id").notNull(),
-    domain: text("domain").notNull(),
-    activeProfileId: text("active_profile_id").notNull(),
-    activeVersion: text("active_version").notNull(),
-    history: jsonb("history").notNull().default([]),
-    rollbackAvailable: boolean("rollback_available").notNull().default(false),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    tenantId: text('tenant_id').notNull(),
+    domain: text('domain').notNull(),
+    activeProfileId: text('active_profile_id').notNull(),
+    activeVersion: text('active_version').notNull(),
+    history: jsonb('history').notNull().default([]),
+    rollbackAvailable: boolean('rollback_available').notNull().default(false),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.tenantId, t.domain] }),

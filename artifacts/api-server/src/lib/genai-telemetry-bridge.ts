@@ -3,9 +3,9 @@
  * the GenAI telemetry collector for Langfuse-compatible tracing.
  */
 
-import { registerTelemetryHandler, type ModelRouterTelemetry } from "@szl-holdings/ai-engine";
-import { genAITelemetry } from "@szl-holdings/observability";
-import { logger } from "./logger.js";
+import { type ModelRouterTelemetry, registerTelemetryHandler } from '@szl-holdings/ai-engine';
+import { genAITelemetry } from '@szl-holdings/observability';
+import { logger } from './logger.js';
 
 let registered = false;
 
@@ -15,7 +15,8 @@ export function registerGenAITelemetryBridge(): void {
 
   registerTelemetryHandler(async (telemetry: ModelRouterTelemetry) => {
     try {
-      const traceId = telemetry.correlationId ?? `trace_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const traceId =
+        telemetry.correlationId ?? `trace_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
       genAITelemetry.recordModelCall({
         traceId,
@@ -28,7 +29,7 @@ export function registerGenAITelemetryBridge(): void {
         latencyMs: telemetry.latencyMs,
         costEstimateUsd: telemetry.costEstimateUsd,
         usedFallback: telemetry.usedFallback,
-        status: "ok",
+        status: 'ok',
         correlationId: telemetry.correlationId,
         tenantId: telemetry.tenantId,
         orgId: null,
@@ -39,9 +40,11 @@ export function registerGenAITelemetryBridge(): void {
         },
       });
     } catch (err) {
-      logger.warn({ err }, "[genai-telemetry-bridge] Failed to record model call span");
+      logger.warn({ err }, '[genai-telemetry-bridge] Failed to record model call span');
     }
   });
 
-  logger.info("[genai-telemetry-bridge] GenAI telemetry bridge registered — model calls will be traced");
+  logger.info(
+    '[genai-telemetry-bridge] GenAI telemetry bridge registered — model calls will be traced',
+  );
 }

@@ -1,8 +1,9 @@
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
-import { router, type Href } from "expo-router";
-import React, { useState } from "react";
+import { Feather } from '@expo/vector-icons';
+import { type NotificationFetcher, NotificationHub, useTheme } from '@szl-holdings/mobile-shared';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { type Href, router } from 'expo-router';
+import React, { useState } from 'react';
 import {
   Alert,
   Platform,
@@ -12,18 +13,21 @@ import {
   Switch,
   Text,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { useAuth } from "@/context/AuthContext";
-import { useColors } from "@/hooks/useColors";
-import { useTheme, NotificationHub, type NotificationFetcher } from "@szl-holdings/mobile-shared";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '@/context/AuthContext';
+import { useColors } from '@/hooks/useColors';
 
 const SESSION_HISTORY = [
-  { id: 1, title: "Discovery Call", date: "Feb 15, 2026", duration: "45 min" },
-  { id: 2, title: "Needs Assessment — Mayfair walkthrough", date: "Feb 22, 2026", duration: "2 hr" },
-  { id: 3, title: "Service Plan presentation", date: "Mar 8, 2026", duration: "1 hr" },
-  { id: 4, title: "Onboarding kickoff", date: "Mar 10, 2026", duration: "1.5 hr" },
+  { id: 1, title: 'Discovery Call', date: 'Feb 15, 2026', duration: '45 min' },
+  {
+    id: 2,
+    title: 'Needs Assessment — Mayfair walkthrough',
+    date: 'Feb 22, 2026',
+    duration: '2 hr',
+  },
+  { id: 3, title: 'Service Plan presentation', date: 'Mar 8, 2026', duration: '1 hr' },
+  { id: 4, title: 'Onboarding kickoff', date: 'Mar 10, 2026', duration: '1.5 hr' },
 ];
 
 interface SettingRowProps {
@@ -64,21 +68,14 @@ function SettingRow({
           <Feather
             name={icon as any}
             size={15}
-            color={destructive ? "#c05050" : colors.goldSubtle}
+            color={destructive ? '#c05050' : colors.goldSubtle}
           />
-          <Text
-            style={[
-              styles.settingLabel,
-              { color: destructive ? "#c05050" : colors.creamDim },
-            ]}
-          >
+          <Text style={[styles.settingLabel, { color: destructive ? '#c05050' : colors.creamDim }]}>
             {label}
           </Text>
           <View style={styles.settingRight}>
             {value ? (
-              <Text style={[styles.settingValue, { color: colors.mutedForeground }]}>
-                {value}
-              </Text>
+              <Text style={[styles.settingValue, { color: colors.mutedForeground }]}>{value}</Text>
             ) : null}
             {toggle && onToggle ? (
               <Switch
@@ -88,8 +85,8 @@ function SettingRow({
                   onToggle(v);
                 }}
                 trackColor={{
-                  false: "rgba(245,240,232,0.1)",
-                  true: "rgba(200,169,106,0.5)",
+                  false: 'rgba(245,240,232,0.1)',
+                  true: 'rgba(200,169,106,0.5)',
                 }}
                 thumbColor={toggleValue ? colors.gold : colors.creamDim}
                 ios_backgroundColor="rgba(245,240,232,0.1)"
@@ -109,46 +106,42 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
   const { mode, toggle } = useTheme();
-  const themeLabel = mode === "dark" ? "Dark" : mode === "light" ? "Light" : "System";
+  const themeLabel = mode === 'dark' ? 'Dark' : mode === 'light' ? 'Light' : 'System';
 
-  const displayName = user?.displayName ?? "Client";
-  const email = user?.email ?? "";
+  const displayName = user?.displayName ?? 'Client';
+  const email = user?.email ?? '';
   const initials = displayName
-    .split(" ")
+    .split(' ')
     .map((p) => p[0])
-    .join("")
+    .join('')
     .slice(0, 2)
     .toUpperCase();
   const [notifUpdates, setNotifUpdates] = useState(true);
   const [notifMessages, setNotifMessages] = useState(true);
   const [notifDocuments, setNotifDocuments] = useState(false);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
+  const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const bottomPad = Platform.OS === 'web' ? 34 + 84 : 90;
 
   const handleLogout = () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out of the Carlota Jo portal?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            await logout();
-            router.replace("/auth");
-          },
+    Alert.alert('Sign Out', 'Are you sure you want to sign out of the Carlota Jo portal?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          await logout();
+          router.replace('/auth');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
-        colors={["rgba(200,169,106,0.05)", "transparent"]}
+        colors={['rgba(200,169,106,0.05)', 'transparent']}
         style={[styles.headerGradient, { height: topPad + 80 }]}
       />
       <ScrollView
@@ -158,49 +151,66 @@ export default function ProfileScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
-            CLIENT PROFILE
-          </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 4,
+          }}
+        >
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>CLIENT PROFILE</Text>
           <NotificationHub
             fetchers={[
               {
-                domain: "carlota",
-                label: "Carlota Jo",
+                domain: 'carlota',
+                label: 'Carlota Jo',
                 color: colors.gold,
                 fetch: async () => {
                   try {
-                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const base = process.env.EXPO_PUBLIC_DOMAIN
+                      ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
+                      : '';
                     const res = await fetch(`${base}/api/carlota/notifications`);
                     if (!res.ok) return [];
                     return res.json();
-                  } catch { return []; }
+                  } catch {
+                    return [];
+                  }
                 },
               },
               {
-                domain: "terra",
-                label: "Terra",
-                color: "#b8943c",
+                domain: 'terra',
+                label: 'Terra',
+                color: '#b8943c',
                 fetch: async () => {
                   try {
-                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const base = process.env.EXPO_PUBLIC_DOMAIN
+                      ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
+                      : '';
                     const res = await fetch(`${base}/api/terra/notifications`);
                     if (!res.ok) return [];
                     return res.json();
-                  } catch { return []; }
+                  } catch {
+                    return [];
+                  }
                 },
               },
               {
-                domain: "lyte",
-                label: "Lyte",
-                color: "#00d4ff",
+                domain: 'lyte',
+                label: 'Lyte',
+                color: '#00d4ff',
                 fetch: async () => {
                   try {
-                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const base = process.env.EXPO_PUBLIC_DOMAIN
+                      ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
+                      : '';
                     const res = await fetch(`${base}/api/lyte/notifications`);
                     if (!res.ok) return [];
                     return res.json();
-                  } catch { return []; }
+                  } catch {
+                    return [];
+                  }
                 },
               },
             ]}
@@ -219,51 +229,46 @@ export default function ProfileScreen() {
             <Text style={[styles.monogramText, { color: colors.gold }]}>{initials}</Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={[styles.profileName, { color: colors.cream }]}>
-              {displayName}
-            </Text>
+            <Text style={[styles.profileName, { color: colors.cream }]}>{displayName}</Text>
             {!!email && (
-              <Text style={[styles.profileEmail, { color: colors.goldSubtle }]}>
-                {email}
-              </Text>
+              <Text style={[styles.profileEmail, { color: colors.goldSubtle }]}>{email}</Text>
             )}
-            <View style={[styles.statusBadge, { borderColor: colors.goldBorder, backgroundColor: colors.goldDim }]}>
+            <View
+              style={[
+                styles.statusBadge,
+                { borderColor: colors.goldBorder, backgroundColor: colors.goldDim },
+              ]}
+            >
               <View style={[styles.statusDot, { backgroundColor: colors.gold }]} />
-              <Text style={[styles.statusText, { color: colors.gold }]}>
-                Active Engagement
-              </Text>
+              <Text style={[styles.statusText, { color: colors.gold }]}>Active Engagement</Text>
             </View>
           </View>
         </View>
 
         <View style={[styles.infoGrid, { borderColor: colors.creamFaint }]}>
           {[
-            { label: "Engagement Type", value: "Residential Management" },
-            { label: "Start Date", value: "March 10, 2026" },
-            { label: "Phase", value: "Onboarding" },
-            { label: "Lead Advisor", value: "Rosa Carlota" },
+            { label: 'Engagement Type', value: 'Residential Management' },
+            { label: 'Start Date', value: 'March 10, 2026' },
+            { label: 'Phase', value: 'Onboarding' },
+            { label: 'Lead Advisor', value: 'Rosa Carlota' },
           ].map((item, i, arr) => (
             <View
               key={item.label}
               style={[
                 styles.infoRow,
-                { borderBottomColor: i < arr.length - 1 ? colors.creamFaint : "transparent" },
+                { borderBottomColor: i < arr.length - 1 ? colors.creamFaint : 'transparent' },
               ]}
             >
               <Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>
                 {item.label}
               </Text>
-              <Text style={[styles.infoValue, { color: colors.creamDim }]}>
-                {item.value}
-              </Text>
+              <Text style={[styles.infoValue, { color: colors.creamDim }]}>{item.value}</Text>
             </View>
           ))}
         </View>
 
         <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            SESSION HISTORY
-          </Text>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>SESSION HISTORY</Text>
           {SESSION_HISTORY.map((session) => (
             <Pressable key={session.id}>
               <View style={[styles.historyRow, { borderBottomColor: colors.creamFaint }]}>
@@ -282,23 +287,22 @@ export default function ProfileScreen() {
         </View>
 
         <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            DISPLAY
-          </Text>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>DISPLAY</Text>
           <View style={[styles.settingsGroup, { borderColor: colors.creamFaint }]}>
             <SettingRow
               icon="moon"
               label="Display Theme"
               value={themeLabel}
-              onPress={() => { Haptics.selectionAsync(); toggle(); }}
+              onPress={() => {
+                Haptics.selectionAsync();
+                toggle();
+              }}
             />
           </View>
         </View>
 
         <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            NOTIFICATIONS
-          </Text>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>NOTIFICATIONS</Text>
           <View style={[styles.settingsGroup, { borderColor: colors.creamFaint }]}>
             <SettingRow
               icon="bell"
@@ -325,37 +329,27 @@ export default function ProfileScreen() {
         </View>
 
         <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            ACCOUNT
-          </Text>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>ACCOUNT</Text>
           <View style={[styles.settingsGroup, { borderColor: colors.creamFaint }]}>
-            <SettingRow
-              icon="lock"
-              label="Privacy & Security"
-              onPress={() => {}}
-            />
+            <SettingRow icon="lock" label="Privacy & Security" onPress={() => {}} />
             <SettingRow
               icon="mail"
               label="Contact Rosa"
               value="rosa@carlotajo.com"
               onPress={() => {}}
             />
-            <SettingRow
-              icon="info"
-              label="App Version"
-              value="1.0.0"
-            />
+            <SettingRow icon="info" label="App Version" value="1.0.0" />
           </View>
         </View>
 
         <Pressable onPress={handleLogout}>
-          <View style={[styles.logoutRow, { borderColor: "rgba(192,80,80,0.2)" }]}>
+          <View style={[styles.logoutRow, { borderColor: 'rgba(192,80,80,0.2)' }]}>
             <Feather name="log-out" size={14} color="#c05050" />
-            <Text style={[styles.logoutText, { color: "#c05050" }]}>Sign Out</Text>
+            <Text style={[styles.logoutText, { color: '#c05050' }]}>Sign Out</Text>
           </View>
         </Pressable>
 
-        <Text style={[styles.footNote, { color: "rgba(245,240,232,0.08)" }]}>
+        <Text style={[styles.footNote, { color: 'rgba(245,240,232,0.08)' }]}>
           Carlota Jo · Private Client Portal · 1.0.0
         </Text>
       </ScrollView>
@@ -365,51 +359,51 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+  headerGradient: { position: 'absolute', top: 0, left: 0, right: 0 },
   content: { paddingHorizontal: 20 },
   eyebrow: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 3,
     marginBottom: 20,
   },
   profileCard: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 16,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 20,
   },
   monogram: {
     width: 56,
     height: 56,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   monogramText: {
     fontSize: 18,
-    fontFamily: "CormorantGaramond_500Medium",
+    fontFamily: 'CormorantGaramond_500Medium',
     letterSpacing: 3,
   },
   profileInfo: { flex: 1, gap: 4 },
   profileName: {
     fontSize: 20,
-    fontFamily: "CormorantGaramond_400Regular",
+    fontFamily: 'CormorantGaramond_400Regular',
   },
   profileEmail: {
     fontSize: 11,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     letterSpacing: 0.3,
   },
   statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
     borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginTop: 4,
   },
   statusDot: {
@@ -419,7 +413,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 1,
   },
   infoGrid: {
@@ -427,8 +421,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 14,
     paddingVertical: 13,
     borderBottomWidth: 1,
@@ -436,13 +430,13 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 11,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     letterSpacing: 0.3,
   },
   infoValue: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    textAlign: "right",
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'right',
     flex: 1,
   },
   section: {
@@ -452,32 +446,32 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 3,
     marginBottom: 14,
   },
   historyRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 13,
     borderBottomWidth: 1,
   },
   historyTitle: {
     fontSize: 13,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     marginBottom: 3,
   },
   historyMeta: {
     fontSize: 10,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   settingsGroup: {
     borderWidth: 1,
   },
   settingRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
     paddingHorizontal: 14,
     paddingVertical: 14,
@@ -486,21 +480,21 @@ const styles = StyleSheet.create({
   settingLabel: {
     flex: 1,
     fontSize: 13,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   settingRight: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   settingValue: {
     fontSize: 11,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   logoutRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 10,
     borderWidth: 1,
     paddingVertical: 14,
@@ -508,13 +502,13 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     letterSpacing: 1,
   },
   footNote: {
     fontSize: 9,
-    fontFamily: "Inter_300Light",
-    textAlign: "center",
+    fontFamily: 'Inter_300Light',
+    textAlign: 'center',
     letterSpacing: 1,
     marginBottom: 8,
   },

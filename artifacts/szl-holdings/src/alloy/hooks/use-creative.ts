@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { creativeApi } from "@/alloy/lib/creative-api";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { creativeApi } from '@/alloy/lib/creative-api';
 
 export type Script = {
   id: number;
@@ -7,7 +7,7 @@ export type Script = {
   title: string;
   content: string;
   version: number;
-  status: "draft" | "review" | "approved" | "final";
+  status: 'draft' | 'review' | 'approved' | 'final';
   updatedAt?: string;
   notes?: string;
 };
@@ -63,7 +63,7 @@ export type Review = {
   reviewerName: string;
   reviewerRole?: string;
   comment: string;
-  status: "pending" | "approved" | "changes_requested" | "rejected";
+  status: 'pending' | 'approved' | 'changes_requested' | 'rejected';
   section?: string;
   createdAt?: string;
   round?: number;
@@ -75,11 +75,11 @@ export type Review = {
 
 export function useScripts(campaignId: string) {
   return useQuery({
-    queryKey: ["creative-scripts", campaignId],
+    queryKey: ['creative-scripts', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
       if (isNaN(numId)) return [];
-      return await creativeApi.scripts.listForCampaign(numId) as Script[];
+      return (await creativeApi.scripts.listForCampaign(numId)) as Script[];
     },
   });
 }
@@ -91,17 +91,20 @@ export function useUpdateScript() {
       const { id, ...rest } = data;
       return await creativeApi.scripts.update(id, rest);
     },
-    onSuccess: (_, variables) => queryClient.invalidateQueries({ queryKey: ["creative-scripts", String(variables.campaignId)] }),
+    onSuccess: (_, variables) =>
+      queryClient.invalidateQueries({
+        queryKey: ['creative-scripts', String(variables.campaignId)],
+      }),
   });
 }
 
 export function useStoryboards(campaignId: string) {
   return useQuery({
-    queryKey: ["creative-storyboards", campaignId],
+    queryKey: ['creative-storyboards', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
       if (isNaN(numId)) return [];
-      return await creativeApi.storyboards.listForCampaign(numId) as StoryboardScene[];
+      return (await creativeApi.storyboards.listForCampaign(numId)) as StoryboardScene[];
     },
   });
 }
@@ -114,23 +117,24 @@ export function useCreateStoryboard() {
         campaignId: data.campaignId,
         title: data.title || `Scene ${data.sceneNumber || 1}`,
         sceneNumber: data.sceneNumber || 1,
-        visualDescription: data.visualDescription || data.visual || "",
-        dialogue: data.dialogue || "",
-        duration: data.duration || "0s",
-        thumbnailUrl: data.thumbnailUrl || "",
+        visualDescription: data.visualDescription || data.visual || '',
+        dialogue: data.dialogue || '',
+        duration: data.duration || '0s',
+        thumbnailUrl: data.thumbnailUrl || '',
       });
     },
-    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ["creative-storyboards", String(v.campaignId)] }),
+    onSuccess: (_, v) =>
+      queryClient.invalidateQueries({ queryKey: ['creative-storyboards', String(v.campaignId)] }),
   });
 }
 
 export function useVoiceovers(campaignId: string) {
   return useQuery({
-    queryKey: ["creative-voiceovers", campaignId],
+    queryKey: ['creative-voiceovers', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
       if (isNaN(numId)) return [];
-      return await creativeApi.voiceAssets.listForCampaign(numId) as Voiceover[];
+      return (await creativeApi.voiceAssets.listForCampaign(numId)) as Voiceover[];
     },
   });
 }
@@ -141,23 +145,24 @@ export function useCreateVoiceover() {
     mutationFn: async (data: Partial<Voiceover>) => {
       return await creativeApi.voiceAssets.create({
         campaignId: data.campaignId,
-        name: data.name || "New Voiceover",
-        provider: data.provider || "placeholder",
-        text: data.text || "",
-        status: data.provider === "elevenlabs" ? "generating" : "pending",
+        name: data.name || 'New Voiceover',
+        provider: data.provider || 'placeholder',
+        text: data.text || '',
+        status: data.provider === 'elevenlabs' ? 'generating' : 'pending',
       });
     },
-    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ["creative-voiceovers", String(v.campaignId)] }),
+    onSuccess: (_, v) =>
+      queryClient.invalidateQueries({ queryKey: ['creative-voiceovers', String(v.campaignId)] }),
   });
 }
 
 export function useAssets(campaignId: string) {
   return useQuery({
-    queryKey: ["creative-assets", campaignId],
+    queryKey: ['creative-assets', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
       if (isNaN(numId)) return [];
-      return await creativeApi.campaignAssets.listForCampaign(numId) as Asset[];
+      return (await creativeApi.campaignAssets.listForCampaign(numId)) as Asset[];
     },
   });
 }
@@ -168,17 +173,18 @@ export function useDeleteAsset() {
     mutationFn: async ({ id, campaignId }: { id: number; campaignId: string }) => {
       return await creativeApi.campaignAssets.delete(id);
     },
-    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ["creative-assets", v.campaignId] }),
+    onSuccess: (_, v) =>
+      queryClient.invalidateQueries({ queryKey: ['creative-assets', v.campaignId] }),
   });
 }
 
 export function useReviews(campaignId: string) {
   return useQuery({
-    queryKey: ["creative-reviews", campaignId],
+    queryKey: ['creative-reviews', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
       if (isNaN(numId)) return [];
-      return await creativeApi.reviews.listForCampaign(numId) as Review[];
+      return (await creativeApi.reviews.listForCampaign(numId)) as Review[];
     },
   });
 }
@@ -186,9 +192,18 @@ export function useReviews(campaignId: string) {
 export function useUpdateReview() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status, campaignId }: { id: number; status: Review["status"]; campaignId: string }) => {
+    mutationFn: async ({
+      id,
+      status,
+      campaignId,
+    }: {
+      id: number;
+      status: Review['status'];
+      campaignId: string;
+    }) => {
       return await creativeApi.reviews.update(id, { status });
     },
-    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ["creative-reviews", v.campaignId] }),
+    onSuccess: (_, v) =>
+      queryClient.invalidateQueries({ queryKey: ['creative-reviews', v.campaignId] }),
   });
 }

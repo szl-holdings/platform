@@ -1,28 +1,28 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  db,
   alloyLegacyPoliciesTable,
-  modelRoutingPoliciesTable,
+  auditEventsTable,
   costBudgetsTable,
   costEventsTable,
+  db,
   governanceIncidentsTable,
-  auditEventsTable,
-} from "@szl-holdings/db";
-import { eq, desc, and, sql } from "drizzle-orm";
-import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
+  modelRoutingPoliciesTable,
+} from '@szl-holdings/db';
+import { and, desc, eq, sql } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess,
-  sendCreated,
-  sendNotFound,
-  sendBadRequest,
-  sendNoContent,
   handleRouteError,
   parsePagination,
-} from "../lib/api-response";
-import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
-import { logger } from "../lib/logger";
+  sendBadRequest,
+  sendCreated,
+  sendNoContent,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { type AuthenticatedUser, authMiddleware, requireRole } from '../middlewares/auth';
 
 async function writeGovernanceAuditEvent(params: {
   userId: number | null;
@@ -40,10 +40,10 @@ async function writeGovernanceAuditEvent(params: {
       entityId: params.entityId ?? undefined,
       newValues: params.newValues ?? null,
       ipAddress: params.req.ip ?? null,
-      userAgent: params.req.get("user-agent") ?? null,
+      userAgent: params.req.get('user-agent') ?? null,
     });
   } catch (err) {
-    logger.error({ err, action: params.action }, "Failed to write governance audit event");
+    logger.error({ err, action: params.action }, 'Failed to write governance audit event');
   }
 }
 
@@ -57,14 +57,16 @@ const createPolicySchema = z.object({
   complianceFramework: z.string().max(200).trim().optional(),
 });
 
-const patchPolicySchema = z.object({
-  name: z.string().min(1).max(200).trim().optional(),
-  description: z.string().max(2000).trim().optional(),
-  rules: z.array(z.unknown()).optional(),
-  isActive: z.boolean().optional(),
-  priority: z.number().int().min(0).max(10000).optional(),
-  scope: z.string().max(100).optional(),
-}).refine(d => Object.keys(d).length > 0, { message: "At least one field is required" });
+const patchPolicySchema = z
+  .object({
+    name: z.string().min(1).max(200).trim().optional(),
+    description: z.string().max(2000).trim().optional(),
+    rules: z.array(z.unknown()).optional(),
+    isActive: z.boolean().optional(),
+    priority: z.number().int().min(0).max(10000).optional(),
+    scope: z.string().max(100).optional(),
+  })
+  .refine((d) => Object.keys(d).length > 0, { message: 'At least one field is required' });
 
 const createModelRoutingSchema = z.object({
   name: z.string().min(1).max(200).trim(),
@@ -78,13 +80,15 @@ const createModelRoutingSchema = z.object({
   environment: z.string().max(50).optional(),
 });
 
-const patchModelRoutingSchema = z.object({
-  isAllowed: z.boolean().optional(),
-  isDefault: z.boolean().optional(),
-  maxCostPerCall: z.number().positive().optional(),
-  priority: z.number().int().min(0).max(10000).optional(),
-  taskCategories: z.array(z.string()).optional(),
-}).refine(d => Object.keys(d).length > 0, { message: "At least one field is required" });
+const patchModelRoutingSchema = z
+  .object({
+    isAllowed: z.boolean().optional(),
+    isDefault: z.boolean().optional(),
+    maxCostPerCall: z.number().positive().optional(),
+    priority: z.number().int().min(0).max(10000).optional(),
+    taskCategories: z.array(z.string()).optional(),
+  })
+  .refine((d) => Object.keys(d).length > 0, { message: 'At least one field is required' });
 
 const createBudgetSchema = z.object({
   name: z.string().min(1).max(200).trim(),
@@ -112,283 +116,404 @@ const router: IRouter = Router();
 
 function isAdmin(user?: AuthenticatedUser): boolean {
   if (!user) return false;
-  return user.roles.includes("super_admin") || user.roles.includes("admin");
+  return user.roles.includes('super_admin') || user.roles.includes('admin');
 }
 
-router.get("/policies", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
-    const policyType = req.query.policyType as string | undefined;
-    const showAll = req.query.isActive === "all";
+router.get(
+  '/policies',
+  authMiddleware(),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
+      const policyType = req.query.policyType as string | undefined;
+      const showAll = req.query.isActive === 'all';
 
-    const conditions = [];
-    if (!showAll) {
-      const isActive = req.query.isActive !== "false";
-      conditions.push(eq(alloyLegacyPoliciesTable.isActive, isActive));
+      const conditions = [];
+      if (!showAll) {
+        const isActive = req.query.isActive !== 'false';
+        conditions.push(eq(alloyLegacyPoliciesTable.isActive, isActive));
+      }
+      if (policyType) conditions.push(eq(alloyLegacyPoliciesTable.policyType, policyType as any));
+
+      const rows = await db
+        .select()
+        .from(alloyLegacyPoliciesTable)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(desc(alloyLegacyPoliciesTable.priority))
+        .limit(limit)
+        .offset(offset);
+
+      return sendSuccess(res, rows, 200, { count: rows.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch policies');
     }
-    if (policyType) conditions.push(eq(alloyLegacyPoliciesTable.policyType, policyType as any));
+  },
+);
 
-    const rows = await db
+router.get('/policies/:id', authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+    const [row] = await db
       .select()
       .from(alloyLegacyPoliciesTable)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(alloyLegacyPoliciesTable.priority))
-      .limit(limit)
-      .offset(offset);
-
-    return sendSuccess(res, rows, 200, { count: rows.length });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to fetch policies");
-  }
-});
-
-router.get("/policies/:id", authMiddleware(), async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
-    const [row] = await db.select().from(alloyLegacyPoliciesTable).where(eq(alloyLegacyPoliciesTable.id, id));
-    if (!row) return sendNotFound(res, "Policy not found");
+      .where(eq(alloyLegacyPoliciesTable.id, id));
+    if (!row) return sendNotFound(res, 'Policy not found');
     return sendSuccess(res, row);
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch policy");
+    handleRouteError(res, err, 'Failed to fetch policy');
   }
 });
 
-router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(createPolicySchema), async (req: Request, res: Response) => {
-  try {
-    const { name, description, policyType, scope, rules, priority, complianceFramework } = req.body;
-    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
-    const [row] = await db.insert(alloyLegacyPoliciesTable).values({
-      orgId,
-      name,
-      description,
-      policyType,
-      scope: scope ?? "tenant",
-      rules: rules ?? [],
-      priority: priority ?? 100,
-      complianceFramework,
-      createdBy: req.user?.displayName ?? "system",
-    }).returning();
-    void writeGovernanceAuditEvent({
-      userId: req.user?.id ?? null,
-      action: "policy.created",
-      entityType: "governance_policy",
-      entityId: String(row.id),
-      newValues: { name, policyType, scope: scope ?? "tenant", priority: priority ?? 100 },
-      req,
-    });
-    return sendCreated(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to create policy");
-  }
-});
+router.post(
+  '/policies',
+  authMiddleware(),
+  requireRole('super_admin', 'admin', 'ops'),
+  validateBody(createPolicySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { name, description, policyType, scope, rules, priority, complianceFramework } =
+        req.body;
+      const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+      const [row] = await db
+        .insert(alloyLegacyPoliciesTable)
+        .values({
+          orgId,
+          name,
+          description,
+          policyType,
+          scope: scope ?? 'tenant',
+          rules: rules ?? [],
+          priority: priority ?? 100,
+          complianceFramework,
+          createdBy: req.user?.displayName ?? 'system',
+        })
+        .returning();
+      void writeGovernanceAuditEvent({
+        userId: req.user?.id ?? null,
+        action: 'policy.created',
+        entityType: 'governance_policy',
+        entityId: String(row.id),
+        newValues: { name, policyType, scope: scope ?? 'tenant', priority: priority ?? 100 },
+        req,
+      });
+      return sendCreated(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create policy');
+    }
+  },
+);
 
-router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(patchPolicySchema), async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
-    const { name, description, rules, isActive, priority, scope } = req.body;
-    const updates: Record<string, unknown> = { updatedAt: new Date() };
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description;
-    if (rules !== undefined) updates.rules = rules;
-    if (isActive !== undefined) updates.isActive = isActive;
-    if (priority !== undefined) updates.priority = priority;
-    if (scope !== undefined) updates.scope = scope;
-    const [row] = await db.update(alloyLegacyPoliciesTable).set(updates as any).where(eq(alloyLegacyPoliciesTable.id, id)).returning();
-    if (!row) return sendNotFound(res, "Policy not found");
-    void writeGovernanceAuditEvent({
-      userId: req.user?.id ?? null,
-      action: "policy.updated",
-      entityType: "governance_policy",
-      entityId: String(id),
-      newValues: { ...updates, updatedAt: undefined },
-      req,
-    });
-    return sendSuccess(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to update policy");
-  }
-});
+router.patch(
+  '/policies/:id',
+  authMiddleware(),
+  requireRole('super_admin', 'admin', 'ops'),
+  validateBody(patchPolicySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(String(req.params.id), 10);
+      if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+      const { name, description, rules, isActive, priority, scope } = req.body;
+      const updates: Record<string, unknown> = { updatedAt: new Date() };
+      if (name !== undefined) updates.name = name;
+      if (description !== undefined) updates.description = description;
+      if (rules !== undefined) updates.rules = rules;
+      if (isActive !== undefined) updates.isActive = isActive;
+      if (priority !== undefined) updates.priority = priority;
+      if (scope !== undefined) updates.scope = scope;
+      const [row] = await db
+        .update(alloyLegacyPoliciesTable)
+        .set(updates as any)
+        .where(eq(alloyLegacyPoliciesTable.id, id))
+        .returning();
+      if (!row) return sendNotFound(res, 'Policy not found');
+      void writeGovernanceAuditEvent({
+        userId: req.user?.id ?? null,
+        action: 'policy.updated',
+        entityType: 'governance_policy',
+        entityId: String(id),
+        newValues: { ...updates, updatedAt: undefined },
+        req,
+      });
+      return sendSuccess(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update policy');
+    }
+  },
+);
 
-router.delete("/policies/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
-    const [row] = await db.delete(alloyLegacyPoliciesTable).where(eq(alloyLegacyPoliciesTable.id, id)).returning();
-    if (!row) return sendNotFound(res, "Policy not found");
-    void writeGovernanceAuditEvent({
-      userId: req.user?.id ?? null,
-      action: "policy.deleted",
-      entityType: "governance_policy",
-      entityId: String(id),
-      req,
-    });
-    return sendNoContent(res);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to delete policy");
-  }
-});
+router.delete(
+  '/policies/:id',
+  validateBody(bodyShape({})),
+  authMiddleware(),
+  requireRole('super_admin', 'admin'),
+  async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(String(req.params.id), 10);
+      if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+      const [row] = await db
+        .delete(alloyLegacyPoliciesTable)
+        .where(eq(alloyLegacyPoliciesTable.id, id))
+        .returning();
+      if (!row) return sendNotFound(res, 'Policy not found');
+      void writeGovernanceAuditEvent({
+        userId: req.user?.id ?? null,
+        action: 'policy.deleted',
+        entityType: 'governance_policy',
+        entityId: String(id),
+        req,
+      });
+      return sendNoContent(res);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to delete policy');
+    }
+  },
+);
 
-router.get("/model-routing", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
-    const provider = req.query.provider as string | undefined;
-    const conditions = [];
-    if (provider) conditions.push(eq(modelRoutingPoliciesTable.modelProvider, provider));
-    const rows = await db
-      .select()
-      .from(modelRoutingPoliciesTable)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(modelRoutingPoliciesTable.priority))
-      .limit(limit)
-      .offset(offset);
-    return sendSuccess(res, rows, 200, { count: rows.length });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to fetch model routing policies");
-  }
-});
+router.get(
+  '/model-routing',
+  authMiddleware(),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
+      const provider = req.query.provider as string | undefined;
+      const conditions = [];
+      if (provider) conditions.push(eq(modelRoutingPoliciesTable.modelProvider, provider));
+      const rows = await db
+        .select()
+        .from(modelRoutingPoliciesTable)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(desc(modelRoutingPoliciesTable.priority))
+        .limit(limit)
+        .offset(offset);
+      return sendSuccess(res, rows, 200, { count: rows.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch model routing policies');
+    }
+  },
+);
 
-router.post("/model-routing", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(createModelRoutingSchema), async (req: Request, res: Response) => {
-  try {
-    const { name, modelProvider, modelId, taskCategories, maxCostPerCall, isAllowed, isDefault, priority, environment } = req.body;
-    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
-    const [row] = await db.insert(modelRoutingPoliciesTable).values({
-      orgId,
-      name, modelProvider, modelId,
-      taskCategories: taskCategories ?? [],
-      maxCostPerCall, isAllowed: isAllowed ?? true,
-      isDefault: isDefault ?? false,
-      priority: priority ?? 100,
-      environment: environment ?? "production",
-    }).returning();
-    void writeGovernanceAuditEvent({
-      userId: req.user?.id ?? null,
-      action: "model_routing.created",
-      entityType: "model_routing_policy",
-      entityId: String(row.id),
-      newValues: { name, modelProvider, modelId, isAllowed: isAllowed ?? true, isDefault: isDefault ?? false },
-      req,
-    });
-    return sendCreated(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to create model routing policy");
-  }
-});
+router.post(
+  '/model-routing',
+  authMiddleware(),
+  requireRole('super_admin', 'admin', 'ops'),
+  validateBody(createModelRoutingSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        name,
+        modelProvider,
+        modelId,
+        taskCategories,
+        maxCostPerCall,
+        isAllowed,
+        isDefault,
+        priority,
+        environment,
+      } = req.body;
+      const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+      const [row] = await db
+        .insert(modelRoutingPoliciesTable)
+        .values({
+          orgId,
+          name,
+          modelProvider,
+          modelId,
+          taskCategories: taskCategories ?? [],
+          maxCostPerCall,
+          isAllowed: isAllowed ?? true,
+          isDefault: isDefault ?? false,
+          priority: priority ?? 100,
+          environment: environment ?? 'production',
+        })
+        .returning();
+      void writeGovernanceAuditEvent({
+        userId: req.user?.id ?? null,
+        action: 'model_routing.created',
+        entityType: 'model_routing_policy',
+        entityId: String(row.id),
+        newValues: {
+          name,
+          modelProvider,
+          modelId,
+          isAllowed: isAllowed ?? true,
+          isDefault: isDefault ?? false,
+        },
+        req,
+      });
+      return sendCreated(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create model routing policy');
+    }
+  },
+);
 
-router.patch("/model-routing/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(patchModelRoutingSchema), async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
-    const { isAllowed, isDefault, maxCostPerCall, priority, taskCategories } = req.body;
-    const updates: Record<string, unknown> = { updatedAt: new Date() };
-    if (isAllowed !== undefined) updates.isAllowed = isAllowed;
-    if (isDefault !== undefined) updates.isDefault = isDefault;
-    if (maxCostPerCall !== undefined) updates.maxCostPerCall = maxCostPerCall;
-    if (priority !== undefined) updates.priority = priority;
-    if (taskCategories !== undefined) updates.taskCategories = taskCategories;
-    const [row] = await db.update(modelRoutingPoliciesTable).set(updates as any).where(eq(modelRoutingPoliciesTable.id, id)).returning();
-    if (!row) return sendNotFound(res, "Model routing policy not found");
-    void writeGovernanceAuditEvent({
-      userId: req.user?.id ?? null,
-      action: "model_routing.updated",
-      entityType: "model_routing_policy",
-      entityId: String(id),
-      newValues: { ...updates, updatedAt: undefined },
-      req,
-    });
-    return sendSuccess(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to update model routing policy");
-  }
-});
+router.patch(
+  '/model-routing/:id',
+  authMiddleware(),
+  requireRole('super_admin', 'admin', 'ops'),
+  validateBody(patchModelRoutingSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(String(req.params.id), 10);
+      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      const { isAllowed, isDefault, maxCostPerCall, priority, taskCategories } = req.body;
+      const updates: Record<string, unknown> = { updatedAt: new Date() };
+      if (isAllowed !== undefined) updates.isAllowed = isAllowed;
+      if (isDefault !== undefined) updates.isDefault = isDefault;
+      if (maxCostPerCall !== undefined) updates.maxCostPerCall = maxCostPerCall;
+      if (priority !== undefined) updates.priority = priority;
+      if (taskCategories !== undefined) updates.taskCategories = taskCategories;
+      const [row] = await db
+        .update(modelRoutingPoliciesTable)
+        .set(updates as any)
+        .where(eq(modelRoutingPoliciesTable.id, id))
+        .returning();
+      if (!row) return sendNotFound(res, 'Model routing policy not found');
+      void writeGovernanceAuditEvent({
+        userId: req.user?.id ?? null,
+        action: 'model_routing.updated',
+        entityType: 'model_routing_policy',
+        entityId: String(id),
+        newValues: { ...updates, updatedAt: undefined },
+        req,
+      });
+      return sendSuccess(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update model routing policy');
+    }
+  },
+);
 
-router.get("/budgets", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const { limit = 20, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
-    const rows = await db
-      .select()
-      .from(costBudgetsTable)
-      .where(eq(costBudgetsTable.isActive, true))
-      .orderBy(desc(costBudgetsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    return sendSuccess(res, rows, 200, { count: rows.length });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to fetch budgets");
-  }
-});
+router.get(
+  '/budgets',
+  authMiddleware(),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { limit = 20, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
+      const rows = await db
+        .select()
+        .from(costBudgetsTable)
+        .where(eq(costBudgetsTable.isActive, true))
+        .orderBy(desc(costBudgetsTable.createdAt))
+        .limit(limit)
+        .offset(offset);
+      return sendSuccess(res, rows, 200, { count: rows.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch budgets');
+    }
+  },
+);
 
-router.post("/budgets", authMiddleware(), requireRole("super_admin", "admin"), validateBody(createBudgetSchema), async (req: Request, res: Response) => {
-  try {
-    const { name, budgetType, limitAmount, warnThreshold, hardStopThreshold, periodEnd } = req.body;
-    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
-    const [row] = await db.insert(costBudgetsTable).values({
-      orgId,
-      name,
-      budgetType: budgetType ?? "monthly",
-      limitAmount: String(limitAmount),
-      warnThreshold: warnThreshold ? String(warnThreshold) : "0.80",
-      hardStopThreshold: hardStopThreshold ? String(hardStopThreshold) : "1.00",
-      periodEnd: periodEnd ? new Date(periodEnd) : null,
-    }).returning();
-    return sendCreated(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to create budget");
-  }
-});
+router.post(
+  '/budgets',
+  authMiddleware(),
+  requireRole('super_admin', 'admin'),
+  validateBody(createBudgetSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { name, budgetType, limitAmount, warnThreshold, hardStopThreshold, periodEnd } =
+        req.body;
+      const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+      const [row] = await db
+        .insert(costBudgetsTable)
+        .values({
+          orgId,
+          name,
+          budgetType: budgetType ?? 'monthly',
+          limitAmount: String(limitAmount),
+          warnThreshold: warnThreshold ? String(warnThreshold) : '0.80',
+          hardStopThreshold: hardStopThreshold ? String(hardStopThreshold) : '1.00',
+          periodEnd: periodEnd ? new Date(periodEnd) : null,
+        })
+        .returning();
+      return sendCreated(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create budget');
+    }
+  },
+);
 
-router.get("/cost-events", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
-    const eventType = req.query.eventType as string | undefined;
-    const conditions = [];
-    if (eventType) conditions.push(eq(costEventsTable.eventType, eventType as any));
-    const rows = await db
-      .select()
-      .from(costEventsTable)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(costEventsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    return sendSuccess(res, rows, 200, { count: rows.length });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to fetch cost events");
-  }
-});
+router.get(
+  '/cost-events',
+  authMiddleware(),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
+      const eventType = req.query.eventType as string | undefined;
+      const conditions = [];
+      if (eventType) conditions.push(eq(costEventsTable.eventType, eventType as any));
+      const rows = await db
+        .select()
+        .from(costEventsTable)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(desc(costEventsTable.createdAt))
+        .limit(limit)
+        .offset(offset);
+      return sendSuccess(res, rows, 200, { count: rows.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch cost events');
+    }
+  },
+);
 
-router.post("/cost-events", authMiddleware(), validateBody(createCostEventSchema), async (req: Request, res: Response) => {
-  try {
-    const { eventType, resourceId, resourceName, modelProvider, modelId, tokensIn, tokensOut, costUsd, budgetId, metadata } = req.body;
-    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
-    const [row] = await db.insert(costEventsTable).values({
-      orgId,
-      budgetId: budgetId ?? null,
-      eventType,
-      resourceId, resourceName,
-      modelProvider, modelId,
-      tokensIn: tokensIn ?? 0,
-      tokensOut: tokensOut ?? 0,
-      costUsd: String(costUsd ?? 0),
-      metadata,
-    }).returning();
+router.post(
+  '/cost-events',
+  authMiddleware(),
+  validateBody(createCostEventSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        eventType,
+        resourceId,
+        resourceName,
+        modelProvider,
+        modelId,
+        tokensIn,
+        tokensOut,
+        costUsd,
+        budgetId,
+        metadata,
+      } = req.body;
+      const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+      const [row] = await db
+        .insert(costEventsTable)
+        .values({
+          orgId,
+          budgetId: budgetId ?? null,
+          eventType,
+          resourceId,
+          resourceName,
+          modelProvider,
+          modelId,
+          tokensIn: tokensIn ?? 0,
+          tokensOut: tokensOut ?? 0,
+          costUsd: String(costUsd ?? 0),
+          metadata,
+        })
+        .returning();
 
-    if (budgetId) {
-      await db.execute(sql`
+      if (budgetId) {
+        await db.execute(sql`
         UPDATE cost_budgets
         SET current_spend = current_spend + ${String(costUsd ?? 0)}::numeric,
             updated_at = NOW()
         WHERE id = ${budgetId}
       `);
+      }
+
+      return sendCreated(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to record cost event');
     }
+  },
+);
 
-    return sendCreated(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to record cost event");
-  }
-});
-
-router.get("/cost-summary", authMiddleware(), async (_req: Request, res: Response) => {
+router.get('/cost-summary', authMiddleware(), async (_req: Request, res: Response) => {
   try {
     const totalSpend = await db.execute(sql`
       SELECT
@@ -416,43 +541,52 @@ router.get("/cost-summary", authMiddleware(), async (_req: Request, res: Respons
       ORDER BY cost DESC
     `);
 
-    const budgets = await db.select().from(costBudgetsTable).where(eq(costBudgetsTable.isActive, true));
+    const budgets = await db
+      .select()
+      .from(costBudgetsTable)
+      .where(eq(costBudgetsTable.isActive, true));
 
     return sendSuccess(res, {
-      period: "last_30_days",
+      period: 'last_30_days',
       summary: (totalSpend as any).rows?.[0] ?? totalSpend,
       byEventType: (byType as any).rows ?? byType,
       byModel: (byModel as any).rows ?? byModel,
       activeBudgets: budgets,
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch cost summary");
+    handleRouteError(res, err, 'Failed to fetch cost summary');
   }
 });
 
-router.get("/incidents", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
-    const severity = req.query.severity as string | undefined;
-    const incidentType = req.query.incidentType as string | undefined;
-    const conditions = [];
-    if (severity) conditions.push(eq(governanceIncidentsTable.severity, severity as any));
-    if (incidentType) conditions.push(eq(governanceIncidentsTable.incidentType, incidentType as any));
-    const rows = await db
-      .select()
-      .from(governanceIncidentsTable)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(governanceIncidentsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    return sendSuccess(res, rows, 200, { count: rows.length });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to fetch incidents");
-  }
-});
+router.get(
+  '/incidents',
+  authMiddleware(),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
+      const severity = req.query.severity as string | undefined;
+      const incidentType = req.query.incidentType as string | undefined;
+      const conditions = [];
+      if (severity) conditions.push(eq(governanceIncidentsTable.severity, severity as any));
+      if (incidentType)
+        conditions.push(eq(governanceIncidentsTable.incidentType, incidentType as any));
+      const rows = await db
+        .select()
+        .from(governanceIncidentsTable)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(desc(governanceIncidentsTable.createdAt))
+        .limit(limit)
+        .offset(offset);
+      return sendSuccess(res, rows, 200, { count: rows.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch incidents');
+    }
+  },
+);
 
 const createIncidentSchema = z.object({
-  severity: z.enum(["critical", "high", "medium", "low", "info"]).optional(),
+  severity: z.enum(['critical', 'high', 'medium', 'low', 'info']).optional(),
   incidentType: z.string().min(1).max(100),
   title: z.string().min(1).max(500).trim(),
   description: z.string().max(5000).trim().optional().nullable(),
@@ -468,44 +602,76 @@ const resolveIncidentSchema = z.object({
   resolution: z.string().max(5000).trim().optional(),
 });
 
-router.post("/incidents", authMiddleware(), validateBody(createIncidentSchema), async (req: Request, res: Response) => {
-  try {
-    const { severity, incidentType, title, description, agentId, userId, resourceType, resourceId, policyId, metadata } = req.body;
-    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
-    const [row] = await db.insert(governanceIncidentsTable).values({
-      orgId,
-      policyId: policyId ?? null,
-      severity: severity ?? "medium",
-      incidentType,
-      title, description,
-      agentId, userId,
-      resourceType, resourceId,
-      metadata,
-    }).returning();
-    return sendCreated(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to create incident");
-  }
-});
+router.post(
+  '/incidents',
+  authMiddleware(),
+  validateBody(createIncidentSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        severity,
+        incidentType,
+        title,
+        description,
+        agentId,
+        userId,
+        resourceType,
+        resourceId,
+        policyId,
+        metadata,
+      } = req.body;
+      const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+      const [row] = await db
+        .insert(governanceIncidentsTable)
+        .values({
+          orgId,
+          policyId: policyId ?? null,
+          severity: severity ?? 'medium',
+          incidentType,
+          title,
+          description,
+          agentId,
+          userId,
+          resourceType,
+          resourceId,
+          metadata,
+        })
+        .returning();
+      return sendCreated(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create incident');
+    }
+  },
+);
 
-router.patch("/incidents/:id/resolve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(resolveIncidentSchema), async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, "Invalid incident ID");
-    const { resolution } = req.body;
-    const [row] = await db.update(governanceIncidentsTable).set({
-      resolution,
-      resolvedBy: req.user?.displayName ?? "system",
-      resolvedAt: new Date(),
-    }).where(eq(governanceIncidentsTable.id, id)).returning();
-    if (!row) return sendNotFound(res, "Incident not found");
-    return sendSuccess(res, row);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to resolve incident");
-  }
-});
+router.patch(
+  '/incidents/:id/resolve',
+  authMiddleware(),
+  requireRole('super_admin', 'admin', 'ops'),
+  validateBody(resolveIncidentSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(String(req.params.id), 10);
+      if (isNaN(id)) return sendBadRequest(res, 'Invalid incident ID');
+      const { resolution } = req.body;
+      const [row] = await db
+        .update(governanceIncidentsTable)
+        .set({
+          resolution,
+          resolvedBy: req.user?.displayName ?? 'system',
+          resolvedAt: new Date(),
+        })
+        .where(eq(governanceIncidentsTable.id, id))
+        .returning();
+      if (!row) return sendNotFound(res, 'Incident not found');
+      return sendSuccess(res, row);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to resolve incident');
+    }
+  },
+);
 
-router.get("/analytics", authMiddleware(), async (_req: Request, res: Response) => {
+router.get('/analytics', authMiddleware(), async (_req: Request, res: Response) => {
   try {
     const agentRuns = await db.execute(sql`
       SELECT COUNT(*) as total_runs,
@@ -557,7 +723,7 @@ router.get("/analytics", authMiddleware(), async (_req: Request, res: Response) 
     `);
 
     return sendSuccess(res, {
-      period: "last_30_days",
+      period: 'last_30_days',
       agentRuns: (agentRuns as any).rows?.[0] ?? agentRuns,
       skillInvocations: (skillInvocations as any).rows?.[0] ?? skillInvocations,
       policyViolations: (policyViolations as any).rows ?? policyViolations,
@@ -565,7 +731,7 @@ router.get("/analytics", authMiddleware(), async (_req: Request, res: Response) 
       activePolicies: (activePolicies as any).rows ?? activePolicies,
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch analytics");
+    handleRouteError(res, err, 'Failed to fetch analytics');
   }
 });
 

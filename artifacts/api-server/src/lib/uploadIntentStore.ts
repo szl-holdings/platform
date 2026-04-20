@@ -12,7 +12,7 @@
  * not from client input. It is authoritative for the orgId written to filesTable.
  */
 
-import { LRUCache } from "lru-cache";
+import { LRUCache } from 'lru-cache';
 
 const INTENT_TTL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -63,10 +63,7 @@ export function recordUploadIntent(
  *
  * Returns the intent data if valid, null otherwise.
  */
-export function peekUploadIntent(
-  objectPath: string,
-  userId: number,
-): UploadIntent | null {
+export function peekUploadIntent(objectPath: string, userId: number): UploadIntent | null {
   const intent = store.get(objectPath);
   if (!intent) return null;
   if (intent.userId !== userId) return null;
@@ -82,10 +79,7 @@ export function peekUploadIntent(
  * Returns the full intent data (including server-resolved org context) on success, null otherwise.
  * Call only after all validation steps have passed to avoid burning the intent on recoverable errors.
  */
-export function consumeUploadIntent(
-  objectPath: string,
-  userId: number,
-): UploadIntent | null {
+export function consumeUploadIntent(objectPath: string, userId: number): UploadIntent | null {
   const intent = store.get(objectPath);
   if (!intent) return null;
   if (intent.userId !== userId) return null;

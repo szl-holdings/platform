@@ -8,17 +8,17 @@
  * - production → renders nothing
  */
 
-import React, { useState } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-export type AppMode = "demo" | "sandbox" | "production" | "local-dev";
+export type AppMode = 'demo' | 'sandbox' | 'production' | 'local-dev';
 
 function resolveAppMode(): AppMode {
-  const raw = (process.env.EXPO_PUBLIC_APP_MODE ?? "").toLowerCase().trim();
-  if (raw === "demo") return "demo";
-  if (raw === "sandbox") return "sandbox";
-  if (raw === "production") return "production";
-  return "local-dev";
+  const raw = (process.env.EXPO_PUBLIC_APP_MODE ?? '').toLowerCase().trim();
+  if (raw === 'demo') return 'demo';
+  if (raw === 'sandbox') return 'sandbox';
+  if (raw === 'production') return 'production';
+  return 'local-dev';
 }
 
 const APP_MODE = resolveAppMode();
@@ -30,23 +30,21 @@ export interface AppModeBannerProps {
 export function AppModeBanner({ onResetDemo }: AppModeBannerProps) {
   const [dismissed, setDismissed] = useState(false);
 
-  if (APP_MODE !== "demo" && APP_MODE !== "sandbox") return null;
-  if (APP_MODE === "sandbox" && dismissed) return null;
+  if (APP_MODE !== 'demo' && APP_MODE !== 'sandbox') return null;
+  if (APP_MODE === 'sandbox' && dismissed) return null;
 
-  const isDemo = APP_MODE === "demo";
+  const isDemo = APP_MODE === 'demo';
 
   return (
     <View style={[styles.container, isDemo ? styles.demoBg : styles.sandboxBg]}>
       <View style={styles.row}>
         <View style={[styles.dot, isDemo ? styles.demoDot : styles.sandboxDot]} />
         <Text style={[styles.label, isDemo ? styles.demoLabel : styles.sandboxLabel]}>
-          {isDemo ? "DEMO MODE" : "SANDBOX"}
+          {isDemo ? 'DEMO MODE' : 'SANDBOX'}
         </Text>
         <Text style={styles.separator}>·</Text>
         <Text style={styles.subtitle} numberOfLines={1}>
-          {isDemo
-            ? "No live data — writes intercepted"
-            : "Staging environment — not production"}
+          {isDemo ? 'No live data — writes intercepted' : 'Staging environment — not production'}
         </Text>
       </View>
 
@@ -54,7 +52,11 @@ export function AppModeBanner({ onResetDemo }: AppModeBannerProps) {
         {isDemo && onResetDemo && (
           <Pressable
             onPress={onResetDemo}
-            style={({ pressed }) => [styles.actionBtn, styles.demoActionBtn, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.actionBtn,
+              styles.demoActionBtn,
+              pressed && styles.pressed,
+            ]}
             accessibilityLabel="Reset demo data"
           >
             <Text style={[styles.actionText, styles.demoActionText]}>Reset</Text>
@@ -76,24 +78,24 @@ export function AppModeBanner({ onResetDemo }: AppModeBannerProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderBottomWidth: 1,
   },
   demoBg: {
-    backgroundColor: "rgba(212,100,40,0.18)",
-    borderBottomColor: "rgba(212,100,40,0.35)",
+    backgroundColor: 'rgba(212,100,40,0.18)',
+    borderBottomColor: 'rgba(212,100,40,0.35)',
   },
   sandboxBg: {
-    backgroundColor: "rgba(20,184,166,0.12)",
-    borderBottomColor: "rgba(20,184,166,0.25)",
+    backgroundColor: 'rgba(20,184,166,0.12)',
+    borderBottomColor: 'rgba(20,184,166,0.25)',
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
     flex: 1,
   },
@@ -103,35 +105,35 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   demoDot: {
-    backgroundColor: "#e8884a",
+    backgroundColor: '#e8884a',
   },
   sandboxDot: {
-    backgroundColor: "#2dd4bf",
+    backgroundColor: '#2dd4bf',
   },
   label: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: '700',
     letterSpacing: 1,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
   demoLabel: {
-    color: "#e8884a",
+    color: '#e8884a',
   },
   sandboxLabel: {
-    color: "#2dd4bf",
+    color: '#2dd4bf',
   },
   separator: {
-    color: "rgba(255,255,255,0.3)",
+    color: 'rgba(255,255,255,0.3)',
     fontSize: 10,
   },
   subtitle: {
     fontSize: 10,
-    color: "rgba(255,255,255,0.55)",
+    color: 'rgba(255,255,255,0.55)',
     flex: 1,
   },
   actions: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
   actionBtn: {
@@ -141,24 +143,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   demoActionBtn: {
-    backgroundColor: "rgba(232,136,74,0.15)",
-    borderColor: "rgba(232,136,74,0.40)",
+    backgroundColor: 'rgba(232,136,74,0.15)',
+    borderColor: 'rgba(232,136,74,0.40)',
   },
   actionText: {
     fontSize: 10,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   demoActionText: {
-    color: "#e8884a",
+    color: '#e8884a',
   },
   dismissBtn: {
     width: 20,
     height: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dismissText: {
-    color: "rgba(255,255,255,0.40)",
+    color: 'rgba(255,255,255,0.40)',
     fontSize: 12,
   },
   pressed: {

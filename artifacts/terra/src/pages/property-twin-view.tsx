@@ -1,30 +1,32 @@
-import { useState, Suspense, lazy } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ConfidenceMeter, PolicyStateChip, ProofEnvelope } from '@szl-holdings/design-system';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Building2,
   Activity,
-  Shield,
   AlertTriangle,
-  Link as LinkIcon,
+  Building2,
   CheckCircle,
-  XCircle,
-  Clock,
   ChevronRight,
-  TrendingUp,
+  Clock,
+  ExternalLink,
   History,
   Info,
-  ExternalLink,
+  Link as LinkIcon,
+  Shield,
+  ShieldAlert,
   ShieldCheck,
-  ShieldAlert
-} from "lucide-react";
-import { propertyTwins } from "@/data/property-twin";
-import { ProofEnvelope, ConfidenceMeter, PolicyStateChip } from "@szl-holdings/design-system";
-import { cn } from "@szl-holdings/shared-ui/utils";
+  TrendingUp,
+  XCircle,
+} from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
+import { propertyTwins } from '@/data/property-twin';
 
-const property = propertyTwins.find(p => p.id === "twin-004")!;
+const property = propertyTwins.find((p) => p.id === 'twin-004')!;
 
 export default function PropertyTwinView() {
-  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(property.escalationWorkflows?.[0]?.id || null);
+  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(
+    property.escalationWorkflows?.[0]?.id || null,
+  );
 
   return (
     <div className="space-y-6 pb-20">
@@ -34,7 +36,9 @@ export default function PropertyTwinView() {
             <Building2 className="w-6 h-6 text-[#c8a060]" />
             Property Digital Twin
           </h1>
-          <p className="text-white/40 text-sm mt-1">{property.name} • {property.address}, {property.city}</p>
+          <p className="text-white/40 text-sm mt-1">
+            {property.name} • {property.address}, {property.city}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <div className="px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
@@ -56,32 +60,41 @@ export default function PropertyTwinView() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {property.externalDataConnectors.map((connector) => (
-                <div 
-                  key={connector.id} 
+                <div
+                  key={connector.id}
                   className="bg-white/[0.02] border border-white/5 rounded-lg p-3 flex flex-col gap-2"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">{connector.name}</span>
-                    {connector.status === "connected" ? (
+                    <span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                      {connector.name}
+                    </span>
+                    {connector.status === 'connected' ? (
                       <CheckCircle className="w-3 h-3 text-emerald-500" />
-                    ) : connector.status === "error" ? (
+                    ) : connector.status === 'error' ? (
                       <XCircle className="w-3 h-3 text-rose-500" />
                     ) : (
                       <Clock className="w-3 h-3 text-white/20" />
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                      connector.status === "connected" ? "bg-emerald-500/10 text-emerald-400" :
-                      connector.status === "error" ? "bg-rose-500/10 text-rose-400" :
-                      "bg-white/5 text-white/30"
-                    )}>
-                      {connector.status.replace("_", " ")}
+                    <span
+                      className={cn(
+                        'text-[10px] font-bold px-1.5 py-0.5 rounded',
+                        connector.status === 'connected'
+                          ? 'bg-emerald-500/10 text-emerald-400'
+                          : connector.status === 'error'
+                            ? 'bg-rose-500/10 text-rose-400'
+                            : 'bg-white/5 text-white/30',
+                      )}
+                    >
+                      {connector.status.replace('_', ' ')}
                     </span>
                     {connector.lastSyncAt && (
                       <span className="text-[9px] text-white/20">
-                        {new Date(connector.lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(connector.lastSyncAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </span>
                     )}
                   </div>
@@ -99,10 +112,12 @@ export default function PropertyTwinView() {
             <div className="space-y-6 relative before:absolute before:inset-0 before:left-[11px] before:w-px before:bg-white/5">
               {property.distressHistory?.map((signal) => (
                 <div key={signal.id} className="relative pl-8">
-                  <div className={cn(
-                    "absolute left-0 top-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#0a0c10] z-10",
-                    signal.severity === "critical" ? "bg-rose-500" : "bg-amber-500"
-                  )}>
+                  <div
+                    className={cn(
+                      'absolute left-0 top-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#0a0c10] z-10',
+                      signal.severity === 'critical' ? 'bg-rose-500' : 'bg-amber-500',
+                    )}
+                  >
                     <Activity className="w-3 h-3 text-white" />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -113,13 +128,19 @@ export default function PropertyTwinView() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded",
-                        signal.severity === "critical" ? "bg-rose-500/10 text-rose-400" : "bg-amber-500/10 text-amber-400"
-                      )}>
-                        {signal.type.replace("_", " ")}
+                      <span
+                        className={cn(
+                          'text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded',
+                          signal.severity === 'critical'
+                            ? 'bg-rose-500/10 text-rose-400'
+                            : 'bg-amber-500/10 text-amber-400',
+                        )}
+                      >
+                        {signal.type.replace('_', ' ')}
                       </span>
-                      <span className="text-[10px] text-white/40 italic">System: Distress Engine V4</span>
+                      <span className="text-[10px] text-white/40 italic">
+                        System: Distress Engine V4
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -136,9 +157,9 @@ export default function PropertyTwinView() {
               confidence={0.89}
               timestamp={new Date()}
               evidence={[
-                { id: "e1", label: "City Assessor Link", type: "api" },
-                { id: "e2", label: "Financial Distress Signal", type: "signal" },
-                { id: "e3", label: "ACRIS Lien Report", type: "document" }
+                { id: 'e1', label: 'City Assessor Link', type: 'api' },
+                { id: 'e2', label: 'Financial Distress Signal', type: 'signal' },
+                { id: 'e3', label: 'ACRIS Lien Report', type: 'document' },
               ]}
               policyState="requires-approval"
               autonomyMode="recommend"
@@ -150,7 +171,8 @@ export default function PropertyTwinView() {
                     AI Recommendation
                   </div>
                   <p className="text-xs text-white/50 leading-relaxed">
-                    Initiate immediate debt restructuring and emergency maintenance funding to preserve asset value.
+                    Initiate immediate debt restructuring and emergency maintenance funding to
+                    preserve asset value.
                   </p>
                 </div>
 
@@ -160,8 +182,15 @@ export default function PropertyTwinView() {
                     <span className="text-emerald-400">3 Signals Linked</span>
                   </div>
                   <div className="space-y-1.5">
-                    {["Tax lien filed (critical)", "Occupancy dropped below 70%", "Deferred maintenance exceeding $500k"].map((item, i) => (
-                      <div key={i} className="flex items-center gap-2 text-[11px] text-white/60 bg-white/[0.02] p-2 rounded border border-white/5">
+                    {[
+                      'Tax lien filed (critical)',
+                      'Occupancy dropped below 70%',
+                      'Deferred maintenance exceeding $500k',
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 text-[11px] text-white/60 bg-white/[0.02] p-2 rounded border border-white/5"
+                      >
                         <CheckCircle className="w-3 h-3 text-emerald-500/50" />
                         {item}
                       </div>
@@ -183,9 +212,7 @@ export default function PropertyTwinView() {
                 <div className="pt-2 border-t border-white/5">
                   <div className="flex items-center justify-between text-[10px] text-white/20">
                     <span>Generated by Atlas-L4</span>
-                    <span className="flex items-center gap-1 font-mono">
-                      CONFIDENCE: 89%
-                    </span>
+                    <span className="flex items-center gap-1 font-mono">CONFIDENCE: 89%</span>
                   </div>
                 </div>
               </div>

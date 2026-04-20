@@ -1,20 +1,20 @@
-import type { Router, Request, Response } from "express";
-import { IndexRebuildRequestSchema, IndexVerifyRequestSchema } from "@workspace/aef-contracts";
+import { randomUUID } from 'node:crypto';
+import { IndexRebuildRequestSchema, IndexVerifyRequestSchema } from '@workspace/aef-contracts';
+import type { PolicyContext } from '@workspace/aef-policy-guard';
+import type { AuditEmitter, WorkflowContext } from '@workspace/aef-workflow-runtime';
 import {
   createWorkflowMachine,
-  FileCheckpointStore,
   FileApprovalStore,
-} from "@workspace/aef-workflow-runtime";
-import type { WorkflowContext, AuditEmitter } from "@workspace/aef-workflow-runtime";
-import { getRequestId } from "../middleware/request-id.js";
-import { getTenantId } from "../middleware/tenant.js";
-import { tenantEnforcer, policyEngine, defaultLedgerStore } from "../context.js";
-import type { PolicyContext } from "@workspace/aef-policy-guard";
-import { logger } from "../logger.js";
-import { recordRebuildDuration, recordApprovalWait } from "./metrics.js";
-import { randomUUID } from "node:crypto";
+  FileCheckpointStore,
+} from '@workspace/aef-workflow-runtime';
+import type { Request, Response, Router } from 'express';
+import { defaultLedgerStore, policyEngine, tenantEnforcer } from '../context.js';
+import { logger } from '../logger.js';
+import { getRequestId } from '../middleware/request-id.js';
+import { getTenantId } from '../middleware/tenant.js';
+import { recordApprovalWait, recordRebuildDuration } from './metrics.js';
 
-const DATA_DIR = process.env["AEF_DATA_DIR"] ?? "/tmp/aef-index-ops";
+const DATA_DIR = process.env['AEF_DATA_DIR'] ?? '/tmp/aef-index-ops';
 const checkpointStore = new FileCheckpointStore(`${DATA_DIR}/checkpoints.json`);
 const approvalStore = new FileApprovalStore(`${DATA_DIR}/approvals.json`);
 
@@ -25,7 +25,7 @@ const approvalStore = new FileApprovalStore(`${DATA_DIR}/approvals.json`);
  */
 function makeAuditEmitter(workflowId: string, reqId: string, tenantId: string): AuditEmitter {
   return (event) => {
-    logger.info("workflow_audit", {
+    logger.info('workflow_audit', {
       workflowId,
       reqId,
       tenantId,
@@ -36,12 +36,13 @@ function makeAuditEmitter(workflowId: string, reqId: string, tenantId: string): 
     });
     // Non-blocking ledger write for step-level audit trail
     try {
-      const durationMs = typeof event.details["durationMs"] === "number" ? event.details["durationMs"] : undefined;
+      const durationMs =
+        typeof event.details['durationMs'] === 'number' ? event.details['durationMs'] : undefined;
       defaultLedgerStore.append({
         entryId: randomUUID(),
         requestId: reqId,
         tenantId,
-        chunkId: `step:${workflowId}:${event.stepId ?? "unknown"}`,
+        chunkId: `step:${workflowId}:${event.stepId ?? 'unknown'}`,
         sourceId: `workflow:${workflowId}`,
         fusedScore: 0,
         boostApplied: false,
@@ -61,10 +62,10 @@ function makeAuditEmitter(workflowId: string, reqId: string, tenantId: string): 
 }
 
 export function registerIndexOpsRoutes(router: Router): void {
-  router.post("/v1/index/rebuild", async (req: Request, res: Response) => {
+  router.post('/v1/index/rebuild', async (req: Request, res: Response) => {
     const parsed = IndexRebuildRequestSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "validation_error", issues: parsed.error.issues });
+      res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });
       return;
     }
 
@@ -77,12 +78,12 @@ export function registerIndexOpsRoutes(router: Router): void {
     const policyCtx: PolicyContext = { requestId: reqId, tenantId, hasProvenance: true };
     const tenantDecision = tenantEnforcer.enforce(policyCtx);
     if (tenantDecision !== null && !tenantDecision.allow) {
-      res.status(403).json({ error: "tenant_not_registered", reasons: tenantDecision.reasons });
+      res.status(403).json({ error: 'tenant_not_registered', reasons: tenantDecision.reasons });
       return;
     }
     const policyDecision = policyEngine.evaluate(policyCtx);
     if (!policyDecision.allow) {
-      res.status(403).json({ error: "policy_denied", reasons: policyDecision.reasons });
+      res.status(403).json({ error: 'policy_denied', reasons: policyDecision.reasons });
       return;
     }
 
@@ -91,19 +92,22 @@ export function registerIndexOpsRoutes(router: Router): void {
       workflowId,
       tenantId: String(bodyTenant ?? tenantId),
       requestedBy: reqId,
-      input: { fullRebuild, ...(parsed.data.sourceIds ? { sourceIds: parsed.data.sourceIds } : {}) },
+      input: {
+        fullRebuild,
+        ...(parsed.data.sourceIds ? { sourceIds: parsed.data.sourceIds } : {}),
+      },
       approvalRequired: fullRebuild,
     };
 
     const auditEmitter = makeAuditEmitter(workflowId, reqId, tenantId);
-    const machine = createWorkflowMachine("rebuild_index");
+    const machine = createWorkflowMachine('rebuild_index');
     const result = await machine.run(ctx, { checkpointStore, approvalStore, auditEmitter });
 
     const rebuildDurationMs = Date.now() - rebuildStart;
     recordRebuildDuration(rebuildDurationMs);
 
     // Track approval wait time if the workflow paused for approval
-    if (result.status === "waiting_approval" && result.approvalRequestId) {
+    if (result.status === 'waiting_approval' && result.approvalRequestId) {
       recordApprovalWait(rebuildDurationMs);
     }
 
@@ -123,23 +127,28 @@ export function registerIndexOpsRoutes(router: Router): void {
         redactedFields: policyDecision.redactions,
         requestedAt,
         completedAt: new Date().toISOString(),
-        backendId: "workflow:rebuild_index",
+        backendId: 'workflow:rebuild_index',
         stageTimings: { total: rebuildDurationMs },
         ...(result.approvalRequestId
           ? {
               approvalDecision: {
                 approvalRequestId: result.approvalRequestId,
-                verdict: result.status === "waiting_approval" ? "pending" : "approved",
+                verdict: result.status === 'waiting_approval' ? 'pending' : 'approved',
                 decidedAt: new Date().toISOString(),
               },
             }
           : {}),
       });
     } catch (err) {
-      logger.error("rebuild ledger write failed", { workflowId, err: String(err) });
+      logger.error('rebuild ledger write failed', { workflowId, err: String(err) });
     }
 
-    logger.info("index rebuild dispatched", { reqId, workflowId, status: result.status, durationMs: rebuildDurationMs });
+    logger.info('index rebuild dispatched', {
+      reqId,
+      workflowId,
+      status: result.status,
+      durationMs: rebuildDurationMs,
+    });
 
     // Always 202 — rebuild is a background operation regardless of sync completion
     res.status(202).json({
@@ -154,10 +163,10 @@ export function registerIndexOpsRoutes(router: Router): void {
     });
   });
 
-  router.post("/v1/index/verify", async (req: Request, res: Response) => {
+  router.post('/v1/index/verify', async (req: Request, res: Response) => {
     const parsed = IndexVerifyRequestSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "validation_error", issues: parsed.error.issues });
+      res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });
       return;
     }
 
@@ -170,12 +179,12 @@ export function registerIndexOpsRoutes(router: Router): void {
     const policyCtx: PolicyContext = { requestId: reqId, tenantId, hasProvenance: true };
     const tenantDecision = tenantEnforcer.enforce(policyCtx);
     if (tenantDecision !== null && !tenantDecision.allow) {
-      res.status(403).json({ error: "tenant_not_registered", reasons: tenantDecision.reasons });
+      res.status(403).json({ error: 'tenant_not_registered', reasons: tenantDecision.reasons });
       return;
     }
     const policyDecision = policyEngine.evaluate(policyCtx);
     if (!policyDecision.allow) {
-      res.status(403).json({ error: "policy_denied", reasons: policyDecision.reasons });
+      res.status(403).json({ error: 'policy_denied', reasons: policyDecision.reasons });
       return;
     }
 
@@ -189,7 +198,7 @@ export function registerIndexOpsRoutes(router: Router): void {
     };
 
     const auditEmitter = makeAuditEmitter(workflowId, reqId, tenantId);
-    const machine = createWorkflowMachine("verify_index_health");
+    const machine = createWorkflowMachine('verify_index_health');
     const result = await machine.run(ctx, { checkpointStore, approvalStore, auditEmitter });
 
     const verifyDurationMs = Date.now() - verifyStart;
@@ -211,20 +220,27 @@ export function registerIndexOpsRoutes(router: Router): void {
         redactedFields: policyDecision.redactions,
         requestedAt,
         completedAt: new Date().toISOString(),
-        backendId: "workflow:verify_index_health",
+        backendId: 'workflow:verify_index_health',
         stageTimings: { total: verifyDurationMs },
       });
     } catch (err) {
-      logger.error("verify ledger write failed", { workflowId, err: String(err) });
+      logger.error('verify ledger write failed', { workflowId, err: String(err) });
     }
 
-    logger.info("index verify completed", { reqId, workflowId, status: result.status, durationMs: verifyDurationMs });
+    logger.info('index verify completed', {
+      reqId,
+      workflowId,
+      status: result.status,
+      durationMs: verifyDurationMs,
+    });
 
-    const verifyOutput = result.finalOutput as {
-      totalVerified?: number;
-      missingChunks?: string[];
-      corruptChunks?: string[];
-    } | undefined;
+    const verifyOutput = result.finalOutput as
+      | {
+          totalVerified?: number;
+          missingChunks?: string[];
+          corruptChunks?: string[];
+        }
+      | undefined;
 
     res.json({
       requestId: reqId,
@@ -235,7 +251,7 @@ export function registerIndexOpsRoutes(router: Router): void {
       chunksVerified: verifyOutput?.totalVerified ?? (sourceIds?.length ?? 0) * 2,
       missingChunks: verifyOutput?.missingChunks ?? [],
       corruptChunks: verifyOutput?.corruptChunks ?? [],
-      verified: result.status === "completed",
+      verified: result.status === 'completed',
     });
   });
 }

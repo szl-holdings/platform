@@ -1,6 +1,6 @@
-import type { PrismDomain, EvidenceContext } from "@szl-holdings/prism-bus";
+import type { EvidenceContext, PrismDomain } from '@szl-holdings/prism-bus';
 
-export type EvidenceType = EvidenceContext["type"];
+export type EvidenceType = EvidenceContext['type'];
 
 export interface ForgeEvidenceCapture {
   executionId: string;
@@ -47,13 +47,15 @@ export class ForgeEvidenceStore {
   }
 
   getForExecution(executionId: string): EvidenceContext[] {
-    return this.entries.filter(e => e.executionId === executionId);
+    return this.entries.filter((e) => e.executionId === executionId);
   }
 
-  getAll(options: { limit?: number; domain?: PrismDomain; type?: EvidenceType } = {}): EvidenceContext[] {
+  getAll(
+    options: { limit?: number; domain?: PrismDomain; type?: EvidenceType } = {},
+  ): EvidenceContext[] {
     let results = this.entries;
-    if (options.domain) results = results.filter(e => e.domain === options.domain);
-    if (options.type) results = results.filter(e => e.type === options.type);
+    if (options.domain) results = results.filter((e) => e.domain === options.domain);
+    if (options.type) results = results.filter((e) => e.type === options.type);
     return results.slice(0, options.limit ?? 100);
   }
 
@@ -62,7 +64,7 @@ export class ForgeEvidenceStore {
     for (let i = 0; i < input.length; i++) {
       hash = (hash * 33) ^ input.charCodeAt(i);
     }
-    return (hash >>> 0).toString(16).padStart(8, "0");
+    return (hash >>> 0).toString(16).padStart(8, '0');
   }
 }
 

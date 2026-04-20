@@ -1,6 +1,18 @@
-import type { SpatialTwinCategory, DriftStatus, OverlaySignalType, SourceTrustClass, ModelLaneType } from "@szl-holdings/db";
+import type {
+  DriftStatus,
+  ModelLaneType,
+  OverlaySignalType,
+  SourceTrustClass,
+  SpatialTwinCategory,
+} from '@szl-holdings/db';
 
-export type { SpatialTwinCategory, DriftStatus, OverlaySignalType, SourceTrustClass, ModelLaneType };
+export type {
+  DriftStatus,
+  ModelLaneType,
+  OverlaySignalType,
+  SourceTrustClass,
+  SpatialTwinCategory,
+};
 
 export interface SpatialCoordinates {
   lat: number;
@@ -25,7 +37,7 @@ export interface SpatialTwinSnapshot {
   }>;
   alerts: Array<{
     id: string;
-    severity: "info" | "warning" | "critical";
+    severity: 'info' | 'warning' | 'critical';
     message: string;
     metric: string;
     currentValue: unknown;
@@ -85,7 +97,11 @@ export interface DriftAssessment {
     trustedValue: unknown;
     divergenceScore: number;
   }>;
-  trustedSourceDeltas: Array<{ sourceId: string; sourceSlug: string; delta: Record<string, unknown> }>;
+  trustedSourceDeltas: Array<{
+    sourceId: string;
+    sourceSlug: string;
+    delta: Record<string, unknown>;
+  }>;
   confidenceDowngradeReason?: string | null;
   originalConfidence: number;
   adjustedConfidence: number;
@@ -108,7 +124,7 @@ export interface ScenarioBranch {
   riskAssessment?: string | null;
   recommendedActions: string[];
   confidenceScore: number;
-  status: "pending" | "running" | "completed" | "failed" | "archived";
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'archived';
   proofChainId?: number | null;
   correlationId?: string | null;
   metadata?: Record<string, unknown> | null;
@@ -120,12 +136,15 @@ export interface ScenarioBranchComparison {
   baseline: ScenarioBranch;
   branchA: ScenarioBranch;
   branchB?: ScenarioBranch;
-  fieldComparisons: Record<string, {
-    baseline: unknown;
-    branchA: unknown;
-    branchB?: unknown;
-    unit?: string;
-  }>;
+  fieldComparisons: Record<
+    string,
+    {
+      baseline: unknown;
+      branchA: unknown;
+      branchB?: unknown;
+      unit?: string;
+    }
+  >;
   riskRanking: Array<{ branchId: string; riskScore: number; label: string }>;
   recommendation: string;
 }
@@ -136,7 +155,7 @@ export interface SimulationArtifact {
   entityId: string;
   twinCategory: SpatialTwinCategory;
   scenarioBranchId?: string | null;
-  artifactType: "snapshot" | "branch_comparison" | "drift_report" | "replay_frame" | "scene_memory";
+  artifactType: 'snapshot' | 'branch_comparison' | 'drift_report' | 'replay_frame' | 'scene_memory';
   contentHash: string;
   payload: Record<string, unknown>;
   modelLane?: string | null;
@@ -157,7 +176,7 @@ export interface EvidenceOverlay {
   payload: Record<string, unknown>;
   confidenceScore: number;
   causalLinkage: Array<{ targetEntityId: string; linkType: string; strength: number }>;
-  severity: "info" | "warning" | "critical";
+  severity: 'info' | 'warning' | 'critical';
 }
 
 export interface SpatialRecommendation {
@@ -165,7 +184,7 @@ export interface SpatialRecommendation {
   twinId: string;
   entityId: string;
   twinCategory: SpatialTwinCategory;
-  priority: "low" | "medium" | "high" | "critical";
+  priority: 'low' | 'medium' | 'high' | 'critical';
   category: string;
   title: string;
   rationale: string;
@@ -234,7 +253,11 @@ export interface DriftGuardInput {
   currentConfidence: number;
   currentSnapshotId?: number;
   approvedSnapshotId?: number;
-  trustedSourceDeltas?: Array<{ sourceId: string; sourceSlug: string; delta: Record<string, unknown> }>;
+  trustedSourceDeltas?: Array<{
+    sourceId: string;
+    sourceSlug: string;
+    delta: Record<string, unknown>;
+  }>;
 }
 
 export interface ScenarioForgeInput {

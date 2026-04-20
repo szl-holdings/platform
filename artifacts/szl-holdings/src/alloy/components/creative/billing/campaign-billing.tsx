@@ -1,5 +1,5 @@
-import * as React from "react";
-import { CreditCard, ExternalLink, Package, Loader2, Copy, CheckCircle } from "lucide-react";
+import { CheckCircle, Copy, CreditCard, ExternalLink, Loader2, Package } from 'lucide-react';
+import * as React from 'react';
 
 interface StripeProduct {
   id: string;
@@ -10,7 +10,7 @@ interface StripeProduct {
 }
 
 function formatPrice(amount: number, currency: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount / 100);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount / 100);
 }
 
 interface CampaignBillingProps {
@@ -26,9 +26,11 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
-    fetch("/api/billing/products")
+    fetch('/api/billing/products')
       .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setProducts(data); })
+      .then((data) => {
+        if (Array.isArray(data)) setProducts(data);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -37,14 +39,14 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
     setCreatingLink(priceId);
     try {
       const baseUrl = window.location.origin;
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           priceId,
-          mode: "payment",
-          successUrl: baseUrl + "/alloy/?billing=success",
-          cancelUrl: baseUrl + "/alloy/?billing=cancel",
+          mode: 'payment',
+          successUrl: baseUrl + '/alloy/?billing=success',
+          cancelUrl: baseUrl + '/alloy/?billing=cancel',
           metadata: { campaignId, campaignName },
         }),
       });
@@ -93,10 +95,22 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
               value={paymentLink}
               className="flex-1 px-3 py-2 text-xs font-mono bg-black/30 border border-white/10 rounded-lg text-slate-300"
             />
-            <button onClick={handleCopy} className="p-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300 transition-colors">
-              {copied ? <CheckCircle className="w-4 h-4 text-blue-400" /> : <Copy className="w-4 h-4" />}
+            <button
+              onClick={handleCopy}
+              className="p-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300 transition-colors"
+            >
+              {copied ? (
+                <CheckCircle className="w-4 h-4 text-blue-400" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
             </button>
-            <a href={paymentLink} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300 transition-colors">
+            <a
+              href={paymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300 transition-colors"
+            >
               <ExternalLink className="w-4 h-4" />
             </a>
           </div>
@@ -109,12 +123,17 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
           <div className="p-8 text-center bg-[#0d1117] border border-white/8 rounded-xl">
             <Package className="w-8 h-8 text-slate-600 mx-auto mb-3" />
             <p className="text-sm text-slate-500">No Stripe products available</p>
-            <p className="text-xs text-slate-600 mt-1">Create products in Stripe to generate payment links.</p>
+            <p className="text-xs text-slate-600 mt-1">
+              Create products in Stripe to generate payment links.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {products.map((product) => (
-              <div key={product.id} className="p-4 bg-[#0d1117] border border-white/8 hover:border-white/12 rounded-xl transition-colors">
+              <div
+                key={product.id}
+                className="p-4 bg-[#0d1117] border border-white/8 hover:border-white/12 rounded-xl transition-colors"
+              >
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h4 className="text-sm font-semibold text-white">{product.name}</h4>
@@ -122,14 +141,20 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
                       <p className="text-xs text-slate-500 mt-1">{product.description}</p>
                     )}
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${product.active ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
-                    {product.active ? "Active" : "Inactive"}
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${product.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}
+                  >
+                    {product.active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {product.prices.map((price) => (
-                    <span key={price.id} className="text-xs px-2 py-1 rounded bg-white/5 font-mono text-slate-400">
-                      {formatPrice(price.amount, price.currency)}{price.interval && `/${price.interval}`}
+                    <span
+                      key={price.id}
+                      className="text-xs px-2 py-1 rounded bg-white/5 font-mono text-slate-400"
+                    >
+                      {formatPrice(price.amount, price.currency)}
+                      {price.interval && `/${price.interval}`}
                     </span>
                   ))}
                 </div>

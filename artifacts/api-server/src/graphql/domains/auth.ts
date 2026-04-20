@@ -1,4 +1,4 @@
-import { GraphQLError } from "graphql";
+import { GraphQLError } from 'graphql';
 
 export const authTypeDefs = `#graphql
   type User {
@@ -22,11 +22,21 @@ export const authTypeDefs = `#graphql
 
 export const authResolvers = {
   Query: {
-    me: async (_: unknown, __: unknown, ctx: { user?: { id: string; email?: string; name?: string; role?: string; createdAt?: string } }) => {
+    me: async (
+      _: unknown,
+      __: unknown,
+      ctx: {
+        user?: { id: string; email?: string; name?: string; role?: string; createdAt?: string };
+      },
+    ) => {
       if (!ctx.user) return null;
       return ctx.user;
     },
-    authStatus: async (_: unknown, __: unknown, ctx: { user?: { id: string; email?: string; name?: string; role?: string } }) => {
+    authStatus: async (
+      _: unknown,
+      __: unknown,
+      ctx: { user?: { id: string; email?: string; name?: string; role?: string } },
+    ) => {
       return {
         user: ctx.user ?? null,
         authenticated: !!ctx.user,

@@ -1,4 +1,4 @@
-import type { TrackEventPayload, AnalyticsEventContext } from "./types.js";
+import type { AnalyticsEventContext, TrackEventPayload } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Server SDK — Express middleware for server-side event tracking
@@ -22,9 +22,14 @@ const SERVER_FLUSH_SIZE = 50;
 
 export function createServerAnalyticsSDK(
   options: ServerAnalyticsOptions,
-  persistFn: (events: TrackEventPayload[]) => Promise<void>
+  persistFn: (events: TrackEventPayload[]) => Promise<void>,
 ): ServerAnalyticsSDK {
-  const { sourceApp, domain, captureApiCalls = true, excludePaths = ["/health", "/metrics", "/api/health"] } = options;
+  const {
+    sourceApp,
+    domain,
+    captureApiCalls = true,
+    excludePaths = ['/health', '/metrics', '/api/health'],
+  } = options;
 
   const flushServerQueue = async () => {
     if (SERVER_QUEUE.length === 0) return;
@@ -62,19 +67,25 @@ export function createServerAnalyticsSDK(
         next();
         return;
       }
-      const request = req as { method: string; path: string; url: string; user?: { id?: number }; ip?: string };
+      const request = req as {
+        method: string;
+        path: string;
+        url: string;
+        user?: { id?: number };
+        ip?: string;
+      };
       const response = res as { statusCode: number; on: (event: string, cb: () => void) => void };
       const startTime = Date.now();
 
-      if (excludePaths.some(p => request.path?.startsWith(p))) {
+      if (excludePaths.some((p) => request.path?.startsWith(p))) {
         next();
         return;
       }
 
-      response.on("finish", () => {
+      response.on('finish', () => {
         const durationMs = Date.now() - startTime;
         SERVER_QUEUE.push({
-          eventName: "api_request",
+          eventName: 'api_request',
           sourceApp,
           domain,
           serverSide: true,
@@ -101,7 +112,10 @@ export function createServerAnalyticsSDK(
 // Enrichment helpers
 // ---------------------------------------------------------------------------
 
-export function enrichServerEvent(event: TrackEventPayload, context: Partial<AnalyticsEventContext>): TrackEventPayload {
+export function enrichServerEvent(
+  event: TrackEventPayload,
+  context: Partial<AnalyticsEventContext>,
+): TrackEventPayload {
   return {
     ...event,
     context: { ...event.context, ...context },
@@ -126,17 +140,17 @@ const FLUSH_BATCH_SIZE = 25;
 const MAX_QUEUE_SIZE = 200;
 
 export function createClientAnalytics(config: ClientAnalyticsConfig) {
-  const { sourceApp, domain, apiBase = "/api", enabled = true } = config;
+  const { sourceApp, domain, apiBase = '/api', enabled = true } = config;
 
   let _flushTimer: ReturnType<typeof setInterval> | null = null;
 
   function getSessionId(): string {
-    const key = "__ame_sid";
+    const key = '__ame_sid';
     try {
-      let sid = (typeof sessionStorage !== "undefined" && sessionStorage.getItem(key)) || null;
+      let sid = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(key)) || null;
       if (!sid) {
         sid = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-        if (typeof sessionStorage !== "undefined") sessionStorage.setItem(key, sid);
+        if (typeof sessionStorage !== 'undefined') sessionStorage.setItem(key, sid);
       }
       return sid;
     } catch {
@@ -149,8 +163,8 @@ export function createClientAnalytics(config: ClientAnalyticsConfig) {
     const batch = CLIENT_QUEUE.splice(0, FLUSH_BATCH_SIZE);
     try {
       const response = await fetch(`${apiBase}/analytics-engine/events/batch`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ events: batch }),
         signal: AbortSignal.timeout(8_000),
         keepalive: true,
@@ -180,7 +194,11 @@ export function createClientAnalytics(config: ClientAnalyticsConfig) {
     }
   }
 
-  function track(eventName: string, properties?: Record<string, unknown>, overrides?: Partial<TrackEventPayload>): void {
+  function track(
+    eventName: string,
+    properties?: Record<string, unknown>,
+    overrides?: Partial<TrackEventPayload>,
+  ): void {
     if (!enabled) return;
     const sessionId = getSessionId();
     const event: TrackEventPayload & { queuedAt: number } = {
@@ -191,9 +209,9 @@ export function createClientAnalytics(config: ClientAnalyticsConfig) {
       serverSide: false,
       context: {
         sessionId,
-        ...(typeof window !== "undefined" ? { url: window.location.href } : {}),
-        ...(typeof document !== "undefined" ? { referrer: document.referrer } : {}),
-        ...(typeof navigator !== "undefined" ? { userAgent: navigator.userAgent } : {}),
+        ...(typeof window !== 'undefined' ? { url: window.location.href } : {}),
+        ...(typeof document !== 'undefined' ? { referrer: document.referrer } : {}),
+        ...(typeof navigator !== 'undefined' ? { userAgent: navigator.userAgent } : {}),
       },
       ...overrides,
       queuedAt: Date.now(),
@@ -204,15 +222,15 @@ export function createClientAnalytics(config: ClientAnalyticsConfig) {
   }
 
   function page(pageName: string, properties?: Record<string, unknown>): void {
-    track("page_viewed", {
+    track('page_viewed', {
       pageName,
-      path: typeof window !== "undefined" ? window.location.pathname : "",
+      path: typeof window !== 'undefined' ? window.location.pathname : '',
       ...properties,
     });
   }
 
   function identify(userId: string, traits?: Record<string, unknown>): void {
-    track("user_identified", traits, { context: { userId } });
+    track('user_identified', traits, { context: { userId } });
   }
 
   return { track, page, identify, flush, start, stop };

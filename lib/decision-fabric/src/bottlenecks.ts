@@ -8,12 +8,12 @@
  */
 
 import {
-  db,
   approvalRequestsTable,
+  db,
   decisionRecordsTable,
   outcomeGraphTable,
-} from "@szl-holdings/db";
-import { and, desc, eq, gte, isNotNull, sql } from "drizzle-orm";
+} from '@szl-holdings/db';
+import { and, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
 
 export interface ApprovalBottleneck {
   actionClass: string | null;
@@ -36,7 +36,7 @@ export interface BottleneckQueryOptions {
 export async function getApprovalBottlenecks(
   options: BottleneckQueryOptions = {},
 ): Promise<ApprovalBottleneck[]> {
-  const conditions: any[] = [eq(approvalRequestsTable.status, "pending")];
+  const conditions: any[] = [eq(approvalRequestsTable.status, 'pending')];
   if (options.orgId != null) conditions.push(eq(approvalRequestsTable.orgId, options.orgId));
 
   const rows = await db
@@ -45,7 +45,9 @@ export async function getApprovalBottlenecks(
       resourceType: approvalRequestsTable.resourceType,
       pendingCount: sql<number>`count(*)::int`,
       oldest: sql<Date | null>`min(${approvalRequestsTable.createdAt})`,
-      avgAgeMs: sql<number | null>`avg(extract(epoch from (now() - ${approvalRequestsTable.createdAt})) * 1000)::float`,
+      avgAgeMs: sql<
+        number | null
+      >`avg(extract(epoch from (now() - ${approvalRequestsTable.createdAt})) * 1000)::float`,
     })
     .from(approvalRequestsTable)
     .where(and(...conditions))
@@ -75,13 +77,17 @@ export interface PolicyFailure {
  * Real implementations should also tail covenant-policy decision logs; this
  * surface provides a stable API even when those logs are sparse.
  */
-export async function getPolicyFailures(options: BottleneckQueryOptions = {}): Promise<PolicyFailure[]> {
-  const conditions: any[] = [eq(decisionRecordsTable.status, "rolled_back")];
+export async function getPolicyFailures(
+  options: BottleneckQueryOptions = {},
+): Promise<PolicyFailure[]> {
+  const conditions: any[] = [eq(decisionRecordsTable.status, 'rolled_back')];
   if (options.orgId != null) conditions.push(eq(decisionRecordsTable.orgId, options.orgId));
 
   const rows = await db
     .select({
-      policyName: sql<string | null>`coalesce(${decisionRecordsTable.metadata}->>'denied_policy_name', 'unknown')`,
+      policyName: sql<
+        string | null
+      >`coalesce(${decisionRecordsTable.metadata}->>'denied_policy_name', 'unknown')`,
       denials: sql<number>`count(*)::int`,
       lastDeniedAt: sql<Date | null>`max(${decisionRecordsTable.decidedAt})`,
     })

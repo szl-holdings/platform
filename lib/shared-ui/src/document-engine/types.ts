@@ -1,7 +1,7 @@
-export type DocumentStatus = "draft" | "review" | "approved" | "signed" | "archived";
-export type SignatureStatus = "pending" | "viewed" | "signed" | "declined" | "expired";
-export type PdfJobStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
-export type AppSource = "terra" | "aegis" | "carlota_jo" | "vessels" | "alloy" | "szl" | "general";
+export type DocumentStatus = 'draft' | 'review' | 'approved' | 'signed' | 'archived';
+export type SignatureStatus = 'pending' | 'viewed' | 'signed' | 'declined' | 'expired';
+export type PdfJobStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type AppSource = 'terra' | 'aegis' | 'carlota_jo' | 'vessels' | 'alloy' | 'szl' | 'general';
 
 export interface DocumentRecord {
   id: number;
@@ -60,7 +60,7 @@ export interface SignatureRecord {
   signingOrder: number;
   status: SignatureStatus;
   signatureData: string | null;
-  signatureType: "typed" | "drawn" | "uploaded" | null;
+  signatureType: 'typed' | 'drawn' | 'uploaded' | null;
   signedAt: string | null;
   viewedAt: string | null;
   expiresAt: string | null;
@@ -132,8 +132,18 @@ export interface PdfBatch {
 
 export interface EditorNode {
   type: string;
-  children: EditorNode[] | { text: string; bold?: boolean; italic?: boolean; underline?: boolean; code?: boolean; color?: string; fontSize?: string }[];
-  align?: "left" | "center" | "right" | "justify";
+  children:
+    | EditorNode[]
+    | {
+        text: string;
+        bold?: boolean;
+        italic?: boolean;
+        underline?: boolean;
+        code?: boolean;
+        color?: string;
+        fontSize?: string;
+      }[];
+  align?: 'left' | 'center' | 'right' | 'justify';
   level?: number;
   mergeField?: string;
   url?: string;

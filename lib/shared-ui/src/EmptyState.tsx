@@ -1,5 +1,5 @@
-import * as React from "react";
-import { cn } from "./utils";
+import type * as React from 'react';
+import { cn } from './utils';
 
 export interface EmptyStateProps {
   icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
@@ -26,43 +26,51 @@ export function EmptyState({
   description,
   action,
   secondaryAction,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
   className,
   compact = false,
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center",
-        compact ? "py-8 px-4" : "py-16 px-6",
-        className
+        'flex flex-col items-center justify-center text-center',
+        compact ? 'py-8 px-4' : 'py-16 px-6',
+        className,
       )}
     >
       {illustration ? (
-        <div className={cn("mb-4", compact ? "mb-3" : "")}>
-          {illustration}
-        </div>
+        <div className={cn('mb-4', compact ? 'mb-3' : '')}>{illustration}</div>
       ) : Icon ? (
         <div
           className={cn(
-            "rounded-2xl flex items-center justify-center mb-4",
-            compact ? "w-12 h-12 rounded-xl mb-3" : "w-16 h-16"
+            'rounded-2xl flex items-center justify-center mb-4',
+            compact ? 'w-12 h-12 rounded-xl mb-3' : 'w-16 h-16',
           )}
           style={{ backgroundColor: `${accentColor}12` }}
         >
           <Icon
-            className={cn(compact ? "w-6 h-6" : "w-8 h-8")}
+            className={cn(compact ? 'w-6 h-6' : 'w-8 h-8')}
             style={{ color: `${accentColor}80` } as React.CSSProperties}
           />
         </div>
       ) : null}
 
-      <h3 className={cn("font-display font-semibold text-foreground", compact ? "text-sm" : "text-base")}>
+      <h3
+        className={cn(
+          'font-display font-semibold text-foreground',
+          compact ? 'text-sm' : 'text-base',
+        )}
+      >
         {headline}
       </h3>
 
       {description && (
-        <p className={cn("text-muted-foreground max-w-xs leading-relaxed mt-1.5", compact ? "text-xs" : "text-sm")}>
+        <p
+          className={cn(
+            'text-muted-foreground max-w-xs leading-relaxed mt-1.5',
+            compact ? 'text-xs' : 'text-sm',
+          )}
+        >
           {description}
         </p>
       )}
@@ -73,8 +81,8 @@ export function EmptyState({
             <button
               onClick={action.onClick}
               className={cn(
-                "font-semibold rounded-xl transition-all hover:opacity-90 active:scale-[0.98] text-white",
-                compact ? "text-xs py-1.5 px-3" : "text-sm py-2 px-4"
+                'font-semibold rounded-xl transition-all hover:opacity-90 active:scale-[0.98] text-white',
+                compact ? 'text-xs py-1.5 px-3' : 'text-sm py-2 px-4',
               )}
               style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}
             >
@@ -85,8 +93,8 @@ export function EmptyState({
             <button
               onClick={secondaryAction.onClick}
               className={cn(
-                "font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-colors",
-                compact ? "text-xs py-1.5 px-3" : "text-sm py-2 px-4"
+                'font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-colors',
+                compact ? 'text-xs py-1.5 px-3' : 'text-sm py-2 px-4',
               )}
             >
               {secondaryAction.label}

@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface ActivityFeedItem {
   id: string;
@@ -10,7 +10,7 @@ export interface ActivityFeedItem {
   timestamp: string;
   icon?: ReactNode;
   traceId?: string;
-  policyResult?: "allowed" | "requires-approval" | "blocked";
+  policyResult?: 'allowed' | 'requires-approval' | 'blocked';
 }
 
 export interface ActivityFeedProps {
@@ -20,13 +20,16 @@ export interface ActivityFeedProps {
 
 const POLICY_COLORS: Record<string, string> = {
   allowed: color.accent.green,
-  "requires-approval": color.accent.amber,
+  'requires-approval': color.accent.amber,
   blocked: color.accent.red,
 };
 
 export function ActivityFeed({ items, className }: ActivityFeedProps) {
   return (
-    <div className={cn("flex flex-col divide-y", className)} style={{ borderColor: color.border.subtle }}>
+    <div
+      className={cn('flex flex-col divide-y', className)}
+      style={{ borderColor: color.border.subtle }}
+    >
       {items.map((item) => (
         <div key={item.id} className="flex items-start gap-3 py-3">
           {item.icon && (
@@ -38,7 +41,7 @@ export function ActivityFeed({ items, className }: ActivityFeedProps) {
             <p className="text-sm leading-tight" style={{ color: color.text.primary }}>
               {item.actor && (
                 <span className="font-medium" style={{ color: color.text.primary }}>
-                  {item.actor}{" "}
+                  {item.actor}{' '}
                 </span>
               )}
               <span style={{ color: color.text.secondary }}>{item.action}</span>

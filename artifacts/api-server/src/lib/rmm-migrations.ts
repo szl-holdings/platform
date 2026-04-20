@@ -1,7 +1,7 @@
-import { db } from "@szl-holdings/db";
-import { sql } from "drizzle-orm";
-import { logger } from "./logger";
-import { createCipheriv, randomBytes, scryptSync } from "crypto";
+import { db } from '@szl-holdings/db';
+import { createCipheriv, randomBytes, scryptSync } from 'crypto';
+import { sql } from 'drizzle-orm';
+import { logger } from './logger';
 
 export async function ensureRmmTables(): Promise<void> {
   try {
@@ -157,7 +157,9 @@ export async function ensureRmmTables(): Promise<void> {
     `);
 
     await db.execute(sql`ALTER TABLE msp_devices ADD COLUMN IF NOT EXISTS connector_id INTEGER`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS msp_devices_connector_idx ON msp_devices(connector_id)`);
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS msp_devices_connector_idx ON msp_devices(connector_id)`,
+    );
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS msp_org_site_mappings (
@@ -173,14 +175,18 @@ export async function ensureRmmTables(): Promise<void> {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS msp_org_site_connector_idx ON msp_org_site_mappings(connector_id)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS msp_org_site_client_idx ON msp_org_site_mappings(internal_client_id)`);
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS msp_org_site_connector_idx ON msp_org_site_mappings(connector_id)`,
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS msp_org_site_client_idx ON msp_org_site_mappings(internal_client_id)`,
+    );
 
     await backfillPlaintextConfigs();
 
-    logger.info("RMM tables ensured (idempotent migration complete)");
+    logger.info('RMM tables ensured (idempotent migration complete)');
   } catch (err) {
-    logger.error({ err }, "RMM table migration failed");
+    logger.error({ err }, 'RMM table migration failed');
     throw err;
   }
 }
@@ -191,28 +197,31 @@ async function backfillPlaintextConfigs(): Promise<void> {
       SELECT id, config FROM msp_rmm_connectors
     `);
 
-    const keyRaw = process.env.CONNECTOR_ENCRYPTION_KEY ?? process.env.DATABASE_URL ?? "rmm-dev-only-key";
-    const key = scryptSync(keyRaw, "rmm-connector-salt", 32);
+    const keyRaw =
+      process.env.CONNECTOR_ENCRYPTION_KEY ?? process.env.DATABASE_URL ?? 'rmm-dev-only-key';
+    const key = scryptSync(keyRaw, 'rmm-connector-salt', 32);
     let migrated = 0;
 
     for (const row of rows.rows as Array<{ id: number; config: unknown }>) {
-      if (typeof row.config === "string" && (row.config as string).startsWith("enc:")) continue;
-      if (typeof row.config === "object" && row.config !== null) {
+      if (typeof row.config === 'string' && (row.config as string).startsWith('enc:')) continue;
+      if (typeof row.config === 'object' && row.config !== null) {
         const iv = randomBytes(16);
-        const cipher = createCipheriv("aes-256-gcm", key, iv);
+        const cipher = createCipheriv('aes-256-gcm', key, iv);
         const plaintext = JSON.stringify(row.config);
-        const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+        const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
         const tag = cipher.getAuthTag();
-        const encStr = `enc:${iv.toString("hex")}:${tag.toString("hex")}:${encrypted.toString("hex")}`;
-        await db.execute(sql`UPDATE msp_rmm_connectors SET config = ${JSON.stringify(encStr)}::jsonb WHERE id = ${row.id}`);
+        const encStr = `enc:${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`;
+        await db.execute(
+          sql`UPDATE msp_rmm_connectors SET config = ${JSON.stringify(encStr)}::jsonb WHERE id = ${row.id}`,
+        );
         migrated++;
       }
     }
 
     if (migrated > 0) {
-      logger.info({ migrated }, "Backfilled plaintext connector configs to encrypted format");
+      logger.info({ migrated }, 'Backfilled plaintext connector configs to encrypted format');
     }
   } catch (err) {
-    logger.warn({ err }, "Plaintext config backfill failed (non-fatal)");
+    logger.warn({ err }, 'Plaintext config backfill failed (non-fatal)');
   }
 }

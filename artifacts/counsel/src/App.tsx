@@ -1,33 +1,58 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
-import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
-import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
+import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
+import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
 import {
-  LayoutDashboard, Scale, Clock, Network, BarChart3, ShieldAlert,
-  Zap, Bell, CheckCircle2, Shield, Menu, Briefcase
-} from "lucide-react";
-import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
-import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
-import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
-import { SentientLayer, useSentientLayer, type SentientUpdate, type SentientAction, type SentientCrossLink } from "@szl-holdings/shared-ui/sentient-layer";
-import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
+  type CommandItem,
+  CommandPalette,
+  createBaselineWebActions,
+  getEcosystemSwitchCommands,
+  useCommandPalette,
+} from '@szl-holdings/shared-ui/command-palette';
+import {
+  DashboardShell as SharedDashboardShell,
+  SidebarNav,
+  type SidebarNavSection,
+} from '@szl-holdings/shared-ui/design-system';
+import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
+import {
+  type SentientAction,
+  type SentientCrossLink,
+  SentientLayer,
+  type SentientUpdate,
+  useSentientLayer,
+} from '@szl-holdings/shared-ui/sentient-layer';
+import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useUserPreferences } from '@szl-holdings/shared-ui/use-user-preferences';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  BarChart3,
+  Bell,
+  Briefcase,
+  CheckCircle2,
+  Clock,
+  LayoutDashboard,
+  Menu,
+  Network,
+  Scale,
+  Shield,
+  ShieldAlert,
+  Zap,
+} from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
-const COUNSEL_ACCENT = "#8b5cf6";
+const COUNSEL_ACCENT = '#8b5cf6';
 
-const DashboardPage = lazy(() => import("./pages/dashboard"));
-const CounselLandingPage = lazy(() => import("./pages/counsel-landing"));
-const MatterOverviewPage = lazy(() => import("./pages/matter-overview"));
-const ObligationTimelinePage = lazy(() => import("./pages/obligation-timeline"));
-const DependencyGraphPage = lazy(() => import("./pages/dependency-graph"));
-const CounselPerformancePage = lazy(() => import("./pages/counsel-performance"));
-const RiskExposureDeskPage = lazy(() => import("./pages/risk-exposure-desk"));
-const DecisionCenterPage = lazy(() => import("./pages/decision-center"));
-const AlertsPage = lazy(() => import("./pages/alerts"));
-const ApprovalsPage = lazy(() => import("./pages/approvals"));
-const TrustProvenancePage = lazy(() => import("./pages/trust-provenance"));
+const DashboardPage = lazy(() => import('./pages/dashboard'));
+const CounselLandingPage = lazy(() => import('./pages/counsel-landing'));
+const MatterOverviewPage = lazy(() => import('./pages/matter-overview'));
+const ObligationTimelinePage = lazy(() => import('./pages/obligation-timeline'));
+const DependencyGraphPage = lazy(() => import('./pages/dependency-graph'));
+const CounselPerformancePage = lazy(() => import('./pages/counsel-performance'));
+const RiskExposureDeskPage = lazy(() => import('./pages/risk-exposure-desk'));
+const DecisionCenterPage = lazy(() => import('./pages/decision-center'));
+const AlertsPage = lazy(() => import('./pages/alerts'));
+const ApprovalsPage = lazy(() => import('./pages/approvals'));
+const TrustProvenancePage = lazy(() => import('./pages/trust-provenance'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -54,31 +79,76 @@ function CounselSidebarContent({
 
   const sections: SidebarNavSection[] = [
     {
-      id: "os-layer",
-      label: "OS Layer",
+      id: 'os-layer',
+      label: 'OS Layer',
       items: [
-        { id: "decision-center", label: "Decision Center", href: "/decision-center", icon: <Zap className="w-3.5 h-3.5" /> },
+        {
+          id: 'decision-center',
+          label: 'Decision Center',
+          href: '/decision-center',
+          icon: <Zap className="w-3.5 h-3.5" />,
+        },
       ],
     },
     {
-      id: "core",
-      label: "Core",
+      id: 'core',
+      label: 'Core',
       items: [
-        { id: "/dashboard", label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
-        { id: "/matters", label: "Matter Overview", href: "/matters", icon: <Briefcase className="w-3.5 h-3.5" /> },
-        { id: "/obligations", label: "Obligation Timeline", href: "/obligations", icon: <Clock className="w-3.5 h-3.5" /> },
-        { id: "/dependencies", label: "Dependency Graph", href: "/dependencies", icon: <Network className="w-3.5 h-3.5" /> },
-        { id: "/performance", label: "Counsel Performance", href: "/performance", icon: <Scale className="w-3.5 h-3.5" /> },
-        { id: "/risk", label: "Risk & Exposure Desk", href: "/risk", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
+        {
+          id: '/dashboard',
+          label: 'Dashboard',
+          href: '/dashboard',
+          icon: <LayoutDashboard className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/matters',
+          label: 'Matter Overview',
+          href: '/matters',
+          icon: <Briefcase className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/obligations',
+          label: 'Obligation Timeline',
+          href: '/obligations',
+          icon: <Clock className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/dependencies',
+          label: 'Dependency Graph',
+          href: '/dependencies',
+          icon: <Network className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/performance',
+          label: 'Counsel Performance',
+          href: '/performance',
+          icon: <Scale className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/risk',
+          label: 'Risk & Exposure Desk',
+          href: '/risk',
+          icon: <ShieldAlert className="w-3.5 h-3.5" />,
+        },
       ],
     },
     {
-      id: "operations",
-      label: "Operations",
+      id: 'operations',
+      label: 'Operations',
       items: [
-        { id: "/alerts", label: "Alerts", href: "/alerts", icon: <Bell className="w-3.5 h-3.5" /> },
-        { id: "/approvals", label: "Approvals", href: "/approvals", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
-        { id: "/trust", label: "Trust & Provenance", href: "/trust", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: '/alerts', label: 'Alerts', href: '/alerts', icon: <Bell className="w-3.5 h-3.5" /> },
+        {
+          id: '/approvals',
+          label: 'Approvals',
+          href: '/approvals',
+          icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/trust',
+          label: 'Trust & Provenance',
+          href: '/trust',
+          icon: <Shield className="w-3.5 h-3.5" />,
+        },
       ],
     },
   ];
@@ -97,13 +167,18 @@ function CounselSidebarContent({
         <div className="flex items-center gap-2.5 cursor-pointer">
           <div
             className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
-            style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.12)" }}
+            style={{
+              background: 'rgba(139,92,246,0.08)',
+              border: '1px solid rgba(139,92,246,0.12)',
+            }}
           >
             <Scale className="w-4 h-4 text-violet-400" />
           </div>
           {expanded && (
             <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-semibold text-violet-50 truncate tracking-tight">Counsel</h1>
+              <h1 className="text-sm font-semibold text-violet-50 truncate tracking-tight">
+                Counsel
+              </h1>
               <p className="text-[10px] truncate font-mono uppercase tracking-wider text-violet-400/40">
                 Legal Matter Command
               </p>
@@ -116,7 +191,10 @@ function CounselSidebarContent({
           <div className="space-y-2">
             <div
               className="rounded-lg px-3 py-3"
-              style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.08)" }}
+              style={{
+                background: 'rgba(139,92,246,0.04)',
+                border: '1px solid rgba(139,92,246,0.08)',
+              }}
             >
               <div className="text-[9px] uppercase tracking-widest font-medium mb-2 text-violet-400/50">
                 Matter Status
@@ -145,7 +223,13 @@ function CounselSidebarContent({
               aria-label="Collapse sidebar"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M8 2L5 6l3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M8 2L5 6l3 4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
           </div>
@@ -156,7 +240,13 @@ function CounselSidebarContent({
             aria-label="Expand sidebar"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M4 2l3 4-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M4 2l3 4-3 4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         )
@@ -207,7 +297,7 @@ function AppShell() {
     userOverriddenSidebarRef.current = true;
     setSidebarCollapsed((prev) => {
       const next = !prev;
-      setPreference("sidebar_collapsed", next);
+      setPreference('sidebar_collapsed', next);
       return next;
     });
   }, [setPreference]);
@@ -216,41 +306,165 @@ function AppShell() {
 
   const paletteCommands: CommandItem[] = [
     ...createBaselineWebActions(navigate),
-    ...getEcosystemSwitchCommands("counsel"),
-    { id: "nav-dashboard", label: "Dashboard", group: "Navigate", action: () => navigate("/dashboard") },
-    { id: "nav-matters", label: "Matter Overview", group: "Navigate", action: () => navigate("/matters") },
-    { id: "nav-obligations", label: "Obligation Timeline", group: "Navigate", action: () => navigate("/obligations") },
-    { id: "nav-dependencies", label: "Dependency Graph", group: "Navigate", action: () => navigate("/dependencies") },
-    { id: "nav-performance", label: "Counsel Performance", group: "Navigate", action: () => navigate("/performance") },
-    { id: "nav-risk", label: "Risk Exposure Desk", group: "Navigate", action: () => navigate("/risk") },
-    { id: "nav-decisions", label: "Decision Center", group: "Navigate", action: () => navigate("/decision-center") },
-    { id: "nav-alerts", label: "Alerts", group: "Navigate", action: () => navigate("/alerts") },
-    { id: "nav-approvals", label: "Approvals", group: "Navigate", action: () => navigate("/approvals") },
-    { id: "nav-trust", label: "Trust & Provenance", group: "Navigate", action: () => navigate("/trust") },
+    ...getEcosystemSwitchCommands('counsel'),
+    {
+      id: 'nav-dashboard',
+      label: 'Dashboard',
+      group: 'Navigate',
+      action: () => navigate('/dashboard'),
+    },
+    {
+      id: 'nav-matters',
+      label: 'Matter Overview',
+      group: 'Navigate',
+      action: () => navigate('/matters'),
+    },
+    {
+      id: 'nav-obligations',
+      label: 'Obligation Timeline',
+      group: 'Navigate',
+      action: () => navigate('/obligations'),
+    },
+    {
+      id: 'nav-dependencies',
+      label: 'Dependency Graph',
+      group: 'Navigate',
+      action: () => navigate('/dependencies'),
+    },
+    {
+      id: 'nav-performance',
+      label: 'Counsel Performance',
+      group: 'Navigate',
+      action: () => navigate('/performance'),
+    },
+    {
+      id: 'nav-risk',
+      label: 'Risk Exposure Desk',
+      group: 'Navigate',
+      action: () => navigate('/risk'),
+    },
+    {
+      id: 'nav-decisions',
+      label: 'Decision Center',
+      group: 'Navigate',
+      action: () => navigate('/decision-center'),
+    },
+    { id: 'nav-alerts', label: 'Alerts', group: 'Navigate', action: () => navigate('/alerts') },
+    {
+      id: 'nav-approvals',
+      label: 'Approvals',
+      group: 'Navigate',
+      action: () => navigate('/approvals'),
+    },
+    {
+      id: 'nav-trust',
+      label: 'Trust & Provenance',
+      group: 'Navigate',
+      action: () => navigate('/trust'),
+    },
   ];
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
   const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();
 
   const sentientUpdates: SentientUpdate[] = [
-    { id: "u1", headline: "Greenfield v. Apex: 14-day trial deadline — brief not filed", surface: "Counsel", severity: "critical", timestamp: new Date(Date.now() - 8 * 60000).toISOString(), href: "/obligations" },
-    { id: "u2", headline: "Matter 2024-SEC-441: opposing counsel response received", surface: "Counsel", severity: "info", timestamp: new Date(Date.now() - 45 * 60000).toISOString(), href: "/matters" },
-    { id: "u3", headline: "Exposure increased: $6.4M at risk — Greenfield + TechCo cluster", surface: "Counsel", severity: "warning", timestamp: new Date(Date.now() - 2 * 3600000).toISOString(), href: "/risk" },
-    { id: "u4", headline: "New dependency: Vessels sanctions matter linked to Apex case", surface: "Counsel", severity: "info", timestamp: new Date(Date.now() - 3 * 3600000).toISOString(), href: "/dependencies" },
+    {
+      id: 'u1',
+      headline: 'Greenfield v. Apex: 14-day trial deadline — brief not filed',
+      surface: 'Counsel',
+      severity: 'critical',
+      timestamp: new Date(Date.now() - 8 * 60000).toISOString(),
+      href: '/obligations',
+    },
+    {
+      id: 'u2',
+      headline: 'Matter 2024-SEC-441: opposing counsel response received',
+      surface: 'Counsel',
+      severity: 'info',
+      timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+      href: '/matters',
+    },
+    {
+      id: 'u3',
+      headline: 'Exposure increased: $6.4M at risk — Greenfield + TechCo cluster',
+      surface: 'Counsel',
+      severity: 'warning',
+      timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
+      href: '/risk',
+    },
+    {
+      id: 'u4',
+      headline: 'New dependency: Vessels sanctions matter linked to Apex case',
+      surface: 'Counsel',
+      severity: 'info',
+      timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
+      href: '/dependencies',
+    },
   ];
 
   const sentientActions: SentientAction[] = [
-    { id: "a1", label: "File Greenfield brief — 14-day deadline in 96 hours", description: "Agent has drafted briefing outline with case citations. Requires counsel review before filing.", confidence: 0.89, policyVerdict: "requires_approval", href: "/matters" },
-    { id: "a2", label: "Generate demand letter — TechCo IP matter", description: "Demand letter template ready with $2.1M exposure framing. Low risk, routine action.", confidence: 0.92, policyVerdict: "allowed", href: "/decisions" },
-    { id: "a3", label: "Escalate 2024-SEC-441 to senior partner", description: "SEC response received with accelerated discovery timeline. Recommend immediate escalation.", confidence: 0.87, policyVerdict: "requires_approval", href: "/approvals" },
+    {
+      id: 'a1',
+      label: 'File Greenfield brief — 14-day deadline in 96 hours',
+      description:
+        'Agent has drafted briefing outline with case citations. Requires counsel review before filing.',
+      confidence: 0.89,
+      policyVerdict: 'requires_approval',
+      href: '/matters',
+    },
+    {
+      id: 'a2',
+      label: 'Generate demand letter — TechCo IP matter',
+      description:
+        'Demand letter template ready with $2.1M exposure framing. Low risk, routine action.',
+      confidence: 0.92,
+      policyVerdict: 'allowed',
+      href: '/decisions',
+    },
+    {
+      id: 'a3',
+      label: 'Escalate 2024-SEC-441 to senior partner',
+      description:
+        'SEC response received with accelerated discovery timeline. Recommend immediate escalation.',
+      confidence: 0.87,
+      policyVerdict: 'requires_approval',
+      href: '/approvals',
+    },
   ];
 
   const sentientCrossLinks: SentientCrossLink[] = [
-    { id: "cl1", surface: "Sentra", surfaceAccent: "#ef4444", label: "Sentra: data breach incident linked to Greenfield", description: "Sentra's IC-2409 incident is the source event for the Greenfield data breach matter.", href: "/sentra/incident", preservedContext: { surface: "counsel", matter: "greenfield" } },
-    { id: "cl2", surface: "Vessels", surfaceAccent: "#0ea5e9", label: "Vessels: MV Atlantic Falcon sanctions linkage", description: "Vessels flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.", href: "/vessels/sanctions", preservedContext: { surface: "counsel" } },
-    { id: "cl3", surface: "Lyte", surfaceAccent: "#0ea5e9", label: "Lyte: 2 legal decisions pending executive approval", description: "Lyte's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.", href: "/lyte/decision-center", preservedContext: { surface: "counsel" } },
+    {
+      id: 'cl1',
+      surface: 'Sentra',
+      surfaceAccent: '#ef4444',
+      label: 'Sentra: data breach incident linked to Greenfield',
+      description:
+        "Sentra's IC-2409 incident is the source event for the Greenfield data breach matter.",
+      href: '/sentra/incident',
+      preservedContext: { surface: 'counsel', matter: 'greenfield' },
+    },
+    {
+      id: 'cl2',
+      surface: 'Vessels',
+      surfaceAccent: '#0ea5e9',
+      label: 'Vessels: MV Atlantic Falcon sanctions linkage',
+      description:
+        'Vessels flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
+      href: '/vessels/sanctions',
+      preservedContext: { surface: 'counsel' },
+    },
+    {
+      id: 'cl3',
+      surface: 'Lyte',
+      surfaceAccent: '#0ea5e9',
+      label: 'Lyte: 2 legal decisions pending executive approval',
+      description:
+        "Lyte's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",
+      href: '/lyte/decision-center',
+      preservedContext: { surface: 'counsel' },
+    },
   ];
 
-  if (location === "/" || location === "") {
+  if (location === '/' || location === '') {
     return (
       <>
         <EcosystemNav
@@ -258,7 +472,7 @@ function AppShell() {
           currentAppName="Counsel Legal Matter Command"
           accentColor={COUNSEL_ACCENT}
         />
-        <Suspense fallback={<div style={{ height: "100vh", background: "#0a0614" }} />}>
+        <Suspense fallback={<div style={{ height: '100vh', background: '#0a0614' }} />}>
           <CounselLandingPage />
         </Suspense>
         <Toaster position="bottom-right" theme="dark" />
@@ -267,7 +481,7 @@ function AppShell() {
   }
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#0a0614" }}>
+    <div className="flex flex-col h-screen" style={{ background: '#0a0614' }}>
       <EcosystemNav
         currentAppId="counsel"
         currentAppName="Counsel Legal Matter Command"
@@ -283,12 +497,12 @@ function AppShell() {
         }
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
-        sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}
+        sidebarWidth={sidebarExpanded ? '13rem' : '3.5rem'}
         sidebarEvents={{
           onMouseEnter: () => setSidebarHovered(true),
           onMouseLeave: () => setSidebarHovered(false),
         }}
-        theme={{ sidebarBg: "#0a0614", pageBg: "#0a0614", headerBg: "rgba(10,6,20,0.92)" }}
+        theme={{ sidebarBg: '#0a0614', pageBg: '#0a0614', headerBg: 'rgba(10,6,20,0.92)' }}
         accentColor={COUNSEL_ACCENT}
         topbar={
           <div className="flex items-center gap-3 w-full md:hidden">
@@ -336,14 +550,14 @@ function AppShell() {
 export default function App() {
   return (
     <AppModeProvider>
-    <AppModeBanner />
-    <AnalyticsProvider appName="counsel">
-      <QueryClientProvider client={queryClient}>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AppShell />
-        </WouterRouter>
-      </QueryClientProvider>
-    </AnalyticsProvider>
+      <AppModeBanner />
+      <AnalyticsProvider appName="counsel">
+        <QueryClientProvider client={queryClient}>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+            <AppShell />
+          </WouterRouter>
+        </QueryClientProvider>
+      </AnalyticsProvider>
     </AppModeProvider>
   );
 }

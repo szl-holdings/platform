@@ -13,17 +13,17 @@
  * forged this way.
  */
 
-import { randomBytes } from "crypto";
-import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from "../types.js";
+import { randomBytes } from 'crypto';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '../types.js';
 
 export const CSRF_TOKEN_BYTES = 32;
 export const CSRF_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 /** Generates a cryptographically random hex CSRF token. */
 export function generateCsrfToken(): string {
-  return randomBytes(CSRF_TOKEN_BYTES).toString("hex");
+  return randomBytes(CSRF_TOKEN_BYTES).toString('hex');
 }
 
 /**
@@ -57,9 +57,9 @@ export function csrfCookieOptions(opts: CsrfCookieOptions) {
   return {
     httpOnly: false,
     secure: opts.isProduction,
-    sameSite: "strict" as const,
+    sameSite: 'strict' as const,
     maxAge: CSRF_COOKIE_MAX_AGE_MS,
-    path: "/",
+    path: '/',
   };
 }
 
@@ -67,15 +67,18 @@ export function csrfCookieOptions(opts: CsrfCookieOptions) {
 
 export type CsrfValidationResult =
   | { ok: true }
-  | { ok: false; reason: "missing_cookie" | "missing_header" | "mismatch" };
+  | { ok: false; reason: 'missing_cookie' | 'missing_header' | 'mismatch' };
 
 /**
  * Validates a CSRF double-submit pair.  Returns `{ ok: true }` when the
  * cookie and header are present and match, otherwise returns a reason code.
  */
-export function validateCsrfPair(cookieToken: string | undefined, headerToken: string | undefined): CsrfValidationResult {
-  if (!cookieToken) return { ok: false, reason: "missing_cookie" };
-  if (!headerToken) return { ok: false, reason: "missing_header" };
-  if (!csrfTimingSafeEqual(cookieToken, headerToken)) return { ok: false, reason: "mismatch" };
+export function validateCsrfPair(
+  cookieToken: string | undefined,
+  headerToken: string | undefined,
+): CsrfValidationResult {
+  if (!cookieToken) return { ok: false, reason: 'missing_cookie' };
+  if (!headerToken) return { ok: false, reason: 'missing_header' };
+  if (!csrfTimingSafeEqual(cookieToken, headerToken)) return { ok: false, reason: 'mismatch' };
   return { ok: true };
 }

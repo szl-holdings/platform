@@ -1,13 +1,13 @@
-import type { PlanStep, ResolvedPlanContext, RiskLevel, RollbackPoint } from "./types.js";
-import { PlanCycleError } from "./types.js";
+import type { PlanStep, ResolvedPlanContext, RiskLevel, RollbackPoint } from './types.js';
+import { PlanCycleError } from './types.js';
 
 const RISK_RANK: Record<RiskLevel, number> = { low: 0, medium: 1, high: 2, critical: 3 };
 
 export function levelForRisk(risk: number): RiskLevel {
-  if (risk >= 0.75) return "critical";
-  if (risk >= 0.5) return "high";
-  if (risk >= 0.25) return "medium";
-  return "low";
+  if (risk >= 0.75) return 'critical';
+  if (risk >= 0.5) return 'high';
+  if (risk >= 0.25) return 'medium';
+  return 'low';
 }
 
 /**
@@ -39,7 +39,7 @@ export function estimateRiskAndApprovals(
         requiredApproval && !step.approvalReason
           ? requiresApprovalByRisk
             ? `risk=${riskLevel} ≥ threshold=${context.approvalThreshold}`
-            : "explicit approval required by caller"
+            : 'explicit approval required by caller'
           : step.approvalReason,
       rollbackPoints,
     };
@@ -66,7 +66,9 @@ export function topoSort(steps: PlanStep[]): string[] {
       dependents.get(d)!.push(s.stepId);
     }
   }
-  const ready = steps.filter((s) => (indeg.get(s.stepId) ?? 0) === 0).sort((a, b) => a.index - b.index);
+  const ready = steps
+    .filter((s) => (indeg.get(s.stepId) ?? 0) === 0)
+    .sort((a, b) => a.index - b.index);
   const order: string[] = [];
   while (ready.length > 0) {
     const next = ready.shift()!;

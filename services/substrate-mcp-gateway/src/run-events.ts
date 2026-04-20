@@ -9,18 +9,18 @@
  * with a Redis pub/sub or similar.
  */
 
-import { EventEmitter } from "node:events";
+import { EventEmitter } from 'node:events';
 
 // ─── Event Types ──────────────────────────────────────────────────────────────
 
 export type RunEventType =
-  | "run_started"
-  | "stage_complete"
-  | "run_complete"
-  | "run_failed"
-  | "approval_required"
-  | "approval_granted"
-  | "approval_rejected";
+  | 'run_started'
+  | 'stage_complete'
+  | 'run_complete'
+  | 'run_failed'
+  | 'approval_required'
+  | 'approval_granted'
+  | 'approval_rejected';
 
 export interface RunLifecycleEvent {
   type: RunEventType;
@@ -37,7 +37,7 @@ export interface RunLifecycleEvent {
 // ─── Event Bus ────────────────────────────────────────────────────────────────
 
 class RunEventBus extends EventEmitter {
-  private static readonly CHANNEL = "run_event";
+  private static readonly CHANNEL = 'run_event';
 
   emit_run_event(event: RunLifecycleEvent): void {
     this.emit(RunEventBus.CHANNEL, event);

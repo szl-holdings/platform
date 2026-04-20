@@ -11,65 +11,58 @@
  */
 
 /**
- * @deprecated Use `@szl-holdings/design-system` cockpit primitives instead.
+ * @deprecated Use `PolicyStateChip` + `AutonomyModeToggle` from `@szl-holdings/design-system/proof` instead.
  * This component continues to work but will be removed in a future major version.
  */
-export { KPIBlock, KPIGrid } from "./KPIBlock";
+export { ActionControlPanel } from './ActionControlPanel';
 
 /**
  * @deprecated Use `TimelineLane` from `@szl-holdings/design-system/cockpit` instead.
  * This component continues to work but will be removed in a future major version.
  */
-export { CausalTimeline } from "./CausalTimeline";
-
-/**
- * @deprecated Use `ProofEnvelope` + `DenseTable` from `@szl-holdings/design-system` instead.
- * This component continues to work but will be removed in a future major version.
- */
-export { RecommendationQueue } from "./RecommendationQueue";
-
+export { CausalTimeline } from './CausalTimeline';
+export type { GraphEdge, GraphNode } from './EntityGraph';
 /**
  * @deprecated Use `GraphCanvas` from `@szl-holdings/design-system/cockpit` instead.
  * This component continues to work but will be removed in a future major version.
  */
-export { RiskHeatmap } from "./RiskHeatmap";
-
-/**
- * @deprecated Use `DenseTable` from `@szl-holdings/design-system/cockpit` instead.
- * This component continues to work but will be removed in a future major version.
- */
-export { ValueLedger } from "./ValueLedger";
-
-/**
- * @deprecated Use `PolicyStateChip` + `AutonomyModeToggle` from `@szl-holdings/design-system/proof` instead.
- * This component continues to work but will be removed in a future major version.
- */
-export { ActionControlPanel } from "./ActionControlPanel";
-
+export { EntityGraph } from './EntityGraph';
+export type { ExecSummaryConfig } from './ExecutiveSummary';
 /**
  * @deprecated Use `NarrativePanel` + `ProofEnvelope` from `@szl-holdings/design-system` instead.
  * This component continues to work but will be removed in a future major version.
  */
-export { ExecutiveSummary } from "./ExecutiveSummary";
-
+export { ExecutiveSummary } from './ExecutiveSummary';
+/**
+ * @deprecated Use `@szl-holdings/design-system` cockpit primitives instead.
+ * This component continues to work but will be removed in a future major version.
+ */
+export { KPIBlock, KPIGrid } from './KPIBlock';
+/**
+ * @deprecated Use `ProofEnvelope` + `DenseTable` from `@szl-holdings/design-system` instead.
+ * This component continues to work but will be removed in a future major version.
+ */
+export { RecommendationQueue } from './RecommendationQueue';
 /**
  * @deprecated Use `GraphCanvas` from `@szl-holdings/design-system/cockpit` instead.
  * This component continues to work but will be removed in a future major version.
  */
-export { EntityGraph } from "./EntityGraph";
-
+export { RiskHeatmap } from './RiskHeatmap';
 export type {
-  CausalEvent,
-  KPIMetric,
-  Recommendation,
-  RiskItem,
-  OpportunityItem,
-  ValueEntry,
   ActionItem,
   ActionStatus,
+  CausalEvent,
+  KPIMetric,
+  OpportunityItem,
+  Recommendation,
+  RiskItem,
+  RiskLevel,
   Severity,
   Trend,
-  RiskLevel,
-} from "./types";
-export type { GraphNode, GraphEdge } from "./EntityGraph";
-export type { ExecSummaryConfig } from "./ExecutiveSummary";
+  ValueEntry,
+} from './types';
+/**
+ * @deprecated Use `DenseTable` from `@szl-holdings/design-system/cockpit` instead.
+ * This component continues to work but will be removed in a future major version.
+ */
+export { ValueLedger } from './ValueLedger';

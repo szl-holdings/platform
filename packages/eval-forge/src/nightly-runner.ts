@@ -1,7 +1,7 @@
-import { runEvalSuite, checkRunRegression } from "./runtime.js";
-import { FORGE_SUITES } from "./suites/index.js";
-import type { EvalSuiteDef, EvalExecutor, EvalRunReport } from "./types.js";
-import { buildSuiteExecutor, type EvalInferFn } from "./executors.js";
+import { buildSuiteExecutor, type EvalInferFn } from './executors.js';
+import { checkRunRegression, runEvalSuite } from './runtime.js';
+import { FORGE_SUITES } from './suites/index.js';
+import type { EvalExecutor, EvalRunReport, EvalSuiteDef } from './types.js';
 
 export interface NightlyRunOptions {
   suites?: EvalSuiteDef[];
@@ -45,10 +45,7 @@ export interface NightlyRunSummary {
     notes: string[];
   }>;
   durationMs: number;
-  byEvalType: Record<
-    string,
-    { suiteId: string; passRate: number; passed: number; total: number }
-  >;
+  byEvalType: Record<string, { suiteId: string; passRate: number; passed: number; total: number }>;
 }
 
 const stubExecutor: EvalExecutor = async (input, caseId, domain) => {
@@ -56,7 +53,7 @@ const stubExecutor: EvalExecutor = async (input, caseId, domain) => {
   await new Promise((r) => setTimeout(r, Math.random() * 10 + 5));
   return {
     output: { ...input, _stub: true, domain, caseId, confidence: 0.85 },
-    model: "stub-model-v1",
+    model: 'stub-model-v1',
     latencyMs: Date.now() - start,
     tokensUsed: 0,
     costUsd: 0,
@@ -71,7 +68,7 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
     infer,
     baselineStore = new Map(),
     regressionThresholdPct = 5,
-    triggeredBy = "nightly-cron",
+    triggeredBy = 'nightly-cron',
     verbose = false,
   } = opts;
 
@@ -94,12 +91,14 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
   }
 
   const suiteReports: EvalRunReport[] = [];
-  const regressionDetails: NightlyRunSummary["regressionDetails"] = [];
+  const regressionDetails: NightlyRunSummary['regressionDetails'] = [];
   const criticalRegressions: string[] = [];
 
   for (const suite of suites) {
     if (verbose) {
-      console.log(`[Eval Forge]   Running: ${suite.name} (${suite.evalType}, ${suite.cases.length} cases)`);
+      console.log(
+        `[Eval Forge]   Running: ${suite.name} (${suite.evalType}, ${suite.cases.length} cases)`,
+      );
     }
 
     const report = await runEvalSuite(suite, resolveExecutor(suite), {
@@ -119,11 +118,11 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
       if (regression.hasRegression) {
         regressionDetails.push({
           suiteId: suite.suiteId,
-          evalType: suite.evalType ?? "unknown",
+          evalType: suite.evalType ?? 'unknown',
           severity: regression.severity,
           notes: regression.regressionNotes,
         });
-        if (regression.severity === "critical") {
+        if (regression.severity === 'critical') {
           criticalRegressions.push(suite.suiteId);
         }
       }
@@ -133,7 +132,7 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
     suiteReports.push(report);
 
     if (verbose) {
-      const marker = report.hasRegression ? "⚠️" : "✓";
+      const marker = report.hasRegression ? '⚠️' : '✓';
       console.log(
         `[Eval Forge]   ${marker} ${suite.suiteId}: ${report.passed}/${report.totalCases} passed (${(report.passRate * 100).toFixed(1)}%)`,
       );
@@ -147,7 +146,7 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
   const suitesWithRegression = suiteReports.filter((r) => r.hasRegression).length;
   const durationMs = Date.now() - startTime;
 
-  const byEvalType: NightlyRunSummary["byEvalType"] = {};
+  const byEvalType: NightlyRunSummary['byEvalType'] = {};
   for (const r of suiteReports) {
     if (r.evalType) {
       byEvalType[r.evalType] = {
@@ -176,14 +175,16 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
 
   if (verbose) {
     console.log(`\n[Eval Forge] Run complete in ${durationMs}ms`);
-    console.log(`[Eval Forge] ${totalPassed}/${totalCases} cases passed (${(overallPassRate * 100).toFixed(1)}%)`);
+    console.log(
+      `[Eval Forge] ${totalPassed}/${totalCases} cases passed (${(overallPassRate * 100).toFixed(1)}%)`,
+    );
     if (suitesWithRegression > 0) {
       console.log(`[Eval Forge] ⚠️  ${suitesWithRegression} suite(s) with regressions`);
     }
     if (criticalRegressions.length > 0) {
-      console.log(`[Eval Forge] 🚨 CRITICAL regressions: ${criticalRegressions.join(", ")}`);
+      console.log(`[Eval Forge] 🚨 CRITICAL regressions: ${criticalRegressions.join(', ')}`);
     }
-    console.log(`[Eval Forge] Eval types covered: ${Object.keys(byEvalType).join(", ")}`);
+    console.log(`[Eval Forge] Eval types covered: ${Object.keys(byEvalType).join(', ')}`);
   }
 
   return summary;
@@ -207,18 +208,20 @@ export async function scheduleNightlyRun(
   timeoutId = setTimeout(() => {
     if (!active) return;
     runNightlyEvals({ ...opts, verbose: true }).catch((err) =>
-      console.error("[Eval Forge] Nightly run error:", err),
+      console.error('[Eval Forge] Nightly run error:', err),
     );
     intervalId = setInterval(() => {
       if (!active) return;
       runNightlyEvals({ ...opts, verbose: true }).catch((err) =>
-        console.error("[Eval Forge] Nightly run error:", err),
+        console.error('[Eval Forge] Nightly run error:', err),
       );
     }, intervalMs);
   }, delay);
 
   if (opts.verbose) {
-    console.log(`[Eval Forge] Scheduled nightly run at UTC ${cronHourUtc}:00 (first run in ${Math.round(delay / 60000)}m)`);
+    console.log(
+      `[Eval Forge] Scheduled nightly run at UTC ${cronHourUtc}:00 (first run in ${Math.round(delay / 60000)}m)`,
+    );
   }
 
   return {

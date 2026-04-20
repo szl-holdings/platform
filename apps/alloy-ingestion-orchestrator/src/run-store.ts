@@ -5,7 +5,7 @@
  * Dev implementation: in-memory.
  */
 
-import type { WorkflowRun, ListRunsFilter } from "./types.js";
+import type { ListRunsFilter, WorkflowRun } from './types.js';
 
 export interface RunStore {
   save(run: WorkflowRun): void;

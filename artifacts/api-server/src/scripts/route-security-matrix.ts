@@ -40,31 +40,30 @@
  *   pnpm --filter @workspace/api-server exec tsx src/scripts/route-security-matrix.ts --strict-auth
  */
 
-import { readFileSync, readdirSync, statSync } from "fs";
-import { join, relative, basename } from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { readdirSync, readFileSync, statSync } from 'fs';
+import { basename, dirname, join, relative } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const ROUTES_DIR = join(__dirname, "../routes");
+const ROUTES_DIR = join(__dirname, '../routes');
 
 // ---------------------------------------------------------------------------
 // Named middleware imports — presence means the file explicitly imports an
 // auth enforcement helper.
 // ---------------------------------------------------------------------------
 const NAMED_MIDDLEWARE_INDICATORS = [
-  "authMiddleware",
-  "requireRole",
-  "requireAnyAuth",
-  "requireAuth",
-  "adminGuard",
-  "tenantScope",
-  "scimBearerAuth",
-  "dosApiKeyAuth",
-  "federationAuth",
-  "requireInternalToken",
+  'authMiddleware',
+  'requireRole',
+  'requireAnyAuth',
+  'requireAuth',
+  'adminGuard',
+  'tenantScope',
+  'scimBearerAuth',
+  'dosApiKeyAuth',
+  'federationAuth',
+  'requireInternalToken',
 ];
 
 // ---------------------------------------------------------------------------
@@ -72,15 +71,15 @@ const NAMED_MIDDLEWARE_INDICATORS = [
 // directly in handler code (not via imported middleware).
 // ---------------------------------------------------------------------------
 const INLINE_AUTH_INDICATORS = [
-  "isAuthenticated()",
-  "req.user",
-  "req.oidcUser",
-  "@public-route",
-  "intentionally unauthenticated",
-  "intentionally public",
-  "public, unauthenticated",
-  "public endpoint",
-  "no authentication required",
+  'isAuthenticated()',
+  'req.user',
+  'req.oidcUser',
+  '@public-route',
+  'intentionally unauthenticated',
+  'intentionally public',
+  'public, unauthenticated',
+  'public endpoint',
+  'no authentication required',
 ];
 
 // ---------------------------------------------------------------------------
@@ -91,42 +90,42 @@ const INLINE_AUTH_INDICATORS = [
 // ---------------------------------------------------------------------------
 const GROUP_PROTECTED_BASENAMES = new Set([
   // platform.ts group: /changelog (tenantScope required:true)
-  "changelog.ts",
+  'changelog.ts',
   // platform.ts group: /privacy (mounted after audit/changelog tenantScope)
-  "privacy.ts",
+  'privacy.ts',
   // data-services.ts group: /analytics (tenantScope or service-level auth)
-  "analytics.ts",
-  "analytics-engine.ts",
-  "telemetry.ts",
+  'analytics.ts',
+  'analytics-engine.ts',
+  'telemetry.ts',
   // operations.ts group
-  "services.ts",
+  'services.ts',
   // core.ts group: /config (inline isAuthenticated + role checks)
-  "config.ts",
+  'config.ts',
   // misc.ts or ai.ts group
-  "a2a.ts",
-  "ai-safety.ts",
-  "fine-tuning.ts",
-  "fund-inbound-deals.ts",
-  "executive-briefings.ts",
-  "aegis-pcap.ts",
-  "trust-provenance.ts",
+  'a2a.ts',
+  'ai-safety.ts',
+  'fine-tuning.ts',
+  'fund-inbound-deals.ts',
+  'executive-briefings.ts',
+  'aegis-pcap.ts',
+  'trust-provenance.ts',
   // admin/* files — registered in platform.ts with requireRole or tenantScope
-  "admin/flags.ts",
-  "admin/growth.ts",
-  "admin/integrations.ts",
-  "admin/seed.ts",
-  "admin/support.ts",
-  "admin/system.ts",
-  "admin/usage.ts",
+  'admin/flags.ts',
+  'admin/growth.ts',
+  'admin/integrations.ts',
+  'admin/seed.ts',
+  'admin/support.ts',
+  'admin/system.ts',
+  'admin/usage.ts',
   // Shared/helper files that are sub-required by protected routers
-  "control-tower/shared.ts",
-  "domain-agents/configs.ts",
-  "domain-agents/runner.ts",
-  "lyte-cognitive-helpers.ts",
+  'control-tower/shared.ts',
+  'domain-agents/configs.ts',
+  'domain-agents/runner.ts',
+  'lyte-cognitive-helpers.ts',
   // Maps: proxy to Google Maps; not in enforcer allowlist so blocked by default
-  "maps.ts",
+  'maps.ts',
   // OIDC auth handler — serves /api/auth/* which is in PUBLIC_PREFIXES
-  "oidc-auth.ts",
+  'oidc-auth.ts',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -136,40 +135,40 @@ const GROUP_PROTECTED_BASENAMES = new Set([
 // ---------------------------------------------------------------------------
 const PUBLIC_FILE_BASENAMES = new Set([
   // Health & infrastructure probes
-  "health.ts",
-  "public-status.ts",
+  'health.ts',
+  'public-status.ts',
   // Auth / OIDC flows — session creation endpoints
-  "auth.ts",
-  "oidc.ts",
-  "mobile-auth.ts",
+  'auth.ts',
+  'oidc.ts',
+  'mobile-auth.ts',
   // Public contact / marketing endpoints
-  "contact.ts",
-  "demo-requests.ts",
+  'contact.ts',
+  'demo-requests.ts',
   // Streaming ingestion — uses source token auth within the handler
-  "streaming-ingestion.ts",
+  'streaming-ingestion.ts',
   // SCIM — uses bearer token auth within the handler
-  "scim.ts",
+  'scim.ts',
   // Webhooks — uses HMAC auth within the handler
-  "webhooks.ts",
+  'webhooks.ts',
   // DOS public API — uses API key auth (dosApiKeyAuth)
-  "distribution-os.ts",
+  'distribution-os.ts',
   // Carlota Jo time-tracking — intentionally public marketing demo
-  "carlota-time-tracking.ts",
+  'carlota-time-tracking.ts',
   // LP portal — read-only public demo data
-  "lp-portal.ts",
+  'lp-portal.ts',
   // Anonymous visitor tracking — no PII, pre-login funnel
-  "page-view-tracking.ts",
+  'page-view-tracking.ts',
   // Newsletter subscribe proxy — public marketing capture
-  "newsletter.ts",
+  'newsletter.ts',
   // Demo reset — POST /api/demo/reset is in enforcer allowlist (public so the
   // Demo Launchpad presenter can reset state without auth in demo mode).
-  "demo-reset.ts",
+  'demo-reset.ts',
   // Terra cognitive read routes — intentionally optional auth (richer when authed)
-  "terra-cognitive.ts",
+  'terra-cognitive.ts',
   // Federation agent discovery
-  "agent-federation.ts",
+  'agent-federation.ts',
   // API docs (swagger UI assets)
-  "openapi.ts",
+  'openapi.ts',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -181,14 +180,14 @@ function collectRouteFiles(dir: string, files: string[] = [], base: string = dir
     const full = join(dir, entry);
     const stat = statSync(full);
     if (stat.isDirectory()) {
-      if (!["__tests__", "groups"].includes(entry)) {
+      if (!['__tests__', 'groups'].includes(entry)) {
         collectRouteFiles(full, files, base);
       }
     } else if (
-      entry.endsWith(".ts") &&
-      entry !== "index.ts" &&
-      !entry.endsWith(".test.ts") &&
-      !entry.endsWith(".spec.ts")
+      entry.endsWith('.ts') &&
+      entry !== 'index.ts' &&
+      !entry.endsWith('.test.ts') &&
+      !entry.endsWith('.spec.ts')
     ) {
       files.push(full);
     }
@@ -196,7 +195,7 @@ function collectRouteFiles(dir: string, files: string[] = [], base: string = dir
   return files;
 }
 
-type AuthStatus = "PROTECTED" | "PUBLIC" | "GROUP-PROTECTED" | "UNCLASSIFIED";
+type AuthStatus = 'PROTECTED' | 'PUBLIC' | 'GROUP-PROTECTED' | 'UNCLASSIFIED';
 
 // ---------------------------------------------------------------------------
 // Zod input validation tracking
@@ -206,24 +205,51 @@ type AuthStatus = "PROTECTED" | "PUBLIC" | "GROUP-PROTECTED" | "UNCLASSIFIED";
 // + `anyQuerySchema` safety net for any route that lacks a specific schema.
 // ---------------------------------------------------------------------------
 const ROUTE_CALL_RE = /\b(?:router|app|r)\s*\.\s*(get|post|put|patch|delete|all)\s*\(/g;
-const MUTATING_METHODS = new Set(["post", "put", "patch", "delete"]);
+const MUTATING_METHODS = new Set(['post', 'put', 'patch', 'delete']);
 
 function findMatchingParen(src: string, openIdx: number): number {
-  let depth = 0, i = openIdx;
-  let inStr: string | null = null, inTpl = false, inLine = false, inBlock = false;
+  let depth = 0,
+    i = openIdx;
+  let inStr: string | null = null,
+    inTpl = false,
+    inLine = false,
+    inBlock = false;
   while (i < src.length) {
-    const c = src[i], n = src[i + 1];
-    if (inLine) { if (c === "\n") inLine = false; }
-    else if (inBlock) { if (c === "*" && n === "/") { inBlock = false; i++; } }
-    else if (inStr) { if (c === "\\") { i += 2; continue; } if (c === inStr) inStr = null; }
-    else if (inTpl) { if (c === "\\") { i += 2; continue; } if (c === "`") inTpl = false; }
-    else {
-      if (c === "/" && n === "/") { inLine = true; i++; }
-      else if (c === "/" && n === "*") { inBlock = true; i++; }
-      else if (c === "'" || c === '"') inStr = c;
-      else if (c === "`") inTpl = true;
-      else if (c === "(") depth++;
-      else if (c === ")") { depth--; if (depth === 0) return i; }
+    const c = src[i],
+      n = src[i + 1];
+    if (inLine) {
+      if (c === '\n') inLine = false;
+    } else if (inBlock) {
+      if (c === '*' && n === '/') {
+        inBlock = false;
+        i++;
+      }
+    } else if (inStr) {
+      if (c === '\\') {
+        i += 2;
+        continue;
+      }
+      if (c === inStr) inStr = null;
+    } else if (inTpl) {
+      if (c === '\\') {
+        i += 2;
+        continue;
+      }
+      if (c === '`') inTpl = false;
+    } else {
+      if (c === '/' && n === '/') {
+        inLine = true;
+        i++;
+      } else if (c === '/' && n === '*') {
+        inBlock = true;
+        i++;
+      } else if (c === "'" || c === '"') inStr = c;
+      else if (c === '`') inTpl = true;
+      else if (c === '(') depth++;
+      else if (c === ')') {
+        depth--;
+        if (depth === 0) return i;
+      }
     }
     i++;
   }
@@ -245,8 +271,8 @@ interface ValidationStats {
 // (body is a plain JSON object; query is at least an object), but no
 // field-level shape, type, enum, or range checks. High-impact mutating
 // routes should upgrade off these to a route-specific Zod schema.
-const BASELINE_BODY_SCHEMAS = ["jsonObjectBodySchema"];
-const BASELINE_QUERY_SCHEMAS = ["anyQuerySchema", "listQuerySchema", "paginationQuerySchema"];
+const BASELINE_BODY_SCHEMAS = ['jsonObjectBodySchema'];
+const BASELINE_QUERY_SCHEMAS = ['anyQuerySchema', 'listQuerySchema', 'paginationQuerySchema'];
 
 function analyzeValidation(content: string): ValidationStats {
   const stats: ValidationStats = {
@@ -277,22 +303,26 @@ function analyzeValidation(content: string): ValidationStats {
     if ((needsBody || needsQuery) && stats.unvalidatedExamples.length < 3) {
       // Grab the first arg (path) for context
       const pathMatch = block.match(/^\s*(["'`])([^"'`]{1,80})\1/);
-      const path = pathMatch?.[2] ?? "(unknown path)";
+      const path = pathMatch?.[2] ?? '(unknown path)';
       stats.unvalidatedExamples.push(`${method.toUpperCase()} ${path}`);
     }
 
     // Detect baseline (permissive) schemas — present but not field-tightened.
-    const baselineBody = hasBody && BASELINE_BODY_SCHEMAS.some(s =>
-      new RegExp(`\\bvalidateBody\\s*\\(\\s*${s}\\b`).test(block),
-    );
-    const baselineQuery = hasQuery && BASELINE_QUERY_SCHEMAS.some(s =>
-      new RegExp(`\\bvalidateQuery\\s*\\(\\s*${s}\\b`).test(block),
-    );
+    const baselineBody =
+      hasBody &&
+      BASELINE_BODY_SCHEMAS.some((s) =>
+        new RegExp(`\\bvalidateBody\\s*\\(\\s*${s}\\b`).test(block),
+      );
+    const baselineQuery =
+      hasQuery &&
+      BASELINE_QUERY_SCHEMAS.some((s) =>
+        new RegExp(`\\bvalidateQuery\\s*\\(\\s*${s}\\b`).test(block),
+      );
     if (baselineBody) stats.baselineBody++;
     if (baselineQuery) stats.baselineQuery++;
     if ((baselineBody || baselineQuery) && stats.baselineExamples.length < 3) {
       const pathMatch = block.match(/^\s*(["'`])([^"'`]{1,80})\1/);
-      const path = pathMatch?.[2] ?? "(unknown path)";
+      const path = pathMatch?.[2] ?? '(unknown path)';
       stats.baselineExamples.push(`${method.toUpperCase()} ${path}`);
     }
   }
@@ -314,7 +344,7 @@ function analyzeFile(filePath: string): RouteEntry {
   const fileName = basename(filePath);
   // For files in subdirectories, use "subdir/filename.ts" format for group matching
   const relBasename = relPath;
-  const content = readFileSync(filePath, "utf-8");
+  const content = readFileSync(filePath, 'utf-8');
 
   const namedIndicators: string[] = [];
   for (const indicator of NAMED_MIDDLEWARE_INDICATORS) {
@@ -331,18 +361,20 @@ function analyzeFile(filePath: string): RouteEntry {
   }
 
   const allIndicators = [...namedIndicators, ...inlineIndicators];
-  const isPublicAllowlisted = PUBLIC_FILE_BASENAMES.has(fileName) || PUBLIC_FILE_BASENAMES.has(relBasename);
-  const isGroupProtected = GROUP_PROTECTED_BASENAMES.has(fileName) || GROUP_PROTECTED_BASENAMES.has(relBasename);
+  const isPublicAllowlisted =
+    PUBLIC_FILE_BASENAMES.has(fileName) || PUBLIC_FILE_BASENAMES.has(relBasename);
+  const isGroupProtected =
+    GROUP_PROTECTED_BASENAMES.has(fileName) || GROUP_PROTECTED_BASENAMES.has(relBasename);
 
   let status: AuthStatus;
   if (allIndicators.length > 0) {
-    status = "PROTECTED";
+    status = 'PROTECTED';
   } else if (isPublicAllowlisted) {
-    status = "PUBLIC";
+    status = 'PUBLIC';
   } else if (isGroupProtected) {
-    status = "GROUP-PROTECTED";
+    status = 'GROUP-PROTECTED';
   } else {
-    status = "UNCLASSIFIED";
+    status = 'UNCLASSIFIED';
   }
 
   return {
@@ -361,17 +393,17 @@ function analyzeFile(filePath: string): RouteEntry {
 // ---------------------------------------------------------------------------
 
 const args = process.argv.slice(2);
-const jsonMode = args.includes("--json");
-const strictMode = args.includes("--strict");
-const strictAuthMode = args.includes("--strict-auth");
+const jsonMode = args.includes('--json');
+const strictMode = args.includes('--strict');
+const strictAuthMode = args.includes('--strict-auth');
 
 const routeFiles = collectRouteFiles(ROUTES_DIR);
 const entries = routeFiles.map(analyzeFile);
 
-const protected_ = entries.filter(e => e.status === "PROTECTED");
-const public_ = entries.filter(e => e.status === "PUBLIC");
-const groupProtected = entries.filter(e => e.status === "GROUP-PROTECTED");
-const unclassified = entries.filter(e => e.status === "UNCLASSIFIED");
+const protected_ = entries.filter((e) => e.status === 'PROTECTED');
+const public_ = entries.filter((e) => e.status === 'PUBLIC');
+const groupProtected = entries.filter((e) => e.status === 'GROUP-PROTECTED');
+const unclassified = entries.filter((e) => e.status === 'UNCLASSIFIED');
 
 // Aggregate Zod input validation coverage across all route files.
 const validationTotals = entries.reduce(
@@ -386,16 +418,18 @@ const validationTotals = entries.reduce(
   { totalRoutes: 0, unvalidatedBody: 0, unvalidatedQuery: 0, baselineBody: 0, baselineQuery: 0 },
 );
 const filesWithUnvalidated = entries.filter(
-  e => e.validation.unvalidatedBody > 0 || e.validation.unvalidatedQuery > 0,
+  (e) => e.validation.unvalidatedBody > 0 || e.validation.unvalidatedQuery > 0,
 );
 const filesWithBaseline = entries
-  .filter(e => e.validation.baselineBody > 0 || e.validation.baselineQuery > 0)
-  .sort((a, b) =>
-    (b.validation.baselineBody + b.validation.baselineQuery) -
-    (a.validation.baselineBody + a.validation.baselineQuery),
+  .filter((e) => e.validation.baselineBody > 0 || e.validation.baselineQuery > 0)
+  .sort(
+    (a, b) =>
+      b.validation.baselineBody +
+      b.validation.baselineQuery -
+      (a.validation.baselineBody + a.validation.baselineQuery),
   );
-const filesWithValidation = entries.filter(e => {
-  const c = readFileSync(e.file, "utf-8");
+const filesWithValidation = entries.filter((e) => {
+  const c = readFileSync(e.file, 'utf-8');
   return /\bvalidate(Body|Query|Params)\s*\(/.test(c);
 });
 
@@ -408,7 +442,9 @@ if (jsonMode) {
       groupProtected: groupProtected.length,
       public: public_.length,
       unclassified: unclassified.length,
-      coveragePct: Math.round(((protected_.length + groupProtected.length + public_.length) / entries.length) * 100),
+      coveragePct: Math.round(
+        ((protected_.length + groupProtected.length + public_.length) / entries.length) * 100,
+      ),
       validation: {
         totalRoutes: validationTotals.totalRoutes,
         filesWithValidation: filesWithValidation.length,
@@ -434,15 +470,15 @@ if (jsonMode) {
             Math.max(1, validationTotals.totalRoutes)) *
             100,
         ),
-        topBaselineFiles: filesWithBaseline.slice(0, 20).map(e => ({
+        topBaselineFiles: filesWithBaseline.slice(0, 20).map((e) => ({
           file: e.relPath,
           baselineBody: e.validation.baselineBody,
           baselineQuery: e.validation.baselineQuery,
         })),
       },
     },
-    note: "All /api/* routes not in the enforcer public allowlist are blocked by the global deny-by-default guard (src/middlewares/global-auth-enforcer.ts) regardless of file-level indicators.",
-    routes: entries.map(e => ({
+    note: 'All /api/* routes not in the enforcer public allowlist are blocked by the global deny-by-default guard (src/middlewares/global-auth-enforcer.ts) regardless of file-level indicators.',
+    routes: entries.map((e) => ({
       file: e.relPath,
       status: e.status,
       isPublicAllowlisted: e.isPublicAllowlisted,
@@ -450,29 +486,33 @@ if (jsonMode) {
       indicators: e.indicators,
     })),
   };
-  process.stdout.write(JSON.stringify(output, null, 2) + "\n");
+  process.stdout.write(JSON.stringify(output, null, 2) + '\n');
 } else {
   const pad = (s: string, n: number) => s.padEnd(n);
   const COL_FILE = 55;
   const COL_STATUS = 16;
   const COL_INDICATORS = 40;
 
-  const sep = "-".repeat(COL_FILE + COL_STATUS + COL_INDICATORS + 6);
-  console.log("\n=== SZL Holdings — Route Security Matrix ===");
+  const sep = '-'.repeat(COL_FILE + COL_STATUS + COL_INDICATORS + 6);
+  console.log('\n=== SZL Holdings — Route Security Matrix ===');
   console.log(`Generated: ${new Date().toISOString()}`);
-  console.log("Backstop: global deny-by-default enforcer blocks all unauthenticated /api/* requests");
-  console.log("         not in the public allowlist (src/middlewares/global-auth-enforcer.ts).\n");
   console.log(
-    pad("Route file", COL_FILE) + " | " +
-    pad("Status", COL_STATUS) + " | " +
-    "Auth indicators / notes"
+    'Backstop: global deny-by-default enforcer blocks all unauthenticated /api/* requests',
+  );
+  console.log('         not in the public allowlist (src/middlewares/global-auth-enforcer.ts).\n');
+  console.log(
+    pad('Route file', COL_FILE) +
+      ' | ' +
+      pad('Status', COL_STATUS) +
+      ' | ' +
+      'Auth indicators / notes',
   );
   console.log(sep);
 
   const grouped: Record<string, RouteEntry[]> = {
     PROTECTED: protected_,
     PUBLIC: public_,
-    "GROUP-PROTECTED": groupProtected,
+    'GROUP-PROTECTED': groupProtected,
     UNCLASSIFIED: unclassified,
   };
 
@@ -480,50 +520,66 @@ if (jsonMode) {
     if (group.length === 0) continue;
     for (const e of group.sort((a, b) => a.relPath.localeCompare(b.relPath))) {
       let notes: string;
-      if (e.status === "PROTECTED") {
-        notes = e.indicators.slice(0, 3).join(", ") + (e.indicators.length > 3 ? ` +${e.indicators.length - 3}` : "");
-      } else if (e.status === "PUBLIC") {
-        notes = "(in enforcer allowlist — intentionally public)";
-      } else if (e.status === "GROUP-PROTECTED") {
-        notes = "(auth applied at route-group level — attested April 2026)";
+      if (e.status === 'PROTECTED') {
+        notes =
+          e.indicators.slice(0, 3).join(', ') +
+          (e.indicators.length > 3 ? ` +${e.indicators.length - 3}` : '');
+      } else if (e.status === 'PUBLIC') {
+        notes = '(in enforcer allowlist — intentionally public)';
+      } else if (e.status === 'GROUP-PROTECTED') {
+        notes = '(auth applied at route-group level — attested April 2026)';
       } else {
-        notes = "⚠ NONE — review required";
+        notes = '⚠ NONE — review required';
       }
-      console.log(
-        pad(e.relPath, COL_FILE) + " | " +
-        pad(groupName, COL_STATUS) + " | " +
-        notes
-      );
+      console.log(pad(e.relPath, COL_FILE) + ' | ' + pad(groupName, COL_STATUS) + ' | ' + notes);
     }
     console.log(sep);
   }
 
-  console.log("\nSummary:");
+  console.log('\nSummary:');
   console.log(`  Total route files   : ${entries.length}`);
   console.log(`  PROTECTED           : ${protected_.length} (explicit auth enforcement in file)`);
-  console.log(`  GROUP-PROTECTED     : ${groupProtected.length} (auth applied at route-group registration level)`);
-  console.log(`  PUBLIC              : ${public_.length} (intentionally unauthenticated, in enforcer allowlist)`);
+  console.log(
+    `  GROUP-PROTECTED     : ${groupProtected.length} (auth applied at route-group registration level)`,
+  );
+  console.log(
+    `  PUBLIC              : ${public_.length} (intentionally unauthenticated, in enforcer allowlist)`,
+  );
   console.log(`  UNCLASSIFIED        : ${unclassified.length} (require review)`);
-  console.log(`  Total auth coverage : ${Math.round(((protected_.length + groupProtected.length + public_.length) / entries.length) * 100)}%`);
+  console.log(
+    `  Total auth coverage : ${Math.round(((protected_.length + groupProtected.length + public_.length) / entries.length) * 100)}%`,
+  );
 
-  console.log("\nZod input validation:");
+  console.log('\nZod input validation:');
   console.log(`  Files with validation: ${filesWithValidation.length}/${entries.length}`);
   console.log(`  Total route handlers : ${validationTotals.totalRoutes}`);
-  console.log(`  Unvalidated body     : ${validationTotals.unvalidatedBody} mutating routes (POST/PUT/PATCH/DELETE)`);
-  console.log(`  Unvalidated query    : ${validationTotals.unvalidatedQuery} routes reading req.query`);
+  console.log(
+    `  Unvalidated body     : ${validationTotals.unvalidatedBody} mutating routes (POST/PUT/PATCH/DELETE)`,
+  );
+  console.log(
+    `  Unvalidated query    : ${validationTotals.unvalidatedQuery} routes reading req.query`,
+  );
   console.log(`  Files needing fixes  : ${filesWithUnvalidated.length}`);
   if (filesWithUnvalidated.length > 0 && filesWithUnvalidated.length <= 25) {
-    console.log("\n  Files with unvalidated handlers:");
+    console.log('\n  Files with unvalidated handlers:');
     for (const e of filesWithUnvalidated) {
       const v = e.validation;
-      console.log(`    - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${v.unvalidatedExamples.join("; ")}`);
+      console.log(
+        `    - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${v.unvalidatedExamples.join('; ')}`,
+      );
     }
   }
 
-  console.log("\nField-level (tightened) schema coverage:");
-  console.log(`  Routes on baseline body schema (jsonObjectBodySchema)  : ${validationTotals.baselineBody}`);
-  console.log(`  Routes on baseline query schema (anyQuerySchema, etc.) : ${validationTotals.baselineQuery}`);
-  console.log(`  Files with one or more baseline-schema routes          : ${filesWithBaseline.length}`);
+  console.log('\nField-level (tightened) schema coverage:');
+  console.log(
+    `  Routes on baseline body schema (jsonObjectBodySchema)  : ${validationTotals.baselineBody}`,
+  );
+  console.log(
+    `  Routes on baseline query schema (anyQuerySchema, etc.) : ${validationTotals.baselineQuery}`,
+  );
+  console.log(
+    `  Files with one or more baseline-schema routes          : ${filesWithBaseline.length}`,
+  );
   const tightenedPct = Math.round(
     ((validationTotals.totalRoutes -
       validationTotals.unvalidatedBody -
@@ -539,7 +595,9 @@ if (jsonMode) {
     console.log(`\n  Top ${top.length} files still on baseline schemas (highest counts first):`);
     for (const e of top) {
       const v = e.validation;
-      console.log(`    - ${e.relPath}  body=${v.baselineBody} query=${v.baselineQuery}  e.g. ${v.baselineExamples.join("; ")}`);
+      console.log(
+        `    - ${e.relPath}  body=${v.baselineBody} query=${v.baselineQuery}  e.g. ${v.baselineExamples.join('; ')}`,
+      );
     }
   }
 
@@ -548,18 +606,24 @@ if (jsonMode) {
     for (const e of unclassified) {
       console.log(`   - ${e.relPath}`);
     }
-    console.log("\n  Action required: either:");
-    console.log("   (a) Add auth enforcement middleware to the file (authMiddleware, requireRole, tenantScope, etc.)");
-    console.log("   (b) Add the file to PUBLIC_FILE_BASENAMES in this script AND to");
-    console.log("       PUBLIC_EXACT_PATHS / PUBLIC_PREFIXES in src/middlewares/global-auth-enforcer.ts");
-    console.log("   (c) Add the file to GROUP_PROTECTED_BASENAMES in this script and attest");
-    console.log("       that it is protected by group-level middleware in routes/groups/*.ts");
-    console.log("\n  Note: the global deny-by-default enforcer blocks unauthenticated access");
-    console.log("  to all non-allowlisted routes regardless — but defence-in-depth requires");
-    console.log("  explicit file-level or group-level classification.");
+    console.log('\n  Action required: either:');
+    console.log(
+      '   (a) Add auth enforcement middleware to the file (authMiddleware, requireRole, tenantScope, etc.)',
+    );
+    console.log('   (b) Add the file to PUBLIC_FILE_BASENAMES in this script AND to');
+    console.log(
+      '       PUBLIC_EXACT_PATHS / PUBLIC_PREFIXES in src/middlewares/global-auth-enforcer.ts',
+    );
+    console.log('   (c) Add the file to GROUP_PROTECTED_BASENAMES in this script and attest');
+    console.log('       that it is protected by group-level middleware in routes/groups/*.ts');
+    console.log('\n  Note: the global deny-by-default enforcer blocks unauthenticated access');
+    console.log('  to all non-allowlisted routes regardless — but defence-in-depth requires');
+    console.log('  explicit file-level or group-level classification.');
   } else {
-    console.log("\n✓  All route files are classified as PROTECTED, GROUP-PROTECTED, or explicitly PUBLIC.");
-    console.log("   Deny-by-default enforcement gap is closed.");
+    console.log(
+      '\n✓  All route files are classified as PROTECTED, GROUP-PROTECTED, or explicitly PUBLIC.',
+    );
+    console.log('   Deny-by-default enforcement gap is closed.');
   }
   console.log();
 }
@@ -573,7 +637,7 @@ if (strictMode) {
     validationTotals.unvalidatedBody > 0 ||
     validationTotals.unvalidatedQuery > 0;
   if (hasIssues) {
-    console.error("\n✗  Route Security Matrix --strict: regression detected.\n");
+    console.error('\n✗  Route Security Matrix --strict: regression detected.\n');
     if (unclassified.length > 0) {
       console.error(
         `  • ${unclassified.length} route file(s) are UNCLASSIFIED — add explicit ` +
@@ -586,31 +650,33 @@ if (strictMode) {
         `  • ${validationTotals.unvalidatedBody} mutating handler(s) missing validateBody, ` +
           `${validationTotals.unvalidatedQuery} handler(s) reading req.query without validateQuery.`,
       );
-      const sample = filesWithUnvalidated.slice(0, 5).map(e => {
+      const sample = filesWithUnvalidated.slice(0, 5).map((e) => {
         const v = e.validation;
-        const ex = v.unvalidatedExamples.join("; ");
+        const ex = v.unvalidatedExamples.join('; ');
         return `      - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${ex}`;
       });
       if (sample.length > 0) {
-        console.error(`\n    Files needing validation (first ${sample.length} of ${filesWithUnvalidated.length}):`);
+        console.error(
+          `\n    Files needing validation (first ${sample.length} of ${filesWithUnvalidated.length}):`,
+        );
         for (const line of sample) console.error(line);
       }
       console.error(
-        "\n  How to fix:\n" +
-          "    1) Preferred — add a route-specific Zod schema in src/lib/validation.ts and\n" +
-          "       wire it as the first middleware:\n" +
-          "         router.post(\"/path\", validateBody(myRouteSchema), handler)\n" +
-          "    2) Fast unblock — install the baseline safety net automatically:\n" +
-          "         pnpm --filter @workspace/api-server exec tsx \\\n" +
-          "           src/scripts/apply-validation-codemod.ts\n" +
-          "       This adds validateBody(jsonObjectBodySchema) /\n" +
-          "       validateQuery(anyQuerySchema) to any new mutating routes so the\n" +
-          "       gate goes green; tighten the schema in a follow-up PR.",
+        '\n  How to fix:\n' +
+          '    1) Preferred — add a route-specific Zod schema in src/lib/validation.ts and\n' +
+          '       wire it as the first middleware:\n' +
+          '         router.post("/path", validateBody(myRouteSchema), handler)\n' +
+          '    2) Fast unblock — install the baseline safety net automatically:\n' +
+          '         pnpm --filter @workspace/api-server exec tsx \\\n' +
+          '           src/scripts/apply-validation-codemod.ts\n' +
+          '       This adds validateBody(jsonObjectBodySchema) /\n' +
+          '       validateQuery(anyQuerySchema) to any new mutating routes so the\n' +
+          '       gate goes green; tighten the schema in a follow-up PR.',
       );
     }
     console.error(
-      "\n  Re-run locally to verify:\n" +
-        "    pnpm --filter @workspace/api-server run audit:route-security:strict\n",
+      '\n  Re-run locally to verify:\n' +
+        '    pnpm --filter @workspace/api-server run audit:route-security:strict\n',
     );
     process.exit(1);
   }

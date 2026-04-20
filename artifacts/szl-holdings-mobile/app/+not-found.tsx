@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import { Link } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function NotFound() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Not Found</Text>
-      <Link href={"/(shell)" as any} style={styles.link}>
+      <Link href={'/(shell)' as any} style={styles.link}>
         <Text style={styles.linkText}>Go Home</Text>
       </Link>
     </View>
@@ -15,15 +15,15 @@ export default function NotFound() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#090810",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#090810',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 24,
   },
   title: {
-    color: "#f0eeff",
+    color: '#f0eeff',
     fontSize: 18,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     marginBottom: 16,
   },
   link: {
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   linkText: {
-    color: "#c9a84c",
+    color: '#c9a84c',
     fontSize: 14,
   },
 });

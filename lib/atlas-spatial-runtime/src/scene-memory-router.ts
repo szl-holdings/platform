@@ -1,11 +1,11 @@
 import {
   db,
+  type SpatialTwinCategory,
   sceneMemoryIndexTable,
   spatialTwinSnapshotsTable,
-  type SpatialTwinCategory,
-} from "@szl-holdings/db";
-import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
-import type { SceneMemorySlice, SceneMemoryQuery } from "./types.js";
+} from '@szl-holdings/db';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import type { SceneMemoryQuery, SceneMemorySlice } from './types.js';
 
 function computeRecencyScore(snapshotAt: Date): number {
   const ageMs = Date.now() - snapshotAt.getTime();
@@ -19,12 +19,7 @@ function computeCompositeScore(
   trustWeight: number,
   causalRelevanceScore: number,
 ): number {
-  return (
-    overlapScore * 0.35 +
-    recencyScore * 0.25 +
-    trustWeight * 0.20 +
-    causalRelevanceScore * 0.20
-  );
+  return overlapScore * 0.35 + recencyScore * 0.25 + trustWeight * 0.2 + causalRelevanceScore * 0.2;
 }
 
 export interface IndexSnapshotParams {
@@ -47,17 +42,24 @@ export async function indexSnapshot(params: IndexSnapshotParams): Promise<void> 
     .select({ snapshotAt: spatialTwinSnapshotsTable.snapshotAt })
     .from(spatialTwinSnapshotsTable)
     .where(eq(spatialTwinSnapshotsTable.id, params.snapshotId))
-    .then(r => r[0]);
+    .then((r) => r[0]);
 
   if (!snapshot) {
-    throw Object.assign(new Error(`Snapshot ${params.snapshotId} not found for indexing`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Snapshot ${params.snapshotId} not found for indexing`), {
+      code: 'NOT_FOUND',
+    });
   }
 
   const recencyScore = computeRecencyScore(snapshot.snapshotAt);
   const overlapScore = params.overlapScore ?? 0.5;
   const trustWeight = params.trustWeight ?? 0.7;
   const causalRelevanceScore = params.causalRelevanceScore ?? 0.5;
-  const compositeRankScore = computeCompositeScore(overlapScore, recencyScore, trustWeight, causalRelevanceScore);
+  const compositeRankScore = computeCompositeScore(
+    overlapScore,
+    recencyScore,
+    trustWeight,
+    causalRelevanceScore,
+  );
 
   await db.insert(sceneMemoryIndexTable).values({
     orgId: params.orgId ?? null,
@@ -83,11 +85,10 @@ export async function recallSceneMemory(query: SceneMemoryQuery): Promise<SceneM
   if (query.orgId != null) conditions.push(eq(sceneMemoryIndexTable.orgId, query.orgId));
   if (query.twinId) conditions.push(eq(sceneMemoryIndexTable.twinId, query.twinId));
   if (query.entityId) conditions.push(eq(sceneMemoryIndexTable.entityId, query.entityId));
-  if (query.twinCategory) conditions.push(eq(sceneMemoryIndexTable.twinCategory, query.twinCategory));
+  if (query.twinCategory)
+    conditions.push(eq(sceneMemoryIndexTable.twinCategory, query.twinCategory));
   if (query.minCompositeScore != null) {
-    conditions.push(
-      sql`${sceneMemoryIndexTable.compositeRankScore} >= ${query.minCompositeScore}`
-    );
+    conditions.push(sql`${sceneMemoryIndexTable.compositeRankScore} >= ${query.minCompositeScore}`);
   }
 
   const rows = await db
@@ -117,8 +118,8 @@ export async function recallSceneMemory(query: SceneMemoryQuery): Promise<SceneM
     .limit(query.limit ?? 20);
 
   return rows
-    .filter(r => r.snapshotId != null)
-    .map(r => ({
+    .filter((r) => r.snapshotId != null)
+    .map((r) => ({
       snapshotId: r.snapshotId!,
       twinId: r.twinId,
       entityId: r.entityId,
@@ -143,7 +144,9 @@ export async function getTopMemorySlices(
 }
 
 export async function pruneExpiredMemory(twinId?: string): Promise<number> {
-  const conditions = [sql`${sceneMemoryIndexTable.expiresAt} IS NOT NULL AND ${sceneMemoryIndexTable.expiresAt} < NOW()`];
+  const conditions = [
+    sql`${sceneMemoryIndexTable.expiresAt} IS NOT NULL AND ${sceneMemoryIndexTable.expiresAt} < NOW()`,
+  ];
   if (twinId) conditions.push(eq(sceneMemoryIndexTable.twinId, twinId));
 
   const result = await db

@@ -18,12 +18,12 @@
  * the `queue*` wrappers below to keep work from being lost when the API
  * server restarts mid-request.
  */
-import { durableJobQueue } from "@szl-holdings/forge-runtime";
-import { JOB_TYPES } from "./job-queue";
-import { logger } from "./logger";
-import { sendEmail, type EmailOptions } from "./email";
-import { gatewayInfer, type GatewayRequest } from "./ai-gateway";
-import { dispatchExternalAlert, type AlertDispatchParams } from "./notification-dispatch";
+import { durableJobQueue } from '@szl-holdings/forge-runtime';
+import { type GatewayRequest, gatewayInfer } from './ai-gateway';
+import { type EmailOptions, sendEmail } from './email';
+import { JOB_TYPES } from './job-queue';
+import { logger } from './logger';
+import { type AlertDispatchParams, dispatchExternalAlert } from './notification-dispatch';
 
 let registered = false;
 
@@ -41,13 +41,13 @@ export function registerQueuedJobHandlers(): void {
     if (!result.success) {
       logger.warn(
         { jobId: job.id, to: opts.to, subject: opts.subject, error: result.error },
-        "[queued-email] Email delivery failed — will retry via durable queue"
+        '[queued-email] Email delivery failed — will retry via durable queue',
       );
-      throw new Error(`Email delivery failed: ${result.error ?? "unknown"}`);
+      throw new Error(`Email delivery failed: ${result.error ?? 'unknown'}`);
     }
     logger.info(
       { jobId: job.id, to: opts.to, provider: result.provider, messageId: result.messageId },
-      "[queued-email] Email delivered"
+      '[queued-email] Email delivered',
     );
   });
 
@@ -63,13 +63,18 @@ export function registerQueuedJobHandlers(): void {
     };
     const response = await gatewayInfer(request);
     logger.info(
-      { jobId: job.id, agentId: request.agentId, provider: response.provider, latencyMs: response.routing.totalLatencyMs },
-      "[queued-ai] Inference complete"
+      {
+        jobId: job.id,
+        agentId: request.agentId,
+        provider: response.provider,
+        latencyMs: response.routing.totalLatencyMs,
+      },
+      '[queued-ai] Inference complete',
     );
     if (callback?.url) {
       const res = await fetch(callback.url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(callback.headers ?? {}) },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(callback.headers ?? {}) },
         body: JSON.stringify({ jobId: job.id, response }),
         signal: AbortSignal.timeout(10_000),
       });
@@ -88,16 +93,22 @@ export function registerQueuedJobHandlers(): void {
     await dispatchExternalAlert(params);
     logger.info(
       { jobId: job.id, appName: params.appName, severity: params.severity },
-      "[queued-alert] External alert dispatch complete"
+      '[queued-alert] External alert dispatch complete',
     );
   });
 
-  logger.info("[queued-jobs] Registered handlers: EMAIL_SEND, AI_INFERENCE, EXTERNAL_ALERT");
+  logger.info('[queued-jobs] Registered handlers: EMAIL_SEND, AI_INFERENCE, EXTERNAL_ALERT');
 }
 
 /** Enqueue an email for durable delivery. Returns the job id. */
-export async function queueEmail(opts: EmailOptions, queueName: "critical" | "high" | "default" | "low" = "default"): Promise<string> {
-  const job = await durableJobQueue.enqueue(JOB_TYPES.EMAIL_SEND, opts, { queue: queueName, maxRetries: 5 });
+export async function queueEmail(
+  opts: EmailOptions,
+  queueName: 'critical' | 'high' | 'default' | 'low' = 'default',
+): Promise<string> {
+  const job = await durableJobQueue.enqueue(JOB_TYPES.EMAIL_SEND, opts, {
+    queue: queueName,
+    maxRetries: 5,
+  });
   return job.id;
 }
 
@@ -109,7 +120,7 @@ export async function queueAiInference(
   const job = await durableJobQueue.enqueue(
     JOB_TYPES.AI_INFERENCE,
     { request, callback },
-    { queue: "agents", maxRetries: 3 },
+    { queue: 'agents', maxRetries: 3 },
   );
   return job.id;
 }
@@ -117,8 +128,11 @@ export async function queueAiInference(
 /** Enqueue an external alert for durable fanout to Slack/Teams/email/SMS/voice/push. */
 export async function queueExternalAlert(
   params: AlertDispatchParams,
-  queueName: "critical" | "high" | "default" = "high",
+  queueName: 'critical' | 'high' | 'default' = 'high',
 ): Promise<string> {
-  const job = await durableJobQueue.enqueue(JOB_TYPES.EXTERNAL_ALERT, params, { queue: queueName, maxRetries: 4 });
+  const job = await durableJobQueue.enqueue(JOB_TYPES.EXTERNAL_ALERT, params, {
+    queue: queueName,
+    maxRetries: 4,
+  });
   return job.id;
 }

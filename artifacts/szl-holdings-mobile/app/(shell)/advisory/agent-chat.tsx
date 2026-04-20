@@ -1,1 +1,1 @@
-export { default } from "./(tabs)/agent-chat";
+export { default } from './(tabs)/agent-chat';

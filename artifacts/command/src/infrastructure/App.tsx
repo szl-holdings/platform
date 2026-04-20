@@ -1,7 +1,7 @@
-import React, { lazy, Suspense } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ImperiumLayout } from "@imp/components/imperium-layout";
+import { ImperiumLayout } from '@imp/components/imperium-layout';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { lazy, Suspense } from 'react';
+import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,7 +19,7 @@ function PageLoader() {
       <div className="flex flex-col items-center gap-3">
         <div
           className="w-8 h-8 border-2 rounded-full animate-spin"
-          style={{ borderColor: "rgba(201,162,39,0.2)", borderTopColor: "#c9a227" }}
+          style={{ borderColor: 'rgba(201,162,39,0.2)', borderTopColor: '#c9a227' }}
         />
         <p className="font-display text-xs tracking-widest text-gold-dim uppercase">
           Consulting the Augurs...
@@ -29,19 +29,19 @@ function PageLoader() {
   );
 }
 
-const LegatusConsole = lazy(() => import("@/pages/legatus-console"));
-const ImperiumMap = lazy(() => import("@/pages/imperium-map"));
-const PraetorianGuard = lazy(() => import("@/pages/praetorian-guard"));
-const SenateChamber = lazy(() => import("@/pages/senate-chamber"));
-const SupplyLines = lazy(() => import("@/pages/supply-lines"));
-const CenturionAI = lazy(() => import("@/pages/centurion-ai"));
-const IntelligenceBriefing = lazy(() => import("@/pages/intelligence-briefing"));
-const GeospatialIntelligence = lazy(() => import("@/pages/geospatial"));
-const DirectiveCascade = lazy(() => import("@/pages/directive-cascade"));
-const Coalition = lazy(() => import("@/pages/coalition"));
-const StrategicReserves = lazy(() => import("@/pages/strategic-reserves"));
+const LegatusConsole = lazy(() => import('@/pages/legatus-console'));
+const ImperiumMap = lazy(() => import('@/pages/imperium-map'));
+const PraetorianGuard = lazy(() => import('@/pages/praetorian-guard'));
+const SenateChamber = lazy(() => import('@/pages/senate-chamber'));
+const SupplyLines = lazy(() => import('@/pages/supply-lines'));
+const CenturionAI = lazy(() => import('@/pages/centurion-ai'));
+const IntelligenceBriefing = lazy(() => import('@/pages/intelligence-briefing'));
+const GeospatialIntelligence = lazy(() => import('@/pages/geospatial'));
+const DirectiveCascade = lazy(() => import('@/pages/directive-cascade'));
+const Coalition = lazy(() => import('@/pages/coalition'));
+const StrategicReserves = lazy(() => import('@/pages/strategic-reserves'));
 
-const base = (import.meta.env.BASE_URL || "/imperium/").replace(/\/$/, "");
+const base = (import.meta.env.BASE_URL || '/imperium/').replace(/\/$/, '');
 
 export default function App() {
   return (

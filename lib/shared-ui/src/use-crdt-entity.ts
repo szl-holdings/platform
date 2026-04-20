@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface FieldSchema {
   conflictReview?: boolean;
@@ -40,7 +40,7 @@ interface LwwField {
 }
 
 interface CrdtDeltaMsg {
-  type: "crdt:delta";
+  type: 'crdt:delta';
   room: string;
   entityType: string;
   entityId: string;
@@ -57,8 +57,8 @@ function lwwWins(a: LwwField, b: LwwField): LwwField {
 }
 
 function getWsUrl(): string {
-  if (typeof window === "undefined") return "";
-  const proto = window.location.protocol === "https:" ? "wss" : "ws";
+  if (typeof window === 'undefined') return '';
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
   return `${proto}://${window.location.host}/ws`;
 }
 
@@ -66,9 +66,9 @@ export function useCrdtEntity(
   entityType: string,
   entityId: string,
   initialValues: Record<string, unknown> = {},
-  options: UseCrdtEntityOptions = {}
+  options: UseCrdtEntityOptions = {},
 ): UseCrdtEntityResult {
-  const { apiBaseUrl = "/api", actorId = "anon", schema, onMerge } = options;
+  const { apiBaseUrl = '/api', actorId = 'anon', schema, onMerge } = options;
   const room = `${entityType}:${entityId}`;
 
   const [fields, setFields] = useState<Record<string, unknown>>(initialValues);
@@ -87,7 +87,7 @@ export function useCrdtEntity(
         fieldStatesRef.current[key] = {
           value,
           timestamp: 0,
-          actorId: "__initial__",
+          actorId: '__initial__',
           clock: {},
         };
       }
@@ -102,20 +102,32 @@ export function useCrdtEntity(
     wsRef.current = ws;
 
     ws.onopen = () => {
-      if (!mountedRef.current) { ws.close(); return; }
-      ws.send(JSON.stringify({ type: "crdt:subscribe", room }));
+      if (!mountedRef.current) {
+        ws.close();
+        return;
+      }
+      ws.send(JSON.stringify({ type: 'crdt:subscribe', room }));
       setIsConnected(true);
     };
 
     ws.onmessage = (ev) => {
       if (!mountedRef.current) return;
       try {
-        const msg = JSON.parse(ev.data as string) as { type: string; room?: string; delta?: Record<string, LwwField>; entityType?: string; entityId?: string; actorId?: string; ts?: number; clock?: Record<string, number> };
-        if (msg.type === "ping") {
-          ws.send(JSON.stringify({ type: "pong", timestamp: Date.now() }));
+        const msg = JSON.parse(ev.data as string) as {
+          type: string;
+          room?: string;
+          delta?: Record<string, LwwField>;
+          entityType?: string;
+          entityId?: string;
+          actorId?: string;
+          ts?: number;
+          clock?: Record<string, number>;
+        };
+        if (msg.type === 'ping') {
+          ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
           return;
         }
-        if (msg.type !== "crdt:delta" || msg.room !== room) return;
+        if (msg.type !== 'crdt:delta' || msg.room !== room) return;
 
         const delta = msg.delta ?? {};
         const mergeEvents: CrdtMergeEvent[] = [];
@@ -157,7 +169,9 @@ export function useCrdtEntity(
           setPendingMerges((prev) => [...prev, ...mergeEvents]);
           onMerge?.(mergeEvents);
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     };
 
     ws.onclose = () => {
@@ -203,20 +217,20 @@ export function useCrdtEntity(
       if (ws?.readyState === WebSocket.OPEN) {
         ws.send(
           JSON.stringify({
-            type: "crdt:delta",
+            type: 'crdt:delta',
             room,
             entityType,
             entityId,
             actorId,
             delta: { [key]: field },
             clock: newClock,
-          })
+          }),
         );
       } else {
         fetch(`${apiBaseUrl}/changes`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             entityType,
             entityId,
@@ -224,10 +238,12 @@ export function useCrdtEntity(
             delta: { [key]: field },
             crdtClock: newClock,
           }),
-        }).catch(() => { /* ignore */ });
+        }).catch(() => {
+          /* ignore */
+        });
       }
     },
-    [room, entityType, entityId, actorId, apiBaseUrl]
+    [room, entityType, entityId, actorId, apiBaseUrl],
   );
 
   const clearMerges = useCallback(() => setPendingMerges([]), []);

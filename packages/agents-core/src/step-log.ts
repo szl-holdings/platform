@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const StepLogLevelSchema = z.enum(["debug", "info", "warn", "error"]);
+export const StepLogLevelSchema = z.enum(['debug', 'info', 'warn', 'error']);
 export type StepLogLevel = z.infer<typeof StepLogLevelSchema>;
 
 export const StepLogEntrySchema = z.object({
@@ -32,7 +32,7 @@ const sinks: StepLogSink[] = [];
 const inMemoryLog: StepLogEntry[] = [];
 
 let onSinkError: StepLogSinkError = (sink, entry, err) => {
-  console.error("[agents-core:step-log] Sink threw an error — entry will still be in-memory log", {
+  console.error('[agents-core:step-log] Sink threw an error — entry will still be in-memory log', {
     stepId: entry.stepId,
     runId: entry.runId,
     error: err instanceof Error ? err.message : String(err),
@@ -51,7 +51,7 @@ export function clearStepLogSinks(): void {
   sinks.length = 0;
 }
 
-export async function emitStepLog(entry: Omit<StepLogEntry, "timestamp">): Promise<void> {
+export async function emitStepLog(entry: Omit<StepLogEntry, 'timestamp'>): Promise<void> {
   const full: StepLogEntry = { ...entry, timestamp: Date.now() };
   inMemoryLog.push(full);
   for (const sink of sinks) {
@@ -75,12 +75,12 @@ export function clearStepLog(): void {
 export function makeStepLogger(runId: string, stepId: string, stepName: string) {
   return {
     info: (message: string, data?: Record<string, unknown>) =>
-      emitStepLog({ runId, stepId, stepName, level: "info", message, data }),
+      emitStepLog({ runId, stepId, stepName, level: 'info', message, data }),
     warn: (message: string, data?: Record<string, unknown>) =>
-      emitStepLog({ runId, stepId, stepName, level: "warn", message, data }),
+      emitStepLog({ runId, stepId, stepName, level: 'warn', message, data }),
     error: (message: string, data?: Record<string, unknown>) =>
-      emitStepLog({ runId, stepId, stepName, level: "error", message, data }),
+      emitStepLog({ runId, stepId, stepName, level: 'error', message, data }),
     debug: (message: string, data?: Record<string, unknown>) =>
-      emitStepLog({ runId, stepId, stepName, level: "debug", message, data }),
+      emitStepLog({ runId, stepId, stepName, level: 'debug', message, data }),
   };
 }

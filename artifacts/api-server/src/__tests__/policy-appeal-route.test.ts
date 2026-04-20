@@ -16,41 +16,41 @@
  *         justificationLength.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express from "express";
-import type { Router as ExpressRouter } from "express";
-import cookieParser from "cookie-parser";
-import request from "supertest";
+import cookieParser from 'cookie-parser';
+import type { Router as ExpressRouter } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("@szl-holdings/observability", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('@szl-holdings/observability', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createObservabilityMock();
 });
 
-vi.mock("@szl-holdings/db", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('@szl-holdings/db', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createDbMock();
 });
 
-vi.mock("../lib/logger.js", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('../lib/logger.js', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createLoggerMock();
 });
 
-vi.mock("../middlewares/auth.js", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('../middlewares/auth.js', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createAuthMiddlewareMock({
     id: 4242,
-    email: "operator@szl-holdings.test",
-    roles: ["operator"],
-    orgs: [{ orgId: 7, orgSlug: "acme", orgName: "Acme Inc", role: "operator" }],
+    email: 'operator@szl-holdings.test',
+    roles: ['operator'],
+    orgs: [{ orgId: 7, orgSlug: 'acme', orgName: 'Acme Inc', role: 'operator' }],
   });
 });
 
-const { globalAuthEnforcer } = await import("../middlewares/global-auth-enforcer.js");
-const { csrfMiddleware } = await import("../middlewares/csrf.js");
-const { default: approvalsRouter } = await import("../routes/approvals.js");
-const { logger } = await import("../lib/logger.js");
+const { globalAuthEnforcer } = await import('../middlewares/global-auth-enforcer.js');
+const { csrfMiddleware } = await import('../middlewares/csrf.js');
+const { default: approvalsRouter } = await import('../routes/approvals.js');
+const { logger } = await import('../lib/logger.js');
 
 interface AppealResponseBody {
   requestId: string;
@@ -68,7 +68,7 @@ function buildAuthEnforcedApp() {
   const app = express();
   app.use(express.json());
   app.use(globalAuthEnforcer as express.RequestHandler);
-  app.use("/api", approvalsRouter as unknown as ExpressRouter);
+  app.use('/api', approvalsRouter as unknown as ExpressRouter);
   return app;
 }
 
@@ -77,14 +77,14 @@ function buildCsrfEnforcedApp() {
   app.use(express.json());
   app.use(cookieParser());
   app.use(csrfMiddleware as unknown as express.RequestHandler);
-  app.use("/api", approvalsRouter as unknown as ExpressRouter);
+  app.use('/api', approvalsRouter as unknown as ExpressRouter);
   return app;
 }
 
 function buildHandlerApp() {
   const app = express();
   app.use(express.json());
-  app.use("/api", approvalsRouter as unknown as ExpressRouter);
+  app.use('/api', approvalsRouter as unknown as ExpressRouter);
   return app;
 }
 
@@ -92,69 +92,67 @@ beforeEach(() => {
   (logger.info as unknown as ReturnType<typeof vi.fn>).mockClear();
 });
 
-describe("POST /api/audit-log/policy-appeal — 401 unauthenticated", () => {
+describe('POST /api/audit-log/policy-appeal — 401 unauthenticated', () => {
   const app = buildAuthEnforcedApp();
 
-  it("returns 401 UNAUTHORIZED when no credentials are presented", async () => {
-    const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({
-        requestId: "req-123",
-        action: "appeal",
-        justification: "Policy was misapplied to this decision.",
-      });
+  it('returns 401 UNAUTHORIZED when no credentials are presented', async () => {
+    const res = await request(app).post('/api/audit-log/policy-appeal').send({
+      requestId: 'req-123',
+      action: 'appeal',
+      justification: 'Policy was misapplied to this decision.',
+    });
 
     expect(res.status).toBe(401);
     const body = res.body as ErrorBody;
-    expect(body.code).toBe("UNAUTHORIZED");
+    expect(body.code).toBe('UNAUTHORIZED');
     const recordedCalls = (logger.info as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
-      (c) => c[1] === "policy.appeal.recorded",
+      (c) => c[1] === 'policy.appeal.recorded',
     );
     expect(recordedCalls).toHaveLength(0);
   });
 });
 
-describe("POST /api/audit-log/policy-appeal — 403 CSRF enforcement", () => {
+describe('POST /api/audit-log/policy-appeal — 403 CSRF enforcement', () => {
   const app = buildCsrfEnforcedApp();
 
-  it("rejects cookie-authed POST with no CSRF token (CSRF_TOKEN_MISSING)", async () => {
+  it('rejects cookie-authed POST with no CSRF token (CSRF_TOKEN_MISSING)', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .set("Cookie", ["session=fake-session-cookie"])
+      .post('/api/audit-log/policy-appeal')
+      .set('Cookie', ['session=fake-session-cookie'])
       .send({
-        requestId: "req-123",
-        action: "appeal",
-        justification: "Policy was misapplied to this decision.",
+        requestId: 'req-123',
+        action: 'appeal',
+        justification: 'Policy was misapplied to this decision.',
       });
 
     expect(res.status).toBe(403);
     const body = res.body as ErrorBody;
-    expect(body.code).toBe("CSRF_TOKEN_MISSING");
+    expect(body.code).toBe('CSRF_TOKEN_MISSING');
   });
 
-  it("rejects cookie-authed POST with mismatched CSRF tokens (CSRF_TOKEN_MISMATCH)", async () => {
+  it('rejects cookie-authed POST with mismatched CSRF tokens (CSRF_TOKEN_MISMATCH)', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .set("Cookie", ["session=fake; csrf_token=cookie-value"])
-      .set("X-CSRF-Token", "header-value-different")
+      .post('/api/audit-log/policy-appeal')
+      .set('Cookie', ['session=fake; csrf_token=cookie-value'])
+      .set('X-CSRF-Token', 'header-value-different')
       .send({
-        requestId: "req-123",
-        action: "appeal",
-        justification: "Policy was misapplied to this decision.",
+        requestId: 'req-123',
+        action: 'appeal',
+        justification: 'Policy was misapplied to this decision.',
       });
 
     expect(res.status).toBe(403);
     const body = res.body as ErrorBody;
-    expect(body.code).toBe("CSRF_TOKEN_MISMATCH");
+    expect(body.code).toBe('CSRF_TOKEN_MISMATCH');
   });
 
-  it("allows bearer-authed POST through CSRF (no cookie path required)", async () => {
+  it('allows bearer-authed POST through CSRF (no cookie path required)', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .set("Authorization", "Bearer fake-token")
+      .post('/api/audit-log/policy-appeal')
+      .set('Authorization', 'Bearer fake-token')
       .send({
-        requestId: "req-bearer",
-        action: "escalate",
+        requestId: 'req-bearer',
+        action: 'escalate',
       });
 
     // CSRF is bypassed for bearer auth; the (mocked) auth middleware then
@@ -163,119 +161,117 @@ describe("POST /api/audit-log/policy-appeal — 403 CSRF enforcement", () => {
   });
 });
 
-describe("POST /api/audit-log/policy-appeal — 400 validation", () => {
+describe('POST /api/audit-log/policy-appeal — 400 validation', () => {
   const app = buildHandlerApp();
 
-  it("rejects missing requestId (handler validation)", async () => {
+  it('rejects missing requestId (handler validation)', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({ action: "appeal", justification: "long enough justification" });
+      .post('/api/audit-log/policy-appeal')
+      .send({ action: 'appeal', justification: 'long enough justification' });
 
     expect(res.status).toBe(400);
     expect((res.body as ErrorBody).error).toMatch(/requestId/i);
   });
 
-  it("rejects missing action", async () => {
+  it('rejects missing action', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({ requestId: "req-1" });
+      .post('/api/audit-log/policy-appeal')
+      .send({ requestId: 'req-1' });
 
     expect(res.status).toBe(400);
     expect((res.body as ErrorBody).error).toMatch(/action/i);
   });
 
-  it("rejects invalid action enum value", async () => {
+  it('rejects invalid action enum value', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({ requestId: "req-1", action: "delete" });
+      .post('/api/audit-log/policy-appeal')
+      .send({ requestId: 'req-1', action: 'delete' });
 
     expect(res.status).toBe(400);
     expect((res.body as ErrorBody).error).toMatch(/escalate|appeal/i);
   });
 
-  it("rejects appeal with justification shorter than 8 chars", async () => {
+  it('rejects appeal with justification shorter than 8 chars', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({ requestId: "req-1", action: "appeal", justification: "short" });
+      .post('/api/audit-log/policy-appeal')
+      .send({ requestId: 'req-1', action: 'appeal', justification: 'short' });
 
     expect(res.status).toBe(400);
     expect((res.body as ErrorBody).error).toMatch(/justification/i);
   });
 
-  it("rejects appeal with whitespace-only justification", async () => {
+  it('rejects appeal with whitespace-only justification', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({ requestId: "req-1", action: "appeal", justification: "          " });
+      .post('/api/audit-log/policy-appeal')
+      .send({ requestId: 'req-1', action: 'appeal', justification: '          ' });
 
     // Trim then length-check — produces same 400 as missing justification.
     expect(res.status).toBe(400);
     expect((res.body as ErrorBody).error).toMatch(/justification/i);
   });
 
-  it("rejects non-object body via validateBody middleware", async () => {
+  it('rejects non-object body via validateBody middleware', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .set("Content-Type", "application/json")
-      .send(JSON.stringify("not-an-object"));
+      .post('/api/audit-log/policy-appeal')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify('not-an-object'));
 
     expect(res.status).toBe(400);
   });
 });
 
-describe("POST /api/audit-log/policy-appeal — 201 happy path + structured audit log", () => {
+describe('POST /api/audit-log/policy-appeal — 201 happy path + structured audit log', () => {
   const app = buildHandlerApp();
 
-  it("records an appeal and emits policy.appeal.recorded with actor + org context", async () => {
-    const justification = "The control should not have applied here because…";
-    const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({
-        requestId: "req-2024-0329",
-        action: "appeal",
-        justification,
-      });
+  it('records an appeal and emits policy.appeal.recorded with actor + org context', async () => {
+    const justification = 'The control should not have applied here because…';
+    const res = await request(app).post('/api/audit-log/policy-appeal').send({
+      requestId: 'req-2024-0329',
+      action: 'appeal',
+      justification,
+    });
 
     expect(res.status).toBe(201);
     const body = res.body as AppealResponseBody;
-    expect(body.requestId).toBe("req-2024-0329");
-    expect(body.action).toBe("appeal");
+    expect(body.requestId).toBe('req-2024-0329');
+    expect(body.action).toBe('appeal');
     expect(body.actorId).toBe(4242);
-    expect(typeof body.recordedAt).toBe("string");
+    expect(typeof body.recordedAt).toBe('string');
     expect(Number.isNaN(Date.parse(body.recordedAt))).toBe(false);
 
     // The structured audit log line — the heart of the audit-integrity
     // guarantee this endpoint exists to provide.
     expect(logger.info).toHaveBeenCalledWith(
       expect.objectContaining({
-        requestId: "req-2024-0329",
-        action: "appeal",
+        requestId: 'req-2024-0329',
+        action: 'appeal',
         justificationLength: justification.length,
         actorId: 4242,
-        actorRole: "operator",
+        actorRole: 'operator',
         orgId: 7,
       }),
-      "policy.appeal.recorded",
+      'policy.appeal.recorded',
     );
   });
 
-  it("records an escalate (no justification required)", async () => {
+  it('records an escalate (no justification required)', async () => {
     const res = await request(app)
-      .post("/api/audit-log/policy-appeal")
-      .send({ requestId: "req-escalate-1", action: "escalate" });
+      .post('/api/audit-log/policy-appeal')
+      .send({ requestId: 'req-escalate-1', action: 'escalate' });
 
     expect(res.status).toBe(201);
-    expect((res.body as AppealResponseBody).action).toBe("escalate");
+    expect((res.body as AppealResponseBody).action).toBe('escalate');
 
     expect(logger.info).toHaveBeenCalledWith(
       expect.objectContaining({
-        requestId: "req-escalate-1",
-        action: "escalate",
+        requestId: 'req-escalate-1',
+        action: 'escalate',
         justificationLength: 0,
         actorId: 4242,
-        actorRole: "operator",
+        actorRole: 'operator',
         orgId: 7,
       }),
-      "policy.appeal.recorded",
+      'policy.appeal.recorded',
     );
   });
 });

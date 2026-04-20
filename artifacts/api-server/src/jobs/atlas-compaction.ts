@@ -1,6 +1,6 @@
-import { db, auditEventsTable } from "@szl-holdings/db";
-import { sql } from "drizzle-orm";
-import { logger } from "../lib/logger";
+import { auditEventsTable, db } from '@szl-holdings/db';
+import { sql } from 'drizzle-orm';
+import { logger } from '../lib/logger';
 
 export interface CompactionResult {
   dryRun: boolean;
@@ -26,10 +26,10 @@ export interface CompactionResult {
  * Set COMPACTION_DRY_RUN=true to count affected rows without deleting them.
  */
 export async function runAtlasCompaction(): Promise<CompactionResult> {
-  const dryRun = process.env["COMPACTION_DRY_RUN"] === "true";
+  const dryRun = process.env['COMPACTION_DRY_RUN'] === 'true';
   const start = Date.now();
 
-  logger.info({ dryRun }, "[atlas-compaction] Starting ATLAS snapshot compaction");
+  logger.info({ dryRun }, '[atlas-compaction] Starting ATLAS snapshot compaction');
 
   const hourlyResult = await compactHourly(dryRun);
   const monthlyResult = await compactMonthly(dryRun);
@@ -45,7 +45,7 @@ export async function runAtlasCompaction(): Promise<CompactionResult> {
     durationMs,
   };
 
-  logger.info(summary, "[atlas-compaction] Compaction complete");
+  logger.info(summary, '[atlas-compaction] Compaction complete');
 
   await writeAuditEntry(summary);
 
@@ -80,12 +80,12 @@ async function compactHourly(dryRun: boolean): Promise<number> {
   const count = Number((countResult.rows[0] as { count: string } | undefined)?.count ?? 0);
 
   if (count === 0) {
-    logger.info("[atlas-compaction] No hourly compaction candidates found");
+    logger.info('[atlas-compaction] No hourly compaction candidates found');
     return 0;
   }
 
   if (dryRun) {
-    logger.info({ count }, "[atlas-compaction] DRY RUN — would compact hourly candidates");
+    logger.info({ count }, '[atlas-compaction] DRY RUN — would compact hourly candidates');
     return count;
   }
 
@@ -108,7 +108,7 @@ async function compactHourly(dryRun: boolean): Promise<number> {
       )
   `);
 
-  logger.info({ count }, "[atlas-compaction] Hourly compaction complete");
+  logger.info({ count }, '[atlas-compaction] Hourly compaction complete');
   return count;
 }
 
@@ -138,12 +138,12 @@ async function compactMonthly(dryRun: boolean): Promise<number> {
   const count = Number((countResult.rows[0] as { count: string } | undefined)?.count ?? 0);
 
   if (count === 0) {
-    logger.info("[atlas-compaction] No monthly compaction candidates found");
+    logger.info('[atlas-compaction] No monthly compaction candidates found');
     return 0;
   }
 
   if (dryRun) {
-    logger.info({ count }, "[atlas-compaction] DRY RUN — would compact monthly candidates");
+    logger.info({ count }, '[atlas-compaction] DRY RUN — would compact monthly candidates');
     return count;
   }
 
@@ -164,7 +164,7 @@ async function compactMonthly(dryRun: boolean): Promise<number> {
       )
   `);
 
-  logger.info({ count }, "[atlas-compaction] Monthly compaction complete");
+  logger.info({ count }, '[atlas-compaction] Monthly compaction complete');
   return count;
 }
 
@@ -185,8 +185,8 @@ async function countProtected(): Promise<number> {
 async function writeAuditEntry(summary: CompactionResult): Promise<void> {
   try {
     await db.insert(auditEventsTable).values({
-      action: "atlas_snapshot_compaction",
-      entityType: "atlas_artifacts",
+      action: 'atlas_snapshot_compaction',
+      entityType: 'atlas_artifacts',
       entityId: null,
       newValues: {
         dryRun: summary.dryRun,
@@ -198,6 +198,6 @@ async function writeAuditEntry(summary: CompactionResult): Promise<void> {
       },
     });
   } catch (err) {
-    logger.warn({ err }, "[atlas-compaction] Failed to write audit entry (non-fatal)");
+    logger.warn({ err }, '[atlas-compaction] Failed to write audit entry (non-fatal)');
   }
 }

@@ -12,32 +12,32 @@
  *  - The Outcome Graph (recommendation lifecycle)
  */
 
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
 export type RecommendationType =
-  | "risk_assessment"
-  | "threat_triage"
-  | "owner_suggestion"
-  | "deal_analysis"
-  | "voyage_pnl"
-  | "sanctions_check"
-  | "legal_matter"
-  | "escalation_proposal"
-  | "workflow_template"
-  | "anomaly_detection"
-  | "generic";
+  | 'risk_assessment'
+  | 'threat_triage'
+  | 'owner_suggestion'
+  | 'deal_analysis'
+  | 'voyage_pnl'
+  | 'sanctions_check'
+  | 'legal_matter'
+  | 'escalation_proposal'
+  | 'workflow_template'
+  | 'anomaly_detection'
+  | 'generic';
 
 export type TraceDomain =
-  | "aegis"
-  | "terra"
-  | "vessels"
-  | "prism_counsel"
-  | "alloy"
-  | "lyte"
-  | "cortex"
-  | "global";
+  | 'aegis'
+  | 'terra'
+  | 'vessels'
+  | 'prism_counsel'
+  | 'alloy'
+  | 'lyte'
+  | 'cortex'
+  | 'global';
 
-export type TraceStatus = "pending" | "evaluated" | "reviewed" | "flagged" | "archived";
+export type TraceStatus = 'pending' | 'evaluated' | 'reviewed' | 'flagged' | 'archived';
 
 export interface AITrace {
   traceId: string;
@@ -56,7 +56,7 @@ export interface AITrace {
   latencyMs: number;
   costEstimateUsd: number;
   confidence: number;
-  riskLevel?: "low" | "medium" | "high" | "critical";
+  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
   requiresReview: boolean;
   reviewReason?: string;
   proofChainId?: number;
@@ -87,7 +87,7 @@ export interface TraceCaptureInput {
   latencyMs: number;
   costEstimateUsd?: number;
   confidence?: number;
-  riskLevel?: "low" | "medium" | "high" | "critical";
+  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
   proofChainId?: number;
   outcomeGraphId?: number;
   inputSummary?: string;
@@ -97,37 +97,57 @@ export interface TraceCaptureInput {
 }
 
 export const REVIEW_CONFIDENCE_THRESHOLD = 0.55;
-export const REVIEW_HIGH_RISK_LEVELS: Array<"high" | "critical"> = ["high", "critical"];
-export const REVIEW_COST_THRESHOLD_USD = 0.50;
+export const REVIEW_HIGH_RISK_LEVELS: Array<'high' | 'critical'> = ['high', 'critical'];
+export const REVIEW_COST_THRESHOLD_USD = 0.5;
 
 const inMemoryTraces: AITrace[] = [];
 const MAX_IN_MEMORY_TRACES = 5000;
 
 let externalSink: ((trace: AITrace) => Promise<void>) | null = null;
-let externalUpdateSink: ((traceId: string, status: TraceStatus, evalScore?: number, evalPassed?: boolean) => Promise<void>) | null = null;
+let externalUpdateSink:
+  | ((
+      traceId: string,
+      status: TraceStatus,
+      evalScore?: number,
+      evalPassed?: boolean,
+    ) => Promise<void>)
+  | null = null;
 
 export function registerTraceSink(sink: (trace: AITrace) => Promise<void>): void {
   externalSink = sink;
 }
 
-export function registerTraceUpdateSink(sink: (traceId: string, status: TraceStatus, evalScore?: number, evalPassed?: boolean) => Promise<void>): void {
+export function registerTraceUpdateSink(
+  sink: (
+    traceId: string,
+    status: TraceStatus,
+    evalScore?: number,
+    evalPassed?: boolean,
+  ) => Promise<void>,
+): void {
   externalUpdateSink = sink;
 }
 
 function computePromptHash(promptText: string): string {
-  return createHash("sha256").update(promptText).digest("hex").slice(0, 16);
+  return createHash('sha256').update(promptText).digest('hex').slice(0, 16);
 }
 
 function shouldRequireReview(input: TraceCaptureInput): { required: boolean; reason?: string } {
   const confidence = input.confidence ?? 1.0;
   if (confidence < REVIEW_CONFIDENCE_THRESHOLD) {
-    return { required: true, reason: `Low confidence: ${confidence.toFixed(2)} < ${REVIEW_CONFIDENCE_THRESHOLD}` };
+    return {
+      required: true,
+      reason: `Low confidence: ${confidence.toFixed(2)} < ${REVIEW_CONFIDENCE_THRESHOLD}`,
+    };
   }
-  if (input.riskLevel && REVIEW_HIGH_RISK_LEVELS.includes(input.riskLevel as "high" | "critical")) {
+  if (input.riskLevel && REVIEW_HIGH_RISK_LEVELS.includes(input.riskLevel as 'high' | 'critical')) {
     return { required: true, reason: `High-risk recommendation: ${input.riskLevel}` };
   }
   if ((input.costEstimateUsd ?? 0) > REVIEW_COST_THRESHOLD_USD) {
-    return { required: true, reason: `High cost: $${input.costEstimateUsd?.toFixed(4)} > $${REVIEW_COST_THRESHOLD_USD}` };
+    return {
+      required: true,
+      reason: `High cost: $${input.costEstimateUsd?.toFixed(4)} > $${REVIEW_COST_THRESHOLD_USD}`,
+    };
   }
   return { required: false };
 }
@@ -161,7 +181,7 @@ export function captureTrace(input: TraceCaptureInput): AITrace {
     inputSummary: input.inputSummary,
     outputSummary: input.outputSummary,
     toolsUsed: input.toolsUsed,
-    status: "pending",
+    status: 'pending',
     metadata: input.metadata,
     capturedAt: new Date().toISOString(),
   };
@@ -173,7 +193,11 @@ export function captureTrace(input: TraceCaptureInput): AITrace {
 
   if (externalSink) {
     externalSink(trace).catch((err) => {
-      console.error("[ai-engine/trace-capture] sink write failed for traceId=%s: %s", trace.traceId, err instanceof Error ? err.message : String(err));
+      console.error(
+        '[ai-engine/trace-capture] sink write failed for traceId=%s: %s',
+        trace.traceId,
+        err instanceof Error ? err.message : String(err),
+      );
     });
   }
 
@@ -182,48 +206,58 @@ export function captureTrace(input: TraceCaptureInput): AITrace {
 
 export function hydrateTraces(traces: AITrace[]): void {
   for (const trace of traces) {
-    if (!inMemoryTraces.find(t => t.traceId === trace.traceId)) {
+    if (!inMemoryTraces.find((t) => t.traceId === trace.traceId)) {
       inMemoryTraces.push(trace);
     }
   }
-  inMemoryTraces.sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
+  inMemoryTraces.sort(
+    (a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime(),
+  );
   if (inMemoryTraces.length > MAX_IN_MEMORY_TRACES) {
     inMemoryTraces.length = MAX_IN_MEMORY_TRACES;
   }
 }
 
 export function getTrace(traceId: string): AITrace | undefined {
-  return inMemoryTraces.find(t => t.traceId === traceId);
+  return inMemoryTraces.find((t) => t.traceId === traceId);
 }
 
-export function listTraces(options: {
-  orgId?: number;
-  domain?: TraceDomain;
-  requiresReview?: boolean;
-  status?: TraceStatus;
-  riskLevel?: string;
-  since?: Date;
-  until?: Date;
-  limit?: number;
-  offset?: number;
-} = {}): AITrace[] {
+export function listTraces(
+  options: {
+    orgId?: number;
+    domain?: TraceDomain;
+    requiresReview?: boolean;
+    status?: TraceStatus;
+    riskLevel?: string;
+    since?: Date;
+    until?: Date;
+    limit?: number;
+    offset?: number;
+  } = {},
+): AITrace[] {
   let results = inMemoryTraces;
 
-  if (options.orgId != null) results = results.filter(t => t.orgId === options.orgId);
-  if (options.domain) results = results.filter(t => t.domain === options.domain);
-  if (options.requiresReview != null) results = results.filter(t => t.requiresReview === options.requiresReview);
-  if (options.status) results = results.filter(t => t.status === options.status);
-  if (options.riskLevel) results = results.filter(t => t.riskLevel === options.riskLevel);
-  if (options.since) results = results.filter(t => new Date(t.capturedAt) >= options.since!);
-  if (options.until) results = results.filter(t => new Date(t.capturedAt) <= options.until!);
+  if (options.orgId != null) results = results.filter((t) => t.orgId === options.orgId);
+  if (options.domain) results = results.filter((t) => t.domain === options.domain);
+  if (options.requiresReview != null)
+    results = results.filter((t) => t.requiresReview === options.requiresReview);
+  if (options.status) results = results.filter((t) => t.status === options.status);
+  if (options.riskLevel) results = results.filter((t) => t.riskLevel === options.riskLevel);
+  if (options.since) results = results.filter((t) => new Date(t.capturedAt) >= options.since!);
+  if (options.until) results = results.filter((t) => new Date(t.capturedAt) <= options.until!);
 
   const offset = options.offset ?? 0;
   const limit = options.limit ?? 100;
   return results.slice(offset, offset + limit);
 }
 
-export function updateTraceStatus(traceId: string, status: TraceStatus, evalScore?: number, evalPassed?: boolean): boolean {
-  const trace = inMemoryTraces.find(t => t.traceId === traceId);
+export function updateTraceStatus(
+  traceId: string,
+  status: TraceStatus,
+  evalScore?: number,
+  evalPassed?: boolean,
+): boolean {
+  const trace = inMemoryTraces.find((t) => t.traceId === traceId);
   if (!trace) return false;
   trace.status = status;
   if (evalScore != null) trace.evalScore = evalScore;
@@ -231,7 +265,11 @@ export function updateTraceStatus(traceId: string, status: TraceStatus, evalScor
 
   if (externalUpdateSink) {
     externalUpdateSink(traceId, status, evalScore, evalPassed).catch((err) => {
-      console.error("[ai-engine/trace-capture] update sink failed for traceId=%s: %s", traceId, err instanceof Error ? err.message : String(err));
+      console.error(
+        '[ai-engine/trace-capture] update sink failed for traceId=%s: %s',
+        traceId,
+        err instanceof Error ? err.message : String(err),
+      );
     });
   }
 
@@ -251,8 +289,8 @@ export interface TraceAggregate {
 
 export function aggregateTraces(options: { orgId?: number; since?: Date } = {}): TraceAggregate[] {
   let traces = inMemoryTraces;
-  if (options.orgId != null) traces = traces.filter(t => t.orgId === options.orgId);
-  if (options.since) traces = traces.filter(t => new Date(t.capturedAt) >= options.since!);
+  if (options.orgId != null) traces = traces.filter((t) => t.orgId === options.orgId);
+  if (options.since) traces = traces.filter((t) => new Date(t.capturedAt) >= options.since!);
 
   const byDomain = new Map<string, AITrace[]>();
   for (const t of traces) {
@@ -262,20 +300,23 @@ export function aggregateTraces(options: { orgId?: number; since?: Date } = {}):
   }
 
   return Array.from(byDomain.entries()).map(([domain, domainTraces]) => {
-    const evaluated = domainTraces.filter(t => t.evalPassed != null);
-    const passed = evaluated.filter(t => t.evalPassed).length;
+    const evaluated = domainTraces.filter((t) => t.evalPassed != null);
+    const passed = evaluated.filter((t) => t.evalPassed).length;
     return {
       domain,
       totalTraces: domainTraces.length,
-      reviewRequired: domainTraces.filter(t => t.requiresReview).length,
+      reviewRequired: domainTraces.filter((t) => t.requiresReview).length,
       avgConfidence: domainTraces.reduce((s, t) => s + t.confidence, 0) / domainTraces.length,
       avgLatencyMs: domainTraces.reduce((s, t) => s + t.latencyMs, 0) / domainTraces.length,
       totalCostUsd: domainTraces.reduce((s, t) => s + t.costEstimateUsd, 0),
       evalPassRate: evaluated.length > 0 ? passed / evaluated.length : null,
-      byRiskLevel: domainTraces.reduce((acc, t) => {
-        if (t.riskLevel) acc[t.riskLevel] = (acc[t.riskLevel] ?? 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
+      byRiskLevel: domainTraces.reduce(
+        (acc, t) => {
+          if (t.riskLevel) acc[t.riskLevel] = (acc[t.riskLevel] ?? 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
     };
   });
 }

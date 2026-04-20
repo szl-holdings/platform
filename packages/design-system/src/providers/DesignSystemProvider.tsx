@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, type ReactNode } from "react";
-import type { DensityMode } from "../tokens/index.js";
+import React, { createContext, type ReactNode, useContext, useState } from 'react';
+import type { DensityMode } from '../tokens/index.js';
 
-export type ScreenMode = "executive" | "operator";
+export type ScreenMode = 'executive' | 'operator';
 
 export interface DesignSystemContextValue {
   density: DensityMode;
@@ -11,9 +11,9 @@ export interface DesignSystemContextValue {
 }
 
 const DesignSystemContext = createContext<DesignSystemContextValue>({
-  density: "comfortable",
+  density: 'comfortable',
   setDensity: () => void 0,
-  screenMode: "executive",
+  screenMode: 'executive',
   setScreenMode: () => void 0,
 });
 
@@ -35,8 +35,8 @@ export interface DesignSystemProviderProps {
  * </DesignSystemProvider>
  */
 export function DesignSystemProvider({
-  defaultDensity = "comfortable",
-  defaultScreenMode = "executive",
+  defaultDensity = 'comfortable',
+  defaultScreenMode = 'executive',
   children,
 }: DesignSystemProviderProps) {
   const [density, setDensity] = useState<DensityMode>(defaultDensity);

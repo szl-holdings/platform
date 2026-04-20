@@ -1,33 +1,33 @@
-import { readFileSync, existsSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { existsSync, readFileSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, "..");
-const manifestPath = resolve(root, "src/data/slides-manifest.json");
+const root = resolve(__dirname, '..');
+const manifestPath = resolve(root, 'src/data/slides-manifest.json');
 
 let errors = 0;
 
 function fail(msg) {
-  console.error("[validate-slides] FAIL:", msg);
+  console.error('[validate-slides] FAIL:', msg);
   errors++;
 }
 
 if (!existsSync(manifestPath)) {
-  fail("slides-manifest.json not found at src/data/slides-manifest.json");
+  fail('slides-manifest.json not found at src/data/slides-manifest.json');
   process.exit(1);
 }
 
 let manifest;
 try {
-  manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+  manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
 } catch (e) {
-  fail("slides-manifest.json is invalid JSON: " + e.message);
+  fail('slides-manifest.json is invalid JSON: ' + e.message);
   process.exit(1);
 }
 
 if (!Array.isArray(manifest)) {
-  fail("slides-manifest.json must be an array");
+  fail('slides-manifest.json must be an array');
   process.exit(1);
 }
 
@@ -55,7 +55,7 @@ manifest.forEach((entry, i) => {
 const sorted = [...positions].sort((a, b) => a - b);
 for (let i = 0; i < sorted.length; i++) {
   if (sorted[i] !== i + 1) {
-    fail(`Positions must be contiguous from 1. Got: ${sorted.join(", ")}`);
+    fail(`Positions must be contiguous from 1. Got: ${sorted.join(', ')}`);
     break;
   }
 }

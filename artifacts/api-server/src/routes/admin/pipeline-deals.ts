@@ -28,41 +28,41 @@
  *     row with from_stage / to_stage, actor user id, email, and name.
  */
 
-import type { IRouter, Request, Response } from "express";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  pipelineDealsTable,
-  pipelineDealEventsTable,
-  PIPELINE_VERTICALS,
   PIPELINE_STAGES,
+  PIPELINE_VERTICALS,
   type PipelineStage,
-} from "@szl-holdings/db";
-import { and, desc, eq, inArray, type SQL } from "drizzle-orm";
-import { z } from "zod";
+  pipelineDealEventsTable,
+  pipelineDealsTable,
+} from '@szl-holdings/db';
+import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
+import type { IRouter, Request, Response } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess,
-  sendCreated,
-  sendNotFound,
-  sendBadRequest,
-  sendForbidden,
   handleRouteError,
-} from "../../lib/api-response.js";
-import { validateBody } from "../../lib/validation.js";
-import { logger } from "../../lib/logger.js";
+  sendBadRequest,
+  sendCreated,
+  sendForbidden,
+  sendNotFound,
+  sendSuccess,
+} from '../../lib/api-response.js';
+import { logger } from '../../lib/logger.js';
+import { validateBody } from '../../lib/validation.js';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const verticalEnum = z.enum(PIPELINE_VERTICALS);
 const stageEnum = z.enum(PIPELINE_STAGES);
 
 const createDealSchema = z.object({
   account: z.string().min(1).max(200),
   vertical: verticalEnum,
-  champion: z.string().max(200).optional().default(""),
-  championTitle: z.string().max(200).optional().default(""),
-  stage: stageEnum.optional().default("Researched"),
+  champion: z.string().max(200).optional().default(''),
+  championTitle: z.string().max(200).optional().default(''),
+  stage: stageEnum.optional().default('Researched'),
   fitScore: z.number().int().min(1).max(10).optional().default(7),
-  nextStep: z.string().max(2000).optional().default(""),
-  notes: z.string().max(8000).optional().default(""),
+  nextStep: z.string().max(2000).optional().default(''),
+  notes: z.string().max(8000).optional().default(''),
   orgId: z.number().int().positive().optional(),
 });
 
@@ -80,7 +80,9 @@ const updateDealSchema = z.object({
 const idParamsSchema = z.object({ id: z.coerce.number().int().positive() });
 
 function actorOrgIds(req: Request): number[] {
-  return req.user?.orgs?.map((o) => o.orgId).filter((n): n is number => typeof n === "number") ?? [];
+  return (
+    req.user?.orgs?.map((o) => o.orgId).filter((n): n is number => typeof n === 'number') ?? []
+  );
 }
 
 function actorEmail(req: Request): string | null {
@@ -93,7 +95,7 @@ function actorName(req: Request): string | null {
 
 function actorUserId(req: Request): number | null {
   const id = req.user?.id;
-  return typeof id === "number" && id > 0 ? id : null;
+  return typeof id === 'number' && id > 0 ? id : null;
 }
 
 /**
@@ -109,11 +111,14 @@ function resolveWriteOrg(
 ): { orgId: number } | { error: string; status: number } {
   const memberships = actorOrgIds(req);
   if (memberships.length === 0) {
-    return { error: "Your account has no organization membership; cannot create pipeline deals.", status: 400 };
+    return {
+      error: 'Your account has no organization membership; cannot create pipeline deals.',
+      status: 400,
+    };
   }
   if (bodyOrgId !== undefined) {
     if (!memberships.includes(bodyOrgId)) {
-      return { error: "You are not a member of the specified organization.", status: 403 };
+      return { error: 'You are not a member of the specified organization.', status: 403 };
     }
     return { orgId: bodyOrgId };
   }
@@ -121,7 +126,7 @@ function resolveWriteOrg(
     return { orgId: memberships[0] };
   }
   return {
-    error: "Your account belongs to multiple organizations; specify `orgId` in the request body.",
+    error: 'Your account belongs to multiple organizations; specify `orgId` in the request body.',
     status: 400,
   };
 }
@@ -149,7 +154,7 @@ async function recordEvent(args: {
     });
   } catch (err) {
     // Audit failure must not break the user-facing operation; log it.
-    logger.warn({ err, dealId: args.dealId }, "[pipeline-deals] failed to write audit event");
+    logger.warn({ err, dealId: args.dealId }, '[pipeline-deals] failed to write audit event');
   }
 }
 
@@ -167,7 +172,7 @@ function buildEventOrgFilter(req: Request): SQL | null {
 }
 
 export function register(router: IRouter): void {
-  router.get("/admin/pipeline-deals", async (req: Request, res: Response) => {
+  router.get('/admin/pipeline-deals', async (req: Request, res: Response) => {
     try {
       const filter = buildOrgFilter(req);
       if (!filter) {
@@ -181,28 +186,30 @@ export function register(router: IRouter): void {
         .orderBy(desc(pipelineDealsTable.updatedAt));
       sendSuccess(res, rows);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list pipeline deals");
+      handleRouteError(res, err, 'Failed to list pipeline deals');
     }
   });
 
   router.post(
-    "/admin/pipeline-deals",
-    validateBody(bodyShape({
-      "account": z.unknown().optional(),
-      "champion": z.unknown().optional(),
-      "championTitle": z.unknown().optional(),
-      "fitScore": z.unknown().optional(),
-      "nextStep": z.unknown().optional(),
-      "notes": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "stage": z.unknown().optional(),
-      "vertical": z.unknown().optional(),
-    })),
+    '/admin/pipeline-deals',
+    validateBody(
+      bodyShape({
+        account: z.unknown().optional(),
+        champion: z.unknown().optional(),
+        championTitle: z.unknown().optional(),
+        fitScore: z.unknown().optional(),
+        nextStep: z.unknown().optional(),
+        notes: z.unknown().optional(),
+        orgId: z.unknown().optional(),
+        stage: z.unknown().optional(),
+        vertical: z.unknown().optional(),
+      }),
+    ),
     async (req: Request, res: Response) => {
       try {
         const body = createDealSchema.parse(req.body);
         const resolved = resolveWriteOrg(req, body.orgId);
-        if ("error" in resolved) {
+        if ('error' in resolved) {
           if (resolved.status === 403) sendForbidden(res, resolved.error);
           else sendBadRequest(res, resolved.error);
           return;
@@ -231,24 +238,29 @@ export function register(router: IRouter): void {
           fromStage: null,
           toStage: created.stage,
           req,
-          note: "deal created",
+          note: 'deal created',
         });
         sendCreated(res, created);
       } catch (err) {
         if (err instanceof z.ZodError) {
-          sendBadRequest(res, err.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "));
+          sendBadRequest(
+            res,
+            err.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+          );
           return;
         }
-        handleRouteError(res, err, "Failed to create pipeline deal");
+        handleRouteError(res, err, 'Failed to create pipeline deal');
       }
     },
   );
 
   router.patch(
-    "/admin/pipeline-deals/:id",
-    validateBody(bodyShape({
-      "stage": z.unknown().optional(),
-    })),
+    '/admin/pipeline-deals/:id',
+    validateBody(
+      bodyShape({
+        stage: z.unknown().optional(),
+      }),
+    ),
     async (req: Request, res: Response) => {
       try {
         const { id } = idParamsSchema.parse({ id: req.params.id });
@@ -256,7 +268,7 @@ export function register(router: IRouter): void {
 
         const orgFilter = buildOrgFilter(req);
         if (!orgFilter) {
-          sendNotFound(res, "Pipeline deal");
+          sendNotFound(res, 'Pipeline deal');
           return;
         }
         const [existing] = await db
@@ -265,7 +277,7 @@ export function register(router: IRouter): void {
           .where(and(eq(pipelineDealsTable.id, id), orgFilter))
           .limit(1);
         if (!existing) {
-          sendNotFound(res, "Pipeline deal");
+          sendNotFound(res, 'Pipeline deal');
           return;
         }
 
@@ -274,14 +286,14 @@ export function register(router: IRouter): void {
           updatedByUserId: actorUserId(req),
         };
         for (const k of [
-          "account",
-          "vertical",
-          "champion",
-          "championTitle",
-          "stage",
-          "fitScore",
-          "nextStep",
-          "notes",
+          'account',
+          'vertical',
+          'champion',
+          'championTitle',
+          'stage',
+          'fitScore',
+          'nextStep',
+          'notes',
         ] as const) {
           if (body[k] !== undefined) patch[k] = body[k];
         }
@@ -307,20 +319,23 @@ export function register(router: IRouter): void {
         sendSuccess(res, updated);
       } catch (err) {
         if (err instanceof z.ZodError) {
-          sendBadRequest(res, err.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "));
+          sendBadRequest(
+            res,
+            err.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+          );
           return;
         }
-        handleRouteError(res, err, "Failed to update pipeline deal");
+        handleRouteError(res, err, 'Failed to update pipeline deal');
       }
     },
   );
 
-  router.delete("/admin/pipeline-deals/:id", async (req: Request, res: Response) => {
+  router.delete('/admin/pipeline-deals/:id', async (req: Request, res: Response) => {
     try {
       const { id } = idParamsSchema.parse({ id: req.params.id });
       const orgFilter = buildOrgFilter(req);
       if (!orgFilter) {
-        sendNotFound(res, "Pipeline deal");
+        sendNotFound(res, 'Pipeline deal');
         return;
       }
       const [existing] = await db
@@ -329,7 +344,7 @@ export function register(router: IRouter): void {
         .where(and(eq(pipelineDealsTable.id, id), orgFilter))
         .limit(1);
       if (!existing) {
-        sendNotFound(res, "Pipeline deal");
+        sendNotFound(res, 'Pipeline deal');
         return;
       }
       await db.delete(pipelineDealsTable).where(eq(pipelineDealsTable.id, id));
@@ -338,11 +353,11 @@ export function register(router: IRouter): void {
       // even after the source deal is removed.
       sendSuccess(res, { id });
     } catch (err) {
-      handleRouteError(res, err, "Failed to delete pipeline deal");
+      handleRouteError(res, err, 'Failed to delete pipeline deal');
     }
   });
 
-  router.get("/admin/pipeline-deals/:id/events", async (req: Request, res: Response) => {
+  router.get('/admin/pipeline-deals/:id/events', async (req: Request, res: Response) => {
     try {
       const { id } = idParamsSchema.parse({ id: req.params.id });
       const eventOrgFilter = buildEventOrgFilter(req);
@@ -359,7 +374,7 @@ export function register(router: IRouter): void {
         .orderBy(desc(pipelineDealEventsTable.createdAt));
       sendSuccess(res, events);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list pipeline deal events");
+      handleRouteError(res, err, 'Failed to list pipeline deal events');
     }
   });
 }

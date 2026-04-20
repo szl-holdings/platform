@@ -2,24 +2,24 @@
 // Publishes the v1.0-standby GitHub release for Wave 3 launch.
 // Uses the Replit GitHub connector for OAuth (no PAT required).
 
-const OWNER = "stephenlutar2-hash";
-const REPO = "szl-holdings-platform";
-const TAG = "v1.0-standby";
-const TARGET = "main";
+const OWNER = 'stephenlutar2-hash';
+const REPO = 'szl-holdings-platform';
+const TAG = 'v1.0-standby';
+const TARGET = 'main';
 
 async function getGithubToken() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
-    ? "repl " + process.env.REPL_IDENTITY
+    ? 'repl ' + process.env.REPL_IDENTITY
     : process.env.WEB_REPL_RENEWAL
-    ? "depl " + process.env.WEB_REPL_RENEWAL
-    : null;
+      ? 'depl ' + process.env.WEB_REPL_RENEWAL
+      : null;
   if (!hostname || !xReplitToken) {
-    throw new Error("Missing REPLIT_CONNECTORS_HOSTNAME or identity token");
+    throw new Error('Missing REPLIT_CONNECTORS_HOSTNAME or identity token');
   }
   const url = `https://${hostname}/api/v2/connection?include_secrets=true&connector_names=github`;
   const r = await fetch(url, {
-    headers: { Accept: "application/json", X_REPLIT_TOKEN: xReplitToken },
+    headers: { Accept: 'application/json', X_REPLIT_TOKEN: xReplitToken },
   });
   if (!r.ok) throw new Error(`Connector lookup failed: ${r.status}`);
   const j = await r.json();
@@ -27,7 +27,7 @@ async function getGithubToken() {
   const token =
     settings.access_token ||
     (settings.oauth && settings.oauth.credentials && settings.oauth.credentials.access_token);
-  if (!token) throw new Error("No GitHub access token in connector settings");
+  if (!token) throw new Error('No GitHub access token in connector settings');
   return token;
 }
 
@@ -36,11 +36,11 @@ async function gh(token, path, init = {}) {
     ...init,
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "User-Agent": "szl-holdings-launch",
-      "X-GitHub-Api-Version": "2022-11-28",
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'szl-holdings-launch',
+      'X-GitHub-Api-Version': '2022-11-28',
       ...(init.headers || {}),
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
     },
   });
   return r;
@@ -98,7 +98,7 @@ async function main() {
   const token = await getGithubToken();
 
   // Verify identity
-  const userR = await gh(token, "/user");
+  const userR = await gh(token, '/user');
   const user = await userR.json();
   console.log(`Authenticated as: ${user.login}`);
 
@@ -118,9 +118,9 @@ async function main() {
     const existing = await existingR.json();
     console.log(`Release ${TAG} already exists (id=${existing.id}). Updating body.`);
     const updateR = await gh(token, `/repos/${OWNER}/${REPO}/releases/${existing.id}`, {
-      method: "PATCH",
+      method: 'PATCH',
       body: JSON.stringify({
-        name: "v1.0-standby — Wave 3 Launch Standby",
+        name: 'v1.0-standby — Wave 3 Launch Standby',
         body: RELEASE_BODY,
         draft: false,
         prerelease: true,
@@ -134,11 +134,11 @@ async function main() {
   } else {
     console.log(`Creating release ${TAG}...`);
     const createR = await gh(token, `/repos/${OWNER}/${REPO}/releases`, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({
         tag_name: TAG,
         target_commitish: repo.default_branch || TARGET,
-        name: "v1.0-standby — Wave 3 Launch Standby",
+        name: 'v1.0-standby — Wave 3 Launch Standby',
         body: RELEASE_BODY,
         draft: false,
         prerelease: true,
@@ -152,7 +152,7 @@ async function main() {
     release = await createR.json();
   }
 
-  console.log("\n=== RELEASE PUBLISHED ===");
+  console.log('\n=== RELEASE PUBLISHED ===');
   console.log(`URL:        ${release.html_url}`);
   console.log(`API URL:    ${release.url}`);
   console.log(`Tag:        ${release.tag_name}`);
@@ -162,6 +162,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("FAILED:", e.message);
+  console.error('FAILED:', e.message);
   process.exit(1);
 });

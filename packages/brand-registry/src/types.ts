@@ -41,7 +41,7 @@ export interface ProductEntry {
   category: string;
   oneLiner: string;
   description: string;
-  status: "live" | "beta" | "alpha" | "development" | "deferred";
+  status: 'live' | 'beta' | 'alpha' | 'development' | 'deferred';
   doctrineRole?: string;
   link?: string;
   color?: string;

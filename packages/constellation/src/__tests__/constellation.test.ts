@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ConstellationAdapter } from '../adapter.ts';
+import { getAdapter, getRegisteredDomains, listAdapters, registerAdapter } from '../registry.ts';
+import type { CreateCstNode, CstNode, CstNodeTypeRegistration } from '../types.ts';
 import {
-  CstNodeSchema,
-  CstEdgeSchema,
+  AddCstEvidenceSchema,
   CreateCstNodeSchema,
+  CstEdgeSchema,
+  CstNodeSchema,
   CstQueryFiltersSchema,
   CstRelationshipFiltersSchema,
   CstSearchParamsSchema,
-  AddCstEvidenceSchema,
-} from "../types.ts";
-import { registerAdapter, getAdapter, listAdapters, getRegisteredDomains } from "../registry.ts";
-import type { ConstellationAdapter } from "../adapter.ts";
-import type { CstNode, CstNodeTypeRegistration, CreateCstNode } from "../types.ts";
+} from '../types.ts';
 
-vi.mock("@szl-holdings/db", () => ({
+vi.mock('@szl-holdings/db', () => ({
   db: {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
@@ -33,7 +33,7 @@ vi.mock("@szl-holdings/db", () => ({
   cstNodeTypes: {},
 }));
 
-vi.mock("drizzle-orm", () => ({
+vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   and: vi.fn(),
   gte: vi.fn(),
@@ -43,18 +43,18 @@ vi.mock("drizzle-orm", () => ({
   sql: vi.fn(),
 }));
 
-describe("Constellation types — Zod validation", () => {
-  it("validates a valid CstNode shape", () => {
+describe('Constellation types — Zod validation', () => {
+  it('validates a valid CstNode shape', () => {
     const node = {
-      id: "00000000-0000-0000-0000-000000000001",
-      canonicalId: "00000000-0000-0000-0000-000000000002",
-      domain: "terra",
-      entityType: "property",
-      labels: ["commercial"],
-      name: "Test Property",
+      id: '00000000-0000-0000-0000-000000000001',
+      canonicalId: '00000000-0000-0000-0000-000000000002',
+      domain: 'terra',
+      entityType: 'property',
+      labels: ['commercial'],
+      name: 'Test Property',
       freshness: new Date().toISOString(),
       confidence: 0.9,
-      sensitivityTier: "internal",
+      sensitivityTier: 'internal',
       relatedActionIds: [],
       relatedDocumentIds: [],
       relatedExecutionIds: [],
@@ -68,16 +68,16 @@ describe("Constellation types — Zod validation", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects a node with invalid domain", () => {
+  it('rejects a node with invalid domain', () => {
     const result = CstNodeSchema.safeParse({
-      id: "00000000-0000-0000-0000-000000000001",
-      canonicalId: "00000000-0000-0000-0000-000000000002",
-      domain: "invalid_domain",
-      entityType: "property",
-      name: "Test Property",
+      id: '00000000-0000-0000-0000-000000000001',
+      canonicalId: '00000000-0000-0000-0000-000000000002',
+      domain: 'invalid_domain',
+      entityType: 'property',
+      name: 'Test Property',
       freshness: new Date().toISOString(),
       confidence: 0.9,
-      sensitivityTier: "internal",
+      sensitivityTier: 'internal',
       relatedActionIds: [],
       relatedDocumentIds: [],
       relatedExecutionIds: [],
@@ -90,16 +90,16 @@ describe("Constellation types — Zod validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects confidence out of range", () => {
+  it('rejects confidence out of range', () => {
     const result = CstNodeSchema.safeParse({
-      id: "00000000-0000-0000-0000-000000000001",
-      canonicalId: "00000000-0000-0000-0000-000000000002",
-      domain: "terra",
-      entityType: "property",
-      name: "Test",
+      id: '00000000-0000-0000-0000-000000000001',
+      canonicalId: '00000000-0000-0000-0000-000000000002',
+      domain: 'terra',
+      entityType: 'property',
+      name: 'Test',
       freshness: new Date().toISOString(),
       confidence: 1.5,
-      sensitivityTier: "internal",
+      sensitivityTier: 'internal',
       relatedActionIds: [],
       relatedDocumentIds: [],
       relatedExecutionIds: [],
@@ -112,21 +112,21 @@ describe("Constellation types — Zod validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("validates CreateCstNode with minimal required fields", () => {
+  it('validates CreateCstNode with minimal required fields', () => {
     const result = CreateCstNodeSchema.safeParse({
-      domain: "vessels",
-      entityType: "vessel",
-      name: "MV Test Ship",
+      domain: 'vessels',
+      entityType: 'vessel',
+      name: 'MV Test Ship',
     });
     expect(result.success).toBe(true);
   });
 
-  it("validates CstEdge schema", () => {
+  it('validates CstEdge schema', () => {
     const edge = {
-      id: "00000000-0000-0000-0000-000000000001",
-      fromNodeId: "00000000-0000-0000-0000-000000000002",
-      toNodeId: "00000000-0000-0000-0000-000000000003",
-      relationshipType: "owns",
+      id: '00000000-0000-0000-0000-000000000001',
+      fromNodeId: '00000000-0000-0000-0000-000000000002',
+      toNodeId: '00000000-0000-0000-0000-000000000003',
+      relationshipType: 'owns',
       confidence: 0.95,
       active: true,
       extensions: {},
@@ -137,67 +137,67 @@ describe("Constellation types — Zod validation", () => {
     expect(result.success).toBe(true);
   });
 
-  it("validates query filters with defaults", () => {
+  it('validates query filters with defaults', () => {
     const result = CstQueryFiltersSchema.safeParse({});
     expect(result.success).toBe(true);
     expect(result.data?.limit).toBe(50);
     expect(result.data?.offset).toBe(0);
   });
 
-  it("rejects query filters with limit > 500", () => {
+  it('rejects query filters with limit > 500', () => {
     const result = CstQueryFiltersSchema.safeParse({ limit: 1000 });
     expect(result.success).toBe(false);
   });
 
-  it("validates search params", () => {
-    const result = CstSearchParamsSchema.safeParse({ q: "madison avenue" });
+  it('validates search params', () => {
+    const result = CstSearchParamsSchema.safeParse({ q: 'madison avenue' });
     expect(result.success).toBe(true);
     expect(result.data?.limit).toBe(20);
   });
 
-  it("rejects empty search query", () => {
-    const result = CstSearchParamsSchema.safeParse({ q: "" });
+  it('rejects empty search query', () => {
+    const result = CstSearchParamsSchema.safeParse({ q: '' });
     expect(result.success).toBe(false);
   });
 
-  it("validates AddCstEvidence schema", () => {
+  it('validates AddCstEvidence schema', () => {
     const result = AddCstEvidenceSchema.safeParse({
-      edgeId: "00000000-0000-0000-0000-000000000001",
-      evidenceType: "deed_record",
+      edgeId: '00000000-0000-0000-0000-000000000001',
+      evidenceType: 'deed_record',
     });
     expect(result.success).toBe(true);
   });
 
-  it("validates relationship filters with includeEvidence default", () => {
+  it('validates relationship filters with includeEvidence default', () => {
     const result = CstRelationshipFiltersSchema.safeParse({});
     expect(result.success).toBe(true);
     expect(result.data?.includeEvidence).toBe(false);
   });
 });
 
-describe("Constellation adapter registry", () => {
+describe('Constellation adapter registry', () => {
   const mockTypes: CstNodeTypeRegistration[] = [
     {
-      domain: "platform",
-      typeKey: "test_type",
-      displayName: "Test Type",
+      domain: 'platform',
+      typeKey: 'test_type',
+      displayName: 'Test Type',
     },
   ];
 
   const mockAdapter: ConstellationAdapter = {
-    domain: "platform",
+    domain: 'platform',
     nodeTypes: mockTypes,
     async upsertEntity(input: CreateCstNode): Promise<CstNode> {
       return {
-        id: "00000000-0000-0000-0000-000000000099",
-        canonicalId: "00000000-0000-0000-0000-000000000100",
+        id: '00000000-0000-0000-0000-000000000099',
+        canonicalId: '00000000-0000-0000-0000-000000000100',
         domain: input.domain,
         entityType: input.entityType,
         labels: input.labels ?? [],
         name: input.name,
         freshness: new Date().toISOString(),
         confidence: input.confidence ?? 1.0,
-        sensitivityTier: input.sensitivityTier ?? "internal",
+        sensitivityTier: input.sensitivityTier ?? 'internal',
         relatedActionIds: [],
         relatedDocumentIds: [],
         relatedExecutionIds: [],
@@ -213,99 +213,99 @@ describe("Constellation adapter registry", () => {
     },
   };
 
-  it("registers an adapter and retrieves it", () => {
+  it('registers an adapter and retrieves it', () => {
     registerAdapter(mockAdapter);
-    const retrieved = getAdapter("platform");
+    const retrieved = getAdapter('platform');
     expect(retrieved).toBeDefined();
-    expect(retrieved?.domain).toBe("platform");
+    expect(retrieved?.domain).toBe('platform');
   });
 
-  it("lists all registered adapters", () => {
+  it('lists all registered adapters', () => {
     const adapters = listAdapters();
     expect(adapters.length).toBeGreaterThan(0);
   });
 
-  it("returns registered domains", () => {
+  it('returns registered domains', () => {
     const domains = getRegisteredDomains();
-    expect(domains).toContain("platform");
+    expect(domains).toContain('platform');
   });
 
-  it("adapter can upsert an entity", async () => {
-    const adapter = getAdapter("platform");
+  it('adapter can upsert an entity', async () => {
+    const adapter = getAdapter('platform');
     expect(adapter).toBeDefined();
     const node = await adapter!.upsertEntity({
-      domain: "platform",
-      entityType: "test_type",
-      name: "Test Entity",
+      domain: 'platform',
+      entityType: 'test_type',
+      name: 'Test Entity',
     });
-    expect(node.name).toBe("Test Entity");
-    expect(node.domain).toBe("platform");
+    expect(node.name).toBe('Test Entity');
+    expect(node.domain).toBe('platform');
   });
 
-  it("adapter lookup returns null for unknown alias", async () => {
-    const adapter = getAdapter("platform");
-    const result = await adapter!.lookupByAlias("unknown_type", "unknown_value");
+  it('adapter lookup returns null for unknown alias', async () => {
+    const adapter = getAdapter('platform');
+    const result = await adapter!.lookupByAlias('unknown_type', 'unknown_value');
     expect(result).toBeNull();
   });
 });
 
-describe("Constellation node type registrations", () => {
-  it("terra adapter has correct node types", async () => {
-    const { terraAdapter } = await import("../adapters/terra.ts");
-    expect(terraAdapter.domain).toBe("terra");
+describe('Constellation node type registrations', () => {
+  it('terra adapter has correct node types', async () => {
+    const { terraAdapter } = await import('../adapters/terra.ts');
+    expect(terraAdapter.domain).toBe('terra');
     expect(terraAdapter.nodeTypes.length).toBeGreaterThanOrEqual(4);
     const typeKeys = terraAdapter.nodeTypes.map((t) => t.typeKey);
-    expect(typeKeys).toContain("property");
-    expect(typeKeys).toContain("lender");
-    expect(typeKeys).toContain("owner");
-    expect(typeKeys).toContain("parcel");
+    expect(typeKeys).toContain('property');
+    expect(typeKeys).toContain('lender');
+    expect(typeKeys).toContain('owner');
+    expect(typeKeys).toContain('parcel');
   });
 
-  it("vessels adapter has correct node types", async () => {
-    const { vesselsAdapter } = await import("../adapters/vessels.ts");
-    expect(vesselsAdapter.domain).toBe("vessels");
+  it('vessels adapter has correct node types', async () => {
+    const { vesselsAdapter } = await import('../adapters/vessels.ts');
+    expect(vesselsAdapter.domain).toBe('vessels');
     const typeKeys = vesselsAdapter.nodeTypes.map((t) => t.typeKey);
-    expect(typeKeys).toContain("vessel");
-    expect(typeKeys).toContain("voyage");
-    expect(typeKeys).toContain("port");
-    expect(typeKeys).toContain("sanctions_entity");
+    expect(typeKeys).toContain('vessel');
+    expect(typeKeys).toContain('voyage');
+    expect(typeKeys).toContain('port');
+    expect(typeKeys).toContain('sanctions_entity');
   });
 
-  it("aegis adapter has correct node types", async () => {
-    const { aegisAdapter } = await import("../adapters/aegis.ts");
-    expect(aegisAdapter.domain).toBe("aegis");
+  it('aegis adapter has correct node types', async () => {
+    const { aegisAdapter } = await import('../adapters/aegis.ts');
+    expect(aegisAdapter.domain).toBe('aegis');
     const typeKeys = aegisAdapter.nodeTypes.map((t) => t.typeKey);
-    expect(typeKeys).toContain("asset");
-    expect(typeKeys).toContain("identity");
-    expect(typeKeys).toContain("control");
-    expect(typeKeys).toContain("incident");
+    expect(typeKeys).toContain('asset');
+    expect(typeKeys).toContain('identity');
+    expect(typeKeys).toContain('control');
+    expect(typeKeys).toContain('incident');
   });
 
-  it("prism adapter has correct node types", async () => {
-    const { prismAdapter } = await import("../adapters/prism.ts");
-    expect(prismAdapter.domain).toBe("prism");
+  it('prism adapter has correct node types', async () => {
+    const { prismAdapter } = await import('../adapters/prism.ts');
+    expect(prismAdapter.domain).toBe('prism');
     const typeKeys = prismAdapter.nodeTypes.map((t) => t.typeKey);
-    expect(typeKeys).toContain("matter");
-    expect(typeKeys).toContain("filing");
-    expect(typeKeys).toContain("regulation");
-    expect(typeKeys).toContain("evidence");
+    expect(typeKeys).toContain('matter');
+    expect(typeKeys).toContain('filing');
+    expect(typeKeys).toContain('regulation');
+    expect(typeKeys).toContain('evidence');
   });
 
-  it("imperium adapter has correct node types", async () => {
-    const { imperiumAdapter } = await import("../adapters/imperium.ts");
-    expect(imperiumAdapter.domain).toBe("imperium");
+  it('imperium adapter has correct node types', async () => {
+    const { imperiumAdapter } = await import('../adapters/imperium.ts');
+    expect(imperiumAdapter.domain).toBe('imperium');
     const typeKeys = imperiumAdapter.nodeTypes.map((t) => t.typeKey);
-    expect(typeKeys).toContain("tenant");
-    expect(typeKeys).toContain("environment");
-    expect(typeKeys).toContain("deployment");
+    expect(typeKeys).toContain('tenant');
+    expect(typeKeys).toContain('environment');
+    expect(typeKeys).toContain('deployment');
   });
 
-  it("carlota-jo adapter has correct node types", async () => {
-    const { carlotaJoAdapter } = await import("../adapters/carlota-jo.ts");
-    expect(carlotaJoAdapter.domain).toBe("carlota-jo");
+  it('carlota-jo adapter has correct node types', async () => {
+    const { carlotaJoAdapter } = await import('../adapters/carlota-jo.ts');
+    expect(carlotaJoAdapter.domain).toBe('carlota-jo');
     const typeKeys = carlotaJoAdapter.nodeTypes.map((t) => t.typeKey);
-    expect(typeKeys).toContain("household");
-    expect(typeKeys).toContain("vendor");
-    expect(typeKeys).toContain("schedule");
+    expect(typeKeys).toContain('household');
+    expect(typeKeys).toContain('vendor');
+    expect(typeKeys).toContain('schedule');
   });
 });

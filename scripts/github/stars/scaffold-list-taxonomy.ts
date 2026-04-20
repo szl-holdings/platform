@@ -27,75 +27,69 @@
  * your existing starred repos into the taxonomy.
  */
 
-const GITHUB_TOKEN =
-  process.env.GITHUB_TOKEN || process.env.GH_TOKEN || null;
-const USERNAME = process.argv[2] || "stephenlutar2-hash";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || null;
+const USERNAME = process.argv[2] || 'stephenlutar2-hash';
 
 // The 8 canonical SZL Holdings star lists
 const CANONICAL_LISTS = [
   {
-    name: "Design/UI",
-    slug: "design-ui",
+    name: 'Design/UI',
+    slug: 'design-ui',
     description:
-      "Visual systems, component libraries, animation, design tokens, and UI engineering references.",
+      'Visual systems, component libraries, animation, design tokens, and UI engineering references.',
   },
   {
-    name: "AI/Agents/RAG",
-    slug: "ai-agents-rag",
+    name: 'AI/Agents/RAG',
+    slug: 'ai-agents-rag',
     description:
-      "LLM orchestration, agent frameworks, retrieval-augmented generation, and AI workflow primitives.",
+      'LLM orchestration, agent frameworks, retrieval-augmented generation, and AI workflow primitives.',
   },
   {
-    name: "Observability",
-    slug: "observability",
-    description:
-      "Logging, distributed tracing, metrics, APM, and business observability patterns.",
+    name: 'Observability',
+    slug: 'observability',
+    description: 'Logging, distributed tracing, metrics, APM, and business observability patterns.',
   },
   {
-    name: "Security/Trust",
-    slug: "security-trust",
+    name: 'Security/Trust',
+    slug: 'security-trust',
     description:
-      "Authentication, RBAC, secrets management, compliance patterns, and zero-trust architecture.",
+      'Authentication, RBAC, secrets management, compliance patterns, and zero-trust architecture.',
   },
   {
-    name: "Infra/DevOps",
-    slug: "infra-devops",
+    name: 'Infra/DevOps',
+    slug: 'infra-devops',
     description:
-      "CI/CD pipelines, infrastructure-as-code, deployment architectures, and platform engineering.",
+      'CI/CD pipelines, infrastructure-as-code, deployment architectures, and platform engineering.',
   },
   {
-    name: "Docs/README",
-    slug: "docs-readme",
+    name: 'Docs/README',
+    slug: 'docs-readme',
     description:
-      "Documentation excellence — README patterns, API docs, ADRs, changelogs, and docs-as-code.",
+      'Documentation excellence — README patterns, API docs, ADRs, changelogs, and docs-as-code.',
   },
   {
-    name: "Component Libraries",
-    slug: "component-libraries",
+    name: 'Component Libraries',
+    slug: 'component-libraries',
     description:
-      "Headless UI components, accessible primitives, React component systems, and design system implementations.",
+      'Headless UI components, accessible primitives, React component systems, and design system implementations.',
   },
   {
-    name: "Competitive/Reference",
-    slug: "competitive-reference",
+    name: 'Competitive/Reference',
+    slug: 'competitive-reference',
     description:
-      "Direct competitors, category leaders, and reference implementations across SZL product domains.",
+      'Direct competitors, category leaders, and reference implementations across SZL product domains.',
   },
 ];
 
 function printManualInstructions() {
-  console.log("\n================================================================");
-  console.log("  MANUAL FALLBACK — Create Lists via GitHub Web UI");
-  console.log("================================================================\n");
-  console.log(
-    "GitHub Lists must be created manually if a token is not available.\n"
-  );
-  console.log("Steps:\n");
-  console.log(
-    `  1. Go to: https://github.com/${USERNAME}?tab=stars\n`
-  );
+  console.log('\n================================================================');
+  console.log('  MANUAL FALLBACK — Create Lists via GitHub Web UI');
+  console.log('================================================================\n');
+  console.log('GitHub Lists must be created manually if a token is not available.\n');
+  console.log('Steps:\n');
+  console.log(`  1. Go to: https://github.com/${USERNAME}?tab=stars\n`);
   console.log("  2. Click 'Create list' in the left sidebar\n");
-  console.log("  3. Create each list below:\n");
+  console.log('  3. Create each list below:\n');
 
   for (const list of CANONICAL_LISTS) {
     console.log(`  ---`);
@@ -103,10 +97,10 @@ function printManualInstructions() {
     console.log(`  Description: ${list.description}`);
   }
 
-  console.log("\n  4. Once lists exist, assign starred repos to the");
-  console.log("     appropriate list using the bookmark icon on each repo.\n");
-  console.log("  Reference: docs/github/list-taxonomy.md for inclusion criteria.\n");
-  console.log("================================================================\n");
+  console.log('\n  4. Once lists exist, assign starred repos to the');
+  console.log('     appropriate list using the bookmark icon on each repo.\n');
+  console.log('  Reference: docs/github/list-taxonomy.md for inclusion criteria.\n');
+  console.log('================================================================\n');
 }
 
 async function checkListsApi(): Promise<boolean> {
@@ -115,15 +109,12 @@ async function checkListsApi(): Promise<boolean> {
   if (!GITHUB_TOKEN) return false;
 
   try {
-    const res = await fetch(
-      `https://api.github.com/user/starred`,
-      {
-        headers: {
-          Authorization: `Bearer ${GITHUB_TOKEN}`,
-          Accept: "application/vnd.github+json",
-        },
-      }
-    );
+    const res = await fetch(`https://api.github.com/user/starred`, {
+      headers: {
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+      },
+    });
     return res.ok;
   } catch {
     return false;
@@ -131,27 +122,25 @@ async function checkListsApi(): Promise<boolean> {
 }
 
 async function main() {
-  console.log("================================================================");
-  console.log("  SZL Holdings — Scaffold List Taxonomy");
+  console.log('================================================================');
+  console.log('  SZL Holdings — Scaffold List Taxonomy');
   console.log(`  User: @${USERNAME}`);
-  console.log("================================================================\n");
+  console.log('================================================================\n');
 
   // Be explicit upfront: this is a guided setup tool, not an API creator.
-  console.log("NOTE: GitHub Lists are a web UI-only feature.");
-  console.log("  This script CANNOT create lists via the GitHub API.");
-  console.log("  It prints the canonical list definitions and setup instructions.");
-  console.log("  You must create lists manually at: github.com/" + USERNAME + "?tab=stars\n");
+  console.log('NOTE: GitHub Lists are a web UI-only feature.');
+  console.log('  This script CANNOT create lists via the GitHub API.');
+  console.log('  It prints the canonical list definitions and setup instructions.');
+  console.log('  You must create lists manually at: github.com/' + USERNAME + '?tab=stars\n');
 
-  console.log("Canonical lists to configure:\n");
+  console.log('Canonical lists to configure:\n');
   for (const list of CANONICAL_LISTS) {
     console.log(`  - ${list.name}`);
     console.log(`    ${list.description}\n`);
   }
 
   if (!GITHUB_TOKEN) {
-    console.log(
-      "GITHUB_TOKEN not set — skipping token validation.\n"
-    );
+    console.log('GITHUB_TOKEN not set — skipping token validation.\n');
     printManualInstructions();
     process.exit(0);
   }
@@ -163,32 +152,24 @@ async function main() {
 
   if (!tokenValid) {
     console.error(
-      "GitHub token is set but could not authenticate. Verify GITHUB_TOKEN is valid.\n"
+      'GitHub token is set but could not authenticate. Verify GITHUB_TOKEN is valid.\n',
     );
     printManualInstructions();
     process.exit(1);
   }
 
-  console.log(
-    "Token verified (valid for export-starred-repos.ts and other API operations)."
-  );
-  console.log(
-    "List creation still requires GitHub web UI — see instructions below.\n"
-  );
+  console.log('Token verified (valid for export-starred-repos.ts and other API operations).');
+  console.log('List creation still requires GitHub web UI — see instructions below.\n');
 
   printManualInstructions();
 
-  console.log("\nAlternative: Use the export and report scripts to analyze");
-  console.log("your existing stars and manually organize into these lists.\n");
-  console.log(
-    "  npx tsx scripts/github/stars/export-starred-repos.ts"
-  );
-  console.log(
-    "  npx tsx scripts/github/stars/generate-category-report.ts\n"
-  );
+  console.log('\nAlternative: Use the export and report scripts to analyze');
+  console.log('your existing stars and manually organize into these lists.\n');
+  console.log('  npx tsx scripts/github/stars/export-starred-repos.ts');
+  console.log('  npx tsx scripts/github/stars/generate-category-report.ts\n');
 }
 
 main().catch((err) => {
-  console.error("Unexpected error:", err);
+  console.error('Unexpected error:', err);
   process.exit(1);
 });

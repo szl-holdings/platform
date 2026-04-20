@@ -1,6 +1,6 @@
-import type { Request, Response, NextFunction } from "express";
-import { randomUUID } from "crypto";
-import { runWithRequestContext } from "../lib/request-context";
+import { randomUUID } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
+import { runWithRequestContext } from '../lib/request-context';
 
 declare global {
   namespace Express {
@@ -11,10 +11,10 @@ declare global {
   }
 }
 
-const SZL_CORRELATION_HEADER = "x-szl-correlation-id";
-const LEGACY_CORRELATION_HEADER = "x-correlation-id";
-const REQUEST_ID_HEADER = "x-request-id";
-const TRACE_PARENT_HEADER = "traceparent";
+const SZL_CORRELATION_HEADER = 'x-szl-correlation-id';
+const LEGACY_CORRELATION_HEADER = 'x-correlation-id';
+const REQUEST_ID_HEADER = 'x-request-id';
+const TRACE_PARENT_HEADER = 'traceparent';
 
 const VALID_ID_PATTERN = /^[\w\-.:]{1,128}$/;
 
@@ -25,8 +25,12 @@ export function correlationMiddleware(req: Request, res: Response, next: NextFun
   const inboundLegacyCorrelationId = req.headers[LEGACY_CORRELATION_HEADER] as string | undefined;
   const traceParent = req.headers[TRACE_PARENT_HEADER] as string | undefined;
 
-  const inboundCorrelation = inboundSzlCorrelationId || inboundLegacyCorrelationId || inboundRequestId;
-  const correlationId = inboundCorrelation && VALID_ID_PATTERN.test(inboundCorrelation) ? inboundCorrelation : randomUUID();
+  const inboundCorrelation =
+    inboundSzlCorrelationId || inboundLegacyCorrelationId || inboundRequestId;
+  const correlationId =
+    inboundCorrelation && VALID_ID_PATTERN.test(inboundCorrelation)
+      ? inboundCorrelation
+      : randomUUID();
   const requestId = randomUUID();
 
   req.correlationId = correlationId;

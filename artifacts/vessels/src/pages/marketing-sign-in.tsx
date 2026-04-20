@@ -1,6 +1,6 @@
-import { Link } from "wouter";
-import { Ship } from "lucide-react";
-import { MarketingNav } from "@/components/MarketingNav";
+import { Ship } from 'lucide-react';
+import { Link } from 'wouter';
+import { MarketingNav } from '@/components/MarketingNav';
 
 export default function SignInPage() {
   return (
@@ -17,7 +17,9 @@ export default function SignInPage() {
           </div>
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-2xl p-7 space-y-4">
             <div>
-              <label className="block text-[11px] font-medium text-sky-400/50 mb-1.5 uppercase tracking-[0.08em]">Work email</label>
+              <label className="block text-[11px] font-medium text-sky-400/50 mb-1.5 uppercase tracking-[0.08em]">
+                Work email
+              </label>
               <input
                 type="email"
                 placeholder="you@company.com"
@@ -25,7 +27,9 @@ export default function SignInPage() {
               />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-sky-400/50 mb-1.5 uppercase tracking-[0.08em]">Password</label>
+              <label className="block text-[11px] font-medium text-sky-400/50 mb-1.5 uppercase tracking-[0.08em]">
+                Password
+              </label>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -38,7 +42,10 @@ export default function SignInPage() {
               </button>
             </Link>
             <p className="text-center text-[12px] text-sky-400/30">
-              Don't have access? <Link href="/demo" className="text-sky-400 hover:text-sky-300">Request a demo</Link>
+              Don't have access?{' '}
+              <Link href="/demo" className="text-sky-400 hover:text-sky-300">
+                Request a demo
+              </Link>
             </p>
           </div>
         </div>

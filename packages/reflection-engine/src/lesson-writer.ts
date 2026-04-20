@@ -1,6 +1,6 @@
-import type { TraceRecord } from "@workspace/trace-graph";
-import type { FailureMode, RouteQuality } from "./types.js";
-import type { QualityScore } from "./scorer.js";
+import type { TraceRecord } from '@workspace/trace-graph';
+import type { QualityScore } from './scorer.js';
+import type { FailureMode, RouteQuality } from './types.js';
 
 export interface LessonOutput {
   whatWorked: string[];
@@ -23,13 +23,11 @@ export function writeLessons(
 
   if (score.toolSuccessRate === 1 && trace.toolCalls.length > 0) {
     whatWorked.push(
-      `All ${trace.toolCalls.length} tool call(s) succeeded (${bestRoute.tools.join(", ")}).`,
+      `All ${trace.toolCalls.length} tool call(s) succeeded (${bestRoute.tools.join(', ')}).`,
     );
   } else if (score.toolSuccessRate > 0.5 && trace.toolCalls.length > 0) {
     const successes = trace.toolCalls.filter((t) => t.success).length;
-    whatWorked.push(
-      `${successes}/${trace.toolCalls.length} tool calls succeeded.`,
-    );
+    whatWorked.push(`${successes}/${trace.toolCalls.length} tool calls succeeded.`);
   }
 
   if (score.retrievalQuality >= 0.8 && trace.retrieval.length > 0) {
@@ -38,63 +36,56 @@ export function writeLessons(
     );
   }
 
-  if (trace.status === "completed" && trace.errors.length === 0) {
-    whatWorked.push("Run completed successfully with no errors.");
+  if (trace.status === 'completed' && trace.errors.length === 0) {
+    whatWorked.push('Run completed successfully with no errors.');
   }
 
   if (score.efficiencyScore >= 0.8) {
     whatWorked.push(
-      `Execution was efficient (latency: ${trace.latencyMs ?? "N/A"}ms, cost: $${(trace.costUsd ?? 0).toFixed(4)}).`,
+      `Execution was efficient (latency: ${trace.latencyMs ?? 'N/A'}ms, cost: $${(trace.costUsd ?? 0).toFixed(4)}).`,
     );
   }
 
-  if (failureMode === "tool_failure" || score.toolSuccessRate < 1) {
+  if (failureMode === 'tool_failure' || score.toolSuccessRate < 1) {
     const failed = trace.toolCalls.filter((t) => !t.success);
     for (const f of failed) {
       whatFailed.push(
-        `Tool "${f.toolName}" failed${f.errorCode ? ` with code ${f.errorCode}` : ""}.`,
+        `Tool "${f.toolName}" failed${f.errorCode ? ` with code ${f.errorCode}` : ''}.`,
       );
     }
   }
 
-  if (failureMode === "guardrail_block") {
+  if (failureMode === 'guardrail_block') {
     const blocks = trace.guardrailResults.filter(
-      (g) => g.outcome === "block" || g.outcome === "require-approval",
+      (g) => g.outcome === 'block' || g.outcome === 'require-approval',
     );
     for (const b of blocks) {
-      whatFailed.push(
-        `Guardrail "${b.guardId}" triggered: ${b.reason ?? "no reason provided"}.`,
-      );
+      whatFailed.push(`Guardrail "${b.guardId}" triggered: ${b.reason ?? 'no reason provided'}.`);
     }
   }
 
-  if (failureMode === "retrieval_miss") {
+  if (failureMode === 'retrieval_miss') {
     whatFailed.push(
-      "All retrieval queries returned zero results. Knowledge base may be incomplete.",
+      'All retrieval queries returned zero results. Knowledge base may be incomplete.',
     );
-    whatWasMissing.push("Relevant documents or records in the retrieval sources.");
+    whatWasMissing.push('Relevant documents or records in the retrieval sources.');
   }
 
-  if (failureMode === "timeout") {
-    whatFailed.push(
-      `Execution was too slow (${trace.latencyMs}ms), exceeding acceptable limits.`,
-    );
+  if (failureMode === 'timeout') {
+    whatFailed.push(`Execution was too slow (${trace.latencyMs}ms), exceeding acceptable limits.`);
   }
 
-  if (failureMode === "policy_violation") {
+  if (failureMode === 'policy_violation') {
     for (const e of trace.errors) {
-      if (
-        e.code.toLowerCase().includes("policy") ||
-        e.message.toLowerCase().includes("policy")
-      ) {
+      if (e.code.toLowerCase().includes('policy') || e.message.toLowerCase().includes('policy')) {
         whatFailed.push(`Policy violation: ${e.message}`);
       }
     }
   }
 
-  if (failureMode === "high_cost") {
+  if (failureMode === 'high_cost') {
     whatFailed.push(
-      `Cost exceeded threshold: $${trace.costUsd?.toFixed(4)} with ${trace.totalTokens ?? "unknown"} tokens.`,
+      `Cost exceeded threshold: $${trace.costUsd?.toFixed(4)} with ${trace.totalTokens ?? 'unknown'} tokens.`,
     );
   }
 
@@ -104,63 +95,59 @@ export function writeLessons(
     }
   }
 
-  if (trace.retrieval.length === 0 && failureMode !== "no_failure") {
-    whatWasMissing.push("No retrieval was attempted; grounding data may have improved outcome.");
+  if (trace.retrieval.length === 0 && failureMode !== 'no_failure') {
+    whatWasMissing.push('No retrieval was attempted; grounding data may have improved outcome.');
   }
 
   if (!trace.model) {
-    whatWasMissing.push("Model was not recorded; model attribution is missing from this trace.");
+    whatWasMissing.push('Model was not recorded; model attribution is missing from this trace.');
   }
 
-  if (trace.toolCalls.length === 0 && failureMode !== "no_failure") {
-    whatWasMissing.push("No tools were called; additional tool use may have resolved the failure.");
+  if (trace.toolCalls.length === 0 && failureMode !== 'no_failure') {
+    whatWasMissing.push('No tools were called; additional tool use may have resolved the failure.');
   }
 
-  if (failureMode === "tool_failure") {
-    const failedTools = trace.toolCalls
-      .filter((t) => !t.success)
-      .map((t) => t.toolName);
-    whatToTryNext.push(
-      `Retry with fallback tools in place of: ${failedTools.join(", ")}.`,
-    );
+  if (failureMode === 'tool_failure') {
+    const failedTools = trace.toolCalls.filter((t) => !t.success).map((t) => t.toolName);
+    whatToTryNext.push(`Retry with fallback tools in place of: ${failedTools.join(', ')}.`);
     if (trace.toolCalls.some((t) => !t.success && t.retries === 0)) {
-      whatToTryNext.push("Add retry logic with exponential back-off for failed tool calls.");
+      whatToTryNext.push('Add retry logic with exponential back-off for failed tool calls.');
     }
   }
 
-  if (failureMode === "guardrail_block") {
+  if (failureMode === 'guardrail_block') {
     whatToTryNext.push(
-      "Reformulate the request to avoid triggering guardrails, or request operator approval.",
+      'Reformulate the request to avoid triggering guardrails, or request operator approval.',
     );
   }
 
-  if (failureMode === "retrieval_miss") {
+  if (failureMode === 'retrieval_miss') {
     whatToTryNext.push(
-      "Broaden retrieval queries or seed the knowledge base with relevant documents.",
+      'Broaden retrieval queries or seed the knowledge base with relevant documents.',
     );
   }
 
-  if (failureMode === "timeout") {
+  if (failureMode === 'timeout') {
     whatToTryNext.push(
       `Switch to a faster model or reduce tool parallelism to cut latency below acceptable threshold.`,
     );
   }
 
-  if (failureMode === "high_cost") {
+  if (failureMode === 'high_cost') {
     whatToTryNext.push(
-      "Use a cheaper model for initial passes and reserve high-cost models for final synthesis.",
+      'Use a cheaper model for initial passes and reserve high-cost models for final synthesis.',
     );
-    whatToTryNext.push("Implement token budgets to cap spend per run.");
+    whatToTryNext.push('Implement token budgets to cap spend per run.');
   }
 
   if (score.overall >= 0.85) {
     whatToTryNext.push(
-      "Run is high-quality; consider promoting this route as the canonical strategy.",
+      'Run is high-quality; consider promoting this route as the canonical strategy.',
     );
   }
 
   const lessonParts: string[] = [];
-  if (failureMode !== "no_failure") {
+  if (failureMode !== 'no_failure') {
     lessonParts.push(`Failure mode: ${failureMode}.`);
   }
   if (whatWorked.length > 0) {
@@ -172,11 +159,9 @@ export function writeLessons(
   if (whatToTryNext.length > 0) {
     lessonParts.push(`Next action: ${whatToTryNext[0]}`);
   }
-  lessonParts.push(
-    `Quality score: ${(score.overall * 100).toFixed(0)}/100.`,
-  );
+  lessonParts.push(`Quality score: ${(score.overall * 100).toFixed(0)}/100.`);
 
-  const lesson = lessonParts.join(" ") || "Run completed without notable observations.";
+  const lesson = lessonParts.join(' ') || 'Run completed without notable observations.';
 
   return { whatWorked, whatFailed, whatWasMissing, whatToTryNext, lesson };
 }

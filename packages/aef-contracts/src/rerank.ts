@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { TenantIdSchema } from "./tenant.js";
+import { z } from 'zod';
+import { TenantIdSchema } from './tenant.js';
 
 export const RerankCandidateSchema = z.object({
   id: z.string(),

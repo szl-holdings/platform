@@ -5,15 +5,15 @@
  * the API gateway. Avoids HTTP round-trips for gateway-to-orchestrator calls.
  */
 
-import { defaultEngine } from "./engine.js";
-import { defaultRunStore } from "./run-store.js";
-import { defaultAuditEmitter } from "./audit.js";
-import { buildIngestDocumentWorkflow } from "./workflows/ingest-document.js";
-import { buildRebuildIndexWorkflow } from "./workflows/rebuild-index.js";
-import { buildVerifyIndexHealthWorkflow } from "./workflows/verify-index-health.js";
-import { buildRunRetrievalEvalWorkflow } from "./workflows/run-retrieval-eval.js";
-import { buildRotateProfileVersionWorkflow } from "./workflows/rotate-profile-version.js";
-import type { WorkflowRun } from "./types.js";
+import { defaultAuditEmitter } from './audit.js';
+import { defaultEngine } from './engine.js';
+import { defaultRunStore } from './run-store.js';
+import type { WorkflowRun } from './types.js';
+import { buildIngestDocumentWorkflow } from './workflows/ingest-document.js';
+import { buildRebuildIndexWorkflow } from './workflows/rebuild-index.js';
+import { buildRotateProfileVersionWorkflow } from './workflows/rotate-profile-version.js';
+import { buildRunRetrievalEvalWorkflow } from './workflows/run-retrieval-eval.js';
+import { buildVerifyIndexHealthWorkflow } from './workflows/verify-index-health.js';
 
 // ─── Ingest Document ──────────────────────────────────────────────────────────
 
@@ -32,12 +32,12 @@ export interface IngestDocumentParams {
 }
 
 export async function submitIngestDocument(params: IngestDocumentParams): Promise<WorkflowRun> {
-  const profileId = params.profileId ?? "default";
+  const profileId = params.profileId ?? 'default';
   const definition = buildIngestDocumentWorkflow(
     {
       sourceId: params.sourceId,
       content: params.content,
-      contentType: params.contentType ?? "text/plain",
+      contentType: params.contentType ?? 'text/plain',
       title: params.title,
       sourceUri: params.sourceUri,
       chunkSize: params.chunkSize,
@@ -65,7 +65,7 @@ export interface RebuildIndexParams {
 }
 
 export async function submitRebuildIndex(params: RebuildIndexParams): Promise<WorkflowRun> {
-  const profileId = params.profileId ?? "default";
+  const profileId = params.profileId ?? 'default';
   const definition = buildRebuildIndexWorkflow({
     tenantId: params.tenantId,
     profileId,
@@ -88,8 +88,10 @@ export interface VerifyIndexHealthParams {
   sampleSize?: number;
 }
 
-export async function submitVerifyIndexHealth(params: VerifyIndexHealthParams): Promise<WorkflowRun> {
-  const profileId = params.profileId ?? "default";
+export async function submitVerifyIndexHealth(
+  params: VerifyIndexHealthParams,
+): Promise<WorkflowRun> {
+  const profileId = params.profileId ?? 'default';
   const definition = buildVerifyIndexHealthWorkflow({
     tenantId: params.tenantId,
     profileId,
@@ -111,11 +113,11 @@ export interface RunRetrievalEvalParams {
   datasetId: string;
   queries: Array<{ queryId: string; query: string; relevantChunkIds: string[] }>;
   topK?: number;
-  metrics?: Array<"ndcg" | "recall" | "precision" | "mrr">;
+  metrics?: Array<'ndcg' | 'recall' | 'precision' | 'mrr'>;
 }
 
 export async function submitRetrievalEval(params: RunRetrievalEvalParams): Promise<WorkflowRun> {
-  const profileId = params.profileId ?? "default";
+  const profileId = params.profileId ?? 'default';
   const definition = buildRunRetrievalEvalWorkflow({
     tenantId: params.tenantId,
     profileId,

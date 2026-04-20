@@ -21,22 +21,22 @@
  *     (adopt / counter / monitor).
  */
 
-import { promises as fs } from "fs";
-import path from "path";
-import { eq, sql, inArray, and, desc, like } from "drizzle-orm";
 import {
-  db,
-  competitiveIntelFeedsTable,
   competitiveIntelAlertsTable,
+  competitiveIntelFeedsTable,
   competitiveIntelStateTable,
-  type CompetitiveIntelFeed as DbFeed,
   type CompetitiveIntelAlert as DbAlert,
-} from "@szl-holdings/db";
-import { logger } from "../lib/logger";
+  type CompetitiveIntelFeed as DbFeed,
+  db,
+} from '@szl-holdings/db';
+import { and, desc, eq, inArray, like, sql } from 'drizzle-orm';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { logger } from '../lib/logger';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type Recommendation = "adopt" | "counter" | "monitor";
+export type Recommendation = 'adopt' | 'counter' | 'monitor';
 
 export interface ChampionFeed {
   id: string;
@@ -63,7 +63,7 @@ export interface IntelAlert {
   recommendationReason: string;
   dismissed: boolean;
   dismissedAt?: string;
-  source: "rss" | "seed";
+  source: 'rss' | 'seed';
   /**
    * ISO timestamp when this alert was pushed to Slack/email. Set the first
    * time `notifyNewAlerts` includes the alert in a dispatch so we never
@@ -102,66 +102,66 @@ interface PollResult {
 export const DEFAULT_CHAMPION_FEEDS: ChampionFeed[] = [
   // Cyber Resilience
   {
-    id: "crowdstrike-blog",
-    laneId: "cyber",
-    champion: "CrowdStrike",
-    feedUrl: "https://www.crowdstrike.com/blog/feed/",
-    homeUrl: "https://www.crowdstrike.com/blog/",
+    id: 'crowdstrike-blog',
+    laneId: 'cyber',
+    champion: 'CrowdStrike',
+    feedUrl: 'https://www.crowdstrike.com/blog/feed/',
+    homeUrl: 'https://www.crowdstrike.com/blog/',
   },
   {
-    id: "darktrace-blog",
-    laneId: "cyber",
-    champion: "Darktrace",
-    feedUrl: "https://darktrace.com/blog/rss.xml",
-    homeUrl: "https://darktrace.com/blog",
+    id: 'darktrace-blog',
+    laneId: 'cyber',
+    champion: 'Darktrace',
+    feedUrl: 'https://darktrace.com/blog/rss.xml',
+    homeUrl: 'https://darktrace.com/blog',
   },
   // Legal Matter Command
   {
-    id: "clio-blog",
-    laneId: "legal",
-    champion: "Clio",
-    feedUrl: "https://www.clio.com/blog/feed/",
-    homeUrl: "https://www.clio.com/blog/",
+    id: 'clio-blog',
+    laneId: 'legal',
+    champion: 'Clio',
+    feedUrl: 'https://www.clio.com/blog/feed/',
+    homeUrl: 'https://www.clio.com/blog/',
   },
   // Real Estate Intelligence
   {
-    id: "costar-news",
-    laneId: "real-estate",
-    champion: "CoStar",
-    feedUrl: "https://www.costar.com/rss/news.xml",
-    homeUrl: "https://www.costar.com/news",
+    id: 'costar-news',
+    laneId: 'real-estate',
+    champion: 'CoStar',
+    feedUrl: 'https://www.costar.com/rss/news.xml',
+    homeUrl: 'https://www.costar.com/news',
   },
   // Maritime Intelligence
   {
-    id: "windward-blog",
-    laneId: "maritime",
-    champion: "Windward",
-    feedUrl: "https://windward.ai/feed/",
-    homeUrl: "https://windward.ai/blog/",
+    id: 'windward-blog',
+    laneId: 'maritime',
+    champion: 'Windward',
+    feedUrl: 'https://windward.ai/feed/',
+    homeUrl: 'https://windward.ai/blog/',
   },
   // Executive Briefing
   {
-    id: "palantir-blog",
-    laneId: "executive-briefing",
-    champion: "Palantir",
-    feedUrl: "https://blog.palantir.com/feed",
-    homeUrl: "https://blog.palantir.com/",
+    id: 'palantir-blog',
+    laneId: 'executive-briefing',
+    champion: 'Palantir',
+    feedUrl: 'https://blog.palantir.com/feed',
+    homeUrl: 'https://blog.palantir.com/',
   },
   // Decision Intelligence
   {
-    id: "thoughtspot-blog",
-    laneId: "decision-intelligence",
-    champion: "ThoughtSpot",
-    feedUrl: "https://www.thoughtspot.com/blog/rss.xml",
-    homeUrl: "https://www.thoughtspot.com/blog",
+    id: 'thoughtspot-blog',
+    laneId: 'decision-intelligence',
+    champion: 'ThoughtSpot',
+    feedUrl: 'https://www.thoughtspot.com/blog/rss.xml',
+    homeUrl: 'https://www.thoughtspot.com/blog',
   },
   // Holdings Strategy
   {
-    id: "palantir-foundry-blog",
-    laneId: "holdings-strategy",
-    champion: "Palantir Foundry",
-    feedUrl: "https://blog.palantir.com/feed",
-    homeUrl: "https://blog.palantir.com/",
+    id: 'palantir-foundry-blog',
+    laneId: 'holdings-strategy',
+    champion: 'Palantir Foundry',
+    feedUrl: 'https://blog.palantir.com/feed',
+    homeUrl: 'https://blog.palantir.com/',
   },
 ];
 
@@ -223,8 +223,8 @@ function alertFromRow(row: DbAlert): IntelAlert {
 
 // ─── Bootstrap / migration ───────────────────────────────────────────────────
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const STATE_FILE = path.join(DATA_DIR, "competitive-intel.json");
+const DATA_DIR = path.join(process.cwd(), '.data');
+const STATE_FILE = path.join(DATA_DIR, 'competitive-intel.json');
 
 /** Legacy on-disk shape — only used during one-shot migration. */
 interface PersistedState {
@@ -298,7 +298,9 @@ async function refreshFeedsCache(): Promise<void> {
 async function seedFeedsIfEmpty(): Promise<void> {
   const state = await getState();
   if (state?.feedsSeededAt) return;
-  const existing = await db.select({ id: competitiveIntelFeedsTable.id }).from(competitiveIntelFeedsTable);
+  const existing = await db
+    .select({ id: competitiveIntelFeedsTable.id })
+    .from(competitiveIntelFeedsTable);
   if (existing.length === 0) {
     const now = new Date();
     for (const f of DEFAULT_CHAMPION_FEEDS) {
@@ -347,18 +349,18 @@ async function migrateLegacyJsonIfPresent(): Promise<void> {
   if (state?.jsonMigratedAt) return;
   let raw: string;
   try {
-    raw = await fs.readFile(STATE_FILE, "utf8");
+    raw = await fs.readFile(STATE_FILE, 'utf8');
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code === "ENOENT") return; // nothing to migrate
-    logger.warn({ err }, "[competitive-intel] Failed to read legacy JSON for migration");
+    if (code === 'ENOENT') return; // nothing to migrate
+    logger.warn({ err }, '[competitive-intel] Failed to read legacy JSON for migration');
     return;
   }
   let parsed: PersistedState;
   try {
     parsed = JSON.parse(raw) as PersistedState;
   } catch (err) {
-    logger.warn({ err }, "[competitive-intel] Legacy JSON is malformed — skipping migration");
+    logger.warn({ err }, '[competitive-intel] Legacy JSON is malformed — skipping migration');
     return;
   }
 
@@ -417,13 +419,13 @@ async function migrateLegacyJsonIfPresent(): Promise<void> {
           .onConflictDoNothing();
         migratedAlerts++;
       } catch (err) {
-        logger.warn({ err, alertId: a.id }, "[competitive-intel] Skipping malformed legacy alert");
+        logger.warn({ err, alertId: a.id }, '[competitive-intel] Skipping malformed legacy alert');
       }
     }
   }
 
   const meta: Record<string, unknown> = {};
-  if (parsed.mutedLanes && typeof parsed.mutedLanes === "object") {
+  if (parsed.mutedLanes && typeof parsed.mutedLanes === 'object') {
     meta.mutedLanes = parsed.mutedLanes;
   }
 
@@ -432,7 +434,7 @@ async function migrateLegacyJsonIfPresent(): Promise<void> {
     .set({
       jsonMigratedAt: new Date(),
       lastFullPollAt: parsed.lastFullPollAt ? new Date(parsed.lastFullPollAt) : null,
-      pollRunCount: typeof parsed.pollRunCount === "number" ? parsed.pollRunCount : 0,
+      pollRunCount: typeof parsed.pollRunCount === 'number' ? parsed.pollRunCount : 0,
       alertsSeededAt: parsed.seededAt ? new Date(parsed.seededAt) : null,
       feedsSeededAt: parsed.feedsSeededAt ? new Date(parsed.feedsSeededAt) : null,
       meta: Object.keys(meta).length > 0 ? meta : null,
@@ -444,12 +446,12 @@ async function migrateLegacyJsonIfPresent(): Promise<void> {
   try {
     await fs.rename(STATE_FILE, `${STATE_FILE}.bak`);
   } catch (err) {
-    logger.debug({ err }, "[competitive-intel] Could not rename legacy JSON to .bak");
+    logger.debug({ err }, '[competitive-intel] Could not rename legacy JSON to .bak');
   }
 
   logger.info(
     { migratedFeeds, migratedAlerts },
-    "[competitive-intel] Migrated legacy JSON store into Postgres",
+    '[competitive-intel] Migrated legacy JSON store into Postgres',
   );
 }
 
@@ -470,88 +472,102 @@ function buildSeedAlerts(): Array<typeof competitiveIntelAlertsTable.$inferInser
     recommendationReason: string;
   }> = [
     {
-      id: "seed-crowdstrike-charlotte-actions",
-      laneId: "cyber",
-      champion: "CrowdStrike",
-      title: "Charlotte AI Detection Actions — agentic triage now GA",
-      summary: "CrowdStrike opened the Charlotte AI agentic triage capability to all Falcon customers, letting analysts hand off triage of low-severity detections to an autonomous agent with audit trail.",
-      link: "https://www.crowdstrike.com/blog/",
+      id: 'seed-crowdstrike-charlotte-actions',
+      laneId: 'cyber',
+      champion: 'CrowdStrike',
+      title: 'Charlotte AI Detection Actions — agentic triage now GA',
+      summary:
+        'CrowdStrike opened the Charlotte AI agentic triage capability to all Falcon customers, letting analysts hand off triage of low-severity detections to an autonomous agent with audit trail.',
+      link: 'https://www.crowdstrike.com/blog/',
       publishedAt: new Date(now - 4 * 24 * 3600_000),
-      recommendation: "counter",
-      recommendationReason: "Sentra already wraps every action in a governed proof envelope — counter by emphasising approver identity and reversibility on the Incident Commander surface.",
+      recommendation: 'counter',
+      recommendationReason:
+        'Sentra already wraps every action in a governed proof envelope — counter by emphasising approver identity and reversibility on the Incident Commander surface.',
     },
     {
-      id: "seed-clio-matter-stages-mobile",
-      laneId: "legal",
-      champion: "Clio",
-      title: "Matter Stages now available in Clio Mobile",
-      summary: "Clio extended its visual Matter Stages pipeline to the iOS and Android apps so attorneys can advance matters from anywhere.",
-      link: "https://www.clio.com/blog/",
+      id: 'seed-clio-matter-stages-mobile',
+      laneId: 'legal',
+      champion: 'Clio',
+      title: 'Matter Stages now available in Clio Mobile',
+      summary:
+        'Clio extended its visual Matter Stages pipeline to the iOS and Android apps so attorneys can advance matters from anywhere.',
+      link: 'https://www.clio.com/blog/',
       publishedAt: new Date(now - 2 * 24 * 3600_000),
-      recommendation: "adopt",
-      recommendationReason: "PRISM Counsel already mirrors Matter Stages on the desktop — extending the rail to the SZL Holdings mobile shell would close the parity gap.",
+      recommendation: 'adopt',
+      recommendationReason:
+        'PRISM Counsel already mirrors Matter Stages on the desktop — extending the rail to the SZL Holdings mobile shell would close the parity gap.',
     },
     {
-      id: "seed-costar-loan-overlay",
-      laneId: "real-estate",
-      champion: "CoStar",
-      title: "CoStar adds CMBS loan overlay directly on the property pin",
-      summary: "CoStar shipped a loan-data overlay so brokers can see active CMBS terms, maturity, and DSCR without leaving the property card.",
-      link: "https://www.costar.com/news",
+      id: 'seed-costar-loan-overlay',
+      laneId: 'real-estate',
+      champion: 'CoStar',
+      title: 'CoStar adds CMBS loan overlay directly on the property pin',
+      summary:
+        'CoStar shipped a loan-data overlay so brokers can see active CMBS terms, maturity, and DSCR without leaving the property card.',
+      link: 'https://www.costar.com/news',
       publishedAt: new Date(now - 6 * 24 * 3600_000),
-      recommendation: "adopt",
-      recommendationReason: "Terra has the data via CRED iQ — wire a Loan Overlay strip onto the property card so analysts stop tab-switching.",
+      recommendation: 'adopt',
+      recommendationReason:
+        'Terra has the data via CRED iQ — wire a Loan Overlay strip onto the property card so analysts stop tab-switching.',
     },
     {
-      id: "seed-windward-rf-fusion",
-      laneId: "maritime",
-      champion: "Windward",
-      title: "Windward fuses RF GEOINT signals into Predictive Intelligence",
-      summary: "Windward's Maritime AI now ingests commercial RF GEOINT alongside AIS and SAR, sharpening dark-vessel detection in chokepoints.",
-      link: "https://windward.ai/blog/",
+      id: 'seed-windward-rf-fusion',
+      laneId: 'maritime',
+      champion: 'Windward',
+      title: 'Windward fuses RF GEOINT signals into Predictive Intelligence',
+      summary:
+        "Windward's Maritime AI now ingests commercial RF GEOINT alongside AIS and SAR, sharpening dark-vessel detection in chokepoints.",
+      link: 'https://windward.ai/blog/',
       publishedAt: new Date(now - 9 * 24 * 3600_000),
-      recommendation: "monitor",
-      recommendationReason: "Vessels already shows Intelligence Sources fusion badges — monitor RF coverage gaps and prioritise an RF data partner if customers ask.",
+      recommendation: 'monitor',
+      recommendationReason:
+        'Vessels already shows Intelligence Sources fusion badges — monitor RF coverage gaps and prioritise an RF data partner if customers ask.',
     },
     {
-      id: "seed-palantir-aip-now",
-      laneId: "executive-briefing",
-      champion: "Palantir",
-      title: "AIP Now — daily executive briefing template kit",
-      summary: "Palantir released a packaged template for executive daily briefings inside AIP, including sourcing strips and recommendation cards.",
-      link: "https://blog.palantir.com/",
+      id: 'seed-palantir-aip-now',
+      laneId: 'executive-briefing',
+      champion: 'Palantir',
+      title: 'AIP Now — daily executive briefing template kit',
+      summary:
+        'Palantir released a packaged template for executive daily briefings inside AIP, including sourcing strips and recommendation cards.',
+      link: 'https://blog.palantir.com/',
       publishedAt: new Date(now - 1 * 24 * 3600_000),
-      recommendation: "counter",
-      recommendationReason: "Pulse already ships Today's Brief with provenance + dissent — counter with a side-by-side comparison demo emphasising cross-domain consensus.",
+      recommendation: 'counter',
+      recommendationReason:
+        "Pulse already ships Today's Brief with provenance + dissent — counter with a side-by-side comparison demo emphasising cross-domain consensus.",
     },
     {
-      id: "seed-thoughtspot-spotter",
-      laneId: "decision-intelligence",
-      champion: "ThoughtSpot",
-      title: "ThoughtSpot Spotter — agentic analytics in the same chat thread",
-      summary: "ThoughtSpot introduced Spotter, an agentic analytics assistant that returns answers, charts, and follow-up questions in a single conversation.",
-      link: "https://www.thoughtspot.com/blog",
+      id: 'seed-thoughtspot-spotter',
+      laneId: 'decision-intelligence',
+      champion: 'ThoughtSpot',
+      title: 'ThoughtSpot Spotter — agentic analytics in the same chat thread',
+      summary:
+        'ThoughtSpot introduced Spotter, an agentic analytics assistant that returns answers, charts, and follow-up questions in a single conversation.',
+      link: 'https://www.thoughtspot.com/blog',
       publishedAt: new Date(now - 5 * 24 * 3600_000),
-      recommendation: "adopt",
-      recommendationReason: "Lyte's Signals Console NL bar should grow follow-up question chips so it matches Spotter's conversational loop.",
+      recommendation: 'adopt',
+      recommendationReason:
+        "Lyte's Signals Console NL bar should grow follow-up question chips so it matches Spotter's conversational loop.",
     },
     {
-      id: "seed-palantir-foundry-warp",
-      laneId: "holdings-strategy",
-      champion: "Palantir Foundry",
-      title: "Foundry Warp Speed — ontology-driven app generation",
-      summary: "Foundry shipped Warp Speed, letting non-engineers spin up ontology-grounded apps from a prompt with full lineage preserved.",
-      link: "https://blog.palantir.com/",
+      id: 'seed-palantir-foundry-warp',
+      laneId: 'holdings-strategy',
+      champion: 'Palantir Foundry',
+      title: 'Foundry Warp Speed — ontology-driven app generation',
+      summary:
+        'Foundry shipped Warp Speed, letting non-engineers spin up ontology-grounded apps from a prompt with full lineage preserved.',
+      link: 'https://blog.palantir.com/',
       publishedAt: new Date(now - 7 * 24 * 3600_000),
-      recommendation: "monitor",
-      recommendationReason: "Command already exposes ontology via the Worldline Registry — monitor enterprise reactions before investing in a builder surface.",
+      recommendation: 'monitor',
+      recommendationReason:
+        'Command already exposes ontology via the Worldline Registry — monitor enterprise reactions before investing in a builder surface.',
     },
   ];
-  return seeds.map(s => ({
+  return seeds.map((s) => ({
     ...s,
     detectedAt,
     dismissed: false,
-    source: "seed" as const,
+    source: 'seed' as const,
   }));
 }
 
@@ -567,29 +583,35 @@ interface ParsedItem {
 
 function decodeEntities(s: string): string {
   return s
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&apos;/g, "'")
-    .replace(/&amp;/g, "&")
+    .replace(/&amp;/g, '&')
     .replace(/&#(\d+);/g, (_m, n) => String.fromCodePoint(Number(n)));
 }
 
 function stripHtml(s: string): string {
-  return decodeEntities(s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+  return decodeEntities(
+    s
+      .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim(),
+  );
 }
 
 function pickTag(block: string, tag: string): string | null {
-  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i");
+  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'i');
   const m = block.match(re);
   if (!m) return null;
-  const inner = m[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").trim();
+  const inner = m[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').trim();
   return inner;
 }
 
 function pickAttr(block: string, tag: string, attr: string): string | null {
-  const re = new RegExp(`<${tag}[^>]*\\s${attr}=\"([^\"]+)\"[^>]*/?>`, "i");
+  const re = new RegExp(`<${tag}[^>]*\\s${attr}="([^"]+)"[^>]*/?>`, 'i');
   const m = block.match(re);
   return m ? m[1] : null;
 }
@@ -599,15 +621,19 @@ function parseFeed(xml: string): ParsedItem[] {
   const blockRe = /<(item|entry)\b[\s\S]*?<\/\1>/gi;
   const matches = xml.match(blockRe) ?? [];
   for (const block of matches) {
-    const title = stripHtml(pickTag(block, "title") ?? "");
-    let link = pickTag(block, "link") ?? "";
+    const title = stripHtml(pickTag(block, 'title') ?? '');
+    let link = pickTag(block, 'link') ?? '';
     if (!link || /<link\b/i.test(`<link${link}`)) {
-      link = pickAttr(block, "link", "href") ?? link;
+      link = pickAttr(block, 'link', 'href') ?? link;
     }
     link = stripHtml(link);
-    const summary = stripHtml(pickTag(block, "description") ?? pickTag(block, "summary") ?? pickTag(block, "content") ?? "");
-    const pubDate = stripHtml(pickTag(block, "pubDate") ?? pickTag(block, "published") ?? pickTag(block, "updated") ?? "");
-    const guid = stripHtml(pickTag(block, "guid") ?? pickTag(block, "id") ?? link);
+    const summary = stripHtml(
+      pickTag(block, 'description') ?? pickTag(block, 'summary') ?? pickTag(block, 'content') ?? '',
+    );
+    const pubDate = stripHtml(
+      pickTag(block, 'pubDate') ?? pickTag(block, 'published') ?? pickTag(block, 'updated') ?? '',
+    );
+    const guid = stripHtml(pickTag(block, 'guid') ?? pickTag(block, 'id') ?? link);
     if (title && link) {
       items.push({ title, link, summary: summary.slice(0, 600), pubDate, guid });
     }
@@ -618,38 +644,82 @@ function parseFeed(xml: string): ParsedItem[] {
 // ─── Classification ──────────────────────────────────────────────────────────
 
 const MAJOR_FEATURE_KEYWORDS = [
-  "introducing", "introduces", "announces", "announcing", "now available",
-  "general availability", " ga ", "launches", "launching", "launched",
-  "release", "released", "ships", "shipping", "new feature", "unveils",
-  "rolls out", "rolling out", "extends", "expands", "powered by",
-  "agent", "copilot", "ai-native",
+  'introducing',
+  'introduces',
+  'announces',
+  'announcing',
+  'now available',
+  'general availability',
+  ' ga ',
+  'launches',
+  'launching',
+  'launched',
+  'release',
+  'released',
+  'ships',
+  'shipping',
+  'new feature',
+  'unveils',
+  'rolls out',
+  'rolling out',
+  'extends',
+  'expands',
+  'powered by',
+  'agent',
+  'copilot',
+  'ai-native',
 ];
 
 function isMajorFeatureAnnouncement(title: string, summary: string): boolean {
   const hay = `${title} ${summary}`.toLowerCase();
-  return MAJOR_FEATURE_KEYWORDS.some(k => hay.includes(k));
+  return MAJOR_FEATURE_KEYWORDS.some((k) => hay.includes(k));
 }
 
-const ADOPT_HINTS = ["mobile", "kanban", "pipeline", "overlay", "dashboard", "chart", "template", "matter", "comp", "loan"];
-const COUNTER_HINTS = ["agent", "copilot", "agentic", "autonomous", "ai-native", "natural language", "generative"];
+const ADOPT_HINTS = [
+  'mobile',
+  'kanban',
+  'pipeline',
+  'overlay',
+  'dashboard',
+  'chart',
+  'template',
+  'matter',
+  'comp',
+  'loan',
+];
+const COUNTER_HINTS = [
+  'agent',
+  'copilot',
+  'agentic',
+  'autonomous',
+  'ai-native',
+  'natural language',
+  'generative',
+];
 
-function classifyRecommendation(title: string, summary: string): { rec: Recommendation; reason: string } {
+function classifyRecommendation(
+  title: string,
+  summary: string,
+): { rec: Recommendation; reason: string } {
   const hay = `${title} ${summary}`.toLowerCase();
-  if (COUNTER_HINTS.some(k => hay.includes(k))) {
+  if (COUNTER_HINTS.some((k) => hay.includes(k))) {
     return {
-      rec: "counter",
-      reason: "Touches our Governed Autonomy moat — counter by emphasising approver identity, reversibility, and proof chain on the matching SZL surface.",
+      rec: 'counter',
+      reason:
+        'Touches our Governed Autonomy moat — counter by emphasising approver identity, reversibility, and proof chain on the matching SZL surface.',
     };
   }
-  if (ADOPT_HINTS.some(k => hay.includes(k))) {
+  if (ADOPT_HINTS.some((k) => hay.includes(k))) {
     return {
-      rec: "adopt",
-      reason: "Looks like a UX or workflow pattern we can reinterpret in our voice — log into the Steal-This board for triage.",
+      rec: 'adopt',
+      reason:
+        'Looks like a UX or workflow pattern we can reinterpret in our voice — log into the Steal-This board for triage.',
     };
   }
   return {
-    rec: "monitor",
-    reason: "No immediate action — keep the alert for trend tracking and revisit on next Atlas review.",
+    rec: 'monitor',
+    reason:
+      'No immediate action — keep the alert for trend tracking and revisit on next Atlas review.',
   };
 }
 
@@ -662,8 +732,8 @@ async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<string> 
     const res = await fetch(url, {
       signal: ctrl.signal,
       headers: {
-        "User-Agent": "SZL-Competitive-Intel/1.0 (+https://szlholdings.com)",
-        Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
+        'User-Agent': 'SZL-Competitive-Intel/1.0 (+https://szlholdings.com)',
+        Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
       },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -684,7 +754,7 @@ async function pollFeed(feed: DbFeed): Promise<{ created: number; ok: boolean }>
   if (feed.paused) {
     await db
       .update(competitiveIntelFeedsTable)
-      .set({ lastPolledAt: new Date(), lastError: "paused", updatedAt: new Date() })
+      .set({ lastPolledAt: new Date(), lastError: 'paused', updatedAt: new Date() })
       .where(eq(competitiveIntelFeedsTable.id, feed.id));
     return { created: 0, ok: false };
   }
@@ -699,7 +769,7 @@ async function pollFeed(feed: DbFeed): Promise<{ created: number; ok: boolean }>
       .update(competitiveIntelFeedsTable)
       .set({ lastPolledAt: polledAt, lastError: errMsg, updatedAt: new Date() })
       .where(eq(competitiveIntelFeedsTable.id, feed.id));
-    logger.debug({ feedId: feed.id, err: errMsg }, "[competitive-intel] Feed fetch failed");
+    logger.debug({ feedId: feed.id, err: errMsg }, '[competitive-intel] Feed fetch failed');
     return { created: 0, ok: false };
   }
 
@@ -740,20 +810,20 @@ async function pollFeed(feed: DbFeed): Promise<{ created: number; ok: boolean }>
       recommendation: rec,
       recommendationReason: reason,
       dismissed: false,
-      source: "rss",
+      source: 'rss',
     });
   }
 
   let created = 0;
   let inserted: DbAlert[] = [];
   if (candidates.length > 0) {
-    const ids = candidates.map(c => c.id!);
+    const ids = candidates.map((c) => c.id!);
     const existing = await db
       .select({ id: competitiveIntelAlertsTable.id })
       .from(competitiveIntelAlertsTable)
       .where(inArray(competitiveIntelAlertsTable.id, ids));
-    const existingIds = new Set(existing.map(e => e.id));
-    const fresh = candidates.filter(c => !existingIds.has(c.id!));
+    const existingIds = new Set(existing.map((e) => e.id));
+    const fresh = candidates.filter((c) => !existingIds.has(c.id!));
     if (fresh.length > 0) {
       inserted = await db
         .insert(competitiveIntelAlertsTable)
@@ -792,7 +862,7 @@ export async function pollAllFeeds(): Promise<PollResult> {
   const justCreated: IntelAlert[] = [];
 
   await Promise.allSettled(
-    feeds.map(async feed => {
+    feeds.map(async (feed) => {
       try {
         const { created, ok, newAlerts: createdAlerts } = await pollFeed(feed);
         newAlerts += created;
@@ -801,7 +871,7 @@ export async function pollAllFeeds(): Promise<PollResult> {
           justCreated.push(...createdAlerts);
         }
       } catch (err) {
-        logger.warn({ err, feedId: feed.id }, "[competitive-intel] pollFeed threw");
+        logger.warn({ err, feedId: feed.id }, '[competitive-intel] pollFeed threw');
       }
     }),
   );
@@ -811,7 +881,7 @@ export async function pollAllFeeds(): Promise<PollResult> {
   // webhook can't grow the retry batch unbounded.
   const RETRY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
   const retryCutoff = new Date(Date.now() - RETRY_WINDOW_MS);
-  const justCreatedIds = new Set(justCreated.map(a => a.id));
+  const justCreatedIds = new Set(justCreated.map((a) => a.id));
   const retryRows = await db
     .select()
     .from(competitiveIntelAlertsTable)
@@ -819,21 +889,21 @@ export async function pollAllFeeds(): Promise<PollResult> {
       and(
         sql`${competitiveIntelAlertsTable.notifiedAt} is null`,
         eq(competitiveIntelAlertsTable.dismissed, false),
-        eq(competitiveIntelAlertsTable.source, "rss"),
+        eq(competitiveIntelAlertsTable.source, 'rss'),
         sql`${competitiveIntelAlertsTable.detectedAt} >= ${retryCutoff}`,
       ) as any,
     );
-  const retries = retryRows.map(alertFromRow).filter(a => !justCreatedIds.has(a.id));
+  const retries = retryRows.map(alertFromRow).filter((a) => !justCreatedIds.has(a.id));
   const toNotify = [...justCreated, ...retries];
 
   // Notify Slack/email for high-confidence, non-muted, non-dismissed alerts.
   // Errors are swallowed so a flaky webhook never breaks the poll cycle.
   if (toNotify.length > 0) {
     try {
-      const { notifyNewAlerts } = await import("../lib/competitive-intel-notifications");
+      const { notifyNewAlerts } = await import('../lib/competitive-intel-notifications');
       await notifyNewAlerts(toNotify);
     } catch (err) {
-      logger.warn({ err }, "[competitive-intel] notifyNewAlerts failed");
+      logger.warn({ err }, '[competitive-intel] notifyNewAlerts failed');
     }
   }
 
@@ -857,7 +927,7 @@ export async function pollAllFeeds(): Promise<PollResult> {
     newAlerts,
     durationMs: Date.now() - start,
   };
-  logger.info(result, "[competitive-intel] Poll cycle complete");
+  logger.info(result, '[competitive-intel] Poll cycle complete');
   return result;
 }
 
@@ -873,7 +943,7 @@ async function trimAlertHistoryPerLane(maxPerLane: number): Promise<void> {
       .from(competitiveIntelAlertsTable)
       .where(eq(competitiveIntelAlertsTable.laneId, laneId))
       .orderBy(desc(competitiveIntelAlertsTable.publishedAt));
-    const toDelete = rows.slice(maxPerLane).map(r => r.id);
+    const toDelete = rows.slice(maxPerLane).map((r) => r.id);
     if (toDelete.length > 0) {
       await db
         .delete(competitiveIntelAlertsTable)
@@ -884,7 +954,10 @@ async function trimAlertHistoryPerLane(maxPerLane: number): Promise<void> {
 
 // ─── Public store API ────────────────────────────────────────────────────────
 
-export async function listAlerts(opts?: { laneId?: string; includeDismissed?: boolean }): Promise<IntelAlert[]> {
+export async function listAlerts(opts?: {
+  laneId?: string;
+  includeDismissed?: boolean;
+}): Promise<IntelAlert[]> {
   await ensureLoaded();
   const conds = [];
   if (opts?.laneId) conds.push(eq(competitiveIntelAlertsTable.laneId, opts.laneId));
@@ -906,7 +979,7 @@ export async function dismissAlert(id: string, actor?: string): Promise<IntelAle
     .where(eq(competitiveIntelAlertsTable.id, id))
     .returning();
   if (updated.length === 0) return null;
-  logger.info({ alertId: id, actor }, "[competitive-intel] Alert dismissed");
+  logger.info({ alertId: id, actor }, '[competitive-intel] Alert dismissed');
   return alertFromRow(updated[0]);
 }
 
@@ -919,7 +992,7 @@ async function refreshMutedLanesCache(): Promise<void> {
   const row = await getState();
   for (const k of Object.keys(_mutedLanesCache)) delete _mutedLanesCache[k];
   const meta = (row?.meta ?? null) as { mutedLanes?: Record<string, boolean> } | null;
-  if (meta && meta.mutedLanes && typeof meta.mutedLanes === "object") {
+  if (meta && meta.mutedLanes && typeof meta.mutedLanes === 'object') {
     for (const [laneId, muted] of Object.entries(meta.mutedLanes)) {
       if (muted) _mutedLanesCache[laneId] = true;
     }
@@ -953,7 +1026,7 @@ export function isLaneMuted(laneId: string): boolean {
 
 export async function setLaneMute(laneId: string, muted: boolean): Promise<LaneInfo | null> {
   await ensureLoaded();
-  const known = CHAMPION_FEEDS.some(f => f.laneId === laneId);
+  const known = CHAMPION_FEEDS.some((f) => f.laneId === laneId);
   if (!known) return null;
 
   // Read-modify-write the meta JSON so we don't clobber other meta keys.
@@ -972,9 +1045,9 @@ export async function setLaneMute(laneId: string, muted: boolean): Promise<LaneI
     .where(eq(competitiveIntelStateTable.id, 1));
 
   await refreshMutedLanesCache();
-  logger.info({ laneId, muted }, "[competitive-intel] Lane mute updated");
+  logger.info({ laneId, muted }, '[competitive-intel] Lane mute updated');
   const lanes = await listLanes();
-  return lanes.find(l => l.laneId === laneId) ?? null;
+  return lanes.find((l) => l.laneId === laneId) ?? null;
 }
 
 /**
@@ -1024,24 +1097,24 @@ export async function getMonitorStatus(): Promise<{
 
 // ─── Feed management (admin) ─────────────────────────────────────────────────
 
-const VALID_RECOMMENDATIONS: Recommendation[] = ["adopt", "counter", "monitor"];
+const VALID_RECOMMENDATIONS: Recommendation[] = ['adopt', 'counter', 'monitor'];
 
 function slugify(input: string): string {
   return input
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
     .slice(0, 60);
 }
 
 async function uniqueFeedId(base: string): Promise<string> {
-  const root = slugify(base) || "feed";
+  const root = slugify(base) || 'feed';
   const existing = await db
     .select({ id: competitiveIntelFeedsTable.id })
     .from(competitiveIntelFeedsTable)
     .where(like(competitiveIntelFeedsTable.id, `${root}%`));
-  const taken = new Set(existing.map(r => r.id));
+  const taken = new Set(existing.map((r) => r.id));
   if (!taken.has(root)) return root;
   let i = 2;
   while (taken.has(`${root}-${i}`)) i++;
@@ -1067,7 +1140,7 @@ export interface FeedUpdate {
 }
 
 function validateUrl(value: string, field: string): string {
-  const trimmed = String(value ?? "").trim();
+  const trimmed = String(value ?? '').trim();
   if (!trimmed) throw new Error(`${field} is required`);
   let parsed: URL;
   try {
@@ -1075,7 +1148,7 @@ function validateUrl(value: string, field: string): string {
   } catch {
     throw new Error(`${field} must be a valid URL`);
   }
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new Error(`${field} must use http or https`);
   }
   return trimmed;
@@ -1089,14 +1162,14 @@ export async function listFeeds(): Promise<ChampionFeed[]> {
 
 export async function addFeed(input: FeedInput, actor?: string): Promise<ChampionFeed> {
   await ensureLoaded();
-  const champion = String(input.champion ?? "").trim();
-  const laneId = String(input.laneId ?? "").trim();
-  if (!champion) throw new Error("champion is required");
-  if (!laneId) throw new Error("laneId is required");
-  const feedUrl = validateUrl(input.feedUrl, "feedUrl");
-  const homeUrl = input.homeUrl ? validateUrl(input.homeUrl, "homeUrl") : feedUrl;
+  const champion = String(input.champion ?? '').trim();
+  const laneId = String(input.laneId ?? '').trim();
+  if (!champion) throw new Error('champion is required');
+  if (!laneId) throw new Error('laneId is required');
+  const feedUrl = validateUrl(input.feedUrl, 'feedUrl');
+  const homeUrl = input.homeUrl ? validateUrl(input.homeUrl, 'homeUrl') : feedUrl;
   if (input.recommendationHint && !VALID_RECOMMENDATIONS.includes(input.recommendationHint)) {
-    throw new Error("recommendationHint must be adopt | counter | monitor");
+    throw new Error('recommendationHint must be adopt | counter | monitor');
   }
   // Check for duplicate (laneId, feedUrl) — case-insensitive on URL.
   const dupes = await db
@@ -1109,7 +1182,7 @@ export async function addFeed(input: FeedInput, actor?: string): Promise<Champio
       ),
     );
   if (dupes.length > 0) {
-    throw new Error("A feed with this URL already exists in this lane");
+    throw new Error('A feed with this URL already exists in this lane');
   }
   const id = await uniqueFeedId(`${laneId}-${champion}`);
   const now = new Date();
@@ -1128,11 +1201,15 @@ export async function addFeed(input: FeedInput, actor?: string): Promise<Champio
     })
     .returning();
   await refreshFeedsCache();
-  logger.info({ feedId: id, actor }, "[competitive-intel] Feed added");
+  logger.info({ feedId: id, actor }, '[competitive-intel] Feed added');
   return feedFromRow(inserted[0]);
 }
 
-export async function updateFeed(id: string, patch: FeedUpdate, actor?: string): Promise<ChampionFeed | null> {
+export async function updateFeed(
+  id: string,
+  patch: FeedUpdate,
+  actor?: string,
+): Promise<ChampionFeed | null> {
   await ensureLoaded();
   const existing = await db
     .select()
@@ -1146,16 +1223,16 @@ export async function updateFeed(id: string, patch: FeedUpdate, actor?: string):
 
   if (patch.champion !== undefined) {
     const v = String(patch.champion).trim();
-    if (!v) throw new Error("champion cannot be empty");
+    if (!v) throw new Error('champion cannot be empty');
     next.champion = v;
   }
   if (patch.laneId !== undefined) {
     const v = String(patch.laneId).trim();
-    if (!v) throw new Error("laneId cannot be empty");
+    if (!v) throw new Error('laneId cannot be empty');
     next.laneId = v;
   }
-  if (patch.feedUrl !== undefined) next.feedUrl = validateUrl(patch.feedUrl, "feedUrl");
-  if (patch.homeUrl !== undefined) next.homeUrl = validateUrl(patch.homeUrl, "homeUrl");
+  if (patch.feedUrl !== undefined) next.feedUrl = validateUrl(patch.feedUrl, 'feedUrl');
+  if (patch.homeUrl !== undefined) next.homeUrl = validateUrl(patch.homeUrl, 'homeUrl');
   if (patch.paused !== undefined) next.paused = patch.paused === true;
   if (patch.recommendationHint !== undefined) {
     if (patch.recommendationHint === null) {
@@ -1163,7 +1240,7 @@ export async function updateFeed(id: string, patch: FeedUpdate, actor?: string):
     } else if (VALID_RECOMMENDATIONS.includes(patch.recommendationHint)) {
       next.recommendationHint = patch.recommendationHint;
     } else {
-      throw new Error("recommendationHint must be adopt | counter | monitor");
+      throw new Error('recommendationHint must be adopt | counter | monitor');
     }
   }
 
@@ -1180,8 +1257,8 @@ export async function updateFeed(id: string, patch: FeedUpdate, actor?: string):
           sql`lower(${competitiveIntelFeedsTable.feedUrl}) = lower(${checkUrl})`,
         ),
       );
-    if (dupes.some(d => d.id !== id)) {
-      throw new Error("A feed with this URL already exists in this lane");
+    if (dupes.some((d) => d.id !== id)) {
+      throw new Error('A feed with this URL already exists in this lane');
     }
   }
 
@@ -1192,7 +1269,7 @@ export async function updateFeed(id: string, patch: FeedUpdate, actor?: string):
     .where(eq(competitiveIntelFeedsTable.id, id))
     .returning();
   await refreshFeedsCache();
-  logger.info({ feedId: id, actor }, "[competitive-intel] Feed updated");
+  logger.info({ feedId: id, actor }, '[competitive-intel] Feed updated');
   return updated.length > 0 ? feedFromRow(updated[0]) : null;
 }
 
@@ -1210,7 +1287,7 @@ export async function removeFeed(id: string, actor?: string): Promise<boolean> {
     .delete(competitiveIntelAlertsTable)
     .where(like(competitiveIntelAlertsTable.id, `${id}-%`));
   await refreshFeedsCache();
-  logger.info({ feedId: id, actor }, "[competitive-intel] Feed removed");
+  logger.info({ feedId: id, actor }, '[competitive-intel] Feed removed');
   return true;
 }
 
@@ -1221,13 +1298,18 @@ const POLL_INTERVAL_MS = 24 * 3600_000;
 
 export function startCompetitiveIntelMonitor(): void {
   if (_timer) return;
-  ensureLoaded().catch(err => logger.warn({ err }, "[competitive-intel] initial load failed"));
+  ensureLoaded().catch((err) => logger.warn({ err }, '[competitive-intel] initial load failed'));
   _timer = setInterval(() => {
-    pollAllFeeds().catch(err => logger.error({ err }, "[competitive-intel] scheduled poll failed"));
+    pollAllFeeds().catch((err) =>
+      logger.error({ err }, '[competitive-intel] scheduled poll failed'),
+    );
   }, POLL_INTERVAL_MS);
-  logger.info({ intervalMs: POLL_INTERVAL_MS }, "[competitive-intel] Monitor started");
+  logger.info({ intervalMs: POLL_INTERVAL_MS }, '[competitive-intel] Monitor started');
 }
 
 export function stopCompetitiveIntelMonitor(): void {
-  if (_timer) { clearInterval(_timer); _timer = null; }
+  if (_timer) {
+    clearInterval(_timer);
+    _timer = null;
+  }
 }

@@ -1,1 +1,1 @@
-import "@szl-holdings/monte-carlo/scenario-simulation.worker";
+import '@szl-holdings/monte-carlo/scenario-simulation.worker';

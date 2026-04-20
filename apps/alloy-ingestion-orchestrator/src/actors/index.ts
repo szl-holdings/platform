@@ -14,9 +14,9 @@
  *   HumanApprovalGate   — pauses the run and creates an approval request
  */
 
-import { randomUUID } from "crypto";
-import type { StorageAdapters } from "../storage/interfaces.js";
-import type { AuditEmitter } from "../audit.js";
+import { randomUUID } from 'crypto';
+import type { AuditEmitter } from '../audit.js';
+import type { StorageAdapters } from '../storage/interfaces.js';
 
 // ─── Actor Context ────────────────────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ export async function IngestionPlanner(
 ): Promise<IngestionPlannerOutput> {
   const chunkSize = input.chunkSize ?? 512;
   const chunkOverlap = input.chunkOverlap ?? 64;
-  const normalizedContent = input.content.replace(/\r\n/g, "\n").trim();
+  const normalizedContent = input.content.replace(/\r\n/g, '\n').trim();
   const estimatedChunks = Math.max(
     1,
     Math.ceil((normalizedContent.length - chunkOverlap) / (chunkSize - chunkOverlap)),
@@ -68,11 +68,11 @@ export async function IngestionPlanner(
 
   ctx.audit.emit({
     runId: ctx.runId,
-    workflowId: "ingest_document",
+    workflowId: 'ingest_document',
     tenantId: ctx.tenantId,
     profileId: ctx.profileId,
-    kind: "step.completed",
-    payload: { actor: "IngestionPlanner", sourceId: input.sourceId, estimatedChunks },
+    kind: 'step.completed',
+    payload: { actor: 'IngestionPlanner', sourceId: input.sourceId, estimatedChunks },
   });
 
   return {
@@ -162,11 +162,11 @@ export async function SchemaMapper(
 
   ctx.audit.emit({
     runId: ctx.runId,
-    workflowId: "ingest_document",
+    workflowId: 'ingest_document',
     tenantId: ctx.tenantId,
     profileId: ctx.profileId,
-    kind: "step.completed",
-    payload: { actor: "SchemaMapper", sourceId: input.sourceId, chunksProduced: totalChunks },
+    kind: 'step.completed',
+    payload: { actor: 'SchemaMapper', sourceId: input.sourceId, chunksProduced: totalChunks },
   });
 
   return {
@@ -191,7 +191,7 @@ export interface PolicyGuardOutput {
   /** Alias for allowedChunks — used by downstream EmbedDispatcher via __from_prev__ resolution */
   chunks: MappedChunk[];
   deniedChunks: Array<{ chunk: MappedChunk; reasons: string[] }>;
-  policyOutcome: "allowed" | "partial" | "denied";
+  policyOutcome: 'allowed' | 'partial' | 'denied';
 }
 
 export async function PolicyGuard(
@@ -210,19 +210,17 @@ export async function PolicyGuard(
     }
   }
 
-  const policyOutcome: PolicyGuardOutput["policyOutcome"] =
-    deniedChunks.length === 0 ? "allowed"
-    : allowedChunks.length === 0 ? "denied"
-    : "partial";
+  const policyOutcome: PolicyGuardOutput['policyOutcome'] =
+    deniedChunks.length === 0 ? 'allowed' : allowedChunks.length === 0 ? 'denied' : 'partial';
 
   ctx.audit.emit({
     runId: ctx.runId,
-    workflowId: "ingest_document",
+    workflowId: 'ingest_document',
     tenantId: ctx.tenantId,
     profileId: ctx.profileId,
-    kind: "step.completed",
+    kind: 'step.completed',
     payload: {
-      actor: "PolicyGuard",
+      actor: 'PolicyGuard',
       sourceId: input.sourceId,
       policyOutcome,
       allowed: allowedChunks.length,
@@ -230,20 +228,22 @@ export async function PolicyGuard(
     },
   });
 
-  return { sourceId: input.sourceId, allowedChunks, chunks: allowedChunks, deniedChunks, policyOutcome };
+  return {
+    sourceId: input.sourceId,
+    allowedChunks,
+    chunks: allowedChunks,
+    deniedChunks,
+    policyOutcome,
+  };
 }
 
-function evaluatePolicyRules(
-  chunk: MappedChunk,
-  _tenantId: string,
-  _profileId: string,
-): string[] {
+function evaluatePolicyRules(chunk: MappedChunk, _tenantId: string, _profileId: string): string[] {
   const reasons: string[] = [];
   if (chunk.content.length === 0) {
-    reasons.push("empty-chunk");
+    reasons.push('empty-chunk');
   }
-  if (chunk.content.toLowerCase().includes("[redacted]")) {
-    reasons.push("contains-redacted-marker");
+  if (chunk.content.toLowerCase().includes('[redacted]')) {
+    reasons.push('contains-redacted-marker');
   }
   return reasons;
 }
@@ -276,7 +276,7 @@ export async function EmbedDispatcher(
   ctx: ActorContext,
 ): Promise<EmbedDispatcherOutput> {
   const t0 = Date.now();
-  const model = input.model ?? "text-embedding-3-small";
+  const model = input.model ?? 'text-embedding-3-small';
   const embeddedAt = new Date().toISOString();
 
   const embeddedChunks: EmbeddedChunk[] = input.chunks.map((chunk) => ({
@@ -290,12 +290,12 @@ export async function EmbedDispatcher(
 
   ctx.audit.emit({
     runId: ctx.runId,
-    workflowId: "ingest_document",
+    workflowId: 'ingest_document',
     tenantId: ctx.tenantId,
     profileId: ctx.profileId,
-    kind: "step.completed",
+    kind: 'step.completed',
     payload: {
-      actor: "EmbedDispatcher",
+      actor: 'EmbedDispatcher',
       sourceId: input.sourceId,
       chunksEmbedded: embeddedChunks.length,
       model,
@@ -322,7 +322,7 @@ export async function EmbedDispatcher(
 }
 
 function stubEmbedding(content: string, dims: number): number[] {
-  const seed = content.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const seed = content.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return Array.from({ length: dims }, (_, i) => Math.sin(seed * (i + 1) * 0.01) * 0.5 + 0.5);
 }
 
@@ -347,7 +347,7 @@ export interface IndexVerifierOutput {
     hit: boolean;
   }>;
   driftScore: number;
-  healthStatus: "healthy" | "degraded" | "critical";
+  healthStatus: 'healthy' | 'degraded' | 'critical';
   verifiedAt: string;
 }
 
@@ -359,7 +359,7 @@ export async function IndexVerifier(
   const sampleSize = Math.min(input.sampleSize ?? 20, chunks.length);
   const sampledChunkIds = chunks.slice(0, sampleSize).map((c) => c.chunkId);
 
-  const goldQueryResults: IndexVerifierOutput["goldQueryResults"] = [];
+  const goldQueryResults: IndexVerifierOutput['goldQueryResults'] = [];
   const goldQueries = input.goldQueries ?? [];
 
   for (const gq of goldQueries) {
@@ -376,20 +376,18 @@ export async function IndexVerifier(
   const hits = goldQueryResults.filter((r) => r.hit).length;
   const total = goldQueryResults.length;
   const driftScore = total > 0 ? 1 - hits / total : 0;
-  const healthStatus: IndexVerifierOutput["healthStatus"] =
-    driftScore < 0.1 ? "healthy"
-    : driftScore < 0.3 ? "degraded"
-    : "critical";
+  const healthStatus: IndexVerifierOutput['healthStatus'] =
+    driftScore < 0.1 ? 'healthy' : driftScore < 0.3 ? 'degraded' : 'critical';
 
   const verifiedAt = new Date().toISOString();
 
   ctx.audit.emit({
     runId: ctx.runId,
-    workflowId: "verify_index_health",
+    workflowId: 'verify_index_health',
     tenantId: ctx.tenantId,
     profileId: ctx.profileId,
-    kind: "step.completed",
-    payload: { actor: "IndexVerifier", chunksVerified: sampleSize, driftScore, healthStatus },
+    kind: 'step.completed',
+    payload: { actor: 'IndexVerifier', chunksVerified: sampleSize, driftScore, healthStatus },
   });
 
   return {
@@ -412,7 +410,7 @@ export interface RetrievalEvaluatorInput {
   datasetId: string;
   queries: Array<{ queryId: string; query: string; relevantChunkIds: string[] }>;
   topK?: number;
-  metrics?: Array<"ndcg" | "recall" | "precision" | "mrr">;
+  metrics?: Array<'ndcg' | 'recall' | 'precision' | 'mrr'>;
 }
 
 export interface RetrievalEvaluatorOutput {
@@ -430,7 +428,7 @@ export async function RetrievalEvaluator(
 ): Promise<RetrievalEvaluatorOutput> {
   const t0 = Date.now();
   const topK = input.topK ?? 10;
-  const metrics = input.metrics ?? ["ndcg", "recall"];
+  const metrics = input.metrics ?? ['ndcg', 'recall'];
   const chunks = await ctx.storage.chunkStore.listByTenant(input.tenantId, input.profileId);
   const availableIds = new Set(chunks.map((c) => c.chunkId));
 
@@ -447,11 +445,11 @@ export async function RetrievalEvaluator(
       ? perQueryRecall.reduce((a, b) => a + b, 0) / perQueryRecall.length
       : 0;
 
-  const metricResults: RetrievalEvaluatorOutput["metrics"] = [];
+  const metricResults: RetrievalEvaluatorOutput['metrics'] = [];
   for (const m of metrics) {
     metricResults.push({
       metric: m,
-      value: m === "recall" ? meanRecall : meanRecall * (0.9 + Math.random() * 0.1),
+      value: m === 'recall' ? meanRecall : meanRecall * (0.9 + Math.random() * 0.1),
       atK: topK,
     });
   }
@@ -461,12 +459,12 @@ export async function RetrievalEvaluator(
 
   ctx.audit.emit({
     runId: ctx.runId,
-    workflowId: "run_retrieval_eval",
+    workflowId: 'run_retrieval_eval',
     tenantId: ctx.tenantId,
     profileId: ctx.profileId,
-    kind: "step.completed",
+    kind: 'step.completed',
     payload: {
-      actor: "RetrievalEvaluator",
+      actor: 'RetrievalEvaluator',
       datasetId: input.datasetId,
       queryCount: input.queries.length,
       meanRecall,
@@ -498,7 +496,7 @@ export interface HumanApprovalGateInput {
 
 export interface HumanApprovalGateOutput {
   approvalRequestId: string;
-  status: "pending-approval";
+  status: 'pending-approval';
   submittedAt: string;
 }
 
@@ -506,7 +504,7 @@ export async function HumanApprovalGate(
   input: HumanApprovalGateInput,
   ctx: ActorContext,
 ): Promise<HumanApprovalGateOutput> {
-  const { submitPendingApprovalRequest } = await import("@workspace/approvals-inbox");
+  const { submitPendingApprovalRequest } = await import('@workspace/approvals-inbox');
 
   const request = submitPendingApprovalRequest({
     runId: input.runId,
@@ -517,8 +515,8 @@ export async function HumanApprovalGate(
     projectedImpact: input.projectedImpact,
     projectedRisk: input.projectedRisk,
     requestedBy: `orchestrator:${ctx.tenantId}`,
-    domain: "aef-ingestion",
-    surface: "orchestrator",
+    domain: 'aef-ingestion',
+    surface: 'orchestrator',
     timeoutMs: input.timeoutMs ?? 3_600_000,
   });
 
@@ -526,12 +524,12 @@ export async function HumanApprovalGate(
 
   ctx.audit.emit({
     runId: ctx.runId,
-    workflowId: "approval",
+    workflowId: 'approval',
     tenantId: ctx.tenantId,
     profileId: ctx.profileId,
-    kind: "approval.requested",
+    kind: 'approval.requested',
     payload: {
-      actor: "HumanApprovalGate",
+      actor: 'HumanApprovalGate',
       approvalRequestId: request.id,
       action: input.action,
       stepId: input.stepId,
@@ -540,7 +538,7 @@ export async function HumanApprovalGate(
 
   return {
     approvalRequestId: request.id,
-    status: "pending-approval",
+    status: 'pending-approval',
     submittedAt,
   };
 }

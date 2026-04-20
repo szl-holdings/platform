@@ -1,5 +1,5 @@
-import { useState, useEffect, type ReactNode } from "react";
-import { useAuth } from "@szl-holdings/replit-auth-web";
+import { useAuth } from '@szl-holdings/replit-auth-web';
+import { type ReactNode, useEffect, useState } from 'react';
 
 export interface PrivateAppGuardProps {
   children: ReactNode;
@@ -13,9 +13,8 @@ export interface PrivateAppGuardProps {
 // PIN is stored here so subsequent route navigations within the SPA stay in
 // demo mode without prompting again. The PIN is never embedded in the URL or
 // the client bundle — it is entered via the modal and validated server-side.
-const DEMO_TOKEN_KEY = "szl-demo-token";
-const DEMO_ALLOWED =
-  import.meta.env.DEV || import.meta.env.VITE_DEMO_ALLOWED === "true";
+const DEMO_TOKEN_KEY = 'szl-demo-token';
+const DEMO_ALLOWED = import.meta.env.DEV || import.meta.env.VITE_DEMO_ALLOWED === 'true';
 
 function isDemoActive(): boolean {
   if (!DEMO_ALLOWED) return false;
@@ -28,9 +27,9 @@ function isDemoActive(): boolean {
 
 async function verifyAndStorePin(pin: string): Promise<boolean> {
   try {
-    const res = await fetch("/api/pulse/demo/verify", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
+    const res = await fetch('/api/pulse/demo/verify', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ pin }),
     });
     const data = (await res.json()) as { valid?: boolean };
@@ -57,53 +56,50 @@ function PinModal({
   accentColor: string;
   onSuccess: () => void;
 }) {
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setError("");
+    setError('');
     const ok = await verifyAndStorePin(pin);
     setSubmitting(false);
     if (ok) {
       // Strip ?demo from the URL so the trigger doesn't reopen on refresh.
       try {
         const url = new URL(window.location.href);
-        url.searchParams.delete("demo");
-        url.searchParams.delete("view");
-        window.history.replaceState({}, "", url.toString());
+        url.searchParams.delete('demo');
+        url.searchParams.delete('view');
+        window.history.replaceState({}, '', url.toString());
       } catch {
         // ignore URL manipulation errors
       }
       onSuccess();
     } else {
-      setError("Invalid access code. Please try again.");
-      setPin("");
+      setError('Invalid access code. Please try again.');
+      setPin('');
     }
   };
 
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background: "#080c14",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        minHeight: '100vh',
+        background: '#080c14',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <form
-        onSubmit={handleSubmit}
-        style={{ textAlign: "center", maxWidth: 360, padding: "2rem" }}
-      >
+      <form onSubmit={handleSubmit} style={{ textAlign: 'center', maxWidth: 360, padding: '2rem' }}>
         <div
           style={{
-            fontSize: "0.65rem",
+            fontSize: '0.65rem',
             fontWeight: 700,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
             color: accentColor,
             marginBottom: 12,
           }}
@@ -112,19 +108,19 @@ function PinModal({
         </div>
         <h2
           style={{
-            color: "rgba(255,255,255,0.9)",
-            fontSize: "1.3rem",
+            color: 'rgba(255,255,255,0.9)',
+            fontSize: '1.3rem',
             fontWeight: 500,
-            marginBottom: "0.5rem",
+            marginBottom: '0.5rem',
           }}
         >
           Enter Access Code
         </h2>
         <p
           style={{
-            color: "rgba(255,255,255,0.4)",
-            marginBottom: "1.5rem",
-            fontSize: "0.825rem",
+            color: 'rgba(255,255,255,0.4)',
+            marginBottom: '1.5rem',
+            fontSize: '0.825rem',
             lineHeight: 1.6,
           }}
         >
@@ -137,24 +133,24 @@ function PinModal({
           placeholder="Access code"
           autoFocus
           style={{
-            width: "100%",
-            padding: "0.625rem 0.875rem",
-            background: "rgba(255,255,255,0.05)",
-            color: "rgba(255,255,255,0.9)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: "6px",
-            fontSize: "0.875rem",
-            marginBottom: "0.75rem",
-            boxSizing: "border-box",
-            outline: "none",
+            width: '100%',
+            padding: '0.625rem 0.875rem',
+            background: 'rgba(255,255,255,0.05)',
+            color: 'rgba(255,255,255,0.9)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '6px',
+            fontSize: '0.875rem',
+            marginBottom: '0.75rem',
+            boxSizing: 'border-box',
+            outline: 'none',
           }}
         />
         {error && (
           <p
             style={{
-              color: "#ef4444",
-              fontSize: "0.8rem",
-              marginBottom: "0.75rem",
+              color: '#ef4444',
+              fontSize: '0.8rem',
+              marginBottom: '0.75rem',
             }}
           >
             {error}
@@ -164,18 +160,18 @@ function PinModal({
           type="submit"
           disabled={submitting || !pin}
           style={{
-            width: "100%",
-            padding: "0.625rem 1.75rem",
+            width: '100%',
+            padding: '0.625rem 1.75rem',
             background: `${accentColor}1f`,
             color: accentColor,
             border: `1px solid ${accentColor}59`,
-            borderRadius: "6px",
-            cursor: submitting ? "not-allowed" : "pointer",
-            fontSize: "0.875rem",
+            borderRadius: '6px',
+            cursor: submitting ? 'not-allowed' : 'pointer',
+            fontSize: '0.875rem',
             fontWeight: 500,
           }}
         >
-          {submitting ? "Verifying…" : "Enter Demo"}
+          {submitting ? 'Verifying…' : 'Enter Demo'}
         </button>
       </form>
     </div>
@@ -197,8 +193,8 @@ function PinModal({
  */
 export function PrivateAppGuard({
   children,
-  appName = "this application",
-  accentColor = "#4B8BDB",
+  appName = 'this application',
+  accentColor = '#4B8BDB',
   loadingColor,
 }: PrivateAppGuardProps) {
   const { isLoading, isAuthenticated, login } = useAuth();
@@ -208,7 +204,7 @@ export function PrivateAppGuard({
     if (isDemoActive()) return false;
     try {
       const params = new URLSearchParams(window.location.search);
-      return params.has("demo") || params.get("view") === "app";
+      return params.has('demo') || params.get('view') === 'app';
     } catch {
       return false;
     }
@@ -251,11 +247,11 @@ export function PrivateAppGuard({
     return (
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          background: "#080c14",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: '#080c14',
         }}
       >
         <div
@@ -264,8 +260,8 @@ export function PrivateAppGuard({
             height: 24,
             border: `2px solid ${color}40`,
             borderTopColor: color,
-            borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
           }}
         />
       </div>
@@ -275,27 +271,27 @@ export function PrivateAppGuard({
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        background: "#080c14",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        background: '#080c14',
         gap: 24,
-        padding: "0 24px",
-        textAlign: "center",
+        padding: '0 24px',
+        textAlign: 'center',
       }}
     >
       <div
         style={{
           width: 48,
           height: 48,
-          borderRadius: "50%",
+          borderRadius: '50%',
           background: `${accentColor}20`,
           border: `1px solid ${accentColor}40`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <svg
@@ -317,9 +313,9 @@ export function PrivateAppGuard({
           style={{
             fontSize: 20,
             fontWeight: 600,
-            color: "#e2e8f0",
-            margin: "0 0 8px 0",
-            fontFamily: "inherit",
+            color: '#e2e8f0',
+            margin: '0 0 8px 0',
+            fontFamily: 'inherit',
           }}
         >
           Authentication required
@@ -327,7 +323,7 @@ export function PrivateAppGuard({
         <p
           style={{
             fontSize: 14,
-            color: "#94a3b8",
+            color: '#94a3b8',
             margin: 0,
             maxWidth: 360,
           }}
@@ -335,19 +331,19 @@ export function PrivateAppGuard({
           Sign in to access {appName}.
         </p>
       </div>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
         <button
           onClick={login}
           style={{
-            padding: "10px 28px",
+            padding: '10px 28px',
             background: `${accentColor}20`,
             border: `1px solid ${accentColor}60`,
             borderRadius: 8,
             color: accentColor,
             fontSize: 14,
             fontWeight: 500,
-            cursor: "pointer",
-            transition: "all 0.15s",
+            cursor: 'pointer',
+            transition: 'all 0.15s',
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.background = `${accentColor}35`;
@@ -362,15 +358,15 @@ export function PrivateAppGuard({
           <button
             onClick={() => setShowPinModal(true)}
             style={{
-              padding: "10px 28px",
-              background: "transparent",
-              border: "1px solid rgba(255,255,255,0.18)",
+              padding: '10px 28px',
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.18)',
               borderRadius: 8,
-              color: "rgba(255,255,255,0.7)",
+              color: 'rgba(255,255,255,0.7)',
               fontSize: 14,
               fontWeight: 500,
-              cursor: "pointer",
-              transition: "all 0.15s",
+              cursor: 'pointer',
+              transition: 'all 0.15s',
             }}
           >
             Enter demo code

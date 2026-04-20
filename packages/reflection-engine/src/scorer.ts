@@ -1,5 +1,5 @@
-import type { TraceRecord } from "@workspace/trace-graph";
-import type { RouteQuality } from "./types.js";
+import type { TraceRecord } from '@workspace/trace-graph';
+import type { RouteQuality } from './types.js';
 
 export interface QualityScore {
   overall: number;
@@ -25,7 +25,7 @@ export function scoreTrace(trace: TraceRecord): QualityScore {
   breakdown.toolSuccessRate = toolSuccessRate;
 
   const guardrailBlocks = trace.guardrailResults.filter(
-    (g) => g.outcome === "block" || g.outcome === "require-approval",
+    (g) => g.outcome === 'block' || g.outcome === 'require-approval',
   ).length;
   const guardrailHealth = Math.max(0, 1 - guardrailBlocks * 0.25);
   breakdown.guardrailHealth = guardrailHealth;
@@ -35,9 +35,7 @@ export function scoreTrace(trace: TraceRecord): QualityScore {
     retrieval.length > 0
       ? retrieval.reduce((sum, r) => {
           const hitRatio =
-            r.hitCount + r.missCount > 0
-              ? r.hitCount / (r.hitCount + r.missCount)
-              : 1;
+            r.hitCount + r.missCount > 0 ? r.hitCount / (r.hitCount + r.missCount) : 1;
           const quality = r.qualityScore ?? hitRatio;
           return sum + quality;
         }, 0) / retrieval.length
@@ -52,9 +50,7 @@ export function scoreTrace(trace: TraceRecord): QualityScore {
     latencyScore =
       0.5 +
       0.5 *
-        (1 -
-          (latencyMs - LATENCY_EXCELLENT_MS) /
-            (LATENCY_ACCEPTABLE_MS - LATENCY_EXCELLENT_MS));
+        (1 - (latencyMs - LATENCY_EXCELLENT_MS) / (LATENCY_ACCEPTABLE_MS - LATENCY_EXCELLENT_MS));
   }
   breakdown.latencyScore = latencyScore;
 
@@ -64,18 +60,14 @@ export function scoreTrace(trace: TraceRecord): QualityScore {
     costScore = 0.2;
   } else if (costUsd > COST_EXCELLENT_USD) {
     costScore =
-      0.5 +
-      0.5 *
-        (1 -
-          (costUsd - COST_EXCELLENT_USD) /
-            (COST_ACCEPTABLE_USD - COST_EXCELLENT_USD));
+      0.5 + 0.5 * (1 - (costUsd - COST_EXCELLENT_USD) / (COST_ACCEPTABLE_USD - COST_EXCELLENT_USD));
   }
   breakdown.costScore = costScore;
 
   const efficiencyScore = (latencyScore + costScore) / 2;
   breakdown.efficiencyScore = efficiencyScore;
 
-  const statusPenalty = trace.status === "completed" ? 1 : trace.status === "failed" ? 0.1 : 0.5;
+  const statusPenalty = trace.status === 'completed' ? 1 : trace.status === 'failed' ? 0.1 : 0.5;
   breakdown.statusPenalty = statusPenalty;
 
   const errorPenalty = Math.max(0, 1 - trace.errors.length * 0.2);
@@ -110,8 +102,7 @@ export function extractBestRoute(trace: TraceRecord): RouteQuality {
 
   const avgRetrievalQuality =
     trace.retrieval.length > 0
-      ? trace.retrieval.reduce((s, r) => s + (r.qualityScore ?? 0.5), 0) /
-        trace.retrieval.length
+      ? trace.retrieval.reduce((s, r) => s + (r.qualityScore ?? 0.5), 0) / trace.retrieval.length
       : undefined;
 
   return {

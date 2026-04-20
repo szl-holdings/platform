@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { TenantIdSchema } from "./tenant.js";
+import { z } from 'zod';
+import { TenantIdSchema } from './tenant.js';
 
 export const EvalQuerySchema = z.object({
   queryId: z.string(),
@@ -16,7 +16,7 @@ export const EvalRunRequestSchema = z.object({
   datasetId: z.string(),
   queries: z.array(EvalQuerySchema).min(1),
   topK: z.number().int().positive().default(10),
-  metrics: z.array(z.enum(["ndcg", "recall", "precision", "mrr"])).default(["ndcg", "recall"]),
+  metrics: z.array(z.enum(['ndcg', 'recall', 'precision', 'mrr'])).default(['ndcg', 'recall']),
   metadata: z.record(z.unknown()).default({}),
 });
 export type EvalRunRequest = z.infer<typeof EvalRunRequestSchema>;

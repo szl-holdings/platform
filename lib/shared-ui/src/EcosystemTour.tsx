@@ -1,6 +1,6 @@
-import * as React from "react";
-import { X, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
-import { cn } from "./utils";
+import { ChevronLeft, ChevronRight, Sparkles, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from './utils';
 
 export interface TourStep {
   id: string;
@@ -22,7 +22,7 @@ function useTourState(storageKey: string) {
   const key = `szl_tour_dismissed_${storageKey}`;
   const [dismissed, setDismissed] = React.useState(() => {
     try {
-      return localStorage.getItem(key) === "true";
+      return localStorage.getItem(key) === 'true';
     } catch {
       return false;
     }
@@ -30,7 +30,7 @@ function useTourState(storageKey: string) {
 
   const dismiss = React.useCallback(() => {
     try {
-      localStorage.setItem(key, "true");
+      localStorage.setItem(key, 'true');
     } catch {}
     setDismissed(true);
   }, [key]);
@@ -42,7 +42,7 @@ export function EcosystemTour({
   steps,
   onComplete,
   onDismiss,
-  storageKey = "ecosystem",
+  storageKey = 'ecosystem',
 }: EcosystemTourProps) {
   const { dismissed, dismiss } = useTourState(storageKey);
   const [currentStep, setCurrentStep] = React.useState(0);
@@ -74,29 +74,29 @@ export function EcosystemTour({
 
   const handleNext = React.useCallback(() => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(s => s + 1);
+      setCurrentStep((s) => s + 1);
     } else {
       handleComplete();
     }
   }, [currentStep, steps.length, handleComplete]);
 
   const handlePrev = React.useCallback(() => {
-    if (currentStep > 0) setCurrentStep(s => s - 1);
+    if (currentStep > 0) setCurrentStep((s) => s - 1);
   }, [currentStep]);
 
   if (dismissed || !visible) return null;
 
   const step = steps[currentStep]!;
   const Icon = step.icon;
-  const accentColor = step.accentColor || "#8b7ac8";
+  const accentColor = step.accentColor || '#8b7ac8';
   const isLast = currentStep === steps.length - 1;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 pointer-events-none">
       <div
         className={cn(
-          "pointer-events-auto w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl overflow-hidden transition-all duration-300",
-          visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          'pointer-events-auto w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl overflow-hidden transition-all duration-300',
+          visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
         )}
         style={{ boxShadow: `0 0 40px ${accentColor}15, 0 20px 40px rgba(0,0,0,0.4)` }}
       >
@@ -115,11 +115,9 @@ export function EcosystemTour({
                 className="w-7 h-7 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: `${accentColor}15` }}
               >
-                {Icon ? (
-                  (Icon as any)({ className: "w-3.5 h-3.5", style: { color: accentColor } })
-                ) : (
-                  (Sparkles as any)({ className: "w-3.5 h-3.5", style: { color: accentColor } })
-                )}
+                {Icon
+                  ? (Icon as any)({ className: 'w-3.5 h-3.5', style: { color: accentColor } })
+                  : (Sparkles as any)({ className: 'w-3.5 h-3.5', style: { color: accentColor } })}
               </div>
               <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
                 Step {currentStep + 1} of {steps.length}
@@ -146,7 +144,8 @@ export function EcosystemTour({
                 color: accentColor,
               }}
             >
-              <span className="font-semibold">Tip: </span>{step.tip}
+              <span className="font-semibold">Tip: </span>
+              {step.tip}
             </div>
           )}
 
@@ -158,8 +157,8 @@ export function EcosystemTour({
                   onClick={() => setCurrentStep(i)}
                   className="transition-all rounded-full"
                   style={{
-                    width: i === currentStep ? "16px" : "6px",
-                    height: "6px",
+                    width: i === currentStep ? '16px' : '6px',
+                    height: '6px',
                     backgroundColor: i === currentStep ? accentColor : `${accentColor}30`,
                   }}
                   aria-label={`Go to step ${i + 1}`}
@@ -181,7 +180,7 @@ export function EcosystemTour({
                 className="flex items-center gap-1.5 py-2 px-4 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
                 style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}
               >
-                {isLast ? "Finish" : "Next"} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
+                {isLast ? 'Finish' : 'Next'} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>

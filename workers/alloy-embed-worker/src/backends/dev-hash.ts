@@ -12,8 +12,13 @@
  * or ExternalHttpEmbeddingBackend (which calls any HTTP inference service).
  */
 
-import { createHash } from "crypto";
-import type { EmbeddingBackend, EmbeddingBackendDescriptor, RawEmbedRequest, RawEmbedResponse } from "./interface.js";
+import { createHash } from 'crypto';
+import type {
+  EmbeddingBackend,
+  EmbeddingBackendDescriptor,
+  RawEmbedRequest,
+  RawEmbedResponse,
+} from './interface.js';
 
 const DEFAULT_DIM = 384;
 
@@ -22,9 +27,9 @@ function hashEmbed(text: string, dim: number = DEFAULT_DIM): number[] {
   let round = 0;
 
   while (floats.length < dim) {
-    const digest = createHash("sha256")
+    const digest = createHash('sha256')
       .update(text)
-      .update(round.toString(16).padStart(8, "0"))
+      .update(round.toString(16).padStart(8, '0'))
       .digest();
 
     for (let j = 0; j <= digest.length - 4; j += 4) {
@@ -49,10 +54,10 @@ function hashEmbed(text: string, dim: number = DEFAULT_DIM): number[] {
 
 export class DevHashEmbeddingBackend implements EmbeddingBackend {
   readonly descriptor: EmbeddingBackendDescriptor = {
-    backendId: "dev-hash",
-    kind: "cpu-local",
-    displayName: "DevHash (deterministic, no model required)",
-    supportedModels: ["aef-dev-hash", "*"],
+    backendId: 'dev-hash',
+    kind: 'cpu-local',
+    displayName: 'DevHash (deterministic, no model required)',
+    supportedModels: ['aef-dev-hash', '*'],
   };
 
   readonly dimensions = DEFAULT_DIM;
@@ -65,7 +70,7 @@ export class DevHashEmbeddingBackend implements EmbeddingBackend {
 
     return {
       vectors,
-      model: request.model ?? "aef-dev-hash",
+      model: request.model ?? 'aef-dev-hash',
       dimensions: this.dimensions,
       tokenCounts,
     };

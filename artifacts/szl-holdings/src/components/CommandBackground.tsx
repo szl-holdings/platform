@@ -1,17 +1,17 @@
-import { ParticleField } from "@/components/ParticleField";
+import { ParticleField } from '@/components/ParticleField';
 
 interface CommandBackgroundProps {
-  variant?: "default" | "grid" | "minimal";
+  variant?: 'default' | 'grid' | 'minimal';
   accentColor?: string;
-  intensity?: "low" | "medium" | "high";
+  intensity?: 'low' | 'medium' | 'high';
 }
 
 export function CommandBackground({
-  variant = "default",
-  accentColor = "201, 169, 110",
-  intensity = "medium",
+  variant = 'default',
+  accentColor = '201, 169, 110',
+  intensity = 'medium',
 }: CommandBackgroundProps) {
-  const densityMap = { low: "sparse", medium: "normal", high: "dense" } as const;
+  const densityMap = { low: 'sparse', medium: 'normal', high: 'dense' } as const;
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
@@ -21,26 +21,22 @@ export function CommandBackground({
         className="absolute inset-0 opacity-[0.022]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.9) 1px, transparent 1px)",
-          backgroundSize: "72px 72px",
+            'linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.9) 1px, transparent 1px)',
+          backgroundSize: '72px 72px',
         }}
       />
 
-      {variant !== "minimal" && (
-        <ParticleField
-          color={accentColor}
-          density={densityMap[intensity]}
-          className="opacity-60"
-        />
+      {variant !== 'minimal' && (
+        <ParticleField color={accentColor} density={densityMap[intensity]} className="opacity-60" />
       )}
 
-      {variant === "grid" && (
+      {variant === 'grid' && (
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.9) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
+              'linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.9) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
           }}
         />
       )}

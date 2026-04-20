@@ -33,28 +33,24 @@
  *     send the whole store.
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db, platformSettingsTable } from "@szl-holdings/db";
-import { and, eq } from "drizzle-orm";
-import {
-  sendSuccess,
-  sendBadRequest,
-  handleRouteError,
-} from "../lib/api-response";
-import { validateBody } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, platformSettingsTable } from '@szl-holdings/db';
+import { and, eq } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { validateBody } from '../lib/validation';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
-const NAMESPACE = "szl.actionStore";
-const KEY = "default";
+const NAMESPACE = 'szl.actionStore';
+const KEY = 'default';
 
 const TOP_LEVEL_KEYS = [
-  "riskOwners",
-  "riskActions",
-  "oppDecisions",
-  "recDecisions",
-  "riskLinearOverrides",
+  'riskOwners',
+  'riskActions',
+  'oppDecisions',
+  'recDecisions',
+  'riskLinearOverrides',
 ] as const;
-type TopLevelKey = typeof TOP_LEVEL_KEYS[number];
+type TopLevelKey = (typeof TOP_LEVEL_KEYS)[number];
 
 type ActionStore = Record<TopLevelKey, Record<string, unknown>>;
 
@@ -74,10 +70,10 @@ function normalize(raw: unknown): ActionStore {
     recDecisions: {},
     riskLinearOverrides: {},
   };
-  if (raw && typeof raw === "object") {
+  if (raw && typeof raw === 'object') {
     for (const k of TOP_LEVEL_KEYS) {
       const v = (raw as Record<string, unknown>)[k];
-      if (v && typeof v === "object" && !Array.isArray(v)) {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
         out[k] = { ...(v as Record<string, unknown>) };
       }
     }
@@ -90,12 +86,27 @@ async function loadStore(): Promise<ActionStore> {
     const [row] = await db
       .select()
       .from(platformSettingsTable)
-      .where(and(eq(platformSettingsTable.namespace, NAMESPACE), eq(platformSettingsTable.key, KEY)))
+      .where(
+        and(eq(platformSettingsTable.namespace, NAMESPACE), eq(platformSettingsTable.key, KEY)),
+      )
       .limit(1);
-    if (!row) return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {}, riskLinearOverrides: {} };
+    if (!row)
+      return {
+        riskOwners: {},
+        riskActions: {},
+        oppDecisions: {},
+        recDecisions: {},
+        riskLinearOverrides: {},
+      };
     return normalize(row.value);
   } catch {
-    return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {}, riskLinearOverrides: {} };
+    return {
+      riskOwners: {},
+      riskActions: {},
+      oppDecisions: {},
+      recDecisions: {},
+      riskLinearOverrides: {},
+    };
   }
 }
 
@@ -109,15 +120,15 @@ async function saveStore(store: ActionStore): Promise<void> {
   if (existing) {
     await db
       .update(platformSettingsTable)
-      .set({ value: store as never, valueType: "json", updatedAt: new Date() })
+      .set({ value: store as never, valueType: 'json', updatedAt: new Date() })
       .where(eq(platformSettingsTable.id, existing.id));
   } else {
     await db.insert(platformSettingsTable).values({
       namespace: NAMESPACE,
       key: KEY,
       value: store as never,
-      valueType: "json",
-      category: "shared-state",
+      valueType: 'json',
+      category: 'shared-state',
       isPublic: true,
     });
   }
@@ -134,7 +145,7 @@ function mergePatch(current: ActionStore, patch: Record<string, unknown>): Actio
   for (const key of TOP_LEVEL_KEYS) {
     const slice = patch[key];
     if (slice === undefined) continue;
-    if (slice === null || typeof slice !== "object" || Array.isArray(slice)) continue;
+    if (slice === null || typeof slice !== 'object' || Array.isArray(slice)) continue;
     for (const [id, value] of Object.entries(slice as Record<string, unknown>)) {
       if (value === null) {
         delete next[key][id];
@@ -170,30 +181,30 @@ function broadcast(store: ActionStore): void {
 
 const router: IRouter = Router();
 
-router.get("/action-store", async (_req: Request, res: Response) => {
+router.get('/action-store', async (_req: Request, res: Response) => {
   try {
     const store = await loadStore();
     sendSuccess(res, store);
   } catch (err) {
-    handleRouteError(res, err, "Failed to load action store");
+    handleRouteError(res, err, 'Failed to load action store');
   }
 });
 
-router.get("/action-store/stream", async (req: Request, res: Response) => {
+router.get('/action-store/stream', async (req: Request, res: Response) => {
   // Server-Sent Events: long-lived response that pushes the full store to the
   // client every time PATCH /action-store mutates it. Clients use this as the
   // primary sync channel; the polling on GET /action-store stays as a safety
   // net but goes effectively idle while a stream is connected.
   res.status(200);
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache, no-transform");
-  res.setHeader("Connection", "keep-alive");
-  res.setHeader("X-Accel-Buffering", "no");
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders?.();
 
   // Suggest a slow client-side reconnect — EventSource defaults to ~3s which
   // is fine, but spelling it out makes the safety net behaviour explicit.
-  res.write("retry: 3000\n\n");
+  res.write('retry: 3000\n\n');
 
   // Initial snapshot so the client doesn't need a separate GET on connect.
   try {
@@ -208,7 +219,7 @@ router.get("/action-store/stream", async (req: Request, res: Response) => {
   // Heartbeat to keep proxies / load balancers from killing the idle socket.
   const heartbeat = setInterval(() => {
     try {
-      res.write(": ping\n\n");
+      res.write(': ping\n\n');
     } catch {
       // ignore — close handler will clean up
     }
@@ -218,37 +229,30 @@ router.get("/action-store/stream", async (req: Request, res: Response) => {
     clearInterval(heartbeat);
     subscribers.delete(res);
   };
-  req.on("close", cleanup);
-  req.on("error", cleanup);
-  res.on("close", cleanup);
-  res.on("error", cleanup);
+  req.on('close', cleanup);
+  req.on('error', cleanup);
+  res.on('close', cleanup);
+  res.on('error', cleanup);
 });
 
-router.patch(
-  "/action-store",
-  validateBody(bodyShape({})),
-  async (req: Request, res: Response) => {
-    try {
-      const body = req.body as Record<string, unknown>;
-      const hasAnyKnownKey = TOP_LEVEL_KEYS.some((k) => k in body);
-      if (!hasAnyKnownKey) {
-        sendBadRequest(
-          res,
-          `Body must include at least one of: ${TOP_LEVEL_KEYS.join(", ")}`,
-        );
-        return;
-      }
-      const current = await loadStore();
-      const next = mergePatch(current, body);
-      await saveStore(next);
-      sendSuccess(res, next);
-      // Push to every open SSE subscriber so other open Business State /
-      // Enterprise State pages reflect the change within ~100ms.
-      broadcast(next);
-    } catch (err) {
-      handleRouteError(res, err, "Failed to update action store");
+router.patch('/action-store', validateBody(bodyShape({})), async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const hasAnyKnownKey = TOP_LEVEL_KEYS.some((k) => k in body);
+    if (!hasAnyKnownKey) {
+      sendBadRequest(res, `Body must include at least one of: ${TOP_LEVEL_KEYS.join(', ')}`);
+      return;
     }
-  },
-);
+    const current = await loadStore();
+    const next = mergePatch(current, body);
+    await saveStore(next);
+    sendSuccess(res, next);
+    // Push to every open SSE subscriber so other open Business State /
+    // Enterprise State pages reflect the change within ~100ms.
+    broadcast(next);
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to update action store');
+  }
+});
 
 export default router;

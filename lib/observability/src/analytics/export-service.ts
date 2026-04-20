@@ -1,15 +1,15 @@
-import type { AnalyticsEvent, AnalyticsMetricSnapshot, AnalyticsAnomaly } from "@szl-holdings/db";
+import type { AnalyticsAnomaly, AnalyticsEvent, AnalyticsMetricSnapshot } from '@szl-holdings/db';
 
 // ---------------------------------------------------------------------------
 // Export format types
 // ---------------------------------------------------------------------------
 
-export type ExportFormat = "csv" | "json" | "parquet";
+export type ExportFormat = 'csv' | 'json' | 'parquet';
 
 export interface ExportOptions {
   format: ExportFormat;
   domain: string;
-  exportType: "events" | "metric_snapshots" | "funnel" | "cohort" | "anomalies";
+  exportType: 'events' | 'metric_snapshots' | 'funnel' | 'cohort' | 'anomalies';
   filterParams?: Record<string, unknown>;
   from?: Date;
   to?: Date;
@@ -22,21 +22,21 @@ export interface ExportOptions {
 
 function toCSVRow(row: Record<string, unknown>): string {
   return Object.values(row)
-    .map(val => {
-      if (val === null || val === undefined) return "";
-      const str = typeof val === "object" ? JSON.stringify(val) : String(val);
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    .map((val) => {
+      if (val === null || val === undefined) return '';
+      const str = typeof val === 'object' ? JSON.stringify(val) : String(val);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
         return `"${str.replace(/"/g, '""')}"`;
       }
       return str;
     })
-    .join(",");
+    .join(',');
 }
 
 function toCSV(rows: Record<string, unknown>[]): string {
-  if (rows.length === 0) return "";
-  const headers = Object.keys(rows[0]!).join(",");
-  const body = rows.map(toCSVRow).join("\n");
+  if (rows.length === 0) return '';
+  const headers = Object.keys(rows[0]!).join(',');
+  const body = rows.map(toCSVRow).join('\n');
   return `${headers}\n${body}`;
 }
 
@@ -45,7 +45,7 @@ function toCSV(rows: Record<string, unknown>[]): string {
 // ---------------------------------------------------------------------------
 
 function toJSONLines(rows: Record<string, unknown>[]): string {
-  return rows.map(row => JSON.stringify(row)).join("\n");
+  return rows.map((row) => JSON.stringify(row)).join('\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -54,20 +54,23 @@ function toJSONLines(rows: Record<string, unknown>[]): string {
 
 function toParquetJSON(rows: Record<string, unknown>[]): string {
   if (rows.length === 0) return JSON.stringify({ schema: [], rows: 0, columns: {} });
-  const schema = Object.keys(rows[0]!).map(key => ({ name: key, type: inferType(rows[0]![key]) }));
+  const schema = Object.keys(rows[0]!).map((key) => ({
+    name: key,
+    type: inferType(rows[0]![key]),
+  }));
   const columns: Record<string, unknown[]> = {};
   for (const col of schema) {
-    columns[col.name] = rows.map(r => r[col.name] ?? null);
+    columns[col.name] = rows.map((r) => r[col.name] ?? null);
   }
   return JSON.stringify({ schema, rows: rows.length, columns }, null, 2);
 }
 
 function inferType(value: unknown): string {
-  if (typeof value === "number") return "float64";
-  if (typeof value === "boolean") return "bool";
-  if (value instanceof Date) return "timestamp";
-  if (typeof value === "object") return "json";
-  return "string";
+  if (typeof value === 'number') return 'float64';
+  if (typeof value === 'boolean') return 'bool';
+  if (value instanceof Date) return 'timestamp';
+  if (typeof value === 'object') return 'json';
+  return 'string';
 }
 
 // ---------------------------------------------------------------------------
@@ -75,7 +78,7 @@ function inferType(value: unknown): string {
 // ---------------------------------------------------------------------------
 
 export function serializeAnalyticsEvents(events: AnalyticsEvent[], format: ExportFormat): string {
-  const rows: Record<string, unknown>[] = events.map(e => ({
+  const rows: Record<string, unknown>[] = events.map((e) => ({
     id: e.id,
     eventId: e.eventId,
     eventName: e.eventName,
@@ -103,8 +106,11 @@ export function serializeAnalyticsEvents(events: AnalyticsEvent[], format: Expor
 // Metric snapshot export serialization
 // ---------------------------------------------------------------------------
 
-export function serializeMetricSnapshots(snapshots: AnalyticsMetricSnapshot[], format: ExportFormat): string {
-  const rows: Record<string, unknown>[] = snapshots.map(s => ({
+export function serializeMetricSnapshots(
+  snapshots: AnalyticsMetricSnapshot[],
+  format: ExportFormat,
+): string {
+  const rows: Record<string, unknown>[] = snapshots.map((s) => ({
     id: s.id,
     metricId: s.metricId,
     granularity: s.granularity,
@@ -125,7 +131,7 @@ export function serializeMetricSnapshots(snapshots: AnalyticsMetricSnapshot[], f
 // ---------------------------------------------------------------------------
 
 export function serializeAnomalies(anomalies: AnalyticsAnomaly[], format: ExportFormat): string {
-  const rows: Record<string, unknown>[] = anomalies.map(a => ({
+  const rows: Record<string, unknown>[] = anomalies.map((a) => ({
     anomalyId: a.anomalyId,
     metricId: a.metricId,
     domain: a.domain,
@@ -151,9 +157,12 @@ export function serializeAnomalies(anomalies: AnalyticsAnomaly[], format: Export
 
 export function serialize(rows: Record<string, unknown>[], format: ExportFormat): string {
   switch (format) {
-    case "csv": return toCSV(rows);
-    case "json": return toJSONLines(rows);
-    case "parquet": return toParquetJSON(rows);
+    case 'csv':
+      return toCSV(rows);
+    case 'json':
+      return toJSONLines(rows);
+    case 'parquet':
+      return toParquetJSON(rows);
   }
 }
 
@@ -163,17 +172,23 @@ export function serialize(rows: Record<string, unknown>[], format: ExportFormat)
 
 export function getContentType(format: ExportFormat): string {
   switch (format) {
-    case "csv": return "text/csv";
-    case "json": return "application/x-ndjson";
-    case "parquet": return "application/json";
+    case 'csv':
+      return 'text/csv';
+    case 'json':
+      return 'application/x-ndjson';
+    case 'parquet':
+      return 'application/json';
   }
 }
 
 export function getFileExtension(format: ExportFormat): string {
   switch (format) {
-    case "csv": return ".csv";
-    case "json": return ".jsonl";
-    case "parquet": return ".json";
+    case 'csv':
+      return '.csv';
+    case 'json':
+      return '.jsonl';
+    case 'parquet':
+      return '.json';
   }
 }
 
@@ -186,28 +201,29 @@ export interface ScheduledExportJob {
   domain: string;
   exportType: string;
   format: ExportFormat;
-  scheduleFrequency: "daily" | "weekly" | "monthly";
+  scheduleFrequency: 'daily' | 'weekly' | 'monthly';
   filterParams: Record<string, unknown>;
   webhookUrl?: string;
 }
 
-export function computeNextRunAt(frequency: "once" | "daily" | "weekly" | "monthly"): Date | null {
+export function computeNextRunAt(frequency: 'once' | 'daily' | 'weekly' | 'monthly'): Date | null {
   const now = new Date();
   switch (frequency) {
-    case "once": return null;
-    case "daily": {
+    case 'once':
+      return null;
+    case 'daily': {
       const next = new Date(now);
       next.setDate(next.getDate() + 1);
       next.setHours(2, 0, 0, 0);
       return next;
     }
-    case "weekly": {
+    case 'weekly': {
       const next = new Date(now);
       next.setDate(next.getDate() + 7);
       next.setHours(2, 0, 0, 0);
       return next;
     }
-    case "monthly": {
+    case 'monthly': {
       const next = new Date(now);
       next.setMonth(next.getMonth() + 1);
       next.setDate(1);

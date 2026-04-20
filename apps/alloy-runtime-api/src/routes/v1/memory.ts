@@ -9,18 +9,19 @@
  * POST   /v1/memory/query       — query entries by scope + optional key prefix
  * DELETE /v1/memory/evict-stale — evict expired entries for the current tenant
  */
-import { Router, type IRouter } from "express";
-import type { Request, Response } from "express";
-import { z } from "zod";
-import type { MemoryScope } from "@szl-holdings/shared-contracts";
-import { getMemoryStore } from "../../store.js";
+
+import type { MemoryScope } from '@szl-holdings/shared-contracts';
+import type { Request, Response } from 'express';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { getMemoryStore } from '../../store.js';
 
 const router: IRouter = Router();
 
-export const VALID_SCOPES: MemoryScope[] = ["working", "episodic", "semantic", "governance"];
+export const VALID_SCOPES: MemoryScope[] = ['working', 'episodic', 'semantic', 'governance'];
 
 const WriteSchema = z.object({
-  scope: z.enum(["working", "episodic", "semantic", "governance"]),
+  scope: z.enum(['working', 'episodic', 'semantic', 'governance']),
   key: z.string().min(1),
   value: z.unknown(),
   agentRole: z.string().optional(),
@@ -30,19 +31,19 @@ const WriteSchema = z.object({
 });
 
 const QuerySchema = z.object({
-  scope: z.enum(["working", "episodic", "semantic", "governance"]),
+  scope: z.enum(['working', 'episodic', 'semantic', 'governance']),
   keyPrefix: z.string().optional(),
   limit: z.number().int().positive().optional(),
 });
 
 function tenantId(req: Request): string {
-  return req.tenantCtx?.tenantId ?? "default";
+  return req.tenantCtx?.tenantId ?? 'default';
 }
 
-router.post("/write", (req: Request, res: Response): void => {
+router.post('/write', (req: Request, res: Response): void => {
   const parse = WriteSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: "Validation failed", issues: parse.error.issues });
+    res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
 
@@ -66,10 +67,10 @@ router.post("/write", (req: Request, res: Response): void => {
   res.status(201).json({ ok: true, scope, key, tenantId: tid });
 });
 
-router.post("/query", (req: Request, res: Response): void => {
+router.post('/query', (req: Request, res: Response): void => {
   const parse = QuerySchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: "Validation failed", issues: parse.error.issues });
+    res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
 
@@ -86,14 +87,12 @@ router.post("/query", (req: Request, res: Response): void => {
     keys = keys.slice(0, limit);
   }
 
-  const entries = keys
-    .map((k) => memoryStore.get(scope, k))
-    .filter((e) => e !== undefined);
+  const entries = keys.map((k) => memoryStore.get(scope, k)).filter((e) => e !== undefined);
 
   res.status(200).json({ scope, tenantId: tid, count: entries.length, entries });
 });
 
-router.delete("/evict-stale", (req: Request, res: Response): void => {
+router.delete('/evict-stale', (req: Request, res: Response): void => {
   const tid = tenantId(req);
   const memoryStore = getMemoryStore(tid);
   const evicted = memoryStore.expireStale();

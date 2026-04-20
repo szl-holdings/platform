@@ -16,26 +16,26 @@
  * the ON CONFLICT path without Postgres).
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { randomUUID } from "crypto";
-import { and, eq } from "drizzle-orm";
-import type { OntologyEngine as OntologyEngineClass } from "@szl-holdings/ai-engine/ontology/ontology-engine";
-import type { db as DbHandle, entitiesTable as EntitiesTable } from "@szl-holdings/db";
+import type { OntologyEngine as OntologyEngineClass } from '@szl-holdings/ai-engine/ontology/ontology-engine';
+import type { db as DbHandle, entitiesTable as EntitiesTable } from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, eq } from 'drizzle-orm';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 const d = HAS_DB ? describe : describe.skip;
 
-d("OntologyEngine.upsertEntity wasCreated flag", () => {
+d('OntologyEngine.upsertEntity wasCreated flag', () => {
   let engine: OntologyEngineClass;
   let db: typeof DbHandle;
   let entitiesTable: typeof EntitiesTable;
 
   const name = `wascreated-test-${randomUUID()}`;
-  const domain = "ontology-wascreated-test";
+  const domain = 'ontology-wascreated-test';
 
   beforeAll(async () => {
-    const ontologyMod = await import("@szl-holdings/ai-engine/ontology/ontology-engine");
-    const dbMod = await import("@szl-holdings/db");
+    const ontologyMod = await import('@szl-holdings/ai-engine/ontology/ontology-engine');
+    const dbMod = await import('@szl-holdings/db');
     db = dbMod.db;
     entitiesTable = dbMod.entitiesTable;
     engine = new ontologyMod.OntologyEngine();
@@ -57,24 +57,24 @@ d("OntologyEngine.upsertEntity wasCreated flag", () => {
     engine?.dispose();
   });
 
-  it("returns wasCreated=true on first insert and wasCreated=false on subsequent merge", async () => {
+  it('returns wasCreated=true on first insert and wasCreated=false on subsequent merge', async () => {
     const first = await engine.upsertEntity({
-      type: "asset",
+      type: 'asset',
       name,
       domain,
       metadata: { iteration: 1 },
-      tags: ["initial"],
+      tags: ['initial'],
     });
 
     expect(first.wasCreated).toBe(true);
     expect(first.id).toBeTruthy();
 
     const second = await engine.upsertEntity({
-      type: "asset",
+      type: 'asset',
       name,
       domain,
       metadata: { iteration: 2 },
-      tags: ["updated"],
+      tags: ['updated'],
     });
 
     expect(second.wasCreated).toBe(false);
@@ -84,11 +84,11 @@ d("OntologyEngine.upsertEntity wasCreated flag", () => {
 
     // A third pass should also be classified as a merge.
     const third = await engine.upsertEntity({
-      type: "asset",
+      type: 'asset',
       name,
       domain,
       metadata: { iteration: 3 },
-      tags: ["updated-again"],
+      tags: ['updated-again'],
     });
     expect(third.wasCreated).toBe(false);
     expect(third.id).toBe(first.id);

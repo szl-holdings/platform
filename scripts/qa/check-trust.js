@@ -8,25 +8,25 @@
  *   node scripts/qa/check-trust.js
  */
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 const REQUIRED_TRUST_ROUTES = [
-  { route: "/legal/privacy", label: "Privacy Policy" },
-  { route: "/legal/terms", label: "Terms of Service" },
-  { route: "/accessibility", label: "Accessibility Statement" },
-  { route: "/trust-center", label: "Trust Center" },
-  { route: "/trust", label: "Trust Overview" },
-  { route: "/trust/security", label: "Security" },
-  { route: "/trust/governance", label: "Governance" },
-  { route: "/trust/architecture", label: "Architecture" },
-  { route: "/trust/ai", label: "AI Governance" },
-  { route: "/trust/approvals", label: "Approvals" },
-  { route: "/trust/operations", label: "Operations" },
-  { route: "/status", label: "Status Page" },
-  { route: "/solutions/aegis/trust", label: "Aegis Trust" },
-  { route: "/solutions/vessels/trust", label: "Vessels Trust" },
-  { route: "/solutions/terra/trust", label: "Terra Trust" },
-  { route: "/solutions/lyte/trust", label: "Lyte Trust" },
+  { route: '/legal/privacy', label: 'Privacy Policy' },
+  { route: '/legal/terms', label: 'Terms of Service' },
+  { route: '/accessibility', label: 'Accessibility Statement' },
+  { route: '/trust-center', label: 'Trust Center' },
+  { route: '/trust', label: 'Trust Overview' },
+  { route: '/trust/security', label: 'Security' },
+  { route: '/trust/governance', label: 'Governance' },
+  { route: '/trust/architecture', label: 'Architecture' },
+  { route: '/trust/ai', label: 'AI Governance' },
+  { route: '/trust/approvals', label: 'Approvals' },
+  { route: '/trust/operations', label: 'Operations' },
+  { route: '/status', label: 'Status Page' },
+  { route: '/solutions/aegis/trust', label: 'Aegis Trust' },
+  { route: '/solutions/vessels/trust', label: 'Vessels Trust' },
+  { route: '/solutions/terra/trust', label: 'Terra Trust' },
+  { route: '/solutions/lyte/trust', label: 'Lyte Trust' },
 ];
 
 const PLACEHOLDER_PATTERNS = [
@@ -41,7 +41,7 @@ async function checkRoute(url, label) {
   const issues = [];
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "SZL-QA-Trust/1.0" },
+      headers: { 'User-Agent': 'SZL-QA-Trust/1.0' },
     });
 
     if (!res.ok) {
@@ -63,7 +63,10 @@ async function checkRoute(url, label) {
     }
 
     // Check minimum content length (sparse pages are suspicious)
-    const textContent = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const textContent = html
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (textContent.length < 200) {
       issues.push(`Page content is very short (${textContent.length} chars) — may be incomplete`);
     }

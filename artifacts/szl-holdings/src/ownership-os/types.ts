@@ -104,7 +104,13 @@ export interface ScenarioDetail {
   certReadiness: CertReadiness[];
   legalFlags: LegalFlag[];
   govDocs: GovernanceDoc[];
-  decisionLog: Array<{ id: number; decisionType: string; summary: string; madeBy?: string; occurredAt: string; }>;
+  decisionLog: Array<{
+    id: number;
+    decisionType: string;
+    summary: string;
+    madeBy?: string;
+    occurredAt: string;
+  }>;
 }
 
 export interface NextActions {

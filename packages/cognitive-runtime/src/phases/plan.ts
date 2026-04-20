@@ -1,6 +1,6 @@
-import { createPlan, type PlanGraph, type PlanContext } from "@workspace/planner";
-import type { PhaseResult } from "../types.js";
-import type { OrientOutput } from "./orient.js";
+import { createPlan, type PlanContext, type PlanGraph } from '@workspace/planner';
+import type { PhaseResult } from '../types.js';
+import type { OrientOutput } from './orient.js';
 
 export interface PlanRevisionContext {
   revision: number;
@@ -12,7 +12,7 @@ export interface PlanPhaseOptions {
   agentId?: string;
   sessionId?: string;
   traceId?: string;
-  agentTier?: PlanContext["agentTier"];
+  agentTier?: PlanContext['agentTier'];
   maxBudgetUsd?: number;
   maxRetries?: number;
   domain?: string;
@@ -30,8 +30,8 @@ export interface PlanPhaseOutput {
   planId: string;
   stepCount: number;
   executionOrder: string[];
-  riskLevel: PlanGraph["riskLevel"];
-  confidence: PlanGraph["confidence"];
+  riskLevel: PlanGraph['riskLevel'];
+  confidence: PlanGraph['confidence'];
   estimatedCostUsd: number;
   fallbackCount: number;
   plan: PlanGraph;
@@ -55,10 +55,10 @@ export async function planPhase(
     agentId: opts.agentId,
     sessionId: opts.sessionId,
     traceId: opts.traceId,
-    agentTier: opts.agentTier ?? "analyst",
+    agentTier: opts.agentTier ?? 'analyst',
     maxBudgetUsd: opts.maxBudgetUsd,
     fallbackCount: 2,
-    approvalThreshold: orientOutput.riskScore > 0.7 ? "medium" : "high",
+    approvalThreshold: orientOutput.riskScore > 0.7 ? 'medium' : 'high',
     metadata: {
       domain: opts.domain,
       noveltyScore: orientOutput.noveltyScore,
@@ -81,8 +81,8 @@ export async function planPhase(
       if (retryCount > maxRetries) {
         const completedAt = Date.now();
         return {
-          phase: "plan",
-          status: "error",
+          phase: 'plan',
+          status: 'error',
           startedAt,
           completedAt,
           durationMs: completedAt - startedAt,
@@ -105,9 +105,8 @@ export async function planPhase(
         ...step.route,
         modelProvider: opts.preferredProvider ?? step.route.modelProvider,
         model: opts.preferredModel ?? step.route.model,
-        selectedBy: (opts.preferredProvider || opts.preferredModel)
-          ? "preferred"
-          : step.route.selectedBy,
+        selectedBy:
+          opts.preferredProvider || opts.preferredModel ? 'preferred' : step.route.selectedBy,
       },
       metadata: {
         ...step.metadata,
@@ -134,8 +133,8 @@ export async function planPhase(
 
   const completedAt = Date.now();
   return {
-    phase: "plan",
-    status: "ok",
+    phase: 'plan',
+    status: 'ok',
     startedAt,
     completedAt,
     durationMs: completedAt - startedAt,

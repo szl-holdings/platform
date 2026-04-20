@@ -1,14 +1,19 @@
-import { logger } from "./logger";
-import { db, auditEventsTable, streamDataSourcesTable, streamIngestedEventsTable } from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
-import { publish, WS_CHANNELS } from "./websocket";
-import { randomUUID } from "crypto";
+import {
+  auditEventsTable,
+  db,
+  streamDataSourcesTable,
+  streamIngestedEventsTable,
+} from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { desc, eq } from 'drizzle-orm';
+import { logger } from './logger';
+import { publish, WS_CHANNELS } from './websocket';
 
 export interface StreamEvent {
   id: string;
   type: string;
   source: string;
-  category: "siem" | "market" | "ais";
+  category: 'siem' | 'market' | 'ais';
   severity?: string;
   payload: Record<string, unknown>;
   timestamp: string;
@@ -16,7 +21,7 @@ export interface StreamEvent {
   sourceId?: number;
 }
 
-export type StreamCategory = "siem" | "market" | "ais";
+export type StreamCategory = 'siem' | 'market' | 'ais';
 
 const BUFFER_CAPACITY = 500;
 
@@ -45,7 +50,7 @@ const _rateLimitCleanupTimer = setInterval(() => {
     }
   }
 }, 60_000);
-if (typeof _rateLimitCleanupTimer.unref === "function") _rateLimitCleanupTimer.unref();
+if (typeof _rateLimitCleanupTimer.unref === 'function') _rateLimitCleanupTimer.unref();
 
 function isRateLimited(key: string): boolean {
   const now = Date.now();
@@ -70,19 +75,22 @@ function pushToBuffer(category: StreamCategory, event: StreamEvent): void {
   for (const subscriber of subscriberSets[category]) {
     try {
       subscriber(event);
-    } catch {
-    }
+    } catch {}
   }
-  const wsChannel = category === "siem"
-    ? WS_CHANNELS.AEGIS_INCIDENTS
-    : category === "ais"
-      ? WS_CHANNELS.VESSEL_POSITIONS
-      : WS_CHANNELS.LYTE_METRICS;
+  const wsChannel =
+    category === 'siem'
+      ? WS_CHANNELS.AEGIS_INCIDENTS
+      : category === 'ais'
+        ? WS_CHANNELS.VESSEL_POSITIONS
+        : WS_CHANNELS.LYTE_METRICS;
 
   publish(wsChannel, event.type, event);
 }
 
-export function subscribeToBuffer(category: StreamCategory, cb: (evt: StreamEvent) => void): () => void {
+export function subscribeToBuffer(
+  category: StreamCategory,
+  cb: (evt: StreamEvent) => void,
+): () => void {
   subscriberSets[category].add(cb);
   return () => subscriberSets[category].delete(cb);
 }
@@ -105,26 +113,28 @@ async function persistEvent(event: StreamEvent, sourceId?: number): Promise<void
       eventTs: new Date(event.timestamp),
     });
   } catch (err) {
-    logger.debug({ err }, "[ingestion] Failed to persist event (non-fatal)");
+    logger.debug({ err }, '[ingestion] Failed to persist event (non-fatal)');
   }
 }
 
 async function logIngestionAudit(source: string, count: number): Promise<void> {
   try {
     await db.insert(auditEventsTable).values({
-      action: "stream.ingestion",
-      entityType: "stream",
+      action: 'stream.ingestion',
+      entityType: 'stream',
       entityId: source,
       newValues: { source, count, ingestedAt: new Date().toISOString() },
     });
-  } catch {
-  }
+  } catch {}
 }
 
-export function ingestEvent(event: Omit<StreamEvent, "id" | "normalized"> & { id?: string }, sourceId?: number): StreamEvent {
+export function ingestEvent(
+  event: Omit<StreamEvent, 'id' | 'normalized'> & { id?: string },
+  sourceId?: number,
+): StreamEvent {
   if (isRateLimited(`ingest:${event.category}`)) {
-    logger.debug({ category: event.category }, "[ingestion] Rate limit hit, dropping event");
-    throw new Error("Rate limit exceeded");
+    logger.debug({ category: event.category }, '[ingestion] Rate limit hit, dropping event');
+    throw new Error('Rate limit exceeded');
   }
 
   const full: StreamEvent = {
@@ -140,8 +150,8 @@ export function ingestEvent(event: Omit<StreamEvent, "id" | "normalized"> & { id
 }
 
 export async function ingestBatch(
-  events: Array<Omit<StreamEvent, "normalized">>,
-  sourceId?: number
+  events: Array<Omit<StreamEvent, 'normalized'>>,
+  sourceId?: number,
 ): Promise<{ ingested: number; dropped: number }> {
   let ingested = 0;
   let dropped = 0;
@@ -156,7 +166,7 @@ export async function ingestBatch(
   }
 
   if (ingested > 0) {
-    const source = events[0]?.source ?? "unknown";
+    const source = events[0]?.source ?? 'unknown';
     void logIngestionAudit(source, ingested);
   }
 
@@ -166,7 +176,7 @@ export async function ingestBatch(
 export interface DataSourceConfig {
   id: number;
   name: string;
-  type: "webhook" | "polling";
+  type: 'webhook' | 'polling';
   category: StreamCategory;
   endpoint?: string;
   authToken?: string;
@@ -190,7 +200,7 @@ export async function loadDataSourcesFromDb(): Promise<void> {
       const config: DataSourceConfig = {
         id: row.id,
         name: row.name,
-        type: row.type as "webhook" | "polling",
+        type: row.type as 'webhook' | 'polling',
         category: row.category as StreamCategory,
         endpoint: row.endpoint ?? undefined,
         authToken: (row.authConfig as Record<string, string> | null)?.token,
@@ -200,32 +210,37 @@ export async function loadDataSourcesFromDb(): Promise<void> {
         eventsIngested: row.eventsIngested,
       };
       sourceRegistry.set(row.id, config);
-      if (config.enabled && config.type === "polling") {
+      if (config.enabled && config.type === 'polling') {
         void startPollingSource(config);
       }
     }
-    logger.info({ count: rows.length }, "[ingestion] Loaded data sources from DB");
+    logger.info({ count: rows.length }, '[ingestion] Loaded data sources from DB');
   } catch (err) {
-    logger.warn({ err }, "[ingestion] Could not load data sources from DB");
+    logger.warn({ err }, '[ingestion] Could not load data sources from DB');
   }
 }
 
-export async function registerDataSource(config: Omit<DataSourceConfig, "id" | "eventsIngested" | "status">): Promise<DataSourceConfig> {
-  const [row] = await db.insert(streamDataSourcesTable).values({
-    name: config.name,
-    type: config.type,
-    category: config.category,
-    endpoint: config.endpoint,
-    authConfig: config.authToken ? { token: config.authToken } : null,
-    pollingIntervalMs: config.pollingIntervalMs,
-    enabled: config.enabled,
-    status: "idle",
-  }).returning();
+export async function registerDataSource(
+  config: Omit<DataSourceConfig, 'id' | 'eventsIngested' | 'status'>,
+): Promise<DataSourceConfig> {
+  const [row] = await db
+    .insert(streamDataSourcesTable)
+    .values({
+      name: config.name,
+      type: config.type,
+      category: config.category,
+      endpoint: config.endpoint,
+      authConfig: config.authToken ? { token: config.authToken } : null,
+      pollingIntervalMs: config.pollingIntervalMs,
+      enabled: config.enabled,
+      status: 'idle',
+    })
+    .returning();
 
   const full: DataSourceConfig = {
     id: row!.id,
     name: row!.name,
-    type: row!.type as "webhook" | "polling",
+    type: row!.type as 'webhook' | 'polling',
     category: row!.category as StreamCategory,
     endpoint: row!.endpoint ?? undefined,
     authToken: config.authToken,
@@ -237,29 +252,38 @@ export async function registerDataSource(config: Omit<DataSourceConfig, "id" | "
 
   sourceRegistry.set(full.id, full);
 
-  if (full.enabled && full.type === "polling") {
+  if (full.enabled && full.type === 'polling') {
     void startPollingSource(full);
   }
 
-  logger.info({ id: full.id, name: full.name, type: full.type, category: full.category }, "[ingestion] Registered new data source");
+  logger.info(
+    { id: full.id, name: full.name, type: full.type, category: full.category },
+    '[ingestion] Registered new data source',
+  );
   return full;
 }
 
 export async function pauseDataSource(id: number): Promise<void> {
   stopPollingSource(id);
   const config = sourceRegistry.get(id);
-  if (config) config.status = "paused";
-  await db.update(streamDataSourcesTable).set({ status: "paused", enabled: false, updatedAt: new Date() }).where(eq(streamDataSourcesTable.id, id));
-  logger.info({ id }, "[ingestion] Data source paused");
+  if (config) config.status = 'paused';
+  await db
+    .update(streamDataSourcesTable)
+    .set({ status: 'paused', enabled: false, updatedAt: new Date() })
+    .where(eq(streamDataSourcesTable.id, id));
+  logger.info({ id }, '[ingestion] Data source paused');
 }
 
 export async function resumeDataSource(id: number): Promise<void> {
   const config = sourceRegistry.get(id);
   if (!config) throw new Error(`Data source ${id} not found`);
   config.enabled = true;
-  config.status = "active";
-  await db.update(streamDataSourcesTable).set({ status: "active", enabled: true, updatedAt: new Date() }).where(eq(streamDataSourcesTable.id, id));
-  if (config.type === "polling") {
+  config.status = 'active';
+  await db
+    .update(streamDataSourcesTable)
+    .set({ status: 'active', enabled: true, updatedAt: new Date() })
+    .where(eq(streamDataSourcesTable.id, id));
+  if (config.type === 'polling') {
     void startPollingSource(config);
   }
 }
@@ -275,30 +299,34 @@ export function getDataSource(id: number): DataSourceConfig | undefined {
 async function updateSourceHealth(id: number, ok: boolean, error?: string): Promise<void> {
   const config = sourceRegistry.get(id);
   if (config) {
-    config.status = ok ? "active" : "error";
+    config.status = ok ? 'active' : 'error';
   }
   try {
-    await db.update(streamDataSourcesTable).set({
-      status: ok ? "active" : "error",
-      lastHealthAt: ok ? new Date() : undefined,
-      lastErrorAt: ok ? undefined : new Date(),
-      lastError: ok ? null : error ?? null,
-      updatedAt: new Date(),
-    }).where(eq(streamDataSourcesTable.id, id));
-  } catch {
-  }
+    await db
+      .update(streamDataSourcesTable)
+      .set({
+        status: ok ? 'active' : 'error',
+        lastHealthAt: ok ? new Date() : undefined,
+        lastErrorAt: ok ? undefined : new Date(),
+        lastError: ok ? null : (error ?? null),
+        updatedAt: new Date(),
+      })
+      .where(eq(streamDataSourcesTable.id, id));
+  } catch {}
 }
 
 async function incrementSourceCounter(id: number, count: number): Promise<void> {
   const config = sourceRegistry.get(id);
   if (config) config.eventsIngested += count;
   try {
-    await db.update(streamDataSourcesTable).set({
-      eventsIngested: (config?.eventsIngested ?? 0),
-      updatedAt: new Date(),
-    }).where(eq(streamDataSourcesTable.id, id));
-  } catch {
-  }
+    await db
+      .update(streamDataSourcesTable)
+      .set({
+        eventsIngested: config?.eventsIngested ?? 0,
+        updatedAt: new Date(),
+      })
+      .where(eq(streamDataSourcesTable.id, id));
+  } catch {}
 }
 
 function startPollingSource(config: DataSourceConfig): void {
@@ -306,7 +334,7 @@ function startPollingSource(config: DataSourceConfig): void {
 
   const poll = getPollerForSource(config);
   if (!poll) {
-    logger.warn({ id: config.id, name: config.name }, "[ingestion] No poller found for source");
+    logger.warn({ id: config.id, name: config.name }, '[ingestion] No poller found for source');
     return;
   }
 
@@ -320,7 +348,7 @@ function startPollingSource(config: DataSourceConfig): void {
       await updateSourceHealth(config.id, true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.warn({ id: config.id, name: config.name, err: msg }, "[ingestion] Polling error");
+      logger.warn({ id: config.id, name: config.name, err: msg }, '[ingestion] Polling error');
       await updateSourceHealth(config.id, false, msg);
     }
   };
@@ -328,7 +356,10 @@ function startPollingSource(config: DataSourceConfig): void {
   void run();
   const timer = setInterval(run, config.pollingIntervalMs);
   activePollers.set(config.id, timer);
-  logger.info({ id: config.id, name: config.name, intervalMs: config.pollingIntervalMs }, "[ingestion] Polling started");
+  logger.info(
+    { id: config.id, name: config.name, intervalMs: config.pollingIntervalMs },
+    '[ingestion] Polling started',
+  );
 }
 
 function stopPollingSource(id: number): void {
@@ -339,36 +370,42 @@ function stopPollingSource(id: number): void {
   }
 }
 
-type PollerFn = (config: DataSourceConfig) => Promise<Array<Omit<StreamEvent, "normalized">>>;
+type PollerFn = (config: DataSourceConfig) => Promise<Array<Omit<StreamEvent, 'normalized'>>>;
 
 function getPollerForSource(config: DataSourceConfig): PollerFn | null {
-  if (config.category === "market") return pollCoinGecko;
-  if (config.category === "ais") return pollAisVessels;
-  if (config.category === "siem") return pollSiemWebhookQueue;
+  if (config.category === 'market') return pollCoinGecko;
+  if (config.category === 'ais') return pollAisVessels;
+  if (config.category === 'siem') return pollSiemWebhookQueue;
   return null;
 }
 
 let coinGeckoBackoffUntil = 0;
 let coinGeckoBackoffMs = 0;
 
-async function pollCoinGecko(_config: DataSourceConfig): Promise<Array<Omit<StreamEvent, "normalized">>> {
+async function pollCoinGecko(
+  _config: DataSourceConfig,
+): Promise<Array<Omit<StreamEvent, 'normalized'>>> {
   const now = Date.now();
   if (coinGeckoBackoffUntil > now) {
-    throw new Error(`CoinGecko rate-limited — backing off for ${Math.ceil((coinGeckoBackoffUntil - now) / 1000)}s`);
+    throw new Error(
+      `CoinGecko rate-limited — backing off for ${Math.ceil((coinGeckoBackoffUntil - now) / 1000)}s`,
+    );
   }
 
-  const COINS = ["bitcoin", "ethereum", "solana", "chainlink", "avalanche-2"];
-  const ids = COINS.join(",");
+  const COINS = ['bitcoin', 'ethereum', 'solana', 'chainlink', 'avalanche-2'];
+  const ids = COINS.join(',');
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`;
 
   const res = await fetch(url, {
-    headers: { Accept: "application/json" },
+    headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(8000),
   });
 
   if (res.status === 429) {
-    const retryAfter = res.headers.get("Retry-After");
-    const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : Math.min((coinGeckoBackoffMs || 60_000) * 2, 300_000);
+    const retryAfter = res.headers.get('Retry-After');
+    const waitMs = retryAfter
+      ? parseInt(retryAfter, 10) * 1000
+      : Math.min((coinGeckoBackoffMs || 60_000) * 2, 300_000);
     coinGeckoBackoffMs = waitMs;
     coinGeckoBackoffUntil = Date.now() + waitMs;
     throw new Error(`CoinGecko 429 — backing off ${Math.ceil(waitMs / 1000)}s`);
@@ -379,29 +416,32 @@ async function pollCoinGecko(_config: DataSourceConfig): Promise<Array<Omit<Stre
   coinGeckoBackoffMs = 0;
   coinGeckoBackoffUntil = 0;
 
-  const data = await res.json() as Record<string, {
-    usd: number;
-    usd_24h_change?: number;
-    usd_24h_vol?: number;
-  }>;
+  const data = (await res.json()) as Record<
+    string,
+    {
+      usd: number;
+      usd_24h_change?: number;
+      usd_24h_vol?: number;
+    }
+  >;
 
   const TICKER_MAP: Record<string, string> = {
-    bitcoin: "BTC-USD",
-    ethereum: "ETH-USD",
-    solana: "SOL-USD",
-    chainlink: "LINK-USD",
-    "avalanche-2": "AVAX-USD",
+    bitcoin: 'BTC-USD',
+    ethereum: 'ETH-USD',
+    solana: 'SOL-USD',
+    chainlink: 'LINK-USD',
+    'avalanche-2': 'AVAX-USD',
   };
 
   return Object.entries(data).map(([coinId, info]) => {
     const ticker = TICKER_MAP[coinId] ?? coinId.toUpperCase();
     const change = info.usd_24h_change ?? 0;
-    const severity = Math.abs(change) > 10 ? "high" : Math.abs(change) > 5 ? "medium" : "low";
+    const severity = Math.abs(change) > 10 ? 'high' : Math.abs(change) > 5 ? 'medium' : 'low';
     return {
       id: `mkt_${coinId}_${Date.now()}`,
-      type: Math.abs(change) > 5 ? "price_alert" : "price_update",
-      source: "coingecko",
-      category: "market" as StreamCategory,
+      type: Math.abs(change) > 5 ? 'price_alert' : 'price_update',
+      source: 'coingecko',
+      category: 'market' as StreamCategory,
       severity,
       payload: {
         ticker,
@@ -414,23 +454,73 @@ async function pollCoinGecko(_config: DataSourceConfig): Promise<Array<Omit<Stre
   });
 }
 
-type AisVesselPosition = { mmsi: string; name: string; lat: number; lon: number; speed: number; course: number; status: string };
+type AisVesselPosition = {
+  mmsi: string;
+  name: string;
+  lat: number;
+  lon: number;
+  speed: number;
+  course: number;
+  status: string;
+};
 
 let aisVesselPositions: AisVesselPosition[] = [
-  { mmsi: "123456001", name: "MV PACIFIC STAR", lat: 23.4, lon: 118.7, speed: 14.2, course: 45, status: "underway" },
-  { mmsi: "123456002", name: "MV ATLAS", lat: 35.1, lon: -12.3, speed: 18.5, course: 270, status: "underway" },
-  { mmsi: "123456003", name: "MV HORIZON", lat: -4.2, lon: 39.8, speed: 11.0, course: 180, status: "underway" },
-  { mmsi: "123456004", name: "MV LIBERTY", lat: 51.5, lon: 1.2, speed: 8.3, course: 90, status: "underway" },
-  { mmsi: "123456005", name: "MV CORSAIR", lat: 14.6, lon: 120.9, speed: 12.1, course: 315, status: "underway" },
+  {
+    mmsi: '123456001',
+    name: 'MV PACIFIC STAR',
+    lat: 23.4,
+    lon: 118.7,
+    speed: 14.2,
+    course: 45,
+    status: 'underway',
+  },
+  {
+    mmsi: '123456002',
+    name: 'MV ATLAS',
+    lat: 35.1,
+    lon: -12.3,
+    speed: 18.5,
+    course: 270,
+    status: 'underway',
+  },
+  {
+    mmsi: '123456003',
+    name: 'MV HORIZON',
+    lat: -4.2,
+    lon: 39.8,
+    speed: 11.0,
+    course: 180,
+    status: 'underway',
+  },
+  {
+    mmsi: '123456004',
+    name: 'MV LIBERTY',
+    lat: 51.5,
+    lon: 1.2,
+    speed: 8.3,
+    course: 90,
+    status: 'underway',
+  },
+  {
+    mmsi: '123456005',
+    name: 'MV CORSAIR',
+    lat: 14.6,
+    lon: 120.9,
+    speed: 12.1,
+    course: 315,
+    status: 'underway',
+  },
 ];
 
 let aisBackoffUntil = 0;
 let aisBackoffMs = 0;
 
-async function pollAisVessels(_config: DataSourceConfig): Promise<Array<Omit<StreamEvent, "normalized">>> {
+async function pollAisVessels(
+  _config: DataSourceConfig,
+): Promise<Array<Omit<StreamEvent, 'normalized'>>> {
   const now = Date.now();
   if (aisBackoffUntil > now) {
-    aisVesselPositions = aisVesselPositions.map(v => ({
+    aisVesselPositions = aisVesselPositions.map((v) => ({
       ...v,
       lat: v.lat + (Math.random() - 0.5) * 0.02,
       lon: v.lon + (Math.random() - 0.5) * 0.02,
@@ -441,19 +531,22 @@ async function pollAisVessels(_config: DataSourceConfig): Promise<Array<Omit<Str
   }
 
   try {
-    const res = await fetch("https://api.vesselfinder.com/vessels?userkey=demo&lat=0&lng=0&radius=6371", {
-      signal: AbortSignal.timeout(4000),
-    });
+    const res = await fetch(
+      'https://api.vesselfinder.com/vessels?userkey=demo&lat=0&lng=0&radius=6371',
+      {
+        signal: AbortSignal.timeout(4000),
+      },
+    );
     if (res.ok) {
       const raw = await res.json();
       if (Array.isArray(raw) && raw.length > 0) {
         const validated = (raw as unknown[]).filter(
           (v): v is AisVesselPosition =>
             v !== null &&
-            typeof v === "object" &&
-            typeof (v as Record<string, unknown>).mmsi === "string" &&
-            typeof (v as Record<string, unknown>).lat === "number" &&
-            typeof (v as Record<string, unknown>).lon === "number"
+            typeof v === 'object' &&
+            typeof (v as Record<string, unknown>).mmsi === 'string' &&
+            typeof (v as Record<string, unknown>).lat === 'number' &&
+            typeof (v as Record<string, unknown>).lon === 'number',
         );
         if (validated.length > 0) {
           aisVesselPositions = validated;
@@ -467,10 +560,10 @@ async function pollAisVessels(_config: DataSourceConfig): Promise<Array<Omit<Str
     const backoff = Math.min((aisBackoffMs || 30_000) * 2, 300_000);
     aisBackoffMs = backoff;
     aisBackoffUntil = Date.now() + backoff;
-    logger.debug({ backoffMs: backoff }, "[ingestion] AIS fetch failed — backing off");
+    logger.debug({ backoffMs: backoff }, '[ingestion] AIS fetch failed — backing off');
   }
 
-  aisVesselPositions = aisVesselPositions.map(v => ({
+  aisVesselPositions = aisVesselPositions.map((v) => ({
     ...v,
     lat: v.lat + (Math.random() - 0.5) * 0.02,
     lon: v.lon + (Math.random() - 0.5) * 0.02,
@@ -481,21 +574,21 @@ async function pollAisVessels(_config: DataSourceConfig): Promise<Array<Omit<Str
   return aisVesselPositions.slice(0, 5).map(buildAisEvent);
 }
 
-function buildAisEvent(vessel: AisVesselPosition): Omit<StreamEvent, "normalized"> {
+function buildAisEvent(vessel: AisVesselPosition): Omit<StreamEvent, 'normalized'> {
   return {
     id: `ais_${vessel.mmsi}_${Date.now()}`,
-    type: "position_update",
-    source: "ais_feed",
-    category: "ais" as StreamCategory,
+    type: 'position_update',
+    source: 'ais_feed',
+    category: 'ais' as StreamCategory,
     severity: undefined,
     payload: {
       mmsi: vessel.mmsi,
       vessel: vessel.name,
-      lat: parseFloat((vessel.lat).toFixed(4)),
-      lon: parseFloat((vessel.lon).toFixed(4)),
-      speed: parseFloat((vessel.speed).toFixed(1)),
+      lat: parseFloat(vessel.lat.toFixed(4)),
+      lon: parseFloat(vessel.lon.toFixed(4)),
+      speed: parseFloat(vessel.speed.toFixed(1)),
       course: Math.round(vessel.course),
-      status: vessel.status ?? "underway",
+      status: vessel.status ?? 'underway',
     },
     timestamp: new Date().toISOString(),
   };
@@ -514,55 +607,63 @@ export function enqueueWebhookEvent(category: StreamCategory, event: StreamEvent
   }
 }
 
-async function pollSiemWebhookQueue(_config: DataSourceConfig): Promise<Array<Omit<StreamEvent, "normalized">>> {
+async function pollSiemWebhookQueue(
+  _config: DataSourceConfig,
+): Promise<Array<Omit<StreamEvent, 'normalized'>>> {
   const drained = webhookEventQueues.siem.splice(0);
   if (drained.length > 0) return drained;
   return [];
 }
 
-export function normalizeSiemPayload(raw: Record<string, unknown>, sourceHint?: string): Omit<StreamEvent, "normalized"> {
+export function normalizeSiemPayload(
+  raw: Record<string, unknown>,
+  sourceHint?: string,
+): Omit<StreamEvent, 'normalized'> {
   const now = new Date().toISOString();
   return {
     id: `siem_wh_${Date.now()}_${randomUUID().slice(0, 6)}`,
-    type: (raw["event_type"] ?? raw["type"] ?? raw["action"] ?? "siem_event") as string,
-    source: (raw["source"] ?? raw["product"] ?? sourceHint ?? "webhook") as string,
-    category: "siem",
-    severity: ((raw["severity"] ?? raw["priority"] ?? "medium") as string).toLowerCase() as string,
+    type: (raw['event_type'] ?? raw['type'] ?? raw['action'] ?? 'siem_event') as string,
+    source: (raw['source'] ?? raw['product'] ?? sourceHint ?? 'webhook') as string,
+    category: 'siem',
+    severity: ((raw['severity'] ?? raw['priority'] ?? 'medium') as string).toLowerCase() as string,
     payload: raw,
-    timestamp: (raw["timestamp"] ?? raw["event_time"] ?? raw["time"] ?? now) as string,
+    timestamp: (raw['timestamp'] ?? raw['event_time'] ?? raw['time'] ?? now) as string,
   };
 }
 
-export function normalizeAisNmea(sentence: string, sourceId?: number): Omit<StreamEvent, "normalized"> | null {
+export function normalizeAisNmea(
+  sentence: string,
+  sourceId?: number,
+): Omit<StreamEvent, 'normalized'> | null {
   const VDMVDO = /^\$AIVDM,\d+,\d+,[^,]*,[AB],(.+),\d\*[0-9A-F]{2}$/;
   const match = sentence.match(VDMVDO);
   if (!match) return null;
   const payload = match[1]!;
   return {
     id: `ais_nmea_${Date.now()}`,
-    type: "position_update",
-    source: "ais_nmea",
-    category: "ais",
+    type: 'position_update',
+    source: 'ais_nmea',
+    category: 'ais',
     payload: { raw: payload, sentence },
     timestamp: new Date().toISOString(),
     sourceId,
   };
 }
 
-const BUILT_IN_SOURCES: Array<Omit<DataSourceConfig, "id" | "eventsIngested" | "status">> = [
+const BUILT_IN_SOURCES: Array<Omit<DataSourceConfig, 'id' | 'eventsIngested' | 'status'>> = [
   {
-    name: "CoinGecko Market Feed",
-    type: "polling",
-    category: "market",
-    endpoint: "https://api.coingecko.com/api/v3",
+    name: 'CoinGecko Market Feed',
+    type: 'polling',
+    category: 'market',
+    endpoint: 'https://api.coingecko.com/api/v3',
     pollingIntervalMs: 120_000,
     enabled: true,
   },
   {
-    name: "AIS Vessel Tracker",
-    type: "polling",
-    category: "ais",
-    endpoint: "internal://ais-simulator",
+    name: 'AIS Vessel Tracker',
+    type: 'polling',
+    category: 'ais',
+    endpoint: 'internal://ais-simulator',
     pollingIntervalMs: 60_000,
     enabled: true,
   },
@@ -572,21 +673,27 @@ let frameworkInitialized = false;
 
 async function ensureStreamTablesExist(): Promise<boolean> {
   try {
-    const { sql } = await import("drizzle-orm");
+    const { sql } = await import('drizzle-orm');
     const result = await db.execute(sql`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
         WHERE table_name = 'stream_data_sources'
       ) AS table_exists
     `);
-    const exists = (result as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
+    const exists =
+      (result as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
     if (!exists) {
-      logger.warn("[ingestion] stream_data_sources table not found — run migration 0025_stream_data_sources.sql");
+      logger.warn(
+        '[ingestion] stream_data_sources table not found — run migration 0025_stream_data_sources.sql',
+      );
       return false;
     }
     return true;
   } catch (err) {
-    logger.warn({ err }, "[ingestion] Failed to verify stream tables — continuing without DB persistence");
+    logger.warn(
+      { err },
+      '[ingestion] Failed to verify stream tables — continuing without DB persistence',
+    );
     return false;
   }
 }
@@ -605,36 +712,40 @@ export async function initIngestionFramework(): Promise<void> {
 
   for (const builtIn of BUILT_IN_SOURCES) {
     const existing = existingSources.find(
-      s => s.name === builtIn.name && s.category === builtIn.category
+      (s) => s.name === builtIn.name && s.category === builtIn.category,
     );
     if (!existing) {
       try {
         await registerDataSource(builtIn);
       } catch (err) {
-        logger.warn({ err, name: builtIn.name }, "[ingestion] Failed to register built-in source");
+        logger.warn({ err, name: builtIn.name }, '[ingestion] Failed to register built-in source');
       }
     } else {
       if (existing.pollingIntervalMs !== builtIn.pollingIntervalMs) {
         try {
-          await db.update(streamDataSourcesTable)
+          await db
+            .update(streamDataSourcesTable)
             .set({ pollingIntervalMs: builtIn.pollingIntervalMs, updatedAt: new Date() })
             .where(eq(streamDataSourcesTable.id, existing.id));
           existing.pollingIntervalMs = builtIn.pollingIntervalMs;
           if (activePollers.has(existing.id)) {
             stopPollingSource(existing.id);
           }
-          logger.info({ id: existing.id, name: existing.name, newIntervalMs: builtIn.pollingIntervalMs }, "[ingestion] Updated polling interval for built-in source");
+          logger.info(
+            { id: existing.id, name: existing.name, newIntervalMs: builtIn.pollingIntervalMs },
+            '[ingestion] Updated polling interval for built-in source',
+          );
         } catch (err) {
-          logger.warn({ err, name: builtIn.name }, "[ingestion] Failed to update polling interval");
+          logger.warn({ err, name: builtIn.name }, '[ingestion] Failed to update polling interval');
         }
       }
-      if (existing.enabled && existing.type === "polling" && !activePollers.has(existing.id)) {
+      if (existing.enabled && existing.type === 'polling' && !activePollers.has(existing.id)) {
         startPollingSource(existing);
       }
     }
   }
 
-  logger.info("[ingestion] Framework initialized");
+  logger.info('[ingestion] Framework initialized');
 }
 
 export function getIngestionStats(): {

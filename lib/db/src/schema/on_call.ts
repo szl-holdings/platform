@@ -18,19 +18,19 @@
  * table to FK against.
  */
 import {
-  pgTable,
-  text,
-  serial,
-  integer,
-  timestamp,
-  jsonb,
-  index,
-  uniqueIndex,
   boolean,
-} from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
-import { usersTable } from "./auth";
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-zod';
+import type { z } from 'zod/v4';
+import { usersTable } from './auth';
 
 /**
  * One row per team that has a configured rotation. Teams without a row fall
@@ -42,30 +42,30 @@ import { usersTable } from "./auth";
  * an active team member is skipped at resolution time.
  */
 export const onCallSchedulesTable = pgTable(
-  "on_call_schedules",
+  'on_call_schedules',
   {
-    id: serial("id").primaryKey(),
-    team: text("team").notNull(),
+    id: serial('id').primaryKey(),
+    team: text('team').notNull(),
     /** Rotation cadence in hours. 168=weekly, 24=daily, 12=12h, 0=disabled. */
-    rotationIntervalHours: integer("rotation_interval_hours").notNull().default(168),
+    rotationIntervalHours: integer('rotation_interval_hours').notNull().default(168),
     /** Ordered array of user ids defining the rotation. JSONB for flexibility. */
-    memberOrder: jsonb("member_order").$type<number[]>().notNull().default([]),
+    memberOrder: jsonb('member_order').$type<number[]>().notNull().default([]),
     /** Anchor moment for slot 0; subsequent slots advance every interval. */
-    handoffAnchor: timestamp("handoff_anchor", { withTimezone: true }).notNull().defaultNow(),
+    handoffAnchor: timestamp('handoff_anchor', { withTimezone: true }).notNull().defaultNow(),
     /** IANA timezone label for display ("UTC", "America/Los_Angeles", ...). */
-    timezone: text("timezone").notNull().default("UTC"),
+    timezone: text('timezone').notNull().default('UTC'),
     /**
      * Minutes before a hand-off boundary at which to nudge the next on-call
      * user. 0 disables the warning entirely (the moment-of-handoff
      * notification still fires). See task #2482.
      */
-    warningMinutes: integer("warning_minutes").notNull().default(30),
-    updatedBy: integer("updated_by").references(() => usersTable.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    warningMinutes: integer('warning_minutes').notNull().default(30),
+    updatedBy: integer('updated_by').references(() => usersTable.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    teamUnique: uniqueIndex("on_call_schedules_team_unique").on(t.team),
+    teamUnique: uniqueIndex('on_call_schedules_team_unique').on(t.team),
   }),
 );
 
@@ -78,21 +78,25 @@ export const onCallSchedulesTable = pgTable(
  * defaults to `override` for the v1 contract.
  */
 export const onCallShiftsTable = pgTable(
-  "on_call_shifts",
+  'on_call_shifts',
   {
-    id: serial("id").primaryKey(),
-    team: text("team").notNull(),
-    userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
-    kind: text("kind", { enum: ["override", "shift"] }).notNull().default("override"),
-    startAt: timestamp("start_at", { withTimezone: true }).notNull(),
-    endAt: timestamp("end_at", { withTimezone: true }).notNull(),
-    note: text("note"),
-    createdBy: integer("created_by").references(() => usersTable.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    id: serial('id').primaryKey(),
+    team: text('team').notNull(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['override', 'shift'] })
+      .notNull()
+      .default('override'),
+    startAt: timestamp('start_at', { withTimezone: true }).notNull(),
+    endAt: timestamp('end_at', { withTimezone: true }).notNull(),
+    note: text('note'),
+    createdBy: integer('created_by').references(() => usersTable.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    teamRangeIdx: index("on_call_shifts_team_range_idx").on(t.team, t.startAt, t.endAt),
+    teamRangeIdx: index('on_call_shifts_team_range_idx').on(t.team, t.startAt, t.endAt),
   }),
 );
 
@@ -125,22 +129,22 @@ export type OnCallShift = typeof onCallShiftsTable.$inferSelect;
  *   - `handoff` — fired at the hand-off moment.
  */
 export const onCallHandoffNotificationsTable = pgTable(
-  "on_call_handoff_notifications",
+  'on_call_handoff_notifications',
   {
-    id: serial("id").primaryKey(),
-    team: text("team").notNull(),
-    userId: integer("user_id")
+    id: serial('id').primaryKey(),
+    team: text('team').notNull(),
+    userId: integer('user_id')
       .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    handoffAt: timestamp("handoff_at", { withTimezone: true }).notNull(),
-    kind: text("kind", { enum: ["warning", "handoff"] }).notNull(),
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    handoffAt: timestamp('handoff_at', { withTimezone: true }).notNull(),
+    kind: text('kind', { enum: ['warning', 'handoff'] }).notNull(),
     /** notifications.id of the in-app row inserted, if any. */
-    notificationId: integer("notification_id"),
-    inAppDelivered: boolean("in_app_delivered").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    notificationId: integer('notification_id'),
+    inAppDelivered: boolean('in_app_delivered').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    dedupIdx: uniqueIndex("on_call_handoff_notifications_dedup").on(
+    dedupIdx: uniqueIndex('on_call_handoff_notifications_dedup').on(
       t.team,
       t.handoffAt,
       t.kind,

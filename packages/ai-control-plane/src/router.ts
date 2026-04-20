@@ -1,19 +1,19 @@
-import { createLogger } from "./logger.js";
-import { evalRegistry } from "./eval-selector.js";
+import { evalRegistry } from './eval-selector.js';
+import { createLogger } from './logger.js';
 
-const logger = createLogger("ai-control-plane:router");
+const logger = createLogger('ai-control-plane:router');
 
-export type ProviderType = "openai" | "anthropic" | "local" | "self-hosted" | "nim";
+export type ProviderType = 'openai' | 'anthropic' | 'local' | 'self-hosted' | 'nim';
 
 export type RouteClass =
-  | "reasoning"
-  | "triage"
-  | "extraction"
-  | "planning"
-  | "embedding"
-  | "classification"
-  | "summarization"
-  | "generation";
+  | 'reasoning'
+  | 'triage'
+  | 'extraction'
+  | 'planning'
+  | 'embedding'
+  | 'classification'
+  | 'summarization'
+  | 'generation';
 
 export interface ModelEndpoint {
   provider: ProviderType;
@@ -43,80 +43,80 @@ export interface RouteResult {
   endpoint: ModelEndpoint;
   fallbackChain: ModelEndpoint[];
   estimatedCostUsd?: number;
-  selectedBy: "eval" | "cost" | "priority" | "preferred";
+  selectedBy: 'eval' | 'cost' | 'priority' | 'preferred';
 }
 
-export type AgentTierName = "assistant" | "analyst" | "operator" | "autonomous";
+export type AgentTierName = 'assistant' | 'analyst' | 'operator' | 'autonomous';
 
 const DEFAULT_ENDPOINTS: ModelEndpoint[] = [
   {
-    provider: "openai",
-    model: "gpt-4o",
+    provider: 'openai',
+    model: 'gpt-4o',
     priority: 10,
     maxTokens: 128000,
     costPerInputToken: 0.0000025,
     costPerOutputToken: 0.00001,
-    tags: ["reasoning", "planning", "generation"],
+    tags: ['reasoning', 'planning', 'generation'],
     evalScore: 0.92,
     enabled: true,
   },
   {
-    provider: "openai",
-    model: "gpt-4o-mini",
+    provider: 'openai',
+    model: 'gpt-4o-mini',
     priority: 20,
     maxTokens: 128000,
     costPerInputToken: 0.00000015,
     costPerOutputToken: 0.0000006,
-    tags: ["triage", "classification", "extraction", "summarization"],
+    tags: ['triage', 'classification', 'extraction', 'summarization'],
     evalScore: 0.84,
     enabled: true,
   },
   {
-    provider: "anthropic",
-    model: "claude-opus-4-5",
+    provider: 'anthropic',
+    model: 'claude-opus-4-5',
     priority: 11,
     maxTokens: 200000,
     costPerInputToken: 0.000015,
     costPerOutputToken: 0.000075,
-    tags: ["reasoning", "planning", "generation"],
+    tags: ['reasoning', 'planning', 'generation'],
     evalScore: 0.93,
     enabled: true,
   },
   {
-    provider: "anthropic",
-    model: "claude-haiku-3-5",
+    provider: 'anthropic',
+    model: 'claude-haiku-3-5',
     priority: 21,
     maxTokens: 200000,
     costPerInputToken: 0.00000025,
     costPerOutputToken: 0.00000125,
-    tags: ["triage", "summarization", "extraction"],
+    tags: ['triage', 'summarization', 'extraction'],
     evalScore: 0.82,
     enabled: true,
   },
   {
-    provider: "local",
-    model: "llama-3.3-70b-instruct",
-    baseUrl: "http://localhost:11434/v1",
-    apiKeyEnvVar: "LOCAL_MODEL_API_KEY",
+    provider: 'local',
+    model: 'llama-3.3-70b-instruct',
+    baseUrl: 'http://localhost:11434/v1',
+    apiKeyEnvVar: 'LOCAL_MODEL_API_KEY',
     priority: 30,
     maxTokens: 32000,
     costPerInputToken: 0,
     costPerOutputToken: 0,
-    tags: ["reasoning", "generation", "triage"],
+    tags: ['reasoning', 'generation', 'triage'],
     evalScore: 0.78,
     enabled: true,
   },
 ];
 
 const ROUTE_CLASS_TAGS: Record<RouteClass, string[]> = {
-  reasoning: ["reasoning"],
-  triage: ["triage", "classification"],
-  extraction: ["extraction"],
-  planning: ["planning", "reasoning"],
-  embedding: ["embedding"],
-  classification: ["classification", "triage"],
-  summarization: ["summarization"],
-  generation: ["generation", "reasoning"],
+  reasoning: ['reasoning'],
+  triage: ['triage', 'classification'],
+  extraction: ['extraction'],
+  planning: ['planning', 'reasoning'],
+  embedding: ['embedding'],
+  classification: ['classification', 'triage'],
+  summarization: ['summarization'],
+  generation: ['generation', 'reasoning'],
 };
 
 class ModelRouter {
@@ -131,11 +131,11 @@ class ModelRouter {
 
   addEndpoint(endpoint: ModelEndpoint): void {
     this.endpoints.push(endpoint);
-    logger.info({ provider: endpoint.provider, model: endpoint.model }, "Endpoint registered");
+    logger.info({ provider: endpoint.provider, model: endpoint.model }, 'Endpoint registered');
   }
 
   removeEndpoint(provider: ProviderType, model: string): void {
-    this.endpoints = this.endpoints.filter(e => !(e.provider === provider && e.model === model));
+    this.endpoints = this.endpoints.filter((e) => !(e.provider === provider && e.model === model));
   }
 
   listEndpoints(): ModelEndpoint[] {
@@ -144,43 +144,54 @@ class ModelRouter {
 
   route(req: RouteRequest): RouteResult {
     const tags = ROUTE_CLASS_TAGS[req.routeClass] ?? [];
-    const candidates = this.endpoints.filter(e => {
+    const candidates = this.endpoints.filter((e) => {
       if (!e.enabled) return false;
       if (this.isCircuitOpen(e)) return false;
-      if (e.tags && !e.tags.some(t => tags.includes(t))) return false;
+      if (e.tags && !e.tags.some((t) => tags.includes(t))) return false;
       return true;
     });
 
     if (candidates.length === 0) {
-      const fallback = this.endpoints.find(e => e.enabled);
-      if (!fallback) throw new Error("No available model endpoints");
-      return { endpoint: fallback, fallbackChain: [], selectedBy: "priority" };
+      const fallback = this.endpoints.find((e) => e.enabled);
+      if (!fallback) throw new Error('No available model endpoints');
+      return { endpoint: fallback, fallbackChain: [], selectedBy: 'priority' };
     }
 
     let selected: ModelEndpoint;
-    let selectedBy: RouteResult["selectedBy"] = "priority";
+    let selectedBy: RouteResult['selectedBy'] = 'priority';
 
     if (req.preferredProvider) {
-      const preferred = candidates.find(e => e.provider === req.preferredProvider);
+      const preferred = candidates.find((e) => e.provider === req.preferredProvider);
       if (preferred) {
         selected = preferred;
-        selectedBy = "preferred";
+        selectedBy = 'preferred';
       } else {
         selected = this.selectByEvalOrCost(candidates, req);
-        selectedBy = req.evalThreshold ? "eval" : "cost";
+        selectedBy = req.evalThreshold ? 'eval' : 'cost';
       }
     } else {
       selected = this.selectByEvalOrCost(candidates, req);
-      selectedBy = req.evalThreshold ? "eval" : "cost";
+      selectedBy = req.evalThreshold ? 'eval' : 'cost';
     }
 
-    const fallbackChain = candidates.filter(e => e !== selected).sort((a, b) => a.priority - b.priority);
+    const fallbackChain = candidates
+      .filter((e) => e !== selected)
+      .sort((a, b) => a.priority - b.priority);
 
-    const estimatedCostUsd = req.promptTokenEstimate && selected.costPerInputToken
-      ? req.promptTokenEstimate * selected.costPerInputToken
-      : undefined;
+    const estimatedCostUsd =
+      req.promptTokenEstimate && selected.costPerInputToken
+        ? req.promptTokenEstimate * selected.costPerInputToken
+        : undefined;
 
-    logger.debug({ provider: selected.provider, model: selected.model, routeClass: req.routeClass, selectedBy }, "Route resolved");
+    logger.debug(
+      {
+        provider: selected.provider,
+        model: selected.model,
+        routeClass: req.routeClass,
+        selectedBy,
+      },
+      'Route resolved',
+    );
 
     return { endpoint: selected, fallbackChain, estimatedCostUsd, selectedBy };
   }
@@ -192,17 +203,17 @@ class ModelRouter {
 
   private selectByEvalOrCost(candidates: ModelEndpoint[], req: RouteRequest): ModelEndpoint {
     if (req.evalThreshold) {
-      const evalCandidates = candidates.filter(e =>
-        this.liveEvalScore(e, req.routeClass) >= req.evalThreshold!,
+      const evalCandidates = candidates.filter(
+        (e) => this.liveEvalScore(e, req.routeClass) >= req.evalThreshold!,
       );
       if (evalCandidates.length > 0) {
-        return evalCandidates.sort((a, b) =>
-          this.liveEvalScore(b, req.routeClass) - this.liveEvalScore(a, req.routeClass),
+        return evalCandidates.sort(
+          (a, b) => this.liveEvalScore(b, req.routeClass) - this.liveEvalScore(a, req.routeClass),
         )[0]!;
       }
     }
     if (req.maxBudgetUsd && req.promptTokenEstimate) {
-      const budgetCandidates = candidates.filter(e => {
+      const budgetCandidates = candidates.filter((e) => {
         const cost = (e.costPerInputToken ?? 0) * req.promptTokenEstimate!;
         return cost <= req.maxBudgetUsd!;
       });
@@ -224,7 +235,7 @@ class ModelRouter {
     state.failures++;
     if (state.failures >= this.FAILURE_THRESHOLD) {
       state.openedAt = Date.now();
-      logger.warn({ provider: endpoint.provider, model: endpoint.model }, "Circuit breaker opened");
+      logger.warn({ provider: endpoint.provider, model: endpoint.model }, 'Circuit breaker opened');
     }
     this.circuitBreakers.set(key, state);
   }

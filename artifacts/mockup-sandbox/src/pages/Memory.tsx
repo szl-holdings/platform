@@ -1,45 +1,45 @@
-import { useState, useEffect, useCallback } from "react";
-import { nexusApi } from "../lib/api";
-import type { MemoryItem } from "../lib/types";
 import {
+  AlertCircle,
   Brain,
+  ChevronDown,
+  Filter,
+  Loader,
   Pin,
-  Trash2,
   Plus,
   Search,
-  Filter,
   Tag,
-  AlertCircle,
-  Loader,
-  ChevronDown,
-} from "lucide-react";
+  Trash2,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { nexusApi } from '../lib/api';
+import type { MemoryItem } from '../lib/types';
 
 const TYPE_COLORS: Record<string, string> = {
-  fact: "#00d4ff",
-  preference: "#a855f7",
-  entity: "#00ff88",
-  claim: "#ffb700",
-  context: "#8896aa",
+  fact: '#00d4ff',
+  preference: '#a855f7',
+  entity: '#00ff88',
+  claim: '#ffb700',
+  context: '#8896aa',
 };
 
 const TIER_LABELS: Record<string, string> = {
-  working: "WRK",
-  session: "SES",
-  episodic: "EPI",
-  semantic: "SEM",
+  working: 'WRK',
+  session: 'SES',
+  episodic: 'EPI',
+  semantic: 'SEM',
 };
 
 export default function Memory() {
   const [items, setItems] = useState<MemoryItem[]>([]);
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [pinnedOnly, setPinnedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
-  const [newKey, setNewKey] = useState("");
-  const [newValue, setNewValue] = useState("");
-  const [newType, setNewType] = useState<MemoryItem["type"]>("fact");
+  const [newKey, setNewKey] = useState('');
+  const [newValue, setNewValue] = useState('');
+  const [newType, setNewType] = useState<MemoryItem['type']>('fact');
   const [submitting, setSubmitting] = useState(false);
 
   const fetchItems = useCallback(async () => {
@@ -51,7 +51,7 @@ export default function Memory() {
       });
       setItems(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load memory");
+      setError(err instanceof Error ? err.message : 'Failed to load memory');
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ export default function Memory() {
   }
 
   async function handleForget(id: string) {
-    if (!confirm("Forget this memory item?")) return;
+    if (!confirm('Forget this memory item?')) return;
     try {
       await nexusApi.forgetMemory(id);
       setItems((prev) => prev.filter((i) => i.id !== id));
@@ -87,11 +87,11 @@ export default function Memory() {
         type: newType,
       });
       setItems((prev) => [item, ...prev]);
-      setNewKey("");
-      setNewValue("");
+      setNewKey('');
+      setNewValue('');
       setAdding(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add memory");
+      setError(err instanceof Error ? err.message : 'Failed to add memory');
     } finally {
       setSubmitting(false);
     }
@@ -129,7 +129,9 @@ export default function Memory() {
             <h3 className="text-sm font-semibold text-[#a855f7]">New Memory Item</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">Key</label>
+                <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">
+                  Key
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. preferred_output_format"
@@ -139,20 +141,26 @@ export default function Memory() {
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">Type</label>
+                <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">
+                  Type
+                </label>
                 <select
                   value={newType}
-                  onChange={(e) => setNewType(e.target.value as MemoryItem["type"])}
+                  onChange={(e) => setNewType(e.target.value as MemoryItem['type'])}
                   className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#a855f7]/50"
                 >
                   {Object.keys(TYPE_COLORS).map((t) => (
-                    <option key={t} value={t}>{t}</option>
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
             <div>
-              <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">Value</label>
+              <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">
+                Value
+              </label>
               <textarea
                 placeholder="Memory value or fact…"
                 value={newValue}
@@ -173,7 +181,7 @@ export default function Memory() {
                 disabled={submitting || !newKey.trim() || !newValue.trim()}
                 className="px-4 py-1.5 text-xs rounded-lg bg-[#a855f7]/10 border border-[#a855f7]/30 text-[#a855f7] hover:bg-[#a855f7]/20 disabled:opacity-40 transition-colors"
               >
-                {submitting ? "Saving…" : "Save"}
+                {submitting ? 'Saving…' : 'Save'}
               </button>
             </div>
           </div>
@@ -197,15 +205,17 @@ export default function Memory() {
           >
             <option value="">All types</option>
             {Object.keys(TYPE_COLORS).map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
           <button
             onClick={() => setPinnedOnly((p) => !p)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs transition-colors ${
               pinnedOnly
-                ? "bg-[#ffb700]/10 border-[#ffb700]/30 text-[#ffb700]"
-                : "border-nexus text-muted-foreground hover:text-foreground"
+                ? 'bg-[#ffb700]/10 border-[#ffb700]/30 text-[#ffb700]'
+                : 'border-nexus text-muted-foreground hover:text-foreground'
             }`}
           >
             <Pin className="w-3.5 h-3.5" />
@@ -233,7 +243,12 @@ export default function Memory() {
                 </h2>
                 <div className="space-y-2">
                   {grouped.pinned.map((item) => (
-                    <MemoryCard key={item.id} item={item} onPin={handlePin} onForget={handleForget} />
+                    <MemoryCard
+                      key={item.id}
+                      item={item}
+                      onPin={handlePin}
+                      onForget={handleForget}
+                    />
                   ))}
                 </div>
               </section>
@@ -248,7 +263,12 @@ export default function Memory() {
                 )}
                 <div className="space-y-2">
                   {grouped.unpinned.map((item) => (
-                    <MemoryCard key={item.id} item={item} onPin={handlePin} onForget={handleForget} />
+                    <MemoryCard
+                      key={item.id}
+                      item={item}
+                      onPin={handlePin}
+                      onForget={handleForget}
+                    />
                   ))}
                 </div>
               </section>
@@ -279,7 +299,7 @@ function MemoryCard({
   onPin: (i: MemoryItem) => void;
   onForget: (id: string) => void;
 }) {
-  const typeColor = TYPE_COLORS[item.type] ?? "#8896aa";
+  const typeColor = TYPE_COLORS[item.type] ?? '#8896aa';
 
   return (
     <div className="bg-nexus-surface border border-nexus rounded-lg px-4 py-3 flex items-start gap-3 group hover:border-[#1a2535]/80 transition-colors">
@@ -304,7 +324,10 @@ function MemoryCard({
           {item.tags.length > 0 && (
             <div className="flex gap-1 flex-wrap">
               {item.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="text-[9px] px-1 py-0.5 rounded bg-nexus-bg text-muted-foreground/40 border border-nexus">
+                <span
+                  key={tag}
+                  className="text-[9px] px-1 py-0.5 rounded bg-nexus-bg text-muted-foreground/40 border border-nexus"
+                >
                   {tag}
                 </span>
               ))}
@@ -314,7 +337,9 @@ function MemoryCard({
         <div className="text-xs font-mono font-semibold text-foreground/80 mb-1">{item.key}</div>
         <div className="text-xs text-muted-foreground leading-relaxed">{item.value}</div>
         {item.source && (
-          <div className="text-[9px] text-muted-foreground/40 mt-1 font-mono">source: {item.source}</div>
+          <div className="text-[9px] text-muted-foreground/40 mt-1 font-mono">
+            source: {item.source}
+          </div>
         )}
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -322,10 +347,10 @@ function MemoryCard({
           onClick={() => onPin(item)}
           className={`p-1.5 rounded-md transition-colors ${
             item.pinned
-              ? "text-[#ffb700] bg-[#ffb700]/10"
-              : "text-muted-foreground/40 hover:text-[#ffb700] hover:bg-[#ffb700]/10"
+              ? 'text-[#ffb700] bg-[#ffb700]/10'
+              : 'text-muted-foreground/40 hover:text-[#ffb700] hover:bg-[#ffb700]/10'
           }`}
-          title={item.pinned ? "Unpin" : "Pin"}
+          title={item.pinned ? 'Unpin' : 'Pin'}
         >
           <Pin className="w-3 h-3" />
         </button>

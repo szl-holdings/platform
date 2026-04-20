@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 
-const API = "/api";
+const API = '/api';
 
 export interface CarlotaApiData {
   inquiriesTotal: number;
@@ -11,7 +11,7 @@ export interface CarlotaApiData {
 }
 
 async function fetchCount(url: string): Promise<number> {
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, { credentials: 'include' });
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const json = await res.json();
   if (json?.meta?.total !== undefined) return json.meta.total;
@@ -21,7 +21,7 @@ async function fetchCount(url: string): Promise<number> {
 }
 
 async function fetchServices(): Promise<number> {
-  const res = await fetch(`${API}/booking/services`, { credentials: "include" });
+  const res = await fetch(`${API}/booking/services`, { credentials: 'include' });
   if (!res.ok) throw new Error(`API error ${res.status}`);
   const json = await res.json();
   if (Array.isArray(json?.data)) return json.data.length;
@@ -29,33 +29,24 @@ async function fetchServices(): Promise<number> {
 }
 
 export function useCarlotaApiData(): CarlotaApiData {
-  const {
-    data: inquiriesCount = 0,
-    isSuccess: inquiriesOk,
-  } = useQuery({
-    queryKey: ["carlota-inquiries-count"],
+  const { data: inquiriesCount = 0, isSuccess: inquiriesOk } = useQuery({
+    queryKey: ['carlota-inquiries-count'],
     queryFn: () => fetchCount(`${API}/booking/inquiries?limit=1`),
     staleTime: 60_000,
     retry: 1,
     refetchInterval: 120_000,
   });
 
-  const {
-    data: reservationsCount = 0,
-    isSuccess: reservationsOk,
-  } = useQuery({
-    queryKey: ["carlota-reservations-count"],
+  const { data: reservationsCount = 0, isSuccess: reservationsOk } = useQuery({
+    queryKey: ['carlota-reservations-count'],
     queryFn: () => fetchCount(`${API}/booking/reservations?limit=1`),
     staleTime: 60_000,
     retry: 1,
     refetchInterval: 120_000,
   });
 
-  const {
-    data: servicesCount = 0,
-    isSuccess: servicesOk,
-  } = useQuery({
-    queryKey: ["carlota-services-count"],
+  const { data: servicesCount = 0, isSuccess: servicesOk } = useQuery({
+    queryKey: ['carlota-services-count'],
     queryFn: fetchServices,
     staleTime: 300_000,
     retry: 1,

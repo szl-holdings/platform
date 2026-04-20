@@ -1,14 +1,28 @@
-import type { Router, Request, Response } from "express";
-import { EvalRunRequestSchema } from "@workspace/aef-contracts";
-import { runEval } from "@workspace/aef-evals";
-import type { GoldenFixtureSet, RetrievalAdapter, RequestedMetric } from "@workspace/aef-evals";
-import { getRequestId } from "../middleware/request-id.js";
-import { getTenantId } from "../middleware/tenant.js";
-import { storageBundle, tenantEnforcer, policyEngine, defaultLedgerStore, profileRegistry } from "../context.js";
-import { logger } from "../logger.js";
-import type { PolicyContext } from "@workspace/aef-policy-guard";
-import { normalizeQuery, applyPreFusionBoosts, reciprocalRankFusion, wrapAsBoosted, applyMetadataFilter, normalizeScores, assembleCitations } from "@workspace/aef-retrieval-core";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
+import { EvalRunRequestSchema } from '@workspace/aef-contracts';
+import type { GoldenFixtureSet, RequestedMetric, RetrievalAdapter } from '@workspace/aef-evals';
+import { runEval } from '@workspace/aef-evals';
+import type { PolicyContext } from '@workspace/aef-policy-guard';
+import {
+  applyMetadataFilter,
+  applyPreFusionBoosts,
+  assembleCitations,
+  normalizeQuery,
+  normalizeScores,
+  reciprocalRankFusion,
+  wrapAsBoosted,
+} from '@workspace/aef-retrieval-core';
+import type { Request, Response, Router } from 'express';
+import {
+  defaultLedgerStore,
+  policyEngine,
+  profileRegistry,
+  storageBundle,
+  tenantEnforcer,
+} from '../context.js';
+import { logger } from '../logger.js';
+import { getRequestId } from '../middleware/request-id.js';
+import { getTenantId } from '../middleware/tenant.js';
 
 /**
  * Inline retrieval adapter for the eval harness.
@@ -58,10 +72,10 @@ function buildRetrievalAdapter(tenantId: string): RetrievalAdapter {
 }
 
 export function registerEvalsRoute(router: Router): void {
-  router.post("/v1/evals/run", async (req: Request, res: Response) => {
+  router.post('/v1/evals/run', async (req: Request, res: Response) => {
     const parsed = EvalRunRequestSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "validation_error", issues: parsed.error.issues });
+      res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });
       return;
     }
 
@@ -74,22 +88,22 @@ export function registerEvalsRoute(router: Router): void {
     const policyCtx: PolicyContext = { requestId: reqId, tenantId, hasProvenance: true };
     const tenantDecision = tenantEnforcer.enforce(policyCtx);
     if (tenantDecision !== null && !tenantDecision.allow) {
-      res.status(403).json({ error: "tenant_not_registered", reasons: tenantDecision.reasons });
+      res.status(403).json({ error: 'tenant_not_registered', reasons: tenantDecision.reasons });
       return;
     }
     const policyDecision = policyEngine.evaluate(policyCtx);
     if (!policyDecision.allow) {
-      res.status(403).json({ error: "policy_denied", reasons: policyDecision.reasons });
+      res.status(403).json({ error: 'policy_denied', reasons: policyDecision.reasons });
       return;
     }
 
     // Attempt to resolve the profile from the domain registry.
     // Unknown profiles (e.g. "default") are flagged as not_configured.
-    let evalStatus = "completed";
+    let evalStatus = 'completed';
     try {
       profileRegistry.resolve(profileId);
     } catch {
-      evalStatus = "not_configured";
+      evalStatus = 'not_configured';
     }
 
     // Build golden fixture set from Zod-parsed request queries (fully typed, no cast needed)
@@ -107,13 +121,14 @@ export function registerEvalsRoute(router: Router): void {
     };
 
     const adapter = buildRetrievalAdapter(tenantId);
-    const requestedMetrics = (metrics as string[]).filter(
-      (m): m is RequestedMetric => ["ndcg", "recall", "precision", "mrr"].includes(m),
+    const requestedMetrics = (metrics as string[]).filter((m): m is RequestedMetric =>
+      ['ndcg', 'recall', 'precision', 'mrr'].includes(m),
     );
 
     const evalResult = await runEval(fixtureSet, adapter, {
       topK,
-      metrics: requestedMetrics.length > 0 ? requestedMetrics : ["ndcg", "recall", "precision", "mrr"],
+      metrics:
+        requestedMetrics.length > 0 ? requestedMetrics : ['ndcg', 'recall', 'precision', 'mrr'],
       evidenceCheckFn: (queryId) => ({
         hasSourceId: true,
         hasChunkId: true,
@@ -143,7 +158,11 @@ export function registerEvalsRoute(router: Router): void {
         completedAt: new Date().toISOString(),
       });
     } catch (err) {
-      logger.error("eval ledger write failed", { evalId: evalResult.evalId, reqId, err: String(err) });
+      logger.error('eval ledger write failed', {
+        evalId: evalResult.evalId,
+        reqId,
+        err: String(err),
+      });
     }
 
     res.json({

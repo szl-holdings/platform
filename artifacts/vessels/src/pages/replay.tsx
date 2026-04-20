@@ -1,36 +1,153 @@
-import { useState, useEffect, useRef } from "react";
-
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, MapPin, Fuel, Wind, AlertTriangle, Activity, ChevronRight, Zap } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import {
+  Activity,
+  AlertTriangle,
+  ChevronRight,
+  Clock,
+  Fuel,
+  MapPin,
+  Pause,
+  Play,
+  RotateCcw,
+  SkipBack,
+  SkipForward,
+  Wind,
+  Zap,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const DEMO_VOYAGE_EVENTS = [
-  { time: "Apr 8 06:00", type: "departure", label: "Departed Ras Tanura (SATANK)", detail: "Cargo: 280,000t crude", severity: "info", lat: 26.6, lon: 50.2 },
-  { time: "Apr 8 14:30", type: "waypoint", label: "Strait of Hormuz transit", detail: "Passage: 2h 14m, no incidents", severity: "info", lat: 26.6, lon: 56.5 },
-  { time: "Apr 9 09:15", type: "weather", label: "Beaufort 6 sea state encountered", detail: "Speed reduced to 11.2 kts", severity: "warn", lat: 23.0, lon: 58.5 },
-  { time: "Apr 9 18:40", type: "fuel", label: "Fuel consumption spike +8%", detail: "Weather-related variance", severity: "warn", lat: 21.5, lon: 57.0 },
-  { time: "Apr 10 11:00", type: "ais", label: "AIS transmission gap 47 min", detail: "Gulf of Aden, possible interference", severity: "warn", lat: 14.5, lon: 49.0 },
-  { time: "Apr 10 22:00", type: "waypoint", label: "Bab-el-Mandeb crossing", detail: "UKMTO notification sent", severity: "info", lat: 12.5, lon: 43.5 },
-  { time: "Apr 11 16:00", type: "anomaly", label: "Speed reduction — congestion", detail: "Red Sea northbound lane congestion", severity: "warn", lat: 19.0, lon: 39.5 },
-  { time: "Apr 12 08:00", type: "inspection", label: "Pre-canal inspection report submitted", detail: "Suez Canal Authority clearance", severity: "info", lat: 28.5, lon: 33.5 },
-  { time: "Apr 12 20:00", type: "waypoint", label: "Suez Canal southbound entry", detail: "Convoy position: 4 of 18", severity: "info", lat: 30.0, lon: 32.5 },
-  { time: "Apr 13 14:00", type: "anomaly", label: "Engine temp elevated +4°C", detail: "Monitoring — within operating range", severity: "warn", lat: 31.5, lon: 32.0 },
-  { time: "Apr 14 06:00", type: "waypoint", label: "Port Said exit — Mediterranean", detail: "Speed restored 13.4 kts", severity: "info", lat: 31.3, lon: 32.3 },
-  { time: "Apr 15 09:45", type: "weather", label: "Med weather system avoided", detail: "Route deviation +18nm", severity: "info", lat: 35.8, lon: 24.0 },
-  { time: "Apr 16 04:00", type: "waypoint", label: "Gibraltar Strait approach", detail: "Current position — ETA Rotterdam Apr 20", severity: "info", lat: 36.1, lon: -5.3 },
+  {
+    time: 'Apr 8 06:00',
+    type: 'departure',
+    label: 'Departed Ras Tanura (SATANK)',
+    detail: 'Cargo: 280,000t crude',
+    severity: 'info',
+    lat: 26.6,
+    lon: 50.2,
+  },
+  {
+    time: 'Apr 8 14:30',
+    type: 'waypoint',
+    label: 'Strait of Hormuz transit',
+    detail: 'Passage: 2h 14m, no incidents',
+    severity: 'info',
+    lat: 26.6,
+    lon: 56.5,
+  },
+  {
+    time: 'Apr 9 09:15',
+    type: 'weather',
+    label: 'Beaufort 6 sea state encountered',
+    detail: 'Speed reduced to 11.2 kts',
+    severity: 'warn',
+    lat: 23.0,
+    lon: 58.5,
+  },
+  {
+    time: 'Apr 9 18:40',
+    type: 'fuel',
+    label: 'Fuel consumption spike +8%',
+    detail: 'Weather-related variance',
+    severity: 'warn',
+    lat: 21.5,
+    lon: 57.0,
+  },
+  {
+    time: 'Apr 10 11:00',
+    type: 'ais',
+    label: 'AIS transmission gap 47 min',
+    detail: 'Gulf of Aden, possible interference',
+    severity: 'warn',
+    lat: 14.5,
+    lon: 49.0,
+  },
+  {
+    time: 'Apr 10 22:00',
+    type: 'waypoint',
+    label: 'Bab-el-Mandeb crossing',
+    detail: 'UKMTO notification sent',
+    severity: 'info',
+    lat: 12.5,
+    lon: 43.5,
+  },
+  {
+    time: 'Apr 11 16:00',
+    type: 'anomaly',
+    label: 'Speed reduction — congestion',
+    detail: 'Red Sea northbound lane congestion',
+    severity: 'warn',
+    lat: 19.0,
+    lon: 39.5,
+  },
+  {
+    time: 'Apr 12 08:00',
+    type: 'inspection',
+    label: 'Pre-canal inspection report submitted',
+    detail: 'Suez Canal Authority clearance',
+    severity: 'info',
+    lat: 28.5,
+    lon: 33.5,
+  },
+  {
+    time: 'Apr 12 20:00',
+    type: 'waypoint',
+    label: 'Suez Canal southbound entry',
+    detail: 'Convoy position: 4 of 18',
+    severity: 'info',
+    lat: 30.0,
+    lon: 32.5,
+  },
+  {
+    time: 'Apr 13 14:00',
+    type: 'anomaly',
+    label: 'Engine temp elevated +4°C',
+    detail: 'Monitoring — within operating range',
+    severity: 'warn',
+    lat: 31.5,
+    lon: 32.0,
+  },
+  {
+    time: 'Apr 14 06:00',
+    type: 'waypoint',
+    label: 'Port Said exit — Mediterranean',
+    detail: 'Speed restored 13.4 kts',
+    severity: 'info',
+    lat: 31.3,
+    lon: 32.3,
+  },
+  {
+    time: 'Apr 15 09:45',
+    type: 'weather',
+    label: 'Med weather system avoided',
+    detail: 'Route deviation +18nm',
+    severity: 'info',
+    lat: 35.8,
+    lon: 24.0,
+  },
+  {
+    time: 'Apr 16 04:00',
+    type: 'waypoint',
+    label: 'Gibraltar Strait approach',
+    detail: 'Current position — ETA Rotterdam Apr 20',
+    severity: 'info',
+    lat: 36.1,
+    lon: -5.3,
+  },
 ];
 
 const METRICS_TIMELINE = [
-  { label: "Apr 8", speed: 13.8, fuel: 72.4, weather: 2, risk: 18 },
-  { label: "Apr 9", speed: 11.4, fuel: 78.1, weather: 6, risk: 42 },
-  { label: "Apr 10", speed: 12.2, fuel: 74.8, weather: 4, risk: 55 },
-  { label: "Apr 11", speed: 11.8, fuel: 68.0, weather: 3, risk: 44 },
-  { label: "Apr 12", speed: 9.2, fuel: 52.4, weather: 2, risk: 28 },
-  { label: "Apr 13", speed: 8.4, fuel: 47.8, weather: 2, risk: 22 },
-  { label: "Apr 14", speed: 13.4, fuel: 69.8, weather: 3, risk: 20 },
-  { label: "Apr 15", speed: 13.1, fuel: 68.2, weather: 4, risk: 18 },
-  { label: "Apr 16", speed: 13.4, fuel: 70.0, weather: 3, risk: 16 },
+  { label: 'Apr 8', speed: 13.8, fuel: 72.4, weather: 2, risk: 18 },
+  { label: 'Apr 9', speed: 11.4, fuel: 78.1, weather: 6, risk: 42 },
+  { label: 'Apr 10', speed: 12.2, fuel: 74.8, weather: 4, risk: 55 },
+  { label: 'Apr 11', speed: 11.8, fuel: 68.0, weather: 3, risk: 44 },
+  { label: 'Apr 12', speed: 9.2, fuel: 52.4, weather: 2, risk: 28 },
+  { label: 'Apr 13', speed: 8.4, fuel: 47.8, weather: 2, risk: 22 },
+  { label: 'Apr 14', speed: 13.4, fuel: 69.8, weather: 3, risk: 20 },
+  { label: 'Apr 15', speed: 13.1, fuel: 68.2, weather: 4, risk: 18 },
+  { label: 'Apr 16', speed: 13.4, fuel: 70.0, weather: 3, risk: 16 },
 ];
 
 const typeIcons: Record<string, React.ReactNode> = {
@@ -74,11 +191,18 @@ interface VoyageEvent {
 function mapApiEvent(e: ApiVesselEvent): VoyageEvent {
   const d = e.occurredAt ? new Date(e.occurredAt) : null;
   return {
-    time: d ? d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Unknown",
+    time: d
+      ? d.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'Unknown',
     type: e.eventType,
-    label: e.description ?? e.eventType.replace(/_/g, " "),
+    label: e.description ?? e.eventType.replace(/_/g, ' '),
     detail: `Status: ${e.status}`,
-    severity: e.severity ?? (e.status === "open" ? "warn" : "info"),
+    severity: e.severity ?? (e.status === 'open' ? 'warn' : 'info'),
     lat: e.latitude ? Number(e.latitude) : 0,
     lon: e.longitude ? Number(e.longitude) : 0,
   };
@@ -89,11 +213,12 @@ function ScrubberChart({ data, cursor }: { data: typeof METRICS_TIMELINE; cursor
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const w = canvas.width, h = canvas.height;
+    const w = canvas.width,
+      h = canvas.height;
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#060d1a";
+    ctx.fillStyle = '#060d1a';
     ctx.fillRect(0, 0, w, h);
     const pad = { l: 10, r: 10, t: 10, b: 20 };
     const chartW = w - pad.l - pad.r;
@@ -107,16 +232,29 @@ function ScrubberChart({ data, cursor }: { data: typeof METRICS_TIMELINE; cursor
       values.forEach((v, i) => {
         const x = pad.l + i * stepX;
         const y = pad.t + chartH * (1 - v / max);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       });
       ctx.stroke();
     };
-    drawLine(data.map(d => d.speed), 16, "rgba(56,189,248,0.7)");
-    drawLine(data.map(d => d.fuel), 100, "rgba(251,191,36,0.5)");
-    drawLine(data.map(d => d.risk), 100, "rgba(248,113,113,0.45)");
+    drawLine(
+      data.map((d) => d.speed),
+      16,
+      'rgba(56,189,248,0.7)',
+    );
+    drawLine(
+      data.map((d) => d.fuel),
+      100,
+      'rgba(251,191,36,0.5)',
+    );
+    drawLine(
+      data.map((d) => d.risk),
+      100,
+      'rgba(248,113,113,0.45)',
+    );
     const cx = pad.l + cursor * stepX;
     ctx.beginPath();
-    ctx.strokeStyle = "rgba(139,122,200,0.8)";
+    ctx.strokeStyle = 'rgba(139,122,200,0.8)';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 3]);
     ctx.moveTo(cx, pad.t);
@@ -125,10 +263,10 @@ function ScrubberChart({ data, cursor }: { data: typeof METRICS_TIMELINE; cursor
     ctx.setLineDash([]);
     ctx.beginPath();
     ctx.arc(cx, pad.t + chartH / 2, 4, 0, Math.PI * 2);
-    ctx.fillStyle = "#8b7ac8";
+    ctx.fillStyle = '#8b7ac8';
     ctx.fill();
-    ctx.font = "8px monospace";
-    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.font = '8px monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
     data.forEach((d, i) => {
       ctx.fillText(d.label, pad.l + i * stepX - 14, h - 4);
     });
@@ -141,9 +279,11 @@ export default function VesselsReplayPage() {
   const [cursor, setCursor] = useState(12);
   const [selectedVesselId, setSelectedVesselId] = useState<string | null>(null);
 
-  const { data: vesselsData, isError: vesselsListError } = useStandardQuery<{ data: Array<{ id: number; name: string }> }>({
-    queryKey: ["vessels-list-replay"],
-    queryFn: () => fetch("/api/vessels").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+  const { data: vesselsData, isError: vesselsListError } = useStandardQuery<{
+    data: Array<{ id: number; name: string }>;
+  }>({
+    queryKey: ['vessels-list-replay'],
+    queryFn: () => fetch('/api/vessels').then((r) => (r.ok ? r.json() : Promise.reject(r.status))),
     staleTime: 120000,
     retry: 1,
   });
@@ -151,9 +291,17 @@ export default function VesselsReplayPage() {
   const vessels = vesselsData?.data ?? [];
   const effectiveVesselId = selectedVesselId ?? (vessels[0] ? String(vessels[0].id) : null);
 
-  const { data: eventsData, isFetching: eventsFetching, isError: eventsError, isLoading: eventsLoading } = useStandardQuery<{ data: ApiVesselEvent[] }>({
-    queryKey: ["vessel-events", effectiveVesselId],
-    queryFn: () => fetch(`/api/vessels/${effectiveVesselId}/events`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
+  const {
+    data: eventsData,
+    isFetching: eventsFetching,
+    isError: eventsError,
+    isLoading: eventsLoading,
+  } = useStandardQuery<{ data: ApiVesselEvent[] }>({
+    queryKey: ['vessel-events', effectiveVesselId],
+    queryFn: () =>
+      fetch(`/api/vessels/${effectiveVesselId}/events`).then((r) =>
+        r.ok ? r.json() : Promise.reject(r.status),
+      ),
     staleTime: 60000,
     retry: 1,
     enabled: !!effectiveVesselId,
@@ -161,16 +309,19 @@ export default function VesselsReplayPage() {
 
   const apiEvents = eventsData?.data;
   const isLiveEvents = apiEvents && apiEvents.length > 0;
-  const VOYAGE_EVENTS: VoyageEvent[] = isLiveEvents ? apiEvents.map(mapApiEvent) : DEMO_VOYAGE_EVENTS;
+  const VOYAGE_EVENTS: VoyageEvent[] = isLiveEvents
+    ? apiEvents.map(mapApiEvent)
+    : DEMO_VOYAGE_EVENTS;
   const totalEvents = VOYAGE_EVENTS.length;
 
-  const dataMode: "loading" | "live" | "demo" | "error" = (eventsLoading || (eventsFetching && !eventsData))
-    ? "loading"
-    : (eventsError || vesselsListError)
-    ? "error"
-    : isLiveEvents
-    ? "live"
-    : "demo";
+  const dataMode: 'loading' | 'live' | 'demo' | 'error' =
+    eventsLoading || (eventsFetching && !eventsData)
+      ? 'loading'
+      : eventsError || vesselsListError
+        ? 'error'
+        : isLiveEvents
+          ? 'live'
+          : 'demo';
 
   useEffect(() => {
     setCursor(Math.min(12, totalEvents - 1));
@@ -178,16 +329,25 @@ export default function VesselsReplayPage() {
 
   useEffect(() => {
     if (!playing) return;
-    if (cursor >= totalEvents - 1) { setPlaying(false); return; }
-    const t = setTimeout(() => setCursor(c => Math.min(c + 1, totalEvents - 1)), 900);
+    if (cursor >= totalEvents - 1) {
+      setPlaying(false);
+      return;
+    }
+    const t = setTimeout(() => setCursor((c) => Math.min(c + 1, totalEvents - 1)), 900);
     return () => clearTimeout(t);
   }, [playing, cursor, totalEvents]);
 
-  const metricCursor = Math.floor((cursor / Math.max(totalEvents - 1, 1)) * (METRICS_TIMELINE.length - 1));
+  const metricCursor = Math.floor(
+    (cursor / Math.max(totalEvents - 1, 1)) * (METRICS_TIMELINE.length - 1),
+  );
   const current = VOYAGE_EVENTS[Math.min(cursor, totalEvents - 1)] ?? VOYAGE_EVENTS[0];
-  const sevColor: Record<string, string> = { info: "text-sky-400/60", warn: "text-amber-400", crit: "text-red-400" };
+  const sevColor: Record<string, string> = {
+    info: 'text-sky-400/60',
+    warn: 'text-amber-400',
+    crit: 'text-red-400',
+  };
 
-  const selectedVesselName = vessels.find(v => String(v.id) === effectiveVesselId)?.name;
+  const selectedVesselName = vessels.find((v) => String(v.id) === effectiveVesselId)?.name;
 
   return (
     <div className="p-6 space-y-6">
@@ -196,40 +356,57 @@ export default function VesselsReplayPage() {
           <div className="flex items-center gap-2 mb-1">
             <RotateCcw className="w-4 h-4 text-violet-400" />
             <h1 className="font-display text-xl font-bold text-sky-50">Voyage Replay</h1>
-            <Badge variant="outline" className="text-[9px] text-violet-400 border-violet-500/30 bg-violet-500/5">ATLAS RUNTIME</Badge>
+            <Badge
+              variant="outline"
+              className="text-[9px] text-violet-400 border-violet-500/30 bg-violet-500/5"
+            >
+              ATLAS RUNTIME
+            </Badge>
           </div>
-          <p className="text-xs text-sky-400/40">Step through the voyage worldline — every event, anomaly, and decision point</p>
+          <p className="text-xs text-sky-400/40">
+            Step through the voyage worldline — every event, anomaly, and decision point
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {vessels.length > 0 && (
             <select
-              value={effectiveVesselId ?? ""}
-              onChange={e => { setSelectedVesselId(e.target.value); setCursor(0); setPlaying(false); }}
+              value={effectiveVesselId ?? ''}
+              onChange={(e) => {
+                setSelectedVesselId(e.target.value);
+                setCursor(0);
+                setPlaying(false);
+              }}
               className="text-[10px] bg-[#0a1628] border border-sky-500/20 text-sky-300 rounded-lg px-2 py-1 outline-none"
             >
-              {vessels.map(v => (
-                <option key={v.id} value={String(v.id)}>{v.name}</option>
+              {vessels.map((v) => (
+                <option key={v.id} value={String(v.id)}>
+                  {v.name}
+                </option>
               ))}
             </select>
           )}
-          {dataMode === "live" && (
+          {dataMode === 'live' && (
             <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE
             </div>
           )}
-          {dataMode === "demo" && (
+          {dataMode === 'demo' && (
             <div className="flex items-center gap-1.5 text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />DEMO
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              DEMO
             </div>
           )}
-          {dataMode === "error" && (
+          {dataMode === 'error' && (
             <div className="flex items-center gap-1.5 text-[10px] text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />ERROR
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+              ERROR
             </div>
           )}
-          {dataMode === "loading" && (
+          {dataMode === 'loading' && (
             <div className="flex items-center gap-1.5 text-[10px] text-sky-400/60 bg-sky-500/5 border border-sky-500/20 px-2 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400/60 animate-pulse" />LOADING
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400/60 animate-pulse" />
+              LOADING
             </div>
           )}
           <div className="flex items-center gap-1.5 text-[10px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-1 rounded-lg">
@@ -239,27 +416,34 @@ export default function VesselsReplayPage() {
         </div>
       </div>
 
-      {dataMode === "live" && (
+      {dataMode === 'live' && (
         <div className="flex items-center gap-2 text-[10px] px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-emerald-400/80">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          Live events from {selectedVesselName ?? "vessel"} — {totalEvents} events loaded
+          Live events from {selectedVesselName ?? 'vessel'} — {totalEvents} events loaded
         </div>
       )}
-      {dataMode === "demo" && (
+      {dataMode === 'demo' && (
         <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 text-amber-200">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
           <div>
             <p className="font-semibold text-amber-300">Demo data — no live records found</p>
-            <p className="text-amber-300/70 text-[10px] mt-0.5">No voyage events were returned for {selectedVesselName ?? "this vessel"}. Showing illustrative demo events. The page will switch to live data automatically once real events are recorded.</p>
+            <p className="text-amber-300/70 text-[10px] mt-0.5">
+              No voyage events were returned for {selectedVesselName ?? 'this vessel'}. Showing
+              illustrative demo events. The page will switch to live data automatically once real
+              events are recorded.
+            </p>
           </div>
         </div>
       )}
-      {dataMode === "error" && (
+      {dataMode === 'error' && (
         <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-red-500/30 bg-red-500/8 text-red-200">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
           <div>
             <p className="font-semibold text-red-300">Live data unavailable</p>
-            <p className="text-red-300/70 text-[10px] mt-0.5">The voyage events API request failed. Showing demo content while the connection is restored.</p>
+            <p className="text-red-300/70 text-[10px] mt-0.5">
+              The voyage events API request failed. Showing demo content while the connection is
+              restored.
+            </p>
           </div>
         </div>
       )}
@@ -271,47 +455,114 @@ export default function VesselsReplayPage() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <p className="text-sm font-semibold text-sky-100">{current.label}</p>
-            <Badge variant="outline" className={cn("text-[9px] capitalize", current.severity === "warn" ? "text-amber-400 border-amber-500/20 bg-amber-500/5" : "text-sky-400/60 border-sky-500/10 bg-transparent")}>{current.severity}</Badge>
+            <Badge
+              variant="outline"
+              className={cn(
+                'text-[9px] capitalize',
+                current.severity === 'warn'
+                  ? 'text-amber-400 border-amber-500/20 bg-amber-500/5'
+                  : 'text-sky-400/60 border-sky-500/10 bg-transparent',
+              )}
+            >
+              {current.severity}
+            </Badge>
           </div>
           <p className="text-[11px] text-sky-400/50">{current.detail}</p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-[10px] text-sky-400/40 font-mono">Event {cursor + 1} / {totalEvents}</p>
+          <p className="text-[10px] text-sky-400/40 font-mono">
+            Event {cursor + 1} / {totalEvents}
+          </p>
           {(current.lat !== 0 || current.lon !== 0) && (
-            <p className="text-[10px] text-sky-400/30 font-mono">{current.lat.toFixed(1)}°N {Math.abs(current.lon).toFixed(1)}°{current.lon >= 0 ? "E" : "W"}</p>
+            <p className="text-[10px] text-sky-400/30 font-mono">
+              {current.lat.toFixed(1)}°N {Math.abs(current.lon).toFixed(1)}°
+              {current.lon >= 0 ? 'E' : 'W'}
+            </p>
           )}
         </div>
       </div>
 
       <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] text-sky-400/50 uppercase tracking-wider">Voyage Timeline</span>
+          <span className="text-[10px] text-sky-400/50 uppercase tracking-wider">
+            Voyage Timeline
+          </span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-[9px] text-sky-400/40">
-              <span className="inline-block w-3 h-0.5 bg-sky-400/60 rounded" />Speed
-              <span className="inline-block w-3 h-0.5 bg-amber-400/50 rounded ml-1" />Fuel
-              <span className="inline-block w-3 h-0.5 bg-red-400/45 rounded ml-1" />Risk
+              <span className="inline-block w-3 h-0.5 bg-sky-400/60 rounded" />
+              Speed
+              <span className="inline-block w-3 h-0.5 bg-amber-400/50 rounded ml-1" />
+              Fuel
+              <span className="inline-block w-3 h-0.5 bg-red-400/45 rounded ml-1" />
+              Risk
             </div>
           </div>
         </div>
         <ScrubberChart data={METRICS_TIMELINE} cursor={metricCursor} />
-        <input type="range" min={0} max={totalEvents - 1} value={cursor} onChange={e => { setPlaying(false); setCursor(Number(e.target.value)); }}
-          className="w-full h-1.5 rounded-full accent-violet-500 cursor-pointer" />
+        <input
+          type="range"
+          min={0}
+          max={totalEvents - 1}
+          value={cursor}
+          onChange={(e) => {
+            setPlaying(false);
+            setCursor(Number(e.target.value));
+          }}
+          className="w-full h-1.5 rounded-full accent-violet-500 cursor-pointer"
+        />
         <div className="flex items-center justify-center gap-3">
-          <button onClick={() => { setPlaying(false); setCursor(0); }} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors">
-            <SkipBack className="w-3.5 h-3.5" />Start
+          <button
+            onClick={() => {
+              setPlaying(false);
+              setCursor(0);
+            }}
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+          >
+            <SkipBack className="w-3.5 h-3.5" />
+            Start
           </button>
-          <button onClick={() => setCursor(c => Math.max(0, c - 1))} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors">
+          <button
+            onClick={() => setCursor((c) => Math.max(0, c - 1))}
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+          >
             ‹ Prev
           </button>
-          <button onClick={() => setPlaying(p => !p)} className={cn("flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg border transition-colors", playing ? "bg-violet-500/15 border-violet-500/30 text-violet-300" : "bg-sky-500/10 border-sky-500/30 text-sky-300")}>
-            {playing ? <><Pause className="w-3.5 h-3.5" />Pause</> : <><Play className="w-3.5 h-3.5" />Play</>}
+          <button
+            onClick={() => setPlaying((p) => !p)}
+            className={cn(
+              'flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg border transition-colors',
+              playing
+                ? 'bg-violet-500/15 border-violet-500/30 text-violet-300'
+                : 'bg-sky-500/10 border-sky-500/30 text-sky-300',
+            )}
+          >
+            {playing ? (
+              <>
+                <Pause className="w-3.5 h-3.5" />
+                Pause
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5" />
+                Play
+              </>
+            )}
           </button>
-          <button onClick={() => setCursor(c => Math.min(totalEvents - 1, c + 1))} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors">
+          <button
+            onClick={() => setCursor((c) => Math.min(totalEvents - 1, c + 1))}
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+          >
             Next ›
           </button>
-          <button onClick={() => { setPlaying(false); setCursor(totalEvents - 1); }} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors">
-            End<SkipForward className="w-3.5 h-3.5" />
+          <button
+            onClick={() => {
+              setPlaying(false);
+              setCursor(totalEvents - 1);
+            }}
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-sky-500/20 bg-sky-500/5 text-sky-400/60 hover:text-sky-300 transition-colors"
+          >
+            End
+            <SkipForward className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -319,26 +570,63 @@ export default function VesselsReplayPage() {
       <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-sky-500/10">
           <p className="text-sm font-semibold text-sky-100">Voyage Event Log</p>
-          <p className="text-[10px] text-sky-400/40">Click any event to jump to that point in the voyage</p>
+          <p className="text-[10px] text-sky-400/40">
+            Click any event to jump to that point in the voyage
+          </p>
         </div>
         <div className="max-h-80 overflow-y-auto">
           {VOYAGE_EVENTS.map((ev, i) => {
             const isCurrent = i === cursor;
             const isPast = i < cursor;
             return (
-              <div key={i} onClick={() => { setPlaying(false); setCursor(i); }}
-                className={cn("flex gap-3 px-4 py-3 border-b border-sky-500/5 cursor-pointer transition-all", isCurrent ? "bg-violet-500/8 border-violet-500/20" : isPast ? "hover:bg-sky-500/3 opacity-70" : "hover:bg-sky-500/3 opacity-40")}>
+              <div
+                key={i}
+                onClick={() => {
+                  setPlaying(false);
+                  setCursor(i);
+                }}
+                className={cn(
+                  'flex gap-3 px-4 py-3 border-b border-sky-500/5 cursor-pointer transition-all',
+                  isCurrent
+                    ? 'bg-violet-500/8 border-violet-500/20'
+                    : isPast
+                      ? 'hover:bg-sky-500/3 opacity-70'
+                      : 'hover:bg-sky-500/3 opacity-40',
+                )}
+              >
                 <div className="flex flex-col items-center mt-0.5">
-                  <div className={cn("w-2 h-2 rounded-full shrink-0", isCurrent ? "bg-violet-400 ring-2 ring-violet-400/30" : isPast ? "bg-sky-500/40" : "bg-sky-500/15")} />
-                  {i < VOYAGE_EVENTS.length - 1 && <div className="w-px flex-1 bg-sky-500/8 mt-0.5" />}
+                  <div
+                    className={cn(
+                      'w-2 h-2 rounded-full shrink-0',
+                      isCurrent
+                        ? 'bg-violet-400 ring-2 ring-violet-400/30'
+                        : isPast
+                          ? 'bg-sky-500/40'
+                          : 'bg-sky-500/15',
+                    )}
+                  />
+                  {i < VOYAGE_EVENTS.length - 1 && (
+                    <div className="w-px flex-1 bg-sky-500/8 mt-0.5" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0 pb-1">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span>{typeIcons[ev.type] ?? <Activity className="w-3 h-3 text-sky-400" />}</span>
-                    <p className={cn("text-[11px] font-medium", isCurrent ? "text-sky-100" : "text-sky-300")}>{ev.label}</p>
-                    {ev.severity === "warn" && <span className="text-[9px] text-amber-400">⚠</span>}
+                    <span>
+                      {typeIcons[ev.type] ?? <Activity className="w-3 h-3 text-sky-400" />}
+                    </span>
+                    <p
+                      className={cn(
+                        'text-[11px] font-medium',
+                        isCurrent ? 'text-sky-100' : 'text-sky-300',
+                      )}
+                    >
+                      {ev.label}
+                    </p>
+                    {ev.severity === 'warn' && <span className="text-[9px] text-amber-400">⚠</span>}
                   </div>
-                  <p className="text-[10px] text-sky-400/40">{ev.time} · {ev.detail}</p>
+                  <p className="text-[10px] text-sky-400/40">
+                    {ev.time} · {ev.detail}
+                  </p>
                 </div>
               </div>
             );

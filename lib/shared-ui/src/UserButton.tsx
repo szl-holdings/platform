@@ -1,5 +1,5 @@
-import { useAuth } from "@szl-holdings/replit-auth-web";
-import type { AuthUser } from "@szl-holdings/replit-auth-web";
+import type { AuthUser } from '@szl-holdings/replit-auth-web';
+import { useAuth } from '@szl-holdings/replit-auth-web';
 
 export type { AuthUser };
 
@@ -8,7 +8,7 @@ interface UserButtonProps {
   showName?: boolean;
 }
 
-export function UserButton({ className = "", showName = false }: UserButtonProps) {
+export function UserButton({ className = '', showName = false }: UserButtonProps) {
   const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   if (isLoading) {
@@ -30,15 +30,13 @@ export function UserButton({ className = "", showName = false }: UserButtonProps
     );
   }
 
-  const displayName = user.displayName || user.name || user.username || "User";
+  const displayName = user.displayName || user.name || user.username || 'User';
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       {showName && (
-        <span className="text-sm font-medium text-foreground hidden sm:block">
-          {displayName}
-        </span>
+        <span className="text-sm font-medium text-foreground hidden sm:block">{displayName}</span>
       )}
       <button
         onClick={logout}

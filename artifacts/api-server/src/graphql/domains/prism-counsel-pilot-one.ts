@@ -1,22 +1,30 @@
-import { db } from "@szl-holdings/db";
 import {
-  pcInsurerPressureSnapshotsTable, pcInsurerPressureDriversTable,
-  pcSettlementFrictionSnapshotsTable, pcSettlementFrictionDriversTable,
-  pcMovementRecommendationsTable, pcCarrierSilenceWindowsTable,
-  pcCarrierBehaviorPatternsTable, pcCarrierResponseEventsTable,
-  pcPortfolioBenchmarkSnapshotsTable, pcPortfolioActionEffectivenessTable,
-  pcPortfolioTeamLagMetricsTable, pcPortfolioMatterCohortsTable,
-  pcQuietRiskSnapshotsTable, pcWorldlineSignalOverlaysTable,
-  pcWorldlineWeatherEventsTable, pcWorldlineRegulatoryEventsTable,
+  db,
+  pcCarrierBehaviorPatternsTable,
+  pcCarrierResponseEventsTable,
+  pcCarrierSilenceWindowsTable,
+  pcInsurerPressureDriversTable,
+  pcInsurerPressureSnapshotsTable,
+  pcMovementRecommendationsTable,
+  pcPortfolioActionEffectivenessTable,
+  pcPortfolioBenchmarkSnapshotsTable,
+  pcPortfolioMatterCohortsTable,
+  pcPortfolioTeamLagMetricsTable,
+  pcQuietRiskSnapshotsTable,
+  pcSettlementFrictionDriversTable,
+  pcSettlementFrictionSnapshotsTable,
   pcWorldlineRecoveryMarkersTable,
-} from "@szl-holdings/db";
-import { eq, and, desc, gte } from "drizzle-orm";
-import { insurerPressureEngine } from "../../services/prism-insurer-pressure";
-import { settlementFrictionEngine } from "../../services/prism-settlement-friction";
-import { portfolioLearning } from "../../services/prism-portfolio-learning";
-import { forecastExpanded } from "../../services/prism-forecast-expanded";
-import { copilotPilotOne } from "../../services/prism-copilot-pilot-one";
-import type { GraphQLContext } from "../index.js";
+  pcWorldlineRegulatoryEventsTable,
+  pcWorldlineSignalOverlaysTable,
+  pcWorldlineWeatherEventsTable,
+} from '@szl-holdings/db';
+import { and, desc, eq, gte } from 'drizzle-orm';
+import { copilotPilotOne } from '../../services/prism-copilot-pilot-one';
+import { forecastExpanded } from '../../services/prism-forecast-expanded';
+import { insurerPressureEngine } from '../../services/prism-insurer-pressure';
+import { portfolioLearning } from '../../services/prism-portfolio-learning';
+import { settlementFrictionEngine } from '../../services/prism-settlement-friction';
+import type { GraphQLContext } from '../index.js';
 
 export const prismCounselPilotOneTypeDefs = `#graphql
 
@@ -395,21 +403,31 @@ export const prismCounselPilotOneResolvers = {
         const snap = await insurerPressureEngine.getLatestSnapshot(1, matterId);
         if (!snap) return null;
         return { ...snap.snapshot, drivers: snap.drivers };
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     },
 
-    pcInsurerPressureHistory: async (_: unknown, { matterId, limit = 10 }: { matterId: number; limit?: number }) => {
+    pcInsurerPressureHistory: async (
+      _: unknown,
+      { matterId, limit = 10 }: { matterId: number; limit?: number },
+    ) => {
       try {
-        return await db.select().from(pcInsurerPressureSnapshotsTable)
+        return await db
+          .select()
+          .from(pcInsurerPressureSnapshotsTable)
           .where(eq(pcInsurerPressureSnapshotsTable.matterId, matterId))
-          .orderBy(desc(pcInsurerPressureSnapshotsTable.computedAt)).limit(limit);
-      } catch { return []; }
+          .orderBy(desc(pcInsurerPressureSnapshotsTable.computedAt))
+          .limit(limit);
+      } catch {
+        return [];
+      }
     },
 
     pcPortfolioPressureView: async (_: unknown, { orgId }: { orgId: number }) => {
       try {
         const view = await insurerPressureEngine.getPortfolioPressureView(orgId);
-        return view.map(item => ({
+        return view.map((item) => ({
           matterId: item.matter.id,
           matterTitle: item.matter.title,
           caseNumber: item.matter.caseNumber,
@@ -419,15 +437,31 @@ export const prismCounselPilotOneResolvers = {
           recommendedNextAction: item.pressure.recommendedNextAction,
           requiresReview: item.pressure.requiresReview,
         }));
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
 
-    pcCarrierSilenceWindows: async (_: unknown, { orgId, matterId }: { orgId: number; matterId?: number }) => {
-      try { return await insurerPressureEngine.getSilenceWindows(orgId, matterId); } catch { return []; }
+    pcCarrierSilenceWindows: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId?: number },
+    ) => {
+      try {
+        return await insurerPressureEngine.getSilenceWindows(orgId, matterId);
+      } catch {
+        return [];
+      }
     },
 
-    pcCarrierBehaviorPatterns: async (_: unknown, { orgId, carrier }: { orgId: number; carrier?: string }) => {
-      try { return await insurerPressureEngine.getCarrierPatterns(orgId, carrier); } catch { return []; }
+    pcCarrierBehaviorPatterns: async (
+      _: unknown,
+      { orgId, carrier }: { orgId: number; carrier?: string },
+    ) => {
+      try {
+        return await insurerPressureEngine.getCarrierPatterns(orgId, carrier);
+      } catch {
+        return [];
+      }
     },
 
     pcSettlementFriction: async (_: unknown, { matterId }: { matterId: number }) => {
@@ -435,21 +469,31 @@ export const prismCounselPilotOneResolvers = {
         const snap = await settlementFrictionEngine.getLatestSnapshot(1, matterId);
         if (!snap) return null;
         return { ...snap.snapshot, drivers: snap.drivers };
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     },
 
-    pcSettlementFrictionHistory: async (_: unknown, { matterId, limit = 10 }: { matterId: number; limit?: number }) => {
+    pcSettlementFrictionHistory: async (
+      _: unknown,
+      { matterId, limit = 10 }: { matterId: number; limit?: number },
+    ) => {
       try {
-        return await db.select().from(pcSettlementFrictionSnapshotsTable)
+        return await db
+          .select()
+          .from(pcSettlementFrictionSnapshotsTable)
           .where(eq(pcSettlementFrictionSnapshotsTable.matterId, matterId))
-          .orderBy(desc(pcSettlementFrictionSnapshotsTable.computedAt)).limit(limit);
-      } catch { return []; }
+          .orderBy(desc(pcSettlementFrictionSnapshotsTable.computedAt))
+          .limit(limit);
+      } catch {
+        return [];
+      }
     },
 
     pcPortfolioFrictionView: async (_: unknown, { orgId }: { orgId: number }) => {
       try {
         const view = await settlementFrictionEngine.getPortfolioFrictionView(orgId);
-        return view.map(item => ({
+        return view.map((item) => ({
           matterId: item.matter.id,
           matterTitle: item.matter.title,
           caseNumber: item.matter.caseNumber,
@@ -459,77 +503,173 @@ export const prismCounselPilotOneResolvers = {
           readinessDragDays: item.friction.readinessDragDays,
           smallestAction: item.friction.smallestAction,
         }));
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
 
-    pcMovementRecommendations: async (_: unknown, { orgId, matterId }: { orgId: number; matterId?: number }) => {
-      try { return await settlementFrictionEngine.getMovementRecommendations(orgId, matterId); } catch { return []; }
+    pcMovementRecommendations: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId?: number },
+    ) => {
+      try {
+        return await settlementFrictionEngine.getMovementRecommendations(orgId, matterId);
+      } catch {
+        return [];
+      }
     },
 
-    pcPortfolioBenchmarks: async (_: unknown, { orgId, type }: { orgId: number; type?: string }) => {
-      try { return await portfolioLearning.getBenchmarks(orgId, type); } catch { return []; }
+    pcPortfolioBenchmarks: async (
+      _: unknown,
+      { orgId, type }: { orgId: number; type?: string },
+    ) => {
+      try {
+        return await portfolioLearning.getBenchmarks(orgId, type);
+      } catch {
+        return [];
+      }
     },
 
     pcActionEffectiveness: async (_: unknown, { orgId }: { orgId: number }) => {
-      try { return await portfolioLearning.getActionEffectiveness(orgId); } catch { return []; }
+      try {
+        return await portfolioLearning.getActionEffectiveness(orgId);
+      } catch {
+        return [];
+      }
     },
 
     pcTeamLagMetrics: async (_: unknown, { orgId }: { orgId: number }) => {
       try {
-        return await db.select().from(pcPortfolioTeamLagMetricsTable)
-          .where(eq(pcPortfolioTeamLagMetricsTable.orgId, orgId)).limit(20);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcPortfolioTeamLagMetricsTable)
+          .where(eq(pcPortfolioTeamLagMetricsTable.orgId, orgId))
+          .limit(20);
+      } catch {
+        return [];
+      }
     },
 
-    pcMatterCohorts: async (_: unknown, { orgId, cohortType }: { orgId: number; cohortType?: string }) => {
-      try { return await portfolioLearning.getMatterCohorts(orgId, cohortType); } catch { return []; }
+    pcMatterCohorts: async (
+      _: unknown,
+      { orgId, cohortType }: { orgId: number; cohortType?: string },
+    ) => {
+      try {
+        return await portfolioLearning.getMatterCohorts(orgId, cohortType);
+      } catch {
+        return [];
+      }
     },
 
-    pcQuietRiskSnapshots: async (_: unknown, { orgId, matterId }: { orgId: number; matterId?: number }) => {
+    pcQuietRiskSnapshots: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId?: number },
+    ) => {
       try {
         const cond = matterId
-          ? and(eq(pcQuietRiskSnapshotsTable.orgId, orgId), eq(pcQuietRiskSnapshotsTable.matterId, matterId))
+          ? and(
+              eq(pcQuietRiskSnapshotsTable.orgId, orgId),
+              eq(pcQuietRiskSnapshotsTable.matterId, matterId),
+            )
           : eq(pcQuietRiskSnapshotsTable.orgId, orgId);
-        return await db.select().from(pcQuietRiskSnapshotsTable).where(cond).orderBy(desc(pcQuietRiskSnapshotsTable.riskScore)).limit(20);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcQuietRiskSnapshotsTable)
+          .where(cond)
+          .orderBy(desc(pcQuietRiskSnapshotsTable.riskScore))
+          .limit(20);
+      } catch {
+        return [];
+      }
     },
 
-    pcBestNextActions: async (_: unknown, { orgId, userId = 1 }: { orgId: number; userId?: number }) => {
-      try { return await portfolioLearning.getBestNext30Minutes(orgId, userId); } catch { return []; }
+    pcBestNextActions: async (
+      _: unknown,
+      { orgId, userId = 1 }: { orgId: number; userId?: number },
+    ) => {
+      try {
+        return await portfolioLearning.getBestNext30Minutes(orgId, userId);
+      } catch {
+        return [];
+      }
     },
 
     pcManagerWatchlist: async (_: unknown, { orgId }: { orgId: number }) => {
-      try { return await portfolioLearning.getManagerWatchlist(orgId); } catch { return []; }
+      try {
+        return await portfolioLearning.getManagerWatchlist(orgId);
+      } catch {
+        return [];
+      }
     },
 
-    pcWorldlineOverlays: async (_: unknown, { orgId, matterId }: { orgId: number; matterId?: number }) => {
+    pcWorldlineOverlays: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId?: number },
+    ) => {
       try {
         const cond = matterId
-          ? and(eq(pcWorldlineSignalOverlaysTable.orgId, orgId), eq(pcWorldlineSignalOverlaysTable.matterId, matterId))
+          ? and(
+              eq(pcWorldlineSignalOverlaysTable.orgId, orgId),
+              eq(pcWorldlineSignalOverlaysTable.matterId, matterId),
+            )
           : eq(pcWorldlineSignalOverlaysTable.orgId, orgId);
-        return await db.select().from(pcWorldlineSignalOverlaysTable).where(cond).orderBy(desc(pcWorldlineSignalOverlaysTable.createdAt)).limit(30);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcWorldlineSignalOverlaysTable)
+          .where(cond)
+          .orderBy(desc(pcWorldlineSignalOverlaysTable.createdAt))
+          .limit(30);
+      } catch {
+        return [];
+      }
     },
 
     pcWorldlineWeatherEvents: async (_: unknown, { orgId }: { orgId: number }) => {
       try {
-        return await db.select().from(pcWorldlineWeatherEventsTable).where(eq(pcWorldlineWeatherEventsTable.orgId, orgId)).orderBy(desc(pcWorldlineWeatherEventsTable.fetchedAt)).limit(20);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcWorldlineWeatherEventsTable)
+          .where(eq(pcWorldlineWeatherEventsTable.orgId, orgId))
+          .orderBy(desc(pcWorldlineWeatherEventsTable.fetchedAt))
+          .limit(20);
+      } catch {
+        return [];
+      }
     },
 
     pcWorldlineRegulatoryEvents: async (_: unknown, { orgId }: { orgId: number }) => {
       try {
-        return await db.select().from(pcWorldlineRegulatoryEventsTable).where(eq(pcWorldlineRegulatoryEventsTable.orgId, orgId)).orderBy(desc(pcWorldlineRegulatoryEventsTable.fetchedAt)).limit(20);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcWorldlineRegulatoryEventsTable)
+          .where(eq(pcWorldlineRegulatoryEventsTable.orgId, orgId))
+          .orderBy(desc(pcWorldlineRegulatoryEventsTable.fetchedAt))
+          .limit(20);
+      } catch {
+        return [];
+      }
     },
 
-    pcWorldlineRecoveryMarkers: async (_: unknown, { orgId, matterId }: { orgId: number; matterId?: number }) => {
+    pcWorldlineRecoveryMarkers: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId?: number },
+    ) => {
       try {
         const cond = matterId
-          ? and(eq(pcWorldlineRecoveryMarkersTable.orgId, orgId), eq(pcWorldlineRecoveryMarkersTable.matterId, matterId))
+          ? and(
+              eq(pcWorldlineRecoveryMarkersTable.orgId, orgId),
+              eq(pcWorldlineRecoveryMarkersTable.matterId, matterId),
+            )
           : eq(pcWorldlineRecoveryMarkersTable.orgId, orgId);
-        return await db.select().from(pcWorldlineRecoveryMarkersTable).where(cond).orderBy(desc(pcWorldlineRecoveryMarkersTable.fetchedAt)).limit(20);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcWorldlineRecoveryMarkersTable)
+          .where(cond)
+          .orderBy(desc(pcWorldlineRecoveryMarkersTable.fetchedAt))
+          .limit(20);
+      } catch {
+        return [];
+      }
     },
 
     pcPilotOneForecastView: async (_: unknown, { matterId }: { matterId: number }) => {
@@ -538,8 +678,9 @@ export const prismCounselPilotOneResolvers = {
         return {
           matterId: view.matterId,
           asOf: view.asOf,
-          forecasts: view.forecasts.map(f => ({
-            type: f.type, label: f.label,
+          forecasts: view.forecasts.map((f) => ({
+            type: f.type,
+            label: f.label,
             currentScore: f.data?.currentScore ?? null,
             priorScore: f.data?.priorScore ?? null,
             trend: f.data?.trend ?? null,
@@ -554,7 +695,14 @@ export const prismCounselPilotOneResolvers = {
           summaryDeclining: view.summary.declining,
         };
       } catch {
-        return { matterId, asOf: new Date().toISOString(), forecasts: [], summaryHighRisk: 0, summaryImproving: 0, summaryDeclining: 0 };
+        return {
+          matterId,
+          asOf: new Date().toISOString(),
+          forecasts: [],
+          summaryHighRisk: 0,
+          summaryImproving: 0,
+          summaryDeclining: 0,
+        };
       }
     },
 
@@ -564,87 +712,172 @@ export const prismCounselPilotOneResolvers = {
   },
 
   Mutation: {
-    pcComputeInsurerPressure: async (_: unknown, { orgId, matterId }: { orgId: number; matterId: number }) => {
+    pcComputeInsurerPressure: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId: number },
+    ) => {
       try {
         const { snapshotId, analysis } = await insurerPressureEngine.compute(orgId, matterId);
         const snap = await insurerPressureEngine.getLatestSnapshot(orgId, matterId);
-        if (!snap) throw new Error("Snapshot save failed");
+        if (!snap) throw new Error('Snapshot save failed');
         return { ...snap.snapshot, drivers: snap.drivers };
-      } catch (err: any) { throw new Error(err.message ?? "Failed to compute pressure"); }
+      } catch (err: any) {
+        throw new Error(err.message ?? 'Failed to compute pressure');
+      }
     },
 
-    pcRecordCarrierEvent: async (_: unknown, args: { matterId: number; carrierName: string; eventType: string; description?: string; daysSinceLastContact?: number }) => {
+    pcRecordCarrierEvent: async (
+      _: unknown,
+      args: {
+        matterId: number;
+        carrierName: string;
+        eventType: string;
+        description?: string;
+        daysSinceLastContact?: number;
+      },
+    ) => {
       try {
-        await insurerPressureEngine.recordCarrierEvent(1, args.matterId, { carrierName: args.carrierName, eventType: args.eventType, description: args.description, daysSinceLastContact: args.daysSinceLastContact });
+        await insurerPressureEngine.recordCarrierEvent(1, args.matterId, {
+          carrierName: args.carrierName,
+          eventType: args.eventType,
+          description: args.description,
+          daysSinceLastContact: args.daysSinceLastContact,
+        });
         return true;
-      } catch { return false; }
+      } catch {
+        return false;
+      }
     },
 
-    pcComputeSettlementFriction: async (_: unknown, { orgId, matterId }: { orgId: number; matterId: number }) => {
+    pcComputeSettlementFriction: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId: number },
+    ) => {
       try {
         const { snapshotId, analysis } = await settlementFrictionEngine.compute(orgId, matterId);
         const snap = await settlementFrictionEngine.getLatestSnapshot(orgId, matterId);
-        if (!snap) throw new Error("Snapshot save failed");
+        if (!snap) throw new Error('Snapshot save failed');
         return { ...snap.snapshot, drivers: snap.drivers };
-      } catch (err: any) { throw new Error(err.message ?? "Failed to compute friction"); }
+      } catch (err: any) {
+        throw new Error(err.message ?? 'Failed to compute friction');
+      }
     },
 
-    pcAcceptMovementRecommendation: async (_: unknown, { recommendationId, actorId }: { recommendationId: number; actorId: number }) => {
+    pcAcceptMovementRecommendation: async (
+      _: unknown,
+      { recommendationId, actorId }: { recommendationId: number; actorId: number },
+    ) => {
       try {
-        const [updated] = await db.update(pcMovementRecommendationsTable)
-          .set({ status: "accepted", acceptedBy: actorId, acceptedAt: new Date() })
+        const [updated] = await db
+          .update(pcMovementRecommendationsTable)
+          .set({ status: 'accepted', acceptedBy: actorId, acceptedAt: new Date() })
           .where(eq(pcMovementRecommendationsTable.id, recommendationId))
           .returning();
-        if (!updated) throw new Error("Recommendation not found");
+        if (!updated) throw new Error('Recommendation not found');
         return updated;
-      } catch (err: any) { throw new Error(err.message ?? "Failed to accept recommendation"); }
+      } catch (err: any) {
+        throw new Error(err.message ?? 'Failed to accept recommendation');
+      }
     },
 
     pcRunPortfolioLearning: async (_: unknown, { orgId }: { orgId: number }) => {
-      try { await portfolioLearning.runFullPortfolioLearning(orgId); return true; } catch { return false; }
+      try {
+        await portfolioLearning.runFullPortfolioLearning(orgId);
+        return true;
+      } catch {
+        return false;
+      }
     },
 
-    pcDetectQuietRisk: async (_: unknown, { orgId, matterId }: { orgId: number; matterId: number }) => {
+    pcDetectQuietRisk: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId: number },
+    ) => {
       try {
         await portfolioLearning.detectQuietRisk(orgId, matterId);
-        const [snap] = await db.select().from(pcQuietRiskSnapshotsTable)
-          .where(and(eq(pcQuietRiskSnapshotsTable.orgId, orgId), eq(pcQuietRiskSnapshotsTable.matterId, matterId)))
-          .orderBy(desc(pcQuietRiskSnapshotsTable.computedAt)).limit(1);
+        const [snap] = await db
+          .select()
+          .from(pcQuietRiskSnapshotsTable)
+          .where(
+            and(
+              eq(pcQuietRiskSnapshotsTable.orgId, orgId),
+              eq(pcQuietRiskSnapshotsTable.matterId, matterId),
+            ),
+          )
+          .orderBy(desc(pcQuietRiskSnapshotsTable.computedAt))
+          .limit(1);
         return snap;
-      } catch (err: any) { throw new Error(err.message ?? "Failed to detect quiet risk"); }
+      } catch (err: any) {
+        throw new Error(err.message ?? 'Failed to detect quiet risk');
+      }
     },
 
-    pcComputePilotOneForecasts: async (_: unknown, { orgId, matterId }: { orgId: number; matterId: number }) => {
+    pcComputePilotOneForecasts: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId: number },
+    ) => {
       try {
         await forecastExpanded.runForecastCycle(orgId, matterId);
         const view = await forecastExpanded.getForecastDiffView(orgId, matterId);
         return {
-          matterId: view.matterId, asOf: view.asOf,
-          forecasts: view.forecasts.map(f => ({ type: f.type, label: f.label, currentScore: f.data?.currentScore ?? null, priorScore: f.data?.priorScore ?? null, trend: f.data?.trend ?? null, confidence: f.data?.confidence ?? null, topDrivers: f.data?.topDrivers ?? [], whatChanged: f.data?.whatChanged ?? null, highestLeverageAction: f.data?.highestLeverageAction ?? null, hasData: f.data !== null })),
-          summaryHighRisk: view.summary.highRisk, summaryImproving: view.summary.improving, summaryDeclining: view.summary.declining,
+          matterId: view.matterId,
+          asOf: view.asOf,
+          forecasts: view.forecasts.map((f) => ({
+            type: f.type,
+            label: f.label,
+            currentScore: f.data?.currentScore ?? null,
+            priorScore: f.data?.priorScore ?? null,
+            trend: f.data?.trend ?? null,
+            confidence: f.data?.confidence ?? null,
+            topDrivers: f.data?.topDrivers ?? [],
+            whatChanged: f.data?.whatChanged ?? null,
+            highestLeverageAction: f.data?.highestLeverageAction ?? null,
+            hasData: f.data !== null,
+          })),
+          summaryHighRisk: view.summary.highRisk,
+          summaryImproving: view.summary.improving,
+          summaryDeclining: view.summary.declining,
         };
-      } catch (err: any) { throw new Error(err.message ?? "Failed to compute forecasts"); }
+      } catch (err: any) {
+        throw new Error(err.message ?? 'Failed to compute forecasts');
+      }
     },
 
-    pcExecuteCopilotCard: async (_: unknown, { orgId, matterId, cardId }: { orgId: number; matterId: number; cardId: string }) => {
-      try { return await copilotPilotOne.executeActionCard(orgId, matterId, cardId as any); }
-      catch (err: any) { throw new Error(err.message ?? "Failed to execute action card"); }
+    pcExecuteCopilotCard: async (
+      _: unknown,
+      { orgId, matterId, cardId }: { orgId: number; matterId: number; cardId: string },
+    ) => {
+      try {
+        return await copilotPilotOne.executeActionCard(orgId, matterId, cardId as any);
+      } catch (err: any) {
+        throw new Error(err.message ?? 'Failed to execute action card');
+      }
     },
   },
 
   PcInsurerPressureSnapshot: {
     drivers: async (snap: { id: number }) => {
       try {
-        return await db.select().from(pcInsurerPressureDriversTable).where(eq(pcInsurerPressureDriversTable.snapshotId, snap.id));
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcInsurerPressureDriversTable)
+          .where(eq(pcInsurerPressureDriversTable.snapshotId, snap.id));
+      } catch {
+        return [];
+      }
     },
   },
 
   PcSettlementFrictionSnapshot: {
     drivers: async (snap: { id: number }) => {
       try {
-        return await db.select().from(pcSettlementFrictionDriversTable).where(eq(pcSettlementFrictionDriversTable.snapshotId, snap.id));
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcSettlementFrictionDriversTable)
+          .where(eq(pcSettlementFrictionDriversTable.snapshotId, snap.id));
+      } catch {
+        return [];
+      }
     },
   },
 };

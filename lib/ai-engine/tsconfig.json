@@ -10,8 +10,5 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "references": [
-    { "path": "../db" },
-    { "path": "../services" }
-  ]
+  "references": [{ "path": "../db" }, { "path": "../services" }]
 }

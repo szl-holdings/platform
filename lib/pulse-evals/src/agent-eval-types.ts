@@ -7,40 +7,31 @@
  */
 
 export type AgentId =
-  | "sentinel-maritime"
-  | "helmsman-voyage"
-  | "guardian-security"
-  | "prism-ai"
+  | 'sentinel-maritime'
+  | 'helmsman-voyage'
+  | 'guardian-security'
+  | 'prism-ai'
   | string;
 
-export type EvalRunType =
-  | "scheduled"
-  | "on_demand"
-  | "ci_gate"
-  | "pre_promotion"
-  | "regression";
+export type EvalRunType = 'scheduled' | 'on_demand' | 'ci_gate' | 'pre_promotion' | 'regression';
 
-export type ReplayMode =
-  | "shadow"
-  | "historical"
-  | "scenario"
-  | "adversarial";
+export type ReplayMode = 'shadow' | 'historical' | 'scenario' | 'adversarial';
 
 export type FailureReason =
-  | "semantic_error"
-  | "missing_evidence"
-  | "hallucinated_evidence"
-  | "wrong_recommendation"
-  | "prohibited_recommendation"
-  | "confidence_overstatement"
-  | "confidence_understatement"
-  | "schema_violation"
-  | "incomplete_reasoning"
-  | "policy_mismatch";
+  | 'semantic_error'
+  | 'missing_evidence'
+  | 'hallucinated_evidence'
+  | 'wrong_recommendation'
+  | 'prohibited_recommendation'
+  | 'confidence_overstatement'
+  | 'confidence_understatement'
+  | 'schema_violation'
+  | 'incomplete_reasoning'
+  | 'policy_mismatch';
 
-export type CaseDifficulty = "easy" | "medium" | "hard" | "adversarial";
+export type CaseDifficulty = 'easy' | 'medium' | 'hard' | 'adversarial';
 
-export type PromotionDecision = "approve" | "block" | "pending_review";
+export type PromotionDecision = 'approve' | 'block' | 'pending_review';
 
 export interface EvalDimensionScores {
   semantic_accuracy: number;
@@ -55,8 +46,8 @@ export const DIMENSION_WEIGHTS: EvalDimensionScores = {
   semantic_accuracy: 0.35,
   recommendation_quality: 0.25,
   evidence_completeness: 0.15,
-  confidence_calibration: 0.10,
-  format_compliance: 0.10,
+  confidence_calibration: 0.1,
+  format_compliance: 0.1,
   safety_flag: 0.05,
 };
 
@@ -191,7 +182,7 @@ export interface AgentReplayRunRecord {
   safety_violations_current: number;
   safety_violations_candidate: number;
   reviewer?: string;
-  review_status: "pending" | "approved" | "rejected";
+  review_status: 'pending' | 'approved' | 'rejected';
   review_notes?: string;
   created_at: string;
 }
@@ -241,7 +232,7 @@ export interface PromotionGateResult {
 }
 
 export interface EvalLedgerEntry {
-  ledger_entry_type: "eval_run";
+  ledger_entry_type: 'eval_run';
   eval_id: string;
   agent_id: AgentId;
   model_version: string;

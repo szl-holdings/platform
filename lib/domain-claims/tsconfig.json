@@ -8,8 +8,6 @@
     "rootDir": "src",
     "types": ["node"]
   },
-  "references": [
-    { "path": "../../lib/config" }
-  ],
+  "references": [{ "path": "../../lib/config" }],
   "include": ["src"]
 }

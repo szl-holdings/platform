@@ -1,5 +1,5 @@
-import { logger } from "./logger.js";
-import { durableJobQueue, type DurableJobOptions } from "./durable-job-queue.js";
+import { type DurableJobOptions, durableJobQueue } from './durable-job-queue.js';
+import { logger } from './logger.js';
 
 export interface ScheduleDefinition {
   name: string;
@@ -7,37 +7,39 @@ export interface ScheduleDefinition {
   cronExpression: string;
   payload?: Record<string, unknown>;
   queue?: string;
-  priority?: DurableJobOptions["priority"];
+  priority?: DurableJobOptions['priority'];
   maxRetries?: number;
   enabled?: boolean;
 }
 
-type AnyPool = { query: (text: string, values?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> };
+type AnyPool = {
+  query: (text: string, values?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>;
+};
 
 function parseCronField(field: string, min: number, max: number): Set<number> {
   const result = new Set<number>();
-  for (const part of field.split(",")) {
+  for (const part of field.split(',')) {
     const trimmed = part.trim();
-    if (trimmed === "*") {
+    if (trimmed === '*') {
       for (let i = min; i <= max; i++) result.add(i);
-    } else if (trimmed.startsWith("*/")) {
+    } else if (trimmed.startsWith('*/')) {
       const step = parseInt(trimmed.slice(2), 10);
       if (!isNaN(step) && step > 0) {
         for (let i = min; i <= max; i += step) result.add(i);
       }
-    } else if (trimmed.includes("/")) {
-      const [rangePart, stepPart] = trimmed.split("/");
-      const step = parseInt(stepPart ?? "1", 10);
-      if (rangePart === "*") {
+    } else if (trimmed.includes('/')) {
+      const [rangePart, stepPart] = trimmed.split('/');
+      const step = parseInt(stepPart ?? '1', 10);
+      if (rangePart === '*') {
         for (let i = min; i <= max; i += step) result.add(i);
-      } else if (rangePart?.includes("-")) {
-        const [startStr, endStr] = rangePart.split("-");
+      } else if (rangePart?.includes('-')) {
+        const [startStr, endStr] = rangePart.split('-');
         const rangeStart = parseInt(startStr ?? String(min), 10);
         const rangeEnd = parseInt(endStr ?? String(max), 10);
         for (let i = rangeStart; i <= rangeEnd && i <= max; i += step) result.add(i);
       }
-    } else if (trimmed.includes("-")) {
-      const [startStr, endStr] = trimmed.split("-");
+    } else if (trimmed.includes('-')) {
+      const [startStr, endStr] = trimmed.split('-');
       const rangeStart = parseInt(startStr ?? String(min), 10);
       const rangeEnd = parseInt(endStr ?? String(max), 10);
       for (let i = rangeStart; i <= rangeEnd && i <= max; i++) result.add(i);
@@ -60,11 +62,11 @@ interface CronFields {
 function parseCronExpression(expr: string): CronFields {
   const parts = expr.trim().split(/\s+/);
   return {
-    minutes: parseCronField(parts[0] ?? "*", 0, 59),
-    hours: parseCronField(parts[1] ?? "*", 0, 23),
-    daysOfMonth: parseCronField(parts[2] ?? "*", 1, 31),
-    months: parseCronField(parts[3] ?? "*", 1, 12),
-    daysOfWeek: parseCronField(parts[4] ?? "*", 0, 6),
+    minutes: parseCronField(parts[0] ?? '*', 0, 59),
+    hours: parseCronField(parts[1] ?? '*', 0, 23),
+    daysOfMonth: parseCronField(parts[2] ?? '*', 1, 31),
+    months: parseCronField(parts[3] ?? '*', 1, 12),
+    daysOfWeek: parseCronField(parts[4] ?? '*', 0, 6),
   };
 }
 
@@ -144,8 +146,14 @@ export class DurableScheduler {
       [
         def.name,
         def.jobType,
-        def.queue ?? "default",
-        def.priority === "critical" ? 10 : def.priority === "high" ? 30 : def.priority === "low" ? 80 : 50,
+        def.queue ?? 'default',
+        def.priority === 'critical'
+          ? 10
+          : def.priority === 'high'
+            ? 30
+            : def.priority === 'low'
+              ? 80
+              : 50,
         def.cronExpression,
         JSON.stringify(def.payload ?? {}),
         def.maxRetries ?? 3,
@@ -171,21 +179,24 @@ export class DurableScheduler {
          RETURNING name`,
       );
       if (recovered.rows.length > 0) {
-        logger.warn({ count: recovered.rows.length }, "DurableScheduler: recovered stale claimed schedules on startup");
+        logger.warn(
+          { count: recovered.rows.length },
+          'DurableScheduler: recovered stale claimed schedules on startup',
+        );
       }
     } catch (err) {
-      logger.warn({ err }, "DurableScheduler: stale schedule recovery failed (non-fatal)");
+      logger.warn({ err }, 'DurableScheduler: stale schedule recovery failed (non-fatal)');
     }
 
     await this.fireDueSchedules();
 
     this.pollTimer = setInterval(() => {
-      this.fireDueSchedules().catch(err => {
-        logger.warn({ err }, "DurableScheduler: poll error");
+      this.fireDueSchedules().catch((err) => {
+        logger.warn({ err }, 'DurableScheduler: poll error');
       });
     }, this.pollIntervalMs);
 
-    logger.info({ pollIntervalMs: this.pollIntervalMs }, "DurableScheduler: started");
+    logger.info({ pollIntervalMs: this.pollIntervalMs }, 'DurableScheduler: started');
   }
 
   stop(): void {
@@ -194,7 +205,7 @@ export class DurableScheduler {
       this.pollTimer = null;
     }
     this.isRunning = false;
-    logger.info("DurableScheduler: stopped");
+    logger.info('DurableScheduler: stopped');
   }
 
   private async fireDueSchedules(): Promise<void> {
@@ -220,14 +231,19 @@ export class DurableScheduler {
       try {
         await this.fireSchedule(pool, row);
       } catch (err) {
-        logger.warn({ err, scheduleName: row["name"] }, "DurableScheduler: failed to fire schedule");
+        logger.warn(
+          { err, scheduleName: row['name'] },
+          'DurableScheduler: failed to fire schedule',
+        );
       }
     }
   }
 
   private async fireSchedule(pool: AnyPool, row: Record<string, unknown>): Promise<void> {
-    const cronExpr = row["cron_expression"] as string;
-    const lastRunAt = row["last_run_at"] ? new Date(row["last_run_at"] as string) : new Date(Date.now() - 60_000);
+    const cronExpr = row['cron_expression'] as string;
+    const lastRunAt = row['last_run_at']
+      ? new Date(row['last_run_at'] as string)
+      : new Date(Date.now() - 60_000);
     const now = new Date();
 
     const nextRunAt = getNextRunTime(cronExpr, now);
@@ -235,7 +251,8 @@ export class DurableScheduler {
     const missedRuns = getAllMissedRunTimes(cronExpr, lastRunAt, now);
     const runsToFire = missedRuns.length > 0 ? missedRuns : [now];
 
-    const payload = typeof row["payload"] === "string" ? JSON.parse(row["payload"]) : (row["payload"] ?? {});
+    const payload =
+      typeof row['payload'] === 'string' ? JSON.parse(row['payload']) : (row['payload'] ?? {});
 
     let lastError: unknown;
     let firedCount = 0;
@@ -243,36 +260,49 @@ export class DurableScheduler {
     for (const runTime of runsToFire) {
       try {
         await durableJobQueue.enqueue(
-          row["job_type"] as string,
+          row['job_type'] as string,
           { ...payload, scheduledFor: runTime.toISOString(), catchUp: firedCount > 0 },
           {
-            queue: row["queue"] as string,
-            maxRetries: row["max_retries"] as number,
-            metadata: { scheduleName: row["name"] as string, triggeredBy: "scheduler", missedRun: firedCount > 0 },
+            queue: row['queue'] as string,
+            maxRetries: row['max_retries'] as number,
+            metadata: {
+              scheduleName: row['name'] as string,
+              triggeredBy: 'scheduler',
+              missedRun: firedCount > 0,
+            },
           },
         );
         firedCount++;
       } catch (err) {
         lastError = err;
-        logger.warn({ err, scheduleName: row["name"], runTime }, "DurableScheduler: failed to enqueue job for run time");
+        logger.warn(
+          { err, scheduleName: row['name'], runTime },
+          'DurableScheduler: failed to enqueue job for run time',
+        );
       }
     }
 
     if (firedCount > 0) {
       await pool.query(
         `UPDATE job_schedules SET last_status = 'completed', last_run_at = NOW(), next_run_at = $1, updated_at = NOW() WHERE id = $2`,
-        [nextRunAt, row["id"]],
+        [nextRunAt, row['id']],
       );
       if (firedCount > 1) {
-        logger.info({ schedule: row["name"], missedCount: firedCount - 1, nextRunAt }, "DurableScheduler: fired schedule with catch-up runs");
+        logger.info(
+          { schedule: row['name'], missedCount: firedCount - 1, nextRunAt },
+          'DurableScheduler: fired schedule with catch-up runs',
+        );
       } else {
-        logger.info({ schedule: row["name"], jobType: row["job_type"], nextRunAt }, "DurableScheduler: schedule fired");
+        logger.info(
+          { schedule: row['name'], jobType: row['job_type'], nextRunAt },
+          'DurableScheduler: schedule fired',
+        );
       }
     } else {
-      const failedNextRunAt = getNextRunTime(row["cron_expression"] as string, new Date());
+      const failedNextRunAt = getNextRunTime(row['cron_expression'] as string, new Date());
       await pool.query(
         `UPDATE job_schedules SET last_status = 'failed', fail_count = fail_count + 1, next_run_at = $1, updated_at = NOW() WHERE id = $2`,
-        [failedNextRunAt, row["id"]],
+        [failedNextRunAt, row['id']],
       );
       throw lastError;
     }
@@ -280,32 +310,27 @@ export class DurableScheduler {
 
   async getSchedules(): Promise<unknown[]> {
     const pool = await this.getPool();
-    const result = await pool.query(
-      `SELECT * FROM job_schedules ORDER BY name ASC`,
-    );
+    const result = await pool.query(`SELECT * FROM job_schedules ORDER BY name ASC`);
     return result.rows;
   }
 
   async enableSchedule(name: string, enabled: boolean): Promise<void> {
     const pool = await this.getPool();
-    await pool.query(
-      `UPDATE job_schedules SET enabled = $1, updated_at = NOW() WHERE name = $2`,
-      [enabled, name],
-    );
+    await pool.query(`UPDATE job_schedules SET enabled = $1, updated_at = NOW() WHERE name = $2`, [
+      enabled,
+      name,
+    ]);
   }
 
   async triggerNow(name: string): Promise<void> {
     const pool = await this.getPool();
-    const result = await pool.query(
-      `SELECT * FROM job_schedules WHERE name = $1`,
-      [name],
-    );
+    const result = await pool.query(`SELECT * FROM job_schedules WHERE name = $1`, [name]);
     if (result.rows.length === 0) throw new Error(`Schedule not found: ${name}`);
     await this.fireSchedule(pool, result.rows[0]!);
   }
 
   private async getPool(): Promise<AnyPool> {
-    const { pool } = await import("@szl-holdings/db");
+    const { pool } = await import('@szl-holdings/db');
     return pool as unknown as AnyPool;
   }
 }
@@ -317,8 +342,8 @@ export async function seedDefaultSchedules(schedules: ScheduleDefinition[]): Pro
     try {
       await durableScheduler.upsertSchedule(s);
     } catch (err) {
-      logger.warn({ err, schedule: s.name }, "DurableScheduler: failed to seed schedule");
+      logger.warn({ err, schedule: s.name }, 'DurableScheduler: failed to seed schedule');
     }
   }
-  logger.info({ count: schedules.length }, "DurableScheduler: default schedules seeded");
+  logger.info({ count: schedules.length }, 'DurableScheduler: default schedules seeded');
 }

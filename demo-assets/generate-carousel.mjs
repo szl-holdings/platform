@@ -18,11 +18,16 @@ for (const candidate of PLAYWRIGHT_CANDIDATES) {
   try {
     ({ chromium } = await import(candidate));
     break;
-  } catch { /* try next */ }
+  } catch {
+    /* try next */
+  }
 }
 if (!chromium) {
-  throw new Error('Could not resolve Playwright. Run: pnpm add -D playwright && npx playwright install chromium');
+  throw new Error(
+    'Could not resolve Playwright. Run: pnpm add -D playwright && npx playwright install chromium',
+  );
 }
+
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -600,28 +605,29 @@ function slide10Thesis() {
 
 async function run() {
   console.log('Loading screenshots as base64 data URLs...');
-  const [szlImg, lyteImg, vesselsImg, terraImg, prismImg, carlotaImg, stephenImg] = await Promise.all([
-    loadDataUrl('szl-holdings-hero.jpg'),
-    loadDataUrl('lyte-hero.jpg'),
-    loadDataUrl('vessels-hero.jpg'),
-    loadDataUrl('terra-hero.jpg'),
-    loadDataUrl('prism-counsel-hero.jpg'),
-    loadDataUrl('carlota-jo-hero.jpg'),
-    loadDataUrl('stephen-site-hero.jpg'),
-  ]);
+  const [szlImg, lyteImg, vesselsImg, terraImg, prismImg, carlotaImg, stephenImg] =
+    await Promise.all([
+      loadDataUrl('szl-holdings-hero.jpg'),
+      loadDataUrl('lyte-hero.jpg'),
+      loadDataUrl('vessels-hero.jpg'),
+      loadDataUrl('terra-hero.jpg'),
+      loadDataUrl('prism-counsel-hero.jpg'),
+      loadDataUrl('carlota-jo-hero.jpg'),
+      loadDataUrl('stephen-site-hero.jpg'),
+    ]);
   console.log('All images loaded.');
 
   const slides = [
-    { id: 'slide-01-cover',           html: slide01Cover() },
-    { id: 'slide-02-thesis',          html: slide02Thesis() },
-    { id: 'slide-03-szl-dashboard',   html: slide03SzlDashboard(szlImg) },
-    { id: 'slide-04-lyte',            html: slide04Lyte(lyteImg) },
-    { id: 'slide-05-vessels',         html: slide05Vessels(vesselsImg) },
-    { id: 'slide-06-terra',           html: slide06Terra(terraImg) },
-    { id: 'slide-07-aegis',           html: slide07Aegis() },
-    { id: 'slide-08-prism-imperium',  html: slide08PrismImperium(prismImg) },
+    { id: 'slide-01-cover', html: slide01Cover() },
+    { id: 'slide-02-thesis', html: slide02Thesis() },
+    { id: 'slide-03-szl-dashboard', html: slide03SzlDashboard(szlImg) },
+    { id: 'slide-04-lyte', html: slide04Lyte(lyteImg) },
+    { id: 'slide-05-vessels', html: slide05Vessels(vesselsImg) },
+    { id: 'slide-06-terra', html: slide06Terra(terraImg) },
+    { id: 'slide-07-aegis', html: slide07Aegis() },
+    { id: 'slide-08-prism-imperium', html: slide08PrismImperium(prismImg) },
     { id: 'slide-09-carlota-stephen', html: slide09CarlotaStephen(carlotaImg, stephenImg) },
-    { id: 'slide-10-thesis',          html: slide10Thesis() },
+    { id: 'slide-10-thesis', html: slide10Thesis() },
   ];
 
   // Resolve Chromium: use PLAYWRIGHT_CHROMIUM_EXECUTABLE env var first,
@@ -630,17 +636,24 @@ async function run() {
   let executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
   if (!executablePath) {
     try {
-      executablePath = execSync('which chromium-browser 2>/dev/null || which chromium 2>/dev/null || which google-chrome 2>/dev/null', { encoding: 'utf8' }).trim().split('\n')[0];
-    } catch { /* will let playwright use its own bundled binary */ }
+      executablePath = execSync(
+        'which chromium-browser 2>/dev/null || which chromium 2>/dev/null || which google-chrome 2>/dev/null',
+        { encoding: 'utf8' },
+      )
+        .trim()
+        .split('\n')[0];
+    } catch {
+      /* will let playwright use its own bundled binary */
+    }
   }
 
   const browser = await chromium.launch({
     ...(executablePath ? { executablePath } : {}),
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   });
   const context = await browser.newContext({
     viewport: { width: W, height: H },
-    deviceScaleFactor: 1
+    deviceScaleFactor: 1,
   });
 
   const jpgPaths = [];
@@ -667,8 +680,10 @@ async function run() {
     const pageOut = path.join(OUTPUT_DIR, `pdf-page-${String(i + 1).padStart(2, '0')}.pdf`);
     await page.pdf({
       path: pageOut,
-      width: `${W}px`, height: `${H}px`,
-      printBackground: true, margin: { top: '0', bottom: '0', left: '0', right: '0' }
+      width: `${W}px`,
+      height: `${H}px`,
+      printBackground: true,
+      margin: { top: '0', bottom: '0', left: '0', right: '0' },
     });
     await page.close();
   }
@@ -682,22 +697,26 @@ async function run() {
     .page { page-break-after: always; width: ${W}px; height: ${H}px; overflow: hidden; }
     .page:last-child { page-break-after: auto; }
   </style></head><body>
-    ${slides.map(s => {
-      // Strip the outer html wrapper from each slide HTML, keep just inner body content
-      const bodyMatch = s.html.match(/<body>([\s\S]*?)<\/body>/);
-      const styleMatch = s.html.match(/<style>([\s\S]*?)<\/style>/);
-      const style = styleMatch ? `<style>${styleMatch[1]}</style>` : '';
-      const body = bodyMatch ? bodyMatch[1] : '';
-      return `<div class="page">${style}${body}</div>`;
-    }).join('\n')}
+    ${slides
+      .map((s) => {
+        // Strip the outer html wrapper from each slide HTML, keep just inner body content
+        const bodyMatch = s.html.match(/<body>([\s\S]*?)<\/body>/);
+        const styleMatch = s.html.match(/<style>([\s\S]*?)<\/style>/);
+        const style = styleMatch ? `<style>${styleMatch[1]}</style>` : '';
+        const body = bodyMatch ? bodyMatch[1] : '';
+        return `<div class="page">${style}${body}</div>`;
+      })
+      .join('\n')}
   </body></html>`;
 
   await combinedPage.setContent(combinedHtml, { waitUntil: 'domcontentloaded' });
   await combinedPage.waitForTimeout(600);
   await combinedPage.pdf({
     path: PDF_OUT,
-    width: `${W}px`, height: `${H}px`,
-    printBackground: true, margin: { top: '0', bottom: '0', left: '0', right: '0' }
+    width: `${W}px`,
+    height: `${H}px`,
+    printBackground: true,
+    margin: { top: '0', bottom: '0', left: '0', right: '0' },
   });
   await combinedPage.close();
   console.log(`  -> ${PDF_OUT}`);
@@ -710,8 +729,11 @@ async function run() {
 
   await browser.close();
   console.log('\nDone! Generated:');
-  jpgPaths.forEach(p => console.log(' ', p));
+  jpgPaths.forEach((p) => console.log(' ', p));
   console.log(' ', PDF_OUT);
 }
 
-run().catch(err => { console.error(err); process.exit(1); });
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

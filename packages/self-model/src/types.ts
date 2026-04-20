@@ -1,14 +1,14 @@
 export type RiskTier =
-  | "advisory-only"
-  | "internal-workflow"
-  | "autonomous-reversible"
-  | "autonomous-irreversible"
-  | "regulated-workflow"
-  | "executive-facing"
-  | "human-approval-mandatory"
-  | "classified";
+  | 'advisory-only'
+  | 'internal-workflow'
+  | 'autonomous-reversible'
+  | 'autonomous-irreversible'
+  | 'regulated-workflow'
+  | 'executive-facing'
+  | 'human-approval-mandatory'
+  | 'classified';
 
-export type CapabilityStatus = "active" | "degraded" | "unavailable" | "unknown";
+export type CapabilityStatus = 'active' | 'degraded' | 'unavailable' | 'unknown';
 
 export interface Capability {
   name: string;
@@ -38,14 +38,14 @@ export interface ActiveObjective {
   progress?: number;
   startedAt?: string;
   dueAt?: string;
-  status: "pending" | "in-progress" | "blocked" | "completed" | "abandoned";
+  status: 'pending' | 'in-progress' | 'blocked' | 'completed' | 'abandoned';
 }
 
 export interface PerformanceRecord {
   runId: string;
   agentId: string;
   domain?: string;
-  outcome: "success" | "partial" | "failure";
+  outcome: 'success' | 'partial' | 'failure';
   summary?: string;
   durationMs?: number;
   confidenceBefore?: number;
@@ -68,7 +68,7 @@ export interface ConfidenceProfile {
   overall: number;
   byDomain: Record<string, number>;
   byCapability: Record<string, number>;
-  trend: "rising" | "stable" | "declining";
+  trend: 'rising' | 'stable' | 'declining';
   lastAdjustedAt: string;
 }
 
@@ -90,7 +90,7 @@ export interface RoutingPattern {
 export interface EscalationThreshold {
   metric: string;
   threshold: number;
-  action: "request-help" | "pause" | "abort" | "notify";
+  action: 'request-help' | 'pause' | 'abort' | 'notify';
   notifyRecipients?: string[];
 }
 
@@ -98,12 +98,12 @@ export interface HumanDependency {
   role: string;
   userId?: string;
   reason: string;
-  escalationLevel: "advisory" | "approval-required" | "blocking";
+  escalationLevel: 'advisory' | 'approval-required' | 'blocking';
 }
 
 export interface DomainProfile {
   domain: string;
-  strength: "strong" | "adequate" | "weak" | "unknown";
+  strength: 'strong' | 'adequate' | 'weak' | 'unknown';
   confidence: number;
   knowledgeCount?: number;
   lastActiveAt?: string;
@@ -115,7 +115,7 @@ export interface IdentityProfile {
   version: string;
   description?: string;
   owner?: string;
-  environment: "development" | "staging" | "production" | "sandbox";
+  environment: 'development' | 'staging' | 'production' | 'sandbox';
   launchedAt: string;
   primaryDomain?: string;
   tags?: string[];
@@ -160,7 +160,7 @@ export interface RunOutcome {
   runId: string;
   agentId: string;
   domain?: string;
-  status: "success" | "partial" | "failure";
+  status: 'success' | 'partial' | 'failure';
   summary?: string;
   durationMs?: number;
   errorCode?: string;
@@ -173,7 +173,7 @@ export interface HelpRequest {
   metric: string;
   currentValue: number;
   threshold: number;
-  action: EscalationThreshold["action"];
+  action: EscalationThreshold['action'];
   notifyRecipients: string[];
   requestedAt: string;
 }

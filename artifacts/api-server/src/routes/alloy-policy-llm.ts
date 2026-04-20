@@ -1,13 +1,13 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { z } from "zod";
-import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
-import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
-  PolicyEffectSchema,
-  PolicyConditionSchema,
-  type LLMAssistResult,
   type CompiledRuleIR,
-} from "@szl-holdings/policy-engine";
+  type LLMAssistResult,
+  PolicyConditionSchema,
+  PolicyEffectSchema,
+} from '@szl-holdings/policy-engine';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
+import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const policyLLMRouter: IRouter = Router();
 
@@ -22,7 +22,7 @@ const policyLLMRouter: IRouter = Router();
  * output to this set so the model can't return e.g. `matches` and have the
  * preview silently skip it.
  */
-const StudioOperatorSchema = z.enum(["eq", "gt", "gte", "lt", "lte", "in", "not_in"]);
+const StudioOperatorSchema = z.enum(['eq', 'gt', 'gte', 'lt', 'lte', 'in', 'not_in']);
 
 const StudioConditionSchema = z.object({
   field: z.string().min(1).max(120),
@@ -93,10 +93,10 @@ const USER_PROMPT_TEMPLATE = (
     ? `Deterministic parser already produced:
 - effect: ${deterministic.effect}
 - confidence: ${deterministic.confidence.toFixed(2)}
-- warnings: ${(deterministic.warnings ?? []).join("; ") || "(none)"}
+- warnings: ${(deterministic.warnings ?? []).join('; ') || '(none)'}
 
 Repair gaps and resolve ambiguity. If the deterministic parse is correct, echo it back with a higher confidence.`
-    : "No deterministic parse available — produce a fresh structured rule.";
+    : 'No deterministic parse available — produce a fresh structured rule.';
 
   return `Sentence:
 """${sentence}"""
@@ -110,16 +110,17 @@ async function callLLM(
   sentence: string,
   deterministic?: { effect: string; confidence: number; warnings?: string[] },
 ): Promise<LLMResponse> {
-  const baseUrl = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
-  const apiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
-  const model = process.env["ALLOY_POLICY_LLM_MODEL"] ?? "gpt-5-mini";
+  const baseUrl = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'];
+  const apiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+  const model = process.env['ALLOY_POLICY_LLM_MODEL'] ?? 'gpt-5-mini';
 
   if (!baseUrl || !apiKey) {
     return {
       result: null,
       modelUsed: model,
       llmAvailable: false,
-      fallbackReason: "OpenAI integration not configured (AI_INTEGRATIONS_OPENAI_* env vars missing).",
+      fallbackReason:
+        'OpenAI integration not configured (AI_INTEGRATIONS_OPENAI_* env vars missing).',
     };
   }
 
@@ -127,26 +128,26 @@ async function callLLM(
   const timer = setTimeout(() => controller.abort(), 12_000);
 
   try {
-    const response = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
-      method: "POST",
+    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
         max_completion_tokens: 600,
-        response_format: { type: "json_object" },
+        response_format: { type: 'json_object' },
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: USER_PROMPT_TEMPLATE(sentence, deterministic) },
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: USER_PROMPT_TEMPLATE(sentence, deterministic) },
         ],
       }),
       signal: controller.signal,
     });
 
     if (!response.ok) {
-      const text = await response.text().catch(() => "");
+      const text = await response.text().catch(() => '');
       return {
         result: null,
         modelUsed: model,
@@ -164,11 +165,11 @@ async function callLLM(
         result: null,
         modelUsed: model,
         llmAvailable: true,
-        fallbackReason: "LLM returned no content.",
+        fallbackReason: 'LLM returned no content.',
       };
     }
 
-    const cleaned = raw.replace(/^```json\s*|\s*```$/g, "").trim();
+    const cleaned = raw.replace(/^```json\s*|\s*```$/g, '').trim();
     let parsedJson: unknown;
     try {
       parsedJson = JSON.parse(cleaned);
@@ -189,8 +190,8 @@ async function callLLM(
         llmAvailable: true,
         fallbackReason: `LLM payload failed validation: ${validated.error.issues
           .slice(0, 3)
-          .map((i) => `${i.path.join(".")}: ${i.message}`)
-          .join("; ")}`,
+          .map((i) => `${i.path.join('.')}: ${i.message}`)
+          .join('; ')}`,
       };
     }
 
@@ -220,16 +221,16 @@ async function callLLM(
  * The endpoint is safe to call repeatedly; it is read-only on the server side.
  */
 policyLLMRouter.post(
-  "/alloy/policies/llm-assist",
+  '/alloy/policies/llm-assist',
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   async (req: Request, res: Response) => {
     try {
       const parsed = RequestBodySchema.safeParse(req.body);
       if (!parsed.success) {
         sendError(
           res,
-          `Invalid request body: ${parsed.error.issues.map((i) => i.message).join("; ")}`,
+          `Invalid request body: ${parsed.error.issues.map((i) => i.message).join('; ')}`,
           400,
         );
         return;
@@ -255,7 +256,7 @@ policyLLMRouter.post(
         thresholdHint: 0.7,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to resolve policy sentence with LLM");
+      handleRouteError(res, err, 'Failed to resolve policy sentence with LLM');
     }
   },
 );

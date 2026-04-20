@@ -1,8 +1,8 @@
-import type { TerraDistressProperty } from "@szl-holdings/db";
+import type { TerraDistressProperty } from '@szl-holdings/db';
 
 export interface ScoringResult {
   score: number;
-  confidence: "low" | "medium" | "high";
+  confidence: 'low' | 'medium' | 'high';
   reasoning: string;
   recommended_action: string;
   breakdown: {
@@ -16,20 +16,20 @@ export interface ScoringResult {
 }
 
 const DISTRESS_TYPE_WEIGHT: Record<string, number> = {
-  "auction": 30,
-  "pre-foreclosure": 26,
-  "foreclosure": 24,
-  "tax-lien": 20,
-  "reo": 18,
-  "expired-listing": 10,
+  auction: 30,
+  'pre-foreclosure': 26,
+  foreclosure: 24,
+  'tax-lien': 20,
+  reo: 18,
+  'expired-listing': 10,
 };
 
 const BOROUGH_DEMAND: Record<string, number> = {
-  "Manhattan": 18,
-  "Brooklyn": 16,
-  "Queens": 14,
-  "Bronx": 12,
-  "Staten Island": 10,
+  Manhattan: 18,
+  Brooklyn: 16,
+  Queens: 14,
+  Bronx: 12,
+  'Staten Island': 10,
 };
 
 function clamp(v: number, min = 0, max = 100): number {
@@ -82,7 +82,7 @@ function computeScore(prop: TerraDistressProperty): ScoringResult {
 
   // 6. Auction urgency bonus (0–15 extra for auction proximity)
   let auctionBonus = 0;
-  if (prop.distressType === "auction" && prop.auctionDate) {
+  if (prop.distressType === 'auction' && prop.auctionDate) {
     const auctionDate = new Date(prop.auctionDate);
     const daysToAuction = Math.ceil((auctionDate.getTime() - today.getTime()) / 86400000);
     if (daysToAuction >= 0 && daysToAuction <= 7) auctionBonus = 15;
@@ -90,50 +90,74 @@ function computeScore(prop: TerraDistressProperty): ScoringResult {
     else if (daysToAuction <= 30) auctionBonus = 8;
   }
 
-  const rawScore = distressTypeScore + timeScore + equityScore + locationScore + filingScore + auctionBonus;
+  const rawScore =
+    distressTypeScore + timeScore + equityScore + locationScore + filingScore + auctionBonus;
   const maxPossible = 30 + 20 + 25 + 18 + 15 + 15;
   const normalizedScore = clamp(Math.round((rawScore / maxPossible) * 100));
 
   // Confidence based on data completeness
-  const hasAll = !!(prop.estimatedValue && prop.debtAmount && prop.filingDate && prop.ownerName && prop.ownerType);
+  const hasAll = !!(
+    prop.estimatedValue &&
+    prop.debtAmount &&
+    prop.filingDate &&
+    prop.ownerName &&
+    prop.ownerType
+  );
   const hasMost = !!(prop.estimatedValue && prop.filingDate && prop.ownerName);
-  const confidence: "low" | "medium" | "high" = hasAll ? "high" : hasMost ? "medium" : "low";
+  const confidence: 'low' | 'medium' | 'high' = hasAll ? 'high' : hasMost ? 'medium' : 'low';
 
   // Reasoning
-  const equityPct = prop.debtAmount && prop.estimatedValue
-    ? Math.round(((Number(prop.estimatedValue) - Number(prop.debtAmount)) / Number(prop.estimatedValue)) * 100)
-    : null;
+  const equityPct =
+    prop.debtAmount && prop.estimatedValue
+      ? Math.round(
+          ((Number(prop.estimatedValue) - Number(prop.debtAmount)) / Number(prop.estimatedValue)) *
+            100,
+        )
+      : null;
 
   const reasoningParts: string[] = [];
 
-  if (prop.distressType === "auction" && prop.auctionDate) {
-    const daysToAuction = Math.ceil((new Date(prop.auctionDate).getTime() - today.getTime()) / 86400000);
+  if (prop.distressType === 'auction' && prop.auctionDate) {
+    const daysToAuction = Math.ceil(
+      (new Date(prop.auctionDate).getTime() - today.getTime()) / 86400000,
+    );
     reasoningParts.push(`Auction scheduled in ${daysToAuction} days — high urgency window`);
   } else {
-    reasoningParts.push(`${prop.distressType.replace(/-/g, " ")} distress signal — ${distressTypeScore >= 25 ? "high" : distressTypeScore >= 18 ? "moderate" : "lower"}-priority distress type`);
+    reasoningParts.push(
+      `${prop.distressType.replace(/-/g, ' ')} distress signal — ${distressTypeScore >= 25 ? 'high' : distressTypeScore >= 18 ? 'moderate' : 'lower'}-priority distress type`,
+    );
   }
 
   if (equityPct !== null) {
-    reasoningParts.push(`${equityPct}% estimated equity position (${equityPct >= 35 ? "strong acquisition opportunity" : equityPct >= 20 ? "workable margin" : "thin equity — negotiate carefully"})`);
+    reasoningParts.push(
+      `${equityPct}% estimated equity position (${equityPct >= 35 ? 'strong acquisition opportunity' : equityPct >= 20 ? 'workable margin' : 'thin equity — negotiate carefully'})`,
+    );
   }
 
-  reasoningParts.push(`${prop.borough} location — ${locationScore >= 16 ? "top-tier" : locationScore >= 13 ? "strong"  : "moderate"} NYC demand market`);
-  reasoningParts.push(`${daysInDistress} days in distress — ${daysInDistress >= 90 && daysInDistress <= 180 ? "motivated seller likely" : daysInDistress > 180 ? "extended distress, seller pressure high" : "early stage, window opening"}`);
+  reasoningParts.push(
+    `${prop.borough} location — ${locationScore >= 16 ? 'top-tier' : locationScore >= 13 ? 'strong' : 'moderate'} NYC demand market`,
+  );
+  reasoningParts.push(
+    `${daysInDistress} days in distress — ${daysInDistress >= 90 && daysInDistress <= 180 ? 'motivated seller likely' : daysInDistress > 180 ? 'extended distress, seller pressure high' : 'early stage, window opening'}`,
+  );
 
-  const reasoning = reasoningParts.join(". ") + ".";
+  const reasoning = reasoningParts.join('. ') + '.';
 
   // Recommended action
   let recommended_action: string;
   if (normalizedScore >= 85) {
-    recommended_action = "Immediate direct outreach — certified mail + attorney of record. Priority acquisition candidate.";
+    recommended_action =
+      'Immediate direct outreach — certified mail + attorney of record. Priority acquisition candidate.';
   } else if (normalizedScore >= 70) {
-    recommended_action = "Schedule direct owner contact within 5 business days. Add to investor queue.";
+    recommended_action =
+      'Schedule direct owner contact within 5 business days. Add to investor queue.';
   } else if (normalizedScore >= 55) {
-    recommended_action = "Monitor and follow up within 30 days. Add to watchlist.";
+    recommended_action = 'Monitor and follow up within 30 days. Add to watchlist.';
   } else if (normalizedScore >= 40) {
-    recommended_action = "Low priority. Add to watchlist. Revisit if distress stage escalates.";
+    recommended_action = 'Low priority. Add to watchlist. Revisit if distress stage escalates.';
   } else {
-    recommended_action = "Hold — insufficient opportunity signal. Re-evaluate at next data refresh.";
+    recommended_action =
+      'Hold — insufficient opportunity signal. Re-evaluate at next data refresh.';
   }
 
   return {
@@ -156,8 +180,10 @@ export async function scoreDistressProperty(prop: TerraDistressProperty): Promis
   return computeScore(prop);
 }
 
-export async function scoreDistressProperties(props: TerraDistressProperty[]): Promise<Array<ScoringResult & { id: string; address: string }>> {
-  return props.map(prop => ({
+export async function scoreDistressProperties(
+  props: TerraDistressProperty[],
+): Promise<Array<ScoringResult & { id: string; address: string }>> {
+  return props.map((prop) => ({
     id: prop.externalId ?? String(prop.id),
     address: prop.address,
     ...computeScore(prop),

@@ -1,7 +1,6 @@
-import AppObservabilityPage from "@szl-holdings/shared-ui/AppObservabilityPage";
-  import { mspConfig } from "@szl-holdings/observability/configs";
+import { mspConfig } from '@szl-holdings/observability/configs';
+import AppObservabilityPage from '@szl-holdings/shared-ui/AppObservabilityPage';
 
-  export default function ObservabilityPage() {
-    return <AppObservabilityPage config={mspConfig} />;
-  }
-  
+export default function ObservabilityPage() {
+  return <AppObservabilityPage config={mspConfig} />;
+}

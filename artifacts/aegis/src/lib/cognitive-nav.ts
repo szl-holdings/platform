@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { useLocation } from "wouter";
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'wouter';
 
 export type Crumb = {
   path: string;
@@ -7,18 +7,18 @@ export type Crumb = {
   context?: string;
 };
 
-const KEY = "aegis.cognitive.breadcrumbs";
+const KEY = 'aegis.cognitive.breadcrumbs';
 const MAX = 6;
 
 export const COGNITIVE_ROUTES: Record<string, string> = {
-  "/cognitive-attack-path": "Cognitive Attack Path",
-  "/identity-blast-radius": "Identity Blast Radius",
-  "/compliance/incident-proof": "Incident Proof Chain",
-  "/business-impact": "Business Impact Map",
+  '/cognitive-attack-path': 'Cognitive Attack Path',
+  '/identity-blast-radius': 'Identity Blast Radius',
+  '/compliance/incident-proof': 'Incident Proof Chain',
+  '/business-impact': 'Business Impact Map',
 };
 
 function readStore(): Crumb[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === 'undefined') return [];
   try {
     const raw = window.sessionStorage.getItem(KEY);
     return raw ? (JSON.parse(raw) as Crumb[]) : [];
@@ -28,13 +28,13 @@ function readStore(): Crumb[] {
 }
 
 function writeStore(crumbs: Crumb[]) {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.setItem(KEY, JSON.stringify(crumbs.slice(-MAX)));
   } catch {
     /* ignore */
   }
-  window.dispatchEvent(new CustomEvent("aegis:crumbs-changed"));
+  window.dispatchEvent(new CustomEvent('aegis:crumbs-changed'));
 }
 
 export function pushCrumb(crumb: Crumb) {
@@ -51,7 +51,7 @@ export function clearCrumbs() {
 
 export function popToPath(path: string) {
   const crumbs = readStore();
-  const idx = crumbs.findIndex(c => c.path === path);
+  const idx = crumbs.findIndex((c) => c.path === path);
   if (idx >= 0) writeStore(crumbs.slice(0, idx));
   else writeStore([]);
 }
@@ -60,11 +60,11 @@ export function useCrumbs(): Crumb[] {
   const [crumbs, setCrumbs] = useState<Crumb[]>(() => readStore());
   useEffect(() => {
     const handler = () => setCrumbs(readStore());
-    window.addEventListener("aegis:crumbs-changed", handler);
-    window.addEventListener("storage", handler);
+    window.addEventListener('aegis:crumbs-changed', handler);
+    window.addEventListener('storage', handler);
     return () => {
-      window.removeEventListener("aegis:crumbs-changed", handler);
-      window.removeEventListener("storage", handler);
+      window.removeEventListener('aegis:crumbs-changed', handler);
+      window.removeEventListener('storage', handler);
     };
   }, []);
   return crumbs;
@@ -75,8 +75,7 @@ export function useDrilldown() {
   const [location, navigate] = useLocation();
   return useCallback(
     (target: string, opts?: { fromLabel?: string; fromContext?: string }) => {
-      const fromLabel =
-        opts?.fromLabel ?? COGNITIVE_ROUTES[location] ?? location;
+      const fromLabel = opts?.fromLabel ?? COGNITIVE_ROUTES[location] ?? location;
       const crumb: Crumb = { path: location, label: fromLabel };
       if (opts?.fromContext) crumb.context = opts.fromContext;
       pushCrumb(crumb);

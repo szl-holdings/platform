@@ -1,7 +1,7 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { useApiStatus } from "./useApiStatus";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useApiStatus } from './useApiStatus';
 
-export type SyncState = "synced" | "syncing" | "pending" | "conflict" | "error" | "offline";
+export type SyncState = 'synced' | 'syncing' | 'pending' | 'conflict' | 'error' | 'offline';
 
 export interface OfflineSyncState {
   syncState: SyncState;
@@ -58,8 +58,7 @@ export function useOfflineSync({
       ]);
       setPendingCount(qc);
       setConflictCount(cc);
-    } catch {
-    }
+    } catch {}
   }, []);
 
   const triggerSync = useCallback(async () => {
@@ -107,12 +106,12 @@ export function useOfflineSync({
   }, [syncIntervalMs, isOffline, triggerSync]);
 
   const syncState: SyncState = (() => {
-    if (isOffline) return "offline";
-    if (isSyncing) return "syncing";
-    if (syncError) return "error";
-    if (conflictCount > 0) return "conflict";
-    if (pendingCount > 0) return "pending";
-    return "synced";
+    if (isOffline) return 'offline';
+    if (isSyncing) return 'syncing';
+    if (syncError) return 'error';
+    if (conflictCount > 0) return 'conflict';
+    if (pendingCount > 0) return 'pending';
+    return 'synced';
   })();
 
   return {

@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface SideNavSection {
   id: string;
@@ -26,13 +26,13 @@ export interface SideNavProps {
 
 export function SideNav({ sections, activeItemId, collapsed = false, className }: SideNavProps) {
   return (
-    <nav className={cn("flex flex-col gap-4 py-3 px-2", className)}>
+    <nav className={cn('flex flex-col gap-4 py-3 px-2', className)}>
       {sections.map((section) => (
         <div key={section.id} className="flex flex-col gap-0.5">
           {!collapsed && section.title && (
             <span
               className="px-2 mb-1 uppercase tracking-wider"
-              style={{ color: color.text.muted, fontSize: "10px", fontWeight: 500 }}
+              style={{ color: color.text.muted, fontSize: '10px', fontWeight: 500 }}
             >
               {section.title}
             </span>
@@ -63,12 +63,12 @@ function SideNavItemRow({
   return (
     <a
       href={item.href}
-      className={cn("flex items-center gap-2 px-2 rounded transition-colors")}
+      className={cn('flex items-center gap-2 px-2 rounded transition-colors')}
       style={{
-        height: "34px",
-        textDecoration: "none",
-        fontSize: "13px",
-        background: active ? color.bg.active : "transparent",
+        height: '34px',
+        textDecoration: 'none',
+        fontSize: '13px',
+        background: active ? color.bg.active : 'transparent',
         color: active ? color.text.primary : color.text.secondary,
       }}
     >
@@ -80,8 +80,8 @@ function SideNavItemRow({
           style={{
             background: color.border.default,
             color: color.text.secondary,
-            minWidth: "18px",
-            textAlign: "center",
+            minWidth: '18px',
+            textAlign: 'center',
           }}
         >
           {item.badge}

@@ -1,12 +1,12 @@
+import type { SelfModelStore } from './store.js';
+import { defaultSelfModelStore } from './store.js';
 import type {
-  RunOutcome,
-  UpdateAfterRunResult,
+  EscalationThreshold,
   HelpRequest,
   PerformanceRecord,
-  EscalationThreshold,
-} from "./types.js";
-import type { SelfModelStore } from "./store.js";
-import { defaultSelfModelStore } from "./store.js";
+  RunOutcome,
+  UpdateAfterRunResult,
+} from './types.js';
 
 const CONFIDENCE_SUCCESS_BOOST = 0.02;
 const CONFIDENCE_PARTIAL_PENALTY = 0.01;
@@ -25,15 +25,20 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function detectTrend(before: number, after: number): "rising" | "stable" | "declining" {
+function detectTrend(before: number, after: number): 'rising' | 'stable' | 'declining' {
   const delta = after - before;
-  if (delta > 0.01) return "rising";
-  if (delta < -0.01) return "declining";
-  return "stable";
+  if (delta > 0.01) return 'rising';
+  if (delta < -0.01) return 'declining';
+  return 'stable';
 }
 
 function checkThresholds(
-  state: { confidenceProfile: { overall: number }; driftScore: number; consecutiveFailures: number; failurePatternCount: number },
+  state: {
+    confidenceProfile: { overall: number };
+    driftScore: number;
+    consecutiveFailures: number;
+    failurePatternCount: number;
+  },
   thresholds: EscalationThreshold[],
   agentId: string,
 ): HelpRequest | null {
@@ -49,11 +54,11 @@ function checkThresholds(
     if (current === undefined) continue;
 
     const breached =
-      threshold.metric === "confidence"
+      threshold.metric === 'confidence'
         ? current < threshold.threshold
         : current > threshold.threshold;
 
-    if (breached && threshold.action === "request-help") {
+    if (breached && threshold.action === 'request-help') {
       return {
         runtimeId: agentId,
         reason: `Metric "${threshold.metric}" breached threshold: current=${current.toFixed(3)}, threshold=${threshold.threshold}`,
@@ -84,13 +89,13 @@ export function updateAfterRun(
 
   let confidenceDelta: number;
   switch (outcome.status) {
-    case "success":
+    case 'success':
       confidenceDelta = outcome.confidenceDelta ?? CONFIDENCE_SUCCESS_BOOST;
       break;
-    case "partial":
+    case 'partial':
       confidenceDelta = outcome.confidenceDelta ?? -CONFIDENCE_PARTIAL_PENALTY;
       break;
-    case "failure":
+    case 'failure':
       confidenceDelta = outcome.confidenceDelta ?? -CONFIDENCE_FAILURE_PENALTY;
       break;
   }
@@ -98,21 +103,19 @@ export function updateAfterRun(
   const newConfidence = clamp(prevConfidence + confidenceDelta, CONFIDENCE_MIN, CONFIDENCE_MAX);
 
   const newDrift =
-    outcome.status === "failure"
+    outcome.status === 'failure'
       ? clamp(state.driftScore + DRIFT_FAILURE_INCREMENT, DRIFT_MIN, DRIFT_MAX)
       : clamp(state.driftScore - DRIFT_SUCCESS_DECAY, DRIFT_MIN, DRIFT_MAX);
 
   const newConsecutiveFailures =
-    outcome.status === "failure"
+    outcome.status === 'failure'
       ? state.consecutiveFailures + 1
       : CONSECUTIVE_FAILURE_RESET_ON_SUCCESS
         ? 0
         : state.consecutiveFailures;
 
   const newFailurePatternCount =
-    outcome.status === "failure"
-      ? state.failurePatternCount + 1
-      : state.failurePatternCount;
+    outcome.status === 'failure' ? state.failurePatternCount + 1 : state.failurePatternCount;
 
   const performanceRecord: PerformanceRecord = {
     runId: outcome.runId,
@@ -128,7 +131,7 @@ export function updateAfterRun(
     occurredAt: now,
   };
 
-  if (outcome.status === "failure") {
+  if (outcome.status === 'failure') {
     store.recordFailure(agentId, performanceRecord);
   } else {
     store.recordWin(agentId, performanceRecord);
@@ -157,7 +160,7 @@ export function updateAfterRun(
       failurePatternCount: newFailurePatternCount,
     },
     `run:${outcome.runId}:${outcome.status}`,
-    "run-outcome",
+    'run-outcome',
   );
 
   const helpRequest = checkThresholds(updated, updated.escalationThresholds, agentId);
@@ -196,7 +199,7 @@ export function requestHelpIfBelowThreshold(
     if (threshold.metric !== metric) continue;
 
     const breached =
-      metric === "confidence" || metric === "uncertainty"
+      metric === 'confidence' || metric === 'uncertainty'
         ? current <= threshold.threshold
         : current >= threshold.threshold;
 

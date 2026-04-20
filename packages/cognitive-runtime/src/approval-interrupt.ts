@@ -10,17 +10,22 @@
  *
  * Resumption is idempotent: repeated calls with the same decisionId are no-ops.
  */
-import { randomUUID } from "crypto";
+
+import type {
+  ApprovalDecision,
+  ApprovalInterruptSpec,
+  ApprovalRequest,
+} from '@szl-holdings/contracts/governance';
 import {
-  createApprovalRequest,
-  decideApproval,
   type CreateApprovalRequestOptions,
+  createApprovalRequest,
   type DecideApprovalOptions,
   type DecideApprovalResult,
-} from "@workspace/approvals-inbox";
-import type { ApprovalInterruptSpec, ApprovalRequest, ApprovalDecision } from "@szl-holdings/contracts/governance";
+  decideApproval,
+} from '@workspace/approvals-inbox';
+import { randomUUID } from 'crypto';
 
-export type { ApprovalInterruptSpec, ApprovalRequest, ApprovalDecision };
+export type { ApprovalDecision, ApprovalInterruptSpec, ApprovalRequest };
 
 // ─── Detection ───────────────────────────────────────────────────────────────
 
@@ -32,26 +37,20 @@ export type { ApprovalInterruptSpec, ApprovalRequest, ApprovalDecision };
  * `__approvalInterrupt` key:
  *   return { __approvalInterrupt: { actionLabel, payload, policyReason, ... } }
  */
-export function extractApprovalInterrupt(
-  stepOutput: unknown,
-): ApprovalInterruptSpec | undefined {
-  if (!stepOutput || typeof stepOutput !== "object") return undefined;
+export function extractApprovalInterrupt(stepOutput: unknown): ApprovalInterruptSpec | undefined {
+  if (!stepOutput || typeof stepOutput !== 'object') return undefined;
   const out = stepOutput as Record<string, unknown>;
   const spec = out.__approvalInterrupt;
-  if (!spec || typeof spec !== "object") return undefined;
+  if (!spec || typeof spec !== 'object') return undefined;
   const s = spec as Record<string, unknown>;
-  if (typeof s.actionLabel !== "string") return undefined;
+  if (typeof s.actionLabel !== 'string') return undefined;
   return {
     actionLabel: s.actionLabel as string,
     payload: (s.payload as Record<string, unknown>) ?? {},
-    policyReason: (s.policyReason as string) ?? "approval required by policy",
-    evidenceSummary: (s.evidenceSummary as string) ?? "",
-    suggestedDecision:
-      (s.suggestedDecision as "approve" | "deny" | "escalate") ?? "approve",
-    expiresAt:
-      typeof s.expiresAt === "number"
-        ? s.expiresAt
-        : Date.now() + 24 * 60 * 60 * 1000,
+    policyReason: (s.policyReason as string) ?? 'approval required by policy',
+    evidenceSummary: (s.evidenceSummary as string) ?? '',
+    suggestedDecision: (s.suggestedDecision as 'approve' | 'deny' | 'escalate') ?? 'approve',
+    expiresAt: typeof s.expiresAt === 'number' ? s.expiresAt : Date.now() + 24 * 60 * 60 * 1000,
   };
 }
 
@@ -72,9 +71,7 @@ export interface RaiseApprovalInterruptOptions {
  * Create and persist an ApprovalRequest for a workflow step that requires
  * human approval. Returns the created request.
  */
-export function raiseApprovalInterrupt(
-  opts: RaiseApprovalInterruptOptions,
-): ApprovalRequest {
+export function raiseApprovalInterrupt(opts: RaiseApprovalInterruptOptions): ApprovalRequest {
   const createOpts: CreateApprovalRequestOptions = {
     runId: opts.runId,
     stepId: opts.stepId,

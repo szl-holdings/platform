@@ -6,27 +6,27 @@
  *
  * Consumed by: Sentra, Vessels, Terra, Counsel, Command, Lyte, Pulse.
  */
-import React, { useState } from "react";
-import { cn } from "./utils";
+import React, { useState } from 'react';
+import { cn } from './utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
 export type AgentRunStatus =
-  | "running"
-  | "success"
-  | "failed"
-  | "paused"
-  | "awaiting_approval"
-  | "cancelled"
-  | "rolled_back";
+  | 'running'
+  | 'success'
+  | 'failed'
+  | 'paused'
+  | 'awaiting_approval'
+  | 'cancelled'
+  | 'rolled_back';
 
-export type PolicyVerdict = "allowed" | "requires_approval" | "blocked";
+export type PolicyVerdict = 'allowed' | 'requires_approval' | 'blocked';
 
 export interface AgentToolCall {
   id: string;
   name: string;
   durationMs: number;
-  status: "ok" | "error" | "skipped";
+  status: 'ok' | 'error' | 'skipped';
   output?: string;
 }
 
@@ -66,33 +66,33 @@ export interface AgentRunCardProps {
 // ─── Internal tokens ─────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<AgentRunStatus, { label: string; color: string; dot: string }> = {
-  running:           { label: "Running",          color: "#3b82f6", dot: "#3b82f6" },
-  success:           { label: "Success",           color: "#22c55e", dot: "#22c55e" },
-  failed:            { label: "Failed",            color: "#ef4444", dot: "#ef4444" },
-  paused:            { label: "Paused",            color: "#f59e0b", dot: "#f59e0b" },
-  awaiting_approval: { label: "Awaiting Approval", color: "#f59e0b", dot: "#f59e0b" },
-  cancelled:         { label: "Cancelled",         color: "#6b7280", dot: "#6b7280" },
-  rolled_back:       { label: "Rolled Back",       color: "#8b5cf6", dot: "#8b5cf6" },
+  running: { label: 'Running', color: '#3b82f6', dot: '#3b82f6' },
+  success: { label: 'Success', color: '#22c55e', dot: '#22c55e' },
+  failed: { label: 'Failed', color: '#ef4444', dot: '#ef4444' },
+  paused: { label: 'Paused', color: '#f59e0b', dot: '#f59e0b' },
+  awaiting_approval: { label: 'Awaiting Approval', color: '#f59e0b', dot: '#f59e0b' },
+  cancelled: { label: 'Cancelled', color: '#6b7280', dot: '#6b7280' },
+  rolled_back: { label: 'Rolled Back', color: '#8b5cf6', dot: '#8b5cf6' },
 };
 
 const VERDICT_CONFIG: Record<PolicyVerdict, { label: string; color: string }> = {
-  allowed:           { label: "Allowed",          color: "#22c55e" },
-  requires_approval: { label: "Needs Approval",   color: "#f59e0b" },
-  blocked:           { label: "Blocked",          color: "#ef4444" },
+  allowed: { label: 'Allowed', color: '#22c55e' },
+  requires_approval: { label: 'Needs Approval', color: '#f59e0b' },
+  blocked: { label: 'Blocked', color: '#ef4444' },
 };
 
 const BG = {
-  card: "rgba(13,18,32,0.9)",
-  trace: "rgba(9,12,22,0.95)",
-  toolRow: "rgba(255,255,255,0.025)",
+  card: 'rgba(13,18,32,0.9)',
+  trace: 'rgba(9,12,22,0.95)',
+  toolRow: 'rgba(255,255,255,0.025)',
 } as const;
 
-const BORDER = "rgba(255,255,255,0.07)";
+const BORDER = 'rgba(255,255,255,0.07)';
 const TEXT = {
-  primary: "rgba(255,255,255,0.88)",
-  secondary: "rgba(255,255,255,0.52)",
-  muted: "rgba(255,255,255,0.28)",
-  mono: "rgba(255,255,255,0.42)",
+  primary: 'rgba(255,255,255,0.88)',
+  secondary: 'rgba(255,255,255,0.52)',
+  muted: 'rgba(255,255,255,0.28)',
+  mono: 'rgba(255,255,255,0.42)',
 } as const;
 
 function duration(ms: number): string {
@@ -113,7 +113,7 @@ function timeAgo(iso: string): string {
 
 function StatusBadge({ status }: { status: AgentRunStatus }) {
   const cfg = STATUS_CONFIG[status];
-  const isRunning = status === "running";
+  const isRunning = status === 'running';
 
   return (
     <span
@@ -125,7 +125,7 @@ function StatusBadge({ status }: { status: AgentRunStatus }) {
       }}
     >
       <span
-        className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", isRunning && "animate-pulse")}
+        className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', isRunning && 'animate-pulse')}
         style={{ background: cfg.dot }}
       />
       {cfg.label}
@@ -139,11 +139,8 @@ function ConfidenceBar({ value, accentColor }: { value: number; accentColor: str
   const pct = Math.round(value * 100);
   return (
     <div className="flex items-center gap-1.5">
-      <div className="w-16 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-        <div
-          className="h-1 rounded-full"
-          style={{ width: `${pct}%`, background: accentColor }}
-        />
+      <div className="w-16 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+        <div className="h-1 rounded-full" style={{ width: `${pct}%`, background: accentColor }} />
       </div>
       <span className="text-[10px] font-mono tabular-nums" style={{ color: TEXT.muted }}>
         {pct}%
@@ -156,22 +153,19 @@ function ConfidenceBar({ value, accentColor }: { value: number; accentColor: str
 
 function ToolCallTrace({ toolCalls }: { toolCalls: AgentToolCall[] }) {
   return (
-    <div
-      className="mt-2 rounded-md overflow-hidden"
-      style={{ border: `1px solid ${BORDER}` }}
-    >
+    <div className="mt-2 rounded-md overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
       <div
         className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-widest"
         style={{ background: BG.trace, borderBottom: `1px solid ${BORDER}`, color: TEXT.muted }}
       >
-        Tool Trace — {toolCalls.length} call{toolCalls.length !== 1 ? "s" : ""}
+        Tool Trace — {toolCalls.length} call{toolCalls.length !== 1 ? 's' : ''}
       </div>
       {toolCalls.map((call, i) => (
         <div
           key={call.id}
           className="flex items-center gap-2 px-3 py-2"
           style={{
-            background: i % 2 === 0 ? BG.toolRow : "transparent",
+            background: i % 2 === 0 ? BG.toolRow : 'transparent',
             borderBottom: i < toolCalls.length - 1 ? `1px solid ${BORDER}` : undefined,
           }}
         >
@@ -179,14 +173,10 @@ function ToolCallTrace({ toolCalls }: { toolCalls: AgentToolCall[] }) {
             className="text-[9px] font-mono"
             style={{
               color:
-                call.status === "ok"
-                  ? "#22c55e"
-                  : call.status === "error"
-                  ? "#ef4444"
-                  : TEXT.muted,
+                call.status === 'ok' ? '#22c55e' : call.status === 'error' ? '#ef4444' : TEXT.muted,
             }}
           >
-            {call.status === "ok" ? "✓" : call.status === "error" ? "✗" : "—"}
+            {call.status === 'ok' ? '✓' : call.status === 'error' ? '✗' : '—'}
           </span>
           <span className="text-[11px] font-mono flex-1" style={{ color: TEXT.primary }}>
             {call.name}
@@ -204,7 +194,7 @@ function ToolCallTrace({ toolCalls }: { toolCalls: AgentToolCall[] }) {
 
 export function AgentRunCard({
   run,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
   compact = false,
   showTrace = false,
   onViewTrace,
@@ -217,14 +207,14 @@ export function AgentRunCard({
 
   return (
     <article
-      className={cn("rounded-xl overflow-hidden", className)}
+      className={cn('rounded-xl overflow-hidden', className)}
       style={{
         background: BG.card,
         border: `1px solid ${BORDER}`,
       }}
     >
       {/* Main row */}
-      <div className={cn("flex items-start gap-3", compact ? "px-3 py-2.5" : "px-4 py-3")}>
+      <div className={cn('flex items-start gap-3', compact ? 'px-3 py-2.5' : 'px-4 py-3')}>
         {/* Agent type dot */}
         <div
           className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
@@ -234,11 +224,17 @@ export function AgentRunCard({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn("font-semibold", compact ? "text-[12px]" : "text-[13px]")} style={{ color: TEXT.primary }}>
+            <span
+              className={cn('font-semibold', compact ? 'text-[12px]' : 'text-[13px]')}
+              style={{ color: TEXT.primary }}
+            >
               {run.agentName}
             </span>
             {run.agentType && (
-              <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: TEXT.muted }}>
+              <span
+                className="text-[9px] font-mono uppercase tracking-wider"
+                style={{ color: TEXT.muted }}
+              >
                 {run.agentType}
               </span>
             )}
@@ -283,7 +279,7 @@ export function AgentRunCard({
           {run.error && (
             <p
               className="text-[11px] mt-1.5 leading-snug px-2 py-1.5 rounded"
-              style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)" }}
+              style={{ color: '#ef4444', background: 'rgba(239,68,68,0.08)' }}
             >
               {run.error}
             </p>
@@ -310,14 +306,14 @@ export function AgentRunCard({
               )}
               {run.toolCalls && (
                 <span className="text-[10px] font-mono" style={{ color: TEXT.muted }}>
-                  {run.toolCalls.length} tool{run.toolCalls.length !== 1 ? "s" : ""}
+                  {run.toolCalls.length} tool{run.toolCalls.length !== 1 ? 's' : ''}
                 </span>
               )}
               {run.tags?.map((tag) => (
                 <span
                   key={tag}
                   className="text-[9px] font-mono px-1.5 py-0.5 rounded"
-                  style={{ background: "rgba(255,255,255,0.05)", color: TEXT.muted }}
+                  style={{ background: 'rgba(255,255,255,0.05)', color: TEXT.muted }}
                 >
                   {tag}
                 </span>
@@ -329,29 +325,41 @@ export function AgentRunCard({
         {/* Actions */}
         {!compact && (
           <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
-            {run.status === "awaiting_approval" && onApprove && (
+            {run.status === 'awaiting_approval' && onApprove && (
               <button
                 onClick={() => onApprove(run)}
                 className="px-2.5 py-1 rounded text-[10px] font-medium transition-colors hover:opacity-80"
-                style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.30)", color: "#22c55e" }}
+                style={{
+                  background: 'rgba(34,197,94,0.12)',
+                  border: '1px solid rgba(34,197,94,0.30)',
+                  color: '#22c55e',
+                }}
               >
                 Approve
               </button>
             )}
-            {run.status === "awaiting_approval" && onReject && (
+            {run.status === 'awaiting_approval' && onReject && (
               <button
                 onClick={() => onReject(run)}
                 className="px-2.5 py-1 rounded text-[10px] font-medium transition-colors hover:opacity-80"
-                style={{ background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444" }}
+                style={{
+                  background: 'rgba(239,68,68,0.10)',
+                  border: '1px solid rgba(239,68,68,0.25)',
+                  color: '#ef4444',
+                }}
               >
                 Reject
               </button>
             )}
-            {run.status === "success" && onRequestRollback && (
+            {run.status === 'success' && onRequestRollback && (
               <button
                 onClick={() => onRequestRollback(run)}
                 className="px-2.5 py-1 rounded text-[10px] font-medium transition-colors hover:opacity-80"
-                style={{ background: "rgba(139,92,246,0.10)", border: "1px solid rgba(139,92,246,0.25)", color: "#8b5cf6" }}
+                style={{
+                  background: 'rgba(139,92,246,0.10)',
+                  border: '1px solid rgba(139,92,246,0.25)',
+                  color: '#8b5cf6',
+                }}
               >
                 Rollback
               </button>
@@ -363,9 +371,13 @@ export function AgentRunCard({
                   if (!expanded) onViewTrace?.(run);
                 }}
                 className="px-2 py-1 rounded text-[10px] font-mono transition-colors hover:opacity-80"
-                style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, color: TEXT.muted }}
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${BORDER}`,
+                  color: TEXT.muted,
+                }}
               >
-                {expanded ? "▲ Hide" : "▼ Trace"}
+                {expanded ? '▲ Hide' : '▼ Trace'}
               </button>
             )}
           </div>
@@ -399,8 +411,8 @@ export interface AgentRunListProps {
 
 export function AgentRunList({
   runs,
-  accentColor = "#8b7ac8",
-  emptyMessage = "No agent runs found.",
+  accentColor = '#8b7ac8',
+  emptyMessage = 'No agent runs found.',
   compact = false,
   onViewTrace,
   onApprove,
@@ -410,7 +422,7 @@ export function AgentRunList({
 }: AgentRunListProps) {
   if (runs.length === 0) {
     return (
-      <div className={cn("flex flex-col items-center justify-center py-12 text-center", className)}>
+      <div className={cn('flex flex-col items-center justify-center py-12 text-center', className)}>
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
           style={{ background: `${accentColor}10` }}
@@ -428,7 +440,7 @@ export function AgentRunList({
   }
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn('flex flex-col gap-2', className)}>
       {runs.map((run) => (
         <AgentRunCard
           key={run.id}

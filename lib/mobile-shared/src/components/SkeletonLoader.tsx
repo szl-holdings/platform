@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, type ViewStyle } from "react-native";
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, type ViewStyle } from 'react-native';
 
 interface Props {
   width?: number | string;
@@ -10,10 +10,10 @@ interface Props {
 }
 
 export function SkeletonLoader({
-  width = "100%",
+  width = '100%',
   height = 16,
   borderRadius,
-  color = "rgba(200,169,106,0.12)",
+  color = 'rgba(200,169,106,0.12)',
   style,
 }: Props) {
   const pulse = useRef(new Animated.Value(0.3)).current;
@@ -56,6 +56,6 @@ export function SkeletonLoader({
 
 const styles = StyleSheet.create({
   skeleton: {
-    overflow: "hidden",
+    overflow: 'hidden',
   },
 });

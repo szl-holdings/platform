@@ -1,11 +1,11 @@
-import React from "react";
-import { Redirect, Stack } from "expo-router";
-import { View, StyleSheet } from "react-native";
-import { useAuth } from "@/context/AuthContext";
-import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
-import { ScreenshotPolicyEnforcer } from "@/components/ScreenshotPolicyEnforcer";
-import { BottomTabBar } from "@/components/BottomTabBar";
-import { NotificationCountProvider } from "@/context/NotificationCountContext";
+import { Redirect, Stack } from 'expo-router';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { BottomTabBar } from '@/components/BottomTabBar';
+import { ScreenshotPolicyEnforcer } from '@/components/ScreenshotPolicyEnforcer';
+import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
+import { useAuth } from '@/context/AuthContext';
+import { NotificationCountProvider } from '@/context/NotificationCountContext';
 
 export default function ShellLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -18,7 +18,7 @@ export default function ShellLayout() {
     <NotificationCountProvider>
       <View style={styles.root}>
         <View style={styles.stackContainer}>
-          <Stack screenOptions={{ headerShown: false, animation: "none" }}>
+          <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="defense" />
             <Stack.Screen name="fleet" />
@@ -27,11 +27,11 @@ export default function ShellLayout() {
             <Stack.Screen name="advisory" />
             <Stack.Screen name="portfolio" />
             <Stack.Screen name="founder" />
-            <Stack.Screen name="quick-actions" options={{ animation: "slide_from_bottom" }} />
-            <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
+            <Stack.Screen name="quick-actions" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="intelligence" />
-            <Stack.Screen name="notifications" options={{ animation: "slide_from_right" }} />
-            <Stack.Screen name="usage" options={{ animation: "slide_from_right" }} />
+            <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="usage" options={{ animation: 'slide_from_right' }} />
           </Stack>
         </View>
         <BottomTabBar />

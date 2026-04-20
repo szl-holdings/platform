@@ -1,6 +1,6 @@
-import { useEffect, useRef, useCallback, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { getAuthToken } from "@/lib/apiClient";
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getAuthToken } from '@/lib/apiClient';
 
 export interface WorkflowRunEvent {
   id: number;
@@ -8,14 +8,14 @@ export interface WorkflowRunEvent {
   state: string;
 }
 
-type WsStatus = "idle" | "connecting" | "connected" | "disconnected" | "error";
+type WsStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 
 function getWsBase(): string {
   const domain = process.env.EXPO_PUBLIC_DOMAIN;
   if (domain) {
     return `wss://${domain}`;
   }
-  return "ws://localhost";
+  return 'ws://localhost';
 }
 
 export function useAlloyWebSocket(enabled = true) {
@@ -24,7 +24,7 @@ export function useAlloyWebSocket(enabled = true) {
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
-  const [status, setStatus] = useState<WsStatus>("idle");
+  const [status, setStatus] = useState<WsStatus>('idle');
   const [lastEvent, setLastEvent] = useState<WorkflowRunEvent | null>(null);
 
   const cleanup = useCallback(() => {
@@ -54,7 +54,7 @@ export function useAlloyWebSocket(enabled = true) {
   const connect = useCallback(async () => {
     if (!mountedRef.current || !enabled) return;
     cleanup();
-    setStatus("connecting");
+    setStatus('connecting');
 
     const token = await getAuthToken();
     const ws = new WebSocket(`${getWsBase()}/ws`);
@@ -62,17 +62,17 @@ export function useAlloyWebSocket(enabled = true) {
 
     ws.onopen = () => {
       if (!mountedRef.current) return;
-      setStatus("connected");
+      setStatus('connected');
       ws.send(
         JSON.stringify({
-          type: "subscribe",
-          channel: "workflow-runs",
+          type: 'subscribe',
+          channel: 'workflow-runs',
           token: token ?? undefined,
-        })
+        }),
       );
       heartbeatRef.current = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: "ping" }));
+          ws.send(JSON.stringify({ type: 'ping' }));
         }
       }, 25000);
     };
@@ -82,29 +82,28 @@ export function useAlloyWebSocket(enabled = true) {
       try {
         const msg = JSON.parse(ev.data as string);
         if (
-          msg.type === "message" &&
-          msg.channel === "workflow-runs" &&
-          (msg.event === "run-updated" || msg.event === "workflow-run-updated")
+          msg.type === 'message' &&
+          msg.channel === 'workflow-runs' &&
+          (msg.event === 'run-updated' || msg.event === 'workflow-run-updated')
         ) {
           const run: WorkflowRunEvent = msg.data;
           setLastEvent(run);
-          qc.invalidateQueries({ queryKey: ["szl-alloy-runs"] });
-          if (run.state === "waiting_approval") {
-            qc.invalidateQueries({ queryKey: ["szl-alloy-approvals-pending"] });
+          qc.invalidateQueries({ queryKey: ['szl-alloy-runs'] });
+          if (run.state === 'waiting_approval') {
+            qc.invalidateQueries({ queryKey: ['szl-alloy-approvals-pending'] });
           }
         }
-      } catch {
-      }
+      } catch {}
     };
 
     ws.onerror = () => {
       if (!mountedRef.current) return;
-      setStatus("error");
+      setStatus('error');
     };
 
     ws.onclose = () => {
       if (!mountedRef.current) return;
-      setStatus("disconnected");
+      setStatus('disconnected');
       if (heartbeatRef.current) {
         clearInterval(heartbeatRef.current);
         heartbeatRef.current = null;

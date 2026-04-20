@@ -1,2 +1,4 @@
-export function Alerts() { return <div>Alerts</div>; }
+export function Alerts() {
+  return <div>Alerts</div>;
+}
 export default Alerts;

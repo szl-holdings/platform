@@ -1,6 +1,6 @@
-import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
-import { sample } from "./distributions.js";
-import type { ScenarioDefinition, RunConfig } from "./schema.js";
+import { isMainThread, parentPort, Worker, workerData } from 'worker_threads';
+import { sample } from './distributions.js';
+import type { RunConfig, ScenarioDefinition } from './schema.js';
 
 export interface WorkerTask {
   iterations: number;
@@ -210,7 +210,10 @@ parentPort.postMessage({ type: "result", inputSamples, validInputSamples, output
 })();
 `;
 
-export type ParallelProgressCallback = (completedIterations: number, totalIterations: number) => void;
+export type ParallelProgressCallback = (
+  completedIterations: number,
+  totalIterations: number,
+) => void;
 
 export interface ParallelRunConfig {
   workers?: number;
@@ -229,7 +232,7 @@ export interface ChunkResult {
 
 export function runParallelChunks(
   scenarioJson: string,
-  config: ParallelRunConfig
+  config: ParallelRunConfig,
 ): Promise<ChunkResult> {
   const numWorkers = Math.min(config.workers ?? 4, 8);
   const totalIterations = config.iterations;
@@ -268,9 +271,13 @@ export function runParallelChunks(
           reject(new Error(`Worker timed out after ${timeoutMs}ms`));
         }, timeoutMs);
 
-        w.on("message", (msg: { type?: string } & WorkerResult) => {
-          if (msg.type === "progress") {
-            const progressMsg = msg as unknown as { type: "progress"; completed: number; total: number };
+        w.on('message', (msg: { type?: string } & WorkerResult) => {
+          if (msg.type === 'progress') {
+            const progressMsg = msg as unknown as {
+              type: 'progress';
+              completed: number;
+              total: number;
+            };
             workerCompletedMap.set(workerId, progressMsg.completed);
             reportAggregatedProgress();
             return;
@@ -280,15 +287,15 @@ export function runParallelChunks(
           reportAggregatedProgress();
           resolve(msg);
         });
-        w.on("error", (err) => {
+        w.on('error', (err) => {
           clearTimeout(timer);
           reject(err);
         });
-        w.on("exit", (code) => {
+        w.on('exit', (code) => {
           clearTimeout(timer);
           if (code !== 0) reject(new Error(`Worker exited with code ${code}`));
         });
-      })
+      }),
     );
   }
 
@@ -321,8 +328,8 @@ export function runParallelChunks(
     if (merged.validCount === 0 && merged.violationCount > 0) {
       throw new Error(
         `Simulation produced 0 valid iterations out of ${merged.violationCount + merged.validCount} attempts. ` +
-        `All iterations failed due to expression errors or constraint violations. ` +
-        `Check your outputExprs, intermediates, and constraints for correctness.`
+          `All iterations failed due to expression errors or constraint violations. ` +
+          `Check your outputExprs, intermediates, and constraints for correctness.`,
       );
     }
 

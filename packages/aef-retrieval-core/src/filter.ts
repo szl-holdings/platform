@@ -1,14 +1,11 @@
-import type { BoostedHit } from "./boost.js";
-import type { FusedHit } from "./fusion.js";
+import type { BoostedHit } from './boost.js';
+import type { FusedHit } from './fusion.js';
 
 export type MetadataFilterValue = string | number | boolean | string[];
 
 export type MetadataFilter = Record<string, MetadataFilterValue>;
 
-function matchesFilter(
-  metadata: Record<string, unknown>,
-  filter: MetadataFilter,
-): boolean {
+function matchesFilter(metadata: Record<string, unknown>, filter: MetadataFilter): boolean {
   for (const [key, expected] of Object.entries(filter)) {
     const actual = metadata[key];
 
@@ -34,7 +31,7 @@ export function applyTenantFilter<T extends FusedHit | BoostedHit>(
   tenantId: string,
 ): T[] {
   return hits.filter((h) => {
-    const hitTenant = h.metadata["tenantId"];
+    const hitTenant = h.metadata['tenantId'];
     return hitTenant === tenantId;
   });
 }

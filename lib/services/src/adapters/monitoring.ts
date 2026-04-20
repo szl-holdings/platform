@@ -1,9 +1,9 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface ErrorReport {
   id: string;
   message: string;
-  level: "error" | "warning" | "info";
+  level: 'error' | 'warning' | 'info';
   timestamp: string;
   context?: Record<string, unknown>;
   reported: boolean;
@@ -18,37 +18,38 @@ export interface AnalyticsEvent {
 }
 
 export class MonitoringAdapter extends ServiceAdapter {
-  readonly name = "monitoring";
-  readonly description = "Error reporting and analytics (Sentry-compatible)";
-  readonly requiredEnvVars = ["SENTRY_DSN"];
+  readonly name = 'monitoring';
+  readonly description = 'Error reporting and analytics (Sentry-compatible)';
+  readonly requiredEnvVars = ['SENTRY_DSN'];
 
   private get sentryDsn(): string | undefined {
-    return process.env["SENTRY_DSN"];
+    return process.env['SENTRY_DSN'];
   }
 
   protected async performHealthCheck(): Promise<void> {
     const dsn = this.sentryDsn;
-    if (!dsn) throw new Error("SENTRY_DSN not configured");
+    if (!dsn) throw new Error('SENTRY_DSN not configured');
     const parsed = new URL(dsn);
     const host = parsed.hostname;
     const response = await fetch(`https://${host}/api/0/`, {
-      method: "GET",
+      method: 'GET',
     });
-    if (!response.ok && response.status !== 401) throw new Error(`Sentry returned ${response.status}`);
+    if (!response.ok && response.status !== 401)
+      throw new Error(`Sentry returned ${response.status}`);
   }
 
   async reportError(
     error: Error | string,
     context?: Record<string, unknown>,
   ): Promise<ErrorReport> {
-    const message = typeof error === "string" ? error : error.message;
+    const message = typeof error === 'string' ? error : error.message;
     const id = `err_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     if (!this.isLive) {
       return {
         id,
         message,
-        level: "error",
+        level: 'error',
         timestamp: new Date().toISOString(),
         context,
         reported: true,
@@ -64,15 +65,15 @@ export class MonitoringAdapter extends ServiceAdapter {
       const host = dsn.host;
 
       const response = await fetch(`https://${host}/api/${projectId}/store/`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "X-Sentry-Auth": `Sentry sentry_version=7, sentry_key=${sentryKey}`,
+          'Content-Type': 'application/json',
+          'X-Sentry-Auth': `Sentry sentry_version=7, sentry_key=${sentryKey}`,
         },
         body: JSON.stringify({
-          event_id: id.replace(/[^a-f0-9]/g, "").slice(0, 32),
+          event_id: id.replace(/[^a-f0-9]/g, '').slice(0, 32),
           message,
-          level: "error",
+          level: 'error',
           extra: context,
           timestamp: new Date().toISOString(),
         }),
@@ -85,7 +86,7 @@ export class MonitoringAdapter extends ServiceAdapter {
     return {
       id,
       message,
-      level: "error",
+      level: 'error',
       timestamp: new Date().toISOString(),
       context,
       reported,
@@ -93,10 +94,7 @@ export class MonitoringAdapter extends ServiceAdapter {
     };
   }
 
-  async trackEvent(
-    name: string,
-    properties?: Record<string, unknown>,
-  ): Promise<AnalyticsEvent> {
+  async trackEvent(name: string, properties?: Record<string, unknown>): Promise<AnalyticsEvent> {
     if (!this.isLive) {
       return { name, properties, tracked: true, mock: true };
     }

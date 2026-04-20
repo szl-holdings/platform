@@ -1,62 +1,68 @@
-import { useState } from "react";
-import { ShieldAlert, CheckCircle2, FileText, Activity } from "lucide-react";
-import { sentraTwin } from "@/data/sentra-twin";
-import { cn } from "@szl-holdings/shared-ui/utils";
 import {
-  ProofEnvelope,
-  type PolicyState,
   type AutonomyMode,
   type EvidenceSource,
-} from "@szl-holdings/design-system";
+  type PolicyState,
+  ProofEnvelope,
+} from '@szl-holdings/design-system';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { Activity, CheckCircle2, FileText, ShieldAlert } from 'lucide-react';
+import { useState } from 'react';
+import { sentraTwin } from '@/data/sentra-twin';
 
-const ACCENT = "#ef4444";
+const ACCENT = '#ef4444';
 const DRIFT_EVIDENCE: EvidenceSource[] = [
   {
-    id: "ev-ctrl-001",
-    label: "NIST CSF Gap Scanner — OT Segment",
-    type: "api",
+    id: 'ev-ctrl-001',
+    label: 'NIST CSF Gap Scanner — OT Segment',
+    type: 'api',
     timestamp: new Date(Date.now() - 8 * 60_000).toISOString(),
-    excerpt: "Respond family control RC.RP-1 failed automated playbook execution on legacy SCADA (SCADA-01, SCADA-02). 2 critical servers without verified backup integrity.",
+    excerpt:
+      'Respond family control RC.RP-1 failed automated playbook execution on legacy SCADA (SCADA-01, SCADA-02). 2 critical servers without verified backup integrity.',
   },
   {
-    id: "ev-ctrl-002",
-    label: "Signal Mesh — Control Drift Correlator",
-    type: "model",
+    id: 'ev-ctrl-002',
+    label: 'Signal Mesh — Control Drift Correlator',
+    type: 'model',
     timestamp: new Date(Date.now() - 15 * 60_000).toISOString(),
-    excerpt: "Correlated 3 control drift signals across Respond and Recover CSF families. Confidence 92% that gaps were exploited in current incident INC-2026-0891.",
+    excerpt:
+      'Correlated 3 control drift signals across Respond and Recover CSF families. Confidence 92% that gaps were exploited in current incident INC-2026-0891.',
   },
 ];
 
 export default function ControlDrift() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("recommend");
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
 
   const families = [
-    { name: "Identify", status: "compliant", count: 12, drift: 0 },
-    { name: "Protect", status: "compliant", count: 45, drift: 0 },
-    { name: "Detect", status: "remediation_pending", count: 18, drift: 1 },
-    { name: "Respond", status: "drift_detected", count: 8, drift: 2 },
-    { name: "Recover", status: "drift_detected", count: 14, drift: 1 },
+    { name: 'Identify', status: 'compliant', count: 12, drift: 0 },
+    { name: 'Protect', status: 'compliant', count: 45, drift: 0 },
+    { name: 'Detect', status: 'remediation_pending', count: 18, drift: 1 },
+    { name: 'Respond', status: 'drift_detected', count: 8, drift: 2 },
+    { name: 'Recover', status: 'drift_detected', count: 14, drift: 1 },
   ];
 
   return (
     <div className="space-y-8 animate-fade-in">
       <header>
         <h1 className="text-3xl font-display font-bold text-slate-100">Control Drift</h1>
-        <p className="text-slate-400 mt-1">NIST CSF control family monitoring and drift detection</p>
+        <p className="text-slate-400 mt-1">
+          NIST CSF control family monitoring and drift detection
+        </p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {families.map(family => (
+        {families.map((family) => (
           <div key={family.name} className="sentra-panel p-4 text-center">
             <div className="text-[10px] text-slate-500 uppercase font-mono mb-2">{family.name}</div>
-            <div className={cn(
-              "text-2xl font-display font-bold mb-2",
-              family.drift > 0 ? "text-red-400" : "text-emerald-400"
-            )}>
+            <div
+              className={cn(
+                'text-2xl font-display font-bold mb-2',
+                family.drift > 0 ? 'text-red-400' : 'text-emerald-400',
+              )}
+            >
               {family.drift > 0 ? family.drift : family.count}
             </div>
             <div className="text-[9px] font-mono text-slate-600">
-              {family.drift > 0 ? "DRIFT DETECTED" : "CONTROLS OK"}
+              {family.drift > 0 ? 'DRIFT DETECTED' : 'CONTROLS OK'}
             </div>
           </div>
         ))}
@@ -64,7 +70,7 @@ export default function ControlDrift() {
 
       <div className="space-y-6">
         <h2 className="text-lg font-display font-bold text-slate-200">Active Drift Indicators</h2>
-        
+
         <div className="space-y-4">
           {sentraTwin.controlDrifts.map((drift, i) => (
             <div key={i} className="sentra-panel p-6">
@@ -75,22 +81,24 @@ export default function ControlDrift() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400 font-mono uppercase tracking-widest">{drift.family}</span>
+                      <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400 font-mono uppercase tracking-widest">
+                        {drift.family}
+                      </span>
                       <h3 className="font-bold text-slate-100">{drift.control}</h3>
                     </div>
-                    <p className="text-sm text-slate-400 mt-2 max-w-2xl">
-                      {drift.evidence}
-                    </p>
-                    
+                    <p className="text-sm text-slate-400 mt-2 max-w-2xl">{drift.evidence}</p>
+
                     <div className="mt-6">
-                      <h4 className="text-[10px] text-slate-500 uppercase font-mono font-bold mb-3">Remediation Proof</h4>
+                      <h4 className="text-[10px] text-slate-500 uppercase font-mono font-bold mb-3">
+                        Remediation Proof
+                      </h4>
                       <ProofEnvelope
                         title="Automated Remediation — Deploy Respond Playbook"
                         accentColor={ACCENT}
                         evidence={DRIFT_EVIDENCE}
                         timestamp={DRIFT_EVIDENCE[0].timestamp}
                         confidence={92}
-                        policyState={"requires-approval" as PolicyState}
+                        policyState={'requires-approval' as PolicyState}
                         autonomyMode={autonomyMode}
                         onAutonomyChange={setAutonomyMode}
                       >
@@ -98,8 +106,12 @@ export default function ControlDrift() {
                           <div className="flex items-center gap-3">
                             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             <div>
-                              <div className="text-xs font-bold text-slate-200">Automated Remediation Available</div>
-                              <p className="text-[10px] text-slate-500 mt-0.5">Deploy baseline Respond playbook to OT firewall cluster.</p>
+                              <div className="text-xs font-bold text-slate-200">
+                                Automated Remediation Available
+                              </div>
+                              <p className="text-[10px] text-slate-500 mt-0.5">
+                                Deploy baseline Respond playbook to OT firewall cluster.
+                              </p>
                             </div>
                           </div>
                           <button className="px-4 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-colors">

@@ -1,13 +1,13 @@
-import { createLogger } from "./logger.js";
+import { createLogger } from './logger.js';
 
-const logger = createLogger("ai-control-plane:pii-redactor");
+const logger = createLogger('ai-control-plane:pii-redactor');
 
 export interface PiiPattern {
   id: string;
   type: string;
   pattern: RegExp;
   replacement: string;
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   enabled: boolean;
 }
 
@@ -23,72 +23,72 @@ export interface InjectionScanResult {
   safe: boolean;
   detected: boolean;
   patterns: string[];
-  severity: "none" | "low" | "high";
+  severity: 'none' | 'low' | 'high';
 }
 
 const DEFAULT_PII_PATTERNS: PiiPattern[] = [
   {
-    id: "ssn",
-    type: "SSN",
+    id: 'ssn',
+    type: 'SSN',
     pattern: /\b\d{3}-\d{2}-\d{4}\b/g,
-    replacement: "[SSN REDACTED]",
-    severity: "critical",
+    replacement: '[SSN REDACTED]',
+    severity: 'critical',
     enabled: true,
   },
   {
-    id: "credit-card",
-    type: "CREDIT_CARD",
+    id: 'credit-card',
+    type: 'CREDIT_CARD',
     pattern: /\b(?:\d[ -]?){13,16}\b/g,
-    replacement: "[CARD REDACTED]",
-    severity: "critical",
+    replacement: '[CARD REDACTED]',
+    severity: 'critical',
     enabled: true,
   },
   {
-    id: "email",
-    type: "EMAIL",
-    pattern: /\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b/g,
-    replacement: "[EMAIL REDACTED]",
-    severity: "medium",
+    id: 'email',
+    type: 'EMAIL',
+    pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g,
+    replacement: '[EMAIL REDACTED]',
+    severity: 'medium',
     enabled: true,
   },
   {
-    id: "phone-us",
-    type: "PHONE",
+    id: 'phone-us',
+    type: 'PHONE',
     pattern: /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g,
-    replacement: "[PHONE REDACTED]",
-    severity: "medium",
+    replacement: '[PHONE REDACTED]',
+    severity: 'medium',
     enabled: true,
   },
   {
-    id: "api-key",
-    type: "API_KEY",
-    pattern: /\b(?:sk-|pk_live_|Bearer\s+)[A-Za-z0-9_\-]{20,}\b/g,
-    replacement: "[API_KEY REDACTED]",
-    severity: "critical",
+    id: 'api-key',
+    type: 'API_KEY',
+    pattern: /\b(?:sk-|pk_live_|Bearer\s+)[A-Za-z0-9_-]{20,}\b/g,
+    replacement: '[API_KEY REDACTED]',
+    severity: 'critical',
     enabled: true,
   },
   {
-    id: "password",
-    type: "PASSWORD",
+    id: 'password',
+    type: 'PASSWORD',
     pattern: /\b(?:password|passwd|pwd)\s*[:=]\s*\S+/gi,
-    replacement: "[PASSWORD REDACTED]",
-    severity: "critical",
+    replacement: '[PASSWORD REDACTED]',
+    severity: 'critical',
     enabled: true,
   },
   {
-    id: "secret",
-    type: "SECRET",
+    id: 'secret',
+    type: 'SECRET',
     pattern: /\b(?:secret|token|key)\s*[:=]\s*[A-Za-z0-9_\-./+]{16,}/gi,
-    replacement: "[SECRET REDACTED]",
-    severity: "high",
+    replacement: '[SECRET REDACTED]',
+    severity: 'high',
     enabled: true,
   },
   {
-    id: "ip-address",
-    type: "IP_ADDRESS",
+    id: 'ip-address',
+    type: 'IP_ADDRESS',
     pattern: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-    replacement: "[IP REDACTED]",
-    severity: "low",
+    replacement: '[IP REDACTED]',
+    severity: 'low',
     enabled: true,
   },
 ];
@@ -118,15 +118,15 @@ class PiiRedactor {
   }
 
   removePattern(id: string): void {
-    this.patterns = this.patterns.filter(p => p.id !== id);
+    this.patterns = this.patterns.filter((p) => p.id !== id);
   }
 
   listPatterns(): PiiPattern[] {
     return [...this.patterns];
   }
 
-  redact(text: string, options: { minSeverity?: PiiPattern["severity"] } = {}): RedactionResult {
-    const severityOrder: PiiPattern["severity"][] = ["low", "medium", "high", "critical"];
+  redact(text: string, options: { minSeverity?: PiiPattern['severity'] } = {}): RedactionResult {
+    const severityOrder: PiiPattern['severity'][] = ['low', 'medium', 'high', 'critical'];
     const minIdx = options.minSeverity ? severityOrder.indexOf(options.minSeverity) : 0;
 
     let redacted = text;
@@ -145,7 +145,7 @@ class PiiRedactor {
     }
 
     if (detectedTypes.length > 0) {
-      logger.info({ detectedTypes, count: detectedTypes.length }, "PII detected and redacted");
+      logger.info({ detectedTypes, count: detectedTypes.length }, 'PII detected and redacted');
     }
 
     return {
@@ -170,11 +170,14 @@ class PiiRedactor {
       safe: detected.length === 0,
       detected: detected.length > 0,
       patterns: detected,
-      severity: detected.length === 0 ? "none" : detected.length > 2 ? "high" : "low",
+      severity: detected.length === 0 ? 'none' : detected.length > 2 ? 'high' : 'low',
     };
 
     if (!result.safe) {
-      logger.warn({ patternCount: detected.length, severity: result.severity }, "Prompt injection detected");
+      logger.warn(
+        { patternCount: detected.length, severity: result.severity },
+        'Prompt injection detected',
+      );
     }
 
     return result;
@@ -189,7 +192,10 @@ class PiiRedactor {
 
 export const piiRedactor = new PiiRedactor();
 
-export function redactPii(text: string, options?: Parameters<PiiRedactor["redact"]>[1]): RedactionResult {
+export function redactPii(
+  text: string,
+  options?: Parameters<PiiRedactor['redact']>[1],
+): RedactionResult {
   return piiRedactor.redact(text, options);
 }
 

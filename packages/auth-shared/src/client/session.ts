@@ -6,7 +6,7 @@
  * any privileged DB calls.
  */
 
-import type { AuthenticatedUser, OrgMembership } from "../types.js";
+import type { AuthenticatedUser, OrgMembership } from '../types.js';
 
 // ── Session state ────────────────────────────────────────────────────────────
 
@@ -41,10 +41,7 @@ export function sessionHasRole(
 }
 
 /** Returns true if the session user is an org member. */
-export function sessionInOrg(
-  session: ClientSession | null | undefined,
-  orgId: number,
-): boolean {
+export function sessionInOrg(session: ClientSession | null | undefined, orgId: number): boolean {
   if (!session) return false;
   return session.user.orgs.some((o) => o.orgId === orgId);
 }

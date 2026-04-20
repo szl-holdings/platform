@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export interface UtmParams {
   utm_source: string;
@@ -7,8 +7,8 @@ export interface UtmParams {
   utm_content: string;
 }
 
-const UTM_KEYS: (keyof UtmParams)[] = ["utm_source", "utm_medium", "utm_campaign", "utm_content"];
-const SESSION_KEY = "szl_utm";
+const UTM_KEYS: (keyof UtmParams)[] = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+const SESSION_KEY = 'szl_utm';
 
 function readFromUrl(): Partial<UtmParams> {
   const params = new URLSearchParams(window.location.search);
@@ -33,8 +33,7 @@ function readFromSession(): Partial<UtmParams> {
 function saveToSession(params: Partial<UtmParams>) {
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(params));
-  } catch {
-  }
+  } catch {}
 }
 
 export function useUtm(): Partial<UtmParams> {

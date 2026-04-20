@@ -10,12 +10,11 @@
  *   npx tsx scripts/media/generate-diagrams.ts --output docs/media/diagrams
  */
 
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
 const OUTPUT_DIR =
-  process.argv.find((_, i) => process.argv[i - 1] === "--output") ||
-  "docs/media/diagrams";
+  process.argv.find((_, i) => process.argv[i - 1] === '--output') || 'docs/media/diagrams';
 
 function generateEcosystemMapSVG(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" style="background:#0a0a0f;font-family:ui-sans-serif,system-ui,sans-serif">
@@ -263,18 +262,18 @@ function main() {
   }
 
   const diagrams = [
-    { name: "ecosystem-map.svg", generate: generateEcosystemMapSVG },
-    { name: "signal-to-action-flow.svg", generate: generateSignalToActionSVG },
+    { name: 'ecosystem-map.svg', generate: generateEcosystemMapSVG },
+    { name: 'signal-to-action-flow.svg', generate: generateSignalToActionSVG },
   ];
 
   for (const diagram of diagrams) {
     const outputPath = path.join(OUTPUT_DIR, diagram.name);
     const content = diagram.generate();
-    fs.writeFileSync(outputPath, content, "utf-8");
+    fs.writeFileSync(outputPath, content, 'utf-8');
     console.log(`Generated: ${outputPath}`);
   }
 
-  console.log("\nAll diagrams generated.");
+  console.log('\nAll diagrams generated.');
 }
 
 main();

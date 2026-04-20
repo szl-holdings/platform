@@ -1,1 +1,1 @@
-export { default } from "./(tabs)/economics";
+export { default } from './(tabs)/economics';

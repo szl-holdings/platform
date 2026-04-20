@@ -1,10 +1,10 @@
+import { ALL_DOMAIN_PROFILES } from './profiles/index.js';
+import type { AEFDomain, DomainProfile } from './schema.js';
 import type {
   DomainProfile as LegacyDomainProfile,
   ProfileVersionRecord,
   RolloutState,
-} from "./types.js";
-import type { DomainProfile, AEFDomain } from "./schema.js";
-import { ALL_DOMAIN_PROFILES } from "./profiles/index.js";
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Legacy ProfileRegistry (HEAD API)
@@ -19,10 +19,7 @@ export class ProfileRegistry {
   private readonly versions = new Map<string, Map<string, ProfileVersionRecord>>();
   private readonly rollout = new Map<string, RolloutState>();
 
-  register(
-    profile: LegacyDomainProfile,
-    options: ProfileRegistryOptions = {},
-  ): void {
+  register(profile: LegacyDomainProfile, options: ProfileRegistryOptions = {}): void {
     const { allowOverwrite = false } = options;
     const key = `${profile.profileId}@${profile.version}`;
 
@@ -78,11 +75,7 @@ export class ProfileRegistry {
     }
   }
 
-  stageForTenants(
-    profileId: string,
-    version: string,
-    tenantIds: string[],
-  ): void {
+  stageForTenants(profileId: string, version: string, tenantIds: string[]): void {
     const profileVersions = this.versions.get(profileId);
     if (!profileVersions) {
       throw new Error(`Unknown profile: ${profileId}`);
@@ -122,17 +115,13 @@ export class ProfileRegistry {
       throw new Error(`Unknown profile: ${profileId}`);
     }
 
-    const sortedVersions = Array.from(profileVersions.keys()).sort(
-      (a, b) => compareVersions(b, a),
-    );
+    const sortedVersions = Array.from(profileVersions.keys()).sort((a, b) => compareVersions(b, a));
 
     const currentIdx = sortedVersions.indexOf(state.activeVersion);
     const previousVersion = sortedVersions[currentIdx + 1];
 
     if (!previousVersion) {
-      throw new Error(
-        `No previous version available for rollback on profile: ${profileId}`,
-      );
+      throw new Error(`No previous version available for rollback on profile: ${profileId}`);
     }
 
     this.rollout.set(profileId, {
@@ -154,20 +143,14 @@ export class ProfileRegistry {
 
     const profileVersions = this.versions.get(profileId)!;
 
-    if (
-      tenantId &&
-      state.stagedVersion &&
-      state.stagedTenantIds.includes(tenantId)
-    ) {
+    if (tenantId && state.stagedVersion && state.stagedTenantIds.includes(tenantId)) {
       const staged = profileVersions.get(state.stagedVersion);
       if (staged) return staged.profile;
     }
 
     const active = profileVersions.get(state.activeVersion);
     if (!active) {
-      throw new Error(
-        `Active version ${state.activeVersion} not found for profile: ${profileId}`,
-      );
+      throw new Error(`Active version ${state.activeVersion} not found for profile: ${profileId}`);
     }
 
     return active.profile;
@@ -190,15 +173,10 @@ export class ProfileRegistry {
   listVersions(profileId: string): string[] {
     const profileVersions = this.versions.get(profileId);
     if (!profileVersions) return [];
-    return Array.from(profileVersions.keys()).sort((a, b) =>
-      compareVersions(b, a),
-    );
+    return Array.from(profileVersions.keys()).sort((a, b) => compareVersions(b, a));
   }
 
-  getRecord(
-    profileId: string,
-    version: string,
-  ): ProfileVersionRecord | undefined {
+  getRecord(profileId: string, version: string): ProfileVersionRecord | undefined {
     return this.versions.get(profileId)?.get(version);
   }
 
@@ -219,8 +197,8 @@ export class ProfileRegistry {
 }
 
 function compareVersions(a: string, b: string): number {
-  const partsA = a.split(".").map(Number);
-  const partsB = b.split(".").map(Number);
+  const partsA = a.split('.').map(Number);
+  const partsB = b.split('.').map(Number);
   for (let i = 0; i < 3; i++) {
     const diff = (partsA[i] ?? 0) - (partsB[i] ?? 0);
     if (diff !== 0) return diff;
@@ -277,7 +255,7 @@ export interface ProfileRegistrySnapshot {
     profileId: string;
     domain: AEFDomain;
     version: string;
-    status: DomainProfile["status"];
+    status: DomainProfile['status'];
   }>;
   generatedAt: string;
 }
@@ -338,7 +316,7 @@ export class DomainProfileRegistry {
       return this.profiles.get(this.profileKey(profileId, version));
     }
     const candidates = Array.from(this.profiles.values()).filter(
-      (p) => p.profileId === profileId && p.status !== "deprecated",
+      (p) => p.profileId === profileId && p.status !== 'deprecated',
     );
     if (candidates.length === 0) return undefined;
     candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
@@ -347,7 +325,7 @@ export class DomainProfileRegistry {
 
   getProfileForDomain(domain: AEFDomain): DomainProfile | undefined {
     const candidates = Array.from(this.profiles.values()).filter(
-      (p) => p.domain === domain && p.status === "active",
+      (p) => p.domain === domain && p.status === 'active',
     );
     if (candidates.length === 0) return undefined;
     candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
@@ -371,7 +349,7 @@ export class DomainProfileRegistry {
         `[DomainProfileRegistry] Profile not found: ${targetProfileId}@${targetVersion}`,
       );
     }
-    if (targetProfile.status === "deprecated") {
+    if (targetProfile.status === 'deprecated') {
       throw new Error(
         `[DomainProfileRegistry] Cannot rotate to deprecated profile: ${targetProfileId}@${targetVersion}`,
       );
@@ -414,7 +392,11 @@ export class DomainProfileRegistry {
     return newPointer;
   }
 
-  async rollback(tenantId: string, domain: AEFDomain, rolledBackBy: string): Promise<TenantProfilePointer> {
+  async rollback(
+    tenantId: string,
+    domain: AEFDomain,
+    rolledBackBy: string,
+  ): Promise<TenantProfilePointer> {
     const pointerKey = this.tenantDomainKey(tenantId, domain);
     const existing = this.tenantPointers.get(pointerKey);
 
@@ -453,11 +435,9 @@ export class DomainProfileRegistry {
     }
     this.profiles.set(key, {
       ...profile,
-      status: "deprecated",
+      status: 'deprecated',
       deprecatedAt: new Date().toISOString(),
-      deprecationMessage: successorProfileId
-        ? `Superseded by ${successorProfileId}`
-        : "Deprecated",
+      deprecationMessage: successorProfileId ? `Superseded by ${successorProfileId}` : 'Deprecated',
       successorProfileId,
       updatedAt: new Date().toISOString(),
     });

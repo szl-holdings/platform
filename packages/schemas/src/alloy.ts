@@ -1,12 +1,12 @@
 /**
  * Alloy workflow engine domain schemas.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 export const workflowStepResultSchema = z.object({
   stepId: z.string(),
   stepType: z.string(),
-  status: z.enum(["pending", "running", "success", "failed", "skipped"]),
+  status: z.enum(['pending', 'running', 'success', 'failed', 'skipped']),
   output: z.record(z.unknown()).optional(),
   error: z.string().optional(),
   durationMs: z.number().int().min(0).optional(),
@@ -22,7 +22,7 @@ export const agentDecisionSchema = z.object({
   decision: z.string(),
   confidence: z.number().min(0).max(1).optional(),
   reasoning: z.string().optional(),
-  riskLevel: z.enum(["low", "medium", "high", "critical"]).optional(),
+  riskLevel: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   requiresApproval: z.boolean(),
   metadata: z.record(z.unknown()).optional(),
   createdAt: z.coerce.date(),
@@ -35,7 +35,7 @@ export const approvalSchema = z.object({
   action: z.string(),
   requestedBy: z.number().int().positive(),
   approvedBy: z.number().int().positive().nullable().optional(),
-  status: z.enum(["pending", "approved", "rejected", "expired"]),
+  status: z.enum(['pending', 'approved', 'rejected', 'expired']),
   comment: z.string().optional(),
   requestedAt: z.coerce.date(),
   resolvedAt: z.coerce.date().nullable().optional(),
@@ -59,7 +59,7 @@ export const jobQueuePayloadSchema = z.object({
   correlationId: z.string().optional(),
   orgId: z.number().int().positive().optional(),
   payload: z.record(z.unknown()),
-  priority: z.enum(["critical", "high", "medium", "low"]).optional().default("medium"),
+  priority: z.enum(['critical', 'high', 'medium', 'low']).optional().default('medium'),
   attempts: z.number().int().min(0).optional().default(0),
   maxAttempts: z.number().int().positive().optional().default(3),
   scheduledAt: z.coerce.date().optional(),

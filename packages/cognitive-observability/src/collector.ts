@@ -1,5 +1,5 @@
-import type { CognitiveMetric, KnownMetricName } from "./metrics.js";
-import { makeMetric } from "./metrics.js";
+import type { CognitiveMetric, KnownMetricName } from './metrics.js';
+import { makeMetric } from './metrics.js';
 
 export interface MetricCollector {
   record(metric: CognitiveMetric): void;

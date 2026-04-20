@@ -1,20 +1,38 @@
-import { useMemo, useState } from "react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
-import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import type { GpuNode, QueuedJob } from '@szl-holdings/observability';
+import { InfraSimulator, MetricTimeSeriesSimulator } from '@szl-holdings/observability';
+import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
-
-  Server, Activity, Thermometer, Zap, Clock, TrendingUp,
-  AlertTriangle, CheckCircle, Cpu, Database, Network, BarChart3,
-} from "lucide-react";
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Cpu,
+  Database,
+  Network,
+  Server,
+  Thermometer,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, LineChart, Line, ReferenceLine, BarChart, Bar,
-} from "recharts";
-import { InfraSimulator, MetricTimeSeriesSimulator } from "@szl-holdings/observability";
-import type { GpuNode, QueuedJob } from "@szl-holdings/observability";
-import { api } from "@/lib/api";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { api } from '@/lib/api';
 
 const infraSim = new InfraSimulator(0x9ef4a2b8);
 const metricSim = new MetricTimeSeriesSimulator(0xdeadbeef);
@@ -35,30 +53,43 @@ const throughputData = throughputHistory.map((p, i) => ({
   anomaly: p.anomaly,
 }));
 
-const trainingNode = clusterSnapshot.nodes.find(n => n.trainingLoss !== undefined);
+const trainingNode = clusterSnapshot.nodes.find((n) => n.trainingLoss !== undefined);
 const lossHistory = trainingNode
   ? Array.from({ length: 30 }, (_, i) => {
       const prog = i / 29;
       const base = 2.8 - prog * (2.8 - (trainingNode.trainingLoss ?? 0.6));
       return {
         step: `${i * 100}`,
-        loss: parseFloat((base + (Math.sin(i) * 0.04)).toFixed(4)),
-        gradNorm: parseFloat(((trainingNode.gradientNorm ?? 1.5) * (1 - prog * 0.4) + Math.sin(i * 0.5) * 0.2).toFixed(3)),
+        loss: parseFloat((base + Math.sin(i) * 0.04).toFixed(4)),
+        gradNorm: parseFloat(
+          ((trainingNode.gradientNorm ?? 1.5) * (1 - prog * 0.4) + Math.sin(i * 0.5) * 0.2).toFixed(
+            3,
+          ),
+        ),
       };
     })
   : [];
 
-function stateColor(state: GpuNode["state"]) {
-  return state === "error" ? "text-red-400" :
-    state === "throttle" ? "text-orange-400" :
-    state === "plateau" ? "text-emerald-400" :
-    state === "ramping" ? "text-cyan-400" : "text-slate-400";
+function stateColor(state: GpuNode['state']) {
+  return state === 'error'
+    ? 'text-red-400'
+    : state === 'throttle'
+      ? 'text-orange-400'
+      : state === 'plateau'
+        ? 'text-emerald-400'
+        : state === 'ramping'
+          ? 'text-cyan-400'
+          : 'text-slate-400';
 }
 
-function stateBg(state: GpuNode["state"]) {
-  return state === "error" ? "border-red-500/30" :
-    state === "throttle" ? "border-orange-500/30" :
-    state === "plateau" ? "" : "";
+function stateBg(state: GpuNode['state']) {
+  return state === 'error'
+    ? 'border-red-500/30'
+    : state === 'throttle'
+      ? 'border-orange-500/30'
+      : state === 'plateau'
+        ? ''
+        : '';
 }
 
 function GpuNodeCard({ node }: { node: GpuNode }) {
@@ -74,8 +105,12 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <span className="font-semibold text-sm">{node.name}</span>
-              <Badge variant="outline" className="text-[10px]">{node.model}</Badge>
-              <Badge variant="outline" className="text-[10px]">{node.gpuCount} GPUs</Badge>
+              <Badge variant="outline" className="text-[10px]">
+                {node.model}
+              </Badge>
+              <Badge variant="outline" className="text-[10px]">
+                {node.gpuCount} GPUs
+              </Badge>
               <Badge
                 variant="outline"
                 className={`text-[10px] capitalize ${stateColor(node.state)}`}
@@ -93,7 +128,8 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
               <p className="text-xs text-muted-foreground mb-2">
                 Job: <span className="text-foreground">{node.activeJob.name}</span>
                 <span className="text-sky-400 ml-2">
-                  {node.activeJob.progress.toFixed(0)}% — ETA {Math.round(node.activeJob.estimatedEtaMs / 60000)}m
+                  {node.activeJob.progress.toFixed(0)}% — ETA{' '}
+                  {Math.round(node.activeJob.estimatedEtaMs / 60000)}m
                 </span>
                 {node.activeJob.preemptible && (
                   <span className="text-amber-400 ml-2 text-[10px]">preemptible</span>
@@ -107,42 +143,69 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
               <div>
                 <div className="flex justify-between text-[10px] mb-0.5">
                   <span className="text-muted-foreground">GPU Util</span>
-                  <span className={node.utilizationPct >= 90 ? "text-emerald-400" : node.utilizationPct >= 60 ? "text-amber-400" : "text-slate-400"}>
+                  <span
+                    className={
+                      node.utilizationPct >= 90
+                        ? 'text-emerald-400'
+                        : node.utilizationPct >= 60
+                          ? 'text-amber-400'
+                          : 'text-slate-400'
+                    }
+                  >
                     {node.utilizationPct.toFixed(0)}%
                   </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all ${node.utilizationPct >= 90 ? "bg-emerald-500" : node.utilizationPct >= 60 ? "bg-amber-500" : "bg-slate-500"}`}
-                    style={{ width: `${node.utilizationPct}%` }} />
+                  <div
+                    className={`h-full rounded-full transition-all ${node.utilizationPct >= 90 ? 'bg-emerald-500' : node.utilizationPct >= 60 ? 'bg-amber-500' : 'bg-slate-500'}`}
+                    style={{ width: `${node.utilizationPct}%` }}
+                  />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-[10px] mb-0.5">
                   <span className="text-muted-foreground">VRAM</span>
-                  <span>{node.vramUsedGb.toFixed(0)}/{node.vramTotalGb}GB <span className="text-muted-foreground">({node.vramFragmentation.toFixed(0)}% frag)</span></span>
+                  <span>
+                    {node.vramUsedGb.toFixed(0)}/{node.vramTotalGb}GB{' '}
+                    <span className="text-muted-foreground">
+                      ({node.vramFragmentation.toFixed(0)}% frag)
+                    </span>
+                  </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-purple-500" style={{ width: `${Math.min(100, vramPct)}%` }} />
+                  <div
+                    className="h-full rounded-full bg-purple-500"
+                    style={{ width: `${Math.min(100, vramPct)}%` }}
+                  />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-[10px] mb-0.5">
                   <span className="text-muted-foreground">Power</span>
-                  <span className={powerPct >= 95 ? "text-orange-400" : "text-sky-400"}>
-                    {(node.powerWatts / 1000).toFixed(1)}kW / {(node.powerLimitWatts / 1000).toFixed(1)}kW
+                  <span className={powerPct >= 95 ? 'text-orange-400' : 'text-sky-400'}>
+                    {(node.powerWatts / 1000).toFixed(1)}kW /{' '}
+                    {(node.powerLimitWatts / 1000).toFixed(1)}kW
                   </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${powerPct >= 95 ? "bg-orange-500" : "bg-sky-500"}`} style={{ width: `${powerPct}%` }} />
+                  <div
+                    className={`h-full rounded-full ${powerPct >= 95 ? 'bg-orange-500' : 'bg-sky-500'}`}
+                    style={{ width: `${powerPct}%` }}
+                  />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-[10px] mb-0.5">
                   <span className="text-muted-foreground">NVLink BW</span>
-                  <span className="text-violet-400">{node.nvlinkBandwidthGbps.toFixed(0)} / {node.nvlinkBandwidthMaxGbps} GB/s</span>
+                  <span className="text-violet-400">
+                    {node.nvlinkBandwidthGbps.toFixed(0)} / {node.nvlinkBandwidthMaxGbps} GB/s
+                  </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-violet-500" style={{ width: `${nvlinkPct}%` }} />
+                  <div
+                    className="h-full rounded-full bg-violet-500"
+                    style={{ width: `${nvlinkPct}%` }}
+                  />
                 </div>
               </div>
             </div>
@@ -150,14 +213,16 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
 
           <div className="grid grid-cols-2 gap-2 text-center shrink-0">
             <div>
-              <p className={`text-sm font-bold ${node.tempCelsius >= 85 ? "text-red-400" : node.tempCelsius >= 75 ? "text-orange-400" : node.tempCelsius >= 65 ? "text-amber-400" : "text-emerald-400"}`}>
+              <p
+                className={`text-sm font-bold ${node.tempCelsius >= 85 ? 'text-red-400' : node.tempCelsius >= 75 ? 'text-orange-400' : node.tempCelsius >= 65 ? 'text-amber-400' : 'text-emerald-400'}`}
+              >
                 {node.tempCelsius}°C
               </p>
               <p className="text-[10px] text-muted-foreground">Temp</p>
             </div>
             <div>
               <p className="text-sm font-bold text-cyan-400">
-                {node.tokenThroughput > 0 ? `${(node.tokenThroughput / 1000).toFixed(0)}K` : "—"}
+                {node.tokenThroughput > 0 ? `${(node.tokenThroughput / 1000).toFixed(0)}K` : '—'}
               </p>
               <p className="text-[10px] text-muted-foreground">tok/s</p>
             </div>
@@ -180,14 +245,18 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
           <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-1 mb-1.5">
               <AlertTriangle className="w-3 h-3 text-amber-400" />
-              <span className="text-[10px] font-medium text-amber-400">Xid Events ({node.xidEvents.length})</span>
+              <span className="text-[10px] font-medium text-amber-400">
+                Xid Events ({node.xidEvents.length})
+              </span>
             </div>
             <div className="space-y-1">
               {node.xidEvents.slice(0, 2).map((xid) => (
                 <div key={xid.xidCode} className="flex items-center gap-2 text-[10px]">
                   <span className="font-mono text-amber-400">Xid {xid.xidCode}</span>
                   <span className="text-muted-foreground">{xid.description}</span>
-                  <span className="text-muted-foreground ml-auto">{Math.floor((NOW - xid.occurredAt) / 60000)}m ago</span>
+                  <span className="text-muted-foreground ml-auto">
+                    {Math.floor((NOW - xid.occurredAt) / 60000)}m ago
+                  </span>
                 </div>
               ))}
             </div>
@@ -198,17 +267,20 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
           <div className="mt-2 pt-2 border-t border-border">
             <p className="text-[10px] text-muted-foreground mb-1">Thermal curve (10 min)</p>
             <ResponsiveContainer width="100%" height={40}>
-              <AreaChart data={node.thermalCurve.slice(-10)} margin={{ top: 2, right: 2, left: -40, bottom: 0 }}>
+              <AreaChart
+                data={node.thermalCurve.slice(-10)}
+                margin={{ top: 2, right: 2, left: -40, bottom: 0 }}
+              >
                 <Area
                   type="monotone"
                   dataKey="celsius"
-                  stroke={node.tempCelsius >= 80 ? "#f97316" : "#6366f1"}
-                  fill={node.tempCelsius >= 80 ? "#f97316" : "#6366f1"}
+                  stroke={node.tempCelsius >= 80 ? '#f97316' : '#6366f1'}
+                  fill={node.tempCelsius >= 80 ? '#f97316' : '#6366f1'}
                   fillOpacity={0.15}
                   strokeWidth={1.5}
                   dot={false}
                 />
-                <YAxis domain={["dataMin - 5", "dataMax + 5"]} hide />
+                <YAxis domain={['dataMin - 5', 'dataMax + 5']} hide />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -220,10 +292,10 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
 
 function QueuedJobRow({ job, rank }: { job: QueuedJob; rank: number }) {
   const priorityColors: Record<string, string> = {
-    critical: "text-red-400 bg-red-400/10 border-red-400/20",
-    high: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-    medium: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-    low: "text-slate-400 bg-slate-400/10 border-slate-400/20",
+    critical: 'text-red-400 bg-red-400/10 border-red-400/20',
+    high: 'text-orange-400 bg-orange-400/10 border-orange-400/20',
+    medium: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
+    low: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
   };
   const waitMin = Math.round(job.estimatedWaitMs / 60_000);
   return (
@@ -232,13 +304,23 @@ function QueuedJobRow({ job, rank }: { job: QueuedJob; rank: number }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs font-medium truncate">{job.name}</span>
-          <Badge variant="outline" className={`text-[9px] ${priorityColors[job.priority]}`}>{job.priority}</Badge>
-          {job.preemptible && <Badge variant="outline" className="text-[9px] text-slate-400">preemptible</Badge>}
+          <Badge variant="outline" className={`text-[9px] ${priorityColors[job.priority]}`}>
+            {job.priority}
+          </Badge>
+          {job.preemptible && (
+            <Badge variant="outline" className="text-[9px] text-slate-400">
+              preemptible
+            </Badge>
+          )}
         </div>
-        <p className="text-[10px] text-muted-foreground">{job.type} · {job.model} · {job.gpusRequired} GPUs required</p>
+        <p className="text-[10px] text-muted-foreground">
+          {job.type} · {job.model} · {job.gpusRequired} GPUs required
+        </p>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-xs text-amber-400">{waitMin < 60 ? `${waitMin}m` : `${(waitMin / 60).toFixed(1)}h`}</p>
+        <p className="text-xs text-amber-400">
+          {waitMin < 60 ? `${waitMin}m` : `${(waitMin / 60).toFixed(1)}h`}
+        </p>
         <p className="text-[10px] text-muted-foreground">est. wait</p>
       </div>
     </div>
@@ -247,14 +329,14 @@ function QueuedJobRow({ job, rank }: { job: QueuedJob; rank: number }) {
 
 export default function GPUMonitoring() {
   const { data: liveGpuData } = useStandardQuery({
-    queryKey: ["dcgm-gpus"],
+    queryKey: ['dcgm-gpus'],
     queryFn: () => api.live.gpuMetrics(),
     refetchInterval: 30_000,
     staleTime: 15_000,
   });
 
   const { data: liveClusterData } = useStandardQuery({
-    queryKey: ["dcgm-cluster"],
+    queryKey: ['dcgm-cluster'],
     queryFn: () => api.live.gpuCluster(),
     refetchInterval: 30_000,
     staleTime: 15_000,
@@ -282,23 +364,28 @@ export default function GPUMonitoring() {
 
   const liveGpus = liveGpuData?.gpus as DcgmGpu[] | undefined;
 
-  const modelMap: Record<string, GpuNode["model"]> = {
-    "NVIDIA H100 80GB HBM3": "NVIDIA H100 SXM5",
-    "NVIDIA A100 80GB SXM": "NVIDIA A100 80GB",
-    "NVIDIA A100 40GB SXM": "NVIDIA A100 40GB",
-    "NVIDIA H200 141GB HBM3e": "NVIDIA H200 SXM5",
+  const modelMap: Record<string, GpuNode['model']> = {
+    'NVIDIA H100 80GB HBM3': 'NVIDIA H100 SXM5',
+    'NVIDIA A100 80GB SXM': 'NVIDIA A100 80GB',
+    'NVIDIA A100 40GB SXM': 'NVIDIA A100 40GB',
+    'NVIDIA H200 141GB HBM3e': 'NVIDIA H200 SXM5',
   };
 
   const liveNodes: GpuNode[] | undefined = liveGpus?.map((g) => {
-    const state: GpuNode["state"] = g.temperatureCelsius >= 85 ? "error"
-      : g.temperatureCelsius >= 75 ? "throttle"
-      : g.utilizationPct >= 90 ? "plateau"
-      : g.utilizationPct > 5 ? "ramping"
-      : "idle";
+    const state: GpuNode['state'] =
+      g.temperatureCelsius >= 85
+        ? 'error'
+        : g.temperatureCelsius >= 75
+          ? 'throttle'
+          : g.utilizationPct >= 90
+            ? 'plateau'
+            : g.utilizationPct > 5
+              ? 'ramping'
+              : 'idle';
     return {
       id: g.uuid ?? `gpu-${g.gpuIndex}`,
       name: `gpu-node-${g.gpuIndex}`,
-      model: modelMap[g.modelName] ?? "NVIDIA H100 SXM5",
+      model: modelMap[g.modelName] ?? 'NVIDIA H100 SXM5',
       gpuCount: 1,
       state,
       utilizationPct: g.utilizationPct ?? 0,
@@ -312,7 +399,12 @@ export default function GPUMonitoring() {
       nvlinkBandwidthMaxGbps: 600,
       eccErrorCount: (g.eccSingleBit ?? 0) + (g.eccDoubleBit ?? 0),
       xidEvents: g.throttleReasons?.length
-        ? g.throttleReasons.map((r) => ({ xidCode: 79, description: r, occurredAt: Date.now(), severity: "warning" as const }))
+        ? g.throttleReasons.map((r) => ({
+            xidCode: 79,
+            description: r,
+            occurredAt: Date.now(),
+            severity: 'warning' as const,
+          }))
         : [],
       thermalCurve: [],
       tokenThroughput: 0,
@@ -335,16 +427,20 @@ export default function GPUMonitoring() {
 
   const derivedClusterHealth = (() => {
     const src = liveNodes ?? clusterSnapshot.nodes;
-    const errorCount = src.filter((n) => n.state === "error").length;
-    const throttleCount = src.filter((n) => n.state === "throttle").length;
-    if (errorCount > 0) return "critical";
-    if (throttleCount > 0) return "degraded";
-    return "healthy";
+    const errorCount = src.filter((n) => n.state === 'error').length;
+    const throttleCount = src.filter((n) => n.state === 'throttle').length;
+    if (errorCount > 0) return 'critical';
+    if (throttleCount > 0) return 'degraded';
+    return 'healthy';
   })();
   const clusterHealth = derivedClusterHealth;
 
-  const healthColor = clusterHealth === "critical" ? "text-red-400" :
-    clusterHealth === "degraded" ? "text-orange-400" : "text-emerald-400";
+  const healthColor =
+    clusterHealth === 'critical'
+      ? 'text-red-400'
+      : clusterHealth === 'degraded'
+        ? 'text-orange-400'
+        : 'text-emerald-400';
 
   return (
     <div className="p-6 space-y-6">
@@ -355,16 +451,28 @@ export default function GPUMonitoring() {
             GPU Cluster — DCGM Monitor
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            NVIDIA DCGM-style telemetry — thermal curves, VRAM fragmentation, NVLink mesh, Xid events
+            NVIDIA DCGM-style telemetry — thermal curves, VRAM fragmentation, NVLink mesh, Xid
+            events
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={`text-xs ${isLive ? "text-cyan-400 border-cyan-500/30" : "text-slate-400 border-slate-500/30"}`}>
-            {isLive ? <Cpu className="w-3 h-3 mr-1 inline" /> : <Database className="w-3 h-3 mr-1 inline" />}
-            {isLive ? "DCGM Live" : "Simulated"}
+          <Badge
+            variant="outline"
+            className={`text-xs ${isLive ? 'text-cyan-400 border-cyan-500/30' : 'text-slate-400 border-slate-500/30'}`}
+          >
+            {isLive ? (
+              <Cpu className="w-3 h-3 mr-1 inline" />
+            ) : (
+              <Database className="w-3 h-3 mr-1 inline" />
+            )}
+            {isLive ? 'DCGM Live' : 'Simulated'}
           </Badge>
           <Badge variant="outline" className={`${healthColor} text-xs capitalize`}>
-            {clusterHealth === "healthy" ? <CheckCircle className="w-3 h-3 mr-1 inline" /> : <AlertTriangle className="w-3 h-3 mr-1 inline" />}
+            {clusterHealth === 'healthy' ? (
+              <CheckCircle className="w-3 h-3 mr-1 inline" />
+            ) : (
+              <AlertTriangle className="w-3 h-3 mr-1 inline" />
+            )}
             Cluster {clusterHealth}
           </Badge>
         </div>
@@ -372,12 +480,24 @@ export default function GPUMonitoring() {
 
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Total GPUs", value: liveSummary?.totalGpus ?? clusterSnapshot.totalGpus },
-          { label: "Active GPUs", value: liveSummary?.activeGpus ?? clusterSnapshot.activeGpus },
-          { label: "Avg Util", value: `${(liveSummary?.avgUtilization ?? clusterSnapshot.avgUtilization).toFixed(0)}%` },
-          { label: "VRAM Used", value: `${(liveSummary?.usedVramGb ?? clusterSnapshot.usedVramGb).toFixed(0)}/${(liveSummary?.totalVramGb ?? clusterSnapshot.totalVramGb).toFixed(0)}GB` },
-          { label: "Total Power", value: `${(liveSummary?.totalPowerKw ?? clusterSnapshot.totalPowerKw).toFixed(1)}kW` },
-          { label: "Throughput", value: `${clusterSnapshot.totalThroughputKtps.toFixed(0)}K tok/s` },
+          { label: 'Total GPUs', value: liveSummary?.totalGpus ?? clusterSnapshot.totalGpus },
+          { label: 'Active GPUs', value: liveSummary?.activeGpus ?? clusterSnapshot.activeGpus },
+          {
+            label: 'Avg Util',
+            value: `${(liveSummary?.avgUtilization ?? clusterSnapshot.avgUtilization).toFixed(0)}%`,
+          },
+          {
+            label: 'VRAM Used',
+            value: `${(liveSummary?.usedVramGb ?? clusterSnapshot.usedVramGb).toFixed(0)}/${(liveSummary?.totalVramGb ?? clusterSnapshot.totalVramGb).toFixed(0)}GB`,
+          },
+          {
+            label: 'Total Power',
+            value: `${(liveSummary?.totalPowerKw ?? clusterSnapshot.totalPowerKw).toFixed(1)}kW`,
+          },
+          {
+            label: 'Throughput',
+            value: `${clusterSnapshot.totalThroughputKtps.toFixed(0)}K tok/s`,
+          },
         ].map(({ label, value }) => (
           <Card key={label}>
             <CardContent className="p-3 text-center">
@@ -400,13 +520,28 @@ export default function GPUMonitoring() {
             <ResponsiveContainer width="100%" height={160}>
               <AreaChart data={throughputData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="hour" tick={{ fontSize: 9, fill: "#94a3b8" }} interval={3} />
-                <YAxis tick={{ fontSize: 9, fill: "#94a3b8" }} tickFormatter={v => `${(v / 1000).toFixed(0)}K`} />
-                <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
-                  formatter={(v: number) => [`${v.toLocaleString()} tok/s`, "Throughput"]}
+                <XAxis dataKey="hour" tick={{ fontSize: 9, fill: '#94a3b8' }} interval={3} />
+                <YAxis
+                  tick={{ fontSize: 9, fill: '#94a3b8' }}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
                 />
-                <Area type="monotone" dataKey="tokens" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.2} dot={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: 8,
+                    fontSize: 11,
+                  }}
+                  formatter={(v: number) => [`${v.toLocaleString()} tok/s`, 'Throughput']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="tokens"
+                  stroke="#8b5cf6"
+                  fill="#8b5cf6"
+                  fillOpacity={0.2}
+                  dot={false}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -417,20 +552,43 @@ export default function GPUMonitoring() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-violet-400" />
-                Training Loss Curve — {trainingNode?.activeJob?.model ?? "Active Model"}
+                Training Loss Curve — {trainingNode?.activeJob?.model ?? 'Active Model'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={160}>
                 <LineChart data={lossHistory} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="step" tick={{ fontSize: 9, fill: "#94a3b8" }} interval={5} />
-                  <YAxis tick={{ fontSize: 9, fill: "#94a3b8" }} domain={["dataMin - 0.1", "dataMax + 0.1"]} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
+                  <XAxis dataKey="step" tick={{ fontSize: 9, fill: '#94a3b8' }} interval={5} />
+                  <YAxis
+                    tick={{ fontSize: 9, fill: '#94a3b8' }}
+                    domain={['dataMin - 0.1', 'dataMax + 0.1']}
                   />
-                  <Line type="monotone" dataKey="loss" stroke="#a78bfa" dot={false} strokeWidth={2} name="Train Loss" />
-                  <Line type="monotone" dataKey="gradNorm" stroke="#f0abfc" dot={false} strokeWidth={1.5} strokeDasharray="4 2" name="Grad Norm" />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 8,
+                      fontSize: 11,
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="loss"
+                    stroke="#a78bfa"
+                    dot={false}
+                    strokeWidth={2}
+                    name="Train Loss"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="gradNorm"
+                    stroke="#f0abfc"
+                    dot={false}
+                    strokeWidth={1.5}
+                    strokeDasharray="4 2"
+                    name="Grad Norm"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -440,8 +598,10 @@ export default function GPUMonitoring() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Node Details</h2>
-          {nodes.map(node => (
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Node Details
+          </h2>
+          {nodes.map((node) => (
             <GpuNodeCard key={node.id} node={node} />
           ))}
         </div>
@@ -476,27 +636,47 @@ export default function GPUMonitoring() {
             <CardContent className="p-3">
               <div className="grid grid-cols-2 gap-2">
                 {clusterSnapshot.nvlinkTopology.links.slice(0, 6).map((link) => (
-                  <div key={`${link.from}-${link.to}`} className="rounded-lg border border-border p-2">
+                  <div
+                    key={`${link.from}-${link.to}`}
+                    className="rounded-lg border border-border p-2"
+                  >
                     <div className="flex items-center gap-1 mb-1">
-                      <div className={`w-1.5 h-1.5 rounded-full ${link.healthy ? "bg-emerald-400" : "bg-red-400"}`} />
-                      <span className="text-[10px] text-muted-foreground font-mono">{link.from} ↔ {link.to}</span>
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full ${link.healthy ? 'bg-emerald-400' : 'bg-red-400'}`}
+                      />
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {link.from} ↔ {link.to}
+                      </span>
                     </div>
                     <div className="flex justify-between text-[10px]">
                       <span className="text-foreground">{link.bandwidthGbps.toFixed(0)} GB/s</span>
-                      <span className={link.utilizationPct > 80 ? "text-amber-400" : "text-muted-foreground"}>
+                      <span
+                        className={
+                          link.utilizationPct > 80 ? 'text-amber-400' : 'text-muted-foreground'
+                        }
+                      >
                         {link.utilizationPct.toFixed(0)}%
                       </span>
                     </div>
                     <div className="h-1 bg-muted rounded-full mt-1 overflow-hidden">
-                      <div className={`h-full rounded-full ${link.utilizationPct > 80 ? "bg-amber-500" : "bg-violet-500"}`}
-                        style={{ width: `${link.utilizationPct}%` }} />
+                      <div
+                        className={`h-full rounded-full ${link.utilizationPct > 80 ? 'bg-amber-500' : 'bg-violet-500'}`}
+                        style={{ width: `${link.utilizationPct}%` }}
+                      />
                     </div>
                   </div>
                 ))}
               </div>
               <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-                <span>{clusterSnapshot.nvlinkTopology.links.filter(l => l.healthy).length}/{clusterSnapshot.nvlinkTopology.links.length} links healthy</span>
-                <span>{clusterSnapshot.nvlinkTopology.links.filter(l => !l.healthy).length > 0 ? "⚠ degraded links detected" : "✓ mesh nominal"}</span>
+                <span>
+                  {clusterSnapshot.nvlinkTopology.links.filter((l) => l.healthy).length}/
+                  {clusterSnapshot.nvlinkTopology.links.length} links healthy
+                </span>
+                <span>
+                  {clusterSnapshot.nvlinkTopology.links.filter((l) => !l.healthy).length > 0
+                    ? '⚠ degraded links detected'
+                    : '✓ mesh nominal'}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -509,16 +689,20 @@ export default function GPUMonitoring() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 space-y-2">
-              {nodes.map(node => (
+              {nodes.map((node) => (
                 <div key={node.id} className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground w-24 truncate">{node.name.split(" ").slice(-2).join(" ")}</span>
+                  <span className="text-[10px] text-muted-foreground w-24 truncate">
+                    {node.name.split(' ').slice(-2).join(' ')}
+                  </span>
                   <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${node.tempCelsius >= 85 ? "bg-red-500" : node.tempCelsius >= 75 ? "bg-orange-500" : node.tempCelsius >= 65 ? "bg-amber-500" : "bg-emerald-500"}`}
+                      className={`h-full rounded-full transition-all ${node.tempCelsius >= 85 ? 'bg-red-500' : node.tempCelsius >= 75 ? 'bg-orange-500' : node.tempCelsius >= 65 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                       style={{ width: `${(node.tempCelsius / 95) * 100}%` }}
                     />
                   </div>
-                  <span className={`text-xs font-mono w-12 text-right ${node.tempCelsius >= 85 ? "text-red-400" : node.tempCelsius >= 75 ? "text-orange-400" : node.tempCelsius >= 65 ? "text-amber-400" : "text-emerald-400"}`}>
+                  <span
+                    className={`text-xs font-mono w-12 text-right ${node.tempCelsius >= 85 ? 'text-red-400' : node.tempCelsius >= 75 ? 'text-orange-400' : node.tempCelsius >= 65 ? 'text-amber-400' : 'text-emerald-400'}`}
+                  >
                     {node.tempCelsius}°C
                   </span>
                 </div>

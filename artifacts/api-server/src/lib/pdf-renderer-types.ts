@@ -10,24 +10,24 @@ export interface TextNode {
 }
 
 export type BlockType =
-  | "paragraph"
-  | "heading1"
-  | "heading2"
-  | "heading3"
-  | "bullet_list"
-  | "ordered_list"
-  | "blockquote"
-  | "code_block"
-  | "horizontal_rule"
-  | "table"
-  | "image"
-  | "merge_field";
+  | 'paragraph'
+  | 'heading1'
+  | 'heading2'
+  | 'heading3'
+  | 'bullet_list'
+  | 'ordered_list'
+  | 'blockquote'
+  | 'code_block'
+  | 'horizontal_rule'
+  | 'table'
+  | 'image'
+  | 'merge_field';
 
 export interface BlockNode {
   id: string;
   type: BlockType;
   children: TextNode[];
-  align?: "left" | "center" | "right" | "justify";
+  align?: 'left' | 'center' | 'right' | 'justify';
   mergeField?: string;
   url?: string;
   alt?: string;

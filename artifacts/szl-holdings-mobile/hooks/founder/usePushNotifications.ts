@@ -1,9 +1,9 @@
 import {
   configurePushNotificationHandler,
-  usePushNotificationsBase,
   registerForPushNotificationsAsync,
-} from "@szl-holdings/mobile-shared/notifications";
-import { Platform } from "react-native";
+  usePushNotificationsBase,
+} from '@szl-holdings/mobile-shared/notifications';
+import { Platform } from 'react-native';
 
 configurePushNotificationHandler({ shouldPlaySound: false });
 
@@ -13,18 +13,18 @@ function getApiBase(): string {
   if (process.env.EXPO_PUBLIC_DOMAIN) {
     return `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`;
   }
-  return "/api";
+  return '/api';
 }
 
 async function registerTokenWithBackend(token: string): Promise<void> {
   try {
     await fetch(`${getApiBase()}/push-tokens`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token,
         platform: Platform.OS,
-        appId: "stephen-mobile",
+        appId: 'stephen-mobile',
       }),
     });
   } catch {

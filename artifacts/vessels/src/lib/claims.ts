@@ -14,23 +14,16 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import {
-  makeClaimResolver,
-  metricDisplay,
-  type ClaimValue,
-} from "@szl-holdings/domain-claims";
+import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/domain-claims';
 
 export type { ClaimValue };
 export { metricDisplay };
 
-const resolveClaim = makeClaimResolver("vessels/claims");
+const resolveClaim = makeClaimResolver('vessels/claims');
 
-export const VESSELS_COUNT = resolveClaim("vessels-count", "52,000+");
+export const VESSELS_COUNT = resolveClaim('vessels-count', '52,000+');
 export const VESSELS_DARK_DETECTION_LEAD = resolveClaim(
-  "vessels-dark-detection-lead",
-  "34 days pre-designation"
+  'vessels-dark-detection-lead',
+  '34 days pre-designation',
 );
-export const VESSELS_UPTIME_SLA = resolveClaim(
-  "vessels-uptime-sla",
-  "99.97% uptime SLA"
-);
+export const VESSELS_UPTIME_SLA = resolveClaim('vessels-uptime-sla', '99.97% uptime SLA');

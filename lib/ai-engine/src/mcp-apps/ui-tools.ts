@@ -12,14 +12,14 @@
  * Return format: { type: "ui_component", componentType, props, sandboxed: true }
  */
 
-export type UIComponentType = "data_table" | "chart" | "approval_form" | "metric_card" | "timeline";
+export type UIComponentType = 'data_table' | 'chart' | 'approval_form' | 'metric_card' | 'timeline';
 
 export interface UIComponentResponse {
-  type: "ui_component";
+  type: 'ui_component';
   componentType: UIComponentType;
   props: Record<string, unknown>;
   sandboxed: boolean;
-  renderMode: "inline" | "modal" | "panel";
+  renderMode: 'inline' | 'modal' | 'panel';
   title: string;
   description?: string;
   sourceToolName: string;
@@ -31,7 +31,7 @@ export interface DataTableConfig {
   columns: Array<{
     key: string;
     label: string;
-    type: "string" | "number" | "date" | "badge" | "link";
+    type: 'string' | 'number' | 'date' | 'badge' | 'link';
     sortable?: boolean;
     filterable?: boolean;
     width?: string;
@@ -44,7 +44,7 @@ export interface DataTableConfig {
 }
 
 export interface ChartConfig {
-  chartType: "line" | "bar" | "pie" | "area" | "scatter" | "donut";
+  chartType: 'line' | 'bar' | 'pie' | 'area' | 'scatter' | 'donut';
   title: string;
   xAxis?: { label: string; dataKey: string };
   yAxis?: { label: string; unit?: string };
@@ -63,8 +63,8 @@ export interface ApprovalFormConfig {
   actionId: string;
   actionTitle: string;
   actionDescription: string;
-  riskLevel: "low" | "medium" | "high" | "critical";
-  requiredApproverRole: "operator" | "manager" | "executive";
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  requiredApproverRole: 'operator' | 'manager' | 'executive';
   proposedParameters: Record<string, unknown>;
   impactSummary: string;
   callbackUrl: string;
@@ -72,7 +72,7 @@ export interface ApprovalFormConfig {
   fields?: Array<{
     key: string;
     label: string;
-    type: "checkbox" | "text" | "select" | "textarea";
+    type: 'checkbox' | 'text' | 'select' | 'textarea';
     required: boolean;
     options?: string[];
     defaultValue?: unknown;
@@ -84,9 +84,9 @@ export interface MetricCardConfig {
     label: string;
     value: string | number;
     unit?: string;
-    trend?: "up" | "down" | "stable";
+    trend?: 'up' | 'down' | 'stable';
     trendValue?: string;
-    severity?: "success" | "warning" | "danger" | "info";
+    severity?: 'success' | 'warning' | 'danger' | 'info';
   }>;
   title?: string;
   columns?: number;
@@ -99,7 +99,7 @@ export interface TimelineConfig {
     label: string;
     description?: string;
     actor?: string;
-    severity?: "info" | "warning" | "critical" | "success";
+    severity?: 'info' | 'warning' | 'critical' | 'success';
     metadata?: Record<string, unknown>;
   }>;
   ascending?: boolean;
@@ -108,15 +108,15 @@ export interface TimelineConfig {
 export function buildDataTableComponent(
   config: DataTableConfig,
   sourceToolName: string,
-  renderMode: UIComponentResponse["renderMode"] = "panel",
+  renderMode: UIComponentResponse['renderMode'] = 'panel',
 ): UIComponentResponse {
   return {
-    type: "ui_component",
-    componentType: "data_table",
+    type: 'ui_component',
+    componentType: 'data_table',
     props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
-    title: config.title ?? "Data Table",
+    title: config.title ?? 'Data Table',
     sourceToolName,
     generatedAt: new Date().toISOString(),
   };
@@ -125,11 +125,11 @@ export function buildDataTableComponent(
 export function buildChartComponent(
   config: ChartConfig,
   sourceToolName: string,
-  renderMode: UIComponentResponse["renderMode"] = "panel",
+  renderMode: UIComponentResponse['renderMode'] = 'panel',
 ): UIComponentResponse {
   return {
-    type: "ui_component",
-    componentType: "chart",
+    type: 'ui_component',
+    componentType: 'chart',
     props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
@@ -145,28 +145,28 @@ export function buildApprovalFormComponent(
   description?: string,
 ): UIComponentResponse {
   return {
-    type: "ui_component",
-    componentType: "approval_form",
+    type: 'ui_component',
+    componentType: 'approval_form',
     props: {
       ...config,
       fields: config.fields ?? [
         {
-          key: "approve",
-          label: "I authorize this action",
-          type: "checkbox",
+          key: 'approve',
+          label: 'I authorize this action',
+          type: 'checkbox',
           required: true,
           defaultValue: false,
         },
         {
-          key: "rationale",
-          label: "Approval rationale",
-          type: "textarea",
+          key: 'rationale',
+          label: 'Approval rationale',
+          type: 'textarea',
           required: true,
         },
       ],
     },
     sandboxed: true,
-    renderMode: "modal",
+    renderMode: 'modal',
     title: `Approval Required: ${config.actionTitle}`,
     description: description ?? config.impactSummary,
     sourceToolName,
@@ -178,15 +178,15 @@ export function buildApprovalFormComponent(
 export function buildMetricCardComponent(
   config: MetricCardConfig,
   sourceToolName: string,
-  renderMode: UIComponentResponse["renderMode"] = "inline",
+  renderMode: UIComponentResponse['renderMode'] = 'inline',
 ): UIComponentResponse {
   return {
-    type: "ui_component",
-    componentType: "metric_card",
+    type: 'ui_component',
+    componentType: 'metric_card',
     props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
-    title: config.title ?? "Metrics",
+    title: config.title ?? 'Metrics',
     sourceToolName,
     generatedAt: new Date().toISOString(),
   };
@@ -195,114 +195,126 @@ export function buildMetricCardComponent(
 export function buildTimelineComponent(
   config: TimelineConfig,
   sourceToolName: string,
-  renderMode: UIComponentResponse["renderMode"] = "panel",
+  renderMode: UIComponentResponse['renderMode'] = 'panel',
 ): UIComponentResponse {
   return {
-    type: "ui_component",
-    componentType: "timeline",
+    type: 'ui_component',
+    componentType: 'timeline',
     props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
-    title: config.title ?? "Timeline",
+    title: config.title ?? 'Timeline',
     sourceToolName,
     generatedAt: new Date().toISOString(),
   };
 }
 
 export function isUIComponentResponse(value: unknown): value is UIComponentResponse {
-  return typeof value === "object" && value !== null && (value as Record<string, unknown>).type === "ui_component";
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as Record<string, unknown>).type === 'ui_component'
+  );
 }
 
 export const MCP_APP_TOOLS = {
   data_table_viewer: {
-    name: "data_table_viewer",
-    description: "Render tabular data as an interactive table with sorting, filtering, and export. Use when an agent has structured data to present (alerts, records, metrics lists).",
+    name: 'data_table_viewer',
+    description:
+      'Render tabular data as an interactive table with sorting, filtering, and export. Use when an agent has structured data to present (alerts, records, metrics lists).',
     parameters: {
-      type: "object",
-      required: ["columns", "rows"],
+      type: 'object',
+      required: ['columns', 'rows'],
       properties: {
-        columns: { type: "array", description: "Column definitions with key, label, type" },
-        rows: { type: "array", description: "Data rows as objects keyed by column keys" },
-        title: { type: "string" },
-        exportable: { type: "boolean" },
-        pageSize: { type: "number" },
+        columns: { type: 'array', description: 'Column definitions with key, label, type' },
+        rows: { type: 'array', description: 'Data rows as objects keyed by column keys' },
+        title: { type: 'string' },
+        exportable: { type: 'boolean' },
+        pageSize: { type: 'number' },
       },
     },
-    execute: (args: Record<string, unknown>): UIComponentResponse => buildDataTableComponent(
-      {
-        columns: (args.columns as DataTableConfig["columns"]) ?? [],
-        rows: (args.rows as DataTableConfig["rows"]) ?? [],
-        totalRows: ((args.rows as unknown[]) ?? []).length,
-        title: args.title as string | undefined,
-        exportable: (args.exportable as boolean) ?? true,
-        pageSize: (args.pageSize as number) ?? 25,
-      },
-      "data_table_viewer",
-    ),
+    execute: (args: Record<string, unknown>): UIComponentResponse =>
+      buildDataTableComponent(
+        {
+          columns: (args.columns as DataTableConfig['columns']) ?? [],
+          rows: (args.rows as DataTableConfig['rows']) ?? [],
+          totalRows: ((args.rows as unknown[]) ?? []).length,
+          title: args.title as string | undefined,
+          exportable: (args.exportable as boolean) ?? true,
+          pageSize: (args.pageSize as number) ?? 25,
+        },
+        'data_table_viewer',
+      ),
   },
 
   chart_builder: {
-    name: "chart_builder",
-    description: "Build a chart visualization (line, bar, pie, area) from agent data. Use when visualizing trends, distributions, or comparisons.",
+    name: 'chart_builder',
+    description:
+      'Build a chart visualization (line, bar, pie, area) from agent data. Use when visualizing trends, distributions, or comparisons.',
     parameters: {
-      type: "object",
-      required: ["chartType", "title", "series"],
+      type: 'object',
+      required: ['chartType', 'title', 'series'],
       properties: {
-        chartType: { type: "string", enum: ["line", "bar", "pie", "area", "scatter", "donut"] },
-        title: { type: "string" },
-        series: { type: "array" },
-        data: { type: "array" },
-        xAxis: { type: "object" },
-        yAxis: { type: "object" },
-        legend: { type: "boolean" },
+        chartType: { type: 'string', enum: ['line', 'bar', 'pie', 'area', 'scatter', 'donut'] },
+        title: { type: 'string' },
+        series: { type: 'array' },
+        data: { type: 'array' },
+        xAxis: { type: 'object' },
+        yAxis: { type: 'object' },
+        legend: { type: 'boolean' },
       },
     },
-    execute: (args: Record<string, unknown>): UIComponentResponse => buildChartComponent(
-      {
-        chartType: (args.chartType as ChartConfig["chartType"]) ?? "bar",
-        title: (args.title as string) ?? "Chart",
-        series: (args.series as ChartConfig["series"]) ?? [],
-        data: args.data as ChartConfig["data"],
-        xAxis: args.xAxis as ChartConfig["xAxis"],
-        yAxis: args.yAxis as ChartConfig["yAxis"],
-        legend: (args.legend as boolean) ?? true,
-        responsive: true,
-      },
-      "chart_builder",
-    ),
+    execute: (args: Record<string, unknown>): UIComponentResponse =>
+      buildChartComponent(
+        {
+          chartType: (args.chartType as ChartConfig['chartType']) ?? 'bar',
+          title: (args.title as string) ?? 'Chart',
+          series: (args.series as ChartConfig['series']) ?? [],
+          data: args.data as ChartConfig['data'],
+          xAxis: args.xAxis as ChartConfig['xAxis'],
+          yAxis: args.yAxis as ChartConfig['yAxis'],
+          legend: (args.legend as boolean) ?? true,
+          responsive: true,
+        },
+        'chart_builder',
+      ),
   },
 
   approval_form: {
-    name: "approval_form",
-    description: "Render a human-in-the-loop approval form for high-risk actions. Use when an agent action requires explicit human authorization before execution.",
+    name: 'approval_form',
+    description:
+      'Render a human-in-the-loop approval form for high-risk actions. Use when an agent action requires explicit human authorization before execution.',
     parameters: {
-      type: "object",
-      required: ["actionId", "actionTitle", "riskLevel", "requiredApproverRole", "callbackUrl"],
+      type: 'object',
+      required: ['actionId', 'actionTitle', 'riskLevel', 'requiredApproverRole', 'callbackUrl'],
       properties: {
-        actionId: { type: "string" },
-        actionTitle: { type: "string" },
-        actionDescription: { type: "string" },
-        riskLevel: { type: "string", enum: ["low", "medium", "high", "critical"] },
-        requiredApproverRole: { type: "string", enum: ["operator", "manager", "executive"] },
-        proposedParameters: { type: "object" },
-        impactSummary: { type: "string" },
-        callbackUrl: { type: "string" },
-        expiresAt: { type: "string" },
+        actionId: { type: 'string' },
+        actionTitle: { type: 'string' },
+        actionDescription: { type: 'string' },
+        riskLevel: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+        requiredApproverRole: { type: 'string', enum: ['operator', 'manager', 'executive'] },
+        proposedParameters: { type: 'object' },
+        impactSummary: { type: 'string' },
+        callbackUrl: { type: 'string' },
+        expiresAt: { type: 'string' },
       },
     },
-    execute: (args: Record<string, unknown>): UIComponentResponse => buildApprovalFormComponent(
-      {
-        actionId: (args.actionId as string) ?? "",
-        actionTitle: (args.actionTitle as string) ?? "Action Approval",
-        actionDescription: (args.actionDescription as string) ?? "",
-        riskLevel: (args.riskLevel as ApprovalFormConfig["riskLevel"]) ?? "high",
-        requiredApproverRole: (args.requiredApproverRole as ApprovalFormConfig["requiredApproverRole"]) ?? "manager",
-        proposedParameters: (args.proposedParameters as Record<string, unknown>) ?? {},
-        impactSummary: (args.impactSummary as string) ?? "",
-        callbackUrl: (args.callbackUrl as string) ?? "",
-        expiresAt: (args.expiresAt as string) ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      },
-      "approval_form",
-    ),
+    execute: (args: Record<string, unknown>): UIComponentResponse =>
+      buildApprovalFormComponent(
+        {
+          actionId: (args.actionId as string) ?? '',
+          actionTitle: (args.actionTitle as string) ?? 'Action Approval',
+          actionDescription: (args.actionDescription as string) ?? '',
+          riskLevel: (args.riskLevel as ApprovalFormConfig['riskLevel']) ?? 'high',
+          requiredApproverRole:
+            (args.requiredApproverRole as ApprovalFormConfig['requiredApproverRole']) ?? 'manager',
+          proposedParameters: (args.proposedParameters as Record<string, unknown>) ?? {},
+          impactSummary: (args.impactSummary as string) ?? '',
+          callbackUrl: (args.callbackUrl as string) ?? '',
+          expiresAt:
+            (args.expiresAt as string) ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        },
+        'approval_form',
+      ),
   },
 } as const;

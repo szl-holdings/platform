@@ -1,15 +1,19 @@
-import { trace, type Tracer, SpanStatusCode, type Attributes } from "@opentelemetry/api";
-import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
-import { BatchSpanProcessor, ConsoleSpanExporter, type SpanProcessor } from "@opentelemetry/sdk-trace-base";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { resourceFromAttributes } from "@opentelemetry/resources";
+import { type Attributes, SpanStatusCode, type Tracer, trace } from '@opentelemetry/api';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import {
+  BatchSpanProcessor,
+  ConsoleSpanExporter,
+  type SpanProcessor,
+} from '@opentelemetry/sdk-trace-base';
+import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 
-const ATTR_SERVICE_NAME = "service.name";
-const ATTR_SERVICE_VERSION = "service.version";
-const ATTR_DEPLOYMENT_ENVIRONMENT_NAME = "deployment.environment.name";
+const ATTR_SERVICE_NAME = 'service.name';
+const ATTR_SERVICE_VERSION = 'service.version';
+const ATTR_DEPLOYMENT_ENVIRONMENT_NAME = 'deployment.environment.name';
 
-const SERVICE_NAME = "command-web";
-const TRACER_NAME = "command-web";
+const SERVICE_NAME = 'command-web';
+const TRACER_NAME = 'command-web';
 
 let initialised = false;
 let tracer: Tracer | null = null;
@@ -25,19 +29,19 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
   if (initialised && tracer) return tracer;
 
   const env = import.meta.env;
-  const endpoint = opts.endpoint ?? env.VITE_OTEL_ENDPOINT ?? "";
-  const environment = opts.environment ?? env.MODE ?? "development";
+  const endpoint = opts.endpoint ?? env.VITE_OTEL_ENDPOINT ?? '';
+  const environment = opts.environment ?? env.MODE ?? 'development';
 
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: opts.serviceName ?? SERVICE_NAME,
-    [ATTR_SERVICE_VERSION]: opts.serviceVersion ?? "0.0.0",
+    [ATTR_SERVICE_VERSION]: opts.serviceVersion ?? '0.0.0',
     [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: environment,
   });
 
   const processors: SpanProcessor[] = [];
   if (endpoint) {
-    const trimmed = endpoint.replace(/\/+$/, "");
-    const url = /\/v1\/traces$/.test(trimmed) ? trimmed : trimmed + "/v1/traces";
+    const trimmed = endpoint.replace(/\/+$/, '');
+    const url = /\/v1\/traces$/.test(trimmed) ? trimmed : trimmed + '/v1/traces';
     const exporter = new OTLPTraceExporter({ url });
     processors.push(
       new BatchSpanProcessor(exporter, {
@@ -45,7 +49,7 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
         scheduledDelayMillis: 1500,
       }),
     );
-  } else if (environment !== "production") {
+  } else if (environment !== 'production') {
     processors.push(new BatchSpanProcessor(new ConsoleSpanExporter()));
   }
 
@@ -71,13 +75,12 @@ function toAttributes(input: Record<string, unknown>): Attributes {
   const out: Attributes = {};
   for (const [k, v] of Object.entries(input)) {
     if (v === null || v === undefined) continue;
-    if (
-      typeof v === "string" ||
-      typeof v === "number" ||
-      typeof v === "boolean"
-    ) {
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
       out[k] = v;
-    } else if (Array.isArray(v) && v.every((x) => typeof x === "string" || typeof x === "number" || typeof x === "boolean")) {
+    } else if (
+      Array.isArray(v) &&
+      v.every((x) => typeof x === 'string' || typeof x === 'number' || typeof x === 'boolean')
+    ) {
       out[k] = v as Attributes[string];
     } else {
       try {
@@ -94,7 +97,7 @@ export interface RecordSpanInput {
   name: string;
   attributes?: Record<string, unknown>;
   durationMs: number;
-  status?: "ok" | "error";
+  status?: 'ok' | 'error';
   errorMessage?: string;
 }
 
@@ -105,9 +108,9 @@ export function recordSpan(input: RecordSpanInput): void {
     startTime: start,
     attributes: toAttributes(input.attributes ?? {}),
   });
-  if (input.status === "error") {
+  if (input.status === 'error') {
     span.setStatus({ code: SpanStatusCode.ERROR, message: input.errorMessage });
-    if (input.errorMessage) span.recordException({ name: "Error", message: input.errorMessage });
+    if (input.errorMessage) span.recordException({ name: 'Error', message: input.errorMessage });
   } else {
     span.setStatus({ code: SpanStatusCode.OK });
   }
@@ -125,14 +128,14 @@ export async function withSpan<T>(
   try {
     const result = await fn();
     span.setStatus({ code: SpanStatusCode.OK });
-    span.setAttribute("app.duration_ms", Math.round(performance.now() - start));
+    span.setAttribute('app.duration_ms', Math.round(performance.now() - start));
     span.end();
     return result;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     span.setStatus({ code: SpanStatusCode.ERROR, message });
     span.recordException(err instanceof Error ? err : new Error(message));
-    span.setAttribute("app.duration_ms", Math.round(performance.now() - start));
+    span.setAttribute('app.duration_ms', Math.round(performance.now() - start));
     span.end();
     throw err;
   }

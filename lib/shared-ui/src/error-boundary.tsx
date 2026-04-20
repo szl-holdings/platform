@@ -1,4 +1,4 @@
-import { Component, type ReactNode, useState, useCallback } from "react";
+import { Component, type ReactNode, useCallback, useState } from 'react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -26,7 +26,7 @@ function UserFeedbackForm({
   supportEmail: string;
 }) {
   const [submitted, setSubmitted] = useState(false);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState('');
 
   const handleSubmit = useCallback(() => {
     if (!description.trim()) return;
@@ -40,12 +40,12 @@ function UserFeedbackForm({
         timestamp: new Date().toISOString(),
       });
       if (navigator.sendBeacon) {
-        const blob = new Blob([body], { type: "application/json" });
-        navigator.sendBeacon("/api/observability/error-feedback", blob);
+        const blob = new Blob([body], { type: 'application/json' });
+        navigator.sendBeacon('/api/observability/error-feedback', blob);
       } else {
-        fetch("/api/observability/error-feedback", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        fetch('/api/observability/error-feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body,
           keepalive: true,
         }).catch(() => {});
@@ -58,20 +58,20 @@ function UserFeedbackForm({
 
   if (submitted) {
     return (
-      <p style={{ color: "#6b8f71", fontSize: "0.85rem", marginTop: "1rem" }}>
+      <p style={{ color: '#6b8f71', fontSize: '0.85rem', marginTop: '1rem' }}>
         Thank you — your feedback has been recorded.
       </p>
     );
   }
 
   return (
-    <div style={{ marginTop: "1.25rem", textAlign: "left" }}>
+    <div style={{ marginTop: '1.25rem', textAlign: 'left' }}>
       <label
         style={{
-          display: "block",
-          color: "#94a3b8",
-          fontSize: "0.8rem",
-          marginBottom: "0.5rem",
+          display: 'block',
+          color: '#94a3b8',
+          fontSize: '0.8rem',
+          marginBottom: '0.5rem',
           fontWeight: 500,
         }}
       >
@@ -83,41 +83,39 @@ function UserFeedbackForm({
         placeholder="Describe what you were doing..."
         rows={3}
         style={{
-          width: "100%",
-          background: "rgba(0,0,0,0.3)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: "8px",
-          color: "#e2e8f0",
-          padding: "0.75rem",
-          fontSize: "0.85rem",
-          fontFamily: "inherit",
-          resize: "vertical",
-          outline: "none",
-          boxSizing: "border-box",
+          width: '100%',
+          background: 'rgba(0,0,0,0.3)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '8px',
+          color: '#e2e8f0',
+          padding: '0.75rem',
+          fontSize: '0.85rem',
+          fontFamily: 'inherit',
+          resize: 'vertical',
+          outline: 'none',
+          boxSizing: 'border-box',
         }}
       />
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: "0.5rem",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: '0.5rem',
         }}
       >
         <button
           onClick={handleSubmit}
           disabled={!description.trim()}
           style={{
-            padding: "0.5rem 1rem",
-            borderRadius: "6px",
-            border: "none",
-            background: description.trim()
-              ? "rgba(107,143,113,0.3)"
-              : "rgba(255,255,255,0.05)",
-            color: description.trim() ? "#6b8f71" : "#475569",
-            fontSize: "0.8rem",
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            border: 'none',
+            background: description.trim() ? 'rgba(107,143,113,0.3)' : 'rgba(255,255,255,0.05)',
+            color: description.trim() ? '#6b8f71' : '#475569',
+            fontSize: '0.8rem',
             fontWeight: 500,
-            cursor: description.trim() ? "pointer" : "default",
+            cursor: description.trim() ? 'pointer' : 'default',
           }}
         >
           Send Feedback
@@ -125,9 +123,9 @@ function UserFeedbackForm({
         <a
           href={`mailto:${supportEmail}`}
           style={{
-            color: "#64748b",
-            fontSize: "0.75rem",
-            textDecoration: "none",
+            color: '#64748b',
+            fontSize: '0.75rem',
+            textDecoration: 'none',
           }}
         >
           Contact support
@@ -149,18 +147,20 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   override componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
-    console.error("[ErrorBoundary] Caught error:", error, errorInfo);
+    console.error('[ErrorBoundary] Caught error:', error, errorInfo);
     this.props.onError?.(error, errorInfo);
 
     try {
-      const pkg = "@sentry/react";
-      import(/* @vite-ignore */ pkg).then((Sentry) => {
-        if (Sentry.isInitialized()) {
-          Sentry.captureException(error, {
-            contexts: { react: { componentStack: errorInfo.componentStack } },
-          });
-        }
-      }).catch(() => {});
+      const pkg = '@sentry/react';
+      import(/* @vite-ignore */ pkg)
+        .then((Sentry) => {
+          if (Sentry.isInitialized()) {
+            Sentry.captureException(error, {
+              contexts: { react: { componentStack: errorInfo.componentStack } },
+            });
+          }
+        })
+        .catch(() => {});
     } catch {
       /* Sentry not available */
     }
@@ -168,7 +168,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     try {
       const body = JSON.stringify({
         errorId: this.state.errorId,
-        app: this.props.appName || "unknown",
+        app: this.props.appName || 'unknown',
         message: error.message,
         stack: error.stack?.slice(0, 2000),
         componentStack: errorInfo.componentStack?.slice(0, 2000),
@@ -176,12 +176,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         timestamp: new Date().toISOString(),
       });
       if (navigator.sendBeacon) {
-        const blob = new Blob([body], { type: "application/json" });
-        navigator.sendBeacon("/api/observability/client-errors", blob);
+        const blob = new Blob([body], { type: 'application/json' });
+        navigator.sendBeacon('/api/observability/client-errors', blob);
       } else {
-        fetch("/api/observability/client-errors", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        fetch('/api/observability/client-errors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body,
           keepalive: true,
         }).catch(() => {});
@@ -196,7 +196,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   handleGoHome = () => {
-    const href = this.props.homeHref || window.location.pathname.split("/").slice(0, 2).join("/") || "/";
+    const href =
+      this.props.homeHref || window.location.pathname.split('/').slice(0, 2).join('/') || '/';
     window.location.href = href;
   };
 
@@ -208,47 +209,47 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       const { error, errorId } = this.state;
       const {
-        appName = "Application",
-        supportEmail = "support@stephenl.dev",
-        accentColor = "#8b7ac8",
+        appName = 'Application',
+        supportEmail = 'support@stephenl.dev',
+        accentColor = '#8b7ac8',
       } = this.props;
 
       return (
         <div
           style={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #0a0a0f 100%)",
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #0a0a0f 100%)',
             fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-            padding: "2rem",
+            padding: '2rem',
           }}
         >
           <div
             style={{
-              maxWidth: "520px",
-              width: "100%",
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "16px",
-              padding: "2.5rem",
-              backdropFilter: "blur(12px)",
+              maxWidth: '520px',
+              width: '100%',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '16px',
+              padding: '2.5rem',
+              backdropFilter: 'blur(12px)',
             }}
           >
-            <div style={{ textAlign: "center" }}>
+            <div style={{ textAlign: 'center' }}>
               <div
                 style={{
-                  width: "64px",
-                  height: "64px",
-                  borderRadius: "50%",
-                  background: "rgba(196,90,74,0.15)",
-                  border: "1px solid rgba(196,90,74,0.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 1.5rem",
-                  fontSize: "28px",
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'rgba(196,90,74,0.15)',
+                  border: '1px solid rgba(196,90,74,0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1.5rem',
+                  fontSize: '28px',
                 }}
               >
                 ⚡
@@ -256,11 +257,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
               <h1
                 style={{
-                  color: "#f1f5f9",
-                  fontSize: "1.4rem",
+                  color: '#f1f5f9',
+                  fontSize: '1.4rem',
                   fontWeight: 600,
-                  marginBottom: "0.75rem",
-                  letterSpacing: "-0.01em",
+                  marginBottom: '0.75rem',
+                  letterSpacing: '-0.01em',
                 }}
               >
                 Something went wrong
@@ -268,10 +269,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
               <p
                 style={{
-                  color: "#94a3b8",
-                  fontSize: "0.9rem",
+                  color: '#94a3b8',
+                  fontSize: '0.9rem',
                   lineHeight: 1.6,
-                  marginBottom: "0.5rem",
+                  marginBottom: '0.5rem',
                 }}
               >
                 {appName} encountered an unexpected error. Our team has been notified.
@@ -281,21 +282,21 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             {error && (
               <div
                 style={{
-                  background: "rgba(0,0,0,0.3)",
-                  borderRadius: "8px",
-                  padding: "0.75rem",
-                  marginBottom: "1.25rem",
-                  marginTop: "0.5rem",
+                  background: 'rgba(0,0,0,0.3)',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  marginBottom: '1.25rem',
+                  marginTop: '0.5rem',
                 }}
               >
                 <p
                   style={{
-                    color: "#64748b",
-                    fontSize: "0.8rem",
-                    fontFamily: "monospace",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    color: '#64748b',
+                    fontSize: '0.8rem',
+                    fontFamily: 'monospace',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                     margin: 0,
                   }}
                   title={error.message}
@@ -305,10 +306,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 {errorId && (
                   <p
                     style={{
-                      color: "#475569",
-                      fontSize: "0.7rem",
-                      fontFamily: "monospace",
-                      margin: "0.5rem 0 0",
+                      color: '#475569',
+                      fontSize: '0.7rem',
+                      fontFamily: 'monospace',
+                      margin: '0.5rem 0 0',
                     }}
                   >
                     Reference: {errorId}
@@ -319,56 +320,52 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             <div
               style={{
-                display: "flex",
-                gap: "0.75rem",
-                justifyContent: "center",
-                flexWrap: "wrap",
+                display: 'flex',
+                gap: '0.75rem',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
               }}
             >
               <button
                 onClick={this.handleReset}
                 style={{
-                  padding: "0.625rem 1.25rem",
-                  borderRadius: "8px",
-                  border: "none",
+                  padding: '0.625rem 1.25rem',
+                  borderRadius: '8px',
+                  border: 'none',
                   background: accentColor,
-                  color: "#fff",
-                  fontSize: "0.875rem",
+                  color: '#fff',
+                  fontSize: '0.875rem',
                   fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "opacity 0.2s",
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s',
                 }}
-                onMouseOver={(e) =>
-                  ((e.target as HTMLButtonElement).style.opacity = "0.85")
-                }
-                onMouseOut={(e) =>
-                  ((e.target as HTMLButtonElement).style.opacity = "1")
-                }
+                onMouseOver={(e) => ((e.target as HTMLButtonElement).style.opacity = '0.85')}
+                onMouseOut={(e) => ((e.target as HTMLButtonElement).style.opacity = '1')}
               >
                 Try Again
               </button>
               <button
                 onClick={this.handleGoHome}
                 style={{
-                  padding: "0.625rem 1.25rem",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  background: "transparent",
-                  color: "#94a3b8",
-                  fontSize: "0.875rem",
+                  padding: '0.625rem 1.25rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'transparent',
+                  color: '#94a3b8',
+                  fontSize: '0.875rem',
                   fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
                 onMouseOver={(e) => {
                   const btn = e.target as HTMLButtonElement;
-                  btn.style.color = "#f1f5f9";
-                  btn.style.borderColor = "rgba(255,255,255,0.2)";
+                  btn.style.color = '#f1f5f9';
+                  btn.style.borderColor = 'rgba(255,255,255,0.2)';
                 }}
                 onMouseOut={(e) => {
                   const btn = e.target as HTMLButtonElement;
-                  btn.style.color = "#94a3b8";
-                  btn.style.borderColor = "rgba(255,255,255,0.1)";
+                  btn.style.color = '#94a3b8';
+                  btn.style.borderColor = 'rgba(255,255,255,0.1)';
                 }}
               >
                 Go Home
@@ -376,36 +373,32 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <button
                 onClick={() => window.location.reload()}
                 style={{
-                  padding: "0.625rem 1.25rem",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  background: "transparent",
-                  color: "#94a3b8",
-                  fontSize: "0.875rem",
+                  padding: '0.625rem 1.25rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'transparent',
+                  color: '#94a3b8',
+                  fontSize: '0.875rem',
                   fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
                 onMouseOver={(e) => {
                   const btn = e.target as HTMLButtonElement;
-                  btn.style.color = "#f1f5f9";
-                  btn.style.borderColor = "rgba(255,255,255,0.2)";
+                  btn.style.color = '#f1f5f9';
+                  btn.style.borderColor = 'rgba(255,255,255,0.2)';
                 }}
                 onMouseOut={(e) => {
                   const btn = e.target as HTMLButtonElement;
-                  btn.style.color = "#94a3b8";
-                  btn.style.borderColor = "rgba(255,255,255,0.1)";
+                  btn.style.color = '#94a3b8';
+                  btn.style.borderColor = 'rgba(255,255,255,0.1)';
                 }}
               >
                 Reload Page
               </button>
             </div>
 
-            <UserFeedbackForm
-              errorId={errorId}
-              appName={appName}
-              supportEmail={supportEmail}
-            />
+            <UserFeedbackForm errorId={errorId} appName={appName} supportEmail={supportEmail} />
           </div>
         </div>
       );
@@ -426,7 +419,10 @@ interface SectionErrorBoundaryState {
   error: Error | null;
 }
 
-export class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, SectionErrorBoundaryState> {
+export class SectionErrorBoundary extends Component<
+  SectionErrorBoundaryProps,
+  SectionErrorBoundaryState
+> {
   constructor(props: SectionErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -437,7 +433,11 @@ export class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, S
   }
 
   override componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
-    console.error(`[SectionErrorBoundary:${this.props.sectionName || "unknown"}]`, error, errorInfo);
+    console.error(
+      `[SectionErrorBoundary:${this.props.sectionName || 'unknown'}]`,
+      error,
+      errorInfo,
+    );
     this.props.onError?.(error, errorInfo);
   }
 
@@ -447,27 +447,27 @@ export class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, S
 
   override render() {
     if (this.state.hasError) {
-      const { sectionName = "This section" } = this.props;
+      const { sectionName = 'This section' } = this.props;
       return (
         <div
           style={{
-            padding: "2rem",
-            background: "rgba(196,90,74,0.05)",
-            border: "1px solid rgba(196,90,74,0.15)",
-            borderRadius: "12px",
-            textAlign: "center",
+            padding: '2rem',
+            background: 'rgba(196,90,74,0.05)',
+            border: '1px solid rgba(196,90,74,0.15)',
+            borderRadius: '12px',
+            textAlign: 'center',
           }}
         >
-          <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: "0 0 0.75rem" }}>
+          <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0 0 0.75rem' }}>
             {sectionName} encountered an error
           </p>
           {this.state.error && (
             <p
               style={{
-                color: "#64748b",
-                fontSize: "0.75rem",
-                fontFamily: "monospace",
-                margin: "0 0 1rem",
+                color: '#64748b',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                margin: '0 0 1rem',
               }}
             >
               {this.state.error.message}
@@ -476,13 +476,13 @@ export class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, S
           <button
             onClick={this.handleRetry}
             style={{
-              padding: "0.5rem 1rem",
-              borderRadius: "6px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#94a3b8",
-              fontSize: "0.8rem",
-              cursor: "pointer",
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#94a3b8',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
             }}
           >
             Retry

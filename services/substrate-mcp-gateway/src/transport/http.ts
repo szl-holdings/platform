@@ -10,37 +10,37 @@
  *   GET  /mcp/prompts   — Prompt template inventory
  */
 
-import express, { type Request, type Response } from "express";
+import { runtimeEventBus, type SubstrateRuntimeEvent } from '@szl/substrate';
+import express, { type Request, type Response } from 'express';
+import { authMiddleware, resolveAuthContext } from '../auth.js';
 import {
-  SERVER_INFO,
   CAPABILITIES,
-  SUBSTRATE_TOOLS,
-  SUBSTRATE_RESOURCES,
+  SERVER_INFO,
   SUBSTRATE_PROMPTS,
-} from "../descriptor.js";
-import { handleToolCall, handleResourceRead, handlePromptGet } from "../handlers.js";
-import { authMiddleware, resolveAuthContext } from "../auth.js";
-import { runEventBus, type RunLifecycleEvent } from "../run-events.js";
-import { runtimeEventBus, type SubstrateRuntimeEvent } from "@szl/substrate";
+  SUBSTRATE_RESOURCES,
+  SUBSTRATE_TOOLS,
+} from '../descriptor.js';
+import { handlePromptGet, handleResourceRead, handleToolCall } from '../handlers.js';
+import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
 
 // ─── JSON-RPC Helpers ─────────────────────────────────────────────────────────
 
 interface JsonRpcRequest {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: string | number | null;
   method: string;
   params?: Record<string, unknown>;
 }
 
 interface JsonRpcResponse {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: string | number | null;
   result?: unknown;
   error?: { code: number; message: string; data?: unknown };
 }
 
 function rpcOk(id: string | number | null, result: unknown): JsonRpcResponse {
-  return { jsonrpc: "2.0", id, result };
+  return { jsonrpc: '2.0', id, result };
 }
 
 function rpcErr(
@@ -49,20 +49,17 @@ function rpcErr(
   message: string,
   data?: unknown,
 ): JsonRpcResponse {
-  return { jsonrpc: "2.0", id, error: { code, message, ...(data ? { data } : {}) } };
+  return { jsonrpc: '2.0', id, error: { code, message, ...(data ? { data } : {}) } };
 }
 
 // ─── MCP Method Router ────────────────────────────────────────────────────────
 
-async function handleMcpMethod(
-  req: JsonRpcRequest,
-  actorId: string,
-): Promise<JsonRpcResponse> {
+async function handleMcpMethod(req: JsonRpcRequest, actorId: string): Promise<JsonRpcResponse> {
   const { method, params = {}, id } = req;
 
   try {
     switch (method) {
-      case "initialize":
+      case 'initialize':
         return rpcOk(id, {
           protocolVersion: SERVER_INFO.protocolVersion,
           capabilities: CAPABILITIES,
@@ -72,10 +69,10 @@ async function handleMcpMethod(
           },
         });
 
-      case "ping":
+      case 'ping':
         return rpcOk(id, {});
 
-      case "tools/list":
+      case 'tools/list':
         return rpcOk(id, {
           tools: SUBSTRATE_TOOLS.map((t) => ({
             name: t.name,
@@ -84,24 +81,26 @@ async function handleMcpMethod(
           })),
         });
 
-      case "tools/call": {
-        const toolName = String(params["name"] ?? "");
-        const toolArgs = (params["arguments"] ?? {}) as Record<string, unknown>;
+      case 'tools/call': {
+        const toolName = String(params['name'] ?? '');
+        const toolArgs = (params['arguments'] ?? {}) as Record<string, unknown>;
 
         if (!toolName) {
-          return rpcErr(id, -32602, "INVALID_PARAMS", { reason: "Missing tool name in params.name" });
+          return rpcErr(id, -32602, 'INVALID_PARAMS', {
+            reason: 'Missing tool name in params.name',
+          });
         }
 
         const known = SUBSTRATE_TOOLS.find((t) => t.name === toolName);
         if (!known) {
-          return rpcErr(id, -32601, "METHOD_NOT_FOUND", { reason: `No tool named '${toolName}'` });
+          return rpcErr(id, -32601, 'METHOD_NOT_FOUND', { reason: `No tool named '${toolName}'` });
         }
 
         const result = await handleToolCall(toolName, toolArgs, actorId);
         return rpcOk(id, result);
       }
 
-      case "resources/list":
+      case 'resources/list':
         return rpcOk(id, {
           resources: SUBSTRATE_RESOURCES.map((r) => ({
             uri: r.uri,
@@ -111,19 +110,21 @@ async function handleMcpMethod(
           })),
         });
 
-      case "resources/read": {
-        const uri = String(params["uri"] ?? "");
+      case 'resources/read': {
+        const uri = String(params['uri'] ?? '');
         if (!uri) {
-          return rpcErr(id, -32602, "INVALID_PARAMS", { reason: "Missing resource URI in params.uri" });
+          return rpcErr(id, -32602, 'INVALID_PARAMS', {
+            reason: 'Missing resource URI in params.uri',
+          });
         }
         const result = await handleResourceRead(uri);
-        if ("error" in result) {
-          return rpcErr(id, -32001, "NOT_FOUND", { reason: result.error });
+        if ('error' in result) {
+          return rpcErr(id, -32001, 'NOT_FOUND', { reason: result.error });
         }
         return rpcOk(id, result);
       }
 
-      case "prompts/list":
+      case 'prompts/list':
         return rpcOk(id, {
           prompts: SUBSTRATE_PROMPTS.map((p) => ({
             name: p.name,
@@ -132,26 +133,28 @@ async function handleMcpMethod(
           })),
         });
 
-      case "prompts/get": {
-        const name = String(params["name"] ?? "");
-        const promptArgs = (params["arguments"] ?? {}) as Record<string, string>;
+      case 'prompts/get': {
+        const name = String(params['name'] ?? '');
+        const promptArgs = (params['arguments'] ?? {}) as Record<string, string>;
         if (!name) {
-          return rpcErr(id, -32602, "INVALID_PARAMS", { reason: "Missing prompt name in params.name" });
+          return rpcErr(id, -32602, 'INVALID_PARAMS', {
+            reason: 'Missing prompt name in params.name',
+          });
         }
         const result = handlePromptGet(name, promptArgs);
-        if ("error" in result) {
-          return rpcErr(id, -32001, "NOT_FOUND", { reason: result.error });
+        if ('error' in result) {
+          return rpcErr(id, -32001, 'NOT_FOUND', { reason: result.error });
         }
         return rpcOk(id, result);
       }
 
       default:
-        return rpcErr(id, -32601, "METHOD_NOT_FOUND", { method });
+        return rpcErr(id, -32601, 'METHOD_NOT_FOUND', { method });
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error(`[substrate-mcp-gateway] Error handling ${method}:`, e);
-    return rpcErr(id, -32603, "INTERNAL_ERROR", { reason: msg });
+    return rpcErr(id, -32603, 'INTERNAL_ERROR', { reason: msg });
   }
 }
 
@@ -168,34 +171,34 @@ function sseId(): string {
 export function createHttpTransport(): express.Router {
   const router = express.Router();
 
-  router.use(express.json({ limit: "4mb" }));
+  router.use(express.json({ limit: '4mb' }));
   router.use(authMiddleware);
 
   // ── Index (public) ────────────────────────────────────────────────────────
   // Returning 200 at the router root lets the artifact router probe `/mcp/`
   // and confirm the service is up before considering the workflow ready.
 
-  router.get("/", (_req, res) => {
+  router.get('/', (_req, res) => {
     res.json({
       service: SERVER_INFO.name,
       version: SERVER_INFO.version,
       protocol: SERVER_INFO.protocolVersion,
       endpoints: {
-        health: "GET /mcp/health",
-        tools: "GET /mcp/tools",
-        resources: "GET /mcp/resources",
-        prompts: "GET /mcp/prompts",
-        jsonrpc: "POST /mcp",
-        sse: "GET /mcp/sse",
+        health: 'GET /mcp/health',
+        tools: 'GET /mcp/tools',
+        resources: 'GET /mcp/resources',
+        prompts: 'GET /mcp/prompts',
+        jsonrpc: 'POST /mcp',
+        sse: 'GET /mcp/sse',
       },
     });
   });
 
   // ── Health ────────────────────────────────────────────────────────────────
 
-  router.get("/health", (_req, res) => {
+  router.get('/health', (_req, res) => {
     res.json({
-      status: "ok",
+      status: 'ok',
       service: SERVER_INFO.name,
       version: SERVER_INFO.version,
       protocol: SERVER_INFO.protocolVersion,
@@ -210,32 +213,32 @@ export function createHttpTransport(): express.Router {
 
   // ── Tool inventory ────────────────────────────────────────────────────────
 
-  router.get("/tools", (_req, res) => {
+  router.get('/tools', (_req, res) => {
     res.json({ tools: SUBSTRATE_TOOLS });
   });
 
   // ── Resource inventory ────────────────────────────────────────────────────
 
-  router.get("/resources", (_req, res) => {
+  router.get('/resources', (_req, res) => {
     res.json({ resources: SUBSTRATE_RESOURCES });
   });
 
   // ── Prompt inventory ──────────────────────────────────────────────────────
 
-  router.get("/prompts", (_req, res) => {
+  router.get('/prompts', (_req, res) => {
     res.json({ prompts: SUBSTRATE_PROMPTS });
   });
 
   // ── SSE stream ────────────────────────────────────────────────────────────
 
-  router.get("/sse", (req: Request, res: Response) => {
+  router.get('/sse', (req: Request, res: Response) => {
     const id = sseId();
     const ctx = resolveAuthContext(req);
 
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Accel-Buffering", "no");
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
     sseClients.set(id, res);
@@ -250,8 +253,8 @@ export function createHttpTransport(): express.Router {
     }
 
     // Send ready event immediately on connect
-    writeEvent("$/ready", {
-      endpoint: "/mcp",
+    writeEvent('$/ready', {
+      endpoint: '/mcp',
       sessionId: id,
       serverInfo: SERVER_INFO,
       capabilities: CAPABILITIES,
@@ -266,18 +269,16 @@ export function createHttpTransport(): express.Router {
     // Subscribe to substrate runtime journal events so SSE clients receive
     // stage:start, stage:complete, stage:failed, run:complete, and run:failed
     // pushes as a workflow run progresses (no polling required).
-    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe(
-      (event: SubstrateRuntimeEvent) => {
-        writeEvent(event.type, event);
-      },
-    );
+    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
+      writeEvent(event.type, event);
+    });
 
     // Keepalive pings every 30s
     const keepalive = setInterval(() => {
-      writeEvent("$/ping", { timestamp: Date.now() });
+      writeEvent('$/ping', { timestamp: Date.now() });
     }, 30_000);
 
-    req.on("close", () => {
+    req.on('close', () => {
       clearInterval(keepalive);
       unsubscribeRunEvents();
       unsubscribeRuntimeEvents();
@@ -287,25 +288,28 @@ export function createHttpTransport(): express.Router {
 
   // ── JSON-RPC 2.0 endpoint ─────────────────────────────────────────────────
 
-  router.post("/", async (req: Request, res: Response) => {
-    const ctx = (req as Request & { authCtx?: { authenticated: boolean; actorId: string } }).authCtx;
-    const actorId = ctx?.actorId ?? "anonymous";
+  router.post('/', async (req: Request, res: Response) => {
+    const ctx = (req as Request & { authCtx?: { authenticated: boolean; actorId: string } })
+      .authCtx;
+    const actorId = ctx?.actorId ?? 'anonymous';
 
     const body = req.body as unknown;
 
     // Batch request
     if (Array.isArray(body)) {
       if (body.length > 20) {
-        res.status(400).json(rpcErr(null, -32600, "INVALID_REQUEST", {
-          reason: "Batch size limit is 20 requests",
-        }));
+        res.status(400).json(
+          rpcErr(null, -32600, 'INVALID_REQUEST', {
+            reason: 'Batch size limit is 20 requests',
+          }),
+        );
         return;
       }
       const results = await Promise.all(
         body.map((item: unknown) => {
           const rpcReq = item as JsonRpcRequest;
           if (!rpcReq.jsonrpc || !rpcReq.method) {
-            return rpcErr(rpcReq.id ?? null, -32600, "INVALID_REQUEST");
+            return rpcErr(rpcReq.id ?? null, -32600, 'INVALID_REQUEST');
           }
           return handleMcpMethod(rpcReq, actorId);
         }),
@@ -315,8 +319,8 @@ export function createHttpTransport(): express.Router {
     }
 
     const rpcReq = body as JsonRpcRequest;
-    if (!rpcReq || typeof rpcReq !== "object" || !rpcReq.jsonrpc || !rpcReq.method) {
-      res.status(400).json(rpcErr(null, -32600, "INVALID_REQUEST"));
+    if (!rpcReq || typeof rpcReq !== 'object' || !rpcReq.jsonrpc || !rpcReq.method) {
+      res.status(400).json(rpcErr(null, -32600, 'INVALID_REQUEST'));
       return;
     }
 

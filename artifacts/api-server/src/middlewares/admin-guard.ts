@@ -1,11 +1,11 @@
-import type { Request, Response, NextFunction } from "express";
-import { getSessionToken, getSessionUser } from "../lib/auth";
-import { sendUnauthorized, sendForbidden, sendError } from "../lib/api-response";
-import type { RoleName } from "@szl-holdings/db";
-import { logger } from "../lib/logger";
-import { verifyInternalHeader, tokenHasScope } from "../lib/internal-tokens";
+import type { RoleName } from '@szl-holdings/db';
+import type { NextFunction, Request, Response } from 'express';
+import { sendError, sendForbidden, sendUnauthorized } from '../lib/api-response';
+import { getSessionToken, getSessionUser } from '../lib/auth';
+import { tokenHasScope, verifyInternalHeader } from '../lib/internal-tokens';
+import { logger } from '../lib/logger';
 
-const ADMIN_ROLES: RoleName[] = ["super_admin", "ops", "exec"];
+const ADMIN_ROLES: RoleName[] = ['super_admin', 'ops', 'exec'];
 
 /**
  * Check whether the request carries an authorized internal service token for
@@ -20,15 +20,15 @@ const ADMIN_ROLES: RoleName[] = ["super_admin", "ops", "exec"];
  * containment.
  */
 function hasInternalServiceToken(req: Request): boolean {
-  const header = req.headers["x-internal-token"] as string | undefined;
+  const header = req.headers['x-internal-token'] as string | undefined;
   // Use originalUrl so path-prefix scoping is checked against the externally-
   // visible path, not the router-relative path (req.path strips the mount).
   const match = verifyInternalHeader(header, req.originalUrl || req.url);
   if (!match) return false;
-  if (!tokenHasScope(match.context, "internal:write")) {
+  if (!tokenHasScope(match.context, 'internal:write')) {
     logger.warn(
       { tokenName: match.context.name, path: req.path, scopes: Array.from(match.context.scopes) },
-      "[admin-guard] Internal token rejected — missing internal:write scope"
+      '[admin-guard] Internal token rejected — missing internal:write scope',
     );
     return false;
   }
@@ -43,26 +43,31 @@ export function adminGuard(req: Request, res: Response, next: NextFunction): voi
 
   const token = getSessionToken(req);
   if (!token) {
-    sendUnauthorized(res, "Admin access requires authentication");
+    sendUnauthorized(res, 'Admin access requires authentication');
     return;
   }
 
-  getSessionUser(token).then(user => {
-    if (!user) {
-      sendUnauthorized(res, "Invalid or expired session");
-      return;
-    }
+  getSessionUser(token)
+    .then((user) => {
+      if (!user) {
+        sendUnauthorized(res, 'Invalid or expired session');
+        return;
+      }
 
-    const hasAdminRole = user.roles.some(r => ADMIN_ROLES.includes(r as RoleName));
-    if (!hasAdminRole) {
-      logger.warn({ userId: user.id, roles: user.roles }, "Admin route access denied — insufficient role");
-      sendForbidden(res, "Admin access requires elevated role");
-      return;
-    }
+      const hasAdminRole = user.roles.some((r) => ADMIN_ROLES.includes(r as RoleName));
+      if (!hasAdminRole) {
+        logger.warn(
+          { userId: user.id, roles: user.roles },
+          'Admin route access denied — insufficient role',
+        );
+        sendForbidden(res, 'Admin access requires elevated role');
+        return;
+      }
 
-    next();
-  }).catch(err => {
-    logger.error({ err }, "Admin guard error");
-    sendError(res, "Authentication error", 500, "INTERNAL_ERROR");
-  });
+      next();
+    })
+    .catch((err) => {
+      logger.error({ err }, 'Admin guard error');
+      sendError(res, 'Authentication error', 500, 'INTERNAL_ERROR');
+    });
 }

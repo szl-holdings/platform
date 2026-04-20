@@ -1,23 +1,28 @@
-export * from "./types.js";
-export * from "./evaluator.js";
-export * from "./guardrails.js";
-export * from "./modes.js";
-export * from "./prism-counsel-policies.js";
-export * from "./compiler.js";
+export * from './compiler.js';
+export * from './evaluator.js';
+export * from './guardrails.js';
+export * from './modes.js';
+export * from './prism-counsel-policies.js';
+export * from './types.js';
 
-export const POLICY_ENGINE_VERSION = "1.1.0" as const;
+export const POLICY_ENGINE_VERSION = '1.1.0' as const;
 
-import { randomUUID } from "crypto";
-import type { Policy, EvaluationRequest, PolicyEvaluationResult, PolicyEvaluation } from "./types.js";
-import { evaluatePolicies } from "./evaluator.js";
-import { BUILT_IN_GUARDRAILS } from "./guardrails.js";
-import { defaultPolicyModeRegistry } from "./modes.js";
-import { PRISM_COUNSEL_POLICIES } from "./prism-counsel-policies.js";
+import { randomUUID } from 'crypto';
+import { evaluatePolicies } from './evaluator.js';
+import { BUILT_IN_GUARDRAILS } from './guardrails.js';
+import { defaultPolicyModeRegistry } from './modes.js';
+import { PRISM_COUNSEL_POLICIES } from './prism-counsel-policies.js';
+import type {
+  EvaluationRequest,
+  Policy,
+  PolicyEvaluation,
+  PolicyEvaluationResult,
+} from './types.js';
 
 const registeredPolicies: Policy[] = [...BUILT_IN_GUARDRAILS, ...PRISM_COUNSEL_POLICIES];
 
 export function registerPolicy(policy: Policy): void {
-  const idx = registeredPolicies.findIndex(p => p.id === policy.id);
+  const idx = registeredPolicies.findIndex((p) => p.id === policy.id);
   if (idx >= 0) {
     registeredPolicies[idx] = policy;
   } else {
@@ -26,7 +31,7 @@ export function registerPolicy(policy: Policy): void {
 }
 
 export function unregisterPolicy(policyId: string): boolean {
-  const idx = registeredPolicies.findIndex(p => p.id === policyId);
+  const idx = registeredPolicies.findIndex((p) => p.id === policyId);
   if (idx >= 0) {
     registeredPolicies.splice(idx, 1);
     return true;
@@ -55,28 +60,28 @@ export function buildPolicyEvaluation(params: {
   product?: string;
   workspace?: string;
   subjectRoles?: string[];
-  entitySensitivity?: PolicyEvaluation["entitySensitivity"];
+  entitySensitivity?: PolicyEvaluation['entitySensitivity'];
   confidence?: number;
   freshnessScore?: number;
-  environment?: PolicyEvaluation["environment"];
+  environment?: PolicyEvaluation['environment'];
   windowValid?: boolean;
   projectedCostUsd?: number;
   projectedImpact: string;
   projectedRisk: string;
-  evidenceChain: PolicyEvaluation["evidenceChain"];
+  evidenceChain: PolicyEvaluation['evidenceChain'];
   evaluatedBy?: string;
   evaluationRequest?: EvaluationRequest;
 }): PolicyEvaluation {
   const {
     action,
     actionType,
-    product = "*",
-    workspace = "*",
+    product = '*',
+    workspace = '*',
     subjectRoles = [],
-    entitySensitivity = "internal",
+    entitySensitivity = 'internal',
     confidence = 1.0,
     freshnessScore = 1.0,
-    environment = "production",
+    environment = 'production',
     windowValid = true,
     projectedCostUsd,
     projectedImpact,
@@ -92,7 +97,7 @@ export function buildPolicyEvaluation(params: {
     workspace,
   });
 
-  const effectiveMode = modeConfig?.mode ?? "approval-required";
+  const effectiveMode = modeConfig?.mode ?? 'approval-required';
 
   const request: EvaluationRequest = evaluationRequest ?? {
     action,
@@ -115,14 +120,14 @@ export function buildPolicyEvaluation(params: {
   const policyResult = evaluatePolicies(registeredPolicies, request);
 
   let blockedReason: string | undefined;
-  if (effectiveMode === "observe") {
+  if (effectiveMode === 'observe') {
     blockedReason = "Mode is 'observe': action logged but not executed.";
-  } else if (policyResult.effect === "block") {
-    blockedReason = policyResult.violations[0]?.reason ?? "Blocked by policy.";
+  } else if (policyResult.effect === 'block') {
+    blockedReason = policyResult.violations[0]?.reason ?? 'Blocked by policy.';
   } else if (!windowValid) {
-    blockedReason = "Action is outside the permitted execution window.";
+    blockedReason = 'Action is outside the permitted execution window.';
   } else if (
-    effectiveMode === "auto-within-guardrails" &&
+    effectiveMode === 'auto-within-guardrails' &&
     modeConfig &&
     confidence < modeConfig.confidenceThreshold
   ) {

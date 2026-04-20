@@ -4,9 +4,9 @@
  * contracts package into the frontend bundle.
  */
 
-export type ApprovalStatus = "pending" | "approved" | "denied" | "escalated" | "timed_out";
-export type ApprovalVerdict_ = "approve" | "deny" | "escalate";
-export type GateStatus = "complete" | "degraded" | "blocked" | "pending";
+export type ApprovalStatus = 'pending' | 'approved' | 'denied' | 'escalated' | 'timed_out';
+export type ApprovalVerdict_ = 'approve' | 'deny' | 'escalate';
+export type GateStatus = 'complete' | 'degraded' | 'blocked' | 'pending';
 
 export interface ApprovalInterruptSpec {
   actionLabel: string;
@@ -48,7 +48,7 @@ export interface LedgerToolCall {
   toolId: string;
   stepId: string;
   latencyMs: number;
-  outcome: "success" | "failure" | "skipped";
+  outcome: 'success' | 'failure' | 'skipped';
   error?: string;
 }
 
@@ -62,14 +62,14 @@ export interface LedgerSource {
 export interface LedgerApprovalEvent {
   requestId: string;
   stepId: string;
-  verdict: "approve" | "deny" | "escalate" | "timed_out" | "pending";
+  verdict: 'approve' | 'deny' | 'escalate' | 'timed_out' | 'pending';
   actor?: string;
   decidedAt?: number;
 }
 
 export interface LedgerPolicyOutcome {
   policyId: string;
-  result: "pass" | "require-approval" | "block" | "pending";
+  result: 'pass' | 'require-approval' | 'block' | 'pending';
   tier?: string;
   reason?: string;
 }

@@ -1,26 +1,26 @@
-import type { BriefGenerationContext } from "./types.js";
-import { summarizeContext } from "./context-builder.js";
+import { summarizeContext } from './context-builder.js';
+import type { BriefGenerationContext } from './types.js';
 
 const DOMAIN_AGENT_MAP: Record<string, string> = {
-  terra: "Terra",
-  vessels: "Helmsman",
-  aegis: "Sentinel",
-  lyte: "Lyte",
-  prism: "Lexis",
-  "szl-holdings": "Atlas",
-  carlota: "Alloy",
-  consolidated: "Alloy",
+  terra: 'Terra',
+  vessels: 'Helmsman',
+  aegis: 'Sentinel',
+  lyte: 'Lyte',
+  prism: 'Lexis',
+  'szl-holdings': 'Atlas',
+  carlota: 'Alloy',
+  consolidated: 'Alloy',
 };
 
 export function getAgentId(domain: string): string {
-  return DOMAIN_AGENT_MAP[domain] ?? "Alloy";
+  return DOMAIN_AGENT_MAP[domain] ?? 'Alloy';
 }
 
 export function buildSystemPrompt(domain: string): string {
   const agent = getAgentId(domain);
   const domainDesc =
-    domain === "consolidated"
-      ? "all operational domains (maritime, security, real estate, legal, financial, platform)"
+    domain === 'consolidated'
+      ? 'all operational domains (maritime, security, real estate, legal, financial, platform)'
       : `the ${domain} domain`;
 
   return `You are ${agent}, an AI intelligence analyst responsible for ${domainDesc}.
@@ -103,7 +103,14 @@ Generate the brief JSON now. Be concise and evidence-first.`;
 }
 
 export function buildCitationManifest(
-  citations: Array<{ id: string; sourceType: string; sourceId: string; domain?: string; confidence?: number; freshness?: string }>,
+  citations: Array<{
+    id: string;
+    sourceType: string;
+    sourceId: string;
+    domain?: string;
+    confidence?: number;
+    freshness?: string;
+  }>,
 ): string {
   return citations
     .map((c) => {
@@ -111,7 +118,7 @@ export function buildCitationManifest(
       if (c.domain) parts.push(`domain=${c.domain}`);
       if (c.confidence !== undefined) parts.push(`confidence=${(c.confidence * 100).toFixed(0)}%`);
       if (c.freshness) parts.push(`freshness=${c.freshness}`);
-      return parts.join(" | ");
+      return parts.join(' | ');
     })
-    .join("\n");
+    .join('\n');
 }

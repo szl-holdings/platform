@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
-import { cn } from "../utils.js";
-import { color, v } from "../tokens/index.js";
-import { EvidenceBadge, type EvidenceSource } from "./EvidenceBadge.js";
-import { FreshnessChip } from "./FreshnessChip.js";
-import { ConfidenceMeter } from "./ConfidenceMeter.js";
-import { PolicyStateChip, type PolicyState } from "./PolicyStateChip.js";
-import { AutonomyModeToggle, type AutonomyMode } from "./AutonomyModeToggle.js";
+import { useCallback, useEffect, useState } from 'react';
+import { color, v } from '../tokens/index.js';
+import { cn } from '../utils.js';
+import { type AutonomyMode, AutonomyModeToggle } from './AutonomyModeToggle.js';
+import { ConfidenceMeter } from './ConfidenceMeter.js';
+import { EvidenceBadge, type EvidenceSource } from './EvidenceBadge.js';
+import { FreshnessChip } from './FreshnessChip.js';
+import { type PolicyState, PolicyStateChip } from './PolicyStateChip.js';
 
 export interface AutonomyDecision {
   policyState: PolicyState;
   policyReason?: string;
-  disposition: "execute" | "queue" | "draft" | "block";
+  disposition: 'execute' | 'queue' | 'draft' | 'block';
   mode: AutonomyMode;
 }
 
@@ -43,7 +43,7 @@ export interface ProofEnvelopeProps {
   actionLabel?: string;
 }
 
-const DEFAULT_AUTONOMY_ENDPOINT = "/api/alloy/autonomy-mode";
+const DEFAULT_AUTONOMY_ENDPOINT = '/api/alloy/autonomy-mode';
 
 async function patchAutonomyMode(
   endpoint: string,
@@ -52,17 +52,17 @@ async function patchAutonomyMode(
 ): Promise<AutonomyDecision | null> {
   try {
     const res = await fetch(endpoint, {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ domain, mode }),
     });
     if (!res.ok) {
       // 401/403/etc — surface a degraded reason but don't crash the UI.
       return {
-        policyState: "blocked",
+        policyState: 'blocked',
         policyReason: `Autonomy mode change rejected (${res.status}). Mode not persisted.`,
-        disposition: "block",
+        disposition: 'block',
         mode,
       };
     }
@@ -70,9 +70,9 @@ async function patchAutonomyMode(
     return json?.data?.decision ?? null;
   } catch (err) {
     return {
-      policyState: "blocked",
+      policyState: 'blocked',
       policyReason: `Could not reach Alloy autonomy service — mode not persisted (${(err as Error).message}).`,
-      disposition: "block",
+      disposition: 'block',
       mode,
     };
   }
@@ -118,8 +118,9 @@ export function ProofEnvelope({
 
   const effectivePolicyState = liveDecision?.policyState ?? policyState;
   const effectivePolicyReason =
-    liveDecision?.policyReason ?? policyReason ??
-    (actionLabel && liveDecision?.disposition === "execute"
+    liveDecision?.policyReason ??
+    policyReason ??
+    (actionLabel && liveDecision?.disposition === 'execute'
       ? `Cleared to execute: ${actionLabel}`
       : undefined);
 
@@ -131,16 +132,15 @@ export function ProofEnvelope({
         borderLeftColor: accentColor,
         borderLeftWidth: 2,
       }}
-      className={cn(
-        "rounded-xl border shadow-lg overflow-hidden",
-        className
-      )}
-      data-autonomy-pending={pending ? "true" : undefined}
+      className={cn('rounded-xl border shadow-lg overflow-hidden', className)}
+      data-autonomy-pending={pending ? 'true' : undefined}
       data-autonomy-domain={domain}
     >
       {title && (
         <div style={{ borderColor: v.borderSubtle }} className="border-b px-4 py-2.5">
-          <h3 style={{ color: v.textPrimary }} className="text-sm font-semibold">{title}</h3>
+          <h3 style={{ color: v.textPrimary }} className="text-sm font-semibold">
+            {title}
+          </h3>
         </div>
       )}
 
@@ -156,7 +156,10 @@ export function ProofEnvelope({
             label="Confidence"
             variant="compact"
           />
-          <PolicyStateChip state={effectivePolicyState} {...(effectivePolicyReason !== undefined ? { reason: effectivePolicyReason } : {})} />
+          <PolicyStateChip
+            state={effectivePolicyState}
+            {...(effectivePolicyReason !== undefined ? { reason: effectivePolicyReason } : {})}
+          />
           <div className="ml-auto">
             <AutonomyModeToggle
               value={autonomyMode}
@@ -175,7 +178,7 @@ export function ProofEnvelope({
           >
             <span style={{ color: v.textMuted }} className="font-semibold uppercase tracking-wide">
               Alloy:
-            </span>{" "}
+            </span>{' '}
             {liveDecision.policyReason}
           </div>
         )}

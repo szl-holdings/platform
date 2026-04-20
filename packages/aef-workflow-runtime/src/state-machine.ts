@@ -1,15 +1,15 @@
+import type { ApprovalStore } from './approval.js';
+import { createApprovalRequest, InMemoryApprovalStore } from './approval.js';
+import type { CheckpointStore } from './checkpoint.js';
+import { InMemoryCheckpointStore } from './checkpoint.js';
 import type {
-  WorkflowDefinition,
-  WorkflowContext,
-  WorkflowCheckpoint,
-  WorkflowStepResult,
-  AuditEvent,
   AuditEmitter,
-} from "./types.js";
-import type { CheckpointStore } from "./checkpoint.js";
-import type { ApprovalStore } from "./approval.js";
-import { InMemoryCheckpointStore } from "./checkpoint.js";
-import { InMemoryApprovalStore, createApprovalRequest } from "./approval.js";
+  AuditEvent,
+  WorkflowCheckpoint,
+  WorkflowContext,
+  WorkflowDefinition,
+  WorkflowStepResult,
+} from './types.js';
 
 export interface WorkflowRunOptions {
   checkpointStore?: CheckpointStore;
@@ -21,7 +21,7 @@ export interface WorkflowRunOptions {
 export interface WorkflowRunResult {
   workflowId: string;
   kind: string;
-  status: WorkflowCheckpoint["status"];
+  status: WorkflowCheckpoint['status'];
   completedSteps: WorkflowStepResult[];
   approvalRequestId?: string;
   durationMs: number;
@@ -35,10 +35,7 @@ export class WorkflowStateMachine {
     this.definition = definition;
   }
 
-  async run(
-    ctx: WorkflowContext,
-    opts: WorkflowRunOptions = {},
-  ): Promise<WorkflowRunResult> {
+  async run(ctx: WorkflowContext, opts: WorkflowRunOptions = {}): Promise<WorkflowRunResult> {
     const {
       checkpointStore = new InMemoryCheckpointStore(),
       approvalStore = new InMemoryApprovalStore(),
@@ -55,42 +52,49 @@ export class WorkflowStateMachine {
       startIndex = checkpoint.currentStepIndex;
       completedSteps = [...checkpoint.completedSteps];
 
-      if (checkpoint.status === "waiting_approval" && checkpoint.approvalRequestId) {
+      if (checkpoint.status === 'waiting_approval' && checkpoint.approvalRequestId) {
         const approval = approvalStore.get(checkpoint.approvalRequestId);
         if (!approval) {
           throw new Error(
             `Workflow ${ctx.workflowId} is waiting for approval ${checkpoint.approvalRequestId} but the approval record was not found.`,
           );
         }
-        if (approval.decision === "pending") {
+        if (approval.decision === 'pending') {
           return {
             workflowId: ctx.workflowId,
             kind: this.definition.kind,
-            status: "waiting_approval",
+            status: 'waiting_approval',
             completedSteps,
             approvalRequestId: checkpoint.approvalRequestId,
             durationMs: Date.now() - startedAt,
-            finalOutput: { awaiting: "approval" },
+            finalOutput: { awaiting: 'approval' },
           };
         }
-        if (approval.decision === "rejected") {
-          this.saveCheckpoint(checkpointStore, ctx, "rejected", startIndex, completedSteps, checkpoint.context);
+        if (approval.decision === 'rejected') {
+          this.saveCheckpoint(
+            checkpointStore,
+            ctx,
+            'rejected',
+            startIndex,
+            completedSteps,
+            checkpoint.context,
+          );
           this.emitAudit(auditEmitter, {
             workflowId: ctx.workflowId,
             kind: this.definition.kind,
             tenantId: ctx.tenantId,
             profileId: ctx.profileId,
-            outcome: "rejected",
+            outcome: 'rejected',
             details: { approvalId: checkpoint.approvalRequestId },
           });
           return {
             workflowId: ctx.workflowId,
             kind: this.definition.kind,
-            status: "rejected",
+            status: 'rejected',
             completedSteps,
             approvalRequestId: checkpoint.approvalRequestId,
             durationMs: Date.now() - startedAt,
-            finalOutput: { rejection: "operator rejected" },
+            finalOutput: { rejection: 'operator rejected' },
           };
         }
         // Approval was granted — resume from the step AFTER the approval gate
@@ -109,7 +113,7 @@ export class WorkflowStateMachine {
 
       const stepStartedAt = new Date().toISOString();
 
-      this.saveCheckpoint(checkpointStore, ctx, "running", i, completedSteps, accumulatedOutput);
+      this.saveCheckpoint(checkpointStore, ctx, 'running', i, completedSteps, accumulatedOutput);
 
       this.emitAudit(auditEmitter, {
         workflowId: ctx.workflowId,
@@ -118,8 +122,8 @@ export class WorkflowStateMachine {
         actor: stepDef.actor,
         tenantId: ctx.tenantId,
         profileId: ctx.profileId,
-        outcome: "success",
-        details: { phase: "step_start" },
+        outcome: 'success',
+        details: { phase: 'step_start' },
       });
 
       let stepResult: WorkflowStepResult;
@@ -134,22 +138,24 @@ export class WorkflowStateMachine {
         // Extract the inner output for step storage and accumulation so downstream
         // steps can read fields directly from ctx.input without extra nesting.
         const flatOutput: Record<string, unknown> =
-          (result["output"] !== undefined && typeof result["output"] === "object" && result["output"] !== null)
-            ? (result["output"] as Record<string, unknown>)
+          result['output'] !== undefined &&
+          typeof result['output'] === 'object' &&
+          result['output'] !== null
+            ? (result['output'] as Record<string, unknown>)
             : result;
 
-        if (result["requiresApproval"] === true && ctx.approvalRequired) {
+        if (result['requiresApproval'] === true && ctx.approvalRequired) {
           const approvalReq = createApprovalRequest(
             ctx.workflowId,
             `${this.definition.kind}.${stepDef.stepId}`,
-            (result["approvalContext"] as Record<string, unknown>) ?? {},
+            (result['approvalContext'] as Record<string, unknown>) ?? {},
           );
           approvalStore.create(approvalReq);
 
           stepResult = {
             stepId: stepDef.stepId,
             actor: stepDef.actor,
-            status: "waiting",
+            status: 'waiting',
             startedAt: stepStartedAt,
             completedAt: new Date().toISOString(),
             output: flatOutput,
@@ -159,7 +165,7 @@ export class WorkflowStateMachine {
           this.saveCheckpoint(
             checkpointStore,
             ctx,
-            "waiting_approval",
+            'waiting_approval',
             i,
             completedSteps,
             accumulatedOutput,
@@ -173,25 +179,25 @@ export class WorkflowStateMachine {
             actor: stepDef.actor,
             tenantId: ctx.tenantId,
             profileId: ctx.profileId,
-            outcome: "approval_requested",
+            outcome: 'approval_requested',
             details: { approvalId: approvalReq.approvalId },
           });
 
           return {
             workflowId: ctx.workflowId,
             kind: this.definition.kind,
-            status: "waiting_approval",
+            status: 'waiting_approval',
             completedSteps,
             approvalRequestId: approvalReq.approvalId,
             durationMs: Date.now() - startedAt,
-            finalOutput: { awaiting: "approval", approvalId: approvalReq.approvalId },
+            finalOutput: { awaiting: 'approval', approvalId: approvalReq.approvalId },
           };
         }
 
         stepResult = {
           stepId: stepDef.stepId,
           actor: stepDef.actor,
-          status: "success",
+          status: 'success',
           startedAt: stepStartedAt,
           completedAt: new Date().toISOString(),
           output: flatOutput,
@@ -206,17 +212,16 @@ export class WorkflowStateMachine {
           actor: stepDef.actor,
           tenantId: ctx.tenantId,
           profileId: ctx.profileId,
-          outcome: "success",
+          outcome: 'success',
           details: { output: result },
         });
       } catch (err) {
-        const errorMsg =
-          err instanceof Error ? err.message : String(err);
+        const errorMsg = err instanceof Error ? err.message : String(err);
 
         stepResult = {
           stepId: stepDef.stepId,
           actor: stepDef.actor,
-          status: "failed",
+          status: 'failed',
           startedAt: stepStartedAt,
           completedAt: new Date().toISOString(),
           output: {},
@@ -224,7 +229,7 @@ export class WorkflowStateMachine {
         };
 
         completedSteps.push(stepResult);
-        this.saveCheckpoint(checkpointStore, ctx, "failed", i, completedSteps, accumulatedOutput);
+        this.saveCheckpoint(checkpointStore, ctx, 'failed', i, completedSteps, accumulatedOutput);
 
         this.emitAudit(auditEmitter, {
           workflowId: ctx.workflowId,
@@ -233,14 +238,14 @@ export class WorkflowStateMachine {
           actor: stepDef.actor,
           tenantId: ctx.tenantId,
           profileId: ctx.profileId,
-          outcome: "failure",
+          outcome: 'failure',
           details: { error: errorMsg },
         });
 
         return {
           workflowId: ctx.workflowId,
           kind: this.definition.kind,
-          status: "failed",
+          status: 'failed',
           completedSteps,
           durationMs: Date.now() - startedAt,
           finalOutput: accumulatedOutput,
@@ -253,7 +258,7 @@ export class WorkflowStateMachine {
     this.saveCheckpoint(
       checkpointStore,
       ctx,
-      "completed",
+      'completed',
       this.definition.steps.length,
       completedSteps,
       accumulatedOutput,
@@ -265,14 +270,14 @@ export class WorkflowStateMachine {
       kind: this.definition.kind,
       tenantId: ctx.tenantId,
       profileId: ctx.profileId,
-      outcome: "success",
+      outcome: 'success',
       details: { totalSteps: completedSteps.length, durationMs: Date.now() - startedAt },
     });
 
     return {
       workflowId: ctx.workflowId,
       kind: this.definition.kind,
-      status: "completed",
+      status: 'completed',
       completedSteps,
       durationMs: Date.now() - startedAt,
       finalOutput: accumulatedOutput,
@@ -286,7 +291,7 @@ export class WorkflowStateMachine {
       kind: this.definition.kind,
       currentStepIndex: 0,
       totalSteps: this.definition.steps.length,
-      status: "pending",
+      status: 'pending',
       completedSteps: [],
       context: ctx.input,
       createdAt: now,
@@ -297,7 +302,7 @@ export class WorkflowStateMachine {
   private saveCheckpoint(
     store: CheckpointStore,
     ctx: WorkflowContext,
-    status: WorkflowCheckpoint["status"],
+    status: WorkflowCheckpoint['status'],
     currentStepIndex: number,
     completedSteps: WorkflowStepResult[],
     context: Record<string, unknown>,
@@ -324,7 +329,7 @@ export class WorkflowStateMachine {
       actor?: string | undefined;
       tenantId: string;
       profileId?: string | undefined;
-      outcome: AuditEvent["outcome"];
+      outcome: AuditEvent['outcome'];
       details: Record<string, unknown>;
     },
   ): void {

@@ -38,16 +38,16 @@ export const scaleIn = {
 };
 
 export const slideUp = {
-  initial: { opacity: 0, y: "10px" },
-  animate: { opacity: 1, y: "0px" },
-  exit: { opacity: 0, y: "10px" },
+  initial: { opacity: 0, y: '10px' },
+  animate: { opacity: 1, y: '0px' },
+  exit: { opacity: 0, y: '10px' },
   transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
 };
 
 export const slideInRight = {
-  initial: { x: "100%", opacity: 0 },
+  initial: { x: '100%', opacity: 0 },
   animate: { x: 0, opacity: 1 },
-  exit: { x: "100%", opacity: 0 },
+  exit: { x: '100%', opacity: 0 },
   transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
 };
 
@@ -94,36 +94,36 @@ export const staggerItemLeft = {
 export const scrollReveal = {
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" },
+  viewport: { once: true, margin: '-80px' },
   transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] },
 };
 
 export const scrollRevealLeft = {
   initial: { opacity: 0, x: -22 },
   whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true, margin: "-80px" },
+  viewport: { once: true, margin: '-80px' },
   transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] },
 };
 
 export const scrollRevealRight = {
   initial: { opacity: 0, x: 22 },
   whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true, margin: "-80px" },
+  viewport: { once: true, margin: '-80px' },
   transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] },
 };
 
 export const hoverLift = {
-  whileHover: { y: -3, transition: { duration: 0.20, ease: [0.25, 0.46, 0.45, 0.94] } },
+  whileHover: { y: -3, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } },
   whileTap: { y: 0, scale: 0.99 },
 };
 
 export const hoverLiftSlight = {
-  whileHover: { y: -2, transition: { duration: 0.20, ease: [0.25, 0.46, 0.45, 0.94] } },
+  whileHover: { y: -2, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } },
   whileTap: { y: 0 },
 };
 
 export const hoverScale = {
-  whileHover: { scale: 1.012, transition: { duration: 0.20, ease: [0.25, 0.46, 0.45, 0.94] } },
+  whileHover: { scale: 1.012, transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] } },
   whileTap: { scale: 0.988 },
 };
 
@@ -135,15 +135,15 @@ export const navReveal = {
 
 export const shimmer = {
   animate: {
-    backgroundPosition: ["200% 0", "-200% 0"],
-    transition: { duration: 2.4, repeat: Infinity, ease: "linear" },
+    backgroundPosition: ['200% 0', '-200% 0'],
+    transition: { duration: 2.4, repeat: Infinity, ease: 'linear' },
   },
 };
 
 export const pulseSubtle = {
   animate: {
     opacity: [0.65, 1, 0.65],
-    transition: { duration: 2.8, repeat: Infinity, ease: "easeInOut" },
+    transition: { duration: 2.8, repeat: Infinity, ease: 'easeInOut' },
   },
 };
 
@@ -151,7 +151,7 @@ export const nodePulse = {
   animate: {
     scale: [1, 1.04, 1],
     opacity: [0.8, 1, 0.8],
-    transition: { duration: 3.2, repeat: Infinity, ease: "easeInOut" },
+    transition: { duration: 3.2, repeat: Infinity, ease: 'easeInOut' },
   },
 };
 
@@ -159,28 +159,28 @@ export const signalPulse = {
   animate: {
     opacity: [0.6, 1, 0.6],
     scale: [0.98, 1.01, 0.98],
-    transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+    transition: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
   },
 };
 
 export const ambientDrift = {
   animate: {
     y: [0, -6, 0],
-    transition: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+    transition: { duration: 8, repeat: Infinity, ease: 'easeInOut' },
   },
 };
 
 export const sectionReveal = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-100px" },
+  viewport: { once: true, margin: '-100px' },
   transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] },
 };
 
 export const cardReveal = {
   initial: { opacity: 0, y: 18 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-60px" },
+  viewport: { once: true, margin: '-60px' },
   transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
 };
 

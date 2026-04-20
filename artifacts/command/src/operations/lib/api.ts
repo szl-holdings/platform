@@ -1,8 +1,12 @@
-import { apiFetch, type PaginationMeta, type PaginatedResponse } from "@szl-holdings/shared-ui/api-fetch";
+import {
+  apiFetch,
+  type PaginatedResponse,
+  type PaginationMeta,
+} from '@szl-holdings/shared-ui/api-fetch';
 
 async function apiFetchList<T>(path: string): Promise<T[]> {
   const json = await apiFetch<T[] | PaginatedResponse<T>>(path);
-  if (json && typeof json === "object" && "data" in json && "meta" in json) {
+  if (json && typeof json === 'object' && 'data' in json && 'meta' in json) {
     return (json as PaginatedResponse<T>).data;
   }
   return json as T[];
@@ -175,117 +179,239 @@ export interface LyteReadinessSummary {
 
 export const api = {
   signals: {
-    list: () => apiFetchList<LyteSignal>("/lyte/signals"),
-    create: (data: Partial<LyteSignal>) => apiFetch<LyteSignal>("/lyte/signals", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteSignal>) => apiFetch<LyteSignal>(`/lyte/signals/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/signals/${id}`, { method: "DELETE" }),
-    acknowledge: (id: number) => apiFetch<LyteSignal>(`/lyte/signals/${id}/acknowledge`, { method: "POST" }),
-    assign: (id: number, assignee: string) => apiFetch<LyteSignal>(`/lyte/signals/${id}/assign`, { method: "POST", body: JSON.stringify({ assignee }) }),
-    escalate: (id: number, to?: string, notes?: string) => apiFetch<LyteSignal>(`/lyte/signals/${id}/escalate`, { method: "POST", body: JSON.stringify({ escalateTo: to, notes }) }),
-    resolve: (id: number, notes?: string) => apiFetch<LyteSignal>(`/lyte/signals/${id}/resolve`, { method: "POST", body: JSON.stringify({ notes }) }),
-    override: (id: number, reason: string) => apiFetch<LyteSignal>(`/lyte/signals/${id}/override`, { method: "POST", body: JSON.stringify({ reason }) }),
+    list: () => apiFetchList<LyteSignal>('/lyte/signals'),
+    create: (data: Partial<LyteSignal>) =>
+      apiFetch<LyteSignal>('/lyte/signals', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<LyteSignal>) =>
+      apiFetch<LyteSignal>(`/lyte/signals/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/signals/${id}`, { method: 'DELETE' }),
+    acknowledge: (id: number) =>
+      apiFetch<LyteSignal>(`/lyte/signals/${id}/acknowledge`, { method: 'POST' }),
+    assign: (id: number, assignee: string) =>
+      apiFetch<LyteSignal>(`/lyte/signals/${id}/assign`, {
+        method: 'POST',
+        body: JSON.stringify({ assignee }),
+      }),
+    escalate: (id: number, to?: string, notes?: string) =>
+      apiFetch<LyteSignal>(`/lyte/signals/${id}/escalate`, {
+        method: 'POST',
+        body: JSON.stringify({ escalateTo: to, notes }),
+      }),
+    resolve: (id: number, notes?: string) =>
+      apiFetch<LyteSignal>(`/lyte/signals/${id}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ notes }),
+      }),
+    override: (id: number, reason: string) =>
+      apiFetch<LyteSignal>(`/lyte/signals/${id}/override`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      }),
     timeline: (id: number) => apiFetchList<unknown>(`/lyte/signals/${id}/timeline`),
     comments: (id: number) => apiFetchList<unknown>(`/lyte/signals/${id}/comments`),
-    addComment: (id: number, body: string, authorName: string) => apiFetch<unknown>(`/lyte/signals/${id}/comments`, { method: "POST", body: JSON.stringify({ body, authorName, commentType: "comment" }) }),
+    addComment: (id: number, body: string, authorName: string) =>
+      apiFetch<unknown>(`/lyte/signals/${id}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ body, authorName, commentType: 'comment' }),
+      }),
   },
   incidents: {
-    list: () => apiFetchList<LyteIncident>("/lyte/incidents"),
-    create: (data: Partial<LyteIncident>) => apiFetch<LyteIncident>("/lyte/incidents", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteIncident>) => apiFetch<LyteIncident>(`/lyte/incidents/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/incidents/${id}`, { method: "DELETE" }),
+    list: () => apiFetchList<LyteIncident>('/lyte/incidents'),
+    create: (data: Partial<LyteIncident>) =>
+      apiFetch<LyteIncident>('/lyte/incidents', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<LyteIncident>) =>
+      apiFetch<LyteIncident>(`/lyte/incidents/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/incidents/${id}`, { method: 'DELETE' }),
   },
   recommendations: {
-    list: () => apiFetchList<LyteRecommendation>("/lyte/recommendations"),
-    create: (data: Partial<LyteRecommendation>) => apiFetch<LyteRecommendation>("/lyte/recommendations", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteRecommendation>) => apiFetch<LyteRecommendation>(`/lyte/recommendations/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/recommendations/${id}`, { method: "DELETE" }),
+    list: () => apiFetchList<LyteRecommendation>('/lyte/recommendations'),
+    create: (data: Partial<LyteRecommendation>) =>
+      apiFetch<LyteRecommendation>('/lyte/recommendations', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: Partial<LyteRecommendation>) =>
+      apiFetch<LyteRecommendation>(`/lyte/recommendations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/recommendations/${id}`, { method: 'DELETE' }),
   },
   playbooks: {
-    list: () => apiFetchList<LytePlaybook>("/lyte/playbooks"),
+    list: () => apiFetchList<LytePlaybook>('/lyte/playbooks'),
     get: (id: number) => apiFetch<LytePlaybook>(`/lyte/playbooks/${id}`),
-    create: (data: Partial<LytePlaybook>) => apiFetch<LytePlaybook>("/lyte/playbooks", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LytePlaybook>) => apiFetch<LytePlaybook>(`/lyte/playbooks/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/playbooks/${id}`, { method: "DELETE" }),
+    create: (data: Partial<LytePlaybook>) =>
+      apiFetch<LytePlaybook>('/lyte/playbooks', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<LytePlaybook>) =>
+      apiFetch<LytePlaybook>(`/lyte/playbooks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/playbooks/${id}`, { method: 'DELETE' }),
   },
   commandCards: {
-    list: () => apiFetchList<LyteCommandCard>("/lyte/command-cards"),
-    create: (data: Partial<LyteCommandCard>) => apiFetch<LyteCommandCard>("/lyte/command-cards", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteCommandCard>) => apiFetch<LyteCommandCard>(`/lyte/command-cards/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/command-cards/${id}`, { method: "DELETE" }),
+    list: () => apiFetchList<LyteCommandCard>('/lyte/command-cards'),
+    create: (data: Partial<LyteCommandCard>) =>
+      apiFetch<LyteCommandCard>('/lyte/command-cards', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: Partial<LyteCommandCard>) =>
+      apiFetch<LyteCommandCard>(`/lyte/command-cards/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/command-cards/${id}`, { method: 'DELETE' }),
   },
   actions: {
     list: (params?: { workspaceId?: number; role?: string; state?: string }) => {
-      const qs = params ? new URLSearchParams(Object.entries(params).filter(([, v]) => v != null) as [string, string][]).toString() : "";
-      return apiFetchList<LyteAction>(`/lyte/actions${qs ? `?${qs}` : ""}`);
+      const qs = params
+        ? new URLSearchParams(
+            Object.entries(params).filter(([, v]) => v != null) as [string, string][],
+          ).toString()
+        : '';
+      return apiFetchList<LyteAction>(`/lyte/actions${qs ? `?${qs}` : ''}`);
     },
     get: (id: number) => apiFetch<LyteAction>(`/lyte/actions/${id}`),
-    create: (data: Partial<LyteAction>) => apiFetch<LyteAction>("/lyte/actions", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteAction>) => apiFetch<LyteAction>(`/lyte/actions/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/actions/${id}`, { method: "DELETE" }),
+    create: (data: Partial<LyteAction>) =>
+      apiFetch<LyteAction>('/lyte/actions', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<LyteAction>) =>
+      apiFetch<LyteAction>(`/lyte/actions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/actions/${id}`, { method: 'DELETE' }),
   },
   views: {
     list: (params?: { workspaceId?: number; role?: string }) => {
-      const qs = params ? new URLSearchParams(Object.entries(params).filter(([, v]) => v != null) as [string, string][]).toString() : "";
-      return apiFetchList<LyteSavedView>(`/lyte/views${qs ? `?${qs}` : ""}`);
+      const qs = params
+        ? new URLSearchParams(
+            Object.entries(params).filter(([, v]) => v != null) as [string, string][],
+          ).toString()
+        : '';
+      return apiFetchList<LyteSavedView>(`/lyte/views${qs ? `?${qs}` : ''}`);
     },
-    create: (data: Partial<LyteSavedView>) => apiFetch<LyteSavedView>("/lyte/views", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteSavedView>) => apiFetch<LyteSavedView>(`/lyte/views/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/views/${id}`, { method: "DELETE" }),
+    create: (data: Partial<LyteSavedView>) =>
+      apiFetch<LyteSavedView>('/lyte/views', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<LyteSavedView>) =>
+      apiFetch<LyteSavedView>(`/lyte/views/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/views/${id}`, { method: 'DELETE' }),
   },
   readiness: {
-    get: () => apiFetch<LyteReadinessSummary>("/lyte/readiness"),
-    list: (workspaceId?: number) => apiFetchList<LyteReadinessItem>(`/lyte/readiness${workspaceId ? `?workspaceId=${workspaceId}` : ""}`),
+    get: () => apiFetch<LyteReadinessSummary>('/lyte/readiness'),
+    list: (workspaceId?: number) =>
+      apiFetchList<LyteReadinessItem>(
+        `/lyte/readiness${workspaceId ? `?workspaceId=${workspaceId}` : ''}`,
+      ),
     getItem: (id: number) => apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`),
-    create: (data: Partial<LyteReadinessItem>) => apiFetch<LyteReadinessItem>("/lyte/readiness", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteReadinessItem>) => apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/readiness/${id}`, { method: "DELETE" }),
-    score: (workspaceId?: number) => apiFetch<{ score: number; breakdown: unknown[]; readyCount: number; totalItems: number; lastUpdated: string }>(`/lyte/readiness/score${workspaceId ? `?workspaceId=${workspaceId}` : ""}`),
+    create: (data: Partial<LyteReadinessItem>) =>
+      apiFetch<LyteReadinessItem>('/lyte/readiness', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: Partial<LyteReadinessItem>) =>
+      apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/readiness/${id}`, { method: 'DELETE' }),
+    score: (workspaceId?: number) =>
+      apiFetch<{
+        score: number;
+        breakdown: unknown[];
+        readyCount: number;
+        totalItems: number;
+        lastUpdated: string;
+      }>(`/lyte/readiness/score${workspaceId ? `?workspaceId=${workspaceId}` : ''}`),
   },
-  dashboard: () => apiFetch<LyteDashboard>("/lyte/dashboard"),
+  dashboard: () => apiFetch<LyteDashboard>('/lyte/dashboard'),
   dashboards: {
-    list: () => apiFetch<unknown[]>("/lyte/dashboards"),
+    list: () => apiFetch<unknown[]>('/lyte/dashboards'),
     get: (id: number) => apiFetch<unknown>(`/lyte/dashboards/${id}`),
-    create: (data: Record<string, unknown>) => apiFetch<unknown>("/lyte/dashboards", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Record<string, unknown>) => apiFetch<unknown>(`/lyte/dashboards/${id}`, { method: "PUT", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/dashboards/${id}`, { method: "DELETE" }),
+    create: (data: Record<string, unknown>) =>
+      apiFetch<unknown>('/lyte/dashboards', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Record<string, unknown>) =>
+      apiFetch<unknown>(`/lyte/dashboards/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: number) =>
+      apiFetch<{ deleted: boolean }>(`/lyte/dashboards/${id}`, { method: 'DELETE' }),
   },
-  executiveSummary: () => apiFetch<Record<string, unknown>>("/lyte/executive-summary"),
-  insights: () => apiFetch<{ narratives: Array<{ type: string; priority: string; headline: string; detail: string }>; signalSummary: Record<string, number>; sourceSummary: Record<string, number> }>("/lyte/insights/narratives"),
+  executiveSummary: () => apiFetch<Record<string, unknown>>('/lyte/executive-summary'),
+  insights: () =>
+    apiFetch<{
+      narratives: Array<{ type: string; priority: string; headline: string; detail: string }>;
+      signalSummary: Record<string, number>;
+      sourceSummary: Record<string, number>;
+    }>('/lyte/insights/narratives'),
   live: {
-    techNews: () => apiFetch<any>("/lyte/live/tech-news"),
-    blsEmployment: () => apiFetch<any>("/lyte/live/bls-employment"),
+    techNews: () => apiFetch<any>('/lyte/live/tech-news'),
+    blsEmployment: () => apiFetch<any>('/lyte/live/bls-employment'),
     githubTrending: (language?: string) =>
-      apiFetch<any>(`/lyte/live/github-trending${language ? `?language=${encodeURIComponent(language)}` : ""}`),
+      apiFetch<any>(
+        `/lyte/live/github-trending${language ? `?language=${encodeURIComponent(language)}` : ''}`,
+      ),
   },
   ai: {
-    health: () => apiFetch<AlloyAIHealth>("/ai/health"),
-    models: () => apiFetch<AlloyAIModels>("/ai/models"),
+    health: () => apiFetch<AlloyAIHealth>('/ai/health'),
+    models: () => apiFetch<AlloyAIModels>('/ai/models'),
     respond: (messages: Array<{ role: string; content: string }>, routeClass?: string) =>
-      apiFetch<AlloyAIResponse>("/ai/respond", { method: "POST", body: JSON.stringify({ messages, routeClass }) }),
+      apiFetch<AlloyAIResponse>('/ai/respond', {
+        method: 'POST',
+        body: JSON.stringify({ messages, routeClass }),
+      }),
     triage: (input: string, context?: string) =>
-      apiFetch<AlloyAITriageResult>("/ai/triage", { method: "POST", body: JSON.stringify({ input, context }) }),
+      apiFetch<AlloyAITriageResult>('/ai/triage', {
+        method: 'POST',
+        body: JSON.stringify({ input, context }),
+      }),
     extract: (input: string) =>
-      apiFetch<AlloyAIExtractResult>("/ai/extract", { method: "POST", body: JSON.stringify({ input }) }),
+      apiFetch<AlloyAIExtractResult>('/ai/extract', {
+        method: 'POST',
+        body: JSON.stringify({ input }),
+      }),
     plan: (objective: string, context?: string) =>
-      apiFetch<AlloyAIPlanResult>("/ai/plan", { method: "POST", body: JSON.stringify({ objective, context }) }),
+      apiFetch<AlloyAIPlanResult>('/ai/plan', {
+        method: 'POST',
+        body: JSON.stringify({ objective, context }),
+      }),
     retrieve: (query: string, topK?: number) =>
-      apiFetch<AlloyAIRetrievalResult>("/ai/retrieve", { method: "POST", body: JSON.stringify({ query, topK }) }),
-    tools: () => apiFetch<AlloyAIToolsResult>("/ai/tools"),
+      apiFetch<AlloyAIRetrievalResult>('/ai/retrieve', {
+        method: 'POST',
+        body: JSON.stringify({ query, topK }),
+      }),
+    tools: () => apiFetch<AlloyAIToolsResult>('/ai/tools'),
     toolPreview: (toolName: string, args?: Record<string, unknown>) =>
-      apiFetch<AlloyAIToolPreview>("/ai/tools/preview", { method: "POST", body: JSON.stringify({ toolName, arguments: args }) }),
+      apiFetch<AlloyAIToolPreview>('/ai/tools/preview', {
+        method: 'POST',
+        body: JSON.stringify({ toolName, arguments: args }),
+      }),
     audit: (limit?: number) => apiFetch<AlloyAIAuditResult>(`/ai/audit?limit=${limit || 50}`),
-    decisions: (params?: { limit?: number; offset?: number; status?: string; riskLevel?: string }) => {
+    decisions: (params?: {
+      limit?: number;
+      offset?: number;
+      status?: string;
+      riskLevel?: string;
+    }) => {
       const q = new URLSearchParams();
-      if (params?.limit) q.set("limit", String(params.limit));
-      if (params?.offset) q.set("offset", String(params.offset));
-      if (params?.status) q.set("status", params.status);
-      if (params?.riskLevel) q.set("riskLevel", params.riskLevel);
-      return apiFetch<{ total: number; offset: number; limit: number; decisions: AlloyDecision[] }>(`/ai/decision?${q.toString()}`);
+      if (params?.limit) q.set('limit', String(params.limit));
+      if (params?.offset) q.set('offset', String(params.offset));
+      if (params?.status) q.set('status', params.status);
+      if (params?.riskLevel) q.set('riskLevel', params.riskLevel);
+      return apiFetch<{ total: number; offset: number; limit: number; decisions: AlloyDecision[] }>(
+        `/ai/decision?${q.toString()}`,
+      );
     },
     createDecision: (payload: {
       recommendedAction: string;
       rationaleSummary: string;
-      riskLevel: "P0" | "P1" | "P2" | "P3" | "P4";
+      riskLevel: 'P0' | 'P1' | 'P2' | 'P3' | 'P4';
       confidence?: number;
       workflowId?: string | null;
       signalIds?: string[];
@@ -294,81 +420,143 @@ export const api = {
       fallbackPlan?: string | null;
       modelRoute?: string;
       rawInput?: string;
-    }) => apiFetch<{ decision: AlloyDecision; approvalPolicy: AlloyApprovalPolicy; message: string }>("/ai/decision", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+    }) =>
+      apiFetch<{ decision: AlloyDecision; approvalPolicy: AlloyApprovalPolicy; message: string }>(
+        '/ai/decision',
+        {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        },
+      ),
     approveDecision: (id: string, approverName?: string) =>
-      apiFetch<{ decision: AlloyDecision; message: string }>(`/ai/decision/${id}/approve`, { method: "POST", body: JSON.stringify({ approverName }) }),
+      apiFetch<{ decision: AlloyDecision; message: string }>(`/ai/decision/${id}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({ approverName }),
+      }),
     rejectDecision: (id: string, reason?: string, rejectorName?: string) =>
-      apiFetch<{ decision: AlloyDecision; message: string }>(`/ai/decision/${id}/reject`, { method: "POST", body: JSON.stringify({ reason, rejectorName }) }),
-    approvalMatrix: () => apiFetch<{ matrix: Record<string, AlloyApprovalPolicy>; description: string; executionMode: string }>("/ai/approval-matrix"),
+      apiFetch<{ decision: AlloyDecision; message: string }>(`/ai/decision/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason, rejectorName }),
+      }),
+    approvalMatrix: () =>
+      apiFetch<{
+        matrix: Record<string, AlloyApprovalPolicy>;
+        description: string;
+        executionMode: string;
+      }>('/ai/approval-matrix'),
   },
   covenant: {
-    status: () => apiFetch<{ engine: string; status: string; stats: Record<string, unknown>; highRiskActions: string[] }>("/covenant/status"),
-    policies: () => apiFetch<{ policies: Array<Record<string, unknown>>; count: number }>("/covenant/policies"),
-    simulate: (subject: { roles: string[] }, resource: { type: string; domain?: string }, action: string, context?: Record<string, unknown>) =>
-      apiFetch<{ decision: Record<string, unknown>; explanation: string; ui: Record<string, unknown> }>("/covenant/simulate", {
-        method: "POST",
+    status: () =>
+      apiFetch<{
+        engine: string;
+        status: string;
+        stats: Record<string, unknown>;
+        highRiskActions: string[];
+      }>('/covenant/status'),
+    policies: () =>
+      apiFetch<{ policies: Array<Record<string, unknown>>; count: number }>('/covenant/policies'),
+    simulate: (
+      subject: { roles: string[] },
+      resource: { type: string; domain?: string },
+      action: string,
+      context?: Record<string, unknown>,
+    ) =>
+      apiFetch<{
+        decision: Record<string, unknown>;
+        explanation: string;
+        ui: Record<string, unknown>;
+      }>('/covenant/simulate', {
+        method: 'POST',
         body: JSON.stringify({ subject, resource, action, context }),
       }),
-    evaluate: (subject: { roles: string[] }, resource: { type: string; domain?: string }, action: string, context?: Record<string, unknown>) =>
-      apiFetch<{ decision: Record<string, unknown>; ui: Record<string, unknown> }>("/covenant/evaluate", {
-        method: "POST",
-        body: JSON.stringify({ subject, resource, action, context }),
-      }),
-    recent: (limit?: number) => apiFetch<{ decisions: Array<Record<string, unknown>>; count: number }>(`/covenant/decisions/recent?limit=${limit || 20}`),
-    denied: (limit?: number) => apiFetch<{ decisions: Array<Record<string, unknown>>; count: number }>(`/covenant/decisions/denied?limit=${limit || 20}`),
+    evaluate: (
+      subject: { roles: string[] },
+      resource: { type: string; domain?: string },
+      action: string,
+      context?: Record<string, unknown>,
+    ) =>
+      apiFetch<{ decision: Record<string, unknown>; ui: Record<string, unknown> }>(
+        '/covenant/evaluate',
+        {
+          method: 'POST',
+          body: JSON.stringify({ subject, resource, action, context }),
+        },
+      ),
+    recent: (limit?: number) =>
+      apiFetch<{ decisions: Array<Record<string, unknown>>; count: number }>(
+        `/covenant/decisions/recent?limit=${limit || 20}`,
+      ),
+    denied: (limit?: number) =>
+      apiFetch<{ decisions: Array<Record<string, unknown>>; count: number }>(
+        `/covenant/decisions/denied?limit=${limit || 20}`,
+      ),
   },
   alloyRuns: {
     list: (params?: { state?: string; limit?: number }) => {
       const q = new URLSearchParams();
-      if (params?.state) q.set("state", params.state);
-      if (params?.limit) q.set("limit", String(params.limit));
-      return apiFetch<{ data: AlloyWorkflowRun[]; meta: { total: number } }>(`/alloy/runs?${q.toString()}`);
+      if (params?.state) q.set('state', params.state);
+      if (params?.limit) q.set('limit', String(params.limit));
+      return apiFetch<{ data: AlloyWorkflowRun[]; meta: { total: number } }>(
+        `/alloy/runs?${q.toString()}`,
+      );
     },
     get: (id: number) => apiFetch<AlloyWorkflowRun>(`/alloy/runs/${id}`),
   },
   alloyWorkflows: {
     list: (params?: { limit?: number }) => {
       const q = new URLSearchParams();
-      if (params?.limit) q.set("limit", String(params.limit));
-      return apiFetch<{ data: AlloyWorkflow[]; meta: { total: number } }>(`/alloy/workflows?${q.toString()}`);
+      if (params?.limit) q.set('limit', String(params.limit));
+      return apiFetch<{ data: AlloyWorkflow[]; meta: { total: number } }>(
+        `/alloy/workflows?${q.toString()}`,
+      );
     },
     run: (id: number, input?: Record<string, unknown>) =>
-      apiFetch<AlloyWorkflowRun>(`/alloy/workflows/${id}/run`, { method: "POST", body: JSON.stringify({ input }) }),
+      apiFetch<AlloyWorkflowRun>(`/alloy/workflows/${id}/run`, {
+        method: 'POST',
+        body: JSON.stringify({ input }),
+      }),
   },
   receipts: {
     list: (params?: { limit?: number; contentType?: string }) => {
       const q = new URLSearchParams();
-      if (params?.limit) q.set("limit", String(params.limit));
-      if (params?.contentType) q.set("contentType", params.contentType);
-      return apiFetch<{ receipts: Array<Record<string, unknown>>; count: number }>(`/receipt-graph/receipts?${q.toString()}`);
+      if (params?.limit) q.set('limit', String(params.limit));
+      if (params?.contentType) q.set('contentType', params.contentType);
+      return apiFetch<{ receipts: Array<Record<string, unknown>>; count: number }>(
+        `/receipt-graph/receipts?${q.toString()}`,
+      );
     },
     get: (id: string) => apiFetch<Record<string, unknown>>(`/receipt-graph/receipts/${id}`),
-    executiveSummary: () => apiFetch<Record<string, unknown>>("/receipt-graph/trust-summary"),
+    executiveSummary: () => apiFetch<Record<string, unknown>>('/receipt-graph/trust-summary'),
   },
   handoffs: {
-    contracts: () => apiFetch<{ contracts: Array<Record<string, unknown>>; count: number }>("/cross-app/handoffs/contracts"),
+    contracts: () =>
+      apiFetch<{ contracts: Array<Record<string, unknown>>; count: number }>(
+        '/cross-app/handoffs/contracts',
+      ),
     history: (params?: { sourceDomain?: string; limit?: number }) => {
       const q = new URLSearchParams();
-      if (params?.sourceDomain) q.set("sourceDomain", params.sourceDomain);
-      if (params?.limit) q.set("limit", String(params.limit));
-      return apiFetch<{ handoffs: Array<Record<string, unknown>>; count: number }>(`/cross-app/handoffs/history?${q.toString()}`);
+      if (params?.sourceDomain) q.set('sourceDomain', params.sourceDomain);
+      if (params?.limit) q.set('limit', String(params.limit));
+      return apiFetch<{ handoffs: Array<Record<string, unknown>>; count: number }>(
+        `/cross-app/handoffs/history?${q.toString()}`,
+      );
     },
-    stats: () => apiFetch<Record<string, unknown>>("/cross-app/handoffs/stats"),
+    stats: () => apiFetch<Record<string, unknown>>('/cross-app/handoffs/stats'),
     trigger: (type: string, payload?: Record<string, unknown>) =>
-      apiFetch<{ handoff: Record<string, unknown>; message: string }>("/cross-app/handoffs/trigger", {
-        method: "POST",
-        body: JSON.stringify({ type, payload }),
-      }),
+      apiFetch<{ handoff: Record<string, unknown>; message: string }>(
+        '/cross-app/handoffs/trigger',
+        {
+          method: 'POST',
+          body: JSON.stringify({ type, payload }),
+        },
+      ),
   },
 };
 
 export interface AlloyWorkflowRun {
   id: number;
   workflowId: number;
-  state: "queued" | "running" | "completed" | "failed" | "waiting_approval" | "cancelled";
+  state: 'queued' | 'running' | 'completed' | 'failed' | 'waiting_approval' | 'cancelled';
   input: Record<string, unknown>;
   output?: Record<string, unknown>;
   errorMessage?: string;
@@ -412,7 +600,16 @@ export interface AlloyAIHealth {
 
 export interface AlloyAIModels {
   slots: Array<{ model: string; role: string; provider: string }>;
-  routes: Record<string, { model: string; role: string; maxTokens: number; temperature: number; structuredOutput: boolean }>;
+  routes: Record<
+    string,
+    {
+      model: string;
+      role: string;
+      maxTokens: number;
+      temperature: number;
+      structuredOutput: boolean;
+    }
+  >;
   provider: string;
   tokenConfigured: boolean;
 }
@@ -459,7 +656,12 @@ export interface AlloyAIPlanResult {
     action: string;
     actionType: string;
     confidence: number;
-    evidence: Array<{ source: string; sourceType: string; content: string; relevanceScore: number }>;
+    evidence: Array<{
+      source: string;
+      sourceType: string;
+      content: string;
+      relevanceScore: number;
+    }>;
     impactedOwner: string | null;
     approvalRequired: boolean;
     approvalLevel: string;
@@ -471,7 +673,14 @@ export interface AlloyAIPlanResult {
 }
 
 export interface AlloyAIRetrievalResult {
-  chunks: Array<{ id: string; content: string; source: string; sourceType: string; score: number; matchType: string }>;
+  chunks: Array<{
+    id: string;
+    content: string;
+    source: string;
+    sourceType: string;
+    score: number;
+    matchType: string;
+  }>;
   evidence: Array<{ source: string; sourceType: string; content: string; relevanceScore: number }>;
   query: string;
   method: string;
@@ -480,7 +689,11 @@ export interface AlloyAIRetrievalResult {
 }
 
 export interface AlloyAIToolsResult {
-  tools: Array<{ name: string; description: string; policy: { allowed: boolean; requiresApproval: boolean; reason: string } }>;
+  tools: Array<{
+    name: string;
+    description: string;
+    policy: { allowed: boolean; requiresApproval: boolean; reason: string };
+  }>;
   executionMode: string;
   approvalRequired: boolean;
 }
@@ -516,18 +729,25 @@ export interface AlloyDecision {
   confidence: number;
   ownerSuggestion: string | null;
   approvalRequired: boolean;
-  riskLevel: "P0" | "P1" | "P2" | "P3" | "P4";
+  riskLevel: 'P0' | 'P1' | 'P2' | 'P3' | 'P4';
   fallbackPlan: string | null;
   modelRoute: string;
-  schemaVersion: "2.0.0";
-  status: "proposed" | "pending_approval" | "approved" | "rejected" | "executed" | "failed" | "expired";
+  schemaVersion: '2.0.0';
+  status:
+    | 'proposed'
+    | 'pending_approval'
+    | 'approved'
+    | 'rejected'
+    | 'executed'
+    | 'failed'
+    | 'expired';
   approvedBy: string | null;
   approvedAt: string | null;
   rejectedBy: string | null;
   rejectedAt: string | null;
   rejectionReason: string | null;
   executedAt: string | null;
-  executionOutcome: "pending" | "success" | "failure" | "partial" | "rejected" | null;
+  executionOutcome: 'pending' | 'success' | 'failure' | 'partial' | 'rejected' | null;
   rawInput: string | null;
   rawOutput: string | null;
   createdAt: string;

@@ -20,11 +20,11 @@
  */
 
 import {
-  useQuery,
-  useMutation,
-  type UseQueryOptions,
-  type UseMutationOptions,
   type QueryKey,
+  type UseMutationOptions,
+  type UseQueryOptions,
+  useMutation,
+  useQuery,
 } from '@tanstack/react-query';
 
 const STANDARD_DEFAULTS = {
@@ -39,9 +39,7 @@ export function useStandardQuery<
   TError = Error,
   TData = TQueryFnData,
   TQueryKey extends QueryKey = QueryKey,
->(
-  options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
-) {
+>(options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>) {
   return useQuery<TQueryFnData, TError, TData, TQueryKey>({
     ...STANDARD_DEFAULTS,
     ...options,
@@ -53,8 +51,6 @@ export function useStandardMutation<
   TError = Error,
   TVariables = void,
   TContext = unknown,
->(
-  options: UseMutationOptions<TData, TError, TVariables, TContext>,
-) {
+>(options: UseMutationOptions<TData, TError, TVariables, TContext>) {
   return useMutation<TData, TError, TVariables, TContext>(options);
 }

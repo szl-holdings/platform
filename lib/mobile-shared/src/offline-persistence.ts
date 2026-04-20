@@ -1,8 +1,8 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const OUTBOX_KEY = "crdt_outbox";
-const REPLICA_PREFIX = "crdt_replica:";
-const CURSOR_KEY = "crdt_cursor";
+const OUTBOX_KEY = 'crdt_outbox';
+const REPLICA_PREFIX = 'crdt_replica:';
+const CURSOR_KEY = 'crdt_cursor';
 
 export interface OutboxEntry {
   id: string;
@@ -19,7 +19,10 @@ export interface LocalReplica {
   entityType: string;
   entityId: string;
   fields: Record<string, unknown>;
-  fieldStates: Record<string, { value: unknown; timestamp: number; actorId: string; clock: Record<string, number> }>;
+  fieldStates: Record<
+    string,
+    { value: unknown; timestamp: number; actorId: string; clock: Record<string, number> }
+  >;
   updatedAt: number;
 }
 
@@ -36,14 +39,18 @@ async function loadJson<T>(key: string): Promise<T | null> {
 async function saveJson(key: string, value: unknown): Promise<void> {
   try {
     await AsyncStorage.setItem(key, JSON.stringify(value));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 export async function getOutbox(): Promise<OutboxEntry[]> {
   return (await loadJson<OutboxEntry[]>(OUTBOX_KEY)) ?? [];
 }
 
-export async function enqueueOutbox(entry: Omit<OutboxEntry, "id" | "queuedAt" | "attempts">): Promise<void> {
+export async function enqueueOutbox(
+  entry: Omit<OutboxEntry, 'id' | 'queuedAt' | 'attempts'>,
+): Promise<void> {
   const outbox = await getOutbox();
   const newEntry: OutboxEntry = {
     ...entry,
@@ -58,7 +65,10 @@ export async function enqueueOutbox(entry: Omit<OutboxEntry, "id" | "queuedAt" |
 export async function removeFromOutbox(ids: string[]): Promise<void> {
   const outbox = await getOutbox();
   const idSet = new Set(ids);
-  await saveJson(OUTBOX_KEY, outbox.filter((e) => !idSet.has(e.id)));
+  await saveJson(
+    OUTBOX_KEY,
+    outbox.filter((e) => !idSet.has(e.id)),
+  );
 }
 
 export async function incrementOutboxAttempts(id: string): Promise<void> {
@@ -70,7 +80,10 @@ export async function incrementOutboxAttempts(id: string): Promise<void> {
   }
 }
 
-export async function getLocalReplica(entityType: string, entityId: string): Promise<LocalReplica | null> {
+export async function getLocalReplica(
+  entityType: string,
+  entityId: string,
+): Promise<LocalReplica | null> {
   return loadJson<LocalReplica>(`${REPLICA_PREFIX}${entityType}:${entityId}`);
 }
 
@@ -81,10 +94,13 @@ export async function saveLocalReplica(replica: LocalReplica): Promise<void> {
 export async function applyDeltaToReplica(
   entityType: string,
   entityId: string,
-  delta: Record<string, { value: unknown; timestamp: number; actorId: string; clock: Record<string, number> }>,
-  actorId: string
+  delta: Record<
+    string,
+    { value: unknown; timestamp: number; actorId: string; clock: Record<string, number> }
+  >,
+  actorId: string,
 ): Promise<LocalReplica> {
-  const existing = await getLocalReplica(entityType, entityId) ?? {
+  const existing = (await getLocalReplica(entityType, entityId)) ?? {
     entityType,
     entityId,
     fields: {},
@@ -94,8 +110,11 @@ export async function applyDeltaToReplica(
 
   for (const [key, incoming] of Object.entries(delta)) {
     const current = existing.fieldStates[key];
-    if (!current || incoming.timestamp > current.timestamp ||
-      (incoming.timestamp === current.timestamp && incoming.actorId >= current.actorId)) {
+    if (
+      !current ||
+      incoming.timestamp > current.timestamp ||
+      (incoming.timestamp === current.timestamp && incoming.actorId >= current.actorId)
+    ) {
       existing.fieldStates[key] = incoming;
       existing.fields[key] = incoming.value;
     }
@@ -120,7 +139,9 @@ export async function clearLocalData(entityType?: string, entityId?: string): Pr
     await AsyncStorage.removeItem(`${REPLICA_PREFIX}${entityType}:${entityId}`);
   } else {
     const keys = await AsyncStorage.getAllKeys();
-    const toRemove = keys.filter((k) => k.startsWith(REPLICA_PREFIX) || k === OUTBOX_KEY || k === CURSOR_KEY);
+    const toRemove = keys.filter(
+      (k) => k.startsWith(REPLICA_PREFIX) || k === OUTBOX_KEY || k === CURSOR_KEY,
+    );
     await AsyncStorage.multiRemove(toRemove);
   }
 }

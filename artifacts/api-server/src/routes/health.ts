@@ -1,11 +1,11 @@
-import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
-import v8 from "node:v8";
-import { HealthCheckResponse } from "@szl-holdings/api-zod";
-import { getBackupHealthStatus } from "../lib/backup-service";
-import { pool } from "@szl-holdings/db";
-import { adminGuard } from "../middlewares/admin-guard";
-import { verifyInternalHeader, tokenHasScope } from "../lib/internal-tokens";
-import { Sentry } from "../lib/sentry";
+import v8 from 'node:v8';
+import { HealthCheckResponse } from '@szl-holdings/api-zod';
+import { pool } from '@szl-holdings/db';
+import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
+import { getBackupHealthStatus } from '../lib/backup-service';
+import { tokenHasScope, verifyInternalHeader } from '../lib/internal-tokens';
+import { Sentry } from '../lib/sentry';
+import { adminGuard } from '../middlewares/admin-guard';
 
 /**
  * Apply a lightweight diagnostics guard in production environments.
@@ -20,12 +20,12 @@ import { Sentry } from "../lib/sentry";
  *   - Otherwise, fall back to `adminGuard` (which requires an authenticated
  *     ops/super_admin/exec session).
  */
-const IS_PRODUCTION = process.env.NODE_ENV === "production" || process.env.APP_ENV === "production";
+const IS_PRODUCTION = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
 function healthDiagnosticsGuard(req: Request, res: Response, next: NextFunction): void {
-  const header = req.headers["x-internal-token"] as string | undefined;
+  const header = req.headers['x-internal-token'] as string | undefined;
   if (header) {
     const match = verifyInternalHeader(header, req.originalUrl || req.url);
-    if (match && tokenHasScope(match.context, "health:read")) {
+    if (match && tokenHasScope(match.context, 'health:read')) {
       next();
       return;
     }
@@ -39,23 +39,25 @@ const productionAdminGuard = IS_PRODUCTION
 const router: IRouter = Router();
 
 const PLATFORM_APPS = [
-  { slug: "szl-holdings", name: "SZL Holdings Dashboard", type: "command_surface" },
-  { slug: "command", name: "Unified Command", type: "command_surface" },
-  { slug: "aegis", name: "Aegis — Defense & Intelligence", type: "domain_pack" },
-  { slug: "terra", name: "Terra — Real Estate Intelligence", type: "domain_pack" },
-  { slug: "vessels", name: "Vessels — Maritime Intelligence", type: "domain_pack" },
-  { slug: "carlota-jo", name: "Carlota Jo Consulting", type: "domain_pack" },
-  { slug: "szl-holdings-mobile", name: "CORTEX — Mobile Command", type: "mobile" },
-  { slug: "api-server", name: "API Server", type: "backend" },
+  { slug: 'szl-holdings', name: 'SZL Holdings Dashboard', type: 'command_surface' },
+  { slug: 'command', name: 'Unified Command', type: 'command_surface' },
+  { slug: 'aegis', name: 'Aegis — Defense & Intelligence', type: 'domain_pack' },
+  { slug: 'terra', name: 'Terra — Real Estate Intelligence', type: 'domain_pack' },
+  { slug: 'vessels', name: 'Vessels — Maritime Intelligence', type: 'domain_pack' },
+  { slug: 'carlota-jo', name: 'Carlota Jo Consulting', type: 'domain_pack' },
+  { slug: 'szl-holdings-mobile', name: 'CORTEX — Mobile Command', type: 'mobile' },
+  { slug: 'api-server', name: 'API Server', type: 'backend' },
 ];
 
 async function checkDatabase(): Promise<{ status: string; latencyMs: number; tables?: number }> {
   const start = Date.now();
   try {
-    const result = await pool.query("SELECT count(*)::int AS cnt FROM pg_tables WHERE schemaname = 'public'");
-    return { status: "ok", latencyMs: Date.now() - start, tables: result.rows[0]?.cnt ?? 0 };
+    const result = await pool.query(
+      "SELECT count(*)::int AS cnt FROM pg_tables WHERE schemaname = 'public'",
+    );
+    return { status: 'ok', latencyMs: Date.now() - start, tables: result.rows[0]?.cnt ?? 0 };
   } catch {
-    return { status: "degraded", latencyMs: Date.now() - start };
+    return { status: 'degraded', latencyMs: Date.now() - start };
   }
 }
 
@@ -76,7 +78,7 @@ function getPoolStats(): {
   waiting: number;
   max: number;
   usedPct: number;
-  status: "ok" | "elevated" | "saturated";
+  status: 'ok' | 'elevated' | 'saturated';
 } {
   const total = (pool as unknown as { totalCount: number }).totalCount ?? 0;
   const idle = (pool as unknown as { idleCount: number }).idleCount ?? 0;
@@ -84,41 +86,45 @@ function getPoolStats(): {
   const max = ((pool as unknown as { options?: { max?: number } }).options?.max ?? 10) || 10;
   const active = Math.max(0, total - idle);
   const usedPct = max > 0 ? (active / max) * 100 : 0;
-  let status: "ok" | "elevated" | "saturated" = "ok";
-  if (usedPct > 80 || waiting > 0) status = "saturated";
-  else if (usedPct > 60) status = "elevated";
+  let status: 'ok' | 'elevated' | 'saturated' = 'ok';
+  if (usedPct > 80 || waiting > 0) status = 'saturated';
+  else if (usedPct > 60) status = 'elevated';
   return { total, idle, active, waiting, max, usedPct: Math.round(usedPct * 10) / 10, status };
 }
 
-router.get("/healthz", async (_req, res) => {
-  const base = HealthCheckResponse.parse({ status: "ok" });
+router.get('/healthz', async (_req, res) => {
+  const base = HealthCheckResponse.parse({ status: 'ok' });
   const backupHealth = getBackupHealthStatus();
   const dbHealth = await checkDatabase();
 
   const hasSessionSecret = !!process.env.SESSION_SECRET;
-  const hasAiKey = !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY);
+  const hasAiKey = !!(
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY ||
+    process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ||
+    process.env.AI_INTEGRATIONS_GEMINI_API_KEY
+  );
   const hasCloudStorage = !!process.env.OBJECT_STORAGE_BUCKET_ID;
-  const authStatus = hasSessionSecret ? "ok" : "degraded";
+  const authStatus = hasSessionSecret ? 'ok' : 'degraded';
   const sentryDsnConfigured = !!process.env.SENTRY_DSN;
   const sentryInitialized = Sentry.isInitialized();
 
-  const overallStatus = dbHealth.status === "ok" && authStatus === "ok" ? "ok" : "degraded";
+  const overallStatus = dbHealth.status === 'ok' && authStatus === 'ok' ? 'ok' : 'degraded';
 
   res.json({
     ...base,
     status: overallStatus,
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version ?? "0.0.0",
+    version: process.env.npm_package_version ?? '0.0.0',
     uptime: Math.floor(process.uptime()),
     services: {
-      server: { status: "ok" },
+      server: { status: 'ok' },
       database: dbHealth,
-      storage: { status: "ok", mode: hasCloudStorage ? "cloud" : "local" },
-      auth: { status: authStatus, mode: hasSessionSecret ? "configured" : "missing_secret" },
-      ai: { status: "ok", mode: hasAiKey ? "live" : "mock" },
+      storage: { status: 'ok', mode: hasCloudStorage ? 'cloud' : 'local' },
+      auth: { status: authStatus, mode: hasSessionSecret ? 'configured' : 'missing_secret' },
+      ai: { status: 'ok', mode: hasAiKey ? 'live' : 'mock' },
       errorTracking: {
-        status: sentryInitialized ? "ok" : sentryDsnConfigured ? "degraded" : "unconfigured",
-        provider: "sentry",
+        status: sentryInitialized ? 'ok' : sentryDsnConfigured ? 'degraded' : 'unconfigured',
+        provider: 'sentry',
         dsnConfigured: sentryDsnConfigured,
         initialized: sentryInitialized,
       },
@@ -140,8 +146,8 @@ router.get("/healthz", async (_req, res) => {
   });
 });
 
-router.get("/health", async (req, res) => {
-  req.url = "/healthz";
+router.get('/health', async (req, res) => {
+  req.url = '/healthz';
   (router as any).handle(req, res, () => {});
 });
 
@@ -153,7 +159,7 @@ router.get("/health", async (req, res) => {
  * In development/staging, the endpoint is unrestricted so operators and
  *   integration tests can access diagnostics without credentials.
  */
-router.get("/health/detailed", productionAdminGuard, async (_req: Request, res: Response) => {
+router.get('/health/detailed', productionAdminGuard, async (_req: Request, res: Response) => {
   const dbHealth = await checkDatabase();
   const dbPool = getPoolStats();
   const backupHealth = getBackupHealthStatus();
@@ -176,14 +182,14 @@ router.get("/health/detailed", productionAdminGuard, async (_req: Request, res: 
   };
 
   res.json({
-    status: "ok",
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version ?? "0.0.0",
+    version: process.env.npm_package_version ?? '0.0.0',
     uptime: Math.floor(process.uptime()),
     nodeVersion: process.version,
     pid: process.pid,
     env: process.env.NODE_ENV,
-    runtimeMode: process.env.RUNTIME_MODE ?? process.env.APP_ENV ?? "unknown",
+    runtimeMode: process.env.RUNTIME_MODE ?? process.env.APP_ENV ?? 'unknown',
     database: dbHealth,
     dbPool,
     backup: {

@@ -87,10 +87,7 @@
     }
   ],
   "permissions": ["identity", "messageTeamMembers"],
-  "validDomains": [
-    "{{PRISM_COUNSEL_API_DOMAIN}}",
-    "szlholdings.com"
-  ],
+  "validDomains": ["{{PRISM_COUNSEL_API_DOMAIN}}", "szlholdings.com"],
   "webApplicationInfo": {
     "id": "{{AZURE_AD_APP_CLIENT_ID}}",
     "resource": "api://{{PRISM_COUNSEL_API_DOMAIN}}/{{AZURE_AD_APP_CLIENT_ID}}"

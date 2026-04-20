@@ -1,9 +1,11 @@
-import { pool } from "@szl-holdings/db";
-import { logger } from "./logger";
-import type { AlloyDecision } from "@szl-holdings/ai-engine";
+import type { AlloyDecision } from '@szl-holdings/ai-engine';
+import { pool } from '@szl-holdings/db';
+import { logger } from './logger';
 
-
-export async function insertDecision(decision: Partial<AlloyDecision> & Record<string, unknown>, orgId?: number | null): Promise<void> {
+export async function insertDecision(
+  decision: Partial<AlloyDecision> & Record<string, unknown>,
+  orgId?: number | null,
+): Promise<void> {
   await pool.query(
     `INSERT INTO alloy_ai_decisions (
       decision_id, org_id, workflow_id, signal_ids, recommended_action, rationale_summary,
@@ -36,30 +38,66 @@ export async function insertDecision(decision: Partial<AlloyDecision> & Record<s
 
 export async function updateDecisionStatus(
   decisionId: string,
-  patch: Partial<Pick<AlloyDecision, "status" | "approvedBy" | "approvedAt" | "rejectedBy" | "rejectedAt" | "rejectionReason" | "executionOutcome" | "executedAt">>,
+  patch: Partial<
+    Pick<
+      AlloyDecision,
+      | 'status'
+      | 'approvedBy'
+      | 'approvedAt'
+      | 'rejectedBy'
+      | 'rejectedAt'
+      | 'rejectionReason'
+      | 'executionOutcome'
+      | 'executedAt'
+    >
+  >,
   orgId: number | null,
   isAdmin?: boolean,
 ): Promise<void> {
   if (!isAdmin && (orgId === null || orgId === undefined)) {
-    throw new Error("NO_ORG: non-admin users must have an org to update decisions");
+    throw new Error('NO_ORG: non-admin users must have an org to update decisions');
   }
-  const sets: string[] = ["updated_at = NOW()"];
+  const sets: string[] = ['updated_at = NOW()'];
   const values: unknown[] = [];
   let idx = 1;
 
-  if (patch.status !== undefined) { sets.push(`status = $${idx++}`); values.push(patch.status); }
-  if (patch.approvedBy !== undefined) { sets.push(`approved_by = $${idx++}`); values.push(patch.approvedBy); }
-  if (patch.approvedAt !== undefined) { sets.push(`approved_at = $${idx++}`); values.push(patch.approvedAt); }
-  if (patch.rejectedBy !== undefined) { sets.push(`rejected_by = $${idx++}`); values.push(patch.rejectedBy); }
-  if (patch.rejectedAt !== undefined) { sets.push(`rejected_at = $${idx++}`); values.push(patch.rejectedAt); }
-  if (patch.rejectionReason !== undefined) { sets.push(`rejection_reason = $${idx++}`); values.push(patch.rejectionReason); }
-  if (patch.executionOutcome !== undefined) { sets.push(`execution_outcome = $${idx++}`); values.push(patch.executionOutcome); }
-  if (patch.executedAt !== undefined) { sets.push(`executed_at = $${idx++}`); values.push(patch.executedAt); }
+  if (patch.status !== undefined) {
+    sets.push(`status = $${idx++}`);
+    values.push(patch.status);
+  }
+  if (patch.approvedBy !== undefined) {
+    sets.push(`approved_by = $${idx++}`);
+    values.push(patch.approvedBy);
+  }
+  if (patch.approvedAt !== undefined) {
+    sets.push(`approved_at = $${idx++}`);
+    values.push(patch.approvedAt);
+  }
+  if (patch.rejectedBy !== undefined) {
+    sets.push(`rejected_by = $${idx++}`);
+    values.push(patch.rejectedBy);
+  }
+  if (patch.rejectedAt !== undefined) {
+    sets.push(`rejected_at = $${idx++}`);
+    values.push(patch.rejectedAt);
+  }
+  if (patch.rejectionReason !== undefined) {
+    sets.push(`rejection_reason = $${idx++}`);
+    values.push(patch.rejectionReason);
+  }
+  if (patch.executionOutcome !== undefined) {
+    sets.push(`execution_outcome = $${idx++}`);
+    values.push(patch.executionOutcome);
+  }
+  if (patch.executedAt !== undefined) {
+    sets.push(`executed_at = $${idx++}`);
+    values.push(patch.executedAt);
+  }
 
   if (sets.length === 1) return;
 
   values.push(decisionId);
-  let sql = `UPDATE alloy_ai_decisions SET ${sets.join(", ")} WHERE decision_id = $${idx}`;
+  let sql = `UPDATE alloy_ai_decisions SET ${sets.join(', ')} WHERE decision_id = $${idx}`;
 
   if (orgId !== undefined && orgId !== null) {
     sql += ` AND org_id = $${++idx}`;
@@ -76,22 +114,22 @@ function rowToDecision(row: Record<string, unknown>): AlloyDecision {
     signalIds: (row.signal_ids as string[]) ?? [],
     recommendedAction: row.recommended_action as string,
     rationaleSummary: row.rationale_summary as string,
-    evidenceRefs: (row.evidence_refs as AlloyDecision["evidenceRefs"]) ?? [],
+    evidenceRefs: (row.evidence_refs as AlloyDecision['evidenceRefs']) ?? [],
     confidence: Number(row.confidence),
     ownerSuggestion: row.owner_suggestion as string | null,
     approvalRequired: Boolean(row.approval_required),
-    riskLevel: row.risk_level as AlloyDecision["riskLevel"],
+    riskLevel: row.risk_level as AlloyDecision['riskLevel'],
     fallbackPlan: row.fallback_plan as string | null,
     modelRoute: row.model_route as string,
-    schemaVersion: "2.0.0" as const,
-    status: row.status as AlloyDecision["status"],
+    schemaVersion: '2.0.0' as const,
+    status: row.status as AlloyDecision['status'],
     approvedBy: (row.approved_by as string | null) ?? null,
     approvedAt: (row.approved_at as string | null) ?? null,
     rejectedBy: (row.rejected_by as string | null) ?? null,
     rejectedAt: (row.rejected_at as string | null) ?? null,
     rejectionReason: (row.rejection_reason as string | null) ?? null,
     executedAt: (row.executed_at as string | null) ?? null,
-    executionOutcome: (row.execution_outcome as AlloyDecision["executionOutcome"]) ?? null,
+    executionOutcome: (row.execution_outcome as AlloyDecision['executionOutcome']) ?? null,
     rawInput: (row.raw_input as string | null) ?? null,
     rawOutput: (row.raw_output as string | null) ?? null,
     createdAt: row.created_at as string,
@@ -118,10 +156,16 @@ export async function listDecisions(opts: {
     conditions.push(`org_id = $${idx++}`);
     values.push(opts.orgId);
   }
-  if (opts.status) { conditions.push(`status = $${idx++}`); values.push(opts.status); }
-  if (opts.riskLevel) { conditions.push(`risk_level = $${idx++}`); values.push(opts.riskLevel); }
+  if (opts.status) {
+    conditions.push(`status = $${idx++}`);
+    values.push(opts.status);
+  }
+  if (opts.riskLevel) {
+    conditions.push(`risk_level = $${idx++}`);
+    values.push(opts.riskLevel);
+  }
 
-  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const [countResult, rowsResult] = await Promise.all([
     pool.query(`SELECT COUNT(*)::int AS total FROM alloy_ai_decisions ${where}`, values),
@@ -133,11 +177,15 @@ export async function listDecisions(opts: {
 
   return {
     total: (countResult.rows[0] as { total: number }).total,
-    decisions: rowsResult.rows.map(r => rowToDecision(r as Record<string, unknown>)),
+    decisions: rowsResult.rows.map((r) => rowToDecision(r as Record<string, unknown>)),
   };
 }
 
-export async function getDecision(decisionId: string, orgId: number | null, isAdmin: boolean): Promise<AlloyDecision | null> {
+export async function getDecision(
+  decisionId: string,
+  orgId: number | null,
+  isAdmin: boolean,
+): Promise<AlloyDecision | null> {
   if (!isAdmin && (orgId === null || orgId === undefined)) {
     return null;
   }
@@ -186,7 +234,7 @@ export async function appendAuditEntry(entry: {
       ],
     );
   } catch (err) {
-    logger.warn({ err, endpoint: entry.endpoint }, "Audit log append failed (non-fatal)");
+    logger.warn({ err, endpoint: entry.endpoint }, 'Audit log append failed (non-fatal)');
   }
 }
 
@@ -211,7 +259,7 @@ export async function listAuditEntries(opts: {
     values.push(opts.orgId);
   }
 
-  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const [countResult, rowsResult] = await Promise.all([
     pool.query(`SELECT COUNT(*)::int AS total FROM alloy_ai_audit_log ${where}`, values),

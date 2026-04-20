@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import { Ship, Menu, X, ChevronRight } from "lucide-react";
+import { ChevronRight, Menu, Ship, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'wouter';
 
 const navLinks = [
-  { label: "Platform", href: "/platform" },
-  { label: "Capabilities", href: "/capabilities" },
-  { label: "Use Cases", href: "/use-cases" },
-  { label: "Security", href: "/security" },
-  { label: "Pricing", href: "/pricing" },
+  { label: 'Platform', href: '/platform' },
+  { label: 'Capabilities', href: '/capabilities' },
+  { label: 'Use Cases', href: '/use-cases' },
+  { label: 'Security', href: '/security' },
+  { label: 'Pricing', href: '/pricing' },
 ];
 
 export function MarketingNav() {
@@ -17,8 +17,8 @@ export function MarketingNav() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => setMobileOpen(false), [location]);
@@ -26,9 +26,7 @@ export function MarketingNav() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-[#060e1a]/95 backdrop-blur-md border-b border-sky-500/10"
-          : "bg-transparent"
+        scrolled ? 'bg-[#060e1a]/95 backdrop-blur-md border-b border-sky-500/10' : 'bg-transparent'
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-[60px] flex items-center justify-between">
@@ -45,9 +43,7 @@ export function MarketingNav() {
               key={link.href}
               href={link.href}
               className={`text-[13px] font-medium transition-colors duration-200 ${
-                location === link.href
-                  ? "text-sky-300"
-                  : "text-sky-300/50 hover:text-sky-200"
+                location === link.href ? 'text-sky-300' : 'text-sky-300/50 hover:text-sky-200'
               }`}
             >
               {link.label}
@@ -70,7 +66,7 @@ export function MarketingNav() {
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden text-sky-300/50 hover:text-sky-200 transition-colors"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -89,7 +85,13 @@ export function MarketingNav() {
                 {link.label}
               </Link>
             ))}
-            <Link href="/sign-in" onClick={() => setMobileOpen(false)} className="text-sky-300/50 text-[15px]">Sign In</Link>
+            <Link
+              href="/sign-in"
+              onClick={() => setMobileOpen(false)}
+              className="text-sky-300/50 text-[15px]"
+            >
+              Sign In
+            </Link>
             <Link
               href="/demo"
               onClick={() => setMobileOpen(false)}

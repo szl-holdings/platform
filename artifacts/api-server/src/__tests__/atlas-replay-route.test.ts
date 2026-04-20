@@ -14,10 +14,10 @@
  * touching the database.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express from "express";
-import request from "supertest";
-import type { IRouter } from "express";
+import type { IRouter } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Hoisted mocks
@@ -28,7 +28,7 @@ const mockIngestSignal = vi.fn();
 const mockExecutedomainWorkflow = vi.fn();
 const mockRegisterEvaluationHook = vi.fn();
 
-vi.mock("../lib/atlas-execution-engine.js", () => {
+vi.mock('../lib/atlas-execution-engine.js', () => {
   return {
     initializeAtlasExecutionEngine: vi.fn(),
     ingestSignal: (...args: unknown[]) => mockIngestSignal(...args),
@@ -42,44 +42,45 @@ vi.mock("../lib/atlas-execution-engine.js", () => {
     getEvaluationHookById: (...args: unknown[]) => mockGetEvaluationHookById(...args),
     registerEvaluationHook: (...args: unknown[]) => mockRegisterEvaluationHook(...args),
     evaluateSignalsForDomain: vi.fn().mockResolvedValue([]),
-    checkDomainPolicy: vi.fn().mockReturnValue({ allowed: true, effect: "allow" }),
+    checkDomainPolicy: vi.fn().mockReturnValue({ allowed: true, effect: 'allow' }),
     executedomainWorkflow: (...args: unknown[]) => mockExecutedomainWorkflow(...args),
     DOMAIN_WORKFLOWS: {
-      "aegis-incident-response": {
-        id: "aegis-incident-response",
-        name: "Aegis Security Incident Response",
-        domain: "aegis",
+      'aegis-incident-response': {
+        id: 'aegis-incident-response',
+        name: 'Aegis Security Incident Response',
+        domain: 'aegis',
         steps: [],
       },
-      "vessels-voyage-risk": {
-        id: "vessels-voyage-risk",
-        name: "Vessels Voyage Risk",
-        domain: "vessels",
+      'vessels-voyage-risk': {
+        id: 'vessels-voyage-risk',
+        name: 'Vessels Voyage Risk',
+        domain: 'vessels',
         steps: [],
       },
     },
   };
 });
 
-vi.mock("../lib/logger.js", () => ({
+vi.mock('../lib/logger.js', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("../lib/decisioning-store.js", () => ({
+vi.mock('../lib/decisioning-store.js', () => ({
   dbListRuns: vi.fn().mockResolvedValue({ runs: [], total: 0 }),
   dbGetRunById: vi.fn().mockResolvedValue(null),
   dbCancelRun: vi.fn().mockResolvedValue(false),
   dbApproveRun: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../middlewares/auth.js", () => ({
-  authMiddleware: (_opts?: unknown) => (req: Record<string, unknown>, _res: unknown, next: () => void) => {
-    req.isInternalAgent = true;
-    next();
-  },
+vi.mock('../middlewares/auth.js', () => ({
+  authMiddleware:
+    (_opts?: unknown) => (req: Record<string, unknown>, _res: unknown, next: () => void) => {
+      req.isInternalAgent = true;
+      next();
+    },
 }));
 
-vi.mock("../middlewares/sliding-window-limiter.js", () => ({
+vi.mock('../middlewares/sliding-window-limiter.js', () => ({
   perUserApiSlidingLimiter: (_req: unknown, _res: unknown, next: () => void) => next(),
   perUserWriteSlidingLimiter: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
@@ -88,7 +89,7 @@ vi.mock("../middlewares/sliding-window-limiter.js", () => ({
 // Router import (after mocks)
 // ---------------------------------------------------------------------------
 
-const domainAtlasRouter = (await import("../routes/domain-atlas-execution.js")).default;
+const domainAtlasRouter = (await import('../routes/domain-atlas-execution.js')).default;
 
 function buildApp(): express.Application {
   const app = express();
@@ -105,11 +106,11 @@ function buildApp(): express.Application {
 
 function makeHook(overrides: Record<string, unknown> = {}) {
   return {
-    id: "hook-aegis-1",
-    domain: "aegis",
-    workflowId: "run-original-1",
-    workflowName: "Aegis Security Incident Response",
-    triggerSignalId: "sig-1",
+    id: 'hook-aegis-1',
+    domain: 'aegis',
+    workflowId: 'run-original-1',
+    workflowName: 'Aegis Security Incident Response',
+    triggerSignalId: 'sig-1',
     replayable: true,
     snapshotAt: Date.now(),
     benchmarkMetrics: {
@@ -119,32 +120,32 @@ function makeHook(overrides: Record<string, unknown> = {}) {
     },
     signalSnapshot: [
       {
-        id: "sig-1",
-        domain: "aegis",
-        signalType: "security-incident",
-        severity: "high",
-        title: "Lateral movement",
-        description: "",
+        id: 'sig-1',
+        domain: 'aegis',
+        signalType: 'security-incident',
+        severity: 'high',
+        title: 'Lateral movement',
+        description: '',
         confidence: 0.9,
-        source: "siem",
+        source: 'siem',
         payload: {},
-        status: "raw",
-        tenantId: "t1",
+        status: 'raw',
+        tenantId: 't1',
         createdAt: Date.now(),
         updatedAt: Date.now(),
       },
     ],
     runSnapshot: {
-      runId: "run-original-1",
-      workflowId: "aegis-incident-response",
-      workflowName: "Aegis Security Incident Response",
-      executionMode: "semi_auto",
+      runId: 'run-original-1',
+      workflowId: 'aegis-incident-response',
+      workflowName: 'Aegis Security Incident Response',
+      executionMode: 'semi_auto',
       isDryRun: false,
       isSimulation: false,
-      status: "completed",
+      status: 'completed',
       currentStepIndex: 0,
       steps: [],
-      approvalState: "none",
+      approvalState: 'none',
       auditTrail: [],
       startedAt: Date.now() - 1000,
       completedAt: Date.now(),
@@ -157,104 +158,102 @@ function makeHook(overrides: Record<string, unknown> = {}) {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("POST /:domain/atlas/evaluation-hooks/replay — HTTP guards", () => {
+describe('POST /:domain/atlas/evaluation-hooks/replay — HTTP guards', () => {
   let app: express.Application;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockIngestSignal.mockResolvedValue({ id: "sig-replayed" });
-    mockRegisterEvaluationHook.mockResolvedValue({ id: "replay-hook-1" });
+    mockIngestSignal.mockResolvedValue({ id: 'sig-replayed' });
+    mockRegisterEvaluationHook.mockResolvedValue({ id: 'replay-hook-1' });
     app = buildApp();
   });
 
-  it("returns 400 when hookId is missing from the request body", async () => {
-    const res = await request(app)
-      .post("/aegis/atlas/evaluation-hooks/replay")
-      .send({});
+  it('returns 400 when hookId is missing from the request body', async () => {
+    const res = await request(app).post('/aegis/atlas/evaluation-hooks/replay').send({});
 
     expect(res.status).toBe(400);
     expect(mockGetEvaluationHookById).not.toHaveBeenCalled();
   });
 
-  it("returns 404 when the hookId does not match any stored hook", async () => {
+  it('returns 404 when the hookId does not match any stored hook', async () => {
     mockGetEvaluationHookById.mockResolvedValueOnce(undefined);
 
     const res = await request(app)
-      .post("/aegis/atlas/evaluation-hooks/replay")
-      .send({ hookId: "missing-hook" });
+      .post('/aegis/atlas/evaluation-hooks/replay')
+      .send({ hookId: 'missing-hook' });
 
     expect(res.status).toBe(404);
-    expect(mockGetEvaluationHookById).toHaveBeenCalledWith("missing-hook", undefined);
+    expect(mockGetEvaluationHookById).toHaveBeenCalledWith('missing-hook', undefined);
     expect(mockExecutedomainWorkflow).not.toHaveBeenCalled();
   });
 
-  it("returns 403 when the hook belongs to a different domain than the URL", async () => {
-    mockGetEvaluationHookById.mockResolvedValueOnce(makeHook({ domain: "vessels" }));
+  it('returns 403 when the hook belongs to a different domain than the URL', async () => {
+    mockGetEvaluationHookById.mockResolvedValueOnce(makeHook({ domain: 'vessels' }));
 
     const res = await request(app)
-      .post("/aegis/atlas/evaluation-hooks/replay")
-      .send({ hookId: "hook-vessels-1" });
+      .post('/aegis/atlas/evaluation-hooks/replay')
+      .send({ hookId: 'hook-vessels-1' });
 
     expect(res.status).toBe(403);
     expect(res.body.error).toMatch(/different domain/i);
     expect(mockExecutedomainWorkflow).not.toHaveBeenCalled();
   });
 
-  it("returns 422 when the hook is not marked as replayable", async () => {
+  it('returns 422 when the hook is not marked as replayable', async () => {
     mockGetEvaluationHookById.mockResolvedValueOnce(makeHook({ replayable: false }));
 
     const res = await request(app)
-      .post("/aegis/atlas/evaluation-hooks/replay")
-      .send({ hookId: "hook-aegis-1" });
+      .post('/aegis/atlas/evaluation-hooks/replay')
+      .send({ hookId: 'hook-aegis-1' });
 
     expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/not.*replayable/i);
     expect(mockExecutedomainWorkflow).not.toHaveBeenCalled();
   });
 
-  it("returns 201 with benchmark metrics in the response body on a valid replay", async () => {
+  it('returns 201 with benchmark metrics in the response body on a valid replay', async () => {
     mockGetEvaluationHookById.mockResolvedValueOnce(makeHook());
     mockExecutedomainWorkflow.mockResolvedValueOnce({
       run: {
-        runId: "run-replay-1",
-        workflowId: "aegis-incident-response",
-        workflowName: "Aegis Security Incident Response",
-        executionMode: "semi_auto",
+        runId: 'run-replay-1',
+        workflowId: 'aegis-incident-response',
+        workflowName: 'Aegis Security Incident Response',
+        executionMode: 'semi_auto',
         isDryRun: true,
         isSimulation: false,
-        status: "completed",
+        status: 'completed',
         currentStepIndex: 0,
         steps: [
-          { stepId: "s1", stepName: "Step 1", status: "completed" },
-          { stepId: "s2", stepName: "Step 2", status: "completed" },
-          { stepId: "s3", stepName: "Step 3", status: "failed" },
+          { stepId: 's1', stepName: 'Step 1', status: 'completed' },
+          { stepId: 's2', stepName: 'Step 2', status: 'completed' },
+          { stepId: 's3', stepName: 'Step 3', status: 'failed' },
         ],
-        approvalState: "none",
+        approvalState: 'none',
         auditTrail: [],
         startedAt: Date.now() - 50,
         completedAt: Date.now(),
       },
       requiresApproval: false,
-      dryRunSummary: "Replay completed",
+      dryRunSummary: 'Replay completed',
     });
 
     const res = await request(app)
-      .post("/aegis/atlas/evaluation-hooks/replay")
-      .send({ hookId: "hook-aegis-1", isDryRun: true });
+      .post('/aegis/atlas/evaluation-hooks/replay')
+      .send({ hookId: 'hook-aegis-1', isDryRun: true });
 
     expect(res.status).toBe(201);
 
     const body = res.body as Record<string, unknown>;
-    expect(body.domain).toBe("aegis");
-    expect(body.replayedHookId).toBe("hook-aegis-1");
-    expect(body.replayHookId).toBe("replay-hook-1");
-    expect(typeof body.latencyMs).toBe("number");
+    expect(body.domain).toBe('aegis');
+    expect(body.replayedHookId).toBe('hook-aegis-1');
+    expect(body.replayHookId).toBe('replay-hook-1');
+    expect(typeof body.latencyMs).toBe('number');
 
     const bc = body.benchmarkComparison as Record<string, unknown>;
     expect(bc).toBeDefined();
     expect(bc.originalLatencyMs).toBe(420);
     expect(bc.originalStepsCompleted).toBe(5);
-    expect(typeof bc.replayLatencyMs).toBe("number");
+    expect(typeof bc.replayLatencyMs).toBe('number');
     expect(bc.replayStepsCompleted).toBe(2);
 
     // The replay endpoint must register a new hook capturing benchmark metrics
@@ -268,6 +267,6 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — HTTP guards", () => {
     expect(registered.workflowName).toMatch(/\[REPLAY\]/);
     expect(registered.benchmarkMetrics.stepsCompleted).toBe(2);
     expect(registered.benchmarkMetrics.stepsFailed).toBe(1);
-    expect(typeof registered.benchmarkMetrics.latencyMs).toBe("number");
+    expect(typeof registered.benchmarkMetrics.latencyMs).toBe('number');
   });
 });

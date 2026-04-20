@@ -1,6 +1,6 @@
-import { getSeverityColor } from "../lib/utils";
-import type { IntelligenceCard } from "../types";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from 'lucide-react';
+import { getSeverityColor } from '../lib/utils';
+import type { IntelligenceCard } from '../types';
 
 interface IntelligencePanelProps {
   cards: IntelligenceCard[];
@@ -11,7 +11,7 @@ export function IntelligencePanel({ cards }: IntelligencePanelProps) {
     <div className="flex flex-col gap-4">
       <h2
         className="text-xs font-bold tracking-widest uppercase px-1"
-        style={{ color: "var(--color-fg-muted)" }}
+        style={{ color: 'var(--color-fg-muted)' }}
       >
         AI Correlation Intelligence
       </h2>
@@ -23,9 +23,9 @@ export function IntelligencePanel({ cards }: IntelligencePanelProps) {
               key={card.id}
               className="rounded-xl p-5 flex flex-col gap-3"
               style={{
-                backgroundColor: "var(--color-bg-elevated)",
+                backgroundColor: 'var(--color-bg-elevated)',
                 border: `1px solid var(--color-surface-border)`,
-                borderLeftWidth: "3px",
+                borderLeftWidth: '3px',
                 borderLeftColor: severityColor,
               }}
               data-testid={`card-intelligence-${card.id}`}
@@ -33,7 +33,7 @@ export function IntelligencePanel({ cards }: IntelligencePanelProps) {
               <div className="flex items-start justify-between gap-4">
                 <h3
                   className="font-bold text-sm leading-tight"
-                  style={{ color: "var(--color-fg-primary)" }}
+                  style={{ color: 'var(--color-fg-primary)' }}
                 >
                   {card.title}
                 </h3>
@@ -50,7 +50,7 @@ export function IntelligencePanel({ cards }: IntelligencePanelProps) {
 
               <p
                 className="text-xs leading-relaxed flex-1"
-                style={{ color: "var(--color-fg-muted)" }}
+                style={{ color: 'var(--color-fg-muted)' }}
               >
                 {card.description}
               </p>
@@ -61,9 +61,9 @@ export function IntelligencePanel({ cards }: IntelligencePanelProps) {
                     key={entity}
                     className="text-[10px] uppercase tracking-wider font-mono px-2 py-0.5 rounded"
                     style={{
-                      backgroundColor: "var(--color-surface-base)",
-                      border: "1px solid var(--color-surface-border)",
-                      color: "var(--color-fg-secondary)",
+                      backgroundColor: 'var(--color-surface-base)',
+                      border: '1px solid var(--color-surface-border)',
+                      color: 'var(--color-fg-secondary)',
                     }}
                   >
                     {entity}
@@ -73,7 +73,7 @@ export function IntelligencePanel({ cards }: IntelligencePanelProps) {
 
               <div
                 className="mt-1 pt-3 flex items-center gap-2"
-                style={{ borderTop: "1px solid var(--color-surface-border)" }}
+                style={{ borderTop: '1px solid var(--color-surface-border)' }}
               >
                 <ArrowRight className="w-3 h-3 shrink-0" style={{ color: severityColor }} />
                 <span className="text-xs font-medium" style={{ color: severityColor }}>

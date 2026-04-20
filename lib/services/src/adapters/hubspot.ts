@@ -1,4 +1,4 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface HubSpotContact {
   id: string;
@@ -21,58 +21,58 @@ export interface HubSpotDeal {
 
 const MOCK_CONTACTS: HubSpotContact[] = [
   {
-    id: "hs_001",
-    email: "john.smith@acme.com",
-    firstName: "John",
-    lastName: "Smith",
-    company: "ACME Corp",
-    lifecycleStage: "customer",
-    lastActivity: "2026-03-24T10:00:00Z",
+    id: 'hs_001',
+    email: 'john.smith@acme.com',
+    firstName: 'John',
+    lastName: 'Smith',
+    company: 'ACME Corp',
+    lifecycleStage: 'customer',
+    lastActivity: '2026-03-24T10:00:00Z',
   },
   {
-    id: "hs_002",
-    email: "jane.doe@globex.com",
-    firstName: "Jane",
-    lastName: "Doe",
-    company: "Globex Inc",
-    lifecycleStage: "lead",
-    lastActivity: "2026-03-22T14:00:00Z",
+    id: 'hs_002',
+    email: 'jane.doe@globex.com',
+    firstName: 'Jane',
+    lastName: 'Doe',
+    company: 'Globex Inc',
+    lifecycleStage: 'lead',
+    lastActivity: '2026-03-22T14:00:00Z',
   },
 ];
 
 const MOCK_DEALS: HubSpotDeal[] = [
   {
-    id: "deal_001",
-    name: "Enterprise License - ACME",
-    stage: "contractsent",
+    id: 'deal_001',
+    name: 'Enterprise License - ACME',
+    stage: 'contractsent',
     amount: 75000,
-    closeDate: "2026-04-15",
-    contactId: "hs_001",
+    closeDate: '2026-04-15',
+    contactId: 'hs_001',
   },
   {
-    id: "deal_002",
-    name: "Platform Onboarding - Globex",
-    stage: "qualifiedtobuy",
+    id: 'deal_002',
+    name: 'Platform Onboarding - Globex',
+    stage: 'qualifiedtobuy',
     amount: 25000,
-    closeDate: "2026-05-01",
-    contactId: "hs_002",
+    closeDate: '2026-05-01',
+    contactId: 'hs_002',
   },
 ];
 
 export class HubSpotAdapter extends ServiceAdapter {
-  readonly name = "hubspot";
-  readonly description = "HubSpot CRM contacts, deals, and pipelines";
-  readonly requiredEnvVars = ["HUBSPOT_ACCESS_TOKEN"];
+  readonly name = 'hubspot';
+  readonly description = 'HubSpot CRM contacts, deals, and pipelines';
+  readonly requiredEnvVars = ['HUBSPOT_ACCESS_TOKEN'];
 
   private get accessToken(): string | undefined {
-    return process.env["HUBSPOT_ACCESS_TOKEN"];
+    return process.env['HUBSPOT_ACCESS_TOKEN'];
   }
 
   private async hsRequest(path: string): Promise<unknown> {
     const response = await fetch(`https://api.hubapi.com${path}`, {
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
     if (!response.ok) throw new Error(`HubSpot API error: ${response.status}`);
@@ -81,13 +81,13 @@ export class HubSpotAdapter extends ServiceAdapter {
 
   protected async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
-    if (!result.connected) throw new Error("HubSpot connection verification failed");
+    if (!result.connected) throw new Error('HubSpot connection verification failed');
   }
 
   async testConnection(): Promise<{ connected: boolean; portalId?: string }> {
     if (!this.isLive) return { connected: false };
     try {
-      const data = (await this.hsRequest("/account-info/v3/details")) as { portalId: number };
+      const data = (await this.hsRequest('/account-info/v3/details')) as { portalId: number };
       return { connected: true, portalId: String(data.portalId) };
     } catch {
       return { connected: false };

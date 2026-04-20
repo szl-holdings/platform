@@ -10,15 +10,13 @@
  *   import { db } from "@szl-holdings/db"; // raw db access when needed
  */
 
-export { db, pool } from "@szl-holdings/db";
-export * from "@szl-holdings/db/schema";
-
-export { authRepo } from "./repositories/auth";
-export { alloyRepo } from "./repositories/alloy";
-export { auditRepo } from "./repositories/audit";
-export { vesselsRepo } from "./repositories/vessels";
-export { terraRepo } from "./repositories/terra";
-export { firestormRepo } from "./repositories/firestorm";
-
-export type { UserRow, NewUser, SessionRow } from "./repositories/auth";
-export type { AuditLogRow, NewAuditLog } from "./repositories/audit";
+export { db, pool } from '@szl-holdings/db';
+export * from '@szl-holdings/db/schema';
+export { alloyRepo } from './repositories/alloy';
+export type { AuditLogRow, NewAuditLog } from './repositories/audit';
+export { auditRepo } from './repositories/audit';
+export type { NewUser, SessionRow, UserRow } from './repositories/auth';
+export { authRepo } from './repositories/auth';
+export { firestormRepo } from './repositories/firestorm';
+export { terraRepo } from './repositories/terra';
+export { vesselsRepo } from './repositories/vessels';

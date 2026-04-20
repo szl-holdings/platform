@@ -1,51 +1,55 @@
-import { useState, useEffect, useRef } from "react";
-import { nexusApi } from "../lib/api";
-import type { IngestJob } from "../lib/types";
 import {
-  Download,
-  Plus,
-  Loader,
   AlertCircle,
   CheckCircle,
-  XCircle,
-  Clock,
   ChevronDown,
   ChevronRight,
+  Clock,
+  Download,
+  Github,
+  Loader,
+  Plus,
   RefreshCw,
   RotateCw,
-  Github,
-} from "lucide-react";
+  XCircle,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { nexusApi } from '../lib/api';
+import type { IngestJob } from '../lib/types';
 
 const SEED_REPOS = [
-  "https://github.com/anthropics/claude-code",
-  "https://github.com/anthropics/anthropic-cookbook",
-  "https://github.com/grapeot/WhatTheFuck",
-  "https://github.com/heshengtao/comfyui-claude",
-  "https://github.com/RafalWilinski/claude-squad",
-  "https://github.com/Doriandarko/claude-engineer",
-  "https://github.com/anthropics/courses",
-  "https://github.com/heshengtao/comfyui_LLM_party",
-  "https://github.com/disler/multi-agent-postgres-data-analytics",
-  "https://github.com/g1ibby/claude-mcp-tools",
+  'https://github.com/anthropics/claude-code',
+  'https://github.com/anthropics/anthropic-cookbook',
+  'https://github.com/grapeot/WhatTheFuck',
+  'https://github.com/heshengtao/comfyui-claude',
+  'https://github.com/RafalWilinski/claude-squad',
+  'https://github.com/Doriandarko/claude-engineer',
+  'https://github.com/anthropics/courses',
+  'https://github.com/heshengtao/comfyui_LLM_party',
+  'https://github.com/disler/multi-agent-postgres-data-analytics',
+  'https://github.com/g1ibby/claude-mcp-tools',
 ];
 
 const STATUS_META: Record<
-  IngestJob["status"],
-  { color: string; label: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }
+  IngestJob['status'],
+  {
+    color: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  }
 > = {
-  queued: { color: "#8896aa", label: "Queued", icon: Clock },
-  fetching: { color: "#00d4ff", label: "Fetching", icon: Download },
-  adapting: { color: "#a855f7", label: "Adapting", icon: RefreshCw },
-  publishing: { color: "#ffb700", label: "Publishing", icon: RefreshCw },
-  done: { color: "#00ff88", label: "Done", icon: CheckCircle },
-  failed: { color: "#ff4455", label: "Failed", icon: XCircle },
+  queued: { color: '#8896aa', label: 'Queued', icon: Clock },
+  fetching: { color: '#00d4ff', label: 'Fetching', icon: Download },
+  adapting: { color: '#a855f7', label: 'Adapting', icon: RefreshCw },
+  publishing: { color: '#ffb700', label: 'Publishing', icon: RefreshCw },
+  done: { color: '#00ff88', label: 'Done', icon: CheckCircle },
+  failed: { color: '#ff4455', label: 'Failed', icon: XCircle },
 };
 
 export default function Ingest() {
   const [jobs, setJobs] = useState<IngestJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newUrl, setNewUrl] = useState("");
+  const [newUrl, setNewUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -55,7 +59,7 @@ export default function Ingest() {
       const data = await nexusApi.listIngestJobs();
       setJobs(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load ingest jobs");
+      setError(err instanceof Error ? err.message : 'Failed to load ingest jobs');
     } finally {
       setLoading(false);
     }
@@ -64,7 +68,9 @@ export default function Ingest() {
   useEffect(() => {
     fetchJobs();
     pollRef.current = setInterval(fetchJobs, 5000);
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
   }, []);
 
   async function handleIngest(url?: string) {
@@ -74,17 +80,17 @@ export default function Ingest() {
     setError(null);
     try {
       await nexusApi.startIngest(finalUrl.trim());
-      setNewUrl("");
+      setNewUrl('');
       await fetchJobs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start ingest");
+      setError(err instanceof Error ? err.message : 'Failed to start ingest');
     } finally {
       setSubmitting(false);
     }
   }
 
-  const activeJobs = jobs.filter((j) => j.status !== "done" && j.status !== "failed");
-  const completedJobs = jobs.filter((j) => j.status === "done" || j.status === "failed");
+  const activeJobs = jobs.filter((j) => j.status !== 'done' && j.status !== 'failed');
+  const completedJobs = jobs.filter((j) => j.status === 'done' || j.status === 'failed');
 
   return (
     <div className="min-h-full bg-nexus-bg p-6">
@@ -117,7 +123,9 @@ export default function Ingest() {
                 placeholder="https://github.com/owner/repo"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleIngest(); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleIngest();
+                }}
                 className="w-full bg-nexus-bg border border-nexus rounded-lg pl-9 pr-3 py-2.5 text-sm font-mono focus:outline-none focus:border-[#00d4ff]/50 placeholder:text-muted-foreground/30"
               />
             </div>
@@ -126,17 +134,25 @@ export default function Ingest() {
               disabled={submitting || !newUrl.trim()}
               className="px-4 py-2 rounded-lg bg-[#00d4ff]/10 border border-[#00d4ff]/30 text-nexus-cyan text-sm font-medium hover:bg-[#00d4ff]/20 disabled:opacity-40 transition-colors flex items-center gap-2"
             >
-              {submitting ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              {submitting ? (
+                <Loader className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
               Ingest
             </button>
           </div>
 
           <div>
-            <p className="text-[10px] text-muted-foreground/50 mb-2">Seed the library with these repos:</p>
+            <p className="text-[10px] text-muted-foreground/50 mb-2">
+              Seed the library with these repos:
+            </p>
             <div className="flex flex-wrap gap-2">
               {SEED_REPOS.map((repo) => {
-                const name = repo.split("/").slice(-2).join("/");
-                const alreadyIngested = jobs.some((j) => j.repoUrl === repo || j.repoName === name.split("/")[1]);
+                const name = repo.split('/').slice(-2).join('/');
+                const alreadyIngested = jobs.some(
+                  (j) => j.repoUrl === repo || j.repoName === name.split('/')[1],
+                );
                 return (
                   <button
                     key={repo}
@@ -144,8 +160,8 @@ export default function Ingest() {
                     disabled={alreadyIngested || submitting}
                     className={`text-[10px] font-mono px-2 py-1 rounded border transition-colors flex items-center gap-1 ${
                       alreadyIngested
-                        ? "border-[#00ff88]/30 text-nexus-green/60 cursor-default"
-                        : "border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-[#00d4ff]/20"
+                        ? 'border-[#00ff88]/30 text-nexus-green/60 cursor-default'
+                        : 'border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-[#00d4ff]/20'
                     }`}
                   >
                     {alreadyIngested && <CheckCircle className="w-2.5 h-2.5" />}
@@ -188,7 +204,7 @@ export default function Ingest() {
                           await nexusApi.retryIngest(id);
                           await fetchJobs();
                         } catch (err) {
-                          setError(err instanceof Error ? err.message : "Retry failed");
+                          setError(err instanceof Error ? err.message : 'Retry failed');
                         }
                       }}
                     />
@@ -215,7 +231,7 @@ export default function Ingest() {
                           await nexusApi.retryIngest(id);
                           await fetchJobs();
                         } catch (err) {
-                          setError(err instanceof Error ? err.message : "Retry failed");
+                          setError(err instanceof Error ? err.message : 'Retry failed');
                         }
                       }}
                     />
@@ -228,7 +244,9 @@ export default function Ingest() {
               <div className="text-center py-16 text-muted-foreground/40">
                 <Download className="w-12 h-12 mx-auto mb-4 opacity-20" />
                 <p className="text-sm">No ingest jobs yet.</p>
-                <p className="text-xs mt-1">Enter a GitHub repo URL above to start ingesting skills.</p>
+                <p className="text-xs mt-1">
+                  Enter a GitHub repo URL above to start ingesting skills.
+                </p>
               </div>
             )}
           </>
@@ -251,17 +269,17 @@ function JobCard({
 }) {
   const meta = STATUS_META[job.status];
   const StatusIcon = meta.icon;
-  const isActive = job.status !== "done" && job.status !== "failed";
+  const isActive = job.status !== 'done' && job.status !== 'failed';
   const [retrying, setRetrying] = useState(false);
 
   return (
     <div
       className={`rounded-lg border bg-nexus-surface overflow-hidden transition-all ${
-        job.status === "done"
-          ? "border-[#00ff88]/20"
-          : job.status === "failed"
-          ? "border-[#ff4455]/20"
-          : "border-[#00d4ff]/20"
+        job.status === 'done'
+          ? 'border-[#00ff88]/20'
+          : job.status === 'failed'
+            ? 'border-[#ff4455]/20'
+            : 'border-[#00d4ff]/20'
       }`}
     >
       <button onClick={onExpand} className="w-full flex items-center gap-3 px-4 py-3 text-left">
@@ -271,7 +289,7 @@ function JobCard({
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
         )}
         <StatusIcon
-          className={`w-3.5 h-3.5 shrink-0 ${isActive && job.status !== "queued" ? "animate-spin" : ""}`}
+          className={`w-3.5 h-3.5 shrink-0 ${isActive && job.status !== 'queued' ? 'animate-spin' : ''}`}
           style={{ color: meta.color }}
         />
         <div className="flex-1 min-w-0">
@@ -284,7 +302,9 @@ function JobCard({
               {meta.label}
             </span>
           </div>
-          <div className="text-[10px] font-mono text-muted-foreground/50 truncate">{job.repoUrl}</div>
+          <div className="text-[10px] font-mono text-muted-foreground/50 truncate">
+            {job.repoUrl}
+          </div>
         </div>
         {job.skillsGenerated > 0 && (
           <div className="text-[10px] font-mono text-nexus-green shrink-0">
@@ -320,7 +340,9 @@ function JobCard({
               <div className="bg-nexus-bg rounded-lg p-2 space-y-1 max-h-32 overflow-y-auto">
                 {job.log.map((entry, i) => (
                   <div key={i} className="text-[10px] font-mono text-muted-foreground/70">
-                    <span className="text-muted-foreground/30 mr-2">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-muted-foreground/30 mr-2">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
                     {entry}
                   </div>
                 ))}
@@ -339,7 +361,7 @@ function JobCard({
                 <span>Completed: {new Date(job.completedAt).toLocaleString()}</span>
               )}
             </div>
-            {job.status === "failed" && (
+            {job.status === 'failed' && (
               <button
                 onClick={async () => {
                   setRetrying(true);

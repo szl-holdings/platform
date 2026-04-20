@@ -79,14 +79,11 @@
  *   pnpm --filter @workspace/scripts backfill:memory-domain -- --verify-only
  */
 
-import { pool } from "@szl-holdings/db";
-import {
-  KNOWN_MEMORY_DOMAINS,
-  MEMORY_DOMAIN_UNKNOWN,
-} from "@workspace/memory-fabric";
+import { pool } from '@szl-holdings/db';
+import { KNOWN_MEMORY_DOMAINS, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
 
-const DRY_RUN = process.argv.includes("--dry-run");
-const VERIFY_ONLY = process.argv.includes("--verify-only");
+const DRY_RUN = process.argv.includes('--dry-run');
+const VERIFY_ONLY = process.argv.includes('--verify-only');
 
 /**
  * Canonical domain keys that the executive briefing route matches against.
@@ -113,15 +110,15 @@ const SCOPE_DOMAIN_KEYS: readonly string[] = KNOWN_MEMORY_DOMAINS.filter(
  * both "szl" and "holdings" lands in `szl-holdings` rather than `platform`.
  */
 const PROVENANCE_PATTERNS: Array<{ domain: string; needles: string[] }> = [
-  { domain: "vessels", needles: ["vessel", "maritime", "ais", "voyage", "imo"] },
-  { domain: "aegis", needles: ["aegis", "firestorm", "treasury", "shell-co", "shell co"] },
-  { domain: "terra", needles: ["terra", "real-estate", "realestate", "property", "broker"] },
-  { domain: "lyte", needles: ["lyte"] },
-  { domain: "prism", needles: ["prism", "counsel", "legal", "clm", "matter"] },
-  { domain: "carlota", needles: ["carlota"] },
-  { domain: "sentra", needles: ["sentra", "edr", "soc", "ransomware", "ot-network"] },
-  { domain: "szl-holdings", needles: ["szl", "holdings", "fund-ops", "fundops"] },
-  { domain: "platform", needles: ["platform", "system", "infra", "gateway", "scheduler"] },
+  { domain: 'vessels', needles: ['vessel', 'maritime', 'ais', 'voyage', 'imo'] },
+  { domain: 'aegis', needles: ['aegis', 'firestorm', 'treasury', 'shell-co', 'shell co'] },
+  { domain: 'terra', needles: ['terra', 'real-estate', 'realestate', 'property', 'broker'] },
+  { domain: 'lyte', needles: ['lyte'] },
+  { domain: 'prism', needles: ['prism', 'counsel', 'legal', 'clm', 'matter'] },
+  { domain: 'carlota', needles: ['carlota'] },
+  { domain: 'sentra', needles: ['sentra', 'edr', 'soc', 'ransomware', 'ot-network'] },
+  { domain: 'szl-holdings', needles: ['szl', 'holdings', 'fund-ops', 'fundops'] },
+  { domain: 'platform', needles: ['platform', 'system', 'infra', 'gateway', 'scheduler'] },
 ];
 
 /**
@@ -137,7 +134,11 @@ const PROVENANCE_PATTERNS: Array<{ domain: string; needles: string[] }> = [
  *                     UPDATE ... FROM statement.
  * @param metadataRef  SQL reference to the row's existing `metadata` column.
  */
-function backfillSet(domainExpr: string, scopeIdRef = "scope_id", metadataRef = "metadata"): string {
+function backfillSet(
+  domainExpr: string,
+  scopeIdRef = 'scope_id',
+  metadataRef = 'metadata',
+): string {
   return `
     metadata = CASE
       WHEN ${scopeIdRef} IS NOT NULL AND ${scopeIdRef} !~ '^domain:'
@@ -193,7 +194,7 @@ const UNTAGGED_WHERE = `(metadata IS NULL OR metadata->>'domain' IS NULL OR meta
 
 function buildSteps(): BackfillStep[] {
   const steps: BackfillStep[] = [];
-  const keysArrayLiteral = `ARRAY[${SCOPE_DOMAIN_KEYS.map((k) => `'${k}'`).join(",")}]::text[]`;
+  const keysArrayLiteral = `ARRAY[${SCOPE_DOMAIN_KEYS.map((k) => `'${k}'`).join(',')}]::text[]`;
 
   // ---- Step 1a: scope_id LIKE 'domain:<d>' --------------------------------
   // Already canonical; just lift the suffix. No legacyScopeId stash needed.
@@ -254,7 +255,7 @@ function buildSteps(): BackfillStep[] {
 
   // ---- Step 2: provenance_source substring matches ------------------------
   for (const { domain, needles } of PROVENANCE_PATTERNS) {
-    const ilikeClauses = needles.map((_, i) => `provenance_source ILIKE $${i + 1}`).join(" OR ");
+    const ilikeClauses = needles.map((_, i) => `provenance_source ILIKE $${i + 1}`).join(' OR ');
     const params = needles.map((n) => `%${n}%`);
     steps.push({
       label: `step 2 (provenance → ${domain})`,
@@ -288,10 +289,10 @@ function buildSteps(): BackfillStep[] {
     )
   `;
   steps.push({
-    label: "step 3 (linked_entities majority)",
+    label: 'step 3 (linked_entities majority)',
     updateSql: `
       UPDATE memory_records mr
-         SET ${backfillSet("t.inferred_domain", "mr.scope_id", "mr.metadata")}
+         SET ${backfillSet('t.inferred_domain', 'mr.scope_id', 'mr.metadata')}
         FROM (
           SELECT mr2.id AS mr_id,
                  (
@@ -305,7 +306,7 @@ function buildSteps(): BackfillStep[] {
                     LIMIT 1
                  ) AS inferred_domain
             FROM memory_records mr2
-           WHERE ${UNTAGGED_WHERE.replace(/metadata/g, "mr2.metadata")}
+           WHERE ${UNTAGGED_WHERE.replace(/metadata/g, 'mr2.metadata')}
              AND jsonb_typeof(mr2.linked_entities) = 'array'
              AND jsonb_array_length(mr2.linked_entities) > 0
         ) t
@@ -410,11 +411,13 @@ async function runParityVerification(): Promise<ParityRow[]> {
 }
 
 async function reportParity(rows: ParityRow[]): Promise<void> {
-  console.log("[backfill-memory-domain] per-domain parity (old four-signal vs new metadata.domain):");
-  console.log("  domain                       old      new   old-only   new-only");
+  console.log(
+    '[backfill-memory-domain] per-domain parity (old four-signal vs new metadata.domain):',
+  );
+  console.log('  domain                       old      new   old-only   new-only');
   let regressions = 0;
   for (const r of rows) {
-    const flag = r.oldOnly > 0 ? "  <-- REGRESSION" : "";
+    const flag = r.oldOnly > 0 ? '  <-- REGRESSION' : '';
     console.log(
       `  ${r.domain.padEnd(24)} ${String(r.oldCount).padStart(6)} ${String(r.newCount).padStart(8)} ${String(r.oldOnly).padStart(10)} ${String(r.newOnly).padStart(10)}${flag}`,
     );
@@ -425,12 +428,14 @@ async function reportParity(rows: ParityRow[]): Promise<void> {
       `[backfill-memory-domain] parity check failed: ${regressions} domain(s) lost rows under the new query. Investigate the rows reported as old-only.`,
     );
   }
-  console.log("[backfill-memory-domain] parity check passed: every domain's new query is a superset of the old query.");
+  console.log(
+    "[backfill-memory-domain] parity check passed: every domain's new query is a superset of the old query.",
+  );
 }
 
 async function backfill(): Promise<void> {
   console.log(
-    `[backfill-memory-domain] starting${DRY_RUN ? " (dry-run)" : ""}${VERIFY_ONLY ? " (verify-only)" : ""}`,
+    `[backfill-memory-domain] starting${DRY_RUN ? ' (dry-run)' : ''}${VERIFY_ONLY ? ' (verify-only)' : ''}`,
   );
 
   if (!VERIFY_ONLY) {
@@ -449,11 +454,11 @@ async function backfill(): Promise<void> {
       }
       const totalUpdated = results.reduce((s, r) => s + r.rowsAffected, 0);
       console.log(
-        `[backfill-memory-domain] ${DRY_RUN ? "would update" : "updated"} ${totalUpdated} row(s) ` +
+        `[backfill-memory-domain] ${DRY_RUN ? 'would update' : 'updated'} ${totalUpdated} row(s) ` +
           `across ${results.length} step(s) (untagged baseline: ${untaggedTotal})`,
       );
     } else {
-      console.log("[backfill-memory-domain] nothing to do — every row already has a domain tag.");
+      console.log('[backfill-memory-domain] nothing to do — every row already has a domain tag.');
     }
 
     // ---- Spot-check: per-domain distribution after the run ---------------
@@ -463,9 +468,11 @@ async function backfill(): Promise<void> {
         GROUP BY 1
         ORDER BY n DESC`,
     );
-    console.log("[backfill-memory-domain] post-run distribution of metadata.domain:");
+    console.log('[backfill-memory-domain] post-run distribution of metadata.domain:');
     for (const row of distribution) {
-      const known = (KNOWN_MEMORY_DOMAINS as readonly string[]).includes(row.domain) ? "" : " (unknown key)";
+      const known = (KNOWN_MEMORY_DOMAINS as readonly string[]).includes(row.domain)
+        ? ''
+        : ' (unknown key)';
       console.log(`  ${row.domain.padEnd(24)} ${String(row.n).padStart(8)}${known}`);
     }
 
@@ -481,7 +488,7 @@ async function backfill(): Promise<void> {
           `[backfill-memory-domain] invariant violated: ${remaining} row(s) still lack metadata.domain after backfill`,
         );
       }
-      console.log("[backfill-memory-domain] invariant holds: every row now has metadata.domain.");
+      console.log('[backfill-memory-domain] invariant holds: every row now has metadata.domain.');
     }
   }
 
@@ -496,7 +503,7 @@ backfill()
     process.exit(0);
   })
   .catch(async (err) => {
-    console.error("[backfill-memory-domain] failed:", err);
+    console.error('[backfill-memory-domain] failed:', err);
     try {
       await pool.end();
     } catch {

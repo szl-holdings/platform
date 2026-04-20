@@ -1,8 +1,8 @@
-import React, { type ReactNode, useState } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
-import { useScreenMode } from "../hooks/useScreenMode.js";
-import { useDensity } from "../hooks/useDensity.js";
+import React, { type ReactNode, useState } from 'react';
+import { useDensity } from '../hooks/useDensity.js';
+import { useScreenMode } from '../hooks/useScreenMode.js';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export type NavItem = {
   id: string;
@@ -13,14 +13,14 @@ export type NavItem = {
 };
 
 export const AEEP_NAV_ITEMS: NavItem[] = [
-  { id: "overview", label: "Overview", href: "/overview" },
-  { id: "operations", label: "Operations", href: "/operations" },
-  { id: "search", label: "Search", href: "/search" },
-  { id: "workflows", label: "Workflows", href: "/workflows" },
-  { id: "evidence", label: "Evidence", href: "/evidence" },
-  { id: "memory", label: "Memory", href: "/memory" },
-  { id: "reports", label: "Reports", href: "/reports" },
-  { id: "admin", label: "Admin", href: "/admin" },
+  { id: 'overview', label: 'Overview', href: '/overview' },
+  { id: 'operations', label: 'Operations', href: '/operations' },
+  { id: 'search', label: 'Search', href: '/search' },
+  { id: 'workflows', label: 'Workflows', href: '/workflows' },
+  { id: 'evidence', label: 'Evidence', href: '/evidence' },
+  { id: 'memory', label: 'Memory', href: '/memory' },
+  { id: 'reports', label: 'Reports', href: '/reports' },
+  { id: 'admin', label: 'Admin', href: '/admin' },
 ];
 
 export interface AppShellProps {
@@ -49,11 +49,11 @@ export function AppShell({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const { mode: screenMode } = useScreenMode();
   const { pagePadding } = useDensity();
-  const sideNavWidth = collapsed ? "56px" : "220px";
+  const sideNavWidth = collapsed ? '56px' : '220px';
 
   return (
     <div
-      className={cn("flex h-screen w-full overflow-hidden", className)}
+      className={cn('flex h-screen w-full overflow-hidden', className)}
       style={{ background: color.bg.base }}
     >
       <aside
@@ -62,16 +62,16 @@ export function AppShell({
           width: sideNavWidth,
           background: color.bg.surface,
           borderColor: color.border.subtle,
-          transition: "width 150ms cubic-bezier(0.2, 0, 0, 1)",
+          transition: 'width 150ms cubic-bezier(0.2, 0, 0, 1)',
         }}
       >
         <div
           className="flex items-center gap-2 px-3 border-b"
-          style={{ height: "48px", borderColor: color.border.subtle }}
+          style={{ height: '48px', borderColor: color.border.subtle }}
         >
           <div
             className="flex-shrink-0 rounded"
-            style={{ width: "24px", height: "24px", background: color.accent.blue }}
+            style={{ width: '24px', height: '24px', background: color.accent.blue }}
           />
           {!collapsed && (
             <span className="font-semibold text-sm" style={{ color: color.text.primary }}>
@@ -89,10 +89,10 @@ export function AppShell({
                   href={item.href}
                   className="flex items-center gap-2 px-2 rounded text-sm transition-colors"
                   style={{
-                    height: "34px",
-                    background: activeNavItem === item.id ? color.bg.active : "transparent",
+                    height: '34px',
+                    background: activeNavItem === item.id ? color.bg.active : 'transparent',
                     color: activeNavItem === item.id ? color.text.primary : color.text.secondary,
-                    textDecoration: "none",
+                    textDecoration: 'none',
                   }}
                 >
                   {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
@@ -103,7 +103,7 @@ export function AppShell({
                       style={{
                         background: color.border.default,
                         color: color.text.secondary,
-                        minWidth: "20px",
+                        minWidth: '20px',
                       }}
                     >
                       {item.badge}
@@ -120,22 +120,22 @@ export function AppShell({
           onClick={() => setCollapsed((c) => !c)}
           className="flex items-center justify-center border-t"
           style={{
-            height: "40px",
+            height: '40px',
             borderColor: color.border.subtle,
             color: color.text.muted,
-            background: "transparent",
-            cursor: "pointer",
+            background: 'transparent',
+            cursor: 'pointer',
           }}
-          aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+          aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
         >
-          <span style={{ fontSize: "12px" }}>{collapsed ? "→" : "←"}</span>
+          <span style={{ fontSize: '12px' }}>{collapsed ? '→' : '←'}</span>
         </button>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header
           className="flex-shrink-0 flex items-center gap-3 px-4 border-b"
-          style={{ height: "48px", background: color.bg.surface, borderColor: color.border.subtle }}
+          style={{ height: '48px', background: color.bg.surface, borderColor: color.border.subtle }}
         >
           {tenantLabel && (
             <div
@@ -144,12 +144,12 @@ export function AppShell({
                 background: color.bg.overlay,
                 border: `1px solid ${color.border.default}`,
                 color: color.text.secondary,
-                height: "26px",
+                height: '26px',
               }}
             >
               <span
                 className="rounded-full"
-                style={{ width: "6px", height: "6px", background: color.accent.green }}
+                style={{ width: '6px', height: '6px', background: color.accent.green }}
               />
               {tenantLabel}
             </div>
@@ -161,7 +161,7 @@ export function AppShell({
               background: color.bg.overlay,
               border: `1px solid ${color.border.default}`,
               color: color.text.secondary,
-              height: "26px",
+              height: '26px',
             }}
           >
             {screenMode}
@@ -176,8 +176,8 @@ export function AppShell({
               background: color.bg.overlay,
               border: `1px solid ${color.border.default}`,
               color: color.text.secondary,
-              height: "30px",
-              cursor: "pointer",
+              height: '30px',
+              cursor: 'pointer',
             }}
           >
             Search or run command…
@@ -186,7 +186,7 @@ export function AppShell({
               style={{
                 background: color.border.subtle,
                 color: color.text.muted,
-                fontSize: "10px",
+                fontSize: '10px',
               }}
             >
               ⌘K
@@ -208,7 +208,7 @@ export function AppShell({
             <aside
               className="flex-shrink-0 border-l overflow-y-auto"
               style={{
-                width: "320px",
+                width: '320px',
                 background: color.bg.surface,
                 borderColor: color.border.subtle,
               }}

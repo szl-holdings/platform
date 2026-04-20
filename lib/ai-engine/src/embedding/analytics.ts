@@ -1,5 +1,5 @@
-import type { EmbeddingProviderType } from "./provider.js";
-import type { EmbeddingDomain } from "./domain-config.js";
+import type { EmbeddingDomain } from './domain-config.js';
+import type { EmbeddingProviderType } from './provider.js';
 
 interface LatencySample {
   value: number;
@@ -80,7 +80,7 @@ class EmbeddingAnalyticsTracker {
       hits: this.globalCacheHits,
       misses: this.globalCacheMisses,
       total,
-      hitRate: total > 0 ? `${((this.globalCacheHits / total) * 100).toFixed(1)}%` : "0%",
+      hitRate: total > 0 ? `${((this.globalCacheHits / total) * 100).toFixed(1)}%` : '0%',
     };
   }
 
@@ -92,20 +92,16 @@ class EmbeddingAnalyticsTracker {
   }
 
   getAnalyticsReport(): EmbeddingAnalyticsReport {
-    const providerReports: EmbeddingAnalyticsReport["providers"] = {};
+    const providerReports: EmbeddingAnalyticsReport['providers'] = {};
 
     for (const [provider, stats] of this.providerStats.entries()) {
-      const successRate = stats.totalRequests > 0
-        ? stats.successRequests / stats.totalRequests
-        : 0;
-      const avgLatency = stats.successRequests > 0
-        ? stats.successLatencyMs / stats.successRequests
-        : 0;
+      const successRate = stats.totalRequests > 0 ? stats.successRequests / stats.totalRequests : 0;
+      const avgLatency =
+        stats.successRequests > 0 ? stats.successLatencyMs / stats.successRequests : 0;
       const percentiles = this.computePercentiles(stats.latencySamples);
       const totalCacheOps = stats.cacheHits + stats.totalRequests;
-      const cacheHitRate = totalCacheOps > 0
-        ? `${((stats.cacheHits / totalCacheOps) * 100).toFixed(1)}%`
-        : "0%";
+      const cacheHitRate =
+        totalCacheOps > 0 ? `${((stats.cacheHits / totalCacheOps) * 100).toFixed(1)}%` : '0%';
 
       const topModels = Object.entries(stats.modelUsage)
         .sort(([, a], [, b]) => b - a)
@@ -156,16 +152,19 @@ export interface EmbeddingAnalyticsReport {
     total: number;
     hitRate: string;
   };
-  providers: Record<string, {
-    totalRequests: number;
-    successRequests: number;
-    successRate: string;
-    avgLatencyMs: number;
-    latencyPercentiles: { p50: number; p90: number; p99: number };
-    cacheHitRate: string;
-    topModels: Array<{ model: string; count: number }>;
-    topDomains: Array<{ domain: string; count: number }>;
-  }>;
+  providers: Record<
+    string,
+    {
+      totalRequests: number;
+      successRequests: number;
+      successRate: string;
+      avgLatencyMs: number;
+      latencyPercentiles: { p50: number; p90: number; p99: number };
+      cacheHitRate: string;
+      topModels: Array<{ model: string; count: number }>;
+      topDomains: Array<{ domain: string; count: number }>;
+    }
+  >;
 }
 
 export const embeddingAnalytics = new EmbeddingAnalyticsTracker();

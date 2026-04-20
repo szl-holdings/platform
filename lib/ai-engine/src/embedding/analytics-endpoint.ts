@@ -1,18 +1,18 @@
-import type { Request, Response, Router as ExpressRouter } from "express";
-import { embeddingAnalytics } from "./analytics.js";
-import { embeddingPipeline } from "./provider.js";
-import { getAllDomainConfigs, getDomainModelConfig, inferDomain } from "./domain-config.js";
-import type { EmbeddingDomain } from "./domain-config.js";
+import type { Router as ExpressRouter, Request, Response } from 'express';
+import { embeddingAnalytics } from './analytics.js';
+import type { EmbeddingDomain } from './domain-config.js';
+import { getAllDomainConfigs, getDomainModelConfig, inferDomain } from './domain-config.js';
+import { embeddingPipeline } from './provider.js';
 
 export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
-  const { Router } = await import("express");
+  const { Router } = await import('express');
   const router = Router();
 
-  router.get("/embedding/analytics", (_req: Request, res: Response) => {
+  router.get('/embedding/analytics', (_req: Request, res: Response) => {
     try {
       const report = embeddingAnalytics.getAnalyticsReport();
       const providerHealth = embeddingPipeline.getProviderHealth();
-      const domainConfigs = getAllDomainConfigs().map(c => ({
+      const domainConfigs = getAllDomainConfigs().map((c) => ({
         domain: c.domain,
         model: c.model,
         hfModel: c.hfModel,
@@ -37,7 +37,7 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
     }
   });
 
-  router.get("/embedding/health", (_req: Request, res: Response) => {
+  router.get('/embedding/health', (_req: Request, res: Response) => {
     try {
       const providerHealth = embeddingPipeline.getProviderHealth();
       const availableProviders = Object.entries(providerHealth)
@@ -46,7 +46,12 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
 
       res.json({
         ok: true,
-        status: availableProviders.length > 1 ? "healthy" : availableProviders.length === 1 ? "degraded" : "unavailable",
+        status:
+          availableProviders.length > 1
+            ? 'healthy'
+            : availableProviders.length === 1
+              ? 'degraded'
+              : 'unavailable',
         availableProviders,
         providerHealth,
       });
@@ -58,7 +63,7 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
     }
   });
 
-  router.post("/embedding/batch", async (req: Request, res: Response) => {
+  router.post('/embedding/batch', async (req: Request, res: Response) => {
     try {
       const body = req.body as {
         texts?: unknown;
@@ -68,20 +73,26 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
       };
 
       if (!Array.isArray(body.texts) || body.texts.length === 0) {
-        res.status(400).json({ ok: false, error: "texts must be a non-empty array" });
+        res.status(400).json({ ok: false, error: 'texts must be a non-empty array' });
         return;
       }
 
       const texts = (body.texts as unknown[]).map((t, i) => {
-        if (typeof t !== "string") throw new Error(`texts[${i}] must be a string`);
+        if (typeof t !== 'string') throw new Error(`texts[${i}] must be a string`);
         return t;
       });
 
-      const domain = body.domain ? inferDomain(body.domain) as EmbeddingDomain : undefined;
+      const domain = body.domain ? (inferDomain(body.domain) as EmbeddingDomain) : undefined;
       const domainConfig = domain ? getDomainModelConfig(domain) : undefined;
 
-      const rawConcurrency = typeof body.concurrency === "number" ? body.concurrency : 5;
-      const concurrency = Math.max(1, Math.min(50, Number.isFinite(rawConcurrency) && rawConcurrency > 0 ? Math.floor(rawConcurrency) : 5));
+      const rawConcurrency = typeof body.concurrency === 'number' ? body.concurrency : 5;
+      const concurrency = Math.max(
+        1,
+        Math.min(
+          50,
+          Number.isFinite(rawConcurrency) && rawConcurrency > 0 ? Math.floor(rawConcurrency) : 5,
+        ),
+      );
 
       const batchResult = await embeddingPipeline.embedBatch(texts, {
         domain,
@@ -96,7 +107,7 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
         errorCount: batchResult.errorCount,
         provider: batchResult.provider,
         model: batchResult.model,
-        results: batchResult.results.map(r => ({
+        results: batchResult.results.map((r) => ({
           index: r.index,
           dimensions: r.dimensions,
           model: r.model,
@@ -115,16 +126,16 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
     }
   });
 
-  router.post("/embedding/single", async (req: Request, res: Response) => {
+  router.post('/embedding/single', async (req: Request, res: Response) => {
     try {
       const body = req.body as { text?: unknown; domain?: string; model?: string };
 
-      if (typeof body.text !== "string" || !body.text.trim()) {
-        res.status(400).json({ ok: false, error: "text must be a non-empty string" });
+      if (typeof body.text !== 'string' || !body.text.trim()) {
+        res.status(400).json({ ok: false, error: 'text must be a non-empty string' });
         return;
       }
 
-      const domain = body.domain ? inferDomain(body.domain) as EmbeddingDomain : undefined;
+      const domain = body.domain ? (inferDomain(body.domain) as EmbeddingDomain) : undefined;
       const domainConfig = domain ? getDomainModelConfig(domain) : undefined;
 
       const result = await embeddingPipeline.embed(body.text, {

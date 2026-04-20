@@ -4,43 +4,52 @@ import {
   guardianTiersTable,
   toolMeshToolsTable,
   toolMeshToolVersionsTable,
-} from "@szl-holdings/db";
+} from '@szl-holdings/db';
 import {
-  GRAPH_QUERY_TOOL_MANIFEST,
-  DOCUMENT_RETRIEVAL_TOOL_MANIFEST,
-  SECURITY_TOOL_MANIFESTS,
-  FINANCE_TOOL_MANIFESTS,
-  OPERATIONS_TOOL_MANIFESTS,
-  type ToolManifest,
-} from "@workspace/tool-mesh";
-import {
-  PolicyTierSchema,
   POLICY_TIER_DESCRIPTIONS,
+  type PolicyTier,
+  PolicyTierSchema,
   TIER_CONTROLS,
   TIER_NUMBER,
   TIER_RISK_LEVEL,
-  type PolicyTier,
-} from "@workspace/guardian";
-import { inArray, isNull, and } from "drizzle-orm";
-import { logger } from "./logger";
+} from '@workspace/guardian';
+import {
+  DOCUMENT_RETRIEVAL_TOOL_MANIFEST,
+  FINANCE_TOOL_MANIFESTS,
+  GRAPH_QUERY_TOOL_MANIFEST,
+  OPERATIONS_TOOL_MANIFESTS,
+  SECURITY_TOOL_MANIFESTS,
+  type ToolManifest,
+} from '@workspace/tool-mesh';
+import { and, inArray, isNull } from 'drizzle-orm';
+import { logger } from './logger';
 
 const DEFAULT_TIERS = PolicyTierSchema.options;
 
-const DEFAULT_DOMAINS = ["graph", "documents", "data", "communication", "finance", "legal", "security", "infrastructure", "analytics"] as const;
+const DEFAULT_DOMAINS = [
+  'graph',
+  'documents',
+  'data',
+  'communication',
+  'finance',
+  'legal',
+  'security',
+  'infrastructure',
+  'analytics',
+] as const;
 
 function defaultPolicyForTier(tier: string, domain: string) {
-  const isMandatory = tier === "human-approval-mandatory";
+  const isMandatory = tier === 'human-approval-mandatory';
   return {
     name: `default-${domain}-${tier}`,
     description: `Default tier policy for ${domain} (${tier}) — seeded at startup`,
     tier: tier as (typeof DEFAULT_TIERS)[number],
-    conditions: [{ field: "domain", operator: "eq" as const, value: domain }],
-    action: (isMandatory ? "require-approval" : "allow") as
-      | "allow" | "require-approval",
+    conditions: [{ field: 'domain', operator: 'eq' as const, value: domain }],
+    action: (isMandatory ? 'require-approval' : 'allow') as 'allow' | 'require-approval',
     priority: 900,
     enabled: true,
-    owner: "guardian-defaults",
-    tags: ["default", "tier-baseline", domain] as string[],
+    owner: 'guardian-defaults',
+    tags: ['default', 'tier-baseline', domain] as string[],
   };
 }
 
@@ -62,7 +71,7 @@ const ALL_TOOL_MANIFESTS: ToolManifest[] = [
  * masked schema drift and left tier tables silently empty.
  */
 export async function seedGuardianTiers(): Promise<void> {
-  const tierNames = (PolicyTierSchema.options as PolicyTier[]);
+  const tierNames = PolicyTierSchema.options as PolicyTier[];
   const existing = await db
     .select({ tier: guardianTiersTable.tier })
     .from(guardianTiersTable)
@@ -81,9 +90,15 @@ export async function seedGuardianTiers(): Promise<void> {
     }));
   if (missing.length > 0) {
     await db.insert(guardianTiersTable).values(missing);
-    logger.info({ inserted: missing.length, alreadyPresent: existingSet.size }, "[seed-guardian] Default tier definitions seeded");
+    logger.info(
+      { inserted: missing.length, alreadyPresent: existingSet.size },
+      '[seed-guardian] Default tier definitions seeded',
+    );
   } else {
-    logger.info({ alreadyPresent: existingSet.size }, "[seed-guardian] All default tier definitions already present");
+    logger.info(
+      { alreadyPresent: existingSet.size },
+      '[seed-guardian] All default tier definitions already present',
+    );
   }
 }
 
@@ -111,15 +126,23 @@ export async function seedGuardianDefaults(): Promise<void> {
   const existing = await db
     .select({ name: guardianPoliciesTable.name })
     .from(guardianPoliciesTable)
-    .where(and(isNull(guardianPoliciesTable.orgId), inArray(guardianPoliciesTable.name, defaultNames)));
+    .where(
+      and(isNull(guardianPoliciesTable.orgId), inArray(guardianPoliciesTable.name, defaultNames)),
+    );
   const existingNames = new Set(existing.map((r) => r.name));
   const missing = defaults.filter((p) => !existingNames.has(p.name));
 
   if (missing.length > 0) {
     await db.insert(guardianPoliciesTable).values(missing);
-    logger.info({ inserted: missing.length, alreadyPresent: existingNames.size }, "[seed-guardian] Default tier policies seeded");
+    logger.info(
+      { inserted: missing.length, alreadyPresent: existingNames.size },
+      '[seed-guardian] Default tier policies seeded',
+    );
   } else {
-    logger.info({ alreadyPresent: existingNames.size }, "[seed-guardian] All default tier policies already present");
+    logger.info(
+      { alreadyPresent: existingNames.size },
+      '[seed-guardian] All default tier policies already present',
+    );
   }
 
   // Per-row idempotency for tools via the unique tool_id constraint.
@@ -146,9 +169,16 @@ export async function seedGuardianDefaults(): Promise<void> {
       .insert(toolMeshToolsTable)
       .values(toolRows as any)
       .onConflictDoNothing({ target: toolMeshToolsTable.toolId })
-      .returning({ id: toolMeshToolsTable.id, toolId: toolMeshToolsTable.toolId, version: toolMeshToolsTable.version });
+      .returning({
+        id: toolMeshToolsTable.id,
+        toolId: toolMeshToolsTable.toolId,
+        version: toolMeshToolsTable.version,
+      });
 
-    logger.info({ inserted: inserted.length, attempted: toolRows.length }, "[seed-guardian] Default tool manifests seeded");
+    logger.info(
+      { inserted: inserted.length, attempted: toolRows.length },
+      '[seed-guardian] Default tool manifests seeded',
+    );
 
     // For each newly-inserted tool, write the initial version snapshot so
     // tool_mesh_tool_versions has a baseline row from the start.
@@ -160,7 +190,7 @@ export async function seedGuardianDefaults(): Promise<void> {
         .values({
           toolDbId: ins.id,
           version: manifest.version,
-          changelog: "Initial seed version",
+          changelog: 'Initial seed version',
           schemaSnapshot: {
             inputSchema: manifest.inputSchema ?? null,
             outputSchema: manifest.outputSchema ?? null,
@@ -169,7 +199,9 @@ export async function seedGuardianDefaults(): Promise<void> {
             policyTier: manifest.policyTier,
           },
         })
-        .onConflictDoNothing({ target: [toolMeshToolVersionsTable.toolDbId, toolMeshToolVersionsTable.version] });
+        .onConflictDoNothing({
+          target: [toolMeshToolVersionsTable.toolDbId, toolMeshToolVersionsTable.version],
+        });
     }
   }
 }

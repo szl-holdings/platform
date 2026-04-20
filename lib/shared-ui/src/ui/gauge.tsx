@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface GaugeProps {
   value: number;
@@ -19,46 +19,51 @@ function useAnimatedCounter(target: number, duration = 1500) {
     const animate = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = 1 - (1 - progress) ** 3;
       setCount(parseFloat((eased * target).toFixed(1)));
       if (progress < 1) {
         frameRef.current = requestAnimationFrame(animate);
       }
     };
     frameRef.current = requestAnimationFrame(animate);
-    return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); };
+    return () => {
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
   }, [target, duration]);
 
   return count;
 }
 
-export function Gauge({ 
-  value, 
-  max = 100, 
-  size = 200, 
-  strokeWidth = 16, 
-  color = "hsl(var(--primary))",
-  label
+export function Gauge({
+  value,
+  max = 100,
+  size = 200,
+  strokeWidth = 16,
+  color = 'hsl(var(--primary))',
+  label,
 }: GaugeProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const arcLength = circumference * 0.75;
   const offset = circumference * 0.25 * 0.5;
-  
+
   const percentage = Math.min(value / max, 1);
-  const strokeDashoffset = arcLength - (percentage * arcLength);
+  const strokeDashoffset = arcLength - percentage * arcLength;
   const animatedValue = useAnimatedCounter(value);
 
   const getColor = () => {
     if (value >= 80) return color;
-    if (value >= 60) return "hsl(var(--warning))";
-    return "hsl(var(--destructive))";
+    if (value >= 60) return 'hsl(var(--warning))';
+    return 'hsl(var(--destructive))';
   };
 
   const gaugeColor = getColor();
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative flex flex-col items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <svg
         width={size}
         height={size}
@@ -75,7 +80,7 @@ export function Gauge({
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
-        
+
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -101,13 +106,16 @@ export function Gauge({
           return (
             <line
               key={i}
-              x1={x1} y1={y1} x2={x2} y2={y2}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
               stroke="rgba(255,255,255,0.08)"
               strokeWidth={i % 5 === 0 ? 2 : 1}
             />
           );
         })}
-        
+
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -120,15 +128,15 @@ export function Gauge({
           filter="url(#glow)"
           initial={{ strokeDashoffset: arcLength - offset }}
           animate={{ strokeDashoffset: strokeDashoffset - offset }}
-          transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+          transition={{ duration: 1.5, ease: 'easeOut', delay: 0.2 }}
         />
       </svg>
-      
+
       <div className="absolute inset-0 flex flex-col items-center justify-center pb-4">
-        <motion.span 
+        <motion.span
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+          transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
           className="text-5xl font-display font-bold text-white tracking-tighter"
         >
           {animatedValue.toFixed(1)}

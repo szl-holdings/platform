@@ -1,13 +1,22 @@
-import { Shield, Activity, Target, Network, CheckCircle2, XCircle, AlertTriangle, Clock } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { ProofEnvelope, ConfidenceMeter } from "@szl-holdings/design-system";
-import { 
-  phantomClusterActor, 
-  phantomIndicators, 
-  affectedSystems, 
+import { ConfidenceMeter, ProofEnvelope } from '@szl-holdings/design-system';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Network,
+  Shield,
+  Target,
+  XCircle,
+} from 'lucide-react';
+import {
+  affectedSystems,
   containmentWorkflow,
-  threatTwins
-} from "../data/threat-twin";
+  phantomClusterActor,
+  phantomIndicators,
+  threatTwins,
+} from '../data/threat-twin';
 
 export default function ThreatTwinView() {
   const actor = phantomClusterActor;
@@ -28,7 +37,9 @@ export default function ThreatTwinView() {
         <div className="flex items-center gap-3">
           <div className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Active Monitoring</span>
+            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
+              Active Monitoring
+            </span>
           </div>
         </div>
       </div>
@@ -40,7 +51,7 @@ export default function ThreatTwinView() {
             <div className="absolute top-0 right-0 p-4 opacity-5">
               <Target className="w-24 h-24 text-red-500" />
             </div>
-            
+
             <div className="flex items-start justify-between mb-6">
               <div>
                 <div className="flex items-center gap-3 mb-1">
@@ -52,7 +63,9 @@ export default function ThreatTwinView() {
                 <p className="text-red-400/70 text-sm max-w-xl">{actor.description}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-red-400/40 uppercase font-bold tracking-widest mb-1">Confidence Score</p>
+                <p className="text-[10px] text-red-400/40 uppercase font-bold tracking-widest mb-1">
+                  Confidence Score
+                </p>
                 <ConfidenceMeter value={actor.confidence} />
               </div>
             </div>
@@ -68,7 +81,9 @@ export default function ThreatTwinView() {
               </div>
               <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/10">
                 <p className="text-[10px] text-red-400/40 uppercase font-bold mb-1">Last Active</p>
-                <p className="text-sm font-medium text-red-200">{new Date(actor.lastActivityAt).toLocaleTimeString()}</p>
+                <p className="text-sm font-medium text-red-200">
+                  {new Date(actor.lastActivityAt).toLocaleTimeString()}
+                </p>
               </div>
               <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/10">
                 <p className="text-[10px] text-red-400/40 uppercase font-bold mb-1">Impact Level</p>
@@ -77,10 +92,15 @@ export default function ThreatTwinView() {
             </div>
 
             <div>
-              <p className="text-[10px] text-red-400/40 uppercase font-bold tracking-widest mb-3">Associated TTPs (MITRE ATT&CK)</p>
+              <p className="text-[10px] text-red-400/40 uppercase font-bold tracking-widest mb-3">
+                Associated TTPs (MITRE ATT&CK)
+              </p>
               <div className="flex flex-wrap gap-2">
                 {actor.ttps.map((ttp, i) => (
-                  <span key={i} className="px-2 py-1 rounded bg-[#1a1125] border border-red-500/10 text-[11px] text-red-300/80">
+                  <span
+                    key={i}
+                    className="px-2 py-1 rounded bg-[#1a1125] border border-red-500/10 text-[11px] text-red-300/80"
+                  >
                     {ttp}
                   </span>
                 ))}
@@ -93,7 +113,9 @@ export default function ThreatTwinView() {
             <div className="px-5 py-4 border-b border-red-500/10 flex items-center justify-between bg-red-500/5">
               <div className="flex items-center gap-2">
                 <Network className="w-4 h-4 text-red-400" />
-                <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider">Indicator Mesh Feed</h3>
+                <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider">
+                  Indicator Mesh Feed
+                </h3>
               </div>
               <span className="text-[10px] text-red-400/60 font-mono">TLP: AMBER/RED</span>
             </div>
@@ -101,10 +123,18 @@ export default function ThreatTwinView() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-red-500/5 border-b border-red-500/10">
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">Indicator</th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">Type</th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">TLP</th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">Last Seen</th>
+                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                      Indicator
+                    </th>
+                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                      Type
+                    </th>
+                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                      TLP
+                    </th>
+                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                      Last Seen
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-red-500/10">
@@ -112,20 +142,30 @@ export default function ThreatTwinView() {
                     <tr key={ioc.id} className="hover:bg-red-500/5 transition-colors group">
                       <td className="px-5 py-3">
                         <div className="flex flex-col">
-                          <span className="text-xs font-mono text-red-200 group-hover:text-red-400 transition-colors">{ioc.value}</span>
-                          <span className="text-[10px] text-red-400/40 mt-0.5">{ioc.description}</span>
+                          <span className="text-xs font-mono text-red-200 group-hover:text-red-400 transition-colors">
+                            {ioc.value}
+                          </span>
+                          <span className="text-[10px] text-red-400/40 mt-0.5">
+                            {ioc.description}
+                          </span>
                         </div>
                       </td>
                       <td className="px-5 py-3">
-                        <span className="text-[10px] font-bold text-red-400/60 uppercase">{ioc.type}</span>
+                        <span className="text-[10px] font-bold text-red-400/60 uppercase">
+                          {ioc.type}
+                        </span>
                       </td>
                       <td className="px-5 py-3">
-                        <span className={cn(
-                          "px-2 py-0.5 rounded text-[9px] font-bold uppercase border",
-                          ioc.tlp === "red" ? "bg-red-500/20 text-red-400 border-red-500/30" :
-                          ioc.tlp === "amber" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
-                          "bg-green-500/20 text-green-400 border-green-500/30"
-                        )}>
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded text-[9px] font-bold uppercase border',
+                            ioc.tlp === 'red'
+                              ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                              : ioc.tlp === 'amber'
+                                ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                                : 'bg-green-500/20 text-green-400 border-green-500/30',
+                          )}
+                        >
                           TLP:{ioc.tlp}
                         </span>
                       </td>
@@ -150,25 +190,38 @@ export default function ThreatTwinView() {
             </h3>
             <div className="space-y-3">
               {affectedSystems.map((system, i) => (
-                <div key={i} className="p-3 rounded-lg bg-red-500/5 border border-red-500/10 flex items-center justify-between">
+                <div
+                  key={i}
+                  className="p-3 rounded-lg bg-red-500/5 border border-red-500/10 flex items-center justify-between"
+                >
                   <div>
                     <p className="text-xs font-bold text-red-200">{system.name}</p>
                     <p className="text-[10px] text-red-400/50 uppercase">{system.type}</p>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className={cn(
-                      "text-[10px] font-bold uppercase mb-1",
-                      system.status === "compromised" ? "text-red-500" :
-                      system.status === "at_risk" ? "text-orange-500" : "text-yellow-500"
-                    )}>
-                      {system.status.replace("_", " ")}
+                    <span
+                      className={cn(
+                        'text-[10px] font-bold uppercase mb-1',
+                        system.status === 'compromised'
+                          ? 'text-red-500'
+                          : system.status === 'at_risk'
+                            ? 'text-orange-500'
+                            : 'text-yellow-500',
+                      )}
+                    >
+                      {system.status.replace('_', ' ')}
                     </span>
                     <div className="w-12 h-1 bg-white/5 rounded-full overflow-hidden">
-                      <div className={cn(
-                        "h-full rounded-full",
-                        system.status === "compromised" ? "bg-red-500 w-full" :
-                        system.status === "at_risk" ? "bg-orange-500 w-2/3" : "bg-yellow-500 w-1/3"
-                      )} />
+                      <div
+                        className={cn(
+                          'h-full rounded-full',
+                          system.status === 'compromised'
+                            ? 'bg-red-500 w-full'
+                            : system.status === 'at_risk'
+                              ? 'bg-orange-500 w-2/3'
+                              : 'bg-yellow-500 w-1/3',
+                        )}
+                      />
                     </div>
                   </div>
                 </div>
@@ -179,7 +232,9 @@ export default function ThreatTwinView() {
           {/* Containment Workflow */}
           <div className="bg-[#09060e] border border-red-500/10 rounded-xl overflow-hidden shadow-2xl shadow-red-500/5">
             <div className="px-5 py-4 border-b border-red-500/10 bg-red-500/5">
-              <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider">Containment Workflow</h3>
+              <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider">
+                Containment Workflow
+              </h3>
             </div>
             <div className="p-5">
               <ProofEnvelope
@@ -199,13 +254,18 @@ export default function ThreatTwinView() {
                       <div key={i} className="flex gap-3">
                         <div className="mt-1 flex flex-col items-center">
                           <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                          {i < containmentWorkflow.steps.length - 1 && <div className="w-px h-full bg-red-500/20 my-1" />}
+                          {i < containmentWorkflow.steps.length - 1 && (
+                            <div className="w-px h-full bg-red-500/20 my-1" />
+                          )}
                         </div>
                         <div className="flex-1">
                           <p className="text-[11px] font-bold text-red-100">
-                            <span className="text-red-400 uppercase mr-1">{step.action}:</span> {step.target}
+                            <span className="text-red-400 uppercase mr-1">{step.action}:</span>{' '}
+                            {step.target}
                           </p>
-                          <p className="text-[10px] text-red-400/60 leading-relaxed">{step.description}</p>
+                          <p className="text-[10px] text-red-400/60 leading-relaxed">
+                            {step.description}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -239,9 +299,15 @@ export default function ThreatTwinView() {
                     <div className="w-1 h-1 rounded-full bg-red-400" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-bold text-red-200 leading-tight">{entry.action.replace(/_/g, " ").toUpperCase()}</p>
-                    <p className="text-[10px] text-red-400/50 mt-0.5">{entry.actor} ({entry.actorRole})</p>
-                    <p className="text-[9px] text-red-500/40 mt-1 font-mono">{new Date(entry.at).toLocaleTimeString()}</p>
+                    <p className="text-[11px] font-bold text-red-200 leading-tight">
+                      {entry.action.replace(/_/g, ' ').toUpperCase()}
+                    </p>
+                    <p className="text-[10px] text-red-400/50 mt-0.5">
+                      {entry.actor} ({entry.actorRole})
+                    </p>
+                    <p className="text-[9px] text-red-500/40 mt-1 font-mono">
+                      {new Date(entry.at).toLocaleTimeString()}
+                    </p>
                   </div>
                 </div>
               ))}

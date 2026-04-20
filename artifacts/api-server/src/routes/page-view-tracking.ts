@@ -11,13 +11,13 @@
  * src/middlewares/global-auth-enforcer.ts.
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db, pageViewEventsTable } from "@szl-holdings/db";
-import { handleRouteError, sendSuccess, sendBadRequest } from "../lib/api-response";
-import { z } from "zod/v4";
-import { validateBody } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, pageViewEventsTable } from '@szl-holdings/db';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod/v4';
+import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { validateBody } from '../lib/validation';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 const trackSchema = z.object({
@@ -31,29 +31,33 @@ const trackSchema = z.object({
   ipHash: z.string().max(128).optional().nullable(),
 });
 
-router.post("/track/page-view", validateBody(bodyShape({})), async (req: Request, res: Response) => {
-  try {
-    const parsed = trackSchema.safeParse(req.body);
-    if (!parsed.success) {
-      sendBadRequest(res, "Invalid page-view payload");
-      return;
+router.post(
+  '/track/page-view',
+  validateBody(bodyShape({})),
+  async (req: Request, res: Response) => {
+    try {
+      const parsed = trackSchema.safeParse(req.body);
+      if (!parsed.success) {
+        sendBadRequest(res, 'Invalid page-view payload');
+        return;
+      }
+
+      const { sessionId, path, referrer, userAgent, country, ipHash } = parsed.data;
+
+      await db.insert(pageViewEventsTable).values({
+        sessionId,
+        path,
+        referrer: referrer ?? null,
+        userAgent: userAgent ?? null,
+        country: country ?? null,
+        ipHash: ipHash ?? null,
+      });
+
+      sendSuccess(res, { recorded: true }, 201);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to record page view');
     }
-
-    const { sessionId, path, referrer, userAgent, country, ipHash } = parsed.data;
-
-    await db.insert(pageViewEventsTable).values({
-      sessionId,
-      path,
-      referrer: referrer ?? null,
-      userAgent: userAgent ?? null,
-      country: country ?? null,
-      ipHash: ipHash ?? null,
-    });
-
-    sendSuccess(res, { recorded: true }, 201);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to record page view");
-  }
-});
+  },
+);
 
 export default router;

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useCallback, useState } from "react";
-import { Platform } from "react-native";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 
-export type WsStatus = "idle" | "connecting" | "connected" | "disconnected" | "error";
+export type WsStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
 
 export interface WebSocketOptions<T> {
   url: string | null;
@@ -42,7 +42,7 @@ export function useWebSocket<T = unknown>({
   heartbeatMs = 25_000,
   reconnectMs = 5_000,
 }: WebSocketOptions<T>): WebSocketResult {
-  const [status, setStatus] = useState<WsStatus>("idle");
+  const [status, setStatus] = useState<WsStatus>('idle');
   const wsRef = useRef<WebSocket | null>(null);
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -79,26 +79,26 @@ export function useWebSocket<T = unknown>({
 
   const connect = useCallback(() => {
     if (!mountedRef.current || !enabled || !url) return;
-    if (Platform.OS === "web") return;
+    if (Platform.OS === 'web') return;
     cleanup();
-    setStatus("connecting");
+    setStatus('connecting');
 
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => {
       if (!mountedRef.current) return;
-      setStatus("connected");
+      setStatus('connected');
       ws.send(
         JSON.stringify({
-          type: "subscribe",
+          type: 'subscribe',
           channel,
           token: tokenRef.current ?? undefined,
-        })
+        }),
       );
       heartbeatRef.current = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: "ping" }));
+          ws.send(JSON.stringify({ type: 'ping' }));
         }
       }, heartbeatMs);
     };
@@ -107,9 +107,9 @@ export function useWebSocket<T = unknown>({
       if (!mountedRef.current) return;
       try {
         const envelope: WsEnvelope = JSON.parse(ev.data as string);
-        if (envelope.type === "pong") return;
-        if (envelope.type === "connected") return;
-        if (envelope.type === "subscribed") return;
+        if (envelope.type === 'pong') return;
+        if (envelope.type === 'connected') return;
+        if (envelope.type === 'subscribed') return;
         if (envelope.data) {
           onMessageRef.current?.(envelope.data as T);
           onInvalidateRef.current?.();
@@ -119,12 +119,12 @@ export function useWebSocket<T = unknown>({
 
     ws.onerror = () => {
       if (!mountedRef.current) return;
-      setStatus("error");
+      setStatus('error');
     };
 
     ws.onclose = () => {
       if (!mountedRef.current) return;
-      setStatus("disconnected");
+      setStatus('disconnected');
       if (heartbeatRef.current) {
         clearInterval(heartbeatRef.current);
         heartbeatRef.current = null;
@@ -143,7 +143,7 @@ export function useWebSocket<T = unknown>({
 
   const disconnect = useCallback(() => {
     cleanup();
-    setStatus("idle");
+    setStatus('idle');
   }, [cleanup]);
 
   const reconnect = useCallback(() => {

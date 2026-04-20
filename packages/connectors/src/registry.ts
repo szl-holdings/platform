@@ -6,8 +6,8 @@
  * event automatically flows through the 9-stage mesh.
  */
 
-import type { Signal, SignalInput } from "@workspace/ontology";
-import type { ConnectorAdapter, ConnectorCategory } from "./interfaces.js";
+import type { Signal, SignalInput } from '@workspace/ontology';
+import type { ConnectorAdapter, ConnectorCategory } from './interfaces.js';
 
 export interface ConnectorRegistryEntry {
   adapter: ConnectorAdapter;
@@ -32,7 +32,7 @@ export class ConnectorRegistry {
   }
 
   async startAll(): Promise<void> {
-    if (!this._emitSignal) throw new Error("Call setEmitSignal() before startAll()");
+    if (!this._emitSignal) throw new Error('Call setEmitSignal() before startAll()');
     const emitter = this._emitSignal;
 
     for (const [id, entry] of this.adapters) {
@@ -77,7 +77,15 @@ export class ConnectorRegistry {
     return all;
   }
 
-  list(): Array<{ connectorId: string; name: string; category: ConnectorCategory; status: string; signalsEmitted: number; startedAt?: string; lastSignalAt?: string }> {
+  list(): Array<{
+    connectorId: string;
+    name: string;
+    category: ConnectorCategory;
+    status: string;
+    signalsEmitted: number;
+    startedAt?: string;
+    lastSignalAt?: string;
+  }> {
     return Array.from(this.adapters.entries()).map(([id, entry]) => ({
       connectorId: id,
       name: entry.adapter.metadata.connectorName,

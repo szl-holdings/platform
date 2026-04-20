@@ -8,18 +8,18 @@
  * for the future Eval Console (Task #1173).
  */
 
+import { defaultRuntime, lookupWorkflow, type SubstrateRuntimeOptions } from '../engine.js';
+import { defaultJournal, defaultRunStore } from '../journal.js';
 import type {
-  PipelineRun,
   CounterfactualDiff,
+  PipelineRun,
+  PolicyProfile,
+  RuntimeStartOptions,
   StageDiff,
   StageResultStatus,
   WorkflowDefinition,
-  PolicyProfile,
-  RuntimeStartOptions,
-} from "../types.js";
-import { PolicyProfileSchema } from "../types.js";
-import { defaultRunStore, defaultJournal } from "../journal.js";
-import { defaultRuntime, lookupWorkflow, type SubstrateRuntimeOptions } from "../engine.js";
+} from '../types.js';
+import { PolicyProfileSchema } from '../types.js';
 
 /**
  * Look up a policy from the policy-engine registry by ID and project it into a
@@ -35,13 +35,15 @@ export class PolicyNotFoundError extends Error {
   readonly policyId: string;
   constructor(policyId: string) {
     super(`No policy registered with id "${policyId}"`);
-    this.name = "PolicyNotFoundError";
+    this.name = 'PolicyNotFoundError';
     this.policyId = policyId;
   }
 }
 
-export async function resolvePolicyProfileById(policyId: string): Promise<PolicyProfile | undefined> {
-  const { getRegisteredPolicies } = await import("@szl-holdings/policy-engine");
+export async function resolvePolicyProfileById(
+  policyId: string,
+): Promise<PolicyProfile | undefined> {
+  const { getRegisteredPolicies } = await import('@szl-holdings/policy-engine');
   const policies = getRegisteredPolicies();
   const found = policies.find((p) => p.id === policyId);
   if (!found) return undefined;
@@ -53,7 +55,7 @@ export async function resolvePolicyProfileById(policyId: string): Promise<Policy
     // Omit highRiskCategories so PolicyProfileSchema applies its default
     // (financial, deletion, write-external, infrastructure) — the full
     // strict governance posture for counterfactual evaluation.
-    minimumApprovalTier: "operator",
+    minimumApprovalTier: 'operator',
   });
 }
 
@@ -97,18 +99,18 @@ export async function replay(opts: ReplayOptions): Promise<ReplayResult> {
   // embedded in the run's metadata (written by engine.start() for replay durability);
   // fall back to the in-memory registry last (present only when the process started
   // the original run in the same session).
-  const snapshotDef = sourceRun.metadata?.["__workflowSnapshot"] as WorkflowDefinition | undefined;
+  const snapshotDef = sourceRun.metadata?.['__workflowSnapshot'] as WorkflowDefinition | undefined;
   const workflow = opts.workflow ?? snapshotDef ?? lookupWorkflow(sourceRun.workflowId);
   if (!workflow) {
     throw new Error(
       `[substrate replay] Workflow '${sourceRun.workflowId}' cannot be resolved for run '${opts.runId}'. ` +
-      "Pass the WorkflowDefinition explicitly via opts.workflow, or use a run created after workflow-snapshot support (v0.1.0).",
+        'Pass the WorkflowDefinition explicitly via opts.workflow, or use a run created after workflow-snapshot support (v0.1.0).',
     );
   }
 
-  const mode: RuntimeStartOptions["mode"] = opts.counterfactual ? "counterfactual" : "replay";
+  const mode: RuntimeStartOptions['mode'] = opts.counterfactual ? 'counterfactual' : 'replay';
 
-  const runtime = new (await import("../engine.js")).SubstrateRuntime(opts.runtimeOptions ?? {});
+  const runtime = new (await import('../engine.js')).SubstrateRuntime(opts.runtimeOptions ?? {});
 
   const replayRun = await runtime.start(workflow, sourceRun.input, {
     mode,
@@ -135,7 +137,13 @@ export async function replay(opts: ReplayOptions): Promise<ReplayResult> {
     diff = buildCounterfactualDiff(sourceRun, replayRun, opts.model, opts.policy?.id);
   }
 
-  return { sourceRun, replayRun, ...(diff !== undefined ? { diff } : {}), stableHashes: stable, mismatchedStages };
+  return {
+    sourceRun,
+    replayRun,
+    ...(diff !== undefined ? { diff } : {}),
+    stableHashes: stable,
+    mismatchedStages,
+  };
 }
 
 // ─── Diff Builder ─────────────────────────────────────────────────────────────
@@ -169,8 +177,7 @@ function buildCounterfactualDiff(
       (bConf !== undefined && cfConf !== undefined && Math.abs(bConf - cfConf) > 0.05);
 
     const decisionChanged =
-      bStatus !== cfStatus &&
-      (bStatus === "completed" || cfStatus === "completed");
+      bStatus !== cfStatus && (bStatus === 'completed' || cfStatus === 'completed');
 
     stageDiffs.push({
       stageId,
@@ -178,7 +185,9 @@ function buildCounterfactualDiff(
       baseline: baselineResult
         ? {
             status: baselineResult.status as StageResultStatus,
-            ...(baselineResult.confidence !== undefined ? { confidence: baselineResult.confidence } : {}),
+            ...(baselineResult.confidence !== undefined
+              ? { confidence: baselineResult.confidence }
+              : {}),
             ...(baselineResult.output !== undefined ? { output: baselineResult.output } : {}),
           }
         : null,
@@ -214,40 +223,46 @@ function buildCounterfactualDiff(
 
 export function formatDiff(diff: CounterfactualDiff): string {
   const lines: string[] = [];
-  lines.push("=".repeat(70));
+  lines.push('='.repeat(70));
   lines.push(`COUNTERFACTUAL DIFF`);
   lines.push(`Baseline:        ${diff.baselineRunId}`);
   lines.push(`Counterfactual:  ${diff.counterfactualRunId}`);
   if (diff.counterfactualModel) lines.push(`Model Swap:      ${diff.counterfactualModel}`);
   if (diff.counterfactualPolicy) lines.push(`Policy Swap:     ${diff.counterfactualPolicy}`);
   lines.push(`Generated:       ${diff.generatedAt}`);
-  lines.push("-".repeat(70));
+  lines.push('-'.repeat(70));
 
   for (const sd of diff.stageDiffs) {
-    const marker = sd.decisionChanged ? "⚡" : sd.differ ? "~" : " ";
+    const marker = sd.decisionChanged ? '⚡' : sd.differ ? '~' : ' ';
     lines.push(`${marker} [${sd.stageType}] ${sd.stageId}`);
     if (sd.baseline) {
-      const bConf = sd.baseline.confidence !== undefined ? ` conf=${(sd.baseline.confidence * 100).toFixed(1)}%` : "";
+      const bConf =
+        sd.baseline.confidence !== undefined
+          ? ` conf=${(sd.baseline.confidence * 100).toFixed(1)}%`
+          : '';
       lines.push(`    baseline:       status=${sd.baseline.status}${bConf}`);
     } else {
       lines.push(`    baseline:       (not executed)`);
     }
     if (sd.counterfactual) {
-      const cfConf = sd.counterfactual.confidence !== undefined ? ` conf=${(sd.counterfactual.confidence * 100).toFixed(1)}%` : "";
+      const cfConf =
+        sd.counterfactual.confidence !== undefined
+          ? ` conf=${(sd.counterfactual.confidence * 100).toFixed(1)}%`
+          : '';
       lines.push(`    counterfactual: status=${sd.counterfactual.status}${cfConf}`);
     } else {
       lines.push(`    counterfactual: (not executed)`);
     }
   }
 
-  lines.push("-".repeat(70));
+  lines.push('-'.repeat(70));
   const delta = diff.finalConfidenceDelta;
-  const deltaStr = (delta >= 0 ? "+" : "") + (delta * 100).toFixed(1) + "%";
+  const deltaStr = (delta >= 0 ? '+' : '') + (delta * 100).toFixed(1) + '%';
   lines.push(`Final Confidence Delta: ${deltaStr}`);
-  lines.push(`Outcome Changed:        ${diff.outcomeChanged ? "YES ⚡" : "no"}`);
-  lines.push("=".repeat(70));
+  lines.push(`Outcome Changed:        ${diff.outcomeChanged ? 'YES ⚡' : 'no'}`);
+  lines.push('='.repeat(70));
 
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 // ─── Typed API Endpoint Handler (for Eval Console) ───────────────────────────

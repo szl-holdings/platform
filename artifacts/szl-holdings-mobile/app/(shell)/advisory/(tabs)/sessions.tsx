@@ -1,7 +1,13 @@
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
-import React, { useState, useCallback } from "react";
+import { Feather } from '@expo/vector-icons';
+import {
+  formatInUserTimeZone,
+  useSyncEngine,
+  useUserPreferences,
+} from '@szl-holdings/mobile-shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,30 +18,21 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  useSyncEngine,
-  useUserPreferences,
-  formatInUserTimeZone,
-} from "@szl-holdings/mobile-shared";
-import { useColors } from "@/hooks/useColors";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
 
 const API_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
 
-const TIME_SLOTS = [
-  "9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
-];
+const TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
 
 const SERVICES = [
-  { id: "residence-operations", title: "Residence Operations" },
-  { id: "property-coordination", title: "Property Coordination" },
-  { id: "household-systems", title: "Household Systems" },
-  { id: "vendor-management", title: "Vendor Management" },
-  { id: "lifestyle-admin", title: "Lifestyle & Admin" },
-  { id: "special-projects", title: "Special Projects" },
+  { id: 'residence-operations', title: 'Residence Operations' },
+  { id: 'property-coordination', title: 'Property Coordination' },
+  { id: 'household-systems', title: 'Household Systems' },
+  { id: 'vendor-management', title: 'Vendor Management' },
+  { id: 'lifestyle-admin', title: 'Lifestyle & Admin' },
+  { id: 'special-projects', title: 'Special Projects' },
 ];
 
 function getNextBusinessDays(): string[] {
@@ -44,7 +41,7 @@ function getNextBusinessDays(): string[] {
   d.setDate(d.getDate() + 3);
   while (days.length < 14) {
     if (d.getDay() !== 0 && d.getDay() !== 6) {
-      days.push(d.toISOString().split("T")[0]);
+      days.push(d.toISOString().split('T')[0]);
     }
     d.setDate(d.getDate() + 1);
   }
@@ -52,11 +49,11 @@ function getNextBusinessDays(): string[] {
 }
 
 function formatDate(dateStr: string): { day: string; date: string; month: string } {
-  const d = new Date(dateStr + "T12:00:00");
+  const d = new Date(dateStr + 'T12:00:00');
   return {
-    day: formatInUserTimeZone(d, { weekday: "short" }, "en-GB").toUpperCase(),
-    date: formatInUserTimeZone(d, { day: "numeric" }, "en-GB"),
-    month: formatInUserTimeZone(d, { month: "short" }, "en-GB").toUpperCase(),
+    day: formatInUserTimeZone(d, { weekday: 'short' }, 'en-GB').toUpperCase(),
+    date: formatInUserTimeZone(d, { day: 'numeric' }, 'en-GB'),
+    month: formatInUserTimeZone(d, { month: 'short' }, 'en-GB').toUpperCase(),
   };
 }
 
@@ -76,7 +73,7 @@ function resolveSessionInstant(session: SessionItem): Date | null {
     startTime?: string | null;
   };
   for (const candidate of [anySession.startsAt, anySession.scheduledFor, anySession.startTime]) {
-    if (typeof candidate !== "string" || candidate.length === 0) continue;
+    if (typeof candidate !== 'string' || candidate.length === 0) continue;
     // Require an ISO-style timestamp (must contain "T" and either "Z" or a
     // numeric offset) so we know the source zone unambiguously.
     if (!/T\d{2}:\d{2}/.test(candidate)) continue;
@@ -91,17 +88,14 @@ function formatSessionDate(session: SessionItem): string {
   const d = resolveSessionInstant(session);
   if (!d) return session.date; // Legacy display string — render as-is.
   return (
-    formatInUserTimeZone(d, { month: "short", day: "numeric", year: "numeric" }) ||
-    session.date
+    formatInUserTimeZone(d, { month: 'short', day: 'numeric', year: 'numeric' }) || session.date
   );
 }
 
 function formatSessionTime(session: SessionItem): string {
   const d = resolveSessionInstant(session);
   if (!d) return session.time; // Legacy display string — render as-is.
-  return (
-    formatInUserTimeZone(d, { hour: "numeric", minute: "2-digit" }) || session.time
-  );
+  return formatInUserTimeZone(d, { hour: 'numeric', minute: '2-digit' }) || session.time;
 }
 
 type SessionItem = {
@@ -116,19 +110,19 @@ type SessionItem = {
 const UPCOMING_SESSIONS: SessionItem[] = [
   {
     id: 1,
-    title: "Q2 Review Session",
-    date: "Apr 7, 2026",
-    time: "10:00 AM",
-    location: "London",
-    status: "Confirmed",
+    title: 'Q2 Review Session',
+    date: 'Apr 7, 2026',
+    time: '10:00 AM',
+    location: 'London',
+    status: 'Confirmed',
   },
   {
     id: 2,
-    title: "Oxfordshire Property Walkthrough",
-    date: "Apr 21, 2026",
-    time: "2:00 PM",
-    location: "Oxfordshire",
-    status: "Pending confirmation",
+    title: 'Oxfordshire Property Walkthrough',
+    date: 'Apr 21, 2026',
+    time: '2:00 PM',
+    location: 'Oxfordshire',
+    status: 'Pending confirmation',
   },
 ];
 
@@ -138,19 +132,19 @@ export default function SessionsScreen() {
   const qc = useQueryClient();
   // Subscribe so dates re-render when the user changes their time zone.
   useUserPreferences();
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
-  const [selectedService, setSelectedService] = useState("");
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedService, setSelectedService] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   const apiBase = process.env.EXPO_PUBLIC_DOMAIN
     ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
-    : "/api";
+    : '/api';
 
   const syncEngine = useSyncEngine();
 
   const { data: sessions = UPCOMING_SESSIONS } = useQuery<SessionItem[]>({
-    queryKey: ["carlota-sessions"],
+    queryKey: ['carlota-sessions'],
     queryFn: async () => {
       const res = await fetch(`${apiBase}/carlota-jo/booking/reservations`);
       if (!res.ok) return UPCOMING_SESSIONS;
@@ -163,68 +157,78 @@ export default function SessionsScreen() {
   });
 
   const bookSession = useMutation({
-    mutationFn: async ({ service, date, time }: { service: string; date: string; time: string }) => {
+    mutationFn: async ({
+      service,
+      date,
+      time,
+    }: {
+      service: string;
+      date: string;
+      time: string;
+    }) => {
       const url = `${apiBase}/carlota-jo/booking/reservations`;
       const idempotencyKey = `carlota-booking-${service}-${date}-${time}`;
 
       if (!syncEngine.isOnline) {
         await syncEngine.enqueue({
-          domain: "carlota-jo",
-          method: "POST",
+          domain: 'carlota-jo',
+          method: 'POST',
           url,
-          body: { service, date, time, clientName: "Client" },
+          body: { service, date, time, clientName: 'Client' },
           idempotencyKey,
         });
         return { queued: true };
       }
 
       const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Idempotency-Key": idempotencyKey },
-        body: JSON.stringify({ service, date, time, clientName: "Client" }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Idempotency-Key': idempotencyKey },
+        body: JSON.stringify({ service, date, time, clientName: 'Client' }),
       });
-      if (!res.ok) throw new Error("Booking failed");
+      if (!res.ok) throw new Error('Booking failed');
       return res.json();
     },
     onMutate: async ({ service, date, time }) => {
-      await qc.cancelQueries({ queryKey: ["carlota-sessions"] });
-      const prev = qc.getQueryData<SessionItem[]>(["carlota-sessions"]);
+      await qc.cancelQueries({ queryKey: ['carlota-sessions'] });
+      const prev = qc.getQueryData<SessionItem[]>(['carlota-sessions']);
       const optimistic: SessionItem = {
         id: Date.now(),
-        title: service.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        title: service.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
         date,
         time,
-        status: "Pending confirmation",
+        status: 'Pending confirmation',
       };
-      qc.setQueryData<SessionItem[]>(["carlota-sessions"], (old) => [
-        ...(old ?? []),
-        optimistic,
-      ]);
+      qc.setQueryData<SessionItem[]>(['carlota-sessions'], (old) => [...(old ?? []), optimistic]);
       return { prev };
     },
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
-        "Session Requested",
+        'Session Requested',
         `Your consultation request has been submitted.\n\nRosa will confirm within 24 hours.`,
-        [{ text: "Done", onPress: () => {
-          setSelectedDate("");
-          setSelectedTime("");
-          setSelectedService("");
-        }}]
+        [
+          {
+            text: 'Done',
+            onPress: () => {
+              setSelectedDate('');
+              setSelectedTime('');
+              setSelectedService('');
+            },
+          },
+        ],
       );
     },
     onError: (_err, _vars, ctx) => {
       if (ctx?.prev !== undefined) {
-        qc.setQueryData<SessionItem[]>(["carlota-sessions"], ctx.prev);
+        qc.setQueryData<SessionItem[]>(['carlota-sessions'], ctx.prev);
       }
-      Alert.alert("Error", "Unable to submit. Please try again.");
+      Alert.alert('Error', 'Unable to submit. Please try again.');
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["carlota-sessions"] }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['carlota-sessions'] }),
   });
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
+  const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const bottomPad = Platform.OS === 'web' ? 34 + 84 : 90;
 
   const days = getNextBusinessDays();
 
@@ -237,7 +241,7 @@ export default function SessionsScreen() {
 
   const handleBookSession = () => {
     if (!selectedDate || !selectedTime || !selectedService) {
-      Alert.alert("Incomplete", "Please select a service, date, and time.");
+      Alert.alert('Incomplete', 'Please select a service, date, and time.');
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -247,7 +251,7 @@ export default function SessionsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
-        colors={["rgba(200,169,106,0.05)", "transparent"]}
+        colors={['rgba(200,169,106,0.05)', 'transparent']}
         style={[styles.headerGradient, { height: topPad + 80 }]}
       />
       <ScrollView
@@ -257,30 +261,18 @@ export default function SessionsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.gold}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />
         }
       >
-        <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
-          SESSION BOOKING
-        </Text>
-        <Text style={[styles.title, { color: colors.cream }]}>
-          Schedule a{"\n"}Consultation
-        </Text>
+        <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>SESSION BOOKING</Text>
+        <Text style={[styles.title, { color: colors.cream }]}>Schedule a{'\n'}Consultation</Text>
 
         {sessions.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-              UPCOMING
-            </Text>
+            <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>UPCOMING</Text>
             {sessions.map((session) => (
               <Pressable key={session.id}>
-                <View
-                  style={[styles.sessionCard, { borderColor: colors.goldBorder }]}
-                >
+                <View style={[styles.sessionCard, { borderColor: colors.goldBorder }]}>
                   <View style={styles.sessionHeader}>
                     <Text style={[styles.sessionTitle, { color: colors.cream }]}>
                       {session.title}
@@ -290,13 +282,13 @@ export default function SessionsScreen() {
                         styles.sessionBadge,
                         {
                           backgroundColor:
-                            session.status === "Confirmed"
-                              ? "rgba(200,169,106,0.12)"
-                              : "transparent",
+                            session.status === 'Confirmed'
+                              ? 'rgba(200,169,106,0.12)'
+                              : 'transparent',
                           borderColor:
-                            session.status === "Confirmed"
+                            session.status === 'Confirmed'
                               ? colors.goldBorder
-                              : "rgba(245,240,232,0.08)",
+                              : 'rgba(245,240,232,0.08)',
                         },
                       ]}
                     >
@@ -305,9 +297,7 @@ export default function SessionsScreen() {
                           styles.sessionBadgeText,
                           {
                             color:
-                              session.status === "Confirmed"
-                                ? colors.gold
-                                : colors.mutedForeground,
+                              session.status === 'Confirmed' ? colors.gold : colors.mutedForeground,
                           },
                         ]}
                       >
@@ -320,11 +310,21 @@ export default function SessionsScreen() {
                     <Text style={[styles.sessionMetaText, { color: colors.creamDim }]}>
                       {formatSessionDate(session)}
                     </Text>
-                    <Feather name="clock" size={11} color={colors.goldSubtle} style={{ marginLeft: 12 }} />
+                    <Feather
+                      name="clock"
+                      size={11}
+                      color={colors.goldSubtle}
+                      style={{ marginLeft: 12 }}
+                    />
                     <Text style={[styles.sessionMetaText, { color: colors.creamDim }]}>
                       {formatSessionTime(session)}
                     </Text>
-                    <Feather name="map-pin" size={11} color={colors.goldSubtle} style={{ marginLeft: 12 }} />
+                    <Feather
+                      name="map-pin"
+                      size={11}
+                      color={colors.goldSubtle}
+                      style={{ marginLeft: 12 }}
+                    />
                     <Text style={[styles.sessionMetaText, { color: colors.creamDim }]}>
                       {session.location}
                     </Text>
@@ -336,9 +336,7 @@ export default function SessionsScreen() {
         )}
 
         <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            SERVICE AREA
-          </Text>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>SERVICE AREA</Text>
           <View style={styles.serviceGrid}>
             {SERVICES.map((svc) => (
               <Pressable
@@ -352,14 +350,8 @@ export default function SessionsScreen() {
                   style={[
                     styles.serviceChip,
                     {
-                      borderColor:
-                        selectedService === svc.id
-                          ? colors.gold
-                          : colors.creamFaint,
-                      backgroundColor:
-                        selectedService === svc.id
-                          ? colors.goldDim
-                          : "transparent",
+                      borderColor: selectedService === svc.id ? colors.gold : colors.creamFaint,
+                      backgroundColor: selectedService === svc.id ? colors.goldDim : 'transparent',
                     },
                   ]}
                 >
@@ -367,10 +359,7 @@ export default function SessionsScreen() {
                     style={[
                       styles.serviceChipText,
                       {
-                        color:
-                          selectedService === svc.id
-                            ? colors.gold
-                            : colors.creamDim,
+                        color: selectedService === svc.id ? colors.gold : colors.creamDim,
                       },
                     ]}
                   >
@@ -383,9 +372,7 @@ export default function SessionsScreen() {
         </View>
 
         <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            PREFERRED DATE
-          </Text>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>PREFERRED DATE</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.dateRow}>
               {days.map((d) => {
@@ -404,7 +391,7 @@ export default function SessionsScreen() {
                         styles.dateCell,
                         {
                           borderColor: isSelected ? colors.gold : colors.creamFaint,
-                          backgroundColor: isSelected ? colors.goldDim : "transparent",
+                          backgroundColor: isSelected ? colors.goldDim : 'transparent',
                         },
                       ]}
                     >
@@ -457,10 +444,8 @@ export default function SessionsScreen() {
                   style={[
                     styles.timeChip,
                     {
-                      borderColor:
-                        selectedTime === t ? colors.gold : colors.creamFaint,
-                      backgroundColor:
-                        selectedTime === t ? colors.goldDim : "transparent",
+                      borderColor: selectedTime === t ? colors.gold : colors.creamFaint,
+                      backgroundColor: selectedTime === t ? colors.goldDim : 'transparent',
                     },
                   ]}
                 >
@@ -489,7 +474,7 @@ export default function SessionsScreen() {
               backgroundColor:
                 selectedDate && selectedTime && selectedService
                   ? colors.gold
-                  : "rgba(200,169,106,0.2)",
+                  : 'rgba(200,169,106,0.2)',
               opacity: pressed ? 0.85 : 1,
             },
           ]}
@@ -516,7 +501,8 @@ export default function SessionsScreen() {
         <View style={styles.disclaimer}>
           <Feather name="shield" size={11} color={colors.mutedForeground} />
           <Text style={[styles.disclaimerText, { color: colors.mutedForeground }]}>
-            Rosa will confirm within 24 hours. All sessions are handled with complete confidentiality.
+            Rosa will confirm within 24 hours. All sessions are handled with complete
+            confidentiality.
           </Text>
         </View>
       </ScrollView>
@@ -526,17 +512,17 @@ export default function SessionsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+  headerGradient: { position: 'absolute', top: 0, left: 0, right: 0 },
   content: { paddingHorizontal: 20 },
   eyebrow: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 3,
     marginBottom: 8,
   },
   title: {
     fontSize: 28,
-    fontFamily: "CormorantGaramond_400Regular",
+    fontFamily: 'CormorantGaramond_400Regular',
     lineHeight: 36,
     marginBottom: 28,
   },
@@ -547,7 +533,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 3,
     marginBottom: 14,
   },
@@ -557,14 +543,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sessionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 10,
   },
   sessionTitle: {
     fontSize: 14,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     flex: 1,
     marginRight: 12,
   },
@@ -575,22 +561,22 @@ const styles = StyleSheet.create({
   },
   sessionBadgeText: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 1,
   },
   sessionMeta: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
-    flexWrap: "wrap",
+    flexWrap: 'wrap',
   },
   sessionMetaText: {
     fontSize: 11,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   serviceGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   serviceChip: {
@@ -600,11 +586,11 @@ const styles = StyleSheet.create({
   },
   serviceChipText: {
     fontSize: 11,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     letterSpacing: 0.3,
   },
   dateRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 8,
     paddingBottom: 4,
   },
@@ -612,26 +598,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: 56,
     paddingVertical: 10,
-    alignItems: "center",
+    alignItems: 'center',
     gap: 2,
   },
   dateCellDay: {
     fontSize: 8,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 1,
   },
   dateCellNum: {
     fontSize: 18,
-    fontFamily: "CormorantGaramond_400Regular",
+    fontFamily: 'CormorantGaramond_400Regular',
   },
   dateCellMonth: {
     fontSize: 8,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 1,
   },
   timeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   timeChip: {
@@ -641,28 +627,28 @@ const styles = StyleSheet.create({
   },
   timeChipText: {
     fontSize: 12,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   submitBtn: {
     height: 52,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
   },
   submitBtnText: {
     fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 3,
   },
   disclaimer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: 8,
     marginBottom: 8,
   },
   disclaimerText: {
     fontSize: 11,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     flex: 1,
     lineHeight: 16,
   },

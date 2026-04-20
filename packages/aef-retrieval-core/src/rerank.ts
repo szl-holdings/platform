@@ -1,4 +1,4 @@
-import type { NormalizedHit } from "./normalize.js";
+import type { NormalizedHit } from './normalize.js';
 
 /**
  * Lightweight CPU cross-encoder approximation.
@@ -13,11 +13,7 @@ import type { NormalizedHit } from "./normalize.js";
  * This means the reranker can override or re-sort the RRF/boosted ranking
  * with semantic relevance signals — the canonical "second-pass" retrieval gate.
  */
-export function rerankHits(
-  hits: NormalizedHit[],
-  query: string,
-  topK?: number,
-): NormalizedHit[] {
+export function rerankHits(hits: NormalizedHit[], query: string, topK?: number): NormalizedHit[] {
   if (hits.length === 0) return hits;
 
   const queryTerms = new Set(
@@ -36,9 +32,9 @@ export function rerankHits(
     // Collect all candidate text from metadata fields
     const textSources: string[] = [];
     for (const val of Object.values(hit.metadata)) {
-      if (typeof val === "string") textSources.push(val.toLowerCase());
+      if (typeof val === 'string') textSources.push(val.toLowerCase());
     }
-    const candidateText = textSources.join(" ");
+    const candidateText = textSources.join(' ');
     const candidateTerms = candidateText.split(/\s+/);
 
     let termHits = 0;
@@ -49,8 +45,7 @@ export function rerankHits(
     // Precision-weighted overlap: normalise by query term count
     const overlapPrecision = termHits / queryTerms.size;
     // Term frequency density in candidate
-    const density =
-      candidateTerms.length > 0 ? termHits / candidateTerms.length : 0;
+    const density = candidateTerms.length > 0 ? termHits / candidateTerms.length : 0;
 
     // Composite reranker score: blend overlap precision + density + base score
     const rerankerScore = Math.min(
@@ -74,7 +69,7 @@ export function rerankHits(
       ...hit.metadata,
       rerankerScore,
       rerankerRank: idx + 1,
-      rerankerBackend: "cpu-term-overlap-v1",
+      rerankerBackend: 'cpu-term-overlap-v1',
     },
   }));
 }

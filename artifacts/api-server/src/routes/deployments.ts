@@ -17,33 +17,36 @@
  *   GET  /deployments/:appId/history         — version history for an app
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  db,
-  deploymentsTable,
-  usersTable,
-  notificationsTable,
-  notificationPreferencesTable,
   appsRegistryTable,
   type Deployment,
-} from "@szl-holdings/db";
-import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
+  db,
+  deploymentsTable,
+  notificationPreferencesTable,
+  notificationsTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { and, asc, desc, eq, inArray, or } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess,
+  handleRouteError,
+  sendBadRequest,
   sendCreated,
   sendNotFound,
-  sendBadRequest,
-  handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware, denyIfReadOnly, requireRole } from "../middlewares/auth";
-import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { logger } from "../lib/logger";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
-import { publish, WS_CHANNELS } from "../lib/websocket";
-import { dispatchToExternalChannels } from "./notifications";
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { publish, WS_CHANNELS } from '../lib/websocket';
+import { authMiddleware, denyIfReadOnly, requireRole } from '../middlewares/auth';
+import {
+  perUserApiSlidingLimiter,
+  perUserWriteSlidingLimiter,
+} from '../middlewares/sliding-window-limiter';
+import { dispatchToExternalChannels } from './notifications';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
 const router: IRouter = Router();
 
 /**
@@ -56,13 +59,13 @@ function principalFor(req: Request): string {
   const u = req.user;
   if (!u) {
     // Defensive — should be unreachable because POST routes require auth.
-    throw new Error("principalFor called without an authenticated user");
+    throw new Error('principalFor called without an authenticated user');
   }
   return u.email ?? u.displayName ?? String(u.id);
 }
 
-export type DeploymentStatus = "active" | "deploying" | "rolled-back" | "failed" | "inactive";
-export type DeploymentEnvironment = "development" | "staging" | "production";
+export type DeploymentStatus = 'active' | 'deploying' | 'rolled-back' | 'failed' | 'inactive';
+export type DeploymentEnvironment = 'development' | 'staging' | 'production';
 
 export interface DeploymentUserSummary {
   id: number;
@@ -92,7 +95,7 @@ export interface DeploymentRecord {
  * or that have a NULL `owner_team`. Platform owns shared infrastructure and
  * is the right "who do I page" fallback when nothing else is configured.
  */
-const DEFAULT_OWNER_TEAM = "Platform";
+const DEFAULT_OWNER_TEAM = 'Platform';
 
 /**
  * Resolve owning teams for a batch of app slugs from the apps registry.
@@ -152,15 +155,15 @@ async function lookupDeployers(
   deployedByValues: string[],
 ): Promise<Map<string, DeploymentUserSummary>> {
   const map = new Map<string, DeploymentUserSummary>();
-  const unique = Array.from(new Set(deployedByValues.filter((v) => v && v !== "system")));
+  const unique = Array.from(new Set(deployedByValues.filter((v) => v && v !== 'system')));
   if (unique.length === 0) return map;
 
-  const emails = unique.filter((v) => v.includes("@"));
+  const emails = unique.filter((v) => v.includes('@'));
   const numericIds = unique
     .filter((v) => /^\d+$/.test(v))
     .map((v) => Number.parseInt(v, 10))
     .filter((n) => Number.isFinite(n));
-  const otherNames = unique.filter((v) => !v.includes("@") && !/^\d+$/.test(v));
+  const otherNames = unique.filter((v) => !v.includes('@') && !/^\d+$/.test(v));
 
   const filters = [];
   if (emails.length > 0) filters.push(inArray(usersTable.email, emails));
@@ -208,11 +211,7 @@ async function recordsWithUsers(rows: Deployment[]): Promise<DeploymentRecord[]>
   );
 }
 
-async function getHistory(
-  appId: string,
-  env: string,
-  deployedBy?: string,
-): Promise<Deployment[]> {
+async function getHistory(appId: string, env: string, deployedBy?: string): Promise<Deployment[]> {
   const conditions = [
     eq(deploymentsTable.appId, appId),
     eq(deploymentsTable.environment, env as DeploymentEnvironment),
@@ -235,7 +234,7 @@ async function getActive(appId: string, env: string): Promise<Deployment | undef
       and(
         eq(deploymentsTable.appId, appId),
         eq(deploymentsTable.environment, env as DeploymentEnvironment),
-        eq(deploymentsTable.status, "active"),
+        eq(deploymentsTable.status, 'active'),
       ),
     )
     .orderBy(desc(deploymentsTable.deployedAt), desc(deploymentsTable.id))
@@ -294,14 +293,11 @@ async function notifyRollback(params: {
     recipientIds.delete(params.rolledBackByUserId);
 
     if (recipientIds.size === 0) {
-      logger.info(
-        { appId: params.appId, team },
-        "Rollback notification: no recipients to notify",
-      );
+      logger.info({ appId: params.appId, team }, 'Rollback notification: no recipients to notify');
       return;
     }
 
-    const appUrl = process.env["APP_URL"] ?? process.env["VITE_APP_URL"] ?? "";
+    const appUrl = process.env['APP_URL'] ?? process.env['VITE_APP_URL'] ?? '';
     const actionUrl = `${appUrl}/command/operations/deployments`;
     const title = `Rollback: ${params.appName} (${params.environment})`;
     const message =
@@ -330,8 +326,8 @@ async function notifyRollback(params: {
           .insert(notificationsTable)
           .values({
             userId,
-            type: "warning",
-            channel: "in_app",
+            type: 'warning',
+            channel: 'in_app',
             title,
             message,
             actionUrl,
@@ -339,7 +335,7 @@ async function notifyRollback(params: {
           .returning();
         if (notif) {
           notificationId = notif.id;
-          publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notif);
+          publish(WS_CHANNELS.NOTIFICATIONS, 'new_notification', notif);
           inAppDelivered++;
         }
       } else {
@@ -353,7 +349,7 @@ async function notifyRollback(params: {
       void dispatchToExternalChannels({
         notificationId,
         userId,
-        type: "warning",
+        type: 'warning',
         title,
         message,
         actionUrl,
@@ -370,233 +366,272 @@ async function notifyRollback(params: {
         from: params.fromVersion,
         to: params.toVersion,
       },
-      "Rollback notifications dispatched",
+      'Rollback notifications dispatched',
     );
   } catch (err) {
-    logger.error(
-      { err, appId: params.appId },
-      "Failed to send rollback notifications",
-    );
+    logger.error({ err, appId: params.appId }, 'Failed to send rollback notifications');
   }
 }
 
-router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const env = (req.query.environment as string) ?? "production";
-    const deployedByFilter = (req.query.deployedBy as string | undefined)?.trim() || undefined;
-    const conditions = [
-      eq(deploymentsTable.environment, env as DeploymentEnvironment),
-      eq(deploymentsTable.status, "active"),
-    ];
-    if (deployedByFilter) {
-      conditions.push(eq(deploymentsTable.deployedBy, deployedByFilter));
-    }
-    const rows = await db
-      .select()
-      .from(deploymentsTable)
-      .where(and(...conditions));
-    const deployments = await recordsWithUsers(rows);
-    return sendSuccess(res, {
-      deployments,
-      environment: env,
-      count: deployments.length,
-      deployedBy: deployedByFilter,
-    });
-  } catch (err) {
-    return handleRouteError(res, err, "GET /deployments");
-  }
-});
-
-router.get("/deployments/:appId", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const { appId } = req.params as { appId: string };
-    const env = (req.query.environment as string) ?? "production";
-    const active = await getActive(appId, env);
-    if (!active) {
-      return sendNotFound(res, `No active deployment for app '${appId}' in '${env}'`);
-    }
-    const [enriched] = await recordsWithUsers([active]);
-    return sendSuccess(res, enriched);
-  } catch (err) {
-    return handleRouteError(res, err, `GET /deployments/${req.params.appId}`);
-  }
-});
-
-router.get("/deployments/:appId/history", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  try {
-    const { appId } = req.params as { appId: string };
-    const env = (req.query.environment as string) ?? "production";
-    const deployedByFilter = (req.query.deployedBy as string | undefined)?.trim() || undefined;
-    const rows = await getHistory(appId, env, deployedByFilter);
-    const history = await recordsWithUsers(rows);
-    return sendSuccess(res, {
-      appId,
-      environment: env,
-      history,
-      count: history.length,
-      deployedBy: deployedByFilter,
-    });
-  } catch (err) {
-    return handleRouteError(res, err, `GET /deployments/${req.params.appId}/history`);
-  }
-});
-
-router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(bodyShape({
-      "appId": z.unknown().optional(),
-      "appName": z.unknown().optional(),
-      "commitSha": z.unknown().optional(),
-      "environment": z.unknown().optional(),
-      "metadata": z.unknown().optional(),
-      "notes": z.unknown().optional(),
-      "version": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
-  try {
-    const { appId, appName, version, environment, commitSha, notes, metadata } =
-      req.body as Partial<DeploymentRecord>;
-    if (!appId || !version || !environment) {
-      return sendBadRequest(res, "appId, version, and environment are required");
-    }
-    // Audit trail: deployedBy is always taken from the authenticated principal,
-    // never from request input — clients cannot spoof who triggered a deploy.
-    const deployedBy = principalFor(req);
-
-    const inserted = await db.transaction(async (tx) => {
-      await tx
-        .update(deploymentsTable)
-        .set({ status: "inactive" })
-        .where(
-          and(
-            eq(deploymentsTable.appId, appId),
-            eq(deploymentsTable.environment, environment as DeploymentEnvironment),
-            eq(deploymentsTable.status, "active"),
-          ),
-        );
-
-      const [row] = await tx
-        .insert(deploymentsTable)
-        .values({
-          appId,
-          appName: appName ?? appId,
-          version,
-          environment: environment as DeploymentEnvironment,
-          status: "active",
-          deployedBy,
-          commitSha: commitSha ?? null,
-          notes: notes ?? null,
-          metadata: metadata ?? null,
-        })
-        .returning();
-      return row!;
-    });
-
-    logger.info({ appId, version, environment }, "Deployment registered");
-    const [enriched] = await recordsWithUsers([inserted]);
-    return sendCreated(res, enriched);
-  } catch (err) {
-    return handleRouteError(res, err, "POST /deployments");
-  }
-});
-
-router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(bodyShape({
-      "environment": z.unknown().optional(),
-      "version": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
-  try {
-    const { appId } = req.params as { appId: string };
-    const env = (req.body.environment as string) ?? "production";
-    const targetVersion = req.body.version as string | undefined;
-    const deployedBy = principalFor(req);
-
-    const result = await db.transaction(async (tx) => {
-      const history = await tx
+router.get(
+  '/deployments',
+  authMiddleware({ required: false }),
+  perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const env = (req.query.environment as string) ?? 'production';
+      const deployedByFilter = (req.query.deployedBy as string | undefined)?.trim() || undefined;
+      const conditions = [
+        eq(deploymentsTable.environment, env as DeploymentEnvironment),
+        eq(deploymentsTable.status, 'active'),
+      ];
+      if (deployedByFilter) {
+        conditions.push(eq(deploymentsTable.deployedBy, deployedByFilter));
+      }
+      const rows = await db
         .select()
         .from(deploymentsTable)
-        .where(
-          and(
-            eq(deploymentsTable.appId, appId),
-            eq(deploymentsTable.environment, env as DeploymentEnvironment),
-          ),
-        )
-        .orderBy(asc(deploymentsTable.deployedAt), asc(deploymentsTable.id));
-
-      if (history.length < 2) {
-        return { error: "No previous version available to roll back to" } as const;
-      }
-
-      const activeIdx = history.findIndex((r) => r.status === "active");
-      if (activeIdx < 0) {
-        return { error: "No active deployment to roll back" } as const;
-      }
-
-      let targetIdx: number;
-      if (targetVersion) {
-        targetIdx = history.reduce((found: number, r: any, i: number) => (r.version === targetVersion && r.status !== "active") ? i : found, -1);
-        if (targetIdx < 0) {
-          return { error: `Version '${targetVersion}' not found in history` } as const;
-        }
-      } else {
-        targetIdx = activeIdx > 0 ? activeIdx - 1 : -1;
-        if (targetIdx < 0) {
-          return { error: "No previous version to roll back to" } as const;
-        }
-      }
-
-      const activeRow = history[activeIdx]!;
-      const target = history[targetIdx]!;
-
-      await tx
-        .update(deploymentsTable)
-        .set({ status: "rolled-back" })
-        .where(eq(deploymentsTable.id, activeRow.id));
-
-      const [rolled] = await tx
-        .insert(deploymentsTable)
-        .values({
-          appId: target.appId,
-          appName: target.appName,
-          version: target.version,
-          environment: target.environment,
-          status: "active",
-          deployedBy,
-          commitSha: target.commitSha,
-          notes: `Rolled back from ${activeRow.version} to ${target.version}`,
-          metadata: target.metadata,
-        })
-        .returning();
-
-      const previousAfter = { ...activeRow, status: "rolled-back" as const };
-      return { rolled: rolled!, previous: previousAfter } as const;
-    });
-
-    if ("error" in result) {
-      return sendBadRequest(res, result.error ?? "Unknown rollback error");
+        .where(and(...conditions));
+      const deployments = await recordsWithUsers(rows);
+      return sendSuccess(res, {
+        deployments,
+        environment: env,
+        count: deployments.length,
+        deployedBy: deployedByFilter,
+      });
+    } catch (err) {
+      return handleRouteError(res, err, 'GET /deployments');
     }
+  },
+);
 
-    logger.info(
-      { appId, from: result.previous.version, to: result.rolled.version },
-      "Rollback executed",
-    );
+router.get(
+  '/deployments/:appId',
+  authMiddleware({ required: false }),
+  perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { appId } = req.params as { appId: string };
+      const env = (req.query.environment as string) ?? 'production';
+      const active = await getActive(appId, env);
+      if (!active) {
+        return sendNotFound(res, `No active deployment for app '${appId}' in '${env}'`);
+      }
+      const [enriched] = await recordsWithUsers([active]);
+      return sendSuccess(res, enriched);
+    } catch (err) {
+      return handleRouteError(res, err, `GET /deployments/${req.params.appId}`);
+    }
+  },
+);
 
-    void notifyRollback({
-      appId,
-      appName: result.previous.appName,
-      environment: env,
-      fromVersion: result.previous.version,
-      toVersion: result.rolled.version,
-      rolledBackBy: deployedBy,
-      rolledBackByUserId: req.user!.id,
-      previousDeployedBy: result.previous.deployedBy,
-    });
+router.get(
+  '/deployments/:appId/history',
+  authMiddleware({ required: false }),
+  perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { appId } = req.params as { appId: string };
+      const env = (req.query.environment as string) ?? 'production';
+      const deployedByFilter = (req.query.deployedBy as string | undefined)?.trim() || undefined;
+      const rows = await getHistory(appId, env, deployedByFilter);
+      const history = await recordsWithUsers(rows);
+      return sendSuccess(res, {
+        appId,
+        environment: env,
+        history,
+        count: history.length,
+        deployedBy: deployedByFilter,
+      });
+    } catch (err) {
+      return handleRouteError(res, err, `GET /deployments/${req.params.appId}/history`);
+    }
+  },
+);
 
-    const enriched = await recordsWithUsers([result.previous, result.rolled]);
-    return sendSuccess(res, {
-      rolledBack: true,
-      previous: enriched[0]!,
-      current: enriched[1]!,
-    });
-  } catch (err) {
-    return handleRouteError(res, err, `POST /deployments/${req.params.appId}/rollback`);
-  }
-});
+router.post(
+  '/deployments',
+  authMiddleware({ required: true }),
+  denyIfReadOnly(),
+  requireRole('ops', 'exec', 'admin', 'super_admin'),
+  perUserWriteSlidingLimiter,
+  validateBody(
+    bodyShape({
+      appId: z.unknown().optional(),
+      appName: z.unknown().optional(),
+      commitSha: z.unknown().optional(),
+      environment: z.unknown().optional(),
+      metadata: z.unknown().optional(),
+      notes: z.unknown().optional(),
+      version: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
+    try {
+      const { appId, appName, version, environment, commitSha, notes, metadata } =
+        req.body as Partial<DeploymentRecord>;
+      if (!appId || !version || !environment) {
+        return sendBadRequest(res, 'appId, version, and environment are required');
+      }
+      // Audit trail: deployedBy is always taken from the authenticated principal,
+      // never from request input — clients cannot spoof who triggered a deploy.
+      const deployedBy = principalFor(req);
+
+      const inserted = await db.transaction(async (tx) => {
+        await tx
+          .update(deploymentsTable)
+          .set({ status: 'inactive' })
+          .where(
+            and(
+              eq(deploymentsTable.appId, appId),
+              eq(deploymentsTable.environment, environment as DeploymentEnvironment),
+              eq(deploymentsTable.status, 'active'),
+            ),
+          );
+
+        const [row] = await tx
+          .insert(deploymentsTable)
+          .values({
+            appId,
+            appName: appName ?? appId,
+            version,
+            environment: environment as DeploymentEnvironment,
+            status: 'active',
+            deployedBy,
+            commitSha: commitSha ?? null,
+            notes: notes ?? null,
+            metadata: metadata ?? null,
+          })
+          .returning();
+        return row!;
+      });
+
+      logger.info({ appId, version, environment }, 'Deployment registered');
+      const [enriched] = await recordsWithUsers([inserted]);
+      return sendCreated(res, enriched);
+    } catch (err) {
+      return handleRouteError(res, err, 'POST /deployments');
+    }
+  },
+);
+
+router.post(
+  '/deployments/:appId/rollback',
+  authMiddleware({ required: true }),
+  denyIfReadOnly(),
+  requireRole('ops', 'exec', 'admin', 'super_admin'),
+  perUserWriteSlidingLimiter,
+  validateBody(
+    bodyShape({
+      environment: z.unknown().optional(),
+      version: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
+    try {
+      const { appId } = req.params as { appId: string };
+      const env = (req.body.environment as string) ?? 'production';
+      const targetVersion = req.body.version as string | undefined;
+      const deployedBy = principalFor(req);
+
+      const result = await db.transaction(async (tx) => {
+        const history = await tx
+          .select()
+          .from(deploymentsTable)
+          .where(
+            and(
+              eq(deploymentsTable.appId, appId),
+              eq(deploymentsTable.environment, env as DeploymentEnvironment),
+            ),
+          )
+          .orderBy(asc(deploymentsTable.deployedAt), asc(deploymentsTable.id));
+
+        if (history.length < 2) {
+          return { error: 'No previous version available to roll back to' } as const;
+        }
+
+        const activeIdx = history.findIndex((r) => r.status === 'active');
+        if (activeIdx < 0) {
+          return { error: 'No active deployment to roll back' } as const;
+        }
+
+        let targetIdx: number;
+        if (targetVersion) {
+          targetIdx = history.reduce(
+            (found: number, r: any, i: number) =>
+              r.version === targetVersion && r.status !== 'active' ? i : found,
+            -1,
+          );
+          if (targetIdx < 0) {
+            return { error: `Version '${targetVersion}' not found in history` } as const;
+          }
+        } else {
+          targetIdx = activeIdx > 0 ? activeIdx - 1 : -1;
+          if (targetIdx < 0) {
+            return { error: 'No previous version to roll back to' } as const;
+          }
+        }
+
+        const activeRow = history[activeIdx]!;
+        const target = history[targetIdx]!;
+
+        await tx
+          .update(deploymentsTable)
+          .set({ status: 'rolled-back' })
+          .where(eq(deploymentsTable.id, activeRow.id));
+
+        const [rolled] = await tx
+          .insert(deploymentsTable)
+          .values({
+            appId: target.appId,
+            appName: target.appName,
+            version: target.version,
+            environment: target.environment,
+            status: 'active',
+            deployedBy,
+            commitSha: target.commitSha,
+            notes: `Rolled back from ${activeRow.version} to ${target.version}`,
+            metadata: target.metadata,
+          })
+          .returning();
+
+        const previousAfter = { ...activeRow, status: 'rolled-back' as const };
+        return { rolled: rolled!, previous: previousAfter } as const;
+      });
+
+      if ('error' in result) {
+        return sendBadRequest(res, result.error ?? 'Unknown rollback error');
+      }
+
+      logger.info(
+        { appId, from: result.previous.version, to: result.rolled.version },
+        'Rollback executed',
+      );
+
+      void notifyRollback({
+        appId,
+        appName: result.previous.appName,
+        environment: env,
+        fromVersion: result.previous.version,
+        toVersion: result.rolled.version,
+        rolledBackBy: deployedBy,
+        rolledBackByUserId: req.user!.id,
+        previousDeployedBy: result.previous.deployedBy,
+      });
+
+      const enriched = await recordsWithUsers([result.previous, result.rolled]);
+      return sendSuccess(res, {
+        rolledBack: true,
+        previous: enriched[0]!,
+        current: enriched[1]!,
+      });
+    } catch (err) {
+      return handleRouteError(res, err, `POST /deployments/${req.params.appId}/rollback`);
+    }
+  },
+);
 
 export default router;

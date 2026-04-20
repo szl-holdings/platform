@@ -1,16 +1,16 @@
 import {
   db,
-  proofChainTable,
   type InsertProofChain,
   type ProofChain,
-  type ProvenanceSourceClass,
-  type ProofReviewState,
   type ProofExportSafetyState,
-} from "@szl-holdings/db";
-import { eq, and, desc, inArray } from "drizzle-orm";
-import { createHash } from "crypto";
+  type ProofReviewState,
+  type ProvenanceSourceClass,
+  proofChainTable,
+} from '@szl-holdings/db';
+import { createHash } from 'crypto';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 
-export type { ProofChain, ProvenanceSourceClass, ProofReviewState, ProofExportSafetyState };
+export type { ProofChain, ProofExportSafetyState, ProofReviewState, ProvenanceSourceClass };
 
 export interface TagAIContentParams {
   orgId?: number | null;
@@ -40,7 +40,7 @@ export interface ReviewProofParams {
 }
 
 function computePromptHash(promptText: string): string {
-  return createHash("sha256").update(promptText).digest("hex").slice(0, 16);
+  return createHash('sha256').update(promptText).digest('hex').slice(0, 16);
 }
 
 function deriveExportSafetyState(
@@ -48,39 +48,42 @@ function deriveExportSafetyState(
   confidenceScore: number,
   reviewState: ProofReviewState,
 ): ProofExportSafetyState {
-  if (reviewState === "retracted" || reviewState === "flagged") return "blocked";
-  if (reviewState === "approved") return "safe";
-  if (confidenceScore < 0.5) return "restricted";
-  if (sourceClass === "llm_generated" || sourceClass === "llm_summarized") return "pending_review";
-  if (sourceClass === "human_authored" || sourceClass === "system_computed") return "safe";
-  return "pending_review";
+  if (reviewState === 'retracted' || reviewState === 'flagged') return 'blocked';
+  if (reviewState === 'approved') return 'safe';
+  if (confidenceScore < 0.5) return 'restricted';
+  if (sourceClass === 'llm_generated' || sourceClass === 'llm_summarized') return 'pending_review';
+  if (sourceClass === 'human_authored' || sourceClass === 'system_computed') return 'safe';
+  return 'pending_review';
 }
 
 export async function tagAIContent(params: TagAIContentParams): Promise<ProofChain> {
   const confidence = params.confidenceScore ?? 0.5;
-  const initialReviewState: ProofReviewState = "unreviewed";
+  const initialReviewState: ProofReviewState = 'unreviewed';
   const exportSafety = deriveExportSafetyState(params.sourceClass, confidence, initialReviewState);
 
-  const [proof] = await db.insert(proofChainTable).values({
-    orgId: params.orgId ?? null,
-    contentId: params.contentId,
-    contentType: params.contentType,
-    sourceClass: params.sourceClass,
-    confidenceScore: confidence,
-    modelLane: params.modelLane ?? null,
-    modelId: params.modelId ?? null,
-    modelProvider: params.modelProvider ?? null,
-    modelVersion: params.modelVersion ?? null,
-    promptHash: params.promptText ? computePromptHash(params.promptText) : null,
-    parentProofId: params.parentProofId ?? null,
-    reviewState: initialReviewState,
-    exportSafetyState: exportSafety,
-    generatedByUserId: params.generatedByUserId ?? null,
-    correlationId: params.correlationId ?? null,
-    serviceAttribution: params.serviceAttribution ?? null,
-    inputSources: params.inputSources ?? [],
-    metadata: params.metadata ?? {},
-  }).returning();
+  const [proof] = await db
+    .insert(proofChainTable)
+    .values({
+      orgId: params.orgId ?? null,
+      contentId: params.contentId,
+      contentType: params.contentType,
+      sourceClass: params.sourceClass,
+      confidenceScore: confidence,
+      modelLane: params.modelLane ?? null,
+      modelId: params.modelId ?? null,
+      modelProvider: params.modelProvider ?? null,
+      modelVersion: params.modelVersion ?? null,
+      promptHash: params.promptText ? computePromptHash(params.promptText) : null,
+      parentProofId: params.parentProofId ?? null,
+      reviewState: initialReviewState,
+      exportSafetyState: exportSafety,
+      generatedByUserId: params.generatedByUserId ?? null,
+      correlationId: params.correlationId ?? null,
+      serviceAttribution: params.serviceAttribution ?? null,
+      inputSources: params.inputSources ?? [],
+      metadata: params.metadata ?? {},
+    })
+    .returning();
 
   return proof;
 }
@@ -92,7 +95,7 @@ export async function reviewProof(params: ReviewProofParams): Promise<ProofChain
     .where(eq(proofChainTable.id, params.proofId));
 
   if (!existing) {
-    throw Object.assign(new Error(`Proof ${params.proofId} not found`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Proof ${params.proofId} not found`), { code: 'NOT_FOUND' });
   }
 
   const exportSafety =
@@ -127,23 +130,22 @@ export async function getProofByContent(
     .select()
     .from(proofChainTable)
     .where(
-      and(
-        eq(proofChainTable.contentId, contentId),
-        eq(proofChainTable.contentType, contentType),
-      ),
+      and(eq(proofChainTable.contentId, contentId), eq(proofChainTable.contentType, contentType)),
     )
     .orderBy(desc(proofChainTable.createdAt))
     .limit(1);
   return row;
 }
 
-export async function listProofChain(options: {
-  orgId?: number;
-  contentType?: string;
-  reviewState?: ProofReviewState;
-  sourceClass?: ProvenanceSourceClass;
-  limit?: number;
-} = {}): Promise<ProofChain[]> {
+export async function listProofChain(
+  options: {
+    orgId?: number;
+    contentType?: string;
+    reviewState?: ProofReviewState;
+    sourceClass?: ProvenanceSourceClass;
+    limit?: number;
+  } = {},
+): Promise<ProofChain[]> {
   const conditions = [];
   if (options.orgId != null) conditions.push(eq(proofChainTable.orgId, options.orgId));
   if (options.contentType) conditions.push(eq(proofChainTable.contentType, options.contentType));
@@ -165,22 +167,24 @@ export async function listProofChain(options: {
 export async function isExportSafe(contentId: string, contentType: string): Promise<boolean> {
   const proof = await getProofByContent(contentId, contentType);
   if (!proof) return true;
-  return proof.exportSafetyState === "safe";
+  return proof.exportSafetyState === 'safe';
 }
 
 export async function assertExportSafe(contentId: string, contentType: string): Promise<void> {
   const proof = await getProofByContent(contentId, contentType);
   if (!proof) return;
-  if (proof.exportSafetyState === "blocked") {
+  if (proof.exportSafetyState === 'blocked') {
     throw Object.assign(
-      new Error(`Content ${contentType}:${contentId} is blocked from export — retracted or flagged`),
-      { code: "EXPORT_BLOCKED" },
+      new Error(
+        `Content ${contentType}:${contentId} is blocked from export — retracted or flagged`,
+      ),
+      { code: 'EXPORT_BLOCKED' },
     );
   }
-  if (proof.exportSafetyState === "restricted") {
+  if (proof.exportSafetyState === 'restricted') {
     throw Object.assign(
       new Error(`Content ${contentType}:${contentId} export is restricted — low confidence`),
-      { code: "EXPORT_RESTRICTED" },
+      { code: 'EXPORT_RESTRICTED' },
     );
   }
 }
@@ -213,10 +217,9 @@ export function summarizeProof(proof: ProofChain): ProofSummary {
   };
 }
 
+export type { TagSpatialContentParams } from './spatial-lineage.js';
 export {
-  tagSpatialContent,
   getProofBundle,
   hashArtifactContent,
-} from "./spatial-lineage.js";
-
-export type { TagSpatialContentParams } from "./spatial-lineage.js";
+  tagSpatialContent,
+} from './spatial-lineage.js';

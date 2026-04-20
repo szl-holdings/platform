@@ -1,23 +1,50 @@
-import { Code2, Key, Webhook, Shield, Terminal, Zap, Globe, ChevronRight, ExternalLink, AlertCircle, Lock, RefreshCw, Server, FileCode, Hash, ArrowRight, PlayCircle, Database, Layers } from "lucide-react";
-import { CodeBlock, LanguageTabs, SectionHeader, SubSectionHeader, Callout, InlineCode } from "./components";
+import {
+  AlertCircle,
+  ArrowRight,
+  ChevronRight,
+  Code2,
+  Database,
+  ExternalLink,
+  FileCode,
+  Globe,
+  Hash,
+  Key,
+  Layers,
+  Lock,
+  PlayCircle,
+  RefreshCw,
+  Server,
+  Shield,
+  Terminal,
+  Webhook,
+  Zap,
+} from 'lucide-react';
+import {
+  Callout,
+  CodeBlock,
+  InlineCode,
+  LanguageTabs,
+  SectionHeader,
+  SubSectionHeader,
+} from './components';
 
 export function CodeSamplesSection() {
   return (
-          <section>
-            <SectionHeader
-              id="code-samples"
-              title="Code Samples"
-              subtitle="Common operations in JavaScript (Node.js), Python, and cURL."
-            />
+    <section>
+      <SectionHeader
+        id="code-samples"
+        title="Code Samples"
+        subtitle="Common operations in JavaScript (Node.js), Python, and cURL."
+      />
 
-            <SubSectionHeader id="samples-auth" title="Authentication" />
-            <LanguageTabs
-              tabs={[
-                {
-                  label: "JavaScript",
-                  language: "javascript",
-                  filename: "auth.js",
-                  code: `import { createReplitAuth } from '@replit/auth-client';
+      <SubSectionHeader id="samples-auth" title="Authentication" />
+      <LanguageTabs
+        tabs={[
+          {
+            label: 'JavaScript',
+            language: 'javascript',
+            filename: 'auth.js',
+            code: `import { createReplitAuth } from '@replit/auth-client';
 
 // Initialize with your Replit identity token
 async function authenticate() {
@@ -59,12 +86,12 @@ function createApiClient(token) {
     },
   };
 }`,
-                },
-                {
-                  label: "Python",
-                  language: "python",
-                  filename: "auth.py",
-                  code: `import requests
+          },
+          {
+            label: 'Python',
+            language: 'python',
+            filename: 'auth.py',
+            code: `import requests
 
 class SZLClient:
     """Authenticated SZL Holdings API client."""
@@ -97,12 +124,12 @@ class SZLClient:
         res = self.session.post(f"{self.BASE_URL}{path}", json=data)
         res.raise_for_status()
         return res.json()`,
-                },
-                {
-                  label: "cURL",
-                  language: "bash",
-                  filename: "auth.sh",
-                  code: `# Authenticate and extract token
+          },
+          {
+            label: 'cURL',
+            language: 'bash',
+            filename: 'auth.sh',
+            code: `# Authenticate and extract token
 TOKEN=$(curl -s -X POST https://[host]/api/auth/login \\
   -H "Content-Type: application/json" \\
   -d '{"credential": "$REPLIT_IDENTITY_TOKEN"}' \\
@@ -114,18 +141,18 @@ export SZL_TOKEN="$TOKEN"
 # Verify by fetching current user
 curl https://[host]/api/auth/me \\
   -H "Authorization: Bearer $SZL_TOKEN"`,
-                },
-              ]}
-            />
+          },
+        ]}
+      />
 
-            <SubSectionHeader id="samples-projects" title="Projects" />
-            <LanguageTabs
-              tabs={[
-                {
-                  label: "JavaScript",
-                  language: "javascript",
-                  filename: "projects.js",
-                  code: `const client = createApiClient(token);
+      <SubSectionHeader id="samples-projects" title="Projects" />
+      <LanguageTabs
+        tabs={[
+          {
+            label: 'JavaScript',
+            language: 'javascript',
+            filename: 'projects.js',
+            code: `const client = createApiClient(token);
 
 // List all projects
 const projects = await client.get('/projects');
@@ -143,12 +170,12 @@ console.log('Created:', newProject.id);
 const updated = await client.patch(\`/projects/\${newProject.id}\`, {
   status: 'completed',
 });`,
-                },
-                {
-                  label: "Python",
-                  language: "python",
-                  filename: "projects.py",
-                  code: `client = SZLClient.from_credential(credential)
+          },
+          {
+            label: 'Python',
+            language: 'python',
+            filename: 'projects.py',
+            code: `client = SZLClient.from_credential(credential)
 
 # List all projects
 projects = client.get("/projects")
@@ -161,12 +188,12 @@ new_project = client.post("/projects", {
     "status": "active",
 })
 print(f"Created project {new_project['id']}")`,
-                },
-                {
-                  label: "cURL",
-                  language: "bash",
-                  filename: "projects.sh",
-                  code: `# List all projects
+          },
+          {
+            label: 'cURL',
+            language: 'bash',
+            filename: 'projects.sh',
+            code: `# List all projects
 curl https://[host]/api/projects \\
   -H "Authorization: Bearer $SZL_TOKEN"
 
@@ -179,18 +206,18 @@ curl -X POST https://[host]/api/projects \\
     "description": "Quarterly route risk analysis",
     "status": "active"
   }'`,
-                },
-              ]}
-            />
+          },
+        ]}
+      />
 
-            <SubSectionHeader id="samples-vessels" title="Vessels" />
-            <LanguageTabs
-              tabs={[
-                {
-                  label: "JavaScript",
-                  language: "javascript",
-                  filename: "vessels.js",
-                  code: `const client = createApiClient(token);
+      <SubSectionHeader id="samples-vessels" title="Vessels" />
+      <LanguageTabs
+        tabs={[
+          {
+            label: 'JavaScript',
+            language: 'javascript',
+            filename: 'vessels.js',
+            code: `const client = createApiClient(token);
 
 // List all vessels in the fleet
 const fleet = await client.get('/vessels');
@@ -209,12 +236,12 @@ const alert = await client.post('/vessels/42/alerts', {
   severity: 'high',
   message: 'Vessel deviated 45nm from planned route',
 });`,
-                },
-                {
-                  label: "Python",
-                  language: "python",
-                  filename: "vessels.py",
-                  code: `client = SZLClient.from_credential(credential)
+          },
+          {
+            label: 'Python',
+            language: 'python',
+            filename: 'vessels.py',
+            code: `client = SZLClient.from_credential(credential)
 
 # List fleet
 fleet = client.get("/vessels")
@@ -228,12 +255,12 @@ for cp in intel.get("chokepoints", []):
 # Get vessel details
 vessel = client.get("/vessels/42")
 print(f"Vessel: {vessel['name']}, IMO: {vessel['imo']}")`,
-                },
-                {
-                  label: "cURL",
-                  language: "bash",
-                  filename: "vessels.sh",
-                  code: `# List fleet
+          },
+          {
+            label: 'cURL',
+            language: 'bash',
+            filename: 'vessels.sh',
+            code: `# List fleet
 curl https://[host]/api/vessels \\
   -H "Authorization: Bearer $SZL_TOKEN"
 
@@ -244,18 +271,18 @@ curl https://[host]/api/vessels/live/chokepoints \\
 # Get a specific vessel
 curl https://[host]/api/vessels/42 \\
   -H "Authorization: Bearer $SZL_TOKEN"`,
-                },
-              ]}
-            />
+          },
+        ]}
+      />
 
-            <SubSectionHeader id="samples-alloy" title="Alloy Signal Ingestion" />
-            <LanguageTabs
-              tabs={[
-                {
-                  label: "JavaScript",
-                  language: "javascript",
-                  filename: "alloy-signals.js",
-                  code: `const client = createApiClient(token);
+      <SubSectionHeader id="samples-alloy" title="Alloy Signal Ingestion" />
+      <LanguageTabs
+        tabs={[
+          {
+            label: 'JavaScript',
+            language: 'javascript',
+            filename: 'alloy-signals.js',
+            code: `const client = createApiClient(token);
 
 // Ingest a signal to trigger an Alloy workflow
 const result = await client.post('/alloy/ingest/signal', {
@@ -277,12 +304,12 @@ const result = await client.post('/alloy/ingest/signal', {
 
 console.log('Signal ID:', result.signalId);
 console.log('Workflows triggered:', result.workflowsTriggered);`,
-                },
-                {
-                  label: "Python",
-                  language: "python",
-                  filename: "alloy_signals.py",
-                  code: `client = SZLClient.from_credential(credential)
+          },
+          {
+            label: 'Python',
+            language: 'python',
+            filename: 'alloy_signals.py',
+            code: `client = SZLClient.from_credential(credential)
 
 # Ingest a signal
 result = client.post("/alloy/ingest/signal", {
@@ -301,12 +328,12 @@ result = client.post("/alloy/ingest/signal", {
     },
 })
 print(f"Signal {result['signalId']} — {result['workflowsTriggered']} workflows triggered")`,
-                },
-                {
-                  label: "cURL",
-                  language: "bash",
-                  filename: "alloy-signals.sh",
-                  code: `curl -X POST https://[host]/api/alloy/ingest/signal \\
+          },
+          {
+            label: 'cURL',
+            language: 'bash',
+            filename: 'alloy-signals.sh',
+            code: `curl -X POST https://[host]/api/alloy/ingest/signal \\
   -H "Authorization: Bearer $SZL_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -320,9 +347,9 @@ print(f"Signal {result['signalId']} — {result['workflowsTriggered']} workflows
       "reason": "weather"
     }
   }'`,
-                },
-              ]}
-            />
-          </section>
+          },
+        ]}
+      />
+    </section>
   );
 }

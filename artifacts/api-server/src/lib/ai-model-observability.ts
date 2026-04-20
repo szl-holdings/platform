@@ -1,6 +1,12 @@
-import { getAllAgentIds, getModelConfig, checkFreshness, getModelCard, type ModelCard } from "./model-registry";
-import { inferenceTelemetry } from "./inference-telemetry";
-import { providerCircuitBreaker, type CircuitBreakerStatus } from "./ai-gateway";
+import { type CircuitBreakerStatus, providerCircuitBreaker } from './ai-gateway';
+import { inferenceTelemetry } from './inference-telemetry';
+import {
+  checkFreshness,
+  getAllAgentIds,
+  getModelCard,
+  getModelConfig,
+  type ModelCard,
+} from './model-registry';
 
 export interface AiModelEntry {
   id: string;
@@ -8,8 +14,14 @@ export interface AiModelEntry {
   provider: string;
   model: string;
   version: string;
-  category: "reasoning" | "prediction" | "threat-detection" | "generation" | "analysis" | "research";
-  status: "active" | "deprecated" | "staging" | "canary";
+  category:
+    | 'reasoning'
+    | 'prediction'
+    | 'threat-detection'
+    | 'generation'
+    | 'analysis'
+    | 'research';
+  status: 'active' | 'deprecated' | 'staging' | 'canary';
   deployedAt: string;
   inferenceMetrics: {
     avgLatencyMs: number;
@@ -23,63 +35,80 @@ export interface AiModelEntry {
     current: number | null;
     baseline: number | null;
     drift: number;
-    driftStatus: "stable" | "warning" | "critical";
+    driftStatus: 'stable' | 'warning' | 'critical';
     lastEvaluated: string | null;
   };
   tags: string[];
   description: string;
 }
 
-const categoryMap: Record<string, AiModelEntry["category"]> = {
-  inca: "research",
-  vessels: "analysis",
-  firestorm: "threat-detection",
-  dreamscape: "generation",
-  lyte: "analysis",
-  "szl-holdings": "reasoning",
-  "carlota-jo": "analysis",
-  "readiness-report": "analysis",
-  msp: "analysis",
-  terra: "analysis",
-  admin: "reasoning",
-  stephen: "analysis",
+const categoryMap: Record<string, AiModelEntry['category']> = {
+  inca: 'research',
+  vessels: 'analysis',
+  firestorm: 'threat-detection',
+  dreamscape: 'generation',
+  lyte: 'analysis',
+  'szl-holdings': 'reasoning',
+  'carlota-jo': 'analysis',
+  'readiness-report': 'analysis',
+  msp: 'analysis',
+  terra: 'analysis',
+  admin: 'reasoning',
+  stephen: 'analysis',
 };
 
-function buildMetricsFromTelemetry(agentId: string): AiModelEntry["inferenceMetrics"] {
+function buildMetricsFromTelemetry(agentId: string): AiModelEntry['inferenceMetrics'] {
   const records = inferenceTelemetry.getRecords({ agentId, windowMs: 3600000 });
-  const successes = records.filter(r => r.success);
-  const latencies = successes.map(r => r.latencyMs).sort((a, b) => a - b);
-  const failures = records.filter(r => !r.success).length;
+  const successes = records.filter((r) => r.success);
+  const latencies = successes.map((r) => r.latencyMs).sort((a, b) => a - b);
+  const failures = records.filter((r) => !r.success).length;
 
   if (records.length === 0) {
-    return { avgLatencyMs: 0, p95LatencyMs: 0, p99LatencyMs: 0, requestsPerMinute: 0, errorRate: 0, tokenCostPer1k: null };
+    return {
+      avgLatencyMs: 0,
+      p95LatencyMs: 0,
+      p99LatencyMs: 0,
+      requestsPerMinute: 0,
+      errorRate: 0,
+      tokenCostPer1k: null,
+    };
   }
 
   const windowMinutes = 60;
   return {
-    avgLatencyMs: latencies.length > 0 ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length) : 0,
+    avgLatencyMs:
+      latencies.length > 0
+        ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length)
+        : 0,
     p95LatencyMs: latencies.length > 0 ? latencies[Math.ceil(latencies.length * 0.95) - 1]! : 0,
     p99LatencyMs: latencies.length > 0 ? latencies[Math.ceil(latencies.length * 0.99) - 1]! : 0,
     requestsPerMinute: parseFloat((records.length / windowMinutes).toFixed(2)),
     errorRate: parseFloat((failures / records.length).toFixed(4)),
-    tokenCostPer1k: records.reduce((s, r) => s + r.estimatedCostUsd, 0) / Math.max(records.reduce((s, r) => s + r.totalTokens, 0) / 1000, 1),
+    tokenCostPer1k:
+      records.reduce((s, r) => s + r.estimatedCostUsd, 0) /
+      Math.max(records.reduce((s, r) => s + r.totalTokens, 0) / 1000, 1),
   };
 }
 
-function buildAccuracyFromTelemetry(agentId: string): AiModelEntry["accuracyMetrics"] {
+function buildAccuracyFromTelemetry(agentId: string): AiModelEntry['accuracyMetrics'] {
   const recent = inferenceTelemetry.getRecords({ agentId, windowMs: 3600000 });
   const older = inferenceTelemetry.getRecords({ agentId, windowMs: 86400000 });
 
-  const recentSuccessRate = recent.length > 0 ? recent.filter(r => r.success).length / recent.length : null;
-  const olderSuccessRate = older.length > 0 ? older.filter(r => r.success).length / older.length : null;
+  const recentSuccessRate =
+    recent.length > 0 ? recent.filter((r) => r.success).length / recent.length : null;
+  const olderSuccessRate =
+    older.length > 0 ? older.filter((r) => r.success).length / older.length : null;
 
-  const drift = recentSuccessRate !== null && olderSuccessRate !== null ? Math.abs(recentSuccessRate - olderSuccessRate) : 0;
+  const drift =
+    recentSuccessRate !== null && olderSuccessRate !== null
+      ? Math.abs(recentSuccessRate - olderSuccessRate)
+      : 0;
 
   return {
     current: recentSuccessRate !== null ? parseFloat(recentSuccessRate.toFixed(3)) : null,
     baseline: olderSuccessRate !== null ? parseFloat(olderSuccessRate.toFixed(3)) : null,
     drift: parseFloat(drift.toFixed(3)),
-    driftStatus: drift > 0.1 ? "critical" : drift > 0.05 ? "warning" : "stable",
+    driftStatus: drift > 0.1 ? 'critical' : drift > 0.05 ? 'warning' : 'stable',
     lastEvaluated: recent.length > 0 ? new Date(recent[0]!.timestamp).toISOString() : null,
   };
 }
@@ -95,7 +124,7 @@ export function getAiModels(): AiModelEntry[] {
       provider: card.provider,
       model: card.model,
       version: card.version,
-      category: categoryMap[agentId] || "analysis",
+      category: categoryMap[agentId] || 'analysis',
       status: card.lifecycle,
       deployedAt: card.lastDeployed,
       inferenceMetrics: buildMetricsFromTelemetry(agentId),
@@ -119,9 +148,9 @@ export function getCircuitBreakerMetrics(): {
   const circuits = providerCircuitBreaker.getAllStatuses();
   return {
     circuits,
-    openCount: circuits.filter(c => c.state === "open").length,
-    halfOpenCount: circuits.filter(c => c.state === "half-open").length,
-    closedCount: circuits.filter(c => c.state === "closed").length,
+    openCount: circuits.filter((c) => c.state === 'open').length,
+    halfOpenCount: circuits.filter((c) => c.state === 'half-open').length,
+    closedCount: circuits.filter((c) => c.state === 'closed').length,
   };
 }
 
@@ -136,10 +165,12 @@ export function getModelObservabilitySummary(): {
   circuitBreakers: ReturnType<typeof getCircuitBreakerMetrics>;
 } {
   const models = getAiModels();
-  const active = models.filter((m) => m.status === "active");
-  const avgLatency = active.reduce((s, m) => s + m.inferenceMetrics.avgLatencyMs, 0) / (active.length || 1);
-  const avgError = active.reduce((s, m) => s + m.inferenceMetrics.errorRate, 0) / (active.length || 1);
-  const driftAlerts = models.filter((m) => m.accuracyMetrics.driftStatus !== "stable").length;
+  const active = models.filter((m) => m.status === 'active');
+  const avgLatency =
+    active.reduce((s, m) => s + m.inferenceMetrics.avgLatencyMs, 0) / (active.length || 1);
+  const avgError =
+    active.reduce((s, m) => s + m.inferenceMetrics.errorRate, 0) / (active.length || 1);
+  const driftAlerts = models.filter((m) => m.accuracyMetrics.driftStatus !== 'stable').length;
 
   return {
     totalModels: models.length,

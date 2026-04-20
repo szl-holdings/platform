@@ -1,5 +1,5 @@
-import type { ConstellationNode, ConstellationEdge } from "./schema.js";
-import type { CstDomain, CstNodeTypeRegistration, CreateCstNode, CstNode } from "./types.ts";
+import type { ConstellationEdge, ConstellationNode } from './schema.js';
+import type { CreateCstNode, CstDomain, CstNode, CstNodeTypeRegistration } from './types.ts';
 
 export interface DomainAdapter<TSource = unknown> {
   readonly domain: string;
@@ -28,8 +28,8 @@ class InMemoryAdapterRegistry implements AdapterRegistry {
 
   list(): Array<{ domain: string; sourceType: string }> {
     return Array.from(this.adapters.keys()).map((k) => {
-      const [domain, sourceType] = k.split(":");
-      return { domain: domain ?? "", sourceType: sourceType ?? "" };
+      const [domain, sourceType] = k.split(':');
+      return { domain: domain ?? '', sourceType: sourceType ?? '' };
     });
   }
 }
@@ -38,7 +38,7 @@ export const adapterRegistry: AdapterRegistry = new InMemoryAdapterRegistry();
 
 export function projectDomain<T>(
   adapter: DomainAdapter<T>,
-  sources: T[]
+  sources: T[],
 ): { nodes: ConstellationNode[]; edges: ConstellationEdge[] } {
   const nodes = sources.map((s) => adapter.projectNode(s));
   const edges = sources.flatMap((s) => adapter.projectEdges?.(s, nodes) ?? []);

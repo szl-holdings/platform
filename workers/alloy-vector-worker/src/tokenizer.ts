@@ -19,20 +19,23 @@ export interface Tokenizer {
 
 const tokenizerCache = new Map<string, Promise<Tokenizer>>();
 
-export async function loadTokenizer(modelRef = "Xenova/all-MiniLM-L6-v2"): Promise<Tokenizer> {
+export async function loadTokenizer(modelRef = 'Xenova/all-MiniLM-L6-v2'): Promise<Tokenizer> {
   let pending = tokenizerCache.get(modelRef);
   if (!pending) {
     pending = (async () => {
-      const tf = await import("@huggingface/transformers");
-      const AutoTokenizer = (tf as { AutoTokenizer: { from_pretrained: (m: string) => Promise<unknown> } }).AutoTokenizer;
-      const raw = await AutoTokenizer.from_pretrained(modelRef) as {
+      const tf = await import('@huggingface/transformers');
+      const AutoTokenizer = (
+        tf as { AutoTokenizer: { from_pretrained: (m: string) => Promise<unknown> } }
+      ).AutoTokenizer;
+      const raw = (await AutoTokenizer.from_pretrained(modelRef)) as {
         encode: (text: string, opts?: { add_special_tokens?: boolean }) => number[];
         decode: (ids: number[], opts?: { skip_special_tokens?: boolean }) => string;
         model_max_length?: number;
       };
-      const maxModelTokens = typeof raw.model_max_length === "number" && Number.isFinite(raw.model_max_length)
-        ? raw.model_max_length
-        : 512;
+      const maxModelTokens =
+        typeof raw.model_max_length === 'number' && Number.isFinite(raw.model_max_length)
+          ? raw.model_max_length
+          : 512;
       return {
         modelRef,
         maxModelTokens,
@@ -66,7 +69,7 @@ export interface TokenChunkOptions {
   /** Hard cap; chunks longer than this are dropped or truncated per `truncationStrategy`. */
   maxTokens: number;
   /** What to do if a window exceeds `maxTokens`. */
-  truncationStrategy: "truncate" | "reject";
+  truncationStrategy: 'truncate' | 'reject';
   /** Optional warning threshold (kept for parity with profile config; not enforced). */
   warnAtTokens?: number;
 }
@@ -77,16 +80,16 @@ export interface TokenChunkOptions {
  * window back into text so downstream embedding sees the exact substring.
  */
 export function chunkByTokens(
-  tokenizer: Pick<Tokenizer, "encode" | "decode">,
+  tokenizer: Pick<Tokenizer, 'encode' | 'decode'>,
   text: string,
   opts: TokenChunkOptions,
 ): TokenChunk[] {
   const { chunkSize, chunkOverlap, maxTokens, truncationStrategy } = opts;
-  if (chunkSize <= 0) throw new Error("chunkByTokens: chunkSize must be > 0");
+  if (chunkSize <= 0) throw new Error('chunkByTokens: chunkSize must be > 0');
   if (chunkOverlap < 0 || chunkOverlap >= chunkSize) {
-    throw new Error("chunkByTokens: chunkOverlap must be in [0, chunkSize)");
+    throw new Error('chunkByTokens: chunkOverlap must be in [0, chunkSize)');
   }
-  if (maxTokens <= 0) throw new Error("chunkByTokens: maxTokens must be > 0");
+  if (maxTokens <= 0) throw new Error('chunkByTokens: maxTokens must be > 0');
 
   const ids = tokenizer.encode(text);
   if (ids.length === 0) return [];
@@ -102,7 +105,7 @@ export function chunkByTokens(
     let truncated = false;
 
     if (windowIds.length > maxTokens) {
-      if (truncationStrategy === "reject") {
+      if (truncationStrategy === 'reject') {
         throw new Error(
           `chunkByTokens: window of ${windowIds.length} tokens exceeds maxTokens=${maxTokens} and truncationStrategy='reject'`,
         );

@@ -3,8 +3,8 @@
  * Imported by both the screen and its tests so regressions are caught.
  */
 
-export type Priority = "low" | "medium" | "high" | "critical";
-export type Decision = "approved" | "rejected" | "revised";
+export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type Decision = 'approved' | 'rejected' | 'revised';
 
 export interface ApprovalLike {
   id: number;
@@ -16,13 +16,13 @@ export interface ApprovalLike {
   expiresAt?: string;
 }
 
-export const VALID_DECISIONS: readonly Decision[] = ["approved", "rejected", "revised"] as const;
+export const VALID_DECISIONS: readonly Decision[] = ['approved', 'rejected', 'revised'] as const;
 
 export const PRIORITY_COLORS: Record<Priority, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "#6b7280",
+  critical: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#6b7280',
 };
 
 export function isValidDecision(d: string): d is Decision {
@@ -41,7 +41,7 @@ export function approvalsListPath(status: string): string {
 
 export interface ReviewRequest {
   path: string;
-  method: "POST";
+  method: 'POST';
   body: { decision: Decision; note: string };
 }
 
@@ -51,25 +51,25 @@ export function buildReviewRequest(id: number, decision: Decision, note: string)
   }
   return {
     path: `/api/approvals/${id}/review`,
-    method: "POST",
+    method: 'POST',
     body: { decision, note },
   };
 }
 
 export interface EscalateRequest {
   path: string;
-  method: "POST";
+  method: 'POST';
   body: { reason: string };
 }
 
 export function buildEscalateRequest(id: number, reason: string): EscalateRequest {
   const trimmed = reason.trim();
   if (trimmed.length < 4) {
-    throw new Error("Escalation reason too short");
+    throw new Error('Escalation reason too short');
   }
   return {
     path: `/api/approvals/${id}/escalate`,
-    method: "POST",
+    method: 'POST',
     body: { reason: trimmed },
   };
 }
@@ -84,18 +84,18 @@ export function commentsListPath(id: number): string {
 
 export interface PostCommentRequest {
   path: string;
-  method: "POST";
+  method: 'POST';
   body: { body: string };
 }
 
 export function buildPostCommentRequest(id: number, body: string): PostCommentRequest {
   const trimmed = body.trim();
   if (trimmed.length === 0) {
-    throw new Error("Comment body is required");
+    throw new Error('Comment body is required');
   }
   return {
     path: `/api/approvals/${id}/comment`,
-    method: "POST",
+    method: 'POST',
     body: { body: trimmed },
   };
 }
@@ -110,7 +110,7 @@ export interface QueuedDecision {
 
 export function enqueueOfflineDecision(
   queue: readonly QueuedDecision[],
-  approval: Pick<ApprovalLike, "id" | "title">,
+  approval: Pick<ApprovalLike, 'id' | 'title'>,
   decision: Decision,
   note: string,
   nowIso: string = new Date().toISOString(),

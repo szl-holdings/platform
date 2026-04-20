@@ -13,20 +13,20 @@
  *   await defaultConnectorRegistry.startAll();
  */
 
-export * from "./interfaces.js";
-export * from "./registry.js";
-export * from "./adapters/index.js";
+export * from './adapters/index.js';
+export * from './interfaces.js';
+export * from './registry.js';
 
-export const CONNECTORS_VERSION = "1.0.0" as const;
+export const CONNECTORS_VERSION = '1.0.0' as const;
 
 export const CONNECTOR_CATEGORIES = [
-  "email-calendar",
-  "messaging",
-  "crm-project",
-  "storage-docs",
-  "webhooks",
-  "ais-maritime",
-  "property-ops",
-  "security-tools",
-  "legal-matter",
+  'email-calendar',
+  'messaging',
+  'crm-project',
+  'storage-docs',
+  'webhooks',
+  'ais-maritime',
+  'property-ops',
+  'security-tools',
+  'legal-matter',
 ] as const;

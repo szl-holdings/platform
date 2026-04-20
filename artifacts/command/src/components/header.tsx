@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Activity, Search, LayoutGrid } from "lucide-react";
+import { Activity, LayoutGrid, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface HeaderProps {
   lastUpdatedAt: number;
@@ -8,7 +8,12 @@ interface HeaderProps {
   onAppSwitcherOpen?: () => void;
 }
 
-export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAppSwitcherOpen }: HeaderProps) {
+export function Header({
+  lastUpdatedAt,
+  sseConnected = false,
+  onSearchOpen,
+  onAppSwitcherOpen,
+}: HeaderProps) {
   const [time, setTime] = useState(new Date());
   const [countdown, setCountdown] = useState(30);
 
@@ -32,15 +37,15 @@ export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAp
     <header
       className="flex items-center justify-between px-6 py-4 sticky top-0 z-50"
       style={{
-        backgroundColor: "var(--color-bg-primary)",
-        borderBottom: "1px solid var(--color-surface-border)",
+        backgroundColor: 'var(--color-bg-primary)',
+        borderBottom: '1px solid var(--color-surface-border)',
       }}
     >
       <div className="flex items-center gap-3">
-        <Activity className="w-5 h-5" style={{ color: "var(--color-fg-muted)" }} />
+        <Activity className="w-5 h-5" style={{ color: 'var(--color-fg-muted)' }} />
         <h1
           className="text-sm font-bold tracking-[0.2em]"
-          style={{ color: "var(--color-fg-primary)" }}
+          style={{ color: 'var(--color-fg-primary)' }}
         >
           ECOSYSTEM COMMAND
         </h1>
@@ -52,9 +57,9 @@ export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAp
             onClick={onAppSwitcherOpen}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors"
             style={{
-              backgroundColor: "var(--color-surface-base)",
-              border: "1px solid var(--color-surface-border)",
-              color: "var(--color-fg-muted)",
+              backgroundColor: 'var(--color-surface-base)',
+              border: '1px solid var(--color-surface-border)',
+              color: 'var(--color-fg-muted)',
             }}
             aria-label="Open app switcher"
             title="Switch to any platform app (⌘J)"
@@ -64,9 +69,9 @@ export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAp
             <kbd
               className="hidden sm:inline text-[10px] px-1 rounded"
               style={{
-                backgroundColor: "var(--color-bg-elevated)",
-                border: "1px solid var(--color-surface-border)",
-                color: "var(--color-fg-muted)",
+                backgroundColor: 'var(--color-bg-elevated)',
+                border: '1px solid var(--color-surface-border)',
+                color: 'var(--color-fg-muted)',
               }}
             >
               ⌘J
@@ -78,9 +83,9 @@ export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAp
             onClick={onSearchOpen}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors"
             style={{
-              backgroundColor: "var(--color-surface-base)",
-              border: "1px solid var(--color-surface-border)",
-              color: "var(--color-fg-muted)",
+              backgroundColor: 'var(--color-surface-base)',
+              border: '1px solid var(--color-surface-border)',
+              color: 'var(--color-fg-muted)',
             }}
             aria-label="Open search"
           >
@@ -89,9 +94,9 @@ export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAp
             <kbd
               className="hidden sm:inline text-[10px] px-1 rounded"
               style={{
-                backgroundColor: "var(--color-bg-elevated)",
-                border: "1px solid var(--color-surface-border)",
-                color: "var(--color-fg-muted)",
+                backgroundColor: 'var(--color-bg-elevated)',
+                border: '1px solid var(--color-surface-border)',
+                color: 'var(--color-fg-muted)',
               }}
             >
               ⌘K
@@ -101,26 +106,31 @@ export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAp
 
         <div
           className="flex items-center gap-6 text-xs font-mono"
-          style={{ color: "var(--color-fg-muted)" }}
+          style={{ color: 'var(--color-fg-muted)' }}
         >
           {sseConnected ? (
             <div className="flex items-center gap-2">
               <span
                 className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: "var(--color-low)", boxShadow: "0 0 6px var(--color-low)" }}
+                style={{
+                  backgroundColor: 'var(--color-low)',
+                  boxShadow: '0 0 6px var(--color-low)',
+                }}
               />
-              <span style={{ color: "var(--color-low)" }}>LIVE</span>
+              <span style={{ color: 'var(--color-low)' }}>LIVE</span>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <span
                 className="w-2 h-2 rounded-full animate-pulse"
-                style={{ backgroundColor: "var(--color-aegis)" }}
+                style={{ backgroundColor: 'var(--color-aegis)' }}
               />
               <span>Refreshing in: {countdown}s</span>
             </div>
           )}
-          <div className="hidden md:block">{time.toISOString().replace("T", " ").substring(0, 19)} UTC</div>
+          <div className="hidden md:block">
+            {time.toISOString().replace('T', ' ').substring(0, 19)} UTC
+          </div>
         </div>
       </div>
     </header>

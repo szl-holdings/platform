@@ -1,27 +1,27 @@
-import { logger } from "./logger.js";
-import { db, agentKnowledgeTable, agentRunsTable } from "@szl-holdings/db";
-import { desc, sql } from "drizzle-orm";
+import { agentKnowledgeTable, agentRunsTable, db } from '@szl-holdings/db';
+import { desc, sql } from 'drizzle-orm';
+import { logger } from './logger.js';
 
 export type KnowledgeEntryType =
-  | "observation"
-  | "alert"
-  | "insight"
-  | "metric"
-  | "correlation"
-  | "recommendation"
-  | "anomaly"
-  | "trend";
+  | 'observation'
+  | 'alert'
+  | 'insight'
+  | 'metric'
+  | 'correlation'
+  | 'recommendation'
+  | 'anomaly'
+  | 'trend';
 
 export type KnowledgeDomain =
-  | "vessels"
-  | "firestorm"
-  | "lyte"
-  | "inca"
-  | "dreamscape"
-  | "terra"
-  | "msp"
-  | "readiness-report"
-  | "global";
+  | 'vessels'
+  | 'firestorm'
+  | 'lyte'
+  | 'inca'
+  | 'dreamscape'
+  | 'terra'
+  | 'msp'
+  | 'readiness-report'
+  | 'global';
 
 export interface KnowledgeEntry {
   id: string;
@@ -64,7 +64,7 @@ export class KnowledgeStore {
         .select()
         .from(agentKnowledgeTable)
         .where(
-          sql`(${agentKnowledgeTable.expiresAt} IS NULL OR ${agentKnowledgeTable.expiresAt} > ${now})`
+          sql`(${agentKnowledgeTable.expiresAt} IS NULL OR ${agentKnowledgeTable.expiresAt} > ${now})`,
         )
         .orderBy(desc(agentKnowledgeTable.timestamp))
         .limit(MAX_ENTRIES);
@@ -88,14 +88,16 @@ export class KnowledgeStore {
         this.entryOrder.push(entry.id);
       }
       this.loaded = true;
-      logger.info({ count: rows.length }, "Knowledge store loaded from DB");
+      logger.info({ count: rows.length }, 'Knowledge store loaded from DB');
     } catch (err) {
-      logger.error({ err }, "Failed to load knowledge store from DB, starting empty");
+      logger.error({ err }, 'Failed to load knowledge store from DB, starting empty');
       this.loaded = true;
     }
   }
 
-  write(entry: Omit<KnowledgeEntry, "id" | "timestamp"> & { id?: string; timestamp?: number }): KnowledgeEntry {
+  write(
+    entry: Omit<KnowledgeEntry, 'id' | 'timestamp'> & { id?: string; timestamp?: number },
+  ): KnowledgeEntry {
     const id = entry.id ?? `ke-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const timestamp = entry.timestamp ?? Date.now();
     const full: KnowledgeEntry = {
@@ -116,34 +118,40 @@ export class KnowledgeStore {
 
     this.pruneExpired();
 
-    db.insert(agentKnowledgeTable).values({
-      entryId: full.id,
-      type: full.type,
-      domain: full.domain,
-      sourceAgent: full.sourceAgent,
-      title: full.title,
-      summary: full.summary,
-      confidence: full.confidence,
-      tags: full.tags,
-      relatedEntryIds: full.relatedEntryIds,
-      data: full.data ?? null,
-      timestamp: full.timestamp,
-      expiresAt: full.expiresAt ?? null,
-    }).onConflictDoUpdate({
-      target: agentKnowledgeTable.entryId,
-      set: {
+    db.insert(agentKnowledgeTable)
+      .values({
+        entryId: full.id,
+        type: full.type,
+        domain: full.domain,
+        sourceAgent: full.sourceAgent,
         title: full.title,
         summary: full.summary,
         confidence: full.confidence,
         tags: full.tags,
+        relatedEntryIds: full.relatedEntryIds,
         data: full.data ?? null,
+        timestamp: full.timestamp,
         expiresAt: full.expiresAt ?? null,
-      },
-    }).catch(err => {
-      logger.error({ err, entryId: full.id }, "Failed to persist knowledge entry to DB");
-    });
+      })
+      .onConflictDoUpdate({
+        target: agentKnowledgeTable.entryId,
+        set: {
+          title: full.title,
+          summary: full.summary,
+          confidence: full.confidence,
+          tags: full.tags,
+          data: full.data ?? null,
+          expiresAt: full.expiresAt ?? null,
+        },
+      })
+      .catch((err) => {
+        logger.error({ err, entryId: full.id }, 'Failed to persist knowledge entry to DB');
+      });
 
-    logger.debug({ id, domain: full.domain, type: full.type, sourceAgent: full.sourceAgent }, "Knowledge entry written");
+    logger.debug(
+      { id, domain: full.domain, type: full.type, sourceAgent: full.sourceAgent },
+      'Knowledge entry written',
+    );
     return full;
   }
 
@@ -164,7 +172,7 @@ export class KnowledgeStore {
       if (q.sourceAgent && e.sourceAgent !== q.sourceAgent) continue;
       if (e.timestamp < since) continue;
       if (e.confidence < minConf) continue;
-      if (q.tags && q.tags.length > 0 && !q.tags.some(t => e.tags.includes(t))) continue;
+      if (q.tags && q.tags.length > 0 && !q.tags.some((t) => e.tags.includes(t))) continue;
       results.push(e);
       if (q.limit && results.length >= q.limit) break;
     }
@@ -188,9 +196,10 @@ export class KnowledgeStore {
       byDomain: domains,
       byType: types,
       oldestEntry: this.entryOrder[0] ? this.entries.get(this.entryOrder[0])?.timestamp : undefined,
-      newestEntry: this.entryOrder.length > 0
-        ? this.entries.get(this.entryOrder[this.entryOrder.length - 1])?.timestamp
-        : undefined,
+      newestEntry:
+        this.entryOrder.length > 0
+          ? this.entries.get(this.entryOrder[this.entryOrder.length - 1])?.timestamp
+          : undefined,
     };
   }
 
@@ -212,9 +221,9 @@ export class KnowledgeStore {
   findCorrelations(entry: KnowledgeEntry, windowMs = 3600000): KnowledgeEntry[] {
     const windowStart = entry.timestamp - windowMs;
     const candidates = this.query({ since: windowStart, minConfidence: 0.5 });
-    return candidates.filter(e => {
+    return candidates.filter((e) => {
       if (e.id === entry.id || e.domain === entry.domain) return false;
-      const sharedTags = e.tags.filter(t => entry.tags.includes(t));
+      const sharedTags = e.tags.filter((t) => entry.tags.includes(t));
       return sharedTags.length > 0;
     });
   }
@@ -222,19 +231,17 @@ export class KnowledgeStore {
 
 export const knowledgeStore = new KnowledgeStore();
 
-export function createKnowledgeEntry(
-  params: {
-    type: KnowledgeEntryType;
-    domain: KnowledgeDomain;
-    sourceAgent: string;
-    title: string;
-    summary: string;
-    confidence?: number;
-    tags?: string[];
-    data?: Record<string, unknown>;
-    ttlMs?: number;
-  }
-): KnowledgeEntry {
+export function createKnowledgeEntry(params: {
+  type: KnowledgeEntryType;
+  domain: KnowledgeDomain;
+  sourceAgent: string;
+  title: string;
+  summary: string;
+  confidence?: number;
+  tags?: string[];
+  data?: Record<string, unknown>;
+  ttlMs?: number;
+}): KnowledgeEntry {
   return knowledgeStore.write({
     type: params.type,
     domain: params.domain,
@@ -263,31 +270,34 @@ export async function persistAgentRun(record: {
   eventsPublished: string[];
 }): Promise<void> {
   try {
-    await db.insert(agentRunsTable).values({
-      runId: record.runId,
-      agentId: record.agentId,
-      domain: record.domain,
-      status: record.status,
-      startedAt: record.startedAt,
-      completedAt: record.completedAt ?? null,
-      durationMs: record.durationMs ?? null,
-      summary: record.summary ?? null,
-      error: record.error ?? null,
-      knowledgeEntryIds: record.knowledgeEntryIds,
-      eventsPublished: record.eventsPublished,
-    }).onConflictDoUpdate({
-      target: agentRunsTable.runId,
-      set: {
+    await db
+      .insert(agentRunsTable)
+      .values({
+        runId: record.runId,
+        agentId: record.agentId,
+        domain: record.domain,
         status: record.status,
+        startedAt: record.startedAt,
         completedAt: record.completedAt ?? null,
         durationMs: record.durationMs ?? null,
         summary: record.summary ?? null,
         error: record.error ?? null,
         knowledgeEntryIds: record.knowledgeEntryIds,
         eventsPublished: record.eventsPublished,
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: agentRunsTable.runId,
+        set: {
+          status: record.status,
+          completedAt: record.completedAt ?? null,
+          durationMs: record.durationMs ?? null,
+          summary: record.summary ?? null,
+          error: record.error ?? null,
+          knowledgeEntryIds: record.knowledgeEntryIds,
+          eventsPublished: record.eventsPublished,
+        },
+      });
   } catch (err) {
-    logger.error({ err, runId: record.runId }, "Failed to persist agent run to DB");
+    logger.error({ err, runId: record.runId }, 'Failed to persist agent run to DB');
   }
 }

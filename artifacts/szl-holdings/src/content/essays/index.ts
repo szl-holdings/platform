@@ -3,7 +3,7 @@ export interface Essay {
   title: string;
   subtitle: string;
   date: string;
-  category: "doctrine" | "architecture" | "strategy" | "operations" | "memo";
+  category: 'doctrine' | 'architecture' | 'strategy' | 'operations' | 'memo';
   readTime: number;
   excerpt: string;
   body: string;
@@ -11,11 +11,11 @@ export interface Essay {
 
 export const ESSAYS: Essay[] = [
   {
-    slug: "governed-autonomy",
-    title: "Governed Autonomy",
-    subtitle: "Why the right constraint produces the right freedom",
-    date: "2026-01-14",
-    category: "doctrine",
+    slug: 'governed-autonomy',
+    title: 'Governed Autonomy',
+    subtitle: 'Why the right constraint produces the right freedom',
+    date: '2026-01-14',
+    category: 'doctrine',
     readTime: 7,
     excerpt:
       "Every AI system eventually runs into the same problem: the thing it optimizes for isn't quite the thing you wanted. The solution isn't more intelligence — it's better structure.",
@@ -54,11 +54,11 @@ export const ESSAYS: Essay[] = [
     `.trim(),
   },
   {
-    slug: "one-spine-six-verticals",
-    title: "One Spine, Six Verticals",
-    subtitle: "The architectural bet behind the SZL portfolio",
-    date: "2025-11-08",
-    category: "architecture",
+    slug: 'one-spine-six-verticals',
+    title: 'One Spine, Six Verticals',
+    subtitle: 'The architectural bet behind the SZL portfolio',
+    date: '2025-11-08',
+    category: 'architecture',
     readTime: 9,
     excerpt:
       "The hardest architectural question I faced in building SZL wasn't technical. It was whether to build six separate companies or one company with six faces.",
@@ -97,11 +97,11 @@ export const ESSAYS: Essay[] = [
     `.trim(),
   },
   {
-    slug: "the-signal-problem",
-    title: "The Signal Problem",
-    subtitle: "Why enterprise software is drowning in data and starving for intelligence",
-    date: "2025-09-22",
-    category: "strategy",
+    slug: 'the-signal-problem',
+    title: 'The Signal Problem',
+    subtitle: 'Why enterprise software is drowning in data and starving for intelligence',
+    date: '2025-09-22',
+    category: 'strategy',
     readTime: 6,
     excerpt:
       "Enterprise organizations don't lack data. They lack the capacity to act on what the data is telling them, at the moment it needs to be acted on.",
@@ -136,11 +136,11 @@ export const ESSAYS: Essay[] = [
     `.trim(),
   },
   {
-    slug: "building-without-fake-traction",
-    title: "Building Without Fake Traction",
-    subtitle: "A memo on discipline in an era of performance",
-    date: "2025-07-03",
-    category: "memo",
+    slug: 'building-without-fake-traction',
+    title: 'Building Without Fake Traction',
+    subtitle: 'A memo on discipline in an era of performance',
+    date: '2025-07-03',
+    category: 'memo',
     readTime: 5,
     excerpt:
       "The startup media environment rewards the appearance of momentum. This creates a systematic pressure toward fake traction — announcements, partnerships, and metrics that look like growth but aren't.",
@@ -177,11 +177,11 @@ export const ESSAYS: Essay[] = [
     `.trim(),
   },
   {
-    slug: "what-design-partners-actually-get",
-    title: "What Design Partners Actually Get",
+    slug: 'what-design-partners-actually-get',
+    title: 'What Design Partners Actually Get',
     subtitle: "The structure of the first engagement and why it's built that way",
-    date: "2026-03-01",
-    category: "memo",
+    date: '2026-03-01',
+    category: 'memo',
     readTime: 6,
     excerpt:
       "A design partner engagement is not a trial. It's a structured proof exercise, and the distinction matters.",
@@ -225,6 +225,6 @@ export function getEssay(slug: string): Essay | undefined {
   return ESSAYS.find((e) => e.slug === slug);
 }
 
-export function getEssaysByCategory(category: Essay["category"]): Essay[] {
+export function getEssaysByCategory(category: Essay['category']): Essay[] {
   return ESSAYS.filter((e) => e.category === category);
 }

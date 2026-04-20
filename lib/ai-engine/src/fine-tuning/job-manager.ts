@@ -6,14 +6,13 @@
  * and emits events on completion.
  */
 
-import { db } from "@szl-holdings/db";
-import { fineTuningJobs, fineTuningDatasets, fineTunedModelRegistry } from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
-import { curateDatasetForAgent } from "./domain-curators.js";
-import { serializeToJSONL } from "./dataset-exporter.js";
-import { runValidationGate, type ValidationGateResult } from "./validation-gate.js";
+import { db, fineTunedModelRegistry, fineTuningDatasets, fineTuningJobs } from '@szl-holdings/db';
+import { desc, eq } from 'drizzle-orm';
+import { serializeToJSONL } from './dataset-exporter.js';
+import { curateDatasetForAgent } from './domain-curators.js';
+import { runValidationGate, type ValidationGateResult } from './validation-gate.js';
 
-export type FineTuningProvider = "openai" | "huggingface";
+export type FineTuningProvider = 'openai' | 'huggingface';
 
 export interface FineTuningJobRequest {
   agentId: string;
@@ -36,7 +35,15 @@ export interface FineTuningJobStatus {
   agentId: string;
   provider: FineTuningProvider;
   baseModel: string;
-  status: "pending" | "preparing" | "running" | "succeeded" | "failed" | "cancelled" | "validating" | "registered";
+  status:
+    | 'pending'
+    | 'preparing'
+    | 'running'
+    | 'succeeded'
+    | 'failed'
+    | 'cancelled'
+    | 'validating'
+    | 'registered';
   fineTunedModelId?: string;
   datasetSize: number;
   datasetVersion: string;
@@ -53,30 +60,30 @@ const MIN_SAMPLES_DEFAULT = 10;
 async function submitOpenAIFineTuning(
   samples: string,
   baseModel: string,
-  hyperparameters: FineTuningJobRequest["hyperparameters"],
+  hyperparameters: FineTuningJobRequest['hyperparameters'],
   suffix: string,
 ): Promise<{ providerJobId: string }> {
-  const openaiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
-  if (!openaiKey) throw new Error("AI_INTEGRATIONS_OPENAI_API_KEY not configured");
-  const openaiBase = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] ?? "https://api.openai.com/v1";
+  const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+  if (!openaiKey) throw new Error('AI_INTEGRATIONS_OPENAI_API_KEY not configured');
+  const openaiBase = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
 
-  const fileBlob = new Blob([samples], { type: "application/jsonl" });
+  const fileBlob = new Blob([samples], { type: 'application/jsonl' });
   const formData = new FormData();
-  formData.append("file", fileBlob, `${suffix}.jsonl`);
-  formData.append("purpose", "fine-tune");
+  formData.append('file', fileBlob, `${suffix}.jsonl`);
+  formData.append('purpose', 'fine-tune');
 
   const uploadResponse = await fetch(`${openaiBase}/files`, {
-    method: "POST",
+    method: 'POST',
     headers: { Authorization: `Bearer ${openaiKey}` },
     body: formData,
   });
 
   if (!uploadResponse.ok) {
-    const err = await uploadResponse.text().catch(() => "");
+    const err = await uploadResponse.text().catch(() => '');
     throw new Error(`OpenAI file upload failed: ${uploadResponse.status} ${err}`);
   }
 
-  const uploadData = await uploadResponse.json() as { id: string };
+  const uploadData = (await uploadResponse.json()) as { id: string };
   const fileId = uploadData.id;
 
   const ftBody: Record<string, unknown> = {
@@ -88,20 +95,20 @@ async function submitOpenAIFineTuning(
   if (hyperparameters?.nEpochs) ftBody.hyperparameters = { n_epochs: hyperparameters.nEpochs };
 
   const ftResponse = await fetch(`${openaiBase}/fine_tuning/jobs`, {
-    method: "POST",
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${openaiKey}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(ftBody),
   });
 
   if (!ftResponse.ok) {
-    const err = await ftResponse.text().catch(() => "");
+    const err = await ftResponse.text().catch(() => '');
     throw new Error(`OpenAI fine-tuning submission failed: ${ftResponse.status} ${err}`);
   }
 
-  const ftData = await ftResponse.json() as { id: string };
+  const ftData = (await ftResponse.json()) as { id: string };
   return { providerJobId: ftData.id };
 }
 
@@ -109,12 +116,12 @@ async function submitHuggingFaceFineTuning(
   _samples: string,
   baseModel: string,
   agentId: string,
-  hyperparameters: FineTuningJobRequest["hyperparameters"],
+  hyperparameters: FineTuningJobRequest['hyperparameters'],
 ): Promise<{ providerJobId: string }> {
-  const hfToken = process.env["HF_TOKEN"] || process.env["HUGGINGFACE_API_KEY"];
-  if (!hfToken) throw new Error("HF_TOKEN not configured");
+  const hfToken = process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY'];
+  if (!hfToken) throw new Error('HF_TOKEN not configured');
 
-  const jobId = `${agentId}-${baseModel.replace(/[^a-z0-9]/gi, "-")}-${Date.now()}`;
+  const jobId = `${agentId}-${baseModel.replace(/[^a-z0-9]/gi, '-')}-${Date.now()}`;
 
   const body = {
     model_name_or_path: baseModel,
@@ -124,14 +131,14 @@ async function submitHuggingFaceFineTuning(
     learning_rate: hyperparameters?.learningRateMultiplier
       ? 5e-5 * hyperparameters.learningRateMultiplier
       : 5e-5,
-    task: "text-generation",
+    task: 'text-generation',
   };
 
-  const response = await fetch("https://api.huggingface.co/api/autotrain/v1/projects", {
-    method: "POST",
+  const response = await fetch('https://api.huggingface.co/api/autotrain/v1/projects', {
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${hfToken}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
@@ -140,7 +147,7 @@ async function submitHuggingFaceFineTuning(
     return { providerJobId: `hf-simulated-${jobId}` };
   }
 
-  const data = await response.json() as { id: string; name: string };
+  const data = (await response.json()) as { id: string; name: string };
   return { providerJobId: data.id ?? `hf-${jobId}` };
 }
 
@@ -150,9 +157,9 @@ async function pollOpenAIJobStatus(providerJobId: string): Promise<{
   trainingCost?: number;
   error?: string;
 }> {
-  const openaiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
-  if (!openaiKey) throw new Error("AI_INTEGRATIONS_OPENAI_API_KEY not configured");
-  const openaiBase = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] ?? "https://api.openai.com/v1";
+  const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+  if (!openaiKey) throw new Error('AI_INTEGRATIONS_OPENAI_API_KEY not configured');
+  const openaiBase = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
 
   const response = await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}`, {
     headers: { Authorization: `Bearer ${openaiKey}` },
@@ -162,7 +169,7 @@ async function pollOpenAIJobStatus(providerJobId: string): Promise<{
     throw new Error(`Failed to poll OpenAI job: ${response.status}`);
   }
 
-  const data = await response.json() as {
+  const data = (await response.json()) as {
     status: string;
     fine_tuned_model?: string;
     trained_tokens?: number;
@@ -187,81 +194,101 @@ async function pollHuggingFaceJobStatus(providerJobId: string): Promise<{
   fineTunedModelId?: string;
   error?: string;
 }> {
-  if (providerJobId.startsWith("hf-simulated-")) {
-    return { status: "running" };
+  if (providerJobId.startsWith('hf-simulated-')) {
+    return { status: 'running' };
   }
 
-  const hfToken = process.env["HF_TOKEN"] || process.env["HUGGINGFACE_API_KEY"];
-  if (!hfToken) throw new Error("HF_TOKEN not configured");
+  const hfToken = process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY'];
+  if (!hfToken) throw new Error('HF_TOKEN not configured');
 
-  const response = await fetch(`https://api.huggingface.co/api/autotrain/v1/projects/${providerJobId}`, {
-    headers: { Authorization: `Bearer ${hfToken}` },
-  });
+  const response = await fetch(
+    `https://api.huggingface.co/api/autotrain/v1/projects/${providerJobId}`,
+    {
+      headers: { Authorization: `Bearer ${hfToken}` },
+    },
+  );
 
   if (!response.ok) {
-    return { status: "running" };
+    return { status: 'running' };
   }
 
-  const data = await response.json() as { status: string; model_id?: string; error?: string };
+  const data = (await response.json()) as { status: string; model_id?: string; error?: string };
   return {
-    status: data.status === "completed" ? "succeeded" : data.status,
+    status: data.status === 'completed' ? 'succeeded' : data.status,
     fineTunedModelId: data.model_id,
     error: data.error,
   };
 }
 
-export async function submitFineTuningJob(request: FineTuningJobRequest): Promise<FineTuningJobStatus> {
+export async function submitFineTuningJob(
+  request: FineTuningJobRequest,
+): Promise<FineTuningJobStatus> {
   const { agentId, provider, baseModel, hyperparameters, options } = request;
   const minSamples = options?.minSamples ?? MIN_SAMPLES_DEFAULT;
 
-  const dataset = await curateDatasetForAgent(agentId, "openai-jsonl", { since: options?.since });
+  const dataset = await curateDatasetForAgent(agentId, 'openai-jsonl', { since: options?.since });
 
   if (dataset.sampleCount < minSamples) {
     throw new Error(
-      `Insufficient training data for ${agentId}: ${dataset.sampleCount} samples (minimum ${minSamples}). Collect more feedback or training pairs.`
+      `Insufficient training data for ${agentId}: ${dataset.sampleCount} samples (minimum ${minSamples}). Collect more feedback or training pairs.`,
     );
   }
 
   const jobId = `ft-${agentId}-${provider}-${Date.now()}`;
-  const suffix = `${agentId}-${new Date().toISOString().split("T")[0]}`;
-  const jsonlContent = serializeToJSONL(dataset.samples as Array<{ messages: Array<{ role: "system" | "user" | "assistant"; content: string }> }>);
+  const suffix = `${agentId}-${new Date().toISOString().split('T')[0]}`;
+  const jsonlContent = serializeToJSONL(
+    dataset.samples as Array<{
+      messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+    }>,
+  );
 
   let providerJobId: string;
 
-  if (provider === "openai") {
+  if (provider === 'openai') {
     const result = await submitOpenAIFineTuning(jsonlContent, baseModel, hyperparameters, suffix);
     providerJobId = result.providerJobId;
   } else {
-    const result = await submitHuggingFaceFineTuning(jsonlContent, baseModel, agentId, hyperparameters);
+    const result = await submitHuggingFaceFineTuning(
+      jsonlContent,
+      baseModel,
+      agentId,
+      hyperparameters,
+    );
     providerJobId = result.providerJobId;
   }
 
-  await db.insert(fineTuningDatasets).values({
-    version: dataset.version,
-    agentId,
-    domain: dataset.format,
-    format: "openai-jsonl",
-    sampleCount: dataset.sampleCount,
-    sourceBreakdown: dataset.sourceBreakdown,
-  }).onConflictDoNothing();
+  await db
+    .insert(fineTuningDatasets)
+    .values({
+      version: dataset.version,
+      agentId,
+      domain: dataset.format,
+      format: 'openai-jsonl',
+      sampleCount: dataset.sampleCount,
+      sourceBreakdown: dataset.sourceBreakdown,
+    })
+    .onConflictDoNothing();
 
-  const [inserted] = await db.insert(fineTuningJobs).values({
-    jobId,
-    agentId,
-    provider,
-    baseModel,
-    status: "pending",
-    datasetVersion: dataset.version,
-    datasetSize: dataset.sampleCount,
-    hyperparameters: {
-      providerJobId,
-      nEpochs: hyperparameters?.nEpochs ?? 3,
-      batchSize: hyperparameters?.batchSize ?? 4,
-      learningRateMultiplier: hyperparameters?.learningRateMultiplier ?? 1.0,
-    },
-  }).returning();
+  const [inserted] = await db
+    .insert(fineTuningJobs)
+    .values({
+      jobId,
+      agentId,
+      provider,
+      baseModel,
+      status: 'pending',
+      datasetVersion: dataset.version,
+      datasetSize: dataset.sampleCount,
+      hyperparameters: {
+        providerJobId,
+        nEpochs: hyperparameters?.nEpochs ?? 3,
+        batchSize: hyperparameters?.batchSize ?? 4,
+        learningRateMultiplier: hyperparameters?.learningRateMultiplier ?? 1.0,
+      },
+    })
+    .returning();
 
-  if (!inserted) throw new Error("Failed to insert fine-tuning job record");
+  if (!inserted) throw new Error('Failed to insert fine-tuning job record');
 
   return {
     jobId,
@@ -269,7 +296,7 @@ export async function submitFineTuningJob(request: FineTuningJobRequest): Promis
     agentId,
     provider,
     baseModel,
-    status: "pending",
+    status: 'pending',
     datasetSize: dataset.sampleCount,
     datasetVersion: dataset.version,
     submittedAt: inserted.submittedAt.toISOString(),
@@ -286,16 +313,26 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
   if (!job) throw new Error(`Fine-tuning job not found: ${jobId}`);
 
   const hyperparams = job.hyperparameters as Record<string, unknown>;
-  const providerJobId = hyperparams["providerJobId"] as string;
+  const providerJobId = hyperparams['providerJobId'] as string;
 
-  if (!providerJobId || job.status === "succeeded" || job.status === "failed" || job.status === "registered") {
+  if (
+    !providerJobId ||
+    job.status === 'succeeded' ||
+    job.status === 'failed' ||
+    job.status === 'registered'
+  ) {
     return mapJobToStatus(job);
   }
 
-  let polledStatus: { status: string; fineTunedModelId?: string; trainingCost?: number; error?: string };
+  let polledStatus: {
+    status: string;
+    fineTunedModelId?: string;
+    trainingCost?: number;
+    error?: string;
+  };
 
   try {
-    if (job.provider === "openai") {
+    if (job.provider === 'openai') {
       polledStatus = await pollOpenAIJobStatus(providerJobId);
     } else {
       polledStatus = await pollHuggingFaceJobStatus(providerJobId);
@@ -306,35 +343,48 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
 
   const providerStatus = mapProviderStatus(polledStatus.status);
 
-  type JobUpdate = Parameters<ReturnType<typeof db.update<typeof fineTuningJobs>>["set"]>[0];
+  type JobUpdate = Parameters<ReturnType<typeof db.update<typeof fineTuningJobs>>['set']>[0];
   const updatePayload: JobUpdate = {
     status: providerStatus,
     updatedAt: new Date(),
     ...(polledStatus.fineTunedModelId ? { fineTunedModelId: polledStatus.fineTunedModelId } : {}),
     ...(polledStatus.trainingCost ? { trainingCostUsd: polledStatus.trainingCost } : {}),
     ...(polledStatus.error ? { errorMessage: polledStatus.error } : {}),
-    ...(providerStatus === "succeeded" || providerStatus === "failed" ? { completedAt: new Date() } : {}),
+    ...(providerStatus === 'succeeded' || providerStatus === 'failed'
+      ? { completedAt: new Date() }
+      : {}),
   };
 
-  await db.update(fineTuningJobs)
-    .set(updatePayload)
-    .where(eq(fineTuningJobs.jobId, jobId));
+  await db.update(fineTuningJobs).set(updatePayload).where(eq(fineTuningJobs.jobId, jobId));
 
-  if (providerStatus === "succeeded" && polledStatus.fineTunedModelId) {
+  if (providerStatus === 'succeeded' && polledStatus.fineTunedModelId) {
     void triggerValidationAsync(jobId, polledStatus.fineTunedModelId, job.agentId).catch(() => {});
   }
 
-  const [updated] = await db.select().from(fineTuningJobs).where(eq(fineTuningJobs.jobId, jobId)).limit(1);
+  const [updated] = await db
+    .select()
+    .from(fineTuningJobs)
+    .where(eq(fineTuningJobs.jobId, jobId))
+    .limit(1);
   return mapJobToStatus(updated ?? job);
 }
 
-async function triggerValidationAsync(jobId: string, fineTunedModelId: string, agentId: string): Promise<void> {
+async function triggerValidationAsync(
+  jobId: string,
+  fineTunedModelId: string,
+  agentId: string,
+): Promise<void> {
   try {
-    await db.update(fineTuningJobs)
-      .set({ status: "validating", updatedAt: new Date() })
+    await db
+      .update(fineTuningJobs)
+      .set({ status: 'validating', updatedAt: new Date() })
       .where(eq(fineTuningJobs.jobId, jobId));
 
-    const [job] = await db.select().from(fineTuningJobs).where(eq(fineTuningJobs.jobId, jobId)).limit(1);
+    const [job] = await db
+      .select()
+      .from(fineTuningJobs)
+      .where(eq(fineTuningJobs.jobId, jobId))
+      .limit(1);
     if (!job) return;
 
     const gateResult: ValidationGateResult = await runValidationGate(
@@ -344,15 +394,18 @@ async function triggerValidationAsync(jobId: string, fineTunedModelId: string, a
       agentId,
     );
 
-    await db.update(fineTuningJobs)
+    await db
+      .update(fineTuningJobs)
       .set({
         evalScores: gateResult.fineTunedScores as unknown as Record<string, unknown>,
         baseModelEvalScores: gateResult.baseModelScores as unknown as Record<string, unknown>,
-        promotedToLifecycle: gateResult.promoted ? "staging" : undefined,
-        status: gateResult.promoted ? "registered" : "failed",
+        promotedToLifecycle: gateResult.promoted ? 'staging' : undefined,
+        status: gateResult.promoted ? 'registered' : 'failed',
         validatedAt: new Date(),
         updatedAt: new Date(),
-        errorMessage: gateResult.promoted ? undefined : `Validation gate failed: ${gateResult.failureReason}`,
+        errorMessage: gateResult.promoted
+          ? undefined
+          : `Validation gate failed: ${gateResult.failureReason}`,
       })
       .where(eq(fineTuningJobs.jobId, jobId));
 
@@ -371,36 +424,39 @@ async function registerFineTunedModel(
   job: typeof fineTuningJobs.$inferSelect,
   gateResult: ValidationGateResult,
 ): Promise<void> {
-  await db.insert(fineTunedModelRegistry).values({
-    modelId,
-    agentId,
-    jobId,
-    baseModel: job.baseModel,
-    provider: job.provider,
-    datasetVersion: job.datasetVersion,
-    lifecycle: "staging",
-    evalPassRate: gateResult.fineTunedScores?.passRate ?? 0,
-    evalScores: gateResult.fineTunedScores as unknown as Record<string, unknown>,
-    baseModelEvalScores: gateResult.baseModelScores as unknown as Record<string, unknown>,
-    costPer1kInput: gateResult.estimatedCostPer1kInput,
-    costPer1kOutput: gateResult.estimatedCostPer1kOutput,
-    isActive: true,
-  }).onConflictDoNothing();
+  await db
+    .insert(fineTunedModelRegistry)
+    .values({
+      modelId,
+      agentId,
+      jobId,
+      baseModel: job.baseModel,
+      provider: job.provider,
+      datasetVersion: job.datasetVersion,
+      lifecycle: 'staging',
+      evalPassRate: gateResult.fineTunedScores?.passRate ?? 0,
+      evalScores: gateResult.fineTunedScores as unknown as Record<string, unknown>,
+      baseModelEvalScores: gateResult.baseModelScores as unknown as Record<string, unknown>,
+      costPer1kInput: gateResult.estimatedCostPer1kInput,
+      costPer1kOutput: gateResult.estimatedCostPer1kOutput,
+      isActive: true,
+    })
+    .onConflictDoNothing();
 }
 
-function mapProviderStatus(providerStatus: string): FineTuningJobStatus["status"] {
-  const map: Record<string, FineTuningJobStatus["status"]> = {
-    pending: "pending",
-    validating_files: "preparing",
-    queued: "preparing",
-    running: "running",
-    succeeded: "succeeded",
-    failed: "failed",
-    cancelled: "cancelled",
-    completed: "succeeded",
-    error: "failed",
+function mapProviderStatus(providerStatus: string): FineTuningJobStatus['status'] {
+  const map: Record<string, FineTuningJobStatus['status']> = {
+    pending: 'pending',
+    validating_files: 'preparing',
+    queued: 'preparing',
+    running: 'running',
+    succeeded: 'succeeded',
+    failed: 'failed',
+    cancelled: 'cancelled',
+    completed: 'succeeded',
+    error: 'failed',
   };
-  return map[providerStatus] ?? "running";
+  return map[providerStatus] ?? 'running';
 }
 
 function mapJobToStatus(job: typeof fineTuningJobs.$inferSelect): FineTuningJobStatus {
@@ -410,7 +466,7 @@ function mapJobToStatus(job: typeof fineTuningJobs.$inferSelect): FineTuningJobS
     agentId: job.agentId,
     provider: job.provider as FineTuningProvider,
     baseModel: job.baseModel,
-    status: job.status as FineTuningJobStatus["status"],
+    status: job.status as FineTuningJobStatus['status'],
     fineTunedModelId: job.fineTunedModelId ?? undefined,
     datasetSize: job.datasetSize,
     datasetVersion: job.datasetVersion,
@@ -425,7 +481,12 @@ function mapJobToStatus(job: typeof fineTuningJobs.$inferSelect): FineTuningJobS
 
 export async function listFineTuningJobs(agentId?: string): Promise<FineTuningJobStatus[]> {
   const query = agentId
-    ? db.select().from(fineTuningJobs).where(eq(fineTuningJobs.agentId, agentId)).orderBy(desc(fineTuningJobs.createdAt)).limit(50)
+    ? db
+        .select()
+        .from(fineTuningJobs)
+        .where(eq(fineTuningJobs.agentId, agentId))
+        .orderBy(desc(fineTuningJobs.createdAt))
+        .limit(50)
     : db.select().from(fineTuningJobs).orderBy(desc(fineTuningJobs.createdAt)).limit(100);
 
   const jobs = await query;
@@ -433,24 +494,30 @@ export async function listFineTuningJobs(agentId?: string): Promise<FineTuningJo
 }
 
 export async function cancelFineTuningJob(jobId: string): Promise<void> {
-  const [job] = await db.select().from(fineTuningJobs).where(eq(fineTuningJobs.jobId, jobId)).limit(1);
+  const [job] = await db
+    .select()
+    .from(fineTuningJobs)
+    .where(eq(fineTuningJobs.jobId, jobId))
+    .limit(1);
   if (!job) throw new Error(`Job not found: ${jobId}`);
 
   const hyperparams = job.hyperparameters as Record<string, unknown>;
-  const providerJobId = hyperparams["providerJobId"] as string;
+  const providerJobId = hyperparams['providerJobId'] as string;
 
-  if (job.provider === "openai" && providerJobId) {
-    const openaiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  if (job.provider === 'openai' && providerJobId) {
+    const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
     if (openaiKey) {
-      const openaiBase = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] ?? "https://api.openai.com/v1";
+      const openaiBase =
+        process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
       await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}/cancel`, {
-        method: "POST",
+        method: 'POST',
         headers: { Authorization: `Bearer ${openaiKey}` },
       }).catch(() => {});
     }
   }
 
-  await db.update(fineTuningJobs)
-    .set({ status: "cancelled", updatedAt: new Date() })
+  await db
+    .update(fineTuningJobs)
+    .set({ status: 'cancelled', updatedAt: new Date() })
     .where(eq(fineTuningJobs.jobId, jobId));
 }

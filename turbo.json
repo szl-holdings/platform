@@ -33,7 +33,13 @@
       "outputs": []
     },
     "lint:ci": {
-      "inputs": ["src/**", "biome.json", "../../biome.json", ".oxlintrc.json", "../../.oxlintrc.json"],
+      "inputs": [
+        "src/**",
+        "biome.json",
+        "../../biome.json",
+        ".oxlintrc.json",
+        "../../.oxlintrc.json"
+      ],
       "outputs": []
     },
     "format": {

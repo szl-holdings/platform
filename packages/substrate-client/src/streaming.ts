@@ -21,7 +21,7 @@
  * ```
  */
 
-import type { RunEvent, StreamingOptions } from "./types.js";
+import type { RunEvent, StreamingOptions } from './types.js';
 
 export interface SubstrateStreamingOptions extends StreamingOptions {
   sseUrl: string;
@@ -66,11 +66,11 @@ export class SubstrateStreaming {
     this.abortController = new AbortController();
 
     const headers: Record<string, string> = {
-      Accept: "text/event-stream",
-      "Cache-Control": "no-cache",
+      Accept: 'text/event-stream',
+      'Cache-Control': 'no-cache',
     };
     if (this.apiKey) {
-      headers["Authorization"] = `Bearer ${this.apiKey}`;
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
     }
 
     let res: Response;
@@ -97,7 +97,7 @@ export class SubstrateStreaming {
     this.reconnectAttempts = 0;
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "";
+    let buffer = '';
 
     try {
       while (true) {
@@ -105,20 +105,20 @@ export class SubstrateStreaming {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
 
-        let eventType = "";
+        let eventType = '';
         let dataLines: string[] = [];
 
         for (const line of lines) {
-          if (line.startsWith("event:")) {
+          if (line.startsWith('event:')) {
             eventType = line.slice(6).trim();
-          } else if (line.startsWith("data:")) {
+          } else if (line.startsWith('data:')) {
             dataLines.push(line.slice(5).trim());
-          } else if (line === "") {
+          } else if (line === '') {
             if (dataLines.length > 0) {
-              const dataStr = dataLines.join("\n");
+              const dataStr = dataLines.join('\n');
               let parsed: unknown;
               try {
                 parsed = JSON.parse(dataStr);
@@ -126,16 +126,16 @@ export class SubstrateStreaming {
                 parsed = { raw: dataStr };
               }
 
-              const parsedRunId = (parsed as Record<string, unknown>)["runId"];
+              const parsedRunId = (parsed as Record<string, unknown>)['runId'];
               const event: RunEvent = {
-                type: (eventType || "ping") as RunEvent["type"],
+                type: (eventType || 'ping') as RunEvent['type'],
                 timestamp: Date.now(),
                 data: parsed,
-                ...(typeof parsedRunId === "string" ? { runId: parsedRunId } : {}),
+                ...(typeof parsedRunId === 'string' ? { runId: parsedRunId } : {}),
               };
 
               this.onEvent?.(event);
-              eventType = "";
+              eventType = '';
               dataLines = [];
             }
           }
@@ -164,9 +164,7 @@ export class SubstrateStreaming {
 
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       this.onError?.(
-        new Error(
-          `SSE connection failed after ${this.maxReconnectAttempts} reconnect attempts`,
-        ),
+        new Error(`SSE connection failed after ${this.maxReconnectAttempts} reconnect attempts`),
       );
       this.onClose?.();
       return;

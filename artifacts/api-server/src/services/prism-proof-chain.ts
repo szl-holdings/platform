@@ -1,8 +1,8 @@
-import { db } from "@szl-holdings/db";
-import { pcProofChainEntriesTable } from "@szl-holdings/db/schema";
-import { eq, and, desc } from "drizzle-orm";
-import { createHash } from "crypto";
-import { logger } from "../lib/logger";
+import { db } from '@szl-holdings/db';
+import { pcProofChainEntriesTable } from '@szl-holdings/db/schema';
+import { createHash } from 'crypto';
+import { and, desc, eq } from 'drizzle-orm';
+import { logger } from '../lib/logger';
 
 interface ProofChainInput {
   orgId: number;
@@ -15,39 +15,52 @@ interface ProofChainInput {
   modelLane?: string;
   modelProvider?: string;
   modelVersion?: string;
-  actorType?: "system" | "user" | "service";
+  actorType?: 'system' | 'user' | 'service';
   actorId?: number;
   privilegeState?: string;
 }
 
 class ProofChainService {
   async record(input: ProofChainInput): Promise<number> {
-    const outputHash = createHash("sha256").update(input.outputContent).digest("hex");
+    const outputHash = createHash('sha256').update(input.outputContent).digest('hex');
 
-    const [entry] = await db.insert(pcProofChainEntriesTable).values({
-      orgId: input.orgId,
-      matterId: input.matterId,
-      outputType: input.outputType as any,
-      outputContent: input.outputContent,
-      outputHash,
-      sourceReferences: input.sourceReferences,
-      sourceClass: input.sourceClass,
-      extractionConfidence: input.extractionConfidence,
-      modelLane: input.modelLane,
-      modelProvider: input.modelProvider,
-      modelVersion: input.modelVersion,
-      actorType: (input.actorType ?? "system") as any,
-      actorId: input.actorId,
-      privilegeState: (input.privilegeState ?? "none") as any,
-    }).returning();
+    const [entry] = await db
+      .insert(pcProofChainEntriesTable)
+      .values({
+        orgId: input.orgId,
+        matterId: input.matterId,
+        outputType: input.outputType as any,
+        outputContent: input.outputContent,
+        outputHash,
+        sourceReferences: input.sourceReferences,
+        sourceClass: input.sourceClass,
+        extractionConfidence: input.extractionConfidence,
+        modelLane: input.modelLane,
+        modelProvider: input.modelProvider,
+        modelVersion: input.modelVersion,
+        actorType: (input.actorType ?? 'system') as any,
+        actorId: input.actorId,
+        privilegeState: (input.privilegeState ?? 'none') as any,
+      })
+      .returning();
 
-    logger.info({ proofChainId: entry.id, outputType: input.outputType, matterId: input.matterId }, "Proof Chain entry recorded");
+    logger.info(
+      { proofChainId: entry.id, outputType: input.outputType, matterId: input.matterId },
+      'Proof Chain entry recorded',
+    );
     return entry.id;
   }
 
   async getTrace(orgId: number, proofChainId: number) {
-    const [entry] = await db.select().from(pcProofChainEntriesTable)
-      .where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId)));
+    const [entry] = await db
+      .select()
+      .from(pcProofChainEntriesTable)
+      .where(
+        and(
+          eq(pcProofChainEntriesTable.id, proofChainId),
+          eq(pcProofChainEntriesTable.orgId, orgId),
+        ),
+      );
     if (!entry) return null;
 
     return {
@@ -70,49 +83,96 @@ class ProofChainService {
   }
 
   async setReviewState(orgId: number, proofChainId: number, state: string, reviewerId: number) {
-    const result = await db.update(pcProofChainEntriesTable).set({
-      reviewState: state as any,
-      reviewedBy: reviewerId,
-      reviewedAt: new Date(),
-    }).where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId))).returning({ id: pcProofChainEntriesTable.id });
-    if (!result.length) throw Object.assign(new Error("Proof chain entry not found"), { statusCode: 404 });
+    const result = await db
+      .update(pcProofChainEntriesTable)
+      .set({
+        reviewState: state as any,
+        reviewedBy: reviewerId,
+        reviewedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(pcProofChainEntriesTable.id, proofChainId),
+          eq(pcProofChainEntriesTable.orgId, orgId),
+        ),
+      )
+      .returning({ id: pcProofChainEntriesTable.id });
+    if (!result.length)
+      throw Object.assign(new Error('Proof chain entry not found'), { statusCode: 404 });
   }
 
   async setApprovalState(orgId: number, proofChainId: number, state: string, approverId: number) {
-    const result = await db.update(pcProofChainEntriesTable).set({
-      approvalState: state as any,
-      approvedBy: approverId,
-      approvedAt: new Date(),
-      exportSafe: state === "approved",
-    }).where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId))).returning({ id: pcProofChainEntriesTable.id });
-    if (!result.length) throw Object.assign(new Error("Proof chain entry not found"), { statusCode: 404 });
+    const result = await db
+      .update(pcProofChainEntriesTable)
+      .set({
+        approvalState: state as any,
+        approvedBy: approverId,
+        approvedAt: new Date(),
+        exportSafe: state === 'approved',
+      })
+      .where(
+        and(
+          eq(pcProofChainEntriesTable.id, proofChainId),
+          eq(pcProofChainEntriesTable.orgId, orgId),
+        ),
+      )
+      .returning({ id: pcProofChainEntriesTable.id });
+    if (!result.length)
+      throw Object.assign(new Error('Proof chain entry not found'), { statusCode: 404 });
   }
 
   async getMatterChain(orgId: number, matterId: number) {
-    return db.select().from(pcProofChainEntriesTable)
-      .where(and(eq(pcProofChainEntriesTable.orgId, orgId), eq(pcProofChainEntriesTable.matterId, matterId)))
+    return db
+      .select()
+      .from(pcProofChainEntriesTable)
+      .where(
+        and(
+          eq(pcProofChainEntriesTable.orgId, orgId),
+          eq(pcProofChainEntriesTable.matterId, matterId),
+        ),
+      )
       .orderBy(desc(pcProofChainEntriesTable.createdAt));
   }
 
   async getPendingReviews(orgId: number) {
-    return db.select().from(pcProofChainEntriesTable)
-      .where(and(eq(pcProofChainEntriesTable.orgId, orgId), eq(pcProofChainEntriesTable.reviewState, "pending_review")))
+    return db
+      .select()
+      .from(pcProofChainEntriesTable)
+      .where(
+        and(
+          eq(pcProofChainEntriesTable.orgId, orgId),
+          eq(pcProofChainEntriesTable.reviewState, 'pending_review'),
+        ),
+      )
       .orderBy(desc(pcProofChainEntriesTable.createdAt));
   }
 
-  async verifyIntegrity(orgId: number, proofChainId: number): Promise<{ valid: boolean; details: any }> {
-    const [entry] = await db.select().from(pcProofChainEntriesTable)
-      .where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId)));
-    if (!entry) return { valid: false, details: { error: "Entry not found" } };
+  async verifyIntegrity(
+    orgId: number,
+    proofChainId: number,
+  ): Promise<{ valid: boolean; details: any }> {
+    const [entry] = await db
+      .select()
+      .from(pcProofChainEntriesTable)
+      .where(
+        and(
+          eq(pcProofChainEntriesTable.id, proofChainId),
+          eq(pcProofChainEntriesTable.orgId, orgId),
+        ),
+      );
+    if (!entry) return { valid: false, details: { error: 'Entry not found' } };
 
-    const currentHash = createHash("sha256").update(entry.outputContent ?? "").digest("hex");
+    const currentHash = createHash('sha256')
+      .update(entry.outputContent ?? '')
+      .digest('hex');
     const hashValid = currentHash === entry.outputHash;
 
     return {
       valid: hashValid,
       details: {
         hashMatch: hashValid,
-        hasSourceReferences: Array.isArray(entry.sourceReferences) && (entry.sourceReferences as any[]).length > 0,
+        hasSourceReferences:
+          Array.isArray(entry.sourceReferences) && (entry.sourceReferences as any[]).length > 0,
         reviewState: entry.reviewState,
         approvalState: entry.approvalState,
         exportSafe: entry.exportSafe,
@@ -126,12 +186,21 @@ class ProofChainService {
     return {
       matterId,
       totalEntries: chain.length,
-      byType: chain.reduce((acc: any, e) => { acc[e.outputType] = (acc[e.outputType] ?? 0) + 1; return acc; }, {}),
-      reviewStates: chain.reduce((acc: any, e) => { acc[e.reviewState] = (acc[e.reviewState] ?? 0) + 1; return acc; }, {}),
-      approvalStates: chain.reduce((acc: any, e) => { acc[e.approvalState] = (acc[e.approvalState] ?? 0) + 1; return acc; }, {}),
-      exportSafeCount: chain.filter(e => e.exportSafe).length,
-      modelLanes: [...new Set(chain.map(e => e.modelLane).filter(Boolean))],
-      providers: [...new Set(chain.map(e => e.modelProvider).filter(Boolean))],
+      byType: chain.reduce((acc: any, e) => {
+        acc[e.outputType] = (acc[e.outputType] ?? 0) + 1;
+        return acc;
+      }, {}),
+      reviewStates: chain.reduce((acc: any, e) => {
+        acc[e.reviewState] = (acc[e.reviewState] ?? 0) + 1;
+        return acc;
+      }, {}),
+      approvalStates: chain.reduce((acc: any, e) => {
+        acc[e.approvalState] = (acc[e.approvalState] ?? 0) + 1;
+        return acc;
+      }, {}),
+      exportSafeCount: chain.filter((e) => e.exportSafe).length,
+      modelLanes: [...new Set(chain.map((e) => e.modelLane).filter(Boolean))],
+      providers: [...new Set(chain.map((e) => e.modelProvider).filter(Boolean))],
       generatedAt: new Date().toISOString(),
     };
   }

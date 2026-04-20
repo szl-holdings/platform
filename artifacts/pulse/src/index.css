@@ -26,31 +26,33 @@
   padding: 0;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   background: var(--pulse-bg);
   color: var(--pulse-text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 .font-serif {
-  font-family: 'Crimson Pro', 'Georgia', 'Times New Roman', serif;
+  font-family: "Crimson Pro", "Georgia", "Times New Roman", serif;
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: "JetBrains Mono", "Courier New", monospace;
 }
 
 /* Classification bar */
 .classification-bar {
-  background: linear-gradient(90deg, rgba(200,168,75,0.1) 0%, rgba(200,168,75,0.05) 100%);
-  border-bottom: 1px solid rgba(200,168,75,0.25);
+  background: linear-gradient(90deg, rgba(200, 168, 75, 0.1) 0%, rgba(200, 168, 75, 0.05) 100%);
+  border-bottom: 1px solid rgba(200, 168, 75, 0.25);
 }
 
 /* Briefing prose */
 .prose-brief p {
-  font-family: 'Crimson Pro', Georgia, serif;
+  font-family: "Crimson Pro", Georgia, serif;
   font-size: 1.1rem;
   line-height: 1.8;
   color: #d4d8e8;
@@ -58,7 +60,7 @@ html, body, #root {
 }
 
 .prose-brief h3 {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -69,21 +71,21 @@ html, body, #root {
 
 /* Confidence chip variants */
 .conf-high {
-  background: rgba(78,202,139,0.12);
+  background: rgba(78, 202, 139, 0.12);
   color: #4eca8b;
-  border-color: rgba(78,202,139,0.3);
+  border-color: rgba(78, 202, 139, 0.3);
 }
 
 .conf-moderate {
-  background: rgba(200,168,75,0.12);
+  background: rgba(200, 168, 75, 0.12);
   color: #c8a84b;
-  border-color: rgba(200,168,75,0.3);
+  border-color: rgba(200, 168, 75, 0.3);
 }
 
 .conf-low {
-  background: rgba(224,80,80,0.12);
+  background: rgba(224, 80, 80, 0.12);
   color: #e05050;
-  border-color: rgba(224,80,80,0.3);
+  border-color: rgba(224, 80, 80, 0.3);
 }
 
 /* Scrollbar */
@@ -117,11 +119,11 @@ html, body, #root {
   text-decoration: none;
 }
 .nav-item:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--pulse-text);
 }
 .nav-item.active {
-  background: rgba(200,168,75,0.1);
+  background: rgba(200, 168, 75, 0.1);
   color: var(--pulse-gold);
 }
 
@@ -148,8 +150,14 @@ html, body, #root {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fadeIn {
@@ -157,16 +165,24 @@ html, body, #root {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(200,168,75,0.2); }
-  50% { box-shadow: 0 0 12px 2px rgba(200,168,75,0.3); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 168, 75, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px rgba(200, 168, 75, 0.3);
+  }
 }
 
 .live-indicator {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

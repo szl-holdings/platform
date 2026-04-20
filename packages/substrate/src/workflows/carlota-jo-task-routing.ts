@@ -11,90 +11,100 @@
  * Phase 2 vertical production workflow.
  */
 
-import { defineWorkflow, definePolicy, defineBudget, Retrieve, Reason, Verify, ApprovalGate, Decide } from "../index.js";
-import { defaultRuntime, type SubstrateRuntimeOptions } from "../engine.js";
-import type { RuntimeStartOptions, PipelineRun } from "../types.js";
+import { defaultRuntime, type SubstrateRuntimeOptions } from '../engine.js';
+import {
+  ApprovalGate,
+  Decide,
+  defineBudget,
+  definePolicy,
+  defineWorkflow,
+  Reason,
+  Retrieve,
+  Verify,
+} from '../index.js';
+import type { PipelineRun, RuntimeStartOptions } from '../types.js';
 
 // ─── Workflow Definition ──────────────────────────────────────────────────────
 
 export const carlotaJoTaskRoutingWorkflow = defineWorkflow({
-  id: "carlota-jo-task-routing",
-  name: "Carlota Jo — White-Glove Task Routing and Approval Coordination",
+  id: 'carlota-jo-task-routing',
+  name: 'Carlota Jo — White-Glove Task Routing and Approval Coordination',
   description:
-    "Routes client tasks and engagement requests to the appropriate advisor or delivery team. " +
-    "Applies white-glove prioritisation rules, checks capacity and expertise match, " +
-    "and coordinates approval before assignment and client notification.",
-  version: "1.0.0",
-  domain: "carlota-jo",
-  tags: { vertical: "carlota-jo", category: "task-routing", substrate_phase: "2" },
+    'Routes client tasks and engagement requests to the appropriate advisor or delivery team. ' +
+    'Applies white-glove prioritisation rules, checks capacity and expertise match, ' +
+    'and coordinates approval before assignment and client notification.',
+  version: '1.0.0',
+  domain: 'carlota-jo',
+  tags: { vertical: 'carlota-jo', category: 'task-routing', substrate_phase: '2' },
 
   policy: definePolicy({
-    id: "carlota-jo-task-routing-policy",
-    name: "Carlota Jo Task Routing Policy",
-    highRiskCategories: ["notification", "write-external", "financial"],
-    policyIds: ["pol-001", "pol-carlota-routing"],
-    minimumApprovalTier: "operator",
+    id: 'carlota-jo-task-routing-policy',
+    name: 'Carlota Jo Task Routing Policy',
+    highRiskCategories: ['notification', 'write-external', 'financial'],
+    policyIds: ['pol-001', 'pol-carlota-routing'],
+    minimumApprovalTier: 'operator',
   }),
 
   budget: defineBudget({ escalateAt: 0.5, requireHumanBelow: 0.3, minFinalConfidence: 0.45 }),
 
   stages: [
     Retrieve({
-      id: "retrieve-client-context",
-      name: "Retrieve: Client and Task Context",
+      id: 'retrieve-client-context',
+      name: 'Retrieve: Client and Task Context',
       description:
-        "Retrieves the client profile, prior engagement history, current advisor capacity, " +
-        "expertise matrix, and any pending tasks for the requesting client.",
-      retrieverAdapterId: "carlota-retriever",
+        'Retrieves the client profile, prior engagement history, current advisor capacity, ' +
+        'expertise matrix, and any pending tasks for the requesting client.',
+      retrieverAdapterId: 'carlota-retriever',
       topK: 25,
       minRelevanceScore: 0.5,
       dependsOn: [],
-      otelTags: { vertical: "carlota-jo", stage_category: "client-context-retrieval" },
-      priority: "high",
+      otelTags: { vertical: 'carlota-jo', stage_category: 'client-context-retrieval' },
+      priority: 'high',
     }),
     Reason({
-      id: "reason-task-routing",
-      name: "Reason: Task Routing and Prioritisation",
+      id: 'reason-task-routing',
+      name: 'Reason: Task Routing and Prioritisation',
       description:
-        "Scores advisors for the task by expertise match, availability, SLA tier, " +
-        "and client relationship depth. Produces a ranked routing recommendation.",
-      modelAdapterId: "default",
-      dependsOn: ["retrieve-client-context"],
-      otelTags: { vertical: "carlota-jo", stage_category: "routing-reasoning" },
-      priority: "high",
+        'Scores advisors for the task by expertise match, availability, SLA tier, ' +
+        'and client relationship depth. Produces a ranked routing recommendation.',
+      modelAdapterId: 'default',
+      dependsOn: ['retrieve-client-context'],
+      otelTags: { vertical: 'carlota-jo', stage_category: 'routing-reasoning' },
+      priority: 'high',
     }),
     Verify({
-      id: "verify-routing",
-      name: "Verify: Routing Recommendation",
-      description: "Confirms routing recommendation for policy alignment and capacity accuracy.",
+      id: 'verify-routing',
+      name: 'Verify: Routing Recommendation',
+      description: 'Confirms routing recommendation for policy alignment and capacity accuracy.',
       minConfidence: 0.65,
       allowRevision: true,
-      dependsOn: ["reason-task-routing"],
-      otelTags: { vertical: "carlota-jo", stage_category: "verification" },
+      dependsOn: ['reason-task-routing'],
+      otelTags: { vertical: 'carlota-jo', stage_category: 'verification' },
     }),
     ApprovalGate({
-      id: "approval-gate",
-      name: "Operator Approval Gate",
-      description: "Practice lead approves the routing assignment before the task is confirmed and the client is notified.",
-      requiredTier: "operator",
-      inboxPattern: "carlota-jo-task-routing",
-      dependsOn: ["verify-routing"],
-      otelTags: { vertical: "carlota-jo", stage_category: "approval-gate" },
-      priority: "critical",
+      id: 'approval-gate',
+      name: 'Operator Approval Gate',
+      description:
+        'Practice lead approves the routing assignment before the task is confirmed and the client is notified.',
+      requiredTier: 'operator',
+      inboxPattern: 'carlota-jo-task-routing',
+      dependsOn: ['verify-routing'],
+      otelTags: { vertical: 'carlota-jo', stage_category: 'approval-gate' },
+      priority: 'critical',
     }),
     Decide({
-      id: "decide-task-assignment",
-      name: "Decide: Confirm Task Assignment",
+      id: 'decide-task-assignment',
+      name: 'Decide: Confirm Task Assignment',
       description:
-        "Confirms the task assignment, sends advisor and client notifications, " +
-        "creates the engagement record, and logs the routing evidence chain.",
-      modelAdapterId: "default",
-      sideEffects: ["notification", "write-internal"],
-      highRiskSideEffects: ["write-external", "financial"],
-      approvalPolicy: "operator",
-      dependsOn: ["approval-gate"],
-      otelTags: { vertical: "carlota-jo", stage_category: "assignment-decision" },
-      priority: "critical",
+        'Confirms the task assignment, sends advisor and client notifications, ' +
+        'creates the engagement record, and logs the routing evidence chain.',
+      modelAdapterId: 'default',
+      sideEffects: ['notification', 'write-internal'],
+      highRiskSideEffects: ['write-external', 'financial'],
+      approvalPolicy: 'operator',
+      dependsOn: ['approval-gate'],
+      otelTags: { vertical: 'carlota-jo', stage_category: 'assignment-decision' },
+      priority: 'critical',
     }),
   ],
 });
@@ -106,7 +116,7 @@ export interface CarlotaJoTaskRoutingInput {
   taskTitle: string;
   taskDescription: string;
   taskType?: string;
-  urgency?: "immediate" | "standard" | "deferred";
+  urgency?: 'immediate' | 'standard' | 'deferred';
   requestedBy?: string;
   sessionId?: string;
 }
@@ -150,45 +160,56 @@ export async function runCarlotaJoTaskRouting(
 ): Promise<CarlotaJoTaskRoutingResult> {
   const { hooks, stageExecutor, journal, runStore, ...runtimeOpts } = options ?? {};
 
-  const runtime = hooks || stageExecutor || journal || runStore
-    ? new (await import("../engine.js")).SubstrateRuntime({ hooks, stageExecutor, journal, runStore })
-    : defaultRuntime;
+  const runtime =
+    hooks || stageExecutor || journal || runStore
+      ? new (await import('../engine.js')).SubstrateRuntime({
+          hooks,
+          stageExecutor,
+          journal,
+          runStore,
+        })
+      : defaultRuntime;
 
   const run = await runtime.start(carlotaJoTaskRoutingWorkflow, input, {
-    mode: runtimeOpts.mode ?? "live",
+    mode: runtimeOpts.mode ?? 'live',
     ...(input.sessionId ? { sessionId: input.sessionId } : {}),
     metadata: {
-      requestedBy: input.requestedBy ?? "system",
+      requestedBy: input.requestedBy ?? 'system',
       clientId: input.clientId,
-      taskType: input.taskType ?? "general",
-      urgency: input.urgency ?? "standard",
+      taskType: input.taskType ?? 'general',
+      urgency: input.urgency ?? 'standard',
     },
     ...runtimeOpts,
   });
 
-  const reasonResult = run.stageResults.find(r => r.stageId === "reason-task-routing");
-  const decideResult = run.stageResults.find(r => r.stageId === "decide-task-assignment");
-  const approvalResult = run.stageResults.find(r => r.stageId === "approval-gate");
+  const reasonResult = run.stageResults.find((r) => r.stageId === 'reason-task-routing');
+  const decideResult = run.stageResults.find((r) => r.stageId === 'decide-task-assignment');
+  const approvalResult = run.stageResults.find((r) => r.stageId === 'approval-gate');
 
-  const pendingApprovalId = run.status === "pending-approval"
-    ? (approvalResult?.approvalId ?? null) : null;
+  const pendingApprovalId =
+    run.status === 'pending-approval' ? (approvalResult?.approvalId ?? null) : null;
 
   const advisorMatches = parseAdvisorMatches(reasonResult?.output, input);
-  const decision = run.status === "completed" && decideResult?.output
-    ? buildRoutingDecision(run.runId, input, advisorMatches, run.finalConfidence ?? 0)
-    : null;
+  const decision =
+    run.status === 'completed' && decideResult?.output
+      ? buildRoutingDecision(run.runId, input, advisorMatches, run.finalConfidence ?? 0)
+      : null;
 
   return { run, advisorMatches, decision, pendingApprovalId };
 }
 
 function parseAdvisorMatches(output: unknown, input: CarlotaJoTaskRoutingInput): AdvisorMatch[] {
-  if (output && typeof output === "object" && Array.isArray((output as Record<string, unknown>)["advisorMatches"])) {
-    return (output as Record<string, unknown>)["advisorMatches"] as AdvisorMatch[];
+  if (
+    output &&
+    typeof output === 'object' &&
+    Array.isArray((output as Record<string, unknown>)['advisorMatches'])
+  ) {
+    return (output as Record<string, unknown>)['advisorMatches'] as AdvisorMatch[];
   }
   return [
     {
-      advisorId: "ADV-001",
-      advisorName: "Carlota Jiménez",
+      advisorId: 'ADV-001',
+      advisorName: 'Carlota Jiménez',
       expertiseScore: 0.94,
       capacityScore: 0.81,
       relationshipDepth: 0.88,
@@ -196,13 +217,13 @@ function parseAdvisorMatches(output: unknown, input: CarlotaJoTaskRoutingInput):
       rationale: `Highest expertise + relationship depth match for client ${input.clientId} task: ${input.taskTitle}`,
     },
     {
-      advisorId: "ADV-003",
-      advisorName: "Marcus Webb",
+      advisorId: 'ADV-003',
+      advisorName: 'Marcus Webb',
       expertiseScore: 0.86,
       capacityScore: 0.94,
       relationshipDepth: 0.62,
       overallMatchScore: 0.81,
-      rationale: "High capacity availability with strong domain expertise alignment",
+      rationale: 'High capacity availability with strong domain expertise alignment',
     },
   ];
 }
@@ -221,7 +242,7 @@ function buildRoutingDecision(
     assignedAdvisor: assigned,
     alternativeAdvisors: matches.slice(1),
     estimatedStartDate: new Date(Date.now() + 2 * 86_400_000).toISOString(),
-    slaCommitment: input.urgency === "immediate" ? "Same-day response" : "48-hour acknowledgement",
+    slaCommitment: input.urgency === 'immediate' ? 'Same-day response' : '48-hour acknowledgement',
     notificationDraft:
       `Dear ${input.clientId}, your request "${input.taskTitle}" has been assigned to ` +
       `${assigned.advisorName} (match score: ${(assigned.overallMatchScore * 100).toFixed(0)}%). ` +

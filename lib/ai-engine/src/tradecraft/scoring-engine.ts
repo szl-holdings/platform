@@ -13,7 +13,7 @@ export interface DecisionOutcomeRecord {
   skillId: string | null;
   capability: string | null;
   predictedConfidence: number;
-  actualOutcome: "accepted" | "rejected" | "overridden" | "deferred" | "pending";
+  actualOutcome: 'accepted' | 'rejected' | 'overridden' | 'deferred' | 'pending';
   wasActedOn: boolean;
   wasOverridden: boolean;
   overrideReason: string | null;
@@ -21,7 +21,7 @@ export interface DecisionOutcomeRecord {
   actualImpactLevel: string | null;
   recommendedAction: string;
   finalAction: string | null;
-  executionResult: "success" | "partial" | "failure" | "not_executed" | null;
+  executionResult: 'success' | 'partial' | 'failure' | 'not_executed' | null;
   humanReviewRequired: boolean;
   humanReviewRequested: boolean;
   decisionType: string;
@@ -57,7 +57,7 @@ export interface ConfidenceCalibrationScore {
   recommendedAdjustment: number;
   isOverconfident: boolean;
   isUnderconfident: boolean;
-  calibrationVerdict: "well_calibrated" | "overconfident" | "underconfident" | "insufficient_data";
+  calibrationVerdict: 'well_calibrated' | 'overconfident' | 'underconfident' | 'insufficient_data';
   bucketAnalysis: Array<{
     bucket: string;
     predictedRange: [number, number];
@@ -79,7 +79,7 @@ export interface SkillEffectivenessScore {
   overrideRate: number;
   humanReviewTriggerRate: number;
   effectivenessScore: number;
-  trend: "improving" | "stable" | "declining" | "insufficient_data";
+  trend: 'improving' | 'stable' | 'declining' | 'insufficient_data';
   calculatedAt: string;
 }
 
@@ -89,7 +89,7 @@ export interface AgentPerformanceProfile {
   calibration: ConfidenceCalibrationScore;
   skillEffectiveness: SkillEffectivenessScore[];
   overallHealthScore: number;
-  healthLabel: "excellent" | "good" | "fair" | "poor" | "critical";
+  healthLabel: 'excellent' | 'good' | 'fair' | 'poor' | 'critical';
   flags: string[];
   lastDecisionAt: string | null;
   calculatedAt: string;
@@ -115,13 +115,19 @@ const DEFAULT_CONFIG: ScoringWindowConfig = {
   lowAcceptanceWarningThreshold: 0.5,
 };
 
-function filterByWindow(records: DecisionOutcomeRecord[], windowDays: number): DecisionOutcomeRecord[] {
+function filterByWindow(
+  records: DecisionOutcomeRecord[],
+  windowDays: number,
+): DecisionOutcomeRecord[] {
   const cutoff = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
-  return records.filter(r => r.recordedAt >= cutoff && r.actualOutcome !== "pending");
+  return records.filter((r) => r.recordedAt >= cutoff && r.actualOutcome !== 'pending');
 }
 
-function computeAccuracyScore(records: DecisionOutcomeRecord[], windowDays: number): AgentAccuracyScore {
-  const agentId = records[0]?.agentId ?? "unknown";
+function computeAccuracyScore(
+  records: DecisionOutcomeRecord[],
+  windowDays: number,
+): AgentAccuracyScore {
+  const agentId = records[0]?.agentId ?? 'unknown';
   const windowed = filterByWindow(records, windowDays);
   const total = windowed.length;
 
@@ -134,7 +140,7 @@ function computeAccuracyScore(records: DecisionOutcomeRecord[], windowDays: numb
       rejectedDecisions: 0,
       overriddenDecisions: 0,
       deferredDecisions: 0,
-      pendingDecisions: records.filter(r => r.actualOutcome === "pending").length,
+      pendingDecisions: records.filter((r) => r.actualOutcome === 'pending').length,
       acceptanceRate: 0,
       overrideRate: 0,
       rejectionRate: 0,
@@ -144,23 +150,23 @@ function computeAccuracyScore(records: DecisionOutcomeRecord[], windowDays: numb
     };
   }
 
-  const accepted = windowed.filter(r => r.actualOutcome === "accepted").length;
-  const rejected = windowed.filter(r => r.actualOutcome === "rejected").length;
-  const overridden = windowed.filter(r => r.actualOutcome === "overridden").length;
-  const deferred = windowed.filter(r => r.actualOutcome === "deferred").length;
-  const pending = records.filter(r => r.actualOutcome === "pending").length;
+  const accepted = windowed.filter((r) => r.actualOutcome === 'accepted').length;
+  const rejected = windowed.filter((r) => r.actualOutcome === 'rejected').length;
+  const overridden = windowed.filter((r) => r.actualOutcome === 'overridden').length;
+  const deferred = windowed.filter((r) => r.actualOutcome === 'deferred').length;
+  const pending = records.filter((r) => r.actualOutcome === 'pending').length;
 
-  const impactMatchCount = windowed.filter(r =>
-    r.actualImpactLevel !== null && r.predictedImpactLevel === r.actualImpactLevel
+  const impactMatchCount = windowed.filter(
+    (r) => r.actualImpactLevel !== null && r.predictedImpactLevel === r.actualImpactLevel,
   ).length;
-  const impactResolved = windowed.filter(r => r.actualImpactLevel !== null).length;
+  const impactResolved = windowed.filter((r) => r.actualImpactLevel !== null).length;
   const impactAccuracy = impactResolved > 0 ? impactMatchCount / impactResolved : 0;
 
   const acceptanceRate = accepted / total;
   const overrideRate = overridden / total;
   const rejectionRate = rejected / total;
 
-  const weightedScore = (acceptanceRate * 0.5) + ((1 - overrideRate) * 0.3) + (impactAccuracy * 0.2);
+  const weightedScore = acceptanceRate * 0.5 + (1 - overrideRate) * 0.3 + impactAccuracy * 0.2;
 
   return {
     agentId,
@@ -185,7 +191,7 @@ function computeCalibrationScore(
   windowDays: number,
   config: ScoringWindowConfig,
 ): ConfidenceCalibrationScore {
-  const agentId = records[0]?.agentId ?? "unknown";
+  const agentId = records[0]?.agentId ?? 'unknown';
   const windowed = filterByWindow(records, windowDays);
 
   if (windowed.length < config.minSampleSize) {
@@ -200,14 +206,16 @@ function computeCalibrationScore(
       recommendedAdjustment: 0,
       isOverconfident: false,
       isUnderconfident: false,
-      calibrationVerdict: "insufficient_data",
+      calibrationVerdict: 'insufficient_data',
       bucketAnalysis: [],
       calculatedAt: new Date().toISOString(),
     };
   }
 
-  const meanPredicted = windowed.reduce((sum, r) => sum + r.predictedConfidence, 0) / windowed.length;
-  const meanActual = windowed.filter(r => r.actualOutcome === "accepted").length / windowed.length;
+  const meanPredicted =
+    windowed.reduce((sum, r) => sum + r.predictedConfidence, 0) / windowed.length;
+  const meanActual =
+    windowed.filter((r) => r.actualOutcome === 'accepted').length / windowed.length;
   const calibrationBias = meanPredicted - meanActual;
   const calibrationError = Math.abs(calibrationBias);
 
@@ -215,10 +223,13 @@ function computeCalibrationScore(
   const bucketAnalysis = Array.from({ length: config.calibrationBuckets }, (_, i) => {
     const low = i * bucketSize;
     const high = low + bucketSize;
-    const bucketRecords = windowed.filter(r => r.predictedConfidence >= low && r.predictedConfidence < high);
-    const actualRate = bucketRecords.length > 0
-      ? bucketRecords.filter(r => r.actualOutcome === "accepted").length / bucketRecords.length
-      : 0;
+    const bucketRecords = windowed.filter(
+      (r) => r.predictedConfidence >= low && r.predictedConfidence < high,
+    );
+    const actualRate =
+      bucketRecords.length > 0
+        ? bucketRecords.filter((r) => r.actualOutcome === 'accepted').length / bucketRecords.length
+        : 0;
     const midpoint = low + bucketSize / 2;
     return {
       bucket: `${Math.round(low * 100)}-${Math.round(high * 100)}%`,
@@ -231,11 +242,12 @@ function computeCalibrationScore(
 
   const isOverconfident = calibrationBias > 0.1;
   const isUnderconfident = calibrationBias < -0.1;
-  let verdict: ConfidenceCalibrationScore["calibrationVerdict"] = "well_calibrated";
-  if (isOverconfident) verdict = "overconfident";
-  else if (isUnderconfident) verdict = "underconfident";
+  let verdict: ConfidenceCalibrationScore['calibrationVerdict'] = 'well_calibrated';
+  if (isOverconfident) verdict = 'overconfident';
+  else if (isUnderconfident) verdict = 'underconfident';
 
-  const recommendedAdjustment = calibrationBias > 0 ? -calibrationBias * 0.5 : Math.abs(calibrationBias) * 0.5;
+  const recommendedAdjustment =
+    calibrationBias > 0 ? -calibrationBias * 0.5 : Math.abs(calibrationBias) * 0.5;
 
   return {
     agentId,
@@ -260,7 +272,10 @@ function computeSkillEffectiveness(
   capability: string,
   windowDays: number,
 ): SkillEffectivenessScore {
-  const windowed = filterByWindow(records.filter(r => r.skillId === skillId), windowDays);
+  const windowed = filterByWindow(
+    records.filter((r) => r.skillId === skillId),
+    windowDays,
+  );
   const total = windowed.length;
 
   if (total === 0) {
@@ -275,32 +290,39 @@ function computeSkillEffectiveness(
       overrideRate: 0,
       humanReviewTriggerRate: 0,
       effectivenessScore: 0,
-      trend: "insufficient_data",
+      trend: 'insufficient_data',
       calculatedAt: new Date().toISOString(),
     };
   }
 
-  const accepted = windowed.filter(r => r.actualOutcome === "accepted").length;
-  const overridden = windowed.filter(r => r.wasOverridden).length;
-  const humanReview = windowed.filter(r => r.humanReviewRequested).length;
+  const accepted = windowed.filter((r) => r.actualOutcome === 'accepted').length;
+  const overridden = windowed.filter((r) => r.wasOverridden).length;
+  const humanReview = windowed.filter((r) => r.humanReviewRequested).length;
 
   const acceptanceRate = accepted / total;
   const overrideRate = overridden / total;
   const humanReviewRate = humanReview / total;
   const avgConfidence = windowed.reduce((sum, r) => sum + r.predictedConfidence, 0) / total;
 
-  const effectivenessScore = (acceptanceRate * 0.5) + ((1 - overrideRate) * 0.3) + ((1 - humanReviewRate) * 0.2);
+  const effectivenessScore =
+    acceptanceRate * 0.5 + (1 - overrideRate) * 0.3 + (1 - humanReviewRate) * 0.2;
 
   const midpoint = Math.floor(total / 2);
   const firstHalf = windowed.slice(0, midpoint);
   const secondHalf = windowed.slice(midpoint);
-  const firstAccept = firstHalf.length > 0 ? firstHalf.filter(r => r.actualOutcome === "accepted").length / firstHalf.length : 0;
-  const secondAccept = secondHalf.length > 0 ? secondHalf.filter(r => r.actualOutcome === "accepted").length / secondHalf.length : 0;
+  const firstAccept =
+    firstHalf.length > 0
+      ? firstHalf.filter((r) => r.actualOutcome === 'accepted').length / firstHalf.length
+      : 0;
+  const secondAccept =
+    secondHalf.length > 0
+      ? secondHalf.filter((r) => r.actualOutcome === 'accepted').length / secondHalf.length
+      : 0;
 
-  let trend: SkillEffectivenessScore["trend"] = "stable";
-  if (total < 5) trend = "insufficient_data";
-  else if (secondAccept - firstAccept > 0.1) trend = "improving";
-  else if (firstAccept - secondAccept > 0.1) trend = "declining";
+  let trend: SkillEffectivenessScore['trend'] = 'stable';
+  if (total < 5) trend = 'insufficient_data';
+  else if (secondAccept - firstAccept > 0.1) trend = 'improving';
+  else if (firstAccept - secondAccept > 0.1) trend = 'declining';
 
   return {
     skillId,
@@ -328,7 +350,7 @@ export class ScoringEngine {
 
   recordOutcome(record: DecisionOutcomeRecord): void {
     const existing = this.outcomeStore.get(record.agentId) ?? [];
-    const existingIdx = existing.findIndex(r => r.decisionId === record.decisionId);
+    const existingIdx = existing.findIndex((r) => r.decisionId === record.decisionId);
     if (existingIdx >= 0) {
       existing[existingIdx] = record;
     } else {
@@ -342,48 +364,50 @@ export class ScoringEngine {
 
   private async persistOutcome(record: DecisionOutcomeRecord): Promise<void> {
     try {
-      const { db } = await import("@szl-holdings/db");
-      const { alloyDecisionOutcomes } = await import("@szl-holdings/db");
-      await db.insert(alloyDecisionOutcomes).values({
-        decisionId: record.decisionId,
-        agentId: record.agentId,
-        tenantId: record.tenantId,
-        skillId: record.skillId,
-        capability: record.capability,
-        predictedConfidence: record.predictedConfidence,
-        actualOutcome: record.actualOutcome,
-        wasActedOn: record.wasActedOn,
-        wasOverridden: record.wasOverridden,
-        overrideReason: record.overrideReason,
-        predictedImpactLevel: record.predictedImpactLevel,
-        actualImpactLevel: record.actualImpactLevel,
-        recommendedAction: record.recommendedAction,
-        finalAction: record.finalAction,
-        executionResult: record.executionResult,
-        humanReviewRequired: record.humanReviewRequired,
-        humanReviewRequested: record.humanReviewRequested,
-        decisionType: record.decisionType,
-        resolvedAt: record.resolvedAt ? new Date(record.resolvedAt) : null,
-      }).onConflictDoUpdate({
-        target: alloyDecisionOutcomes.decisionId,
-        set: {
+      const { db } = await import('@szl-holdings/db');
+      const { alloyDecisionOutcomes } = await import('@szl-holdings/db');
+      await db
+        .insert(alloyDecisionOutcomes)
+        .values({
+          decisionId: record.decisionId,
+          agentId: record.agentId,
+          tenantId: record.tenantId,
+          skillId: record.skillId,
+          capability: record.capability,
+          predictedConfidence: record.predictedConfidence,
           actualOutcome: record.actualOutcome,
           wasActedOn: record.wasActedOn,
           wasOverridden: record.wasOverridden,
+          overrideReason: record.overrideReason,
+          predictedImpactLevel: record.predictedImpactLevel,
           actualImpactLevel: record.actualImpactLevel,
+          recommendedAction: record.recommendedAction,
           finalAction: record.finalAction,
           executionResult: record.executionResult,
+          humanReviewRequired: record.humanReviewRequired,
+          humanReviewRequested: record.humanReviewRequested,
+          decisionType: record.decisionType,
           resolvedAt: record.resolvedAt ? new Date(record.resolvedAt) : null,
-        },
-      });
-    } catch {
-    }
+        })
+        .onConflictDoUpdate({
+          target: alloyDecisionOutcomes.decisionId,
+          set: {
+            actualOutcome: record.actualOutcome,
+            wasActedOn: record.wasActedOn,
+            wasOverridden: record.wasOverridden,
+            actualImpactLevel: record.actualImpactLevel,
+            finalAction: record.finalAction,
+            executionResult: record.executionResult,
+            resolvedAt: record.resolvedAt ? new Date(record.resolvedAt) : null,
+          },
+        });
+    } catch {}
   }
 
   async loadFromDb(agentId: string): Promise<void> {
     try {
-      const { db, alloyDecisionOutcomes } = await import("@szl-holdings/db");
-      const { eq, desc } = await import("drizzle-orm");
+      const { db, alloyDecisionOutcomes } = await import('@szl-holdings/db');
+      const { eq, desc } = await import('drizzle-orm');
       const rows = await db
         .select()
         .from(alloyDecisionOutcomes)
@@ -391,14 +415,14 @@ export class ScoringEngine {
         .orderBy(desc(alloyDecisionOutcomes.recordedAt))
         .limit(1000);
 
-      const records = rows.map(r => ({
+      const records = rows.map((r) => ({
         decisionId: r.decisionId,
         agentId: r.agentId,
         tenantId: r.tenantId,
         skillId: r.skillId,
         capability: r.capability,
         predictedConfidence: r.predictedConfidence,
-        actualOutcome: r.actualOutcome as DecisionOutcomeRecord["actualOutcome"],
+        actualOutcome: r.actualOutcome as DecisionOutcomeRecord['actualOutcome'],
         wasActedOn: r.wasActedOn,
         wasOverridden: r.wasOverridden,
         overrideReason: r.overrideReason,
@@ -406,7 +430,7 @@ export class ScoringEngine {
         actualImpactLevel: r.actualImpactLevel,
         recommendedAction: r.recommendedAction,
         finalAction: r.finalAction,
-        executionResult: r.executionResult as DecisionOutcomeRecord["executionResult"],
+        executionResult: r.executionResult as DecisionOutcomeRecord['executionResult'],
         humanReviewRequired: r.humanReviewRequired,
         humanReviewRequested: r.humanReviewRequested,
         decisionType: r.decisionType,
@@ -415,8 +439,7 @@ export class ScoringEngine {
       }));
 
       this.outcomeStore.set(agentId, records);
-    } catch {
-    }
+    } catch {}
   }
 
   getAgentAccuracy(agentId: string, windowDays?: number): AgentAccuracyScore {
@@ -429,9 +452,19 @@ export class ScoringEngine {
     return computeCalibrationScore(records, windowDays ?? this.config.longWindowDays, this.config);
   }
 
-  getSkillEffectiveness(agentId: string, skillId: string, capability: string, windowDays?: number): SkillEffectivenessScore {
+  getSkillEffectiveness(
+    agentId: string,
+    skillId: string,
+    capability: string,
+    windowDays?: number,
+  ): SkillEffectivenessScore {
     const records = this.outcomeStore.get(agentId) ?? [];
-    return computeSkillEffectiveness(records, skillId, capability, windowDays ?? this.config.longWindowDays);
+    return computeSkillEffectiveness(
+      records,
+      skillId,
+      capability,
+      windowDays ?? this.config.longWindowDays,
+    );
   }
 
   getAllSkillEffectiveness(agentId: string, windowDays?: number): SkillEffectivenessScore[] {
@@ -443,7 +476,12 @@ export class ScoringEngine {
       }
     }
     return [...skillGroups.values()].map(({ skillId, capability }) =>
-      computeSkillEffectiveness(records, skillId, capability, windowDays ?? this.config.longWindowDays)
+      computeSkillEffectiveness(
+        records,
+        skillId,
+        capability,
+        windowDays ?? this.config.longWindowDays,
+      ),
     );
   }
 
@@ -456,30 +494,44 @@ export class ScoringEngine {
 
     const flags: string[] = [];
     if (accuracy.overrideRate > this.config.overrideRateWarningThreshold) {
-      flags.push(`High override rate: ${Math.round(accuracy.overrideRate * 100)}% (threshold: ${Math.round(this.config.overrideRateWarningThreshold * 100)}%)`);
+      flags.push(
+        `High override rate: ${Math.round(accuracy.overrideRate * 100)}% (threshold: ${Math.round(this.config.overrideRateWarningThreshold * 100)}%)`,
+      );
     }
-    if (accuracy.acceptanceRate < this.config.lowAcceptanceWarningThreshold && accuracy.totalDecisions >= this.config.minSampleSize) {
-      flags.push(`Low acceptance rate: ${Math.round(accuracy.acceptanceRate * 100)}% (threshold: ${Math.round(this.config.lowAcceptanceWarningThreshold * 100)}%)`);
+    if (
+      accuracy.acceptanceRate < this.config.lowAcceptanceWarningThreshold &&
+      accuracy.totalDecisions >= this.config.minSampleSize
+    ) {
+      flags.push(
+        `Low acceptance rate: ${Math.round(accuracy.acceptanceRate * 100)}% (threshold: ${Math.round(this.config.lowAcceptanceWarningThreshold * 100)}%)`,
+      );
     }
-    if (calibration.calibrationVerdict === "overconfident") {
-      flags.push(`Overconfident: predicting ${Math.round(calibration.meanPredictedConfidence * 100)}% but actual acceptance is ${Math.round(calibration.meanActualAcceptanceRate * 100)}%`);
+    if (calibration.calibrationVerdict === 'overconfident') {
+      flags.push(
+        `Overconfident: predicting ${Math.round(calibration.meanPredictedConfidence * 100)}% but actual acceptance is ${Math.round(calibration.meanActualAcceptanceRate * 100)}%`,
+      );
     }
-    if (calibration.calibrationVerdict === "underconfident") {
-      flags.push(`Underconfident: apply +${Math.round(Math.abs(calibration.recommendedAdjustment) * 100)}% confidence adjustment`);
+    if (calibration.calibrationVerdict === 'underconfident') {
+      flags.push(
+        `Underconfident: apply +${Math.round(Math.abs(calibration.recommendedAdjustment) * 100)}% confidence adjustment`,
+      );
     }
-    skillEffectiveness.filter(s => s.trend === "declining" && s.totalUsages >= this.config.minSampleSize).forEach(s => {
-      flags.push(`Skill '${s.capability}' is declining in effectiveness`);
-    });
+    skillEffectiveness
+      .filter((s) => s.trend === 'declining' && s.totalUsages >= this.config.minSampleSize)
+      .forEach((s) => {
+        flags.push(`Skill '${s.capability}' is declining in effectiveness`);
+      });
 
-    const overallScore = (accuracy.weightedAccuracyScore * 0.6) +
-      ((calibration.calibrationVerdict === "well_calibrated" ? 1 : 0.5) * 0.4);
+    const overallScore =
+      accuracy.weightedAccuracyScore * 0.6 +
+      (calibration.calibrationVerdict === 'well_calibrated' ? 1 : 0.5) * 0.4;
 
-    let healthLabel: AgentPerformanceProfile["healthLabel"] = "good";
-    if (overallScore >= 0.85) healthLabel = "excellent";
-    else if (overallScore >= 0.7) healthLabel = "good";
-    else if (overallScore >= 0.5) healthLabel = "fair";
-    else if (overallScore >= 0.35) healthLabel = "poor";
-    else healthLabel = "critical";
+    let healthLabel: AgentPerformanceProfile['healthLabel'] = 'good';
+    if (overallScore >= 0.85) healthLabel = 'excellent';
+    else if (overallScore >= 0.7) healthLabel = 'good';
+    else if (overallScore >= 0.5) healthLabel = 'fair';
+    else if (overallScore >= 0.35) healthLabel = 'poor';
+    else healthLabel = 'critical';
 
     const lastDecision = records.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))[0];
 
@@ -496,12 +548,16 @@ export class ScoringEngine {
     };
   }
 
-  detectTrend(agentId: string, shortWindow?: number, longWindow?: number): {
+  detectTrend(
+    agentId: string,
+    shortWindow?: number,
+    longWindow?: number,
+  ): {
     isDeclinig: boolean;
     shortTermScore: number;
     longTermScore: number;
     delta: number;
-    trend: "improving" | "stable" | "declining" | "insufficient_data";
+    trend: 'improving' | 'stable' | 'declining' | 'insufficient_data';
   } {
     const records = this.outcomeStore.get(agentId) ?? [];
     const shortW = shortWindow ?? this.config.shortWindowDays;
@@ -512,14 +568,20 @@ export class ScoringEngine {
 
     const shortRecords = filterByWindow(records, shortW);
     if (shortRecords.length < this.config.minSampleSize) {
-      return { isDeclinig: false, shortTermScore: shortScore, longTermScore: longScore, delta: 0, trend: "insufficient_data" };
+      return {
+        isDeclinig: false,
+        shortTermScore: shortScore,
+        longTermScore: longScore,
+        delta: 0,
+        trend: 'insufficient_data',
+      };
     }
 
     const delta = shortScore - longScore;
     const isDeclinig = delta < -this.config.declineThreshold;
-    let trend: "improving" | "stable" | "declining" = "stable";
-    if (delta > this.config.declineThreshold) trend = "improving";
-    else if (isDeclinig) trend = "declining";
+    let trend: 'improving' | 'stable' | 'declining' = 'stable';
+    if (delta > this.config.declineThreshold) trend = 'improving';
+    else if (isDeclinig) trend = 'declining';
 
     return { isDeclinig, shortTermScore: shortScore, longTermScore: longScore, delta, trend };
   }

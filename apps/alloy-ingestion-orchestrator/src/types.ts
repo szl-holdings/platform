@@ -6,38 +6,38 @@
  * Runs are durable: state is checkpointed after each step.
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // ─── Run Status ───────────────────────────────────────────────────────────────
 
 export type WorkflowRunStatus =
-  | "queued"
-  | "running"
-  | "pending-approval"
-  | "completed"
-  | "failed"
-  | "cancelled";
+  | 'queued'
+  | 'running'
+  | 'pending-approval'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
 // ─── Step Status ──────────────────────────────────────────────────────────────
 
 export type StepStatus =
-  | "pending"
-  | "running"
-  | "completed"
-  | "failed"
-  | "skipped"
-  | "pending-approval";
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'skipped'
+  | 'pending-approval';
 
 // ─── Actor Types (the 7 deterministic workflow actors) ───────────────────────
 
 export type ActorName =
-  | "IngestionPlanner"
-  | "SchemaMapper"
-  | "PolicyGuard"
-  | "EmbedDispatcher"
-  | "IndexVerifier"
-  | "RetrievalEvaluator"
-  | "HumanApprovalGate";
+  | 'IngestionPlanner'
+  | 'SchemaMapper'
+  | 'PolicyGuard'
+  | 'EmbedDispatcher'
+  | 'IndexVerifier'
+  | 'RetrievalEvaluator'
+  | 'HumanApprovalGate';
 
 // ─── Workflow Step ────────────────────────────────────────────────────────────
 
@@ -105,18 +105,18 @@ export interface OrchestratorAuditEvent {
   tenantId: string;
   profileId: string;
   kind:
-    | "run.started"
-    | "run.completed"
-    | "run.failed"
-    | "run.cancelled"
-    | "step.started"
-    | "step.completed"
-    | "step.failed"
-    | "step.retrying"
-    | "approval.requested"
-    | "approval.granted"
-    | "approval.rejected"
-    | "checkpoint.saved";
+    | 'run.started'
+    | 'run.completed'
+    | 'run.failed'
+    | 'run.cancelled'
+    | 'step.started'
+    | 'step.completed'
+    | 'step.failed'
+    | 'step.retrying'
+    | 'approval.requested'
+    | 'approval.granted'
+    | 'approval.rejected'
+    | 'checkpoint.saved';
   payload: Record<string, unknown>;
   occurredAt: string;
 }
@@ -148,7 +148,7 @@ export interface WorkflowDefinition {
 export const SubmitRunRequestSchema = z.object({
   workflowId: z.string().min(1),
   tenantId: z.string().min(1),
-  profileId: z.string().default("default"),
+  profileId: z.string().default('default'),
   input: z.unknown(),
   metadata: z.record(z.unknown()).default({}),
 });
@@ -177,7 +177,7 @@ export interface ListRunsFilter {
 // ─── Approval Request/Response ────────────────────────────────────────────────
 
 export const ApprovalDecisionSchema = z.object({
-  decision: z.enum(["approved", "rejected"]),
+  decision: z.enum(['approved', 'rejected']),
   actorId: z.string().optional(),
   note: z.string().optional(),
 });

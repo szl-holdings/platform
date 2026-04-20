@@ -1,25 +1,25 @@
-import type { Router, Request, Response } from "express";
-import { RerankRequestSchema } from "@workspace/aef-contracts";
-import { rankCandidates } from "@workspace/alloy-rank-worker";
-import type { RankCandidate } from "@workspace/alloy-rank-worker";
-import { getRequestId } from "../middleware/request-id.js";
-import { getTenantId } from "../middleware/tenant.js";
-import { tenantEnforcer, policyEngine, defaultLedgerStore } from "../context.js";
-import { logger } from "../logger.js";
-import type { PolicyContext } from "@workspace/aef-policy-guard";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
+import { RerankRequestSchema } from '@workspace/aef-contracts';
+import type { PolicyContext } from '@workspace/aef-policy-guard';
+import type { RankCandidate } from '@workspace/alloy-rank-worker';
+import { rankCandidates } from '@workspace/alloy-rank-worker';
+import type { Request, Response, Router } from 'express';
+import { defaultLedgerStore, policyEngine, tenantEnforcer } from '../context.js';
+import { logger } from '../logger.js';
+import { getRequestId } from '../middleware/request-id.js';
+import { getTenantId } from '../middleware/tenant.js';
 
 export function registerRerankRoute(router: Router): void {
-  router.post("/v1/rerank", (req: Request, res: Response) => {
+  router.post('/v1/rerank', (req: Request, res: Response) => {
     const parsed = RerankRequestSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "validation_error", issues: parsed.error.issues });
+      res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });
       return;
     }
 
     const { requestId, query, candidates, topK, model } = parsed.data;
     const tenantId = getTenantId(res);
-    const resolvedModel = model ?? "aef-rerank-cpu-v1";
+    const resolvedModel = model ?? 'aef-rerank-cpu-v1';
     const startMs = Date.now();
     const reqId = requestId || getRequestId(req);
     const requestedAt = new Date().toISOString();
@@ -28,18 +28,31 @@ export function registerRerankRoute(router: Router): void {
     const policyCtx: PolicyContext = { requestId: reqId, tenantId, hasProvenance: true };
     const tenantDecision = tenantEnforcer.enforce(policyCtx);
     if (tenantDecision !== null && !tenantDecision.allow) {
-      res.status(403).json({ error: "tenant_not_registered", reasons: tenantDecision.reasons, appliedRuleIds: tenantDecision.appliedRuleIds });
+      res.status(403).json({
+        error: 'tenant_not_registered',
+        reasons: tenantDecision.reasons,
+        appliedRuleIds: tenantDecision.appliedRuleIds,
+      });
       return;
     }
     const policyDecision = policyEngine.evaluate(policyCtx);
     if (!policyDecision.allow) {
-      res.status(403).json({ error: "policy_denied", reasons: policyDecision.reasons, appliedRuleIds: policyDecision.appliedRuleIds });
+      res.status(403).json({
+        error: 'policy_denied',
+        reasons: policyDecision.reasons,
+        appliedRuleIds: policyDecision.appliedRuleIds,
+      });
       return;
     }
 
     // Wire through the alloy-rank-worker cross-encoder scorer
     const rankInputs: RankCandidate[] = (
-      candidates as Array<{ id: string; text: string; score?: number; metadata?: Record<string, unknown> }>
+      candidates as Array<{
+        id: string;
+        text: string;
+        score?: number;
+        metadata?: Record<string, unknown>;
+      }>
     ).map((c) => ({
       id: c.id,
       text: c.text,
@@ -47,7 +60,7 @@ export function registerRerankRoute(router: Router): void {
       metadata: c.metadata ?? {},
     }));
 
-    const ranked = rankCandidates(query, rankInputs, topK, "cross-encoder");
+    const ranked = rankCandidates(query, rankInputs, topK, 'cross-encoder');
     const completedAt = new Date().toISOString();
     const rerankMs = Date.now() - startMs;
 
@@ -76,17 +89,23 @@ export function registerRerankRoute(router: Router): void {
         });
       } catch (err) {
         ledgerFailures++;
-        logger.error("rerank ledger write failed", { chunkId: result.id, reqId, err: String(err) });
+        logger.error('rerank ledger write failed', { chunkId: result.id, reqId, err: String(err) });
       }
     }
 
-    logger.info("rerank completed", { reqId, tenantId, candidates: candidates.length, returned: ranked.length, processingMs: rerankMs });
+    logger.info('rerank completed', {
+      reqId,
+      tenantId,
+      candidates: candidates.length,
+      returned: ranked.length,
+      processingMs: rerankMs,
+    });
 
     res.json({
       requestId: reqId,
       tenantId,
       model: resolvedModel,
-      backend: "alloy-rank-worker:cross-encoder",
+      backend: 'alloy-rank-worker:cross-encoder',
       results: ranked.map((r) => ({
         id: r.id,
         text: r.text,

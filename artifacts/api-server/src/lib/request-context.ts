@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from "async_hooks";
+import { AsyncLocalStorage } from 'async_hooks';
 
 export interface RequestContext {
   correlationId: string;
@@ -20,11 +20,11 @@ export function getContextHeaders(): Record<string, string> {
   const ctx = requestContextStore.getStore();
   if (!ctx) return {};
   const headers: Record<string, string> = {
-    "x-correlation-id": ctx.correlationId,
-    "x-request-id": ctx.requestId,
+    'x-correlation-id': ctx.correlationId,
+    'x-request-id': ctx.requestId,
   };
   if (ctx.traceParent) {
-    headers["traceparent"] = ctx.traceParent;
+    headers['traceparent'] = ctx.traceParent;
   }
   return headers;
 }

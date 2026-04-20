@@ -1,13 +1,13 @@
-import type { EvalSuiteDef, EvalCase } from "@workspace/eval-forge";
-import type { TypedTool } from "@workspace/agents-tools";
-import type { PromptRef } from "@workspace/agents-prompts";
-import { resolvePrompt } from "@workspace/agents-prompts";
+import type { PromptRef } from '@workspace/agents-prompts';
+import { resolvePrompt } from '@workspace/agents-prompts';
+import type { TypedTool } from '@workspace/agents-tools';
+import type { EvalCase, EvalSuiteDef } from '@workspace/eval-forge';
 
 export interface ToolEvalCase {
   label: string;
   input: Record<string, unknown>;
   groundTruth: Record<string, unknown>;
-  expectedOutcome?: "pass" | "fail";
+  expectedOutcome?: 'pass' | 'fail';
   tags?: string[];
 }
 
@@ -17,17 +17,17 @@ export function createToolEvalSuite(
   options?: { suiteId?: string; domain?: string; version?: number },
 ): EvalSuiteDef {
   const suiteId = options?.suiteId ?? `tool-eval:${tool.manifest.id}`;
-  const domain = options?.domain ?? tool.manifest.domainTags[0] ?? "custom";
+  const domain = options?.domain ?? tool.manifest.domainTags[0] ?? 'custom';
 
   const evalCases: EvalCase[] = cases.map((c, idx) => ({
     id: `${suiteId}:case-${idx}`,
     domain,
     label: c.label,
-    evalType: "tool-reliability" as const,
-    graderType: "tool-reliability" as const,
+    evalType: 'tool-reliability' as const,
+    graderType: 'tool-reliability' as const,
     input: c.input,
     groundTruth: c.groundTruth,
-    expectedOutcome: c.expectedOutcome ?? "pass",
+    expectedOutcome: c.expectedOutcome ?? 'pass',
     tags: [...(c.tags ?? []), `tool:${tool.manifest.id}`, `version:${tool.manifest.version}`],
   }));
 
@@ -36,9 +36,9 @@ export function createToolEvalSuite(
     name: `Tool Reliability — ${tool.manifest.name}`,
     description: `Auto-generated reliability eval suite for tool '${tool.manifest.id}' v${tool.manifest.version}`,
     domain,
-    evalType: "tool-reliability",
+    evalType: 'tool-reliability',
     cases: evalCases,
-    tags: ["auto-generated", "tool-reliability", `tool:${tool.manifest.id}`],
+    tags: ['auto-generated', 'tool-reliability', `tool:${tool.manifest.id}`],
     version: options?.version ?? 1,
   };
 }
@@ -47,7 +47,7 @@ export interface PromptEvalCase {
   label: string;
   variables: Record<string, unknown>;
   groundTruth: Record<string, unknown>;
-  expectedOutcome?: "pass" | "fail";
+  expectedOutcome?: 'pass' | 'fail';
   tags?: string[];
 }
 
@@ -57,9 +57,9 @@ export function createPromptEvalSuite(
   options?: { suiteId?: string; domain?: string; version?: number },
 ): EvalSuiteDef {
   const suiteId = options?.suiteId ?? `prompt-eval:${promptRef.id}`;
-  const domain = options?.domain ?? "agents-core";
+  const domain = options?.domain ?? 'agents-core';
 
-  let resolvedVersionId = promptRef.versionConstraint ?? "active";
+  let resolvedVersionId = promptRef.versionConstraint ?? 'active';
   try {
     const resolved = resolvePrompt(promptRef, {});
     resolvedVersionId = resolved.versionId;
@@ -73,20 +73,16 @@ export function createPromptEvalSuite(
     id: `${suiteId}:case-${idx}`,
     domain,
     label: c.label,
-    evalType: "prompt-eval" as const,
-    graderType: "prompt-eval" as const,
+    evalType: 'prompt-eval' as const,
+    graderType: 'prompt-eval' as const,
     input: {
       ...c.variables,
       __promptId: promptRef.id,
       __versionConstraint: promptRef.versionConstraint,
     },
     groundTruth: c.groundTruth,
-    expectedOutcome: c.expectedOutcome ?? "pass",
-    tags: [
-      ...(c.tags ?? []),
-      `prompt:${promptRef.id}`,
-      `version:${resolvedVersionId}`,
-    ],
+    expectedOutcome: c.expectedOutcome ?? 'pass',
+    tags: [...(c.tags ?? []), `prompt:${promptRef.id}`, `version:${resolvedVersionId}`],
   }));
 
   return {
@@ -94,9 +90,9 @@ export function createPromptEvalSuite(
     name: `Prompt Eval — ${promptRef.id}`,
     description: `Auto-generated prompt eval suite for prompt '${promptRef.id}' (${resolvedVersionId})`,
     domain,
-    evalType: "prompt-eval",
+    evalType: 'prompt-eval',
     cases: evalCases,
-    tags: ["auto-generated", "prompt-eval", `prompt:${promptRef.id}`],
+    tags: ['auto-generated', 'prompt-eval', `prompt:${promptRef.id}`],
     version: options?.version ?? 1,
   };
 }
@@ -114,9 +110,9 @@ export function createEndToEndEvalSuite(params: {
     name: params.name,
     description: params.description,
     domain: params.domain,
-    evalType: "end-to-end-scenario",
+    evalType: 'end-to-end-scenario',
     cases: params.cases,
-    tags: ["end-to-end", params.domain],
+    tags: ['end-to-end', params.domain],
     version: params.version ?? 1,
   };
 }

@@ -1,17 +1,17 @@
-import { ChevronRight, Home } from "lucide-react";
-import { useLocation } from "wouter";
-import { useCrumbs, popToPath, clearCrumbs, COGNITIVE_ROUTES } from "../lib/cognitive-nav";
+import { ChevronRight, Home } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { COGNITIVE_ROUTES, clearCrumbs, popToPath, useCrumbs } from '../lib/cognitive-nav';
 
 const DS = {
-  text: { primary: "rgba(255,255,255,0.85)", muted: "rgba(255,255,255,0.4)" },
+  text: { primary: 'rgba(255,255,255,0.85)', muted: 'rgba(255,255,255,0.4)' },
 };
 
-export function CognitiveBreadcrumbs({ accent = "#ef4444" }: { accent?: string }) {
+export function CognitiveBreadcrumbs({ accent = '#ef4444' }: { accent?: string }) {
   const crumbs = useCrumbs();
   const [location, navigate] = useLocation();
   if (crumbs.length === 0) return null;
 
-  const currentLabel = COGNITIVE_ROUTES[location] ?? "Current view";
+  const currentLabel = COGNITIVE_ROUTES[location] ?? 'Current view';
 
   return (
     <nav
@@ -22,7 +22,7 @@ export function CognitiveBreadcrumbs({ accent = "#ef4444" }: { accent?: string }
       <button
         onClick={() => {
           clearCrumbs();
-          navigate("/");
+          navigate('/');
         }}
         className="flex items-center gap-1 hover:text-white transition-colors"
         aria-label="Home"

@@ -1,7 +1,7 @@
 /**
  * Terra real estate intelligence domain schemas.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 export const propertySchema = z.object({
   id: z.number().int().positive(),
@@ -18,15 +18,15 @@ export const propertySchema = z.object({
 export type Property = z.infer<typeof propertySchema>;
 
 export const distressSignalTypeSchema = z.enum([
-  "lis_pendens",
-  "foreclosure",
-  "tax_lien",
-  "code_violation",
-  "probate",
-  "divorce",
-  "eviction",
-  "judgment",
-  "other",
+  'lis_pendens',
+  'foreclosure',
+  'tax_lien',
+  'code_violation',
+  'probate',
+  'divorce',
+  'eviction',
+  'judgment',
+  'other',
 ]);
 
 export const distressSignalSchema = z.object({
@@ -42,13 +42,13 @@ export const distressSignalSchema = z.object({
 export type DistressSignal = z.infer<typeof distressSignalSchema>;
 
 export const dealStageSchema = z.enum([
-  "lead",
-  "contacted",
-  "qualified",
-  "under_contract",
-  "due_diligence",
-  "closed",
-  "lost",
+  'lead',
+  'contacted',
+  'qualified',
+  'under_contract',
+  'due_diligence',
+  'closed',
+  'lost',
 ]);
 
 export const dealSchema = z.object({

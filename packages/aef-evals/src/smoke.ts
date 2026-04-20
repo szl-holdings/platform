@@ -18,13 +18,13 @@
  */
 
 import {
-  defaultProfileRegistry,
-  type AEFDomain,
   AEF_DOMAIN_PROFILE_DOMAINS,
-} from "@workspace/aef-domain-profiles";
-import { ALL_GOLDEN_QUERIES, ALL_MOCK_CORPORA } from "./fixtures/index.js";
-import { runRetrievalEval, type RetrievalAdapter } from "./harness.js";
-import type { GoldenQuery, RetrievedResult } from "./metrics.js";
+  type AEFDomain,
+  defaultProfileRegistry,
+} from '@workspace/aef-domain-profiles';
+import { ALL_GOLDEN_QUERIES, ALL_MOCK_CORPORA } from './fixtures/index.js';
+import { type RetrievalAdapter, runRetrievalEval } from './harness.js';
+import type { GoldenQuery, RetrievedResult } from './metrics.js';
 
 export interface SmokeResult {
   domain: AEFDomain;
@@ -162,17 +162,15 @@ export async function runSmoke(): Promise<SmokeRunReport> {
       if (retrieved.length === 0) adversarialCorrect++;
     }
     const adversarialPrecision =
-      adversarialQueries.length === 0
-        ? 1
-        : adversarialCorrect / adversarialQueries.length;
+      adversarialQueries.length === 0 ? 1 : adversarialCorrect / adversarialQueries.length;
 
     const failures: string[] = [];
     const agg = report.aggregateMetrics;
 
-    const recall = agg.find((m) => m.metric === "recall")?.value ?? 0;
-    const ndcg = agg.find((m) => m.metric === "ndcg")?.value ?? 0;
-    const mrr_ = agg.find((m) => m.metric === "mrr")?.value ?? 0;
-    const emr = agg.find((m) => m.metric === "exact_match_recovery")?.value ?? 0;
+    const recall = agg.find((m) => m.metric === 'recall')?.value ?? 0;
+    const ndcg = agg.find((m) => m.metric === 'ndcg')?.value ?? 0;
+    const mrr_ = agg.find((m) => m.metric === 'mrr')?.value ?? 0;
+    const emr = agg.find((m) => m.metric === 'exact_match_recovery')?.value ?? 0;
 
     if (positiveQueries.length < SMOKE_THRESHOLDS.minPositiveQueries) {
       failures.push(
@@ -185,7 +183,9 @@ export async function runSmoke(): Promise<SmokeRunReport> {
       );
     }
     if (recall < SMOKE_THRESHOLDS.minRecallAtK) {
-      failures.push(`recall@k too low: ${recall.toFixed(3)} (min ${SMOKE_THRESHOLDS.minRecallAtK})`);
+      failures.push(
+        `recall@k too low: ${recall.toFixed(3)} (min ${SMOKE_THRESHOLDS.minRecallAtK})`,
+      );
     }
     if (ndcg < SMOKE_THRESHOLDS.minNdcgAtK) {
       failures.push(`nDCG@k too low: ${ndcg.toFixed(3)} (min ${SMOKE_THRESHOLDS.minNdcgAtK})`);

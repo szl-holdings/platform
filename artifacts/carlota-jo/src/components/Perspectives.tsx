@@ -1,50 +1,55 @@
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 const articles = [
   {
     id: 1,
-    category: "Technology & Operations",
-    title: "Why 73% of Digital Transformations Fail — and What the Other 27% Do Differently",
-    excerpt: "Our analysis of 140 enterprise transformation programs reveals three structural patterns that separate successful digital initiatives from costly false starts.",
-    readTime: "12 min read",
-    date: "March 2026",
+    category: 'Technology & Operations',
+    title: 'Why 73% of Digital Transformations Fail — and What the Other 27% Do Differently',
+    excerpt:
+      'Our analysis of 140 enterprise transformation programs reveals three structural patterns that separate successful digital initiatives from costly false starts.',
+    readTime: '12 min read',
+    date: 'March 2026',
     featured: true,
   },
   {
     id: 2,
-    category: "M&A & Corporate Finance",
-    title: "The Hidden Cost of Synergy Optimism in Cross-Border Transactions",
-    excerpt: "Acquirers consistently overestimate synergy capture by 35-50%. A disciplined framework for probability-adjusted integration planning.",
-    readTime: "9 min read",
-    date: "February 2026",
+    category: 'M&A & Corporate Finance',
+    title: 'The Hidden Cost of Synergy Optimism in Cross-Border Transactions',
+    excerpt:
+      'Acquirers consistently overestimate synergy capture by 35-50%. A disciplined framework for probability-adjusted integration planning.',
+    readTime: '9 min read',
+    date: 'February 2026',
     featured: false,
   },
   {
     id: 3,
-    category: "Growth Strategy",
-    title: "Beyond TAM: Why Traditional Market Sizing Misleads Capital Allocation",
-    excerpt: "Jobs-to-be-done segmentation reveals addressable markets that top-down sizing methodologies systematically overlook.",
-    readTime: "8 min read",
-    date: "January 2026",
+    category: 'Growth Strategy',
+    title: 'Beyond TAM: Why Traditional Market Sizing Misleads Capital Allocation',
+    excerpt:
+      'Jobs-to-be-done segmentation reveals addressable markets that top-down sizing methodologies systematically overlook.',
+    readTime: '8 min read',
+    date: 'January 2026',
     featured: false,
   },
   {
     id: 4,
-    category: "Portfolio Strategy",
-    title: "When to Prune: A Framework for Portfolio Rationalization Under Uncertainty",
-    excerpt: "How to identify and divest underperforming assets without destroying optionality — lessons from 12 conglomerate restructurings.",
-    readTime: "11 min read",
-    date: "December 2025",
+    category: 'Portfolio Strategy',
+    title: 'When to Prune: A Framework for Portfolio Rationalization Under Uncertainty',
+    excerpt:
+      'How to identify and divest underperforming assets without destroying optionality — lessons from 12 conglomerate restructurings.',
+    readTime: '11 min read',
+    date: 'December 2025',
     featured: false,
   },
   {
     id: 5,
-    category: "Risk & Governance",
-    title: "CSRD Readiness: What European Reporting Standards Mean for Global Boards",
-    excerpt: "The Corporate Sustainability Reporting Directive will reshape governance expectations worldwide. A practical readiness assessment for non-EU multinationals.",
-    readTime: "7 min read",
-    date: "November 2025",
+    category: 'Risk & Governance',
+    title: 'CSRD Readiness: What European Reporting Standards Mean for Global Boards',
+    excerpt:
+      'The Corporate Sustainability Reporting Directive will reshape governance expectations worldwide. A practical readiness assessment for non-EU multinationals.',
+    readTime: '7 min read',
+    date: 'November 2025',
     featured: false,
   },
 ];
@@ -82,7 +87,8 @@ export default function Perspectives() {
             className="lg:col-span-7 flex items-end"
           >
             <p className="text-sm text-ink-600 font-light leading-relaxed max-w-xl">
-              Original research, frameworks, and insights from our advisory practice. We publish what we learn so that leaders everywhere can make better-informed decisions.
+              Original research, frameworks, and insights from our advisory practice. We publish
+              what we learn so that leaders everywhere can make better-informed decisions.
             </p>
           </motion.div>
         </div>
@@ -121,7 +127,10 @@ export default function Perspectives() {
               </div>
               <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.12em] uppercase text-warm-gold group-hover:text-warm-gold-light transition-colors">
                 Read
-                <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight
+                  size={12}
+                  className="group-hover:translate-x-1 transition-transform duration-300"
+                />
               </span>
             </div>
           </motion.div>
@@ -149,7 +158,10 @@ export default function Perspectives() {
                     <span>{article.date}</span>
                     <span>{article.readTime}</span>
                   </div>
-                  <ArrowRight size={12} className="text-warm-gold/40 group-hover:text-warm-gold group-hover:translate-x-1 transition-all duration-300" />
+                  <ArrowRight
+                    size={12}
+                    className="text-warm-gold/40 group-hover:text-warm-gold group-hover:translate-x-1 transition-all duration-300"
+                  />
                 </div>
               </motion.div>
             ))}
@@ -180,7 +192,10 @@ export default function Perspectives() {
                   <span>{article.date}</span>
                   <span>{article.readTime}</span>
                 </div>
-                <ArrowRight size={12} className="text-warm-gold/40 group-hover:text-warm-gold group-hover:translate-x-1 transition-all duration-300" />
+                <ArrowRight
+                  size={12}
+                  className="text-warm-gold/40 group-hover:text-warm-gold group-hover:translate-x-1 transition-all duration-300"
+                />
               </div>
             </motion.div>
           ))}

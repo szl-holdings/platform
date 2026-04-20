@@ -1,11 +1,11 @@
-import type { VerifierDecision } from "./types.js";
+import type { VerifierDecision } from './types.js';
 
 export interface VerifierStoreQuery {
-  targetType?: VerifierDecision["target"]["targetType"];
+  targetType?: VerifierDecision['target']['targetType'];
   targetId?: string;
   traceId?: string;
   planId?: string;
-  outcome?: VerifierDecision["outcome"];
+  outcome?: VerifierDecision['outcome'];
   /**
    * Restrict results to records owned by any of these org ids. When
    * undefined, no org filter is applied (caller is trusted to be
@@ -36,7 +36,7 @@ export interface VerifierStore {
   save(decision: VerifierDecision): Promise<VerifierDecision>;
   get(id: string, scope?: VerifierAccessScope): Promise<VerifierDecision | undefined>;
   latestForTarget(
-    targetType: VerifierDecision["target"]["targetType"],
+    targetType: VerifierDecision['target']['targetType'],
     targetId: string,
     scope?: VerifierAccessScope,
   ): Promise<VerifierDecision | undefined>;
@@ -60,7 +60,7 @@ export class InMemoryVerifierStore implements VerifierStore {
   }
 
   async latestForTarget(
-    targetType: VerifierDecision["target"]["targetType"],
+    targetType: VerifierDecision['target']['targetType'],
     targetId: string,
     scope?: VerifierAccessScope,
   ): Promise<VerifierDecision | undefined> {
@@ -75,7 +75,9 @@ export class InMemoryVerifierStore implements VerifierStore {
     return all[0];
   }
 
-  async list(query: VerifierStoreQuery = {}): Promise<{ items: VerifierDecision[]; total: number }> {
+  async list(
+    query: VerifierStoreQuery = {},
+  ): Promise<{ items: VerifierDecision[]; total: number }> {
     let items = Array.from(this.records.values());
     if (query.targetType) items = items.filter((r) => r.target.targetType === query.targetType);
     if (query.targetId) items = items.filter((r) => r.target.targetId === query.targetId);
@@ -84,7 +86,9 @@ export class InMemoryVerifierStore implements VerifierStore {
     if (query.outcome) items = items.filter((r) => r.outcome === query.outcome);
     if (query.orgIds !== undefined) {
       const allowed = new Set(query.orgIds);
-      items = items.filter((r) => r.orgId !== null && r.orgId !== undefined && allowed.has(r.orgId));
+      items = items.filter(
+        (r) => r.orgId !== null && r.orgId !== undefined && allowed.has(r.orgId),
+      );
     }
     items.sort((a, b) => b.evaluatedAt - a.evaluatedAt);
     const total = items.length;
@@ -129,7 +133,7 @@ class DefaultVerifierStore implements VerifierStore {
     return this.backend.get(id, scope);
   }
   latestForTarget(
-    t: VerifierDecision["target"]["targetType"],
+    t: VerifierDecision['target']['targetType'],
     id: string,
     scope?: VerifierAccessScope,
   ) {

@@ -1,35 +1,35 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { db, pushNotificationPreferencesTable } from "@szl-holdings/db";
-import { eq, and } from "drizzle-orm";
-import { sendSuccess, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { pushPreferenceUpdateSchema, validateBody } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, pushNotificationPreferencesTable } from '@szl-holdings/db';
+import { and, eq } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { handleRouteError, sendBadRequest, sendNoContent, sendSuccess } from '../lib/api-response';
+import { pushPreferenceUpdateSchema, validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
 const VALID_APP_IDS = [
-  "aegis-mobile",
-  "carlota-jo-mobile",
-  "lyte-mobile",
-  "stephen-mobile",
-  "szl-holdings-mobile",
-  "terra-mobile",
-  "vessels-mobile",
+  'aegis-mobile',
+  'carlota-jo-mobile',
+  'lyte-mobile',
+  'stephen-mobile',
+  'szl-holdings-mobile',
+  'terra-mobile',
+  'vessels-mobile',
 ];
 
 const CATEGORIES_BY_APP: Record<string, string[]> = {
-  "aegis-mobile": ["threats", "incidents", "health", "all"],
-  "carlota-jo-mobile": ["sessions", "documents", "messages", "all"],
-  "lyte-mobile": ["kpi_alerts", "escalations", "milestones", "all"],
-  "stephen-mobile": ["content_published", "venture_updates", "all"],
-  "szl-holdings-mobile": ["portfolio_alerts", "investor_updates", "all"],
-  "terra-mobile": ["deal_updates", "listing_changes", "distress_signals", "all"],
-  "vessels-mobile": ["vessel_alerts", "compliance", "port_arrivals", "all"],
+  'aegis-mobile': ['threats', 'incidents', 'health', 'all'],
+  'carlota-jo-mobile': ['sessions', 'documents', 'messages', 'all'],
+  'lyte-mobile': ['kpi_alerts', 'escalations', 'milestones', 'all'],
+  'stephen-mobile': ['content_published', 'venture_updates', 'all'],
+  'szl-holdings-mobile': ['portfolio_alerts', 'investor_updates', 'all'],
+  'terra-mobile': ['deal_updates', 'listing_changes', 'distress_signals', 'all'],
+  'vessels-mobile': ['vessel_alerts', 'compliance', 'port_arrivals', 'all'],
 };
 
-router.get("/push-preferences", authMiddleware(), async (req, res) => {
+router.get('/push-preferences', authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const preferences = await db
@@ -38,17 +38,17 @@ router.get("/push-preferences", authMiddleware(), async (req, res) => {
       .where(eq(pushNotificationPreferencesTable.userId, userId));
     sendSuccess(res, preferences);
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch push preferences");
+    handleRouteError(res, err, 'Failed to fetch push preferences');
   }
 });
 
-router.get("/push-preferences/:appId", authMiddleware(), async (req, res) => {
+router.get('/push-preferences/:appId', authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const { appId } = req.params as { appId: string };
 
     if (!VALID_APP_IDS.includes(appId)) {
-      sendBadRequest(res, `Unknown appId. Valid values: ${VALID_APP_IDS.join(", ")}`);
+      sendBadRequest(res, `Unknown appId. Valid values: ${VALID_APP_IDS.join(', ')}`);
       return;
     }
 
@@ -58,95 +58,108 @@ router.get("/push-preferences/:appId", authMiddleware(), async (req, res) => {
       .where(
         and(
           eq(pushNotificationPreferencesTable.userId, userId),
-          eq(pushNotificationPreferencesTable.appId, appId)
-        )
+          eq(pushNotificationPreferencesTable.appId, appId),
+        ),
       );
     sendSuccess(res, preferences);
   } catch (err) {
-    handleRouteError(res, err, "Failed to fetch push preferences for app");
+    handleRouteError(res, err, 'Failed to fetch push preferences for app');
   }
 });
 
-router.put("/push-preferences/:appId/:category", authMiddleware(), validateBody(pushPreferenceUpdateSchema), async (req, res) => {
-  try {
-    const userId = req.user!.id;
-    const { appId, category } = req.params as { appId: string; category: string };
-    const { enabled } = req.body;
+router.put(
+  '/push-preferences/:appId/:category',
+  authMiddleware(),
+  validateBody(pushPreferenceUpdateSchema),
+  async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { appId, category } = req.params as { appId: string; category: string };
+      const { enabled } = req.body;
 
-    if (!VALID_APP_IDS.includes(appId)) {
-      sendBadRequest(res, `Unknown appId. Valid values: ${VALID_APP_IDS.join(", ")}`);
-      return;
-    }
+      if (!VALID_APP_IDS.includes(appId)) {
+        sendBadRequest(res, `Unknown appId. Valid values: ${VALID_APP_IDS.join(', ')}`);
+        return;
+      }
 
-    const validCategories = CATEGORIES_BY_APP[appId] ?? [];
-    if (!validCategories.includes(category)) {
-      sendBadRequest(res, `Unknown category for ${appId}. Valid values: ${validCategories.join(", ")}`);
-      return;
-    }
+      const validCategories = CATEGORIES_BY_APP[appId] ?? [];
+      if (!validCategories.includes(category)) {
+        sendBadRequest(
+          res,
+          `Unknown category for ${appId}. Valid values: ${validCategories.join(', ')}`,
+        );
+        return;
+      }
 
-    const existing = await db
-      .select()
-      .from(pushNotificationPreferencesTable)
-      .where(
-        and(
-          eq(pushNotificationPreferencesTable.userId, userId),
-          eq(pushNotificationPreferencesTable.appId, appId),
-          eq(pushNotificationPreferencesTable.category, category)
-        )
-      );
-
-    let result;
-    if (existing.length > 0) {
-      [result] = await db
-        .update(pushNotificationPreferencesTable)
-        .set({ enabled, updatedAt: new Date() })
+      const existing = await db
+        .select()
+        .from(pushNotificationPreferencesTable)
         .where(
           and(
             eq(pushNotificationPreferencesTable.userId, userId),
             eq(pushNotificationPreferencesTable.appId, appId),
-            eq(pushNotificationPreferencesTable.category, category)
+            eq(pushNotificationPreferencesTable.category, category),
+          ),
+        );
+
+      let result;
+      if (existing.length > 0) {
+        [result] = await db
+          .update(pushNotificationPreferencesTable)
+          .set({ enabled, updatedAt: new Date() })
+          .where(
+            and(
+              eq(pushNotificationPreferencesTable.userId, userId),
+              eq(pushNotificationPreferencesTable.appId, appId),
+              eq(pushNotificationPreferencesTable.category, category),
+            ),
           )
-        )
-        .returning();
-    } else {
-      [result] = await db
-        .insert(pushNotificationPreferencesTable)
-        .values({ userId, appId, category, enabled })
-        .returning();
+          .returning();
+      } else {
+        [result] = await db
+          .insert(pushNotificationPreferencesTable)
+          .values({ userId, appId, category, enabled })
+          .returning();
+      }
+
+      sendSuccess(res, result);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update push preference');
     }
+  },
+);
 
-    sendSuccess(res, result);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to update push preference");
-  }
-});
+router.delete(
+  '/push-preferences/:appId',
+  validateBody(bodyShape({})),
+  authMiddleware(),
+  async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { appId } = req.params as { appId: string };
 
-router.delete("/push-preferences/:appId", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
-  try {
-    const userId = req.user!.id;
-    const { appId } = req.params as { appId: string };
+      await db
+        .delete(pushNotificationPreferencesTable)
+        .where(
+          and(
+            eq(pushNotificationPreferencesTable.userId, userId),
+            eq(pushNotificationPreferencesTable.appId, appId),
+          ),
+        );
 
-    await db
-      .delete(pushNotificationPreferencesTable)
-      .where(
-        and(
-          eq(pushNotificationPreferencesTable.userId, userId),
-          eq(pushNotificationPreferencesTable.appId, appId)
-        )
-      );
+      sendNoContent(res);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to delete push preferences for app');
+    }
+  },
+);
 
-    sendNoContent(res);
-  } catch (err) {
-    handleRouteError(res, err, "Failed to delete push preferences for app");
-  }
-});
-
-router.get("/push-preferences/categories/:appId", authMiddleware(), async (req, res) => {
+router.get('/push-preferences/categories/:appId', authMiddleware(), async (req, res) => {
   try {
     const { appId } = req.params as { appId: string };
 
     if (!VALID_APP_IDS.includes(appId)) {
-      sendBadRequest(res, `Unknown appId. Valid values: ${VALID_APP_IDS.join(", ")}`);
+      sendBadRequest(res, `Unknown appId. Valid values: ${VALID_APP_IDS.join(', ')}`);
       return;
     }
 
@@ -155,7 +168,7 @@ router.get("/push-preferences/categories/:appId", authMiddleware(), async (req, 
       categories: CATEGORIES_BY_APP[appId] ?? [],
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to list push categories");
+    handleRouteError(res, err, 'Failed to list push categories');
   }
 });
 

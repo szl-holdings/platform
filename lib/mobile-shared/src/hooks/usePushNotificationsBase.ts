@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
-import * as Notifications from "expo-notifications";
-import { registerForPushNotificationsAsync } from "../notifications";
+import * as Notifications from 'expo-notifications';
+import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
+import { registerForPushNotificationsAsync } from '../notifications';
 
 export interface UsePushNotificationsBaseOptions {
   enabled?: boolean;
@@ -16,9 +16,7 @@ export interface UsePushNotificationsBaseOptions {
   onNotificationResponse?: (response: Notifications.NotificationResponse) => void;
 }
 
-export function usePushNotificationsBase(
-  options: UsePushNotificationsBaseOptions = {},
-): void {
+export function usePushNotificationsBase(options: UsePushNotificationsBaseOptions = {}): void {
   const { enabled = true, skipAutoRegistration = false } = options;
 
   // Store callbacks in refs so the effect doesn't re-run when inline callbacks change identity
@@ -32,7 +30,7 @@ export function usePushNotificationsBase(
   onNotificationResponseRef.current = options.onNotificationResponse;
 
   useEffect(() => {
-    if (!enabled || Platform.OS === "web") return;
+    if (!enabled || Platform.OS === 'web') return;
 
     let mounted = true;
     let notificationListener: Notifications.EventSubscription | null = null;
@@ -48,11 +46,11 @@ export function usePushNotificationsBase(
 
           if (token && onTokenAcquiredRef.current) {
             await onTokenAcquiredRef.current(token).catch((err) => {
-              console.warn("[Push] onTokenAcquired failed:", err);
+              console.warn('[Push] onTokenAcquired failed:', err);
             });
           }
         } catch (err) {
-          console.warn("[Push] Token registration failed; listeners will still attach:", err);
+          console.warn('[Push] Token registration failed; listeners will still attach:', err);
         }
 
         if (!mounted) return;

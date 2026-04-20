@@ -21,7 +21,13 @@
 // Mode definitions
 // ---------------------------------------------------------------------------
 
-export const RUNTIME_MODES = ["local-dev", "internal-preview", "sandbox", "demo", "production"] as const;
+export const RUNTIME_MODES = [
+  'local-dev',
+  'internal-preview',
+  'sandbox',
+  'demo',
+  'production',
+] as const;
 export type RuntimeMode = (typeof RUNTIME_MODES)[number];
 
 /**
@@ -32,7 +38,7 @@ export type RuntimeMode = (typeof RUNTIME_MODES)[number];
 export interface RuntimeModeProfile {
   mode: RuntimeMode;
   label: string;
-  auth: "full" | "dev-oidc" | "bypass-allowed";
+  auth: 'full' | 'dev-oidc' | 'bypass-allowed';
   allowSeedData: boolean;
   allowConnectorFallback: boolean;
   allowAiFallback: boolean;
@@ -46,9 +52,9 @@ export interface RuntimeModeProfile {
 
 export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
   sandbox: {
-    mode: "sandbox",
-    label: "Sandbox",
-    auth: "dev-oidc",
+    mode: 'sandbox',
+    label: 'Sandbox',
+    auth: 'dev-oidc',
     allowSeedData: true,
     allowConnectorFallback: true,
     allowAiFallback: true,
@@ -59,10 +65,10 @@ export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
     destructiveOpsAllowed: true,
     requireDemoLabels: true,
   },
-  "local-dev": {
-    mode: "local-dev",
-    label: "Local Dev",
-    auth: "dev-oidc",
+  'local-dev': {
+    mode: 'local-dev',
+    label: 'Local Dev',
+    auth: 'dev-oidc',
     allowSeedData: true,
     allowConnectorFallback: true,
     allowAiFallback: true,
@@ -73,10 +79,10 @@ export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
     destructiveOpsAllowed: true,
     requireDemoLabels: false,
   },
-  "internal-preview": {
-    mode: "internal-preview",
-    label: "Internal Preview",
-    auth: "dev-oidc",
+  'internal-preview': {
+    mode: 'internal-preview',
+    label: 'Internal Preview',
+    auth: 'dev-oidc',
     allowSeedData: true,
     allowConnectorFallback: true,
     allowAiFallback: true,
@@ -88,9 +94,9 @@ export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
     requireDemoLabels: true,
   },
   demo: {
-    mode: "demo",
-    label: "Demo",
-    auth: "dev-oidc",
+    mode: 'demo',
+    label: 'Demo',
+    auth: 'dev-oidc',
     allowSeedData: true,
     allowConnectorFallback: true,
     allowAiFallback: true,
@@ -102,9 +108,9 @@ export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
     requireDemoLabels: true,
   },
   production: {
-    mode: "production",
-    label: "Production",
-    auth: "full",
+    mode: 'production',
+    label: 'Production',
+    auth: 'full',
     allowSeedData: false,
     allowConnectorFallback: false,
     allowAiFallback: false,
@@ -122,42 +128,42 @@ export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
 // ---------------------------------------------------------------------------
 
 export function resolveRuntimeMode(): RuntimeMode {
-  const explicit = process.env["RUNTIME_MODE"];
+  const explicit = process.env['RUNTIME_MODE'];
   if (explicit) {
     if (!RUNTIME_MODES.includes(explicit as RuntimeMode)) {
       const msg =
         `[runtime-mode] Invalid RUNTIME_MODE value: "${explicit}". ` +
-        `Valid values: ${RUNTIME_MODES.join(", ")}. ` +
+        `Valid values: ${RUNTIME_MODES.join(', ')}. ` +
         `Unset RUNTIME_MODE or correct it to a valid value before starting the server.`;
       throw new Error(msg);
     }
     return explicit as RuntimeMode;
   }
 
-  const appMode = (process.env["APP_MODE"] ?? "").toLowerCase().trim();
-  if (appMode === "demo") return "demo";
-  if (appMode === "sandbox") return "sandbox";
-  if (appMode === "production") return "production";
+  const appMode = (process.env['APP_MODE'] ?? '').toLowerCase().trim();
+  if (appMode === 'demo') return 'demo';
+  if (appMode === 'sandbox') return 'sandbox';
+  if (appMode === 'production') return 'production';
 
-  const demoMode = process.env["DEMO_MODE"];
-  if (demoMode === "true" || demoMode === "1") {
-    return "demo";
+  const demoMode = process.env['DEMO_MODE'];
+  if (demoMode === 'true' || demoMode === '1') {
+    return 'demo';
   }
 
-  const enableDemoSeed = process.env["ENABLE_DEMO_SEED"];
-  if (enableDemoSeed === "true" || enableDemoSeed === "1") {
-    return "demo";
+  const enableDemoSeed = process.env['ENABLE_DEMO_SEED'];
+  if (enableDemoSeed === 'true' || enableDemoSeed === '1') {
+    return 'demo';
   }
 
-  const appEnv = process.env["APP_ENV"];
-  const nodeEnv = process.env["NODE_ENV"];
+  const appEnv = process.env['APP_ENV'];
+  const nodeEnv = process.env['NODE_ENV'];
 
-  if (appEnv === "demo") return "demo";
-  if (appEnv === "sandbox") return "sandbox";
-  if (appEnv === "production" || nodeEnv === "production") return "production";
-  if (appEnv === "staging" || appEnv === "internal-preview") return "internal-preview";
+  if (appEnv === 'demo') return 'demo';
+  if (appEnv === 'sandbox') return 'sandbox';
+  if (appEnv === 'production' || nodeEnv === 'production') return 'production';
+  if (appEnv === 'staging' || appEnv === 'internal-preview') return 'internal-preview';
 
-  return "local-dev";
+  return 'local-dev';
 }
 
 export function getRuntimeModeProfile(): RuntimeModeProfile {
@@ -173,23 +179,23 @@ export function getRuntimeMode(): RuntimeMode {
 // ---------------------------------------------------------------------------
 
 export function isProductionMode(): boolean {
-  return resolveRuntimeMode() === "production";
+  return resolveRuntimeMode() === 'production';
 }
 
 export function isDemoMode(): boolean {
-  return resolveRuntimeMode() === "demo";
+  return resolveRuntimeMode() === 'demo';
 }
 
 export function isInternalPreviewMode(): boolean {
-  return resolveRuntimeMode() === "internal-preview";
+  return resolveRuntimeMode() === 'internal-preview';
 }
 
 export function isLocalDevMode(): boolean {
-  return resolveRuntimeMode() === "local-dev";
+  return resolveRuntimeMode() === 'local-dev';
 }
 
 export function isSandboxMode(): boolean {
-  return resolveRuntimeMode() === "sandbox";
+  return resolveRuntimeMode() === 'sandbox';
 }
 
 export function isSeedDataAllowed(): boolean {
@@ -221,35 +227,37 @@ export function areDemoLabelsRequired(): boolean {
 // ---------------------------------------------------------------------------
 
 export function getClientRuntimeMode(env: Record<string, string | undefined>): RuntimeMode {
-  const explicit = env["VITE_RUNTIME_MODE"] ?? env["VITE_APP_MODE"];
+  const explicit = env['VITE_RUNTIME_MODE'] ?? env['VITE_APP_MODE'];
   if (explicit) {
     if (!RUNTIME_MODES.includes(explicit as RuntimeMode)) {
       console.error(
         `[runtime-mode] Invalid VITE_RUNTIME_MODE/VITE_APP_MODE value: "${explicit}". ` +
-          `Valid values: ${RUNTIME_MODES.join(", ")}. Falling back to derived mode.`,
+          `Valid values: ${RUNTIME_MODES.join(', ')}. Falling back to derived mode.`,
       );
     } else {
       return explicit as RuntimeMode;
     }
   }
 
-  const demoMode = env["VITE_DEMO_MODE"];
-  if (demoMode === "true" || demoMode === "1") {
-    return "demo";
+  const demoMode = env['VITE_DEMO_MODE'];
+  if (demoMode === 'true' || demoMode === '1') {
+    return 'demo';
   }
 
-  const appEnv = env["VITE_APP_ENV"];
-  const mode = env["MODE"];
+  const appEnv = env['VITE_APP_ENV'];
+  const mode = env['MODE'];
 
-  if (appEnv === "demo") return "demo";
-  if (appEnv === "sandbox") return "sandbox";
-  if (appEnv === "production" || mode === "production") return "production";
-  if (appEnv === "staging" || appEnv === "internal-preview") return "internal-preview";
+  if (appEnv === 'demo') return 'demo';
+  if (appEnv === 'sandbox') return 'sandbox';
+  if (appEnv === 'production' || mode === 'production') return 'production';
+  if (appEnv === 'staging' || appEnv === 'internal-preview') return 'internal-preview';
 
-  return "local-dev";
+  return 'local-dev';
 }
 
-export function getClientRuntimeModeProfile(env: Record<string, string | undefined>): RuntimeModeProfile {
+export function getClientRuntimeModeProfile(
+  env: Record<string, string | undefined>,
+): RuntimeModeProfile {
   return RUNTIME_MODE_PROFILES[getClientRuntimeMode(env)];
 }
 
@@ -259,7 +267,7 @@ export function getClientRuntimeModeProfile(env: Record<string, string | undefin
 
 export interface ConnectorStatus {
   active: boolean;
-  reason: "live" | "mock-fallback" | "not-activated";
+  reason: 'live' | 'mock-fallback' | 'not-activated';
   label: string;
 }
 
@@ -270,11 +278,11 @@ export function resolveConnectorStatus(
 ): ConnectorStatus {
   const hasAllKeys = credentialKeys.every((k) => {
     const val = envGetter(k);
-    return val !== undefined && val.trim() !== "";
+    return val !== undefined && val.trim() !== '';
   });
 
   if (hasAllKeys) {
-    return { active: true, reason: "live", label: "Live" };
+    return { active: true, reason: 'live', label: 'Live' };
   }
 
   const profile = getRuntimeModeProfile();
@@ -282,15 +290,15 @@ export function resolveConnectorStatus(
   if (profile.allowConnectorFallback) {
     return {
       active: false,
-      reason: "mock-fallback",
-      label: "Demo",
+      reason: 'mock-fallback',
+      label: 'Demo',
     };
   }
 
   return {
     active: false,
-    reason: "not-activated",
-    label: "Not Activated",
+    reason: 'not-activated',
+    label: 'Not Activated',
   };
 }
 

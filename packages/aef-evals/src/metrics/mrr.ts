@@ -1,7 +1,4 @@
-export function computeMrr(
-  retrievedIds: string[],
-  relevantIds: string[],
-): number {
+export function computeMrr(retrievedIds: string[], relevantIds: string[]): number {
   const relevantSet = new Set(relevantIds);
   for (let i = 0; i < retrievedIds.length; i++) {
     if (relevantSet.has(retrievedIds[i]!)) {

@@ -13,12 +13,12 @@
  *   node scripts/generate-screenshots.js [apps...] [--all] [--output-dir <dir>]
  */
 
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, "..");
+const REPO_ROOT = path.resolve(__dirname, '..');
 
 const DEVICE_SIZES = {
   ios: [
@@ -26,153 +26,153 @@ const DEVICE_SIZES = {
       name: 'iPhone 6.7" (required)',
       width: 1290,
       height: 2796,
-      label: "iphone-6_7",
+      label: 'iphone-6_7',
       required: true,
-      notes: "iPhone 15 Pro Max / 14 Plus",
+      notes: 'iPhone 15 Pro Max / 14 Plus',
     },
     {
       name: 'iPhone 6.5"',
       width: 1242,
       height: 2688,
-      label: "iphone-6_5",
+      label: 'iphone-6_5',
       required: false,
-      notes: "iPhone 11 Pro Max / XS Max",
+      notes: 'iPhone 11 Pro Max / XS Max',
     },
     {
       name: 'iPhone 5.5"',
       width: 1242,
       height: 2208,
-      label: "iphone-5_5",
+      label: 'iphone-5_5',
       required: false,
-      notes: "iPhone 8 Plus",
+      notes: 'iPhone 8 Plus',
     },
     {
       name: 'iPad Pro 12.9" (required for tablet)',
       width: 2048,
       height: 2732,
-      label: "ipad-12_9",
+      label: 'ipad-12_9',
       required: false,
-      notes: "iPad Pro 12.9\" 3rd gen+",
+      notes: 'iPad Pro 12.9" 3rd gen+',
     },
   ],
   android: [
     {
-      name: "Android Phone (required)",
+      name: 'Android Phone (required)',
       width: 1080,
       height: 1920,
-      label: "android-phone",
+      label: 'android-phone',
       required: true,
-      notes: "Standard Android phone",
+      notes: 'Standard Android phone',
     },
     {
       name: 'Android Tablet 7"',
       width: 1200,
       height: 1920,
-      label: "android-tablet-7",
+      label: 'android-tablet-7',
       required: false,
-      notes: "7-inch tablet",
+      notes: '7-inch tablet',
     },
     {
       name: 'Android Tablet 10"',
       width: 1920,
       height: 1200,
-      label: "android-tablet-10",
+      label: 'android-tablet-10',
       required: false,
-      notes: "10-inch tablet",
+      notes: '10-inch tablet',
     },
   ],
 };
 
 const APPS = {
   aegis: {
-    dir: "artifacts/aegis-mobile",
-    name: "Aegis — SOC Command Center",
-    color: "#080B12",
-    accentColor: "#6366f1",
+    dir: 'artifacts/aegis-mobile',
+    name: 'Aegis — SOC Command Center',
+    color: '#080B12',
+    accentColor: '#6366f1',
     screens: [
-      "Threat Dashboard — Live incident feed with severity triage",
-      "Active Incidents — List with status and assignee",
-      "Incident Detail — Timeline, evidence, and response actions",
-      "Intelligence Feed — Correlated threat data and ATT&CK mapping",
-      "Alert Settings — Push notification configuration",
+      'Threat Dashboard — Live incident feed with severity triage',
+      'Active Incidents — List with status and assignee',
+      'Incident Detail — Timeline, evidence, and response actions',
+      'Intelligence Feed — Correlated threat data and ATT&CK mapping',
+      'Alert Settings — Push notification configuration',
     ],
   },
-  "carlota-jo": {
-    dir: "artifacts/carlota-jo-mobile",
-    name: "Carlota Jo — Client App",
-    color: "#0e0c09",
-    accentColor: "#c9a84c",
+  'carlota-jo': {
+    dir: 'artifacts/carlota-jo-mobile',
+    name: 'Carlota Jo — Client App',
+    color: '#0e0c09',
+    accentColor: '#c9a84c',
     screens: [
-      "Dashboard — Portfolio overview and engagement status",
-      "Secure Messaging — Encrypted advisor communication",
-      "Document Vault — Agreements and reports",
-      "Meeting Schedule — Advisory session calendar",
-      "Profile — Account and access settings",
+      'Dashboard — Portfolio overview and engagement status',
+      'Secure Messaging — Encrypted advisor communication',
+      'Document Vault — Agreements and reports',
+      'Meeting Schedule — Advisory session calendar',
+      'Profile — Account and access settings',
     ],
   },
   lyte: {
-    dir: "artifacts/lyte-mobile",
-    name: "Lyte — AIOps Command",
-    color: "#070c14",
-    accentColor: "#00d4ff",
+    dir: 'artifacts/lyte-mobile',
+    name: 'Lyte — AIOps Command',
+    color: '#070c14',
+    accentColor: '#00d4ff',
     screens: [
-      "Infrastructure Health — Service status overview",
-      "Anomaly Detection — ML-surfaced incidents with root cause",
-      "Incident Detail — Correlated services and remediation steps",
-      "Topology Map — Service dependency visualization",
-      "Alert Policies — Smart alerting configuration",
+      'Infrastructure Health — Service status overview',
+      'Anomaly Detection — ML-surfaced incidents with root cause',
+      'Incident Detail — Correlated services and remediation steps',
+      'Topology Map — Service dependency visualization',
+      'Alert Policies — Smart alerting configuration',
     ],
   },
   szl: {
-    dir: "artifacts/szl-holdings-mobile",
-    name: "SZL Holdings — Executive Command",
-    color: "#090810",
-    accentColor: "#c9a84c",
+    dir: 'artifacts/szl-holdings-mobile',
+    name: 'SZL Holdings — Executive Command',
+    color: '#090810',
+    accentColor: '#c9a84c',
     screens: [
-      "Portfolio Overview — Entity performance KPIs",
-      "Deal Flow — Active transactions and pipeline",
-      "Communications — Encrypted principal messaging",
-      "Documents — Board materials and investment memos",
-      "Reporting — Financial summaries and analytics",
+      'Portfolio Overview — Entity performance KPIs',
+      'Deal Flow — Active transactions and pipeline',
+      'Communications — Encrypted principal messaging',
+      'Documents — Board materials and investment memos',
+      'Reporting — Financial summaries and analytics',
     ],
   },
   stephen: {
-    dir: "artifacts/stephen-mobile",
-    name: "Stephen Lutar — Personal Command",
-    color: "#0a0a0a",
-    accentColor: "#ffffff",
+    dir: 'artifacts/stephen-mobile',
+    name: 'Stephen Lutar — Personal Command',
+    color: '#0a0a0a',
+    accentColor: '#ffffff',
     screens: [
-      "Home — Personal command dashboard",
-      "Content Feed — Exclusive updates and insights",
-      "Scheduling — Meeting request and management",
-      "Messages — Private communication channel",
-      "Network — Contact and connection management",
+      'Home — Personal command dashboard',
+      'Content Feed — Exclusive updates and insights',
+      'Scheduling — Meeting request and management',
+      'Messages — Private communication channel',
+      'Network — Contact and connection management',
     ],
   },
   terra: {
-    dir: "artifacts/terra-mobile",
-    name: "Terra — Real Estate Intelligence",
-    color: "#0d0b08",
-    accentColor: "#b8943c",
+    dir: 'artifacts/terra-mobile',
+    name: 'Terra — Real Estate Intelligence',
+    color: '#0d0b08',
+    accentColor: '#b8943c',
     screens: [
-      "Distress Feed — Filtered property opportunities",
-      "Property Detail — Comps, history, and field notes",
-      "Map View — Geographic property visualization",
-      "Acquisition Pipeline — Deal lifecycle tracking",
-      "Watchlist — Monitored properties with alerts",
+      'Distress Feed — Filtered property opportunities',
+      'Property Detail — Comps, history, and field notes',
+      'Map View — Geographic property visualization',
+      'Acquisition Pipeline — Deal lifecycle tracking',
+      'Watchlist — Monitored properties with alerts',
     ],
   },
   vessels: {
-    dir: "artifacts/vessels-mobile",
-    name: "Vessels — Fleet Command",
-    color: "#020d18",
-    accentColor: "#0ea5e9",
+    dir: 'artifacts/vessels-mobile',
+    name: 'Vessels — Fleet Command',
+    color: '#020d18',
+    accentColor: '#0ea5e9',
     screens: [
-      "Fleet Map — Live AIS vessel positions",
-      "Vessel Detail — Specs, voyage, and cargo",
-      "Port Intelligence — Berth and congestion status",
-      "Route Tracking — Active voyage with waypoints",
-      "Alerts — Fleet events and incident notifications",
+      'Fleet Map — Live AIS vessel positions',
+      'Vessel Detail — Specs, voyage, and cargo',
+      'Port Intelligence — Berth and congestion status',
+      'Route Tracking — Active voyage with waypoints',
+      'Alerts — Fleet events and incident notifications',
     ],
   },
 };
@@ -189,31 +189,31 @@ function generateManifest(appKey, app) {
     name: app.name,
     generatedAt: new Date().toISOString(),
     instructions: {
-      step1: "Run the app with: npx expo start --web",
-      step2: "Open browser dev tools and set viewport to each device size below",
-      step3: "Navigate to each screen listed and capture a screenshot",
-      step4: "Save screenshots with the naming convention: <label>-<screen-index>.png",
-      step5: "Upload to App Store Connect / Google Play Console using store/ metadata",
+      step1: 'Run the app with: npx expo start --web',
+      step2: 'Open browser dev tools and set viewport to each device size below',
+      step3: 'Navigate to each screen listed and capture a screenshot',
+      step4: 'Save screenshots with the naming convention: <label>-<screen-index>.png',
+      step5: 'Upload to App Store Connect / Google Play Console using store/ metadata',
     },
     ios: DEVICE_SIZES.ios.map((device) => ({
       ...device,
       screens: app.screens,
       outputDir: `screenshots/${appKey}/ios/${device.label}/`,
-      fileNaming: `${device.label}-NN.png (01 through ${String(app.screens.length).padStart(2, "0")})`,
+      fileNaming: `${device.label}-NN.png (01 through ${String(app.screens.length).padStart(2, '0')})`,
     })),
     android: DEVICE_SIZES.android.map((device) => ({
       ...device,
       screens: app.screens,
       outputDir: `screenshots/${appKey}/android/${device.label}/`,
-      fileNaming: `${device.label}-NN.png (01 through ${String(app.screens.length).padStart(2, "0")})`,
+      fileNaming: `${device.label}-NN.png (01 through ${String(app.screens.length).padStart(2, '0')})`,
     })),
   };
 }
 
 function generateHtmlTemplate(appKey, app) {
   const screensList = app.screens
-    .map((s, i) => `<li><strong>Screen ${String(i + 1).padStart(2, "0")}:</strong> ${s}</li>`)
-    .join("\n          ");
+    .map((s, i) => `<li><strong>Screen ${String(i + 1).padStart(2, '0')}:</strong> ${s}</li>`)
+    .join('\n          ');
 
   const iosSizes = DEVICE_SIZES.ios
     .map(
@@ -221,11 +221,11 @@ function generateHtmlTemplate(appKey, app) {
         `<tr>
         <td>${d.name}</td>
         <td>${d.width} &times; ${d.height}</td>
-        <td><span class="${d.required ? "required" : "optional"} badge">${d.required ? "Required" : "Optional"}</span></td>
+        <td><span class="${d.required ? 'required' : 'optional'} badge">${d.required ? 'Required' : 'Optional'}</span></td>
         <td>${d.notes}</td>
-      </tr>`
+      </tr>`,
     )
-    .join("\n      ");
+    .join('\n      ');
 
   const androidSizes = DEVICE_SIZES.android
     .map(
@@ -233,11 +233,11 @@ function generateHtmlTemplate(appKey, app) {
         `<tr>
         <td>${d.name}</td>
         <td>${d.width} &times; ${d.height}</td>
-        <td><span class="${d.required ? "required" : "optional"} badge">${d.required ? "Required" : "Optional"}</span></td>
+        <td><span class="${d.required ? 'required' : 'optional'} badge">${d.required ? 'Required' : 'Optional'}</span></td>
         <td>${d.notes}</td>
-      </tr>`
+      </tr>`,
     )
-    .join("\n      ");
+    .join('\n      ');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -316,23 +316,24 @@ function generateHtmlTemplate(appKey, app) {
 
 function parseArgs(argv) {
   const args = argv.slice(2);
-  const opts = { apps: [], all: false, outputDir: "screenshots" };
+  const opts = { apps: [], all: false, outputDir: 'screenshots' };
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--all") opts.all = true;
-    else if (args[i] === "--output-dir") opts.outputDir = args[++i];
-    else if (!args[i].startsWith("--")) opts.apps.push(args[i]);
+    if (args[i] === '--all') opts.all = true;
+    else if (args[i] === '--output-dir') opts.outputDir = args[++i];
+    else if (!args[i].startsWith('--')) opts.apps.push(args[i]);
   }
   return opts;
 }
 
 function main() {
   const opts = parseArgs(process.argv);
-  const targetKeys =
-    opts.all ? Object.keys(APPS)
-    : opts.apps.length > 0 ? opts.apps
-    : Object.keys(APPS);
+  const targetKeys = opts.all
+    ? Object.keys(APPS)
+    : opts.apps.length > 0
+      ? opts.apps
+      : Object.keys(APPS);
 
-  console.log("\n📸 Screenshot Generation Utility\n");
+  console.log('\n📸 Screenshot Generation Utility\n');
 
   for (const appKey of targetKeys) {
     const app = APPS[appKey];
@@ -344,39 +345,41 @@ function main() {
     console.log(`  Processing ${app.name}...`);
 
     const appDir = path.resolve(REPO_ROOT, app.dir);
-    const manifestDir = path.join(appDir, "store");
+    const manifestDir = path.join(appDir, 'store');
     ensureDir(manifestDir);
 
     const manifest = generateManifest(appKey, app);
     fs.writeFileSync(
-      path.join(manifestDir, "screenshot-manifest.json"),
-      JSON.stringify(manifest, null, 2)
+      path.join(manifestDir, 'screenshot-manifest.json'),
+      JSON.stringify(manifest, null, 2),
     );
 
     const htmlGuide = generateHtmlTemplate(appKey, app);
-    fs.writeFileSync(path.join(manifestDir, "screenshot-guide.html"), htmlGuide);
+    fs.writeFileSync(path.join(manifestDir, 'screenshot-guide.html'), htmlGuide);
 
     const outputBase = path.resolve(REPO_ROOT, opts.outputDir, appKey);
     const screenshotDirs = [
-      ...DEVICE_SIZES.ios.map((d) => path.join(outputBase, "ios", d.label)),
-      ...DEVICE_SIZES.android.map((d) => path.join(outputBase, "android", d.label)),
+      ...DEVICE_SIZES.ios.map((d) => path.join(outputBase, 'ios', d.label)),
+      ...DEVICE_SIZES.android.map((d) => path.join(outputBase, 'android', d.label)),
     ];
     screenshotDirs.forEach(ensureDir);
 
-    const readmePath = path.join(outputBase, "README.txt");
+    const readmePath = path.join(outputBase, 'README.txt');
     fs.writeFileSync(
       readmePath,
-      `${app.name} — Screenshots\n${"=".repeat(50)}\n\nOpen ${app.dir}/store/screenshot-guide.html\nfor capture instructions and device size requirements.\n\nManifest: ${app.dir}/store/screenshot-manifest.json\n`
+      `${app.name} — Screenshots\n${'='.repeat(50)}\n\nOpen ${app.dir}/store/screenshot-guide.html\nfor capture instructions and device size requirements.\n\nManifest: ${app.dir}/store/screenshot-manifest.json\n`,
     );
 
-    console.log(`  ✅ ${appKey}: manifest + guide written, ${screenshotDirs.length} output dirs created`);
+    console.log(
+      `  ✅ ${appKey}: manifest + guide written, ${screenshotDirs.length} output dirs created`,
+    );
   }
 
-  console.log("\n✅ Done! Next steps:");
+  console.log('\n✅ Done! Next steps:');
   console.log("   1. Open each app's store/screenshot-guide.html in a browser");
-  console.log("   2. Follow the capture instructions for each device size");
-  console.log("   3. Place captured screenshots in the output directories");
-  console.log("   4. Upload to App Store Connect and Google Play Console\n");
+  console.log('   2. Follow the capture instructions for each device size');
+  console.log('   3. Place captured screenshots in the output directories');
+  console.log('   4. Upload to App Store Connect and Google Play Console\n');
 }
 
 main();

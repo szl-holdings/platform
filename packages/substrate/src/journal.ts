@@ -6,17 +6,17 @@
  * the audit log. Hash-stable replays are guaranteed when inputs match.
  */
 
-import { createHash, createHmac, randomBytes, randomUUID } from "crypto";
-import { EventEmitter } from "node:events";
+import { EventEmitter } from 'node:events';
+import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
 import type {
-  EvidenceBundle,
   AnyStage,
-  StageResult,
-  PipelineRun,
+  EvidenceBundle,
   ExecutionMode,
+  PipelineRun,
+  StageResult,
   StageType,
-} from "./types.js";
-import { EvidenceBundleSchema } from "./types.js";
+} from './types.js';
+import { EvidenceBundleSchema } from './types.js';
 
 // ─── Runtime Event Bus ────────────────────────────────────────────────────────
 //
@@ -27,13 +27,13 @@ import { EvidenceBundleSchema } from "./types.js";
 // it with a Redis pub/sub.
 
 export type SubstrateRuntimeEventType =
-  | "stage:start"
-  | "stage:complete"
-  | "stage:failed"
-  | "run:started"
-  | "run:complete"
-  | "run:failed"
-  | "run:pending-approval";
+  | 'stage:start'
+  | 'stage:complete'
+  | 'stage:failed'
+  | 'run:started'
+  | 'run:complete'
+  | 'run:failed'
+  | 'run:pending-approval';
 
 export interface SubstrateRuntimeEvent {
   type: SubstrateRuntimeEventType;
@@ -48,7 +48,7 @@ export interface SubstrateRuntimeEvent {
 }
 
 class RuntimeEventBus extends EventEmitter {
-  private static readonly CHANNEL = "substrate_runtime_event";
+  private static readonly CHANNEL = 'substrate_runtime_event';
 
   emitRuntimeEvent(event: SubstrateRuntimeEvent): void {
     this.emit(RuntimeEventBus.CHANNEL, event);
@@ -64,7 +64,7 @@ export const runtimeEventBus = new RuntimeEventBus();
 runtimeEventBus.setMaxListeners(512);
 
 function emitStageEvent(opts: {
-  type: "stage:start" | "stage:complete" | "stage:failed";
+  type: 'stage:start' | 'stage:complete' | 'stage:failed';
   run: PipelineRun;
   stage: AnyStage;
   result?: StageResult;
@@ -84,7 +84,7 @@ function emitStageEvent(opts: {
 }
 
 function emitRunEvent(opts: {
-  type: "run:started" | "run:complete" | "run:failed" | "run:pending-approval";
+  type: 'run:started' | 'run:complete' | 'run:failed' | 'run:pending-approval';
   run: PipelineRun;
 }): void {
   const { type, run } = opts;
@@ -104,7 +104,7 @@ function emitRunEvent(opts: {
  * Called from the runtime before stage execution so SSE clients see progress.
  */
 export function emitStageStart(run: PipelineRun, stage: AnyStage): void {
-  emitStageEvent({ type: "stage:start", run, stage });
+  emitStageEvent({ type: 'stage:start', run, stage });
 }
 
 // ─── Signing Key ──────────────────────────────────────────────────────────────
@@ -118,14 +118,14 @@ export function emitStageStart(run: PipelineRun, stage: AnyStage): void {
 // cannot be forged even in misconfigured environments. Production deployments
 // should set SUBSTRATE_SIGNING_KEY (32+ byte hex) for cross-process verification.
 
-const PROCESS_RANDOM_KEY = randomBytes(32).toString("hex");
-const SIGNING_KEY = process.env["SUBSTRATE_SIGNING_KEY"] ?? PROCESS_RANDOM_KEY;
+const PROCESS_RANDOM_KEY = randomBytes(32).toString('hex');
+const SIGNING_KEY = process.env['SUBSTRATE_SIGNING_KEY'] ?? PROCESS_RANDOM_KEY;
 
-if (!process.env["SUBSTRATE_SIGNING_KEY"]) {
+if (!process.env['SUBSTRATE_SIGNING_KEY']) {
   console.info(
-    "[substrate] SUBSTRATE_SIGNING_KEY is not set — using a per-process random key. " +
-    "Bundles signed in this process are verifiable only within the same process. " +
-    "Set SUBSTRATE_SIGNING_KEY in production for cross-process verification.",
+    '[substrate] SUBSTRATE_SIGNING_KEY is not set — using a per-process random key. ' +
+      'Bundles signed in this process are verifiable only within the same process. ' +
+      'Set SUBSTRATE_SIGNING_KEY in production for cross-process verification.',
   );
 }
 
@@ -134,7 +134,7 @@ if (!process.env["SUBSTRATE_SIGNING_KEY"]) {
  * Used to prove the bundle was written by a substrate instance holding the key.
  */
 export function signBundleHash(bundleHash: string): string {
-  return createHmac("sha256", SIGNING_KEY).update(bundleHash).digest("hex").slice(0, 32);
+  return createHmac('sha256', SIGNING_KEY).update(bundleHash).digest('hex').slice(0, 32);
 }
 
 /**
@@ -154,7 +154,7 @@ export function verifyBundleSignature(bundle: { bundleHash: string; signature: s
  */
 export function hashValue(value: unknown): string {
   const canonical = JSON.stringify(value, (_k, v) => {
-    if (v && typeof v === "object" && !Array.isArray(v)) {
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
       return Object.keys(v as Record<string, unknown>)
         .sort()
         .reduce<Record<string, unknown>>((acc, key) => {
@@ -164,7 +164,7 @@ export function hashValue(value: unknown): string {
     }
     return v as unknown;
   });
-  return createHash("sha256").update(canonical).digest("hex").slice(0, 32);
+  return createHash('sha256').update(canonical).digest('hex').slice(0, 32);
 }
 
 /**
@@ -184,7 +184,7 @@ export function computeBundleHash(fields: {
   policyOutcome?: string;
   parentHash?: string;
 }): string {
-  return createHash("sha256")
+  return createHash('sha256')
     .update(
       JSON.stringify({
         stageId: fields.stageId,
@@ -195,7 +195,7 @@ export function computeBundleHash(fields: {
         parentHash: fields.parentHash ?? null,
       }),
     )
-    .digest("hex")
+    .digest('hex')
     .slice(0, 32);
 }
 
@@ -264,7 +264,7 @@ export class SubstrateJournal {
     toolArgs?: unknown;
     toolResult?: unknown;
     citations?: string[];
-    policyOutcome?: EvidenceBundle["policyOutcome"];
+    policyOutcome?: EvidenceBundle['policyOutcome'];
     metadata?: Record<string, unknown>;
   }): Promise<EvidenceBundle> {
     const { run, stage, result } = opts;
@@ -312,7 +312,10 @@ export class SubstrateJournal {
     // Fan-out a stage:complete (or stage:failed) event so live subscribers
     // (e.g. the gateway SSE transport) can push progress without polling.
     emitStageEvent({
-      type: result.status === "failed" || result.status === "timed-out" ? "stage:failed" : "stage:complete",
+      type:
+        result.status === 'failed' || result.status === 'timed-out'
+          ? 'stage:failed'
+          : 'stage:complete',
       run,
       stage,
       result,
@@ -335,7 +338,7 @@ export class SubstrateJournal {
    */
   async writePipelineTransition(opts: {
     run: PipelineRun;
-    event: "started" | "completed" | "failed" | "pending-approval" | "dry-run-complete";
+    event: 'started' | 'completed' | 'failed' | 'pending-approval' | 'dry-run-complete';
     metadata?: Record<string, unknown>;
   }): Promise<EvidenceBundle> {
     const { run } = opts;
@@ -358,7 +361,7 @@ export class SubstrateJournal {
       bundleId: `eb-${randomUUID()}`,
       runId: run.runId,
       stageId: `__pipeline__${opts.event}`,
-      stageType: "Reason" as StageType,
+      stageType: 'Reason' as StageType,
       workflowId: run.workflowId,
       citations: [],
       confidence: run.finalConfidence ?? 0,
@@ -375,14 +378,14 @@ export class SubstrateJournal {
 
     // Map pipeline transition events onto runtime event bus subscribers.
     const evt = opts.event;
-    if (evt === "started") {
-      emitRunEvent({ type: "run:started", run });
-    } else if (evt === "completed" || evt === "dry-run-complete") {
-      emitRunEvent({ type: "run:complete", run });
-    } else if (evt === "failed") {
-      emitRunEvent({ type: "run:failed", run });
-    } else if (evt === "pending-approval") {
-      emitRunEvent({ type: "run:pending-approval", run });
+    if (evt === 'started') {
+      emitRunEvent({ type: 'run:started', run });
+    } else if (evt === 'completed' || evt === 'dry-run-complete') {
+      emitRunEvent({ type: 'run:complete', run });
+    } else if (evt === 'failed') {
+      emitRunEvent({ type: 'run:failed', run });
+    } else if (evt === 'pending-approval') {
+      emitRunEvent({ type: 'run:pending-approval', run });
     }
 
     return bundle;
@@ -430,18 +433,18 @@ export class SubstrateJournal {
 
   private async linkToProofChain(bundle: EvidenceBundle): Promise<void> {
     // Dynamic import to avoid hard dependency on proof-chain
-    const { tagAIContent } = await import("@szl-holdings/proof-chain");
+    const { tagAIContent } = await import('@szl-holdings/proof-chain');
     await tagAIContent({
       contentId: bundle.bundleId,
-      contentType: "substrate-evidence-bundle",
-      sourceClass: "llm_generated",
+      contentType: 'substrate-evidence-bundle',
+      sourceClass: 'llm_generated',
       confidenceScore: bundle.confidence,
       correlationId: bundle.runId,
       metadata: {
         stageId: bundle.stageId,
         workflowId: bundle.workflowId,
         bundleHash: bundle.bundleHash,
-        mode: "substrate",
+        mode: 'substrate',
       },
     });
   }
@@ -484,7 +487,7 @@ class JournalBackedRunStore implements RunStore {
     const snapshot = JSON.stringify(run);
     const snapshotHash = hashValue(snapshot);
     const bundleHash = computeBundleHash({
-      stageId: "__run__snapshot",
+      stageId: '__run__snapshot',
       inputHash: snapshotHash,
       outputHash: snapshotHash,
       confidence: 0,
@@ -492,8 +495,8 @@ class JournalBackedRunStore implements RunStore {
     const snapshotBundle: EvidenceBundle = {
       bundleId: `eb-snap-${run.runId}-${Date.now()}`,
       runId: run.runId,
-      stageId: "__run__snapshot",
-      stageType: "Reason",
+      stageId: '__run__snapshot',
+      stageType: 'Reason',
       workflowId: run.workflowId,
       citations: [],
       confidence: 0,
@@ -516,12 +519,12 @@ class JournalBackedRunStore implements RunStore {
     const bundles = await this.journalStore.getRunBundles(runId);
     // Find the most recent __run__snapshot bundle
     const snapshots = bundles
-      .filter((b) => b.stageId === "__run__snapshot" && b.metadata["_runSnapshot"])
+      .filter((b) => b.stageId === '__run__snapshot' && b.metadata['_runSnapshot'])
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
     if (snapshots.length === 0) return null;
 
-    const run = snapshots[0]!.metadata["_runSnapshot"] as PipelineRun;
+    const run = snapshots[0]!.metadata['_runSnapshot'] as PipelineRun;
     // Warm the cache for future hits
     this.cache.set(runId, run);
     return run;
@@ -545,10 +548,10 @@ export const defaultRunStore: RunStore = new JournalBackedRunStore(defaultJourna
 
 export function modeLabel(mode: ExecutionMode): string {
   const labels: Record<ExecutionMode, string> = {
-    "live": "LIVE",
-    "dry-run": "DRY-RUN",
-    "replay": "REPLAY",
-    "counterfactual": "COUNTERFACTUAL",
+    live: 'LIVE',
+    'dry-run': 'DRY-RUN',
+    replay: 'REPLAY',
+    counterfactual: 'COUNTERFACTUAL',
   };
   return labels[mode];
 }

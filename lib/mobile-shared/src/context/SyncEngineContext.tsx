@@ -1,14 +1,9 @@
-import React, {
-  createContext,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import type React from 'react';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
-const QUEUE_KEY = "mobile-shared:sync-queue-v2";
-const CONFLICTS_KEY = "mobile-shared:sync-conflicts-v2";
-const ETAG_CACHE_KEY = "mobile-shared:etag-cache-v1";
+const QUEUE_KEY = 'mobile-shared:sync-queue-v2';
+const CONFLICTS_KEY = 'mobile-shared:sync-conflicts-v2';
+const ETAG_CACHE_KEY = 'mobile-shared:etag-cache-v1';
 const MAX_QUEUE = 100;
 const MAX_RETRIES = 5;
 const BASE_BACKOFF_MS = 1_000;
@@ -18,7 +13,7 @@ const RETRY_POLL_MS = 10_000;
 export interface QueuedMutation {
   id: string;
   domain: string;
-  method: "POST" | "PUT" | "PATCH" | "DELETE";
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   url: string;
   body?: unknown;
   headers?: Record<string, string>;
@@ -26,7 +21,7 @@ export interface QueuedMutation {
   timestamp: number;
   retries: number;
   nextRetryAt: number;
-  status: "pending" | "retrying" | "failed" | "conflict";
+  status: 'pending' | 'retrying' | 'failed' | 'conflict';
 }
 
 export interface ConflictInfo {
@@ -47,7 +42,7 @@ export interface SyncEngineState {
 
 export interface EnqueueOptions {
   domain: string;
-  method: "POST" | "PUT" | "PATCH" | "DELETE";
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   url: string;
   body?: unknown;
   headers?: Record<string, string>;
@@ -57,7 +52,7 @@ export interface EnqueueOptions {
 export interface SyncEngineContextValue extends SyncEngineState {
   domain: string;
   enqueue: (options: EnqueueOptions) => Promise<void>;
-  resolveConflict: (conflictId: string, resolution: "keep-mine" | "keep-theirs") => Promise<void>;
+  resolveConflict: (conflictId: string, resolution: 'keep-mine' | 'keep-theirs') => Promise<void>;
   dismissConflict: (conflictId: string) => Promise<void>;
   retryFailed: () => Promise<void>;
   isOnline: boolean;
@@ -70,7 +65,7 @@ async function getStorage(): Promise<{
   setItem: (k: string, v: string) => Promise<void>;
 } | null> {
   try {
-    const mod = await import("@react-native-async-storage/async-storage");
+    const mod = await import('@react-native-async-storage/async-storage');
     return mod.default;
   } catch {
     return null;
@@ -155,11 +150,13 @@ function generateId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-function stripConcurrencyHeaders(headers: Record<string, string> | undefined): Record<string, string> {
+function stripConcurrencyHeaders(
+  headers: Record<string, string> | undefined,
+): Record<string, string> {
   if (!headers) return {};
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(headers)) {
-    if (key.toLowerCase() !== "if-match") {
+    if (key.toLowerCase() !== 'if-match') {
       result[key] = value;
     }
   }
@@ -200,9 +197,9 @@ export function SyncEngineProvider({
     const queue = await readQueue();
     const domainQueue = queue.filter((m) => m.domain === domain);
     const pendingItems = domainQueue.filter(
-      (m) => m.status === "pending" || m.status === "retrying"
+      (m) => m.status === 'pending' || m.status === 'retrying',
     );
-    const failedItems = domainQueue.filter((m) => m.status === "failed");
+    const failedItems = domainQueue.filter((m) => m.status === 'failed');
     setPending(pendingItems.length);
     setFailedCount(failedItems.length);
   }, [domain]);
@@ -213,14 +210,13 @@ export function SyncEngineProvider({
       if (queue.length >= MAX_QUEUE) return;
 
       const idempotencyKey =
-        options.idempotencyKey ??
-        `${domain}-${options.method}-${options.url}-${generateId()}`;
+        options.idempotencyKey ?? `${domain}-${options.method}-${options.url}-${generateId()}`;
 
       const existing = queue.find(
         (m) =>
           m.idempotencyKey === idempotencyKey &&
           m.domain === domain &&
-          (m.status === "pending" || m.status === "retrying")
+          (m.status === 'pending' || m.status === 'retrying'),
       );
       if (existing) return;
 
@@ -235,13 +231,13 @@ export function SyncEngineProvider({
         timestamp: Date.now(),
         retries: 0,
         nextRetryAt: 0,
-        status: "pending",
+        status: 'pending',
       };
 
       await writeQueue([...queue, entry]);
       setPending((n) => n + 1);
     },
-    [domain]
+    [domain],
   );
 
   const drainQueue = useCallback(async () => {
@@ -252,7 +248,7 @@ export function SyncEngineProvider({
     try {
       const token = await getTokenRef.current();
       const baseHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
@@ -261,15 +257,15 @@ export function SyncEngineProvider({
       const eligibleQueue = queue.filter(
         (m) =>
           m.domain === domain &&
-          (m.status === "pending" || m.status === "retrying") &&
-          m.nextRetryAt <= now
+          (m.status === 'pending' || m.status === 'retrying') &&
+          m.nextRetryAt <= now,
       );
       const notEligible = queue.filter(
         (m) =>
           m.domain !== domain ||
-          m.status === "failed" ||
-          m.status === "conflict" ||
-          m.nextRetryAt > now
+          m.status === 'failed' ||
+          m.status === 'conflict' ||
+          m.nextRetryAt > now,
       );
 
       if (eligibleQueue.length === 0) {
@@ -286,26 +282,25 @@ export function SyncEngineProvider({
         try {
           const storedETag = await getStoredETag(mutation.url);
           const concurrencyHeaders: Record<string, string> = {};
-          if (storedETag && !mutation.headers?.["If-Match"] && !mutation.headers?.["if-match"]) {
-            concurrencyHeaders["If-Match"] = storedETag;
+          if (storedETag && !mutation.headers?.['If-Match'] && !mutation.headers?.['if-match']) {
+            concurrencyHeaders['If-Match'] = storedETag;
           }
 
           const headers: Record<string, string> = {
             ...baseHeaders,
             ...concurrencyHeaders,
             ...mutation.headers,
-            "X-Idempotency-Key": mutation.idempotencyKey,
+            'X-Idempotency-Key': mutation.idempotencyKey,
           };
 
           const res = await fetch(mutation.url, {
             method: mutation.method,
             headers,
-            body:
-              mutation.body !== undefined ? JSON.stringify(mutation.body) : undefined,
+            body: mutation.body !== undefined ? JSON.stringify(mutation.body) : undefined,
           });
 
           if (res.ok || res.status === 204) {
-            const responseETag = res.headers.get("etag");
+            const responseETag = res.headers.get('etag');
             if (responseETag) {
               await captureETag(mutation.url, responseETag);
             }
@@ -334,37 +329,37 @@ export function SyncEngineProvider({
             };
 
             newConflicts.push(conflict);
-            remaining.push({ ...mutation, status: "conflict" });
+            remaining.push({ ...mutation, status: 'conflict' });
             onConflictRef.current?.(conflict);
             continue;
           }
 
           if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-            remaining.push({ ...mutation, status: "failed" });
+            remaining.push({ ...mutation, status: 'failed' });
             continue;
           }
 
           if (mutation.retries >= MAX_RETRIES) {
-            remaining.push({ ...mutation, status: "failed" });
+            remaining.push({ ...mutation, status: 'failed' });
           } else {
             const backoff = calcBackoff(mutation.retries);
             remaining.push({
               ...mutation,
               retries: mutation.retries + 1,
               nextRetryAt: Date.now() + backoff,
-              status: "retrying",
+              status: 'retrying',
             });
           }
         } catch {
           if (mutation.retries >= MAX_RETRIES) {
-            remaining.push({ ...mutation, status: "failed" });
+            remaining.push({ ...mutation, status: 'failed' });
           } else {
             const backoff = calcBackoff(mutation.retries);
             remaining.push({
               ...mutation,
               retries: mutation.retries + 1,
               nextRetryAt: Date.now() + backoff,
-              status: "retrying",
+              status: 'retrying',
             });
           }
         }
@@ -374,10 +369,10 @@ export function SyncEngineProvider({
       await writeQueue(updatedQueue);
 
       const pendingCount = updatedQueue.filter(
-        (m) => m.domain === domain && (m.status === "pending" || m.status === "retrying")
+        (m) => m.domain === domain && (m.status === 'pending' || m.status === 'retrying'),
       ).length;
       const failedCount = updatedQueue.filter(
-        (m) => m.domain === domain && m.status === "failed"
+        (m) => m.domain === domain && m.status === 'failed',
       ).length;
 
       setPending(pendingCount);
@@ -402,19 +397,17 @@ export function SyncEngineProvider({
   }, [domain]);
 
   const resolveConflict = useCallback(
-    async (conflictId: string, resolution: "keep-mine" | "keep-theirs") => {
+    async (conflictId: string, resolution: 'keep-mine' | 'keep-theirs') => {
       const conflict = conflicts.find((c) => c.id === conflictId);
       if (!conflict) return;
 
       const queue = await readQueue();
-      const withoutConflict = queue.filter(
-        (m) => m.id !== conflict.mutation.id
-      );
+      const withoutConflict = queue.filter((m) => m.id !== conflict.mutation.id);
 
-      if (resolution === "keep-mine") {
+      if (resolution === 'keep-mine') {
         const retryMutation: QueuedMutation = {
           ...conflict.mutation,
-          status: "pending",
+          status: 'pending',
           retries: 0,
           nextRetryAt: 0,
           headers: stripConcurrencyHeaders(conflict.mutation.headers),
@@ -430,35 +423,40 @@ export function SyncEngineProvider({
       setConflicts(updatedConflicts);
       await writeConflicts(updatedConflicts);
     },
-    [conflicts]
+    [conflicts],
   );
 
-  const dismissConflict = useCallback(async (conflictId: string) => {
-    const existing = conflicts.find((c) => c.id === conflictId);
-    const updatedConflicts = conflicts.filter((c) => c.id !== conflictId);
-    setConflicts(updatedConflicts);
-    await writeConflicts(updatedConflicts);
+  const dismissConflict = useCallback(
+    async (conflictId: string) => {
+      const existing = conflicts.find((c) => c.id === conflictId);
+      const updatedConflicts = conflicts.filter((c) => c.id !== conflictId);
+      setConflicts(updatedConflicts);
+      await writeConflicts(updatedConflicts);
 
-    if (existing) {
-      const queue = await readQueue();
-      const withoutOrphan = queue.filter((m) => m.id !== existing.mutation.id);
-      await writeQueue(withoutOrphan);
-      const pendingCount = withoutOrphan.filter(
-        (m) => m.domain === domain && (m.status === "pending" || m.status === "retrying")
-      ).length;
-      const failedCnt = withoutOrphan.filter((m) => m.domain === domain && m.status === "failed").length;
-      setPending(pendingCount);
-      setFailedCount(failedCnt);
-    }
-  }, [conflicts, domain]);
+      if (existing) {
+        const queue = await readQueue();
+        const withoutOrphan = queue.filter((m) => m.id !== existing.mutation.id);
+        await writeQueue(withoutOrphan);
+        const pendingCount = withoutOrphan.filter(
+          (m) => m.domain === domain && (m.status === 'pending' || m.status === 'retrying'),
+        ).length;
+        const failedCnt = withoutOrphan.filter(
+          (m) => m.domain === domain && m.status === 'failed',
+        ).length;
+        setPending(pendingCount);
+        setFailedCount(failedCnt);
+      }
+    },
+    [conflicts, domain],
+  );
 
   const retryFailed = useCallback(async () => {
     const queue = await readQueue();
     const updated = queue.map((m) => {
-      if (m.domain === domain && m.status === "failed") {
+      if (m.domain === domain && m.status === 'failed') {
         return {
           ...m,
-          status: "pending" as const,
+          status: 'pending' as const,
           retries: 0,
           nextRetryAt: 0,
           headers: stripConcurrencyHeaders(m.headers),
@@ -490,7 +488,7 @@ export function SyncEngineProvider({
     const setupNetInfo = async () => {
       try {
         // @ts-expect-error optional peer dep resolved at runtime in Expo apps
-        const NetInfo = await import("@react-native-community/netinfo");
+        const NetInfo = await import('@react-native-community/netinfo');
 
         netinfoUnsubscribe = NetInfo.default.addEventListener(
           (state: { isConnected: boolean | null; isInternetReachable: boolean | null }) => {
@@ -499,7 +497,7 @@ export function SyncEngineProvider({
             if (online) {
               drainQueue();
             }
-          }
+          },
         );
 
         const netState: { isConnected: boolean | null; isInternetReachable: boolean | null } =
@@ -544,9 +542,5 @@ export function SyncEngineProvider({
     retryFailed,
   };
 
-  return (
-    <SyncEngineContext.Provider value={value}>
-      {children}
-    </SyncEngineContext.Provider>
-  );
+  return <SyncEngineContext.Provider value={value}>{children}</SyncEngineContext.Provider>;
 }

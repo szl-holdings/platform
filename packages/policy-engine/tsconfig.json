@@ -8,8 +8,6 @@
     "composite": true,
     "types": ["node"]
   },
-  "references": [
-    { "path": "../atlas-core" }
-  ],
+  "references": [{ "path": "../atlas-core" }],
   "include": ["src/**/*"]
 }

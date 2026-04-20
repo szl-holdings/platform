@@ -1,6 +1,6 @@
-import { usePushNotifications } from "@/hooks/advisory/usePushNotifications";
-import { useEffect } from "react";
-import { useNotifications } from "@/context/NotificationContext";
+import { useEffect } from 'react';
+import { useNotifications } from '@/context/NotificationContext';
+import { usePushNotifications } from '@/hooks/advisory/usePushNotifications';
 
 export function PushNotificationBootstrap() {
   const { notification } = usePushNotifications();

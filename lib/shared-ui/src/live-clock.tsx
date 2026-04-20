@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { useUserPreferences } from "./use-user-preferences";
+import { useEffect, useMemo, useState } from 'react';
+import { useUserPreferences } from './use-user-preferences';
 
 export interface LiveClockProps {
   className?: string;
@@ -9,7 +9,7 @@ export interface LiveClockProps {
    * - `local`: user's preferred time zone (falls back to browser default)
    * - `iso`: HH:MM:SS slice from the ISO string in UTC
    */
-  format?: "utc" | "local" | "iso";
+  format?: 'utc' | 'local' | 'iso';
   /** Explicit time zone override that wins over the user preference. */
   timeZone?: string;
 }
@@ -17,9 +17,9 @@ export interface LiveClockProps {
 function formatLocalTime(time: Date, timeZone: string | undefined): string {
   try {
     return new Intl.DateTimeFormat(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       timeZone,
     }).format(time);
   } catch {
@@ -27,7 +27,7 @@ function formatLocalTime(time: Date, timeZone: string | undefined): string {
   }
 }
 
-export function LiveClock({ className, style, format = "utc", timeZone }: LiveClockProps) {
+export function LiveClock({ className, style, format = 'utc', timeZone }: LiveClockProps) {
   const [time, setTime] = useState(new Date());
   const { prefs } = useUserPreferences();
 
@@ -42,9 +42,9 @@ export function LiveClock({ className, style, format = "utc", timeZone }: LiveCl
   );
 
   const display =
-    format === "iso"
+    format === 'iso'
       ? time.toISOString().slice(11, 19)
-      : format === "local"
+      : format === 'local'
         ? formatLocalTime(time, resolvedZone)
         : `UTC ${time.toISOString().slice(11, 19)}`;
 

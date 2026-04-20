@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import React, {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 export interface TenantBranding {
   id: number;
@@ -32,15 +39,15 @@ export interface TenantBrandConfig {
 }
 
 const DEFAULT_BRAND: TenantBrandConfig = {
-  companyName: "SZL Holdings",
+  companyName: 'SZL Holdings',
   tagline: null,
   logoUrl: null,
   faviconUrl: null,
-  primaryColor: "#6366f1",
-  accentColor: "#7c3aed",
-  sidebarHeaderText: "SZL Holdings",
+  primaryColor: '#6366f1',
+  accentColor: '#7c3aed',
+  sidebarHeaderText: 'SZL Holdings',
   customDomainLabel: null,
-  emailFromName: "SZL Holdings",
+  emailFromName: 'SZL Holdings',
   emailFooterText: null,
   isCustomized: false,
 };
@@ -54,7 +61,8 @@ export function mergeBranding(branding: TenantBranding | null): TenantBrandConfi
     faviconUrl: branding.faviconUrl ?? null,
     primaryColor: branding.primaryColor ?? DEFAULT_BRAND.primaryColor,
     accentColor: branding.accentColor ?? DEFAULT_BRAND.accentColor,
-    sidebarHeaderText: branding.sidebarHeaderText ?? branding.companyName ?? DEFAULT_BRAND.sidebarHeaderText,
+    sidebarHeaderText:
+      branding.sidebarHeaderText ?? branding.companyName ?? DEFAULT_BRAND.sidebarHeaderText,
     customDomainLabel: branding.customDomainLabel ?? null,
     emailFromName: branding.emailFromName ?? branding.companyName ?? DEFAULT_BRAND.emailFromName,
     emailFooterText: branding.emailFooterText ?? null,
@@ -92,7 +100,7 @@ export interface TenantBrandProviderProps {
 export function TenantBrandProvider({
   children,
   azureTenantId,
-  apiBase = "",
+  apiBase = '',
   initialBranding = null,
 }: TenantBrandProviderProps) {
   const [rawBranding, setRawBranding] = useState<TenantBranding | null>(initialBranding);
@@ -106,32 +114,37 @@ export function TenantBrandProvider({
     setIsLoading(true);
     const url = `${apiBase}/api/tenant-branding/${encodeURIComponent(azureTenantId)}`;
     fetch(url)
-      .then(r => r.json())
+      .then((r) => r.json())
       .then((json) => {
         const b = json?.data?.branding ?? json?.branding ?? null;
         setRawBranding(b);
         setError(null);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : "Failed to load branding");
+        setError(err instanceof Error ? err.message : 'Failed to load branding');
       })
       .finally(() => setIsLoading(false));
   }, [azureTenantId, apiBase]);
 
   const brand = mergeBranding(rawBranding);
 
-  const setPreview = useCallback((partial: Partial<TenantBrandConfig> | null) => {
-    if (!partial) {
-      setPreviewBrand(null);
-    } else {
-      setPreviewBrand(prev => ({ ...(prev ?? brand), ...partial }));
-    }
-  }, [brand]);
+  const setPreview = useCallback(
+    (partial: Partial<TenantBrandConfig> | null) => {
+      if (!partial) {
+        setPreviewBrand(null);
+      } else {
+        setPreviewBrand((prev) => ({ ...(prev ?? brand), ...partial }));
+      }
+    },
+    [brand],
+  );
 
   const activeBrand = previewBrand ?? brand;
 
   return (
-    <TenantBrandContext.Provider value={{ brand, rawBranding, isLoading, error, previewBrand, setPreview, activeBrand }}>
+    <TenantBrandContext.Provider
+      value={{ brand, rawBranding, isLoading, error, previewBrand, setPreview, activeBrand }}
+    >
       {children}
     </TenantBrandContext.Provider>
   );
@@ -144,9 +157,9 @@ export function useTenantBrand(): TenantBrandContextValue {
 export function useTenantCSSVars(): React.CSSProperties {
   const { activeBrand } = useTenantBrand();
   return {
-    "--tenant-primary": activeBrand.primaryColor,
-    "--tenant-accent": activeBrand.accentColor,
-    "--tenant-company": `"${activeBrand.companyName}"`,
+    '--tenant-primary': activeBrand.primaryColor,
+    '--tenant-accent': activeBrand.accentColor,
+    '--tenant-company': `"${activeBrand.companyName}"`,
   } as React.CSSProperties;
 }
 

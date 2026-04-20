@@ -1,13 +1,6 @@
-import * as React from "react";
-import {
-  CheckCircle2,
-  Circle,
-  ChevronDown,
-  ChevronUp,
-  X,
-  Rocket,
-} from "lucide-react";
-import { cn } from "../utils";
+import { CheckCircle2, ChevronDown, ChevronUp, Circle, Rocket, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../utils';
 
 export interface ChecklistItem {
   id: string;
@@ -29,18 +22,18 @@ export interface OnboardingChecklistProps {
 }
 
 export function OnboardingChecklist({
-  title = "Getting Started",
+  title = 'Getting Started',
   items,
   onDismiss,
   onItemClick,
-  accentColor = "#8b7ac8",
-  storageKey = "onboarding_checklist",
+  accentColor = '#8b7ac8',
+  storageKey = 'onboarding_checklist',
   className,
 }: OnboardingChecklistProps) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(() => {
     try {
-      return localStorage.getItem(`szl_${storageKey}_dismissed`) === "true";
+      return localStorage.getItem(`szl_${storageKey}_dismissed`) === 'true';
     } catch {
       return false;
     }
@@ -53,7 +46,7 @@ export function OnboardingChecklist({
 
   const handleDismiss = React.useCallback(() => {
     try {
-      localStorage.setItem(`szl_${storageKey}_dismissed`, "true");
+      localStorage.setItem(`szl_${storageKey}_dismissed`, 'true');
     } catch {}
     setDismissed(true);
     onDismiss?.();
@@ -64,7 +57,7 @@ export function OnboardingChecklist({
   return (
     <div
       className={cn(
-        "w-72 rounded-2xl border border-border bg-card shadow-xl overflow-hidden",
+        'w-72 rounded-2xl border border-border bg-card shadow-xl overflow-hidden',
         className,
       )}
       style={{
@@ -76,26 +69,21 @@ export function OnboardingChecklist({
         style={{
           background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60)`,
           width: `${progress}%`,
-          transition: "width 0.4s ease",
+          transition: 'width 0.4s ease',
         }}
       />
 
       <div className="p-4">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <Rocket
-              className="w-4 h-4"
-              style={{ color: accentColor }}
-            />
-            <h4 className="text-sm font-display font-bold text-foreground">
-              {title}
-            </h4>
+            <Rocket className="w-4 h-4" style={{ color: accentColor }} />
+            <h4 className="text-sm font-display font-bold text-foreground">{title}</h4>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setCollapsed(!collapsed)}
               className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-              aria-label={collapsed ? "Expand" : "Collapse"}
+              aria-label={collapsed ? 'Expand' : 'Collapse'}
             >
               {collapsed ? (
                 <ChevronDown className="w-3.5 h-3.5" />
@@ -114,9 +102,7 @@ export function OnboardingChecklist({
         </div>
 
         <p className="text-xs text-muted-foreground mb-3">
-          {allDone
-            ? "All set! You're ready to go."
-            : `${completedCount} of ${totalCount} complete`}
+          {allDone ? "All set! You're ready to go." : `${completedCount} of ${totalCount} complete`}
         </p>
 
         {!collapsed && (
@@ -129,10 +115,8 @@ export function OnboardingChecklist({
                   item.action?.();
                 }}
                 className={cn(
-                  "w-full flex items-start gap-2.5 p-2 rounded-lg text-left transition-colors",
-                  item.completed
-                    ? "opacity-60"
-                    : "hover:bg-muted/50 cursor-pointer",
+                  'w-full flex items-start gap-2.5 p-2 rounded-lg text-left transition-colors',
+                  item.completed ? 'opacity-60' : 'hover:bg-muted/50 cursor-pointer',
                 )}
               >
                 {item.completed ? (
@@ -146,10 +130,8 @@ export function OnboardingChecklist({
                 <div className="min-w-0">
                   <span
                     className={cn(
-                      "text-sm font-medium block",
-                      item.completed
-                        ? "line-through text-muted-foreground"
-                        : "text-foreground",
+                      'text-sm font-medium block',
+                      item.completed ? 'line-through text-muted-foreground' : 'text-foreground',
                     )}
                   >
                     {item.label}

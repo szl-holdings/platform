@@ -9,7 +9,7 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import { getClaim, type ClaimTruthValue } from "@szl-holdings/config/public-claims";
+import { type ClaimTruthValue, getClaim } from '@szl-holdings/config/public-claims';
 
 export type { ClaimTruthValue };
 
@@ -32,13 +32,11 @@ export function makeClaimResolver(
   return function resolveClaim(claimId: string, fallback: string): ClaimValue {
     const claim = getClaim(claimId);
     if (!claim) {
-      console.warn(
-        `[${modulePrefix}] Unknown claim id "${claimId}" — fallback "${fallback}".`,
-      );
+      console.warn(`[${modulePrefix}] Unknown claim id "${claimId}" — fallback "${fallback}".`);
       return {
         value: fallback,
-        label: "[Demo]",
-        truthValue: "pending",
+        label: '[Demo]',
+        truthValue: 'pending',
         displayWithLabel: `${fallback} [Demo]`,
       };
     }
@@ -46,9 +44,7 @@ export function makeClaimResolver(
       value: claim.claim,
       label: claim.displayLabel,
       truthValue: claim.truthValue,
-      displayWithLabel: claim.displayLabel
-        ? `${claim.claim} ${claim.displayLabel}`
-        : claim.claim,
+      displayWithLabel: claim.displayLabel ? `${claim.claim} ${claim.displayLabel}` : claim.claim,
     };
   };
 }

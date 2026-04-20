@@ -1,7 +1,7 @@
 /**
  * Common request/response primitives used across all API contracts.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 export const paginationQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
@@ -59,7 +59,7 @@ export const timestampsSchema = z.object({
 
 export const sortQuerySchema = z.object({
   sortBy: z.string().optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
 /**

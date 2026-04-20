@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { TenantIdSchema } from "./tenant.js";
+import { z } from 'zod';
+import { TenantIdSchema } from './tenant.js';
 
 export const IndexRebuildRequestSchema = z.object({
   requestId: z.string().min(1),
@@ -15,7 +15,7 @@ export const IndexRebuildResponseSchema = z.object({
   requestId: z.string(),
   tenantId: TenantIdSchema,
   jobId: z.string(),
-  status: z.enum(["queued", "running", "completed", "failed", "waiting_approval"]),
+  status: z.enum(['queued', 'running', 'completed', 'failed', 'waiting_approval']),
   startedAt: z.string().datetime().optional(),
 });
 export type IndexRebuildResponse = z.infer<typeof IndexRebuildResponseSchema>;

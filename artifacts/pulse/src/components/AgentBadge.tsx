@@ -1,16 +1,16 @@
-import { AGENTS, type Agent } from "../lib/data";
+import { AGENTS, type Agent } from '../lib/data';
 
 interface Props {
   agentId: string;
   showDomain?: boolean;
-  size?: "sm" | "md";
+  size?: 'sm' | 'md';
 }
 
-export default function AgentBadge({ agentId, showDomain = false, size = "md" }: Props) {
+export default function AgentBadge({ agentId, showDomain = false, size = 'md' }: Props) {
   const agent = AGENTS[agentId];
   if (!agent) return null;
 
-  const fontSize = size === "sm" ? "0.62rem" : "0.68rem";
+  const fontSize = size === 'sm' ? '0.62rem' : '0.68rem';
 
   return (
     <span
@@ -23,9 +23,7 @@ export default function AgentBadge({ agentId, showDomain = false, size = "md" }:
       }}
     >
       <span style={{ fontWeight: 700 }}>{agent.name}</span>
-      {showDomain && (
-        <span style={{ opacity: 0.7 }}>· {agent.domain.replace("_", " ")}</span>
-      )}
+      {showDomain && <span style={{ opacity: 0.7 }}>· {agent.domain.replace('_', ' ')}</span>}
     </span>
   );
 }

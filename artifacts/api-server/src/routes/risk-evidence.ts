@@ -33,21 +33,21 @@
  * runaway client cannot blow up the row.
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db, platformSettingsTable } from "@szl-holdings/db";
-import { and, eq } from "drizzle-orm";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, platformSettingsTable } from '@szl-holdings/db';
+import { and, eq } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess,
-  sendCreated,
-  sendBadRequest,
-  sendNotFound,
   handleRouteError,
-} from "../lib/api-response";
-import { validateBody } from "../lib/validation";
+  sendBadRequest,
+  sendCreated,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { validateBody } from '../lib/validation';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-const NAMESPACE = "szl.riskEvidence";
+const NAMESPACE = 'szl.riskEvidence';
 const MAX_RUNS_PER_DOMAIN = 200;
 
 interface SavedRiskRun {
@@ -72,11 +72,11 @@ const DOMAIN_PATTERN = /^[A-Za-z0-9._\-:]{1,80}$/;
 const EVIDENCE_ID_PATTERN = /^[A-Za-z0-9._\-:]{1,80}$/;
 
 function isValidDomain(d: unknown): d is string {
-  return typeof d === "string" && DOMAIN_PATTERN.test(d);
+  return typeof d === 'string' && DOMAIN_PATTERN.test(d);
 }
 
 function isValidEvidenceId(id: unknown): id is string {
-  return typeof id === "string" && EVIDENCE_ID_PATTERN.test(id);
+  return typeof id === 'string' && EVIDENCE_ID_PATTERN.test(id);
 }
 
 function generateEvidenceId(): string {
@@ -84,27 +84,31 @@ function generateEvidenceId(): string {
 }
 
 function normalizeRun(raw: unknown): SavedRiskRun | null {
-  if (!raw || typeof raw !== "object") return null;
+  if (!raw || typeof raw !== 'object') return null;
   const r = raw as Record<string, unknown>;
-  if (typeof r.scenarioId !== "string" || typeof r.scenarioTitle !== "string" || typeof r.domain !== "string") {
+  if (
+    typeof r.scenarioId !== 'string' ||
+    typeof r.scenarioTitle !== 'string' ||
+    typeof r.domain !== 'string'
+  ) {
     return null;
   }
   return {
-    evidenceId: typeof r.evidenceId === "string" ? r.evidenceId : generateEvidenceId(),
+    evidenceId: typeof r.evidenceId === 'string' ? r.evidenceId : generateEvidenceId(),
     scenarioId: r.scenarioId,
-    scenarioVersion: typeof r.scenarioVersion === "string" ? r.scenarioVersion : undefined,
+    scenarioVersion: typeof r.scenarioVersion === 'string' ? r.scenarioVersion : undefined,
     scenarioTitle: r.scenarioTitle,
     domain: r.domain,
-    iterations: typeof r.iterations === "number" ? r.iterations : 0,
-    validIterations: typeof r.validIterations === "number" ? r.validIterations : 0,
-    durationMs: typeof r.durationMs === "number" ? r.durationMs : 0,
+    iterations: typeof r.iterations === 'number' ? r.iterations : 0,
+    validIterations: typeof r.validIterations === 'number' ? r.validIterations : 0,
+    durationMs: typeof r.durationMs === 'number' ? r.durationMs : 0,
     metrics: Array.isArray(r.metrics) ? r.metrics : [],
     sensitivities: Array.isArray(r.sensitivities) ? r.sensitivities : [],
     inputs: Array.isArray(r.inputs) ? r.inputs : [],
-    savedAt: typeof r.savedAt === "string" ? r.savedAt : new Date().toISOString(),
-    savedBy: typeof r.savedBy === "string" ? r.savedBy : undefined,
-    tenant: typeof r.tenant === "string" ? r.tenant : undefined,
-    note: typeof r.note === "string" && r.note.trim() ? r.note : undefined,
+    savedAt: typeof r.savedAt === 'string' ? r.savedAt : new Date().toISOString(),
+    savedBy: typeof r.savedBy === 'string' ? r.savedBy : undefined,
+    tenant: typeof r.tenant === 'string' ? r.tenant : undefined,
+    note: typeof r.note === 'string' && r.note.trim() ? r.note : undefined,
   };
 }
 
@@ -122,7 +126,9 @@ async function loadRuns(domain: string): Promise<SavedRiskRun[]> {
   const [row] = await db
     .select()
     .from(platformSettingsTable)
-    .where(and(eq(platformSettingsTable.namespace, NAMESPACE), eq(platformSettingsTable.key, domain)))
+    .where(
+      and(eq(platformSettingsTable.namespace, NAMESPACE), eq(platformSettingsTable.key, domain)),
+    )
     .limit(1);
   if (!row) return [];
   return normalizeRuns(row.value);
@@ -133,21 +139,23 @@ async function saveRuns(domain: string, runs: SavedRiskRun[]): Promise<void> {
   const [existing] = await db
     .select({ id: platformSettingsTable.id })
     .from(platformSettingsTable)
-    .where(and(eq(platformSettingsTable.namespace, NAMESPACE), eq(platformSettingsTable.key, domain)))
+    .where(
+      and(eq(platformSettingsTable.namespace, NAMESPACE), eq(platformSettingsTable.key, domain)),
+    )
     .limit(1);
 
   if (existing) {
     await db
       .update(platformSettingsTable)
-      .set({ value: trimmed as never, valueType: "json", updatedAt: new Date() })
+      .set({ value: trimmed as never, valueType: 'json', updatedAt: new Date() })
       .where(eq(platformSettingsTable.id, existing.id));
   } else {
     await db.insert(platformSettingsTable).values({
       namespace: NAMESPACE,
       key: domain,
       value: trimmed as never,
-      valueType: "json",
-      category: "risk-evidence",
+      valueType: 'json',
+      category: 'risk-evidence',
       isPublic: true,
     });
   }
@@ -155,11 +163,11 @@ async function saveRuns(domain: string, runs: SavedRiskRun[]): Promise<void> {
 
 const router: IRouter = Router();
 
-router.get("/risk-evidence/by-id/:evidenceId", async (req: Request, res: Response) => {
+router.get('/risk-evidence/by-id/:evidenceId', async (req: Request, res: Response) => {
   try {
     const { evidenceId } = req.params;
     if (!isValidEvidenceId(evidenceId)) {
-      sendBadRequest(res, "Invalid evidenceId");
+      sendBadRequest(res, 'Invalid evidenceId');
       return;
     }
     // Scan every domain row. The rows are JSONB arrays so the work is bounded
@@ -172,56 +180,58 @@ router.get("/risk-evidence/by-id/:evidenceId", async (req: Request, res: Respons
       .where(eq(platformSettingsTable.namespace, NAMESPACE));
     for (const row of rows) {
       const runs = normalizeRuns(row.value);
-      const match = runs.find(r => r.evidenceId === evidenceId);
+      const match = runs.find((r) => r.evidenceId === evidenceId);
       if (match) {
         sendSuccess(res, match);
         return;
       }
     }
-    sendNotFound(res, "Risk evidence run");
+    sendNotFound(res, 'Risk evidence run');
   } catch (err) {
-    handleRouteError(res, err, "Failed to resolve risk evidence by id");
+    handleRouteError(res, err, 'Failed to resolve risk evidence by id');
   }
 });
 
-router.get("/risk-evidence/:domain", async (req: Request, res: Response) => {
+router.get('/risk-evidence/:domain', async (req: Request, res: Response) => {
   try {
     const { domain } = req.params;
     if (!isValidDomain(domain)) {
-      sendBadRequest(res, "Invalid domain");
+      sendBadRequest(res, 'Invalid domain');
       return;
     }
     const runs = await loadRuns(domain);
     runs.sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
     sendSuccess(res, { runs });
   } catch (err) {
-    handleRouteError(res, err, "Failed to load risk evidence");
+    handleRouteError(res, err, 'Failed to load risk evidence');
   }
 });
 
 router.post(
-  "/risk-evidence/:domain",
-  validateBody(bodyShape({
-      "domain": z.unknown().optional(),
-      "evidenceId": z.unknown().optional(),
-      "savedAt": z.unknown().optional(),
-    })),
+  '/risk-evidence/:domain',
+  validateBody(
+    bodyShape({
+      domain: z.unknown().optional(),
+      evidenceId: z.unknown().optional(),
+      savedAt: z.unknown().optional(),
+    }),
+  ),
   async (req: Request, res: Response) => {
     try {
       const { domain } = req.params;
       if (!isValidDomain(domain)) {
-        sendBadRequest(res, "Invalid domain");
+        sendBadRequest(res, 'Invalid domain');
         return;
       }
       const body = req.body as Record<string, unknown>;
       // The body's "domain" must agree with the path domain when present.
-      if (typeof body.domain === "string" && body.domain !== domain) {
-        sendBadRequest(res, "Body domain does not match path");
+      if (typeof body.domain === 'string' && body.domain !== domain) {
+        sendBadRequest(res, 'Body domain does not match path');
         return;
       }
       const candidate = normalizeRun({ ...body, domain });
       if (!candidate) {
-        sendBadRequest(res, "Body must include scenarioId, scenarioTitle and domain");
+        sendBadRequest(res, 'Body must include scenarioId, scenarioTitle and domain');
         return;
       }
       // Honour client-provided evidenceId when present (so SaveRiskRunButton's
@@ -229,47 +239,52 @@ router.post(
       // back to a server-generated id when missing.
       const record: SavedRiskRun = {
         ...candidate,
-        evidenceId: typeof body.evidenceId === "string" && EVIDENCE_ID_PATTERN.test(body.evidenceId)
-          ? body.evidenceId
-          : generateEvidenceId(),
-        savedAt: typeof body.savedAt === "string" ? body.savedAt : new Date().toISOString(),
+        evidenceId:
+          typeof body.evidenceId === 'string' && EVIDENCE_ID_PATTERN.test(body.evidenceId)
+            ? body.evidenceId
+            : generateEvidenceId(),
+        savedAt: typeof body.savedAt === 'string' ? body.savedAt : new Date().toISOString(),
       };
 
       const existing = await loadRuns(domain);
       // Replace any prior record with the same evidenceId so re-saves are
       // idempotent rather than creating duplicate envelopes.
-      const filtered = existing.filter(r => r.evidenceId !== record.evidenceId);
+      const filtered = existing.filter((r) => r.evidenceId !== record.evidenceId);
       const next = [record, ...filtered];
       await saveRuns(domain, next);
       sendCreated(res, record);
     } catch (err) {
-      handleRouteError(res, err, "Failed to save risk evidence");
+      handleRouteError(res, err, 'Failed to save risk evidence');
     }
   },
 );
 
-router.delete("/risk-evidence/:domain/:evidenceId", validateBody(bodyShape({})), async (req: Request, res: Response) => {
-  try {
-    const { domain, evidenceId } = req.params;
-    if (!isValidDomain(domain)) {
-      sendBadRequest(res, "Invalid domain");
-      return;
+router.delete(
+  '/risk-evidence/:domain/:evidenceId',
+  validateBody(bodyShape({})),
+  async (req: Request, res: Response) => {
+    try {
+      const { domain, evidenceId } = req.params;
+      if (!isValidDomain(domain)) {
+        sendBadRequest(res, 'Invalid domain');
+        return;
+      }
+      if (!isValidEvidenceId(evidenceId)) {
+        sendBadRequest(res, 'Invalid evidenceId');
+        return;
+      }
+      const existing = await loadRuns(domain);
+      const next = existing.filter((r) => r.evidenceId !== evidenceId);
+      if (next.length === existing.length) {
+        sendNotFound(res, 'Risk evidence run');
+        return;
+      }
+      await saveRuns(domain, next);
+      sendSuccess(res, { ok: true, evidenceId });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to delete risk evidence');
     }
-    if (!isValidEvidenceId(evidenceId)) {
-      sendBadRequest(res, "Invalid evidenceId");
-      return;
-    }
-    const existing = await loadRuns(domain);
-    const next = existing.filter(r => r.evidenceId !== evidenceId);
-    if (next.length === existing.length) {
-      sendNotFound(res, "Risk evidence run");
-      return;
-    }
-    await saveRuns(domain, next);
-    sendSuccess(res, { ok: true, evidenceId });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to delete risk evidence");
-  }
-});
+  },
+);
 
 export default router;

@@ -11,4 +11,4 @@
  *   import { alloyWorkflowsTable } from "@szl-holdings/db-schema/alloy";
  */
 
-export * from "@szl-holdings/db/schema";
+export * from '@szl-holdings/db/schema';

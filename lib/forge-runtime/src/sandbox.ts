@@ -1,10 +1,10 @@
-import type { PrismDomain } from "@szl-holdings/prism-bus";
+import type { PrismDomain } from '@szl-holdings/prism-bus';
 
 export type ApprovalClass =
-  | "observe_only"
-  | "propose_only"
-  | "approval_required"
-  | "approved_execute";
+  | 'observe_only'
+  | 'propose_only'
+  | 'approval_required'
+  | 'approved_execute';
 
 export interface ForgeSandboxPolicy {
   tenantId?: string | null;
@@ -20,7 +20,13 @@ export interface ForgeSandboxPolicy {
 }
 
 export interface ForgeSandboxViolation {
-  type: "host_blocked" | "tool_blocked" | "domain_blocked" | "duration_exceeded" | "cost_exceeded" | "approval_required";
+  type:
+    | 'host_blocked'
+    | 'tool_blocked'
+    | 'domain_blocked'
+    | 'duration_exceeded'
+    | 'cost_exceeded'
+    | 'approval_required';
   detail: string;
   blockedValue?: string;
 }
@@ -47,12 +53,12 @@ export class ForgeSandbox {
 
   checkHost(host: string): ForgeSandboxViolation | null {
     if (this.policy.allowedHosts.length === 0) return null;
-    const allowed = this.policy.allowedHosts.some(h =>
-      h === "*" || host === h || host.endsWith(`.${h}`)
+    const allowed = this.policy.allowedHosts.some(
+      (h) => h === '*' || host === h || host.endsWith(`.${h}`),
     );
     if (!allowed) {
       const violation: ForgeSandboxViolation = {
-        type: "host_blocked",
+        type: 'host_blocked',
         detail: `Host '${host}' is not in the FORGE sandbox allowed list`,
         blockedValue: host,
       };
@@ -64,10 +70,10 @@ export class ForgeSandbox {
 
   checkTool(toolName: string): ForgeSandboxViolation | null {
     if (this.policy.allowedTools.length === 0) return null;
-    const allowed = this.policy.allowedTools.some(t => t === "*" || t === toolName);
+    const allowed = this.policy.allowedTools.some((t) => t === '*' || t === toolName);
     if (!allowed) {
       const violation: ForgeSandboxViolation = {
-        type: "tool_blocked",
+        type: 'tool_blocked',
         detail: `Tool '${toolName}' is not permitted in this FORGE execution context`,
         blockedValue: toolName,
       };
@@ -81,10 +87,10 @@ export class ForgeSandbox {
     const allowed =
       this.policy.allowedDomains.length === 0 ||
       this.policy.allowedDomains.includes(domain) ||
-      this.policy.allowedDomains.includes("global" as PrismDomain);
+      this.policy.allowedDomains.includes('global' as PrismDomain);
     if (!allowed) {
       const violation: ForgeSandboxViolation = {
-        type: "domain_blocked",
+        type: 'domain_blocked',
         detail: `Domain '${domain}' is outside the FORGE sandbox boundary`,
         blockedValue: domain,
       };
@@ -97,7 +103,7 @@ export class ForgeSandbox {
   checkDuration(durationMs: number): ForgeSandboxViolation | null {
     if (durationMs > this.policy.maxDurationMs) {
       const violation: ForgeSandboxViolation = {
-        type: "duration_exceeded",
+        type: 'duration_exceeded',
         detail: `Execution duration ${durationMs}ms exceeded FORGE limit ${this.policy.maxDurationMs}ms`,
       };
       this.violations.push(violation);
@@ -109,7 +115,7 @@ export class ForgeSandbox {
   checkCost(costUsd: number): ForgeSandboxViolation | null {
     if (this.policy.maxCostUsd != null && costUsd > this.policy.maxCostUsd) {
       const violation: ForgeSandboxViolation = {
-        type: "cost_exceeded",
+        type: 'cost_exceeded',
         detail: `Execution cost $${costUsd.toFixed(4)} exceeded FORGE limit $${this.policy.maxCostUsd.toFixed(4)}`,
       };
       this.violations.push(violation);
@@ -120,10 +126,10 @@ export class ForgeSandbox {
 
   requiresApprovalForAction(actionClass: ApprovalClass): boolean {
     const hierarchy: ApprovalClass[] = [
-      "observe_only",
-      "propose_only",
-      "approval_required",
-      "approved_execute",
+      'observe_only',
+      'propose_only',
+      'approval_required',
+      'approved_execute',
     ];
     const policyIdx = hierarchy.indexOf(this.policy.approvalClass);
     const actionIdx = hierarchy.indexOf(actionClass);
@@ -145,14 +151,14 @@ export class ForgeSandbox {
 
 export function createDefaultSandboxPolicy(
   domain: PrismDomain,
-  overrides: Partial<ForgeSandboxPolicy> = {}
+  overrides: Partial<ForgeSandboxPolicy> = {},
 ): ForgeSandboxPolicy {
   return {
     domain,
-    approvalClass: "propose_only",
+    approvalClass: 'propose_only',
     allowedHosts: [],
     allowedTools: [],
-    allowedDomains: [domain, "global"] as PrismDomain[],
+    allowedDomains: [domain, 'global'] as PrismDomain[],
     maxDurationMs: 5 * 60 * 1000,
     maxCostUsd: 1.0,
     isDryRunDefault: false,

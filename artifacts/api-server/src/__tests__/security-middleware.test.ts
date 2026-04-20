@@ -10,17 +10,17 @@
  *  3. tenantScope         — 403 for cross-tenant access / missing memberships
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express from "express";
-import type { Request, Response, NextFunction } from "express";
-import request from "supertest";
-import { z } from "zod";
+import type { NextFunction, Request, Response } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
 // Module mocks — hoisted before any imports
 // ---------------------------------------------------------------------------
 
-vi.mock("@szl-holdings/observability", () => ({
+vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: {
     recordAuthFailure: vi.fn(),
     recordRequest: vi.fn(),
@@ -35,10 +35,10 @@ const mockDbInnerJoin = vi.fn(() => ({ where: mockDbWhere }));
 const mockDbFrom = vi.fn(() => ({ innerJoin: mockDbInnerJoin, where: mockDbWhere }));
 const mockDbSelect = vi.fn(() => ({ from: mockDbFrom }));
 
-vi.mock("@szl-holdings/db", () => ({
+vi.mock('@szl-holdings/db', () => ({
   db: { select: mockDbSelect },
-  orgMembersTable: { orgId: "orgId", userId: "userId" },
-  organizationsTable: { id: "id", slug: "slug", name: "name" },
+  orgMembersTable: { orgId: 'orgId', userId: 'userId' },
+  organizationsTable: { id: 'id', slug: 'slug', name: 'name' },
   ROLE_HIERARCHY: {},
   isReadOnlyRole: () => false,
   toCanonicalRole: (r: string) => r,
@@ -48,15 +48,19 @@ vi.mock("@szl-holdings/db", () => ({
 // Import middlewares AFTER mocks
 // ---------------------------------------------------------------------------
 
-const { globalAuthEnforcer } = await import("../middlewares/global-auth-enforcer.js");
-const { validateBody, validateQuery, jsonObjectBodySchema, listQuerySchema } = await import("../lib/validation.js");
-const { tenantScope } = await import("../middlewares/tenant-scope.js");
+const { globalAuthEnforcer } = await import('../middlewares/global-auth-enforcer.js');
+const { validateBody, validateQuery, jsonObjectBodySchema, listQuerySchema } = await import(
+  '../lib/validation.js'
+);
+const { tenantScope } = await import('../middlewares/tenant-scope.js');
 
 // ---------------------------------------------------------------------------
 // Helper: build an Express app with optional middleware and a success handler
 // ---------------------------------------------------------------------------
 
-function buildApp(...middlewares: Array<(req: Request, res: Response, next: NextFunction) => void>) {
+function buildApp(
+  ...middlewares: Array<(req: Request, res: Response, next: NextFunction) => void>
+) {
   const app = express();
   app.use(express.json());
   for (const mw of middlewares) {
@@ -69,75 +73,81 @@ function buildApp(...middlewares: Array<(req: Request, res: Response, next: Next
 // 1. globalAuthEnforcer
 // ---------------------------------------------------------------------------
 
-describe("globalAuthEnforcer", () => {
+describe('globalAuthEnforcer', () => {
   const successHandler = (_req: Request, res: Response) => res.json({ ok: true });
 
-  it("returns 401 for unauthenticated requests to /api/* paths", async () => {
+  it('returns 401 for unauthenticated requests to /api/* paths', async () => {
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/api/protected-resource", successHandler);
+    app.get('/api/protected-resource', successHandler);
 
-    const res = await request(app).get("/api/protected-resource");
+    const res = await request(app).get('/api/protected-resource');
 
     expect(res.status).toBe(401);
     expect((res.body as Record<string, unknown>).error).toBeDefined();
-    expect((res.body as Record<string, unknown>).code).toBe("UNAUTHORIZED");
+    expect((res.body as Record<string, unknown>).code).toBe('UNAUTHORIZED');
   });
 
-  it("passes through when req.user is populated (authenticated)", async () => {
+  it('passes through when req.user is populated (authenticated)', async () => {
     const app = express();
     app.use(express.json());
     app.use((req, _res, next) => {
-      (req as Request & { user: unknown }).user = { id: 1, displayName: "Test User", email: "user@example.com", roles: ["member"], orgs: [] };
+      (req as Request & { user: unknown }).user = {
+        id: 1,
+        displayName: 'Test User',
+        email: 'user@example.com',
+        roles: ['member'],
+        orgs: [],
+      };
       next();
     });
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/api/protected-resource", successHandler);
+    app.get('/api/protected-resource', successHandler);
 
-    const res = await request(app).get("/api/protected-resource");
+    const res = await request(app).get('/api/protected-resource');
 
     expect(res.status).toBe(200);
     expect((res.body as Record<string, unknown>).ok).toBe(true);
   });
 
-  it("passes through for public exact path /api/health", async () => {
+  it('passes through for public exact path /api/health', async () => {
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/api/health", successHandler);
+    app.get('/api/health', successHandler);
 
-    const res = await request(app).get("/api/health");
+    const res = await request(app).get('/api/health');
 
     expect(res.status).toBe(200);
   });
 
-  it("passes through for public prefix /api/auth/login", async () => {
+  it('passes through for public prefix /api/auth/login', async () => {
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.post("/api/auth/login", successHandler);
+    app.post('/api/auth/login', successHandler);
 
-    const res = await request(app).post("/api/auth/login");
+    const res = await request(app).post('/api/auth/login');
 
     expect(res.status).toBe(200);
   });
 
-  it("passes through for public prefix /api/public/pricing", async () => {
+  it('passes through for public prefix /api/public/pricing', async () => {
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/api/public/pricing", successHandler);
+    app.get('/api/public/pricing', successHandler);
 
-    const res = await request(app).get("/api/public/pricing");
+    const res = await request(app).get('/api/public/pricing');
 
     expect(res.status).toBe(200);
   });
 
-  it("passes through when a valid X-Internal-Token header is provided on a legacy-allowed prefix", async () => {
-    const token = "test-internal-token-abc123";
-    const original = process.env["ALLOY_INTERNAL_TOKEN"];
-    process.env["ALLOY_INTERNAL_TOKEN"] = token;
+  it('passes through when a valid X-Internal-Token header is provided on a legacy-allowed prefix', async () => {
+    const token = 'test-internal-token-abc123';
+    const original = process.env['ALLOY_INTERNAL_TOKEN'];
+    process.env['ALLOY_INTERNAL_TOKEN'] = token;
 
     const app = express();
     app.use(express.json());
@@ -146,52 +156,52 @@ describe("globalAuthEnforcer", () => {
     // path prefixes (`/api/internal/`, `/api/alloy/agent/`, `/api/health`,
     // `/api/env-registry`). A path outside that allowlist would be rejected
     // — see the dedicated rejection test below.
-    app.get("/api/internal/protected-resource", successHandler);
+    app.get('/api/internal/protected-resource', successHandler);
 
     const res = await request(app)
-      .get("/api/internal/protected-resource")
-      .set("x-internal-token", token);
+      .get('/api/internal/protected-resource')
+      .set('x-internal-token', token);
 
     // Restore original value precisely — delete if it was absent, reset if it had a value
     if (original === undefined) {
-      delete process.env["ALLOY_INTERNAL_TOKEN"];
+      delete process.env['ALLOY_INTERNAL_TOKEN'];
     } else {
-      process.env["ALLOY_INTERNAL_TOKEN"] = original;
+      process.env['ALLOY_INTERNAL_TOKEN'] = original;
     }
 
     expect(res.status).toBe(200);
   });
 
   it("rejects X-Internal-Token that doesn't match (still 401)", async () => {
-    const original = process.env["ALLOY_INTERNAL_TOKEN"];
-    process.env["ALLOY_INTERNAL_TOKEN"] = "correct-token";
+    const original = process.env['ALLOY_INTERNAL_TOKEN'];
+    process.env['ALLOY_INTERNAL_TOKEN'] = 'correct-token';
 
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/api/internal/protected-resource", (_req, res) => res.json({ ok: true }));
+    app.get('/api/internal/protected-resource', (_req, res) => res.json({ ok: true }));
 
     const res = await request(app)
-      .get("/api/internal/protected-resource")
-      .set("x-internal-token", "wrong-token");
+      .get('/api/internal/protected-resource')
+      .set('x-internal-token', 'wrong-token');
 
     // Restore original value precisely
     if (original === undefined) {
-      delete process.env["ALLOY_INTERNAL_TOKEN"];
+      delete process.env['ALLOY_INTERNAL_TOKEN'];
     } else {
-      process.env["ALLOY_INTERNAL_TOKEN"] = original;
+      process.env['ALLOY_INTERNAL_TOKEN'] = original;
     }
 
     expect(res.status).toBe(401);
   });
 
-  it("does not block non-/api paths regardless of auth state", async () => {
+  it('does not block non-/api paths regardless of auth state', async () => {
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/some-public-page", successHandler);
+    app.get('/some-public-page', successHandler);
 
-    const res = await request(app).get("/some-public-page");
+    const res = await request(app).get('/some-public-page');
 
     expect(res.status).toBe(200);
   });
@@ -201,121 +211,131 @@ describe("globalAuthEnforcer", () => {
 // 2. validateBody
 // ---------------------------------------------------------------------------
 
-describe("validateBody", () => {
+describe('validateBody', () => {
   const testSchema = z.object({
     name: z.string().min(1).max(50),
     score: z.number().int().min(0).max(100),
     email: z.string().email().optional(),
   });
 
-  const validPayload = { name: "Alice", score: 42 };
+  const validPayload = { name: 'Alice', score: 42 };
 
-  it("calls next() for a valid payload and sets req.body to parsed data", async () => {
+  it('calls next() for a valid payload and sets req.body to parsed data', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/test", validateBody(testSchema), (req, res) => {
+    app.post('/test', validateBody(testSchema), (req, res) => {
       res.json({ received: req.body });
     });
 
-    const res = await request(app).post("/test").send(validPayload);
+    const res = await request(app).post('/test').send(validPayload);
 
     expect(res.status).toBe(200);
     expect((res.body as Record<string, unknown>).received).toMatchObject(validPayload);
   });
 
-  it("returns 400 with structured Zod issues when a required field is missing", async () => {
+  it('returns 400 with structured Zod issues when a required field is missing', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/test", validateBody(testSchema), (_req, res) => res.json({ ok: true }));
+    app.post('/test', validateBody(testSchema), (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).post("/test").send({ score: 10 });
+    const res = await request(app).post('/test').send({ score: 10 });
 
     expect(res.status).toBe(400);
-    const body = res.body as { error: string; code: string; details?: { issues: Array<{ path: unknown[]; message: string; code: string }> } };
-    expect(body.error).toContain("Validation error");
-    expect(body.code).toBe("BAD_REQUEST");
+    const body = res.body as {
+      error: string;
+      code: string;
+      details?: { issues: Array<{ path: unknown[]; message: string; code: string }> };
+    };
+    expect(body.error).toContain('Validation error');
+    expect(body.code).toBe('BAD_REQUEST');
     // Structured Zod details must be present
     expect(body.details).toBeDefined();
     expect(Array.isArray(body.details?.issues)).toBe(true);
     expect((body.details?.issues.length ?? 0) > 0).toBe(true);
-    const nameIssue = body.details?.issues.find(i => String(i.path[0]) === "name");
+    const nameIssue = body.details?.issues.find((i) => String(i.path[0]) === 'name');
     expect(nameIssue).toBeDefined();
     expect(nameIssue?.message).toBeDefined();
     expect(nameIssue?.code).toBeDefined();
   });
 
-  it("returns structured Zod issues when a field has the wrong type", async () => {
+  it('returns structured Zod issues when a field has the wrong type', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/test", validateBody(testSchema), (_req, res) => res.json({ ok: true }));
+    app.post('/test', validateBody(testSchema), (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).post("/test").send({ name: "Bob", score: "not-a-number" });
+    const res = await request(app).post('/test').send({ name: 'Bob', score: 'not-a-number' });
 
     expect(res.status).toBe(400);
-    const body = res.body as { error: string; details?: { issues: Array<{ path: unknown[]; message: string; code: string }> } };
-    expect(body.error).toContain("Validation error");
+    const body = res.body as {
+      error: string;
+      details?: { issues: Array<{ path: unknown[]; message: string; code: string }> };
+    };
+    expect(body.error).toContain('Validation error');
     expect(Array.isArray(body.details?.issues)).toBe(true);
-    const scoreIssue = body.details?.issues.find(i => String(i.path[0]) === "score");
+    const scoreIssue = body.details?.issues.find((i) => String(i.path[0]) === 'score');
     expect(scoreIssue).toBeDefined();
   });
 
-  it("returns structured Zod issues when a string field exceeds maxLength", async () => {
+  it('returns structured Zod issues when a string field exceeds maxLength', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/test", validateBody(testSchema), (_req, res) => res.json({ ok: true }));
+    app.post('/test', validateBody(testSchema), (_req, res) => res.json({ ok: true }));
 
     const res = await request(app)
-      .post("/test")
-      .send({ name: "x".repeat(200), score: 5 });
+      .post('/test')
+      .send({ name: 'x'.repeat(200), score: 5 });
 
     expect(res.status).toBe(400);
-    const body = res.body as { error: string; details?: { issues: Array<{ path: unknown[]; message: string; code: string }> } };
-    expect(body.error).toContain("Validation error");
+    const body = res.body as {
+      error: string;
+      details?: { issues: Array<{ path: unknown[]; message: string; code: string }> };
+    };
+    expect(body.error).toContain('Validation error');
     expect(Array.isArray(body.details?.issues)).toBe(true);
-    const nameIssue = body.details?.issues.find(i => String(i.path[0]) === "name");
-    expect(nameIssue?.code).toBe("too_big");
+    const nameIssue = body.details?.issues.find((i) => String(i.path[0]) === 'name');
+    expect(nameIssue?.code).toBe('too_big');
   });
 
-  it("returns 400 when a numeric field is out of range", async () => {
+  it('returns 400 when a numeric field is out of range', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/test", validateBody(testSchema), (_req, res) => res.json({ ok: true }));
+    app.post('/test', validateBody(testSchema), (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).post("/test").send({ name: "Bob", score: 999 });
+    const res = await request(app).post('/test').send({ name: 'Bob', score: 999 });
 
     expect(res.status).toBe(400);
     const body = res.body as { details?: { issues: Array<{ path: unknown[]; code: string }> } };
     expect(Array.isArray(body.details?.issues)).toBe(true);
-    const scoreIssue = body.details?.issues.find(i => String(i.path[0]) === "score");
-    expect(scoreIssue?.code).toBe("too_big");
+    const scoreIssue = body.details?.issues.find((i) => String(i.path[0]) === 'score');
+    expect(scoreIssue?.code).toBe('too_big');
   });
 
-  it("returns 400 when an email field has an invalid format", async () => {
+  it('returns 400 when an email field has an invalid format', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/test", validateBody(testSchema), (_req, res) => res.json({ ok: true }));
+    app.post('/test', validateBody(testSchema), (_req, res) => res.json({ ok: true }));
 
     const res = await request(app)
-      .post("/test")
-      .send({ name: "Bob", score: 10, email: "not-an-email" });
+      .post('/test')
+      .send({ name: 'Bob', score: 10, email: 'not-an-email' });
 
     expect(res.status).toBe(400);
     const body = res.body as { details?: { issues: Array<{ path: unknown[] }> } };
     expect(Array.isArray(body.details?.issues)).toBe(true);
-    const emailIssue = body.details?.issues.find(i => String(i.path[0]) === "email");
+    const emailIssue = body.details?.issues.find((i) => String(i.path[0]) === 'email');
     expect(emailIssue).toBeDefined();
   });
 
-  it("returns 400 with issues array for a completely empty body on a required-fields schema", async () => {
+  it('returns 400 with issues array for a completely empty body on a required-fields schema', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/test", validateBody(testSchema), (_req, res) => res.json({ ok: true }));
+    app.post('/test', validateBody(testSchema), (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).post("/test").send({});
+    const res = await request(app).post('/test').send({});
 
     expect(res.status).toBe(400);
     const body = res.body as { code: string; details?: { issues: Array<unknown> } };
-    expect(body.code).toBe("BAD_REQUEST");
+    expect(body.code).toBe('BAD_REQUEST');
     expect(Array.isArray(body.details?.issues)).toBe(true);
     expect((body.details?.issues.length ?? 0) > 0).toBe(true);
   });
@@ -325,7 +345,7 @@ describe("validateBody", () => {
 // 3. tenantScope
 // ---------------------------------------------------------------------------
 
-describe("tenantScope", () => {
+describe('tenantScope', () => {
   beforeEach(() => {
     mockDbWhere.mockResolvedValue([]);
   });
@@ -333,8 +353,8 @@ describe("tenantScope", () => {
   function makeUser(overrides: Record<string, unknown> = {}) {
     return {
       id: 1,
-      email: "user@example.com",
-      roles: ["member"],
+      email: 'user@example.com',
+      roles: ['member'],
       orgs: [],
       ...overrides,
     };
@@ -347,50 +367,52 @@ describe("tenantScope", () => {
     };
   }
 
-  it("returns 401 when req.user is absent", async () => {
+  it('returns 401 when req.user is absent', async () => {
     const app = express();
     app.use(express.json());
     app.use(tenantScope() as express.RequestHandler);
-    app.get("/resource", (_req, res) => res.json({ ok: true }));
+    app.get('/resource', (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).get("/resource");
+    const res = await request(app).get('/resource');
 
     expect(res.status).toBe(401);
   });
 
-  it("returns 403 when the user has no org memberships (DB returns empty)", async () => {
+  it('returns 403 when the user has no org memberships (DB returns empty)', async () => {
     mockDbWhere.mockResolvedValue([]);
 
     const app = express();
     app.use(express.json());
     app.use(injectUser(makeUser({ orgs: [] })) as express.RequestHandler);
     app.use(tenantScope() as express.RequestHandler);
-    app.get("/resource", (_req, res) => res.json({ ok: true }));
+    app.get('/resource', (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).get("/resource");
+    const res = await request(app).get('/resource');
 
     expect(res.status).toBe(403);
-    expect((res.body as Record<string, unknown>).error).toContain("No organization membership");
+    expect((res.body as Record<string, unknown>).error).toContain('No organization membership');
   });
 
-  it("sets tenantOrgId and passes through when org memberships match", async () => {
+  it('sets tenantOrgId and passes through when org memberships match', async () => {
     const app = express();
     app.use(express.json());
     app.use(
       injectUser(
         makeUser({
-          orgs: [{ orgId: 42, orgSlug: "acme", orgName: "Acme Corp", role: "member" }],
+          orgs: [{ orgId: 42, orgSlug: 'acme', orgName: 'Acme Corp', role: 'member' }],
         }),
       ) as express.RequestHandler,
     );
     app.use(tenantScope() as express.RequestHandler);
-    app.get("/resource", (req, res) => res.json({ tenantOrgId: req.tenantOrgId, tenantOrgSlug: req.tenantOrgSlug }));
+    app.get('/resource', (req, res) =>
+      res.json({ tenantOrgId: req.tenantOrgId, tenantOrgSlug: req.tenantOrgSlug }),
+    );
 
-    const res = await request(app).get("/resource");
+    const res = await request(app).get('/resource');
 
     expect(res.status).toBe(200);
     expect((res.body as Record<string, unknown>).tenantOrgId).toBe(42);
-    expect((res.body as Record<string, unknown>).tenantOrgSlug).toBe("acme");
+    expect((res.body as Record<string, unknown>).tenantOrgSlug).toBe('acme');
   });
 
   it("returns 403 for cross-tenant access when orgSlug in params doesn't match user's orgs", async () => {
@@ -399,90 +421,89 @@ describe("tenantScope", () => {
     const app = express();
     app.use(express.json());
     app.get(
-      "/orgs/:orgSlug/data",
+      '/orgs/:orgSlug/data',
       injectUser(
         makeUser({
-          orgs: [{ orgId: 42, orgSlug: "acme", orgName: "Acme Corp", role: "member" }],
+          orgs: [{ orgId: 42, orgSlug: 'acme', orgName: 'Acme Corp', role: 'member' }],
         }),
       ) as express.RequestHandler,
       tenantScope() as express.RequestHandler,
       (_req, res) => res.json({ ok: true }),
     );
 
-    const res = await request(app).get("/orgs/rival-org/data");
+    const res = await request(app).get('/orgs/rival-org/data');
 
     expect(res.status).toBe(403);
-    expect((res.body as Record<string, unknown>).error).toContain("not a member of this organization");
+    expect((res.body as Record<string, unknown>).error).toContain(
+      'not a member of this organization',
+    );
   });
 
   it("allows access when orgSlug in params matches the user's org membership", async () => {
     const app = express();
     app.use(express.json());
     app.get(
-      "/orgs/:orgSlug/data",
+      '/orgs/:orgSlug/data',
       injectUser(
         makeUser({
-          orgs: [{ orgId: 42, orgSlug: "acme", orgName: "Acme Corp", role: "member" }],
+          orgs: [{ orgId: 42, orgSlug: 'acme', orgName: 'Acme Corp', role: 'member' }],
         }),
       ) as express.RequestHandler,
       tenantScope() as express.RequestHandler,
-      (req, res) =>
-        res.json({ tenantOrgId: req.tenantOrgId, tenantOrgSlug: req.tenantOrgSlug }),
+      (req, res) => res.json({ tenantOrgId: req.tenantOrgId, tenantOrgSlug: req.tenantOrgSlug }),
     );
 
-    const res = await request(app).get("/orgs/acme/data");
+    const res = await request(app).get('/orgs/acme/data');
 
     expect(res.status).toBe(200);
     expect((res.body as Record<string, unknown>).tenantOrgId).toBe(42);
   });
 
-  it("admin user bypasses org membership checks entirely", async () => {
+  it('admin user bypasses org membership checks entirely', async () => {
     const app = express();
     app.use(express.json());
-    app.use(
-      injectUser(makeUser({ roles: ["admin"], orgs: [] })) as express.RequestHandler,
-    );
+    app.use(injectUser(makeUser({ roles: ['admin'], orgs: [] })) as express.RequestHandler);
     app.use(tenantScope() as express.RequestHandler);
-    app.get("/orgs/:orgSlug/data", (_req, res) => res.json({ ok: true }));
+    app.get('/orgs/:orgSlug/data', (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).get("/orgs/any-org/data");
+    const res = await request(app).get('/orgs/any-org/data');
 
     expect(res.status).toBe(200);
     expect((res.body as Record<string, unknown>).ok).toBe(true);
   });
 
-  it("super_admin bypasses org membership checks", async () => {
+  it('super_admin bypasses org membership checks', async () => {
     const app = express();
     app.use(express.json());
-    app.use(
-      injectUser(makeUser({ roles: ["super_admin"], orgs: [] })) as express.RequestHandler,
-    );
+    app.use(injectUser(makeUser({ roles: ['super_admin'], orgs: [] })) as express.RequestHandler);
     app.use(tenantScope() as express.RequestHandler);
-    app.get("/orgs/:orgSlug/data", (_req, res) => res.json({ ok: true }));
+    app.get('/orgs/:orgSlug/data', (_req, res) => res.json({ ok: true }));
 
-    const res = await request(app).get("/orgs/anything/data");
+    const res = await request(app).get('/orgs/anything/data');
 
     expect(res.status).toBe(200);
   });
 
-  it("returns 403 for cross-tenant access via numeric orgId param", async () => {
+  it('returns 403 for cross-tenant access via numeric orgId param', async () => {
     const app = express();
     app.use(express.json());
     app.get(
-      "/orgs/:orgId/data",
+      '/orgs/:orgId/data',
       injectUser(
         makeUser({
-          orgs: [{ orgId: 42, orgSlug: "acme", orgName: "Acme Corp", role: "member" }],
+          orgs: [{ orgId: 42, orgSlug: 'acme', orgName: 'Acme Corp', role: 'member' }],
         }),
       ) as express.RequestHandler,
       tenantScope() as express.RequestHandler,
       (_req, res) => res.json({ ok: true }),
     );
 
-    const res = await request(app).get("/orgs/99/data");
+    const res = await request(app).get('/orgs/99/data');
 
     expect(res.status).toBe(403);
-    expect((res.body as Record<string, unknown>).error).toContain("not a member of this organization");
+    expect((res.body as Record<string, unknown>).error).toContain(
+      'not a member of this organization',
+    );
   });
 });
 
@@ -490,66 +511,66 @@ describe("tenantScope", () => {
 // 4. validateQuery
 // ---------------------------------------------------------------------------
 
-describe("validateQuery", () => {
+describe('validateQuery', () => {
   const testQuerySchema = z.object({
     page: z.coerce.number().int().min(1).max(1000).optional(),
     limit: z.coerce.number().int().min(1).max(100).optional(),
-    status: z.enum(["active", "inactive", "pending"]).optional(),
+    status: z.enum(['active', 'inactive', 'pending']).optional(),
   });
 
   function buildQueryApp(schema: z.ZodSchema<unknown>) {
     const app = express();
     app.use(express.json());
-    app.get("/items", validateQuery(schema) as express.RequestHandler, (_req, res) => {
+    app.get('/items', validateQuery(schema) as express.RequestHandler, (_req, res) => {
       res.json({ ok: true });
     });
     app.use((_err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-      res.status(500).json({ error: "unexpected" });
+      res.status(500).json({ error: 'unexpected' });
     });
     return app;
   }
 
-  it("calls next() for valid query params", async () => {
+  it('calls next() for valid query params', async () => {
     const res = await request(buildQueryApp(testQuerySchema)).get(
-      "/items?page=2&limit=10&status=active",
+      '/items?page=2&limit=10&status=active',
     );
     expect(res.status).toBe(200);
     expect((res.body as { ok: boolean }).ok).toBe(true);
   });
 
-  it("returns 400 with error message when a coerced number param is not numeric", async () => {
-    const res = await request(buildQueryApp(testQuerySchema)).get("/items?page=not-a-number");
+  it('returns 400 with error message when a coerced number param is not numeric', async () => {
+    const res = await request(buildQueryApp(testQuerySchema)).get('/items?page=not-a-number');
 
     expect(res.status).toBe(400);
     const body = res.body as { error: string; code: string };
-    expect(body.code).toBe("BAD_REQUEST");
+    expect(body.code).toBe('BAD_REQUEST');
     expect(body.error).toMatch(/Invalid query parameters/i);
   });
 
-  it("returns 400 when an enum param has an invalid value", async () => {
-    const res = await request(buildQueryApp(testQuerySchema)).get("/items?status=unknown-status");
+  it('returns 400 when an enum param has an invalid value', async () => {
+    const res = await request(buildQueryApp(testQuerySchema)).get('/items?status=unknown-status');
 
     expect(res.status).toBe(400);
-    expect((res.body as { code: string }).code).toBe("BAD_REQUEST");
+    expect((res.body as { code: string }).code).toBe('BAD_REQUEST');
   });
 
-  it("returns 400 when page exceeds the max bound", async () => {
-    const res = await request(buildQueryApp(testQuerySchema)).get("/items?page=99999");
+  it('returns 400 when page exceeds the max bound', async () => {
+    const res = await request(buildQueryApp(testQuerySchema)).get('/items?page=99999');
 
     expect(res.status).toBe(400);
-    expect((res.body as { code: string }).code).toBe("BAD_REQUEST");
+    expect((res.body as { code: string }).code).toBe('BAD_REQUEST');
   });
 
-  it("listQuerySchema rejects an oversized limit", async () => {
-    const res = await request(buildQueryApp(listQuerySchema)).get("/items?limit=9999");
+  it('listQuerySchema rejects an oversized limit', async () => {
+    const res = await request(buildQueryApp(listQuerySchema)).get('/items?limit=9999');
 
     expect(res.status).toBe(400);
-    expect((res.body as { code: string }).code).toBe("BAD_REQUEST");
+    expect((res.body as { code: string }).code).toBe('BAD_REQUEST');
   });
 
-  it("listQuerySchema accepts all standard search/filter fields without error", async () => {
+  it('listQuerySchema accepts all standard search/filter fields without error', async () => {
     const res = await request(buildQueryApp(listQuerySchema)).get(
-      "/items?page=1&limit=25&status=active&type=incident&q=test&order=desc",
+      '/items?page=1&limit=25&status=active&type=incident&q=test&order=desc',
     );
 
     expect(res.status).toBe(200);
@@ -560,79 +581,83 @@ describe("validateQuery", () => {
 // 5. jsonObjectBodySchema — rejects non-object bodies
 // ---------------------------------------------------------------------------
 
-describe("jsonObjectBodySchema", () => {
-  it("accepts a plain object body and passes it through", async () => {
+describe('jsonObjectBodySchema', () => {
+  it('accepts a plain object body and passes it through', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/endpoint", validateBody(jsonObjectBodySchema), (req, res) => {
+    app.post('/endpoint', validateBody(jsonObjectBodySchema), (req, res) => {
       res.json({ received: req.body });
     });
 
-    const res = await request(app).post("/endpoint").send({ foo: "bar", count: 3 });
+    const res = await request(app).post('/endpoint').send({ foo: 'bar', count: 3 });
 
     expect(res.status).toBe(200);
-    expect((res.body as Record<string, unknown>).received).toMatchObject({ foo: "bar", count: 3 });
+    expect((res.body as Record<string, unknown>).received).toMatchObject({ foo: 'bar', count: 3 });
   });
 
-  it("accepts a nested object body with arbitrary keys", async () => {
+  it('accepts a nested object body with arbitrary keys', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/endpoint", validateBody(jsonObjectBodySchema), (req, res) => {
+    app.post('/endpoint', validateBody(jsonObjectBodySchema), (req, res) => {
       res.json({ received: req.body });
     });
 
     const res = await request(app)
-      .post("/endpoint")
-      .send({ type: "command", payload: { action: "restart", target: "pod-1" }, meta: { ts: 1234 } });
+      .post('/endpoint')
+      .send({
+        type: 'command',
+        payload: { action: 'restart', target: 'pod-1' },
+        meta: { ts: 1234 },
+      });
 
     expect(res.status).toBe(200);
     const body = res.body as { received: Record<string, unknown> };
-    expect(body.received.type).toBe("command");
+    expect(body.received.type).toBe('command');
   });
 
-  it("returns 400 with BAD_REQUEST code when the body is a JSON array", async () => {
+  it('returns 400 with BAD_REQUEST code when the body is a JSON array', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/endpoint", validateBody(jsonObjectBodySchema), (_req, res) => {
+    app.post('/endpoint', validateBody(jsonObjectBodySchema), (_req, res) => {
       res.json({ ok: true });
     });
 
     const res = await request(app)
-      .post("/endpoint")
-      .set("Content-Type", "application/json")
-      .send("[1,2,3]");
+      .post('/endpoint')
+      .set('Content-Type', 'application/json')
+      .send('[1,2,3]');
 
     expect(res.status).toBe(400);
     const body = res.body as { code?: string };
-    expect(body.code).toBe("BAD_REQUEST");
+    expect(body.code).toBe('BAD_REQUEST');
   });
 
-  it("accepts an empty body (defaults to empty object)", async () => {
+  it('accepts an empty body (defaults to empty object)', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/endpoint", validateBody(jsonObjectBodySchema), (_req, res) => {
+    app.post('/endpoint', validateBody(jsonObjectBodySchema), (_req, res) => {
       res.json({ ok: true });
     });
 
-    const res = await request(app).post("/endpoint");
+    const res = await request(app).post('/endpoint');
 
     expect(res.status).toBe(200);
   });
 
-  it("returns 400 when the body is a primitive (handled at parser or middleware layer)", async () => {
+  it('returns 400 when the body is a primitive (handled at parser or middleware layer)', async () => {
     const app = express();
     app.use(express.json());
-    app.post("/endpoint", validateBody(jsonObjectBodySchema), (_req, res) => {
+    app.post('/endpoint', validateBody(jsonObjectBodySchema), (_req, res) => {
       res.json({ ok: true });
     });
     app.use((_err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-      res.status(400).json({ code: "BAD_REQUEST", error: "Invalid request body" });
+      res.status(400).json({ code: 'BAD_REQUEST', error: 'Invalid request body' });
     });
 
     const res = await request(app)
-      .post("/endpoint")
-      .set("Content-Type", "application/json")
-      .send("true");
+      .post('/endpoint')
+      .set('Content-Type', 'application/json')
+      .send('true');
 
     expect(res.status).toBe(400);
   });

@@ -4,19 +4,19 @@
 //           deliverables/SZL-Medium-Launch-Plan.pdf,
 //           deliverables/SZL-Newsletter-Screenshots.zip
 
-const fs = require("fs");
-const path = require("path");
-const puppeteer = require("puppeteer-core");
-const archiver = require("archiver");
+const fs = require('fs');
+const path = require('path');
+const puppeteer = require('puppeteer-core');
+const archiver = require('archiver');
 
-const { POSTS } = require("./posts.cjs");
-const STRAT = require("./strategy.cjs");
+const { POSTS } = require('./posts.cjs');
+const STRAT = require('./strategy.cjs');
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const DELIVERABLES = path.join(ROOT, "deliverables");
-const BUILD = path.join(ROOT, "tmp", "launch-build");
-const MOCKUPS_DIR = path.join(BUILD, "mockups");
-const REFERENCES_DIR = path.join(BUILD, "references");
+const ROOT = path.resolve(__dirname, '..', '..');
+const DELIVERABLES = path.join(ROOT, 'deliverables');
+const BUILD = path.join(ROOT, 'tmp', 'launch-build');
+const MOCKUPS_DIR = path.join(BUILD, 'mockups');
+const REFERENCES_DIR = path.join(BUILD, 'references');
 
 function ensureDir(d) {
   fs.mkdirSync(d, { recursive: true });
@@ -31,57 +31,95 @@ ensureDir(REFERENCES_DIR);
 // Markdown-lite → HTML (we control the input)
 // ────────────────────────────────────────────────
 function mdToHtml(src) {
-  if (!src) return "";
-  const lines = src.replace(/\r\n/g, "\n").split("\n");
+  if (!src) return '';
+  const lines = src.replace(/\r\n/g, '\n').split('\n');
   const out = [];
   let inList = false;
   let inOl = false;
   let para = [];
   const flushPara = () => {
     if (para.length) {
-      const joined = para.join(" ").trim();
+      const joined = para.join(' ').trim();
       if (joined) out.push(`<p>${inline(joined)}</p>`);
       para = [];
     }
   };
   const closeLists = () => {
-    if (inList) { out.push("</ul>"); inList = false; }
-    if (inOl) { out.push("</ol>"); inOl = false; }
+    if (inList) {
+      out.push('</ul>');
+      inList = false;
+    }
+    if (inOl) {
+      out.push('</ol>');
+      inOl = false;
+    }
   };
-  for (let raw of lines) {
-    const line = raw.replace(/\s+$/, "");
-    if (/^###\s+/.test(line)) { flushPara(); closeLists(); out.push(`<h3>${inline(line.replace(/^###\s+/, ""))}</h3>`); continue; }
-    if (/^##\s+/.test(line)) { flushPara(); closeLists(); out.push(`<h2>${inline(line.replace(/^##\s+/, ""))}</h2>`); continue; }
-    if (/^#\s+/.test(line)) { flushPara(); closeLists(); out.push(`<h1>${inline(line.replace(/^#\s+/, ""))}</h1>`); continue; }
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, '');
+    if (/^###\s+/.test(line)) {
+      flushPara();
+      closeLists();
+      out.push(`<h3>${inline(line.replace(/^###\s+/, ''))}</h3>`);
+      continue;
+    }
+    if (/^##\s+/.test(line)) {
+      flushPara();
+      closeLists();
+      out.push(`<h2>${inline(line.replace(/^##\s+/, ''))}</h2>`);
+      continue;
+    }
+    if (/^#\s+/.test(line)) {
+      flushPara();
+      closeLists();
+      out.push(`<h1>${inline(line.replace(/^#\s+/, ''))}</h1>`);
+      continue;
+    }
     if (/^\s*[-*]\s+/.test(line)) {
       flushPara();
-      if (inOl) { out.push("</ol>"); inOl = false; }
-      if (!inList) { out.push("<ul>"); inList = true; }
-      out.push(`<li>${inline(line.replace(/^\s*[-*]\s+/, ""))}</li>`);
+      if (inOl) {
+        out.push('</ol>');
+        inOl = false;
+      }
+      if (!inList) {
+        out.push('<ul>');
+        inList = true;
+      }
+      out.push(`<li>${inline(line.replace(/^\s*[-*]\s+/, ''))}</li>`);
       continue;
     }
     if (/^\s*\d+\.\s+/.test(line)) {
       flushPara();
-      if (inList) { out.push("</ul>"); inList = false; }
-      if (!inOl) { out.push("<ol>"); inOl = true; }
-      out.push(`<li>${inline(line.replace(/^\s*\d+\.\s+/, ""))}</li>`);
+      if (inList) {
+        out.push('</ul>');
+        inList = false;
+      }
+      if (!inOl) {
+        out.push('<ol>');
+        inOl = true;
+      }
+      out.push(`<li>${inline(line.replace(/^\s*\d+\.\s+/, ''))}</li>`);
       continue;
     }
-    if (line.trim() === "") { flushPara(); closeLists(); continue; }
+    if (line.trim() === '') {
+      flushPara();
+      closeLists();
+      continue;
+    }
     para.push(line);
   }
-  flushPara(); closeLists();
-  return out.join("\n");
+  flushPara();
+  closeLists();
+  return out.join('\n');
 }
 
 function inline(t) {
   return t
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/(^|[\s(])\*([^*]+)\*/g, "$1<em>$2</em>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[\s(])\*([^*]+)\*/g, '$1<em>$2</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 }
 
@@ -254,27 +292,34 @@ const PDF_STYLES = `
 // Build the Substack PDF HTML
 // ────────────────────────────────────────────────
 function pillarClass(name) {
-  return name.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "");
+  return name
+    .toLowerCase()
+    .replace(/[^a-z]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 function buildSwatches() {
-  return STRAT.VISUAL_IDENTITY.palette.map(c => `
+  return STRAT.VISUAL_IDENTITY.palette
+    .map(
+      (c) => `
     <div class="swatch">
       <div class="chip" style="background:${c.hex}"></div>
       <div class="name">${c.name}</div>
       <div class="hex">${c.hex}</div>
       <div class="usage">${c.usage}</div>
-    </div>`).join("");
+    </div>`,
+    )
+    .join('');
 }
 function buildPostHtml(post, i) {
-  const tagRow = post.tags.map(t => `<span class="tag-chip">${t}</span>`).join("");
-  const mTagRow = post.mediumTags.map(t => `<span class="tag-chip">${t}</span>`).join("");
+  const tagRow = post.tags.map((t) => `<span class="tag-chip">${t}</span>`).join('');
+  const mTagRow = post.mediumTags.map((t) => `<span class="tag-chip">${t}</span>`).join('');
   return `
     <div class="page post">
       <div class="post-header">
         <div class="chips">
           <span class="pillar-chip ${pillarClass(post.pillar)}">${post.pillar}</span>
           <span class="tag-chip">Week ${post.week}</span>
-          <span class="tag-chip">Post ${String(i + 1).padStart(2, "0")} of ${POSTS.length}</span>
+          <span class="tag-chip">Post ${String(i + 1).padStart(2, '0')} of ${POSTS.length}</span>
           <span class="tag-chip">${post.readTime}</span>
         </div>
         <h1 class="title">${post.title}</h1>
@@ -293,23 +338,25 @@ function buildCalendarTable() {
     <table class="calendar">
       <thead><tr><th style="width:60px;">Week</th><th style="width:90px;">Pillar</th><th>Title</th><th style="width:80px;">Post</th></tr></thead>
       <tbody>
-      ${POSTS.map((p, i) => `
+      ${POSTS.map(
+        (p, i) => `
         <tr>
-          <td class="w">W${String(p.week).padStart(2, "0")}</td>
-          <td><span class="pillar-chip ${pillarClass(p.pillar)}">${p.pillar.split(" ")[0]}</span></td>
+          <td class="w">W${String(p.week).padStart(2, '0')}</td>
+          <td><span class="pillar-chip ${pillarClass(p.pillar)}">${p.pillar.split(' ')[0]}</span></td>
           <td class="t">${p.title}</td>
-          <td>#${String(i + 1).padStart(2, "0")}</td>
+          <td>#${String(i + 1).padStart(2, '0')}</td>
         </tr>
-      `).join("")}
+      `,
+      ).join('')}
       </tbody>
     </table>
   `;
 }
 
 function buildCover(platform) {
-  const label = platform === "medium" ? "MEDIUM LAUNCH PLAN" : "SUBSTACK LAUNCH PLAN";
-  const tint = platform === "medium" ? "#1a7a4f" : "#D4A054";
-  const titleTop = platform === "medium" ? "Medium" : "Substack";
+  const label = platform === 'medium' ? 'MEDIUM LAUNCH PLAN' : 'SUBSTACK LAUNCH PLAN';
+  const tint = platform === 'medium' ? '#1a7a4f' : '#D4A054';
+  const titleTop = platform === 'medium' ? 'Medium' : 'Substack';
   return `
     <div class="cover">
       <div class="brand">
@@ -329,27 +376,30 @@ function buildCover(platform) {
 
 function buildTocPage(platform) {
   const sections = [
-    { t: "Positioning, Audience & Voice", p: "03" },
-    { t: "Publication Identity & Bio", p: "05" },
-    { t: "About Page (copy-paste)", p: "07" },
-    { t: "Visual Identity Direction", p: "09" },
-    { t: "Editorial Pillars & Share Mix", p: "11" },
-    { t: "90-Day Editorial Calendar (24 essays)", p: "12" },
-    { t: "Welcome Email / First Issue", p: "14" },
-    { t: "Full Essay Library — all 24 posts, fully drafted", p: "15" },
-    { t: "Growth Plan & Cross-posting Strategy", p: "—" },
-    { t: "LinkedIn & X Amplification Templates", p: "—" },
-    { t: "Monetization Plan & Founding-Member Offer", p: "—" },
-    { t: "KPIs & Tracking Sheet Specification", p: "—" },
-    { t: `${platform === "medium" ? "Medium" : "Substack"} Setup Checklist (step-by-step)`, p: "—" }
+    { t: 'Positioning, Audience & Voice', p: '03' },
+    { t: 'Publication Identity & Bio', p: '05' },
+    { t: 'About Page (copy-paste)', p: '07' },
+    { t: 'Visual Identity Direction', p: '09' },
+    { t: 'Editorial Pillars & Share Mix', p: '11' },
+    { t: '90-Day Editorial Calendar (24 essays)', p: '12' },
+    { t: 'Welcome Email / First Issue', p: '14' },
+    { t: 'Full Essay Library — all 24 posts, fully drafted', p: '15' },
+    { t: 'Growth Plan & Cross-posting Strategy', p: '—' },
+    { t: 'LinkedIn & X Amplification Templates', p: '—' },
+    { t: 'Monetization Plan & Founding-Member Offer', p: '—' },
+    { t: 'KPIs & Tracking Sheet Specification', p: '—' },
+    {
+      t: `${platform === 'medium' ? 'Medium' : 'Substack'} Setup Checklist (step-by-step)`,
+      p: '—',
+    },
   ];
   return `
     <div class="page toc">
       <span class="section-eyebrow">Contents</span>
-      <h1>${platform === "medium" ? "Medium" : "Substack"} Launch Plan</h1>
-      <p style="color:var(--text-3);max-width:640px;">Everything needed to launch SZL Command on ${platform === "medium" ? "Medium" : "Substack"}, in order. Every section is copy-paste ready. Pair this document with the Newsletter Screenshots zip for mockups and reference captures.</p>
+      <h1>${platform === 'medium' ? 'Medium' : 'Substack'} Launch Plan</h1>
+      <p style="color:var(--text-3);max-width:640px;">Everything needed to launch SZL Command on ${platform === 'medium' ? 'Medium' : 'Substack'}, in order. Every section is copy-paste ready. Pair this document with the Newsletter Screenshots zip for mockups and reference captures.</p>
       <ol>
-        ${sections.map(s => `<li><span class="tl">${s.t}</span><span class="tp">${s.p}</span></li>`).join("")}
+        ${sections.map((s) => `<li><span class="tl">${s.t}</span><span class="tp">${s.p}</span></li>`).join('')}
       </ol>
     </div>
   `;
@@ -362,13 +412,17 @@ function buildPositioningPage() {
       <h1>Positioning, audience & voice.</h1>
       <p style="font-size:12pt;color:var(--text);max-width:720px;">${STRAT.POSITIONING.oneLine}</p>
       <h2>Target audiences</h2>
-      ${STRAT.POSITIONING.audiences.map(a => `
+      ${STRAT.POSITIONING.audiences
+        .map(
+          (a) => `
         <div class="panel">
           <h3>${a.name}</h3>
           <p>${a.description}</p>
-          <p style="margin:0;"><strong>What we publish for them:</strong> ${a.posts.join(" · ")}</p>
+          <p style="margin:0;"><strong>What we publish for them:</strong> ${a.posts.join(' · ')}</p>
         </div>
-      `).join("")}
+      `,
+        )
+        .join('')}
       <h2>Voice</h2>
       <ul>
         <li><strong>Direct and specific.</strong> Named products, named markets, named mistakes. No hedging for optics.</li>
@@ -430,7 +484,7 @@ function buildVisualIdentityPage() {
       ${mdToHtml(STRAT.VISUAL_IDENTITY.coverImageDirection)}
       <h2>UI principles</h2>
       <ul>
-        ${STRAT.VISUAL_IDENTITY.uiPrinciples.map(p => `<li>${p}</li>`).join("")}
+        ${STRAT.VISUAL_IDENTITY.uiPrinciples.map((p) => `<li>${p}</li>`).join('')}
       </ul>
     </div>
   `;
@@ -445,14 +499,16 @@ function buildPillarsAndCalendarPage() {
       <table>
         <thead><tr><th>#</th><th>Pillar</th><th>Share</th><th>Signal color</th></tr></thead>
         <tbody>
-          ${STRAT.PILLARS.map(p => `
+          ${STRAT.PILLARS.map(
+            (p) => `
             <tr>
               <td>${p.id}</td>
               <td><span class="pillar-chip ${pillarClass(p.name)}">${p.name}</span></td>
               <td>${Math.round(p.share * 100)}%</td>
               <td>${p.color}</td>
             </tr>
-          `).join("")}
+          `,
+          ).join('')}
         </tbody>
       </table>
     </div>
@@ -487,19 +543,19 @@ function buildWelcomeEmailPage() {
 }
 
 function buildGrowthAndMoreSections(platform) {
-  const checklist = platform === "medium" ? STRAT.MEDIUM_CHECKLIST : STRAT.SUBSTACK_CHECKLIST;
+  const checklist = platform === 'medium' ? STRAT.MEDIUM_CHECKLIST : STRAT.SUBSTACK_CHECKLIST;
   return `
     <div class="page">
       <span class="section-eyebrow">Section 09 · Growth plan</span>
       <h1>Growth plan.</h1>
       <h2>Cross-posting strategy</h2>
-      <ul>${STRAT.GROWTH_PLAN.crossPosting.map(x => `<li>${x}</li>`).join("")}</ul>
+      <ul>${STRAT.GROWTH_PLAN.crossPosting.map((x) => `<li>${x}</li>`).join('')}</ul>
       <h2>Amplification rhythm</h2>
-      <ul>${STRAT.GROWTH_PLAN.amplification.map(x => `<li>${x}</li>`).join("")}</ul>
+      <ul>${STRAT.GROWTH_PLAN.amplification.map((x) => `<li>${x}</li>`).join('')}</ul>
       <h2>GitHub / portfolio wiring</h2>
-      <ul>${STRAT.GROWTH_PLAN.github.map(x => `<li>${x}</li>`).join("")}</ul>
+      <ul>${STRAT.GROWTH_PLAN.github.map((x) => `<li>${x}</li>`).join('')}</ul>
       <h2>Partner cross-promos</h2>
-      <ul>${STRAT.GROWTH_PLAN.partnerCrossPromos.map(x => `<li>${x}</li>`).join("")}</ul>
+      <ul>${STRAT.GROWTH_PLAN.partnerCrossPromos.map((x) => `<li>${x}</li>`).join('')}</ul>
       <h2>Paid tier pricing</h2>
       <div class="panel">
         <p><strong>Free:</strong> ${STRAT.GROWTH_PLAN.paidTierPricing.free}</p>
@@ -512,9 +568,9 @@ function buildGrowthAndMoreSections(platform) {
       <span class="section-eyebrow">Section 10 · Amplification templates</span>
       <h1>LinkedIn & X templates.</h1>
       <h2>LinkedIn short-form template</h2>
-      <div class="panel"><pre style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--text-2);margin:0;">${STRAT.LINKEDIN_TEMPLATE.replace(/</g, "&lt;")}</pre></div>
+      <div class="panel"><pre style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--text-2);margin:0;">${STRAT.LINKEDIN_TEMPLATE.replace(/</g, '&lt;')}</pre></div>
       <h2>X thread template</h2>
-      <div class="panel"><pre style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--text-2);margin:0;">${STRAT.X_TEMPLATE.replace(/</g, "&lt;")}</pre></div>
+      <div class="panel"><pre style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--text-2);margin:0;">${STRAT.X_TEMPLATE.replace(/</g, '&lt;')}</pre></div>
     </div>
     <div class="page">
       <span class="section-eyebrow">Section 11 · Monetization</span>
@@ -523,13 +579,13 @@ function buildGrowthAndMoreSections(platform) {
       <div class="panel">
         <p><strong>Free tier:</strong> ${STRAT.MONETIZATION.freeVsPaid.free}</p>
         <p style="margin:0;"><strong>Paid tier includes:</strong></p>
-        <ul>${STRAT.MONETIZATION.freeVsPaid.paid.map(x => `<li>${x}</li>`).join("")}</ul>
+        <ul>${STRAT.MONETIZATION.freeVsPaid.paid.map((x) => `<li>${x}</li>`).join('')}</ul>
       </div>
       <h2>Founding-member offer</h2>
       <div class="panel">
         <p><strong>Price:</strong> ${STRAT.MONETIZATION.foundingMemberOffer.price}</p>
         <p><strong>Cap:</strong> ${STRAT.MONETIZATION.foundingMemberOffer.cap}</p>
-        <ul>${STRAT.MONETIZATION.foundingMemberOffer.benefits.map(x => `<li>${x}</li>`).join("")}</ul>
+        <ul>${STRAT.MONETIZATION.foundingMemberOffer.benefits.map((x) => `<li>${x}</li>`).join('')}</ul>
       </div>
       <h2>Consulting funnel tie-in</h2>
       ${mdToHtml(STRAT.MONETIZATION.consultingFunnel)}
@@ -537,9 +593,12 @@ function buildGrowthAndMoreSections(platform) {
       <table>
         <thead><tr><th>Stream</th><th>Year 1</th><th>Year 3</th></tr></thead>
         <tbody>
-          ${Object.keys(STRAT.MONETIZATION.revenueMix.year1).map(k =>
-            `<tr><td>${k}</td><td>${STRAT.MONETIZATION.revenueMix.year1[k]}</td><td>${STRAT.MONETIZATION.revenueMix.year3[k]}</td></tr>`
-          ).join("")}
+          ${Object.keys(STRAT.MONETIZATION.revenueMix.year1)
+            .map(
+              (k) =>
+                `<tr><td>${k}</td><td>${STRAT.MONETIZATION.revenueMix.year1[k]}</td><td>${STRAT.MONETIZATION.revenueMix.year3[k]}</td></tr>`,
+            )
+            .join('')}
         </tbody>
       </table>
     </div>
@@ -571,27 +630,31 @@ function buildGrowthAndMoreSections(platform) {
       </div>
       <h2>Tracking sheet columns (paste into Google Sheets)</h2>
       <div class="panel">
-        <pre style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--text-2);margin:0;">${STRAT.KPIS.trackingSheetSpec.columns.join("\t")}</pre>
+        <pre style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--text-2);margin:0;">${STRAT.KPIS.trackingSheetSpec.columns.join('\t')}</pre>
       </div>
       <p style="margin-top:8px;"><strong>Cadence:</strong> ${STRAT.KPIS.trackingSheetSpec.cadence}</p>
     </div>
     <div class="page">
       <span class="section-eyebrow">Section 13 · Setup checklist</span>
-      <h1>${platform === "medium" ? "Medium" : "Substack"} setup checklist.</h1>
+      <h1>${platform === 'medium' ? 'Medium' : 'Substack'} setup checklist.</h1>
       <p>Step-by-step launch checklist. Follow in order.</p>
-      ${checklist.map(c => `
+      ${checklist
+        .map(
+          (c) => `
         <div class="panel">
-          <h3 style="margin:0 0 6px;"><span style="font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:9pt;">STEP ${String(c.step).padStart(2, "0")}</span> · ${c.task}</h3>
+          <h3 style="margin:0 0 6px;"><span style="font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:9pt;">STEP ${String(c.step).padStart(2, '0')}</span> · ${c.task}</h3>
           <p style="margin:0;">${c.detail}</p>
         </div>
-      `).join("")}
+      `,
+        )
+        .join('')}
     </div>
   `;
 }
 
 function buildLibraryIntro(platform) {
-  const plat = platform === "medium" ? "Medium" : "Substack";
-  const other = platform === "medium" ? "Substack" : "Medium";
+  const plat = platform === 'medium' ? 'Medium' : 'Substack';
+  const other = platform === 'medium' ? 'Substack' : 'Medium';
   return `
     <div class="page">
       <span class="section-eyebrow">Section 08 · Full essay library</span>
@@ -599,9 +662,11 @@ function buildLibraryIntro(platform) {
       <p>Every essay below is copy-paste ready. Order matches the 90-day calendar (two posts per week for twelve weeks).</p>
       <div class="callout">
         <h4>${plat} usage notes</h4>
-        <p style="margin:0;">Each essay carries two tag rows at the end: <strong>Substack tags</strong> (shorter, lowercase, 3–5) and <strong>Medium tags</strong> (pick any 5). ${platform === "medium"
-          ? "When cross-posting from Substack, set the Medium canonical URL to the Substack original and publish 24 hours after the Substack version."
-          : "Publish on Substack first; cross-post to Medium 24 hours later with canonical pointing back to the Substack URL."} The ${other} version of this kit handles the inverse.</p>
+        <p style="margin:0;">Each essay carries two tag rows at the end: <strong>Substack tags</strong> (shorter, lowercase, 3–5) and <strong>Medium tags</strong> (pick any 5). ${
+          platform === 'medium'
+            ? 'When cross-posting from Substack, set the Medium canonical URL to the Substack original and publish 24 hours after the Substack version.'
+            : 'Publish on Substack first; cross-post to Medium 24 hours later with canonical pointing back to the Substack URL.'
+        } The ${other} version of this kit handles the inverse.</p>
       </div>
       <p style="color:var(--text-3);font-family:'JetBrains Mono',monospace;font-size:8.5pt;letter-spacing:0.1em;text-transform:uppercase;">Continue to Essay 01 →</p>
     </div>
@@ -620,8 +685,8 @@ function buildPdfHtml(platform) {
     buildWelcomeEmailPage(),
     buildLibraryIntro(platform),
     ...POSTS.map((p, i) => buildPostHtml(p, i)),
-    buildGrowthAndMoreSections(platform)
-  ].join("\n");
+    buildGrowthAndMoreSections(platform),
+  ].join('\n');
   return `${coverCss}${body}</body></html>`;
 }
 
@@ -986,7 +1051,7 @@ function mockupMediumArticle() {
       <h2>Where AI belongs — and where it doesn't</h2>
       <p>This is the part I get asked about most. AI belongs in entity extraction, cross-source linking, translation, transcription, and first-draft report generation. AI does not belong in targeting recommendations without a human in the loop.</p>
       <div class="tags">
-        ${post.mediumTags.map(t => `<span class="tag-chip">${t}</span>`).join("")}
+        ${post.mediumTags.map((t) => `<span class="tag-chip">${t}</span>`).join('')}
       </div>
     </div>
   </body></html>`;
@@ -996,49 +1061,101 @@ function mockupMediumArticle() {
 // Reference captures
 // ────────────────────────────────────────────────
 const REFERENCE_TARGETS = [
-  { file: "01-stratechery.png", url: "https://stratechery.com/", label: "Stratechery by Ben Thompson", why: "Gold standard for paid tech-strategy long-form. Model for our voice, cadence, and paid tier." },
-  { file: "02-not-boring.png", url: "https://www.notboring.co/", label: "Not Boring by Packy McCormick", why: "Model for narrative-heavy deep dives with strong visual identity. Reference for hero illustration style." },
-  { file: "03-lennys-newsletter.png", url: "https://www.lennysnewsletter.com/", label: "Lenny's Newsletter", why: "Best-in-class monetization and community motion on Substack. Reference for paid-tier structure." },
-  { file: "04-the-generalist.png", url: "https://www.generalist.com/", label: "The Generalist by Mario Gabriele", why: "Strong investor-adjacent audience, company deep-dive format, clean visual system." },
-  { file: "05-every.png", url: "https://every.to/", label: "Every (Dan Shipper et al.)", why: "Multi-pillar publication model — closest to our six-pillar structure. Good reference for calendar rhythm." },
-  { file: "06-platformer.png", url: "https://www.platformer.news/", label: "Platformer by Casey Newton", why: "Beat-reporter Substack with sharp paid tier and tight cadence. Reference for industry-news rhythm." },
-  { file: "07-bens-bites.png", url: "https://bensbites.com/", label: "Ben's Bites", why: "High-velocity AI newsletter with strong visual identity and growth motion. Reference for fast-cadence ops." },
-  { file: "08-the-pragmatic-engineer.png", url: "https://newsletter.pragmaticengineer.com/", label: "The Pragmatic Engineer by Gergely Orosz", why: "Top-grossing technical Substack. Reference for engineering-essay pillar pricing and structure." }
+  {
+    file: '01-stratechery.png',
+    url: 'https://stratechery.com/',
+    label: 'Stratechery by Ben Thompson',
+    why: 'Gold standard for paid tech-strategy long-form. Model for our voice, cadence, and paid tier.',
+  },
+  {
+    file: '02-not-boring.png',
+    url: 'https://www.notboring.co/',
+    label: 'Not Boring by Packy McCormick',
+    why: 'Model for narrative-heavy deep dives with strong visual identity. Reference for hero illustration style.',
+  },
+  {
+    file: '03-lennys-newsletter.png',
+    url: 'https://www.lennysnewsletter.com/',
+    label: "Lenny's Newsletter",
+    why: 'Best-in-class monetization and community motion on Substack. Reference for paid-tier structure.',
+  },
+  {
+    file: '04-the-generalist.png',
+    url: 'https://www.generalist.com/',
+    label: 'The Generalist by Mario Gabriele',
+    why: 'Strong investor-adjacent audience, company deep-dive format, clean visual system.',
+  },
+  {
+    file: '05-every.png',
+    url: 'https://every.to/',
+    label: 'Every (Dan Shipper et al.)',
+    why: 'Multi-pillar publication model — closest to our six-pillar structure. Good reference for calendar rhythm.',
+  },
+  {
+    file: '06-platformer.png',
+    url: 'https://www.platformer.news/',
+    label: 'Platformer by Casey Newton',
+    why: 'Beat-reporter Substack with sharp paid tier and tight cadence. Reference for industry-news rhythm.',
+  },
+  {
+    file: '07-bens-bites.png',
+    url: 'https://bensbites.com/',
+    label: "Ben's Bites",
+    why: 'High-velocity AI newsletter with strong visual identity and growth motion. Reference for fast-cadence ops.',
+  },
+  {
+    file: '08-the-pragmatic-engineer.png',
+    url: 'https://newsletter.pragmaticengineer.com/',
+    label: 'The Pragmatic Engineer by Gergely Orosz',
+    why: 'Top-grossing technical Substack. Reference for engineering-essay pillar pricing and structure.',
+  },
 ];
 
 // ────────────────────────────────────────────────
 // Render helpers
 // ────────────────────────────────────────────────
 function resolveChromium() {
-  const { execSync } = require("child_process");
+  const { execSync } = require('child_process');
   // 1. Explicit env var wins.
-  if (process.env.CHROMIUM_PATH && fs.existsSync(process.env.CHROMIUM_PATH)) return process.env.CHROMIUM_PATH;
-  if (process.env.PUPPETEER_EXECUTABLE_PATH && fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) return process.env.PUPPETEER_EXECUTABLE_PATH;
+  if (process.env.CHROMIUM_PATH && fs.existsSync(process.env.CHROMIUM_PATH))
+    return process.env.CHROMIUM_PATH;
+  if (process.env.PUPPETEER_EXECUTABLE_PATH && fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH))
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
   // 2. Common system locations.
   const candidates = [
-    "/usr/bin/chromium-browser",
-    "/usr/bin/chromium",
-    "/usr/bin/google-chrome",
-    "/usr/bin/google-chrome-stable",
-    "/snap/bin/chromium",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/Applications/Chromium.app/Contents/MacOS/Chromium"
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/snap/bin/chromium',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
   ];
-  for (const c of candidates) { if (fs.existsSync(c)) return c; }
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
   // 3. Nix store discovery — prefer non-"ungoogled" upstream chromium builds, newest by mtime.
   try {
     const lines = execSync(
-      "ls -dt /nix/store/*chromium*/bin/chromium-browser 2>/dev/null | grep -v ungoogled || ls -dt /nix/store/*chromium*/bin/chromium-browser 2>/dev/null",
-      { encoding: "utf8" }
-    ).trim().split("\n").filter(Boolean);
-    for (const f of lines) { if (fs.existsSync(f)) return f; }
+      'ls -dt /nix/store/*chromium*/bin/chromium-browser 2>/dev/null | grep -v ungoogled || ls -dt /nix/store/*chromium*/bin/chromium-browser 2>/dev/null',
+      { encoding: 'utf8' },
+    )
+      .trim()
+      .split('\n')
+      .filter(Boolean);
+    for (const f of lines) {
+      if (fs.existsSync(f)) return f;
+    }
   } catch (_) {}
   // 4. PATH lookup.
   try {
-    const which = execSync("command -v chromium-browser || command -v chromium || command -v google-chrome || true", { encoding: "utf8" }).trim();
+    const which = execSync(
+      'command -v chromium-browser || command -v chromium || command -v google-chrome || true',
+      { encoding: 'utf8' },
+    ).trim();
     if (which && fs.existsSync(which)) return which;
   } catch (_) {}
-  throw new Error("Chromium executable not found. Set CHROMIUM_PATH or install chromium.");
+  throw new Error('Chromium executable not found. Set CHROMIUM_PATH or install chromium.');
 }
 
 async function launchBrowser() {
@@ -1047,20 +1164,25 @@ async function launchBrowser() {
   return await puppeteer.launch({
     executablePath: exe,
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--font-render-hinting=none"]
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--font-render-hinting=none',
+    ],
   });
 }
 
 async function renderPdf(browser, html, outPath) {
   const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: "networkidle0", timeout: 60000 });
-  await page.emulateMediaType("print");
+  await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+  await page.emulateMediaType('print');
   await page.pdf({
     path: outPath,
-    format: "Letter",
+    format: 'Letter',
     printBackground: true,
-    margin: { top: "0in", bottom: "0in", left: "0in", right: "0in" },
-    preferCSSPageSize: false
+    margin: { top: '0in', bottom: '0in', left: '0in', right: '0in' },
+    preferCSSPageSize: false,
   });
   await page.close();
 }
@@ -1068,13 +1190,13 @@ async function renderPdf(browser, html, outPath) {
 async function renderMockup(browser, html, outPath, width = 1440, height = 900, fullPage = true) {
   const page = await browser.newPage();
   await page.setViewport({ width, height, deviceScaleFactor: 2 });
-  await page.setContent(html, { waitUntil: "networkidle0", timeout: 60000 });
-  await page.screenshot({ path: outPath, fullPage, type: "png" });
+  await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
+  await page.screenshot({ path: outPath, fullPage, type: 'png' });
   await page.close();
 }
 
 function referenceCardHtml(ref) {
-  const host = new URL(ref.url).hostname.replace(/^www\./, "");
+  const host = new URL(ref.url).hostname.replace(/^www\./, '');
   return `<html><head><style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -1094,7 +1216,7 @@ function referenceCardHtml(ref) {
   </style></head><body>
     <div class="card">
       <div class="eye"><div class="mark">S</div><span>SZL Command · Reference</span></div>
-      <h1>${ref.label.replace(/ by /g, " <em>by</em> ").replace(/ \(([^)]+)\)$/, " <em>($1)</em>")}</h1>
+      <h1>${ref.label.replace(/ by /g, ' <em>by</em> ').replace(/ \(([^)]+)\)$/, ' <em>($1)</em>')}</h1>
       <div class="url">${host}</div>
       <div class="why"><strong>Why it's a reference:</strong> ${ref.why}</div>
       <div class="foot"><span>Visit ${host} to view live</span><span class="right">SZL HOLDINGS · LAUNCH KIT</span></div>
@@ -1106,37 +1228,48 @@ async function captureReference(browser, ref, outPath) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
   let needFallback = false;
-  let reason = "";
+  let reason = '';
   try {
-    await page.goto(ref.url, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await new Promise(r => setTimeout(r, 4000));
+    await page.goto(ref.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 4000));
     // Sniff for Cloudflare / bot-challenge / blank pages
     const sniff = await page.evaluate(() => {
-      const text = (document.body && document.body.innerText || "").trim();
-      const title = document.title || "";
-      const html = document.documentElement.outerHTML || "";
+      const text = ((document.body && document.body.innerText) || '').trim();
+      const title = document.title || '';
+      const html = document.documentElement.outerHTML || '';
       return {
         textLen: text.length,
         title,
-        hasChallenge: /just a moment|cloudflare|enable javascript and cookies|attention required|verify you are human|checking your browser/i.test(text + " " + title + " " + html),
-        bodyHeight: document.body ? document.body.scrollHeight : 0
+        hasChallenge:
+          /just a moment|cloudflare|enable javascript and cookies|attention required|verify you are human|checking your browser/i.test(
+            text + ' ' + title + ' ' + html,
+          ),
+        bodyHeight: document.body ? document.body.scrollHeight : 0,
       };
     });
-    if (sniff.hasChallenge) { needFallback = true; reason = "bot-challenge page"; }
-    else if (sniff.textLen < 200) { needFallback = true; reason = `thin content (${sniff.textLen} chars)`; }
-    else if (sniff.bodyHeight < 400) { needFallback = true; reason = `short body (${sniff.bodyHeight}px)`; }
+    if (sniff.hasChallenge) {
+      needFallback = true;
+      reason = 'bot-challenge page';
+    } else if (sniff.textLen < 200) {
+      needFallback = true;
+      reason = `thin content (${sniff.textLen} chars)`;
+    } else if (sniff.bodyHeight < 400) {
+      needFallback = true;
+      reason = `short body (${sniff.bodyHeight}px)`;
+    }
   } catch (err) {
-    needFallback = true; reason = err.message;
+    needFallback = true;
+    reason = err.message;
   }
 
   if (needFallback) {
     console.log(`  ↻ ${ref.url} → branded reference card (${reason})`);
-    await page.setContent(referenceCardHtml(ref), { waitUntil: "networkidle0" });
-    await new Promise(r => setTimeout(r, 800));
+    await page.setContent(referenceCardHtml(ref), { waitUntil: 'networkidle0' });
+    await new Promise((r) => setTimeout(r, 800));
   } else {
     console.log(`  ✓ captured ${ref.url}`);
   }
-  await page.screenshot({ path: outPath, fullPage: false, type: "png" });
+  await page.screenshot({ path: outPath, fullPage: false, type: 'png' });
   await page.close();
 }
 
@@ -1145,14 +1278,32 @@ async function captureReference(browser, ref, outPath) {
 // ────────────────────────────────────────────────
 function buildReadme() {
   const mockupList = [
-    ["substack-home.png", "Substack homepage mockup — shows how the SZL Command landing page should look, including hero gradient, gold brand mark, subscribe CTA, and three featured post cards."],
-    ["substack-about.png", "Substack about-page mockup — shows the positioning, pillar chips, paid-tier callout, and audience section."],
-    ["substack-welcome-email.png", "Welcome email mockup — exactly what a new subscriber receives, ready to paste into the Substack welcome-email editor."],
-    ["substack-post.png", "Substack post mockup — long-form post layout with gradient cover, gold drop cap, Source Serif body. Use as a visual target when formatting posts."],
-    ["medium-publication.png", "Medium publication-page mockup — how the SZL Command publication on Medium should appear, including tabs for each pillar."],
-    ["medium-article.png", "Medium article mockup — single-post layout on Medium, including tag chips and member-program formatting."]
+    [
+      'substack-home.png',
+      'Substack homepage mockup — shows how the SZL Command landing page should look, including hero gradient, gold brand mark, subscribe CTA, and three featured post cards.',
+    ],
+    [
+      'substack-about.png',
+      'Substack about-page mockup — shows the positioning, pillar chips, paid-tier callout, and audience section.',
+    ],
+    [
+      'substack-welcome-email.png',
+      'Welcome email mockup — exactly what a new subscriber receives, ready to paste into the Substack welcome-email editor.',
+    ],
+    [
+      'substack-post.png',
+      'Substack post mockup — long-form post layout with gradient cover, gold drop cap, Source Serif body. Use as a visual target when formatting posts.',
+    ],
+    [
+      'medium-publication.png',
+      'Medium publication-page mockup — how the SZL Command publication on Medium should appear, including tabs for each pillar.',
+    ],
+    [
+      'medium-article.png',
+      'Medium article mockup — single-post layout on Medium, including tag chips and member-program formatting.',
+    ],
   ];
-  const refList = REFERENCE_TARGETS.map(r => [r.file, `${r.label} — ${r.why}`]);
+  const refList = REFERENCE_TARGETS.map((r) => [r.file, `${r.label} — ${r.why}`]);
   return `SZL COMMAND — NEWSLETTER SCREENSHOTS KIT
 ===========================================
 
@@ -1172,7 +1323,7 @@ when briefing a designer, when previewing visuals with investors, or
 when setting up the live publications. Each mockup is 2x resolution
 PNG for retina clarity.
 
-${mockupList.map(([f, d]) => `  ${f}\n      ${d}`).join("\n\n")}
+${mockupList.map(([f, d]) => `  ${f}\n      ${d}`).join('\n\n')}
 
 /references — screenshots of best-in-class Substack and Medium
 publications in adjacent spaces. Use these as reference for
@@ -1180,7 +1331,7 @@ editorial voice, cadence, and visual direction. Screenshots are
 captured at launch time; if a page has changed since capture,
 the structural reference still holds.
 
-${refList.map(([f, d]) => `  ${f}\n      ${d}`).join("\n\n")}
+${refList.map(([f, d]) => `  ${f}\n      ${d}`).join('\n\n')}
 
 How to use this kit
 -------------------
@@ -1202,14 +1353,16 @@ Version: 1.0 · Generated on ${new Date().toISOString().slice(0, 10)}
 async function bundleZip(zipPath) {
   return new Promise((resolve, reject) => {
     const output = fs.createWriteStream(zipPath);
-    const archive = archiver("zip", { zlib: { level: 9 } });
-    output.on("close", () => resolve(archive.pointer()));
-    archive.on("warning", err => { if (err.code !== "ENOENT") reject(err); });
-    archive.on("error", reject);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    output.on('close', () => resolve(archive.pointer()));
+    archive.on('warning', (err) => {
+      if (err.code !== 'ENOENT') reject(err);
+    });
+    archive.on('error', reject);
     archive.pipe(output);
-    archive.directory(MOCKUPS_DIR, "mockups");
-    archive.directory(REFERENCES_DIR, "references");
-    archive.append(buildReadme(), { name: "README.txt" });
+    archive.directory(MOCKUPS_DIR, 'mockups');
+    archive.directory(REFERENCES_DIR, 'references');
+    archive.append(buildReadme(), { name: 'README.txt' });
     archive.finalize();
   });
 }
@@ -1218,29 +1371,29 @@ async function bundleZip(zipPath) {
 // Main
 // ────────────────────────────────────────────────
 async function main() {
-  console.log("=== SZL Launch Kit Generator ===");
+  console.log('=== SZL Launch Kit Generator ===');
   console.log(`Deliverables → ${DELIVERABLES}`);
 
   const browser = await launchBrowser();
 
-  console.log("\n[1/4] Rendering Substack PDF…");
-  const substackHtml = buildPdfHtml("substack");
-  await renderPdf(browser, substackHtml, path.join(DELIVERABLES, "SZL-Substack-Launch-Plan.pdf"));
-  console.log("      ✓ SZL-Substack-Launch-Plan.pdf");
+  console.log('\n[1/4] Rendering Substack PDF…');
+  const substackHtml = buildPdfHtml('substack');
+  await renderPdf(browser, substackHtml, path.join(DELIVERABLES, 'SZL-Substack-Launch-Plan.pdf'));
+  console.log('      ✓ SZL-Substack-Launch-Plan.pdf');
 
-  console.log("\n[2/4] Rendering Medium PDF…");
-  const mediumHtml = buildPdfHtml("medium");
-  await renderPdf(browser, mediumHtml, path.join(DELIVERABLES, "SZL-Medium-Launch-Plan.pdf"));
-  console.log("      ✓ SZL-Medium-Launch-Plan.pdf");
+  console.log('\n[2/4] Rendering Medium PDF…');
+  const mediumHtml = buildPdfHtml('medium');
+  await renderPdf(browser, mediumHtml, path.join(DELIVERABLES, 'SZL-Medium-Launch-Plan.pdf'));
+  console.log('      ✓ SZL-Medium-Launch-Plan.pdf');
 
-  console.log("\n[3/4] Rendering mockups…");
+  console.log('\n[3/4] Rendering mockups…');
   const mockups = [
-    ["substack-home.png", mockupSubstackHome(), 1440, 900, true],
-    ["substack-about.png", mockupSubstackAbout(), 1440, 900, true],
-    ["substack-welcome-email.png", mockupSubstackWelcome(), 800, 1100, true],
-    ["substack-post.png", mockupSubstackPost(), 1440, 900, true],
-    ["medium-publication.png", mockupMediumPub(), 1440, 900, true],
-    ["medium-article.png", mockupMediumArticle(), 1440, 900, true]
+    ['substack-home.png', mockupSubstackHome(), 1440, 900, true],
+    ['substack-about.png', mockupSubstackAbout(), 1440, 900, true],
+    ['substack-welcome-email.png', mockupSubstackWelcome(), 800, 1100, true],
+    ['substack-post.png', mockupSubstackPost(), 1440, 900, true],
+    ['medium-publication.png', mockupMediumPub(), 1440, 900, true],
+    ['medium-article.png', mockupMediumArticle(), 1440, 900, true],
   ];
   for (const [name, html, w, h, full] of mockups) {
     const p = path.join(MOCKUPS_DIR, name);
@@ -1248,28 +1401,31 @@ async function main() {
     console.log(`      ✓ ${name}`);
   }
 
-  console.log("\n[4/4] Capturing reference screenshots…");
+  console.log('\n[4/4] Capturing reference screenshots…');
   for (const ref of REFERENCE_TARGETS) {
     await captureReference(browser, ref, path.join(REFERENCES_DIR, ref.file));
   }
 
   await browser.close();
 
-  console.log("\n[5/5] Bundling ZIP…");
-  const zipOut = path.join(DELIVERABLES, "SZL-Newsletter-Screenshots.zip");
+  console.log('\n[5/5] Bundling ZIP…');
+  const zipOut = path.join(DELIVERABLES, 'SZL-Newsletter-Screenshots.zip');
   const sz = await bundleZip(zipOut);
   console.log(`      ✓ SZL-Newsletter-Screenshots.zip (${Math.round(sz / 1024)} KB)`);
 
   const stats = {
-    substackPdf: fs.statSync(path.join(DELIVERABLES, "SZL-Substack-Launch-Plan.pdf")).size,
-    mediumPdf: fs.statSync(path.join(DELIVERABLES, "SZL-Medium-Launch-Plan.pdf")).size,
-    zip: fs.statSync(zipOut).size
+    substackPdf: fs.statSync(path.join(DELIVERABLES, 'SZL-Substack-Launch-Plan.pdf')).size,
+    mediumPdf: fs.statSync(path.join(DELIVERABLES, 'SZL-Medium-Launch-Plan.pdf')).size,
+    zip: fs.statSync(zipOut).size,
   };
-  console.log("\n=== Complete ===");
+  console.log('\n=== Complete ===');
   console.log(`  Substack PDF: ${(stats.substackPdf / 1024).toFixed(1)} KB`);
   console.log(`  Medium PDF:   ${(stats.mediumPdf / 1024).toFixed(1)} KB`);
   console.log(`  Screenshots:  ${(stats.zip / 1024).toFixed(1)} KB`);
   console.log(`  Posts drafted: ${POSTS.length}`);
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

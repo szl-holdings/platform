@@ -3,7 +3,7 @@
  * Imported by both the screen and its tests so regressions are caught.
  */
 
-export type RunState = "pending" | "running" | "completed" | "failed" | "cancelled";
+export type RunState = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 export interface WorkflowRunLike {
   id: number;
@@ -40,9 +40,9 @@ export interface RunDetailLike extends WorkflowRunLike {
   workflowName?: string;
 }
 
-export type FilterState = "all" | "running" | "failed" | "completed";
+export type FilterState = 'all' | 'running' | 'failed' | 'completed';
 
-export const RUNS_LIST_PATH = "/api/alloy/runs?limit=30";
+export const RUNS_LIST_PATH = '/api/alloy/runs?limit=30';
 
 export function runDetailPath(runId: number): string {
   return `/api/alloy/runs/${runId}`;
@@ -59,15 +59,15 @@ export function normalizeRuns<T>(raw: { data: T[] } | T[] | undefined): T[] {
 }
 
 export function filterByState<T extends { state: string }>(runs: T[], f: FilterState): T[] {
-  return f === "all" ? runs : runs.filter((r) => r.state === f);
+  return f === 'all' ? runs : runs.filter((r) => r.state === f);
 }
 
 export function computeRunStats(runs: ReadonlyArray<{ state: string }>) {
   return {
     total: runs.length,
-    running: runs.filter((r) => r.state === "running").length,
-    failed: runs.filter((r) => r.state === "failed").length,
-    completed: runs.filter((r) => r.state === "completed").length,
+    running: runs.filter((r) => r.state === 'running').length,
+    failed: runs.filter((r) => r.state === 'failed').length,
+    completed: runs.filter((r) => r.state === 'completed').length,
   };
 }
 
@@ -86,13 +86,14 @@ export async function loadRunDetail(
   ]);
 
   const baseRun: WorkflowRunLike =
-    detailRaw.status === "fulfilled"
-      ? ((detailRaw.value as { data: WorkflowRunLike })?.data ?? (detailRaw.value as WorkflowRunLike))
+    detailRaw.status === 'fulfilled'
+      ? ((detailRaw.value as { data: WorkflowRunLike })?.data ??
+        (detailRaw.value as WorkflowRunLike))
       : { ...run };
 
   let steps: RunStepLike[] | undefined;
   let workflowName: string | undefined;
-  if (stepsRaw.status === "fulfilled") {
+  if (stepsRaw.status === 'fulfilled') {
     const stepsData =
       (stepsRaw.value as { data: RunStepsResponseLike })?.data ??
       (stepsRaw.value as RunStepsResponseLike);
@@ -105,11 +106,11 @@ export async function loadRunDetail(
 
 export function buildReplayUrl(apiBase: string | null | undefined, runId: number): string {
   if (!apiBase) return `/command/#run/${runId}`;
-  return `${apiBase.replace(/\/api\/?$/, "")}/command/#run/${runId}`;
+  return `${apiBase.replace(/\/api\/?$/, '')}/command/#run/${runId}`;
 }
 
 export function formatDuration(ms?: number | null): string {
-  if (!ms) return "—";
+  if (!ms) return '—';
   if (ms < 1000) return `${ms}ms`;
   const secs = (ms / 1000).toFixed(1);
   if (ms < 60000) return `${secs}s`;
@@ -117,10 +118,10 @@ export function formatDuration(ms?: number | null): string {
 }
 
 export function formatRelative(iso?: string | null, now: number = Date.now()): string {
-  if (!iso) return "—";
+  if (!iso) return '—';
   const ms = now - new Date(iso).getTime();
   const mins = Math.floor(ms / 60000);
-  if (mins < 1) return "just now";
+  if (mins < 1) return 'just now';
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;

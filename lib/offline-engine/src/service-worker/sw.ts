@@ -2,22 +2,16 @@
 
 declare const self: ServiceWorkerGlobalScope;
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = 'v1';
 const STATIC_CACHE = `szl-static-${CACHE_VERSION}`;
 const API_CACHE = `szl-api-${CACHE_VERSION}`;
 const DASHBOARD_CACHE = `szl-dashboard-${CACHE_VERSION}`;
 
-const STATIC_ASSET_PATTERNS = [
-  /\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp)$/,
-];
+const STATIC_ASSET_PATTERNS = [/\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp)$/];
 
-const API_PATH_PATTERNS = [
-  /\/api\//,
-];
+const API_PATH_PATTERNS = [/\/api\//];
 
-const DASHBOARD_PATTERNS = [
-  /\/api\/.*\/(incidents|vessels|signals|fleets|assessments)(\?.*)?$/,
-];
+const DASHBOARD_PATTERNS = [/\/api\/.*\/(incidents|vessels|signals|fleets|assessments)(\?.*)?$/];
 
 function isStaticAsset(url: string): boolean {
   return STATIC_ASSET_PATTERNS.some((p) => p.test(url));
@@ -31,45 +25,40 @@ function isDashboardView(url: string): boolean {
   return DASHBOARD_PATTERNS.some((p) => p.test(url));
 }
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
       caches.open(STATIC_CACHE),
       caches.open(API_CACHE),
       caches.open(DASHBOARD_CACHE),
-    ]).then(() => self.skipWaiting())
+    ]).then(() => self.skipWaiting()),
   );
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
       .then((keys) =>
         Promise.all(
           keys
-            .filter(
-              (key) =>
-                key !== STATIC_CACHE &&
-                key !== API_CACHE &&
-                key !== DASHBOARD_CACHE
-            )
-            .map((key) => caches.delete(key))
-        )
+            .filter((key) => key !== STATIC_CACHE && key !== API_CACHE && key !== DASHBOARD_CACHE)
+            .map((key) => caches.delete(key)),
+        ),
       )
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
-self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") {
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', (event) => {
   const { request } = event;
-  if (request.method !== "GET") return;
+  if (request.method !== 'GET') return;
 
   const url = request.url;
 
@@ -114,13 +103,10 @@ async function networkFirst(request: Request, cacheName: string): Promise<Respon
   } catch {
     const cached = await cache.match(request);
     if (cached) return cached;
-    return new Response(
-      JSON.stringify({ error: "offline", message: "No cached data available" }),
-      {
-        status: 503,
-        headers: { "Content-Type": "application/json", "X-Offline": "true" },
-      }
-    );
+    return new Response(JSON.stringify({ error: 'offline', message: 'No cached data available' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json', 'X-Offline': 'true' },
+    });
   }
 }
 

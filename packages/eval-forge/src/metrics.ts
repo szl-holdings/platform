@@ -1,11 +1,13 @@
-import type { EvalCaseResult, EvalForgeMetrics } from "./types.js";
+import type { EvalCaseResult, EvalForgeMetrics } from './types.js';
 
 function percentile(sorted: number[], pct: number): number {
   if (sorted.length === 0) return 0;
   return sorted[Math.min(Math.floor(sorted.length * pct), sorted.length - 1)]!;
 }
 
-export function computeCorrectnessMetrics(results: EvalCaseResult[]): EvalForgeMetrics["correctness"] {
+export function computeCorrectnessMetrics(
+  results: EvalCaseResult[],
+): EvalForgeMetrics['correctness'] {
   const passed = results.filter((r) => r.passed).length;
   const total = results.length;
   const avgScore = total > 0 ? results.reduce((s, r) => s + r.score, 0) / total : 0;
@@ -18,7 +20,9 @@ export function computeCorrectnessMetrics(results: EvalCaseResult[]): EvalForgeM
   };
 }
 
-export function computeEvidenceQualityMetrics(results: EvalCaseResult[]): EvalForgeMetrics["evidenceQuality"] {
+export function computeEvidenceQualityMetrics(
+  results: EvalCaseResult[],
+): EvalForgeMetrics['evidenceQuality'] {
   let totalCitations = 0;
   let citationCoverage = 0;
   let citationAccuracy = 0;
@@ -28,26 +32,46 @@ export function computeEvidenceQualityMetrics(results: EvalCaseResult[]): EvalFo
   for (const r of results) {
     const out = r.output;
     const gt = r.groundTruth;
-    const citations = Array.isArray(out.citations) ? out.citations.length :
-      typeof out.citationCount === "number" ? out.citationCount : 0;
-    const expectedCitations = typeof gt.minCitations === "number" ? gt.minCitations :
-      Array.isArray(gt.citations) ? gt.citations.length : 0;
+    const citations = Array.isArray(out.citations)
+      ? out.citations.length
+      : typeof out.citationCount === 'number'
+        ? out.citationCount
+        : 0;
+    const expectedCitations =
+      typeof gt.minCitations === 'number'
+        ? gt.minCitations
+        : Array.isArray(gt.citations)
+          ? gt.citations.length
+          : 0;
 
     totalCitations += citations;
-    const coverage = expectedCitations > 0 ? Math.min(1, citations / expectedCitations) : (citations > 0 ? 1 : 0.5);
+    const coverage =
+      expectedCitations > 0 ? Math.min(1, citations / expectedCitations) : citations > 0 ? 1 : 0.5;
     citationCoverage += coverage;
 
-    const accurate = typeof out.citationAccuracy === "number" ? out.citationAccuracy :
-      typeof r.graderDetails?.citationAccuracy === "number" ? r.graderDetails.citationAccuracy : r.score;
+    const accurate =
+      typeof out.citationAccuracy === 'number'
+        ? out.citationAccuracy
+        : typeof r.graderDetails?.citationAccuracy === 'number'
+          ? r.graderDetails.citationAccuracy
+          : r.score;
     citationAccuracy += accurate;
 
-    const verified = out.sourceVerified === true ? 1 : (typeof out.sourceVerifiedCount === "number" ? out.sourceVerifiedCount : 0);
+    const verified =
+      out.sourceVerified === true
+        ? 1
+        : typeof out.sourceVerifiedCount === 'number'
+          ? out.sourceVerifiedCount
+          : 0;
     sourceVerified += verified;
     count++;
   }
 
   const n = count || 1;
-  const score = (citationCoverage / n) * 0.4 + (citationAccuracy / n) * 0.4 + Math.min(1, sourceVerified / n) * 0.2;
+  const score =
+    (citationCoverage / n) * 0.4 +
+    (citationAccuracy / n) * 0.4 +
+    Math.min(1, sourceVerified / n) * 0.2;
 
   return {
     citationCoverage: citationCoverage / n,
@@ -58,9 +82,18 @@ export function computeEvidenceQualityMetrics(results: EvalCaseResult[]): EvalFo
   };
 }
 
-export function computeConfidenceCalibration(results: EvalCaseResult[]): EvalForgeMetrics["confidenceCalibration"] {
+export function computeConfidenceCalibration(
+  results: EvalCaseResult[],
+): EvalForgeMetrics['confidenceCalibration'] {
   if (results.length === 0) {
-    return { avgConfidence: 0, calibrationError: 0, overconfidenceRate: 0, underconfidenceRate: 0, brierScore: 0, score: 1 };
+    return {
+      avgConfidence: 0,
+      calibrationError: 0,
+      overconfidenceRate: 0,
+      underconfidenceRate: 0,
+      brierScore: 0,
+      score: 1,
+    };
   }
 
   let totalConf = 0;
@@ -69,8 +102,12 @@ export function computeConfidenceCalibration(results: EvalCaseResult[]): EvalFor
   let underconfident = 0;
 
   for (const r of results) {
-    const conf = typeof r.output.confidence === "number" ? r.output.confidence :
-      typeof r.graderDetails?.confidence === "number" ? r.graderDetails.confidence : r.score;
+    const conf =
+      typeof r.output.confidence === 'number'
+        ? r.output.confidence
+        : typeof r.graderDetails?.confidence === 'number'
+          ? r.graderDetails.confidence
+          : r.score;
     const outcome = r.passed ? 1 : 0;
 
     totalConf += conf;
@@ -96,7 +133,7 @@ export function computeConfidenceCalibration(results: EvalCaseResult[]): EvalFor
   };
 }
 
-export function computeLatencyMetrics(results: EvalCaseResult[]): EvalForgeMetrics["latency"] {
+export function computeLatencyMetrics(results: EvalCaseResult[]): EvalForgeMetrics['latency'] {
   if (results.length === 0) {
     return { avgLatencyMs: 0, p50LatencyMs: 0, p95LatencyMs: 0, p99LatencyMs: 0, maxLatencyMs: 0 };
   }
@@ -111,9 +148,19 @@ export function computeLatencyMetrics(results: EvalCaseResult[]): EvalForgeMetri
   };
 }
 
-export function computeCostMetrics(results: EvalCaseResult[], successfulOutcomes: number): EvalForgeMetrics["cost"] {
+export function computeCostMetrics(
+  results: EvalCaseResult[],
+  successfulOutcomes: number,
+): EvalForgeMetrics['cost'] {
   if (results.length === 0) {
-    return { totalCostUsd: 0, avgCostUsd: 0, costPerOutcome: 0, totalTokensUsed: 0, avgTokensUsed: 0, p95CostUsd: 0 };
+    return {
+      totalCostUsd: 0,
+      avgCostUsd: 0,
+      costPerOutcome: 0,
+      totalTokensUsed: 0,
+      avgTokensUsed: 0,
+      p95CostUsd: 0,
+    };
   }
   const costs = results.map((r) => r.costUsd).sort((a, b) => a - b);
   const totalCostUsd = costs.reduce((a, b) => a + b, 0);
@@ -128,19 +175,25 @@ export function computeCostMetrics(results: EvalCaseResult[], successfulOutcomes
   };
 }
 
-export function computeInterventionValueMetrics(results: EvalCaseResult[]): EvalForgeMetrics["interventionValue"] {
+export function computeInterventionValueMetrics(
+  results: EvalCaseResult[],
+): EvalForgeMetrics['interventionValue'] {
   let interventions = 0;
   let improvementSum = 0;
 
   for (const r of results) {
-    const intervened = r.graderDetails?.intervened === true ||
-      r.tags?.includes("intervened") ||
-      (r.output.interventionApplied === true);
+    const intervened =
+      r.graderDetails?.intervened === true ||
+      r.tags?.includes('intervened') ||
+      r.output.interventionApplied === true;
     if (intervened) {
       interventions++;
-      const improvement = typeof r.graderDetails?.improvementDelta === "number"
-        ? r.graderDetails.improvementDelta
-        : (r.passed ? 0.15 : 0);
+      const improvement =
+        typeof r.graderDetails?.improvementDelta === 'number'
+          ? r.graderDetails.improvementDelta
+          : r.passed
+            ? 0.15
+            : 0;
       improvementSum += improvement;
     }
   }
@@ -157,16 +210,17 @@ export function computeInterventionValueMetrics(results: EvalCaseResult[]): Eval
   };
 }
 
-export function computeHumanOverrideMetrics(results: EvalCaseResult[]): EvalForgeMetrics["humanOverrideRate"] {
+export function computeHumanOverrideMetrics(
+  results: EvalCaseResult[],
+): EvalForgeMetrics['humanOverrideRate'] {
   let overrides = 0;
   const overrideReasons: Record<string, number> = {};
 
   for (const r of results) {
-    const overridden = !r.passed && r.score < 0.5 ||
-      r.graderDetails?.humanOverride === true;
+    const overridden = (!r.passed && r.score < 0.5) || r.graderDetails?.humanOverride === true;
     if (overridden) {
       overrides++;
-      const reason = r.failureReason ?? "unspecified";
+      const reason = r.failureReason ?? 'unspecified';
       overrideReasons[reason] = (overrideReasons[reason] ?? 0) + 1;
     }
   }
@@ -182,21 +236,26 @@ export function computeHumanOverrideMetrics(results: EvalCaseResult[]): EvalForg
   };
 }
 
-export function computeRollbackMetrics(results: EvalCaseResult[]): EvalForgeMetrics["rollbackRate"] {
+export function computeRollbackMetrics(
+  results: EvalCaseResult[],
+): EvalForgeMetrics['rollbackRate'] {
   let rollbacks = 0;
   let rollbackLatencySum = 0;
   const rollbackReasons: Record<string, number> = {};
 
   for (const r of results) {
-    const rolledBack = r.output.rolledBack === true ||
+    const rolledBack =
+      r.output.rolledBack === true ||
       r.graderDetails?.rolledBack === true ||
-      r.tags?.includes("rollback");
+      r.tags?.includes('rollback');
     if (rolledBack) {
       rollbacks++;
-      const latency = typeof r.graderDetails?.rollbackLatencyMs === "number"
-        ? r.graderDetails.rollbackLatencyMs : r.latencyMs;
+      const latency =
+        typeof r.graderDetails?.rollbackLatencyMs === 'number'
+          ? r.graderDetails.rollbackLatencyMs
+          : r.latencyMs;
       rollbackLatencySum += latency;
-      const reason = r.failureReason ?? "execution-failure";
+      const reason = r.failureReason ?? 'execution-failure';
       rollbackReasons[reason] = (rollbackReasons[reason] ?? 0) + 1;
     }
   }
@@ -212,23 +271,33 @@ export function computeRollbackMetrics(results: EvalCaseResult[]): EvalForgeMetr
   };
 }
 
-export function computePolicyViolationMetrics(results: EvalCaseResult[]): EvalForgeMetrics["policyViolations"] {
+export function computePolicyViolationMetrics(
+  results: EvalCaseResult[],
+): EvalForgeMetrics['policyViolations'] {
   let violations = 0;
   let criticalViolations = 0;
   const violationsByType: Record<string, number> = {};
 
   for (const r of results) {
-    const policies = r.groundTruth.policies as string[] | undefined ?? r.tags?.filter((t) => t.startsWith("policy:")) ?? [];
-    const violationDetected = !r.passed && policies.length > 0 ||
+    const policies =
+      (r.groundTruth.policies as string[] | undefined) ??
+      r.tags?.filter((t) => t.startsWith('policy:')) ??
+      [];
+    const violationDetected =
+      (!r.passed && policies.length > 0) ||
       r.graderDetails?.policyViolation === true ||
       r.output.policyViolation !== undefined;
 
     if (violationDetected) {
       violations++;
-      const severity = r.score < 0.3 ? "critical" : "standard";
-      if (severity === "critical") criticalViolations++;
-      const vType = typeof r.output.policyViolation === "string" ? r.output.policyViolation :
-        typeof r.graderDetails?.violationType === "string" ? r.graderDetails.violationType : "general";
+      const severity = r.score < 0.3 ? 'critical' : 'standard';
+      if (severity === 'critical') criticalViolations++;
+      const vType =
+        typeof r.output.policyViolation === 'string'
+          ? r.output.policyViolation
+          : typeof r.graderDetails?.violationType === 'string'
+            ? r.graderDetails.violationType
+            : 'general';
       violationsByType[vType] = (violationsByType[vType] ?? 0) + 1;
     }
   }
@@ -260,6 +329,4 @@ export function computeAllMetrics(results: EvalCaseResult[]): EvalForgeMetrics {
   };
 }
 
-export type {
-  EvalForgeMetrics,
-};
+export type { EvalForgeMetrics };

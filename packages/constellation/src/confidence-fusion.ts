@@ -9,7 +9,7 @@
  *  - max: the most optimistic (largest) score.
  */
 
-export type FusionStrategy = "weighted_average" | "bayesian" | "min" | "max";
+export type FusionStrategy = 'weighted_average' | 'bayesian' | 'min' | 'max';
 
 export interface ConfidenceSignal {
   value: number;
@@ -34,9 +34,9 @@ export interface FusionResult {
  */
 export function fuseConfidence(
   signals: ConfidenceSignal[],
-  strategy: FusionStrategy = "weighted_average",
+  strategy: FusionStrategy = 'weighted_average',
 ): FusionResult {
-  const base: Omit<FusionResult, "fused"> = {
+  const base: Omit<FusionResult, 'fused'> = {
     strategy,
     inputCount: signals.length,
     signals,
@@ -48,7 +48,7 @@ export function fuseConfidence(
   let fused: number;
 
   switch (strategy) {
-    case "weighted_average": {
+    case 'weighted_average': {
       let totalWeight = 0;
       let weightedSum = 0;
       for (const s of signals) {
@@ -60,7 +60,7 @@ export function fuseConfidence(
       break;
     }
 
-    case "bayesian": {
+    case 'bayesian': {
       let product = 1;
       for (const s of signals) {
         product *= 1 - clamp(s.value);
@@ -69,12 +69,12 @@ export function fuseConfidence(
       break;
     }
 
-    case "min": {
+    case 'min': {
       fused = Math.min(...signals.map((s) => clamp(s.value)));
       break;
     }
 
-    case "max": {
+    case 'max': {
       fused = Math.max(...signals.map((s) => clamp(s.value)));
       break;
     }
@@ -94,7 +94,7 @@ export function fuseConfidence(
 export function applyFusedConfidence<T extends { confidence: number }>(
   node: T,
   signals: ConfidenceSignal[],
-  strategy: FusionStrategy = "weighted_average",
+  strategy: FusionStrategy = 'weighted_average',
 ): T & { confidence: number } {
   const { fused } = fuseConfidence(signals, strategy);
   return { ...node, confidence: fused };

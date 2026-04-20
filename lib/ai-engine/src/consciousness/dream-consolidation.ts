@@ -4,7 +4,7 @@ export interface DreamReplay {
   query: string;
   domains: string[];
   agentPerformance: Array<{ agentId: string; confidence: number; success: boolean }>;
-  outcome: "positive" | "neutral" | "negative";
+  outcome: 'positive' | 'neutral' | 'negative';
   timestamp: string;
 }
 
@@ -13,7 +13,7 @@ export interface DiscoveredPattern {
   description: string;
   frequency: number;
   domains: string[];
-  significance: "low" | "medium" | "high";
+  significance: 'low' | 'medium' | 'high';
   actionableInsight: string;
   discoveredAt: string;
 }
@@ -62,9 +62,12 @@ class DreamConsolidationEngine {
     avgConfidence: number;
     validationPassed: boolean;
   }): void {
-    const outcome: DreamReplay["outcome"] =
-      input.avgConfidence > 70 && input.validationPassed ? "positive" :
-      input.avgConfidence < 40 || !input.validationPassed ? "negative" : "neutral";
+    const outcome: DreamReplay['outcome'] =
+      input.avgConfidence > 70 && input.validationPassed
+        ? 'positive'
+        : input.avgConfidence < 40 || !input.validationPassed
+          ? 'negative'
+          : 'neutral';
 
     this.replayBuffer.push({
       replayId: `replay_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -77,7 +80,10 @@ class DreamConsolidationEngine {
     });
 
     if (this.replayBuffer.length > DreamConsolidationEngine.MAX_REPLAY_BUFFER) {
-      this.replayBuffer.splice(0, this.replayBuffer.length - DreamConsolidationEngine.MAX_REPLAY_BUFFER);
+      this.replayBuffer.splice(
+        0,
+        this.replayBuffer.length - DreamConsolidationEngine.MAX_REPLAY_BUFFER,
+      );
     }
   }
 
@@ -120,9 +126,9 @@ class DreamConsolidationEngine {
   private discoverPatterns(replays: DreamReplay[]): DiscoveredPattern[] {
     const patterns: DiscoveredPattern[] = [];
 
-    const domainCombos: Record<string, { count: number; outcomes: DreamReplay["outcome"][] }> = {};
+    const domainCombos: Record<string, { count: number; outcomes: DreamReplay['outcome'][] }> = {};
     for (const r of replays) {
-      const key = r.domains.sort().join("+");
+      const key = r.domains.sort().join('+');
       if (!domainCombos[key]) domainCombos[key] = { count: 0, outcomes: [] };
       domainCombos[key]!.count++;
       domainCombos[key]!.outcomes.push(r.outcome);
@@ -130,16 +136,16 @@ class DreamConsolidationEngine {
 
     for (const [combo, data] of Object.entries(domainCombos)) {
       if (data.count >= 3) {
-        const negativeRate = data.outcomes.filter(o => o === "negative").length / data.count;
-        const positiveRate = data.outcomes.filter(o => o === "positive").length / data.count;
+        const negativeRate = data.outcomes.filter((o) => o === 'negative').length / data.count;
+        const positiveRate = data.outcomes.filter((o) => o === 'positive').length / data.count;
 
         if (negativeRate > 0.5) {
           patterns.push({
             patternId: `pat_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
             description: `Domain combination ${combo} has ${(negativeRate * 100).toFixed(0)}% failure rate across ${data.count} orchestrations`,
             frequency: data.count,
-            domains: combo.split("+"),
-            significance: negativeRate > 0.7 ? "high" : "medium",
+            domains: combo.split('+'),
+            significance: negativeRate > 0.7 ? 'high' : 'medium',
             actionableInsight: `Investigate routing failures for ${combo} — may need specialized handling or agent tuning`,
             discoveredAt: new Date().toISOString(),
           });
@@ -148,8 +154,8 @@ class DreamConsolidationEngine {
             patternId: `pat_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
             description: `Domain combination ${combo} is a strong performer: ${(positiveRate * 100).toFixed(0)}% success across ${data.count} orchestrations`,
             frequency: data.count,
-            domains: combo.split("+"),
-            significance: "medium",
+            domains: combo.split('+'),
+            significance: 'medium',
             actionableInsight: `Consider prioritizing ${combo} routing — proven high-success combination`,
             discoveredAt: new Date().toISOString(),
           });
@@ -175,31 +181,31 @@ class DreamConsolidationEngine {
           description: `Agent ${agent} failing at ${(failRate * 100).toFixed(0)}% rate across ${total} invocations`,
           frequency: total,
           domains: [],
-          significance: failRate > 0.6 ? "high" : "medium",
+          significance: failRate > 0.6 ? 'high' : 'medium',
           actionableInsight: `Agent ${agent} needs investigation — possible prompt degradation, model drift, or domain coverage gap`,
           discoveredAt: new Date().toISOString(),
         });
       }
     }
 
-    const timeSlots: Record<string, DreamReplay["outcome"][]> = {};
+    const timeSlots: Record<string, DreamReplay['outcome'][]> = {};
     for (const r of replays) {
       const hour = new Date(r.timestamp).getHours();
-      const slot = hour < 8 ? "night" : hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+      const slot = hour < 8 ? 'night' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
       if (!timeSlots[slot]) timeSlots[slot] = [];
       timeSlots[slot]!.push(r.outcome);
     }
 
     for (const [slot, outcomes] of Object.entries(timeSlots)) {
       if (outcomes.length >= 5) {
-        const negRate = outcomes.filter(o => o === "negative").length / outcomes.length;
+        const negRate = outcomes.filter((o) => o === 'negative').length / outcomes.length;
         if (negRate > 0.5) {
           patterns.push({
             patternId: `pat_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
             description: `Higher failure rate during ${slot} hours (${(negRate * 100).toFixed(0)}% negative across ${outcomes.length} orchestrations)`,
             frequency: outcomes.length,
             domains: [],
-            significance: "low",
+            significance: 'low',
             actionableInsight: `Performance degrades during ${slot} — possibly due to load patterns or data staleness`,
             discoveredAt: new Date().toISOString(),
           });
@@ -208,7 +214,7 @@ class DreamConsolidationEngine {
     }
 
     for (const p of patterns) {
-      if (!this.patterns.some(ep => ep.description === p.description)) {
+      if (!this.patterns.some((ep) => ep.description === p.description)) {
         this.patterns.push(p);
       }
     }
@@ -216,7 +222,7 @@ class DreamConsolidationEngine {
       this.patterns = this.patterns
         .sort((a, b) => {
           const sigOrder = { high: 3, medium: 2, low: 1 };
-          return (sigOrder[b.significance] - sigOrder[a.significance]) || (b.frequency - a.frequency);
+          return sigOrder[b.significance] - sigOrder[a.significance] || b.frequency - a.frequency;
         })
         .slice(0, DreamConsolidationEngine.MAX_PATTERNS);
     }
@@ -232,7 +238,7 @@ class DreamConsolidationEngine {
       const toKeep: DreamReplay[] = [];
 
       for (const r of this.replayBuffer) {
-        const hash = `${r.domains.sort().join("+")}:${r.outcome}:${r.query.slice(0, 50)}`;
+        const hash = `${r.domains.sort().join('+')}:${r.outcome}:${r.query.slice(0, 50)}`;
         const count = queryHashes.get(hash) ?? 0;
         if (count < 3) {
           toKeep.push(r);
@@ -252,19 +258,25 @@ class DreamConsolidationEngine {
     const totalReplays = replays.length;
     if (totalReplays === 0) return insights;
 
-    const positiveRate = replays.filter(r => r.outcome === "positive").length / totalReplays;
-    const negativeRate = replays.filter(r => r.outcome === "negative").length / totalReplays;
+    const positiveRate = replays.filter((r) => r.outcome === 'positive').length / totalReplays;
+    const negativeRate = replays.filter((r) => r.outcome === 'negative').length / totalReplays;
 
-    insights.push(`Overall performance: ${(positiveRate * 100).toFixed(0)}% positive, ${(negativeRate * 100).toFixed(0)}% negative across ${totalReplays} orchestrations`);
+    insights.push(
+      `Overall performance: ${(positiveRate * 100).toFixed(0)}% positive, ${(negativeRate * 100).toFixed(0)}% negative across ${totalReplays} orchestrations`,
+    );
 
-    const highSigPatterns = patterns.filter(p => p.significance === "high");
+    const highSigPatterns = patterns.filter((p) => p.significance === 'high');
     if (highSigPatterns.length > 0) {
-      insights.push(`Critical patterns found: ${highSigPatterns.map(p => p.description.slice(0, 80)).join("; ")}`);
+      insights.push(
+        `Critical patterns found: ${highSigPatterns.map((p) => p.description.slice(0, 80)).join('; ')}`,
+      );
     }
 
-    const allDomains = new Set(replays.flatMap(r => r.domains));
+    const allDomains = new Set(replays.flatMap((r) => r.domains));
     if (allDomains.size > 5) {
-      insights.push(`Broad domain coverage: ${allDomains.size} domains active in recent orchestrations — system operating cross-domain`);
+      insights.push(
+        `Broad domain coverage: ${allDomains.size} domains active in recent orchestrations — system operating cross-domain`,
+      );
     }
 
     return insights;
@@ -285,9 +297,13 @@ class DreamConsolidationEngine {
     for (const [agent, stats] of Object.entries(agentStats)) {
       const rate = stats.success / stats.total;
       if (rate < 0.5 && stats.total >= 3) {
-        updates.push(`Flag ${agent} for weakness review (${(rate * 100).toFixed(0)}% success over ${stats.total} runs)`);
+        updates.push(
+          `Flag ${agent} for weakness review (${(rate * 100).toFixed(0)}% success over ${stats.total} runs)`,
+        );
       } else if (rate > 0.9 && stats.total >= 5) {
-        updates.push(`Confirm ${agent} as strong performer (${(rate * 100).toFixed(0)}% success over ${stats.total} runs)`);
+        updates.push(
+          `Confirm ${agent} as strong performer (${(rate * 100).toFixed(0)}% success over ${stats.total} runs)`,
+        );
       }
     }
 
@@ -297,14 +313,18 @@ class DreamConsolidationEngine {
   private deriveGoalUpdates(replays: DreamReplay[], patterns: DiscoveredPattern[]): string[] {
     const updates: string[] = [];
 
-    const failPatterns = patterns.filter(p => p.significance === "high" && p.actionableInsight.includes("failure"));
+    const failPatterns = patterns.filter(
+      (p) => p.significance === 'high' && p.actionableInsight.includes('failure'),
+    );
     for (const p of failPatterns.slice(0, 3)) {
       updates.push(`Create investigation goal: ${p.actionableInsight.slice(0, 100)}`);
     }
 
-    const negativeReplays = replays.filter(r => r.outcome === "negative");
+    const negativeReplays = replays.filter((r) => r.outcome === 'negative');
     if (negativeReplays.length > replays.length * 0.3) {
-      updates.push(`System-wide performance concern: ${(negativeReplays.length / replays.length * 100).toFixed(0)}% negative outcomes — create improvement goal`);
+      updates.push(
+        `System-wide performance concern: ${((negativeReplays.length / replays.length) * 100).toFixed(0)}% negative outcomes — create improvement goal`,
+      );
     }
 
     return updates;
@@ -343,7 +363,7 @@ class DreamConsolidationEngine {
   }
 
   buildDreamContext(): string {
-    if (this.cycleCount === 0) return "";
+    if (this.cycleCount === 0) return '';
 
     const lines = [
       `## Dream Consolidation`,
@@ -355,18 +375,20 @@ class DreamConsolidationEngine {
     }
 
     if (this.patterns.length > 0) {
-      const high = this.patterns.filter(p => p.significance === "high");
+      const high = this.patterns.filter((p) => p.significance === 'high');
       if (high.length > 0) {
-        lines.push(`Critical patterns: ${high.map(p => p.description.slice(0, 80)).join("; ")}`);
+        lines.push(`Critical patterns: ${high.map((p) => p.description.slice(0, 80)).join('; ')}`);
       }
     }
 
     if (this.reports.length > 0) {
       const latest = this.reports[this.reports.length - 1]!;
-      lines.push(`Latest cycle: ${latest.replaysProcessed} replays → ${latest.patternsDiscovered.length} patterns, ${latest.memoriesPruned} pruned`);
+      lines.push(
+        `Latest cycle: ${latest.replaysProcessed} replays → ${latest.patternsDiscovered.length} patterns, ${latest.memoriesPruned} pruned`,
+      );
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 }
 

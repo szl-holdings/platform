@@ -1,12 +1,19 @@
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, ChevronRight, ArrowLeft, AlertTriangle, TrendingUp, Zap } from "lucide-react";
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  ChevronRight,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
+import { useRef, useState } from 'react';
 
-const BG = "hsl(214,16%,4%)";
-const SURFACE = "hsla(0,0%,100%,0.035)";
-const BORDER = "hsla(0,0%,100%,0.07)";
-const TEXT = "hsl(38,8%,92%)";
-const TEXT_SEC = "hsl(214,7%,55%)";
+const BG = 'hsl(214,16%,4%)';
+const SURFACE = 'hsla(0,0%,100%,0.035)';
+const BORDER = 'hsla(0,0%,100%,0.07)';
+const TEXT = 'hsl(38,8%,92%)';
+const TEXT_SEC = 'hsl(214,7%,55%)';
 
 export interface FunnelQuestion {
   id: string;
@@ -25,7 +32,7 @@ export interface DiagnosticResult {
   maxScore: number;
   label: string;
   description: string;
-  severity: "critical" | "moderate" | "ready";
+  severity: 'critical' | 'moderate' | 'ready';
   ctaLabel: string;
   ctaHref?: string;
 }
@@ -43,22 +50,22 @@ export interface DiagnosticFunnelProps {
 }
 
 const SEVERITY_STYLES = {
-  critical: { color: "hsl(0,84%,60%)", icon: AlertTriangle, bg: "hsla(0,84%,60%,0.08)" },
-  moderate: { color: "hsl(45,90%,55%)", icon: TrendingUp, bg: "hsla(45,90%,55%,0.08)" },
-  ready: { color: "hsl(152,70%,50%)", icon: Zap, bg: "hsla(152,70%,50%,0.08)" },
+  critical: { color: 'hsl(0,84%,60%)', icon: AlertTriangle, bg: 'hsla(0,84%,60%,0.08)' },
+  moderate: { color: 'hsl(45,90%,55%)', icon: TrendingUp, bg: 'hsla(45,90%,55%,0.08)' },
+  ready: { color: 'hsl(152,70%,50%)', icon: Zap, bg: 'hsla(152,70%,50%,0.08)' },
 };
 
 export function DiagnosticFunnel({
-  headline = "Is your organization ready for governed AI decision-making?",
-  subheadline = "Answer four questions to get an instant readiness score.",
+  headline = 'Is your organization ready for governed AI decision-making?',
+  subheadline = 'Answer four questions to get an instant readiness score.',
   questions,
   results,
-  accentColor = "hsl(191,92%,44%)",
+  accentColor = 'hsl(191,92%,44%)',
   onStepComplete,
   onComplete,
   onDemoRequest,
 }: DiagnosticFunnelProps) {
-  const [step, setStep] = useState<"intro" | number | "result">("intro");
+  const [step, setStep] = useState<'intro' | number | 'result'>('intro');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [scores, setScores] = useState<Record<string, number>>({});
   const ref = useRef<HTMLDivElement>(null);
@@ -67,14 +74,15 @@ export function DiagnosticFunnel({
   const maxPossible = questions.reduce((a, q) => a + Math.max(...q.options.map((o) => o.score)), 0);
   const pct = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0;
 
-  const result = results.find((r) => {
-    const scaledMin = Math.round((r.minScore / 100) * maxPossible);
-    const scaledMax = Math.round((r.maxScore / 100) * maxPossible);
-    return totalScore >= scaledMin && totalScore <= scaledMax;
-  }) ?? results[results.length - 1];
+  const result =
+    results.find((r) => {
+      const scaledMin = Math.round((r.minScore / 100) * maxPossible);
+      const scaledMax = Math.round((r.maxScore / 100) * maxPossible);
+      return totalScore >= scaledMin && totalScore <= scaledMax;
+    }) ?? results[results.length - 1];
 
   const handleStart = () => {
-    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setStep(0);
   };
 
@@ -88,38 +96,45 @@ export function DiagnosticFunnel({
     const nextStep = (step as number) + 1;
     if (nextStep >= questions.length) {
       const finalScore = Object.values(newScores).reduce((a, b) => a + b, 0);
-      const finalResult = results.find((r) => {
-        const scaledMin = Math.round((r.minScore / 100) * maxPossible);
-        const scaledMax = Math.round((r.maxScore / 100) * maxPossible);
-        return finalScore >= scaledMin && finalScore <= scaledMax;
-      }) ?? results[results.length - 1];
-      onComplete?.(finalScore, finalResult?.label ?? "", newAnswers);
-      setStep("result");
+      const finalResult =
+        results.find((r) => {
+          const scaledMin = Math.round((r.minScore / 100) * maxPossible);
+          const scaledMax = Math.round((r.maxScore / 100) * maxPossible);
+          return finalScore >= scaledMin && finalScore <= scaledMax;
+        }) ?? results[results.length - 1];
+      onComplete?.(finalScore, finalResult?.label ?? '', newAnswers);
+      setStep('result');
     } else {
       setStep(nextStep);
     }
   };
 
   const handleBack = () => {
-    if (step === "result") {
+    if (step === 'result') {
       setStep(questions.length - 1);
-    } else if (typeof step === "number" && step > 0) {
+    } else if (typeof step === 'number' && step > 0) {
       setStep(step - 1);
     } else {
-      setStep("intro");
+      setStep('intro');
     }
   };
 
-  const currentQ = typeof step === "number" ? questions[step] : null;
+  const currentQ = typeof step === 'number' ? questions[step] : null;
 
   return (
     <section ref={ref} style={{ background: BG }} className="py-24 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: accentColor }}>
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-3"
+            style={{ color: accentColor }}
+          >
             Readiness Assessment
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: TEXT }}>
+          <h2
+            className="text-3xl sm:text-4xl font-bold tracking-tight mb-4"
+            style={{ color: TEXT }}
+          >
             {headline}
           </h2>
           <p className="text-base" style={{ color: TEXT_SEC }}>
@@ -128,7 +143,7 @@ export function DiagnosticFunnel({
         </div>
 
         <AnimatePresence mode="wait">
-          {step === "intro" && (
+          {step === 'intro' && (
             <motion.div
               key="intro"
               initial={{ opacity: 0, y: 16 }}
@@ -161,7 +176,7 @@ export function DiagnosticFunnel({
             </motion.div>
           )}
 
-          {typeof step === "number" && currentQ && (
+          {typeof step === 'number' && currentQ && (
             <motion.div
               key={`step-${step}`}
               initial={{ opacity: 0, x: 20 }}
@@ -215,7 +230,7 @@ export function DiagnosticFunnel({
                     style={{
                       border: `1px solid ${answers[currentQ.id] === opt.value ? `${accentColor}50` : BORDER}`,
                       background:
-                        answers[currentQ.id] === opt.value ? `${accentColor}08` : "transparent",
+                        answers[currentQ.id] === opt.value ? `${accentColor}08` : 'transparent',
                     }}
                   >
                     <div
@@ -224,7 +239,7 @@ export function DiagnosticFunnel({
                         borderColor:
                           answers[currentQ.id] === opt.value ? accentColor : `${TEXT_SEC}60`,
                         background:
-                          answers[currentQ.id] === opt.value ? accentColor : "transparent",
+                          answers[currentQ.id] === opt.value ? accentColor : 'transparent',
                       }}
                     >
                       {answers[currentQ.id] === opt.value && (
@@ -247,7 +262,7 @@ export function DiagnosticFunnel({
             </motion.div>
           )}
 
-          {step === "result" && result && (
+          {step === 'result' && result && (
             <ResultCard
               result={result}
               score={pct}
@@ -256,7 +271,7 @@ export function DiagnosticFunnel({
               onRetake={() => {
                 setAnswers({});
                 setScores({});
-                setStep("intro");
+                setStep('intro');
               }}
               onDemoRequest={() => onDemoRequest?.(totalScore, result.label)}
             />
@@ -303,7 +318,10 @@ function ResultCard({
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: accentColor }}>
+        <span
+          className="text-xs font-semibold tracking-widest uppercase"
+          style={{ color: accentColor }}
+        >
           Your Result
         </span>
       </div>

@@ -1,9 +1,8 @@
-import { type IRouter } from "express";
-import { register as registerProviders } from "./providers.js";
-import { register as registerActions } from "./actions.js";
-import { register as registerPlaybooks } from "./playbooks.js";
-import { register as registerMonitoring } from "./monitoring.js";
-import { startSyncScheduler } from "./monitoring.js";
+import type { IRouter } from 'express';
+import { register as registerActions } from './actions.js';
+import { register as registerMonitoring, startSyncScheduler } from './monitoring.js';
+import { register as registerPlaybooks } from './playbooks.js';
+import { register as registerProviders } from './providers.js';
 
 export { startSyncScheduler };
 

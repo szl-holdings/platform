@@ -1,18 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { PolicyResult } from "@szl-holdings/shared-ui/policy-result";
-import { AdminAuditTrail } from "@szl-holdings/shared-ui/admin-audit-trail";
-import { SimulationCockpit } from "@szl-holdings/shared-ui/simulation-cockpit";
-import { Building2, FileSearch, Shield, Clock, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
-import { PendingAutonomyApprovalsPanel } from "../components/pending-autonomy-approvals";
-import { ProofPanel } from "@szl-holdings/shared-ui/proof-panel";
-import { type ProofPanelData } from "@szl-holdings/shared-ui/proof-panel";
-import { type PolicyDecisionRecord } from "@szl-holdings/shared-ui/policy-result";
-import { type AuditTrailEntry } from "@szl-holdings/shared-ui/admin-audit-trail";
-import { type SimulationScenario, type PredictedVsActual } from "@szl-holdings/shared-ui/simulation-cockpit";
-import { postPolicyAppeal } from "@szl-holdings/shared-ui/policy-appeal-client";
+import { AdminAuditTrail, type AuditTrailEntry } from '@szl-holdings/shared-ui/admin-audit-trail';
+import { postPolicyAppeal } from '@szl-holdings/shared-ui/policy-appeal-client';
+import { type PolicyDecisionRecord, PolicyResult } from '@szl-holdings/shared-ui/policy-result';
+import { ProofPanel, type ProofPanelData } from '@szl-holdings/shared-ui/proof-panel';
+import {
+  type PredictedVsActual,
+  SimulationCockpit,
+  type SimulationScenario,
+} from '@szl-holdings/shared-ui/simulation-cockpit';
+import {
+  AlertCircle,
+  Building2,
+  Clock,
+  FileSearch,
+  Loader2,
+  Shield,
+  TrendingUp,
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { PendingAutonomyApprovalsPanel } from '../components/pending-autonomy-approvals';
 
-const ACCENT = "#f59e0b";
-const DOMAIN = "terra";
+const ACCENT = '#f59e0b';
+const DOMAIN = 'terra';
 
 interface SimulationData {
   title: string;
@@ -49,7 +57,12 @@ function ErrorPanel({ label, onRetry }: { label: string; onRetry: () => void }) 
   );
 }
 
-function useApiData<T>(url: string): { data: T | null; loading: boolean; error: boolean; refetch: () => void } {
+function useApiData<T>(url: string): {
+  data: T | null;
+  loading: boolean;
+  error: boolean;
+  refetch: () => void;
+} {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -59,38 +72,48 @@ function useApiData<T>(url: string): { data: T | null; loading: boolean; error: 
     let cancelled = false;
     setLoading(true);
     setError(false);
-    fetch(url, { credentials: "include" })
-      .then(r => {
+    fetch(url, { credentials: 'include' })
+      .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<T>;
       })
-      .then(json => {
+      .then((json) => {
         if (!cancelled) {
           setData(json);
           setLoading(false);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.warn(`[trust-provenance] fetch failed: ${url}`, err);
         if (!cancelled) {
           setError(true);
           setLoading(false);
         }
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [url, tick]);
 
-  return { data, loading, error, refetch: () => setTick(t => t + 1) };
+  return { data, loading, error, refetch: () => setTick((t) => t + 1) };
 }
 
-type View = "proofs" | "policy" | "audit" | "simulation" | "approvals";
+type View = 'proofs' | 'policy' | 'audit' | 'simulation' | 'approvals';
 
 export default function TrustProvenancePage() {
-  const [view, setView] = useState<View>("proofs");
+  const [view, setView] = useState<View>('proofs');
 
-  const proofResult = useApiData<{ domain: string; records: ProofPanelData[]; total: number }>(`/api/proof-chain?domain=${DOMAIN}`);
-  const auditResult = useApiData<{ domain: string; entries: AuditTrailEntry[]; total: number }>(`/api/audit-log?domain=${DOMAIN}`);
-  const policyResult = useApiData<{ domain: string; decisions: PolicyDecisionRecord[]; total: number }>(`/api/covenant/decisions?domain=${DOMAIN}`);
+  const proofResult = useApiData<{ domain: string; records: ProofPanelData[]; total: number }>(
+    `/api/proof-chain?domain=${DOMAIN}`,
+  );
+  const auditResult = useApiData<{ domain: string; entries: AuditTrailEntry[]; total: number }>(
+    `/api/audit-log?domain=${DOMAIN}`,
+  );
+  const policyResult = useApiData<{
+    domain: string;
+    decisions: PolicyDecisionRecord[];
+    total: number;
+  }>(`/api/covenant/decisions?domain=${DOMAIN}`);
   const simulationResult = useApiData<SimulationData>(`/api/simulations/results?domain=${DOMAIN}`);
 
   const proofs = proofResult.data?.records ?? [];
@@ -99,11 +122,11 @@ export default function TrustProvenancePage() {
   const simulation = simulationResult.data;
 
   const tabs: Array<{ id: View; label: string }> = [
-    { id: "proofs", label: "AI Proof Chains" },
-    { id: "approvals", label: "Pending Approvals" },
-    { id: "policy", label: "Policy Governance" },
-    { id: "audit", label: "Audit Trail" },
-    { id: "simulation", label: "Deal Simulation" },
+    { id: 'proofs', label: 'AI Proof Chains' },
+    { id: 'approvals', label: 'Pending Approvals' },
+    { id: 'policy', label: 'Policy Governance' },
+    { id: 'audit', label: 'Audit Trail' },
+    { id: 'simulation', label: 'Deal Simulation' },
   ];
 
   return (
@@ -114,19 +137,46 @@ export default function TrustProvenancePage() {
         </div>
         <div>
           <h1 className="text-xl font-bold">Trust & Provenance Center</h1>
-          <p className="text-xs text-muted-foreground">AI output provenance · Policy governance · Decision audit · Deal simulation cockpit</p>
+          <p className="text-xs text-muted-foreground">
+            AI output provenance · Policy governance · Decision audit · Deal simulation cockpit
+          </p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: "Proof Records", value: proofResult.loading ? "…" : proofs.length, icon: FileSearch, color: "text-amber-400" },
-          { label: "Pending Reviews", value: proofResult.loading ? "…" : proofs.filter(p => p.reviewState === "unreviewed").length, icon: Clock, color: "text-orange-400" },
-          { label: "Policies Active", value: policyResult.loading ? "…" : policyDecisions.length, icon: Shield, color: "text-purple-400" },
-          { label: "Deals Simulated", value: simulationResult.loading ? "…" : (simulation ? simulation.scenarios.length : 0), icon: TrendingUp, color: "text-green-400" },
+          {
+            label: 'Proof Records',
+            value: proofResult.loading ? '…' : proofs.length,
+            icon: FileSearch,
+            color: 'text-amber-400',
+          },
+          {
+            label: 'Pending Reviews',
+            value: proofResult.loading
+              ? '…'
+              : proofs.filter((p) => p.reviewState === 'unreviewed').length,
+            icon: Clock,
+            color: 'text-orange-400',
+          },
+          {
+            label: 'Policies Active',
+            value: policyResult.loading ? '…' : policyDecisions.length,
+            icon: Shield,
+            color: 'text-purple-400',
+          },
+          {
+            label: 'Deals Simulated',
+            value: simulationResult.loading ? '…' : simulation ? simulation.scenarios.length : 0,
+            icon: TrendingUp,
+            color: 'text-green-400',
+          },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-background border border-border rounded-xl p-4 flex items-center gap-3">
+          <div
+            key={label}
+            className="bg-background border border-border rounded-xl p-4 flex items-center gap-3"
+          >
             <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
               <Icon className={`w-4 h-4 ${color}`} />
             </div>
@@ -140,14 +190,14 @@ export default function TrustProvenancePage() {
 
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-muted/30 border border-border rounded-xl">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setView(tab.id)}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
               view === tab.id
-                ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
-                : "text-muted-foreground hover:text-foreground"
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {tab.label}
@@ -155,21 +205,21 @@ export default function TrustProvenancePage() {
         ))}
       </div>
 
-      {view === "approvals" && (
+      {view === 'approvals' && (
         <PendingAutonomyApprovalsPanel
           domain="terra"
           accentColor={ACCENT}
           accentClasses={{
-            text: "text-amber-300",
-            textMuted: "text-amber-400/60",
-            bg: "bg-amber-500/10",
-            border: "border-amber-500/20",
-            button: "text-amber-300",
+            text: 'text-amber-300',
+            textMuted: 'text-amber-400/60',
+            bg: 'bg-amber-500/10',
+            border: 'border-amber-500/20',
+            button: 'text-amber-300',
           }}
         />
       )}
 
-      {view === "proofs" && (
+      {view === 'proofs' && (
         <div className="space-y-4">
           {proofResult.loading ? (
             <LoadingPanel label="proof records" />
@@ -177,16 +227,25 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="proof records" onRetry={proofResult.refetch} />
           ) : (
             <>
-              <p className="text-xs text-muted-foreground px-1">AI-generated valuations, distress scores, and investment memos with full provenance metadata</p>
-              {proofs.map(proof => (
-                <ProofPanel key={proof.proofId} proof={proof} variant="drawer" accentColor={ACCENT} showActions />
+              <p className="text-xs text-muted-foreground px-1">
+                AI-generated valuations, distress scores, and investment memos with full provenance
+                metadata
+              </p>
+              {proofs.map((proof) => (
+                <ProofPanel
+                  key={proof.proofId}
+                  proof={proof}
+                  variant="drawer"
+                  accentColor={ACCENT}
+                  showActions
+                />
               ))}
             </>
           )}
         </div>
       )}
 
-      {view === "policy" && (
+      {view === 'policy' && (
         <div className="space-y-4">
           {policyResult.loading ? (
             <LoadingPanel label="policy decisions" />
@@ -194,7 +253,9 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="policy decisions" onRetry={policyResult.refetch} />
           ) : (
             <>
-              <p className="text-xs text-muted-foreground px-1">Covenant policy evaluation results for deal approvals and transactions</p>
+              <p className="text-xs text-muted-foreground px-1">
+                Covenant policy evaluation results for deal approvals and transactions
+              </p>
               {policyDecisions.map((d, i) => (
                 <PolicyResult
                   key={d.requestId ?? i}
@@ -204,13 +265,13 @@ export default function TrustProvenancePage() {
                   onEscalate={() => {
                     void postPolicyAppeal({
                       requestId: d.requestId,
-                      action: "escalate",
+                      action: 'escalate',
                     });
                   }}
                   onAppeal={(reason) => {
                     void postPolicyAppeal({
                       requestId: d.requestId,
-                      action: "appeal",
+                      action: 'appeal',
                       justification: reason,
                     });
                   }}
@@ -221,17 +282,21 @@ export default function TrustProvenancePage() {
         </div>
       )}
 
-      {view === "audit" && (
-        auditResult.loading ? (
+      {view === 'audit' &&
+        (auditResult.loading ? (
           <LoadingPanel label="audit trail" />
         ) : auditResult.error ? (
           <ErrorPanel label="audit trail" onRetry={auditResult.refetch} />
         ) : (
-          <AdminAuditTrail entries={auditEntries} title="Terra Decision Audit Trail" accentColor={ACCENT} domainLabel="Real Estate Intelligence" />
-        )
-      )}
+          <AdminAuditTrail
+            entries={auditEntries}
+            title="Terra Decision Audit Trail"
+            accentColor={ACCENT}
+            domainLabel="Real Estate Intelligence"
+          />
+        ))}
 
-      {view === "simulation" && (
+      {view === 'simulation' && (
         <div className="space-y-4">
           {simulationResult.loading ? (
             <LoadingPanel label="simulation results" />

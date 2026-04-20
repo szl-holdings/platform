@@ -1,4 +1,4 @@
-import { logger } from "../lib/logger";
+import { logger } from '../lib/logger';
 
 let cachedAccessToken: { token: string; expiresAt: number } | null = null;
 
@@ -17,40 +17,47 @@ async function getLinearAccessToken(): Promise<string> {
     return cachedAccessToken.token;
   }
 
-  const hostname = process.env["REPLIT_CONNECTORS_HOSTNAME"];
+  const hostname = process.env['REPLIT_CONNECTORS_HOSTNAME'];
   if (!hostname) {
-    throw new Error("REPLIT_CONNECTORS_HOSTNAME is not set — Linear connector is unavailable in this environment");
+    throw new Error(
+      'REPLIT_CONNECTORS_HOSTNAME is not set — Linear connector is unavailable in this environment',
+    );
   }
 
-  const xReplitToken = process.env["REPL_IDENTITY"]
-    ? `repl ${process.env["REPL_IDENTITY"]}`
-    : process.env["WEB_REPL_RENEWAL"]
-      ? `depl ${process.env["WEB_REPL_RENEWAL"]}`
+  const xReplitToken = process.env['REPL_IDENTITY']
+    ? `repl ${process.env['REPL_IDENTITY']}`
+    : process.env['WEB_REPL_RENEWAL']
+      ? `depl ${process.env['WEB_REPL_RENEWAL']}`
       : null;
 
   if (!xReplitToken) {
-    throw new Error("X_REPLIT_TOKEN not found — Linear connector is unavailable in this environment");
+    throw new Error(
+      'X_REPLIT_TOKEN not found — Linear connector is unavailable in this environment',
+    );
   }
 
   const url = `https://${hostname}/api/v2/connection?include_secrets=true&connector_names=linear`;
   const response = await fetch(url, {
-    headers: { Accept: "application/json", X_REPLIT_TOKEN: xReplitToken },
+    headers: { Accept: 'application/json', X_REPLIT_TOKEN: xReplitToken },
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(`Failed to fetch Linear connection (${response.status}): ${text.slice(0, 200)}`);
+    const text = await response.text().catch(() => '');
+    throw new Error(
+      `Failed to fetch Linear connection (${response.status}): ${text.slice(0, 200)}`,
+    );
   }
 
   const data = (await response.json()) as ReplitConnectionPayload;
   const item = data.items?.[0];
   const settings = item?.settings;
-  const accessToken =
-    settings?.access_token ?? settings?.oauth?.credentials?.access_token ?? null;
+  const accessToken = settings?.access_token ?? settings?.oauth?.credentials?.access_token ?? null;
   const expiresAtRaw = settings?.expires_at ?? settings?.oauth?.credentials?.expires_at;
 
   if (!accessToken) {
-    throw new Error("Linear connection is not authorized — connect Linear in Replit integrations to enable ticket creation");
+    throw new Error(
+      'Linear connection is not authorized — connect Linear in Replit integrations to enable ticket creation',
+    );
   }
 
   const expiresAt = expiresAtRaw ? new Date(expiresAtRaw).getTime() : Date.now() + 30 * 60_000;
@@ -65,26 +72,26 @@ interface LinearGraphQLResponse<T> {
 
 async function linearGraphQL<T>(query: string, variables: Record<string, unknown>): Promise<T> {
   const token = await getLinearAccessToken();
-  const response = await fetch("https://api.linear.app/graphql", {
-    method: "POST",
+  const response = await fetch('https://api.linear.app/graphql', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}`,
     },
     body: JSON.stringify({ query, variables }),
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
+    const text = await response.text().catch(() => '');
     throw new Error(`Linear GraphQL request failed (${response.status}): ${text.slice(0, 300)}`);
   }
 
   const payload = (await response.json()) as LinearGraphQLResponse<T>;
   if (payload.errors?.length) {
-    throw new Error(`Linear GraphQL error: ${payload.errors.map((e) => e.message).join("; ")}`);
+    throw new Error(`Linear GraphQL error: ${payload.errors.map((e) => e.message).join('; ')}`);
   }
   if (!payload.data) {
-    throw new Error("Linear GraphQL response missing data");
+    throw new Error('Linear GraphQL response missing data');
   }
   return payload.data;
 }
@@ -106,7 +113,7 @@ export async function listLinearTeams(): Promise<LinearTeam[]> {
 async function getDefaultTeam(preferredKey?: string): Promise<LinearTeam> {
   const teams = await listLinearTeams();
   if (teams.length === 0) {
-    throw new Error("No Linear teams available for the connected workspace");
+    throw new Error('No Linear teams available for the connected workspace');
   }
   if (preferredKey) {
     const match = teams.find((t) => t.key.toLowerCase() === preferredKey.toLowerCase());
@@ -115,7 +122,11 @@ async function getDefaultTeam(preferredKey?: string): Promise<LinearTeam> {
   return teams[0]!;
 }
 
-interface LinearLabel { id: string; name: string; team: { id: string } | null }
+interface LinearLabel {
+  id: string;
+  name: string;
+  team: { id: string } | null;
+}
 
 interface ResolvedLabels {
   // Labels we already had IDs for (existed in the workspace).
@@ -159,10 +170,23 @@ async function resolveLabels(teamId: string, names: string[]): Promise<ResolvedL
 // Deterministic pastel-on-dark palette for auto-created labels: same name
 // always gets the same color, so labels stay visually consistent across runs.
 const LABEL_COLOR_PALETTE = [
-  "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899",
-  "#f43f5e", "#ef4444", "#f97316", "#f59e0b", "#eab308",
-  "#84cc16", "#22c55e", "#10b981", "#14b8a6", "#06b6d4",
-  "#0ea5e9", "#3b82f6",
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#d946ef',
+  '#ec4899',
+  '#f43f5e',
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#eab308',
+  '#84cc16',
+  '#22c55e',
+  '#10b981',
+  '#14b8a6',
+  '#06b6d4',
+  '#0ea5e9',
+  '#3b82f6',
 ];
 
 function colorForLabelName(name: string): string {
@@ -198,7 +222,9 @@ async function createLinearLabel(
 }
 
 async function findUserIdByName(name: string): Promise<string | null> {
-  const data = await linearGraphQL<{ users: { nodes: Array<{ id: string; name: string; displayName: string }> } }>(
+  const data = await linearGraphQL<{
+    users: { nodes: Array<{ id: string; name: string; displayName: string }> };
+  }>(
     `query Users { users(first: 100, includeDisabled: false) { nodes { id name displayName } } }`,
     {},
   );
@@ -246,14 +272,16 @@ export interface CreatedLinearIssue {
   skippedLabels: string[];
 }
 
-export async function createLinearIssue(input: CreateLinearIssueInput): Promise<CreatedLinearIssue> {
+export async function createLinearIssue(
+  input: CreateLinearIssueInput,
+): Promise<CreatedLinearIssue> {
   const team = await getDefaultTeam(input.teamKey);
   let assigneeId: string | null = null;
   if (input.assigneeName) {
     try {
       assigneeId = await findUserIdByName(input.assigneeName);
     } catch (err) {
-      logger.warn({ err, assignee: input.assigneeName }, "linear: assignee lookup failed");
+      logger.warn({ err, assignee: input.assigneeName }, 'linear: assignee lookup failed');
     }
   }
 
@@ -296,7 +324,10 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
               labelIds.push(created.id);
               createdLabels.push(created.name);
             } catch (err) {
-              logger.warn({ err, label: name, teamId: team.id }, "linear: auto-create label failed");
+              logger.warn(
+                { err, label: name, teamId: team.id },
+                'linear: auto-create label failed',
+              );
               skippedLabels.push(name);
             }
           }
@@ -305,7 +336,7 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
         }
       }
     } catch (err) {
-      logger.warn({ err, labels: input.labels }, "linear: label lookup failed");
+      logger.warn({ err, labels: input.labels }, 'linear: label lookup failed');
       // Lookup failed entirely — surface every requested label as skipped so
       // operators see why nothing got tagged instead of silently dropping them.
       skippedLabels.push(...input.labels);
@@ -326,12 +357,12 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
   const data = await linearGraphQL<{
     issueCreate: {
       success: boolean;
-      issue: Omit<CreatedLinearIssue, "appliedLabels" | "createdLabels" | "skippedLabels">;
+      issue: Omit<CreatedLinearIssue, 'appliedLabels' | 'createdLabels' | 'skippedLabels'>;
     };
   }>(mutation, variables);
 
   if (!data.issueCreate.success || !data.issueCreate.issue) {
-    throw new Error("Linear rejected the issue creation request");
+    throw new Error('Linear rejected the issue creation request');
   }
   return {
     ...data.issueCreate.issue,
@@ -342,6 +373,8 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
 }
 
 export function isLinearConfigured(): boolean {
-  return Boolean(process.env["REPLIT_CONNECTORS_HOSTNAME"]) &&
-    Boolean(process.env["REPL_IDENTITY"] ?? process.env["WEB_REPL_RENEWAL"]);
+  return (
+    Boolean(process.env['REPLIT_CONNECTORS_HOSTNAME']) &&
+    Boolean(process.env['REPL_IDENTITY'] ?? process.env['WEB_REPL_RENEWAL'])
+  );
 }

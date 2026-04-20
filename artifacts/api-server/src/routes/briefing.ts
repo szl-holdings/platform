@@ -12,23 +12,25 @@
  *   POST /briefing/generate      — force-regenerate today's briefing
  */
 
-import { Router, type IRouter } from "express";
-import { db, dailyBriefingsTable } from "@szl-holdings/db";
-import { desc, eq, and, gte } from "drizzle-orm";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { dailyBriefingsTable, db } from '@szl-holdings/db';
+import { and, desc, eq, gte } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
 import {
-  sendSuccess,
+  handleRouteError,
+  sendBadRequest,
   sendCreated,
   sendNotFound,
-  sendBadRequest,
-  handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
+import {
+  perUserApiSlidingLimiter,
+  perUserWriteSlidingLimiter,
+} from '../middlewares/sliding-window-limiter';
 
-import { logger } from "../lib/logger";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
-
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 function todayStr(): string {
@@ -37,7 +39,7 @@ function todayStr(): string {
 
 interface AggregatedSignal {
   domain: string;
-  level: "info" | "warning" | "critical";
+  level: 'info' | 'warning' | 'critical';
   title: string;
   summary: string;
   count: number;
@@ -65,44 +67,44 @@ function aggregateSignals(): {
 
   const signals: AggregatedSignal[] = [];
 
-  const critAegis = alerts.filter((a) => a.severity === "critical" && a.status === "new").length;
-  const highAegis = alerts.filter((a) => a.severity === "high" && a.status === "new").length;
+  const critAegis = alerts.filter((a) => a.severity === 'critical' && a.status === 'new').length;
+  const highAegis = alerts.filter((a) => a.severity === 'high' && a.status === 'new').length;
   if (critAegis > 0 || highAegis > 0) {
     signals.push({
-      domain: "firestorm",
-      level: critAegis > 0 ? "critical" : "warning",
-      title: `${critAegis + highAegis} active security ${critAegis + highAegis === 1 ? "alert" : "alerts"}`,
+      domain: 'firestorm',
+      level: critAegis > 0 ? 'critical' : 'warning',
+      title: `${critAegis + highAegis} active security ${critAegis + highAegis === 1 ? 'alert' : 'alerts'}`,
       summary: `${critAegis} critical, ${highAegis} high-severity alerts require SOC attention.`,
       count: critAegis + highAegis,
     });
   }
 
-  const darkVessels = vessels.filter((v) => v.status === "ais_dark").length;
-  const critVesselEvents = vesselEvents.filter((e) => e.severity === "critical").length;
+  const darkVessels = vessels.filter((v) => v.status === 'ais_dark').length;
+  const critVesselEvents = vesselEvents.filter((e) => e.severity === 'critical').length;
   if (darkVessels > 0 || critVesselEvents > 0) {
     signals.push({
-      domain: "vessels",
-      level: darkVessels > 2 || critVesselEvents > 0 ? "critical" : "warning",
-      title: `Fleet status: ${darkVessels} dark vessel${darkVessels !== 1 ? "s" : ""}`,
+      domain: 'vessels',
+      level: darkVessels > 2 || critVesselEvents > 0 ? 'critical' : 'warning',
+      title: `Fleet status: ${darkVessels} dark vessel${darkVessels !== 1 ? 's' : ''}`,
       summary: `${vessels.length} vessels tracked. ${darkVessels} AIS-dark, ${critVesselEvents} critical events.`,
       count: darkVessels + critVesselEvents,
     });
   } else if (vessels.length > 0) {
     signals.push({
-      domain: "vessels",
-      level: "info",
-      title: `Fleet nominal — ${vessels.filter((v) => v.status === "at_sea").length} vessels at sea`,
+      domain: 'vessels',
+      level: 'info',
+      title: `Fleet nominal — ${vessels.filter((v) => v.status === 'at_sea').length} vessels at sea`,
       summary: `All ${vessels.length} tracked vessels reporting nominal AIS status.`,
       count: vessels.length,
     });
   }
 
-  const openIncidents = lyteIncidents.filter((i) => i.status !== "resolved").length;
+  const openIncidents = lyteIncidents.filter((i) => i.status !== 'resolved').length;
   if (openIncidents > 0) {
     signals.push({
-      domain: "lyte",
-      level: openIncidents > 2 ? "critical" : "warning",
-      title: `${openIncidents} open infrastructure incident${openIncidents !== 1 ? "s" : ""}`,
+      domain: 'lyte',
+      level: openIncidents > 2 ? 'critical' : 'warning',
+      title: `${openIncidents} open infrastructure incident${openIncidents !== 1 ? 's' : ''}`,
       summary: `${openIncidents} active incidents impacting SLO compliance across observed services.`,
       count: openIncidents,
     });
@@ -111,8 +113,8 @@ function aggregateSignals(): {
   const distressProps = properties.filter((p: any) => p.distressScore > 0.7).length;
   if (distressProps > 0) {
     signals.push({
-      domain: "terra",
-      level: "warning",
+      domain: 'terra',
+      level: 'warning',
       title: `${distressProps} high-distress properties flagged`,
       summary: `${distressProps} properties above 70% distress threshold require portfolio review.`,
       count: distressProps,
@@ -121,8 +123,8 @@ function aggregateSignals(): {
 
   if (correlations.length > 0) {
     signals.push({
-      domain: "szl-holdings",
-      level: "info",
+      domain: 'szl-holdings',
+      level: 'info',
       title: `${correlations.length} cross-domain correlations detected`,
       summary: `AI correlation engine identified ${correlations.length} signals spanning multiple domains requiring strategic attention.`,
       count: correlations.length,
@@ -130,46 +132,65 @@ function aggregateSignals(): {
   }
 
   const totalAlerts = signals.reduce((s, sig) => s + sig.count, 0);
-  const criticalCount = signals.filter((s) => s.level === "critical").reduce((acc, s) => acc + s.count, 0);
-  const highCount = signals.filter((s) => s.level === "warning").reduce((acc, s) => acc + s.count, 0);
+  const criticalCount = signals
+    .filter((s) => s.level === 'critical')
+    .reduce((acc, s) => acc + s.count, 0);
+  const highCount = signals
+    .filter((s) => s.level === 'warning')
+    .reduce((acc, s) => acc + s.count, 0);
 
   const holdingNav = holdings.reduce((acc: number, h: any) => acc + (h.valueUsd ?? 0), 0);
-  const navStr = holdingNav > 1e9
-    ? `$${(holdingNav / 1e9).toFixed(2)}B`
-    : holdingNav > 1e6
-    ? `$${(holdingNav / 1e6).toFixed(1)}M`
-    : `$${holdingNav.toLocaleString()}`;
+  const navStr =
+    holdingNav > 1e9
+      ? `$${(holdingNav / 1e9).toFixed(2)}B`
+      : holdingNav > 1e6
+        ? `$${(holdingNav / 1e6).toFixed(1)}M`
+        : `$${holdingNav.toLocaleString()}`;
 
   const overallHealth =
-    criticalCount > 5 ? "critical" :
-    criticalCount > 0 ? "degraded" :
-    highCount > 3 ? "warning" :
-    "nominal";
+    criticalCount > 5
+      ? 'critical'
+      : criticalCount > 0
+        ? 'degraded'
+        : highCount > 3
+          ? 'warning'
+          : 'nominal';
 
   const domainScores: Record<string, number> = {
-    vessels: Math.max(40, 98 - (darkVessels * 10) - (critVesselEvents * 8)),
-    firestorm: Math.max(20, 98 - (critAegis * 10) - (highAegis * 4)),
-    terra: Math.max(50, 95 - (distressProps * 5)),
-    lyte: Math.max(40, 96 - (openIncidents * 12)),
-    "szl-holdings": Math.max(60, 92),
+    vessels: Math.max(40, 98 - darkVessels * 10 - critVesselEvents * 8),
+    firestorm: Math.max(20, 98 - critAegis * 10 - highAegis * 4),
+    terra: Math.max(50, 95 - distressProps * 5),
+    lyte: Math.max(40, 96 - openIncidents * 12),
+    'szl-holdings': Math.max(60, 92),
   };
 
   const headline =
     criticalCount > 0
-      ? `${criticalCount} critical alert${criticalCount !== 1 ? "s" : ""} across ${signals.filter(s => s.level === "critical").length} domain${signals.filter(s => s.level === "critical").length !== 1 ? "s" : ""} require immediate attention`
+      ? `${criticalCount} critical alert${criticalCount !== 1 ? 's' : ''} across ${signals.filter((s) => s.level === 'critical').length} domain${signals.filter((s) => s.level === 'critical').length !== 1 ? 's' : ''} require immediate attention`
       : signals.length > 0
-      ? `${signals.length} intelligence signal${signals.length !== 1 ? "s" : ""} across ecosystem — portfolio NAV ${navStr}`
-      : `All domains nominal — portfolio NAV ${navStr}`;
+        ? `${signals.length} intelligence signal${signals.length !== 1 ? 's' : ''} across ecosystem — portfolio NAV ${navStr}`
+        : `All domains nominal — portfolio NAV ${navStr}`;
 
   const executiveSummary = [
-    `As of ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} UTC, the SZL ecosystem is operating at ${overallHealth.toUpperCase()} status.`,
+    `As of ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} UTC, the SZL ecosystem is operating at ${overallHealth.toUpperCase()} status.`,
     signals.length > 0
-      ? `${signals.length} intelligence signal${signals.length !== 1 ? "s" : ""} identified across ${[...new Set(signals.map(s => s.domain))].length} domains.`
-      : "No critical signals detected.",
-    holdingNav > 0 ? `Portfolio NAV: ${navStr}.` : "",
-  ].filter(Boolean).join(" ");
+      ? `${signals.length} intelligence signal${signals.length !== 1 ? 's' : ''} identified across ${[...new Set(signals.map((s) => s.domain))].length} domains.`
+      : 'No critical signals detected.',
+    holdingNav > 0 ? `Portfolio NAV: ${navStr}.` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-  return { signals, domainScores, totalAlerts, criticalCount, highCount, overallHealth, headline, executiveSummary };
+  return {
+    signals,
+    domainScores,
+    totalAlerts,
+    criticalCount,
+    highCount,
+    overallHealth,
+    headline,
+    executiveSummary,
+  };
 }
 
 async function getOrGenerateBriefing(date: string, orgId: number | null, forceRegenerate = false) {
@@ -209,16 +230,23 @@ async function getOrGenerateBriefing(date: string, orgId: number | null, forceRe
   if (!briefing) {
     const conditions: ReturnType<typeof eq>[] = [eq(dailyBriefingsTable.briefingDate, date)];
     if (orgId != null) conditions.push(eq(dailyBriefingsTable.orgId, orgId));
-    const [existing] = await db.select().from(dailyBriefingsTable).where(and(...conditions)).limit(1);
+    const [existing] = await db
+      .select()
+      .from(dailyBriefingsTable)
+      .where(and(...conditions))
+      .limit(1);
     return existing!;
   }
 
-  logger.info({ date, orgId, overallHealth: agg.overallHealth }, "[Briefing] Generated daily briefing");
+  logger.info(
+    { date, orgId, overallHealth: agg.overallHealth },
+    '[Briefing] Generated daily briefing',
+  );
   return briefing;
 }
 
 router.get(
-  "/briefing/today",
+  '/briefing/today',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (req, res) => {
@@ -229,11 +257,11 @@ router.get(
     } catch (err) {
       handleRouteError(res, err, "Failed to get today's briefing");
     }
-  }
+  },
 );
 
 router.post(
-  "/briefing/generate",
+  '/briefing/generate',
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   validateBody(bodyShape({})),
@@ -243,20 +271,20 @@ router.post(
       const briefing = await getOrGenerateBriefing(todayStr(), orgId, true);
       sendCreated(res, briefing);
     } catch (err) {
-      handleRouteError(res, err, "Failed to generate briefing");
+      handleRouteError(res, err, 'Failed to generate briefing');
     }
-  }
+  },
 );
 
 router.get(
-  "/briefing/history",
+  '/briefing/history',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const orgId = (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;
-      const limit = Math.min(Number(req.query["limit"] ?? 30), 90);
+      const limit = Math.min(Number(req.query['limit'] ?? 30), 90);
 
       const since = new Date();
       since.setDate(since.getDate() - limit);
@@ -273,20 +301,20 @@ router.get(
 
       sendSuccess(res, { briefings, count: briefings.length });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch briefing history");
+      handleRouteError(res, err, 'Failed to fetch briefing history');
     }
-  }
+  },
 );
 
 router.get(
-  "/briefing/:date",
+  '/briefing/:date',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
       const { date } = req.params as { date: string };
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        sendBadRequest(res, "Invalid date format — use YYYY-MM-DD");
+        sendBadRequest(res, 'Invalid date format — use YYYY-MM-DD');
         return;
       }
 
@@ -307,9 +335,9 @@ router.get(
 
       sendSuccess(res, briefing);
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch briefing");
+      handleRouteError(res, err, 'Failed to fetch briefing');
     }
-  }
+  },
 );
 
 export default router;

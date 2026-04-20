@@ -28,8 +28,8 @@ export interface MobileTokenStore {
 }
 
 export const TOKEN_STORE_KEYS = {
-  SESSION: "szl.session_token",
-  REFRESH: "szl.refresh_token",
+  SESSION: 'szl.session_token',
+  REFRESH: 'szl.refresh_token',
 } as const;
 
 /**

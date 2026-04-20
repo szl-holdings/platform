@@ -8,34 +8,35 @@
  * is accepted only as a display-name override for API-key callers (internal
  * agents) — for web sessions the authenticated user identity takes precedence.
  */
-import { Router, type IRouter, type Request, type Response } from "express";
+
 import {
-  listApprovalRequests,
-  getApprovalRequestById,
-  decideApproval,
-} from "@workspace/approvals-inbox";
-import {
-  approvalsListQuerySchema,
   approvalDecideBodySchema,
-} from "@szl-holdings/contracts/governance";
+  approvalsListQuerySchema,
+} from '@szl-holdings/contracts/governance';
 import {
-  sendSuccess,
-  sendCreated,
-  sendNotFound,
-  sendBadRequest,
-  sendForbidden,
+  decideApproval,
+  getApprovalRequestById,
+  listApprovalRequests,
+} from '@workspace/approvals-inbox';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import {
   handleRouteError,
-} from "../lib/api-response";
-import { logger } from "../lib/logger";
+  sendBadRequest,
+  sendCreated,
+  sendForbidden,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
 
 const router: IRouter = Router();
 
 // GET /v1/approvals
-router.get("/", (req: Request, res: Response) => {
+router.get('/', (req: Request, res: Response) => {
   try {
     const query = approvalsListQuerySchema.safeParse(req.query);
     if (!query.success) {
-      return sendBadRequest(res, "Invalid query parameters", query.error.flatten().fieldErrors);
+      return sendBadRequest(res, 'Invalid query parameters', query.error.flatten().fieldErrors);
     }
     const { status, profileId, limit, offset } = query.data;
 
@@ -47,9 +48,7 @@ router.get("/", (req: Request, res: Response) => {
     const user = req.user as
       | { roles?: string[]; orgs?: Array<{ orgSlug: string; orgId: number }> }
       | undefined;
-    const isPrivileged =
-      user?.roles?.includes("super_admin") ||
-      user?.roles?.includes("admin");
+    const isPrivileged = user?.roles?.includes('super_admin') || user?.roles?.includes('admin');
 
     let effectiveTenantId = query.data.tenantId;
     if (!isPrivileged) {
@@ -63,10 +62,16 @@ router.get("/", (req: Request, res: Response) => {
       }
     }
 
-    const items = listApprovalRequests({ status, tenantId: effectiveTenantId, profileId, limit, offset });
+    const items = listApprovalRequests({
+      status,
+      tenantId: effectiveTenantId,
+      profileId,
+      limit,
+      offset,
+    });
     return sendSuccess(res, items, 200, { total: items.length, limit, offset });
   } catch (err) {
-    return handleRouteError(res, err, "v1-approvals:list");
+    return handleRouteError(res, err, 'v1-approvals:list');
   }
 });
 
@@ -74,59 +79,56 @@ router.get("/", (req: Request, res: Response) => {
 // Returns true when the caller is authorised to access a specific approval
 // request. Privileged roles may access any tenant's records; non-privileged
 // callers are restricted to records whose tenantId matches one of their orgs.
-function callerCanAccessApproval(
-  req: Request,
-  itemTenantId: string | undefined,
-): boolean {
-  const user = req.user as
-    | { roles?: string[]; orgs?: Array<{ orgSlug: string }> }
-    | undefined;
+function callerCanAccessApproval(req: Request, itemTenantId: string | undefined): boolean {
+  const user = req.user as { roles?: string[]; orgs?: Array<{ orgSlug: string }> } | undefined;
   if (!user) return false;
-  if (user.roles?.includes("super_admin") || user.roles?.includes("admin")) return true;
+  if (user.roles?.includes('super_admin') || user.roles?.includes('admin')) return true;
   if (!itemTenantId) return true; // unscoped record — allow for internal flows
   return user.orgs?.some((o) => o.orgSlug === itemTenantId) ?? false;
 }
 
 // GET /v1/approvals/:id
-router.get("/:id", (req: Request, res: Response) => {
+router.get('/:id', (req: Request, res: Response) => {
   try {
     const item = getApprovalRequestById(req.params.id!);
-    if (!item) return sendNotFound(res, "ApprovalRequest not found");
+    if (!item) return sendNotFound(res, 'ApprovalRequest not found');
     if (!callerCanAccessApproval(req, item.tenantId)) {
-      return sendForbidden(res, "Access denied: record belongs to a different tenant");
+      return sendForbidden(res, 'Access denied: record belongs to a different tenant');
     }
     return sendSuccess(res, item);
   } catch (err) {
-    return handleRouteError(res, err, "v1-approvals:get");
+    return handleRouteError(res, err, 'v1-approvals:get');
   }
 });
 
 // POST /v1/approvals/:id/decide
-router.post("/:id/decide", (req: Request, res: Response) => {
+router.post('/:id/decide', (req: Request, res: Response) => {
   try {
     const body = approvalDecideBodySchema.safeParse(req.body);
     if (!body.success) {
-      return sendBadRequest(res, "Invalid decision body", body.error.flatten().fieldErrors);
+      return sendBadRequest(res, 'Invalid decision body', body.error.flatten().fieldErrors);
     }
     const { verdict, reason, decisionId } = body.data;
 
     // Bind actor to the authenticated principal — fall back to body.actor
     // only for API-key callers (internal agents) where req.user may be absent.
     const user = req.user as
-      | { email?: string | null; displayName?: string; id?: number; roles?: string[]; orgs?: Array<{ orgSlug: string }> }
+      | {
+          email?: string | null;
+          displayName?: string;
+          id?: number;
+          roles?: string[];
+          orgs?: Array<{ orgSlug: string }>;
+        }
       | undefined;
-    const actor =
-      user?.email ??
-      user?.displayName ??
-      body.data.actor ??
-      "unknown";
+    const actor = user?.email ?? user?.displayName ?? body.data.actor ?? 'unknown';
 
     // Tenant ownership: non-privileged callers may only decide on their own
     // tenant's approval requests.
     const existingReq = getApprovalRequestById(req.params.id!);
-    if (!existingReq) return sendNotFound(res, "ApprovalRequest not found");
+    if (!existingReq) return sendNotFound(res, 'ApprovalRequest not found');
     if (!callerCanAccessApproval(req, existingReq.tenantId)) {
-      return sendForbidden(res, "Access denied: record belongs to a different tenant");
+      return sendForbidden(res, 'Access denied: record belongs to a different tenant');
     }
 
     const result = decideApproval({
@@ -136,20 +138,17 @@ router.post("/:id/decide", (req: Request, res: Response) => {
       reason,
       ...(decisionId !== undefined && { decisionId }),
     });
-    logger.info(
-      { requestId: req.params.id, verdict, actor },
-      "[v1-approvals] decision recorded",
-    );
+    logger.info({ requestId: req.params.id, verdict, actor }, '[v1-approvals] decision recorded');
     return sendCreated(res, {
       decision: result.decision,
       request: result.updatedRequest,
       governanceMemory: result.governanceMemory ?? null,
     });
   } catch (err) {
-    if (err instanceof Error && err.message.includes("not found")) {
+    if (err instanceof Error && err.message.includes('not found')) {
       return sendNotFound(res, err.message);
     }
-    return handleRouteError(res, err, "v1-approvals:decide");
+    return handleRouteError(res, err, 'v1-approvals:decide');
   }
 });
 

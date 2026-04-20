@@ -1,23 +1,28 @@
-import { Router } from "express";
-import type { Request, Response } from "express";
-import { HybridSearchRequestSchema } from "@workspace/aef-contracts";
-import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
-import { PolicyEngine } from "@workspace/aef-policy-guard";
-import { reciprocalRankFusion, applyExactMatchBoosts, normalizeScores, assembleCitations } from "@workspace/aef-retrieval-core";
-import { embedTexts } from "@workspace/alloy-embed-worker";
-import { rerankCandidates } from "@workspace/alloy-rerank-worker";
-import { randomUUID } from "crypto";
-import { logger } from "../middleware/logger.js";
-import { getProfile } from "../profiles/default.js";
-import { errorBudgetCounter } from "../middleware/prometheus.js";
+import { HybridSearchRequestSchema } from '@workspace/aef-contracts';
+import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
+import { PolicyEngine } from '@workspace/aef-policy-guard';
+import {
+  applyExactMatchBoosts,
+  assembleCitations,
+  normalizeScores,
+  reciprocalRankFusion,
+} from '@workspace/aef-retrieval-core';
+import { embedTexts } from '@workspace/alloy-embed-worker';
+import { rerankCandidates } from '@workspace/alloy-rerank-worker';
+import { randomUUID } from 'crypto';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import { logger } from '../middleware/logger.js';
+import { errorBudgetCounter } from '../middleware/prometheus.js';
+import { getProfile } from '../profiles/default.js';
 
 export const hybridSearchRouter = Router();
 const policyEngine = new PolicyEngine();
 
-hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response) => {
+hybridSearchRouter.post('/v1/hybrid-search', async (req: Request, res: Response) => {
   const parseResult = HybridSearchRequestSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: "Validation failed", detail: parseResult.error.issues });
+    res.status(400).json({ error: 'Validation failed', detail: parseResult.error.issues });
     return;
   }
 
@@ -27,9 +32,9 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
 
   let profile;
   try {
-    profile = getProfile(body.profileId ?? req.profileId ?? "default");
+    profile = getProfile(body.profileId ?? req.profileId ?? 'default');
   } catch (err) {
-    res.status(400).json({ error: "Profile not found", detail: String(err) });
+    res.status(400).json({ error: 'Profile not found', detail: String(err) });
     return;
   }
 
@@ -42,27 +47,30 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
   });
 
   if (!policyDecision.allow) {
-    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: body.tenantId as string });
-    res.status(403).json({ error: "Request blocked by policy", reasons: policyDecision.reasons, traceId });
+    errorBudgetCounter.inc({ kind: 'policy_denied', tenant_id: body.tenantId as string });
+    res
+      .status(403)
+      .json({ error: 'Request blocked by policy', reasons: policyDecision.reasons, traceId });
     return;
   }
 
   const start = Date.now();
 
-  const devHashMode = !process.env["SUBSTRATE_EMBED_URL"] && process.env["NODE_ENV"] !== "production";
+  const devHashMode =
+    !process.env['SUBSTRATE_EMBED_URL'] && process.env['NODE_ENV'] !== 'production';
 
   let queryVector: number[];
   try {
     const [vec] = await embedTexts([body.query], {
-      backendId: devHashMode ? "dev-hash" : "cpu-local",
-      model: "aef-dev-hash",
-      pooling: "mean",
+      backendId: devHashMode ? 'dev-hash' : 'cpu-local',
+      model: 'aef-dev-hash',
+      pooling: 'mean',
       normalize: true,
     });
     queryVector = vec!;
   } catch (err) {
-    errorBudgetCounter.inc({ kind: "embed_error", tenant_id: body.tenantId as string });
-    res.status(502).json({ error: "Query embedding failed", detail: String(err), traceId });
+    errorBudgetCounter.inc({ kind: 'embed_error', tenant_id: body.tenantId as string });
+    res.status(502).json({ error: 'Query embedding failed', detail: String(err), traceId });
     return;
   }
 
@@ -78,7 +86,7 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
       sourceUri: `https://example.com/doc/${i}`,
       title: `Synthetic Document ${i}`,
       page: i + 1,
-      section: "section-1",
+      section: 'section-1',
       text: `This is synthetic document ${i} matching query: ${body.query}`,
     },
   }));
@@ -109,11 +117,11 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
           query: body.query,
           candidates: finalCitations.map((c) => ({
             id: c.chunkId,
-            text: String(c.metadata["text"] ?? ""),
+            text: String(c.metadata['text'] ?? ''),
             score: c.score,
           })),
           topK,
-          model: "aef-dev-rerank",
+          model: 'aef-dev-rerank',
         },
         { useFallback: false },
       );
@@ -124,7 +132,10 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
         .map((c) => ({ ...c, rerankerScore: rerankScoreById.get(c.chunkId) }))
         .sort((a, b) => (b.rerankerScore ?? b.score) - (a.rerankerScore ?? a.score));
     } catch (err) {
-      logger.warn({ traceId, error: String(err) }, "Rerank failed during hybrid-search, using fusion order");
+      logger.warn(
+        { traceId, error: String(err) },
+        'Rerank failed during hybrid-search, using fusion order',
+      );
     }
   }
 
@@ -161,7 +172,7 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
 
   const hits = finalCitations.map((c, i) => {
     const evidence = evidenceEntries[i]!;
-    const textVal = c.metadata["text"];
+    const textVal = c.metadata['text'];
     return {
       chunkId: c.chunkId,
       sourceId: c.sourceId,
@@ -169,7 +180,7 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
       title: c.title,
       page: c.page,
       section: c.section,
-      text: typeof textVal === "string" ? textVal : "",
+      text: typeof textVal === 'string' ? textVal : '',
       denseScore: c.denseScore,
       keywordScore: c.keywordScore,
       fusedScore: c.fusedScore,
@@ -177,10 +188,10 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
       finalScore: c.rerankerScore ?? c.score,
       boostApplied: c.boostApplied,
       selectedRationale: c.boostApplied
-        ? "Exact-match boost applied"
+        ? 'Exact-match boost applied'
         : body.rerankEnabled
-          ? "Selected by reranker"
-          : "Selected by reciprocal rank fusion",
+          ? 'Selected by reranker'
+          : 'Selected by reciprocal rank fusion',
       evidenceId: evidence.entryId,
       evidence: body.includeProvenance ? evidence : undefined,
       metadata: c.metadata,
@@ -202,5 +213,8 @@ hybridSearchRouter.post("/v1/hybrid-search", async (req: Request, res: Response)
     policyReasons: policyDecision.reasons,
   });
 
-  logger.info({ traceId, requestId: body.requestId, hitCount: hits.length, processingMs }, "hybrid-search completed");
+  logger.info(
+    { traceId, requestId: body.requestId, hitCount: hits.length, processingMs },
+    'hybrid-search completed',
+  );
 });

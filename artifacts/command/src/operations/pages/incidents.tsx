@@ -1,35 +1,35 @@
 // @ts-nocheck
-import { useIncidents, useCreateIncident, useUpdateIncident } from "@lyte/hooks/use-lyte";
-import { formatDistanceToNow } from "date-fns";
-import { Plus, Search, AlertTriangle, ShieldCheck, ChevronRight, Clock, User } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ExportButton } from "@szl-holdings/shared-ui/data-export";
-import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
+import { useCreateIncident, useIncidents, useUpdateIncident } from '@lyte/hooks/use-lyte';
+import { ActivityFeed, CommentThread } from '@szl-holdings/shared-ui/collaboration';
+import { ExportButton } from '@szl-holdings/shared-ui/data-export';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { formatDistanceToNow } from 'date-fns';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertTriangle, ChevronRight, Clock, Plus, Search, ShieldCheck, User } from 'lucide-react';
+import { useState } from 'react';
 
 const severityColors = {
-  critical: "bg-[#c45a4a]/20 text-[#c45a4a] border-[#c45a4a]/30",
-  high: "bg-[#c8953c]/20 text-[#c8953c] border-[#c8953c]/30",
-  medium: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  low: "bg-[#4a90b8]/20 text-[#4a90b8] border-[#4a90b8]/30",
+  critical: 'bg-[#c45a4a]/20 text-[#c45a4a] border-[#c45a4a]/30',
+  high: 'bg-[#c8953c]/20 text-[#c8953c] border-[#c8953c]/30',
+  medium: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+  low: 'bg-[#4a90b8]/20 text-[#4a90b8] border-[#4a90b8]/30',
 };
 
 const severityGlows = {
-  critical: "shadow-[0_0_20px_rgba(196,90,74,0.1)]",
-  high: "shadow-[0_0_15px_rgba(249,115,22,0.08)]",
-  medium: "",
-  low: "",
+  critical: 'shadow-[0_0_20px_rgba(196,90,74,0.1)]',
+  high: 'shadow-[0_0_15px_rgba(249,115,22,0.08)]',
+  medium: '',
+  low: '',
 };
 
-const statusOrder = ["open", "investigating", "mitigating", "resolved", "closed"];
+const statusOrder = ['open', 'investigating', 'mitigating', 'resolved', 'closed'];
 
 const statusStepColors: Record<string, string> = {
-  open: "bg-[#c45a4a]",
-  investigating: "bg-[#c8953c]",
-  mitigating: "bg-yellow-500",
-  resolved: "bg-[#6b8f71]",
-  closed: "bg-slate-500",
+  open: 'bg-[#c45a4a]',
+  investigating: 'bg-[#c8953c]',
+  mitigating: 'bg-yellow-500',
+  resolved: 'bg-[#6b8f71]',
+  closed: 'bg-slate-500',
 };
 
 function StatusTimeline({ currentStatus }: { currentStatus: string }) {
@@ -38,21 +38,22 @@ function StatusTimeline({ currentStatus }: { currentStatus: string }) {
     <div className="flex items-center gap-0.5">
       {statusOrder.map((step, i) => (
         <div key={step} className="flex items-center">
-          <div className={cn(
-            "w-2 h-2 rounded-full transition-all",
-            i <= currentIdx ? statusStepColors[step] : "bg-slate-700",
-            i === currentIdx && "ring-2 ring-offset-1 ring-offset-transparent w-2.5 h-2.5",
-            i === currentIdx && step === 'open' && "ring-[#c45a4a]/50",
-            i === currentIdx && step === 'investigating' && "ring-[#c8953c]/50",
-            i === currentIdx && step === 'mitigating' && "ring-yellow-500/50",
-            i === currentIdx && step === 'resolved' && "ring-emerald-500/50",
-            i === currentIdx && step === 'closed' && "ring-slate-500/50",
-          )} />
+          <div
+            className={cn(
+              'w-2 h-2 rounded-full transition-all',
+              i <= currentIdx ? statusStepColors[step] : 'bg-slate-700',
+              i === currentIdx && 'ring-2 ring-offset-1 ring-offset-transparent w-2.5 h-2.5',
+              i === currentIdx && step === 'open' && 'ring-[#c45a4a]/50',
+              i === currentIdx && step === 'investigating' && 'ring-[#c8953c]/50',
+              i === currentIdx && step === 'mitigating' && 'ring-yellow-500/50',
+              i === currentIdx && step === 'resolved' && 'ring-emerald-500/50',
+              i === currentIdx && step === 'closed' && 'ring-slate-500/50',
+            )}
+          />
           {i < statusOrder.length - 1 && (
-            <div className={cn(
-              "w-3 h-[2px] mx-0.5",
-              i < currentIdx ? "bg-white/20" : "bg-slate-800"
-            )} />
+            <div
+              className={cn('w-3 h-[2px] mx-0.5', i < currentIdx ? 'bg-white/20' : 'bg-slate-800')}
+            />
           )}
         </div>
       ))}
@@ -64,7 +65,7 @@ export default function Incidents() {
   const { data: incidents, isLoading } = useIncidents();
   const createMutation = useCreateIncident();
   const updateMutation = useUpdateIncident();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   if (isLoading) {
@@ -78,17 +79,19 @@ export default function Incidents() {
     );
   }
 
-  const filtered = incidents?.filter(i => 
-    i.title.toLowerCase().includes(search.toLowerCase()) || 
-    i.assignee?.toLowerCase().includes(search.toLowerCase())
+  const filtered = incidents?.filter(
+    (i) =>
+      i.title.toLowerCase().includes(search.toLowerCase()) ||
+      i.assignee?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleCreate = () => {
     createMutation.mutate({
-      title: "New Incident",
-      description: "Incident opened manually. Update with affected services, observed symptoms, and initial scope assessment.",
-      severity: "medium",
-      assignee: "Unassigned",
+      title: 'New Incident',
+      description:
+        'Incident opened manually. Update with affected services, observed symptoms, and initial scope assessment.',
+      severity: 'medium',
+      assignee: 'Unassigned',
     });
   };
 
@@ -99,17 +102,26 @@ export default function Incidents() {
     }
   };
 
-  const openCount = filtered?.filter(i => !['resolved', 'closed'].includes(i.status)).length || 0;
-  const criticalCount = filtered?.filter(i => i.severity === 'critical' && !['resolved', 'closed'].includes(i.status)).length || 0;
+  const openCount = filtered?.filter((i) => !['resolved', 'closed'].includes(i.status)).length || 0;
+  const criticalCount =
+    filtered?.filter((i) => i.severity === 'critical' && !['resolved', 'closed'].includes(i.status))
+      .length || 0;
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h2 className="text-3xl font-display font-bold text-white mb-2">Incident Tracker</h2>
-          <p className="text-slate-400">End-to-end incident lifecycle management — triage, escalate, and drive resolution with full audit trail.</p>
+          <p className="text-slate-400">
+            End-to-end incident lifecycle management — triage, escalate, and drive resolution with
+            full audit trail.
+          </p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3 w-full md:w-auto items-center">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex gap-3 w-full md:w-auto items-center"
+        >
           <div className="flex items-center gap-2 text-xs">
             <span className="text-slate-500">{openCount} open</span>
             {criticalCount > 0 && (
@@ -120,11 +132,11 @@ export default function Incidents() {
           </div>
           <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input 
+            <input
               type="text"
               placeholder="Search incidents..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-card/50 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
             />
           </div>
@@ -134,12 +146,12 @@ export default function Incidents() {
               Title: i.title,
               Severity: i.severity,
               Status: i.status,
-              "Assigned To": i.assignedTo || "",
-              "Created At": i.createdAt || "",
+              'Assigned To': i.assignedTo || '',
+              'Created At': i.createdAt || '',
             }))}
-            options={{ filename: "incidents", title: "Incident Tracker", accentColor: "#4a90b8" }}
+            options={{ filename: 'incidents', title: 'Incident Tracker', accentColor: '#4a90b8' }}
           />
-          <button 
+          <button
             onClick={handleCreate}
             disabled={createMutation.isPending}
             className="shrink-0 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2"
@@ -160,8 +172,8 @@ export default function Incidents() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
                 className={cn(
-                  "bg-glass rounded-xl p-5 transition-all cursor-pointer hover:border-white/10 relative overflow-hidden group",
-                  isActive && severityGlows[inc.severity as keyof typeof severityGlows]
+                  'bg-glass rounded-xl p-5 transition-all cursor-pointer hover:border-white/10 relative overflow-hidden group',
+                  isActive && severityGlows[inc.severity as keyof typeof severityGlows],
                 )}
                 onClick={() => setExpandedId(expandedId === inc.id ? null : inc.id)}
               >
@@ -177,7 +189,12 @@ export default function Incidents() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
-                      <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide border", severityColors[inc.severity as keyof typeof severityColors])}>
+                      <span
+                        className={cn(
+                          'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide border',
+                          severityColors[inc.severity as keyof typeof severityColors],
+                        )}
+                      >
                         {inc.severity}
                       </span>
                       <h3 className="font-semibold text-white truncate">{inc.title}</h3>
@@ -190,7 +207,7 @@ export default function Incidents() {
 
                     <div className="flex items-center gap-2 text-slate-400">
                       <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 border border-white/10">
-                        {inc.assignee?.[0] || "?"}
+                        {inc.assignee?.[0] || '?'}
                       </div>
                       <span className="text-xs hidden lg:block">{inc.assignee}</span>
                     </div>
@@ -201,7 +218,10 @@ export default function Incidents() {
 
                     {inc.status !== 'closed' && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); advanceStatus(inc.id, inc.status); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          advanceStatus(inc.id, inc.status);
+                        }}
                         className="text-xs font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-400/10 hover:bg-cyan-400/20 px-3 py-1.5 rounded-lg transition-colors border border-cyan-400/20 flex items-center gap-1"
                       >
                         Advance <ChevronRight className="w-3 h-3" />
@@ -214,13 +234,15 @@ export default function Incidents() {
                   {expandedId === inc.id && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
+                      animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
                       <div className="pt-4 mt-4 border-t border-white/5 grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Status</span>
+                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                            Status
+                          </span>
                           <div className="text-white capitalize mt-1 flex items-center gap-2">
                             {isActive ? (
                               <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
@@ -231,30 +253,46 @@ export default function Incidents() {
                           </div>
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Assignee</span>
+                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                            Assignee
+                          </span>
                           <div className="text-white mt-1 flex items-center gap-2">
                             <User className="w-3.5 h-3.5 text-slate-500" />
                             {inc.assignee}
                           </div>
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Created</span>
+                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                            Created
+                          </span>
                           <div className="text-white mt-1 flex items-center gap-2">
                             <Clock className="w-3.5 h-3.5 text-slate-500" />
                             {formatDistanceToNow(new Date(inc.createdAt), { addSuffix: true })}
                           </div>
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Severity</span>
+                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                            Severity
+                          </span>
                           <div className="mt-1">
-                            <span className={cn("px-2 py-0.5 rounded-md text-xs font-bold uppercase border", severityColors[inc.severity as keyof typeof severityColors])}>
+                            <span
+                              className={cn(
+                                'px-2 py-0.5 rounded-md text-xs font-bold uppercase border',
+                                severityColors[inc.severity as keyof typeof severityColors],
+                              )}
+                            >
                               {inc.severity}
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="mt-4">
-                        <CommentThread entityType="incident" entityId={String(inc.id)} title="Incident Discussion" defaultCollapsed={true} />
+                        <CommentThread
+                          entityType="incident"
+                          entityId={String(inc.id)}
+                          title="Incident Discussion"
+                          defaultCollapsed={true}
+                        />
                       </div>
                     </motion.div>
                   )}

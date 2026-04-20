@@ -1,16 +1,16 @@
-import { randomUUID } from "node:crypto";
-import { aggregateDecision } from "./aggregator.js";
-import { BUILT_IN_CHECKS, type Check, type RegisteredCheck } from "./checks.js";
+import { randomUUID } from 'node:crypto';
+import { aggregateDecision } from './aggregator.js';
+import { BUILT_IN_CHECKS, type Check, type RegisteredCheck } from './checks.js';
 import {
-  VerifierContextSchema,
-  VerifierOutputSchema,
-  VerifierTargetSchema,
   type CheckResult,
   type VerifierContext,
+  VerifierContextSchema,
   type VerifierDecision,
   type VerifierOutput,
+  VerifierOutputSchema,
   type VerifierTarget,
-} from "./types.js";
+  VerifierTargetSchema,
+} from './types.js';
 
 const registry: RegisteredCheck[] = [...BUILT_IN_CHECKS];
 
@@ -56,16 +56,13 @@ export function verify(
   maybeContext: Partial<VerifierContext> = {},
 ): VerifierDecision {
   const targetParse =
-    targetOrContext !== undefined
-      ? VerifierTargetSchema.safeParse(targetOrContext)
-      : null;
+    targetOrContext !== undefined ? VerifierTargetSchema.safeParse(targetOrContext) : null;
   const target: VerifierTarget = targetParse?.success
     ? targetParse.data
-    : { targetType: "output", targetId: randomUUID() };
-  const context: Partial<VerifierContext> =
-    targetParse?.success
-      ? maybeContext
-      : ((targetOrContext as Partial<VerifierContext> | undefined) ?? {});
+    : { targetType: 'output', targetId: randomUUID() };
+  const context: Partial<VerifierContext> = targetParse?.success
+    ? maybeContext
+    : ((targetOrContext as Partial<VerifierContext> | undefined) ?? {});
 
   const parsedOutput = VerifierOutputSchema.parse(output);
   const parsedTarget = target;
@@ -81,7 +78,7 @@ export function verify(
     // Short-circuit: if any check raises a blocker, stop running further
     // checks. The aggregator will still emit a fully-populated decision
     // from the partial results.
-    if (r.outcome === "blocked") break;
+    if (r.outcome === 'blocked') break;
   }
 
   const aggregated = aggregateDecision(results);

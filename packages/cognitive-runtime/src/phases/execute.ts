@@ -1,12 +1,16 @@
-import { randomUUID } from "crypto";
-import { GuardianDecisionEngine } from "@workspace/guardian/decision-engine";
-import type { PlanGraph, PlanStep } from "@workspace/planner";
-import type { ExecuteStepResult, PhaseResult, ResolvedCognitiveContext } from "../types.js";
-import { GuardianBlockError } from "../types.js";
-import { saveCheckpoint } from "../checkpoint.js";
-import type { CheckpointStore } from "../checkpoint.js";
-import type { CognitiveLoopRun } from "../types.js";
-import { extractApprovalInterrupt } from "../approval-interrupt.js";
+import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
+import type { PlanGraph, PlanStep } from '@workspace/planner';
+import { randomUUID } from 'crypto';
+import { extractApprovalInterrupt } from '../approval-interrupt.js';
+import type { CheckpointStore } from '../checkpoint.js';
+import { saveCheckpoint } from '../checkpoint.js';
+import type {
+  CognitiveLoopRun,
+  ExecuteStepResult,
+  PhaseResult,
+  ResolvedCognitiveContext,
+} from '../types.js';
+import { GuardianBlockError } from '../types.js';
 
 export type StepExecutorFn = (
   step: PlanStep,
@@ -50,7 +54,7 @@ const defaultStepExecutor: StepExecutorFn = async (step, context) => {
     routeClass: step.route.routeClass,
     toolId: step.route.toolId,
     model: step.route.model,
-    result: `Step '${step.title}' executed via ${step.route.toolId ?? step.route.model ?? "default handler"}.`,
+    result: `Step '${step.title}' executed via ${step.route.toolId ?? step.route.model ?? 'default handler'}.`,
     completedAt: new Date().toISOString(),
   };
 };
@@ -75,7 +79,12 @@ async function executeStep(
       sessionId: ctx.sessionId,
       action: step.title,
       domain: ctx.domain,
-      tier: step.riskLevel === "critical" ? "dual-approved" : step.riskLevel === "high" ? "operator-approved" : "supervised",
+      tier:
+        step.riskLevel === 'critical'
+          ? 'dual-approved'
+          : step.riskLevel === 'high'
+            ? 'operator-approved'
+            : 'supervised',
       toolId: step.route.toolId,
       model: step.route.model,
       requestedAt: new Date().toISOString(),
@@ -86,11 +95,11 @@ async function executeStep(
       },
     });
 
-    if (decision.outcome === "block") {
+    if (decision.outcome === 'block') {
       return {
         stepId: step.stepId,
         stepTitle: step.title,
-        status: "blocked",
+        status: 'blocked',
         guardianOutcome: decision.outcome,
         error: decision.reason,
         retries: 0,
@@ -98,13 +107,13 @@ async function executeStep(
       };
     }
 
-    if (decision.outcome === "require-approval" || decision.outcome === "require-dual-approval") {
+    if (decision.outcome === 'require-approval' || decision.outcome === 'require-dual-approval') {
       return {
         stepId: step.stepId,
         stepTitle: step.title,
-        status: "pending_approval",
+        status: 'pending_approval',
         guardianOutcome: decision.outcome,
-        error: `Step requires ${decision.outcome.replace("-", " ")}: ${decision.reason}`,
+        error: `Step requires ${decision.outcome.replace('-', ' ')}: ${decision.reason}`,
         retries: 0,
         durationMs: Date.now() - stepStartedAt,
       };
@@ -115,7 +124,7 @@ async function executeStep(
     try {
       const output = await executor(step, {
         traceId,
-        planId: run.planId ?? "",
+        planId: run.planId ?? '',
         agentId: ctx.agentId,
         dryRun: ctx.dryRun,
       });
@@ -123,7 +132,7 @@ async function executeStep(
       return {
         stepId: step.stepId,
         stepTitle: step.title,
-        status: "completed",
+        status: 'completed',
         output,
         retries,
         toolId: step.route.toolId,
@@ -135,7 +144,7 @@ async function executeStep(
         return {
           stepId: step.stepId,
           stepTitle: step.title,
-          status: "failed",
+          status: 'failed',
           error: err instanceof Error ? err.message : String(err),
           retries,
           toolId: step.route.toolId,
@@ -149,8 +158,8 @@ async function executeStep(
   return {
     stepId: step.stepId,
     stepTitle: step.title,
-    status: "failed",
-    error: "Exceeded retry limit",
+    status: 'failed',
+    error: 'Exceeded retry limit',
     retries,
     durationMs: Date.now() - stepStartedAt,
   };
@@ -186,14 +195,14 @@ export async function executePhase(
     const result = await executeStep(step, opts, traceId);
     stepResults.push(result);
 
-    if (result.status === "blocked") {
+    if (result.status === 'blocked') {
       blockedByGuardian = true;
       break;
     }
 
     // pending_approval is a hard gate — execution must not continue
     // until a human approver grants access (like a block but resumable)
-    if (result.status === "pending_approval") {
+    if (result.status === 'pending_approval') {
       pendingApproval = true;
       break;
     }
@@ -203,12 +212,12 @@ export async function executePhase(
     // execution immediately — exactly as pending_approval does. This guarantees
     // that no subsequent steps run after a governed interrupt node, preventing
     // side effects past the interrupt point.
-    if (result.status === "completed" && extractApprovalInterrupt(result.output)) {
+    if (result.status === 'completed' && extractApprovalInterrupt(result.output)) {
       pendingApproval = true;
       break;
     }
 
-    if (result.status === "failed") {
+    if (result.status === 'failed') {
       break;
     }
 
@@ -222,13 +231,13 @@ export async function executePhase(
     }
   }
 
-  const completedSteps = stepResults.filter((r) => r.status === "completed").length;
-  const failedSteps = stepResults.filter((r) => r.status === "failed").length;
+  const completedSteps = stepResults.filter((r) => r.status === 'completed').length;
+  const failedSteps = stepResults.filter((r) => r.status === 'failed').length;
   const blockedSteps = stepResults.filter(
-    (r) => r.status === "blocked" || r.status === "pending_approval",
+    (r) => r.status === 'blocked' || r.status === 'pending_approval',
   ).length;
 
-  const lastOutput = stepResults.filter((r) => r.status === "completed").at(-1)?.output;
+  const lastOutput = stepResults.filter((r) => r.status === 'completed').at(-1)?.output;
 
   const output: ExecutePhaseOutput = {
     stepResults,
@@ -243,19 +252,19 @@ export async function executePhase(
   };
 
   const status = blockedByGuardian
-    ? "blocked"
+    ? 'blocked'
     : pendingApproval
-      ? "blocked"
+      ? 'blocked'
       : failedSteps > 0
-        ? "error"
-        : "ok";
+        ? 'error'
+        : 'ok';
 
-  const pendingStep = stepResults.find((r) => r.status === "pending_approval");
-  const blockedStep = stepResults.find((r) => r.status === "blocked");
+  const pendingStep = stepResults.find((r) => r.status === 'pending_approval');
+  const blockedStep = stepResults.find((r) => r.status === 'blocked');
 
   const completedAt = Date.now();
   return {
-    phase: "execute",
+    phase: 'execute',
     status,
     startedAt,
     completedAt,
@@ -269,9 +278,9 @@ export async function executePhase(
       pendingApproval,
     },
     error: blockedByGuardian
-      ? `Guardian blocked step: ${blockedStep?.error ?? "unknown reason"}`
+      ? `Guardian blocked step: ${blockedStep?.error ?? 'unknown reason'}`
       : pendingApproval
-        ? `Step requires approval before execution can continue: ${pendingStep?.error ?? "pending_approval"}`
+        ? `Step requires approval before execution can continue: ${pendingStep?.error ?? 'pending_approval'}`
         : failedSteps > 0
           ? `${failedSteps} step(s) failed`
           : undefined,

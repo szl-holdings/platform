@@ -1,54 +1,54 @@
-import { createHash, randomUUID } from "crypto";
+import { createHash, randomUUID } from 'crypto';
 import type {
+  ApproveReceiptParams,
+  AuditPacket,
+  ConfidenceTier,
+  CreateReceiptParams,
+  ExecutiveTrustSummary,
+  PolicyClass,
+  PostExecutionDelta,
+  ReceiptClass,
+  ReceiptInputSource,
+  ReceiptStatus,
+  ReceiptSummary,
+  RecordDeltaParams,
   TrustReceipt,
   TrustReceiptGraph,
-  ReceiptSummary,
-  ReceiptStatus,
-  PolicyClass,
-  ConfidenceTier,
-  ReceiptClass,
-  CreateReceiptParams,
-  ApproveReceiptParams,
-  RecordDeltaParams,
-  AuditPacket,
-  ExecutiveTrustSummary,
-  PostExecutionDelta,
-  ReceiptInputSource,
-} from "./types.js";
+} from './types.js';
 
 function computeConfidenceTier(score: number): ConfidenceTier {
-  if (score >= 0.8) return "high";
-  if (score >= 0.6) return "medium";
-  if (score >= 0.4) return "low";
-  return "uncertain";
+  if (score >= 0.8) return 'high';
+  if (score >= 0.6) return 'medium';
+  if (score >= 0.4) return 'low';
+  return 'uncertain';
 }
 
 function derivePolicy(receiptClass: ReceiptClass, confidence: number): PolicyClass {
-  if (receiptClass === "action" || receiptClass === "export") {
-    if (confidence < 0.5) return "blocked";
-    if (confidence < 0.7) return "require_human";
-    return "require_human";
+  if (receiptClass === 'action' || receiptClass === 'export') {
+    if (confidence < 0.5) return 'blocked';
+    if (confidence < 0.7) return 'require_human';
+    return 'require_human';
   }
-  if (receiptClass === "decision" || receiptClass === "approval") {
-    if (confidence >= 0.85) return "require_human";
-    return "require_human";
+  if (receiptClass === 'decision' || receiptClass === 'approval') {
+    if (confidence >= 0.85) return 'require_human';
+    return 'require_human';
   }
-  if (confidence >= 0.9) return "audit_only";
-  if (confidence >= 0.7) return "audit_only";
-  return "require_human";
+  if (confidence >= 0.9) return 'audit_only';
+  if (confidence >= 0.7) return 'audit_only';
+  return 'require_human';
 }
 
 function deriveExportSafe(status: ReceiptStatus, confidence: number, policy: PolicyClass): boolean {
-  if (status === "retracted" || status === "rejected") return false;
-  if (policy === "blocked") return false;
-  if (status === "approved") return true;
+  if (status === 'retracted' || status === 'rejected') return false;
+  if (policy === 'blocked') return false;
+  if (status === 'approved') return true;
   if (confidence < 0.5) return false;
-  if (status === "generated" && policy === "audit_only") return true;
+  if (status === 'generated' && policy === 'audit_only') return true;
   return false;
 }
 
 function computePromptHash(promptText: string): string {
-  return createHash("sha256").update(promptText).digest("hex").slice(0, 16);
+  return createHash('sha256').update(promptText).digest('hex').slice(0, 16);
 }
 
 const MAX_RECEIPTS = 5000;
@@ -57,7 +57,7 @@ const MAX_EDGES = 10000;
 interface ReceiptEdge {
   parentId: string;
   childId: string;
-  relationship: "derived_from" | "informed_by" | "supersedes" | "validated_by";
+  relationship: 'derived_from' | 'informed_by' | 'supersedes' | 'validated_by';
 }
 
 class ReceiptStore {
@@ -72,7 +72,7 @@ class ReceiptStore {
     const receiptClass = params.receiptClass;
     const policy = params.policyClass ?? derivePolicy(receiptClass, confidence);
     const tier = computeConfidenceTier(confidence);
-    const status: ReceiptStatus = "generated";
+    const status: ReceiptStatus = 'generated';
     const exportSafe = deriveExportSafe(status, confidence, policy);
 
     const receipt: TrustReceipt = {
@@ -128,7 +128,7 @@ class ReceiptStore {
     }
 
     if (params.parentReceiptId) {
-      this.addEdge(params.parentReceiptId, id, "derived_from");
+      this.addEdge(params.parentReceiptId, id, 'derived_from');
     }
 
     return receipt;
@@ -137,10 +137,12 @@ class ReceiptStore {
   approve(params: ApproveReceiptParams): TrustReceipt {
     const receipt = this.receipts.get(params.receiptId);
     if (!receipt) {
-      throw Object.assign(new Error(`Receipt ${params.receiptId} not found`), { code: "NOT_FOUND" });
+      throw Object.assign(new Error(`Receipt ${params.receiptId} not found`), {
+        code: 'NOT_FOUND',
+      });
     }
 
-    const newStatus: ReceiptStatus = params.newStatus ?? "approved";
+    const newStatus: ReceiptStatus = params.newStatus ?? 'approved';
     const exportSafe = deriveExportSafe(newStatus, receipt.confidenceScore, receipt.policyClass);
 
     const updated: TrustReceipt = {
@@ -160,7 +162,9 @@ class ReceiptStore {
   recordDelta(params: RecordDeltaParams): TrustReceipt {
     const receipt = this.receipts.get(params.receiptId);
     if (!receipt) {
-      throw Object.assign(new Error(`Receipt ${params.receiptId} not found`), { code: "NOT_FOUND" });
+      throw Object.assign(new Error(`Receipt ${params.receiptId} not found`), {
+        code: 'NOT_FOUND',
+      });
     }
 
     const delta: PostExecutionDelta = {
@@ -181,11 +185,7 @@ class ReceiptStore {
     return updated;
   }
 
-  addEdge(
-    parentId: string,
-    childId: string,
-    relationship: ReceiptEdge["relationship"],
-  ): void {
+  addEdge(parentId: string, childId: string, relationship: ReceiptEdge['relationship']): void {
     if (this.edges.length >= MAX_EDGES) {
       this.edges.shift();
     }
@@ -199,7 +199,7 @@ class ReceiptStore {
   getByContent(contentType: string, contentId: string): TrustReceipt[] {
     const key = `${contentType}:${contentId}`;
     const ids = this.receiptsByContent.get(key) ?? [];
-    return ids.map(id => this.receipts.get(id)).filter(Boolean) as TrustReceipt[];
+    return ids.map((id) => this.receipts.get(id)).filter(Boolean) as TrustReceipt[];
   }
 
   getGraph(receiptId: string, maxDepth = 5): TrustReceiptGraph {
@@ -213,11 +213,11 @@ class ReceiptStore {
       const receipt = this.receipts.get(id);
       if (receipt) receiptsInGraph.push(receipt);
 
-      const childEdges = this.edges.filter(e => e.parentId === id);
-      const parentEdges = this.edges.filter(e => e.childId === id);
+      const childEdges = this.edges.filter((e) => e.parentId === id);
+      const parentEdges = this.edges.filter((e) => e.childId === id);
 
       for (const edge of [...childEdges, ...parentEdges]) {
-        if (!edgesInGraph.find(e => e.parentId === edge.parentId && e.childId === edge.childId)) {
+        if (!edgesInGraph.find((e) => e.parentId === edge.parentId && e.childId === edge.childId)) {
           edgesInGraph.push(edge);
         }
         const nextId = edge.parentId === id ? edge.childId : edge.parentId;
@@ -235,23 +235,25 @@ class ReceiptStore {
     };
   }
 
-  list(options: {
-    orgId?: number | null;
-    contentType?: string;
-    receiptClass?: ReceiptClass;
-    status?: ReceiptStatus;
-    limit?: number;
-    sinceMs?: number;
-  } = {}): TrustReceipt[] {
+  list(
+    options: {
+      orgId?: number | null;
+      contentType?: string;
+      receiptClass?: ReceiptClass;
+      status?: ReceiptStatus;
+      limit?: number;
+      sinceMs?: number;
+    } = {},
+  ): TrustReceipt[] {
     let items = Array.from(this.receipts.values());
 
-    if (options.orgId != null) items = items.filter(r => r.orgId === options.orgId);
-    if (options.contentType) items = items.filter(r => r.contentType === options.contentType);
-    if (options.receiptClass) items = items.filter(r => r.receiptClass === options.receiptClass);
-    if (options.status) items = items.filter(r => r.status === options.status);
+    if (options.orgId != null) items = items.filter((r) => r.orgId === options.orgId);
+    if (options.contentType) items = items.filter((r) => r.contentType === options.contentType);
+    if (options.receiptClass) items = items.filter((r) => r.receiptClass === options.receiptClass);
+    if (options.status) items = items.filter((r) => r.status === options.status);
     if (options.sinceMs) {
       const cutoff = new Date(Date.now() - options.sinceMs);
-      items = items.filter(r => r.createdAt >= cutoff);
+      items = items.filter((r) => r.createdAt >= cutoff);
     }
 
     items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -279,7 +281,7 @@ class ReceiptStore {
   buildAuditPacket(receiptId: string, exportedByUserId?: number): AuditPacket {
     const receipt = this.get(receiptId);
     if (!receipt) {
-      throw Object.assign(new Error(`Receipt ${receiptId} not found`), { code: "NOT_FOUND" });
+      throw Object.assign(new Error(`Receipt ${receiptId} not found`), { code: 'NOT_FOUND' });
     }
 
     const graph = this.getGraph(receiptId);
@@ -290,12 +292,12 @@ class ReceiptStore {
       `Status: ${receipt.status}`,
       `Policy: ${receipt.policyClass}`,
       `Confidence: ${receipt.confidenceScore} (${receipt.confidenceTier})`,
-      `Model: ${receipt.modelId ?? "none"} (${receipt.modelProvider ?? "none"})`,
+      `Model: ${receipt.modelId ?? 'none'} (${receipt.modelProvider ?? 'none'})`,
       `Export Safe: ${receipt.exportSafe}`,
       `Graph depth: ${graph.depth}, receipts: ${graph.receipts.length}`,
       `Exported: ${new Date().toISOString()}`,
-      `Integrity hash: ${createHash("sha256").update(JSON.stringify(receipt)).digest("hex").slice(0, 32)}`,
-    ].join("\n");
+      `Integrity hash: ${createHash('sha256').update(JSON.stringify(receipt)).digest('hex').slice(0, 32)}`,
+    ].join('\n');
 
     return {
       receiptId,
@@ -308,9 +310,15 @@ class ReceiptStore {
     };
   }
 
-  getExecutiveSummary(options: { orgId?: number | null; windowMs?: number } = {}): ExecutiveTrustSummary {
+  getExecutiveSummary(
+    options: { orgId?: number | null; windowMs?: number } = {},
+  ): ExecutiveTrustSummary {
     const windowMs = options.windowMs ?? 86_400_000;
-    const items = this.list({ ...(options.orgId !== undefined ? { orgId: options.orgId } : {}), sinceMs: windowMs, limit: 5000 });
+    const items = this.list({
+      ...(options.orgId !== undefined ? { orgId: options.orgId } : {}),
+      sinceMs: windowMs,
+      limit: 5000,
+    });
 
     const byClass = {} as Record<ReceiptClass, number>;
     const byStatus = {} as Record<ReceiptStatus, number>;
@@ -328,9 +336,9 @@ class ReceiptStore {
       byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
       policyCount[r.policyClass] = (policyCount[r.policyClass] ?? 0) + 1;
       totalConf += r.confidenceScore;
-      if (r.confidenceTier === "high") highConf++;
-      if (r.confidenceTier === "uncertain" || r.confidenceTier === "low") lowConf++;
-      if (r.status === "pending_review") pendingApproval++;
+      if (r.confidenceTier === 'high') highConf++;
+      if (r.confidenceTier === 'uncertain' || r.confidenceTier === 'low') lowConf++;
+      if (r.status === 'pending_review') pendingApproval++;
       if (r.exportSafe) exportSafeCount++;
       else exportBlockedCount++;
     }
@@ -353,7 +361,7 @@ class ReceiptStore {
       exportSafeCount,
       exportBlockedCount,
       topPolicyClasses,
-      recentReceipts: items.slice(0, 20).map(r => this.summarize(r)),
+      recentReceipts: items.slice(0, 20).map((r) => this.summarize(r)),
     };
   }
 }

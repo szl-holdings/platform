@@ -1,12 +1,16 @@
-import { obligationTwins } from "../data/counsel-twin";
-import { Clock, AlertTriangle, CheckCircle2, Lock } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { AlertTriangle, CheckCircle2, Clock, Lock } from 'lucide-react';
+import { obligationTwins } from '../data/counsel-twin';
 
 export default function ObligationTimeline() {
-  const sortedObligations = [...obligationTwins].sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
-  
-  const nextDeadline = sortedObligations.find(o => new Date(o.deadline) > new Date());
-  const daysToNext = nextDeadline ? Math.ceil((new Date(nextDeadline.deadline).getTime() - new Date().getTime()) / 86400000) : null;
+  const sortedObligations = [...obligationTwins].sort(
+    (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
+  );
+
+  const nextDeadline = sortedObligations.find((o) => new Date(o.deadline) > new Date());
+  const daysToNext = nextDeadline
+    ? Math.ceil((new Date(nextDeadline.deadline).getTime() - new Date().getTime()) / 86400000)
+    : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -17,7 +21,9 @@ export default function ObligationTimeline() {
         </div>
         {daysToNext !== null && (
           <div className="bg-violet-500/10 border border-violet-500/20 px-4 py-2 rounded-xl">
-            <div className="text-[10px] font-medium text-violet-400 uppercase tracking-wider">Next Deadline</div>
+            <div className="text-[10px] font-medium text-violet-400 uppercase tracking-wider">
+              Next Deadline
+            </div>
             <div className="text-xl font-bold text-violet-100">{daysToNext} Days</div>
           </div>
         )}
@@ -25,27 +31,36 @@ export default function ObligationTimeline() {
 
       <div className="relative space-y-4">
         <div className="absolute left-6 top-0 bottom-0 w-px bg-violet-500/10" />
-        
+
         {sortedObligations.map((obl, i) => (
           <div key={obl.id} className="relative pl-12">
-            <div className={cn(
-              "absolute left-[21px] top-4 w-2 h-2 rounded-full border-2 bg-[#060e1a] z-10",
-              obl.status === "overdue" ? "border-red-500" :
-              obl.status === "blocked" ? "border-amber-500" :
-              obl.status === "in_progress" ? "border-violet-500" :
-              "border-violet-500/30"
-            )} />
-            
+            <div
+              className={cn(
+                'absolute left-[21px] top-4 w-2 h-2 rounded-full border-2 bg-[#060e1a] z-10',
+                obl.status === 'overdue'
+                  ? 'border-red-500'
+                  : obl.status === 'blocked'
+                    ? 'border-amber-500'
+                    : obl.status === 'in_progress'
+                      ? 'border-violet-500'
+                      : 'border-violet-500/30',
+              )}
+            />
+
             <div className="bg-[#0a0614] border border-violet-500/10 rounded-xl p-4 flex items-center justify-between hover:border-violet-500/30 transition-colors">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-violet-100">{obl.title}</span>
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider",
-                    obl.status === "overdue" ? "bg-red-500/10 text-red-400" :
-                    obl.status === "blocked" ? "bg-amber-500/10 text-amber-400" :
-                    "bg-violet-500/10 text-violet-400"
-                  )}>
+                  <span
+                    className={cn(
+                      'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider',
+                      obl.status === 'overdue'
+                        ? 'bg-red-500/10 text-red-400'
+                        : obl.status === 'blocked'
+                          ? 'bg-amber-500/10 text-amber-400'
+                          : 'bg-violet-500/10 text-violet-400',
+                    )}
+                  >
                     {obl.status}
                   </span>
                 </div>
@@ -60,9 +75,11 @@ export default function ObligationTimeline() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-right">
-                <div className="text-xs font-bold text-violet-200">${(obl.exposureUsd / 1000).toFixed(0)}K Risk</div>
+                <div className="text-xs font-bold text-violet-200">
+                  ${(obl.exposureUsd / 1000).toFixed(0)}K Risk
+                </div>
                 <div className="text-[10px] text-violet-400/50">Priority: {obl.riskLevel}</div>
               </div>
             </div>

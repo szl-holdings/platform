@@ -13,17 +13,13 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import {
-  makeClaimResolver,
-  metricDisplay,
-  type ClaimValue,
-} from "@szl-holdings/domain-claims";
+import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/domain-claims';
 
 export type { ClaimValue };
 export { metricDisplay };
 
-const resolveClaim = makeClaimResolver("command/claims");
+const resolveClaim = makeClaimResolver('command/claims');
 
-export const COMMAND_UPTIME_30DAY = resolveClaim("command-uptime-30day", "99.98%");
-export const COMMAND_UPTIME_90DAY = resolveClaim("command-uptime-90day", "99.97%");
-export const COMMAND_UPTIME_OVERALL = resolveClaim("uptime-claim", "99.98% uptime");
+export const COMMAND_UPTIME_30DAY = resolveClaim('command-uptime-30day', '99.98%');
+export const COMMAND_UPTIME_90DAY = resolveClaim('command-uptime-90day', '99.97%');
+export const COMMAND_UPTIME_OVERALL = resolveClaim('uptime-claim', '99.98% uptime');

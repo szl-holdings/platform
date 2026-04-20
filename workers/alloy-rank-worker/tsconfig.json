@@ -9,8 +9,6 @@
     "types": ["node"],
     "noUnusedLocals": false
   },
-  "references": [
-    { "path": "../../packages/aef-contracts" }
-  ],
+  "references": [{ "path": "../../packages/aef-contracts" }],
   "include": ["src/**/*"]
 }

@@ -1,16 +1,16 @@
-import DataLoader from "dataloader";
+import DataLoader from 'dataloader';
 
 async function getDb() {
-  const { db } = await import("@szl-holdings/db");
+  const { db } = await import('@szl-holdings/db');
   return db;
 }
 
 async function getTables() {
-  return import("@szl-holdings/db/schema");
+  return import('@szl-holdings/db/schema');
 }
 
 async function getOrm() {
-  return import("drizzle-orm");
+  return import('drizzle-orm');
 }
 
 export function createVesselByIdLoader() {
@@ -19,7 +19,10 @@ export function createVesselByIdLoader() {
       const db = await getDb();
       const { vesselsTable } = await getTables();
       const { inArray } = await getOrm();
-      const rows = await db.select().from(vesselsTable).where(inArray(vesselsTable.id, [...ids]));
+      const rows = await db
+        .select()
+        .from(vesselsTable)
+        .where(inArray(vesselsTable.id, [...ids]));
       const map = new Map(rows.map((r: any) => [r.id, r]));
       return ids.map((id) => map.get(id) ?? null);
     } catch {
@@ -34,7 +37,10 @@ export function createFirestormAssessmentByIdLoader() {
       const db = await getDb();
       const { firestormAssessmentsTable } = await getTables();
       const { inArray } = await getOrm();
-      const rows = await db.select().from(firestormAssessmentsTable).where(inArray(firestormAssessmentsTable.id, [...ids]));
+      const rows = await db
+        .select()
+        .from(firestormAssessmentsTable)
+        .where(inArray(firestormAssessmentsTable.id, [...ids]));
       const map = new Map(rows.map((r: any) => [r.id, r]));
       return ids.map((id) => map.get(id) ?? null);
     } catch {
@@ -73,7 +79,10 @@ export function createFirestormIncidentByIdLoader() {
       const db = await getDb();
       const { firestormIncidentsTable } = await getTables();
       const { inArray } = await getOrm();
-      const rows = await db.select().from(firestormIncidentsTable).where(inArray(firestormIncidentsTable.id, [...ids]));
+      const rows = await db
+        .select()
+        .from(firestormIncidentsTable)
+        .where(inArray(firestormIncidentsTable.id, [...ids]));
       const map = new Map(rows.map((r: any) => [r.id, r]));
       return ids.map((id) => map.get(id) ?? null);
     } catch {

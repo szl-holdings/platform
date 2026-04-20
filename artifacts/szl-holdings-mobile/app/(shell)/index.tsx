@@ -1,32 +1,32 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { Feather } from '@expo/vector-icons';
+import { useApiStatus } from '@szl-holdings/mobile-shared';
+import { useQuery } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View,
-  Text,
+  ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
-import { Feather } from "@expo/vector-icons";
-import { useColors } from "@/hooks/useColors";
-import { useAuth } from "@/context/AuthContext";
-import { useWorkspace, WORKSPACES, type WorkspaceDomain } from "@/context/WorkspaceContext";
-import { WorkspaceTrigger } from "@/components/WorkspaceSwitcher";
-import { useApiStatus } from "@szl-holdings/mobile-shared";
-import { VoiceCommandModal } from "@/components/VoiceCommandModal";
-import { FusionBar } from "@/components/FusionBar";
-import { useNotificationCountContext } from "@/context/NotificationCountContext";
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FusionBar } from '@/components/FusionBar';
+import { VoiceCommandModal } from '@/components/VoiceCommandModal';
+import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
+import { useAuth } from '@/context/AuthContext';
+import { useNotificationCountContext } from '@/context/NotificationCountContext';
+import { useWorkspace, WORKSPACES, type WorkspaceDomain } from '@/context/WorkspaceContext';
+import { useColors } from '@/hooks/useColors';
 
-const ACCENT = "#c9a84c";
+const ACCENT = '#c9a84c';
 
 interface CommandSignal {
   id: string;
   domain: WorkspaceDomain | string;
-  severity: "critical" | "high" | "medium" | "low" | "info";
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
   title: string;
   source: string;
   time: string;
@@ -39,24 +39,24 @@ interface DomainSummary {
   accent: string;
   activeCount: number;
   criticalCount: number;
-  status: "operational" | "degraded" | "critical" | "unknown";
+  status: 'operational' | 'degraded' | 'critical' | 'unknown';
   route: string;
 }
 
 const SERVER_TO_WORKSPACE: Record<string, WorkspaceDomain> = {
-  vessels: "fleet",
-  firestorm: "defense",
-  aegis: "defense",
-  terra: "properties",
-  lyte: "operations",
-  msp: "operations",
-  inca: "intelligence",
-  cortex: "intelligence",
-  prism: "advisory",
-  carlota: "advisory",
-  szl: "portfolio",
-  founder: "founder",
-  command: "command",
+  vessels: 'fleet',
+  firestorm: 'defense',
+  aegis: 'defense',
+  terra: 'properties',
+  lyte: 'operations',
+  msp: 'operations',
+  inca: 'intelligence',
+  cortex: 'intelligence',
+  prism: 'advisory',
+  carlota: 'advisory',
+  szl: 'portfolio',
+  founder: 'founder',
+  command: 'command',
 };
 
 function mapServerDomain(d: string): WorkspaceDomain | null {
@@ -64,15 +64,22 @@ function mapServerDomain(d: string): WorkspaceDomain | null {
     return SERVER_TO_WORKSPACE[d];
   }
   const known: WorkspaceDomain[] = [
-    "command", "defense", "fleet", "properties", "operations",
-    "advisory", "portfolio", "founder", "intelligence",
+    'command',
+    'defense',
+    'fleet',
+    'properties',
+    'operations',
+    'advisory',
+    'portfolio',
+    'founder',
+    'intelligence',
   ];
   return (known as string[]).includes(d) ? (d as WorkspaceDomain) : null;
 }
 
 function getApiBase(): string {
   const domain = process.env.EXPO_PUBLIC_DOMAIN;
-  return domain ? `https://${domain}` : "";
+  return domain ? `https://${domain}` : '';
 }
 
 async function fetchCommandFeed(headers: Record<string, string>): Promise<{
@@ -81,7 +88,7 @@ async function fetchCommandFeed(headers: Record<string, string>): Promise<{
 }> {
   try {
     const res = await fetch(`${getApiBase()}/api/cortex/command-feed`, { headers });
-    if (!res.ok) throw new Error("feed unavailable");
+    if (!res.ok) throw new Error('feed unavailable');
     return res.json();
   } catch {
     return { signals: [], summaries: [] };
@@ -90,11 +97,16 @@ async function fetchCommandFeed(headers: Record<string, string>): Promise<{
 
 function severityColor(sev: string, colors: ReturnType<typeof useColors>) {
   switch (sev) {
-    case "critical": return colors.red;
-    case "high": return colors.amber;
-    case "medium": return "#f59e0b";
-    case "low": return colors.blue;
-    default: return colors.mutedForeground;
+    case 'critical':
+      return colors.red;
+    case 'high':
+      return colors.amber;
+    case 'medium':
+      return '#f59e0b';
+    case 'low':
+      return colors.blue;
+    default:
+      return colors.mutedForeground;
   }
 }
 
@@ -111,7 +123,7 @@ function SignalRow({
 
   return (
     <TouchableOpacity
-      onPress={() => router.navigate(ws?.route as never ?? "/(shell)/")}
+      onPress={() => router.navigate((ws?.route as never) ?? '/(shell)/')}
       style={[styles.signalRow, { backgroundColor: colors.card, borderColor: colors.border }]}
       activeOpacity={0.8}
     >
@@ -124,7 +136,12 @@ function SignalRow({
           {ws?.icon} {ws?.label} · {signal.source} · {signal.time}
         </Text>
       </View>
-      <View style={[styles.sevBadge, { backgroundColor: `${sevColor}18`, borderColor: `${sevColor}30` }]}>
+      <View
+        style={[
+          styles.sevBadge,
+          { backgroundColor: `${sevColor}18`, borderColor: `${sevColor}30` },
+        ]}
+      >
         <Text style={[styles.sevText, { color: sevColor }]}>{signal.severity.toUpperCase()}</Text>
       </View>
     </TouchableOpacity>
@@ -139,11 +156,11 @@ function DomainCard({
   colors: ReturnType<typeof useColors>;
 }) {
   const statusColor =
-    summary.status === "critical"
+    summary.status === 'critical'
       ? colors.red
-      : summary.status === "degraded"
-      ? colors.amber
-      : colors.green;
+      : summary.status === 'degraded'
+        ? colors.amber
+        : colors.green;
 
   return (
     <TouchableOpacity
@@ -179,11 +196,11 @@ export default function CommandFeedScreen() {
   const { unreadCount: notifUnreadCount } = useNotificationCountContext();
 
   useEffect(() => {
-    setActiveWorkspace("command");
+    setActiveWorkspace('command');
   }, [setActiveWorkspace]);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["cortex-command-feed", isAuthenticated],
+    queryKey: ['cortex-command-feed', isAuthenticated],
     queryFn: () => fetchCommandFeed(buildHeaders()),
     enabled: isAuthenticated,
     staleTime: 30000,
@@ -196,8 +213,15 @@ export default function CommandFeedScreen() {
   useEffect(() => {
     if (isAuthenticated) return;
     const allDomains: WorkspaceDomain[] = [
-      "command", "defense", "fleet", "properties", "operations",
-      "advisory", "portfolio", "founder", "intelligence",
+      'command',
+      'defense',
+      'fleet',
+      'properties',
+      'operations',
+      'advisory',
+      'portfolio',
+      'founder',
+      'intelligence',
     ];
     for (const d of allDomains) setBadge(d, 0);
   }, [isAuthenticated, setBadge]);
@@ -218,20 +242,26 @@ export default function CommandFeedScreen() {
       }
     }
     const allDomains: WorkspaceDomain[] = [
-      "command", "defense", "fleet", "properties", "operations",
-      "advisory", "portfolio", "founder",
+      'command',
+      'defense',
+      'fleet',
+      'properties',
+      'operations',
+      'advisory',
+      'portfolio',
+      'founder',
     ];
     for (const d of allDomains) {
       setBadge(d, counts[d] ?? 0);
     }
   }, [data, setBadge, signals, summaries]);
 
-  const criticalCount = signals.filter((s) => s.severity === "critical").length;
+  const criticalCount = signals.filter((s) => s.severity === 'critical').length;
 
   const { data: briefingData } = useQuery({
-    queryKey: ["morning-brief"],
+    queryKey: ['morning-brief'],
     queryFn: async () => {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       try {
         const res = await fetch(`${getApiBase()}/api/briefing/today`, { headers });
         if (!res.ok) return null;
@@ -246,20 +276,44 @@ export default function CommandFeedScreen() {
   });
 
   const brief = briefingData ?? {
-    headline: "3 critical signals across 2 domains require immediate attention",
-    executiveSummary: "As of today UTC, the SZL ecosystem is operating at DEGRADED status. 3 intelligence signals identified across 4 domains. APT-41 campaign and Shanghai port delay are the highest-priority items.",
-    overallHealth: "degraded",
+    headline: '3 critical signals across 2 domains require immediate attention',
+    executiveSummary:
+      'As of today UTC, the SZL ecosystem is operating at DEGRADED status. 3 intelligence signals identified across 4 domains. APT-41 campaign and Shanghai port delay are the highest-priority items.',
+    overallHealth: 'degraded',
     criticalCount: 3,
     highCount: 5,
     totalAlerts: 8,
     signals: [
-      { domain: "firestorm", level: "critical", title: "APT-41 Lateral Movement", summary: "Nation-state threat actor active across 3 subsidiaries. Legal hold triggered.", count: 1 },
-      { domain: "vessels", level: "high", title: "Shanghai Port Delay +32h", summary: "12 Terra properties and 8 PRISM contracts flagged via signal chain.", count: 2 },
-      { domain: "szl-holdings", level: "medium", title: "Market Volatility Index 0.72", summary: "Portfolio rebalance signal chain triggered across Terra, Vessels, and fund ops.", count: 5 },
+      {
+        domain: 'firestorm',
+        level: 'critical',
+        title: 'APT-41 Lateral Movement',
+        summary: 'Nation-state threat actor active across 3 subsidiaries. Legal hold triggered.',
+        count: 1,
+      },
+      {
+        domain: 'vessels',
+        level: 'high',
+        title: 'Shanghai Port Delay +32h',
+        summary: '12 Terra properties and 8 PRISM contracts flagged via signal chain.',
+        count: 2,
+      },
+      {
+        domain: 'szl-holdings',
+        level: 'medium',
+        title: 'Market Volatility Index 0.72',
+        summary: 'Portfolio rebalance signal chain triggered across Terra, Vessels, and fund ops.',
+        count: 5,
+      },
     ],
   };
 
-  const healthColor = brief.overallHealth === "critical" ? colors.red : brief.overallHealth === "degraded" ? colors.amber : colors.green;
+  const healthColor =
+    brief.overallHealth === 'critical'
+      ? colors.red
+      : brief.overallHealth === 'degraded'
+        ? colors.amber
+        : colors.green;
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -276,7 +330,12 @@ export default function CommandFeedScreen() {
         <View style={styles.headerCenter}>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Command Feed</Text>
           {criticalCount > 0 && (
-            <View style={[styles.criticalPill, { backgroundColor: `${colors.red}18`, borderColor: `${colors.red}30` }]}>
+            <View
+              style={[
+                styles.criticalPill,
+                { backgroundColor: `${colors.red}18`, borderColor: `${colors.red}30` },
+              ]}
+            >
               <Text style={[styles.criticalPillText, { color: colors.red }]}>
                 {criticalCount} CRITICAL
               </Text>
@@ -286,45 +345,48 @@ export default function CommandFeedScreen() {
         <View style={styles.headerActions}>
           <TouchableOpacity
             onPress={() => setVoiceVisible(true)}
-            style={[styles.headerIconBtn, { backgroundColor: `${ACCENT}12`, borderColor: `${ACCENT}25` }]}
+            style={[
+              styles.headerIconBtn,
+              { backgroundColor: `${ACCENT}12`, borderColor: `${ACCENT}25` },
+            ]}
           >
             <Feather name="mic" size={16} color={ACCENT} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.navigate("/(shell)/quick-actions" as never)}
+            onPress={() => router.navigate('/(shell)/quick-actions' as never)}
             style={[styles.headerIconBtn, { borderColor: colors.border }]}
           >
             <Feather name="layers" size={16} color={colors.mutedForeground} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.navigate("/(shell)/settings" as never)}
+            onPress={() => router.navigate('/(shell)/settings' as never)}
             style={[styles.headerIconBtn, { borderColor: colors.border }]}
           >
             <Feather name="settings" size={16} color={colors.mutedForeground} />
             {notifUnreadCount > 0 && (
               <View
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                   top: -4,
                   right: -4,
                   minWidth: 15,
                   height: 15,
                   borderRadius: 8,
-                  backgroundColor: "#ef4444",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  backgroundColor: '#ef4444',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   paddingHorizontal: 3,
                 }}
               >
                 <Text
                   style={{
-                    color: "#fff",
+                    color: '#fff',
                     fontSize: 9,
-                    fontFamily: "Inter_600SemiBold",
+                    fontFamily: 'Inter_600SemiBold',
                     lineHeight: 13,
                   }}
                 >
-                  {notifUnreadCount > 99 ? "99+" : String(notifUnreadCount)}
+                  {notifUnreadCount > 99 ? '99+' : String(notifUnreadCount)}
                 </Text>
               </View>
             )}
@@ -339,17 +401,13 @@ export default function CommandFeedScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={ACCENT}
-          />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={ACCENT} />
         }
       >
         {user && (
           <View style={styles.greeting}>
             <Text style={[styles.greetingText, { color: colors.mutedForeground }]}>
-              Good day, {user.displayName ?? "Commander"}
+              Good day, {user.displayName ?? 'Commander'}
             </Text>
           </View>
         )}
@@ -358,15 +416,29 @@ export default function CommandFeedScreen() {
         <FusionBar />
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>MORNING BRIEF</Text>
-        <View style={[styles.briefCard, { backgroundColor: colors.card, borderColor: healthColor + "40" }]}>
+        <View
+          style={[
+            styles.briefCard,
+            { backgroundColor: colors.card, borderColor: healthColor + '40' },
+          ]}
+        >
           <View style={styles.briefHeader}>
-            <View style={[styles.briefHealthBadge, { backgroundColor: healthColor + "20", borderColor: healthColor + "40" }]}>
+            <View
+              style={[
+                styles.briefHealthBadge,
+                { backgroundColor: healthColor + '20', borderColor: healthColor + '40' },
+              ]}
+            >
               <Text style={[styles.briefHealthText, { color: healthColor }]}>
-                {(brief.overallHealth ?? "nominal").toUpperCase()}
+                {(brief.overallHealth ?? 'nominal').toUpperCase()}
               </Text>
             </View>
             <Text style={[styles.briefDate, { color: colors.mutedForeground }]}>
-              {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+              })}
             </Text>
           </View>
           <Text style={[styles.briefHeadline, { color: colors.foreground }]} numberOfLines={3}>
@@ -376,37 +448,78 @@ export default function CommandFeedScreen() {
             {brief.executiveSummary}
           </Text>
           <View style={styles.briefStats}>
-            <View style={[styles.briefStat, { backgroundColor: colors.red + "15", borderColor: colors.red + "30" }]}>
-              <Text style={[styles.briefStatNum, { color: colors.red }]}>{brief.criticalCount ?? 0}</Text>
-              <Text style={[styles.briefStatLabel, { color: colors.mutedForeground }]}>Critical</Text>
+            <View
+              style={[
+                styles.briefStat,
+                { backgroundColor: colors.red + '15', borderColor: colors.red + '30' },
+              ]}
+            >
+              <Text style={[styles.briefStatNum, { color: colors.red }]}>
+                {brief.criticalCount ?? 0}
+              </Text>
+              <Text style={[styles.briefStatLabel, { color: colors.mutedForeground }]}>
+                Critical
+              </Text>
             </View>
-            <View style={[styles.briefStat, { backgroundColor: colors.amber + "15", borderColor: colors.amber + "30" }]}>
-              <Text style={[styles.briefStatNum, { color: colors.amber }]}>{brief.highCount ?? 0}</Text>
+            <View
+              style={[
+                styles.briefStat,
+                { backgroundColor: colors.amber + '15', borderColor: colors.amber + '30' },
+              ]}
+            >
+              <Text style={[styles.briefStatNum, { color: colors.amber }]}>
+                {brief.highCount ?? 0}
+              </Text>
               <Text style={[styles.briefStatLabel, { color: colors.mutedForeground }]}>High</Text>
             </View>
-            <View style={[styles.briefStat, { backgroundColor: colors.border, borderColor: colors.border }]}>
-              <Text style={[styles.briefStatNum, { color: colors.foreground }]}>{brief.totalAlerts ?? 0}</Text>
+            <View
+              style={[
+                styles.briefStat,
+                { backgroundColor: colors.border, borderColor: colors.border },
+              ]}
+            >
+              <Text style={[styles.briefStatNum, { color: colors.foreground }]}>
+                {brief.totalAlerts ?? 0}
+              </Text>
               <Text style={[styles.briefStatLabel, { color: colors.mutedForeground }]}>Total</Text>
             </View>
           </View>
-          {Array.isArray(brief.signals) && brief.signals.slice(0, 3).map((sig: any, i: number) => {
-            const sigColor = sig.level === "critical" ? colors.red : sig.level === "high" ? colors.amber : colors.blue;
-            return (
-              <View key={i} style={[styles.briefSignalRow, { borderTopColor: colors.border }]}>
-                <View style={[styles.sevDot, { backgroundColor: sigColor }]} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.briefSignalTitle, { color: colors.foreground }]} numberOfLines={1}>{sig.title}</Text>
-                  <Text style={[styles.briefSignalSummary, { color: colors.mutedForeground }]} numberOfLines={2}>{sig.summary}</Text>
+          {Array.isArray(brief.signals) &&
+            brief.signals.slice(0, 3).map((sig: any, i: number) => {
+              const sigColor =
+                sig.level === 'critical'
+                  ? colors.red
+                  : sig.level === 'high'
+                    ? colors.amber
+                    : colors.blue;
+              return (
+                <View key={i} style={[styles.briefSignalRow, { borderTopColor: colors.border }]}>
+                  <View style={[styles.sevDot, { backgroundColor: sigColor }]} />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[styles.briefSignalTitle, { color: colors.foreground }]}
+                      numberOfLines={1}
+                    >
+                      {sig.title}
+                    </Text>
+                    <Text
+                      style={[styles.briefSignalSummary, { color: colors.mutedForeground }]}
+                      numberOfLines={2}
+                    >
+                      {sig.summary}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            );
-          })}
+              );
+            })}
         </View>
 
         {/* Posture Score Card */}
-        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>GOVERNANCE POSTURE</Text>
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+          GOVERNANCE POSTURE
+        </Text>
         <TouchableOpacity
-          onPress={() => router.navigate("/(shell)/operations" as never)}
+          onPress={() => router.navigate('/(shell)/operations' as never)}
           activeOpacity={0.85}
           style={{
             marginHorizontal: 0,
@@ -414,31 +527,97 @@ export default function CommandFeedScreen() {
             borderRadius: 14,
             backgroundColor: colors.card,
             borderWidth: 1,
-            borderColor: "rgba(201,168,76,0.25)",
+            borderColor: 'rgba(201,168,76,0.25)',
             padding: 16,
-            flexDirection: "row",
-            alignItems: "center",
+            flexDirection: 'row',
+            alignItems: 'center',
             gap: 16,
           }}
         >
           {/* Ring */}
-          <View style={{ alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 32, borderWidth: 4, borderColor: "rgba(201,168,76,0.35)", backgroundColor: "rgba(201,168,76,0.06)" }}>
-            <Text style={{ fontSize: 22, fontWeight: "900", color: ACCENT, fontFamily: "Inter_700Bold" }}>84</Text>
-            <Text style={{ fontSize: 8, color: "rgba(201,168,76,0.6)", fontFamily: "Inter_400Regular", letterSpacing: 0.5 }}>/ 100</Text>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 64,
+              height: 64,
+              borderRadius: 32,
+              borderWidth: 4,
+              borderColor: 'rgba(201,168,76,0.35)',
+              backgroundColor: 'rgba(201,168,76,0.06)',
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 22,
+                fontWeight: '900',
+                color: ACCENT,
+                fontFamily: 'Inter_700Bold',
+              }}
+            >
+              84
+            </Text>
+            <Text
+              style={{
+                fontSize: 8,
+                color: 'rgba(201,168,76,0.6)',
+                fontFamily: 'Inter_400Regular',
+                letterSpacing: 0.5,
+              }}
+            >
+              / 100
+            </Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 13, fontWeight: "700", color: colors.foreground, fontFamily: "Inter_700Bold", marginBottom: 2 }}>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: '700',
+                color: colors.foreground,
+                fontFamily: 'Inter_700Bold',
+                marginBottom: 2,
+              }}
+            >
               Board-Ready
             </Text>
-            <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", lineHeight: 16 }}>
+            <Text
+              style={{
+                fontSize: 11,
+                color: colors.mutedForeground,
+                fontFamily: 'Inter_400Regular',
+                lineHeight: 16,
+              }}
+            >
               Security 82 · Operational 74 · Financial 71 · Compliance 88
             </Text>
-            <View style={{ marginTop: 6, flexDirection: "row", gap: 6 }}>
-              <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: "rgba(245,158,11,0.12)", borderWidth: 1, borderColor: "rgba(245,158,11,0.25)" }}>
-                <Text style={{ fontSize: 9, color: "#fbbf24", fontFamily: "Inter_600SemiBold" }}>2 WARN</Text>
+            <View style={{ marginTop: 6, flexDirection: 'row', gap: 6 }}>
+              <View
+                style={{
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  borderRadius: 4,
+                  backgroundColor: 'rgba(245,158,11,0.12)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(245,158,11,0.25)',
+                }}
+              >
+                <Text style={{ fontSize: 9, color: '#fbbf24', fontFamily: 'Inter_600SemiBold' }}>
+                  2 WARN
+                </Text>
               </View>
-              <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: "rgba(201,168,76,0.08)", borderWidth: 1, borderColor: "rgba(201,168,76,0.18)" }}>
-                <Text style={{ fontSize: 9, color: ACCENT, fontFamily: "Inter_600SemiBold" }}>↑ +1.4 vs last week</Text>
+              <View
+                style={{
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  borderRadius: 4,
+                  backgroundColor: 'rgba(201,168,76,0.08)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(201,168,76,0.18)',
+                }}
+              >
+                <Text style={{ fontSize: 9, color: ACCENT, fontFamily: 'Inter_600SemiBold' }}>
+                  ↑ +1.4 vs last week
+                </Text>
               </View>
             </View>
           </View>
@@ -447,15 +626,22 @@ export default function CommandFeedScreen() {
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>DOMAINS</Text>
         {summaries.length === 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.domainRow}>
-            {WORKSPACES.filter((w) => w.id !== "command").map((ws) => (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.domainRow}
+          >
+            {WORKSPACES.filter((w) => w.id !== 'command').map((ws) => (
               <TouchableOpacity
                 key={ws.id}
                 onPress={() => {
                   setActiveWorkspace(ws.id as WorkspaceDomain);
                   router.navigate(ws.route as never);
                 }}
-                style={[styles.domainCard, { backgroundColor: colors.card, borderColor: `${ws.accent}25` }]}
+                style={[
+                  styles.domainCard,
+                  { backgroundColor: colors.card, borderColor: `${ws.accent}25` },
+                ]}
                 activeOpacity={0.8}
               >
                 <View style={[styles.domainIcon, { backgroundColor: `${ws.accent}18` }]}>
@@ -467,7 +653,11 @@ export default function CommandFeedScreen() {
             ))}
           </ScrollView>
         ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.domainRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.domainRow}
+          >
             {summaries.map((s) => (
               <DomainCard key={s.domain} summary={s} colors={colors} />
             ))}
@@ -480,7 +670,7 @@ export default function CommandFeedScreen() {
           <ActivityIndicator color={ACCENT} style={{ marginTop: 40 }} />
         ) : signals.length === 0 ? (
           <View style={[styles.emptyState, { borderColor: colors.border }]}>
-            <Text style={{ fontSize: 32, textAlign: "center" }}>⬡</Text>
+            <Text style={{ fontSize: 32, textAlign: 'center' }}>⬡</Text>
             <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
               All domains nominal
             </Text>
@@ -489,9 +679,7 @@ export default function CommandFeedScreen() {
             </Text>
           </View>
         ) : (
-          signals.map((signal) => (
-            <SignalRow key={signal.id} signal={signal} colors={colors} />
-          ))
+          signals.map((signal) => <SignalRow key={signal.id} signal={signal} colors={colors} />)
         )}
       </ScrollView>
     </View>
@@ -501,8 +689,8 @@ export default function CommandFeedScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
@@ -514,11 +702,11 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: -0.3,
   },
   criticalPill: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
@@ -526,30 +714,30 @@ const styles = StyleSheet.create({
   },
   criticalPillText: {
     fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 0.5,
   },
   refreshBtn: { padding: 4 },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 6 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   headerIconBtn: {
     width: 32,
     height: 32,
     borderRadius: 8,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 8 },
   greeting: { marginBottom: 8 },
   greetingText: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     letterSpacing: 0.3,
   },
   sectionLabel: {
     fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 1.5,
     marginTop: 8,
     marginBottom: 4,
@@ -563,25 +751,25 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    alignItems: "center",
+    alignItems: 'center',
     gap: 6,
   },
   domainIcon: {
     width: 40,
     height: 40,
     borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   domainIconText: { fontSize: 18 },
   domainLabel: {
     fontSize: 11,
-    fontFamily: "Inter_500Medium",
-    textAlign: "center",
+    fontFamily: 'Inter_500Medium',
+    textAlign: 'center',
   },
   domainStats: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
   criticalBadge: {
@@ -589,11 +777,11 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
-  criticalText: { fontSize: 9, fontFamily: "Inter_600SemiBold" },
+  criticalText: { fontSize: 9, fontFamily: 'Inter_600SemiBold' },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   signalRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 12,
     borderRadius: 10,
     borderWidth: 1,
@@ -601,32 +789,32 @@ const styles = StyleSheet.create({
   },
   sevDot: { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
   signalContent: { flex: 1, gap: 3 },
-  signalTitle: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  signalMeta: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  signalTitle: { fontSize: 13, fontFamily: 'Inter_500Medium' },
+  signalMeta: { fontSize: 11, fontFamily: 'Inter_400Regular' },
   sevBadge: {
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 5,
     borderWidth: 1,
   },
-  sevText: { fontSize: 9, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
+  sevText: { fontSize: 9, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5 },
   emptyState: {
-    alignItems: "center",
+    alignItems: 'center',
     padding: 40,
     borderRadius: 12,
     borderWidth: 1,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     gap: 8,
     marginTop: 20,
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
   },
   emptySubText: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
   briefCard: {
     borderRadius: 14,
@@ -636,9 +824,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   briefHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   briefHealthBadge: {
     paddingHorizontal: 8,
@@ -646,28 +834,28 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
   },
-  briefHealthText: { fontSize: 10, fontFamily: "Inter_600SemiBold", letterSpacing: 1 },
-  briefDate: { fontSize: 11, fontFamily: "Inter_400Regular" },
-  briefHeadline: { fontSize: 14, fontFamily: "Inter_600SemiBold", lineHeight: 20 },
-  briefSummary: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
-  briefStats: { flexDirection: "row", gap: 8 },
+  briefHealthText: { fontSize: 10, fontFamily: 'Inter_600SemiBold', letterSpacing: 1 },
+  briefDate: { fontSize: 11, fontFamily: 'Inter_400Regular' },
+  briefHeadline: { fontSize: 14, fontFamily: 'Inter_600SemiBold', lineHeight: 20 },
+  briefSummary: { fontSize: 12, fontFamily: 'Inter_400Regular', lineHeight: 18 },
+  briefStats: { flexDirection: 'row', gap: 8 },
   briefStat: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
     padding: 8,
     borderRadius: 8,
     borderWidth: 1,
     gap: 2,
   },
-  briefStatNum: { fontSize: 18, fontFamily: "Inter_600SemiBold" },
-  briefStatLabel: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  briefStatNum: { fontSize: 18, fontFamily: 'Inter_600SemiBold' },
+  briefStatLabel: { fontSize: 10, fontFamily: 'Inter_400Regular' },
   briefSignalRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: 8,
     paddingTop: 8,
     borderTopWidth: 1,
   },
-  briefSignalTitle: { fontSize: 12, fontFamily: "Inter_500Medium" },
-  briefSignalSummary: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 2 },
+  briefSignalTitle: { fontSize: 12, fontFamily: 'Inter_500Medium' },
+  briefSignalSummary: { fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: 2 },
 });

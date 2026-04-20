@@ -1,37 +1,61 @@
-import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
-import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-
-import { useState } from "react";
-import { Shield, AlertTriangle, Brain, Radio, Crosshair, Activity, Loader2, Zap, FileText } from "lucide-react";
-import { SeverityMeter, TypewriterText, AnomalySparkline } from "@szl-holdings/shared-ui/ai-components";
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import {
+  AnomalySparkline,
+  SeverityMeter,
+  TypewriterText,
+} from '@szl-holdings/shared-ui/ai-components';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
+import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
+import {
+  Activity,
+  AlertTriangle,
+  Brain,
+  Crosshair,
+  FileText,
+  Loader2,
+  Radio,
+  Shield,
+  Zap,
+} from 'lucide-react';
+import { useState } from 'react';
 
 export default function ThreatIntelAI() {
-  const { data: cves = [], isLoading: cvesLoading } = useStandardQuery({ queryKey: ["threat-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves") });
-  const { data: threats = [], isLoading: threatsLoading } = useStandardQuery({ queryKey: ["threat-data"], queryFn: () => apiFetch<any[]>("/intelligence/threats") });
-  const { data: anomalies = [], isLoading: anomaliesLoading } = useStandardQuery({ queryKey: ["threat-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
+  const { data: cves = [], isLoading: cvesLoading } = useStandardQuery({
+    queryKey: ['threat-cves'],
+    queryFn: () => apiFetch<any[]>('/intelligence/cves'),
+  });
+  const { data: threats = [], isLoading: threatsLoading } = useStandardQuery({
+    queryKey: ['threat-data'],
+    queryFn: () => apiFetch<any[]>('/intelligence/threats'),
+  });
+  const { data: anomalies = [], isLoading: anomaliesLoading } = useStandardQuery({
+    queryKey: ['threat-anomalies'],
+    queryFn: () => apiFetch<any[]>('/intelligence/anomalies'),
+  });
   const isLoading = cvesLoading || threatsLoading || anomaliesLoading;
 
-  const [briefingText, setBriefingText] = useState("");
+  const [briefingText, setBriefingText] = useState('');
   const [briefingDone, setBriefingDone] = useState(false);
 
   const generateBriefing = async () => {
-    setBriefingText("");
+    setBriefingText('');
     setBriefingDone(false);
     try {
-      const result = await apiFetch<any>("/intelligence/ai/threat-briefing", { method: "POST" });
-      const summary = result.analysis?.summary?.summary || result.analysis?.summary || "";
-      const threatNames = (result.threats || []).map((t: any) => `${t.name} (${t.severity})`).join(", ");
-      setBriefingText(summary || `Active threats: ${threatNames}` || "Briefing generated.");
+      const result = await apiFetch<any>('/intelligence/ai/threat-briefing', { method: 'POST' });
+      const summary = result.analysis?.summary?.summary || result.analysis?.summary || '';
+      const threatNames = (result.threats || [])
+        .map((t: any) => `${t.name} (${t.severity})`)
+        .join(', ');
+      setBriefingText(summary || `Active threats: ${threatNames}` || 'Briefing generated.');
     } catch {
-      setBriefingText("Unable to generate briefing at this time.");
+      setBriefingText('Unable to generate briefing at this time.');
     }
     setBriefingDone(true);
   };
 
-  const criticalCves = cves.filter((c: any) => c.severity === "CRITICAL");
-  const highCves = cves.filter((c: any) => c.severity === "HIGH");
+  const criticalCves = cves.filter((c: any) => c.severity === 'CRITICAL');
+  const highCves = cves.filter((c: any) => c.severity === 'HIGH');
 
   if (isLoading) return <PageDataSkeleton rows={6} accentColor="#ef4444" />;
 
@@ -42,7 +66,9 @@ export default function ThreatIntelAI() {
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Crosshair className="w-7 h-7 text-red-400" /> AI Threat Command Wall
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Streaming intelligence briefings, CVE auto-classification, and attack surface analysis</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Streaming intelligence briefings, CVE auto-classification, and attack surface analysis
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-slate-500">{threats.length} active threats</span>
@@ -68,7 +94,11 @@ export default function ThreatIntelAI() {
           <div className="bg-black/30 rounded-xl p-5 border border-white/5 min-h-[200px]">
             {briefingText ? (
               briefingDone ? (
-                <TypewriterText text={briefingText} speed={15} className="text-sm text-slate-300 leading-relaxed" />
+                <TypewriterText
+                  text={briefingText}
+                  speed={15}
+                  className="text-sm text-slate-300 leading-relaxed"
+                />
               ) : (
                 <div className="flex items-center gap-2 text-sm text-slate-400">
                   <Loader2 className="w-4 h-4 animate-spin" /> Analyzing threat landscape...
@@ -77,7 +107,9 @@ export default function ThreatIntelAI() {
             ) : (
               <div className="flex flex-col items-center justify-center h-[180px] text-slate-500">
                 <FileText className="w-8 h-8 mb-2 opacity-30" />
-                <p className="text-sm">Click "Generate Briefing" for an AI-analyzed threat report</p>
+                <p className="text-sm">
+                  Click "Generate Briefing" for an AI-analyzed threat report
+                </p>
               </div>
             )}
           </div>
@@ -91,19 +123,27 @@ export default function ThreatIntelAI() {
             {anomalies.slice(0, 5).map((a: any, i: number) => (
               <div key={i} className="p-3 rounded-xl bg-black/20 border border-white/5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-white">{a.type || a.name || `Anomaly ${i + 1}`}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                    a.severity === "critical" ? "bg-red-500/10 text-red-400" :
-                    a.severity === "high" ? "bg-orange-500/10 text-orange-400" :
-                    "bg-amber-500/10 text-amber-400"
-                  }`}>{a.severity}</span>
+                  <span className="text-sm text-white">
+                    {a.type || a.name || `Anomaly ${i + 1}`}
+                  </span>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full ${
+                      a.severity === 'critical'
+                        ? 'bg-red-500/10 text-red-400'
+                        : a.severity === 'high'
+                          ? 'bg-orange-500/10 text-orange-400'
+                          : 'bg-amber-500/10 text-amber-400'
+                    }`}
+                  >
+                    {a.severity}
+                  </span>
                 </div>
                 <AnomalySparkline
                   data={Array.from({ length: 20 }, () => Math.random() * 100)}
                   anomalyIndices={[Math.floor(Math.random() * 10) + 10]}
                   width={200}
                   height={30}
-                  color={a.severity === "critical" ? "#ef4444" : "#f97316"}
+                  color={a.severity === 'critical' ? '#ef4444' : '#f97316'}
                 />
               </div>
             ))}
@@ -125,11 +165,15 @@ export default function ThreatIntelAI() {
             <div className="text-xs text-slate-500">High</div>
           </div>
           <div className="text-center p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-            <div className="text-2xl font-bold text-amber-400">{cves.filter((c: any) => c.severity === "MEDIUM").length}</div>
+            <div className="text-2xl font-bold text-amber-400">
+              {cves.filter((c: any) => c.severity === 'MEDIUM').length}
+            </div>
             <div className="text-xs text-slate-500">Medium</div>
           </div>
           <div className="text-center p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-            <div className="text-2xl font-bold text-blue-400">{cves.filter((c: any) => c.severity === "LOW").length}</div>
+            <div className="text-2xl font-bold text-blue-400">
+              {cves.filter((c: any) => c.severity === 'LOW').length}
+            </div>
             <div className="text-xs text-slate-500">Low</div>
           </div>
         </div>
@@ -137,8 +181,18 @@ export default function ThreatIntelAI() {
           {cves.slice(0, 8).map((cve: any, i: number) => (
             <SeverityMeter
               key={i}
-              level={(cve.severity?.toLowerCase() || "medium") as "critical" | "high" | "medium" | "low"}
-              score={cve.severity === "CRITICAL" ? 95 : cve.severity === "HIGH" ? 75 : cve.severity === "MEDIUM" ? 50 : 25}
+              level={
+                (cve.severity?.toLowerCase() || 'medium') as 'critical' | 'high' | 'medium' | 'low'
+              }
+              score={
+                cve.severity === 'CRITICAL'
+                  ? 95
+                  : cve.severity === 'HIGH'
+                    ? 75
+                    : cve.severity === 'MEDIUM'
+                      ? 50
+                      : 25
+              }
               label={cve.id || cve.cveId || `CVE-${i}`}
             />
           ))}
@@ -151,19 +205,21 @@ export default function ThreatIntelAI() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { name: "External Exposure", score: 42, detail: "12 public endpoints, 3 need review" },
-            { name: "Internal Threats", score: 28, detail: "Low insider risk, monitoring active" },
-            { name: "Supply Chain Risk", score: 61, detail: "4 dependencies with known CVEs" },
+            { name: 'External Exposure', score: 42, detail: '12 public endpoints, 3 need review' },
+            { name: 'Internal Threats', score: 28, detail: 'Low insider risk, monitoring active' },
+            { name: 'Supply Chain Risk', score: 61, detail: '4 dependencies with known CVEs' },
           ].map((surface) => (
             <div key={surface.name} className="p-4 rounded-xl bg-black/20 border border-white/5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-white">{surface.name}</span>
-                <span className={`text-xs font-mono font-bold ${surface.score >= 60 ? "text-orange-400" : surface.score >= 40 ? "text-amber-400" : "text-emerald-400"}`}>
+                <span
+                  className={`text-xs font-mono font-bold ${surface.score >= 60 ? 'text-orange-400' : surface.score >= 40 ? 'text-amber-400' : 'text-emerald-400'}`}
+                >
                   {surface.score}/100
                 </span>
               </div>
               <SeverityMeter
-                level={surface.score >= 60 ? "high" : surface.score >= 40 ? "medium" : "low"}
+                level={surface.score >= 60 ? 'high' : surface.score >= 40 ? 'medium' : 'low'}
                 score={surface.score}
               />
               <p className="text-xs text-slate-500 mt-2">{surface.detail}</p>

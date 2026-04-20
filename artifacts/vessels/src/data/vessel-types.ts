@@ -1,24 +1,44 @@
 export type VesselStatus =
-  | "at_sea"
-  | "in_port"
-  | "anchored"
-  | "idle"
-  | "maintenance"
-  | "underway"
-  | "delayed"
-  | "loading"
-  | "risk_watch"
-  | "exception_active";
+  | 'at_sea'
+  | 'in_port'
+  | 'anchored'
+  | 'idle'
+  | 'maintenance'
+  | 'underway'
+  | 'delayed'
+  | 'loading'
+  | 'risk_watch'
+  | 'exception_active';
 
-export type VesselClass = "capesize" | "panamax" | "supramax" | "handysize" | "vlcc" | "aframax" | "suezmax";
+export type VesselClass =
+  | 'capesize'
+  | 'panamax'
+  | 'supramax'
+  | 'handysize'
+  | 'vlcc'
+  | 'aframax'
+  | 'suezmax';
 
-export type ExceptionSeverity = "critical" | "high" | "watch" | "normal" | "medium" | "low";
+export type ExceptionSeverity = 'critical' | 'high' | 'watch' | 'normal' | 'medium' | 'low';
 
-export type ExceptionType = "speed" | "deviation" | "compliance" | "sanctions" | "maintenance" | "weather" | "technical";
+export type ExceptionType =
+  | 'speed'
+  | 'deviation'
+  | 'compliance'
+  | 'sanctions'
+  | 'maintenance'
+  | 'weather'
+  | 'technical';
 
-export type MaintenanceStatus = "scheduled" | "overdue" | "in_progress" | "completed" | "cancelled" | string;
+export type MaintenanceStatus =
+  | 'scheduled'
+  | 'overdue'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled'
+  | string;
 
-export type ReadinessState = "ready" | "restricted" | "unavailable" | "maintenance";
+export type ReadinessState = 'ready' | 'restricted' | 'unavailable' | 'maintenance';
 
 export interface VesselProfile {
   id: number;

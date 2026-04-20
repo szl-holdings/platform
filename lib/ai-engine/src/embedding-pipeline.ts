@@ -21,14 +21,14 @@ class HuggingFaceEmbeddingProvider implements EmbeddingProvider {
 
   constructor(modelId: string, dimensions = 1536) {
     this.id = modelId;
-    this.name = modelId.split("/").pop() ?? modelId;
+    this.name = modelId.split('/').pop() ?? modelId;
     this.dimensions = dimensions;
   }
 
   async embed(texts: string[]): Promise<number[][]> {
-    const token = process.env["HF_TOKEN"] ?? process.env["HUGGINGFACE_API_KEY"];
+    const token = process.env['HF_TOKEN'] ?? process.env['HUGGINGFACE_API_KEY'];
     if (!token) {
-      console.warn("[embedding-pipeline] No HF_TOKEN — returning zero embeddings");
+      console.warn('[embedding-pipeline] No HF_TOKEN — returning zero embeddings');
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
 
@@ -36,16 +36,16 @@ class HuggingFaceEmbeddingProvider implements EmbeddingProvider {
 
     try {
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ inputs: texts, options: { wait_for_model: true } }),
       });
 
       if (!response.ok) {
-        const errText = await response.text().catch(() => "unknown");
+        const errText = await response.text().catch(() => 'unknown');
         console.warn(`[embedding-pipeline] HF API error ${response.status}: ${errText}`);
         return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
       }
@@ -65,7 +65,7 @@ class HuggingFaceEmbeddingProvider implements EmbeddingProvider {
         return item as number[];
       });
     } catch (err) {
-      console.warn("[embedding-pipeline] Embedding request failed:", err);
+      console.warn('[embedding-pipeline] Embedding request failed:', err);
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
   }
@@ -81,26 +81,31 @@ class OpenAIEmbeddingProvider implements EmbeddingProvider {
   private apiKey: string;
   private baseUrl: string;
 
-  constructor(modelId: string, dimensions = 1536, apiKey?: string, baseUrl = "https://api.openai.com/v1") {
+  constructor(
+    modelId: string,
+    dimensions = 1536,
+    apiKey?: string,
+    baseUrl = 'https://api.openai.com/v1',
+  ) {
     this.id = modelId;
     this.name = modelId;
     this.dimensions = dimensions;
-    this.apiKey = apiKey ?? process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ?? "";
+    this.apiKey = apiKey ?? process.env['AI_INTEGRATIONS_OPENAI_API_KEY'] ?? '';
     this.baseUrl = baseUrl;
   }
 
   async embed(texts: string[]): Promise<number[][]> {
     if (!this.apiKey) {
-      console.warn("[embedding-pipeline] No OpenAI API key — returning zero embeddings");
+      console.warn('[embedding-pipeline] No OpenAI API key — returning zero embeddings');
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
 
     try {
       const response = await fetch(`${this.baseUrl}/embeddings`, {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ model: this.id, input: texts }),
       });
@@ -113,7 +118,7 @@ class OpenAIEmbeddingProvider implements EmbeddingProvider {
       const data = (await response.json()) as { data: Array<{ embedding: number[] }> };
       return data.data.map((d) => d.embedding);
     } catch (err) {
-      console.warn("[embedding-pipeline] OpenAI embedding failed:", err);
+      console.warn('[embedding-pipeline] OpenAI embedding failed:', err);
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
   }
@@ -127,16 +132,16 @@ class GeminiEmbeddingProvider implements EmbeddingProvider {
   dimensions: number;
   maxBatchSize = 1;
 
-  constructor(modelId = "models/text-embedding-004", dimensions = 768) {
+  constructor(modelId = 'models/text-embedding-004', dimensions = 768) {
     this.id = modelId;
-    this.name = modelId.split("/").pop() ?? modelId;
+    this.name = modelId.split('/').pop() ?? modelId;
     this.dimensions = dimensions;
   }
 
   async embed(texts: string[]): Promise<number[][]> {
-    const apiKey = process.env["AI_INTEGRATIONS_GEMINI_API_KEY"] ?? process.env["GOOGLE_API_KEY"];
+    const apiKey = process.env['AI_INTEGRATIONS_GEMINI_API_KEY'] ?? process.env['GOOGLE_API_KEY'];
     if (!apiKey) {
-      console.warn("[embedding-pipeline] No Gemini API key — returning zero embeddings");
+      console.warn('[embedding-pipeline] No Gemini API key — returning zero embeddings');
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
 
@@ -146,9 +151,12 @@ class GeminiEmbeddingProvider implements EmbeddingProvider {
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/${this.id}:embedContent?key=${apiKey}`,
           {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ model: this.id, content: { parts: [{ text: text.slice(0, 8000) }] } }),
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: this.id,
+              content: { parts: [{ text: text.slice(0, 8000) }] },
+            }),
           },
         );
         if (!response.ok) {
@@ -159,7 +167,7 @@ class GeminiEmbeddingProvider implements EmbeddingProvider {
         const data = (await response.json()) as { embedding?: { values?: number[] } };
         results.push(data.embedding?.values ?? (new Array(this.dimensions).fill(0) as number[]));
       } catch (err) {
-        console.warn("[embedding-pipeline] Gemini embedding failed:", err);
+        console.warn('[embedding-pipeline] Gemini embedding failed:', err);
         results.push(new Array(this.dimensions).fill(0) as number[]);
       }
     }
@@ -180,7 +188,7 @@ class LocalOllamaEmbeddingProvider implements EmbeddingProvider {
     this.id = modelId;
     this.name = `local:${modelId}`;
     this.dimensions = dimensions;
-    this.baseUrl = baseUrl ?? process.env["OLLAMA_BASE_URL"] ?? "http://localhost:11434";
+    this.baseUrl = baseUrl ?? process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434';
   }
 
   async embed(texts: string[]): Promise<number[][]> {
@@ -188,8 +196,8 @@ class LocalOllamaEmbeddingProvider implements EmbeddingProvider {
     for (const text of texts) {
       try {
         const response = await fetch(`${this.baseUrl}/api/embeddings`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ model: this.id, prompt: text.slice(0, 8000) }),
         });
         if (!response.ok) {
@@ -200,7 +208,7 @@ class LocalOllamaEmbeddingProvider implements EmbeddingProvider {
         const data = (await response.json()) as { embedding?: number[] };
         results.push(data.embedding ?? (new Array(this.dimensions).fill(0) as number[]));
       } catch (err) {
-        console.warn("[embedding-pipeline] Ollama embedding failed:", err);
+        console.warn('[embedding-pipeline] Ollama embedding failed:', err);
         results.push(new Array(this.dimensions).fill(0) as number[]);
       }
     }
@@ -218,12 +226,17 @@ class LocalOllamaEmbeddingProvider implements EmbeddingProvider {
 // schema uses a single shared column. Operators can change VECTOR_DIM and run a
 // new migration + full re-embed to switch canonical dimensions.
 
-export const SCHEMA_VECTOR_DIM: number = parseInt(process.env["VECTOR_DIM"] ?? "1024", 10);
+export const SCHEMA_VECTOR_DIM: number = parseInt(process.env['VECTOR_DIM'] ?? '1024', 10);
 
 export class EmbeddingDimensionError extends Error {
-  constructor(public readonly modelId: string, public readonly actual: number) {
-    super(`Embedding model "${modelId}" produces ${actual}-dimensional vectors (VECTOR_DIM=${SCHEMA_VECTOR_DIM})`);
-    this.name = "EmbeddingDimensionError";
+  constructor(
+    public readonly modelId: string,
+    public readonly actual: number,
+  ) {
+    super(
+      `Embedding model "${modelId}" produces ${actual}-dimensional vectors (VECTOR_DIM=${SCHEMA_VECTOR_DIM})`,
+    );
+    this.name = 'EmbeddingDimensionError';
   }
 }
 
@@ -244,15 +257,18 @@ export function normalizeEmbeddingDimension(vec: number[], targetDim: number): n
 // ─── Provider Registry ────────────────────────────────────────────────────────
 
 const BUILTIN_PROVIDERS: Record<string, EmbeddingProvider> = {
-  "BAAI/bge-m3": new HuggingFaceEmbeddingProvider("BAAI/bge-m3", 1024),
-  "sentence-transformers/all-MiniLM-L6-v2": new HuggingFaceEmbeddingProvider("sentence-transformers/all-MiniLM-L6-v2", 384),
-  "text-embedding-3-small": new OpenAIEmbeddingProvider("text-embedding-3-small", 1536),
-  "text-embedding-3-large": new OpenAIEmbeddingProvider("text-embedding-3-large", 3072),
-  "text-embedding-ada-002": new OpenAIEmbeddingProvider("text-embedding-ada-002", 1536),
-  "models/text-embedding-004": new GeminiEmbeddingProvider("models/text-embedding-004", 768),
-  "models/embedding-001": new GeminiEmbeddingProvider("models/embedding-001", 768),
-  "nomic-embed-text": new LocalOllamaEmbeddingProvider("nomic-embed-text", 768),
-  "mxbai-embed-large": new LocalOllamaEmbeddingProvider("mxbai-embed-large", 1024),
+  'BAAI/bge-m3': new HuggingFaceEmbeddingProvider('BAAI/bge-m3', 1024),
+  'sentence-transformers/all-MiniLM-L6-v2': new HuggingFaceEmbeddingProvider(
+    'sentence-transformers/all-MiniLM-L6-v2',
+    384,
+  ),
+  'text-embedding-3-small': new OpenAIEmbeddingProvider('text-embedding-3-small', 1536),
+  'text-embedding-3-large': new OpenAIEmbeddingProvider('text-embedding-3-large', 3072),
+  'text-embedding-ada-002': new OpenAIEmbeddingProvider('text-embedding-ada-002', 1536),
+  'models/text-embedding-004': new GeminiEmbeddingProvider('models/text-embedding-004', 768),
+  'models/embedding-001': new GeminiEmbeddingProvider('models/embedding-001', 768),
+  'nomic-embed-text': new LocalOllamaEmbeddingProvider('nomic-embed-text', 768),
+  'mxbai-embed-large': new LocalOllamaEmbeddingProvider('mxbai-embed-large', 1024),
 };
 
 const customProviders: Map<string, EmbeddingProvider> = new Map();
@@ -262,8 +278,12 @@ export function registerEmbeddingProvider(provider: EmbeddingProvider): void {
 }
 
 export function getEmbeddingProvider(modelId?: string): EmbeddingProvider {
-  const id = modelId ?? process.env["HF_EMBED_MODEL"] ?? "BAAI/bge-m3";
-  return customProviders.get(id) ?? BUILTIN_PROVIDERS[id] ?? new HuggingFaceEmbeddingProvider(id, SCHEMA_VECTOR_DIM);
+  const id = modelId ?? process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+  return (
+    customProviders.get(id) ??
+    BUILTIN_PROVIDERS[id] ??
+    new HuggingFaceEmbeddingProvider(id, SCHEMA_VECTOR_DIM)
+  );
 }
 
 /**
@@ -280,10 +300,7 @@ export function listEmbeddingProviders(): Array<{
   schemaCompatible: boolean;
   normalisationApplied: boolean;
 }> {
-  const all = [
-    ...Object.values(BUILTIN_PROVIDERS),
-    ...Array.from(customProviders.values()),
-  ];
+  const all = [...Object.values(BUILTIN_PROVIDERS), ...Array.from(customProviders.values())];
   return all.map((p) => ({
     id: p.id,
     name: p.name,
@@ -300,10 +317,15 @@ export async function generateEmbedding(text: string, modelId?: string): Promise
   const provider = getEmbeddingProvider(modelId);
   const results = await provider.embed([text.slice(0, 8000)]);
   const raw = results[0] ?? [];
-  return raw.length === SCHEMA_VECTOR_DIM ? raw : normalizeEmbeddingDimension(raw, SCHEMA_VECTOR_DIM);
+  return raw.length === SCHEMA_VECTOR_DIM
+    ? raw
+    : normalizeEmbeddingDimension(raw, SCHEMA_VECTOR_DIM);
 }
 
-export async function generateEmbeddingsBatch(texts: string[], modelId?: string): Promise<number[][]> {
+export async function generateEmbeddingsBatch(
+  texts: string[],
+  modelId?: string,
+): Promise<number[][]> {
   const provider = getEmbeddingProvider(modelId);
   const batchSize = provider.maxBatchSize;
   const results: number[][] = [];
@@ -311,7 +333,11 @@ export async function generateEmbeddingsBatch(texts: string[], modelId?: string)
   for (let i = 0; i < texts.length; i += batchSize) {
     const batch = texts.slice(i, i + batchSize).map((t) => t.slice(0, 8000));
     const embeddings = await provider.embed(batch);
-    results.push(...embeddings.map((v) => (v.length === SCHEMA_VECTOR_DIM ? v : normalizeEmbeddingDimension(v, SCHEMA_VECTOR_DIM))));
+    results.push(
+      ...embeddings.map((v) =>
+        v.length === SCHEMA_VECTOR_DIM ? v : normalizeEmbeddingDimension(v, SCHEMA_VECTOR_DIM),
+      ),
+    );
   }
 
   return results;
@@ -320,11 +346,13 @@ export async function generateEmbeddingsBatch(texts: string[], modelId?: string)
 // ─── Vector Format Utilities ──────────────────────────────────────────────────
 
 export function toVectorLiteral(embedding: number[]): string {
-  return `[${embedding.join(",")}]`;
+  return `[${embedding.join(',')}]`;
 }
 
 export function cosineSimilarity(a: number[], b: number[]): number {
-  let dot = 0, magA = 0, magB = 0;
+  let dot = 0,
+    magA = 0,
+    magB = 0;
   const len = Math.min(a.length, b.length);
   for (let i = 0; i < len; i++) {
     dot += a[i]! * b[i]!;
@@ -338,7 +366,7 @@ export function cosineSimilarity(a: number[], b: number[]): number {
 // ─── Async Embedding Task Processor ──────────────────────────────────────────
 
 async function getPool() {
-  const { pool } = await import("@szl-holdings/db");
+  const { pool } = await import('@szl-holdings/db');
   return pool;
 }
 
@@ -365,21 +393,23 @@ export async function scheduleEmbeddingTask(task: EmbeddingTaskSpec): Promise<vo
       [
         task.targetTable,
         task.targetId,
-        task.contentColumn ?? "content",
-        task.targetColumn ?? "embedding",
+        task.contentColumn ?? 'content',
+        task.targetColumn ?? 'embedding',
         task.modelId ?? null,
         task.priority ?? 5,
       ],
     );
   } catch (err) {
-    console.warn("[embedding-pipeline] Failed to schedule task:", err);
+    console.warn('[embedding-pipeline] Failed to schedule task:', err);
     // Re-throw so callers (especially API route handlers) can return a proper error
     // response rather than silently reporting success on an enqueue failure.
     throw err;
   }
 }
 
-export async function processEmbeddingTasks(limit = 20): Promise<{ processed: number; failed: number }> {
+export async function processEmbeddingTasks(
+  limit = 20,
+): Promise<{ processed: number; failed: number }> {
   const pool = await getPool();
   let processed = 0;
   let failed = 0;
@@ -413,12 +443,21 @@ export async function processEmbeddingTasks(limit = 20): Promise<{ processed: nu
       try {
         const allowedEntry = ALLOWED_EMBED_TABLES[targetTable];
         if (!allowedEntry) {
-          await pool.query(`UPDATE embedding_tasks SET status = 'failed', error_message = 'Table not allowed' WHERE id = $1`, [taskId]);
+          await pool.query(
+            `UPDATE embedding_tasks SET status = 'failed', error_message = 'Table not allowed' WHERE id = $1`,
+            [taskId],
+          );
           failed++;
           continue;
         }
-        if (!allowedEntry.allowedContent.includes(contentColumn) || !allowedEntry.allowedTarget.includes(targetColumn)) {
-          await pool.query(`UPDATE embedding_tasks SET status = 'failed', error_message = 'Column not allowed' WHERE id = $1`, [taskId]);
+        if (
+          !allowedEntry.allowedContent.includes(contentColumn) ||
+          !allowedEntry.allowedTarget.includes(targetColumn)
+        ) {
+          await pool.query(
+            `UPDATE embedding_tasks SET status = 'failed', error_message = 'Column not allowed' WHERE id = $1`,
+            [taskId],
+          );
           failed++;
           continue;
         }
@@ -434,14 +473,20 @@ export async function processEmbeddingTasks(limit = 20): Promise<{ processed: nu
         );
 
         if (!contentResult.rows[0]) {
-          await pool.query(`UPDATE embedding_tasks SET status = 'failed', error_message = 'Row not found' WHERE id = $1`, [taskId]);
+          await pool.query(
+            `UPDATE embedding_tasks SET status = 'failed', error_message = 'Row not found' WHERE id = $1`,
+            [taskId],
+          );
           failed++;
           continue;
         }
 
         const content = contentResult.rows[0][safeContent] as string;
         if (!content) {
-          await pool.query(`UPDATE embedding_tasks SET status = 'failed', error_message = 'Empty content' WHERE id = $1`, [taskId]);
+          await pool.query(
+            `UPDATE embedding_tasks SET status = 'failed', error_message = 'Empty content' WHERE id = $1`,
+            [taskId],
+          );
           failed++;
           continue;
         }
@@ -456,13 +501,17 @@ export async function processEmbeddingTasks(limit = 20): Promise<{ processed: nu
           const currentAttempts = task.attempts as number;
           const maxAttempts = task.max_attempts as number;
           if (currentAttempts >= maxAttempts) {
-            console.error(`[embedding-pipeline] Task ${taskId} exhausted retries (${currentAttempts}/${maxAttempts}) on zero vector — marking failed`);
+            console.error(
+              `[embedding-pipeline] Task ${taskId} exhausted retries (${currentAttempts}/${maxAttempts}) on zero vector — marking failed`,
+            );
             await pool.query(
               `UPDATE embedding_tasks SET status = 'failed', error_message = 'Provider returned zero vector — retries exhausted' WHERE id = $1`,
               [taskId],
             );
           } else {
-            console.warn(`[embedding-pipeline] Zero embedding returned for task ${taskId} (attempt ${currentAttempts}/${maxAttempts}) — requeueing`);
+            console.warn(
+              `[embedding-pipeline] Zero embedding returned for task ${taskId} (attempt ${currentAttempts}/${maxAttempts}) — requeueing`,
+            );
             await pool.query(
               `UPDATE embedding_tasks SET status = 'pending', error_message = 'Provider returned zero vector — will retry' WHERE id = $1`,
               [taskId],
@@ -480,13 +529,13 @@ export async function processEmbeddingTasks(limit = 20): Promise<{ processed: nu
         );
 
         // Persist model provenance on tables that track it (kg_entities, rag_knowledge_chunks).
-        const effectiveModelId = modelId ?? process.env["HF_EMBED_MODEL"] ?? "BAAI/bge-m3";
-        if (safeTable === "kg_entities") {
+        const effectiveModelId = modelId ?? process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+        if (safeTable === 'kg_entities') {
           await pool.query(
             `UPDATE kg_entities SET embedding_model = $1, embedding_at = NOW() WHERE id = $2`,
             [effectiveModelId, targetId],
           );
-        } else if (safeTable === "rag_knowledge_chunks") {
+        } else if (safeTable === 'rag_knowledge_chunks') {
           await pool.query(
             `UPDATE rag_knowledge_chunks SET embedding_model = $1, embedding_at = NOW() WHERE id = $2`,
             [effectiveModelId, targetId],
@@ -520,7 +569,7 @@ export async function processEmbeddingTasks(limit = 20): Promise<{ processed: nu
       }
     }
   } catch (err) {
-    console.warn("[embedding-pipeline] Task processing failed:", err);
+    console.warn('[embedding-pipeline] Task processing failed:', err);
   }
 
   return { processed, failed };
@@ -530,16 +579,19 @@ export async function processEmbeddingTasks(limit = 20): Promise<{ processed: nu
 
 // NOTE: rag_knowledge_documents is intentionally excluded — it has no vector column.
 // Only tables with a vector(1024) column may appear in this allowlist.
-const ALLOWED_EMBED_TABLES: Record<string, { idCol: string; allowedContent: string[]; allowedTarget: string[] }> = {
+const ALLOWED_EMBED_TABLES: Record<
+  string,
+  { idCol: string; allowedContent: string[]; allowedTarget: string[] }
+> = {
   kg_entities: {
-    idCol: "id",
-    allowedContent: ["name", "description"],
-    allowedTarget: ["embedding"],
+    idCol: 'id',
+    allowedContent: ['name', 'description'],
+    allowedTarget: ['embedding'],
   },
   rag_knowledge_chunks: {
-    idCol: "id",
-    allowedContent: ["content"],
-    allowedTarget: ["embedding"],
+    idCol: 'id',
+    allowedContent: ['content'],
+    allowedTarget: ['embedding'],
   },
   // rag_knowledge_documents intentionally removed — no vector column exists on that table.
 };
@@ -553,9 +605,13 @@ function assertAllowedIdentifier(table: string, contentCol: string, targetCol: s
   const entry = ALLOWED_EMBED_TABLES[table];
   if (!entry) throw new Error(`[embedding-pipeline] Table not in allowlist: ${table}`);
   if (!entry.allowedContent.includes(contentCol))
-    throw new Error(`[embedding-pipeline] Content column not in allowlist: ${contentCol} for ${table}`);
+    throw new Error(
+      `[embedding-pipeline] Content column not in allowlist: ${contentCol} for ${table}`,
+    );
   if (!entry.allowedTarget.includes(targetCol))
-    throw new Error(`[embedding-pipeline] Target column not in allowlist: ${targetCol} for ${table}`);
+    throw new Error(
+      `[embedding-pipeline] Target column not in allowlist: ${targetCol} for ${table}`,
+    );
 }
 
 export async function batchEmbedTable(
@@ -578,7 +634,7 @@ export async function batchEmbedTable(
   let lastId: string | null = null;
 
   while (true) {
-    const cursorClause = lastId ? `AND ${safeId} > $2` : "";
+    const cursorClause = lastId ? `AND ${safeId} > $2` : '';
     const params = lastId ? [batchSize, lastId] : [batchSize];
     const result = await pool.query(
       `SELECT ${safeId}, ${safeContent} FROM ${safeTable}
@@ -592,7 +648,9 @@ export async function batchEmbedTable(
     if (result.rows.length === 0) break;
 
     lastId = result.rows[result.rows.length - 1][safeId] as string;
-    const texts = result.rows.map((r: Record<string, unknown>) => String(r[safeContent] ?? "").slice(0, 8000));
+    const texts = result.rows.map((r: Record<string, unknown>) =>
+      String(r[safeContent] ?? '').slice(0, 8000),
+    );
     const ids = result.rows.map((r: Record<string, unknown>) => r[safeId]);
 
     try {
@@ -639,24 +697,31 @@ export async function scheduleReembeddingOnModelChange(options: {
   priority?: number;
 }): Promise<ReembeddingStatus[]> {
   const pool = await getPool();
-  const modelId = options.targetModelId ?? process.env["HF_EMBED_MODEL"] ?? "BAAI/bge-m3";
+  const modelId = options.targetModelId ?? process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
   const priority = options.priority ?? 8;
 
   const watchedTables = options.tables ?? [
-    { table: "kg_entities", contentColumn: "description", targetColumn: "embedding" },
-    { table: "rag_knowledge_chunks", contentColumn: "content", targetColumn: "embedding" },
+    { table: 'kg_entities', contentColumn: 'description', targetColumn: 'embedding' },
+    { table: 'rag_knowledge_chunks', contentColumn: 'content', targetColumn: 'embedding' },
   ];
 
   const results: ReembeddingStatus[] = [];
 
-  for (const { table, contentColumn, targetColumn = "embedding" } of watchedTables) {
+  for (const { table, contentColumn, targetColumn = 'embedding' } of watchedTables) {
     const entry = ALLOWED_EMBED_TABLES[table];
     if (!entry) {
-      console.warn(`[embedding-pipeline] scheduleReembeddingOnModelChange: table ${table} not in allowlist, skipping`);
+      console.warn(
+        `[embedding-pipeline] scheduleReembeddingOnModelChange: table ${table} not in allowlist, skipping`,
+      );
       continue;
     }
-    if (!entry.allowedContent.includes(contentColumn) || !entry.allowedTarget.includes(targetColumn)) {
-      console.warn(`[embedding-pipeline] scheduleReembeddingOnModelChange: columns not in allowlist for ${table}, skipping`);
+    if (
+      !entry.allowedContent.includes(contentColumn) ||
+      !entry.allowedTarget.includes(targetColumn)
+    ) {
+      console.warn(
+        `[embedding-pipeline] scheduleReembeddingOnModelChange: columns not in allowlist for ${table}, skipping`,
+      );
       continue;
     }
 
@@ -666,7 +731,7 @@ export async function scheduleReembeddingOnModelChange(options: {
     // Both kg_entities and rag_knowledge_chunks now track embedding_model provenance.
     // We re-queue any row whose embedding_model is NULL (never embedded) or differs
     // from the target model (stale, produced by an older model).
-    const hasModelCol = safeTable === "kg_entities" || safeTable === "rag_knowledge_chunks";
+    const hasModelCol = safeTable === 'kg_entities' || safeTable === 'rag_knowledge_chunks';
     const whereClause = hasModelCol
       ? `WHERE ${contentColumn} IS NOT NULL AND ${contentColumn} != '' AND (embedding_model IS NULL OR embedding_model != $1)`
       : `WHERE ${contentColumn} IS NOT NULL AND ${contentColumn} != '' AND ${targetColumn} IS NULL`;
@@ -714,7 +779,9 @@ export async function scheduleReembeddingOnModelChange(options: {
     });
 
     if (scheduled > 0) {
-      console.info(`[embedding-pipeline] Scheduled ${scheduled} re-embedding tasks for ${safeTable} → model=${modelId}`);
+      console.info(
+        `[embedding-pipeline] Scheduled ${scheduled} re-embedding tasks for ${safeTable} → model=${modelId}`,
+      );
     }
   }
 

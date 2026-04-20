@@ -5,19 +5,19 @@
  */
 
 import {
+  type CorrelationLink,
+  type DecisionRecord,
   db,
   decisionRecordsTable,
-  type DecisionRecord,
-  type CorrelationLink,
-} from "@szl-holdings/db";
-import { and, eq } from "drizzle-orm";
-import { getEventsForWorkflowRun } from "./correlation";
+} from '@szl-holdings/db';
+import { and, eq } from 'drizzle-orm';
+import { getEventsForWorkflowRun } from './correlation';
 
 export interface Workflow360TimelineEntry {
   occurredAt: Date;
-  primitive: CorrelationLink["primitive"];
+  primitive: CorrelationLink['primitive'];
   primitiveId: string;
-  domain: CorrelationLink["domain"];
+  domain: CorrelationLink['domain'];
   entityType: string | null;
   entityId: string | null;
   metadata: Record<string, unknown> | null;
@@ -34,7 +34,7 @@ export interface Workflow360View {
   /** All decision records associated with this workflow run, oldest-first. */
   decisionRecords: DecisionRecord[];
   totalEvents: number;
-  primitivesTouched: CorrelationLink["primitive"][];
+  primitivesTouched: CorrelationLink['primitive'][];
   timeline: Workflow360TimelineEntry[];
 }
 

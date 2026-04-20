@@ -1,7 +1,7 @@
-import { useState, createContext, useContext, useCallback, type ReactNode } from "react";
-import { cn } from "./utils";
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+import { cn } from './utils';
 
-export type StakeholderView = "executive" | "investor" | "operator" | "client";
+export type StakeholderView = 'executive' | 'investor' | 'operator' | 'client';
 
 export interface StakeholderLensConfig {
   label: string;
@@ -12,28 +12,28 @@ export interface StakeholderLensConfig {
 
 export const STAKEHOLDER_VIEWS: Record<StakeholderView, StakeholderLensConfig> = {
   executive: {
-    label: "Executive",
-    description: "Strategic KPIs, trends & summaries",
-    icon: "👔",
-    color: "#8b5cf6",
+    label: 'Executive',
+    description: 'Strategic KPIs, trends & summaries',
+    icon: '👔',
+    color: '#8b5cf6',
   },
   investor: {
-    label: "Investor",
-    description: "Compliance, benchmarks & risk-adjusted returns",
-    icon: "📊",
-    color: "#3b82f6",
+    label: 'Investor',
+    description: 'Compliance, benchmarks & risk-adjusted returns',
+    icon: '📊',
+    color: '#3b82f6',
   },
   operator: {
-    label: "Operator",
-    description: "Full granularity, alerts & action queues",
-    icon: "⚙️",
-    color: "#10b981",
+    label: 'Operator',
+    description: 'Full granularity, alerts & action queues',
+    icon: '⚙️',
+    color: '#10b981',
   },
   client: {
-    label: "Client",
-    description: "Simplified progress & deliverables",
-    icon: "👤",
-    color: "#f59e0b",
+    label: 'Client',
+    description: 'Simplified progress & deliverables',
+    icon: '👤',
+    color: '#f59e0b',
   },
 };
 
@@ -44,7 +44,7 @@ interface StakeholderLensContextType {
 }
 
 const StakeholderLensContext = createContext<StakeholderLensContextType>({
-  view: "operator",
+  view: 'operator',
   setView: () => {},
   config: STAKEHOLDER_VIEWS.operator,
 });
@@ -55,7 +55,7 @@ export function useStakeholderLens() {
 
 export function StakeholderLensProvider({
   children,
-  defaultView = "operator",
+  defaultView = 'operator',
 }: {
   children: ReactNode;
   defaultView?: StakeholderView;
@@ -63,9 +63,7 @@ export function StakeholderLensProvider({
   const [view, setView] = useState<StakeholderView>(defaultView);
 
   return (
-    <StakeholderLensContext.Provider
-      value={{ view, setView, config: STAKEHOLDER_VIEWS[view] }}
-    >
+    <StakeholderLensContext.Provider value={{ view, setView, config: STAKEHOLDER_VIEWS[view] }}>
       {children}
     </StakeholderLensContext.Provider>
   );
@@ -86,7 +84,7 @@ export function StakeholderLensSwitcher({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-white/10 hover:border-white/20 transition-colors text-xs"
@@ -105,21 +103,29 @@ export function StakeholderLensSwitcher({
               ([key, cfg]) => (
                 <button
                   key={key}
-                  onClick={() => { setView(key); setOpen(false); }}
+                  onClick={() => {
+                    setView(key);
+                    setOpen(false);
+                  }}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-white/5 transition-colors",
-                    view === key && "bg-white/5",
+                    'w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-white/5 transition-colors',
+                    view === key && 'bg-white/5',
                   )}
                 >
                   <span className="text-base">{cfg.icon}</span>
                   <div>
-                    <div className="text-xs font-medium" style={{ color: view === key ? cfg.color : "rgba(255,255,255,0.7)" }}>
+                    <div
+                      className="text-xs font-medium"
+                      style={{ color: view === key ? cfg.color : 'rgba(255,255,255,0.7)' }}
+                    >
                       {cfg.label}
                     </div>
                     <div className="text-[10px] text-white/35">{cfg.description}</div>
                   </div>
                   {view === key && (
-                    <span className="ml-auto text-[10px]" style={{ color: cfg.color }}>●</span>
+                    <span className="ml-auto text-[10px]" style={{ color: cfg.color }}>
+                      ●
+                    </span>
                   )}
                 </button>
               ),

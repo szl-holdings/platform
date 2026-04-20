@@ -1,4 +1,4 @@
-import type { AttributionTouchpoint, AttributionResult, AttributionModel } from "./types.js";
+import type { AttributionModel, AttributionResult, AttributionTouchpoint } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Attribution Engine — Multi-touch attribution modeling
@@ -8,14 +8,14 @@ export function computeAttribution(
   touchpoints: AttributionTouchpoint[],
   outcomeType: string,
   outcomeValue: number | undefined,
-  model: AttributionModel
+  model: AttributionModel,
 ): AttributionResult {
   const sorted = [...touchpoints].sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
 
   if (sorted.length === 0) {
     return {
-      journeyId: "",
-      entityId: "",
+      journeyId: '',
+      entityId: '',
       outcomeType,
       ...(outcomeValue !== undefined ? { outcomeValue } : {}),
       model,
@@ -51,29 +51,29 @@ function allocateCredit(touchpoints: AttributionTouchpoint[], model: Attribution
   if (n === 0) return [];
 
   switch (model) {
-    case "first_touch": {
+    case 'first_touch': {
       return touchpoints.map((_, i) => (i === 0 ? 1 : 0));
     }
 
-    case "last_touch": {
+    case 'last_touch': {
       return touchpoints.map((_, i) => (i === n - 1 ? 1 : 0));
     }
 
-    case "linear": {
+    case 'linear': {
       const credit = 1 / n;
       return touchpoints.map(() => credit);
     }
 
-    case "time_decay": {
+    case 'time_decay': {
       const halfLifeDays = 7;
       const now = touchpoints[n - 1]!.occurredAt.getTime();
-      const rawWeights = touchpoints.map(tp => {
+      const rawWeights = touchpoints.map((tp) => {
         const ageMs = now - tp.occurredAt.getTime();
         const ageDays = ageMs / (1000 * 60 * 60 * 24);
-        return Math.pow(0.5, ageDays / halfLifeDays);
+        return 0.5 ** (ageDays / halfLifeDays);
       });
       const totalWeight = rawWeights.reduce((s, w) => s + w, 0);
-      return rawWeights.map(w => (totalWeight > 0 ? w / totalWeight : 1 / n));
+      return rawWeights.map((w) => (totalWeight > 0 ? w / totalWeight : 1 / n));
     }
   }
 }
@@ -83,7 +83,7 @@ function allocateCredit(touchpoints: AttributionTouchpoint[], model: Attribution
 // ---------------------------------------------------------------------------
 
 export function groupTouchpointsByJourney(
-  touchpoints: AttributionTouchpoint[]
+  touchpoints: AttributionTouchpoint[],
 ): Map<string, AttributionTouchpoint[]> {
   const map = new Map<string, AttributionTouchpoint[]>();
   for (const tp of touchpoints) {
@@ -108,9 +108,7 @@ export interface AttributionChannelSummary {
   totalOutcomeValue: number;
 }
 
-export function buildAttributionReport(
-  results: AttributionResult[]
-): AttributionChannelSummary[] {
+export function buildAttributionReport(results: AttributionResult[]): AttributionChannelSummary[] {
   const channelMap = new Map<string, AttributionChannelSummary>();
 
   const getOrCreate = (channel: string): AttributionChannelSummary => {
@@ -135,21 +133,21 @@ export function buildAttributionReport(
     const tps = result.touchpoints;
 
     tps.forEach((tp, idx) => {
-      const ch = tp.channel ?? "unknown";
+      const ch = tp.channel ?? 'unknown';
       const summary = getOrCreate(ch);
 
       if (idx === 0) summary.firstTouchCount += 1;
       if (idx === tps.length - 1) summary.lastTouchCount += 1;
 
-      if (result.model === "linear") {
+      if (result.model === 'linear') {
         summary.linearCredit += tp.creditPercent / 100;
-      } else if (result.model === "time_decay") {
+      } else if (result.model === 'time_decay') {
         summary.timeDecayCredit += tp.creditPercent / 100;
       }
     });
 
     // Accumulate outcomes to the primary channel (last touch)
-    const lastChannel = tps[tps.length - 1]?.channel ?? "unknown";
+    const lastChannel = tps[tps.length - 1]?.channel ?? 'unknown';
     const lastSummary = getOrCreate(lastChannel);
     lastSummary.totalOutcomes += 1;
     lastSummary.totalOutcomeValue += outcome;
@@ -166,18 +164,18 @@ export function linkOutcomeToJourney(
   outcomeEntityId: string,
   outcomeEntityType: string,
   allTouchpoints: AttributionTouchpoint[],
-  windowHours: number = 720
+  windowHours: number = 720,
 ): AttributionTouchpoint[] {
   const outcomeTimestamp = new Date();
   const cutoff = new Date(outcomeTimestamp.getTime() - windowHours * 60 * 60 * 1000);
 
   return allTouchpoints
     .filter(
-      tp =>
+      (tp) =>
         tp.entityId === outcomeEntityId &&
         tp.entityType === outcomeEntityType &&
         tp.occurredAt >= cutoff &&
-        tp.occurredAt <= outcomeTimestamp
+        tp.occurredAt <= outcomeTimestamp,
     )
     .sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
 }

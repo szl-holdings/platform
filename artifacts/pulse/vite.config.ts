@@ -1,42 +1,53 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import fs from "fs";
-import { PROXY_ROUTES, CANONICAL_FALLBACK_PORT } from "../../packages/proxy-routes.js";
+import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import fs from 'fs';
+import path from 'path';
+import { defineConfig } from 'vite';
+import { CANONICAL_FALLBACK_PORT, PROXY_ROUTES } from '../../packages/proxy-routes.js';
 
-process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
+process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
 const port = Number(process.env.VITE_PORT) || 5201;
-const basePath = process.env.BASE_PATH || "/pulse/";
+const basePath = process.env.BASE_PATH || '/pulse/';
 
 // Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
 const SHARED_PROXY_PORT = 9090;
 
 function sharedProxyPlugin() {
   return {
-    name: "shared-proxy",
-    apply: "serve" as const,
+    name: 'shared-proxy',
+    apply: 'serve' as const,
     async configureServer() {
-      const http = await import("http");
+      const http = await import('http');
       const proxyServer = http.createServer((req, res) => {
-        const url = req.url || "/";
-        if (url === "/__health") {
-          res.writeHead(200, { "Content-Type": "text/plain" });
-          res.end("OK");
+        const url = req.url || '/';
+        if (url === '/__health') {
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end('OK');
           return;
         }
-        const normalizedUrl = url.endsWith("/") ? url : url + "/";
+        const normalizedUrl = url.endsWith('/') ? url : url + '/';
         const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
         const targetPort = route ? route.port : CANONICAL_FALLBACK_PORT;
         const upstream = http.request(
-          { hostname: "127.0.0.1", port: targetPort, path: url, method: req.method,
-            headers: { ...req.headers, host: "localhost:" + targetPort } },
-          (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
+          {
+            hostname: '127.0.0.1',
+            port: targetPort,
+            path: url,
+            method: req.method,
+            headers: { ...req.headers, host: 'localhost:' + targetPort },
+          },
+          (upRes) => {
+            res.writeHead(upRes.statusCode || 200, upRes.headers);
+            upRes.pipe(res, { end: true });
+          },
         );
-        upstream.on("error", () => {
-          if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("Upstream not ready on port " + targetPort); }
+        upstream.on('error', () => {
+          if (!res.headersSent) {
+            res.writeHead(503, { 'Content-Type': 'text/plain' });
+            res.end('Upstream not ready on port ' + targetPort);
+          }
         });
         req.pipe(upstream, { end: true });
       });
@@ -48,12 +59,14 @@ function sharedProxyPlugin() {
             resolve();
           }
         };
-        proxyServer.once("error", (err: NodeJS.ErrnoException) => {
-          console.warn("[shared-proxy] Bind error:", err.code);
+        proxyServer.once('error', (err: NodeJS.ErrnoException) => {
+          console.warn('[shared-proxy] Bind error:', err.code);
           finish();
         });
-        proxyServer.listen({ port: SHARED_PROXY_PORT, host: "::", reusePort: true }, () => {
-          console.log("[shared-proxy] Listening on port " + SHARED_PROXY_PORT + " (reusePort, dual-stack)");
+        proxyServer.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, () => {
+          console.log(
+            '[shared-proxy] Listening on port ' + SHARED_PROXY_PORT + ' (reusePort, dual-stack)',
+          );
           finish();
         });
       });
@@ -61,44 +74,44 @@ function sharedProxyPlugin() {
   };
 }
 
-const libRoot = path.resolve(import.meta.dirname, "../../lib");
+const libRoot = path.resolve(import.meta.dirname, '../../lib');
+const packagesRoot = path.resolve(import.meta.dirname, '../../packages');
 
 interface AliasEntry {
   find: string | RegExp;
   replacement: string;
 }
 
-function buildWorkspaceAliases(): AliasEntry[] {
-  const aliases: AliasEntry[] = [];
-  if (!fs.existsSync(libRoot)) return aliases;
-
-  const libDirs = fs.readdirSync(libRoot, { withFileTypes: true })
-    .filter(d => d.isDirectory())
-    .map(d => d.name);
-
-  for (const dir of libDirs) {
-    const pkgPath = path.join(libRoot, dir, "package.json");
+function scanDirForAliases(rootDir: string, aliases: AliasEntry[]): void {
+  if (!fs.existsSync(rootDir)) return;
+  const dirs = fs
+    .readdirSync(rootDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
+  for (const dir of dirs) {
+    const pkgPath = path.join(rootDir, dir, 'package.json');
     if (!fs.existsSync(pkgPath)) continue;
     try {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
       if (!pkg.name || !pkg.exports) continue;
-
       for (const [exportKey, exportValue] of Object.entries(pkg.exports)) {
-        if (typeof exportValue !== "string") continue;
-        const aliasKey = exportKey === "."
-          ? pkg.name
-          : `${pkg.name}/${exportKey.replace(/^\.\//, "")}`;
-        const aliasValue = path.join(libRoot, dir, exportValue);
-        const escapedKey = aliasKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        aliases.push({
-          find: new RegExp(`^${escapedKey}$`),
-          replacement: aliasValue,
-        });
+        if (typeof exportValue !== 'string') continue;
+        const aliasKey =
+          exportKey === '.' ? pkg.name : `${pkg.name}/${exportKey.replace(/^\.\//, '')}`;
+        const aliasValue = path.join(rootDir, dir, exportValue);
+        const escapedKey = aliasKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        aliases.push({ find: new RegExp(`^${escapedKey}$`), replacement: aliasValue });
       }
     } catch {
       // skip
     }
   }
+}
+
+function buildWorkspaceAliases(): AliasEntry[] {
+  const aliases: AliasEntry[] = [];
+  scanDirForAliases(libRoot, aliases);
+  scanDirForAliases(packagesRoot, aliases);
   return aliases;
 }
 
@@ -111,31 +124,28 @@ export default defineConfig({
     tailwindcss(),
     runtimeErrorOverlay(),
     sharedProxyPlugin(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
+    ...(process.env.NODE_ENV !== 'production' && process.env.REPL_ID !== undefined
       ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
+          await import('@replit/vite-plugin-cartographer').then((m) =>
             m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
+              root: path.resolve(import.meta.dirname, '..'),
             }),
           ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
+          await import('@replit/vite-plugin-dev-banner').then((m) => m.devBanner()),
         ]
       : []),
   ],
   resolve: {
     alias: [
-      { find: "@", replacement: path.resolve(import.meta.dirname, "src") },
+      { find: '@', replacement: path.resolve(import.meta.dirname, 'src') },
       ...workspaceAliases,
     ],
-    dedupe: ["react", "react-dom"],
+    dedupe: ['react', 'react-dom'],
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
-    sourcemap: "hidden",
+    outDir: path.resolve(import.meta.dirname, 'dist/public'),
+    sourcemap: 'hidden',
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
@@ -160,16 +170,16 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: "0.0.0.0",
+    host: '0.0.0.0',
     allowedHosts: true,
     hmr: { clientPort: 443 },
     fs: {
       strict: false,
-      deny: ["**/.*"],
+      deny: ['**/.*'],
     },
     proxy: {
-      "/api": {
-        target: "http://localhost:8080",
+      '/api': {
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       },
@@ -177,7 +187,7 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "0.0.0.0",
+    host: '0.0.0.0',
     allowedHosts: true,
   },
 });

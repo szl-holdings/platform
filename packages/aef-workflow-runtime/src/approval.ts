@@ -1,13 +1,13 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-import type { ApprovalRequest } from "./types.js";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import type { ApprovalRequest } from './types.js';
 
 export interface ApprovalStore {
   create(request: ApprovalRequest): void;
   get(approvalId: string): ApprovalRequest | undefined;
   resolve(
     approvalId: string,
-    decision: "approved" | "rejected",
+    decision: 'approved' | 'rejected',
     operatorId: string,
     rationale?: string,
   ): ApprovalRequest;
@@ -31,7 +31,7 @@ export class InMemoryApprovalStore implements ApprovalStore {
 
   resolve(
     approvalId: string,
-    decision: "approved" | "rejected",
+    decision: 'approved' | 'rejected',
     operatorId: string,
     rationale?: string,
   ): ApprovalRequest {
@@ -39,10 +39,8 @@ export class InMemoryApprovalStore implements ApprovalStore {
     if (!existing) {
       throw new Error(`Approval request not found: ${approvalId}`);
     }
-    if (existing.decision !== "pending") {
-      throw new Error(
-        `Approval ${approvalId} is already resolved: ${existing.decision}`,
-      );
+    if (existing.decision !== 'pending') {
+      throw new Error(`Approval ${approvalId} is already resolved: ${existing.decision}`);
     }
 
     const resolved: ApprovalRequest = {
@@ -59,9 +57,7 @@ export class InMemoryApprovalStore implements ApprovalStore {
   list(workflowId?: string): ApprovalRequest[] {
     const all = Array.from(this.store.values());
     if (workflowId) {
-      return all
-        .filter((r) => r.workflowId === workflowId)
-        .map((r) => ({ ...r }));
+      return all.filter((r) => r.workflowId === workflowId).map((r) => ({ ...r }));
     }
     return all.map((r) => ({ ...r }));
   }
@@ -77,7 +73,7 @@ export function createApprovalRequest(
     workflowId,
     kind,
     requestedAt: new Date().toISOString(),
-    decision: "pending",
+    decision: 'pending',
     context,
   };
 }
@@ -94,7 +90,7 @@ export class FileApprovalStore implements ApprovalStore {
   private loadFromDisk(): Map<string, ApprovalRequest> {
     try {
       if (!existsSync(this.filePath)) return new Map();
-      const raw = readFileSync(this.filePath, "utf8");
+      const raw = readFileSync(this.filePath, 'utf8');
       const entries = JSON.parse(raw) as Array<[string, ApprovalRequest]>;
       return new Map(entries);
     } catch {
@@ -108,7 +104,7 @@ export class FileApprovalStore implements ApprovalStore {
       writeFileSync(
         this.filePath,
         JSON.stringify(Array.from(this.data.entries()), null, 2),
-        "utf8",
+        'utf8',
       );
     } catch {
       // best-effort flush
@@ -130,7 +126,7 @@ export class FileApprovalStore implements ApprovalStore {
 
   resolve(
     approvalId: string,
-    decision: "approved" | "rejected",
+    decision: 'approved' | 'rejected',
     operatorId: string,
     rationale?: string,
   ): ApprovalRequest {
@@ -138,7 +134,7 @@ export class FileApprovalStore implements ApprovalStore {
     if (!existing) {
       throw new Error(`Approval request not found: ${approvalId}`);
     }
-    if (existing.decision !== "pending") {
+    if (existing.decision !== 'pending') {
       throw new Error(`Approval ${approvalId} is already resolved: ${existing.decision}`);
     }
     const resolved: ApprovalRequest = {

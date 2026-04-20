@@ -1,19 +1,19 @@
-import { getApiBase } from "@/lib/apiClient";
-import { cacheSet, cacheGetStale } from "@/lib/cache";
+import { getApiBase } from '@/lib/apiClient';
+import { cacheGetStale, cacheSet } from '@/lib/cache';
 
-export { cacheSet, cacheGetStale };
+export { cacheGetStale, cacheSet };
 
 export const CACHE_KEYS = {
-  VESSELS: "fleet_cache_vessels",
-  ALERTS: "fleet_cache_alerts",
-  VOYAGE_ECONOMICS: "fleet_cache_voyage_economics",
-  POSITIONS: "fleet_cache_positions",
-  ECONOMICS: "fleet_cache_economics",
-  FLEET: "fleet_cache_fleet",
-  INCIDENTS: "fleet_cache_incidents",
-  FINDINGS: "fleet_cache_findings",
-  SIGNALS: "fleet_cache_signals",
-  EXCEPTIONS: "fleet_cache_exceptions",
+  VESSELS: 'fleet_cache_vessels',
+  ALERTS: 'fleet_cache_alerts',
+  VOYAGE_ECONOMICS: 'fleet_cache_voyage_economics',
+  POSITIONS: 'fleet_cache_positions',
+  ECONOMICS: 'fleet_cache_economics',
+  FLEET: 'fleet_cache_fleet',
+  INCIDENTS: 'fleet_cache_incidents',
+  FINDINGS: 'fleet_cache_findings',
+  SIGNALS: 'fleet_cache_signals',
+  EXCEPTIONS: 'fleet_cache_exceptions',
 } as const;
 
 export interface Vessel {
@@ -23,7 +23,7 @@ export interface Vessel {
   mmsi: string;
   flag: string;
   vesselType: string;
-  status: "underway" | "anchored" | "moored" | "drifting" | "unknown";
+  status: 'underway' | 'anchored' | 'moored' | 'drifting' | 'unknown';
   lat: number;
   lon: number;
   latitude?: string;
@@ -44,16 +44,30 @@ export interface FleetException {
   id: string;
   vesselId: string;
   vesselName: string;
-  type: "speed" | "route_deviation" | "zone_entry" | "communication_loss" | "ais_gap" | "weather" | "other";
-  exceptionType: "speed" | "route_deviation" | "zone_entry" | "communication_loss" | "ais_gap" | "weather" | "other";
-  severity: "critical" | "high" | "medium" | "low";
+  type:
+    | 'speed'
+    | 'route_deviation'
+    | 'zone_entry'
+    | 'communication_loss'
+    | 'ais_gap'
+    | 'weather'
+    | 'other';
+  exceptionType:
+    | 'speed'
+    | 'route_deviation'
+    | 'zone_entry'
+    | 'communication_loss'
+    | 'ais_gap'
+    | 'weather'
+    | 'other';
+  severity: 'critical' | 'high' | 'medium' | 'low';
   title: string;
   description: string;
   lat?: number;
   lon?: number;
   createdAt: string;
   resolvedAt?: string;
-  status: "active" | "acknowledged" | "resolved";
+  status: 'active' | 'acknowledged' | 'resolved';
   estimatedImpactUsd?: string;
   detectedAt?: string;
 }
@@ -103,8 +117,8 @@ export interface VoyageEconomics {
 }
 
 async function getHeaders(token?: string | null): Promise<Record<string, string>> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
 
@@ -112,51 +126,51 @@ export const api = {
   async getVessels(token?: string | null): Promise<Vessel[]> {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels`, { headers });
-    if (!res.ok) throw new Error("Failed to fetch vessels");
+    if (!res.ok) throw new Error('Failed to fetch vessels');
     return res.json();
   },
 
   async getVessel(id: string, token?: string | null): Promise<Vessel> {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels/${id}`, { headers });
-    if (!res.ok) throw new Error("Failed to fetch vessel");
+    if (!res.ok) throw new Error('Failed to fetch vessel');
     return res.json();
   },
 
   async getExceptions(token?: string | null): Promise<FleetException[]> {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels/exceptions`, { headers });
-    if (!res.ok) throw new Error("Failed to fetch exceptions");
+    if (!res.ok) throw new Error('Failed to fetch exceptions');
     return res.json();
   },
 
   async getVoyageEconomics(vesselId: string, token?: string | null): Promise<VoyageEconomics> {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels/${vesselId}/economics`, { headers });
-    if (!res.ok) throw new Error("Failed to fetch voyage economics");
+    if (!res.ok) throw new Error('Failed to fetch voyage economics');
     return res.json();
   },
 
   async voyageEconomics(token?: string | null): Promise<VoyageEconomics[]> {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels/economics`, { headers });
-    if (!res.ok) throw new Error("Failed to fetch voyage economics");
+    if (!res.ok) throw new Error('Failed to fetch voyage economics');
     return res.json();
   },
 
   async economicsAnalytics(token?: string | null): Promise<Record<string, unknown>> {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels/economics/analytics`, { headers });
-    if (!res.ok) throw new Error("Failed to fetch economics analytics");
+    if (!res.ok) throw new Error('Failed to fetch economics analytics');
     return res.json();
   },
 
   async acknowledgeException(id: string, token?: string | null): Promise<void> {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels/exceptions/${id}/acknowledge`, {
-      method: "POST",
+      method: 'POST',
       headers,
     });
-    if (!res.ok) throw new Error("Failed to acknowledge exception");
+    if (!res.ok) throw new Error('Failed to acknowledge exception');
   },
 };

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 /**
  * Terra Portfolio Module Seeds
@@ -12,10 +12,10 @@ import { pgTable, text, timestamp, jsonb } from "drizzle-orm/pg-core";
  * the data can be edited, audited, and rotated without redeploying.
  * The boot seeder populates rows on first launch when missing.
  */
-export const terraPortfolioModulesTable = pgTable("terra_portfolio_modules", {
-  module: text("module").primaryKey(),
-  payload: jsonb("payload").notNull(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const terraPortfolioModulesTable = pgTable('terra_portfolio_modules', {
+  module: text('module').primaryKey(),
+  payload: jsonb('payload').notNull(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 export type TerraPortfolioModuleRow = typeof terraPortfolioModulesTable.$inferSelect;

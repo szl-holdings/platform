@@ -213,7 +213,10 @@
               }
             }
           },
-          "deadlines": { "type": "array", "items": { "$ref": "#/components/schemas/DeadlineSummary" } },
+          "deadlines": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DeadlineSummary" }
+          },
           "openApprovals": { "type": "integer" },
           "advisory": { "type": "string" }
         }
@@ -221,7 +224,10 @@
       "DeadlineList": {
         "type": "object",
         "properties": {
-          "deadlines": { "type": "array", "items": { "$ref": "#/components/schemas/DeadlineSummary" } },
+          "deadlines": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DeadlineSummary" }
+          },
           "overdue": { "type": "integer" },
           "dueSoon": { "type": "integer" }
         }

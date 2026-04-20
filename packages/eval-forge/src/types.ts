@@ -1,53 +1,53 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const EVAL_FORGE_VERSION = "1.0.0" as const;
+export const EVAL_FORGE_VERSION = '1.0.0' as const;
 
 export type EvalType =
-  | "prompt-eval"
-  | "model-routing"
-  | "verifier"
-  | "tool-reliability"
-  | "citation-fidelity"
-  | "memory-retrieval"
-  | "planning-quality"
-  | "reflection-quality"
-  | "autonomy-safety"
-  | "end-to-end-scenario";
+  | 'prompt-eval'
+  | 'model-routing'
+  | 'verifier'
+  | 'tool-reliability'
+  | 'citation-fidelity'
+  | 'memory-retrieval'
+  | 'planning-quality'
+  | 'reflection-quality'
+  | 'autonomy-safety'
+  | 'end-to-end-scenario';
 
 export const ALL_EVAL_TYPES: EvalType[] = [
-  "prompt-eval",
-  "model-routing",
-  "verifier",
-  "tool-reliability",
-  "citation-fidelity",
-  "memory-retrieval",
-  "planning-quality",
-  "reflection-quality",
-  "autonomy-safety",
-  "end-to-end-scenario",
+  'prompt-eval',
+  'model-routing',
+  'verifier',
+  'tool-reliability',
+  'citation-fidelity',
+  'memory-retrieval',
+  'planning-quality',
+  'reflection-quality',
+  'autonomy-safety',
+  'end-to-end-scenario',
 ];
 
 export type GraderType =
-  | "prompt-eval"
-  | "model-routing-eval"
-  | "verifier-eval"
-  | "tool-reliability"
-  | "citation-quality"
-  | "memory-retrieval"
-  | "planning-quality"
-  | "reflection-quality"
-  | "autonomy-safety"
-  | "scenario-eval"
-  | "agent-workflow-eval"
-  | "policy-adherence"
-  | "hallucination"
-  | "bias-safety"
-  | "latency-cost"
-  | "trace-grading"
-  | "human-review"
-  | "exact-match"
-  | "semantic-similarity"
-  | "custom";
+  | 'prompt-eval'
+  | 'model-routing-eval'
+  | 'verifier-eval'
+  | 'tool-reliability'
+  | 'citation-quality'
+  | 'memory-retrieval'
+  | 'planning-quality'
+  | 'reflection-quality'
+  | 'autonomy-safety'
+  | 'scenario-eval'
+  | 'agent-workflow-eval'
+  | 'policy-adherence'
+  | 'hallucination'
+  | 'bias-safety'
+  | 'latency-cost'
+  | 'trace-grading'
+  | 'human-review'
+  | 'exact-match'
+  | 'semantic-similarity'
+  | 'custom';
 
 export interface EvalCase {
   id: string;
@@ -57,7 +57,7 @@ export interface EvalCase {
   graderType: GraderType;
   input: Record<string, unknown>;
   groundTruth: Record<string, unknown>;
-  expectedOutcome?: "pass" | "fail";
+  expectedOutcome?: 'pass' | 'fail';
   policies?: string[];
   tags?: string[];
   isRedTeam?: boolean;
@@ -101,7 +101,7 @@ export interface EvalCaseResult {
   groundTruth: Record<string, unknown>;
   passed: boolean;
   score: number;
-  expectedOutcome: "pass" | "fail";
+  expectedOutcome: 'pass' | 'fail';
   latencyMs: number;
   tokensUsed: number;
   costUsd: number;
@@ -200,7 +200,7 @@ export interface EvalRunReport {
   totalTokensUsed: number;
   metrics: EvalForgeMetrics;
   hasRegression?: boolean;
-  regressionSeverity?: "none" | "minor" | "major" | "critical";
+  regressionSeverity?: 'none' | 'minor' | 'major' | 'critical';
   regressionNotes?: string[];
   improvementNotes?: string[];
   baselineRunId?: string;
@@ -220,7 +220,7 @@ export const EvalRunReportSummarySchema = z.object({
   passed: z.number(),
   failed: z.number(),
   hasRegression: z.boolean().optional(),
-  regressionSeverity: z.enum(["none", "minor", "major", "critical"]).optional(),
+  regressionSeverity: z.enum(['none', 'minor', 'major', 'critical']).optional(),
   runAt: z.string(),
   triggeredBy: z.string(),
 });

@@ -1,11 +1,11 @@
-import type { PlanGraph } from "./types.js";
-import { PlanNotFoundError } from "./types.js";
+import type { PlanGraph } from './types.js';
+import { PlanNotFoundError } from './types.js';
 
 export interface PlanStoreQuery {
   agentId?: string;
   sessionId?: string;
   workflowId?: string;
-  status?: PlanGraph["status"];
+  status?: PlanGraph['status'];
   parentPlanId?: string;
   /** Tenant scoping: only return plans whose `context.orgId` matches. */
   orgId?: string;
@@ -40,7 +40,7 @@ export class InMemoryPlanStore implements PlanStore {
     if (query.workflowId) items = items.filter((p) => p.context.workflowId === query.workflowId);
     if (query.status) items = items.filter((p) => p.status === query.status);
     if (query.parentPlanId) items = items.filter((p) => p.parentPlanId === query.parentPlanId);
-    if (query.orgId !== undefined) items = items.filter((p) => p.context["orgId"] === query.orgId);
+    if (query.orgId !== undefined) items = items.filter((p) => p.context['orgId'] === query.orgId);
     items.sort((a, b) => b.createdAt - a.createdAt);
     const total = items.length;
     const offset = query.offset ?? 0;
@@ -63,11 +63,21 @@ class MutablePlanStore implements PlanStore {
   setBackend(store: PlanStore): void {
     this.inner = store;
   }
-  put(plan: PlanGraph) { return this.inner.put(plan); }
-  get(planId: string) { return this.inner.get(planId); }
-  list(query?: PlanStoreQuery) { return this.inner.list(query ?? {}); }
-  delete(planId: string) { return this.inner.delete(planId); }
-  count() { return this.inner.count(); }
+  put(plan: PlanGraph) {
+    return this.inner.put(plan);
+  }
+  get(planId: string) {
+    return this.inner.get(planId);
+  }
+  list(query?: PlanStoreQuery) {
+    return this.inner.list(query ?? {});
+  }
+  delete(planId: string) {
+    return this.inner.delete(planId);
+  }
+  count() {
+    return this.inner.count();
+  }
 }
 
 export const defaultPlanStore = new MutablePlanStore(new InMemoryPlanStore());

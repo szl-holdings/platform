@@ -1,4 +1,4 @@
-import type { Signal, BusinessImpact, RankingWeights } from "./types.js";
+import type { BusinessImpact, RankingWeights, Signal } from './types.js';
 
 const URGENCY_SCORES: Record<string, number> = {
   routine: 0.2,
@@ -19,7 +19,11 @@ export function scoreBusinessImpact(impact: BusinessImpact): number {
   }
 
   const reputationalMap: Record<string, number> = {
-    none: 0, low: 0.1, medium: 0.3, high: 0.6, critical: 1.0,
+    none: 0,
+    low: 0.1,
+    medium: 0.3,
+    high: 0.6,
+    critical: 1.0,
   };
   if (impact.reputationalRisk) {
     score += reputationalMap[impact.reputationalRisk] ?? 0;
@@ -86,7 +90,7 @@ export function computePriorityScore(params: {
   const slaScore = signals.length > 0 ? scoreSlaProximity(signals[0]) : 0.1;
   const crossDomainScore = scoreCrossDomainRisk(
     businessImpact,
-    signals.map(s => s.domain)
+    signals.map((s) => s.domain),
   );
 
   const raw =

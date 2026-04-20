@@ -10,8 +10,6 @@
     "lib": ["es2022", "dom", "dom.iterable"],
     "types": ["node"]
   },
-  "references": [
-    { "path": "../db" }
-  ],
+  "references": [{ "path": "../db" }],
   "include": ["src"]
 }

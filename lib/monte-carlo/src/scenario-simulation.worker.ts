@@ -1,12 +1,12 @@
 /// <reference lib="webworker" />
 import {
-  runScenarioSimulation,
-  simulateScenarioShard,
   type MonteCarloResult,
+  runScenarioSimulation,
   type ScenarioShardSamples,
   type SimulationProgress,
-} from "./scenario-simulation.js";
-import { getScenarioById } from "./scenarios.js";
+  simulateScenarioShard,
+} from './scenario-simulation.js';
+import { getScenarioById } from './scenarios.js';
 
 export interface ScenarioSimulationRequest {
   requestId: number;
@@ -17,35 +17,35 @@ export interface ScenarioSimulationRequest {
    * caller can merge multiple shards from a worker pool. Defaults to "full"
    * which returns a complete {@link MonteCarloResult}.
    */
-  mode?: "full" | "shard";
+  mode?: 'full' | 'shard';
 }
 
 export type ScenarioSimulationResponse =
   | {
       requestId: number;
-      type: "progress";
+      type: 'progress';
       completed: number;
       total: number;
       validIterations: number;
     }
   | {
       requestId: number;
-      type: "result";
+      type: 'result';
       ok: true;
-      mode: "full";
+      mode: 'full';
       result: MonteCarloResult;
     }
   | {
       requestId: number;
-      type: "result";
+      type: 'result';
       ok: true;
-      mode: "shard";
+      mode: 'shard';
       shard: ScenarioShardSamples;
       durationMs: number;
     }
   | {
       requestId: number;
-      type: "error";
+      type: 'error';
       ok: false;
       error: string;
     };
@@ -55,19 +55,19 @@ const PROGRESS_THRESHOLD = 10_000;
 const ctx = self as unknown as DedicatedWorkerGlobalScope;
 
 function nowMs(): number {
-  return typeof performance !== "undefined" && typeof performance.now === "function"
+  return typeof performance !== 'undefined' && typeof performance.now === 'function'
     ? performance.now()
     : Date.now();
 }
 
-ctx.addEventListener("message", (event: MessageEvent<ScenarioSimulationRequest>) => {
+ctx.addEventListener('message', (event: MessageEvent<ScenarioSimulationRequest>) => {
   const { requestId, scenarioId, iterations, mode } = event.data;
   try {
     const scenario = getScenarioById(scenarioId);
     if (!scenario) {
       const response: ScenarioSimulationResponse = {
         requestId,
-        type: "error",
+        type: 'error',
         ok: false,
         error: `Unknown scenario: ${scenarioId}`,
       };
@@ -79,7 +79,7 @@ ctx.addEventListener("message", (event: MessageEvent<ScenarioSimulationRequest>)
       ? (p: SimulationProgress) => {
           const msg: ScenarioSimulationResponse = {
             requestId,
-            type: "progress",
+            type: 'progress',
             completed: p.completed,
             total: p.total,
             validIterations: p.validIterations,
@@ -88,15 +88,15 @@ ctx.addEventListener("message", (event: MessageEvent<ScenarioSimulationRequest>)
         }
       : undefined;
 
-    if (mode === "shard") {
+    if (mode === 'shard') {
       const start = nowMs();
       const shard = simulateScenarioShard(scenario, iterations, { onProgress });
       const durationMs = nowMs() - start;
       const response: ScenarioSimulationResponse = {
         requestId,
-        type: "result",
+        type: 'result',
         ok: true,
-        mode: "shard",
+        mode: 'shard',
         shard,
         durationMs,
       };
@@ -106,16 +106,16 @@ ctx.addEventListener("message", (event: MessageEvent<ScenarioSimulationRequest>)
     const result = runScenarioSimulation(scenario, iterations, { onProgress });
     const response: ScenarioSimulationResponse = {
       requestId,
-      type: "result",
+      type: 'result',
       ok: true,
-      mode: "full",
+      mode: 'full',
       result,
     };
     ctx.postMessage(response);
   } catch (err) {
     const response: ScenarioSimulationResponse = {
       requestId,
-      type: "error",
+      type: 'error',
       ok: false,
       error: err instanceof Error ? err.message : String(err),
     };

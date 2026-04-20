@@ -1,4 +1,4 @@
-import { getEnv, type Env } from "@szl-holdings/env";
+import { type Env, getEnv } from '@szl-holdings/env';
 
 export interface AzureServiceConfig {
   enabled: boolean;
@@ -12,7 +12,7 @@ function isAzureEnabled(envKey: keyof Env): boolean {
 
 export const azureKeyVault = {
   get enabled() {
-    return isAzureEnabled("AZURE_KEY_VAULT_URL");
+    return isAzureEnabled('AZURE_KEY_VAULT_URL');
   },
   get config(): AzureServiceConfig {
     return {
@@ -29,7 +29,7 @@ export const azureKeyVault = {
 
 export const azureBlobStorage = {
   get enabled() {
-    return isAzureEnabled("AZURE_STORAGE_CONNECTION_STRING");
+    return isAzureEnabled('AZURE_STORAGE_CONNECTION_STRING');
   },
   get config(): AzureServiceConfig {
     return {
@@ -39,24 +39,24 @@ export const azureBlobStorage = {
   },
   async uploadBlob(_container: string, _blobName: string, _data: Buffer): Promise<string | null> {
     if (!this.enabled) return null;
-    console.warn("[azure:blob-storage] uploadBlob — stub, returning null");
+    console.warn('[azure:blob-storage] uploadBlob — stub, returning null');
     return null;
   },
   async downloadBlob(_container: string, _blobName: string): Promise<Buffer | null> {
     if (!this.enabled) return null;
-    console.warn("[azure:blob-storage] downloadBlob — stub, returning null");
+    console.warn('[azure:blob-storage] downloadBlob — stub, returning null');
     return null;
   },
   async deleteBlob(_container: string, _blobName: string): Promise<boolean> {
     if (!this.enabled) return false;
-    console.warn("[azure:blob-storage] deleteBlob — stub, returning false");
+    console.warn('[azure:blob-storage] deleteBlob — stub, returning false');
     return false;
   },
 };
 
 export const azureRedis = {
   get enabled() {
-    return isAzureEnabled("AZURE_REDIS_CONNECTION_STRING");
+    return isAzureEnabled('AZURE_REDIS_CONNECTION_STRING');
   },
   get config(): AzureServiceConfig {
     return {
@@ -66,24 +66,24 @@ export const azureRedis = {
   },
   async get(_key: string): Promise<string | null> {
     if (!this.enabled) return null;
-    console.warn("[azure:redis] get — stub, returning null");
+    console.warn('[azure:redis] get — stub, returning null');
     return null;
   },
   async set(_key: string, _value: string, _ttlSeconds?: number): Promise<boolean> {
     if (!this.enabled) return false;
-    console.warn("[azure:redis] set — stub, returning false");
+    console.warn('[azure:redis] set — stub, returning false');
     return false;
   },
   async del(_key: string): Promise<boolean> {
     if (!this.enabled) return false;
-    console.warn("[azure:redis] del — stub, returning false");
+    console.warn('[azure:redis] del — stub, returning false');
     return false;
   },
 };
 
 export const azurePostgres = {
   get enabled() {
-    return isAzureEnabled("AZURE_PG_CONNECTION_STRING");
+    return isAzureEnabled('AZURE_PG_CONNECTION_STRING');
   },
   get config(): AzureServiceConfig {
     return {
@@ -93,14 +93,14 @@ export const azurePostgres = {
   },
   async query(_sql: string, _params?: unknown[]): Promise<unknown[] | null> {
     if (!this.enabled) return null;
-    console.warn("[azure:postgres] query — stub, returning null");
+    console.warn('[azure:postgres] query — stub, returning null');
     return null;
   },
 };
 
 export const azureAppInsights = {
   get enabled() {
-    return isAzureEnabled("AZURE_APP_INSIGHTS_CONNECTION_STRING");
+    return isAzureEnabled('AZURE_APP_INSIGHTS_CONNECTION_STRING');
   },
   get config(): AzureServiceConfig {
     return {
@@ -114,7 +114,7 @@ export const azureAppInsights = {
   },
   trackException(_error: Error): void {
     if (!this.enabled) return;
-    console.warn("[azure:app-insights] trackException — stub");
+    console.warn('[azure:app-insights] trackException — stub');
   },
   trackMetric(_name: string, _value: number): void {
     if (!this.enabled) return;

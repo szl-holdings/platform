@@ -6,8 +6,9 @@
  *  - Merge two nodes where one is discovered to be a duplicate, preserving
  *    provenance from both and fusing their confidence scores.
  */
-import type { GraphStore } from "./store.js";
-import type { ConstellationNode } from "./schema.js";
+
+import type { ConstellationNode } from './schema.js';
+import type { GraphStore } from './store.js';
 
 export interface ResolutionResult {
   canonical: ConstellationNode;
@@ -93,12 +94,10 @@ export function mergeNodes(
     ...(source.aliases ?? []).filter(
       (a) => !existingAliasKeys.has(`${a.aliasType}:${a.aliasValue}`),
     ),
-    { aliasType: "merged_from", aliasValue: source.id, isPrimary: false },
+    { aliasType: 'merged_from', aliasValue: source.id, isPrimary: false },
   ];
 
-  const mergedTags = Array.from(
-    new Set([...(target.tags ?? []), ...(source.tags ?? [])]),
-  );
+  const mergedTags = Array.from(new Set([...(target.tags ?? []), ...(source.tags ?? [])]));
 
   const fusedConfidence = (target.confidence + source.confidence) / 2;
 
@@ -121,14 +120,15 @@ export function mergeNodes(
   // Track the canonical (fromNodeId, toNodeId, type) tuples already present
   // on the target so we don't create duplicate edges.
   const existingEdgeKeys = new Set(
-    store.listEdges().filter(
-      (e) => e.fromNodeId === targetId || e.toNodeId === targetId,
-    ).map((e) => `${e.fromNodeId}→${e.toNodeId}→${e.type}`),
+    store
+      .listEdges()
+      .filter((e) => e.fromNodeId === targetId || e.toNodeId === targetId)
+      .map((e) => `${e.fromNodeId}→${e.toNodeId}→${e.type}`),
   );
 
-  const sourceEdges = store.listEdges().filter(
-    (e) => e.fromNodeId === sourceId || e.toNodeId === sourceId,
-  );
+  const sourceEdges = store
+    .listEdges()
+    .filter((e) => e.fromNodeId === sourceId || e.toNodeId === sourceId);
 
   for (const edge of sourceEdges) {
     store.deleteEdge(edge.id);

@@ -3823,9 +3823,7 @@
           "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L"
         }
       ],
-      "cwes": [
-        "CWE-705"
-      ],
+      "cwes": ["CWE-705"],
       "description": "@tootallnate/once vulnerable to Incorrect Control Flow Scoping",
       "recommendation": "Upgrade @tootallnate/once to a non-vulnerable version. Vulnerable range: <3.0.1",
       "affects": [

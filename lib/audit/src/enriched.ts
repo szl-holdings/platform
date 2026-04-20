@@ -9,21 +9,21 @@
  * - Actor attribution and resource context
  */
 
-import { db, alloyAuditLogTable } from "@szl-holdings/db";
-import type { Request } from "express";
-import { hashIp } from "./ip-hash.js";
+import { alloyAuditLogTable, db } from '@szl-holdings/db';
+import type { Request } from 'express';
+import { hashIp } from './ip-hash.js';
 
 export type AdminActionClass =
-  | "user_management"
-  | "org_management"
-  | "feature_flag"
-  | "config_change"
-  | "data_export"
-  | "data_delete"
-  | "approval_action"
-  | "policy_change"
-  | "system_action"
-  | "security_action";
+  | 'user_management'
+  | 'org_management'
+  | 'feature_flag'
+  | 'config_change'
+  | 'data_export'
+  | 'data_delete'
+  | 'approval_action'
+  | 'policy_change'
+  | 'system_action'
+  | 'security_action';
 
 export interface EnrichedAuditParams {
   orgId?: number | null;
@@ -74,8 +74,7 @@ export async function writeEnrichedAudit(params: EnrichedAuditParams): Promise<v
         enrichedAt: new Date().toISOString(),
       },
     });
-  } catch {
-  }
+  } catch {}
 }
 
 export async function writeExportAudit(params: ExportAuditParams): Promise<void> {
@@ -83,12 +82,12 @@ export async function writeExportAudit(params: ExportAuditParams): Promise<void>
     await db.insert(alloyAuditLogTable).values({
       orgId: params.orgId ?? null,
       userId: params.userId ?? null,
-      action: "export",
-      resourceType: "data_export",
+      action: 'export',
+      resourceType: 'data_export',
       resourceId: params.exportId,
       correlationId: params.correlationId ?? null,
-      serviceAttribution: "export-service",
-      adminActionClass: "data_export",
+      serviceAttribution: 'export-service',
+      adminActionClass: 'data_export',
       ipAddress: hashIp(params.ipAddress),
       userAgent: params.userAgent ?? null,
       after: {
@@ -102,13 +101,12 @@ export async function writeExportAudit(params: ExportAuditParams): Promise<void>
         enrichedAt: new Date().toISOString(),
       },
     });
-  } catch {
-  }
+  } catch {}
 }
 
 export function enrichAuditFromRequest(
   req: Request,
-  base: Omit<EnrichedAuditParams, "correlationId" | "ipAddress" | "userAgent" | "userId">,
+  base: Omit<EnrichedAuditParams, 'correlationId' | 'ipAddress' | 'userAgent' | 'userId'>,
 ): EnrichedAuditParams {
   const user = (req as unknown as { user?: { id?: number } }).user;
   const reqWithCorrelation = req as unknown as { correlationId?: string };
@@ -117,6 +115,6 @@ export function enrichAuditFromRequest(
     userId: user?.id ?? null,
     correlationId: reqWithCorrelation.correlationId ?? null,
     ipAddress: req.ip ?? null,
-    userAgent: (req.headers["user-agent"] as string) ?? null,
+    userAgent: (req.headers['user-agent'] as string) ?? null,
   };
 }

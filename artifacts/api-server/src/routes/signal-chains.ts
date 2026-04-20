@@ -13,33 +13,36 @@
  *   POST /signal-chains/evaluate       — evaluate all chains against current signals
  */
 
-import { Router, type IRouter } from "express";
-import { authMiddleware } from "../middlewares/auth";
-import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { logActivity } from "@szl-holdings/audit";
-import { logger } from "../lib/logger";
+import { logActivity } from '@szl-holdings/audit';
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  signalChainExecutionsTable,
-  firestormIncidentsTable,
   firestormAlertsTable,
+  firestormIncidentsTable,
+  fundNavRecordsTable,
+  holdingsVenturesTable,
+  pcMattersTable,
+  signalChainExecutionsTable,
   vesselsAlertsTable,
   vesselsEventsTable,
-  pcMattersTable,
-  holdingsVenturesTable,
-  fundNavRecordsTable,
-} from "@szl-holdings/db";
-import { eq, and, desc, count, sql, ne } from "drizzle-orm";
-import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+} from '@szl-holdings/db';
+import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
+import {
+  perUserApiSlidingLimiter,
+  perUserWriteSlidingLimiter,
+} from '../middlewares/sliding-window-limiter';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 interface SignalChainStep {
   id: string;
   domain: string;
   action: string;
-  status: "pending" | "executed" | "skipped" | "failed";
+  status: 'pending' | 'executed' | 'skipped' | 'failed';
   executedAt?: number;
   explainability: string;
   resultSummary?: string;
@@ -53,7 +56,7 @@ interface SignalChainExecution {
   triggerValue: number;
   threshold: number;
   steps: SignalChainStep[];
-  status: "running" | "completed" | "failed";
+  status: 'running' | 'completed' | 'failed';
   auditRef?: string;
 }
 
@@ -65,7 +68,7 @@ interface SignalChain {
   triggerSignal: string;
   triggerThreshold: number;
   targetDomains: string[];
-  severity: "critical" | "high" | "medium" | "low";
+  severity: 'critical' | 'high' | 'medium' | 'low';
   enabled: boolean;
   executionCount: number;
   lastExecuted?: number;
@@ -107,39 +110,41 @@ async function fetchLiveSignalSnapshot(): Promise<LiveSignalSnapshot> {
     db
       .select({ severity: vesselsAlertsTable.severity, status: vesselsAlertsTable.status })
       .from(vesselsAlertsTable)
-      .where(ne(vesselsAlertsTable.status, "resolved"))
+      .where(ne(vesselsAlertsTable.status, 'resolved'))
       .limit(100),
     db
       .select({ count: count() })
       .from(vesselsEventsTable)
       .where(
         and(
-          eq(vesselsEventsTable.eventType, "delay_event"),
-          ne(vesselsEventsTable.status, "resolved"),
-        )
+          eq(vesselsEventsTable.eventType, 'delay_event'),
+          ne(vesselsEventsTable.status, 'resolved'),
+        ),
       ),
     db
-      .select({ severity: firestormIncidentsTable.severity, status: firestormIncidentsTable.status })
+      .select({
+        severity: firestormIncidentsTable.severity,
+        status: firestormIncidentsTable.status,
+      })
       .from(firestormIncidentsTable)
-      .where(ne(firestormIncidentsTable.status, "closed"))
+      .where(ne(firestormIncidentsTable.status, 'closed'))
       .limit(50),
     db
       .select({ severity: firestormAlertsTable.severity, status: firestormAlertsTable.status })
       .from(firestormAlertsTable)
-      .where(and(
-        ne(firestormAlertsTable.status, "resolved"),
-        ne(firestormAlertsTable.status, "dismissed"),
-      ))
+      .where(
+        and(
+          ne(firestormAlertsTable.status, 'resolved'),
+          ne(firestormAlertsTable.status, 'dismissed'),
+        ),
+      )
       .limit(50),
     db
       .select({ status: pcMattersTable.status, healthScore: pcMattersTable.healthScore })
       .from(pcMattersTable)
       .where(sql`${pcMattersTable.status} NOT IN ('closed', 'archived')`)
       .limit(100),
-    db
-      .select({ status: holdingsVenturesTable.status })
-      .from(holdingsVenturesTable)
-      .limit(100),
+    db.select({ status: holdingsVenturesTable.status }).from(holdingsVenturesTable).limit(100),
     db
       .select({ totalNavCents: fundNavRecordsTable.totalNavCents })
       .from(fundNavRecordsTable)
@@ -148,12 +153,18 @@ async function fetchLiveSignalSnapshot(): Promise<LiveSignalSnapshot> {
   ]);
 
   const vesselActiveAlerts = vesselAlertRows.length;
-  const vesselCriticalAlerts = vesselAlertRows.filter((r) => r.severity === "critical" || r.severity === "high").length;
+  const vesselCriticalAlerts = vesselAlertRows.filter(
+    (r) => r.severity === 'critical' || r.severity === 'high',
+  ).length;
   const vesselDelayEvents = vesselDelayRows[0]?.count ?? 0;
 
-  const securityCriticalIncidents = securityIncidentRows.filter((r) => r.severity === "critical").length;
+  const securityCriticalIncidents = securityIncidentRows.filter(
+    (r) => r.severity === 'critical',
+  ).length;
   const securityOpenIncidents = securityIncidentRows.length;
-  const securityCriticalAlerts = securityAlertRows.filter((r) => r.severity === "critical" || r.severity === "high").length;
+  const securityCriticalAlerts = securityAlertRows.filter(
+    (r) => r.severity === 'critical' || r.severity === 'high',
+  ).length;
 
   const riskComponents = [
     Math.min(1, vesselActiveAlerts / 10) * 0.25,
@@ -171,10 +182,15 @@ async function fetchLiveSignalSnapshot(): Promise<LiveSignalSnapshot> {
     securityCriticalAlerts,
     marketVolatilityScore,
     prismOpenMatters: matterRows.length,
-    prismLowHealthMatters: matterRows.filter((m) => typeof m.healthScore === "number" && m.healthScore < 60).length,
-    prismTrialReady: matterRows.filter((m) => m.status === "trial" || m.status === "pre_trial").length,
-    holdingsActiveVentures: ventureRows.filter((v) => v.status === "active" || v.status === "growth").length,
-    holdingsSunsetVentures: ventureRows.filter((v) => v.status === "sunset").length,
+    prismLowHealthMatters: matterRows.filter(
+      (m) => typeof m.healthScore === 'number' && m.healthScore < 60,
+    ).length,
+    prismTrialReady: matterRows.filter((m) => m.status === 'trial' || m.status === 'pre_trial')
+      .length,
+    holdingsActiveVentures: ventureRows.filter(
+      (v) => v.status === 'active' || v.status === 'growth',
+    ).length,
+    holdingsSunsetVentures: ventureRows.filter((v) => v.status === 'sunset').length,
     holdingsLatestNavCents: navRows[0]?.totalNavCents ?? null,
     fetchedAt: Date.now(),
   };
@@ -184,110 +200,110 @@ const auditLog: SignalChainExecution[] = [];
 
 const DEFAULT_CHAINS: SignalChain[] = [
   {
-    id: "maritime-realestate",
-    name: "Maritime Delay → Real Estate Impact",
+    id: 'maritime-realestate',
+    name: 'Maritime Delay → Real Estate Impact',
     description:
-      "When a vessel delay is detected at a major port, automatically notify the Terra team about affected port-adjacent properties and flag potential delivery timeline risks.",
-    triggerDomain: "vessels",
-    triggerSignal: "port_delay_hours",
+      'When a vessel delay is detected at a major port, automatically notify the Terra team about affected port-adjacent properties and flag potential delivery timeline risks.',
+    triggerDomain: 'vessels',
+    triggerSignal: 'port_delay_hours',
     triggerThreshold: 24,
-    targetDomains: ["terra", "prism"],
-    severity: "high",
+    targetDomains: ['terra', 'prism'],
+    severity: 'high',
     enabled: true,
     executionCount: 3,
     lastExecuted: Date.now() - 7200000,
     steps: [
       {
-        domain: "vessels",
-        action: "Identify delayed vessels and affected port",
+        domain: 'vessels',
+        action: 'Identify delayed vessels and affected port',
         explainabilityTemplate:
-          "Vessel {vessel} reported a {delay}h delay at {port}, exceeding the {threshold}h threshold.",
+          'Vessel {vessel} reported a {delay}h delay at {port}, exceeding the {threshold}h threshold.',
       },
       {
-        domain: "terra",
-        action: "Flag port-adjacent properties for delivery timeline review",
+        domain: 'terra',
+        action: 'Flag port-adjacent properties for delivery timeline review',
         explainabilityTemplate:
-          "Terra identified {count} properties within 50km of {port} with active construction or delivery dependencies.",
+          'Terra identified {count} properties within 50km of {port} with active construction or delivery dependencies.',
       },
       {
-        domain: "prism",
-        action: "Review contract clauses for force-majeure or delay penalties",
+        domain: 'prism',
+        action: 'Review contract clauses for force-majeure or delay penalties',
         explainabilityTemplate:
-          "PRISM Counsel flagged {count} contracts with delivery deadline clauses that may be triggered by the {port} delay.",
+          'PRISM Counsel flagged {count} contracts with delivery deadline clauses that may be triggered by the {port} delay.',
       },
     ],
   },
   {
-    id: "security-legal",
-    name: "Security Incident → Legal Review",
+    id: 'security-legal',
+    name: 'Security Incident → Legal Review',
     description:
-      "When a critical cyber incident is detected in Aegis, automatically trigger a legal hold review in PRISM Counsel and update executive risk score.",
-    triggerDomain: "aegis",
-    triggerSignal: "incident_severity",
+      'When a critical cyber incident is detected in Aegis, automatically trigger a legal hold review in PRISM Counsel and update executive risk score.',
+    triggerDomain: 'aegis',
+    triggerSignal: 'incident_severity',
     triggerThreshold: 0.8,
-    targetDomains: ["prism", "szl-holdings"],
-    severity: "critical",
+    targetDomains: ['prism', 'szl-holdings'],
+    severity: 'critical',
     enabled: true,
     executionCount: 1,
     lastExecuted: Date.now() - 43200000,
     steps: [
       {
-        domain: "aegis",
-        action: "Classify and scope the incident",
+        domain: 'aegis',
+        action: 'Classify and scope the incident',
         explainabilityTemplate:
-          "Aegis detected a {severity} incident ({id}) affecting {assets} assets with a threat confidence score of {confidence}.",
+          'Aegis detected a {severity} incident ({id}) affecting {assets} assets with a threat confidence score of {confidence}.',
       },
       {
-        domain: "prism",
-        action: "Initiate legal hold and regulatory disclosure review",
+        domain: 'prism',
+        action: 'Initiate legal hold and regulatory disclosure review',
         explainabilityTemplate:
-          "PRISM Counsel initiated legal hold on incident artifacts and is reviewing breach notification obligations under applicable jurisdiction.",
+          'PRISM Counsel initiated legal hold on incident artifacts and is reviewing breach notification obligations under applicable jurisdiction.',
       },
       {
-        domain: "szl-holdings",
-        action: "Update executive portfolio risk score",
+        domain: 'szl-holdings',
+        action: 'Update executive portfolio risk score',
         explainabilityTemplate:
           "Portfolio risk score updated from {before} to {after} reflecting the cyber incident's potential financial and reputational impact.",
       },
     ],
   },
   {
-    id: "market-portfolio",
-    name: "Market Shift → Portfolio Rebalance",
+    id: 'market-portfolio',
+    name: 'Market Shift → Portfolio Rebalance',
     description:
-      "When a significant market shift is detected in SZL Holdings macro signals, automatically trigger portfolio review workflows across Terra, Vessels, and fund operations.",
-    triggerDomain: "szl-holdings",
-    triggerSignal: "market_volatility_index",
+      'When a significant market shift is detected in SZL Holdings macro signals, automatically trigger portfolio review workflows across Terra, Vessels, and fund operations.',
+    triggerDomain: 'szl-holdings',
+    triggerSignal: 'market_volatility_index',
     triggerThreshold: 0.65,
-    targetDomains: ["terra", "vessels", "szl-holdings"],
-    severity: "medium",
+    targetDomains: ['terra', 'vessels', 'szl-holdings'],
+    severity: 'medium',
     enabled: true,
     executionCount: 7,
     lastExecuted: Date.now() - 3600000,
     steps: [
       {
-        domain: "szl-holdings",
-        action: "Assess macro market signal and impacted asset classes",
+        domain: 'szl-holdings',
+        action: 'Assess macro market signal and impacted asset classes',
         explainabilityTemplate:
-          "Market volatility index reached {value}, exceeding the {threshold} threshold. Primary impact: {assetClasses}.",
+          'Market volatility index reached {value}, exceeding the {threshold} threshold. Primary impact: {assetClasses}.',
       },
       {
-        domain: "terra",
-        action: "Run distress scoring refresh on real estate portfolio",
+        domain: 'terra',
+        action: 'Run distress scoring refresh on real estate portfolio',
         explainabilityTemplate:
-          "Terra triggered an accelerated distress scoring refresh on {count} properties in interest-rate-sensitive markets.",
+          'Terra triggered an accelerated distress scoring refresh on {count} properties in interest-rate-sensitive markets.',
       },
       {
-        domain: "vessels",
-        action: "Review fleet utilization and trade route economics",
+        domain: 'vessels',
+        action: 'Review fleet utilization and trade route economics',
         explainabilityTemplate:
-          "Vessels updated voyage economics model for {count} active routes, flagging {flagged} with margin compression risk.",
+          'Vessels updated voyage economics model for {count} active routes, flagging {flagged} with margin compression risk.',
       },
       {
-        domain: "szl-holdings",
-        action: "Generate rebalancing recommendation for fund committee",
+        domain: 'szl-holdings',
+        action: 'Generate rebalancing recommendation for fund committee',
         explainabilityTemplate:
-          "Portfolio optimization engine generated a rebalancing proposal with {opportunities} opportunities across {domains} domains, estimated NAV impact: {impact}.",
+          'Portfolio optimization engine generated a rebalancing proposal with {opportunities} opportunities across {domains} domains, estimated NAV impact: {impact}.',
       },
     ],
   },
@@ -304,37 +320,58 @@ function computeLiveTriggerValue(
   chain: SignalChain,
   snapshot: LiveSignalSnapshot,
 ): { triggerValue: number; triggerReason: string } {
-  if (chain.id === "maritime-realestate") {
+  if (chain.id === 'maritime-realestate') {
     const activeDelays = snapshot.vesselDelayEvents;
     const highAlerts = snapshot.vesselCriticalAlerts;
     if (activeDelays > 0) {
       const value = Math.max(28, activeDelays * 8);
-      return { triggerValue: value, triggerReason: `${activeDelays} active vessel delay event(s) detected — port congestion threshold exceeded (${value}h)` };
+      return {
+        triggerValue: value,
+        triggerReason: `${activeDelays} active vessel delay event(s) detected — port congestion threshold exceeded (${value}h)`,
+      };
     }
     if (highAlerts > 0) {
       const value = Math.min(48, 24 + highAlerts * 4);
-      return { triggerValue: value, triggerReason: `${highAlerts} high/critical vessel alert(s) active — delay risk index at ${value}h` };
+      return {
+        triggerValue: value,
+        triggerReason: `${highAlerts} high/critical vessel alert(s) active — delay risk index at ${value}h`,
+      };
     }
-    return { triggerValue: 8, triggerReason: "No active vessel delays detected — monitoring nominal" };
+    return {
+      triggerValue: 8,
+      triggerReason: 'No active vessel delays detected — monitoring nominal',
+    };
   }
 
-  if (chain.id === "security-legal") {
+  if (chain.id === 'security-legal') {
     const critIncidents = snapshot.securityCriticalIncidents;
     const critAlerts = snapshot.securityCriticalAlerts;
     const lowHealthMatters = snapshot.prismLowHealthMatters;
     if (critIncidents > 0) {
       const value = Math.min(0.99, 0.8 + critIncidents * 0.05 + lowHealthMatters * 0.01);
-      return { triggerValue: value, triggerReason: `${critIncidents} critical security incident(s) open + ${snapshot.prismOpenMatters} active legal matter(s) — threat+exposure score ${value.toFixed(2)}` };
+      return {
+        triggerValue: value,
+        triggerReason: `${critIncidents} critical security incident(s) open + ${snapshot.prismOpenMatters} active legal matter(s) — threat+exposure score ${value.toFixed(2)}`,
+      };
     }
     if (critAlerts > 0) {
       const value = Math.min(0.95, 0.72 + critAlerts * 0.02 + lowHealthMatters * 0.01);
-      return { triggerValue: value, triggerReason: `${critAlerts} critical/high security alert(s) active; legal docket carrying ${snapshot.prismOpenMatters} matter(s) (${lowHealthMatters} low-health) — score ${value.toFixed(2)}` };
+      return {
+        triggerValue: value,
+        triggerReason: `${critAlerts} critical/high security alert(s) active; legal docket carrying ${snapshot.prismOpenMatters} matter(s) (${lowHealthMatters} low-health) — score ${value.toFixed(2)}`,
+      };
     }
     if (lowHealthMatters >= 3) {
       const value = Math.min(0.85, 0.55 + lowHealthMatters * 0.04);
-      return { triggerValue: value, triggerReason: `${lowHealthMatters} legal matter(s) below health threshold — exposure-driven trigger ${value.toFixed(2)}` };
+      return {
+        triggerValue: value,
+        triggerReason: `${lowHealthMatters} legal matter(s) below health threshold — exposure-driven trigger ${value.toFixed(2)}`,
+      };
     }
-    return { triggerValue: 0.25, triggerReason: `No critical security incidents detected — posture nominal; ${snapshot.prismOpenMatters} legal matter(s) on docket` };
+    return {
+      triggerValue: 0.25,
+      triggerReason: `No critical security incidents detected — posture nominal; ${snapshot.prismOpenMatters} legal matter(s) on docket`,
+    };
   }
 
   // market-portfolio chain
@@ -343,65 +380,72 @@ function computeLiveTriggerValue(
   const portfolioPressure = sunsetVentures * 0.08;
   const compositeScore = vScore + portfolioPressure;
   if (compositeScore > 0.05) {
-    const value = Math.min(0.95, compositeScore + 0.40);
+    const value = Math.min(0.95, compositeScore + 0.4);
     return {
       triggerValue: value,
       triggerReason: `Compound signal pressure: ${snapshot.securityOpenIncidents} open security incident(s) + ${snapshot.vesselActiveAlerts} vessel alert(s) + ${sunsetVentures} sunset venture(s) across ${snapshot.holdingsActiveVentures} active → volatility index ${value.toFixed(2)}`,
     };
   }
-  return { triggerValue: 0.15, triggerReason: `No compound signals detected — market conditions nominal; ${snapshot.holdingsActiveVentures} active venture(s) on portfolio` };
+  return {
+    triggerValue: 0.15,
+    triggerReason: `No compound signals detected — market conditions nominal; ${snapshot.holdingsActiveVentures} active venture(s) on portfolio`,
+  };
 }
 
-function buildExecutionFromSnapshot(chain: SignalChain, snapshot: LiveSignalSnapshot, manual = false): SignalChainExecution {
+function buildExecutionFromSnapshot(
+  chain: SignalChain,
+  snapshot: LiveSignalSnapshot,
+  manual = false,
+): SignalChainExecution {
   const execId = `exec-${chain.id}-${Date.now()}`;
 
   const { triggerValue, triggerReason } = computeLiveTriggerValue(chain, snapshot);
 
   const stepResults: Record<string, string[]> = {
-    "maritime-realestate": [
+    'maritime-realestate': [
       snapshot.vesselDelayEvents > 0
         ? `${snapshot.vesselDelayEvents} active delay event(s) tracked; ${snapshot.vesselCriticalAlerts} high-severity vessel alert(s) open`
-        : "MV Pacific Star (IMO 9876543) delayed 32h at Shanghai; 4 other vessels monitoring",
-      "12 properties flagged in Pudong logistics corridor; 3 with active construction timelines",
-      "8 contracts flagged with milestone clauses; 2 require immediate review",
+        : 'MV Pacific Star (IMO 9876543) delayed 32h at Shanghai; 4 other vessels monitoring',
+      '12 properties flagged in Pudong logistics corridor; 3 with active construction timelines',
+      '8 contracts flagged with milestone clauses; 2 require immediate review',
     ],
-    "security-legal": [
+    'security-legal': [
       snapshot.securityCriticalIncidents > 0
         ? `${snapshot.securityCriticalIncidents} critical incident(s) active; ${snapshot.securityOpenIncidents} total open; ${snapshot.securityCriticalAlerts} critical alert(s) raised`
-        : "INC-2026-0412: Critical severity, 47 assets affected, confidence 0.91",
+        : 'INC-2026-0412: Critical severity, 47 assets affected, confidence 0.91',
       snapshot.prismOpenMatters > 0
         ? `Legal hold + disclosure review queued against existing docket of ${snapshot.prismOpenMatters} matter(s) (${snapshot.prismLowHealthMatters} low-health, ${snapshot.prismTrialReady} trial-ready)`
-        : "Legal hold initiated on 23 artifact sets; SEC disclosure review in progress",
+        : 'Legal hold initiated on 23 artifact sets; SEC disclosure review in progress',
       snapshot.holdingsActiveVentures > 0
-        ? `Risk score recomputed across ${snapshot.holdingsActiveVentures} active venture(s)${snapshot.holdingsLatestNavCents !== null ? ` ($${(snapshot.holdingsLatestNavCents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })} NAV)` : ""}; board notification triggered`
-        : "Risk score updated: 72 → 81 (high); board notification triggered",
+        ? `Risk score recomputed across ${snapshot.holdingsActiveVentures} active venture(s)${snapshot.holdingsLatestNavCents !== null ? ` ($${(snapshot.holdingsLatestNavCents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })} NAV)` : ''}; board notification triggered`
+        : 'Risk score updated: 72 → 81 (high); board notification triggered',
     ],
-    "market-portfolio": [
+    'market-portfolio': [
       `Composite volatility index at ${triggerValue.toFixed(2)}; primary impact: fixed-income, logistics REITs`,
-      "134 properties rescored; 18 crossed distress threshold",
-      "7 routes flagged; 3 with >15% margin compression",
-      "Rebalancing proposal: shift 8% from logistics to multifamily; estimated NAV +$2.1M",
+      '134 properties rescored; 18 crossed distress threshold',
+      '7 routes flagged; 3 with >15% margin compression',
+      'Rebalancing proposal: shift 8% from logistics to multifamily; estimated NAV +$2.1M',
     ],
   };
 
-  const results = stepResults[chain.id] ?? chain.steps.map(() => "Executed successfully");
+  const results = stepResults[chain.id] ?? chain.steps.map(() => 'Executed successfully');
 
   return {
     executionId: execId,
     chainId: chain.id,
     triggeredAt: Date.now(),
-    triggerReason: manual ? "Manual trigger via API" : triggerReason,
+    triggerReason: manual ? 'Manual trigger via API' : triggerReason,
     triggerValue,
     threshold: chain.triggerThreshold,
-    status: "completed",
+    status: 'completed',
     auditRef: `audit-${execId}`,
     steps: chain.steps.map((s, i) => ({
       id: `${execId}-step-${i}`,
       domain: s.domain,
       action: s.action,
-      status: "executed" as const,
+      status: 'executed' as const,
       executedAt: Date.now() + i * 1200,
-      explainability: results[i] ?? "Step completed",
+      explainability: results[i] ?? 'Step completed',
       resultSummary: results[i],
     })),
   };
@@ -410,56 +454,71 @@ function buildExecutionFromSnapshot(chain: SignalChain, snapshot: LiveSignalSnap
 function buildExecutionFallback(chain: SignalChain, manual = false): SignalChainExecution {
   const execId = `exec-${chain.id}-${Date.now()}`;
   const triggerValues: Record<string, { value: number; reason: string }> = {
-    "maritime-realestate": { value: 32, reason: "MV Pacific Star reported 32h delay at Port of Shanghai" },
-    "security-legal": { value: 0.91, reason: "APT-41 lateral movement detected across 3 subsidiaries" },
-    "market-portfolio": { value: 0.72, reason: "Fed rate decision triggered volatility spike in risk assets" },
+    'maritime-realestate': {
+      value: 32,
+      reason: 'MV Pacific Star reported 32h delay at Port of Shanghai',
+    },
+    'security-legal': {
+      value: 0.91,
+      reason: 'APT-41 lateral movement detected across 3 subsidiaries',
+    },
+    'market-portfolio': {
+      value: 0.72,
+      reason: 'Fed rate decision triggered volatility spike in risk assets',
+    },
   };
 
-  const tv = triggerValues[chain.id] ?? { value: chain.triggerThreshold * 1.2, reason: manual ? "Manual trigger" : "Threshold crossed" };
+  const tv = triggerValues[chain.id] ?? {
+    value: chain.triggerThreshold * 1.2,
+    reason: manual ? 'Manual trigger' : 'Threshold crossed',
+  };
 
   const stepResults: Record<string, string[]> = {
-    "maritime-realestate": [
-      "MV Pacific Star (IMO 9876543) delayed 32h at Shanghai; 4 other vessels monitoring",
-      "12 properties flagged in Pudong logistics corridor; 3 with active construction timelines",
-      "8 contracts flagged with milestone clauses; 2 require immediate review",
+    'maritime-realestate': [
+      'MV Pacific Star (IMO 9876543) delayed 32h at Shanghai; 4 other vessels monitoring',
+      '12 properties flagged in Pudong logistics corridor; 3 with active construction timelines',
+      '8 contracts flagged with milestone clauses; 2 require immediate review',
     ],
-    "security-legal": [
-      "INC-2026-0412: Critical severity, 47 assets affected, confidence 0.91",
-      "Legal hold initiated on 23 artifact sets; SEC disclosure review in progress",
-      "Risk score updated: 72 → 81 (high); board notification triggered",
+    'security-legal': [
+      'INC-2026-0412: Critical severity, 47 assets affected, confidence 0.91',
+      'Legal hold initiated on 23 artifact sets; SEC disclosure review in progress',
+      'Risk score updated: 72 → 81 (high); board notification triggered',
     ],
-    "market-portfolio": [
-      "VIX-equivalent at 0.72; primary impact: fixed-income, logistics REITs",
-      "134 properties rescored; 18 crossed distress threshold",
-      "7 routes flagged; 3 with >15% margin compression",
-      "Rebalancing proposal: shift 8% from logistics to multifamily; estimated NAV +$2.1M",
+    'market-portfolio': [
+      'VIX-equivalent at 0.72; primary impact: fixed-income, logistics REITs',
+      '134 properties rescored; 18 crossed distress threshold',
+      '7 routes flagged; 3 with >15% margin compression',
+      'Rebalancing proposal: shift 8% from logistics to multifamily; estimated NAV +$2.1M',
     ],
   };
 
-  const results = stepResults[chain.id] ?? chain.steps.map(() => "Executed successfully");
+  const results = stepResults[chain.id] ?? chain.steps.map(() => 'Executed successfully');
 
   return {
     executionId: execId,
     chainId: chain.id,
     triggeredAt: Date.now(),
-    triggerReason: manual ? "Manual trigger via API" : tv.reason,
+    triggerReason: manual ? 'Manual trigger via API' : tv.reason,
     triggerValue: tv.value,
     threshold: chain.triggerThreshold,
-    status: "completed",
+    status: 'completed',
     auditRef: `audit-${execId}`,
     steps: chain.steps.map((s, i) => ({
       id: `${execId}-step-${i}`,
       domain: s.domain,
       action: s.action,
-      status: "executed" as const,
+      status: 'executed' as const,
       executedAt: Date.now() + i * 1200,
-      explainability: results[i] ?? "Step completed",
+      explainability: results[i] ?? 'Step completed',
       resultSummary: results[i],
     })),
   };
 }
 
-async function persistExecution(execution: SignalChainExecution, triggerDomain: string): Promise<void> {
+async function persistExecution(
+  execution: SignalChainExecution,
+  triggerDomain: string,
+): Promise<void> {
   try {
     await db.insert(signalChainExecutionsTable).values({
       chainId: execution.chainId,
@@ -476,12 +535,12 @@ async function persistExecution(execution: SignalChainExecution, triggerDomain: 
       status: execution.status,
     });
   } catch (err) {
-    logger.warn({ err }, "[SignalChains] DB persist failed — execution still logged in memory");
+    logger.warn({ err }, '[SignalChains] DB persist failed — execution still logged in memory');
   }
 }
 
 router.get(
-  "/signal-chains",
+  '/signal-chains',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   (_req, res) => {
@@ -501,11 +560,11 @@ router.get(
       lastExecution: c.lastExecution,
     }));
     res.json({ success: true, chains, total: chains.length });
-  }
+  },
 );
 
 router.get(
-  "/signal-chains/audit-log",
+  '/signal-chains/audit-log',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
@@ -513,11 +572,11 @@ router.get(
     const limit = Math.min(Number(req.query.limit ?? 50), 200);
     const log = auditLog.slice(-limit).reverse();
     res.json({ success: true, entries: log, total: auditLog.length });
-  }
+  },
 );
 
 router.get(
-  "/signal-chains/:id/audit",
+  '/signal-chains/:id/audit',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
@@ -525,12 +584,13 @@ router.get(
     const { id } = req.params as { id: string };
     const chain = chainState.get(id);
     if (!chain) {
-      res.status(404).json({ success: false, error: "Signal chain not found" });
+      res.status(404).json({ success: false, error: 'Signal chain not found' });
       return;
     }
     const rawLimit = Number(req.query.limit ?? 25);
     const rawOffset = Number(req.query.offset ?? 0);
-    const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(Math.floor(rawLimit), 200) : 25;
+    const limit =
+      Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(Math.floor(rawLimit), 200) : 25;
     const offset = Number.isFinite(rawOffset) && rawOffset >= 0 ? Math.floor(rawOffset) : 0;
     try {
       const [rows, countRows] = await Promise.all([
@@ -557,40 +617,43 @@ router.get(
         hasMore: offset + rows.length < total,
       });
     } catch (err) {
-      logger.warn({ err }, "[SignalChains] DB audit query failed");
-      res.status(500).json({ success: false, error: "Failed to query audit trail" });
+      logger.warn({ err }, '[SignalChains] DB audit query failed');
+      res.status(500).json({ success: false, error: 'Failed to query audit trail' });
     }
-  }
+  },
 );
 
 router.get(
-  "/signal-chains/:id",
+  '/signal-chains/:id',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   (req, res) => {
     const chain = chainState.get(req.params.id as string);
     if (!chain) {
-      res.status(404).json({ success: false, error: "Signal chain not found" });
+      res.status(404).json({ success: false, error: 'Signal chain not found' });
       return;
     }
-    const history = auditLog.filter((e) => e.chainId === req.params.id as string).slice(-10).reverse();
+    const history = auditLog
+      .filter((e) => e.chainId === (req.params.id as string))
+      .slice(-10)
+      .reverse();
     res.json({ success: true, chain, history });
-  }
+  },
 );
 
 router.post(
-  "/signal-chains/:id/trigger",
+  '/signal-chains/:id/trigger',
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   validateBody(bodyShape({})),
   async (req, res) => {
     const chain = chainState.get(req.params.id as string);
     if (!chain) {
-      res.status(404).json({ success: false, error: "Signal chain not found" });
+      res.status(404).json({ success: false, error: 'Signal chain not found' });
       return;
     }
     if (!chain.enabled) {
-      res.status(400).json({ success: false, error: "Signal chain is disabled" });
+      res.status(400).json({ success: false, error: 'Signal chain is disabled' });
       return;
     }
 
@@ -598,9 +661,12 @@ router.post(
     try {
       const snapshot = await fetchLiveSignalSnapshot();
       execution = buildExecutionFromSnapshot(chain, snapshot, true);
-      logger.info({ chainId: chain.id, snapshot }, "[SignalChains] Using live signal snapshot for manual trigger");
+      logger.info(
+        { chainId: chain.id, snapshot },
+        '[SignalChains] Using live signal snapshot for manual trigger',
+      );
     } catch (err) {
-      logger.warn({ err }, "[SignalChains] Live snapshot unavailable, using fallback");
+      logger.warn({ err }, '[SignalChains] Live snapshot unavailable, using fallback');
       execution = buildExecutionFallback(chain, true);
     }
 
@@ -613,8 +679,8 @@ router.post(
 
     try {
       await logActivity({
-        action: "signal_chain.triggered",
-        resource: "signal_chain",
+        action: 'signal_chain.triggered',
+        resource: 'signal_chain',
         resourceId: chain.id,
         metadata: {
           chainName: chain.name,
@@ -625,28 +691,38 @@ router.post(
         },
       });
     } catch (err) {
-      logger.warn({ err }, "[SignalChains] Audit log write failed");
+      logger.warn({ err }, '[SignalChains] Audit log write failed');
     }
 
-    logger.info({ chainId: chain.id, executionId: execution.executionId }, "[SignalChains] Chain triggered");
+    logger.info(
+      { chainId: chain.id, executionId: execution.executionId },
+      '[SignalChains] Chain triggered',
+    );
     res.json({ success: true, execution });
-  }
+  },
 );
 
 router.post(
-  "/signal-chains/evaluate", validateBody(bodyShape({})),
+  '/signal-chains/evaluate',
+  validateBody(bodyShape({})),
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   async (_req, res) => {
     const triggered: SignalChainExecution[] = [];
-    const monitoring: Array<{ chainId: string; chainName: string; triggerValue: number; threshold: number; reason: string }> = [];
+    const monitoring: Array<{
+      chainId: string;
+      chainName: string;
+      triggerValue: number;
+      threshold: number;
+      reason: string;
+    }> = [];
 
     let snapshot: LiveSignalSnapshot | null = null;
     try {
       snapshot = await fetchLiveSignalSnapshot();
-      logger.info({ snapshot }, "[SignalChains] Live signal snapshot fetched for evaluation");
+      logger.info({ snapshot }, '[SignalChains] Live signal snapshot fetched for evaluation');
     } catch (err) {
-      logger.warn({ err }, "[SignalChains] Could not fetch live signals, using fallback data");
+      logger.warn({ err }, '[SignalChains] Could not fetch live signals, using fallback data');
     }
 
     for (const chain of chainState.values()) {
@@ -667,8 +743,8 @@ router.post(
 
           try {
             await logActivity({
-              action: "signal_chain.auto_evaluated",
-              resource: "signal_chain",
+              action: 'signal_chain.auto_evaluated',
+              resource: 'signal_chain',
               resourceId: chain.id,
               metadata: {
                 chainName: chain.name,
@@ -690,7 +766,10 @@ router.post(
             threshold: chain.triggerThreshold,
             reason: triggerReason,
           });
-          logger.info({ chainId: chain.id, triggerValue, threshold: chain.triggerThreshold }, "[SignalChains] Chain below threshold — monitoring");
+          logger.info(
+            { chainId: chain.id, triggerValue, threshold: chain.triggerThreshold },
+            '[SignalChains] Chain below threshold — monitoring',
+          );
         }
       } else {
         const execution = buildExecutionFallback(chain, false);
@@ -702,8 +781,8 @@ router.post(
 
         try {
           await logActivity({
-            action: "signal_chain.auto_evaluated",
-            resource: "signal_chain",
+            action: 'signal_chain.auto_evaluated',
+            resource: 'signal_chain',
             resourceId: chain.id,
             metadata: {
               chainName: chain.name,
@@ -719,8 +798,12 @@ router.post(
     }
 
     logger.info(
-      { triggered: triggered.length, monitoring: monitoring.length, liveSnapshot: snapshot !== null },
-      "[SignalChains] Evaluation cycle completed"
+      {
+        triggered: triggered.length,
+        monitoring: monitoring.length,
+        liveSnapshot: snapshot !== null,
+      },
+      '[SignalChains] Evaluation cycle completed',
     );
     res.json({
       success: true,
@@ -741,7 +824,7 @@ router.post(
           }
         : null,
     });
-  }
+  },
 );
 
 export default router;

@@ -1,4 +1,4 @@
-import type { ToolManifest } from "./manifest.js";
+import type { ToolManifest } from './manifest.js';
 
 export interface ToolRegistry {
   register(manifest: ToolManifest): void;
@@ -21,9 +21,13 @@ export class InMemoryToolRegistry implements ToolRegistry {
 
   list(filter?: { domainTag?: string; policyTier?: string; enabled?: boolean }): ToolManifest[] {
     let results = Array.from(this.manifests.values());
-    if (filter?.domainTag) results = results.filter((m) => m.domainTags.includes(filter.domainTag as ToolManifest["domainTags"][0]));
+    if (filter?.domainTag)
+      results = results.filter((m) =>
+        m.domainTags.includes(filter.domainTag as ToolManifest['domainTags'][0]),
+      );
     if (filter?.policyTier) results = results.filter((m) => m.policyTier === filter.policyTier);
-    if (filter?.enabled !== undefined) results = results.filter((m) => m.enabled === filter.enabled);
+    if (filter?.enabled !== undefined)
+      results = results.filter((m) => m.enabled === filter.enabled);
     return results;
   }
 

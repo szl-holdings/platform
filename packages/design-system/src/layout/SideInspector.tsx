@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface SideInspectorProps {
   title?: string;
@@ -14,18 +14,18 @@ export function SideInspector({
   title,
   children,
   onClose,
-  width = "360px",
+  width = '360px',
   className,
 }: SideInspectorProps) {
   return (
     <aside
-      className={cn("flex flex-col border-l overflow-hidden", className)}
+      className={cn('flex flex-col border-l overflow-hidden', className)}
       style={{ width, background: color.bg.surface, borderColor: color.border.subtle }}
     >
       {(title || onClose) && (
         <div
           className="flex items-center justify-between px-4 border-b flex-shrink-0"
-          style={{ height: "44px", borderColor: color.border.subtle }}
+          style={{ height: '44px', borderColor: color.border.subtle }}
         >
           {title && (
             <span className="font-semibold text-sm" style={{ color: color.text.primary }}>
@@ -38,10 +38,10 @@ export function SideInspector({
               onClick={onClose}
               style={{
                 color: color.text.muted,
-                background: "transparent",
-                cursor: "pointer",
-                border: "none",
-                fontSize: "16px",
+                background: 'transparent',
+                cursor: 'pointer',
+                border: 'none',
+                fontSize: '16px',
               }}
               aria-label="Close inspector"
             >

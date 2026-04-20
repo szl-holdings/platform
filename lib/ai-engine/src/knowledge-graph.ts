@@ -3,10 +3,10 @@
  * community detection, centrality scoring, and cross-domain linking.
  */
 
-import { generateEmbedding, toVectorLiteral } from "./embedding-pipeline.js";
+import { generateEmbedding, toVectorLiteral } from './embedding-pipeline.js';
 
 async function getPool() {
-  const { pool } = await import("@szl-holdings/db");
+  const { pool } = await import('@szl-holdings/db');
   return pool;
 }
 
@@ -106,16 +106,20 @@ export async function upsertEntity(entity: {
       entity.tenantId ?? null,
     ],
   );
-  const id = result.rows[0]?.id as string ?? "";
+  const id = (result.rows[0]?.id as string) ?? '';
   const wasInsert = Number(result.rows[0]?.xmax) === 0;
 
   // Automatically detect and persist cross-domain links for new entities.
   // This runs in the background so it never blocks the caller.
   if (id && wasInsert) {
-    const ALL_DOMAINS = ["prism", "terra", "aegis", "carlota_jo", "lyte", "stephen", "szl"];
+    const ALL_DOMAINS = ['prism', 'terra', 'aegis', 'carlota_jo', 'lyte', 'stephen', 'szl'];
     const otherDomains = ALL_DOMAINS.filter((d) => d !== entity.domain);
     setImmediate(() => {
-      void autoLinkEntity({ id, name: entity.name, domain: entity.domain, entityType: entity.entityType }, otherDomains, entity.tenantId);
+      void autoLinkEntity(
+        { id, name: entity.name, domain: entity.domain, entityType: entity.entityType },
+        otherDomains,
+        entity.tenantId,
+      );
     });
   }
 
@@ -141,7 +145,7 @@ async function autoLinkEntity(
         confidence: c.confidence,
         fromDomain: src.domain,
         toDomain: c.toEntity.domain,
-        detectedBy: "auto",
+        detectedBy: 'auto',
         properties: { autoLinked: true, reason: c.reason },
       });
 
@@ -154,11 +158,21 @@ async function autoLinkEntity(
          ON CONFLICT ON CONSTRAINT kg_xdomain_rel_unique DO UPDATE SET
            detected_by = EXCLUDED.detected_by,
            metadata = EXCLUDED.metadata`,
-        [relId, src.domain, c.toEntity.domain, c.suggestedRelationship, src.id, JSON.stringify({ reason: c.reason, confidence: c.confidence })],
+        [
+          relId,
+          src.domain,
+          c.toEntity.domain,
+          c.suggestedRelationship,
+          src.id,
+          JSON.stringify({ reason: c.reason, confidence: c.confidence }),
+        ],
       );
     }
   } catch (err) {
-    console.error("[knowledge-graph] autoLinkEntity failed:", err instanceof Error ? err.message : String(err));
+    console.error(
+      '[knowledge-graph] autoLinkEntity failed:',
+      err instanceof Error ? err.message : String(err),
+    );
   }
 }
 
@@ -205,17 +219,22 @@ export async function upsertRelationship(rel: {
   const id = result.rows[0]?.id as string;
 
   if (isCrossDomain && id) {
-    await pool.query(
-      `INSERT INTO kg_cross_domain_links (relationship_id, from_domain, to_domain, link_type, detected_by)
+    await pool
+      .query(
+        `INSERT INTO kg_cross_domain_links (relationship_id, from_domain, to_domain, link_type, detected_by)
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT DO NOTHING`,
-      [id, rel.fromDomain, rel.toDomain, rel.relationshipType, rel.detectedBy ?? "system"],
-    ).catch((err: unknown) => {
-      console.warn("[knowledge-graph] cross-domain link insert failed:", err instanceof Error ? err.message : String(err));
-    });
+        [id, rel.fromDomain, rel.toDomain, rel.relationshipType, rel.detectedBy ?? 'system'],
+      )
+      .catch((err: unknown) => {
+        console.warn(
+          '[knowledge-graph] cross-domain link insert failed:',
+          err instanceof Error ? err.message : String(err),
+        );
+      });
   }
 
-  return id ?? "";
+  return id ?? '';
 }
 
 // ─── Multi-Hop Traversal ──────────────────────────────────────────────────────
@@ -318,9 +337,7 @@ export async function traverseSubgraph(
   // Tenant boundary: filter out any entity IDs that are not accessible to the caller.
   // This prevents IDOR-style data leakage when a tenant-scoped caller supplies an
   // arbitrary root entity UUID belonging to another tenant.
-  const tenantEntityFilter = options.tenantId
-    ? `AND (tenant_id IS NULL OR tenant_id = $2)`
-    : "";
+  const tenantEntityFilter = options.tenantId ? `AND (tenant_id IS NULL OR tenant_id = $2)` : '';
   const tenantEntityArgs = options.tenantId ? [entityIds, options.tenantId] : [entityIds];
 
   const entitiesResult = await pool.query(
@@ -337,7 +354,8 @@ export async function traverseSubgraph(
     description: r.description as string | null,
     properties: (r.properties as Record<string, unknown>) ?? {},
     confidence: Number(r.confidence ?? 1),
-    degree: allRelationships.filter((rel) => rel.fromEntityId === r.id || rel.toEntityId === r.id).length,
+    degree: allRelationships.filter((rel) => rel.fromEntityId === r.id || rel.toEntityId === r.id)
+      .length,
   }));
 
   return {
@@ -427,7 +445,12 @@ export async function findPaths(
 
   const paths: GraphPath[] = [];
 
-  for (const row of sqlResult.rows as Array<{ full_path: string[]; rel_ids: string[]; total_strength: number; depth: number }>) {
+  for (const row of sqlResult.rows as Array<{
+    full_path: string[];
+    rel_ids: string[];
+    total_strength: number;
+    depth: number;
+  }>) {
     const entityIds = row.full_path;
     const relIds = row.rel_ids;
 
@@ -435,7 +458,9 @@ export async function findPaths(
       `SELECT * FROM kg_entities WHERE id = ANY($1) AND ($2::text IS NULL OR tenant_id IS NULL OR tenant_id = $2)`,
       [entityIds, tenantId],
     );
-    const relsResult = await pool.query(`SELECT * FROM kg_relationships WHERE id = ANY($1)`, [relIds]);
+    const relsResult = await pool.query(`SELECT * FROM kg_relationships WHERE id = ANY($1)`, [
+      relIds,
+    ]);
 
     const entityMap = new Map<string, GraphEntity>(
       entitiesResult.rows.map((e: Record<string, unknown>) => [
@@ -577,7 +602,9 @@ export async function detectCommunities(
 
     const degreeMap = new Map<string, number>();
     for (const { neighbor } of [...adjacency.entries()].flatMap(([id, ns]) =>
-      memberIds.includes(id) ? ns.filter((n) => memberIds.includes(n.neighbor)).map((n) => ({ ...n, from: id })) : []
+      memberIds.includes(id)
+        ? ns.filter((n) => memberIds.includes(n.neighbor)).map((n) => ({ ...n, from: id }))
+        : [],
     )) {
       degreeMap.set(neighbor, (degreeMap.get(neighbor) ?? 0) + 1);
     }
@@ -594,7 +621,8 @@ export async function detectCommunities(
     const totalPossibleEdges = (memberIds.length * (memberIds.length - 1)) / 2;
     const actualEdges = relsResult.rows.filter(
       (r: Record<string, unknown>) =>
-        memberIds.includes(r.from_entity_id as string) && memberIds.includes(r.to_entity_id as string),
+        memberIds.includes(r.from_entity_id as string) &&
+        memberIds.includes(r.to_entity_id as string),
     ).length;
     const cohesion = totalPossibleEdges > 0 ? actualEdges / totalPossibleEdges : 0;
 
@@ -676,7 +704,7 @@ export async function findSimilarEntities(
   const queryEmbedding = await generateEmbedding(query);
   const embeddingLiteral = toVectorLiteral(queryEmbedding);
 
-  const conditions: string[] = ["e.is_active = true", "e.embedding IS NOT NULL"];
+  const conditions: string[] = ['e.is_active = true', 'e.embedding IS NOT NULL'];
   const params: unknown[] = [embeddingLiteral];
   let p = 2;
 
@@ -697,7 +725,7 @@ export async function findSimilarEntities(
   const result = await pool.query(
     `SELECT e.*, 1 - (e.embedding <=> $1::vector) AS score
      FROM kg_entities e
-     WHERE ${conditions.join(" AND ")}
+     WHERE ${conditions.join(' AND ')}
      ORDER BY e.embedding <=> $1::vector
      LIMIT $${p}`,
     params,
@@ -740,7 +768,7 @@ export async function detectCrossDomainLinks(
   // or link candidates. A tenant-scoped caller who supplies an arbitrary UUID
   // must not receive cross-tenant entity metadata.
   const srcParams: unknown[] = [sourceEntity.id];
-  const srcTenantClause = tenantId ? `AND (tenant_id IS NULL OR tenant_id = $2)` : "";
+  const srcTenantClause = tenantId ? `AND (tenant_id IS NULL OR tenant_id = $2)` : '';
   if (tenantId) srcParams.push(tenantId);
 
   const sourceEntityFull = await pool.query(
@@ -750,10 +778,11 @@ export async function detectCrossDomainLinks(
   const src = sourceEntityFull.rows[0] as Record<string, unknown> | undefined;
   if (!src) return [];
 
-  const tenantFilter = tenantId
-    ? `AND (tenant_id IS NULL OR tenant_id = $3)`
-    : "";
-  const queryParams: unknown[] = [targetDomains, `%${sourceEntity.name.split(" ").slice(0, 2).join("%")}%`];
+  const tenantFilter = tenantId ? `AND (tenant_id IS NULL OR tenant_id = $3)` : '';
+  const queryParams: unknown[] = [
+    targetDomains,
+    `%${sourceEntity.name.split(' ').slice(0, 2).join('%')}%`,
+  ];
   if (tenantId) queryParams.push(tenantId);
 
   const targetEntities = await pool.query(
@@ -764,18 +793,18 @@ export async function detectCrossDomainLinks(
   for (const target of targetEntities.rows as Record<string, unknown>[]) {
     if (target.id === sourceEntity.id) continue;
 
-    let suggestedRelationship = "relates_to";
+    let suggestedRelationship = 'relates_to';
     let confidence = 0.6;
-    let reason = "Name similarity";
+    let reason = 'Name similarity';
 
     if (target.entity_type === src.entity_type) {
       confidence += 0.1;
-      reason += " + same type";
+      reason += ' + same type';
     }
     if ((target.name as string).toLowerCase() === (src.name as string).toLowerCase()) {
       confidence = 0.95;
-      suggestedRelationship = "same_as";
-      reason = "Exact name match";
+      suggestedRelationship = 'same_as';
+      reason = 'Exact name match';
     }
 
     candidates.push({
@@ -823,11 +852,11 @@ export async function getGraphStats(
 
   const domainArgs: unknown[] = [];
   const tArgs: unknown[] = [];
-  let domainFilter = "";
-  let tenantFilter = "";
+  let domainFilter = '';
+  let tenantFilter = '';
   // tenantFilterSolo is used for queries that do NOT already include a domain
   // parameter — its placeholder is always $1 so it matches tArgs = [tenantId].
-  let tenantFilterSolo = "";
+  let tenantFilterSolo = '';
   if (domain) {
     domainArgs.push(domain);
     domainFilter = `AND domain = $1`;
@@ -859,10 +888,13 @@ export async function getGraphStats(
     const dp = relArgs.length;
     relClauses.push(`(e_from.domain = $${dp} OR e_to.domain = $${dp})`);
   }
-  const relWhereClause = relClauses.length > 0 ? `AND ${relClauses.join(" AND ")}` : "";
+  const relWhereClause = relClauses.length > 0 ? `AND ${relClauses.join(' AND ')}` : '';
 
   const [entities, rels, crossDomain, byDomain, byType, byRelType] = await Promise.all([
-    pool.query(`SELECT COUNT(*)::int AS total FROM kg_entities WHERE is_active = true ${combinedFilter}`, combinedArgs),
+    pool.query(
+      `SELECT COUNT(*)::int AS total FROM kg_entities WHERE is_active = true ${combinedFilter}`,
+      combinedArgs,
+    ),
     pool.query(
       `SELECT COUNT(DISTINCT r.id)::int AS total
        FROM kg_relationships r
@@ -879,8 +911,14 @@ export async function getGraphStats(
        WHERE r.is_cross_domain = true ${relWhereClause}`,
       relArgs,
     ),
-    pool.query(`SELECT domain, COUNT(*)::int AS count FROM kg_entities WHERE is_active = true ${tenantFilterSolo} GROUP BY domain`, tArgs),
-    pool.query(`SELECT entity_type, COUNT(*)::int AS count FROM kg_entities WHERE is_active = true ${combinedFilter} GROUP BY entity_type`, combinedArgs),
+    pool.query(
+      `SELECT domain, COUNT(*)::int AS count FROM kg_entities WHERE is_active = true ${tenantFilterSolo} GROUP BY domain`,
+      tArgs,
+    ),
+    pool.query(
+      `SELECT entity_type, COUNT(*)::int AS count FROM kg_entities WHERE is_active = true ${combinedFilter} GROUP BY entity_type`,
+      combinedArgs,
+    ),
     pool.query(
       `SELECT r.relationship_type, COUNT(DISTINCT r.id)::int AS count
        FROM kg_relationships r
@@ -896,8 +934,20 @@ export async function getGraphStats(
     totalEntities: (entities.rows[0] as { total: number }).total,
     totalRelationships: (rels.rows[0] as { total: number }).total,
     crossDomainLinks: (crossDomain.rows[0] as { total: number }).total,
-    byDomain: Object.fromEntries((byDomain.rows as Array<{ domain: string; count: number }>).map((r) => [r.domain, r.count])),
-    byEntityType: Object.fromEntries((byType.rows as Array<{ entity_type: string; count: number }>).map((r) => [r.entity_type, r.count])),
-    byRelationshipType: Object.fromEntries((byRelType.rows as Array<{ relationship_type: string; count: number }>).map((r) => [r.relationship_type, r.count])),
+    byDomain: Object.fromEntries(
+      (byDomain.rows as Array<{ domain: string; count: number }>).map((r) => [r.domain, r.count]),
+    ),
+    byEntityType: Object.fromEntries(
+      (byType.rows as Array<{ entity_type: string; count: number }>).map((r) => [
+        r.entity_type,
+        r.count,
+      ]),
+    ),
+    byRelationshipType: Object.fromEntries(
+      (byRelType.rows as Array<{ relationship_type: string; count: number }>).map((r) => [
+        r.relationship_type,
+        r.count,
+      ]),
+    ),
   };
 }

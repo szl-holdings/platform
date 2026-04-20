@@ -9,9 +9,10 @@
  * Stubs return the correct response envelope so callers can be coded against
  * the contract immediately.
  */
-import { Router, type IRouter } from "express";
-import type { Request, Response } from "express";
-import { z } from "zod";
+
+import type { Request, Response } from 'express';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
 
 const router: IRouter = Router();
 
@@ -30,53 +31,53 @@ const RerankSchema = z.object({
 
 const OpenAIEmbedSchema = z.object({
   input: z.union([z.string(), z.array(z.string())]),
-  model: z.string().default("text-embedding-ada-002"),
-  encoding_format: z.enum(["float", "base64"]).optional(),
+  model: z.string().default('text-embedding-ada-002'),
+  encoding_format: z.enum(['float', 'base64']).optional(),
 });
 
-router.post("/embed", (req: Request, res: Response): void => {
+router.post('/embed', (req: Request, res: Response): void => {
   const parse = EmbedSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: "Validation failed", issues: parse.error.issues });
+    res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
 
   const { texts, model, backend } = parse.data;
-  const tenantId = req.tenantCtx?.tenantId ?? "default";
+  const tenantId = req.tenantCtx?.tenantId ?? 'default';
 
   res.status(200).json({
     tenantId,
-    model: model ?? "dev-hash",
-    backend: backend ?? "cpu-local",
+    model: model ?? 'dev-hash',
+    backend: backend ?? 'cpu-local',
     embeddings: texts.map((t) => ({ text: t, vector: [], dimensions: 0 })),
-    note: "Embedding backend not yet wired — returns zero-dimension stubs. Connect retrieval-core EmbeddingBackend.",
+    note: 'Embedding backend not yet wired — returns zero-dimension stubs. Connect retrieval-core EmbeddingBackend.',
   });
 });
 
-router.post("/rerank", (req: Request, res: Response): void => {
+router.post('/rerank', (req: Request, res: Response): void => {
   const parse = RerankSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: "Validation failed", issues: parse.error.issues });
+    res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
 
   const { query, passages, topN, model } = parse.data;
-  const tenantId = req.tenantCtx?.tenantId ?? "default";
+  const tenantId = req.tenantCtx?.tenantId ?? 'default';
   const limit = topN ?? passages.length;
 
   res.status(200).json({
     query,
     tenantId,
-    model: model ?? "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    model: model ?? 'cross-encoder/ms-marco-MiniLM-L-6-v2',
     reranked: passages.slice(0, limit).map((text, i) => ({ rank: i + 1, text, score: 0 })),
-    note: "Reranking backend not yet wired — returns original order with zero scores. Connect retrieval-core RerankPipeline.",
+    note: 'Reranking backend not yet wired — returns original order with zero scores. Connect retrieval-core RerankPipeline.',
   });
 });
 
-router.post("/openai/embeddings", (req: Request, res: Response): void => {
+router.post('/openai/embeddings', (req: Request, res: Response): void => {
   const parse = OpenAIEmbedSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: "Validation failed", issues: parse.error.issues });
+    res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
 
@@ -84,9 +85,9 @@ router.post("/openai/embeddings", (req: Request, res: Response): void => {
   const texts = Array.isArray(input) ? input : [input];
 
   res.status(200).json({
-    object: "list",
+    object: 'list',
     model,
-    data: texts.map((_, i) => ({ object: "embedding", index: i, embedding: [] })),
+    data: texts.map((_, i) => ({ object: 'embedding', index: i, embedding: [] })),
     usage: { prompt_tokens: 0, total_tokens: 0 },
   });
 });

@@ -1,4 +1,4 @@
-import type { EmbeddingBackend, PoolingStrategy, TruncationPolicy } from "./backends/interface.js";
+import type { EmbeddingBackend, PoolingStrategy, TruncationPolicy } from './backends/interface.js';
 
 export interface BatchItem {
   texts: string[];
@@ -35,7 +35,7 @@ const DEFAULT_CONFIG: MicroBatchQueueConfig = {
   maxBatchSize: 32,
   flushIntervalMs: 20,
   maxTokens: 512,
-  truncationPolicy: "truncate",
+  truncationPolicy: 'truncate',
 };
 
 export class MicroBatchQueue {
@@ -78,7 +78,7 @@ export class MicroBatchQueue {
 
     this.batches.delete(keyStr);
 
-    const [backendId, model, pooling] = keyStr.split("|") as [string, string, PoolingStrategy];
+    const [backendId, model, pooling] = keyStr.split('|') as [string, string, PoolingStrategy];
     const backend = this.backends.get(backendId);
 
     if (!backend) {

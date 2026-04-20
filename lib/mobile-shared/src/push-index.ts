@@ -1,9 +1,12 @@
 export {
-  PUSH_NOTIFICATION_HANDLER,
-  configurePushNotificationHandler,
-  registerForPushNotificationsAsync,
+  type UsePushNotificationsBaseOptions,
+  usePushNotificationsBase,
+} from './hooks/usePushNotificationsBase';
+export {
   addNotificationReceivedListener,
   addNotificationResponseReceivedListener,
+  configurePushNotificationHandler,
+  PUSH_NOTIFICATION_HANDLER,
+  registerForPushNotificationsAsync,
   scheduleLocalNotification,
-} from "./notifications";
-export { usePushNotificationsBase, type UsePushNotificationsBaseOptions } from "./hooks/usePushNotificationsBase";
+} from './notifications';

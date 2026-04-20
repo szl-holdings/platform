@@ -1,22 +1,22 @@
-import { randomUUID } from "crypto";
-import { defaultTraceStore } from "@workspace/trace-graph";
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
-import type { MemoryEntry } from "@workspace/memory-fabric";
-import { scoreTrace, extractBestRoute } from "./scorer.js";
-import { classifyFailureMode } from "./classifier.js";
-import { writeLessons } from "./lesson-writer.js";
-import { shouldDraftSkill, draftCandidateSkill } from "./skill-drafter.js";
-import { defaultReflectionStore } from "./store.js";
-import { defaultCandidateSkillLibrary } from "./candidate-skill-library.js";
-import type { CandidateSkillLibrary } from "./candidate-skill-library.js";
-import type { Reflection } from "./types.js";
+import type { MemoryEntry } from '@workspace/memory-fabric';
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import { defaultTraceStore } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
+import type { CandidateSkillLibrary } from './candidate-skill-library.js';
+import { defaultCandidateSkillLibrary } from './candidate-skill-library.js';
+import { classifyFailureMode } from './classifier.js';
+import { writeLessons } from './lesson-writer.js';
+import { extractBestRoute, scoreTrace } from './scorer.js';
+import { draftCandidateSkill, shouldDraftSkill } from './skill-drafter.js';
+import { defaultReflectionStore } from './store.js';
+import type { Reflection } from './types.js';
 
 export interface ReflectOptions {
   traceStore?: typeof defaultTraceStore;
   memoryStore?: typeof defaultMemoryStore;
   reflectionStore?: typeof defaultReflectionStore;
   skillLibrary?: CandidateSkillLibrary;
-  onSkillDrafted?: (skill: import("./types.js").CandidateSkill) => void;
+  onSkillDrafted?: (skill: import('./types.js').CandidateSkill) => void;
   /**
    * Domain to tag the reflection's memory entries with so executive briefings
    * and other domain-scoped readers can find them. Defaults to
@@ -28,14 +28,11 @@ export interface ReflectOptions {
 export class TraceNotFoundError extends Error {
   constructor(traceId: string) {
     super(`Trace not found: ${traceId}`);
-    this.name = "TraceNotFoundError";
+    this.name = 'TraceNotFoundError';
   }
 }
 
-export async function reflect(
-  traceId: string,
-  options: ReflectOptions = {},
-): Promise<Reflection> {
+export async function reflect(traceId: string, options: ReflectOptions = {}): Promise<Reflection> {
   const traceStore = options.traceStore ?? defaultTraceStore;
   const memoryStore = options.memoryStore ?? defaultMemoryStore;
   const reflectionStore = options.reflectionStore ?? defaultReflectionStore;
@@ -51,12 +48,16 @@ export async function reflect(
   const score = scoreTrace(trace);
   const failureMode = classifyFailureMode(trace);
   const bestRoute = extractBestRoute(trace);
-  const { whatWorked, whatFailed, whatWasMissing, whatToTryNext, lesson } =
-    writeLessons(trace, score, failureMode, bestRoute);
+  const { whatWorked, whatFailed, whatWasMissing, whatToTryNext, lesson } = writeLessons(
+    trace,
+    score,
+    failureMode,
+    bestRoute,
+  );
 
   const skillLibrary = options.skillLibrary ?? defaultCandidateSkillLibrary;
 
-  let candidateSkill: Reflection["candidateSkill"] = undefined;
+  let candidateSkill: Reflection['candidateSkill'];
   if (shouldDraftSkill(trace, score, failureMode)) {
     candidateSkill = draftCandidateSkill(trace, score);
     skillLibrary.registerDraft(candidateSkill);
@@ -66,12 +67,12 @@ export async function reflect(
   }
 
   const now = new Date().toISOString();
-  const memoryIds: Reflection["memoryIds"] = {};
+  const memoryIds: Reflection['memoryIds'] = {};
 
   const episodicId = `reflection-episodic-${traceId}`;
   const episodicEntry: MemoryEntry = {
     id: episodicId,
-    tier: "episodic",
+    tier: 'episodic',
     key: `reflection:${traceId}`,
     value: {
       traceId,
@@ -83,9 +84,9 @@ export async function reflect(
       whatToTryNext,
     },
     provenance: {
-      source: "reflection-engine",
+      source: 'reflection-engine',
       sourceId: traceId,
-      method: "derived",
+      method: 'derived',
       createdAt: now,
     },
     freshness: {
@@ -93,12 +94,12 @@ export async function reflect(
       isStale: false,
     },
     confidence: score.overall,
-    retention: { policy: "persistent", pinned: false },
-    sensitivity: "internal",
+    retention: { policy: 'persistent', pinned: false },
+    sensitivity: 'internal',
     linkedEntities: [],
     linkedTraces: [traceId],
     linkedActions: [],
-    tags: ["reflection", "lesson", `failure:${failureMode}`],
+    tags: ['reflection', 'lesson', `failure:${failureMode}`],
     domain: options.domain ?? MEMORY_DOMAIN_UNKNOWN,
     metadata: { qualityScore: score.overall, failureMode },
   };
@@ -109,13 +110,13 @@ export async function reflect(
     const skillMemoryId = `reflection-skill-${candidateSkill.skillId}`;
     const skillEntry: MemoryEntry = {
       id: skillMemoryId,
-      tier: "skill",
+      tier: 'skill',
       key: `candidate-skill:${candidateSkill.skillId}`,
       value: candidateSkill,
       provenance: {
-        source: "reflection-engine",
+        source: 'reflection-engine',
         sourceId: traceId,
-        method: "derived",
+        method: 'derived',
         createdAt: now,
       },
       freshness: {
@@ -123,12 +124,12 @@ export async function reflect(
         isStale: false,
       },
       confidence: score.overall,
-      retention: { policy: "persistent", pinned: false },
-      sensitivity: "internal",
+      retention: { policy: 'persistent', pinned: false },
+      sensitivity: 'internal',
       linkedEntities: [],
       linkedTraces: [traceId],
       linkedActions: [],
-      tags: ["candidate-skill", "draft", candidateSkill.category],
+      tags: ['candidate-skill', 'draft', candidateSkill.category],
       domain: options.domain ?? MEMORY_DOMAIN_UNKNOWN,
       metadata: { skillId: candidateSkill.skillId, derivedFromTraceId: traceId },
     };

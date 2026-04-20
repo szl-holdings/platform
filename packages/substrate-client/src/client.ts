@@ -27,30 +27,30 @@
  */
 
 import type {
-  SubstrateClientOptions,
-  SubmitRunResponse,
+  ApprovalActionResponse,
+  ApprovalListResponse,
+  ApprovalVerdict,
+  CounterfactualResponse,
+  ExecutionMode,
   PipelineRunSummary,
   ReplayResponse,
-  CounterfactualResponse,
-  ApprovalListResponse,
-  ApprovalActionResponse,
+  SubmitRunResponse,
+  SubstrateClientOptions,
   WorkflowListResponse,
-  ApprovalVerdict,
-  ExecutionMode,
-} from "./types.js";
-import { SubstrateClientError } from "./types.js";
+} from './types.js';
+import { SubstrateClientError } from './types.js';
 
 // ─── JSON-RPC Helpers ─────────────────────────────────────────────────────────
 
 interface JsonRpcRequest {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: number;
   method: string;
   params: Record<string, unknown> | undefined;
 }
 
 interface JsonRpcResponse<T = unknown> {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: number | null;
   result?: T;
   error?: { code: number; message: string; data?: unknown };
@@ -71,7 +71,7 @@ export class SubstrateClient {
   private readonly _fetch: typeof fetch;
 
   constructor(options: SubstrateClientOptions) {
-    this.baseUrl = options.baseUrl.replace(/\/$/, "");
+    this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.apiKey = options.apiKey;
     this.timeoutMs = options.timeoutMs ?? 30_000;
     this._fetch = options.fetch ?? globalThis.fetch;
@@ -79,23 +79,20 @@ export class SubstrateClient {
 
   // ─── Internal RPC ──────────────────────────────────────────────────────────
 
-  private async rpc<T>(
-    method: string,
-    params?: Record<string, unknown>,
-  ): Promise<T> {
+  private async rpc<T>(method: string, params?: Record<string, unknown>): Promise<T> {
     const body: JsonRpcRequest = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: nextId(),
       method,
       params,
     };
 
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     };
     if (this.apiKey) {
-      headers["Authorization"] = `Bearer ${this.apiKey}`;
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
     }
 
     const controller = new AbortController();
@@ -104,7 +101,7 @@ export class SubstrateClient {
     let res: Response;
     try {
       res = await this._fetch(`${this.baseUrl}/mcp`, {
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify(body),
         signal: controller.signal,
@@ -119,41 +116,35 @@ export class SubstrateClient {
     }
 
     if (!res.ok) {
-      throw new SubstrateClientError(
-        `HTTP error ${res.status}`,
-        -32603,
-        { status: res.status, statusText: res.statusText },
-      );
+      throw new SubstrateClientError(`HTTP error ${res.status}`, -32603, {
+        status: res.status,
+        statusText: res.statusText,
+      });
     }
 
     const json = (await res.json()) as JsonRpcResponse<T>;
 
     if (json.error) {
-      throw new SubstrateClientError(
-        json.error.message,
-        json.error.code,
-        json.error.data,
-      );
+      throw new SubstrateClientError(json.error.message, json.error.code, json.error.data);
     }
 
     return json.result as T;
   }
 
-  private async toolCall<T>(
-    toolName: string,
-    args: Record<string, unknown>,
-  ): Promise<T> {
-    const result = await this.rpc<{ content: Array<{ type: "text"; text: string }>; isError?: boolean }>(
-      "tools/call",
-      { name: toolName, arguments: args },
-    );
+  private async toolCall<T>(toolName: string, args: Record<string, unknown>): Promise<T> {
+    const result = await this.rpc<{
+      content: Array<{ type: 'text'; text: string }>;
+      isError?: boolean;
+    }>('tools/call', { name: toolName, arguments: args });
 
-    const text = result.content?.[0]?.text ?? "{}";
+    const text = result.content?.[0]?.text ?? '{}';
     let parsed: unknown;
     try {
       parsed = JSON.parse(text);
     } catch {
-      throw new SubstrateClientError(`Invalid JSON response from tool ${toolName}`, -32603, { raw: text });
+      throw new SubstrateClientError(`Invalid JSON response from tool ${toolName}`, -32603, {
+        raw: text,
+      });
     }
 
     if (result.isError) {
@@ -180,10 +171,10 @@ export class SubstrateClient {
     mode?: ExecutionMode;
     metadata?: Record<string, unknown>;
   }): Promise<SubmitRunResponse> {
-    return this.toolCall<SubmitRunResponse>("substrate_submit_run", {
+    return this.toolCall<SubmitRunResponse>('substrate_submit_run', {
       workflowId: options.workflowId,
       input: options.input,
-      mode: options.mode ?? "live",
+      mode: options.mode ?? 'live',
       ...(options.metadata ? { metadata: options.metadata } : {}),
     });
   }
@@ -192,18 +183,15 @@ export class SubstrateClient {
    * Get the current state of a run by ID.
    */
   async getRun(runId: string): Promise<PipelineRunSummary> {
-    return this.toolCall<PipelineRunSummary>("substrate_get_run", { runId });
+    return this.toolCall<PipelineRunSummary>('substrate_get_run', { runId });
   }
 
   /**
    * Replay a completed run from its journal.
    * Returns a new ReplayResponse with the replay run ID.
    */
-  async replay(options: {
-    runId: string;
-    workflowId: string;
-  }): Promise<ReplayResponse> {
-    return this.toolCall<ReplayResponse>("substrate_replay", {
+  async replay(options: { runId: string; workflowId: string }): Promise<ReplayResponse> {
+    return this.toolCall<ReplayResponse>('substrate_replay', {
       runId: options.runId,
       workflowId: options.workflowId,
     });
@@ -219,7 +207,7 @@ export class SubstrateClient {
     modelAdapterId?: string;
     policyId?: string;
   }): Promise<CounterfactualResponse> {
-    return this.toolCall<CounterfactualResponse>("substrate_counterfactual", {
+    return this.toolCall<CounterfactualResponse>('substrate_counterfactual', {
       runId: options.runId,
       workflowId: options.workflowId,
       ...(options.modelAdapterId ? { modelAdapterId: options.modelAdapterId } : {}),
@@ -235,7 +223,7 @@ export class SubstrateClient {
     verdict?: ApprovalVerdict;
     domain?: string;
   }): Promise<ApprovalListResponse> {
-    return this.toolCall<ApprovalListResponse>("substrate_list_approvals", {
+    return this.toolCall<ApprovalListResponse>('substrate_list_approvals', {
       ...(options?.verdict ? { verdict: options.verdict } : {}),
       ...(options?.domain ? { domain: options.domain } : {}),
     });
@@ -251,7 +239,7 @@ export class SubstrateClient {
     note?: string;
     domain?: string;
   }): Promise<ApprovalActionResponse> {
-    return this.toolCall<ApprovalActionResponse>("substrate_approve", {
+    return this.toolCall<ApprovalActionResponse>('substrate_approve', {
       recommendationId: options.recommendationId,
       ...(options.actor ? { actor: options.actor } : {}),
       ...(options.note ? { note: options.note } : {}),
@@ -269,7 +257,7 @@ export class SubstrateClient {
     actor?: string;
     domain?: string;
   }): Promise<ApprovalActionResponse> {
-    return this.toolCall<ApprovalActionResponse>("substrate_reject", {
+    return this.toolCall<ApprovalActionResponse>('substrate_reject', {
       recommendationId: options.recommendationId,
       note: options.note,
       ...(options.actor ? { actor: options.actor } : {}),
@@ -281,7 +269,7 @@ export class SubstrateClient {
    * List all registered workflows in the Substrate runtime.
    */
   async listWorkflows(): Promise<WorkflowListResponse> {
-    return this.toolCall<WorkflowListResponse>("substrate_list_workflows", {});
+    return this.toolCall<WorkflowListResponse>('substrate_list_workflows', {});
   }
 
   // ─── Discovery ─────────────────────────────────────────────────────────────
@@ -295,14 +283,16 @@ export class SubstrateClient {
     capabilities: unknown;
     serverInfo: { name: string; version: string };
   }> {
-    return this.rpc("initialize");
+    return this.rpc('initialize');
   }
 
   /**
    * List all available tools with their full JSON Schema definitions.
    */
-  async listTools(): Promise<{ tools: Array<{ name: string; description: string; inputSchema: unknown }> }> {
-    return this.rpc("tools/list");
+  async listTools(): Promise<{
+    tools: Array<{ name: string; description: string; inputSchema: unknown }>;
+  }> {
+    return this.rpc('tools/list');
   }
 
   /**
@@ -319,7 +309,13 @@ export class SubstrateClient {
     if (!res.ok) {
       throw new SubstrateClientError(`Health check failed: HTTP ${res.status}`, -32603);
     }
-    return res.json() as Promise<{ status: string; service: string; version: string; toolCount: number; timestamp: string }>;
+    return res.json() as Promise<{
+      status: string;
+      service: string;
+      version: string;
+      toolCount: number;
+      timestamp: string;
+    }>;
   }
 
   // ─── SSE URL ──────────────────────────────────────────────────────────────

@@ -1,12 +1,8 @@
-export type RedactionHook = (
-  value: unknown,
-  fieldName: string,
-  tenantId: string,
-) => unknown;
+export type RedactionHook = (value: unknown, fieldName: string, tenantId: string) => unknown;
 
 export class RedactionRegistry {
   private readonly hooks = new Map<string, RedactionHook>();
-  private readonly defaultMask = "[REDACTED]";
+  private readonly defaultMask = '[REDACTED]';
 
   registerHook(fieldName: string, hook: RedactionHook): void {
     this.hooks.set(fieldName, hook);

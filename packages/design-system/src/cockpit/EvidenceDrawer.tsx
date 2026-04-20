@@ -1,14 +1,14 @@
-import { useEffect, useRef } from "react";
-import { X, ExternalLink, Clock, Shield, Link2 } from "lucide-react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
-import { FreshnessChip, type FreshnessLevel } from "../proof/FreshnessChip.js";
-import { ConfidenceMeter } from "../proof/ConfidenceMeter.js";
-import { PolicyStateChip, type PolicyState } from "../proof/PolicyStateChip.js";
+import { Clock, ExternalLink, Link2, Shield, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { ConfidenceMeter } from '../proof/ConfidenceMeter.js';
+import { FreshnessChip, type FreshnessLevel } from '../proof/FreshnessChip.js';
+import { type PolicyState, PolicyStateChip } from '../proof/PolicyStateChip.js';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface EvidenceItem {
   evidenceId: string;
-  kind: "raw" | "normalized" | "derived";
+  kind: 'raw' | 'normalized' | 'derived';
   source: string;
   ref: string;
   summary: string;
@@ -31,16 +31,16 @@ export interface EvidenceDrawerProps {
   accent?: string;
 }
 
-const KIND_LABELS: Record<EvidenceItem["kind"], { label: string; accentColor: string }> = {
-  raw:        { label: "RAW",     accentColor: color.accent.blue },
-  normalized: { label: "NORM",    accentColor: color.accent.violet },
-  derived:    { label: "DERIVED", accentColor: color.accent.violet },
+const KIND_LABELS: Record<EvidenceItem['kind'], { label: string; accentColor: string }> = {
+  raw: { label: 'RAW', accentColor: color.accent.blue },
+  normalized: { label: 'NORM', accentColor: color.accent.violet },
+  derived: { label: 'DERIVED', accentColor: color.accent.violet },
 };
 
 export function EvidenceDrawer({
   open,
   onClose,
-  title = "Evidence",
+  title = 'Evidence',
   evidence,
   className,
   accent = color.accent.violet,
@@ -50,10 +50,10 @@ export function EvidenceDrawer({
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
   if (!open) return null;
@@ -62,7 +62,7 @@ export function EvidenceDrawer({
     <>
       <div
         className="fixed inset-0 z-40"
-        style={{ background: "rgba(6,11,18,0.65)" }}
+        style={{ background: 'rgba(6,11,18,0.65)' }}
         onClick={onClose}
         aria-hidden="true"
       />
@@ -72,8 +72,8 @@ export function EvidenceDrawer({
         role="dialog"
         aria-label={title}
         className={cn(
-          "fixed right-0 top-0 bottom-0 z-50 flex w-[420px] max-w-[95vw] flex-col shadow-2xl transition-transform duration-200",
-          open ? "translate-x-0" : "translate-x-full",
+          'fixed right-0 top-0 bottom-0 z-50 flex w-[420px] max-w-[95vw] flex-col shadow-2xl transition-transform duration-200',
+          open ? 'translate-x-0' : 'translate-x-full',
           className,
         )}
         style={{ background: color.bg.surface, borderLeft: `2px solid ${accent}` }}
@@ -83,9 +83,11 @@ export function EvidenceDrawer({
           style={{ borderBottom: `1px solid ${color.border.subtle}` }}
         >
           <div>
-            <div className="text-sm font-semibold" style={{ color: color.text.primary }}>{title}</div>
+            <div className="text-sm font-semibold" style={{ color: color.text.primary }}>
+              {title}
+            </div>
             <div className="mt-0.5 text-xs" style={{ color: color.text.muted }}>
-              {evidence.length} evidence item{evidence.length !== 1 ? "s" : ""}
+              {evidence.length} evidence item{evidence.length !== 1 ? 's' : ''}
             </div>
           </div>
           <button
@@ -94,8 +96,8 @@ export function EvidenceDrawer({
             style={{
               border: `1px solid ${color.border.subtle}`,
               color: color.text.muted,
-              background: "transparent",
-              cursor: "pointer",
+              background: 'transparent',
+              cursor: 'pointer',
             }}
           >
             <X className="h-3.5 w-3.5" />
@@ -106,7 +108,9 @@ export function EvidenceDrawer({
           {evidence.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Shield className="mb-3 h-8 w-8" style={{ color: color.border.subtle }} />
-              <p className="text-sm" style={{ color: color.text.muted }}>No evidence recorded</p>
+              <p className="text-sm" style={{ color: color.text.muted }}>
+                No evidence recorded
+              </p>
             </div>
           )}
 
@@ -133,7 +137,10 @@ export function EvidenceDrawer({
                     >
                       {kd.label}
                     </span>
-                    <span className="truncate text-xs font-medium" style={{ color: color.text.primary }}>
+                    <span
+                      className="truncate text-xs font-medium"
+                      style={{ color: color.text.primary }}
+                    >
                       {item.source}
                     </span>
                   </div>
@@ -187,11 +194,15 @@ export function EvidenceDrawer({
                     }}
                   >
                     <Clock className="h-3 w-3 shrink-0" style={{ color: color.accent.amber }} />
-                    <span className="text-xs" style={{ color: color.accent.amber }}>{item.changeNote}</span>
+                    <span className="text-xs" style={{ color: color.accent.amber }}>
+                      {item.changeNote}
+                    </span>
                   </div>
                 )}
 
-                <div className="font-mono text-xs" style={{ color: color.text.muted }}>{item.ref}</div>
+                <div className="font-mono text-xs" style={{ color: color.text.muted }}>
+                  {item.ref}
+                </div>
               </div>
             );
           })}

@@ -1,6 +1,6 @@
-import React from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface SegmentedControlOption<T extends string = string> {
   value: T;
@@ -23,7 +23,7 @@ export function SegmentedControl<T extends string = string>({
 }: SegmentedControlProps<T>) {
   return (
     <div
-      className={cn("flex items-center rounded-md p-0.5", className)}
+      className={cn('flex items-center rounded-md p-0.5', className)}
       style={{ background: color.bg.overlay, border: `1px solid ${color.border.subtle}` }}
       role="group"
     >
@@ -37,15 +37,15 @@ export function SegmentedControl<T extends string = string>({
             onClick={() => !option.disabled && onChange(option.value)}
             className="rounded px-3 text-xs font-medium transition-colors"
             style={{
-              height: "28px",
-              background: isActive ? color.bg.active : "transparent",
+              height: '28px',
+              background: isActive ? color.bg.active : 'transparent',
               color: isActive
                 ? color.text.primary
                 : option.disabled
                   ? color.border.default
                   : color.text.secondary,
-              border: "none",
-              cursor: option.disabled ? "not-allowed" : "pointer",
+              border: 'none',
+              cursor: option.disabled ? 'not-allowed' : 'pointer',
             }}
           >
             {option.label}

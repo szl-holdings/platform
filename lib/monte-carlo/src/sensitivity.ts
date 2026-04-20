@@ -1,6 +1,6 @@
-import { sample, type Distribution } from "./distributions.js";
-import type { ScenarioDefinition, InputVariable } from "./schema.js";
-import type { SimulationResult } from "./engine.js";
+import { type Distribution, sample } from './distributions.js';
+import type { SimulationResult } from './engine.js';
+import type { InputVariable, ScenarioDefinition } from './schema.js';
 
 export interface TornadoEntry {
   inputId: string;
@@ -12,7 +12,7 @@ export interface TornadoEntry {
   swing: number;
   impactPct: number;
   rank: number;
-  direction: "positive" | "negative" | "mixed";
+  direction: 'positive' | 'negative' | 'mixed';
 }
 
 export interface SensitivityReport {
@@ -37,7 +37,7 @@ export function computeSensitivity(
   scenario: ScenarioDefinition,
   simulationResult: SimulationResult,
   outputId: string,
-  samplesPerVariable = 200
+  samplesPerVariable = 200,
 ): SensitivityReport {
   const outputMetric = scenario.outputs.find((o) => o.id === outputId);
   if (!outputMetric) throw new Error(`Output '${outputId}' not found`);
@@ -58,10 +58,12 @@ export function computeSensitivity(
     const r = outputCorrelations[v.id] ?? 0;
     const inputStats = simulationResult.inputSamples[v.id];
     if (!inputStats || inputStats.length === 0) return sum;
-    const inputStdDev = Math.sqrt(inputStats.reduce((s, x) => {
-      const mean = inputStats.reduce((a, b) => a + b, 0) / inputStats.length;
-      return s + (x - mean) ** 2;
-    }, 0) / inputStats.length);
+    const inputStdDev = Math.sqrt(
+      inputStats.reduce((s, x) => {
+        const mean = inputStats.reduce((a, b) => a + b, 0) / inputStats.length;
+        return s + (x - mean) ** 2;
+      }, 0) / inputStats.length,
+    );
     return sum + Math.abs(r) * inputStdDev;
   }, 0);
 
@@ -71,7 +73,8 @@ export function computeSensitivity(
     if (inputSamples.length === 0) continue;
 
     const inputMean = inputSamples.reduce((a, b) => a + b, 0) / inputSamples.length;
-    const inputVar = inputSamples.reduce((s, x) => s + (x - inputMean) ** 2, 0) / inputSamples.length;
+    const inputVar =
+      inputSamples.reduce((s, x) => s + (x - inputMean) ** 2, 0) / inputSamples.length;
     const inputStdDev = Math.sqrt(inputVar);
 
     const perturbedOutputs: number[] = [];
@@ -82,7 +85,9 @@ export function computeSensitivity(
       try {
         const out = scenario.calculate(perturbedInputs, j)[outputId];
         if (out !== undefined && isFinite(out)) perturbedOutputs.push(out);
-      } catch { /* skip invalid iteration */ }
+      } catch {
+        /* skip invalid iteration */
+      }
     }
 
     let lowOutput: number, highOutput: number;
@@ -98,11 +103,11 @@ export function computeSensitivity(
     }
 
     const swing = Math.abs(highOutput - lowOutput);
-    const impactPct = totalSwingSum > 0 ? (Math.abs(r) * inputStdDev / totalSwingSum) * 100 : 0;
+    const impactPct = totalSwingSum > 0 ? ((Math.abs(r) * inputStdDev) / totalSwingSum) * 100 : 0;
 
-    let direction: "positive" | "negative" | "mixed" = "mixed";
-    if (r > 0.1) direction = "positive";
-    else if (r < -0.1) direction = "negative";
+    let direction: 'positive' | 'negative' | 'mixed' = 'mixed';
+    if (r > 0.1) direction = 'positive';
+    else if (r < -0.1) direction = 'negative';
 
     tornadoEntries.push({
       inputId: input.id,
@@ -119,7 +124,9 @@ export function computeSensitivity(
   }
 
   tornadoEntries.sort((a, b) => b.impactPct - a.impactPct);
-  tornadoEntries.forEach((e, i) => { e.rank = i + 1; });
+  tornadoEntries.forEach((e, i) => {
+    e.rank = i + 1;
+  });
 
   const topDriver = tornadoEntries[0];
   const criticalAssumptions: CriticalAssumption[] = tornadoEntries.slice(0, 5).map((e) => ({
@@ -139,8 +146,8 @@ export function computeSensitivity(
     outputLabel: outputMetric.label,
     baselineMean,
     tornado: tornadoEntries,
-    topDriver: topDriver?.inputId ?? "",
-    topDriverLabel: topDriver?.inputLabel ?? "",
+    topDriver: topDriver?.inputId ?? '',
+    topDriverLabel: topDriver?.inputLabel ?? '',
     criticalAssumptions,
     narrative,
   };
@@ -148,19 +155,25 @@ export function computeSensitivity(
 
 function expectedValue(dist: Distribution): number {
   switch (dist.type) {
-    case "normal": return dist.mean;
-    case "log_normal": return dist.mean;
-    case "uniform": return (dist.min + dist.max) / 2;
-    case "triangular": return (dist.min + dist.mode + dist.max) / 3;
-    case "beta": {
+    case 'normal':
+      return dist.mean;
+    case 'log_normal':
+      return dist.mean;
+    case 'uniform':
+      return (dist.min + dist.max) / 2;
+    case 'triangular':
+      return (dist.min + dist.mode + dist.max) / 3;
+    case 'beta': {
       const raw = dist.alpha / (dist.alpha + dist.beta);
       const lo = dist.min ?? 0;
       const hi = dist.max ?? 1;
       return lo + raw * (hi - lo);
     }
-    case "poisson": return dist.lambda;
-    case "constant": return dist.value;
-    case "custom": {
+    case 'poisson':
+      return dist.lambda;
+    case 'constant':
+      return dist.value;
+    case 'custom': {
       if (dist.weights) {
         const total = dist.weights.reduce((a, b) => a + b, 0);
         return dist.values.reduce((s, v, i) => s + v * (dist.weights![i]! / total), 0);
@@ -176,6 +189,11 @@ function buildAssumptionSummary(entry: TornadoEntry): string {
 
 function buildNarrative(entry: TornadoEntry, outputLabel: string, baseline: number): string {
   const pct = entry.impactPct.toFixed(0);
-  const dir = entry.direction === "positive" ? "positively" : entry.direction === "negative" ? "negatively" : "ambiguously";
+  const dir =
+    entry.direction === 'positive'
+      ? 'positively'
+      : entry.direction === 'negative'
+        ? 'negatively'
+        : 'ambiguously';
   return `${outputLabel} is ${pct}% driven by ${entry.inputLabel}, which ${dir} correlates with the outcome. Moving from P10 to P90 of this variable shifts ${outputLabel} by ${Math.abs(entry.highValue - entry.lowValue).toFixed(2)} (from ${entry.lowValue.toFixed(2)} to ${entry.highValue.toFixed(2)}).`;
 }

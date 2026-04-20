@@ -5,21 +5,21 @@ import {
   readFileSync,
   unlinkSync,
   writeFileSync,
-} from "node:fs";
-import { join } from "node:path";
+} from 'node:fs';
+import { join } from 'node:path';
 import type {
-  RawDocRecord,
   ChunkRecord,
-  VectorRecord,
-  MetadataIndexRecord,
-  EvalFixtureRecord,
-  RawDocStore,
   ChunkStore,
-  VectorStore,
-  MetadataIndexStore,
+  EvalFixtureRecord,
   EvalFixtureStore,
+  MetadataIndexRecord,
+  MetadataIndexStore,
+  RawDocRecord,
+  RawDocStore,
   StorageBundle,
-} from "./interfaces.js";
+  VectorRecord,
+  VectorStore,
+} from './interfaces.js';
 
 function ensureDir(dir: string): void {
   if (!existsSync(dir)) {
@@ -30,14 +30,14 @@ function ensureDir(dir: string): void {
 function readJson<T>(filePath: string): T | undefined {
   if (!existsSync(filePath)) return undefined;
   try {
-    return JSON.parse(readFileSync(filePath, "utf8")) as T;
+    return JSON.parse(readFileSync(filePath, 'utf8')) as T;
   } catch {
     return undefined;
   }
 }
 
 function writeJson(filePath: string, data: unknown): void {
-  writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
@@ -68,7 +68,7 @@ export class LocalFsRawDocStore implements RawDocStore {
   private readonly baseDir: string;
 
   constructor(baseDir: string) {
-    this.baseDir = join(baseDir, "raw-docs");
+    this.baseDir = join(baseDir, 'raw-docs');
     ensureDir(this.baseDir);
   }
 
@@ -114,7 +114,7 @@ export class LocalFsChunkStore implements ChunkStore {
   private readonly baseDir: string;
 
   constructor(baseDir: string) {
-    this.baseDir = join(baseDir, "chunks");
+    this.baseDir = join(baseDir, 'chunks');
     ensureDir(this.baseDir);
   }
 
@@ -191,7 +191,7 @@ export class LocalFsVectorStore implements VectorStore {
   private readonly baseDir: string;
 
   constructor(baseDir: string) {
-    this.baseDir = join(baseDir, "vectors");
+    this.baseDir = join(baseDir, 'vectors');
     ensureDir(this.baseDir);
   }
 
@@ -213,9 +213,16 @@ export class LocalFsVectorStore implements VectorStore {
     tenantId: string;
     profileId?: string;
     metadataFilter?: Record<string, unknown>;
-  }): Promise<Array<{ chunkId: string; sourceId: string; score: number; metadata: Record<string, unknown> }>> {
+  }): Promise<
+    Array<{ chunkId: string; sourceId: string; score: number; metadata: Record<string, unknown> }>
+  > {
     const files = readdirSync(this.baseDir);
-    const candidates: Array<{ chunkId: string; sourceId: string; score: number; metadata: Record<string, unknown> }> = [];
+    const candidates: Array<{
+      chunkId: string;
+      sourceId: string;
+      score: number;
+      metadata: Record<string, unknown>;
+    }> = [];
 
     for (const file of files) {
       const rec = readJson<VectorRecord>(join(this.baseDir, file));
@@ -226,13 +233,21 @@ export class LocalFsVectorStore implements VectorStore {
       if (opts.metadataFilter) {
         let match = true;
         for (const [k, v] of Object.entries(opts.metadataFilter)) {
-          if (rec.metadata[k] !== v) { match = false; break; }
+          if (rec.metadata[k] !== v) {
+            match = false;
+            break;
+          }
         }
         if (!match) continue;
       }
 
       const score = cosineSimilarity(opts.vector, rec.vector);
-      candidates.push({ chunkId: rec.chunkId, sourceId: rec.sourceId, score, metadata: rec.metadata });
+      candidates.push({
+        chunkId: rec.chunkId,
+        sourceId: rec.sourceId,
+        score,
+        metadata: rec.metadata,
+      });
     }
 
     candidates.sort((a, b) => b.score - a.score);
@@ -275,7 +290,7 @@ export class LocalFsMetadataIndexStore implements MetadataIndexStore {
   private readonly baseDir: string;
 
   constructor(baseDir: string) {
-    this.baseDir = join(baseDir, "metadata-index");
+    this.baseDir = join(baseDir, 'metadata-index');
     ensureDir(this.baseDir);
   }
 
@@ -296,9 +311,23 @@ export class LocalFsMetadataIndexStore implements MetadataIndexStore {
     topK: number;
     tenantId: string;
     metadataFilter?: Record<string, unknown>;
-  }): Promise<Array<{ chunkId: string; sourceId: string; score: number; highlights: string[]; metadata: Record<string, unknown> }>> {
+  }): Promise<
+    Array<{
+      chunkId: string;
+      sourceId: string;
+      score: number;
+      highlights: string[];
+      metadata: Record<string, unknown>;
+    }>
+  > {
     const files = readdirSync(this.baseDir);
-    const candidates: Array<{ chunkId: string; sourceId: string; score: number; highlights: string[]; metadata: Record<string, unknown> }> = [];
+    const candidates: Array<{
+      chunkId: string;
+      sourceId: string;
+      score: number;
+      highlights: string[];
+      metadata: Record<string, unknown>;
+    }> = [];
 
     for (const file of files) {
       const rec = readJson<MetadataIndexRecord>(join(this.baseDir, file));
@@ -308,7 +337,10 @@ export class LocalFsMetadataIndexStore implements MetadataIndexStore {
       if (opts.metadataFilter) {
         let match = true;
         for (const [k, v] of Object.entries(opts.metadataFilter)) {
-          if (rec.metadata[k] !== v) { match = false; break; }
+          if (rec.metadata[k] !== v) {
+            match = false;
+            break;
+          }
         }
         if (!match) continue;
       }
@@ -319,14 +351,12 @@ export class LocalFsMetadataIndexStore implements MetadataIndexStore {
         ...Object.values(rec.metadata).map((v) => String(v)),
       ]
         .filter(Boolean)
-        .join(" ");
+        .join(' ');
 
       const score = keywordScore(textContent, opts.terms);
       if (score > 0) {
         const words = opts.terms.toLowerCase().split(/\s+/).filter(Boolean);
-        const highlights = words.filter((w) =>
-          textContent.toLowerCase().includes(w),
-        );
+        const highlights = words.filter((w) => textContent.toLowerCase().includes(w));
         candidates.push({
           chunkId: rec.chunkId,
           sourceId: rec.sourceId,
@@ -377,7 +407,7 @@ export class LocalFsEvalFixtureStore implements EvalFixtureStore {
   private readonly baseDir: string;
 
   constructor(baseDir: string) {
-    this.baseDir = join(baseDir, "eval-fixtures");
+    this.baseDir = join(baseDir, 'eval-fixtures');
     ensureDir(this.baseDir);
   }
 
@@ -423,7 +453,9 @@ export class LocalFsEvalFixtureStore implements EvalFixtureStore {
   }
 }
 
-export function createLocalFsStorageBundle(baseDir: string): import("./interfaces.js").StorageBundle {
+export function createLocalFsStorageBundle(
+  baseDir: string,
+): import('./interfaces.js').StorageBundle {
   return {
     rawDocs: new LocalFsRawDocStore(baseDir),
     chunks: new LocalFsChunkStore(baseDir),

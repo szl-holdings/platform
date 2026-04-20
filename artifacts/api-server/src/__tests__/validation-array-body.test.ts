@@ -19,10 +19,10 @@
  *   POST /api/lyte/workspaces     — lyte.ts    (auth → denyIfReadOnly → validateBody)
  */
 
-import { describe, it, expect, vi } from "vitest";
-import express from "express";
-import type { Router as ExpressRouter } from "express";
-import request from "supertest";
+import type { Router as ExpressRouter } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Module mocks — must be declared before any dynamic imports.
@@ -30,14 +30,14 @@ import request from "supertest";
 // adding a new DB table / channel does not require updating this file.
 // ---------------------------------------------------------------------------
 
-vi.mock("@szl-holdings/observability", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('@szl-holdings/observability', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createObservabilityMock();
 });
 
-vi.mock("@szl-holdings/db", async () => {
-  const m = await import("./helpers/mocks.js");
-  const { z } = await import("zod");
+vi.mock('@szl-holdings/db', async () => {
+  const m = await import('./helpers/mocks.js');
+  const { z } = await import('zod');
   const base = m.createDbMock();
   // Routes import drizzle-zod insertXxxSchema objects from @szl-holdings/db.
   // The default Proxy-based stub returns `{}` for unknown exports, but
@@ -48,7 +48,7 @@ vi.mock("@szl-holdings/db", async () => {
   const objectSchema = z.object({}).passthrough();
   return new Proxy(base as object, {
     get(target, prop) {
-      if (typeof prop === "string" && /^insertLyte.*Schema$/.test(prop)) {
+      if (typeof prop === 'string' && /^insertLyte.*Schema$/.test(prop)) {
         return objectSchema;
       }
       return Reflect.get(target, prop);
@@ -59,29 +59,29 @@ vi.mock("@szl-holdings/db", async () => {
   });
 });
 
-vi.mock("@szl-holdings/forge-runtime", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('@szl-holdings/forge-runtime', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createForgeRuntimeMock();
 });
 
-vi.mock("@szl-holdings/services", () => ({
+vi.mock('@szl-holdings/services', () => ({
   services: new Proxy({}, { get: () => () => ({}) }),
 }));
 
-vi.mock("@szl-holdings/constellation", () => ({
+vi.mock('@szl-holdings/constellation', () => ({
   lyteAdapter: { upsertEntity: vi.fn(async () => ({})) },
 }));
 
-vi.mock("../lib/logger.js", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('../lib/logger.js', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createLoggerMock();
 });
 
-vi.mock("../lib/platform-flags.js", () => ({
+vi.mock('../lib/platform-flags.js', () => ({
   isFlagEnabled: vi.fn(async () => false),
 }));
 
-vi.mock("../lib/stripe-gate.js", () => ({
+vi.mock('../lib/stripe-gate.js', () => ({
   // Pass through — validateBody runs before this in /billing/checkout, so
   // the array-body test never reaches it. Implementation kept to satisfy
   // the import surface.
@@ -89,13 +89,13 @@ vi.mock("../lib/stripe-gate.js", () => ({
     next(),
 }));
 
-vi.mock("../lib/websocket.js", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('../lib/websocket.js', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createWebsocketMock();
 });
 
-vi.mock("../middlewares/auth.js", async () => {
-  const m = await import("./helpers/mocks.js");
+vi.mock('../middlewares/auth.js', async () => {
+  const m = await import('./helpers/mocks.js');
   return m.createAuthMiddlewareMock();
 });
 
@@ -103,8 +103,8 @@ vi.mock("../middlewares/auth.js", async () => {
 // Dynamic imports after all mocks are in place
 // ---------------------------------------------------------------------------
 
-const { default: billingRouter } = await import("../routes/billing.js");
-const { default: lyteRouter } = await import("../routes/lyte.js");
+const { default: billingRouter } = await import('../routes/billing.js');
+const { default: lyteRouter } = await import('../routes/lyte.js');
 
 interface ValidationErrorBody {
   error: string;
@@ -114,7 +114,7 @@ interface ValidationErrorBody {
   };
 }
 
-function buildApp(router: ExpressRouter, mountPrefix = "") {
+function buildApp(router: ExpressRouter, mountPrefix = '') {
   const app = express();
   app.use(express.json());
   if (mountPrefix) {
@@ -129,14 +129,14 @@ function buildApp(router: ExpressRouter, mountPrefix = "") {
 // billing.ts — POST /billing/checkout
 // ===========================================================================
 
-describe("validateBody rejects array body — POST /billing/checkout (billing.ts)", () => {
+describe('validateBody rejects array body — POST /billing/checkout (billing.ts)', () => {
   const app = buildApp(billingRouter as unknown as ExpressRouter);
 
-  it("returns 400 when body is a JSON array, not an object", async () => {
+  it('returns 400 when body is a JSON array, not an object', async () => {
     const res = await request(app)
-      .post("/billing/checkout")
-      .set("Content-Type", "application/json")
-      .send(JSON.stringify([{ planId: "starter" }, { planId: "pro" }]));
+      .post('/billing/checkout')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify([{ planId: 'starter' }, { planId: 'pro' }]));
 
     expect(res.status).toBe(400);
     const body = res.body as ValidationErrorBody;
@@ -146,11 +146,11 @@ describe("validateBody rejects array body — POST /billing/checkout (billing.ts
     expect(body.details!.issues.length).toBeGreaterThan(0);
   });
 
-  it("returns 400 when body is an empty array", async () => {
+  it('returns 400 when body is an empty array', async () => {
     const res = await request(app)
-      .post("/billing/checkout")
-      .set("Content-Type", "application/json")
-      .send("[]");
+      .post('/billing/checkout')
+      .set('Content-Type', 'application/json')
+      .send('[]');
 
     expect(res.status).toBe(400);
     const body = res.body as ValidationErrorBody;
@@ -162,14 +162,14 @@ describe("validateBody rejects array body — POST /billing/checkout (billing.ts
 // lyte.ts — POST /lyte/workspaces
 // ===========================================================================
 
-describe("validateBody rejects array body — POST /lyte/workspaces (lyte.ts)", () => {
+describe('validateBody rejects array body — POST /lyte/workspaces (lyte.ts)', () => {
   const app = buildApp(lyteRouter as unknown as ExpressRouter);
 
-  it("returns 400 when body is a JSON array, not an object", async () => {
+  it('returns 400 when body is a JSON array, not an object', async () => {
     const res = await request(app)
-      .post("/lyte/workspaces")
-      .set("Content-Type", "application/json")
-      .send(JSON.stringify([{ name: "ws-a" }, { name: "ws-b" }]));
+      .post('/lyte/workspaces')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify([{ name: 'ws-a' }, { name: 'ws-b' }]));
 
     expect(res.status).toBe(400);
     const body = res.body as ValidationErrorBody;

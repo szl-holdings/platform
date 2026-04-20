@@ -1,1 +1,1 @@
-export { useCriticalAlertNotifier } from "./operations/useCriticalAlertNotifier";
+export { useCriticalAlertNotifier } from './operations/useCriticalAlertNotifier';

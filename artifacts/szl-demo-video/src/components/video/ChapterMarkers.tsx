@@ -22,7 +22,12 @@ function formatTime(ms: number): string {
   return `${m}:${rem.toString().padStart(2, '0')}`;
 }
 
-export function ChapterMarkers({ chapters, currentScene, totalElapsedMs, totalDurationMs }: ChapterMarkersProps) {
+export function ChapterMarkers({
+  chapters,
+  currentScene,
+  totalElapsedMs,
+  totalDurationMs,
+}: ChapterMarkersProps) {
   const progress = Math.min(totalElapsedMs / totalDurationMs, 1);
 
   return (
@@ -45,12 +50,18 @@ export function ChapterMarkers({ chapters, currentScene, totalElapsedMs, totalDu
                   <motion.div
                     className="absolute inset-y-0 left-0 rounded-full"
                     style={{
-                      backgroundColor: isActive ? 'var(--color-hero-accent, #00d4ff)' : isPast ? 'rgba(255,255,255,0.5)' : 'transparent',
+                      backgroundColor: isActive
+                        ? 'var(--color-hero-accent, #00d4ff)'
+                        : isPast
+                          ? 'rgba(255,255,255,0.5)'
+                          : 'transparent',
                     }}
                     animate={{
                       width: isActive
                         ? `${Math.min(((totalElapsedMs - ch.startMs) / ch.durationMs) * 100, 100)}%`
-                        : isPast ? '100%' : '0%'
+                        : isPast
+                          ? '100%'
+                          : '0%',
                     }}
                     transition={{ duration: 0.1 }}
                   />
@@ -59,7 +70,9 @@ export function ChapterMarkers({ chapters, currentScene, totalElapsedMs, totalDu
                 <div className="absolute bottom-3 left-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                   <div className="bg-black/80 backdrop-blur-sm rounded-lg px-2.5 py-1.5 text-nowrap border border-white/10">
                     <div className="text-[10px] font-semibold text-white/90">{ch.title}</div>
-                    <div className="text-[9px] text-white/50 font-mono">{formatTime(ch.startMs)}</div>
+                    <div className="text-[9px] text-white/50 font-mono">
+                      {formatTime(ch.startMs)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -75,11 +88,17 @@ export function ChapterMarkers({ chapters, currentScene, totalElapsedMs, totalDu
             transition={{ duration: 0.4 }}
             className="flex items-center gap-2"
           >
-            <span className="text-[9px] font-mono text-white/30">{currentScene + 1} / {chapters.length}</span>
-            <span className="text-[10px] font-semibold text-white/70">{chapters[currentScene]?.title}</span>
+            <span className="text-[9px] font-mono text-white/30">
+              {currentScene + 1} / {chapters.length}
+            </span>
+            <span className="text-[10px] font-semibold text-white/70">
+              {chapters[currentScene]?.title}
+            </span>
             <span className="text-[9px] text-white/40">{chapters[currentScene]?.subtitle}</span>
           </motion.div>
-          <span className="text-[9px] font-mono text-white/30">{formatTime(totalElapsedMs)} / {formatTime(totalDurationMs)}</span>
+          <span className="text-[9px] font-mono text-white/30">
+            {formatTime(totalElapsedMs)} / {formatTime(totalDurationMs)}
+          </span>
         </div>
       </div>
     </div>

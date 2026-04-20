@@ -1,21 +1,21 @@
+import { NoOpPersistenceAdapter, type SelfModelPersistenceAdapter } from './persistence.js';
 import type {
-  SelfModelState,
-  IdentityProfile,
-  Capability,
-  ToolAccess,
-  RiskTier,
   ActiveObjective,
-  PolicyInForce,
+  Capability,
+  ConfidenceProfile,
+  DomainProfile,
   EscalationThreshold,
   HumanDependency,
+  IdentityProfile,
   LearnedStrategy,
-  RoutingPattern,
-  DomainProfile,
   PerformanceRecord,
-  ConfidenceProfile,
+  PolicyInForce,
+  RiskTier,
+  RoutingPattern,
+  SelfModelState,
+  ToolAccess,
   UncertaintyProfile,
-} from "./types.js";
-import { NoOpPersistenceAdapter, type SelfModelPersistenceAdapter } from "./persistence.js";
+} from './types.js';
 
 const MAX_RECENT_FAILURES = 20;
 const MAX_RECENT_WINS = 20;
@@ -56,7 +56,7 @@ export class SelfModelStore {
       activeObjectives: params.activeObjectives ?? [],
       capabilities: params.capabilities ?? [],
       toolAccess: params.toolAccess ?? [],
-      riskTier: params.riskTier ?? "internal-workflow",
+      riskTier: params.riskTier ?? 'internal-workflow',
       policiesInForce: params.policiesInForce ?? [],
       currentEnvironment: params.currentEnvironment ?? params.identityProfile.environment,
       recentFailures: [],
@@ -66,7 +66,7 @@ export class SelfModelStore {
         overall: 1.0,
         byDomain: {},
         byCapability: {},
-        trend: "stable",
+        trend: 'stable',
         lastAdjustedAt: now,
       },
       uncertaintyProfile: {
@@ -106,7 +106,12 @@ export class SelfModelStore {
     return Array.from(this.models.values());
   }
 
-  update(agentId: string, updates: Partial<SelfModelState>, changeReason?: string, triggeredBy?: string): SelfModelState {
+  update(
+    agentId: string,
+    updates: Partial<SelfModelState>,
+    changeReason?: string,
+    triggeredBy?: string,
+  ): SelfModelState {
     const current = this.models.get(agentId);
     if (!current) throw new Error(`No self-model found for agent: ${agentId}`);
 
@@ -124,7 +129,9 @@ export class SelfModelStore {
     this.models.set(agentId, updated);
 
     void Promise.all([
-      this.adapter.saveSnapshot(agentId, snapshot, changeReason, triggeredBy).catch(() => undefined),
+      this.adapter
+        .saveSnapshot(agentId, snapshot, changeReason, triggeredBy)
+        .catch(() => undefined),
       this.adapter.saveModel(agentId, updated).catch(() => undefined),
     ]);
 
@@ -172,7 +179,7 @@ export class SelfModelStore {
   addLearnedStrategy(agentId: string, strategy: LearnedStrategy): void {
     const state = this.models.get(agentId);
     if (!state) return;
-    const existing = state.learnedStrategies.findIndex(s => s.strategyId === strategy.strategyId);
+    const existing = state.learnedStrategies.findIndex((s) => s.strategyId === strategy.strategyId);
     let strategies: LearnedStrategy[];
     if (existing >= 0) {
       strategies = state.learnedStrategies.map((s, i) =>
@@ -196,10 +203,18 @@ export class SelfModelStore {
     this.models.set(agentId, { ...state, uncertaintyProfile: profile });
   }
 
-  updateDomainProfiles(agentId: string, strengths: DomainProfile[], weaknesses: DomainProfile[]): void {
+  updateDomainProfiles(
+    agentId: string,
+    strengths: DomainProfile[],
+    weaknesses: DomainProfile[],
+  ): void {
     const state = this.models.get(agentId);
     if (!state) return;
-    this.models.set(agentId, { ...state, domainStrengths: strengths, domainWeaknesses: weaknesses });
+    this.models.set(agentId, {
+      ...state,
+      domainStrengths: strengths,
+      domainWeaknesses: weaknesses,
+    });
   }
 
   setRoutingPatterns(agentId: string, patterns: RoutingPattern[]): void {

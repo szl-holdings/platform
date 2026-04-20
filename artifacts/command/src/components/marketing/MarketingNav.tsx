@@ -1,5 +1,5 @@
-import { Link } from "wouter";
-import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Button } from '@szl-holdings/shared-ui/ui/button';
+import { Link } from 'wouter';
 
 export function MarketingNav() {
   return (
@@ -14,25 +14,82 @@ export function MarketingNav() {
             <span className="cursor-pointer hover:text-white transition-colors">Ecosystem</span>
             <div className="absolute top-full left-0 pt-4 hidden group-hover:block">
               <div className="bg-[#111] border border-white/10 rounded-lg p-4 w-64 shadow-2xl">
-                <Link href="/marketing/apps/terra" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Terra</Link>
-                <Link href="/marketing/apps/vessels" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Vessels</Link>
-                <Link href="/marketing/apps/lyte" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Lyte</Link>
-                <Link href="/marketing/apps/aegis" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Aegis</Link>
-                <Link href="/marketing/apps/prism" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">PRISM Counsel</Link>
-                <Link href="/marketing/apps/szl-holdings" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">SZL Holdings</Link>
-                <Link href="/marketing/apps/carlota-jo" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Carlota Jo</Link>
-                <Link href="/marketing/apps/stephen" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Stephen</Link>
-                <Link href="/marketing/apps/command" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Command</Link>
-                <Link href="/aegis/" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Aegis</Link>
+                <Link
+                  href="/marketing/apps/terra"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Terra
+                </Link>
+                <Link
+                  href="/marketing/apps/vessels"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Vessels
+                </Link>
+                <Link
+                  href="/marketing/apps/lyte"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Lyte
+                </Link>
+                <Link
+                  href="/marketing/apps/aegis"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Aegis
+                </Link>
+                <Link
+                  href="/marketing/apps/prism"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  PRISM Counsel
+                </Link>
+                <Link
+                  href="/marketing/apps/szl-holdings"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  SZL Holdings
+                </Link>
+                <Link
+                  href="/marketing/apps/carlota-jo"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Carlota Jo
+                </Link>
+                <Link
+                  href="/marketing/apps/stephen"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Stephen
+                </Link>
+                <Link
+                  href="/marketing/apps/command"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Command
+                </Link>
+                <Link
+                  href="/aegis/"
+                  className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
+                >
+                  Aegis
+                </Link>
               </div>
             </div>
           </div>
-          <Link href="/marketing/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link href="/marketing/status" className="hover:text-white transition-colors">Status</Link>
+          <Link href="/marketing/pricing" className="hover:text-white transition-colors">
+            Pricing
+          </Link>
+          <Link href="/marketing/status" className="hover:text-white transition-colors">
+            Status
+          </Link>
         </div>
 
         <div className="flex items-center space-x-4">
-          <Link href="/" className="text-sm font-medium text-white/70 hover:text-white transition-colors">
+          <Link
+            href="/"
+            className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+          >
             Login
           </Link>
           <Link href="/marketing/signup">

@@ -1,5 +1,5 @@
-import type { ToolManifest } from "./manifest.js";
-import type { ToolHandler } from "./gateway.js";
+import type { ToolHandler } from './gateway.js';
+import type { ToolManifest } from './manifest.js';
 
 export interface ToolExecutionRecord {
   id: string;
@@ -72,7 +72,9 @@ export class ToolMeshExecutor {
     return this.records.find((r) => r.id === id);
   }
 
-  getHistory(filters: { toolId?: string; callerId?: string; limit?: number } = {}): ToolExecutionRecord[] {
+  getHistory(
+    filters: { toolId?: string; callerId?: string; limit?: number } = {},
+  ): ToolExecutionRecord[] {
     let results = this.records;
     if (filters.toolId) results = results.filter((r) => r.toolId === filters.toolId);
     if (filters.callerId) results = results.filter((r) => r.callerId === filters.callerId);

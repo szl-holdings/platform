@@ -1,16 +1,9 @@
-import { randomUUID } from "crypto";
-import {
-  defaultPlanStore,
-  type PlanStore,
-} from "@workspace/planner/store";
-import type {
-  PlanGraph,
-  PlanStep,
-  PlanStepStatus,
-} from "@workspace/planner/types";
-import { PlanNotFoundError } from "@workspace/planner/types";
-import type { ActionLedgerWriter } from "./types.js";
-import { InMemoryActionLedger, makeLedgerEntry } from "./ledger.js";
+import { defaultPlanStore, type PlanStore } from '@workspace/planner/store';
+import type { PlanGraph, PlanStep, PlanStepStatus } from '@workspace/planner/types';
+import { PlanNotFoundError } from '@workspace/planner/types';
+import { randomUUID } from 'crypto';
+import { InMemoryActionLedger, makeLedgerEntry } from './ledger.js';
+import type { ActionLedgerWriter } from './types.js';
 
 export interface PlanStepExecutorContext {
   planId: string;
@@ -56,7 +49,7 @@ export interface PlanRunStepRecord {
   durationMs: number;
 }
 
-export type PlanRunStatus = "completed" | "failed" | "awaiting-approval";
+export type PlanRunStatus = 'completed' | 'failed' | 'awaiting-approval';
 
 export interface PlanRunResult {
   runId: string;
@@ -80,7 +73,7 @@ const defaultExecutor: PlanStepExecutor = async (step) => ({
     routeClass: step.route.routeClass,
     model: step.route.model,
     toolId: step.route.toolId,
-    note: "default executor — no side-effects",
+    note: 'default executor — no side-effects',
   },
 });
 
@@ -137,7 +130,7 @@ export async function approvePlanStep(
   const plan = await store.get(planId);
   if (!plan) throw new PlanNotFoundError(planId);
   const steps = plan.steps.map((s) =>
-    s.stepId === stepId ? { ...s, status: "ready" as PlanStepStatus } : s,
+    s.stepId === stepId ? { ...s, status: 'ready' as PlanStepStatus } : s,
   );
   if (!steps.some((s) => s.stepId === stepId)) {
     throw new Error(`Step not found: ${stepId} in plan ${planId}`);
@@ -185,9 +178,9 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
 
   const executed: PlanRunStepRecord[] = [];
 
-  await persistPlan(store, plan, updatedSteps, "executing");
+  await persistPlan(store, plan, updatedSteps, 'executing');
   ledger.record(
-    makeLedgerEntry(runId, "workflow-start", `Run ${runId} executing plan ${planId}`, {
+    makeLedgerEntry(runId, 'workflow-start', `Run ${runId} executing plan ${planId}`, {
       metadata: { planId, rootPlanId, depth, fallbackOf: plan.fallbackOf ?? null },
     }),
   );
@@ -196,45 +189,39 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
     const idx = ordered[orderIdx]!;
     const step = updatedSteps[idx]!;
 
-    if (step.status === "completed") {
+    if (step.status === 'completed') {
       executed.push({
         stepId: step.stepId,
-        status: "completed",
-        output: step.metadata["output"],
+        status: 'completed',
+        output: step.metadata['output'],
         durationMs: 0,
       });
       continue;
     }
-    if (step.status === "skipped") {
-      executed.push({ stepId: step.stepId, status: "skipped", durationMs: 0 });
+    if (step.status === 'skipped') {
+      executed.push({ stepId: step.stepId, status: 'skipped', durationMs: 0 });
       continue;
     }
 
     // Approval gate.
-    const preApproved =
-      approvedStepIds.has(step.stepId) || step.status === "ready";
+    const preApproved = approvedStepIds.has(step.stepId) || step.status === 'ready';
     if (step.requiredApproval && !preApproved) {
-      step.status = "blocked";
+      step.status = 'blocked';
       ledger.record(
-        makeLedgerEntry(
-          runId,
-          "approval",
-          `Plan ${planId} step ${step.stepId} awaiting approval`,
-          {
-            stepId: step.stepId,
-            metadata: {
-              reason: step.approvalReason ?? "approval required",
-              planId,
-            },
+        makeLedgerEntry(runId, 'approval', `Plan ${planId} step ${step.stepId} awaiting approval`, {
+          stepId: step.stepId,
+          metadata: {
+            reason: step.approvalReason ?? 'approval required',
+            planId,
           },
-        ),
+        }),
       );
-      await persistPlan(store, plan, updatedSteps, "executing");
+      await persistPlan(store, plan, updatedSteps, 'executing');
       return {
         runId,
         planId,
         rootPlanId,
-        status: "awaiting-approval",
+        status: 'awaiting-approval',
         executedSteps: executed,
         awaitingApproval: {
           planId,
@@ -245,10 +232,10 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
       };
     }
 
-    step.status = "running";
-    await persistPlan(store, plan, updatedSteps, "executing");
+    step.status = 'running';
+    await persistPlan(store, plan, updatedSteps, 'executing');
     ledger.record(
-      makeLedgerEntry(runId, "tool-call", `Step ${step.stepId} starting`, {
+      makeLedgerEntry(runId, 'tool-call', `Step ${step.stepId} starting`, {
         stepId: step.stepId,
         metadata: {
           planId,
@@ -279,7 +266,7 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
     const durationMs = Date.now() - t0;
 
     if (result.success) {
-      step.status = "completed";
+      step.status = 'completed';
       step.metadata = {
         ...step.metadata,
         output: result.output,
@@ -287,22 +274,22 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
       };
       executed.push({
         stepId: step.stepId,
-        status: "completed",
+        status: 'completed',
         output: result.output,
         durationMs,
       });
       ledger.record(
-        makeLedgerEntry(runId, "tool-call", `Step ${step.stepId} completed`, {
+        makeLedgerEntry(runId, 'tool-call', `Step ${step.stepId} completed`, {
           stepId: step.stepId,
           metadata: { planId, durationMs },
         }),
       );
-      await persistPlan(store, plan, updatedSteps, "executing");
+      await persistPlan(store, plan, updatedSteps, 'executing');
       continue;
     }
 
     // Failure path.
-    step.status = "failed";
+    step.status = 'failed';
     step.metadata = {
       ...step.metadata,
       error: result.error,
@@ -310,19 +297,19 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
     };
     executed.push({
       stepId: step.stepId,
-      status: "failed",
+      status: 'failed',
       error: result.error,
       durationMs,
     });
     ledger.record(
       makeLedgerEntry(
         runId,
-        "tool-call",
-        `Step ${step.stepId} failed: ${result.error ?? "unknown error"}`,
+        'tool-call',
+        `Step ${step.stepId} failed: ${result.error ?? 'unknown error'}`,
         { stepId: step.stepId, metadata: { planId, durationMs } },
       ),
     );
-    await persistPlan(store, plan, updatedSteps, "failed");
+    await persistPlan(store, plan, updatedSteps, 'failed');
 
     // Failover to the highest-rank fallback we haven't tried yet.
     if (depth < maxDepth && plan.fallbacks.length > 0) {
@@ -331,7 +318,7 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
         ledger.record(
           makeLedgerEntry(
             runId,
-            "rollback",
+            'rollback',
             `Failover from plan ${planId} → fallback ${fbId} after step ${step.stepId} failed`,
             {
               stepId: step.stepId,
@@ -360,16 +347,16 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
       runId,
       planId,
       rootPlanId,
-      status: "failed",
+      status: 'failed',
       executedSteps: executed,
       error: result.error ?? `Step ${step.stepId} failed`,
       fallbacksUsed,
     };
   }
 
-  await persistPlan(store, plan, updatedSteps, "completed");
+  await persistPlan(store, plan, updatedSteps, 'completed');
   ledger.record(
-    makeLedgerEntry(runId, "workflow-end", `Run ${runId} completed plan ${planId}`, {
+    makeLedgerEntry(runId, 'workflow-end', `Run ${runId} completed plan ${planId}`, {
       metadata: { planId, rootPlanId, depth },
     }),
   );
@@ -378,7 +365,7 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
     runId,
     planId,
     rootPlanId,
-    status: "completed",
+    status: 'completed',
     executedSteps: executed,
     fallbacksUsed,
   };
@@ -388,7 +375,7 @@ async function persistPlan(
   store: PlanStore,
   plan: PlanGraph,
   steps: PlanStep[],
-  status: PlanGraph["status"],
+  status: PlanGraph['status'],
 ): Promise<void> {
   await store.put({ ...plan, steps, status, updatedAt: Date.now() });
 }

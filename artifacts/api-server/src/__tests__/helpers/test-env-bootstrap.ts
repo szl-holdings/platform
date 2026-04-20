@@ -16,11 +16,8 @@
  * Replit environment (see `setEnvVars`).
  */
 
-const SAFE_TOKEN = "vitest-internal-token-padding-padding-padding-1214";
-if (
-  !process.env.ALLOY_INTERNAL_TOKEN ||
-  process.env.ALLOY_INTERNAL_TOKEN.length < 32
-) {
+const SAFE_TOKEN = 'vitest-internal-token-padding-padding-padding-1214';
+if (!process.env.ALLOY_INTERNAL_TOKEN || process.env.ALLOY_INTERNAL_TOKEN.length < 32) {
   process.env.ALLOY_INTERNAL_TOKEN = SAFE_TOKEN;
 }
-process.env.NODE_ENV ??= "test";
+process.env.NODE_ENV ??= 'test';

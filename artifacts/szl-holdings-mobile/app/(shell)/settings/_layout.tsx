@@ -1,9 +1,9 @@
-import React from "react";
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
+import React from 'react';
 
 export default function SettingsLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false, animation: "slide_from_right" }}>
+    <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="widgets" />
       <Stack.Screen name="digest" />

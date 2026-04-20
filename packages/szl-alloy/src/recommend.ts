@@ -1,15 +1,15 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
+import { computeConfidence } from './confidence.js';
+import { computeEvidenceFreshnessScore, createEvidence, listEvidence } from './evidence.js';
+import { attachEvidence, closeSession, openSession } from './session.js';
 import type {
-  RecommendationResult,
+  ApprovalMode,
+  AutonomyMode,
   Evidence,
   PolicyDecision,
-  AutonomyMode,
   PolicyState,
-  ApprovalMode,
-} from "./types.js";
-import { createEvidence, listEvidence, computeEvidenceFreshnessScore } from "./evidence.js";
-import { computeConfidence } from "./confidence.js";
-import { openSession, attachEvidence, closeSession } from "./session.js";
+  RecommendationResult,
+} from './types.js';
 
 export interface RecommendParams {
   title: string;
@@ -17,14 +17,14 @@ export interface RecommendParams {
   reasoning: string;
   domain: string;
   value?: unknown;
-  urgency?: "routine" | "moderate" | "urgent" | "critical";
+  urgency?: 'routine' | 'moderate' | 'urgent' | 'critical';
   autonomyMode?: AutonomyMode;
   baseConfidence?: number;
   evidenceIds?: string[];
   supportingEvidenceIds?: string[];
   contradictingEvidenceIds?: string[];
   inlineEvidence?: Array<{
-    kind: Evidence["kind"];
+    kind: Evidence['kind'];
     label: string;
     value: string;
     source: string;
@@ -47,12 +47,14 @@ export interface RecommendParams {
 export async function recommend(params: RecommendParams): Promise<RecommendationResult> {
   const now = new Date().toISOString();
   const id = randomUUID();
-  const autonomyMode: AutonomyMode = params.autonomyMode ?? "recommend";
+  const autonomyMode: AutonomyMode = params.autonomyMode ?? 'recommend';
   const rawTenant = params.tenantOrgId;
   const tenantOrgId: number | null =
-    typeof rawTenant === "number" && Number.isFinite(rawTenant) ? rawTenant
-    : typeof rawTenant === "string" && /^\d+$/.test(rawTenant) ? parseInt(rawTenant, 10)
-    : null;
+    typeof rawTenant === 'number' && Number.isFinite(rawTenant)
+      ? rawTenant
+      : typeof rawTenant === 'string' && /^\d+$/.test(rawTenant)
+        ? parseInt(rawTenant, 10)
+        : null;
 
   const ownedSession = !params.runId;
   let runId: string;
@@ -65,7 +67,7 @@ export async function recommend(params: RecommendParams): Promise<Recommendation
     const session = openSession({
       autonomyMode,
       objective: params.title,
-      tenantOrgId: typeof tenantOrgId === "number" ? tenantOrgId : null,
+      tenantOrgId: typeof tenantOrgId === 'number' ? tenantOrgId : null,
     });
     runId = session.runId;
     traceId = session.traceId;
@@ -79,7 +81,7 @@ export async function recommend(params: RecommendParams): Promise<Recommendation
 
   if (hasEvidenceOps && tenantOrgId === null) {
     throw new Error(
-      "[alloy/recommend] tenantOrgId is required when using evidence operations. Provide a numeric tenantOrgId.",
+      '[alloy/recommend] tenantOrgId is required when using evidence operations. Provide a numeric tenantOrgId.',
     );
   }
 
@@ -101,26 +103,24 @@ export async function recommend(params: RecommendParams): Promise<Recommendation
 
   const supportingIds = [...(params.supportingEvidenceIds ?? []), ...inlineEvidenceIds];
   const contradictingIds = params.contradictingEvidenceIds ?? [];
-  const allEvidenceIds = [
-    ...(params.evidenceIds ?? []),
-    ...supportingIds,
-    ...contradictingIds,
-  ];
+  const allEvidenceIds = [...(params.evidenceIds ?? []), ...supportingIds, ...contradictingIds];
 
   const supportingEvidence = tenantOrgId !== null ? listEvidence(supportingIds, tenantOrgId) : [];
-  const contradictingEvidence = tenantOrgId !== null ? listEvidence(contradictingIds, tenantOrgId) : [];
-  const allEvidence = tenantOrgId !== null
-    ? (allEvidenceIds.length > 0
+  const contradictingEvidence =
+    tenantOrgId !== null ? listEvidence(contradictingIds, tenantOrgId) : [];
+  const allEvidence =
+    tenantOrgId !== null
+      ? allEvidenceIds.length > 0
         ? listEvidence(allEvidenceIds, tenantOrgId)
-        : listEvidence(undefined, tenantOrgId).filter(e => inlineEvidenceIds.includes(e.id)))
-    : [];
+        : listEvidence(undefined, tenantOrgId).filter((e) => inlineEvidenceIds.includes(e.id))
+      : [];
 
   const freshnessScore = computeEvidenceFreshnessScore(allEvidence);
 
   const policyPenalty =
-    params.policyDecision?.policyState === "blocked"
+    params.policyDecision?.policyState === 'blocked'
       ? 1
-      : params.policyDecision?.policyState === "requires_approval"
+      : params.policyDecision?.policyState === 'requires_approval'
         ? 0.5
         : 0;
 
@@ -132,15 +132,14 @@ export async function recommend(params: RecommendParams): Promise<Recommendation
     policyPenalty,
   });
 
-  const policyState: PolicyState =
-    params.policyDecision?.policyState ?? "unchecked";
+  const policyState: PolicyState = params.policyDecision?.policyState ?? 'unchecked';
 
   const approvalMode: ApprovalMode =
-    policyState === "requires_approval"
-      ? "pending"
-      : policyState === "blocked"
-        ? "rejected"
-        : "none";
+    policyState === 'requires_approval'
+      ? 'pending'
+      : policyState === 'blocked'
+        ? 'rejected'
+        : 'none';
 
   const validUntil = params.validForMs
     ? new Date(Date.now() + params.validForMs).toISOString()
@@ -168,7 +167,7 @@ export async function recommend(params: RecommendParams): Promise<Recommendation
     policyDecision: params.policyDecision,
     approvalMode,
     autonomyMode,
-    urgency: params.urgency ?? "routine",
+    urgency: params.urgency ?? 'routine',
     suggestedAction: params.suggestedAction,
     metadata: {
       ...(params.metadata ?? {}),

@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 function normalize(str: string): string {
-  return str.toLowerCase().replace(/[\s\-_]/g, "");
+  return str.toLowerCase().replace(/[\s\-_]/g, '');
 }
 
 function fuzzyMatch(text: string, query: string): boolean {
@@ -28,13 +28,13 @@ function fuzzyScore(text: string, query: string): number {
 export function useFuzzySearch<T>(
   items: T[],
   query: string,
-  getSearchFields: (item: T) => string[]
+  getSearchFields: (item: T) => string[],
 ): T[] {
   return useMemo(() => {
     if (!query.trim()) return items;
     const q = query.trim();
     const matched = items.filter((item) =>
-      getSearchFields(item).some((field) => fuzzyMatch(field, q))
+      getSearchFields(item).some((field) => fuzzyMatch(field, q)),
     );
     matched.sort((a, b) => {
       const scoreA = Math.max(...getSearchFields(a).map((f) => fuzzyScore(f, q)));

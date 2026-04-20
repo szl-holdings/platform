@@ -1,23 +1,34 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import rateLimit from "express-rate-limit";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { isFlagEnabled } from "../lib/platform-flags";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  exportJsonSnapshot,
-  exportBranchPackage,
-  exportProofBundle,
-  exportOpenUSDManifest,
+  auditEventsTable,
+  db,
+  type SpatialTwinSnapshot,
+  spatialTwinSnapshotsTable,
+} from '@szl-holdings/db';
+import type { BranchPackage, ProofBundle, SceneSnapshot } from '@szl-holdings/scene-export';
+import {
   buildOpenUSDManifest,
-} from "@szl-holdings/scene-export";
-import type { SceneSnapshot, BranchPackage, ProofBundle } from "@szl-holdings/scene-export";
-import { sendSuccess, sendError, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response";
-import { db, auditEventsTable, spatialTwinSnapshotsTable, type SpatialTwinSnapshot } from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
-import { logger } from "../lib/logger";
+  exportBranchPackage,
+  exportJsonSnapshot,
+  exportOpenUSDManifest,
+  exportProofBundle,
+} from '@szl-holdings/scene-export';
+import { desc, eq } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendError,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { isFlagEnabled } from '../lib/platform-flags';
+import { anyQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
-import { anyQuerySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
 
 /**
@@ -26,9 +37,12 @@ const router: IRouter = Router();
  * without a corresponding entry in audit_events (fail-closed compliance).
  */
 class AtlasExportAuditError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown,
+  ) {
     super(message);
-    this.name = "AtlasExportAuditError";
+    this.name = 'AtlasExportAuditError';
   }
 }
 
@@ -62,18 +76,15 @@ async function recordAtlasExportAudit(params: {
         ...(params.details ?? {}),
       },
       ipAddress: params.req.ip ?? null,
-      userAgent: params.req.get("user-agent") ?? null,
-      product: "atlas",
+      userAgent: params.req.get('user-agent') ?? null,
+      product: 'atlas',
     });
   } catch (err) {
     logger.error(
       { err, action: params.action, entityId: params.entityId },
-      "Failed to write ATLAS export audit event — failing export request",
+      'Failed to write ATLAS export audit event — failing export request',
     );
-    throw new AtlasExportAuditError(
-      "Failed to record audit event for ATLAS export",
-      err,
-    );
+    throw new AtlasExportAuditError('Failed to record audit event for ATLAS export', err);
   }
 }
 
@@ -81,9 +92,9 @@ function handleAuditFailure(res: Response, err: unknown): boolean {
   if (err instanceof AtlasExportAuditError) {
     sendError(
       res,
-      "Export blocked: audit log unavailable. Please retry.",
+      'Export blocked: audit log unavailable. Please retry.',
       503,
-      "AUDIT_LOG_UNAVAILABLE",
+      'AUDIT_LOG_UNAVAILABLE',
     );
     return true;
   }
@@ -95,22 +106,18 @@ const atlasExportRateLimit = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "ATLAS export rate limit exceeded." },
+  message: { error: 'ATLAS export rate limit exceeded.' },
   validate: { xForwardedForHeader: false, ip: false },
 });
 
-const FEATURE_FLAG = "ENABLE_ATLAS_SPATIAL_RUNTIME";
+const FEATURE_FLAG = 'ENABLE_ATLAS_SPATIAL_RUNTIME';
 
 async function checkAtlasEnabled(res: Response): Promise<boolean> {
   const enabled = await isFlagEnabled(FEATURE_FLAG);
   if (!enabled) {
-    sendError(
-      res,
-      "ATLAS Spatial Runtime is currently unavailable.",
-      503,
-      "FEATURE_DISABLED",
-      { feature: FEATURE_FLAG },
-    );
+    sendError(res, 'ATLAS Spatial Runtime is currently unavailable.', 503, 'FEATURE_DISABLED', {
+      feature: FEATURE_FLAG,
+    });
     return false;
   }
   return true;
@@ -130,15 +137,19 @@ async function loadLatestSpatialSnapshot(sceneId: string): Promise<SpatialTwinSn
     .select()
     .from(spatialTwinSnapshotsTable)
     .where(eq(spatialTwinSnapshotsTable.twinId, sceneId))
-    .orderBy(desc(spatialTwinSnapshotsTable.snapshotAt), desc(spatialTwinSnapshotsTable.sequenceNumber))
+    .orderBy(
+      desc(spatialTwinSnapshotsTable.snapshotAt),
+      desc(spatialTwinSnapshotsTable.sequenceNumber),
+    )
     .limit(1);
   return rows[0] ?? null;
 }
 
 router.get(
-  "/atlas/snapshot/:sceneId", validateQuery(anyQuerySchema),
+  '/atlas/snapshot/:sceneId',
+  validateQuery(anyQuerySchema),
   authMiddleware(),
-  requireRole("operator", "ops", "exec", "admin", "super_admin"),
+  requireRole('operator', 'ops', 'exec', 'admin', 'super_admin'),
   atlasExportRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -157,14 +168,18 @@ router.get(
       }
 
       const metadata = (row.metadata ?? {}) as Record<string, unknown>;
-      const correlationId = typeof metadata.correlationId === "string" ? metadata.correlationId : null;
+      const correlationId =
+        typeof metadata.correlationId === 'string' ? metadata.correlationId : null;
 
       const snapshot: SceneSnapshot = {
         sceneId,
-        domain: domainOverride ?? row.twinCategory ?? "default",
-        entityType: entityTypeOverride ?? row.twinCategory ?? "scene",
+        domain: domainOverride ?? row.twinCategory ?? 'default',
+        entityType: entityTypeOverride ?? row.twinCategory ?? 'scene',
         entityId: entityIdOverride ?? row.entityId,
-        capturedAt: (row.snapshotAt instanceof Date ? row.snapshotAt : new Date(row.snapshotAt as unknown as string)).toISOString(),
+        capturedAt: (row.snapshotAt instanceof Date
+          ? row.snapshotAt
+          : new Date(row.snapshotAt as unknown as string)
+        ).toISOString(),
         state: (row.state ?? {}) as Record<string, unknown>,
         proofChainId: row.proofChainId ?? null,
         correlationId,
@@ -174,8 +189,8 @@ router.get(
       const result = exportJsonSnapshot(snapshot);
       await recordAtlasExportAudit({
         req,
-        action: "atlas.snapshot.export",
-        entityType: "atlas_scene",
+        action: 'atlas.snapshot.export',
+        entityType: 'atlas_scene',
         entityId: sceneId,
         format: result.format,
         details: {
@@ -187,31 +202,34 @@ router.get(
       sendSuccess(res, result);
     } catch (err) {
       if (handleAuditFailure(res, err)) return;
-      if (err instanceof Error && err.message.includes("required")) {
+      if (err instanceof Error && err.message.includes('required')) {
         sendBadRequest(res, err.message);
         return;
       }
-      handleRouteError(res, err, "Failed to export scene snapshot");
+      handleRouteError(res, err, 'Failed to export scene snapshot');
     }
   },
 );
 
 router.post(
-  "/atlas/branch/export", validateBody(bodyShape({
-      "approvedBy": z.unknown().optional(),
-      "branchId": z.unknown().optional(),
-      "branchLabel": z.unknown().optional(),
-      "branchedAt": z.unknown().optional(),
-      "correlationId": z.unknown().optional(),
-      "deltaState": z.unknown().optional(),
-      "domain": z.unknown().optional(),
-      "hypothesis": z.unknown().optional(),
-      "metadata": z.unknown().optional(),
-      "outcomeProjections": z.unknown().optional(),
-      "parentSceneId": z.unknown().optional(),
-    })),
+  '/atlas/branch/export',
+  validateBody(
+    bodyShape({
+      approvedBy: z.unknown().optional(),
+      branchId: z.unknown().optional(),
+      branchLabel: z.unknown().optional(),
+      branchedAt: z.unknown().optional(),
+      correlationId: z.unknown().optional(),
+      deltaState: z.unknown().optional(),
+      domain: z.unknown().optional(),
+      hypothesis: z.unknown().optional(),
+      metadata: z.unknown().optional(),
+      outcomeProjections: z.unknown().optional(),
+      parentSceneId: z.unknown().optional(),
+    }),
+  ),
   authMiddleware(),
-  requireRole("operator", "ops", "exec", "admin", "super_admin"),
+  requireRole('operator', 'ops', 'exec', 'admin', 'super_admin'),
   atlasExportRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -220,15 +238,15 @@ router.post(
       const body = req.body as Partial<BranchPackage>;
 
       if (!body.parentSceneId) {
-        sendBadRequest(res, "parentSceneId is required");
+        sendBadRequest(res, 'parentSceneId is required');
         return;
       }
       if (!body.branchId) {
-        sendBadRequest(res, "branchId is required");
+        sendBadRequest(res, 'branchId is required');
         return;
       }
       if (!body.hypothesis) {
-        sendBadRequest(res, "hypothesis is required");
+        sendBadRequest(res, 'hypothesis is required');
         return;
       }
 
@@ -236,7 +254,7 @@ router.post(
         parentSceneId: body.parentSceneId,
         branchId: body.branchId,
         branchLabel: body.branchLabel ?? body.branchId,
-        domain: body.domain ?? "default",
+        domain: body.domain ?? 'default',
         branchedAt: body.branchedAt ?? new Date().toISOString(),
         hypothesis: body.hypothesis,
         deltaState: body.deltaState ?? {},
@@ -249,8 +267,8 @@ router.post(
       const result = exportBranchPackage(branchPackage);
       await recordAtlasExportAudit({
         req,
-        action: "atlas.branch.export",
-        entityType: "atlas_branch",
+        action: 'atlas.branch.export',
+        entityType: 'atlas_branch',
         entityId: branchPackage.branchId,
         format: result.format,
         details: {
@@ -263,32 +281,35 @@ router.post(
       sendSuccess(res, result);
     } catch (err) {
       if (handleAuditFailure(res, err)) return;
-      if (err instanceof Error && err.message.includes("required")) {
+      if (err instanceof Error && err.message.includes('required')) {
         sendBadRequest(res, err.message);
         return;
       }
-      handleRouteError(res, err, "Failed to export branch package");
+      handleRouteError(res, err, 'Failed to export branch package');
     }
   },
 );
 
 router.post(
-  "/atlas/proof-bundle/export", validateBody(bodyShape({
-      "approvalChain": z.unknown().optional(),
-      "bundleId": z.unknown().optional(),
-      "citations": z.unknown().optional(),
-      "confidenceScore": z.unknown().optional(),
-      "contentId": z.unknown().optional(),
-      "contentType": z.unknown().optional(),
-      "correlationId": z.unknown().optional(),
-      "generatedAt": z.unknown().optional(),
-      "metadata": z.unknown().optional(),
-      "modelVersion": z.unknown().optional(),
-      "serviceAttribution": z.unknown().optional(),
-      "sourceClass": z.unknown().optional(),
-    })),
+  '/atlas/proof-bundle/export',
+  validateBody(
+    bodyShape({
+      approvalChain: z.unknown().optional(),
+      bundleId: z.unknown().optional(),
+      citations: z.unknown().optional(),
+      confidenceScore: z.unknown().optional(),
+      contentId: z.unknown().optional(),
+      contentType: z.unknown().optional(),
+      correlationId: z.unknown().optional(),
+      generatedAt: z.unknown().optional(),
+      metadata: z.unknown().optional(),
+      modelVersion: z.unknown().optional(),
+      serviceAttribution: z.unknown().optional(),
+      sourceClass: z.unknown().optional(),
+    }),
+  ),
   authMiddleware(),
-  requireRole("operator", "ops", "exec", "admin", "super_admin"),
+  requireRole('operator', 'ops', 'exec', 'admin', 'super_admin'),
   atlasExportRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -297,25 +318,25 @@ router.post(
       const body = req.body as Partial<ProofBundle>;
 
       if (!body.bundleId) {
-        sendBadRequest(res, "bundleId is required");
+        sendBadRequest(res, 'bundleId is required');
         return;
       }
       if (!body.contentId) {
-        sendBadRequest(res, "contentId is required");
+        sendBadRequest(res, 'contentId is required');
         return;
       }
       if (body.confidenceScore === undefined || body.confidenceScore === null) {
-        sendBadRequest(res, "confidenceScore is required");
+        sendBadRequest(res, 'confidenceScore is required');
         return;
       }
 
       const proofBundle: ProofBundle = {
         bundleId: body.bundleId,
         contentId: body.contentId,
-        contentType: body.contentType ?? "unknown",
-        sourceClass: body.sourceClass ?? "unknown",
+        contentType: body.contentType ?? 'unknown',
+        sourceClass: body.sourceClass ?? 'unknown',
         confidenceScore: body.confidenceScore,
-        serviceAttribution: body.serviceAttribution ?? "atlas",
+        serviceAttribution: body.serviceAttribution ?? 'atlas',
         modelVersion: body.modelVersion ?? null,
         citations: body.citations ?? [],
         approvalChain: body.approvalChain ?? [],
@@ -327,8 +348,8 @@ router.post(
       const result = exportProofBundle(proofBundle);
       await recordAtlasExportAudit({
         req,
-        action: "atlas.proof_bundle.export",
-        entityType: "atlas_proof_bundle",
+        action: 'atlas.proof_bundle.export',
+        entityType: 'atlas_proof_bundle',
         entityId: proofBundle.bundleId,
         format: result.format,
         details: {
@@ -343,19 +364,20 @@ router.post(
       sendSuccess(res, result);
     } catch (err) {
       if (handleAuditFailure(res, err)) return;
-      if (err instanceof Error && err.message.includes("required")) {
+      if (err instanceof Error && err.message.includes('required')) {
         sendBadRequest(res, err.message);
         return;
       }
-      handleRouteError(res, err, "Failed to export proof bundle");
+      handleRouteError(res, err, 'Failed to export proof bundle');
     }
   },
 );
 
 router.get(
-  "/atlas/export/openusd/:sceneId", validateQuery(anyQuerySchema),
+  '/atlas/export/openusd/:sceneId',
+  validateQuery(anyQuerySchema),
   authMiddleware(),
-  requireRole("operator", "ops", "exec", "admin", "super_admin"),
+  requireRole('operator', 'ops', 'exec', 'admin', 'super_admin'),
   atlasExportRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -371,7 +393,7 @@ router.get(
       if (proofChainId !== undefined) {
         const parsed = Number(proofChainId);
         if (!Number.isInteger(parsed) || parsed < 0) {
-          sendBadRequest(res, "proofChainId must be a non-negative integer");
+          sendBadRequest(res, 'proofChainId must be a non-negative integer');
           return;
         }
         resolvedProofChainId = parsed;
@@ -385,17 +407,18 @@ router.get(
 
       const manifest = buildOpenUSDManifest({
         stage: `/ATLAS/${sceneId}`,
-        domain: domainOverride ?? row.twinCategory ?? "default",
+        domain: domainOverride ?? row.twinCategory ?? 'default',
         entityId: entityIdOverride ?? row.entityId,
-        proofChainId: resolvedProofChainId !== undefined ? resolvedProofChainId : (row.proofChainId ?? null),
+        proofChainId:
+          resolvedProofChainId !== undefined ? resolvedProofChainId : (row.proofChainId ?? null),
         sceneState: (row.state ?? {}) as Record<string, unknown>,
       });
 
       const result = exportOpenUSDManifest(manifest);
       await recordAtlasExportAudit({
         req,
-        action: "atlas.openusd.export",
-        entityType: "atlas_scene",
+        action: 'atlas.openusd.export',
+        entityType: 'atlas_scene',
         entityId: sceneId,
         format: result.format,
         details: {
@@ -407,11 +430,11 @@ router.get(
       sendSuccess(res, result);
     } catch (err) {
       if (handleAuditFailure(res, err)) return;
-      if (err instanceof Error && err.message.includes("required")) {
+      if (err instanceof Error && err.message.includes('required')) {
         sendBadRequest(res, err.message);
         return;
       }
-      handleRouteError(res, err, "Failed to export OpenUSD manifest");
+      handleRouteError(res, err, 'Failed to export OpenUSD manifest');
     }
   },
 );

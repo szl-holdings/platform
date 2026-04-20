@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { WorkspaceDomain } from "@/context/WorkspaceContext";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+import type { WorkspaceDomain } from '@/context/WorkspaceContext';
 
-const STORAGE_KEY = "cortex_screenshot_policies";
+const STORAGE_KEY = 'cortex_screenshot_policies';
 
 const DEFAULT_POLICIES: Record<WorkspaceDomain, boolean> = {
   intelligence: false,
@@ -52,7 +52,7 @@ export function ScreenshotGuardProvider({ children }: { children: ReactNode }) {
 
   const isPolicyEnabled = useCallback(
     (domain: WorkspaceDomain) => policies[domain] ?? false,
-    [policies]
+    [policies],
   );
 
   return (

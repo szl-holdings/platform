@@ -1,12 +1,19 @@
-export type Vertical = "firestorm" | "vessels" | "terra" | "lyte" | "prism" | "alloy" | "carlota-jo";
-export type RunStatus = "running" | "paused" | "completed" | "failed" | "awaiting-approval";
-export type PolicyStatus = "compliant" | "violated" | "pending" | "escalated";
-export type RiskLevel = "low" | "medium" | "high" | "critical";
-export type Perspective = "executive" | "operator" | "analyst" | "approver";
-export type ApprovalVerdict = "approved" | "rejected" | "escalated";
-export type StageStatus = "pending" | "running" | "completed" | "failed" | "skipped";
+export type Vertical =
+  | 'firestorm'
+  | 'vessels'
+  | 'terra'
+  | 'lyte'
+  | 'prism'
+  | 'alloy'
+  | 'carlota-jo';
+export type RunStatus = 'running' | 'paused' | 'completed' | 'failed' | 'awaiting-approval';
+export type PolicyStatus = 'compliant' | 'violated' | 'pending' | 'escalated';
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type Perspective = 'executive' | 'operator' | 'analyst' | 'approver';
+export type ApprovalVerdict = 'approved' | 'rejected' | 'escalated';
+export type StageStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
 
-export type RetrieverSource = "adapter" | "synthetic" | "inline" | "dry-run";
+export type RetrieverSource = 'adapter' | 'synthetic' | 'inline' | 'dry-run';
 
 export interface RetrieverSourceMeta {
   source: RetrieverSource;
@@ -16,7 +23,16 @@ export interface RetrieverSourceMeta {
 export interface RunStage {
   id: string;
   name: string;
-  kind: "signal" | "context" | "recommendation" | "simulation" | "policy" | "execution" | "proof" | "outcome" | "learning";
+  kind:
+    | 'signal'
+    | 'context'
+    | 'recommendation'
+    | 'simulation'
+    | 'policy'
+    | 'execution'
+    | 'proof'
+    | 'outcome'
+    | 'learning';
   status: StageStatus;
   startedAt: string | null;
   completedAt: string | null;
@@ -33,7 +49,7 @@ export interface RunStage {
 export interface PolicyEvalResult {
   policyId: string;
   policyName: string;
-  result: "pass" | "fail" | "warn";
+  result: 'pass' | 'fail' | 'warn';
   blockedReason: string | null;
   requiresApproval: boolean;
   violatedPolicies: string[];
@@ -42,7 +58,7 @@ export interface PolicyEvalResult {
 export interface EvidenceRef {
   refId: string;
   source: string;
-  sourceType: "document" | "signal" | "api" | "agent" | "human" | "sensor";
+  sourceType: 'document' | 'signal' | 'api' | 'agent' | 'human' | 'sensor';
   content: string;
   relevanceScore: number;
   timestamp: string;
@@ -64,7 +80,7 @@ export interface TraceSpan {
   startTime: string;
   durationMs: number;
   tags: Record<string, string>;
-  status: "ok" | "error" | "unset";
+  status: 'ok' | 'error' | 'unset';
 }
 
 export interface ApprovalEvent {
@@ -132,14 +148,14 @@ export interface CounterfactualDiff {
       recommendation: string;
       confidence: number;
       keyEvidence: string[];
-      policyResult: "pass" | "fail" | "warn";
+      policyResult: 'pass' | 'fail' | 'warn';
       requiresApproval: boolean;
     };
     counterfactual: {
       recommendation: string;
       confidence: number;
       keyEvidence: string[];
-      policyResult: "pass" | "fail" | "warn";
+      policyResult: 'pass' | 'fail' | 'warn';
       requiresApproval: boolean;
     };
     changed: boolean;

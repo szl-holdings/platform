@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 export interface PropertyAlert {
   id: string;
@@ -13,8 +13,7 @@ export function usePropertyAlertsWebSocket(onAlert?: (alert: PropertyAlert) => v
   const callbackRef = useRef(onAlert);
   callbackRef.current = onAlert;
 
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
   return { connected: false };
 }

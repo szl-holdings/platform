@@ -1,23 +1,23 @@
-import { ApolloClient, InMemoryCache, HttpLink, split } from "@apollo/client";
-import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
-import { getMainDefinition } from "@apollo/client/utilities";
-import { createClient } from "graphql-ws";
+import { ApolloClient, HttpLink, InMemoryCache, split } from '@apollo/client';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { createClient } from 'graphql-ws';
 
 let _apolloClient: ApolloClient<unknown> | null = null;
 
 function getGraphQLEndpoint(): string {
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     return `${window.location.origin}/api/graphql`;
   }
-  return "/api/graphql";
+  return '/api/graphql';
 }
 
 function getGraphQLWsEndpoint(): string {
-  if (typeof window !== "undefined") {
-    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+  if (typeof window !== 'undefined') {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${window.location.host}/api/graphql/ws`;
   }
-  return "ws://localhost/api/graphql/ws";
+  return 'ws://localhost/api/graphql/ws';
 }
 
 export function createApolloClient(
@@ -29,9 +29,9 @@ export function createApolloClient(
 
   const httpLink = new HttpLink({
     uri: httpEndpoint,
-    credentials: "include",
+    credentials: 'include',
     headers: {
-      "X-Requested-With": "XMLHttpRequest",
+      'X-Requested-With': 'XMLHttpRequest',
     },
   });
 
@@ -46,10 +46,7 @@ export function createApolloClient(
   const splitLink = split(
     ({ query }) => {
       const definition = getMainDefinition(query);
-      return (
-        definition.kind === "OperationDefinition" &&
-        definition.operation === "subscription"
-      );
+      return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
     },
     wsLink,
     httpLink,
@@ -60,11 +57,11 @@ export function createApolloClient(
     cache: new InMemoryCache(),
     defaultOptions: {
       watchQuery: {
-        fetchPolicy: "cache-and-network",
+        fetchPolicy: 'cache-and-network',
       },
       query: {
-        fetchPolicy: "network-only",
-        errorPolicy: "all",
+        fetchPolicy: 'network-only',
+        errorPolicy: 'all',
       },
     },
   });

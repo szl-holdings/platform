@@ -1,11 +1,11 @@
-import * as React from "react";
-import { Lock, ArrowRight, Sparkles, Shield, X } from "lucide-react";
-import { cn } from "../utils";
+import { ArrowRight, Lock, Shield, Sparkles, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../utils';
 
 export interface PaywallGateProps {
   featureName: string;
   featureDescription?: string;
-  requiredPlan?: "starter" | "professional" | "enterprise" | "command";
+  requiredPlan?: 'starter' | 'professional' | 'enterprise' | 'command';
   packName?: string;
   upgradeUrl?: string;
   onUpgrade?: () => void;
@@ -17,21 +17,21 @@ export interface PaywallGateProps {
 }
 
 const PLAN_LABELS: Record<string, string> = {
-  starter: "Starter",
-  professional: "Professional",
-  enterprise: "Enterprise",
-  command: "Command",
+  starter: 'Starter',
+  professional: 'Professional',
+  enterprise: 'Enterprise',
+  command: 'Command',
 };
 
 export function PaywallGate({
   featureName,
   featureDescription,
-  requiredPlan = "professional",
+  requiredPlan = 'professional',
   packName,
-  upgradeUrl = "/settings/billing/upgrade",
+  upgradeUrl = '/settings/billing/upgrade',
   onUpgrade,
   onNavigate,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
   className,
   compact = false,
   children,
@@ -51,10 +51,7 @@ export function PaywallGate({
   if (compact) {
     return (
       <div
-        className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-xl border",
-          className
-        )}
+        className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl border', className)}
         style={{
           backgroundColor: `${accentColor}08`,
           borderColor: `${accentColor}20`,
@@ -83,8 +80,8 @@ export function PaywallGate({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center py-12 px-6 rounded-2xl border relative overflow-hidden",
-        className
+        'flex flex-col items-center justify-center text-center py-12 px-6 rounded-2xl border relative overflow-hidden',
+        className,
       )}
       style={{
         backgroundColor: `${accentColor}05`,
@@ -115,9 +112,7 @@ export function PaywallGate({
         </div>
       </div>
 
-      <h3 className="text-base font-display font-semibold text-foreground mb-1">
-        {featureName}
-      </h3>
+      <h3 className="text-base font-display font-semibold text-foreground mb-1">{featureName}</h3>
 
       <p className="text-sm text-muted-foreground max-w-xs leading-relaxed mb-1">
         {featureDescription ??
@@ -166,15 +161,15 @@ export interface TrialBannerProps {
 
 export function TrialBanner({
   daysRemaining,
-  upgradeUrl = "/settings/billing/upgrade",
+  upgradeUrl = '/settings/billing/upgrade',
   onUpgrade,
   onNavigate,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
   className,
 }: TrialBannerProps) {
   const [dismissed, setDismissed] = React.useState(() => {
     try {
-      return localStorage.getItem("szl_trial_banner_dismissed") === "true";
+      return localStorage.getItem('szl_trial_banner_dismissed') === 'true';
     } catch {
       return false;
     }
@@ -196,25 +191,19 @@ export function TrialBanner({
 
   return (
     <div
-      className={cn(
-        "flex items-center gap-3 px-4 py-2.5 rounded-xl border",
-        className
-      )}
+      className={cn('flex items-center gap-3 px-4 py-2.5 rounded-xl border', className)}
       style={{
-        backgroundColor: urgent ? "rgba(239,68,68,0.08)" : `${accentColor}08`,
-        borderColor: urgent ? "rgba(239,68,68,0.25)" : `${accentColor}25`,
+        backgroundColor: urgent ? 'rgba(239,68,68,0.08)' : `${accentColor}08`,
+        borderColor: urgent ? 'rgba(239,68,68,0.25)' : `${accentColor}25`,
       }}
     >
-      <Sparkles
-        className="w-4 h-4 shrink-0"
-        style={{ color: urgent ? "#dc2626" : accentColor }}
-      />
+      <Sparkles className="w-4 h-4 shrink-0" style={{ color: urgent ? '#dc2626' : accentColor }} />
       <p className="flex-1 text-sm text-foreground">
         <span className="font-semibold">
           {daysRemaining === 0
-            ? "Your trial ends today."
-            : `${daysRemaining} day${daysRemaining === 1 ? "" : "s"} left in your trial.`}
-        </span>{" "}
+            ? 'Your trial ends today.'
+            : `${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left in your trial.`}
+        </span>{' '}
         <span className="text-muted-foreground">
           Add a payment method to continue after your trial.
         </span>
@@ -224,7 +213,7 @@ export function TrialBanner({
         className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg text-white transition-all hover:opacity-90 active:scale-[0.98]"
         style={{
           background: urgent
-            ? "linear-gradient(135deg, #c45a4a, #dc2626)"
+            ? 'linear-gradient(135deg, #c45a4a, #dc2626)'
             : `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
         }}
       >
@@ -233,7 +222,7 @@ export function TrialBanner({
       <button
         onClick={() => {
           try {
-            localStorage.setItem("szl_trial_banner_dismissed", "true");
+            localStorage.setItem('szl_trial_banner_dismissed', 'true');
           } catch {}
           setDismissed(true);
         }}

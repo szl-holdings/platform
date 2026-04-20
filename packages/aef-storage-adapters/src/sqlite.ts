@@ -1,17 +1,17 @@
-import { createRequire } from "node:module";
+import { createRequire } from 'node:module';
 import type {
-  RawDocRecord,
   ChunkRecord,
-  VectorRecord,
-  MetadataIndexRecord,
-  EvalFixtureRecord,
-  RawDocStore,
   ChunkStore,
-  VectorStore,
-  MetadataIndexStore,
+  EvalFixtureRecord,
   EvalFixtureStore,
+  MetadataIndexRecord,
+  MetadataIndexStore,
+  RawDocRecord,
+  RawDocStore,
   StorageBundle,
-} from "./interfaces.js";
+  VectorRecord,
+  VectorStore,
+} from './interfaces.js';
 
 const _require = createRequire(import.meta.url);
 
@@ -53,11 +53,11 @@ interface SqliteStatement {
 
 function openDatabase(filePath: string): SqliteDb {
   try {
-    const BetterSqlite3 = _require("better-sqlite3") as (path: string, opts?: unknown) => SqliteDb;
+    const BetterSqlite3 = _require('better-sqlite3') as (path: string, opts?: unknown) => SqliteDb;
     return BetterSqlite3(filePath, { fileMustExist: false });
   } catch {
     throw new Error(
-      "better-sqlite3 is not installed. Install it to use SqliteStorageBundle, or use LocalFsStorageBundle for development.",
+      'better-sqlite3 is not installed. Install it to use SqliteStorageBundle, or use LocalFsStorageBundle for development.',
     );
   }
 }
@@ -67,7 +67,7 @@ export class SqliteRawDocStore implements RawDocStore {
 
   constructor(filePath: string) {
     this.db = openDatabase(filePath);
-    this.db.pragma("journal_mode = WAL");
+    this.db.pragma('journal_mode = WAL');
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS raw_docs (
         source_id TEXT NOT NULL,
@@ -91,9 +91,15 @@ export class SqliteRawDocStore implements RawDocStore {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
-      doc.sourceId, doc.tenantId, doc.profileId ?? null, doc.title ?? null,
-      doc.sourceUri ?? null, doc.contentType, doc.content,
-      JSON.stringify(doc.metadata), doc.ingestedAt,
+      doc.sourceId,
+      doc.tenantId,
+      doc.profileId ?? null,
+      doc.title ?? null,
+      doc.sourceUri ?? null,
+      doc.contentType,
+      doc.content,
+      JSON.stringify(doc.metadata),
+      doc.ingestedAt,
     );
   }
 
@@ -108,7 +114,10 @@ export class SqliteRawDocStore implements RawDocStore {
     const stmt = profileId
       ? this.db.prepare(`SELECT * FROM raw_docs WHERE tenant_id = ? AND profile_id = ?`)
       : this.db.prepare(`SELECT * FROM raw_docs WHERE tenant_id = ?`);
-    const rows = (profileId ? stmt.all(tenantId, profileId) : stmt.all(tenantId)) as Record<string, unknown>[];
+    const rows = (profileId ? stmt.all(tenantId, profileId) : stmt.all(tenantId)) as Record<
+      string,
+      unknown
+    >[];
     return rows.map((r) => this.rowToRecord(r));
   }
 
@@ -125,19 +134,19 @@ export class SqliteRawDocStore implements RawDocStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): RawDocRecord {
-    const profileId = row["profile_id"] ? String(row["profile_id"]) : undefined;
-    const title = row["title"] ? String(row["title"]) : undefined;
-    const sourceUri = row["source_uri"] ? String(row["source_uri"]) : undefined;
+    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
+    const title = row['title'] ? String(row['title']) : undefined;
+    const sourceUri = row['source_uri'] ? String(row['source_uri']) : undefined;
     return {
-      sourceId: String(row["source_id"]),
-      tenantId: String(row["tenant_id"]),
+      sourceId: String(row['source_id']),
+      tenantId: String(row['tenant_id']),
       ...(profileId !== undefined ? { profileId } : {}),
       ...(title !== undefined ? { title } : {}),
       ...(sourceUri !== undefined ? { sourceUri } : {}),
-      contentType: String(row["content_type"]),
-      content: String(row["content"]),
-      metadata: JSON.parse(String(row["metadata"] ?? "{}")),
-      ingestedAt: String(row["ingested_at"]),
+      contentType: String(row['content_type']),
+      content: String(row['content']),
+      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
+      ingestedAt: String(row['ingested_at']),
     };
   }
 }
@@ -147,7 +156,7 @@ export class SqliteChunkStore implements ChunkStore {
 
   constructor(filePath: string) {
     this.db = openDatabase(filePath);
-    this.db.pragma("journal_mode = WAL");
+    this.db.pragma('journal_mode = WAL');
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS chunks (
         chunk_id TEXT PRIMARY KEY,
@@ -170,9 +179,15 @@ export class SqliteChunkStore implements ChunkStore {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
-      chunk.chunkId, chunk.sourceId, chunk.tenantId, chunk.profileId ?? null,
-      chunk.chunkIndex, chunk.text, chunk.tokenCount ?? null,
-      JSON.stringify(chunk.metadata), chunk.createdAt,
+      chunk.chunkId,
+      chunk.sourceId,
+      chunk.tenantId,
+      chunk.profileId ?? null,
+      chunk.chunkIndex,
+      chunk.text,
+      chunk.tokenCount ?? null,
+      JSON.stringify(chunk.metadata),
+      chunk.createdAt,
     );
   }
 
@@ -184,8 +199,12 @@ export class SqliteChunkStore implements ChunkStore {
   }
 
   async listBySource(sourceId: string, tenantId: string): Promise<ChunkRecord[]> {
-    const stmt = this.db.prepare(`SELECT * FROM chunks WHERE source_id = ? AND tenant_id = ? ORDER BY chunk_index`);
-    return (stmt.all(sourceId, tenantId) as Record<string, unknown>[]).map((r) => this.rowToRecord(r));
+    const stmt = this.db.prepare(
+      `SELECT * FROM chunks WHERE source_id = ? AND tenant_id = ? ORDER BY chunk_index`,
+    );
+    return (stmt.all(sourceId, tenantId) as Record<string, unknown>[]).map((r) =>
+      this.rowToRecord(r),
+    );
   }
 
   async listByTenant(tenantId: string, limit = 100): Promise<ChunkRecord[]> {
@@ -212,18 +231,18 @@ export class SqliteChunkStore implements ChunkStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): ChunkRecord {
-    const profileId = row["profile_id"] ? String(row["profile_id"]) : undefined;
-    const tokenCount = row["token_count"] ? Number(row["token_count"]) : undefined;
+    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
+    const tokenCount = row['token_count'] ? Number(row['token_count']) : undefined;
     return {
-      chunkId: String(row["chunk_id"]),
-      sourceId: String(row["source_id"]),
-      tenantId: String(row["tenant_id"]),
+      chunkId: String(row['chunk_id']),
+      sourceId: String(row['source_id']),
+      tenantId: String(row['tenant_id']),
       ...(profileId !== undefined ? { profileId } : {}),
-      chunkIndex: Number(row["chunk_index"]),
-      text: String(row["text"]),
+      chunkIndex: Number(row['chunk_index']),
+      text: String(row['text']),
       ...(tokenCount !== undefined ? { tokenCount } : {}),
-      metadata: JSON.parse(String(row["metadata"] ?? "{}")),
-      createdAt: String(row["created_at"]),
+      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
+      createdAt: String(row['created_at']),
     };
   }
 }
@@ -233,7 +252,7 @@ export class SqliteVectorStore implements VectorStore {
 
   constructor(filePath: string) {
     this.db = openDatabase(filePath);
-    this.db.pragma("journal_mode = WAL");
+    this.db.pragma('journal_mode = WAL');
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS vectors (
         chunk_id TEXT PRIMARY KEY,
@@ -256,9 +275,15 @@ export class SqliteVectorStore implements VectorStore {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
-      record.chunkId, record.sourceId, record.tenantId, record.profileId ?? null,
-      record.model, record.dimensions, JSON.stringify(record.vector),
-      JSON.stringify(record.metadata), record.indexedAt,
+      record.chunkId,
+      record.sourceId,
+      record.tenantId,
+      record.profileId ?? null,
+      record.model,
+      record.dimensions,
+      JSON.stringify(record.vector),
+      JSON.stringify(record.metadata),
+      record.indexedAt,
     );
   }
 
@@ -275,11 +300,15 @@ export class SqliteVectorStore implements VectorStore {
     tenantId: string;
     profileId?: string;
     metadataFilter?: Record<string, unknown>;
-  }): Promise<Array<{ chunkId: string; sourceId: string; score: number; metadata: Record<string, unknown> }>> {
+  }): Promise<
+    Array<{ chunkId: string; sourceId: string; score: number; metadata: Record<string, unknown> }>
+  > {
     const stmt = opts.profileId
       ? this.db.prepare(`SELECT * FROM vectors WHERE tenant_id = ? AND profile_id = ?`)
       : this.db.prepare(`SELECT * FROM vectors WHERE tenant_id = ?`);
-    const rows = (opts.profileId ? stmt.all(opts.tenantId, opts.profileId) : stmt.all(opts.tenantId)) as Record<string, unknown>[];
+    const rows = (
+      opts.profileId ? stmt.all(opts.tenantId, opts.profileId) : stmt.all(opts.tenantId)
+    ) as Record<string, unknown>[];
 
     const candidates = rows
       .map((row) => {
@@ -317,17 +346,17 @@ export class SqliteVectorStore implements VectorStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): VectorRecord {
-    const profileId = row["profile_id"] ? String(row["profile_id"]) : undefined;
+    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
     return {
-      chunkId: String(row["chunk_id"]),
-      sourceId: String(row["source_id"]),
-      tenantId: String(row["tenant_id"]),
+      chunkId: String(row['chunk_id']),
+      sourceId: String(row['source_id']),
+      tenantId: String(row['tenant_id']),
       ...(profileId !== undefined ? { profileId } : {}),
-      model: String(row["model"]),
-      dimensions: Number(row["dimensions"]),
-      vector: JSON.parse(String(row["vector"] ?? "[]")) as number[],
-      metadata: JSON.parse(String(row["metadata"] ?? "{}")),
-      indexedAt: String(row["indexed_at"]),
+      model: String(row['model']),
+      dimensions: Number(row['dimensions']),
+      vector: JSON.parse(String(row['vector'] ?? '[]')) as number[],
+      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
+      indexedAt: String(row['indexed_at']),
     };
   }
 }
@@ -337,7 +366,7 @@ export class SqliteMetadataIndexStore implements MetadataIndexStore {
 
   constructor(filePath: string) {
     this.db = openDatabase(filePath);
-    this.db.pragma("journal_mode = WAL");
+    this.db.pragma('journal_mode = WAL');
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS metadata_index (
         chunk_id TEXT PRIMARY KEY,
@@ -360,9 +389,15 @@ export class SqliteMetadataIndexStore implements MetadataIndexStore {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
-      record.chunkId, record.sourceId, record.tenantId, record.profileId ?? null,
-      record.title ?? null, record.page ?? null, record.section ?? null,
-      JSON.stringify(record.metadata), record.updatedAt,
+      record.chunkId,
+      record.sourceId,
+      record.tenantId,
+      record.profileId ?? null,
+      record.title ?? null,
+      record.page ?? null,
+      record.section ?? null,
+      JSON.stringify(record.metadata),
+      record.updatedAt,
     );
   }
 
@@ -378,7 +413,15 @@ export class SqliteMetadataIndexStore implements MetadataIndexStore {
     topK: number;
     tenantId: string;
     metadataFilter?: Record<string, unknown>;
-  }): Promise<Array<{ chunkId: string; sourceId: string; score: number; highlights: string[]; metadata: Record<string, unknown> }>> {
+  }): Promise<
+    Array<{
+      chunkId: string;
+      sourceId: string;
+      score: number;
+      highlights: string[];
+      metadata: Record<string, unknown>;
+    }>
+  > {
     const stmt = this.db.prepare(`SELECT * FROM metadata_index WHERE tenant_id = ?`);
     const rows = stmt.all(opts.tenantId) as Record<string, unknown>[];
 
@@ -390,11 +433,22 @@ export class SqliteMetadataIndexStore implements MetadataIndexStore {
             if (rec.metadata[k] !== v) return null;
           }
         }
-        const textContent = [rec.title, rec.section, ...Object.values(rec.metadata).map(String)].filter(Boolean).join(" ");
+        const textContent = [rec.title, rec.section, ...Object.values(rec.metadata).map(String)]
+          .filter(Boolean)
+          .join(' ');
         const score = keywordScore(textContent, opts.terms);
         if (score === 0) return null;
-        const highlights = opts.terms.toLowerCase().split(/\s+/).filter((w) => w && textContent.toLowerCase().includes(w));
-        return { chunkId: rec.chunkId, sourceId: rec.sourceId, score, highlights, metadata: rec.metadata };
+        const highlights = opts.terms
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w && textContent.toLowerCase().includes(w));
+        return {
+          chunkId: rec.chunkId,
+          sourceId: rec.sourceId,
+          score,
+          highlights,
+          metadata: rec.metadata,
+        };
       })
       .filter((c): c is NonNullable<typeof c> => c !== null);
 
@@ -409,7 +463,9 @@ export class SqliteMetadataIndexStore implements MetadataIndexStore {
   }
 
   async deleteBySource(sourceId: string, tenantId: string): Promise<number> {
-    const stmt = this.db.prepare(`DELETE FROM metadata_index WHERE source_id = ? AND tenant_id = ?`);
+    const stmt = this.db.prepare(
+      `DELETE FROM metadata_index WHERE source_id = ? AND tenant_id = ?`,
+    );
     const result = stmt.run(sourceId, tenantId) as { changes: number };
     return result.changes;
   }
@@ -421,20 +477,21 @@ export class SqliteMetadataIndexStore implements MetadataIndexStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): MetadataIndexRecord {
-    const profileId = row["profile_id"] ? String(row["profile_id"]) : undefined;
-    const title = row["title"] ? String(row["title"]) : undefined;
-    const page = row["page"] !== null && row["page"] !== undefined ? Number(row["page"]) : undefined;
-    const section = row["section"] ? String(row["section"]) : undefined;
+    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
+    const title = row['title'] ? String(row['title']) : undefined;
+    const page =
+      row['page'] !== null && row['page'] !== undefined ? Number(row['page']) : undefined;
+    const section = row['section'] ? String(row['section']) : undefined;
     return {
-      chunkId: String(row["chunk_id"]),
-      sourceId: String(row["source_id"]),
-      tenantId: String(row["tenant_id"]),
+      chunkId: String(row['chunk_id']),
+      sourceId: String(row['source_id']),
+      tenantId: String(row['tenant_id']),
       ...(profileId !== undefined ? { profileId } : {}),
       ...(title !== undefined ? { title } : {}),
       ...(page !== undefined ? { page } : {}),
       ...(section !== undefined ? { section } : {}),
-      metadata: JSON.parse(String(row["metadata"] ?? "{}")),
-      updatedAt: String(row["updated_at"]),
+      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
+      updatedAt: String(row['updated_at']),
     };
   }
 }
@@ -444,7 +501,7 @@ export class SqliteEvalFixtureStore implements EvalFixtureStore {
 
   constructor(filePath: string) {
     this.db = openDatabase(filePath);
-    this.db.pragma("journal_mode = WAL");
+    this.db.pragma('journal_mode = WAL');
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS eval_fixtures (
         fixture_id TEXT PRIMARY KEY,
@@ -465,8 +522,13 @@ export class SqliteEvalFixtureStore implements EvalFixtureStore {
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
-      fixture.fixtureId, fixture.profileId, fixture.tenantId, fixture.queryId,
-      fixture.query, JSON.stringify(fixture.relevantChunkIds), JSON.stringify(fixture.metadata),
+      fixture.fixtureId,
+      fixture.profileId,
+      fixture.tenantId,
+      fixture.queryId,
+      fixture.query,
+      JSON.stringify(fixture.relevantChunkIds),
+      JSON.stringify(fixture.metadata),
     );
   }
 
@@ -496,13 +558,13 @@ export class SqliteEvalFixtureStore implements EvalFixtureStore {
 
   private rowToRecord(row: Record<string, unknown>): EvalFixtureRecord {
     return {
-      fixtureId: String(row["fixture_id"]),
-      profileId: String(row["profile_id"]),
-      tenantId: String(row["tenant_id"]),
-      queryId: String(row["query_id"]),
-      query: String(row["query"]),
-      relevantChunkIds: JSON.parse(String(row["relevant_chunk_ids"] ?? "[]")) as string[],
-      metadata: JSON.parse(String(row["metadata"] ?? "{}")),
+      fixtureId: String(row['fixture_id']),
+      profileId: String(row['profile_id']),
+      tenantId: String(row['tenant_id']),
+      queryId: String(row['query_id']),
+      query: String(row['query']),
+      relevantChunkIds: JSON.parse(String(row['relevant_chunk_ids'] ?? '[]')) as string[],
+      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
     };
   }
 }

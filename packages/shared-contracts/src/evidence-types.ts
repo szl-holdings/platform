@@ -4,10 +4,10 @@
  * Shared types for evidence ledger entries, source citations,
  * confidence scoring, and proof envelopes.
  */
-import type { PolicyVerdict } from "./policy-types.js";
+import type { PolicyVerdict } from './policy-types.js';
 
-export type ConfidenceLevel = "high" | "medium" | "low" | "contradiction";
-export type FreshnessLevel = "fresh" | "aging" | "stale" | "unknown";
+export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'contradiction';
+export type FreshnessLevel = 'fresh' | 'aging' | 'stale' | 'unknown';
 
 export interface SourceCitation {
   sourceId: string;
@@ -25,7 +25,7 @@ export interface ToolCallRecord {
   inputSummary?: string;
   outputSummary?: string;
   durationMs?: number;
-  status: "success" | "error" | "skipped";
+  status: 'success' | 'error' | 'skipped';
   error?: string;
   timestamp: string;
 }

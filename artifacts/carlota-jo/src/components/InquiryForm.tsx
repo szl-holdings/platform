@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, AlertCircle } from "lucide-react";
+import { motion } from 'framer-motion';
+import { AlertCircle, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = BASE + "/api";
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const API_BASE = BASE + '/api';
 export default function InquiryForm() {
   const [form, setForm] = useState({
-    name: "",
-    organisation: "",
-    email: "",
-    message: "",
+    name: '',
+    organisation: '',
+    email: '',
+    message: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -21,21 +21,21 @@ export default function InquiryForm() {
     setSubmitting(true);
     try {
       const res = await fetch(`${API_BASE}/cms/contact-submissions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           siteId: 4,
-          formKey: "carlota_inquiry",
+          formKey: 'carlota_inquiry',
           fullName: form.name,
           email: form.email,
           message: form.message,
           metadataJson: { organisation: form.organisation },
         }),
       });
-      if (!res.ok) throw new Error("Submission failed");
+      if (!res.ok) throw new Error('Submission failed');
       setSubmitted(true);
     } catch {
-      setSubmitError("Something went wrong. Please email us at inquiries@carlotajo.com");
+      setSubmitError('Something went wrong. Please email us at inquiries@carlotajo.com');
     } finally {
       setSubmitting(false);
     }
@@ -48,7 +48,7 @@ export default function InquiryForm() {
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-5"
           >
@@ -59,13 +59,14 @@ export default function InquiryForm() {
               <em>private conversation</em>
             </h2>
             <p className="text-ink-500 text-sm font-light leading-relaxed mb-10">
-              We work with a small number of clients at a time. If you are facing a consequential decision and want a candid second opinion, we'd like to hear from you.
+              We work with a small number of clients at a time. If you are facing a consequential
+              decision and want a candid second opinion, we'd like to hear from you.
             </p>
             <div className="space-y-5">
               {[
-                ["Confidentiality", "All enquiries are treated in strict confidence."],
-                ["Response", "We respond within 48 hours."],
-                ["No commitment", "An initial conversation carries no obligation."],
+                ['Confidentiality', 'All enquiries are treated in strict confidence.'],
+                ['Response', 'We respond within 48 hours.'],
+                ['No commitment', 'An initial conversation carries no obligation.'],
               ].map(([label, text]) => (
                 <div key={label} className="flex gap-4">
                   <div className="w-4 h-[1px] bg-gold/30 shrink-0 mt-[0.65rem]" />
@@ -81,7 +82,7 @@ export default function InquiryForm() {
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-7"
           >
@@ -156,8 +157,18 @@ export default function InquiryForm() {
                     <span>{submitError}</span>
                   </div>
                 )}
-                <button type="submit" disabled={submitting} className="cj-btn-primary disabled:opacity-60 disabled:cursor-not-allowed">
-                  {submitting ? "Submitting..." : <>Submit enquiry <ArrowRight size={13} /></>}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="cj-btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {submitting ? (
+                    'Submitting...'
+                  ) : (
+                    <>
+                      Submit enquiry <ArrowRight size={13} />
+                    </>
+                  )}
                 </button>
                 <p className="text-[11px] text-ink-400/60 font-light">
                   Treated in strict confidence.

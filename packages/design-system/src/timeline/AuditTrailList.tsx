@@ -1,6 +1,6 @@
-import React from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface AuditEntry {
   id: string;
@@ -10,7 +10,7 @@ export interface AuditEntry {
   resourceType?: string;
   resourceId?: string;
   timestamp: string;
-  policyResult?: "allowed" | "requires-approval" | "blocked" | "override";
+  policyResult?: 'allowed' | 'requires-approval' | 'blocked' | 'override';
   traceId?: string;
   ipAddress?: string;
   metadata?: Record<string, string | number>;
@@ -23,14 +23,14 @@ export interface AuditTrailListProps {
 
 const POLICY_COLORS: Record<string, string> = {
   allowed: color.accent.green,
-  "requires-approval": color.accent.amber,
+  'requires-approval': color.accent.amber,
   blocked: color.accent.red,
   override: color.accent.violet,
 };
 
 export function AuditTrailList({ entries, className }: AuditTrailListProps) {
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn('flex flex-col', className)}>
       {entries.map((entry) => (
         <div
           key={entry.id}
@@ -40,11 +40,9 @@ export function AuditTrailList({ entries, className }: AuditTrailListProps) {
           <div
             className="flex-shrink-0 rounded mt-1"
             style={{
-              width: "8px",
-              height: "8px",
-              background: entry.policyResult
-                ? POLICY_COLORS[entry.policyResult]
-                : color.text.muted,
+              width: '8px',
+              height: '8px',
+              background: entry.policyResult ? POLICY_COLORS[entry.policyResult] : color.text.muted,
             }}
           />
 

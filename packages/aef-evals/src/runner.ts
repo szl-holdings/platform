@@ -1,18 +1,18 @@
+import { computeLatencyPercentiles } from './metrics/latency.js';
+import { computeMrr } from './metrics/mrr.js';
+import { computeNdcgAtK } from './metrics/ndcg.js';
+import { computePrecisionAtK } from './metrics/precision.js';
+import { computeRecallAtK } from './metrics/recall.js';
 import type {
-  GoldenFixtureSet,
-  RetrievalResult,
-  MetricResult,
-  EvidenceCompletenessResult,
   EvalRunResult,
+  EvidenceCompletenessResult,
+  GoldenFixtureSet,
+  MetricResult,
   RetrievalAdapter,
-} from "./types.js";
-import { computeNdcgAtK } from "./metrics/ndcg.js";
-import { computeRecallAtK } from "./metrics/recall.js";
-import { computePrecisionAtK } from "./metrics/precision.js";
-import { computeMrr } from "./metrics/mrr.js";
-import { computeLatencyPercentiles } from "./metrics/latency.js";
+  RetrievalResult,
+} from './types.js';
 
-export type RequestedMetric = "ndcg" | "recall" | "precision" | "mrr";
+export type RequestedMetric = 'ndcg' | 'recall' | 'precision' | 'mrr';
 
 export interface EvalRunOptions {
   topK?: number;
@@ -25,11 +25,7 @@ export async function runEval(
   adapter: RetrievalAdapter,
   options: EvalRunOptions = {},
 ): Promise<EvalRunResult> {
-  const {
-    topK = 10,
-    metrics = ["ndcg", "recall", "precision", "mrr"],
-    evidenceCheckFn,
-  } = options;
+  const { topK = 10, metrics = ['ndcg', 'recall', 'precision', 'mrr'], evidenceCheckFn } = options;
 
   const latenciesMs: number[] = [];
   const retrievalResults: RetrievalResult[] = [];
@@ -49,10 +45,14 @@ export async function runEval(
     const gq = fixtureSet.queries[i]!;
     const rr = retrievalResults[i]!;
 
-    if (metrics.includes("ndcg")) ndcgValues.push(computeNdcgAtK(rr.retrievedChunkIds, gq.relevantChunkIds, topK));
-    if (metrics.includes("recall")) recallValues.push(computeRecallAtK(rr.retrievedChunkIds, gq.relevantChunkIds, topK));
-    if (metrics.includes("precision")) precisionValues.push(computePrecisionAtK(rr.retrievedChunkIds, gq.relevantChunkIds, topK));
-    if (metrics.includes("mrr")) mrrValues.push(computeMrr(rr.retrievedChunkIds, gq.relevantChunkIds));
+    if (metrics.includes('ndcg'))
+      ndcgValues.push(computeNdcgAtK(rr.retrievedChunkIds, gq.relevantChunkIds, topK));
+    if (metrics.includes('recall'))
+      recallValues.push(computeRecallAtK(rr.retrievedChunkIds, gq.relevantChunkIds, topK));
+    if (metrics.includes('precision'))
+      precisionValues.push(computePrecisionAtK(rr.retrievedChunkIds, gq.relevantChunkIds, topK));
+    if (metrics.includes('mrr'))
+      mrrValues.push(computeMrr(rr.retrievedChunkIds, gq.relevantChunkIds));
   }
 
   function avg(arr: number[]): number {
@@ -61,10 +61,14 @@ export async function runEval(
   }
 
   const metricResults: MetricResult[] = [];
-  if (metrics.includes("ndcg")) metricResults.push({ metric: "ndcg", atK: topK, value: avg(ndcgValues) });
-  if (metrics.includes("recall")) metricResults.push({ metric: "recall", atK: topK, value: avg(recallValues) });
-  if (metrics.includes("precision")) metricResults.push({ metric: "precision", atK: topK, value: avg(precisionValues) });
-  if (metrics.includes("mrr")) metricResults.push({ metric: "mrr", atK: topK, value: avg(mrrValues) });
+  if (metrics.includes('ndcg'))
+    metricResults.push({ metric: 'ndcg', atK: topK, value: avg(ndcgValues) });
+  if (metrics.includes('recall'))
+    metricResults.push({ metric: 'recall', atK: topK, value: avg(recallValues) });
+  if (metrics.includes('precision'))
+    metricResults.push({ metric: 'precision', atK: topK, value: avg(precisionValues) });
+  if (metrics.includes('mrr'))
+    metricResults.push({ metric: 'mrr', atK: topK, value: avg(mrrValues) });
 
   const evidenceCompleteness: EvidenceCompletenessResult[] = fixtureSet.queries.map((gq) => {
     const provided = evidenceCheckFn ? evidenceCheckFn(gq.queryId) : {};
@@ -79,10 +83,7 @@ export async function runEval(
       complete: false,
     };
     result.complete =
-      result.hasSourceId &&
-      result.hasChunkId &&
-      result.hasFusedScore &&
-      result.hasPolicyDecision;
+      result.hasSourceId && result.hasChunkId && result.hasFusedScore && result.hasPolicyDecision;
     return result;
   });
 

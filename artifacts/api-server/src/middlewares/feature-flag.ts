@@ -1,7 +1,7 @@
-import type { Request, Response, NextFunction } from "express";
-import { LRUCache } from "lru-cache";
-import { db, featureFlagsTable } from "@szl-holdings/db";
-import { eq } from "drizzle-orm";
+import { db, featureFlagsTable } from '@szl-holdings/db';
+import { eq } from 'drizzle-orm';
+import type { NextFunction, Request, Response } from 'express';
+import { LRUCache } from 'lru-cache';
 
 const flagCache = new LRUCache<string, { value: boolean; expiresAt: number }>({ max: 500 });
 const CACHE_TTL = 30_000;
@@ -26,7 +26,7 @@ export function requireFeatureFlag(flagKey: string, opts?: { disabledMessage?: s
       const enabled = await isFlagEnabled(flagKey);
       if (!enabled) {
         res.status(403).json({
-          error: "Feature not available",
+          error: 'Feature not available',
           message: opts?.disabledMessage ?? `Feature '${flagKey}' is not enabled`,
           flagKey,
         });
@@ -34,10 +34,10 @@ export function requireFeatureFlag(flagKey: string, opts?: { disabledMessage?: s
       }
       next();
     } catch (err) {
-      req.log?.warn({ err, flagKey }, "Feature flag check error — denying access (fail-closed)");
+      req.log?.warn({ err, flagKey }, 'Feature flag check error — denying access (fail-closed)');
       res.status(503).json({
-        error: "Feature flag evaluation failed",
-        message: "Unable to evaluate feature flag. Access denied for safety.",
+        error: 'Feature flag evaluation failed',
+        message: 'Unable to evaluate feature flag. Access denied for safety.',
         flagKey,
       });
     }

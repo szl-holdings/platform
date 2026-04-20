@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { TenantIdSchema } from "./tenant.js";
+import { z } from 'zod';
+import { TenantIdSchema } from './tenant.js';
 
 export const MetadataFilterSchema = z.record(
-  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])
+  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
 );
 export type MetadataFilter = z.infer<typeof MetadataFilterSchema>;
 
@@ -24,19 +24,19 @@ export type HybridSearchRequest = z.infer<typeof HybridSearchRequestSchema>;
 
 // Canonical 13-stage retrieval pipeline — documented native shape.
 export const RETRIEVAL_PATH = [
-  "normalize_query",
-  "load_profile",
-  "policy_check",
-  "query_shaping",
-  "dense_ann",
-  "keyword_bm25",
-  "exact_match_boost",
-  "rrf_fusion",
-  "metadata_filter",
-  "rerank",
-  "evidence_assemble",
-  "ledger_write",
-  "response_normalization",
+  'normalize_query',
+  'load_profile',
+  'policy_check',
+  'query_shaping',
+  'dense_ann',
+  'keyword_bm25',
+  'exact_match_boost',
+  'rrf_fusion',
+  'metadata_filter',
+  'rerank',
+  'evidence_assemble',
+  'ledger_write',
+  'response_normalization',
 ] as const;
 export type RetrievalStage = (typeof RETRIEVAL_PATH)[number];
 

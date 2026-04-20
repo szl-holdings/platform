@@ -1,15 +1,15 @@
-import { parseIntId } from "../utils.js";
 import {
-  getTrustCenterStatus,
-  listHoldingsVentures,
+  createHoldingsInquiry,
   getHoldingsVenture,
   getHoldingsVentureBySlug,
+  getTrustCenterStatus,
+  type HoldingsStoragePort,
+  listHoldingsInquiries,
   listHoldingsMetrics,
   listHoldingsMilestones,
-  listHoldingsInquiries,
-  createHoldingsInquiry,
-  type HoldingsStoragePort,
-} from "../../lib/domain-services/holdings/index.js";
+  listHoldingsVentures,
+} from '../../lib/domain-services/holdings/index.js';
+import { parseIntId } from '../utils.js';
 
 export const holdingsTypeDefs = `#graphql
   type TrustFramework {
@@ -86,45 +86,98 @@ export const holdingsTypeDefs = `#graphql
 `;
 
 async function buildHoldingsStorage(): Promise<HoldingsStoragePort> {
-  const { db } = await import("@szl-holdings/db");
-  const { holdingsVenturesTable, holdingsMetricsTable, holdingsMilestonesTable, holdingsInquiriesTable } = await import("@szl-holdings/db/schema");
-  const { desc, eq } = await import("drizzle-orm");
+  const { db } = await import('@szl-holdings/db');
+  const {
+    holdingsVenturesTable,
+    holdingsMetricsTable,
+    holdingsMilestonesTable,
+    holdingsInquiriesTable,
+  } = await import('@szl-holdings/db/schema');
+  const { desc, eq } = await import('drizzle-orm');
 
   return {
     async listVentures(args) {
       try {
-        const q = db.select().from(holdingsVenturesTable).orderBy(desc(holdingsVenturesTable.createdAt)).limit(args.limit).offset(args.offset);
+        const q = db
+          .select()
+          .from(holdingsVenturesTable)
+          .orderBy(desc(holdingsVenturesTable.createdAt))
+          .limit(args.limit)
+          .offset(args.offset);
         if (args.status) return await q.where(eq(holdingsVenturesTable.status, args.status as any));
         return await q;
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
     async getVenture(id) {
       try {
-        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.id, id)).limit(1);
+        const rows = await db
+          .select()
+          .from(holdingsVenturesTable)
+          .where(eq(holdingsVenturesTable.id, id))
+          .limit(1);
         return rows[0] ?? null;
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     },
     async getVentureBySlug(slug) {
       try {
-        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.slug, slug as any)).limit(1);
+        const rows = await db
+          .select()
+          .from(holdingsVenturesTable)
+          .where(eq(holdingsVenturesTable.slug, slug as any))
+          .limit(1);
         return rows[0] ?? null;
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     },
     async listMetrics(args) {
-      try { return await db.select().from(holdingsMetricsTable).where(eq(holdingsMetricsTable.ventureId, args.ventureId)).orderBy(desc(holdingsMetricsTable.createdAt)).limit(args.limit); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(holdingsMetricsTable)
+          .where(eq(holdingsMetricsTable.ventureId, args.ventureId))
+          .orderBy(desc(holdingsMetricsTable.createdAt))
+          .limit(args.limit);
+      } catch {
+        return [];
+      }
     },
     async listMilestones(args) {
-      try { return await db.select().from(holdingsMilestonesTable).where(eq(holdingsMilestonesTable.ventureId, args.ventureId)).orderBy(desc(holdingsMilestonesTable.createdAt)).limit(args.limit); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(holdingsMilestonesTable)
+          .where(eq(holdingsMilestonesTable.ventureId, args.ventureId))
+          .orderBy(desc(holdingsMilestonesTable.createdAt))
+          .limit(args.limit);
+      } catch {
+        return [];
+      }
     },
     async listInquiries(args) {
       try {
-        const q = db.select().from(holdingsInquiriesTable).orderBy(desc(holdingsInquiriesTable.createdAt)).limit(args.limit).offset(args.offset);
-        if (args.status) return await q.where(eq(holdingsInquiriesTable.status, args.status as any));
+        const q = db
+          .select()
+          .from(holdingsInquiriesTable)
+          .orderBy(desc(holdingsInquiriesTable.createdAt))
+          .limit(args.limit)
+          .offset(args.offset);
+        if (args.status)
+          return await q.where(eq(holdingsInquiriesTable.status, args.status as any));
         return await q;
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
     async createInquiry(data) {
-      const rows = await db.insert(holdingsInquiriesTable).values(data as any).returning();
+      const rows = await db
+        .insert(holdingsInquiriesTable)
+        .values(data as any)
+        .returning();
       return rows[0];
     },
   };
@@ -133,7 +186,10 @@ async function buildHoldingsStorage(): Promise<HoldingsStoragePort> {
 export const holdingsResolvers = {
   Query: {
     trustCenter: () => getTrustCenterStatus(),
-    holdingsVentures: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
+    holdingsVentures: async (
+      _: unknown,
+      args: { status?: string; limit?: number; offset?: number },
+    ) => {
       return listHoldingsVentures(await buildHoldingsStorage(), args);
     },
     holdingsVenture: async (_: unknown, args: { id: string }) => {
@@ -143,17 +199,29 @@ export const holdingsResolvers = {
       return getHoldingsVentureBySlug(await buildHoldingsStorage(), args.slug);
     },
     holdingsMetrics: async (_: unknown, args: { ventureId: string; limit?: number }) => {
-      return listHoldingsMetrics(await buildHoldingsStorage(), { ventureId: parseIntId(args.ventureId, "ventureId"), limit: args.limit });
+      return listHoldingsMetrics(await buildHoldingsStorage(), {
+        ventureId: parseIntId(args.ventureId, 'ventureId'),
+        limit: args.limit,
+      });
     },
     holdingsMilestones: async (_: unknown, args: { ventureId: string; limit?: number }) => {
-      return listHoldingsMilestones(await buildHoldingsStorage(), { ventureId: parseIntId(args.ventureId, "ventureId"), limit: args.limit });
+      return listHoldingsMilestones(await buildHoldingsStorage(), {
+        ventureId: parseIntId(args.ventureId, 'ventureId'),
+        limit: args.limit,
+      });
     },
-    holdingsInquiries: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
+    holdingsInquiries: async (
+      _: unknown,
+      args: { status?: string; limit?: number; offset?: number },
+    ) => {
       return listHoldingsInquiries(await buildHoldingsStorage(), args);
     },
   },
   Mutation: {
-    createHoldingsInquiry: async (_: unknown, args: { name: string; email: string; subject: string; message: string }) => {
+    createHoldingsInquiry: async (
+      _: unknown,
+      args: { name: string; email: string; subject: string; message: string },
+    ) => {
       try {
         return await createHoldingsInquiry(await buildHoldingsStorage(), args);
       } catch (err) {

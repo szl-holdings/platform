@@ -1,5 +1,5 @@
-import * as React from "react";
-import { cn } from "../utils";
+import type * as React from 'react';
+import { cn } from '../utils';
 
 export interface ServiceCardProps {
   id?: string;
@@ -10,7 +10,7 @@ export interface ServiceCardProps {
   accentColor?: string;
   href?: string;
   onClick?: () => void;
-  variant?: "light" | "dark" | "bordered";
+  variant?: 'light' | 'dark' | 'bordered';
   className?: string;
   features?: string[];
   cta?: { label: string; href?: string; onClick?: () => void };
@@ -21,33 +21,35 @@ export function ServiceCard({
   title,
   description,
   icon,
-  accentColor = "hsl(215 45% 32%)",
+  accentColor = 'hsl(215 45% 32%)',
   href,
   onClick,
-  variant = "dark",
+  variant = 'dark',
   className,
   features,
   cta,
 }: ServiceCardProps) {
-  const isDark = variant === "dark";
-  const isBordered = variant === "bordered";
+  const isDark = variant === 'dark';
+  const isBordered = variant === 'bordered';
 
   const content = (
     <div
       className={cn(
-        "group rounded-2xl p-6 transition-all duration-300",
-        isDark && "bg-white/3 border border-white/8 hover:border-white/16 hover:bg-white/5",
-        !isDark && !isBordered && "bg-white border border-neutral-100 hover:border-neutral-200 hover:shadow-sm",
-        isBordered && "border-2 border-neutral-200 hover:border-current bg-white",
-        className
+        'group rounded-2xl p-6 transition-all duration-300',
+        isDark && 'bg-white/3 border border-white/8 hover:border-white/16 hover:bg-white/5',
+        !isDark &&
+          !isBordered &&
+          'bg-white border border-neutral-100 hover:border-neutral-200 hover:shadow-sm',
+        isBordered && 'border-2 border-neutral-200 hover:border-current bg-white',
+        className,
       )}
-      style={isBordered ? { "--hover-border": accentColor } as React.CSSProperties : undefined}
+      style={isBordered ? ({ '--hover-border': accentColor } as React.CSSProperties) : undefined}
     >
       {tag && (
         <p
           className={cn(
-            "text-[10px] font-medium tracking-[0.25em] uppercase mb-4",
-            isDark ? "text-white/40" : "text-neutral-400"
+            'text-[10px] font-medium tracking-[0.25em] uppercase mb-4',
+            isDark ? 'text-white/40' : 'text-neutral-400',
           )}
         >
           {tag}
@@ -65,8 +67,8 @@ export function ServiceCard({
 
       <h3
         className={cn(
-          "text-base font-bold mb-3 leading-snug",
-          isDark ? "text-white" : "text-neutral-900"
+          'text-base font-bold mb-3 leading-snug',
+          isDark ? 'text-white' : 'text-neutral-900',
         )}
       >
         {title}
@@ -74,9 +76,9 @@ export function ServiceCard({
 
       <p
         className={cn(
-          "text-sm leading-relaxed",
-          isDark ? "text-white/50" : "text-neutral-500",
-          (features || cta) ? "mb-5" : ""
+          'text-sm leading-relaxed',
+          isDark ? 'text-white/50' : 'text-neutral-500',
+          features || cta ? 'mb-5' : '',
         )}
       >
         {description}
@@ -90,7 +92,7 @@ export function ServiceCard({
                 className="w-1.5 h-1.5 rounded-full shrink-0"
                 style={{ backgroundColor: accentColor }}
               />
-              <span className={isDark ? "text-white/60" : "text-neutral-600"}>{f}</span>
+              <span className={isDark ? 'text-white/60' : 'text-neutral-600'}>{f}</span>
             </li>
           ))}
         </ul>
@@ -98,7 +100,7 @@ export function ServiceCard({
 
       {cta && (
         <a
-          href={cta.href ?? "#"}
+          href={cta.href ?? '#'}
           onClick={cta.onClick}
           className="inline-flex items-center gap-1.5 text-sm font-semibold transition-colors"
           style={{ color: accentColor }}

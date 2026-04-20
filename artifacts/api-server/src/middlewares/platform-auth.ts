@@ -1,8 +1,19 @@
-import type { Request, Response, NextFunction } from "express";
-import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
-import { eq, and, gt } from "drizzle-orm";
-import type { PlatformRole } from "@szl-holdings/db";
-import { PLATFORM_ROLE_HIERARCHY, hasPlatformRole, isPlatformAdmin, canWritePlatform } from "@szl-holdings/db";
+import type { PlatformRole } from '@szl-holdings/db';
+import {
+  canWritePlatform,
+  db,
+  hasPlatformRole,
+  isPlatformAdmin,
+  organizationsTable,
+  orgMembersTable,
+  PLATFORM_ROLE_HIERARCHY,
+  rolesTable,
+  sessionsTable,
+  userRolesTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { and, eq, gt } from 'drizzle-orm';
+import type { NextFunction, Request, Response } from 'express';
 
 export interface PlatformUser {
   id: number;
@@ -22,7 +33,13 @@ declare global {
   }
 }
 
-async function resolveUserFromToken(token: string): Promise<{ id: number; displayName: string; email: string | null; platformRole: PlatformRole | null; team: string | null } | null> {
+async function resolveUserFromToken(token: string): Promise<{
+  id: number;
+  displayName: string;
+  email: string | null;
+  platformRole: PlatformRole | null;
+  team: string | null;
+} | null> {
   const [session] = await db
     .select()
     .from(sessionsTable)
@@ -41,9 +58,12 @@ async function resolveUserFromToken(token: string): Promise<{ id: number; displa
   };
 }
 
-async function resolveOrgFromRequest(req: Request, userId: number): Promise<{ orgId: number; orgSlug: string } | null> {
-  const orgSlugHeader = req.headers["x-org-slug"] as string | undefined;
-  const orgIdHeader = req.headers["x-org-id"] as string | undefined;
+async function resolveOrgFromRequest(
+  req: Request,
+  userId: number,
+): Promise<{ orgId: number; orgSlug: string } | null> {
+  const orgSlugHeader = req.headers['x-org-slug'] as string | undefined;
+  const orgIdHeader = req.headers['x-org-id'] as string | undefined;
   const orgSlugQuery = req.query.orgSlug as string | undefined;
   const orgIdQuery = req.query.orgId as string | undefined;
 
@@ -51,7 +71,10 @@ async function resolveOrgFromRequest(req: Request, userId: number): Promise<{ or
   const orgIdRaw = orgIdHeader || orgIdQuery;
 
   if (orgSlug) {
-    const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.slug, orgSlug));
+    const [org] = await db
+      .select()
+      .from(organizationsTable)
+      .where(eq(organizationsTable.slug, orgSlug));
     if (!org) return null;
 
     const [membership] = await db
@@ -67,7 +90,10 @@ async function resolveOrgFromRequest(req: Request, userId: number): Promise<{ or
     const orgId = parseInt(orgIdRaw, 10);
     if (isNaN(orgId)) return null;
 
-    const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, orgId));
+    const [org] = await db
+      .select()
+      .from(organizationsTable)
+      .where(eq(organizationsTable.id, orgId));
     if (!org) return null;
 
     const [membership] = await db
@@ -96,9 +122,9 @@ export function platformAuth(options: { required?: boolean; minRole?: PlatformRo
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith("Bearer ")) {
+      if (!authHeader?.startsWith('Bearer ')) {
         if (required) {
-          res.status(401).json({ error: "Authentication required" });
+          res.status(401).json({ error: 'Authentication required' });
           return;
         }
         next();
@@ -110,7 +136,7 @@ export function platformAuth(options: { required?: boolean; minRole?: PlatformRo
 
       if (!userBase) {
         if (required) {
-          res.status(401).json({ error: "Invalid or expired session" });
+          res.status(401).json({ error: 'Invalid or expired session' });
           return;
         }
         next();
@@ -121,7 +147,11 @@ export function platformAuth(options: { required?: boolean; minRole?: PlatformRo
         const userLevel = PLATFORM_ROLE_HIERARCHY[userBase.platformRole] ?? 0;
         const requiredLevel = PLATFORM_ROLE_HIERARCHY[minRole] ?? 0;
         if (userLevel < requiredLevel) {
-          res.status(403).json({ error: "Insufficient platform role", required: minRole, current: userBase.platformRole });
+          res.status(403).json({
+            error: 'Insufficient platform role',
+            required: minRole,
+            current: userBase.platformRole,
+          });
           return;
         }
       }
@@ -136,8 +166,8 @@ export function platformAuth(options: { required?: boolean; minRole?: PlatformRo
 
       next();
     } catch (err) {
-      console.error("[platform-auth] error:", err);
-      res.status(500).json({ error: "Authentication error" });
+      console.error('[platform-auth] error:', err);
+      res.status(500).json({ error: 'Authentication error' });
     }
   };
 }
@@ -145,13 +175,13 @@ export function platformAuth(options: { required?: boolean; minRole?: PlatformRo
 export function requirePlatformRole(...allowedRoles: PlatformRole[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.platformUser) {
-      res.status(401).json({ error: "Authentication required" });
+      res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
     const userRole = req.platformUser.platformRole;
     if (!userRole) {
-      res.status(403).json({ error: "No platform role assigned" });
+      res.status(403).json({ error: 'No platform role assigned' });
       return;
     }
 
@@ -167,7 +197,11 @@ export function requirePlatformRole(...allowedRoles: PlatformRole[]) {
     });
 
     if (!hasRole) {
-      res.status(403).json({ error: "Insufficient platform permissions", required: allowedRoles, current: userRole });
+      res.status(403).json({
+        error: 'Insufficient platform permissions',
+        required: allowedRoles,
+        current: userRole,
+      });
       return;
     }
 
@@ -178,7 +212,9 @@ export function requirePlatformRole(...allowedRoles: PlatformRole[]) {
 export function requireOrgScope() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.platformUser?.orgId) {
-      res.status(403).json({ error: "Org scope required — provide x-org-slug header or orgSlug query param" });
+      res
+        .status(403)
+        .json({ error: 'Org scope required — provide x-org-slug header or orgSlug query param' });
       return;
     }
     next();
@@ -189,7 +225,7 @@ export function requireWriteAccess() {
   return (req: Request, res: Response, next: NextFunction) => {
     const role = req.platformUser?.platformRole;
     if (!canWritePlatform(role ?? undefined)) {
-      res.status(403).json({ error: "Write access not permitted for this role", current: role });
+      res.status(403).json({ error: 'Write access not permitted for this role', current: role });
       return;
     }
     next();
@@ -201,7 +237,9 @@ export function enforceOrgScope(orgIdGetter: (req: Request) => number | null | u
     const resourceOrgId = orgIdGetter(req);
     if (resourceOrgId && req.platformUser?.orgId && resourceOrgId !== req.platformUser.orgId) {
       if (!isPlatformAdmin(req.platformUser.platformRole ?? undefined)) {
-        res.status(403).json({ error: "Access denied — resource belongs to a different organization" });
+        res
+          .status(403)
+          .json({ error: 'Access denied — resource belongs to a different organization' });
         return;
       }
     }
@@ -213,21 +251,20 @@ export function logPlatformEvent(eventType: string, entityType: string) {
   return async (req: Request, _res: Response, next: NextFunction) => {
     next();
     try {
-      const { db: database, eventLogTable } = await import("@szl-holdings/db");
+      const { db: database, eventLogTable } = await import('@szl-holdings/db');
       if (req.platformUser) {
         await database.insert(eventLogTable).values({
           orgId: req.platformUser.orgId ?? undefined,
-          product: "platform",
+          product: 'platform',
           actorId: req.platformUser.id,
           actorName: req.platformUser.displayName,
           eventType,
           entityType,
           entityId: req.params.id ?? null,
           ip: req.ip ?? null,
-          userAgent: req.headers["user-agent"] ?? null,
+          userAgent: req.headers['user-agent'] ?? null,
         } as any);
       }
-    } catch {
-    }
+    } catch {}
   };
 }

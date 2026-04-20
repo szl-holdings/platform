@@ -14,34 +14,43 @@
  *   GET  /sessions/command/:sessionId/comments — list session comments
  */
 
-import { Router, type IRouter } from "express";
-import { randomUUID } from "crypto";
-import { db, commandSessionsTable, commandSessionCommentsTable } from "@szl-holdings/db";
-import { desc, eq, and } from "drizzle-orm";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { commandSessionCommentsTable, commandSessionsTable, db } from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, desc, eq } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
 import {
-  sendSuccess,
+  handleRouteError,
+  sendBadRequest,
   sendCreated,
   sendNotFound,
-  sendBadRequest,
-  handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { publish } from "../lib/websocket";
-import { logger } from "../lib/logger";
-import { commandSessionCreateSchema, listQuerySchema, sessionCommentCreateSchema, validateBody, validateQuery } from "../lib/validation";
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
+import {
+  commandSessionCreateSchema,
+  listQuerySchema,
+  sessionCommentCreateSchema,
+  validateBody,
+  validateQuery,
+} from '../lib/validation';
+import { publish } from '../lib/websocket';
+import { authMiddleware } from '../middlewares/auth';
+import {
+  perUserApiSlidingLimiter,
+  perUserWriteSlidingLimiter,
+} from '../middlewares/sliding-window-limiter';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 router.get(
-  "/sessions/command",
+  '/sessions/command',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const appId = req.query["appId"] as string | undefined;
+      const appId = req.query['appId'] as string | undefined;
       const conditions: ReturnType<typeof eq>[] = [eq(commandSessionsTable.isActive, true)];
       if (appId) conditions.push(eq(commandSessionsTable.appId, appId));
 
@@ -54,13 +63,13 @@ router.get(
 
       sendSuccess(res, { sessions, count: sessions.length });
     } catch (err) {
-      handleRouteError(res, err, "Failed to list sessions");
+      handleRouteError(res, err, 'Failed to list sessions');
     }
-  }
+  },
 );
 
 router.post(
-  "/sessions/command",
+  '/sessions/command',
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   validateBody(commandSessionCreateSchema),
@@ -89,16 +98,16 @@ router.post(
           sessionId,
           orgId,
           createdByUserId: userId,
-          title: title ?? "Command Session",
-          appId: appId ?? "command",
+          title: title ?? 'Command Session',
+          appId: appId ?? 'command',
           participantUserIds: userId ? [userId] : [],
           isActive: true,
         })
         .returning();
 
-      logger.info({ sessionId, appId, orgId }, "[Session] Command session created");
+      logger.info({ sessionId, appId, orgId }, '[Session] Command session created');
 
-      publish("command-sessions", "session:created", {
+      publish('command-sessions', 'session:created', {
         sessionId,
         title: session.title,
         appId: session.appId,
@@ -107,13 +116,13 @@ router.post(
 
       sendCreated(res, { session, joined: false });
     } catch (err) {
-      handleRouteError(res, err, "Failed to create session");
+      handleRouteError(res, err, 'Failed to create session');
     }
-  }
+  },
 );
 
 router.get(
-  "/sessions/command/:sessionId",
+  '/sessions/command/:sessionId',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (req, res) => {
@@ -133,34 +142,38 @@ router.get(
 
       sendSuccess(res, { session });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get session");
+      handleRouteError(res, err, 'Failed to get session');
     }
-  }
+  },
 );
 
 router.delete(
-  "/sessions/command/:id", validateBody(bodyShape({})),
+  '/sessions/command/:id',
+  validateBody(bodyShape({})),
   authMiddleware({ required: false }),
   async (req, res) => {
     try {
-      const id = Number(req.params["id"]);
-      if (isNaN(id)) { sendBadRequest(res, "Invalid id"); return; }
+      const id = Number(req.params['id']);
+      if (isNaN(id)) {
+        sendBadRequest(res, 'Invalid id');
+        return;
+      }
 
       await db
         .update(commandSessionsTable)
         .set({ isActive: false, endedAt: new Date() })
         .where(eq(commandSessionsTable.id, id));
 
-      publish("command-sessions", "session:ended", { sessionId: id });
+      publish('command-sessions', 'session:ended', { sessionId: id });
       sendSuccess(res, { ended: true });
     } catch (err) {
-      handleRouteError(res, err, "Failed to end session");
+      handleRouteError(res, err, 'Failed to end session');
     }
-  }
+  },
 );
 
 router.post(
-  "/sessions/command/:sessionId/comments",
+  '/sessions/command/:sessionId/comments',
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   validateBody(sessionCommentCreateSchema),
@@ -174,7 +187,7 @@ router.post(
         .values({
           sessionId,
           authorUserId: req.user?.id ?? null,
-          authorLabel: authorLabel ?? req.user?.displayName ?? "Anonymous",
+          authorLabel: authorLabel ?? req.user?.displayName ?? 'Anonymous',
           entityId: entityId ?? null,
           entityType: entityType ?? null,
           body: body.trim(),
@@ -187,23 +200,23 @@ router.post(
         .set({ lastActivityAt: new Date() })
         .where(eq(commandSessionsTable.sessionId, sessionId));
 
-      publish(`session:${sessionId}`, "comment:added", comment);
+      publish(`session:${sessionId}`, 'comment:added', comment);
       sendCreated(res, comment);
     } catch (err) {
-      handleRouteError(res, err, "Failed to post comment");
+      handleRouteError(res, err, 'Failed to post comment');
     }
-  }
+  },
 );
 
 router.get(
-  "/sessions/command/:sessionId/comments",
+  '/sessions/command/:sessionId/comments',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const { sessionId } = req.params as { sessionId: string };
-      const limit = Math.min(Number(req.query["limit"] ?? 50), 200);
+      const limit = Math.min(Number(req.query['limit'] ?? 50), 200);
 
       const comments = await db
         .select()
@@ -214,9 +227,9 @@ router.get(
 
       sendSuccess(res, { comments, count: comments.length });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch comments");
+      handleRouteError(res, err, 'Failed to fetch comments');
     }
-  }
+  },
 );
 
 export default router;

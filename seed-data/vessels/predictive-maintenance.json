@@ -1,8 +1,74 @@
 [
-  { "id": 1, "vesselId": 9, "vesselName": "PACIFIC BASIN TIANJIN", "component": "Propeller Shaft Stern Tube Bearing", "failureProbability": 73, "predictedFailureDate": "2026-05-10", "recommendedAction": "Schedule emergency docking for bearing replacement at PT United Shipyard Tanjung Priok", "estimatedCost": 120000, "confidence": 73, "riskLevel": "High" },
-  { "id": 2, "vesselId": 10, "vesselName": "TORM HELLAS", "component": "Main Engine Turbocharger (MAN TCA66)", "failureProbability": 62, "predictedFailureDate": "2026-06-15", "recommendedAction": "Replace turbocharger cartridge during current Constanta Shipyard drydock", "estimatedCost": 85000, "confidence": 68, "riskLevel": "High" },
-  { "id": 3, "vesselId": 18, "vesselName": "MINERVA SOPHIA", "component": "Cargo Pump Mechanical Seal (Framo SD200)", "failureProbability": 55, "predictedFailureDate": "2026-07-20", "recommendedAction": "Order spare seals and plan replacement during next discharge at Trieste", "estimatedCost": 12000, "confidence": 71, "riskLevel": "Medium" },
-  { "id": 4, "vesselId": 7, "vesselName": "GALATA BRIDGE", "component": "Ballast Water UV Reactor (Alfa Laval PureBallast)", "failureProbability": 48, "predictedFailureDate": "2026-08-01", "recommendedAction": "Replace UV lamp assembly during scheduled BWTS maintenance at Constanta", "estimatedCost": 35000, "confidence": 65, "riskLevel": "Medium" },
-  { "id": 5, "vesselId": 5, "vesselName": "OLDENDORFF BRISBANE", "component": "Auxiliary Boiler Tubes (Aalborg AQ-12)", "failureProbability": 41, "predictedFailureDate": "2026-09-10", "recommendedAction": "Conduct ultrasonic thickness measurement during next port stay at Qingdao", "estimatedCost": 55000, "confidence": 60, "riskLevel": "Medium" },
-  { "id": 6, "vesselId": 1, "vesselName": "CONSTANTA SPIRIT", "component": "Steering Gear Hydraulic Pump (Rolls-Royce)", "failureProbability": 28, "predictedFailureDate": "2026-11-15", "recommendedAction": "Replace hydraulic pump seal kit during next scheduled Constanta port call", "estimatedCost": 8000, "confidence": 58, "riskLevel": "Low" }
+  {
+    "id": 1,
+    "vesselId": 9,
+    "vesselName": "PACIFIC BASIN TIANJIN",
+    "component": "Propeller Shaft Stern Tube Bearing",
+    "failureProbability": 73,
+    "predictedFailureDate": "2026-05-10",
+    "recommendedAction": "Schedule emergency docking for bearing replacement at PT United Shipyard Tanjung Priok",
+    "estimatedCost": 120000,
+    "confidence": 73,
+    "riskLevel": "High"
+  },
+  {
+    "id": 2,
+    "vesselId": 10,
+    "vesselName": "TORM HELLAS",
+    "component": "Main Engine Turbocharger (MAN TCA66)",
+    "failureProbability": 62,
+    "predictedFailureDate": "2026-06-15",
+    "recommendedAction": "Replace turbocharger cartridge during current Constanta Shipyard drydock",
+    "estimatedCost": 85000,
+    "confidence": 68,
+    "riskLevel": "High"
+  },
+  {
+    "id": 3,
+    "vesselId": 18,
+    "vesselName": "MINERVA SOPHIA",
+    "component": "Cargo Pump Mechanical Seal (Framo SD200)",
+    "failureProbability": 55,
+    "predictedFailureDate": "2026-07-20",
+    "recommendedAction": "Order spare seals and plan replacement during next discharge at Trieste",
+    "estimatedCost": 12000,
+    "confidence": 71,
+    "riskLevel": "Medium"
+  },
+  {
+    "id": 4,
+    "vesselId": 7,
+    "vesselName": "GALATA BRIDGE",
+    "component": "Ballast Water UV Reactor (Alfa Laval PureBallast)",
+    "failureProbability": 48,
+    "predictedFailureDate": "2026-08-01",
+    "recommendedAction": "Replace UV lamp assembly during scheduled BWTS maintenance at Constanta",
+    "estimatedCost": 35000,
+    "confidence": 65,
+    "riskLevel": "Medium"
+  },
+  {
+    "id": 5,
+    "vesselId": 5,
+    "vesselName": "OLDENDORFF BRISBANE",
+    "component": "Auxiliary Boiler Tubes (Aalborg AQ-12)",
+    "failureProbability": 41,
+    "predictedFailureDate": "2026-09-10",
+    "recommendedAction": "Conduct ultrasonic thickness measurement during next port stay at Qingdao",
+    "estimatedCost": 55000,
+    "confidence": 60,
+    "riskLevel": "Medium"
+  },
+  {
+    "id": 6,
+    "vesselId": 1,
+    "vesselName": "CONSTANTA SPIRIT",
+    "component": "Steering Gear Hydraulic Pump (Rolls-Royce)",
+    "failureProbability": 28,
+    "predictedFailureDate": "2026-11-15",
+    "recommendedAction": "Replace hydraulic pump seal kit during next scheduled Constanta port call",
+    "estimatedCost": 8000,
+    "confidence": 58,
+    "riskLevel": "Low"
+  }
 ]

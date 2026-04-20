@@ -1,36 +1,36 @@
 import {
-  registry,
+  aboutSzlParagraph,
+  copyrightLine,
+  copyrightLineShort,
+  ecosystemThesis,
+  founderQuote,
+  getLiveProducts,
+  getMetric,
   getProduct,
   getProductName,
   getProductTagline,
-  getLiveProducts,
-  getMetric,
-  copyrightLine,
-  copyrightLineShort,
-  aboutSzlParagraph,
-  founderQuote,
-  ecosystemThesis,
-} from "./index.js";
+  registry,
+} from './index.js';
 
 export type {
   BrandRegistry,
-  ProductEntry,
   CompanyFacts,
   FounderBio,
-} from "./types.js";
+  ProductEntry,
+} from './types.js';
 
 export {
-  registry,
+  aboutSzlParagraph,
+  copyrightLine,
+  copyrightLineShort,
+  ecosystemThesis,
+  founderQuote,
+  getLiveProducts,
+  getMetric,
   getProduct,
   getProductName,
   getProductTagline,
-  getLiveProducts,
-  getMetric,
-  copyrightLine,
-  copyrightLineShort,
-  aboutSzlParagraph,
-  founderQuote,
-  ecosystemThesis,
+  registry,
 };
 
 export const mobile = {

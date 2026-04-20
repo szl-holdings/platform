@@ -13,100 +13,107 @@
  */
 
 import {
+  type AITrace,
+  hydrateReviewQueue,
+  hydrateTraces,
+  type ReviewQueueItem,
+  registerReviewQueueSink,
   registerTraceSink,
   registerTraceUpdateSink,
-  hydrateTraces,
-  registerReviewQueueSink,
-  hydrateReviewQueue,
-  type AITrace,
   type TraceStatus,
-  type ReviewQueueItem,
-} from "@szl-holdings/ai-engine";
-import { setDbPool } from "./ai-evals-db-reader";
-import { logger } from "./logger";
+} from '@szl-holdings/ai-engine';
+import { setDbPool } from './ai-evals-db-reader';
+import { logger } from './logger';
 
-const TRACE_HYDRATE_LIMIT = parseInt(process.env.AI_TRACE_HYDRATE_LIMIT ?? "2000", 10);
-const REVIEW_HYDRATE_LIMIT = parseInt(process.env.AI_REVIEW_HYDRATE_LIMIT ?? "500", 10);
+const TRACE_HYDRATE_LIMIT = parseInt(process.env.AI_TRACE_HYDRATE_LIMIT ?? '2000', 10);
+const REVIEW_HYDRATE_LIMIT = parseInt(process.env.AI_REVIEW_HYDRATE_LIMIT ?? '500', 10);
 
 function rowToTrace(row: Record<string, unknown>): AITrace {
   return {
-    traceId: String(row["trace_id"]),
-    correlationId: row["correlation_id"] != null ? String(row["correlation_id"]) : undefined,
-    orgId: row["org_id"] != null ? Number(row["org_id"]) : null,
-    agentId: row["agent_id"] != null ? String(row["agent_id"]) : undefined,
-    model: String(row["model"]),
-    modelProvider: String(row["model_provider"]),
-    modelVersion: row["model_version"] != null ? String(row["model_version"]) : undefined,
-    routeClass: row["route_class"] != null ? String(row["route_class"]) : undefined,
-    domain: String(row["domain"]) as AITrace["domain"],
-    recommendationType: String(row["recommendation_type"]) as AITrace["recommendationType"],
-    promptHash: String(row["prompt_hash"]),
-    promptTokens: Number(row["prompt_tokens"] ?? 0),
-    completionTokens: Number(row["completion_tokens"] ?? 0),
-    latencyMs: Number(row["latency_ms"] ?? 0),
-    costEstimateUsd: Number(row["cost_estimate_usd"] ?? 0),
-    confidence: Number(row["confidence"] ?? 1),
-    riskLevel: row["risk_level"] != null ? String(row["risk_level"]) as AITrace["riskLevel"] : undefined,
-    requiresReview: Boolean(row["requires_review"]),
-    reviewReason: row["review_reason"] != null ? String(row["review_reason"]) : undefined,
-    proofChainId: row["proof_chain_id"] != null ? Number(row["proof_chain_id"]) : undefined,
-    outcomeGraphId: row["outcome_graph_id"] != null ? Number(row["outcome_graph_id"]) : undefined,
-    inputSummary: row["input_summary"] != null ? String(row["input_summary"]) : undefined,
-    outputSummary: row["output_summary"] != null ? String(row["output_summary"]) : undefined,
-    toolsUsed: Array.isArray(row["tools_used"]) ? row["tools_used"] as string[] : undefined,
-    evalScore: row["eval_score"] != null ? Number(row["eval_score"]) : undefined,
-    evalPassed: row["eval_passed"] != null ? Boolean(row["eval_passed"]) : undefined,
-    status: String(row["status"]) as AITrace["status"],
-    metadata: row["metadata"] != null ? row["metadata"] as Record<string, unknown> : undefined,
-    capturedAt: row["captured_at"] instanceof Date
-      ? (row["captured_at"] as Date).toISOString()
-      : String(row["captured_at"]),
+    traceId: String(row['trace_id']),
+    correlationId: row['correlation_id'] != null ? String(row['correlation_id']) : undefined,
+    orgId: row['org_id'] != null ? Number(row['org_id']) : null,
+    agentId: row['agent_id'] != null ? String(row['agent_id']) : undefined,
+    model: String(row['model']),
+    modelProvider: String(row['model_provider']),
+    modelVersion: row['model_version'] != null ? String(row['model_version']) : undefined,
+    routeClass: row['route_class'] != null ? String(row['route_class']) : undefined,
+    domain: String(row['domain']) as AITrace['domain'],
+    recommendationType: String(row['recommendation_type']) as AITrace['recommendationType'],
+    promptHash: String(row['prompt_hash']),
+    promptTokens: Number(row['prompt_tokens'] ?? 0),
+    completionTokens: Number(row['completion_tokens'] ?? 0),
+    latencyMs: Number(row['latency_ms'] ?? 0),
+    costEstimateUsd: Number(row['cost_estimate_usd'] ?? 0),
+    confidence: Number(row['confidence'] ?? 1),
+    riskLevel:
+      row['risk_level'] != null ? (String(row['risk_level']) as AITrace['riskLevel']) : undefined,
+    requiresReview: Boolean(row['requires_review']),
+    reviewReason: row['review_reason'] != null ? String(row['review_reason']) : undefined,
+    proofChainId: row['proof_chain_id'] != null ? Number(row['proof_chain_id']) : undefined,
+    outcomeGraphId: row['outcome_graph_id'] != null ? Number(row['outcome_graph_id']) : undefined,
+    inputSummary: row['input_summary'] != null ? String(row['input_summary']) : undefined,
+    outputSummary: row['output_summary'] != null ? String(row['output_summary']) : undefined,
+    toolsUsed: Array.isArray(row['tools_used']) ? (row['tools_used'] as string[]) : undefined,
+    evalScore: row['eval_score'] != null ? Number(row['eval_score']) : undefined,
+    evalPassed: row['eval_passed'] != null ? Boolean(row['eval_passed']) : undefined,
+    status: String(row['status']) as AITrace['status'],
+    metadata: row['metadata'] != null ? (row['metadata'] as Record<string, unknown>) : undefined,
+    capturedAt:
+      row['captured_at'] instanceof Date
+        ? (row['captured_at'] as Date).toISOString()
+        : String(row['captured_at']),
   };
 }
 
 function rowToReviewItem(row: Record<string, unknown>): ReviewQueueItem {
   return {
-    reviewId: String(row["review_id"]),
-    traceId: String(row["trace_id"]),
-    orgId: row["org_id"] != null ? Number(row["org_id"]) : null,
-    domain: String(row["domain"]),
-    recommendationType: String(row["recommendation_type"]),
-    model: String(row["model"]),
-    confidence: Number(row["confidence"] ?? 1),
-    riskLevel: row["risk_level"] != null ? String(row["risk_level"]) : undefined,
-    reviewReason: String(row["review_reason"] ?? ""),
-    priority: String(row["priority"]) as ReviewQueueItem["priority"],
-    inputSummary: row["input_summary"] != null ? String(row["input_summary"]) : undefined,
-    outputSummary: row["output_summary"] != null ? String(row["output_summary"]) : undefined,
-    costEstimateUsd: Number(row["cost_estimate_usd"] ?? 0),
-    latencyMs: Number(row["latency_ms"] ?? 0),
-    evalScore: row["eval_score"] != null ? Number(row["eval_score"]) : undefined,
-    evalPassed: row["eval_passed"] != null ? Boolean(row["eval_passed"]) : undefined,
-    verdict: row["verdict"] != null ? String(row["verdict"]) as ReviewQueueItem["verdict"] : undefined,
-    reviewedBy: row["reviewed_by"] != null ? Number(row["reviewed_by"]) : undefined,
-    reviewNotes: row["review_notes"] != null ? String(row["review_notes"]) : undefined,
-    escalatedTo: row["escalated_to"] != null ? String(row["escalated_to"]) : undefined,
-    status: String(row["status"]) as ReviewQueueItem["status"],
-    enqueuedAt: row["enqueued_at"] instanceof Date
-      ? (row["enqueued_at"] as Date).toISOString()
-      : String(row["enqueued_at"]),
-    reviewedAt: row["reviewed_at"] != null
-      ? (row["reviewed_at"] instanceof Date
-        ? (row["reviewed_at"] as Date).toISOString()
-        : String(row["reviewed_at"]))
-      : undefined,
-    metadata: row["metadata"] != null ? row["metadata"] as Record<string, unknown> : undefined,
+    reviewId: String(row['review_id']),
+    traceId: String(row['trace_id']),
+    orgId: row['org_id'] != null ? Number(row['org_id']) : null,
+    domain: String(row['domain']),
+    recommendationType: String(row['recommendation_type']),
+    model: String(row['model']),
+    confidence: Number(row['confidence'] ?? 1),
+    riskLevel: row['risk_level'] != null ? String(row['risk_level']) : undefined,
+    reviewReason: String(row['review_reason'] ?? ''),
+    priority: String(row['priority']) as ReviewQueueItem['priority'],
+    inputSummary: row['input_summary'] != null ? String(row['input_summary']) : undefined,
+    outputSummary: row['output_summary'] != null ? String(row['output_summary']) : undefined,
+    costEstimateUsd: Number(row['cost_estimate_usd'] ?? 0),
+    latencyMs: Number(row['latency_ms'] ?? 0),
+    evalScore: row['eval_score'] != null ? Number(row['eval_score']) : undefined,
+    evalPassed: row['eval_passed'] != null ? Boolean(row['eval_passed']) : undefined,
+    verdict:
+      row['verdict'] != null ? (String(row['verdict']) as ReviewQueueItem['verdict']) : undefined,
+    reviewedBy: row['reviewed_by'] != null ? Number(row['reviewed_by']) : undefined,
+    reviewNotes: row['review_notes'] != null ? String(row['review_notes']) : undefined,
+    escalatedTo: row['escalated_to'] != null ? String(row['escalated_to']) : undefined,
+    status: String(row['status']) as ReviewQueueItem['status'],
+    enqueuedAt:
+      row['enqueued_at'] instanceof Date
+        ? (row['enqueued_at'] as Date).toISOString()
+        : String(row['enqueued_at']),
+    reviewedAt:
+      row['reviewed_at'] != null
+        ? row['reviewed_at'] instanceof Date
+          ? (row['reviewed_at'] as Date).toISOString()
+          : String(row['reviewed_at'])
+        : undefined,
+    metadata: row['metadata'] != null ? (row['metadata'] as Record<string, unknown>) : undefined,
   };
 }
 
 export async function initAiEvalsPersistence(): Promise<void> {
   if (!process.env.DATABASE_URL) {
-    logger.info("[ai-evals] DATABASE_URL not set — AI traces and review queue remain in-memory only");
+    logger.info(
+      '[ai-evals] DATABASE_URL not set — AI traces and review queue remain in-memory only',
+    );
     return;
   }
 
   try {
-    const { pool } = await import("@szl-holdings/db");
+    const { pool } = await import('@szl-holdings/db');
 
     // Make the pool available to the DB reader module for dashboard queries
     setDbPool(pool);
@@ -165,21 +172,23 @@ export async function initAiEvalsPersistence(): Promise<void> {
     });
 
     // ── Register trace status update sink ─────────────────────────────────
-    registerTraceUpdateSink(async (traceId: string, status: TraceStatus, evalScore?: number, evalPassed?: boolean) => {
-      const client = await pool.connect();
-      try {
-        await client.query(
-          `UPDATE ai_traces
+    registerTraceUpdateSink(
+      async (traceId: string, status: TraceStatus, evalScore?: number, evalPassed?: boolean) => {
+        const client = await pool.connect();
+        try {
+          await client.query(
+            `UPDATE ai_traces
            SET status = $1,
                eval_score = COALESCE($2, eval_score),
                eval_passed = COALESCE($3, eval_passed)
            WHERE trace_id = $4`,
-          [status, evalScore ?? null, evalPassed ?? null, traceId],
-        );
-      } finally {
-        client.release();
-      }
-    });
+            [status, evalScore ?? null, evalPassed ?? null, traceId],
+          );
+        } finally {
+          client.release();
+        }
+      },
+    );
 
     // ── Register review queue sink (write-through to DB) ──────────────────
     registerReviewQueueSink({
@@ -269,16 +278,19 @@ export async function initAiEvalsPersistence(): Promise<void> {
     const client = await pool.connect();
     try {
       const [tracesResult, reviewResult] = await Promise.all([
-        client.query(
-          `SELECT * FROM ai_traces ORDER BY captured_at DESC LIMIT $1`,
-          [TRACE_HYDRATE_LIMIT],
-        ).catch(() => ({ rows: [] })),
-        client.query(
-          `SELECT * FROM ai_review_queue
+        client
+          .query(`SELECT * FROM ai_traces ORDER BY captured_at DESC LIMIT $1`, [
+            TRACE_HYDRATE_LIMIT,
+          ])
+          .catch(() => ({ rows: [] })),
+        client
+          .query(
+            `SELECT * FROM ai_review_queue
            WHERE status IN ('pending', 'in_review', 'escalated')
            ORDER BY enqueued_at DESC LIMIT $1`,
-          [REVIEW_HYDRATE_LIMIT],
-        ).catch(() => ({ rows: [] })),
+            [REVIEW_HYDRATE_LIMIT],
+          )
+          .catch(() => ({ rows: [] })),
       ]);
 
       const traces = (tracesResult.rows as Record<string, unknown>[]).map(rowToTrace);
@@ -289,12 +301,15 @@ export async function initAiEvalsPersistence(): Promise<void> {
 
       logger.info(
         { tracesLoaded: traces.length, reviewItemsLoaded: reviewItems.length },
-        "[ai-evals] AI traces and review queue hydrated from PostgreSQL",
+        '[ai-evals] AI traces and review queue hydrated from PostgreSQL',
       );
     } finally {
       client.release();
     }
   } catch (err) {
-    logger.error({ err }, "[ai-evals] Failed to initialize AI evals persistence — falling back to in-memory");
+    logger.error(
+      { err },
+      '[ai-evals] Failed to initialize AI evals persistence — falling back to in-memory',
+    );
   }
 }

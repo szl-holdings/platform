@@ -1,6 +1,6 @@
-import nodemailer from "nodemailer";
-import { logger } from "./logger";
-import { isFlagEnabled } from "./platform-flags";
+import nodemailer from 'nodemailer';
+import { logger } from './logger';
+import { isFlagEnabled } from './platform-flags';
 
 interface EmailAttachment {
   filename: string;
@@ -24,27 +24,27 @@ interface SendResult {
   provider?: string;
 }
 
-const FROM_ADDRESS = "SZL Holdings <inquiries@szlholdings.com>";
-const FROM_NAME = "SZL Holdings";
-const FROM_EMAIL = "inquiries@szlholdings.com";
-const INTERNAL_EMAIL = process.env.SZL_INTERNAL_EMAIL || "team@szlholdings.com";
+const FROM_ADDRESS = 'SZL Holdings <inquiries@szlholdings.com>';
+const FROM_NAME = 'SZL Holdings';
+const FROM_EMAIL = 'inquiries@szlholdings.com';
+const INTERNAL_EMAIL = process.env.SZL_INTERNAL_EMAIL || 'team@szlholdings.com';
 
 async function sendViaSendGrid(options: EmailOptions): Promise<SendResult> {
   const apiKey = process.env.SENDGRID_API_KEY;
-  if (!apiKey) throw new Error("SENDGRID_API_KEY not configured");
+  if (!apiKey) throw new Error('SENDGRID_API_KEY not configured');
 
-  const sgAttachments = options.attachments?.map(a => ({
-    content: a.content.toString("base64"),
+  const sgAttachments = options.attachments?.map((a) => ({
+    content: a.content.toString('base64'),
     filename: a.filename,
     type: a.contentType,
-    disposition: "attachment",
+    disposition: 'attachment',
   }));
 
-  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
-    method: "POST",
+  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       personalizations: [{ to: [{ email: options.to }] }],
@@ -52,8 +52,8 @@ async function sendViaSendGrid(options: EmailOptions): Promise<SendResult> {
       reply_to: options.replyTo ? { email: options.replyTo } : undefined,
       subject: options.subject,
       content: [
-        { type: "text/html", value: options.html },
-        ...(options.text ? [{ type: "text/plain", value: options.text }] : []),
+        { type: 'text/html', value: options.html },
+        ...(options.text ? [{ type: 'text/plain', value: options.text }] : []),
       ],
       ...(sgAttachments?.length ? { attachments: sgAttachments } : {}),
     }),
@@ -64,24 +64,24 @@ async function sendViaSendGrid(options: EmailOptions): Promise<SendResult> {
     throw new Error(`SendGrid error: ${res.status} ${err}`);
   }
 
-  const messageId = res.headers.get("x-message-id") ?? `sg-${Date.now()}`;
-  return { success: true, messageId, provider: "sendgrid" };
+  const messageId = res.headers.get('x-message-id') ?? `sg-${Date.now()}`;
+  return { success: true, messageId, provider: 'sendgrid' };
 }
 
 async function sendViaResend(options: EmailOptions): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("RESEND_API_KEY not configured");
+  if (!apiKey) throw new Error('RESEND_API_KEY not configured');
 
-  const resendAttachments = options.attachments?.map(a => ({
+  const resendAttachments = options.attachments?.map((a) => ({
     filename: a.filename,
-    content: a.content.toString("base64"),
+    content: a.content.toString('base64'),
   }));
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       from: FROM_ADDRESS,
@@ -99,18 +99,18 @@ async function sendViaResend(options: EmailOptions): Promise<SendResult> {
     throw new Error(`Resend error: ${res.status} ${err}`);
   }
 
-  const data = await res.json() as { id: string };
-  return { success: true, messageId: data.id, provider: "resend" };
+  const data = (await res.json()) as { id: string };
+  return { success: true, messageId: data.id, provider: 'resend' };
 }
 
 async function sendViaSMTP(options: EmailOptions): Promise<SendResult> {
   const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
 
   if (!smtpHost || !smtpUser || !smtpPass) {
-    throw new Error("SMTP credentials not configured");
+    throw new Error('SMTP credentials not configured');
   }
 
   const transporter = nodemailer.createTransport({
@@ -120,7 +120,7 @@ async function sendViaSMTP(options: EmailOptions): Promise<SendResult> {
     auth: { user: smtpUser, pass: smtpPass },
   });
 
-  const smtpAttachments = options.attachments?.map(a => ({
+  const smtpAttachments = options.attachments?.map((a) => ({
     filename: a.filename,
     content: a.content,
     contentType: a.contentType,
@@ -136,51 +136,56 @@ async function sendViaSMTP(options: EmailOptions): Promise<SendResult> {
     attachments: smtpAttachments,
   });
 
-  return { success: true, messageId: info.messageId, provider: "smtp" };
+  return { success: true, messageId: info.messageId, provider: 'smtp' };
 }
 
-function getPrimaryProvider(): "sendgrid" | "resend" {
+function getPrimaryProvider(): 'sendgrid' | 'resend' {
   const configured = process.env.EMAIL_PROVIDER?.toLowerCase();
-  if (configured === "sendgrid" && process.env.SENDGRID_API_KEY) return "sendgrid";
-  if (configured === "resend" && process.env.RESEND_API_KEY) return "resend";
-  if (process.env.SENDGRID_API_KEY) return "sendgrid";
-  return "resend";
+  if (configured === 'sendgrid' && process.env.SENDGRID_API_KEY) return 'sendgrid';
+  if (configured === 'resend' && process.env.RESEND_API_KEY) return 'resend';
+  if (process.env.SENDGRID_API_KEY) return 'sendgrid';
+  return 'resend';
 }
 
 let _emailProviderWarningLogged = false;
 
 export function hasEmailProviderConfigured(): boolean {
-  return !!(process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS));
+  return !!(
+    process.env.SENDGRID_API_KEY ||
+    process.env.RESEND_API_KEY ||
+    (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
+  );
 }
 
 export async function sendEmail(options: EmailOptions): Promise<SendResult> {
-  const emailEnabled = await isFlagEnabled("live_email_delivery_enabled");
+  const emailEnabled = await isFlagEnabled('live_email_delivery_enabled');
   if (!emailEnabled) {
-    logger.debug({ to: options.to, subject: options.subject }, "[email] Delivery skipped — live_email_delivery_enabled flag is OFF");
-    return { success: false, error: "Email delivery is disabled (set live_email_delivery_enabled flag to activate)" };
+    logger.debug(
+      { to: options.to, subject: options.subject },
+      '[email] Delivery skipped — live_email_delivery_enabled flag is OFF',
+    );
+    return {
+      success: false,
+      error: 'Email delivery is disabled (set live_email_delivery_enabled flag to activate)',
+    };
   }
 
   if (!hasEmailProviderConfigured()) {
     if (!_emailProviderWarningLogged) {
-      logger.warn("No email provider configured (SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials). Email delivery skipped.");
+      logger.warn(
+        'No email provider configured (SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials). Email delivery skipped.',
+      );
       _emailProviderWarningLogged = true;
     }
-    return { success: false, error: "No email provider configured" };
+    return { success: false, error: 'No email provider configured' };
   }
 
   const primary = getPrimaryProvider();
 
-  const providers: Array<() => Promise<SendResult>> = primary === "sendgrid"
-    ? [
-        () => sendViaSendGrid(options),
-        () => sendViaResend(options),
-        () => sendViaSMTP(options),
-      ]
-    : [
-        () => sendViaResend(options),
-        () => sendViaSendGrid(options),
-        () => sendViaSMTP(options),
-      ];
+  const providers: Array<() => Promise<SendResult>> =
+    primary === 'sendgrid'
+      ? [() => sendViaSendGrid(options), () => sendViaResend(options), () => sendViaSMTP(options)]
+      : [() => sendViaResend(options), () => sendViaSendGrid(options), () => sendViaSMTP(options)];
 
   let lastError: Error | undefined;
   for (const send of providers) {
@@ -196,9 +201,9 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
 
 export function getEmailProviderStatus(): { primary: string; available: string[] } {
   const available: string[] = [];
-  if (process.env.SENDGRID_API_KEY) available.push("sendgrid");
-  if (process.env.RESEND_API_KEY) available.push("resend");
-  if (process.env.SMTP_HOST && process.env.SMTP_USER) available.push("smtp");
+  if (process.env.SENDGRID_API_KEY) available.push('sendgrid');
+  if (process.env.RESEND_API_KEY) available.push('resend');
+  if (process.env.SMTP_HOST && process.env.SMTP_USER) available.push('smtp');
   return { primary: getPrimaryProvider(), available };
 }
 
@@ -257,16 +262,20 @@ export interface AlertFiredEmailOptions {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: "#dc2626",
-  high:     "#ea580c",
-  warning:  "#d97706",
-  info:     "#2563eb",
+  critical: '#dc2626',
+  high: '#ea580c',
+  warning: '#d97706',
+  info: '#2563eb',
 };
 
-export function buildAlertFiredEmail(opts: AlertFiredEmailOptions): { subject: string; html: string; text: string } {
-  const severityColor = SEVERITY_COLORS[opts.severity.toLowerCase()] ?? "#6b7280";
+export function buildAlertFiredEmail(opts: AlertFiredEmailOptions): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const severityColor = SEVERITY_COLORS[opts.severity.toLowerCase()] ?? '#6b7280';
   const severityLabel = opts.severity.toUpperCase();
-  const alertsUrl = opts.alertsUrl ?? "https://szlholdings.com/command/ops/alerts";
+  const alertsUrl = opts.alertsUrl ?? 'https://szlholdings.com/command/ops/alerts';
 
   const subject = `[${severityLabel}] Alert fired: ${opts.ruleName}`;
 
@@ -306,7 +315,7 @@ export function buildAlertFiredEmail(opts: AlertFiredEmailOptions): { subject: s
     `View alerts: ${alertsUrl}`,
     ``,
     `This is an automated alert from the SZL Holdings Ops Center.`,
-  ].join("\n");
+  ].join('\n');
 
   return { subject, html, text };
 }
@@ -338,33 +347,48 @@ export function buildLeadNotificationEmail(inquiry: {
   utm_campaign?: string;
   utm_content?: string;
 }): string {
-  const hasUtm = inquiry.utm_source || inquiry.utm_medium || inquiry.utm_campaign || inquiry.utm_content;
+  const hasUtm =
+    inquiry.utm_source || inquiry.utm_medium || inquiry.utm_campaign || inquiry.utm_content;
   return szlBrand(`
     <h2>New Inquiry Received</h2>
     <p>A new inquiry has been submitted through the SZL Holdings contact form.</p>
     <div class="highlight">
       <p class="label">From</p>
-      <p>${inquiry.name}${inquiry.company ? ` · ${inquiry.company}` : ""}</p>
+      <p>${inquiry.name}${inquiry.company ? ` · ${inquiry.company}` : ''}</p>
       <p class="label" style="margin-top:8px;">Email</p>
       <p>${inquiry.email}</p>
       <p class="label" style="margin-top:8px;">Subject</p>
       <p>${inquiry.subject}</p>
       <p class="label" style="margin-top:8px;">Message</p>
-      <p>${inquiry.message.replace(/\n/g, "<br />")}</p>${inquiry.intent ? `
+      <p>${inquiry.message.replace(/\n/g, '<br />')}</p>${
+        inquiry.intent
+          ? `
       <p class="label" style="margin-top:8px;">Intent</p>
-      <p>${inquiry.intent}</p>` : ""}${inquiry.source ? `
+      <p>${inquiry.intent}</p>`
+          : ''
+      }${
+        inquiry.source
+          ? `
       <p class="label" style="margin-top:8px;">Source</p>
-      <p>${inquiry.source}</p>` : ""}${hasUtm ? `
+      <p>${inquiry.source}</p>`
+          : ''
+      }${
+        hasUtm
+          ? `
       <p class="label" style="margin-top:8px;">Attribution</p>
       <p>${[
-        inquiry.utm_source ? `source: ${inquiry.utm_source}` : "",
-        inquiry.utm_medium ? `medium: ${inquiry.utm_medium}` : "",
-        inquiry.utm_campaign ? `campaign: ${inquiry.utm_campaign}` : "",
-        inquiry.utm_content ? `content: ${inquiry.utm_content}` : "",
-      ].filter(Boolean).join(" · ")}</p>` : ""}
+        inquiry.utm_source ? `source: ${inquiry.utm_source}` : '',
+        inquiry.utm_medium ? `medium: ${inquiry.utm_medium}` : '',
+        inquiry.utm_campaign ? `campaign: ${inquiry.utm_campaign}` : '',
+        inquiry.utm_content ? `content: ${inquiry.utm_content}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ')}</p>`
+          : ''
+      }
     </div>
     <p>Review and respond in the admin panel or reply directly to this email.</p>
-    <a class="cta" href="${process.env.VITE_APP_URL || "https://szlholdings.com"}/admin">Open Admin</a>
+    <a class="cta" href="${process.env.VITE_APP_URL || 'https://szlholdings.com'}/admin">Open Admin</a>
   `);
 }
 
@@ -381,24 +405,32 @@ export function buildWelcomeEmail(name: string, email: string): string {
       <p><strong>Alloy</strong> — Execution fabric. Workflow orchestration, signal routing, audit trail, and policy-gated action.</p>
     </div>
     <p>Explore the platform:</p>
-    <a class="cta" href="${process.env.VITE_APP_URL || "https://szlholdings.com"}">Visit SZL Holdings</a>
+    <a class="cta" href="${process.env.VITE_APP_URL || 'https://szlholdings.com'}">Visit SZL Holdings</a>
   `);
 }
 
-export function buildBookingAckEmail(name: string, appointmentType: string, scheduledAt?: string): string {
+export function buildBookingAckEmail(
+  name: string,
+  appointmentType: string,
+  scheduledAt?: string,
+): string {
   return szlBrand(`
     <h2>Booking Confirmed</h2>
     <p>Hello ${name},</p>
     <p>Your ${appointmentType} booking with SZL Holdings has been confirmed.</p>
-    ${scheduledAt ? `
+    ${
+      scheduledAt
+        ? `
     <div class="highlight">
       <p class="label">Scheduled</p>
       <p>${scheduledAt}</p>
     </div>
-    ` : ""}
+    `
+        : ''
+    }
     <p>Our team will prepare a briefing tailored to your organization's interests. We look forward to exploring how the SZL ecosystem can accelerate your strategic objectives.</p>
     <p>If you need to reschedule or have questions beforehand, reply to this email or contact us at <strong>inquiries@szlholdings.com</strong>.</p>
-    <a class="cta" href="${process.env.VITE_APP_URL || "https://szlholdings.com"}/corporate">About SZL Holdings</a>
+    <a class="cta" href="${process.env.VITE_APP_URL || 'https://szlholdings.com'}/corporate">About SZL Holdings</a>
   `);
 }
 
@@ -430,7 +462,12 @@ export function buildPasswordResetEmail(name: string, resetUrl: string): string 
   `);
 }
 
-export function buildDemoConfirmationEmail(name: string, company: string, scheduledAt: string, calendarUrl?: string): string {
+export function buildDemoConfirmationEmail(
+  name: string,
+  company: string,
+  scheduledAt: string,
+  calendarUrl?: string,
+): string {
   return szlBrand(`
     <h2>Demo Confirmed — SZL Holdings</h2>
     <p>Hello ${name},</p>
@@ -446,7 +483,11 @@ export function buildDemoConfirmationEmail(name: string, company: string, schedu
   `);
 }
 
-export function buildAccessRequestConfirmationEmail(name: string, productName: string, requestId: string): string {
+export function buildAccessRequestConfirmationEmail(
+  name: string,
+  productName: string,
+  requestId: string,
+): string {
   return szlBrand(`
     <h2>Access Request Received</h2>
     <p>Hello ${name},</p>
@@ -463,7 +504,12 @@ export function buildAccessRequestConfirmationEmail(name: string, productName: s
   `);
 }
 
-export function buildClientPortalInviteEmail(name: string, company: string, inviteUrl: string, expiresAt: string): string {
+export function buildClientPortalInviteEmail(
+  name: string,
+  company: string,
+  inviteUrl: string,
+  expiresAt: string,
+): string {
   return szlBrand(`
     <h2>You're Invited to the SZL Client Portal</h2>
     <p>Hello ${name},</p>
@@ -490,7 +536,7 @@ export function buildOrgInviteEmail(params: {
   return szlBrand(`
     <h2>You've been invited to join ${orgName}</h2>
     <p>Hello,</p>
-    <p>${invitedByName ? `<strong>${invitedByName}</strong> has invited you` : "You have been invited"} to join <strong>${orgName}</strong> on the SZL Holdings platform as a <strong>${role}</strong>.</p>
+    <p>${invitedByName ? `<strong>${invitedByName}</strong> has invited you` : 'You have been invited'} to join <strong>${orgName}</strong> on the SZL Holdings platform as a <strong>${role}</strong>.</p>
     <div class="highlight">
       <p class="label">Organization</p>
       <p>${orgName}</p>
@@ -508,31 +554,41 @@ export function buildOrgInviteEmail(params: {
 export function buildNotificationDigestEmail(params: {
   userName: string;
   date: string;
-  notifications: Array<{ title: string; message: string; type: string; actionUrl?: string | null; createdAt: string }>;
+  notifications: Array<{
+    title: string;
+    message: string;
+    type: string;
+    actionUrl?: string | null;
+    createdAt: string;
+  }>;
 }): string {
   const { userName, date, notifications } = params;
 
   const typeLabel: Record<string, string> = {
-    info: "Info",
-    success: "Success",
-    warning: "Warning",
-    error: "Alert",
-    action_required: "Action Required",
+    info: 'Info',
+    success: 'Success',
+    warning: 'Warning',
+    error: 'Alert',
+    action_required: 'Action Required',
   };
 
   const typeColor: Record<string, string> = {
-    info: "#6366f1",
-    success: "#10b981",
-    warning: "#f59e0b",
-    error: "#ef4444",
-    action_required: "#f59e0b",
+    info: '#6366f1',
+    success: '#10b981',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    action_required: '#f59e0b',
   };
 
-  const items = notifications.map(n => {
-    const color = typeColor[n.type] ?? "#6366f1";
-    const label = typeLabel[n.type] ?? n.type;
-    const time = new Date(n.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-    return `
+  const items = notifications
+    .map((n) => {
+      const color = typeColor[n.type] ?? '#6366f1';
+      const label = typeLabel[n.type] ?? n.type;
+      const time = new Date(n.createdAt).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+      return `
     <div style="border-left:3px solid ${color};padding:10px 14px;margin:10px 0;background:#f9fafb;border-radius:4px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
         <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${color};">${label}</span>
@@ -540,36 +596,37 @@ export function buildNotificationDigestEmail(params: {
       </div>
       <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#111827;">${n.title}</p>
       <p style="margin:0;font-size:13px;color:#4b5563;">${n.message}</p>
-      ${n.actionUrl ? `<a href="${n.actionUrl.startsWith("http") ? n.actionUrl : `${process.env.APP_URL || "https://szlholdings.com"}${n.actionUrl}`}" style="font-size:12px;color:#6366f1;text-decoration:none;margin-top:6px;display:inline-block;">View →</a>` : ""}
+      ${n.actionUrl ? `<a href="${n.actionUrl.startsWith('http') ? n.actionUrl : `${process.env.APP_URL || 'https://szlholdings.com'}${n.actionUrl}`}" style="font-size:12px;color:#6366f1;text-decoration:none;margin-top:6px;display:inline-block;">View →</a>` : ''}
     </div>`;
-  }).join("");
+    })
+    .join('');
 
   return szlBrand(`
     <h2>Your Daily Digest — ${date}</h2>
     <p>Hello ${userName},</p>
-    <p>Here's a summary of your <strong>${notifications.length} unread notification${notifications.length !== 1 ? "s" : ""}</strong> from the past 24 hours.</p>
+    <p>Here's a summary of your <strong>${notifications.length} unread notification${notifications.length !== 1 ? 's' : ''}</strong> from the past 24 hours.</p>
     ${items}
     <div class="divider"></div>
     <p style="font-size:13px;color:#6b7280;">To manage your notification preferences or turn off digest emails, visit your account settings.</p>
-    <a class="cta" href="${process.env.APP_URL || "https://szlholdings.com"}/settings/notifications">Manage Preferences</a>
+    <a class="cta" href="${process.env.APP_URL || 'https://szlholdings.com'}/settings/notifications">Manage Preferences</a>
   `);
 }
 
 function escapeHtml(str: string): string {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  new:       "New",
-  contacted: "Contacted",
-  qualified: "Qualified",
-  closed:    "Closed",
-  lost:      "Lost",
+  new: 'New',
+  contacted: 'Contacted',
+  qualified: 'Qualified',
+  closed: 'Closed',
+  lost: 'Lost',
 };
 
 export function buildTicketStatusEmail(params: {
@@ -586,8 +643,8 @@ export function buildTicketStatusEmail(params: {
   const subject = `Update on your inquiry — ${statusLabel}`;
 
   const notesBlock = notes
-    ? `<div class="highlight"><p class="label">Note from our team</p><p>${escapeHtml(notes).replace(/\n/g, "<br />")}</p></div>`
-    : "";
+    ? `<div class="highlight"><p class="label">Note from our team</p><p>${escapeHtml(notes).replace(/\n/g, '<br />')}</p></div>`
+    : '';
 
   const html = szlBrand(`
     <h2>Your Inquiry Has Been Updated</h2>
@@ -596,7 +653,7 @@ export function buildTicketStatusEmail(params: {
     <div class="highlight">
       <p class="label">Status</p>
       <p><strong>${statusLabel}</strong></p>
-      ${previousStatus && previousStatus !== newStatus ? `<p style="margin-top:4px;font-size:12px;color:#9ca3af;">Previously: ${STATUS_LABELS[previousStatus] ?? escapeHtml(previousStatus)}</p>` : ""}
+      ${previousStatus && previousStatus !== newStatus ? `<p style="margin-top:4px;font-size:12px;color:#9ca3af;">Previously: ${STATUS_LABELS[previousStatus] ?? escapeHtml(previousStatus)}</p>` : ''}
     </div>
     ${notesBlock}
     <p>If you have any questions or need further assistance, feel free to reply directly to this email or contact us at <strong>inquiries@szlholdings.com</strong>.</p>
@@ -612,7 +669,9 @@ export function buildTicketStatusEmail(params: {
     `Our team has updated the status of your inquiry.`,
     ``,
     `Status: ${statusLabel}`,
-    ...(previousStatus && previousStatus !== newStatus ? [`Previously: ${STATUS_LABELS[previousStatus] ?? previousStatus}`] : []),
+    ...(previousStatus && previousStatus !== newStatus
+      ? [`Previously: ${STATUS_LABELS[previousStatus] ?? previousStatus}`]
+      : []),
     ...(notes ? [``, `Note from our team:`, notes] : []),
     ``,
     `If you have questions, reply to this email or contact inquiries@szlholdings.com.`,
@@ -620,12 +679,18 @@ export function buildTicketStatusEmail(params: {
     `Inquiry reference: #${ticketId}`,
   ];
 
-  return { subject, html, text: textParts.join("\n") };
+  return { subject, html, text: textParts.join('\n') };
 }
 
 export function buildBillingNotificationEmail(params: {
   name: string;
-  eventType: "invoice_paid" | "invoice_due" | "payment_failed" | "subscription_renewed" | "subscription_cancelled" | "trial_ending";
+  eventType:
+    | 'invoice_paid'
+    | 'invoice_due'
+    | 'payment_failed'
+    | 'subscription_renewed'
+    | 'subscription_cancelled'
+    | 'trial_ending';
   amount?: string;
   currency?: string;
   invoiceUrl?: string;
@@ -633,31 +698,40 @@ export function buildBillingNotificationEmail(params: {
   renewalDate?: string;
   trialEndDate?: string;
 }): string {
-  const { name, eventType, amount, currency = "USD", invoiceUrl, dueDate, renewalDate, trialEndDate } = params;
+  const {
+    name,
+    eventType,
+    amount,
+    currency = 'USD',
+    invoiceUrl,
+    dueDate,
+    renewalDate,
+    trialEndDate,
+  } = params;
 
   const eventMessages: Record<typeof eventType, { title: string; body: string }> = {
     invoice_paid: {
-      title: "Payment Received",
+      title: 'Payment Received',
       body: `Your payment of <strong>${amount} ${currency}</strong> has been successfully processed. Your services remain active and uninterrupted.`,
     },
     invoice_due: {
-      title: "Invoice Due Soon",
+      title: 'Invoice Due Soon',
       body: `An invoice of <strong>${amount} ${currency}</strong> is due on <strong>${dueDate}</strong>. Please ensure your payment method is up to date to avoid any service interruption.`,
     },
     payment_failed: {
-      title: "Payment Failed — Action Required",
+      title: 'Payment Failed — Action Required',
       body: `We were unable to process your payment of <strong>${amount} ${currency}</strong>. Please update your payment method immediately to avoid service interruption.`,
     },
     subscription_renewed: {
-      title: "Subscription Renewed",
+      title: 'Subscription Renewed',
       body: `Your SZL Holdings subscription has been successfully renewed. Your next billing date is <strong>${renewalDate}</strong>.`,
     },
     subscription_cancelled: {
-      title: "Subscription Cancelled",
+      title: 'Subscription Cancelled',
       body: `Your subscription has been cancelled. You will continue to have access until your current billing period ends. We're sorry to see you go — contact us if there's anything we can improve.`,
     },
     trial_ending: {
-      title: "Your Trial is Ending Soon",
+      title: 'Your Trial is Ending Soon',
       body: `Your free trial ends on <strong>${trialEndDate}</strong>. To continue accessing SZL Holdings services without interruption, please upgrade your plan before that date.`,
     },
   };
@@ -668,13 +742,17 @@ export function buildBillingNotificationEmail(params: {
     <h2>${title}</h2>
     <p>Hello ${name},</p>
     <p>${body}</p>
-    ${invoiceUrl ? `
+    ${
+      invoiceUrl
+        ? `
     <div class="highlight">
       <p class="label">Invoice</p>
       <p>View and download your invoice for your records.</p>
     </div>
     <a class="cta" href="${invoiceUrl}">View Invoice</a>
-    ` : `<a class="cta" href="https://szlholdings.com/billing">Manage Billing</a>`}
+    `
+        : `<a class="cta" href="https://szlholdings.com/billing">Manage Billing</a>`
+    }
     <p style="margin-top:16px;font-size:12px;color:#9ca3af;">Questions about your billing? Contact <strong>billing@szlholdings.com</strong></p>
   `);
 }
@@ -733,13 +811,13 @@ export function buildStephenContactAckEmail(name: string, inquiryType: string): 
 
 export function buildStephenStatusUpdateEmail(args: {
   name: string;
-  status: "confirmed" | "declined" | "completed";
+  status: 'confirmed' | 'declined' | 'completed';
   note?: string;
 }): string {
   const headlines: Record<typeof args.status, string> = {
-    confirmed: "Design partner application accepted",
-    declined: "Design partner application update",
-    completed: "Design partner engagement complete",
+    confirmed: 'Design partner application accepted',
+    declined: 'Design partner application update',
+    completed: 'Design partner engagement complete',
   };
   const bodies: Record<typeof args.status, string> = {
     confirmed: `Thank you, ${args.name}. Your application has been accepted. I'll follow up shortly to schedule a working session and share the design partner brief.`,
@@ -749,7 +827,7 @@ export function buildStephenStatusUpdateEmail(args: {
   return stephenBrand(`
     <h2>${headlines[args.status]}</h2>
     <p>${bodies[args.status]}</p>
-    ${args.note ? `<div class="highlight"><p class="label">A note from Stephen</p><p>${args.note.replace(/\n/g, "<br />")}</p></div>` : ""}
+    ${args.note ? `<div class="highlight"><p class="label">A note from Stephen</p><p>${args.note.replace(/\n/g, '<br />')}</p></div>` : ''}
     <p>If you'd like to follow up directly, just reply to this email.</p>
   `);
 }
@@ -766,13 +844,13 @@ export function buildStephenContactNotificationEmail(inquiry: {
     <p>A new inquiry has arrived through your contact form.</p>
     <div class="highlight">
       <p class="label">From</p>
-      <p>${inquiry.name}${inquiry.company ? ` · ${inquiry.company}` : ""}</p>
+      <p>${inquiry.name}${inquiry.company ? ` · ${inquiry.company}` : ''}</p>
       <p class="label" style="margin-top:8px;">Email</p>
       <p>${inquiry.email}</p>
       <p class="label" style="margin-top:8px;">Type</p>
       <p>${inquiry.type}</p>
       <p class="label" style="margin-top:8px;">Message</p>
-      <p>${inquiry.message.replace(/\n/g, "<br />")}</p>
+      <p>${inquiry.message.replace(/\n/g, '<br />')}</p>
     </div>
     <p>Reply directly to this email to respond to ${inquiry.name}.</p>
   `);
@@ -831,18 +909,20 @@ export function buildCarlotaRadarAlertEmail(opts: {
   signal: CarlotaRadarSignalSummary;
   radarUrl?: string;
 }): { subject: string; html: string } {
-  const radarUrl = opts.radarUrl || `${process.env.VITE_APP_URL || "https://carlotajo.com"}/carlota-jo/competitive-radar`;
+  const radarUrl =
+    opts.radarUrl ||
+    `${process.env.VITE_APP_URL || 'https://carlotajo.com'}/carlota-jo/competitive-radar`;
   const subject = `[High impact] ${opts.signal.competitor}: ${opts.signal.event.slice(0, 80)}`;
   const html = carlotaBrand(`
     <h2 style="color:#a07850;">High-impact competitor signal</h2>
-    <p>${opts.recipientName ? `${opts.recipientName}, a` : "A"} new high-impact signal has landed on your competitive radar.</p>
+    <p>${opts.recipientName ? `${opts.recipientName}, a` : 'A'} new high-impact signal has landed on your competitive radar.</p>
     <div class="highlight">
       <p class="label">${opts.signal.competitor} · ${opts.signal.date}</p>
       <p style="font-weight:600;margin:4px 0 8px;">${opts.signal.event}</p>
       <p style="font-size:13px;color:#555;">${opts.signal.detail}</p>
-      ${opts.signal.source ? `<p style="font-size:11px;color:#888;margin-top:8px;">Source: ${opts.signal.source}</p>` : ""}
+      ${opts.signal.source ? `<p style="font-size:11px;color:#888;margin-top:8px;">Source: ${opts.signal.source}</p>` : ''}
     </div>
-    ${opts.signal.url ? `<p><a href="${opts.signal.url}" style="color:#a07850;">Open original article →</a></p>` : ""}
+    ${opts.signal.url ? `<p><a href="${opts.signal.url}" style="color:#a07850;">Open original article →</a></p>` : ''}
     <a class="cta" href="${radarUrl}">Open Competitive Radar</a>
     <p style="font-size:11px;color:#999;margin-top:16px;">Manage your alert preferences from the radar settings panel.</p>
   `);
@@ -851,24 +931,30 @@ export function buildCarlotaRadarAlertEmail(opts: {
 
 export function buildCarlotaRadarDigestEmail(opts: {
   recipientName?: string;
-  frequency: "daily" | "weekly";
+  frequency: 'daily' | 'weekly';
   signals: CarlotaRadarSignalSummary[];
   radarUrl?: string;
 }): { subject: string; html: string } {
-  const radarUrl = opts.radarUrl || `${process.env.VITE_APP_URL || "https://carlotajo.com"}/carlota-jo/competitive-radar`;
-  const window = opts.frequency === "daily" ? "today" : "this week";
-  const subject = `Competitive Radar — ${opts.signals.length} high-impact signal${opts.signals.length === 1 ? "" : "s"} ${window}`;
-  const items = opts.signals.map(s => `
+  const radarUrl =
+    opts.radarUrl ||
+    `${process.env.VITE_APP_URL || 'https://carlotajo.com'}/carlota-jo/competitive-radar`;
+  const window = opts.frequency === 'daily' ? 'today' : 'this week';
+  const subject = `Competitive Radar — ${opts.signals.length} high-impact signal${opts.signals.length === 1 ? '' : 's'} ${window}`;
+  const items = opts.signals
+    .map(
+      (s) => `
     <div style="border-left:3px solid #c9a97a;padding:8px 12px;margin:8px 0;background:#faf7f2;">
       <p style="margin:0;font-size:11px;color:#a07850;text-transform:uppercase;letter-spacing:0.1em;">${s.competitor} · ${s.date}</p>
       <p style="margin:4px 0;font-weight:600;">${s.event}</p>
       <p style="margin:0;font-size:12px;color:#555;">${s.detail}</p>
-      ${s.url ? `<p style="margin:6px 0 0;"><a href="${s.url}" style="font-size:11px;color:#a07850;">Open article →</a></p>` : ""}
+      ${s.url ? `<p style="margin:6px 0 0;"><a href="${s.url}" style="font-size:11px;color:#a07850;">Open article →</a></p>` : ''}
     </div>
-  `).join("");
+  `,
+    )
+    .join('');
   const html = carlotaBrand(`
-    <h2 style="color:#a07850;">Competitive Radar — ${opts.frequency === "daily" ? "Daily" : "Weekly"} digest</h2>
-    <p>${opts.recipientName ? `${opts.recipientName},` : ""} ${opts.signals.length} high-impact competitor signal${opts.signals.length === 1 ? "" : "s"} landed ${window}.</p>
+    <h2 style="color:#a07850;">Competitive Radar — ${opts.frequency === 'daily' ? 'Daily' : 'Weekly'} digest</h2>
+    <p>${opts.recipientName ? `${opts.recipientName},` : ''} ${opts.signals.length} high-impact competitor signal${opts.signals.length === 1 ? '' : 's'} landed ${window}.</p>
     ${items}
     <a class="cta" href="${radarUrl}">Open Competitive Radar</a>
     <p style="font-size:11px;color:#999;margin-top:16px;">Manage your alert preferences from the radar settings panel.</p>
@@ -885,7 +971,7 @@ export function buildCarlotaContactAckEmail(name: string): string {
       <p>All inquiries are handled with absolute discretion. You will receive a personal response within one business day.</p>
     </div>
     <p>Should you have an urgent matter, please contact us directly at <strong>hello@carlotajo.com</strong>.</p>
-    <a class="cta" href="${process.env.VITE_APP_URL || "https://carlotajo.com"}/carlota-jo">Visit Our Site</a>
+    <a class="cta" href="${process.env.VITE_APP_URL || 'https://carlotajo.com'}/carlota-jo">Visit Our Site</a>
   `);
 }
 
@@ -903,7 +989,7 @@ export interface CarlotaInvoiceEmailData {
     deliverable: string;
     hours: number;
     rate: number;
-    rateType: "standard" | "premium" | "fixed" | "non-billable";
+    rateType: 'standard' | 'premium' | 'fixed' | 'non-billable';
     amount: number;
   }>;
   fromName?: string;
@@ -912,13 +998,14 @@ export interface CarlotaInvoiceEmailData {
 }
 
 export function buildCarlotaInvoiceEmail(invoice: CarlotaInvoiceEmailData): string {
-  const currency = invoice.currency || "GBP";
-  const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : "$";
+  const currency = invoice.currency || 'GBP';
+  const symbol = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : '$';
   const fmt = (n: number) =>
     `${symbol}${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const itemsHtml = invoice.items && invoice.items.length > 0
-    ? `
+  const itemsHtml =
+    invoice.items && invoice.items.length > 0
+      ? `
       <table style="width:100%;border-collapse:collapse;margin:16px 0;font-family:-apple-system,sans-serif;">
         <thead>
           <tr style="border-bottom:1px solid #c9a97a;">
@@ -929,7 +1016,9 @@ export function buildCarlotaInvoiceEmail(invoice: CarlotaInvoiceEmailData): stri
           </tr>
         </thead>
         <tbody>
-          ${invoice.items.map(it => `
+          ${invoice.items
+            .map(
+              (it) => `
             <tr style="border-bottom:1px solid #f0ebe0;">
               <td style="padding:10px 4px;font-size:12px;color:#4a4a4a;vertical-align:top;">${it.date}</td>
               <td style="padding:10px 4px;font-size:12px;color:#1a1a1a;vertical-align:top;">
@@ -939,11 +1028,13 @@ export function buildCarlotaInvoiceEmail(invoice: CarlotaInvoiceEmailData): stri
               <td style="padding:10px 4px;font-size:12px;color:#4a4a4a;text-align:right;vertical-align:top;">${it.hours.toFixed(2)}</td>
               <td style="padding:10px 4px;font-size:12px;color:#1a1a1a;text-align:right;vertical-align:top;">${fmt(it.amount)}</td>
             </tr>
-          `).join("")}
+          `,
+            )
+            .join('')}
         </tbody>
       </table>
     `
-    : `<p style="font-size:12px;color:#6b5e47;font-style:italic;">Summary invoice — line item details available on request.</p>`;
+      : `<p style="font-size:12px;color:#6b5e47;font-style:italic;">Summary invoice — line item details available on request.</p>`;
 
   return carlotaBrand(`
     <h2>Invoice ${invoice.invoiceId}</h2>
@@ -970,7 +1061,7 @@ export function buildCarlotaInvoiceEmail(invoice: CarlotaInvoiceEmailData): stri
         <td style="padding:12px 4px;font-size:16px;color:#1a1a1a;text-align:right;font-weight:700;font-family:Georgia,serif;">${fmt(invoice.amount)}</td>
       </tr>
     </table>
-    ${invoice.notes ? `<p style="font-size:12px;color:#6b5e47;font-style:italic;margin-top:16px;">${invoice.notes}</p>` : ""}
+    ${invoice.notes ? `<p style="font-size:12px;color:#6b5e47;font-style:italic;margin-top:16px;">${invoice.notes}</p>` : ''}
     <p style="margin-top:24px;">Payment terms: <strong>Net 15</strong>. Please remit via bank transfer to the account on file. For any questions regarding this invoice, reply directly to this email or contact <strong>billing@carlotajo.com</strong>.</p>
     <p>With appreciation,<br /><em>Carlota Jo Advisory</em></p>
   `);
@@ -989,22 +1080,24 @@ export function buildCarlotaInquiryNotificationEmail(inquiry: {
     <p>A new inquiry has been submitted through the Carlota Jo Advisory contact form.</p>
     <div class="highlight">
       <p class="label">From</p>
-      <p>${inquiry.name}${inquiry.company ? ` — ${inquiry.company}` : ""}</p>
+      <p>${inquiry.name}${inquiry.company ? ` — ${inquiry.company}` : ''}</p>
       <p class="label" style="margin-top:10px;">Email</p>
       <p>${inquiry.email}</p>
-      ${inquiry.phone ? `<p class="label" style="margin-top:10px;">Phone</p><p>${inquiry.phone}</p>` : ""}
-      ${inquiry.service ? `<p class="label" style="margin-top:10px;">Service interest</p><p>${inquiry.service}</p>` : ""}
+      ${inquiry.phone ? `<p class="label" style="margin-top:10px;">Phone</p><p>${inquiry.phone}</p>` : ''}
+      ${inquiry.service ? `<p class="label" style="margin-top:10px;">Service interest</p><p>${inquiry.service}</p>` : ''}
       <p class="label" style="margin-top:10px;">Message</p>
-      <p>${inquiry.message.replace(/\n/g, "<br />")}</p>
+      <p>${inquiry.message.replace(/\n/g, '<br />')}</p>
     </div>
     <p>Reply directly to this email to respond to ${inquiry.name}.</p>
   `);
 }
 
-const STEPHEN_ADMIN_EMAIL = process.env.STEPHEN_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || "stephen@szlholdings.com";
-const CARLOTA_ADMIN_EMAIL = process.env.CARLOTA_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || "hello@carlotajo.com";
+const STEPHEN_ADMIN_EMAIL =
+  process.env.STEPHEN_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || 'stephen@szlholdings.com';
+const CARLOTA_ADMIN_EMAIL =
+  process.env.CARLOTA_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || 'hello@carlotajo.com';
 
-export { INTERNAL_EMAIL, STEPHEN_ADMIN_EMAIL, CARLOTA_ADMIN_EMAIL };
+export { CARLOTA_ADMIN_EMAIL, INTERNAL_EMAIL, STEPHEN_ADMIN_EMAIL };
 
 // ─── Tenant-Branded Email Templates ──────────────────────────────────────────
 
@@ -1019,9 +1112,9 @@ export interface TenantEmailBranding {
 }
 
 export function buildTenantBrand(branding: TenantEmailBranding, content: string): string {
-  const primaryColor = branding.primaryColor || "#6366f1";
-  const accentColor = branding.accentColor || "#7c3aed";
-  const companyName = branding.companyName || "SZL Holdings";
+  const primaryColor = branding.primaryColor || '#6366f1';
+  const accentColor = branding.accentColor || '#7c3aed';
+  const companyName = branding.companyName || 'SZL Holdings';
   const footerText = branding.emailFooterText || `${companyName} · Powered by SZL Holdings`;
 
   const logoHtml = branding.logoUrl
@@ -1077,13 +1170,16 @@ export function buildTenantWelcomeEmail(
   name: string,
   dashboardUrl?: string,
 ): string {
-  const companyName = branding.companyName || "the platform";
-  return buildTenantBrand(branding, `
+  const companyName = branding.companyName || 'the platform';
+  return buildTenantBrand(
+    branding,
+    `
     <h2>Welcome to ${companyName}</h2>
     <p>Hello ${name},</p>
     <p>Your account has been created and you now have access to <strong>${companyName}</strong>. You can sign in and get started right away.</p>
-    ${dashboardUrl ? `<a class="cta" href="${dashboardUrl}">Access Your Dashboard</a>` : ""}
-  `);
+    ${dashboardUrl ? `<a class="cta" href="${dashboardUrl}">Access Your Dashboard</a>` : ''}
+  `,
+  );
 }
 
 export function buildTenantInviteEmail(
@@ -1092,20 +1188,27 @@ export function buildTenantInviteEmail(
   inviteUrl: string,
   expiresAt?: string,
 ): string {
-  const companyName = branding.companyName || "the platform";
-  return buildTenantBrand(branding, `
+  const companyName = branding.companyName || 'the platform';
+  return buildTenantBrand(
+    branding,
+    `
     <h2>You've been invited</h2>
     <p>Hello ${name},</p>
     <p>You have been invited to join <strong>${companyName}</strong>. Click the button below to set up your account.</p>
-    ${expiresAt ? `
+    ${
+      expiresAt
+        ? `
     <div class="highlight">
       <p class="label">Invitation Expires</p>
       <p>${expiresAt}</p>
     </div>
-    ` : ""}
+    `
+        : ''
+    }
     <a class="cta" href="${inviteUrl}">Accept Invitation</a>
     <p style="margin-top:16px;font-size:12px;color:#9ca3af;">If you did not expect this invitation, you can safely ignore this email.</p>
-  `);
+  `,
+  );
 }
 
 export function buildTenantNotificationEmail(
@@ -1115,11 +1218,14 @@ export function buildTenantNotificationEmail(
   ctaLabel?: string,
   ctaUrl?: string,
 ): string {
-  return buildTenantBrand(branding, `
+  return buildTenantBrand(
+    branding,
+    `
     <h2>${title}</h2>
     <p>${body}</p>
-    ${ctaLabel && ctaUrl ? `<a class="cta" href="${ctaUrl}">${ctaLabel}</a>` : ""}
-  `);
+    ${ctaLabel && ctaUrl ? `<a class="cta" href="${ctaUrl}">${ctaLabel}</a>` : ''}
+  `,
+  );
 }
 
 export function buildSupportTicketConfirmationEmail(params: {
@@ -1130,7 +1236,7 @@ export function buildSupportTicketConfirmationEmail(params: {
   priority: string;
 }): string {
   const priorityLabel = params.priority.charAt(0).toUpperCase() + params.priority.slice(1);
-  const categoryLabel = params.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const categoryLabel = params.category.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   return szlBrand(`
     <h2>Support ticket received</h2>
     <p>Hi ${params.submitterName}, your support request has been logged and our team will be in touch shortly.</p>
@@ -1160,7 +1266,7 @@ export function buildSupportTicketAdminNotificationEmail(params: {
   priority: string;
 }): string {
   const priorityLabel = params.priority.charAt(0).toUpperCase() + params.priority.slice(1);
-  const categoryLabel = params.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const categoryLabel = params.category.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   return szlBrand(`
     <h2>New support ticket — ${params.ticketRef}</h2>
     <p>A new support ticket has been submitted and requires attention.</p>
@@ -1176,7 +1282,7 @@ export function buildSupportTicketAdminNotificationEmail(params: {
       <p class="label" style="margin-top:8px;">Priority</p>
       <p>${priorityLabel}</p>
       <p class="label" style="margin-top:8px;">Description</p>
-      <p>${params.description.replace(/\n/g, "<br />")}</p>
+      <p>${params.description.replace(/\n/g, '<br />')}</p>
     </div>
   `);
 }
@@ -1188,14 +1294,14 @@ export function buildSupportTicketStatusUpdateEmail(params: {
   newStatus: string;
 }): string {
   const statusLabels: Record<string, string> = {
-    open: "Open",
-    in_progress: "In Progress",
-    waiting_on_customer: "Waiting on You",
-    resolved: "Resolved",
-    closed: "Closed",
+    open: 'Open',
+    in_progress: 'In Progress',
+    waiting_on_customer: 'Waiting on You',
+    resolved: 'Resolved',
+    closed: 'Closed',
   };
   const statusLabel = statusLabels[params.newStatus] ?? params.newStatus;
-  const isResolved = params.newStatus === "resolved" || params.newStatus === "closed";
+  const isResolved = params.newStatus === 'resolved' || params.newStatus === 'closed';
   return szlBrand(`
     <h2>Your ticket status has been updated</h2>
     <p>Hi ${params.submitterName}, there's an update on your support request.</p>
@@ -1207,30 +1313,31 @@ export function buildSupportTicketStatusUpdateEmail(params: {
       <p class="label" style="margin-top:8px;">New Status</p>
       <p style="font-weight:600;">${statusLabel}</p>
     </div>
-    ${isResolved
-      ? `<p>We believe your issue has been resolved. If you have further questions or the issue persists, please don't hesitate to reach out at <strong>support@szlholdings.com</strong>.</p>`
-      : `<p>Our team is actively working on your request. We'll keep you updated as things progress.</p>`
+    ${
+      isResolved
+        ? `<p>We believe your issue has been resolved. If you have further questions or the issue persists, please don't hesitate to reach out at <strong>support@szlholdings.com</strong>.</p>`
+        : `<p>Our team is actively working on your request. We'll keep you updated as things progress.</p>`
     }
     <p>Thank you for your patience.</p>
   `);
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  info:            "#6366f1",
-  success:         "#10b981",
-  warning:         "#f59e0b",
-  error:           "#ef4444",
-  action_required: "#f59e0b",
-  alert:           "#ef4444",
+  info: '#6366f1',
+  success: '#10b981',
+  warning: '#f59e0b',
+  error: '#ef4444',
+  action_required: '#f59e0b',
+  alert: '#ef4444',
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  info:            "Info",
-  success:         "Success",
-  warning:         "Warning",
-  error:           "Alert",
-  action_required: "Action Required",
-  alert:           "Alert",
+  info: 'Info',
+  success: 'Success',
+  warning: 'Warning',
+  error: 'Alert',
+  action_required: 'Action Required',
+  alert: 'Alert',
 };
 
 export function buildTransactionalNotificationEmail(params: {
@@ -1241,11 +1348,11 @@ export function buildTransactionalNotificationEmail(params: {
   actionUrl?: string | null;
 }): string {
   const { name, title, message, type, actionUrl } = params;
-  const color = TYPE_COLORS[type] ?? "#6366f1";
-  const label = TYPE_LABELS[type] ?? "Notification";
+  const color = TYPE_COLORS[type] ?? '#6366f1';
+  const label = TYPE_LABELS[type] ?? 'Notification';
   const safeName = escapeHtml(name);
   const safeTitle = escapeHtml(title);
-  const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
+  const safeMessage = escapeHtml(message).replace(/\n/g, '<br />');
 
   return szlBrand(`
     <div style="display:inline-block;padding:3px 10px;background:${color}15;border-radius:4px;margin-bottom:16px;">
@@ -1254,7 +1361,7 @@ export function buildTransactionalNotificationEmail(params: {
     <h2>${safeTitle}</h2>
     <p>Hi ${safeName},</p>
     <p>${safeMessage}</p>
-    ${actionUrl ? `<a class="cta" href="${actionUrl}" style="background:${color};">View Details</a>` : ""}
+    ${actionUrl ? `<a class="cta" href="${actionUrl}" style="background:${color};">View Details</a>` : ''}
     <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is a notification from the SZL Holdings platform. To manage your notification preferences, visit your account settings.</p>
   `);
 }
@@ -1277,27 +1384,32 @@ export interface ScheduledReportEmailOptions {
    *   - "attachment" → "The PDF is attached to this email" (when the PDF
    *                    is delivered as an email attachment).
    */
-  linkMode?: "auth" | "presigned" | "attachment";
+  linkMode?: 'auth' | 'presigned' | 'attachment';
 }
 
-export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { subject: string; html: string; text: string } {
-  const { recipientName, reportTitle, scheduleName, domain, frequency, generatedAt, downloadUrl } = opts;
-  const linkMode = opts.linkMode ?? "auth";
+export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const { recipientName, reportTitle, scheduleName, domain, frequency, generatedAt, downloadUrl } =
+    opts;
+  const linkMode = opts.linkMode ?? 'auth';
   const accessHtml =
-    linkMode === "attachment"
-      ? "The PDF report is attached to this email. You can also use the button below to access the latest version online."
-      : linkMode === "presigned"
-      ? "Click below to download the PDF. This link is valid for 7 days and does not require signing in."
-      : "Click below to download the PDF report. The link requires authentication to your SZL Holdings account.";
+    linkMode === 'attachment'
+      ? 'The PDF report is attached to this email. You can also use the button below to access the latest version online.'
+      : linkMode === 'presigned'
+        ? 'Click below to download the PDF. This link is valid for 7 days and does not require signing in.'
+        : 'Click below to download the PDF report. The link requires authentication to your SZL Holdings account.';
   const accessText =
-    linkMode === "attachment"
-      ? "The PDF report is attached to this email."
-      : linkMode === "presigned"
-      ? "Download your report (link valid for 7 days, no sign-in required):"
-      : "Download your report (sign-in required):";
+    linkMode === 'attachment'
+      ? 'The PDF report is attached to this email.'
+      : linkMode === 'presigned'
+        ? 'Download your report (link valid for 7 days, no sign-in required):'
+        : 'Download your report (sign-in required):';
 
-  const greeting = recipientName ? `Hello ${recipientName},` : "Hello,";
-  const domainLabel = domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const greeting = recipientName ? `Hello ${recipientName},` : 'Hello,';
+  const domainLabel = domain.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   const frequencyLabel = frequency.charAt(0).toUpperCase() + frequency.slice(1);
 
   const subject = `Your ${frequencyLabel} Report is Ready — ${reportTitle}`;
@@ -1337,11 +1449,10 @@ export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { 
     ``,
     `This is an automated delivery from your scheduled report configuration.`,
     `If you no longer wish to receive these reports, contact your administrator.`,
-  ].join("\n");
+  ].join('\n');
 
   return { subject, html, text };
 }
-
 
 export interface PulseBriefingEmailSection {
   id: string;
@@ -1374,10 +1485,10 @@ export interface PulseBriefingEmailOptions {
 }
 
 const RISK_COLORS: Record<string, string> = {
-  CRITICAL: "#b91c1c",
-  HIGH:     "#c2410c",
-  MEDIUM:   "#b45309",
-  LOW:      "#15803d",
+  CRITICAL: '#b91c1c',
+  HIGH: '#c2410c',
+  MEDIUM: '#b45309',
+  LOW: '#15803d',
 };
 
 function pulseBrand(content: string, footer: string): string {
@@ -1403,22 +1514,37 @@ function pulseBrand(content: string, footer: string): string {
 </html>`;
 }
 
-export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): { subject: string; html: string; text: string } {
-  const filtered = opts.domainsFilter && opts.domainsFilter.length > 0
-    ? opts.sections.filter((s) => opts.domainsFilter!.includes(s.id ?? s.agentId) || opts.domainsFilter!.some((d) => s.title.toLowerCase().includes(d.replace(/_/g, " "))))
-    : opts.sections;
+export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const filtered =
+    opts.domainsFilter && opts.domainsFilter.length > 0
+      ? opts.sections.filter(
+          (s) =>
+            opts.domainsFilter!.includes(s.id ?? s.agentId) ||
+            opts.domainsFilter!.some((d) => s.title.toLowerCase().includes(d.replace(/_/g, ' '))),
+        )
+      : opts.sections;
   const sectionsToRender = filtered.length > 0 ? filtered : opts.sections;
 
-  const overallColor = RISK_COLORS[opts.overallRisk] ?? "#9ca3af";
-  const greeting = opts.recipientName ? `Good morning, ${escapeHtml(opts.recipientName)}.` : "Good morning.";
+  const overallColor = RISK_COLORS[opts.overallRisk] ?? '#9ca3af';
+  const greeting = opts.recipientName
+    ? `Good morning, ${escapeHtml(opts.recipientName)}.`
+    : 'Good morning.';
 
-  const sectionsHtml = sectionsToRender.map((s) => {
-    const color = RISK_COLORS[s.riskLevel] ?? "#9ca3af";
-    const findingsHtml = s.keyFindings.slice(0, 3).map((f) => {
-      const fc = RISK_COLORS[f.severity] ?? "#9ca3af";
-      return `<li style="margin:4px 0;color:rgba(255,255,255,0.78);font-size:13px;line-height:1.5;"><span style="color:${fc};font-weight:700;font-size:10px;letter-spacing:0.06em;">[${escapeHtml(f.severity)}]</span> ${escapeHtml(f.finding)}</li>`;
-    }).join("");
-    return `
+  const sectionsHtml = sectionsToRender
+    .map((s) => {
+      const color = RISK_COLORS[s.riskLevel] ?? '#9ca3af';
+      const findingsHtml = s.keyFindings
+        .slice(0, 3)
+        .map((f) => {
+          const fc = RISK_COLORS[f.severity] ?? '#9ca3af';
+          return `<li style="margin:4px 0;color:rgba(255,255,255,0.78);font-size:13px;line-height:1.5;"><span style="color:${fc};font-weight:700;font-size:10px;letter-spacing:0.06em;">[${escapeHtml(f.severity)}]</span> ${escapeHtml(f.finding)}</li>`;
+        })
+        .join('');
+      return `
     <div style="border-left:3px solid ${color};padding:14px 18px;margin:14px 0;background:rgba(255,255,255,0.03);border-radius:0 6px 6px 0;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
         <span style="font-size:14px;font-weight:600;color:#fff;">${escapeHtml(s.title)}</span>
@@ -1426,22 +1552,29 @@ export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): { subj
         <span style="font-size:10px;font-weight:700;color:${color};letter-spacing:0.08em;margin-left:auto;">${escapeHtml(s.riskLevel)} · ${(s.confidence * 100).toFixed(0)}% (${escapeHtml(s.confidenceLabel)})</span>
       </div>
       <p style="margin:0 0 10px;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;">${escapeHtml(s.keyJudgment)}</p>
-      ${findingsHtml ? `<ul style="margin:8px 0 0;padding-left:18px;">${findingsHtml}</ul>` : ""}
+      ${findingsHtml ? `<ul style="margin:8px 0 0;padding-left:18px;">${findingsHtml}</ul>` : ''}
     </div>`;
-  }).join("");
+    })
+    .join('');
 
   const actionsHtml = opts.recommendedActions.length
     ? `<div style="margin-top:24px;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#c8a84b;margin-bottom:10px;">Recommended Actions</div>
-        ${opts.recommendedActions.slice(0, 5).map((a) => `
+        ${opts.recommendedActions
+          .slice(0, 5)
+          .map(
+            (a) => `
           <div style="padding:10px 14px;background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.18);border-radius:6px;margin-bottom:8px;">
             <div style="font-size:13px;color:#fff;font-weight:600;margin-bottom:4px;"><span style="color:#c8a84b;font-weight:700;">[${escapeHtml(a.priority)}]</span> ${escapeHtml(a.action)}</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.5);">Owner: ${escapeHtml(a.owner)} · Due: ${escapeHtml(a.dueBy)}</div>
-          </div>`).join("")}
+          </div>`,
+          )
+          .join('')}
       </div>`
-    : "";
+    : '';
 
-  const html = pulseBrand(`
+  const html = pulseBrand(
+    `
     <div style="font-size:10px;letter-spacing:0.1em;color:#b45309;text-align:right;margin-bottom:8px;">${escapeHtml(opts.classification)}</div>
     <p style="margin:0 0 6px;font-size:13px;color:rgba(255,255,255,0.55);">${greeting}</p>
     <h1 style="margin:0 0 12px;font-size:20px;font-weight:600;color:#fff;line-height:1.3;">${escapeHtml(opts.headline)}</h1>
@@ -1454,33 +1587,41 @@ export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): { subj
     <div style="margin-top:28px;text-align:center;">
       <a href="${opts.pulseUrl}" style="display:inline-block;padding:10px 20px;background:rgba(200,168,75,0.14);border:1px solid rgba(200,168,75,0.4);border-radius:6px;color:#c8a84b;text-decoration:none;font-size:13px;font-weight:600;">Read Full Briefing →</a>
     </div>
-  `, `
+  `,
+    `
     SZL Holdings · Pulse — AI Executive Briefing<br />
     You're receiving this because you subscribed to daily Pulse briefings.<br />
     <a href="${opts.manageUrl}" style="color:rgba(200,168,75,0.7);">Manage subscription</a> · <a href="${opts.unsubscribeUrl}" style="color:rgba(200,168,75,0.7);">Unsubscribe</a>
-  `);
+  `,
+  );
 
   const textLines = [
     `PULSE · AI EXECUTIVE BRIEFING — ${opts.date}`,
     opts.classification,
-    "",
+    '',
     opts.headline,
-    "",
+    '',
     opts.leadSentence,
-    "",
+    '',
     `Overall risk: ${opts.overallRisk} · Confidence: ${(opts.overallConfidence * 100).toFixed(0)}%`,
-    "",
+    '',
     ...sectionsToRender.flatMap((s) => [
       `── ${s.title} (${s.agentName ?? s.agentId}) — ${s.riskLevel} · ${(s.confidence * 100).toFixed(0)}% (${s.confidenceLabel})`,
       s.keyJudgment,
       ...s.keyFindings.slice(0, 3).map((f) => `  • [${f.severity}] ${f.finding}`),
-      "",
+      '',
     ]),
     ...(opts.recommendedActions.length
-      ? ["RECOMMENDED ACTIONS:", ...opts.recommendedActions.slice(0, 5).map((a) => `  [${a.priority}] ${a.action} (Owner: ${a.owner}, Due: ${a.dueBy})`), ""]
+      ? [
+          'RECOMMENDED ACTIONS:',
+          ...opts.recommendedActions
+            .slice(0, 5)
+            .map((a) => `  [${a.priority}] ${a.action} (Owner: ${a.owner}, Due: ${a.dueBy})`),
+          '',
+        ]
       : []),
     `Read full briefing: ${opts.pulseUrl}`,
-    "",
+    '',
     `Manage subscription: ${opts.manageUrl}`,
     `Unsubscribe: ${opts.unsubscribeUrl}`,
   ];
@@ -1488,6 +1629,6 @@ export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): { subj
   return {
     subject: `Pulse Brief · ${opts.date} · ${opts.headline.slice(0, 80)}`,
     html,
-    text: textLines.join("\n"),
+    text: textLines.join('\n'),
   };
 }

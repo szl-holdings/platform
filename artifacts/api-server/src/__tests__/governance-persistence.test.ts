@@ -33,11 +33,11 @@
  * Skipped if no DATABASE_URL is configured.
  */
 
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
-import type { Request, Response, NextFunction } from "express";
-import express from "express";
-import request from "supertest";
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 const d = HAS_DB ? describe : describe.skip;
@@ -54,12 +54,19 @@ const TEST_ORG_ID = 1;
 // for *_by_id columns rather than violating the users FK.
 const mockAuthUser = {
   id: undefined as number | undefined,
-  email: "persistence-test@example.com",
-  roles: ["super_admin"],
-  orgs: [{ orgId: TEST_ORG_ID, orgSlug: "persistence-test", orgName: "Persistence Test", role: "super_admin" }],
+  email: 'persistence-test@example.com',
+  roles: ['super_admin'],
+  orgs: [
+    {
+      orgId: TEST_ORG_ID,
+      orgSlug: 'persistence-test',
+      orgName: 'Persistence Test',
+      role: 'super_admin',
+    },
+  ],
 };
 
-vi.mock("../middlewares/auth.js", () => ({
+vi.mock('../middlewares/auth.js', () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
     (req as unknown as { user: typeof mockAuthUser }).user = mockAuthUser;
     next();
@@ -71,7 +78,7 @@ vi.mock("../middlewares/auth.js", () => ({
   parseIdParam: (paramName: string) => (req: Request, res: Response, next: NextFunction) => {
     const val = req.params[paramName];
     if (!val || isNaN(Number(val))) {
-      res.status(400).json({ error: "Invalid ID" });
+      res.status(400).json({ error: 'Invalid ID' });
       return;
     }
     next();
@@ -83,14 +90,14 @@ vi.mock("../middlewares/auth.js", () => ({
 // Express app — equivalent to a fresh server boot from the router's
 // perspective.
 async function bootApp() {
-  const { default: guardianRouter } = await import("../routes/guardian.js");
+  const { default: guardianRouter } = await import('../routes/guardian.js');
   const app = express();
   app.use(express.json());
-  app.use("/api/guardian", guardianRouter);
+  app.use('/api/guardian', guardianRouter);
   return app;
 }
 
-d("Governance state persists across an in-process server restart (#1912)", () => {
+d('Governance state persists across an in-process server restart (#1912)', () => {
   const runId = randomUUID().slice(0, 8);
 
   // Pinned state we expect to survive the restart.
@@ -98,33 +105,33 @@ d("Governance state persists across an in-process server restart (#1912)", () =>
     policy: {
       id: `persistence-policy-${runId}`,
       name: `persistence-test-policy-${runId}`,
-      description: "Persistence smoke test — must survive restart",
-      tier: "supervised" as const,
-      conditions: [{ field: "domain", operator: "eq" as const, value: "general" }],
-      action: "allow" as const,
+      description: 'Persistence smoke test — must survive restart',
+      tier: 'supervised' as const,
+      conditions: [{ field: 'domain', operator: 'eq' as const, value: 'general' }],
+      action: 'allow' as const,
       priority: 17,
       enabled: true,
-      tags: ["persistence-test", runId],
+      tags: ['persistence-test', runId],
     },
     approval: {
       requestId: `persistence-approval-${runId}`,
-      action: "test:persistence",
-      tier: "operator-approved" as const,
-      approvalType: "single" as const,
-      requiredApprovers: ["ops"],
+      action: 'test:persistence',
+      tier: 'operator-approved' as const,
+      approvalType: 'single' as const,
+      requiredApprovers: ['ops'],
     },
     guardrail: {
       guardrailId: `persistence-guardrail-${runId}`,
       name: `Persistence guardrail ${runId}`,
-      description: "Created by governance persistence test",
-      guardrailType: "rate_limit" as const,
+      description: 'Created by governance persistence test',
+      guardrailType: 'rate_limit' as const,
       config: { limit: 100, windowSec: 60, runId },
-      enforcement: "enforce" as const,
+      enforcement: 'enforce' as const,
     },
     tier: {
       // Org-scoped override targeting our test org. The shared seeded
       // global row (org_id IS NULL) is never touched.
-      tier: "supervised" as const,
+      tier: 'supervised' as const,
       tierNumber: 1,
       description: `Org-scoped supervised override (${runId})`,
       riskLevel: 2,
@@ -141,36 +148,55 @@ d("Governance state persists across an in-process server restart (#1912)", () =>
 
   beforeAll(async () => {
     // Make sure the test org exists so the FK on org-scoped rows is valid.
-    const { db, organizationsTable } = await import("@szl-holdings/db");
-    const { eq } = await import("drizzle-orm");
-    const [existingOrg] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, TEST_ORG_ID)).limit(1);
+    const { db, organizationsTable } = await import('@szl-holdings/db');
+    const { eq } = await import('drizzle-orm');
+    const [existingOrg] = await db
+      .select()
+      .from(organizationsTable)
+      .where(eq(organizationsTable.id, TEST_ORG_ID))
+      .limit(1);
     if (!existingOrg) {
       // Insert a minimal placeholder if the row doesn't exist. Most dev
       // databases already have an org with id=1; this is a safety net.
-      await db.insert(organizationsTable).values({
-        id: TEST_ORG_ID,
-        name: "Persistence Test Org",
-        slug: "persistence-test",
-      }).onConflictDoNothing();
+      await db
+        .insert(organizationsTable)
+        .values({
+          id: TEST_ORG_ID,
+          name: 'Persistence Test Org',
+          slug: 'persistence-test',
+        })
+        .onConflictDoNothing();
     }
   });
 
   afterAll(async () => {
     // Targeted cleanup: ONLY the rows this test created. Global seed rows
     // (org_id IS NULL) are never touched.
-    const { db, guardianPoliciesTable, guardianApprovalRequestsTable, guardianTiersTable, guardrailConfigsTable } = await import("@szl-holdings/db");
-    const { eq } = await import("drizzle-orm");
-    if (policyDbId !== null) await db.delete(guardianPoliciesTable).where(eq(guardianPoliciesTable.id, policyDbId));
-    if (approvalDbId !== null) await db.delete(guardianApprovalRequestsTable).where(eq(guardianApprovalRequestsTable.id, approvalDbId));
-    if (guardrailDbId !== null) await db.delete(guardrailConfigsTable).where(eq(guardrailConfigsTable.id, guardrailDbId));
-    if (tierDbId !== null) await db.delete(guardianTiersTable).where(eq(guardianTiersTable.id, tierDbId));
+    const {
+      db,
+      guardianPoliciesTable,
+      guardianApprovalRequestsTable,
+      guardianTiersTable,
+      guardrailConfigsTable,
+    } = await import('@szl-holdings/db');
+    const { eq } = await import('drizzle-orm');
+    if (policyDbId !== null)
+      await db.delete(guardianPoliciesTable).where(eq(guardianPoliciesTable.id, policyDbId));
+    if (approvalDbId !== null)
+      await db
+        .delete(guardianApprovalRequestsTable)
+        .where(eq(guardianApprovalRequestsTable.id, approvalDbId));
+    if (guardrailDbId !== null)
+      await db.delete(guardrailConfigsTable).where(eq(guardrailConfigsTable.id, guardrailDbId));
+    if (tierDbId !== null)
+      await db.delete(guardianTiersTable).where(eq(guardianTiersTable.id, tierDbId));
   });
 
-  it("Phase 1 — bootstraps the server and creates governance state via HTTP", async () => {
+  it('Phase 1 — bootstraps the server and creates governance state via HTTP', async () => {
     const app = await bootApp();
 
     // 1) POST /policies — create a Guardian policy through the real route
-    const policyRes = await request(app).post("/api/guardian/policies").send(PINNED.policy);
+    const policyRes = await request(app).post('/api/guardian/policies').send(PINNED.policy);
     expect(policyRes.status).toBe(201);
     expect(policyRes.body?.name).toBe(PINNED.policy.name);
     policyDbId = policyRes.body.id;
@@ -189,7 +215,9 @@ d("Governance state persists across an in-process server restart (#1912)", () =>
     tierDbId = tierRes.body.id;
 
     // 3) POST /guardrail-configs — create a guardrail through the real route
-    const guardrailRes = await request(app).post("/api/guardian/guardrail-configs").send(PINNED.guardrail);
+    const guardrailRes = await request(app)
+      .post('/api/guardian/guardrail-configs')
+      .send(PINNED.guardrail);
     expect(guardrailRes.status).toBe(201);
     expect(guardrailRes.body?.guardrailId).toBe(PINNED.guardrail.guardrailId);
     guardrailDbId = guardrailRes.body.id;
@@ -199,22 +227,25 @@ d("Governance state persists across an in-process server restart (#1912)", () =>
     // we insert through the same Drizzle path the engine uses. The point
     // of the test is that the row survives restart and is readable through
     // GET /approvals.
-    const { db, guardianApprovalRequestsTable } = await import("@szl-holdings/db");
-    const [approvalRow] = await db.insert(guardianApprovalRequestsTable).values({
-      requestId: PINNED.approval.requestId,
-      orgId: TEST_ORG_ID,
-      action: PINNED.approval.action,
-      tier: PINNED.approval.tier,
-      approvalType: PINNED.approval.approvalType,
-      requiredApprovers: PINNED.approval.requiredApprovers,
-      status: "pending",
-    }).returning();
+    const { db, guardianApprovalRequestsTable } = await import('@szl-holdings/db');
+    const [approvalRow] = await db
+      .insert(guardianApprovalRequestsTable)
+      .values({
+        requestId: PINNED.approval.requestId,
+        orgId: TEST_ORG_ID,
+        action: PINNED.approval.action,
+        tier: PINNED.approval.tier,
+        approvalType: PINNED.approval.approvalType,
+        requiredApprovers: PINNED.approval.requiredApprovers,
+        status: 'pending',
+      })
+      .returning();
     approvalDbId = approvalRow!.id;
   });
 
-  it("Restart in-process — resets the engine and re-runs initGuardianEngine()", async () => {
+  it('Restart in-process — resets the engine and re-runs initGuardianEngine()', async () => {
     // Step 1: clear the live engine state so we can prove it's empty.
-    const engineModBefore = await import("../lib/guardian-engine.js");
+    const engineModBefore = await import('../lib/guardian-engine.js');
     const engine = engineModBefore.getGuardianEngine();
     for (const r of engine.getRules()) engine.removeRule(r.id);
 
@@ -224,19 +255,22 @@ d("Governance state persists across an in-process server restart (#1912)", () =>
 
     // Step 3: re-import the engine and re-run hydration — this is the same
     // path `initGuardianEngine()` takes during real bootstrap.
-    const engineMod = await import("../lib/guardian-engine.js");
+    const engineMod = await import('../lib/guardian-engine.js');
     const loaded = await engineMod.syncGuardianPolicies(true);
     expect(loaded).toBeGreaterThan(0);
 
     // Our policy must reappear in-memory after the rehydrate.
-    const ours = engineMod.getGuardianEngine().getRules().find(r => r.name === PINNED.policy.name);
+    const ours = engineMod
+      .getGuardianEngine()
+      .getRules()
+      .find((r) => r.name === PINNED.policy.name);
     expect(ours).toBeDefined();
     expect(ours!.tier).toBe(PINNED.policy.tier);
     expect(ours!.priority).toBe(PINNED.policy.priority);
     expect(ours!.action).toBe(PINNED.policy.action);
   });
 
-  it("Phase 2 — fresh app instance reads every value back identically over HTTP", async () => {
+  it('Phase 2 — fresh app instance reads every value back identically over HTTP', async () => {
     // Mount a brand-new app with a freshly-imported router, simulating a
     // post-restart server.
     const app = await bootApp();
@@ -257,9 +291,17 @@ d("Governance state persists across an in-process server restart (#1912)", () =>
     // 2) Tier override round-trip — GET /policies/tiers must surface the
     // org override (we simulated request comes from the same test org via
     // the auth mock).
-    const tiersRes = await request(app).get("/api/guardian/policies/tiers");
+    const tiersRes = await request(app).get('/api/guardian/policies/tiers');
     expect(tiersRes.status).toBe(200);
-    const supervised = (tiersRes.body as Array<{ tier: string; description: string; riskLevel: number; controls: Record<string, unknown>; tierNumber: number }>).find(t => t.tier === PINNED.tier.tier);
+    const supervised = (
+      tiersRes.body as Array<{
+        tier: string;
+        description: string;
+        riskLevel: number;
+        controls: Record<string, unknown>;
+        tierNumber: number;
+      }>
+    ).find((t) => t.tier === PINNED.tier.tier);
     expect(supervised).toBeDefined();
     expect(supervised!.description).toBe(PINNED.tier.description);
     expect(supervised!.riskLevel).toBe(PINNED.tier.riskLevel);
@@ -279,16 +321,25 @@ d("Governance state persists across an in-process server restart (#1912)", () =>
     expect(guardrail.enabled).toBe(true);
 
     // 4) Approval request round-trip — GET /approvals must include our row
-    const approvalsRes = await request(app).get("/api/guardian/approvals?limit=200");
+    const approvalsRes = await request(app).get('/api/guardian/approvals?limit=200');
     expect(approvalsRes.status).toBe(200);
     // GET /approvals returns paginated { data, meta } shape (sendSuccess with meta)
-    const approvalsList = (Array.isArray(approvalsRes.body) ? approvalsRes.body : approvalsRes.body?.data ?? []) as Array<{ requestId: string; action: string; tier: string; approvalType: string; requiredApprovers: string[]; status: string }>;
-    const approval = approvalsList.find(a => a.requestId === PINNED.approval.requestId);
+    const approvalsList = (
+      Array.isArray(approvalsRes.body) ? approvalsRes.body : (approvalsRes.body?.data ?? [])
+    ) as Array<{
+      requestId: string;
+      action: string;
+      tier: string;
+      approvalType: string;
+      requiredApprovers: string[];
+      status: string;
+    }>;
+    const approval = approvalsList.find((a) => a.requestId === PINNED.approval.requestId);
     expect(approval).toBeDefined();
     expect(approval!.action).toBe(PINNED.approval.action);
     expect(approval!.tier).toBe(PINNED.approval.tier);
     expect(approval!.approvalType).toBe(PINNED.approval.approvalType);
     expect(approval!.requiredApprovers).toEqual(PINNED.approval.requiredApprovers);
-    expect(approval!.status).toBe("pending");
+    expect(approval!.status).toBe('pending');
   });
 });

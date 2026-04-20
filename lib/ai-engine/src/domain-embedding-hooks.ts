@@ -13,9 +13,9 @@
  * do not break the primary domain operation.
  */
 
-import { upsertEntity, upsertRelationship } from "./knowledge-graph.js";
-import { scheduleEmbeddingTask, getEmbeddingProvider } from "./embedding-pipeline.js";
-import { ingestDocument } from "./rag/knowledge-store.js";
+import { getEmbeddingProvider, scheduleEmbeddingTask } from './embedding-pipeline.js';
+import { upsertEntity, upsertRelationship } from './knowledge-graph.js';
+import { ingestDocument } from './rag/knowledge-store.js';
 
 // ─── Dimension Guard ──────────────────────────────────────────────────────────
 
@@ -69,7 +69,10 @@ export interface PrismMatterSummary {
  * Ingest a PRISM legal matter into the knowledge graph and embedding pipeline.
  * Call this when a pc_matters row is created or updated.
  */
-export async function ingestPrismMatter(matter: PrismMatterSummary, tenantId?: string): Promise<void> {
+export async function ingestPrismMatter(
+  matter: PrismMatterSummary,
+  tenantId?: string,
+): Promise<void> {
   try {
     const description = [
       `Matter Type: ${matter.matterType}`,
@@ -79,12 +82,12 @@ export async function ingestPrismMatter(matter: PrismMatterSummary, tenantId?: s
       matter.notes ?? null,
     ]
       .filter(Boolean)
-      .join(". ");
+      .join('. ');
 
     const entityId = await upsertEntity({
       name: matter.title,
-      entityType: "legal_matter",
-      domain: "prism",
+      entityType: 'legal_matter',
+      domain: 'prism',
       subDomain: matter.matterType,
       description,
       canonicalId: `prism_matter_${matter.id}`,
@@ -101,10 +104,10 @@ export async function ingestPrismMatter(matter: PrismMatterSummary, tenantId?: s
 
     if (description && entityId) {
       await scheduleEmbeddingTask({
-        targetTable: "kg_entities",
+        targetTable: 'kg_entities',
         targetId: entityId,
-        contentColumn: "description",
-        targetColumn: "embedding",
+        contentColumn: 'description',
+        targetColumn: 'embedding',
         priority: 5,
       });
     }
@@ -113,9 +116,9 @@ export async function ingestPrismMatter(matter: PrismMatterSummary, tenantId?: s
       docId: `prism_matter_${matter.id}`,
       title: matter.title,
       content: description,
-      domain: "prism",
-      sourceType: "case_memory",
-      tags: [matter.matterType, matter.status, "legal_matter"],
+      domain: 'prism',
+      sourceType: 'case_memory',
+      tags: [matter.matterType, matter.status, 'legal_matter'],
       importance: 7,
       extraMetadata: { orgId: tenantId ?? String(matter.orgId) },
     });
@@ -141,25 +144,30 @@ export interface TerraPropertySummary {
  * Ingest a Terra real estate property into the knowledge graph.
  * Call this when a terra_properties row is created or updated.
  */
-export async function ingestTerraProperty(property: TerraPropertySummary, tenantId?: string): Promise<void> {
+export async function ingestTerraProperty(
+  property: TerraPropertySummary,
+  tenantId?: string,
+): Promise<void> {
   if (!tenantId) {
-    console.warn(`[domain-embedding-hooks] ingestTerraProperty skipped — no tenant context for property id=${property.id}. Global artifact creation is not permitted from route-level hooks.`);
+    console.warn(
+      `[domain-embedding-hooks] ingestTerraProperty skipped — no tenant context for property id=${property.id}. Global artifact creation is not permitted from route-level hooks.`,
+    );
     return;
   }
   try {
     const description = [
-      `Property at ${property.address}, ${property.city}, ${property.state}${property.zipCode ? ` ${property.zipCode}` : ""}`,
+      `Property at ${property.address}, ${property.city}, ${property.state}${property.zipCode ? ` ${property.zipCode}` : ''}`,
       property.propertyType ? `Type: ${property.propertyType}` : null,
       property.ownerName ? `Owner: ${property.ownerName}` : null,
       property.currentValue ? `Value: $${property.currentValue.toLocaleString()}` : null,
     ]
       .filter(Boolean)
-      .join(". ");
+      .join('. ');
 
     const entityId = await upsertEntity({
       name: `${property.address}, ${property.city}`,
-      entityType: "real_estate_property",
-      domain: "terra",
+      entityType: 'real_estate_property',
+      domain: 'terra',
       subDomain: property.propertyType ?? undefined,
       description,
       canonicalId: `terra_property_${property.id}`,
@@ -177,10 +185,10 @@ export async function ingestTerraProperty(property: TerraPropertySummary, tenant
 
     if (description && entityId) {
       await scheduleEmbeddingTask({
-        targetTable: "kg_entities",
+        targetTable: 'kg_entities',
         targetId: entityId,
-        contentColumn: "description",
-        targetColumn: "embedding",
+        contentColumn: 'description',
+        targetColumn: 'embedding',
         priority: 5,
       });
     }
@@ -189,14 +197,17 @@ export async function ingestTerraProperty(property: TerraPropertySummary, tenant
       docId: `terra_property_${property.id}`,
       title: `${property.address}, ${property.city}, ${property.state}`,
       content: description,
-      domain: "terra",
-      sourceType: "document",
-      tags: ["real_estate", property.propertyType ?? "property", property.state],
+      domain: 'terra',
+      sourceType: 'document',
+      tags: ['real_estate', property.propertyType ?? 'property', property.state],
       importance: 6,
       extraMetadata: tenantId ? { orgId: tenantId } : undefined,
     });
   } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest Terra property id=${property.id}:`, err);
+    console.error(
+      `[domain-embedding-hooks] Failed to ingest Terra property id=${property.id}:`,
+      err,
+    );
   }
 }
 
@@ -215,29 +226,36 @@ export interface AegisIncidentSummary {
  * Ingest an Aegis security incident into the knowledge graph.
  * Call this when a security incident is created or updated.
  */
-export async function ingestAegisIncident(incident: AegisIncidentSummary, tenantId?: string): Promise<void> {
+export async function ingestAegisIncident(
+  incident: AegisIncidentSummary,
+  tenantId?: string,
+): Promise<void> {
   if (!tenantId) {
-    console.warn(`[domain-embedding-hooks] ingestAegisIncident skipped — no tenant context for incident id=${incident.id}`);
+    console.warn(
+      `[domain-embedding-hooks] ingestAegisIncident skipped — no tenant context for incident id=${incident.id}`,
+    );
     return;
   }
   try {
     const description = [
       `${incident.incidentType} incident — severity: ${incident.severity}`,
       incident.description ?? null,
-      incident.affectedSystems?.length ? `Affected systems: ${incident.affectedSystems.join(", ")}` : null,
+      incident.affectedSystems?.length
+        ? `Affected systems: ${incident.affectedSystems.join(', ')}`
+        : null,
     ]
       .filter(Boolean)
-      .join(". ");
+      .join('. ');
 
     const entityId = await upsertEntity({
       name: incident.title,
-      entityType: "security_incident",
-      domain: "aegis",
+      entityType: 'security_incident',
+      domain: 'aegis',
       subDomain: incident.incidentType,
       description,
       canonicalId: `aegis_incident_${incident.id}`,
       sourceIds: [`aegis_incidents:${incident.id}`],
-      confidence: incident.severity === "critical" ? 1.0 : 0.85,
+      confidence: incident.severity === 'critical' ? 1.0 : 0.85,
       properties: {
         incidentId: incident.id,
         incidentType: incident.incidentType,
@@ -249,10 +267,10 @@ export async function ingestAegisIncident(incident: AegisIncidentSummary, tenant
 
     if (description && entityId) {
       await scheduleEmbeddingTask({
-        targetTable: "kg_entities",
+        targetTable: 'kg_entities',
         targetId: entityId,
-        contentColumn: "description",
-        targetColumn: "embedding",
+        contentColumn: 'description',
+        targetColumn: 'embedding',
         priority: 2,
       });
     }
@@ -261,14 +279,17 @@ export async function ingestAegisIncident(incident: AegisIncidentSummary, tenant
       docId: `aegis_incident_${incident.id}`,
       title: incident.title,
       content: description,
-      domain: "aegis",
-      sourceType: "incident",
-      tags: [incident.incidentType, incident.severity, "security"],
-      importance: incident.severity === "critical" ? 10 : 7,
+      domain: 'aegis',
+      sourceType: 'incident',
+      tags: [incident.incidentType, incident.severity, 'security'],
+      importance: incident.severity === 'critical' ? 10 : 7,
       extraMetadata: tenantId ? { orgId: tenantId } : undefined,
     });
   } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest Aegis incident id=${incident.id}:`, err);
+    console.error(
+      `[domain-embedding-hooks] Failed to ingest Aegis incident id=${incident.id}:`,
+      err,
+    );
   }
 }
 
@@ -286,9 +307,14 @@ export interface CarlotaServiceSummary {
  * Ingest a Carlota Jo consulting service into the knowledge graph.
  * Call this when a carlota_services row is created or updated.
  */
-export async function ingestCarlotaService(service: CarlotaServiceSummary, tenantId?: string): Promise<void> {
+export async function ingestCarlotaService(
+  service: CarlotaServiceSummary,
+  tenantId?: string,
+): Promise<void> {
   if (!tenantId) {
-    console.warn(`[domain-embedding-hooks] ingestCarlotaService skipped — no tenant context for service id=${service.id}`);
+    console.warn(
+      `[domain-embedding-hooks] ingestCarlotaService skipped — no tenant context for service id=${service.id}`,
+    );
     return;
   }
   try {
@@ -298,12 +324,12 @@ export async function ingestCarlotaService(service: CarlotaServiceSummary, tenan
       service.category ? `Category: ${service.category}` : null,
     ]
       .filter(Boolean)
-      .join(". ");
+      .join('. ');
 
     const entityId = await upsertEntity({
       name: service.name,
-      entityType: "consulting_service",
-      domain: "carlota_jo",
+      entityType: 'consulting_service',
+      domain: 'carlota_jo',
       subDomain: service.category ?? undefined,
       description,
       canonicalId: `carlota_service_${service.id}`,
@@ -318,15 +344,18 @@ export async function ingestCarlotaService(service: CarlotaServiceSummary, tenan
 
     if (description && entityId) {
       await scheduleEmbeddingTask({
-        targetTable: "kg_entities",
+        targetTable: 'kg_entities',
         targetId: entityId,
-        contentColumn: "description",
-        targetColumn: "embedding",
+        contentColumn: 'description',
+        targetColumn: 'embedding',
         priority: 6,
       });
     }
   } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest Carlota Jo service id=${service.id}:`, err);
+    console.error(
+      `[domain-embedding-hooks] Failed to ingest Carlota Jo service id=${service.id}:`,
+      err,
+    );
   }
 }
 
@@ -344,10 +373,15 @@ export interface LyteSystemSummary {
 /**
  * Ingest a Lyte system or AIOps entity into the knowledge graph.
  */
-export async function ingestLyteSystem(system: LyteSystemSummary, tenantId?: string): Promise<void> {
+export async function ingestLyteSystem(
+  system: LyteSystemSummary,
+  tenantId?: string,
+): Promise<void> {
   const effectiveTenantId = tenantId ?? (system.orgId != null ? String(system.orgId) : undefined);
   if (!effectiveTenantId) {
-    console.warn(`[domain-embedding-hooks] ingestLyteSystem skipped — no tenant context for system id=${system.id}`);
+    console.warn(
+      `[domain-embedding-hooks] ingestLyteSystem skipped — no tenant context for system id=${system.id}`,
+    );
     return;
   }
   try {
@@ -357,16 +391,16 @@ export async function ingestLyteSystem(system: LyteSystemSummary, tenantId?: str
       system.health ? `Health: ${system.health}` : null,
     ]
       .filter(Boolean)
-      .join(". ");
+      .join('. ');
 
     const entityId = await upsertEntity({
       name: system.name,
-      entityType: "system",
-      domain: "lyte",
+      entityType: 'system',
+      domain: 'lyte',
       subDomain: system.systemType,
       description,
       canonicalId: `lyte_system_${system.id}`,
-      sourceIds: [`lyte_systems:${system.id}${system.orgId ? `:org:${system.orgId}` : ""}`],
+      sourceIds: [`lyte_systems:${system.id}${system.orgId ? `:org:${system.orgId}` : ''}`],
       properties: {
         systemId: system.id,
         systemType: system.systemType,
@@ -378,10 +412,10 @@ export async function ingestLyteSystem(system: LyteSystemSummary, tenantId?: str
 
     if (description && entityId) {
       await scheduleEmbeddingTask({
-        targetTable: "kg_entities",
+        targetTable: 'kg_entities',
         targetId: entityId,
-        contentColumn: "description",
-        targetColumn: "embedding",
+        contentColumn: 'description',
+        targetColumn: 'embedding',
         priority: 5,
       });
     }
@@ -404,9 +438,14 @@ export interface FirestormFindingSummary {
   recommendation?: string | null;
 }
 
-export async function ingestFirestormFinding(finding: FirestormFindingSummary, tenantId?: string): Promise<void> {
+export async function ingestFirestormFinding(
+  finding: FirestormFindingSummary,
+  tenantId?: string,
+): Promise<void> {
   if (!tenantId) {
-    console.warn(`[domain-embedding-hooks] ingestFirestormFinding skipped — no tenant context for finding id=${finding.id}`);
+    console.warn(
+      `[domain-embedding-hooks] ingestFirestormFinding skipped — no tenant context for finding id=${finding.id}`,
+    );
     return;
   }
   try {
@@ -416,35 +455,49 @@ export async function ingestFirestormFinding(finding: FirestormFindingSummary, t
       finding.recommendation ? `Recommendation: ${finding.recommendation}` : null,
       finding.affectedAsset ? `Affected asset: ${finding.affectedAsset}` : null,
     ].filter(Boolean);
-    const description = parts.join(". ") || `${finding.severity} finding: ${finding.title}`;
+    const description = parts.join('. ') || `${finding.severity} finding: ${finding.title}`;
 
     const entityId = await upsertEntity({
       name: finding.title,
-      entityType: "security_finding",
-      domain: "aegis",
-      subDomain: finding.category ?? "finding",
+      entityType: 'security_finding',
+      domain: 'aegis',
+      subDomain: finding.category ?? 'finding',
       description,
       canonicalId: `firestorm_finding_${finding.id}`,
       sourceIds: [`firestorm_findings:${finding.id}`],
-      confidence: finding.severity === "critical" ? 1.0 : 0.8,
-      properties: { findingId: finding.id, severity: finding.severity, status: finding.status, affectedAsset: finding.affectedAsset },
+      confidence: finding.severity === 'critical' ? 1.0 : 0.8,
+      properties: {
+        findingId: finding.id,
+        severity: finding.severity,
+        status: finding.status,
+        affectedAsset: finding.affectedAsset,
+      },
       tenantId,
     });
     if (description && entityId) {
-      await scheduleEmbeddingTask({ targetTable: "kg_entities", targetId: entityId, contentColumn: "description", targetColumn: "embedding", priority: 2 });
+      await scheduleEmbeddingTask({
+        targetTable: 'kg_entities',
+        targetId: entityId,
+        contentColumn: 'description',
+        targetColumn: 'embedding',
+        priority: 2,
+      });
     }
     await ingestDocument({
       docId: `firestorm_finding_${finding.id}`,
       title: finding.title,
       content: description,
-      domain: "aegis",
-      sourceType: "security_finding",
-      tags: [finding.severity, finding.status, "firestorm", "finding"],
-      importance: finding.severity === "critical" ? 10 : finding.severity === "high" ? 8 : 5,
+      domain: 'aegis',
+      sourceType: 'security_finding',
+      tags: [finding.severity, finding.status, 'firestorm', 'finding'],
+      importance: finding.severity === 'critical' ? 10 : finding.severity === 'high' ? 8 : 5,
       extraMetadata: tenantId ? { orgId: tenantId } : undefined,
     });
   } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest Firestorm finding id=${finding.id}:`, err);
+    console.error(
+      `[domain-embedding-hooks] Failed to ingest Firestorm finding id=${finding.id}:`,
+      err,
+    );
   }
 }
 
@@ -458,9 +511,14 @@ export interface FirestormScenarioSummary {
   mitreTechnique?: string | null;
 }
 
-export async function ingestFirestormScenario(scenario: FirestormScenarioSummary, tenantId?: string): Promise<void> {
+export async function ingestFirestormScenario(
+  scenario: FirestormScenarioSummary,
+  tenantId?: string,
+): Promise<void> {
   if (!tenantId) {
-    console.warn(`[domain-embedding-hooks] ingestFirestormScenario skipped — no tenant context for scenario id=${scenario.id}`);
+    console.warn(
+      `[domain-embedding-hooks] ingestFirestormScenario skipped — no tenant context for scenario id=${scenario.id}`,
+    );
     return;
   }
   try {
@@ -469,35 +527,51 @@ export async function ingestFirestormScenario(scenario: FirestormScenarioSummary
       scenario.attackVector ? `Attack vector: ${scenario.attackVector}` : null,
       scenario.mitreTechnique ? `MITRE technique: ${scenario.mitreTechnique}` : null,
     ].filter(Boolean);
-    const description = parts.join(". ") || `${scenario.severity} ${scenario.category} threat scenario: ${scenario.name}`;
+    const description =
+      parts.join('. ') ||
+      `${scenario.severity} ${scenario.category} threat scenario: ${scenario.name}`;
 
     const entityId = await upsertEntity({
       name: scenario.name,
-      entityType: "threat_scenario",
-      domain: "aegis",
+      entityType: 'threat_scenario',
+      domain: 'aegis',
       subDomain: scenario.category,
       description,
       canonicalId: `firestorm_scenario_${scenario.id}`,
       sourceIds: [`firestorm_scenarios:${scenario.id}`],
       confidence: 0.9,
-      properties: { scenarioId: scenario.id, category: scenario.category, severity: scenario.severity, mitreTechnique: scenario.mitreTechnique },
+      properties: {
+        scenarioId: scenario.id,
+        category: scenario.category,
+        severity: scenario.severity,
+        mitreTechnique: scenario.mitreTechnique,
+      },
       tenantId,
     });
     if (description && entityId) {
-      await scheduleEmbeddingTask({ targetTable: "kg_entities", targetId: entityId, contentColumn: "description", targetColumn: "embedding", priority: 3 });
+      await scheduleEmbeddingTask({
+        targetTable: 'kg_entities',
+        targetId: entityId,
+        contentColumn: 'description',
+        targetColumn: 'embedding',
+        priority: 3,
+      });
     }
     await ingestDocument({
       docId: `firestorm_scenario_${scenario.id}`,
       title: scenario.name,
       content: description,
-      domain: "aegis",
-      sourceType: "threat_scenario",
-      tags: [scenario.category, scenario.severity, "firestorm", "scenario"],
-      importance: scenario.severity === "critical" ? 9 : 6,
+      domain: 'aegis',
+      sourceType: 'threat_scenario',
+      tags: [scenario.category, scenario.severity, 'firestorm', 'scenario'],
+      importance: scenario.severity === 'critical' ? 9 : 6,
       extraMetadata: tenantId ? { orgId: tenantId } : undefined,
     });
   } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest Firestorm scenario id=${scenario.id}:`, err);
+    console.error(
+      `[domain-embedding-hooks] Failed to ingest Firestorm scenario id=${scenario.id}:`,
+      err,
+    );
   }
 }
 
@@ -511,9 +585,14 @@ export interface FirestormAlertSummary {
   relatedCve?: string | null;
 }
 
-export async function ingestFirestormAlert(alert: FirestormAlertSummary, tenantId?: string): Promise<void> {
+export async function ingestFirestormAlert(
+  alert: FirestormAlertSummary,
+  tenantId?: string,
+): Promise<void> {
   if (!tenantId) {
-    console.warn(`[domain-embedding-hooks] ingestFirestormAlert skipped — no tenant context for alert id=${alert.id}`);
+    console.warn(
+      `[domain-embedding-hooks] ingestFirestormAlert skipped — no tenant context for alert id=${alert.id}`,
+    );
     return;
   }
   try {
@@ -522,31 +601,43 @@ export async function ingestFirestormAlert(alert: FirestormAlertSummary, tenantI
       alert.relatedCve ? `Related CVE: ${alert.relatedCve}` : null,
       `Source: ${alert.source}`,
     ].filter(Boolean);
-    const description = parts.join(". ") || `${alert.severity} security alert: ${alert.title}`;
+    const description = parts.join('. ') || `${alert.severity} security alert: ${alert.title}`;
 
     const entityId = await upsertEntity({
       name: alert.title,
-      entityType: "security_alert",
-      domain: "aegis",
+      entityType: 'security_alert',
+      domain: 'aegis',
       subDomain: alert.source,
       description,
       canonicalId: `firestorm_alert_${alert.id}`,
       sourceIds: [`firestorm_alerts:${alert.id}`],
-      confidence: alert.severity === "critical" ? 1.0 : 0.85,
-      properties: { alertId: alert.id, severity: alert.severity, status: alert.status, relatedCve: alert.relatedCve, source: alert.source },
+      confidence: alert.severity === 'critical' ? 1.0 : 0.85,
+      properties: {
+        alertId: alert.id,
+        severity: alert.severity,
+        status: alert.status,
+        relatedCve: alert.relatedCve,
+        source: alert.source,
+      },
       tenantId,
     });
     if (description && entityId) {
-      await scheduleEmbeddingTask({ targetTable: "kg_entities", targetId: entityId, contentColumn: "description", targetColumn: "embedding", priority: 1 });
+      await scheduleEmbeddingTask({
+        targetTable: 'kg_entities',
+        targetId: entityId,
+        contentColumn: 'description',
+        targetColumn: 'embedding',
+        priority: 1,
+      });
     }
     await ingestDocument({
       docId: `firestorm_alert_${alert.id}`,
       title: alert.title,
       content: description,
-      domain: "aegis",
-      sourceType: "security_alert",
-      tags: [alert.severity, alert.source, "firestorm", "alert"],
-      importance: alert.severity === "critical" ? 10 : alert.severity === "high" ? 8 : 6,
+      domain: 'aegis',
+      sourceType: 'security_alert',
+      tags: [alert.severity, alert.source, 'firestorm', 'alert'],
+      importance: alert.severity === 'critical' ? 10 : alert.severity === 'high' ? 8 : 6,
       extraMetadata: tenantId ? { orgId: tenantId } : undefined,
     });
   } catch (err) {
@@ -577,7 +668,7 @@ export async function linkDomainEntities(opts: {
       toDomain: opts.toDomain,
       relationshipType: opts.relationshipType,
       strength: opts.strength ?? 0.8,
-      detectedBy: opts.detectedBy ?? "domain_hook",
+      detectedBy: opts.detectedBy ?? 'domain_hook',
     });
   } catch (err) {
     console.error(`[domain-embedding-hooks] Failed to link entities:`, err);

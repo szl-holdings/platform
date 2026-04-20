@@ -1,10 +1,10 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { authMiddleware } from "../middlewares/auth";
-import { handleRouteError } from "../lib/api-response";
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { handleRouteError } from '../lib/api-response';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-type ThreatLevel = "CLEAR" | "ELEVATED" | "ACTIVE" | "CRITICAL";
+type ThreatLevel = 'CLEAR' | 'ELEVATED' | 'ACTIVE' | 'CRITICAL';
 
 function computeStatus() {
   const now = Date.now();
@@ -23,14 +23,14 @@ function computeStatus() {
 
   let threatLevel: ThreatLevel;
   if (pendingApproval > 0 && activeRemediation > 0) {
-    threatLevel = "ACTIVE";
+    threatLevel = 'ACTIVE';
   } else if (activeRemediation > 0) {
-    threatLevel = "ELEVATED";
+    threatLevel = 'ELEVATED';
   } else {
-    threatLevel = "CLEAR";
+    threatLevel = 'CLEAR';
   }
 
-  const uptime = 99.97 - (baseNoise * 0.05);
+  const uptime = 99.97 - baseNoise * 0.05;
   const activeAgents = 12 + Math.floor(baseNoise * 4);
   const p95LatencyMs = Math.round(38 + baseNoise * 22);
 
@@ -51,13 +51,13 @@ function computeStatus() {
 }
 
 router.get(
-  "/infrastructure/status",
+  '/infrastructure/status',
   authMiddleware({ required: false }),
   (_req: Request, res: Response) => {
     try {
       res.json(computeStatus());
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch infrastructure status");
+      handleRouteError(res, err, 'Failed to fetch infrastructure status');
     }
   },
 );

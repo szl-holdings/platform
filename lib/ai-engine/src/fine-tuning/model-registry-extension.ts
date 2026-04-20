@@ -5,9 +5,8 @@
  * with automatic fallback to base models when not available.
  */
 
-import { db } from "@szl-holdings/db";
-import { fineTunedModelRegistry, fineTuningJobs } from "@szl-holdings/db";
-import { eq, and, desc } from "drizzle-orm";
+import { db, fineTunedModelRegistry, fineTuningJobs } from '@szl-holdings/db';
+import { and, desc, eq } from 'drizzle-orm';
 
 export interface FineTunedModelInfo {
   modelId: string;
@@ -15,7 +14,7 @@ export interface FineTunedModelInfo {
   jobId: string;
   baseModel: string;
   provider: string;
-  lifecycle: "staging" | "canary" | "active" | "deprecated";
+  lifecycle: 'staging' | 'canary' | 'active' | 'deprecated';
   evalPassRate: number;
   datasetVersion: string;
   costPer1kInput?: number;
@@ -29,9 +28,9 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 
 export async function getActiveFineTunedModel(
   agentId: string,
-  requiredLifecycle: Array<"staging" | "canary" | "active"> = ["active", "canary"],
+  requiredLifecycle: Array<'staging' | 'canary' | 'active'> = ['active', 'canary'],
 ): Promise<FineTunedModelInfo | null> {
-  const cacheKey = `${agentId}:${requiredLifecycle.join(",")}`;
+  const cacheKey = `${agentId}:${requiredLifecycle.join(',')}`;
   const cached = _modelCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return cached.model;
 
@@ -39,16 +38,15 @@ export async function getActiveFineTunedModel(
     const models = await db
       .select()
       .from(fineTunedModelRegistry)
-      .where(and(
-        eq(fineTunedModelRegistry.agentId, agentId),
-        eq(fineTunedModelRegistry.isActive, true),
-      ))
+      .where(
+        and(eq(fineTunedModelRegistry.agentId, agentId), eq(fineTunedModelRegistry.isActive, true)),
+      )
       .orderBy(desc(fineTunedModelRegistry.registeredAt))
       .limit(10);
 
-    const eligible = models.filter(m =>
-      requiredLifecycle.includes(m.lifecycle as "staging" | "canary" | "active") &&
-      m.isActive
+    const eligible = models.filter(
+      (m) =>
+        requiredLifecycle.includes(m.lifecycle as 'staging' | 'canary' | 'active') && m.isActive,
     );
 
     if (eligible.length === 0) return null;
@@ -68,7 +66,7 @@ export async function getActiveFineTunedModel(
       jobId: best.jobId,
       baseModel: best.baseModel,
       provider: best.provider,
-      lifecycle: best.lifecycle as FineTunedModelInfo["lifecycle"],
+      lifecycle: best.lifecycle as FineTunedModelInfo['lifecycle'],
       evalPassRate: best.evalPassRate ?? 0,
       datasetVersion: best.datasetVersion,
       costPer1kInput: best.costPer1kInput ?? undefined,
@@ -89,7 +87,7 @@ export async function resolveModelForAgent(
   baseModel: string,
   options?: {
     preferFineTuned?: boolean;
-    minLifecycle?: "staging" | "canary" | "active";
+    minLifecycle?: 'staging' | 'canary' | 'active';
   },
 ): Promise<{
   model: string;
@@ -103,10 +101,12 @@ export async function resolveModelForAgent(
     return { model: baseModel, provider: detectProvider(baseModel), isFineTuned: false };
   }
 
-  const lifecyclePriority: Array<"staging" | "canary" | "active"> =
-    options?.minLifecycle === "active" ? ["active"]
-    : options?.minLifecycle === "canary" ? ["active", "canary"]
-    : ["active", "canary", "staging"];
+  const lifecyclePriority: Array<'staging' | 'canary' | 'active'> =
+    options?.minLifecycle === 'active'
+      ? ['active']
+      : options?.minLifecycle === 'canary'
+        ? ['active', 'canary']
+        : ['active', 'canary', 'staging'];
 
   const fineTuned = await getActiveFineTunedModel(agentId, lifecyclePriority);
 
@@ -129,13 +129,13 @@ export async function getAllFineTunedModels(): Promise<FineTunedModelInfo[]> {
     .where(eq(fineTunedModelRegistry.isActive, true))
     .orderBy(desc(fineTunedModelRegistry.registeredAt));
 
-  return models.map(m => ({
+  return models.map((m) => ({
     modelId: m.modelId,
     agentId: m.agentId,
     jobId: m.jobId,
     baseModel: m.baseModel,
     provider: m.provider,
-    lifecycle: m.lifecycle as FineTunedModelInfo["lifecycle"],
+    lifecycle: m.lifecycle as FineTunedModelInfo['lifecycle'],
     evalPassRate: m.evalPassRate ?? 0,
     datasetVersion: m.datasetVersion,
     costPer1kInput: m.costPer1kInput ?? undefined,
@@ -147,9 +147,10 @@ export async function getAllFineTunedModels(): Promise<FineTunedModelInfo[]> {
 
 export async function deprecateFineTunedModel(modelId: string): Promise<void> {
   invalidateModelCache();
-  await db.update(fineTunedModelRegistry)
+  await db
+    .update(fineTunedModelRegistry)
     .set({
-      lifecycle: "deprecated",
+      lifecycle: 'deprecated',
       isActive: false,
       deprecatedAt: new Date(),
     })
@@ -171,7 +172,6 @@ export async function getModelLineage(modelId: string): Promise<{
   baseModelName: string;
   jobHistory: Array<{ jobId: string; status: string; submittedAt: string; datasetVersion: string }>;
 }> {
-
   const [model] = await db
     .select()
     .from(fineTunedModelRegistry)
@@ -179,7 +179,7 @@ export async function getModelLineage(modelId: string): Promise<{
     .limit(1);
 
   if (!model) {
-    return { model: null, baseModelName: "", jobHistory: [] };
+    return { model: null, baseModelName: '', jobHistory: [] };
   }
 
   const jobs = await db
@@ -196,7 +196,7 @@ export async function getModelLineage(modelId: string): Promise<{
       jobId: model.jobId,
       baseModel: model.baseModel,
       provider: model.provider,
-      lifecycle: model.lifecycle as FineTunedModelInfo["lifecycle"],
+      lifecycle: model.lifecycle as FineTunedModelInfo['lifecycle'],
       evalPassRate: model.evalPassRate ?? 0,
       datasetVersion: model.datasetVersion,
       costPer1kInput: model.costPer1kInput ?? undefined,
@@ -205,7 +205,7 @@ export async function getModelLineage(modelId: string): Promise<{
       promotedAt: model.promotedAt?.toISOString(),
     },
     baseModelName: model.baseModel,
-    jobHistory: jobs.map(j => ({
+    jobHistory: jobs.map((j) => ({
       jobId: j.jobId,
       status: j.status,
       submittedAt: j.submittedAt.toISOString(),
@@ -215,8 +215,8 @@ export async function getModelLineage(modelId: string): Promise<{
 }
 
 function detectProvider(model: string): string {
-  if (model.startsWith("gpt") || model.startsWith("ft:")) return "openai";
-  if (model.startsWith("claude")) return "anthropic";
-  if (model.startsWith("gemini")) return "gemini";
-  return "huggingface";
+  if (model.startsWith('gpt') || model.startsWith('ft:')) return 'openai';
+  if (model.startsWith('claude')) return 'anthropic';
+  if (model.startsWith('gemini')) return 'gemini';
+  return 'huggingface';
 }

@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
-import { Platform } from "react-native";
+import type React from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 
 export interface NotificationPreferences {
   enabled: boolean;
@@ -30,18 +31,18 @@ function getApiBase(): string {
   if (process.env.EXPO_PUBLIC_DOMAIN) {
     return `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`;
   }
-  return "/api";
+  return '/api';
 }
 
 async function getAuthToken(): Promise<string | null> {
   try {
-    if (Platform.OS === "web") {
-      return typeof window !== "undefined"
-        ? window.localStorage.getItem("lyte_session_token")
+    if (Platform.OS === 'web') {
+      return typeof window !== 'undefined'
+        ? window.localStorage.getItem('lyte_session_token')
         : null;
     }
-    const SecureStore = await import("expo-secure-store");
-    return SecureStore.getItemAsync("lyte_session_token");
+    const SecureStore = await import('expo-secure-store');
+    return SecureStore.getItemAsync('lyte_session_token');
   } catch {
     return null;
   }
@@ -52,19 +53,18 @@ async function registerPushTokenWithBackend(token: string): Promise<void> {
     const authToken = await getAuthToken();
     if (!authToken) return;
     await fetch(`${getApiBase()}/push-tokens`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
         token,
         platform: Platform.OS,
-        appId: "lyte-mobile",
+        appId: 'lyte-mobile',
       }),
     });
-  } catch {
-  }
+  } catch {}
 }
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
@@ -80,19 +80,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const responseListenerRef = useRef<any>(null);
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
-    if (Platform.OS === "web") {
+    if (Platform.OS === 'web') {
       setPermissionGranted(false);
       return false;
     }
     try {
-      const Notifications = await import("expo-notifications");
+      const Notifications = await import('expo-notifications');
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
-      if (existingStatus !== "granted") {
+      if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
-      const granted = finalStatus === "granted";
+      const granted = finalStatus === 'granted';
       setPermissionGranted(granted);
       if (granted) {
         try {
@@ -110,26 +110,29 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, []);
 
-  const sendLocalNotification = useCallback(async (title: string, body: string) => {
-    if (Platform.OS === "web" || !permissionGranted || !preferences.enabled) return;
-    try {
-      const Notifications = await import("expo-notifications");
-      await Notifications.scheduleNotificationAsync({
-        content: { title, body, sound: true },
-        trigger: null,
-      });
-    } catch {}
-  }, [permissionGranted, preferences.enabled]);
+  const sendLocalNotification = useCallback(
+    async (title: string, body: string) => {
+      if (Platform.OS === 'web' || !permissionGranted || !preferences.enabled) return;
+      try {
+        const Notifications = await import('expo-notifications');
+        await Notifications.scheduleNotificationAsync({
+          content: { title, body, sound: true },
+          trigger: null,
+        });
+      } catch {}
+    },
+    [permissionGranted, preferences.enabled],
+  );
 
   useEffect(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === 'web') return;
     const setup = async () => {
       try {
-        const { setupAndroidNotificationChannels } = await import("@/lib/notifications");
+        const { setupAndroidNotificationChannels } = await import('@/lib/notifications');
         await setupAndroidNotificationChannels();
       } catch {}
       try {
-        const Notifications = await import("expo-notifications");
+        const Notifications = await import('expo-notifications');
         Notifications.setNotificationHandler({
           handleNotification: async () => ({
             shouldShowAlert: true,
@@ -140,7 +143,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           }),
         });
         const { status } = await Notifications.getPermissionsAsync();
-        const granted = status === "granted";
+        const granted = status === 'granted';
         setPermissionGranted(granted);
         if (granted) {
           try {
@@ -150,19 +153,24 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             await registerPushTokenWithBackend(token);
           } catch {}
           listenerRef.current = Notifications.addNotificationReceivedListener(() => {});
-          responseListenerRef.current = Notifications.addNotificationResponseReceivedListener((response) => {
-            try {
-              const data = (response.notification.request.content.data ?? {}) as Record<string, unknown>;
-              const type = typeof data.type === "string" ? data.type : null;
-              const deepLink = typeof data.deepLink === "string" ? data.deepLink : null;
-              const { router } = require("expo-router");
-              if (deepLink) {
-                router.push(deepLink);
-              } else if (type === "daily_digest") {
-                router.push("/(shell)/intelligence/pulse");
-              }
-            } catch {}
-          });
+          responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
+            (response) => {
+              try {
+                const data = (response.notification.request.content.data ?? {}) as Record<
+                  string,
+                  unknown
+                >;
+                const type = typeof data.type === 'string' ? data.type : null;
+                const deepLink = typeof data.deepLink === 'string' ? data.deepLink : null;
+                const { router } = require('expo-router');
+                if (deepLink) {
+                  router.push(deepLink);
+                } else if (type === 'daily_digest') {
+                  router.push('/(shell)/intelligence/pulse');
+                }
+              } catch {}
+            },
+          );
         }
       } catch {}
     };
@@ -174,7 +182,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <NotificationContext.Provider value={{ permissionGranted, expoPushToken, preferences, setPreferences, requestPermission, sendLocalNotification }}>
+    <NotificationContext.Provider
+      value={{
+        permissionGranted,
+        expoPushToken,
+        preferences,
+        setPreferences,
+        requestPermission,
+        sendLocalNotification,
+      }}
+    >
       {children}
     </NotificationContext.Provider>
   );

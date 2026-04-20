@@ -1,7 +1,7 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
-import { InspectorTabs, type InspectorTab } from "../layout/InspectorTabs.js";
+import React, { type ReactNode } from 'react';
+import { type InspectorTab, InspectorTabs } from '../layout/InspectorTabs.js';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface DetailDrawerProps {
   open: boolean;
@@ -21,7 +21,7 @@ export function DetailDrawer({
   subtitle,
   tabs,
   children,
-  width = "480px",
+  width = '480px',
   className,
 }: DetailDrawerProps) {
   if (!open) return null;
@@ -30,11 +30,11 @@ export function DetailDrawer({
     <>
       <div
         className="fixed inset-0 z-40"
-        style={{ background: "rgba(6,11,18,0.5)" }}
+        style={{ background: 'rgba(6,11,18,0.5)' }}
         onClick={onClose}
       />
       <aside
-        className={cn("fixed right-0 top-0 bottom-0 z-50 flex flex-col shadow-2xl", className)}
+        className={cn('fixed right-0 top-0 bottom-0 z-50 flex flex-col shadow-2xl', className)}
         style={{
           width,
           background: color.bg.surface,
@@ -63,10 +63,10 @@ export function DetailDrawer({
             onClick={onClose}
             style={{
               color: color.text.muted,
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "18px",
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '18px',
               lineHeight: 1,
               flexShrink: 0,
             }}

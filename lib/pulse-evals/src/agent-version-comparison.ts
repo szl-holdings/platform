@@ -9,15 +9,18 @@
  * Per spec: docs/AGENT_EVAL_AND_REPLAY.md
  */
 
+import {
+  PROMOTION_AGGREGATE_THRESHOLD,
+  PROMOTION_SAFETY_FLAG_REQUIREMENT,
+} from './agent-eval-promotion.js';
 import type {
   AgentEvalRunRecord,
-  VersionComparisonRecord,
   DimensionDelta,
-  RegressionAnalysis,
   EvalDimensionScores,
   PromotionDecision,
-} from "./agent-eval-types.js";
-import { PROMOTION_AGGREGATE_THRESHOLD, PROMOTION_SAFETY_FLAG_REQUIREMENT } from "./agent-eval-promotion.js";
+  RegressionAnalysis,
+  VersionComparisonRecord,
+} from './agent-eval-types.js';
 
 const comparisonHistory: VersionComparisonRecord[] = [];
 
@@ -40,21 +43,21 @@ function computeRegressionAnalysis(
   candidateRun: AgentEvalRunRecord,
 ): RegressionAnalysis {
   const baselinePassed = new Set(
-    baselineRun.case_results.filter(r => r.passed).map(r => r.case_id),
+    baselineRun.case_results.filter((r) => r.passed).map((r) => r.case_id),
   );
   const baselineFailed = new Set(
-    baselineRun.case_results.filter(r => !r.passed).map(r => r.case_id),
+    baselineRun.case_results.filter((r) => !r.passed).map((r) => r.case_id),
   );
   const candidatePassed = new Set(
-    candidateRun.case_results.filter(r => r.passed).map(r => r.case_id),
+    candidateRun.case_results.filter((r) => r.passed).map((r) => r.case_id),
   );
   const candidateFailed = new Set(
-    candidateRun.case_results.filter(r => !r.passed).map(r => r.case_id),
+    candidateRun.case_results.filter((r) => !r.passed).map((r) => r.case_id),
   );
 
-  const new_failures = Array.from(baselinePassed).filter(id => candidateFailed.has(id));
-  const recovered_failures = Array.from(baselineFailed).filter(id => candidatePassed.has(id));
-  const unchanged_failures = Array.from(baselineFailed).filter(id => candidateFailed.has(id));
+  const new_failures = Array.from(baselinePassed).filter((id) => candidateFailed.has(id));
+  const recovered_failures = Array.from(baselineFailed).filter((id) => candidatePassed.has(id));
+  const unchanged_failures = Array.from(baselineFailed).filter((id) => candidateFailed.has(id));
 
   return { new_failures, recovered_failures, unchanged_failures };
 }
@@ -69,7 +72,7 @@ function buildPromotionNotes(
   const positives: string[] = [];
 
   if (candidateRun.dimension_scores.safety_flag < PROMOTION_SAFETY_FLAG_REQUIREMENT) {
-    issues.push("Safety flag violations detected — promotion blocked regardless of score.");
+    issues.push('Safety flag violations detected — promotion blocked regardless of score.');
   }
 
   if (candidateRun.aggregate_score < PROMOTION_AGGREGATE_THRESHOLD) {
@@ -80,13 +83,13 @@ function buildPromotionNotes(
 
   if (regression.new_failures.length > 0) {
     issues.push(
-      `${regression.new_failures.length} new regression(s): [${regression.new_failures.join(", ")}].`,
+      `${regression.new_failures.length} new regression(s): [${regression.new_failures.join(', ')}].`,
     );
   }
 
   if (regression.recovered_failures.length > 0) {
     positives.push(
-      `Candidate version recovers ${regression.recovered_failures.length} previously failing case(s): [${regression.recovered_failures.join(", ")}].`,
+      `Candidate version recovers ${regression.recovered_failures.length} previously failing case(s): [${regression.recovered_failures.join(', ')}].`,
     );
   }
 
@@ -98,20 +101,18 @@ function buildPromotionNotes(
 
   if (regression.unchanged_failures.length > 0) {
     positives.push(
-      `${regression.unchanged_failures.length} persistent failure(s) remain — flagged for next sprint: [${regression.unchanged_failures.join(", ")}].`,
+      `${regression.unchanged_failures.length} persistent failure(s) remain — flagged for next sprint: [${regression.unchanged_failures.join(', ')}].`,
     );
   }
 
   const blocked = issues.some(
-    i =>
-      i.includes("Safety flag") ||
-      i.includes("below required") ||
-      i.includes("regression"),
+    (i) => i.includes('Safety flag') || i.includes('below required') || i.includes('regression'),
   );
 
-  const recommendation: PromotionDecision = blocked ? "block" : "approve";
-  const notes = [...(positives.length > 0 ? positives : []), ...(issues.length > 0 ? issues : [])].join(" ") ||
-    "No significant changes detected between versions.";
+  const recommendation: PromotionDecision = blocked ? 'block' : 'approve';
+  const notes =
+    [...(positives.length > 0 ? positives : []), ...(issues.length > 0 ? issues : [])].join(' ') ||
+    'No significant changes detected between versions.';
 
   return { recommendation, notes };
 }
@@ -154,16 +155,15 @@ export function compareEvalRuns(
 }
 
 export function getVersionComparison(comparison_id: string): VersionComparisonRecord | undefined {
-  return comparisonHistory.find(c => c.comparison_id === comparison_id);
+  return comparisonHistory.find((c) => c.comparison_id === comparison_id);
 }
 
-export function listVersionComparisons(options: {
-  agent_id?: string;
-  limit?: number;
-} = {}): VersionComparisonRecord[] {
+export function listVersionComparisons(
+  options: { agent_id?: string; limit?: number } = {},
+): VersionComparisonRecord[] {
   let records = comparisonHistory;
   if (options.agent_id) {
-    records = records.filter(r => r.comparison_id.includes(options.agent_id!));
+    records = records.filter((r) => r.comparison_id.includes(options.agent_id!));
   }
   return records.slice(0, options.limit ?? 50);
 }
@@ -183,11 +183,11 @@ export function formatVersionComparisonReport(c: VersionComparisonRecord): strin
     `    format_compliance:      ${sign(c.dimension_deltas.format_compliance)}`,
     `    safety_flag:            ${sign(c.dimension_deltas.safety_flag)}`,
     `  Regression Analysis:`,
-    `    New Failures:       [${c.regression_analysis.new_failures.join(", ") || "none"}]`,
-    `    Recovered Failures: [${c.regression_analysis.recovered_failures.join(", ") || "none"}]`,
-    `    Unchanged Failures: [${c.regression_analysis.unchanged_failures.join(", ") || "none"}]`,
+    `    New Failures:       [${c.regression_analysis.new_failures.join(', ') || 'none'}]`,
+    `    Recovered Failures: [${c.regression_analysis.recovered_failures.join(', ') || 'none'}]`,
+    `    Unchanged Failures: [${c.regression_analysis.unchanged_failures.join(', ') || 'none'}]`,
     `  Promotion: ${c.promotion_recommendation.toUpperCase()}`,
     `  Notes: ${c.promotion_notes}`,
   ];
-  return lines.join("\n");
+  return lines.join('\n');
 }

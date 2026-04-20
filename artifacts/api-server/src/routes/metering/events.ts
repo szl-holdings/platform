@@ -1,58 +1,82 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
+  billingLineItemsTable,
+  costAllocationsTable,
   db,
+  invoicesTable,
   meteringEventsTable,
-  usageAggregatesTable,
-  rateCardsTable,
-  rateCardTiersTable,
-  rateCardAssignmentsTable,
+  organizationsTable,
   quotaConfigsTable,
   quotaViolationsTable,
-  costAllocationsTable,
-  billingLineItemsTable,
-  organizationsTable,
-  invoicesTable,
-  subscriptionsTable,
+  rateCardAssignmentsTable,
+  rateCardsTable,
+  rateCardTiersTable,
   revenueEventsTable,
-} from "@szl-holdings/db";
+  subscriptionsTable,
+  usageAggregatesTable,
+} from '@szl-holdings/db';
 import {
-  eq, desc, asc, and, gte, lte, sql, sum, count, avg, isNull, ne, inArray,
-} from "drizzle-orm";
+  and,
+  asc,
+  avg,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNull,
+  lte,
+  ne,
+  sql,
+  sum,
+} from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError,
-} from "../../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/auth";
-import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
-import { logger } from "../../lib/logger";
-import { periodBounds, computeCharge, recomputeAggregate, checkAndEnforceQuota, meteringRateLimit } from "./shared";
-import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
+  handleRouteError,
+  sendBadRequest,
+  sendError,
+  sendNotFound,
+  sendSuccess,
+} from '../../lib/api-response';
+import { logger } from '../../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
+import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
+import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
+import {
+  checkAndEnforceQuota,
+  computeCharge,
+  meteringRateLimit,
+  periodBounds,
+  recomputeAggregate,
+} from './shared';
 
 const router: IRouter = Router();
-const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
-const READ_ROLES = ["admin", "super_admin", "ops", "analyst"] as const;
+const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
+const READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. METERING EVENTS
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.post(
-  "/metering/events",
+  '/metering/events',
   authMiddleware({ required: false }),
-  validateBody(bodyShape({
-      "dimensions": z.unknown().optional(),
-      "eventType": z.unknown().optional(),
-      "featureKey": z.unknown().optional(),
-      "idempotencyKey": z.unknown().optional(),
-      "metadata": z.unknown().optional(),
-      "occurredAt": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "product": z.unknown().optional(),
-      "quantity": z.unknown().optional(),
-      "unitLabel": z.unknown().optional(),
-      "userId": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      dimensions: z.unknown().optional(),
+      eventType: z.unknown().optional(),
+      featureKey: z.unknown().optional(),
+      idempotencyKey: z.unknown().optional(),
+      metadata: z.unknown().optional(),
+      occurredAt: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      product: z.unknown().optional(),
+      quantity: z.unknown().optional(),
+      unitLabel: z.unknown().optional(),
+      userId: z.unknown().optional(),
+    }),
+  ),
   async (req: Request, res: Response) => {
     try {
       const {
@@ -82,7 +106,7 @@ router.post(
       };
 
       if (!orgId || !eventType || !featureKey) {
-        sendBadRequest(res, "orgId, eventType, and featureKey are required");
+        sendBadRequest(res, 'orgId, eventType, and featureKey are required');
         return;
       }
 
@@ -91,7 +115,7 @@ router.post(
       const quotaCheck = await checkAndEnforceQuota(orgId, featureKey, qty);
       if (!quotaCheck.allowed) {
         res.status(429).json({
-          error: "quota_exceeded",
+          error: 'quota_exceeded',
           message: quotaCheck.reason,
           violation: quotaCheck.violation,
           featureKey,
@@ -106,9 +130,9 @@ router.post(
           userId: userId ?? null,
           eventType,
           featureKey,
-          product: product ?? "platform",
+          product: product ?? 'platform',
           quantity: String(qty),
-          unitLabel: unitLabel ?? "unit",
+          unitLabel: unitLabel ?? 'unit',
           dimensions: dimensions ?? null,
           idempotencyKey: idempotencyKey ?? null,
           occurredAt: occurredAt ? new Date(occurredAt) : new Date(),
@@ -117,26 +141,28 @@ router.post(
         .onConflictDoNothing()
         .returning();
 
-      await recomputeAggregate(orgId, featureKey, product ?? "platform");
+      await recomputeAggregate(orgId, featureKey, product ?? 'platform');
 
       if (!event) {
-        sendSuccess(res, { status: "deduplicated", idempotencyKey });
+        sendSuccess(res, { status: 'deduplicated', idempotencyKey });
         return;
       }
 
-      sendSuccess(res, { status: "recorded", event });
+      sendSuccess(res, { status: 'recorded', event });
     } catch (err) {
-      handleRouteError(res, err, "Failed to record metering event");
+      handleRouteError(res, err, 'Failed to record metering event');
     }
   },
 );
 
 router.post(
-  "/metering/events/batch",
+  '/metering/events/batch',
   authMiddleware({ required: false }),
-  validateBody(bodyShape({
-      "events": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      events: z.unknown().optional(),
+    }),
+  ),
   async (req: Request, res: Response) => {
     try {
       const { events } = req.body as {
@@ -156,12 +182,12 @@ router.post(
       };
 
       if (!Array.isArray(events) || events.length === 0) {
-        sendBadRequest(res, "events array is required and must not be empty");
+        sendBadRequest(res, 'events array is required and must not be empty');
         return;
       }
 
       if (events.length > 500) {
-        sendBadRequest(res, "Batch size exceeds maximum of 500 events");
+        sendBadRequest(res, 'Batch size exceeds maximum of 500 events');
         return;
       }
 
@@ -170,9 +196,9 @@ router.post(
         userId: e.userId ?? null,
         eventType: e.eventType,
         featureKey: e.featureKey,
-        product: e.product ?? "platform",
+        product: e.product ?? 'platform',
         quantity: String(e.quantity ?? 1),
-        unitLabel: e.unitLabel ?? "unit",
+        unitLabel: e.unitLabel ?? 'unit',
         dimensions: e.dimensions ?? null,
         idempotencyKey: e.idempotencyKey ?? null,
         occurredAt: e.occurredAt ? new Date(e.occurredAt) : new Date(),
@@ -187,11 +213,11 @@ router.post(
 
       const touched = new Set<string>();
       for (const e of events) {
-        touched.add(`${e.orgId}:${e.featureKey}:${e.product ?? "platform"}`);
+        touched.add(`${e.orgId}:${e.featureKey}:${e.product ?? 'platform'}`);
       }
       await Promise.all(
         [...touched].map((k) => {
-          const [orgId, featureKey, product] = k.split(":");
+          const [orgId, featureKey, product] = k.split(':');
           return recomputeAggregate(parseInt(orgId!, 10), featureKey!, product!);
         }),
       );
@@ -202,13 +228,13 @@ router.post(
         total: events.length,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to batch record metering events");
+      handleRouteError(res, err, 'Failed to batch record metering events');
     }
   },
 );
 
 router.get(
-  "/metering/events",
+  '/metering/events',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
@@ -219,7 +245,7 @@ router.get(
       const product = req.query.product as string | undefined;
       const since = req.query.since ? new Date(req.query.since as string) : undefined;
       const until = req.query.until ? new Date(req.query.until as string) : undefined;
-      const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 1000);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10), 1000);
 
       const conditions = [];
       if (orgId) conditions.push(eq(meteringEventsTable.orgId, orgId));
@@ -237,10 +263,11 @@ router.get(
 
       sendSuccess(res, events);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list metering events");
+      handleRouteError(res, err, 'Failed to list metering events');
     }
   },
 );
 
-
-export function register(r: IRouter): void { r.use(router); }
+export function register(r: IRouter): void {
+  r.use(router);
+}

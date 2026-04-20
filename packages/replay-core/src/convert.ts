@@ -14,9 +14,9 @@
  *   exportDataset() + batchConvert() → ReplaySnapshot[] (ready for replay)
  */
 
-import type { IncidentSnapshot, FlowSnapshot } from "./capture.ts";
-import { createSnapshot } from "./snapshot.ts";
-import type { ReplaySnapshot } from "./snapshot.ts";
+import type { FlowSnapshot, IncidentSnapshot } from './capture.ts';
+import type { ReplaySnapshot } from './snapshot.ts';
+import { createSnapshot } from './snapshot.ts';
 
 export interface IncidentConvertOptions {
   /** Override the scenario ID (defaults to the incident's scenarioId). */
@@ -49,18 +49,23 @@ export function incidentToReplaySnapshot(
   if (!incident.piiRedacted) {
     console.warn(
       `[replay-core] incidentToReplaySnapshot: incident "${incident.id}" has piiRedacted=false. ` +
-      "Call redactIncidentPII() before converting to avoid PII exposure in replay pipelines.",
+        'Call redactIncidentPII() before converting to avoid PII exposure in replay pipelines.',
     );
   }
 
-  const { scenarioId = incident.scenarioId, label = incident.title, extraTags = [], register = true } = options;
+  const {
+    scenarioId = incident.scenarioId,
+    label = incident.title,
+    extraTags = [],
+    register = true,
+  } = options;
 
   const snapshot = {
     id: `replay-${incident.id}`,
     scenarioId,
     label,
     domain: incident.domain,
-    snapshotType: "incident" as const,
+    snapshotType: 'incident' as const,
     historicalContext: {
       ...incident.inputContext,
       incidentType: incident.incidentType,
@@ -85,7 +90,7 @@ export function incidentToReplaySnapshot(
       humanOverride: incident.humanOverride,
       ...incident.metadata,
     },
-    version: "1.0",
+    version: '1.0',
   };
 
   if (register) {
@@ -115,11 +120,16 @@ export function flowToReplaySnapshot(
   if (!flow.piiRedacted) {
     console.warn(
       `[replay-core] flowToReplaySnapshot: flow "${flow.id}" has piiRedacted=false. ` +
-      "Call exportDataset() or manually redact flow steps before converting.",
+        'Call exportDataset() or manually redact flow steps before converting.',
     );
   }
 
-  const { scenarioId = flow.scenarioId, label = flow.title, extraTags = [], register = true } = options;
+  const {
+    scenarioId = flow.scenarioId,
+    label = flow.title,
+    extraTags = [],
+    register = true,
+  } = options;
 
   const lastStep = flow.steps.at(-1);
   const groundTruth = lastStep?.output ?? {};
@@ -129,12 +139,12 @@ export function flowToReplaySnapshot(
     scenarioId,
     label,
     domain: flow.domain,
-    snapshotType: "flow" as const,
+    snapshotType: 'flow' as const,
     historicalContext: {
       flowType: flow.flowType,
       totalSteps: flow.steps.length,
-      stepNames: flow.steps.map(s => s.stepName),
-      steps: flow.steps.map(s => ({
+      stepNames: flow.steps.map((s) => s.stepName),
+      steps: flow.steps.map((s) => ({
         stepIndex: s.stepIndex,
         stepName: s.stepName,
         input: s.input,
@@ -144,14 +154,10 @@ export function flowToReplaySnapshot(
         policyChecks: s.policyChecks,
       })),
     },
-    agentInputs: flow.steps.map(s => s.input),
+    agentInputs: flow.steps.map((s) => s.input),
     groundTruth,
     sanitized: flow.sanitized,
-    tags: [
-      ...flow.captureContext.tags,
-      ...extraTags,
-      `flowType:${flow.flowType}`,
-    ],
+    tags: [...flow.captureContext.tags, ...extraTags, `flowType:${flow.flowType}`],
     metadata: {
       sourceFlowId: flow.id,
       flowType: flow.flowType,
@@ -160,7 +166,7 @@ export function flowToReplaySnapshot(
       capturedBy: flow.captureContext.capturedBy,
       ...flow.metadata,
     },
-    version: "1.0",
+    version: '1.0',
   };
 
   if (register) {
@@ -181,13 +187,9 @@ export function batchConvert(
 ): { incidents: ReplaySnapshot[]; flows: ReplaySnapshot[]; total: number } {
   const { register = true } = options;
 
-  const incidents = dataset.incidents.map(inc =>
-    incidentToReplaySnapshot(inc, { register })
-  );
+  const incidents = dataset.incidents.map((inc) => incidentToReplaySnapshot(inc, { register }));
 
-  const flows = dataset.flows.map(flow =>
-    flowToReplaySnapshot(flow, { register })
-  );
+  const flows = dataset.flows.map((flow) => flowToReplaySnapshot(flow, { register }));
 
   return { incidents, flows, total: incidents.length + flows.length };
 }

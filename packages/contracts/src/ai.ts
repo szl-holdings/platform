@@ -1,22 +1,22 @@
 /**
  * AI operations contracts — request/response schemas.
  */
-import { z } from "zod";
-import { paginationQuerySchema, sortQuerySchema } from "./common";
+import { z } from 'zod';
+import { paginationQuerySchema, sortQuerySchema } from './common';
 
 export const aiDomainSchema = z.enum([
-  "aegis",
-  "terra",
-  "vessels",
-  "prism_counsel",
-  "alloy",
-  "lyte",
-  "cortex",
-  "global",
+  'aegis',
+  'terra',
+  'vessels',
+  'prism_counsel',
+  'alloy',
+  'lyte',
+  'cortex',
+  'global',
 ]);
 export type AIDomain = z.infer<typeof aiDomainSchema>;
 
-export const riskLevelSchema = z.enum(["low", "medium", "high", "critical"]);
+export const riskLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
 export type RiskLevel = z.infer<typeof riskLevelSchema>;
 
 export const chatBodySchema = z.object({
@@ -52,7 +52,7 @@ export const traceListQuerySchema = z.object({
   requiresReview: z
     .string()
     .optional()
-    .transform((v) => (v === "true" ? true : v === "false" ? false : undefined)),
+    .transform((v) => (v === 'true' ? true : v === 'false' ? false : undefined)),
   status: z.string().optional(),
   riskLevel: riskLevelSchema.optional(),
   orgId: z.coerce.number().int().positive().optional(),
@@ -60,12 +60,12 @@ export const traceListQuerySchema = z.object({
 export type TraceListQuery = z.infer<typeof traceListQuerySchema>;
 
 export const traceStatusPatchSchema = z.object({
-  status: z.enum(["pending", "evaluated", "reviewed", "flagged", "archived"]),
+  status: z.enum(['pending', 'evaluated', 'reviewed', 'flagged', 'archived']),
 });
 export type TraceStatusPatch = z.infer<typeof traceStatusPatchSchema>;
 
 export const traceFeedbackBodySchema = z.object({
-  sentiment: z.enum(["up", "down"]),
+  sentiment: z.enum(['up', 'down']),
   correction: z.string().max(4096).optional(),
   comment: z.string().max(2048).optional(),
 });
@@ -74,15 +74,13 @@ export type TraceFeedbackBody = z.infer<typeof traceFeedbackBodySchema>;
 export const reviewQueueListQuerySchema = z.object({
   ...paginationQuerySchema.shape,
   domain: aiDomainSchema.optional(),
-  status: z.enum(["pending", "in_review", "resolved"]).optional(),
-  priority: z.enum(["critical", "high", "medium", "low"]).optional(),
-  verdict: z
-    .enum(["approved", "rejected", "flagged", "escalated", "deferred"])
-    .optional(),
+  status: z.enum(['pending', 'in_review', 'resolved']).optional(),
+  priority: z.enum(['critical', 'high', 'medium', 'low']).optional(),
+  verdict: z.enum(['approved', 'rejected', 'flagged', 'escalated', 'deferred']).optional(),
 });
 
 export const reviewDecisionBodySchema = z.object({
-  verdict: z.enum(["approved", "rejected", "flagged", "escalated", "deferred"]),
+  verdict: z.enum(['approved', 'rejected', 'flagged', 'escalated', 'deferred']),
   comment: z.string().max(2048).optional(),
   correction: z.string().max(4096).optional(),
 });

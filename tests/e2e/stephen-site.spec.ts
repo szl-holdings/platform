@@ -15,16 +15,16 @@
  * port 3000 (BASE_PATH=/).  STEPHEN_BASE_PATH overrides the entry path if
  * the routing topology ever changes.
  */
-import { test, expect } from "@playwright/test";
+import { expect, test } from '@playwright/test';
 
-const STEPHEN_PATH = process.env.STEPHEN_BASE_PATH ?? "/stephen";
+const STEPHEN_PATH = process.env.STEPHEN_BASE_PATH ?? '/stephen';
 
 let appAvailable = true;
 
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
   try {
-    const resp = await page.goto(STEPHEN_PATH, { timeout: 8000, waitUntil: "domcontentloaded" });
+    const resp = await page.goto(STEPHEN_PATH, { timeout: 8000, waitUntil: 'domcontentloaded' });
     appAvailable = !!resp && resp.status() < 500;
   } catch {
     appAvailable = false;
@@ -36,49 +36,49 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe("Stephen Lutar — Smoke Tests", () => {
-  test("/stephen entry loads without fatal errors", async ({ page }) => {
-    const resp = await page.goto(STEPHEN_PATH, { waitUntil: "domcontentloaded" });
+test.describe('Stephen Lutar — Smoke Tests', () => {
+  test('/stephen entry loads without fatal errors', async ({ page }) => {
+    const resp = await page.goto(STEPHEN_PATH, { waitUntil: 'domcontentloaded' });
     expect(resp?.status() ?? 0).toBeLessThan(500);
-    const root = page.locator("#root");
+    const root = page.locator('#root');
     await expect(root).toBeAttached({ timeout: 15000 });
-    const errorBoundary = page.locator("text=Something went wrong").first();
+    const errorBoundary = page.locator('text=Something went wrong').first();
     const hasError = await errorBoundary.isVisible().catch(() => false);
     expect(hasError).toBe(false);
   });
 
-  test("/stephen redirects to a leadership-style destination", async ({ page }) => {
+  test('/stephen redirects to a leadership-style destination', async ({ page }) => {
     await page.goto(STEPHEN_PATH);
-    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
     // /stephen is wired as an ExternalRedirect to /szl-holdings/leadership.
     // Allow either the configured override or the default leadership path so
     // the assertion stays meaningful across CI (BASE_PATH=/) and dev mounts.
     await expect(page).toHaveURL(/leadership|stephen/i);
   });
 
-  test("/stephen destination has a page title", async ({ page }) => {
+  test('/stephen destination has a page title', async ({ page }) => {
     await page.goto(STEPHEN_PATH);
-    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
     await expect(page).toHaveTitle(/.+/);
   });
 
-  test("/stephen destination renders substantive content", async ({ page }) => {
+  test('/stephen destination renders substantive content', async ({ page }) => {
     await page.goto(STEPHEN_PATH);
-    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
     const html = await page.content();
     expect(html.length).toBeGreaterThan(500);
   });
 });
 
-test.describe("Stephen Lutar — Mobile Viewport", () => {
+test.describe('Stephen Lutar — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test("/stephen renders on mobile without crash", async ({ page }) => {
+  test('/stephen renders on mobile without crash', async ({ page }) => {
     await page.goto(STEPHEN_PATH);
-    await page.waitForLoadState("domcontentloaded");
-    const root = page.locator("#root");
+    await page.waitForLoadState('domcontentloaded');
+    const root = page.locator('#root');
     await expect(root).toBeAttached({ timeout: 15000 });
-    const errorBoundary = page.locator("text=Something went wrong").first();
+    const errorBoundary = page.locator('text=Something went wrong').first();
     const hasError = await errorBoundary.isVisible().catch(() => false);
     expect(hasError).toBe(false);
   });

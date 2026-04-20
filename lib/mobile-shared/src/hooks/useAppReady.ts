@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { AppState, type AppStateStatus, Platform } from "react-native";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, type AppStateStatus, Platform } from 'react-native';
 
 export interface UseAppReadyOptions {
   onForeground?: () => void;
@@ -22,15 +22,15 @@ export function useAppReady(options: UseAppReadyOptions = {}): AppReadyResult {
   callbacksRef.current = { onForeground, onBackground };
 
   useEffect(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === 'web') return;
 
-    const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
-      if (nextState === "active" && appState !== "active") {
+    const sub = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      if (nextState === 'active' && appState !== 'active') {
         sessionStartRef.current = Date.now();
         callbacksRef.current.onForeground?.();
       } else if (
-        (nextState === "background" || nextState === "inactive") &&
-        appState === "active"
+        (nextState === 'background' || nextState === 'inactive') &&
+        appState === 'active'
       ) {
         if (trackSessionDuration) {
           setSessionDurationMs((prev) => prev + (Date.now() - sessionStartRef.current));
@@ -44,7 +44,7 @@ export function useAppReady(options: UseAppReadyOptions = {}): AppReadyResult {
   }, [appState, trackSessionDuration]);
 
   return {
-    isActive: appState === "active",
+    isActive: appState === 'active',
     sessionDurationMs,
     appState,
   };

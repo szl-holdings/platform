@@ -7,16 +7,16 @@
  * audit events, different email copy, different conflict handling).
  */
 
-import crypto from "crypto";
-import { db, orgInvitationsTable, auditEventsTable, usersTable } from "@szl-holdings/db";
-import { and, eq, gt } from "drizzle-orm";
-import { sendEmail, buildOrgInviteEmail } from "./email";
-import { hashIp } from "@szl-holdings/audit";
-import { logger } from "./logger";
+import { hashIp } from '@szl-holdings/audit';
+import { auditEventsTable, db, orgInvitationsTable, usersTable } from '@szl-holdings/db';
+import crypto from 'crypto';
+import { and, eq, gt } from 'drizzle-orm';
+import { buildOrgInviteEmail, sendEmail } from './email';
+import { logger } from './logger';
 
 export const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-export type InviteRole = "admin" | "member" | "viewer";
+export type InviteRole = 'admin' | 'member' | 'viewer';
 
 export interface CreateInvitationParams {
   orgId: number;
@@ -33,13 +33,13 @@ export interface CreateInvitationParams {
    *             { conflict: true } if a non-expired pending invitation
    *             already exists.
    */
-  conflictMode: "replace" | "reject";
+  conflictMode: 'replace' | 'reject';
 }
 
 export type CreateInvitationResult =
   | {
       conflict: true;
-      reason: "already_pending";
+      reason: 'already_pending';
     }
   | {
       conflict: false;
@@ -65,7 +65,7 @@ export async function createOrgInvitation(
 ): Promise<CreateInvitationResult> {
   const email = params.email.toLowerCase();
 
-  if (params.conflictMode === "reject") {
+  if (params.conflictMode === 'reject') {
     // Only treat NON-EXPIRED pending invites as conflicts. Stale rows whose
     // expiresAt has passed (but were never marked "expired" by a sweeper)
     // must not block re-inviting the same email.
@@ -73,30 +73,34 @@ export async function createOrgInvitation(
     const existing = await db
       .select({ id: orgInvitationsTable.id })
       .from(orgInvitationsTable)
-      .where(and(
-        eq(orgInvitationsTable.orgId, params.orgId),
-        eq(orgInvitationsTable.email, email),
-        eq(orgInvitationsTable.status, "pending"),
-        gt(orgInvitationsTable.expiresAt, now),
-      ))
+      .where(
+        and(
+          eq(orgInvitationsTable.orgId, params.orgId),
+          eq(orgInvitationsTable.email, email),
+          eq(orgInvitationsTable.status, 'pending'),
+          gt(orgInvitationsTable.expiresAt, now),
+        ),
+      )
       .limit(1);
 
     if (existing.length > 0) {
-      return { conflict: true, reason: "already_pending" };
+      return { conflict: true, reason: 'already_pending' };
     }
   } else {
     // "replace" — expire any existing pending invitations for this email
     await db
       .update(orgInvitationsTable)
-      .set({ status: "expired" })
-      .where(and(
-        eq(orgInvitationsTable.orgId, params.orgId),
-        eq(orgInvitationsTable.email, email),
-        eq(orgInvitationsTable.status, "pending"),
-      ));
+      .set({ status: 'expired' })
+      .where(
+        and(
+          eq(orgInvitationsTable.orgId, params.orgId),
+          eq(orgInvitationsTable.email, email),
+          eq(orgInvitationsTable.status, 'pending'),
+        ),
+      );
   }
 
-  const token = crypto.randomBytes(32).toString("hex");
+  const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
   const [invitation] = await db
@@ -107,7 +111,7 @@ export async function createOrgInvitation(
       email,
       role: params.role,
       token,
-      status: "pending",
+      status: 'pending',
       expiresAt,
     })
     .returning();
@@ -116,19 +120,24 @@ export async function createOrgInvitation(
   try {
     await db.insert(auditEventsTable).values({
       userId: params.invitedByUserId,
-      action: "invitation_sent",
-      entityType: "org_invitation",
+      action: 'invitation_sent',
+      entityType: 'org_invitation',
       entityId: String(invitation.id),
       ipAddress: hashIp(params.ipAddress ?? null),
-      newValues: { orgId: params.orgId, email, role: params.role, expiresAt: expiresAt.toISOString() },
+      newValues: {
+        orgId: params.orgId,
+        email,
+        role: params.role,
+        expiresAt: expiresAt.toISOString(),
+      },
     });
   } catch (err) {
-    logger.error({ err }, "[invitation-service] Failed to write invitation audit event");
+    logger.error({ err }, '[invitation-service] Failed to write invitation audit event');
   }
 
   // Fire-and-forget email — preserves existing semantics where DB row is
   // the source of truth and email is a best-effort notification.
-  const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "https://szlholdings.com";
+  const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || 'https://szlholdings.com';
   const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
 
   void (async () => {
@@ -146,16 +155,23 @@ export async function createOrgInvitation(
           orgName: params.orgName,
           inviteUrl,
           role: params.role,
-          expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+          expiresAt: expiresAt.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
           invitedByName: inviter?.displayName || inviter?.email || undefined,
         }),
         text: `You've been invited to join ${params.orgName} as a ${params.role}. Accept your invitation here: ${inviteUrl} (expires ${expiresAt.toLocaleDateString()})`,
       });
       if (!result.success) {
-        logger.warn({ error: result.error, email }, "[invitation-service] Email provider rejected invite email");
+        logger.warn(
+          { error: result.error, email },
+          '[invitation-service] Email provider rejected invite email',
+        );
       }
     } catch (err) {
-      logger.warn({ err, email }, "[invitation-service] Failed to send invite email");
+      logger.warn({ err, email }, '[invitation-service] Failed to send invite email');
     }
   })();
 

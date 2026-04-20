@@ -6,12 +6,15 @@
  * or conditional rendering.
  */
 
-import type { AuthenticatedUser } from "../types.js";
-import { isElevated, isReadOnly, isMemberOf } from "../types.js";
+import type { AuthenticatedUser } from '../types.js';
+import { isElevated, isMemberOf, isReadOnly } from '../types.js';
 
 export type GuardResult =
   | { allowed: true }
-  | { allowed: false; reason: "unauthenticated" | "insufficient_role" | "read_only" | "not_org_member" };
+  | {
+      allowed: false;
+      reason: 'unauthenticated' | 'insufficient_role' | 'read_only' | 'not_org_member';
+    };
 
 /**
  * Returns `{ allowed: true }` when the user is authenticated and holds at
@@ -21,10 +24,10 @@ export function guardRole(
   user: AuthenticatedUser | null | undefined,
   ...roles: string[]
 ): GuardResult {
-  if (!user) return { allowed: false, reason: "unauthenticated" };
+  if (!user) return { allowed: false, reason: 'unauthenticated' };
   if (isElevated(user)) return { allowed: true };
   const ok = roles.some((r) => user.roles.includes(r as never));
-  if (!ok) return { allowed: false, reason: "insufficient_role" };
+  if (!ok) return { allowed: false, reason: 'insufficient_role' };
   return { allowed: true };
 }
 
@@ -33,9 +36,9 @@ export function guardRole(
  * perform write operations.
  */
 export function guardNotReadOnly(user: AuthenticatedUser | null | undefined): GuardResult {
-  if (!user) return { allowed: false, reason: "unauthenticated" };
+  if (!user) return { allowed: false, reason: 'unauthenticated' };
   if (isElevated(user)) return { allowed: true };
-  if (isReadOnly(user)) return { allowed: false, reason: "read_only" };
+  if (isReadOnly(user)) return { allowed: false, reason: 'read_only' };
   return { allowed: true };
 }
 
@@ -46,9 +49,9 @@ export function guardOrgMembership(
   user: AuthenticatedUser | null | undefined,
   orgId: number,
 ): GuardResult {
-  if (!user) return { allowed: false, reason: "unauthenticated" };
+  if (!user) return { allowed: false, reason: 'unauthenticated' };
   if (isElevated(user)) return { allowed: true };
-  if (!isMemberOf(user, orgId)) return { allowed: false, reason: "not_org_member" };
+  if (!isMemberOf(user, orgId)) return { allowed: false, reason: 'not_org_member' };
   return { allowed: true };
 }
 

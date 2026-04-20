@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { cn } from "./utils";
+import { useMemo, useState } from 'react';
+import { cn } from './utils';
 
 export interface DecisionItem {
   id: string;
@@ -8,7 +8,7 @@ export interface DecisionItem {
   description: string;
   recommendation: string;
   confidence: number;
-  risk: "low" | "medium" | "high" | "critical";
+  risk: 'low' | 'medium' | 'high' | 'critical';
   autoResolvable: boolean;
   autoResolved?: boolean;
   autoResolvedAt?: number;
@@ -45,21 +45,21 @@ export function useDecisionShield(items: DecisionItem[]): DecisionShieldSummary 
 export interface DecisionShieldPanelProps {
   items: DecisionItem[];
   accentColor?: string;
-  onDecide?: (item: DecisionItem, action: "approve" | "reject" | "defer") => void;
+  onDecide?: (item: DecisionItem, action: 'approve' | 'reject' | 'defer') => void;
   onViewAutoResolved?: () => void;
   className?: string;
 }
 
 const RISK_COLORS: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "#3b82f6",
+  critical: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#3b82f6',
 };
 
 export function DecisionShieldPanel({
   items,
-  accentColor = "#8b5cf6",
+  accentColor = '#8b5cf6',
   onDecide,
   onViewAutoResolved,
   className,
@@ -68,8 +68,14 @@ export function DecisionShieldPanel({
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
-    <div className={cn("rounded-xl border bg-neutral-900/50 backdrop-blur", className)} style={{ borderColor: `${accentColor}20` }}>
-      <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: `${accentColor}10` }}>
+    <div
+      className={cn('rounded-xl border bg-neutral-900/50 backdrop-blur', className)}
+      style={{ borderColor: `${accentColor}20` }}
+    >
+      <div
+        className="px-4 py-3 border-b flex items-center justify-between"
+        style={{ borderColor: `${accentColor}10` }}
+      >
         <div>
           <h3 className="text-sm font-semibold text-white/90 flex items-center gap-2">
             <span className="text-base">🛡</span>
@@ -89,7 +95,7 @@ export function DecisionShieldPanel({
         )}
       </div>
 
-      <div className="divide-y" style={{ ["--tw-divide-opacity" as string]: "0.05" }}>
+      <div className="divide-y" style={{ ['--tw-divide-opacity' as string]: '0.05' }}>
         {summary.pendingDecisions.map((item) => {
           const isExpanded = expandedId === item.id;
           return (
@@ -105,19 +111,29 @@ export function DecisionShieldPanel({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-white/85 truncate">{item.title}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ background: `${RISK_COLORS[item.risk]}20`, color: RISK_COLORS[item.risk] }}>
+                    <span
+                      className="text-[9px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
+                      style={{
+                        background: `${RISK_COLORS[item.risk]}20`,
+                        color: RISK_COLORS[item.risk],
+                      }}
+                    >
                       {item.risk}
                     </span>
                   </div>
-                  <p className="text-xs text-white/40 mt-0.5">{item.domain} • {item.description}</p>
+                  <p className="text-xs text-white/40 mt-0.5">
+                    {item.domain} • {item.description}
+                  </p>
                 </div>
-                <span className="text-white/20 text-xs shrink-0">{isExpanded ? "▲" : "▼"}</span>
+                <span className="text-white/20 text-xs shrink-0">{isExpanded ? '▲' : '▼'}</span>
               </div>
 
               {isExpanded && (
                 <div className="mt-3 ml-5 space-y-2">
                   <div className="bg-white/5 rounded-lg p-3">
-                    <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">AI Recommendation</div>
+                    <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">
+                      AI Recommendation
+                    </div>
                     <p className="text-xs text-white/70">{item.recommendation}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <div className="h-1.5 flex-1 bg-white/10 rounded-full overflow-hidden">
@@ -125,11 +141,18 @@ export function DecisionShieldPanel({
                           className="h-full rounded-full"
                           style={{
                             width: `${item.confidence * 100}%`,
-                            background: item.confidence > 0.8 ? "#10b981" : item.confidence > 0.6 ? "#f59e0b" : "#ef4444",
+                            background:
+                              item.confidence > 0.8
+                                ? '#10b981'
+                                : item.confidence > 0.6
+                                  ? '#f59e0b'
+                                  : '#ef4444',
                           }}
                         />
                       </div>
-                      <span className="text-[10px] text-white/50 font-mono">{Math.round(item.confidence * 100)}%</span>
+                      <span className="text-[10px] text-white/50 font-mono">
+                        {Math.round(item.confidence * 100)}%
+                      </span>
                     </div>
                   </div>
 
@@ -139,19 +162,19 @@ export function DecisionShieldPanel({
 
                   <div className="flex gap-2 pt-1">
                     <button
-                      onClick={() => onDecide?.(item, "approve")}
+                      onClick={() => onDecide?.(item, 'approve')}
                       className="text-[11px] px-3 py-1 rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
                     >
                       Approve
                     </button>
                     <button
-                      onClick={() => onDecide?.(item, "reject")}
+                      onClick={() => onDecide?.(item, 'reject')}
                       className="text-[11px] px-3 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
                     >
                       Reject
                     </button>
                     <button
-                      onClick={() => onDecide?.(item, "defer")}
+                      onClick={() => onDecide?.(item, 'defer')}
                       className="text-[11px] px-3 py-1 rounded bg-white/10 text-white/50 hover:bg-white/15 transition-colors"
                     >
                       Defer

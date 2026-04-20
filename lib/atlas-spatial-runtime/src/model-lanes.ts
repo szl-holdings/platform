@@ -1,19 +1,19 @@
-import type { ModelLaneMetadata, ModelLaneType } from "./types.js";
+import type { ModelLaneMetadata, ModelLaneType } from './types.js';
 
 /** Maps ATLAS ModelLaneType to the model-router RouteClass. */
 export type ModelRouterRouteClass =
-  | "reasoning"
-  | "planning"
-  | "vision_understanding"
-  | "summarization"
-  | "extraction";
+  | 'reasoning'
+  | 'planning'
+  | 'vision_understanding'
+  | 'summarization'
+  | 'extraction';
 
 export const LANE_TO_ROUTE_CLASS: Record<ModelLaneType, ModelRouterRouteClass> = {
-  reasoning: "reasoning",
-  multimodal: "vision_understanding",
-  simulation: "planning",
-  summarization: "summarization",
-  rendering: "vision_understanding",
+  reasoning: 'reasoning',
+  multimodal: 'vision_understanding',
+  simulation: 'planning',
+  summarization: 'summarization',
+  rendering: 'vision_understanding',
 };
 
 /** Returns the model-router RouteClass for a given ATLAS lane type. */
@@ -43,34 +43,37 @@ export interface LaneResult<T = string> {
   promptHash?: string;
 }
 
-const LANE_DEFAULTS: Record<ModelLaneType, { modelId: string; provider: string; temperature: number; maxTokens: number }> = {
+const LANE_DEFAULTS: Record<
+  ModelLaneType,
+  { modelId: string; provider: string; temperature: number; maxTokens: number }
+> = {
   reasoning: {
-    modelId: "Qwen/Qwen3-8B",
-    provider: "huggingface",
+    modelId: 'Qwen/Qwen3-8B',
+    provider: 'huggingface',
     temperature: 0.3,
     maxTokens: 4096,
   },
   multimodal: {
-    modelId: "Qwen/Qwen2.5-VL-7B-Instruct",
-    provider: "huggingface",
+    modelId: 'Qwen/Qwen2.5-VL-7B-Instruct',
+    provider: 'huggingface',
     temperature: 0.4,
     maxTokens: 2048,
   },
   simulation: {
-    modelId: "Qwen/Qwen3-8B",
-    provider: "huggingface",
+    modelId: 'Qwen/Qwen3-8B',
+    provider: 'huggingface',
     temperature: 0.1,
     maxTokens: 8192,
   },
   summarization: {
-    modelId: "Qwen/Qwen3-0.6B",
-    provider: "huggingface",
+    modelId: 'Qwen/Qwen3-0.6B',
+    provider: 'huggingface',
     temperature: 0.5,
     maxTokens: 1024,
   },
   rendering: {
-    modelId: "Qwen/Qwen2.5-VL-7B-Instruct",
-    provider: "huggingface",
+    modelId: 'Qwen/Qwen2.5-VL-7B-Instruct',
+    provider: 'huggingface',
     temperature: 0.6,
     maxTokens: 2048,
   },
@@ -95,12 +98,15 @@ const LANE_COST_PER_TOKEN: Record<ModelLaneType, number> = {
 const LANE_CONFIDENCE_CONTRIBUTION: Record<ModelLaneType, number> = {
   reasoning: 0.85,
   multimodal: 0.75,
-  simulation: 0.80,
-  summarization: 0.70,
+  simulation: 0.8,
+  summarization: 0.7,
   rendering: 0.65,
 };
 
-export function getLaneMetadata(laneType: ModelLaneType, overrides?: Partial<LaneRoute>): ModelLaneMetadata {
+export function getLaneMetadata(
+  laneType: ModelLaneType,
+  overrides?: Partial<LaneRoute>,
+): ModelLaneMetadata {
   const defaults = LANE_DEFAULTS[laneType];
   const modelId = overrides?.modelId ?? defaults.modelId;
   const provider = overrides?.provider ?? defaults.provider;
@@ -146,17 +152,25 @@ export function createNimAdapterStub(endpoint?: string): NimAdapterStub {
     endpoint,
     modelId: undefined,
     async authenticate() {
-      throw new Error("NIM adapter not configured — stub only. Set NIM_ENDPOINT and NIM_API_KEY to enable.");
+      throw new Error(
+        'NIM adapter not configured — stub only. Set NIM_ENDPOINT and NIM_API_KEY to enable.',
+      );
     },
     async invoke() {
-      throw new Error("NIM adapter not available — falling back to default lane routing.");
+      throw new Error('NIM adapter not available — falling back to default lane routing.');
     },
   };
 }
 
 export function allLaneMetadata(): ModelLaneMetadata[] {
-  const lanes: ModelLaneType[] = ["reasoning", "multimodal", "simulation", "summarization", "rendering"];
-  return lanes.map(lt => getLaneMetadata(lt));
+  const lanes: ModelLaneType[] = [
+    'reasoning',
+    'multimodal',
+    'simulation',
+    'summarization',
+    'rendering',
+  ];
+  return lanes.map((lt) => getLaneMetadata(lt));
 }
 
 export class ModelLaneRouter {
@@ -184,7 +198,7 @@ export class ModelLaneRouter {
   }
 
   allMetadata(): ModelLaneMetadata[] {
-    return allLaneMetadata().map(m => ({
+    return allLaneMetadata().map((m) => ({
       ...m,
       nimAdapterAvailable: this.nimAdapter?.isAvailable ?? false,
     }));

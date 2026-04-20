@@ -1,28 +1,24 @@
-import React, { useRef, useState, useEffect } from "react";
+import { Feather } from '@expo/vector-icons';
+import { formatInUserTimeZone, useUserPreferences } from '@szl-holdings/mobile-shared';
+import { useQuery } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
-  Linking,
   Dimensions,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
-import { useColors } from "@/hooks/useColors";
-import { formatInUserTimeZone, useUserPreferences } from "@szl-holdings/mobile-shared";
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
 
-const { width: W } = Dimensions.get("window");
+const { width: W } = Dimensions.get('window');
 
 type Article = {
   id: number;
@@ -45,17 +41,17 @@ type CaseStudy = {
   outcome?: string | null;
 };
 
-type ReaderItem = (Article | CaseStudy) & { _type: "article" | "case-study" };
+type ReaderItem = (Article | CaseStudy) & { _type: 'article' | 'case-study' };
 
 function useApiBase() {
   const domain = process.env.EXPO_PUBLIC_DOMAIN;
-  return domain ? `https://${domain}` : "";
+  return domain ? `https://${domain}` : '';
 }
 
 function useAllArticles() {
   const base = useApiBase();
   return useQuery<Article[]>({
-    queryKey: ["all-articles"],
+    queryKey: ['all-articles'],
     queryFn: async () => {
       const res = await fetch(`${base}/api/cms/articles?limit=20`);
       if (!res.ok) return [];
@@ -69,7 +65,7 @@ function useAllArticles() {
 function useAllCaseStudies() {
   const base = useApiBase();
   return useQuery<CaseStudy[]>({
-    queryKey: ["all-case-studies"],
+    queryKey: ['all-case-studies'],
     queryFn: async () => {
       const res = await fetch(`${base}/api/stephen/portfolio-case-studies`);
       if (!res.ok) return [];
@@ -83,15 +79,15 @@ function useAllCaseStudies() {
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return null;
   const formatted = formatInUserTimeZone(dateStr, {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
   });
   return formatted || null;
 }
 
-function isArticleType(item: ReaderItem): item is Article & { _type: "article" } {
-  return item._type === "article";
+function isArticleType(item: ReaderItem): item is Article & { _type: 'article' } {
+  return item._type === 'article';
 }
 
 function ReaderPage({
@@ -115,7 +111,7 @@ function ReaderPage({
     >
       <View style={[styles.typeBadge, { backgroundColor: colors.silverDim }]}>
         <Text style={[styles.typeBadgeText, { color: colors.silver }]}>
-          {isArticleType(item) ? "Article" : "Case Study"}
+          {isArticleType(item) ? 'Article' : 'Case Study'}
         </Text>
       </View>
 
@@ -175,9 +171,7 @@ function ReaderPage({
         style={[styles.webBtn, { borderColor: colors.border }]}
         onPress={() => onOpenExternal(item)}
       >
-        <Text style={[styles.webBtnText, { color: colors.silver }]}>
-          Read on stephenlutar.com
-        </Text>
+        <Text style={[styles.webBtnText, { color: colors.silver }]}>Read on stephenlutar.com</Text>
         <Feather name="external-link" size={14} color={colors.silver} />
       </TouchableOpacity>
     </ScrollView>
@@ -198,8 +192,8 @@ export default function ArticleReaderScreen() {
   const isLoading = artLoading || csLoading;
 
   const allItems: ReaderItem[] = [
-    ...allArticles.map((a) => ({ ...a, _type: "article" as const })),
-    ...allCaseStudies.map((c) => ({ ...c, _type: "case-study" as const })),
+    ...allArticles.map((a) => ({ ...a, _type: 'article' as const })),
+    ...allCaseStudies.map((c) => ({ ...c, _type: 'case-study' as const })),
   ];
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -231,16 +225,14 @@ export default function ArticleReaderScreen() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace("/");
+      router.replace('/');
     }
   };
 
   const handleOpenExternal = (item: ReaderItem) => {
-    const base = "https://stephenlutar.com";
+    const base = 'https://stephenlutar.com';
     const url =
-      item._type === "article"
-        ? `${base}/writing/${item.slug}`
-        : `${base}/work/${item.slug}`;
+      item._type === 'article' ? `${base}/writing/${item.slug}` : `${base}/work/${item.slug}`;
     Linking.openURL(url);
   };
 
@@ -268,10 +260,7 @@ export default function ArticleReaderScreen() {
     return (
       <View style={[styles.root, { backgroundColor: colors.background }]}>
         <View
-          style={[
-            styles.header,
-            { paddingTop: insets.top + 8, borderBottomColor: colors.border },
-          ]}
+          style={[styles.header, { paddingTop: insets.top + 8, borderBottomColor: colors.border }]}
         >
           <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
             <Feather name="arrow-left" size={20} color={colors.foreground} />
@@ -288,17 +277,19 @@ export default function ArticleReaderScreen() {
     return (
       <View style={[styles.root, { backgroundColor: colors.background }]}>
         <View
-          style={[
-            styles.header,
-            { paddingTop: insets.top + 8, borderBottomColor: colors.border },
-          ]}
+          style={[styles.header, { paddingTop: insets.top + 8, borderBottomColor: colors.border }]}
         >
           <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
             <Feather name="arrow-left" size={20} color={colors.foreground} />
           </TouchableOpacity>
         </View>
         <View style={styles.centered}>
-          <Feather name="alert-circle" size={36} color={colors.border} style={{ marginBottom: 12 }} />
+          <Feather
+            name="alert-circle"
+            size={36}
+            color={colors.border}
+            style={{ marginBottom: 12 }}
+          />
           <Text style={[styles.errorText, { color: colors.mutedForeground }]}>
             Content not found
           </Text>
@@ -331,7 +322,7 @@ export default function ArticleReaderScreen() {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={[styles.headerTitle, { color: colors.silver }]}>
-            {currentItem._type === "article" ? "ARTICLE" : "CASE STUDY"}
+            {currentItem._type === 'article' ? 'ARTICLE' : 'CASE STUDY'}
           </Text>
           {allItems.length > 1 ? (
             <Text style={[styles.headerCount, { color: colors.mutedForeground }]}>
@@ -450,92 +441,92 @@ export default function ArticleReaderScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
   },
   backBtn: { padding: 4, marginRight: 8 },
-  headerCenter: { flex: 1, alignItems: "center" },
-  headerTitle: { fontSize: 10, fontFamily: "Inter_600SemiBold", letterSpacing: 2 },
-  headerCount: { fontSize: 10, fontFamily: "Inter_400Regular", marginTop: 2 },
+  headerCenter: { flex: 1, alignItems: 'center' },
+  headerTitle: { fontSize: 10, fontFamily: 'Inter_600SemiBold', letterSpacing: 2 },
+  headerCount: { fontSize: 10, fontFamily: 'Inter_400Regular', marginTop: 2 },
   externalBtn: { padding: 4 },
   progressTrack: { height: 2 },
   progressBar: { height: 2 },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center", padding: 32 },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   errorText: {
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
     marginBottom: 16,
   },
   retryBtn: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 16, paddingVertical: 8 },
-  retryText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  retryText: { fontSize: 13, fontFamily: 'Inter_500Medium' },
   typeBadge: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 3,
     marginBottom: 14,
   },
-  typeBadgeText: { fontSize: 10, fontFamily: "Inter_600SemiBold", letterSpacing: 1 },
+  typeBadgeText: { fontSize: 10, fontFamily: 'Inter_600SemiBold', letterSpacing: 1 },
   articleTitle: {
     fontSize: 26,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     lineHeight: 34,
     letterSpacing: -0.4,
     marginBottom: 12,
   },
-  metaRow: { flexDirection: "row", gap: 4, marginBottom: 16 },
-  metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  metaRow: { flexDirection: 'row', gap: 4, marginBottom: 16 },
+  metaText: { fontSize: 12, fontFamily: 'Inter_400Regular' },
   divider: { height: 1, marginBottom: 20 },
   bodyText: {
     fontSize: 16,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     lineHeight: 28,
     marginBottom: 24,
   },
   outcomeBox: { borderWidth: 1, borderRadius: 10, padding: 18, marginBottom: 24 },
   outcomeLabel: {
     fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 1.5,
     marginBottom: 8,
   },
-  outcomeText: { fontSize: 15, fontFamily: "Inter_500Medium", lineHeight: 22 },
-  tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 24 },
+  outcomeText: { fontSize: 15, fontFamily: 'Inter_500Medium', lineHeight: 22 },
+  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
   tagChip: { borderWidth: 1, borderRadius: 4, paddingHorizontal: 10, paddingVertical: 4 },
-  tagText: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  tagText: { fontSize: 11, fontFamily: 'Inter_400Regular' },
   webBtn: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     borderWidth: 1,
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
-  webBtnText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  webBtnText: { fontSize: 13, fontFamily: 'Inter_500Medium' },
   navBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 12,
     borderTopWidth: 1,
   },
   navBtn: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 9,
   },
-  navBtnText: { fontSize: 12, fontFamily: "Inter_500Medium" },
-  navDots: { flexDirection: "row", gap: 5, alignItems: "center" },
+  navBtnText: { fontSize: 12, fontFamily: 'Inter_500Medium' },
+  navDots: { flexDirection: 'row', gap: 5, alignItems: 'center' },
   navDot: { height: 6, borderRadius: 3 },
 });

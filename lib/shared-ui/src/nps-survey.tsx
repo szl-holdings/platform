@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from "react";
-import { m, AnimatePresence } from "framer-motion";
-import { X, Send, ChevronRight } from "lucide-react";
-import { cn } from "./utils";
+import { AnimatePresence, m } from 'framer-motion';
+import { ChevronRight, Send, X } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+import { cn } from './utils';
 
 export interface NpsSurveyProps {
   appName?: string;
@@ -15,38 +15,39 @@ export interface NpsSurveyProps {
 }
 
 const SCORE_LABELS: Record<number, string> = {
-  0: "Not at all likely",
-  5: "Neutral",
-  10: "Extremely likely",
+  0: 'Not at all likely',
+  5: 'Neutral',
+  10: 'Extremely likely',
 };
 
 function getScoreColor(score: number | null): string {
-  if (score === null) return "bg-muted text-muted-foreground border-border";
-  if (score >= 9) return "bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/30";
-  if (score >= 7) return "bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-500/30";
-  return "bg-red-500 text-white border-red-500 shadow-sm shadow-red-500/30";
+  if (score === null) return 'bg-muted text-muted-foreground border-border';
+  if (score >= 9)
+    return 'bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/30';
+  if (score >= 7) return 'bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-500/30';
+  return 'bg-red-500 text-white border-red-500 shadow-sm shadow-red-500/30';
 }
 
 function getScoreRingColor(score: number | null): string {
-  if (score === null) return "";
-  if (score >= 9) return "ring-2 ring-emerald-500/30";
-  if (score >= 7) return "ring-2 ring-amber-500/30";
-  return "ring-2 ring-red-500/30";
+  if (score === null) return '';
+  if (score >= 9) return 'ring-2 ring-emerald-500/30';
+  if (score >= 7) return 'ring-2 ring-amber-500/30';
+  return 'ring-2 ring-red-500/30';
 }
 
 export function NpsSurvey({
   appName,
   pageUrl,
   userRole,
-  apiBaseUrl = "",
+  apiBaseUrl = '',
   onSubmit,
   onDismiss,
   onSnooze,
   className,
 }: NpsSurveyProps) {
-  const [step, setStep] = useState<"score" | "comment" | "done">("score");
+  const [step, setStep] = useState<'score' | 'comment' | 'done'>('score');
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +57,7 @@ export function NpsSurvey({
 
   const handleNext = () => {
     if (selectedScore === null) return;
-    setStep("comment");
+    setStep('comment');
   };
 
   const handleSubmit = useCallback(async () => {
@@ -65,25 +66,26 @@ export function NpsSurvey({
     setError(null);
     try {
       const res = await fetch(`${apiBaseUrl}/api/feedback/nps`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           score: selectedScore,
           comment: comment.trim() || undefined,
           appName,
-          pageUrl: pageUrl ?? (typeof window !== "undefined" ? window.location.pathname : undefined),
+          pageUrl:
+            pageUrl ?? (typeof window !== 'undefined' ? window.location.pathname : undefined),
           userRole,
         }),
       });
-      if (!res.ok) throw new Error("Submission failed");
-      setStep("done");
+      if (!res.ok) throw new Error('Submission failed');
+      setStep('done');
       onSubmit?.(selectedScore, comment);
       setTimeout(() => {
         onDismiss?.();
       }, 2500);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -92,9 +94,9 @@ export function NpsSurvey({
   const handleSnooze = useCallback(async () => {
     try {
       await fetch(`${apiBaseUrl}/api/feedback/dismiss`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ snoozeDays: 7 }),
       });
     } catch {}
@@ -105,9 +107,9 @@ export function NpsSurvey({
   const handleDismiss = useCallback(async () => {
     try {
       await fetch(`${apiBaseUrl}/api/feedback/dismiss`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ snoozeDays: 30 }),
       });
     } catch {}
@@ -119,10 +121,10 @@ export function NpsSurvey({
       initial={{ opacity: 0, y: 20, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 10, scale: 0.97 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       className={cn(
-        "relative bg-card border border-border rounded-2xl shadow-xl shadow-black/10 p-5 w-full max-w-md",
-        className
+        'relative bg-card border border-border rounded-2xl shadow-xl shadow-black/10 p-5 w-full max-w-md',
+        className,
       )}
     >
       <button
@@ -134,7 +136,7 @@ export function NpsSurvey({
       </button>
 
       <AnimatePresence mode="wait">
-        {step === "score" && (
+        {step === 'score' && (
           <m.div
             key="score"
             initial={{ opacity: 0, x: 10 }}
@@ -144,11 +146,15 @@ export function NpsSurvey({
             className="space-y-5"
           >
             <div>
-              <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Quick Feedback</div>
+              <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
+                Quick Feedback
+              </div>
               <h3 className="text-sm font-semibold text-foreground leading-snug pr-6">
                 How likely are you to recommend this platform to a colleague?
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">0 = Not at all likely · 10 = Extremely likely</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                0 = Not at all likely · 10 = Extremely likely
+              </p>
             </div>
 
             <div className="flex gap-1.5 flex-wrap">
@@ -157,10 +163,10 @@ export function NpsSurvey({
                   key={score}
                   onClick={() => handleScoreSelect(score)}
                   className={cn(
-                    "w-9 h-9 rounded-lg border text-xs font-bold transition-all duration-150",
+                    'w-9 h-9 rounded-lg border text-xs font-bold transition-all duration-150',
                     selectedScore === score
                       ? getScoreColor(score)
-                      : "bg-background border-border text-foreground hover:border-primary/40 hover:bg-primary/5"
+                      : 'bg-background border-border text-foreground hover:border-primary/40 hover:bg-primary/5',
                   )}
                 >
                   {score}
@@ -185,10 +191,10 @@ export function NpsSurvey({
                 onClick={handleNext}
                 disabled={selectedScore === null}
                 className={cn(
-                  "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all",
+                  'flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all',
                   selectedScore !== null
-                    ? "bg-primary text-white hover:bg-primary/90"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                    ? 'bg-primary text-white hover:bg-primary/90'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed',
                 )}
               >
                 Next <ChevronRight className="w-3.5 h-3.5" />
@@ -197,7 +203,7 @@ export function NpsSurvey({
           </m.div>
         )}
 
-        {step === "comment" && (
+        {step === 'comment' && (
           <m.div
             key="comment"
             initial={{ opacity: 0, x: 10 }}
@@ -208,18 +214,26 @@ export function NpsSurvey({
           >
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className={cn("w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold flex-shrink-0", getScoreColor(selectedScore), getScoreRingColor(selectedScore))}>
+                <span
+                  className={cn(
+                    'w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold flex-shrink-0',
+                    getScoreColor(selectedScore),
+                    getScoreRingColor(selectedScore),
+                  )}
+                >
                   {selectedScore}
                 </span>
                 <h3 className="text-sm font-semibold text-foreground">
                   {selectedScore !== null && selectedScore >= 9
-                    ? "Great to hear! What do you love most?"
+                    ? 'Great to hear! What do you love most?'
                     : selectedScore !== null && selectedScore >= 7
-                    ? "Thanks! What could we improve?"
-                    : "We appreciate your honesty. What went wrong?"}
+                      ? 'Thanks! What could we improve?'
+                      : 'We appreciate your honesty. What went wrong?'}
                 </h3>
               </div>
-              <p className="text-xs text-muted-foreground">Optional — share any thoughts (max 500 chars)</p>
+              <p className="text-xs text-muted-foreground">
+                Optional — share any thoughts (max 500 chars)
+              </p>
             </div>
 
             <textarea
@@ -230,13 +244,11 @@ export function NpsSurvey({
               className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none transition-all"
             />
 
-            {error && (
-              <p className="text-xs text-red-500">{error}</p>
-            )}
+            {error && <p className="text-xs text-red-500">{error}</p>}
 
             <div className="flex items-center justify-between gap-3">
               <button
-                onClick={() => setStep("score")}
+                onClick={() => setStep('score')}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 ← Back
@@ -251,13 +263,13 @@ export function NpsSurvey({
                 ) : (
                   <Send className="w-3.5 h-3.5" />
                 )}
-                {loading ? "Sending..." : "Submit"}
+                {loading ? 'Sending...' : 'Submit'}
               </button>
             </div>
           </m.div>
         )}
 
-        {step === "done" && (
+        {step === 'done' && (
           <m.div
             key="done"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -265,12 +277,20 @@ export function NpsSurvey({
             className="py-4 text-center space-y-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto">
-              <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg
+                className="w-5 h-5 text-emerald-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <h3 className="text-sm font-semibold text-foreground">Thank you for your feedback!</h3>
-            <p className="text-xs text-muted-foreground">Your response helps us improve the platform for everyone.</p>
+            <p className="text-xs text-muted-foreground">
+              Your response helps us improve the platform for everyone.
+            </p>
           </m.div>
         )}
       </AnimatePresence>
@@ -280,20 +300,24 @@ export function NpsSurvey({
 
 export interface NpsSurveyOverlayProps extends NpsSurveyProps {
   visible: boolean;
-  position?: "bottom-right" | "bottom-center" | "bottom-left";
+  position?: 'bottom-right' | 'bottom-center' | 'bottom-left';
 }
 
-export function NpsSurveyOverlay({ visible, position = "bottom-right", ...props }: NpsSurveyOverlayProps) {
+export function NpsSurveyOverlay({
+  visible,
+  position = 'bottom-right',
+  ...props
+}: NpsSurveyOverlayProps) {
   const positionClass = {
-    "bottom-right": "bottom-6 right-6",
-    "bottom-center": "bottom-6 left-1/2 -translate-x-1/2",
-    "bottom-left": "bottom-6 left-6",
+    'bottom-right': 'bottom-6 right-6',
+    'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2',
+    'bottom-left': 'bottom-6 left-6',
   }[position];
 
   return (
     <AnimatePresence>
       {visible && (
-        <div className={cn("fixed z-50", positionClass)}>
+        <div className={cn('fixed z-50', positionClass)}>
           <NpsSurvey {...props} />
         </div>
       )}
@@ -302,7 +326,7 @@ export function NpsSurveyOverlay({ visible, position = "bottom-right", ...props 
 }
 
 export function useNpsSurvey({
-  apiBaseUrl = "",
+  apiBaseUrl = '',
   appName,
   userRole,
   triggerDelayMs = 5000,
@@ -319,9 +343,11 @@ export function useNpsSurvey({
     if (checked) return;
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`${apiBaseUrl}/api/feedback/nps-eligibility`, { credentials: "include" });
+        const res = await fetch(`${apiBaseUrl}/api/feedback/nps-eligibility`, {
+          credentials: 'include',
+        });
         if (res.ok) {
-          const data = await res.json() as { eligible: boolean };
+          const data = (await res.json()) as { eligible: boolean };
           if (data.eligible) setVisible(true);
         }
       } catch {

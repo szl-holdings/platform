@@ -11,27 +11,27 @@
  *   - Emits audit events for every state transition
  */
 
-import { randomUUID } from "crypto";
-import type { WorkflowDefinition, WorkflowRun, StepResult } from "./types.js";
-import { DEFAULT_RETRY_POLICY } from "./types.js";
-import type { CheckpointStore } from "./checkpoint-store.js";
-import { createCheckpoint, defaultCheckpointStore } from "./checkpoint-store.js";
-import type { RunStore } from "./run-store.js";
-import { defaultRunStore } from "./run-store.js";
-import type { AuditEmitter } from "./audit.js";
-import { defaultAuditEmitter } from "./audit.js";
-import type { StorageAdapters } from "./storage/interfaces.js";
-import { devRawDocumentStore, devChunkStore, devIndexStore } from "./storage/dev.js";
-import type { ActorContext } from "./actors/index.js";
+import { randomUUID } from 'crypto';
+import type { ActorContext } from './actors/index.js';
 import {
-  IngestionPlanner,
-  SchemaMapper,
-  PolicyGuard,
   EmbedDispatcher,
-  IndexVerifier,
-  RetrievalEvaluator,
   HumanApprovalGate,
-} from "./actors/index.js";
+  IndexVerifier,
+  IngestionPlanner,
+  PolicyGuard,
+  RetrievalEvaluator,
+  SchemaMapper,
+} from './actors/index.js';
+import type { AuditEmitter } from './audit.js';
+import { defaultAuditEmitter } from './audit.js';
+import type { CheckpointStore } from './checkpoint-store.js';
+import { createCheckpoint, defaultCheckpointStore } from './checkpoint-store.js';
+import type { RunStore } from './run-store.js';
+import { defaultRunStore } from './run-store.js';
+import { devChunkStore, devIndexStore, devRawDocumentStore } from './storage/dev.js';
+import type { StorageAdapters } from './storage/interfaces.js';
+import type { StepResult, WorkflowDefinition, WorkflowRun } from './types.js';
+import { DEFAULT_RETRY_POLICY } from './types.js';
 
 // ─── Default Storage ──────────────────────────────────────────────────────────
 
@@ -63,28 +63,25 @@ export interface EngineOptions {
 //   the corresponding field from the prior step output.
 //   If a value equals "__from_run__", replace with the run ID.
 
-function resolveStepInput(
-  rawInput: unknown,
-  priorOutput: unknown,
-  runId: string,
-): unknown {
-  if (rawInput === "__from_prev__") return priorOutput;
-  if (rawInput === "__from_run__") return runId;
-  if (rawInput === null || typeof rawInput !== "object") return rawInput;
+function resolveStepInput(rawInput: unknown, priorOutput: unknown, runId: string): unknown {
+  if (rawInput === '__from_prev__') return priorOutput;
+  if (rawInput === '__from_run__') return runId;
+  if (rawInput === null || typeof rawInput !== 'object') return rawInput;
   if (Array.isArray(rawInput)) {
     return rawInput.map((item) => resolveStepInput(item, priorOutput, runId));
   }
 
   const obj = rawInput as Record<string, unknown>;
-  const priorObj = (priorOutput !== null && typeof priorOutput === "object" && !Array.isArray(priorOutput))
-    ? (priorOutput as Record<string, unknown>)
-    : {};
+  const priorObj =
+    priorOutput !== null && typeof priorOutput === 'object' && !Array.isArray(priorOutput)
+      ? (priorOutput as Record<string, unknown>)
+      : {};
 
   const resolved: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (value === "__from_prev__") {
+    if (value === '__from_prev__') {
       resolved[key] = priorObj[key] ?? priorOutput;
-    } else if (value === "__from_run__") {
+    } else if (value === '__from_run__') {
       resolved[key] = runId;
     } else {
       resolved[key] = resolveStepInput(value, priorOutput, runId);
@@ -128,7 +125,7 @@ export class OrchestratorEngine {
       workflowName: definition.name,
       tenantId: params.tenantId,
       profileId: params.profileId,
-      status: "queued",
+      status: 'queued',
       input: params.input,
       stepResults: [],
       currentStepIndex: 0,
@@ -143,7 +140,7 @@ export class OrchestratorEngine {
       workflowId: definition.workflowId,
       tenantId: params.tenantId,
       profileId: params.profileId,
-      kind: "run.started",
+      kind: 'run.started',
       payload: { workflowName: definition.name },
     });
 
@@ -155,29 +152,29 @@ export class OrchestratorEngine {
   async resume(
     runId: string,
     definition: WorkflowDefinition,
-    decision: "approved" | "rejected",
+    decision: 'approved' | 'rejected',
     actorId?: string,
     note?: string,
   ): Promise<WorkflowRun> {
     const run = this.runStore.get(runId);
     if (!run) throw new Error(`Run not found: ${runId}`);
-    if (run.status !== "pending-approval") {
+    if (run.status !== 'pending-approval') {
       throw new Error(`Run ${runId} is not pending-approval (status=${run.status})`);
     }
 
-    if (decision === "rejected") {
+    if (decision === 'rejected') {
       this.audit.emit({
         runId,
         workflowId: run.workflowId,
         tenantId: run.tenantId,
         profileId: run.profileId,
-        kind: "approval.rejected",
+        kind: 'approval.rejected',
         payload: { actorId: actorId ?? null, note: note ?? null },
       });
       const updated: WorkflowRun = {
         ...run,
-        status: "failed",
-        error: `Approval rejected by ${actorId ?? "operator"}${note ? `: ${note}` : ""}`,
+        status: 'failed',
+        error: `Approval rejected by ${actorId ?? 'operator'}${note ? `: ${note}` : ''}`,
         updatedAt: new Date().toISOString(),
       };
       this.runStore.save(updated);
@@ -189,7 +186,7 @@ export class OrchestratorEngine {
       workflowId: run.workflowId,
       tenantId: run.tenantId,
       profileId: run.profileId,
-      kind: "approval.granted",
+      kind: 'approval.granted',
       payload: { actorId: actorId ?? null, note: note ?? null },
     });
 
@@ -205,12 +202,12 @@ export class OrchestratorEngine {
   cancel(runId: string): WorkflowRun {
     const run = this.runStore.get(runId);
     if (!run) throw new Error(`Run not found: ${runId}`);
-    if (run.status === "completed" || run.status === "failed" || run.status === "cancelled") {
+    if (run.status === 'completed' || run.status === 'failed' || run.status === 'cancelled') {
       throw new Error(`Run ${runId} is already terminal (status=${run.status})`);
     }
     const updated: WorkflowRun = {
       ...run,
-      status: "cancelled",
+      status: 'cancelled',
       updatedAt: new Date().toISOString(),
     };
     this.runStore.save(updated);
@@ -219,7 +216,7 @@ export class OrchestratorEngine {
       workflowId: run.workflowId,
       tenantId: run.tenantId,
       profileId: run.profileId,
-      kind: "run.cancelled",
+      kind: 'run.cancelled',
       payload: {},
     });
     return updated;
@@ -235,7 +232,7 @@ export class OrchestratorEngine {
   ): Promise<WorkflowRun> {
     let currentRun: WorkflowRun = {
       ...run,
-      status: "running",
+      status: 'running',
       stepResults: [...priorResults],
       updatedAt: new Date().toISOString(),
     };
@@ -259,7 +256,7 @@ export class OrchestratorEngine {
         workflowId: definition.workflowId,
         tenantId: currentRun.tenantId,
         profileId: currentRun.profileId,
-        kind: "step.started",
+        kind: 'step.started',
         payload: { stepId: step.stepId, actor: step.actor, stepIndex: i },
       });
 
@@ -272,22 +269,22 @@ export class OrchestratorEngine {
         audit: this.audit,
       };
 
-      if (step.actor === "HumanApprovalGate") {
+      if (step.actor === 'HumanApprovalGate') {
         const gateInput = resolvedInput as Parameters<typeof HumanApprovalGate>[0];
         let gateOutput: Awaited<ReturnType<typeof HumanApprovalGate>>;
         try {
           gateOutput = await HumanApprovalGate(gateInput, actorCtx);
         } catch (err) {
           const error = err instanceof Error ? err.message : String(err);
-          const failedRun = this._failRun(currentRun, step.stepId, "HumanApprovalGate", error, i);
+          const failedRun = this._failRun(currentRun, step.stepId, 'HumanApprovalGate', error, i);
           this.runStore.save(failedRun);
           return failedRun;
         }
 
         const gateResult: StepResult = {
           stepId: step.stepId,
-          actor: "HumanApprovalGate",
-          status: "pending-approval",
+          actor: 'HumanApprovalGate',
+          status: 'pending-approval',
           output: gateOutput,
           startedAt: new Date().toISOString(),
           attempt: 1,
@@ -302,7 +299,7 @@ export class OrchestratorEngine {
           ...currentRun,
           stepResults: [...currentRun.stepResults, gateResult],
           currentStepIndex: i,
-          status: "pending-approval",
+          status: 'pending-approval',
           approvalRequestId: gateOutput.approvalRequestId,
           latestCheckpointId: checkpoint.checkpointId,
           updatedAt: new Date().toISOString(),
@@ -314,7 +311,7 @@ export class OrchestratorEngine {
           workflowId: definition.workflowId,
           tenantId: currentRun.tenantId,
           profileId: currentRun.profileId,
-          kind: "checkpoint.saved",
+          kind: 'checkpoint.saved',
           payload: { checkpointId: checkpoint.checkpointId, stepIndex: i },
         });
         return currentRun;
@@ -340,10 +337,10 @@ export class OrchestratorEngine {
         updatedAt: new Date().toISOString(),
       };
 
-      if (stepResult.status === "failed") {
+      if (stepResult.status === 'failed') {
         currentRun = {
           ...currentRun,
-          status: "failed",
+          status: 'failed',
           error: stepResult.error ?? `Step ${step.stepId} failed`,
           completedAt: new Date().toISOString(),
         };
@@ -353,7 +350,7 @@ export class OrchestratorEngine {
           workflowId: definition.workflowId,
           tenantId: currentRun.tenantId,
           profileId: currentRun.profileId,
-          kind: "run.failed",
+          kind: 'run.failed',
           payload: { stepId: step.stepId, error: currentRun.error },
         });
         return currentRun;
@@ -371,7 +368,7 @@ export class OrchestratorEngine {
         workflowId: definition.workflowId,
         tenantId: currentRun.tenantId,
         profileId: currentRun.profileId,
-        kind: "checkpoint.saved",
+        kind: 'checkpoint.saved',
         payload: { checkpointId: checkpoint.checkpointId, stepIndex: i },
       });
     }
@@ -379,7 +376,7 @@ export class OrchestratorEngine {
     const completedAt = new Date().toISOString();
     currentRun = {
       ...currentRun,
-      status: "completed",
+      status: 'completed',
       completedAt,
       updatedAt: completedAt,
     };
@@ -389,7 +386,7 @@ export class OrchestratorEngine {
       workflowId: definition.workflowId,
       tenantId: currentRun.tenantId,
       profileId: currentRun.profileId,
-      kind: "run.completed",
+      kind: 'run.completed',
       payload: { stepCount: definition.steps.length },
     });
 
@@ -409,7 +406,7 @@ export class OrchestratorEngine {
     profileId: string,
   ): Promise<StepResult> {
     const startedAt = new Date().toISOString();
-    let lastError = "";
+    let lastError = '';
     for (let attempt = 1; attempt <= retryPolicy.maxAttempts; attempt++) {
       const t0 = Date.now();
       try {
@@ -420,13 +417,13 @@ export class OrchestratorEngine {
           workflowId,
           tenantId,
           profileId,
-          kind: "step.completed",
+          kind: 'step.completed',
           payload: { stepId, actor, attempt, durationMs, stepIndex },
         });
         return {
           stepId,
-          actor: actor as StepResult["actor"],
-          status: "completed",
+          actor: actor as StepResult['actor'],
+          status: 'completed',
           output,
           startedAt,
           completedAt: new Date().toISOString(),
@@ -440,7 +437,7 @@ export class OrchestratorEngine {
           workflowId,
           tenantId,
           profileId,
-          kind: attempt < retryPolicy.maxAttempts ? "step.retrying" : "step.failed",
+          kind: attempt < retryPolicy.maxAttempts ? 'step.retrying' : 'step.failed',
           payload: { stepId, actor, attempt, error: lastError, stepIndex },
         });
         if (attempt < retryPolicy.maxAttempts) {
@@ -451,8 +448,8 @@ export class OrchestratorEngine {
 
     return {
       stepId,
-      actor: actor as StepResult["actor"],
-      status: "failed",
+      actor: actor as StepResult['actor'],
+      status: 'failed',
       error: lastError,
       startedAt,
       completedAt: new Date().toISOString(),
@@ -462,19 +459,19 @@ export class OrchestratorEngine {
 
   private async _invokeActor(actor: string, input: unknown, ctx: ActorContext): Promise<unknown> {
     switch (actor) {
-      case "IngestionPlanner":
+      case 'IngestionPlanner':
         return IngestionPlanner(input as Parameters<typeof IngestionPlanner>[0], ctx);
-      case "SchemaMapper":
+      case 'SchemaMapper':
         return SchemaMapper(input as Parameters<typeof SchemaMapper>[0], ctx);
-      case "PolicyGuard":
+      case 'PolicyGuard':
         return PolicyGuard(input as Parameters<typeof PolicyGuard>[0], ctx);
-      case "EmbedDispatcher":
+      case 'EmbedDispatcher':
         return EmbedDispatcher(input as Parameters<typeof EmbedDispatcher>[0], ctx);
-      case "IndexVerifier":
+      case 'IndexVerifier':
         return IndexVerifier(input as Parameters<typeof IndexVerifier>[0], ctx);
-      case "RetrievalEvaluator":
+      case 'RetrievalEvaluator':
         return RetrievalEvaluator(input as Parameters<typeof RetrievalEvaluator>[0], ctx);
-      case "HumanApprovalGate":
+      case 'HumanApprovalGate':
         return HumanApprovalGate(input as Parameters<typeof HumanApprovalGate>[0], ctx);
       default:
         throw new Error(`Unknown actor: ${actor}`);
@@ -484,14 +481,14 @@ export class OrchestratorEngine {
   private _failRun(
     run: WorkflowRun,
     stepId: string,
-    actor: StepResult["actor"],
+    actor: StepResult['actor'],
     error: string,
     stepIndex: number,
   ): WorkflowRun {
     const failedResult: StepResult = {
       stepId,
       actor,
-      status: "failed",
+      status: 'failed',
       error,
       startedAt: new Date().toISOString(),
       attempt: 1,
@@ -501,12 +498,12 @@ export class OrchestratorEngine {
       workflowId: run.workflowId,
       tenantId: run.tenantId,
       profileId: run.profileId,
-      kind: "run.failed",
+      kind: 'run.failed',
       payload: { stepId, error, stepIndex },
     });
     return {
       ...run,
-      status: "failed",
+      status: 'failed',
       stepResults: [...run.stepResults, failedResult],
       error,
       currentStepIndex: stepIndex,

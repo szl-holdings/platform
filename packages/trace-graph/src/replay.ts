@@ -1,6 +1,6 @@
-import type { TraceRecord, TraceSpan, RunGrade } from "./schema.js";
-import type { TraceStore } from "./store.js";
-import { defaultTraceStore } from "./store.js";
+import type { RunGrade, TraceRecord, TraceSpan } from './schema.js';
+import type { TraceStore } from './store.js';
+import { defaultTraceStore } from './store.js';
 
 export interface TraceTree {
   trace: TraceRecord;
@@ -35,8 +35,8 @@ export interface TraceDiff {
   toolCallCountDelta: number;
   errorCountDelta: number;
   retrialDelta: number;
-  statusA: TraceRecord["status"];
-  statusB: TraceRecord["status"];
+  statusA: TraceRecord['status'];
+  statusB: TraceRecord['status'];
   modelChanged: boolean;
   modelsAdded: string[];
   modelsRemoved: string[];
@@ -143,15 +143,14 @@ export class TraceReplayer {
     const errorCountDelta = b.errors.length - a.errors.length;
     const retrialDelta = b.retries - a.retries;
 
-    const modelChanged = (b.model ?? "") !== (a.model ?? "");
+    const modelChanged = (b.model ?? '') !== (a.model ?? '');
     const modelsA = new Set(a.modelsUsed);
     const modelsB = new Set(b.modelsUsed);
     const modelsAdded = [...modelsB].filter((m) => !modelsA.has(m));
     const modelsRemoved = [...modelsA].filter((m) => !modelsB.has(m));
 
     const promptVersionsChanged =
-      JSON.stringify([...a.promptVersions].sort()) !==
-      JSON.stringify([...b.promptVersions].sort());
+      JSON.stringify([...a.promptVersions].sort()) !== JSON.stringify([...b.promptVersions].sort());
 
     const toolNamesA = new Set(a.toolCalls.map((t) => t.toolName));
     const toolNamesB = new Set(b.toolCalls.map((t) => t.toolName));
@@ -162,13 +161,11 @@ export class TraceReplayer {
     const verifierPassRateB = calcVerifierPassRate(b);
     const verifierPassRateDelta = verifierPassRateB - verifierPassRateA;
 
-    const outputChanged =
-      JSON.stringify(a.output ?? null) !== JSON.stringify(b.output ?? null);
+    const outputChanged = JSON.stringify(a.output ?? null) !== JSON.stringify(b.output ?? null);
 
     const gradeA = a.grade?.score ?? null;
     const gradeB = b.grade?.score ?? null;
-    const gradeScoreDelta =
-      gradeA !== null && gradeB !== null ? gradeB - gradeA : null;
+    const gradeScoreDelta = gradeA !== null && gradeB !== null ? gradeB - gradeA : null;
 
     const regressionReasons: string[] = [];
     if (
@@ -179,10 +176,7 @@ export class TraceReplayer {
         `Latency increased by ${latencyDeltaMs}ms (threshold: ${thresholds.latencyRegressionMs}ms)`,
       );
     }
-    if (
-      thresholds.costRegressionUsd !== undefined &&
-      costDeltaUsd > thresholds.costRegressionUsd
-    ) {
+    if (thresholds.costRegressionUsd !== undefined && costDeltaUsd > thresholds.costRegressionUsd) {
       regressionReasons.push(
         `Cost increased by $${costDeltaUsd.toFixed(4)} (threshold: $${thresholds.costRegressionUsd})`,
       );
@@ -246,20 +240,20 @@ export class TraceReplayer {
 
 function calcVerifierPassRate(trace: TraceRecord): number {
   if (trace.verifierDecisions.length === 0) return 1.0;
-  const passes = trace.verifierDecisions.filter((v) => v.outcome === "pass").length;
+  const passes = trace.verifierDecisions.filter((v) => v.outcome === 'pass').length;
   return passes / trace.verifierDecisions.length;
 }
 
 export interface TraceReplayVisitor {
   onTraceStart?: (trace: TraceRecord) => void;
   onTraceEnd?: (trace: TraceRecord) => void;
-  onToolCall?: (call: TraceRecord["toolCalls"][0], trace: TraceRecord) => void;
-  onRetrieval?: (retrieval: TraceRecord["retrieval"][0], trace: TraceRecord) => void;
-  onMemoryIO?: (io: TraceRecord["memoryIO"][0], trace: TraceRecord) => void;
-  onGuardrailResult?: (result: TraceRecord["guardrailResults"][0], trace: TraceRecord) => void;
-  onVerifierDecision?: (decision: TraceRecord["verifierDecisions"][0], trace: TraceRecord) => void;
-  onReflection?: (reflection: TraceRecord["reflections"][0], trace: TraceRecord) => void;
-  onRollbackPoint?: (point: TraceRecord["rollbackPoints"][0], trace: TraceRecord) => void;
+  onToolCall?: (call: TraceRecord['toolCalls'][0], trace: TraceRecord) => void;
+  onRetrieval?: (retrieval: TraceRecord['retrieval'][0], trace: TraceRecord) => void;
+  onMemoryIO?: (io: TraceRecord['memoryIO'][0], trace: TraceRecord) => void;
+  onGuardrailResult?: (result: TraceRecord['guardrailResults'][0], trace: TraceRecord) => void;
+  onVerifierDecision?: (decision: TraceRecord['verifierDecisions'][0], trace: TraceRecord) => void;
+  onReflection?: (reflection: TraceRecord['reflections'][0], trace: TraceRecord) => void;
+  onRollbackPoint?: (point: TraceRecord['rollbackPoints'][0], trace: TraceRecord) => void;
   onSpan?: (span: TraceSpan, trace: TraceRecord) => void;
 }
 

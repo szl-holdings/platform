@@ -10,33 +10,27 @@
  * a new tab from the Command artifact.
  */
 
-export type ProductKey =
-  | "lyte"
-  | "vessels"
-  | "terra"
-  | "prism"
-  | "aegis"
-  | "carlota";
+export type ProductKey = 'lyte' | 'vessels' | 'terra' | 'prism' | 'aegis' | 'carlota';
 
 const enc = (s: string) => encodeURIComponent(s);
 
 /** Dashboard / home URL for a given product. */
 export function productDashboardUrl(product: string): string {
   switch (product.toLowerCase()) {
-    case "vessels":
-      return "/vessels/dashboard";
-    case "terra":
-      return "/terra/dashboard";
-    case "carlota":
-      return "/carlota-jo/";
-    case "aegis":
-      return "/aegis/";
-    case "prism":
-      return "/operations/prism";
-    case "lyte":
-      return "/operations";
+    case 'vessels':
+      return '/vessels/dashboard';
+    case 'terra':
+      return '/terra/dashboard';
+    case 'carlota':
+      return '/carlota-jo/';
+    case 'aegis':
+      return '/aegis/';
+    case 'prism':
+      return '/operations/prism';
+    case 'lyte':
+      return '/operations';
     default:
-      return "/";
+      return '/';
   }
 }
 
@@ -44,26 +38,23 @@ export function productDashboardUrl(product: string): string {
  * Detail-page URL for a specific entity inside a product.
  * Returns null if the product does not have a per-entity detail surface.
  */
-export function productEntityUrl(
-  product: string,
-  entityId: string
-): string | null {
+export function productEntityUrl(product: string, entityId: string): string | null {
   if (!entityId) return null;
   const id = enc(entityId);
   switch (product.toLowerCase()) {
-    case "vessels":
+    case 'vessels':
       // Wouter route `/vessels/:id` mounted under base `/vessels`.
       return `/vessels/vessels/${id}`;
-    case "terra":
+    case 'terra':
       // Wouter route `/property/:id` mounted under base `/terra`.
       return `/terra/property/${id}`;
-    case "carlota":
+    case 'carlota':
       return `/carlota-jo/inquiries?entity=${id}`;
-    case "prism":
+    case 'prism':
       return `/operations/prism?entity=${id}`;
-    case "aegis":
+    case 'aegis':
       return `/aegis/?entity=${id}`;
-    case "lyte":
+    case 'lyte':
       return `/operations?entity=${id}`;
     default:
       return null;
@@ -79,80 +70,80 @@ export function productEntityUrl(
  */
 export function inferProductForEntity(
   entityId: string,
-  candidateProducts: string[] = []
+  candidateProducts: string[] = [],
 ): ProductKey {
   const id = entityId.toLowerCase();
 
   // Vessels / maritime
   if (
-    id.startsWith("imo") ||
-    id.startsWith("mmsi") ||
-    id.startsWith("vessel") ||
-    id.startsWith("voyage") ||
-    id.startsWith("port-")
+    id.startsWith('imo') ||
+    id.startsWith('mmsi') ||
+    id.startsWith('vessel') ||
+    id.startsWith('voyage') ||
+    id.startsWith('port-')
   ) {
-    return "vessels";
+    return 'vessels';
   }
 
   // Terra / real estate
   if (
-    id.startsWith("bbl") ||
-    id.startsWith("bin-") ||
-    id.startsWith("dp-") ||
-    id.startsWith("prop") ||
-    id.startsWith("nyc-") ||
-    id.startsWith("parcel") ||
-    id.startsWith("listing")
+    id.startsWith('bbl') ||
+    id.startsWith('bin-') ||
+    id.startsWith('dp-') ||
+    id.startsWith('prop') ||
+    id.startsWith('nyc-') ||
+    id.startsWith('parcel') ||
+    id.startsWith('listing')
   ) {
-    return "terra";
+    return 'terra';
   }
 
   // PRISM Counsel
   if (
-    id.startsWith("matter") ||
-    id.startsWith("case-") ||
-    id.startsWith("prism") ||
-    id.startsWith("filing")
+    id.startsWith('matter') ||
+    id.startsWith('case-') ||
+    id.startsWith('prism') ||
+    id.startsWith('filing')
   ) {
-    return "prism";
+    return 'prism';
   }
 
   // Aegis Security
   if (
-    id.startsWith("cve") ||
-    id.startsWith("finding") ||
-    id.startsWith("threat") ||
-    id.startsWith("ioc-") ||
-    id.startsWith("aegis")
+    id.startsWith('cve') ||
+    id.startsWith('finding') ||
+    id.startsWith('threat') ||
+    id.startsWith('ioc-') ||
+    id.startsWith('aegis')
   ) {
-    return "aegis";
+    return 'aegis';
   }
 
   // Carlota Jo Consulting
   if (
-    id.startsWith("carlota") ||
-    id.startsWith("engagement") ||
-    id.startsWith("partner") ||
-    id.startsWith("inq-")
+    id.startsWith('carlota') ||
+    id.startsWith('engagement') ||
+    id.startsWith('partner') ||
+    id.startsWith('inq-')
   ) {
-    return "carlota";
+    return 'carlota';
   }
 
   // Lyte AIOps
   if (
-    id.startsWith("inc-") ||
-    id.startsWith("incident") ||
-    id.startsWith("lyte") ||
-    id.startsWith("run-")
+    id.startsWith('inc-') ||
+    id.startsWith('incident') ||
+    id.startsWith('lyte') ||
+    id.startsWith('run-')
   ) {
-    return "lyte";
+    return 'lyte';
   }
 
   // Fallback: first product attached to the correlation.
   const fallback = candidateProducts[0]?.toLowerCase();
-  const known: ProductKey[] = ["lyte", "vessels", "terra", "prism", "aegis", "carlota"];
+  const known: ProductKey[] = ['lyte', 'vessels', 'terra', 'prism', 'aegis', 'carlota'];
   if (fallback && (known as string[]).includes(fallback)) {
     return fallback as ProductKey;
   }
-  return "lyte";
+  return 'lyte';
 }

@@ -1,37 +1,41 @@
 export {
-  OnboardingWizard,
+  ActivationBanner,
+  type ActivationBannerProps,
+  type ActivationStep,
+  SetupAlert,
+  type SetupAlertProps,
+} from './ActivationBanner';
+export { type ChangelogEntry, ChangelogPage } from './changelog-page';
+export { HelpTip, type HelpTipProps } from './help-tip';
+export {
   GettingStartedChecklist,
-  OnboardingReplayButton,
-  useOnboardingState,
-  useChecklistState,
-  type OnboardingStep,
+  type GettingStartedChecklistProps,
   type OnboardingChecklistItem,
   type OnboardingConfig,
+  OnboardingReplayButton,
+  type OnboardingStep,
+  OnboardingWizard,
   type OnboardingWizardProps,
-  type GettingStartedChecklistProps,
-} from "./legacy-wizard";
-export { ProductTour, type ProductTourStep, type ProductTourProps } from "./product-tour";
-export { useProductTour } from "./use-product-tour";
-export { OnboardingChecklist, type ChecklistItem, type OnboardingChecklistProps } from "./onboarding-checklist";
-export { HelpTip, type HelpTipProps } from "./help-tip";
-export { ChangelogPage, type ChangelogEntry } from "./changelog-page";
-export { useOnboardingAnalytics } from "./use-onboarding-analytics";
+  useChecklistState,
+  useOnboardingState,
+} from './legacy-wizard';
 export {
-  ActivationBanner,
-  SetupAlert,
-  type ActivationStep,
-  type ActivationBannerProps,
-  type SetupAlertProps,
-} from "./ActivationBanner";
+  type ChecklistItem,
+  OnboardingChecklist,
+  type OnboardingChecklistProps,
+} from './onboarding-checklist';
 export {
   PaywallGate,
-  TrialBanner,
   type PaywallGateProps,
+  TrialBanner,
   type TrialBannerProps,
-} from "./PaywallGate";
+} from './PaywallGate';
+export { ProductTour, type ProductTourProps, type ProductTourStep } from './product-tour';
 export {
-  useActivationState,
-  markActivationEvent,
   type ActivationState,
   type ActivationStateOptions,
-} from "./use-activation-state";
+  markActivationEvent,
+  useActivationState,
+} from './use-activation-state';
+export { useOnboardingAnalytics } from './use-onboarding-analytics';
+export { useProductTour } from './use-product-tour';

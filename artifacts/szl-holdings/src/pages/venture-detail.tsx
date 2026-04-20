@@ -1,20 +1,20 @@
-import { useEffect } from "react";
-import { m } from "framer-motion";
-import { useRoute, useLocation, Link } from "wouter";
-import { ArrowLeft, ArrowRight, ExternalLink, CheckCircle } from "lucide-react";
-import { SiteNav } from "@/components/SiteNav";
-import { SiteFooter } from "@/components/SiteFooter";
-import { StatusTag } from "@/components/StatusTag";
-import { KPIStrip } from "@/components/KPIStrip";
-import { SectionHeader } from "@/components/SectionHeader";
-import { CaseStudyBlock } from "@/components/CaseStudyBlock";
-import { TimelineBlock } from "@/components/TimelineBlock";
-import { InquiryForm } from "@/components/InquiryForm";
-import { getVentureById, ventures } from "@/data/ventures";
-import { analytics, initScrollDepthTracking } from "@/lib/analytics";
+import { m } from 'framer-motion';
+import { ArrowLeft, ArrowRight, CheckCircle, ExternalLink } from 'lucide-react';
+import { useEffect } from 'react';
+import { Link, useLocation, useRoute } from 'wouter';
+import { CaseStudyBlock } from '@/components/CaseStudyBlock';
+import { InquiryForm } from '@/components/InquiryForm';
+import { KPIStrip } from '@/components/KPIStrip';
+import { SectionHeader } from '@/components/SectionHeader';
+import { SiteFooter } from '@/components/SiteFooter';
+import { SiteNav } from '@/components/SiteNav';
+import { StatusTag } from '@/components/StatusTag';
+import { TimelineBlock } from '@/components/TimelineBlock';
+import { getVentureById, ventures } from '@/data/ventures';
+import { analytics, initScrollDepthTracking } from '@/lib/analytics';
 
 export default function VentureDetailPage() {
-  const [match, params] = useRoute("/ventures/:id");
+  const [match, params] = useRoute('/ventures/:id');
   const [, navigate] = useLocation();
   const ventureId = params?.id;
 
@@ -35,7 +35,9 @@ export default function VentureDetailPage() {
       <div className="min-h-screen bg-white">
         <SiteNav />
         <div className="max-w-6xl mx-auto px-6 pt-40 text-center">
-          <h1 className="font-[var(--font-display)] text-2xl font-bold text-szl-text mb-4">Venture not found</h1>
+          <h1 className="font-[var(--font-display)] text-2xl font-bold text-szl-text mb-4">
+            Venture not found
+          </h1>
           <Link href="/portfolio" className="text-szl-accent hover:underline text-sm">
             ← Back to Portfolio
           </Link>
@@ -72,7 +74,7 @@ export default function VentureDetailPage() {
                     style={{
                       backgroundColor: `${venture.accentColor}18`,
                       color: venture.accentColor,
-                      fontFamily: "var(--font-display)",
+                      fontFamily: 'var(--font-display)',
                     }}
                   >
                     {venture.name.slice(0, 1)}
@@ -81,7 +83,9 @@ export default function VentureDetailPage() {
                     <h1 className="font-[var(--font-display)] text-3xl sm:text-4xl font-extrabold text-szl-text">
                       {venture.name}
                     </h1>
-                    <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mt-1">{venture.category}</p>
+                    <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mt-1">
+                      {venture.category}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
@@ -116,7 +120,11 @@ export default function VentureDetailPage() {
         <section className="py-10 bg-szl-bg-secondary border-b border-szl-border">
           <div className="max-w-6xl mx-auto px-6">
             <KPIStrip
-              items={venture.metrics.map((m) => ({ value: m.value, label: m.label, trend: m.trend }))}
+              items={venture.metrics.map((m) => ({
+                value: m.value,
+                label: m.label,
+                trend: m.trend,
+              }))}
               variant="border"
             />
           </div>
@@ -126,24 +134,26 @@ export default function VentureDetailPage() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-start">
               <div>
-                <SectionHeader
-                  eyebrow="What It Is"
-                  title="The full picture."
-                  className="mb-6"
-                />
-                <p className="text-szl-text-secondary text-base leading-relaxed mb-8">{venture.description}</p>
+                <SectionHeader eyebrow="What It Is" title="The full picture." className="mb-6" />
+                <p className="text-szl-text-secondary text-base leading-relaxed mb-8">
+                  {venture.description}
+                </p>
 
                 <SectionHeader
                   eyebrow="Pain Solved"
                   title="The problem it fixes."
                   className="mb-4"
                 />
-                <p className="text-szl-text-secondary text-base leading-relaxed">{venture.painSolved}</p>
+                <p className="text-szl-text-secondary text-base leading-relaxed">
+                  {venture.painSolved}
+                </p>
               </div>
 
               <div className="space-y-6">
                 <div className="rounded-2xl border border-szl-border bg-szl-bg-secondary p-6">
-                  <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-4">Capabilities</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-4">
+                    Capabilities
+                  </p>
                   <div className="space-y-2.5">
                     {venture.capabilities.map((cap) => (
                       <div key={cap} className="flex items-start gap-2.5">
@@ -155,11 +165,16 @@ export default function VentureDetailPage() {
                 </div>
 
                 <div className="rounded-2xl border border-szl-border bg-szl-bg-secondary p-6">
-                  <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-4">Use Cases</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-4">
+                    Use Cases
+                  </p>
                   <div className="space-y-2">
                     {venture.useCases.map((uc) => (
                       <div key={uc} className="flex items-start gap-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: venture.accentColor }} />
+                        <span
+                          className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
+                          style={{ backgroundColor: venture.accentColor }}
+                        />
                         <span className="text-sm text-szl-text-secondary">{uc}</span>
                       </div>
                     ))}
@@ -187,22 +202,22 @@ export default function VentureDetailPage() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-12">
               <div>
-                <SectionHeader
-                  eyebrow="Timeline"
-                  title="Key milestones."
-                />
+                <SectionHeader eyebrow="Timeline" title="Key milestones." />
                 <TimelineBlock entries={venture.milestones} accentColor={venture.accentColor} />
               </div>
               <div>
-                <SectionHeader
-                  eyebrow="What's Next"
-                  title="Next milestone."
-                />
+                <SectionHeader eyebrow="What's Next" title="Next milestone." />
                 <div
                   className="rounded-2xl border p-6"
-                  style={{ borderColor: `${venture.accentColor}30`, backgroundColor: `${venture.accentColor}08` }}
+                  style={{
+                    borderColor: `${venture.accentColor}30`,
+                    backgroundColor: `${venture.accentColor}08`,
+                  }}
                 >
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: venture.accentColor }}>
+                  <p
+                    className="text-xs font-bold uppercase tracking-widest mb-2"
+                    style={{ color: venture.accentColor }}
+                  >
                     In Progress
                   </p>
                   <p className="font-[var(--font-display)] text-base font-bold text-szl-text">
@@ -231,9 +246,15 @@ export default function VentureDetailPage() {
         <section className="py-16 bg-white border-b border-szl-border">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="font-[var(--font-display)] text-xl font-bold text-szl-text">Other ventures</h2>
-              <Link href="/portfolio" className="group inline-flex items-center gap-1.5 text-sm text-szl-text-secondary hover:text-szl-accent transition-colors">
-                View all <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <h2 className="font-[var(--font-display)] text-xl font-bold text-szl-text">
+                Other ventures
+              </h2>
+              <Link
+                href="/portfolio"
+                className="group inline-flex items-center gap-1.5 text-sm text-szl-text-secondary hover:text-szl-accent transition-colors"
+              >
+                View all{' '}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
@@ -252,12 +273,18 @@ export default function VentureDetailPage() {
                   >
                     <div
                       className="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0"
-                      style={{ backgroundColor: `${ov.accentColor}18`, color: ov.accentColor, fontFamily: "var(--font-display)" }}
+                      style={{
+                        backgroundColor: `${ov.accentColor}18`,
+                        color: ov.accentColor,
+                        fontFamily: 'var(--font-display)',
+                      }}
                     >
                       {ov.name.slice(0, 1)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-szl-text group-hover:text-szl-accent transition-colors truncate">{ov.name}</p>
+                      <p className="text-sm font-semibold text-szl-text group-hover:text-szl-accent transition-colors truncate">
+                        {ov.name}
+                      </p>
                       <p className="text-[10px] text-szl-text-muted truncate">{ov.tagline}</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-szl-text-muted group-hover:text-szl-accent group-hover:translate-x-0.5 transition-all shrink-0" />

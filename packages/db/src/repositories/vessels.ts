@@ -2,13 +2,13 @@
  * Vessels maritime intelligence repository — typed query helpers.
  * Uses @szl-holdings/db as the single relational entry point.
  */
-import { db } from "@szl-holdings/db";
+import { db } from '@szl-holdings/db';
 
 export const vesselsRepo = {
   async getVesselCount(orgId?: number): Promise<number> {
     const query = orgId
       ? `SELECT COUNT(*) AS count FROM vessels_vessels WHERE org_id = ${orgId}`
-      : "SELECT COUNT(*) AS count FROM vessels_vessels";
+      : 'SELECT COUNT(*) AS count FROM vessels_vessels';
     const result = await db.execute<{ count: string }>(query);
     return Number(result.rows[0]?.count ?? 0);
   },

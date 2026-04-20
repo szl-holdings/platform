@@ -1,37 +1,37 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const CST_DOMAINS = [
-  "terra",
-  "prism",
-  "vessels",
-  "aegis",
-  "lyte",
-  "imperium",
-  "carlota-jo",
-  "platform",
+  'terra',
+  'prism',
+  'vessels',
+  'aegis',
+  'lyte',
+  'imperium',
+  'carlota-jo',
+  'platform',
 ] as const;
-export type CstDomain = typeof CST_DOMAINS[number];
+export type CstDomain = (typeof CST_DOMAINS)[number];
 
 export const CST_SENSITIVITY_TIERS = [
-  "public",
-  "internal",
-  "confidential",
-  "restricted",
-  "top_secret",
+  'public',
+  'internal',
+  'confidential',
+  'restricted',
+  'top_secret',
 ] as const;
-export type CstSensitivityTier = typeof CST_SENSITIVITY_TIERS[number];
+export type CstSensitivityTier = (typeof CST_SENSITIVITY_TIERS)[number];
 
 export const CST_PROVENANCE_SOURCE_TYPES = [
-  "api",
-  "feed",
-  "manual",
-  "agent",
-  "system",
-  "webhook",
-  "import",
-  "seed",
+  'api',
+  'feed',
+  'manual',
+  'agent',
+  'system',
+  'webhook',
+  'import',
+  'seed',
 ] as const;
-export type CstProvenanceSourceType = typeof CST_PROVENANCE_SOURCE_TYPES[number];
+export type CstProvenanceSourceType = (typeof CST_PROVENANCE_SOURCE_TYPES)[number];
 
 export const CstProvenanceSchema = z.object({
   sourceId: z.string(),
@@ -42,7 +42,7 @@ export type CstProvenance = z.infer<typeof CstProvenanceSchema>;
 
 export const CstOwnerSchema = z.object({
   ownerId: z.string(),
-  ownerType: z.enum(["human", "agent", "system", "organization"]),
+  ownerType: z.enum(['human', 'agent', 'system', 'organization']),
   ownerOrgId: z.string().optional(),
 });
 export type CstOwner = z.infer<typeof CstOwnerSchema>;
@@ -59,7 +59,7 @@ export const CstNodeSchema = z.object({
   freshness: z.string().datetime(),
   confidence: z.number().min(0).max(1),
   owner: CstOwnerSchema.optional(),
-  sensitivityTier: z.enum(CST_SENSITIVITY_TIERS).default("internal"),
+  sensitivityTier: z.enum(CST_SENSITIVITY_TIERS).default('internal'),
   relatedActionIds: z.array(z.string()).default([]),
   relatedDocumentIds: z.array(z.string()).default([]),
   relatedExecutionIds: z.array(z.string()).default([]),

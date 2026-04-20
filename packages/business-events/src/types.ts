@@ -1,33 +1,33 @@
 export type ATLASEventClass =
-  | "business.transaction.started"
-  | "business.transaction.completed"
-  | "business.transaction.failed"
-  | "business.risk.detected"
-  | "business.opportunity.created"
-  | "policy.violation.detected"
-  | "recommendation.generated"
-  | "action.approved"
-  | "action.executed"
-  | "action.failed"
-  | "outcome.realized";
+  | 'business.transaction.started'
+  | 'business.transaction.completed'
+  | 'business.transaction.failed'
+  | 'business.risk.detected'
+  | 'business.opportunity.created'
+  | 'policy.violation.detected'
+  | 'recommendation.generated'
+  | 'action.approved'
+  | 'action.executed'
+  | 'action.failed'
+  | 'outcome.realized';
 
 export type ATLASDomain =
-  | "maritime"
-  | "real-estate"
-  | "defense"
-  | "finance"
-  | "lyte"
-  | "workforce"
-  | "platform"
+  | 'maritime'
+  | 'real-estate'
+  | 'defense'
+  | 'finance'
+  | 'lyte'
+  | 'workforce'
+  | 'platform'
   | string;
 
-export type ATLASSeverity = "info" | "low" | "medium" | "high" | "critical";
+export type ATLASSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 
-export type ATLASSLAImpact = "none" | "at-risk" | "breached" | "recovered";
+export type ATLASSLAImpact = 'none' | 'at-risk' | 'breached' | 'recovered';
 
 export interface ATLASActor {
   actorId?: string;
-  actorType: "user" | "agent" | "system" | "automation";
+  actorType: 'user' | 'agent' | 'system' | 'automation';
   actorName?: string;
   tenantId?: string;
   orgId?: string;
@@ -36,7 +36,7 @@ export interface ATLASActor {
 export interface ATLASBusinessValue {
   amount?: number;
   currency?: string;
-  type: "at-risk" | "protected" | "created" | "lost" | "estimated";
+  type: 'at-risk' | 'protected' | 'created' | 'lost' | 'estimated';
   description?: string;
 }
 
@@ -63,25 +63,25 @@ export interface ATLASBaseEvent {
   tags?: string[];
   metadata?: Record<string, unknown>;
   timestamp: number;
-  schemaVersion: "1.0";
+  schemaVersion: '1.0';
 }
 
 export interface ATLASTransactionStartedEvent extends ATLASBaseEvent {
-  eventClass: "business.transaction.started";
+  eventClass: 'business.transaction.started';
   transactionType: string;
   transactionId: string;
 }
 
 export interface ATLASTransactionCompletedEvent extends ATLASBaseEvent {
-  eventClass: "business.transaction.completed";
+  eventClass: 'business.transaction.completed';
   transactionType: string;
   transactionId: string;
   durationMs: number;
-  outcome: "success" | "partial" | "compensated";
+  outcome: 'success' | 'partial' | 'compensated';
 }
 
 export interface ATLASTransactionFailedEvent extends ATLASBaseEvent {
-  eventClass: "business.transaction.failed";
+  eventClass: 'business.transaction.failed';
   transactionType: string;
   transactionId: string;
   durationMs: number;
@@ -91,7 +91,7 @@ export interface ATLASTransactionFailedEvent extends ATLASBaseEvent {
 }
 
 export interface ATLASRiskDetectedEvent extends ATLASBaseEvent {
-  eventClass: "business.risk.detected";
+  eventClass: 'business.risk.detected';
   riskType: string;
   riskScore?: number;
   riskFactors?: string[];
@@ -99,7 +99,7 @@ export interface ATLASRiskDetectedEvent extends ATLASBaseEvent {
 }
 
 export interface ATLASOpportunityCreatedEvent extends ATLASBaseEvent {
-  eventClass: "business.opportunity.created";
+  eventClass: 'business.opportunity.created';
   opportunityType: string;
   opportunityId: string;
   estimatedValue?: ATLASBusinessValue;
@@ -107,7 +107,7 @@ export interface ATLASOpportunityCreatedEvent extends ATLASBaseEvent {
 }
 
 export interface ATLASPolicyViolationEvent extends ATLASBaseEvent {
-  eventClass: "policy.violation.detected";
+  eventClass: 'policy.violation.detected';
   policyId: string;
   policyName: string;
   violationType: string;
@@ -116,7 +116,7 @@ export interface ATLASPolicyViolationEvent extends ATLASBaseEvent {
 }
 
 export interface ATLASRecommendationGeneratedEvent extends ATLASBaseEvent {
-  eventClass: "recommendation.generated";
+  eventClass: 'recommendation.generated';
   recommendationType: string;
   recommendationId: string;
   confidence?: number;
@@ -125,16 +125,16 @@ export interface ATLASRecommendationGeneratedEvent extends ATLASBaseEvent {
 }
 
 export interface ATLASActionApprovedEvent extends ATLASBaseEvent {
-  eventClass: "action.approved";
+  eventClass: 'action.approved';
   actionId: string;
   actionType: string;
   approvedByUserId?: string;
   approvalDelayMs?: number;
-  approvalLevel: "auto" | "human" | "executive";
+  approvalLevel: 'auto' | 'human' | 'executive';
 }
 
 export interface ATLASActionExecutedEvent extends ATLASBaseEvent {
-  eventClass: "action.executed";
+  eventClass: 'action.executed';
   actionId: string;
   actionType: string;
   executorId?: string;
@@ -143,7 +143,7 @@ export interface ATLASActionExecutedEvent extends ATLASBaseEvent {
 }
 
 export interface ATLASActionFailedEvent extends ATLASBaseEvent {
-  eventClass: "action.failed";
+  eventClass: 'action.failed';
   actionId: string;
   actionType: string;
   durationMs: number;
@@ -153,7 +153,7 @@ export interface ATLASActionFailedEvent extends ATLASBaseEvent {
 }
 
 export interface ATLASOutcomeRealizedEvent extends ATLASBaseEvent {
-  eventClass: "outcome.realized";
+  eventClass: 'outcome.realized';
   outcomeType: string;
   outcomeId?: string;
   measuredValue?: ATLASBusinessValue;

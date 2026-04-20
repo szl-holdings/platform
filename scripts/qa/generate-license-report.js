@@ -18,37 +18,60 @@
  * Output: security/license-report.md
  */
 
-import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, "../..");
-const STORE_DIR = join(ROOT, "node_modules/.pnpm");
-const OUTPUT_DIR = join(ROOT, "security");
-const OUTPUT_FILE = join(OUTPUT_DIR, "license-report.md");
+const ROOT = join(__dirname, '../..');
+const STORE_DIR = join(ROOT, 'node_modules/.pnpm');
+const OUTPUT_DIR = join(ROOT, 'security');
+const OUTPUT_FILE = join(OUTPUT_DIR, 'license-report.md');
 
 // SPDX identifiers that are explicitly copyleft — flag as REVIEW
 const COPYLEFT_IDENTIFIERS = [
-  "GPL-2.0", "GPL-3.0", "AGPL-3.0", "LGPL-2.0", "LGPL-2.1", "LGPL-3.0",
-  "MPL-2.0", "CDDL-1.0", "EPL-1.0", "EPL-2.0", "CC-BY-SA-", "OSL-3.0",
-  "Hippocratic",
+  'GPL-2.0',
+  'GPL-3.0',
+  'AGPL-3.0',
+  'LGPL-2.0',
+  'LGPL-2.1',
+  'LGPL-3.0',
+  'MPL-2.0',
+  'CDDL-1.0',
+  'EPL-1.0',
+  'EPL-2.0',
+  'CC-BY-SA-',
+  'OSL-3.0',
+  'Hippocratic',
 ];
 
 // SPDX identifiers known to be permissive — any license NOT in this set (and not in
 // copyleft list) gets flagged CHECK rather than OK, so non-standard strings don't slip
 // through as permitted.
 const PERMISSIVE_IDENTIFIERS = new Set([
-  "MIT", "MIT-0", "ISC", "BSD-2-Clause", "BSD-3-Clause", "BSD-4-Clause",
-  "Apache-2.0", "Apache 2.0", "0BSD", "BlueOak-1.0.0", "Unlicense",
-  "CC0-1.0", "CC-BY-4.0", "CC-BY-3.0",
-  "Python-2.0", "PSF-2.0",
-  "OFL-1.1",  // SIL Open Font License
-  "Zlib", "Zlib/libpng",
-  "W3C",
-  "Public Domain",
-  "WTFPL",
-  "EUPL-1.2",
+  'MIT',
+  'MIT-0',
+  'ISC',
+  'BSD-2-Clause',
+  'BSD-3-Clause',
+  'BSD-4-Clause',
+  'Apache-2.0',
+  'Apache 2.0',
+  '0BSD',
+  'BlueOak-1.0.0',
+  'Unlicense',
+  'CC0-1.0',
+  'CC-BY-4.0',
+  'CC-BY-3.0',
+  'Python-2.0',
+  'PSF-2.0',
+  'OFL-1.1', // SIL Open Font License
+  'Zlib',
+  'Zlib/libpng',
+  'W3C',
+  'Public Domain',
+  'WTFPL',
+  'EUPL-1.2',
 ]);
 
 function fatal(msg) {
@@ -61,11 +84,11 @@ function licenseString(pkg) {
   if (lic) return String(lic);
   if (pkg.licenses) {
     if (Array.isArray(pkg.licenses)) {
-      return pkg.licenses.map(l => l.type || l).join(" OR ");
+      return pkg.licenses.map((l) => l.type || l).join(' OR ');
     }
     return String(pkg.licenses);
   }
-  return "UNKNOWN";
+  return 'UNKNOWN';
 }
 
 /**
@@ -75,26 +98,26 @@ function licenseString(pkg) {
  */
 function normalizeLicense(license) {
   const aliases = {
-    "Apache 2.0": "Apache-2.0",
-    "Apache License 2.0": "Apache-2.0",
-    "Apache License, Version 2.0": "Apache-2.0",
-    "Apache-2": "Apache-2.0",
-    "BSD": "BSD-2-Clause",
-    "BSD-2": "BSD-2-Clause",
-    "BSD-3": "BSD-3-Clause",
-    "BSD3": "BSD-3-Clause",
-    "BSD2": "BSD-2-Clause",
-    "MIT License": "MIT",
-    "MIT/X11": "MIT",
-    "ISC License": "ISC",
-    "The ISC License": "ISC",
-    "Zlib/libpng": "Zlib",
-    "zlib": "Zlib",
-    "Public Domain": "Public Domain",
-    "CC-BY-3.0 AT": "CC-BY-3.0",
-    "CC0": "CC0-1.0",
-    "Unlicensed": "Unlicense",
-    "Free": "Unlicense",
+    'Apache 2.0': 'Apache-2.0',
+    'Apache License 2.0': 'Apache-2.0',
+    'Apache License, Version 2.0': 'Apache-2.0',
+    'Apache-2': 'Apache-2.0',
+    BSD: 'BSD-2-Clause',
+    'BSD-2': 'BSD-2-Clause',
+    'BSD-3': 'BSD-3-Clause',
+    BSD3: 'BSD-3-Clause',
+    BSD2: 'BSD-2-Clause',
+    'MIT License': 'MIT',
+    'MIT/X11': 'MIT',
+    'ISC License': 'ISC',
+    'The ISC License': 'ISC',
+    'Zlib/libpng': 'Zlib',
+    zlib: 'Zlib',
+    'Public Domain': 'Public Domain',
+    'CC-BY-3.0 AT': 'CC-BY-3.0',
+    CC0: 'CC0-1.0',
+    Unlicensed: 'Unlicense',
+    Free: 'Unlicense',
   };
   return aliases[license] ?? license;
 }
@@ -110,54 +133,60 @@ function normalizeLicense(license) {
  * license string is flagged for human review rather than silently permitted.
  */
 function flag(license) {
-  if (!license || license === "UNKNOWN") return "CHECK";
+  if (!license || license === 'UNKNOWN') return 'CHECK';
   license = normalizeLicense(license);
 
   // Non-standard indicators that always require manual review
   const customIndicators = [
-    "SEE LICENSE IN", "see license in",
-    "http://", "https://",
-    "Standard", "standard",
-    "no charge", "proprietary", "commercial",
-    "Proprietary", "Commercial",
+    'SEE LICENSE IN',
+    'see license in',
+    'http://',
+    'https://',
+    'Standard',
+    'standard',
+    'no charge',
+    'proprietary',
+    'commercial',
+    'Proprietary',
+    'Commercial',
   ];
   for (const ind of customIndicators) {
-    if (license.includes(ind)) return "CHECK";
+    if (license.includes(ind)) return 'CHECK';
   }
 
   // Known copyleft / restrictive → REVIEW
   for (const cp of COPYLEFT_IDENTIFIERS) {
-    if (license.includes(cp)) return "REVIEW";
+    if (license.includes(cp)) return 'REVIEW';
   }
 
   // Decompose compound expressions and check each token
   // Handles "(MIT OR GPL-3.0)", "(BSD-2-Clause OR MIT OR Apache-2.0)", etc.
   // Strip SPDX expression syntax: parentheses, AND, OR, WITH, ONLY, +
   const tokens = license
-    .replace(/[()]/g, " ")
+    .replace(/[()]/g, ' ')
     .split(/\s+(?:AND|OR|WITH)\s+|\s+/)
-    .map(t => t.replace(/\+$/, "").trim())
+    .map((t) => t.replace(/\+$/, '').trim())
     .filter(Boolean);
 
   for (const token of tokens) {
     // Re-check each token against copyleft
     for (const cp of COPYLEFT_IDENTIFIERS) {
-      if (token.includes(cp)) return "REVIEW";
+      if (token.includes(cp)) return 'REVIEW';
     }
     // If any token is not in the permissive allowlist, flag CHECK
-    if (!PERMISSIVE_IDENTIFIERS.has(token)) return "CHECK";
+    if (!PERMISSIVE_IDENTIFIERS.has(token)) return 'CHECK';
   }
 
-  return "OK";
+  return 'OK';
 }
 
 function readPackage(pkgJsonPath, fallbackName) {
   try {
-    const raw = readFileSync(pkgJsonPath, "utf8");
+    const raw = readFileSync(pkgJsonPath, 'utf8');
     const pkg = JSON.parse(raw);
     return {
       name: pkg.name || fallbackName,
-      version: pkg.version || "",
+      version: pkg.version || '',
       license: licenseString(pkg),
     };
   } catch (e) {
@@ -170,7 +199,9 @@ function scanStore() {
   try {
     storeDirs = readdirSync(STORE_DIR);
   } catch (e) {
-    fatal(`Cannot read pnpm store at ${STORE_DIR}: ${e.message}\nRun 'pnpm install --frozen-lockfile' first.`);
+    fatal(
+      `Cannot read pnpm store at ${STORE_DIR}: ${e.message}\nRun 'pnpm install --frozen-lockfile' first.`,
+    );
   }
 
   if (!storeDirs || storeDirs.length === 0) {
@@ -181,7 +212,7 @@ function scanStore() {
   let parseErrors = 0;
 
   for (const storeEntry of storeDirs) {
-    const innerModules = join(STORE_DIR, storeEntry, "node_modules");
+    const innerModules = join(STORE_DIR, storeEntry, 'node_modules');
     let entries;
     try {
       entries = readdirSync(innerModules);
@@ -190,7 +221,7 @@ function scanStore() {
     }
 
     for (const entry of entries) {
-      if (entry.startsWith("@")) {
+      if (entry.startsWith('@')) {
         let scopedEntries;
         try {
           scopedEntries = readdirSync(join(innerModules, entry));
@@ -198,7 +229,7 @@ function scanStore() {
           continue;
         }
         for (const sub of scopedEntries) {
-          const pj = join(innerModules, entry, sub, "package.json");
+          const pj = join(innerModules, entry, sub, 'package.json');
           if (existsSync(pj)) {
             const info = readPackage(pj, `${entry}/${sub}`);
             if (info) {
@@ -210,7 +241,7 @@ function scanStore() {
           }
         }
       } else {
-        const pj = join(innerModules, entry, "package.json");
+        const pj = join(innerModules, entry, 'package.json');
         if (existsSync(pj)) {
           const info = readPackage(pj, entry);
           if (info) {
@@ -225,7 +256,7 @@ function scanStore() {
   }
 
   if (Object.keys(packages).length === 0) {
-    fatal("No packages found in pnpm store — license scan produced empty results.");
+    fatal('No packages found in pnpm store — license scan produced empty results.');
   }
 
   return { packages, parseErrors };
@@ -247,70 +278,82 @@ function buildReport(packages, parseErrors) {
     return a.name.localeCompare(b.name);
   });
 
-  const review = entries.filter(e => e.flag === "REVIEW");
-  const check = entries.filter(e => e.flag === "CHECK");
-  const ok = entries.filter(e => e.flag === "OK");
+  const review = entries.filter((e) => e.flag === 'REVIEW');
+  const check = entries.filter((e) => e.flag === 'CHECK');
+  const ok = entries.filter((e) => e.flag === 'OK');
   const total = entries.length;
 
   const generated = new Date().toISOString().slice(0, 10);
 
-  let report = "# License Compliance Report\n\n";
+  let report = '# License Compliance Report\n\n';
   report += `**Generated:** ${generated}\n`;
   report += `**Total packages scanned:** ${total}\n`;
-  if (parseErrors > 0) report += `**Parse warnings:** ${parseErrors} package.json files could not be read (see stderr)\n`;
-  report += "\n";
+  if (parseErrors > 0)
+    report += `**Parse warnings:** ${parseErrors} package.json files could not be read (see stderr)\n`;
+  report += '\n';
 
-  report += "## Summary\n\n";
-  report += "| Category | Count |\n|----------|-------|\n";
+  report += '## Summary\n\n';
+  report += '| Category | Count |\n|----------|-------|\n';
   report += `| Permissive — OK | ${ok.length} |\n`;
   report += `| Copyleft — REVIEW | ${review.length} |\n`;
   report += `| Unknown / Non-standard — CHECK | ${check.length} |\n`;
   report += `| **Total** | **${total}** |\n\n`;
 
-  report += "**Flag key:**\n";
-  report += "- `OK` — permissive license (MIT, Apache-2.0, ISC, BSD-*, Unlicense, CC0, etc.); no commercial use restrictions\n";
-  report += "- `REVIEW` — copyleft or restrictive license (MPL-2.0, LGPL, GPL, AGPL, Hippocratic, etc.); may impose obligations or restrict use\n";
-  report += "- `CHECK` — license unknown or non-standard; verify before commercial distribution\n\n";
+  report += '**Flag key:**\n';
+  report +=
+    '- `OK` — permissive license (MIT, Apache-2.0, ISC, BSD-*, Unlicense, CC0, etc.); no commercial use restrictions\n';
+  report +=
+    '- `REVIEW` — copyleft or restrictive license (MPL-2.0, LGPL, GPL, AGPL, Hippocratic, etc.); may impose obligations or restrict use\n';
+  report +=
+    '- `CHECK` — license unknown or non-standard; verify before commercial distribution\n\n';
 
   if (review.length > 0) {
-    report += "## Copyleft / Restrictive Packages — Review Required\n\n";
-    report += "These packages have licenses that impose obligations or restrict commercial use. " +
-      "MPL-2.0 (file-scoped copyleft) has no obligation when used unmodified in a larger proprietary codebase. " +
-      "Dual-licensed packages should elect the permissive option. " +
-      "Hippocratic-2.1 restricts use for human rights violations — acceptable for legitimate commercial use but requires acknowledgment.\n\n";
-    report += "| Package | Version | License | Notes |\n|---------|---------|---------|-------|\n";
+    report += '## Copyleft / Restrictive Packages — Review Required\n\n';
+    report +=
+      'These packages have licenses that impose obligations or restrict commercial use. ' +
+      'MPL-2.0 (file-scoped copyleft) has no obligation when used unmodified in a larger proprietary codebase. ' +
+      'Dual-licensed packages should elect the permissive option. ' +
+      'Hippocratic-2.1 restricts use for human rights violations — acceptable for legitimate commercial use but requires acknowledgment.\n\n';
+    report += '| Package | Version | License | Notes |\n|---------|---------|---------|-------|\n';
     for (const e of review) {
-      const notes = e.license.includes(" OR ") ? "Dual-licensed — elect permissive option" :
-        e.license.includes("MPL-2.0") ? "File-scoped copyleft; no obligation if unmodified" :
-        e.license.includes("AGPL-3.0") ? "Strong copyleft — review before any distribution" :
-        e.license.includes("GPL-3.0") ? "Copyleft — review before distribution" :
-        e.license.includes("Hippocratic") ? "Restrictive ethical license — confirm commercial use compliance" :
-        "Review obligations before commercial distribution";
+      const notes = e.license.includes(' OR ')
+        ? 'Dual-licensed — elect permissive option'
+        : e.license.includes('MPL-2.0')
+          ? 'File-scoped copyleft; no obligation if unmodified'
+          : e.license.includes('AGPL-3.0')
+            ? 'Strong copyleft — review before any distribution'
+            : e.license.includes('GPL-3.0')
+              ? 'Copyleft — review before distribution'
+              : e.license.includes('Hippocratic')
+                ? 'Restrictive ethical license — confirm commercial use compliance'
+                : 'Review obligations before commercial distribution';
       report += `| \`${e.name}\` | ${e.version} | ${e.license} | ${notes} |\n`;
     }
-    report += "\n";
+    report += '\n';
   }
 
   if (check.length > 0) {
-    report += "## Unknown / Non-Standard License Packages\n\n";
-    report += "These packages have missing or non-SPDX license identifiers. " +
-      "Verify acceptable use before commercial deployment.\n\n";
-    report += "| Package | Version | License String |\n|---------|---------|---------------|\n";
+    report += '## Unknown / Non-Standard License Packages\n\n';
+    report +=
+      'These packages have missing or non-SPDX license identifiers. ' +
+      'Verify acceptable use before commercial deployment.\n\n';
+    report += '| Package | Version | License String |\n|---------|---------|---------------|\n';
     for (const e of check) {
       report += `| \`${e.name}\` | ${e.version} | ${e.license} |\n`;
     }
-    report += "\n";
+    report += '\n';
   }
 
-  report += "## Full Dependency License Inventory\n\n";
-  report += "Complete per-package license listing for all installed dependencies.\n\n";
-  report += "| Package | Version | License | Flag |\n|---------|---------|---------|------|\n";
+  report += '## Full Dependency License Inventory\n\n';
+  report += 'Complete per-package license listing for all installed dependencies.\n\n';
+  report += '| Package | Version | License | Flag |\n|---------|---------|---------|------|\n';
   for (const e of entries) {
     report += `| \`${e.name}\` | ${e.version} | ${e.license} | ${e.flag} |\n`;
   }
-  report += "\n";
+  report += '\n';
 
-  report += "_Auto-generated by `scripts/qa/generate-license-report.js`. Re-run after any dependency change._\n";
+  report +=
+    '_Auto-generated by `scripts/qa/generate-license-report.js`. Re-run after any dependency change._\n';
 
   return report;
 }
@@ -318,7 +361,7 @@ function buildReport(packages, parseErrors) {
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  console.log("[license-report] Scanning pnpm store for license data...");
+  console.log('[license-report] Scanning pnpm store for license data...');
   const { packages, parseErrors } = scanStore();
   const total = Object.keys(packages).length;
   console.log(`[license-report] Found ${total} unique packages (${parseErrors} parse warnings)`);
@@ -328,9 +371,11 @@ async function main() {
   writeFileSync(OUTPUT_FILE, report);
   console.log(`[license-report] Written to ${OUTPUT_FILE}`);
 
-  const review = Object.values(packages).filter(p => flag(p.license) === "REVIEW");
-  const check = Object.values(packages).filter(p => flag(p.license) === "CHECK");
-  console.log(`[license-report] Summary: ${total - review.length - check.length} OK, ${review.length} REVIEW, ${check.length} CHECK`);
+  const review = Object.values(packages).filter((p) => flag(p.license) === 'REVIEW');
+  const check = Object.values(packages).filter((p) => flag(p.license) === 'CHECK');
+  console.log(
+    `[license-report] Summary: ${total - review.length - check.length} OK, ${review.length} REVIEW, ${check.length} CHECK`,
+  );
 }
 
-main().catch(err => fatal(err.message));
+main().catch((err) => fatal(err.message));

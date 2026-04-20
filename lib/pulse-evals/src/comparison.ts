@@ -1,20 +1,20 @@
 import type {
+  EvalDomain,
   EvalSuiteReport,
-  SideBySideComparison,
   RegressionBaseline,
   RegressionCheckResult,
-  EvalDomain,
-} from "./types.js";
+  SideBySideComparison,
+} from './types.js';
 
 const regressionBaselines = new Map<string, RegressionBaseline>();
 
 export function compareSuites(reports: EvalSuiteReport[]): SideBySideComparison {
   if (reports.length === 0) {
-    throw new Error("At least one report required for comparison");
+    throw new Error('At least one report required for comparison');
   }
 
   const base = reports[0];
-  const entries = reports.map(r => ({ model: r.model, report: r }));
+  const entries = reports.map((r) => ({ model: r.model, report: r }));
 
   const sorted = [...reports].sort((a, b) => b.passRate - a.passRate);
   const winner = sorted[0]?.model;
@@ -69,9 +69,9 @@ export function checkRegression(
   const scoreDelta = current.avgScore - baseline.avgScore;
 
   const regressionFields: string[] = [];
-  if (passRateDelta < -thresholdPct) regressionFields.push("passRate");
-  if (scoreDelta < -(thresholdPct / 100)) regressionFields.push("avgScore");
-  if (latencyDelta > baseline.avgLatencyMs * (thresholdPct / 100)) regressionFields.push("latency");
+  if (passRateDelta < -thresholdPct) regressionFields.push('passRate');
+  if (scoreDelta < -(thresholdPct / 100)) regressionFields.push('avgScore');
+  if (latencyDelta > baseline.avgLatencyMs * (thresholdPct / 100)) regressionFields.push('latency');
 
   return {
     suiteId: current.suiteId,
@@ -103,8 +103,9 @@ export function getRegressionDashboard(): {
   return {
     baselines,
     totalTracked: baselines.length,
-    lastUpdated: baselines.length > 0
-      ? baselines.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))[0].recordedAt
-      : new Date().toISOString(),
+    lastUpdated:
+      baselines.length > 0
+        ? baselines.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))[0].recordedAt
+        : new Date().toISOString(),
   };
 }

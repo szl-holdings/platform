@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from 'crypto';
 
 /**
  * Anonymize an IP address before storage in audit and session records.
@@ -17,18 +17,22 @@ import crypto from "crypto";
  * unsalted SHA-256 hashes are precomputable over the IPv4/v6 address space.
  */
 
-const _env = process.env["NODE_ENV"];
-if (!process.env["IP_HASH_SALT"] && _env !== "development" && _env !== "test") {
+const _env = process.env['NODE_ENV'];
+if (!process.env['IP_HASH_SALT'] && _env !== 'development' && _env !== 'test') {
   console.warn(
-    "[audit/ip-hash] WARNING: IP_HASH_SALT is not set. " +
-    "IP hashes are precomputable over the address space. " +
-    "Set IP_HASH_SALT to a cryptographically random value in production."
+    '[audit/ip-hash] WARNING: IP_HASH_SALT is not set. ' +
+      'IP hashes are precomputable over the address space. ' +
+      'Set IP_HASH_SALT to a cryptographically random value in production.',
   );
 }
 
 export function hashIp(ip: string | null | undefined): string | null {
   if (!ip) return null;
-  const salt = process.env["IP_HASH_SALT"] ?? "";
-  const hash = crypto.createHash("sha256").update(salt + ip).digest("hex").slice(0, 40);
+  const salt = process.env['IP_HASH_SALT'] ?? '';
+  const hash = crypto
+    .createHash('sha256')
+    .update(salt + ip)
+    .digest('hex')
+    .slice(0, 40);
   return `sha256:${hash}`;
 }

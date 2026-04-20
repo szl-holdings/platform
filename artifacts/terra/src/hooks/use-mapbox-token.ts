@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 
 async function fetchMapboxToken(): Promise<string | null> {
   try {
-    const res = await fetch("/api/config/mapbox-token", { credentials: "include" });
+    const res = await fetch('/api/config/mapbox-token', { credentials: 'include' });
     if (!res.ok) return null;
     const data = await res.json();
     if (data.configured === false) return null;
@@ -14,7 +14,7 @@ async function fetchMapboxToken(): Promise<string | null> {
 
 export function useMapboxToken() {
   const { data: token, isLoading } = useQuery({
-    queryKey: ["mapbox-token"],
+    queryKey: ['mapbox-token'],
     queryFn: fetchMapboxToken,
     staleTime: Infinity,
     retry: 1,

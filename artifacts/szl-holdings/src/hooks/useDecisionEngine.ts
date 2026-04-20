@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { PrismEventBus } from "@szl-holdings/prism-bus/bus";
-import type { PrismBusEvent } from "@szl-holdings/prism-bus/bus";
-import { CovenantPolicyEngine } from "@szl-holdings/covenant-policy/engine";
-import type { CovenantDecision, CovenantPolicy } from "@szl-holdings/covenant-policy/engine";
-import { sample } from "@szl-holdings/monte-carlo/distributions";
-import { VESSELS_VOYAGE_COST } from "@szl-holdings/monte-carlo/scenarios";
-import type { ScenarioDefinition } from "@szl-holdings/monte-carlo/schema";
+import type { CovenantDecision, CovenantPolicy } from '@szl-holdings/covenant-policy/engine';
+import { CovenantPolicyEngine } from '@szl-holdings/covenant-policy/engine';
+import { sample } from '@szl-holdings/monte-carlo/distributions';
+import { VESSELS_VOYAGE_COST } from '@szl-holdings/monte-carlo/scenarios';
+import type { ScenarioDefinition } from '@szl-holdings/monte-carlo/schema';
+import type { PrismBusEvent } from '@szl-holdings/prism-bus/bus';
+import { PrismEventBus } from '@szl-holdings/prism-bus/bus';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface MonteCarloResult {
   scenarioId: string;
@@ -15,26 +15,29 @@ export interface MonteCarloResult {
   iterations: number;
   validIterations: number;
   durationMs: number;
-  metrics: Record<string, {
-    label: string;
-    format?: string;
-    higherIsBetter?: boolean;
-    mean: number;
-    p5: number;
-    p25: number;
-    p50: number;
-    p75: number;
-    p95: number;
-    min: number;
-    max: number;
-    stdDev: number;
-  }>;
+  metrics: Record<
+    string,
+    {
+      label: string;
+      format?: string;
+      higherIsBetter?: boolean;
+      mean: number;
+      p5: number;
+      p25: number;
+      p50: number;
+      p75: number;
+      p95: number;
+      min: number;
+      max: number;
+      stdDev: number;
+    }
+  >;
   inputSensitivity: Array<{ inputId: string; label: string; impact: number }>;
 }
 
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;
-  const idx = Math.max(0, Math.ceil(sorted.length * p / 100) - 1);
+  const idx = Math.max(0, Math.ceil((sorted.length * p) / 100) - 1);
   return sorted[idx]!;
 }
 
@@ -65,7 +68,10 @@ function runScenarioSimulation(scenario: ScenarioDefinition, iterations: number)
       let valid = true;
       if (scenario.constraints) {
         for (const constraint of scenario.constraints) {
-          if (!constraint.check(outputs)) { valid = false; break; }
+          if (!constraint.check(outputs)) {
+            valid = false;
+            break;
+          }
         }
       }
       if (!valid) continue;
@@ -74,10 +80,12 @@ function runScenarioSimulation(scenario: ScenarioDefinition, iterations: number)
         const v = outputs[out.id];
         if (v !== undefined && isFinite(v)) outputAccum[out.id]!.push(v);
       }
-    } catch { /* constraint violation */ }
+    } catch {
+      /* constraint violation */
+    }
   }
 
-  const metrics: MonteCarloResult["metrics"] = {};
+  const metrics: MonteCarloResult['metrics'] = {};
   for (const out of scenario.outputs) {
     const values = outputAccum[out.id] ?? [];
     const sorted = [...values].sort((a, b) => a - b);
@@ -100,21 +108,27 @@ function runScenarioSimulation(scenario: ScenarioDefinition, iterations: number)
 
   const primaryOutput = scenario.outputs[0];
   const baseOutputs = primaryOutput ? (outputAccum[primaryOutput.id] ?? []) : [];
-  const baseMean = baseOutputs.length > 0 ? baseOutputs.reduce((s, v) => s + v, 0) / baseOutputs.length : 0;
-  const baseVar = baseOutputs.length > 0 ? baseOutputs.reduce((s, v) => s + (v - baseMean) ** 2, 0) / baseOutputs.length : 0;
+  const baseMean =
+    baseOutputs.length > 0 ? baseOutputs.reduce((s, v) => s + v, 0) / baseOutputs.length : 0;
+  const baseVar =
+    baseOutputs.length > 0
+      ? baseOutputs.reduce((s, v) => s + (v - baseMean) ** 2, 0) / baseOutputs.length
+      : 0;
 
-  const inputSensitivity = scenario.inputs.map(inp => {
-    const inputVals = inputAccum[inp.id]!;
-    const inputMean = inputVals.reduce((s, v) => s + v, 0) / inputVals.length;
-    let cov = 0;
-    for (let i = 0; i < Math.min(inputVals.length, baseOutputs.length); i++) {
-      cov += (inputVals[i]! - inputMean) * (baseOutputs[i]! - baseMean);
-    }
-    cov /= inputVals.length;
-    const inputVar = inputVals.reduce((s, v) => s + (v - inputMean) ** 2, 0) / inputVals.length;
-    const r2 = baseVar > 0 && inputVar > 0 ? (cov * cov) / (inputVar * baseVar) : 0;
-    return { inputId: inp.id, label: inp.label, impact: Math.sqrt(r2) };
-  }).sort((a, b) => b.impact - a.impact);
+  const inputSensitivity = scenario.inputs
+    .map((inp) => {
+      const inputVals = inputAccum[inp.id]!;
+      const inputMean = inputVals.reduce((s, v) => s + v, 0) / inputVals.length;
+      let cov = 0;
+      for (let i = 0; i < Math.min(inputVals.length, baseOutputs.length); i++) {
+        cov += (inputVals[i]! - inputMean) * (baseOutputs[i]! - baseMean);
+      }
+      cov /= inputVals.length;
+      const inputVar = inputVals.reduce((s, v) => s + (v - inputMean) ** 2, 0) / inputVals.length;
+      const r2 = baseVar > 0 && inputVar > 0 ? (cov * cov) / (inputVar * baseVar) : 0;
+      return { inputId: inp.id, label: inp.label, impact: Math.sqrt(r2) };
+    })
+    .sort((a, b) => b.impact - a.impact);
 
   return {
     scenarioId: scenario.id,
@@ -130,15 +144,16 @@ function runScenarioSimulation(scenario: ScenarioDefinition, iterations: number)
 }
 
 const MARITIME_RESPONSE_POLICY: CovenantPolicy = {
-  id: "maritime-critical-response-v2",
-  name: "Maritime Critical Response Protocol",
-  description: "Governs emergency response actions for maritime threats involving cross-domain signals",
-  version: "2.0.0",
-  roles: ["super_admin", "admin", "exec", "ops", "compliance"],
-  domains: ["aegis", "vessels", "global"],
-  permissions: ["execute", "approve"],
+  id: 'maritime-critical-response-v2',
+  name: 'Maritime Critical Response Protocol',
+  description:
+    'Governs emergency response actions for maritime threats involving cross-domain signals',
+  version: '2.0.0',
+  roles: ['super_admin', 'admin', 'exec', 'ops', 'compliance'],
+  domains: ['aegis', 'vessels', 'global'],
+  permissions: ['execute', 'approve'],
   conditions: [],
-  effect: "allow",
+  effect: 'allow',
   priority: 100,
 };
 
@@ -193,10 +208,15 @@ export interface OutcomeRecord {
 }
 
 export interface EngineState {
-  status: "idle" | "running" | "complete" | "error";
+  status: 'idle' | 'running' | 'complete' | 'error';
   publishedSignals: PrismBusEvent[];
   correlatedEvents: PrismBusEvent[];
-  busStats: { totalPublished: number; byType: Record<string, number>; subscriptionCount: number; historySize: number };
+  busStats: {
+    totalPublished: number;
+    byType: Record<string, number>;
+    subscriptionCount: number;
+    historySize: number;
+  };
   busHistory: PrismBusEvent[];
   policyDecision: CovenantDecision | null;
   policySimulation: { decision: CovenantDecision; explanation: string[] } | null;
@@ -210,7 +230,7 @@ export interface EngineState {
 
 export function useDecisionEngine() {
   const [state, setState] = useState<EngineState>({
-    status: "idle",
+    status: 'idle',
     publishedSignals: [],
     correlatedEvents: [],
     busStats: { totalPublished: 0, byType: {}, subscriptionCount: 0, historySize: 0 },
@@ -233,75 +253,80 @@ export function useDecisionEngine() {
     if (ranRef.current) return;
     ranRef.current = true;
 
-    setState(prev => ({ ...prev, status: "running" }));
+    setState((prev) => ({ ...prev, status: 'running' }));
 
     try {
       const bus = new PrismEventBus();
       busRef.current = bus;
 
       const correlatedEvents: PrismBusEvent[] = [];
-      bus.subscribe("correlation-engine", ["domain_signal", "cross_domain_correlation"], (evt) => {
-        correlatedEvents.push(evt);
-      }, ["aegis", "vessels", "global"]);
+      bus.subscribe(
+        'correlation-engine',
+        ['domain_signal', 'cross_domain_correlation'],
+        (evt) => {
+          correlatedEvents.push(evt);
+        },
+        ['aegis', 'vessels', 'global'],
+      );
 
       const correlationId = `incident-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
       const aegisSignal = await bus.publish({
-        type: "domain_signal",
-        domain: "aegis",
-        sourceId: "aegis-ids-sensor-07",
-        severity: "critical",
+        type: 'domain_signal',
+        domain: 'aegis',
+        sourceId: 'aegis-ids-sensor-07',
+        severity: 'critical',
         correlationId,
         payload: {
-          signalType: "intrusion_detection",
-          title: "Unauthorized SSH access detected — Port of Rotterdam OT network",
-          source_ip: "185.220.101.42",
-          target: "SCADA-RTU-07",
-          protocol: "SSH",
-          geo: "Tor exit node (Frankfurt)",
+          signalType: 'intrusion_detection',
+          title: 'Unauthorized SSH access detected — Port of Rotterdam OT network',
+          source_ip: '185.220.101.42',
+          target: 'SCADA-RTU-07',
+          protocol: 'SSH',
+          geo: 'Tor exit node (Frankfurt)',
         },
       });
 
       const vesselsSignal = await bus.publish({
-        type: "domain_signal",
-        domain: "vessels",
-        sourceId: "vessels-ais-monitor",
-        severity: "high",
+        type: 'domain_signal',
+        domain: 'vessels',
+        sourceId: 'vessels-ais-monitor',
+        severity: 'high',
         correlationId,
         payload: {
-          signalType: "ais_anomaly",
-          title: "MV Nordic Pioneer — AIS transponder dark for 47 minutes near approach channel",
-          vessel: "MV Nordic Pioneer",
-          imo: "9847231",
-          flag: "Marshall Islands",
-          last_position: "51.95°N, 4.12°E",
-          cargo: "Crude Oil (VLCC)",
+          signalType: 'ais_anomaly',
+          title: 'MV Nordic Pioneer — AIS transponder dark for 47 minutes near approach channel',
+          vessel: 'MV Nordic Pioneer',
+          imo: '9847231',
+          flag: 'Marshall Islands',
+          last_position: '51.95°N, 4.12°E',
+          cargo: 'Crude Oil (VLCC)',
         },
       });
 
       const inputSources = [
-        { type: "threat_intel", id: "OSINT-2026-0341", label: "Maritime Cyber Threat Feed" },
-        { type: "ais_data", id: "IMO-9847231", label: "Vessel AIS Track History" },
-        { type: "scada_log", id: "RTU-07-LOG", label: "Port SCADA Event Log" },
-        { type: "historical", id: "OG-4821", label: "Prior similar incident (Rotterdam, 2025-11)" },
+        { type: 'threat_intel', id: 'OSINT-2026-0341', label: 'Maritime Cyber Threat Feed' },
+        { type: 'ais_data', id: 'IMO-9847231', label: 'Vessel AIS Track History' },
+        { type: 'scada_log', id: 'RTU-07-LOG', label: 'Port SCADA Event Log' },
+        { type: 'historical', id: 'OG-4821', label: 'Prior similar incident (Rotterdam, 2025-11)' },
       ];
 
       const crossDomainLinks = [
-        "SSH source IP previously flagged in maritime threat feed (OSINT-2026-0341)",
-        "MV Nordic Pioneer scheduled berth at compromised port facility",
-        "Temporal overlap: AIS dark period began 4 minutes before SSH intrusion",
+        'SSH source IP previously flagged in maritime threat feed (OSINT-2026-0341)',
+        'MV Nordic Pioneer scheduled berth at compromised port facility',
+        'Temporal overlap: AIS dark period began 4 minutes before SSH intrusion',
         "Port SCADA target controls berth crane allocation for the vessel's assigned dock",
       ];
 
       const correlationEvent = await bus.publish({
-        type: "cross_domain_correlation",
-        domain: "global",
-        sourceId: "prism-correlation-engine",
-        severity: "critical",
+        type: 'cross_domain_correlation',
+        domain: 'global',
+        sourceId: 'prism-correlation-engine',
+        severity: 'critical',
         correlationId,
         payload: {
           confidence: 0.87,
-          pattern: "Coordinated port intrusion + vessel approach anomaly",
+          pattern: 'Coordinated port intrusion + vessel approach anomaly',
           linkedSignals: [aegisSignal.id, vesselsSignal.id],
           crossDomainLinks,
           inputSources,
@@ -312,15 +337,15 @@ export function useDecisionEngine() {
       const busStats = bus.getStats();
 
       const recommendation: Recommendation = {
-        title: "Initiate port security lockdown and divert vessel to secondary anchorage",
+        title: 'Initiate port security lockdown and divert vessel to secondary anchorage',
         confidence: 0.82,
-        modelId: "szl-threat-correlation-v3",
-        modelProvider: "SZL CORTEX",
+        modelId: 'szl-threat-correlation-v3',
+        modelProvider: 'SZL CORTEX',
         correlationId,
         actions: [
           `Isolate ${aegisSignal.payload.target} from OT network (Aegis automated response)`,
           `Issue HOLD order for ${vesselsSignal.payload.vessel} via VTS channel 14`,
-          "Deploy incident response team to port control room",
+          'Deploy incident response team to port control room',
           `Notify flag state authority (${vesselsSignal.payload.flag} MDA)`,
         ],
         inputSources,
@@ -334,23 +359,23 @@ export function useDecisionEngine() {
 
       const policyRequest = {
         subject: {
-          userId: "user-jvandenberg",
-          roles: ["exec" as const, "ops" as const],
-          tenantId: "szl-holdings",
-          attributes: { department: "maritime-security", clearanceLevel: "top-secret" },
+          userId: 'user-jvandenberg',
+          roles: ['exec' as const, 'ops' as const],
+          tenantId: 'szl-holdings',
+          attributes: { department: 'maritime-security', clearanceLevel: 'top-secret' },
         },
         resource: {
-          type: "incident-response",
+          type: 'incident-response',
           id: correlationId,
-          domain: "vessels" as const,
-          actionClass: "emergency_response",
+          domain: 'vessels' as const,
+          actionClass: 'emergency_response',
         },
-        action: "execute" as const,
+        action: 'execute' as const,
         context: {
           correlationConfidence: correlationEvent.payload.confidence,
-          estimatedCost: monteCarloResult.metrics["totalVoyageCost"]?.p50 ?? 0,
-          signalCount: busHistory.filter(e => e.type === "domain_signal").length,
-          domains: ["aegis", "vessels"],
+          estimatedCost: monteCarloResult.metrics['totalVoyageCost']?.p50 ?? 0,
+          signalCount: busHistory.filter((e) => e.type === 'domain_signal').length,
+          domains: ['aegis', 'vessels'],
         },
       };
 
@@ -358,10 +383,10 @@ export function useDecisionEngine() {
       const policySimulation = policyEngine.simulate(policyRequest);
 
       await bus.publish({
-        type: "policy_decision",
-        domain: "global",
-        sourceId: "covenant-policy-engine",
-        severity: "info",
+        type: 'policy_decision',
+        domain: 'global',
+        sourceId: 'covenant-policy-engine',
+        severity: 'info',
         correlationId,
         payload: {
           requestId: policyDecision.requestId,
@@ -373,37 +398,72 @@ export function useDecisionEngine() {
 
       const now = Date.now();
       const executionSteps: ExecutionStep[] = [
-        { action: `Isolate ${aegisSignal.payload.target}`, status: "completed", duration: "12s", executor: "Aegis Automated Response", triggeredAt: now },
-        { action: `VTS Channel 14 — HOLD order for ${vesselsSignal.payload.vessel}`, status: "completed", duration: "34s", executor: "Maritime Comms Gateway", triggeredAt: now + 12000 },
-        { action: "IR team dispatched to port control", status: "completed", duration: "4m 12s", executor: "Ops Coordinator", triggeredAt: now + 46000 },
-        { action: `Flag state notification (${vesselsSignal.payload.flag} MDA)`, status: "completed", duration: "1s", executor: "Regulatory Compliance Engine", triggeredAt: now + 298000 },
+        {
+          action: `Isolate ${aegisSignal.payload.target}`,
+          status: 'completed',
+          duration: '12s',
+          executor: 'Aegis Automated Response',
+          triggeredAt: now,
+        },
+        {
+          action: `VTS Channel 14 — HOLD order for ${vesselsSignal.payload.vessel}`,
+          status: 'completed',
+          duration: '34s',
+          executor: 'Maritime Comms Gateway',
+          triggeredAt: now + 12000,
+        },
+        {
+          action: 'IR team dispatched to port control',
+          status: 'completed',
+          duration: '4m 12s',
+          executor: 'Ops Coordinator',
+          triggeredAt: now + 46000,
+        },
+        {
+          action: `Flag state notification (${vesselsSignal.payload.flag} MDA)`,
+          status: 'completed',
+          duration: '1s',
+          executor: 'Regulatory Compliance Engine',
+          triggeredAt: now + 298000,
+        },
       ];
 
       for (const step of executionSteps) {
         await bus.publish({
-          type: "execution_completed",
-          domain: "vessels",
-          sourceId: step.executor.toLowerCase().replace(/\s+/g, "-"),
-          severity: "info",
+          type: 'execution_completed',
+          domain: 'vessels',
+          sourceId: step.executor.toLowerCase().replace(/\s+/g, '-'),
+          severity: 'info',
           correlationId,
-          payload: { action: step.action, status: step.status, duration: step.duration, executor: step.executor },
+          payload: {
+            action: step.action,
+            status: step.status,
+            duration: step.duration,
+            executor: step.executor,
+          },
         });
       }
 
       const promptText = `Correlate signals [${aegisSignal.id}, ${vesselsSignal.id}] across domains [aegis, vessels] and recommend response for pattern: ${correlationEvent.payload.pattern}`;
-      const promptHashBytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(promptText));
-      const promptHash = Array.from(new Uint8Array(promptHashBytes)).map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+      const promptHashBytes = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(promptText),
+      );
+      const promptHash = Array.from(new Uint8Array(promptHashBytes))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 16);
 
       const proofRecord: ProofRecord = {
         proofChainId: `PC-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         contentId: correlationId,
-        contentType: "incident_response_recommendation",
-        sourceClass: "llm_summarized",
+        contentType: 'incident_response_recommendation',
+        sourceClass: 'llm_summarized',
         confidenceScore: recommendation.confidence,
         modelId: recommendation.modelId,
         modelProvider: recommendation.modelProvider,
-        reviewState: "approved",
-        exportSafetyState: "safe",
+        reviewState: 'approved',
+        exportSafetyState: 'safe',
         promptHash,
         correlationId,
         inputSources: recommendation.inputSources,
@@ -411,10 +471,10 @@ export function useDecisionEngine() {
       };
 
       await bus.publish({
-        type: "evidence_captured",
-        domain: "global",
-        sourceId: "proof-chain-engine",
-        severity: "info",
+        type: 'evidence_captured',
+        domain: 'global',
+        sourceId: 'proof-chain-engine',
+        severity: 'info',
         correlationId,
         payload: {
           proofChainId: proofRecord.proofChainId,
@@ -426,18 +486,18 @@ export function useDecisionEngine() {
         },
       });
 
-      const predictedCost = monteCarloResult.metrics["totalVoyageCost"]?.p50 ?? 340;
-      const predictedHours = (monteCarloResult.metrics["totalDays"]?.p50 ?? 1) * 24;
+      const predictedCost = monteCarloResult.metrics['totalVoyageCost']?.p50 ?? 340;
+      const predictedHours = (monteCarloResult.metrics['totalDays']?.p50 ?? 1) * 24;
 
       const outcomeRecord: OutcomeRecord = {
         outcomeId: `OG-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         domain: monteCarloResult.domain,
-        entityType: "incident_response",
+        entityType: 'incident_response',
         recommendationText: recommendation.title,
-        recommendationAction: "lockdown_and_divert",
+        recommendationAction: 'lockdown_and_divert',
         confidence: recommendation.confidence,
-        decisionStatus: policyDecision.allowed ? "accepted" : "rejected",
-        outcomeResult: policyDecision.allowed ? "achieved" : "blocked",
+        decisionStatus: policyDecision.allowed ? 'accepted' : 'rejected',
+        outcomeResult: policyDecision.allowed ? 'achieved' : 'blocked',
         predictedCost,
         actualCost: predictedCost * 0.84,
         predictedHours,
@@ -449,9 +509,9 @@ export function useDecisionEngine() {
       const finalBusStats = bus.getStats();
 
       setState({
-        status: "complete",
-        publishedSignals: finalBusHistory.filter(e => e.type === "domain_signal"),
-        correlatedEvents: finalBusHistory.filter(e => e.type === "cross_domain_correlation"),
+        status: 'complete',
+        publishedSignals: finalBusHistory.filter((e) => e.type === 'domain_signal'),
+        correlatedEvents: finalBusHistory.filter((e) => e.type === 'cross_domain_correlation'),
         busStats: finalBusStats,
         busHistory: finalBusHistory,
         policyDecision,
@@ -464,9 +524,9 @@ export function useDecisionEngine() {
         error: null,
       });
     } catch (err) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        status: "error",
+        status: 'error',
         error: err instanceof Error ? err.message : String(err),
       }));
     }

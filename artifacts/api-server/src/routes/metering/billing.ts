@@ -1,44 +1,60 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
+  billingLineItemsTable,
+  costAllocationsTable,
   db,
+  invoicesTable,
   meteringEventsTable,
-  usageAggregatesTable,
-  rateCardsTable,
-  rateCardTiersTable,
-  rateCardAssignmentsTable,
+  organizationsTable,
   quotaConfigsTable,
   quotaViolationsTable,
-  costAllocationsTable,
-  billingLineItemsTable,
-  organizationsTable,
-  invoicesTable,
-  subscriptionsTable,
+  rateCardAssignmentsTable,
+  rateCardsTable,
+  rateCardTiersTable,
   revenueEventsTable,
-} from "@szl-holdings/db";
+  subscriptionsTable,
+  usageAggregatesTable,
+} from '@szl-holdings/db';
 import {
-  eq, desc, asc, and, gte, lte, sql, sum, count, avg, isNull, ne, inArray,
-} from "drizzle-orm";
+  and,
+  asc,
+  avg,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNull,
+  lte,
+  ne,
+  sql,
+  sum,
+} from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError,
-} from "../../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/auth";
-import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
-import { logger } from "../../lib/logger";
-import { periodBounds, checkAndEnforceQuota, meteringRateLimit, computeCharge } from "./shared";
-import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
+  handleRouteError,
+  sendBadRequest,
+  sendError,
+  sendNotFound,
+  sendSuccess,
+} from '../../lib/api-response';
+import { logger } from '../../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
+import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
+import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
+import { checkAndEnforceQuota, computeCharge, meteringRateLimit, periodBounds } from './shared';
 
 const router: IRouter = Router();
-const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
-const READ_ROLES = ["admin", "super_admin", "ops", "analyst"] as const;
+const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
+const READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 5. COST ALLOCATION ENGINE
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/metering/cost-allocation",
+  '/metering/cost-allocation',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
@@ -77,9 +93,12 @@ router.get(
         { totalInfraCost: 0, totalBilled: 0 },
       );
 
-      const margin = summary.totalBilled > 0
-        ? Math.round(((summary.totalBilled - summary.totalInfraCost) / summary.totalBilled) * 10000) / 100
-        : null;
+      const margin =
+        summary.totalBilled > 0
+          ? Math.round(
+              ((summary.totalBilled - summary.totalInfraCost) / summary.totalBilled) * 10000,
+            ) / 100
+          : null;
 
       sendSuccess(res, {
         summary: {
@@ -90,29 +109,43 @@ router.get(
         allocations,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get cost allocations");
+      handleRouteError(res, err, 'Failed to get cost allocations');
     }
   },
 );
 
 router.post(
-  "/metering/cost-allocation",
+  '/metering/cost-allocation',
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  validateBody(bodyShape({
-      "billedAmount": z.unknown().optional(),
-      "costDriver": z.unknown().optional(),
-      "currency": z.unknown().optional(),
-      "featureKey": z.unknown().optional(),
-      "infraCost": z.unknown().optional(),
-      "notes": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "periodEnd": z.unknown().optional(),
-      "periodStart": z.unknown().optional(),
-      "product": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
+  validateBody(
+    bodyShape({
+      billedAmount: z.unknown().optional(),
+      costDriver: z.unknown().optional(),
+      currency: z.unknown().optional(),
+      featureKey: z.unknown().optional(),
+      infraCost: z.unknown().optional(),
+      notes: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      periodEnd: z.unknown().optional(),
+      periodStart: z.unknown().optional(),
+      product: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
     try {
-      const { orgId, featureKey, product, periodStart, periodEnd, infraCost, billedAmount, currency, costDriver, notes } = req.body as {
+      const {
+        orgId,
+        featureKey,
+        product,
+        periodStart,
+        periodEnd,
+        infraCost,
+        billedAmount,
+        currency,
+        costDriver,
+        notes,
+      } = req.body as {
         orgId: number;
         featureKey: string;
         product?: string;
@@ -126,7 +159,10 @@ router.post(
       };
 
       if (!orgId || !featureKey || !periodStart || !periodEnd || infraCost === undefined) {
-        sendBadRequest(res, "orgId, featureKey, periodStart, periodEnd, and infraCost are required");
+        sendBadRequest(
+          res,
+          'orgId, featureKey, periodStart, periodEnd, and infraCost are required',
+        );
         return;
       }
 
@@ -135,12 +171,12 @@ router.post(
         .values({
           orgId,
           featureKey,
-          product: product ?? "platform",
+          product: product ?? 'platform',
           periodStart: new Date(periodStart),
           periodEnd: new Date(periodEnd),
           infraCost,
-          billedAmount: billedAmount ?? "0",
-          currency: currency ?? "usd",
+          billedAmount: billedAmount ?? '0',
+          currency: currency ?? 'usd',
           costDriver: costDriver ?? null,
           notes: notes ?? null,
         })
@@ -148,13 +184,13 @@ router.post(
 
       sendSuccess(res, row, 201);
     } catch (err) {
-      handleRouteError(res, err, "Failed to record cost allocation");
+      handleRouteError(res, err, 'Failed to record cost allocation');
     }
   },
 );
 
 router.get(
-  "/metering/margin-analysis",
+  '/metering/margin-analysis',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
@@ -202,12 +238,15 @@ router.get(
       sendSuccess(res, {
         tenants: enriched,
         unprofitableCount: enriched.filter((t) => t.unprofitable).length,
-        avgMargin: enriched.length > 0
-          ? Math.round(enriched.reduce((s, t) => s + (t.margin ?? 0), 0) / enriched.length * 100) / 100
-          : null,
+        avgMargin:
+          enriched.length > 0
+            ? Math.round(
+                (enriched.reduce((s, t) => s + (t.margin ?? 0), 0) / enriched.length) * 100,
+              ) / 100
+            : null,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get margin analysis");
+      handleRouteError(res, err, 'Failed to get margin analysis');
     }
   },
 );
@@ -217,15 +256,18 @@ router.get(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.post(
-  "/metering/invoices/generate",
+  '/metering/invoices/generate',
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  validateBody(bodyShape({
-      "dryRun": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "periodEnd": z.unknown().optional(),
-      "periodStart": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
+  validateBody(
+    bodyShape({
+      dryRun: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      periodEnd: z.unknown().optional(),
+      periodStart: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
     try {
       const { orgId, periodStart, periodEnd, dryRun } = req.body as {
         orgId: number;
@@ -235,12 +277,12 @@ router.post(
       };
 
       if (!orgId) {
-        sendBadRequest(res, "orgId is required");
+        sendBadRequest(res, 'orgId is required');
         return;
       }
 
       const now = new Date();
-      const { start, end } = periodBounds("month", now);
+      const { start, end } = periodBounds('month', now);
       const pStart = periodStart ? new Date(periodStart) : start;
       const pEnd = periodEnd ? new Date(periodEnd) : end;
 
@@ -250,7 +292,7 @@ router.post(
         .where(
           and(
             eq(usageAggregatesTable.orgId, orgId),
-            eq(usageAggregatesTable.periodType, "month"),
+            eq(usageAggregatesTable.periodType, 'month'),
             gte(usageAggregatesTable.periodStart, pStart),
             lte(usageAggregatesTable.periodEnd, pEnd),
           ),
@@ -292,12 +334,16 @@ router.post(
           .where(eq(rateCardTiersTable.rateCardId, card.id))
           .orderBy(asc(rateCardTiersTable.order));
 
-        const total = computeCharge(qty, {
-          pricingModel: card.pricingModel,
-          unitAmount: card.unitAmount,
-          flatAmount: card.flatAmount,
-          freeUnits: card.freeUnits,
-        }, tiers);
+        const total = computeCharge(
+          qty,
+          {
+            pricingModel: card.pricingModel,
+            unitAmount: card.unitAmount,
+            flatAmount: card.flatAmount,
+            freeUnits: card.freeUnits,
+          },
+          tiers,
+        );
 
         lineItems.push({
           featureKey: agg.featureKey,
@@ -320,7 +366,7 @@ router.post(
           periodEnd: pEnd,
           lineItems,
           grandTotal: Math.round(grandTotal * 100) / 100,
-          currency: "usd",
+          currency: 'usd',
         });
         return;
       }
@@ -330,8 +376,8 @@ router.post(
         .values({
           orgId,
           amount: String(Math.round(grandTotal * 100) / 100),
-          currency: "usd",
-          status: "draft",
+          currency: 'usd',
+          status: 'draft',
           dueDate: new Date(pEnd.getTime() + 30 * 86_400_000),
         })
         .returning();
@@ -346,37 +392,43 @@ router.post(
             quantity: String(li.quantity),
             unitAmount: String(li.unitAmount),
             totalAmount: String(li.totalAmount),
-            currency: "usd",
+            currency: 'usd',
             periodStart: pStart,
             periodEnd: pEnd,
             rateCardId: li.rateCardId ?? null,
-            status: "finalized" as const,
+            status: 'finalized' as const,
           })),
         );
       }
 
-      sendSuccess(res, {
-        invoice,
-        lineItems,
-        grandTotal: Math.round(grandTotal * 100) / 100,
-        currency: "usd",
-      }, 201);
+      sendSuccess(
+        res,
+        {
+          invoice,
+          lineItems,
+          grandTotal: Math.round(grandTotal * 100) / 100,
+          currency: 'usd',
+        },
+        201,
+      );
     } catch (err) {
-      handleRouteError(res, err, "Failed to generate invoice");
+      handleRouteError(res, err, 'Failed to generate invoice');
     }
   },
 );
 
 router.get(
-  "/metering/line-items",
+  '/metering/line-items',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
-      const invoiceId = req.query.invoiceId ? parseInt(req.query.invoiceId as string, 10) : undefined;
-      const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 500);
+      const invoiceId = req.query.invoiceId
+        ? parseInt(req.query.invoiceId as string, 10)
+        : undefined;
+      const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10), 500);
 
       const conditions = [];
       if (orgId) conditions.push(eq(billingLineItemsTable.orgId, orgId));
@@ -391,7 +443,7 @@ router.get(
 
       sendSuccess(res, items);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list billing line items");
+      handleRouteError(res, err, 'Failed to list billing line items');
     }
   },
 );
@@ -401,7 +453,7 @@ router.get(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/metering/quotas",
+  '/metering/quotas',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
@@ -422,30 +474,39 @@ router.get(
 
       sendSuccess(res, quotas);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list quotas");
+      handleRouteError(res, err, 'Failed to list quotas');
     }
   },
 );
 
 router.post(
-  "/metering/quotas",
+  '/metering/quotas',
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  validateBody(bodyShape({
-      "featureKey": z.unknown().optional(),
-      "hardLimit": z.unknown().optional(),
-      "hardLimitAction": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "overageUnitAmount": z.unknown().optional(),
-      "periodType": z.unknown().optional(),
-      "product": z.unknown().optional(),
-      "softLimit": z.unknown().optional(),
-      "softLimitAction": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
+  validateBody(
+    bodyShape({
+      featureKey: z.unknown().optional(),
+      hardLimit: z.unknown().optional(),
+      hardLimitAction: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      overageUnitAmount: z.unknown().optional(),
+      periodType: z.unknown().optional(),
+      product: z.unknown().optional(),
+      softLimit: z.unknown().optional(),
+      softLimitAction: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
     try {
       const {
-        orgId, featureKey, product, periodType,
-        softLimit, hardLimit, softLimitAction, hardLimitAction,
+        orgId,
+        featureKey,
+        product,
+        periodType,
+        softLimit,
+        hardLimit,
+        softLimitAction,
+        hardLimitAction,
         overageUnitAmount,
       } = req.body as {
         orgId?: number;
@@ -460,7 +521,7 @@ router.post(
       };
 
       if (!featureKey) {
-        sendBadRequest(res, "featureKey is required");
+        sendBadRequest(res, 'featureKey is required');
         return;
       }
 
@@ -469,21 +530,30 @@ router.post(
         .values({
           orgId: orgId ?? null,
           featureKey,
-          product: product ?? "platform",
-          periodType: (periodType ?? "month") as typeof quotaConfigsTable.$inferInsert["periodType"],
+          product: product ?? 'platform',
+          periodType: (periodType ??
+            'month') as (typeof quotaConfigsTable.$inferInsert)['periodType'],
           softLimit: softLimit ?? null,
           hardLimit: hardLimit ?? null,
-          softLimitAction: (softLimitAction ?? "notify") as typeof quotaConfigsTable.$inferInsert["softLimitAction"],
-          hardLimitAction: (hardLimitAction ?? "block") as typeof quotaConfigsTable.$inferInsert["hardLimitAction"],
+          softLimitAction: (softLimitAction ??
+            'notify') as (typeof quotaConfigsTable.$inferInsert)['softLimitAction'],
+          hardLimitAction: (hardLimitAction ??
+            'block') as (typeof quotaConfigsTable.$inferInsert)['hardLimitAction'],
           overageUnitAmount: overageUnitAmount ?? null,
         })
         .onConflictDoUpdate({
-          target: [quotaConfigsTable.orgId, quotaConfigsTable.featureKey, quotaConfigsTable.periodType],
+          target: [
+            quotaConfigsTable.orgId,
+            quotaConfigsTable.featureKey,
+            quotaConfigsTable.periodType,
+          ],
           set: {
             softLimit: softLimit ?? null,
             hardLimit: hardLimit ?? null,
-            softLimitAction: (softLimitAction ?? "notify") as typeof quotaConfigsTable.$inferInsert["softLimitAction"],
-            hardLimitAction: (hardLimitAction ?? "block") as typeof quotaConfigsTable.$inferInsert["hardLimitAction"],
+            softLimitAction: (softLimitAction ??
+              'notify') as (typeof quotaConfigsTable.$inferInsert)['softLimitAction'],
+            hardLimitAction: (hardLimitAction ??
+              'block') as (typeof quotaConfigsTable.$inferInsert)['hardLimitAction'],
             overageUnitAmount: overageUnitAmount ?? null,
             updatedAt: new Date(),
           },
@@ -492,19 +562,21 @@ router.post(
 
       sendSuccess(res, quota, 201);
     } catch (err) {
-      handleRouteError(res, err, "Failed to set quota");
+      handleRouteError(res, err, 'Failed to set quota');
     }
   },
 );
 
 router.post(
-  "/metering/check-quota",
+  '/metering/check-quota',
   authMiddleware({ required: false }),
-  validateBody(bodyShape({
-      "featureKey": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "quantity": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      featureKey: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      quantity: z.unknown().optional(),
+    }),
+  ),
   async (req: Request, res: Response) => {
     try {
       const { orgId, featureKey, quantity } = req.body as {
@@ -514,7 +586,7 @@ router.post(
       };
 
       if (!orgId || !featureKey) {
-        sendBadRequest(res, "orgId and featureKey are required");
+        sendBadRequest(res, 'orgId and featureKey are required');
         return;
       }
 
@@ -527,13 +599,13 @@ router.post(
         violation: result.violation ?? null,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to check quota");
+      handleRouteError(res, err, 'Failed to check quota');
     }
   },
 );
 
 router.get(
-  "/metering/quota-violations",
+  '/metering/quota-violations',
   authMiddleware(),
   requireRole(...READ_ROLES),
   validateQuery(listQuerySchema),
@@ -541,7 +613,7 @@ router.get(
     try {
       const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
       const since = req.query.since ? new Date(req.query.since as string) : undefined;
-      const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 500);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10), 500);
 
       const conditions = [];
       if (orgId) conditions.push(eq(quotaViolationsTable.orgId, orgId));
@@ -560,11 +632,11 @@ router.get(
 
       sendSuccess(res, violations);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list quota violations");
+      handleRouteError(res, err, 'Failed to list quota violations');
     }
   },
 );
 
-
-
-export function register(r: IRouter): void { r.use(router); }
+export function register(r: IRouter): void {
+  r.use(router);
+}

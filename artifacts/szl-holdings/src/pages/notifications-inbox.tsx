@@ -1,12 +1,12 @@
-import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { ErrorState } from "@szl-holdings/shared-ui/design-system";
-import { useState, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
-import { Bell, Check, CheckCheck, Filter, RefreshCw, Trash2, ExternalLink } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
-import { formatDateTime } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { ErrorState } from '@szl-holdings/shared-ui/design-system';
+import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
+import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
+import { formatDateTime } from '@szl-holdings/shared-ui/utils';
+import { useQueryClient } from '@tanstack/react-query';
+import { Bell, Check, CheckCheck, ExternalLink, Filter, RefreshCw, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface Notification {
   id: number;
@@ -23,30 +23,30 @@ interface Notification {
 }
 
 const APP_SOURCES = [
-  { id: "all", label: "All Sources" },
-  { id: "aegis", label: "Aegis" },
-  { id: "vessels", label: "Vessels" },
-  { id: "terra", label: "Terra" },
-  { id: "lyte", label: "Lyte" },
-  { id: "carlota-jo", label: "Carlota Jo" },
-  { id: "alloy", label: "Alloy" },
-  { id: "system", label: "System" },
+  { id: 'all', label: 'All Sources' },
+  { id: 'aegis', label: 'Aegis' },
+  { id: 'vessels', label: 'Vessels' },
+  { id: 'terra', label: 'Terra' },
+  { id: 'lyte', label: 'Lyte' },
+  { id: 'carlota-jo', label: 'Carlota Jo' },
+  { id: 'alloy', label: 'Alloy' },
+  { id: 'system', label: 'System' },
 ];
 
 const TYPE_COLORS: Record<string, string> = {
-  info: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  warning: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  error: "bg-red-500/20 text-red-400 border-red-500/30",
-  success: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  action_required: "bg-violet-500/20 text-violet-400 border-violet-500/30",
+  info: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  warning: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  error: 'bg-red-500/20 text-red-400 border-red-500/30',
+  success: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  action_required: 'bg-violet-500/20 text-violet-400 border-violet-500/30',
 };
 
 const TYPE_DOT: Record<string, string> = {
-  info: "bg-blue-500",
-  warning: "bg-amber-500",
-  error: "bg-red-500",
-  success: "bg-emerald-500",
-  action_required: "bg-violet-500",
+  info: 'bg-blue-500',
+  warning: 'bg-amber-500',
+  error: 'bg-red-500',
+  success: 'bg-emerald-500',
+  action_required: 'bg-violet-500',
 };
 
 function formatRelative(dateStr: string): string {
@@ -54,7 +54,7 @@ function formatRelative(dateStr: string): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "just now";
+  if (diffMin < 1) return 'just now';
   if (diffMin < 60) return `${diffMin}m ago`;
   const diffH = Math.floor(diffMin / 60);
   if (diffH < 24) return `${diffH}h ago`;
@@ -76,21 +76,23 @@ function NotificationRow({
   return (
     <div
       className={cn(
-        "group flex items-start gap-3 px-5 py-4 border-b border-border/40 transition-colors hover:bg-white/[0.02]",
-        !notification.isRead && "bg-white/[0.015]"
+        'group flex items-start gap-3 px-5 py-4 border-b border-border/40 transition-colors hover:bg-white/[0.02]',
+        !notification.isRead && 'bg-white/[0.015]',
       )}
     >
       <div className="flex-shrink-0 mt-1.5">
-        <div className={cn("w-2 h-2 rounded-full", typeDot, notification.isRead && "opacity-30")} />
+        <div className={cn('w-2 h-2 rounded-full', typeDot, notification.isRead && 'opacity-30')} />
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3 mb-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded border", typeColor)}>
-              {notification.type.replace("_", " ").toUpperCase()}
+            <span
+              className={cn('text-[10px] font-semibold px-1.5 py-0.5 rounded border', typeColor)}
+            >
+              {notification.type.replace('_', ' ').toUpperCase()}
             </span>
-            {notification.appId && notification.appId !== "system" && (
+            {notification.appId && notification.appId !== 'system' && (
               <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
                 {notification.appId}
               </span>
@@ -104,7 +106,12 @@ function NotificationRow({
           </span>
         </div>
 
-        <p className={cn("text-sm font-medium mb-0.5", notification.isRead ? "text-foreground/60" : "text-foreground")}>
+        <p
+          className={cn(
+            'text-sm font-medium mb-0.5',
+            notification.isRead ? 'text-foreground/60' : 'text-foreground',
+          )}
+        >
           {notification.title}
         </p>
         <p className="text-xs text-muted-foreground leading-relaxed">{notification.message}</p>
@@ -142,17 +149,17 @@ function NotificationRow({
 }
 
 export default function NotificationsInbox() {
-  const [filterSource, setFilterSource] = useState("all");
-  const [filterRead, setFilterRead] = useState<"all" | "unread" | "read">("all");
+  const [filterSource, setFilterSource] = useState('all');
+  const [filterRead, setFilterRead] = useState<'all' | 'unread' | 'read'>('all');
   const qc = useQueryClient();
 
   const { data, isLoading, error, refetch } = useStandardQuery<Notification[]>({
-    queryKey: ["notifications-inbox"],
+    queryKey: ['notifications-inbox'],
     queryFn: async () => {
-      const res = await fetch("/api/notifications?limit=100");
+      const res = await fetch('/api/notifications?limit=100');
       if (!res.ok) {
         if (res.status === 401) return [];
-        throw new Error("Failed to load notifications");
+        throw new Error('Failed to load notifications');
       }
       const json = await res.json();
       return (json.data ?? json) as Notification[];
@@ -163,36 +170,36 @@ export default function NotificationsInbox() {
 
   const markReadMutation = useStandardMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
-      if (!res.ok) throw new Error("Failed to mark as read");
+      const res = await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
+      if (!res.ok) throw new Error('Failed to mark as read');
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications-inbox"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications-inbox'] }),
   });
 
   const markAllReadMutation = useStandardMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/notifications/read-all", { method: "PATCH" });
-      if (!res.ok) throw new Error("Failed to mark all as read");
+      const res = await fetch('/api/notifications/read-all', { method: 'PATCH' });
+      if (!res.ok) throw new Error('Failed to mark all as read');
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications-inbox"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications-inbox'] }),
   });
 
   const deleteMutation = useStandardMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/notifications/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete notification");
+      const res = await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete notification');
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications-inbox"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications-inbox'] }),
   });
 
   const notifications = data ?? [];
 
   const filtered = notifications.filter((n) => {
-    const sourceMatch = filterSource === "all" || (n.appId ?? "system") === filterSource;
+    const sourceMatch = filterSource === 'all' || (n.appId ?? 'system') === filterSource;
     const readMatch =
-      filterRead === "all" ||
-      (filterRead === "unread" && !n.isRead) ||
-      (filterRead === "read" && n.isRead);
+      filterRead === 'all' ||
+      (filterRead === 'unread' && !n.isRead) ||
+      (filterRead === 'read' && n.isRead);
     return sourceMatch && readMatch;
   });
 
@@ -208,7 +215,7 @@ export default function NotificationsInbox() {
               <h1 className="text-lg font-semibold text-foreground">Notifications</h1>
               {unreadCount > 0 && (
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold border border-red-500/30">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
             </div>
@@ -241,15 +248,15 @@ export default function NotificationsInbox() {
           <div className="flex items-center gap-3 px-5 py-3 border-b border-border/60 bg-card/60">
             <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <div className="flex items-center gap-1.5 overflow-x-auto">
-              {(["all", "unread", "read"] as const).map((v) => (
+              {(['all', 'unread', 'read'] as const).map((v) => (
                 <button
                   key={v}
                   onClick={() => setFilterRead(v)}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors",
+                    'px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors',
                     filterRead === v
-                      ? "bg-primary/10 text-primary border border-primary/20"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
                   )}
                 >
                   {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -261,10 +268,10 @@ export default function NotificationsInbox() {
                   key={src.id}
                   onClick={() => setFilterSource(src.id)}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors",
+                    'px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors',
                     filterSource === src.id
-                      ? "bg-primary/10 text-primary border border-primary/20"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
                   )}
                 >
                   {src.label}
@@ -285,7 +292,9 @@ export default function NotificationsInbox() {
                 description="You may need to sign in, or there was a problem reaching the server."
                 onRetry={() => refetch()}
                 retryLabel="Retry"
-                onReset={() => { window.location.href = "/api/auth/login"; }}
+                onReset={() => {
+                  window.location.href = '/api/auth/login';
+                }}
                 resetLabel="Sign In"
               />
             </div>
@@ -294,11 +303,11 @@ export default function NotificationsInbox() {
               <EmptyState
                 compact
                 icon={CheckCheck}
-                headline={filterRead === "unread" ? "No unread notifications" : "No notifications"}
+                headline={filterRead === 'unread' ? 'No unread notifications' : 'No notifications'}
                 description={
-                  filterRead === "unread"
+                  filterRead === 'unread'
                     ? "You're all caught up."
-                    : "New alerts from your workspaces will appear here."
+                    : 'New alerts from your workspaces will appear here.'
                 }
               />
             </div>
@@ -318,14 +327,12 @@ export default function NotificationsInbox() {
           {filtered.length > 0 && (
             <div className="px-5 py-3 border-t border-border/40 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                {filtered.length} notification{filtered.length !== 1 ? "s" : ""}
-                {filterRead !== "all" ? ` (${filterRead})` : ""}
-                {filterSource !== "all" ? ` from ${filterSource}` : ""}
+                {filtered.length} notification{filtered.length !== 1 ? 's' : ''}
+                {filterRead !== 'all' ? ` (${filterRead})` : ''}
+                {filterSource !== 'all' ? ` from ${filterSource}` : ''}
               </p>
               {unreadCount > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  {unreadCount} unread
-                </span>
+                <span className="text-xs text-muted-foreground">{unreadCount} unread</span>
               )}
             </div>
           )}

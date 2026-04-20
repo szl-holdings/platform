@@ -42,7 +42,7 @@ const RECENCY_HALF_LIFE_DAYS = 30;
 function recencyWeight(recordedAt: string, now = Date.now()): number {
   const ageMs = now - new Date(recordedAt).getTime();
   const ageDays = ageMs / (1000 * 60 * 60 * 24);
-  return Math.pow(0.5, ageDays / RECENCY_HALF_LIFE_DAYS);
+  return 0.5 ** (ageDays / RECENCY_HALF_LIFE_DAYS);
 }
 
 /**
@@ -55,7 +55,7 @@ export function rankEvidence(
   now = Date.now(),
 ): RankedEvidence[] {
   const scored = evidence.map((e) => {
-    const sourcePriority = SOURCE_PRIORITY[e.sourceType ?? "system"] ?? 0.7;
+    const sourcePriority = SOURCE_PRIORITY[e.sourceType ?? 'system'] ?? 0.7;
     const recency = recencyWeight(e.recordedAt, now);
     const score =
       weights.confidence * e.confidence +
@@ -73,10 +73,7 @@ export function rankEvidence(
 /**
  * Return the single best piece of evidence from a list, or null if empty.
  */
-export function topEvidence(
-  evidence: EvidenceItem[],
-  now = Date.now(),
-): RankedEvidence | null {
+export function topEvidence(evidence: EvidenceItem[], now = Date.now()): RankedEvidence | null {
   const ranked = rankEvidence(evidence, undefined, now);
   return ranked[0] ?? null;
 }

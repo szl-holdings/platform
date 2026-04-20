@@ -1,7 +1,7 @@
-import { pgTable, text, serial, timestamp, integer, index } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
-import { GLOBAL_TENANT_SENTINEL } from "./command_inbox_alert_states";
+import { index, integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-zod';
+import type { z } from 'zod/v4';
+import { GLOBAL_TENANT_SENTINEL } from './command_inbox_alert_states';
 
 /**
  * Immutable audit log for operator actions on Command Inbox alerts.
@@ -17,11 +17,11 @@ import { GLOBAL_TENANT_SENTINEL } from "./command_inbox_alert_states";
  * literal work without Postgres NULL semantics surprises.
  */
 export const commandInboxAlertAuditTable = pgTable(
-  "command_inbox_alert_audit",
+  'command_inbox_alert_audit',
   {
-    id: serial("id").primaryKey(),
-    alertId: text("alert_id").notNull(),
-    tenantId: text("tenant_id").notNull().default(GLOBAL_TENANT_SENTINEL),
+    id: serial('id').primaryKey(),
+    alertId: text('alert_id').notNull(),
+    tenantId: text('tenant_id').notNull().default(GLOBAL_TENANT_SENTINEL),
     /**
      * The operator action recorded.
      * - "acknowledged" | "snoozed" | "resolved": new state set on the alert.
@@ -29,20 +29,17 @@ export const commandInboxAlertAuditTable = pgTable(
      *   We log this as a distinct action so the timeline shows the
      *   un-snooze event explicitly rather than a gap.
      */
-    action: text("action", {
-      enum: ["acknowledged", "snoozed", "resolved", "unsnoozed"],
+    action: text('action', {
+      enum: ['acknowledged', 'snoozed', 'resolved', 'unsnoozed'],
     }).notNull(),
-    snoozedUntil: timestamp("snoozed_until", { withTimezone: true }),
-    actorId: integer("actor_id"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    snoozedUntil: timestamp('snoozed_until', { withTimezone: true }),
+    actorId: integer('actor_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    alertIdx: index("command_inbox_alert_audit_alert_idx").on(t.alertId),
-    alertTenantIdx: index("command_inbox_alert_audit_alert_tenant_idx").on(
-      t.alertId,
-      t.tenantId,
-    ),
-    createdAtIdx: index("command_inbox_alert_audit_created_at_idx").on(t.createdAt),
+    alertIdx: index('command_inbox_alert_audit_alert_idx').on(t.alertId),
+    alertTenantIdx: index('command_inbox_alert_audit_alert_tenant_idx').on(t.alertId, t.tenantId),
+    createdAtIdx: index('command_inbox_alert_audit_created_at_idx').on(t.createdAt),
   }),
 );
 

@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from 'react';
 
 export interface GraphQLDataSection<T = Record<string, unknown>> {
   label: string;
@@ -15,8 +15,8 @@ export interface GraphQLDataPanelProps {
 }
 
 export function GraphQLDataPanel({
-  title = "GraphQL Live Data",
-  accentColor = "rgb(96, 165, 250)",
+  title = 'GraphQL Live Data',
+  accentColor = 'rgb(96, 165, 250)',
   loading = false,
   sections,
   className,
@@ -29,8 +29,8 @@ export function GraphQLDataPanel({
   return (
     <div
       className={
-        "rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-3" +
-        (className ? " " + className : "")
+        'rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-3' +
+        (className ? ' ' + className : '')
       }
     >
       <div className="flex items-center gap-2">
@@ -38,9 +38,7 @@ export function GraphQLDataPanel({
           className="h-1.5 w-1.5 rounded-full animate-pulse"
           style={{ backgroundColor: accentColor }}
         />
-        <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest">
-          {title}
-        </span>
+        <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest">{title}</span>
       </div>
       {sections.map(
         (section) =>
@@ -51,7 +49,7 @@ export function GraphQLDataPanel({
                 {section.items.map((item, i) => section.renderItem(item, i))}
               </div>
             </div>
-          )
+          ),
       )}
     </div>
   );

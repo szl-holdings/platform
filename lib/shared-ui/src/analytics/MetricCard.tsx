@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import type { MetricQueryResult } from "@szl-holdings/observability/analytics";
+import type { MetricQueryResult } from '@szl-holdings/observability/analytics';
+import { useMemo } from 'react';
 
 export interface MetricCardProps {
   result: MetricQueryResult;
@@ -8,45 +8,46 @@ export interface MetricCardProps {
   description?: string;
   thresholdWarning?: number;
   thresholdCritical?: number;
-  thresholdDirection?: "above" | "below";
+  thresholdDirection?: 'above' | 'below';
   loading?: boolean;
   compact?: boolean;
 }
 
 function formatValue(value: number, unit?: string): string {
-  if (unit === "%" || unit === "percent") return `${value.toFixed(1)}%`;
-  if (unit === "ms") return value >= 1000 ? `${(value / 1000).toFixed(2)}s` : `${value.toFixed(0)}ms`;
-  if (unit === "hours") return value >= 24 ? `${(value / 24).toFixed(1)}d` : `${value.toFixed(1)}h`;
+  if (unit === '%' || unit === 'percent') return `${value.toFixed(1)}%`;
+  if (unit === 'ms')
+    return value >= 1000 ? `${(value / 1000).toFixed(2)}s` : `${value.toFixed(0)}ms`;
+  if (unit === 'hours') return value >= 24 ? `${(value / 24).toFixed(1)}d` : `${value.toFixed(1)}h`;
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
   if (Number.isInteger(value)) return String(value);
   return value.toFixed(2);
 }
 
-function getTrendIcon(trend?: "up" | "down" | "stable"): string {
-  if (trend === "up") return "↑";
-  if (trend === "down") return "↓";
-  return "→";
+function getTrendIcon(trend?: 'up' | 'down' | 'stable'): string {
+  if (trend === 'up') return '↑';
+  if (trend === 'down') return '↓';
+  return '→';
 }
 
 function getStatusColor(
   value: number,
   thresholdWarning?: number,
   thresholdCritical?: number,
-  thresholdDirection?: "above" | "below"
+  thresholdDirection?: 'above' | 'below',
 ): string {
-  if (!thresholdDirection) return "text-white";
+  if (!thresholdDirection) return 'text-white';
 
-  const isAbove = thresholdDirection === "above";
+  const isAbove = thresholdDirection === 'above';
   if (thresholdCritical !== undefined) {
     const exceeded = isAbove ? value >= thresholdCritical : value <= thresholdCritical;
-    if (exceeded) return "text-red-400";
+    if (exceeded) return 'text-red-400';
   }
   if (thresholdWarning !== undefined) {
     const exceeded = isAbove ? value >= thresholdWarning : value <= thresholdWarning;
-    if (exceeded) return "text-yellow-400";
+    if (exceeded) return 'text-yellow-400';
   }
-  return "text-emerald-400";
+  return 'text-emerald-400';
 }
 
 export function MetricCard({
@@ -61,16 +62,17 @@ export function MetricCard({
   compact = false,
 }: MetricCardProps) {
   const statusColor = useMemo(
-    () => getStatusColor(result.currentValue, thresholdWarning, thresholdCritical, thresholdDirection),
-    [result.currentValue, thresholdWarning, thresholdCritical, thresholdDirection]
+    () =>
+      getStatusColor(result.currentValue, thresholdWarning, thresholdCritical, thresholdDirection),
+    [result.currentValue, thresholdWarning, thresholdCritical, thresholdDirection],
   );
 
   const changeColor = useMemo(() => {
-    if (!result.changePercent) return "text-zinc-400";
+    if (!result.changePercent) return 'text-zinc-400';
     const isPositive = result.changePercent > 0;
-    const goodDirection = thresholdDirection !== "above";
+    const goodDirection = thresholdDirection !== 'above';
     const isGood = isPositive === goodDirection;
-    return isGood ? "text-emerald-400" : "text-red-400";
+    return isGood ? 'text-emerald-400' : 'text-red-400';
   }, [result.changePercent, thresholdDirection]);
 
   if (loading) {
@@ -93,9 +95,7 @@ export function MetricCard({
           )}
         </div>
         {result.trend && (
-          <span className={`text-xs font-medium ${changeColor}`}>
-            {getTrendIcon(result.trend)}
-          </span>
+          <span className={`text-xs font-medium ${changeColor}`}>{getTrendIcon(result.trend)}</span>
         )}
       </div>
 
@@ -108,15 +108,26 @@ export function MetricCard({
 
       {result.changePercent !== undefined && (
         <div className={`flex items-center gap-1 text-xs ${changeColor}`}>
-          <span>{result.changePercent >= 0 ? "+" : ""}{result.changePercent.toFixed(1)}%</span>
+          <span>
+            {result.changePercent >= 0 ? '+' : ''}
+            {result.changePercent.toFixed(1)}%
+          </span>
           <span className="text-zinc-500">vs prev period</span>
         </div>
       )}
 
       {!compact && thresholdCritical !== undefined && (
         <div className="flex items-center gap-1 text-xs text-zinc-500">
-          <span>Critical: {thresholdCritical}{unit}</span>
-          {thresholdWarning !== undefined && <span>· Warn: {thresholdWarning}{unit}</span>}
+          <span>
+            Critical: {thresholdCritical}
+            {unit}
+          </span>
+          {thresholdWarning !== undefined && (
+            <span>
+              · Warn: {thresholdWarning}
+              {unit}
+            </span>
+          )}
         </div>
       )}
     </div>

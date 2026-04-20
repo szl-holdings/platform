@@ -1,23 +1,28 @@
 export type ConnectorCategory =
-  | "ticketing"
-  | "alerting"
-  | "communication"
-  | "crm"
-  | "security"
-  | "ai_inference"
-  | "ai_voice"
-  | "ai_media"
-  | "ai_observability"
-  | "ai_models"
-  | "data"
-  | "storage"
-  | "monitoring";
+  | 'ticketing'
+  | 'alerting'
+  | 'communication'
+  | 'crm'
+  | 'security'
+  | 'ai_inference'
+  | 'ai_voice'
+  | 'ai_media'
+  | 'ai_observability'
+  | 'ai_models'
+  | 'data'
+  | 'storage'
+  | 'monitoring';
 
-export type AuthScheme = "api_key" | "oauth2_client_credentials" | "oauth2_authorization_code" | "webhook_signature" | "none";
+export type AuthScheme =
+  | 'api_key'
+  | 'oauth2_client_credentials'
+  | 'oauth2_authorization_code'
+  | 'webhook_signature'
+  | 'none';
 
-export type ConnectorHealthStatus = "healthy" | "degraded" | "down" | "unconfigured" | "disabled";
+export type ConnectorHealthStatus = 'healthy' | 'degraded' | 'down' | 'unconfigured' | 'disabled';
 
-export type CircuitBreakerState = "closed" | "open" | "half_open";
+export type CircuitBreakerState = 'closed' | 'open' | 'half_open';
 
 export interface AuthConfig {
   scheme: AuthScheme;
@@ -26,13 +31,13 @@ export interface AuthConfig {
   oauthTokenUrl?: string;
   oauthScopes?: string[];
   webhookSignatureHeader?: string;
-  webhookSignatureAlgorithm?: "hmac-sha256" | "hmac-sha1";
+  webhookSignatureAlgorithm?: 'hmac-sha256' | 'hmac-sha1';
   description?: string;
 }
 
 export interface CapabilityParameter {
   name: string;
-  type: "string" | "number" | "boolean" | "object" | "array";
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   description: string;
   required: boolean;
   enum?: string[];

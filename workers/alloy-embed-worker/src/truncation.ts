@@ -1,4 +1,4 @@
-import type { TruncationPolicy } from "./backends/interface.js";
+import type { TruncationPolicy } from './backends/interface.js';
 
 export interface TruncationResult {
   text: string;
@@ -25,7 +25,7 @@ export function applyTruncation(
     };
   }
 
-  if (policy === "reject") {
+  if (policy === 'reject') {
     throw new Error(
       `TruncationPolicy[reject]: text length ${text.length} chars exceeds estimated limit of ${maxChars} chars ` +
         `(maxTokens=${maxTokens}, estimatedCharsPerToken=${estimatedCharsPerToken}). ` +
@@ -48,9 +48,7 @@ export function applyTruncationBatch(
   policy: TruncationPolicy,
   estimatedCharsPerToken = 4,
 ): { results: TruncationResult[]; anyTruncated: boolean } {
-  const results = texts.map((t) =>
-    applyTruncation(t, maxTokens, policy, estimatedCharsPerToken),
-  );
+  const results = texts.map((t) => applyTruncation(t, maxTokens, policy, estimatedCharsPerToken));
   return {
     results,
     anyTruncated: results.some((r) => r.wasTruncated),

@@ -5,77 +5,71 @@
  * a Signal. The 9-stage pipeline processes it through intake → telemetry-writeback.
  */
 
-import { z } from "zod";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
 
 export const SignalSourceSchema = z.enum([
-  "browser",
-  "api",
-  "worker",
-  "connector",
-  "model",
-  "human",
-  "system",
-  "synthetic",
+  'browser',
+  'api',
+  'worker',
+  'connector',
+  'model',
+  'human',
+  'system',
+  'synthetic',
 ]);
 export type SignalSource = z.infer<typeof SignalSourceSchema>;
 
 export const SignalTypeSchema = z.enum([
-  "anomaly",
-  "risk",
-  "opportunity",
-  "threshold-breach",
-  "state-change",
-  "position-update",
-  "sanctions-match",
-  "deadline",
-  "escalation",
-  "market-signal",
-  "compliance-flag",
-  "recommendation",
-  "approval",
-  "execution",
-  "outcome",
-  "telemetry",
-  "heartbeat",
-  "connector-event",
-  "custom",
+  'anomaly',
+  'risk',
+  'opportunity',
+  'threshold-breach',
+  'state-change',
+  'position-update',
+  'sanctions-match',
+  'deadline',
+  'escalation',
+  'market-signal',
+  'compliance-flag',
+  'recommendation',
+  'approval',
+  'execution',
+  'outcome',
+  'telemetry',
+  'heartbeat',
+  'connector-event',
+  'custom',
 ]);
 export type SignalType = z.infer<typeof SignalTypeSchema>;
 
-export const SignalSeveritySchema = z.enum([
-  "info",
-  "low",
-  "medium",
-  "high",
-  "critical",
-]);
+export const SignalSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
 export type SignalSeverity = z.infer<typeof SignalSeveritySchema>;
 
 export const SignalDomainSchema = z.enum([
-  "maritime",
-  "real-estate",
-  "legal",
-  "security",
-  "finance",
-  "workforce",
-  "hospitality",
-  "platform",
-  "ai",
-  "cross-domain",
+  'maritime',
+  'real-estate',
+  'legal',
+  'security',
+  'finance',
+  'workforce',
+  'hospitality',
+  'platform',
+  'ai',
+  'cross-domain',
 ]);
 export type SignalDomain = z.infer<typeof SignalDomainSchema>;
 
 export const SignalStageSchema = z.enum([
-  "intake",
-  "normalize",
-  "enrich",
-  "entity-resolve",
-  "correlate",
-  "score",
-  "recommend",
-  "policy-evaluate",
-  "telemetry-writeback",
+  'intake',
+  'normalize',
+  'enrich',
+  'entity-resolve',
+  'correlate',
+  'score',
+  'recommend',
+  'policy-evaluate',
+  'telemetry-writeback',
 ]);
 export type SignalStage = z.infer<typeof SignalStageSchema>;
 
@@ -128,27 +122,27 @@ export const SignalSchema = z.object({
   tags: z.array(z.string()).default([]),
   provenance: ProvenanceSchema.optional(),
 
-  stage: SignalStageSchema.default("intake"),
+  stage: SignalStageSchema.default('intake'),
   processingErrors: z.array(z.string()).default([]),
 
   correlatedSignalIds: z.array(z.string()).default([]),
   evidenceItemIds: z.array(z.string()).default([]),
   recommendationIds: z.array(z.string()).default([]),
 
-  schemaVersion: z.string().default("signal/1.0"),
+  schemaVersion: z.string().default('signal/1.0'),
 });
 export type Signal = z.infer<typeof SignalSchema>;
 
 export type SignalInput = Omit<
   Signal,
-  | "signalId"
-  | "receivedAt"
-  | "schemaVersion"
-  | "stage"
-  | "processingErrors"
-  | "correlatedSignalIds"
-  | "evidenceItemIds"
-  | "recommendationIds"
+  | 'signalId'
+  | 'receivedAt'
+  | 'schemaVersion'
+  | 'stage'
+  | 'processingErrors'
+  | 'correlatedSignalIds'
+  | 'evidenceItemIds'
+  | 'recommendationIds'
 >;
 
 export function createSignal(input: SignalInput): Signal {
@@ -156,7 +150,7 @@ export function createSignal(input: SignalInput): Signal {
     ...input,
     signalId: randomUUID(),
     receivedAt: new Date().toISOString(),
-    schemaVersion: "signal/1.0",
+    schemaVersion: 'signal/1.0',
   });
 }
 
@@ -167,8 +161,8 @@ export function fromAtlasEvent(
   tenantId?: string,
 ): Signal {
   return createSignal({
-    source: "api",
-    type: "connector-event",
+    source: 'api',
+    type: 'connector-event',
     domain,
     occurredAt: (payload.occurredAt as string | undefined) ?? new Date().toISOString(),
     expiresAt: undefined,
@@ -177,8 +171,8 @@ export function fromAtlasEvent(
     entityRefs: [],
     tenantId,
     rawPayload: { eventName, ...payload },
-    tags: ["atlas-event", eventName.split(".")[0] ?? "unknown"],
-    provenance: { sourceService: "atlas-events" },
+    tags: ['atlas-event', eventName.split('.')[0] ?? 'unknown'],
+    provenance: { sourceService: 'atlas-events' },
   });
 }
 
@@ -188,15 +182,15 @@ export function fromBusinessEvent(
   domain: SignalDomain,
 ): Signal {
   return createSignal({
-    source: "api",
-    type: "connector-event",
+    source: 'api',
+    type: 'connector-event',
     domain,
     occurredAt: new Date().toISOString(),
     freshness: 1,
     confidence: 0.85,
     entityRefs: [],
     rawPayload: { eventClass, ...payload },
-    tags: ["business-event", eventClass.split(".")[0] ?? "unknown"],
-    provenance: { sourceService: "business-events" },
+    tags: ['business-event', eventClass.split('.')[0] ?? 'unknown'],
+    provenance: { sourceService: 'business-events' },
   });
 }

@@ -1,33 +1,40 @@
 export type ReceiptClass =
-  | "recommendation"
-  | "artifact"
-  | "decision"
-  | "action"
-  | "analysis"
-  | "alert"
-  | "approval"
-  | "export";
+  | 'recommendation'
+  | 'artifact'
+  | 'decision'
+  | 'action'
+  | 'analysis'
+  | 'alert'
+  | 'approval'
+  | 'export';
 
 export type ReceiptStatus =
-  | "generated"
-  | "approved"
-  | "rejected"
-  | "retracted"
-  | "superseded"
-  | "pending_review";
+  | 'generated'
+  | 'approved'
+  | 'rejected'
+  | 'retracted'
+  | 'superseded'
+  | 'pending_review';
 
 export type PolicyClass =
-  | "auto_approve"
-  | "require_human"
-  | "require_executive"
-  | "require_dual_sign"
-  | "blocked"
-  | "audit_only";
+  | 'auto_approve'
+  | 'require_human'
+  | 'require_executive'
+  | 'require_dual_sign'
+  | 'blocked'
+  | 'audit_only';
 
-export type ConfidenceTier = "high" | "medium" | "low" | "uncertain";
+export type ConfidenceTier = 'high' | 'medium' | 'low' | 'uncertain';
 
 export interface ReceiptInputSource {
-  type: "retrieval_chunk" | "live_api" | "database_query" | "user_input" | "model_output" | "tool_result" | "system_signal";
+  type:
+    | 'retrieval_chunk'
+    | 'live_api'
+    | 'database_query'
+    | 'user_input'
+    | 'model_output'
+    | 'tool_result'
+    | 'system_signal';
   id: string;
   label?: string;
   relevanceScore?: number;
@@ -38,7 +45,7 @@ export interface ReceiptAssumption {
   id: string;
   statement: string;
   basis: string;
-  confidenceImpact: "high" | "medium" | "low";
+  confidenceImpact: 'high' | 'medium' | 'low';
 }
 
 export interface PostExecutionDelta {
@@ -86,7 +93,11 @@ export interface TrustReceipt {
 export interface TrustReceiptGraph {
   rootReceiptId: string;
   receipts: TrustReceipt[];
-  edges: Array<{ parentId: string; childId: string; relationship: "derived_from" | "informed_by" | "supersedes" | "validated_by" }>;
+  edges: Array<{
+    parentId: string;
+    childId: string;
+    relationship: 'derived_from' | 'informed_by' | 'supersedes' | 'validated_by';
+  }>;
   depth: number;
 }
 

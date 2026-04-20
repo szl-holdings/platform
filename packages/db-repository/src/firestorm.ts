@@ -3,11 +3,11 @@
  */
 import {
   db,
-  firestormScenariosTable,
-  firestormRunsTable,
   firestormFindingsTable,
-} from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
+  firestormRunsTable,
+  firestormScenariosTable,
+} from '@szl-holdings/db';
+import { desc, eq } from 'drizzle-orm';
 
 export class FirestormRepository {
   async findScenarioById(id: number) {

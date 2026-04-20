@@ -1,18 +1,18 @@
-import webpush from "web-push";
-import { db, webPushSubscriptionsTable } from "@szl-holdings/db";
-import { eq, and } from "drizzle-orm";
-import { logger } from "./logger";
+import { db, webPushSubscriptionsTable } from '@szl-holdings/db';
+import { and, eq } from 'drizzle-orm';
+import webpush from 'web-push';
+import { logger } from './logger';
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT ?? "mailto:platform@szlholdings.com";
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT ?? 'mailto:platform@szlholdings.com';
 
 let vapidConfigured = false;
 
 function ensureVapidConfigured(): boolean {
   if (vapidConfigured) return true;
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    logger.warn("[web-push] VAPID_PUBLIC_KEY or VAPID_PRIVATE_KEY not set — web push disabled");
+    logger.warn('[web-push] VAPID_PUBLIC_KEY or VAPID_PRIVATE_KEY not set — web push disabled');
     return false;
   }
   try {
@@ -20,7 +20,7 @@ function ensureVapidConfigured(): boolean {
     vapidConfigured = true;
     return true;
   } catch (err) {
-    logger.warn({ err }, "[web-push] Failed to configure VAPID details");
+    logger.warn({ err }, '[web-push] Failed to configure VAPID details');
     return false;
   }
 }
@@ -50,14 +50,14 @@ export async function sendWebPushToAll(payload: WebPushPayload): Promise<SendWeb
     return { sent: 0, failed: 0, deactivated: 0 };
   }
 
-  let subs: typeof webPushSubscriptionsTable.$inferSelect[];
+  let subs: (typeof webPushSubscriptionsTable.$inferSelect)[];
   try {
     subs = await db
       .select()
       .from(webPushSubscriptionsTable)
       .where(eq(webPushSubscriptionsTable.isActive, true));
   } catch (err) {
-    logger.warn({ err }, "[web-push] Failed to query subscriptions");
+    logger.warn({ err }, '[web-push] Failed to query subscriptions');
     return { sent: 0, failed: 0, deactivated: 0 };
   }
 
@@ -66,22 +66,27 @@ export async function sendWebPushToAll(payload: WebPushPayload): Promise<SendWeb
   return sendToSubscriptions(subs, payload);
 }
 
-export async function sendWebPushToApp(appId: string, payload: WebPushPayload): Promise<SendWebPushResult> {
+export async function sendWebPushToApp(
+  appId: string,
+  payload: WebPushPayload,
+): Promise<SendWebPushResult> {
   if (!ensureVapidConfigured()) {
     return { sent: 0, failed: 0, deactivated: 0 };
   }
 
-  let subs: typeof webPushSubscriptionsTable.$inferSelect[];
+  let subs: (typeof webPushSubscriptionsTable.$inferSelect)[];
   try {
     subs = await db
       .select()
       .from(webPushSubscriptionsTable)
-      .where(and(
-        eq(webPushSubscriptionsTable.isActive, true),
-        eq(webPushSubscriptionsTable.appId, appId)
-      ));
+      .where(
+        and(
+          eq(webPushSubscriptionsTable.isActive, true),
+          eq(webPushSubscriptionsTable.appId, appId),
+        ),
+      );
   } catch (err) {
-    logger.warn({ err }, "[web-push] Failed to query subscriptions for app");
+    logger.warn({ err }, '[web-push] Failed to query subscriptions for app');
     return { sent: 0, failed: 0, deactivated: 0 };
   }
 
@@ -90,8 +95,8 @@ export async function sendWebPushToApp(appId: string, payload: WebPushPayload): 
 }
 
 async function sendToSubscriptions(
-  subs: typeof webPushSubscriptionsTable.$inferSelect[],
-  payload: WebPushPayload
+  subs: (typeof webPushSubscriptionsTable.$inferSelect)[],
+  payload: WebPushPayload,
 ): Promise<SendWebPushResult> {
   let sent = 0;
   let failed = 0;
@@ -100,8 +105,8 @@ async function sendToSubscriptions(
   const notificationPayload = JSON.stringify({
     title: payload.title,
     body: payload.body,
-    icon: payload.icon ?? "/favicon.svg",
-    badge: payload.badge ?? "/favicon.svg",
+    icon: payload.icon ?? '/favicon.svg',
+    badge: payload.badge ?? '/favicon.svg',
     tag: payload.tag,
     data: {
       ...payload.data,
@@ -130,11 +135,11 @@ async function sendToSubscriptions(
         }
         return { success: false, gone: false, endpoint: sub.endpoint, err };
       }
-    })
+    }),
   );
 
   for (const result of sendResults) {
-    if (result.status === "fulfilled") {
+    if (result.status === 'fulfilled') {
       const val = result.value;
       if (val.success) {
         sent++;
@@ -143,7 +148,10 @@ async function sendToSubscriptions(
         if (val.gone) {
           toDeactivate.push(val.endpoint);
         } else {
-          logger.warn({ endpoint: val.endpoint?.slice(0, 40), err: (val as { err?: unknown }).err }, "[web-push] Push send failed");
+          logger.warn(
+            { endpoint: val.endpoint?.slice(0, 40), err: (val as { err?: unknown }).err },
+            '[web-push] Push send failed',
+          );
         }
       }
     } else {
@@ -157,11 +165,11 @@ async function sendToSubscriptions(
         .update(webPushSubscriptionsTable)
         .set({ isActive: false, updatedAt: new Date() })
         .where(eq(webPushSubscriptionsTable.endpoint, endpoint))
-        .catch((err) => logger.warn({ err }, "[web-push] Failed to deactivate subscription"));
+        .catch((err) => logger.warn({ err }, '[web-push] Failed to deactivate subscription'));
     }
-    logger.info({ count: toDeactivate.length }, "[web-push] Deactivated expired subscriptions");
+    logger.info({ count: toDeactivate.length }, '[web-push] Deactivated expired subscriptions');
   }
 
-  logger.info({ sent, failed, total: subs.length }, "[web-push] Push dispatch complete");
+  logger.info({ sent, failed, total: subs.length }, '[web-push] Push dispatch complete');
   return { sent, failed, deactivated: toDeactivate.length };
 }

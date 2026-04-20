@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View, type ViewStyle } from "react-native";
+import type React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 
 export interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -24,12 +24,14 @@ export function EmptyState({
   description,
   action,
   secondaryAction,
-  accentColor = "#C8A96A",
+  accentColor = '#C8A96A',
   style,
   compact = false,
 }: EmptyStateProps) {
   return (
-    <View style={[styles.container, compact ? styles.containerCompact : styles.containerFull, style]}>
+    <View
+      style={[styles.container, compact ? styles.containerCompact : styles.containerFull, style]}
+    >
       {icon && (
         <View
           style={[
@@ -42,17 +44,17 @@ export function EmptyState({
         </View>
       )}
 
-      <Text style={[styles.title, compact ? styles.titleCompact : styles.titleFull]}>
-        {title}
-      </Text>
+      <Text style={[styles.title, compact ? styles.titleCompact : styles.titleFull]}>{title}</Text>
 
       {description ? (
-        <Text style={[styles.description, compact ? styles.descriptionCompact : styles.descriptionFull]}>
+        <Text
+          style={[styles.description, compact ? styles.descriptionCompact : styles.descriptionFull]}
+        >
           {description}
         </Text>
       ) : null}
 
-      {(action || secondaryAction) ? (
+      {action || secondaryAction ? (
         <View style={styles.actions}>
           {action ? (
             <TouchableOpacity
@@ -82,8 +84,8 @@ export function EmptyState({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   containerFull: {
     paddingVertical: 56,
@@ -96,8 +98,8 @@ const styles = StyleSheet.create({
   iconWrap: {
     borderRadius: 16,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
   },
   iconWrapFull: {
@@ -111,9 +113,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   title: {
-    color: "rgba(232,234,240,0.75)",
-    fontWeight: "600",
-    textAlign: "center",
+    color: 'rgba(232,234,240,0.75)',
+    fontWeight: '600',
+    textAlign: 'center',
     marginBottom: 8,
   },
   titleFull: {
@@ -123,8 +125,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   description: {
-    color: "rgba(232,234,240,0.4)",
-    textAlign: "center",
+    color: 'rgba(232,234,240,0.4)',
+    textAlign: 'center',
     lineHeight: 20,
     marginBottom: 20,
   },
@@ -137,9 +139,9 @@ const styles = StyleSheet.create({
     maxWidth: 240,
   },
   actions: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 10,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 8,
   },
   primaryButton: {
@@ -148,9 +150,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   primaryButtonText: {
-    color: "#080B12",
+    color: '#080B12',
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   secondaryButton: {
     paddingHorizontal: 16,
@@ -158,6 +160,6 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 });

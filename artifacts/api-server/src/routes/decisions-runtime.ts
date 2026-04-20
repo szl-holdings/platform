@@ -20,25 +20,30 @@
  * can see the demo workspace (ws-demo-001). All mutating routes require auth.
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { z } from "zod/v4";
-import { authMiddleware, type AuthenticatedUser } from "../middlewares/auth";
-import { logger } from "../lib/logger";
-import { db, PgPool, drizzleConnect } from "@szl-holdings/db";
 import {
-  decisionsRuntimeTable,
-  decisionEvidenceTable,
-  decisionValidationsTable,
-  decisionRunsTable,
+  db,
   decisionAuditEventsTable,
-} from "@szl-holdings/db";
-import { eq, and, desc, asc, inArray } from "drizzle-orm";
-import { evaluateDecisionPolicy } from "../services/decision-policy-engine";
-import type { DecisionInput } from "../services/decision-policy-engine";
-import { runAdversarialValidation } from "../services/decision-adversarial-validation";
-import type { AdversarialValidationInput, EvidenceItem } from "../services/decision-adversarial-validation";
-import { seedDecisionsIfEmpty } from "../services/decision-seed";
-import { randomUUID } from "crypto";
+  decisionEvidenceTable,
+  decisionRunsTable,
+  decisionsRuntimeTable,
+  decisionValidationsTable,
+  drizzleConnect,
+  PgPool,
+} from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod/v4';
+import { logger } from '../lib/logger';
+import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
+import type {
+  AdversarialValidationInput,
+  EvidenceItem,
+} from '../services/decision-adversarial-validation';
+import { runAdversarialValidation } from '../services/decision-adversarial-validation';
+import type { DecisionInput } from '../services/decision-policy-engine';
+import { evaluateDecisionPolicy } from '../services/decision-policy-engine';
+import { seedDecisionsIfEmpty } from '../services/decision-seed';
 
 // ─── Dedicated pool for decision-runtime routes ────────────────────────────────
 // Separate from the main pool so autonomous agents saturating the primary pool
@@ -60,15 +65,15 @@ const requireAuth = authMiddleware({ required: true });
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getWorkspaceId(user: AuthenticatedUser | undefined): string {
-  return user?.orgs[0]?.orgId ? `ws-org-${user.orgs[0].orgId}` : "ws-demo-001";
+  return user?.orgs[0]?.orgId ? `ws-org-${user.orgs[0].orgId}` : 'ws-demo-001';
 }
 
 function getActorId(user: AuthenticatedUser | undefined): string {
-  return user ? `user:${user.id}` : "system:anonymous";
+  return user ? `user:${user.id}` : 'system:anonymous';
 }
 
 function getActorDisplay(user: AuthenticatedUser | undefined): string {
-  return user ? (user.displayName || user.email || `User ${user.id}`) : "Anonymous";
+  return user ? user.displayName || user.email || `User ${user.id}` : 'Anonymous';
 }
 
 // ─── Seed on demand (idempotent, non-blocking) ───────────────────────────────
@@ -79,8 +84,8 @@ let seedStarted = false;
 function kickoffSeed() {
   if (seedStarted) return;
   seedStarted = true;
-  seedDecisionsIfEmpty().catch(err => {
-    logger.warn({ err }, "Decision seed failed");
+  seedDecisionsIfEmpty().catch((err) => {
+    logger.warn({ err }, 'Decision seed failed');
     seedStarted = false; // allow retry on next request
   });
 }
@@ -92,7 +97,7 @@ function withQueryTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error(`DB query timed out after ${ms}ms`)), ms)
+      setTimeout(() => reject(new Error(`DB query timed out after ${ms}ms`)), ms),
     ),
   ]);
 }
@@ -108,8 +113,8 @@ const cardSummarySchema = z.object({
   domain: z.string(),
   title: z.string(),
   summary: z.string(),
-  severity: z.enum(["critical", "high", "medium", "low"]),
-  autonomyMode: z.enum(["observe", "recommend", "draft", "execute-with-approval", "auto-execute"]),
+  severity: z.enum(['critical', 'high', 'medium', 'low']),
+  autonomyMode: z.enum(['observe', 'recommend', 'draft', 'execute-with-approval', 'auto-execute']),
   status: z.string(),
   policyState: z.string().nullable(),
   freshness: z.string().nullable(),
@@ -147,7 +152,7 @@ const transitionResponseSchema = z.object({
 function validateResponse<T>(schema: z.ZodType<T>, data: unknown, routeName: string): T {
   const result = schema.safeParse(data);
   if (!result.success) {
-    logger.warn({ issues: result.error.issues, routeName }, "Response schema validation failed");
+    logger.warn({ issues: result.error.issues, routeName }, 'Response schema validation failed');
     throw new Error(`Response contract violation in ${routeName}`);
   }
   return result.data;
@@ -156,7 +161,7 @@ function validateResponse<T>(schema: z.ZodType<T>, data: unknown, routeName: str
 // ─── GET /decisions/cards ──────────────────────────────────────────────────────
 // Single SQL query with LEFT JOIN aggregate to count evidence — avoids N+1 queries.
 
-router.get("/decisions/cards", noAuth, async (req: Request, res: Response) => {
+router.get('/decisions/cards', noAuth, async (req: Request, res: Response) => {
   kickoffSeed();
   try {
     const workspaceId = getWorkspaceId(req.user);
@@ -170,10 +175,18 @@ router.get("/decisions/cards", noAuth, async (req: Request, res: Response) => {
     // Build raw SQL with parameterized filters — single query with LEFT JOIN for evidence counts.
     const extraFilters: string[] = [];
     const params: unknown[] = [workspaceId];
-    if (severityFilter) { extraFilters.push(`AND dr.severity = $${params.push(severityFilter)}`); }
-    if (domainFilter) { extraFilters.push(`AND dr.domain = $${params.push(domainFilter)}`); }
-    if (statusFilter) { extraFilters.push(`AND dr.status = $${params.push(statusFilter)}`); }
-    if (autonomyModeFilter) { extraFilters.push(`AND dr.autonomy_mode = $${params.push(autonomyModeFilter)}`); }
+    if (severityFilter) {
+      extraFilters.push(`AND dr.severity = $${params.push(severityFilter)}`);
+    }
+    if (domainFilter) {
+      extraFilters.push(`AND dr.domain = $${params.push(domainFilter)}`);
+    }
+    if (statusFilter) {
+      extraFilters.push(`AND dr.status = $${params.push(statusFilter)}`);
+    }
+    if (autonomyModeFilter) {
+      extraFilters.push(`AND dr.autonomy_mode = $${params.push(autonomyModeFilter)}`);
+    }
 
     const rawSql = `
       SELECT
@@ -191,7 +204,7 @@ router.get("/decisions/cards", noAuth, async (req: Request, res: Response) => {
         GROUP BY card_id
       ) ev ON ev.card_id = dr.card_id
       WHERE dr.workspace_id = $1
-      ${extraFilters.join(" ")}
+      ${extraFilters.join(' ')}
       ORDER BY dr.priority DESC, dr.created_at DESC
       LIMIT ${limit}
     `;
@@ -223,20 +236,25 @@ router.get("/decisions/cards", noAuth, async (req: Request, res: Response) => {
       reviewedBy: r.reviewed_by,
     }));
 
-    const responseBody = validateResponse(listResponseSchema, { success: true as const, data, total: data.length }, "GET /decisions/cards");
+    const responseBody = validateResponse(
+      listResponseSchema,
+      { success: true as const, data, total: data.length },
+      'GET /decisions/cards',
+    );
     return res.json(responseBody);
   } catch (err) {
-    logger.error({ err }, "GET /decisions/cards error");
-    const msg = err instanceof Error && err.message.includes("timed out")
-      ? "Decision list temporarily unavailable — server is under load, please retry"
-      : "Failed to list decisions";
+    logger.error({ err }, 'GET /decisions/cards error');
+    const msg =
+      err instanceof Error && err.message.includes('timed out')
+        ? 'Decision list temporarily unavailable — server is under load, please retry'
+        : 'Failed to list decisions';
     return res.status(503).json({ error: msg, retryable: true });
   }
 });
 
 // ─── GET /decisions/cards/:id ──────────────────────────────────────────────────
 
-router.get("/decisions/cards/:id", noAuth, async (req: Request, res: Response) => {
+router.get('/decisions/cards/:id', noAuth, async (req: Request, res: Response) => {
   try {
     kickoffSeed();
     const workspaceId = getWorkspaceId(req.user);
@@ -245,58 +263,84 @@ router.get("/decisions/cards/:id", noAuth, async (req: Request, res: Response) =
     // Support both numeric id and cardId
     let card = null;
     if (/^\d+$/.test(id)) {
-      const rows = await withQueryTimeout(ddb
-        .select()
-        .from(decisionsRuntimeTable)
-        .where(and(
-          eq(decisionsRuntimeTable.id, parseInt(id, 10)),
-          eq(decisionsRuntimeTable.workspaceId, workspaceId),
-        ))
-        .limit(1));
+      const rows = await withQueryTimeout(
+        ddb
+          .select()
+          .from(decisionsRuntimeTable)
+          .where(
+            and(
+              eq(decisionsRuntimeTable.id, parseInt(id, 10)),
+              eq(decisionsRuntimeTable.workspaceId, workspaceId),
+            ),
+          )
+          .limit(1),
+      );
       card = rows[0] ?? null;
     } else {
-      const rows = await withQueryTimeout(ddb
-        .select()
-        .from(decisionsRuntimeTable)
-        .where(and(
-          eq(decisionsRuntimeTable.cardId, id),
-          eq(decisionsRuntimeTable.workspaceId, workspaceId),
-        ))
-        .limit(1));
+      const rows = await withQueryTimeout(
+        ddb
+          .select()
+          .from(decisionsRuntimeTable)
+          .where(
+            and(
+              eq(decisionsRuntimeTable.cardId, id),
+              eq(decisionsRuntimeTable.workspaceId, workspaceId),
+            ),
+          )
+          .limit(1),
+      );
       card = rows[0] ?? null;
     }
 
     if (!card) {
-      return res.status(404).json({ error: "Decision card not found" });
+      return res.status(404).json({ error: 'Decision card not found' });
     }
 
-    const [evidence, validations, runs, auditEvents] = await withQueryTimeout(Promise.all([
-      ddb.select().from(decisionEvidenceTable)
-        .where(and(
-          eq(decisionEvidenceTable.cardId, card.cardId),
-          eq(decisionEvidenceTable.workspaceId, workspaceId),
-        ))
-        .orderBy(asc(decisionEvidenceTable.orderIdx)),
-      ddb.select().from(decisionValidationsTable)
-        .where(and(
-          eq(decisionValidationsTable.cardId, card.cardId),
-          eq(decisionValidationsTable.workspaceId, workspaceId),
-        ))
-        .orderBy(asc(decisionValidationsTable.createdAt)),
-      ddb.select().from(decisionRunsTable)
-        .where(and(
-          eq(decisionRunsTable.cardId, card.cardId),
-          eq(decisionRunsTable.workspaceId, workspaceId),
-        ))
-        .orderBy(desc(decisionRunsTable.createdAt))
-        .limit(1),
-      ddb.select().from(decisionAuditEventsTable)
-        .where(and(
-          eq(decisionAuditEventsTable.cardId, card.cardId),
-          eq(decisionAuditEventsTable.workspaceId, workspaceId),
-        ))
-        .orderBy(asc(decisionAuditEventsTable.occurredAt)),
-    ]));
+    const [evidence, validations, runs, auditEvents] = await withQueryTimeout(
+      Promise.all([
+        ddb
+          .select()
+          .from(decisionEvidenceTable)
+          .where(
+            and(
+              eq(decisionEvidenceTable.cardId, card.cardId),
+              eq(decisionEvidenceTable.workspaceId, workspaceId),
+            ),
+          )
+          .orderBy(asc(decisionEvidenceTable.orderIdx)),
+        ddb
+          .select()
+          .from(decisionValidationsTable)
+          .where(
+            and(
+              eq(decisionValidationsTable.cardId, card.cardId),
+              eq(decisionValidationsTable.workspaceId, workspaceId),
+            ),
+          )
+          .orderBy(asc(decisionValidationsTable.createdAt)),
+        ddb
+          .select()
+          .from(decisionRunsTable)
+          .where(
+            and(
+              eq(decisionRunsTable.cardId, card.cardId),
+              eq(decisionRunsTable.workspaceId, workspaceId),
+            ),
+          )
+          .orderBy(desc(decisionRunsTable.createdAt))
+          .limit(1),
+        ddb
+          .select()
+          .from(decisionAuditEventsTable)
+          .where(
+            and(
+              eq(decisionAuditEventsTable.cardId, card.cardId),
+              eq(decisionAuditEventsTable.workspaceId, workspaceId),
+            ),
+          )
+          .orderBy(asc(decisionAuditEventsTable.occurredAt)),
+      ]),
+    );
 
     return res.json({
       success: true,
@@ -326,7 +370,7 @@ router.get("/decisions/cards/:id", noAuth, async (req: Request, res: Response) =
           reviewedBy: card.reviewedBy,
           reviewNote: card.reviewNote,
         },
-        evidence: evidence.map(e => ({
+        evidence: evidence.map((e) => ({
           id: e.id,
           label: e.label,
           value: e.value,
@@ -337,7 +381,7 @@ router.get("/decisions/cards/:id", noAuth, async (req: Request, res: Response) =
           confidence: e.confidence,
           capturedAt: e.capturedAt,
         })),
-        validations: validations.map(v => ({
+        validations: validations.map((v) => ({
           id: v.id,
           checkType: v.checkType,
           passed: v.passed,
@@ -346,20 +390,22 @@ router.get("/decisions/cards/:id", noAuth, async (req: Request, res: Response) =
           metadata: v.metadata,
           ranAt: v.ranAt,
         })),
-        runTrace: runs[0] ? {
-          runId: runs[0].runId,
-          steps: runs[0].steps,
-          totalLatencyMs: runs[0].totalLatencyMs,
-          totalInputTokens: runs[0].totalInputTokens,
-          totalOutputTokens: runs[0].totalOutputTokens,
-          estimatedCostUsd: runs[0].estimatedCostUsd,
-          modelsCalled: runs[0].modelsCalled,
-          toolsCalled: runs[0].toolsCalled,
-          status: runs[0].status,
-          startedAt: runs[0].startedAt,
-          completedAt: runs[0].completedAt,
-        } : null,
-        auditTrail: auditEvents.map(a => ({
+        runTrace: runs[0]
+          ? {
+              runId: runs[0].runId,
+              steps: runs[0].steps,
+              totalLatencyMs: runs[0].totalLatencyMs,
+              totalInputTokens: runs[0].totalInputTokens,
+              totalOutputTokens: runs[0].totalOutputTokens,
+              estimatedCostUsd: runs[0].estimatedCostUsd,
+              modelsCalled: runs[0].modelsCalled,
+              toolsCalled: runs[0].toolsCalled,
+              status: runs[0].status,
+              startedAt: runs[0].startedAt,
+              completedAt: runs[0].completedAt,
+            }
+          : null,
+        auditTrail: auditEvents.map((a) => ({
           eventId: a.eventId,
           eventType: a.eventType,
           actorId: a.actorId,
@@ -373,8 +419,8 @@ router.get("/decisions/cards/:id", noAuth, async (req: Request, res: Response) =
       },
     });
   } catch (err) {
-    logger.error({ err }, "GET /decisions/cards/:id error");
-    return res.status(500).json({ error: "Failed to get decision" });
+    logger.error({ err }, 'GET /decisions/cards/:id error');
+    return res.status(500).json({ error: 'Failed to get decision' });
   }
 });
 
@@ -388,8 +434,8 @@ const actionSchema = z.object({
 async function transitionCard(
   req: Request,
   res: Response,
-  newStatus: "approved" | "rejected" | "changes-requested",
-  eventType: "card.approved" | "card.rejected" | "card.changes_requested",
+  newStatus: 'approved' | 'rejected' | 'changes-requested',
+  eventType: 'card.approved' | 'card.rejected' | 'card.changes_requested',
 ) {
   try {
     kickoffSeed();
@@ -400,7 +446,7 @@ async function transitionCard(
 
     const parsed = actionSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
+      return res.status(400).json({ error: 'Invalid body', details: parsed.error.flatten() });
     }
 
     const conditions = [eq(decisionsRuntimeTable.workspaceId, workspaceId)];
@@ -410,246 +456,293 @@ async function transitionCard(
       conditions.push(eq(decisionsRuntimeTable.cardId, id));
     }
 
-    const rows = await withQueryTimeout(ddb
-      .select()
-      .from(decisionsRuntimeTable)
-      .where(and(...conditions))
-      .limit(1));
+    const rows = await withQueryTimeout(
+      ddb
+        .select()
+        .from(decisionsRuntimeTable)
+        .where(and(...conditions))
+        .limit(1),
+    );
 
     const card = rows[0];
     if (!card) {
-      return res.status(404).json({ error: "Decision card not found" });
+      return res.status(404).json({ error: 'Decision card not found' });
     }
 
     const previousStatus = card.status;
     const actorId = getActorId(req.user);
     const actorDisplay = getActorDisplay(req.user);
-    const reason = parsed.data.reason ?? parsed.data.note ?? "";
+    const reason = parsed.data.reason ?? parsed.data.note ?? '';
     const eventId = `audit-${card.cardId}-${eventType}-${Date.now()}`;
 
     // Both mutation and audit event must succeed or both must roll back — no silent mutations.
-    await withQueryTimeout(ddb.transaction(async (tx) => {
-      await tx
-        .update(decisionsRuntimeTable)
-        .set({
-          status: newStatus,
-          reviewedAt: new Date(),
+    await withQueryTimeout(
+      ddb.transaction(async (tx) => {
+        await tx
+          .update(decisionsRuntimeTable)
+          .set({
+            status: newStatus,
+            reviewedAt: new Date(),
+            reviewedBy: actorDisplay,
+            reviewNote: reason || null,
+            updatedAt: new Date(),
+          })
+          .where(and(...conditions));
+
+        await tx.insert(decisionAuditEventsTable).values({
+          eventId,
+          cardId: card.cardId,
+          workspaceId,
+          eventType,
+          actorId,
+          actorType: 'human',
+          actorDisplay,
+          reason: reason || null,
+          previousStatus,
+          newStatus,
+          occurredAt: new Date(),
+        });
+      }),
+    );
+
+    logger.info(
+      { cardId: card.cardId, eventType, actorId, newStatus },
+      'Decision card state transition',
+    );
+
+    const responseBody = validateResponse(
+      transitionResponseSchema,
+      {
+        success: true as const,
+        data: {
+          cardId: card.cardId,
+          previousStatus,
+          newStatus,
+          eventId,
           reviewedBy: actorDisplay,
-          reviewNote: reason || null,
-          updatedAt: new Date(),
-        })
-        .where(and(...conditions));
-
-      await tx.insert(decisionAuditEventsTable).values({
-        eventId,
-        cardId: card.cardId,
-        workspaceId,
-        eventType,
-        actorId,
-        actorType: "human",
-        actorDisplay,
-        reason: reason || null,
-        previousStatus,
-        newStatus,
-        occurredAt: new Date(),
-      });
-    }));
-
-    logger.info({ cardId: card.cardId, eventType, actorId, newStatus }, "Decision card state transition");
-
-    const responseBody = validateResponse(transitionResponseSchema, {
-      success: true as const,
-      data: {
-        cardId: card.cardId,
-        previousStatus,
-        newStatus,
-        eventId,
-        reviewedBy: actorDisplay,
-        reviewedAt: new Date().toISOString(),
+          reviewedAt: new Date().toISOString(),
+        },
       },
-    }, `POST /decisions/cards/:id/${eventType}`);
+      `POST /decisions/cards/:id/${eventType}`,
+    );
     return res.json(responseBody);
   } catch (err) {
     logger.error({ err }, `${eventType} error`);
-    return res.status(500).json({ error: "Failed to process action" });
+    return res.status(500).json({ error: 'Failed to process action' });
   }
 }
 
 // ─── POST /decisions/cards/:id/approve ────────────────────────────────────────
 
-router.post("/decisions/cards/:id/approve", requireAuth, async (req: Request, res: Response) => {
-  return transitionCard(req, res, "approved", "card.approved");
+router.post('/decisions/cards/:id/approve', requireAuth, async (req: Request, res: Response) => {
+  return transitionCard(req, res, 'approved', 'card.approved');
 });
 
 // ─── POST /decisions/cards/:id/reject ─────────────────────────────────────────
 
-router.post("/decisions/cards/:id/reject", requireAuth, async (req: Request, res: Response) => {
-  return transitionCard(req, res, "rejected", "card.rejected");
+router.post('/decisions/cards/:id/reject', requireAuth, async (req: Request, res: Response) => {
+  return transitionCard(req, res, 'rejected', 'card.rejected');
 });
 
 // ─── POST /decisions/cards/:id/request-changes ────────────────────────────────
 
-router.post("/decisions/cards/:id/request-changes", requireAuth, async (req: Request, res: Response) => {
-  return transitionCard(req, res, "changes-requested", "card.changes_requested");
-});
+router.post(
+  '/decisions/cards/:id/request-changes',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    return transitionCard(req, res, 'changes-requested', 'card.changes_requested');
+  },
+);
 
 // ─── POST /decisions/cards/:id/validate-and-promote ───────────────────────────
 // Runs all six adversarial validation checks against the current card evidence,
 // persists validation records, and promotes to ready-for-review only if all
 // required checks pass. State transition + audit write are atomic.
 
-router.post("/decisions/cards/:id/validate-and-promote", requireAuth, async (req: Request, res: Response) => {
-  try {
-    kickoffSeed();
-    const workspaceId = getWorkspaceId(req.user);
-    const { id } = req.params;
+router.post(
+  '/decisions/cards/:id/validate-and-promote',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      kickoffSeed();
+      const workspaceId = getWorkspaceId(req.user);
+      const { id } = req.params;
 
-    const conditions = [eq(decisionsRuntimeTable.workspaceId, workspaceId)];
-    if (/^\d+$/.test(id)) {
-      conditions.push(eq(decisionsRuntimeTable.id, parseInt(id, 10)));
-    } else {
-      conditions.push(eq(decisionsRuntimeTable.cardId, id));
-    }
+      const conditions = [eq(decisionsRuntimeTable.workspaceId, workspaceId)];
+      if (/^\d+$/.test(id)) {
+        conditions.push(eq(decisionsRuntimeTable.id, parseInt(id, 10)));
+      } else {
+        conditions.push(eq(decisionsRuntimeTable.cardId, id));
+      }
 
-    const rows = await withQueryTimeout(ddb.select().from(decisionsRuntimeTable).where(and(...conditions)).limit(1));
-    const card = rows[0];
-    if (!card) return res.status(404).json({ error: "Decision card not found" });
-
-    if (card.status === "approved" || card.status === "rejected") {
-      return res.status(409).json({ error: `Cannot promote a card in "${card.status}" status` });
-    }
-
-    // Load evidence rows to build adversarial validation input
-    const evidenceRows = await withQueryTimeout(
-      ddb.select().from(decisionEvidenceTable).where(
-        and(eq(decisionEvidenceTable.cardId, card.cardId), eq(decisionEvidenceTable.workspaceId, workspaceId))
-      )
-    );
-
-    const evidence: EvidenceItem[] = evidenceRows.map(ev => ({
-      type: (ev.evidenceType ?? "doc") as EvidenceItem["type"],
-      source: ev.source ?? "unknown",
-      content: String(ev.content ?? ""),
-      timestamp: (ev.retrievedAt ?? new Date()).toISOString(),
-      confidence: typeof ev.confidence === "number" ? ev.confidence : 0.8,
-    }));
-
-    const validationInput: AdversarialValidationInput = {
-      cardId: card.cardId,
-      title: card.title,
-      summary: card.summary,
-      severity: card.severity as AdversarialValidationInput["severity"],
-      autonomyMode: card.autonomyMode as AdversarialValidationInput["autonomyMode"],
-      confidence: typeof card.confidence === "number" ? card.confidence : 0.8,
-      recommendedAction: card.recommendedAction ?? undefined,
-      evidence,
-    };
-
-    const validationResult = runAdversarialValidation(validationInput);
-    const actorId = getActorId(req.user);
-    const actorDisplay = getActorDisplay(req.user);
-    const now = new Date();
-
-    if (!validationResult.allPassed) {
-      return res.status(422).json({
-        success: false,
-        error: "Adversarial validation failed — card cannot be promoted",
-        blockingFailures: validationResult.blockingFailures.map(c => ({
-          checkType: c.checkType,
-          explanation: c.explanation,
-          severity: c.severity,
-        })),
-        warnings: validationResult.warnings.map(c => ({ checkType: c.checkType, explanation: c.explanation })),
-      });
-    }
-
-    // All checks passed — atomically persist validations + transition + audit event
-    const eventId = `audit-${card.cardId}-card.promoted-${Date.now()}`;
-    await withQueryTimeout(ddb.transaction(async (tx) => {
-      // Delete old validation results and reinsert fresh ones — simpler than upsert
-      // since there's no unique(cardId, checkType) constraint on the table.
-      await tx.delete(decisionValidationsTable).where(
-        and(eq(decisionValidationsTable.cardId, card.cardId), eq(decisionValidationsTable.workspaceId, workspaceId))
+      const rows = await withQueryTimeout(
+        ddb
+          .select()
+          .from(decisionsRuntimeTable)
+          .where(and(...conditions))
+          .limit(1),
       );
-      for (const check of validationResult.checks) {
-        await tx.insert(decisionValidationsTable).values({
-          cardId: card.cardId,
-          workspaceId,
-          checkType: check.checkType,
-          passed: check.passed,
-          explanation: check.explanation,
-          severity: check.severity,
-          metadata: (check.metadata ?? {}) as Record<string, unknown>,
+      const card = rows[0];
+      if (!card) return res.status(404).json({ error: 'Decision card not found' });
+
+      if (card.status === 'approved' || card.status === 'rejected') {
+        return res.status(409).json({ error: `Cannot promote a card in "${card.status}" status` });
+      }
+
+      // Load evidence rows to build adversarial validation input
+      const evidenceRows = await withQueryTimeout(
+        ddb
+          .select()
+          .from(decisionEvidenceTable)
+          .where(
+            and(
+              eq(decisionEvidenceTable.cardId, card.cardId),
+              eq(decisionEvidenceTable.workspaceId, workspaceId),
+            ),
+          ),
+      );
+
+      const evidence: EvidenceItem[] = evidenceRows.map((ev) => ({
+        type: (ev.evidenceType ?? 'doc') as EvidenceItem['type'],
+        source: ev.source ?? 'unknown',
+        content: String(ev.content ?? ''),
+        timestamp: (ev.retrievedAt ?? new Date()).toISOString(),
+        confidence: typeof ev.confidence === 'number' ? ev.confidence : 0.8,
+      }));
+
+      const validationInput: AdversarialValidationInput = {
+        cardId: card.cardId,
+        title: card.title,
+        summary: card.summary,
+        severity: card.severity as AdversarialValidationInput['severity'],
+        autonomyMode: card.autonomyMode as AdversarialValidationInput['autonomyMode'],
+        confidence: typeof card.confidence === 'number' ? card.confidence : 0.8,
+        recommendedAction: card.recommendedAction ?? undefined,
+        evidence,
+      };
+
+      const validationResult = runAdversarialValidation(validationInput);
+      const actorId = getActorId(req.user);
+      const actorDisplay = getActorDisplay(req.user);
+      const now = new Date();
+
+      if (!validationResult.allPassed) {
+        return res.status(422).json({
+          success: false,
+          error: 'Adversarial validation failed — card cannot be promoted',
+          blockingFailures: validationResult.blockingFailures.map((c) => ({
+            checkType: c.checkType,
+            explanation: c.explanation,
+            severity: c.severity,
+          })),
+          warnings: validationResult.warnings.map((c) => ({
+            checkType: c.checkType,
+            explanation: c.explanation,
+          })),
         });
       }
 
-      await tx.update(decisionsRuntimeTable).set({
-        status: "ready-for-review",
-        validationSummary: {
-          allPassed: validationResult.allPassed,
-          checkCount: validationResult.checks.length,
-          blockingFailures: validationResult.blockingFailures.length,
-          warnings: validationResult.warnings.length,
-        },
-        updatedAt: now,
-      }).where(and(...conditions));
+      // All checks passed — atomically persist validations + transition + audit event
+      const eventId = `audit-${card.cardId}-card.promoted-${Date.now()}`;
+      await withQueryTimeout(
+        ddb.transaction(async (tx) => {
+          // Delete old validation results and reinsert fresh ones — simpler than upsert
+          // since there's no unique(cardId, checkType) constraint on the table.
+          await tx
+            .delete(decisionValidationsTable)
+            .where(
+              and(
+                eq(decisionValidationsTable.cardId, card.cardId),
+                eq(decisionValidationsTable.workspaceId, workspaceId),
+              ),
+            );
+          for (const check of validationResult.checks) {
+            await tx.insert(decisionValidationsTable).values({
+              cardId: card.cardId,
+              workspaceId,
+              checkType: check.checkType,
+              passed: check.passed,
+              explanation: check.explanation,
+              severity: check.severity,
+              metadata: (check.metadata ?? {}) as Record<string, unknown>,
+            });
+          }
 
-      await tx.insert(decisionAuditEventsTable).values({
-        eventId,
-        cardId: card.cardId,
-        workspaceId,
-        eventType: "card.promoted",
-        actorId,
-        actorType: "human",
-        actorDisplay,
-        reason: `All ${validationResult.checks.length} adversarial checks passed`,
-        previousStatus: card.status,
-        newStatus: "ready-for-review",
-        occurredAt: now,
+          await tx
+            .update(decisionsRuntimeTable)
+            .set({
+              status: 'ready-for-review',
+              validationSummary: {
+                allPassed: validationResult.allPassed,
+                checkCount: validationResult.checks.length,
+                blockingFailures: validationResult.blockingFailures.length,
+                warnings: validationResult.warnings.length,
+              },
+              updatedAt: now,
+            })
+            .where(and(...conditions));
+
+          await tx.insert(decisionAuditEventsTable).values({
+            eventId,
+            cardId: card.cardId,
+            workspaceId,
+            eventType: 'card.promoted',
+            actorId,
+            actorType: 'human',
+            actorDisplay,
+            reason: `All ${validationResult.checks.length} adversarial checks passed`,
+            previousStatus: card.status,
+            newStatus: 'ready-for-review',
+            occurredAt: now,
+          });
+        }),
+      );
+
+      logger.info(
+        { cardId: card.cardId, actorId, checksRun: validationResult.checks.length },
+        'Card promoted to ready-for-review',
+      );
+
+      return res.json({
+        success: true,
+        data: {
+          cardId: card.cardId,
+          previousStatus: card.status,
+          newStatus: 'ready-for-review',
+          eventId,
+          checksRun: validationResult.checks.length,
+          validationSummary: {
+            allPassed: validationResult.allPassed,
+            checkCount: validationResult.checks.length,
+            blockingFailures: 0,
+            warnings: validationResult.warnings.length,
+          },
+        },
       });
-    }));
-
-    logger.info({ cardId: card.cardId, actorId, checksRun: validationResult.checks.length }, "Card promoted to ready-for-review");
-
-    return res.json({
-      success: true,
-      data: {
-        cardId: card.cardId,
-        previousStatus: card.status,
-        newStatus: "ready-for-review",
-        eventId,
-        checksRun: validationResult.checks.length,
-        validationSummary: {
-          allPassed: validationResult.allPassed,
-          checkCount: validationResult.checks.length,
-          blockingFailures: 0,
-          warnings: validationResult.warnings.length,
-        },
-      },
-    });
-  } catch (err) {
-    logger.error({ err }, "POST /decisions/cards/:id/validate-and-promote error");
-    return res.status(500).json({ error: "Failed to validate and promote card" });
-  }
-});
+    } catch (err) {
+      logger.error({ err }, 'POST /decisions/cards/:id/validate-and-promote error');
+      return res.status(500).json({ error: 'Failed to validate and promote card' });
+    }
+  },
+);
 
 // ─── POST /decisions/simulate-policy ──────────────────────────────────────────
 // Policy simulation: requires auth. workspaceId is always derived from the
 // authenticated user's org — never trusted from the request body.
 
 const simulatePolicySchema = z.object({
-  severity: z.enum(["critical", "high", "medium", "low"]),
-  autonomyMode: z.enum(["observe", "recommend", "draft", "execute-with-approval", "auto-execute"]),
+  severity: z.enum(['critical', 'high', 'medium', 'low']),
+  autonomyMode: z.enum(['observe', 'recommend', 'draft', 'execute-with-approval', 'auto-execute']),
   recommendedAction: z.string().optional(),
   confidence: z.number().min(0).max(1),
   domain: z.string().optional(),
 });
 
-router.post("/decisions/simulate-policy", requireAuth, async (req: Request, res: Response) => {
+router.post('/decisions/simulate-policy', requireAuth, async (req: Request, res: Response) => {
   try {
     const parsed = simulatePolicySchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
+      return res.status(400).json({ error: 'Invalid body', details: parsed.error.flatten() });
     }
 
     // Always derive workspaceId from the authenticated user — never from request body.
@@ -679,8 +772,8 @@ router.post("/decisions/simulate-policy", requireAuth, async (req: Request, res:
       },
     });
   } catch (err) {
-    logger.error({ err }, "POST /decisions/simulate-policy error");
-    return res.status(500).json({ error: "Failed to simulate policy" });
+    logger.error({ err }, 'POST /decisions/simulate-policy error');
+    return res.status(500).json({ error: 'Failed to simulate policy' });
   }
 });
 

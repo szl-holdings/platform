@@ -1,10 +1,10 @@
-import { logger } from "./logger";
+import { logger } from './logger';
 
 export interface GeocodeResult {
   latitude: number;
   longitude: number;
   formattedAddress: string;
-  provider: "mapbox" | "google" | "mock";
+  provider: 'mapbox' | 'google' | 'mock';
   confidence?: number;
 }
 
@@ -13,12 +13,12 @@ export interface ReverseGeocodeResult {
   city?: string;
   country?: string;
   postalCode?: string;
-  provider: "mapbox" | "google" | "mock";
+  provider: 'mapbox' | 'google' | 'mock';
 }
 
 async function geocodeViaMapbox(address: string): Promise<GeocodeResult> {
   const token = process.env.MAPBOX_ACCESS_TOKEN;
-  if (!token) throw new Error("MAPBOX_ACCESS_TOKEN not configured");
+  if (!token) throw new Error('MAPBOX_ACCESS_TOKEN not configured');
 
   const encoded = encodeURIComponent(address);
   const res = await fetch(
@@ -37,7 +37,7 @@ async function geocodeViaMapbox(address: string): Promise<GeocodeResult> {
   };
 
   if (!data.features || data.features.length === 0) {
-    throw new Error("Mapbox: no results found for address");
+    throw new Error('Mapbox: no results found for address');
   }
 
   const feature = data.features[0];
@@ -45,14 +45,14 @@ async function geocodeViaMapbox(address: string): Promise<GeocodeResult> {
     latitude: feature.center[1],
     longitude: feature.center[0],
     formattedAddress: feature.place_name,
-    provider: "mapbox",
+    provider: 'mapbox',
     confidence: feature.relevance,
   };
 }
 
 async function geocodeViaGoogle(address: string): Promise<GeocodeResult> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) throw new Error("GOOGLE_MAPS_API_KEY not configured");
+  if (!apiKey) throw new Error('GOOGLE_MAPS_API_KEY not configured');
 
   const encoded = encodeURIComponent(address);
   const res = await fetch(
@@ -70,7 +70,7 @@ async function geocodeViaGoogle(address: string): Promise<GeocodeResult> {
     }>;
   };
 
-  if (data.status !== "OK" || data.results.length === 0) {
+  if (data.status !== 'OK' || data.results.length === 0) {
     throw new Error(`Google Maps: ${data.status}`);
   }
 
@@ -79,13 +79,13 @@ async function geocodeViaGoogle(address: string): Promise<GeocodeResult> {
     latitude: result.geometry.location.lat,
     longitude: result.geometry.location.lng,
     formattedAddress: result.formatted_address,
-    provider: "google",
+    provider: 'google',
   };
 }
 
 async function reverseGeocodeViaMapbox(lat: number, lng: number): Promise<ReverseGeocodeResult> {
   const token = process.env.MAPBOX_ACCESS_TOKEN;
-  if (!token) throw new Error("MAPBOX_ACCESS_TOKEN not configured");
+  if (!token) throw new Error('MAPBOX_ACCESS_TOKEN not configured');
 
   const res = await fetch(
     `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}&limit=1`,
@@ -102,20 +102,20 @@ async function reverseGeocodeViaMapbox(lat: number, lng: number): Promise<Revers
   };
 
   if (!data.features || data.features.length === 0) {
-    throw new Error("Mapbox: no reverse geocoding results");
+    throw new Error('Mapbox: no reverse geocoding results');
   }
 
   const feature = data.features[0];
-  const city = feature.context?.find((c) => c.id.startsWith("place"))?.text;
-  const country = feature.context?.find((c) => c.id.startsWith("country"))?.text;
-  const postalCode = feature.context?.find((c) => c.id.startsWith("postcode"))?.text;
+  const city = feature.context?.find((c) => c.id.startsWith('place'))?.text;
+  const country = feature.context?.find((c) => c.id.startsWith('country'))?.text;
+  const postalCode = feature.context?.find((c) => c.id.startsWith('postcode'))?.text;
 
-  return { formattedAddress: feature.place_name, city, country, postalCode, provider: "mapbox" };
+  return { formattedAddress: feature.place_name, city, country, postalCode, provider: 'mapbox' };
 }
 
 async function reverseGeocodeViaGoogle(lat: number, lng: number): Promise<ReverseGeocodeResult> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) throw new Error("GOOGLE_MAPS_API_KEY not configured");
+  if (!apiKey) throw new Error('GOOGLE_MAPS_API_KEY not configured');
 
   const res = await fetch(
     `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`,
@@ -132,7 +132,7 @@ async function reverseGeocodeViaGoogle(lat: number, lng: number): Promise<Revers
     }>;
   };
 
-  if (data.status !== "OK" || data.results.length === 0) {
+  if (data.status !== 'OK' || data.results.length === 0) {
     throw new Error(`Google Maps reverse geocoding: ${data.status}`);
   }
 
@@ -142,21 +142,21 @@ async function reverseGeocodeViaGoogle(lat: number, lng: number): Promise<Revers
 
   return {
     formattedAddress: result.formatted_address,
-    city: getComponent("locality"),
-    country: getComponent("country"),
-    postalCode: getComponent("postal_code"),
-    provider: "google",
+    city: getComponent('locality'),
+    country: getComponent('country'),
+    postalCode: getComponent('postal_code'),
+    provider: 'google',
   };
 }
 
 export async function geocodeAddress(address: string): Promise<GeocodeResult> {
   if (process.env.MAPBOX_ACCESS_TOKEN) {
-    const { isFlagEnabled } = await import("./platform-flags");
-    if (await isFlagEnabled("live_mapbox_tiles_enabled")) {
+    const { isFlagEnabled } = await import('./platform-flags');
+    if (await isFlagEnabled('live_mapbox_tiles_enabled')) {
       try {
         return await geocodeViaMapbox(address);
       } catch (err) {
-        logger.warn({ err }, "Mapbox geocode failed, trying Google Maps fallback");
+        logger.warn({ err }, 'Mapbox geocode failed, trying Google Maps fallback');
       }
     }
   }
@@ -165,17 +165,17 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
     return await geocodeViaGoogle(address);
   }
 
-  return { latitude: 0, longitude: 0, formattedAddress: address, provider: "mock", confidence: 0 };
+  return { latitude: 0, longitude: 0, formattedAddress: address, provider: 'mock', confidence: 0 };
 }
 
 export async function reverseGeocode(lat: number, lng: number): Promise<ReverseGeocodeResult> {
   if (process.env.MAPBOX_ACCESS_TOKEN) {
-    const { isFlagEnabled } = await import("./platform-flags");
-    if (await isFlagEnabled("live_mapbox_tiles_enabled")) {
+    const { isFlagEnabled } = await import('./platform-flags');
+    if (await isFlagEnabled('live_mapbox_tiles_enabled')) {
       try {
         return await reverseGeocodeViaMapbox(lat, lng);
       } catch (err) {
-        logger.warn({ err }, "Mapbox reverse geocode failed, trying Google Maps fallback");
+        logger.warn({ err }, 'Mapbox reverse geocode failed, trying Google Maps fallback');
       }
     }
   }
@@ -184,15 +184,19 @@ export async function reverseGeocode(lat: number, lng: number): Promise<ReverseG
     return await reverseGeocodeViaGoogle(lat, lng);
   }
 
-  return { formattedAddress: `${lat.toFixed(4)}, ${lng.toFixed(4)}`, provider: "mock" };
+  return { formattedAddress: `${lat.toFixed(4)}, ${lng.toFixed(4)}`, provider: 'mock' };
 }
 
-export function getGeocodingProviderStatus(): { mapbox: boolean; google: boolean; activeProvider: string } {
+export function getGeocodingProviderStatus(): {
+  mapbox: boolean;
+  google: boolean;
+  activeProvider: string;
+} {
   const mapbox = !!process.env.MAPBOX_ACCESS_TOKEN;
   const google = !!process.env.GOOGLE_MAPS_API_KEY;
   return {
     mapbox,
     google,
-    activeProvider: mapbox ? "mapbox" : google ? "google" : "mock",
+    activeProvider: mapbox ? 'mapbox' : google ? 'google' : 'mock',
   };
 }

@@ -1,4 +1,4 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface SMSResult {
   sent: boolean;
@@ -15,28 +15,24 @@ export interface VoiceCallResult {
 }
 
 export class TwilioAdapter extends ServiceAdapter {
-  readonly name = "twilio";
-  readonly description = "SMS messaging and voice calls via Twilio";
-  readonly requiredEnvVars = [
-    "TWILIO_ACCOUNT_SID",
-    "TWILIO_AUTH_TOKEN",
-    "TWILIO_PHONE_NUMBER",
-  ];
+  readonly name = 'twilio';
+  readonly description = 'SMS messaging and voice calls via Twilio';
+  readonly requiredEnvVars = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_PHONE_NUMBER'];
 
   private get accountSid(): string | undefined {
-    return process.env["TWILIO_ACCOUNT_SID"];
+    return process.env['TWILIO_ACCOUNT_SID'];
   }
 
   private get authToken(): string | undefined {
-    return process.env["TWILIO_AUTH_TOKEN"];
+    return process.env['TWILIO_AUTH_TOKEN'];
   }
 
   private get fromNumber(): string | undefined {
-    return process.env["TWILIO_PHONE_NUMBER"];
+    return process.env['TWILIO_PHONE_NUMBER'];
   }
 
   private get authHeader(): string {
-    return `Basic ${Buffer.from(`${this.accountSid}:${this.authToken}`).toString("base64")}`;
+    return `Basic ${Buffer.from(`${this.accountSid}:${this.authToken}`).toString('base64')}`;
   }
 
   protected async performHealthCheck(): Promise<void> {
@@ -67,9 +63,9 @@ export class TwilioAdapter extends ServiceAdapter {
     });
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: this.authHeader,
       },
       body: params.toString(),
@@ -113,16 +109,16 @@ export class TwilioAdapter extends ServiceAdapter {
     });
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: this.authHeader,
       },
       body: params.toString(),
     });
 
     if (!response.ok) {
-      const errText = await response.text().catch(() => "");
+      const errText = await response.text().catch(() => '');
       throw new Error(`Twilio Voice API error: ${response.status} ${errText}`);
     }
 
@@ -138,9 +134,9 @@ export class TwilioAdapter extends ServiceAdapter {
 
 function escapeXml(str: string): string {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }

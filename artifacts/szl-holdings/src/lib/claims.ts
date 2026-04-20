@@ -14,59 +14,40 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import { FOUNDER_YEARS_EXPERIENCE } from "@szl-holdings/platform-registry/public-claims";
-import {
-  makeClaimResolver,
-  metricDisplay,
-  type ClaimValue,
-} from "@szl-holdings/domain-claims";
+import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/domain-claims';
+import { FOUNDER_YEARS_EXPERIENCE } from '@szl-holdings/platform-registry/public-claims';
 
 export type { ClaimValue };
 export { metricDisplay };
 
-const resolveClaim = makeClaimResolver("szl-holdings/claims");
+const resolveClaim = makeClaimResolver('szl-holdings/claims');
 
 // ─── Lyte / szl-holdings metrics ─────────────────────────────────────────────
 
-export const LYTE_SIGNAL_DETECTION_TIME = resolveClaim(
-  "lyte-signal-detection-time",
-  "< 4 min"
-);
+export const LYTE_SIGNAL_DETECTION_TIME = resolveClaim('lyte-signal-detection-time', '< 4 min');
 
-export const LYTE_SIGNALS_PER_DAY = resolveClaim(
-  "lyte-signals-per-day",
-  "2.4M+"
-);
+export const LYTE_SIGNALS_PER_DAY = resolveClaim('lyte-signals-per-day', '2.4M+');
 
-export const LYTE_FALSE_POSITIVE_RATE = resolveClaim(
-  "lyte-false-positive-rate",
-  "< 3%"
-);
+export const LYTE_FALSE_POSITIVE_RATE = resolveClaim('lyte-false-positive-rate', '< 3%');
 
 // ─── Vessels metrics ──────────────────────────────────────────────────────────
 
-export const VESSELS_COUNT = resolveClaim("vessels-count", "52,000+");
+export const VESSELS_COUNT = resolveClaim('vessels-count', '52,000+');
 
 export const VESSELS_DARK_DETECTION_LEAD = resolveClaim(
-  "vessels-dark-detection-lead",
-  "34 days pre-designation"
+  'vessels-dark-detection-lead',
+  '34 days pre-designation',
 );
 
 // ─── Aegis metrics ────────────────────────────────────────────────────────────
 
-export const AEGIS_SIMULATIONS = resolveClaim("aegis-simulations", "31,200+");
+export const AEGIS_SIMULATIONS = resolveClaim('aegis-simulations', '31,200+');
 
-export const AEGIS_MITRE_COVERAGE = resolveClaim(
-  "aegis-mitre-coverage",
-  "200+ techniques"
-);
+export const AEGIS_MITRE_COVERAGE = resolveClaim('aegis-mitre-coverage', '200+ techniques');
 
 // ─── Carlota Jo metrics ───────────────────────────────────────────────────────
 
-export const CARLOTA_JO_RETENTION = resolveClaim(
-  "carlota-jo-retention",
-  "98%"
-);
+export const CARLOTA_JO_RETENTION = resolveClaim('carlota-jo-retention', '98%');
 
 /**
  * Founder years experience is computed from the registered start year, not a
@@ -75,7 +56,7 @@ export const CARLOTA_JO_RETENTION = resolveClaim(
 export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
   value: `${FOUNDER_YEARS_EXPERIENCE} years`,
   label: null,
-  truthValue: "verified",
+  truthValue: 'verified',
   displayWithLabel: `${FOUNDER_YEARS_EXPERIENCE} years`,
 };
 
@@ -85,15 +66,11 @@ export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
 // Resolved from the same registry id so the value and [Demo] label stay in
 // lockstep with terra/src/lib/claims.ts.
 
-export const TERRA_PORTFOLIO_AUM = resolveClaim(
-  "terra-portfolio-aum",
-  "$4.2B+"
-);
+export const TERRA_PORTFOLIO_AUM = resolveClaim('terra-portfolio-aum', '$4.2B+');
 
 // ─── Platform tagline ─────────────────────────────────────────────────────────
 
 export const PLATFORM_TAGLINE = resolveClaim(
-  "tagline-governed-decision",
-  "Governed decision infrastructure — connecting what is observable to what is executable, with full attribution."
+  'tagline-governed-decision',
+  'Governed decision infrastructure — connecting what is observable to what is executable, with full attribution.',
 );
-

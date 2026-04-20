@@ -1,3 +1,3 @@
-export { createI18n, SUPPORTED_LOCALES, LOCALE_LABELS, LOCALE_FLAGS } from "./config";
-export type { SupportedLocale, I18nConfig } from "./config";
-export { formatDate, formatNumber, formatCurrency, formatRelativeTime } from "./formatting";
+export type { I18nConfig, SupportedLocale } from './config';
+export { createI18n, LOCALE_FLAGS, LOCALE_LABELS, SUPPORTED_LOCALES } from './config';
+export { formatCurrency, formatDate, formatNumber, formatRelativeTime } from './formatting';

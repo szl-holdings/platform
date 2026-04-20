@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { m } from "framer-motion";
-import { useLocation } from "wouter";
-import portfolioData from "@/data/portfolio.json";
-import siteData from "@/data/site.json";
-import { ventures } from "@/data/ventures";
-import { analytics } from "@/lib/analytics";
-import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
+import { SectionErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
+import { m } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'wouter';
+import portfolioData from '@/data/portfolio.json';
+import siteData from '@/data/site.json';
+import { ventures } from '@/data/ventures';
+import { analytics } from '@/lib/analytics';
 
 interface Node {
   id: string;
@@ -20,8 +20,12 @@ interface Node {
 }
 
 function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace("#", "");
-  return [parseInt(h.substring(0, 2), 16), parseInt(h.substring(2, 4), 16), parseInt(h.substring(4, 6), 16)];
+  const h = hex.replace('#', '');
+  return [
+    parseInt(h.substring(0, 2), 16),
+    parseInt(h.substring(2, 4), 16),
+    parseInt(h.substring(4, 6), 16),
+  ];
 }
 
 function buildNodes(width: number, height: number): Node[] {
@@ -31,13 +35,13 @@ function buildNodes(width: number, height: number): Node[] {
 
   const nodes: Node[] = [
     {
-      id: "szl",
+      id: 'szl',
       name: siteData.company.name,
       x: cx,
       y: cy,
       radius: 40,
-      color: "#6366f1",
-      link: "#",
+      color: '#6366f1',
+      link: '#',
       status: siteData.ecosystem.legendLabels.live,
       angle: 0,
     },
@@ -94,7 +98,7 @@ export function Constellation() {
     const canvas = canvasRef.current;
     if (!canvas || nodes.length === 0) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
@@ -102,10 +106,18 @@ export function Constellation() {
     canvas.height = dimensions.height * dpr;
     ctx.scale(dpr, dpr);
 
-    const particlePool: { x: number; y: number; speed: number; progress: number; lineIndex: number; size: number }[] = [];
+    const particlePool: {
+      x: number;
+      y: number;
+      speed: number;
+      progress: number;
+      lineIndex: number;
+      size: number;
+    }[] = [];
     for (let i = 0; i < 30; i++) {
       particlePool.push({
-        x: 0, y: 0,
+        x: 0,
+        y: 0,
         speed: 0.003 + Math.random() * 0.004,
         progress: Math.random(),
         lineIndex: Math.floor(Math.random() * (nodes.length - 1)),
@@ -146,7 +158,7 @@ export function Constellation() {
 
       ctx.beginPath();
       ctx.arc(cx, cy, orbitR, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(99, 102, 241, 0.06)";
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.06)';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 8]);
       ctx.stroke();
@@ -154,7 +166,7 @@ export function Constellation() {
 
       ctx.beginPath();
       ctx.arc(cx, cy, orbitR * 0.6, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(99, 102, 241, 0.03)";
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.03)';
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 10]);
       ctx.stroke();
@@ -223,9 +235,9 @@ export function Constellation() {
       });
 
       nodes.forEach((node) => {
-        const isHub = node.id === "szl";
+        const isHub = node.id === 'szl';
         const isHovered = hoveredNode === node.id;
-        const pulseScale = isHub ? 1 + Math.sin(t * 1.5) * 0.04 : (isHovered ? 1.08 : 1);
+        const pulseScale = isHub ? 1 + Math.sin(t * 1.5) * 0.04 : isHovered ? 1.08 : 1;
         const r = node.radius * pulseScale;
         const [cr, cg, cb] = hexToRgb(node.color);
 
@@ -233,7 +245,7 @@ export function Constellation() {
           const outerGlow = ctx.createRadialGradient(node.x, node.y, r, node.x, node.y, r * 3.5);
           outerGlow.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0.08)`);
           outerGlow.addColorStop(0.5, `rgba(${cr}, ${cg}, ${cb}, 0.03)`);
-          outerGlow.addColorStop(1, "transparent");
+          outerGlow.addColorStop(1, 'transparent');
           ctx.beginPath();
           ctx.arc(node.x, node.y, r * 3.5, 0, Math.PI * 2);
           ctx.fillStyle = outerGlow;
@@ -245,7 +257,7 @@ export function Constellation() {
           ctx.arc(node.x, node.y, r * 2.8, scanAngle, scanAngle + 0.3);
           ctx.closePath();
           const scanGrad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 2.8);
-          scanGrad.addColorStop(0, "transparent");
+          scanGrad.addColorStop(0, 'transparent');
           scanGrad.addColorStop(0.8, `rgba(${cr}, ${cg}, ${cb}, 0.06)`);
           scanGrad.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0.02)`);
           ctx.fillStyle = scanGrad;
@@ -255,7 +267,7 @@ export function Constellation() {
         if (isHovered && !isHub) {
           const hoverGlow = ctx.createRadialGradient(node.x, node.y, r, node.x, node.y, r * 3);
           hoverGlow.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0.15)`);
-          hoverGlow.addColorStop(1, "transparent");
+          hoverGlow.addColorStop(1, 'transparent');
           ctx.beginPath();
           ctx.arc(node.x, node.y, r * 3, 0, Math.PI * 2);
           ctx.fillStyle = hoverGlow;
@@ -265,8 +277,12 @@ export function Constellation() {
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
         const bg = ctx.createRadialGradient(
-          node.x - r * 0.3, node.y - r * 0.3, 0,
-          node.x, node.y, r
+          node.x - r * 0.3,
+          node.y - r * 0.3,
+          0,
+          node.x,
+          node.y,
+          r,
         );
         bg.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0.9)`);
         bg.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0.5)`);
@@ -275,7 +291,9 @@ export function Constellation() {
 
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-        ctx.strokeStyle = isHovered ? `rgba(${cr}, ${cg}, ${cb}, 0.8)` : `rgba(${cr}, ${cg}, ${cb}, 0.3)`;
+        ctx.strokeStyle = isHovered
+          ? `rgba(${cr}, ${cg}, ${cb}, 0.8)`
+          : `rgba(${cr}, ${cg}, ${cb}, 0.3)`;
         ctx.lineWidth = isHovered ? 2 : 1;
         ctx.stroke();
 
@@ -287,14 +305,18 @@ export function Constellation() {
           ctx.stroke();
         }
 
-        ctx.fillStyle = "#ffffff";
-        ctx.font = `${isHub ? "bold 13px" : "600 10px"} 'Plus Jakarta Sans', sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(isHub ? "SZL" : node.name.length > 8 ? node.name.slice(0, 7) : node.name, node.x, node.y);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `${isHub ? 'bold 13px' : '600 10px'} 'Plus Jakarta Sans', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(
+          isHub ? 'SZL' : node.name.length > 8 ? node.name.slice(0, 7) : node.name,
+          node.x,
+          node.y,
+        );
 
         if (!isHub) {
-          ctx.fillStyle = "rgba(160, 170, 200, 0.65)";
+          ctx.fillStyle = 'rgba(160, 170, 200, 0.65)';
           ctx.font = "500 9px 'Inter', sans-serif";
           ctx.fillText(node.status, node.x, node.y + r + 14);
         }
@@ -323,7 +345,7 @@ export function Constellation() {
       }
     }
     setHoveredNode(found);
-    canvas.style.cursor = found && found !== "szl" ? "pointer" : "default";
+    canvas.style.cursor = found && found !== 'szl' ? 'pointer' : 'default';
   };
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -334,14 +356,14 @@ export function Constellation() {
     const my = e.clientY - rect.top;
 
     for (const node of nodes) {
-      if (node.id === "szl") continue;
+      if (node.id === 'szl') continue;
       const dist = Math.hypot(node.x - mx, node.y - my);
       if (dist < node.radius + 10) {
         analytics.ecosystemNodeClick(node.id);
         const venture = ventures.find((v) => v.id === node.id);
         if (venture) {
           navigate(venture.path);
-        } else if (node.link !== "#") {
+        } else if (node.link !== '#') {
           window.location.href = node.link;
         }
         break;
@@ -351,68 +373,72 @@ export function Constellation() {
 
   return (
     <SectionErrorBoundary sectionName="Ecosystem Constellation">
-    <section id="ecosystem" className="py-20 lg:py-28">
-      <div className="max-w-7xl mx-auto px-6">
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
-            {ecosystem.title}
-          </h2>
-          <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
-            {ecosystem.subtitle}
-          </p>
-        </m.div>
+      <section id="ecosystem" className="py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6">
+          <m.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
+              {ecosystem.title}
+            </h2>
+            <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
+              {ecosystem.subtitle}
+            </p>
+          </m.div>
 
-        <m.div
-          ref={containerRef}
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative rounded-2xl border border-szl-border bg-gradient-to-b from-szl-surface to-szl-bg/80 overflow-hidden"
-          role="img"
-          aria-label={ecosystem.canvasAriaLabel}
-        >
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-primary/30 to-transparent" />
-          <canvas
-            ref={canvasRef}
-            width={dimensions.width}
-            height={dimensions.height}
-            style={{ width: dimensions.width, height: dimensions.height }}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredNode(null)}
-            onClick={handleClick}
-            aria-hidden="true"
-          />
-          <nav aria-label="Portfolio company links" className="sr-only">
-            {ventures.map(venture => (
-              <a key={venture.id} href={venture.path}>{venture.name} - {venture.status}</a>
-            ))}
-          </nav>
-        </m.div>
+          <m.div
+            ref={containerRef}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative rounded-2xl border border-szl-border bg-gradient-to-b from-szl-surface to-szl-bg/80 overflow-hidden"
+            role="img"
+            aria-label={ecosystem.canvasAriaLabel}
+          >
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-primary/30 to-transparent" />
+            <canvas
+              ref={canvasRef}
+              width={dimensions.width}
+              height={dimensions.height}
+              style={{ width: dimensions.width, height: dimensions.height }}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setHoveredNode(null)}
+              onClick={handleClick}
+              aria-hidden="true"
+            />
+            <nav aria-label="Portfolio company links" className="sr-only">
+              {ventures.map((venture) => (
+                <a key={venture.id} href={venture.path}>
+                  {venture.name} - {venture.status}
+                </a>
+              ))}
+            </nav>
+          </m.div>
 
-        <div className="mt-6 flex flex-wrap justify-center gap-8 text-sm text-szl-text-muted">
-          <span className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-szl-emerald opacity-40" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-szl-emerald" />
+          <div className="mt-6 flex flex-wrap justify-center gap-8 text-sm text-szl-text-muted">
+            <span className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-szl-emerald opacity-40" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-szl-emerald" />
+              </span>
+              {ecosystem.legendLabels.live}
             </span>
-            {ecosystem.legendLabels.live}
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-szl-amber" /> {ecosystem.legendLabels.beta}
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-szl-text-muted" /> {ecosystem.legendLabels.inDevelopment}
-          </span>
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-szl-amber" />{' '}
+              {ecosystem.legendLabels.beta}
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-szl-text-muted" />{' '}
+              {ecosystem.legendLabels.inDevelopment}
+            </span>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
     </SectionErrorBoundary>
   );
 }

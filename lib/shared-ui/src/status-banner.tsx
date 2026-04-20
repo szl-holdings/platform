@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import type React from 'react';
+import { useState } from 'react';
 
-export type StatusLevel = "info" | "warning" | "critical" | "maintenance";
+export type StatusLevel = 'info' | 'warning' | 'critical' | 'maintenance';
 
 export interface StatusBannerConfig {
   active: boolean;
@@ -9,38 +10,41 @@ export interface StatusBannerConfig {
   link?: { label: string; href: string };
 }
 
-const LEVEL_STYLES: Record<StatusLevel, { bg: string; border: string; color: string; dot: string }> = {
+const LEVEL_STYLES: Record<
+  StatusLevel,
+  { bg: string; border: string; color: string; dot: string }
+> = {
   info: {
-    bg: "rgba(59,130,246,0.08)",
-    border: "rgba(59,130,246,0.25)",
-    color: "#93c5fd",
-    dot: "#3b82f6",
+    bg: 'rgba(59,130,246,0.08)',
+    border: 'rgba(59,130,246,0.25)',
+    color: '#93c5fd',
+    dot: '#3b82f6',
   },
   warning: {
-    bg: "rgba(251,191,36,0.08)",
-    border: "rgba(251,191,36,0.25)",
-    color: "#fcd34d",
-    dot: "#f59e0b",
+    bg: 'rgba(251,191,36,0.08)',
+    border: 'rgba(251,191,36,0.25)',
+    color: '#fcd34d',
+    dot: '#f59e0b',
   },
   critical: {
-    bg: "rgba(239,68,68,0.10)",
-    border: "rgba(239,68,68,0.30)",
-    color: "#fca5a5",
-    dot: "#ef4444",
+    bg: 'rgba(239,68,68,0.10)',
+    border: 'rgba(239,68,68,0.30)',
+    color: '#fca5a5',
+    dot: '#ef4444',
   },
   maintenance: {
-    bg: "rgba(139,92,246,0.08)",
-    border: "rgba(139,92,246,0.25)",
-    color: "#c4b5fd",
-    dot: "#8b5cf6",
+    bg: 'rgba(139,92,246,0.08)',
+    border: 'rgba(139,92,246,0.25)',
+    color: '#c4b5fd',
+    dot: '#8b5cf6',
   },
 };
 
 const LEVEL_LABELS: Record<StatusLevel, string> = {
-  info: "Notice",
-  warning: "Degraded",
-  critical: "Incident",
-  maintenance: "Maintenance",
+  info: 'Notice',
+  warning: 'Degraded',
+  critical: 'Incident',
+  maintenance: 'Maintenance',
 };
 
 export interface StatusBannerProps {
@@ -61,53 +65,62 @@ export function StatusBanner({ config, dismissible = true }: StatusBannerProps) 
       role="status"
       aria-live="polite"
       style={{
-        width: "100%",
+        width: '100%',
         background: styles.bg,
         borderBottom: `1px solid ${styles.border}`,
-        padding: "0.5rem 1rem",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "0.75rem",
-        fontSize: "0.8125rem",
+        padding: '0.5rem 1rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '0.75rem',
+        fontSize: '0.8125rem',
         lineHeight: 1.4,
-        position: "relative",
+        position: 'relative',
         zIndex: 50,
       }}
     >
       <span
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "0.375rem",
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.375rem',
           flexShrink: 0,
         }}
       >
         <span
           style={{
-            display: "inline-block",
-            width: "7px",
-            height: "7px",
-            borderRadius: "50%",
+            display: 'inline-block',
+            width: '7px',
+            height: '7px',
+            borderRadius: '50%',
             background: styles.dot,
             boxShadow: `0 0 5px ${styles.dot}`,
-            animation: config.level === "critical" ? "status-pulse 1.2s ease-in-out infinite" : "none",
+            animation:
+              config.level === 'critical' ? 'status-pulse 1.2s ease-in-out infinite' : 'none',
           }}
         />
-        <span style={{ fontWeight: 700, color: styles.color, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.6875rem" }}>
+        <span
+          style={{
+            fontWeight: 700,
+            color: styles.color,
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+            fontSize: '0.6875rem',
+          }}
+        >
           {label}
         </span>
       </span>
 
-      <span style={{ color: "rgba(255,255,255,0.70)" }}>{config.message}</span>
+      <span style={{ color: 'rgba(255,255,255,0.70)' }}>{config.message}</span>
 
       {config.link && (
         <a
           href={config.link.href}
           style={{
             color: styles.color,
-            textDecoration: "underline",
-            textUnderlineOffset: "2px",
+            textDecoration: 'underline',
+            textUnderlineOffset: '2px',
             fontWeight: 500,
             flexShrink: 0,
           }}
@@ -121,18 +134,18 @@ export function StatusBanner({ config, dismissible = true }: StatusBannerProps) 
           onClick={() => setDismissed(true)}
           aria-label="Dismiss banner"
           style={{
-            position: "absolute",
-            right: "0.75rem",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            color: "rgba(255,255,255,0.30)",
-            fontSize: "1rem",
+            position: 'absolute',
+            right: '0.75rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'rgba(255,255,255,0.30)',
+            fontSize: '1rem',
             lineHeight: 1,
-            padding: "2px 4px",
-            fontFamily: "Inter, system-ui, sans-serif",
+            padding: '2px 4px',
+            fontFamily: 'Inter, system-ui, sans-serif',
           }}
         >
           ×
@@ -155,8 +168,8 @@ export function useStatusBanner(defaultConfig?: Partial<StatusBannerConfig>): {
 } {
   const [config, setConfig] = useState<StatusBannerConfig>({
     active: false,
-    level: "info",
-    message: "",
+    level: 'info',
+    message: '',
     ...defaultConfig,
   });
   return { config, setConfig };

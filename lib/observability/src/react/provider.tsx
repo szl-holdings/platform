@@ -1,8 +1,17 @@
-import { createContext, useContext, useEffect, useRef, useState, useMemo, useCallback, type ReactNode } from "react";
-import { MetricCollector } from "../collector.js";
-import { initWebVitals } from "./web-vitals.js";
-import { initInteractionTracker } from "./interaction-tracker.js";
-import type { DomainConfig, AppObservabilityState } from "../types.js";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { MetricCollector } from '../collector.js';
+import type { AppObservabilityState, DomainConfig } from '../types.js';
+import { initInteractionTracker } from './interaction-tracker.js';
+import { initWebVitals } from './web-vitals.js';
 
 interface ServerTelemetryData {
   requestCount: number;
@@ -22,17 +31,23 @@ interface ObservabilityContextValue {
   state: AppObservabilityState;
   config: DomainConfig;
   serverTelemetry: ServerTelemetryData | null;
-  dataSource: "api" | "local";
+  dataSource: 'api' | 'local';
 }
 
 const ObservabilityContext = createContext<ObservabilityContextValue | null>(null);
 
 function resolveApiBase(): string {
-  if (typeof window === "undefined") return "/api/";
+  if (typeof window === 'undefined') return '/api/';
   return `${window.location.origin}/api/`;
 }
 
-export function ObservabilityProvider({ config, children }: { config: DomainConfig; children: ReactNode }) {
+export function ObservabilityProvider({
+  config,
+  children,
+}: {
+  config: DomainConfig;
+  children: ReactNode;
+}) {
   const collectorRef = useRef<MetricCollector | null>(null);
   if (!collectorRef.current) {
     collectorRef.current = new MetricCollector(config);
@@ -41,7 +56,7 @@ export function ObservabilityProvider({ config, children }: { config: DomainConf
 
   const [state, setState] = useState<AppObservabilityState>(() => collector.getSnapshot());
   const [serverTelemetry, setServerTelemetry] = useState<ServerTelemetryData | null>(null);
-  const [dataSource, setDataSource] = useState<"api" | "local">("local");
+  const [dataSource, setDataSource] = useState<'api' | 'local'>('local');
   const apiBase = useMemo(() => resolveApiBase(), []);
 
   useEffect(() => {
@@ -65,14 +80,16 @@ export function ObservabilityProvider({ config, children }: { config: DomainConf
             events: data.events,
             lastUpdated: Date.now(),
           } as AppObservabilityState);
-          setDataSource("api");
+          setDataSource('api');
         }
         if (data.serverTelemetry) {
           setServerTelemetry(data.serverTelemetry);
         }
         return true;
       }
-    } catch { /* fall back to local collector */ }
+    } catch {
+      /* fall back to local collector */
+    }
     return false;
   }, [apiBase, config.appSlug]);
 
@@ -90,12 +107,12 @@ export function ObservabilityProvider({ config, children }: { config: DomainConf
         if (!ok) {
           collector.simulateTick();
           setState(collector.getSnapshot());
-          setDataSource("local");
+          setDataSource('local');
         }
       } else {
         collector.simulateTick();
         setState(collector.getSnapshot());
-        setDataSource("local");
+        setDataSource('local');
         useApi = await fetchFromApi();
       }
     }, 5000);
@@ -114,18 +131,14 @@ export function ObservabilityProvider({ config, children }: { config: DomainConf
 
   const value = useMemo(
     () => ({ collector, state, config, serverTelemetry, dataSource }),
-    [collector, state, config, serverTelemetry, dataSource]
+    [collector, state, config, serverTelemetry, dataSource],
   );
 
-  return (
-    <ObservabilityContext.Provider value={value}>
-      {children}
-    </ObservabilityContext.Provider>
-  );
+  return <ObservabilityContext.Provider value={value}>{children}</ObservabilityContext.Provider>;
 }
 
 export function useObservability(): ObservabilityContextValue {
   const ctx = useContext(ObservabilityContext);
-  if (!ctx) throw new Error("useObservability must be used within ObservabilityProvider");
+  if (!ctx) throw new Error('useObservability must be used within ObservabilityProvider');
   return ctx;
 }

@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import type { AuditEvent } from "@szl-holdings/design-system/cockpit/audit-rail";
-import type { EvidenceItem } from "@szl-holdings/design-system/cockpit/evidence-drawer";
+import type { AuditEvent } from '@szl-holdings/design-system/cockpit/audit-rail';
+import type { EvidenceItem } from '@szl-holdings/design-system/cockpit/evidence-drawer';
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 
 interface FabricShellState {
   auditEvents: AuditEvent[];
@@ -15,7 +15,7 @@ interface FabricShellState {
 const FabricShellContext = createContext<FabricShellState>({
   auditEvents: [],
   drawerOpen: false,
-  drawerTitle: "Evidence",
+  drawerTitle: 'Evidence',
   drawerEvidence: [],
   pushAuditEvent: () => {},
   openEvidenceDrawer: () => {},
@@ -25,7 +25,7 @@ const FabricShellContext = createContext<FabricShellState>({
 export function FabricShellProvider({ children }: { children: ReactNode }) {
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerTitle, setDrawerTitle] = useState("Evidence");
+  const [drawerTitle, setDrawerTitle] = useState('Evidence');
   const [drawerEvidence, setDrawerEvidence] = useState<EvidenceItem[]>([]);
 
   const pushAuditEvent = useCallback((event: AuditEvent) => {
@@ -44,7 +44,15 @@ export function FabricShellProvider({ children }: { children: ReactNode }) {
 
   return (
     <FabricShellContext.Provider
-      value={{ auditEvents, drawerOpen, drawerTitle, drawerEvidence, pushAuditEvent, openEvidenceDrawer, closeEvidenceDrawer }}
+      value={{
+        auditEvents,
+        drawerOpen,
+        drawerTitle,
+        drawerEvidence,
+        pushAuditEvent,
+        openEvidenceDrawer,
+        closeEvidenceDrawer,
+      }}
     >
       {children}
     </FabricShellContext.Provider>

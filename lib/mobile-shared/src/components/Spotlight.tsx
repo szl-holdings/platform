@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BlurView } from 'expo-blur';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
+  Dimensions,
+  FlatList,
+  KeyboardAvoidingView,
   Modal,
-  View,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  Platform,
-  Dimensions,
-  KeyboardAvoidingView,
-} from "react-native";
-import { BlurView } from "expo-blur";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+  View,
+} from 'react-native';
 
 /**
  * Mobile command interface — structurally aligned with CommandItem from
@@ -48,7 +48,7 @@ interface SpotlightFabProps {
   right?: number;
 }
 
-const RECENT_KEY_PREFIX = "spotlight_recent_";
+const RECENT_KEY_PREFIX = 'spotlight_recent_';
 const MAX_RECENT = 5;
 
 async function getRecentIds(key: string): Promise<string[]> {
@@ -81,25 +81,25 @@ function fuzzyMatch(query: string, text: string): boolean {
 }
 
 type ListItem =
-  | { type: "header"; group: string }
-  | { type: "command"; command: SpotlightCommand; flatIndex: number };
+  | { type: 'header'; group: string }
+  | { type: 'command'; command: SpotlightCommand; flatIndex: number };
 
 export function SpotlightModal({
   visible,
   onClose,
   commands,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
   appName,
-  placeholder = "Search screens & actions...",
+  placeholder = 'Search screens & actions...',
 }: SpotlightModalProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [recentIds, setRecentIds] = useState<string[]>([]);
-  const storageKey = RECENT_KEY_PREFIX + (appName ?? "app");
+  const storageKey = RECENT_KEY_PREFIX + (appName ?? 'app');
 
   useEffect(() => {
     if (visible) {
-      setQuery("");
+      setQuery('');
       setSelectedIndex(0);
       getRecentIds(storageKey).then(setRecentIds);
     }
@@ -108,20 +108,20 @@ export function SpotlightModal({
   const recentCommands: SpotlightCommand[] = recentIds
     .map((id) => commands.find((c) => c.id === id))
     .filter(Boolean)
-    .map((c) => ({ ...c!, group: "Recent" })) as SpotlightCommand[];
+    .map((c) => ({ ...c!, group: 'Recent' })) as SpotlightCommand[];
 
   const quickActions = commands.filter((c) => c.isQuickAction);
 
   const flatFiltered: SpotlightCommand[] = query.trim()
     ? commands.filter((cmd) => {
-        const text = [cmd.label, cmd.description ?? "", ...(cmd.keywords ?? [])].join(" ");
+        const text = [cmd.label, cmd.description ?? '', ...(cmd.keywords ?? [])].join(' ');
         return fuzzyMatch(query, text);
       })
     : [
         ...recentCommands,
         ...quickActions
           .filter((c) => !recentIds.includes(c.id))
-          .map((c) => ({ ...c, group: "Quick Actions" })),
+          .map((c) => ({ ...c, group: 'Quick Actions' })),
         ...commands
           .filter((c) => !recentIds.includes(c.id) && !c.isQuickAction)
           .map((c) => ({ ...c })),
@@ -129,7 +129,7 @@ export function SpotlightModal({
 
   const groupMap: Record<string, SpotlightCommand[]> = {};
   for (const cmd of flatFiltered) {
-    const g = cmd.group ?? "Navigate";
+    const g = cmd.group ?? 'Navigate';
     if (!groupMap[g]) groupMap[g] = [];
     groupMap[g].push(cmd);
   }
@@ -137,9 +137,9 @@ export function SpotlightModal({
   const listData: ListItem[] = [];
   let flatIdx = 0;
   for (const [group, items] of Object.entries(groupMap)) {
-    listData.push({ type: "header", group });
+    listData.push({ type: 'header', group });
     for (const cmd of items) {
-      listData.push({ type: "command", command: cmd, flatIndex: flatIdx });
+      listData.push({ type: 'command', command: cmd, flatIndex: flatIdx });
       flatIdx++;
     }
   }
@@ -150,10 +150,10 @@ export function SpotlightModal({
       cmd.action();
       onClose();
     },
-    [storageKey, onClose]
+    [storageKey, onClose],
   );
 
-  const { width } = Dimensions.get("window");
+  const { width } = Dimensions.get('window');
 
   return (
     <Modal
@@ -164,13 +164,13 @@ export function SpotlightModal({
       statusBarTranslucent
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.modalOuter}
       >
         <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
 
         <View style={[styles.sheet, { width: Math.min(width - 32, 560) }]}>
-          {Platform.OS === "ios" ? (
+          {Platform.OS === 'ios' ? (
             <BlurView intensity={85} tint="dark" style={StyleSheet.absoluteFill} />
           ) : (
             <View style={[StyleSheet.absoluteFill, styles.androidBg]} />
@@ -178,10 +178,13 @@ export function SpotlightModal({
 
           <View style={styles.sheetContent}>
             <View style={styles.inputRow}>
-              <Text style={[styles.searchIcon, { color: accentColor + "aa" }]}>⌕</Text>
+              <Text style={[styles.searchIcon, { color: accentColor + 'aa' }]}>⌕</Text>
               <TextInput
                 value={query}
-                onChangeText={(t) => { setQuery(t); setSelectedIndex(0); }}
+                onChangeText={(t) => {
+                  setQuery(t);
+                  setSelectedIndex(0);
+                }}
                 placeholder={placeholder}
                 placeholderTextColor="rgba(255,255,255,0.25)"
                 style={styles.input}
@@ -193,7 +196,12 @@ export function SpotlightModal({
                 }}
               />
               {appName && (
-                <View style={[styles.appBadge, { backgroundColor: accentColor + "22", borderColor: accentColor + "44" }]}>
+                <View
+                  style={[
+                    styles.appBadge,
+                    { backgroundColor: accentColor + '22', borderColor: accentColor + '44' },
+                  ]}
+                >
                   <Text style={[styles.appBadgeText, { color: accentColor }]}>{appName}</Text>
                 </View>
               )}
@@ -205,23 +213,21 @@ export function SpotlightModal({
             <FlatList
               data={listData}
               keyExtractor={(item, i) =>
-                item.type === "header" ? `h-${item.group}` : `c-${item.command.id}-${i}`
+                item.type === 'header' ? `h-${item.group}` : `c-${item.command.id}-${i}`
               }
               style={styles.list}
               keyboardShouldPersistTaps="handled"
               ListEmptyComponent={
-                query.trim() ? (
-                  <Text style={styles.emptyText}>No results for "{query}"</Text>
-                ) : null
+                query.trim() ? <Text style={styles.emptyText}>No results for "{query}"</Text> : null
               }
               renderItem={({ item }) => {
-                if (item.type === "header") {
+                if (item.type === 'header') {
                   return (
                     <Text
                       style={[
                         styles.groupHeader,
-                        item.group === "Recent" && { color: accentColor + "99" },
-                        item.group === "Quick Actions" && { color: accentColor + "cc" },
+                        item.group === 'Recent' && { color: accentColor + '99' },
+                        item.group === 'Quick Actions' && { color: accentColor + 'cc' },
                       ]}
                     >
                       {item.group.toUpperCase()}
@@ -236,22 +242,27 @@ export function SpotlightModal({
                     style={[
                       styles.row,
                       isSelected
-                        ? { backgroundColor: accentColor + "18", borderLeftColor: accentColor }
-                        : { borderLeftColor: "transparent" },
+                        ? { backgroundColor: accentColor + '18', borderLeftColor: accentColor }
+                        : { borderLeftColor: 'transparent' },
                     ]}
                     activeOpacity={0.7}
                   >
                     {cmd.icon ? (
                       <Text style={styles.rowIcon}>{cmd.icon}</Text>
                     ) : (
-                      <View style={[styles.rowIconPlaceholder, { backgroundColor: accentColor + "18" }]}>
+                      <View
+                        style={[styles.rowIconPlaceholder, { backgroundColor: accentColor + '18' }]}
+                      >
                         <Text style={[styles.rowIconPlaceholderText, { color: accentColor }]}>
                           {cmd.label[0]}
                         </Text>
                       </View>
                     )}
                     <View style={styles.rowText}>
-                      <Text style={[styles.rowLabel, isSelected && { color: "#fff" }]} numberOfLines={1}>
+                      <Text
+                        style={[styles.rowLabel, isSelected && { color: '#fff' }]}
+                        numberOfLines={1}
+                      >
                         {cmd.label}
                       </Text>
                       {cmd.description ? (
@@ -261,7 +272,12 @@ export function SpotlightModal({
                       ) : null}
                     </View>
                     {cmd.isQuickAction && (
-                      <View style={[styles.quickBadge, { backgroundColor: accentColor + "22", borderColor: accentColor + "44" }]}>
+                      <View
+                        style={[
+                          styles.quickBadge,
+                          { backgroundColor: accentColor + '22', borderColor: accentColor + '44' },
+                        ]}
+                      >
                         <Text style={[styles.quickBadgeText, { color: accentColor }]}>Action</Text>
                       </View>
                     )}
@@ -271,8 +287,8 @@ export function SpotlightModal({
             />
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>tap to navigate  ·  tap outside to close</Text>
-              <Text style={[styles.footerCount, { color: accentColor + "66" }]}>
+              <Text style={styles.footerText}>tap to navigate · tap outside to close</Text>
+              <Text style={[styles.footerCount, { color: accentColor + '66' }]}>
                 {flatFiltered.length} commands
               </Text>
             </View>
@@ -283,7 +299,12 @@ export function SpotlightModal({
   );
 }
 
-export function SpotlightFab({ onPress, accentColor = "#8b7ac8", bottom = 100, right = 20 }: SpotlightFabProps) {
+export function SpotlightFab({
+  onPress,
+  accentColor = '#8b7ac8',
+  bottom = 100,
+  right = 20,
+}: SpotlightFabProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -292,8 +313,8 @@ export function SpotlightFab({ onPress, accentColor = "#8b7ac8", bottom = 100, r
         {
           bottom,
           right,
-          backgroundColor: accentColor + "22",
-          borderColor: accentColor + "55",
+          backgroundColor: accentColor + '22',
+          borderColor: accentColor + '55',
         },
       ]}
       activeOpacity={0.8}
@@ -305,15 +326,15 @@ export function SpotlightFab({ onPress, accentColor = "#8b7ac8", bottom = 100, r
 
 const styles = StyleSheet.create({
   fab: {
-    position: "absolute",
+    position: 'absolute',
     width: 44,
     height: 44,
     borderRadius: 22,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 1000,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -321,42 +342,42 @@ const styles = StyleSheet.create({
   },
   fabIcon: {
     fontSize: 22,
-    fontWeight: "300",
+    fontWeight: '300',
   },
   modalOuter: {
     flex: 1,
-    alignItems: "center",
-    paddingTop: Platform.OS === "ios" ? 80 : 60,
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 80 : 60,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.65)",
+    backgroundColor: 'rgba(0,0,0,0.65)',
   },
   sheet: {
-    maxHeight: "70%",
+    maxHeight: '70%',
     borderRadius: 16,
-    overflow: "hidden",
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    shadowColor: "#000",
+    borderColor: 'rgba(255,255,255,0.1)',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.6,
     shadowRadius: 40,
     elevation: 20,
   },
   androidBg: {
-    backgroundColor: "rgba(8,10,18,0.97)",
+    backgroundColor: 'rgba(8,10,18,0.97)',
   },
   sheetContent: {
     flex: 1,
   },
   inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: 'rgba(255,255,255,0.07)',
     gap: 8,
   },
   searchIcon: {
@@ -365,9 +386,9 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: "rgba(255,255,255,0.9)",
+    color: 'rgba(255,255,255,0.9)',
     fontSize: 15,
-    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
     padding: 0,
     margin: 0,
   },
@@ -379,30 +400,30 @@ const styles = StyleSheet.create({
   },
   appBadgeText: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: '700',
     letterSpacing: 0.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
   escButton: {
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: 'rgba(255,255,255,0.07)',
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 7,
     paddingVertical: 3,
   },
   escText: {
     fontSize: 10,
-    color: "rgba(255,255,255,0.4)",
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+    color: 'rgba(255,255,255,0.4)',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   list: {
     maxHeight: 380,
   },
   emptyText: {
     padding: 40,
-    textAlign: "center",
-    color: "rgba(255,255,255,0.3)",
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.3)',
     fontSize: 13,
   },
   groupHeader: {
@@ -410,13 +431,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 4,
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: '700',
     letterSpacing: 1,
-    color: "rgba(255,255,255,0.3)",
+    color: 'rgba(255,255,255,0.3)',
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 9,
     gap: 10,
@@ -425,18 +446,18 @@ const styles = StyleSheet.create({
   rowIcon: {
     fontSize: 16,
     width: 22,
-    textAlign: "center",
+    textAlign: 'center',
   },
   rowIconPlaceholder: {
     width: 22,
     height: 22,
     borderRadius: 6,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowIconPlaceholderText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   rowText: {
     flex: 1,
@@ -444,12 +465,12 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 13,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.75)",
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.75)',
   },
   rowDesc: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.35)",
+    color: 'rgba(255,255,255,0.35)',
     marginTop: 1,
   },
   quickBadge: {
@@ -460,22 +481,22 @@ const styles = StyleSheet.create({
   },
   quickBadgeText: {
     fontSize: 9,
-    fontWeight: "700",
-    textTransform: "uppercase",
+    fontWeight: '700',
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.06)",
+    borderTopColor: 'rgba(255,255,255,0.06)',
   },
   footerText: {
     fontSize: 10,
-    color: "rgba(255,255,255,0.2)",
+    color: 'rgba(255,255,255,0.2)',
   },
   footerCount: {
     fontSize: 10,

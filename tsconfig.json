@@ -116,6 +116,27 @@
     },
     {
       "path": "./packages/verifier"
+    },
+    {
+      "path": "./packages/env"
+    },
+    {
+      "path": "./packages/auth-shared"
+    },
+    {
+      "path": "./packages/brand-registry"
+    },
+    {
+      "path": "./packages/design-system"
+    },
+    {
+      "path": "./packages/db"
+    },
+    {
+      "path": "./packages/contracts"
+    },
+    {
+      "path": "./packages/shared-contracts"
     }
   ]
 }

@@ -1,12 +1,12 @@
 import {
   db,
+  type SpatialTwinCategory,
   scenarioBranchesTable,
   spatialTwinSnapshotsTable,
-  type SpatialTwinCategory,
-} from "@szl-holdings/db";
-import { eq, and, desc } from "drizzle-orm";
-import { randomUUID } from "crypto";
-import type { ScenarioBranch, ScenarioBranchComparison, ScenarioForgeInput } from "./types.js";
+} from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, desc, eq } from 'drizzle-orm';
+import type { ScenarioBranch, ScenarioBranchComparison, ScenarioForgeInput } from './types.js';
 
 function generateBranchId(): string {
   return `branch-${randomUUID()}`;
@@ -18,12 +18,12 @@ function applyParametersToState(
 ): Record<string, unknown> {
   const result = { ...baseState };
   for (const [key, value] of Object.entries(parameters)) {
-    if (key.includes(".")) {
-      const parts = key.split(".");
+    if (key.includes('.')) {
+      const parts = key.split('.');
       let current: Record<string, unknown> = result;
       for (let i = 0; i < parts.length - 1; i++) {
         const part = parts[i]!;
-        if (typeof current[part] !== "object" || current[part] === null) {
+        if (typeof current[part] !== 'object' || current[part] === null) {
           current[part] = {};
         }
         current = current[part] as Record<string, unknown>;
@@ -49,7 +49,7 @@ function computeDeltaMetrics(
 
     if (before !== after) {
       const entry: { before: unknown; after: unknown; changePercent?: number } = { before, after };
-      if (typeof before === "number" && typeof after === "number" && before !== 0) {
+      if (typeof before === 'number' && typeof after === 'number' && before !== 0) {
         entry.changePercent = ((after - before) / Math.abs(before)) * 100;
       }
       delta[key] = entry;
@@ -59,27 +59,29 @@ function computeDeltaMetrics(
   return delta;
 }
 
-function assessBranchRisk(deltaMetrics: Record<string, { before: unknown; after: unknown; changePercent?: number }>): {
+function assessBranchRisk(
+  deltaMetrics: Record<string, { before: unknown; after: unknown; changePercent?: number }>,
+): {
   riskAssessment: string;
   recommendedActions: string[];
   confidenceScore: number;
 } {
   const changes = Object.values(deltaMetrics);
   const majorChanges = changes.filter(
-    c => typeof c.changePercent === "number" && Math.abs(c.changePercent) > 20,
+    (c) => typeof c.changePercent === 'number' && Math.abs(c.changePercent) > 20,
   );
 
   let riskLevel: string;
   let confidenceScore: number;
 
   if (majorChanges.length > 3) {
-    riskLevel = "HIGH";
+    riskLevel = 'HIGH';
     confidenceScore = 0.65;
   } else if (majorChanges.length > 1) {
-    riskLevel = "MODERATE";
+    riskLevel = 'MODERATE';
     confidenceScore = 0.78;
   } else {
-    riskLevel = "LOW";
+    riskLevel = 'LOW';
     confidenceScore = 0.88;
   }
 
@@ -87,31 +89,37 @@ function assessBranchRisk(deltaMetrics: Record<string, { before: unknown; after:
   const recommendedActions: string[] = [];
 
   if (majorChanges.length > 2) {
-    recommendedActions.push("Review branch parameters for plausibility before applying to live twin");
-    recommendedActions.push("Cross-validate simulation results against trusted source data");
+    recommendedActions.push(
+      'Review branch parameters for plausibility before applying to live twin',
+    );
+    recommendedActions.push('Cross-validate simulation results against trusted source data');
   }
   if (majorChanges.length > 3) {
-    recommendedActions.push("Require senior analyst approval before scenario branch promotion");
+    recommendedActions.push('Require senior analyst approval before scenario branch promotion');
   }
 
   return { riskAssessment, recommendedActions, confidenceScore };
 }
 
 export async function forgeBranch(input: ScenarioForgeInput): Promise<ScenarioBranch> {
-  const baseSnapshotCond = input.orgId != null
-    ? and(eq(spatialTwinSnapshotsTable.id, input.baselineSnapshotId), eq(spatialTwinSnapshotsTable.orgId, input.orgId))
-    : eq(spatialTwinSnapshotsTable.id, input.baselineSnapshotId);
+  const baseSnapshotCond =
+    input.orgId != null
+      ? and(
+          eq(spatialTwinSnapshotsTable.id, input.baselineSnapshotId),
+          eq(spatialTwinSnapshotsTable.orgId, input.orgId),
+        )
+      : eq(spatialTwinSnapshotsTable.id, input.baselineSnapshotId);
 
   const baseSnapshot = await db
     .select()
     .from(spatialTwinSnapshotsTable)
     .where(baseSnapshotCond)
-    .then(r => r[0]);
+    .then((r) => r[0]);
 
   if (!baseSnapshot) {
     throw Object.assign(
       new Error(`Baseline snapshot ${input.baselineSnapshotId} not found or not accessible`),
-      { code: "NOT_FOUND" },
+      { code: 'NOT_FOUND' },
     );
   }
 
@@ -123,43 +131,49 @@ export async function forgeBranch(input: ScenarioForgeInput): Promise<ScenarioBr
   const branchId = generateBranchId();
   const now = new Date();
 
-  const [branchSnapshot] = await db.insert(spatialTwinSnapshotsTable).values({
-    orgId: input.orgId ?? null,
-    twinId: input.twinId,
-    entityId: input.entityId,
-    twinCategory: input.twinCategory,
-    sequenceNumber: (baseSnapshot.sequenceNumber ?? 0) + 1,
-    state: branchState,
-    predictedStates: baseSnapshot.predictedStates ?? [],
-    alerts: [],
-    confidenceScore,
-    parentSnapshotId: input.baselineSnapshotId,
-    derivedBranchId: branchId,
-    sourceEvidenceList: baseSnapshot.sourceEvidenceList ?? [],
-    spatialContext: baseSnapshot.spatialContext ?? {},
-    metadata: { branchName: input.branchName, parameters: input.parameters },
-  }).returning();
+  const [branchSnapshot] = await db
+    .insert(spatialTwinSnapshotsTable)
+    .values({
+      orgId: input.orgId ?? null,
+      twinId: input.twinId,
+      entityId: input.entityId,
+      twinCategory: input.twinCategory,
+      sequenceNumber: (baseSnapshot.sequenceNumber ?? 0) + 1,
+      state: branchState,
+      predictedStates: baseSnapshot.predictedStates ?? [],
+      alerts: [],
+      confidenceScore,
+      parentSnapshotId: input.baselineSnapshotId,
+      derivedBranchId: branchId,
+      sourceEvidenceList: baseSnapshot.sourceEvidenceList ?? [],
+      spatialContext: baseSnapshot.spatialContext ?? {},
+      metadata: { branchName: input.branchName, parameters: input.parameters },
+    })
+    .returning();
 
-  const [branch] = await db.insert(scenarioBranchesTable).values({
-    orgId: input.orgId ?? null,
-    branchId,
-    twinId: input.twinId,
-    entityId: input.entityId,
-    twinCategory: input.twinCategory,
-    name: input.branchName,
-    description: input.branchDescription ?? null,
-    baselineSnapshotId: input.baselineSnapshotId,
-    branchSnapshotId: branchSnapshot.id,
-    parameters: input.parameters,
-    deltaMetrics,
-    riskAssessment,
-    recommendedActions,
-    confidenceScore,
-    status: "completed",
-    correlationId: input.correlationId ?? null,
-    createdByUserId: input.createdByUserId ?? null,
-    completedAt: now,
-  }).returning();
+  const [branch] = await db
+    .insert(scenarioBranchesTable)
+    .values({
+      orgId: input.orgId ?? null,
+      branchId,
+      twinId: input.twinId,
+      entityId: input.entityId,
+      twinCategory: input.twinCategory,
+      name: input.branchName,
+      description: input.branchDescription ?? null,
+      baselineSnapshotId: input.baselineSnapshotId,
+      branchSnapshotId: branchSnapshot.id,
+      parameters: input.parameters,
+      deltaMetrics,
+      riskAssessment,
+      recommendedActions,
+      confidenceScore,
+      status: 'completed',
+      correlationId: input.correlationId ?? null,
+      createdByUserId: input.createdByUserId ?? null,
+      completedAt: now,
+    })
+    .returning();
 
   return {
     id: branch.id,
@@ -172,23 +186,25 @@ export async function forgeBranch(input: ScenarioForgeInput): Promise<ScenarioBr
     baselineSnapshotId: branch.baselineSnapshotId,
     branchSnapshotId: branch.branchSnapshotId,
     parameters: (branch.parameters as Record<string, unknown>) ?? {},
-    deltaMetrics: (branch.deltaMetrics as Record<string, { before: unknown; after: unknown; changePercent?: number }>) ?? {},
+    deltaMetrics:
+      (branch.deltaMetrics as Record<
+        string,
+        { before: unknown; after: unknown; changePercent?: number }
+      >) ?? {},
     riskAssessment: branch.riskAssessment,
     recommendedActions: (branch.recommendedActions as string[]) ?? [],
     confidenceScore: branch.confidenceScore,
-    status: branch.status as ScenarioBranch["status"],
+    status: branch.status as ScenarioBranch['status'],
     proofChainId: branch.proofChainId,
     correlationId: branch.correlationId,
   };
 }
 
-export async function getBranch(
-  branchId: string,
-  orgId?: number,
-): Promise<ScenarioBranch | null> {
-  const cond = orgId != null
-    ? and(eq(scenarioBranchesTable.branchId, branchId), eq(scenarioBranchesTable.orgId, orgId))
-    : eq(scenarioBranchesTable.branchId, branchId);
+export async function getBranch(branchId: string, orgId?: number): Promise<ScenarioBranch | null> {
+  const cond =
+    orgId != null
+      ? and(eq(scenarioBranchesTable.branchId, branchId), eq(scenarioBranchesTable.orgId, orgId))
+      : eq(scenarioBranchesTable.branchId, branchId);
 
   const [row] = await db.select().from(scenarioBranchesTable).where(cond);
   if (!row) return null;
@@ -204,11 +220,15 @@ export async function getBranch(
     baselineSnapshotId: row.baselineSnapshotId,
     branchSnapshotId: row.branchSnapshotId,
     parameters: (row.parameters as Record<string, unknown>) ?? {},
-    deltaMetrics: (row.deltaMetrics as Record<string, { before: unknown; after: unknown; changePercent?: number }>) ?? {},
+    deltaMetrics:
+      (row.deltaMetrics as Record<
+        string,
+        { before: unknown; after: unknown; changePercent?: number }
+      >) ?? {},
     riskAssessment: row.riskAssessment,
     recommendedActions: (row.recommendedActions as string[]) ?? [],
     confidenceScore: row.confidenceScore,
-    status: row.status as ScenarioBranch["status"],
+    status: row.status as ScenarioBranch['status'],
     proofChainId: row.proofChainId,
     correlationId: row.correlationId,
   };
@@ -216,12 +236,18 @@ export async function getBranch(
 
 export async function updateBranch(
   branchId: string,
-  updates: { name?: string; description?: string; status?: ScenarioBranch["status"]; metadata?: Record<string, unknown> },
+  updates: {
+    name?: string;
+    description?: string;
+    status?: ScenarioBranch['status'];
+    metadata?: Record<string, unknown>;
+  },
   orgId?: number,
 ): Promise<ScenarioBranch | null> {
-  const cond = orgId != null
-    ? and(eq(scenarioBranchesTable.branchId, branchId), eq(scenarioBranchesTable.orgId, orgId))
-    : eq(scenarioBranchesTable.branchId, branchId);
+  const cond =
+    orgId != null
+      ? and(eq(scenarioBranchesTable.branchId, branchId), eq(scenarioBranchesTable.orgId, orgId))
+      : eq(scenarioBranchesTable.branchId, branchId);
 
   const updateValues: Record<string, unknown> = { updatedAt: new Date() };
   if (updates.name != null) updateValues.name = updates.name;
@@ -248,23 +274,25 @@ export async function updateBranch(
     baselineSnapshotId: row.baselineSnapshotId,
     branchSnapshotId: row.branchSnapshotId,
     parameters: (row.parameters as Record<string, unknown>) ?? {},
-    deltaMetrics: (row.deltaMetrics as Record<string, { before: unknown; after: unknown; changePercent?: number }>) ?? {},
+    deltaMetrics:
+      (row.deltaMetrics as Record<
+        string,
+        { before: unknown; after: unknown; changePercent?: number }
+      >) ?? {},
     riskAssessment: row.riskAssessment,
     recommendedActions: (row.recommendedActions as string[]) ?? [],
     confidenceScore: row.confidenceScore,
-    status: row.status as ScenarioBranch["status"],
+    status: row.status as ScenarioBranch['status'],
     proofChainId: row.proofChainId,
     correlationId: row.correlationId,
   };
 }
 
-export async function deleteBranch(
-  branchId: string,
-  orgId?: number,
-): Promise<boolean> {
-  const cond = orgId != null
-    ? and(eq(scenarioBranchesTable.branchId, branchId), eq(scenarioBranchesTable.orgId, orgId))
-    : eq(scenarioBranchesTable.branchId, branchId);
+export async function deleteBranch(branchId: string, orgId?: number): Promise<boolean> {
+  const cond =
+    orgId != null
+      ? and(eq(scenarioBranchesTable.branchId, branchId), eq(scenarioBranchesTable.orgId, orgId))
+      : eq(scenarioBranchesTable.branchId, branchId);
 
   const [deleted] = await db
     .delete(scenarioBranchesTable)
@@ -279,14 +307,17 @@ export async function compareBranches(
   branchBId?: string,
   orgId?: number,
 ): Promise<ScenarioBranchComparison> {
-  const condA = orgId != null
-    ? and(eq(scenarioBranchesTable.branchId, branchAId), eq(scenarioBranchesTable.orgId, orgId))
-    : eq(scenarioBranchesTable.branchId, branchAId);
+  const condA =
+    orgId != null
+      ? and(eq(scenarioBranchesTable.branchId, branchAId), eq(scenarioBranchesTable.orgId, orgId))
+      : eq(scenarioBranchesTable.branchId, branchAId);
 
   const [branchARow] = await db.select().from(scenarioBranchesTable).where(condA);
 
   if (!branchARow) {
-    throw Object.assign(new Error(`Branch ${branchAId} not found or not accessible`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Branch ${branchAId} not found or not accessible`), {
+      code: 'NOT_FOUND',
+    });
   }
 
   const condB = branchBId
@@ -296,7 +327,11 @@ export async function compareBranches(
     : undefined;
 
   const branchBRow = condB
-    ? await db.select().from(scenarioBranchesTable).where(condB).then(r => r[0])
+    ? await db
+        .select()
+        .from(scenarioBranchesTable)
+        .where(condB)
+        .then((r) => r[0])
     : undefined;
 
   const baselineSnapshot = branchARow.baselineSnapshotId
@@ -304,7 +339,7 @@ export async function compareBranches(
         .select()
         .from(spatialTwinSnapshotsTable)
         .where(eq(spatialTwinSnapshotsTable.id, branchARow.baselineSnapshotId))
-        .then(r => r[0])
+        .then((r) => r[0])
     : null;
 
   const branchASnapshot = branchARow.branchSnapshotId
@@ -312,7 +347,7 @@ export async function compareBranches(
         .select()
         .from(spatialTwinSnapshotsTable)
         .where(eq(spatialTwinSnapshotsTable.id, branchARow.branchSnapshotId))
-        .then(r => r[0])
+        .then((r) => r[0])
     : null;
 
   const branchBSnapshot = branchBRow?.branchSnapshotId
@@ -320,7 +355,7 @@ export async function compareBranches(
         .select()
         .from(spatialTwinSnapshotsTable)
         .where(eq(spatialTwinSnapshotsTable.id, branchBRow.branchSnapshotId))
-        .then(r => r[0])
+        .then((r) => r[0])
     : null;
 
   const baselineState = (baselineSnapshot?.state as Record<string, unknown>) ?? {};
@@ -333,7 +368,7 @@ export async function compareBranches(
     ...(branchBState ? Object.keys(branchBState) : []),
   ]);
 
-  const fieldComparisons: ScenarioBranchComparison["fieldComparisons"] = {};
+  const fieldComparisons: ScenarioBranchComparison['fieldComparisons'] = {};
   for (const field of allFields) {
     fieldComparisons[field] = {
       baseline: baselineState[field],
@@ -353,11 +388,15 @@ export async function compareBranches(
     baselineSnapshotId: row.baselineSnapshotId,
     branchSnapshotId: row.branchSnapshotId,
     parameters: (row.parameters as Record<string, unknown>) ?? {},
-    deltaMetrics: (row.deltaMetrics as Record<string, { before: unknown; after: unknown; changePercent?: number }>) ?? {},
+    deltaMetrics:
+      (row.deltaMetrics as Record<
+        string,
+        { before: unknown; after: unknown; changePercent?: number }
+      >) ?? {},
     riskAssessment: row.riskAssessment,
     recommendedActions: (row.recommendedActions as string[]) ?? [],
     confidenceScore: row.confidenceScore,
-    status: row.status as ScenarioBranch["status"],
+    status: row.status as ScenarioBranch['status'],
     proofChainId: row.proofChainId,
     correlationId: row.correlationId,
   });
@@ -365,17 +404,30 @@ export async function compareBranches(
   const branchA = toScenarioBranch(branchARow);
   const branchB = branchBRow ? toScenarioBranch(branchBRow) : undefined;
 
-  const baseline = toScenarioBranch({ ...branchARow, branchId: "baseline", name: "Baseline" });
+  const baseline = toScenarioBranch({ ...branchARow, branchId: 'baseline', name: 'Baseline' });
 
-  const riskRanking: ScenarioBranchComparison["riskRanking"] = [
-    { branchId: branchARow.branchId, riskScore: 1 - branchARow.confidenceScore, label: branchARow.name },
-    ...(branchBRow ? [{ branchId: branchBRow.branchId, riskScore: 1 - branchBRow.confidenceScore, label: branchBRow.name }] : []),
+  const riskRanking: ScenarioBranchComparison['riskRanking'] = [
+    {
+      branchId: branchARow.branchId,
+      riskScore: 1 - branchARow.confidenceScore,
+      label: branchARow.name,
+    },
+    ...(branchBRow
+      ? [
+          {
+            branchId: branchBRow.branchId,
+            riskScore: 1 - branchBRow.confidenceScore,
+            label: branchBRow.name,
+          },
+        ]
+      : []),
   ].sort((a, b) => b.riskScore - a.riskScore);
 
   const highestRisk = riskRanking[0];
-  const recommendation = highestRisk && highestRisk.riskScore > 0.3
-    ? `Branch "${highestRisk.label}" carries the highest risk (score: ${highestRisk.riskScore.toFixed(2)}). Consider the lower-risk alternative.`
-    : "All branches within acceptable risk parameters. Select based on operational priority.";
+  const recommendation =
+    highestRisk && highestRisk.riskScore > 0.3
+      ? `Branch "${highestRisk.label}" carries the highest risk (score: ${highestRisk.riskScore.toFixed(2)}). Consider the lower-risk alternative.`
+      : 'All branches within acceptable risk parameters. Select based on operational priority.';
 
   return { baseline, branchA, branchB, fieldComparisons, riskRanking, recommendation };
 }
@@ -385,14 +437,15 @@ export async function listBranches(options: {
   entityId?: string;
   twinCategory?: SpatialTwinCategory;
   orgId?: number;
-  status?: ScenarioBranch["status"];
+  status?: ScenarioBranch['status'];
   limit?: number;
 }): Promise<ScenarioBranch[]> {
   const conditions = [];
   if (options.orgId != null) conditions.push(eq(scenarioBranchesTable.orgId, options.orgId));
   if (options.twinId) conditions.push(eq(scenarioBranchesTable.twinId, options.twinId));
   if (options.entityId) conditions.push(eq(scenarioBranchesTable.entityId, options.entityId));
-  if (options.twinCategory) conditions.push(eq(scenarioBranchesTable.twinCategory, options.twinCategory));
+  if (options.twinCategory)
+    conditions.push(eq(scenarioBranchesTable.twinCategory, options.twinCategory));
   if (options.status) conditions.push(eq(scenarioBranchesTable.status, options.status));
 
   const q = db
@@ -403,7 +456,7 @@ export async function listBranches(options: {
 
   const rows = conditions.length > 0 ? await q.where(and(...conditions)) : await q;
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     id: row.id,
     branchId: row.branchId,
     twinId: row.twinId,
@@ -414,11 +467,15 @@ export async function listBranches(options: {
     baselineSnapshotId: row.baselineSnapshotId,
     branchSnapshotId: row.branchSnapshotId,
     parameters: (row.parameters as Record<string, unknown>) ?? {},
-    deltaMetrics: (row.deltaMetrics as Record<string, { before: unknown; after: unknown; changePercent?: number }>) ?? {},
+    deltaMetrics:
+      (row.deltaMetrics as Record<
+        string,
+        { before: unknown; after: unknown; changePercent?: number }
+      >) ?? {},
     riskAssessment: row.riskAssessment,
     recommendedActions: (row.recommendedActions as string[]) ?? [],
     confidenceScore: row.confidenceScore,
-    status: row.status as ScenarioBranch["status"],
+    status: row.status as ScenarioBranch['status'],
     proofChainId: row.proofChainId,
     correlationId: row.correlationId,
     metadata: (row.metadata as Record<string, unknown>) ?? null,
@@ -448,7 +505,11 @@ export class ScenarioForge {
     return deleteBranch(branchId, orgId);
   }
 
-  async compare(branchAId: string, branchBId?: string, orgId?: number): Promise<ScenarioBranchComparison> {
+  async compare(
+    branchAId: string,
+    branchBId?: string,
+    orgId?: number,
+  ): Promise<ScenarioBranchComparison> {
     return compareBranches(branchAId, branchBId, orgId);
   }
 

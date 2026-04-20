@@ -1,6 +1,6 @@
-import { z } from "zod";
-import type { ToolManifest } from "../manifest.js";
-import type { ToolHandler } from "../gateway.js";
+import { z } from 'zod';
+import type { ToolHandler } from '../gateway.js';
+import type { ToolManifest } from '../manifest.js';
 
 export const GraphQueryInputSchema = z.object({
   query: z.string(),
@@ -11,25 +11,30 @@ export const GraphQueryInputSchema = z.object({
 export type GraphQueryInput = z.infer<typeof GraphQueryInputSchema>;
 
 export const GRAPH_QUERY_TOOL_MANIFEST: ToolManifest = {
-  id: "graph-query",
-  name: "Graph Query",
-  version: "1.0.0",
-  description: "Query the Constellation operational graph. Returns matching nodes and edges based on a search query.",
-  domainTags: ["graph"],
-  policyTier: "internal-workflow",
-  allowedEnvironments: ["development", "staging", "production"],
+  id: 'graph-query',
+  name: 'Graph Query',
+  version: '1.0.0',
+  description:
+    'Query the Constellation operational graph. Returns matching nodes and edges based on a search query.',
+  domainTags: ['graph'],
+  policyTier: 'internal-workflow',
+  allowedEnvironments: ['development', 'staging', 'production'],
   inputSchema: {
-    type: "object",
+    type: 'object',
     properties: {
-      query: { type: "string", description: "Search query string" },
-      domain: { type: "string", description: "Optional domain filter" },
-      maxResults: { type: "integer", minimum: 1, description: "Maximum number of results to return" },
+      query: { type: 'string', description: 'Search query string' },
+      domain: { type: 'string', description: 'Optional domain filter' },
+      maxResults: {
+        type: 'integer',
+        minimum: 1,
+        description: 'Maximum number of results to return',
+      },
     },
-    required: ["query"],
+    required: ['query'],
   },
   rateLimits: { requestsPerMinute: 60 },
   timeoutMs: 5000,
-  failureModes: [{ type: "timeout", retryable: true, maxRetries: 2 }],
+  failureModes: [{ type: 'timeout', retryable: true, maxRetries: 2 }],
   approvalRequired: false,
   observabilityHooks: { emitTrace: true, emitMetrics: true, sensitiveFields: [] },
   enabled: true,

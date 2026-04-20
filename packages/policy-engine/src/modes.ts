@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * The five policy modes that govern how the action-engine handles a proposed action.
@@ -10,20 +10,20 @@ import { z } from "zod";
  * auto-within-guardrails – execute autonomously if confidence, cost, and scope are within limits
  */
 export const PolicyModeSchema = z.enum([
-  "observe",
-  "recommend",
-  "draft",
-  "approval-required",
-  "auto-within-guardrails",
+  'observe',
+  'recommend',
+  'draft',
+  'approval-required',
+  'auto-within-guardrails',
 ]);
 export type PolicyMode = z.infer<typeof PolicyModeSchema>;
 
 export const POLICY_MODE_DESCRIPTIONS: Record<PolicyMode, string> = {
-  "observe": "Log and monitor only — no action taken",
-  "recommend": "Surface recommendation to operator; no execution",
-  "draft": "Produce a draft artifact for human review before any action",
-  "approval-required": "Queue for explicit human approval before execution",
-  "auto-within-guardrails": "Execute autonomously when confidence, cost, and scope meet thresholds",
+  observe: 'Log and monitor only — no action taken',
+  recommend: 'Surface recommendation to operator; no execution',
+  draft: 'Produce a draft artifact for human review before any action',
+  'approval-required': 'Queue for explicit human approval before execution',
+  'auto-within-guardrails': 'Execute autonomously when confidence, cost, and scope meet thresholds',
 };
 
 /**
@@ -31,9 +31,9 @@ export const POLICY_MODE_DESCRIPTIONS: Record<PolicyMode, string> = {
  * Any field can be '*' (wildcard) to match all values.
  */
 export const PolicyModeScopeSchema = z.object({
-  product: z.string().default("*"),
-  actionType: z.string().default("*"),
-  workspace: z.string().default("*"),
+  product: z.string().default('*'),
+  actionType: z.string().default('*'),
+  workspace: z.string().default('*'),
 });
 export type PolicyModeScope = z.infer<typeof PolicyModeScopeSchema>;
 
@@ -43,9 +43,11 @@ export const PolicyModeConfigSchema = z.object({
   mode: PolicyModeSchema,
   confidenceThreshold: z.number().min(0).max(1).default(0.8),
   maxCostUsd: z.number().min(0).optional(),
-  guardedEntitySensitivity: z.enum(["public", "internal", "confidential", "restricted"]).default("internal"),
+  guardedEntitySensitivity: z
+    .enum(['public', 'internal', 'confidential', 'restricted'])
+    .default('internal'),
   validWindowCron: z.string().optional(),
-  environment: z.enum(["development", "staging", "production", "all"]).default("all"),
+  environment: z.enum(['development', 'staging', 'production', 'all']).default('all'),
   reason: z.string().optional(),
   createdBy: z.string().optional(),
   createdAt: z.number().default(() => Date.now()),
@@ -61,7 +63,7 @@ export class PolicyModeRegistry {
   private configs: PolicyModeConfig[] = [];
 
   register(config: PolicyModeConfig): void {
-    const idx = this.configs.findIndex(c => c.id === config.id);
+    const idx = this.configs.findIndex((c) => c.id === config.id);
     if (idx >= 0) {
       this.configs[idx] = config;
     } else {
@@ -70,7 +72,7 @@ export class PolicyModeRegistry {
   }
 
   unregister(id: string): boolean {
-    const idx = this.configs.findIndex(c => c.id === id);
+    const idx = this.configs.findIndex((c) => c.id === id);
     if (idx >= 0) {
       this.configs.splice(idx, 1);
       return true;
@@ -83,20 +85,24 @@ export class PolicyModeRegistry {
   }
 
   getById(id: string): PolicyModeConfig | undefined {
-    return this.configs.find(c => c.id === id);
+    return this.configs.find((c) => c.id === id);
   }
 
   /**
    * Resolve the effective PolicyModeConfig for a given (product, actionType, workspace) triple.
    * More specific matches (non-wildcard fields) take precedence.
    */
-  resolve(params: { product: string; actionType: string; workspace: string }): PolicyModeConfig | null {
-    const candidates = this.configs.filter(c => {
+  resolve(params: {
+    product: string;
+    actionType: string;
+    workspace: string;
+  }): PolicyModeConfig | null {
+    const candidates = this.configs.filter((c) => {
       const s = c.scope;
       return (
-        (s.product === "*" || s.product === params.product) &&
-        (s.actionType === "*" || s.actionType === params.actionType) &&
-        (s.workspace === "*" || s.workspace === params.workspace)
+        (s.product === '*' || s.product === params.product) &&
+        (s.actionType === '*' || s.actionType === params.actionType) &&
+        (s.workspace === '*' || s.workspace === params.workspace)
       );
     });
 
@@ -114,9 +120,9 @@ export class PolicyModeRegistry {
 
 function specificityScore(scope: PolicyModeScope): number {
   let score = 0;
-  if (scope.product !== "*") score++;
-  if (scope.actionType !== "*") score++;
-  if (scope.workspace !== "*") score++;
+  if (scope.product !== '*') score++;
+  if (scope.actionType !== '*') score++;
+  if (scope.workspace !== '*') score++;
   return score;
 }
 

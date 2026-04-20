@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 /* ─── Accessibility: Skip to content link ─── */
@@ -28,7 +28,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -153,27 +155,48 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @layer base {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 }
@@ -183,7 +206,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   background: var(--color-terra-bg);
   color: var(--color-terra-text);
   overflow-x: hidden;
@@ -195,8 +218,13 @@ body {
   background-size: 72px 72px;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
@@ -206,22 +234,34 @@ h1, h2, h3, h4, h5, h6 {
   color: #e8eaf0;
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--color-terra-bg); }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.12); }
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-terra-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 /* Deal pipeline card */
 .deal-card {
   background: var(--color-terra-surface);
   border: 1px solid var(--color-terra-border);
   border-radius: 6px;
-  transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease;
 }
 .deal-card:hover {
   border-color: var(--color-terra-border-hover);
   background: var(--color-terra-surface-hover);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.32);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.32);
 }
 
 /* KPI stat */
@@ -240,7 +280,7 @@ h1, h2, h3, h4, h5, h6 {
 .property-panel {
   background: var(--color-terra-surface);
   border: 1px solid var(--color-terra-border);
-  border-left: 2px solid rgba(45, 106, 79, 0.30);
+  border-left: 2px solid rgba(45, 106, 79, 0.3);
   border-radius: 6px;
   transition: border-left-color 0.18s ease;
 }
@@ -257,51 +297,121 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Status badges */
-.badge-active { background: rgba(45, 106, 79, 0.10); color: #40856a; border: 1px solid rgba(45, 106, 79, 0.22); }
-.badge-pending { background: rgba(154, 120, 64, 0.10); color: #b8943c; border: 1px solid rgba(154, 120, 64, 0.22); }
-.badge-closed { background: rgba(139, 42, 42, 0.10); color: #b85454; border: 1px solid rgba(139, 42, 42, 0.22); }
-.badge-under-contract { background: rgba(30, 107, 74, 0.10); color: #38876a; border: 1px solid rgba(30, 107, 74, 0.22); }
+.badge-active {
+  background: rgba(45, 106, 79, 0.1);
+  color: #40856a;
+  border: 1px solid rgba(45, 106, 79, 0.22);
+}
+.badge-pending {
+  background: rgba(154, 120, 64, 0.1);
+  color: #b8943c;
+  border: 1px solid rgba(154, 120, 64, 0.22);
+}
+.badge-closed {
+  background: rgba(139, 42, 42, 0.1);
+  color: #b85454;
+  border: 1px solid rgba(139, 42, 42, 0.22);
+}
+.badge-under-contract {
+  background: rgba(30, 107, 74, 0.1);
+  color: #38876a;
+  border: 1px solid rgba(30, 107, 74, 0.22);
+}
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes shimmer-terra {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
 }
 @keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 @keyframes pulse-dot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0.6; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
 }
 
-.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
-.animate-fade-in { animation: fade-in 0.3s ease-out both; }
-.animate-scale-in { animation: scale-in 0.3s ease-out both; }
-.animate-slide-in-right { animation: slide-in-right 0.25s ease-out both; }
-.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s ease-out both;
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out both;
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out both;
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
 
 .skeleton-terra {
-  background: linear-gradient(90deg, var(--color-terra-bg-secondary) 25%, rgba(255, 255, 255, 0.02) 50%, var(--color-terra-bg-secondary) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-terra-bg-secondary) 25%,
+    rgba(255, 255, 255, 0.02) 50%,
+    var(--color-terra-bg-secondary) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer-terra 1.8s ease-in-out infinite;
   border-radius: 4px;
 }
 
-.stagger-1 { animation-delay: 0.04s; }
-.stagger-2 { animation-delay: 0.08s; }
-.stagger-3 { animation-delay: 0.12s; }
-.stagger-4 { animation-delay: 0.16s; }
-.stagger-5 { animation-delay: 0.20s; }
-.stagger-6 { animation-delay: 0.24s; }
+.stagger-1 {
+  animation-delay: 0.04s;
+}
+.stagger-2 {
+  animation-delay: 0.08s;
+}
+.stagger-3 {
+  animation-delay: 0.12s;
+}
+.stagger-4 {
+  animation-delay: 0.16s;
+}
+.stagger-5 {
+  animation-delay: 0.2s;
+}
+.stagger-6 {
+  animation-delay: 0.24s;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

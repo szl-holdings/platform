@@ -1,6 +1,5 @@
-import * as React from "react";
-import { cn } from "../utils";
-import { toAlpha } from "../utils";
+import * as React from 'react';
+import { cn, toAlpha } from '../utils';
 
 export interface SidebarNavItem {
   id: string;
@@ -8,7 +7,7 @@ export interface SidebarNavItem {
   href?: string;
   icon?: React.ReactNode;
   badge?: string | number;
-  badgeVariant?: "default" | "danger" | "warning" | "success";
+  badgeVariant?: 'default' | 'danger' | 'warning' | 'success';
   children?: SidebarNavItem[];
   onClick?: () => void;
 }
@@ -32,9 +31,9 @@ export interface SidebarNavProps {
 
 export function SidebarNav({
   sections,
-  currentPath = "/",
+  currentPath = '/',
   collapsed = false,
-  accentColor = "hsl(215 45% 48%)",
+  accentColor = 'hsl(215 45% 48%)',
   onNavigate,
   className,
   footer,
@@ -52,26 +51,40 @@ export function SidebarNav({
   };
 
   const isActive = (item: SidebarNavItem) =>
-    item.href
-      ? currentPath === item.href || currentPath.startsWith(item.href + "/")
-      : false;
+    item.href ? currentPath === item.href || currentPath.startsWith(item.href + '/') : false;
 
   const renderItem = (item: SidebarNavItem, depth = 0) => {
     const active = isActive(item);
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expanded.has(item.id);
-    const Tag = item.href ? "a" : "button";
+    const Tag = item.href ? 'a' : 'button';
 
     const badgeStyle: React.CSSProperties = (() => {
       switch (item.badgeVariant) {
-        case "danger":
-          return { background: toAlpha("#ef4444", 0.13), color: "#f87171", border: `1px solid ${toAlpha("#ef4444", 0.22)}` };
-        case "warning":
-          return { background: toAlpha("#f59e0b", 0.13), color: "#fbbf24", border: `1px solid ${toAlpha("#f59e0b", 0.22)}` };
-        case "success":
-          return { background: toAlpha("#10b981", 0.13), color: "#34d399", border: `1px solid ${toAlpha("#10b981", 0.22)}` };
+        case 'danger':
+          return {
+            background: toAlpha('#ef4444', 0.13),
+            color: '#f87171',
+            border: `1px solid ${toAlpha('#ef4444', 0.22)}`,
+          };
+        case 'warning':
+          return {
+            background: toAlpha('#f59e0b', 0.13),
+            color: '#fbbf24',
+            border: `1px solid ${toAlpha('#f59e0b', 0.22)}`,
+          };
+        case 'success':
+          return {
+            background: toAlpha('#10b981', 0.13),
+            color: '#34d399',
+            border: `1px solid ${toAlpha('#10b981', 0.22)}`,
+          };
         default:
-          return { background: toAlpha("#ffffff", 0.07), color: "hsl(210 5% 50%)", border: `1px solid ${toAlpha("#ffffff", 0.09)}` };
+          return {
+            background: toAlpha('#ffffff', 0.07),
+            color: 'hsl(210 5% 50%)',
+            border: `1px solid ${toAlpha('#ffffff', 0.09)}`,
+          };
       }
     })();
 
@@ -92,23 +105,21 @@ export function SidebarNav({
             onNavigate?.(item);
           }}
           className={cn(
-            "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsla(210_60%_58%_/_0.4)]",
-            depth > 0 && "pl-8 text-xs",
-            active
-              ? "text-white/90"
-              : "text-white/45 hover:text-white/80 hover:bg-white/5"
+            'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsla(210_60%_58%_/_0.4)]',
+            depth > 0 && 'pl-8 text-xs',
+            active ? 'text-white/90' : 'text-white/45 hover:text-white/80 hover:bg-white/5',
           )}
           style={
             active
               ? {
-                  background: toAlpha(accentColor, 0.10),
+                  background: toAlpha(accentColor, 0.1),
                   border: `1px solid ${toAlpha(accentColor, 0.18)}`,
-                  borderRadius: "0.5rem",
+                  borderRadius: '0.5rem',
                 }
-              : { border: "1px solid transparent", borderRadius: "0.5rem" }
+              : { border: '1px solid transparent', borderRadius: '0.5rem' }
           }
-          aria-current={active ? "page" : undefined}
+          aria-current={active ? 'page' : undefined}
         >
           {item.icon && (
             <span
@@ -132,8 +143,8 @@ export function SidebarNav({
               {hasChildren && (
                 <span
                   className={cn(
-                    "shrink-0 text-white/30 transition-transform duration-200",
-                    isExpanded && "rotate-90"
+                    'shrink-0 text-white/30 transition-transform duration-200',
+                    isExpanded && 'rotate-90',
                   )}
                 >
                   ›
@@ -153,7 +164,7 @@ export function SidebarNav({
   };
 
   return (
-    <nav className={cn("flex flex-col h-full py-3", className)} aria-label="Sidebar">
+    <nav className={cn('flex flex-col h-full py-3', className)} aria-label="Sidebar">
       {header && <div className="px-3 mb-3">{header}</div>}
 
       <div className="flex-1 overflow-y-auto px-2 space-y-4">
@@ -164,17 +175,13 @@ export function SidebarNav({
                 {section.label}
               </p>
             )}
-            <ul className="space-y-0.5">
-              {section.items.map((item) => renderItem(item))}
-            </ul>
+            <ul className="space-y-0.5">{section.items.map((item) => renderItem(item))}</ul>
           </div>
         ))}
       </div>
 
       {footer && (
-        <div className={cn("px-2 pt-3 border-t border-white/6", collapsed && "px-1")}>
-          {footer}
-        </div>
+        <div className={cn('px-2 pt-3 border-t border-white/6', collapsed && 'px-1')}>{footer}</div>
       )}
     </nav>
   );

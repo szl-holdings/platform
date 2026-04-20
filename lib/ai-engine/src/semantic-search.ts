@@ -3,11 +3,11 @@
  * full-text, and metadata fusion using Reciprocal Rank Fusion (RRF).
  */
 
-import { generateEmbedding, toVectorLiteral } from "./embedding-pipeline.js";
-import type { RagSourceType, SensitivityLevel } from "./types.js";
+import { generateEmbedding, toVectorLiteral } from './embedding-pipeline.js';
+import type { RagSourceType, SensitivityLevel } from './types.js';
 
 async function getPool() {
-  const { pool } = await import("@szl-holdings/db");
+  const { pool } = await import('@szl-holdings/db');
   return pool;
 }
 
@@ -23,7 +23,7 @@ export interface SemanticSearchResult {
   score: number;
   vectorScore: number;
   textScore: number;
-  matchType: "semantic" | "keyword" | "hybrid";
+  matchType: 'semantic' | 'keyword' | 'hybrid';
   metadata: Record<string, unknown>;
   citationId?: string;
 }
@@ -49,7 +49,7 @@ export interface HybridSearchResponse {
   query: string;
   totalFound: number;
   latencyMs: number;
-  method: "semantic" | "keyword" | "hybrid";
+  method: 'semantic' | 'keyword' | 'hybrid';
   modelUsed?: string;
 }
 
@@ -114,39 +114,71 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
     minScore = 0.1,
     vectorWeight = 0.7,
     textWeight = 0.3,
-    sensitivityLevel = "restricted",
+    sensitivityLevel = 'restricted',
     tenantId,
   } = options;
 
   const pool = await getPool();
 
-  const SENSITIVITY_ORDER: SensitivityLevel[] = ["public", "internal", "confidential", "restricted"];
+  const SENSITIVITY_ORDER: SensitivityLevel[] = [
+    'public',
+    'internal',
+    'confidential',
+    'restricted',
+  ];
   const allowedLevels = SENSITIVITY_ORDER.slice(0, SENSITIVITY_ORDER.indexOf(sensitivityLevel) + 1);
 
-  let vectorResults: Array<{ id: string; content: string; source: string; sourceType: string; domain: string; metadata: Record<string, unknown>; score: number }> = [];
-  let textResults: Array<{ id: string; content: string; source: string; sourceType: string; domain: string; metadata: Record<string, unknown>; score: number }> = [];
+  let vectorResults: Array<{
+    id: string;
+    content: string;
+    source: string;
+    sourceType: string;
+    domain: string;
+    metadata: Record<string, unknown>;
+    score: number;
+  }> = [];
+  let textResults: Array<{
+    id: string;
+    content: string;
+    source: string;
+    sourceType: string;
+    domain: string;
+    metadata: Record<string, unknown>;
+    score: number;
+  }> = [];
   let modelUsed: string | undefined;
 
   try {
     const embedding = await generateEmbedding(query);
-    modelUsed = process.env["HF_EMBED_MODEL"] ?? "BAAI/bge-m3";
+    modelUsed = process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
 
     // A zero vector means the embedding provider failed (auth error, API down, etc.).
     // Running vector similarity on a zero query would return arbitrary low-quality
     // results rather than semantically relevant ones. Fall back to text-only mode.
     const isZeroQuery = embedding.length === 0 || embedding.every((v) => v === 0);
     if (isZeroQuery) {
-      console.warn(`[semantic-search] Zero query embedding for hybridSearch — falling back to text-only`);
-      throw new Error("zero-embedding-fallback");
+      console.warn(
+        `[semantic-search] Zero query embedding for hybridSearch — falling back to text-only`,
+      );
+      throw new Error('zero-embedding-fallback');
     }
 
     const vecParams: unknown[] = [toVectorLiteral(embedding), allowedLevels];
-    const vecConditions = ["sensitivity_level = ANY($2)", "embedding IS NOT NULL"];
+    const vecConditions = ['sensitivity_level = ANY($2)', 'embedding IS NOT NULL'];
     let vecP = 3;
-    if (domains?.length) { vecConditions.push(`domain = ANY($${vecP++})`); vecParams.push(domains); }
-    if (sourceTypes?.length) { vecConditions.push(`source_type = ANY($${vecP++})`); vecParams.push(sourceTypes); }
+    if (domains?.length) {
+      vecConditions.push(`domain = ANY($${vecP++})`);
+      vecParams.push(domains);
+    }
+    if (sourceTypes?.length) {
+      vecConditions.push(`source_type = ANY($${vecP++})`);
+      vecParams.push(sourceTypes);
+    }
     // Tenant isolation: restrict to chunks without an org context (shared) or matching the caller's org
-    if (tenantId) { vecConditions.push(`(metadata->>'orgId' IS NULL OR metadata->>'orgId' = $${vecP++})`); vecParams.push(tenantId); }
+    if (tenantId) {
+      vecConditions.push(`(metadata->>'orgId' IS NULL OR metadata->>'orgId' = $${vecP++})`);
+      vecParams.push(tenantId);
+    }
     if (options.metadataFilters && Object.keys(options.metadataFilters).length > 0) {
       vecConditions.push(`metadata @> $${vecP++}::jsonb`);
       vecParams.push(JSON.stringify(options.metadataFilters));
@@ -157,7 +189,7 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
       SELECT id, content, source, source_type, domain, metadata,
              1 - (embedding <=> $1::vector) AS score
       FROM rag_knowledge_chunks
-      WHERE ${vecConditions.join(" AND ")}
+      WHERE ${vecConditions.join(' AND ')}
       ORDER BY embedding <=> $1::vector
       LIMIT $${vecP}
     `;
@@ -173,19 +205,31 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
       score: parseFloat(String(r.score ?? 0)),
     }));
   } catch (err) {
-    console.warn("[semantic-search] Vector search failed:", err);
+    console.warn('[semantic-search] Vector search failed:', err);
   }
 
   try {
-    const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+    const queryWords = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 2);
     if (queryWords.length > 0) {
-      const tsQuery = queryWords.map((w) => `${w}:*`).join(" | ");
+      const tsQuery = queryWords.map((w) => `${w}:*`).join(' | ');
       const textParams: unknown[] = [allowedLevels];
-      const textConditions = ["sensitivity_level = ANY($1)"];
+      const textConditions = ['sensitivity_level = ANY($1)'];
       let txtP = 2;
-      if (domains?.length) { textConditions.push(`domain = ANY($${txtP++})`); textParams.push(domains); }
-      if (sourceTypes?.length) { textConditions.push(`source_type = ANY($${txtP++})`); textParams.push(sourceTypes); }
-      if (tenantId) { textConditions.push(`(metadata->>'orgId' IS NULL OR metadata->>'orgId' = $${txtP++})`); textParams.push(tenantId); }
+      if (domains?.length) {
+        textConditions.push(`domain = ANY($${txtP++})`);
+        textParams.push(domains);
+      }
+      if (sourceTypes?.length) {
+        textConditions.push(`source_type = ANY($${txtP++})`);
+        textParams.push(sourceTypes);
+      }
+      if (tenantId) {
+        textConditions.push(`(metadata->>'orgId' IS NULL OR metadata->>'orgId' = $${txtP++})`);
+        textParams.push(tenantId);
+      }
       if (options.metadataFilters && Object.keys(options.metadataFilters).length > 0) {
         textConditions.push(`metadata @> $${txtP++}::jsonb`);
         textParams.push(JSON.stringify(options.metadataFilters));
@@ -197,7 +241,7 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
         SELECT id, content, source, source_type, domain, metadata,
                ts_rank(to_tsvector('english', content), to_tsquery('english', $${txtP})) AS score
         FROM rag_knowledge_chunks
-        WHERE ${textConditions.join(" AND ")}
+        WHERE ${textConditions.join(' AND ')}
           AND to_tsvector('english', content) @@ to_tsquery('english', $${txtP})
         ORDER BY score DESC
         LIMIT $${txtP + 1}
@@ -215,15 +259,15 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
       }));
     }
   } catch (err) {
-    console.warn("[semantic-search] Text search failed:", err);
+    console.warn('[semantic-search] Text search failed:', err);
   }
 
   const hasVector = vectorResults.length > 0;
   const hasText = textResults.length > 0;
 
-  let method: "semantic" | "keyword" | "hybrid" = "hybrid";
-  if (hasVector && !hasText) method = "semantic";
-  else if (!hasVector && hasText) method = "keyword";
+  let method: 'semantic' | 'keyword' | 'hybrid' = 'hybrid';
+  if (hasVector && !hasText) method = 'semantic';
+  else if (!hasVector && hasText) method = 'keyword';
 
   const rrfScores = mergeWithRRF(
     vectorResults.map((r) => ({ id: r.id, score: r.score })),
@@ -242,7 +286,9 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
     .map(([id, scores]) => {
       const result = allResults.get(id);
       if (!result) return null;
-      const snippet = result.content.slice(0, 300).replace(/\s+/g, " ").trim() + (result.content.length > 300 ? "..." : "");
+      const snippet =
+        result.content.slice(0, 300).replace(/\s+/g, ' ').trim() +
+        (result.content.length > 300 ? '...' : '');
       return {
         id,
         title: (result.metadata?.title as string) || result.source || id,
@@ -295,7 +341,9 @@ export interface UnifiedSearchResult {
   latencyMs: number;
 }
 
-export async function unifiedSemanticSearch(options: UnifiedSearchOptions): Promise<UnifiedSearchResult> {
+export async function unifiedSemanticSearch(
+  options: UnifiedSearchOptions,
+): Promise<UnifiedSearchResult> {
   const startMs = Date.now();
   const pool = await getPool();
   const { query, domains, limit = 10, includeGraph = false, tenantId } = options;
@@ -308,7 +356,7 @@ export async function unifiedSemanticSearch(options: UnifiedSearchOptions): Prom
           if (embedding.length === 0) return [];
           // Guard: all-zero vector produces meaningless cosine similarity scores — skip.
           if (embedding.every((v) => v === 0)) return [];
-          const conditions = ["is_active = true", "embedding IS NOT NULL"];
+          const conditions = ['is_active = true', 'embedding IS NOT NULL'];
           const params: unknown[] = [toVectorLiteral(embedding)];
           let p = 2;
           if (domains?.length) {
@@ -323,7 +371,7 @@ export async function unifiedSemanticSearch(options: UnifiedSearchOptions): Prom
           const result = await pool.query(
             `SELECT id, name, entity_type, domain, 1 - (embedding <=> $1::vector) AS score
              FROM kg_entities
-             WHERE ${conditions.join(" AND ")}
+             WHERE ${conditions.join(' AND ')}
              ORDER BY embedding <=> $1::vector
              LIMIT $${params.length}`,
             params,
@@ -341,7 +389,7 @@ export async function unifiedSemanticSearch(options: UnifiedSearchOptions): Prom
 
   return {
     chunks: chunkResults?.results ?? [],
-    graphEntities: graphResults as UnifiedSearchResult["graphEntities"],
+    graphEntities: graphResults as UnifiedSearchResult['graphEntities'],
     totalFound: (chunkResults?.totalFound ?? 0) + ((graphResults as unknown[])?.length ?? 0),
     latencyMs: Date.now() - startMs,
   };
@@ -358,7 +406,10 @@ export async function buildVectorRAGContext(
     includeGraph?: boolean;
     tenantId?: string;
   } = {},
-): Promise<{ context: string; citations: Array<{ id: string; title: string; domain: string; score: number }> }> {
+): Promise<{
+  context: string;
+  citations: Array<{ id: string; title: string; domain: string; score: number }>;
+}> {
   const { domain, limit = 5, minScore = 0.05, includeGraph = false, tenantId } = options;
 
   const [chunkResults, graphResult] = await Promise.all([
@@ -370,16 +421,23 @@ export async function buildVectorRAGContext(
       tenantId,
     }),
     includeGraph
-      ? unifiedSemanticSearch({ query, domains: domain ? [domain] : undefined, limit, includeGraph: true, tenantId })
+      ? unifiedSemanticSearch({
+          query,
+          domains: domain ? [domain] : undefined,
+          limit,
+          includeGraph: true,
+          tenantId,
+        })
       : Promise.resolve(null),
   ]);
 
   if (chunkResults.results.length === 0 && !graphResult?.graphEntities?.length) {
-    return { context: "", citations: [] };
+    return { context: '', citations: [] };
   }
 
-  const parts = chunkResults.results.map((r, i) =>
-    `[${i + 1}] [${r.sourceType.toUpperCase()} | ${r.domain} | relevance: ${Math.round(r.score * 100)}%]\n**${r.title}**\n${r.snippet}`,
+  const parts = chunkResults.results.map(
+    (r, i) =>
+      `[${i + 1}] [${r.sourceType.toUpperCase()} | ${r.domain} | relevance: ${Math.round(r.score * 100)}%]\n**${r.title}**\n${r.snippet}`,
   );
 
   if (graphResult?.graphEntities?.length) {
@@ -390,8 +448,8 @@ export async function buildVectorRAGContext(
     parts.push(...graphParts);
   }
 
-  const method = `${chunkResults.method}${includeGraph ? "+graph" : ""}`;
-  const context = `## Retrieved Knowledge Context (${method})\n\n${parts.join("\n\n---\n\n")}`;
+  const method = `${chunkResults.method}${includeGraph ? '+graph' : ''}`;
+  const context = `## Retrieved Knowledge Context (${method})\n\n${parts.join('\n\n---\n\n')}`;
   const citations = chunkResults.results.map((r) => ({
     id: r.citationId ?? r.id,
     title: r.title,

@@ -1,5 +1,14 @@
-import { m } from "framer-motion";
-import { ArrowRight, AlertCircle, Layers, Zap, BarChart3, CheckCircle2, TrendingUp, HelpCircle } from "lucide-react";
+import { m } from 'framer-motion';
+import {
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  HelpCircle,
+  Layers,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
 
 export interface CaseStudySection {
   problem: string;
@@ -27,11 +36,21 @@ interface CaseStudyCardProps {
   index?: number;
 }
 
-function SectionLabel({ icon: Icon, label, color }: { icon: React.ElementType; label: string; color: string }) {
+function SectionLabel({
+  icon: Icon,
+  label,
+  color,
+}: {
+  icon: React.ElementType;
+  label: string;
+  color: string;
+}) {
   return (
     <div className="flex items-center gap-2 mb-3">
       <Icon className="w-4 h-4 shrink-0" style={{ color }} />
-      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color }}>
+        {label}
+      </span>
     </div>
   );
 }
@@ -46,14 +65,25 @@ export function CaseStudyCard({ study, index = 0 }: CaseStudyCardProps) {
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: `${study.productAccent}25`, background: "rgba(255,255,255,0.02)" }}
+      style={{ borderColor: `${study.productAccent}25`, background: 'rgba(255,255,255,0.02)' }}
     >
       <div className="px-6 pt-6 pb-4 border-b" style={{ borderColor: `${study.productAccent}15` }}>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border" style={{ color: study.productAccent, borderColor: `${study.productAccent}40`, background: `${study.productAccent}12` }}>{study.product}</span>
-              <span className="text-[10px] text-white/30 uppercase tracking-widest">{study.category}</span>
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
+                style={{
+                  color: study.productAccent,
+                  borderColor: `${study.productAccent}40`,
+                  background: `${study.productAccent}12`,
+                }}
+              >
+                {study.product}
+              </span>
+              <span className="text-[10px] text-white/30 uppercase tracking-widest">
+                {study.category}
+              </span>
             </div>
             <h3 className="text-lg font-bold text-white leading-snug">{study.title}</h3>
             <p className="text-sm text-white/50 mt-1">{study.subtitle}</p>
@@ -85,7 +115,13 @@ export function CaseStudyCard({ study, index = 0 }: CaseStudyCardProps) {
           </ul>
         </div>
 
-        <div className="rounded-xl p-4 border bg-white/2" style={{ borderColor: `${study.productAccent}20`, background: `${study.productAccent}06` }}>
+        <div
+          className="rounded-xl p-4 border bg-white/2"
+          style={{
+            borderColor: `${study.productAccent}20`,
+            background: `${study.productAccent}06`,
+          }}
+        >
           <SectionLabel icon={Zap} label="System Built" color={study.productAccent} />
           <p className="text-sm text-white/70 leading-relaxed">{sections.systemBuilt}</p>
         </div>
@@ -95,7 +131,12 @@ export function CaseStudyCard({ study, index = 0 }: CaseStudyCardProps) {
           <ol className="space-y-2">
             {sections.howItWorked.map((step, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-white/65">
-                <span className="mt-0.5 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: `${study.productAccent}20`, color: study.productAccent }}>{i + 1}</span>
+                <span
+                  className="mt-0.5 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: `${study.productAccent}20`, color: study.productAccent }}
+                >
+                  {i + 1}
+                </span>
                 {step}
               </li>
             ))}
@@ -112,8 +153,17 @@ export function CaseStudyCard({ study, index = 0 }: CaseStudyCardProps) {
             <SectionLabel icon={BarChart3} label="Visual Proof" color="rgba(255,255,255,0.4)" />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-1">
               {sections.visualProof.map((item, i) => (
-                <div key={i} className="rounded-lg p-3 text-center border" style={{ borderColor: `${study.productAccent}20`, background: `${study.productAccent}08` }}>
-                  <div className="text-xl font-bold" style={{ color: study.productAccent }}>{item.value}</div>
+                <div
+                  key={i}
+                  className="rounded-lg p-3 text-center border"
+                  style={{
+                    borderColor: `${study.productAccent}20`,
+                    background: `${study.productAccent}08`,
+                  }}
+                >
+                  <div className="text-xl font-bold" style={{ color: study.productAccent }}>
+                    {item.value}
+                  </div>
                   <div className="text-[10px] font-medium text-white/60 mt-0.5">{item.label}</div>
                   {item.sub && <div className="text-[9px] text-white/35 mt-0.5">{item.sub}</div>}
                 </div>
@@ -122,9 +172,20 @@ export function CaseStudyCard({ study, index = 0 }: CaseStudyCardProps) {
           </div>
         )}
 
-        <div className="rounded-xl p-4 border" style={{ borderColor: `${study.productAccent}25`, background: `${study.productAccent}10` }}>
+        <div
+          className="rounded-xl p-4 border"
+          style={{
+            borderColor: `${study.productAccent}25`,
+            background: `${study.productAccent}10`,
+          }}
+        >
           <SectionLabel icon={HelpCircle} label="Why It Matters" color={study.productAccent} />
-          <p className="text-sm leading-relaxed font-medium" style={{ color: `${study.productAccent}cc` }}>{sections.whyItMatters}</p>
+          <p
+            className="text-sm leading-relaxed font-medium"
+            style={{ color: `${study.productAccent}cc` }}
+          >
+            {sections.whyItMatters}
+          </p>
         </div>
       </div>
     </m.article>

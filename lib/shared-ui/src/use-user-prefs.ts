@@ -14,12 +14,12 @@
  * can read or write without wrapping the tree in a provider.
  */
 
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
-const STORAGE_KEY = "szl:user-prefs";
-const NAMESPACE = "ui-prefs";
-const RESOLVE_PATH = "/api/settings/resolve?namespace=ui-prefs";
-const WRITE_PATH = "/api/settings/user";
+const STORAGE_KEY = 'szl:user-prefs';
+const NAMESPACE = 'ui-prefs';
+const RESOLVE_PATH = '/api/settings/resolve?namespace=ui-prefs';
+const WRITE_PATH = '/api/settings/user';
 
 export interface UserPrefs {
   sidebarCollapsed: boolean;
@@ -33,7 +33,7 @@ const DEFAULTS: UserPrefs = {
 };
 
 function readLocal(): UserPrefs {
-  if (typeof window === "undefined") return { ...DEFAULTS };
+  if (typeof window === 'undefined') return { ...DEFAULTS };
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULTS };
@@ -45,7 +45,7 @@ function readLocal(): UserPrefs {
 }
 
 function writeLocal(prefs: UserPrefs): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
   } catch {
@@ -81,9 +81,9 @@ function getServerSnapshot(): UserPrefs {
 }
 
 function getCsrfToken(): string {
-  if (typeof document === "undefined") return "";
+  if (typeof document === 'undefined') return '';
   const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-  return m ? decodeURIComponent(m[1]!) : "";
+  return m ? decodeURIComponent(m[1]!) : '';
 }
 
 async function hydrateFromServer(): Promise<void> {
@@ -92,7 +92,7 @@ async function hydrateFromServer(): Promise<void> {
   hydrationStartedAt = Date.now();
   hydrationPromise = (async () => {
     try {
-      const res = await fetch(RESOLVE_PATH, { credentials: "include" });
+      const res = await fetch(RESOLVE_PATH, { credentials: 'include' });
       if (!res.ok) return;
       const json = (await res.json()) as {
         data?: { settings?: Array<{ key: string; value: unknown }> };
@@ -125,11 +125,11 @@ async function hydrateFromServer(): Promise<void> {
   return hydrationPromise;
 }
 
-function valueTypeOf(value: unknown): "boolean" | "number" | "string" | "json" {
-  if (typeof value === "boolean") return "boolean";
-  if (typeof value === "number") return "number";
-  if (typeof value === "string") return "string";
-  return "json";
+function valueTypeOf(value: unknown): 'boolean' | 'number' | 'string' | 'json' {
+  if (typeof value === 'boolean') return 'boolean';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'string') return 'string';
+  return 'json';
 }
 
 function pushToServer(key: string, value: unknown): void {
@@ -152,11 +152,11 @@ function pushToServer(key: string, value: unknown): void {
 async function doPush(key: string, value: unknown): Promise<void> {
   try {
     await fetch(WRITE_PATH, {
-      method: "POST",
-      credentials: "include",
+      method: 'POST',
+      credentials: 'include',
       headers: {
-        "Content-Type": "application/json",
-        "x-csrf-token": getCsrfToken(),
+        'Content-Type': 'application/json',
+        'x-csrf-token': getCsrfToken(),
       },
       body: JSON.stringify({
         namespace: NAMESPACE,
@@ -200,9 +200,9 @@ export function useUserPref<K extends keyof UserPrefs>(
 }
 
 export function useSidebarCollapsed(): [boolean, (v: boolean) => void] {
-  return useUserPref("sidebarCollapsed");
+  return useUserPref('sidebarCollapsed');
 }
 
 export function useNotificationSound(): [boolean, (v: boolean) => void] {
-  return useUserPref("notificationSound");
+  return useUserPref('notificationSound');
 }

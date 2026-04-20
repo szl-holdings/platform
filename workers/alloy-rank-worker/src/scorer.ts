@@ -1,4 +1,4 @@
-export type RankMode = "cross-encoder" | "fallback-inversion";
+export type RankMode = 'cross-encoder' | 'fallback-inversion';
 
 export interface RankCandidate {
   id: string;
@@ -23,10 +23,16 @@ export interface RankedResult {
 }
 
 function tokenize(s: string): string[] {
-  return s.toLowerCase().split(/\W+/).filter((t) => t.length > 0);
+  return s
+    .toLowerCase()
+    .split(/\W+/)
+    .filter((t) => t.length > 0);
 }
 
-function crossEncoderScore(query: string, text: string): {
+function crossEncoderScore(
+  query: string,
+  text: string,
+): {
   score: number;
   hits: number;
   total: number;
@@ -62,15 +68,20 @@ export function rankCandidates(
   topK: number,
   mode: RankMode,
 ): RankedResult[] {
-  const scored = candidates.map((c): Omit<RankedResult, "rank"> => {
-    if (mode === "cross-encoder") {
+  const scored = candidates.map((c): Omit<RankedResult, 'rank'> => {
+    if (mode === 'cross-encoder') {
       const { score, hits, total, lengthPenalty } = crossEncoderScore(query, c.text);
       return {
         id: c.id,
         text: c.text,
         score,
         mode,
-        breakdown: { rawScore: score, queryTermHits: hits, queryTermTotal: total, textLengthPenalty: lengthPenalty },
+        breakdown: {
+          rawScore: score,
+          queryTermHits: hits,
+          queryTermTotal: total,
+          textLengthPenalty: lengthPenalty,
+        },
         metadata: c.metadata ?? {},
       };
     } else {

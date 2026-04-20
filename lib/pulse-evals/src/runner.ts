@@ -1,12 +1,12 @@
+import { ALL_DATASETS, DOMAIN_DATASETS } from './golden-datasets.js';
 import type {
-  GoldenDatasetCase,
-  EvalCaseResult,
-  EvalSuiteReport,
   EvalAssertion,
+  EvalCaseResult,
   EvalDomain,
+  EvalSuiteReport,
+  GoldenDatasetCase,
   PulseEvalConfig,
-} from "./types.js";
-import { ALL_DATASETS, DOMAIN_DATASETS } from "./golden-datasets.js";
+} from './types.js';
 
 type EvalExecutor = (
   input: string | Record<string, unknown>,
@@ -21,13 +21,13 @@ type EvalExecutor = (
 }>;
 
 function getNestedField(obj: Record<string, unknown>, field: string): unknown {
-  const parts = field.split(".");
+  const parts = field.split('.');
   let current: unknown = obj;
   for (const part of parts) {
-    if (current == null || typeof current !== "object") return undefined;
+    if (current == null || typeof current !== 'object') return undefined;
     const idx = part.match(/\[(\d+)\]/);
     if (idx) {
-      const arrKey = part.replace(/\[\d+\]/, "");
+      const arrKey = part.replace(/\[\d+\]/, '');
       const arr = (current as Record<string, unknown>)[arrKey];
       if (Array.isArray(arr)) {
         current = arr[parseInt(idx[1], 10)];
@@ -47,34 +47,56 @@ function checkAssertion(
 ): { passed: boolean; actual: unknown } {
   const actual = getNestedField(output, assertion.field);
   switch (assertion.operator) {
-    case "equals":
+    case 'equals':
       return { passed: actual === assertion.value, actual };
-    case "contains":
-      return { passed: typeof actual === "string" && actual.includes(assertion.value as string), actual };
-    case "not_contains":
-      return { passed: typeof actual !== "string" || !actual.includes(assertion.value as string), actual };
-    case "exists":
-      return { passed: actual !== undefined && actual !== null, actual };
-    case "not_exists":
-      return { passed: actual === undefined || actual === null, actual };
-    case "gt":
-      return { passed: typeof actual === "number" && actual > (assertion.value as number), actual };
-    case "lt":
-      return { passed: typeof actual === "number" && actual < (assertion.value as number), actual };
-    case "gte":
-      return { passed: typeof actual === "number" && actual >= (assertion.value as number), actual };
-    case "lte":
-      return { passed: typeof actual === "number" && actual <= (assertion.value as number), actual };
-    case "oneOf":
-      return { passed: Array.isArray(assertion.value) && (assertion.value as unknown[]).includes(actual), actual };
-    case "notEmpty":
+    case 'contains':
       return {
-        passed: Array.isArray(actual) ? actual.length > 0 : typeof actual === "string" ? actual.length > 0 : actual != null,
+        passed: typeof actual === 'string' && actual.includes(assertion.value as string),
         actual,
       };
-    case "within_range": {
+    case 'not_contains':
+      return {
+        passed: typeof actual !== 'string' || !actual.includes(assertion.value as string),
+        actual,
+      };
+    case 'exists':
+      return { passed: actual !== undefined && actual !== null, actual };
+    case 'not_exists':
+      return { passed: actual === undefined || actual === null, actual };
+    case 'gt':
+      return { passed: typeof actual === 'number' && actual > (assertion.value as number), actual };
+    case 'lt':
+      return { passed: typeof actual === 'number' && actual < (assertion.value as number), actual };
+    case 'gte':
+      return {
+        passed: typeof actual === 'number' && actual >= (assertion.value as number),
+        actual,
+      };
+    case 'lte':
+      return {
+        passed: typeof actual === 'number' && actual <= (assertion.value as number),
+        actual,
+      };
+    case 'oneOf':
+      return {
+        passed: Array.isArray(assertion.value) && (assertion.value as unknown[]).includes(actual),
+        actual,
+      };
+    case 'notEmpty':
+      return {
+        passed: Array.isArray(actual)
+          ? actual.length > 0
+          : typeof actual === 'string'
+            ? actual.length > 0
+            : actual != null,
+        actual,
+      };
+    case 'within_range': {
       const range = assertion.value as { min: number; max: number };
-      return { passed: typeof actual === "number" && actual >= range.min && actual <= range.max, actual };
+      return {
+        passed: typeof actual === 'number' && actual >= range.min && actual <= range.max,
+        actual,
+      };
     }
     default:
       return { passed: false, actual };
@@ -104,29 +126,29 @@ export async function runPulseEvals(
     caseIds,
     includeRedTeam = true,
     suiteId = `pulse_eval_${Date.now()}`,
-    suiteName = "PULSE EVALS — Full Suite",
+    suiteName = 'PULSE EVALS — Full Suite',
     config = {},
   } = options;
 
   let cases: GoldenDatasetCase[] = ALL_DATASETS;
 
   if (domains?.length) {
-    cases = cases.filter(c => domains.includes(c.domain));
+    cases = cases.filter((c) => domains.includes(c.domain));
   }
 
   if (caseIds?.length) {
-    cases = cases.filter(c => caseIds.includes(c.id));
+    cases = cases.filter((c) => caseIds.includes(c.id));
   }
 
   if (!includeRedTeam) {
-    cases = cases.filter(c => !c.isRedTeam);
+    cases = cases.filter((c) => !c.isRedTeam);
   }
 
   const results: EvalCaseResult[] = [];
   let totalLatency = 0;
   let totalTokens = 0;
   let totalCost = 0;
-  let topModel = "unknown";
+  let topModel = 'unknown';
 
   for (const evalCase of cases) {
     try {
@@ -141,12 +163,12 @@ export async function runPulseEvals(
       totalTokens += tokensUsed ?? 0;
       totalCost += costUsd ?? 0;
 
-      const assertionResults = evalCase.assertions.map(assertion => {
+      const assertionResults = evalCase.assertions.map((assertion) => {
         const { passed, actual } = checkAssertion(output, assertion);
         return {
           field: assertion.field,
           operator: assertion.operator,
-          expected: assertion.value ?? "exists",
+          expected: assertion.value ?? 'exists',
           actual,
           passed,
           description: assertion.description,
@@ -159,7 +181,7 @@ export async function runPulseEvals(
         caseId: evalCase.id,
         domain: evalCase.domain,
         isRedTeam: evalCase.isRedTeam ?? false,
-        passed: assertionResults.every(a => a.passed),
+        passed: assertionResults.every((a) => a.passed),
         score,
         assertions: assertionResults,
         model,
@@ -176,16 +198,16 @@ export async function runPulseEvals(
         passed: false,
         score: 0,
         assertions: [],
-        model: "error",
+        model: 'error',
         latencyMs: 0,
         error: err instanceof Error ? err.message : String(err),
       });
     }
   }
 
-  const passed = results.filter(r => r.passed).length;
+  const passed = results.filter((r) => r.passed).length;
 
-  const domainForReport = domains?.length === 1 ? domains[0] : "ranking";
+  const domainForReport = domains?.length === 1 ? domains[0] : 'ranking';
 
   return {
     suiteId,
@@ -224,10 +246,10 @@ export async function runRedTeamEvals(
   options?: { suiteId?: string; config?: PulseEvalConfig },
 ): Promise<EvalSuiteReport> {
   return runPulseEvals(executor, {
-    domains: ["red_team"],
+    domains: ['red_team'],
     includeRedTeam: true,
     suiteId: options?.suiteId ?? `pulse_redteam_${Date.now()}`,
-    suiteName: "PULSE EVALS — Red Team Suite",
+    suiteName: 'PULSE EVALS — Red Team Suite',
     config: options?.config,
   });
 }

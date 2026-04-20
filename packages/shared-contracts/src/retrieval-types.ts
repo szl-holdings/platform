@@ -5,8 +5,8 @@
  * and chunk metadata.
  */
 
-export type RetrievalStrategy = "semantic" | "keyword" | "hybrid" | "graph" | "structured";
-export type RerankerType = "cross-encoder" | "reciprocal-rank-fusion" | "score-threshold" | "none";
+export type RetrievalStrategy = 'semantic' | 'keyword' | 'hybrid' | 'graph' | 'structured';
+export type RerankerType = 'cross-encoder' | 'reciprocal-rank-fusion' | 'score-threshold' | 'none';
 
 export interface RetrievalQuery {
   queryId: string;
@@ -55,6 +55,6 @@ export interface IndexHealthReport {
     coveragePercent?: number;
     staleChunkCount?: number;
   }>;
-  overallStatus: "healthy" | "degraded" | "critical";
+  overallStatus: 'healthy' | 'degraded' | 'critical';
   generatedAt: string;
 }

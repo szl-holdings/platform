@@ -1,31 +1,31 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from 'vitest';
 import {
-  computeCorrectnessMetrics,
-  computeEvidenceQualityMetrics,
-  computeConfidenceCalibration,
-  computeLatencyMetrics,
-  computeCostMetrics,
-  computeInterventionValueMetrics,
-  computeHumanOverrideMetrics,
-  computeRollbackMetrics,
-  computePolicyViolationMetrics,
   computeAllMetrics,
-} from "../metrics.js";
-import type { EvalCaseResult } from "../types.js";
+  computeConfidenceCalibration,
+  computeCorrectnessMetrics,
+  computeCostMetrics,
+  computeEvidenceQualityMetrics,
+  computeHumanOverrideMetrics,
+  computeInterventionValueMetrics,
+  computeLatencyMetrics,
+  computePolicyViolationMetrics,
+  computeRollbackMetrics,
+} from '../metrics.js';
+import type { EvalCaseResult } from '../types.js';
 
 function makeResult(overrides: Partial<EvalCaseResult> = {}): EvalCaseResult {
   return {
-    caseId: "test-001",
-    domain: "test",
-    label: "Test case",
-    evalType: "prompt-eval",
-    graderType: "exact-match",
+    caseId: 'test-001',
+    domain: 'test',
+    label: 'Test case',
+    evalType: 'prompt-eval',
+    graderType: 'exact-match',
     input: {},
     output: {},
     groundTruth: {},
     passed: true,
     score: 0.9,
-    expectedOutcome: "pass",
+    expectedOutcome: 'pass',
     latencyMs: 100,
     tokensUsed: 500,
     costUsd: 0.001,
@@ -33,8 +33,8 @@ function makeResult(overrides: Partial<EvalCaseResult> = {}): EvalCaseResult {
   };
 }
 
-describe("computeCorrectnessMetrics", () => {
-  it("computes pass rate and average score", () => {
+describe('computeCorrectnessMetrics', () => {
+  it('computes pass rate and average score', () => {
     const results = [
       makeResult({ passed: true, score: 1.0 }),
       makeResult({ passed: false, score: 0.4 }),
@@ -48,7 +48,7 @@ describe("computeCorrectnessMetrics", () => {
     expect(m.total).toBe(3);
   });
 
-  it("handles empty results", () => {
+  it('handles empty results', () => {
     const m = computeCorrectnessMetrics([]);
     expect(m.passRate).toBe(0);
     expect(m.avgScore).toBe(0);
@@ -56,11 +56,11 @@ describe("computeCorrectnessMetrics", () => {
   });
 });
 
-describe("computeEvidenceQualityMetrics", () => {
-  it("computes citation coverage score", () => {
+describe('computeEvidenceQualityMetrics', () => {
+  it('computes citation coverage score', () => {
     const results = [
       makeResult({
-        output: { citations: ["a", "b", "c"], citationAccuracy: 0.9, sourceVerified: true },
+        output: { citations: ['a', 'b', 'c'], citationAccuracy: 0.9, sourceVerified: true },
         groundTruth: { minCitations: 2 },
       }),
     ];
@@ -70,15 +70,15 @@ describe("computeEvidenceQualityMetrics", () => {
     expect(m.score).toBeGreaterThan(0.5);
   });
 
-  it("handles zero citations", () => {
+  it('handles zero citations', () => {
     const m = computeEvidenceQualityMetrics([makeResult({ output: {}, groundTruth: {} })]);
     expect(m.totalCitations).toBe(0);
     expect(m.score).toBeGreaterThanOrEqual(0);
   });
 });
 
-describe("computeConfidenceCalibration", () => {
-  it("computes brier score and calibration error", () => {
+describe('computeConfidenceCalibration', () => {
+  it('computes brier score and calibration error', () => {
     const results = [
       makeResult({ passed: true, output: { confidence: 0.9 } }),
       makeResult({ passed: false, output: { confidence: 0.1 } }),
@@ -88,33 +88,31 @@ describe("computeConfidenceCalibration", () => {
     expect(m.score).toBeGreaterThan(0.5);
   });
 
-  it("handles empty results", () => {
+  it('handles empty results', () => {
     const m = computeConfidenceCalibration([]);
     expect(m.brierScore).toBe(0);
     expect(m.score).toBe(1);
   });
 });
 
-describe("computeLatencyMetrics", () => {
-  it("computes percentiles correctly", () => {
-    const results = [100, 200, 300, 400, 500].map((ms) =>
-      makeResult({ latencyMs: ms }),
-    );
+describe('computeLatencyMetrics', () => {
+  it('computes percentiles correctly', () => {
+    const results = [100, 200, 300, 400, 500].map((ms) => makeResult({ latencyMs: ms }));
     const m = computeLatencyMetrics(results);
     expect(m.avgLatencyMs).toBe(300);
     expect(m.p50LatencyMs).toBe(300);
     expect(m.maxLatencyMs).toBe(500);
   });
 
-  it("handles empty results", () => {
+  it('handles empty results', () => {
     const m = computeLatencyMetrics([]);
     expect(m.avgLatencyMs).toBe(0);
     expect(m.p95LatencyMs).toBe(0);
   });
 });
 
-describe("computeCostMetrics", () => {
-  it("computes total and per-outcome costs", () => {
+describe('computeCostMetrics', () => {
+  it('computes total and per-outcome costs', () => {
     const results = [
       makeResult({ costUsd: 0.001, tokensUsed: 100, passed: true }),
       makeResult({ costUsd: 0.002, tokensUsed: 200, passed: true }),
@@ -127,10 +125,10 @@ describe("computeCostMetrics", () => {
   });
 });
 
-describe("computeInterventionValueMetrics", () => {
-  it("counts interventions from tags", () => {
+describe('computeInterventionValueMetrics', () => {
+  it('counts interventions from tags', () => {
     const results = [
-      makeResult({ tags: ["intervened"], passed: true }),
+      makeResult({ tags: ['intervened'], passed: true }),
       makeResult({ passed: false }),
     ];
     const m = computeInterventionValueMetrics(results);
@@ -139,8 +137,8 @@ describe("computeInterventionValueMetrics", () => {
   });
 });
 
-describe("computeHumanOverrideMetrics", () => {
-  it("counts overrides based on score threshold", () => {
+describe('computeHumanOverrideMetrics', () => {
+  it('counts overrides based on score threshold', () => {
     const results = [
       makeResult({ passed: false, score: 0.3 }),
       makeResult({ passed: true, score: 0.9 }),
@@ -151,10 +149,10 @@ describe("computeHumanOverrideMetrics", () => {
   });
 });
 
-describe("computeRollbackMetrics", () => {
-  it("counts rollbacks from tags", () => {
+describe('computeRollbackMetrics', () => {
+  it('counts rollbacks from tags', () => {
     const results = [
-      makeResult({ tags: ["rollback"], latencyMs: 200 }),
+      makeResult({ tags: ['rollback'], latencyMs: 200 }),
       makeResult({ passed: true }),
     ];
     const m = computeRollbackMetrics(results);
@@ -163,14 +161,14 @@ describe("computeRollbackMetrics", () => {
   });
 });
 
-describe("computePolicyViolationMetrics", () => {
-  it("detects violations from output fields", () => {
+describe('computePolicyViolationMetrics', () => {
+  it('detects violations from output fields', () => {
     const results = [
       makeResult({
         passed: false,
         score: 0.1,
-        output: { policyViolation: "unsafe_action" },
-        tags: ["policy:no-delete"],
+        output: { policyViolation: 'unsafe_action' },
+        tags: ['policy:no-delete'],
       }),
       makeResult({ passed: true, score: 0.9, output: {} }),
     ];
@@ -180,18 +178,18 @@ describe("computePolicyViolationMetrics", () => {
   });
 });
 
-describe("computeAllMetrics", () => {
-  it("returns all 9 metric categories", () => {
+describe('computeAllMetrics', () => {
+  it('returns all 9 metric categories', () => {
     const results = [makeResult(), makeResult({ passed: false, score: 0.4 })];
     const m = computeAllMetrics(results);
-    expect(m).toHaveProperty("correctness");
-    expect(m).toHaveProperty("evidenceQuality");
-    expect(m).toHaveProperty("confidenceCalibration");
-    expect(m).toHaveProperty("latency");
-    expect(m).toHaveProperty("cost");
-    expect(m).toHaveProperty("interventionValue");
-    expect(m).toHaveProperty("humanOverrideRate");
-    expect(m).toHaveProperty("rollbackRate");
-    expect(m).toHaveProperty("policyViolations");
+    expect(m).toHaveProperty('correctness');
+    expect(m).toHaveProperty('evidenceQuality');
+    expect(m).toHaveProperty('confidenceCalibration');
+    expect(m).toHaveProperty('latency');
+    expect(m).toHaveProperty('cost');
+    expect(m).toHaveProperty('interventionValue');
+    expect(m).toHaveProperty('humanOverrideRate');
+    expect(m).toHaveProperty('rollbackRate');
+    expect(m).toHaveProperty('policyViolations');
   });
 });

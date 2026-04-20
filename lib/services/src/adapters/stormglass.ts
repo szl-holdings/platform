@@ -1,4 +1,4 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface MarineWeather {
   latitude: number;
@@ -25,17 +25,17 @@ const MOCK_MARINE: MarineWeather[] = [
 ];
 
 export class StormGlassAdapter extends ServiceAdapter {
-  readonly name = "stormglass";
-  readonly description = "StormGlass marine weather and ocean data";
-  readonly requiredEnvVars = ["STORMGLASS_API_KEY"];
+  readonly name = 'stormglass';
+  readonly description = 'StormGlass marine weather and ocean data';
+  readonly requiredEnvVars = ['STORMGLASS_API_KEY'];
 
   private get apiKey(): string | undefined {
-    return process.env["STORMGLASS_API_KEY"];
+    return process.env['STORMGLASS_API_KEY'];
   }
 
   protected async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
-    if (!result.connected) throw new Error("StormGlass connection verification failed");
+    if (!result.connected) throw new Error('StormGlass connection verification failed');
   }
 
   async testConnection(): Promise<{ connected: boolean }> {
@@ -56,7 +56,7 @@ export class StormGlassAdapter extends ServiceAdapter {
       return MOCK_MARINE.map((m) => ({ ...m, latitude: lat, longitude: lng }));
     }
     try {
-      const params = "waveHeight,wavePeriod,windSpeed,windDirection,waterTemperature";
+      const params = 'waveHeight,wavePeriod,windSpeed,windDirection,waterTemperature';
       const response = await fetch(
         `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${params}`,
         { headers: { Authorization: this.apiKey! } },

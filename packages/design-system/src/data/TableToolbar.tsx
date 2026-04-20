@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface TableToolbarProps {
   totalCount?: number;
@@ -21,11 +21,11 @@ export function TableToolbar({
 }: TableToolbarProps) {
   return (
     <div
-      className={cn("flex items-center gap-3 px-4 border-b", className)}
-      style={{ height: "40px", background: color.bg.surface, borderColor: color.border.subtle }}
+      className={cn('flex items-center gap-3 px-4 border-b', className)}
+      style={{ height: '40px', background: color.bg.surface, borderColor: color.border.subtle }}
     >
       {totalCount !== undefined && (
-        <span style={{ color: color.text.muted, fontSize: "12px" }}>
+        <span style={{ color: color.text.muted, fontSize: '12px' }}>
           {selectedCount !== undefined && selectedCount > 0
             ? `${selectedCount} of ${totalCount} selected`
             : `${totalCount} rows`}
@@ -39,11 +39,11 @@ export function TableToolbar({
             onClick={onRefresh}
             className="rounded px-2 text-xs transition-colors"
             style={{
-              height: "28px",
+              height: '28px',
               color: color.text.secondary,
-              background: "transparent",
-              cursor: "pointer",
-              border: "none",
+              background: 'transparent',
+              cursor: 'pointer',
+              border: 'none',
             }}
           >
             Refresh
@@ -55,11 +55,11 @@ export function TableToolbar({
             onClick={onExport}
             className="rounded px-2 text-xs transition-colors"
             style={{
-              height: "28px",
+              height: '28px',
               color: color.text.secondary,
-              background: "transparent",
-              cursor: "pointer",
-              border: "none",
+              background: 'transparent',
+              cursor: 'pointer',
+              border: 'none',
             }}
           >
             Export

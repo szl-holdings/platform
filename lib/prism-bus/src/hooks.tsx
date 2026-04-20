@@ -1,42 +1,42 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PrismBusEvent, PrismBusEventType } from './bus.js';
+import { prismBus } from './bus.js';
+import type { PrismToolDescriptor } from './connectors.js';
+import { prismConnectorRegistry } from './connectors.js';
 import type {
-  UserContext,
-  TenantContext,
   DomainContext,
   PrismContextBundle,
   PrismDomain,
-} from "./context.js";
-import type { PrismBusEvent, PrismBusEventType } from "./bus.js";
-import { prismBus } from "./bus.js";
-import { prismConnectorRegistry } from "./connectors.js";
-import type { PrismToolDescriptor } from "./connectors.js";
+  TenantContext,
+  UserContext,
+} from './context.js';
 
 export interface UsePrismContextReturn {
   context: PrismContextBundle;
   setUser: (user: UserContext | null) => void;
   setTenant: (tenant: TenantContext | null) => void;
   setDomain: (domain: DomainContext | null) => void;
-  publishEvent: (event: Omit<PrismBusEvent, "id" | "timestamp">) => Promise<PrismBusEvent>;
+  publishEvent: (event: Omit<PrismBusEvent, 'id' | 'timestamp'>) => Promise<PrismBusEvent>;
 }
 
 export function usePrismContext(initialContext: PrismContextBundle = {}): UsePrismContextReturn {
   const [context, setContext] = useState<PrismContextBundle>(initialContext);
 
   const setUser = useCallback((user: UserContext | null) => {
-    setContext(prev => ({ ...prev, user }));
+    setContext((prev) => ({ ...prev, user }));
   }, []);
 
   const setTenant = useCallback((tenant: TenantContext | null) => {
-    setContext(prev => ({ ...prev, tenant }));
+    setContext((prev) => ({ ...prev, tenant }));
   }, []);
 
   const setDomain = useCallback((domain: DomainContext | null) => {
-    setContext(prev => ({ ...prev, domain }));
+    setContext((prev) => ({ ...prev, domain }));
   }, []);
 
   const publishEvent = useCallback(
-    (event: Omit<PrismBusEvent, "id" | "timestamp">) => prismBus.publish(event),
-    []
+    (event: Omit<PrismBusEvent, 'id' | 'timestamp'>) => prismBus.publish(event),
+    [],
   );
 
   return { context, setUser, setTenant, setDomain, publishEvent };
@@ -45,18 +45,18 @@ export function usePrismContext(initialContext: PrismContextBundle = {}): UsePri
 export interface UsePrismBusReturn {
   events: PrismBusEvent[];
   subscribe: (
-    types: PrismBusEventType[] | "*",
+    types: PrismBusEventType[] | '*',
     handler: (event: PrismBusEvent) => void,
-    domains?: PrismDomain[] | "*"
+    domains?: PrismDomain[] | '*',
   ) => () => void;
-  publishEvent: (event: Omit<PrismBusEvent, "id" | "timestamp">) => Promise<PrismBusEvent>;
+  publishEvent: (event: Omit<PrismBusEvent, 'id' | 'timestamp'>) => Promise<PrismBusEvent>;
   stats: ReturnType<typeof prismBus.getStats>;
 }
 
 export function usePrismBus(
   subscriberId: string,
-  watchTypes?: PrismBusEventType[] | "*",
-  watchDomains?: PrismDomain[] | "*"
+  watchTypes?: PrismBusEventType[] | '*',
+  watchDomains?: PrismDomain[] | '*',
 ): UsePrismBusReturn {
   const [events, setEvents] = useState<PrismBusEvent[]>([]);
   const unsubRef = useRef<(() => void) | null>(null);
@@ -68,9 +68,9 @@ export function usePrismBus(
       subscriberId,
       watchTypes,
       (event) => {
-        setEvents(prev => [event, ...prev].slice(0, 200));
+        setEvents((prev) => [event, ...prev].slice(0, 200));
       },
-      watchDomains
+      watchDomains,
     );
     unsubRef.current = unsub;
     return () => {
@@ -81,16 +81,16 @@ export function usePrismBus(
 
   const subscribe = useCallback(
     (
-      types: PrismBusEventType[] | "*",
+      types: PrismBusEventType[] | '*',
       handler: (event: PrismBusEvent) => void,
-      domains?: PrismDomain[] | "*"
+      domains?: PrismDomain[] | '*',
     ) => prismBus.subscribe(subscriberId, types, handler, domains),
-    [subscriberId]
+    [subscriberId],
   );
 
   const publishEvent = useCallback(
-    (event: Omit<PrismBusEvent, "id" | "timestamp">) => prismBus.publish(event),
-    []
+    (event: Omit<PrismBusEvent, 'id' | 'timestamp'>) => prismBus.publish(event),
+    [],
   );
 
   return { events, subscribe, publishEvent, stats: prismBus.getStats() };

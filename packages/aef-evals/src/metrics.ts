@@ -35,16 +35,10 @@ export interface MetricResult {
 }
 
 function relevantAtK(retrieved: RetrievedResult[], relevant: Set<string>, k: number): number[] {
-  return retrieved
-    .slice(0, k)
-    .map((r) => (relevant.has(r.chunkId) ? 1 : 0));
+  return retrieved.slice(0, k).map((r) => (relevant.has(r.chunkId) ? 1 : 0));
 }
 
-export function recallAtK(
-  retrieved: RetrievedResult[],
-  relevant: string[],
-  k: number,
-): number {
+export function recallAtK(retrieved: RetrievedResult[], relevant: string[], k: number): number {
   if (relevant.length === 0) return 1;
   const relevantSet = new Set(relevant);
   const hits = relevantAtK(retrieved, relevantSet, k);
@@ -52,11 +46,7 @@ export function recallAtK(
   return found / relevant.length;
 }
 
-export function precisionAtK(
-  retrieved: RetrievedResult[],
-  relevant: string[],
-  k: number,
-): number {
+export function precisionAtK(retrieved: RetrievedResult[], relevant: string[], k: number): number {
   if (k === 0) return 0;
   const relevantSet = new Set(relevant);
   const hits = relevantAtK(retrieved, relevantSet, k);
@@ -68,11 +58,7 @@ function dcg(gains: number[]): number {
   return gains.reduce((acc, gain, i) => acc + gain / Math.log2(i + 2), 0);
 }
 
-export function ndcgAtK(
-  retrieved: RetrievedResult[],
-  relevant: string[],
-  k: number,
-): number {
+export function ndcgAtK(retrieved: RetrievedResult[], relevant: string[], k: number): number {
   if (relevant.length === 0) return 1;
   const relevantSet = new Set(relevant);
   const gains = relevantAtK(retrieved, relevantSet, k);
@@ -86,10 +72,7 @@ export function ndcgAtK(
   return actualDcg / idealDcg;
 }
 
-export function mrr(
-  retrieved: RetrievedResult[],
-  relevant: string[],
-): number {
+export function mrr(retrieved: RetrievedResult[], relevant: string[]): number {
   const relevantSet = new Set(relevant);
   for (let i = 0; i < retrieved.length; i++) {
     if (relevantSet.has(retrieved[i]!.chunkId)) {
@@ -126,21 +109,19 @@ export function computeAllMetrics(
   k: number,
 ): MetricResult[] {
   return [
-    { metric: "recall", atK: k, value: recallAtK(retrieved, query.relevantChunkIds, k) },
-    { metric: "precision", atK: k, value: precisionAtK(retrieved, query.relevantChunkIds, k) },
-    { metric: "ndcg", atK: k, value: ndcgAtK(retrieved, query.relevantChunkIds, k) },
-    { metric: "mrr", atK: k, value: mrr(retrieved, query.relevantChunkIds) },
+    { metric: 'recall', atK: k, value: recallAtK(retrieved, query.relevantChunkIds, k) },
+    { metric: 'precision', atK: k, value: precisionAtK(retrieved, query.relevantChunkIds, k) },
+    { metric: 'ndcg', atK: k, value: ndcgAtK(retrieved, query.relevantChunkIds, k) },
+    { metric: 'mrr', atK: k, value: mrr(retrieved, query.relevantChunkIds) },
     {
-      metric: "exact_match_recovery",
+      metric: 'exact_match_recovery',
       atK: k,
       value: exactMatchRecoveryRate(retrieved, query.exactMatchBoostTerms ?? [], k),
     },
   ];
 }
 
-export function aggregateMetrics(
-  perQueryMetrics: MetricResult[][],
-): MetricResult[] {
+export function aggregateMetrics(perQueryMetrics: MetricResult[][]): MetricResult[] {
   if (perQueryMetrics.length === 0) return [];
   const template = perQueryMetrics[0]!;
   return template.map((_, idx) => {

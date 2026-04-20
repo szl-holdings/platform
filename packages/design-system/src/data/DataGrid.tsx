@@ -1,7 +1,7 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
-import { useDensity } from "../hooks/useDensity.js";
+import React, { type ReactNode } from 'react';
+import { useDensity } from '../hooks/useDensity.js';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface DataGridColumn<T> {
   id: string;
@@ -9,7 +9,7 @@ export interface DataGridColumn<T> {
   accessor: (row: T) => ReactNode;
   width?: string;
   minWidth?: string;
-  align?: "left" | "center" | "right";
+  align?: 'left' | 'center' | 'right';
   sortable?: boolean;
 }
 
@@ -32,20 +32,20 @@ export function DataGrid<T>({
   onRowClick,
   selectedRowKey,
   loading = false,
-  emptyMessage = "No data",
+  emptyMessage = 'No data',
   className,
   stickyHeader = true,
 }: DataGridProps<T>) {
   const { rowHeight, fontSize } = useDensity();
 
   return (
-    <div className={cn("overflow-auto", className)}>
+    <div className={cn('overflow-auto', className)}>
       <table className="w-full border-collapse">
         <thead>
           <tr
             style={{
               background: color.bg.surface,
-              position: stickyHeader ? "sticky" : undefined,
+              position: stickyHeader ? 'sticky' : undefined,
               top: stickyHeader ? 0 : undefined,
               zIndex: stickyHeader ? 1 : undefined,
             }}
@@ -56,14 +56,14 @@ export function DataGrid<T>({
                 className="text-left px-3 font-medium border-b"
                 style={{
                   color: color.text.secondary,
-                  fontSize: "11px",
+                  fontSize: '11px',
                   fontWeight: 500,
                   borderColor: color.border.subtle,
-                  height: "36px",
+                  height: '36px',
                   width: col.width,
                   minWidth: col.minWidth,
-                  textAlign: col.align ?? "left",
-                  whiteSpace: "nowrap",
+                  textAlign: col.align ?? 'left',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {col.label}
@@ -103,9 +103,9 @@ export function DataGrid<T>({
                   className="transition-colors border-b"
                   style={{
                     height: rowHeight,
-                    background: isSelected ? color.bg.active : "transparent",
+                    background: isSelected ? color.bg.active : 'transparent',
                     borderColor: color.border.subtle,
-                    cursor: onRowClick ? "pointer" : "default",
+                    cursor: onRowClick ? 'pointer' : 'default',
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected)
@@ -113,7 +113,7 @@ export function DataGrid<T>({
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected)
-                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
                   }}
                 >
                   {columns.map((col) => (
@@ -123,11 +123,11 @@ export function DataGrid<T>({
                       style={{
                         color: color.text.primary,
                         fontSize,
-                        textAlign: col.align ?? "left",
+                        textAlign: col.align ?? 'left',
                         maxWidth: col.width,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {col.accessor(row)}

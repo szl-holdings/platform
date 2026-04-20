@@ -1,14 +1,14 @@
-import { z } from "zod";
-import { PolicyEvaluationSchema } from "@szl-holdings/policy-engine";
+import { PolicyEvaluationSchema } from '@szl-holdings/policy-engine';
+import { z } from 'zod';
 
-export const ExecutionModeSchema = z.enum(["manual", "semi_auto", "autonomous"]);
+export const ExecutionModeSchema = z.enum(['manual', 'semi_auto', 'autonomous']);
 export type ExecutionMode = z.infer<typeof ExecutionModeSchema>;
 
 export const WorkflowStepSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  executionMode: ExecutionModeSchema.default("manual"),
+  executionMode: ExecutionModeSchema.default('manual'),
   requiresApproval: z.boolean().default(false),
   approverRole: z.string().optional(),
   handler: z.string(),
@@ -25,12 +25,12 @@ export const WorkflowDefinitionSchema = z.object({
   description: z.string().optional(),
   domain: z.string(),
   steps: z.array(WorkflowStepSchema),
-  executionMode: ExecutionModeSchema.default("manual"),
+  executionMode: ExecutionModeSchema.default('manual'),
   isDryRunCapable: z.boolean().default(true),
   isSimulationCapable: z.boolean().default(true),
   requiresExplicitApproval: z.boolean().default(true),
   estimatedCostUsd: z.number().min(0).optional(),
-  rollbackPolicy: z.enum(["none", "step", "full"]).default("step"),
+  rollbackPolicy: z.enum(['none', 'step', 'full']).default('step'),
   metadata: z.record(z.unknown()).optional(),
 });
 export type WorkflowDefinition = z.input<typeof WorkflowDefinitionSchema>;
@@ -40,7 +40,7 @@ export const StepExecutionRecordSchema = z.object({
   stepName: z.string(),
   startedAt: z.number(),
   completedAt: z.number().optional(),
-  status: z.enum(["pending", "running", "completed", "failed", "skipped", "rolled_back"]),
+  status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped', 'rolled_back']),
   inputs: z.record(z.unknown()).optional(),
   outputs: z.record(z.unknown()).optional(),
   error: z.string().optional(),
@@ -60,21 +60,31 @@ export const WorkflowRunSchema = z.object({
   executionMode: ExecutionModeSchema,
   isDryRun: z.boolean().default(false),
   isSimulation: z.boolean().default(false),
-  status: z.enum(["pending_approval", "approved", "running", "completed", "failed", "rolled_back", "cancelled"]),
+  status: z.enum([
+    'pending_approval',
+    'approved',
+    'running',
+    'completed',
+    'failed',
+    'rolled_back',
+    'cancelled',
+  ]),
   currentStepIndex: z.number().int().min(0).default(0),
   steps: z.array(StepExecutionRecordSchema),
-  approvalState: z.enum(["none", "pending", "approved", "rejected"]).default("none"),
+  approvalState: z.enum(['none', 'pending', 'approved', 'rejected']).default('none'),
   approvedBy: z.string().optional(),
   approvedAt: z.number().optional(),
   rejectionReason: z.string().optional(),
   policyEvaluation: PolicyEvaluationSchema.optional(),
-  auditTrail: z.array(z.object({
-    at: z.number(),
-    actor: z.string().optional(),
-    action: z.string(),
-    detail: z.string().optional(),
-    immutable: z.boolean().default(true),
-  })),
+  auditTrail: z.array(
+    z.object({
+      at: z.number(),
+      actor: z.string().optional(),
+      action: z.string(),
+      detail: z.string().optional(),
+      immutable: z.boolean().default(true),
+    }),
+  ),
   startedAt: z.number(),
   completedAt: z.number().optional(),
   estimatedCostUsd: z.number().optional(),

@@ -1,4 +1,4 @@
-import { ServiceAdapter, type ServiceStatus } from "../base.js";
+import { ServiceAdapter, type ServiceStatus } from '../base.js';
 
 export interface SubstackPublishResult {
   published: boolean;
@@ -8,21 +8,21 @@ export interface SubstackPublishResult {
 }
 
 export class SubstackAdapter extends ServiceAdapter {
-  readonly name = "substack";
-  readonly description = "Substack newsletter publishing via API";
-  readonly requiredEnvVars = ["SUBSTACK_API_KEY"];
+  readonly name = 'substack';
+  readonly description = 'Substack newsletter publishing via API';
+  readonly requiredEnvVars = ['SUBSTACK_API_KEY'];
 
   private get apiKey(): string | undefined {
-    return process.env["SUBSTACK_API_KEY"];
+    return process.env['SUBSTACK_API_KEY'];
   }
 
   private get subdomain(): string {
-    return process.env["SUBSTACK_SUBDOMAIN"] || "szlholdings";
+    return process.env['SUBSTACK_SUBDOMAIN'] || 'szlholdings';
   }
 
   get status(): ServiceStatus {
-    if (this.apiKey) return "LIVE_CONFIGURED";
-    return "MOCKED_DEMO_MODE";
+    if (this.apiKey) return 'LIVE_CONFIGURED';
+    return 'MOCKED_DEMO_MODE';
   }
 
   get isLive(): boolean {
@@ -31,13 +31,13 @@ export class SubstackAdapter extends ServiceAdapter {
 
   get presentEnvVars(): string[] {
     const present: string[] = [];
-    if (this.apiKey) present.push("SUBSTACK_API_KEY");
-    if (process.env["SUBSTACK_SUBDOMAIN"]) present.push("SUBSTACK_SUBDOMAIN");
+    if (this.apiKey) present.push('SUBSTACK_API_KEY');
+    if (process.env['SUBSTACK_SUBDOMAIN']) present.push('SUBSTACK_SUBDOMAIN');
     return present;
   }
 
   get missingEnvVars(): string[] {
-    return this.apiKey ? [] : ["SUBSTACK_API_KEY"];
+    return this.apiKey ? [] : ['SUBSTACK_API_KEY'];
   }
 
   protected async performHealthCheck(): Promise<void> {
@@ -52,10 +52,13 @@ export class SubstackAdapter extends ServiceAdapter {
     title: string;
     subtitle?: string;
     body: string;
-    bodyFormat?: "html" | "markdown";
+    bodyFormat?: 'html' | 'markdown';
   }): Promise<SubstackPublishResult> {
     if (!this.isLive) {
-      const slug = opts.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      const slug = opts.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
       return {
         published: true,
         externalUrl: `https://${this.subdomain}.substack.com/p/${slug}`,
@@ -65,16 +68,16 @@ export class SubstackAdapter extends ServiceAdapter {
 
     try {
       const res = await fetch(`https://${this.subdomain}.substack.com/api/v1/drafts`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Cookie: `substack.sid=${this.apiKey}`,
         },
         body: JSON.stringify({
           draft_title: opts.title,
-          draft_subtitle: opts.subtitle || "",
+          draft_subtitle: opts.subtitle || '',
           draft_body: opts.body,
-          type: "newsletter",
+          type: 'newsletter',
         }),
       });
 
@@ -84,14 +87,18 @@ export class SubstackAdapter extends ServiceAdapter {
       }
 
       const data = (await res.json()) as { id?: number; slug?: string };
-      const slug = data.slug || opts.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      const slug = data.slug || opts.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       return {
         published: true,
         externalUrl: `https://${this.subdomain}.substack.com/p/${slug}`,
         mock: false,
       };
     } catch (err) {
-      return { published: false, mock: false, error: err instanceof Error ? err.message : String(err) };
+      return {
+        published: false,
+        mock: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
     }
   }
 }

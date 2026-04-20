@@ -1,4 +1,4 @@
-import type { ActionLedgerWriter, LedgerEntry } from "./types.js";
+import type { ActionLedgerWriter, LedgerEntry } from './types.js';
 
 export class InMemoryActionLedger implements ActionLedgerWriter {
   private readonly entries = new Map<string, LedgerEntry[]>();
@@ -22,9 +22,9 @@ export class InMemoryActionLedger implements ActionLedgerWriter {
 
 export function makeLedgerEntry(
   runId: string,
-  type: LedgerEntry["type"],
+  type: LedgerEntry['type'],
   description: string,
-  opts: Partial<Omit<LedgerEntry, "entryId" | "runId" | "type" | "description" | "timestamp">> = {}
+  opts: Partial<Omit<LedgerEntry, 'entryId' | 'runId' | 'type' | 'description' | 'timestamp'>> = {},
 ): LedgerEntry {
   return {
     entryId: `ledger-${Date.now()}-${Math.random().toString(36).slice(2)}`,

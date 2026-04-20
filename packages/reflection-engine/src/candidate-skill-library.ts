@@ -1,8 +1,8 @@
-import type { CandidateSkill } from "./types.js";
+import type { CandidateSkill } from './types.js';
 
 export interface CandidateSkillLibraryQuery {
-  status?: CandidateSkill["status"];
-  category?: CandidateSkill["category"];
+  status?: CandidateSkill['status'];
+  category?: CandidateSkill['category'];
   limit?: number;
   offset?: number;
 }
@@ -12,7 +12,7 @@ export interface CandidateSkillLibrary {
   getDraft(skillId: string): CandidateSkill | undefined;
   listDrafts(query?: CandidateSkillLibraryQuery): CandidateSkill[];
   promote(skillId: string): boolean;
-  count(status?: CandidateSkill["status"]): number;
+  count(status?: CandidateSkill['status']): number;
 }
 
 export class InMemoryCandidateSkillLibrary implements CandidateSkillLibrary {
@@ -23,7 +23,7 @@ export class InMemoryCandidateSkillLibrary implements CandidateSkillLibrary {
     if (existing) {
       return;
     }
-    this.skills.set(skill.skillId, { ...skill, status: "draft" });
+    this.skills.set(skill.skillId, { ...skill, status: 'draft' });
   }
 
   getDraft(skillId: string): CandidateSkill | undefined {
@@ -40,10 +40,7 @@ export class InMemoryCandidateSkillLibrary implements CandidateSkillLibrary {
       results = results.filter((s) => s.category === query.category);
     }
 
-    results.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const offset = query?.offset ?? 0;
     const limit = query?.limit ?? 50;
@@ -53,11 +50,11 @@ export class InMemoryCandidateSkillLibrary implements CandidateSkillLibrary {
   promote(skillId: string): boolean {
     const skill = this.skills.get(skillId);
     if (!skill) return false;
-    this.skills.set(skillId, { ...skill, status: "active" });
+    this.skills.set(skillId, { ...skill, status: 'active' });
     return true;
   }
 
-  count(status?: CandidateSkill["status"]): number {
+  count(status?: CandidateSkill['status']): number {
     if (!status) return this.skills.size;
     let n = 0;
     for (const s of this.skills.values()) {

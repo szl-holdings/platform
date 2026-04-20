@@ -6,8 +6,8 @@
  * a sanctioned counterparty in the legal domain and a cyber asset in Aegis).
  */
 
-import type { GraphStore } from "./store.js";
-import type { ConstellationNode, ConstellationEdge } from "./schema.js";
+import type { ConstellationEdge, ConstellationNode } from './schema.js';
+import type { GraphStore } from './store.js';
 
 export interface CrossDomainNode {
   node: ConstellationNode;

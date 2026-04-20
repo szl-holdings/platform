@@ -12,8 +12,8 @@
  *   5. IndexVerifier    — verify a sample of the written chunks
  */
 
-import type { WorkflowDefinition } from "../types.js";
-import type { IngestionPlannerInput } from "../actors/index.js";
+import type { IngestionPlannerInput } from '../actors/index.js';
+import type { WorkflowDefinition } from '../types.js';
 
 export interface IngestDocumentInput {
   sourceId: string;
@@ -27,11 +27,15 @@ export interface IngestDocumentInput {
   metadata?: Record<string, unknown>;
 }
 
-export function buildIngestDocumentWorkflow(input: IngestDocumentInput, tenantId: string, profileId: string): WorkflowDefinition {
+export function buildIngestDocumentWorkflow(
+  input: IngestDocumentInput,
+  tenantId: string,
+  profileId: string,
+): WorkflowDefinition {
   const plannerInput: IngestionPlannerInput = {
     sourceId: input.sourceId,
     content: input.content,
-    contentType: input.contentType ?? "text/plain",
+    contentType: input.contentType ?? 'text/plain',
     title: input.title,
     sourceUri: input.sourceUri,
     chunkSize: input.chunkSize ?? 512,
@@ -40,25 +44,26 @@ export function buildIngestDocumentWorkflow(input: IngestDocumentInput, tenantId
   };
 
   return {
-    workflowId: "ingest_document",
-    name: "Ingest Document",
-    description: "Normalize → chunk (per profile) → policy check → embed dispatch → index write → ledger entry",
+    workflowId: 'ingest_document',
+    name: 'Ingest Document',
+    description:
+      'Normalize → chunk (per profile) → policy check → embed dispatch → index write → ledger entry',
     retryPolicy: { maxAttempts: 3, backoffMs: 100 },
     steps: [
       {
-        stepId: "ingest-plan",
-        name: "IngestionPlanner: Normalize & Plan",
-        actor: "IngestionPlanner",
+        stepId: 'ingest-plan',
+        name: 'IngestionPlanner: Normalize & Plan',
+        actor: 'IngestionPlanner',
         input: plannerInput,
       },
       {
-        stepId: "schema-map",
-        name: "SchemaMapper: Chunk & Map",
-        actor: "SchemaMapper",
+        stepId: 'schema-map',
+        name: 'SchemaMapper: Chunk & Map',
+        actor: 'SchemaMapper',
         input: {
           sourceId: input.sourceId,
-          normalizedContent: "__from_prev__",
-          contentType: input.contentType ?? "text/plain",
+          normalizedContent: '__from_prev__',
+          contentType: input.contentType ?? 'text/plain',
           chunkSize: input.chunkSize ?? 512,
           chunkOverlap: input.chunkOverlap ?? 64,
           title: input.title,
@@ -67,32 +72,32 @@ export function buildIngestDocumentWorkflow(input: IngestDocumentInput, tenantId
         },
       },
       {
-        stepId: "policy-check",
-        name: "PolicyGuard: Policy Check",
-        actor: "PolicyGuard",
+        stepId: 'policy-check',
+        name: 'PolicyGuard: Policy Check',
+        actor: 'PolicyGuard',
         input: {
           sourceId: input.sourceId,
           tenantId,
           profileId,
-          chunks: "__from_prev__",
+          chunks: '__from_prev__',
         },
       },
       {
-        stepId: "embed-dispatch",
-        name: "EmbedDispatcher: Embed & Write",
-        actor: "EmbedDispatcher",
+        stepId: 'embed-dispatch',
+        name: 'EmbedDispatcher: Embed & Write',
+        actor: 'EmbedDispatcher',
         input: {
           sourceId: input.sourceId,
-          chunks: "__from_prev__",
+          chunks: '__from_prev__',
           tenantId,
           profileId,
           model: input.model,
         },
       },
       {
-        stepId: "index-verify",
-        name: "IndexVerifier: Verify Written Chunks",
-        actor: "IndexVerifier",
+        stepId: 'index-verify',
+        name: 'IndexVerifier: Verify Written Chunks',
+        actor: 'IndexVerifier',
         input: {
           tenantId,
           profileId,

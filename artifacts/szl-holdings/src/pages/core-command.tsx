@@ -1,37 +1,56 @@
-import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { useSearch, useLocation } from "wouter";
-import { m } from "framer-motion";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { m } from 'framer-motion';
 import {
-  Shield, Brain, Zap, Ship, Building, Activity,
-  Layers, CheckCircle2, AlertTriangle, RefreshCw, Target,
-  Database, Cpu, GitBranch, Bell, Globe, ExternalLink,
-  ArrowUpRight, TrendingUp, Eye, BarChart3, DollarSign,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  Activity,
+  AlertTriangle,
+  ArrowUpRight,
+  BarChart3,
+  Bell,
+  Brain,
+  Building,
+  CheckCircle2,
+  Cpu,
+  Database,
+  DollarSign,
+  ExternalLink,
+  Eye,
+  GitBranch,
+  Globe,
+  Layers,
+  RefreshCw,
+  Shield,
+  Ship,
+  Target,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useLocation, useSearch } from 'wouter';
+import { cn } from '@/lib/utils';
 
-const DecisionTheater = lazy(() => import("@/components/decision-theater"));
+const DecisionTheater = lazy(() => import('@/components/decision-theater'));
 
 function useCountUp(target: number, duration = 1200, enabled = true) {
   const [value, setValue] = useState(0);
   const rafRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!enabled || typeof target !== "number") return;
+    if (!enabled || typeof target !== 'number') return;
     const start = Date.now();
     const from = 0;
     function tick() {
       const elapsed = Date.now() - start;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = 1 - (1 - progress) ** 3;
       setValue(Math.round(from + (target - from) * eased));
       if (progress < 1) rafRef.current = requestAnimationFrame(tick);
     }
     rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, [target, duration, enabled]);
   return value;
 }
-
 
 interface CoreMetrics {
   terra: {
@@ -74,7 +93,10 @@ interface CoreHealth {
   status: string;
   uptime_seconds: number;
   version: string;
-  services: Record<string, { status: string; latency_ms?: number; memory_mb?: number; version?: string }>;
+  services: Record<
+    string,
+    { status: string; latency_ms?: number; memory_mb?: number; version?: string }
+  >;
   telemetry: {
     total_recommendations: number;
     total_audit_events: number;
@@ -82,21 +104,70 @@ interface CoreHealth {
 }
 
 const SEVERITY_BG: Record<string, string> = {
-  critical: "bg-red-500/10 border-red-500/25 text-red-400",
-  high: "bg-orange-500/10 border-orange-500/25 text-orange-400",
-  medium: "bg-amber-500/10 border-amber-500/25 text-amber-400",
-  low: "bg-blue-500/10 border-blue-500/25 text-blue-400",
-  info: "bg-slate-500/10 border-slate-500/25 text-slate-400",
+  critical: 'bg-red-500/10 border-red-500/25 text-red-400',
+  high: 'bg-orange-500/10 border-orange-500/25 text-orange-400',
+  medium: 'bg-amber-500/10 border-amber-500/25 text-amber-400',
+  low: 'bg-blue-500/10 border-blue-500/25 text-blue-400',
+  info: 'bg-slate-500/10 border-slate-500/25 text-slate-400',
 };
 
 const platformLinks = [
-  { name: "Terra", role: "OBSERVE", subtitle: "Property Intelligence", href: "/terra/", icon: Building, color: "#4d7c0f" },
-  { name: "Lyte", role: "INTERPRET", subtitle: "Decision Intelligence", href: "/command/operations/", icon: Zap, color: "#f59e0b" },
-  { name: "Alloy Creative", role: "CREATE", subtitle: "Creative Workflows", href: "/alloy/creative", icon: Brain, color: "#ec4899" },
-  { name: "Alloy", role: "EXECUTE", subtitle: "Execution Fabric", href: "/alloy/", icon: Layers, color: "#6366f1" },
-  { name: "Aegis", role: "DEFEND", subtitle: "Defense & Intelligence", href: "/aegis/", icon: Shield, color: "#6366f1" },
-  { name: "Vessels", role: "TRACK", subtitle: "Maritime Intelligence", href: "/vessels/", icon: Ship, color: "#3b82f6" },
-  { name: "Carlota Jo", role: "CONSULT", subtitle: "Brand Strategy", href: "/carlota-jo/", icon: Globe, color: "#10b981" },
+  {
+    name: 'Terra',
+    role: 'OBSERVE',
+    subtitle: 'Property Intelligence',
+    href: '/terra/',
+    icon: Building,
+    color: '#4d7c0f',
+  },
+  {
+    name: 'Lyte',
+    role: 'INTERPRET',
+    subtitle: 'Decision Intelligence',
+    href: '/command/operations/',
+    icon: Zap,
+    color: '#f59e0b',
+  },
+  {
+    name: 'Alloy Creative',
+    role: 'CREATE',
+    subtitle: 'Creative Workflows',
+    href: '/alloy/creative',
+    icon: Brain,
+    color: '#ec4899',
+  },
+  {
+    name: 'Alloy',
+    role: 'EXECUTE',
+    subtitle: 'Execution Fabric',
+    href: '/alloy/',
+    icon: Layers,
+    color: '#6366f1',
+  },
+  {
+    name: 'Aegis',
+    role: 'DEFEND',
+    subtitle: 'Defense & Intelligence',
+    href: '/aegis/',
+    icon: Shield,
+    color: '#6366f1',
+  },
+  {
+    name: 'Vessels',
+    role: 'TRACK',
+    subtitle: 'Maritime Intelligence',
+    href: '/vessels/',
+    icon: Ship,
+    color: '#3b82f6',
+  },
+  {
+    name: 'Carlota Jo',
+    role: 'CONSULT',
+    subtitle: 'Brand Strategy',
+    href: '/carlota-jo/',
+    icon: Globe,
+    color: '#10b981',
+  },
 ];
 
 function SummaryCard({
@@ -117,12 +188,16 @@ function SummaryCard({
   alert?: boolean;
 }) {
   return (
-    <div className={cn(
-      "rounded-xl border bg-card/60 p-4 flex flex-col gap-2",
-      alert ? "border-red-500/30" : "border-border/40",
-    )}>
+    <div
+      className={cn(
+        'rounded-xl border bg-card/60 p-4 flex flex-col gap-2',
+        alert ? 'border-red-500/30' : 'border-border/40',
+      )}
+    >
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{ background: `${color}20` }}
@@ -133,10 +208,7 @@ function SummaryCard({
       {loading ? (
         <div className="h-8 w-20 bg-muted/30 rounded animate-pulse" />
       ) : (
-        <p
-          className="text-2xl font-bold font-display tabular-nums"
-          style={{ color }}
-        >
+        <p className="text-2xl font-bold font-display tabular-nums" style={{ color }}>
           {value}
         </p>
       )}
@@ -145,7 +217,14 @@ function SummaryCard({
   );
 }
 
-function AnimatedKPI({ value, prefix = "", suffix = "", color, duration = 1400, decimals = 0 }: {
+function AnimatedKPI({
+  value,
+  prefix = '',
+  suffix = '',
+  color,
+  duration = 1400,
+  decimals = 0,
+}: {
   value: number | null;
   prefix?: string;
   suffix?: string;
@@ -153,78 +232,91 @@ function AnimatedKPI({ value, prefix = "", suffix = "", color, duration = 1400, 
   duration?: number;
   decimals?: number;
 }) {
-  const counted = useCountUp(value !== null ? Math.round(value * Math.pow(10, decimals)) : 0, duration, value !== null);
-  const actual = counted / Math.pow(10, decimals);
-  const display = value === null ? "—" : `${prefix}${actual.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+  const counted = useCountUp(
+    value !== null ? Math.round(value * 10 ** decimals) : 0,
+    duration,
+    value !== null,
+  );
+  const actual = counted / 10 ** decimals;
+  const display =
+    value === null
+      ? '—'
+      : `${prefix}${actual.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
   return <span style={{ color }}>{display}</span>;
 }
 
 const INVESTOR_KPIS = [
   {
-    label: "Distress Opportunities",
+    label: 'Distress Opportunities',
     value: null as number | null,
-    prefix: "",
-    suffix: "",
-    sub: "Tracked NYC properties",
-    color: "#0ea5e9",
+    prefix: '',
+    suffix: '',
+    sub: 'Tracked NYC properties',
+    color: '#0ea5e9',
     icon: Building,
-    field: "distress" as const,
+    field: 'distress' as const,
   },
   {
-    label: "Deployed AUM",
+    label: 'Deployed AUM',
     value: 47_200_000,
-    prefix: "$",
-    suffix: "",
-    sub: "Across active vehicles",
-    color: "#10b981",
+    prefix: '$',
+    suffix: '',
+    sub: 'Across active vehicles',
+    color: '#10b981',
     icon: DollarSign,
-    field: "static" as const,
+    field: 'static' as const,
   },
   {
-    label: "Portfolio IRR",
+    label: 'Portfolio IRR',
     value: 22,
-    prefix: "",
-    suffix: "%",
-    sub: "5-year blended return",
-    color: "#f59e0b",
+    prefix: '',
+    suffix: '%',
+    sub: '5-year blended return',
+    color: '#f59e0b',
     icon: TrendingUp,
-    field: "static" as const,
+    field: 'static' as const,
     decimals: 0,
   },
   {
-    label: "Active Deals",
+    label: 'Active Deals',
     value: null as number | null,
-    prefix: "",
-    suffix: "",
-    sub: "Live pipeline",
-    color: "#6366f1",
+    prefix: '',
+    suffix: '',
+    sub: 'Live pipeline',
+    color: '#6366f1',
     icon: Target,
-    field: "deals" as const,
+    field: 'deals' as const,
   },
   {
-    label: "AI Signals Processed",
+    label: 'AI Signals Processed',
     value: null as number | null,
-    prefix: "",
-    suffix: "",
-    sub: "All-time platform",
-    color: "#ec4899",
+    prefix: '',
+    suffix: '',
+    sub: 'All-time platform',
+    color: '#ec4899',
     icon: Brain,
-    field: "recs" as const,
+    field: 'recs' as const,
   },
   {
-    label: "Platform Uptime",
+    label: 'Platform Uptime',
     value: 99.94,
-    prefix: "",
-    suffix: "%",
-    sub: "30-day rolling average",
-    color: "#22c55e",
+    prefix: '',
+    suffix: '%',
+    sub: '30-day rolling average',
+    color: '#22c55e',
     icon: Activity,
-    field: "static" as const,
+    field: 'static' as const,
     decimals: 2,
   },
 ];
 
-function InvestorKPISection({ metricsLoading, metrics }: { metricsLoading: boolean; metrics: CoreMetrics | null }) {
+function InvestorKPISection({
+  metricsLoading,
+  metrics,
+}: {
+  metricsLoading: boolean;
+  metrics: CoreMetrics | null;
+}) {
   const terra = metrics?.terra ?? metrics?.beacon;
   const kpiValues: Record<string, number | null> = {
     distress: terra?.total_distress_properties ?? null,
@@ -245,7 +337,7 @@ function InvestorKPISection({ metricsLoading, metrics }: { metricsLoading: boole
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {INVESTOR_KPIS.map((kpi) => {
           const Icon = kpi.icon;
-          const resolved = kpi.field === "static" ? kpi.value : kpiValues[kpi.field] ?? null;
+          const resolved = kpi.field === 'static' ? kpi.value : (kpiValues[kpi.field] ?? null);
           return (
             <m.div
               key={kpi.label}
@@ -256,17 +348,28 @@ function InvestorKPISection({ metricsLoading, metrics }: { metricsLoading: boole
               style={{ borderColor: metricsLoading ? undefined : `${kpi.color}18` }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">{kpi.label}</span>
-                <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: `${kpi.color}18` }}>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
+                  {kpi.label}
+                </span>
+                <div
+                  className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${kpi.color}18` }}
+                >
                   <Icon className="w-3 h-3" style={{ color: kpi.color }} />
                 </div>
               </div>
-              {metricsLoading && kpi.field !== "static" ? (
+              {metricsLoading && kpi.field !== 'static' ? (
                 <div className="h-8 w-16 bg-muted/20 rounded animate-pulse" />
               ) : (
                 <p className="text-2xl font-bold font-display tabular-nums leading-none">
                   {resolved !== null ? (
-                    <AnimatedKPI value={resolved} prefix={kpi.prefix} suffix={kpi.suffix} color={kpi.color} decimals={"decimals" in kpi ? kpi.decimals : 0} />
+                    <AnimatedKPI
+                      value={resolved}
+                      prefix={kpi.prefix}
+                      suffix={kpi.suffix}
+                      color={kpi.color}
+                      decimals={'decimals' in kpi ? kpi.decimals : 0}
+                    />
                   ) : (
                     <span className="text-muted-foreground/40">—</span>
                   )}
@@ -281,13 +384,19 @@ function InvestorKPISection({ metricsLoading, metrics }: { metricsLoading: boole
   );
 }
 
-type CoreTab = "overview" | "decision-theater" | "recommendations" | "audit" | "services";
-const CORE_TABS: readonly CoreTab[] = ["overview", "decision-theater", "recommendations", "audit", "services"] as const;
+type CoreTab = 'overview' | 'decision-theater' | 'recommendations' | 'audit' | 'services';
+const CORE_TABS: readonly CoreTab[] = [
+  'overview',
+  'decision-theater',
+  'recommendations',
+  'audit',
+  'services',
+] as const;
 
 function parseTab(search: string): CoreTab {
   const params = new URLSearchParams(search);
-  const value = params.get("tab");
-  return (CORE_TABS as readonly string[]).includes(value ?? "") ? (value as CoreTab) : "overview";
+  const value = params.get('tab');
+  return (CORE_TABS as readonly string[]).includes(value ?? '') ? (value as CoreTab) : 'overview';
 }
 
 export default function CoreCommandCenter() {
@@ -296,20 +405,24 @@ export default function CoreCommandCenter() {
   const tab: CoreTab = parseTab(search);
   const setTab = (next: CoreTab) => {
     const params = new URLSearchParams(search);
-    if (next === "overview") {
-      params.delete("tab");
+    if (next === 'overview') {
+      params.delete('tab');
     } else {
-      params.set("tab", next);
+      params.set('tab', next);
     }
     const qs = params.toString();
-    navigate(`/core${qs ? `?${qs}` : ""}`);
+    navigate(`/core${qs ? `?${qs}` : ''}`);
   };
 
-  const { data: metrics, isLoading: metricsLoading, refetch } = useStandardQuery<CoreMetrics>({
-    queryKey: ["core-metrics"],
+  const {
+    data: metrics,
+    isLoading: metricsLoading,
+    refetch,
+  } = useStandardQuery<CoreMetrics>({
+    queryKey: ['core-metrics'],
     queryFn: async () => {
-      const res = await fetch("/api/core/metrics");
-      if (!res.ok) throw new Error("Failed");
+      const res = await fetch('/api/core/metrics');
+      if (!res.ok) throw new Error('Failed');
       const j = await res.json();
       return j.data;
     },
@@ -317,34 +430,40 @@ export default function CoreCommandCenter() {
   });
 
   const { data: health, isLoading: healthLoading } = useStandardQuery<CoreHealth>({
-    queryKey: ["core-health"],
+    queryKey: ['core-health'],
     queryFn: async () => {
-      const res = await fetch("/api/core/health");
-      if (!res.ok) throw new Error("Failed");
+      const res = await fetch('/api/core/health');
+      if (!res.ok) throw new Error('Failed');
       const j = await res.json();
       return j.data;
     },
     refetchInterval: 30_000,
   });
 
-  const { data: recsData, isLoading: recsLoading } = useStandardQuery<{ data: CoreMetrics["alloy"]["recent_recommendations"]; meta: { total: number } }>({
-    queryKey: ["core-recs-tab"],
+  const { data: recsData, isLoading: recsLoading } = useStandardQuery<{
+    data: CoreMetrics['alloy']['recent_recommendations'];
+    meta: { total: number };
+  }>({
+    queryKey: ['core-recs-tab'],
     queryFn: async () => {
-      const res = await fetch("/api/core/recommendations?limit=10");
-      if (!res.ok) throw new Error("Failed");
+      const res = await fetch('/api/core/recommendations?limit=10');
+      if (!res.ok) throw new Error('Failed');
       return res.json();
     },
-    enabled: tab === "recommendations",
+    enabled: tab === 'recommendations',
   });
 
-  const { data: auditData, isLoading: auditLoading } = useStandardQuery<{ data?: unknown[]; items?: unknown[] }>({
-    queryKey: ["audit-tab"],
+  const { data: auditData, isLoading: auditLoading } = useStandardQuery<{
+    data?: unknown[];
+    items?: unknown[];
+  }>({
+    queryKey: ['audit-tab'],
     queryFn: async () => {
-      const res = await fetch("/api/audit?limit=10");
-      if (!res.ok) throw new Error("Failed");
+      const res = await fetch('/api/audit?limit=10');
+      if (!res.ok) throw new Error('Failed');
       return res.json();
     },
-    enabled: tab === "audit",
+    enabled: tab === 'audit',
   });
 
   const serviceEntries = health?.services ? Object.entries(health.services) : [];
@@ -368,33 +487,35 @@ export default function CoreCommandCenter() {
               <h1 className="text-sm font-bold font-display text-foreground leading-none">
                 SZL Core Command
               </h1>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Unified Platform Intelligence</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Unified Platform Intelligence
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div
               className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium border",
-                health?.status === "healthy"
-                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium border',
+                health?.status === 'healthy'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                   : healthLoading
-                  ? "bg-muted/10 border-border/30 text-muted-foreground"
-                  : "bg-amber-500/10 border-amber-500/30 text-amber-400",
+                    ? 'bg-muted/10 border-border/30 text-muted-foreground'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400',
               )}
             >
               <span
                 className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  health?.status === "healthy"
-                    ? "bg-emerald-400 animate-pulse"
-                    : "bg-muted-foreground",
+                  'w-1.5 h-1.5 rounded-full',
+                  health?.status === 'healthy'
+                    ? 'bg-emerald-400 animate-pulse'
+                    : 'bg-muted-foreground',
                 )}
               />
               {healthLoading
-                ? "Connecting…"
-                : health?.status === "healthy"
-                ? "All Systems Operational"
-                : "Checking…"}
+                ? 'Connecting…'
+                : health?.status === 'healthy'
+                  ? 'All Systems Operational'
+                  : 'Checking…'}
             </div>
             <button
               onClick={() => refetch()}
@@ -407,18 +528,20 @@ export default function CoreCommandCenter() {
         </div>
         <div className="border-t border-border/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex gap-0.5 overflow-x-auto">
-            {(["overview", "decision-theater", "recommendations", "audit", "services"] as const).map((t) => (
+            {(
+              ['overview', 'decision-theater', 'recommendations', 'audit', 'services'] as const
+            ).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
                 className={cn(
-                  "px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider transition-all border-b-2 flex-shrink-0",
+                  'px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider transition-all border-b-2 flex-shrink-0',
                   tab === t
-                    ? "border-indigo-400 text-indigo-400"
-                    : "border-transparent text-muted-foreground hover:text-foreground",
+                    ? 'border-indigo-400 text-indigo-400'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
               >
-                {t === "decision-theater" ? "Decision Theater" : t}
+                {t === 'decision-theater' ? 'Decision Theater' : t}
               </button>
             ))}
           </div>
@@ -426,7 +549,7 @@ export default function CoreCommandCenter() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {tab === "overview" && (
+        {tab === 'overview' && (
           <m.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -439,10 +562,10 @@ export default function CoreCommandCenter() {
                 </h2>
                 {metrics?.platform?.generated_at && (
                   <span className="text-[10px] text-muted-foreground">
-                    Updated{" "}
+                    Updated{' '}
                     {new Date(metrics.platform.generated_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })}
                   </span>
                 )}
@@ -450,7 +573,7 @@ export default function CoreCommandCenter() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <SummaryCard
                   label="Distress Properties"
-                  value={t?.total_distress_properties ?? "—"}
+                  value={t?.total_distress_properties ?? '—'}
                   sub="Terra — NYC + NY"
                   icon={Building}
                   color="#0ea5e9"
@@ -458,7 +581,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="High Opportunity"
-                  value={highOpp === 0 && !metricsLoading ? "—" : highOpp}
+                  value={highOpp === 0 && !metricsLoading ? '—' : highOpp}
                   sub="Score ≥ 80"
                   icon={Target}
                   color="#10b981"
@@ -466,7 +589,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="Converted Deals"
-                  value={t?.converted_deals ?? "—"}
+                  value={t?.converted_deals ?? '—'}
                   sub="Closed Won"
                   icon={CheckCircle2}
                   color="#22c55e"
@@ -483,7 +606,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="AI Recommendations"
-                  value={metrics?.alloy?.total_recommendations ?? "—"}
+                  value={metrics?.alloy?.total_recommendations ?? '—'}
                   sub="All-time"
                   icon={Brain}
                   color="#ec4899"
@@ -491,7 +614,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="Workflow Runs"
-                  value={metrics?.alloy?.workflow_runs_30d ?? "—"}
+                  value={metrics?.alloy?.workflow_runs_30d ?? '—'}
                   sub="Last 30 days"
                   icon={GitBranch}
                   color="#6366f1"
@@ -524,8 +647,12 @@ export default function CoreCommandCenter() {
                               <app.icon className="w-4 h-4" style={{ color: app.color }} />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-foreground leading-none">{app.name}</p>
-                              <p className="text-[10px] text-muted-foreground mt-0.5">{app.subtitle}</p>
+                              <p className="text-sm font-bold text-foreground leading-none">
+                                {app.name}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                {app.subtitle}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -554,28 +681,28 @@ export default function CoreCommandCenter() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
                       {
-                        label: "Total Leads",
-                        value: t?.total_leads ?? "—",
+                        label: 'Total Leads',
+                        value: t?.total_leads ?? '—',
                         icon: TrendingUp,
-                        color: "#0ea5e9",
+                        color: '#0ea5e9',
                       },
                       {
-                        label: "Total Deals",
-                        value: t?.total_deals ?? "—",
+                        label: 'Total Deals',
+                        value: t?.total_deals ?? '—',
                         icon: BarChart3,
-                        color: "#10b981",
+                        color: '#10b981',
                       },
                       {
-                        label: "Audit Events",
-                        value: metrics?.platform?.audit_events_30d ?? "—",
+                        label: 'Audit Events',
+                        value: metrics?.platform?.audit_events_30d ?? '—',
                         icon: Bell,
-                        color: "#f59e0b",
+                        color: '#f59e0b',
                       },
                       {
-                        label: "API Uptime",
-                        value: uptimeH !== null ? `${uptimeH}h` : "—",
+                        label: 'API Uptime',
+                        value: uptimeH !== null ? `${uptimeH}h` : '—',
                         icon: Activity,
-                        color: "#22c55e",
+                        color: '#22c55e',
                       },
                     ].map(({ label, value, icon: Icon, color }) => (
                       <div
@@ -589,7 +716,9 @@ export default function CoreCommandCenter() {
                         {metricsLoading ? (
                           <div className="h-6 w-12 bg-muted/30 rounded animate-pulse" />
                         ) : (
-                          <p className="text-lg font-bold tabular-nums" style={{ color }}>{value}</p>
+                          <p className="text-lg font-bold tabular-nums" style={{ color }}>
+                            {value}
+                          </p>
                         )}
                       </div>
                     ))}
@@ -620,8 +749,9 @@ export default function CoreCommandCenter() {
                         <div
                           key={rec.id}
                           className={cn(
-                            "rounded-lg border p-3 text-[11px]",
-                            SEVERITY_BG[rec.severity] ?? "bg-muted/10 border-border/30 text-foreground",
+                            'rounded-lg border p-3 text-[11px]',
+                            SEVERITY_BG[rec.severity] ??
+                              'bg-muted/10 border-border/30 text-foreground',
                           )}
                         >
                           <div className="flex items-start justify-between gap-2 mb-1">
@@ -633,7 +763,9 @@ export default function CoreCommandCenter() {
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground text-[10px]">
-                            <span className="capitalize">{rec.entity_type?.replace(/_/g, " ")}</span>
+                            <span className="capitalize">
+                              {rec.entity_type?.replace(/_/g, ' ')}
+                            </span>
                             <span>·</span>
                             <span>{rec.domain}</span>
                             <span>·</span>
@@ -651,11 +783,36 @@ export default function CoreCommandCenter() {
                   </h2>
                   <div className="space-y-1">
                     {[
-                      { label: "Terra — Property Intelligence", href: "/terra/", color: "#4d7c0f", icon: Building },
-                      { label: "Aegis — Defense & Intelligence", href: "/aegis/", color: "#6366f1", icon: Shield },
-                      { label: "Carlota Jo — Consulting", href: "/carlota-jo/", color: "#10b981", icon: Globe },
-                      { label: "Vessels — Maritime", href: "/vessels/", color: "#3b82f6", icon: Ship },
-                      { label: "Alloy — Creative Workflows", href: "/alloy/creative", color: "#ec4899", icon: Eye },
+                      {
+                        label: 'Terra — Property Intelligence',
+                        href: '/terra/',
+                        color: '#4d7c0f',
+                        icon: Building,
+                      },
+                      {
+                        label: 'Aegis — Defense & Intelligence',
+                        href: '/aegis/',
+                        color: '#6366f1',
+                        icon: Shield,
+                      },
+                      {
+                        label: 'Carlota Jo — Consulting',
+                        href: '/carlota-jo/',
+                        color: '#10b981',
+                        icon: Globe,
+                      },
+                      {
+                        label: 'Vessels — Maritime',
+                        href: '/vessels/',
+                        color: '#3b82f6',
+                        icon: Ship,
+                      },
+                      {
+                        label: 'Alloy — Creative Workflows',
+                        href: '/alloy/creative',
+                        color: '#ec4899',
+                        icon: Eye,
+                      },
                     ].map((link) => (
                       <a
                         key={link.href}
@@ -679,13 +836,19 @@ export default function CoreCommandCenter() {
           </m.div>
         )}
 
-        {tab === "decision-theater" && (
-          <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" /></div>}>
+        {tab === 'decision-theater' && (
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-20">
+                <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+              </div>
+            }
+          >
             <DecisionTheater />
           </Suspense>
         )}
 
-        {tab === "recommendations" && (
+        {tab === 'recommendations' && (
           <m.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -693,7 +856,9 @@ export default function CoreCommandCenter() {
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-base font-bold font-display">Alloy Intelligence Recommendations</h2>
+                <h2 className="text-base font-bold font-display">
+                  Alloy Intelligence Recommendations
+                </h2>
                 <p className="text-[12px] text-muted-foreground mt-0.5">
                   Cross-platform · All entity types · Explainable scoring
                 </p>
@@ -714,9 +879,8 @@ export default function CoreCommandCenter() {
                     No recommendations stored yet
                   </p>
                   <p className="text-[12px] text-muted-foreground max-w-sm mx-auto">
-                    POST to{" "}
-                    <code className="text-indigo-400">/api/core/recommendations</code> with an
-                    entity_type and context to generate scored, explainable recommendations.
+                    POST to <code className="text-indigo-400">/api/core/recommendations</code> with
+                    an entity_type and context to generate scored, explainable recommendations.
                   </p>
                   <div className="mt-4 rounded-lg bg-muted/20 p-3 text-left max-w-sm mx-auto">
                     <pre className="text-[10px] font-mono text-muted-foreground whitespace-pre-wrap">{`{
@@ -734,35 +898,32 @@ export default function CoreCommandCenter() {
                 </div>
               ) : (
                 (recsData?.data ?? []).map((rec) => (
-                  <div
-                    key={rec.id}
-                    className="rounded-xl border border-border/40 bg-card/60 p-4"
-                  >
+                  <div key={rec.id} className="rounded-xl border border-border/40 bg-card/60 p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                           <span
                             className={cn(
-                              "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border",
-                              SEVERITY_BG[rec.severity] ?? "",
+                              'text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border',
+                              SEVERITY_BG[rec.severity] ?? '',
                             )}
                           >
                             {rec.severity}
                           </span>
                           <span className="text-[10px] text-muted-foreground capitalize">
-                            {rec.entity_type?.replace(/_/g, " ")}
+                            {rec.entity_type?.replace(/_/g, ' ')}
                           </span>
                           <span className="text-[10px] text-muted-foreground">·</span>
                           <span className="text-[10px] text-muted-foreground">{rec.domain}</span>
                         </div>
                         <p className="text-sm font-semibold text-foreground mb-1">{rec.title}</p>
                         <p className="text-[11px] text-muted-foreground">
-                          Generated{" "}
-                          {new Date(rec.generated_at).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
+                          Generated{' '}
+                          {new Date(rec.generated_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
                           })}
                         </p>
                       </div>
@@ -771,11 +932,7 @@ export default function CoreCommandCenter() {
                           className="text-2xl font-bold font-display"
                           style={{
                             color:
-                              rec.score >= 80
-                                ? "#ef4444"
-                                : rec.score >= 65
-                                ? "#f59e0b"
-                                : "#0ea5e9",
+                              rec.score >= 80 ? '#ef4444' : rec.score >= 65 ? '#f59e0b' : '#0ea5e9',
                           }}
                         >
                           {Math.round(rec.score)}
@@ -797,7 +954,7 @@ export default function CoreCommandCenter() {
           </m.div>
         )}
 
-        {tab === "audit" && (
+        {tab === 'audit' && (
           <m.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -831,27 +988,31 @@ export default function CoreCommandCenter() {
               ) : (
                 auditEvents.slice(0, 10).map((evt) => (
                   <div
-                    key={String(evt.id ?? `${evt.action_type ?? evt.actionType}-${evt.created_at ?? evt.createdAt}`)}
+                    key={String(
+                      evt.id ??
+                        `${evt.action_type ?? evt.actionType}-${evt.created_at ?? evt.createdAt}`,
+                    )}
                     className="flex items-center gap-3 rounded-lg border border-border/30 bg-card/50 px-4 py-3"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-medium text-foreground truncate">
-                        {String(evt.action_type ?? evt.actionType ?? "Unknown action")}
+                        {String(evt.action_type ?? evt.actionType ?? 'Unknown action')}
                       </p>
                       <p className="text-[10px] text-muted-foreground">
-                        {String(evt.entity_type ?? evt.entityType ?? "")}
+                        {String(evt.entity_type ?? evt.entityType ?? '')}
                         {evt.entity_id || evt.entityId
                           ? ` · ${String(evt.entity_id ?? evt.entityId)}`
-                          : ""}
+                          : ''}
                       </p>
                     </div>
                     <span className="text-[10px] text-muted-foreground flex-shrink-0">
                       {evt.created_at || evt.createdAt
-                        ? new Date(
-                            String(evt.created_at ?? evt.createdAt),
-                          ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                        : ""}
+                        ? new Date(String(evt.created_at ?? evt.createdAt)).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : ''}
                     </span>
                   </div>
                 ))
@@ -860,7 +1021,7 @@ export default function CoreCommandCenter() {
           </m.div>
         )}
 
-        {tab === "services" && (
+        {tab === 'services' && (
           <m.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -869,7 +1030,8 @@ export default function CoreCommandCenter() {
             <div className="mb-6">
               <h2 className="text-base font-bold font-display">Service Health</h2>
               <p className="text-[12px] text-muted-foreground mt-0.5">
-                Real-time status · <code className="text-indigo-400 text-[11px]">GET /api/core/health</code>
+                Real-time status ·{' '}
+                <code className="text-indigo-400 text-[11px]">GET /api/core/health</code>
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
@@ -881,10 +1043,10 @@ export default function CoreCommandCenter() {
                     <div
                       key={name}
                       className={cn(
-                        "rounded-xl border p-4",
-                        svc.status === "ok" || svc.status === "healthy"
-                          ? "border-emerald-500/25 bg-emerald-500/5"
-                          : "border-red-500/25 bg-red-500/5",
+                        'rounded-xl border p-4',
+                        svc.status === 'ok' || svc.status === 'healthy'
+                          ? 'border-emerald-500/25 bg-emerald-500/5'
+                          : 'border-red-500/25 bg-red-500/5',
                       )}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -894,18 +1056,18 @@ export default function CoreCommandCenter() {
                         <div className="flex items-center gap-1.5">
                           <span
                             className={cn(
-                              "w-2 h-2 rounded-full",
-                              svc.status === "ok" || svc.status === "healthy"
-                                ? "bg-emerald-400"
-                                : "bg-red-400",
+                              'w-2 h-2 rounded-full',
+                              svc.status === 'ok' || svc.status === 'healthy'
+                                ? 'bg-emerald-400'
+                                : 'bg-red-400',
                             )}
                           />
                           <span
                             className={cn(
-                              "text-[10px] font-medium",
-                              svc.status === "ok" || svc.status === "healthy"
-                                ? "text-emerald-400"
-                                : "text-red-400",
+                              'text-[10px] font-medium',
+                              svc.status === 'ok' || svc.status === 'healthy'
+                                ? 'text-emerald-400'
+                                : 'text-red-400',
                             )}
                           >
                             {svc.status}
@@ -929,19 +1091,19 @@ export default function CoreCommandCenter() {
               <div className="rounded-xl border border-border/40 bg-card/60 p-4">
                 <p className="text-[11px] text-muted-foreground mb-1">Platform Uptime</p>
                 <p className="text-2xl font-bold text-emerald-400">
-                  {uptimeH !== null ? `${uptimeH}h` : "—"}
+                  {uptimeH !== null ? `${uptimeH}h` : '—'}
                 </p>
               </div>
               <div className="rounded-xl border border-border/40 bg-card/60 p-4">
                 <p className="text-[11px] text-muted-foreground mb-1">Total Recommendations</p>
                 <p className="text-2xl font-bold text-purple-400">
-                  {health?.telemetry?.total_recommendations ?? "—"}
+                  {health?.telemetry?.total_recommendations ?? '—'}
                 </p>
               </div>
               <div className="rounded-xl border border-border/40 bg-card/60 p-4">
                 <p className="text-[11px] text-muted-foreground mb-1">Total Audit Events</p>
                 <p className="text-2xl font-bold text-blue-400">
-                  {health?.telemetry?.total_audit_events ?? "—"}
+                  {health?.telemetry?.total_audit_events ?? '—'}
                 </p>
               </div>
             </div>

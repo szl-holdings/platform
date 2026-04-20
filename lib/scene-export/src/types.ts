@@ -55,7 +55,7 @@ export interface ProofBundle {
   approvalChain: Array<{
     approverRole: string;
     approvedAt: string;
-    decision: "approved" | "rejected" | "escalated";
+    decision: 'approved' | 'rejected' | 'escalated';
     rationale?: string;
   }>;
   generatedAt: string;
@@ -69,7 +69,7 @@ export interface OpenUSDManifest {
   domain: string;
   layers: Array<{
     identifier: string;
-    layerType: "root" | "sublayer" | "reference" | "payload";
+    layerType: 'root' | 'sublayer' | 'reference' | 'payload';
     documentation?: string;
   }>;
   prims: Array<{

@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import type { UppyFile } from "@uppy/core";
+import type { UppyFile } from '@uppy/core';
+import { useCallback, useState } from 'react';
 
 interface UploadMetadata {
   name: string;
@@ -54,51 +54,45 @@ interface UseUploadOptions {
  * ```
  */
 export function useUpload(options: UseUploadOptions = {}) {
-  const basePath = options.basePath ?? "/api/storage";
+  const basePath = options.basePath ?? '/api/storage';
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [progress, setProgress] = useState(0);
 
-  const requestUploadUrl = useCallback(
-    async (file: File): Promise<UploadResponse> => {
-      const response = await fetch(`${basePath}/uploads/request-url`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: file.name,
-          size: file.size,
-          contentType: file.type || "application/octet-stream",
-        }),
-      });
+  const requestUploadUrl = useCallback(async (file: File): Promise<UploadResponse> => {
+    const response = await fetch(`${basePath}/uploads/request-url`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: file.name,
+        size: file.size,
+        contentType: file.type || 'application/octet-stream',
+      }),
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to get upload URL");
-      }
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to get upload URL');
+    }
 
-      return response.json();
-    },
-    []
-  );
+    return response.json();
+  }, []);
 
-  const uploadToPresignedUrl = useCallback(
-    async (file: File, uploadURL: string): Promise<void> => {
-      const response = await fetch(uploadURL, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type || "application/octet-stream",
-        },
-      });
+  const uploadToPresignedUrl = useCallback(async (file: File, uploadURL: string): Promise<void> => {
+    const response = await fetch(uploadURL, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type || 'application/octet-stream',
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to upload file to storage");
-      }
-    },
-    []
-  );
+    if (!response.ok) {
+      throw new Error('Failed to upload file to storage');
+    }
+  }, []);
 
   const uploadFile = useCallback(
     async (file: File): Promise<UploadResponse | null> => {
@@ -117,7 +111,7 @@ export function useUpload(options: UseUploadOptions = {}) {
         options.onSuccess?.(uploadResponse);
         return uploadResponse;
       } catch (err) {
-        const error = err instanceof Error ? err : new Error("Upload failed");
+        const error = err instanceof Error ? err : new Error('Upload failed');
         setError(error);
         options.onError?.(error);
         return null;
@@ -125,41 +119,41 @@ export function useUpload(options: UseUploadOptions = {}) {
         setIsUploading(false);
       }
     },
-    [requestUploadUrl, uploadToPresignedUrl, options]
+    [requestUploadUrl, uploadToPresignedUrl, options],
   );
 
   const getUploadParameters = useCallback(
     async (
-      file: UppyFile<Record<string, unknown>, Record<string, unknown>>
+      file: UppyFile<Record<string, unknown>, Record<string, unknown>>,
     ): Promise<{
-      method: "PUT";
+      method: 'PUT';
       url: string;
       headers?: Record<string, string>;
     }> => {
       const response = await fetch(`${basePath}/uploads/request-url`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: file.name,
           size: file.size,
-          contentType: file.type || "application/octet-stream",
+          contentType: file.type || 'application/octet-stream',
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to get upload URL");
+        throw new Error('Failed to get upload URL');
       }
 
       const data = await response.json();
       return {
-        method: "PUT",
+        method: 'PUT',
         url: data.uploadURL,
-        headers: { "Content-Type": file.type || "application/octet-stream" },
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
       };
     },
-    []
+    [],
   );
 
   return {

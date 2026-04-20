@@ -1,4 +1,4 @@
-import { GOLDEN_SET, type GoldenTestCase } from "./golden-set.js";
+import { GOLDEN_SET, type GoldenTestCase } from './golden-set.js';
 
 export interface EvalResult {
   testId: string;
@@ -29,10 +29,10 @@ export interface EvalReport {
 }
 
 function getNestedField(obj: Record<string, unknown>, field: string): unknown {
-  const parts = field.split(".");
+  const parts = field.split('.');
   let current: unknown = obj;
   for (const part of parts) {
-    if (current == null || typeof current !== "object") return undefined;
+    if (current == null || typeof current !== 'object') return undefined;
     current = (current as Record<string, unknown>)[part];
   }
   return current;
@@ -40,26 +40,36 @@ function getNestedField(obj: Record<string, unknown>, field: string): unknown {
 
 function checkAssertion(
   output: Record<string, unknown>,
-  assertion: GoldenTestCase["assertions"][number],
+  assertion: GoldenTestCase['assertions'][number],
 ): { passed: boolean; actual: unknown } {
   const actual = getNestedField(output, assertion.field);
 
   switch (assertion.operator) {
-    case "equals":
+    case 'equals':
       return { passed: actual === assertion.value, actual };
-    case "contains":
-      return { passed: typeof actual === "string" && actual.includes(assertion.value as string), actual };
-    case "exists":
-      return { passed: actual !== undefined && actual !== null, actual };
-    case "gt":
-      return { passed: typeof actual === "number" && actual > (assertion.value as number), actual };
-    case "lt":
-      return { passed: typeof actual === "number" && actual < (assertion.value as number), actual };
-    case "oneOf":
-      return { passed: Array.isArray(assertion.value) && (assertion.value as unknown[]).includes(actual), actual };
-    case "notEmpty":
+    case 'contains':
       return {
-        passed: Array.isArray(actual) ? actual.length > 0 : typeof actual === "string" ? actual.length > 0 : actual != null,
+        passed: typeof actual === 'string' && actual.includes(assertion.value as string),
+        actual,
+      };
+    case 'exists':
+      return { passed: actual !== undefined && actual !== null, actual };
+    case 'gt':
+      return { passed: typeof actual === 'number' && actual > (assertion.value as number), actual };
+    case 'lt':
+      return { passed: typeof actual === 'number' && actual < (assertion.value as number), actual };
+    case 'oneOf':
+      return {
+        passed: Array.isArray(assertion.value) && (assertion.value as unknown[]).includes(actual),
+        actual,
+      };
+    case 'notEmpty':
+      return {
+        passed: Array.isArray(actual)
+          ? actual.length > 0
+          : typeof actual === 'string'
+            ? actual.length > 0
+            : actual != null,
         actual,
       };
     default:
@@ -68,10 +78,13 @@ function checkAssertion(
 }
 
 export async function runEvals(
-  executor: (input: string, category: string) => Promise<{ output: Record<string, unknown>; model: string; latencyMs: number }>,
+  executor: (
+    input: string,
+    category: string,
+  ) => Promise<{ output: Record<string, unknown>; model: string; latencyMs: number }>,
   options?: { categories?: string[]; testIds?: string[] },
 ): Promise<EvalReport> {
-  const tests = GOLDEN_SET.filter(t => {
+  const tests = GOLDEN_SET.filter((t) => {
     if (options?.testIds?.length) return options.testIds.includes(t.id);
     if (options?.categories?.length) return options.categories.includes(t.category);
     return true;
@@ -79,7 +92,7 @@ export async function runEvals(
 
   const results: EvalResult[] = [];
   let totalLatency = 0;
-  let model = "unknown";
+  let model = 'unknown';
 
   for (const test of tests) {
     try {
@@ -87,12 +100,12 @@ export async function runEvals(
       model = usedModel;
       totalLatency += latencyMs;
 
-      const assertionResults = test.assertions.map(assertion => {
+      const assertionResults = test.assertions.map((assertion) => {
         const { passed, actual } = checkAssertion(output, assertion);
         return {
           field: assertion.field,
           operator: assertion.operator,
-          expected: assertion.value ?? "exists",
+          expected: assertion.value ?? 'exists',
           actual,
           passed,
         };
@@ -101,7 +114,7 @@ export async function runEvals(
       results.push({
         testId: test.id,
         category: test.category,
-        passed: assertionResults.every(a => a.passed),
+        passed: assertionResults.every((a) => a.passed),
         assertions: assertionResults,
         model: usedModel,
         latencyMs,
@@ -113,15 +126,15 @@ export async function runEvals(
         category: test.category,
         passed: false,
         assertions: [],
-        model: "error",
+        model: 'error',
         latencyMs: 0,
         error: err instanceof Error ? err.message : String(err),
       });
     }
   }
 
-  const passed = results.filter(r => r.passed).length;
-  const byCategory: EvalReport["byCategory"] = {};
+  const passed = results.filter((r) => r.passed).length;
+  const byCategory: EvalReport['byCategory'] = {};
   for (const r of results) {
     if (!byCategory[r.category]) byCategory[r.category] = { total: 0, passed: 0, failed: 0 };
     byCategory[r.category].total++;
@@ -135,7 +148,7 @@ export async function runEvals(
     totalTests: results.length,
     passed,
     failed: results.length - passed,
-    passRate: results.length > 0 ? `${((passed / results.length) * 100).toFixed(1)}%` : "0.0%",
+    passRate: results.length > 0 ? `${((passed / results.length) * 100).toFixed(1)}%` : '0.0%',
     byCategory,
     results,
     avgLatencyMs: results.length > 0 ? Math.round(totalLatency / results.length) : 0,

@@ -12,37 +12,34 @@
  * Alt:   ./scripts/wiki/prepare-wiki-pages.ts (if tsx is in PATH)
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SEED_DIR = path.resolve(__dirname, "../../docs/wiki/wiki-seed");
-const SIDEBAR_PATH = path.resolve(__dirname, "../../docs/wiki/_Sidebar.md");
-const FOOTER_PATH = path.resolve(__dirname, "../../docs/wiki/_Footer.md");
-const SCREENSHOTS_DIR = path.resolve(
-  __dirname,
-  "../../docs/media/screenshots"
-);
+const SEED_DIR = path.resolve(__dirname, '../../docs/wiki/wiki-seed');
+const SIDEBAR_PATH = path.resolve(__dirname, '../../docs/wiki/_Sidebar.md');
+const FOOTER_PATH = path.resolve(__dirname, '../../docs/wiki/_Footer.md');
+const SCREENSHOTS_DIR = path.resolve(__dirname, '../../docs/media/screenshots');
 
 const REQUIRED_PAGES = [
-  "Home.md",
-  "Platform-Overview.md",
-  "Architecture.md",
-  "Deployment-Model.md",
-  "Security-Posture.md",
-  "Trust-Center.md",
-  "Screenshots-and-Demos.md",
-  "Buyer-Use-Cases.md",
-  "Investor-Overview.md",
-  "FAQ.md",
-  "Roadmap.md",
-  "Glossary.md",
+  'Home.md',
+  'Platform-Overview.md',
+  'Architecture.md',
+  'Deployment-Model.md',
+  'Security-Posture.md',
+  'Trust-Center.md',
+  'Screenshots-and-Demos.md',
+  'Buyer-Use-Cases.md',
+  'Investor-Overview.md',
+  'FAQ.md',
+  'Roadmap.md',
+  'Glossary.md',
 ];
 
-const REQUIRED_NAV = ["_Sidebar.md", "_Footer.md"];
+const REQUIRED_NAV = ['_Sidebar.md', '_Footer.md'];
 
 interface ValidationResult {
   page: string;
@@ -58,7 +55,7 @@ function checkPagesExist(): string[] {
     }
   }
   for (const nav of REQUIRED_NAV) {
-    const navPath = path.resolve(__dirname, "../../docs/wiki", nav);
+    const navPath = path.resolve(__dirname, '../../docs/wiki', nav);
     if (!fs.existsSync(navPath)) {
       missing.push(`docs/wiki/${nav}`);
     }
@@ -67,16 +64,16 @@ function checkPagesExist(): string[] {
 }
 
 function checkNoFrontmatter(filePath: string): boolean {
-  const content = fs.readFileSync(filePath, "utf-8");
+  const content = fs.readFileSync(filePath, 'utf-8');
   const trimmed = content.trimStart();
-  if (!trimmed.startsWith("---")) return false;
+  if (!trimmed.startsWith('---')) return false;
   // A true YAML frontmatter block has key: value pairs on the lines after `---`.
   // A Markdown horizontal rule `---` is followed by empty lines or regular content.
-  const lines = trimmed.split("\n");
+  const lines = trimmed.split('\n');
   if (lines.length < 2) return false;
   for (let i = 1; i < Math.min(lines.length, 5); i++) {
     const line = lines[i].trim();
-    if (line === "") continue;
+    if (line === '') continue;
     if (/^[\w-]+\s*:/.test(line)) return true; // YAML key: value detected
     break; // Non-YAML content: this is just a horizontal rule
   }
@@ -97,15 +94,11 @@ function checkWikiLinks(content: string, availablePages: Set<string>): string[] 
   const links = extractWikiLinks(content);
   const broken: string[] = [];
   for (const link of links) {
-    const pageName = link.split("|")[0].trim();
-    if (
-      pageName === "_Footer" ||
-      pageName === "_Sidebar" ||
-      pageName === "Home"
-    ) {
+    const pageName = link.split('|')[0].trim();
+    if (pageName === '_Footer' || pageName === '_Sidebar' || pageName === 'Home') {
       continue;
     }
-    if (!availablePages.has(pageName + ".md")) {
+    if (!availablePages.has(pageName + '.md')) {
       broken.push(link);
     }
   }
@@ -126,18 +119,15 @@ function checkScreenshotRefs(content: string): string[] {
   return missing;
 }
 
-function validatePage(
-  pagePath: string,
-  availablePages: Set<string>
-): ValidationResult {
+function validatePage(pagePath: string, availablePages: Set<string>): ValidationResult {
   const pageName = path.basename(pagePath);
   const issues: string[] = [];
 
   if (checkNoFrontmatter(pagePath)) {
-    issues.push("Contains YAML frontmatter — remove before publishing to wiki");
+    issues.push('Contains YAML frontmatter — remove before publishing to wiki');
   }
 
-  const content = fs.readFileSync(pagePath, "utf-8");
+  const content = fs.readFileSync(pagePath, 'utf-8');
 
   const brokenLinks = checkWikiLinks(content, availablePages);
   for (const link of brokenLinks) {
@@ -153,22 +143,20 @@ function validatePage(
 }
 
 function main() {
-  console.log("=== Wiki Page Validation ===\n");
+  console.log('=== Wiki Page Validation ===\n');
 
   const missingPages = checkPagesExist();
   if (missingPages.length > 0) {
-    console.error("MISSING REQUIRED FILES:");
+    console.error('MISSING REQUIRED FILES:');
     for (const page of missingPages) {
       console.error(`  ✗ ${page}`);
     }
-    console.error("");
+    console.error('');
   } else {
-    console.log("✓ All required pages exist\n");
+    console.log('✓ All required pages exist\n');
   }
 
-  const availablePages = new Set(
-    fs.readdirSync(SEED_DIR).filter((f) => f.endsWith(".md"))
-  );
+  const availablePages = new Set(fs.readdirSync(SEED_DIR).filter((f) => f.endsWith('.md')));
 
   const results: ValidationResult[] = [];
 
@@ -193,17 +181,15 @@ function main() {
       for (const issue of result.issues) {
         console.log(`  ✗ ${issue}`);
       }
-      console.log("");
+      console.log('');
     }
   }
 
   if (!hasIssues && missingPages.length === 0) {
-    console.log("✓ All pages validated. Ready for export.\n");
-    console.log(
-      "Next step: npx tsx scripts/wiki/export-docs-to-wiki.ts"
-    );
+    console.log('✓ All pages validated. Ready for export.\n');
+    console.log('Next step: npx tsx scripts/wiki/export-docs-to-wiki.ts');
   } else {
-    console.error("Validation failed. Fix issues before exporting.");
+    console.error('Validation failed. Fix issues before exporting.');
     process.exit(1);
   }
 }

@@ -1,55 +1,58 @@
-import { db } from "@szl-holdings/db";
 import {
-  cstNodes,
-  cstEdges,
   cstEdgeEvidence,
+  cstEdges,
   cstNodeAliases,
+  cstNodes,
   cstNodeTypes,
-} from "@szl-holdings/db";
-import { eq, and, gte, ilike, inArray, or, sql } from "drizzle-orm";
+  db,
+} from '@szl-holdings/db';
+import { and, eq, gte, ilike, inArray, or, sql } from 'drizzle-orm';
+import type { ConstellationEdge, ConstellationNode } from './schema.js';
+import type { GraphStore } from './store.js';
 import type {
+  AddCstEvidence,
+  CreateCstEdge,
+  CreateCstNode,
+  CstEdge,
+  CstEdgeEvidence,
+  CstNode,
+  CstNodeTypeRegistration,
   CstQueryFilters,
   CstRelationshipFilters,
   CstSearchParams,
-  CreateCstNode,
-  CreateCstEdge,
-  AddCstEvidence,
-  CstNode,
-  CstEdge,
-  CstEdgeEvidence,
-  CstNodeTypeRegistration,
-} from "./types.ts";
-import type { GraphStore } from "./store.js";
-import type { ConstellationNode, ConstellationEdge } from "./schema.js";
+} from './types.ts';
 
 function mapDbNodeToSchema(row: typeof cstNodes.$inferSelect): CstNode {
   return {
     id: row.id,
     canonicalId: row.canonicalId,
-    domain: row.domain as CstNode["domain"],
+    domain: row.domain as CstNode['domain'],
     entityType: row.entityType,
     labels: (row.labels ?? []) as string[],
     name: row.name,
     description: row.description ?? undefined,
-    provenance:
-      row.provenanceSourceId
-        ? {
-            sourceId: row.provenanceSourceId,
-            sourceType: (row.provenanceSourceType ?? "system") as CstNode["provenance"] extends undefined ? never : NonNullable<CstNode["provenance"]>["sourceType"],
-            sourceLabel: row.provenanceSourceLabel ?? undefined,
-          }
-        : undefined,
+    provenance: row.provenanceSourceId
+      ? {
+          sourceId: row.provenanceSourceId,
+          sourceType: (row.provenanceSourceType ??
+            'system') as CstNode['provenance'] extends undefined
+            ? never
+            : NonNullable<CstNode['provenance']>['sourceType'],
+          sourceLabel: row.provenanceSourceLabel ?? undefined,
+        }
+      : undefined,
     freshness: row.freshness.toISOString(),
     confidence: row.confidence ?? 1.0,
-    owner:
-      row.ownerId
-        ? {
-            ownerId: row.ownerId,
-            ownerType: (row.ownerType ?? "system") as CstNode["owner"] extends undefined ? never : NonNullable<CstNode["owner"]>["ownerType"],
-            ownerOrgId: row.ownerOrgId ?? undefined,
-          }
-        : undefined,
-    sensitivityTier: (row.sensitivityTier ?? "internal") as CstNode["sensitivityTier"],
+    owner: row.ownerId
+      ? {
+          ownerId: row.ownerId,
+          ownerType: (row.ownerType ?? 'system') as CstNode['owner'] extends undefined
+            ? never
+            : NonNullable<CstNode['owner']>['ownerType'],
+          ownerOrgId: row.ownerOrgId ?? undefined,
+        }
+      : undefined,
+    sensitivityTier: (row.sensitivityTier ?? 'internal') as CstNode['sensitivityTier'],
     relatedActionIds: (row.relatedActionIds ?? []) as string[],
     relatedDocumentIds: (row.relatedDocumentIds ?? []) as string[],
     relatedExecutionIds: (row.relatedExecutionIds ?? []) as string[],
@@ -71,14 +74,15 @@ function mapDbEdgeToSchema(
     toNodeId: row.toNodeId,
     relationshipType: row.relationshipType,
     confidence: row.confidence ?? 1.0,
-    source:
-      row.sourceId
-        ? {
-            sourceId: row.sourceId,
-            sourceType: (row.sourceType ?? "system") as CstEdge["source"] extends undefined ? never : NonNullable<CstEdge["source"]>["sourceType"],
-            sourceLabel: row.sourceLabel ?? undefined,
-          }
-        : undefined,
+    source: row.sourceId
+      ? {
+          sourceId: row.sourceId,
+          sourceType: (row.sourceType ?? 'system') as CstEdge['source'] extends undefined
+            ? never
+            : NonNullable<CstEdge['source']>['sourceType'],
+          sourceLabel: row.sourceLabel ?? undefined,
+        }
+      : undefined,
     active: row.active ?? true,
     extensions: (row.extensions ?? {}) as Record<string, unknown>,
     createdAt: row.createdAt.toISOString(),
@@ -97,14 +101,18 @@ function mapDbEdgeToSchema(
   };
 }
 
-export async function queryNodes(filters: CstQueryFilters): Promise<{ nodes: CstNode[]; total: number }> {
+export async function queryNodes(
+  filters: CstQueryFilters,
+): Promise<{ nodes: CstNode[]; total: number }> {
   const conditions = [];
 
   if (filters.domain) conditions.push(eq(cstNodes.domain, filters.domain));
   if (filters.entityType) conditions.push(eq(cstNodes.entityType, filters.entityType));
-  if (filters.sensitivityTier) conditions.push(eq(cstNodes.sensitivityTier, filters.sensitivityTier));
+  if (filters.sensitivityTier)
+    conditions.push(eq(cstNodes.sensitivityTier, filters.sensitivityTier));
   if (filters.isActive !== undefined) conditions.push(eq(cstNodes.isActive, filters.isActive));
-  if (filters.minConfidence !== undefined) conditions.push(gte(cstNodes.confidence, filters.minConfidence));
+  if (filters.minConfidence !== undefined)
+    conditions.push(gte(cstNodes.confidence, filters.minConfidence));
 
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -116,10 +124,7 @@ export async function queryNodes(filters: CstQueryFilters): Promise<{ nodes: Cst
       .limit(filters.limit)
       .offset(filters.offset)
       .orderBy(cstNodes.createdAt),
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(cstNodes)
-      .where(where),
+    db.select({ count: sql<number>`count(*)::int` }).from(cstNodes).where(where),
   ]);
 
   return {
@@ -129,11 +134,7 @@ export async function queryNodes(filters: CstQueryFilters): Promise<{ nodes: Cst
 }
 
 export async function getNodeById(id: string): Promise<CstNode | null> {
-  const [row] = await db
-    .select()
-    .from(cstNodes)
-    .where(eq(cstNodes.id, id))
-    .limit(1);
+  const [row] = await db.select().from(cstNodes).where(eq(cstNodes.id, id)).limit(1);
   return row ? mapDbNodeToSchema(row) : null;
 }
 
@@ -148,10 +149,7 @@ export async function getNodeByCanonicalId(canonicalId: string): Promise<CstNode
 
 export async function searchNodes(params: CstSearchParams): Promise<CstNode[]> {
   const conditions = [
-    or(
-      ilike(cstNodes.name, `%${params.q}%`),
-      ilike(cstNodes.description, `%${params.q}%`),
-    ),
+    or(ilike(cstNodes.name, `%${params.q}%`), ilike(cstNodes.description, `%${params.q}%`)),
   ];
   if (params.domain) conditions.push(eq(cstNodes.domain, params.domain));
   if (params.entityType) conditions.push(eq(cstNodes.entityType, params.entityType));
@@ -186,7 +184,7 @@ export async function upsertNode(input: CreateCstNode): Promise<CstNode> {
       ownerId: input.owner?.ownerId,
       ownerType: input.owner?.ownerType,
       ownerOrgId: input.owner?.ownerOrgId,
-      sensitivityTier: input.sensitivityTier ?? "internal",
+      sensitivityTier: input.sensitivityTier ?? 'internal',
       relatedActionIds: input.relatedActionIds ?? [],
       relatedDocumentIds: input.relatedDocumentIds ?? [],
       relatedExecutionIds: input.relatedExecutionIds ?? [],
@@ -201,14 +199,23 @@ export async function upsertNode(input: CreateCstNode): Promise<CstNode> {
   return mapDbNodeToSchema(row);
 }
 
-export async function upsertNodeAlias(nodeId: string, aliasType: string, aliasValue: string, sourceSystem?: string, isPrimary = false): Promise<void> {
+export async function upsertNodeAlias(
+  nodeId: string,
+  aliasType: string,
+  aliasValue: string,
+  sourceSystem?: string,
+  isPrimary = false,
+): Promise<void> {
   await db
     .insert(cstNodeAliases)
     .values({ nodeId, aliasType, aliasValue, sourceSystem, isPrimary })
     .onConflictDoNothing();
 }
 
-export async function lookupNodeByAlias(aliasType: string, aliasValue: string): Promise<CstNode | null> {
+export async function lookupNodeByAlias(
+  aliasType: string,
+  aliasValue: string,
+): Promise<CstNode | null> {
   const [alias] = await db
     .select()
     .from(cstNodeAliases)
@@ -278,14 +285,18 @@ export async function addEdgeEvidence(input: AddCstEvidence): Promise<CstEdgeEvi
   };
 }
 
-export async function queryEdges(filters: CstRelationshipFilters): Promise<{ edges: CstEdge[]; total: number }> {
+export async function queryEdges(
+  filters: CstRelationshipFilters,
+): Promise<{ edges: CstEdge[]; total: number }> {
   const conditions = [];
 
   if (filters.fromNodeId) conditions.push(eq(cstEdges.fromNodeId, filters.fromNodeId));
   if (filters.toNodeId) conditions.push(eq(cstEdges.toNodeId, filters.toNodeId));
-  if (filters.relationshipType) conditions.push(eq(cstEdges.relationshipType, filters.relationshipType));
+  if (filters.relationshipType)
+    conditions.push(eq(cstEdges.relationshipType, filters.relationshipType));
   if (filters.active !== undefined) conditions.push(eq(cstEdges.active, filters.active));
-  if (filters.minConfidence !== undefined) conditions.push(gte(cstEdges.confidence, filters.minConfidence));
+  if (filters.minConfidence !== undefined)
+    conditions.push(gte(cstEdges.confidence, filters.minConfidence));
 
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -297,10 +308,7 @@ export async function queryEdges(filters: CstRelationshipFilters): Promise<{ edg
       .limit(filters.limit)
       .offset(filters.offset)
       .orderBy(cstEdges.createdAt),
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(cstEdges)
-      .where(where),
+    db.select({ count: sql<number>`count(*)::int` }).from(cstEdges).where(where),
   ]);
 
   let evidenceByEdge: Map<string, (typeof cstEdgeEvidence.$inferSelect)[]> = new Map();
@@ -320,7 +328,9 @@ export async function queryEdges(filters: CstRelationshipFilters): Promise<{ edg
   }
 
   return {
-    edges: rows.map((r) => mapDbEdgeToSchema(r, filters.includeEvidence ? (evidenceByEdge.get(r.id) ?? []) : undefined)),
+    edges: rows.map((r) =>
+      mapDbEdgeToSchema(r, filters.includeEvidence ? (evidenceByEdge.get(r.id) ?? []) : undefined),
+    ),
     total: countResult[0]?.count ?? 0,
   };
 }
@@ -336,16 +346,13 @@ export async function registerNodeTypes(registrations: CstNodeTypeRegistration[]
         typeKey: r.typeKey,
         displayName: r.displayName,
         description: r.description,
-        defaultSensitivity: r.defaultSensitivity ?? "internal",
+        defaultSensitivity: r.defaultSensitivity ?? 'internal',
       })),
     )
     .onConflictDoNothing();
 }
 
-export {
-  upsertNode as createNode,
-  upsertEdge as createEdge,
-};
+export { upsertEdge as createEdge, upsertNode as createNode };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // In-memory graph traversal helpers (operate on GraphStore, not Postgres)
@@ -363,16 +370,16 @@ type StoreCtx = { store: GraphStore };
  */
 export function findNeighbors(
   nodeId: string,
-  direction: "outgoing" | "incoming" | "both" = "both",
+  direction: 'outgoing' | 'incoming' | 'both' = 'both',
   ctx: StoreCtx,
 ): { nodes: ConstellationNode[] } {
   const edges = ctx.store.listEdges();
   const neighborIds = new Set<string>();
   for (const e of edges) {
-    if ((direction === "outgoing" || direction === "both") && e.fromNodeId === nodeId) {
+    if ((direction === 'outgoing' || direction === 'both') && e.fromNodeId === nodeId) {
       neighborIds.add(e.toNodeId);
     }
-    if ((direction === "incoming" || direction === "both") && e.toNodeId === nodeId) {
+    if ((direction === 'incoming' || direction === 'both') && e.toNodeId === nodeId) {
       neighborIds.add(e.fromNodeId);
     }
   }
@@ -447,9 +454,9 @@ export function subgraph(
   }
 
   const nodes = ctx.store.listNodes().filter((n) => reachable.has(n.id));
-  const edges = ctx.store.listEdges().filter(
-    (e) => reachable.has(e.fromNodeId) && reachable.has(e.toNodeId),
-  );
+  const edges = ctx.store
+    .listEdges()
+    .filter((e) => reachable.has(e.fromNodeId) && reachable.has(e.toNodeId));
   return { nodes, edges };
 }
 

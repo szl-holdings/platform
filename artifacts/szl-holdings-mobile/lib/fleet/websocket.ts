@@ -17,7 +17,7 @@ export interface AlertUpdate {
   vesselId: string;
   vesselName: string;
   type: string;
-  severity: "critical" | "high" | "medium" | "low";
+  severity: 'critical' | 'high' | 'medium' | 'low';
   title: string;
   description: string;
   timestamp: string;
@@ -46,7 +46,7 @@ class VesselsWebSocket {
     const domain = process.env.EXPO_PUBLIC_DOMAIN;
     if (!domain) return;
 
-    const wsUrl = `wss://${domain}/api/vessels/ws${this.token ? `?token=${encodeURIComponent(this.token)}` : ""}`;
+    const wsUrl = `wss://${domain}/api/vessels/ws${this.token ? `?token=${encodeURIComponent(this.token)}` : ''}`;
 
     try {
       this.ws = new WebSocket(wsUrl);
@@ -54,20 +54,19 @@ class VesselsWebSocket {
       this.ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data as string) as { type: string; data: unknown };
-          if (msg.type === "position_update") {
+          if (msg.type === 'position_update') {
             const update = msg.data as VesselPositionUpdate;
             update.latitude = String(update.lat);
             update.longitude = String(update.lon);
             this.positionHandlers.forEach((h) => h(update));
-            this.emit("position_update", update);
-          } else if (msg.type === "alert_update") {
+            this.emit('position_update', update);
+          } else if (msg.type === 'alert_update') {
             this.alertHandlers.forEach((h) => h(msg.data as AlertUpdate));
-            this.emit("alert_created", msg.data as AlertUpdate);
-          } else if (msg.type === "alert_resolved") {
-            this.emit("alert_resolved", msg.data);
+            this.emit('alert_created', msg.data as AlertUpdate);
+          } else if (msg.type === 'alert_resolved') {
+            this.emit('alert_resolved', msg.data);
           }
-        } catch {
-        }
+        } catch {}
       };
 
       this.ws.onclose = () => {
@@ -78,8 +77,7 @@ class VesselsWebSocket {
       this.ws.onerror = () => {
         this.ws?.close();
       };
-    } catch {
-    }
+    } catch {}
   }
 
   private emit(event: string, data?: unknown): void {

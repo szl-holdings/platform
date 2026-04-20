@@ -26,13 +26,13 @@
  *   ensuring tenant checks are accurate regardless of middleware execution order.
  */
 
-import type { Request, Response, NextFunction } from "express";
-import { db, orgMembersTable, organizationsTable } from "@szl-holdings/db";
-import { eq } from "drizzle-orm";
-import type { AuthenticatedUser } from "./auth";
-import { isAllowlistedPublicPath, fullApiPath } from "./global-auth-enforcer";
-import { serverTelemetry } from "@szl-holdings/observability";
-import { logger } from "../lib/logger";
+import { db, organizationsTable, orgMembersTable } from '@szl-holdings/db';
+import { serverTelemetry } from '@szl-holdings/observability';
+import { eq } from 'drizzle-orm';
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../lib/logger';
+import type { AuthenticatedUser } from './auth';
+import { fullApiPath, isAllowlistedPublicPath } from './global-auth-enforcer';
 
 export function recordTenantIsolationViolation(
   req: Request,
@@ -50,17 +50,21 @@ function reportTenantIsolationViolation(
   reason: string,
 ) {
   const userOrgIds = user?.orgs.map((o) => o.orgId) ?? [];
-  serverTelemetry.recordTenantIsolationViolation({
-    userId: user?.id ?? null,
-    userOrgIds,
-    attemptedOrgId,
-    path: req.originalUrl ?? req.path,
-    method: req.method,
-    reason,
-  });
+  try {
+    serverTelemetry.recordTenantIsolationViolation({
+      userId: user?.id ?? null,
+      userOrgIds,
+      attemptedOrgId,
+      path: req.originalUrl ?? req.path,
+      method: req.method,
+      reason,
+    });
+  } catch {
+    // Telemetry failure must not convert a 403 into a 500.
+  }
   logger.error(
     {
-      event: "tenant_isolation_violation",
+      event: 'tenant_isolation_violation',
       userId: user?.id ?? null,
       userOrgIds,
       attemptedOrgId,
@@ -68,7 +72,7 @@ function reportTenantIsolationViolation(
       method: req.method,
       reason,
     },
-    "[tenant-scope] tenant isolation violation",
+    '[tenant-scope] tenant isolation violation',
   );
 }
 
@@ -81,13 +85,13 @@ declare global {
   }
 }
 
-const ELEVATED_ROLES = new Set(["super_admin", "admin"]);
+const ELEVATED_ROLES = new Set(['super_admin', 'admin']);
 
 function isElevated(user: AuthenticatedUser): boolean {
   return user.roles.some((r) => ELEVATED_ROLES.has(r));
 }
 
-async function hydrateOrgMemberships(userId: number): Promise<AuthenticatedUser["orgs"]> {
+async function hydrateOrgMemberships(userId: number): Promise<AuthenticatedUser['orgs']> {
   const rows = await db
     .select({
       orgId: orgMembersTable.orgId,
@@ -139,7 +143,7 @@ export function tenantScope(options: { required?: boolean } = {}) {
             next();
             return;
           }
-          res.status(401).json({ error: "Authentication required" });
+          res.status(401).json({ error: 'Authentication required' });
           return;
         }
         next();
@@ -157,7 +161,7 @@ export function tenantScope(options: { required?: boolean } = {}) {
       // Skip tenant membership for that narrow trust condition only — do
       // NOT exempt all internal-agent callers, because scoped service
       // tokens may belong to specific tenants and must still be checked.
-      if (req.authBypassReason === "nexus_loopback") {
+      if (req.authBypassReason === 'nexus_loopback') {
         next();
         return;
       }
@@ -169,21 +173,26 @@ export function tenantScope(options: { required?: boolean } = {}) {
 
       if (user.orgs.length === 0) {
         if (required) {
-          res.status(403).json({ error: "No organization membership" });
+          res.status(403).json({ error: 'No organization membership' });
           return;
         }
         next();
         return;
       }
 
-      const paramSlug = req.params["orgSlug"] as string | undefined;
-      const paramId = req.params["orgId"] as string | undefined;
+      const paramSlug = req.params['orgSlug'] as string | undefined;
+      const paramId = req.params['orgId'] as string | undefined;
 
       if (paramSlug) {
         const membership = user.orgs.find((o) => o.orgSlug === paramSlug);
         if (!membership) {
-          reportTenantIsolationViolation(req, user, null, `cross-tenant access by orgSlug=${paramSlug}`);
-          res.status(403).json({ error: "Access denied: not a member of this organization" });
+          reportTenantIsolationViolation(
+            req,
+            user,
+            null,
+            `cross-tenant access by orgSlug=${paramSlug}`,
+          );
+          res.status(403).json({ error: 'Access denied: not a member of this organization' });
           return;
         }
         req.tenantOrgId = membership.orgId;
@@ -195,13 +204,13 @@ export function tenantScope(options: { required?: boolean } = {}) {
       if (paramId) {
         const id = parseInt(paramId, 10);
         if (isNaN(id)) {
-          res.status(400).json({ error: "Invalid organization ID" });
+          res.status(400).json({ error: 'Invalid organization ID' });
           return;
         }
         const membership = user.orgs.find((o) => o.orgId === id);
         if (!membership) {
           reportTenantIsolationViolation(req, user, id, `cross-tenant access by orgId=${id}`);
-          res.status(403).json({ error: "Access denied: not a member of this organization" });
+          res.status(403).json({ error: 'Access denied: not a member of this organization' });
           return;
         }
         req.tenantOrgId = membership.orgId;
@@ -215,7 +224,7 @@ export function tenantScope(options: { required?: boolean } = {}) {
       req.tenantOrgSlug = primary!.orgSlug;
       next();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Tenant scope error";
+      const message = err instanceof Error ? err.message : 'Tenant scope error';
       res.status(500).json({ error: message });
     }
   };
@@ -238,22 +247,22 @@ export function assertTenantAccess(
 ): boolean {
   const user = req.user;
   if (!user) {
-    res.status(401).json({ error: "Authentication required" });
+    res.status(401).json({ error: 'Authentication required' });
     return false;
   }
 
   if (isElevated(user)) return true;
 
   if (recordOrgId == null) {
-    reportTenantIsolationViolation(req, user, null, "record has no org_id");
-    res.status(403).json({ error: "Record has no organization — access denied" });
+    reportTenantIsolationViolation(req, user, null, 'record has no org_id');
+    res.status(403).json({ error: 'Record has no organization — access denied' });
     return false;
   }
 
   const isMember = user.orgs.some((o) => o.orgId === recordOrgId);
   if (!isMember) {
-    reportTenantIsolationViolation(req, user, recordOrgId, "cross-tenant record access");
-    res.status(403).json({ error: "Cross-tenant access denied" });
+    reportTenantIsolationViolation(req, user, recordOrgId, 'cross-tenant record access');
+    res.status(403).json({ error: 'Cross-tenant access denied' });
     return false;
   }
 

@@ -1,4 +1,4 @@
-import type { ATLASEvent, ATLASDomain } from "../types.js";
+import type { ATLASDomain, ATLASEvent } from '../types.js';
 
 export interface KPIIngestionRecord {
   domain: ATLASDomain;
@@ -30,15 +30,15 @@ export interface DomainTransactionRecord {
 
 function kpiToEventClass(
   kpiName: string,
-): "business.risk.detected" | "business.opportunity.created" | "outcome.realized" {
+): 'business.risk.detected' | 'business.opportunity.created' | 'outcome.realized' {
   const name = kpiName.toLowerCase();
-  if (name.includes("risk") || name.includes("threat") || name.includes("violation")) {
-    return "business.risk.detected";
+  if (name.includes('risk') || name.includes('threat') || name.includes('violation')) {
+    return 'business.risk.detected';
   }
-  if (name.includes("opportunity") || name.includes("lead") || name.includes("pipeline")) {
-    return "business.opportunity.created";
+  if (name.includes('opportunity') || name.includes('lead') || name.includes('pipeline')) {
+    return 'business.opportunity.created';
   }
-  return "outcome.realized";
+  return 'outcome.realized';
 }
 
 export function kpiRecordToAtlasEvent(record: KPIIngestionRecord): ATLASEvent {
@@ -50,7 +50,7 @@ export function kpiRecordToAtlasEvent(record: KPIIngestionRecord): ATLASEvent {
     correlationId: record.correlationId,
     entityIds: record.entityIds,
     timestamp: record.timestamp ?? Date.now(),
-    schemaVersion: "1.0" as const,
+    schemaVersion: '1.0' as const,
     metadata: {
       kpiName: record.kpiName,
       value: record.value,
@@ -59,44 +59,42 @@ export function kpiRecordToAtlasEvent(record: KPIIngestionRecord): ATLASEvent {
     },
   };
 
-  if (eventClass === "business.risk.detected") {
+  if (eventClass === 'business.risk.detected') {
     return {
       ...base,
-      eventClass: "business.risk.detected",
+      eventClass: 'business.risk.detected',
       riskType: record.kpiName,
       riskScore: Math.min(100, Math.max(0, record.value)),
     };
   }
 
-  if (eventClass === "business.opportunity.created") {
+  if (eventClass === 'business.opportunity.created') {
     return {
       ...base,
-      eventClass: "business.opportunity.created",
+      eventClass: 'business.opportunity.created',
       opportunityType: record.kpiName,
       opportunityId: base.eventId,
       estimatedValue: {
         amount: record.value,
         currency: record.unit,
-        type: "estimated",
+        type: 'estimated',
       },
     };
   }
 
   return {
     ...base,
-    eventClass: "outcome.realized",
+    eventClass: 'outcome.realized',
     outcomeType: record.kpiName,
     measuredValue: {
       amount: record.value,
       currency: record.unit,
-      type: "created",
+      type: 'created',
     },
   };
 }
 
-export function domainTransactionToAtlasEvent(
-  record: DomainTransactionRecord,
-): ATLASEvent {
+export function domainTransactionToAtlasEvent(record: DomainTransactionRecord): ATLASEvent {
   const base = {
     eventId: `tx-${record.transactionId}`,
     domain: record.domain,
@@ -104,31 +102,32 @@ export function domainTransactionToAtlasEvent(
     correlationId: record.correlationId,
     workflowId: record.workflowId,
     timestamp: Date.now(),
-    schemaVersion: "1.0" as const,
+    schemaVersion: '1.0' as const,
     metadata: record.metadata,
   };
 
   if (record.success) {
     return {
       ...base,
-      eventClass: "business.transaction.completed",
+      eventClass: 'business.transaction.completed',
       transactionType: record.transactionType,
       transactionId: record.transactionId,
       durationMs: record.durationMs,
-      outcome: "success",
-      businessValue: record.businessValueAmount != null
-        ? {
-            amount: record.businessValueAmount,
-            currency: record.businessValueCurrency ?? "USD",
-            type: "created",
-          }
-        : undefined,
+      outcome: 'success',
+      businessValue:
+        record.businessValueAmount != null
+          ? {
+              amount: record.businessValueAmount,
+              currency: record.businessValueCurrency ?? 'USD',
+              type: 'created',
+            }
+          : undefined,
     };
   }
 
   return {
     ...base,
-    eventClass: "business.transaction.failed",
+    eventClass: 'business.transaction.failed',
     transactionType: record.transactionType,
     transactionId: record.transactionId,
     durationMs: record.durationMs,

@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface EvidenceSource {
   sourceId: string;
@@ -14,7 +14,7 @@ export interface EvidenceSource {
 
 export interface PolicyCheckResult {
   policyId: string;
-  verdict: "allowed" | "requires-approval" | "blocked" | "override";
+  verdict: 'allowed' | 'requires-approval' | 'blocked' | 'override';
   reason?: string;
   timestamp?: string;
 }
@@ -24,7 +24,7 @@ export interface EvidencePanelProps {
   sources?: EvidenceSource[];
   policyChecks?: PolicyCheckResult[];
   toolsUsed?: string[];
-  approvalStatus?: "none" | "pending" | "approved" | "rejected" | "escalated";
+  approvalStatus?: 'none' | 'pending' | 'approved' | 'rejected' | 'escalated';
   approvalReason?: string;
   children?: ReactNode;
   className?: string;
@@ -32,7 +32,7 @@ export interface EvidencePanelProps {
 
 const VERDICT_COLOR: Record<string, string> = {
   allowed: color.accent.green,
-  "requires-approval": color.accent.amber,
+  'requires-approval': color.accent.amber,
   blocked: color.accent.red,
   override: color.accent.violet,
 };
@@ -50,14 +50,14 @@ export function EvidencePanel({
   sources = [],
   policyChecks = [],
   toolsUsed = [],
-  approvalStatus = "none",
+  approvalStatus = 'none',
   approvalReason,
   children,
   className,
 }: EvidencePanelProps) {
   return (
     <aside
-      className={cn("flex flex-col gap-0 divide-y", className)}
+      className={cn('flex flex-col gap-0 divide-y', className)}
       style={{ borderColor: color.border.subtle }}
     >
       {traceId && (
@@ -65,7 +65,7 @@ export function EvidencePanel({
           <div className="text-xs font-medium mb-1" style={{ color: color.text.secondary }}>
             Trace
           </div>
-          <code className="text-xs" style={{ color: color.accent.blue, fontFamily: "monospace" }}>
+          <code className="text-xs" style={{ color: color.accent.blue, fontFamily: 'monospace' }}>
             {traceId}
           </code>
         </div>
@@ -80,7 +80,10 @@ export function EvidencePanel({
             {sources.map((src) => (
               <div key={src.sourceId} className="flex flex-col gap-0.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium truncate" style={{ color: color.text.primary }}>
+                  <span
+                    className="text-xs font-medium truncate"
+                    style={{ color: color.text.primary }}
+                  >
                     {src.title ?? src.sourceId}
                   </span>
                   {src.score !== undefined && (
@@ -158,7 +161,7 @@ export function EvidencePanel({
         </div>
       )}
 
-      {approvalStatus !== "none" && (
+      {approvalStatus !== 'none' && (
         <div className="p-3">
           <div className="text-xs font-medium mb-1" style={{ color: color.text.secondary }}>
             Approval
@@ -167,8 +170,8 @@ export function EvidencePanel({
             <span
               className="rounded-full"
               style={{
-                width: "7px",
-                height: "7px",
+                width: '7px',
+                height: '7px',
                 background: APPROVAL_COLOR[approvalStatus],
                 flexShrink: 0,
               }}

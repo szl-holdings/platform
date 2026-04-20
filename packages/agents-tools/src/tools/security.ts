@@ -1,22 +1,22 @@
-import { z } from "zod";
 import {
-  ThreatScanInputSchema,
-  THREAT_SCAN_TOOL_MANIFEST,
-  threatScanHandler,
-  AlertEscalationInputSchema,
   ALERT_ESCALATION_TOOL_MANIFEST,
+  AlertEscalationInputSchema,
   alertEscalationHandler,
-  ComplianceCheckInputSchema,
   COMPLIANCE_CHECK_TOOL_MANIFEST,
+  ComplianceCheckInputSchema,
   complianceCheckHandler,
-  IncidentContainmentInputSchema,
   INCIDENT_CONTAINMENT_TOOL_MANIFEST,
+  IncidentContainmentInputSchema,
   incidentContainmentHandler,
-  VulnerabilityReportInputSchema,
+  THREAT_SCAN_TOOL_MANIFEST,
+  ThreatScanInputSchema,
+  threatScanHandler,
   VULNERABILITY_REPORT_TOOL_MANIFEST,
+  VulnerabilityReportInputSchema,
   vulnerabilityReportHandler,
-} from "@workspace/tool-mesh/tools/security-tools";
-import { defineTool } from "../typed-tool.js";
+} from '@workspace/tool-mesh/tools/security-tools';
+import { z } from 'zod';
+import { defineTool } from '../typed-tool.js';
 
 const GenericOutputSchema = z.record(z.unknown());
 
@@ -45,20 +45,22 @@ export const incidentContainmentTool = defineTool({
   manifest: INCIDENT_CONTAINMENT_TOOL_MANIFEST,
   inputSchema: IncidentContainmentInputSchema,
   outputSchema: GenericOutputSchema,
-  handler: (input) => incidentContainmentHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
+  handler: (input) =>
+    incidentContainmentHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
 });
 
 export const vulnerabilityReportTool = defineTool({
   manifest: VULNERABILITY_REPORT_TOOL_MANIFEST,
   inputSchema: VulnerabilityReportInputSchema,
   outputSchema: GenericOutputSchema,
-  handler: (input) => vulnerabilityReportHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
+  handler: (input) =>
+    vulnerabilityReportHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
 });
 
 export {
-  ThreatScanInputSchema,
   AlertEscalationInputSchema,
   ComplianceCheckInputSchema,
   IncidentContainmentInputSchema,
+  ThreatScanInputSchema,
   VulnerabilityReportInputSchema,
 };

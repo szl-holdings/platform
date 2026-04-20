@@ -1,10 +1,10 @@
 /**
  * Span helper utilities for common instrumentation patterns.
  */
-import * as api from "@opentelemetry/api";
+import * as api from '@opentelemetry/api';
 
 function getActiveTracer(): api.Tracer {
-  return api.trace.getTracer("@szl-holdings/otel");
+  return api.trace.getTracer('@szl-holdings/otel');
 }
 
 type SpanCallback<T> = (span: api.Span) => Promise<T>;
@@ -52,12 +52,12 @@ export async function toolCallSpan<T>(
     `tool.${toolName}`,
     async (span) => {
       span.setAttributes({
-        "tool.name": toolName,
-        "tool.args_count": Object.keys(args).length,
-        ...(context?.correlationId ? { "szl.correlation_id": context.correlationId } : {}),
-        ...(context?.orgId ? { "szl.org_id": context.orgId } : {}),
-        ...(context?.agentId ? { "szl.agent_id": context.agentId } : {}),
-        ...(context?.domain ? { "szl.domain": context.domain } : {}),
+        'tool.name': toolName,
+        'tool.args_count': Object.keys(args).length,
+        ...(context?.correlationId ? { 'szl.correlation_id': context.correlationId } : {}),
+        ...(context?.orgId ? { 'szl.org_id': context.orgId } : {}),
+        ...(context?.agentId ? { 'szl.agent_id': context.agentId } : {}),
+        ...(context?.domain ? { 'szl.domain': context.domain } : {}),
       });
       return callback(span);
     },
@@ -77,9 +77,9 @@ export async function dbSpan<T>(
     `db.${operation}`,
     async (span) => {
       span.setAttributes({
-        "db.system": "postgresql",
-        "db.operation": operation,
-        "db.sql.table": table,
+        'db.system': 'postgresql',
+        'db.operation': operation,
+        'db.sql.table': table,
       });
       return callback(span);
     },
@@ -101,11 +101,11 @@ export async function httpOutboundSpan<T>(
     `http.${method.toUpperCase()} ${parsedUrl.hostname}${parsedUrl.pathname}`,
     async (span) => {
       span.setAttributes({
-        "http.method": method.toUpperCase(),
-        "http.url": url,
-        "net.peer.name": parsedUrl.hostname,
-        ...(context?.correlationId ? { "szl.correlation_id": context.correlationId } : {}),
-        ...(context?.service ? { "peer.service": context.service } : {}),
+        'http.method': method.toUpperCase(),
+        'http.url': url,
+        'net.peer.name': parsedUrl.hostname,
+        ...(context?.correlationId ? { 'szl.correlation_id': context.correlationId } : {}),
+        ...(context?.service ? { 'peer.service': context.service } : {}),
       });
       return callback(span);
     },
@@ -126,10 +126,10 @@ export async function jobSpan<T>(
     `job.${jobType}`,
     async (span) => {
       span.setAttributes({
-        "szl.job.type": jobType,
-        "szl.job.id": jobId,
-        ...(context?.correlationId ? { "szl.correlation_id": context.correlationId } : {}),
-        ...(context?.orgId ? { "szl.org_id": context.orgId } : {}),
+        'szl.job.type': jobType,
+        'szl.job.id': jobId,
+        ...(context?.correlationId ? { 'szl.correlation_id': context.correlationId } : {}),
+        ...(context?.orgId ? { 'szl.org_id': context.orgId } : {}),
       });
       return callback(span);
     },

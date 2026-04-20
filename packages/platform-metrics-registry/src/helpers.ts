@@ -1,5 +1,5 @@
-import { PLATFORM_FACTS } from "./registry.js";
-import type { PlatformFacts } from "./schema.js";
+import { PLATFORM_FACTS } from './registry.js';
+import type { PlatformFacts } from './schema.js';
 
 /**
  * Docs consumption helpers.
@@ -49,9 +49,9 @@ export function formatPlatformSummary(facts: PlatformFacts = PLATFORM_FACTS): st
     `Domain packs: ${facts.runtime.domainPackCount}`,
     `Database tables: ${facts.schema.dbTableCount}`,
     `RBAC roles: ${facts.runtime.rbacRoleCount}`,
-    `AI providers: ${facts.curated.aiProviders.join(", ")}`,
+    `AI providers: ${facts.curated.aiProviders.join(', ')}`,
     `Last audit: ${facts.curated.lastAuditDate}`,
-  ].join("\n");
+  ].join('\n');
 }
 
 /**

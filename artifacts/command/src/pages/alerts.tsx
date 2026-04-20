@@ -1,18 +1,30 @@
-import { useState, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { OpsLayout } from "../components/ops-layout";
-import { Bell, BellOff, ArrowUpRight, Clock, CheckCircle2, AlarmClock, ChevronDown, Filter, Settings, XCircle, History } from "lucide-react";
-import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  AlarmClock,
+  ArrowUpRight,
+  Bell,
+  BellOff,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  Filter,
+  History,
+  Settings,
+  XCircle,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { OpsLayout } from '../components/ops-layout';
 
-type AlertStatus = "active" | "acknowledged" | "snoozed" | "resolved";
-type AlertPriority = "critical" | "high" | "medium" | "low";
+type AlertStatus = 'active' | 'acknowledged' | 'snoozed' | 'resolved';
+type AlertPriority = 'critical' | 'high' | 'medium' | 'low';
 
 interface ApiAlertsResponse {
   alerts: Alert[];
   counts: { active: number; critical: number; acknowledged: number; snoozed: number };
   generatedAt: string;
-  dataSource: "live" | "empty";
+  dataSource: 'live' | 'empty';
 }
 
 interface Alert {
@@ -33,10 +45,10 @@ interface Alert {
 }
 
 const SNOOZE_PRESETS: { label: string; minutes: number }[] = [
-  { label: "15m", minutes: 15 },
-  { label: "1h", minutes: 60 },
-  { label: "4h", minutes: 60 * 4 },
-  { label: "24h", minutes: 60 * 24 },
+  { label: '15m', minutes: 15 },
+  { label: '1h', minutes: 60 },
+  { label: '4h', minutes: 60 * 4 },
+  { label: '24h', minutes: 60 * 24 },
 ];
 
 function formatAcknowledgedAt(iso: string): string {
@@ -44,14 +56,14 @@ function formatAcknowledgedAt(iso: string): string {
   if (Number.isNaN(d.getTime())) return iso;
   const diffMs = Date.now() - d.getTime();
   const m = Math.floor(diffMs / 60000);
-  if (m < 1) return "just now";
+  if (m < 1) return 'just now';
   if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
   return d.toLocaleString();
 }
 
-type AuditAction = "acknowledged" | "snoozed" | "resolved" | "unsnoozed";
+type AuditAction = 'acknowledged' | 'snoozed' | 'resolved' | 'unsnoozed';
 
 interface AuditEntry {
   id: number;
@@ -68,10 +80,10 @@ interface AuditResponse {
 }
 
 const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
-  acknowledged: "Acknowledged",
-  snoozed: "Snoozed",
-  resolved: "Resolved",
-  unsnoozed: "Un-snoozed",
+  acknowledged: 'Acknowledged',
+  snoozed: 'Snoozed',
+  resolved: 'Resolved',
+  unsnoozed: 'Un-snoozed',
 };
 
 const AUDIT_ACTION_ICON: Record<AuditAction, React.ElementType> = {
@@ -82,18 +94,18 @@ const AUDIT_ACTION_ICON: Record<AuditAction, React.ElementType> = {
 };
 
 const AUDIT_ACTION_COLOR: Record<AuditAction, string> = {
-  acknowledged: "var(--color-medium)",
-  snoozed: "var(--color-fg-muted)",
-  resolved: "var(--color-low)",
-  unsnoozed: "var(--color-high)",
+  acknowledged: 'var(--color-medium)',
+  snoozed: 'var(--color-fg-muted)',
+  resolved: 'var(--color-low)',
+  unsnoozed: 'var(--color-high)',
 };
 
 function formatSnoozedUntil(iso: string | undefined): string {
-  if (!iso) return "";
+  if (!iso) return '';
   const target = new Date(iso).getTime();
-  if (!Number.isFinite(target)) return "";
+  if (!Number.isFinite(target)) return '';
   const diffMs = target - Date.now();
-  if (diffMs <= 0) return "expiring";
+  if (diffMs <= 0) return 'expiring';
   const mins = Math.round(diffMs / 60_000);
   if (mins < 60) return `${mins}m left`;
   const hours = Math.round(mins / 60);
@@ -103,23 +115,130 @@ function formatSnoozedUntil(iso: string | undefined): string {
 }
 
 const INITIAL_ALERTS: Alert[] = [
-  { id: "a1", domain: "Vessels", domainColor: "#0ea5e9", priority: "critical", title: "Engine room fire suppression triggered — MV Poseidon", description: "Automatic suppression system activated. Port engine offline. Vessel diverting to Piraeus.", time: "2m ago", status: "active", category: "Emergency", assignee: "Ops Team" },
-  { id: "a2", domain: "Aegis", domainColor: "#ef4444", priority: "critical", title: "Credential breach attempt — Maritime OT Systems", description: "7 failed authentication attempts from IP 185.220.101.x targeting SCADA interface.", time: "8m ago", status: "active", category: "Security" },
-  { id: "a3", domain: "Lyte", domainColor: "#f97316", priority: "high", title: "API response times exceeding 2s SLA threshold", description: "P95 latency at 2.4s for /scheduling/routes endpoint. Affecting 12 active operators.", time: "15m ago", status: "acknowledged", category: "Performance", assignee: "Eng Team" },
-  { id: "a4", domain: "Terra", domainColor: "#22c55e", priority: "high", title: "Deal deadline: Miami Beach Commercial — 48h remaining", description: "Binding agreement deadline for $42M commercial acquisition. Legal review incomplete.", time: "1h ago", status: "active", category: "Deadline" },
-  { id: "a5", domain: "PRISM", domainColor: "#a855f7", priority: "high", title: "Force majeure clause triggered — Q3 Cargo Agreement", description: "Oil price threshold crossed. Legal review required for 3 affected contracts.", time: "2h ago", status: "active", category: "Legal" },
-  { id: "a6", domain: "Vessels", domainColor: "#0ea5e9", priority: "medium", title: "MV Argo fuel consumption 18% above forecast", description: "Current heading optimization suggests 4.2% reduction if route adjusted by 12°N.", time: "3h ago", status: "snoozed", category: "Operations" },
-  { id: "a7", domain: "SZL", domainColor: "#f59e0b", priority: "medium", title: "NAV calculation delayed — market data feed latency", description: "Bloomberg feed latency causing 15-min delay in daily NAV computation.", time: "4h ago", status: "acknowledged", category: "Data", assignee: "Finance Ops" },
-  { id: "a8", domain: "Aegis", domainColor: "#ef4444", priority: "medium", title: "SSL certificate expiring in 14 days — legacy.szl.net", description: "Auto-renewal failed. Manual intervention required before expiry on Apr 29.", time: "5h ago", status: "active", category: "Infrastructure" },
-  { id: "a9", domain: "Carlota Jo", domainColor: "#ec4899", priority: "low", title: "Client satisfaction score below target — Q1 Review", description: "3 engagements below 85% satisfaction threshold. Advisory flagged for review.", time: "6h ago", status: "snoozed", category: "Client" },
-  { id: "a10", domain: "Terra", domainColor: "#22c55e", priority: "low", title: "Market data stale for Austin Industrial portfolio", description: "Comparable sales data 30+ days old. Re-evaluation recommended.", time: "8h ago", status: "resolved", category: "Data" },
+  {
+    id: 'a1',
+    domain: 'Vessels',
+    domainColor: '#0ea5e9',
+    priority: 'critical',
+    title: 'Engine room fire suppression triggered — MV Poseidon',
+    description:
+      'Automatic suppression system activated. Port engine offline. Vessel diverting to Piraeus.',
+    time: '2m ago',
+    status: 'active',
+    category: 'Emergency',
+    assignee: 'Ops Team',
+  },
+  {
+    id: 'a2',
+    domain: 'Aegis',
+    domainColor: '#ef4444',
+    priority: 'critical',
+    title: 'Credential breach attempt — Maritime OT Systems',
+    description:
+      '7 failed authentication attempts from IP 185.220.101.x targeting SCADA interface.',
+    time: '8m ago',
+    status: 'active',
+    category: 'Security',
+  },
+  {
+    id: 'a3',
+    domain: 'Lyte',
+    domainColor: '#f97316',
+    priority: 'high',
+    title: 'API response times exceeding 2s SLA threshold',
+    description:
+      'P95 latency at 2.4s for /scheduling/routes endpoint. Affecting 12 active operators.',
+    time: '15m ago',
+    status: 'acknowledged',
+    category: 'Performance',
+    assignee: 'Eng Team',
+  },
+  {
+    id: 'a4',
+    domain: 'Terra',
+    domainColor: '#22c55e',
+    priority: 'high',
+    title: 'Deal deadline: Miami Beach Commercial — 48h remaining',
+    description:
+      'Binding agreement deadline for $42M commercial acquisition. Legal review incomplete.',
+    time: '1h ago',
+    status: 'active',
+    category: 'Deadline',
+  },
+  {
+    id: 'a5',
+    domain: 'PRISM',
+    domainColor: '#a855f7',
+    priority: 'high',
+    title: 'Force majeure clause triggered — Q3 Cargo Agreement',
+    description: 'Oil price threshold crossed. Legal review required for 3 affected contracts.',
+    time: '2h ago',
+    status: 'active',
+    category: 'Legal',
+  },
+  {
+    id: 'a6',
+    domain: 'Vessels',
+    domainColor: '#0ea5e9',
+    priority: 'medium',
+    title: 'MV Argo fuel consumption 18% above forecast',
+    description: 'Current heading optimization suggests 4.2% reduction if route adjusted by 12°N.',
+    time: '3h ago',
+    status: 'snoozed',
+    category: 'Operations',
+  },
+  {
+    id: 'a7',
+    domain: 'SZL',
+    domainColor: '#f59e0b',
+    priority: 'medium',
+    title: 'NAV calculation delayed — market data feed latency',
+    description: 'Bloomberg feed latency causing 15-min delay in daily NAV computation.',
+    time: '4h ago',
+    status: 'acknowledged',
+    category: 'Data',
+    assignee: 'Finance Ops',
+  },
+  {
+    id: 'a8',
+    domain: 'Aegis',
+    domainColor: '#ef4444',
+    priority: 'medium',
+    title: 'SSL certificate expiring in 14 days — legacy.szl.net',
+    description: 'Auto-renewal failed. Manual intervention required before expiry on Apr 29.',
+    time: '5h ago',
+    status: 'active',
+    category: 'Infrastructure',
+  },
+  {
+    id: 'a9',
+    domain: 'Carlota Jo',
+    domainColor: '#ec4899',
+    priority: 'low',
+    title: 'Client satisfaction score below target — Q1 Review',
+    description: '3 engagements below 85% satisfaction threshold. Advisory flagged for review.',
+    time: '6h ago',
+    status: 'snoozed',
+    category: 'Client',
+  },
+  {
+    id: 'a10',
+    domain: 'Terra',
+    domainColor: '#22c55e',
+    priority: 'low',
+    title: 'Market data stale for Austin Industrial portfolio',
+    description: 'Comparable sales data 30+ days old. Re-evaluation recommended.',
+    time: '8h ago',
+    status: 'resolved',
+    category: 'Data',
+  },
 ];
 
 const PRIORITY_COLORS: Record<AlertPriority, string> = {
-  critical: "var(--color-critical)",
-  high: "var(--color-high)",
-  medium: "var(--color-medium)",
-  low: "var(--color-low)",
+  critical: 'var(--color-critical)',
+  high: 'var(--color-high)',
+  medium: 'var(--color-medium)',
+  low: 'var(--color-low)',
 };
 
 const STATUS_ICONS: Record<AlertStatus, React.ElementType> = {
@@ -132,10 +251,10 @@ const STATUS_ICONS: Record<AlertStatus, React.ElementType> = {
 export default function AlertsPage() {
   const queryClient = useQueryClient();
   const { data: apiData } = useStandardQuery<ApiAlertsResponse>({
-    queryKey: ["command-alerts"],
+    queryKey: ['command-alerts'],
     queryFn: async () => {
-      const res = await fetch("/api/command/alerts", { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to load alerts");
+      const res = await fetch('/api/command/alerts', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to load alerts');
       const json = await res.json();
       return (json?.data ?? json) as ApiAlertsResponse;
     },
@@ -149,20 +268,20 @@ export default function AlertsPage() {
       setAlerts(apiData.alerts);
     }
   }, [apiData]);
-  const [filter, setFilter] = useState<AlertStatus | "all">("all");
-  const [priorityFilter, setPriorityFilter] = useState<AlertPriority | "all">("all");
-  const [domainFilter, setDomainFilter] = useState("all");
+  const [filter, setFilter] = useState<AlertStatus | 'all'>('all');
+  const [priorityFilter, setPriorityFilter] = useState<AlertPriority | 'all'>('all');
+  const [domainFilter, setDomainFilter] = useState('all');
   const [selected, setSelected] = useState<string | null>(null);
   const [prefsOpen, setPrefsOpen] = useState(false);
   const [snoozeMenuFor, setSnoozeMenuFor] = useState<string | null>(null);
-  const [customSnooze, setCustomSnooze] = useState<string>("");
+  const [customSnooze, setCustomSnooze] = useState<string>('');
 
   const domains = Array.from(new Set(INITIAL_ALERTS.map((a) => a.domain)));
 
   const filtered = alerts.filter((a) => {
-    if (filter !== "all" && a.status !== filter) return false;
-    if (priorityFilter !== "all" && a.priority !== priorityFilter) return false;
-    if (domainFilter !== "all" && a.domain !== domainFilter) return false;
+    if (filter !== 'all' && a.status !== filter) return false;
+    if (priorityFilter !== 'all' && a.priority !== priorityFilter) return false;
+    if (domainFilter !== 'all' && a.domain !== domainFilter) return false;
     return true;
   });
 
@@ -171,54 +290,53 @@ export default function AlertsPage() {
   // 0 snoozed and undercount the rest. Fall back to local counts only when
   // running against the static seed data (no API yet).
   const counts = apiData?.counts ?? {
-    active: alerts.filter((a) => a.status === "active").length,
-    critical: alerts.filter((a) => a.priority === "critical" && a.status === "active").length,
-    acknowledged: alerts.filter((a) => a.status === "acknowledged").length,
-    snoozed: alerts.filter((a) => a.status === "snoozed").length,
+    active: alerts.filter((a) => a.status === 'active').length,
+    critical: alerts.filter((a) => a.priority === 'critical' && a.status === 'active').length,
+    acknowledged: alerts.filter((a) => a.status === 'acknowledged').length,
+    snoozed: alerts.filter((a) => a.status === 'snoozed').length,
   };
 
   const updateStatus = async (id: string, status: AlertStatus, snoozeMinutes?: number) => {
     // Optimistic local update — the server is the source of truth and the
     // next refetch will reconcile (e.g. snooze drops the row entirely).
     setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-    if (selected === id && (status === "resolved" || status === "snoozed")) setSelected(null);
+    if (selected === id && (status === 'resolved' || status === 'snoozed')) setSelected(null);
     try {
       const body =
-        status === "snoozed"
-          ? { state: "snoozed", snoozeMinutes: snoozeMinutes ?? 60 }
+        status === 'snoozed'
+          ? { state: 'snoozed', snoozeMinutes: snoozeMinutes ?? 60 }
           : { state: status };
       const res = await fetch(`/api/command/alerts/${encodeURIComponent(id)}/state`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       if (!res.ok) {
         // Roll back optimistic update on failure so the UI doesn't lie.
-        await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
+        await queryClient.invalidateQueries({ queryKey: ['command-alerts'] });
         return;
       }
       // Revalidate so badge counts and snooze/resolve filtering are accurate.
-      await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
-      await queryClient.invalidateQueries({ queryKey: ["ops-badge-counts"] });
+      await queryClient.invalidateQueries({ queryKey: ['command-alerts'] });
+      await queryClient.invalidateQueries({ queryKey: ['ops-badge-counts'] });
       // The audit timeline picks up the new action on the next poll, but
       // we invalidate explicitly so it appears immediately for the operator.
-      await queryClient.invalidateQueries({ queryKey: ["command-alert-audit", id] });
+      await queryClient.invalidateQueries({ queryKey: ['command-alert-audit', id] });
     } catch {
-      await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
+      await queryClient.invalidateQueries({ queryKey: ['command-alerts'] });
     }
   };
 
   const selectedAlert = alerts.find((a) => a.id === selected);
 
   const { data: auditData, isLoading: auditLoading } = useStandardQuery<AuditResponse>({
-    queryKey: ["command-alert-audit", selected],
+    queryKey: ['command-alert-audit', selected],
     queryFn: async () => {
-      const res = await fetch(
-        `/api/command/alerts/${encodeURIComponent(selected ?? "")}/audit`,
-        { credentials: "include" },
-      );
-      if (!res.ok) throw new Error("Failed to load alert audit");
+      const res = await fetch(`/api/command/alerts/${encodeURIComponent(selected ?? '')}/audit`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to load alert audit');
       const json = await res.json();
       return (json?.data ?? json) as AuditResponse;
     },
@@ -232,25 +350,58 @@ export default function AlertsPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Active Alerts", value: counts.active, color: "var(--color-high)", icon: Bell },
-            { label: "Critical", value: counts.critical, color: "var(--color-critical)", icon: XCircle },
-            { label: "Acknowledged", value: counts.acknowledged, color: "var(--color-medium)", icon: CheckCircle2 },
-            { label: "Snoozed", value: counts.snoozed, color: "var(--color-fg-muted)", icon: AlarmClock },
+            {
+              label: 'Active Alerts',
+              value: counts.active,
+              color: 'var(--color-high)',
+              icon: Bell,
+            },
+            {
+              label: 'Critical',
+              value: counts.critical,
+              color: 'var(--color-critical)',
+              icon: XCircle,
+            },
+            {
+              label: 'Acknowledged',
+              value: counts.acknowledged,
+              color: 'var(--color-medium)',
+              icon: CheckCircle2,
+            },
+            {
+              label: 'Snoozed',
+              value: counts.snoozed,
+              color: 'var(--color-fg-muted)',
+              icon: AlarmClock,
+            },
           ].map(({ label, value, color, icon: Icon }) => (
             <div
               key={label}
               className="p-4 rounded-xl flex items-center gap-4"
-              style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+              style={{
+                backgroundColor: 'var(--color-surface-base)',
+                border: '1px solid var(--color-surface-border)',
+              }}
             >
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 30%, transparent)` }}
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
+                }}
               >
                 <Icon className="w-4 h-4" style={{ color }} />
               </div>
               <div>
-                <div className="text-2xl font-bold font-mono" style={{ color }}>{value}</div>
-                <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>{label}</div>
+                <div className="text-2xl font-bold font-mono" style={{ color }}>
+                  {value}
+                </div>
+                <div
+                  className="text-[10px] font-mono uppercase tracking-wider"
+                  style={{ color: 'var(--color-fg-muted)' }}
+                >
+                  {label}
+                </div>
               </div>
             </div>
           ))}
@@ -258,16 +409,22 @@ export default function AlertsPage() {
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
-          <Filter className="w-3.5 h-3.5" style={{ color: "var(--color-fg-muted)" }} />
-          <div className="flex gap-1 p-1 rounded-lg" style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}>
-            {(["all", "active", "acknowledged", "snoozed", "resolved"] as const).map((s) => (
+          <Filter className="w-3.5 h-3.5" style={{ color: 'var(--color-fg-muted)' }} />
+          <div
+            className="flex gap-1 p-1 rounded-lg"
+            style={{
+              backgroundColor: 'var(--color-surface-base)',
+              border: '1px solid var(--color-surface-border)',
+            }}
+          >
+            {(['all', 'active', 'acknowledged', 'snoozed', 'resolved'] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
                 className="px-3 py-1 rounded-md text-xs font-medium transition-all capitalize"
                 style={{
-                  backgroundColor: filter === s ? "var(--color-bg-elevated)" : "transparent",
-                  color: filter === s ? "var(--color-fg-primary)" : "var(--color-fg-muted)",
+                  backgroundColor: filter === s ? 'var(--color-bg-elevated)' : 'transparent',
+                  color: filter === s ? 'var(--color-fg-primary)' : 'var(--color-fg-muted)',
                 }}
               >
                 {s}
@@ -276,9 +433,13 @@ export default function AlertsPage() {
           </div>
           <select
             value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value as AlertPriority | "all")}
+            onChange={(e) => setPriorityFilter(e.target.value as AlertPriority | 'all')}
             className="px-2 py-1 rounded-lg text-xs"
-            style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+            style={{
+              backgroundColor: 'var(--color-surface-base)',
+              border: '1px solid var(--color-surface-border)',
+              color: 'var(--color-fg-muted)',
+            }}
           >
             <option value="all">All Priorities</option>
             <option value="critical">Critical</option>
@@ -290,16 +451,28 @@ export default function AlertsPage() {
             value={domainFilter}
             onChange={(e) => setDomainFilter(e.target.value)}
             className="px-2 py-1 rounded-lg text-xs"
-            style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+            style={{
+              backgroundColor: 'var(--color-surface-base)',
+              border: '1px solid var(--color-surface-border)',
+              color: 'var(--color-fg-muted)',
+            }}
           >
             <option value="all">All Domains</option>
-            {domains.map((d) => <option key={d} value={d}>{d}</option>)}
+            {domains.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
           </select>
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setPrefsOpen(!prefsOpen)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
-              style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+              style={{
+                backgroundColor: 'var(--color-surface-base)',
+                border: '1px solid var(--color-surface-border)',
+                color: 'var(--color-fg-muted)',
+              }}
             >
               <Settings className="w-3 h-3" />
               Preferences
@@ -310,32 +483,76 @@ export default function AlertsPage() {
         {prefsOpen && (
           <div
             className="rounded-xl p-5 grid grid-cols-1 md:grid-cols-3 gap-6"
-            style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+            style={{
+              backgroundColor: 'var(--color-surface-base)',
+              border: '1px solid var(--color-surface-border)',
+            }}
           >
             <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--color-fg-muted)" }}>Notification Channels</div>
-              {["In-App Inbox", "Email Digest (Daily)", "Email Digest (Immediate)", "Mobile Push"].map((ch) => (
+              <div
+                className="text-xs font-bold uppercase tracking-widest mb-3"
+                style={{ color: 'var(--color-fg-muted)' }}
+              >
+                Notification Channels
+              </div>
+              {[
+                'In-App Inbox',
+                'Email Digest (Daily)',
+                'Email Digest (Immediate)',
+                'Mobile Push',
+              ].map((ch) => (
                 <label key={ch} className="flex items-center gap-2 py-1.5 cursor-pointer">
-                  <input type="checkbox" defaultChecked={ch.startsWith("In-App") || ch === "Email Digest (Daily)"} className="rounded" style={{ accentColor: "#8b7ac8" }} />
-                  <span className="text-xs" style={{ color: "var(--color-fg-secondary)" }}>{ch}</span>
+                  <input
+                    type="checkbox"
+                    defaultChecked={ch.startsWith('In-App') || ch === 'Email Digest (Daily)'}
+                    className="rounded"
+                    style={{ accentColor: '#8b7ac8' }}
+                  />
+                  <span className="text-xs" style={{ color: 'var(--color-fg-secondary)' }}>
+                    {ch}
+                  </span>
                 </label>
               ))}
             </div>
             <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--color-fg-muted)" }}>Priority Threshold</div>
-              {(["critical", "high", "medium", "low"] as AlertPriority[]).map((p) => (
+              <div
+                className="text-xs font-bold uppercase tracking-widest mb-3"
+                style={{ color: 'var(--color-fg-muted)' }}
+              >
+                Priority Threshold
+              </div>
+              {(['critical', 'high', 'medium', 'low'] as AlertPriority[]).map((p) => (
                 <label key={p} className="flex items-center gap-2 py-1.5 cursor-pointer">
-                  <input type="checkbox" defaultChecked={p !== "low"} className="rounded" style={{ accentColor: "#8b7ac8" }} />
-                  <span className="text-xs capitalize" style={{ color: PRIORITY_COLORS[p] }}>{p}</span>
+                  <input
+                    type="checkbox"
+                    defaultChecked={p !== 'low'}
+                    className="rounded"
+                    style={{ accentColor: '#8b7ac8' }}
+                  />
+                  <span className="text-xs capitalize" style={{ color: PRIORITY_COLORS[p] }}>
+                    {p}
+                  </span>
                 </label>
               ))}
             </div>
             <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--color-fg-muted)" }}>Snooze Defaults</div>
-              {["15 minutes", "1 hour", "4 hours", "Until tomorrow", "Until resolved"].map((t) => (
+              <div
+                className="text-xs font-bold uppercase tracking-widest mb-3"
+                style={{ color: 'var(--color-fg-muted)' }}
+              >
+                Snooze Defaults
+              </div>
+              {['15 minutes', '1 hour', '4 hours', 'Until tomorrow', 'Until resolved'].map((t) => (
                 <label key={t} className="flex items-center gap-2 py-1.5 cursor-pointer">
-                  <input type="radio" name="snooze" defaultChecked={t === "1 hour"} style={{ accentColor: "#8b7ac8" }} />
-                  <span className="text-xs" style={{ color: "var(--color-fg-secondary)" }}>{t}</span>
+                  <input
+                    type="radio"
+                    name="snooze"
+                    defaultChecked={t === '1 hour'}
+                    style={{ accentColor: '#8b7ac8' }}
+                  />
+                  <span className="text-xs" style={{ color: 'var(--color-fg-secondary)' }}>
+                    {t}
+                  </span>
                 </label>
               ))}
             </div>
@@ -343,7 +560,7 @@ export default function AlertsPage() {
         )}
 
         {/* Alert List + Detail Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: "500px" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: '500px' }}>
           <div className="lg:col-span-2 flex flex-col gap-2">
             {filtered.length === 0 && (
               <EmptyState
@@ -362,11 +579,13 @@ export default function AlertsPage() {
                   onClick={() => setSelected(isSelected ? null : alert.id)}
                   className="rounded-xl p-4 cursor-pointer transition-all"
                   style={{
-                    backgroundColor: isSelected ? "var(--color-bg-elevated)" : "var(--color-surface-base)",
-                    border: `1px solid ${isSelected ? "#8b7ac8" : "var(--color-surface-border)"}`,
-                    borderLeftWidth: "3px",
+                    backgroundColor: isSelected
+                      ? 'var(--color-bg-elevated)'
+                      : 'var(--color-surface-base)',
+                    border: `1px solid ${isSelected ? '#8b7ac8' : 'var(--color-surface-border)'}`,
+                    borderLeftWidth: '3px',
                     borderLeftColor: PRIORITY_COLORS[alert.priority],
-                    opacity: alert.status === "resolved" ? 0.5 : 1,
+                    opacity: alert.status === 'resolved' ? 0.5 : 1,
                   }}
                 >
                   <div className="flex items-start gap-3">
@@ -377,109 +596,211 @@ export default function AlertsPage() {
                         border: `1px solid color-mix(in srgb, ${alert.domainColor} 30%, transparent)`,
                       }}
                     >
-                      <span className="text-[10px] font-bold" style={{ color: alert.domainColor }}>{alert.domain[0]}</span>
+                      <span className="text-[10px] font-bold" style={{ color: alert.domainColor }}>
+                        {alert.domain[0]}
+                      </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: alert.domainColor }}>{alert.domain}</span>
-                        <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)", opacity: 0.5 }}>/</span>
-                        <span className="text-[10px] font-mono uppercase" style={{ color: PRIORITY_COLORS[alert.priority] }}>{alert.priority}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: "var(--color-bg-elevated)", color: "var(--color-fg-muted)", border: "1px solid var(--color-surface-border)" }}>{alert.category}</span>
+                        <span
+                          className="text-[10px] font-mono uppercase tracking-wider"
+                          style={{ color: alert.domainColor }}
+                        >
+                          {alert.domain}
+                        </span>
+                        <span
+                          className="text-[10px] font-mono uppercase tracking-wider"
+                          style={{ color: 'var(--color-fg-muted)', opacity: 0.5 }}
+                        >
+                          /
+                        </span>
+                        <span
+                          className="text-[10px] font-mono uppercase"
+                          style={{ color: PRIORITY_COLORS[alert.priority] }}
+                        >
+                          {alert.priority}
+                        </span>
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded"
+                          style={{
+                            backgroundColor: 'var(--color-bg-elevated)',
+                            color: 'var(--color-fg-muted)',
+                            border: '1px solid var(--color-surface-border)',
+                          }}
+                        >
+                          {alert.category}
+                        </span>
                       </div>
-                      <div className="text-sm font-semibold truncate" style={{ color: "var(--color-fg-primary)" }}>{alert.title}</div>
-                      {alert.status === "acknowledged" && (alert.acknowledgedBy || alert.acknowledgedAt) && (
-                        <div className="text-[10px] font-mono mt-0.5 truncate" style={{ color: "var(--color-fg-muted)" }}>
-                          <CheckCircle2 className="w-2.5 h-2.5 inline-block mr-1 -mt-0.5" style={{ color: "var(--color-medium)" }} />
-                          Acknowledged
-                          {alert.acknowledgedBy ? ` by ${alert.acknowledgedBy}` : ""}
-                          {alert.acknowledgedAt ? ` · ${formatAcknowledgedAt(alert.acknowledgedAt)}` : ""}
-                        </div>
-                      )}
+                      <div
+                        className="text-sm font-semibold truncate"
+                        style={{ color: 'var(--color-fg-primary)' }}
+                      >
+                        {alert.title}
+                      </div>
+                      {alert.status === 'acknowledged' &&
+                        (alert.acknowledgedBy || alert.acknowledgedAt) && (
+                          <div
+                            className="text-[10px] font-mono mt-0.5 truncate"
+                            style={{ color: 'var(--color-fg-muted)' }}
+                          >
+                            <CheckCircle2
+                              className="w-2.5 h-2.5 inline-block mr-1 -mt-0.5"
+                              style={{ color: 'var(--color-medium)' }}
+                            />
+                            Acknowledged
+                            {alert.acknowledgedBy ? ` by ${alert.acknowledgedBy}` : ''}
+                            {alert.acknowledgedAt
+                              ? ` · ${formatAcknowledgedAt(alert.acknowledgedAt)}`
+                              : ''}
+                          </div>
+                        )}
                       {isSelected && (
-                        <div className="text-xs mt-1 leading-relaxed" style={{ color: "var(--color-fg-muted)" }}>{alert.description}</div>
+                        <div
+                          className="text-xs mt-1 leading-relaxed"
+                          style={{ color: 'var(--color-fg-muted)' }}
+                        >
+                          {alert.description}
+                        </div>
                       )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>{alert.time}</span>
-                      <StatusIcon className="w-3.5 h-3.5" style={{ color: "var(--color-fg-muted)" }} />
+                      <span
+                        className="text-[10px] font-mono"
+                        style={{ color: 'var(--color-fg-muted)' }}
+                      >
+                        {alert.time}
+                      </span>
+                      <StatusIcon
+                        className="w-3.5 h-3.5"
+                        style={{ color: 'var(--color-fg-muted)' }}
+                      />
                     </div>
                   </div>
                   {isSelected && (
-                    <div className="flex flex-col gap-2 mt-3 pt-3" style={{ borderTop: "1px solid var(--color-surface-border)" }}>
+                    <div
+                      className="flex flex-col gap-2 mt-3 pt-3"
+                      style={{ borderTop: '1px solid var(--color-surface-border)' }}
+                    >
                       <div className="flex flex-wrap gap-2 items-center">
-                        {alert.status !== "acknowledged" && alert.status !== "resolved" && alert.status !== "snoozed" && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "acknowledged"); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
-                          >
-                            <CheckCircle2 className="w-3 h-3" /> Acknowledge
-                          </button>
-                        )}
-                        {alert.status !== "snoozed" && alert.status !== "resolved" && (
+                        {alert.status !== 'acknowledged' &&
+                          alert.status !== 'resolved' &&
+                          alert.status !== 'snoozed' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateStatus(alert.id, 'acknowledged');
+                              }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                              style={{
+                                backgroundColor: 'var(--color-bg-elevated)',
+                                border: '1px solid var(--color-surface-border)',
+                                color: 'var(--color-fg-secondary)',
+                              }}
+                            >
+                              <CheckCircle2 className="w-3 h-3" /> Acknowledge
+                            </button>
+                          )}
+                        {alert.status !== 'snoozed' && alert.status !== 'resolved' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setSnoozeMenuFor(snoozeMenuFor === alert.id ? null : alert.id);
-                              setCustomSnooze("");
+                              setCustomSnooze('');
                             }}
                             aria-expanded={snoozeMenuFor === alert.id}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                            style={{
+                              backgroundColor: 'var(--color-bg-elevated)',
+                              border: '1px solid var(--color-surface-border)',
+                              color: 'var(--color-fg-secondary)',
+                            }}
                           >
                             <AlarmClock className="w-3 h-3" /> Snooze
                             <ChevronDown className="w-3 h-3" />
                           </button>
                         )}
-                        {alert.status === "snoozed" && (
+                        {alert.status === 'snoozed' && (
                           <>
                             {alert.snoozedUntil && (
-                              <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+                              <span
+                                className="text-[10px] font-mono uppercase tracking-wider"
+                                style={{ color: 'var(--color-fg-muted)' }}
+                              >
                                 Snoozed · {formatSnoozedUntil(alert.snoozedUntil)}
                               </span>
                             )}
                             <button
-                              onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "active"); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateStatus(alert.id, 'active');
+                              }}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                              style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                              style={{
+                                backgroundColor: 'var(--color-bg-elevated)',
+                                border: '1px solid var(--color-surface-border)',
+                                color: 'var(--color-fg-secondary)',
+                              }}
                             >
                               <Bell className="w-3 h-3" /> Un-snooze
                             </button>
                           </>
                         )}
-                        {alert.status !== "resolved" && (
+                        {alert.status !== 'resolved' && (
                           <button
-                            onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "resolved"); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateStatus(alert.id, 'resolved');
+                            }}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-low)" }}
+                            style={{
+                              backgroundColor: 'var(--color-bg-elevated)',
+                              border: '1px solid var(--color-surface-border)',
+                              color: 'var(--color-low)',
+                            }}
                           >
                             <CheckCircle2 className="w-3 h-3" /> Resolve
                           </button>
                         )}
                         <button
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ml-auto"
-                          style={{ backgroundColor: "#8b7ac820", border: "1px solid #8b7ac840", color: "#8b7ac8" }}
+                          style={{
+                            backgroundColor: '#8b7ac820',
+                            border: '1px solid #8b7ac840',
+                            color: '#8b7ac8',
+                          }}
                         >
                           <ArrowUpRight className="w-3 h-3" /> Escalate
                         </button>
                       </div>
-                      {snoozeMenuFor === alert.id && alert.status !== "snoozed" && (
+                      {snoozeMenuFor === alert.id && alert.status !== 'snoozed' && (
                         <div
                           onClick={(e) => e.stopPropagation()}
                           className="flex flex-wrap items-center gap-2 p-2 rounded-lg"
-                          style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)" }}
+                          style={{
+                            backgroundColor: 'var(--color-bg-elevated)',
+                            border: '1px solid var(--color-surface-border)',
+                          }}
                         >
-                          <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>Snooze for</span>
+                          <span
+                            className="text-[10px] font-mono uppercase tracking-wider"
+                            style={{ color: 'var(--color-fg-muted)' }}
+                          >
+                            Snooze for
+                          </span>
                           {SNOOZE_PRESETS.map((p) => (
                             <button
                               key={p.label}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                updateStatus(alert.id, "snoozed", p.minutes);
+                                updateStatus(alert.id, 'snoozed', p.minutes);
                                 setSnoozeMenuFor(null);
                               }}
                               className="px-2.5 py-1 rounded-md text-xs font-medium"
-                              style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                              style={{
+                                backgroundColor: 'var(--color-surface-base)',
+                                border: '1px solid var(--color-surface-border)',
+                                color: 'var(--color-fg-secondary)',
+                              }}
                             >
                               {p.label}
                             </button>
@@ -494,22 +815,38 @@ export default function AlertsPage() {
                               onChange={(e) => setCustomSnooze(e.target.value)}
                               onClick={(e) => e.stopPropagation()}
                               className="w-20 px-2 py-1 rounded-md text-xs"
-                              style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-primary)" }}
+                              style={{
+                                backgroundColor: 'var(--color-surface-base)',
+                                border: '1px solid var(--color-surface-border)',
+                                color: 'var(--color-fg-primary)',
+                              }}
                             />
-                            <span className="text-[10px] font-mono uppercase" style={{ color: "var(--color-fg-muted)" }}>min</span>
+                            <span
+                              className="text-[10px] font-mono uppercase"
+                              style={{ color: 'var(--color-fg-muted)' }}
+                            >
+                              min
+                            </span>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 const m = Math.floor(Number(customSnooze));
                                 if (Number.isFinite(m) && m > 0 && m <= 60 * 24 * 30) {
-                                  updateStatus(alert.id, "snoozed", m);
+                                  updateStatus(alert.id, 'snoozed', m);
                                   setSnoozeMenuFor(null);
-                                  setCustomSnooze("");
+                                  setCustomSnooze('');
                                 }
                               }}
-                              disabled={(() => { const m = Math.floor(Number(customSnooze)); return !(Number.isFinite(m) && m > 0 && m <= 60 * 24 * 30); })()}
+                              disabled={(() => {
+                                const m = Math.floor(Number(customSnooze));
+                                return !(Number.isFinite(m) && m > 0 && m <= 60 * 24 * 30);
+                              })()}
                               className="px-2 py-1 rounded-md text-xs font-medium"
-                              style={{ backgroundColor: "#8b7ac820", border: "1px solid #8b7ac840", color: "#8b7ac8" }}
+                              style={{
+                                backgroundColor: '#8b7ac820',
+                                border: '1px solid #8b7ac840',
+                                color: '#8b7ac8',
+                              }}
                             >
                               Apply
                             </button>
@@ -528,42 +865,102 @@ export default function AlertsPage() {
             {selectedAlert ? (
               <div
                 className="rounded-xl p-5 flex flex-col gap-4"
-                style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+                style={{
+                  backgroundColor: 'var(--color-surface-base)',
+                  border: '1px solid var(--color-surface-border)',
+                }}
               >
-                <div className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>Alert Details</div>
+                <div
+                  className="text-[10px] font-mono uppercase tracking-widest"
+                  style={{ color: 'var(--color-fg-muted)' }}
+                >
+                  Alert Details
+                </div>
                 <div>
-                  <div className="text-sm font-bold mb-2" style={{ color: "var(--color-fg-primary)" }}>{selectedAlert.title}</div>
-                  <div className="text-xs leading-relaxed" style={{ color: "var(--color-fg-muted)" }}>{selectedAlert.description}</div>
+                  <div
+                    className="text-sm font-bold mb-2"
+                    style={{ color: 'var(--color-fg-primary)' }}
+                  >
+                    {selectedAlert.title}
+                  </div>
+                  <div
+                    className="text-xs leading-relaxed"
+                    style={{ color: 'var(--color-fg-muted)' }}
+                  >
+                    {selectedAlert.description}
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   {[
-                    { label: "Domain", value: selectedAlert.domain, color: selectedAlert.domainColor },
-                    { label: "Priority", value: selectedAlert.priority, color: PRIORITY_COLORS[selectedAlert.priority] },
-                    { label: "Category", value: selectedAlert.category, color: "var(--color-fg-secondary)" },
-                    { label: "Status", value: selectedAlert.status, color: "var(--color-fg-secondary)" },
-                    { label: "Received", value: selectedAlert.time, color: "var(--color-fg-muted)" },
-                    ...(selectedAlert.assignee ? [{ label: "Assignee", value: selectedAlert.assignee, color: "var(--color-fg-secondary)" }] : []),
+                    {
+                      label: 'Domain',
+                      value: selectedAlert.domain,
+                      color: selectedAlert.domainColor,
+                    },
+                    {
+                      label: 'Priority',
+                      value: selectedAlert.priority,
+                      color: PRIORITY_COLORS[selectedAlert.priority],
+                    },
+                    {
+                      label: 'Category',
+                      value: selectedAlert.category,
+                      color: 'var(--color-fg-secondary)',
+                    },
+                    {
+                      label: 'Status',
+                      value: selectedAlert.status,
+                      color: 'var(--color-fg-secondary)',
+                    },
+                    {
+                      label: 'Received',
+                      value: selectedAlert.time,
+                      color: 'var(--color-fg-muted)',
+                    },
+                    ...(selectedAlert.assignee
+                      ? [
+                          {
+                            label: 'Assignee',
+                            value: selectedAlert.assignee,
+                            color: 'var(--color-fg-secondary)',
+                          },
+                        ]
+                      : []),
                   ].map(({ label, value, color }) => (
-                    <div key={label} className="flex justify-between items-center py-1.5" style={{ borderBottom: "1px solid var(--color-surface-border)" }}>
-                      <span className="text-xs font-mono uppercase tracking-wide" style={{ color: "var(--color-fg-muted)" }}>{label}</span>
-                      <span className="text-xs font-semibold capitalize" style={{ color }}>{value}</span>
+                    <div
+                      key={label}
+                      className="flex justify-between items-center py-1.5"
+                      style={{ borderBottom: '1px solid var(--color-surface-border)' }}
+                    >
+                      <span
+                        className="text-xs font-mono uppercase tracking-wide"
+                        style={{ color: 'var(--color-fg-muted)' }}
+                      >
+                        {label}
+                      </span>
+                      <span className="text-xs font-semibold capitalize" style={{ color }}>
+                        {value}
+                      </span>
                     </div>
                   ))}
                 </div>
 
                 {/* Audit history timeline — every operator action with actor + when. */}
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>
+                  <div
+                    className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest"
+                    style={{ color: 'var(--color-fg-muted)' }}
+                  >
                     <History className="w-3 h-3" />
                     Audit History
                   </div>
                   {auditLoading && (
-                    <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+                    <div className="text-[11px]" style={{ color: 'var(--color-fg-muted)' }}>
                       Loading history…
                     </div>
                   )}
                   {!auditLoading && (auditData?.entries.length ?? 0) === 0 && (
-                    <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+                    <div className="text-[11px]" style={{ color: 'var(--color-fg-muted)' }}>
                       No operator actions recorded yet.
                     </div>
                   )}
@@ -572,30 +969,49 @@ export default function AlertsPage() {
                       {[...(auditData?.entries ?? [])].reverse().map((entry) => {
                         const Icon = AUDIT_ACTION_ICON[entry.action];
                         const color = AUDIT_ACTION_COLOR[entry.action];
-                        const actor = entry.actorName ?? (entry.actorId != null ? `user #${entry.actorId}` : "system");
+                        const actor =
+                          entry.actorName ??
+                          (entry.actorId != null ? `user #${entry.actorId}` : 'system');
                         const snoozedSuffix =
-                          entry.action === "snoozed" && entry.snoozedUntil
+                          entry.action === 'snoozed' && entry.snoozedUntil
                             ? ` until ${new Date(entry.snoozedUntil).toLocaleString()}`
-                            : "";
+                            : '';
                         return (
                           <li
                             key={entry.id}
                             className="flex items-start gap-2 py-1.5 px-2 rounded-md"
-                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)" }}
+                            style={{
+                              backgroundColor: 'var(--color-bg-elevated)',
+                              border: '1px solid var(--color-surface-border)',
+                            }}
                           >
                             <Icon className="w-3 h-3 mt-0.5 shrink-0" style={{ color }} />
                             <div className="flex-1 min-w-0">
-                              <div className="text-[11px] font-semibold" style={{ color: "var(--color-fg-primary)" }}>
+                              <div
+                                className="text-[11px] font-semibold"
+                                style={{ color: 'var(--color-fg-primary)' }}
+                              >
                                 <span style={{ color }}>{AUDIT_ACTION_LABEL[entry.action]}</span>
-                                <span style={{ color: "var(--color-fg-secondary)" }}> by {actor}</span>
+                                <span style={{ color: 'var(--color-fg-secondary)' }}>
+                                  {' '}
+                                  by {actor}
+                                </span>
                                 {snoozedSuffix && (
-                                  <span style={{ color: "var(--color-fg-muted)" }}>{snoozedSuffix}</span>
+                                  <span style={{ color: 'var(--color-fg-muted)' }}>
+                                    {snoozedSuffix}
+                                  </span>
                                 )}
                               </div>
-                              <div className="text-[10px] font-mono mt-0.5" style={{ color: "var(--color-fg-muted)" }}>
+                              <div
+                                className="text-[10px] font-mono mt-0.5"
+                                style={{ color: 'var(--color-fg-muted)' }}
+                              >
                                 <Clock className="w-2.5 h-2.5 inline-block mr-1 -mt-0.5" />
                                 {formatAcknowledgedAt(entry.createdAt)}
-                                <span className="opacity-60"> · {new Date(entry.createdAt).toLocaleString()}</span>
+                                <span className="opacity-60">
+                                  {' '}
+                                  · {new Date(entry.createdAt).toLocaleString()}
+                                </span>
                               </div>
                             </div>
                           </li>
@@ -609,35 +1025,86 @@ export default function AlertsPage() {
               <div className="flex flex-col gap-4">
                 <div
                   className="rounded-xl p-5"
-                  style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+                  style={{
+                    backgroundColor: 'var(--color-surface-base)',
+                    border: '1px solid var(--color-surface-border)',
+                  }}
                 >
-                  <div className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--color-fg-muted)" }}>Alert Volume (24h)</div>
+                  <div
+                    className="text-[10px] font-mono uppercase tracking-widest mb-3"
+                    style={{ color: 'var(--color-fg-muted)' }}
+                  >
+                    Alert Volume (24h)
+                  </div>
                   <div className="flex items-end gap-1 h-20">
                     {[4, 7, 3, 9, 5, 2, 8, 11, 6, 4, 7, 3].map((v, i) => (
-                      <div key={i} className="flex-1 rounded-sm" style={{ height: `${(v / 11) * 100}%`, backgroundColor: i === 11 ? "#8b7ac8" : "var(--color-bg-elevated)" }} />
+                      <div
+                        key={i}
+                        className="flex-1 rounded-sm"
+                        style={{
+                          height: `${(v / 11) * 100}%`,
+                          backgroundColor: i === 11 ? '#8b7ac8' : 'var(--color-bg-elevated)',
+                        }}
+                      />
                     ))}
                   </div>
                   <div className="flex justify-between mt-1">
-                    <span className="text-[9px] font-mono" style={{ color: "var(--color-fg-muted)" }}>12h ago</span>
-                    <span className="text-[9px] font-mono" style={{ color: "var(--color-fg-muted)" }}>Now</span>
+                    <span
+                      className="text-[9px] font-mono"
+                      style={{ color: 'var(--color-fg-muted)' }}
+                    >
+                      12h ago
+                    </span>
+                    <span
+                      className="text-[9px] font-mono"
+                      style={{ color: 'var(--color-fg-muted)' }}
+                    >
+                      Now
+                    </span>
                   </div>
                 </div>
                 <div
                   className="rounded-xl p-5"
-                  style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+                  style={{
+                    backgroundColor: 'var(--color-surface-base)',
+                    border: '1px solid var(--color-surface-border)',
+                  }}
                 >
-                  <div className="text-[10px] font-mono uppercase tracking-widest mb-3" style={{ color: "var(--color-fg-muted)" }}>By Domain</div>
+                  <div
+                    className="text-[10px] font-mono uppercase tracking-widest mb-3"
+                    style={{ color: 'var(--color-fg-muted)' }}
+                  >
+                    By Domain
+                  </div>
                   {domains.map((d) => {
-                    const count = alerts.filter((a) => a.domain === d && a.status === "active").length;
+                    const count = alerts.filter(
+                      (a) => a.domain === d && a.status === 'active',
+                    ).length;
                     const total = alerts.filter((a) => a.domain === d).length;
-                    const color = INITIAL_ALERTS.find((a) => a.domain === d)?.domainColor ?? "#888";
+                    const color = INITIAL_ALERTS.find((a) => a.domain === d)?.domainColor ?? '#888';
                     return (
                       <div key={d} className="flex items-center gap-2 py-1.5">
-                        <span className="text-xs w-20 shrink-0" style={{ color }}>{d}</span>
-                        <div className="flex-1 h-1.5 rounded-full" style={{ backgroundColor: "var(--color-bg-elevated)" }}>
-                          <div className="h-full rounded-full" style={{ width: `${(count / Math.max(total, 1)) * 100}%`, backgroundColor: color }} />
+                        <span className="text-xs w-20 shrink-0" style={{ color }}>
+                          {d}
+                        </span>
+                        <div
+                          className="flex-1 h-1.5 rounded-full"
+                          style={{ backgroundColor: 'var(--color-bg-elevated)' }}
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${(count / Math.max(total, 1)) * 100}%`,
+                              backgroundColor: color,
+                            }}
+                          />
                         </div>
-                        <span className="text-xs font-mono w-6 text-right" style={{ color: "var(--color-fg-muted)" }}>{count}</span>
+                        <span
+                          className="text-xs font-mono w-6 text-right"
+                          style={{ color: 'var(--color-fg-muted)' }}
+                        >
+                          {count}
+                        </span>
                       </div>
                     );
                   })}

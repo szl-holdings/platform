@@ -1,5 +1,5 @@
-import * as React from "react";
-import { cn } from "../utils";
+import type * as React from 'react';
+import { cn } from '../utils';
 
 export interface Feature {
   id?: string;
@@ -18,7 +18,7 @@ export interface FeatureGridProps {
   features: Feature[];
   columns?: 2 | 3 | 4;
   className?: string;
-  variant?: "light" | "dark";
+  variant?: 'light' | 'dark';
   accentColor?: string;
 }
 
@@ -29,17 +29,17 @@ export function FeatureGrid({
   features,
   columns = 3,
   className,
-  variant = "light",
-  accentColor = "hsl(215 45% 32%)",
+  variant = 'light',
+  accentColor = 'hsl(215 45% 32%)',
 }: FeatureGridProps) {
-  const isDark = variant === "dark";
+  const isDark = variant === 'dark';
 
   return (
     <section
       className={cn(
-        "py-24 lg:py-32",
-        isDark ? "bg-neutral-950 text-white" : "bg-neutral-50 text-neutral-900",
-        className
+        'py-24 lg:py-32',
+        isDark ? 'bg-neutral-950 text-white' : 'bg-neutral-50 text-neutral-900',
+        className,
       )}
     >
       <div className="max-w-6xl mx-auto px-6">
@@ -48,8 +48,8 @@ export function FeatureGrid({
             {eyebrow && (
               <p
                 className={cn(
-                  "text-xs font-semibold uppercase tracking-widest mb-4",
-                  isDark ? "text-white/40" : "text-neutral-400"
+                  'text-xs font-semibold uppercase tracking-widest mb-4',
+                  isDark ? 'text-white/40' : 'text-neutral-400',
                 )}
               >
                 {eyebrow}
@@ -59,8 +59,8 @@ export function FeatureGrid({
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <h2
                   className={cn(
-                    "text-3xl sm:text-4xl font-bold leading-tight",
-                    isDark ? "text-white" : "text-neutral-900"
+                    'text-3xl sm:text-4xl font-bold leading-tight',
+                    isDark ? 'text-white' : 'text-neutral-900',
                   )}
                 >
                   {title}
@@ -68,8 +68,8 @@ export function FeatureGrid({
                 {subtitle && (
                   <p
                     className={cn(
-                      "text-sm max-w-sm leading-relaxed",
-                      isDark ? "text-white/50" : "text-neutral-500"
+                      'text-sm max-w-sm leading-relaxed',
+                      isDark ? 'text-white/50' : 'text-neutral-500',
                     )}
                   >
                     {subtitle}
@@ -82,20 +82,20 @@ export function FeatureGrid({
 
         <div
           className={cn(
-            "grid gap-4",
-            columns === 2 && "md:grid-cols-2",
-            columns === 3 && "md:grid-cols-2 lg:grid-cols-3",
-            columns === 4 && "md:grid-cols-2 lg:grid-cols-4"
+            'grid gap-4',
+            columns === 2 && 'md:grid-cols-2',
+            columns === 3 && 'md:grid-cols-2 lg:grid-cols-3',
+            columns === 4 && 'md:grid-cols-2 lg:grid-cols-4',
           )}
         >
           {features.map((feature, index) => (
             <div
               key={feature.id ?? index}
               className={cn(
-                "group rounded-xl border p-6 hover:shadow-sm transition-all duration-200",
+                'group rounded-xl border p-6 hover:shadow-sm transition-all duration-200',
                 isDark
-                  ? "border-white/8 bg-white/3 hover:border-white/12 hover:bg-white/5"
-                  : "border-neutral-100 bg-white hover:border-neutral-200"
+                  ? 'border-white/8 bg-white/3 hover:border-white/12 hover:bg-white/5'
+                  : 'border-neutral-100 bg-white hover:border-neutral-200',
               )}
             >
               {feature.icon && (
@@ -124,16 +124,16 @@ export function FeatureGrid({
 
               <h3
                 className={cn(
-                  "text-base font-bold mb-2",
-                  isDark ? "text-white" : "text-neutral-900"
+                  'text-base font-bold mb-2',
+                  isDark ? 'text-white' : 'text-neutral-900',
                 )}
               >
                 {feature.title}
               </h3>
               <p
                 className={cn(
-                  "text-sm leading-relaxed mb-5",
-                  isDark ? "text-white/50" : "text-neutral-500"
+                  'text-sm leading-relaxed mb-5',
+                  isDark ? 'text-white/50' : 'text-neutral-500',
                 )}
               >
                 {feature.description}
@@ -142,21 +142,21 @@ export function FeatureGrid({
               {feature.metrics && feature.metrics.length > 0 && (
                 <div
                   className={cn(
-                    "space-y-2.5 pt-4 border-t",
-                    isDark ? "border-white/8" : "border-neutral-100"
+                    'space-y-2.5 pt-4 border-t',
+                    isDark ? 'border-white/8' : 'border-neutral-100',
                   )}
                 >
                   {feature.metrics.slice(0, 2).map((metric) => (
                     <div key={metric.label} className="flex items-center justify-between">
                       <span
-                        className={cn("text-xs", isDark ? "text-white/40" : "text-neutral-400")}
+                        className={cn('text-xs', isDark ? 'text-white/40' : 'text-neutral-400')}
                       >
                         {metric.label}
                       </span>
                       <span
                         className={cn(
-                          "font-semibold text-sm",
-                          isDark ? "text-white" : "text-neutral-900"
+                          'font-semibold text-sm',
+                          isDark ? 'text-white' : 'text-neutral-900',
                         )}
                       >
                         {metric.value}

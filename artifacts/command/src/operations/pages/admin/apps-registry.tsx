@@ -1,21 +1,21 @@
-import { Fragment, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { useQueryClient } from '@tanstack/react-query';
 import {
-  Boxes,
   AlertTriangle,
-  Search,
-  Save,
-  Loader2,
+  Boxes,
   CheckCircle2,
-  Plus,
-  Trash2,
-  X,
-  History,
   ChevronDown,
   ChevronRight,
-} from "lucide-react";
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
+  History,
+  Loader2,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react';
+import { Fragment, useMemo, useState } from 'react';
 
 interface AppRow {
   slug: string;
@@ -43,9 +43,9 @@ interface ActivityResponse {
 }
 
 const ACTION_COLORS: Record<string, string> = {
-  create: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/30",
-  update: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/30",
-  delete: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/30",
+  create: 'text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/30',
+  update: 'text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/30',
+  delete: 'text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/30',
 };
 
 function formatTimestamp(iso: string): string {
@@ -55,17 +55,17 @@ function formatTimestamp(iso: string): string {
 }
 
 const STATUS_OPTIONS = [
-  { value: "active", label: "Active" },
-  { value: "coming_soon", label: "Coming soon" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "deprecated", label: "Deprecated" },
+  { value: 'active', label: 'Active' },
+  { value: 'coming_soon', label: 'Coming soon' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'deprecated', label: 'Deprecated' },
 ] as const;
 
 const STATUS_COLORS: Record<string, string> = {
-  active: "text-[#6b8f71] bg-[#6b8f71]/10",
-  coming_soon: "text-[#4a90b8] bg-[#4a90b8]/10",
-  maintenance: "text-[#d4a054] bg-[#d4a054]/10",
-  deprecated: "text-muted-foreground bg-muted",
+  active: 'text-[#6b8f71] bg-[#6b8f71]/10',
+  coming_soon: 'text-[#4a90b8] bg-[#4a90b8]/10',
+  maintenance: 'text-[#d4a054] bg-[#d4a054]/10',
+  deprecated: 'text-muted-foreground bg-muted',
 };
 
 interface NewAppDraft {
@@ -76,15 +76,15 @@ interface NewAppDraft {
 }
 
 const EMPTY_NEW_APP: NewAppDraft = {
-  slug: "",
-  name: "",
-  status: "coming_soon",
-  ownerTeam: "",
+  slug: '',
+  name: '',
+  status: 'coming_soon',
+  ownerTeam: '',
 };
 
 export default function AppsRegistryAdmin() {
   const qc = useQueryClient();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
@@ -94,8 +94,8 @@ export default function AppsRegistryAdmin() {
   const [expandedHistorySlug, setExpandedHistorySlug] = useState<string | null>(null);
 
   const { data, isLoading, error } = useStandardQuery<AppsResponse>({
-    queryKey: ["admin-apps-registry"],
-    queryFn: () => apiFetch<AppsResponse>("/admin/apps"),
+    queryKey: ['admin-apps-registry'],
+    queryFn: () => apiFetch<AppsResponse>('/admin/apps'),
   });
 
   const {
@@ -103,21 +103,21 @@ export default function AppsRegistryAdmin() {
     isLoading: activityLoading,
     error: activityError,
   } = useStandardQuery<ActivityResponse>({
-    queryKey: ["admin-apps-registry-activity"],
-    queryFn: () => apiFetch<ActivityResponse>("/admin/apps/activity?limit=100"),
+    queryKey: ['admin-apps-registry-activity'],
+    queryFn: () => apiFetch<ActivityResponse>('/admin/apps/activity?limit=100'),
     enabled: !error,
   });
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["admin-apps-registry"] });
-    qc.invalidateQueries({ queryKey: ["admin-apps-registry-activity"] });
-    qc.invalidateQueries({ queryKey: ["deployments"] });
+    qc.invalidateQueries({ queryKey: ['admin-apps-registry'] });
+    qc.invalidateQueries({ queryKey: ['admin-apps-registry-activity'] });
+    qc.invalidateQueries({ queryKey: ['deployments'] });
   };
 
   const saveMutation = useStandardMutation({
     mutationFn: ({ slug, ownerTeam }: { slug: string; ownerTeam: string | null }) =>
       apiFetch<AppRow>(`/admin/apps/${slug}/owner-team`, {
-        method: "PUT",
+        method: 'PUT',
         body: JSON.stringify({ ownerTeam }),
       }),
     onSuccess: (updated) => {
@@ -135,7 +135,7 @@ export default function AppsRegistryAdmin() {
   const statusMutation = useStandardMutation({
     mutationFn: ({ slug, status }: { slug: string; status: string }) =>
       apiFetch<AppRow>(`/admin/apps/${slug}/status`, {
-        method: "PUT",
+        method: 'PUT',
         body: JSON.stringify({ status }),
       }),
     onSuccess: () => invalidate(),
@@ -143,8 +143,8 @@ export default function AppsRegistryAdmin() {
 
   const createMutation = useStandardMutation({
     mutationFn: (payload: NewAppDraft) =>
-      apiFetch<AppRow>("/admin/apps", {
-        method: "POST",
+      apiFetch<AppRow>('/admin/apps', {
+        method: 'POST',
         body: JSON.stringify({
           slug: payload.slug.trim(),
           name: payload.name.trim(),
@@ -161,7 +161,7 @@ export default function AppsRegistryAdmin() {
 
   const deleteMutation = useStandardMutation({
     mutationFn: (slug: string) =>
-      apiFetch<{ ok: boolean }>(`/admin/apps/${slug}`, { method: "DELETE" }),
+      apiFetch<{ ok: boolean }>(`/admin/apps/${slug}`, { method: 'DELETE' }),
     onSuccess: () => {
       setConfirmDelete(null);
       invalidate();
@@ -176,7 +176,7 @@ export default function AppsRegistryAdmin() {
       (a) =>
         a.name.toLowerCase().includes(q) ||
         a.slug.toLowerCase().includes(q) ||
-        (a.ownerTeam ?? "").toLowerCase().includes(q),
+        (a.ownerTeam ?? '').toLowerCase().includes(q),
     );
   }, [apps, search]);
 
@@ -240,7 +240,7 @@ export default function AppsRegistryAdmin() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary hover:bg-primary/25"
             >
               {showNewForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-              {showNewForm ? "Cancel" : "New App"}
+              {showNewForm ? 'Cancel' : 'New App'}
             </button>
           </div>
         )}
@@ -308,9 +308,7 @@ export default function AppsRegistryAdmin() {
                   <input
                     list="known-teams"
                     value={newApp.ownerTeam}
-                    onChange={(e) =>
-                      setNewApp((p) => ({ ...p, ownerTeam: e.target.value }))
-                    }
+                    onChange={(e) => setNewApp((p) => ({ ...p, ownerTeam: e.target.value }))}
                     placeholder="Platform"
                     className="mt-1 w-full px-2.5 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
                   />
@@ -364,8 +362,8 @@ export default function AppsRegistryAdmin() {
                 </div>
               ) : activityEntries.length === 0 ? (
                 <div className="text-xs text-muted-foreground py-2">
-                  No registry changes recorded yet. New entries appear here as
-                  admins add, remove, or update apps.
+                  No registry changes recorded yet. New entries appear here as admins add, remove,
+                  or update apps.
                 </div>
               ) : (
                 <ul className="space-y-1.5 max-h-72 overflow-auto">
@@ -374,7 +372,7 @@ export default function AppsRegistryAdmin() {
                       <span
                         className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider border ${
                           ACTION_COLORS[entry.action] ??
-                          "text-muted-foreground bg-muted border-border"
+                          'text-muted-foreground bg-muted border-border'
                         }`}
                       >
                         {entry.action}
@@ -386,7 +384,7 @@ export default function AppsRegistryAdmin() {
                       )}
                       <span className="flex-1">
                         <span className="text-foreground">
-                          {entry.description ?? "(no description)"}
+                          {entry.description ?? '(no description)'}
                         </span>
                         <span className="text-muted-foreground"> — {entry.actor}</span>
                       </span>
@@ -428,199 +426,189 @@ export default function AppsRegistryAdmin() {
                 <tbody className="divide-y divide-border">
                   {filtered.map((app) => {
                     const draft = drafts[app.slug];
-                    const current = app.ownerTeam ?? "";
+                    const current = app.ownerTeam ?? '';
                     const value = draft ?? current;
                     const dirty = draft !== undefined && draft !== current;
                     const saving =
-                      saveMutation.isPending &&
-                      saveMutation.variables?.slug === app.slug;
+                      saveMutation.isPending && saveMutation.variables?.slug === app.slug;
                     const statusChanging =
-                      statusMutation.isPending &&
-                      statusMutation.variables?.slug === app.slug;
+                      statusMutation.isPending && statusMutation.variables?.slug === app.slug;
                     const deleting =
                       deleteMutation.isPending && deleteMutation.variables === app.slug;
                     return (
                       <Fragment key={app.slug}>
-                      <tr className="hover:bg-muted/30">
-                        <td className="px-4 py-3">
-                          <div className="font-medium">{app.name}</div>
-                          <code className="text-[10px] text-muted-foreground font-mono">
-                            {app.slug}
-                          </code>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                                STATUS_COLORS[app.status] ?? "text-muted-foreground bg-muted"
-                              }`}
-                            >
-                              {app.status.replace(/_/g, " ")}
-                            </span>
-                            <select
-                              disabled={statusChanging}
-                              value={app.status}
-                              onChange={(e) =>
-                                statusMutation.mutate({
-                                  slug: app.slug,
-                                  status: e.target.value,
-                                })
-                              }
-                              className="text-[10px] bg-transparent text-muted-foreground border border-border rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
-                            >
-                              {STATUS_OPTIONS.map((o) => (
-                                <option key={o.value} value={o.value}>
-                                  {o.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            list="known-teams"
-                            value={value}
-                            onChange={(e) =>
-                              setDrafts((d) => ({ ...d, [app.slug]: e.target.value }))
-                            }
-                            placeholder="(unassigned — falls back to Platform)"
-                            className="w-full max-w-xs px-2.5 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="inline-flex items-center gap-1.5 justify-end">
-                            {savedSlug === app.slug ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] text-[#6b8f71]">
-                                <CheckCircle2 className="w-3.5 h-3.5" /> Saved
+                        <tr className="hover:bg-muted/30">
+                          <td className="px-4 py-3">
+                            <div className="font-medium">{app.name}</div>
+                            <code className="text-[10px] text-muted-foreground font-mono">
+                              {app.slug}
+                            </code>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                  STATUS_COLORS[app.status] ?? 'text-muted-foreground bg-muted'
+                                }`}
+                              >
+                                {app.status.replace(/_/g, ' ')}
                               </span>
-                            ) : (
-                              <button
-                                onClick={() =>
-                                  saveMutation.mutate({
+                              <select
+                                disabled={statusChanging}
+                                value={app.status}
+                                onChange={(e) =>
+                                  statusMutation.mutate({
                                     slug: app.slug,
-                                    ownerTeam: value.trim() ? value.trim() : null,
+                                    status: e.target.value,
                                   })
                                 }
-                                disabled={!dirty || saving}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="text-[10px] bg-transparent text-muted-foreground border border-border rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
                               >
-                                {saving ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  <Save className="w-3 h-3" />
-                                )}
-                                Save
-                              </button>
-                            )}
-                            {confirmDelete === app.slug ? (
-                              <>
+                                {STATUS_OPTIONS.map((o) => (
+                                  <option key={o.value} value={o.value}>
+                                    {o.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              list="known-teams"
+                              value={value}
+                              onChange={(e) =>
+                                setDrafts((d) => ({ ...d, [app.slug]: e.target.value }))
+                              }
+                              placeholder="(unassigned — falls back to Platform)"
+                              className="w-full max-w-xs px-2.5 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              {savedSlug === app.slug ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] text-[#6b8f71]">
+                                  <CheckCircle2 className="w-3.5 h-3.5" /> Saved
+                                </span>
+                              ) : (
                                 <button
-                                  onClick={() => deleteMutation.mutate(app.slug)}
-                                  disabled={deleting}
-                                  className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-[#c45a4a]/15 border border-[#c45a4a]/40 text-[#c45a4a] disabled:opacity-40"
+                                  onClick={() =>
+                                    saveMutation.mutate({
+                                      slug: app.slug,
+                                      ownerTeam: value.trim() ? value.trim() : null,
+                                    })
+                                  }
+                                  disabled={!dirty || saving}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
-                                  {deleting ? (
+                                  {saving ? (
                                     <Loader2 className="w-3 h-3 animate-spin" />
                                   ) : (
-                                    <Trash2 className="w-3 h-3" />
+                                    <Save className="w-3 h-3" />
                                   )}
-                                  Confirm
+                                  Save
                                 </button>
-                                <button
-                                  onClick={() => setConfirmDelete(null)}
-                                  className="inline-flex items-center px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border border-border text-muted-foreground hover:bg-muted"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                onClick={() => setConfirmDelete(app.slug)}
-                                title="Remove from registry"
-                                className="inline-flex items-center px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border border-border text-muted-foreground hover:text-[#c45a4a] hover:border-[#c45a4a]/40"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() =>
-                                setExpandedHistorySlug((s) =>
-                                  s === app.slug ? null : app.slug,
-                                )
-                              }
-                              title="Show change history"
-                              className={`inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border ${
-                                expandedHistorySlug === app.slug
-                                  ? "border-primary/40 text-primary bg-primary/10"
-                                  : "border-border text-muted-foreground hover:text-primary hover:border-primary/40"
-                              }`}
-                            >
-                              <History className="w-3 h-3" />
-                              {(activityBySlug.get(app.slug)?.length ?? 0) > 0
-                                ? activityBySlug.get(app.slug)!.length
-                                : ""}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      {expandedHistorySlug === app.slug && (
-                        <tr key={`${app.slug}-history`} className="bg-muted/20">
-                          <td colSpan={4} className="px-4 py-3">
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
-                              <History className="w-3 h-3" />
-                              Change history for{" "}
-                              <code className="font-mono">{app.slug}</code>
-                            </div>
-                            {activityLoading ? (
-                              <div className="text-xs text-muted-foreground py-2">
-                                Loading history…
-                              </div>
-                            ) : (activityBySlug.get(app.slug)?.length ?? 0) === 0 ? (
-                              <div className="text-xs text-muted-foreground py-2">
-                                No recorded changes yet for this app.
-                              </div>
-                            ) : (
-                              <ul className="space-y-1.5">
-                                {activityBySlug.get(app.slug)!.map((entry) => (
-                                  <li
-                                    key={entry.id}
-                                    className="flex items-start gap-2 text-xs"
+                              )}
+                              {confirmDelete === app.slug ? (
+                                <>
+                                  <button
+                                    onClick={() => deleteMutation.mutate(app.slug)}
+                                    disabled={deleting}
+                                    className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-[#c45a4a]/15 border border-[#c45a4a]/40 text-[#c45a4a] disabled:opacity-40"
                                   >
-                                    <span
-                                      className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider border ${
-                                        ACTION_COLORS[entry.action] ??
-                                        "text-muted-foreground bg-muted border-border"
-                                      }`}
-                                    >
-                                      {entry.action}
-                                    </span>
-                                    <span className="flex-1">
-                                      <span className="text-foreground">
-                                        {entry.description ?? "(no description)"}
-                                      </span>
-                                      <span className="text-muted-foreground">
-                                        {" "}— {entry.actor}
-                                      </span>
-                                    </span>
-                                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                      {formatTimestamp(entry.createdAt)}
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
+                                    {deleting ? (
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="w-3 h-3" />
+                                    )}
+                                    Confirm
+                                  </button>
+                                  <button
+                                    onClick={() => setConfirmDelete(null)}
+                                    className="inline-flex items-center px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border border-border text-muted-foreground hover:bg-muted"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  onClick={() => setConfirmDelete(app.slug)}
+                                  title="Remove from registry"
+                                  className="inline-flex items-center px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border border-border text-muted-foreground hover:text-[#c45a4a] hover:border-[#c45a4a]/40"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() =>
+                                  setExpandedHistorySlug((s) => (s === app.slug ? null : app.slug))
+                                }
+                                title="Show change history"
+                                className={`inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border ${
+                                  expandedHistorySlug === app.slug
+                                    ? 'border-primary/40 text-primary bg-primary/10'
+                                    : 'border-border text-muted-foreground hover:text-primary hover:border-primary/40'
+                                }`}
+                              >
+                                <History className="w-3 h-3" />
+                                {(activityBySlug.get(app.slug)?.length ?? 0) > 0
+                                  ? activityBySlug.get(app.slug)!.length
+                                  : ''}
+                              </button>
+                            </div>
                           </td>
                         </tr>
-                      )}
+                        {expandedHistorySlug === app.slug && (
+                          <tr key={`${app.slug}-history`} className="bg-muted/20">
+                            <td colSpan={4} className="px-4 py-3">
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                                <History className="w-3 h-3" />
+                                Change history for <code className="font-mono">{app.slug}</code>
+                              </div>
+                              {activityLoading ? (
+                                <div className="text-xs text-muted-foreground py-2">
+                                  Loading history…
+                                </div>
+                              ) : (activityBySlug.get(app.slug)?.length ?? 0) === 0 ? (
+                                <div className="text-xs text-muted-foreground py-2">
+                                  No recorded changes yet for this app.
+                                </div>
+                              ) : (
+                                <ul className="space-y-1.5">
+                                  {activityBySlug.get(app.slug)!.map((entry) => (
+                                    <li key={entry.id} className="flex items-start gap-2 text-xs">
+                                      <span
+                                        className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider border ${
+                                          ACTION_COLORS[entry.action] ??
+                                          'text-muted-foreground bg-muted border-border'
+                                        }`}
+                                      >
+                                        {entry.action}
+                                      </span>
+                                      <span className="flex-1">
+                                        <span className="text-foreground">
+                                          {entry.description ?? '(no description)'}
+                                        </span>
+                                        <span className="text-muted-foreground">
+                                          {' '}
+                                          — {entry.actor}
+                                        </span>
+                                      </span>
+                                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                        {formatTimestamp(entry.createdAt)}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </td>
+                          </tr>
+                        )}
                       </Fragment>
                     );
                   })}
                   {filtered.length === 0 && (
                     <tr>
-                      <td
-                        colSpan={4}
-                        className="py-8 text-center text-sm text-muted-foreground"
-                      >
+                      <td colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
                         No apps match your search.
                       </td>
                     </tr>

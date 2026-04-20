@@ -1,23 +1,23 @@
-import { Ship } from "lucide-react";
-import { Link } from "wouter";
-import { copyrightLine, aboutSzlParagraph } from "@szl-holdings/brand-registry";
+import { aboutSzlParagraph, copyrightLine } from '@szl-holdings/brand-registry';
+import { Ship } from 'lucide-react';
+import { Link } from 'wouter';
 
 const productLinks = [
-  { label: "Platform", href: "/platform" },
-  { label: "Demo", href: "/demo" },
-  { label: "Security", href: "/security" },
-  { label: "Pricing", href: "/pricing" },
+  { label: 'Platform', href: '/platform' },
+  { label: 'Demo', href: '/demo' },
+  { label: 'Security', href: '/security' },
+  { label: 'Pricing', href: '/pricing' },
 ];
 
 const ecosystemLinks = [
-  { label: "SZL Holdings", href: "/" },
-  { label: "Carlota Jo", href: "/carlota-jo/" },
+  { label: 'SZL Holdings', href: '/' },
+  { label: 'Carlota Jo', href: '/carlota-jo/' },
 ];
 
 const legalLinks = [
-  { label: "Privacy", href: "/legal/privacy" },
-  { label: "Terms", href: "/legal/terms" },
-  { label: "Contact", href: "/demo" },
+  { label: 'Privacy', href: '/legal/privacy' },
+  { label: 'Terms', href: '/legal/terms' },
+  { label: 'Contact', href: '/demo' },
 ];
 
 export function MarketingFooter() {
@@ -38,11 +38,16 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h4 className="text-[10px] font-semibold text-sky-400/40 uppercase tracking-[0.12em] mb-4">Product</h4>
+            <h4 className="text-[10px] font-semibold text-sky-400/40 uppercase tracking-[0.12em] mb-4">
+              Product
+            </h4>
             <ul className="space-y-2.5">
               {productLinks.map((l) => (
                 <li key={l.label}>
-                  <Link href={l.href} className="text-sky-300/30 text-[13px] hover:text-sky-200 transition-colors">
+                  <Link
+                    href={l.href}
+                    className="text-sky-300/30 text-[13px] hover:text-sky-200 transition-colors"
+                  >
                     {l.label}
                   </Link>
                 </li>
@@ -51,11 +56,16 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h4 className="text-[10px] font-semibold text-sky-400/40 uppercase tracking-[0.12em] mb-4">Ecosystem</h4>
+            <h4 className="text-[10px] font-semibold text-sky-400/40 uppercase tracking-[0.12em] mb-4">
+              Ecosystem
+            </h4>
             <ul className="space-y-2.5">
               {ecosystemLinks.map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} className="text-sky-300/30 text-[13px] hover:text-sky-200 transition-colors">
+                  <a
+                    href={l.href}
+                    className="text-sky-300/30 text-[13px] hover:text-sky-200 transition-colors"
+                  >
                     {l.label}
                   </a>
                 </li>
@@ -65,15 +75,38 @@ export function MarketingFooter() {
         </div>
 
         <div className="pt-6 border-t border-sky-500/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-sky-400/20 text-[12px]">
-            {copyrightLine()}
-          </p>
+          <p className="text-sky-400/20 text-[12px]">{copyrightLine()}</p>
           <div className="flex items-center gap-4">
-            <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">X</a>
-            <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">LinkedIn</a>
-            <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">Medium</a>
+            <a
+              href="https://x.com/szlholdings"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+            >
+              X
+            </a>
+            <a
+              href="https://linkedin.com/company/szlholdings"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+            >
+              LinkedIn
+            </a>
+            <a
+              href="https://medium.com/@stephen_38454"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+            >
+              Medium
+            </a>
             {legalLinks.map((l) => (
-              <Link key={l.label} href={l.href} className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">
+              <Link
+                key={l.label}
+                href={l.href}
+                className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+              >
                 {l.label}
               </Link>
             ))}

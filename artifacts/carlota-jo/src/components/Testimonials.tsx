@@ -1,17 +1,17 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 const trustIndicators = [
   {
-    headline: "Discretion by design",
-    body: "Client engagements are never disclosed. Names, industries, and arrangements remain strictly confidential — by policy, not exception.",
+    headline: 'Discretion by design',
+    body: 'Client engagements are never disclosed. Names, industries, and arrangements remain strictly confidential — by policy, not exception.',
   },
   {
-    headline: "Retained relationships",
-    body: "Clients who engage Carlota Jo return. The work compounds over time because the trust built in one engagement carries forward to the next.",
+    headline: 'Retained relationships',
+    body: 'Clients who engage Carlota Jo return. The work compounds over time because the trust built in one engagement carries forward to the next.',
   },
   {
-    headline: "No case studies. No references. By design.",
-    body: "High-trust principals require a firm that treats privacy as a service, not a legal obligation. We do not trade client outcomes for credibility.",
+    headline: 'No case studies. No references. By design.',
+    body: 'High-trust principals require a firm that treats privacy as a service, not a legal obligation. We do not trade client outcomes for credibility.',
   },
 ];
 
@@ -45,9 +45,7 @@ export default function Testimonials() {
               className="bg-stone-50 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 px-8 lg:px-12 py-12"
             >
               <div className="lg:col-span-4">
-                <p className="text-sm font-medium text-ink-900 tracking-wide">
-                  {item.headline}
-                </p>
+                <p className="text-sm font-medium text-ink-900 tracking-wide">{item.headline}</p>
               </div>
               <div className="lg:col-span-8">
                 <p className="font-serif text-xl lg:text-2xl font-light text-ink-900 leading-relaxed">

@@ -16,16 +16,15 @@
  *      crash signal the runtime is supposed to survive.
  */
 
-import { eq, and, gte } from "drizzle-orm";
-
-import { db } from "@szl-holdings/db";
-import { orchestrationCheckpointsTable } from "@szl-holdings/db/schema";
+import { db } from '@szl-holdings/db';
+import { orchestrationCheckpointsTable } from '@szl-holdings/db/schema';
 import {
-  PostgresCheckpointStore,
-  defaultCheckpointStore,
-  run as runCognitiveLoop,
   type CognitiveRuntimeOptions,
-} from "@workspace/cognitive-runtime";
+  defaultCheckpointStore,
+  PostgresCheckpointStore,
+  run as runCognitiveLoop,
+} from '@workspace/cognitive-runtime';
+import { and, eq, gte } from 'drizzle-orm';
 
 const FLUSH_INTERVAL_MS = 1000; // production default — ≤1s data-loss budget
 
@@ -55,12 +54,12 @@ async function pollForDurableCheckpoint(
 }
 
 async function main(): Promise<void> {
-  const tag = process.env.CHECKPOINT_RUN_TAG ?? "untagged";
+  const tag = process.env.CHECKPOINT_RUN_TAG ?? 'untagged';
   const agentId = `agent-${tag}`;
   const sessionId = `session-${tag}`;
 
   const store = new PostgresCheckpointStore({
-    db: db as unknown as Parameters<typeof PostgresCheckpointStore>[0]["db"],
+    db: db as unknown as Parameters<typeof PostgresCheckpointStore>[0]['db'],
     table: orchestrationCheckpointsTable,
     flushIntervalMs: FLUSH_INTERVAL_MS,
   });
@@ -115,11 +114,11 @@ async function main(): Promise<void> {
   // Use baseline planner (heuristic, no LLM) — yields 5 plan steps:
   // Perceive → Plan → Act → Verify → Reflect.
   await runCognitiveLoop(
-    "verify orchestrator resumes from orchestration_checkpoints after a real crash",
+    'verify orchestrator resumes from orchestration_checkpoints after a real crash',
     {
       agentId,
       sessionId,
-      domain: "test",
+      domain: 'test',
       maxRetries: 0,
       maxVerifyRevisions: 0,
       checkpointEveryNSteps: 1,
@@ -137,6 +136,6 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   // eslint-disable-next-line no-console
-  console.error("[crash-child] fatal:", err);
+  console.error('[crash-child] fatal:', err);
   process.exit(2);
 });

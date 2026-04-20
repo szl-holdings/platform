@@ -1,19 +1,19 @@
-import { describe, it, expect } from "vitest";
 import {
-  runSimulation,
   DOMAIN_SCENARIO_LIBRARY,
+  runSimulation,
   type ScenarioDefinition,
-} from "@szl-holdings/monte-carlo";
+} from '@szl-holdings/monte-carlo';
+import { describe, expect, it } from 'vitest';
 
 const ITERATIONS = 1000;
 
 const scenarios = Object.values(DOMAIN_SCENARIO_LIBRARY) as ScenarioDefinition[];
 
-describe("Monte Carlo scenario library — smoke coverage", () => {
-  it("registers more than just the maritime voyage scenario", () => {
+describe('Monte Carlo scenario library — smoke coverage', () => {
+  it('registers more than just the maritime voyage scenario', () => {
     expect(scenarios.length).toBeGreaterThanOrEqual(2);
     const ids = new Set(scenarios.map((s) => s.id));
-    expect(ids.has("vessels/voyage-cost")).toBe(true);
+    expect(ids.has('vessels/voyage-cost')).toBe(true);
     // Sanity: every other domain scenario beyond vessels exists.
     expect(scenarios.length).toBe(ids.size);
   });
@@ -52,7 +52,7 @@ describe("Monte Carlo scenario library — smoke coverage", () => {
           })) {
             expect(
               Number.isFinite(value),
-              `${scenario.id}.${output.id}.${name} should be finite, got ${value}`
+              `${scenario.id}.${output.id}.${name} should be finite, got ${value}`,
             ).toBe(true);
           }
 

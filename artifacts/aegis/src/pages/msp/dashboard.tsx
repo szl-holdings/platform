@@ -1,13 +1,33 @@
-import { BarChart3, Users, Ticket, Server, AlertTriangle, CheckCircle, Clock, DollarSign, ArrowUp, ArrowDown, Activity, Wifi, Shield, TrendingUp, ChevronRight, RefreshCw, Bell, MapPin, Star, AlertCircle } from "lucide-react";
-import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
-import { useState } from "react";
-
-import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { toast } from "@szl-holdings/shared-ui/ui/sonner";
-import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
-import { AegisGraphQLPanel } from "@/components/graphql-data-panel";
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { ActivityFeed } from '@szl-holdings/shared-ui/collaboration';
+import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
+import { Skeleton } from '@szl-holdings/shared-ui/ui/skeleton';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  BarChart3,
+  Bell,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  DollarSign,
+  MapPin,
+  RefreshCw,
+  Server,
+  Shield,
+  Star,
+  Ticket,
+  TrendingUp,
+  Users,
+  Wifi,
+} from 'lucide-react';
+import { useState } from 'react';
+import { AegisGraphQLPanel } from '@/components/graphql-data-panel';
 
 interface DashboardMetrics {
   metrics: {
@@ -43,18 +63,18 @@ interface TicketItem {
   ticketNumber: string;
   subject: string;
   clientName: string;
-  priority: "critical" | "high" | "medium" | "low";
-  status: "open" | "in-progress" | "waiting" | "resolved" | "closed";
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  status: 'open' | 'in-progress' | 'waiting' | 'resolved' | 'closed';
   assigneeName: string;
   slaDeadline: string;
-  slaStatus: "on-track" | "at-risk" | "breached";
+  slaStatus: 'on-track' | 'at-risk' | 'breached';
   category: string;
 }
 
 interface ClientItem {
   id: number;
   name: string;
-  status: "active" | "inactive" | "at-risk";
+  status: 'active' | 'inactive' | 'at-risk';
   deviceCount: number;
   openTickets: number;
   healthScore: number;
@@ -76,35 +96,57 @@ interface RevenueData {
     clientName: string;
     mrr: number;
     tier: string;
-    churnRisk: "low" | "medium" | "high";
+    churnRisk: 'low' | 'medium' | 'high';
     contractValue: number;
     daysToRenewal: number;
   }[];
 }
 
 const sevColors: Record<string, { dot: string; badge: string; label: string }> = {
-  critical: { dot: "bg-red-500", badge: "bg-red-500/10 text-red-500 border border-red-500/20", label: "Critical" },
-  warning: { dot: "bg-amber-500", badge: "bg-amber-500/10 text-amber-500 border border-amber-500/20", label: "Warning" },
-  info: { dot: "bg-blue-500", badge: "bg-blue-500/10 text-blue-500 border border-blue-500/20", label: "Info" },
+  critical: {
+    dot: 'bg-red-500',
+    badge: 'bg-red-500/10 text-red-500 border border-red-500/20',
+    label: 'Critical',
+  },
+  warning: {
+    dot: 'bg-amber-500',
+    badge: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+    label: 'Warning',
+  },
+  info: {
+    dot: 'bg-blue-500',
+    badge: 'bg-blue-500/10 text-blue-500 border border-blue-500/20',
+    label: 'Info',
+  },
 };
 
 const prioColors: Record<string, string> = {
-  critical: "bg-red-500/10 text-red-500",
-  high: "bg-orange-500/10 text-orange-500",
-  medium: "bg-amber-500/10 text-amber-600",
-  low: "bg-emerald-500/10 text-emerald-600",
+  critical: 'bg-red-500/10 text-red-500',
+  high: 'bg-orange-500/10 text-orange-500',
+  medium: 'bg-amber-500/10 text-amber-600',
+  low: 'bg-emerald-500/10 text-emerald-600',
 };
 
 const statusColors: Record<string, string> = {
-  "in-progress": "bg-blue-500/10 text-blue-500",
-  open: "bg-violet-500/10 text-violet-500",
-  waiting: "bg-amber-500/10 text-amber-500",
-  resolved: "bg-emerald-500/10 text-emerald-500",
+  'in-progress': 'bg-blue-500/10 text-blue-500',
+  open: 'bg-violet-500/10 text-violet-500',
+  waiting: 'bg-amber-500/10 text-amber-500',
+  resolved: 'bg-emerald-500/10 text-emerald-500',
 };
 
 function HealthBar({ value, status }: { value: number; status: string }) {
-  const color = status === "healthy" || status === "active" ? "bg-emerald-500" : status === "warning" ? "bg-amber-500" : "bg-red-500";
-  const textColor = status === "healthy" || status === "active" ? "text-emerald-500" : status === "warning" ? "text-amber-500" : "text-red-500";
+  const color =
+    status === 'healthy' || status === 'active'
+      ? 'bg-emerald-500'
+      : status === 'warning'
+        ? 'bg-amber-500'
+        : 'bg-red-500';
+  const textColor =
+    status === 'healthy' || status === 'active'
+      ? 'text-emerald-500'
+      : status === 'warning'
+        ? 'text-amber-500'
+        : 'text-red-500';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
@@ -129,9 +171,9 @@ function MetricSkeleton() {
 }
 
 function formatSlaRemaining(deadline: string | null): string {
-  if (!deadline) return "No SLA";
+  if (!deadline) return 'No SLA';
   const diff = new Date(deadline).getTime() - Date.now();
-  if (diff < 0) return "Breached";
+  if (diff < 0) return 'Breached';
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   if (h > 24) return `${Math.floor(h / 24)}d`;
@@ -139,9 +181,14 @@ function formatSlaRemaining(deadline: string | null): string {
   return `${m}m`;
 }
 
-function ClientProfitabilityPanel({ byClient }: { byClient: RevenueData["byClient"] }) {
-  const [sortBy, setSortBy] = useState<"mrr" | "churn">("mrr");
-  const sorted = [...byClient].sort((a, b) => sortBy === "mrr" ? b.mrr - a.mrr : (b.churnRisk === "high" ? 2 : b.churnRisk === "medium" ? 1 : 0) - (a.churnRisk === "high" ? 2 : a.churnRisk === "medium" ? 1 : 0));
+function ClientProfitabilityPanel({ byClient }: { byClient: RevenueData['byClient'] }) {
+  const [sortBy, setSortBy] = useState<'mrr' | 'churn'>('mrr');
+  const sorted = [...byClient].sort((a, b) =>
+    sortBy === 'mrr'
+      ? b.mrr - a.mrr
+      : (b.churnRisk === 'high' ? 2 : b.churnRisk === 'medium' ? 1 : 0) -
+        (a.churnRisk === 'high' ? 2 : a.churnRisk === 'medium' ? 1 : 0),
+  );
   const totalMrr = byClient.reduce((s, c) => s + c.mrr, 0);
 
   return (
@@ -152,29 +199,50 @@ function ClientProfitabilityPanel({ byClient }: { byClient: RevenueData["byClien
           Client Profitability
         </h2>
         <div className="flex items-center gap-1">
-          <button onClick={() => setSortBy("mrr")} className={`text-[10px] px-2 py-1 rounded transition-colors ${sortBy === "mrr" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>By MRR</button>
-          <button onClick={() => setSortBy("churn")} className={`text-[10px] px-2 py-1 rounded transition-colors ${sortBy === "churn" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>By Churn Risk</button>
+          <button
+            onClick={() => setSortBy('mrr')}
+            className={`text-[10px] px-2 py-1 rounded transition-colors ${sortBy === 'mrr' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            By MRR
+          </button>
+          <button
+            onClick={() => setSortBy('churn')}
+            className={`text-[10px] px-2 py-1 rounded transition-colors ${sortBy === 'churn' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            By Churn Risk
+          </button>
         </div>
       </div>
       <div className="divide-y divide-border">
         {sorted.map((c) => (
-          <div key={c.clientName} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
+          <div
+            key={c.clientName}
+            className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors"
+          >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{c.clientName}</p>
-              <p className="text-xs text-muted-foreground mt-0.5 capitalize">{c.tier} · Renews in {c.daysToRenewal}d</p>
+              <p className="text-xs text-muted-foreground mt-0.5 capitalize">
+                {c.tier} · Renews in {c.daysToRenewal}d
+              </p>
             </div>
             <div className="text-right shrink-0 w-32">
               <p className="text-sm font-bold text-emerald-500">${c.mrr.toLocaleString()}/mo</p>
               <div className="flex items-center justify-end gap-1 mt-1">
                 <span className="text-[10px] text-muted-foreground">Churn:</span>
-                <span className={`text-[10px] font-bold ${c.churnRisk === "high" ? "text-red-500" : c.churnRisk === "medium" ? "text-amber-500" : "text-emerald-500"}`}>{c.churnRisk}</span>
+                <span
+                  className={`text-[10px] font-bold ${c.churnRisk === 'high' ? 'text-red-500' : c.churnRisk === 'medium' ? 'text-amber-500' : 'text-emerald-500'}`}
+                >
+                  {c.churnRisk}
+                </span>
               </div>
             </div>
           </div>
         ))}
       </div>
       <div className="p-3 border-t border-border bg-muted/20 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground font-mono">Total MRR: ${totalMrr.toLocaleString()}</span>
+        <span className="text-xs text-muted-foreground font-mono">
+          Total MRR: ${totalMrr.toLocaleString()}
+        </span>
         <span className="text-xs font-bold text-emerald-500">{byClient.length} clients</span>
       </div>
     </div>
@@ -193,21 +261,37 @@ function DispatchBoard({ technicians }: { technicians: TechItem[] }) {
       </div>
       <div className="divide-y divide-border">
         {technicians.slice(0, 5).map((t) => {
-          const available = t.status === "available";
+          const available = t.status === 'available';
           return (
-            <div key={t.id} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${available ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-muted text-muted-foreground border border-border"}`}>
-                {t.name.split(" ").map((n: string) => n[0]).join("")}
+            <div
+              key={t.id}
+              className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors"
+            >
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${available ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-muted text-muted-foreground border border-border'}`}
+              >
+                {t.name
+                  .split(' ')
+                  .map((n: string) => n[0])
+                  .join('')}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium">{t.name}</p>
-                  {t.specialties?.[0] && <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 font-mono">{t.specialties[0]}</span>}
+                  {t.specialties?.[0] && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 font-mono">
+                      {t.specialties[0]}
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground">{t.completedToday} completed today · {t.location}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t.completedToday} completed today · {t.location}
+                </p>
               </div>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${available ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
-                {available ? "Available" : t.status.replace("-", " ")}
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${available ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}
+              >
+                {available ? 'Available' : t.status.replace('-', ' ')}
               </span>
             </div>
           );
@@ -218,7 +302,9 @@ function DispatchBoard({ technicians }: { technicians: TechItem[] }) {
 }
 
 function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
-  const atRisk = tickets.filter(t => t.slaStatus !== "on-track" && t.status !== "resolved" && t.status !== "closed");
+  const atRisk = tickets.filter(
+    (t) => t.slaStatus !== 'on-track' && t.status !== 'resolved' && t.status !== 'closed',
+  );
   return (
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
@@ -230,22 +316,34 @@ function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
       </div>
       <div className="divide-y divide-border">
         {atRisk.slice(0, 4).map((s) => (
-          <div key={s.id} className={`px-4 py-3 hover:bg-muted/20 transition-colors ${s.slaStatus === "breached" ? "bg-red-500/5" : ""}`}>
+          <div
+            key={s.id}
+            className={`px-4 py-3 hover:bg-muted/20 transition-colors ${s.slaStatus === 'breached' ? 'bg-red-500/5' : ''}`}
+          >
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono text-muted-foreground">{s.ticketNumber}</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded bg-muted font-mono uppercase ${prioColors[s.priority]}`}>{s.priority[0].toUpperCase()}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded bg-muted font-mono uppercase ${prioColors[s.priority]}`}
+                >
+                  {s.priority[0].toUpperCase()}
+                </span>
               </div>
-              <span className={`text-[10px] font-bold ${s.slaStatus === "breached" ? "text-red-500 animate-pulse" : "text-amber-500"}`}>
-                {s.slaStatus === "breached" ? "⚠ BREACHED" : "● At Risk"}
+              <span
+                className={`text-[10px] font-bold ${s.slaStatus === 'breached' ? 'text-red-500 animate-pulse' : 'text-amber-500'}`}
+              >
+                {s.slaStatus === 'breached' ? '⚠ BREACHED' : '● At Risk'}
               </span>
             </div>
             <p className="text-sm font-medium truncate">{s.subject}</p>
             <div className="flex items-center justify-between mt-1">
               <p className="text-xs text-muted-foreground">{s.clientName}</p>
               {s.slaDeadline && (
-                <p className={`text-xs font-mono font-bold flex items-center gap-1 ${s.slaStatus === "breached" ? "text-red-500" : "text-amber-500"}`}>
-                  <Clock className="w-3 h-3" />{formatSlaRemaining(s.slaDeadline)}
+                <p
+                  className={`text-xs font-mono font-bold flex items-center gap-1 ${s.slaStatus === 'breached' ? 'text-red-500' : 'text-amber-500'}`}
+                >
+                  <Clock className="w-3 h-3" />
+                  {formatSlaRemaining(s.slaDeadline)}
                 </p>
               )}
             </div>
@@ -264,9 +362,9 @@ function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
 
 function AlertSuppressionPanel() {
   const suppressionRules = [
-    { condition: "Backup completion events", client: "All" },
-    { condition: "SSL renewal confirmations", client: "All" },
-    { condition: "Scheduled maintenance windows", client: "Per client schedule" },
+    { condition: 'Backup completion events', client: 'All' },
+    { condition: 'SSL renewal confirmations', client: 'All' },
+    { condition: 'Scheduled maintenance windows', client: 'Per client schedule' },
   ];
   return (
     <div className="rounded-xl border border-border bg-card">
@@ -279,7 +377,10 @@ function AlertSuppressionPanel() {
       </div>
       <div className="divide-y divide-border">
         {suppressionRules.map((a) => (
-          <div key={a.condition} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
+          <div
+            key={a.condition}
+            className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors"
+          >
             <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
               <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
             </div>
@@ -291,13 +392,15 @@ function AlertSuppressionPanel() {
         ))}
       </div>
       <div className="p-3 border-t border-border">
-        <p className="text-[10px] text-muted-foreground text-center">Configure suppression rules in alert settings</p>
+        <p className="text-[10px] text-muted-foreground text-center">
+          Configure suppression rules in alert settings
+        </p>
       </div>
     </div>
   );
 }
 
-function ClientChurnHeatmap({ byClient }: { byClient: RevenueData["byClient"] }) {
+function ClientChurnHeatmap({ byClient }: { byClient: RevenueData['byClient'] }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <h2 className="font-display font-semibold flex items-center gap-2 mb-4">
@@ -306,7 +409,10 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData["byClient"] })
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {byClient.slice(0, 12).map((c) => (
-          <div key={c.clientName} className={`rounded-lg p-3 border ${c.churnRisk === "high" ? "border-red-500/20 bg-red-500/5" : c.churnRisk === "medium" ? "border-amber-500/20 bg-amber-500/5" : "border-emerald-500/20 bg-emerald-500/5"}`}>
+          <div
+            key={c.clientName}
+            className={`rounded-lg p-3 border ${c.churnRisk === 'high' ? 'border-red-500/20 bg-red-500/5' : c.churnRisk === 'medium' ? 'border-amber-500/20 bg-amber-500/5' : 'border-emerald-500/20 bg-emerald-500/5'}`}
+          >
             <p className="text-xs font-semibold truncate">{c.clientName}</p>
             <div className="flex items-end justify-between mt-2">
               <div>
@@ -315,11 +421,20 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData["byClient"] })
               </div>
               <div className="text-right">
                 <p className="text-[10px] text-muted-foreground">Churn Risk</p>
-                <p className={`text-sm font-bold capitalize ${c.churnRisk === "high" ? "text-red-500" : c.churnRisk === "medium" ? "text-amber-500" : "text-emerald-500"}`}>{c.churnRisk}</p>
+                <p
+                  className={`text-sm font-bold capitalize ${c.churnRisk === 'high' ? 'text-red-500' : c.churnRisk === 'medium' ? 'text-amber-500' : 'text-emerald-500'}`}
+                >
+                  {c.churnRisk}
+                </p>
               </div>
             </div>
             <div className="h-1 bg-border rounded-full mt-2 overflow-hidden">
-              <div className={`h-full rounded-full ${c.churnRisk === "high" ? "bg-red-500" : c.churnRisk === "medium" ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: c.churnRisk === "high" ? "85%" : c.churnRisk === "medium" ? "50%" : "15%" }} />
+              <div
+                className={`h-full rounded-full ${c.churnRisk === 'high' ? 'bg-red-500' : c.churnRisk === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                style={{
+                  width: c.churnRisk === 'high' ? '85%' : c.churnRisk === 'medium' ? '50%' : '15%',
+                }}
+              />
             </div>
           </div>
         ))}
@@ -329,38 +444,63 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData["byClient"] })
 }
 
 export default function Dashboard() {
-  const { data: dashboardData, isLoading: dashLoading, isError: dashError, refetch } = useStandardQuery<DashboardMetrics>({
-    queryKey: ["msp-dashboard"],
-    queryFn: () => apiFetch<DashboardMetrics>("/msp/dashboard"),
+  const {
+    data: dashboardData,
+    isLoading: dashLoading,
+    isError: dashError,
+    refetch,
+  } = useStandardQuery<DashboardMetrics>({
+    queryKey: ['msp-dashboard'],
+    queryFn: () => apiFetch<DashboardMetrics>('/msp/dashboard'),
     staleTime: 60_000,
     retry: 1,
     refetchInterval: 5 * 60_000,
   });
 
-  const { data: ticketsData, isLoading: ticketsLoading, isError: ticketsError, refetch: refetchTickets } = useStandardQuery<{ tickets: TicketItem[] }>({
-    queryKey: ["msp-tickets-dashboard"],
-    queryFn: () => apiFetch<{ tickets: TicketItem[] }>("/msp/tickets?limit=10"),
+  const {
+    data: ticketsData,
+    isLoading: ticketsLoading,
+    isError: ticketsError,
+    refetch: refetchTickets,
+  } = useStandardQuery<{ tickets: TicketItem[] }>({
+    queryKey: ['msp-tickets-dashboard'],
+    queryFn: () => apiFetch<{ tickets: TicketItem[] }>('/msp/tickets?limit=10'),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: techData, isLoading: techLoading, isError: techError, refetch: refetchTech } = useStandardQuery<{ technicians: TechItem[] }>({
-    queryKey: ["msp-technicians-dashboard"],
-    queryFn: () => apiFetch<{ technicians: TechItem[] }>("/msp/technicians"),
+  const {
+    data: techData,
+    isLoading: techLoading,
+    isError: techError,
+    refetch: refetchTech,
+  } = useStandardQuery<{ technicians: TechItem[] }>({
+    queryKey: ['msp-technicians-dashboard'],
+    queryFn: () => apiFetch<{ technicians: TechItem[] }>('/msp/technicians'),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: clientsData, isLoading: clientsLoading, isError: clientsError, refetch: refetchClients } = useStandardQuery<{ clients: ClientItem[] }>({
-    queryKey: ["msp-clients-dashboard"],
-    queryFn: () => apiFetch<{ clients: ClientItem[] }>("/msp/clients"),
+  const {
+    data: clientsData,
+    isLoading: clientsLoading,
+    isError: clientsError,
+    refetch: refetchClients,
+  } = useStandardQuery<{ clients: ClientItem[] }>({
+    queryKey: ['msp-clients-dashboard'],
+    queryFn: () => apiFetch<{ clients: ClientItem[] }>('/msp/clients'),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: revenueData, isLoading: revenueLoading, isError: revenueError, refetch: refetchRevenue } = useStandardQuery<RevenueData>({
-    queryKey: ["msp-revenue-dashboard"],
-    queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
+  const {
+    data: revenueData,
+    isLoading: revenueLoading,
+    isError: revenueError,
+    refetch: refetchRevenue,
+  } = useStandardQuery<RevenueData>({
+    queryKey: ['msp-revenue-dashboard'],
+    queryFn: () => apiFetch<RevenueData>('/msp/revenue'),
     staleTime: 120_000,
     retry: 1,
   });
@@ -384,16 +524,70 @@ export default function Dashboard() {
   const byClient = revenueData?.byClient ?? [];
 
   const nocAlerts = [
-    ...(metrics?.devicesCritical ? [{ id: "crit1", severity: "critical", client: "Managed Devices", message: `${metrics.devicesCritical} device${metrics.devicesCritical > 1 ? "s" : ""} in critical state — immediate attention required`, time: "Live" }] : []),
-    ...(slaBreachCount > 0 ? [{ id: "sla1", severity: "critical", client: "Service Desk", message: `${slaBreachCount} SLA breach${slaBreachCount > 1 ? "es" : ""} active — escalation required`, time: "Live" }] : []),
-    ...(metrics?.expiringContracts ? [{ id: "exp1", severity: "warning", client: "Contracts", message: `${metrics.expiringContracts} contract${metrics.expiringContracts > 1 ? "s" : ""} expiring within 90 days`, time: "Live" }] : []),
+    ...(metrics?.devicesCritical
+      ? [
+          {
+            id: 'crit1',
+            severity: 'critical',
+            client: 'Managed Devices',
+            message: `${metrics.devicesCritical} device${metrics.devicesCritical > 1 ? 's' : ''} in critical state — immediate attention required`,
+            time: 'Live',
+          },
+        ]
+      : []),
+    ...(slaBreachCount > 0
+      ? [
+          {
+            id: 'sla1',
+            severity: 'critical',
+            client: 'Service Desk',
+            message: `${slaBreachCount} SLA breach${slaBreachCount > 1 ? 'es' : ''} active — escalation required`,
+            time: 'Live',
+          },
+        ]
+      : []),
+    ...(metrics?.expiringContracts
+      ? [
+          {
+            id: 'exp1',
+            severity: 'warning',
+            client: 'Contracts',
+            message: `${metrics.expiringContracts} contract${metrics.expiringContracts > 1 ? 's' : ''} expiring within 90 days`,
+            time: 'Live',
+          },
+        ]
+      : []),
   ];
 
   const summaryMetrics = [
-    { label: "Uptime SLA", value: `${uptime.toFixed(1)}%`, icon: Activity, trend: "Infrastructure health", up: true },
-    { label: "CSAT Score", value: `${satisfaction.toFixed(1)}/5`, icon: CheckCircle, trend: "Client satisfaction", up: true },
-    { label: "SLA Breaches", value: String(slaBreachCount), icon: AlertTriangle, trend: slaBreachCount === 0 ? "None active" : `${slaBreachCount} requiring action`, up: slaBreachCount <= 1 },
-    { label: "MRR", value: mrr > 0 ? `$${(mrr / 1000).toFixed(0)}K` : "—", icon: DollarSign, trend: growth > 0 ? `+${growth}% MoM growth` : `${growth}% vs last month`, up: growth >= 0 },
+    {
+      label: 'Uptime SLA',
+      value: `${uptime.toFixed(1)}%`,
+      icon: Activity,
+      trend: 'Infrastructure health',
+      up: true,
+    },
+    {
+      label: 'CSAT Score',
+      value: `${satisfaction.toFixed(1)}/5`,
+      icon: CheckCircle,
+      trend: 'Client satisfaction',
+      up: true,
+    },
+    {
+      label: 'SLA Breaches',
+      value: String(slaBreachCount),
+      icon: AlertTriangle,
+      trend: slaBreachCount === 0 ? 'None active' : `${slaBreachCount} requiring action`,
+      up: slaBreachCount <= 1,
+    },
+    {
+      label: 'MRR',
+      value: mrr > 0 ? `$${(mrr / 1000).toFixed(0)}K` : '—',
+      icon: DollarSign,
+      trend: growth > 0 ? `+${growth}% MoM growth` : `${growth}% vs last month`,
+      up: growth >= 0,
+    },
   ];
 
   return (
@@ -402,13 +596,22 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-display font-bold tracking-tight">Client Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {dashLoading ? "Loading metrics…" : `${activeClients} active clients · ${managedDevices} managed devices · All systems monitored`}
+            {dashLoading
+              ? 'Loading metrics…'
+              : `${activeClients} active clients · ${managedDevices} managed devices · All systems monitored`}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <DataStateBadge state={isDemo ? "demo" : "live"} pulse={isDemo} />
+          <DataStateBadge state={isDemo ? 'demo' : 'live'} pulse={isDemo} />
           <button
-            onClick={() => { refetch(); refetchTickets(); refetchTech(); refetchClients(); refetchRevenue(); toast.info("Refreshing all data…"); }}
+            onClick={() => {
+              refetch();
+              refetchTickets();
+              refetchTech();
+              refetchClients();
+              refetchRevenue();
+              toast.info('Refreshing all data…');
+            }}
             className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg px-3 py-2"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -419,10 +622,17 @@ export default function Dashboard() {
 
       {/* Hero Revenue Banner */}
       <div className="rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-violet-700 p-6 md:p-8 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 0%, transparent 60%)" }} />
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 80% 50%, white 0%, transparent 60%)',
+          }}
+        />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <p className="text-sm font-medium text-white/70 uppercase tracking-wider mb-1">Monthly Recurring Revenue</p>
+            <p className="text-sm font-medium text-white/70 uppercase tracking-wider mb-1">
+              Monthly Recurring Revenue
+            </p>
             {dashLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-12 w-40 bg-white/20" />
@@ -430,11 +640,18 @@ export default function Dashboard() {
               </div>
             ) : (
               <>
-                <div className="text-5xl font-display font-bold tracking-tight">${mrr.toLocaleString()}</div>
+                <div className="text-5xl font-display font-bold tracking-tight">
+                  ${mrr.toLocaleString()}
+                </div>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="flex items-center gap-1 text-sm font-semibold text-emerald-300">
-                    {growth >= 0 ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
-                    {growth >= 0 ? "+" : ""}{growth}%
+                    {growth >= 0 ? (
+                      <ArrowUp className="w-4 h-4" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4" />
+                    )}
+                    {growth >= 0 ? '+' : ''}
+                    {growth}%
                   </span>
                   <span className="text-white/50 text-sm">vs last month</span>
                 </div>
@@ -442,27 +659,29 @@ export default function Dashboard() {
             )}
           </div>
           <div className="grid grid-cols-3 gap-4 md:gap-8">
-            {dashLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="text-center space-y-2">
-                  <Skeleton className="w-5 h-5 bg-white/20 mx-auto rounded" />
-                  <Skeleton className="h-7 w-14 bg-white/20 mx-auto rounded" />
-                  <Skeleton className="h-3 w-16 bg-white/20 mx-auto rounded" />
-                </div>
-              ))
-            ) : (
-              [
-                { label: "Active Clients", value: String(activeClients), icon: Users },
-                { label: "Open Tickets", value: String(openTickets), icon: Ticket },
-                { label: "Managed Devices", value: managedDevices.toLocaleString(), icon: Server },
-              ].map((s) => (
-                <div key={s.label} className="text-center">
-                  <s.icon className="w-5 h-5 text-white/50 mx-auto mb-1" />
-                  <div className="text-2xl font-display font-bold">{s.value}</div>
-                  <div className="text-xs text-white/60 mt-0.5 whitespace-nowrap">{s.label}</div>
-                </div>
-              ))
-            )}
+            {dashLoading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="text-center space-y-2">
+                    <Skeleton className="w-5 h-5 bg-white/20 mx-auto rounded" />
+                    <Skeleton className="h-7 w-14 bg-white/20 mx-auto rounded" />
+                    <Skeleton className="h-3 w-16 bg-white/20 mx-auto rounded" />
+                  </div>
+                ))
+              : [
+                  { label: 'Active Clients', value: String(activeClients), icon: Users },
+                  { label: 'Open Tickets', value: String(openTickets), icon: Ticket },
+                  {
+                    label: 'Managed Devices',
+                    value: managedDevices.toLocaleString(),
+                    icon: Server,
+                  },
+                ].map((s) => (
+                  <div key={s.label} className="text-center">
+                    <s.icon className="w-5 h-5 text-white/50 mx-auto mb-1" />
+                    <div className="text-2xl font-display font-bold">{s.value}</div>
+                    <div className="text-xs text-white/60 mt-0.5 whitespace-nowrap">{s.label}</div>
+                  </div>
+                ))}
           </div>
         </div>
       </div>
@@ -472,31 +691,52 @@ export default function Dashboard() {
         {dashLoading
           ? Array.from({ length: 4 }).map((_, i) => <MetricSkeleton key={i} />)
           : summaryMetrics.map((m) => (
-            <div key={m.label} className="rounded-xl border border-border bg-card p-5 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <m.icon className="w-5 h-5 text-primary" />
+              <div
+                key={m.label}
+                className="rounded-xl border border-border bg-card p-5 flex items-start gap-4"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <m.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">{m.label}</p>
+                  <p className="text-xl font-display font-bold">{m.value}</p>
+                  <p className={`text-xs mt-1 ${m.up ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {m.trend}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">{m.label}</p>
-                <p className="text-xl font-display font-bold">{m.value}</p>
-                <p className={`text-xs mt-1 ${m.up ? "text-emerald-600" : "text-red-500"}`}>{m.trend}</p>
-              </div>
-            </div>
-          ))}
+            ))}
       </div>
 
       {/* SLA Breach Prediction + Dispatch + Alert Suppression */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {ticketsLoading ? <Skeleton className="h-48 rounded-xl" /> : <SLABreachPrediction tickets={tickets} />}
-        {techLoading ? <Skeleton className="h-48 rounded-xl" /> : <DispatchBoard technicians={technicians} />}
+        {ticketsLoading ? (
+          <Skeleton className="h-48 rounded-xl" />
+        ) : (
+          <SLABreachPrediction tickets={tickets} />
+        )}
+        {techLoading ? (
+          <Skeleton className="h-48 rounded-xl" />
+        ) : (
+          <DispatchBoard technicians={technicians} />
+        )}
         <AlertSuppressionPanel />
       </div>
 
       {/* Client Profitability */}
-      {revenueLoading ? <Skeleton className="h-64 rounded-xl" /> : byClient.length > 0 ? <ClientProfitabilityPanel byClient={byClient} /> : null}
+      {revenueLoading ? (
+        <Skeleton className="h-64 rounded-xl" />
+      ) : byClient.length > 0 ? (
+        <ClientProfitabilityPanel byClient={byClient} />
+      ) : null}
 
       {/* Churn Risk Heatmap */}
-      {revenueLoading ? <Skeleton className="h-48 rounded-xl" /> : byClient.length > 0 ? <ClientChurnHeatmap byClient={byClient} /> : null}
+      {revenueLoading ? (
+        <Skeleton className="h-48 rounded-xl" />
+      ) : byClient.length > 0 ? (
+        <ClientChurnHeatmap byClient={byClient} />
+      ) : null}
 
       {/* Client Health Table + NOC Alerts */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
@@ -509,26 +749,42 @@ export default function Dashboard() {
             <span className="text-xs text-muted-foreground">{clients.length} clients</span>
           </div>
           <div className="divide-y divide-border">
-            {clientsLoading ? (
-              Array.from({ length: 5 }).map((_, i) => <div key={i} className="px-4 py-3"><Skeleton className="h-10" /></div>)
-            ) : clients.map((client) => (
-              <div key={client.id} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/30 transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{client.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{client.deviceCount} devices · {client.openTickets} ticket{client.openTickets !== 1 ? "s" : ""}</p>
-                </div>
-                <div className="w-32 shrink-0">
-                  <HealthBar value={client.healthScore} status={client.status} />
-                </div>
-                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
-                  client.status === "active" ? "bg-emerald-500/10 text-emerald-600"
-                  : client.status === "at-risk" ? "bg-red-500/10 text-red-500"
-                  : "bg-muted text-muted-foreground"
-                }`}>
-                  {client.status === "at-risk" ? "At Risk" : client.status.charAt(0).toUpperCase() + client.status.slice(1)}
-                </span>
-              </div>
-            ))}
+            {clientsLoading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="px-4 py-3">
+                    <Skeleton className="h-10" />
+                  </div>
+                ))
+              : clients.map((client) => (
+                  <div
+                    key={client.id}
+                    className="px-4 py-3 flex items-center gap-4 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{client.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {client.deviceCount} devices · {client.openTickets} ticket
+                        {client.openTickets !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    <div className="w-32 shrink-0">
+                      <HealthBar value={client.healthScore} status={client.status} />
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                        client.status === 'active'
+                          ? 'bg-emerald-500/10 text-emerald-600'
+                          : client.status === 'at-risk'
+                            ? 'bg-red-500/10 text-red-500'
+                            : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {client.status === 'at-risk'
+                        ? 'At Risk'
+                        : client.status.charAt(0).toUpperCase() + client.status.slice(1)}
+                    </span>
+                  </div>
+                ))}
           </div>
         </div>
 
@@ -539,7 +795,7 @@ export default function Dashboard() {
               NOC Alerts
             </h2>
             <span className="text-[10px] font-bold uppercase bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">
-              {nocAlerts.filter(a => a.severity === "critical").length} Critical
+              {nocAlerts.filter((a) => a.severity === 'critical').length} Critical
             </span>
           </div>
           <div className="divide-y divide-border">
@@ -552,14 +808,23 @@ export default function Dashboard() {
               nocAlerts.map((alert) => {
                 const sev = sevColors[alert.severity] ?? sevColors.info;
                 return (
-                  <div key={alert.id} className="px-4 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors">
+                  <div
+                    key={alert.id}
+                    className="px-4 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors"
+                  >
                     <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sev.dot}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-medium">{alert.client}</span>
-                        <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full ${sev.badge}`}>{sev.label}</span>
+                        <span
+                          className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full ${sev.badge}`}
+                        >
+                          {sev.label}
+                        </span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{alert.message}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                        {alert.message}
+                      </p>
                       <p className="text-[10px] text-muted-foreground/60 mt-1">{alert.time}</p>
                     </div>
                   </div>
@@ -582,41 +847,73 @@ export default function Dashboard() {
           </div>
           <div className="overflow-x-auto">
             {ticketsLoading ? (
-              <div className="p-4 space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8" />)}</div>
+              <div className="p-4 space-y-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8" />
+                ))}
+              </div>
             ) : (
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Ticket</th>
-                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Client</th>
-                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden sm:table-cell">Subject</th>
-                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Priority</th>
-                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden md:table-cell">Status</th>
-                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden lg:table-cell">SLA</th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">
+                      Ticket
+                    </th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">
+                      Client
+                    </th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden sm:table-cell">
+                      Subject
+                    </th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">
+                      Priority
+                    </th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden md:table-cell">
+                      Status
+                    </th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden lg:table-cell">
+                      SLA
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {tickets.slice(0, 8).map((t) => (
-                    <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{t.ticketNumber}</td>
+                    <tr
+                      key={t.id}
+                      className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                        {t.ticketNumber}
+                      </td>
                       <td className="px-4 py-3 font-medium text-xs">{t.clientName}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell max-w-[200px] truncate">{t.subject}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell max-w-[200px] truncate">
+                        {t.subject}
+                      </td>
                       <td className="px-4 py-3">
-                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${prioColors[t.priority] ?? ""}`}>
+                        <span
+                          className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${prioColors[t.priority] ?? ''}`}
+                        >
                           {t.priority}
                         </span>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
-                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[t.status] ?? "bg-muted text-muted-foreground"}`}>
-                          {t.status.replace("-", " ")}
+                        <span
+                          className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[t.status] ?? 'bg-muted text-muted-foreground'}`}
+                        >
+                          {t.status.replace('-', ' ')}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                         {t.slaDeadline ? (
-                          <span className={`flex items-center gap-1 font-mono ${t.slaStatus === "breached" ? "text-red-500" : t.slaStatus === "at-risk" ? "text-amber-500" : ""}`}>
-                            <Clock className="w-3 h-3" />{formatSlaRemaining(t.slaDeadline)}
+                          <span
+                            className={`flex items-center gap-1 font-mono ${t.slaStatus === 'breached' ? 'text-red-500' : t.slaStatus === 'at-risk' ? 'text-amber-500' : ''}`}
+                          >
+                            <Clock className="w-3 h-3" />
+                            {formatSlaRemaining(t.slaDeadline)}
                           </span>
-                        ) : <span className="text-muted-foreground">—</span>}
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -628,9 +925,33 @@ export default function Dashboard() {
 
         <div className="lg:col-span-2 space-y-4">
           {[
-            { label: "System Uptime", value: uptime > 0 ? `${uptime.toFixed(1)}%` : "99.97%", sub: "Across managed infrastructure", color: "text-emerald-500", bg: "bg-emerald-500", pct: uptime || 99.97, icon: Activity },
-            { label: "SLA Compliance", value: metrics?.avgSlaCompliance ? `${metrics.avgSlaCompliance}%` : "—", sub: "Avg SLA attainment this month", color: "text-blue-500", bg: "bg-blue-500", pct: metrics?.avgSlaCompliance || 96, icon: Shield },
-            { label: "Avg Resolution", value: metrics?.avgResolutionTime || "—", sub: "Closed tickets this month", color: "text-violet-500", bg: "bg-violet-500", pct: 78, icon: Wifi },
+            {
+              label: 'System Uptime',
+              value: uptime > 0 ? `${uptime.toFixed(1)}%` : '99.97%',
+              sub: 'Across managed infrastructure',
+              color: 'text-emerald-500',
+              bg: 'bg-emerald-500',
+              pct: uptime || 99.97,
+              icon: Activity,
+            },
+            {
+              label: 'SLA Compliance',
+              value: metrics?.avgSlaCompliance ? `${metrics.avgSlaCompliance}%` : '—',
+              sub: 'Avg SLA attainment this month',
+              color: 'text-blue-500',
+              bg: 'bg-blue-500',
+              pct: metrics?.avgSlaCompliance || 96,
+              icon: Shield,
+            },
+            {
+              label: 'Avg Resolution',
+              value: metrics?.avgResolutionTime || '—',
+              sub: 'Closed tickets this month',
+              color: 'text-violet-500',
+              bg: 'bg-violet-500',
+              pct: 78,
+              icon: Wifi,
+            },
           ].map((m) => (
             <div key={m.label} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center justify-between mb-2">
@@ -641,7 +962,10 @@ export default function Dashboard() {
                 <span className={`text-2xl font-display font-bold ${m.color}`}>{m.value}</span>
               </div>
               <div className="w-full bg-muted rounded-full h-1.5 mb-1.5">
-                <div className={`${m.bg} h-1.5 rounded-full transition-all duration-1000`} style={{ width: `${m.pct}%` }} />
+                <div
+                  className={`${m.bg} h-1.5 rounded-full transition-all duration-1000`}
+                  style={{ width: `${m.pct}%` }}
+                />
               </div>
               <p className="text-xs text-muted-foreground">{m.sub}</p>
             </div>

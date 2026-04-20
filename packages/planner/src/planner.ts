@@ -1,16 +1,11 @@
-import { randomUUID } from "crypto";
-import {
-  PlanContextSchema,
-  type PlanContext,
-  type PlanGraph,
-  type PlanStep,
-} from "./types.js";
-import { decomposeObjective } from "./decomposer.js";
-import { routePlanSteps } from "./router.js";
-import { estimateRiskAndApprovals, levelForRisk, topoSort } from "./risk-estimator.js";
-import { generateFallbackPlans } from "./fallback-generator.js";
-import { rankFallbacks } from "./ranker.js";
-import { defaultPlanStore, type PlanStore } from "./store.js";
+import { randomUUID } from 'crypto';
+import { decomposeObjective } from './decomposer.js';
+import { generateFallbackPlans } from './fallback-generator.js';
+import { rankFallbacks } from './ranker.js';
+import { estimateRiskAndApprovals, levelForRisk, topoSort } from './risk-estimator.js';
+import { routePlanSteps } from './router.js';
+import { defaultPlanStore, type PlanStore } from './store.js';
+import { type PlanContext, PlanContextSchema, type PlanGraph, type PlanStep } from './types.js';
 
 /**
  * Build a plan graph for the given objective:
@@ -32,7 +27,7 @@ export async function createPlan(
   options: { store?: PlanStore; persist?: boolean } = {},
 ): Promise<PlanGraph> {
   if (!objective || !objective.trim()) {
-    throw new Error("objective must be a non-empty string");
+    throw new Error('objective must be a non-empty string');
   }
   const ctx = PlanContextSchema.parse(context);
   const store = options.store ?? defaultPlanStore;
@@ -54,7 +49,7 @@ export async function createPlan(
     rank: 0,
     title: deriveTitle(objective),
     objective,
-    status: "draft",
+    status: 'draft',
     steps: risked,
     executionOrder: order,
     estimatedCostUsd: aggregateCost,
@@ -107,8 +102,8 @@ export async function getPlanFallbacks(
 }
 
 function deriveTitle(objective: string): string {
-  const cleaned = objective.trim().replace(/\s+/g, " ");
-  return cleaned.length <= 80 ? cleaned : cleaned.slice(0, 77) + "…";
+  const cleaned = objective.trim().replace(/\s+/g, ' ');
+  return cleaned.length <= 80 ? cleaned : cleaned.slice(0, 77) + '…';
 }
 
 function deriveConfidence(steps: PlanStep[]): number {
@@ -151,13 +146,13 @@ export async function replayPlan(
     routeProvider?: string;
     routeModel?: string;
     requiredApproval: boolean;
-    riskLevel: PlanStep["riskLevel"];
+    riskLevel: PlanStep['riskLevel'];
   }>;
 }> {
   const store = options.store ?? defaultPlanStore;
   const plan = await store.get(planId);
   if (!plan) {
-    const { PlanNotFoundError } = await import("./types.js");
+    const { PlanNotFoundError } = await import('./types.js');
     throw new PlanNotFoundError(planId);
   }
   const byId = new Map(plan.steps.map((s) => [s.stepId, s] as const));

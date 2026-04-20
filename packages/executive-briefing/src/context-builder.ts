@@ -1,10 +1,10 @@
 import type {
   BriefGenerationContext,
-  WorldModelEntity,
-  WorldModelEdge,
   MemoryEntry,
   RecentReflection,
-} from "./types.js";
+  WorldModelEdge,
+  WorldModelEntity,
+} from './types.js';
 
 export function buildBriefContext(
   domain: string,
@@ -40,18 +40,18 @@ export function summarizeContext(ctx: BriefGenerationContext): string {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([t, c]) => `${c} ${t}`)
-    .join(", ");
+    .join(', ');
 
   const recentMemories = ctx.memories
     .slice(0, 5)
     .map((m) => `[${m.memoryType}] ${m.content.slice(0, 120)}`)
-    .join("\n");
+    .join('\n');
 
   const lessonSummary = ctx.reflections
     .filter((r) => r.lesson)
     .slice(0, 3)
     .map((r) => r.lesson!)
-    .join(" | ");
+    .join(' | ');
 
   const edges = ctx.edges ?? [];
   const crossDomainEdgeSamples = edges
@@ -59,26 +59,27 @@ export function summarizeContext(ctx: BriefGenerationContext): string {
     .slice(0, 5)
     .map(
       (e) =>
-        `${e.fromDomain ?? "?"}:${e.fromNodeId.slice(0, 8)} —[${e.relationshipType}]→ ${e.toDomain ?? "?"}:${e.toNodeId.slice(0, 8)}`,
+        `${e.fromDomain ?? '?'}:${e.fromNodeId.slice(0, 8)} —[${e.relationshipType}]→ ${e.toDomain ?? '?'}:${e.toNodeId.slice(0, 8)}`,
     )
-    .join("\n");
+    .join('\n');
 
-  const neighborhoodSummary = edges.length > 0
-    ? `Constellation traversal: ${edges.length} edges connecting ${activeEntities.length} entities${ctx.crossDomainEdgeCount ? ` (${ctx.crossDomainEdgeCount} cross-domain)` : ""}.`
-    : ctx.crossDomainEdgeCount
-      ? `Cross-domain edges: ${ctx.crossDomainEdgeCount}`
-      : "";
+  const neighborhoodSummary =
+    edges.length > 0
+      ? `Constellation traversal: ${edges.length} edges connecting ${activeEntities.length} entities${ctx.crossDomainEdgeCount ? ` (${ctx.crossDomainEdgeCount} cross-domain)` : ''}.`
+      : ctx.crossDomainEdgeCount
+        ? `Cross-domain edges: ${ctx.crossDomainEdgeCount}`
+        : '';
 
   return [
     `Domain: ${ctx.domain} | Generated: ${ctx.generatedAt}`,
     `Entities: ${activeEntities.length} active (${typeList}); avg confidence ${(avgConfidence * 100).toFixed(1)}%`,
     neighborhoodSummary,
-    crossDomainEdgeSamples ? `Cross-domain edge samples:\n${crossDomainEdgeSamples}` : "",
-    recentMemories ? `Recent memory entries:\n${recentMemories}` : "No recent memory entries.",
-    lessonSummary ? `Reflection lessons: ${lessonSummary}` : "No recent reflections.",
+    crossDomainEdgeSamples ? `Cross-domain edge samples:\n${crossDomainEdgeSamples}` : '',
+    recentMemories ? `Recent memory entries:\n${recentMemories}` : 'No recent memory entries.',
+    lessonSummary ? `Reflection lessons: ${lessonSummary}` : 'No recent reflections.',
   ]
     .filter(Boolean)
-    .join("\n");
+    .join('\n');
 }
 
 export function extractEntityProvenance(entities: WorldModelEntity[]) {
@@ -94,7 +95,7 @@ export function extractEntityProvenance(entities: WorldModelEntity[]) {
 export function buildCitations(ctx: BriefGenerationContext) {
   const citations: Array<{
     id: string;
-    sourceType: "entity" | "memory" | "reflection";
+    sourceType: 'entity' | 'memory' | 'reflection';
     sourceId: string;
     domain?: string;
     confidence?: number;
@@ -108,7 +109,7 @@ export function buildCitations(ctx: BriefGenerationContext) {
     // Constellation node via /graph/entities/:id, so the citation chain is live.
     citations.push({
       id: `cit-ent-${e.id}`,
-      sourceType: "entity",
+      sourceType: 'entity',
       sourceId: e.id,
       domain: e.domain,
       confidence: e.confidence,
@@ -121,7 +122,7 @@ export function buildCitations(ctx: BriefGenerationContext) {
   for (const m of ctx.memories.slice(0, 10)) {
     citations.push({
       id: `cit-mem-${m.id}`,
-      sourceType: "memory",
+      sourceType: 'memory',
       sourceId: m.id,
       confidence: m.confidence,
       freshness: m.createdAt?.toISOString(),
@@ -133,7 +134,7 @@ export function buildCitations(ctx: BriefGenerationContext) {
   for (const r of ctx.reflections.slice(0, 5)) {
     citations.push({
       id: `cit-ref-${r.id}`,
-      sourceType: "reflection",
+      sourceType: 'reflection',
       sourceId: r.id,
       domain: r.domain,
       confidence: r.qualityScore,

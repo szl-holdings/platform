@@ -1,14 +1,14 @@
 /**
  * Core entity schemas shared across the platform.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 export const orgSchema = z.object({
   id: z.number().int().positive(),
   name: z.string().min(1).max(256),
   slug: z.string().min(2).max(128),
-  status: z.enum(["active", "inactive", "suspended"]).optional(),
-  plan: z.enum(["free", "starter", "professional", "enterprise"]).optional(),
+  status: z.enum(['active', 'inactive', 'suspended']).optional(),
+  plan: z.enum(['free', 'starter', 'professional', 'enterprise']).optional(),
   logoUrl: z.string().url().nullable().optional(),
   domain: z.string().optional(),
   createdAt: z.coerce.date(),
@@ -38,16 +38,16 @@ export const auditEventSchema = z.object({
 export type AuditEvent = z.infer<typeof auditEventSchema>;
 
 export const canonicalEntityTypeSchema = z.enum([
-  "vessel",
-  "property",
-  "agent",
-  "model",
-  "supplier",
-  "matter",
-  "incident",
-  "workflow",
-  "organization",
-  "user",
+  'vessel',
+  'property',
+  'agent',
+  'model',
+  'supplier',
+  'matter',
+  'incident',
+  'workflow',
+  'organization',
+  'user',
 ]);
 export type CanonicalEntityType = z.infer<typeof canonicalEntityTypeSchema>;
 

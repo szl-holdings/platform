@@ -8,17 +8,17 @@
  */
 
 import {
+  type DecisionRecord,
   db,
   decisionRecordsTable,
-  playbookSuggestionsTable,
-  type DecisionRecord,
   type PlaybookSuggestion,
-} from "@szl-holdings/db";
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+  playbookSuggestionsTable,
+} from '@szl-holdings/db';
+import { and, desc, eq, gte, sql } from 'drizzle-orm';
 
 export interface PatternRetrievalOptions {
   orgId?: number | null;
-  domain?: DecisionRecord["domain"];
+  domain?: DecisionRecord['domain'];
   entityType?: string;
   windowDays?: number;
   limit?: number;
@@ -60,7 +60,7 @@ export async function findSimilarDecisions(
 
 export interface PlaybookGenerationOptions {
   orgId?: number | null;
-  domain?: DecisionRecord["domain"];
+  domain?: DecisionRecord['domain'];
   windowDays?: number;
   minSampleSize?: number;
   minSuccessRate?: number;
@@ -100,11 +100,15 @@ export async function generatePlaybookSuggestions(
   const inserted: PlaybookSuggestion[] = [];
   for (const [key, members] of clusters) {
     if (members.length < minSample) continue;
-    const successes = members.filter((m) => m.status === "executed" && (m.predictionError == null || Math.abs(m.predictionError) <= 0.25)).length;
+    const successes = members.filter(
+      (m) =>
+        m.status === 'executed' &&
+        (m.predictionError == null || Math.abs(m.predictionError) <= 0.25),
+    ).length;
     const successRate = successes / members.length;
     if (successRate < minSuccess) continue;
 
-    const [domain, entityType] = key.split("::") as [DecisionRecord["domain"], string];
+    const [domain, entityType] = key.split('::') as [DecisionRecord['domain'], string];
     const triggerSignature = {
       domain,
       entityType,
@@ -129,7 +133,7 @@ export async function generatePlaybookSuggestions(
         sampleSize: members.length,
         successRate,
         confidence: Math.min(1, successRate * Math.min(members.length / 20, 1)),
-        status: "proposed",
+        status: 'proposed',
       })
       .returning();
     inserted.push(row);
@@ -140,11 +144,13 @@ export async function generatePlaybookSuggestions(
 
 export interface ListPlaybookOptions {
   orgId?: number | null;
-  status?: PlaybookSuggestion["status"];
+  status?: PlaybookSuggestion['status'];
   limit?: number;
 }
 
-export async function listPlaybookSuggestions(options: ListPlaybookOptions = {}): Promise<PlaybookSuggestion[]> {
+export async function listPlaybookSuggestions(
+  options: ListPlaybookOptions = {},
+): Promise<PlaybookSuggestion[]> {
   const conditions: any[] = [];
   if (options.orgId != null) conditions.push(eq(playbookSuggestionsTable.orgId, options.orgId));
   if (options.status) conditions.push(eq(playbookSuggestionsTable.status, options.status));
@@ -159,7 +165,7 @@ export async function listPlaybookSuggestions(options: ListPlaybookOptions = {})
 
 export async function reviewPlaybookSuggestion(
   id: number,
-  status: PlaybookSuggestion["status"],
+  status: PlaybookSuggestion['status'],
   reviewedByUserId: number,
   orgId: number | null,
   promotedWorkflowId?: string,

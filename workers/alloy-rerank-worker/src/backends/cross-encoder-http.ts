@@ -1,13 +1,18 @@
-import type { RerankBackend, RerankBackendDescriptor, RawRerankRequest, RawRerankResponse } from "./interface.js";
+import type {
+  RawRerankRequest,
+  RawRerankResponse,
+  RerankBackend,
+  RerankBackendDescriptor,
+} from './interface.js';
 
-const SUBSTRATE_RERANK_URL = process.env["SUBSTRATE_RERANK_URL"] ?? "http://localhost:9800";
+const SUBSTRATE_RERANK_URL = process.env['SUBSTRATE_RERANK_URL'] ?? 'http://localhost:9800';
 
 export class CrossEncoderHttpRerankBackend implements RerankBackend {
   readonly descriptor: RerankBackendDescriptor = {
-    backendId: "cross-encoder-http",
-    displayName: "Cross-Encoder via HTTP (substrate-py-workers)",
-    kind: "cross-encoder-http",
-    supportedModels: ["aef-dev-rerank", "aef-default-rerank"],
+    backendId: 'cross-encoder-http',
+    displayName: 'Cross-Encoder via HTTP (substrate-py-workers)',
+    kind: 'cross-encoder-http',
+    supportedModels: ['aef-dev-rerank', 'aef-default-rerank'],
     isFallback: false,
   };
 
@@ -24,8 +29,8 @@ export class CrossEncoderHttpRerankBackend implements RerankBackend {
     let response: Response;
     try {
       response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: req.query,
           candidates: req.candidates,
@@ -34,11 +39,13 @@ export class CrossEncoderHttpRerankBackend implements RerankBackend {
         }),
       });
     } catch (err) {
-      throw new Error(`CrossEncoderHttpRerankBackend: network error calling ${url}: ${String(err)}`);
+      throw new Error(
+        `CrossEncoderHttpRerankBackend: network error calling ${url}: ${String(err)}`,
+      );
     }
 
     if (!response.ok) {
-      const body = await response.text().catch(() => "<unreadable>");
+      const body = await response.text().catch(() => '<unreadable>');
       throw new Error(`CrossEncoderHttpRerankBackend: HTTP ${response.status}: ${body}`);
     }
 

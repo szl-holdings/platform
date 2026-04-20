@@ -1,9 +1,9 @@
-import { desc, eq } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { InferInsertModel } from "drizzle-orm";
-import type { SkillDefinition, SkillRun, SkillCategory } from "./types.js";
-import type { SkillRegistryBackend, SkillRunStoreBackend } from "./registry.js";
+import type { InferInsertModel } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
+import type { SkillRegistryBackend, SkillRunStoreBackend } from './registry.js';
+import type { SkillCategory, SkillDefinition, SkillRun } from './types.js';
 
 export interface SkillsTableLike extends PgTable {
   skillId: PgColumn;
@@ -88,67 +88,60 @@ function rowToSkill(row: Record<string, unknown>): SkillDefinition {
     return v instanceof Date ? v.toISOString() : (v as string);
   };
   return {
-    id: row["skillId"] as string,
-    name: row["name"] as string,
-    description: row["description"] as string,
-    category: row["category"] as SkillCategory,
-    objective: row["objective"] as string,
-    inputFields: (row["inputFields"] as string[]) ?? [],
-    steps: (row["steps"] as SkillDefinition["steps"]) ?? [],
-    toolsUsed: (row["toolsUsed"] as string[]) ?? [],
-    expectedOutputs: (row["expectedOutputs"] as string[]) ?? [],
-    successCriteria:
-      (row["successCriteria"] as SkillDefinition["successCriteria"]) ?? [],
-    failureConditions:
-      (row["failureConditions"] as SkillDefinition["failureConditions"]) ?? [],
+    id: row['skillId'] as string,
+    name: row['name'] as string,
+    description: row['description'] as string,
+    category: row['category'] as SkillCategory,
+    objective: row['objective'] as string,
+    inputFields: (row['inputFields'] as string[]) ?? [],
+    steps: (row['steps'] as SkillDefinition['steps']) ?? [],
+    toolsUsed: (row['toolsUsed'] as string[]) ?? [],
+    expectedOutputs: (row['expectedOutputs'] as string[]) ?? [],
+    successCriteria: (row['successCriteria'] as SkillDefinition['successCriteria']) ?? [],
+    failureConditions: (row['failureConditions'] as SkillDefinition['failureConditions']) ?? [],
     performance: {
-      totalRuns: (row["totalRuns"] as number) ?? 0,
-      successfulRuns: (row["successfulRuns"] as number) ?? 0,
-      failedRuns: (row["failedRuns"] as number) ?? 0,
-      successRate: (row["successRate"] as number) ?? 0,
-      avgLatencyMs: (row["avgLatencyMs"] as number) ?? 0,
-      lastRunAt: toIso(row["lastRunAt"]),
-      lastFailureAt: toIso(row["lastFailureAt"]),
-      lastFailureReason: (row["lastFailureReason"] as string | undefined) ?? undefined,
+      totalRuns: (row['totalRuns'] as number) ?? 0,
+      successfulRuns: (row['successfulRuns'] as number) ?? 0,
+      failedRuns: (row['failedRuns'] as number) ?? 0,
+      successRate: (row['successRate'] as number) ?? 0,
+      avgLatencyMs: (row['avgLatencyMs'] as number) ?? 0,
+      lastRunAt: toIso(row['lastRunAt']),
+      lastFailureAt: toIso(row['lastFailureAt']),
+      lastFailureReason: (row['lastFailureReason'] as string | undefined) ?? undefined,
     },
-    isBuiltin: (row["isBuiltin"] as boolean) ?? false,
-    enabled: (row["enabled"] as boolean) ?? true,
-    version: (row["version"] as string) ?? "1.0.0",
-    tags: (row["tags"] as string[]) ?? [],
-    createdAt: toIso(row["createdAt"]) ?? now,
-    updatedAt: toIso(row["updatedAt"]) ?? now,
+    isBuiltin: (row['isBuiltin'] as boolean) ?? false,
+    enabled: (row['enabled'] as boolean) ?? true,
+    version: (row['version'] as string) ?? '1.0.0',
+    tags: (row['tags'] as string[]) ?? [],
+    createdAt: toIso(row['createdAt']) ?? now,
+    updatedAt: toIso(row['updatedAt']) ?? now,
   };
 }
 
-function skillUpdateValues(
-  patch: Partial<SkillDefinition>
-): Record<string, unknown> {
+function skillUpdateValues(patch: Partial<SkillDefinition>): Record<string, unknown> {
   const v: Record<string, unknown> = { updatedAt: new Date() };
-  if (patch.name !== undefined) v["name"] = patch.name;
-  if (patch.description !== undefined) v["description"] = patch.description;
-  if (patch.objective !== undefined) v["objective"] = patch.objective;
-  if (patch.enabled !== undefined) v["enabled"] = patch.enabled;
-  if (patch.tags !== undefined) v["tags"] = patch.tags;
-  if (patch.version !== undefined) v["version"] = patch.version;
-  if (patch.steps !== undefined) v["steps"] = patch.steps;
-  if (patch.toolsUsed !== undefined) v["toolsUsed"] = patch.toolsUsed;
-  if (patch.expectedOutputs !== undefined) v["expectedOutputs"] = patch.expectedOutputs;
-  if (patch.successCriteria !== undefined) v["successCriteria"] = patch.successCriteria;
-  if (patch.failureConditions !== undefined)
-    v["failureConditions"] = patch.failureConditions;
+  if (patch.name !== undefined) v['name'] = patch.name;
+  if (patch.description !== undefined) v['description'] = patch.description;
+  if (patch.objective !== undefined) v['objective'] = patch.objective;
+  if (patch.enabled !== undefined) v['enabled'] = patch.enabled;
+  if (patch.tags !== undefined) v['tags'] = patch.tags;
+  if (patch.version !== undefined) v['version'] = patch.version;
+  if (patch.steps !== undefined) v['steps'] = patch.steps;
+  if (patch.toolsUsed !== undefined) v['toolsUsed'] = patch.toolsUsed;
+  if (patch.expectedOutputs !== undefined) v['expectedOutputs'] = patch.expectedOutputs;
+  if (patch.successCriteria !== undefined) v['successCriteria'] = patch.successCriteria;
+  if (patch.failureConditions !== undefined) v['failureConditions'] = patch.failureConditions;
   if (patch.performance !== undefined) {
     const p = patch.performance;
-    if (p.totalRuns !== undefined) v["totalRuns"] = p.totalRuns;
-    if (p.successfulRuns !== undefined) v["successfulRuns"] = p.successfulRuns;
-    if (p.failedRuns !== undefined) v["failedRuns"] = p.failedRuns;
-    if (p.successRate !== undefined) v["successRate"] = p.successRate;
-    if (p.avgLatencyMs !== undefined) v["avgLatencyMs"] = p.avgLatencyMs;
-    if (p.lastRunAt !== undefined)
-      v["lastRunAt"] = p.lastRunAt ? new Date(p.lastRunAt) : null;
+    if (p.totalRuns !== undefined) v['totalRuns'] = p.totalRuns;
+    if (p.successfulRuns !== undefined) v['successfulRuns'] = p.successfulRuns;
+    if (p.failedRuns !== undefined) v['failedRuns'] = p.failedRuns;
+    if (p.successRate !== undefined) v['successRate'] = p.successRate;
+    if (p.avgLatencyMs !== undefined) v['avgLatencyMs'] = p.avgLatencyMs;
+    if (p.lastRunAt !== undefined) v['lastRunAt'] = p.lastRunAt ? new Date(p.lastRunAt) : null;
     if (p.lastFailureAt !== undefined)
-      v["lastFailureAt"] = p.lastFailureAt ? new Date(p.lastFailureAt) : null;
-    if (p.lastFailureReason !== undefined)
-      v["lastFailureReason"] = p.lastFailureReason ?? null;
+      v['lastFailureAt'] = p.lastFailureAt ? new Date(p.lastFailureAt) : null;
+    if (p.lastFailureReason !== undefined) v['lastFailureReason'] = p.lastFailureReason ?? null;
   }
   return v;
 }
@@ -176,10 +169,7 @@ export class PostgresSkillRegistry implements SkillRegistryBackend {
       .onConflictDoUpdate({ target: this.table.skillId, set: row });
   }
 
-  async persistSkillUpdate(
-    skillId: string,
-    patch: Partial<SkillDefinition>
-  ): Promise<void> {
+  async persistSkillUpdate(skillId: string, patch: Partial<SkillDefinition>): Promise<void> {
     const values = skillUpdateValues(patch);
     await this.db
       .update(this.table)
@@ -197,10 +187,7 @@ export class PostgresSkillRegistry implements SkillRegistryBackend {
     let seeded = 0;
     for (const skill of skills) {
       const row = skillToRow(skill);
-      const result = await this.db
-        .insert(this.table)
-        .values(row)
-        .onConflictDoNothing();
+      const result = await this.db.insert(this.table).values(row).onConflictDoNothing();
       if ((result as { rowCount?: number }).rowCount) seeded++;
     }
     return seeded;
@@ -229,17 +216,17 @@ function rowToRun(row: Record<string, unknown>): SkillRun {
     return v instanceof Date ? v.getTime() : (v as number);
   };
   return {
-    runId: row["runId"] as string,
-    skillId: row["skillId"] as string,
-    skillName: row["skillName"] as string,
-    status: row["status"] as SkillRun["status"],
-    inputs: (row["inputs"] as Record<string, unknown>) ?? {},
-    outputs: (row["outputs"] as Record<string, unknown>) ?? undefined,
-    steps: (row["steps"] as SkillRun["steps"]) ?? [],
-    error: (row["error"] as string | undefined) ?? undefined,
-    startedAt: toTs(row["startedAt"]) ?? Date.now(),
-    completedAt: toTs(row["completedAt"]),
-    latencyMs: (row["latencyMs"] as number | undefined) ?? undefined,
+    runId: row['runId'] as string,
+    skillId: row['skillId'] as string,
+    skillName: row['skillName'] as string,
+    status: row['status'] as SkillRun['status'],
+    inputs: (row['inputs'] as Record<string, unknown>) ?? {},
+    outputs: (row['outputs'] as Record<string, unknown>) ?? undefined,
+    steps: (row['steps'] as SkillRun['steps']) ?? [],
+    error: (row['error'] as string | undefined) ?? undefined,
+    startedAt: toTs(row['startedAt']) ?? Date.now(),
+    completedAt: toTs(row['completedAt']),
+    latencyMs: (row['latencyMs'] as number | undefined) ?? undefined,
   };
 }
 

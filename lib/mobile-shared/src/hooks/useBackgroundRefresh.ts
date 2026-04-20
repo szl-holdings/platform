@@ -1,5 +1,5 @@
-import { useEffect, useRef, useCallback } from "react";
-import { AppState, type AppStateStatus, Platform } from "react-native";
+import { useCallback, useEffect, useRef } from 'react';
+import { AppState, type AppStateStatus, Platform } from 'react-native';
 
 export interface BackgroundRefreshTask {
   key: string;
@@ -36,7 +36,7 @@ export function useBackgroundRefresh(options: UseBackgroundRefreshOptions): void
   }, []);
 
   useEffect(() => {
-    if (!enabled || Platform.OS === "web") return;
+    if (!enabled || Platform.OS === 'web') return;
 
     for (const task of tasks) {
       const interval = setInterval(async () => {
@@ -52,8 +52,8 @@ export function useBackgroundRefresh(options: UseBackgroundRefreshOptions): void
 
     let appStateSub: ReturnType<typeof AppState.addEventListener> | null = null;
     if (refreshOnForeground) {
-      appStateSub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
-        if (nextState === "active") {
+      appStateSub = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+        if (nextState === 'active') {
           runDueTasks();
         }
       });

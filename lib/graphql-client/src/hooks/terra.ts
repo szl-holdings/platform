@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from '@apollo/client';
 
 export const GET_TERRA_DISTRESS_PROPERTIES = gql`
   query GetTerraDistressProperties($borough: String, $distressType: String, $limit: Int, $offset: Int) {
@@ -83,7 +83,12 @@ export const CREATE_TERRA_LEAD = gql`
   }
 `;
 
-export function useTerraDistressProperties(variables?: { borough?: string; distressType?: string; limit?: number; offset?: number }) {
+export function useTerraDistressProperties(variables?: {
+  borough?: string;
+  distressType?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_TERRA_DISTRESS_PROPERTIES, { variables });
 }
 

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const BoostTermSchema = z.object({
   term: z.string().min(1),
@@ -18,12 +18,12 @@ export const ExactMatchFieldClassSchema = z.object({
 export type ExactMatchFieldClass = z.infer<typeof ExactMatchFieldClassSchema>;
 
 export const MetadataPresetSchema = z.record(
-  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])
+  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
 );
 export type MetadataPreset = z.infer<typeof MetadataPresetSchema>;
 
 export const TruncationPolicySchema = z.object({
-  strategy: z.enum(["reject", "truncate"]),
+  strategy: z.enum(['reject', 'truncate']),
   maxTokens: z.number().int().positive().default(512),
   warnAtTokens: z.number().int().positive().optional(),
 });
@@ -32,14 +32,7 @@ export type TruncationPolicy = z.infer<typeof TruncationPolicySchema>;
 export const DomainProfileSchema = z.object({
   profileId: z.string().min(1),
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  domain: z.enum([
-    "maritime",
-    "legal",
-    "real-estate",
-    "cyber",
-    "compliance",
-    "advisory",
-  ]),
+  domain: z.enum(['maritime', 'legal', 'real-estate', 'cyber', 'compliance', 'advisory']),
   displayName: z.string(),
   description: z.string(),
   priorityTerms: z.array(z.string()).default([]),
@@ -52,7 +45,7 @@ export const DomainProfileSchema = z.object({
   denseWeight: z.number().min(0).max(1).default(0.6),
   keywordWeight: z.number().min(0).max(1).default(0.4),
   truncationPolicy: TruncationPolicySchema.default({
-    strategy: "truncate",
+    strategy: 'truncate',
     maxTokens: 512,
   }),
   promptContextPrefix: z.string().optional(),
@@ -76,7 +69,10 @@ export type ProfileVersionRecord = z.infer<typeof ProfileVersionRecordSchema>;
 export const RolloutStateSchema = z.object({
   profileId: z.string().min(1),
   activeVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
-  stagedVersion: z.string().regex(/^\d+\.\d+\.\d+$/).optional(),
+  stagedVersion: z
+    .string()
+    .regex(/^\d+\.\d+\.\d+$/)
+    .optional(),
   stagedTenantIds: z.array(z.string()).default([]),
   rolloutStartedAt: z.string().datetime().optional(),
 });

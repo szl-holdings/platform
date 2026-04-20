@@ -10,22 +10,22 @@
  * development mode). In production the gateway refuses to start without the key.
  */
 
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from 'express';
 
-const API_KEY = process.env["SUBSTRATE_GATEWAY_API_KEY"];
-const IS_DEV = process.env["NODE_ENV"] !== "production";
+const API_KEY = process.env['SUBSTRATE_GATEWAY_API_KEY'];
+const IS_DEV = process.env['NODE_ENV'] !== 'production';
 
 if (!API_KEY) {
   if (IS_DEV) {
     console.warn(
-      "[substrate-mcp-gateway] SUBSTRATE_GATEWAY_API_KEY is not set. " +
-      "Running in unauthenticated development mode — ALL requests are accepted. " +
-      "Set this variable before deploying to production.",
+      '[substrate-mcp-gateway] SUBSTRATE_GATEWAY_API_KEY is not set. ' +
+        'Running in unauthenticated development mode — ALL requests are accepted. ' +
+        'Set this variable before deploying to production.',
     );
   } else {
     console.error(
-      "[substrate-mcp-gateway] FATAL: SUBSTRATE_GATEWAY_API_KEY is not set in production mode. " +
-      "The gateway will reject every authenticated request.",
+      '[substrate-mcp-gateway] FATAL: SUBSTRATE_GATEWAY_API_KEY is not set in production mode. ' +
+        'The gateway will reject every authenticated request.',
     );
   }
 }
@@ -35,11 +35,11 @@ if (!API_KEY) {
  * This matches the strategy described in MCP_GATEWAY_STRATEGY.md.
  */
 const PUBLIC_METHODS = new Set([
-  "initialize",
-  "tools/list",
-  "resources/list",
-  "prompts/list",
-  "ping",
+  'initialize',
+  'tools/list',
+  'resources/list',
+  'prompts/list',
+  'ping',
 ]);
 
 export function resolveAuthContext(req: Request): {
@@ -47,14 +47,14 @@ export function resolveAuthContext(req: Request): {
   actorId: string;
   apiKey: string | null;
 } {
-  const authHeader = req.headers["authorization"] ?? "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const authHeader = req.headers['authorization'] ?? '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
   // Dev-only unauthenticated bypass: only when API_KEY is unset AND NODE_ENV is not production
   if (!API_KEY && IS_DEV) {
     return {
       authenticated: true,
-      actorId: token ? `api-key:${token.slice(0, 8)}...` : "anonymous:dev",
+      actorId: token ? `api-key:${token.slice(0, 8)}...` : 'anonymous:dev',
       apiKey: token,
     };
   }
@@ -67,7 +67,7 @@ export function resolveAuthContext(req: Request): {
     };
   }
 
-  return { authenticated: false, actorId: "anonymous", apiKey: null };
+  return { authenticated: false, actorId: 'anonymous', apiKey: null };
 }
 
 /**
@@ -84,27 +84,28 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
 
   // Check if this is a public method
-  if (req.method === "GET") {
+  if (req.method === 'GET') {
     next();
     return;
   }
 
   const body = req.body as { method?: string } | undefined;
-  const method = body?.method ?? "";
+  const method = body?.method ?? '';
   if (PUBLIC_METHODS.has(method)) {
     next();
     return;
   }
 
   res.status(401).json({
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     id: null,
     error: {
       code: -32000,
-      message: "PERMISSION_DENIED",
+      message: 'PERMISSION_DENIED',
       data: {
-        reason: "Missing or invalid Bearer token. " +
-          "Set Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY>",
+        reason:
+          'Missing or invalid Bearer token. ' +
+          'Set Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY>',
       },
     },
   });

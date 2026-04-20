@@ -1,32 +1,32 @@
-import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { useState, useEffect } from "react";
-import { m, AnimatePresence } from "framer-motion";
-import { Shield, Scale, ClipboardList, Lock, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { apiFetch } from "@/ownership-os/api";
-import { DisclaimerBanner } from "@/ownership-os/components";
-import { ScenarioDetailView } from "@/ownership-os/ScenarioDetailView";
-import { ScenarioList } from "@/ownership-os/ScenarioList";
-import { ScenarioComparisonView } from "@/ownership-os/ScenarioComparisonView";
-import { NextActionsPanel } from "@/ownership-os/NextActionsPanel";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { AnimatePresence, m } from 'framer-motion';
+import { ClipboardList, Loader2, Lock, Scale, Shield } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { apiFetch } from '@/ownership-os/api';
+import { DisclaimerBanner } from '@/ownership-os/components';
+import { NextActionsPanel } from '@/ownership-os/NextActionsPanel';
+import { ScenarioComparisonView } from '@/ownership-os/ScenarioComparisonView';
+import { ScenarioDetailView } from '@/ownership-os/ScenarioDetailView';
+import { ScenarioList } from '@/ownership-os/ScenarioList';
 
 const NAV_ITEMS = [
-  { id: "scenarios", label: "Scenarios", icon: Shield },
-  { id: "compare", label: "Compare", icon: Scale },
-  { id: "actions", label: "Next Actions", icon: ClipboardList },
+  { id: 'scenarios', label: 'Scenarios', icon: Shield },
+  { id: 'compare', label: 'Compare', icon: Scale },
+  { id: 'actions', label: 'Next Actions', icon: ClipboardList },
 ] as const;
 
-type NavItem = (typeof NAV_ITEMS)[number]["id"];
+type NavItem = (typeof NAV_ITEMS)[number]['id'];
 
 export default function OwnershipOsPage() {
-  const [nav, setNav] = useState<NavItem>("scenarios");
+  const [nav, setNav] = useState<NavItem>('scenarios');
   const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
 
   const { data: featureEnabled, isLoading: flagLoading } = useStandardQuery<boolean>({
-    queryKey: ["ownership-feature-flag"],
+    queryKey: ['ownership-feature-flag'],
     queryFn: async () => {
       try {
-        await apiFetch("/ownership/health");
+        await apiFetch('/ownership/health');
         return true;
       } catch {
         return false;
@@ -36,7 +36,7 @@ export default function OwnershipOsPage() {
   });
 
   useEffect(() => {
-    document.title = "Ownership Readiness OS | SZL Holdings";
+    document.title = 'Ownership Readiness OS | SZL Holdings';
   }, []);
 
   if (flagLoading) {
@@ -53,7 +53,10 @@ export default function OwnershipOsPage() {
         <div className="bg-card border border-border rounded-xl p-8 text-center max-w-md space-y-3">
           <Lock className="w-8 h-8 text-muted-foreground/40 mx-auto" />
           <h2 className="text-base font-semibold text-foreground">Ownership Readiness OS</h2>
-          <p className="text-sm text-muted-foreground">This module is not currently enabled. Contact an administrator to enable the ownership readiness feature.</p>
+          <p className="text-sm text-muted-foreground">
+            This module is not currently enabled. Contact an administrator to enable the ownership
+            readiness feature.
+          </p>
         </div>
       </div>
     );
@@ -68,7 +71,9 @@ export default function OwnershipOsPage() {
           </div>
           <div>
             <h1 className="text-lg font-semibold text-foreground">Ownership Readiness OS</h1>
-            <p className="text-xs text-muted-foreground">Internal — Certification, Banking & Governance Planning</p>
+            <p className="text-xs text-muted-foreground">
+              Internal — Certification, Banking & Governance Planning
+            </p>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
@@ -77,15 +82,20 @@ export default function OwnershipOsPage() {
         </div>
 
         <div className="flex gap-1.5">
-          {NAV_ITEMS.map(item => {
+          {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.id}
-                onClick={() => { setNav(item.id); setSelectedScenarioId(null); }}
+                onClick={() => {
+                  setNav(item.id);
+                  setSelectedScenarioId(null);
+                }}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                  nav === item.id ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                  nav === item.id
+                    ? 'bg-primary text-white'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted',
                 )}
               >
                 <Icon className="w-3 h-3" /> {item.label}
@@ -95,23 +105,50 @@ export default function OwnershipOsPage() {
         </div>
 
         <AnimatePresence mode="wait">
-          {nav === "scenarios" && !selectedScenarioId && (
-            <m.div key="scenario-list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <ScenarioList onSelect={id => { setSelectedScenarioId(id); }} />
+          {nav === 'scenarios' && !selectedScenarioId && (
+            <m.div
+              key="scenario-list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <ScenarioList
+                onSelect={(id) => {
+                  setSelectedScenarioId(id);
+                }}
+              />
             </m.div>
           )}
-          {nav === "scenarios" && selectedScenarioId && (
-            <m.div key={`scenario-detail-${selectedScenarioId}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <ScenarioDetailView scenarioId={selectedScenarioId} onBack={() => setSelectedScenarioId(null)} />
+          {nav === 'scenarios' && selectedScenarioId && (
+            <m.div
+              key={`scenario-detail-${selectedScenarioId}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <ScenarioDetailView
+                scenarioId={selectedScenarioId}
+                onBack={() => setSelectedScenarioId(null)}
+              />
             </m.div>
           )}
-          {nav === "compare" && (
-            <m.div key="compare" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          {nav === 'compare' && (
+            <m.div
+              key="compare"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
               <ScenarioComparisonView />
             </m.div>
           )}
-          {nav === "actions" && (
-            <m.div key="actions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          {nav === 'actions' && (
+            <m.div
+              key="actions"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
               <div className="space-y-4">
                 <DisclaimerBanner />
                 <NextActionsPanel />

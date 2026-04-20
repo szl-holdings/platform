@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -30,7 +30,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -132,7 +134,9 @@
 }
 
 @layer base {
-  * { @apply border-border; }
+  * {
+    @apply border-border;
+  }
   body {
     @apply bg-background text-foreground antialiased font-sans;
     -webkit-font-smoothing: antialiased;
@@ -142,8 +146,13 @@
       linear-gradient(90deg, hsla(202, 80%, 48%, 0.022) 1px, transparent 1px);
     background-size: 64px 64px;
   }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Space Grotesk", system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
   ::selection {
@@ -153,10 +162,20 @@
 }
 
 /* ─── Refined scrollbars ─── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(214 24% 16%); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(214 24% 24%); }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(214 24% 16%);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(214 24% 24%);
+}
 
 /* ─── Vessel command surfaces ─── */
 .vessel-panel {
@@ -164,12 +183,16 @@
   border: 1px solid hsl(var(--border));
   border-top: 1px solid hsla(202 80% 48% / 0.15);
   border-radius: var(--radius-lg);
-  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 .vessel-panel:hover {
   border-top-color: hsla(202 80% 48% / 0.32);
-  border-color: hsla(202 80% 48% / 0.20);
-  box-shadow: 0 0 18px hsla(202 80% 48% / 0.09), 0 4px 24px rgba(0,0,0,0.32);
+  border-color: hsla(202 80% 48% / 0.2);
+  box-shadow:
+    0 0 18px hsla(202 80% 48% / 0.09),
+    0 4px 24px rgba(0, 0, 0, 0.32);
 }
 
 /* KPI stat panel */
@@ -195,7 +218,9 @@
   border: 1px solid hsl(var(--border));
   border-left: 2px solid hsla(202 80% 48% / 0.35);
   border-radius: var(--radius-lg);
-  transition: border-left-color 0.18s ease, background 0.18s ease;
+  transition:
+    border-left-color 0.18s ease,
+    background 0.18s ease;
 }
 .vessel-card:hover {
   border-left-color: hsla(202 80% 48% / 0.65);
@@ -203,10 +228,18 @@
 }
 
 /* Exception / alert severity bands */
-.exception-critical { border-left: 2px solid hsl(0 72% 51%); }
-.exception-high { border-left: 2px solid hsl(30 88% 52%); }
-.exception-medium { border-left: 2px solid hsl(45 85% 52%); }
-.exception-low { border-left: 2px solid hsl(160 65% 42%); }
+.exception-critical {
+  border-left: 2px solid hsl(0 72% 51%);
+}
+.exception-high {
+  border-left: 2px solid hsl(30 88% 52%);
+}
+.exception-medium {
+  border-left: 2px solid hsl(45 85% 52%);
+}
+.exception-low {
+  border-left: 2px solid hsl(160 65% 42%);
+}
 
 /* Route indicator */
 .route-active {
@@ -217,83 +250,195 @@
 }
 
 /* Status badges */
-.badge-underway { background: hsla(202 80% 48% / 0.12); color: hsl(202 80% 60%); border: 1px solid hsla(202 80% 48% / 0.25); }
-.badge-anchored { background: hsla(45 85% 52% / 0.12); color: hsl(45 85% 62%); border: 1px solid hsla(45 85% 52% / 0.25); }
-.badge-moored { background: hsla(160 65% 42% / 0.12); color: hsl(160 65% 55%); border: 1px solid hsla(160 65% 42% / 0.25); }
-.badge-exception { background: hsla(0 72% 51% / 0.12); color: hsl(0 72% 62%); border: 1px solid hsla(0 72% 51% / 0.25); }
+.badge-underway {
+  background: hsla(202 80% 48% / 0.12);
+  color: hsl(202 80% 60%);
+  border: 1px solid hsla(202 80% 48% / 0.25);
+}
+.badge-anchored {
+  background: hsla(45 85% 52% / 0.12);
+  color: hsl(45 85% 62%);
+  border: 1px solid hsla(45 85% 52% / 0.25);
+}
+.badge-moored {
+  background: hsla(160 65% 42% / 0.12);
+  color: hsl(160 65% 55%);
+  border: 1px solid hsla(160 65% 42% / 0.25);
+}
+.badge-exception {
+  background: hsla(0 72% 51% / 0.12);
+  color: hsl(0 72% 62%);
+  border: 1px solid hsla(0 72% 51% / 0.25);
+}
 
 /* ─── Maritime motion — purposeful, operational ─── */
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 @keyframes pulse-dot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0.6; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
 }
 @keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 @keyframes progress-fill {
-  from { width: 0%; }
+  from {
+    width: 0%;
+  }
 }
 @keyframes wave-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
 }
 @keyframes route-dash {
-  to { stroke-dashoffset: -12; }
+  to {
+    stroke-dashoffset: -12;
+  }
 }
 @keyframes vessel-ping {
-  0% { transform: scale(1); opacity: 1; }
-  75% { transform: scale(2); opacity: 0; }
-  100% { transform: scale(1); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 @keyframes panel-reveal {
-  from { opacity: 0; transform: translateX(8px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
-.animate-fade-in { animation: fade-in 0.3s ease-out both; }
-.animate-scale-in { animation: scale-in 0.3s ease-out both; }
-.animate-slide-in-right { animation: slide-in-right 0.25s ease-out both; }
-.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-.animate-wave-float { animation: wave-float 4s ease-in-out infinite; }
-.animate-vessel-ping { animation: vessel-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
-.animate-panel-reveal { animation: panel-reveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s ease-out both;
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out both;
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out both;
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.animate-wave-float {
+  animation: wave-float 4s ease-in-out infinite;
+}
+.animate-vessel-ping {
+  animation: vessel-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.animate-panel-reveal {
+  animation: panel-reveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 .skeleton {
-  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.06) 50%,
+    hsl(var(--muted)) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
   border-radius: 0.25rem;
 }
 
-.stagger-1 { animation-delay: 0.04s; }
-.stagger-2 { animation-delay: 0.08s; }
-.stagger-3 { animation-delay: 0.12s; }
-.stagger-4 { animation-delay: 0.16s; }
-.stagger-5 { animation-delay: 0.2s; }
-.stagger-6 { animation-delay: 0.24s; }
-.stagger-7 { animation-delay: 0.28s; }
-.stagger-8 { animation-delay: 0.32s; }
+.stagger-1 {
+  animation-delay: 0.04s;
+}
+.stagger-2 {
+  animation-delay: 0.08s;
+}
+.stagger-3 {
+  animation-delay: 0.12s;
+}
+.stagger-4 {
+  animation-delay: 0.16s;
+}
+.stagger-5 {
+  animation-delay: 0.2s;
+}
+.stagger-6 {
+  animation-delay: 0.24s;
+}
+.stagger-7 {
+  animation-delay: 0.28s;
+}
+.stagger-8 {
+  animation-delay: 0.32s;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -1,114 +1,106 @@
 export {
-  metacognitiveMonitor,
-  type MetacognitiveAssessment,
-  type MetacognitiveState,
-  type CertaintyLevel,
-  type ReasoningQuality,
-  type CognitiveLoad,
-  type PredictiveUncertainty,
-  type HallucinationRisk,
-  type MultiHypothesisBranch,
-} from "./metacognitive-monitor.js";
-
-export {
-  selfModelEngine,
-  type AgentCapabilityProfile,
-  type SystemSelfModel,
-  type SystemIdentity,
-  type AgentBeliefModel,
-  type CounterfactualScenario,
-  type AdversarialProbe,
-} from "./self-model.js";
-
-export {
-  cognitiveWorkspace,
-  type WorkingMemoryItem,
   type AttentionFocus,
-  type CognitiveWorkspaceState,
-  type GWTBroadcast,
   type AttentionSchemaReport,
-} from "./cognitive-workspace.js";
-
+  type CognitiveWorkspaceState,
+  cognitiveWorkspace,
+  type GWTBroadcast,
+  type WorkingMemoryItem,
+} from './cognitive-workspace.js';
 export {
-  innerMonologue,
-  setLlmIntrospector,
-  type MonologueEntry,
-  type MonologueType,
-  type InnerMonologueState,
-  type DialecticalTriple,
-  type SocraticChain,
-  type PerspectiveSimulation,
-} from "./inner-monologue.js";
-
+  type ConsolidationReport,
+  type DiscoveredPattern,
+  type DreamConsolidationState,
+  type DreamReplay,
+  dreamConsolidation,
+} from './dream-consolidation.js';
 export {
-  goalEngine,
+  type AffectiveForecast,
+  type EmotionalSignal,
+  type EmotionalState,
+  type EmotionalValence,
+  type EmotionRegulationStrategy,
+  type EmotionType,
+  emotionalSignals,
+  type SchererAppraisal,
+} from './emotional-signals.js';
+export {
   type CognitiveGoal,
   type CuriositySignal,
+  type GoalEngineState,
+  type GoalInterference,
   type GoalPriority,
   type GoalStatus,
-  type GoalEngineState,
+  goalEngine,
   type IntrinsicMotivation,
-  type GoalInterference,
   type MetaGoal,
-} from "./goal-engine.js";
-
+} from './goal-engine.js';
 export {
-  emotionalSignals,
-  type EmotionalSignal,
-  type EmotionalValence,
-  type EmotionalState,
-  type EmotionType,
-  type SchererAppraisal,
-  type EmotionRegulationStrategy,
-  type AffectiveForecast,
-} from "./emotional-signals.js";
-
+  type DialecticalTriple,
+  type InnerMonologueState,
+  innerMonologue,
+  type MonologueEntry,
+  type MonologueType,
+  type PerspectiveSimulation,
+  type SocraticChain,
+  setLlmIntrospector,
+} from './inner-monologue.js';
 export {
-  temporalAwareness,
-  type TemporalMarker,
-  type TemporalPattern,
-  type TemporalAwarenessState,
-  type ProspectiveMemoryItem,
-  type TemporalDiscount,
-  type EpisodicFutureSimulation,
-  type AgentTemporalEvolution,
-} from "./temporal-awareness.js";
-
+  type CertaintyLevel,
+  type CognitiveLoad,
+  type HallucinationRisk,
+  type MetacognitiveAssessment,
+  type MetacognitiveState,
+  type MultiHypothesisBranch,
+  metacognitiveMonitor,
+  type PredictiveUncertainty,
+  type ReasoningQuality,
+} from './metacognitive-monitor.js';
 export {
-  predictiveProcessing,
-  type PredictionModel,
+  type FreeEnergyState,
   type Prediction,
   type PredictionError,
-  type FreeEnergyState,
+  type PredictionModel,
   type PredictiveProcessingState,
-} from "./predictive-processing.js";
-
+  predictiveProcessing,
+} from './predictive-processing.js';
 export {
-  dreamConsolidation,
-  type DreamReplay,
-  type DiscoveredPattern,
-  type ConsolidationReport,
-  type DreamConsolidationState,
-} from "./dream-consolidation.js";
+  type AdversarialProbe,
+  type AgentBeliefModel,
+  type AgentCapabilityProfile,
+  type CounterfactualScenario,
+  type SystemIdentity,
+  type SystemSelfModel,
+  selfModelEngine,
+} from './self-model.js';
+export {
+  type AgentTemporalEvolution,
+  type EpisodicFutureSimulation,
+  type ProspectiveMemoryItem,
+  type TemporalAwarenessState,
+  type TemporalDiscount,
+  type TemporalMarker,
+  type TemporalPattern,
+  temporalAwareness,
+} from './temporal-awareness.js';
 
-import { metacognitiveMonitor } from "./metacognitive-monitor.js";
-import { selfModelEngine } from "./self-model.js";
-import { cognitiveWorkspace } from "./cognitive-workspace.js";
-import { innerMonologue } from "./inner-monologue.js";
-import { goalEngine } from "./goal-engine.js";
-import { emotionalSignals } from "./emotional-signals.js";
-import { temporalAwareness } from "./temporal-awareness.js";
-import { predictiveProcessing } from "./predictive-processing.js";
-import { dreamConsolidation } from "./dream-consolidation.js";
-import type { MetacognitiveState } from "./metacognitive-monitor.js";
-import type { SystemSelfModel } from "./self-model.js";
-import type { CognitiveWorkspaceState } from "./cognitive-workspace.js";
-import type { InnerMonologueState } from "./inner-monologue.js";
-import type { GoalEngineState } from "./goal-engine.js";
-import type { EmotionalState } from "./emotional-signals.js";
-import type { TemporalAwarenessState } from "./temporal-awareness.js";
-import type { PredictiveProcessingState } from "./predictive-processing.js";
-import type { DreamConsolidationState } from "./dream-consolidation.js";
+import type { CognitiveWorkspaceState } from './cognitive-workspace.js';
+import { cognitiveWorkspace } from './cognitive-workspace.js';
+import type { DreamConsolidationState } from './dream-consolidation.js';
+import { dreamConsolidation } from './dream-consolidation.js';
+import type { EmotionalState } from './emotional-signals.js';
+import { emotionalSignals } from './emotional-signals.js';
+import type { GoalEngineState } from './goal-engine.js';
+import { goalEngine } from './goal-engine.js';
+import type { InnerMonologueState } from './inner-monologue.js';
+import { innerMonologue } from './inner-monologue.js';
+import type { MetacognitiveState } from './metacognitive-monitor.js';
+import { metacognitiveMonitor } from './metacognitive-monitor.js';
+import type { PredictiveProcessingState } from './predictive-processing.js';
+import { predictiveProcessing } from './predictive-processing.js';
+import type { SystemSelfModel } from './self-model.js';
+import { selfModelEngine } from './self-model.js';
+import type { TemporalAwarenessState } from './temporal-awareness.js';
+import { temporalAwareness } from './temporal-awareness.js';
 
 export interface ConsciousnessSnapshot {
   metacognition: MetacognitiveState;
@@ -149,8 +141,8 @@ export function buildConsciousnessContext(): string {
     temporalAwareness.buildTemporalContext(),
     predictiveProcessing.buildPredictiveContext(),
     dreamConsolidation.buildDreamContext(),
-  ].filter(s => s.length > 0);
+  ].filter((s) => s.length > 0);
 
-  if (sections.length === 0) return "";
-  return `# Consciousness Layer\n\n${sections.join("\n\n")}`;
+  if (sections.length === 0) return '';
+  return `# Consciousness Layer\n\n${sections.join('\n\n')}`;
 }

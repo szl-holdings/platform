@@ -1,8 +1,8 @@
-import type { StorageAdapter } from "../storage/interface";
-import type { ConflictResolver } from "../conflict-resolution/index";
+import type { ConflictResolver } from '../conflict-resolution/index';
+import type { StorageAdapter } from '../storage/interface';
 
-export type CommandMethod = "POST" | "PUT" | "PATCH" | "DELETE";
-export type CommandPriority = "critical" | "high" | "normal" | "low";
+export type CommandMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type CommandPriority = 'critical' | 'high' | 'normal' | 'low';
 
 export interface OfflineCommand {
   id: string;
@@ -33,7 +33,7 @@ export interface CommandReplayResult {
   commands: OfflineCommand[];
 }
 
-const STORE_NAME = "offline-commands";
+const STORE_NAME = 'offline-commands';
 
 export class CommandQueue {
   private storage: StorageAdapter;
@@ -50,15 +50,17 @@ export class CommandQueue {
     this.conflictResolver = options.conflictResolver;
   }
 
-  async enqueue(command: Omit<OfflineCommand, "id" | "timestamp" | "retries">): Promise<OfflineCommand> {
+  async enqueue(
+    command: Omit<OfflineCommand, 'id' | 'timestamp' | 'retries'>,
+  ): Promise<OfflineCommand> {
     const count = await this.storage.count(this.storeName);
     if (count >= this.maxCommands) {
       const all = await this.getAll();
-      const lowPriority = all.filter((c) => c.priority === "low");
+      const lowPriority = all.filter((c) => c.priority === 'low');
       if (lowPriority.length > 0) {
         await this.storage.delete(this.storeName, lowPriority[0].id);
       } else {
-        throw new Error("Offline command queue is full");
+        throw new Error('Offline command queue is full');
       }
     }
 
@@ -98,7 +100,7 @@ export class CommandQueue {
 
   async replay(
     getHeaders: () => Promise<Record<string, string>>,
-    domain?: string
+    domain?: string,
   ): Promise<CommandReplayResult> {
     const queue = await this.getAll(domain);
     if (queue.length === 0) return { replayed: 0, failed: 0, conflicts: 0, commands: [] };
@@ -113,7 +115,7 @@ export class CommandQueue {
         const res = await fetch(command.url, {
           method: command.method,
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             ...headers,
           },
           body: command.body !== undefined ? JSON.stringify(command.body) : undefined,
@@ -124,7 +126,9 @@ export class CommandQueue {
           replayed++;
         } else if (res.status === 409 && this.conflictResolver) {
           let serverValue: unknown = null;
-          try { serverValue = await res.json(); } catch {}
+          try {
+            serverValue = await res.json();
+          } catch {}
           await this.conflictResolver.detect({
             domain: command.domain,
             entityType: command.type,
@@ -134,9 +138,8 @@ export class CommandQueue {
             serverTimestamp: Date.now(),
             localValue: command.body,
             serverValue,
-            severity: command.priority === "critical" || command.priority === "high"
-              ? "high"
-              : "medium",
+            severity:
+              command.priority === 'critical' || command.priority === 'high' ? 'high' : 'medium',
           });
           conflictCount++;
           await this.dequeue(command.id);
@@ -172,7 +175,12 @@ export class CommandQueue {
       }
     }
 
-    return { replayed, failed: failedCommands.length, conflicts: conflictCount, commands: failedCommands };
+    return {
+      replayed,
+      failed: failedCommands.length,
+      conflicts: conflictCount,
+      commands: failedCommands,
+    };
   }
 
   async clear(domain?: string): Promise<void> {

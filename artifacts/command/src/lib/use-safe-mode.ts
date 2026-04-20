@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-const LS_KEY = "executiveSafeMode";
+const LS_KEY = 'executiveSafeMode';
 
 export function useSafeMode(): [boolean, (value: boolean) => void] {
   const [safeMode, setSafeModeState] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(LS_KEY) === "true";
+      return localStorage.getItem(LS_KEY) === 'true';
     } catch {
       return false;
     }

@@ -8,29 +8,43 @@
  * GET    /api/orgs/:orgSlug/invitations     — list pending invitations
  */
 
-import { Router } from "express";
-import crypto from "crypto";
-import { z } from "zod";
-import { db, orgInvitationsTable, organizationsTable, orgMembersTable, auditEventsTable, usersTable } from "@szl-holdings/db";
-import { eq, and, gt } from "drizzle-orm";
-import { authMiddleware } from "../middlewares/auth";
-import { writeLimiter } from "../middlewares/rate-limiters";
-import { logger } from "../lib/logger";
-import { hashIp } from "@szl-holdings/audit";
-import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
-import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { sendEmail, buildOrgInviteEmail } from "../lib/email";
-import { createOrgInvitation } from "../lib/invitation-service";
-import type { Request, Response } from "express";
+import { hashIp } from '@szl-holdings/audit';
+import { bodyShape } from '@szl-holdings/contracts/common';
+import {
+  auditEventsTable,
+  db,
+  organizationsTable,
+  orgInvitationsTable,
+  orgMembersTable,
+  usersTable,
+} from '@szl-holdings/db';
+import crypto from 'crypto';
+import { and, eq, gt } from 'drizzle-orm';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import { z } from 'zod';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendError,
+  sendForbidden,
+  sendNotFound,
+  sendUnauthorized,
+} from '../lib/api-response';
+import { buildOrgInviteEmail, sendEmail } from '../lib/email';
+import { createOrgInvitation } from '../lib/invitation-service';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
+import { writeLimiter } from '../middlewares/rate-limiters';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router = Router();
 
 const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
 
 const inviteBodySchema = z.object({
-  email: z.string().email("Valid email is required"),
-  role: z.enum(["admin", "member", "viewer"]).default("member"),
+  email: z.string().email('Valid email is required'),
+  role: z.enum(['admin', 'member', 'viewer']).default('member'),
 });
 
 const ORG_ROLE_HIERARCHY: Record<string, number> = { owner: 4, admin: 3, member: 2, viewer: 1 };
@@ -56,7 +70,7 @@ async function writeAuditEvent(params: {
     };
     await db.insert(auditEventsTable).values(row);
   } catch (err) {
-    logger.error({ err }, "Failed to write invitation audit event");
+    logger.error({ err }, 'Failed to write invitation audit event');
   }
 }
 
@@ -67,7 +81,7 @@ async function resolveOrgAndCheckAdminRole(
 ): Promise<{ id: number; name: string } | null> {
   const user = req.user;
   if (!user) {
-    sendUnauthorized(res, "Authentication required");
+    sendUnauthorized(res, 'Authentication required');
     return null;
   }
 
@@ -78,21 +92,21 @@ async function resolveOrgAndCheckAdminRole(
     .limit(1);
 
   if (!org) {
-    sendNotFound(res, "Organization");
+    sendNotFound(res, 'Organization');
     return null;
   }
 
-  const isElevated = user.roles.includes("super_admin") || user.roles.includes("admin");
+  const isElevated = user.roles.includes('super_admin') || user.roles.includes('admin');
   if (isElevated) return org;
 
   const membership = user.orgs.find((o) => o.orgSlug === orgSlug);
   if (!membership) {
-    sendForbidden(res, "Not a member of this organization");
+    sendForbidden(res, 'Not a member of this organization');
     return null;
   }
 
-  if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-    sendForbidden(res, "Insufficient organization role — admin or owner required");
+  if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']) {
+    sendForbidden(res, 'Insufficient organization role — admin or owner required');
     return null;
   }
 
@@ -100,13 +114,13 @@ async function resolveOrgAndCheckAdminRole(
 }
 
 router.post(
-  "/orgs/:orgSlug/invite",
+  '/orgs/:orgSlug/invite',
   writeLimiter,
   authMiddleware(),
   validateBody(inviteBodySchema),
   async (req, res) => {
     try {
-      const orgSlug = req.params["orgSlug"] as string;
+      const orgSlug = req.params['orgSlug'] as string;
       const { email, role } = req.body as z.infer<typeof inviteBodySchema>;
 
       const org = await resolveOrgAndCheckAdminRole(req, res, orgSlug);
@@ -119,14 +133,14 @@ router.post(
         orgId: org.id,
         orgName: org.name,
         email,
-        role: role as "admin" | "member" | "viewer",
+        role: role as 'admin' | 'member' | 'viewer',
         invitedByUserId: req.user!.id,
         ipAddress: req.ip,
-        conflictMode: "reject",
+        conflictMode: 'reject',
       });
 
       if (result.conflict) {
-        sendError(res, "A pending invitation already exists for this email", 409, "CONFLICT");
+        sendError(res, 'A pending invitation already exists for this email', 409, 'CONFLICT');
         return;
       }
 
@@ -138,16 +152,16 @@ router.post(
         inviteUrl: result.invitation.inviteUrl,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to create invitation");
+      handleRouteError(res, err, 'Failed to create invitation');
     }
   },
 );
 
-router.get("/orgs/accept-invite", validateQuery(listQuerySchema), async (req, res) => {
+router.get('/orgs/accept-invite', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const token = req.query["token"];
-    if (!token || typeof token !== "string") {
-      sendBadRequest(res, "Invitation token is required");
+    const token = req.query['token'];
+    if (!token || typeof token !== 'string') {
+      sendBadRequest(res, 'Invitation token is required');
       return;
     }
 
@@ -165,28 +179,28 @@ router.get("/orgs/accept-invite", validateQuery(listQuerySchema), async (req, re
       .limit(1);
 
     if (!invitation) {
-      sendNotFound(res, "Invitation");
+      sendNotFound(res, 'Invitation');
       return;
     }
 
-    if (invitation.status === "accepted") {
-      sendError(res, "This invitation has already been used", 410, "GONE");
+    if (invitation.status === 'accepted') {
+      sendError(res, 'This invitation has already been used', 410, 'GONE');
       return;
     }
 
-    if (invitation.status === "revoked") {
-      sendError(res, "This invitation has been revoked", 410, "GONE");
+    if (invitation.status === 'revoked') {
+      sendError(res, 'This invitation has been revoked', 410, 'GONE');
       return;
     }
 
-    if (invitation.status === "expired" || invitation.expiresAt < new Date()) {
-      if (invitation.status !== "expired") {
+    if (invitation.status === 'expired' || invitation.expiresAt < new Date()) {
+      if (invitation.status !== 'expired') {
         await db
           .update(orgInvitationsTable)
-          .set({ status: "expired" })
+          .set({ status: 'expired' })
           .where(eq(orgInvitationsTable.id, invitation.id));
       }
-      sendError(res, "This invitation has expired", 410, "GONE");
+      sendError(res, 'This invitation has expired', 410, 'GONE');
       return;
     }
 
@@ -204,22 +218,24 @@ router.get("/orgs/accept-invite", validateQuery(listQuerySchema), async (req, re
       expiresAt: invitation.expiresAt,
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to validate invitation");
+    handleRouteError(res, err, 'Failed to validate invitation');
   }
 });
 
 router.post(
-  "/orgs/accept-invite",
+  '/orgs/accept-invite',
   authMiddleware(),
-  validateBody(bodyShape({
-      "token": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      token: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
       const { token } = req.body as { token?: string };
 
-      if (!token || typeof token !== "string") {
-        sendBadRequest(res, "Invitation token is required");
+      if (!token || typeof token !== 'string') {
+        sendBadRequest(res, 'Invitation token is required');
         return;
       }
 
@@ -230,31 +246,31 @@ router.post(
         .limit(1);
 
       if (!invitation) {
-        sendNotFound(res, "Invitation");
+        sendNotFound(res, 'Invitation');
         return;
       }
 
-      if (invitation.status === "accepted") {
-        sendError(res, "This invitation has already been used", 410, "GONE");
+      if (invitation.status === 'accepted') {
+        sendError(res, 'This invitation has already been used', 410, 'GONE');
         return;
       }
 
-      if (invitation.status !== "pending" || invitation.expiresAt < new Date()) {
-        sendError(res, "This invitation is no longer valid", 410, "GONE");
+      if (invitation.status !== 'pending' || invitation.expiresAt < new Date()) {
+        sendError(res, 'This invitation is no longer valid', 410, 'GONE');
         return;
       }
 
-      const userEmail = (req.user!.email ?? "").toLowerCase();
+      const userEmail = (req.user!.email ?? '').toLowerCase();
       if (userEmail !== invitation.email.toLowerCase()) {
         await writeAuditEvent({
           userId: req.user!.id,
-          action: "invitation_accept_denied",
-          entityType: "org_invitation",
+          action: 'invitation_accept_denied',
+          entityType: 'org_invitation',
           entityId: String(invitation.id),
           ipAddress: req.ip,
-          newValues: { reason: "email_mismatch", invitedEmail: invitation.email },
+          newValues: { reason: 'email_mismatch', invitedEmail: invitation.email },
         });
-        sendForbidden(res, "This invitation was not issued to your account");
+        sendForbidden(res, 'This invitation was not issued to your account');
         return;
       }
 
@@ -273,26 +289,26 @@ router.post(
         await db
           .update(orgInvitationsTable)
           .set({
-            status: "accepted",
+            status: 'accepted',
             acceptedByUserId: req.user!.id,
             acceptedAt: new Date(),
           })
           .where(eq(orgInvitationsTable.id, invitation.id));
 
-        res.status(200).json({ message: "You are already a member of this organization" });
+        res.status(200).json({ message: 'You are already a member of this organization' });
         return;
       }
 
       await db.insert(orgMembersTable).values({
         orgId: invitation.orgId,
         userId: req.user!.id,
-        role: invitation.role as "admin" | "member" | "viewer",
+        role: invitation.role as 'admin' | 'member' | 'viewer',
       });
 
       await db
         .update(orgInvitationsTable)
         .set({
-          status: "accepted",
+          status: 'accepted',
           acceptedByUserId: req.user!.id,
           acceptedAt: new Date(),
         })
@@ -300,8 +316,8 @@ router.post(
 
       await writeAuditEvent({
         userId: req.user!.id,
-        action: "invitation_accepted",
-        entityType: "org_invitation",
+        action: 'invitation_accepted',
+        entityType: 'org_invitation',
         entityId: String(invitation.id),
         ipAddress: req.ip,
         newValues: {
@@ -318,27 +334,28 @@ router.post(
         .limit(1);
 
       res.status(200).json({
-        message: "Invitation accepted successfully",
+        message: 'Invitation accepted successfully',
         org: org ? { name: org.name, slug: org.slug } : null,
         role: invitation.role,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to accept invitation");
+      handleRouteError(res, err, 'Failed to accept invitation');
     }
   },
 );
 
 router.delete(
-  "/orgs/:orgSlug/invitations/:invitationId", validateBody(bodyShape({})),
+  '/orgs/:orgSlug/invitations/:invitationId',
+  validateBody(bodyShape({})),
   authMiddleware(),
   async (req, res) => {
     try {
-      const orgSlug = req.params["orgSlug"] as string;
-      const invitationId = req.params["invitationId"] as string;
+      const orgSlug = req.params['orgSlug'] as string;
+      const invitationId = req.params['invitationId'] as string;
       const id = parseInt(invitationId, 10);
 
       if (isNaN(id)) {
-        sendBadRequest(res, "Invalid invitation ID");
+        sendBadRequest(res, 'Invalid invitation ID');
         return;
       }
 
@@ -346,79 +363,74 @@ router.delete(
       if (!org) return;
 
       const [invitation] = await db
-        .select({ id: orgInvitationsTable.id, orgId: orgInvitationsTable.orgId, status: orgInvitationsTable.status })
+        .select({
+          id: orgInvitationsTable.id,
+          orgId: orgInvitationsTable.orgId,
+          status: orgInvitationsTable.status,
+        })
         .from(orgInvitationsTable)
         .where(eq(orgInvitationsTable.id, id))
         .limit(1);
 
       if (!invitation) {
-        sendNotFound(res, "Invitation");
+        sendNotFound(res, 'Invitation');
         return;
       }
 
       if (invitation.orgId !== org.id) {
-        sendForbidden(res, "Invitation does not belong to this organization");
+        sendForbidden(res, 'Invitation does not belong to this organization');
         return;
       }
 
-      if (invitation.status !== "pending") {
-        sendError(res, "Only pending invitations can be revoked", 409, "CONFLICT");
+      if (invitation.status !== 'pending') {
+        sendError(res, 'Only pending invitations can be revoked', 409, 'CONFLICT');
         return;
       }
 
       await db
         .update(orgInvitationsTable)
-        .set({ status: "revoked" })
+        .set({ status: 'revoked' })
         .where(eq(orgInvitationsTable.id, id));
 
       await writeAuditEvent({
         userId: req.user!.id,
-        action: "invitation_revoked",
-        entityType: "org_invitation",
+        action: 'invitation_revoked',
+        entityType: 'org_invitation',
         entityId: String(id),
         ipAddress: req.ip,
         newValues: { revokedByUserId: req.user!.id },
       });
 
-      res.status(200).json({ message: "Invitation revoked" });
+      res.status(200).json({ message: 'Invitation revoked' });
     } catch (err) {
-      handleRouteError(res, err, "Failed to revoke invitation");
+      handleRouteError(res, err, 'Failed to revoke invitation');
     }
   },
 );
 
-router.get(
-  "/orgs/:orgSlug/invitations",
-  authMiddleware(),
-  async (req, res) => {
-    try {
-      const orgSlug = req.params["orgSlug"] as string;
+router.get('/orgs/:orgSlug/invitations', authMiddleware(), async (req, res) => {
+  try {
+    const orgSlug = req.params['orgSlug'] as string;
 
-      const org = await resolveOrgAndCheckAdminRole(req, res, orgSlug);
-      if (!org) return;
+    const org = await resolveOrgAndCheckAdminRole(req, res, orgSlug);
+    if (!org) return;
 
-      const invitations = await db
-        .select({
-          id: orgInvitationsTable.id,
-          email: orgInvitationsTable.email,
-          role: orgInvitationsTable.role,
-          status: orgInvitationsTable.status,
-          expiresAt: orgInvitationsTable.expiresAt,
-          createdAt: orgInvitationsTable.createdAt,
-        })
-        .from(orgInvitationsTable)
-        .where(
-          and(
-            eq(orgInvitationsTable.orgId, org.id),
-            eq(orgInvitationsTable.status, "pending"),
-          ),
-        );
+    const invitations = await db
+      .select({
+        id: orgInvitationsTable.id,
+        email: orgInvitationsTable.email,
+        role: orgInvitationsTable.role,
+        status: orgInvitationsTable.status,
+        expiresAt: orgInvitationsTable.expiresAt,
+        createdAt: orgInvitationsTable.createdAt,
+      })
+      .from(orgInvitationsTable)
+      .where(and(eq(orgInvitationsTable.orgId, org.id), eq(orgInvitationsTable.status, 'pending')));
 
-      res.status(200).json({ invitations });
-    } catch (err) {
-      handleRouteError(res, err, "Failed to list invitations");
-    }
-  },
-);
+    res.status(200).json({ invitations });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to list invitations');
+  }
+});
 
 export default router;

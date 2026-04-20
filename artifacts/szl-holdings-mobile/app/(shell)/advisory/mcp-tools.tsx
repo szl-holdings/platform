@@ -1,1 +1,1 @@
-export { default } from "./(tabs)/mcp-tools";
+export { default } from './(tabs)/mcp-tools';

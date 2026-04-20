@@ -23,39 +23,48 @@
  *   DELETE /teams/:team/schedule/overrides/:id — remove an override (admin)
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  db,
-  usersTable,
-  notificationsTable,
-  notificationPreferencesTable,
   appsRegistryTable,
-  teamPagesTable,
-  onCallSchedulesTable,
-  onCallShiftsTable,
   auditLogsTable,
-  PLATFORM_ROLE_HIERARCHY,
-  type PlatformRole,
+  db,
+  notificationPreferencesTable,
+  notificationsTable,
   type OnCallSchedule,
   type OnCallShift,
-} from "@szl-holdings/db";
-import { and, asc, desc, eq, gte, inArray, lte } from "drizzle-orm";
+  onCallSchedulesTable,
+  onCallShiftsTable,
+  PLATFORM_ROLE_HIERARCHY,
+  type PlatformRole,
+  teamPagesTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { and, asc, desc, eq, gte, inArray, lte } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
 import {
-  sendSuccess,
-  sendBadRequest,
-  sendNotFound,
-  sendForbidden,
   handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware, denyIfReadOnly, requireRole, parseIdParam, InvalidIdError } from "../middlewares/auth";
-import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { logger } from "../lib/logger";
-import { validateBody } from "../lib/validation";
-import { publish, WS_CHANNELS } from "../lib/websocket";
-import { dispatchToExternalChannels } from "./notifications";
+  sendBadRequest,
+  sendForbidden,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { validateBody } from '../lib/validation';
+import { publish, WS_CHANNELS } from '../lib/websocket';
+import {
+  authMiddleware,
+  denyIfReadOnly,
+  InvalidIdError,
+  parseIdParam,
+  requireRole,
+} from '../middlewares/auth';
+import {
+  perUserApiSlidingLimiter,
+  perUserWriteSlidingLimiter,
+} from '../middlewares/sliding-window-limiter';
+import { dispatchToExternalChannels } from './notifications';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
 const router: IRouter = Router();
 
 export interface TeamMember {
@@ -72,7 +81,7 @@ export interface TeamOwnedApp {
   name: string;
 }
 
-export type OnCallSource = "override" | "rotation" | "fallback" | "none";
+export type OnCallSource = 'override' | 'rotation' | 'fallback' | 'none';
 
 export interface TeamDetail {
   team: string;
@@ -110,7 +119,7 @@ function pickFromRotation(
   // Walk forward up to `len` slots so we tolerate users dropped from the team
   // since the schedule was configured.
   for (let step = 0; step < len; step++) {
-    const idx = ((rawSlot + step) % len + len) % len;
+    const idx = (((rawSlot + step) % len) + len) % len;
     const candidateId = order[idx]!;
     const candidate = activeById.get(candidateId);
     if (candidate) return candidate;
@@ -140,9 +149,7 @@ function pickEscalation(active: TeamMember[], onCall: TeamMember | null): TeamMe
   const ranked = active
     .map((m) => ({
       m,
-      rank: m.platformRole
-        ? (PLATFORM_ROLE_HIERARCHY[m.platformRole as PlatformRole] ?? -1)
-        : -1,
+      rank: m.platformRole ? (PLATFORM_ROLE_HIERARCHY[m.platformRole as PlatformRole] ?? -1) : -1,
     }))
     .sort((a, b) => b.rank - a.rank || a.m.id - b.m.id);
   const top = ranked[0];
@@ -180,7 +187,7 @@ export async function resolveOnCall(
     // Only honor if the user is still on the team (active or not — explicit
     // overrides override even the active-only filter, since an admin chose
     // them deliberately).
-    if (m) return { onCall: m, source: "override", schedule: null };
+    if (m) return { onCall: m, source: 'override', schedule: null };
   }
 
   // 2. Configured rotation.
@@ -197,14 +204,14 @@ export async function resolveOnCall(
       active,
       now,
     );
-    if (picked) return { onCall: picked, source: "rotation", schedule };
+    if (picked) return { onCall: picked, source: 'rotation', schedule };
   }
 
   // 3. Legacy fallback.
   const fallback = pickFallbackOnCall(active, now);
   return {
     onCall: fallback,
-    source: fallback ? "fallback" : "none",
+    source: fallback ? 'fallback' : 'none',
     schedule: schedule ?? null,
   };
 }
@@ -277,7 +284,7 @@ export interface TeamScheduleSummary {
     startAt: string;
     endAt: string;
     note: string | null;
-    kind: "override" | "shift";
+    kind: 'override' | 'shift';
   }>;
 }
 
@@ -293,7 +300,7 @@ export interface TeamScheduleSummary {
  * "schedules".
  */
 router.get(
-  "/teams/schedules",
+  '/teams/schedules',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (_req: Request, res: Response) => {
@@ -310,15 +317,15 @@ router.get(
 
       const teamSet = new Set<string>();
       for (const r of userTeamRows) {
-        const t = (r.team ?? "").trim();
+        const t = (r.team ?? '').trim();
         if (t) teamSet.add(t);
       }
       for (const r of appTeamRows) {
-        const t = (r.team ?? "").trim();
+        const t = (r.team ?? '').trim();
         if (t) teamSet.add(t);
       }
       for (const r of scheduleTeamRows) {
-        const t = (r.team ?? "").trim();
+        const t = (r.team ?? '').trim();
         if (t) teamSet.add(t);
       }
       const teams = Array.from(teamSet).sort((a, b) => a.localeCompare(b));
@@ -347,7 +354,7 @@ router.get(
             .orderBy(asc(onCallShiftsTable.startAt))
             .limit(50);
 
-          const handoffs: TeamScheduleSummary["upcomingHandoffs"] = [];
+          const handoffs: TeamScheduleSummary['upcomingHandoffs'] = [];
           if (schedule && schedule.memberOrder.length > 0 && schedule.rotationIntervalHours > 0) {
             const intervalMs = schedule.rotationIntervalHours * 60 * 60 * 1000;
             const anchorMs = schedule.handoffAnchor.getTime();
@@ -365,7 +372,7 @@ router.get(
               if (at.getTime() <= now.getTime()) continue;
               let picked: TeamMember | null = null;
               for (let step = 0; step < len; step++) {
-                const idx = ((slot + step) % len + len) % len;
+                const idx = (((slot + step) % len) + len) % len;
                 const id = schedule.memberOrder[idx]!;
                 const m = activeById.get(id);
                 if (m) {
@@ -374,7 +381,11 @@ router.get(
                 }
               }
               if (picked) {
-                handoffs.push({ at: at.toISOString(), userId: picked.id, displayName: picked.displayName });
+                handoffs.push({
+                  at: at.toISOString(),
+                  userId: picked.id,
+                  displayName: picked.displayName,
+                });
               }
             }
           }
@@ -403,7 +414,7 @@ router.get(
               startAt: o.startAt.toISOString(),
               endAt: o.endAt.toISOString(),
               note: o.note,
-              kind: o.kind as "override" | "shift",
+              kind: o.kind as 'override' | 'shift',
             })),
           };
         }),
@@ -417,19 +428,19 @@ router.get(
         teams: filtered,
       });
     } catch (err) {
-      return handleRouteError(res, err, "GET /teams/schedules");
+      return handleRouteError(res, err, 'GET /teams/schedules');
     }
   },
 );
 
 router.get(
-  "/teams/:team",
+  '/teams/:team',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
-      if (!team) return sendBadRequest(res, "team is required");
+      if (!team) return sendBadRequest(res, 'team is required');
       const detail = await loadTeam(team);
       if (!detail) return sendNotFound(res, `Team '${team}'`);
       return sendSuccess(res, detail);
@@ -450,18 +461,20 @@ router.get(
  * of "who paged whom" via the request body.
  */
 router.post(
-  "/teams/:team/page",
+  '/teams/:team/page',
   authMiddleware({ required: true }),
   denyIfReadOnly(),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-      "message": z.unknown().optional(),
-      "urgency": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      message: z.unknown().optional(),
+      urgency: z.unknown().optional(),
+    }),
+  ),
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
-      if (!team) return sendBadRequest(res, "team is required");
+      if (!team) return sendBadRequest(res, 'team is required');
       const detail = await loadTeam(team);
       if (!detail) return sendNotFound(res, `Team '${team}'`);
       if (!detail.onCall) {
@@ -469,14 +482,13 @@ router.post(
       }
 
       const body = (req.body ?? {}) as { message?: string; urgency?: string };
-      const note = typeof body.message === "string" ? body.message.trim().slice(0, 500) : "";
-      const urgencyRaw = typeof body.urgency === "string" ? body.urgency.toLowerCase() : "warning";
+      const note = typeof body.message === 'string' ? body.message.trim().slice(0, 500) : '';
+      const urgencyRaw = typeof body.urgency === 'string' ? body.urgency.toLowerCase() : 'warning';
       // Map the operator-facing urgency vocabulary onto the notifications
       // table's `type` enum. "critical" → "error" so it shows in red.
-      const urgency: "info" | "warning" | "critical" =
-        urgencyRaw === "critical" || urgencyRaw === "info" ? urgencyRaw : "warning";
-      const notifType: "info" | "warning" | "error" =
-        urgency === "critical" ? "error" : urgency;
+      const urgency: 'info' | 'warning' | 'critical' =
+        urgencyRaw === 'critical' || urgencyRaw === 'info' ? urgencyRaw : 'warning';
+      const notifType: 'info' | 'warning' | 'error' = urgency === 'critical' ? 'error' : urgency;
 
       const actor = req.user!;
       const actorName = actor.displayName ?? actor.email ?? `user#${actor.id}`;
@@ -486,13 +498,13 @@ router.post(
       if (detail.onCall.id === actor.id) {
         return sendSuccess(res, {
           paged: false,
-          reason: "actor_is_oncall",
+          reason: 'actor_is_oncall',
           team,
           onCall: detail.onCall,
         });
       }
 
-      const appUrl = process.env["APP_URL"] ?? process.env["VITE_APP_URL"] ?? "";
+      const appUrl = process.env['APP_URL'] ?? process.env['VITE_APP_URL'] ?? '';
       const actionUrl = `${appUrl}/command/operations/deployments`;
       const title = `Page from ${actorName} · ${team}`;
       const message = note
@@ -544,7 +556,7 @@ router.post(
             .values({
               userId: detail.onCall.id,
               type: notifType,
-              channel: "in_app",
+              channel: 'in_app',
               title,
               message,
               actionUrl,
@@ -552,7 +564,7 @@ router.post(
             .returning();
           if (notif) {
             notificationId = notif.id;
-            publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notif);
+            publish(WS_CHANNELS.NOTIFICATIONS, 'new_notification', notif);
           }
         }
 
@@ -590,7 +602,7 @@ router.post(
         // audit insert blew up. Log loudly so it gets noticed.
         logger.error(
           { err: auditErr, team, onCallUserId: detail.onCall.id, actorId: actor.id },
-          "Failed to record team_pages audit row",
+          'Failed to record team_pages audit row',
         );
       }
 
@@ -604,12 +616,12 @@ router.post(
           mutedAsDuplicate: isDuplicate,
           duplicateOfPageId: isDuplicate ? recentDup!.id : null,
         },
-        isDuplicate ? "Team page muted as duplicate" : "Team paged",
+        isDuplicate ? 'Team page muted as duplicate' : 'Team paged',
       );
 
       return sendSuccess(res, {
         paged: !isDuplicate,
-        reason: isDuplicate ? "muted_duplicate" : undefined,
+        reason: isDuplicate ? 'muted_duplicate' : undefined,
         team,
         onCall: detail.onCall,
         urgency,
@@ -626,14 +638,19 @@ router.post(
 export interface TeamPageHistoryEntry {
   id: number;
   team: string;
-  urgency: "info" | "warning" | "critical";
+  urgency: 'info' | 'warning' | 'critical';
   message: string | null;
   inAppDelivered: boolean;
   mutedAsDuplicate: boolean;
   duplicateOfPageId: number | null;
   createdAt: string;
   actor: { id: number; displayName: string; email: string | null; avatarUrl: string | null } | null;
-  recipient: { id: number; displayName: string; email: string | null; avatarUrl: string | null } | null;
+  recipient: {
+    id: number;
+    displayName: string;
+    email: string | null;
+    avatarUrl: string | null;
+  } | null;
 }
 
 /**
@@ -644,13 +661,13 @@ export interface TeamPageHistoryEntry {
  * never written to the audit table so they never appear here.
  */
 router.get(
-  "/teams/:team/pages",
+  '/teams/:team/pages',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
-      if (!team) return sendBadRequest(res, "team is required");
+      if (!team) return sendBadRequest(res, 'team is required');
 
       // Hand-rolled join: select the page rows then resolve actor/recipient
       // user summaries in two batched lookups. Keeps drizzle types simple
@@ -674,7 +691,9 @@ router.get(
         .limit(10);
 
       const userIds = Array.from(
-        new Set(pageRows.flatMap((r) => [r.actorId, r.recipientId]).filter((n): n is number => n != null)),
+        new Set(
+          pageRows.flatMap((r) => [r.actorId, r.recipientId]).filter((n): n is number => n != null),
+        ),
       );
       const userRows = userIds.length
         ? await db
@@ -692,7 +711,7 @@ router.get(
       const entries: TeamPageHistoryEntry[] = pageRows.map((r) => ({
         id: r.id,
         team: r.team,
-        urgency: r.urgency as "info" | "warning" | "critical",
+        urgency: r.urgency as 'info' | 'warning' | 'critical',
         message: r.message,
         inAppDelivered: r.inAppDelivered,
         mutedAsDuplicate: r.mutedAsDuplicate,
@@ -710,11 +729,11 @@ router.get(
 );
 
 export interface UserPageHistoryEntry extends TeamPageHistoryEntry {
-  role: "received" | "sent";
+  role: 'received' | 'sent';
 }
 
 router.get(
-  "/users/:id/pages",
+  '/users/:id/pages',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (req: Request, res: Response) => {
@@ -722,12 +741,13 @@ router.get(
       const idParam = (req.params as { id: string }).id;
       const userId = Number.parseInt(idParam, 10);
       if (!Number.isInteger(userId) || userId < 1) {
-        return sendBadRequest(res, "Invalid user id");
+        return sendBadRequest(res, 'Invalid user id');
       }
 
-      const roleRaw = typeof req.query["role"] === "string" ? req.query["role"].toLowerCase() : "recipient";
-      const role: "recipient" | "actor" | "both" =
-        roleRaw === "actor" || roleRaw === "both" ? roleRaw : "recipient";
+      const roleRaw =
+        typeof req.query['role'] === 'string' ? req.query['role'].toLowerCase() : 'recipient';
+      const role: 'recipient' | 'actor' | 'both' =
+        roleRaw === 'actor' || roleRaw === 'both' ? roleRaw : 'recipient';
 
       const [user] = await db
         .select({
@@ -745,11 +765,11 @@ router.get(
       if (!user) return sendNotFound(res, `User #${userId}`);
 
       const filter =
-        role === "recipient"
+        role === 'recipient'
           ? eq(teamPagesTable.recipientId, userId)
-          : role === "actor"
-          ? eq(teamPagesTable.actorId, userId)
-          : null;
+          : role === 'actor'
+            ? eq(teamPagesTable.actorId, userId)
+            : null;
 
       const limit = 25;
       let pageRows: Array<{
@@ -819,8 +839,10 @@ router.get(
             return true;
           })
           .sort((a, b) => {
-            const at = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
-            const bt = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+            const at =
+              a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
+            const bt =
+              b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
             return bt - at;
           })
           .slice(0, limit);
@@ -844,9 +866,10 @@ router.get(
             .from(usersTable)
             .where(inArray(usersTable.id, otherIds))
         : [];
-      const userById = new Map<number, { id: number; displayName: string; email: string | null; avatarUrl: string | null }>(
-        otherRows.map((u) => [u.id, u]),
-      );
+      const userById = new Map<
+        number,
+        { id: number; displayName: string; email: string | null; avatarUrl: string | null }
+      >(otherRows.map((u) => [u.id, u]));
       userById.set(user.id, {
         id: user.id,
         displayName: user.displayName,
@@ -857,13 +880,13 @@ router.get(
       const entries: UserPageHistoryEntry[] = pageRows.map((r) => ({
         id: r.id,
         team: r.team,
-        urgency: r.urgency as "info" | "warning" | "critical",
+        urgency: r.urgency as 'info' | 'warning' | 'critical',
         message: r.message,
         inAppDelivered: r.inAppDelivered,
         createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
-        actor: r.actorId != null ? userById.get(r.actorId) ?? null : null,
-        recipient: r.recipientId != null ? userById.get(r.recipientId) ?? null : null,
-        role: r.recipientId === userId ? "received" : "sent",
+        actor: r.actorId != null ? (userById.get(r.actorId) ?? null) : null,
+        recipient: r.recipientId != null ? (userById.get(r.recipientId) ?? null) : null,
+        role: r.recipientId === userId ? 'received' : 'sent',
       }));
 
       return sendSuccess(res, {
@@ -897,7 +920,7 @@ router.get(
  */
 async function writeScheduleAudit(params: {
   actionType: string;
-  entityType: "on_call_schedule" | "on_call_override";
+  entityType: 'on_call_schedule' | 'on_call_override';
   entityId: string;
   team: string;
   actorUserId: number;
@@ -921,7 +944,7 @@ async function writeScheduleAudit(params: {
   } catch (err) {
     logger.error(
       { err, actionType: params.actionType, team: params.team, entityId: params.entityId },
-      "Failed to write on-call schedule audit log",
+      'Failed to write on-call schedule audit log',
     );
   }
 }
@@ -963,22 +986,25 @@ export interface ScheduleResponse {
     id: number;
     userId: number;
     displayName: string;
-    kind: "override";
+    kind: 'override';
     startAt: string;
     endAt: string;
     note: string | null;
     createdBy: number;
   }>;
   currentOnCall: { id: number; displayName: string } | null;
-  currentOnCallSource: "override" | "rotation" | "fallback";
+  currentOnCallSource: 'override' | 'rotation' | 'fallback';
 }
 
-function shiftToDto(s: typeof onCallShiftsTable.$inferSelect, members: Array<{ id: number; displayName: string }>) {
+function shiftToDto(
+  s: typeof onCallShiftsTable.$inferSelect,
+  members: Array<{ id: number; displayName: string }>,
+) {
   return {
     id: s.id,
     userId: s.userId,
     displayName: members.find((m) => m.id === s.userId)?.displayName ?? `User #${s.userId}`,
-    kind: s.kind as "override",
+    kind: s.kind as 'override',
     startAt: s.startAt.toISOString(),
     endAt: s.endAt.toISOString(),
     note: s.note,
@@ -986,7 +1012,10 @@ function shiftToDto(s: typeof onCallShiftsTable.$inferSelect, members: Array<{ i
   };
 }
 
-async function loadScheduleResponse(team: string, now: Date = new Date()): Promise<ScheduleResponse | null> {
+async function loadScheduleResponse(
+  team: string,
+  now: Date = new Date(),
+): Promise<ScheduleResponse | null> {
   const detail = await loadTeam(team, now);
   if (!detail) return null;
 
@@ -1023,13 +1052,13 @@ async function loadScheduleResponse(team: string, now: Date = new Date()): Promi
 }
 
 router.get(
-  "/teams/:team/schedule",
+  '/teams/:team/schedule',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
-      if (!team) return sendBadRequest(res, "team is required");
+      if (!team) return sendBadRequest(res, 'team is required');
       const resp = await loadScheduleResponse(team);
       if (!resp) return sendNotFound(res, `Team '${team}'`);
       return sendSuccess(res, resp);
@@ -1050,21 +1079,23 @@ async function findNonMemberIds(team: string, ids: number[]): Promise<number[]> 
 }
 
 router.put(
-  "/teams/:team/schedule",
+  '/teams/:team/schedule',
   authMiddleware({ required: true }),
-  requireRole("admin", "ops"),
+  requireRole('admin', 'ops'),
   denyIfReadOnly(),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-      "handoffAnchor": z.unknown().optional(),
-      "memberOrder": z.unknown().optional(),
-      "rotationIntervalHours": z.unknown().optional(),
-      "timezone": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      handoffAnchor: z.unknown().optional(),
+      memberOrder: z.unknown().optional(),
+      rotationIntervalHours: z.unknown().optional(),
+      timezone: z.unknown().optional(),
+    }),
+  ),
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
-      if (!team) return sendBadRequest(res, "team is required");
+      if (!team) return sendBadRequest(res, 'team is required');
       const detail = await loadTeam(team);
       if (!detail) return sendNotFound(res, `Team '${team}'`);
 
@@ -1078,45 +1109,59 @@ router.put(
 
       const intervalRaw = body.rotationIntervalHours;
       const interval =
-        typeof intervalRaw === "number" && Number.isFinite(intervalRaw) && intervalRaw >= 0
+        typeof intervalRaw === 'number' && Number.isFinite(intervalRaw) && intervalRaw >= 0
           ? Math.floor(intervalRaw)
           : null;
       if (interval === null) {
-        return sendBadRequest(res, "rotationIntervalHours must be a non-negative number (0 = disabled)");
+        return sendBadRequest(
+          res,
+          'rotationIntervalHours must be a non-negative number (0 = disabled)',
+        );
       }
       if (interval > 24 * 365) {
-        return sendBadRequest(res, "rotationIntervalHours must be <= 8760 (one year)");
+        return sendBadRequest(res, 'rotationIntervalHours must be <= 8760 (one year)');
       }
 
-      if (!Array.isArray(body.memberOrder) || body.memberOrder.some((v) => typeof v !== "number" || !Number.isInteger(v))) {
-        return sendBadRequest(res, "memberOrder must be an array of integer user ids");
+      if (
+        !Array.isArray(body.memberOrder) ||
+        body.memberOrder.some((v) => typeof v !== 'number' || !Number.isInteger(v))
+      ) {
+        return sendBadRequest(res, 'memberOrder must be an array of integer user ids');
       }
-      const memberOrder = (body.memberOrder as number[]).filter((id, i, arr) => arr.indexOf(id) === i);
+      const memberOrder = (body.memberOrder as number[]).filter(
+        (id, i, arr) => arr.indexOf(id) === i,
+      );
 
       const offending = await findNonMemberIds(team, memberOrder);
       if (offending.length > 0) {
-        return sendBadRequest(res, `memberOrder contains user ids that are not on team '${team}': ${offending.join(", ")}`);
+        return sendBadRequest(
+          res,
+          `memberOrder contains user ids that are not on team '${team}': ${offending.join(', ')}`,
+        );
       }
 
       let handoffAnchor = new Date();
-      if (typeof body.handoffAnchor === "string") {
+      if (typeof body.handoffAnchor === 'string') {
         const d = new Date(body.handoffAnchor);
-        if (Number.isNaN(d.getTime())) return sendBadRequest(res, "handoffAnchor must be an ISO timestamp");
+        if (Number.isNaN(d.getTime()))
+          return sendBadRequest(res, 'handoffAnchor must be an ISO timestamp');
         handoffAnchor = d;
       }
 
       const timezone =
-        typeof body.timezone === "string" && body.timezone.trim().length > 0 && body.timezone.length <= 64
+        typeof body.timezone === 'string' &&
+        body.timezone.trim().length > 0 &&
+        body.timezone.length <= 64
           ? body.timezone.trim()
-          : "UTC";
+          : 'UTC';
 
       // #2482: per-schedule warning window. 0 disables the warning, capped
       // at 24h to keep the scheduler's lookahead bounded.
       const warningRaw = body.warningMinutes;
       let warningMinutes = 30;
       if (warningRaw !== undefined) {
-        if (typeof warningRaw !== "number" || !Number.isFinite(warningRaw) || warningRaw < 0) {
-          return sendBadRequest(res, "warningMinutes must be a non-negative number");
+        if (typeof warningRaw !== 'number' || !Number.isFinite(warningRaw) || warningRaw < 0) {
+          return sendBadRequest(res, 'warningMinutes must be a non-negative number');
         }
         warningMinutes = Math.min(Math.floor(warningRaw), 24 * 60);
       }
@@ -1165,7 +1210,7 @@ router.put(
 
       logger.info(
         { team, actorId: actor.id, interval, memberCount: memberOrder.length },
-        "On-call schedule updated",
+        'On-call schedule updated',
       );
 
       const after: Record<string, unknown> = {
@@ -1177,8 +1222,8 @@ router.put(
         updatedBy: actor.id,
       };
       await writeScheduleAudit({
-        actionType: existing ? "on_call_schedule.updated" : "on_call_schedule.created",
-        entityType: "on_call_schedule",
+        actionType: existing ? 'on_call_schedule.updated' : 'on_call_schedule.created',
+        entityType: 'on_call_schedule',
         entityId: auditEntityId,
         team,
         actorUserId: actor.id,
@@ -1195,21 +1240,23 @@ router.put(
 );
 
 router.post(
-  "/teams/:team/schedule/overrides",
+  '/teams/:team/schedule/overrides',
   authMiddleware({ required: true }),
-  requireRole("admin", "ops"),
+  requireRole('admin', 'ops'),
   denyIfReadOnly(),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-      "endAt": z.unknown().optional(),
-      "note": z.unknown().optional(),
-      "startAt": z.unknown().optional(),
-      "userId": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      endAt: z.unknown().optional(),
+      note: z.unknown().optional(),
+      startAt: z.unknown().optional(),
+      userId: z.unknown().optional(),
+    }),
+  ),
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
-      if (!team) return sendBadRequest(res, "team is required");
+      if (!team) return sendBadRequest(res, 'team is required');
       const detail = await loadTeam(team);
       if (!detail) return sendNotFound(res, `Team '${team}'`);
 
@@ -1221,31 +1268,31 @@ router.post(
       };
 
       const userId =
-        typeof body.userId === "number" && Number.isInteger(body.userId) ? body.userId : null;
-      if (userId === null) return sendBadRequest(res, "userId must be an integer");
+        typeof body.userId === 'number' && Number.isInteger(body.userId) ? body.userId : null;
+      if (userId === null) return sendBadRequest(res, 'userId must be an integer');
 
       const offending = await findNonMemberIds(team, [userId]);
       if (offending.length > 0) {
         return sendBadRequest(res, `user ${userId} is not a member of team '${team}'`);
       }
 
-      if (typeof body.startAt !== "string" || typeof body.endAt !== "string") {
-        return sendBadRequest(res, "startAt and endAt must be ISO timestamps");
+      if (typeof body.startAt !== 'string' || typeof body.endAt !== 'string') {
+        return sendBadRequest(res, 'startAt and endAt must be ISO timestamps');
       }
       const startAt = new Date(body.startAt);
       const endAt = new Date(body.endAt);
       if (Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) {
-        return sendBadRequest(res, "startAt and endAt must be valid ISO timestamps");
+        return sendBadRequest(res, 'startAt and endAt must be valid ISO timestamps');
       }
       if (endAt.getTime() <= startAt.getTime()) {
-        return sendBadRequest(res, "endAt must be after startAt");
+        return sendBadRequest(res, 'endAt must be after startAt');
       }
       if (endAt.getTime() - startAt.getTime() > 365 * 24 * 60 * 60 * 1000) {
-        return sendBadRequest(res, "override window must be <= 365 days");
+        return sendBadRequest(res, 'override window must be <= 365 days');
       }
 
       const note =
-        typeof body.note === "string" && body.note.trim().length > 0
+        typeof body.note === 'string' && body.note.trim().length > 0
           ? body.note.trim().slice(0, 500)
           : null;
 
@@ -1255,7 +1302,7 @@ router.post(
         .values({
           team,
           userId,
-          kind: "override",
+          kind: 'override',
           startAt,
           endAt,
           note,
@@ -1265,13 +1312,13 @@ router.post(
 
       logger.info(
         { team, actorId: actor.id, overrideId: created?.id, userId, startAt, endAt },
-        "On-call override created",
+        'On-call override created',
       );
 
       if (created) {
         await writeScheduleAudit({
-          actionType: "on_call_override.created",
-          entityType: "on_call_override",
+          actionType: 'on_call_override.created',
+          entityType: 'on_call_override',
           entityId: String(created.id),
           team,
           actorUserId: actor.id,
@@ -1289,20 +1336,20 @@ router.post(
 );
 
 router.delete(
-  "/teams/:team/schedule/overrides/:id",
+  '/teams/:team/schedule/overrides/:id',
   authMiddleware({ required: true }),
-  requireRole("admin", "ops"),
+  requireRole('admin', 'ops'),
   denyIfReadOnly(),
   perUserWriteSlidingLimiter,
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
-      if (!team) return sendBadRequest(res, "team is required");
+      if (!team) return sendBadRequest(res, 'team is required');
       let id: number;
       try {
         id = parseIdParam((req.params as { id: string }).id);
       } catch (e) {
-        if (e instanceof InvalidIdError) return sendBadRequest(res, "invalid override id");
+        if (e instanceof InvalidIdError) return sendBadRequest(res, 'invalid override id');
         throw e;
       }
       const [existing] = await db
@@ -1317,11 +1364,11 @@ router.delete(
 
       await db.delete(onCallShiftsTable).where(eq(onCallShiftsTable.id, id));
       const actorId = req.user!.id;
-      logger.info({ team, actorId, overrideId: id }, "On-call override deleted");
+      logger.info({ team, actorId, overrideId: id }, 'On-call override deleted');
 
       await writeScheduleAudit({
-        actionType: "on_call_override.deleted",
-        entityType: "on_call_override",
+        actionType: 'on_call_override.deleted',
+        entityType: 'on_call_override',
         entityId: String(id),
         team,
         actorUserId: actorId,
@@ -1332,7 +1379,11 @@ router.delete(
       const resp = await loadScheduleResponse(team);
       return sendSuccess(res, resp);
     } catch (err) {
-      return handleRouteError(res, err, `DELETE /teams/${req.params.team}/schedule/overrides/${req.params.id}`);
+      return handleRouteError(
+        res,
+        err,
+        `DELETE /teams/${req.params.team}/schedule/overrides/${req.params.id}`,
+      );
     }
   },
 );

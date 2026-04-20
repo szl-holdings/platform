@@ -4,16 +4,16 @@
  * Runs golden-set evals on a schedule, persists results to eval_runs table,
  * computes per-agent confidence calibration scores, and exposes a summary endpoint.
  */
-import { randomUUID } from "crypto";
-import { db } from "@szl-holdings/db";
-import { evalRuns, alloyOutcomeLearning } from "@szl-holdings/db";
-import { desc, sql } from "drizzle-orm";
-import { runEvals, type EvalReport } from "../evals/run-evals.js";
+
+import { alloyOutcomeLearning, db, evalRuns } from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { desc, sql } from 'drizzle-orm';
+import { type EvalReport, runEvals } from '../evals/run-evals.js';
 
 const logger = {
-  warn: (obj: Record<string, unknown>, msg: string) => console.warn("[eval-pipeline]", msg, obj),
-  error: (obj: Record<string, unknown>, msg: string) => console.error("[eval-pipeline]", msg, obj),
-  info: (msg: string) => console.log("[eval-pipeline]", msg),
+  warn: (obj: Record<string, unknown>, msg: string) => console.warn('[eval-pipeline]', msg, obj),
+  error: (obj: Record<string, unknown>, msg: string) => console.error('[eval-pipeline]', msg, obj),
+  info: (msg: string) => console.log('[eval-pipeline]', msg),
 };
 
 export interface AgentCalibrationSummary {
@@ -41,7 +41,7 @@ export async function computeAgentCalibrations(): Promise<AgentCalibrationSummar
       .from(alloyOutcomeLearning)
       .groupBy(alloyOutcomeLearning.agentId);
 
-    return rows.map(r => {
+    return rows.map((r) => {
       const acceptanceRate = r.total > 0 ? r.accepted / r.total : 1.0;
       const calibrationBias = (r.avgConf ?? 0.75) - acceptanceRate;
       return {
@@ -53,14 +53,14 @@ export async function computeAgentCalibrations(): Promise<AgentCalibrationSummar
       };
     });
   } catch (err) {
-    logger.warn({ err }, "computeAgentCalibrations failed — returning empty calibration list");
+    logger.warn({ err }, 'computeAgentCalibrations failed — returning empty calibration list');
     return [];
   }
 }
 
 export async function persistEvalReport(
   report: EvalReport,
-  triggeredBy: "scheduled" | "manual" | "api" = "scheduled",
+  triggeredBy: 'scheduled' | 'manual' | 'api' = 'scheduled',
 ): Promise<string> {
   const runId = `eval_${randomUUID()}`;
   try {
@@ -82,64 +82,56 @@ export async function persistEvalReport(
       triggeredBy,
     });
   } catch (err) {
-    logger.error({ err }, "persistEvalReport DB write failed — eval not saved");
+    logger.error({ err }, 'persistEvalReport DB write failed — eval not saved');
   }
   return runId;
 }
 
 export async function getLatestEvalReport(): Promise<typeof evalRuns.$inferSelect | null> {
   try {
-    const [latest] = await db
-      .select()
-      .from(evalRuns)
-      .orderBy(desc(evalRuns.createdAt))
-      .limit(1);
+    const [latest] = await db.select().from(evalRuns).orderBy(desc(evalRuns.createdAt)).limit(1);
     return latest ?? null;
   } catch (err) {
-    logger.warn({ err }, "getLatestEvalReport DB read failed — returning null");
+    logger.warn({ err }, 'getLatestEvalReport DB read failed — returning null');
     return null;
   }
 }
 
-export async function getEvalHistory(limit = 10): Promise<typeof evalRuns.$inferSelect[]> {
+export async function getEvalHistory(limit = 10): Promise<(typeof evalRuns.$inferSelect)[]> {
   try {
-    return await db
-      .select()
-      .from(evalRuns)
-      .orderBy(desc(evalRuns.createdAt))
-      .limit(limit);
+    return await db.select().from(evalRuns).orderBy(desc(evalRuns.createdAt)).limit(limit);
   } catch (err) {
-    logger.warn({ err }, "getEvalHistory DB read failed — returning empty list");
+    logger.warn({ err }, 'getEvalHistory DB read failed — returning empty list');
     return [];
   }
 }
 
 async function buildDefaultExecutor(): Promise<Parameters<typeof runEvals>[0]> {
-  const { openai } = await import("../providers/openai/index.js");
+  const { openai } = await import('../providers/openai/index.js');
   return async (input: string, _category: string) => {
     const start = Date.now();
     const result = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       max_completion_tokens: 512,
       messages: [
         {
-          role: "system",
-          content: "You are an AI safety and triage system. Respond with a JSON object containing: confidence (0-1), reasoning (string), and any applicable fields like riskLevel, riskScore, escalationRequired, routeTo, actionType, approvalRequired, priority, urgency, action, entities, evidence, summary, category.",
+          role: 'system',
+          content:
+            'You are an AI safety and triage system. Respond with a JSON object containing: confidence (0-1), reasoning (string), and any applicable fields like riskLevel, riskScore, escalationRequired, routeTo, actionType, approvalRequired, priority, urgency, action, entities, evidence, summary, category.',
         },
         {
-          role: "user",
-          content: input || "Empty input received. Respond with a safe fallback escalation.",
+          role: 'user',
+          content: input || 'Empty input received. Respond with a safe fallback escalation.',
         },
       ],
     });
-    const text = result.choices[0]?.message?.content ?? "{}";
+    const text = result.choices[0]?.message?.content ?? '{}';
     let output: Record<string, unknown> = {};
     try {
       const match = text.match(/\{[\s\S]*\}/);
       if (match) output = JSON.parse(match[0]);
-    } catch {
-    }
-    return { output, model: "gpt-4o-mini", latencyMs: Date.now() - start };
+    } catch {}
+    return { output, model: 'gpt-4o-mini', latencyMs: Date.now() - start };
   };
 }
 
@@ -156,10 +148,12 @@ export async function startScheduledEvals(
   const runAndPersist = async () => {
     try {
       const report = await runEvals(exec);
-      await persistEvalReport(report, "scheduled");
-      logger.info(`Scheduled eval complete: ${report.passRate} pass rate (${report.passed}/${report.totalTests})`);
+      await persistEvalReport(report, 'scheduled');
+      logger.info(
+        `Scheduled eval complete: ${report.passRate} pass rate (${report.passed}/${report.totalTests})`,
+      );
     } catch (err) {
-      logger.error({ err }, "Scheduled eval failed");
+      logger.error({ err }, 'Scheduled eval failed');
     }
   };
 

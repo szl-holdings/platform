@@ -1,18 +1,23 @@
-import { LRUCache } from "lru-cache";
-import { Expo, type ExpoPushMessage, type ExpoPushTicket, type ExpoPushReceiptId } from "expo-server-sdk";
 import {
   db,
   pool,
-  pushTokensTable,
-  pushReceiptsTable,
   pushNotificationHistoryTable,
   pushNotificationPreferencesTable,
+  pushReceiptsTable,
+  pushTokensTable,
   scheduledNotificationsTable,
   userSettingsTable,
-} from "@szl-holdings/db";
-import { eq, and, inArray, lt, sql, isNull } from "drizzle-orm";
-import { logger } from "./logger";
-import type { NotificationTemplate } from "./push-templates";
+} from '@szl-holdings/db';
+import { and, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
+import {
+  Expo,
+  type ExpoPushMessage,
+  type ExpoPushReceiptId,
+  type ExpoPushTicket,
+} from 'expo-server-sdk';
+import { LRUCache } from 'lru-cache';
+import { logger } from './logger';
+import type { NotificationTemplate } from './push-templates';
 
 const expo = new Expo({});
 
@@ -21,7 +26,7 @@ export type PushMessagePayload = {
   body: string;
   data?: Record<string, unknown>;
   badge?: number;
-  sound?: "default" | null;
+  sound?: 'default' | null;
   channelId?: string;
 };
 
@@ -36,7 +41,9 @@ export type SendResult = {
 
 const USER_RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const USER_RATE_LIMIT_MAX = 10;
-const userRateBuckets = new LRUCache<number, { count: number; windowStart: number }>({ max: 10000 });
+const userRateBuckets = new LRUCache<number, { count: number; windowStart: number }>({
+  max: 10000,
+});
 
 // userId is nullable for anonymous device tokens (e.g. public apps without auth).
 // Anonymous tokens bypass per-user rate limiting — they are deduplicated by token
@@ -50,7 +57,10 @@ export function isUserRateLimited(userId: number | null): boolean {
     return false;
   }
   if (bucket.count >= USER_RATE_LIMIT_MAX) {
-    logger.warn({ userId, count: bucket.count }, "[expo-push] User rate limit exceeded — suppressing push");
+    logger.warn(
+      { userId, count: bucket.count },
+      '[expo-push] User rate limit exceeded — suppressing push',
+    );
     return true;
   }
   bucket.count++;
@@ -60,31 +70,35 @@ export function isUserRateLimited(userId: number | null): boolean {
 // ─── Template → category mapping ─────────────────────────────────────────────
 
 const TEMPLATE_CATEGORY_MAP: Record<NotificationTemplate, string> = {
-  aegis_threat_alert: "threats",
-  aegis_incident_update: "incidents",
-  aegis_system_health: "health",
-  vessels_vessel_alert: "vessel_alerts",
-  vessels_compliance_warning: "compliance",
-  vessels_port_arrival: "port_arrivals",
-  terra_deal_update: "deal_updates",
-  terra_listing_change: "listing_changes",
-  terra_distress_signal: "distress_signals",
-  carlota_session_reminder: "sessions",
-  carlota_document_upload: "documents",
-  carlota_message: "messages",
-  lyte_kpi_alert: "kpi_alerts",
-  lyte_escalation: "escalations",
-  lyte_milestone: "milestones",
-  szl_portfolio_alert: "portfolio_alerts",
-  szl_investor_update: "investor_updates",
-  stephen_content_published: "content_published",
-  stephen_venture_update: "venture_updates",
+  aegis_threat_alert: 'threats',
+  aegis_incident_update: 'incidents',
+  aegis_system_health: 'health',
+  vessels_vessel_alert: 'vessel_alerts',
+  vessels_compliance_warning: 'compliance',
+  vessels_port_arrival: 'port_arrivals',
+  terra_deal_update: 'deal_updates',
+  terra_listing_change: 'listing_changes',
+  terra_distress_signal: 'distress_signals',
+  carlota_session_reminder: 'sessions',
+  carlota_document_upload: 'documents',
+  carlota_message: 'messages',
+  lyte_kpi_alert: 'kpi_alerts',
+  lyte_escalation: 'escalations',
+  lyte_milestone: 'milestones',
+  szl_portfolio_alert: 'portfolio_alerts',
+  szl_investor_update: 'investor_updates',
+  stephen_content_published: 'content_published',
+  stephen_venture_update: 'venture_updates',
 };
 
 // ─── Preference check ─────────────────────────────────────────────────────────
 
 // Anonymous tokens (userId=null) have no per-user preferences — always allowed.
-async function isPreferenceAllowed(userId: number | null, appId: string, category: string): Promise<boolean> {
+async function isPreferenceAllowed(
+  userId: number | null,
+  appId: string,
+  category: string,
+): Promise<boolean> {
   if (userId === null) return true;
   try {
     const [pref] = await db
@@ -94,8 +108,8 @@ async function isPreferenceAllowed(userId: number | null, appId: string, categor
         and(
           eq(pushNotificationPreferencesTable.userId, userId),
           eq(pushNotificationPreferencesTable.appId, appId),
-          eq(pushNotificationPreferencesTable.category, category)
-        )
+          eq(pushNotificationPreferencesTable.category, category),
+        ),
       );
     if (pref !== undefined) return pref.enabled;
 
@@ -106,8 +120,8 @@ async function isPreferenceAllowed(userId: number | null, appId: string, categor
         and(
           eq(pushNotificationPreferencesTable.userId, userId),
           eq(pushNotificationPreferencesTable.appId, appId),
-          eq(pushNotificationPreferencesTable.category, "all")
-        )
+          eq(pushNotificationPreferencesTable.category, 'all'),
+        ),
       );
     if (appPref !== undefined) return appPref.enabled;
   } catch {
@@ -135,9 +149,9 @@ async function isPreferenceAllowed(userId: number | null, appId: string, categor
 //   client-side rule. All other severities (including "high") are suppressed
 //   while quiet hours are active.
 
-export type AlertCategory = "approvals" | "run_failures";
+export type AlertCategory = 'approvals' | 'run_failures';
 
-const ALERT_PREF_NAMESPACE = "szl.ui.preferences";
+const ALERT_PREF_NAMESPACE = 'szl.ui.preferences';
 const HHMM_RE_GATE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 function parseHHMMToMinutes(s: string | undefined): number | null {
@@ -149,15 +163,15 @@ function parseHHMMToMinutes(s: string | undefined): number | null {
 
 function minutesInZone(now: Date, timeZone: string): number | null {
   try {
-    const fmt = new Intl.DateTimeFormat("en-US", {
+    const fmt = new Intl.DateTimeFormat('en-US', {
       timeZone,
-      hour: "2-digit",
-      minute: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: false,
     });
     const parts = fmt.formatToParts(now);
-    const hh = parseInt(parts.find((p) => p.type === "hour")?.value ?? "0", 10);
-    const mm = parseInt(parts.find((p) => p.type === "minute")?.value ?? "0", 10);
+    const hh = parseInt(parts.find((p) => p.type === 'hour')?.value ?? '0', 10);
+    const mm = parseInt(parts.find((p) => p.type === 'minute')?.value ?? '0', 10);
     // Intl returns "24" for midnight in some locales — normalise.
     return ((hh % 24) * 60 + mm) % (24 * 60);
   } catch {
@@ -189,34 +203,37 @@ async function loadAlertPreferences(userId: number): Promise<AlertPrefRow> {
           isNull(userSettingsTable.orgId),
           eq(userSettingsTable.namespace, ALERT_PREF_NAMESPACE),
           inArray(userSettingsTable.key, [
-            "alerts_approvals_enabled",
-            "alerts_run_failures_enabled",
-            "alerts_quiet_hours_enabled",
-            "alerts_quiet_hours_start",
-            "alerts_quiet_hours_end",
-            "time_zone",
-          ])
-        )
+            'alerts_approvals_enabled',
+            'alerts_run_failures_enabled',
+            'alerts_quiet_hours_enabled',
+            'alerts_quiet_hours_start',
+            'alerts_quiet_hours_end',
+            'time_zone',
+          ]),
+        ),
       );
     const out: AlertPrefRow = {};
     for (const r of rows) {
       const raw = r.value as unknown;
-      if (r.valueType === "boolean") {
-        const b = raw === true || raw === "true" || raw === 1 || raw === "1";
-        if (r.key === "alerts_approvals_enabled") out.alerts_approvals_enabled = b;
-        else if (r.key === "alerts_run_failures_enabled") out.alerts_run_failures_enabled = b;
-        else if (r.key === "alerts_quiet_hours_enabled") out.alerts_quiet_hours_enabled = b;
-      } else if (typeof raw === "string") {
-        if (r.key === "alerts_quiet_hours_start") out.alerts_quiet_hours_start = raw;
-        else if (r.key === "alerts_quiet_hours_end") out.alerts_quiet_hours_end = raw;
-        else if (r.key === "time_zone") out.time_zone = raw;
-      } else if (raw === null && r.key === "time_zone") {
+      if (r.valueType === 'boolean') {
+        const b = raw === true || raw === 'true' || raw === 1 || raw === '1';
+        if (r.key === 'alerts_approvals_enabled') out.alerts_approvals_enabled = b;
+        else if (r.key === 'alerts_run_failures_enabled') out.alerts_run_failures_enabled = b;
+        else if (r.key === 'alerts_quiet_hours_enabled') out.alerts_quiet_hours_enabled = b;
+      } else if (typeof raw === 'string') {
+        if (r.key === 'alerts_quiet_hours_start') out.alerts_quiet_hours_start = raw;
+        else if (r.key === 'alerts_quiet_hours_end') out.alerts_quiet_hours_end = raw;
+        else if (r.key === 'time_zone') out.time_zone = raw;
+      } else if (raw === null && r.key === 'time_zone') {
         out.time_zone = null;
       }
     }
     return out;
   } catch (err) {
-    logger.warn({ err, userId }, "[expo-push] Failed to load alert preferences; defaulting to allowed");
+    logger.warn(
+      { err, userId },
+      '[expo-push] Failed to load alert preferences; defaulting to allowed',
+    );
     return {};
   }
 }
@@ -229,16 +246,16 @@ async function loadAlertPreferences(userId: number): Promise<AlertPrefRow> {
 export async function isAlertCategoryAllowedForUser(
   userId: number,
   category: AlertCategory,
-  opts?: { severity?: "low" | "medium" | "high" | "critical"; now?: Date }
+  opts?: { severity?: 'low' | 'medium' | 'high' | 'critical'; now?: Date },
 ): Promise<boolean> {
   const prefs = await loadAlertPreferences(userId);
 
-  if (category === "approvals" && prefs.alerts_approvals_enabled === false) return false;
-  if (category === "run_failures" && prefs.alerts_run_failures_enabled === false) return false;
+  if (category === 'approvals' && prefs.alerts_approvals_enabled === false) return false;
+  if (category === 'run_failures' && prefs.alerts_run_failures_enabled === false) return false;
 
   if (prefs.alerts_quiet_hours_enabled === true) {
     // Critical approvals always wake the user.
-    const isCritical = opts?.severity === "critical";
+    const isCritical = opts?.severity === 'critical';
     if (!isCritical) {
       const start = parseHHMMToMinutes(prefs.alerts_quiet_hours_start) ?? 22 * 60;
       const end = parseHHMMToMinutes(prefs.alerts_quiet_hours_end) ?? 7 * 60;
@@ -254,9 +271,8 @@ export async function isAlertCategoryAllowedForUser(
         if (tz) {
           const minute = minutesInZone(opts?.now ?? new Date(), tz);
           if (minute !== null) {
-            const inWindow = start < end
-              ? minute >= start && minute < end
-              : minute >= start || minute < end;
+            const inWindow =
+              start < end ? minute >= start && minute < end : minute >= start || minute < end;
             if (inWindow) return false;
           }
         }
@@ -277,7 +293,9 @@ async function getActiveTokensForUser(userId: number): Promise<string[]> {
   return rows.map((r) => r.token);
 }
 
-async function getActiveTokensForApp(appId: string): Promise<{ token: string; userId: number | null }[]> {
+async function getActiveTokensForApp(
+  appId: string,
+): Promise<{ token: string; userId: number | null }[]> {
   const rows = await db
     .select({ token: pushTokensTable.token, userId: pushTokensTable.userId })
     .from(pushTokensTable)
@@ -298,7 +316,7 @@ async function getAllActiveTokens(): Promise<{ token: string; userId: number | n
 export async function sendPushToUser(
   userId: number,
   payload: PushMessagePayload,
-  opts?: { templateId?: string; appId?: string }
+  opts?: { templateId?: string; appId?: string },
 ): Promise<SendResult> {
   if (isUserRateLimited(userId)) {
     return { sent: 0, failed: 0, tickets: [] };
@@ -310,17 +328,20 @@ export async function sendPushToUser(
     if (category) {
       const allowed = await isPreferenceAllowed(userId, opts.appId, category);
       if (!allowed) {
-        logger.debug({ userId, appId: opts.appId, category }, "[expo-push] Notification suppressed by user preference");
+        logger.debug(
+          { userId, appId: opts.appId, category },
+          '[expo-push] Notification suppressed by user preference',
+        );
         return { sent: 0, failed: 0, tickets: [] };
       }
     }
   }
 
   const tokens = await getActiveTokensForUser(userId);
-  const appId = opts?.appId ?? "unknown";
+  const appId = opts?.appId ?? 'unknown';
   const tokenUserMap = new Map(tokens.map((t) => [t, userId]));
   return sendToTokens(tokens, payload, {
-    target: "user",
+    target: 'user',
     userId,
     appId,
     templateId: opts?.templateId,
@@ -331,7 +352,7 @@ export async function sendPushToUser(
 export async function sendPushToApp(
   appId: string,
   payload: PushMessagePayload,
-  opts?: { templateId?: string }
+  opts?: { templateId?: string },
 ): Promise<SendResult> {
   const rows = await getActiveTokensForApp(appId);
 
@@ -348,20 +369,22 @@ export async function sendPushToApp(
           if (!allowed) return null;
         }
         return r;
-      })
+      }),
     )
   ).filter((r): r is { token: string; userId: number | null } => r !== null);
 
   logger.debug(
     { total: rows.length, eligible: eligibleRows.length },
-    "[expo-push] App push after rate-limit + preference filtering"
+    '[expo-push] App push after rate-limit + preference filtering',
   );
 
   const tokenUserMap = new Map<string, number>();
-  eligibleRows.forEach((r) => { if (r.userId !== null) tokenUserMap.set(r.token, r.userId); });
+  eligibleRows.forEach((r) => {
+    if (r.userId !== null) tokenUserMap.set(r.token, r.userId);
+  });
   const tokens = eligibleRows.map((r) => r.token);
   return sendToTokens(tokens, payload, {
-    target: "app",
+    target: 'app',
     appId,
     templateId: opts?.templateId,
     tokenUserMap,
@@ -370,7 +393,7 @@ export async function sendPushToApp(
 
 export async function sendPushBroadcast(
   payload: PushMessagePayload,
-  opts?: { templateId?: string }
+  opts?: { templateId?: string },
 ): Promise<SendResult> {
   const rows = await getAllActiveTokens();
 
@@ -379,16 +402,18 @@ export async function sendPushBroadcast(
       rows.map(async (r) => {
         if (isUserRateLimited(r.userId)) return null;
         return r;
-      })
+      }),
     )
   ).filter((r): r is { token: string; userId: number | null } => r !== null);
 
   const tokenUserMap = new Map<string, number>();
-  eligibleRows.forEach((r) => { if (r.userId !== null) tokenUserMap.set(r.token, r.userId); });
+  eligibleRows.forEach((r) => {
+    if (r.userId !== null) tokenUserMap.set(r.token, r.userId);
+  });
   const tokens = eligibleRows.map((r) => r.token);
   return sendToTokens(tokens, payload, {
-    target: "broadcast",
-    appId: "broadcast",
+    target: 'broadcast',
+    appId: 'broadcast',
     templateId: opts?.templateId,
     tokenUserMap,
   });
@@ -403,17 +428,17 @@ async function storeHistory(params: {
   title: string;
   body: string;
   data?: Record<string, unknown>;
-  target: "user" | "app" | "broadcast" | "scheduled";
+  target: 'user' | 'app' | 'broadcast' | 'scheduled';
   tokensSent: number;
   tokensFailed: number;
 }): Promise<number | undefined> {
   try {
-    const status: "sent" | "partial" | "failed" | "pending" =
+    const status: 'sent' | 'partial' | 'failed' | 'pending' =
       params.tokensSent > 0 && params.tokensFailed === 0
-        ? "sent"
+        ? 'sent'
         : params.tokensSent === 0
-          ? "failed"
-          : "partial";
+          ? 'failed'
+          : 'partial';
     const [row] = await db
       .insert(pushNotificationHistoryTable)
       .values({
@@ -432,7 +457,7 @@ async function storeHistory(params: {
       .returning({ id: pushNotificationHistoryTable.id });
     return row?.id;
   } catch (err) {
-    logger.warn({ err }, "[expo-push] Failed to store push notification history");
+    logger.warn({ err }, '[expo-push] Failed to store push notification history');
     return undefined;
   }
 }
@@ -442,7 +467,7 @@ async function storeReceipts(
   appId: string,
   templateId?: string,
   historyId?: number,
-  tokenUserMap?: Map<string, number>
+  tokenUserMap?: Map<string, number>,
 ): Promise<void> {
   if (ticketIdToToken.size === 0) return;
   try {
@@ -454,11 +479,11 @@ async function storeReceipts(
         token,
         appId,
         templateId: templateId ?? null,
-        status: "pending" as const,
-      }))
+        status: 'pending' as const,
+      })),
     );
   } catch (err) {
-    logger.warn({ err }, "[expo-push] Failed to store push receipts");
+    logger.warn({ err }, '[expo-push] Failed to store push receipts');
   }
 }
 
@@ -466,12 +491,12 @@ async function sendToTokens(
   tokens: string[],
   payload: PushMessagePayload,
   opts: {
-    target: "user" | "app" | "broadcast" | "scheduled";
+    target: 'user' | 'app' | 'broadcast' | 'scheduled';
     appId: string;
     userId?: number;
     templateId?: string;
     tokenUserMap?: Map<string, number>;
-  }
+  },
 ): Promise<SendResult> {
   if (tokens.length === 0) {
     await storeHistory({
@@ -492,7 +517,7 @@ async function sendToTokens(
   const invalidTokens = tokens.filter((t) => !Expo.isExpoPushToken(t));
 
   if (invalidTokens.length > 0) {
-    logger.warn({ count: invalidTokens.length }, "[expo-push] Invalid tokens found, deactivating");
+    logger.warn({ count: invalidTokens.length }, '[expo-push] Invalid tokens found, deactivating');
     await deactivateTokens(invalidTokens);
   }
 
@@ -516,9 +541,9 @@ async function sendToTokens(
     title: payload.title,
     body: payload.body,
     data: payload.data ?? {},
-    sound: payload.sound ?? "default",
+    sound: payload.sound ?? 'default',
     badge: payload.badge,
-    channelId: payload.channelId ?? "default",
+    channelId: payload.channelId ?? 'default',
   }));
 
   const chunks = expo.chunkPushNotifications(messages);
@@ -534,13 +559,20 @@ async function sendToTokens(
       const badTokens: string[] = [];
       tickets.forEach((ticket, i) => {
         const token = (chunk[i] as ExpoPushMessage).to as string;
-        if (ticket.status === "ok") {
+        if (ticket.status === 'ok') {
           ticketIdToToken.set(ticket.id, token);
         } else {
-          const errTicket = ticket as { status: "error"; message: string; details?: { error?: string } };
-          logger.warn({ error: errTicket.message, details: errTicket.details }, "[expo-push] Ticket error");
+          const errTicket = ticket as {
+            status: 'error';
+            message: string;
+            details?: { error?: string };
+          };
+          logger.warn(
+            { error: errTicket.message, details: errTicket.details },
+            '[expo-push] Ticket error',
+          );
           failed++;
-          if (errTicket.details?.error === "DeviceNotRegistered") {
+          if (errTicket.details?.error === 'DeviceNotRegistered') {
             badTokens.push(token);
           }
         }
@@ -550,13 +582,13 @@ async function sendToTokens(
         await deactivateTokens(badTokens);
       }
     } catch (err) {
-      logger.error({ err }, "[expo-push] Failed to send chunk");
+      logger.error({ err }, '[expo-push] Failed to send chunk');
       failed += chunk.length;
     }
   }
 
-  const sent = allTickets.filter((t) => t.status === "ok").length;
-  logger.info({ sent, failed, total: validTokens.length }, "[expo-push] Push notifications sent");
+  const sent = allTickets.filter((t) => t.status === 'ok').length;
+  logger.info({ sent, failed, total: validTokens.length }, '[expo-push] Push notifications sent');
 
   const historyId = await storeHistory({
     userId: opts.userId,
@@ -583,7 +615,7 @@ async function deactivateTokens(tokens: string[]): Promise<void> {
       .set({ isActive: false, updatedAt: new Date() })
       .where(inArray(pushTokensTable.token, tokens));
   } catch (err) {
-    logger.warn({ err }, "[expo-push] Failed to deactivate tokens");
+    logger.warn({ err }, '[expo-push] Failed to deactivate tokens');
   }
 }
 
@@ -596,10 +628,10 @@ async function requeueStuckReceipts(): Promise<void> {
     await pool.query(
       `UPDATE push_receipts SET status = 'pending', checked_at = NULL
        WHERE status = 'processing' AND checked_at < $1`,
-      [tenMinutesAgo]
+      [tenMinutesAgo],
     );
   } catch (err) {
-    logger.warn({ err }, "[expo-push] Failed to requeue stuck processing receipts");
+    logger.warn({ err }, '[expo-push] Failed to requeue stuck processing receipts');
   }
 }
 
@@ -625,7 +657,7 @@ export async function verifyPushReceipts(): Promise<void> {
          LIMIT 100
          FOR UPDATE SKIP LOCKED
        )
-       RETURNING id, ticket_id, token, history_id`
+       RETURNING id, ticket_id, token, history_id`,
     );
 
     const pendingReceipts = claimResult.rows.map((r) => ({
@@ -653,25 +685,29 @@ export async function verifyPushReceipts(): Promise<void> {
           const pending = pendingReceipts.find((r) => r.ticketId === receiptId);
           processedTicketIds.add(receiptId);
 
-          if (receipt.status === "ok") {
+          if (receipt.status === 'ok') {
             await db
               .update(pushReceiptsTable)
-              .set({ status: "ok", checkedAt: new Date() })
+              .set({ status: 'ok', checkedAt: new Date() })
               .where(eq(pushReceiptsTable.ticketId, receiptId));
 
             if (pending?.historyId) {
               historyDeliveredCounts.set(
                 pending.historyId,
-                (historyDeliveredCounts.get(pending.historyId) ?? 0) + 1
+                (historyDeliveredCounts.get(pending.historyId) ?? 0) + 1,
               );
             }
-          } else if (receipt.status === "error") {
-            const errReceipt = receipt as { status: "error"; message: string; details?: { error?: string } };
+          } else if (receipt.status === 'error') {
+            const errReceipt = receipt as {
+              status: 'error';
+              message: string;
+              details?: { error?: string };
+            };
             await db
               .update(pushReceiptsTable)
               .set({
-                status: "error",
-                errorCode: errReceipt.details?.error ?? "unknown",
+                status: 'error',
+                errorCode: errReceipt.details?.error ?? 'unknown',
                 errorMessage: errReceipt.message,
                 checkedAt: new Date(),
               })
@@ -680,27 +716,30 @@ export async function verifyPushReceipts(): Promise<void> {
             if (pending?.historyId) {
               historyFailedCounts.set(
                 pending.historyId,
-                (historyFailedCounts.get(pending.historyId) ?? 0) + 1
+                (historyFailedCounts.get(pending.historyId) ?? 0) + 1,
               );
             }
 
-            if (errReceipt.details?.error === "DeviceNotRegistered" && pending?.token) {
+            if (errReceipt.details?.error === 'DeviceNotRegistered' && pending?.token) {
               badTokens.push(pending.token);
             }
 
             logger.warn(
               { receiptId, error: errReceipt.message, details: errReceipt.details },
-              "[expo-push] Receipt error"
+              '[expo-push] Receipt error',
             );
           }
         }
 
         if (badTokens.length > 0) {
           await deactivateTokens(badTokens);
-          logger.info({ count: badTokens.length }, "[expo-push] Deactivated bad tokens from receipts");
+          logger.info(
+            { count: badTokens.length },
+            '[expo-push] Deactivated bad tokens from receipts',
+          );
         }
       } catch (err) {
-        logger.warn({ err }, "[expo-push] Failed to fetch receipt chunk");
+        logger.warn({ err }, '[expo-push] Failed to fetch receipt chunk');
       }
     }
 
@@ -714,11 +753,14 @@ export async function verifyPushReceipts(): Promise<void> {
       try {
         await db
           .update(pushReceiptsTable)
-          .set({ status: "pending", checkedAt: null })
+          .set({ status: 'pending', checkedAt: null })
           .where(inArray(pushReceiptsTable.ticketId, unprocessedIds));
-        logger.debug({ count: unprocessedIds.length }, "[expo-push] Requeued receipts not yet available from Expo");
+        logger.debug(
+          { count: unprocessedIds.length },
+          '[expo-push] Requeued receipts not yet available from Expo',
+        );
       } catch (err) {
-        logger.warn({ err }, "[expo-push] Failed to requeue unprocessed receipts");
+        logger.warn({ err }, '[expo-push] Failed to requeue unprocessed receipts');
       }
     }
 
@@ -745,12 +787,8 @@ export async function verifyPushReceipts(): Promise<void> {
 
         const newDelivered = current.tokensDelivered + deliveredDelta;
         const newFailed = current.tokensFailed + failedDelta;
-        const newStatus: "sent" | "partial" | "failed" =
-          newFailed === 0
-            ? "sent"
-            : newDelivered === 0
-              ? "failed"
-              : "partial";
+        const newStatus: 'sent' | 'partial' | 'failed' =
+          newFailed === 0 ? 'sent' : newDelivered === 0 ? 'failed' : 'partial';
 
         await db
           .update(pushNotificationHistoryTable)
@@ -761,13 +799,16 @@ export async function verifyPushReceipts(): Promise<void> {
           })
           .where(eq(pushNotificationHistoryTable.id, historyId));
       } catch (err) {
-        logger.warn({ err, historyId }, "[expo-push] Failed to update history counts from receipts");
+        logger.warn(
+          { err, historyId },
+          '[expo-push] Failed to update history counts from receipts',
+        );
       }
     }
 
-    logger.info({ checked: pendingReceipts.length }, "[expo-push] Receipt verification complete");
+    logger.info({ checked: pendingReceipts.length }, '[expo-push] Receipt verification complete');
   } catch (err) {
-    logger.warn({ err }, "[expo-push] Receipt verification failed");
+    logger.warn({ err }, '[expo-push] Receipt verification failed');
   }
 }
 
@@ -782,9 +823,9 @@ export async function processScheduledNotifications(): Promise<void> {
       .from(scheduledNotificationsTable)
       .where(
         and(
-          eq(scheduledNotificationsTable.status, "pending"),
-          lt(scheduledNotificationsTable.sendAt, now)
-        )
+          eq(scheduledNotificationsTable.status, 'pending'),
+          lt(scheduledNotificationsTable.sendAt, now),
+        ),
       )
       .limit(20);
 
@@ -796,17 +837,17 @@ export async function processScheduledNotifications(): Promise<void> {
         // process already claimed it, .returning() will be empty — skip safely.
         const [claimed] = await db
           .update(scheduledNotificationsTable)
-          .set({ status: "processing", updatedAt: new Date() })
+          .set({ status: 'processing', updatedAt: new Date() })
           .where(
             and(
               eq(scheduledNotificationsTable.id, job.id),
-              eq(scheduledNotificationsTable.status, "pending")
-            )
+              eq(scheduledNotificationsTable.status, 'pending'),
+            ),
           )
           .returning({ id: scheduledNotificationsTable.id });
 
         if (!claimed) {
-          logger.debug({ jobId: job.id }, "[expo-push] Scheduled job already claimed — skipping");
+          logger.debug({ jobId: job.id }, '[expo-push] Scheduled job already claimed — skipping');
           continue;
         }
 
@@ -814,7 +855,7 @@ export async function processScheduledNotifications(): Promise<void> {
         const templateId = job.template ?? undefined;
 
         if (templateId) {
-          const { buildPushMessage } = await import("./push-templates.js");
+          const { buildPushMessage } = await import('./push-templates.js');
           const template = templateId as NotificationTemplate;
           payload = buildPushMessage(template, (job.vars as Record<string, string | number>) ?? {});
         } else if (job.title && job.body) {
@@ -822,19 +863,19 @@ export async function processScheduledNotifications(): Promise<void> {
             title: job.title,
             body: job.body,
             data: (job.data as Record<string, unknown>) ?? {},
-            sound: "default",
+            sound: 'default',
           };
         } else {
-          throw new Error("Scheduled notification has neither template nor title+body");
+          throw new Error('Scheduled notification has neither template nor title+body');
         }
 
         let result: SendResult;
-        if (job.target === "user" && job.userId) {
+        if (job.target === 'user' && job.userId) {
           result = await sendPushToUser(job.userId, payload, {
             templateId,
-            appId: job.appId ?? "unknown",
+            appId: job.appId ?? 'unknown',
           });
-        } else if (job.target === "app" && job.appId) {
+        } else if (job.target === 'app' && job.appId) {
           result = await sendPushToApp(job.appId, payload, { templateId });
         } else {
           result = await sendPushBroadcast(payload, { templateId });
@@ -843,32 +884,35 @@ export async function processScheduledNotifications(): Promise<void> {
         await db
           .update(scheduledNotificationsTable)
           .set({
-            status: "sent",
+            status: 'sent',
             processedAt: new Date(),
             attempts: job.attempts + 1,
             updatedAt: new Date(),
           })
           .where(eq(scheduledNotificationsTable.id, job.id));
 
-        logger.info({ jobId: job.id, sent: result.sent, failed: result.failed }, "[expo-push] Scheduled notification sent");
+        logger.info(
+          { jobId: job.id, sent: result.sent, failed: result.failed },
+          '[expo-push] Scheduled notification sent',
+        );
       } catch (err) {
         const errMessage = err instanceof Error ? err.message : String(err);
         await db
           .update(scheduledNotificationsTable)
           .set({
-            status: job.attempts >= 2 ? "failed" : "pending",
+            status: job.attempts >= 2 ? 'failed' : 'pending',
             attempts: job.attempts + 1,
             errorMessage: errMessage,
             updatedAt: new Date(),
           })
           .where(eq(scheduledNotificationsTable.id, job.id));
-        logger.warn({ err, jobId: job.id }, "[expo-push] Scheduled notification failed");
+        logger.warn({ err, jobId: job.id }, '[expo-push] Scheduled notification failed');
       }
     }
 
-    logger.info({ processed: due.length }, "[expo-push] Scheduled notifications processed");
+    logger.info({ processed: due.length }, '[expo-push] Scheduled notifications processed');
   } catch (err) {
-    logger.warn({ err }, "[expo-push] Scheduled notification processing failed");
+    logger.warn({ err }, '[expo-push] Scheduled notification processing failed');
   }
 }
 

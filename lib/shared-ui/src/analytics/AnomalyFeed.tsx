@@ -1,4 +1,4 @@
-import type { AnomalyRecord } from "@szl-holdings/observability/analytics";
+import type { AnomalyRecord } from '@szl-holdings/observability/analytics';
 
 export interface AnomalyFeedProps {
   anomalies: AnomalyRecord[];
@@ -10,23 +10,43 @@ export interface AnomalyFeedProps {
 }
 
 const SEVERITY_CONFIG = {
-  critical: { bg: "bg-red-500/20", border: "border-red-500/40", text: "text-red-400", dot: "bg-red-500" },
-  high: { bg: "bg-orange-500/20", border: "border-orange-500/40", text: "text-orange-400", dot: "bg-orange-500" },
-  medium: { bg: "bg-yellow-500/20", border: "border-yellow-500/40", text: "text-yellow-400", dot: "bg-yellow-500" },
-  low: { bg: "bg-blue-500/10", border: "border-blue-500/30", text: "text-blue-400", dot: "bg-blue-500" },
+  critical: {
+    bg: 'bg-red-500/20',
+    border: 'border-red-500/40',
+    text: 'text-red-400',
+    dot: 'bg-red-500',
+  },
+  high: {
+    bg: 'bg-orange-500/20',
+    border: 'border-orange-500/40',
+    text: 'text-orange-400',
+    dot: 'bg-orange-500',
+  },
+  medium: {
+    bg: 'bg-yellow-500/20',
+    border: 'border-yellow-500/40',
+    text: 'text-yellow-400',
+    dot: 'bg-yellow-500',
+  },
+  low: {
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/30',
+    text: 'text-blue-400',
+    dot: 'bg-blue-500',
+  },
 };
 
 const ANOMALY_TYPE_LABELS: Record<string, string> = {
-  spike: "Spike Detected",
-  drop: "Drop Detected",
-  trend_change: "Trend Change",
-  seasonal_deviation: "Seasonal Deviation",
-  missing: "Missing Data",
+  spike: 'Spike Detected',
+  drop: 'Drop Detected',
+  trend_change: 'Trend Change',
+  seasonal_deviation: 'Seasonal Deviation',
+  missing: 'Missing Data',
 };
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return 'just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
@@ -47,7 +67,7 @@ export function AnomalyFeed({
     return (
       <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3 animate-pulse">
         <div className="h-3 w-32 rounded bg-white/10" />
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3].map((i) => (
           <div key={i} className="h-14 rounded-lg bg-white/10" />
         ))}
       </div>
@@ -55,8 +75,8 @@ export function AnomalyFeed({
   }
 
   const visible = anomalies.slice(0, maxItems);
-  const active = visible.filter(a => !a.isResolved);
-  const resolved = visible.filter(a => a.isResolved);
+  const active = visible.filter((a) => !a.isResolved);
+  const resolved = visible.filter((a) => a.isResolved);
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-4 flex flex-col gap-3">
@@ -82,15 +102,16 @@ export function AnomalyFeed({
       )}
 
       <div className="flex flex-col gap-2">
-        {visible.map(anomaly => {
+        {visible.map((anomaly) => {
           const config = SEVERITY_CONFIG[anomaly.severity];
           const typeLabel = ANOMALY_TYPE_LABELS[anomaly.anomalyType] ?? anomaly.anomalyType;
-          const deviationSign = anomaly.anomalyType === "spike" ? "+" : anomaly.anomalyType === "drop" ? "−" : "~";
+          const deviationSign =
+            anomaly.anomalyType === 'spike' ? '+' : anomaly.anomalyType === 'drop' ? '−' : '~';
 
           return (
             <div
               key={anomaly.anomalyId}
-              className={`rounded-lg border p-3 flex flex-col gap-1.5 ${config.bg} ${config.border} ${anomaly.isResolved ? "opacity-50" : ""}`}
+              className={`rounded-lg border p-3 flex flex-col gap-1.5 ${config.bg} ${config.border} ${anomaly.isResolved ? 'opacity-50' : ''}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -108,13 +129,16 @@ export function AnomalyFeed({
 
               <div className="flex items-center gap-3 text-xs">
                 <span className="text-zinc-400">
-                  Observed: <span className="text-white font-medium">{anomaly.observedValue.toFixed(2)}</span>
+                  Observed:{' '}
+                  <span className="text-white font-medium">{anomaly.observedValue.toFixed(2)}</span>
                 </span>
                 <span className="text-zinc-400">
-                  Expected: <span className="text-zinc-300">{anomaly.expectedValue.toFixed(2)}</span>
+                  Expected:{' '}
+                  <span className="text-zinc-300">{anomaly.expectedValue.toFixed(2)}</span>
                 </span>
                 <span className={config.text}>
-                  {deviationSign}{anomaly.deviationPercent.toFixed(1)}%
+                  {deviationSign}
+                  {anomaly.deviationPercent.toFixed(1)}%
                 </span>
               </div>
 

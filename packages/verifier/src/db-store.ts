@@ -1,15 +1,15 @@
-import { eq, and, desc, sql, type SQL } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { and, desc, eq, type SQL, sql } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
+import type { VerifierAccessScope, VerifierStore, VerifierStoreQuery } from './store.js';
 import type {
   CheckOutcome,
   CheckResult,
   DecisionAction,
   VerifierDecision,
   VerifierTarget,
-} from "./types.js";
-import { VerifierResultNotFoundError } from "./types.js";
-import type { VerifierAccessScope, VerifierStore, VerifierStoreQuery } from "./store.js";
+} from './types.js';
+import { VerifierResultNotFoundError } from './types.js';
 
 type Drizzle = NodePgDatabase<Record<string, unknown>>;
 
@@ -60,44 +60,44 @@ interface VerifierRow {
   createdAt: Date;
 }
 
-const TARGET_TYPES: VerifierTarget["targetType"][] = [
-  "plan",
-  "plan_step",
-  "skill_run",
-  "action",
-  "output",
+const TARGET_TYPES: VerifierTarget['targetType'][] = [
+  'plan',
+  'plan_step',
+  'skill_run',
+  'action',
+  'output',
 ];
 
-function asTargetType(s: string): VerifierTarget["targetType"] {
-  return (TARGET_TYPES as string[]).includes(s)
-    ? (s as VerifierTarget["targetType"])
-    : "output";
+function asTargetType(s: string): VerifierTarget['targetType'] {
+  return (TARGET_TYPES as string[]).includes(s) ? (s as VerifierTarget['targetType']) : 'output';
 }
 
-const OUTCOMES: CheckOutcome[] = ["pass", "fail", "warn", "blocked"];
+const OUTCOMES: CheckOutcome[] = ['pass', 'fail', 'warn', 'blocked'];
 
 function asOutcome(s: string): CheckOutcome {
-  return (OUTCOMES as string[]).includes(s) ? (s as CheckOutcome) : "warn";
+  return (OUTCOMES as string[]).includes(s) ? (s as CheckOutcome) : 'warn';
 }
 
 function asRecord(v: unknown): Record<string, unknown> {
-  return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+  return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
 }
 
 function rowToDecision(row: VerifierRow): VerifierDecision {
   const meta = asRecord(row.metadata);
-  const planner = asRecord(meta["__verifier"]);
+  const planner = asRecord(meta['__verifier']);
   const userMeta: Record<string, unknown> = { ...meta };
-  delete userMeta["__verifier"];
+  delete userMeta['__verifier'];
 
-  const action = (planner["action"] as DecisionAction) ?? "approve";
-  const failCount = typeof planner["failCount"] === "number" ? (planner["failCount"] as number) : 0;
+  const action = (planner['action'] as DecisionAction) ?? 'approve';
+  const failCount = typeof planner['failCount'] === 'number' ? (planner['failCount'] as number) : 0;
   const evaluatedAt =
-    typeof planner["evaluatedAt"] === "number" ? (planner["evaluatedAt"] as number) : row.createdAt.getTime();
+    typeof planner['evaluatedAt'] === 'number'
+      ? (planner['evaluatedAt'] as number)
+      : row.createdAt.getTime();
   const orgId =
-    typeof planner["orgId"] === "number"
-      ? (planner["orgId"] as number)
-      : planner["orgId"] === null
+    typeof planner['orgId'] === 'number'
+      ? (planner['orgId'] as number)
+      : planner['orgId'] === null
         ? null
         : null;
 
@@ -105,12 +105,12 @@ function rowToDecision(row: VerifierRow): VerifierDecision {
     ? (row.checks as unknown[]).map((c): CheckResult => {
         const obj = asRecord(c);
         return {
-          name: String(obj["name"] ?? "unknown"),
-          outcome: asOutcome(String(obj["outcome"] ?? "warn")),
-          score: typeof obj["score"] === "number" ? (obj["score"] as number) : 0,
-          message: obj["message"] === undefined ? undefined : String(obj["message"]),
-          evidence: obj["evidence"],
-          recommendedAction: obj["recommendedAction"] as DecisionAction | undefined,
+          name: String(obj['name'] ?? 'unknown'),
+          outcome: asOutcome(String(obj['outcome'] ?? 'warn')),
+          score: typeof obj['score'] === 'number' ? (obj['score'] as number) : 0,
+          message: obj['message'] === undefined ? undefined : String(obj['message']),
+          evidence: obj['evidence'],
+          recommendedAction: obj['recommendedAction'] as DecisionAction | undefined,
         };
       })
     : [];
@@ -128,7 +128,7 @@ function rowToDecision(row: VerifierRow): VerifierDecision {
     action,
     outcome: asOutcome(row.outcome),
     overallScore: row.overallScore ?? 0,
-    reasoning: row.reasoning ?? "",
+    reasoning: row.reasoning ?? '',
     checks,
     blockerCount: row.blockerCount,
     warningCount: row.warningCount,
@@ -212,7 +212,10 @@ export class DbVerifierStore implements VerifierStore {
     return decision;
   }
 
-  async get(verifierId: string, scope?: VerifierAccessScope): Promise<VerifierDecision | undefined> {
+  async get(
+    verifierId: string,
+    scope?: VerifierAccessScope,
+  ): Promise<VerifierDecision | undefined> {
     const orgFilter = orgScopeSql(this.table, scope?.orgIds);
     const where = orgFilter
       ? and(eq(this.table.verifierId, verifierId), orgFilter)
@@ -234,15 +237,12 @@ export class DbVerifierStore implements VerifierStore {
   }
 
   async latestForTarget(
-    targetType: VerifierTarget["targetType"],
+    targetType: VerifierTarget['targetType'],
     targetId: string,
     scope?: VerifierAccessScope,
   ): Promise<VerifierDecision | undefined> {
     const orgFilter = orgScopeSql(this.table, scope?.orgIds);
-    const baseWhere = and(
-      eq(this.table.targetType, targetType),
-      eq(this.table.targetId, targetId),
-    );
+    const baseWhere = and(eq(this.table.targetType, targetType), eq(this.table.targetId, targetId));
     const where = orgFilter ? and(baseWhere, orgFilter) : baseWhere;
     const rows = (await this.db
       .select()
@@ -255,7 +255,9 @@ export class DbVerifierStore implements VerifierStore {
     return rowToDecision(row);
   }
 
-  async list(query: VerifierStoreQuery = {}): Promise<{ items: VerifierDecision[]; total: number }> {
+  async list(
+    query: VerifierStoreQuery = {},
+  ): Promise<{ items: VerifierDecision[]; total: number }> {
     const filters: SQL[] = [];
     if (query.targetType) filters.push(eq(this.table.targetType, query.targetType));
     if (query.targetId) filters.push(eq(this.table.targetId, query.targetId));
@@ -297,4 +299,3 @@ export class DbVerifierStore implements VerifierStore {
     return (result?.rowCount ?? 0) > 0;
   }
 }
-

@@ -38,33 +38,32 @@
  * @module
  */
 
-export { SubstrateClient } from "./client.js";
-export { SubstrateStreaming, connectRunEvents } from "./streaming.js";
-export { SubstrateClientError } from "./types.js";
+export { SubstrateClient } from './client.js';
+export type { SubstrateStreamingOptions } from './streaming.js';
+export { connectRunEvents, SubstrateStreaming } from './streaming.js';
 
 export type {
-  SubstrateClientOptions,
-  ExecutionMode,
-  PipelineRunStatus,
-  StageType,
-  StageResultStatus,
-  StageResultSummary,
-  PipelineRunSummary,
-  SubmitRunResponse,
-  ApprovalVerdict,
+  ApprovalActionResponse,
   ApprovalEntry,
   ApprovalListResponse,
-  ApprovalActionResponse,
-  ReplayResponse,
-  StageDiff,
+  ApprovalVerdict,
   CounterfactualDiff,
   CounterfactualResponse,
-  WorkflowSummary,
-  WorkflowListResponse,
+  ExecutionMode,
+  PipelineRunStatus,
+  PipelineRunSummary,
+  ReplayResponse,
   RunEvent,
+  StageDiff,
+  StageResultStatus,
+  StageResultSummary,
+  StageType,
   StreamingOptions,
-} from "./types.js";
+  SubmitRunResponse,
+  SubstrateClientOptions,
+  WorkflowListResponse,
+  WorkflowSummary,
+} from './types.js';
+export { SubstrateClientError } from './types.js';
 
-export type { SubstrateStreamingOptions } from "./streaming.js";
-
-export const SUBSTRATE_CLIENT_VERSION = "1.0.0" as const;
+export const SUBSTRATE_CLIENT_VERSION = '1.0.0' as const;

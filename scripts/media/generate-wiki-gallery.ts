@@ -11,16 +11,15 @@
  *   npx tsx scripts/media/generate-wiki-gallery.ts --output docs/wiki/Screenshots-and-Demos.md
  */
 
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
 const ASSETS_DIR =
-  process.argv.find((_, i) => process.argv[i - 1] === "--assets-dir") ||
-  "docs/wiki/assets";
+  process.argv.find((_, i) => process.argv[i - 1] === '--assets-dir') || 'docs/wiki/assets';
 
 const OUTPUT_FILE =
-  process.argv.find((_, i) => process.argv[i - 1] === "--output") ||
-  "docs/wiki/Screenshots-and-Demos.md";
+  process.argv.find((_, i) => process.argv[i - 1] === '--output') ||
+  'docs/wiki/Screenshots-and-Demos.md';
 
 interface GalleryEntry {
   file: string;
@@ -29,65 +28,63 @@ interface GalleryEntry {
   description: string;
 }
 
-const KNOWN_FILES: Record<string, Omit<GalleryEntry, "file">> = {
-  "szl-holdings-landing.jpg": {
-    label: "SZL Holdings — Platform Landing",
-    product: "SZL Holdings",
+const KNOWN_FILES: Record<string, Omit<GalleryEntry, 'file'>> = {
+  'szl-holdings-landing.jpg': {
+    label: 'SZL Holdings — Platform Landing',
+    product: 'SZL Holdings',
     description:
       'Main marketing landing page. Dark-premium aesthetic with the core thesis: "Signal → visibility → forecast → governed action."',
   },
-  "lyte-overview.jpg": {
-    label: "Lyte — Business Observability",
-    product: "Lyte",
+  'lyte-overview.jpg': {
+    label: 'Lyte — Business Observability',
+    product: 'Lyte',
     description:
-      "Lyte marketing and command surface. PRISM framework: People, Revenue, Infrastructure, Security, Market.",
+      'Lyte marketing and command surface. PRISM framework: People, Revenue, Infrastructure, Security, Market.',
   },
-  "lyte-dashboard.jpg": {
-    label: "Lyte — Command Dashboard",
-    product: "Lyte",
+  'lyte-dashboard.jpg': {
+    label: 'Lyte — Command Dashboard',
+    product: 'Lyte',
     description:
-      "Lyte command center dashboard with PRISM panels, signal timeline, and priority action queue.",
+      'Lyte command center dashboard with PRISM panels, signal timeline, and priority action queue.',
   },
-  "aegis-overview.jpg": {
-    label: "Aegis — Defense & Intelligence",
-    product: "Aegis",
+  'aegis-overview.jpg': {
+    label: 'Aegis — Defense & Intelligence',
+    product: 'Aegis',
     description:
-      "Aegis unified defense and intelligence platform. SOC, managed operations, and intelligence engine in one console.",
+      'Aegis unified defense and intelligence platform. SOC, managed operations, and intelligence engine in one console.',
   },
-  "vessels-overview.jpg": {
-    label: "Vessels — Fleet Command",
-    product: "Vessels",
+  'vessels-overview.jpg': {
+    label: 'Vessels — Fleet Command',
+    product: 'Vessels',
     description:
-      "Vessels maritime intelligence platform. Fleet tracking, voyage economics, and exception-based operations.",
+      'Vessels maritime intelligence platform. Fleet tracking, voyage economics, and exception-based operations.',
   },
-  "terra-overview.jpg": {
-    label: "Terra — Real Estate Intelligence",
-    product: "Terra",
+  'terra-overview.jpg': {
+    label: 'Terra — Real Estate Intelligence',
+    product: 'Terra',
     description:
-      "Terra real estate intelligence platform. Distress signal detection, ownership analysis, and deal pipeline.",
+      'Terra real estate intelligence platform. Distress signal detection, ownership analysis, and deal pipeline.',
   },
-  "mobile-view.jpg": {
-    label: "SZL Holdings — Mobile Responsive",
-    product: "SZL Holdings",
+  'mobile-view.jpg': {
+    label: 'SZL Holdings — Mobile Responsive',
+    product: 'SZL Holdings',
     description:
-      "Mobile viewport (390px) — responsive layout verification for the platform landing page.",
+      'Mobile viewport (390px) — responsive layout verification for the platform landing page.',
   },
-  "platform-map.svg": {
-    label: "Platform Architecture Map",
-    product: "Architecture",
-    description:
-      "Full platform architecture diagram showing Lyte, Alloy, and domain packs.",
+  'platform-map.svg': {
+    label: 'Platform Architecture Map',
+    product: 'Architecture',
+    description: 'Full platform architecture diagram showing Lyte, Alloy, and domain packs.',
   },
-  "ecosystem-map.svg": {
-    label: "Ecosystem Map",
-    product: "Architecture",
-    description:
-      "Ecosystem-level view showing how all SZL Holdings products connect.",
+  'ecosystem-map.svg': {
+    label: 'Ecosystem Map',
+    product: 'Architecture',
+    description: 'Ecosystem-level view showing how all SZL Holdings products connect.',
   },
-  "founder-card.svg": {
-    label: "Founder Card",
-    product: "Profile",
-    description: "Founder identity card for profile README.",
+  'founder-card.svg': {
+    label: 'Founder Card',
+    product: 'Profile',
+    description: 'Founder identity card for profile README.',
   },
 };
 
@@ -95,14 +92,15 @@ function getEntry(file: string): GalleryEntry {
   const known = KNOWN_FILES[file];
   if (known) return { file, ...known };
 
-  const name = path.basename(file, path.extname(file))
-    .replace(/-/g, " ")
+  const name = path
+    .basename(file, path.extname(file))
+    .replace(/-/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
   return {
     file,
     label: name,
-    product: "Platform",
+    product: 'Platform',
     description: `${name} — visual asset from the SZL Holdings platform ecosystem.`,
   };
 }
@@ -116,15 +114,15 @@ function generateGalleryMarkdown(entries: GalleryEntry[]): string {
   }
 
   const productOrder = [
-    "SZL Holdings",
-    "Lyte",
-    "Alloy",
-    "Aegis",
-    "Vessels",
-    "Terra",
-    "Carlota Jo",
-    "Architecture",
-    "Profile",
+    'SZL Holdings',
+    'Lyte',
+    'Alloy',
+    'Aegis',
+    'Vessels',
+    'Terra',
+    'Carlota Jo',
+    'Architecture',
+    'Profile',
   ];
 
   const orderedProducts = [
@@ -138,7 +136,7 @@ function generateGalleryMarkdown(entries: GalleryEntry[]): string {
 
 This page contains live screenshots and visual assets from all products in the SZL Holdings ecosystem. Screenshots are captured from running applications at 1440×900 (desktop) and 390×844 (mobile) viewports with dark-premium styling.
 
-> Last updated: ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+> Last updated: ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
 
 ---
 
@@ -147,20 +145,26 @@ This page contains live screenshots and visual assets from all products in the S
 `;
 
   for (const product of orderedProducts) {
-    md += `- [${product}](#${product.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")})\n`;
+    md += `- [${product}](#${product
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')})\n`;
   }
 
-  md += "\n---\n\n";
+  md += '\n---\n\n';
 
   for (const product of orderedProducts) {
     const productEntries = byProduct[product];
-    const anchor = product.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const anchor = product
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
 
     md += `## ${product} {#${anchor}}\n\n`;
 
     for (const entry of productEntries) {
       const ext = path.extname(entry.file).toLowerCase();
-      const isImage = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"].includes(ext);
+      const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'].includes(ext);
 
       md += `### ${entry.label}\n\n`;
       md += `${entry.description}\n\n`;
@@ -171,7 +175,7 @@ This page contains live screenshots and visual assets from all products in the S
         md += `[View file](assets/${entry.file})\n\n`;
       }
 
-      md += "---\n\n";
+      md += '---\n\n';
     }
   }
 
@@ -220,11 +224,11 @@ function main() {
 
   const files = fs.readdirSync(ASSETS_DIR).filter((f) => {
     const ext = path.extname(f).toLowerCase();
-    return [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"].includes(ext);
+    return ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp'].includes(ext);
   });
 
   if (files.length === 0) {
-    console.log("No image files found in assets directory.");
+    console.log('No image files found in assets directory.');
     process.exit(0);
   }
 
@@ -238,7 +242,7 @@ function main() {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  fs.writeFileSync(OUTPUT_FILE, markdown, "utf-8");
+  fs.writeFileSync(OUTPUT_FILE, markdown, 'utf-8');
   console.log(`Generated gallery: ${OUTPUT_FILE}`);
   console.log(`  ${entries.length} assets documented`);
 }

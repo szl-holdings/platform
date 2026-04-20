@@ -1,7 +1,7 @@
-import { createLogger } from "./logger.js";
-import type { ModelEndpoint, RouteClass } from "./router.js";
+import { createLogger } from './logger.js';
+import type { ModelEndpoint, RouteClass } from './router.js';
 
-const logger = createLogger("ai-control-plane:eval-selector");
+const logger = createLogger('ai-control-plane:eval-selector');
 
 export interface EvalResult {
   endpointKey: string;
@@ -31,9 +31,14 @@ class EvalRegistry {
     const existing = this.results.get(key);
     if (existing) {
       const totalSamples = existing.sampleCount + result.sampleCount;
-      const mergedScore = (existing.score * existing.sampleCount + result.score * result.sampleCount) / totalSamples;
-      const mergedPassRate = (existing.passRate * existing.sampleCount + result.passRate * result.sampleCount) / totalSamples;
-      const mergedLatency = (existing.avgLatencyMs * existing.sampleCount + result.avgLatencyMs * result.sampleCount) / totalSamples;
+      const mergedScore =
+        (existing.score * existing.sampleCount + result.score * result.sampleCount) / totalSamples;
+      const mergedPassRate =
+        (existing.passRate * existing.sampleCount + result.passRate * result.sampleCount) /
+        totalSamples;
+      const mergedLatency =
+        (existing.avgLatencyMs * existing.sampleCount + result.avgLatencyMs * result.sampleCount) /
+        totalSamples;
       this.results.set(key, {
         ...result,
         score: mergedScore,
@@ -43,9 +48,12 @@ class EvalRegistry {
         evaluatedAt: new Date().toISOString(),
       });
     } else {
-      this.results.set(key, { ...result, evaluatedAt: result.evaluatedAt ?? new Date().toISOString() });
+      this.results.set(key, {
+        ...result,
+        evaluatedAt: result.evaluatedAt ?? new Date().toISOString(),
+      });
     }
-    logger.debug({ key, score: result.score, passRate: result.passRate }, "Eval result recorded");
+    logger.debug({ key, score: result.score, passRate: result.passRate }, 'Eval result recorded');
   }
 
   get(provider: string, model: string, routeClass: RouteClass): EvalResult | undefined {
@@ -56,9 +64,13 @@ class EvalRegistry {
     return Array.from(this.results.values());
   }
 
-  selectBest(endpoints: ModelEndpoint[], routeClass: RouteClass, criteria: EvalCriteria = {}): ModelEndpoint | undefined {
+  selectBest(
+    endpoints: ModelEndpoint[],
+    routeClass: RouteClass,
+    criteria: EvalCriteria = {},
+  ): ModelEndpoint | undefined {
     const scored = endpoints
-      .map(e => {
+      .map((e) => {
         const evalResult = this.get(e.provider, e.model, routeClass);
         return { endpoint: e, eval: evalResult };
       })
@@ -66,9 +78,10 @@ class EvalRegistry {
         if (!ev) return false;
         if (criteria.minScore !== undefined && ev.score < criteria.minScore) return false;
         if (criteria.minPassRate !== undefined && ev.passRate < criteria.minPassRate) return false;
-        if (criteria.maxLatencyMs !== undefined && ev.avgLatencyMs > criteria.maxLatencyMs) return false;
+        if (criteria.maxLatencyMs !== undefined && ev.avgLatencyMs > criteria.maxLatencyMs)
+          return false;
         if (criteria.requiredTags?.length) {
-          if (!criteria.requiredTags.every(t => ev.tags.includes(t))) return false;
+          if (!criteria.requiredTags.every((t) => ev.tags.includes(t))) return false;
         }
         return true;
       })

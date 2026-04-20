@@ -4,25 +4,25 @@
   --color-bg-base: hsl(214, 18%, 3%);
   --color-surface: hsl(214, 12%, 8%);
   --color-border: hsla(0, 0%, 100%, 0.08);
-  
+
   --color-text-primary: hsl(38, 8%, 95%);
   --color-text-muted: hsl(214, 7%, 64%);
-  
+
   --color-hero-accent: hsl(38, 52%, 58%);
   --color-lyte-cyan: hsl(191, 92%, 44%);
-  
+
   --color-critical: hsl(0, 62%, 52%);
   --color-warning: hsl(42, 80%, 50%);
   --color-success: hsl(152, 50%, 42%);
-  
+
   --color-aegis: hsl(222, 60%, 50%);
   --color-vessels: hsl(206, 72%, 40%);
   --color-terra: hsl(140, 50%, 38%);
   --color-carlota: hsl(36, 48%, 52%);
 
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: "Fraunces", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
 @theme inline {
@@ -54,8 +54,12 @@ body {
 }
 
 /* Utils */
-.font-display { font-family: var(--font-display); }
-.font-mono { font-family: var(--font-mono); }
+.font-display {
+  font-family: var(--font-display);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
 
 .bg-noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");

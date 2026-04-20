@@ -7,8 +7,8 @@
  * Dev implementation: in-memory (filesystem-backed optional via JSON).
  */
 
-import { randomUUID } from "crypto";
-import type { WorkflowCheckpoint, StepResult } from "./types.js";
+import { randomUUID } from 'crypto';
+import type { StepResult, WorkflowCheckpoint } from './types.js';
 
 export interface CheckpointStore {
   save(checkpoint: WorkflowCheckpoint): void;

@@ -1,26 +1,33 @@
-export type VesselStatus = "at_sea" | "in_port" | "anchored" | "maintenance" | "loading" | "exception_active" | "delayed";
+export type VesselStatus =
+  | 'at_sea'
+  | 'in_port'
+  | 'anchored'
+  | 'maintenance'
+  | 'loading'
+  | 'exception_active'
+  | 'delayed';
 
-export type VesselClass = "capesize" | "panamax" | "supramax" | "handysize";
+export type VesselClass = 'capesize' | 'panamax' | 'supramax' | 'handysize';
 
-export type ExceptionSeverity = "critical" | "high" | "watch" | "normal" | "medium" | "low";
+export type ExceptionSeverity = 'critical' | 'high' | 'watch' | 'normal' | 'medium' | 'low';
 
 export type ExceptionType =
-  | "route_deviation"
-  | "delay_risk"
-  | "port_congestion"
-  | "weather_disruption"
-  | "maintenance_risk"
-  | "fuel_anomaly"
-  | "schedule_variance"
-  | "security_alert"
-  | "ais_dark"
-  | "sanctions_match"
-  | "overdue_arrival"
-  | "inspection_failure";
+  | 'route_deviation'
+  | 'delay_risk'
+  | 'port_congestion'
+  | 'weather_disruption'
+  | 'maintenance_risk'
+  | 'fuel_anomaly'
+  | 'schedule_variance'
+  | 'security_alert'
+  | 'ais_dark'
+  | 'sanctions_match'
+  | 'overdue_arrival'
+  | 'inspection_failure';
 
-export type MaintenanceStatus = "overdue" | "due_soon" | "scheduled" | "in_progress" | "completed";
+export type MaintenanceStatus = 'overdue' | 'due_soon' | 'scheduled' | 'in_progress' | 'completed';
 
-export type ReadinessState = "ready" | "degraded" | "critical" | "offline";
+export type ReadinessState = 'ready' | 'degraded' | 'critical' | 'offline';
 
 export interface VesselProfile {
   id: number;
@@ -111,7 +118,7 @@ export interface FleetException {
   vesselName: string;
   type: ExceptionType;
   severity: ExceptionSeverity;
-  status: "active" | "acknowledged" | "resolved" | "dismissed";
+  status: 'active' | 'acknowledged' | 'resolved' | 'dismissed';
   title: string;
   description: string;
   detectedAt: string;
@@ -128,7 +135,7 @@ export interface MaintenanceItem {
   component: string;
   description: string;
   status: MaintenanceStatus;
-  priority: "critical" | "high" | "medium" | "low";
+  priority: 'critical' | 'high' | 'medium' | 'low';
   dueDate: string;
   completedDate: string | null;
   estimatedCostUsd: number;
@@ -155,7 +162,7 @@ export interface Corridor {
   origin: string;
   destination: string;
   waypoints: Array<{ lat: number; lon: number }>;
-  riskLevel: "low" | "moderate" | "elevated" | "critical";
+  riskLevel: 'low' | 'moderate' | 'elevated' | 'critical';
   distanceNm: number;
   [key: string]: any;
 }
@@ -167,7 +174,7 @@ export interface MaintenanceLog {
   component: string;
   type: string;
   description: string;
-  status: "Overdue" | "In Progress" | "Scheduled" | "Completed";
+  status: 'Overdue' | 'In Progress' | 'Scheduled' | 'Completed';
   severity: string;
   date: string;
   estimatedHours: number;
@@ -192,7 +199,7 @@ export interface ComplianceCertificate {
   expiryDate: string;
   daysUntilExpiry: number;
   regulation: string | null;
-  status: "Valid" | "Expiring Soon" | "Expired";
+  status: 'Valid' | 'Expiring Soon' | 'Expired';
   [key: string]: any;
 }
 
@@ -203,8 +210,8 @@ export interface PortStateDeficiency {
   inspectedAt: string;
   deficiencyCode: string;
   description: string;
-  severity: "minor" | "major" | "detention";
-  status: "Open" | "Rectified";
+  severity: 'minor' | 'major' | 'detention';
+  status: 'Open' | 'Rectified';
   [key: string]: any;
 }
 
@@ -236,7 +243,7 @@ export interface EventLog {
   id: number;
   vesselId: number | null;
   vesselName: string | null;
-  severity: "Critical" | "Warning" | "Info" | "Debug";
+  severity: 'Critical' | 'Warning' | 'Info' | 'Debug';
   category?: string;
   title?: string;
   message: string;
@@ -267,7 +274,7 @@ export interface EmissionRecord {
 export interface AIBriefing {
   id: number;
   vesselId: number | null;
-  severity: "Critical" | "Warning" | "Info";
+  severity: 'Critical' | 'Warning' | 'Info';
   title: string;
   summary: string;
   details: string;
@@ -284,7 +291,7 @@ export interface PredictiveMaintenance {
   vesselId: number;
   vesselName: string;
   component: string;
-  riskLevel: "High" | "Medium" | "Low";
+  riskLevel: 'High' | 'Medium' | 'Low';
   failureProbability: number;
   recommendedAction: string;
   predictedFailureDate: string;
@@ -307,7 +314,7 @@ export interface ForecastModule {
   currentValue: number | string;
   forecastValue: number | string;
   forecastDate: string;
-  trend: "up" | "down";
+  trend: 'up' | 'down';
   confidence: number;
   dataPoints: ForecastDataPoint[];
   [key: string]: any;
@@ -319,8 +326,8 @@ export interface SanctionsRiskIndicator {
   vesselName: string;
   flag: string;
   imo: string;
-  ofacStatus: "clear" | "match" | "watchlist";
-  euStatus: "clear" | "match" | "watchlist";
+  ofacStatus: 'clear' | 'match' | 'watchlist';
+  euStatus: 'clear' | 'match' | 'watchlist';
   riskScore: number;
   riskLevel: string;
   reason: string | null;
@@ -334,7 +341,7 @@ export interface ComplianceAlert {
   id: number;
   vesselId: number | null;
   type: string;
-  severity: "Critical" | "High" | "Warning" | "Info";
+  severity: 'Critical' | 'High' | 'Warning' | 'Info';
   title: string;
   description: string;
   createdAt: string;

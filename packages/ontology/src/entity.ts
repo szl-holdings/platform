@@ -11,37 +11,31 @@
  * time so that snapshots survive process restarts.
  */
 
-import { z } from "zod";
-import { randomUUID } from "node:crypto";
-import { SignalDomainSchema } from "./signal.js";
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+import { SignalDomainSchema } from './signal.js';
 
 export const EntityTypeSchema = z.enum([
-  "vessel",
-  "voyage",
-  "port",
-  "property",
-  "property-portfolio",
-  "deal",
-  "matter",
-  "contact",
-  "organization",
-  "fleet",
-  "incident",
-  "agent",
-  "model",
-  "workflow",
-  "connector",
-  "custom",
+  'vessel',
+  'voyage',
+  'port',
+  'property',
+  'property-portfolio',
+  'deal',
+  'matter',
+  'contact',
+  'organization',
+  'fleet',
+  'incident',
+  'agent',
+  'model',
+  'workflow',
+  'connector',
+  'custom',
 ]);
 export type EntityType = z.infer<typeof EntityTypeSchema>;
 
-export const EntityHealthSchema = z.enum([
-  "healthy",
-  "degraded",
-  "at-risk",
-  "critical",
-  "unknown",
-]);
+export const EntityHealthSchema = z.enum(['healthy', 'degraded', 'at-risk', 'critical', 'unknown']);
 export type EntityHealth = z.infer<typeof EntityHealthSchema>;
 
 export const EntitySnapshotSchema = z.object({
@@ -53,7 +47,7 @@ export const EntitySnapshotSchema = z.object({
   displayName: z.string(),
   description: z.string().optional(),
 
-  health: EntityHealthSchema.default("unknown"),
+  health: EntityHealthSchema.default('unknown'),
   riskScore: z.number().min(0).max(100).optional(),
   opportunityScore: z.number().min(0).max(100).optional(),
 
@@ -70,28 +64,24 @@ export const EntitySnapshotSchema = z.object({
   snapshotAt: z.string().datetime(),
   validUntil: z.string().datetime().optional(),
 
-  schemaVersion: z.string().default("entity-snapshot/1.0"),
+  schemaVersion: z.string().default('entity-snapshot/1.0'),
 });
 export type EntitySnapshot = z.infer<typeof EntitySnapshotSchema>;
 
-export type EntitySnapshotInput = Omit<EntitySnapshot, "snapshotId" | "schemaVersion">;
+export type EntitySnapshotInput = Omit<EntitySnapshot, 'snapshotId' | 'schemaVersion'>;
 
 export function createEntitySnapshot(input: EntitySnapshotInput): EntitySnapshot {
   return EntitySnapshotSchema.parse({
     ...input,
     snapshotId: randomUUID(),
-    schemaVersion: "entity-snapshot/1.0",
+    schemaVersion: 'entity-snapshot/1.0',
   });
 }
 
 export interface EntityRegistryBackend {
   upsert(snapshot: EntitySnapshot): void;
   get(entityId: string): EntitySnapshot | undefined;
-  list(filter?: {
-    domain?: string;
-    entityType?: string;
-    health?: EntityHealth;
-  }): EntitySnapshot[];
+  list(filter?: { domain?: string; entityType?: string; health?: EntityHealth }): EntitySnapshot[];
   linkSignal(entityId: string, signalId: string): void;
   linkRecommendation(entityId: string, recommendationId: string): void;
   count(): number;

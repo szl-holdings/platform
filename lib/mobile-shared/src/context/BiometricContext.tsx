@@ -1,21 +1,21 @@
 import React, {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useState,
-  type ReactNode,
-} from "react";
-import { AppState, type AppStateStatus, Platform } from "react-native";
+} from 'react';
+import { AppState, type AppStateStatus, Platform } from 'react-native';
 
-let LocalAuthentication: typeof import("expo-local-authentication") | null = null;
-let SecureStore: typeof import("expo-secure-store") | null = null;
+let LocalAuthentication: typeof import('expo-local-authentication') | null = null;
+let SecureStore: typeof import('expo-secure-store') | null = null;
 
 try {
-  LocalAuthentication = require("expo-local-authentication");
+  LocalAuthentication = require('expo-local-authentication');
 } catch {}
 try {
-  SecureStore = require("expo-secure-store");
+  SecureStore = require('expo-secure-store');
 } catch {}
 
 export interface BiometricConfig {
@@ -44,16 +44,16 @@ const BiometricContext = createContext<BiometricContextValue>({
 });
 
 async function secureGet(key: string): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+  if (Platform.OS === 'web') {
+    return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
   }
   if (!SecureStore) return null;
   return SecureStore.getItemAsync(key);
 }
 
 async function secureSet(key: string, value: string): Promise<void> {
-  if (Platform.OS === "web") {
-    if (typeof window !== "undefined") window.localStorage.setItem(key, value);
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') window.localStorage.setItem(key, value);
     return;
   }
   if (!SecureStore) return;
@@ -61,8 +61,8 @@ async function secureSet(key: string, value: string): Promise<void> {
 }
 
 async function secureDel(key: string): Promise<void> {
-  if (Platform.OS === "web") {
-    if (typeof window !== "undefined") window.localStorage.removeItem(key);
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') window.localStorage.removeItem(key);
     return;
   }
   if (!SecureStore) return;
@@ -76,12 +76,7 @@ export function BiometricProvider({
   children: ReactNode;
   config: BiometricConfig;
 }) {
-  const {
-    storagePrefix,
-    appName,
-    lockTimeoutMs = 5 * 60 * 1000,
-    promptMessage,
-  } = config;
+  const { storagePrefix, appName, lockTimeoutMs = 5 * 60 * 1000, promptMessage } = config;
 
   const enabledKey = `${storagePrefix}_biometric_enabled`;
   const defaultPrompt = promptMessage ?? `Authenticate to access ${appName}`;
@@ -92,7 +87,7 @@ export function BiometricProvider({
   const lastActiveRef = React.useRef<number>(Date.now());
 
   useEffect(() => {
-    if (Platform.OS === "web" || !LocalAuthentication) return;
+    if (Platform.OS === 'web' || !LocalAuthentication) return;
 
     LocalAuthentication.hasHardwareAsync().then((has) => {
       setIsAvailable(has);
@@ -100,7 +95,7 @@ export function BiometricProvider({
 
     (async () => {
       const enabled = await secureGet(enabledKey);
-      if (enabled === "true") {
+      if (enabled === 'true') {
         setIsEnabled(true);
         setIsLocked(true);
       }
@@ -108,25 +103,25 @@ export function BiometricProvider({
   }, [enabledKey]);
 
   useEffect(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === 'web') return;
 
     const handleChange = (nextState: AppStateStatus) => {
-      if (nextState === "active") {
+      if (nextState === 'active') {
         const elapsed = Date.now() - lastActiveRef.current;
         if (isEnabled && elapsed > lockTimeoutMs) {
           setIsLocked(true);
         }
-      } else if (nextState === "background" || nextState === "inactive") {
+      } else if (nextState === 'background' || nextState === 'inactive') {
         lastActiveRef.current = Date.now();
       }
     };
 
-    const sub = AppState.addEventListener("change", handleChange);
+    const sub = AppState.addEventListener('change', handleChange);
     return () => sub.remove();
   }, [isEnabled, lockTimeoutMs]);
 
   const unlock = useCallback(async (): Promise<boolean> => {
-    if (Platform.OS === "web" || !LocalAuthentication) {
+    if (Platform.OS === 'web' || !LocalAuthentication) {
       setIsLocked(false);
       return true;
     }
@@ -134,8 +129,8 @@ export function BiometricProvider({
     try {
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: defaultPrompt,
-        fallbackLabel: "Use passcode",
-        cancelLabel: "Cancel",
+        fallbackLabel: 'Use passcode',
+        cancelLabel: 'Cancel',
       });
 
       if (result.success) {
@@ -145,22 +140,22 @@ export function BiometricProvider({
       }
       return false;
     } catch (err) {
-      console.warn("[Biometric] unlock failed:", err);
+      console.warn('[Biometric] unlock failed:', err);
       return false;
     }
   }, [defaultPrompt]);
 
   const enableBiometric = useCallback(async (): Promise<boolean> => {
-    if (Platform.OS === "web" || !LocalAuthentication) return false;
+    if (Platform.OS === 'web' || !LocalAuthentication) return false;
 
     try {
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Confirm identity to enable biometric lock",
-        fallbackLabel: "Use passcode",
+        promptMessage: 'Confirm identity to enable biometric lock',
+        fallbackLabel: 'Use passcode',
       });
 
       if (result.success) {
-        await secureSet(enabledKey, "true");
+        await secureSet(enabledKey, 'true');
         setIsEnabled(true);
         setIsLocked(false);
         lastActiveRef.current = Date.now();
@@ -168,7 +163,7 @@ export function BiometricProvider({
       }
       return false;
     } catch (err) {
-      console.warn("[Biometric] enableBiometric failed:", err);
+      console.warn('[Biometric] enableBiometric failed:', err);
       return false;
     }
   }, [enabledKey]);
@@ -193,12 +188,12 @@ export function useBiometric(): BiometricContextValue {
 }
 
 export async function promptBiometric(reason: string): Promise<boolean> {
-  if (Platform.OS === "web" || !LocalAuthentication) return true;
+  if (Platform.OS === 'web' || !LocalAuthentication) return true;
   try {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: reason,
-      fallbackLabel: "Use passcode",
-      cancelLabel: "Cancel",
+      fallbackLabel: 'Use passcode',
+      cancelLabel: 'Cancel',
       disableDeviceFallback: false,
     });
     return result.success;

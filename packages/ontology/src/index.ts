@@ -25,31 +25,29 @@
  */
 
 // Canonical ontology types (interface-based)
-export * from "./domains.js";
-export * from "./entities.js";
-export * from "./signals.js";
-export * from "./entity-links.js";
-export * from "./entity-snapshot.js";
-
-// Signal mesh contracts (Zod-validated)
-export * from "./signal.js";
-export * from "./entity.js";
-
+export * from './domains.js';
+export * from './entities.js';
+export * from './entity.js';
+export * from './entity-links.js';
+export * from './entity-snapshot.js';
 // Shared evidence & recommendation (interface-based + Zod schemas)
-export * from "./evidence.js";
+export * from './evidence.js';
+// Signal mesh contracts (Zod-validated)
+export * from './signal.js';
+export * from './signals.js';
 
-export const ONTOLOGY_VERSION = "1.0.0" as const;
+export const ONTOLOGY_VERSION = '1.0.0' as const;
 
 export const SIGNAL_PIPELINE_STAGES = [
-  "intake",
-  "normalize",
-  "enrich",
-  "entity-resolve",
-  "correlate",
-  "score",
-  "recommend",
-  "policy-evaluate",
-  "telemetry-writeback",
+  'intake',
+  'normalize',
+  'enrich',
+  'entity-resolve',
+  'correlate',
+  'score',
+  'recommend',
+  'policy-evaluate',
+  'telemetry-writeback',
 ] as const;
 
-export type SignalPipelineStage = typeof SIGNAL_PIPELINE_STAGES[number];
+export type SignalPipelineStage = (typeof SIGNAL_PIPELINE_STAGES)[number];

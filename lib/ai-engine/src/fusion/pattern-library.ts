@@ -6,23 +6,23 @@
  * tunes the pattern engine's sensitivity and confidence weights.
  */
 
-export type PatternStatus = "active" | "degraded" | "suppressed" | "learning";
+export type PatternStatus = 'active' | 'degraded' | 'suppressed' | 'learning';
 export type PatternCategory =
-  | "litigation_financial"
-  | "maritime_security"
-  | "property_legal_financial"
-  | "ownership_chain"
-  | "geopolitical_cascade"
-  | "supply_chain_stress"
-  | "regulatory_exposure"
-  | "cyber_maritime"
-  | "custom";
+  | 'litigation_financial'
+  | 'maritime_security'
+  | 'property_legal_financial'
+  | 'ownership_chain'
+  | 'geopolitical_cascade'
+  | 'supply_chain_stress'
+  | 'regulatory_exposure'
+  | 'cyber_maritime'
+  | 'custom';
 
 export interface PatternFeedback {
   id: string;
   patternId: string;
   alertId: string;
-  relevance: "confirmed" | "false_positive" | "partially_relevant";
+  relevance: 'confirmed' | 'false_positive' | 'partially_relevant';
   rating: number;
   notes?: string;
   reviewedBy?: string;
@@ -57,123 +57,206 @@ export interface CorrelationPattern {
   tags: string[];
 }
 
-const INITIAL_PATTERNS: Array<Omit<CorrelationPattern, "learnedAt" | "updatedAt" | "feedbackHistory" | "exampleAlerts">> = [
+const INITIAL_PATTERNS: Array<
+  Omit<CorrelationPattern, 'learnedAt' | 'updatedAt' | 'feedbackHistory' | 'exampleAlerts'>
+> = [
   {
-    id: "pat-001",
-    name: "Litigation-Financial Stress Cascade",
-    description: "Active litigation in legal domain correlates with measurable financial stress indicators in portfolio holdings. When an entity appears in both PRISM Counsel and SZL/Terra, compounding risk emerges.",
-    category: "litigation_financial",
-    requiredDomains: ["prism-counsel", "szl-holdings"],
+    id: 'pat-001',
+    name: 'Litigation-Financial Stress Cascade',
+    description:
+      'Active litigation in legal domain correlates with measurable financial stress indicators in portfolio holdings. When an entity appears in both PRISM Counsel and SZL/Terra, compounding risk emerges.',
+    category: 'litigation_financial',
+    requiredDomains: ['prism-counsel', 'szl-holdings'],
     evidenceTypes: [
-      { domain: "prism-counsel", signalType: "active_matter", weight: 0.9, description: "Active litigation filing" },
-      { domain: "szl-holdings", signalType: "financial_exposure", weight: 0.8, description: "Portfolio financial exposure" },
-      { domain: "terra", signalType: "valuation_decline", weight: 0.7, description: "Property valuation decline" },
+      {
+        domain: 'prism-counsel',
+        signalType: 'active_matter',
+        weight: 0.9,
+        description: 'Active litigation filing',
+      },
+      {
+        domain: 'szl-holdings',
+        signalType: 'financial_exposure',
+        weight: 0.8,
+        description: 'Portfolio financial exposure',
+      },
+      {
+        domain: 'terra',
+        signalType: 'valuation_decline',
+        weight: 0.7,
+        description: 'Property valuation decline',
+      },
     ],
-    status: "active",
+    status: 'active',
     confidenceScore: 0.85,
     baseConfidence: 0.85,
     feedbackAdjustment: 0,
     hitCount: 0,
     falsePositiveCount: 0,
     lastTriggeredAt: null,
-    tags: ["litigation", "financial", "legal", "cross-domain"],
+    tags: ['litigation', 'financial', 'legal', 'cross-domain'],
   },
   {
-    id: "pat-002",
-    name: "Maritime-Security Threat Convergence",
-    description: "Fleet vessels operating in corridors with active threat intelligence from Aegis SOC. AIS data and cyber threat IOCs converge on the same geographic or operational zone.",
-    category: "maritime_security",
-    requiredDomains: ["vessels", "firestorm"],
+    id: 'pat-002',
+    name: 'Maritime-Security Threat Convergence',
+    description:
+      'Fleet vessels operating in corridors with active threat intelligence from Aegis SOC. AIS data and cyber threat IOCs converge on the same geographic or operational zone.',
+    category: 'maritime_security',
+    requiredDomains: ['vessels', 'firestorm'],
     evidenceTypes: [
-      { domain: "vessels", signalType: "route_risk", weight: 0.95, description: "Vessel in high-risk corridor" },
-      { domain: "firestorm", signalType: "threat_actor_ioc", weight: 0.88, description: "Active threat actor IOC in zone" },
+      {
+        domain: 'vessels',
+        signalType: 'route_risk',
+        weight: 0.95,
+        description: 'Vessel in high-risk corridor',
+      },
+      {
+        domain: 'firestorm',
+        signalType: 'threat_actor_ioc',
+        weight: 0.88,
+        description: 'Active threat actor IOC in zone',
+      },
     ],
-    status: "active",
+    status: 'active',
     confidenceScore: 0.92,
     baseConfidence: 0.92,
     feedbackAdjustment: 0,
     hitCount: 0,
     falsePositiveCount: 0,
     lastTriggeredAt: null,
-    tags: ["maritime", "security", "apt", "vessel"],
+    tags: ['maritime', 'security', 'apt', 'vessel'],
   },
   {
-    id: "pat-003",
-    name: "Tri-Domain Property Risk Signal",
-    description: "Real estate asset with simultaneous legal encumbrance (PRISM), financial stress (SZL Holdings), and market deterioration (Terra). Triple-domain convergence indicates systemic risk.",
-    category: "property_legal_financial",
-    requiredDomains: ["terra", "prism-counsel", "szl-holdings"],
+    id: 'pat-003',
+    name: 'Tri-Domain Property Risk Signal',
+    description:
+      'Real estate asset with simultaneous legal encumbrance (PRISM), financial stress (SZL Holdings), and market deterioration (Terra). Triple-domain convergence indicates systemic risk.',
+    category: 'property_legal_financial',
+    requiredDomains: ['terra', 'prism-counsel', 'szl-holdings'],
     evidenceTypes: [
-      { domain: "terra", signalType: "legal_encumbrance", weight: 0.85, description: "Title/zoning legal flag" },
-      { domain: "prism-counsel", signalType: "active_matter", weight: 0.90, description: "Active legal matter" },
-      { domain: "szl-holdings", signalType: "investment_risk", weight: 0.80, description: "Investment risk elevation" },
+      {
+        domain: 'terra',
+        signalType: 'legal_encumbrance',
+        weight: 0.85,
+        description: 'Title/zoning legal flag',
+      },
+      {
+        domain: 'prism-counsel',
+        signalType: 'active_matter',
+        weight: 0.9,
+        description: 'Active legal matter',
+      },
+      {
+        domain: 'szl-holdings',
+        signalType: 'investment_risk',
+        weight: 0.8,
+        description: 'Investment risk elevation',
+      },
     ],
-    status: "active",
+    status: 'active',
     confidenceScore: 0.88,
     baseConfidence: 0.88,
     feedbackAdjustment: 0,
     hitCount: 0,
     falsePositiveCount: 0,
     lastTriggeredAt: null,
-    tags: ["property", "legal", "financial", "tri-domain"],
+    tags: ['property', 'legal', 'financial', 'tri-domain'],
   },
   {
-    id: "pat-004",
-    name: "Multi-Hop Beneficial Ownership Chain",
-    description: "GraphRAG traversal discovers N-hop ownership chains that connect SZL operational entities to potentially obscured beneficial owners or sanctioned entities through shell company structures.",
-    category: "ownership_chain",
-    requiredDomains: ["szl-holdings", "vessels"],
+    id: 'pat-004',
+    name: 'Multi-Hop Beneficial Ownership Chain',
+    description:
+      'GraphRAG traversal discovers N-hop ownership chains that connect SZL operational entities to potentially obscured beneficial owners or sanctioned entities through shell company structures.',
+    category: 'ownership_chain',
+    requiredDomains: ['szl-holdings', 'vessels'],
     evidenceTypes: [
-      { domain: "szl-holdings", signalType: "ownership_connection", weight: 0.75, description: "Ownership chain node" },
-      { domain: "prism-counsel", signalType: "sanctions_flag", weight: 0.95, description: "Sanctions flag on terminal entity" },
+      {
+        domain: 'szl-holdings',
+        signalType: 'ownership_connection',
+        weight: 0.75,
+        description: 'Ownership chain node',
+      },
+      {
+        domain: 'prism-counsel',
+        signalType: 'sanctions_flag',
+        weight: 0.95,
+        description: 'Sanctions flag on terminal entity',
+      },
     ],
-    status: "active",
+    status: 'active',
     confidenceScore: 0.78,
     baseConfidence: 0.78,
     feedbackAdjustment: 0,
     hitCount: 0,
     falsePositiveCount: 0,
     lastTriggeredAt: null,
-    tags: ["ownership", "beneficial-owner", "sanctions", "kyc", "shell-company"],
+    tags: ['ownership', 'beneficial-owner', 'sanctions', 'kyc', 'shell-company'],
   },
   {
-    id: "pat-005",
-    name: "Geopolitical Fuel-Rate-Default Cascade",
-    description: "Rising fuel costs detected in vessels domain correlate with interest rate movements from financial intelligence, converging on elevated tenant default probability in Terra properties. 45-day cascade window.",
-    category: "geopolitical_cascade",
-    requiredDomains: ["vessels", "szl-holdings", "terra"],
+    id: 'pat-005',
+    name: 'Geopolitical Fuel-Rate-Default Cascade',
+    description:
+      'Rising fuel costs detected in vessels domain correlate with interest rate movements from financial intelligence, converging on elevated tenant default probability in Terra properties. 45-day cascade window.',
+    category: 'geopolitical_cascade',
+    requiredDomains: ['vessels', 'szl-holdings', 'terra'],
     evidenceTypes: [
-      { domain: "vessels", signalType: "fuel_cost_spike", weight: 0.80, description: "Bunker fuel cost increase >15%" },
-      { domain: "szl-holdings", signalType: "rate_environment", weight: 0.75, description: "Rate hike pressure on portfolio" },
-      { domain: "terra", signalType: "tenant_stress", weight: 0.70, description: "Tenant financial stress indicators" },
+      {
+        domain: 'vessels',
+        signalType: 'fuel_cost_spike',
+        weight: 0.8,
+        description: 'Bunker fuel cost increase >15%',
+      },
+      {
+        domain: 'szl-holdings',
+        signalType: 'rate_environment',
+        weight: 0.75,
+        description: 'Rate hike pressure on portfolio',
+      },
+      {
+        domain: 'terra',
+        signalType: 'tenant_stress',
+        weight: 0.7,
+        description: 'Tenant financial stress indicators',
+      },
     ],
-    status: "active",
+    status: 'active',
     confidenceScore: 0.74,
     baseConfidence: 0.74,
     feedbackAdjustment: 0,
     hitCount: 0,
     falsePositiveCount: 0,
     lastTriggeredAt: null,
-    tags: ["geopolitical", "cascade", "fuel", "rate", "tenant", "predictive"],
+    tags: ['geopolitical', 'cascade', 'fuel', 'rate', 'tenant', 'predictive'],
   },
   {
-    id: "pat-006",
-    name: "Cyber-Maritime Infrastructure Targeting",
-    description: "Threat intelligence indicates APT targeting of maritime infrastructure. Fleet vessels may be targets of SCADA/OT attacks or GPS spoofing campaigns coordinated with physical route interdiction.",
-    category: "cyber_maritime",
-    requiredDomains: ["firestorm", "vessels"],
+    id: 'pat-006',
+    name: 'Cyber-Maritime Infrastructure Targeting',
+    description:
+      'Threat intelligence indicates APT targeting of maritime infrastructure. Fleet vessels may be targets of SCADA/OT attacks or GPS spoofing campaigns coordinated with physical route interdiction.',
+    category: 'cyber_maritime',
+    requiredDomains: ['firestorm', 'vessels'],
     evidenceTypes: [
-      { domain: "firestorm", signalType: "ot_scada_threat", weight: 0.90, description: "OT/SCADA threat actor activity" },
-      { domain: "vessels", signalType: "gps_anomaly", weight: 0.85, description: "GPS/AIS anomaly detected" },
+      {
+        domain: 'firestorm',
+        signalType: 'ot_scada_threat',
+        weight: 0.9,
+        description: 'OT/SCADA threat actor activity',
+      },
+      {
+        domain: 'vessels',
+        signalType: 'gps_anomaly',
+        weight: 0.85,
+        description: 'GPS/AIS anomaly detected',
+      },
     ],
-    status: "active",
+    status: 'active',
     confidenceScore: 0.87,
     baseConfidence: 0.87,
     feedbackAdjustment: 0,
     hitCount: 0,
     falsePositiveCount: 0,
     lastTriggeredAt: null,
-    tags: ["cyber", "maritime", "ot", "scada", "gps-spoofing"],
+    tags: ['cyber', 'maritime', 'ot', 'scada', 'gps-spoofing'],
   },
 ];
 
@@ -205,11 +288,13 @@ export class PatternLibrary {
   }
 
   getActive(): CorrelationPattern[] {
-    return [...this.patterns.values()].filter(p => p.status === "active" || p.status === "learning");
+    return [...this.patterns.values()].filter(
+      (p) => p.status === 'active' || p.status === 'learning',
+    );
   }
 
   getByCategory(category: PatternCategory): CorrelationPattern[] {
-    return [...this.patterns.values()].filter(p => p.category === category);
+    return [...this.patterns.values()].filter((p) => p.category === category);
   }
 
   recordHit(patternId: string, alertId: string): void {
@@ -227,7 +312,7 @@ export class PatternLibrary {
   submitFeedback(input: {
     patternId: string;
     alertId: string;
-    relevance: PatternFeedback["relevance"];
+    relevance: PatternFeedback['relevance'];
     rating: number;
     notes?: string;
     reviewedBy?: string;
@@ -262,26 +347,30 @@ export class PatternLibrary {
     const normalizedRating = (feedback.rating - 1) / 4;
 
     let signal = 0;
-    if (feedback.relevance === "confirmed") {
+    if (feedback.relevance === 'confirmed') {
       signal = normalizedRating;
       if (signal > 0.5) {
         pattern.falsePositiveCount = Math.max(0, pattern.falsePositiveCount - 0.5);
       }
-    } else if (feedback.relevance === "false_positive") {
+    } else if (feedback.relevance === 'false_positive') {
       signal = -0.5;
       pattern.falsePositiveCount++;
     } else {
       signal = (normalizedRating - 0.5) * 0.5;
     }
 
-    pattern.feedbackAdjustment = pattern.feedbackAdjustment * (1 - this.LEARNING_RATE) + signal * this.LEARNING_RATE;
-    pattern.confidenceScore = Math.max(0.1, Math.min(0.99, pattern.baseConfidence + pattern.feedbackAdjustment));
+    pattern.feedbackAdjustment =
+      pattern.feedbackAdjustment * (1 - this.LEARNING_RATE) + signal * this.LEARNING_RATE;
+    pattern.confidenceScore = Math.max(
+      0.1,
+      Math.min(0.99, pattern.baseConfidence + pattern.feedbackAdjustment),
+    );
 
     const fpRate = pattern.falsePositiveCount / Math.max(1, pattern.hitCount);
     if (fpRate > 0.5 && pattern.hitCount >= 5) {
-      pattern.status = "degraded";
+      pattern.status = 'degraded';
     } else if (pattern.confidenceScore > 0.6) {
-      pattern.status = "active";
+      pattern.status = 'active';
     }
 
     pattern.updatedAt = new Date().toISOString();
@@ -303,9 +392,9 @@ export class PatternLibrary {
       category: input.category,
       requiredDomains: input.requiredDomains,
       evidenceTypes: input.evidenceTypes,
-      status: "learning",
-      confidenceScore: 0.60,
-      baseConfidence: 0.60,
+      status: 'learning',
+      confidenceScore: 0.6,
+      baseConfidence: 0.6,
       feedbackAdjustment: 0,
       hitCount: 0,
       falsePositiveCount: 0,
@@ -330,21 +419,25 @@ export class PatternLibrary {
     topPatterns: Array<{ id: string; name: string; hitCount: number; confidence: number }>;
   } {
     const all = [...this.patterns.values()];
-    const avgConfidence = all.length > 0
-      ? all.reduce((s, p) => s + p.confidenceScore, 0) / all.length
-      : 0;
+    const avgConfidence =
+      all.length > 0 ? all.reduce((s, p) => s + p.confidenceScore, 0) / all.length : 0;
 
     return {
       totalPatterns: all.length,
-      activePatterns: all.filter(p => p.status === "active").length,
-      degradedPatterns: all.filter(p => p.status === "degraded").length,
+      activePatterns: all.filter((p) => p.status === 'active').length,
+      degradedPatterns: all.filter((p) => p.status === 'degraded').length,
       totalHits: all.reduce((s, p) => s + p.hitCount, 0),
       totalFeedbackItems: this.feedbackStore.length,
       avgConfidence,
       topPatterns: all
         .sort((a, b) => b.hitCount - a.hitCount)
         .slice(0, 5)
-        .map(p => ({ id: p.id, name: p.name, hitCount: p.hitCount, confidence: p.confidenceScore })),
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          hitCount: p.hitCount,
+          confidence: p.confidenceScore,
+        })),
     };
   }
 }

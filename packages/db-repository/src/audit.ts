@@ -1,8 +1,8 @@
 /**
  * Audit Repository — typed access to audit log and activity tables.
  */
-import { db, auditLogTable } from "@szl-holdings/db";
-import { desc, eq, and, gte } from "drizzle-orm";
+import { auditLogTable, db } from '@szl-holdings/db';
+import { and, desc, eq, gte } from 'drizzle-orm';
 
 export interface AuditEntry {
   actor: string;

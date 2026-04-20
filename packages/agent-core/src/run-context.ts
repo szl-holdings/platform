@@ -5,7 +5,7 @@
  * to a trace ID, session, workflow run, domain profile, and agent role.
  * This is the single source of truth for run identity and evidence tagging.
  */
-import type { AgentRoleId } from "@szl-holdings/shared-contracts";
+import type { AgentRoleId } from '@szl-holdings/shared-contracts';
 
 export interface AgentRunContext {
   traceId: string;
@@ -29,12 +29,12 @@ let _traceCounter = 0;
 export function generateTraceId(roleId: AgentRoleId): string {
   const prefix = roleId.slice(0, 4).toLowerCase();
   const ts = Date.now();
-  const counter = (++_traceCounter).toString().padStart(4, "0");
+  const counter = (++_traceCounter).toString().padStart(4, '0');
   return `aeep_${prefix}_${ts}_${counter}`;
 }
 
 export function createRunContext(
-  partial: Omit<AgentRunContext, "startedAt" | "traceId"> & { traceId?: string },
+  partial: Omit<AgentRunContext, 'startedAt' | 'traceId'> & { traceId?: string },
 ): AgentRunContext {
   return {
     ...partial,

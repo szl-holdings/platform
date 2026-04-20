@@ -1,36 +1,38 @@
-import type { SceneSnapshot, ExportAdapterContract, ExportAdapterResult } from "../types.js";
+import type { ExportAdapterContract, ExportAdapterResult, SceneSnapshot } from '../types.js';
 
-const ADAPTER_NAME = "JsonSnapshotAdapter";
-const ADAPTER_VERSION = "1.0.0";
+const ADAPTER_NAME = 'JsonSnapshotAdapter';
+const ADAPTER_VERSION = '1.0.0';
 
 export interface JsonSnapshotOutput {
   $schema: string;
   adapterVersion: string;
-  format: "json_snapshot";
+  format: 'json_snapshot';
   snapshot: SceneSnapshot;
   exportedAt: string;
 }
 
-export class JsonSnapshotAdapter implements ExportAdapterContract<SceneSnapshot, JsonSnapshotOutput> {
+export class JsonSnapshotAdapter
+  implements ExportAdapterContract<SceneSnapshot, JsonSnapshotOutput>
+{
   readonly adapterName = ADAPTER_NAME;
   readonly adapterVersion = ADAPTER_VERSION;
-  readonly outputFormat = "json_snapshot";
+  readonly outputFormat = 'json_snapshot';
 
   validate(input: SceneSnapshot): void {
-    if (!input.sceneId) throw new Error("JsonSnapshotAdapter: sceneId is required");
-    if (!input.domain) throw new Error("JsonSnapshotAdapter: domain is required");
-    if (!input.capturedAt) throw new Error("JsonSnapshotAdapter: capturedAt is required");
-    if (!input.state || typeof input.state !== "object") {
-      throw new Error("JsonSnapshotAdapter: state must be a non-null object");
+    if (!input.sceneId) throw new Error('JsonSnapshotAdapter: sceneId is required');
+    if (!input.domain) throw new Error('JsonSnapshotAdapter: domain is required');
+    if (!input.capturedAt) throw new Error('JsonSnapshotAdapter: capturedAt is required');
+    if (!input.state || typeof input.state !== 'object') {
+      throw new Error('JsonSnapshotAdapter: state must be a non-null object');
     }
   }
 
   serialize(input: SceneSnapshot): JsonSnapshotOutput {
     this.validate(input);
     return {
-      $schema: "https://szlholdings.com/schemas/atlas/scene-snapshot/v1.json",
+      $schema: 'https://szlholdings.com/schemas/atlas/scene-snapshot/v1.json',
       adapterVersion: ADAPTER_VERSION,
-      format: "json_snapshot",
+      format: 'json_snapshot',
       snapshot: {
         sceneId: input.sceneId,
         domain: input.domain,
@@ -53,7 +55,7 @@ export class JsonSnapshotAdapter implements ExportAdapterContract<SceneSnapshot,
     return {
       format: this.outputFormat,
       payload: output,
-      sizeEstimateBytes: Buffer.byteLength(json, "utf8"),
+      sizeEstimateBytes: Buffer.byteLength(json, 'utf8'),
       generatedAt: output.exportedAt,
       adapterVersion: ADAPTER_VERSION,
     };

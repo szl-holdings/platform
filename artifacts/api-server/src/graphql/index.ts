@@ -1,15 +1,15 @@
-import { ApolloServer } from "@apollo/server";
-import { expressMiddleware } from "@as-integrations/express5";
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { useServer } from "graphql-ws/use/ws";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import depthLimit from "graphql-depth-limit";
-import type { Server as HttpServer } from "http";
-import type { Request, RequestHandler } from "express";
-import { WebSocketServer } from "ws";
-import { typeDefs, resolvers } from "./schema.js";
-import { logger } from "../lib/logger.js";
-import { createDataLoaders, type AppDataLoaders } from "./dataloaders.js";
+import { ApolloServer } from '@apollo/server';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { expressMiddleware } from '@as-integrations/express5';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import type { Request, RequestHandler } from 'express';
+import depthLimit from 'graphql-depth-limit';
+import { useServer } from 'graphql-ws/use/ws';
+import type { Server as HttpServer } from 'http';
+import { WebSocketServer } from 'ws';
+import { logger } from '../lib/logger.js';
+import { type AppDataLoaders, createDataLoaders } from './dataloaders.js';
+import { resolvers, typeDefs } from './schema.js';
 
 const MAX_QUERY_DEPTH = 10;
 
@@ -29,7 +29,7 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
 
   const wsServer = new WebSocketServer({
     server: httpServer,
-    path: "/api/graphql/ws",
+    path: '/api/graphql/ws',
   });
 
   const serverCleanup = useServer(
@@ -39,17 +39,17 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
         return { loaders: createDataLoaders() };
       },
       onConnect: async () => {
-        logger.debug("GraphQL subscription client connected");
+        logger.debug('GraphQL subscription client connected');
         return true;
       },
       onDisconnect: () => {
-        logger.debug("GraphQL subscription client disconnected");
+        logger.debug('GraphQL subscription client disconnected');
       },
     },
     wsServer,
   );
 
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === 'production';
 
   const apolloServer = new ApolloServer<GraphQLContext>({
     schema,
@@ -73,7 +73,7 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
 
   const middleware = expressMiddleware(apolloServer, {
     context: async ({ req }: { req: any }) => {
-      const authReq = req as Request & { user?: GraphQLContext["user"] };
+      const authReq = req as Request & { user?: GraphQLContext['user'] };
       return {
         user: authReq.user,
         req,

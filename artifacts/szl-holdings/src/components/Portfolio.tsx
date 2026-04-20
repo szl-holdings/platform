@@ -1,6 +1,6 @@
-import { m } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
-import portfolioData from "@/data/portfolio.json";
+import { m } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
+import portfolioData from '@/data/portfolio.json';
 
 export function Portfolio() {
   return (
@@ -12,14 +12,18 @@ export function Portfolio() {
           viewport={{ once: true }}
           className="mb-20"
         >
-          <p className="text-szl-text-muted text-[10px] font-medium uppercase tracking-[0.25em] mb-6">Portfolio</p>
+          <p className="text-szl-text-muted text-[10px] font-medium uppercase tracking-[0.25em] mb-6">
+            Portfolio
+          </p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 max-w-4xl">
             <h2 className="font-[var(--font-display)] text-4xl sm:text-5xl text-szl-text leading-[1.05]">
-              Six operating companies.<br />
-              <span style={{ color: "var(--color-szl-accent)" }}>One intelligence fabric.</span>
+              Six operating companies.
+              <br />
+              <span style={{ color: 'var(--color-szl-accent)' }}>One intelligence fabric.</span>
             </h2>
             <p className="text-szl-text-secondary text-sm max-w-xs leading-relaxed font-light flex-shrink-0">
-              Each platform commands its vertical. Shared infrastructure compounds the advantage across all of them.
+              Each platform commands its vertical. Shared infrastructure compounds the advantage
+              across all of them.
             </p>
           </div>
         </m.div>
@@ -33,7 +37,7 @@ export function Portfolio() {
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.06 }}
             >
-              {company.link !== "#" ? (
+              {company.link !== '#' ? (
                 <a
                   href={company.link}
                   className="group block bg-szl-bg hover:bg-szl-bg-secondary transition-colors duration-300 p-8 h-full"
@@ -43,7 +47,9 @@ export function Portfolio() {
                       className="w-10 h-10 flex items-center justify-center border border-szl-border"
                       style={{ color: company.color }}
                     >
-                      <span className="font-[var(--font-display)] text-base">{company.name[0]}</span>
+                      <span className="font-[var(--font-display)] text-base">
+                        {company.name[0]}
+                      </span>
                     </div>
                     <ArrowUpRight
                       size={14}
@@ -65,10 +71,10 @@ export function Portfolio() {
               ) : (
                 <div className="block bg-szl-bg p-8 h-full opacity-50">
                   <div className="flex items-start justify-between mb-6">
-                    <div
-                      className="w-10 h-10 flex items-center justify-center border border-szl-border"
-                    >
-                      <span className="font-[var(--font-display)] text-base text-szl-text-muted">{company.name[0]}</span>
+                    <div className="w-10 h-10 flex items-center justify-center border border-szl-border">
+                      <span className="font-[var(--font-display)] text-base text-szl-text-muted">
+                        {company.name[0]}
+                      </span>
                     </div>
                     <span className="text-[10px] text-szl-text-muted tracking-wider uppercase border border-szl-border px-2 py-0.5">
                       Soon

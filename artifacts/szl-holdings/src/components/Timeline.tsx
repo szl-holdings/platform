@@ -1,6 +1,6 @@
-import { m } from "framer-motion";
-import milestonesData from "@/data/milestones.json";
-import siteData from "@/data/site.json";
+import { m } from 'framer-motion';
+import milestonesData from '@/data/milestones.json';
+import siteData from '@/data/site.json';
 
 export function Timeline() {
   const { timeline } = siteData;
@@ -14,7 +14,9 @@ export function Timeline() {
           viewport={{ once: true }}
           className="mb-16"
         >
-          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">History</p>
+          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">
+            History
+          </p>
           <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight">
             {timeline.title}
           </h2>
@@ -26,7 +28,7 @@ export function Timeline() {
               key={`${milestone.year}-${milestone.quarter}`}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
+              viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.4, delay: index * 0.06 }}
               className="group py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-8 hover:bg-szl-bg-secondary/50 px-2 -mx-2 rounded-lg transition-colors duration-200"
             >
@@ -51,7 +53,9 @@ export function Timeline() {
                 {milestone.metric && (
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-szl-bg-secondary border border-szl-border mt-3">
                     <span className="text-szl-text-muted text-xs">{milestone.metric.label}:</span>
-                    <span className="text-szl-text font-semibold text-sm">{milestone.metric.value}</span>
+                    <span className="text-szl-text font-semibold text-sm">
+                      {milestone.metric.value}
+                    </span>
                   </div>
                 )}
               </div>

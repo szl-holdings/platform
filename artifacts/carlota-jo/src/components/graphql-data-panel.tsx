@@ -1,8 +1,11 @@
-import { GraphQLDataPanel } from "@szl-holdings/shared-ui/design-system";
-import { useCarlotaServices, useCarlotaInquiries } from "@szl-holdings/graphql-client/hooks";
+import { useCarlotaInquiries, useCarlotaServices } from '@szl-holdings/graphql-client/hooks';
+import { GraphQLDataPanel } from '@szl-holdings/shared-ui/design-system';
 
 export function CarlotaGraphQLPanel() {
-  const { data: servicesData, loading: sLoading } = useCarlotaServices({ isActive: true, limit: 3 });
+  const { data: servicesData, loading: sLoading } = useCarlotaServices({
+    isActive: true,
+    limit: 3,
+  });
   const { data: inquiriesData, loading: iLoading } = useCarlotaInquiries({ limit: 3 });
 
   return (
@@ -11,7 +14,7 @@ export function CarlotaGraphQLPanel() {
       loading={sLoading && iLoading}
       sections={[
         {
-          label: "Active Services",
+          label: 'Active Services',
           items: servicesData?.carlotaServices ?? [],
           renderItem: (s: { id: string; name: string; category: string }) => (
             <div key={s.id} className="flex items-center justify-between text-xs">
@@ -21,7 +24,7 @@ export function CarlotaGraphQLPanel() {
           ),
         },
         {
-          label: "Recent Inquiries",
+          label: 'Recent Inquiries',
           items: inquiriesData?.carlotaInquiries ?? [],
           renderItem: (i: { id: string; name: string; service: string; status: string }) => (
             <div key={i.id} className="flex items-center justify-between text-xs">

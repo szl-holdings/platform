@@ -1,20 +1,20 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 import type {
-  TraceRecord,
-  TraceSpan,
-  ToolCallRecord,
-  RetrievalRecord,
-  MemoryIORecord,
   CitationRecord,
   GuardrailResult,
-  VerifierDecision,
-  ReflectionEntry,
-  RollbackPoint,
+  MemoryIORecord,
   OperatorComment,
-  RunGrade,
   PlanGraph,
-} from "./schema.js";
-import type { TraceStore } from "./store.js";
+  ReflectionEntry,
+  RetrievalRecord,
+  RollbackPoint,
+  RunGrade,
+  ToolCallRecord,
+  TraceRecord,
+  TraceSpan,
+  VerifierDecision,
+} from './schema.js';
+import type { TraceStore } from './store.js';
 
 export class TraceWriter {
   private store: TraceStore;
@@ -23,10 +23,7 @@ export class TraceWriter {
     this.store = store;
   }
 
-  startTrace(
-    params: Pick<TraceRecord, "traceId"> &
-      Partial<TraceRecord>,
-  ): TraceRecord {
+  startTrace(params: Pick<TraceRecord, 'traceId'> & Partial<TraceRecord>): TraceRecord {
     const trace: TraceRecord = {
       traceId: params.traceId,
       runId: params.runId ?? params.traceId,
@@ -59,7 +56,7 @@ export class TraceWriter {
       operatorComments: params.operatorComments ?? [],
       grade: params.grade,
       businessImpact: params.businessImpact,
-      status: "running",
+      status: 'running',
       startedAt: new Date().toISOString(),
       metadata: params.metadata ?? {},
     };
@@ -158,7 +155,12 @@ export class TraceWriter {
     this.store.save(trace);
   }
 
-  addOperatorComment(traceId: string, operatorId: string, content: string, opts: { spanId?: string; tags?: string[] } = {}): OperatorComment {
+  addOperatorComment(
+    traceId: string,
+    operatorId: string,
+    content: string,
+    opts: { spanId?: string; tags?: string[] } = {},
+  ): OperatorComment {
     const trace = this.store.get(traceId);
     if (!trace) throw new Error(`Trace not found: ${traceId}`);
     const comment: OperatorComment = {
@@ -174,7 +176,7 @@ export class TraceWriter {
     return comment;
   }
 
-  gradeRun(traceId: string, grade: Omit<RunGrade, "gradeId" | "gradedAt">): RunGrade {
+  gradeRun(traceId: string, grade: Omit<RunGrade, 'gradeId' | 'gradedAt'>): RunGrade {
     const trace = this.store.get(traceId);
     if (!trace) throw new Error(`Trace not found: ${traceId}`);
     const fullGrade: RunGrade = {
@@ -190,11 +192,11 @@ export class TraceWriter {
   completeTrace(
     traceId: string,
     params: {
-      status?: TraceRecord["status"];
+      status?: TraceRecord['status'];
       latencyMs?: number;
       totalTokens?: number;
       costUsd?: number;
-      businessImpact?: TraceRecord["businessImpact"];
+      businessImpact?: TraceRecord['businessImpact'];
       output?: Record<string, unknown>;
     } = {},
   ): TraceRecord {
@@ -202,7 +204,7 @@ export class TraceWriter {
     if (!trace) throw new Error(`Trace not found: ${traceId}`);
     const completed: TraceRecord = {
       ...trace,
-      status: params.status ?? "completed",
+      status: params.status ?? 'completed',
       completedAt: new Date().toISOString(),
       latencyMs: params.latencyMs ?? trace.latencyMs,
       totalTokens: params.totalTokens ?? trace.totalTokens,

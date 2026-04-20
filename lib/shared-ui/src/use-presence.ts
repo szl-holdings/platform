@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface PresenceUser {
   userId: string;
@@ -23,25 +23,27 @@ export interface UsePresenceResult {
 
 const DEFAULT_POLL_MS = 30_000;
 
-export function usePresence(
-  channel: string,
-  options: UsePresenceOptions = {},
-): UsePresenceResult {
-  const { apiBaseUrl = "/api", pollIntervalMs = DEFAULT_POLL_MS } = options;
+export function usePresence(channel: string, options: UsePresenceOptions = {}): UsePresenceResult {
+  const { apiBaseUrl = '/api', pollIntervalMs = DEFAULT_POLL_MS } = options;
 
   const [presence, setPresence] = useState<PresenceState>({ count: 0, users: [] });
   const [isLoading, setIsLoading] = useState(true);
   const mountedRef = useRef(true);
   const channelRef = useRef(channel);
 
-  useEffect(() => { channelRef.current = channel; }, [channel]);
+  useEffect(() => {
+    channelRef.current = channel;
+  }, [channel]);
 
   const fetchPresence = useCallback(async () => {
     try {
-      const base = apiBaseUrl.endsWith("/") ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
-      const res = await fetch(`${base}/realtime/presence/${encodeURIComponent(channelRef.current)}`, {
-        credentials: "include",
-      });
+      const base = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
+      const res = await fetch(
+        `${base}/realtime/presence/${encodeURIComponent(channelRef.current)}`,
+        {
+          credentials: 'include',
+        },
+      );
       if (!res.ok) return;
       const data = (await res.json()) as { count: number; users: PresenceUser[] };
       if (mountedRef.current) {
@@ -53,7 +55,9 @@ export function usePresence(
     }
   }, [apiBaseUrl]);
 
-  const refresh = useCallback(() => { void fetchPresence(); }, [fetchPresence]);
+  const refresh = useCallback(() => {
+    void fetchPresence();
+  }, [fetchPresence]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -75,13 +79,20 @@ export function usePresence(
 
 export function useRealtimePresence(
   channel: string,
-  wsMessages: Array<{ type?: string; channel?: string; data?: { count?: number; users?: PresenceUser[] } }>,
+  wsMessages: Array<{
+    type?: string;
+    channel?: string;
+    data?: { count?: number; users?: PresenceUser[] };
+  }>,
 ): PresenceState {
   const [presence, setPresence] = useState<PresenceState>({ count: 0, users: [] });
 
   useEffect(() => {
     for (const msg of wsMessages) {
-      if ((msg as { type?: string }).type === "presence" && (msg as { channel?: string }).channel === channel) {
+      if (
+        (msg as { type?: string }).type === 'presence' &&
+        (msg as { channel?: string }).channel === channel
+      ) {
         const data = (msg as { data?: { count?: number; users?: PresenceUser[] } }).data;
         if (data) {
           setPresence({ count: data.count ?? 0, users: data.users ?? [] });

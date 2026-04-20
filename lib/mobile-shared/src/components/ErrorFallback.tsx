@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Modal,
   Platform,
@@ -8,11 +8,11 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { ErrorFallbackProps } from "./ErrorBoundary";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { ErrorFallbackProps } from './ErrorBoundary';
 
-export type ErrorFallbackMode = "reset" | "reload";
+export type ErrorFallbackMode = 'reset' | 'reload';
 
 export interface BrandedErrorFallbackProps extends ErrorFallbackProps {
   mode?: ErrorFallbackMode;
@@ -24,24 +24,24 @@ export interface BrandedErrorFallbackProps extends ErrorFallbackProps {
 export function BrandedErrorFallback({
   error,
   resetError,
-  mode = "reload",
-  accentColor = "#334155",
+  mode = 'reload',
+  accentColor = '#334155',
   appName,
-  backgroundColor = "#080B12",
+  backgroundColor = '#080B12',
 }: BrandedErrorFallbackProps) {
   const insets = useSafeAreaInsets();
   const [devModalVisible, setDevModalVisible] = useState(false);
 
   const monoFont = Platform.select({
-    ios: "Menlo",
-    android: "monospace",
-    default: "monospace",
+    ios: 'Menlo',
+    android: 'monospace',
+    default: 'monospace',
   });
 
   const handlePrimaryAction = async () => {
-    if (mode === "reload") {
+    if (mode === 'reload') {
       try {
-        const { reloadAppAsync } = await import("expo");
+        const { reloadAppAsync } = await import('expo');
         await reloadAppAsync();
       } catch {
         resetError();
@@ -88,9 +88,7 @@ export function BrandedErrorFallback({
         ) : null}
 
         <Text style={styles.message}>
-          {mode === "reload"
-            ? "Please reload the app to continue."
-            : "Tap below to try again."}
+          {mode === 'reload' ? 'Please reload the app to continue.' : 'Tap below to try again.'}
         </Text>
 
         <TouchableOpacity
@@ -99,11 +97,11 @@ export function BrandedErrorFallback({
           activeOpacity={0.85}
         >
           <Text style={styles.primaryButtonText}>
-            {mode === "reload" ? "Reload App" : "Try Again"}
+            {mode === 'reload' ? 'Reload App' : 'Try Again'}
           </Text>
         </TouchableOpacity>
 
-        {mode === "reload" ? (
+        {mode === 'reload' ? (
           <TouchableOpacity style={styles.secondaryButton} onPress={resetError} activeOpacity={0.7}>
             <Text style={styles.secondaryButtonText}>Dismiss</Text>
           </TouchableOpacity>
@@ -133,11 +131,8 @@ export function BrandedErrorFallback({
               showsVerticalScrollIndicator
             >
               <View style={styles.errorBox}>
-                <Text
-                  style={[styles.errorText, { fontFamily: monoFont }]}
-                  selectable
-                >
-                  {`Error: ${error.message}\n\nStack:\n${error.stack ?? "(no stack)"}`}
+                <Text style={[styles.errorText, { fontFamily: monoFont }]} selectable>
+                  {`Error: ${error.message}\n\nStack:\n${error.stack ?? '(no stack)'}`}
                 </Text>
               </View>
             </ScrollView>
@@ -151,60 +146,60 @@ export function BrandedErrorFallback({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 24,
   },
   devButton: {
-    position: "absolute",
+    position: 'absolute',
     right: 16,
     width: 36,
     height: 36,
     borderRadius: 8,
-    backgroundColor: "rgba(255,100,100,0.15)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(255,100,100,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 10,
   },
   devButtonText: {
-    color: "#f87171",
-    fontWeight: "700",
+    color: '#f87171',
+    fontWeight: '700',
     fontSize: 18,
   },
   content: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: 12,
     maxWidth: 320,
-    width: "100%",
+    width: '100%',
   },
   iconCircle: {
     width: 56,
     height: 56,
     borderRadius: 28,
     borderWidth: 1,
-    backgroundColor: "rgba(196,90,74,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(196,90,74,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 4,
   },
   iconText: {
     fontSize: 24,
   },
   title: {
-    color: "#E8EAF0",
+    color: '#E8EAF0',
     fontSize: 20,
-    fontWeight: "600",
-    textAlign: "center",
+    fontWeight: '600',
+    textAlign: 'center',
   },
   appName: {
-    color: "rgba(232,234,240,0.5)",
+    color: 'rgba(232,234,240,0.5)',
     fontSize: 13,
-    textAlign: "center",
+    textAlign: 'center',
   },
   message: {
-    color: "rgba(232,234,240,0.5)",
+    color: 'rgba(232,234,240,0.5)',
     fontSize: 14,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 20,
     marginBottom: 8,
   },
@@ -213,12 +208,12 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: 10,
     minWidth: 160,
-    alignItems: "center",
+    alignItems: 'center',
   },
   primaryButtonText: {
-    color: "#E8EAF0",
+    color: '#E8EAF0',
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   secondaryButton: {
     paddingVertical: 8,
@@ -226,47 +221,47 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   secondaryButtonText: {
-    color: "rgba(232,234,240,0.4)",
+    color: 'rgba(232,234,240,0.4)',
     fontSize: 13,
   },
   modalContainer: {
     flex: 1,
   },
   modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(232,234,240,0.08)",
+    borderBottomColor: 'rgba(232,234,240,0.08)',
   },
   modalTitle: {
-    color: "#E8EAF0",
+    color: '#E8EAF0',
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   closeButton: {
     width: 36,
     height: 36,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeButtonText: {
-    color: "rgba(232,234,240,0.5)",
+    color: 'rgba(232,234,240,0.5)',
     fontSize: 18,
   },
   modalScroll: {
     flex: 1,
   },
   errorBox: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: 8,
     padding: 16,
   },
   errorText: {
-    color: "rgba(232,234,240,0.6)",
+    color: 'rgba(232,234,240,0.6)',
     fontSize: 11,
     lineHeight: 17,
   },

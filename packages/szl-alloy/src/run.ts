@@ -1,15 +1,15 @@
-import type { AutonomyMode, AlloyRunSession, RecommendationResult } from "./types.js";
+import { type RecommendParams, recommend } from './recommend.js';
 import {
-  openSession,
-  recordToolCall,
-  recordHandoff,
-  recordApproval,
   attachEvidence,
   closeSession,
   getSession,
   type OpenSessionParams,
-} from "./session.js";
-import { recommend, type RecommendParams } from "./recommend.js";
+  openSession,
+  recordApproval,
+  recordHandoff,
+  recordToolCall,
+} from './session.js';
+import type { AlloyRunSession, AutonomyMode, RecommendationResult } from './types.js';
 
 export interface AlloyRunHandle {
   runId: string;
@@ -17,9 +17,9 @@ export interface AlloyRunHandle {
   session(): AlloyRunSession | undefined;
   recordToolCall(toolId: string, toolName: string, success: boolean, latencyMs?: number): void;
   recordHandoff(fromAgent: string, toAgent: string, reason: string): void;
-  recordApproval(stepId: string, decision: "pending" | "approved" | "rejected" | "escalated"): void;
+  recordApproval(stepId: string, decision: 'pending' | 'approved' | 'rejected' | 'escalated'): void;
   attachEvidence(evidenceId: string): void;
-  recommend(params: Omit<RecommendParams, "autonomyMode">): Promise<RecommendationResult>;
+  recommend(params: Omit<RecommendParams, 'autonomyMode'>): Promise<RecommendationResult>;
   close(outcome?: unknown): AlloyRunSession | undefined;
   fail(reason?: string): AlloyRunSession | undefined;
 }

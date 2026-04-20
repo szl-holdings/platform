@@ -4,9 +4,9 @@
  * decision, recommendation and outcome that touched it.
  */
 
-import { type CorrelationLink, type DecisionRecord } from "@szl-holdings/db";
-import { getEventsForEntity } from "./correlation";
-import { listDecisions } from "./decision-records";
+import type { CorrelationLink, DecisionRecord } from '@szl-holdings/db';
+import { getEventsForEntity } from './correlation';
+import { listDecisions } from './decision-records';
 
 export interface EntityInvestigationOptions {
   orgId?: number | null;
@@ -18,7 +18,7 @@ export interface EntityInvestigationResult {
   entityId: string;
   decisions: DecisionRecord[];
   events: CorrelationLink[];
-  primitivesTouched: CorrelationLink["primitive"][];
+  primitivesTouched: CorrelationLink['primitive'][];
   domains: string[];
   firstSeenAt: Date | null;
   lastSeenAt: Date | null;

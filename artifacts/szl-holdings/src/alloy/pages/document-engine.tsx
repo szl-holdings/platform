@@ -1,35 +1,44 @@
-import { BatchPdfPanel, SigningDashboard } from "@szl-holdings/shared-ui/document-engine";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { FileText, Layers, Pen, BookOpen } from "lucide-react";
-import { DocumentEnginePanel } from "@szl-holdings/shared-ui/document-engine";
-import { cn } from "@szl-holdings/shared-ui/utils";
+import {
+  BatchPdfPanel,
+  DocumentEnginePanel,
+  SigningDashboard,
+} from '@szl-holdings/shared-ui/document-engine';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { motion } from 'framer-motion';
+import { BookOpen, FileText, Layers, Pen } from 'lucide-react';
+import { useState } from 'react';
 
 const TABS = [
-  { id: "documents", label: "Documents", icon: FileText },
-  { id: "signing", label: "Signing", icon: Pen },
-  { id: "pdf-batch", label: "PDF Batches", icon: Layers },
+  { id: 'documents', label: 'Documents', icon: FileText },
+  { id: 'signing', label: 'Signing', icon: Pen },
+  { id: 'pdf-batch', label: 'PDF Batches', icon: Layers },
 ] as const;
 
-type TabId = typeof TABS[number]["id"];
+type TabId = (typeof TABS)[number]['id'];
 
 export default function AlloyDocumentEngine() {
-  const [activeTab, setActiveTab] = useState<TabId>("documents");
+  const [activeTab, setActiveTab] = useState<TabId>('documents');
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex-shrink-0">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex-shrink-0"
+      >
         <div className="flex items-center gap-3 px-6 pt-6 pb-0">
           <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center">
             <BookOpen className="w-4 h-4 text-blue-400" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Document Engine</h1>
-            <p className="text-xs text-white/40">Approval memos, governance records, and cross-platform document management</p>
+            <p className="text-xs text-white/40">
+              Approval memos, governance records, and cross-platform document management
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1 px-6 pt-4 border-b border-white/10">
-          {TABS.map(tab => {
+          {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
@@ -37,10 +46,10 @@ export default function AlloyDocumentEngine() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg border-b-2 transition-colors",
+                  'flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg border-b-2 transition-colors',
                   isActive
-                    ? "border-blue-400 text-blue-400 bg-blue-500/5"
-                    : "border-transparent text-white/50 hover:text-white"
+                    ? 'border-blue-400 text-blue-400 bg-blue-500/5'
+                    : 'border-transparent text-white/50 hover:text-white',
                 )}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -52,26 +61,14 @@ export default function AlloyDocumentEngine() {
       </motion.div>
 
       <div className="flex-1 overflow-hidden">
-        {activeTab === "documents" && (
-          <DocumentEnginePanel
-            appSource="alloy"
-            accentColor="#06b6d4"
-            className="h-full"
-          />
+        {activeTab === 'documents' && (
+          <DocumentEnginePanel appSource="alloy" accentColor="#06b6d4" className="h-full" />
         )}
-        {activeTab === "signing" && (
-          <SigningDashboard
-            appSource="alloy"
-            accentColor="#06b6d4"
-            className="h-full"
-          />
+        {activeTab === 'signing' && (
+          <SigningDashboard appSource="alloy" accentColor="#06b6d4" className="h-full" />
         )}
-        {activeTab === "pdf-batch" && (
-          <BatchPdfPanel
-            appSource="alloy"
-            accentColor="#06b6d4"
-            className="h-full"
-          />
+        {activeTab === 'pdf-batch' && (
+          <BatchPdfPanel appSource="alloy" accentColor="#06b6d4" className="h-full" />
         )}
       </div>
     </div>

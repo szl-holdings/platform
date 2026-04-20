@@ -1,7 +1,9 @@
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useRef, useState } from "react";
+import { Feather } from '@expo/vector-icons';
+import { SkeletonLoader, useApiStatus } from '@szl-holdings/mobile-shared';
+import { useQuery } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -12,21 +14,23 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NotificationBell } from '@/components/NotificationCenter';
+import { useAuth } from '@/context/AuthContext';
+import { useColors } from '@/hooks/useColors';
 
-import { useColors } from "@/hooks/useColors";
-import { useAuth } from "@/context/AuthContext";
-import { useApiStatus } from "@szl-holdings/mobile-shared";
-import { SkeletonLoader } from "@szl-holdings/mobile-shared";
-import { NotificationBell } from "@/components/NotificationCenter";
+const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : '';
 
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
-
-type EngagementStage = { phase: string; status: "complete" | "active" | "upcoming"; dates: string };
+type EngagementStage = { phase: string; status: 'complete' | 'active' | 'upcoming'; dates: string };
 type KpiCard = { label: string; value: string; sub: string };
-type ActivityItem = { id: number | string; type: string; title: string; time: string; icon: string };
+type ActivityItem = {
+  id: number | string;
+  type: string;
+  title: string;
+  time: string;
+  icon: string;
+};
 
 function KpiCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   const colors = useColors();
@@ -46,10 +50,7 @@ function KpiCard({ label, value, sub }: { label: string; value: string; sub: str
       onPress={() => Haptics.selectionAsync()}
     >
       <Animated.View
-        style={[
-          styles.kpiCard,
-          { borderColor: colors.goldBorder, transform: [{ scale }] },
-        ]}
+        style={[styles.kpiCard, { borderColor: colors.goldBorder, transform: [{ scale }] }]}
       >
         <Text style={[styles.kpiLabel, { color: colors.creamDim }]}>{label}</Text>
         <Text style={[styles.kpiValue, { color: colors.cream }]}>{value}</Text>
@@ -66,29 +67,29 @@ function TimelineItem({
   isLast,
 }: {
   phase: string;
-  status: "complete" | "active" | "upcoming";
+  status: 'complete' | 'active' | 'upcoming';
   dates: string;
   isLast: boolean;
 }) {
   const colors = useColors();
 
   const dotColor =
-    status === "complete"
-      ? "rgba(200,169,106,0.25)"
-      : status === "active"
-      ? "rgba(200,169,106,0.4)"
-      : "rgba(245,240,232,0.05)";
+    status === 'complete'
+      ? 'rgba(200,169,106,0.25)'
+      : status === 'active'
+        ? 'rgba(200,169,106,0.4)'
+        : 'rgba(245,240,232,0.05)';
 
-  const iconName = status === "complete" ? "check" : status === "active" ? "arrow-right" : "clock";
+  const iconName = status === 'complete' ? 'check' : status === 'active' ? 'arrow-right' : 'clock';
   const iconColor =
-    status === "complete" || status === "active" ? colors.gold : "rgba(245,240,232,0.2)";
+    status === 'complete' || status === 'active' ? colors.gold : 'rgba(245,240,232,0.2)';
 
   const textColor =
-    status === "active"
-      ? "rgba(245,240,232,0.9)"
-      : status === "complete"
-      ? "rgba(245,240,232,0.45)"
-      : "rgba(245,240,232,0.2)";
+    status === 'active'
+      ? 'rgba(245,240,232,0.9)'
+      : status === 'complete'
+        ? 'rgba(245,240,232,0.45)'
+        : 'rgba(245,240,232,0.2)';
 
   return (
     <View style={styles.timelineItem}>
@@ -98,8 +99,8 @@ function TimelineItem({
             styles.timelineDot,
             {
               backgroundColor: dotColor,
-              borderColor: status === "active" ? colors.goldBorder : "transparent",
-              borderWidth: status === "active" ? 1 : 0,
+              borderColor: status === 'active' ? colors.goldBorder : 'transparent',
+              borderWidth: status === 'active' ? 1 : 0,
             },
           ]}
         >
@@ -111,9 +112,7 @@ function TimelineItem({
               styles.timelineLine,
               {
                 backgroundColor:
-                  status === "complete"
-                    ? "rgba(200,169,106,0.15)"
-                    : "rgba(245,240,232,0.04)",
+                  status === 'complete' ? 'rgba(200,169,106,0.15)' : 'rgba(245,240,232,0.04)',
               },
             ]}
           />
@@ -168,21 +167,26 @@ export default function DashboardScreen() {
 
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 17) return "Good afternoon";
-    return "Good evening";
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
   })();
 
-  const displayName = user?.displayName ?? "Client";
+  const displayName = user?.displayName ?? 'Client';
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
+  const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const bottomPad = Platform.OS === 'web' ? 34 + 84 : 90;
 
-  const { data: dashboardData, isLoading: dashLoading, isError: dashError, refetch } = useQuery({
-    queryKey: ["carlota-dashboard"],
+  const {
+    data: dashboardData,
+    isLoading: dashLoading,
+    isError: dashError,
+    refetch,
+  } = useQuery({
+    queryKey: ['carlota-dashboard'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + "/carlotajo/dashboard");
-      if (!res.ok) throw new Error("fetch failed");
+      const res = await fetch(API_BASE + '/carlotajo/dashboard');
+      if (!res.ok) throw new Error('fetch failed');
       const json = await res.json();
       return json.data ?? json;
     },
@@ -192,7 +196,7 @@ export default function DashboardScreen() {
   const kpiCards: KpiCard[] = dashboardData?.kpis ?? [];
   const engagementStages: EngagementStage[] = dashboardData?.engagementStages ?? [];
   const recentActivity: ActivityItem[] = dashboardData?.recentActivity ?? [];
-  const engagementPhase: string = dashboardData?.currentPhase ?? "Onboarding";
+  const engagementPhase: string = dashboardData?.currentPhase ?? 'Onboarding';
 
   const onRefresh = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -204,14 +208,20 @@ export default function DashboardScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {(isOffline || isDegraded) && (
-        <View style={{ backgroundColor: isOffline ? "#7f1d1d" : "#78350f", paddingHorizontal: 16, paddingVertical: 8 }}>
-          <Text style={{ color: "#fca5a5", fontSize: 11, fontWeight: "600" }}>
-            {isOffline ? "Offline — advisory data may be stale" : "Connection degraded — retrying…"}
+        <View
+          style={{
+            backgroundColor: isOffline ? '#7f1d1d' : '#78350f',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+          }}
+        >
+          <Text style={{ color: '#fca5a5', fontSize: 11, fontWeight: '600' }}>
+            {isOffline ? 'Offline — advisory data may be stale' : 'Connection degraded — retrying…'}
           </Text>
         </View>
       )}
       <LinearGradient
-        colors={["rgba(200,169,106,0.05)", "transparent"]}
+        colors={['rgba(200,169,106,0.05)', 'transparent']}
         style={[styles.headerGradient, { height: topPad + 120 }]}
       />
 
@@ -223,11 +233,7 @@ export default function DashboardScreen() {
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.gold}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />
         }
       >
         <View style={styles.greeting}>
@@ -244,7 +250,8 @@ export default function DashboardScreen() {
             </View>
           ) : (
             <Text style={[styles.greetingName, { color: colors.cream }]}>
-              {greeting},{"\n"}{displayName}
+              {greeting},{'\n'}
+              {displayName}
             </Text>
           )}
           <Text style={[styles.greetingStatus, { color: colors.mutedForeground }]}>
@@ -253,7 +260,7 @@ export default function DashboardScreen() {
         </View>
 
         {dashLoading ? (
-          <View style={{ paddingVertical: 24, alignItems: "center" }}>
+          <View style={{ paddingVertical: 24, alignItems: 'center' }}>
             <ActivityIndicator color={colors.gold} />
           </View>
         ) : (
@@ -299,35 +306,57 @@ export default function DashboardScreen() {
             )}
 
             {dashError ? (
-              <View style={{ paddingVertical: 32, alignItems: "center", gap: 8 }}>
+              <View style={{ paddingVertical: 32, alignItems: 'center', gap: 8 }}>
                 <Feather name="wifi-off" size={24} color={colors.mutedForeground} />
-                <Text style={{ color: colors.mutedForeground, fontSize: 13, fontFamily: "Inter_300Light", marginTop: 4 }}>
+                <Text
+                  style={{
+                    color: colors.mutedForeground,
+                    fontSize: 13,
+                    fontFamily: 'Inter_300Light',
+                    marginTop: 4,
+                  }}
+                >
                   Could not reach server
                 </Text>
                 <Pressable onPress={() => refetch()} style={{ marginTop: 4 }}>
-                  <Text style={{ color: colors.gold, fontSize: 12, fontFamily: "Inter_400Regular" }}>Tap to retry</Text>
+                  <Text
+                    style={{ color: colors.gold, fontSize: 12, fontFamily: 'Inter_400Regular' }}
+                  >
+                    Tap to retry
+                  </Text>
                 </Pressable>
               </View>
-            ) : kpiCards.length === 0 && engagementStages.length === 0 && recentActivity.length === 0 && (
-              <View style={{ paddingVertical: 32, alignItems: "center" }}>
-                <Feather name="inbox" size={24} color={colors.mutedForeground} />
-                <Text style={{ color: colors.mutedForeground, fontSize: 13, fontFamily: "Inter_300Light", marginTop: 8 }}>
-                  No engagement data yet
-                </Text>
-              </View>
+            ) : (
+              kpiCards.length === 0 &&
+              engagementStages.length === 0 &&
+              recentActivity.length === 0 && (
+                <View style={{ paddingVertical: 32, alignItems: 'center' }}>
+                  <Feather name="inbox" size={24} color={colors.mutedForeground} />
+                  <Text
+                    style={{
+                      color: colors.mutedForeground,
+                      fontSize: 13,
+                      fontFamily: 'Inter_300Light',
+                      marginTop: 8,
+                    }}
+                  >
+                    No engagement data yet
+                  </Text>
+                </View>
+              )
             )}
           </>
         )}
 
         {(dashboardData?.properties ?? []).length > 0 && (
           <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-            <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-              YOUR PROPERTIES
-            </Text>
-            {(dashboardData.properties as Array<{ name: string; location: string; status: string }>).map((prop) => (
+            <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>YOUR PROPERTIES</Text>
+            {(
+              dashboardData.properties as Array<{ name: string; location: string; status: string }>
+            ).map((prop) => (
               <Pressable key={prop.name}>
                 <View style={[styles.propertyCard, { borderColor: colors.creamFaint }]}>
-                  <Text style={[styles.propertyName, { color: "rgba(245,240,232,0.75)" }]}>
+                  <Text style={[styles.propertyName, { color: 'rgba(245,240,232,0.75)' }]}>
                     {prop.name}
                   </Text>
                   <Text style={[styles.propertyLocation, { color: colors.goldSubtle }]}>
@@ -349,7 +378,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerGradient: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -358,53 +387,53 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20 },
   greeting: { marginBottom: 28 },
   greetingHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
   greetingEyebrow: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 3,
   },
   greetingName: {
     fontSize: 28,
-    fontFamily: "CormorantGaramond_400Regular",
+    fontFamily: 'CormorantGaramond_400Regular',
     lineHeight: 36,
     marginBottom: 6,
   },
   greetingStatus: {
     fontSize: 12,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     letterSpacing: 0.3,
   },
   kpiGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginBottom: 24,
   },
-  kpiCol: { width: "48.5%" },
+  kpiCol: { width: '48.5%' },
   kpiCard: {
     borderWidth: 1,
     padding: 16,
   },
   kpiLabel: {
     fontSize: 9,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     letterSpacing: 1.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     marginBottom: 6,
   },
   kpiValue: {
     fontSize: 22,
-    fontFamily: "CormorantGaramond_400Regular",
+    fontFamily: 'CormorantGaramond_400Regular',
     marginBottom: 4,
   },
   kpiSub: {
     fontSize: 10,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   section: {
     borderTopWidth: 1,
@@ -413,25 +442,25 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 3,
     marginBottom: 16,
   },
   timeline: { gap: 0 },
   timelineItem: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 12,
   },
   timelineLeft: {
-    alignItems: "center",
+    alignItems: 'center',
     width: 20,
   },
   timelineDot: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 1,
   },
   timelineLine: {
@@ -447,19 +476,19 @@ const styles = StyleSheet.create({
   },
   timelinePhase: {
     fontSize: 13,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     marginBottom: 2,
   },
   timelineDates: {
     fontSize: 10,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   activityList: {
     borderWidth: 1,
   },
   activityRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: 14,
     gap: 12,
@@ -468,18 +497,18 @@ const styles = StyleSheet.create({
   activityIcon: {
     width: 32,
     height: 32,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   activityText: { flex: 1 },
   activityTitle: {
     fontSize: 13,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     marginBottom: 2,
   },
   activityTime: {
     fontSize: 10,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
   propertyCard: {
     borderWidth: 1,
@@ -488,17 +517,17 @@ const styles = StyleSheet.create({
   },
   propertyName: {
     fontSize: 14,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     marginBottom: 4,
   },
   propertyLocation: {
     fontSize: 10,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     letterSpacing: 0.5,
     marginBottom: 4,
   },
   propertyStatus: {
     fontSize: 10,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
   },
 });

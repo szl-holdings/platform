@@ -1,66 +1,50 @@
-import { logger } from "./logger";
 import {
-  getDomainFeatureDefinitions,
-  getAllFeatureDefinitions,
-  computeFeature,
-  getFeatureVector,
-  getFeatureStoreSummary,
-  checkFreshness,
-  DOMAIN_FEATURE_CATALOG,
-} from "@szl-holdings/ai-engine";
-import {
-  startTrainingRun,
-  getTrainingRun,
-  listTrainingRuns,
-  triggerDomainTraining,
-  getTrainingPipelineSummary,
-  type TrainingRunConfig,
-} from "@szl-holdings/ai-engine";
-import {
-  mlModelRegistry,
-  type ModelLifecycle,
-} from "@szl-holdings/ai-engine";
-import {
-  predict,
-  batchPredict,
-  getInferenceStats,
-  clearPredictionCache,
-  type PredictionRequest,
+  assignVariant,
   type BatchPredictionRequest,
-} from "@szl-holdings/ai-engine";
-import {
+  batchPredict,
+  bootstrapDomainDatasets,
+  checkFreshness,
+  clearPredictionCache,
+  computeFeature,
+  computeShapExplanation,
+  concludeAbTest,
+  createAbTest,
+  createDataset,
+  DOMAIN_FEATURE_CATALOG,
+  evaluateAbTest,
+  explainPrediction,
+  getAbTestSummary,
+  getAllDomainTemplates,
+  getAllFeatureDefinitions,
+  getDataset,
+  getDatasetSummary,
+  getDomainFeatureDefinitions,
+  getDomainTemplates,
+  getFeatureStoreSummary,
+  getFeatureVector,
+  getInferenceStats,
+  getMonitoringSnapshots,
+  getMonitoringSummary,
+  getRetrainingLog,
+  getTemplate,
+  getTrainingPipelineSummary,
+  getTrainingRun,
+  listAbTests,
+  listDatasets,
+  listTrainingRuns,
+  type ModelLifecycle,
+  mlModelRegistry,
+  type PredictionRequest,
+  predict,
+  recordAbTestOutcome,
+  refreshDataset,
   runMonitoringCycle,
   runMonitoringForAllProductionModels,
-  getMonitoringSnapshots,
-  getRetrainingLog,
-  getMonitoringSummary,
-} from "@szl-holdings/ai-engine";
-import {
-  createAbTest,
-  assignVariant,
-  recordAbTestOutcome,
-  evaluateAbTest,
-  concludeAbTest,
-  listAbTests,
-  getAbTestSummary,
-} from "@szl-holdings/ai-engine";
-import {
-  explainPrediction,
-  computeShapExplanation,
-} from "@szl-holdings/ai-engine";
-import {
-  createDataset,
-  refreshDataset,
-  getDataset,
-  listDatasets,
-  getDatasetSummary,
-  bootstrapDomainDatasets,
-} from "@szl-holdings/ai-engine";
-import {
-  getDomainTemplates,
-  getAllDomainTemplates,
-  getTemplate,
-} from "@szl-holdings/ai-engine";
+  startTrainingRun,
+  type TrainingRunConfig,
+  triggerDomainTraining,
+} from '@szl-holdings/ai-engine';
+import { logger } from './logger';
 
 // ---------------------------------------------------------------------------
 // Feature Store Service
@@ -71,9 +55,15 @@ export const featureStoreService = {
     return domain ? getDomainFeatureDefinitions(domain) : getAllFeatureDefinitions();
   },
 
-  computeFeature(featureId: string, domain: string, entityId: string, entityType: string, value: unknown) {
+  computeFeature(
+    featureId: string,
+    domain: string,
+    entityId: string,
+    entityType: string,
+    value: unknown,
+  ) {
     const defs = getDomainFeatureDefinitions(domain);
-    const def = defs.find(d => d.featureId === featureId);
+    const def = defs.find((d) => d.featureId === featureId);
     if (!def) throw new Error(`Feature definition ${featureId} not found for domain ${domain}`);
     return computeFeature(def, entityId, entityType, value);
   },
@@ -101,7 +91,10 @@ export const featureStoreService = {
 
 export const trainingService = {
   async startRun(config: TrainingRunConfig) {
-    logger.info({ domain: config.domain, modelType: config.modelType }, "Training run initiated via service");
+    logger.info(
+      { domain: config.domain, modelType: config.modelType },
+      'Training run initiated via service',
+    );
     return startTrainingRun(config);
   },
 
@@ -114,7 +107,7 @@ export const trainingService = {
   },
 
   async triggerDomain(domain: string) {
-    return triggerDomainTraining(domain, "api");
+    return triggerDomainTraining(domain, 'api');
   },
 
   getSummary() {
@@ -213,7 +206,7 @@ export const abTestingService = {
     return assignVariant(testId, entityId);
   },
 
-  record(testId: string, variant: "control" | "treatment", metricValue: number) {
+  record(testId: string, variant: 'control' | 'treatment', metricValue: number) {
     return recordAbTestOutcome(testId, variant, metricValue);
   },
 
@@ -239,11 +232,21 @@ export const abTestingService = {
 // ---------------------------------------------------------------------------
 
 export const explainabilityService = {
-  explain(domain: string, modelType: string, prediction: unknown, featureImportance: Record<string, number>, featureValues: Record<string, unknown>) {
+  explain(
+    domain: string,
+    modelType: string,
+    prediction: unknown,
+    featureImportance: Record<string, number>,
+    featureValues: Record<string, unknown>,
+  ) {
     return explainPrediction(domain, modelType, prediction, featureImportance, featureValues);
   },
 
-  computeShap(featureImportance: Record<string, number>, featureValues: Record<string, unknown>, prediction: unknown) {
+  computeShap(
+    featureImportance: Record<string, number>,
+    featureValues: Record<string, unknown>,
+    prediction: unknown,
+  ) {
     return computeShapExplanation(featureImportance, featureValues, prediction);
   },
 };
@@ -313,4 +316,4 @@ export function getMlPipelineStatus() {
   };
 }
 
-logger.info("ML Pipeline service layer initialised");
+logger.info('ML Pipeline service layer initialised');

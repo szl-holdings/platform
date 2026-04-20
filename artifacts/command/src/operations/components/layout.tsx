@@ -1,42 +1,51 @@
-import { useLocation } from "wouter";
-import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import {
+  DashboardShell,
+  SidebarNav,
+  type SidebarNavSection,
+} from '@szl-holdings/shared-ui/design-system';
+import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
+import { colors, spacing } from '@szl-holdings/shared-ui/tokens';
+import { UserButton } from '@szl-holdings/shared-ui/UserButton';
+import { toAlpha } from '@szl-holdings/shared-ui/utils';
+import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
-  LayoutDashboard,
-  Zap,
-  Clock,
-  Users,
-  DollarSign,
-  BookOpen,
-  Target,
   Bell,
-  WifiOff,
+  BookOpen,
   Brain,
-  Shield,
+  Clock,
+  DollarSign,
   Gauge,
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { ReactNode } from "react";
-import { LyteLogo } from "./LyteLogo";
-import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
-import { DashboardShell, SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
-import { colors, spacing } from "@szl-holdings/shared-ui/tokens";
-import { toAlpha } from "@szl-holdings/shared-ui/utils";
+  LayoutDashboard,
+  Shield,
+  Target,
+  Users,
+  WifiOff,
+  Zap,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+import { useLocation } from 'wouter';
+import { LyteLogo } from './LyteLogo';
 
 const LYTE_ACCENT = LANE_ACCENT_HEX.lyte.primary;
-const SIDEBAR_BG = "#08090d";
-const HEADER_BG = toAlpha("#08090d", 0.90);
+const SIDEBAR_BG = '#08090d';
+const HEADER_BG = toAlpha('#08090d', 0.9);
 
 interface AppHealthSummary {
   services: { name: string; status: string }[];
-  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
+  summary: {
+    total: number;
+    liveConfigured: number;
+    mockedDemoMode: number;
+    manualRequired: number;
+  };
 }
 
 function DemoModeBanner() {
   const { data } = useQuery<AppHealthSummary>({
-    queryKey: ["app-health-lyte"],
-    queryFn: () => fetch("/api/services/health/app/lyte").then((r) => r.json()),
+    queryKey: ['app-health-lyte'],
+    queryFn: () => fetch('/api/services/health/app/lyte').then((r) => r.json()),
     refetchInterval: 60000,
   });
   if (!data) return null;
@@ -64,13 +73,13 @@ function DemoModeBanner() {
   return (
     <div
       className="px-4 py-1 flex items-center gap-2 shrink-0"
-      style={{ borderBottom: `1px solid ${toAlpha(LYTE_ACCENT, 0.10)}` }}
+      style={{ borderBottom: `1px solid ${toAlpha(LYTE_ACCENT, 0.1)}` }}
     >
       <span
         className="text-[10px] font-mono px-2 py-0.5 rounded-full"
         style={{
           color: toAlpha(LYTE_ACCENT, 0.75),
-          border: `1px solid ${toAlpha(LYTE_ACCENT, 0.20)}`,
+          border: `1px solid ${toAlpha(LYTE_ACCENT, 0.2)}`,
           background: toAlpha(LYTE_ACCENT, 0.06),
         }}
       >
@@ -85,32 +94,92 @@ function DemoModeBanner() {
 
 const PRIMARY_SECTIONS: SidebarNavSection[] = [
   {
-    id: "primary",
+    id: 'primary',
     items: [
-      { id: "overview", href: "/", label: "Command Overview", icon: <LayoutDashboard className="w-full h-full" /> },
-      { id: "signals", href: "/signals", label: "Signal Feed", icon: <Activity className="w-full h-full" /> },
-      { id: "insights", href: "/insights", label: "Narrative Intelligence", icon: <Zap className="w-full h-full" /> },
-      { id: "agent-insights", href: "/agent-insights", label: "Agent Insights", icon: <Brain className="w-full h-full" /> },
-      { id: "action-center", href: "/action-center", label: "Action Center", icon: <AlertTriangle className="w-full h-full" /> },
-      { id: "readiness", href: "/readiness", label: "Lyte Readiness", icon: <Shield className="w-full h-full" /> },
+      {
+        id: 'overview',
+        href: '/',
+        label: 'Command Overview',
+        icon: <LayoutDashboard className="w-full h-full" />,
+      },
+      {
+        id: 'signals',
+        href: '/signals',
+        label: 'Signal Feed',
+        icon: <Activity className="w-full h-full" />,
+      },
+      {
+        id: 'insights',
+        href: '/insights',
+        label: 'Narrative Intelligence',
+        icon: <Zap className="w-full h-full" />,
+      },
+      {
+        id: 'agent-insights',
+        href: '/agent-insights',
+        label: 'Agent Insights',
+        icon: <Brain className="w-full h-full" />,
+      },
+      {
+        id: 'action-center',
+        href: '/action-center',
+        label: 'Action Center',
+        icon: <AlertTriangle className="w-full h-full" />,
+      },
+      {
+        id: 'readiness',
+        href: '/readiness',
+        label: 'Lyte Readiness',
+        icon: <Shield className="w-full h-full" />,
+      },
     ],
   },
   {
-    id: "analytics",
-    label: "Analytics & Views",
+    id: 'analytics',
+    label: 'Analytics & Views',
     items: [
-      { id: "workflow-latency", href: "/workflow-latency", label: "Workflow Latency", icon: <Clock className="w-full h-full" /> },
-      { id: "apm", href: "/apm", label: "APM Instrumentation", icon: <Gauge className="w-full h-full" /> },
-      { id: "ownership-map", href: "/ownership-map", label: "Ownership Map", icon: <Users className="w-full h-full" /> },
-      { id: "value-at-risk", href: "/value-at-risk", label: "Value at Risk", icon: <DollarSign className="w-full h-full" /> },
-      { id: "use-cases", href: "/use-cases", label: "Use Cases", icon: <BookOpen className="w-full h-full" /> },
+      {
+        id: 'workflow-latency',
+        href: '/workflow-latency',
+        label: 'Workflow Latency',
+        icon: <Clock className="w-full h-full" />,
+      },
+      {
+        id: 'apm',
+        href: '/apm',
+        label: 'APM Instrumentation',
+        icon: <Gauge className="w-full h-full" />,
+      },
+      {
+        id: 'ownership-map',
+        href: '/ownership-map',
+        label: 'Ownership Map',
+        icon: <Users className="w-full h-full" />,
+      },
+      {
+        id: 'value-at-risk',
+        href: '/value-at-risk',
+        label: 'Value at Risk',
+        icon: <DollarSign className="w-full h-full" />,
+      },
+      {
+        id: 'use-cases',
+        href: '/use-cases',
+        label: 'Use Cases',
+        icon: <BookOpen className="w-full h-full" />,
+      },
     ],
   },
   {
-    id: "platform",
-    label: "Platform",
+    id: 'platform',
+    label: 'Platform',
     items: [
-      { id: "platform", href: "/platform", label: "Platform Overview", icon: <Target className="w-full h-full" /> },
+      {
+        id: 'platform',
+        href: '/platform',
+        label: 'Platform Overview',
+        icon: <Target className="w-full h-full" />,
+      },
     ],
   },
 ];
@@ -137,7 +206,9 @@ export function Layout({ children }: { children: ReactNode }) {
           <LyteLogo className="w-4 h-4 text-white" />
         </div>
         <div className="flex flex-col">
-          <span className="font-display font-bold text-sm tracking-[0.1em] text-white leading-none">LYTE</span>
+          <span className="font-display font-bold text-sm tracking-[0.1em] text-white leading-none">
+            LYTE
+          </span>
           <span
             className="text-[9px] uppercase tracking-[0.15em] leading-none mt-0.5"
             style={{ color: toAlpha(LYTE_ACCENT, 0.75) }}
@@ -173,15 +244,24 @@ export function Layout({ children }: { children: ReactNode }) {
         className="font-display font-semibold text-base capitalize tracking-wide"
         style={{ color: colors.text.primary }}
       >
-        {ALL_ITEMS.find(i => i.href === location || (i.href !== "/" && location.startsWith(i.href as string)))?.label || "Lyte"}
+        {ALL_ITEMS.find(
+          (i) => i.href === location || (i.href !== '/' && location.startsWith(i.href as string)),
+        )?.label || 'Lyte'}
       </h1>
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5 text-[10px] font-mono">
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: colors.semantic.error }} />
+          <span
+            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{ background: colors.semantic.error }}
+          />
           <span style={{ color: colors.semantic.error }}>3 Critical</span>
-          <span className="mx-1" style={{ color: colors.border.DEFAULT }}>·</span>
+          <span className="mx-1" style={{ color: colors.border.DEFAULT }}>
+            ·
+          </span>
           <span style={{ color: colors.semantic.warning }}>5 High</span>
-          <span className="mx-1" style={{ color: colors.border.DEFAULT }}>·</span>
+          <span className="mx-1" style={{ color: colors.border.DEFAULT }}>
+            ·
+          </span>
           <span style={{ color: LYTE_ACCENT }}>$17.6M at risk</span>
         </div>
         <div className="h-6 w-px" style={{ background: colors.border.DEFAULT }} />
@@ -208,7 +288,9 @@ export function Layout({ children }: { children: ReactNode }) {
         accentColor={LYTE_ACCENT}
         header={sidebarHeader}
         footer={sidebarFooter}
-        onNavigate={(item) => { if (item.href) navigate(item.href); }}
+        onNavigate={(item) => {
+          if (item.href) navigate(item.href);
+        }}
       />
     </>
   );
@@ -218,7 +300,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
-        style={{ background: LYTE_ACCENT, color: "#fff" }}
+        style={{ background: LYTE_ACCENT, color: '#fff' }}
       >
         Skip to main content
       </a>

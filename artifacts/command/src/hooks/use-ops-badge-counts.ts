@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore } from 'react';
 
 export interface OpsBadgeCounts {
   alerts: number | null;
@@ -21,10 +21,10 @@ let inFlight = false;
 
 async function safeFetchCount(url: string): Promise<number | null> {
   try {
-    const res = await fetch(url, { credentials: "include" });
+    const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) return null;
     const body = (await res.json()) as { count?: number };
-    return typeof body.count === "number" ? body.count : null;
+    return typeof body.count === 'number' ? body.count : null;
   } catch {
     return null;
   }
@@ -35,10 +35,10 @@ async function refresh(): Promise<void> {
   inFlight = true;
   try {
     const [alerts, slaBreaches, governancePending, costOverBudget] = await Promise.all([
-      safeFetchCount("/api/command/alerts/count"),
-      safeFetchCount("/api/command/sla/breaches"),
-      safeFetchCount("/api/governance/pending"),
-      safeFetchCount("/api/command/costs/over-budget"),
+      safeFetchCount('/api/command/alerts/count'),
+      safeFetchCount('/api/command/sla/breaches'),
+      safeFetchCount('/api/governance/pending'),
+      safeFetchCount('/api/command/costs/over-budget'),
     ]);
     snapshot = { alerts, slaBreaches, governancePending, costOverBudget };
     subscribers.forEach((cb) => cb());
@@ -50,7 +50,9 @@ async function refresh(): Promise<void> {
 function ensurePolling(): void {
   if (interval !== null) return;
   void refresh();
-  interval = setInterval(() => { void refresh(); }, POLL_INTERVAL_MS);
+  interval = setInterval(() => {
+    void refresh();
+  }, POLL_INTERVAL_MS);
 }
 
 function stopPolling(): void {

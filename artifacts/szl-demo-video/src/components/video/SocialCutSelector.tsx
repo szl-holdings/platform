@@ -2,13 +2,16 @@ import { motion } from 'framer-motion';
 
 export type SocialCut = 'full' | '60s' | '30s' | '15s';
 
-export const SOCIAL_CUT_CONFIGS: Record<SocialCut, {
-  label: string;
-  duration: string;
-  description: string;
-  sceneRange: [number, number];
-  durations: Record<string, number>;
-}> = {
+export const SOCIAL_CUT_CONFIGS: Record<
+  SocialCut,
+  {
+    label: string;
+    duration: string;
+    description: string;
+    sceneRange: [number, number];
+    durations: Record<string, number>;
+  }
+> = {
   full: {
     label: 'Full Demo',
     duration: '77s',

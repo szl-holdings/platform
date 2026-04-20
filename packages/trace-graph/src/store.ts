@@ -1,9 +1,14 @@
-import type { TraceRecord } from "./schema.js";
+import type { TraceRecord } from './schema.js';
 
 export interface TraceStore {
   save(trace: TraceRecord): void;
   get(traceId: string): TraceRecord | undefined;
-  list(filter?: { sessionId?: string; workflowId?: string; agentId?: string; status?: TraceRecord["status"] }): TraceRecord[];
+  list(filter?: {
+    sessionId?: string;
+    workflowId?: string;
+    agentId?: string;
+    status?: TraceRecord['status'];
+  }): TraceRecord[];
   delete(traceId: string): boolean;
   count(): number;
 }
@@ -19,7 +24,12 @@ export class InMemoryTraceStore implements TraceStore {
     return this.traces.get(traceId);
   }
 
-  list(filter?: { sessionId?: string; workflowId?: string; agentId?: string; status?: TraceRecord["status"] }): TraceRecord[] {
+  list(filter?: {
+    sessionId?: string;
+    workflowId?: string;
+    agentId?: string;
+    status?: TraceRecord['status'];
+  }): TraceRecord[] {
     let results = Array.from(this.traces.values());
     if (filter?.sessionId) results = results.filter((t) => t.sessionId === filter.sessionId);
     if (filter?.workflowId) results = results.filter((t) => t.workflowId === filter.workflowId);
@@ -66,7 +76,12 @@ export class MutableTraceStore implements TraceStore {
     return this.backend.get(traceId);
   }
 
-  list(filter?: { sessionId?: string; workflowId?: string; agentId?: string; status?: TraceRecord["status"] }): TraceRecord[] {
+  list(filter?: {
+    sessionId?: string;
+    workflowId?: string;
+    agentId?: string;
+    status?: TraceRecord['status'];
+  }): TraceRecord[] {
     return this.backend.list(filter);
   }
 

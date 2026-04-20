@@ -19,72 +19,72 @@
  *    retention class, export restrictions
  */
 
-import type { Request, Response, NextFunction } from "express";
-import type { AuthenticatedUser } from "./auth";
-import { logger } from "../lib/logger";
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../lib/logger';
+import type { AuthenticatedUser } from './auth';
 
 // ─── Permission Classes ───────────────────────────────────────────────────────
 
 export type PermissionClass =
-  | "analyst"
-  | "responder"
-  | "soc_manager"
-  | "resilience_lead"
-  | "executive"
-  | "partner_analyst"
-  | "platform_admin";
+  | 'analyst'
+  | 'responder'
+  | 'soc_manager'
+  | 'resilience_lead'
+  | 'executive'
+  | 'partner_analyst'
+  | 'platform_admin';
 
 export type AutomationGate =
-  | "propose_only"
-  | "approval_required"
-  | "approved_execute"
-  | "blocked_by_policy";
+  | 'propose_only'
+  | 'approval_required'
+  | 'approved_execute'
+  | 'blocked_by_policy';
 
 export type SensitivityLabel =
-  | "PUBLIC"
-  | "INTERNAL"
-  | "CONFIDENTIAL"
-  | "RESTRICTED"
-  | "EXECUTIVE-ONLY";
+  | 'PUBLIC'
+  | 'INTERNAL'
+  | 'CONFIDENTIAL'
+  | 'RESTRICTED'
+  | 'EXECUTIVE-ONLY';
 
 export type RetentionClass =
-  | "STANDARD-30D"
-  | "IR-90D"
-  | "COMPLIANCE-7Y"
-  | "BOARD-90D"
-  | "TRANSIENT";
+  | 'STANDARD-30D'
+  | 'IR-90D'
+  | 'COMPLIANCE-7Y'
+  | 'BOARD-90D'
+  | 'TRANSIENT';
 
-export type EnvironmentClass = "production" | "pilot" | "demo";
+export type EnvironmentClass = 'production' | 'pilot' | 'demo';
 
 export type TrustLevel =
-  | "verified"    // First-party, cryptographically verified
-  | "corroborated" // Third-party, cross-referenced with known good
-  | "raw"         // Unverified signal — treat as hypothesis input only
-  | "untrusted";  // Known or suspected tampered/poisoned signal
+  | 'verified' // First-party, cryptographically verified
+  | 'corroborated' // Third-party, cross-referenced with known good
+  | 'raw' // Unverified signal — treat as hypothesis input only
+  | 'untrusted'; // Known or suspected tampered/poisoned signal
 
 // ─── Role-to-Permission Mapping ───────────────────────────────────────────────
 
 const ROLE_PERMISSION_MAP: Record<string, PermissionClass> = {
-  super_admin: "platform_admin",
-  admin: "platform_admin",
-  soc_manager: "soc_manager",
-  analyst: "analyst",
-  responder: "responder",
-  resilience_lead: "resilience_lead",
-  executive: "executive",
-  partner_analyst: "partner_analyst",
+  super_admin: 'platform_admin',
+  admin: 'platform_admin',
+  soc_manager: 'soc_manager',
+  analyst: 'analyst',
+  responder: 'responder',
+  resilience_lead: 'resilience_lead',
+  executive: 'executive',
+  partner_analyst: 'partner_analyst',
 };
 
 // ─── Permission Class Hierarchy ──────────────────────────────────────────────
 
 const CLASS_HIERARCHY: PermissionClass[] = [
-  "analyst",
-  "partner_analyst",
-  "responder",
-  "resilience_lead",
-  "soc_manager",
-  "executive",
-  "platform_admin",
+  'analyst',
+  'partner_analyst',
+  'responder',
+  'resilience_lead',
+  'soc_manager',
+  'executive',
+  'platform_admin',
 ];
 
 function classRank(pc: PermissionClass): number {
@@ -92,8 +92,8 @@ function classRank(pc: PermissionClass): number {
 }
 
 function resolvePermissionClass(user: AuthenticatedUser): PermissionClass {
-  let highest: PermissionClass = "analyst";
-  let highestRank = classRank("analyst");
+  let highest: PermissionClass = 'analyst';
+  let highestRank = classRank('analyst');
   for (const role of user.roles) {
     const pc = ROLE_PERMISSION_MAP[role];
     if (pc) {
@@ -109,19 +109,19 @@ function resolvePermissionClass(user: AuthenticatedUser): PermissionClass {
 
 function hasPermission(user: AuthenticatedUser, required: PermissionClass): boolean {
   const userClass = resolvePermissionClass(user);
-  if (userClass === "platform_admin") return true;
+  if (userClass === 'platform_admin') return true;
   return classRank(userClass) >= classRank(required);
 }
 
 // ─── Typed Approval Context ───────────────────────────────────────────────────
 
 export interface ZtApprovalContext {
-  gate: "approval_required";
+  gate: 'approval_required';
   requestedBy: number | undefined;
   requestedAt: string;
   actionClass: string;
   environment: EnvironmentClass;
-  approvalState: "pending";
+  approvalState: 'pending';
 }
 
 // ─── Environment Label Middleware ─────────────────────────────────────────────
@@ -141,8 +141,8 @@ declare global {
   }
 }
 
-const DEMO_HOSTS = ["demo.", "sandbox.", "preview."];
-const PILOT_HOSTS = ["pilot.", "staging.", "uat."];
+const DEMO_HOSTS = ['demo.', 'sandbox.', 'preview.'];
+const PILOT_HOSTS = ['pilot.', 'staging.', 'uat.'];
 
 /**
  * Attaches environment label to request based on:
@@ -152,22 +152,22 @@ const PILOT_HOSTS = ["pilot.", "staging.", "uat."];
  */
 export function environmentLabel() {
   return (req: Request, res: Response, next: NextFunction) => {
-    const host = req.hostname ?? "";
-    const envOverride = process.env["AEGIS_ENV"] as EnvironmentClass | undefined;
+    const host = req.hostname ?? '';
+    const envOverride = process.env['AEGIS_ENV'] as EnvironmentClass | undefined;
 
-    let env: EnvironmentClass = "production";
-    if (envOverride && ["production", "pilot", "demo"].includes(envOverride)) {
+    let env: EnvironmentClass = 'production';
+    if (envOverride && ['production', 'pilot', 'demo'].includes(envOverride)) {
       env = envOverride as EnvironmentClass;
-    } else if (DEMO_HOSTS.some(prefix => host.includes(prefix))) {
-      env = "demo";
-    } else if (PILOT_HOSTS.some(prefix => host.includes(prefix))) {
-      env = "pilot";
+    } else if (DEMO_HOSTS.some((prefix) => host.includes(prefix))) {
+      env = 'demo';
+    } else if (PILOT_HOSTS.some((prefix) => host.includes(prefix))) {
+      env = 'pilot';
     }
 
     req.ztEnvironment = env;
 
     // Surface environment in response headers (operator tooling, not public)
-    res.setHeader("X-Aegis-Environment", env);
+    res.setHeader('X-Aegis-Environment', env);
 
     next();
   };
@@ -188,9 +188,9 @@ export function identityAwareRoute(options: { require?: PermissionClass } = {}) 
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       res.status(401).json({
-        error: "AUTHENTICATION_REQUIRED",
-        message: "Identity must be verified before accessing this resource.",
-        ztControl: "identity_aware_routing",
+        error: 'AUTHENTICATION_REQUIRED',
+        message: 'Identity must be verified before accessing this resource.',
+        ztControl: 'identity_aware_routing',
       });
       return;
     }
@@ -199,12 +199,12 @@ export function identityAwareRoute(options: { require?: PermissionClass } = {}) 
     req.ztPermissionClass = pc;
 
     // Surface in response headers for audit tooling
-    res.setHeader("X-Aegis-Identity", req.user.id);
-    res.setHeader("X-Aegis-Permission-Class", pc);
+    res.setHeader('X-Aegis-Identity', req.user.id);
+    res.setHeader('X-Aegis-Permission-Class', pc);
 
     if (required && !hasPermission(req.user, required)) {
       logger.warn({
-        msg: "Permission class gate rejected",
+        msg: 'Permission class gate rejected',
         userId: req.user.id,
         userClass: pc,
         required,
@@ -212,9 +212,9 @@ export function identityAwareRoute(options: { require?: PermissionClass } = {}) 
         method: req.method,
       });
       res.status(403).json({
-        error: "PERMISSION_CLASS_INSUFFICIENT",
+        error: 'PERMISSION_CLASS_INSUFFICIENT',
         message: `This action requires permission class: ${required}. Current class: ${pc}.`,
-        ztControl: "identity_aware_routing",
+        ztControl: 'identity_aware_routing',
         requiredClass: required,
         userClass: pc,
       });
@@ -237,9 +237,9 @@ export function identityAwareRoute(options: { require?: PermissionClass } = {}) 
  */
 
 const SESSION_AGE_WARNING_MS = 6 * 60 * 60 * 1000; // 6 hours — flag but don't block
-const SESSION_AGE_HARD_MS = 24 * 60 * 60 * 1000;   // 24 hours — require step-up
+const SESSION_AGE_HARD_MS = 24 * 60 * 60 * 1000; // 24 hours — require step-up
 
-const STEP_UP_REQUIRED_CLASSES: PermissionClass[] = ["soc_manager", "platform_admin", "executive"];
+const STEP_UP_REQUIRED_CLASSES: PermissionClass[] = ['soc_manager', 'platform_admin', 'executive'];
 
 export function sessionAwareness(options: { requireStepUpFor?: PermissionClass[] } = {}) {
   const stepUpClasses = options.requireStepUpFor ?? STEP_UP_REQUIRED_CLASSES;
@@ -255,7 +255,7 @@ export function sessionAwareness(options: { requireStepUpFor?: PermissionClass[]
     let stepUpRequired = false;
 
     // Check session age from headers (set by sessionRefreshPolicy)
-    const sessionAge = parseInt(req.headers["x-session-age-ms"] as string ?? "0", 10);
+    const sessionAge = parseInt((req.headers['x-session-age-ms'] as string) ?? '0', 10);
     if (sessionAge > SESSION_AGE_HARD_MS && stepUpClasses.includes(pc)) {
       stepUpRequired = true;
     } else if (sessionAge > SESSION_AGE_WARNING_MS) {
@@ -265,21 +265,21 @@ export function sessionAwareness(options: { requireStepUpFor?: PermissionClass[]
     // Impersonation sessions are always flagged
     if (req.isImpersonation) {
       suspicious = true;
-      res.setHeader("X-Aegis-Session-Class", "impersonation");
+      res.setHeader('X-Aegis-Session-Class', 'impersonation');
     }
 
     req.ztSuspiciousSession = suspicious;
     req.ztStepUpRequired = stepUpRequired;
 
     if (suspicious) {
-      res.setHeader("X-Aegis-Session-Warning", "session_age_elevated");
+      res.setHeader('X-Aegis-Session-Warning', 'session_age_elevated');
     }
 
     if (stepUpRequired) {
       res.status(401).json({
-        error: "STEP_UP_VERIFICATION_REQUIRED",
-        message: "This action requires step-up verification. Please re-authenticate.",
-        ztControl: "session_awareness",
+        error: 'STEP_UP_VERIFICATION_REQUIRED',
+        message: 'This action requires step-up verification. Please re-authenticate.',
+        ztControl: 'session_awareness',
         permissionClass: pc,
       });
       return;
@@ -308,27 +308,27 @@ export function sessionAwareness(options: { requireStepUpFor?: PermissionClass[]
  */
 export function requireStepUp() {
   return (req: Request, res: Response, next: NextFunction) => {
-    const env = req.ztEnvironment ?? "production";
-    const stepUpToken = req.headers["x-step-up-token"] as string | undefined;
+    const env = req.ztEnvironment ?? 'production';
+    const stepUpToken = req.headers['x-step-up-token'] as string | undefined;
 
-    const isDev = process.env["NODE_ENV"] === "development";
+    const isDev = process.env['NODE_ENV'] === 'development';
 
     if (!stepUpToken) {
-      if (env === "demo" || isDev) {
+      if (env === 'demo' || isDev) {
         // Demo/dev environment: log the bypass and continue
         logger.info({
-          msg: `Step-up bypassed (${env === "demo" ? "demo environment" : "development mode"})`,
+          msg: `Step-up bypassed (${env === 'demo' ? 'demo environment' : 'development mode'})`,
           userId: req.user?.id,
           path: req.path,
         });
-        res.setHeader("X-Aegis-Step-Up", "bypassed-dev");
+        res.setHeader('X-Aegis-Step-Up', 'bypassed-dev');
         next();
         return;
       }
 
       // Production / pilot: reject without step-up token
       logger.warn({
-        msg: "Step-up verification failed — token missing",
+        msg: 'Step-up verification failed — token missing',
         userId: req.user?.id,
         path: req.path,
         method: req.method,
@@ -336,9 +336,10 @@ export function requireStepUp() {
       });
 
       res.status(403).json({
-        error: "STEP_UP_REQUIRED",
-        message: "This action requires step-up verification. Include X-Step-Up-Token in your request.",
-        ztControl: "step_up_verification",
+        error: 'STEP_UP_REQUIRED',
+        message:
+          'This action requires step-up verification. Include X-Step-Up-Token in your request.',
+        ztControl: 'step_up_verification',
         environment: env,
       });
       return;
@@ -347,13 +348,13 @@ export function requireStepUp() {
     // Token present — Phase 1 treats any non-empty token as sufficient
     // Phase 3 will validate against identity provider assertion
     logger.info({
-      msg: "Step-up token accepted",
+      msg: 'Step-up token accepted',
       userId: req.user?.id,
       path: req.path,
       environment: env,
     });
 
-    res.setHeader("X-Aegis-Step-Up", "token-present");
+    res.setHeader('X-Aegis-Step-Up', 'token-present');
     next();
   };
 }
@@ -378,25 +379,26 @@ interface AutomationGateOptions {
  *   router.post("/response/isolate", authMiddleware(), automationGate({ gate: "approval_required" }), handler)
  */
 export function automationGate(options: AutomationGateOptions) {
-  const { gate, actionClass = "unclassified" } = options;
+  const { gate, actionClass = 'unclassified' } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const env = req.ztEnvironment ?? "production";
+    const env = req.ztEnvironment ?? 'production';
     req.ztAutomationGate = gate;
 
-    res.setHeader("X-Aegis-Automation-Gate", gate);
-    res.setHeader("X-Aegis-Action-Class", actionClass);
+    res.setHeader('X-Aegis-Automation-Gate', gate);
+    res.setHeader('X-Aegis-Action-Class', actionClass);
 
     // Demo environments override to propose_only — no real automation
-    const effectiveGate = env === "demo" ? "propose_only" : gate;
+    const effectiveGate = env === 'demo' ? 'propose_only' : gate;
 
-    if (effectiveGate === "blocked_by_policy") {
-      const reason = env === "demo"
-        ? "Automation is disabled in demo environment."
-        : `Action class '${actionClass}' is blocked by platform policy.`;
+    if (effectiveGate === 'blocked_by_policy') {
+      const reason =
+        env === 'demo'
+          ? 'Automation is disabled in demo environment.'
+          : `Action class '${actionClass}' is blocked by platform policy.`;
 
       logger.warn({
-        msg: "Automation gate BLOCKED_BY_POLICY",
+        msg: 'Automation gate BLOCKED_BY_POLICY',
         userId: req.user?.id,
         actionClass,
         gate,
@@ -405,9 +407,9 @@ export function automationGate(options: AutomationGateOptions) {
       });
 
       res.status(403).json({
-        error: "BLOCKED_BY_POLICY",
+        error: 'BLOCKED_BY_POLICY',
         message: reason,
-        ztControl: "automation_gating",
+        ztControl: 'automation_gating',
         gate: effectiveGate,
         actionClass,
         environment: env,
@@ -415,13 +417,13 @@ export function automationGate(options: AutomationGateOptions) {
       return;
     }
 
-    if (effectiveGate === "propose_only") {
+    if (effectiveGate === 'propose_only') {
       // propose_only: gate is enforced as a labeling policy — no external automation
       // will execute. Handler MUST still process the business logic (e.g., persist a note
       // to DB). The gate label is surfaced via response headers and req.ztAutomationGate.
       // Callers that want to block execution should check req.ztAutomationGate in the handler.
       logger.info({
-        msg: "Automation gate PROPOSE_ONLY — handler executes with gate label",
+        msg: 'Automation gate PROPOSE_ONLY — handler executes with gate label',
         userId: req.user?.id,
         actionClass,
         env,
@@ -431,11 +433,11 @@ export function automationGate(options: AutomationGateOptions) {
       return;
     }
 
-    if (effectiveGate === "approval_required") {
+    if (effectiveGate === 'approval_required') {
       // Log approval requirement — actual approval queue is managed by Phase 2
       // Phase 1: attach approval context to request for downstream handler
       logger.info({
-        msg: "Automation gate APPROVAL_REQUIRED — queueing for approver",
+        msg: 'Automation gate APPROVAL_REQUIRED — queueing for approver',
         userId: req.user?.id,
         actionClass,
         env,
@@ -443,12 +445,12 @@ export function automationGate(options: AutomationGateOptions) {
       });
 
       req.ztApprovalContext = {
-        gate: "approval_required",
+        gate: 'approval_required',
         requestedBy: req.user?.id,
         requestedAt: new Date().toISOString(),
         actionClass,
         environment: env,
-        approvalState: "pending",
+        approvalState: 'pending',
       };
       // Pass through to handler — handler is responsible for persisting approval state
     }
@@ -484,58 +486,58 @@ export function dataControls(options: {
   const { sensitivity, retention, exportRestricted = false, trustLevel } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const env = req.ztEnvironment ?? "production";
-    const tenant = req.tenantOrgSlug ?? "global";
+    const env = req.ztEnvironment ?? 'production';
+    const tenant = req.tenantOrgSlug ?? 'global';
 
     const labels: DataControlLabels = {
       sensitivityLabel: sensitivity,
       tenantLabel: tenant,
       environmentLabel: env,
       retentionClass: retention,
-      exportRestricted: exportRestricted || env === "production",
+      exportRestricted: exportRestricted || env === 'production',
       trustLevel,
     };
 
     // Surface labels in response headers
-    res.setHeader("X-Aegis-Sensitivity", sensitivity);
-    res.setHeader("X-Aegis-Tenant", tenant);
-    res.setHeader("X-Aegis-Environment", env);
-    res.setHeader("X-Aegis-Retention", retention);
-    res.setHeader("X-Aegis-Export-Restricted", String(labels.exportRestricted));
-    if (trustLevel) res.setHeader("X-Aegis-Trust-Level", trustLevel);
+    res.setHeader('X-Aegis-Sensitivity', sensitivity);
+    res.setHeader('X-Aegis-Tenant', tenant);
+    res.setHeader('X-Aegis-Environment', env);
+    res.setHeader('X-Aegis-Retention', retention);
+    res.setHeader('X-Aegis-Export-Restricted', String(labels.exportRestricted));
+    if (trustLevel) res.setHeader('X-Aegis-Trust-Level', trustLevel);
 
     // Enforce export restriction based on identity and permission class
-    if (exportRestricted && req.query.export === "true") {
+    if (exportRestricted && req.query.export === 'true') {
       // No identity = block unconditionally
       if (!req.user) {
         res.status(403).json({
-          error: "EXPORT_RESTRICTED",
+          error: 'EXPORT_RESTRICTED',
           message: `Data with sensitivity label '${sensitivity}' cannot be exported without authenticated identity.`,
-          ztControl: "data_controls",
+          ztControl: 'data_controls',
           labels,
         });
         return;
       }
-      const userClass: PermissionClass = req.ztPermissionClass ?? "analyst";
+      const userClass: PermissionClass = req.ztPermissionClass ?? 'analyst';
       // EXECUTIVE-ONLY data: only executive+ may export
-      if (sensitivity === "EXECUTIVE-ONLY" && classRank(userClass) < classRank("executive")) {
+      if (sensitivity === 'EXECUTIVE-ONLY' && classRank(userClass) < classRank('executive')) {
         res.status(403).json({
-          error: "EXPORT_RESTRICTED",
+          error: 'EXPORT_RESTRICTED',
           message: `Data with sensitivity label 'EXECUTIVE-ONLY' requires executive-class identity for export.`,
-          ztControl: "data_controls",
-          requiredClass: "executive",
+          ztControl: 'data_controls',
+          requiredClass: 'executive',
           currentClass: userClass,
           labels,
         });
         return;
       }
       // RESTRICTED data: only responder+ may export
-      if (sensitivity === "RESTRICTED" && classRank(userClass) < classRank("responder")) {
+      if (sensitivity === 'RESTRICTED' && classRank(userClass) < classRank('responder')) {
         res.status(403).json({
-          error: "EXPORT_RESTRICTED",
+          error: 'EXPORT_RESTRICTED',
           message: `Data with sensitivity label 'RESTRICTED' requires responder-class identity for export.`,
-          ztControl: "data_controls",
-          requiredClass: "responder",
+          ztControl: 'data_controls',
+          requiredClass: 'responder',
           currentClass: userClass,
           labels,
         });
@@ -552,23 +554,56 @@ export function dataControls(options: {
 
 // ─── Connector Trust Score ────────────────────────────────────────────────────
 
-export const CONNECTOR_TRUST_SCORES: Record<string, { score: number; level: TrustLevel; reason: string }> = {
-  "internal-db": { score: 1.0, level: "verified", reason: "First-party, cryptographically signed write path" },
-  "edr-crowdstrike": { score: 0.95, level: "verified", reason: "Authenticated API, known-good endpoint" },
-  "siem-splunk": { score: 0.90, level: "verified", reason: "Authenticated API, event-stream integrity" },
-  "threat-feed-isac": { score: 0.78, level: "corroborated", reason: "Industry source, cross-referenced with STIX feed" },
-  "threat-feed-osint": { score: 0.55, level: "raw", reason: "Public OSINT — unverified, treat as hypothesis input" },
-  "email-webhook": { score: 0.30, level: "raw", reason: "Unauthenticated webhook — high spoofing risk" },
-  "unknown": { score: 0.0, level: "untrusted", reason: "Source not registered — treat as adversarial input" },
+export const CONNECTOR_TRUST_SCORES: Record<
+  string,
+  { score: number; level: TrustLevel; reason: string }
+> = {
+  'internal-db': {
+    score: 1.0,
+    level: 'verified',
+    reason: 'First-party, cryptographically signed write path',
+  },
+  'edr-crowdstrike': {
+    score: 0.95,
+    level: 'verified',
+    reason: 'Authenticated API, known-good endpoint',
+  },
+  'siem-splunk': {
+    score: 0.9,
+    level: 'verified',
+    reason: 'Authenticated API, event-stream integrity',
+  },
+  'threat-feed-isac': {
+    score: 0.78,
+    level: 'corroborated',
+    reason: 'Industry source, cross-referenced with STIX feed',
+  },
+  'threat-feed-osint': {
+    score: 0.55,
+    level: 'raw',
+    reason: 'Public OSINT — unverified, treat as hypothesis input',
+  },
+  'email-webhook': {
+    score: 0.3,
+    level: 'raw',
+    reason: 'Unauthenticated webhook — high spoofing risk',
+  },
+  unknown: {
+    score: 0.0,
+    level: 'untrusted',
+    reason: 'Source not registered — treat as adversarial input',
+  },
 };
 
 /**
  * Resolves trust level for a given connector/source identifier.
  */
-export function resolveConnectorTrust(connectorId: string): typeof CONNECTOR_TRUST_SCORES[string] {
-  return CONNECTOR_TRUST_SCORES[connectorId] ?? CONNECTOR_TRUST_SCORES["unknown"];
+export function resolveConnectorTrust(
+  connectorId: string,
+): (typeof CONNECTOR_TRUST_SCORES)[string] {
+  return CONNECTOR_TRUST_SCORES[connectorId] ?? CONNECTOR_TRUST_SCORES['unknown'];
 }
 
 // ─── Exported convenience ─────────────────────────────────────────────────────
 
-export { resolvePermissionClass, hasPermission, classRank };
+export { classRank, hasPermission, resolvePermissionClass };

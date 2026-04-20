@@ -1,6 +1,6 @@
-import type { Request, Response } from "express";
-import { logger } from "./logger";
-import { SENSITIVE_CHANNELS, PUBLIC_CHANNELS } from "./websocket";
+import type { Request, Response } from 'express';
+import { logger } from './logger';
+import { PUBLIC_CHANNELS, SENSITIVE_CHANNELS } from './websocket';
 
 interface SseClient {
   res: Response;
@@ -15,9 +15,9 @@ const sseClients = new Map<string, SseClient>();
 let totalSseConnections = 0;
 
 export function handleSseConnection(req: Request, res: Response): void {
-  const channel = req.query["channel"] as string | undefined;
+  const channel = req.query['channel'] as string | undefined;
   if (!channel) {
-    res.status(400).json({ error: "Missing channel parameter" });
+    res.status(400).json({ error: 'Missing channel parameter' });
     return;
   }
 
@@ -25,7 +25,7 @@ export function handleSseConnection(req: Request, res: Response): void {
   if (isSensitive && !req.isAuthenticated?.()) {
     const user = (req as Request & { user?: { id: number; platformRole?: string } }).user;
     if (!user) {
-      res.status(401).json({ error: "Authentication required for this channel" });
+      res.status(401).json({ error: 'Authentication required for this channel' });
       return;
     }
   }
@@ -50,17 +50,19 @@ export function attachSseClient(
   channel: string,
   opts?: { tenantId?: string | null },
 ): void {
-  const user = (req as Request & { user?: { id: number; platformRole?: string; tenantId?: string } }).user;
+  const user = (
+    req as Request & { user?: { id: number; platformRole?: string; tenantId?: string } }
+  ).user;
 
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache, no-transform");
-  res.setHeader("Connection", "keep-alive");
-  res.setHeader("X-Accel-Buffering", "no");
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
   totalSseConnections++;
   const clientId = `sse-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const tenantOverrideProvided = opts !== undefined && Object.prototype.hasOwnProperty.call(opts, "tenantId");
+  const tenantOverrideProvided = opts !== undefined && Object.hasOwn(opts, 'tenantId');
   const tenantId = tenantOverrideProvided
     ? (opts!.tenantId ?? null)
     : ((user as { tenantId?: string } | undefined)?.tenantId ?? null);
@@ -74,7 +76,7 @@ export function attachSseClient(
   };
   sseClients.set(clientId, client);
 
-  sendSseEvent(res, "connected", { clientId, channel, timestamp: Date.now() });
+  sendSseEvent(res, 'connected', { clientId, channel, timestamp: Date.now() });
 
   const heartbeat = setInterval(() => {
     if (res.writableEnded) {
@@ -82,21 +84,21 @@ export function attachSseClient(
       sseClients.delete(clientId);
       return;
     }
-    res.write(": heartbeat\n\n");
+    res.write(': heartbeat\n\n');
   }, 25_000);
 
-  req.on("close", () => {
+  req.on('close', () => {
     clearInterval(heartbeat);
     sseClients.delete(clientId);
-    logger.debug({ clientId, channel }, "SSE client disconnected");
+    logger.debug({ clientId, channel }, 'SSE client disconnected');
   });
 
-  req.on("error", () => {
+  req.on('error', () => {
     clearInterval(heartbeat);
     sseClients.delete(clientId);
   });
 
-  logger.debug({ clientId, channel }, "SSE client connected");
+  logger.debug({ clientId, channel }, 'SSE client connected');
 }
 
 function sendSseEvent(res: Response, event: string, data: unknown): void {

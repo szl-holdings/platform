@@ -3,12 +3,12 @@
  */
 import {
   db,
-  usersTable,
-  sessionsTable,
   organizationsTable,
   orgMembershipsTable,
-} from "@szl-holdings/db";
-import { eq, and, gt } from "drizzle-orm";
+  sessionsTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { and, eq, gt } from 'drizzle-orm';
 
 export class AuthRepository {
   async findUserById(id: number) {
@@ -17,11 +17,7 @@ export class AuthRepository {
   }
 
   async findUserByEmail(email: string) {
-    const rows = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email))
-      .limit(1);
+    const rows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
     return rows[0] ?? null;
   }
 

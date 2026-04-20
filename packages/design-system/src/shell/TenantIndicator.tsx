@@ -1,8 +1,8 @@
-import React from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
-export type EnvironmentType = "production" | "staging" | "development" | "demo";
+export type EnvironmentType = 'production' | 'staging' | 'development' | 'demo';
 
 export interface TenantIndicatorProps {
   tenantName: string;
@@ -18,15 +18,15 @@ const ENV_DOT_COLOR: Record<EnvironmentType, string> = {
 };
 
 const ENV_LABEL: Record<EnvironmentType, string> = {
-  production: "Production",
-  staging: "Staging",
-  development: "Development",
-  demo: "Demo",
+  production: 'Production',
+  staging: 'Staging',
+  development: 'Development',
+  demo: 'Demo',
 };
 
 export function TenantIndicator({
   tenantName,
-  environment = "production",
+  environment = 'production',
   className,
 }: TenantIndicatorProps) {
   const dotColor = ENV_DOT_COLOR[environment];
@@ -34,26 +34,26 @@ export function TenantIndicator({
 
   return (
     <div
-      className={cn("flex items-center gap-1.5 px-2 rounded text-xs", className)}
+      className={cn('flex items-center gap-1.5 px-2 rounded text-xs', className)}
       style={{
         background: color.bg.overlay,
         border: `1px solid ${color.border.subtle}`,
         color: color.text.secondary,
-        height: "26px",
+        height: '26px',
       }}
     >
       <span
         className="rounded-full flex-shrink-0"
-        style={{ width: "6px", height: "6px", background: dotColor }}
+        style={{ width: '6px', height: '6px', background: dotColor }}
       />
       <span style={{ color: color.text.primary }}>{tenantName}</span>
-      {environment !== "production" && (
+      {environment !== 'production' && (
         <span
           className="rounded px-1"
           style={{
             background: color.border.subtle,
             color: dotColor,
-            fontSize: "9px",
+            fontSize: '9px',
             fontWeight: 600,
           }}
         >

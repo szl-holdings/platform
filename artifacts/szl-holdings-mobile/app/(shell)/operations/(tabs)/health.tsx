@@ -1,8 +1,9 @@
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useState, useEffect, useRef, useMemo } from "react";
+import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   Platform,
   Pressable,
   RefreshControl,
@@ -10,15 +11,14 @@ import {
   StyleSheet,
   Text,
   View,
-  Alert,
-} from "react-native";
-import Svg, { Circle, Polyline } from "react-native-svg";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LYTE_COLORS } from "@/constants/colors";
-import { useColors } from "@/hooks/useColors";
-import { useLyte, PlatformHealth } from "@/context/LyteContext";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Polyline } from 'react-native-svg';
+import { LYTE_COLORS } from '@/constants/colors';
+import { type PlatformHealth, useLyte } from '@/context/LyteContext';
+import { useColors } from '@/hooks/useColors';
 
-function getStatusColor(status: PlatformHealth["status"]) {
+function getStatusColor(status: PlatformHealth['status']) {
   const map = {
     healthy: LYTE_COLORS.neonGreen,
     degraded: LYTE_COLORS.high,
@@ -28,12 +28,19 @@ function getStatusColor(status: PlatformHealth["status"]) {
   return map[status] ?? LYTE_COLORS.low;
 }
 
-function getStatusLabel(status: PlatformHealth["status"]) {
-  const map = { healthy: "Healthy", degraded: "Degraded", down: "Down", unknown: "Unknown" };
-  return map[status] ?? "Unknown";
+function getStatusLabel(status: PlatformHealth['status']) {
+  const map = { healthy: 'Healthy', degraded: 'Degraded', down: 'Down', unknown: 'Unknown' };
+  return map[status] ?? 'Unknown';
 }
 
-const ON_CALL_SCHEDULE: Array<{ name: string; role: string; shift: string; color: string; initials: string; primary: boolean }> = [];
+const ON_CALL_SCHEDULE: Array<{
+  name: string;
+  role: string;
+  shift: string;
+  color: string;
+  initials: string;
+  primary: boolean;
+}> = [];
 
 const RUNBOOKS: Array<{ id: string; title: string; category: string; steps: number }> = [];
 
@@ -54,41 +61,37 @@ function OnCallCard({
   const [activeRunbook, setActiveRunbook] = useState<string | null>(null);
   const [completedRunbooks, setCompletedRunbooks] = useState<Set<string>>(new Set());
 
-  const handlePage = (person: typeof ON_CALL_SCHEDULE[0]) => {
+  const handlePage = (person: (typeof ON_CALL_SCHEDULE)[0]) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      "Page On-Call Engineer",
-      `Send urgent page to ${person.name} (${person.role})?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Page Now",
-          style: "destructive",
-          onPress: () => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setPagedPersons(prev => new Set([...prev, person.name]));
-          },
+    Alert.alert('Page On-Call Engineer', `Send urgent page to ${person.name} (${person.role})?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Page Now',
+        style: 'destructive',
+        onPress: () => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setPagedPersons((prev) => new Set([...prev, person.name]));
         },
-      ],
-    );
+      },
+    ]);
   };
 
-  const handleRunbook = (rb: typeof RUNBOOKS[0]) => {
+  const handleRunbook = (rb: (typeof RUNBOOKS)[0]) => {
     if (completedRunbooks.has(rb.id)) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
-      "Launch Runbook",
+      'Launch Runbook',
       `Execute "${rb.title}"?\n${rb.steps} steps will be tracked in real time.`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Launch",
+          text: 'Launch',
           onPress: () => {
             setActiveRunbook(rb.id);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             setTimeout(() => {
               setActiveRunbook(null);
-              setCompletedRunbooks(prev => new Set([...prev, rb.id]));
+              setCompletedRunbooks((prev) => new Set([...prev, rb.id]));
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             }, 3000);
           },
@@ -98,7 +101,9 @@ function OnCallCard({
   };
 
   return (
-    <View style={[onCallStyles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <View
+      style={[onCallStyles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+    >
       <View style={onCallStyles.header}>
         <View style={[onCallStyles.dot, { backgroundColor: LYTE_COLORS.neonGreen }]} />
         <Text style={onCallStyles.title}>On-Call Now</Text>
@@ -106,50 +111,101 @@ function OnCallCard({
       </View>
 
       {ON_CALL_SCHEDULE.length === 0 ? (
-        <View style={{ paddingVertical: 12, alignItems: "center" }}>
-          <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+        <View style={{ paddingVertical: 12, alignItems: 'center' }}>
+          <Text
+            style={{ color: colors.textTertiary, fontSize: 11, fontFamily: 'Inter_400Regular' }}
+          >
             On-call schedule not configured
           </Text>
         </View>
-      ) : ON_CALL_SCHEDULE.map((person) => {
-        const paged = pagedPersons.has(person.name);
-        return (
-          <View key={person.name} style={[onCallStyles.personRow, { borderColor: colors.border }]}>
-            <View style={[onCallStyles.avatar, { backgroundColor: `${person.color}18`, borderColor: `${person.color}30` }]}>
-              <Text style={[onCallStyles.avatarText, { color: person.color }]}>{person.initials}</Text>
-            </View>
-            <View style={onCallStyles.personInfo}>
-              <Text style={onCallStyles.personName}>{person.name}</Text>
-              <Text style={onCallStyles.personRole}>{person.role}</Text>
-            </View>
-            {person.primary && !paged && (
-              <View style={[onCallStyles.primaryBadge, { backgroundColor: `${LYTE_COLORS.electricBlue}15`, borderColor: `${LYTE_COLORS.electricBlue}30` }]}>
-                <Text style={[onCallStyles.primaryText, { color: LYTE_COLORS.electricBlue }]}>PRIMARY</Text>
-              </View>
-            )}
-            {paged && (
-              <View style={[onCallStyles.primaryBadge, { backgroundColor: `${LYTE_COLORS.neonGreen}15`, borderColor: `${LYTE_COLORS.neonGreen}30` }]}>
-                <Text style={[onCallStyles.primaryText, { color: LYTE_COLORS.neonGreen }]}>PAGED</Text>
-              </View>
-            )}
-            <Pressable
-              onPress={() => handlePage(person)}
-              disabled={paged}
-              style={[onCallStyles.pageBtn, { borderColor: paged ? `${LYTE_COLORS.neonGreen}40` : `${person.color}40`, opacity: paged ? 0.5 : 1 }]}
+      ) : (
+        ON_CALL_SCHEDULE.map((person) => {
+          const paged = pagedPersons.has(person.name);
+          return (
+            <View
+              key={person.name}
+              style={[onCallStyles.personRow, { borderColor: colors.border }]}
             >
-              <Feather name={paged ? "check" : "phone"} size={11} color={paged ? LYTE_COLORS.neonGreen : person.color} />
-            </Pressable>
-          </View>
-        );
-      })}
+              <View
+                style={[
+                  onCallStyles.avatar,
+                  { backgroundColor: `${person.color}18`, borderColor: `${person.color}30` },
+                ]}
+              >
+                <Text style={[onCallStyles.avatarText, { color: person.color }]}>
+                  {person.initials}
+                </Text>
+              </View>
+              <View style={onCallStyles.personInfo}>
+                <Text style={onCallStyles.personName}>{person.name}</Text>
+                <Text style={onCallStyles.personRole}>{person.role}</Text>
+              </View>
+              {person.primary && !paged && (
+                <View
+                  style={[
+                    onCallStyles.primaryBadge,
+                    {
+                      backgroundColor: `${LYTE_COLORS.electricBlue}15`,
+                      borderColor: `${LYTE_COLORS.electricBlue}30`,
+                    },
+                  ]}
+                >
+                  <Text style={[onCallStyles.primaryText, { color: LYTE_COLORS.electricBlue }]}>
+                    PRIMARY
+                  </Text>
+                </View>
+              )}
+              {paged && (
+                <View
+                  style={[
+                    onCallStyles.primaryBadge,
+                    {
+                      backgroundColor: `${LYTE_COLORS.neonGreen}15`,
+                      borderColor: `${LYTE_COLORS.neonGreen}30`,
+                    },
+                  ]}
+                >
+                  <Text style={[onCallStyles.primaryText, { color: LYTE_COLORS.neonGreen }]}>
+                    PAGED
+                  </Text>
+                </View>
+              )}
+              <Pressable
+                onPress={() => handlePage(person)}
+                disabled={paged}
+                style={[
+                  onCallStyles.pageBtn,
+                  {
+                    borderColor: paged ? `${LYTE_COLORS.neonGreen}40` : `${person.color}40`,
+                    opacity: paged ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <Feather
+                  name={paged ? 'check' : 'phone'}
+                  size={11}
+                  color={paged ? LYTE_COLORS.neonGreen : person.color}
+                />
+              </Pressable>
+            </View>
+          );
+        })
+      )}
 
       <Pressable
-        onPress={() => { Haptics.selectionAsync(); setRunbookExpanded(e => !e); }}
+        onPress={() => {
+          Haptics.selectionAsync();
+          setRunbookExpanded((e) => !e);
+        }}
         style={onCallStyles.runbookToggle}
       >
         <Feather name="book-open" size={11} color={colors.textSecondary} />
         <Text style={onCallStyles.runbookToggleText}>Quick Runbooks ({RUNBOOKS.length})</Text>
-        <Feather name={runbookExpanded ? "chevron-up" : "chevron-down"} size={11} color={colors.textTertiary} />
+        <Feather
+          name={runbookExpanded ? 'chevron-up' : 'chevron-down'}
+          size={11}
+          color={colors.textTertiary}
+        />
       </Pressable>
 
       {runbookExpanded && (
@@ -162,11 +218,23 @@ function OnCallCard({
                 key={rb.id}
                 onPress={() => handleRunbook(rb)}
                 disabled={isActive || isDone}
-                style={[onCallStyles.runbookRow, { borderColor: colors.border, opacity: isActive ? 0.7 : 1 }]}
+                style={[
+                  onCallStyles.runbookRow,
+                  { borderColor: colors.border, opacity: isActive ? 0.7 : 1 },
+                ]}
               >
-                <View style={[onCallStyles.runbookIcon, { backgroundColor: isDone ? `${LYTE_COLORS.neonGreen}10` : `${LYTE_COLORS.electricBlue}10` }]}>
+                <View
+                  style={[
+                    onCallStyles.runbookIcon,
+                    {
+                      backgroundColor: isDone
+                        ? `${LYTE_COLORS.neonGreen}10`
+                        : `${LYTE_COLORS.electricBlue}10`,
+                    },
+                  ]}
+                >
                   <Feather
-                    name={isDone ? "check-circle" : isActive ? "loader" : "zap"}
+                    name={isDone ? 'check-circle' : isActive ? 'loader' : 'zap'}
                     size={10}
                     color={isDone ? LYTE_COLORS.neonGreen : LYTE_COLORS.electricBlue}
                   />
@@ -174,10 +242,13 @@ function OnCallCard({
                 <View style={{ flex: 1 }}>
                   <Text style={onCallStyles.runbookTitle}>{rb.title}</Text>
                   <Text style={onCallStyles.runbookMeta}>
-                    {rb.category} · {rb.steps} steps{isActive ? " · Running…" : isDone ? " · Completed" : ""}
+                    {rb.category} · {rb.steps} steps
+                    {isActive ? ' · Running…' : isDone ? ' · Completed' : ''}
                   </Text>
                 </View>
-                {!isDone && !isActive && <Feather name="chevron-right" size={12} color={colors.textTertiary} />}
+                {!isDone && !isActive && (
+                  <Feather name="chevron-right" size={12} color={colors.textTertiary} />
+                )}
               </Pressable>
             );
           })}
@@ -187,7 +258,17 @@ function OnCallCard({
   );
 }
 
-function MetricSparkline({ data, color, width = 60, height = 24 }: { data: number[]; color: string; width?: number; height?: number }) {
+function MetricSparkline({
+  data,
+  color,
+  width = 60,
+  height = 24,
+}: {
+  data: number[];
+  color: string;
+  width?: number;
+  height?: number;
+}) {
   if (data.length < 2) return null;
   const max = Math.max(...data, 0.001);
   const min = Math.min(...data, 0);
@@ -195,14 +276,23 @@ function MetricSparkline({ data, color, width = 60, height = 24 }: { data: numbe
   const pad = 2;
   const w = width - pad * 2;
   const h = height - pad * 2;
-  const points = data.map((v, i) => {
-    const x = pad + (i / (data.length - 1)) * w;
-    const y = pad + h - ((v - min) / range) * h;
-    return `${x},${y}`;
-  }).join(" ");
+  const points = data
+    .map((v, i) => {
+      const x = pad + (i / (data.length - 1)) * w;
+      const y = pad + h - ((v - min) / range) * h;
+      return `${x},${y}`;
+    })
+    .join(' ');
   return (
     <Svg width={width} height={height}>
-      <Polyline points={points} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <Polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }
@@ -225,8 +315,12 @@ function RingChart({ pct, color, size = 60 }: { pct: number; color: string; size
     <Svg width={size} height={size}>
       <Circle cx={size / 2} cy={size / 2} r={r} stroke={`${color}20`} strokeWidth={5} fill="none" />
       <Circle
-        cx={size / 2} cy={size / 2} r={r}
-        stroke={color} strokeWidth={5} fill="none"
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        stroke={color}
+        strokeWidth={5}
+        fill="none"
         strokeDasharray={`${circ}`}
         strokeDashoffset={`${offset}`}
         strokeLinecap="round"
@@ -249,17 +343,43 @@ function PlatformCard({
   const [expanded, setExpanded] = useState(false);
   const statusColor = getStatusColor(platform.status);
   const uptimeSparkline = useRef(generateSparkline(platform.uptime, 12, 0.02)).current;
-  const latencySparkline = useRef(generateSparkline(Math.min(100, (platform.p95Latency / 500) * 100), 12, 0.08)).current;
-  const errSparkline = useRef(generateSparkline(Math.min(100, platform.errorRate * 10), 12, 0.1)).current;
+  const latencySparkline = useRef(
+    generateSparkline(Math.min(100, (platform.p95Latency / 500) * 100), 12, 0.08),
+  ).current;
+  const errSparkline = useRef(
+    generateSparkline(Math.min(100, platform.errorRate * 10), 12, 0.1),
+  ).current;
 
   return (
-    <Pressable onPress={() => { Haptics.selectionAsync(); setExpanded(e => !e); }}>
-      <View style={[styles.platformCard, { borderColor: platform.status === "degraded" ? LYTE_COLORS.highLight : colors.border }]}>
+    <Pressable
+      onPress={() => {
+        Haptics.selectionAsync();
+        setExpanded((e) => !e);
+      }}
+    >
+      <View
+        style={[
+          styles.platformCard,
+          { borderColor: platform.status === 'degraded' ? LYTE_COLORS.highLight : colors.border },
+        ]}
+      >
         <View style={styles.platformHeader}>
-          <View style={[styles.statusDot, { backgroundColor: statusColor, shadowColor: statusColor, shadowOpacity: platform.status === "healthy" ? 0.6 : 0, shadowRadius: 4 }]} />
+          <View
+            style={[
+              styles.statusDot,
+              {
+                backgroundColor: statusColor,
+                shadowColor: statusColor,
+                shadowOpacity: platform.status === 'healthy' ? 0.6 : 0,
+                shadowRadius: 4,
+              },
+            ]}
+          />
           <View style={styles.platformInfo}>
             <Text style={styles.platformName}>{platform.name}</Text>
-            <Text style={[styles.platformStatus, { color: statusColor }]}>{getStatusLabel(platform.status)}</Text>
+            <Text style={[styles.platformStatus, { color: statusColor }]}>
+              {getStatusLabel(platform.status)}
+            </Text>
           </View>
           <View style={styles.platformMetrics}>
             <Text style={styles.metricValue}>{platform.uptime.toFixed(1)}%</Text>
@@ -267,7 +387,9 @@ function PlatformCard({
           </View>
           <View style={styles.ringWrap}>
             <RingChart pct={platform.slaCompliance} color={statusColor} size={44} />
-            <Text style={[styles.ringLabel, { color: statusColor }]}>{platform.slaCompliance}%</Text>
+            <Text style={[styles.ringLabel, { color: statusColor }]}>
+              {platform.slaCompliance}%
+            </Text>
           </View>
         </View>
 
@@ -276,33 +398,83 @@ function PlatformCard({
             <View style={styles.detailRow}>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>ERROR RATE</Text>
-                <Text style={[styles.detailValue, { color: platform.errorRate > 1 ? LYTE_COLORS.critical : LYTE_COLORS.neonGreen }]}>{platform.errorRate.toFixed(1)}%</Text>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    {
+                      color: platform.errorRate > 1 ? LYTE_COLORS.critical : LYTE_COLORS.neonGreen,
+                    },
+                  ]}
+                >
+                  {platform.errorRate.toFixed(1)}%
+                </Text>
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>P95 LATENCY</Text>
-                <Text style={[styles.detailValue, { color: platform.p95Latency > 400 ? LYTE_COLORS.high : colors.textPrimary }]}>{platform.p95Latency}ms</Text>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    { color: platform.p95Latency > 400 ? LYTE_COLORS.high : colors.textPrimary },
+                  ]}
+                >
+                  {platform.p95Latency}ms
+                </Text>
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>ALERTS</Text>
-                <Text style={[styles.detailValue, { color: platform.alertCount > 0 ? LYTE_COLORS.high : LYTE_COLORS.neonGreen }]}>{platform.alertCount}</Text>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    { color: platform.alertCount > 0 ? LYTE_COLORS.high : LYTE_COLORS.neonGreen },
+                  ]}
+                >
+                  {platform.alertCount}
+                </Text>
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>SLA</Text>
-                <Text style={[styles.detailValue, { color: platform.slaCompliance >= 99 ? LYTE_COLORS.neonGreen : LYTE_COLORS.medium }]}>{platform.slaCompliance}%</Text>
+                <Text
+                  style={[
+                    styles.detailValue,
+                    {
+                      color:
+                        platform.slaCompliance >= 99 ? LYTE_COLORS.neonGreen : LYTE_COLORS.medium,
+                    },
+                  ]}
+                >
+                  {platform.slaCompliance}%
+                </Text>
               </View>
             </View>
             <View style={styles.sparklineRow}>
               <View style={styles.sparklineItem}>
                 <Text style={styles.sparklineLabel}>UPTIME 12H</Text>
-                <MetricSparkline data={uptimeSparkline} color={LYTE_COLORS.neonGreen} width={72} height={24} />
+                <MetricSparkline
+                  data={uptimeSparkline}
+                  color={LYTE_COLORS.neonGreen}
+                  width={72}
+                  height={24}
+                />
               </View>
               <View style={styles.sparklineItem}>
                 <Text style={styles.sparklineLabel}>LATENCY 12H</Text>
-                <MetricSparkline data={latencySparkline} color={platform.p95Latency > 400 ? LYTE_COLORS.high : LYTE_COLORS.electricBlue} width={72} height={24} />
+                <MetricSparkline
+                  data={latencySparkline}
+                  color={platform.p95Latency > 400 ? LYTE_COLORS.high : LYTE_COLORS.electricBlue}
+                  width={72}
+                  height={24}
+                />
               </View>
               <View style={styles.sparklineItem}>
                 <Text style={styles.sparklineLabel}>ERROR RATE 12H</Text>
-                <MetricSparkline data={errSparkline} color={platform.errorRate > 1 ? LYTE_COLORS.critical : `${LYTE_COLORS.neonGreen}80`} width={72} height={24} />
+                <MetricSparkline
+                  data={errSparkline}
+                  color={
+                    platform.errorRate > 1 ? LYTE_COLORS.critical : `${LYTE_COLORS.neonGreen}80`
+                  }
+                  width={72}
+                  height={24}
+                />
               </View>
             </View>
           </View>
@@ -320,36 +492,50 @@ export default function HealthScreen() {
   const { platforms, reload, isLoading, lastErrors } = useLyte();
   const [refreshing, setRefreshing] = useState(false);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
+  const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const bottomPad = Platform.OS === 'web' ? 34 + 84 : 90;
 
   const onRefresh = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
     reload();
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
     setRefreshing(false);
   }, [reload]);
 
-  const healthyCount = platforms.filter(p => p.status === "healthy").length;
-  const degradedCount = platforms.filter(p => p.status === "degraded").length;
-  const downCount = platforms.filter(p => p.status === "down").length;
-  const avgUptime = platforms.length > 0 ? platforms.reduce((s, p) => s + p.uptime, 0) / platforms.length : 0;
-  const avgSla = platforms.length > 0 ? platforms.reduce((s, p) => s + p.slaCompliance, 0) / platforms.length : 0;
-  const overallStatus = downCount > 0 ? "down" : degradedCount > 0 ? "degraded" : "healthy";
-  const overallColor = getStatusColor(overallStatus as PlatformHealth["status"]);
+  const healthyCount = platforms.filter((p) => p.status === 'healthy').length;
+  const degradedCount = platforms.filter((p) => p.status === 'degraded').length;
+  const downCount = platforms.filter((p) => p.status === 'down').length;
+  const avgUptime =
+    platforms.length > 0 ? platforms.reduce((s, p) => s + p.uptime, 0) / platforms.length : 0;
+  const avgSla =
+    platforms.length > 0
+      ? platforms.reduce((s, p) => s + p.slaCompliance, 0) / platforms.length
+      : 0;
+  const overallStatus = downCount > 0 ? 'down' : degradedCount > 0 ? 'degraded' : 'healthy';
+  const overallColor = getStatusColor(overallStatus as PlatformHealth['status']);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
-        colors={["rgba(0,255,136,0.04)", "transparent"]}
+        colors={['rgba(0,255,136,0.04)', 'transparent']}
         style={[styles.headerGradient, { height: topPad + 120 }]}
       />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: bottomPad, paddingHorizontal: 16 }}
+        contentContainerStyle={{
+          paddingTop: topPad + 16,
+          paddingBottom: bottomPad,
+          paddingHorizontal: 16,
+        }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={LYTE_COLORS.neonGreen} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={LYTE_COLORS.neonGreen}
+          />
+        }
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>HEALTH DASHBOARD</Text>
@@ -393,24 +579,58 @@ export default function HealthScreen() {
         <Text style={styles.sectionLabel}>ALL PLATFORMS</Text>
         {isLoading ? (
           <View style={{ gap: 8 }}>
-            {[1, 2, 3, 4].map(i => (
+            {[1, 2, 3, 4].map((i) => (
               <View key={i} style={[styles.platformCard, { height: 64, opacity: 0.4 }]} />
             ))}
           </View>
-        ) : lastErrors.some(e => e.endpoint.includes("/api/lyte/health")) ? (
-          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
+        ) : lastErrors.some((e) => e.endpoint.includes('/api/lyte/health')) ? (
+          <View
+            style={{
+              alignItems: 'center',
+              padding: 24,
+              gap: 8,
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
             <Feather name="wifi-off" size={24} color={colors.textTertiary} />
-            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>Health data unavailable</Text>
-            <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>Cannot reach API server. Pull to retry.</Text>
+            <Text
+              style={{ color: colors.textSecondary, fontSize: 13, fontFamily: 'Inter_500Medium' }}
+            >
+              Health data unavailable
+            </Text>
+            <Text
+              style={{ color: colors.textTertiary, fontSize: 11, fontFamily: 'Inter_400Regular' }}
+            >
+              Cannot reach API server. Pull to retry.
+            </Text>
           </View>
         ) : platforms.length === 0 ? (
-          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
+          <View
+            style={{
+              alignItems: 'center',
+              padding: 24,
+              gap: 8,
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
             <Feather name="server" size={24} color={colors.textTertiary} />
-            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>No platforms configured</Text>
+            <Text
+              style={{ color: colors.textSecondary, fontSize: 13, fontFamily: 'Inter_500Medium' }}
+            >
+              No platforms configured
+            </Text>
           </View>
         ) : (
           <View style={styles.platformList}>
-            {platforms.map(p => <PlatformCard key={p.slug} platform={p} styles={styles} colors={colors} />)}
+            {platforms.map((p) => (
+              <PlatformCard key={p.slug} platform={p} styles={styles} colors={colors} />
+            ))}
           </View>
         )}
       </ScrollView>
@@ -421,67 +641,178 @@ export default function HealthScreen() {
 function makeStyles(c: ReturnType<typeof useColors>) {
   return StyleSheet.create({
     container: { flex: 1 },
-    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    headerGradient: { position: 'absolute', top: 0, left: 0, right: 0 },
     scroll: { flex: 1 },
     header: { marginBottom: 20 },
-    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.neonGreen, marginBottom: 4 },
-    headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
-    overallCard: { flexDirection: "row", gap: 16, alignItems: "center", backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 24 },
-    overallLeft: { position: "relative", alignItems: "center", justifyContent: "center" },
-    overallPct: { position: "absolute", fontSize: 11, fontFamily: "Inter_600SemiBold" },
+    eyebrow: {
+      fontSize: 9,
+      fontFamily: 'Inter_500Medium',
+      letterSpacing: 3,
+      color: LYTE_COLORS.neonGreen,
+      marginBottom: 4,
+    },
+    headerTitle: { fontSize: 28, fontFamily: 'Inter_600SemiBold', color: c.textPrimary },
+    overallCard: {
+      flexDirection: 'row',
+      gap: 16,
+      alignItems: 'center',
+      backgroundColor: c.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: c.border,
+      padding: 16,
+      marginBottom: 24,
+    },
+    overallLeft: { position: 'relative', alignItems: 'center', justifyContent: 'center' },
+    overallPct: { position: 'absolute', fontSize: 11, fontFamily: 'Inter_600SemiBold' },
     overallStats: { flex: 1, gap: 10 },
     overallStat: {},
-    overallStatValue: { fontSize: 22, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
-    overallStatLabel: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
-    overallRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-    statusPill: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, backgroundColor: c.surfaceElevated },
-    statusPillText: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    overallStatValue: { fontSize: 22, fontFamily: 'Inter_600SemiBold', color: c.textPrimary },
+    overallStatLabel: { fontSize: 10, fontFamily: 'Inter_400Regular', color: c.textSecondary },
+    overallRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    statusPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 10,
+      backgroundColor: c.surfaceElevated,
+    },
+    statusPillText: { fontSize: 10, fontFamily: 'Inter_400Regular', color: c.textSecondary },
     statusDot: { width: 6, height: 6, borderRadius: 3, shadowOffset: { width: 0, height: 0 } },
-    sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: c.textTertiary, marginBottom: 10 },
+    sectionLabel: {
+      fontSize: 9,
+      fontFamily: 'Inter_500Medium',
+      letterSpacing: 3,
+      color: c.textTertiary,
+      marginBottom: 10,
+    },
     platformList: { gap: 8 },
-    platformCard: { backgroundColor: c.surface, borderRadius: 12, borderWidth: 1, overflow: "hidden" },
-    platformHeader: { flexDirection: "row", alignItems: "center", padding: 14, gap: 10 },
+    platformCard: {
+      backgroundColor: c.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      overflow: 'hidden',
+    },
+    platformHeader: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 10 },
     platformInfo: { flex: 1 },
-    platformName: { fontSize: 13, fontFamily: "Inter_500Medium", color: c.textPrimary, marginBottom: 2 },
-    platformStatus: { fontSize: 10, fontFamily: "Inter_400Regular" },
-    platformMetrics: { alignItems: "flex-end" },
-    metricValue: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
-    metricLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary },
-    ringWrap: { alignItems: "center", justifyContent: "center", position: "relative" },
-    ringLabel: { position: "absolute", fontSize: 9, fontFamily: "Inter_600SemiBold" },
+    platformName: {
+      fontSize: 13,
+      fontFamily: 'Inter_500Medium',
+      color: c.textPrimary,
+      marginBottom: 2,
+    },
+    platformStatus: { fontSize: 10, fontFamily: 'Inter_400Regular' },
+    platformMetrics: { alignItems: 'flex-end' },
+    metricValue: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: c.textPrimary },
+    metricLabel: { fontSize: 9, fontFamily: 'Inter_400Regular', color: c.textTertiary },
+    ringWrap: { alignItems: 'center', justifyContent: 'center', position: 'relative' },
+    ringLabel: { position: 'absolute', fontSize: 9, fontFamily: 'Inter_600SemiBold' },
     platformDetail: { borderTopWidth: 1, borderTopColor: c.border, padding: 12 },
-    detailRow: { flexDirection: "row", gap: 8 },
-    detailItem: { flex: 1, alignItems: "center" },
-    detailLabel: { fontSize: 8, fontFamily: "Inter_500Medium", color: c.textTertiary, letterSpacing: 1, marginBottom: 4 },
-    detailValue: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-    sparklineRow: { flexDirection: "row", gap: 8, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: c.border },
-    sparklineItem: { flex: 1, alignItems: "center", gap: 4 },
-    sparklineLabel: { fontSize: 7, fontFamily: "Inter_500Medium", color: c.textTertiary, letterSpacing: 0.8 },
+    detailRow: { flexDirection: 'row', gap: 8 },
+    detailItem: { flex: 1, alignItems: 'center' },
+    detailLabel: {
+      fontSize: 8,
+      fontFamily: 'Inter_500Medium',
+      color: c.textTertiary,
+      letterSpacing: 1,
+      marginBottom: 4,
+    },
+    detailValue: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+    sparklineRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 12,
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+    },
+    sparklineItem: { flex: 1, alignItems: 'center', gap: 4 },
+    sparklineLabel: {
+      fontSize: 7,
+      fontFamily: 'Inter_500Medium',
+      color: c.textTertiary,
+      letterSpacing: 0.8,
+    },
   });
 }
 
 function makeOnCallStyles(c: ReturnType<typeof useColors>) {
   return StyleSheet.create({
     card: { borderRadius: 12, borderWidth: 1, padding: 14, marginBottom: 16 },
-    header: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 12 },
-    dot: { width: 8, height: 8, borderRadius: 4, shadowColor: LYTE_COLORS.neonGreen, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: { width: 0, height: 0 } },
-    title: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: c.textPrimary, flex: 1 },
-    shift: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textTertiary },
-    personRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8, borderTopWidth: 1 },
-    avatar: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-    avatarText: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      shadowColor: LYTE_COLORS.neonGreen,
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 0 },
+    },
+    title: { fontSize: 12, fontFamily: 'Inter_600SemiBold', color: c.textPrimary, flex: 1 },
+    shift: { fontSize: 10, fontFamily: 'Inter_400Regular', color: c.textTertiary },
+    personRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 8,
+      borderTopWidth: 1,
+    },
+    avatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarText: { fontSize: 10, fontFamily: 'Inter_600SemiBold' },
     personInfo: { flex: 1 },
-    personName: { fontSize: 12, fontFamily: "Inter_500Medium", color: c.textPrimary },
-    personRole: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    personName: { fontSize: 12, fontFamily: 'Inter_500Medium', color: c.textPrimary },
+    personRole: { fontSize: 10, fontFamily: 'Inter_400Regular', color: c.textSecondary },
     primaryBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },
-    primaryText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
-    pageBtn: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-    runbookToggle: { flexDirection: "row", alignItems: "center", gap: 6, paddingTop: 10, marginTop: 2 },
-    runbookToggleText: { flex: 1, fontSize: 10, fontFamily: "Inter_500Medium", color: c.textSecondary },
+    primaryText: { fontSize: 8, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5 },
+    pageBtn: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    runbookToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingTop: 10,
+      marginTop: 2,
+    },
+    runbookToggleText: {
+      flex: 1,
+      fontSize: 10,
+      fontFamily: 'Inter_500Medium',
+      color: c.textSecondary,
+    },
     runbooks: { marginTop: 8, gap: 6 },
-    runbookRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, borderRadius: 8, borderWidth: 1, backgroundColor: c.surfaceElevated },
-    runbookIcon: { width: 24, height: 24, borderRadius: 6, alignItems: "center", justifyContent: "center" },
-    runbookTitle: { fontSize: 11, fontFamily: "Inter_500Medium", color: c.textPrimary },
-    runbookMeta: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    runbookRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      padding: 10,
+      borderRadius: 8,
+      borderWidth: 1,
+      backgroundColor: c.surfaceElevated,
+    },
+    runbookIcon: {
+      width: 24,
+      height: 24,
+      borderRadius: 6,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    runbookTitle: { fontSize: 11, fontFamily: 'Inter_500Medium', color: c.textPrimary },
+    runbookMeta: { fontSize: 9, fontFamily: 'Inter_400Regular', color: c.textTertiary },
   });
 }

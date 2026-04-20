@@ -5,16 +5,16 @@
  * schema. All schemas are derived from the Zod definitions in @szl/substrate.
  */
 
-export const GATEWAY_VERSION = "1.0.0" as const;
+export const GATEWAY_VERSION = '1.0.0' as const;
 
 export const SERVER_INFO = {
-  name: "szl-substrate-mcp-gateway",
+  name: 'szl-substrate-mcp-gateway',
   version: GATEWAY_VERSION,
   description:
-    "Sovereign Execution Substrate — MCP transport layer. " +
-    "Policy-shaped graphs, evidence-chained transitions, approval gating, and " +
-    "counterfactual replay for all SZL workflows.",
-  protocolVersion: "2024-11-05",
+    'Sovereign Execution Substrate — MCP transport layer. ' +
+    'Policy-shaped graphs, evidence-chained transitions, approval gating, and ' +
+    'counterfactual replay for all SZL workflows.',
+  protocolVersion: '2024-11-05',
 } as const;
 
 export const CAPABILITIES = {
@@ -30,7 +30,7 @@ export interface McpToolDescriptor {
   name: string;
   description: string;
   inputSchema: {
-    type: "object";
+    type: 'object';
     properties: Record<string, unknown>;
     required?: string[];
     additionalProperties?: boolean;
@@ -39,140 +39,140 @@ export interface McpToolDescriptor {
 
 export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
   {
-    name: "substrate_submit_run",
+    name: 'substrate_submit_run',
     description:
-      "Submit a workflow run to the Sovereign Execution Substrate. " +
-      "The run is enqueued and started immediately; the response contains the runId " +
-      "for subsequent status polls. All runs flow through the policy compiler, " +
-      "approval engine, and evidence/audit chain. " +
-      "Returns: { runId, status, workflowId, traceId }",
+      'Submit a workflow run to the Sovereign Execution Substrate. ' +
+      'The run is enqueued and started immediately; the response contains the runId ' +
+      'for subsequent status polls. All runs flow through the policy compiler, ' +
+      'approval engine, and evidence/audit chain. ' +
+      'Returns: { runId, status, workflowId, traceId }',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {
         workflowId: {
-          type: "string",
-          description: "ID of a registered workflow (from substrate_list_workflows)",
+          type: 'string',
+          description: 'ID of a registered workflow (from substrate_list_workflows)',
         },
         input: {
-          type: "object",
-          description: "Workflow-specific input payload (arbitrary JSON object)",
+          type: 'object',
+          description: 'Workflow-specific input payload (arbitrary JSON object)',
         },
         mode: {
-          type: "string",
-          enum: ["live", "dry-run"],
+          type: 'string',
+          enum: ['live', 'dry-run'],
           description:
             "Execution mode. 'live' runs against real adapters; " +
             "'dry-run' executes the graph but skips side effects. Default: live",
         },
         metadata: {
-          type: "object",
-          description: "Optional caller-supplied key/value metadata attached to the run",
+          type: 'object',
+          description: 'Optional caller-supplied key/value metadata attached to the run',
         },
       },
-      required: ["workflowId", "input"],
+      required: ['workflowId', 'input'],
       additionalProperties: false,
     },
   },
 
   {
-    name: "substrate_get_run",
+    name: 'substrate_get_run',
     description:
-      "Retrieve the current state of a substrate run by ID. " +
-      "Includes status, stage results, current stage, confidence scores, " +
-      "and the evidence bundle. Poll this to track run progress or detect " +
-      "pending-approval states where human action is required.",
+      'Retrieve the current state of a substrate run by ID. ' +
+      'Includes status, stage results, current stage, confidence scores, ' +
+      'and the evidence bundle. Poll this to track run progress or detect ' +
+      'pending-approval states where human action is required.',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {
         runId: {
-          type: "string",
-          description: "UUID of the run returned by substrate_submit_run",
+          type: 'string',
+          description: 'UUID of the run returned by substrate_submit_run',
         },
       },
-      required: ["runId"],
+      required: ['runId'],
       additionalProperties: false,
     },
   },
 
   {
-    name: "substrate_replay",
+    name: 'substrate_replay',
     description:
-      "Replay a completed substrate run from its journal. " +
-      "Skips stages already completed in the source run; re-executes subsequent " +
-      "stages with identical inputs to verify determinism. " +
-      "Returns a new PipelineRun with replaySourceRunId set.",
+      'Replay a completed substrate run from its journal. ' +
+      'Skips stages already completed in the source run; re-executes subsequent ' +
+      'stages with identical inputs to verify determinism. ' +
+      'Returns a new PipelineRun with replaySourceRunId set.',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {
         runId: {
-          type: "string",
-          description: "ID of the completed run to replay",
+          type: 'string',
+          description: 'ID of the completed run to replay',
         },
         workflowId: {
-          type: "string",
+          type: 'string',
           description:
-            "Workflow definition ID to replay against. " +
+            'Workflow definition ID to replay against. ' +
             "Must match the original run's workflow.",
         },
       },
-      required: ["runId", "workflowId"],
+      required: ['runId', 'workflowId'],
       additionalProperties: false,
     },
   },
 
   {
-    name: "substrate_counterfactual",
+    name: 'substrate_counterfactual',
     description:
-      "Run a counterfactual replay of a completed run with model and/or policy substitution. " +
-      "Produces a decision diff showing which stages changed outcome, " +
-      "the final confidence delta, and whether the overall outcome changed. " +
-      "Used for eval harnesses, offline analysis, and governance audit.",
+      'Run a counterfactual replay of a completed run with model and/or policy substitution. ' +
+      'Produces a decision diff showing which stages changed outcome, ' +
+      'the final confidence delta, and whether the overall outcome changed. ' +
+      'Used for eval harnesses, offline analysis, and governance audit.',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {
         runId: {
-          type: "string",
-          description: "ID of the completed baseline run",
+          type: 'string',
+          description: 'ID of the completed baseline run',
         },
         workflowId: {
-          type: "string",
-          description: "Workflow definition ID to replay against",
+          type: 'string',
+          description: 'Workflow definition ID to replay against',
         },
         modelAdapterId: {
-          type: "string",
+          type: 'string',
           description:
             "Substitute model adapter ID (e.g. 'gpt-4o-mini' vs 'gpt-4o'). " +
-            "Omit to keep original model.",
+            'Omit to keep original model.',
         },
         policyId: {
-          type: "string",
+          type: 'string',
           description:
-            "Substitute policy ID from the policy-engine registry. " +
-            "Omit to keep original policy profile.",
+            'Substitute policy ID from the policy-engine registry. ' +
+            'Omit to keep original policy profile.',
         },
       },
-      required: ["runId", "workflowId"],
+      required: ['runId', 'workflowId'],
       additionalProperties: false,
     },
   },
 
   {
-    name: "substrate_list_approvals",
+    name: 'substrate_list_approvals',
     description:
-      "List pending approval actions in the approvals inbox. " +
+      'List pending approval actions in the approvals inbox. ' +
       "Runs that reach an ApprovalGate stage pause with status 'pending-approval' " +
-      "and surface here. Resolving an approval via substrate_approve or " +
-      "substrate_reject resumes the run.",
+      'and surface here. Resolving an approval via substrate_approve or ' +
+      'substrate_reject resumes the run.',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {
         verdict: {
-          type: "string",
-          enum: ["approved", "rejected", "escalated"],
-          description: "Filter by verdict. Omit to return all entries including pending.",
+          type: 'string',
+          enum: ['approved', 'rejected', 'escalated'],
+          description: 'Filter by verdict. Omit to return all entries including pending.',
         },
         domain: {
-          type: "string",
+          type: 'string',
           description: "Filter by domain (e.g. 'lyte', 'terra', 'vessels')",
         },
       },
@@ -181,76 +181,76 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
   },
 
   {
-    name: "substrate_approve",
+    name: 'substrate_approve',
     description:
-      "Approve a pending substrate run at its ApprovalGate. " +
-      "Records the approval in the approvals inbox with full provenance " +
-      "(actor, timestamp, proof ref). The run then resumes execution " +
-      "from the stage after the gate.",
+      'Approve a pending substrate run at its ApprovalGate. ' +
+      'Records the approval in the approvals inbox with full provenance ' +
+      '(actor, timestamp, proof ref). The run then resumes execution ' +
+      'from the stage after the gate.',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {
         recommendationId: {
-          type: "string",
-          description: "The recommendationId / runId of the pending approval",
+          type: 'string',
+          description: 'The recommendationId / runId of the pending approval',
         },
         actor: {
-          type: "string",
-          description: "Human actor name or system ID performing the approval",
+          type: 'string',
+          description: 'Human actor name or system ID performing the approval',
         },
         note: {
-          type: "string",
-          description: "Optional rationale note recorded in the proof entry",
+          type: 'string',
+          description: 'Optional rationale note recorded in the proof entry',
         },
         domain: {
-          type: "string",
+          type: 'string',
           description: "Domain tag for this approval (e.g. 'lyte', 'vessels')",
         },
       },
-      required: ["recommendationId"],
+      required: ['recommendationId'],
       additionalProperties: false,
     },
   },
 
   {
-    name: "substrate_reject",
+    name: 'substrate_reject',
     description:
-      "Reject a pending substrate run at its ApprovalGate. " +
-      "Records the rejection in the approvals inbox. The run is terminated " +
+      'Reject a pending substrate run at its ApprovalGate. ' +
+      'Records the rejection in the approvals inbox. The run is terminated ' +
       "with status 'failed' and the rejection reason is written to the evidence chain.",
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {
         recommendationId: {
-          type: "string",
-          description: "The recommendationId / runId of the pending approval",
+          type: 'string',
+          description: 'The recommendationId / runId of the pending approval',
         },
         actor: {
-          type: "string",
-          description: "Human actor name or system ID performing the rejection",
+          type: 'string',
+          description: 'Human actor name or system ID performing the rejection',
         },
         note: {
-          type: "string",
-          description: "Required rejection rationale recorded in the proof entry",
+          type: 'string',
+          description: 'Required rejection rationale recorded in the proof entry',
         },
         domain: {
-          type: "string",
-          description: "Domain tag for this rejection",
+          type: 'string',
+          description: 'Domain tag for this rejection',
         },
       },
-      required: ["recommendationId", "note"],
+      required: ['recommendationId', 'note'],
       additionalProperties: false,
     },
   },
 
   {
-    name: "substrate_list_workflows",
+    name: 'substrate_list_workflows',
     description:
-      "List all workflows registered in the Substrate runtime. " +
-      "Returns workflow IDs, names, stage counts, and policy profiles. " +
-      "Use these IDs with substrate_submit_run.",
+      'List all workflows registered in the Substrate runtime. ' +
+      'Returns workflow IDs, names, stage counts, and policy profiles. ' +
+      'Use these IDs with substrate_submit_run.',
     inputSchema: {
-      type: "object",
+      type: 'object',
       properties: {},
       additionalProperties: false,
     },
@@ -268,37 +268,37 @@ export interface McpResourceDescriptor {
 
 export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
   {
-    uri: "substrate://schema/run",
-    name: "Substrate Run Schema",
+    uri: 'substrate://schema/run',
+    name: 'Substrate Run Schema',
     description:
-      "JSON Schema for a PipelineRun — the full state object returned by substrate_get_run. " +
-      "Includes status, stageResults, evidence bundles, and confidence metadata.",
-    mimeType: "application/schema+json",
+      'JSON Schema for a PipelineRun — the full state object returned by substrate_get_run. ' +
+      'Includes status, stageResults, evidence bundles, and confidence metadata.',
+    mimeType: 'application/schema+json',
   },
   {
-    uri: "substrate://schema/stage-result",
-    name: "Substrate Stage Result Schema",
+    uri: 'substrate://schema/stage-result',
+    name: 'Substrate Stage Result Schema',
     description:
-      "JSON Schema for a StageResult — individual stage execution record " +
-      "within a PipelineRun.",
-    mimeType: "application/schema+json",
+      'JSON Schema for a StageResult — individual stage execution record ' +
+      'within a PipelineRun.',
+    mimeType: 'application/schema+json',
   },
   {
-    uri: "substrate://schema/counterfactual-diff",
-    name: "Counterfactual Diff Schema",
+    uri: 'substrate://schema/counterfactual-diff',
+    name: 'Counterfactual Diff Schema',
     description:
-      "JSON Schema for a CounterfactualDiff — produced by substrate_counterfactual. " +
-      "Contains per-stage diffs, final confidence delta, and outcome change flag.",
-    mimeType: "application/schema+json",
+      'JSON Schema for a CounterfactualDiff — produced by substrate_counterfactual. ' +
+      'Contains per-stage diffs, final confidence delta, and outcome change flag.',
+    mimeType: 'application/schema+json',
   },
   {
-    uri: "substrate://policy/active",
-    name: "Active Policy Profiles",
+    uri: 'substrate://policy/active',
+    name: 'Active Policy Profiles',
     description:
-      "Current list of policy profiles registered in the Substrate policy adapter. " +
-      "Each entry includes the policy ID, name, high-risk categories, " +
-      "and minimum approval tier.",
-    mimeType: "application/json",
+      'Current list of policy profiles registered in the Substrate policy adapter. ' +
+      'Each entry includes the policy ID, name, high-risk categories, ' +
+      'and minimum approval tier.',
+    mimeType: 'application/json',
   },
 ];
 
@@ -312,21 +312,23 @@ export interface McpPromptDescriptor {
 
 export const SUBSTRATE_PROMPTS: McpPromptDescriptor[] = [
   {
-    name: "substrate_run_summary",
+    name: 'substrate_run_summary',
     description:
-      "Generate a human-readable summary of a completed substrate run, " +
-      "including the key decision made, confidence scores, and any approval gates triggered.",
-    arguments: [
-      { name: "runId", description: "ID of the run to summarise", required: true },
-    ],
+      'Generate a human-readable summary of a completed substrate run, ' +
+      'including the key decision made, confidence scores, and any approval gates triggered.',
+    arguments: [{ name: 'runId', description: 'ID of the run to summarise', required: true }],
   },
   {
-    name: "substrate_counterfactual_analysis",
+    name: 'substrate_counterfactual_analysis',
     description:
-      "Interpret a counterfactual diff and explain which model or policy substitution " +
-      "caused the outcome to change.",
+      'Interpret a counterfactual diff and explain which model or policy substitution ' +
+      'caused the outcome to change.',
     arguments: [
-      { name: "diffJson", description: "JSON string of the CounterfactualDiff object", required: true },
+      {
+        name: 'diffJson',
+        description: 'JSON string of the CounterfactualDiff object',
+        required: true,
+      },
     ],
   },
 ];

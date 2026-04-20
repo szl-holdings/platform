@@ -1,21 +1,21 @@
-import { Router } from "express";
-import type { Request, Response } from "express";
-import { EmbedRequestSchema } from "@workspace/aef-contracts";
-import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
-import { PolicyEngine } from "@workspace/aef-policy-guard";
-import { embedTexts } from "@workspace/alloy-embed-worker";
-import { randomUUID } from "crypto";
-import { logger } from "../middleware/logger.js";
-import { getProfile } from "../profiles/default.js";
-import { errorBudgetCounter } from "../middleware/prometheus.js";
+import { EmbedRequestSchema } from '@workspace/aef-contracts';
+import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
+import { PolicyEngine } from '@workspace/aef-policy-guard';
+import { embedTexts } from '@workspace/alloy-embed-worker';
+import { randomUUID } from 'crypto';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import { logger } from '../middleware/logger.js';
+import { errorBudgetCounter } from '../middleware/prometheus.js';
+import { getProfile } from '../profiles/default.js';
 
 export const embedRouter = Router();
 const policyEngine = new PolicyEngine();
 
-embedRouter.post("/v1/embed", async (req: Request, res: Response) => {
+embedRouter.post('/v1/embed', async (req: Request, res: Response) => {
   const parseResult = EmbedRequestSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: "Validation failed", detail: parseResult.error.issues });
+    res.status(400).json({ error: 'Validation failed', detail: parseResult.error.issues });
     return;
   }
 
@@ -25,9 +25,9 @@ embedRouter.post("/v1/embed", async (req: Request, res: Response) => {
 
   let profile;
   try {
-    profile = getProfile(body.profileId ?? req.profileId ?? "default");
+    profile = getProfile(body.profileId ?? req.profileId ?? 'default');
   } catch (err) {
-    res.status(400).json({ error: "Profile not found", detail: String(err) });
+    res.status(400).json({ error: 'Profile not found', detail: String(err) });
     return;
   }
 
@@ -40,9 +40,9 @@ embedRouter.post("/v1/embed", async (req: Request, res: Response) => {
   });
 
   if (!policyDecision.allow) {
-    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: body.tenantId as string });
+    errorBudgetCounter.inc({ kind: 'policy_denied', tenant_id: body.tenantId as string });
     res.status(403).json({
-      error: "Request blocked by policy",
+      error: 'Request blocked by policy',
       reasons: policyDecision.reasons,
       traceId,
     });
@@ -52,37 +52,50 @@ embedRouter.post("/v1/embed", async (req: Request, res: Response) => {
   let vectors: number[][];
   const embedStart = Date.now();
 
-  const substrateUrl = process.env["SUBSTRATE_EMBED_URL"];
-  const useDevHash = !substrateUrl && process.env["NODE_ENV"] !== "production";
-  const primaryBackend = useDevHash ? "dev-hash" : "cpu-local";
+  const substrateUrl = process.env['SUBSTRATE_EMBED_URL'];
+  const useDevHash = !substrateUrl && process.env['NODE_ENV'] !== 'production';
+  const primaryBackend = useDevHash ? 'dev-hash' : 'cpu-local';
 
   try {
     vectors = await embedTexts(body.texts, {
       backendId: primaryBackend,
-      model: body.model ?? "aef-dev-hash",
-      pooling: "mean",
+      model: body.model ?? 'aef-dev-hash',
+      pooling: 'mean',
       normalize: body.normalize,
     });
   } catch (primaryErr) {
-    if (!useDevHash && process.env["NODE_ENV"] !== "production") {
-      logger.warn({ traceId, primaryBackend, error: String(primaryErr) }, "Primary embed backend failed; falling back to dev-hash");
+    if (!useDevHash && process.env['NODE_ENV'] !== 'production') {
+      logger.warn(
+        { traceId, primaryBackend, error: String(primaryErr) },
+        'Primary embed backend failed; falling back to dev-hash',
+      );
       try {
         vectors = await embedTexts(body.texts, {
-          backendId: "dev-hash",
-          model: body.model ?? "aef-dev-hash",
-          pooling: "mean",
+          backendId: 'dev-hash',
+          model: body.model ?? 'aef-dev-hash',
+          pooling: 'mean',
           normalize: body.normalize,
         });
       } catch (fallbackErr) {
-        errorBudgetCounter.inc({ kind: "embed_error", tenant_id: body.tenantId as string });
-        logger.error({ traceId, error: String(fallbackErr), tenantId: body.tenantId }, "Embed fallback also failed");
-        res.status(502).json({ error: "Embedding backend error", detail: String(fallbackErr), traceId });
+        errorBudgetCounter.inc({ kind: 'embed_error', tenant_id: body.tenantId as string });
+        logger.error(
+          { traceId, error: String(fallbackErr), tenantId: body.tenantId },
+          'Embed fallback also failed',
+        );
+        res
+          .status(502)
+          .json({ error: 'Embedding backend error', detail: String(fallbackErr), traceId });
         return;
       }
     } else {
-      errorBudgetCounter.inc({ kind: "embed_error", tenant_id: body.tenantId as string });
-      logger.error({ traceId, error: String(primaryErr), tenantId: body.tenantId }, "Embed request failed");
-      res.status(502).json({ error: "Embedding backend error", detail: String(primaryErr), traceId });
+      errorBudgetCounter.inc({ kind: 'embed_error', tenant_id: body.tenantId as string });
+      logger.error(
+        { traceId, error: String(primaryErr), tenantId: body.tenantId },
+        'Embed request failed',
+      );
+      res
+        .status(502)
+        .json({ error: 'Embedding backend error', detail: String(primaryErr), traceId });
       return;
     }
   }
@@ -100,7 +113,7 @@ embedRouter.post("/v1/embed", async (req: Request, res: Response) => {
       profileId: profile.profileId,
       profileVersion: profile.version,
       chunkId: `embed-${body.requestId}-${i}`,
-      sourceId: "embed-request",
+      sourceId: 'embed-request',
       finalScore: 1.0,
       policyAllow: true,
       policyReasons: policyDecision.reasons,
@@ -116,7 +129,7 @@ embedRouter.post("/v1/embed", async (req: Request, res: Response) => {
   const response = {
     requestId: body.requestId,
     tenantId: body.tenantId,
-    model: body.model ?? "aef-dev-hash",
+    model: body.model ?? 'aef-dev-hash',
     dimensions,
     vectors: vectors.map((vector, i) => ({
       index: i,
@@ -129,6 +142,9 @@ embedRouter.post("/v1/embed", async (req: Request, res: Response) => {
     policyReasons: policyDecision.reasons,
   };
 
-  logger.info({ traceId, requestId: body.requestId, count: body.texts.length, processingMs }, "embed completed");
+  logger.info(
+    { traceId, requestId: body.requestId, count: body.texts.length, processingMs },
+    'embed completed',
+  );
   res.status(200).json(response);
 });

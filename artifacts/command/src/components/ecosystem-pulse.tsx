@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
-import { TrendingDown, TrendingUp, Minus } from "lucide-react";
-import type { DomainData } from "../types";
+import { motion } from 'framer-motion';
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import type { DomainData } from '../types';
 
 interface EcosystemPulseProps {
   domains: DomainData[];
@@ -8,16 +8,16 @@ interface EcosystemPulseProps {
   compositeStatus: string;
 }
 
-function scoreToTrend(score: number): "up" | "down" | "neutral" {
-  if (score >= 80) return "up";
-  if (score <= 65) return "down";
-  return "neutral";
+function scoreToTrend(score: number): 'up' | 'down' | 'neutral' {
+  if (score >= 80) return 'up';
+  if (score <= 65) return 'down';
+  return 'neutral';
 }
 
 function scoreToColor(score: number): string {
-  if (score >= 80) return "var(--color-low)";
-  if (score >= 70) return "var(--color-high)";
-  return "var(--color-critical)";
+  if (score >= 80) return 'var(--color-low)';
+  if (score >= 70) return 'var(--color-high)';
+  return 'var(--color-critical)';
 }
 
 const GAUGE_CX = 70;
@@ -49,7 +49,7 @@ function CompositeGauge({ score, status }: { score: number; status: string }) {
             strokeLinecap="round"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: score / 100 }}
-            transition={{ duration: 1.1, ease: "easeOut" }}
+            transition={{ duration: 1.1, ease: 'easeOut' }}
           />
           <motion.text
             key={`label-${score}`}
@@ -83,7 +83,7 @@ function CompositeGauge({ score, status }: { score: number; status: string }) {
 
       <h2
         className="text-[10px] font-bold tracking-widest uppercase"
-        style={{ color: "var(--color-fg-muted)" }}
+        style={{ color: 'var(--color-fg-muted)' }}
       >
         Composite Health
       </h2>
@@ -107,8 +107,8 @@ export function EcosystemPulse({ domains, compositeScore, compositeStatus }: Eco
             transition={{ delay: i * 0.06 }}
             className="flex flex-col gap-1 p-3 rounded-lg border"
             style={{
-              backgroundColor: "var(--color-bg-primary)",
-              borderColor: "var(--color-surface-border)",
+              backgroundColor: 'var(--color-bg-primary)',
+              borderColor: 'var(--color-surface-border)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -121,23 +121,20 @@ export function EcosystemPulse({ domains, compositeScore, compositeStatus }: Eco
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="text-sm font-bold"
-                  style={{ color: "var(--color-fg-primary)" }}
+                  style={{ color: 'var(--color-fg-primary)' }}
                 >
                   {d.score}
                 </motion.span>
-                {scoreToTrend(d.score) === "up" ? (
-                  <TrendingUp className="w-3 h-3" style={{ color: "var(--color-low)" }} />
-                ) : scoreToTrend(d.score) === "down" ? (
-                  <TrendingDown className="w-3 h-3" style={{ color: "var(--color-critical)" }} />
+                {scoreToTrend(d.score) === 'up' ? (
+                  <TrendingUp className="w-3 h-3" style={{ color: 'var(--color-low)' }} />
+                ) : scoreToTrend(d.score) === 'down' ? (
+                  <TrendingDown className="w-3 h-3" style={{ color: 'var(--color-critical)' }} />
                 ) : (
-                  <Minus className="w-3 h-3" style={{ color: "var(--color-fg-muted)" }} />
+                  <Minus className="w-3 h-3" style={{ color: 'var(--color-fg-muted)' }} />
                 )}
               </div>
             </div>
-            <span
-              className="text-[10px] truncate"
-              style={{ color: "var(--color-fg-muted)" }}
-            >
+            <span className="text-[10px] truncate" style={{ color: 'var(--color-fg-muted)' }}>
               {d.status}
             </span>
           </motion.div>

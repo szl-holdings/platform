@@ -1,9 +1,4 @@
-import type {
-  SkillDefinition,
-  SkillRun,
-  SkillRegistryQuery,
-  SkillRunQuery,
-} from "./types.js";
+import type { SkillDefinition, SkillRegistryQuery, SkillRun, SkillRunQuery } from './types.js';
 
 export type { SkillRegistryQuery, SkillRunQuery };
 
@@ -21,7 +16,7 @@ export interface SkillRegistry {
   getSkill(skillId: string): SkillDefinition | undefined;
   listSkills(query?: SkillRegistryQuery): SkillDefinition[];
   updateSkill(skillId: string, patch: Partial<SkillDefinition>): boolean;
-  count(query?: Pick<SkillRegistryQuery, "category" | "enabled" | "isBuiltin" | "tag">): number;
+  count(query?: Pick<SkillRegistryQuery, 'category' | 'enabled' | 'isBuiltin' | 'tag'>): number;
   setBackend(backend: SkillRegistryBackend): void;
 }
 
@@ -29,12 +24,12 @@ export interface SkillRunStore {
   saveRun(run: SkillRun): void;
   getRun(runId: string): SkillRun | undefined;
   listRuns(query?: SkillRunQuery): SkillRun[];
-  countRuns(query?: Pick<SkillRunQuery, "skillId" | "status">): number;
+  countRuns(query?: Pick<SkillRunQuery, 'skillId' | 'status'>): number;
   setBackend(backend: SkillRunStoreBackend): void;
 }
 
 let persistenceLogger: { warn: (...args: unknown[]) => void } = {
-  warn: (...args) => console.warn("[skill-library]", ...args),
+  warn: (...args) => console.warn('[skill-library]', ...args),
 };
 
 export function setSkillLibraryLogger(logger: { warn: (...args: unknown[]) => void }): void {
@@ -53,7 +48,7 @@ export class InMemorySkillRegistry implements SkillRegistry {
     this.skills.set(skill.id, { ...skill });
     if (this.backend) {
       void this.backend.persistSkill(skill).catch((err) => {
-        persistenceLogger.warn({ err }, "[skill-registry] Failed to persist skill registration");
+        persistenceLogger.warn({ err }, '[skill-registry] Failed to persist skill registration');
       });
     }
   }
@@ -80,9 +75,7 @@ export class InMemorySkillRegistry implements SkillRegistry {
       results = results.filter((s) => s.tags.includes(tag));
     }
 
-    results.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const offset = query?.offset ?? 0;
     const limit = query?.limit ?? 100;
@@ -101,13 +94,13 @@ export class InMemorySkillRegistry implements SkillRegistry {
     this.skills.set(skillId, updated);
     if (this.backend) {
       void this.backend.persistSkillUpdate(skillId, patch).catch((err) => {
-        persistenceLogger.warn({ err }, "[skill-registry] Failed to persist skill update");
+        persistenceLogger.warn({ err }, '[skill-registry] Failed to persist skill update');
       });
     }
     return true;
   }
 
-  count(query?: Pick<SkillRegistryQuery, "category" | "enabled" | "isBuiltin" | "tag">): number {
+  count(query?: Pick<SkillRegistryQuery, 'category' | 'enabled' | 'isBuiltin' | 'tag'>): number {
     return this.listSkills({ ...query, limit: 100_000 }).length;
   }
 }
@@ -124,7 +117,7 @@ export class InMemorySkillRunStore implements SkillRunStore {
     this.runs.set(run.runId, { ...run });
     if (this.backend) {
       void this.backend.persistRun(run).catch((err) => {
-        persistenceLogger.warn({ err }, "[skill-run-store] Failed to persist run");
+        persistenceLogger.warn({ err }, '[skill-run-store] Failed to persist run');
       });
     }
   }
@@ -151,7 +144,7 @@ export class InMemorySkillRunStore implements SkillRunStore {
     return results.slice(offset, offset + limit).map((r) => ({ ...r }));
   }
 
-  countRuns(query?: Pick<SkillRunQuery, "skillId" | "status">): number {
+  countRuns(query?: Pick<SkillRunQuery, 'skillId' | 'status'>): number {
     return this.listRuns({ ...query, limit: 100_000 }).length;
   }
 }

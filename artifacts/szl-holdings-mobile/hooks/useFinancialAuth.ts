@@ -1,8 +1,8 @@
-import { useCallback } from "react";
-import { Platform, Alert } from "react-native";
-import * as LocalAuthentication from "expo-local-authentication";
-import { useBiometric } from "@szl-holdings/mobile-shared";
-import { hasPINSet } from "@/components/PINModal";
+import { useBiometric } from '@szl-holdings/mobile-shared';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { useCallback } from 'react';
+import { Alert, Platform } from 'react-native';
+import { hasPINSet } from '@/components/PINModal';
 
 export function useFinancialAuth() {
   const { isEnabled: biometricEnabled } = useBiometric();
@@ -11,14 +11,14 @@ export function useFinancialAuth() {
     async (
       isFinancialReauthEnabled: boolean,
       onAuthorized: () => void,
-      onPINRequired: () => void
+      onPINRequired: () => void,
     ): Promise<void> => {
       if (!isFinancialReauthEnabled) {
         onAuthorized();
         return;
       }
 
-      if (Platform.OS === "web") {
+      if (Platform.OS === 'web') {
         onAuthorized();
         return;
       }
@@ -29,17 +29,17 @@ export function useFinancialAuth() {
 
       if (!biometricEnabled && !pinSet) {
         Alert.alert(
-          "Authentication Required",
-          "Financial actions require biometric or PIN authentication. Please configure your security settings before proceeding.",
-          [{ text: "OK" }]
+          'Authentication Required',
+          'Financial actions require biometric or PIN authentication. Please configure your security settings before proceeding.',
+          [{ text: 'OK' }],
         );
         return;
       }
 
       if (biometricEnabled && isBiometricSupported && isEnrolled) {
         const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: "Financial action requires verification",
-          cancelLabel: pinSet ? "Use PIN" : "Cancel",
+          promptMessage: 'Financial action requires verification',
+          cancelLabel: pinSet ? 'Use PIN' : 'Cancel',
           disableDeviceFallback: false,
         });
         if (result.success) {
@@ -59,11 +59,11 @@ export function useFinancialAuth() {
       }
 
       Alert.alert(
-        "Authentication Required",
-        "Set up biometric or PIN in Security Settings before performing financial actions."
+        'Authentication Required',
+        'Set up biometric or PIN in Security Settings before performing financial actions.',
       );
     },
-    [biometricEnabled]
+    [biometricEnabled],
   );
 
   return { promptIfRequired };

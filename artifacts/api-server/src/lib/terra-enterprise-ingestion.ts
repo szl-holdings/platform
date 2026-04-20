@@ -1,21 +1,21 @@
-import { logger } from "./logger";
-import { db } from "@szl-holdings/db";
 import {
-  terraMlsListingsTable,
-  terraCommercialPropertiesTable,
-  terraCommercialCompsTable,
-  terraDistressPropertiesTable,
-  type InsertTerraMlsListing,
-  type InsertTerraCommercialProperty,
+  db,
   type InsertTerraCommercialComp,
-} from "@szl-holdings/db";
-import { services } from "@szl-holdings/services";
-import { eq, and, ilike, desc, gte } from "drizzle-orm";
-import { startIngestionRun, completeIngestionRun } from "./terra-distress-service";
+  type InsertTerraCommercialProperty,
+  type InsertTerraMlsListing,
+  terraCommercialCompsTable,
+  terraCommercialPropertiesTable,
+  terraDistressPropertiesTable,
+  terraMlsListingsTable,
+} from '@szl-holdings/db';
+import { services } from '@szl-holdings/services';
+import { and, desc, eq, gte, ilike } from 'drizzle-orm';
+import { logger } from './logger';
+import { completeIngestionRun, startIngestionRun } from './terra-distress-service';
 
-const MLS_ENABLED = process.env["TERRA_MLS_ENABLED"] !== "false";
-const COSTAR_ENABLED = process.env["TERRA_COSTAR_ENABLED"] !== "false";
-const COMPSTAK_ENABLED = process.env["TERRA_COMPSTAK_ENABLED"] !== "false";
+const MLS_ENABLED = process.env['TERRA_MLS_ENABLED'] !== 'false';
+const COSTAR_ENABLED = process.env['TERRA_COSTAR_ENABLED'] !== 'false';
+const COMPSTAK_ENABLED = process.env['TERRA_COMPSTAK_ENABLED'] !== 'false';
 
 export async function runMlsListingSync(): Promise<{
   fetched: number;
@@ -24,15 +24,15 @@ export async function runMlsListingSync(): Promise<{
   demoMode: boolean;
 }> {
   if (!MLS_ENABLED) {
-    logger.info("MLS sync skipped — terra_mls_enabled is false");
+    logger.info('MLS sync skipped — terra_mls_enabled is false');
     return { fetched: 0, upserted: 0, errors: 0, demoMode: false };
   }
 
-  const runId = await startIngestionRun("mls_listing_sync");
+  const runId = await startIngestionRun('mls_listing_sync');
   const adapter = services.resoMls;
   const isDemoMode = adapter.isDemoMode;
 
-  logger.info({ isDemoMode, status: adapter.status }, "Starting MLS listing sync");
+  logger.info({ isDemoMode, status: adapter.status }, 'Starting MLS listing sync');
 
   let lastTimestamp: string | null = null;
 
@@ -97,8 +97,11 @@ export async function runMlsListingSync(): Promise<{
         publicRemarks: listing.publicRemarks || null,
         hasDistressCrossRef: distressCrossRef.matched,
         distressPropertyId: distressCrossRef.propertyId,
-        ingestSource: isDemoMode ? "demo" : "mls_sync",
-        isActive: listing.standardStatus === "Active" || listing.standardStatus === "Pending" || listing.standardStatus === "Coming Soon",
+        ingestSource: isDemoMode ? 'demo' : 'mls_sync',
+        isActive:
+          listing.standardStatus === 'Active' ||
+          listing.standardStatus === 'Pending' ||
+          listing.standardStatus === 'Coming Soon',
       };
 
       if (existing.length > 0) {
@@ -112,7 +115,7 @@ export async function runMlsListingSync(): Promise<{
 
       upserted++;
     } catch (err) {
-      logger.warn({ err, listingKey: listing.listingKey }, "Failed to upsert MLS listing");
+      logger.warn({ err, listingKey: listing.listingKey }, 'Failed to upsert MLS listing');
       errors++;
     }
   }
@@ -123,20 +126,23 @@ export async function runMlsListingSync(): Promise<{
     recordsSkipped: 0,
     recordsFailed: errors,
     alertsGenerated: 0,
-    status: errors > 0 ? "partial" : "completed",
+    status: errors > 0 ? 'partial' : 'completed',
   });
 
-  logger.info({ fetched: listings.length, upserted, errors, isDemoMode }, "MLS listing sync complete");
+  logger.info(
+    { fetched: listings.length, upserted, errors, isDemoMode },
+    'MLS listing sync complete',
+  );
   return { fetched: listings.length, upserted, errors, demoMode: isDemoMode };
 }
 
 async function checkDistressCrossRef(
   address: string,
-  postalCode: string | null
+  postalCode: string | null,
 ): Promise<{ matched: boolean; propertyId: number | null }> {
   try {
     const conditions = [
-      ilike(terraDistressPropertiesTable.address, `%${address.split(",")[0]?.trim() ?? address}%`),
+      ilike(terraDistressPropertiesTable.address, `%${address.split(',')[0]?.trim() ?? address}%`),
       eq(terraDistressPropertiesTable.isActive, true),
     ];
     if (postalCode) {
@@ -178,18 +184,25 @@ export async function runCommercialDataRefresh(): Promise<{
   return result;
 }
 
-async function refreshCoStarData(): Promise<{ properties: number; comps: number; errors: number; demoMode: boolean }> {
+async function refreshCoStarData(): Promise<{
+  properties: number;
+  comps: number;
+  errors: number;
+  demoMode: boolean;
+}> {
   const adapter = services.costar;
   const isDemoMode = adapter.isDemoMode;
 
-  logger.info({ isDemoMode }, "Starting CoStar data refresh");
+  logger.info({ isDemoMode }, 'Starting CoStar data refresh');
 
   let properties = 0;
   let comps = 0;
   let errors = 0;
 
   try {
-    const propList = isDemoMode ? adapter.getMockProperties() : await adapter.getProperties({ limit: 200 });
+    const propList = isDemoMode
+      ? adapter.getMockProperties()
+      : await adapter.getProperties({ limit: 200 });
 
     for (const prop of propList) {
       try {
@@ -202,7 +215,7 @@ async function refreshCoStarData(): Promise<{ properties: number; comps: number;
 
         const record: InsertTerraCommercialProperty = {
           externalId,
-          source: isDemoMode ? "demo" : "costar",
+          source: isDemoMode ? 'demo' : 'costar',
           propertyName: prop.propertyName,
           address: prop.address,
           city: prop.city,
@@ -221,7 +234,8 @@ async function refreshCoStarData(): Promise<{ properties: number; comps: number;
           occupancyRate: prop.occupancyRate != null ? String(prop.occupancyRate) : null,
           marketVacancyRate: prop.marketVacancyRate != null ? String(prop.marketVacancyRate) : null,
           askingRentPerSqft: prop.askingRentPerSqft != null ? String(prop.askingRentPerSqft) : null,
-          effectiveRentPerSqft: prop.effectiveRentPerSqft != null ? String(prop.effectiveRentPerSqft) : null,
+          effectiveRentPerSqft:
+            prop.effectiveRentPerSqft != null ? String(prop.effectiveRentPerSqft) : null,
           capRate: prop.capRate != null ? String(prop.capRate) : null,
           lastSalePrice: prop.lastSalePrice != null ? String(prop.lastSalePrice) : null,
           lastSaleDate: prop.lastSaleDate,
@@ -243,12 +257,14 @@ async function refreshCoStarData(): Promise<{ properties: number; comps: number;
 
         properties++;
       } catch (err) {
-        logger.warn({ err, propertyId: prop.propertyId }, "Failed to upsert CoStar property");
+        logger.warn({ err, propertyId: prop.propertyId }, 'Failed to upsert CoStar property');
         errors++;
       }
     }
 
-    const saleCompList = isDemoMode ? adapter.getMockSaleComps() : await adapter.getSaleComps({ limit: 100 });
+    const saleCompList = isDemoMode
+      ? adapter.getMockSaleComps()
+      : await adapter.getSaleComps({ limit: 100 });
 
     for (const comp of saleCompList) {
       try {
@@ -261,8 +277,8 @@ async function refreshCoStarData(): Promise<{ properties: number; comps: number;
 
         const record: InsertTerraCommercialComp = {
           externalId,
-          source: isDemoMode ? "demo" : "costar",
-          compType: "sale",
+          source: isDemoMode ? 'demo' : 'costar',
+          compType: 'sale',
           address: comp.address,
           city: comp.city,
           state: comp.state,
@@ -288,31 +304,38 @@ async function refreshCoStarData(): Promise<{ properties: number; comps: number;
 
         comps++;
       } catch (err) {
-        logger.warn({ err, compId: comp.compId }, "Failed to upsert CoStar sale comp");
+        logger.warn({ err, compId: comp.compId }, 'Failed to upsert CoStar sale comp');
         errors++;
       }
     }
   } catch (err) {
-    logger.error({ err }, "CoStar refresh failed");
+    logger.error({ err }, 'CoStar refresh failed');
     errors++;
   }
 
-  logger.info({ properties, comps, errors, isDemoMode }, "CoStar refresh complete");
+  logger.info({ properties, comps, errors, isDemoMode }, 'CoStar refresh complete');
   return { properties, comps, errors, demoMode: isDemoMode };
 }
 
-async function refreshCompStakData(): Promise<{ leaseComps: number; saleComps: number; errors: number; demoMode: boolean }> {
+async function refreshCompStakData(): Promise<{
+  leaseComps: number;
+  saleComps: number;
+  errors: number;
+  demoMode: boolean;
+}> {
   const adapter = services.compstak;
   const isDemoMode = adapter.isDemoMode;
 
-  logger.info({ isDemoMode }, "Starting CompStak data refresh");
+  logger.info({ isDemoMode }, 'Starting CompStak data refresh');
 
   let leaseComps = 0;
   let saleComps = 0;
   let errors = 0;
 
   try {
-    const leaseList = isDemoMode ? adapter.getMockLeaseComps() : await adapter.getLeaseComps({ limit: 200 });
+    const leaseList = isDemoMode
+      ? adapter.getMockLeaseComps()
+      : await adapter.getLeaseComps({ limit: 200 });
 
     for (const comp of leaseList) {
       try {
@@ -325,8 +348,8 @@ async function refreshCompStakData(): Promise<{ leaseComps: number; saleComps: n
 
         const record: InsertTerraCommercialComp = {
           externalId,
-          source: isDemoMode ? "demo" : "compstak",
-          compType: "lease",
+          source: isDemoMode ? 'demo' : 'compstak',
+          compType: 'lease',
           address: comp.address,
           city: comp.city,
           state: comp.state,
@@ -336,10 +359,15 @@ async function refreshCompStakData(): Promise<{ leaseComps: number; saleComps: n
           tenantIndustry: comp.tenantIndustry,
           transactionType: comp.transactionType,
           leasedSqft: comp.leasedSqft,
-          startingRentPerSqft: comp.startingRentPerSqft != null ? String(comp.startingRentPerSqft) : null,
-          effectiveRentPerSqft: comp.effectiveRentPerSqft != null ? String(comp.effectiveRentPerSqft) : null,
+          startingRentPerSqft:
+            comp.startingRentPerSqft != null ? String(comp.startingRentPerSqft) : null,
+          effectiveRentPerSqft:
+            comp.effectiveRentPerSqft != null ? String(comp.effectiveRentPerSqft) : null,
           freeRentMonths: comp.freeRentMonths,
-          tenantImprovementAllowance: comp.tenantImprovementAllowance != null ? String(comp.tenantImprovementAllowance) : null,
+          tenantImprovementAllowance:
+            comp.tenantImprovementAllowance != null
+              ? String(comp.tenantImprovementAllowance)
+              : null,
           leaseTermMonths: comp.leaseTermMonths,
           transactionDate: comp.leaseStartDate,
           leaseExpirationDate: comp.leaseExpirationDate,
@@ -360,12 +388,14 @@ async function refreshCompStakData(): Promise<{ leaseComps: number; saleComps: n
 
         leaseComps++;
       } catch (err) {
-        logger.warn({ err, compId: comp.compId }, "Failed to upsert CompStak lease comp");
+        logger.warn({ err, compId: comp.compId }, 'Failed to upsert CompStak lease comp');
         errors++;
       }
     }
 
-    const saleList = isDemoMode ? adapter.getMockSaleComps() : await adapter.getSaleComps({ limit: 100 });
+    const saleList = isDemoMode
+      ? adapter.getMockSaleComps()
+      : await adapter.getSaleComps({ limit: 100 });
 
     for (const comp of saleList) {
       try {
@@ -378,8 +408,8 @@ async function refreshCompStakData(): Promise<{ leaseComps: number; saleComps: n
 
         const record: InsertTerraCommercialComp = {
           externalId,
-          source: isDemoMode ? "demo" : "compstak",
-          compType: "sale",
+          source: isDemoMode ? 'demo' : 'compstak',
+          compType: 'sale',
           address: comp.address,
           city: comp.city,
           state: comp.state,
@@ -407,16 +437,16 @@ async function refreshCompStakData(): Promise<{ leaseComps: number; saleComps: n
 
         saleComps++;
       } catch (err) {
-        logger.warn({ err, compId: comp.compId }, "Failed to upsert CompStak sale comp");
+        logger.warn({ err, compId: comp.compId }, 'Failed to upsert CompStak sale comp');
         errors++;
       }
     }
   } catch (err) {
-    logger.error({ err }, "CompStak refresh failed");
+    logger.error({ err }, 'CompStak refresh failed');
     errors++;
   }
 
-  logger.info({ leaseComps, saleComps, errors, isDemoMode }, "CompStak refresh complete");
+  logger.info({ leaseComps, saleComps, errors, isDemoMode }, 'CompStak refresh complete');
   return { leaseComps, saleComps, errors, demoMode: isDemoMode };
 }
 
@@ -431,7 +461,12 @@ export async function getMlsListings(params: {
   const conditions = [eq(terraMlsListingsTable.isActive, true)];
 
   if (params.status) {
-    conditions.push(eq(terraMlsListingsTable.standardStatus, params.status as "Active" | "Pending" | "Closed" | "Expired" | "Withdrawn" | "Coming Soon"));
+    conditions.push(
+      eq(
+        terraMlsListingsTable.standardStatus,
+        params.status as 'Active' | 'Pending' | 'Closed' | 'Expired' | 'Withdrawn' | 'Coming Soon',
+      ),
+    );
   }
   if (params.postalCode) {
     conditions.push(eq(terraMlsListingsTable.postalCode, params.postalCode));
@@ -451,12 +486,12 @@ export async function getMlsListings(params: {
     .limit(params.limit ?? 100)
     .offset(params.offset ?? 0);
 
-  return rows.map(r => ({
+  return rows.map((r) => ({
     id: r.listingKey,
     listingKey: r.listingKey,
     listingId: r.listingId,
     mlsName: r.mlsName,
-    source: "mls" as const,
+    source: 'mls' as const,
     standardStatus: r.standardStatus,
     listPrice: Number(r.listPrice),
     originalListPrice: r.originalListPrice ? Number(r.originalListPrice) : null,
@@ -504,10 +539,20 @@ export async function getCommercialProperties(params: {
     conditions.push(eq(terraCommercialPropertiesTable.zipCode, params.zipCode));
   }
   if (params.source) {
-    conditions.push(eq(terraCommercialPropertiesTable.source, params.source as "costar" | "compstak" | "manual" | "demo"));
+    conditions.push(
+      eq(
+        terraCommercialPropertiesTable.source,
+        params.source as 'costar' | 'compstak' | 'manual' | 'demo',
+      ),
+    );
   }
   if (params.buildingClass) {
-    conditions.push(eq(terraCommercialPropertiesTable.buildingClass, params.buildingClass as "Class A" | "Class B" | "Class C"));
+    conditions.push(
+      eq(
+        terraCommercialPropertiesTable.buildingClass,
+        params.buildingClass as 'Class A' | 'Class B' | 'Class C',
+      ),
+    );
   }
 
   const rows = await db
@@ -518,7 +563,7 @@ export async function getCommercialProperties(params: {
     .limit(params.limit ?? 100)
     .offset(params.offset ?? 0);
 
-  return rows.map(r => ({
+  return rows.map((r) => ({
     id: r.externalId ?? String(r.id),
     source: r.source,
     propertyName: r.propertyName,
@@ -543,7 +588,12 @@ export async function getCommercialProperties(params: {
     capRate: r.capRate ? Number(r.capRate) : null,
     lastSalePrice: r.lastSalePrice ? Number(r.lastSalePrice) : null,
     lastSaleDate: r.lastSaleDate,
-    tenants: r.tenants as Array<{ tenantName: string; leaseExpiration: string; leasedSqft: number; floorOccupied: string }>,
+    tenants: r.tenants as Array<{
+      tenantName: string;
+      leaseExpiration: string;
+      leasedSqft: number;
+      floorOccupied: string;
+    }>,
     submarketName: r.submarketName,
     ownerName: r.ownerName,
     ownerType: r.ownerType,
@@ -552,7 +602,7 @@ export async function getCommercialProperties(params: {
 }
 
 export async function getCommercialComps(params: {
-  compType?: "lease" | "sale";
+  compType?: 'lease' | 'sale';
   propertyType?: string;
   source?: string;
   limit?: number;
@@ -567,7 +617,12 @@ export async function getCommercialComps(params: {
     conditions.push(ilike(terraCommercialCompsTable.propertyType, `%${params.propertyType}%`));
   }
   if (params.source) {
-    conditions.push(eq(terraCommercialCompsTable.source, params.source as "costar" | "compstak" | "manual" | "demo"));
+    conditions.push(
+      eq(
+        terraCommercialCompsTable.source,
+        params.source as 'costar' | 'compstak' | 'manual' | 'demo',
+      ),
+    );
   }
 
   const rows = await db
@@ -578,7 +633,7 @@ export async function getCommercialComps(params: {
     .limit(params.limit ?? 100)
     .offset(params.offset ?? 0);
 
-  return rows.map(r => ({
+  return rows.map((r) => ({
     id: r.externalId ?? String(r.id),
     source: r.source,
     compType: r.compType,
@@ -598,7 +653,9 @@ export async function getCommercialComps(params: {
     pricePerSqft: r.pricePerSqft ? Number(r.pricePerSqft) : null,
     capRate: r.capRate ? Number(r.capRate) : null,
     freeRentMonths: r.freeRentMonths,
-    tenantImprovementAllowance: r.tenantImprovementAllowance ? Number(r.tenantImprovementAllowance) : null,
+    tenantImprovementAllowance: r.tenantImprovementAllowance
+      ? Number(r.tenantImprovementAllowance)
+      : null,
     leaseTermMonths: r.leaseTermMonths,
     transactionDate: r.transactionDate,
     leaseExpirationDate: r.leaseExpirationDate,

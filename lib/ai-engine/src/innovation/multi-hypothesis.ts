@@ -6,8 +6,8 @@
  * by similarity, ranks by evidence strength and cross-agent agreement, and
  * presents the top hypotheses with supporting and contradicting evidence.
  */
-import { openai } from "../providers/openai/index.js";
-import type { AgentCallResult } from "../types.js";
+import { openai } from '../providers/openai/index.js';
+import type { AgentCallResult } from '../types.js';
 
 export interface Hypothesis {
   id: string;
@@ -18,7 +18,7 @@ export interface Hypothesis {
   evidenceFor: string[];
   evidenceAgainst: string[];
   confidence: number;
-  likelihood: "high" | "medium" | "low";
+  likelihood: 'high' | 'medium' | 'low';
 }
 
 export interface HypothesisCluster {
@@ -58,8 +58,8 @@ const HIGH_STAKES_SIGNALS = [
 
 export function isAmbiguousOrHighStakes(query: string): boolean {
   const lower = query.toLowerCase();
-  const ambiguityScore = AMBIGUITY_SIGNALS.filter(p => p.test(lower)).length;
-  const highStakesScore = HIGH_STAKES_SIGNALS.filter(p => p.test(lower)).length;
+  const ambiguityScore = AMBIGUITY_SIGNALS.filter((p) => p.test(lower)).length;
+  const highStakesScore = HIGH_STAKES_SIGNALS.filter((p) => p.test(lower)).length;
   return ambiguityScore >= 2 || highStakesScore >= 1;
 }
 
@@ -96,13 +96,13 @@ Respond ONLY with valid JSON array:
 ]`;
 
     const result = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       max_completion_tokens: 1024,
-      messages: [{ role: "user", content: extractionPrompt }],
-      response_format: { type: "json_object" },
+      messages: [{ role: 'user', content: extractionPrompt }],
+      response_format: { type: 'json_object' },
     });
 
-    const raw = result.choices[0]?.message?.content ?? "{}";
+    const raw = result.choices[0]?.message?.content ?? '{}';
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw);
@@ -110,29 +110,46 @@ Respond ONLY with valid JSON array:
       return [];
     }
 
-    const arr = Array.isArray(parsed) ? parsed : (parsed as Record<string, unknown>).hypotheses ?? [];
+    const arr = Array.isArray(parsed)
+      ? parsed
+      : ((parsed as Record<string, unknown>).hypotheses ?? []);
     if (!Array.isArray(arr)) return [];
 
-    return arr.slice(0, 3).map((h: Record<string, unknown>, idx: number) => ({
-      id: `hyp-${agentId}-${Date.now()}-${idx}`,
-      agentId,
-      agentName,
-      domain,
-      statement: String(h.statement ?? ""),
-      evidenceFor: Array.isArray(h.evidenceFor) ? h.evidenceFor.map(String) : [],
-      evidenceAgainst: Array.isArray(h.evidenceAgainst) ? h.evidenceAgainst.map(String) : [],
-      confidence: Number(h.confidence ?? 70),
-      likelihood: (["high", "medium", "low"].includes(String(h.likelihood)) ? h.likelihood : "medium") as Hypothesis["likelihood"],
-    })).filter(h => h.statement.length > 10);
+    return arr
+      .slice(0, 3)
+      .map((h: Record<string, unknown>, idx: number) => ({
+        id: `hyp-${agentId}-${Date.now()}-${idx}`,
+        agentId,
+        agentName,
+        domain,
+        statement: String(h.statement ?? ''),
+        evidenceFor: Array.isArray(h.evidenceFor) ? h.evidenceFor.map(String) : [],
+        evidenceAgainst: Array.isArray(h.evidenceAgainst) ? h.evidenceAgainst.map(String) : [],
+        confidence: Number(h.confidence ?? 70),
+        likelihood: (['high', 'medium', 'low'].includes(String(h.likelihood))
+          ? h.likelihood
+          : 'medium') as Hypothesis['likelihood'],
+      }))
+      .filter((h) => h.statement.length > 10);
   } catch {
     return [];
   }
 }
 
 function computeSemanticSimilarity(a: string, b: string): number {
-  const aWords = new Set(a.toLowerCase().split(/\W+/).filter(w => w.length > 4));
-  const bWords = new Set(b.toLowerCase().split(/\W+/).filter(w => w.length > 4));
-  const intersection = [...aWords].filter(w => bWords.has(w)).length;
+  const aWords = new Set(
+    a
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 4),
+  );
+  const bWords = new Set(
+    b
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 4),
+  );
+  const intersection = [...aWords].filter((w) => bWords.has(w)).length;
   const union = new Set([...aWords, ...bWords]).size;
   return union > 0 ? intersection / union : 0;
 }
@@ -156,12 +173,16 @@ function clusterHypotheses(hypotheses: Hypothesis[]): HypothesisCluster[] {
       }
     }
 
-    const allEvFor = cluster.flatMap(h => h.evidenceFor);
-    const allEvAgainst = cluster.flatMap(h => h.evidenceAgainst);
-    const uniqueDomains = new Set(cluster.map(h => h.domain));
+    const allEvFor = cluster.flatMap((h) => h.evidenceFor);
+    const allEvAgainst = cluster.flatMap((h) => h.evidenceAgainst);
+    const uniqueDomains = new Set(cluster.map((h) => h.domain));
     const avgConfidence = cluster.reduce((sum, h) => sum + h.confidence, 0) / cluster.length;
 
-    const themeWords = cluster[0]!.statement.split(/\W+/).filter(w => w.length > 5).slice(0, 3).join(" ");
+    const themeWords = cluster[0]!.statement
+      .split(/\W+/)
+      .filter((w) => w.length > 5)
+      .slice(0, 3)
+      .join(' ');
 
     clusters.push({
       clusterId: `cluster-${clusters.length + 1}`,
@@ -176,12 +197,20 @@ function clusterHypotheses(hypotheses: Hypothesis[]): HypothesisCluster[] {
   }
 
   clusters.sort((a, b) => {
-    const scoreA = a.aggregateConfidence * 0.5 + a.agentConsensusCount * 10 * 0.3 + a.hypotheses.length * 5 * 0.2;
-    const scoreB = b.aggregateConfidence * 0.5 + b.agentConsensusCount * 10 * 0.3 + b.hypotheses.length * 5 * 0.2;
+    const scoreA =
+      a.aggregateConfidence * 0.5 +
+      a.agentConsensusCount * 10 * 0.3 +
+      a.hypotheses.length * 5 * 0.2;
+    const scoreB =
+      b.aggregateConfidence * 0.5 +
+      b.agentConsensusCount * 10 * 0.3 +
+      b.hypotheses.length * 5 * 0.2;
     return scoreB - scoreA;
   });
 
-  clusters.forEach((c, i) => { c.rank = i + 1; });
+  clusters.forEach((c, i) => {
+    c.rank = i + 1;
+  });
 
   return clusters.slice(0, 3);
 }
@@ -196,10 +225,16 @@ export async function runMultiHypothesisReasoning(
     const allHypotheses: Hypothesis[] = [];
 
     await Promise.all(
-      agentResponses.slice(0, 4).map(async r => {
-        const hyps = await extractHypothesesFromAgent(r.agentId, r.agentName, r.domain, r.response, query);
+      agentResponses.slice(0, 4).map(async (r) => {
+        const hyps = await extractHypothesesFromAgent(
+          r.agentId,
+          r.agentName,
+          r.domain,
+          r.response,
+          query,
+        );
         allHypotheses.push(...hyps);
-      })
+      }),
     );
 
     if (allHypotheses.length < 2) return null;
@@ -208,10 +243,10 @@ export async function runMultiHypothesisReasoning(
     if (clusters.length === 0) return null;
 
     const topCluster = clusters[0]!;
-    const recommendation = `Primary hypothesis (${topCluster.aggregateConfidence}% confidence, ${topCluster.agentConsensusCount} domain${topCluster.agentConsensusCount !== 1 ? "s" : ""} agree): ${topCluster.hypotheses[0]?.statement ?? topCluster.theme}`;
+    const recommendation = `Primary hypothesis (${topCluster.aggregateConfidence}% confidence, ${topCluster.agentConsensusCount} domain${topCluster.agentConsensusCount !== 1 ? 's' : ''} agree): ${topCluster.hypotheses[0]?.statement ?? topCluster.theme}`;
 
     try {
-      const { db, multiHypothesisSessionsTable } = await import("@szl-holdings/db");
+      const { db, multiHypothesisSessionsTable } = await import('@szl-holdings/db');
       await db.insert(multiHypothesisSessionsTable).values({
         query: query.slice(0, 500),
         hypothesisCount: allHypotheses.length,
@@ -230,7 +265,7 @@ export async function runMultiHypothesisReasoning(
       hypothesisCount: allHypotheses.length,
     };
   } catch (err) {
-    console.warn("[multi-hypothesis] Failed:", err);
+    console.warn('[multi-hypothesis] Failed:', err);
     return null;
   }
 }

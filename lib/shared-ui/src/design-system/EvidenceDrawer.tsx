@@ -1,7 +1,6 @@
-import * as React from "react";
-import { cn } from "../utils";
-import { toAlpha } from "../utils";
-import { colors, effects, zIndex } from "../tokens";
+import * as React from 'react';
+import { colors, effects, zIndex } from '../tokens';
+import { cn, toAlpha } from '../utils';
 
 export interface EvidenceSource {
   id?: string;
@@ -28,7 +27,7 @@ export interface EvidenceDrawerProps {
 export function EvidenceDrawer({
   open,
   onClose,
-  title = "Evidence & Sources",
+  title = 'Evidence & Sources',
   subtitle,
   sources,
   loading = false,
@@ -37,9 +36,11 @@ export function EvidenceDrawer({
 }: EvidenceDrawerProps) {
   React.useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
   if (!open) return null;
@@ -56,11 +57,11 @@ export function EvidenceDrawer({
         role="dialog"
         aria-label={title}
         aria-modal="true"
-        className={cn("fixed top-0 right-0 bottom-0 w-full max-w-[28rem] flex flex-col", className)}
+        className={cn('fixed top-0 right-0 bottom-0 w-full max-w-[28rem] flex flex-col', className)}
         style={{
           background: effects.surface.overlay.background,
           border: `1px solid ${colors.border.strong}`,
-          boxShadow: effects.shadow["2xl"],
+          boxShadow: effects.shadow['2xl'],
           zIndex: zIndex.modal,
         }}
       >
@@ -71,7 +72,7 @@ export function EvidenceDrawer({
           <div>
             <h2
               className="text-[15px] font-semibold"
-              style={{ color: colors.text.primary, letterSpacing: "-0.005em" }}
+              style={{ color: colors.text.primary, letterSpacing: '-0.005em' }}
             >
               {title}
             </h2>
@@ -88,7 +89,12 @@ export function EvidenceDrawer({
             style={{ color: colors.text.muted }}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M1 1l12 12M13 1L1 13"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -102,7 +108,7 @@ export function EvidenceDrawer({
             }}
           >
             <p className="text-[11px]" style={{ color: colors.text.subtle }}>
-              {sources.length} source{sources.length !== 1 ? "s" : ""} referenced
+              {sources.length} source{sources.length !== 1 ? 's' : ''} referenced
             </p>
           </div>
         )}
@@ -119,11 +125,23 @@ export function EvidenceDrawer({
                     border: `1px solid ${colors.border.subtle}`,
                   }}
                 >
-                  <div className="h-3.5 rounded w-3/4" style={{ background: colors.surface.baseHover }} />
-                  <div className="h-2.5 rounded w-1/3" style={{ background: colors.surface.glass }} />
+                  <div
+                    className="h-3.5 rounded w-3/4"
+                    style={{ background: colors.surface.baseHover }}
+                  />
+                  <div
+                    className="h-2.5 rounded w-1/3"
+                    style={{ background: colors.surface.glass }}
+                  />
                   <div className="space-y-1.5">
-                    <div className="h-2.5 rounded w-full" style={{ background: colors.surface.glass }} />
-                    <div className="h-2.5 rounded w-4/5" style={{ background: colors.surface.glass }} />
+                    <div
+                      className="h-2.5 rounded w-full"
+                      style={{ background: colors.surface.glass }}
+                    />
+                    <div
+                      className="h-2.5 rounded w-4/5"
+                      style={{ background: colors.surface.glass }}
+                    />
                   </div>
                 </div>
               ))}
@@ -157,7 +175,10 @@ export function EvidenceDrawer({
                         {source.title}
                       </a>
                     ) : (
-                      <p className="text-[13px] font-medium leading-snug" style={{ color: colors.text.primary }}>
+                      <p
+                        className="text-[13px] font-medium leading-snug"
+                        style={{ color: colors.text.primary }}
+                      >
                         {source.title}
                       </p>
                     )}

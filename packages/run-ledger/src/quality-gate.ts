@@ -1,5 +1,9 @@
-import { randomUUID } from "crypto";
-import type { RunLedgerEntry, QualityGateResult, QualityGateFailingGate } from "@szl-holdings/contracts/governance";
+import type {
+  QualityGateFailingGate,
+  QualityGateResult,
+  RunLedgerEntry,
+} from '@szl-holdings/contracts/governance';
+import { randomUUID } from 'crypto';
 
 // ─── Profile thresholds ───────────────────────────────────────────────────────
 
@@ -13,7 +17,7 @@ export interface QualityGateProfile {
   /** Maximum total run duration in ms. 0 = no limit. */
   latencyBudgetMs: number;
   /** Policy outcomes that cause a gate block. */
-  blockedPolicyResults: Array<"block">;
+  blockedPolicyResults: Array<'block'>;
 }
 
 export const DEFAULT_QUALITY_GATE_PROFILE: QualityGateProfile = {
@@ -21,7 +25,7 @@ export const DEFAULT_QUALITY_GATE_PROFILE: QualityGateProfile = {
   evidenceCoverageThreshold: 0.3,
   toolFailureRateThreshold: 0.5,
   latencyBudgetMs: 0,
-  blockedPolicyResults: ["block"],
+  blockedPolicyResults: ['block'],
 };
 
 // ─── Evaluator ────────────────────────────────────────────────────────────────
@@ -41,12 +45,12 @@ export function evaluateQualityGate(
 
   // ── Gate 1: completion criteria ───────────────────────────────────────────
   const totalTools = ledger.toolCalls.length;
-  const successTools = ledger.toolCalls.filter((t) => t.outcome === "success").length;
+  const successTools = ledger.toolCalls.filter((t) => t.outcome === 'success').length;
   const completionRate = totalTools > 0 ? successTools / totalTools : 1;
 
   if (completionRate < p.completionThreshold) {
     failingGates.push({
-      gate: "completion",
+      gate: 'completion',
       reason: `Only ${(completionRate * 100).toFixed(0)}% of steps completed (threshold: ${(p.completionThreshold * 100).toFixed(0)}%)`,
       actual: completionRate,
       threshold: p.completionThreshold,
@@ -56,13 +60,11 @@ export function evaluateQualityGate(
   // ── Gate 2: evidence coverage ─────────────────────────────────────────────
   const sources = ledger.sourcesConsulted;
   const avgScore =
-    sources.length > 0
-      ? sources.reduce((s, c) => s + c.retrievalScore, 0) / sources.length
-      : 1;
+    sources.length > 0 ? sources.reduce((s, c) => s + c.retrievalScore, 0) / sources.length : 1;
 
   if (sources.length > 0 && avgScore < p.evidenceCoverageThreshold) {
     failingGates.push({
-      gate: "evidence_coverage",
+      gate: 'evidence_coverage',
       reason: `Average retrieval score ${avgScore.toFixed(2)} is below threshold ${p.evidenceCoverageThreshold.toFixed(2)}`,
       actual: avgScore,
       threshold: p.evidenceCoverageThreshold,
@@ -71,22 +73,22 @@ export function evaluateQualityGate(
 
   // ── Gate 3: policy status ─────────────────────────────────────────────────
   for (const outcome of ledger.policyOutcomes) {
-    if (p.blockedPolicyResults.includes(outcome.result as "block")) {
+    if (p.blockedPolicyResults.includes(outcome.result as 'block')) {
       hasBlocker = true;
       failingGates.push({
-        gate: "policy_block",
-        reason: `Policy '${outcome.policyId}' result is '${outcome.result}': ${outcome.reason ?? "blocked"}`,
+        gate: 'policy_block',
+        reason: `Policy '${outcome.policyId}' result is '${outcome.result}': ${outcome.reason ?? 'blocked'}`,
       });
     }
   }
 
   // ── Gate 4: tool failure rate ─────────────────────────────────────────────
-  const failedTools = ledger.toolCalls.filter((t) => t.outcome === "failure").length;
+  const failedTools = ledger.toolCalls.filter((t) => t.outcome === 'failure').length;
   const failureRate = totalTools > 0 ? failedTools / totalTools : 0;
 
   if (failureRate > p.toolFailureRateThreshold) {
     failingGates.push({
-      gate: "tool_failure_rate",
+      gate: 'tool_failure_rate',
       reason: `Tool failure rate ${(failureRate * 100).toFixed(0)}% exceeds threshold ${(p.toolFailureRateThreshold * 100).toFixed(0)}%`,
       actual: failureRate,
       threshold: p.toolFailureRateThreshold,
@@ -96,7 +98,7 @@ export function evaluateQualityGate(
   // ── Gate 5: latency budget ────────────────────────────────────────────────
   if (p.latencyBudgetMs > 0 && (ledger.totalDurationMs ?? 0) > p.latencyBudgetMs) {
     failingGates.push({
-      gate: "latency_budget",
+      gate: 'latency_budget',
       reason: `Run took ${ledger.totalDurationMs}ms, exceeding budget of ${p.latencyBudgetMs}ms`,
       actual: ledger.totalDurationMs ?? 0,
       threshold: p.latencyBudgetMs,
@@ -104,20 +106,20 @@ export function evaluateQualityGate(
   }
 
   // ── Determine status ──────────────────────────────────────────────────────
-  let status: QualityGateResult["status"];
+  let status: QualityGateResult['status'];
   let recommendedNextAction: string;
 
   if (hasBlocker) {
-    status = "blocked";
+    status = 'blocked';
     recommendedNextAction =
-      "A policy block is present. Review the flagged policy outcomes and request an approved override before re-running.";
+      'A policy block is present. Review the flagged policy outcomes and request an approved override before re-running.';
   } else if (failingGates.length > 0) {
-    status = "degraded";
-    const gateNames = failingGates.map((g) => g.gate).join(", ");
+    status = 'degraded';
+    const gateNames = failingGates.map((g) => g.gate).join(', ');
     recommendedNextAction = `Address failing gates: ${gateNames}. Consider improving evidence retrieval, reducing tool retries, or relaxing profile thresholds.`;
   } else {
-    status = "complete";
-    recommendedNextAction = "All quality gates passed. The run artifact is ready for consumption.";
+    status = 'complete';
+    recommendedNextAction = 'All quality gates passed. The run artifact is ready for consumption.';
   }
 
   return {

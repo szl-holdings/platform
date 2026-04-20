@@ -1,16 +1,16 @@
-import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useMemo, useState } from 'react';
 import { useVideoPlayer } from '@/lib/video';
+import { CaptionTrack, SCENE_CAPTIONS } from './CaptionTrack';
+import type { Chapter } from './ChapterMarkers';
+import { ChapterMarkers } from './ChapterMarkers';
+import type { SocialCut } from './SocialCutSelector';
+import { CaptionToggle, SOCIAL_CUT_CONFIGS, SocialCutSelector } from './SocialCutSelector';
 import { Scene1 } from './video_scenes/Scene1';
 import { Scene2 } from './video_scenes/Scene2';
 import { Scene3 } from './video_scenes/Scene3';
 import { Scene4 } from './video_scenes/Scene4';
 import { Scene5 } from './video_scenes/Scene5';
-import { ChapterMarkers } from './ChapterMarkers';
-import type { Chapter } from './ChapterMarkers';
-import { CaptionTrack, SCENE_CAPTIONS } from './CaptionTrack';
-import { SocialCutSelector, CaptionToggle, SOCIAL_CUT_CONFIGS } from './SocialCutSelector';
-import type { SocialCut } from './SocialCutSelector';
 
 const FULL_SCENE_DURATIONS = {
   open: 12000,
@@ -59,7 +59,9 @@ function VideoPlayer({
   }, [activeCut]);
 
   const sceneIndexMap: Record<string, number> = {};
-  Object.keys(FULL_SCENE_DURATIONS).forEach((k, i) => { sceneIndexMap[k] = i; });
+  Object.keys(FULL_SCENE_DURATIONS).forEach((k, i) => {
+    sceneIndexMap[k] = i;
+  });
   const currentSceneKey = sceneKeys[currentScene] ?? '';
   const fullSceneIndex = sceneIndexMap[currentSceneKey] ?? 0;
 
@@ -137,7 +139,7 @@ export default function VideoTemplate() {
           x: ['-20vw', '40vw', '-10vw', '20vw', '-20vw'],
           y: ['-10vh', '30vh', '60vh', '-20vh', '-10vh'],
           scale: [1, 1.2, 0.8, 1.1, 1],
-          opacity: [0.15, 0.25, 0.15, 0.3, 0.15]
+          opacity: [0.15, 0.25, 0.15, 0.3, 0.15],
         }}
         transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
       />
@@ -148,7 +150,7 @@ export default function VideoTemplate() {
           left: ['-10%', '0%', '10%', '5%', '20%'][currentScene],
           width: ['120%', '100%', '80%', '90%', '60%'][currentScene],
           top: ['50%', '20%', '80%', '30%', '50%'][currentScene],
-          opacity: [0.3, 0.6, 0.4, 0.7, 0.2][currentScene]
+          opacity: [0.3, 0.6, 0.4, 0.7, 0.2][currentScene],
         }}
         transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
       />

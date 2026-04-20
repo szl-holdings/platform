@@ -1,12 +1,12 @@
 /**
  * Migration status utilities — check applied vs pending migrations.
  */
-import { db } from "@szl-holdings/db";
+import { db } from '@szl-holdings/db';
 
 export const MIGRATION_PATHS = {
-  drizzle: "lib/db/drizzle",
-  manual: "lib/db/migrations",
-  scripts: "scripts/migrations",
+  drizzle: 'lib/db/drizzle',
+  manual: 'lib/db/migrations',
+  scripts: 'scripts/migrations',
 } as const;
 
 export interface MigrationStatus {
@@ -21,12 +21,10 @@ export async function getMigrationStatus(): Promise<MigrationStatus> {
       id: string;
       hash: string;
       created_at: string;
-    }>(
-      "SELECT id, hash, created_at FROM __drizzle_migrations ORDER BY created_at DESC LIMIT 1",
-    );
+    }>('SELECT id, hash, created_at FROM __drizzle_migrations ORDER BY created_at DESC LIMIT 1');
     const latest = result.rows[0];
     const countResult = await db.execute<{ count: string }>(
-      "SELECT COUNT(*) AS count FROM __drizzle_migrations",
+      'SELECT COUNT(*) AS count FROM __drizzle_migrations',
     );
     return {
       appliedCount: Number(countResult.rows[0]?.count ?? 0),

@@ -1,4 +1,4 @@
-import type { PillarId } from "./types.js";
+import type { PillarId } from './types.js';
 
 export interface TelemetryEvent {
   metricId: string;
@@ -31,7 +31,7 @@ export interface AlertRecord {
   id: string;
   type: string;
   message: string;
-  severity: "warning" | "critical";
+  severity: 'warning' | 'critical';
   triggeredAt: number;
   resolvedAt?: number;
   resolved: boolean;
@@ -146,7 +146,9 @@ export class ServerTelemetryCollector {
 
   get4xxRate(): number {
     if (this.requests.length === 0) return 0;
-    const clientErrors = this.requests.filter((r) => r.statusCode >= 400 && r.statusCode < 500).length;
+    const clientErrors = this.requests.filter(
+      (r) => r.statusCode >= 400 && r.statusCode < 500,
+    ).length;
     return (clientErrors / this.requests.length) * 100;
   }
 
@@ -185,13 +187,16 @@ export class ServerTelemetryCollector {
     return this.authFailureTimestamps.length / windowMin;
   }
 
-  recordTenantIsolationViolation(details: Omit<TenantIsolationViolation, "timestamp">) {
+  recordTenantIsolationViolation(details: Omit<TenantIsolationViolation, 'timestamp'>) {
     const entry: TenantIsolationViolation = { ...details, timestamp: Date.now() };
     this.tenantIsolationViolations.push(entry);
     // Cap at the same window the rest of the collector uses; keep generous tail
     // so the self-monitor can pick up bursts even on a slightly delayed cycle.
     const cutoff = Date.now() - WINDOW_SIZE;
-    while (this.tenantIsolationViolations.length > 0 && this.tenantIsolationViolations[0]!.timestamp < cutoff) {
+    while (
+      this.tenantIsolationViolations.length > 0 &&
+      this.tenantIsolationViolations[0]!.timestamp < cutoff
+    ) {
       this.tenantIsolationViolations.shift();
     }
     if (this.tenantIsolationViolations.length > 500) {
@@ -218,7 +223,11 @@ export class ServerTelemetryCollector {
 
   recordDbQueryLatency(durationMs: number, query?: string) {
     const querySlice = query?.slice(0, 120);
-    this.dbQueryLatencies.push({ durationMs, timestamp: Date.now(), ...(querySlice !== undefined ? { query: querySlice } : {}) });
+    this.dbQueryLatencies.push({
+      durationMs,
+      timestamp: Date.now(),
+      ...(querySlice !== undefined ? { query: querySlice } : {}),
+    });
     const MAX_DB_SAMPLES = 500;
     if (this.dbQueryLatencies.length > MAX_DB_SAMPLES) {
       this.dbQueryLatencies.splice(0, this.dbQueryLatencies.length - MAX_DB_SAMPLES);
@@ -245,11 +254,19 @@ export class ServerTelemetryCollector {
 
   getApmSpans(windowMs = WINDOW_SIZE): ApmSpan[] {
     const cutoff = Date.now() - windowMs;
-    return this.apmSpans.filter(s => s.timestamp >= cutoff);
+    return this.apmSpans.filter((s) => s.timestamp >= cutoff);
   }
 
   getApmLatencyBreakdown(windowMs = WINDOW_SIZE): {
-    routes: Array<{ route: string; avgTotal: number; avgDb: number; avgExternal: number; avgSerialization: number; count: number; p99: number }>;
+    routes: Array<{
+      route: string;
+      avgTotal: number;
+      avgDb: number;
+      avgExternal: number;
+      avgSerialization: number;
+      count: number;
+      p99: number;
+    }>;
     overallP50: number;
     overallP95: number;
     overallP99: number;
@@ -258,7 +275,14 @@ export class ServerTelemetryCollector {
   } {
     const spans = this.getApmSpans(windowMs);
     if (spans.length === 0) {
-      return { routes: [], overallP50: 0, overallP95: 0, overallP99: 0, avgDbFraction: 0, avgExternalFraction: 0 };
+      return {
+        routes: [],
+        overallP50: 0,
+        overallP95: 0,
+        overallP99: 0,
+        avgDbFraction: 0,
+        avgExternalFraction: 0,
+      };
     }
 
     const byRoute = new Map<string, ApmSpan[]>();
@@ -268,21 +292,23 @@ export class ServerTelemetryCollector {
       byRoute.get(key)!.push(s);
     }
 
-    const routes = Array.from(byRoute.entries()).map(([route, ss]) => {
-      const sorted = ss.map(s => s.totalMs).sort((a, b) => a - b);
-      const avg = (arr: number[]) => arr.reduce((s, v) => s + v, 0) / arr.length;
-      return {
-        route,
-        avgTotal: avg(ss.map(s => s.totalMs)),
-        avgDb: avg(ss.map(s => s.dbQueryMs)),
-        avgExternal: avg(ss.map(s => s.externalApiMs)),
-        avgSerialization: avg(ss.map(s => s.serializationMs)),
-        count: ss.length,
-        p99: sorted[Math.floor(sorted.length * 0.99)] ?? sorted[sorted.length - 1] ?? 0,
-      };
-    }).sort((a, b) => b.avgTotal - a.avgTotal);
+    const routes = Array.from(byRoute.entries())
+      .map(([route, ss]) => {
+        const sorted = ss.map((s) => s.totalMs).sort((a, b) => a - b);
+        const avg = (arr: number[]) => arr.reduce((s, v) => s + v, 0) / arr.length;
+        return {
+          route,
+          avgTotal: avg(ss.map((s) => s.totalMs)),
+          avgDb: avg(ss.map((s) => s.dbQueryMs)),
+          avgExternal: avg(ss.map((s) => s.externalApiMs)),
+          avgSerialization: avg(ss.map((s) => s.serializationMs)),
+          count: ss.length,
+          p99: sorted[Math.floor(sorted.length * 0.99)] ?? sorted[sorted.length - 1] ?? 0,
+        };
+      })
+      .sort((a, b) => b.avgTotal - a.avgTotal);
 
-    const allTotals = spans.map(s => s.totalMs).sort((a, b) => a - b);
+    const allTotals = spans.map((s) => s.totalMs).sort((a, b) => a - b);
     const p = (pct: number) => allTotals[Math.floor(allTotals.length * pct)] ?? 0;
     const totalDb = spans.reduce((s, sp) => s + sp.dbQueryMs, 0);
     const totalExt = spans.reduce((s, sp) => s + sp.externalApiMs, 0);
@@ -298,9 +324,11 @@ export class ServerTelemetryCollector {
     };
   }
 
-  getExternalCallStats(windowMs = WINDOW_SIZE): Record<string, { count: number; avgMs: number; p99Ms: number }> {
+  getExternalCallStats(
+    windowMs = WINDOW_SIZE,
+  ): Record<string, { count: number; avgMs: number; p99Ms: number }> {
     const cutoff = Date.now() - windowMs;
-    const recent = this.externalCalls.filter(c => c.timestamp >= cutoff);
+    const recent = this.externalCalls.filter((c) => c.timestamp >= cutoff);
     const byProvider = new Map<string, number[]>();
     for (const c of recent) {
       if (!byProvider.has(c.provider)) byProvider.set(c.provider, []);
@@ -320,21 +348,21 @@ export class ServerTelemetryCollector {
 
   getDbLatencyP50(): number {
     if (this.dbQueryLatencies.length === 0) return 0;
-    const sorted = [...this.dbQueryLatencies].map(r => r.durationMs).sort((a, b) => a - b);
+    const sorted = [...this.dbQueryLatencies].map((r) => r.durationMs).sort((a, b) => a - b);
     return sorted[Math.floor(sorted.length * 0.5)] ?? 0;
   }
 
   getDbLatencyP95(): number {
     if (this.dbQueryLatencies.length === 0) return 0;
-    const sorted = [...this.dbQueryLatencies].map(r => r.durationMs).sort((a, b) => a - b);
+    const sorted = [...this.dbQueryLatencies].map((r) => r.durationMs).sort((a, b) => a - b);
     return sorted[Math.floor(sorted.length * 0.95)] ?? 0;
   }
 
   getDbSlowQueryCount(thresholdMs = 500): number {
-    return this.dbQueryLatencies.filter(r => r.durationMs >= thresholdMs).length;
+    return this.dbQueryLatencies.filter((r) => r.durationMs >= thresholdMs).length;
   }
 
-  recordBusinessEvent(event: Omit<BusinessEvent, "timestamp">) {
+  recordBusinessEvent(event: Omit<BusinessEvent, 'timestamp'>) {
     this.businessEvents.push({ ...event, timestamp: Date.now() });
     if (this.businessEvents.length > MAX_BUSINESS_EVENTS) {
       this.businessEvents.splice(0, this.businessEvents.length - MAX_BUSINESS_EVENTS);
@@ -365,19 +393,18 @@ export class ServerTelemetryCollector {
 
   getJobFailureCount(windowMs = WINDOW_SIZE): number {
     const cutoff = Date.now() - windowMs;
-    return this.businessEvents.filter(
-      (e) => e.timestamp >= cutoff && e.type === "job_failed"
-    ).length;
+    return this.businessEvents.filter((e) => e.timestamp >= cutoff && e.type === 'job_failed')
+      .length;
   }
 
   getWorkflowCompletionCount(windowMs = WINDOW_SIZE): number {
     const cutoff = Date.now() - windowMs;
     return this.businessEvents.filter(
-      (e) => e.timestamp >= cutoff && e.type === "workflow_completed"
+      (e) => e.timestamp >= cutoff && e.type === 'workflow_completed',
     ).length;
   }
 
-  raiseAlert(alert: Omit<AlertRecord, "id" | "triggeredAt" | "resolved">) {
+  raiseAlert(alert: Omit<AlertRecord, 'id' | 'triggeredAt' | 'resolved'>) {
     const id = `alert_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     this.activeAlerts.unshift({ ...alert, id, triggeredAt: Date.now(), resolved: false });
     if (this.activeAlerts.length > MAX_ALERTS) {
@@ -467,7 +494,8 @@ export class ClientTelemetryCollector {
     const data = appSlug ? this.getVitalsForApp(appSlug) : this.vitals;
     if (data.length === 0) return null;
 
-    const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
+    const avg = (arr: number[]) =>
+      arr.length > 0 ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
 
     return {
       count: data.length,

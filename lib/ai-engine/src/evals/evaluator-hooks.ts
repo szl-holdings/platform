@@ -11,19 +11,19 @@
  * And returns a score [0, 1] plus pass/fail per assertion.
  */
 
-import type { AITrace, TraceDomain } from "./trace-capture.js";
+import type { AITrace, TraceDomain } from './trace-capture.js';
 
 export type EvalAssertionOperator =
-  | "equals"
-  | "contains"
-  | "exists"
-  | "gt"
-  | "lt"
-  | "gte"
-  | "lte"
-  | "oneOf"
-  | "notEmpty"
-  | "matches";
+  | 'equals'
+  | 'contains'
+  | 'exists'
+  | 'gt'
+  | 'lt'
+  | 'gte'
+  | 'lte'
+  | 'oneOf'
+  | 'notEmpty'
+  | 'matches';
 
 export interface EvalAssertion {
   field: string;
@@ -59,15 +59,12 @@ export interface EvalHookResult {
   evaluatedAt: string;
 }
 
-export type EvalHookFn = (
-  trace: AITrace,
-  context: DomainEvalContext,
-) => Promise<EvalHookResult>;
+export type EvalHookFn = (trace: AITrace, context: DomainEvalContext) => Promise<EvalHookResult>;
 
 export interface RegisteredEvalHook {
   id: string;
   name: string;
-  domain: TraceDomain | "global";
+  domain: TraceDomain | 'global';
   description: string;
   version: string;
   fn: EvalHookFn;
@@ -78,7 +75,7 @@ const registry = new Map<string, RegisteredEvalHook>();
 const hookResults: EvalHookResult[] = [];
 const MAX_RESULTS = 10000;
 
-export function registerEvaluatorHook(hook: Omit<RegisteredEvalHook, "registeredAt">): void {
+export function registerEvaluatorHook(hook: Omit<RegisteredEvalHook, 'registeredAt'>): void {
   registry.set(hook.id, {
     ...hook,
     registeredAt: new Date().toISOString(),
@@ -89,10 +86,10 @@ export function unregisterEvaluatorHook(hookId: string): boolean {
   return registry.delete(hookId);
 }
 
-export function listEvaluatorHooks(domain?: TraceDomain | "global"): RegisteredEvalHook[] {
+export function listEvaluatorHooks(domain?: TraceDomain | 'global'): RegisteredEvalHook[] {
   const hooks = Array.from(registry.values());
   if (!domain) return hooks;
-  return hooks.filter(h => h.domain === domain || h.domain === "global");
+  return hooks.filter((h) => h.domain === domain || h.domain === 'global');
 }
 
 export function getEvaluatorHook(hookId: string): RegisteredEvalHook | undefined {
@@ -131,25 +128,27 @@ export async function runEvaluatorHooksForTrace(
   return results;
 }
 
-export function getHookResults(options: {
-  traceId?: string;
-  domain?: TraceDomain;
-  hookId?: string;
-  passed?: boolean;
-  limit?: number;
-} = {}): EvalHookResult[] {
+export function getHookResults(
+  options: {
+    traceId?: string;
+    domain?: TraceDomain;
+    hookId?: string;
+    passed?: boolean;
+    limit?: number;
+  } = {},
+): EvalHookResult[] {
   let results = hookResults;
-  if (options.traceId) results = results.filter(r => r.traceId === options.traceId);
-  if (options.domain) results = results.filter(r => r.domain === options.domain);
-  if (options.hookId) results = results.filter(r => r.hookId === options.hookId);
-  if (options.passed != null) results = results.filter(r => r.passed === options.passed);
+  if (options.traceId) results = results.filter((r) => r.traceId === options.traceId);
+  if (options.domain) results = results.filter((r) => r.domain === options.domain);
+  if (options.hookId) results = results.filter((r) => r.hookId === options.hookId);
+  if (options.passed != null) results = results.filter((r) => r.passed === options.passed);
   return results.slice(0, options.limit ?? 100);
 }
 
 export interface HookAggregateStats {
   hookId: string;
   hookName: string;
-  domain: TraceDomain | "global";
+  domain: TraceDomain | 'global';
   totalRuns: number;
   passedRuns: number;
   failedRuns: number;
@@ -170,7 +169,7 @@ export function aggregateHookStats(): HookAggregateStats[] {
   }
 
   return Array.from(stats.values()).map(({ hook, results }) => {
-    const passed = results.filter(r => r.passed).length;
+    const passed = results.filter((r) => r.passed).length;
     const totalScore = results.reduce((s, r) => s + r.score, 0);
     return {
       hookId: hook.id,
@@ -186,24 +185,24 @@ export function aggregateHookStats(): HookAggregateStats[] {
 }
 
 registerEvaluatorHook({
-  id: "global:confidence-threshold",
-  name: "Global Confidence Threshold",
-  domain: "global",
-  description: "Fails any recommendation with confidence below the platform floor (0.4)",
-  version: "1.0.0",
+  id: 'global:confidence-threshold',
+  name: 'Global Confidence Threshold',
+  domain: 'global',
+  description: 'Fails any recommendation with confidence below the platform floor (0.4)',
+  version: '1.0.0',
   fn: async (trace, _ctx) => {
     const threshold = 0.4;
     const passed = trace.confidence >= threshold;
     return {
-      hookId: "global:confidence-threshold",
+      hookId: 'global:confidence-threshold',
       domain: trace.domain,
       traceId: trace.traceId,
       score: Math.min(1, trace.confidence / threshold),
       passed,
       assertions: [
         {
-          field: "confidence",
-          operator: "gte",
+          field: 'confidence',
+          operator: 'gte',
           expected: threshold,
           actual: trace.confidence,
           passed,
@@ -219,25 +218,25 @@ registerEvaluatorHook({
 });
 
 registerEvaluatorHook({
-  id: "global:latency-budget",
-  name: "Global Latency Budget",
-  domain: "global",
-  description: "Warns when AI recommendation latency exceeds 10 seconds",
-  version: "1.0.0",
+  id: 'global:latency-budget',
+  name: 'Global Latency Budget',
+  domain: 'global',
+  description: 'Warns when AI recommendation latency exceeds 10 seconds',
+  version: '1.0.0',
   fn: async (trace, _ctx) => {
     const budgetMs = 10000;
     const passed = trace.latencyMs <= budgetMs;
     const score = Math.min(1, budgetMs / Math.max(trace.latencyMs, 1));
     return {
-      hookId: "global:latency-budget",
+      hookId: 'global:latency-budget',
       domain: trace.domain,
       traceId: trace.traceId,
       score,
       passed,
       assertions: [
         {
-          field: "latencyMs",
-          operator: "lte",
+          field: 'latencyMs',
+          operator: 'lte',
           expected: budgetMs,
           actual: trace.latencyMs,
           passed,
@@ -253,25 +252,25 @@ registerEvaluatorHook({
 });
 
 registerEvaluatorHook({
-  id: "global:cost-budget",
-  name: "Global Cost Budget",
-  domain: "global",
-  description: "Fails recommendations that exceed the per-call cost budget ($1.00)",
-  version: "1.0.0",
+  id: 'global:cost-budget',
+  name: 'Global Cost Budget',
+  domain: 'global',
+  description: 'Fails recommendations that exceed the per-call cost budget ($1.00)',
+  version: '1.0.0',
   fn: async (trace, _ctx) => {
-    const budgetUsd = 1.00;
+    const budgetUsd = 1.0;
     const passed = trace.costEstimateUsd <= budgetUsd;
     const score = passed ? 1 : Math.max(0, 1 - (trace.costEstimateUsd - budgetUsd) / budgetUsd);
     return {
-      hookId: "global:cost-budget",
+      hookId: 'global:cost-budget',
       domain: trace.domain,
       traceId: trace.traceId,
       score,
       passed,
       assertions: [
         {
-          field: "costEstimateUsd",
-          operator: "lte",
+          field: 'costEstimateUsd',
+          operator: 'lte',
           expected: budgetUsd,
           actual: trace.costEstimateUsd,
           passed,

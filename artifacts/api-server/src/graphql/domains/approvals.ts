@@ -1,4 +1,4 @@
-import { parseIntId } from "../utils.js";
+import { parseIntId } from '../utils.js';
 
 export const approvalsTypeDefs = `#graphql
   type ApprovalRequest {
@@ -105,30 +105,34 @@ type GQLContext = {
 export const approvalsResolvers = {
   Query: {
     approvalRequest: async (_: unknown, args: { id: string }) => {
-      const { getApprovalById } = await import("@szl-holdings/covenant-policy");
+      const { getApprovalById } = await import('@szl-holdings/covenant-policy');
       return getApprovalById(parseIntId(args.id));
     },
 
-    approvalRequests: async (_: unknown, args: { status?: string; orgId?: number; limit?: number }, ctx: GQLContext) => {
-      const { listPendingApprovals } = await import("@szl-holdings/covenant-policy");
+    approvalRequests: async (
+      _: unknown,
+      args: { status?: string; orgId?: number; limit?: number },
+      ctx: GQLContext,
+    ) => {
+      const { listPendingApprovals } = await import('@szl-holdings/covenant-policy');
       const user = ctx?.req?.user;
-      const isAdminUser = user?.roles?.some(r => ["super_admin", "admin"].includes(r)) ?? false;
-      const orgId = args.orgId ?? (isAdminUser ? undefined : user?.orgs?.[0]?.orgId ?? undefined);
+      const isAdminUser = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
+      const orgId = args.orgId ?? (isAdminUser ? undefined : (user?.orgs?.[0]?.orgId ?? undefined));
       return listPendingApprovals({ orgId, limit: args.limit ?? 100 });
     },
 
     approvalsByResource: async (_: unknown, args: { resourceType: string; resourceId: string }) => {
-      const { listApprovalsByResource } = await import("@szl-holdings/covenant-policy");
+      const { listApprovalsByResource } = await import('@szl-holdings/covenant-policy');
       return listApprovalsByResource(args.resourceType, args.resourceId);
     },
 
     approvalAuditTrail: async (_: unknown, args: { approvalId: string }) => {
-      const { getApprovalAuditTrail } = await import("@szl-holdings/covenant-policy");
+      const { getApprovalAuditTrail } = await import('@szl-holdings/covenant-policy');
       return getApprovalAuditTrail(parseIntId(args.approvalId));
     },
 
     approvalComments: async (_: unknown, args: { approvalId: string }) => {
-      const { getApprovalComments } = await import("@szl-holdings/covenant-policy");
+      const { getApprovalComments } = await import('@szl-holdings/covenant-policy');
       return getApprovalComments(parseIntId(args.approvalId));
     },
   },
@@ -149,7 +153,7 @@ export const approvalsResolvers = {
       },
       ctx: GQLContext,
     ) => {
-      const { createApprovalRequest } = await import("@szl-holdings/covenant-policy");
+      const { createApprovalRequest } = await import('@szl-holdings/covenant-policy');
       const user = ctx?.req?.user;
       return createApprovalRequest({
         orgId: user?.orgs?.[0]?.orgId ?? null,
@@ -157,8 +161,8 @@ export const approvalsResolvers = {
         resourceId: args.resourceId,
         title: args.title,
         description: args.description,
-        actionClass: args.actionClass ?? "general",
-        priority: (args.priority as "low" | "medium" | "high" | "critical") ?? "medium",
+        actionClass: args.actionClass ?? 'general',
+        priority: (args.priority as 'low' | 'medium' | 'high' | 'critical') ?? 'medium',
         requestedById: user?.id ?? null,
         requestedByRole: user?.roles?.[0],
         requiredApproverRole: args.requiredApproverRole,
@@ -166,7 +170,7 @@ export const approvalsResolvers = {
           ? new Date(Date.now() + args.expiresInHours * 60 * 60 * 1000)
           : undefined,
         correlationId: ctx?.req?.correlationId,
-        serviceAttribution: "graphql",
+        serviceAttribution: 'graphql',
         payload: args.payload,
       });
     },
@@ -176,16 +180,16 @@ export const approvalsResolvers = {
       args: { id: string; decision: string; note?: string },
       ctx: GQLContext,
     ) => {
-      const { reviewApproval } = await import("@szl-holdings/covenant-policy");
+      const { reviewApproval } = await import('@szl-holdings/covenant-policy');
       const user = ctx?.req?.user;
       return reviewApproval({
         approvalId: parseIntId(args.id),
         actorId: user?.id ?? null,
         actorRole: user?.roles?.[0],
-        decision: args.decision as "approved" | "rejected" | "revised",
+        decision: args.decision as 'approved' | 'rejected' | 'revised',
         note: args.note,
         correlationId: ctx?.req?.correlationId,
-        serviceAttribution: "graphql",
+        serviceAttribution: 'graphql',
       });
     },
 
@@ -194,7 +198,7 @@ export const approvalsResolvers = {
       args: { id: string; reason: string; escalatedToId?: number },
       ctx: GQLContext,
     ) => {
-      const { escalateApproval } = await import("@szl-holdings/covenant-policy");
+      const { escalateApproval } = await import('@szl-holdings/covenant-policy');
       const user = ctx?.req?.user;
       return escalateApproval({
         approvalId: parseIntId(args.id),
@@ -203,7 +207,7 @@ export const approvalsResolvers = {
         escalatedToId: args.escalatedToId,
         reason: args.reason,
         correlationId: ctx?.req?.correlationId,
-        serviceAttribution: "graphql",
+        serviceAttribution: 'graphql',
       });
     },
 
@@ -212,10 +216,10 @@ export const approvalsResolvers = {
       args: { approvalId: string; body: string; isInternal?: boolean },
       ctx: GQLContext,
     ) => {
-      const { addApprovalComment, getApprovalById } = await import("@szl-holdings/covenant-policy");
+      const { addApprovalComment, getApprovalById } = await import('@szl-holdings/covenant-policy');
       const user = ctx?.req?.user;
       const approval = await getApprovalById(parseIntId(args.approvalId));
-      if (!approval) throw new Error("Approval not found");
+      if (!approval) throw new Error('Approval not found');
       await addApprovalComment({
         approvalId: parseIntId(args.approvalId),
         orgId: approval.orgId,

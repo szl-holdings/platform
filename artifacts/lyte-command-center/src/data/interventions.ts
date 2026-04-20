@@ -1,7 +1,7 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore } from 'react';
 
-export type InterventionType = "claim" | "resolve" | "reassign" | "address";
-export type InterventionItemKind = "drift" | "debt";
+export type InterventionType = 'claim' | 'resolve' | 'reassign' | 'address';
+export type InterventionItemKind = 'drift' | 'debt';
 
 export interface Intervention {
   id: string;
@@ -37,9 +37,9 @@ export interface DebtIntervention {
   reassignProofRef?: string;
 }
 
-export const DEMO_OPERATOR_FALLBACK = "Demo Operator";
-const STORAGE_KEY = "lyte:interventions:v2";
-const isBrowser = typeof window !== "undefined";
+export const DEMO_OPERATOR_FALLBACK = 'Demo Operator';
+const STORAGE_KEY = 'lyte:interventions:v2';
+const isBrowser = typeof window !== 'undefined';
 
 interface State {
   log: Intervention[];
@@ -51,7 +51,14 @@ interface State {
 }
 
 function load(): State {
-  const base: State = { log: [], drift: {}, debt: {}, operator: DEMO_OPERATOR_FALLBACK, hydrated: false, syncing: false };
+  const base: State = {
+    log: [],
+    drift: {},
+    debt: {},
+    operator: DEMO_OPERATOR_FALLBACK,
+    hydrated: false,
+    syncing: false,
+  };
   if (!isBrowser) return base;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -84,7 +91,7 @@ function persist() {
 
 function emit() {
   persist();
-  listeners.forEach(l => l());
+  listeners.forEach((l) => l());
 }
 
 function setState(updater: (s: State) => State) {
@@ -93,18 +100,23 @@ function setState(updater: (s: State) => State) {
 }
 
 function applyToProjection(record: Intervention, current: State): State {
-  if (record.itemKind === "drift") {
+  if (record.itemKind === 'drift') {
     const prev = current.drift[record.itemId] ?? {};
-    if (record.type === "claim") {
+    if (record.type === 'claim') {
       return {
         ...current,
         drift: {
           ...current.drift,
-          [record.itemId]: { ...prev, claimedBy: record.actor, claimedAt: record.timestamp, claimProofRef: record.proofRef },
+          [record.itemId]: {
+            ...prev,
+            claimedBy: record.actor,
+            claimedAt: record.timestamp,
+            claimProofRef: record.proofRef,
+          },
         },
       };
     }
-    if (record.type === "resolve") {
+    if (record.type === 'resolve') {
       return {
         ...current,
         drift: {
@@ -120,9 +132,9 @@ function applyToProjection(record: Intervention, current: State): State {
       };
     }
   }
-  if (record.itemKind === "debt") {
+  if (record.itemKind === 'debt') {
     const prev = current.debt[record.itemId] ?? {};
-    if (record.type === "reassign") {
+    if (record.type === 'reassign') {
       return {
         ...current,
         debt: {
@@ -137,7 +149,7 @@ function applyToProjection(record: Intervention, current: State): State {
         },
       };
     }
-    if (record.type === "address") {
+    if (record.type === 'address') {
       return {
         ...current,
         debt: {
@@ -157,15 +169,15 @@ function applyToProjection(record: Intervention, current: State): State {
 }
 
 function ingestServerRecord(record: Intervention) {
-  setState(prev => {
-    if (prev.log.some(e => e.id === record.id)) return prev;
+  setState((prev) => {
+    if (prev.log.some((e) => e.id === record.id)) return prev;
     const withLog: State = { ...prev, log: [record, ...prev.log] };
     return applyToProjection(record, withLog);
   });
 }
 
 function localFallbackProofRef(): string {
-  const seq = String(state.log.length + 1).padStart(4, "0");
+  const seq = String(state.log.length + 1).padStart(4, '0');
   return `LOCAL-INT-${seq}`;
 }
 
@@ -179,16 +191,16 @@ async function postIntervention(payload: {
 }): Promise<Intervention | null> {
   if (!isBrowser) return null;
   try {
-    const res = await fetch("/api/lyte/interventions", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/lyte/interventions', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     if (!res.ok) return null;
     const json = await res.json().catch(() => null);
     const data = json?.data ?? json;
-    if (data && typeof data.id === "string" && typeof data.proofRef === "string") {
+    if (data && typeof data.id === 'string' && typeof data.proofRef === 'string') {
       return data as Intervention;
     }
     return null;
@@ -227,19 +239,24 @@ async function recordIntervention(input: {
     proofRef: localFallbackProofRef(),
     timestamp,
   };
-  setState(prev => applyToProjection(fallback, { ...prev, log: [fallback, ...prev.log] }));
+  setState((prev) => applyToProjection(fallback, { ...prev, log: [fallback, ...prev.log] }));
 }
 
 export async function claimDrift(item: { id: string; title: string }) {
-  await recordIntervention({ itemId: item.id, itemKind: "drift", itemTitle: item.title, type: "claim" });
+  await recordIntervention({
+    itemId: item.id,
+    itemKind: 'drift',
+    itemTitle: item.title,
+    type: 'claim',
+  });
 }
 
 export async function resolveDrift(item: { id: string; title: string }, note: string) {
   await recordIntervention({
     itemId: item.id,
-    itemKind: "drift",
+    itemKind: 'drift',
     itemTitle: item.title,
-    type: "resolve",
+    type: 'resolve',
     ...(note ? { notes: note } : {}),
   });
 }
@@ -248,9 +265,9 @@ export async function reassignDebt(item: { id: string; title: string }, newOwner
   if (!newOwner.trim()) return;
   await recordIntervention({
     itemId: item.id,
-    itemKind: "debt",
+    itemKind: 'debt',
     itemTitle: item.title,
-    type: "reassign",
+    type: 'reassign',
     newOwner: newOwner.trim(),
   });
 }
@@ -259,15 +276,22 @@ export async function addressDebt(item: { id: string; title: string }, evidence:
   if (!evidence.trim()) return;
   await recordIntervention({
     itemId: item.id,
-    itemKind: "debt",
+    itemKind: 'debt',
     itemTitle: item.title,
-    type: "address",
+    type: 'address',
     notes: evidence.trim(),
   });
 }
 
 export function clearInterventions() {
-  setState(() => ({ log: [], drift: {}, debt: {}, operator: state.operator, hydrated: state.hydrated, syncing: false }));
+  setState(() => ({
+    log: [],
+    drift: {},
+    debt: {},
+    operator: state.operator,
+    hydrated: state.hydrated,
+    syncing: false,
+  }));
 }
 
 interface AuthUserResponse {
@@ -277,16 +301,16 @@ interface AuthUserResponse {
 
 export async function bootstrapInterventions() {
   if (!isBrowser || state.hydrated || state.syncing) return;
-  setState(prev => ({ ...prev, syncing: true }));
+  setState((prev) => ({ ...prev, syncing: true }));
 
   // Resolve operator from authenticated session if available.
   try {
-    const res = await fetch("/api/auth/user", { credentials: "include" });
+    const res = await fetch('/api/auth/user', { credentials: 'include' });
     if (res.ok) {
       const json = (await res.json().catch(() => null)) as AuthUserResponse | null;
       const name = json?.data?.displayName ?? json?.displayName;
-      if (typeof name === "string" && name.trim()) {
-        setState(prev => ({ ...prev, operator: name }));
+      if (typeof name === 'string' && name.trim()) {
+        setState((prev) => ({ ...prev, operator: name }));
       }
     }
   } catch {
@@ -296,7 +320,7 @@ export async function bootstrapInterventions() {
   // Hydrate intervention ledger from server. Server records are the source of
   // truth — they carry the authenticated actor and the canonical proof ref.
   try {
-    const res = await fetch("/api/lyte/interventions", { credentials: "include" });
+    const res = await fetch('/api/lyte/interventions', { credentials: 'include' });
     if (res.ok) {
       const json = await res.json().catch(() => null);
       const rows = (json?.data ?? json) as Intervention[] | null;
@@ -309,7 +333,7 @@ export async function bootstrapInterventions() {
     /* offline — local store remains authoritative */
   }
 
-  setState(prev => ({ ...prev, hydrated: true, syncing: false }));
+  setState((prev) => ({ ...prev, hydrated: true, syncing: false }));
 }
 
 function subscribe(listener: () => void) {
@@ -324,7 +348,14 @@ function getSnapshot(): State {
 }
 
 function getServerSnapshot(): State {
-  return { log: [], drift: {}, debt: {}, operator: DEMO_OPERATOR_FALLBACK, hydrated: false, syncing: false };
+  return {
+    log: [],
+    drift: {},
+    debt: {},
+    operator: DEMO_OPERATOR_FALLBACK,
+    hydrated: false,
+    syncing: false,
+  };
 }
 
 export function useInterventions(): State {
@@ -335,10 +366,10 @@ export function formatTimestamp(iso: string): string {
   try {
     const d = new Date(iso);
     return d.toLocaleString(undefined, {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   } catch {
     return iso;

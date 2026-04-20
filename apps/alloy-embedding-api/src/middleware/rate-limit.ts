@@ -1,11 +1,11 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from 'express';
 
 interface TenantBucket {
   tokens: number;
   lastRefill: number;
 }
 
-const DEFAULT_RPM = Number(process.env["AEF_RATE_LIMIT_RPM"] ?? 300);
+const DEFAULT_RPM = Number(process.env['AEF_RATE_LIMIT_RPM'] ?? 300);
 const WINDOW_MS = 60_000;
 
 const buckets = new Map<string, TenantBucket>();
@@ -19,7 +19,7 @@ function refill(bucket: TenantBucket, maxTokens: number): void {
 }
 
 export function perTenantRateLimit(req: Request, res: Response, next: NextFunction): void {
-  const tenantId = req.tenantId ?? "default";
+  const tenantId = req.tenantId ?? 'default';
   const maxTokens = DEFAULT_RPM;
 
   let bucket = buckets.get(tenantId);
@@ -32,7 +32,7 @@ export function perTenantRateLimit(req: Request, res: Response, next: NextFuncti
 
   if (bucket.tokens < 1) {
     res.status(429).json({
-      error: "Rate limit exceeded",
+      error: 'Rate limit exceeded',
       detail: `Tenant '${tenantId}' exceeds ${maxTokens} requests per minute`,
       retryAfterMs: Math.ceil((1 / maxTokens) * WINDOW_MS),
     });

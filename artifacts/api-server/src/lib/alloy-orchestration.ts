@@ -1,32 +1,32 @@
-import { db } from "@szl-holdings/db";
 import {
-  alloySignals,
-  alloyWorkflows,
-  alloyWorkflowRuns,
-  alloyApprovals,
+  type AlloySignal,
+  type AlloyWorkflow,
+  type AlloyWorkflowRun,
   alloyActions,
+  alloyApprovals,
   alloyArtifacts,
   alloyAuditLog,
+  alloySignals,
+  alloyWorkflowRuns,
+  alloyWorkflows,
+  db,
+  type InsertAlloyArtifact,
   type InsertAlloyWorkflow,
   type InsertAlloyWorkflowRun,
-  type InsertAlloyArtifact,
-  type AlloyWorkflow,
-  type AlloySignal,
-  type AlloyWorkflowRun,
-} from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
-import { logger } from "./logger";
-import { durableJobQueue } from "@szl-holdings/forge-runtime";
+} from '@szl-holdings/db';
+import { durableJobQueue } from '@szl-holdings/forge-runtime';
+import { desc, eq } from 'drizzle-orm';
+import { logger } from './logger';
 
 // ─── Job Types for Alloy Workflow Engine ──────────────────────────────────────
 
 export const ALLOY_JOB_TYPES = {
-  PROCESS_SIGNAL: "alloy:process_signal",
-  RUN_WORKFLOW: "alloy:run_workflow",
-  EXECUTE_ACTION: "alloy:execute_action",
-  GENERATE_ARTIFACT: "alloy:generate_artifact",
-  SCHEDULED_REVIEW: "alloy:scheduled_review",
-  RETRY_WORKFLOW: "alloy:retry_workflow",
+  PROCESS_SIGNAL: 'alloy:process_signal',
+  RUN_WORKFLOW: 'alloy:run_workflow',
+  EXECUTE_ACTION: 'alloy:execute_action',
+  GENERATE_ARTIFACT: 'alloy:generate_artifact',
+  SCHEDULED_REVIEW: 'alloy:scheduled_review',
+  RETRY_WORKFLOW: 'alloy:retry_workflow',
 } as const;
 
 // ─── Retry Policy ─────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ function retryDelayMs(attempt: number): number {
 
 // ─── Step State Machine ───────────────────────────────────────────────────────
 
-export type StepStatus = "pending" | "running" | "completed" | "failed" | "skipped";
+export type StepStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
 
 export interface WorkflowStep {
   step: number;
@@ -51,8 +51,13 @@ export interface WorkflowStep {
   error?: string;
 }
 
-export function advanceStep(steps: WorkflowStep[], stepNumber: number, result: "completed" | "failed", error?: string): WorkflowStep[] {
-  return steps.map(s => {
+export function advanceStep(
+  steps: WorkflowStep[],
+  stepNumber: number,
+  result: 'completed' | 'failed',
+  error?: string,
+): WorkflowStep[] {
+  return steps.map((s) => {
     if (s.step !== stepNumber) return s;
     return {
       ...s,
@@ -64,24 +69,24 @@ export function advanceStep(steps: WorkflowStep[], stepNumber: number, result: "
 }
 
 export function startStep(steps: WorkflowStep[], stepNumber: number): WorkflowStep[] {
-  return steps.map(s => {
+  return steps.map((s) => {
     if (s.step !== stepNumber) return s;
-    return { ...s, status: "running", startedAt: new Date().toISOString() };
+    return { ...s, status: 'running', startedAt: new Date().toISOString() };
   });
 }
 
 function nextPendingStep(steps: WorkflowStep[]): WorkflowStep | undefined {
-  return steps.find(s => s.status === "pending");
+  return steps.find((s) => s.status === 'pending');
 }
 
 // ─── Audit Helper ─────────────────────────────────────────────────────────────
 
 export async function writeAuditLog(params: {
-  entityType: "signal" | "workflow" | "action" | "artifact" | "approval" | "owner";
+  entityType: 'signal' | 'workflow' | 'action' | 'artifact' | 'approval' | 'owner';
   entityId: number;
   action: string;
   actorUserId?: number;
-  actorType?: "user" | "system" | "agent";
+  actorType?: 'user' | 'system' | 'agent';
   previousState?: unknown;
   newState?: unknown;
   notes?: string;
@@ -93,14 +98,14 @@ export async function writeAuditLog(params: {
       entityId: params.entityId,
       action: params.action,
       actorUserId: params.actorUserId,
-      actorType: params.actorType ?? "system",
+      actorType: params.actorType ?? 'system',
       previousState: params.previousState as Record<string, unknown>,
       newState: params.newState as Record<string, unknown>,
       notes: params.notes,
       correlationId: params.correlationId,
     });
   } catch (err) {
-    logger.error({ err, params }, "Failed to write audit log");
+    logger.error({ err, params }, 'Failed to write audit log');
   }
 }
 
@@ -109,8 +114,8 @@ export async function writeAuditLog(params: {
 export async function processSignalIntoWorkflow(
   signalId: number,
   options: {
-    workflowType?: InsertAlloyWorkflow["type"];
-    priority?: InsertAlloyWorkflow["priority"];
+    workflowType?: InsertAlloyWorkflow['type'];
+    priority?: InsertAlloyWorkflow['priority'];
     requiresApproval?: boolean;
     actorUserId?: number;
     correlationId?: string;
@@ -123,13 +128,16 @@ export async function processSignalIntoWorkflow(
     .limit(1);
 
   if (!signal) {
-    logger.warn({ signalId }, "Signal not found for workflow creation");
+    logger.warn({ signalId }, 'Signal not found for workflow creation');
     return null;
   }
 
-  const workflowType = options.workflowType ?? "investigation";
-  const priority = options.priority ?? (signal.severity === "critical" ? "critical" : signal.severity === "high" ? "high" : "medium");
-  const requiresApproval = options.requiresApproval ?? (signal.severity === "critical" || signal.severity === "high");
+  const workflowType = options.workflowType ?? 'investigation';
+  const priority =
+    options.priority ??
+    (signal.severity === 'critical' ? 'critical' : signal.severity === 'high' ? 'high' : 'medium');
+  const requiresApproval =
+    options.requiresApproval ?? (signal.severity === 'critical' || signal.severity === 'high');
 
   const steps = buildDefaultSteps(workflowType, signal);
 
@@ -142,42 +150,46 @@ export async function processSignalIntoWorkflow(
       type: workflowType,
       domain: signal.domain,
       triggerId: signal.id,
-      triggerType: "signal",
-      status: "pending",
+      triggerType: 'signal',
+      status: 'pending',
       priority,
       requiresApproval,
-      approvalState: "none",
+      approvalState: 'none',
       confidenceScore: signal.confidence,
       steps: steps as unknown as Record<string, unknown>[],
       inputs: { signalId, signalTitle: signal.title, severity: signal.severity },
-      environment: signal.environment ?? "production",
+      environment: signal.environment ?? 'production',
       ownerUserId,
     })
     .returning();
 
   await writeAuditLog({
-    entityType: "workflow",
+    entityType: 'workflow',
     entityId: workflow.id,
-    action: "created",
-    actorType: "system",
+    action: 'created',
+    actorType: 'system',
     actorUserId: options.actorUserId,
-    newState: { status: "pending", signalId, workflowType },
+    newState: { status: 'pending', signalId, workflowType },
     notes: `Workflow created from signal ${signalId}`,
     correlationId: options.correlationId,
   });
 
-  logger.info({ workflowId: workflow.id, signalId, workflowType }, "Workflow created from signal");
+  logger.info({ workflowId: workflow.id, signalId, workflowType }, 'Workflow created from signal');
 
   if (requiresApproval) {
     await requestApproval(workflow.id, {
       requestedByUserId: options.actorUserId,
       reason: `Auto-approval required for ${signal.severity} signal: ${signal.title}`,
     });
-    logger.info({ workflowId: workflow.id, signalId }, "Approval record created automatically for high/critical signal workflow");
+    logger.info(
+      { workflowId: workflow.id, signalId },
+      'Approval record created automatically for high/critical signal workflow',
+    );
   }
 
-  await db.update(alloySignals)
-    .set({ status: "triaged", updatedAt: new Date() })
+  await db
+    .update(alloySignals)
+    .set({ status: 'triaged', updatedAt: new Date() })
     .where(eq(alloySignals.id, signalId));
 
   return workflow;
@@ -185,32 +197,47 @@ export async function processSignalIntoWorkflow(
 
 function buildDefaultSteps(type: string, _signal: AlloySignal): WorkflowStep[] {
   const base: WorkflowStep[] = [
-    { step: 1, name: "intake", description: "Signal intake and validation", status: "pending" },
-    { step: 2, name: "analysis", description: "Signal analysis and classification", status: "pending" },
+    { step: 1, name: 'intake', description: 'Signal intake and validation', status: 'pending' },
+    {
+      step: 2,
+      name: 'analysis',
+      description: 'Signal analysis and classification',
+      status: 'pending',
+    },
   ];
 
-  if (type === "escalation") {
+  if (type === 'escalation') {
     return [
       ...base,
-      { step: 3, name: "escalation", description: "Escalate to responsible owner", status: "pending" },
-      { step: 4, name: "approval", description: "Approval gate", status: "pending" },
-      { step: 5, name: "resolution", description: "Confirm resolution", status: "pending" },
+      {
+        step: 3,
+        name: 'escalation',
+        description: 'Escalate to responsible owner',
+        status: 'pending',
+      },
+      { step: 4, name: 'approval', description: 'Approval gate', status: 'pending' },
+      { step: 5, name: 'resolution', description: 'Confirm resolution', status: 'pending' },
     ];
   }
 
-  if (type === "remediation") {
+  if (type === 'remediation') {
     return [
       ...base,
-      { step: 3, name: "planning", description: "Build remediation plan", status: "pending" },
-      { step: 4, name: "execution", description: "Execute remediation steps", status: "pending" },
-      { step: 5, name: "verification", description: "Verify remediation success", status: "pending" },
+      { step: 3, name: 'planning', description: 'Build remediation plan', status: 'pending' },
+      { step: 4, name: 'execution', description: 'Execute remediation steps', status: 'pending' },
+      {
+        step: 5,
+        name: 'verification',
+        description: 'Verify remediation success',
+        status: 'pending',
+      },
     ];
   }
 
   return [
     ...base,
-    { step: 3, name: "recommendation", description: "Generate recommendations", status: "pending" },
-    { step: 4, name: "output", description: "Generate output artifact", status: "pending" },
+    { step: 3, name: 'recommendation', description: 'Generate recommendations', status: 'pending' },
+    { step: 4, name: 'output', description: 'Generate output artifact', status: 'pending' },
   ];
 }
 
@@ -228,10 +255,14 @@ export async function startWorkflowRun(
 
   if (!workflow) throw new Error(`Workflow not found: ${workflowId}`);
 
-  if (workflow.requiresApproval && workflow.approvalState !== "approved" && !options.overrideApproval) {
+  if (
+    workflow.requiresApproval &&
+    workflow.approvalState !== 'approved' &&
+    !options.overrideApproval
+  ) {
     throw new Error(
       `Workflow ${workflowId} requires approval before it can run (approvalState=${workflow.approvalState}). ` +
-      `Submit an approval request and wait for it to be reviewed.`,
+        `Submit an approval request and wait for it to be reviewed.`,
     );
   }
 
@@ -252,27 +283,39 @@ export async function startWorkflowRun(
     .values({
       workflowId,
       runNumber,
-      status: "started",
+      status: 'started',
       trigger: workflow.triggerType,
       inputs: workflow.inputs as Record<string, unknown>,
       ownerUserId: options.actorUserId,
-      approvalState: workflow.requiresApproval ? "pending" : "none",
+      approvalState: workflow.requiresApproval ? 'pending' : 'none',
       startedAt: new Date(),
       stepsExecuted: updatedSteps as unknown as Record<string, unknown>[],
     })
     .returning();
 
-  await db.update(alloyWorkflows)
-    .set({ status: "running", startedAt: new Date(), updatedAt: new Date(), steps: updatedSteps as unknown as Record<string, unknown>[], currentStep: updatedSteps[0]?.step ?? 1 })
+  await db
+    .update(alloyWorkflows)
+    .set({
+      status: 'running',
+      startedAt: new Date(),
+      updatedAt: new Date(),
+      steps: updatedSteps as unknown as Record<string, unknown>[],
+      currentStep: updatedSteps[0]?.step ?? 1,
+    })
     .where(eq(alloyWorkflows.id, workflowId));
 
   await writeAuditLog({
-    entityType: "workflow",
+    entityType: 'workflow',
     entityId: workflowId,
-    action: "run_started",
-    actorType: options.actorUserId ? "user" : "system",
+    action: 'run_started',
+    actorType: options.actorUserId ? 'user' : 'system',
     actorUserId: options.actorUserId,
-    newState: { runId: run.id, runNumber, status: "running", currentStep: updatedSteps[0]?.step ?? 1 },
+    newState: {
+      runId: run.id,
+      runNumber,
+      status: 'running',
+      currentStep: updatedSteps[0]?.step ?? 1,
+    },
     correlationId: options.correlationId,
   });
 
@@ -282,10 +325,19 @@ export async function startWorkflowRun(
 export async function advanceWorkflowStep(
   runId: number,
   stepNumber: number,
-  result: "completed" | "failed",
-  options: { actorUserId?: number; error?: string; outputs?: Record<string, unknown>; correlationId?: string } = {},
+  result: 'completed' | 'failed',
+  options: {
+    actorUserId?: number;
+    error?: string;
+    outputs?: Record<string, unknown>;
+    correlationId?: string;
+  } = {},
 ): Promise<void> {
-  const [run] = await db.select().from(alloyWorkflowRuns).where(eq(alloyWorkflowRuns.id, runId)).limit(1);
+  const [run] = await db
+    .select()
+    .from(alloyWorkflowRuns)
+    .where(eq(alloyWorkflowRuns.id, runId))
+    .limit(1);
   if (!run) return;
 
   const steps = (run.stepsExecuted ?? []) as WorkflowStep[];
@@ -295,21 +347,27 @@ export async function advanceWorkflowStep(
   const nextStarted = next ? startStep(updatedSteps, next.step) : updatedSteps;
   const allDone = !next;
 
-  await db.update(alloyWorkflowRuns).set({
-    stepsExecuted: nextStarted as unknown as Record<string, unknown>[],
-    ...(options.outputs ? { outputs: options.outputs } : {}),
-  }).where(eq(alloyWorkflowRuns.id, runId));
+  await db
+    .update(alloyWorkflowRuns)
+    .set({
+      stepsExecuted: nextStarted as unknown as Record<string, unknown>[],
+      ...(options.outputs ? { outputs: options.outputs } : {}),
+    })
+    .where(eq(alloyWorkflowRuns.id, runId));
 
-  await db.update(alloyWorkflows).set({
-    steps: nextStarted as unknown as Record<string, unknown>[],
-    updatedAt: new Date(),
-  }).where(eq(alloyWorkflows.id, run.workflowId));
+  await db
+    .update(alloyWorkflows)
+    .set({
+      steps: nextStarted as unknown as Record<string, unknown>[],
+      updatedAt: new Date(),
+    })
+    .where(eq(alloyWorkflows.id, run.workflowId));
 
   await writeAuditLog({
-    entityType: "workflow",
+    entityType: 'workflow',
     entityId: run.workflowId,
     action: `step_${stepNumber}_${result}`,
-    actorType: options.actorUserId ? "user" : "system",
+    actorType: options.actorUserId ? 'user' : 'system',
     actorUserId: options.actorUserId,
     newState: { runId, stepNumber, result, nextStep: next?.step },
     notes: options.error,
@@ -317,7 +375,10 @@ export async function advanceWorkflowStep(
   });
 
   if (allDone) {
-    await completeWorkflowRun(runId, options.outputs ?? {}, { actorUserId: options.actorUserId, correlationId: options.correlationId });
+    await completeWorkflowRun(runId, options.outputs ?? {}, {
+      actorUserId: options.actorUserId,
+      correlationId: options.correlationId,
+    });
   }
 }
 
@@ -336,9 +397,10 @@ export async function completeWorkflowRun(
 
   const now = new Date();
   const durationMs = now.getTime() - run.startedAt.getTime();
-  const status = options.errorMessage ? "failed" : "completed";
+  const status = options.errorMessage ? 'failed' : 'completed';
 
-  await db.update(alloyWorkflowRuns)
+  await db
+    .update(alloyWorkflowRuns)
     .set({
       status,
       outputs,
@@ -348,16 +410,24 @@ export async function completeWorkflowRun(
     })
     .where(eq(alloyWorkflowRuns.id, runId));
 
-  const prevWorkflow = await db.select().from(alloyWorkflows).where(eq(alloyWorkflows.id, run.workflowId)).limit(1);
+  const prevWorkflow = await db
+    .select()
+    .from(alloyWorkflows)
+    .where(eq(alloyWorkflows.id, run.workflowId))
+    .limit(1);
   const retryCount = prevWorkflow[0]?.retryCount ?? 0;
 
-  if (status === "failed" && retryCount < MAX_RETRIES) {
+  if (status === 'failed' && retryCount < MAX_RETRIES) {
     const delayMs = retryDelayMs(retryCount);
-    logger.warn({ runId, workflowId: run.workflowId, retryCount, delayMs }, "Scheduling workflow retry after failure");
+    logger.warn(
+      { runId, workflowId: run.workflowId, retryCount, delayMs },
+      'Scheduling workflow retry after failure',
+    );
 
-    await db.update(alloyWorkflows)
+    await db
+      .update(alloyWorkflows)
       .set({
-        status: "pending",
+        status: 'pending',
         retryCount: retryCount + 1,
         updatedAt: now,
         errorMessage: options.errorMessage,
@@ -365,24 +435,29 @@ export async function completeWorkflowRun(
       .where(eq(alloyWorkflows.id, run.workflowId));
 
     await writeAuditLog({
-      entityType: "workflow",
+      entityType: 'workflow',
       entityId: run.workflowId,
-      action: "retry_scheduled",
-      actorType: "system",
-      previousState: { status: "failed", retryCount },
-      newState: { status: "pending", retryCount: retryCount + 1, delayMs },
+      action: 'retry_scheduled',
+      actorType: 'system',
+      previousState: { status: 'failed', retryCount },
+      newState: { status: 'pending', retryCount: retryCount + 1, delayMs },
       notes: `Retry #${retryCount + 1} of ${MAX_RETRIES} scheduled after ${delayMs}ms`,
       correlationId: options.correlationId,
     });
 
-    await durableJobQueue.enqueue(ALLOY_JOB_TYPES.RETRY_WORKFLOW, {
-      workflowId: run.workflowId,
-      retryAttempt: retryCount + 1,
-    }, { scheduledAt: new Date(Date.now() + delayMs) });
+    await durableJobQueue.enqueue(
+      ALLOY_JOB_TYPES.RETRY_WORKFLOW,
+      {
+        workflowId: run.workflowId,
+        retryAttempt: retryCount + 1,
+      },
+      { scheduledAt: new Date(Date.now() + delayMs) },
+    );
   } else {
-    await db.update(alloyWorkflows)
+    await db
+      .update(alloyWorkflows)
       .set({
-        status: status === "completed" ? "completed" : "failed",
+        status: status === 'completed' ? 'completed' : 'failed',
         completedAt: now,
         outputs,
         updatedAt: now,
@@ -390,25 +465,28 @@ export async function completeWorkflowRun(
       })
       .where(eq(alloyWorkflows.id, run.workflowId));
 
-    if (status === "failed" && retryCount >= MAX_RETRIES) {
-      logger.error({ runId, workflowId: run.workflowId, retryCount }, "Workflow exhausted retries — terminal failure");
+    if (status === 'failed' && retryCount >= MAX_RETRIES) {
+      logger.error(
+        { runId, workflowId: run.workflowId, retryCount },
+        'Workflow exhausted retries — terminal failure',
+      );
       await writeAuditLog({
-        entityType: "workflow",
+        entityType: 'workflow',
         entityId: run.workflowId,
-        action: "retry_exhausted",
-        actorType: "system",
-        newState: { status: "failed", retryCount, maxRetries: MAX_RETRIES },
-        notes: "Max retries exhausted — manual intervention required",
+        action: 'retry_exhausted',
+        actorType: 'system',
+        newState: { status: 'failed', retryCount, maxRetries: MAX_RETRIES },
+        notes: 'Max retries exhausted — manual intervention required',
         correlationId: options.correlationId,
       });
     }
   }
 
   await writeAuditLog({
-    entityType: "workflow",
+    entityType: 'workflow',
     entityId: run.workflowId,
-    action: status === "completed" ? "run_completed" : "run_failed",
-    actorType: options.actorUserId ? "user" : "system",
+    action: status === 'completed' ? 'run_completed' : 'run_failed',
+    actorType: options.actorUserId ? 'user' : 'system',
     actorUserId: options.actorUserId,
     newState: { runId, status, durationMs },
     notes: options.errorMessage,
@@ -438,37 +516,42 @@ export async function requestApproval(
       workflowId,
       requestedByUserId: options.requestedByUserId,
       reviewerUserId: options.reviewerUserId,
-      status: "pending",
+      status: 'pending',
       reason: options.reason,
       requiredRoles: options.requiredRoles ?? [],
       expiresAt,
     })
     .returning();
 
-  await db.update(alloyWorkflows)
-    .set({ status: "waiting_approval", approvalState: "pending", updatedAt: new Date() })
+  await db
+    .update(alloyWorkflows)
+    .set({ status: 'waiting_approval', approvalState: 'pending', updatedAt: new Date() })
     .where(eq(alloyWorkflows.id, workflowId));
 
   await writeAuditLog({
-    entityType: "approval",
+    entityType: 'approval',
     entityId: approval.id,
-    action: "requested",
-    actorType: options.requestedByUserId ? "user" : "system",
+    action: 'requested',
+    actorType: options.requestedByUserId ? 'user' : 'system',
     actorUserId: options.requestedByUserId,
-    newState: { workflowId, status: "pending" },
+    newState: { workflowId, status: 'pending' },
     notes: options.reason,
   });
 
-  await durableJobQueue.enqueue(ALLOY_JOB_TYPES.SCHEDULED_REVIEW, {
-    approvalId: approval.id,
-    workflowId,
-    type: "expiry_check",
-  }, { scheduledAt: expiresAt });
+  await durableJobQueue.enqueue(
+    ALLOY_JOB_TYPES.SCHEDULED_REVIEW,
+    {
+      approvalId: approval.id,
+      workflowId,
+      type: 'expiry_check',
+    },
+    { scheduledAt: expiresAt },
+  );
 }
 
 export async function reviewApproval(
   approvalId: number,
-  decision: "approved" | "rejected",
+  decision: 'approved' | 'rejected',
   options: {
     reviewerUserId: number;
     reviewNote?: string;
@@ -484,7 +567,8 @@ export async function reviewApproval(
   if (!approval) throw new Error(`Approval not found: ${approvalId}`);
 
   const now = new Date();
-  await db.update(alloyApprovals)
+  await db
+    .update(alloyApprovals)
     .set({
       status: decision,
       reviewerUserId: options.reviewerUserId,
@@ -494,24 +578,25 @@ export async function reviewApproval(
     })
     .where(eq(alloyApprovals.id, approvalId));
 
-  const workflowStatus = decision === "approved" ? "approved" : "rejected";
-  await db.update(alloyWorkflows)
+  const workflowStatus = decision === 'approved' ? 'approved' : 'rejected';
+  await db
+    .update(alloyWorkflows)
     .set({ status: workflowStatus, approvalState: decision, updatedAt: now })
     .where(eq(alloyWorkflows.id, approval.workflowId));
 
   await writeAuditLog({
-    entityType: "approval",
+    entityType: 'approval',
     entityId: approvalId,
     action: `approval_${decision}`,
-    actorType: "user",
+    actorType: 'user',
     actorUserId: options.reviewerUserId,
-    previousState: { status: "pending" },
+    previousState: { status: 'pending' },
     newState: { status: decision },
     notes: options.reviewNote,
     correlationId: options.correlationId,
   });
 
-  if (decision === "approved") {
+  if (decision === 'approved') {
     await durableJobQueue.enqueue(ALLOY_JOB_TYPES.RUN_WORKFLOW, {
       workflowId: approval.workflowId,
       actorUserId: options.reviewerUserId,
@@ -524,11 +609,11 @@ export async function reviewApproval(
 export async function generateArtifact(params: {
   workflowId?: number;
   signalId?: number;
-  type: InsertAlloyArtifact["type"];
+  type: InsertAlloyArtifact['type'];
   title: string;
   content: string;
   domain: string;
-  format?: InsertAlloyArtifact["format"];
+  format?: InsertAlloyArtifact['format'];
   confidenceScore?: number;
   requiresApproval?: boolean;
   tags?: string[];
@@ -546,10 +631,10 @@ export async function generateArtifact(params: {
       title: params.title,
       content: params.content,
       domain: params.domain,
-      format: params.format ?? "markdown",
+      format: params.format ?? 'markdown',
       confidenceScore: params.confidenceScore ?? 0.8,
       requiresApproval: params.requiresApproval ?? false,
-      approvalState: params.requiresApproval ? "pending" : "none",
+      approvalState: params.requiresApproval ? 'pending' : 'none',
       tags: params.tags ?? [],
       ownerId: params.ownerId,
       ownerUserId: params.ownerUserId,
@@ -558,10 +643,10 @@ export async function generateArtifact(params: {
     .returning();
 
   await writeAuditLog({
-    entityType: "artifact",
+    entityType: 'artifact',
     entityId: artifact.id,
-    action: "created",
-    actorType: params.actorUserId ? "user" : "system",
+    action: 'created',
+    actorType: params.actorUserId ? 'user' : 'system',
     actorUserId: params.actorUserId,
     newState: { type: params.type, domain: params.domain },
     correlationId: params.correlationId,
@@ -575,49 +660,78 @@ export async function generateArtifact(params: {
 durableJobQueue.register(ALLOY_JOB_TYPES.PROCESS_SIGNAL, async (job) => {
   const { signalId, workflowType, priority, actorUserId } = job.payload as {
     signalId: number;
-    workflowType?: InsertAlloyWorkflow["type"];
-    priority?: InsertAlloyWorkflow["priority"];
+    workflowType?: InsertAlloyWorkflow['type'];
+    priority?: InsertAlloyWorkflow['priority'];
     actorUserId?: number;
   };
-  logger.info({ jobId: job.id, signalId }, "Processing signal into workflow");
-  await processSignalIntoWorkflow(signalId, { workflowType, priority, actorUserId, correlationId: job.id });
+  logger.info({ jobId: job.id, signalId }, 'Processing signal into workflow');
+  await processSignalIntoWorkflow(signalId, {
+    workflowType,
+    priority,
+    actorUserId,
+    correlationId: job.id,
+  });
 });
 
 durableJobQueue.register(ALLOY_JOB_TYPES.RUN_WORKFLOW, async (job) => {
   const { workflowId, actorUserId } = job.payload as { workflowId: number; actorUserId?: number };
-  logger.info({ jobId: job.id, workflowId }, "Running workflow");
+  logger.info({ jobId: job.id, workflowId }, 'Running workflow');
   const run = await startWorkflowRun(workflowId, { actorUserId, correlationId: job.id });
 
   try {
-    const [workflow] = await db.select().from(alloyWorkflows).where(eq(alloyWorkflows.id, workflowId)).limit(1);
-    if (!workflow) throw new Error("Workflow not found");
+    const [workflow] = await db
+      .select()
+      .from(alloyWorkflows)
+      .where(eq(alloyWorkflows.id, workflowId))
+      .limit(1);
+    if (!workflow) throw new Error('Workflow not found');
 
     let currentSteps = (workflow.steps ?? []) as WorkflowStep[];
-    const outputs: Record<string, unknown> = { processedAt: new Date().toISOString(), runId: run.id };
+    const outputs: Record<string, unknown> = {
+      processedAt: new Date().toISOString(),
+      runId: run.id,
+    };
 
     for (const step of currentSteps) {
-      logger.info({ workflowId, runId: run.id, step: step.step, name: step.name }, "Executing workflow step");
+      logger.info(
+        { workflowId, runId: run.id, step: step.step, name: step.name },
+        'Executing workflow step',
+      );
 
       const runningSteps = startStep(currentSteps, step.step);
-      await db.update(alloyWorkflowRuns)
+      await db
+        .update(alloyWorkflowRuns)
         .set({ stepsExecuted: runningSteps as unknown as Record<string, unknown>[] })
         .where(eq(alloyWorkflowRuns.id, run.id));
 
-      await db.update(alloyWorkflows)
-        .set({ steps: runningSteps as unknown as Record<string, unknown>[], currentStep: step.step, updatedAt: new Date() })
+      await db
+        .update(alloyWorkflows)
+        .set({
+          steps: runningSteps as unknown as Record<string, unknown>[],
+          currentStep: step.step,
+          updatedAt: new Date(),
+        })
         .where(eq(alloyWorkflows.id, workflowId));
 
-      const completedSteps = advanceStep(runningSteps, step.step, "completed");
-      await db.update(alloyWorkflowRuns)
+      const completedSteps = advanceStep(runningSteps, step.step, 'completed');
+      await db
+        .update(alloyWorkflowRuns)
         .set({ stepsExecuted: completedSteps as unknown as Record<string, unknown>[] })
         .where(eq(alloyWorkflowRuns.id, run.id));
 
-      await db.update(alloyWorkflows)
-        .set({ steps: completedSteps as unknown as Record<string, unknown>[], updatedAt: new Date() })
+      await db
+        .update(alloyWorkflows)
+        .set({
+          steps: completedSteps as unknown as Record<string, unknown>[],
+          updatedAt: new Date(),
+        })
         .where(eq(alloyWorkflows.id, workflowId));
 
       currentSteps = completedSteps;
-      outputs[`step_${step.step}_${step.name}`] = { status: "completed", timestamp: new Date().toISOString() };
+      outputs[`step_${step.step}_${step.name}`] = {
+        status: 'completed',
+        timestamp: new Date().toISOString(),
+      };
     }
 
     await completeWorkflowRun(run.id, outputs, { actorUserId, correlationId: job.id });
@@ -634,16 +748,23 @@ durableJobQueue.register(ALLOY_JOB_TYPES.RETRY_WORKFLOW, async (job) => {
     retryAttempt: number;
     actorUserId?: number;
   };
-  logger.info({ jobId: job.id, workflowId, retryAttempt }, "Retrying workflow");
+  logger.info({ jobId: job.id, workflowId, retryAttempt }, 'Retrying workflow');
 
-  const [workflow] = await db.select().from(alloyWorkflows).where(eq(alloyWorkflows.id, workflowId)).limit(1);
+  const [workflow] = await db
+    .select()
+    .from(alloyWorkflows)
+    .where(eq(alloyWorkflows.id, workflowId))
+    .limit(1);
   if (!workflow) {
-    logger.warn({ workflowId }, "Workflow not found for retry — skipping");
+    logger.warn({ workflowId }, 'Workflow not found for retry — skipping');
     return;
   }
 
-  if (workflow.status !== "pending") {
-    logger.info({ workflowId, status: workflow.status }, "Workflow retry skipped — not in pending state");
+  if (workflow.status !== 'pending') {
+    logger.info(
+      { workflowId, status: workflow.status },
+      'Workflow retry skipped — not in pending state',
+    );
     return;
   }
 
@@ -652,7 +773,7 @@ durableJobQueue.register(ALLOY_JOB_TYPES.RETRY_WORKFLOW, async (job) => {
 
 durableJobQueue.register(ALLOY_JOB_TYPES.GENERATE_ARTIFACT, async (job) => {
   const params = job.payload as Parameters<typeof generateArtifact>[0];
-  logger.info({ jobId: job.id, type: params.type, domain: params.domain }, "Generating artifact");
+  logger.info({ jobId: job.id, type: params.type, domain: params.domain }, 'Generating artifact');
   await generateArtifact({ ...params, correlationId: job.id });
 });
 
@@ -660,36 +781,47 @@ durableJobQueue.register(ALLOY_JOB_TYPES.SCHEDULED_REVIEW, async (job) => {
   const { approvalId, workflowId, type } = job.payload as {
     approvalId: number;
     workflowId: number;
-    type: "expiry_check" | "scheduled_follow_up";
+    type: 'expiry_check' | 'scheduled_follow_up';
   };
-  logger.info({ jobId: job.id, approvalId, workflowId, type }, "Running scheduled review");
+  logger.info({ jobId: job.id, approvalId, workflowId, type }, 'Running scheduled review');
 
-  if (type === "expiry_check") {
-    const [approval] = await db.select().from(alloyApprovals).where(eq(alloyApprovals.id, approvalId)).limit(1);
-    if (!approval || approval.status !== "pending") return;
+  if (type === 'expiry_check') {
+    const [approval] = await db
+      .select()
+      .from(alloyApprovals)
+      .where(eq(alloyApprovals.id, approvalId))
+      .limit(1);
+    if (!approval || approval.status !== 'pending') return;
 
     const now = new Date();
     if (approval.expiresAt && approval.expiresAt <= now) {
-      await db.update(alloyApprovals)
-        .set({ status: "expired", updatedAt: now })
+      await db
+        .update(alloyApprovals)
+        .set({ status: 'expired', updatedAt: now })
         .where(eq(alloyApprovals.id, approvalId));
 
-      await db.update(alloyWorkflows)
-        .set({ status: "failed", approvalState: "none", updatedAt: now, errorMessage: "Approval expired without review" })
+      await db
+        .update(alloyWorkflows)
+        .set({
+          status: 'failed',
+          approvalState: 'none',
+          updatedAt: now,
+          errorMessage: 'Approval expired without review',
+        })
         .where(eq(alloyWorkflows.id, workflowId));
 
       await writeAuditLog({
-        entityType: "approval",
+        entityType: 'approval',
         entityId: approvalId,
-        action: "approval_expired",
-        actorType: "system",
-        previousState: { status: "pending" },
-        newState: { status: "expired" },
-        notes: "Approval expired — no reviewer action within deadline",
+        action: 'approval_expired',
+        actorType: 'system',
+        previousState: { status: 'pending' },
+        newState: { status: 'expired' },
+        notes: 'Approval expired — no reviewer action within deadline',
         correlationId: job.id,
       });
 
-      logger.warn({ approvalId, workflowId }, "Approval expired — workflow set to failed");
+      logger.warn({ approvalId, workflowId }, 'Approval expired — workflow set to failed');
     }
   }
 });

@@ -6,12 +6,12 @@
  * `artifacts/api-server/src/middlewares/tenant-scope.ts`.
  */
 
-import type { AuthenticatedUser, OrgMembership, TenantContext } from "../types.js";
-import { isElevated, isMemberOf, orgMembership, primaryOrg } from "../types.js";
+import type { AuthenticatedUser, OrgMembership, TenantContext } from '../types.js';
+import { isElevated, isMemberOf, orgMembership, primaryOrg } from '../types.js';
 
 export type TenantResolutionResult =
   | { resolved: true; context: TenantContext }
-  | { resolved: false; reason: "no_org_membership" | "cross_tenant_denied" | "org_not_found" };
+  | { resolved: false; reason: 'no_org_membership' | 'cross_tenant_denied' | 'org_not_found' };
 
 /**
  * Resolves a `TenantContext` from the authenticated user and an optional
@@ -40,18 +40,18 @@ export function resolveTenantContext(
     }
     const primary = primaryOrg(user);
     if (!primary) {
-      return { resolved: true, context: { orgId: 0, orgSlug: "platform" } };
+      return { resolved: true, context: { orgId: 0, orgSlug: 'platform' } };
     }
     return { resolved: true, context: { orgId: primary.orgId, orgSlug: primary.orgSlug } };
   }
 
   if (user.orgs.length === 0) {
-    return { resolved: false, reason: "no_org_membership" };
+    return { resolved: false, reason: 'no_org_membership' };
   }
 
   if (requestedOrgId !== undefined) {
     if (!isMemberOf(user, requestedOrgId)) {
-      return { resolved: false, reason: "cross_tenant_denied" };
+      return { resolved: false, reason: 'cross_tenant_denied' };
     }
     const membership = orgMembership(user, requestedOrgId) as OrgMembership;
     return { resolved: true, context: { orgId: membership.orgId, orgSlug: membership.orgSlug } };

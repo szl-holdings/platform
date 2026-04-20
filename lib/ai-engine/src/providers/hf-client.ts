@@ -1,14 +1,14 @@
-import type { RouteResult } from "./hf-router.js";
+import type { RouteResult } from './hf-router.js';
 
 export interface HFChatMessage {
-  role: "system" | "user" | "assistant" | "tool";
+  role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
   name?: string;
   tool_call_id?: string;
 }
 
 export interface HFToolDef {
-  type: "function";
+  type: 'function';
   function: {
     name: string;
     description: string;
@@ -27,12 +27,12 @@ export interface HFCompletionResult {
   raw: unknown;
 }
 
-const HF_API_BASE = "https://router.huggingface.co/hf-inference/v1";
+const HF_API_BASE = 'https://router.huggingface.co/hf-inference/v1';
 
 function getHeaders(): Record<string, string> {
-  const token = process.env["HF_TOKEN"] || process.env["HUGGINGFACE_API_KEY"];
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY'];
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
 
@@ -41,7 +41,7 @@ export async function chatCompletion(
   route: RouteResult,
   options?: {
     tools?: HFToolDef[];
-    responseFormat?: { type: "json_object" } | { type: "text" };
+    responseFormat?: { type: 'json_object' } | { type: 'text' };
     stream?: boolean;
     signal?: AbortSignal;
   },
@@ -63,42 +63,53 @@ export async function chatCompletion(
 
   try {
     const response = await fetch(`${HF_API_BASE}/chat/completions`, {
-      method: "POST",
+      method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(body),
       signal: options?.signal || controller.signal,
     });
 
     if (!response.ok) {
-      const errorText = await response.text().catch(() => "");
+      const errorText = await response.text().catch(() => '');
       throw new Error(`HF API error ${response.status}: ${errorText}`);
     }
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       choices?: Array<{
-        message?: { content?: string; tool_calls?: Array<{ id: string; function: { name: string; arguments: string } }> };
+        message?: {
+          content?: string;
+          tool_calls?: Array<{ id: string; function: { name: string; arguments: string } }>;
+        };
         finish_reason?: string;
       }>;
       usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
     };
 
     const choice = data.choices?.[0];
-    const toolCalls = (choice?.message?.tool_calls || []).map(tc => ({
+    const toolCalls = (choice?.message?.tool_calls || []).map((tc) => ({
       id: tc.id,
       name: tc.function.name,
-      arguments: (() => { try { return JSON.parse(tc.function.arguments); } catch { return {}; } })(),
+      arguments: (() => {
+        try {
+          return JSON.parse(tc.function.arguments);
+        } catch {
+          return {};
+        }
+      })(),
     }));
 
     return {
-      content: choice?.message?.content || "",
+      content: choice?.message?.content || '',
       model: route.model,
       provider: route.provider,
-      finishReason: choice?.finish_reason || "stop",
-      usage: data.usage ? {
-        promptTokens: data.usage.prompt_tokens || 0,
-        completionTokens: data.usage.completion_tokens || 0,
-        totalTokens: data.usage.total_tokens || 0,
-      } : null,
+      finishReason: choice?.finish_reason || 'stop',
+      usage: data.usage
+        ? {
+            promptTokens: data.usage.prompt_tokens || 0,
+            completionTokens: data.usage.completion_tokens || 0,
+            totalTokens: data.usage.total_tokens || 0,
+          }
+        : null,
       latencyMs: Date.now() - start,
       toolCalls,
       raw: data,
@@ -115,8 +126,8 @@ export async function chatCompletionWithFallback(
 ): Promise<HFCompletionResult> {
   const models = [
     route.model,
-    process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    process.env['HF_SECONDARY_LLM'] || 'Qwen/Qwen3-8B',
+    process.env['HF_FALLBACK_LLM'] || 'Qwen/Qwen3-0.6B',
   ];
   const uniqueModels = [...new Set(models)];
 
@@ -126,39 +137,48 @@ export async function chatCompletionWithFallback(
       return await chatCompletion(messages, { ...route, model }, options);
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
-      continue;
     }
   }
-  throw lastError || new Error("All models failed");
+  throw lastError || new Error('All models failed');
 }
 
 export async function structuredCompletion<T>(
   messages: HFChatMessage[],
   route: RouteResult,
-  validator: (raw: unknown) => { valid: boolean; decision?: T | null; result?: T | null; errors: string[] },
+  validator: (raw: unknown) => {
+    valid: boolean;
+    decision?: T | null;
+    result?: T | null;
+    errors: string[];
+  },
 ): Promise<{ result: T; raw: string; completion: HFCompletionResult }> {
-  const systemMsg = messages.find(m => m.role === "system");
+  const systemMsg = messages.find((m) => m.role === 'system');
   if (systemMsg) {
-    systemMsg.content += "\n\nIMPORTANT: You MUST respond with valid JSON only. No markdown, no code blocks, no explanation outside the JSON.";
+    systemMsg.content +=
+      '\n\nIMPORTANT: You MUST respond with valid JSON only. No markdown, no code blocks, no explanation outside the JSON.';
   }
 
   const completion = await chatCompletionWithFallback(messages, route, {
-    responseFormat: { type: "json_object" },
+    responseFormat: { type: 'json_object' },
   });
 
   let parsed: unknown;
   const raw = completion.content;
   try {
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("No JSON object found in response");
+    if (!jsonMatch) throw new Error('No JSON object found in response');
     parsed = JSON.parse(jsonMatch[0]);
   } catch (err) {
-    throw new Error(`Failed to parse structured output: ${err instanceof Error ? err.message : String(err)}\nRaw: ${raw.slice(0, 500)}`);
+    throw new Error(
+      `Failed to parse structured output: ${err instanceof Error ? err.message : String(err)}\nRaw: ${raw.slice(0, 500)}`,
+    );
   }
 
   const validation = validator(parsed);
   if (!validation.valid) {
-    throw new Error(`Schema validation failed: ${validation.errors.join(", ")}\nRaw: ${raw.slice(0, 500)}`);
+    throw new Error(
+      `Schema validation failed: ${validation.errors.join(', ')}\nRaw: ${raw.slice(0, 500)}`,
+    );
   }
 
   const result = (validation.decision ?? validation.result) as T;

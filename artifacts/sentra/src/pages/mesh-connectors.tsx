@@ -1,24 +1,38 @@
-import { useState } from "react";
-import { Bot, Server, RefreshCcw, Shield, AlertTriangle, CheckCircle2, Pin, Clock } from "lucide-react";
-import { agentMesh } from "@/data/agent-mesh";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import type { TrustState } from "@/data/agent-mesh";
+import { cn } from '@szl-holdings/shared-ui/utils';
+import {
+  AlertTriangle,
+  Bot,
+  CheckCircle2,
+  Clock,
+  Pin,
+  RefreshCcw,
+  Server,
+  Shield,
+} from 'lucide-react';
+import { useState } from 'react';
+import type { TrustState } from '@/data/agent-mesh';
+import { agentMesh } from '@/data/agent-mesh';
 
 const TRUST_STYLES: Record<TrustState, string> = {
-  trusted: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
-  unverified: "text-amber-400 border-amber-500/30 bg-amber-500/10",
-  quarantined: "text-red-400 border-red-500/30 bg-red-500/10",
+  trusted: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+  unverified: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+  quarantined: 'text-red-400 border-red-500/30 bg-red-500/10',
 };
 
 const TRUST_DOT: Record<TrustState, string> = {
-  trusted: "bg-emerald-500",
-  unverified: "bg-amber-500",
-  quarantined: "bg-red-500 animate-pulse",
+  trusted: 'bg-emerald-500',
+  unverified: 'bg-amber-500',
+  quarantined: 'bg-red-500 animate-pulse',
 };
 
 function TrustStateBadge({ state }: { state: TrustState }) {
   return (
-    <span className={cn("px-2 py-0.5 rounded border text-[10px] font-mono uppercase font-bold", TRUST_STYLES[state])}>
+    <span
+      className={cn(
+        'px-2 py-0.5 rounded border text-[10px] font-mono uppercase font-bold',
+        TRUST_STYLES[state],
+      )}
+    >
       {state}
     </span>
   );
@@ -26,19 +40,21 @@ function TrustStateBadge({ state }: { state: TrustState }) {
 
 export default function MeshConnectors() {
   const { runtimes, mcpServers } = agentMesh;
-  const [selectedMcp, setSelectedMcp] = useState<string | null>("mcp-unknown-ext");
+  const [selectedMcp, setSelectedMcp] = useState<string | null>('mcp-unknown-ext');
 
-  const selectedServer = mcpServers.find(m => m.id === selectedMcp);
+  const selectedServer = mcpServers.find((m) => m.id === selectedMcp);
 
-  const trustedCount = mcpServers.filter(m => m.trustState === "trusted").length;
-  const unverifiedCount = mcpServers.filter(m => m.trustState === "unverified").length;
-  const quarantinedCount = mcpServers.filter(m => m.trustState === "quarantined").length;
+  const trustedCount = mcpServers.filter((m) => m.trustState === 'trusted').length;
+  const unverifiedCount = mcpServers.filter((m) => m.trustState === 'unverified').length;
+  const quarantinedCount = mcpServers.filter((m) => m.trustState === 'quarantined').length;
 
   return (
     <div className="space-y-8 animate-fade-in">
       <header>
         <h1 className="text-3xl font-display font-bold text-slate-100">Connectors</h1>
-        <p className="text-slate-400 mt-1">Inventory of every detected agent runtime and MCP server with trust classification</p>
+        <p className="text-slate-400 mt-1">
+          Inventory of every detected agent runtime and MCP server with trust classification
+        </p>
       </header>
 
       <div className="grid grid-cols-3 gap-4">
@@ -74,17 +90,21 @@ export default function MeshConnectors() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {runtimes.map(rt => (
+              {runtimes.map((rt) => (
                 <tr key={rt.id} className="hover:bg-slate-800/20 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
-                      <div className={cn("w-1.5 h-1.5 rounded-full", TRUST_DOT[rt.trustState])} />
+                      <div className={cn('w-1.5 h-1.5 rounded-full', TRUST_DOT[rt.trustState])} />
                       <span className="text-sm font-bold text-slate-200">{rt.name}</span>
                     </div>
                   </td>
                   <td className="px-5 py-4 text-xs font-mono text-slate-400">v{rt.version}</td>
-                  <td className="px-5 py-4 text-xs text-slate-500 font-mono">{rt.sourceRegistry}</td>
-                  <td className="px-5 py-4 text-xs text-slate-400">{rt.configFiles.length} file{rt.configFiles.length > 1 ? "s" : ""}</td>
+                  <td className="px-5 py-4 text-xs text-slate-500 font-mono">
+                    {rt.sourceRegistry}
+                  </td>
+                  <td className="px-5 py-4 text-xs text-slate-400">
+                    {rt.configFiles.length} file{rt.configFiles.length > 1 ? 's' : ''}
+                  </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5 text-xs text-slate-400">
                       <Clock className="w-3 h-3" />
@@ -120,22 +140,28 @@ export default function MeshConnectors() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {mcpServers.map(mcp => (
+                {mcpServers.map((mcp) => (
                   <tr
                     key={mcp.id}
                     className={cn(
-                      "cursor-pointer transition-colors",
-                      selectedMcp === mcp.id ? "bg-slate-800/50" : "hover:bg-slate-800/20"
+                      'cursor-pointer transition-colors',
+                      selectedMcp === mcp.id ? 'bg-slate-800/50' : 'hover:bg-slate-800/20',
                     )}
                     onClick={() => setSelectedMcp(selectedMcp === mcp.id ? null : mcp.id)}
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
-                        <div className={cn("w-1.5 h-1.5 rounded-full", TRUST_DOT[mcp.trustState])} />
-                        <span className="text-sm font-bold text-slate-200 font-mono">{mcp.name}</span>
+                        <div
+                          className={cn('w-1.5 h-1.5 rounded-full', TRUST_DOT[mcp.trustState])}
+                        />
+                        <span className="text-sm font-bold text-slate-200 font-mono">
+                          {mcp.name}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-[11px] font-mono text-slate-500">{mcp.packageRef}</td>
+                    <td className="px-5 py-4 text-[11px] font-mono text-slate-500">
+                      {mcp.packageRef}
+                    </td>
                     <td className="px-5 py-4 text-xs font-mono text-slate-400">v{mcp.version}</td>
                     <td className="px-5 py-4">
                       {mcp.pinned ? (
@@ -165,8 +191,12 @@ export default function MeshConnectors() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Selected Server</div>
-                    <div className="text-base font-bold text-slate-100 font-mono">{selectedServer.name}</div>
+                    <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">
+                      Selected Server
+                    </div>
+                    <div className="text-base font-bold text-slate-100 font-mono">
+                      {selectedServer.name}
+                    </div>
                   </div>
                   <TrustStateBadge state={selectedServer.trustState} />
                 </div>
@@ -174,7 +204,9 @@ export default function MeshConnectors() {
                 <div className="space-y-3 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Package</span>
-                    <span className="font-mono text-slate-300 text-[11px]">{selectedServer.packageRef}</span>
+                    <span className="font-mono text-slate-300 text-[11px]">
+                      {selectedServer.packageRef}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Version</span>
@@ -182,41 +214,59 @@ export default function MeshConnectors() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Registry</span>
-                    <span className="font-mono text-slate-300">{selectedServer.sourceRegistry}</span>
+                    <span className="font-mono text-slate-300">
+                      {selectedServer.sourceRegistry}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Last Seen</span>
-                    <span className="font-mono text-slate-300">{new Date(selectedServer.lastSeen).toLocaleTimeString()}</span>
+                    <span className="font-mono text-slate-300">
+                      {new Date(selectedServer.lastSeen).toLocaleTimeString()}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Pinned</span>
-                    <span className={selectedServer.pinned ? "text-emerald-400" : "text-amber-400"}>
-                      {selectedServer.pinned ? "Yes" : "No"}
+                    <span className={selectedServer.pinned ? 'text-emerald-400' : 'text-amber-400'}>
+                      {selectedServer.pinned ? 'Yes' : 'No'}
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-mono uppercase mb-2">Allowed Egress</div>
+                  <div className="text-[10px] text-slate-500 font-mono uppercase mb-2">
+                    Allowed Egress
+                  </div>
                   {selectedServer.allowedEgressDomains.length > 0 ? (
-                    selectedServer.allowedEgressDomains.map(d => (
-                      <div key={d} className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
+                    selectedServer.allowedEgressDomains.map((d) => (
+                      <div
+                        key={d}
+                        className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5"
+                      >
                         <CheckCircle2 className="w-3 h-3" />
                         {d}
                       </div>
                     ))
                   ) : (
-                    <div className="text-[11px] font-mono text-emerald-400">None (fully contained)</div>
+                    <div className="text-[11px] font-mono text-emerald-400">
+                      None (fully contained)
+                    </div>
                   )}
                 </div>
 
-                {selectedServer.detectedEgressDomains.some(d => !selectedServer.allowedEgressDomains.includes(d)) && (
+                {selectedServer.detectedEgressDomains.some(
+                  (d) => !selectedServer.allowedEgressDomains.includes(d),
+                ) && (
                   <div className="pt-3 border-t border-red-500/20">
-                    <div className="text-[10px] text-red-400 font-mono uppercase mb-2">Unexpected Egress</div>
+                    <div className="text-[10px] text-red-400 font-mono uppercase mb-2">
+                      Unexpected Egress
+                    </div>
                     {selectedServer.detectedEgressDomains
-                      .filter(d => !selectedServer.allowedEgressDomains.includes(d))
-                      .map(d => (
-                        <div key={d} className="text-[11px] font-mono text-red-400 flex items-center gap-1.5">
+                      .filter((d) => !selectedServer.allowedEgressDomains.includes(d))
+                      .map((d) => (
+                        <div
+                          key={d}
+                          className="text-[11px] font-mono text-red-400 flex items-center gap-1.5"
+                        >
                           <AlertTriangle className="w-3 h-3" />
                           {d}
                         </div>
@@ -225,15 +275,17 @@ export default function MeshConnectors() {
                 )}
 
                 <div className="pt-3 border-t border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-mono uppercase mb-2">Active On Runtimes</div>
-                  {selectedServer.runtimeIds.map(id => (
+                  <div className="text-[10px] text-slate-500 font-mono uppercase mb-2">
+                    Active On Runtimes
+                  </div>
+                  {selectedServer.runtimeIds.map((id) => (
                     <div key={id} className="text-[11px] font-mono text-slate-400">
-                      {runtimes.find(r => r.id === id)?.name ?? id}
+                      {runtimes.find((r) => r.id === id)?.name ?? id}
                     </div>
                   ))}
                 </div>
 
-                {selectedServer.trustState === "quarantined" && (
+                {selectedServer.trustState === 'quarantined' && (
                   <div className="pt-3 border-t border-red-500/20">
                     <div className="flex gap-2">
                       <button className="flex-1 px-3 py-2 rounded bg-red-600/20 border border-red-500/30 text-xs text-red-400 font-bold hover:bg-red-600/30 transition-colors">

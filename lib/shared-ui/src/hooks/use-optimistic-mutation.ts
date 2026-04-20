@@ -1,14 +1,28 @@
-import { useMutation, useQueryClient, type QueryKey, type UseMutationOptions } from "@tanstack/react-query";
+import {
+  type QueryKey,
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 
-export interface OptimisticMutationOptions<TData, TError, TVariables, TContext> extends Omit<UseMutationOptions<TData, TError, TVariables, TContext>, "onMutate" | "onError" | "onSettled"> {
+export interface OptimisticMutationOptions<TData, TError, TVariables, TContext>
+  extends Omit<
+    UseMutationOptions<TData, TError, TVariables, TContext>,
+    'onMutate' | 'onError' | 'onSettled'
+  > {
   queryKey: QueryKey;
   updater: (oldData: unknown, variables: TVariables) => unknown;
   onError?: (error: TError, variables: TVariables, context: TContext | undefined) => void;
-  onSettled?: (data: TData | undefined, error: TError | null, variables: TVariables, context: TContext | undefined) => void;
+  onSettled?: (
+    data: TData | undefined,
+    error: TError | null,
+    variables: TVariables,
+    context: TContext | undefined,
+  ) => void;
 }
 
 export function useOptimisticMutation<TData = unknown, TError = Error, TVariables = void>(
-  options: OptimisticMutationOptions<TData, TError, TVariables, { previousData: unknown }>
+  options: OptimisticMutationOptions<TData, TError, TVariables, { previousData: unknown }>,
 ) {
   const qc = useQueryClient();
   const { queryKey, updater, onError, onSettled, ...rest } = options;
@@ -36,21 +50,21 @@ export function useOptimisticMutation<TData = unknown, TError = Error, TVariable
 
 export function toggleBoolean<T extends Record<string, unknown>>(field: keyof T) {
   return (old: unknown, _variables: unknown): unknown => {
-    if (!old || typeof old !== "object") return old;
+    if (!old || typeof old !== 'object') return old;
     return { ...(old as T), [field]: !(old as T)[field] };
   };
 }
 
 export function updateStatus<T extends Record<string, unknown>>(field: keyof T) {
   return (old: unknown, variables: { [K in typeof field]: T[typeof field] }): unknown => {
-    if (!old || typeof old !== "object") return old;
+    if (!old || typeof old !== 'object') return old;
     return { ...(old as T), [field]: variables[field] };
   };
 }
 
 export function updateListItem<T extends { id: number | string }>(
   idField: keyof T,
-  patchFn: (item: T, variables: unknown) => T
+  patchFn: (item: T, variables: unknown) => T,
 ) {
   return (old: unknown, variables: unknown): unknown => {
     if (!old) return old;
@@ -58,7 +72,9 @@ export function updateListItem<T extends { id: number | string }>(
     if (!Array.isArray(list)) return old;
     const vars = variables as Record<string, unknown>;
     const updated = list.map((item: T) =>
-      String(item[idField]) === String(vars.id ?? vars[idField as string]) ? patchFn(item, variables) : item
+      String(item[idField]) === String(vars.id ?? vars[idField as string])
+        ? patchFn(item, variables)
+        : item,
     );
     return Array.isArray(old) ? updated : { ...(old as object), data: updated };
   };

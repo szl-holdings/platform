@@ -1,5 +1,17 @@
-import type { GuardianRule, DecisionRequest, DecisionResult, RuleCondition, EvaluateResult } from "./schema.js";
-import { TIER_RISK_LEVEL, TIER_CONTROLS, type PolicyTier, PolicyTierSchema, type TierControlSet } from "./tiers.js";
+import type {
+  DecisionRequest,
+  DecisionResult,
+  EvaluateResult,
+  GuardianRule,
+  RuleCondition,
+} from './schema.js';
+import {
+  type PolicyTier,
+  PolicyTierSchema,
+  TIER_CONTROLS,
+  TIER_RISK_LEVEL,
+  type TierControlSet,
+} from './tiers.js';
 
 /**
  * Per-call override of the tier metadata the engine uses for a single
@@ -25,25 +37,45 @@ function resolveRiskLevel(tier: PolicyTier, override?: TierOverride): number {
 function evaluateCondition(condition: RuleCondition, context: Record<string, unknown>): boolean {
   const actual = context[condition.field];
   switch (condition.operator) {
-    case "eq":
+    case 'eq':
       return actual === condition.value;
-    case "neq":
+    case 'neq':
       return actual !== condition.value;
-    case "in":
+    case 'in':
       return Array.isArray(condition.value) && condition.value.includes(actual);
-    case "nin":
+    case 'nin':
       return Array.isArray(condition.value) && !condition.value.includes(actual);
-    case "gt":
-      return typeof actual === "number" && typeof condition.value === "number" && actual > condition.value;
-    case "lt":
-      return typeof actual === "number" && typeof condition.value === "number" && actual < condition.value;
-    case "gte":
-      return typeof actual === "number" && typeof condition.value === "number" && actual >= condition.value;
-    case "lte":
-      return typeof actual === "number" && typeof condition.value === "number" && actual <= condition.value;
-    case "matches":
-      return typeof actual === "string" && typeof condition.value === "string" && new RegExp(condition.value).test(actual);
-    case "exists":
+    case 'gt':
+      return (
+        typeof actual === 'number' &&
+        typeof condition.value === 'number' &&
+        actual > condition.value
+      );
+    case 'lt':
+      return (
+        typeof actual === 'number' &&
+        typeof condition.value === 'number' &&
+        actual < condition.value
+      );
+    case 'gte':
+      return (
+        typeof actual === 'number' &&
+        typeof condition.value === 'number' &&
+        actual >= condition.value
+      );
+    case 'lte':
+      return (
+        typeof actual === 'number' &&
+        typeof condition.value === 'number' &&
+        actual <= condition.value
+      );
+    case 'matches':
+      return (
+        typeof actual === 'string' &&
+        typeof condition.value === 'string' &&
+        new RegExp(condition.value).test(actual)
+      );
+    case 'exists':
       return actual !== undefined && actual !== null;
     default:
       return false;
@@ -98,8 +130,8 @@ export class GuardianDecisionEngine {
     if (!request.tier) {
       return {
         requestId: request.requestId,
-        outcome: "deny",
-        reason: "Deny-by-default: no policy tier set on request",
+        outcome: 'deny',
+        reason: 'Deny-by-default: no policy tier set on request',
         requiredApprovers: [],
         decidedAt,
       };
@@ -108,12 +140,12 @@ export class GuardianDecisionEngine {
     const tierRisk = resolveRiskLevel(request.tier as PolicyTier, override);
     if (tierRisk >= 4) {
       const controls = resolveControls(request.tier as PolicyTier, override);
-      if (controls.approvalGate === "dual") {
+      if (controls.approvalGate === 'dual') {
         return {
           requestId: request.requestId,
-          outcome: "require-dual-approval" as const,
+          outcome: 'require-dual-approval' as const,
           reason: `Policy tier '${request.tier}' requires dual human approval (operator + executive)`,
-          requiredApprovers: ["operator", "executive"],
+          requiredApprovers: ['operator', 'executive'],
           decidedAt,
         };
       }
@@ -121,23 +153,24 @@ export class GuardianDecisionEngine {
 
     for (const rule of this.rules) {
       if (ruleMatchesRequest(rule, request)) {
-        const isDualRule = rule.action === "require-dual-approval" || rule.action === "escalate";
-        const outcome = rule.action === "log" || rule.action === "redact"
-          ? "allow" as const
-          : rule.action === "block" || rule.action === "deny"
-            ? "deny" as const
-            : isDualRule
-              ? "require-dual-approval" as const
-              : rule.action as "allow" | "deny" | "require-approval";
+        const isDualRule = rule.action === 'require-dual-approval' || rule.action === 'escalate';
+        const outcome =
+          rule.action === 'log' || rule.action === 'redact'
+            ? ('allow' as const)
+            : rule.action === 'block' || rule.action === 'deny'
+              ? ('deny' as const)
+              : isDualRule
+                ? ('require-dual-approval' as const)
+                : (rule.action as 'allow' | 'deny' | 'require-approval');
         return {
           requestId: request.requestId,
           outcome,
           matchedRuleId: rule.id,
           reason: rule.description ?? `Matched rule: ${rule.name}`,
           requiredApprovers: isDualRule
-            ? ["operator", "executive"]
-            : rule.action === "require-approval"
-              ? ["approver"]
+            ? ['operator', 'executive']
+            : rule.action === 'require-approval'
+              ? ['approver']
               : [],
           decidedAt,
         };
@@ -147,12 +180,12 @@ export class GuardianDecisionEngine {
     const tierParsed = PolicyTierSchema.safeParse(request.tier);
     if (tierParsed.success) {
       const tierControls = resolveControls(tierParsed.data, override);
-      if (tierControls.approvalGate === "single") {
+      if (tierControls.approvalGate === 'single') {
         return {
           requestId: request.requestId,
-          outcome: "require-approval",
+          outcome: 'require-approval',
           reason: `Tier '${request.tier}' requires operator approval for unmatched actions`,
-          requiredApprovers: ["operator"],
+          requiredApprovers: ['operator'],
           decidedAt,
         };
       }
@@ -160,8 +193,8 @@ export class GuardianDecisionEngine {
 
     return {
       requestId: request.requestId,
-      outcome: "deny",
-      reason: "Deny-by-default: no matching allow rule found",
+      outcome: 'deny',
+      reason: 'Deny-by-default: no matching allow rule found',
       requiredApprovers: [],
       decidedAt,
     };
@@ -176,12 +209,12 @@ export class GuardianDecisionEngine {
     if (!request.tier) {
       return {
         requestId: request.requestId,
-        outcome: "block",
-        reason: "Block-by-default: no policy tier set on request",
+        outcome: 'block',
+        reason: 'Block-by-default: no policy tier set on request',
         requiredApprovers: [],
         rollbackRequired: false,
         redactApplied: false,
-        controlViolations: ["missing-tier"],
+        controlViolations: ['missing-tier'],
         decidedAt,
       };
     }
@@ -190,12 +223,12 @@ export class GuardianDecisionEngine {
     if (!tierParsed.success) {
       return {
         requestId: request.requestId,
-        outcome: "block",
+        outcome: 'block',
         reason: `Block: unknown tier '${request.tier}'`,
         requiredApprovers: [],
         rollbackRequired: false,
         redactApplied: false,
-        controlViolations: ["unknown-tier"],
+        controlViolations: ['unknown-tier'],
         decidedAt,
       };
     }
@@ -207,11 +240,11 @@ export class GuardianDecisionEngine {
     redactApplied = controls.redactPII;
 
     if (!controls.allowMemoryWrite && request.memoryScope) {
-      controlViolations.push("memory-write-not-allowed");
+      controlViolations.push('memory-write-not-allowed');
     }
 
     if (!controls.allowExternalComms && request.isExternalComms) {
-      controlViolations.push("external-comms-blocked");
+      controlViolations.push('external-comms-blocked');
     }
 
     if (controls.allowedEnvironments.length > 0 && request.environment) {
@@ -222,7 +255,9 @@ export class GuardianDecisionEngine {
 
     if (controls.maxActionsPerSession !== null && request.actionCount !== undefined) {
       if (request.actionCount >= controls.maxActionsPerSession) {
-        controlViolations.push(`action-limit-exceeded:${request.actionCount}/${controls.maxActionsPerSession}`);
+        controlViolations.push(
+          `action-limit-exceeded:${request.actionCount}/${controls.maxActionsPerSession}`,
+        );
       }
     }
 
@@ -239,16 +274,19 @@ export class GuardianDecisionEngine {
     }
 
     const ruleViolations = controlViolations.filter(
-      v => v === "external-comms-blocked" || v.startsWith("environment-not-allowed") ||
-           v.startsWith("action-limit-exceeded") || v.startsWith("model-not-allowlisted") ||
-           v.startsWith("tool-not-allowlisted")
+      (v) =>
+        v === 'external-comms-blocked' ||
+        v.startsWith('environment-not-allowed') ||
+        v.startsWith('action-limit-exceeded') ||
+        v.startsWith('model-not-allowlisted') ||
+        v.startsWith('tool-not-allowlisted'),
     );
 
     if (ruleViolations.length > 0) {
       return {
         requestId: request.requestId,
-        outcome: "block",
-        reason: `Blocked by tier control violations: ${ruleViolations.join(", ")}`,
+        outcome: 'block',
+        reason: `Blocked by tier control violations: ${ruleViolations.join(', ')}`,
         requiredApprovers: [],
         rollbackRequired,
         redactApplied,
@@ -257,11 +295,11 @@ export class GuardianDecisionEngine {
       };
     }
 
-    if (controlViolations.includes("memory-write-not-allowed")) {
+    if (controlViolations.includes('memory-write-not-allowed')) {
       return {
         requestId: request.requestId,
-        outcome: "block",
-        reason: "Memory write not permitted at this autonomy tier",
+        outcome: 'block',
+        reason: 'Memory write not permitted at this autonomy tier',
         requiredApprovers: [],
         rollbackRequired,
         redactApplied,
@@ -270,12 +308,12 @@ export class GuardianDecisionEngine {
       };
     }
 
-    if (controls.approvalGate === "dual") {
+    if (controls.approvalGate === 'dual') {
       return {
         requestId: request.requestId,
-        outcome: "require-dual-approval",
+        outcome: 'require-dual-approval',
         reason: `Tier '${tier}' requires dual approval (operator + executive)`,
-        requiredApprovers: ["operator", "executive"],
+        requiredApprovers: ['operator', 'executive'],
         rollbackRequired,
         redactApplied,
         controlViolations,
@@ -285,11 +323,15 @@ export class GuardianDecisionEngine {
 
     for (const rule of this.rules) {
       if (ruleMatchesRequest(rule, request)) {
-        if (rule.allowedModels !== undefined && request.model && !rule.allowedModels.includes(request.model)) {
+        if (
+          rule.allowedModels !== undefined &&
+          request.model &&
+          !rule.allowedModels.includes(request.model)
+        ) {
           controlViolations.push(`rule-model-not-allowlisted:${request.model}`);
           return {
             requestId: request.requestId,
-            outcome: "block",
+            outcome: 'block',
             reason: `Rule '${rule.id}' does not allow model '${request.model}'`,
             requiredApprovers: [],
             rollbackRequired,
@@ -300,11 +342,15 @@ export class GuardianDecisionEngine {
           };
         }
 
-        if (rule.allowedTools !== undefined && request.toolId && !rule.allowedTools.includes(request.toolId)) {
+        if (
+          rule.allowedTools !== undefined &&
+          request.toolId &&
+          !rule.allowedTools.includes(request.toolId)
+        ) {
           controlViolations.push(`rule-tool-not-allowlisted:${request.toolId}`);
           return {
             requestId: request.requestId,
-            outcome: "block",
+            outcome: 'block',
             reason: `Rule '${rule.id}' does not allow tool '${request.toolId}'`,
             requiredApprovers: [],
             rollbackRequired,
@@ -315,13 +361,13 @@ export class GuardianDecisionEngine {
           };
         }
 
-        if (rule.action === "allow" || rule.action === "log") {
-          if (controls.approvalGate === "single") {
+        if (rule.action === 'allow' || rule.action === 'log') {
+          if (controls.approvalGate === 'single') {
             return {
               requestId: request.requestId,
-              outcome: "require-approval",
+              outcome: 'require-approval',
               reason: `Tier '${tier}' requires single operator approval`,
-              requiredApprovers: ["operator"],
+              requiredApprovers: ['operator'],
               rollbackRequired,
               redactApplied,
               controlViolations,
@@ -331,7 +377,7 @@ export class GuardianDecisionEngine {
           }
           return {
             requestId: request.requestId,
-            outcome: "allow",
+            outcome: 'allow',
             matchedRuleId: rule.id,
             reason: rule.description ?? `Matched rule: ${rule.name}`,
             requiredApprovers: [],
@@ -342,14 +388,14 @@ export class GuardianDecisionEngine {
           };
         }
 
-        if (rule.action === "require-approval") {
-          if (controls.approvalGate === "single") {
+        if (rule.action === 'require-approval') {
+          if (controls.approvalGate === 'single') {
             return {
               requestId: request.requestId,
-              outcome: "require-approval",
+              outcome: 'require-approval',
               matchedRuleId: rule.id,
               reason: rule.description ?? `Rule requires approval: ${rule.name}`,
-              requiredApprovers: ["operator"],
+              requiredApprovers: ['operator'],
               rollbackRequired,
               redactApplied,
               controlViolations,
@@ -358,10 +404,10 @@ export class GuardianDecisionEngine {
           }
           return {
             requestId: request.requestId,
-            outcome: "require-approval",
+            outcome: 'require-approval',
             matchedRuleId: rule.id,
             reason: rule.description ?? `Rule requires approval: ${rule.name}`,
-            requiredApprovers: ["approver"],
+            requiredApprovers: ['approver'],
             rollbackRequired,
             redactApplied,
             controlViolations,
@@ -369,13 +415,13 @@ export class GuardianDecisionEngine {
           };
         }
 
-        if (rule.action === "require-dual-approval" || rule.action === "escalate") {
+        if (rule.action === 'require-dual-approval' || rule.action === 'escalate') {
           return {
             requestId: request.requestId,
-            outcome: "require-dual-approval",
+            outcome: 'require-dual-approval',
             matchedRuleId: rule.id,
             reason: rule.description ?? `Rule requires dual approval: ${rule.name}`,
-            requiredApprovers: ["operator", "executive"],
+            requiredApprovers: ['operator', 'executive'],
             rollbackRequired,
             redactApplied,
             controlViolations,
@@ -383,15 +429,15 @@ export class GuardianDecisionEngine {
           };
         }
 
-        if (rule.action === "deny" || rule.action === "block" || rule.action === "redact") {
+        if (rule.action === 'deny' || rule.action === 'block' || rule.action === 'redact') {
           return {
             requestId: request.requestId,
-            outcome: "block",
+            outcome: 'block',
             matchedRuleId: rule.id,
             reason: rule.description ?? `Rule blocks action: ${rule.name}`,
             requiredApprovers: [],
             rollbackRequired,
-            redactApplied: rule.action === "redact" ? true : redactApplied,
+            redactApplied: rule.action === 'redact' ? true : redactApplied,
             controlViolations,
             decidedAt,
           };
@@ -399,12 +445,12 @@ export class GuardianDecisionEngine {
       }
     }
 
-    if (controls.approvalGate === "single") {
+    if (controls.approvalGate === 'single') {
       return {
         requestId: request.requestId,
-        outcome: "require-approval",
+        outcome: 'require-approval',
         reason: `Tier '${tier}' requires operator approval for unmatched actions`,
-        requiredApprovers: ["operator"],
+        requiredApprovers: ['operator'],
         rollbackRequired,
         redactApplied,
         controlViolations,
@@ -414,8 +460,8 @@ export class GuardianDecisionEngine {
 
     return {
       requestId: request.requestId,
-      outcome: "block",
-      reason: "Block-by-default: no matching allow rule found",
+      outcome: 'block',
+      reason: 'Block-by-default: no matching allow rule found',
       requiredApprovers: [],
       rollbackRequired,
       redactApplied,
@@ -433,9 +479,9 @@ export function addDefaultAllowRule(tier: PolicyTier): void {
     name: `Default allow for ${tier}`,
     tier,
     conditions: [],
-    action: "allow",
+    action: 'allow',
     priority: 999,
     enabled: true,
-    tags: ["default"],
+    tags: ['default'],
   });
 }

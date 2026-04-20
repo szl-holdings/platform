@@ -1,9 +1,9 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface SPFxWebPartManifest {
   id: string;
   alias: string;
-  componentType: "WebPart";
+  componentType: 'WebPart';
   version: string;
   manifestVersion: number;
   requiresCustomScript: boolean;
@@ -49,105 +49,117 @@ export interface SPFxDeployedPackage {
 
 const MOCK_MANIFESTS: SPFxWebPartManifest[] = [
   {
-    id: "szl-lyte-signal-summary",
-    alias: "SzlLyteSignalSummary",
-    componentType: "WebPart",
-    version: "1.0.0",
+    id: 'szl-lyte-signal-summary',
+    alias: 'SzlLyteSignalSummary',
+    componentType: 'WebPart',
+    version: '1.0.0',
     manifestVersion: 2,
     requiresCustomScript: false,
-    supportedHosts: ["SharePointWebPart", "TeamsTab", "TeamsPersonalApp"],
+    supportedHosts: ['SharePointWebPart', 'TeamsTab', 'TeamsPersonalApp'],
     preconfiguredEntries: [
       {
-        groupId: "5c03119e-3074-46fd-976b-c60198311f70",
-        group: { default: "SZL Platform" },
-        title: { default: "Lyte Signal Summary" },
-        description: { default: "Displays the Lyte Command Center signal summary — critical alerts, open incidents, and readiness score — embedded directly in your SharePoint site." },
-        officeFabricIconFontName: "AlertSolid",
+        groupId: '5c03119e-3074-46fd-976b-c60198311f70',
+        group: { default: 'SZL Platform' },
+        title: { default: 'Lyte Signal Summary' },
+        description: {
+          default:
+            'Displays the Lyte Command Center signal summary — critical alerts, open incidents, and readiness score — embedded directly in your SharePoint site.',
+        },
+        officeFabricIconFontName: 'AlertSolid',
         properties: {
-          apiBaseUrl: "",
-          orgId: "",
+          apiBaseUrl: '',
+          orgId: '',
           refreshIntervalSeconds: 60,
           showCriticalOnly: false,
           maxSignals: 10,
-          theme: "dark",
+          theme: 'dark',
         },
       },
     ],
   },
   {
-    id: "szl-vessels-fleet-status",
-    alias: "SzlVesselsFleetStatus",
-    componentType: "WebPart",
-    version: "1.0.0",
+    id: 'szl-vessels-fleet-status',
+    alias: 'SzlVesselsFleetStatus',
+    componentType: 'WebPart',
+    version: '1.0.0',
     manifestVersion: 2,
     requiresCustomScript: false,
-    supportedHosts: ["SharePointWebPart", "TeamsTab"],
+    supportedHosts: ['SharePointWebPart', 'TeamsTab'],
     preconfiguredEntries: [
       {
-        groupId: "5c03119e-3074-46fd-976b-c60198311f70",
-        group: { default: "SZL Platform" },
-        title: { default: "Vessels Fleet Status" },
-        description: { default: "Displays real-time fleet status, active vessel positions, port calls, and compliance indicators from the Vessels Maritime Intelligence platform." },
-        officeFabricIconFontName: "Ship",
+        groupId: '5c03119e-3074-46fd-976b-c60198311f70',
+        group: { default: 'SZL Platform' },
+        title: { default: 'Vessels Fleet Status' },
+        description: {
+          default:
+            'Displays real-time fleet status, active vessel positions, port calls, and compliance indicators from the Vessels Maritime Intelligence platform.',
+        },
+        officeFabricIconFontName: 'Ship',
         properties: {
-          apiBaseUrl: "",
-          orgId: "",
+          apiBaseUrl: '',
+          orgId: '',
           refreshIntervalSeconds: 120,
           showMap: true,
-          vesselFilter: "all",
+          vesselFilter: 'all',
           maxVessels: 20,
         },
       },
     ],
   },
   {
-    id: "szl-terra-market-overview",
-    alias: "SzlTerraMarketOverview",
-    componentType: "WebPart",
-    version: "1.0.0",
+    id: 'szl-terra-market-overview',
+    alias: 'SzlTerraMarketOverview',
+    componentType: 'WebPart',
+    version: '1.0.0',
     manifestVersion: 2,
     requiresCustomScript: false,
-    supportedHosts: ["SharePointWebPart", "TeamsTab"],
+    supportedHosts: ['SharePointWebPart', 'TeamsTab'],
     preconfiguredEntries: [
       {
-        groupId: "5c03119e-3074-46fd-976b-c60198311f70",
-        group: { default: "SZL Platform" },
-        title: { default: "Terra Market Overview" },
-        description: { default: "Embeds Terra Real Estate Intelligence market data, property pipeline signals, and investment intelligence directly in SharePoint." },
-        officeFabricIconFontName: "CityNext",
+        groupId: '5c03119e-3074-46fd-976b-c60198311f70',
+        group: { default: 'SZL Platform' },
+        title: { default: 'Terra Market Overview' },
+        description: {
+          default:
+            'Embeds Terra Real Estate Intelligence market data, property pipeline signals, and investment intelligence directly in SharePoint.',
+        },
+        officeFabricIconFontName: 'CityNext',
         properties: {
-          apiBaseUrl: "",
-          orgId: "",
+          apiBaseUrl: '',
+          orgId: '',
           refreshIntervalSeconds: 300,
-          marketFilter: "all",
+          marketFilter: 'all',
           showHeatmap: false,
-          currency: "USD",
+          currency: 'USD',
         },
       },
     ],
   },
   {
-    id: "szl-alloy-workflow-status",
-    alias: "SzlAlloyWorkflowStatus",
-    componentType: "WebPart",
-    version: "1.0.0",
+    id: 'szl-alloy-workflow-status',
+    alias: 'SzlAlloyWorkflowStatus',
+    componentType: 'WebPart',
+    version: '1.0.0',
     manifestVersion: 2,
     requiresCustomScript: false,
-    supportedHosts: ["SharePointWebPart", "TeamsTab", "TeamsPersonalApp"],
+    supportedHosts: ['SharePointWebPart', 'TeamsTab', 'TeamsPersonalApp'],
     preconfiguredEntries: [
       {
-        groupId: "5c03119e-3074-46fd-976b-c60198311f70",
-        group: { default: "SZL Platform" },
-        title: { default: "Alloy Workflow Status" },
-        description: { default: "Shows active Alloy workflow runs, pending approvals, recent artifacts, and execution health — embedded in SharePoint as a native web part." },
-        officeFabricIconFontName: "WorkFlow",
+        groupId: '5c03119e-3074-46fd-976b-c60198311f70',
+        group: { default: 'SZL Platform' },
+        title: { default: 'Alloy Workflow Status' },
+        description: {
+          default:
+            'Shows active Alloy workflow runs, pending approvals, recent artifacts, and execution health — embedded in SharePoint as a native web part.',
+        },
+        officeFabricIconFontName: 'WorkFlow',
         properties: {
-          apiBaseUrl: "",
-          orgId: "",
+          apiBaseUrl: '',
+          orgId: '',
           refreshIntervalSeconds: 30,
           showPendingApprovals: true,
           maxWorkflows: 5,
-          statusFilter: "all",
+          statusFilter: 'all',
         },
       },
     ],
@@ -156,43 +168,43 @@ const MOCK_MANIFESTS: SPFxWebPartManifest[] = [
 
 const MOCK_DEPLOYMENT_STATUS: SPFxDeploymentStatus = {
   siteAppCatalogUrl: null,
-  tenantAppCatalogUrl: "https://szlholdings.sharepoint.com/sites/appcatalog",
+  tenantAppCatalogUrl: 'https://szlholdings.sharepoint.com/sites/appcatalog',
   deployedPackages: [
     {
-      id: "szl-lyte-signal-summary",
-      title: "SZL — Lyte Signal Summary",
-      version: "1.0.0",
+      id: 'szl-lyte-signal-summary',
+      title: 'SZL — Lyte Signal Summary',
+      version: '1.0.0',
       isDeploy: true,
       isEnabled: true,
       skipFeatureDeployment: true,
-      installedVersion: "1.0.0",
+      installedVersion: '1.0.0',
     },
     {
-      id: "szl-vessels-fleet-status",
-      title: "SZL — Vessels Fleet Status",
-      version: "1.0.0",
+      id: 'szl-vessels-fleet-status',
+      title: 'SZL — Vessels Fleet Status',
+      version: '1.0.0',
       isDeploy: true,
       isEnabled: true,
       skipFeatureDeployment: true,
-      installedVersion: "1.0.0",
+      installedVersion: '1.0.0',
     },
     {
-      id: "szl-terra-market-overview",
-      title: "SZL — Terra Market Overview",
-      version: "1.0.0",
+      id: 'szl-terra-market-overview',
+      title: 'SZL — Terra Market Overview',
+      version: '1.0.0',
       isDeploy: false,
       isEnabled: false,
       skipFeatureDeployment: false,
-      installedVersion: "",
+      installedVersion: '',
     },
     {
-      id: "szl-alloy-workflow-status",
-      title: "SZL — Alloy Workflow Status",
-      version: "1.0.0",
+      id: 'szl-alloy-workflow-status',
+      title: 'SZL — Alloy Workflow Status',
+      version: '1.0.0',
       isDeploy: true,
       isEnabled: true,
       skipFeatureDeployment: true,
-      installedVersion: "1.0.0",
+      installedVersion: '1.0.0',
     },
   ],
   totalSites: 12,
@@ -200,31 +212,32 @@ const MOCK_DEPLOYMENT_STATUS: SPFxDeploymentStatus = {
 };
 
 export class SharePointSPFxAdapter extends ServiceAdapter {
-  readonly name = "sharepoint_spfx";
-  readonly description = "Microsoft SharePoint SPFx web parts — Lyte, Vessels, Terra, and Alloy dashboards embedded in SharePoint sites via Azure AD auth";
+  readonly name = 'sharepoint_spfx';
+  readonly description =
+    'Microsoft SharePoint SPFx web parts — Lyte, Vessels, Terra, and Alloy dashboards embedded in SharePoint sites via Azure AD auth';
   readonly requiredEnvVars = [
-    "SHAREPOINT_TENANT_ID",
-    "SHAREPOINT_CLIENT_ID",
-    "SHAREPOINT_CLIENT_SECRET",
-    "SHAREPOINT_TENANT_URL",
+    'SHAREPOINT_TENANT_ID',
+    'SHAREPOINT_CLIENT_ID',
+    'SHAREPOINT_CLIENT_SECRET',
+    'SHAREPOINT_TENANT_URL',
   ];
 
   private tokenCache: { token: string; expiresAt: number } | null = null;
 
   private get tenantId(): string | undefined {
-    return process.env["SHAREPOINT_TENANT_ID"];
+    return process.env['SHAREPOINT_TENANT_ID'];
   }
 
   private get clientId(): string | undefined {
-    return process.env["SHAREPOINT_CLIENT_ID"];
+    return process.env['SHAREPOINT_CLIENT_ID'];
   }
 
   private get clientSecret(): string | undefined {
-    return process.env["SHAREPOINT_CLIENT_SECRET"];
+    return process.env['SHAREPOINT_CLIENT_SECRET'];
   }
 
   private get tenantUrl(): string | undefined {
-    return process.env["SHAREPOINT_TENANT_URL"];
+    return process.env['SHAREPOINT_TENANT_URL'];
   }
 
   private async acquireToken(scope: string): Promise<string> {
@@ -234,14 +247,14 @@ export class SharePointSPFxAdapter extends ServiceAdapter {
     }
     const tokenEndpoint = `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`;
     const body = new URLSearchParams({
-      grant_type: "client_credentials",
+      grant_type: 'client_credentials',
       client_id: this.clientId!,
       client_secret: this.clientSecret!,
       scope,
     });
     const response = await fetch(tokenEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
     });
     if (!response.ok) {
@@ -257,11 +270,11 @@ export class SharePointSPFxAdapter extends ServiceAdapter {
   }
 
   private async graphRequest<T>(path: string): Promise<T> {
-    const token = await this.acquireToken("https://graph.microsoft.com/.default");
+    const token = await this.acquireToken('https://graph.microsoft.com/.default');
     const response = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
       headers: {
         Authorization: `Bearer ${token}`,
-        Accept: "application/json",
+        Accept: 'application/json',
       },
     });
     if (!response.ok) {
@@ -272,7 +285,7 @@ export class SharePointSPFxAdapter extends ServiceAdapter {
   }
 
   protected async performHealthCheck(): Promise<void> {
-    await this.graphRequest("/organization?$select=id,displayName&$top=1");
+    await this.graphRequest('/organization?$select=id,displayName&$top=1');
   }
 
   getWebPartManifests(): SPFxWebPartManifest[] {
@@ -298,32 +311,39 @@ export class SharePointSPFxAdapter extends ServiceAdapter {
     if (!this.isLive) {
       return [
         {
-          id: "mock-site-001",
-          displayName: "SZL Holdings Intranet",
-          webUrl: "https://szlholdings.sharepoint.com/sites/intranet",
-          description: "Main company intranet with Lyte signal web part",
-          template: "SITEPAGEPUBLISHING#0",
-          lastModifiedDateTime: "2026-03-29T10:00:00Z",
+          id: 'mock-site-001',
+          displayName: 'SZL Holdings Intranet',
+          webUrl: 'https://szlholdings.sharepoint.com/sites/intranet',
+          description: 'Main company intranet with Lyte signal web part',
+          template: 'SITEPAGEPUBLISHING#0',
+          lastModifiedDateTime: '2026-03-29T10:00:00Z',
         },
         {
-          id: "mock-site-002",
-          displayName: "Operations Hub",
-          webUrl: "https://szlholdings.sharepoint.com/sites/ops",
-          description: "Operations hub with Vessels and Alloy web parts",
-          template: "STS#3",
-          lastModifiedDateTime: "2026-03-28T14:30:00Z",
+          id: 'mock-site-002',
+          displayName: 'Operations Hub',
+          webUrl: 'https://szlholdings.sharepoint.com/sites/ops',
+          description: 'Operations hub with Vessels and Alloy web parts',
+          template: 'STS#3',
+          lastModifiedDateTime: '2026-03-28T14:30:00Z',
         },
       ];
     }
-    const data = await this.graphRequest<{ value: Array<{ id: string; displayName: string; webUrl: string; description: string; root?: unknown; lastModifiedDateTime: string }> }>(
-      "/sites?$select=id,displayName,webUrl,description,lastModifiedDateTime&$top=50",
-    );
+    const data = await this.graphRequest<{
+      value: Array<{
+        id: string;
+        displayName: string;
+        webUrl: string;
+        description: string;
+        root?: unknown;
+        lastModifiedDateTime: string;
+      }>;
+    }>('/sites?$select=id,displayName,webUrl,description,lastModifiedDateTime&$top=50');
     return data.value.map((s) => ({
       id: s.id,
       displayName: s.displayName,
       webUrl: s.webUrl,
-      description: s.description ?? "",
-      template: "STS#3",
+      description: s.description ?? '',
+      template: 'STS#3',
       lastModifiedDateTime: s.lastModifiedDateTime,
     }));
   }
@@ -337,11 +357,11 @@ export class SharePointSPFxAdapter extends ServiceAdapter {
     webParts: { id: string; name: string; entryPoint: string }[];
   } {
     return {
-      toolchain: "Heft (SPFx v1.22+)",
-      version: "1.22.0",
-      nodeVersion: "18.x",
-      buildCommand: "gulp bundle --ship && gulp package-solution --ship",
-      outputPath: "sharepoint/solution/szl-spfx-webparts.sppkg",
+      toolchain: 'Heft (SPFx v1.22+)',
+      version: '1.22.0',
+      nodeVersion: '18.x',
+      buildCommand: 'gulp bundle --ship && gulp package-solution --ship',
+      outputPath: 'sharepoint/solution/szl-spfx-webparts.sppkg',
       webParts: MOCK_MANIFESTS.map((m) => ({
         id: m.id,
         name: m.preconfiguredEntries[0]?.title?.default ?? m.alias,

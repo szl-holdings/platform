@@ -11,19 +11,8 @@
   "iconUrl": "https://szlholdings.com/icons/prism-counsel-connector.png",
   "connectorType": "microsoft_365",
   "authType": "oauth2",
-  "scopes": [
-    "Files.Read.All",
-    "Sites.Read.All",
-    "Mail.Read",
-    "User.Read",
-    "offline_access"
-  ],
-  "appOnlyScopes": [
-    "Files.Read.All",
-    "Sites.Read.All",
-    "ChannelMessage.Read.All",
-    "User.Read.All"
-  ],
+  "scopes": ["Files.Read.All", "Sites.Read.All", "Mail.Read", "User.Read", "offline_access"],
+  "appOnlyScopes": ["Files.Read.All", "Sites.Read.All", "ChannelMessage.Read.All", "User.Read.All"],
   "dataSync": {
     "supportedResourceTypes": [
       {

@@ -1,19 +1,19 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const AutonomyTierSchema = z.enum([
-  "human-approval-mandatory",
-  "human-in-the-loop",
-  "supervised-autonomy",
-  "full-autonomy",
+  'human-approval-mandatory',
+  'human-in-the-loop',
+  'supervised-autonomy',
+  'full-autonomy',
 ]);
 export type AutonomyTier = z.infer<typeof AutonomyTierSchema>;
 
-export const VerifierStatusSchema = z.enum(["passed", "revision_required", "pending"]);
+export const VerifierStatusSchema = z.enum(['passed', 'revision_required', 'pending']);
 export type VerifierStatus = z.infer<typeof VerifierStatusSchema>;
 
 export const CitationSchema = z.object({
   id: z.string(),
-  sourceType: z.enum(["entity", "memory", "reflection", "signal", "trace"]),
+  sourceType: z.enum(['entity', 'memory', 'reflection', 'signal', 'trace']),
   sourceId: z.string(),
   domain: z.string().optional(),
   quote: z.string().optional(),
@@ -35,7 +35,7 @@ export type BeliefStatement = z.infer<typeof BeliefStatementSchema>;
 
 export const RecommendedActionSchema = z.object({
   id: z.string(),
-  priority: z.enum(["P0", "P1", "P2", "P3"]),
+  priority: z.enum(['P0', 'P1', 'P2', 'P3']),
   action: z.string(),
   rationale: z.string(),
   owner: z.string().optional(),
@@ -63,7 +63,7 @@ export const BriefSectionSchema = z.object({
   beliefs: z.array(BeliefStatementSchema),
   gaps: z.array(z.string()),
   confidence: z.number().min(0).max(1),
-  riskLevel: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+  riskLevel: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   freshness: z.string(),
 });
 export type BriefSection = z.infer<typeof BriefSectionSchema>;
@@ -80,7 +80,7 @@ export const StructuredExecutiveBriefSchema = z.object({
   whatWeRecommend: z.array(RecommendedActionSchema),
   autonomyTier: AutonomyTierSchema,
   confidence: z.number().min(0).max(1),
-  overallRisk: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+  overallRisk: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   verifierStatus: VerifierStatusSchema,
   verifierFeedback: z.string().nullable().optional(),
   sourceTraceIds: z.array(z.string()).default([]),

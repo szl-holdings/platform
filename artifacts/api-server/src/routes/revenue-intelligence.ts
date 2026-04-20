@@ -14,26 +14,22 @@
  *   GET /revenue-intelligence/forecast   — 6-month projection
  */
 
-import { Router, type IRouter } from "express";
-import { validateQuery, listQuerySchema } from "../lib/validation.js";
-import { db, revenueEventsTable } from "@szl-holdings/db";
-import { desc, gte, and, eq, sum, count } from "drizzle-orm";
-import {
-  sendSuccess,
-  handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-
+import { db, revenueEventsTable } from '@szl-holdings/db';
+import { and, count, desc, eq, gte, sum } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
+import { listQuerySchema, validateQuery } from '../lib/validation.js';
+import { authMiddleware } from '../middlewares/auth';
+import { perUserApiSlidingLimiter } from '../middlewares/sliding-window-limiter';
 
 const router: IRouter = Router();
 
 function monthStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
 router.get(
-  "/revenue-intelligence/summary",
+  '/revenue-intelligence/summary',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (_req, res) => {
@@ -52,8 +48,8 @@ router.get(
           .where(
             and(
               gte(revenueEventsTable.occurredAt, since90d),
-              eq(revenueEventsTable.eventType, "invoice.paid"),
-            )
+              eq(revenueEventsTable.eventType, 'invoice.paid'),
+            ),
           )
           .groupBy(revenueEventsTable.product),
         db
@@ -62,8 +58,8 @@ router.get(
           .where(
             and(
               gte(revenueEventsTable.occurredAt, since90d),
-              eq(revenueEventsTable.eventType, "invoice.paid"),
-            )
+              eq(revenueEventsTable.eventType, 'invoice.paid'),
+            ),
           ),
       ]);
 
@@ -73,24 +69,21 @@ router.get(
 
       const maritimeRevenue = vessels.reduce(
         (acc: number, v: any) => acc + (v.financialExposureUsd ?? 0),
-        0
+        0,
       );
-      const portfolioNav = holdings.reduce(
-        (acc: number, h: any) => acc + (h.valueUsd ?? 0),
-        0
-      );
+      const portfolioNav = holdings.reduce((acc: number, h: any) => acc + (h.valueUsd ?? 0), 0);
       const realEstateValue = properties.reduce(
         (acc: number, p: any) => acc + (p.estimatedValue ?? 0),
-        0
+        0,
       );
 
       const stripeRevenue = Number(countRow[0]?.total ?? 0);
 
       const streams = [
         {
-          id: "stripe",
-          name: "SaaS / Subscriptions",
-          domain: "lyte",
+          id: 'stripe',
+          name: 'SaaS / Subscriptions',
+          domain: 'lyte',
           revenue90d: stripeRevenue,
           mrr: stripeRevenue / 3,
           products: revenueRows.map((r) => ({
@@ -100,26 +93,26 @@ router.get(
           })),
         },
         {
-          id: "maritime",
-          name: "Maritime Operations",
-          domain: "vessels",
+          id: 'maritime',
+          name: 'Maritime Operations',
+          domain: 'vessels',
           revenue90d: maritimeRevenue,
           mrr: maritimeRevenue / 3,
           assetCount: vessels.length,
         },
         {
-          id: "real-estate",
-          name: "Real Estate Portfolio",
-          domain: "terra",
+          id: 'real-estate',
+          name: 'Real Estate Portfolio',
+          domain: 'terra',
           revenue90d: realEstateValue * 0.012,
           mrr: realEstateValue * 0.004,
           assetCount: properties.length,
           portfolioValue: realEstateValue,
         },
         {
-          id: "portfolio",
-          name: "Investment Portfolio",
-          domain: "szl-holdings",
+          id: 'portfolio',
+          name: 'Investment Portfolio',
+          domain: 'szl-holdings',
           revenue90d: portfolioNav * 0.008,
           mrr: portfolioNav * 0.0027,
           nav: portfolioNav,
@@ -136,28 +129,28 @@ router.get(
           totalMrr,
           portfolioNav,
           streamCount: streams.length,
-          dataWindow: "90d",
+          dataWindow: '90d',
           asOf: new Date().toISOString(),
         },
         streams,
         rawStripeEvents: revenueRows,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch revenue summary");
+      handleRouteError(res, err, 'Failed to fetch revenue summary');
     }
-  }
+  },
 );
 
 router.get(
-  "/revenue-intelligence/events",
+  '/revenue-intelligence/events',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const limit = Math.min(Number(req.query["limit"] ?? 50), 200);
-      const offset = Number(req.query["offset"] ?? 0);
-      const product = req.query["product"] as string | undefined;
+      const limit = Math.min(Number(req.query['limit'] ?? 50), 200);
+      const offset = Number(req.query['offset'] ?? 0);
+      const product = req.query['product'] as string | undefined;
 
       const since30d = new Date();
       since30d.setDate(since30d.getDate() - 30);
@@ -175,13 +168,13 @@ router.get(
 
       sendSuccess(res, { events, count: events.length, limit, offset });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch revenue events");
+      handleRouteError(res, err, 'Failed to fetch revenue events');
     }
-  }
+  },
 );
 
 router.get(
-  "/revenue-intelligence/forecast",
+  '/revenue-intelligence/forecast',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   async (_req, res) => {
@@ -198,8 +191,8 @@ router.get(
         .where(
           and(
             gte(revenueEventsTable.occurredAt, since6m),
-            eq(revenueEventsTable.eventType, "invoice.paid"),
-          )
+            eq(revenueEventsTable.eventType, 'invoice.paid'),
+          ),
         );
 
       const avgMonthly = Number(monthly[0]?.amount ?? 0) / 6;
@@ -208,7 +201,7 @@ router.get(
       const forecast = Array.from({ length: 6 }, (_, i) => {
         const d = new Date();
         d.setMonth(d.getMonth() + i + 1);
-        const projected = avgMonthly * Math.pow(1 + growthRate, i + 1);
+        const projected = avgMonthly * (1 + growthRate) ** (i + 1);
         return {
           month: monthStr(d),
           stripeProjected: Math.round(projected),
@@ -225,9 +218,9 @@ router.get(
         generatedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to generate revenue forecast");
+      handleRouteError(res, err, 'Failed to generate revenue forecast');
     }
-  }
+  },
 );
 
 export default router;

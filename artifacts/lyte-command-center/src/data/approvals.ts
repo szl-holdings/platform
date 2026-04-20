@@ -6,13 +6,13 @@
  * while using the shared package for all state management.
  */
 export {
-  submitApprovalAction,
+  type ApprovalAction,
+  type ApprovalVerdict,
+  clearApprovalInbox,
   getApprovalActions,
   getApprovalForRecommendation,
   getInboxByVerdict,
   getInboxStats,
-  clearApprovalInbox,
-  type ApprovalVerdict,
-  type ApprovalAction,
   type SubmitApprovalOptions,
-} from "@workspace/approvals-inbox";
+  submitApprovalAction,
+} from '@workspace/approvals-inbox';

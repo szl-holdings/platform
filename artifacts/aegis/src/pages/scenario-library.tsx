@@ -1,41 +1,66 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
-import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@szl-holdings/shared-ui/ui/dialog";
-import { Input } from "@szl-holdings/shared-ui/ui/input";
-import { Label } from "@szl-holdings/shared-ui/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
-import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
-import { Target, Plus, Trash2, Shield, Zap, AlertTriangle, Globe, Server, Users, Lock, Link2, Building } from "lucide-react";
-import { useState } from "react";
-import { toast } from "@szl-holdings/shared-ui/ui/sonner";
-import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+import { Button } from '@szl-holdings/shared-ui/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@szl-holdings/shared-ui/ui/dialog';
+import { Input } from '@szl-holdings/shared-ui/ui/input';
+import { Label } from '@szl-holdings/shared-ui/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@szl-holdings/shared-ui/ui/select';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { Textarea } from '@szl-holdings/shared-ui/ui/textarea';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  AlertTriangle,
+  Building,
+  Globe,
+  Link2,
+  Lock,
+  Plus,
+  Server,
+  Shield,
+  Target,
+  Trash2,
+  Users,
+  Zap,
+} from 'lucide-react';
+import { useState } from 'react';
+import { api } from '@/lib/api';
 
 const categoryColors: Record<string, string> = {
-  network: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  application: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  social_engineering: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  physical: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  insider_threat: "bg-red-500/10 text-red-400 border-red-500/20",
-  supply_chain: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  network: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  application: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  social_engineering: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  physical: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  insider_threat: 'bg-red-500/10 text-red-400 border-red-500/20',
+  supply_chain: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
 };
 
 const severityColors: Record<string, string> = {
-  low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  high: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  critical: "bg-red-500/10 text-red-400 border-red-500/20",
+  low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
 };
 
 const categoryLabels: Record<string, string> = {
-  network: "Network",
-  application: "Application",
-  social_engineering: "Social Engineering",
-  physical: "Physical Security",
-  insider_threat: "Insider Threat",
-  supply_chain: "Supply Chain",
+  network: 'Network',
+  application: 'Application',
+  social_engineering: 'Social Engineering',
+  physical: 'Physical Security',
+  insider_threat: 'Insider Threat',
+  supply_chain: 'Supply Chain',
 };
 
 const categoryIcons: Record<string, any> = {
@@ -70,23 +95,39 @@ function ScenarioSkeleton() {
 
 export default function ScenarioLibrary() {
   const qc = useQueryClient();
-  const { data: scenarios = [], isLoading } = useStandardQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
+  const { data: scenarios = [], isLoading } = useStandardQuery({
+    queryKey: ['scenarios'],
+    queryFn: api.scenarios.list,
+  });
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", category: "network", severity: "medium", description: "" });
-  const [filter, setFilter] = useState<string>("all");
+  const [form, setForm] = useState({
+    name: '',
+    category: 'network',
+    severity: 'medium',
+    description: '',
+  });
+  const [filter, setFilter] = useState<string>('all');
 
   const createMut = useStandardMutation({
     mutationFn: (data: any) => api.scenarios.create(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["scenarios"] }); setOpen(false); toast.success("Scenario created"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['scenarios'] });
+      setOpen(false);
+      toast.success('Scenario created');
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
   const deleteMut = useStandardMutation({
     mutationFn: (id: number) => api.scenarios.delete(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["scenarios"] }); toast.success("Scenario deleted"); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['scenarios'] });
+      toast.success('Scenario deleted');
+    },
   });
 
-  const filtered = filter === "all" ? scenarios : scenarios.filter((s: any) => s.category === filter);
+  const filtered =
+    filter === 'all' ? scenarios : scenarios.filter((s: any) => s.category === filter);
   const categories = [...new Set(scenarios.map((s: any) => s.category))];
 
   return (
@@ -94,28 +135,58 @@ export default function ScenarioLibrary() {
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Scenario Library</h1>
-          <p className="text-sm text-muted-foreground mt-1">Attack playbooks — ransomware, lateral movement, data exfiltration, and privilege escalation</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Attack playbooks — ransomware, lateral movement, data exfiltration, and privilege
+            escalation
+          </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="w-4 h-4 mr-2" /> New Scenario</Button>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" /> New Scenario
+            </Button>
           </DialogTrigger>
           <DialogContent className="bg-card border-border">
-            <DialogHeader><DialogTitle className="font-display">Create Scenario</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle className="font-display">Create Scenario</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4">
-              <div><Label>Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Phishing Campaign — APT28 TTP" /></div>
+              <div>
+                <Label>Name</Label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="e.g. Phishing Campaign — APT28 TTP"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Category</Label>
-                  <Select value={form.category} onValueChange={v => setForm(p => ({ ...p, category: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(categoryLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+                  <Select
+                    value={form.category}
+                    onValueChange={(v) => setForm((p) => ({ ...p, category: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(categoryLabels).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>
+                          {v}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label>Severity</Label>
-                  <Select value={form.severity} onValueChange={v => setForm(p => ({ ...p, severity: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={form.severity}
+                    onValueChange={(v) => setForm((p) => ({ ...p, severity: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="low">Low</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
@@ -125,12 +196,27 @@ export default function ScenarioLibrary() {
                   </Select>
                 </div>
               </div>
-              <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Scenario description..." rows={3} /></div>
-              <Button onClick={() => {
-                if (!form.name) { toast.error("Name required"); return; }
-                createMut.mutate(form);
-              }} disabled={createMut.isPending} className="w-full">
-                {createMut.isPending ? "Creating..." : "Create Scenario"}
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                  placeholder="Scenario description..."
+                  rows={3}
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  if (!form.name) {
+                    toast.error('Name required');
+                    return;
+                  }
+                  createMut.mutate(form);
+                }}
+                disabled={createMut.isPending}
+                className="w-full"
+              >
+                {createMut.isPending ? 'Creating...' : 'Create Scenario'}
               </Button>
             </div>
           </DialogContent>
@@ -138,13 +224,26 @@ export default function ScenarioLibrary() {
       </div>
 
       <div className="flex items-center gap-2 flex-wrap animate-fade-in-up stagger-1">
-        <Button variant={filter === "all" ? "default" : "outline"} size="sm" onClick={() => setFilter("all")}>All ({scenarios.length})</Button>
+        <Button
+          variant={filter === 'all' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilter('all')}
+        >
+          All ({scenarios.length})
+        </Button>
         {categories.map((cat: string) => {
           const CatIcon = categoryIcons[cat] || Target;
           return (
-            <Button key={cat} variant={filter === cat ? "default" : "outline"} size="sm" onClick={() => setFilter(cat)} className="gap-1.5">
+            <Button
+              key={cat}
+              variant={filter === cat ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter(cat)}
+              className="gap-1.5"
+            >
               <CatIcon className="w-3.5 h-3.5" />
-              {categoryLabels[cat] || cat} ({scenarios.filter((s: any) => s.category === cat).length})
+              {categoryLabels[cat] || cat} (
+              {scenarios.filter((s: any) => s.category === cat).length})
             </Button>
           );
         })}
@@ -152,7 +251,9 @@ export default function ScenarioLibrary() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => <ScenarioSkeleton key={i} />)}
+          {[...Array(6)].map((_, i) => (
+            <ScenarioSkeleton key={i} />
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <Card className="bg-card border-border border-dashed animate-fade-in-up stagger-2">
@@ -161,38 +262,63 @@ export default function ScenarioLibrary() {
               <Target className="w-8 h-8 text-muted-foreground/30" />
             </div>
             <p className="text-muted-foreground font-medium">No scenarios found</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">{filter !== "all" ? "Try a different filter or create a new scenario" : "Create your first scenario to get started"}</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              {filter !== 'all'
+                ? 'Try a different filter or create a new scenario'
+                : 'Create your first scenario to get started'}
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((scenario: any, i: number) => {
             const CatIcon = categoryIcons[scenario.category] || Target;
-            const isCritical = scenario.severity === "critical";
-            const catBgColor = categoryColors[scenario.category]?.split(" ")[0] || "bg-primary/10";
+            const isCritical = scenario.severity === 'critical';
+            const catBgColor = categoryColors[scenario.category]?.split(' ')[0] || 'bg-primary/10';
             return (
-              <Card key={scenario.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 group hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 animate-fade-in-up stagger-${Math.min((i % 6) + 1, 8)} ${isCritical ? "ring-1 ring-red-500/10" : ""}`}>
+              <Card
+                key={scenario.id}
+                className={`bg-card border-border hover:border-primary/20 transition-all duration-300 group hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 animate-fade-in-up stagger-${Math.min((i % 6) + 1, 8)} ${isCritical ? 'ring-1 ring-red-500/10' : ''}`}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-lg ${catBgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <CatIcon className={`w-4.5 h-4.5 ${categoryColors[scenario.category]?.split(" ")[1] || "text-primary"}`} />
+                      <div
+                        className={`w-9 h-9 rounded-lg ${catBgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                      >
+                        <CatIcon
+                          className={`w-4.5 h-4.5 ${categoryColors[scenario.category]?.split(' ')[1] || 'text-primary'}`}
+                        />
                       </div>
-                      <CardTitle className="text-sm font-display leading-tight">{scenario.name}</CardTitle>
+                      <CardTitle className="text-sm font-display leading-tight">
+                        {scenario.name}
+                      </CardTitle>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteMut.mutate(scenario.id)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => deleteMut.mutate(scenario.id)}
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0 space-y-3">
-                  <p className="text-sm text-muted-foreground line-clamp-2">{scenario.description || "No description"}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {scenario.description || 'No description'}
+                  </p>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className={categoryColors[scenario.category] || ""}>
+                    <Badge variant="outline" className={categoryColors[scenario.category] || ''}>
                       {categoryLabels[scenario.category] || scenario.category}
                     </Badge>
-                    <Badge variant="outline" className={`${severityColors[scenario.severity] || ""} ${isCritical ? "animate-threat-pulse" : ""}`}>
-                      {isCritical && <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />}
+                    <Badge
+                      variant="outline"
+                      className={`${severityColors[scenario.severity] || ''} ${isCritical ? 'animate-threat-pulse' : ''}`}
+                    >
+                      {isCritical && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />
+                      )}
                       {scenario.severity}
                     </Badge>
                   </div>

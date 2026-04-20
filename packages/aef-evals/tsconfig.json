@@ -15,10 +15,7 @@
     "composite": true,
     "types": ["node"]
   },
-  "references": [
-    { "path": "../aef-contracts" },
-    { "path": "../aef-retrieval-core" }
-  ],
+  "references": [{ "path": "../aef-contracts" }, { "path": "../aef-retrieval-core" }],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }

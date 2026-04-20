@@ -1,37 +1,60 @@
-import { describe, expect, it } from "vitest";
-import { PrismEventBus, type PrismBusEvent } from "../bus.js";
+import { describe, expect, it } from 'vitest';
+import { type PrismBusEvent, PrismEventBus } from '../bus.js';
 
-function basePayload(): Omit<PrismBusEvent, "id" | "timestamp"> {
+function basePayload(): Omit<PrismBusEvent, 'id' | 'timestamp'> {
   return {
-    type: "tool_called",
-    domain: "vessels",
-    sourceId: "test-source",
-    payload: { foo: "bar" },
-    severity: "info",
+    type: 'tool_called',
+    domain: 'vessels',
+    sourceId: 'test-source',
+    payload: { foo: 'bar' },
+    severity: 'info',
   };
 }
 
-describe("PrismEventBus", () => {
-  it("publishes an event and returns a fully-populated event", async () => {
+describe('PrismEventBus', () => {
+  it('publishes an event and returns a fully-populated event', async () => {
     const bus = new PrismEventBus();
     const evt = await bus.publish(basePayload());
     expect(evt.id).toBeTruthy();
-    expect(typeof evt.timestamp).toBe("number");
-    expect(evt.type).toBe("tool_called");
-    expect(evt.domain).toBe("vessels");
+    expect(typeof evt.timestamp).toBe('number');
+    expect(evt.type).toBe('tool_called');
+    expect(evt.domain).toBe('vessels');
   });
 
-  it("delivers events to matching subscribers and not to non-matching ones", async () => {
+  it('delivers events to matching subscribers and not to non-matching ones', async () => {
     const bus = new PrismEventBus();
     const matched: PrismBusEvent[] = [];
     const wrongType: PrismBusEvent[] = [];
     const wrongDomain: PrismBusEvent[] = [];
     const wildcard: PrismBusEvent[] = [];
 
-    bus.subscribe("a", ["tool_called"], (e) => { matched.push(e); }, ["vessels"]);
-    bus.subscribe("b", ["workflow_completed"], (e) => { wrongType.push(e); });
-    bus.subscribe("c", ["tool_called"], (e) => { wrongDomain.push(e); }, ["aegis"]);
-    bus.subscribe("d", "*", (e) => { wildcard.push(e); }, "*");
+    bus.subscribe(
+      'a',
+      ['tool_called'],
+      (e) => {
+        matched.push(e);
+      },
+      ['vessels'],
+    );
+    bus.subscribe('b', ['workflow_completed'], (e) => {
+      wrongType.push(e);
+    });
+    bus.subscribe(
+      'c',
+      ['tool_called'],
+      (e) => {
+        wrongDomain.push(e);
+      },
+      ['aegis'],
+    );
+    bus.subscribe(
+      'd',
+      '*',
+      (e) => {
+        wildcard.push(e);
+      },
+      '*',
+    );
 
     await bus.publish(basePayload());
 
@@ -44,10 +67,12 @@ describe("PrismEventBus", () => {
     expect(wildcard).toHaveLength(1);
   });
 
-  it("returns an unsubscribe function that removes the subscription", async () => {
+  it('returns an unsubscribe function that removes the subscription', async () => {
     const bus = new PrismEventBus();
     const seen: PrismBusEvent[] = [];
-    const off = bus.subscribe("x", "*", (e) => { seen.push(e); });
+    const off = bus.subscribe('x', '*', (e) => {
+      seen.push(e);
+    });
     await bus.publish(basePayload());
     off();
     await bus.publish(basePayload());
@@ -58,50 +83,66 @@ describe("PrismEventBus", () => {
   it("treats subscribers tagged with the 'global' domain as receiving any domain", async () => {
     const bus = new PrismEventBus();
     const seen: PrismBusEvent[] = [];
-    bus.subscribe("g", ["tool_called"], (e) => { seen.push(e); }, ["global"]);
-    await bus.publish({ ...basePayload(), domain: "aegis" });
-    await bus.publish({ ...basePayload(), domain: "terra" });
+    bus.subscribe(
+      'g',
+      ['tool_called'],
+      (e) => {
+        seen.push(e);
+      },
+      ['global'],
+    );
+    await bus.publish({ ...basePayload(), domain: 'aegis' });
+    await bus.publish({ ...basePayload(), domain: 'terra' });
     expect(seen).toHaveLength(2);
   });
 
-  it("records history newest-first and filters it correctly", async () => {
+  it('records history newest-first and filters it correctly', async () => {
     const bus = new PrismEventBus();
     const t0 = Date.now();
-    await bus.publish({ ...basePayload(), correlationId: "c1", timestamp: t0 });
-    await bus.publish({ ...basePayload(), type: "workflow_completed", timestamp: t0 + 1 });
-    await bus.publish({ ...basePayload(), domain: "aegis", correlationId: "c1", timestamp: t0 + 2 });
+    await bus.publish({ ...basePayload(), correlationId: 'c1', timestamp: t0 });
+    await bus.publish({ ...basePayload(), type: 'workflow_completed', timestamp: t0 + 1 });
+    await bus.publish({
+      ...basePayload(),
+      domain: 'aegis',
+      correlationId: 'c1',
+      timestamp: t0 + 2,
+    });
 
     const all = bus.getHistory();
     expect(all).toHaveLength(3);
     expect(all[0]!.timestamp).toBeGreaterThanOrEqual(all[2]!.timestamp);
 
-    expect(bus.getHistory({ type: "workflow_completed" })).toHaveLength(1);
-    expect(bus.getHistory({ domain: "aegis" })).toHaveLength(1);
-    expect(bus.getHistory({ correlationId: "c1" })).toHaveLength(2);
+    expect(bus.getHistory({ type: 'workflow_completed' })).toHaveLength(1);
+    expect(bus.getHistory({ domain: 'aegis' })).toHaveLength(1);
+    expect(bus.getHistory({ correlationId: 'c1' })).toHaveLength(2);
     expect(bus.getHistory({ since: t0 + 1 })).toHaveLength(2);
     expect(bus.getHistory({ limit: 1 })).toHaveLength(1);
   });
 
-  it("counts events per type and reports stats", async () => {
+  it('counts events per type and reports stats', async () => {
     const bus = new PrismEventBus();
     await bus.publish(basePayload());
     await bus.publish(basePayload());
-    await bus.publish({ ...basePayload(), type: "policy_decision" });
-    bus.subscribe("s", "*", () => {});
+    await bus.publish({ ...basePayload(), type: 'policy_decision' });
+    bus.subscribe('s', '*', () => {});
 
     const stats = bus.getStats();
     expect(stats.totalPublished).toBe(3);
-    expect(stats.byType["tool_called"]).toBe(2);
-    expect(stats.byType["policy_decision"]).toBe(1);
+    expect(stats.byType['tool_called']).toBe(2);
+    expect(stats.byType['policy_decision']).toBe(1);
     expect(stats.subscriptionCount).toBe(1);
     expect(stats.historySize).toBe(3);
   });
 
-  it("swallows async subscriber rejections so publish still resolves", async () => {
+  it('swallows async subscriber rejections so publish still resolves', async () => {
     const bus = new PrismEventBus();
-    bus.subscribe("bad", "*", async () => { throw new Error("boom"); });
+    bus.subscribe('bad', '*', async () => {
+      throw new Error('boom');
+    });
     const seen: PrismBusEvent[] = [];
-    bus.subscribe("good", "*", (e) => { seen.push(e); });
+    bus.subscribe('good', '*', (e) => {
+      seen.push(e);
+    });
     const evt = await bus.publish(basePayload());
     expect(evt.id).toBeTruthy();
     await Promise.resolve();

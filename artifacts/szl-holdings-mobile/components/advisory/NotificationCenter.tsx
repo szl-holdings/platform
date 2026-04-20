@@ -1,7 +1,8 @@
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import React, { useCallback, useState } from "react";
+import { Feather } from '@expo/vector-icons';
+import { type AppNotification, useNotifications } from '@szl-holdings/mobile-shared';
+import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -11,26 +12,24 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
 
-import { useColors } from "@/hooks/useColors";
-import { useNotifications, type AppNotification } from "@szl-holdings/mobile-shared";
-
-const TYPE_ICONS: Record<AppNotification["type"], string> = {
-  info: "info",
-  success: "check-circle",
-  warning: "alert-triangle",
-  error: "alert-circle",
-  action_required: "zap",
+const TYPE_ICONS: Record<AppNotification['type'], string> = {
+  info: 'info',
+  success: 'check-circle',
+  warning: 'alert-triangle',
+  error: 'alert-circle',
+  action_required: 'zap',
 };
 
-const TYPE_COLORS: Record<AppNotification["type"], string> = {
-  info: "#6E9BD1",
-  success: "#6BB88E",
-  warning: "#D4A55B",
-  error: "#C05050",
-  action_required: "#C8A96A",
+const TYPE_COLORS: Record<AppNotification['type'], string> = {
+  info: '#6E9BD1',
+  success: '#6BB88E',
+  warning: '#D4A55B',
+  error: '#C05050',
+  action_required: '#C8A96A',
 };
 
 function formatTimeAgo(dateStr: string): string {
@@ -38,7 +37,7 @@ function formatTimeAgo(dateStr: string): string {
   const date = new Date(dateStr).getTime();
   const diff = now - date;
 
-  if (diff < 60_000) return "just now";
+  if (diff < 60_000) return 'just now';
   if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
   if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
   if (diff < 604_800_000) return `${Math.floor(diff / 86_400_000)}d ago`;
@@ -53,7 +52,7 @@ interface NotificationRowProps {
 }
 
 function NotificationRow({ notification, onMarkRead, onDelete, colors }: NotificationRowProps) {
-  const icon = TYPE_ICONS[notification.type] ?? "bell";
+  const icon = TYPE_ICONS[notification.type] ?? 'bell';
   const iconColor = TYPE_COLORS[notification.type] ?? colors.gold;
 
   const handlePress = useCallback(() => {
@@ -65,7 +64,7 @@ function NotificationRow({ notification, onMarkRead, onDelete, colors }: Notific
       try {
         router.push(notification.actionUrl as any);
       } catch {
-        console.warn("[notification] Deep-link failed:", notification.actionUrl);
+        console.warn('[notification] Deep-link failed:', notification.actionUrl);
       }
     }
   }, [notification, onMarkRead]);
@@ -84,9 +83,7 @@ function NotificationRow({ notification, onMarkRead, onDelete, colors }: Notific
             {
               borderBottomColor: colors.creamFaint,
               opacity: pressed ? 0.7 : 1,
-              backgroundColor: notification.isRead
-                ? "transparent"
-                : "rgba(200,169,106,0.04)",
+              backgroundColor: notification.isRead ? 'transparent' : 'rgba(200,169,106,0.04)',
             },
           ]}
         >
@@ -102,17 +99,14 @@ function NotificationRow({ notification, onMarkRead, onDelete, colors }: Notific
                 styles.rowTitle,
                 {
                   color: notification.isRead ? colors.creamDim : colors.cream,
-                  fontFamily: notification.isRead ? "Inter_300Light" : "Inter_400Regular",
+                  fontFamily: notification.isRead ? 'Inter_300Light' : 'Inter_400Regular',
                 },
               ]}
               numberOfLines={1}
             >
               {notification.title}
             </Text>
-            <Text
-              style={[styles.rowMessage, { color: colors.mutedForeground }]}
-              numberOfLines={2}
-            >
+            <Text style={[styles.rowMessage, { color: colors.mutedForeground }]} numberOfLines={2}>
               {notification.message}
             </Text>
             <Text style={[styles.rowTime, { color: colors.goldSubtle }]}>
@@ -150,17 +144,12 @@ export function NotificationBell({ size = 20 }: NotificationBellProps) {
         <Feather name="bell" size={size} color={colors.cream} />
         {unreadCount > 0 && (
           <View style={[styles.badge, { backgroundColor: colors.gold }]}>
-            <Text style={styles.badgeText}>
-              {unreadCount > 9 ? "9+" : String(unreadCount)}
-            </Text>
+            <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : String(unreadCount)}</Text>
           </View>
         )}
       </Pressable>
 
-      <NotificationCenter
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-      />
+      <NotificationCenter visible={modalVisible} onClose={() => setModalVisible(false)} />
     </>
   );
 }
@@ -173,10 +162,17 @@ interface NotificationCenterProps {
 export function NotificationCenter({ visible, onClose }: NotificationCenterProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { notifications, unreadCount, isLoading, refresh, markRead, markAllRead, deleteNotification } =
-    useNotifications();
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    refresh,
+    markRead,
+    markAllRead,
+    deleteNotification,
+  } = useNotifications();
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = Platform.OS === 'web' ? 67 : insets.top;
 
   return (
     <Modal
@@ -186,7 +182,9 @@ export function NotificationCenter({ visible, onClose }: NotificationCenterProps
       onRequestClose={onClose}
     >
       <View style={[styles.modal, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { paddingTop: topPad + 16, borderBottomColor: colors.creamFaint }]}>
+        <View
+          style={[styles.header, { paddingTop: topPad + 16, borderBottomColor: colors.creamFaint }]}
+        >
           <Pressable onPress={onClose} hitSlop={12}>
             <Feather name="x" size={18} color={colors.creamDim} />
           </Pressable>
@@ -215,18 +213,14 @@ export function NotificationCenter({ visible, onClose }: NotificationCenterProps
         {unreadCount > 0 && (
           <View style={[styles.unreadBanner, { borderBottomColor: colors.creamFaint }]}>
             <View style={[styles.unreadDotLarge, { backgroundColor: colors.gold }]} />
-            <Text style={[styles.unreadLabel, { color: colors.gold }]}>
-              {unreadCount} unread
-            </Text>
+            <Text style={[styles.unreadLabel, { color: colors.gold }]}>{unreadCount} unread</Text>
           </View>
         )}
 
         <ScrollView
           style={styles.list}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={
-            notifications.length === 0 ? styles.emptyContainer : undefined
-          }
+          contentContainerStyle={notifications.length === 0 ? styles.emptyContainer : undefined}
         >
           {isLoading && notifications.length === 0 ? (
             <View style={styles.emptyContainer}>
@@ -264,26 +258,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
   },
   headerTitle: {
     fontSize: 16,
-    fontFamily: "CormorantGaramond_500Medium",
+    fontFamily: 'CormorantGaramond_500Medium',
     letterSpacing: 0.5,
   },
   headerAction: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     letterSpacing: 0.5,
   },
   unreadBanner: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -296,7 +290,7 @@ const styles = StyleSheet.create({
   },
   unreadLabel: {
     fontSize: 11,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 1,
   },
   list: {
@@ -304,38 +298,38 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 80,
   },
   emptyInner: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: 12,
     paddingHorizontal: 40,
     paddingVertical: 80,
   },
   emptyTitle: {
     fontSize: 16,
-    fontFamily: "CormorantGaramond_400Regular",
-    textAlign: "center",
+    fontFamily: 'CormorantGaramond_400Regular',
+    textAlign: 'center',
   },
   emptySubtitle: {
     fontSize: 12,
-    fontFamily: "Inter_300Light",
-    textAlign: "center",
+    fontFamily: 'Inter_300Light',
+    textAlign: 'center',
     lineHeight: 18,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     gap: 12,
-    position: "relative",
+    position: 'relative',
   },
   unreadDot: {
-    position: "absolute",
+    position: 'absolute',
     left: 8,
     top: 20,
     width: 5,
@@ -346,8 +340,8 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   rowContent: {
@@ -360,12 +354,12 @@ const styles = StyleSheet.create({
   },
   rowMessage: {
     fontSize: 12,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     lineHeight: 17,
   },
   rowTime: {
     fontSize: 10,
-    fontFamily: "Inter_300Light",
+    fontFamily: 'Inter_300Light',
     letterSpacing: 0.5,
     marginTop: 2,
   },
@@ -373,22 +367,22 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   bellWrap: {
-    position: "relative",
+    position: 'relative',
   },
   badge: {
-    position: "absolute",
+    position: 'absolute',
     top: -5,
     right: -6,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 3,
   },
   badgeText: {
     fontSize: 9,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0e0c09",
+    fontFamily: 'Inter_600SemiBold',
+    color: '#0e0c09',
   },
 });

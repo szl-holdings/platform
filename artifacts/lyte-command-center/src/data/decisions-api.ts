@@ -7,28 +7,29 @@
  * POST mutating routes (approve/reject/request-changes, simulate-policy) — require an auth session
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(path, { credentials: "include" });
+  const res = await fetch(path, { credentials: 'include' });
   if (!res.ok) throw new Error(`Request failed (${res.status}): ${path}`);
   return res.json() as Promise<T>;
 }
 
 async function postJson<T>(path: string, body?: unknown): Promise<T> {
-  const csrfToken = document.cookie
-    .split(";")
-    .map(c => c.trim())
-    .find(c => c.startsWith("csrf_token="))
-    ?.split("=")[1] ?? "";
+  const csrfToken =
+    document.cookie
+      .split(';')
+      .map((c) => c.trim())
+      .find((c) => c.startsWith('csrf_token='))
+      ?.split('=')[1] ?? '';
   const res = await fetch(path, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
+    const text = await res.text().catch(() => '');
     throw new Error(`Request failed (${res.status}): ${text || path}`);
   }
   return res.json() as Promise<T>;
@@ -36,12 +37,32 @@ async function postJson<T>(path: string, body?: unknown): Promise<T> {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type Severity = "critical" | "high" | "medium" | "low";
-export type AutonomyMode = "observe" | "recommend" | "draft" | "execute-with-approval" | "auto-execute";
-export type DecisionStatus = "draft" | "validation-pending" | "ready-for-review" | "approved" | "rejected" | "changes-requested" | "executed" | "superseded";
-export type PolicyState = "cleared" | "conditional" | "blocked" | "flagged" | "pending";
-export type Freshness = "live" | "recent" | "stale" | "expired";
-export type Domain = "lyte" | "aegis" | "vessels" | "terra" | "counsel" | "carlota" | "cross_domain";
+export type Severity = 'critical' | 'high' | 'medium' | 'low';
+export type AutonomyMode =
+  | 'observe'
+  | 'recommend'
+  | 'draft'
+  | 'execute-with-approval'
+  | 'auto-execute';
+export type DecisionStatus =
+  | 'draft'
+  | 'validation-pending'
+  | 'ready-for-review'
+  | 'approved'
+  | 'rejected'
+  | 'changes-requested'
+  | 'executed'
+  | 'superseded';
+export type PolicyState = 'cleared' | 'conditional' | 'blocked' | 'flagged' | 'pending';
+export type Freshness = 'live' | 'recent' | 'stale' | 'expired';
+export type Domain =
+  | 'lyte'
+  | 'aegis'
+  | 'vessels'
+  | 'terra'
+  | 'counsel'
+  | 'carlota'
+  | 'cross_domain';
 
 export interface DecisionCard {
   id: number;
@@ -86,16 +107,22 @@ export interface EvidenceItem {
 
 export interface ValidationCheck {
   id: number;
-  checkType: "contradiction" | "stale-data" | "missing-evidence" | "policy" | "confidence-floor" | "falsification";
+  checkType:
+    | 'contradiction'
+    | 'stale-data'
+    | 'missing-evidence'
+    | 'policy'
+    | 'confidence-floor'
+    | 'falsification';
   passed: boolean;
   explanation: string;
-  severity: "blocking" | "warning" | "info";
+  severity: 'blocking' | 'warning' | 'info';
   metadata?: Record<string, unknown>;
   ranAt: string;
 }
 
 export interface RunStep {
-  stepType: "model-call" | "tool-call" | "handoff";
+  stepType: 'model-call' | 'tool-call' | 'handoff';
   name: string;
   latencyMs: number;
   inputTokens?: number;
@@ -103,7 +130,7 @@ export interface RunStep {
   costUsd?: number;
   model?: string;
   tool?: string;
-  status: "completed" | "failed";
+  status: 'completed' | 'failed';
   outputSummary?: string;
 }
 
@@ -134,7 +161,7 @@ export interface AuditEvent {
 }
 
 export interface PolicyEvaluation {
-  decision: "allow" | "require-approval" | "block";
+  decision: 'allow' | 'require-approval' | 'block';
   reasons: string[];
   requiredApproverRoles?: string[];
   slaMinutes?: number;
@@ -164,25 +191,27 @@ export interface DecisionFilters {
 
 export function useDecisions(filters?: DecisionFilters) {
   const params = new URLSearchParams();
-  if (filters?.severity) params.set("severity", filters.severity);
-  if (filters?.domain) params.set("domain", filters.domain);
-  if (filters?.status) params.set("status", filters.status);
-  if (filters?.autonomyMode) params.set("autonomyMode", filters.autonomyMode);
+  if (filters?.severity) params.set('severity', filters.severity);
+  if (filters?.domain) params.set('domain', filters.domain);
+  if (filters?.status) params.set('status', filters.status);
+  if (filters?.autonomyMode) params.set('autonomyMode', filters.autonomyMode);
   const query = params.toString();
 
   return useQuery({
-    queryKey: ["decisions", filters],
-    queryFn: () => getJson<{ success: boolean; data: DecisionCard[]; total: number }>(
-      `/api/decisions/cards${query ? `?${query}` : ""}`,
-    ),
+    queryKey: ['decisions', filters],
+    queryFn: () =>
+      getJson<{ success: boolean; data: DecisionCard[]; total: number }>(
+        `/api/decisions/cards${query ? `?${query}` : ''}`,
+      ),
     refetchInterval: 30_000,
   });
 }
 
 export function useDecision(cardId: string | null) {
   return useQuery({
-    queryKey: ["decisions", cardId],
-    queryFn: () => getJson<{ success: boolean; data: DecisionDetail }>(`/api/decisions/cards/${cardId}`),
+    queryKey: ['decisions', cardId],
+    queryFn: () =>
+      getJson<{ success: boolean; data: DecisionDetail }>(`/api/decisions/cards/${cardId}`),
     enabled: Boolean(cardId),
   });
 }
@@ -195,7 +224,7 @@ export function useDecisionApprove() {
     mutationFn: ({ cardId, reason }: { cardId: string; reason?: string }) =>
       postJson(`/api/decisions/cards/${cardId}/approve`, { reason }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["decisions"] });
+      qc.invalidateQueries({ queryKey: ['decisions'] });
     },
   });
 }
@@ -206,7 +235,7 @@ export function useDecisionReject() {
     mutationFn: ({ cardId, reason }: { cardId: string; reason?: string }) =>
       postJson(`/api/decisions/cards/${cardId}/reject`, { reason }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["decisions"] });
+      qc.invalidateQueries({ queryKey: ['decisions'] });
     },
   });
 }
@@ -217,7 +246,7 @@ export function useDecisionRequestChanges() {
     mutationFn: ({ cardId, reason }: { cardId: string; reason?: string }) =>
       postJson(`/api/decisions/cards/${cardId}/request-changes`, { reason }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["decisions"] });
+      qc.invalidateQueries({ queryKey: ['decisions'] });
     },
   });
 }

@@ -1,4 +1,4 @@
-import type { EmbedInput, EmbedOutput, EmbeddingBackend } from "./backends.js";
+import type { EmbeddingBackend, EmbedInput, EmbedOutput } from './backends.js';
 
 interface BatchEntry {
   input: EmbedInput;
@@ -151,7 +151,11 @@ export class MicroBatcher {
           entry.resolve(output);
         } else {
           partition.stats.errors++;
-          entry.reject(new Error(`Backend returned no output for chunkId "${entry.input.chunkId}" in partition "${key}"`));
+          entry.reject(
+            new Error(
+              `Backend returned no output for chunkId "${entry.input.chunkId}" in partition "${key}"`,
+            ),
+          );
         }
       }
     } catch (err) {
@@ -168,7 +172,10 @@ export class MicroBatcher {
     }
   }
 
-  getStats(): { totalPartitions: number; partitions: Record<string, PartitionStats & { queueDepth: number }> } {
+  getStats(): {
+    totalPartitions: number;
+    partitions: Record<string, PartitionStats & { queueDepth: number }>;
+  } {
     const partitions: Record<string, PartitionStats & { queueDepth: number }> = {};
     for (const [key, partition] of this.partitions) {
       partitions[key] = { ...partition.stats, queueDepth: partition.entries.length };

@@ -34,49 +34,58 @@
  * object storage, or any other external service.
  */
 
-import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import express from "express";
-import request from "supertest";
+import express from 'express';
+import request from 'supertest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Generic, broad mocks for dependencies imported by the route modules
 // ---------------------------------------------------------------------------
 
-vi.mock("../../middlewares/auth", () => ({
+vi.mock('../../middlewares/auth', () => ({
   authMiddleware: (_opts?: unknown) => (_req: any, _res: any, next: () => void) => next(),
-  requireRole: (..._roles: string[]) => (_req: any, _res: any, next: () => void) => next(),
+  requireRole:
+    (..._roles: string[]) =>
+    (_req: any, _res: any, next: () => void) =>
+      next(),
   parseIdParam: (raw: string) => parseInt(raw, 10),
 }));
 
-vi.mock("../../middlewares/admin-guard", () => ({
+vi.mock('../../middlewares/admin-guard', () => ({
   adminGuard: (_req: any, _res: any, next: () => void) => next(),
 }));
 
-vi.mock("../../lib/logger", () => ({
+vi.mock('../../lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("../../lib/seed-vessels", () => ({
+vi.mock('../../lib/seed-vessels', () => ({
   seedVesselsData: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../../lib/agent-scheduler", () => ({
+vi.mock('../../lib/agent-scheduler', () => ({
   dispatchCovenantBreaches: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../../lib/objectStorage", () => ({
+vi.mock('../../lib/objectStorage', () => ({
   ObjectStorageService: class {
-    async upload() { return { ok: true }; }
-    async download() { return null; }
-    getPublicURL() { return ""; }
+    async upload() {
+      return { ok: true };
+    }
+    async download() {
+      return null;
+    }
+    getPublicURL() {
+      return '';
+    }
   },
 }));
 
-vi.mock("../../lib/lead-scoring", () => ({
+vi.mock('../../lib/lead-scoring', () => ({
   computeLeadScore: vi.fn().mockReturnValue(0),
 }));
 
-vi.mock("@szl-holdings/observability", () => ({
+vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: {
     recordAuthFailure: vi.fn(),
     recordRequest: vi.fn(),
@@ -87,34 +96,37 @@ vi.mock("@szl-holdings/observability", () => ({
   seededRng: () => () => 0,
   MetricTimeSeriesSimulator: class {
     constructor(_seed?: number) {}
-    next() { return 0; }
-    sample() { return []; }
+    next() {
+      return 0;
+    }
+    sample() {
+      return [];
+    }
   },
 }));
 
-vi.mock("@szl-holdings/forge-runtime", () => ({
+vi.mock('@szl-holdings/forge-runtime', () => ({
   durableJobQueue: {
     getStats: vi.fn().mockResolvedValue({ failed: 0, completed: 0 }),
     getRecentJobs: vi.fn().mockResolvedValue([]),
   },
 }));
 
-vi.mock("@szl-holdings/services", () => ({ services: [] }));
+vi.mock('@szl-holdings/services', () => ({ services: [] }));
 
-vi.mock("../../lib/lyte-observability-seed.js", () => ({
+vi.mock('../../lib/lyte-observability-seed.js', () => ({
   seedLyteObservability: vi.fn().mockResolvedValue({}),
 }));
 
-vi.mock("../../lib/platform-flags.js", () => ({
+vi.mock('../../lib/platform-flags.js', () => ({
   isFlagEnabled: vi.fn().mockResolvedValue(true),
 }));
 
-vi.mock("../../lib/activity-logger.js", () => ({
+vi.mock('../../lib/activity-logger.js', () => ({
   logActivity: vi.fn().mockResolvedValue(undefined),
 }));
 
-const makeTable = () =>
-  new Proxy({}, { get: (_t, prop) => String(prop) });
+const makeTable = () => new Proxy({}, { get: (_t, prop) => String(prop) });
 
 const drizzleChain: Record<string, any> = {};
 drizzleChain.from = () => drizzleChain;
@@ -131,7 +143,7 @@ drizzleChain.offset = () => Promise.resolve([{ isEnabled: true }]);
 drizzleChain.then = (resolve: (v: unknown[]) => unknown) =>
   Promise.resolve([{ isEnabled: true }]).then(resolve);
 
-vi.mock("@szl-holdings/db", () => {
+vi.mock('@szl-holdings/db', () => {
   const mockDb: any = {
     select: () => drizzleChain,
     insert: () => ({
@@ -161,27 +173,27 @@ vi.mock("@szl-holdings/db", () => {
   return new Proxy(base, {
     get: (target, prop: string) => {
       if (prop in target) return target[prop];
-      if (typeof prop !== "string") return undefined;
-      if (prop.endsWith("Table") || prop.endsWith("View")) return makeTable();
-      if (prop.startsWith("insert") && prop.endsWith("Schema")) {
+      if (typeof prop !== 'string') return undefined;
+      if (prop.endsWith('Table') || prop.endsWith('View')) return makeTable();
+      if (prop.startsWith('insert') && prop.endsWith('Schema')) {
         return { parse: (v: unknown) => v, partial: () => ({ parse: (v: unknown) => v }) };
       }
-      if (prop === "__esModule") return true;
+      if (prop === '__esModule') return true;
       return undefined;
     },
     has: (target, prop) => {
       if (prop in target) return true;
-      if (typeof prop !== "string") return false;
+      if (typeof prop !== 'string') return false;
       return (
-        prop.endsWith("Table") ||
-        prop.endsWith("View") ||
-        (prop.startsWith("insert") && prop.endsWith("Schema"))
+        prop.endsWith('Table') ||
+        prop.endsWith('View') ||
+        (prop.startsWith('insert') && prop.endsWith('Schema'))
       );
     },
   });
 });
 
-vi.mock("@szl-holdings/ai-engine", () => {
+vi.mock('@szl-holdings/ai-engine', () => {
   const stubFn = (..._args: unknown[]) => undefined;
   return {
     twinRegistry: { register: stubFn, get: () => null, list: () => [], update: () => null },
@@ -199,7 +211,7 @@ vi.mock("@szl-holdings/ai-engine", () => {
   };
 });
 
-vi.mock("@szl-holdings/ai-engine/domain-embedding-hooks", () => ({
+vi.mock('@szl-holdings/ai-engine/domain-embedding-hooks', () => ({
   ingestFirestormFinding: vi.fn().mockResolvedValue(undefined),
   ingestFirestormScenario: vi.fn().mockResolvedValue(undefined),
   ingestFirestormAlert: vi.fn().mockResolvedValue(undefined),
@@ -209,7 +221,9 @@ vi.mock("@szl-holdings/ai-engine/domain-embedding-hooks", () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function buildAppWithRouter(routerImporter: () => Promise<{ default: express.Router }>): Promise<express.Express> {
+async function buildAppWithRouter(
+  routerImporter: () => Promise<{ default: express.Router }>,
+): Promise<express.Express> {
   const mod = await routerImporter();
   const app = express();
   app.use(express.json());
@@ -219,19 +233,19 @@ async function buildAppWithRouter(routerImporter: () => Promise<{ default: expre
 
 function expectBlocked(res: { status: number; body: { code?: string } }): void {
   expect(res.status).toBe(404);
-  expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+  expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
 }
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("seed endpoints — production guard", () => {
+describe('seed endpoints — production guard', () => {
   const originalNodeEnv = process.env.NODE_ENV;
   const originalAppEnv = process.env.APP_ENV;
 
   beforeEach(() => {
-    process.env.NODE_ENV = "production";
+    process.env.NODE_ENV = 'production';
     delete (process.env as Record<string, string | undefined>).APP_ENV;
   });
 
@@ -240,124 +254,124 @@ describe("seed endpoints — production guard", () => {
     process.env.APP_ENV = originalAppEnv;
   });
 
-  it("POST /digital-twins/demo/seed returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../digital-twins.js") as any);
-    const res = await request(app).post("/digital-twins/demo/seed").send({});
+  it('POST /digital-twins/demo/seed returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../digital-twins.js') as any);
+    const res = await request(app).post('/digital-twins/demo/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /fusion/demo/seed returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../fusion.js") as any);
-    const res = await request(app).post("/fusion/demo/seed").send({});
+  it('POST /fusion/demo/seed returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../fusion.js') as any);
+    const res = await request(app).post('/fusion/demo/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /aegis/ot-ics/demo/seed returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../ot-ics.js") as any);
-    const res = await request(app).post("/aegis/ot-ics/demo/seed").send({});
+  it('POST /aegis/ot-ics/demo/seed returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../ot-ics.js') as any);
+    const res = await request(app).post('/aegis/ot-ics/demo/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /vessels/seed returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../vessels-extended.js") as any);
-    const res = await request(app).post("/vessels/seed").send({});
+  it('POST /vessels/seed returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../vessels-extended.js') as any);
+    const res = await request(app).post('/vessels/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /certification/seed returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../certification-readiness.js") as any);
-    const res = await request(app).post("/certification/seed").send({});
+  it('POST /certification/seed returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../certification-readiness.js') as any);
+    const res = await request(app).post('/certification/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /terra/cognitive/covenants/seed returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../terra-cognitive.js") as any);
-    const res = await request(app).post("/terra/cognitive/covenants/seed").send({});
+  it('POST /terra/cognitive/covenants/seed returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../terra-cognitive.js') as any);
+    const res = await request(app).post('/terra/cognitive/covenants/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /seed (distribution-os/publishing) returns 404 in production", async () => {
-    const mod = await import("../distribution-os/publishing.js" as any);
+  it('POST /seed (distribution-os/publishing) returns 404 in production', async () => {
+    const mod = await import('../distribution-os/publishing.js' as any);
     const app = express();
     app.use(express.json());
     const router = express.Router();
     mod.register(router);
     app.use(router);
-    const res = await request(app).post("/seed").send({});
+    const res = await request(app).post('/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /admin/seed/reset-demo returns 403 when RUNTIME_MODE=production", async () => {
-    process.env.NODE_ENV = "development";
+  it('POST /admin/seed/reset-demo returns 403 when RUNTIME_MODE=production', async () => {
+    process.env.NODE_ENV = 'development';
     delete (process.env as Record<string, string | undefined>).APP_ENV;
-    process.env.RUNTIME_MODE = "production";
+    process.env.RUNTIME_MODE = 'production';
     try {
-      const mod: any = await import("../admin/seed.js" as any);
+      const mod: any = await import('../admin/seed.js' as any);
       const app = express();
       app.use(express.json());
       const router = express.Router();
       mod.register(router);
       app.use(router);
-      const res = await request(app).post("/admin/seed/reset-demo").send({});
+      const res = await request(app).post('/admin/seed/reset-demo').send({});
       expect(res.status).toBe(403);
-      expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+      expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
     } finally {
       delete (process.env as Record<string, string | undefined>).RUNTIME_MODE;
     }
   });
 
-  it("POST /admin/seed/reset-demo returns 403 when NODE_ENV=production", async () => {
-    process.env.NODE_ENV = "production";
-    const mod: any = await import("../admin/seed.js" as any);
+  it('POST /admin/seed/reset-demo returns 403 when NODE_ENV=production', async () => {
+    process.env.NODE_ENV = 'production';
+    const mod: any = await import('../admin/seed.js' as any);
     const app = express();
     app.use(express.json());
     const router = express.Router();
     mod.register(router);
     app.use(router);
-    const res = await request(app).post("/admin/seed/reset-demo").send({});
+    const res = await request(app).post('/admin/seed/reset-demo').send({});
     expect(res.status).toBe(403);
-    expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+    expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
   });
 
-  it("blocks when only APP_ENV=production (NODE_ENV=development)", async () => {
-    process.env.NODE_ENV = "development";
-    process.env.APP_ENV = "production";
-    const app = await buildAppWithRouter(() => import("../fusion.js") as any);
-    const res = await request(app).post("/fusion/demo/seed").send({});
+  it('blocks when only APP_ENV=production (NODE_ENV=development)', async () => {
+    process.env.NODE_ENV = 'development';
+    process.env.APP_ENV = 'production';
+    const app = await buildAppWithRouter(() => import('../fusion.js') as any);
+    const res = await request(app).post('/fusion/demo/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /demo/reset returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../demo-reset.js") as any);
-    const res = await request(app).post("/demo/reset").send({});
+  it('POST /demo/reset returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../demo-reset.js') as any);
+    const res = await request(app).post('/demo/reset').send({});
     expectBlocked(res);
   });
 
-  it("POST /ownership/seed-preferred-template returns 404 in production", async () => {
-    const app = await buildAppWithRouter(() => import("../ownership-control.js") as any);
-    const res = await request(app).post("/ownership/seed-preferred-template").send({});
+  it('POST /ownership/seed-preferred-template returns 404 in production', async () => {
+    const app = await buildAppWithRouter(() => import('../ownership-control.js') as any);
+    const res = await request(app).post('/ownership/seed-preferred-template').send({});
     expectBlocked(res);
   });
 
-  it("POST /admin/seed (lyte observability seed) returns 404 in production", async () => {
-    const mod: any = await import("../admin/system.js" as any);
+  it('POST /admin/seed (lyte observability seed) returns 404 in production', async () => {
+    const mod: any = await import('../admin/system.js' as any);
     const app = express();
     app.use(express.json());
     const router = express.Router();
     mod.register(router);
     app.use(router);
-    const res = await request(app).post("/admin/seed").send({});
+    const res = await request(app).post('/admin/seed').send({});
     expectBlocked(res);
   });
 
-  it("POST /admin/seed/reset (lyte observability reset) returns 404 in production", async () => {
-    const mod: any = await import("../admin/system.js" as any);
+  it('POST /admin/seed/reset (lyte observability reset) returns 404 in production', async () => {
+    const mod: any = await import('../admin/system.js' as any);
     const app = express();
     app.use(express.json());
     const router = express.Router();
     mod.register(router);
     app.use(router);
-    const res = await request(app).post("/admin/seed/reset").send({});
+    const res = await request(app).post('/admin/seed/reset').send({});
     expectBlocked(res);
   });
 });

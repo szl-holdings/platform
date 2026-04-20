@@ -1,1 +1,1 @@
-export { default } from "./(tabs)/receipts";
+export { default } from './(tabs)/receipts';

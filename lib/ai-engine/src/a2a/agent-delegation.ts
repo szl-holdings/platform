@@ -1,14 +1,14 @@
-import { randomUUID } from "crypto";
-import { callAgent, AGENT_REGISTRY } from "../nuro-mesh.js";
-import { recordDelegationResult, getAgentCard } from "./agent-registry.js";
+import { randomUUID } from 'crypto';
+import { AGENT_REGISTRY, callAgent } from '../nuro-mesh.js';
+import { getAgentCard, recordDelegationResult } from './agent-registry.js';
 
 export type DelegationStatus =
-  | "pending"
-  | "accepted"
-  | "running"
-  | "completed"
-  | "failed"
-  | "rejected";
+  | 'pending'
+  | 'accepted'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'rejected';
 
 export interface DelegationTask {
   taskId: string;
@@ -17,7 +17,7 @@ export interface DelegationTask {
   query: string;
   context: string;
   status: DelegationStatus;
-  priority: "low" | "medium" | "high" | "critical";
+  priority: 'low' | 'medium' | 'high' | 'critical';
   createdAt: string;
   startedAt: string | null;
   completedAt: string | null;
@@ -49,7 +49,7 @@ export async function delegateTask(params: {
   toAgentId: string;
   query: string;
   context?: string;
-  priority?: DelegationTask["priority"];
+  priority?: DelegationTask['priority'];
   parentChain?: string[];
   orgId?: number | null;
   callerUserId?: number | null;
@@ -64,7 +64,7 @@ export async function delegateTask(params: {
   if (!toCard) {
     throw new Error(`Unknown agent: ${params.toAgentId}`);
   }
-  if (toCard.availability === "offline") {
+  if (toCard.availability === 'offline') {
     throw new Error(`Agent ${params.toAgentId} is offline`);
   }
 
@@ -76,9 +76,9 @@ export async function delegateTask(params: {
     fromAgentId: params.fromAgentId,
     toAgentId: params.toAgentId,
     query: params.query,
-    context: params.context ?? "",
-    status: "accepted",
-    priority: params.priority ?? "medium",
+    context: params.context ?? '',
+    status: 'accepted',
+    priority: params.priority ?? 'medium',
     createdAt: now,
     startedAt: null,
     completedAt: null,
@@ -90,16 +90,16 @@ export async function delegateTask(params: {
   activeDelegations.set(taskId, task);
 
   const startTime = Date.now();
-  task.status = "running";
+  task.status = 'running';
   task.startedAt = new Date().toISOString();
 
   try {
-    const agentDef = AGENT_REGISTRY.find(a => a.id === params.toAgentId);
+    const agentDef = AGENT_REGISTRY.find((a) => a.id === params.toAgentId);
     if (!agentDef) throw new Error(`Agent definition not found: ${params.toAgentId}`);
 
-    const agentResult = await callAgent(agentDef, params.query, params.context ?? "", {
+    const agentResult = await callAgent(agentDef, params.query, params.context ?? '', {
       orgId: params.orgId ?? null,
-      action: "a2a_delegation",
+      action: 'a2a_delegation',
       callerUserId: params.callerUserId ?? null,
       callerRoles: params.callerRoles ?? [],
     });
@@ -117,7 +117,7 @@ export async function delegateTask(params: {
       completedAt: new Date().toISOString(),
     };
 
-    task.status = "completed";
+    task.status = 'completed';
     task.completedAt = result.completedAt;
     task.result = result;
 
@@ -130,7 +130,7 @@ export async function delegateTask(params: {
     return result;
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    task.status = "failed";
+    task.status = 'failed';
     task.error = errMsg;
     task.completedAt = new Date().toISOString();
 
@@ -152,25 +152,31 @@ export async function multiDelegateAndMerge(params: {
   orgId?: number | null;
 }): Promise<{ results: DelegationResult[]; mergedSummary: string }> {
   const results = await Promise.allSettled(
-    params.toAgentIds.map(toId =>
+    params.toAgentIds.map((toId) =>
       delegateTask({
         fromAgentId: params.fromAgentId,
         toAgentId: toId,
         query: params.query,
         context: params.context,
         orgId: params.orgId,
-      })
-    )
+      }),
+    ),
   );
 
   const successful: DelegationResult[] = [];
   for (const r of results) {
-    if (r.status === "fulfilled") successful.push(r.value);
+    if (r.status === 'fulfilled') successful.push(r.value);
   }
 
-  const mergedSummary = successful.length === 0
-    ? "[All delegated agents failed to respond]"
-    : successful.map(r => `[${r.toAgentId.toUpperCase()} — ${r.domain} — confidence ${r.confidence}%]\n${r.response}`).join("\n\n---\n\n");
+  const mergedSummary =
+    successful.length === 0
+      ? '[All delegated agents failed to respond]'
+      : successful
+          .map(
+            (r) =>
+              `[${r.toAgentId.toUpperCase()} — ${r.domain} — confidence ${r.confidence}%]\n${r.response}`,
+          )
+          .join('\n\n---\n\n');
 
   return { results: successful, mergedSummary };
 }
@@ -201,21 +207,21 @@ export function getDelegationStats(): {
       byAgent[task.toAgentId] = { delegations: 0, successes: 0, failures: 0 };
     }
     byAgent[task.toAgentId]!.delegations++;
-    if (task.status === "completed") {
+    if (task.status === 'completed') {
       byAgent[task.toAgentId]!.successes++;
       if (task.result?.latencyMs) {
         totalLatency += task.result.latencyMs;
         countWithLatency++;
       }
     }
-    if (task.status === "failed") byAgent[task.toAgentId]!.failures++;
+    if (task.status === 'failed') byAgent[task.toAgentId]!.failures++;
   }
 
   return {
     active: activeDelegations.size,
     totalHistorical: delegationHistory.length,
-    completedCount: delegationHistory.filter(t => t.status === "completed").length,
-    failedCount: delegationHistory.filter(t => t.status === "failed").length,
+    completedCount: delegationHistory.filter((t) => t.status === 'completed').length,
+    failedCount: delegationHistory.filter((t) => t.status === 'failed').length,
     avgLatencyMs: countWithLatency > 0 ? Math.round(totalLatency / countWithLatency) : 0,
     byAgent,
   };

@@ -13,14 +13,14 @@ export interface RawEmbedResponse {
   backendLatencyMs?: number;
 }
 
-export type PoolingStrategy = "cls" | "mean" | "last_token";
+export type PoolingStrategy = 'cls' | 'mean' | 'last_token';
 
-export type TruncationPolicy = "reject" | "truncate";
+export type TruncationPolicy = 'reject' | 'truncate';
 
 export interface EmbeddingBackendDescriptor {
   backendId: string;
   displayName: string;
-  kind: "cpu-local" | "external-http" | "gpu" | "azure";
+  kind: 'cpu-local' | 'external-http' | 'gpu' | 'azure';
   supportedModels: string[];
   maxTokens: number;
   defaultPooling: PoolingStrategy;

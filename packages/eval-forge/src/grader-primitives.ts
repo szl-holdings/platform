@@ -11,9 +11,9 @@ export function fieldScore(
   for (const key of keys) {
     const gt = groundTruth[key];
     const out = output[key];
-    if (typeof gt === "object" && gt !== null && "min" in gt && "max" in gt) {
+    if (typeof gt === 'object' && gt !== null && 'min' in gt && 'max' in gt) {
       const range = gt as { min: number; max: number };
-      const num = typeof out === "number" ? out : 0;
+      const num = typeof out === 'number' ? out : 0;
       if (num >= range.min && num <= range.max) matches++;
       else failures.push(`${key}: [${range.min},${range.max}] got ${num}`);
     } else if (JSON.stringify(out) === JSON.stringify(gt)) {

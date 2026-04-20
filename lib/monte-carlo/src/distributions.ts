@@ -1,32 +1,40 @@
-export type DistributionType = "normal" | "log_normal" | "uniform" | "triangular" | "beta" | "poisson" | "constant" | "custom";
+export type DistributionType =
+  | 'normal'
+  | 'log_normal'
+  | 'uniform'
+  | 'triangular'
+  | 'beta'
+  | 'poisson'
+  | 'constant'
+  | 'custom';
 
 export interface NormalDistribution {
-  type: "normal";
+  type: 'normal';
   mean: number;
   stdDev: number;
 }
 
 export interface LogNormalDistribution {
-  type: "log_normal";
+  type: 'log_normal';
   mean: number;
   stdDev: number;
 }
 
 export interface UniformDistribution {
-  type: "uniform";
+  type: 'uniform';
   min: number;
   max: number;
 }
 
 export interface TriangularDistribution {
-  type: "triangular";
+  type: 'triangular';
   min: number;
   mode: number;
   max: number;
 }
 
 export interface BetaDistribution {
-  type: "beta";
+  type: 'beta';
   alpha: number;
   beta: number;
   min?: number;
@@ -34,17 +42,17 @@ export interface BetaDistribution {
 }
 
 export interface PoissonDistribution {
-  type: "poisson";
+  type: 'poisson';
   lambda: number;
 }
 
 export interface ConstantDistribution {
-  type: "constant";
+  type: 'constant';
   value: number;
 }
 
 export interface CustomDistribution {
-  type: "custom";
+  type: 'custom';
   values: number[];
   weights?: number[];
 }
@@ -76,7 +84,7 @@ function randomBeta(alpha: number, beta: number): number {
 
 function randomGamma(shape: number): number {
   if (shape < 1) {
-    return randomGamma(1 + shape) * Math.pow(Math.random(), 1 / shape);
+    return randomGamma(1 + shape) * Math.random() ** (1 / shape);
   }
   const d = shape - 1 / 3;
   const c = 1 / Math.sqrt(9 * d);
@@ -107,19 +115,21 @@ function randomPoisson(lambda: number): number {
 
 export function sample(dist: Distribution): number {
   switch (dist.type) {
-    case "normal":
+    case 'normal':
       return randomNormal(dist.mean, dist.stdDev);
 
-    case "log_normal": {
-      const lnMean = Math.log(dist.mean * dist.mean / Math.sqrt(dist.stdDev * dist.stdDev + dist.mean * dist.mean));
+    case 'log_normal': {
+      const lnMean = Math.log(
+        (dist.mean * dist.mean) / Math.sqrt(dist.stdDev * dist.stdDev + dist.mean * dist.mean),
+      );
       const lnStd = Math.sqrt(Math.log(1 + (dist.stdDev / dist.mean) * (dist.stdDev / dist.mean)));
       return Math.exp(randomNormal(lnMean, lnStd));
     }
 
-    case "uniform":
+    case 'uniform':
       return dist.min + Math.random() * (dist.max - dist.min);
 
-    case "triangular": {
+    case 'triangular': {
       const u = Math.random();
       const fc = (dist.mode - dist.min) / (dist.max - dist.min);
       if (u < fc) {
@@ -129,20 +139,20 @@ export function sample(dist: Distribution): number {
       }
     }
 
-    case "beta": {
+    case 'beta': {
       const raw = randomBeta(dist.alpha, dist.beta);
       const lo = dist.min ?? 0;
       const hi = dist.max ?? 1;
       return lo + raw * (hi - lo);
     }
 
-    case "poisson":
+    case 'poisson':
       return randomPoisson(dist.lambda);
 
-    case "constant":
+    case 'constant':
       return dist.value;
 
-    case "custom": {
+    case 'custom': {
       if (dist.weights) {
         const totalWeight = dist.weights.reduce((a, b) => a + b, 0);
         let r = Math.random() * totalWeight;

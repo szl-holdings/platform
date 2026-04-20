@@ -12,44 +12,44 @@
 // ─── PRISM Dimensions ────────────────────────────────────────────────────────
 
 export type PRISMDimension =
-  | "revenue"
-  | "staffing"
-  | "infrastructure"
-  | "security"
-  | "market_timing";
+  | 'revenue'
+  | 'staffing'
+  | 'infrastructure'
+  | 'security'
+  | 'market_timing';
 
 export const PRISM_DIMENSION_LABELS: Record<PRISMDimension, string> = {
-  revenue: "Revenue & Pipeline",
-  staffing: "Staffing & Ownership",
-  infrastructure: "Infrastructure & Ops",
-  security: "Security & Compliance",
-  market_timing: "Market Timing",
+  revenue: 'Revenue & Pipeline',
+  staffing: 'Staffing & Ownership',
+  infrastructure: 'Infrastructure & Ops',
+  security: 'Security & Compliance',
+  market_timing: 'Market Timing',
 };
 
 export const PRISM_DIMENSION_ICONS: Record<PRISMDimension, string> = {
-  revenue: "💰",
-  staffing: "👥",
-  infrastructure: "⚙️",
-  security: "🔒",
-  market_timing: "⏱️",
+  revenue: '💰',
+  staffing: '👥',
+  infrastructure: '⚙️',
+  security: '🔒',
+  market_timing: '⏱️',
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type DecisionTwinAction = "approve" | "delay" | "escalate" | "reroute";
+export type DecisionTwinAction = 'approve' | 'delay' | 'escalate' | 'reroute';
 
 export const DECISION_TWIN_ACTION_LABELS: Record<DecisionTwinAction, string> = {
-  approve: "Approve",
-  delay: "Delay",
-  escalate: "Escalate",
-  reroute: "Reroute",
+  approve: 'Approve',
+  delay: 'Delay',
+  escalate: 'Escalate',
+  reroute: 'Reroute',
 };
 
 export const DECISION_TWIN_ACTION_DESCRIPTIONS: Record<DecisionTwinAction, string> = {
-  approve: "Execute the recommendation as proposed — highest expected value path",
-  delay: "Defer action 7–14 days pending additional evidence or stakeholder availability",
-  escalate: "Elevate to executive authority for direct intervention and sponsorship",
-  reroute: "Reassign to alternate owner or workflow path to bypass the current blocker",
+  approve: 'Execute the recommendation as proposed — highest expected value path',
+  delay: 'Defer action 7–14 days pending additional evidence or stakeholder availability',
+  escalate: 'Elevate to executive authority for direct intervention and sponsorship',
+  reroute: 'Reassign to alternate owner or workflow path to bypass the current blocker',
 };
 
 export interface ConfidenceBand {
@@ -93,7 +93,7 @@ export interface DecisionTwinAuditEvent {
   signalId: string;
   scenarioId: string;
   action: DecisionTwinAction;
-  verdict: "accepted" | "rejected" | "modified";
+  verdict: 'accepted' | 'rejected' | 'modified';
   operator: string;
   prismSnapshot: PRISMImpact[];
   overallRiskBefore: number;
@@ -110,7 +110,7 @@ export type TwinAuditPersistenceAdapter = (event: DecisionTwinAuditEvent) => voi
 
 export interface SignalProfile {
   id: string;
-  severity: "critical" | "high" | "medium" | "low";
+  severity: 'critical' | 'high' | 'medium' | 'low';
   type: string;
   confidence: number;
   financialExposureUsd?: number;
@@ -132,17 +132,35 @@ const SEVERITY_BASELINE: Record<string, number> = {
 };
 
 const ACTION_RISK_MULTIPLIER: Record<DecisionTwinAction, Record<PRISMDimension, number>> = {
-  approve:   { revenue: 0.25, staffing: 0.30, infrastructure: 0.35, security: 0.40, market_timing: 0.20 },
-  delay:     { revenue: 0.75, staffing: 0.65, infrastructure: 0.70, security: 0.55, market_timing: 0.90 },
-  escalate:  { revenue: 0.35, staffing: 0.50, infrastructure: 0.55, security: 0.45, market_timing: 0.40 },
-  reroute:   { revenue: 0.45, staffing: 0.40, infrastructure: 0.45, security: 0.50, market_timing: 0.55 },
+  approve: {
+    revenue: 0.25,
+    staffing: 0.3,
+    infrastructure: 0.35,
+    security: 0.4,
+    market_timing: 0.2,
+  },
+  delay: { revenue: 0.75, staffing: 0.65, infrastructure: 0.7, security: 0.55, market_timing: 0.9 },
+  escalate: {
+    revenue: 0.35,
+    staffing: 0.5,
+    infrastructure: 0.55,
+    security: 0.45,
+    market_timing: 0.4,
+  },
+  reroute: {
+    revenue: 0.45,
+    staffing: 0.4,
+    infrastructure: 0.45,
+    security: 0.5,
+    market_timing: 0.55,
+  },
 };
 
 const ACTION_CONFIDENCE_BANDS: Record<DecisionTwinAction, ConfidenceBand> = {
-  approve:  { low: 0.72, mid: 0.82, high: 0.91 },
-  delay:    { low: 0.65, mid: 0.73, high: 0.80 },
-  escalate: { low: 0.70, mid: 0.79, high: 0.88 },
-  reroute:  { low: 0.62, mid: 0.71, high: 0.82 },
+  approve: { low: 0.72, mid: 0.82, high: 0.91 },
+  delay: { low: 0.65, mid: 0.73, high: 0.8 },
+  escalate: { low: 0.7, mid: 0.79, high: 0.88 },
+  reroute: { low: 0.62, mid: 0.71, high: 0.82 },
 };
 
 function clamp(n: number, min = 0, max = 100) {
@@ -156,7 +174,9 @@ function computeDimensionImpact(
   profile: SignalProfile,
 ): PRISMImpact {
   const multiplier = ACTION_RISK_MULTIPLIER[action][dimension];
-  const riskBefore = clamp(baseline + (profile.hasOwnershipGap ? 8 : 0) + (profile.isPolicyBlocked ? 6 : 0));
+  const riskBefore = clamp(
+    baseline + (profile.hasOwnershipGap ? 8 : 0) + (profile.isPolicyBlocked ? 6 : 0),
+  );
   const riskAfter = clamp(riskBefore * multiplier);
   const delta = riskAfter - riskBefore;
 
@@ -178,7 +198,7 @@ function computeDimensionImpact(
     riskBefore,
     riskAfter,
     delta,
-    unit: "risk score",
+    unit: 'risk score',
     confidenceBand,
     evidence,
   };
@@ -205,13 +225,13 @@ function buildDimensionSummary(
       approve: `Clarifies ownership chain immediately. Reduces cross-functional friction by assigning clear accountability.`,
       delay: `Ownership ambiguity compounds over time. Additional stakeholder churn risk increases 12% per week of delay.`,
       escalate: `Executive override resolves authority gap directly. New owner designation within 24–48h is the historical norm.`,
-      reroute: `Reassignment to alternate qualified owner bypasses the blocker. Handoff risk is ${improving ? "manageable" : "elevated"} given current capacity.`,
+      reroute: `Reassignment to alternate qualified owner bypasses the blocker. Handoff risk is ${improving ? 'manageable' : 'elevated'} given current capacity.`,
     },
     infrastructure: {
       approve: `Workflow resumes normal processing state. 3 downstream deliverables unblocked within ${profile.stalledDays ? Math.round(profile.stalledDays * 0.1) : 3} days.`,
       delay: `Blocked workflow accumulates technical debt. Downstream systems remain stalled; data freshness continues to degrade.`,
       escalate: `Override authority unblocks workflow at the policy level. System state normalizes within 1–2 processing cycles.`,
-      reroute: `Alternate workflow path restores processing with ${improving ? "minimal" : "moderate"} disruption. Estimated ${profile.stalledDays ?? 7} day catch-up period.`,
+      reroute: `Alternate workflow path restores processing with ${improving ? 'minimal' : 'moderate'} disruption. Estimated ${profile.stalledDays ?? 7} day catch-up period.`,
     },
     security: {
       approve: `Resolves the policy-blocked state. Audit trail is complete and defensible. No new compliance exposure introduced.`,
@@ -237,49 +257,65 @@ function buildDimensionEvidence(
 ): Array<{ label: string; value: string; source: string }> {
   const base: Array<{ label: string; value: string; source: string }> = [];
 
-  if (dimension === "revenue" && profile.financialExposureUsd) {
+  if (dimension === 'revenue' && profile.financialExposureUsd) {
     base.push({
-      label: "Financial exposure",
+      label: 'Financial exposure',
       value: `$${(profile.financialExposureUsd / 1_000_000).toFixed(1)}M at risk`,
-      source: "Lyte — Revenue Monitor",
+      source: 'Lyte — Revenue Monitor',
     });
   }
-  if (dimension === "staffing" && profile.hasOwnershipGap) {
+  if (dimension === 'staffing' && profile.hasOwnershipGap) {
     base.push({
-      label: "Ownership gap detected",
-      value: "No valid authority holder in approval chain",
-      source: "Lyte — Approval Chain Monitor",
+      label: 'Ownership gap detected',
+      value: 'No valid authority holder in approval chain',
+      source: 'Lyte — Approval Chain Monitor',
     });
   }
-  if (dimension === "market_timing" && profile.stalledDays) {
+  if (dimension === 'market_timing' && profile.stalledDays) {
     base.push({
-      label: "Days stalled",
+      label: 'Days stalled',
       value: `${profile.stalledDays} days (threshold: 21)`,
-      source: "Lyte — Signal Monitor",
+      source: 'Lyte — Signal Monitor',
     });
   }
-  if (dimension === "security" && profile.isPolicyBlocked) {
+  if (dimension === 'security' && profile.isPolicyBlocked) {
     base.push({
-      label: "Policy block active",
-      value: "3 escalation attempts blocked by policy engine",
-      source: "Lyte — Policy Engine",
+      label: 'Policy block active',
+      value: '3 escalation attempts blocked by policy engine',
+      source: 'Lyte — Policy Engine',
     });
   }
 
   base.push({
-    label: "Historical pattern match",
+    label: 'Historical pattern match',
     value: `${Math.round(profile.confidence * 100)}% confidence based on comparable scenarios`,
-    source: "Lyte — Evidence Graph",
+    source: 'Lyte — Evidence Graph',
   });
 
-  if (action === "approve") {
-    base.push({ label: "Recommended action", value: "Highest expected value path per simulation", source: "Decision Twin Engine v1.0" });
-  } else if (action === "delay") {
-    base.push({ label: "Delay risk", value: "Compound stall penalty applies after 7-day threshold", source: "Decision Twin Engine v1.0" });
-  } else if (action === "escalate") {
-    base.push({ label: "Escalation precedent", value: "78% close rate with executive sponsorship at this stage", source: "Lyte — Evidence Graph" });
-  } else if (action === "reroute") {
-    base.push({ label: "Reroute lag", value: "Estimated 10–14 day additional lag for ownership transfer", source: "Decision Twin Engine v1.0" });
+  if (action === 'approve') {
+    base.push({
+      label: 'Recommended action',
+      value: 'Highest expected value path per simulation',
+      source: 'Decision Twin Engine v1.0',
+    });
+  } else if (action === 'delay') {
+    base.push({
+      label: 'Delay risk',
+      value: 'Compound stall penalty applies after 7-day threshold',
+      source: 'Decision Twin Engine v1.0',
+    });
+  } else if (action === 'escalate') {
+    base.push({
+      label: 'Escalation precedent',
+      value: '78% close rate with executive sponsorship at this stage',
+      source: 'Lyte — Evidence Graph',
+    });
+  } else if (action === 'reroute') {
+    base.push({
+      label: 'Reroute lag',
+      value: 'Estimated 10–14 day additional lag for ownership transfer',
+      source: 'Decision Twin Engine v1.0',
+    });
   }
 
   return base;
@@ -287,18 +323,23 @@ function buildDimensionEvidence(
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-export const DECISION_TWIN_ENGINE_VERSION = "1.0.0" as const;
+export const DECISION_TWIN_ENGINE_VERSION = '1.0.0' as const;
 
 export function runDecisionTwin(
   action: DecisionTwinAction,
   profile: SignalProfile,
 ): DecisionTwinScenario {
   const baseline = SEVERITY_BASELINE[profile.severity] ?? 50;
-  const prismImpacts = (["revenue", "staffing", "infrastructure", "security", "market_timing"] as PRISMDimension[])
-    .map(dim => computeDimensionImpact(dim, baseline, action, profile));
+  const prismImpacts = (
+    ['revenue', 'staffing', 'infrastructure', 'security', 'market_timing'] as PRISMDimension[]
+  ).map((dim) => computeDimensionImpact(dim, baseline, action, profile));
 
-  const overallRiskBefore = Math.round(prismImpacts.reduce((s, d) => s + d.riskBefore, 0) / prismImpacts.length);
-  const overallRiskAfter = Math.round(prismImpacts.reduce((s, d) => s + d.riskAfter, 0) / prismImpacts.length);
+  const overallRiskBefore = Math.round(
+    prismImpacts.reduce((s, d) => s + d.riskBefore, 0) / prismImpacts.length,
+  );
+  const overallRiskAfter = Math.round(
+    prismImpacts.reduce((s, d) => s + d.riskAfter, 0) / prismImpacts.length,
+  );
   const overallDelta = overallRiskAfter - overallRiskBefore;
 
   const band = ACTION_CONFIDENCE_BANDS[action];
@@ -322,11 +363,30 @@ export function runDecisionTwin(
     overallRiskAfter,
     overallDelta,
     overallConfidence,
-    timeToImpact: action === "approve" ? "24–48h" : action === "escalate" ? "24–72h" : action === "reroute" ? "7–14d" : "7–14d",
+    timeToImpact:
+      action === 'approve'
+        ? '24–48h'
+        : action === 'escalate'
+          ? '24–72h'
+          : action === 'reroute'
+            ? '7–14d'
+            : '7–14d',
     evidence: [
-      { label: "Signal severity", value: profile.severity.toUpperCase(), source: "Lyte — Signal Monitor" },
-      { label: "Simulation type", value: "Heuristic + historical pattern match", source: "Decision Twin Engine v1.0" },
-      { label: "Data source", value: profile.confidence >= 0.85 ? "Live signal history" : "Demo scenario (scripted)", source: "Lyte Data Policy" },
+      {
+        label: 'Signal severity',
+        value: profile.severity.toUpperCase(),
+        source: 'Lyte — Signal Monitor',
+      },
+      {
+        label: 'Simulation type',
+        value: 'Heuristic + historical pattern match',
+        source: 'Decision Twin Engine v1.0',
+      },
+      {
+        label: 'Data source',
+        value: profile.confidence >= 0.85 ? 'Live signal history' : 'Demo scenario (scripted)',
+        source: 'Lyte Data Policy',
+      },
     ],
     isDemo: profile.confidence < 0.85,
     generatedAt: now,
@@ -335,7 +395,7 @@ export function runDecisionTwin(
 }
 
 export function runAllDecisionTwinScenarios(profile: SignalProfile): DecisionTwinScenario[] {
-  return (["approve", "delay", "escalate", "reroute"] as DecisionTwinAction[]).map(action =>
+  return (['approve', 'delay', 'escalate', 'reroute'] as DecisionTwinAction[]).map((action) =>
     runDecisionTwin(action, profile),
   );
 }
@@ -346,16 +406,16 @@ export function getBestScenario(scenarios: DecisionTwinScenario[]): DecisionTwin
 }
 
 export function riskLabel(score: number): { label: string; color: string } {
-  if (score >= 75) return { label: "Critical", color: "text-red-400" };
-  if (score >= 55) return { label: "High", color: "text-orange-400" };
-  if (score >= 35) return { label: "Moderate", color: "text-amber-400" };
-  return { label: "Low", color: "text-emerald-400" };
+  if (score >= 75) return { label: 'Critical', color: 'text-red-400' };
+  if (score >= 55) return { label: 'High', color: 'text-orange-400' };
+  if (score >= 35) return { label: 'Moderate', color: 'text-amber-400' };
+  return { label: 'Low', color: 'text-emerald-400' };
 }
 
 export function deltaLabel(delta: number): { label: string; color: string } {
-  if (delta <= -20) return { label: `↓${Math.abs(delta)} improved`, color: "text-emerald-400" };
-  if (delta < 0) return { label: `↓${Math.abs(delta)}`, color: "text-emerald-400" };
-  if (delta === 0) return { label: "unchanged", color: "text-amber-400/60" };
-  if (delta <= 10) return { label: `↑${delta}`, color: "text-amber-400" };
-  return { label: `↑${delta} worsened`, color: "text-red-400" };
+  if (delta <= -20) return { label: `↓${Math.abs(delta)} improved`, color: 'text-emerald-400' };
+  if (delta < 0) return { label: `↓${Math.abs(delta)}`, color: 'text-emerald-400' };
+  if (delta === 0) return { label: 'unchanged', color: 'text-amber-400/60' };
+  if (delta <= 10) return { label: `↑${delta}`, color: 'text-amber-400' };
+  return { label: `↑${delta} worsened`, color: 'text-red-400' };
 }

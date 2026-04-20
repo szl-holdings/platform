@@ -1,21 +1,21 @@
-import { z } from "zod";
-import { PolicyTierSchema } from "./tiers.js";
+import { z } from 'zod';
+import { PolicyTierSchema } from './tiers.js';
 
 export const RuleConditionSchema = z.object({
   field: z.string(),
-  operator: z.enum(["eq", "neq", "in", "nin", "gt", "lt", "gte", "lte", "matches", "exists"]),
+  operator: z.enum(['eq', 'neq', 'in', 'nin', 'gt', 'lt', 'gte', 'lte', 'matches', 'exists']),
   value: z.unknown(),
 });
 
 export const RuleActionSchema = z.enum([
-  "allow",
-  "deny",
-  "require-approval",
-  "require-dual-approval",
-  "log",
-  "redact",
-  "escalate",
-  "block",
+  'allow',
+  'deny',
+  'require-approval',
+  'require-dual-approval',
+  'log',
+  'redact',
+  'escalate',
+  'block',
 ]);
 
 export const GuardianRuleSchema = z.object({
@@ -58,17 +58,17 @@ export const DecisionRequestSchema = z.object({
 });
 
 export const EvaluateOutcomeSchema = z.enum([
-  "allow",
-  "require-approval",
-  "require-dual-approval",
-  "block",
+  'allow',
+  'require-approval',
+  'require-dual-approval',
+  'block',
 ]);
 
 export type EvaluateOutcome = z.infer<typeof EvaluateOutcomeSchema>;
 
 export const DecisionResultSchema = z.object({
   requestId: z.string(),
-  outcome: z.enum(["allow", "deny", "require-approval", "require-dual-approval"]),
+  outcome: z.enum(['allow', 'deny', 'require-approval', 'require-dual-approval']),
   matchedRuleId: z.string().optional(),
   reason: z.string(),
   requiredApprovers: z.array(z.string()).default([]),
@@ -122,7 +122,7 @@ export const RollbackEventSchema = z.object({
   tier: PolicyTierSchema,
   triggeredBy: z.string(),
   reason: z.string(),
-  status: z.enum(["pending", "in-progress", "completed", "failed"]),
+  status: z.enum(['pending', 'in-progress', 'completed', 'failed']),
   metadata: z.record(z.unknown()).default({}),
   createdAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
@@ -137,16 +137,20 @@ export const ApprovalRequestSchema = z.object({
   tier: PolicyTierSchema,
   action: z.string(),
   toolId: z.string().optional(),
-  approvalType: z.enum(["single", "dual"]),
-  status: z.enum(["pending", "approved", "rejected", "expired", "cancelled"]),
+  approvalType: z.enum(['single', 'dual']),
+  status: z.enum(['pending', 'approved', 'rejected', 'expired', 'cancelled']),
   requiredApprovers: z.array(z.string()).default([]),
-  approvals: z.array(z.object({
-    approverId: z.string(),
-    approverRole: z.string().optional(),
-    decision: z.enum(["approved", "rejected"]),
-    note: z.string().optional(),
-    decidedAt: z.string().datetime(),
-  })).default([]),
+  approvals: z
+    .array(
+      z.object({
+        approverId: z.string(),
+        approverRole: z.string().optional(),
+        decision: z.enum(['approved', 'rejected']),
+        note: z.string().optional(),
+        decidedAt: z.string().datetime(),
+      }),
+    )
+    .default([]),
   payload: z.record(z.unknown()).default({}),
   expiresAt: z.string().datetime().optional(),
   createdAt: z.string().datetime(),

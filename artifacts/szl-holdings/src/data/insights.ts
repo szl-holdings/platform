@@ -14,30 +14,30 @@ export interface InsightArticle {
 }
 
 export const CATEGORIES = [
-  "All",
-  "Maritime Intelligence",
-  "Cybersecurity",
-  "AI/ML",
-  "Real Estate",
-  "Creative Tech",
-  "Operations",
-  "Annual Letter",
+  'All',
+  'Maritime Intelligence',
+  'Cybersecurity',
+  'AI/ML',
+  'Real Estate',
+  'Creative Tech',
+  'Operations',
+  'Annual Letter',
 ] as const;
 
 export const insights: InsightArticle[] = [
   {
-    slug: "state-of-the-ecosystem-2026",
-    title: "State of the Ecosystem: 2026 Annual Letter",
-    category: "Annual Letter",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "March 30, 2026",
+    slug: 'state-of-the-ecosystem-2026',
+    title: 'State of the Ecosystem: 2026 Annual Letter',
+    category: 'Annual Letter',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'March 30, 2026',
     readTime: 18,
     featured: true,
     flagship: true,
-    tags: ["Annual Letter", "Portfolio", "Strategy", "AI"],
+    tags: ['Annual Letter', 'Portfolio', 'Strategy', 'AI'],
     excerpt:
-      "Five years into building SZL Holdings, we have crossed thresholds that demand honesty — both about what we got right and where the harder work remains. This is that accounting.",
+      'Five years into building SZL Holdings, we have crossed thresholds that demand honesty — both about what we got right and where the harder work remains. This is that accounting.',
     content: `# State of the Ecosystem: 2026 Annual Letter
 
 *To our partners, portfolio operators, and the broader SZL community —*
@@ -108,18 +108,18 @@ More to come.
 *SZL Holdings · March 2026*`,
   },
   {
-    slug: "dark-vessel-activity-maritime-ai",
+    slug: 'dark-vessel-activity-maritime-ai',
     title: "Dark Vessel Activity Is Up 340% — Here's What AI Can See That Humans Can't",
-    category: "Maritime Intelligence",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "March 12, 2026",
+    category: 'Maritime Intelligence',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'March 12, 2026',
     readTime: 9,
     featured: false,
     flagship: false,
-    tags: ["Maritime", "AIS", "AI", "Geopolitics", "Sanctions"],
+    tags: ['Maritime', 'AIS', 'AI', 'Geopolitics', 'Sanctions'],
     excerpt:
-      "Since 2022, the number of vessels going dark — disabling AIS transponders, spoofing location data, or shadow-transferring cargo — has increased by 340%. AI-native maritime intelligence is the only system that can see what traditional oversight cannot.",
+      'Since 2022, the number of vessels going dark — disabling AIS transponders, spoofing location data, or shadow-transferring cargo — has increased by 340%. AI-native maritime intelligence is the only system that can see what traditional oversight cannot.',
     content: `# Dark Vessel Activity Is Up 340% — Here's What AI Can See That Humans Can't
 
 Since 2022, the number of vessels going dark — disabling AIS transponders, spoofing location data, or shadow-transferring cargo at sea — has increased by 340%. The number of sanctioned entities attempting maritime deception has grown proportionally. And the human analysts tasked with catching them are overwhelmed.
@@ -167,18 +167,18 @@ The geopolitical pressure on maritime supply chains is not going to decrease. Ru
 *The intelligence gap is closing. The only question is which side closes it first.*`,
   },
   {
-    slug: "continuous-red-team-the-new-baseline",
-    title: "Why Continuous Adversarial Simulation Is the New Baseline for Enterprise Security",
-    category: "Cybersecurity",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "February 28, 2026",
+    slug: 'continuous-red-team-the-new-baseline',
+    title: 'Why Continuous Adversarial Simulation Is the New Baseline for Enterprise Security',
+    category: 'Cybersecurity',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'February 28, 2026',
     readTime: 10,
     featured: false,
     flagship: false,
-    tags: ["Cybersecurity", "Red Team", "AI", "MITRE", "Enterprise Security"],
+    tags: ['Cybersecurity', 'Red Team', 'AI', 'MITRE', 'Enterprise Security'],
     excerpt:
-      "The traditional annual penetration test is a snapshot of your security posture at a single moment in time. The adversary is testing your defenses continuously. The only rational response is to test them continuously too.",
+      'The traditional annual penetration test is a snapshot of your security posture at a single moment in time. The adversary is testing your defenses continuously. The only rational response is to test them continuously too.',
     content: `# Why Continuous Adversarial Simulation Is the New Baseline for Enterprise Security
 
 The annual penetration test has been the dominant security validation model for thirty years. For thirty years, that has been the wrong model — and most CISOs have known it. The problem was never analytical: everyone understands that testing your defenses once a year while the threat landscape changes daily is suboptimal. The problem was operational: continuous red team simulation was too expensive, too slow, and too dependent on scarce human expertise to be practical at enterprise scale.
@@ -222,18 +222,18 @@ The organizations that make the shift to continuous adversarial simulation now w
 *The adversary is already operating continuously. The only rational response is to match tempo.*`,
   },
   {
-    slug: "llm-evaluation-the-missing-infrastructure",
-    title: "LLM Evaluation Is the Missing Infrastructure Layer of the AI Era",
-    category: "AI/ML",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "February 10, 2026",
+    slug: 'llm-evaluation-the-missing-infrastructure',
+    title: 'LLM Evaluation Is the Missing Infrastructure Layer of the AI Era',
+    category: 'AI/ML',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'February 10, 2026',
     readTime: 11,
     featured: false,
     flagship: false,
-    tags: ["AI", "LLM", "Evaluation", "Model Governance", "Enterprise AI"],
+    tags: ['AI', 'LLM', 'Evaluation', 'Model Governance', 'Enterprise AI'],
     excerpt:
-      "Every enterprise deploying AI at scale is flying partially blind. Benchmark scores tell you how a model performs on standardized tasks. They tell you almost nothing about how it performs on your proprietary data, in your operational context, under your risk constraints.",
+      'Every enterprise deploying AI at scale is flying partially blind. Benchmark scores tell you how a model performs on standardized tasks. They tell you almost nothing about how it performs on your proprietary data, in your operational context, under your risk constraints.',
     content: `# LLM Evaluation Is the Missing Infrastructure Layer of the AI Era
 
 Every enterprise deploying AI at scale is flying partially blind.
@@ -297,18 +297,18 @@ The enterprise AI deployment wave is happening. It is not a future event. Fortun
 *The companies that build rigorous evaluation infrastructure now will be the ones who can deploy AI confidently, compliantly, and quickly when their competitors are still stuck in risk-committee limbo.*`,
   },
   {
-    slug: "climate-risk-commercial-real-estate",
-    title: "Climate Risk Is the Next Pricing Crisis in Commercial Real Estate",
-    category: "Real Estate",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "January 22, 2026",
+    slug: 'climate-risk-commercial-real-estate',
+    title: 'Climate Risk Is the Next Pricing Crisis in Commercial Real Estate',
+    category: 'Real Estate',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'January 22, 2026',
     readTime: 8,
     featured: false,
     flagship: false,
-    tags: ["Real Estate", "Climate Risk", "CRE", "AI", "Insurance"],
+    tags: ['Real Estate', 'Climate Risk', 'CRE', 'AI', 'Insurance'],
     excerpt:
-      "The commercial real estate industry is approaching a climate risk reckoning. Insurance is being withdrawn from coastal and flood-prone markets faster than pricing models can adjust. AI-native intelligence platforms are the only way to price what the market is currently mispricing.",
+      'The commercial real estate industry is approaching a climate risk reckoning. Insurance is being withdrawn from coastal and flood-prone markets faster than pricing models can adjust. AI-native intelligence platforms are the only way to price what the market is currently mispricing.',
     content: `# Climate Risk Is the Next Pricing Crisis in Commercial Real Estate
 
 The commercial real estate industry is approaching a climate risk reckoning that most participants are not prepared for — and the lack of preparation is not due to ignorance. It is due to a fundamental absence of tools that can price physical climate risk at the asset level, across a portfolio, in a way that is operationally integrated rather than a separate analytical exercise.
@@ -346,18 +346,18 @@ The commercial real estate market is at the beginning of a climate risk repricin
 *The buildings haven't changed. The risk models have.*`,
   },
   {
-    slug: "ai-native-creative-production",
-    title: "The Creative Production Stack Is Being Rebuilt From Scratch",
-    category: "Creative Tech",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "January 8, 2026",
+    slug: 'ai-native-creative-production',
+    title: 'The Creative Production Stack Is Being Rebuilt From Scratch',
+    category: 'Creative Tech',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'January 8, 2026',
     readTime: 9,
     featured: false,
     flagship: false,
-    tags: ["Creative Tech", "AI", "Production", "Media", "Brand Intelligence"],
+    tags: ['Creative Tech', 'AI', 'Production', 'Media', 'Brand Intelligence'],
     excerpt:
-      "The media and entertainment industry spent the last decade moving creative production to the cloud. The next decade will rebuild those cloud-based workflows with AI-native architecture. The platforms that own this transition will capture a market that the prior generation of creative SaaS was never designed to serve.",
+      'The media and entertainment industry spent the last decade moving creative production to the cloud. The next decade will rebuild those cloud-based workflows with AI-native architecture. The platforms that own this transition will capture a market that the prior generation of creative SaaS was never designed to serve.',
     content: `# The Creative Production Stack Is Being Rebuilt From Scratch
 
 The media and entertainment industry has spent the last decade moving creative production workflows to the cloud. File storage, collaborative editing, asset management, distribution — all of it migrated from on-premise infrastructure to cloud-native SaaS platforms. That migration is largely complete.
@@ -397,18 +397,18 @@ The commercial opportunity is the inverse of the cloud migration playbook. Cloud
 *The creative stack is being rebuilt. The question is whether you're building the new stack or defending the old one.*`,
   },
   {
-    slug: "aiops-autonomy-gap",
-    title: "The AIOps Autonomy Gap: Why Detection Without Remediation Is Half a Solution",
-    category: "Operations",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "December 15, 2025",
+    slug: 'aiops-autonomy-gap',
+    title: 'The AIOps Autonomy Gap: Why Detection Without Remediation Is Half a Solution',
+    category: 'Operations',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'December 15, 2025',
     readTime: 10,
     featured: false,
     flagship: false,
-    tags: ["AIOps", "Operations", "AI", "Observability", "Automation"],
+    tags: ['AIOps', 'Operations', 'AI', 'Observability', 'Automation'],
     excerpt:
-      "The first generation of AIOps platforms solved the signal problem. They reduced alert noise, surfaced high-priority incidents, and gave operations teams better visibility. The problem is that better visibility without autonomous action is just a faster way of knowing you have a problem.",
+      'The first generation of AIOps platforms solved the signal problem. They reduced alert noise, surfaced high-priority incidents, and gave operations teams better visibility. The problem is that better visibility without autonomous action is just a faster way of knowing you have a problem.',
     content: `# The AIOps Autonomy Gap: Why Detection Without Remediation Is Half a Solution
 
 The first generation of AIOps platforms solved the signal problem. They took the overwhelming flood of monitoring data — alerts from infrastructure, applications, networks, security tools, business process monitors — and applied machine learning to reduce noise, correlate related events, and surface genuinely high-priority incidents. In a world where operations teams were drowning in false positives, this was valuable.
@@ -456,16 +456,16 @@ The operational pressure to close this gap is not going to decrease. IT team hea
 *Detection is where AIOps started. Remediation is where it ends.*`,
   },
   {
-    slug: "what-business-observability-actually-means",
+    slug: 'what-business-observability-actually-means',
     title: "What Business Observability Actually Means — And Why It's Not Another Dashboard",
-    category: "Operations",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "March 20, 2026",
+    category: 'Operations',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'March 20, 2026',
     readTime: 10,
     featured: false,
     flagship: false,
-    tags: ["Business Observability", "Lyte", "Operations", "Enterprise Software"],
+    tags: ['Business Observability', 'Lyte', 'Operations', 'Enterprise Software'],
     excerpt:
       "Business observability is not a dashboard. It is not a reporting layer. It is the infrastructure that tells you what is stuck, what is at risk, and what will break — before anyone notices. Here's what that actually means in practice.",
     content: `# What Business Observability Actually Means — And Why It's Not Another Dashboard
@@ -523,18 +523,18 @@ The organizations that resist instrumentation — usually on the grounds that it
 *The weekly review is not a detection system. It is a postmortem — scheduled in advance.*`,
   },
   {
-    slug: "ai-operations-the-missing-accountability-layer",
-    title: "AI Operations: The Missing Accountability Layer That Will Define Enterprise AI Success",
-    category: "AI/ML",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "March 5, 2026",
+    slug: 'ai-operations-the-missing-accountability-layer',
+    title: 'AI Operations: The Missing Accountability Layer That Will Define Enterprise AI Success',
+    category: 'AI/ML',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'March 5, 2026',
     readTime: 12,
     featured: false,
     flagship: false,
-    tags: ["AI Operations", "Alloy", "Enterprise AI", "Governance", "Workflow Automation"],
+    tags: ['AI Operations', 'Alloy', 'Enterprise AI', 'Governance', 'Workflow Automation'],
     excerpt:
-      "The enterprise AI wave has produced a generation of companies with impressive demo capabilities and fragile production deployments. The missing layer is not better models — it is the accountability infrastructure that makes AI-driven decisions auditable, explainable, and recoverable.",
+      'The enterprise AI wave has produced a generation of companies with impressive demo capabilities and fragile production deployments. The missing layer is not better models — it is the accountability infrastructure that makes AI-driven decisions auditable, explainable, and recoverable.',
     content: `# AI Operations: The Missing Accountability Layer That Will Define Enterprise AI Success
 
 The enterprise AI conversation has been dominated by two narratives: the capability narrative (look how impressive the models are) and the risk narrative (look how dangerous the models are). Both are real. Neither addresses the fundamental problem that is actually limiting enterprise AI adoption at scale.
@@ -592,18 +592,19 @@ This is the direction the market is moving. The platforms that will win enterpri
 *The capability is table stakes. The accountability layer is the moat.*`,
   },
   {
-    slug: "enterprise-architecture-the-platform-thesis",
-    title: "Enterprise Architecture and the Platform Thesis: Why the Next Decade Rewards Vertical Integration",
-    category: "Operations",
-    author: "Stephen Lutar",
-    authorTitle: "Founder & Managing Partner, SZL Holdings",
-    date: "February 18, 2026",
+    slug: 'enterprise-architecture-the-platform-thesis',
+    title:
+      'Enterprise Architecture and the Platform Thesis: Why the Next Decade Rewards Vertical Integration',
+    category: 'Operations',
+    author: 'Stephen Lutar',
+    authorTitle: 'Founder & Managing Partner, SZL Holdings',
+    date: 'February 18, 2026',
     readTime: 13,
     featured: false,
     flagship: false,
-    tags: ["Enterprise Architecture", "Platform Strategy", "Vertical Integration", "SZL Holdings"],
+    tags: ['Enterprise Architecture', 'Platform Strategy', 'Vertical Integration', 'SZL Holdings'],
     excerpt:
-      "The SaaS era taught enterprises to buy point solutions for every function. The AI era is revealing the cost of that fragmentation. The companies that will define the next decade of enterprise software are building integrated platforms — not better single-purpose tools.",
+      'The SaaS era taught enterprises to buy point solutions for every function. The AI era is revealing the cost of that fragmentation. The companies that will define the next decade of enterprise software are building integrated platforms — not better single-purpose tools.',
     content: `# Enterprise Architecture and the Platform Thesis: Why the Next Decade Rewards Vertical Integration
 
 The dominant enterprise software architecture of the last two decades was built on a simple premise: buy the best tool for each function, and integrate them. Best-in-class CRM. Best-in-class ERP. Best-in-class procurement. Best-in-class ITSM. Connect them with APIs, hire integration teams to maintain the connections, and accept the coordination overhead as the cost of functional excellence.
@@ -669,7 +670,7 @@ export function getInsightBySlug(slug: string): InsightArticle | undefined {
 }
 
 export function getInsightsByCategory(category: string): InsightArticle[] {
-  if (category === "All") return insights;
+  if (category === 'All') return insights;
   return insights.filter((i) => i.category === category);
 }
 
@@ -682,7 +683,14 @@ export function getRelatedInsights(slug: string, limit = 3): InsightArticle[] {
     .concat(
       insights
         .filter((i) => i.slug !== slug && i.category !== current.category)
-        .slice(0, Math.max(0, limit - insights.filter((i) => i.slug !== slug && i.category === current.category).length))
+        .slice(
+          0,
+          Math.max(
+            0,
+            limit -
+              insights.filter((i) => i.slug !== slug && i.category === current.category).length,
+          ),
+        ),
     )
     .slice(0, limit);
 }

@@ -1,5 +1,5 @@
-import { DomainCard } from "./domain-card";
-import type { DomainData } from "../types";
+import type { DomainData } from '../types';
+import { DomainCard } from './domain-card';
 
 interface DomainGridProps {
   domains: DomainData[];

@@ -9,9 +9,17 @@
  * - Normalization → ontology entity ingestion pipeline
  */
 
-import type { BaseFeedAdapter, FeedHealthStatus, NormalizedFeedPayload, PollResult } from "./feed-adapter.js";
-import { fusionEngine } from "./fusion-engine.js";
-import type { OntologyEntity, OntologyRelationship } from "@szl-holdings/ai-engine/ontology/ontology-engine";
+import type {
+  OntologyEntity,
+  OntologyRelationship,
+} from '@szl-holdings/ai-engine/ontology/ontology-engine';
+import type {
+  BaseFeedAdapter,
+  FeedHealthStatus,
+  NormalizedFeedPayload,
+  PollResult,
+} from './feed-adapter.js';
+import { fusionEngine } from './fusion-engine.js';
 
 export interface SchedulerConfig {
   maxConcurrentPolls: number;
@@ -30,8 +38,8 @@ export interface FeedRegistration {
 }
 
 type EntityIngestionFn = (
-  entities: NormalizedFeedPayload["entities"],
-  relationships: NormalizedFeedPayload["relationships"],
+  entities: NormalizedFeedPayload['entities'],
+  relationships: NormalizedFeedPayload['relationships'],
   source: string,
 ) => Promise<{ entitiesUpserted: OntologyEntity[]; relationshipsCreated: OntologyRelationship[] }>;
 
@@ -62,7 +70,10 @@ export class FeedScheduler {
   private entityIngestionFn: EntityIngestionFn | null = null;
   private isStarted = false;
   private ingestionHistory = new Map<string, FeedIngestionEvent[]>();
-  private ingestionTotals = new Map<string, { totalCreated: number; totalMerged: number; lastIngestedAt: string | null }>();
+  private ingestionTotals = new Map<
+    string,
+    { totalCreated: number; totalMerged: number; lastIngestedAt: string | null }
+  >();
 
   constructor(config: Partial<SchedulerConfig> = {}) {
     this.config = {
@@ -78,7 +89,8 @@ export class FeedScheduler {
 
   register(adapter: BaseFeedAdapter, overridePollIntervalMs?: number): void {
     const health = adapter.getHealth();
-    const pollIntervalMs = overridePollIntervalMs ?? adapter["config"]?.pollIntervalMs ?? 5 * 60 * 1000;
+    const pollIntervalMs =
+      overridePollIntervalMs ?? adapter['config']?.pollIntervalMs ?? 5 * 60 * 1000;
 
     this.feeds.set(health.feedId, {
       adapter,
@@ -86,11 +98,13 @@ export class FeedScheduler {
       lastPollAt: 0,
       nextPollAt: Date.now() + Math.random() * 30000,
       isPolling: false,
-      enabled: adapter["config"]?.enabled ?? true,
+      enabled: adapter['config']?.enabled ?? true,
       totalPollResults: [],
     });
 
-    console.log(`[FeedScheduler] Registered feed: ${health.feedName} (poll every ${Math.round(pollIntervalMs / 1000)}s)`);
+    console.log(
+      `[FeedScheduler] Registered feed: ${health.feedName} (poll every ${Math.round(pollIntervalMs / 1000)}s)`,
+    );
   }
 
   async start(): Promise<void> {
@@ -101,7 +115,10 @@ export class FeedScheduler {
       try {
         await reg.adapter.connect();
       } catch (err) {
-        console.warn(`[FeedScheduler] Failed to connect feed ${reg.adapter.getHealth().feedId}:`, err instanceof Error ? err.message : err);
+        console.warn(
+          `[FeedScheduler] Failed to connect feed ${reg.adapter.getHealth().feedId}:`,
+          err instanceof Error ? err.message : err,
+        );
       }
     }
 
@@ -126,7 +143,7 @@ export class FeedScheduler {
       this.healthInterval = null;
     }
     this.isStarted = false;
-    console.log("[FeedScheduler] Stopped");
+    console.log('[FeedScheduler] Stopped');
   }
 
   async triggerPoll(feedId: string): Promise<PollResult | null> {
@@ -153,7 +170,9 @@ export class FeedScheduler {
 
   private async pollFeed(feedId: string, reg: FeedRegistration): Promise<PollResult | null> {
     if (reg.isPolling) {
-      console.warn(`[FeedScheduler:${feedId}] Backpressure detected — skipping poll (previous still running)`);
+      console.warn(
+        `[FeedScheduler:${feedId}] Backpressure detected — skipping poll (previous still running)`,
+      );
       return null;
     }
 
@@ -168,21 +187,31 @@ export class FeedScheduler {
       reg.totalPollResults.push(result);
       if (reg.totalPollResults.length > 100) reg.totalPollResults.shift();
 
-      if (result.success && result.payload && this.config.entityIngestionEnabled && this.entityIngestionFn) {
+      if (
+        result.success &&
+        result.payload &&
+        this.config.entityIngestionEnabled &&
+        this.entityIngestionFn
+      ) {
         await this.ingestPayload(result.payload);
       }
 
       if (!result.success) {
         const health = reg.adapter.getHealth();
         if (health.consecutiveFailures >= 5) {
-          console.error(`[FeedScheduler:${feedId}] ${health.consecutiveFailures} consecutive failures — feed may be down`);
+          console.error(
+            `[FeedScheduler:${feedId}] ${health.consecutiveFailures} consecutive failures — feed may be down`,
+          );
           reg.nextPollAt = Date.now() + Math.min(reg.pollIntervalMs * 4, 4 * 60 * 60 * 1000);
         }
       }
 
       return result;
     } catch (err) {
-      console.error(`[FeedScheduler:${feedId}] Unhandled poll error:`, err instanceof Error ? err.message : err);
+      console.error(
+        `[FeedScheduler:${feedId}] Unhandled poll error:`,
+        err instanceof Error ? err.message : err,
+      );
       reg.nextPollAt = Date.now() + reg.pollIntervalMs;
       return null;
     } finally {
@@ -202,14 +231,14 @@ export class FeedScheduler {
       );
 
       if (entitiesUpserted.length > 0) {
-        const entityMap = new Map(entitiesUpserted.map(e => [e.id, e]));
+        const entityMap = new Map(entitiesUpserted.map((e) => [e.id, e]));
 
         for (const entity of entitiesUpserted) {
           const entityRels = relationshipsCreated.filter(
-            r => r.fromEntityId === entity.id || r.toEntityId === entity.id,
+            (r) => r.fromEntityId === entity.id || r.toEntityId === entity.id,
           );
           const connected = entityRels
-            .map(r => {
+            .map((r) => {
               const otherId = r.fromEntityId === entity.id ? r.toEntityId : r.fromEntityId;
               return entityMap.get(otherId);
             })
@@ -224,12 +253,15 @@ export class FeedScheduler {
         }
       }
     } catch (err) {
-      console.warn(`[FeedScheduler] Ingestion error for feed ${payload.feedId}:`, err instanceof Error ? err.message : err);
+      console.warn(
+        `[FeedScheduler] Ingestion error for feed ${payload.feedId}:`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
 
   getAllHealth(): FeedHealthStatus[] {
-    return [...this.feeds.values()].map(reg => reg.adapter.getHealth());
+    return [...this.feeds.values()].map((reg) => reg.adapter.getHealth());
   }
 
   getFeedHealth(feedId: string): FeedHealthStatus | null {
@@ -240,7 +272,13 @@ export class FeedScheduler {
     isStarted: boolean;
     activePolls: number;
     feedCount: number;
-    feedStatuses: Array<{ feedId: string; feedName: string; status: string; enabled: boolean; nextPollIn: number }>;
+    feedStatuses: Array<{
+      feedId: string;
+      feedName: string;
+      status: string;
+      enabled: boolean;
+      nextPollIn: number;
+    }>;
   } {
     const now = Date.now();
     return {
@@ -261,7 +299,10 @@ export class FeedScheduler {
     return this.feeds.get(feedId)?.enabled ?? false;
   }
 
-  recordIngestion(feedId: string, event: Omit<FeedIngestionEvent, "pollAt"> & { pollAt?: string }): void {
+  recordIngestion(
+    feedId: string,
+    event: Omit<FeedIngestionEvent, 'pollAt'> & { pollAt?: string },
+  ): void {
     const pollAt = event.pollAt ?? new Date().toISOString();
     const entry: FeedIngestionEvent = {
       pollAt,
@@ -276,7 +317,11 @@ export class FeedScheduler {
     if (history.length > INGESTION_HISTORY_LIMIT) history.shift();
     this.ingestionHistory.set(feedId, history);
 
-    const totals = this.ingestionTotals.get(feedId) ?? { totalCreated: 0, totalMerged: 0, lastIngestedAt: null };
+    const totals = this.ingestionTotals.get(feedId) ?? {
+      totalCreated: 0,
+      totalMerged: 0,
+      lastIngestedAt: null,
+    };
     totals.totalCreated += entry.entitiesCreated;
     totals.totalMerged += entry.entitiesMerged;
     totals.lastIngestedAt = pollAt;
@@ -284,7 +329,11 @@ export class FeedScheduler {
   }
 
   getIngestionSummary(feedId: string): FeedIngestionSummary {
-    const totals = this.ingestionTotals.get(feedId) ?? { totalCreated: 0, totalMerged: 0, lastIngestedAt: null };
+    const totals = this.ingestionTotals.get(feedId) ?? {
+      totalCreated: 0,
+      totalMerged: 0,
+      lastIngestedAt: null,
+    };
     return {
       feedId,
       totalCreated: totals.totalCreated,
@@ -302,7 +351,7 @@ export class FeedScheduler {
     const reg = this.feeds.get(feedId);
     if (!reg) return false;
     reg.enabled = enabled;
-    console.log(`[FeedScheduler] Feed ${feedId} ${enabled ? "enabled" : "disabled"}`);
+    console.log(`[FeedScheduler] Feed ${feedId} ${enabled ? 'enabled' : 'disabled'}`);
     return true;
   }
 
@@ -326,11 +375,13 @@ export class FeedScheduler {
     let degraded = 0;
     let failed = 0;
     for (const r of results) {
-      if (r.status === "fulfilled") {
+      if (r.status === 'fulfilled') {
         if (r.value.ok) healthy++;
         else {
           degraded++;
-          console.warn(`[FeedScheduler:HealthCheck] Feed ${r.value.feedId} health probe failed: ${r.value.error}`);
+          console.warn(
+            `[FeedScheduler:HealthCheck] Feed ${r.value.feedId} health probe failed: ${r.value.error}`,
+          );
         }
       } else {
         failed++;
@@ -338,7 +389,7 @@ export class FeedScheduler {
     }
 
     const all = this.getAllHealth();
-    const down = all.filter(h => h.status === "down").length;
+    const down = all.filter((h) => h.status === 'down').length;
     console.log(
       `[FeedScheduler:Health] ${all.length} feeds — probe ok: ${healthy}, probe failed: ${degraded + failed}, down: ${down} | active polls: ${this.activePolls}`,
     );

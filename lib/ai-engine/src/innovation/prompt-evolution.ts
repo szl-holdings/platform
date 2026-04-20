@@ -6,17 +6,17 @@
  * Auto-applies low-risk refinements (narrowing existing expertise);
  * flags significant changes for human review.
  */
-import { openai } from "../providers/openai/index.js";
+import { openai } from '../providers/openai/index.js';
 
 export interface PromptEvolutionProposal {
   agentId: string;
   agentName: string;
   currentPromptHash: string;
-  refinementType: "narrow_expertise" | "add_specialty" | "remove_weakness" | "calibrate_tone";
+  refinementType: 'narrow_expertise' | 'add_specialty' | 'remove_weakness' | 'calibrate_tone';
   proposedAddition: string;
   proposedRemoval: string | null;
   rationale: string;
-  riskLevel: "low" | "medium" | "high";
+  riskLevel: 'low' | 'medium' | 'high';
   expectedConfidenceImpact: number;
   requiresHumanReview: boolean;
 }
@@ -35,7 +35,7 @@ function hashPrompt(prompt: string): string {
   let hash = 0;
   for (let i = 0; i < prompt.length; i++) {
     const char = prompt.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16).slice(0, 8);
@@ -85,35 +85,49 @@ Respond with JSON:
 Keep changes minimal and precise. Low-risk = narrow existing focus. High-risk = changes core behavior.`;
 
     const result = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       max_completion_tokens: 512,
-      messages: [{ role: "user", content: analysisPrompt }],
-      response_format: { type: "json_object" },
+      messages: [{ role: 'user', content: analysisPrompt }],
+      response_format: { type: 'json_object' },
     });
 
-    const raw = result.choices[0]?.message?.content ?? "{}";
+    const raw = result.choices[0]?.message?.content ?? '{}';
     let parsed: Record<string, unknown> = {};
-    try { parsed = JSON.parse(raw) as Record<string, unknown>; } catch { return null; }
+    try {
+      parsed = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
 
-    const riskLevel = (["low", "medium", "high"].includes(String(parsed.riskLevel)) ? parsed.riskLevel : "medium") as PromptEvolutionProposal["riskLevel"];
-    const refinementType = (["narrow_expertise", "add_specialty", "remove_weakness", "calibrate_tone"].includes(String(parsed.refinementType))
-      ? parsed.refinementType : "narrow_expertise") as PromptEvolutionProposal["refinementType"];
+    const riskLevel = (
+      ['low', 'medium', 'high'].includes(String(parsed.riskLevel)) ? parsed.riskLevel : 'medium'
+    ) as PromptEvolutionProposal['riskLevel'];
+    const refinementType = (
+      ['narrow_expertise', 'add_specialty', 'remove_weakness', 'calibrate_tone'].includes(
+        String(parsed.refinementType),
+      )
+        ? parsed.refinementType
+        : 'narrow_expertise'
+    ) as PromptEvolutionProposal['refinementType'];
 
     const proposal: PromptEvolutionProposal = {
       agentId,
       agentName,
       currentPromptHash: hashPrompt(currentPrompt),
       refinementType,
-      proposedAddition: String(parsed.proposedAddition ?? "").slice(0, 200),
+      proposedAddition: String(parsed.proposedAddition ?? '').slice(0, 200),
       proposedRemoval: parsed.proposedRemoval ? String(parsed.proposedRemoval).slice(0, 100) : null,
-      rationale: String(parsed.rationale ?? "Performance-driven refinement").slice(0, 300),
+      rationale: String(parsed.rationale ?? 'Performance-driven refinement').slice(0, 300),
       riskLevel,
-      expectedConfidenceImpact: Math.min(20, Math.max(-10, Number(parsed.expectedConfidenceImpact ?? 3))),
-      requiresHumanReview: riskLevel !== "low",
+      expectedConfidenceImpact: Math.min(
+        20,
+        Math.max(-10, Number(parsed.expectedConfidenceImpact ?? 3)),
+      ),
+      requiresHumanReview: riskLevel !== 'low',
     };
 
     try {
-      const { db, agentPromptEvolutionTable } = await import("@szl-holdings/db");
+      const { db, agentPromptEvolutionTable } = await import('@szl-holdings/db');
       await db.insert(agentPromptEvolutionTable).values({
         agentId,
         agentName,
@@ -128,7 +142,7 @@ Keep changes minimal and precise. Low-risk = narrow existing focus. High-risk = 
         avgConfidenceBefore: Math.round(performanceData.avgConfidence),
         successRateBefore: Math.round(performanceData.successRate * 100),
         totalInvocations: performanceData.totalInvocations,
-        status: "proposed",
+        status: 'proposed',
       });
     } catch {}
 
@@ -141,8 +155,8 @@ Keep changes minimal and precise. Low-risk = narrow existing focus. High-risk = 
 export async function runPromptEvolutionCycle(
   agents: Array<{ id: string; name: string; domain: string; systemPrompt: string }>,
 ): Promise<PromptEvolutionProposal[]> {
-  const { db, agentUsageStats } = await import("@szl-holdings/db");
-  const { eq, desc, sql } = await import("drizzle-orm");
+  const { db, agentUsageStats } = await import('@szl-holdings/db');
+  const { eq, desc, sql } = await import('drizzle-orm');
 
   const proposals: PromptEvolutionProposal[] = [];
 
@@ -158,14 +172,21 @@ export async function runPromptEvolutionCycle(
       if (stats.length < 10) continue;
 
       const avgConfidence = 75;
-      const successRate = stats.filter(s => s.success).length / stats.length;
+      const successRate = stats.filter((s) => s.success).length / stats.length;
       const totalInvocations = stats.length;
 
       const proposal = await generatePromptEvolutionProposal(
         agent.id,
         agent.name,
         agent.systemPrompt,
-        { agentId: agent.id, agentName: agent.name, domain: agent.domain, avgConfidence, successRate, totalInvocations },
+        {
+          agentId: agent.id,
+          agentName: agent.name,
+          domain: agent.domain,
+          avgConfidence,
+          successRate,
+          totalInvocations,
+        },
       );
 
       if (proposal) proposals.push(proposal);
@@ -177,8 +198,8 @@ export async function runPromptEvolutionCycle(
 
 export async function getLatestEvolutionProposals(agentId?: string) {
   try {
-    const { db, agentPromptEvolutionTable } = await import("@szl-holdings/db");
-    const { desc, eq } = await import("drizzle-orm");
+    const { db, agentPromptEvolutionTable } = await import('@szl-holdings/db');
+    const { desc, eq } = await import('drizzle-orm');
 
     const query = db
       .select()

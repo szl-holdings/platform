@@ -1,29 +1,39 @@
-import { useState, useEffect } from "react";
-import Layout from "./components/Layout";
-import Home from "./pages/Home";
-import Research from "./pages/Research";
-import Memory from "./pages/Memory";
-import Skills from "./pages/Skills";
-import PatternAtlas from "./pages/PatternAtlas";
-import Bridge from "./pages/Bridge";
-import Orchestrator from "./pages/Orchestrator";
-import Ingest from "./pages/Ingest";
-import DesignSystemPage from "./pages/DesignSystemPage";
-import AIQuality from "./pages/AIQuality";
-import PromptRegistry from "./pages/PromptRegistry";
-import EvalConsole from "./pages/EvalConsole";
-import AuditTrail from "./pages/AuditTrail";
-import type { Page } from "./lib/types";
+import { useEffect, useState } from 'react';
+import Layout from './components/Layout';
+import type { Page } from './lib/types';
+import AIQuality from './pages/AIQuality';
+import AuditTrail from './pages/AuditTrail';
+import Bridge from './pages/Bridge';
+import DesignSystemPage from './pages/DesignSystemPage';
+import EvalConsole from './pages/EvalConsole';
+import Home from './pages/Home';
+import Ingest from './pages/Ingest';
+import Memory from './pages/Memory';
+import Orchestrator from './pages/Orchestrator';
+import PatternAtlas from './pages/PatternAtlas';
+import PromptRegistry from './pages/PromptRegistry';
+import Research from './pages/Research';
+import Skills from './pages/Skills';
 
 const VALID_PAGES: Page[] = [
-  "home", "research", "memory", "skills", "patterns",
-  "bridge", "orchestrator", "ingest", "design-system",
-  "ai-quality", "prompt-registry", "eval-console", "audit",
+  'home',
+  'research',
+  'memory',
+  'skills',
+  'patterns',
+  'bridge',
+  'orchestrator',
+  'ingest',
+  'design-system',
+  'ai-quality',
+  'prompt-registry',
+  'eval-console',
+  'audit',
 ];
 
 function getInitialPage(): Page {
-  const hash = window.location.hash.replace("#", "") as Page;
-  return VALID_PAGES.includes(hash) ? hash : "home";
+  const hash = window.location.hash.replace('#', '') as Page;
+  return VALID_PAGES.includes(hash) ? hash : 'home';
 }
 
 export default function App() {
@@ -31,11 +41,11 @@ export default function App() {
 
   useEffect(() => {
     const handler = () => {
-      const hash = window.location.hash.replace("#", "") as Page;
+      const hash = window.location.hash.replace('#', '') as Page;
       if (VALID_PAGES.includes(hash)) setPage(hash);
     };
-    window.addEventListener("hashchange", handler);
-    return () => window.removeEventListener("hashchange", handler);
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
   }, []);
 
   function navigate(p: Page) {
@@ -45,19 +55,19 @@ export default function App() {
 
   return (
     <Layout page={page} navigate={navigate}>
-      {page === "home" && <Home navigate={navigate} />}
-      {page === "research" && <Research />}
-      {page === "memory" && <Memory />}
-      {page === "skills" && <Skills />}
-      {page === "patterns" && <PatternAtlas />}
-      {page === "bridge" && <Bridge />}
-      {page === "orchestrator" && <Orchestrator />}
-      {page === "ingest" && <Ingest />}
-      {page === "design-system" && <DesignSystemPage />}
-      {page === "ai-quality" && <AIQuality />}
-      {page === "prompt-registry" && <PromptRegistry />}
-      {page === "eval-console" && <EvalConsole />}
-      {page === "audit" && <AuditTrail />}
+      {page === 'home' && <Home navigate={navigate} />}
+      {page === 'research' && <Research />}
+      {page === 'memory' && <Memory />}
+      {page === 'skills' && <Skills />}
+      {page === 'patterns' && <PatternAtlas />}
+      {page === 'bridge' && <Bridge />}
+      {page === 'orchestrator' && <Orchestrator />}
+      {page === 'ingest' && <Ingest />}
+      {page === 'design-system' && <DesignSystemPage />}
+      {page === 'ai-quality' && <AIQuality />}
+      {page === 'prompt-registry' && <PromptRegistry />}
+      {page === 'eval-console' && <EvalConsole />}
+      {page === 'audit' && <AuditTrail />}
     </Layout>
   );
 }

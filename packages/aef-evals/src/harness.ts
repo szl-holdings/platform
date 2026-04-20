@@ -7,14 +7,14 @@
  * performance.now() for sub-millisecond precision on Replit CPU.
  */
 
-import type { DomainProfile } from "@workspace/aef-domain-profiles/schema";
+import type { DomainProfile } from '@workspace/aef-domain-profiles/schema';
 import {
-  computeAllMetrics,
   aggregateMetrics,
+  computeAllMetrics,
   type GoldenQuery,
-  type RetrievedResult,
   type MetricResult,
-} from "./metrics.js";
+  type RetrievedResult,
+} from './metrics.js';
 
 export interface RetrievalAdapter {
   retrieve(
@@ -57,9 +57,7 @@ export interface EvalHarnessResult {
   ranAt: string;
 }
 
-export async function runRetrievalEval(
-  request: EvalHarnessRequest,
-): Promise<EvalHarnessResult> {
+export async function runRetrievalEval(request: EvalHarnessRequest): Promise<EvalHarnessResult> {
   const { evalId, profile, queries, adapter } = request;
   const topK = request.topK ?? profile.topK;
 
@@ -77,7 +75,13 @@ export async function runRetrievalEval(
       );
       const latencyMs = performance.now() - queryStart;
       const metrics = computeAllMetrics(retrieved, golden, topK);
-      perQuery.push({ queryId: golden.queryId, query: golden.query, retrieved, metrics, latencyMs });
+      perQuery.push({
+        queryId: golden.queryId,
+        query: golden.query,
+        retrieved,
+        metrics,
+        latencyMs,
+      });
     } catch (err) {
       const latencyMs = performance.now() - queryStart;
       perQuery.push({
@@ -124,10 +128,20 @@ export interface LatencyBenchmarkResult {
 
 export function computeLatencyPercentiles(latencies: number[]): LatencyBenchmarkResult {
   if (latencies.length === 0) {
-    return { p50Ms: 0, p95Ms: 0, p99Ms: 0, minMs: 0, maxMs: 0, avgMs: 0, samples: 0, throughputQps: 0 };
+    return {
+      p50Ms: 0,
+      p95Ms: 0,
+      p99Ms: 0,
+      minMs: 0,
+      maxMs: 0,
+      avgMs: 0,
+      samples: 0,
+      throughputQps: 0,
+    };
   }
   const sorted = [...latencies].sort((a, b) => a - b);
-  const idx = (pct: number) => Math.min(Math.ceil((pct / 100) * sorted.length) - 1, sorted.length - 1);
+  const idx = (pct: number) =>
+    Math.min(Math.ceil((pct / 100) * sorted.length) - 1, sorted.length - 1);
   const total = sorted.reduce((a, b) => a + b, 0);
   return {
     p50Ms: sorted[idx(50)]!,

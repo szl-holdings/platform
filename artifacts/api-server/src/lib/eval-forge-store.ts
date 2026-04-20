@@ -1,13 +1,13 @@
-import { pool } from "@szl-holdings/db";
-import { logger } from "./logger";
-import type { EvalRunReport, EvalSuiteDef } from "@workspace/eval-forge";
+import { pool } from '@szl-holdings/db';
+import type { EvalRunReport, EvalSuiteDef } from '@workspace/eval-forge';
+import { logger } from './logger';
 
 let dbAvailable: boolean | null = null;
 
 async function checkDbAvailable(): Promise<boolean> {
   if (dbAvailable !== null) return dbAvailable;
   try {
-    await pool.query("SELECT 1");
+    await pool.query('SELECT 1');
     dbAvailable = true;
   } catch {
     dbAvailable = false;
@@ -19,7 +19,7 @@ export async function upsertEvalForgeSuites(suites: EvalSuiteDef[]): Promise<voi
   if (!(await checkDbAvailable())) return;
   const client = await pool.connect();
   try {
-    await client.query("BEGIN");
+    await client.query('BEGIN');
     for (const s of suites) {
       await client.query(
         `INSERT INTO eval_forge_suites (
@@ -48,10 +48,10 @@ export async function upsertEvalForgeSuites(suites: EvalSuiteDef[]): Promise<voi
         ],
       );
     }
-    await client.query("COMMIT");
+    await client.query('COMMIT');
   } catch (err) {
-    await client.query("ROLLBACK");
-    logger.warn({ err }, "[eval-forge-store] Failed to upsert suites");
+    await client.query('ROLLBACK');
+    logger.warn({ err }, '[eval-forge-store] Failed to upsert suites');
   } finally {
     client.release();
   }
@@ -102,7 +102,7 @@ export async function persistEvalForgeRun(report: EvalRunReport): Promise<void> 
       ],
     );
   } catch (err) {
-    logger.warn({ err, runId: report.runId }, "[eval-forge-store] Failed to persist run");
+    logger.warn({ err, runId: report.runId }, '[eval-forge-store] Failed to persist run');
   }
 }
 
@@ -133,17 +133,14 @@ export async function loadRecentRunsFromDb(limit = 100): Promise<EvalRunReport[]
       improvement_notes: string[] | null;
       baseline_run_id: string | null;
       run_at: Date;
-    }>(
-      `SELECT * FROM eval_forge_runs ORDER BY run_at DESC LIMIT $1`,
-      [limit],
-    );
+    }>(`SELECT * FROM eval_forge_runs ORDER BY run_at DESC LIMIT $1`, [limit]);
 
     return result.rows.map((r) => ({
       runId: r.run_id,
       suiteId: r.suite_id,
       suiteName: r.suite_name ?? undefined,
       domain: r.domain ?? undefined,
-      evalType: r.eval_type as EvalRunReport["evalType"] ?? undefined,
+      evalType: (r.eval_type as EvalRunReport['evalType']) ?? undefined,
       model: r.model ?? undefined,
       triggeredBy: r.triggered_by,
       totalCases: r.total_cases,
@@ -154,17 +151,20 @@ export async function loadRecentRunsFromDb(limit = 100): Promise<EvalRunReport[]
       avgLatencyMs: Number(r.avg_latency_ms),
       totalCostUsd: Number(r.total_cost_usd),
       totalTokensUsed: r.total_tokens_used,
-      metrics: (r.metrics ?? {}) as EvalRunReport["metrics"],
-      caseResults: (Array.isArray(r.case_results) ? r.case_results : []) as EvalRunReport["caseResults"],
+      metrics: (r.metrics ?? {}) as EvalRunReport['metrics'],
+      caseResults: (Array.isArray(r.case_results)
+        ? r.case_results
+        : []) as EvalRunReport['caseResults'],
       hasRegression: r.has_regression ?? undefined,
-      regressionSeverity: r.regression_severity as EvalRunReport["regressionSeverity"] ?? undefined,
+      regressionSeverity:
+        (r.regression_severity as EvalRunReport['regressionSeverity']) ?? undefined,
       regressionNotes: r.regression_notes ?? undefined,
       improvementNotes: r.improvement_notes ?? undefined,
       baselineRunId: r.baseline_run_id ?? undefined,
       runAt: r.run_at.toISOString(),
     }));
   } catch (err) {
-    logger.warn({ err }, "[eval-forge-store] Failed to load recent runs from DB");
+    logger.warn({ err }, '[eval-forge-store] Failed to load recent runs from DB');
     return [];
   }
 }

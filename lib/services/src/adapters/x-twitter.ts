@@ -1,4 +1,4 @@
-import { ServiceAdapter, type ServiceStatus } from "../base.js";
+import { ServiceAdapter, type ServiceStatus } from '../base.js';
 
 export interface XPostResult {
   posted: boolean;
@@ -9,34 +9,35 @@ export interface XPostResult {
 }
 
 export class XTwitterAdapter extends ServiceAdapter {
-  readonly name = "x-twitter";
-  readonly description = "X (Twitter) API v2 for posting tweets and threads";
-  readonly requiredEnvVars = ["X_BEARER_TOKEN"];
+  readonly name = 'x-twitter';
+  readonly description = 'X (Twitter) API v2 for posting tweets and threads';
+  readonly requiredEnvVars = ['X_BEARER_TOKEN'];
 
   private get bearerToken(): string | undefined {
-    return process.env["X_BEARER_TOKEN"];
+    return process.env['X_BEARER_TOKEN'];
   }
 
   private get apiKey(): string | undefined {
-    return process.env["X_API_KEY"];
+    return process.env['X_API_KEY'];
   }
 
   private get apiSecret(): string | undefined {
-    return process.env["X_API_SECRET"];
+    return process.env['X_API_SECRET'];
   }
 
   private get accessToken(): string | undefined {
-    return process.env["X_ACCESS_TOKEN"];
+    return process.env['X_ACCESS_TOKEN'];
   }
 
   private get accessSecret(): string | undefined {
-    return process.env["X_ACCESS_SECRET"];
+    return process.env['X_ACCESS_SECRET'];
   }
 
   get status(): ServiceStatus {
-    if (this.accessToken && this.accessSecret && this.apiKey && this.apiSecret) return "LIVE_CONFIGURED";
-    if (this.bearerToken) return "LIVE_CONFIGURED";
-    return "MOCKED_DEMO_MODE";
+    if (this.accessToken && this.accessSecret && this.apiKey && this.apiSecret)
+      return 'LIVE_CONFIGURED';
+    if (this.bearerToken) return 'LIVE_CONFIGURED';
+    return 'MOCKED_DEMO_MODE';
   }
 
   get isLive(): boolean {
@@ -45,22 +46,22 @@ export class XTwitterAdapter extends ServiceAdapter {
 
   get presentEnvVars(): string[] {
     const present: string[] = [];
-    if (this.bearerToken) present.push("X_BEARER_TOKEN");
-    if (this.apiKey) present.push("X_API_KEY");
-    if (this.apiSecret) present.push("X_API_SECRET");
-    if (this.accessToken) present.push("X_ACCESS_TOKEN");
-    if (this.accessSecret) present.push("X_ACCESS_SECRET");
+    if (this.bearerToken) present.push('X_BEARER_TOKEN');
+    if (this.apiKey) present.push('X_API_KEY');
+    if (this.apiSecret) present.push('X_API_SECRET');
+    if (this.accessToken) present.push('X_ACCESS_TOKEN');
+    if (this.accessSecret) present.push('X_ACCESS_SECRET');
     return present;
   }
 
   get missingEnvVars(): string[] {
     if (this.isLive) return [];
-    return ["X_BEARER_TOKEN (or X_API_KEY + X_API_SECRET + X_ACCESS_TOKEN + X_ACCESS_SECRET)"];
+    return ['X_BEARER_TOKEN (or X_API_KEY + X_API_SECRET + X_ACCESS_TOKEN + X_ACCESS_SECRET)'];
   }
 
   protected async performHealthCheck(): Promise<void> {
     if (!this.isLive) return;
-    const res = await fetch("https://api.x.com/2/users/me", {
+    const res = await fetch('https://api.x.com/2/users/me', {
       headers: { Authorization: `Bearer ${this.bearerToken || this.accessToken}` },
     });
     if (!res.ok) throw new Error(`X API health check failed: ${res.status}`);
@@ -78,10 +79,10 @@ export class XTwitterAdapter extends ServiceAdapter {
     }
 
     try {
-      const res = await fetch("https://api.x.com/2/tweets", {
-        method: "POST",
+      const res = await fetch('https://api.x.com/2/tweets', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${this.accessToken}`,
         },
         body: JSON.stringify({ text }),
@@ -101,7 +102,11 @@ export class XTwitterAdapter extends ServiceAdapter {
         mock: false,
       };
     } catch (err) {
-      return { posted: false, mock: false, error: err instanceof Error ? err.message : String(err) };
+      return {
+        posted: false,
+        mock: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
     }
   }
 
@@ -126,10 +131,10 @@ export class XTwitterAdapter extends ServiceAdapter {
         const body: Record<string, unknown> = { text };
         if (replyToId) body.reply = { in_reply_to_tweet_id: replyToId };
 
-        const res = await fetch("https://api.x.com/2/tweets", {
-          method: "POST",
+        const res = await fetch('https://api.x.com/2/tweets', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${this.accessToken}`,
           },
           body: JSON.stringify(body),
@@ -151,7 +156,11 @@ export class XTwitterAdapter extends ServiceAdapter {
           mock: false,
         });
       } catch (err) {
-        results.push({ posted: false, mock: false, error: err instanceof Error ? err.message : String(err) });
+        results.push({
+          posted: false,
+          mock: false,
+          error: err instanceof Error ? err.message : String(err),
+        });
         break;
       }
     }

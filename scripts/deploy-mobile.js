@@ -13,67 +13,67 @@
  *   node scripts/deploy-mobile.js --all --dry-run
  */
 
-import { spawnSync } from "child_process";
-import path from "path";
-import { fileURLToPath } from "url";
+import { spawnSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const APPS = {
   aegis: {
-    dir: "artifacts/aegis-mobile",
-    name: "Aegis — SOC Command Center",
-    bundleId: "com.aegis.soc.mobile",
-    package: "com.aegis.soc.mobile",
+    dir: 'artifacts/aegis-mobile',
+    name: 'Aegis — SOC Command Center',
+    bundleId: 'com.aegis.soc.mobile',
+    package: 'com.aegis.soc.mobile',
   },
-  "carlota-jo": {
-    dir: "artifacts/carlota-jo-mobile",
-    name: "Carlota Jo — Client App",
-    bundleId: "com.carlotajo.advisory.mobile",
-    package: "com.carlotajo.advisory.mobile",
+  'carlota-jo': {
+    dir: 'artifacts/carlota-jo-mobile',
+    name: 'Carlota Jo — Client App',
+    bundleId: 'com.carlotajo.advisory.mobile',
+    package: 'com.carlotajo.advisory.mobile',
   },
   lyte: {
-    dir: "artifacts/lyte-mobile",
-    name: "Lyte — AIOps Command",
-    bundleId: "com.lyte.aiops.mobile",
-    package: "com.lyte.aiops.mobile",
+    dir: 'artifacts/lyte-mobile',
+    name: 'Lyte — AIOps Command',
+    bundleId: 'com.lyte.aiops.mobile',
+    package: 'com.lyte.aiops.mobile',
   },
   szl: {
-    dir: "artifacts/szl-holdings-mobile",
-    name: "SZL Holdings — Executive Command",
-    bundleId: "com.szlholdings.executive.mobile",
-    package: "com.szlholdings.executive.mobile",
+    dir: 'artifacts/szl-holdings-mobile',
+    name: 'SZL Holdings — Executive Command',
+    bundleId: 'com.szlholdings.executive.mobile',
+    package: 'com.szlholdings.executive.mobile',
   },
   stephen: {
-    dir: "artifacts/stephen-mobile",
-    name: "Stephen Lutar — Personal Command",
-    bundleId: "com.stephenlutar.founder.mobile",
-    package: "com.stephenlutar.founder.mobile",
+    dir: 'artifacts/stephen-mobile',
+    name: 'Stephen Lutar — Personal Command',
+    bundleId: 'com.stephenlutar.founder.mobile',
+    package: 'com.stephenlutar.founder.mobile',
   },
   terra: {
-    dir: "artifacts/terra-mobile",
-    name: "Terra — Real Estate Intelligence",
-    bundleId: "com.terra.realestate.mobile",
-    package: "com.terra.realestate.mobile",
+    dir: 'artifacts/terra-mobile',
+    name: 'Terra — Real Estate Intelligence',
+    bundleId: 'com.terra.realestate.mobile',
+    package: 'com.terra.realestate.mobile',
   },
   vessels: {
-    dir: "artifacts/vessels-mobile",
-    name: "Vessels — Fleet Command",
-    bundleId: "com.vessels.maritime.mobile",
-    package: "com.vessels.maritime.mobile",
+    dir: 'artifacts/vessels-mobile',
+    name: 'Vessels — Fleet Command',
+    bundleId: 'com.vessels.maritime.mobile',
+    package: 'com.vessels.maritime.mobile',
   },
 };
 
-const VALID_PLATFORMS = ["ios", "android", "both"];
-const VALID_PROFILES = ["development", "preview", "production"];
+const VALID_PLATFORMS = ['ios', 'android', 'both'];
+const VALID_PROFILES = ['development', 'preview', 'production'];
 
 function parseArgs(argv) {
   const args = argv.slice(2);
   const opts = {
     apps: [],
     all: false,
-    platform: "both",
-    profile: "production",
+    platform: 'both',
+    profile: 'production',
     submit: false,
     update: false,
     dryRun: false,
@@ -82,14 +82,14 @@ function parseArgs(argv) {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === "--all") opts.all = true;
-    else if (arg === "--submit") opts.submit = true;
-    else if (arg === "--update") opts.update = true;
-    else if (arg === "--dry-run") opts.dryRun = true;
-    else if (arg === "--help" || arg === "-h") opts.help = true;
-    else if (arg === "--platform") opts.platform = args[++i];
-    else if (arg === "--profile") opts.profile = args[++i];
-    else if (!arg.startsWith("--")) opts.apps.push(arg);
+    if (arg === '--all') opts.all = true;
+    else if (arg === '--submit') opts.submit = true;
+    else if (arg === '--update') opts.update = true;
+    else if (arg === '--dry-run') opts.dryRun = true;
+    else if (arg === '--help' || arg === '-h') opts.help = true;
+    else if (arg === '--platform') opts.platform = args[++i];
+    else if (arg === '--profile') opts.profile = args[++i];
+    else if (!arg.startsWith('--')) opts.apps.push(arg);
   }
 
   return opts;
@@ -107,7 +107,7 @@ USAGE:
 APPS (use --all for all apps):
 ${Object.entries(APPS)
   .map(([key, app]) => `  ${key.padEnd(12)} ${app.name}`)
-  .join("\n")}
+  .join('\n')}
 
 OPTIONS:
   --all              Target all 7 apps
@@ -142,7 +142,7 @@ PREREQUISITES:
 }
 
 function run(cmd, cwd, dryRun) {
-  const repoRoot = path.resolve(__dirname, "..");
+  const repoRoot = path.resolve(__dirname, '..');
   const fullCwd = path.resolve(repoRoot, cwd);
   if (dryRun) {
     console.log(`  [DRY RUN] cd ${cwd} && ${cmd}`);
@@ -152,7 +152,7 @@ function run(cmd, cwd, dryRun) {
   const result = spawnSync(cmd, {
     cwd: fullCwd,
     shell: true,
-    stdio: "inherit",
+    stdio: 'inherit',
   });
   if (result.status !== 0) {
     throw new Error(`Command failed (exit ${result.status}): ${cmd}`);
@@ -160,15 +160,15 @@ function run(cmd, cwd, dryRun) {
 }
 
 function buildApp(appKey, app, opts) {
-  const platforms = opts.platform === "both" ? ["ios", "android"] : [opts.platform];
+  const platforms = opts.platform === 'both' ? ['ios', 'android'] : [opts.platform];
 
   for (const platform of platforms) {
     const cmd = [
-      "eas build",
+      'eas build',
       `--platform ${platform}`,
       `--profile ${opts.profile}`,
-      "--non-interactive",
-    ].join(" ");
+      '--non-interactive',
+    ].join(' ');
 
     console.log(`\n  📦 Building ${app.name} [${platform}]...`);
     run(cmd, app.dir, opts.dryRun);
@@ -176,16 +176,16 @@ function buildApp(appKey, app, opts) {
 }
 
 function submitApp(appKey, app, opts) {
-  const platforms = opts.platform === "both" ? ["ios", "android"] : [opts.platform];
+  const platforms = opts.platform === 'both' ? ['ios', 'android'] : [opts.platform];
 
   for (const platform of platforms) {
     const cmd = [
-      "eas submit",
+      'eas submit',
       `--platform ${platform}`,
       `--profile production`,
-      "--non-interactive",
-      "--latest",
-    ].join(" ");
+      '--non-interactive',
+      '--latest',
+    ].join(' ');
 
     console.log(`\n  🚀 Submitting ${app.name} [${platform}]...`);
     run(cmd, app.dir, opts.dryRun);
@@ -193,13 +193,13 @@ function submitApp(appKey, app, opts) {
 }
 
 function updateApp(appKey, app, opts) {
-  const date = new Date().toISOString().split("T")[0];
+  const date = new Date().toISOString().split('T')[0];
   const cmd = [
-    "eas update",
+    'eas update',
     `--channel ${opts.profile}`,
     `--message "OTA update — ${date}"`,
-    "--non-interactive",
-  ].join(" ");
+    '--non-interactive',
+  ].join(' ');
 
   console.log(`\n  ⚡ Publishing OTA update for ${app.name}...`);
   run(cmd, app.dir, opts.dryRun);
@@ -229,21 +229,21 @@ function main() {
   } else if (opts.apps.length > 0) {
     const invalid = opts.apps.filter((a) => !APPS[a]);
     if (invalid.length > 0) {
-      console.error(`❌ Unknown app(s): ${invalid.join(", ")}`);
-      console.error(`   Valid apps: ${Object.keys(APPS).join(", ")}`);
+      console.error(`❌ Unknown app(s): ${invalid.join(', ')}`);
+      console.error(`   Valid apps: ${Object.keys(APPS).join(', ')}`);
       process.exit(1);
     }
     targetKeys = opts.apps;
   } else {
-    console.error("❌ No apps specified. Use --all or list app names.");
+    console.error('❌ No apps specified. Use --all or list app names.');
     printHelp();
     process.exit(1);
   }
 
-  console.log("\n╔══════════════════════════════════════════════════════════════╗");
-  console.log("║              Mobile App Deployment Pipeline                   ║");
-  console.log("╚══════════════════════════════════════════════════════════════╝");
-  console.log(`\n  Apps:     ${targetKeys.join(", ")}`);
+  console.log('\n╔══════════════════════════════════════════════════════════════╗');
+  console.log('║              Mobile App Deployment Pipeline                   ║');
+  console.log('╚══════════════════════════════════════════════════════════════╝');
+  console.log(`\n  Apps:     ${targetKeys.join(', ')}`);
   console.log(`  Platform: ${opts.platform}`);
   console.log(`  Profile:  ${opts.profile}`);
   console.log(`  Submit:   ${opts.submit}`);
@@ -251,17 +251,17 @@ function main() {
   console.log(`  Dry Run:  ${opts.dryRun}`);
 
   if (opts.dryRun) {
-    console.log("\n  ⚠️  DRY RUN MODE — no commands will be executed\n");
+    console.log('\n  ⚠️  DRY RUN MODE — no commands will be executed\n');
   }
 
   const errors = [];
 
   for (const appKey of targetKeys) {
     const app = APPS[appKey];
-    console.log(`\n${"─".repeat(64)}`);
+    console.log(`\n${'─'.repeat(64)}`);
     console.log(`  🔵 ${app.name}`);
     console.log(`     ${app.dir}`);
-    console.log(`${"─".repeat(64)}`);
+    console.log(`${'─'.repeat(64)}`);
 
     try {
       if (opts.update) {
@@ -279,9 +279,9 @@ function main() {
     }
   }
 
-  console.log("\n╔══════════════════════════════════════════════════════════════╗");
-  console.log("║                       Summary                                 ║");
-  console.log("╚══════════════════════════════════════════════════════════════╝\n");
+  console.log('\n╔══════════════════════════════════════════════════════════════╗');
+  console.log('║                       Summary                                 ║');
+  console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
   const succeeded = targetKeys.length - errors.length;
   console.log(`  Succeeded: ${succeeded}/${targetKeys.length}`);
@@ -293,7 +293,7 @@ function main() {
     }
     process.exit(1);
   } else {
-    console.log("\n  🎉 All apps processed successfully!\n");
+    console.log('\n  🎉 All apps processed successfully!\n');
   }
 }
 

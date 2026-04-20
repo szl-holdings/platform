@@ -1,15 +1,15 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { prismBus } from "./bus.js";
-import { prismConnectorRegistry } from "./connectors.js";
-import { PRISM_BUILT_IN_TOOLS } from "./bridge.js";
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+import { PRISM_BUILT_IN_TOOLS } from './bridge.js';
+import type { PrismBusEvent, PrismBusEventType } from './bus.js';
+import { prismBus } from './bus.js';
+import { prismConnectorRegistry } from './connectors.js';
 import type {
-  PrismContextBundle,
-  UserContext,
-  TenantContext,
   DomainContext,
+  PrismContextBundle,
   PrismDomain,
-} from "./context.js";
-import type { PrismBusEvent, PrismBusEventType } from "./bus.js";
+  TenantContext,
+  UserContext,
+} from './context.js';
 
 interface PrismBusContextValue {
   context: PrismContextBundle;
@@ -17,11 +17,11 @@ interface PrismBusContextValue {
   setUser: (user: UserContext | null) => void;
   setTenant: (tenant: TenantContext | null) => void;
   setDomain: (domain: DomainContext | null) => void;
-  publishEvent: (event: Omit<PrismBusEvent, "id" | "timestamp">) => Promise<PrismBusEvent>;
+  publishEvent: (event: Omit<PrismBusEvent, 'id' | 'timestamp'>) => Promise<PrismBusEvent>;
   subscribe: (
-    types: PrismBusEventType[] | "*",
+    types: PrismBusEventType[] | '*',
     handler: (event: PrismBusEvent) => void,
-    domains?: PrismDomain[] | "*"
+    domains?: PrismDomain[] | '*',
   ) => () => void;
 }
 
@@ -40,50 +40,57 @@ export function PrismBusProvider({ children, domain, initialContext = {} }: Pris
       domain,
       displayName: domain,
       isActive: true,
-      tools: PRISM_BUILT_IN_TOOLS.filter(t => t.domains.includes(domain)).map(t => t.name),
-      connectors: prismConnectorRegistry.getConnectorsForDomain(domain).map(c => c.id),
+      tools: PRISM_BUILT_IN_TOOLS.filter((t) => t.domains.includes(domain)).map((t) => t.name),
+      connectors: prismConnectorRegistry.getConnectorsForDomain(domain).map((c) => c.id),
       agentSchedules: [],
     },
   });
 
-  const setUser = useCallback((user: UserContext | null) => {
-    setContext(prev => ({ ...prev, user }));
-    if (user) {
-      prismBus.publish({
-        type: "context_updated",
-        domain,
-        sourceId: `prism-provider:${domain}`,
-        severity: "info",
-        payload: { contextType: "user", userId: user.userId },
-        userId: user.userId,
-      }).catch(() => {});
-    }
-  }, [domain]);
+  const setUser = useCallback(
+    (user: UserContext | null) => {
+      setContext((prev) => ({ ...prev, user }));
+      if (user) {
+        prismBus
+          .publish({
+            type: 'context_updated',
+            domain,
+            sourceId: `prism-provider:${domain}`,
+            severity: 'info',
+            payload: { contextType: 'user', userId: user.userId },
+            userId: user.userId,
+          })
+          .catch(() => {});
+      }
+    },
+    [domain],
+  );
 
   const setTenant = useCallback((tenant: TenantContext | null) => {
-    setContext(prev => ({ ...prev, tenant }));
+    setContext((prev) => ({ ...prev, tenant }));
   }, []);
 
   const setDomain = useCallback((domainCtx: DomainContext | null) => {
-    setContext(prev => ({ ...prev, domain: domainCtx }));
+    setContext((prev) => ({ ...prev, domain: domainCtx }));
   }, []);
 
   const publishEvent = useCallback(
-    (event: Omit<PrismBusEvent, "id" | "timestamp">) => prismBus.publish(event),
-    []
+    (event: Omit<PrismBusEvent, 'id' | 'timestamp'>) => prismBus.publish(event),
+    [],
   );
 
   const subscribe = useCallback(
     (
-      types: PrismBusEventType[] | "*",
+      types: PrismBusEventType[] | '*',
       handler: (event: PrismBusEvent) => void,
-      domains?: PrismDomain[] | "*"
+      domains?: PrismDomain[] | '*',
     ) => prismBus.subscribe(`provider-${domain}`, types, handler, domains),
-    [domain]
+    [domain],
   );
 
   return (
-    <PrismBusContext.Provider value={{ context, domain, setUser, setTenant, setDomain, publishEvent, subscribe }}>
+    <PrismBusContext.Provider
+      value={{ context, domain, setUser, setTenant, setDomain, publishEvent, subscribe }}
+    >
       {children}
     </PrismBusContext.Provider>
   );
@@ -92,7 +99,7 @@ export function PrismBusProvider({ children, domain, initialContext = {} }: Pris
 export function usePrismBusContext(): PrismBusContextValue {
   const ctx = useContext(PrismBusContext);
   if (!ctx) {
-    throw new Error("usePrismBusContext must be used within a PrismBusProvider");
+    throw new Error('usePrismBusContext must be used within a PrismBusProvider');
   }
   return ctx;
 }

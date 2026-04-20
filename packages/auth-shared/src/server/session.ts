@@ -4,8 +4,8 @@
  * `artifacts/api-server`.
  */
 
-import { randomBytes } from "crypto";
-import type { SessionToken } from "../types.js";
+import { randomBytes } from 'crypto';
+import type { SessionToken } from '../types.js';
 
 /** Number of random bytes used for a session token (64-char hex). */
 const SESSION_TOKEN_BYTES = 32;
@@ -20,11 +20,11 @@ export const SESSION_ABSOLUTE_MAX_MS = 30 * 24 * 60 * 60 * 1000;
 export const REFRESH_TOKEN_TTL_MS = SESSION_ABSOLUTE_MAX_MS;
 
 /** Cookie name used to carry the opaque session token. */
-export const SESSION_COOKIE_NAME = "sid" as const;
+export const SESSION_COOKIE_NAME = 'sid' as const;
 
 /** Generates a new cryptographically random session token. */
 export function generateSessionToken(): SessionToken {
-  return randomBytes(SESSION_TOKEN_BYTES).toString("hex") as SessionToken;
+  return randomBytes(SESSION_TOKEN_BYTES).toString('hex') as SessionToken;
 }
 
 /** Returns true if a token string matches the expected 64-char hex format. */
@@ -49,19 +49,19 @@ export function sessionCookieOptions(opts: SessionCookieOptions) {
   return {
     httpOnly: true,
     secure: opts.isProduction,
-    sameSite: "lax" as const,
+    sameSite: 'lax' as const,
     maxAge: opts.ttlMs ?? SESSION_TTL_MS,
-    path: "/",
+    path: '/',
   };
 }
 
 /** Returns `res.clearCookie(...)` options for the session cookie. */
-export function sessionClearCookieOptions(opts: Pick<SessionCookieOptions, "isProduction">) {
+export function sessionClearCookieOptions(opts: Pick<SessionCookieOptions, 'isProduction'>) {
   return {
     httpOnly: true,
     secure: opts.isProduction,
-    sameSite: "lax" as const,
-    path: "/",
+    sameSite: 'lax' as const,
+    path: '/',
   };
 }
 
@@ -110,7 +110,7 @@ export function writeSessionCookie(
  */
 export function clearSessionCookie(
   res: { clearCookie: (name: string, options: object) => void },
-  opts: Pick<LoginResponseOptions, "isProduction">,
+  opts: Pick<LoginResponseOptions, 'isProduction'>,
 ): void {
   res.clearCookie(SESSION_COOKIE_NAME, sessionClearCookieOptions(opts));
 }
@@ -148,7 +148,7 @@ export type NextFn = () => void;
 export function requireSessionMiddleware() {
   return function sessionGuard(req: MinimalRequest, res: MinimalResponse, next: NextFn): void {
     if (!req.user) {
-      res.status(401).json({ error: "Authentication required" });
+      res.status(401).json({ error: 'Authentication required' });
       return;
     }
     next();
@@ -168,12 +168,12 @@ export function requireRoleMiddleware(allowed: string[]) {
   return function roleGuard(req: MinimalRequest, res: MinimalResponse, next: NextFn): void {
     const user = req.user as { roles?: string[] } | undefined;
     if (!user) {
-      res.status(401).json({ error: "Authentication required" });
+      res.status(401).json({ error: 'Authentication required' });
       return;
     }
     const hasRole = (user.roles ?? []).some((r) => allowed.includes(r));
     if (!hasRole) {
-      res.status(403).json({ error: "Insufficient role" });
+      res.status(403).json({ error: 'Insufficient role' });
       return;
     }
     next();

@@ -1,12 +1,21 @@
-import * as client from "openid-client";
-import crypto from "crypto";
-import { type Request, type Response } from "express";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable, azureTenantsTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
-import { eq, and, gt } from "drizzle-orm";
-import type { RoleName } from "@szl-holdings/db";
-import { hashIp } from "@szl-holdings/audit";
+import { hashIp } from '@szl-holdings/audit';
+import type { RoleName } from '@szl-holdings/db';
+import {
+  azureTenantsTable,
+  db,
+  organizationsTable,
+  orgMembersTable,
+  rolesTable,
+  sessionsTable,
+  userRolesTable,
+  usersTable,
+} from '@szl-holdings/db';
+import crypto from 'crypto';
+import { and, eq, gt } from 'drizzle-orm';
+import type { Request, Response } from 'express';
+import * as client from 'openid-client';
 
-export const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
+export const ISSUER_URL = process.env.ISSUER_URL ?? 'https://replit.com/oidc';
 /**
  * Session cookie name. Uses the `__Host-` prefix (FINDING-005, NCC Group
  * 2026-04 pen test): browsers refuse to set/send `__Host-` cookies unless
@@ -18,8 +27,8 @@ export const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
  * with active sessions are not invalidated by the rename. New responses
  * always set the new name and clear the legacy one.
  */
-export const SESSION_COOKIE = "__Host-sid";
-export const LEGACY_SESSION_COOKIE = "sid";
+export const SESSION_COOKIE = '__Host-sid';
+export const LEGACY_SESSION_COOKIE = 'sid';
 export const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 
 /**
@@ -40,10 +49,7 @@ const multiTenantConfigs: Map<string, client.Configuration> = new Map();
 
 export async function getOidcConfig(): Promise<client.Configuration> {
   if (!oidcConfig) {
-    oidcConfig = await client.discovery(
-      new URL(ISSUER_URL),
-      process.env.REPL_ID!,
-    );
+    oidcConfig = await client.discovery(new URL(ISSUER_URL), process.env.REPL_ID!);
   }
   return oidcConfig;
 }
@@ -92,11 +98,13 @@ export async function isProvisionedTenant(azureTenantId: string): Promise<boolea
   const [tenant] = await db
     .select()
     .from(azureTenantsTable)
-    .where(and(
-      eq(azureTenantsTable.azureTenantId, azureTenantId),
-      eq(azureTenantsTable.status, "active"),
-      eq(azureTenantsTable.adminConsentGranted, "granted"),
-    ))
+    .where(
+      and(
+        eq(azureTenantsTable.azureTenantId, azureTenantId),
+        eq(azureTenantsTable.status, 'active'),
+        eq(azureTenantsTable.adminConsentGranted, 'granted'),
+      ),
+    )
     .limit(1);
   return !!tenant;
 }
@@ -133,10 +141,7 @@ export async function getAzureTenantForUser(userId: number): Promise<string | nu
       .select({ azureTenantId: azureTenantsTable.azureTenantId })
       .from(orgMembersTable)
       .innerJoin(azureTenantsTable, eq(azureTenantsTable.organizationId, orgMembersTable.orgId))
-      .where(and(
-        eq(orgMembersTable.userId, userId),
-        eq(azureTenantsTable.status, "active"),
-      ))
+      .where(and(eq(orgMembersTable.userId, userId), eq(azureTenantsTable.status, 'active')))
       .limit(1);
     return row?.azureTenantId ?? null;
   } catch {
@@ -145,21 +150,24 @@ export async function getAzureTenantForUser(userId: number): Promise<string | nu
 }
 
 const AZURE_AD_ROLE_MAP: Record<string, RoleName> = {
-  "SZL.Admin": "admin",
-  "SZL.SuperAdmin": "super_admin",
-  "SZL.Operator": "ops",
-  "SZL.Analyst": "analyst",
-  "SZL.Viewer": "viewer",
+  'SZL.Admin': 'admin',
+  'SZL.SuperAdmin': 'super_admin',
+  'SZL.Operator': 'ops',
+  'SZL.Analyst': 'analyst',
+  'SZL.Viewer': 'viewer',
 };
 
-export function mapAzureAdRoles(groups: string[] | undefined, appRoles: string[] | undefined): RoleName[] {
+export function mapAzureAdRoles(
+  groups: string[] | undefined,
+  appRoles: string[] | undefined,
+): RoleName[] {
   const roles: Set<RoleName> = new Set();
   const sources = [...(groups ?? []), ...(appRoles ?? [])];
   for (const r of sources) {
     const mapped = AZURE_AD_ROLE_MAP[r];
     if (mapped) roles.add(mapped);
   }
-  if (roles.size === 0) roles.add("viewer" as RoleName);
+  if (roles.size === 0) roles.add('viewer' as RoleName);
   return Array.from(roles);
 }
 
@@ -181,7 +189,8 @@ export async function upsertUserFromOidc(claims: Record<string, unknown>): Promi
   const email = (claims.email as string) || null;
   const firstName = (claims.first_name as string) || null;
   const lastName = (claims.last_name as string) || null;
-  const displayName = [firstName, lastName].filter(Boolean).join(" ") || (claims.username as string) || replitId;
+  const displayName =
+    [firstName, lastName].filter(Boolean).join(' ') || (claims.username as string) || replitId;
   const avatarUrl = ((claims.profile_image_url || claims.picture) as string) || null;
 
   const [user] = await db
@@ -222,7 +231,8 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
   const email = (claims.email as string) || (claims.preferred_username as string) || null;
   const givenName = (claims.given_name as string) || null;
   const familyName = (claims.family_name as string) || null;
-  const displayName = [givenName, familyName].filter(Boolean).join(" ") || (claims.name as string) || externalId;
+  const displayName =
+    [givenName, familyName].filter(Boolean).join(' ') || (claims.name as string) || externalId;
   const avatarUrl = null;
   const azureTenantId = (claims.tid as string) || null;
 
@@ -247,9 +257,16 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
 
   if (existingRoles.length === 0 && mappedRoles.length > 0) {
     for (const roleName of mappedRoles) {
-      const [role] = await db.select().from(rolesTable).where(eq(rolesTable.name, roleName)).limit(1);
+      const [role] = await db
+        .select()
+        .from(rolesTable)
+        .where(eq(rolesTable.name, roleName))
+        .limit(1);
       if (role) {
-        await db.insert(userRolesTable).values({ userId: user.id, roleId: role.id }).onConflictDoNothing();
+        await db
+          .insert(userRolesTable)
+          .values({ userId: user.id, roleId: role.id })
+          .onConflictDoNothing();
       }
     }
   }
@@ -259,32 +276,35 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
       const [tenant] = await db
         .select({ organizationId: azureTenantsTable.organizationId })
         .from(azureTenantsTable)
-        .where(and(
-          eq(azureTenantsTable.azureTenantId, azureTenantId),
-          eq(azureTenantsTable.status, "active"),
-        ))
+        .where(
+          and(
+            eq(azureTenantsTable.azureTenantId, azureTenantId),
+            eq(azureTenantsTable.status, 'active'),
+          ),
+        )
         .limit(1);
 
       if (tenant?.organizationId) {
         const [existing] = await db
           .select({ id: orgMembersTable.id })
           .from(orgMembersTable)
-          .where(and(
-            eq(orgMembersTable.orgId, tenant.organizationId),
-            eq(orgMembersTable.userId, user.id),
-          ))
+          .where(
+            and(
+              eq(orgMembersTable.orgId, tenant.organizationId),
+              eq(orgMembersTable.userId, user.id),
+            ),
+          )
           .limit(1);
 
         if (!existing) {
           await db.insert(orgMembersTable).values({
             orgId: tenant.organizationId,
             userId: user.id,
-            role: "member",
+            role: 'member',
           });
         }
       }
-    } catch {
-    }
+    } catch {}
   }
 
   const finalRoles = await db
@@ -303,10 +323,16 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
   };
 }
 
-export async function createOidcSession(userId: number, ipAddress: string | null, userAgent: string | null): Promise<string> {
-  const token = crypto.randomBytes(32).toString("hex");
+export async function createOidcSession(
+  userId: number,
+  ipAddress: string | null,
+  userAgent: string | null,
+): Promise<string> {
+  const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + SESSION_TTL);
-  await db.insert(sessionsTable).values({ userId, token, expiresAt, ipAddress: hashIp(ipAddress), userAgent });
+  await db
+    .insert(sessionsTable)
+    .values({ userId, token, expiresAt, ipAddress: hashIp(ipAddress), userAgent });
   return token;
 }
 
@@ -350,7 +376,7 @@ export function getSessionToken(req: Request): string | undefined {
   const cookieToken = readSessionCookie(req);
   if (cookieToken) return cookieToken;
   const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer ")) return authHeader.slice(7);
+  if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7);
   return undefined;
 }
 
@@ -362,40 +388,40 @@ export function setSessionCookie(res: Response, token: string): void {
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
-    path: "/",
+    sameSite: 'lax',
+    path: '/',
     maxAge: SESSION_TTL,
   });
   // Clear any pre-rename cookie so two parallel session cookies don't
   // linger in the browser. Safe to call unconditionally — clearCookie on
   // a missing cookie is a no-op in browsers.
-  res.clearCookie(LEGACY_SESSION_COOKIE, { path: "/" });
+  res.clearCookie(LEGACY_SESSION_COOKIE, { path: '/' });
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(SESSION_COOKIE, { path: "/" });
-  res.clearCookie(LEGACY_SESSION_COOKIE, { path: "/" });
+  res.clearCookie(SESSION_COOKIE, { path: '/' });
+  res.clearCookie(LEGACY_SESSION_COOKIE, { path: '/' });
 }
 
 export function setOidcCookie(res: Response, name: string, value: string): void {
   res.cookie(name, value, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
-    path: "/",
+    sameSite: 'lax',
+    path: '/',
     maxAge: 10 * 60 * 1000,
   });
 }
 
 export function getSafeReturnTo(value: unknown): string {
-  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
-    return "/";
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
+    return '/';
   }
   return value;
 }
 
 export function getOrigin(req: Request): string {
-  const proto = req.headers["x-forwarded-proto"] || "https";
-  const host = req.headers["x-forwarded-host"] || req.headers["host"] || "localhost";
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers['host'] || 'localhost';
   return `${proto}://${host}`;
 }

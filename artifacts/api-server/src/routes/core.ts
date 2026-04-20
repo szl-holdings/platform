@@ -1,26 +1,24 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { db } from "@szl-holdings/db";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  recommendationsTable,
-  auditLogsTable,
-  terraDistressPropertiesTable,
-  terraLeadsTable,
-  terraDealsTable,
-  firestormFindingsTable,
   alloyWorkflows,
+  auditLogsTable,
+  db,
+  firestormFindingsTable,
   platformJobRunsTable,
-} from "@szl-holdings/db";
-import {
   RECOMMENDATION_ENTITY_TYPES,
   type RecommendationEntityType,
-} from "@szl-holdings/db";
-import { sql, desc, gte, eq, count } from "drizzle-orm";
-import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { logger } from "../lib/logger";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  recommendationsTable,
+  terraDealsTable,
+  terraDistressPropertiesTable,
+  terraLeadsTable,
+} from '@szl-holdings/db';
+import { count, desc, eq, gte, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -35,68 +33,63 @@ const ENTITY_SCORING: Record<
 > = {
   distress_property: {
     baseWeight: 1.2,
-    factors: [
-      "opportunity_score",
-      "days_in_distress",
-      "debt_to_value",
-      "auction_proximity",
-    ],
-    domain: "beacon",
-    actionPrefix: "Acquire or note-purchase",
+    factors: ['opportunity_score', 'days_in_distress', 'debt_to_value', 'auction_proximity'],
+    domain: 'beacon',
+    actionPrefix: 'Acquire or note-purchase',
   },
   lead: {
     baseWeight: 1.0,
-    factors: ["conversion_probability", "engagement_score", "recency"],
-    domain: "beacon",
-    actionPrefix: "Re-engage via direct outreach",
+    factors: ['conversion_probability', 'engagement_score', 'recency'],
+    domain: 'beacon',
+    actionPrefix: 'Re-engage via direct outreach',
   },
   deal: {
     baseWeight: 1.1,
-    factors: ["stage_velocity", "deal_size", "close_probability"],
-    domain: "beacon",
-    actionPrefix: "Advance deal stage",
+    factors: ['stage_velocity', 'deal_size', 'close_probability'],
+    domain: 'beacon',
+    actionPrefix: 'Advance deal stage',
   },
   vulnerability: {
     baseWeight: 1.3,
-    factors: ["cvss_score", "exploitability", "asset_criticality"],
-    domain: "firestorm",
-    actionPrefix: "Remediate within",
+    factors: ['cvss_score', 'exploitability', 'asset_criticality'],
+    domain: 'firestorm',
+    actionPrefix: 'Remediate within',
   },
   incident: {
     baseWeight: 1.4,
-    factors: ["severity", "blast_radius", "containment_status"],
-    domain: "rosie",
-    actionPrefix: "Escalate and contain",
+    factors: ['severity', 'blast_radius', 'containment_status'],
+    domain: 'rosie',
+    actionPrefix: 'Escalate and contain',
   },
   asset: {
     baseWeight: 0.9,
-    factors: ["risk_exposure", "compliance_gap", "operational_criticality"],
-    domain: "alloy",
-    actionPrefix: "Audit and secure",
+    factors: ['risk_exposure', 'compliance_gap', 'operational_criticality'],
+    domain: 'alloy',
+    actionPrefix: 'Audit and secure',
   },
   vessel: {
     baseWeight: 1.0,
-    factors: ["anomaly_score", "sanctions_risk", "route_deviation"],
-    domain: "vessels",
-    actionPrefix: "Flag for review",
+    factors: ['anomaly_score', 'sanctions_risk', 'route_deviation'],
+    domain: 'vessels',
+    actionPrefix: 'Flag for review',
   },
   signal: {
     baseWeight: 1.1,
-    factors: ["signal_strength", "recurrence", "cross_domain_correlation"],
-    domain: "lyte",
-    actionPrefix: "Investigate signal",
+    factors: ['signal_strength', 'recurrence', 'cross_domain_correlation'],
+    domain: 'lyte',
+    actionPrefix: 'Investigate signal',
   },
   workflow: {
     baseWeight: 0.8,
-    factors: ["failure_rate", "duration_deviation", "impact_scope"],
-    domain: "alloy",
-    actionPrefix: "Review and optimize",
+    factors: ['failure_rate', 'duration_deviation', 'impact_scope'],
+    domain: 'alloy',
+    actionPrefix: 'Review and optimize',
   },
   general: {
     baseWeight: 1.0,
-    factors: ["context_relevance", "urgency", "impact"],
-    domain: "general",
-    actionPrefix: "Take action on",
+    factors: ['context_relevance', 'urgency', 'impact'],
+    domain: 'general',
+    actionPrefix: 'Take action on',
   },
 };
 
@@ -106,7 +99,7 @@ function scoreEntity(
 ): {
   score: number;
   confidence: number;
-  severity: "info" | "low" | "medium" | "high" | "critical";
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
   title: string;
   reasoning: string;
   recommended_action: string;
@@ -117,48 +110,56 @@ function scoreEntity(
   let rawScore = 55;
   let confidenceBase = 0.7;
 
-  if (entityType === "distress_property") {
+  if (entityType === 'distress_property') {
     const oppScore = Number(context.opportunity_score ?? context.opportunityScore ?? 70);
     const daysInDistress = Number(context.days_in_distress ?? context.daysInDistress ?? 90);
-    const distressType = String(context.distress_type ?? context.distressType ?? "pre-foreclosure");
+    const distressType = String(context.distress_type ?? context.distressType ?? 'pre-foreclosure');
 
     rawScore = oppScore * cfg.baseWeight;
-    if (distressType === "auction") rawScore = Math.min(rawScore + 10, 100);
+    if (distressType === 'auction') rawScore = Math.min(rawScore + 10, 100);
     if (daysInDistress > 180) rawScore = Math.min(rawScore + 5, 100);
     if (daysInDistress < 30) rawScore = Math.max(rawScore - 5, 0);
-    confidenceBase = oppScore >= 85 ? 0.92 : oppScore >= 70 ? 0.80 : 0.65;
+    confidenceBase = oppScore >= 85 ? 0.92 : oppScore >= 70 ? 0.8 : 0.65;
 
-    const severity: "info" | "low" | "medium" | "high" | "critical" =
-      rawScore >= 90 ? "critical" : rawScore >= 75 ? "high" : rawScore >= 60 ? "medium" : "low";
+    const severity: 'info' | 'low' | 'medium' | 'high' | 'critical' =
+      rawScore >= 90 ? 'critical' : rawScore >= 75 ? 'high' : rawScore >= 60 ? 'medium' : 'low';
 
-    const address = String(context.address ?? "property");
-    const borough = context.borough ? ` in ${context.borough}` : "";
+    const address = String(context.address ?? 'property');
+    const borough = context.borough ? ` in ${context.borough}` : '';
     const estVal = context.estimated_value ?? context.estimatedValue;
-    const valStr = estVal
-      ? ` (est. $${Number(estVal).toLocaleString()})`
-      : "";
+    const valStr = estVal ? ` (est. $${Number(estVal).toLocaleString()})` : '';
 
     return {
       score: Math.round(rawScore * 100) / 100,
       confidence: Math.round(confidenceBase * 1000) / 1000,
       severity,
-      title: `${distressType === "auction" ? "Auction Imminent" : distressType === "foreclosure" ? "Active Foreclosure" : "High-Opportunity Distress"}: ${address}${borough}`,
-      reasoning: `Opportunity score ${oppScore}/100 — ${daysInDistress} days in distress, distress type: ${distressType}${valStr}. ${cfg.factors.join(", ")} all factored into scoring. ${daysInDistress > 180 ? "Owner is highly motivated — advanced distress stage." : "Early/mid-stage — window available for outreach."}`,
-      recommended_action: `${cfg.actionPrefix} ${address}${borough}. ${rawScore >= 85 ? "High-priority — act within 72 hours." : rawScore >= 70 ? "Medium-priority — schedule outreach within 7 days." : "Monitor — add to watchlist for 30-day review."}`,
-      timeframe: rawScore >= 85 ? "72 hours" : rawScore >= 70 ? "7 days" : "30 days",
+      title: `${distressType === 'auction' ? 'Auction Imminent' : distressType === 'foreclosure' ? 'Active Foreclosure' : 'High-Opportunity Distress'}: ${address}${borough}`,
+      reasoning: `Opportunity score ${oppScore}/100 — ${daysInDistress} days in distress, distress type: ${distressType}${valStr}. ${cfg.factors.join(', ')} all factored into scoring. ${daysInDistress > 180 ? 'Owner is highly motivated — advanced distress stage.' : 'Early/mid-stage — window available for outreach.'}`,
+      recommended_action: `${cfg.actionPrefix} ${address}${borough}. ${rawScore >= 85 ? 'High-priority — act within 72 hours.' : rawScore >= 70 ? 'Medium-priority — schedule outreach within 7 days.' : 'Monitor — add to watchlist for 30-day review.'}`,
+      timeframe: rawScore >= 85 ? '72 hours' : rawScore >= 70 ? '7 days' : '30 days',
     };
   }
 
-  if (entityType === "vulnerability") {
+  if (entityType === 'vulnerability') {
     const cvss = Number(context.cvss_score ?? context.cvssScore ?? 5.0);
-    const findingTitle = String(context.title ?? "Security Finding");
-    const affectedAsset = String(context.affected_asset ?? context.affectedAsset ?? "unknown asset");
+    const findingTitle = String(context.title ?? 'Security Finding');
+    const affectedAsset = String(
+      context.affected_asset ?? context.affectedAsset ?? 'unknown asset',
+    );
 
     rawScore = (cvss / 10) * 100 * cfg.baseWeight;
-    confidenceBase = cvss >= 8 ? 0.95 : cvss >= 5 ? 0.82 : 0.70;
+    confidenceBase = cvss >= 8 ? 0.95 : cvss >= 5 ? 0.82 : 0.7;
 
-    const severity: "info" | "low" | "medium" | "high" | "critical" =
-      cvss >= 9 ? "critical" : cvss >= 7 ? "high" : cvss >= 4 ? "medium" : cvss >= 1 ? "low" : "info";
+    const severity: 'info' | 'low' | 'medium' | 'high' | 'critical' =
+      cvss >= 9
+        ? 'critical'
+        : cvss >= 7
+          ? 'high'
+          : cvss >= 4
+            ? 'medium'
+            : cvss >= 1
+              ? 'low'
+              : 'info';
 
     return {
       score: Math.round(rawScore * 100) / 100,
@@ -166,51 +167,64 @@ function scoreEntity(
       severity,
       title: `${severity.charAt(0).toUpperCase() + severity.slice(1)} Vulnerability: ${findingTitle}`,
       reasoning: `CVSS score ${cvss}/10 on ${affectedAsset}. Exploitability and asset criticality indicate ${severity} business risk. Immediate remediation prevents potential breach escalation.`,
-      recommended_action: `${cfg.actionPrefix} ${cvss >= 8 ? "24 hours" : cvss >= 5 ? "7 days" : "30 days"} — patch ${affectedAsset}, verify remediation, update security posture in Firestorm.`,
-      timeframe: cvss >= 8 ? "24 hours" : cvss >= 5 ? "7 days" : "30 days",
+      recommended_action: `${cfg.actionPrefix} ${cvss >= 8 ? '24 hours' : cvss >= 5 ? '7 days' : '30 days'} — patch ${affectedAsset}, verify remediation, update security posture in Firestorm.`,
+      timeframe: cvss >= 8 ? '24 hours' : cvss >= 5 ? '7 days' : '30 days',
     };
   }
 
-  if (entityType === "incident") {
-    const severity_raw = String(context.severity ?? "medium");
-    const incidentTitle = String(context.title ?? "Security Incident");
+  if (entityType === 'incident') {
+    const severity_raw = String(context.severity ?? 'medium');
+    const incidentTitle = String(context.title ?? 'Security Incident');
 
-    const sevMap: Record<string, number> = { critical: 95, high: 80, medium: 60, low: 40, info: 20 };
+    const sevMap: Record<string, number> = {
+      critical: 95,
+      high: 80,
+      medium: 60,
+      low: 40,
+      info: 20,
+    };
     rawScore = (sevMap[severity_raw] ?? 60) * cfg.baseWeight;
-    confidenceBase = severity_raw === "critical" ? 0.96 : severity_raw === "high" ? 0.88 : 0.75;
+    confidenceBase = severity_raw === 'critical' ? 0.96 : severity_raw === 'high' ? 0.88 : 0.75;
 
-    const sev: "info" | "low" | "medium" | "high" | "critical" =
-      (["info", "low", "medium", "high", "critical"].includes(severity_raw)
-        ? severity_raw
-        : "medium") as "info" | "low" | "medium" | "high" | "critical";
+    const sev: 'info' | 'low' | 'medium' | 'high' | 'critical' = (
+      ['info', 'low', 'medium', 'high', 'critical'].includes(severity_raw) ? severity_raw : 'medium'
+    ) as 'info' | 'low' | 'medium' | 'high' | 'critical';
 
     return {
       score: Math.min(Math.round(rawScore * 100) / 100, 100),
       confidence: Math.round(confidenceBase * 1000) / 1000,
       severity: sev,
       title: `Active ${sev.charAt(0).toUpperCase() + sev.slice(1)} Incident: ${incidentTitle}`,
-      reasoning: `Incident severity is ${sev}. Containment status and blast radius indicate ${rawScore >= 80 ? "immediate escalation required" : "managed response warranted"}. Cross-domain correlation with known threat patterns.`,
-      recommended_action: `${cfg.actionPrefix} immediately in Aegis Operations — assign incident commander, activate playbook, notify stakeholders within ${sev === "critical" ? "15 minutes" : sev === "high" ? "1 hour" : "4 hours"}.`,
-      timeframe: sev === "critical" ? "15 minutes" : sev === "high" ? "1 hour" : "4 hours",
+      reasoning: `Incident severity is ${sev}. Containment status and blast radius indicate ${rawScore >= 80 ? 'immediate escalation required' : 'managed response warranted'}. Cross-domain correlation with known threat patterns.`,
+      recommended_action: `${cfg.actionPrefix} immediately in Aegis Operations — assign incident commander, activate playbook, notify stakeholders within ${sev === 'critical' ? '15 minutes' : sev === 'high' ? '1 hour' : '4 hours'}.`,
+      timeframe: sev === 'critical' ? '15 minutes' : sev === 'high' ? '1 hour' : '4 hours',
     };
   }
 
-  const severity: "info" | "low" | "medium" | "high" | "critical" =
-    rawScore >= 85 ? "critical" : rawScore >= 70 ? "high" : rawScore >= 55 ? "medium" : rawScore >= 35 ? "low" : "info";
+  const severity: 'info' | 'low' | 'medium' | 'high' | 'critical' =
+    rawScore >= 85
+      ? 'critical'
+      : rawScore >= 70
+        ? 'high'
+        : rawScore >= 55
+          ? 'medium'
+          : rawScore >= 35
+            ? 'low'
+            : 'info';
 
   return {
     score: Math.round(rawScore * 100) / 100,
     confidence: Math.round(confidenceBase * 1000) / 1000,
     severity,
-    title: `${entityType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} Recommendation`,
-    reasoning: `Analyzed ${cfg.factors.join(", ")} for entity of type ${entityType}. Score of ${Math.round(rawScore)} reflects ${rawScore >= 70 ? "elevated priority" : "standard monitoring"} across ${cfg.domain} domain.`,
-    recommended_action: `${cfg.actionPrefix} this ${entityType.replace(/_/g, " ")} within ${rawScore >= 80 ? "48 hours" : "7 days"} — review in ${cfg.domain} dashboard.`,
-    timeframe: rawScore >= 80 ? "48 hours" : "7 days",
+    title: `${entityType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Recommendation`,
+    reasoning: `Analyzed ${cfg.factors.join(', ')} for entity of type ${entityType}. Score of ${Math.round(rawScore)} reflects ${rawScore >= 70 ? 'elevated priority' : 'standard monitoring'} across ${cfg.domain} domain.`,
+    recommended_action: `${cfg.actionPrefix} this ${entityType.replace(/_/g, ' ')} within ${rawScore >= 80 ? '48 hours' : '7 days'} — review in ${cfg.domain} dashboard.`,
+    timeframe: rawScore >= 80 ? '48 hours' : '7 days',
   };
 }
 
 router.post(
-  "/core/recommendations",
+  '/core/recommendations',
   authMiddleware({ required: true }),
   validateBody(bodyShape({})),
   async (req, res) => {
@@ -228,14 +242,14 @@ router.post(
       };
 
       if (!entity_type) {
-        sendError(res, "entity_type is required", 400);
+        sendError(res, 'entity_type is required', 400);
         return;
       }
 
       if (!RECOMMENDATION_ENTITY_TYPES.includes(entity_type as RecommendationEntityType)) {
         sendError(
           res,
-          `Invalid entity_type "${entity_type}". Valid: ${RECOMMENDATION_ENTITY_TYPES.join(", ")}`,
+          `Invalid entity_type "${entity_type}". Valid: ${RECOMMENDATION_ENTITY_TYPES.join(', ')}`,
           400,
         );
         return;
@@ -286,34 +300,28 @@ router.post(
         },
         meta: {
           latency_ms: latencyMs,
-          engine: "Alloy Intelligence Engine v2.0 — Deterministic Scoring",
+          engine: 'Alloy Intelligence Engine v2.0 — Deterministic Scoring',
           domain: effectiveDomain,
         },
       });
     } catch (err) {
-      handleRouteError(res, err, "Recommendation generation failed");
+      handleRouteError(res, err, 'Recommendation generation failed');
     }
   },
 );
 
 router.get(
-  "/core/recommendations",
+  '/core/recommendations',
   authMiddleware({ required: true }),
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const limit = Math.min(
-        100,
-        Math.max(1, parseInt(String(req.query.limit ?? "20"), 10) || 20),
-      );
-      const offset = Math.max(
-        0,
-        parseInt(String(req.query.offset ?? "0"), 10) || 0,
-      );
+      const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? '20'), 10) || 20));
+      const offset = Math.max(0, parseInt(String(req.query.offset ?? '0'), 10) || 0);
       const entityType = req.query.entity_type as string | undefined;
       const domain = req.query.domain as string | undefined;
 
-      let query = db
+      const query = db
         .select()
         .from(recommendationsTable)
         .orderBy(desc(recommendationsTable.createdAt))
@@ -321,9 +329,7 @@ router.get(
         .offset(offset);
 
       const rows = await query;
-      const [{ total }] = await db
-        .select({ total: count() })
-        .from(recommendationsTable);
+      const [{ total }] = await db.select({ total: count() }).from(recommendationsTable);
 
       res.json({
         success: true,
@@ -345,45 +351,41 @@ router.get(
         meta: { total, limit, offset },
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to list recommendations");
+      handleRouteError(res, err, 'Failed to list recommendations');
     }
   },
 );
 
-router.get("/core/health", async (_req, res) => {
+router.get('/core/health', async (_req, res) => {
   try {
     const dbStart = Date.now();
     await db.execute(sql`SELECT 1`);
     const dbLatencyMs = Date.now() - dbStart;
 
-    const [recCount] = await db
-      .select({ count: count() })
-      .from(recommendationsTable);
-    const [auditCount] = await db
-      .select({ count: count() })
-      .from(auditLogsTable);
+    const [recCount] = await db.select({ count: count() }).from(recommendationsTable);
+    const [auditCount] = await db.select({ count: count() }).from(auditLogsTable);
 
     res.json({
       success: true,
       data: {
-        status: "healthy",
+        status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime_seconds: Math.floor(process.uptime()),
-        version: process.env.npm_package_version ?? "0.0.0",
+        version: process.env.npm_package_version ?? '0.0.0',
         services: {
           database: {
-            status: "ok",
+            status: 'ok',
             latency_ms: dbLatencyMs,
           },
           api: {
-            status: "ok",
+            status: 'ok',
             memory_mb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
           },
-          intelligence: { status: "ok", version: "2.0.0" },
-          beacon: { status: "ok" },
-          rosie: { status: "ok" },
-          alloy: { status: "ok" },
-          lyte: { status: "ok" },
+          intelligence: { status: 'ok', version: '2.0.0' },
+          beacon: { status: 'ok' },
+          rosie: { status: 'ok' },
+          alloy: { status: 'ok' },
+          lyte: { status: 'ok' },
         },
         telemetry: {
           total_recommendations: recCount?.count ?? 0,
@@ -391,30 +393,28 @@ router.get("/core/health", async (_req, res) => {
         },
       },
       meta: {
-        environment: process.env.NODE_ENV ?? "development",
+        environment: process.env.NODE_ENV ?? 'development',
         node_version: process.version,
       },
     });
   } catch (err) {
-    logger.error({ err }, "Core health check failed");
+    logger.error({ err }, 'Core health check failed');
     res.status(503).json({
       success: false,
       data: {
-        status: "degraded",
+        status: 'degraded',
         timestamp: new Date().toISOString(),
-        error: "Database connectivity issue",
+        error: 'Database connectivity issue',
       },
     });
   }
 });
 
-router.get("/core/metrics", async (_req, res) => {
+router.get('/core/metrics', async (_req, res) => {
   try {
     const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    const [distressTotal] = await db
-      .select({ count: count() })
-      .from(terraDistressPropertiesTable);
+    const [distressTotal] = await db.select({ count: count() }).from(terraDistressPropertiesTable);
 
     const [distressHighOpp] = await db
       .select({ count: count() })
@@ -430,47 +430,59 @@ router.get("/core/metrics", async (_req, res) => {
     let auditTotal = { count: 0 };
 
     try {
-      [leadsTotal] = await db
-        .select({ count: count() })
-        .from(terraLeadsTable) as [{ count: number }];
-    } catch { /* table may not exist yet */ }
+      [leadsTotal] = (await db.select({ count: count() }).from(terraLeadsTable)) as [
+        { count: number },
+      ];
+    } catch {
+      /* table may not exist yet */
+    }
 
     try {
-      [dealsTotal] = await db
-        .select({ count: count() })
-        .from(terraDealsTable) as [{ count: number }];
-      [dealsConverted] = await db
+      [dealsTotal] = (await db.select({ count: count() }).from(terraDealsTable)) as [
+        { count: number },
+      ];
+      [dealsConverted] = (await db
         .select({ count: count() })
         .from(terraDealsTable)
-        .where(sql`status = 'closed_won'`) as [{ count: number }];
-    } catch { /* table may not exist yet */ }
+        .where(sql`status = 'closed_won'`)) as [{ count: number }];
+    } catch {
+      /* table may not exist yet */
+    }
 
     try {
-      [vulnsOpen] = await db
+      [vulnsOpen] = (await db
         .select({ count: count() })
         .from(firestormFindingsTable)
-        .where(eq(firestormFindingsTable.status, "open")) as [{ count: number }];
-    } catch { /* table may not exist yet */ }
+        .where(eq(firestormFindingsTable.status, 'open'))) as [{ count: number }];
+    } catch {
+      /* table may not exist yet */
+    }
 
     try {
-      [workflowRuns] = await db
+      [workflowRuns] = (await db
         .select({ count: count() })
         .from(platformJobRunsTable)
-        .where(gte(platformJobRunsTable.createdAt, since30d)) as [{ count: number }];
-    } catch { /* table may not exist yet */ }
+        .where(gte(platformJobRunsTable.createdAt, since30d))) as [{ count: number }];
+    } catch {
+      /* table may not exist yet */
+    }
 
     try {
-      [recsTotal] = await db
-        .select({ count: count() })
-        .from(recommendationsTable) as [{ count: number }];
-    } catch { /* table may not exist yet */ }
+      [recsTotal] = (await db.select({ count: count() }).from(recommendationsTable)) as [
+        { count: number },
+      ];
+    } catch {
+      /* table may not exist yet */
+    }
 
     try {
-      [auditTotal] = await db
+      [auditTotal] = (await db
         .select({ count: count() })
         .from(auditLogsTable)
-        .where(gte(auditLogsTable.createdAt, since30d)) as [{ count: number }];
-    } catch { /* table may not exist yet */ }
+        .where(gte(auditLogsTable.createdAt, since30d))) as [{ count: number }];
+    } catch {
+      /* table may not exist yet */
+    }
 
     const recentRecs = await db
       .select()
@@ -510,70 +522,75 @@ router.get("/core/metrics", async (_req, res) => {
         },
       },
       meta: {
-        window: "30d",
+        window: '30d',
         generated_at: new Date().toISOString(),
       },
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to retrieve core metrics");
+    handleRouteError(res, err, 'Failed to retrieve core metrics');
   }
 });
 
-router.get("/core/audit", authMiddleware({ required: true }), requireRole("ops", "analyst", "admin", "super_admin"), validateQuery(listQuerySchema), async (req, res) => {
-  try {
-    const limit = Math.min(
-      50,
-      Math.max(1, parseInt(String(req.query.limit ?? "10"), 10) || 10),
-    );
-
-    let recentLogs: Array<{
-      id: number;
-      action_type: string;
-      entity_type: string;
-      entity_id: string | null;
-      created_at: Date;
-    }> = [];
-
+router.get(
+  '/core/audit',
+  authMiddleware({ required: true }),
+  requireRole('ops', 'analyst', 'admin', 'super_admin'),
+  validateQuery(listQuerySchema),
+  async (req, res) => {
     try {
-      const rows = await db
-        .select({
-          id: auditLogsTable.id,
-          action_type: auditLogsTable.actionType,
-          entity_type: auditLogsTable.entityType,
-          entity_id: auditLogsTable.entityId,
-          created_at: auditLogsTable.createdAt,
-        })
+      const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit ?? '10'), 10) || 10));
+
+      let recentLogs: Array<{
+        id: number;
+        action_type: string;
+        entity_type: string;
+        entity_id: string | null;
+        created_at: Date;
+      }> = [];
+
+      try {
+        const rows = await db
+          .select({
+            id: auditLogsTable.id,
+            action_type: auditLogsTable.actionType,
+            entity_type: auditLogsTable.entityType,
+            entity_id: auditLogsTable.entityId,
+            created_at: auditLogsTable.createdAt,
+          })
+          .from(auditLogsTable)
+          .orderBy(desc(auditLogsTable.createdAt))
+          .limit(limit);
+        recentLogs = rows;
+      } catch {
+        /* table may not exist yet */
+      }
+
+      const [totalCount] = await db
+        .select({ count: count() })
         .from(auditLogsTable)
-        .orderBy(desc(auditLogsTable.createdAt))
-        .limit(limit);
-      recentLogs = rows;
-    } catch { /* table may not exist yet */ }
+        .catch(() => [{ count: 0 }]);
 
-    const [totalCount] = await db
-      .select({ count: count() })
-      .from(auditLogsTable)
-      .catch(() => [{ count: 0 }]);
-
-    res.json({
-      success: true,
-      data: {
-        records: recentLogs.map((r) => ({
-          id: r.id,
-          action_type: r.action_type,
-          entity_type: r.entity_type,
-          entity_id: r.entity_id,
-          created_at: r.created_at,
-        })),
-        total: totalCount?.count ?? 0,
-      },
-      meta: {
-        limit,
-        generated_at: new Date().toISOString(),
-      },
-    });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to retrieve audit summary");
-  }
-});
+      res.json({
+        success: true,
+        data: {
+          records: recentLogs.map((r) => ({
+            id: r.id,
+            action_type: r.action_type,
+            entity_type: r.entity_type,
+            entity_id: r.entity_id,
+            created_at: r.created_at,
+          })),
+          total: totalCount?.count ?? 0,
+        },
+        meta: {
+          limit,
+          generated_at: new Date().toISOString(),
+        },
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to retrieve audit summary');
+    }
+  },
+);
 
 export default router;

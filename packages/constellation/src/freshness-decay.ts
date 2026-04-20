@@ -10,8 +10,8 @@
  * configurable decay factor.
  */
 
-import type { GraphStore } from "./store.js";
-import type { ConstellationNode } from "./schema.js";
+import type { ConstellationNode } from './schema.js';
+import type { GraphStore } from './store.js';
 
 export interface DecayOptions {
   /** Default max age in seconds before a node is considered stale (72 h). */
@@ -37,10 +37,7 @@ const DEFAULT_DECAY_FACTOR = 0.85;
  * Nodes whose TTL has elapsed are marked stale; their confidence is decayed.
  * Nodes that were previously stale but have been refreshed are un-marked.
  */
-export function applyFreshnessDecay(
-  store: GraphStore,
-  options: DecayOptions = {},
-): DecayResult {
+export function applyFreshnessDecay(store: GraphStore, options: DecayOptions = {}): DecayResult {
   const {
     defaultTtlSeconds = DEFAULT_TTL_SECONDS,
     confidenceDecayFactor = DEFAULT_DECAY_FACTOR,
@@ -64,7 +61,12 @@ export function applyFreshnessDecay(
     const wasStale = node.freshness.isStale;
 
     if (shouldBeStale === wasStale) {
-      result.nodes.push({ id: node.id, wasStale, nowStale: shouldBeStale, confidence: node.confidence });
+      result.nodes.push({
+        id: node.id,
+        wasStale,
+        nowStale: shouldBeStale,
+        confidence: node.confidence,
+      });
       continue;
     }
 
@@ -87,7 +89,12 @@ export function applyFreshnessDecay(
     };
 
     store.upsertNode(updated);
-    result.nodes.push({ id: node.id, wasStale, nowStale: shouldBeStale, confidence: newConfidence });
+    result.nodes.push({
+      id: node.id,
+      wasStale,
+      nowStale: shouldBeStale,
+      confidence: newConfidence,
+    });
   }
 
   return result;
@@ -99,9 +106,9 @@ export function applyFreshnessDecay(
  */
 export function freshnessScore(
   node: ConstellationNode,
-  options: Pick<DecayOptions, "defaultTtlSeconds" | "now"> = {},
+  options: Pick<DecayOptions, 'defaultTtlSeconds' | 'now'> = {},
 ): number {
-  const ttl = node.freshness.ttlSeconds ?? (options.defaultTtlSeconds ?? DEFAULT_TTL_SECONDS);
+  const ttl = node.freshness.ttlSeconds ?? options.defaultTtlSeconds ?? DEFAULT_TTL_SECONDS;
   const lastUpdatedMs = new Date(node.freshness.lastUpdatedAt).getTime();
   const nowMs = options.now ?? Date.now();
   const ageSeconds = (nowMs - lastUpdatedMs) / 1000;

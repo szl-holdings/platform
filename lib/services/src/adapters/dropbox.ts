@@ -1,4 +1,4 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface DropboxFile {
   id: string;
@@ -11,42 +11,42 @@ export interface DropboxFile {
 
 const MOCK_FILES: DropboxFile[] = [
   {
-    id: "dbx_001",
-    name: "Contracts",
-    pathDisplay: "/Contracts",
+    id: 'dbx_001',
+    name: 'Contracts',
+    pathDisplay: '/Contracts',
     size: 0,
-    modified: "2026-03-20T10:00:00Z",
+    modified: '2026-03-20T10:00:00Z',
     isFolder: true,
   },
   {
-    id: "dbx_002",
-    name: "Q1-Financials.xlsx",
-    pathDisplay: "/Finance/Q1-Financials.xlsx",
+    id: 'dbx_002',
+    name: 'Q1-Financials.xlsx',
+    pathDisplay: '/Finance/Q1-Financials.xlsx',
     size: 389120,
-    modified: "2026-03-19T14:30:00Z",
+    modified: '2026-03-19T14:30:00Z',
     isFolder: false,
   },
 ];
 
 export class DropboxAdapter extends ServiceAdapter {
-  readonly name = "dropbox";
-  readonly description = "Dropbox file storage and sync";
-  readonly requiredEnvVars = ["DROPBOX_ACCESS_TOKEN"];
+  readonly name = 'dropbox';
+  readonly description = 'Dropbox file storage and sync';
+  readonly requiredEnvVars = ['DROPBOX_ACCESS_TOKEN'];
 
   private get token(): string | undefined {
-    return process.env["DROPBOX_ACCESS_TOKEN"];
+    return process.env['DROPBOX_ACCESS_TOKEN'];
   }
 
   protected async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
-    if (!result.connected) throw new Error("Dropbox connection verification failed");
+    if (!result.connected) throw new Error('Dropbox connection verification failed');
   }
 
   async testConnection(): Promise<{ connected: boolean; email?: string }> {
     if (!this.isLive) return { connected: false };
     try {
-      const response = await fetch("https://api.dropboxapi.com/2/users/get_current_account", {
-        method: "POST",
+      const response = await fetch('https://api.dropboxapi.com/2/users/get_current_account', {
+        method: 'POST',
         headers: { Authorization: `Bearer ${this.token}` },
       });
       if (!response.ok) return { connected: false };
@@ -60,13 +60,13 @@ export class DropboxAdapter extends ServiceAdapter {
   async listFiles(path?: string): Promise<DropboxFile[]> {
     if (!this.isLive) return [...MOCK_FILES];
     try {
-      const response = await fetch("https://api.dropboxapi.com/2/files/list_folder", {
-        method: "POST",
+      const response = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${this.token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ path: path ?? "", limit: 50 }),
+        body: JSON.stringify({ path: path ?? '', limit: 50 }),
       });
       if (!response.ok) return [...MOCK_FILES];
       const data = (await response.json()) as {
@@ -76,7 +76,7 @@ export class DropboxAdapter extends ServiceAdapter {
           path_display: string;
           size?: number;
           server_modified?: string;
-          ".tag": string;
+          '.tag': string;
         }>;
       };
       return data.entries.map((e) => ({
@@ -85,7 +85,7 @@ export class DropboxAdapter extends ServiceAdapter {
         pathDisplay: e.path_display,
         size: e.size ?? 0,
         modified: e.server_modified ?? new Date().toISOString(),
-        isFolder: e[".tag"] === "folder",
+        isFolder: e['.tag'] === 'folder',
       }));
     } catch {
       return [...MOCK_FILES];

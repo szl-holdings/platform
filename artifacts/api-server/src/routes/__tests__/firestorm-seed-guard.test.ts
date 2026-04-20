@@ -10,26 +10,26 @@
  * avoided to prevent cross-test module cache contamination.
  */
 
-import { describe, it, expect, vi, afterEach } from "vitest";
-import express from "express";
-import request from "supertest";
-import type { IRouter } from "express";
+import type { IRouter } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 const makeTable = () => ({
-  id: "id",
-  createdAt: "created_at",
-  updatedAt: "updated_at",
-  riskScore: "risk_score",
-  vesselId: "vessel_id",
-  orgId: "org_id",
-  status: "status",
-  slug: "slug",
-  name: "name",
-  userId: "user_id",
+  id: 'id',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+  riskScore: 'risk_score',
+  vesselId: 'vessel_id',
+  orgId: 'org_id',
+  status: 'status',
+  slug: 'slug',
+  name: 'name',
+  userId: 'user_id',
 });
 
 const makeSchema = () => ({
@@ -41,7 +41,7 @@ const makeSchema = () => ({
 // @szl-holdings/db — explicit no-op mock (no importActual to avoid side effects)
 // ---------------------------------------------------------------------------
 
-vi.mock("@szl-holdings/db", () => {
+vi.mock('@szl-holdings/db', () => {
   const chain: Record<string, unknown> = {};
   chain.from = () => chain;
   chain.where = () => chain;
@@ -49,8 +49,7 @@ vi.mock("@szl-holdings/db", () => {
   chain.leftJoin = () => chain;
   chain.orderBy = () => chain;
   chain.limit = () => Promise.resolve([]);
-  chain.then = (resolve: (v: unknown[]) => unknown) =>
-    Promise.resolve([]).then(resolve);
+  chain.then = (resolve: (v: unknown[]) => unknown) => Promise.resolve([]).then(resolve);
 
   const mockDb = {
     select: () => chain,
@@ -117,17 +116,17 @@ vi.mock("@szl-holdings/db", () => {
 // External AI + embedding packages
 // ---------------------------------------------------------------------------
 
-vi.mock("@szl-holdings/ai-engine", () => ({
+vi.mock('@szl-holdings/ai-engine', () => ({
   validateAndBuildDecision: vi.fn().mockResolvedValue({ ok: true }),
 }));
 
-vi.mock("@szl-holdings/ai-engine/domain-embedding-hooks", () => ({
+vi.mock('@szl-holdings/ai-engine/domain-embedding-hooks', () => ({
   ingestFirestormFinding: vi.fn().mockResolvedValue(undefined),
   ingestFirestormScenario: vi.fn().mockResolvedValue(undefined),
   ingestFirestormAlert: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@szl-holdings/observability", () => ({
+vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: {
     recordAuthFailure: vi.fn(),
     recordRequest: vi.fn(),
@@ -139,28 +138,31 @@ vi.mock("@szl-holdings/observability", () => ({
 // Internal service mocks
 // ---------------------------------------------------------------------------
 
-vi.mock("../../middlewares/auth", () => ({
+vi.mock('../../middlewares/auth', () => ({
   authMiddleware: (_opts?: unknown) => (_req: any, _res: any, next: () => void) => next(),
   parseIdParam: (raw: string) => parseInt(raw, 10),
-  requireRole: (..._roles: string[]) => (_req: any, _res: any, next: () => void) => next(),
+  requireRole:
+    (..._roles: string[]) =>
+    (_req: any, _res: any, next: () => void) =>
+      next(),
 }));
 
-vi.mock("../../lib/logger", () => ({
+vi.mock('../../lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("../../lib/pubsub-bridge.js", () => ({
+vi.mock('../../lib/pubsub-bridge.js', () => ({
   broadcastWs: vi.fn(),
   pubsub: { publish: vi.fn() },
-  FIRESTORM_EVENTS: { SCENARIO_CREATED: "scenario_created", ALERT_TRIGGERED: "alert_triggered" },
+  FIRESTORM_EVENTS: { SCENARIO_CREATED: 'scenario_created', ALERT_TRIGGERED: 'alert_triggered' },
 }));
 
-vi.mock("../../lib/tradecraft-evidence-store", () => ({
+vi.mock('../../lib/tradecraft-evidence-store', () => ({
   queryEvidenceIndex: vi.fn().mockResolvedValue([]),
   ingestDecisionToEvidenceIndex: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../../middlewares/optimistic-concurrency", () => ({
+vi.mock('../../middlewares/optimistic-concurrency', () => ({
   validateIfMatch: (_req: any, _res: any, next: () => void) => next(),
 }));
 
@@ -168,7 +170,7 @@ vi.mock("../../middlewares/optimistic-concurrency", () => ({
 // Import the REAL register function (after all mocks are hoisted by Vitest)
 // ---------------------------------------------------------------------------
 
-const { register } = await import("../firestorm/assets-cases.js");
+const { register } = await import('../firestorm/assets-cases.js');
 
 function buildApp(): express.Express {
   const app = express();
@@ -183,7 +185,7 @@ function buildApp(): express.Express {
 // Tests — POST /firestorm/seed production guard
 // ---------------------------------------------------------------------------
 
-describe("firestorm seed endpoint — real router production guard", () => {
+describe('firestorm seed endpoint — real router production guard', () => {
   const originalNodeEnv = process.env.NODE_ENV;
   const originalAppEnv = process.env.APP_ENV;
 
@@ -192,34 +194,34 @@ describe("firestorm seed endpoint — real router production guard", () => {
     process.env.APP_ENV = originalAppEnv;
   });
 
-  it("returns 404 with SEED_DISABLED_IN_PRODUCTION when NODE_ENV=production", async () => {
-    process.env.NODE_ENV = "production";
+  it('returns 404 with SEED_DISABLED_IN_PRODUCTION when NODE_ENV=production', async () => {
+    process.env.NODE_ENV = 'production';
     delete (process.env as Record<string, string | undefined>).APP_ENV;
 
     const app = buildApp();
-    const res = await request(app).post("/firestorm/seed").send({});
+    const res = await request(app).post('/firestorm/seed').send({});
 
     expect(res.status).toBe(404);
-    expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+    expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
   });
 
-  it("returns 404 when APP_ENV=production (even if NODE_ENV is development)", async () => {
-    process.env.NODE_ENV = "development";
-    process.env.APP_ENV = "production";
+  it('returns 404 when APP_ENV=production (even if NODE_ENV is development)', async () => {
+    process.env.NODE_ENV = 'development';
+    process.env.APP_ENV = 'production';
 
     const app = buildApp();
-    const res = await request(app).post("/firestorm/seed").send({});
+    const res = await request(app).post('/firestorm/seed').send({});
 
     expect(res.status).toBe(404);
-    expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+    expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
   });
 
-  it("response code is SEED_DISABLED_IN_PRODUCTION when blocked in production", async () => {
-    process.env.NODE_ENV = "production";
+  it('response code is SEED_DISABLED_IN_PRODUCTION when blocked in production', async () => {
+    process.env.NODE_ENV = 'production';
     const app = buildApp();
-    const res = await request(app).post("/firestorm/seed").send({});
+    const res = await request(app).post('/firestorm/seed').send({});
 
     expect(res.status).toBe(404);
-    expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+    expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
   });
 });

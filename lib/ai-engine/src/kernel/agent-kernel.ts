@@ -15,13 +15,13 @@
  * This module sits between the Maker-Checker layer and actual execution.
  */
 
-import { createHash, randomUUID } from "crypto";
+import { createHash, randomUUID } from 'crypto';
 
 export interface ScopeCertificate {
   agentId: string;
   allowedTools: string[];
   allowedParameters?: Record<string, unknown>;
-  maxRiskLevel: "low" | "medium" | "high" | "critical";
+  maxRiskLevel: 'low' | 'medium' | 'high' | 'critical';
   issuedAt: string;
   expiresAt: string;
   issuerSignature: string;
@@ -35,11 +35,11 @@ export interface KernelAuditEntry {
   agentId: string;
   toolName: string;
   arguments: Record<string, unknown>;
-  validationResult: "passed" | "failed" | "blocked" | "escalated";
+  validationResult: 'passed' | 'failed' | 'blocked' | 'escalated';
   validationErrors: string[];
-  authorizationResult: "authorized" | "unauthorized" | "escalated";
+  authorizationResult: 'authorized' | 'unauthorized' | 'escalated';
   authorizationReason: string;
-  executionResult: "success" | "failure" | "compensated" | "skipped";
+  executionResult: 'success' | 'failure' | 'compensated' | 'skipped';
   compensationApplied: boolean;
   compensationSteps: string[];
   durationMs: number;
@@ -70,54 +70,55 @@ export interface KernelExecutionResult<T = unknown> {
 
 const TOOL_SCHEMAS: Record<string, { required: string[]; types: Record<string, string> }> = {
   containment_step: {
-    required: ["containmentType", "targetId"],
-    types: { containmentType: "string", targetId: "string" },
+    required: ['containmentType', 'targetId'],
+    types: { containmentType: 'string', targetId: 'string' },
   },
   recovery_step: {
-    required: ["recoveryType", "targetId"],
-    types: { recoveryType: "string", targetId: "string" },
+    required: ['recoveryType', 'targetId'],
+    types: { recoveryType: 'string', targetId: 'string' },
   },
   create_case: {
-    required: ["title", "severity"],
-    types: { title: "string", severity: "string" },
+    required: ['title', 'severity'],
+    types: { title: 'string', severity: 'string' },
   },
   update_case: {
-    required: ["caseId"],
-    types: { caseId: "string" },
+    required: ['caseId'],
+    types: { caseId: 'string' },
   },
   close_case: {
-    required: ["caseId", "resolution"],
-    types: { caseId: "string", resolution: "string" },
+    required: ['caseId', 'resolution'],
+    types: { caseId: 'string', resolution: 'string' },
   },
   notify_team: {
-    required: ["channel", "message"],
-    types: { channel: "string", message: "string" },
+    required: ['channel', 'message'],
+    types: { channel: 'string', message: 'string' },
   },
   lookup_workflow: {
-    required: ["workflowId"],
-    types: { workflowId: "string" },
+    required: ['workflowId'],
+    types: { workflowId: 'string' },
   },
   route_for_approval: {
-    required: ["actionId", "approvalLevel", "reason"],
-    types: { actionId: "string", approvalLevel: "string", reason: "string" },
+    required: ['actionId', 'approvalLevel', 'reason'],
+    types: { actionId: 'string', approvalLevel: 'string', reason: 'string' },
   },
 };
 
 const HIGH_RISK_TOOL_NAMES = new Set([
-  "containment_step",
-  "recovery_step",
-  "close_case",
-  "update_case",
-  "assign_owner",
-  "disable_account",
-  "revoke_token",
+  'containment_step',
+  'recovery_step',
+  'close_case',
+  'update_case',
+  'assign_owner',
+  'disable_account',
+  'revoke_token',
 ]);
 
-function getToolRiskLevel(toolName: string): "low" | "medium" | "high" | "critical" {
-  if (["containment_step", "recovery_step", "disable_account", "revoke_token"].includes(toolName)) return "critical";
-  if (["close_case", "update_case", "assign_owner"].includes(toolName)) return "high";
-  if (["create_case", "create_action_item", "notify_team"].includes(toolName)) return "medium";
-  return "low";
+function getToolRiskLevel(toolName: string): 'low' | 'medium' | 'high' | 'critical' {
+  if (['containment_step', 'recovery_step', 'disable_account', 'revoke_token'].includes(toolName))
+    return 'critical';
+  if (['close_case', 'update_case', 'assign_owner'].includes(toolName)) return 'high';
+  if (['create_case', 'create_action_item', 'notify_team'].includes(toolName)) return 'medium';
+  return 'low';
 }
 
 function validateToolPayload(toolName: string, args: Record<string, unknown>): string[] {
@@ -144,38 +145,47 @@ function checkScopeCertificate(
 ): { authorized: boolean; reason: string } {
   if (!cert) {
     if (HIGH_RISK_TOOL_NAMES.has(toolName)) {
-      return { authorized: false, reason: `No scope certificate provided for high-risk tool '${toolName}'` };
+      return {
+        authorized: false,
+        reason: `No scope certificate provided for high-risk tool '${toolName}'`,
+      };
     }
-    return { authorized: true, reason: "No certificate required for low-risk tool" };
+    return { authorized: true, reason: 'No certificate required for low-risk tool' };
   }
 
   if (new Date(cert.expiresAt) < new Date()) {
     return { authorized: false, reason: `Scope certificate expired at ${cert.expiresAt}` };
   }
 
-  if (!cert.allowedTools.includes(toolName) && !cert.allowedTools.includes("*")) {
-    return { authorized: false, reason: `Tool '${toolName}' not in agent scope certificate (allowed: ${cert.allowedTools.join(", ")})` };
+  if (!cert.allowedTools.includes(toolName) && !cert.allowedTools.includes('*')) {
+    return {
+      authorized: false,
+      reason: `Tool '${toolName}' not in agent scope certificate (allowed: ${cert.allowedTools.join(', ')})`,
+    };
   }
 
   const riskLevel = getToolRiskLevel(toolName);
   const riskOrder = { low: 0, medium: 1, high: 2, critical: 3 };
   if (riskOrder[riskLevel] > riskOrder[cert.maxRiskLevel]) {
-    return { authorized: false, reason: `Tool '${toolName}' risk level '${riskLevel}' exceeds certificate max '${cert.maxRiskLevel}'` };
+    return {
+      authorized: false,
+      reason: `Tool '${toolName}' risk level '${riskLevel}' exceeds certificate max '${cert.maxRiskLevel}'`,
+    };
   }
 
-  return { authorized: true, reason: "Scope certificate validates tool access" };
+  return { authorized: true, reason: 'Scope certificate validates tool access' };
 }
 
 class KernelAuditChain {
   private entries: KernelAuditEntry[] = [];
-  private lastHash = "genesis";
+  private lastHash = 'genesis';
 
   private static readonly MAX_ENTRIES = 10000;
 
-  append(entry: Omit<KernelAuditEntry, "previousHash" | "currentHash">): KernelAuditEntry {
+  append(entry: Omit<KernelAuditEntry, 'previousHash' | 'currentHash'>): KernelAuditEntry {
     const previousHash = this.lastHash;
     const payload = JSON.stringify({ ...entry, previousHash });
-    const currentHash = createHash("sha256").update(payload).digest("hex");
+    const currentHash = createHash('sha256').update(payload).digest('hex');
 
     const full: KernelAuditEntry = { ...entry, previousHash, currentHash };
     this.entries.push(full);
@@ -197,7 +207,7 @@ class KernelAuditChain {
   }
 
   verifyChain(): { valid: boolean; brokenAt: number | null } {
-    let previousHash = "genesis";
+    let previousHash = 'genesis';
     for (let i = 0; i < this.entries.length; i++) {
       const entry = this.entries[i]!;
       if (entry.previousHash !== previousHash) return { valid: false, brokenAt: i };
@@ -220,7 +230,7 @@ class KernelAuditChain {
         tenantId: entry.tenantId,
         previousHash,
       });
-      const expected = createHash("sha256").update(payload).digest("hex");
+      const expected = createHash('sha256').update(payload).digest('hex');
       if (entry.currentHash !== expected) return { valid: false, brokenAt: i };
       previousHash = entry.currentHash;
     }
@@ -233,9 +243,13 @@ export const kernelAuditChain = new KernelAuditChain();
 const idempotencyCache = new Map<string, { result: unknown; timestamp: number }>();
 const IDEMPOTENCY_TTL_MS = 5 * 60 * 1000;
 
-function generateIdempotencyKey(agentId: string, toolName: string, args: Record<string, unknown>): string {
+function generateIdempotencyKey(
+  agentId: string,
+  toolName: string,
+  args: Record<string, unknown>,
+): string {
   const payload = JSON.stringify({ agentId, toolName, args });
-  return createHash("sha256").update(payload).digest("hex").slice(0, 32);
+  return createHash('sha256').update(payload).digest('hex').slice(0, 32);
 }
 
 export async function executeWithKernel<T = unknown>(
@@ -245,7 +259,8 @@ export async function executeWithKernel<T = unknown>(
   options: KernelExecutionOptions,
 ): Promise<KernelExecutionResult<T>> {
   const startTime = Date.now();
-  const idempotencyKey = options.idempotencyKey ?? generateIdempotencyKey(options.agentId, toolName, args);
+  const idempotencyKey =
+    options.idempotencyKey ?? generateIdempotencyKey(options.agentId, toolName, args);
   const entryId = randomUUID();
 
   const cached = idempotencyCache.get(idempotencyKey);
@@ -256,11 +271,11 @@ export async function executeWithKernel<T = unknown>(
       agentId: options.agentId,
       toolName,
       arguments: args,
-      validationResult: "passed",
+      validationResult: 'passed',
       validationErrors: [],
-      authorizationResult: "authorized",
-      authorizationReason: "Idempotent replay — result from cache",
-      executionResult: "skipped",
+      authorizationResult: 'authorized',
+      authorizationReason: 'Idempotent replay — result from cache',
+      executionResult: 'skipped',
       compensationApplied: false,
       compensationSteps: [],
       durationMs: Date.now() - startTime,
@@ -288,11 +303,11 @@ export async function executeWithKernel<T = unknown>(
       agentId: options.agentId,
       toolName,
       arguments: args,
-      validationResult: "failed",
+      validationResult: 'failed',
       validationErrors,
-      authorizationResult: "unauthorized",
-      authorizationReason: "Schema validation failed before authorization check",
-      executionResult: "skipped",
+      authorizationResult: 'unauthorized',
+      authorizationReason: 'Schema validation failed before authorization check',
+      executionResult: 'skipped',
       compensationApplied: false,
       compensationSteps: [],
       durationMs: Date.now() - startTime,
@@ -300,7 +315,16 @@ export async function executeWithKernel<T = unknown>(
       calledBy: options.calledBy,
       tenantId: options.tenantId,
     });
-    return { success: false, output: null, auditEntry, idempotencyKey, blocked: true, blockReason: validationErrors.join("; "), escalated: false, validationErrors };
+    return {
+      success: false,
+      output: null,
+      auditEntry,
+      idempotencyKey,
+      blocked: true,
+      blockReason: validationErrors.join('; '),
+      escalated: false,
+      validationErrors,
+    };
   }
 
   const authCheck = checkScopeCertificate(toolName, args, options.scopeCertificate);
@@ -312,11 +336,11 @@ export async function executeWithKernel<T = unknown>(
       agentId: options.agentId,
       toolName,
       arguments: args,
-      validationResult: "passed",
+      validationResult: 'passed',
       validationErrors: [],
-      authorizationResult: needsEscalation ? "escalated" : "unauthorized",
+      authorizationResult: needsEscalation ? 'escalated' : 'unauthorized',
       authorizationReason: authCheck.reason,
-      executionResult: "skipped",
+      executionResult: 'skipped',
       compensationApplied: false,
       compensationSteps: [],
       durationMs: Date.now() - startTime,
@@ -324,26 +348,35 @@ export async function executeWithKernel<T = unknown>(
       calledBy: options.calledBy,
       tenantId: options.tenantId,
     });
-    return { success: false, output: null, auditEntry, idempotencyKey, blocked: true, blockReason: authCheck.reason, escalated: needsEscalation, validationErrors: [] };
+    return {
+      success: false,
+      output: null,
+      auditEntry,
+      idempotencyKey,
+      blocked: true,
+      blockReason: authCheck.reason,
+      escalated: needsEscalation,
+      validationErrors: [],
+    };
   }
 
   let output: T | null = null;
-  let executionResult: KernelAuditEntry["executionResult"] = "failure";
+  let executionResult: KernelAuditEntry['executionResult'] = 'failure';
   let compensationApplied = false;
   const compensationSteps: string[] = [];
 
   try {
     output = await executorFn(args);
-    executionResult = "success";
+    executionResult = 'success';
     idempotencyCache.set(idempotencyKey, { result: output, timestamp: Date.now() });
   } catch (err) {
-    executionResult = "failure";
+    executionResult = 'failure';
     if (options.compensationFn) {
       try {
         await options.compensationFn();
         compensationApplied = true;
         compensationSteps.push(`Compensation executed at ${new Date().toISOString()}`);
-        executionResult = "compensated";
+        executionResult = 'compensated';
       } catch (compErr) {
         compensationSteps.push(`Compensation FAILED: ${String(compErr)}`);
       }
@@ -356,9 +389,9 @@ export async function executeWithKernel<T = unknown>(
     agentId: options.agentId,
     toolName,
     arguments: args,
-    validationResult: "passed",
+    validationResult: 'passed',
     validationErrors: [],
-    authorizationResult: "authorized",
+    authorizationResult: 'authorized',
     authorizationReason: authCheck.reason,
     executionResult,
     compensationApplied,
@@ -370,7 +403,7 @@ export async function executeWithKernel<T = unknown>(
   });
 
   return {
-    success: executionResult === "success",
+    success: executionResult === 'success',
     output,
     auditEntry,
     idempotencyKey,
@@ -384,13 +417,13 @@ export async function executeWithKernel<T = unknown>(
 export function issueScopeCertificate(
   agentId: string,
   allowedTools: string[],
-  maxRiskLevel: ScopeCertificate["maxRiskLevel"] = "medium",
+  maxRiskLevel: ScopeCertificate['maxRiskLevel'] = 'medium',
   ttlMs = 60 * 60 * 1000,
 ): ScopeCertificate {
   const issuedAt = new Date().toISOString();
   const expiresAt = new Date(Date.now() + ttlMs).toISOString();
   const payload = JSON.stringify({ agentId, allowedTools, maxRiskLevel, issuedAt, expiresAt });
-  const signature = createHash("sha256").update(`kernel-issuer-secret:${payload}`).digest("hex");
+  const signature = createHash('sha256').update(`kernel-issuer-secret:${payload}`).digest('hex');
   return { agentId, allowedTools, maxRiskLevel, issuedAt, expiresAt, issuerSignature: signature };
 }
 

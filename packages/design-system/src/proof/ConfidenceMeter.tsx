@@ -1,13 +1,13 @@
-import { AlertTriangle } from "lucide-react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import { AlertTriangle } from 'lucide-react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface ConfidenceMeterProps {
   value: number;
   contradiction?: boolean;
   label?: string;
   className?: string;
-  variant?: "compact" | "full";
+  variant?: 'compact' | 'full';
 }
 
 function colorForValue(v: number): string {
@@ -21,15 +21,15 @@ export function ConfidenceMeter({
   contradiction = false,
   label,
   className,
-  variant = "compact",
+  variant = 'compact',
 }: ConfidenceMeterProps) {
   const clamped = Math.max(0, Math.min(100, value));
   const fill = colorForValue(clamped);
   const fillColor = contradiction ? color.confidence.contradiction : fill;
 
   return (
-    <div className={cn("inline-flex flex-col gap-1 min-w-0", className)}>
-      {variant === "full" && (
+    <div className={cn('inline-flex flex-col gap-1 min-w-0', className)}>
+      {variant === 'full' && (
         <div className="flex items-center justify-between gap-2">
           {label && (
             <span className="text-xs uppercase tracking-wider" style={{ color: color.text.muted }}>
@@ -38,7 +38,10 @@ export function ConfidenceMeter({
           )}
           <div className="flex items-center gap-1">
             {contradiction && (
-              <span title="Contradictory evidence detected" style={{ color: color.confidence.contradiction }}>
+              <span
+                title="Contradictory evidence detected"
+                style={{ color: color.confidence.contradiction }}
+              >
                 <AlertTriangle className="h-3 w-3" />
               </span>
             )}
@@ -55,7 +58,7 @@ export function ConfidenceMeter({
           aria-valuenow={clamped}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={label ?? "Confidence"}
+          aria-label={label ?? 'Confidence'}
           className="relative h-1.5 flex-1 rounded-full overflow-hidden"
           style={{ background: color.border.subtle }}
         >
@@ -65,10 +68,13 @@ export function ConfidenceMeter({
           />
         </div>
 
-        {variant === "compact" && (
+        {variant === 'compact' && (
           <div className="flex items-center gap-1 shrink-0">
             {contradiction && (
-              <span title="Contradictory evidence" style={{ color: color.confidence.contradiction }}>
+              <span
+                title="Contradictory evidence"
+                style={{ color: color.confidence.contradiction }}
+              >
                 <AlertTriangle className="h-3 w-3" />
               </span>
             )}

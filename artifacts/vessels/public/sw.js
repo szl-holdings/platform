@@ -1,15 +1,12 @@
-const CACHE_VERSION = "vessels-v1";
+const CACHE_VERSION = 'vessels-v1';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 const DASHBOARD_CACHE = `${CACHE_VERSION}-dashboard`;
 
-const DASHBOARD_API_PATTERNS = [
-  /\/api\/vessels\/(fleets|vessels|positions|alerts|events)/,
-];
+const DASHBOARD_API_PATTERNS = [/\/api\/vessels\/(fleets|vessels|positions|alerts|events)/];
 
 function isStaticAsset(url) {
-  return /\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp|json)$/.test(url)
-    && !url.includes("/api/");
+  return /\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp|json)$/.test(url) && !url.includes('/api/');
 }
 
 function isDashboardApi(url) {
@@ -17,82 +14,83 @@ function isDashboardApi(url) {
 }
 
 function isApiRequest(url) {
-  return url.includes("/api/");
+  return url.includes('/api/');
 }
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
       caches.open(STATIC_CACHE),
       caches.open(API_CACHE),
       caches.open(DASHBOARD_CACHE),
-    ]).then(() => self.skipWaiting())
+    ]).then(() => self.skipWaiting()),
   );
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
+    caches
+      .keys()
       .then((keys) =>
-        Promise.all(
-          keys
-            .filter((k) => !k.startsWith(CACHE_VERSION))
-            .map((k) => caches.delete(k))
-        )
+        Promise.all(keys.filter((k) => !k.startsWith(CACHE_VERSION)).map((k) => caches.delete(k))),
       )
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
-self.addEventListener("push", (event) => {
+self.addEventListener('push', (event) => {
   if (!event.data) return;
   let payload;
-  try { payload = event.data.json(); } catch { return; }
-  const title = payload.title || "Vessels Maritime Intelligence";
+  try {
+    payload = event.data.json();
+  } catch {
+    return;
+  }
+  const title = payload.title || 'Vessels Maritime Intelligence';
   const options = {
-    body: payload.body || "",
-    icon: payload.icon || "/favicon.svg",
-    badge: payload.badge || "/favicon.svg",
-    tag: payload.tag || "vessels-alert",
+    body: payload.body || '',
+    icon: payload.icon || '/favicon.svg',
+    badge: payload.badge || '/favicon.svg',
+    tag: payload.tag || 'vessels-alert',
     data: payload.data || {},
     requireInteraction: true,
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener("notificationclick", (event) => {
+self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const actionUrl = event.notification.data?.actionUrl || "/vessels/";
+  const actionUrl = event.notification.data?.actionUrl || '/vessels/';
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if ("focus" in client) {
+        if ('focus' in client) {
           client.focus();
-          if ("navigate" in client) client.navigate(actionUrl);
+          if ('navigate' in client) client.navigate(actionUrl);
           return;
         }
       }
       return clients.openWindow(actionUrl);
-    })
+    }),
   );
 });
 
-self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") {
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  if (event.data?.type === "CLEAR_CACHE") {
+  if (event.data?.type === 'CLEAR_CACHE') {
     caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
   }
-  if (event.data?.type === "CLEAR_API_CACHE") {
+  if (event.data?.type === 'CLEAR_API_CACHE') {
     caches.delete(API_CACHE);
     caches.delete(DASHBOARD_CACHE);
   }
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', (event) => {
   const { request } = event;
-  if (request.method !== "GET") return;
+  if (request.method !== 'GET') return;
 
   const url = request.url;
 
@@ -121,7 +119,7 @@ async function cacheFirst(request, cacheName) {
     if (response.ok) cache.put(request, response.clone());
     return response;
   } catch {
-    return new Response("", { status: 503 });
+    return new Response('', { status: 503 });
   }
 }
 
@@ -134,9 +132,9 @@ async function networkFirst(request, cacheName) {
   } catch {
     const cached = await cache.match(request);
     if (cached) return cached;
-    return new Response(
-      JSON.stringify({ error: "offline", cached: false }),
-      { status: 503, headers: { "Content-Type": "application/json", "X-Offline": "true" } }
-    );
+    return new Response(JSON.stringify({ error: 'offline', cached: false }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json', 'X-Offline': 'true' },
+    });
   }
 }

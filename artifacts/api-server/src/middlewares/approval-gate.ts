@@ -9,14 +9,14 @@
  *   router.post("/risky-action", authMiddleware(), requireApproval({ actionClass: "ai_action" }), handler)
  */
 
-import type { Request, Response, NextFunction } from "express";
-import type { AuthenticatedUser } from "./auth";
-import { logger } from "../lib/logger";
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../lib/logger';
+import type { AuthenticatedUser } from './auth';
 
 export type ApprovalGateMode =
-  | "enforce"      // Hard block — must have pre-issued approvalId in request
-  | "propose"      // Propose only — create approval request, return 202
-  | "audit_only";  // Log but do not block
+  | 'enforce' // Hard block — must have pre-issued approvalId in request
+  | 'propose' // Propose only — create approval request, return 202
+  | 'audit_only'; // Log but do not block
 
 export interface ApprovalGateOptions {
   actionClass: string;
@@ -42,24 +42,24 @@ declare global {
 
 function hasRole(user: AuthenticatedUser | undefined, roles: string[]): boolean {
   if (!user) return false;
-  return user.roles.some(r => roles.includes(r));
+  return user.roles.some((r) => roles.includes(r));
 }
 
 export function requireApproval(options: ApprovalGateOptions) {
   const {
     actionClass,
-    mode = "enforce",
+    mode = 'enforce',
     requiredApproverRole,
-    bypassRoles = ["super_admin"],
+    bypassRoles = ['super_admin'],
     bypassInDev = true,
   } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const isDev = process.env["NODE_ENV"] === "development" || process.env["NODE_ENV"] === "test";
+    const isDev = process.env['NODE_ENV'] === 'development' || process.env['NODE_ENV'] === 'test';
 
     if (bypassInDev && isDev) {
       logger.info({
-        msg: "Approval gate bypassed (dev mode)",
+        msg: 'Approval gate bypassed (dev mode)',
         actionClass,
         path: req.path,
       });
@@ -70,7 +70,7 @@ export function requireApproval(options: ApprovalGateOptions) {
 
     if (hasRole(req.user, bypassRoles)) {
       logger.info({
-        msg: "Approval gate bypassed (role bypass)",
+        msg: 'Approval gate bypassed (role bypass)',
         actionClass,
         userId: req.user?.id,
         roles: req.user?.roles,
@@ -81,15 +81,15 @@ export function requireApproval(options: ApprovalGateOptions) {
       return;
     }
 
-    if (mode === "audit_only") {
+    if (mode === 'audit_only') {
       req.approvalContext = { actionClass, requestedBy: req.user?.id, requiredApproverRole, mode };
       next();
       return;
     }
 
-    if (mode === "propose") {
+    if (mode === 'propose') {
       logger.info({
-        msg: "Approval gate in propose mode — returning 202",
+        msg: 'Approval gate in propose mode — returning 202',
         actionClass,
         userId: req.user?.id,
         path: req.path,
@@ -97,21 +97,22 @@ export function requireApproval(options: ApprovalGateOptions) {
       req.approvalContext = { actionClass, requestedBy: req.user?.id, requiredApproverRole, mode };
       res.status(202).json({
         success: false,
-        code: "APPROVAL_REQUIRED",
+        code: 'APPROVAL_REQUIRED',
         message: `Action '${actionClass}' requires explicit approval. Submit an approval request and retry with the approvalId.`,
         actionClass,
-        requiredApproverRole: requiredApproverRole ?? "admin",
-        mode: "propose",
+        requiredApproverRole: requiredApproverRole ?? 'admin',
+        mode: 'propose',
       });
       return;
     }
 
-    const rawApprovalId = req.headers["x-approval-id"] ?? req.body?.approvalId ?? req.query?.["approvalId"];
+    const rawApprovalId =
+      req.headers['x-approval-id'] ?? req.body?.approvalId ?? req.query?.['approvalId'];
     const approvalId = rawApprovalId ? parseInt(String(rawApprovalId), 10) : undefined;
 
     if (!approvalId || isNaN(approvalId)) {
       logger.warn({
-        msg: "Approval gate: no approvalId provided",
+        msg: 'Approval gate: no approvalId provided',
         actionClass,
         userId: req.user?.id,
         path: req.path,
@@ -119,10 +120,10 @@ export function requireApproval(options: ApprovalGateOptions) {
       });
       res.status(403).json({
         success: false,
-        code: "APPROVAL_REQUIRED",
+        code: 'APPROVAL_REQUIRED',
         message: `Action '${actionClass}' requires an approved approval request. Provide the approvalId via X-Approval-ID header or request body.`,
         actionClass,
-        requiredApproverRole: requiredApproverRole ?? "admin",
+        requiredApproverRole: requiredApproverRole ?? 'admin',
       });
       return;
     }
@@ -131,7 +132,7 @@ export function requireApproval(options: ApprovalGateOptions) {
     req.approvalContext = { actionClass, requestedBy: req.user?.id, requiredApproverRole, mode };
 
     logger.info({
-      msg: "Approval gate: approvalId present, proceeding",
+      msg: 'Approval gate: approvalId present, proceeding',
       approvalId,
       actionClass,
       userId: req.user?.id,
@@ -151,22 +152,22 @@ export function validateApprovalStatus() {
     }
 
     try {
-      const { getApprovalById } = await import("@szl-holdings/covenant-policy");
+      const { getApprovalById } = await import('@szl-holdings/covenant-policy');
       const approval = await getApprovalById(approvalId);
 
       if (!approval) {
         res.status(403).json({
           success: false,
-          code: "APPROVAL_NOT_FOUND",
+          code: 'APPROVAL_NOT_FOUND',
           message: `Approval request ${approvalId} not found.`,
         });
         return;
       }
 
-      if (approval.status !== "approved") {
+      if (approval.status !== 'approved') {
         res.status(403).json({
           success: false,
-          code: "APPROVAL_NOT_APPROVED",
+          code: 'APPROVAL_NOT_APPROVED',
           message: `Approval request ${approvalId} is in status '${approval.status}' — must be 'approved' to proceed.`,
           approvalStatus: approval.status,
         });
@@ -176,14 +177,14 @@ export function validateApprovalStatus() {
       if (approval.expiresAt && approval.expiresAt < new Date()) {
         res.status(403).json({
           success: false,
-          code: "APPROVAL_EXPIRED",
+          code: 'APPROVAL_EXPIRED',
           message: `Approval request ${approvalId} has expired.`,
         });
         return;
       }
 
       logger.info({
-        msg: "Approval validated",
+        msg: 'Approval validated',
         approvalId,
         resourceType: approval.resourceType,
         resourceId: approval.resourceId,
@@ -192,8 +193,8 @@ export function validateApprovalStatus() {
 
       next();
     } catch (err) {
-      logger.error({ err, approvalId }, "Failed to validate approval");
-      res.status(500).json({ success: false, error: "Failed to validate approval" });
+      logger.error({ err, approvalId }, 'Failed to validate approval');
+      res.status(500).json({ success: false, error: 'Failed to validate approval' });
     }
   };
 }

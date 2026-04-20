@@ -1,8 +1,8 @@
-import { randomUUID } from "crypto";
-import type { EvalSuiteDef, EvalCase, EvalExecutor, EvalRunReport } from "@workspace/eval-forge";
-import { runEvalSuite } from "@workspace/eval-forge";
-import { defaultTraceStore, type ToolCallRecord, type TraceRecord } from "@workspace/trace-graph";
-import { listStepIOForRun, type CapturedStepIO as CoreStepIO } from "@workspace/agents-core";
+import { type CapturedStepIO as CoreStepIO, listStepIOForRun } from '@workspace/agents-core';
+import type { EvalCase, EvalExecutor, EvalRunReport, EvalSuiteDef } from '@workspace/eval-forge';
+import { runEvalSuite } from '@workspace/eval-forge';
+import { defaultTraceStore, type ToolCallRecord, type TraceRecord } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
 
 export interface CapturedStepIO {
   stepId: string;
@@ -52,31 +52,33 @@ export function getReplayManifest(runId: string): RunReplayManifest | undefined 
       objective: traceRecord?.objective ?? runId,
       capturedAt: new Date().toISOString(),
       steps,
-      metadata: { source: "agents-core:step-io-store", traceId: runId },
+      metadata: { source: 'agents-core:step-io-store', traceId: runId },
     };
   }
 
   const traceRecord = defaultTraceStore.get(runId);
   if (!traceRecord) return undefined;
 
-  const steps: CapturedStepIO[] = (traceRecord.toolCalls ?? []).map((tc: ToolCallRecord, idx: number) => ({
-    stepId: tc.toolId ?? `step-${idx}`,
-    stepName: tc.toolName ?? tc.toolId ?? `step-${idx}`,
-    toolId: tc.toolId,
-    input: {},
-    output: {},
-    durationMs: tc.latencyMs ?? 0,
-    tokensUsed: tc.tokens,
-    costUsd: tc.costUsd,
-    retryCount: tc.retries ?? 0,
-  }));
+  const steps: CapturedStepIO[] = (traceRecord.toolCalls ?? []).map(
+    (tc: ToolCallRecord, idx: number) => ({
+      stepId: tc.toolId ?? `step-${idx}`,
+      stepName: tc.toolName ?? tc.toolId ?? `step-${idx}`,
+      toolId: tc.toolId,
+      input: {},
+      output: {},
+      durationMs: tc.latencyMs ?? 0,
+      tokensUsed: tc.tokens,
+      costUsd: tc.costUsd,
+      retryCount: tc.retries ?? 0,
+    }),
+  );
 
   return {
     runId,
     objective: traceRecord.objective ?? runId,
     capturedAt: new Date().toISOString(),
     steps,
-    metadata: { source: "trace-graph", traceId: traceRecord.traceId },
+    metadata: { source: 'trace-graph', traceId: traceRecord.traceId },
   };
 }
 
@@ -103,37 +105,37 @@ export async function replayRunAsEval(
 
   const cases: EvalCase[] = manifest.steps.map((step) => ({
     id: `replay:${runId}:${step.stepId}`,
-    domain: "agents-core",
+    domain: 'agents-core',
     label: `Replay — ${step.stepName}`,
-    evalType: "end-to-end-scenario" as const,
-    graderType: "exact-match" as const,
+    evalType: 'end-to-end-scenario' as const,
+    graderType: 'exact-match' as const,
     input: step.input,
     groundTruth: step.output,
-    expectedOutcome: "pass" as const,
+    expectedOutcome: 'pass' as const,
     traceId: runId,
-    tags: ["replay", `run:${runId}`, ...(step.toolId ? [`tool:${step.toolId}`] : [])],
+    tags: ['replay', `run:${runId}`, ...(step.toolId ? [`tool:${step.toolId}`] : [])],
   }));
 
   const suite: EvalSuiteDef = {
     suiteId: `replay:${runId}`,
     name: `Replay Eval — Run ${runId}`,
     description: `Deterministic replay of run '${runId}' (objective: ${manifest.objective})`,
-    domain: "agents-core",
-    evalType: "end-to-end-scenario",
+    domain: 'agents-core',
+    evalType: 'end-to-end-scenario',
     cases,
-    tags: ["replay", `run:${runId}`],
+    tags: ['replay', `run:${runId}`],
     version: 1,
   };
 
   const stepsByStepId = new Map(manifest.steps.map((s) => [s.stepId, s]));
 
   const executor: EvalExecutor = async (input, caseId, _domain) => {
-    const stepId = caseId.split(":")[2];
+    const stepId = caseId.split(':')[2];
     const capturedStep = stepId ? stepsByStepId.get(stepId) : undefined;
 
     if (capturedStep === undefined) {
       return {
-        output: { error: `No captured output for stepId '${stepId ?? "(unknown)"}'` },
+        output: { error: `No captured output for stepId '${stepId ?? '(unknown)'}'` },
         latencyMs: 0,
         tokensUsed: 0,
         costUsd: 0,
@@ -162,7 +164,7 @@ export async function replayRunAsEval(
 
   return runEvalSuite(suite, executor, {
     runId: `replay-eval:${randomUUID()}`,
-    triggeredBy: options?.triggeredBy ?? "replay-eval",
+    triggeredBy: options?.triggeredBy ?? 'replay-eval',
     onCaseComplete: options?.onCaseComplete,
     metadata: { originalRunId: runId, objective: manifest.objective },
   });

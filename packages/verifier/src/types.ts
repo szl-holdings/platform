@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /** Outcome of an individual check. */
-export const CheckOutcomeSchema = z.enum(["pass", "fail", "warn", "blocked"]);
+export const CheckOutcomeSchema = z.enum(['pass', 'fail', 'warn', 'blocked']);
 export type CheckOutcome = z.infer<typeof CheckOutcomeSchema>;
 
 /**
@@ -9,18 +9,18 @@ export type CheckOutcome = z.infer<typeof CheckOutcomeSchema>;
  * Ordered roughly from least to most severe.
  */
 export const DecisionActionSchema = z.enum([
-  "approve",
-  "revise",
-  "request_more_evidence",
-  "escalate",
-  "route_to_human_review",
-  "block",
+  'approve',
+  'revise',
+  'request_more_evidence',
+  'escalate',
+  'route_to_human_review',
+  'block',
 ]);
 export type DecisionAction = z.infer<typeof DecisionActionSchema>;
 
 /** Target the verifier is judging — a plan step, action, skill output, etc. */
 export const VerifierTargetSchema = z.object({
-  targetType: z.enum(["plan", "plan_step", "skill_run", "action", "output"]),
+  targetType: z.enum(['plan', 'plan_step', 'skill_run', 'action', 'output']),
   targetId: z.string().min(1),
   traceId: z.string().optional(),
   planId: z.string().optional(),
@@ -51,10 +51,10 @@ export type Citation = z.infer<typeof CitationSchema>;
 /** Proposed action being verified for safety. */
 export const ProposedActionSchema = z.object({
   kind: z.string(),
-  risk: z.enum(["low", "medium", "high", "critical"]).default("low"),
+  risk: z.enum(['low', 'medium', 'high', 'critical']).default('low'),
   reversible: z.boolean().default(true),
   estimatedCostUsd: z.number().nonnegative().optional(),
-  blastRadius: z.enum(["self", "tenant", "global"]).default("self"),
+  blastRadius: z.enum(['self', 'tenant', 'global']).default('self'),
 });
 export type ProposedAction = z.infer<typeof ProposedActionSchema>;
 
@@ -84,10 +84,10 @@ export const DomainRuleSchema = z.object({
   id: z.string(),
   description: z.string().optional(),
   field: z.string(),
-  operator: z.enum(["eq", "neq", "gt", "gte", "lt", "lte", "in", "not_in", "contains", "matches"]),
+  operator: z.enum(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in', 'not_in', 'contains', 'matches']),
   value: z.unknown(),
   /** Severity if the rule is violated. */
-  severity: z.enum(["warn", "fail", "blocked"]).default("fail"),
+  severity: z.enum(['warn', 'fail', 'blocked']).default('fail'),
 });
 export type DomainRule = z.infer<typeof DomainRuleSchema>;
 
@@ -160,7 +160,7 @@ export type VerifierDecision = z.infer<typeof VerifierDecisionSchema>;
 export class VerifierResultNotFoundError extends Error {
   constructor(id: string) {
     super(`Verifier result not found: ${id}`);
-    this.name = "VerifierResultNotFoundError";
+    this.name = 'VerifierResultNotFoundError';
   }
 }
 

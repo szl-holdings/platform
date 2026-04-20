@@ -1,19 +1,19 @@
-import type { MemoryEntry, MemoryType, SensitivityLevel } from "./types.js";
+import type { MemoryEntry, MemoryType, SensitivityLevel } from './types.js';
 
 const DEFAULT_TTL_BY_TYPE: Record<MemoryType, number | null> = {
-  "working": 0.042,
-  "session": 1,
-  "episodic": 90,
-  "semantic": null,
-  "workflow": 7,
-  "entity": 90,
-  "artifact": 365,
-  "operator-feedback": 730,
-  "executive": 180,
-  "skill": null,
+  working: 0.042,
+  session: 1,
+  episodic: 90,
+  semantic: null,
+  workflow: 7,
+  entity: 90,
+  artifact: 365,
+  'operator-feedback': 730,
+  executive: 180,
+  skill: null,
 };
 
-const SENSITIVITY_LEVELS: SensitivityLevel[] = ["public", "internal", "confidential", "restricted"];
+const SENSITIVITY_LEVELS: SensitivityLevel[] = ['public', 'internal', 'confidential', 'restricted'];
 
 function sensitivityIdx(level: SensitivityLevel): number {
   return SENSITIVITY_LEVELS.indexOf(level);
@@ -50,14 +50,14 @@ export function markStale(entry: MemoryEntry): MemoryEntry {
 
 export function checkSensitivity(
   entry: MemoryEntry,
-  requesterSensitivityLevel: SensitivityLevel
+  requesterSensitivityLevel: SensitivityLevel,
 ): boolean {
   return sensitivityIdx(requesterSensitivityLevel) >= sensitivityIdx(entry.sensitivity);
 }
 
 export function redactEntry(
   entry: MemoryEntry,
-  requesterSensitivityLevel: SensitivityLevel
+  requesterSensitivityLevel: SensitivityLevel,
 ): MemoryEntry | null {
   const entryIdx = sensitivityIdx(entry.sensitivity);
   const requesterIdx = sensitivityIdx(requesterSensitivityLevel);
@@ -74,8 +74,8 @@ export function redactEntry(
 
   return {
     ...entry,
-    value: "[REDACTED]",
-    summary: entry.summary ? "[REDACTED]" : undefined,
+    value: '[REDACTED]',
+    summary: entry.summary ? '[REDACTED]' : undefined,
     metadata: {},
     linkedEntities: [],
     linkedTraces: [],
@@ -88,7 +88,7 @@ export function isLowValue(entry: MemoryEntry): boolean {
 }
 
 export function isProvenPlaybook(entry: MemoryEntry): boolean {
-  return entry.tier === "skill" && entry.confidence >= 0.8;
+  return entry.tier === 'skill' && entry.confidence >= 0.8;
 }
 
 export function getTTLByType(): Record<MemoryType, number | null> {

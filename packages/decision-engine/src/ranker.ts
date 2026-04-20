@@ -1,15 +1,22 @@
-import { randomUUID } from "crypto";
-import type { Signal, BusinessImpact, RankingWeights, Recommendation, SignalBatch, DecisionEngineResult } from "./types.js";
-import { RankingWeightsSchema } from "./types.js";
-import { computePriorityScore } from "./scorer.js";
+import { randomUUID } from 'crypto';
+import { computePriorityScore } from './scorer.js';
+import type {
+  BusinessImpact,
+  DecisionEngineResult,
+  RankingWeights,
+  Recommendation,
+  Signal,
+  SignalBatch,
+} from './types.js';
+import { RankingWeightsSchema } from './types.js';
 
 const DEFAULT_WEIGHTS = RankingWeightsSchema.parse({});
 
-function deriveUrgency(priority: number): Recommendation["urgency"] {
-  if (priority >= 80) return "critical";
-  if (priority >= 60) return "urgent";
-  if (priority >= 35) return "moderate";
-  return "routine";
+function deriveUrgency(priority: number): Recommendation['urgency'] {
+  if (priority >= 80) return 'critical';
+  if (priority >= 60) return 'urgent';
+  if (priority >= 35) return 'moderate';
+  return 'routine';
 }
 
 export interface SignalGroup {
@@ -20,7 +27,7 @@ export interface SignalGroup {
   suggestedAction: string;
   suggestedOwner?: string;
   estimatedCostUsd?: number;
-  evidence?: Recommendation["evidence"];
+  evidence?: Recommendation['evidence'];
   customTitle?: string;
   customSummary?: string;
   customReasoning?: string;
@@ -28,14 +35,14 @@ export interface SignalGroup {
 
 export function rankSignalGroups(
   groups: SignalGroup[],
-  weights: Partial<RankingWeights> = {}
+  weights: Partial<RankingWeights> = {},
 ): Recommendation[] {
   const resolvedWeights = RankingWeightsSchema.parse({ ...DEFAULT_WEIGHTS, ...weights });
 
-  const recs: Recommendation[] = groups.map(group => {
+  const recs: Recommendation[] = groups.map((group) => {
     const priority = computePriorityScore({
       businessImpact: group.businessImpact,
-      urgency: "routine",
+      urgency: 'routine',
       confidence: group.confidence,
       signals: group.signals,
       weights: resolvedWeights,
@@ -43,14 +50,15 @@ export function rankSignalGroups(
 
     const urgency = deriveUrgency(priority);
 
-    const title = group.customTitle ??
-      `${urgency === "critical" ? "CRITICAL: " : urgency === "urgent" ? "URGENT: " : ""}${group.suggestedAction}`;
+    const title =
+      group.customTitle ??
+      `${urgency === 'critical' ? 'CRITICAL: ' : urgency === 'urgent' ? 'URGENT: ' : ''}${group.suggestedAction}`;
 
-    const summary = group.customSummary ??
+    const summary =
+      group.customSummary ??
       `${group.signals.length} signal(s) from ${group.domain} require attention. Recommended action: ${group.suggestedAction}.`;
 
-    const reasoning = group.customReasoning ??
-      buildReasoning(group, priority);
+    const reasoning = group.customReasoning ?? buildReasoning(group, priority);
 
     return {
       id: randomUUID(),
@@ -66,14 +74,17 @@ export function rankSignalGroups(
       suggestedAction: group.suggestedAction,
       suggestedOwner: group.suggestedOwner,
       estimatedCostUsd: group.estimatedCostUsd,
-      evidence: (group.evidence && group.evidence.length > 0)
-        ? group.evidence
-        : group.signals.length > 0
-          ? group.signals.slice(0, 3).map(s => ({ label: s.source, value: s.type, source: s.source }))
-          : [{ label: "system", value: "no source signals available — review required" }],
-      policyState: "unchecked",
-      approvalState: "none",
-      executionStatus: "none",
+      evidence:
+        group.evidence && group.evidence.length > 0
+          ? group.evidence
+          : group.signals.length > 0
+            ? group.signals
+                .slice(0, 3)
+                .map((s) => ({ label: s.source, value: s.type, source: s.source }))
+            : [{ label: 'system', value: 'no source signals available — review required' }],
+      policyState: 'unchecked',
+      approvalState: 'none',
+      executionStatus: 'none',
       createdAt: Date.now(),
     };
   });
@@ -82,33 +93,35 @@ export function rankSignalGroups(
 }
 
 function buildReasoning(group: SignalGroup, priority: number): string {
-  const lines: string[] = [
-    `Priority score: ${priority}/100.`,
-  ];
+  const lines: string[] = [`Priority score: ${priority}/100.`];
 
   if (group.businessImpact.financialExposureUsd !== undefined) {
-    lines.push(`Financial exposure: $${group.businessImpact.financialExposureUsd.toLocaleString()}.`);
+    lines.push(
+      `Financial exposure: $${group.businessImpact.financialExposureUsd.toLocaleString()}.`,
+    );
   }
   if (group.businessImpact.regulatoryExposure) {
-    lines.push("Regulatory exposure detected — legal review may be required.");
+    lines.push('Regulatory exposure detected — legal review may be required.');
   }
   if ((group.businessImpact.crossDomainBlastRadius?.length ?? 0) > 0) {
-    lines.push(`Cross-domain impact detected in: ${group.businessImpact.crossDomainBlastRadius!.join(", ")}.`);
+    lines.push(
+      `Cross-domain impact detected in: ${group.businessImpact.crossDomainBlastRadius!.join(', ')}.`,
+    );
   }
   if (group.signals.length > 0) {
     lines.push(`Based on ${group.signals.length} signal(s) from domain '${group.domain}'.`);
-    const sources = [...new Set(group.signals.map(s => s.source))];
-    lines.push(`Signal sources: ${sources.join(", ")}.`);
+    const sources = [...new Set(group.signals.map((s) => s.source))];
+    lines.push(`Signal sources: ${sources.join(', ')}.`);
   }
   lines.push(`Confidence: ${Math.round(group.confidence * 100)}%.`);
 
-  return lines.join(" ");
+  return lines.join(' ');
 }
 
 export function evaluateSignalBatch(
   batch: SignalBatch,
   buildGroups: (signals: Signal[]) => SignalGroup[],
-  weights?: Partial<RankingWeights>
+  weights?: Partial<RankingWeights>,
 ): DecisionEngineResult {
   const groups = buildGroups(batch.signals);
   const recommendations = rankSignalGroups(groups, weights);
@@ -117,6 +130,6 @@ export function evaluateSignalBatch(
     recommendations,
     totalSignalsEvaluated: batch.signals.length,
     evaluatedAt: Date.now(),
-    engineVersion: "1.0.0",
+    engineVersion: '1.0.0',
   };
 }

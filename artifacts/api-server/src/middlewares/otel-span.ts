@@ -1,14 +1,14 @@
-import type { Request, Response, NextFunction } from "express";
-import * as api from "@opentelemetry/api";
+import * as api from '@opentelemetry/api';
+import type { NextFunction, Request, Response } from 'express';
 
-const SKIP_PREFIXES = ["/health", "/api/health", "/api/apm", "/api/traces", "/favicon"];
+const SKIP_PREFIXES = ['/health', '/api/health', '/api/apm', '/api/traces', '/favicon'];
 
 function shouldSkip(path: string): boolean {
   return SKIP_PREFIXES.some((p) => path.startsWith(p));
 }
 
-const SZL_CORRELATION_HEADER = "x-szl-correlation-id";
-const W3C_TRACEPARENT_HEADER = "traceparent";
+const SZL_CORRELATION_HEADER = 'x-szl-correlation-id';
+const W3C_TRACEPARENT_HEADER = 'traceparent';
 
 const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
 const NUMERIC_ID_RE = /\/\d+(?=\/|$)/g;
@@ -16,9 +16,9 @@ const SHORT_HEX_RE = /\/[0-9a-f]{12,}(?=\/|$)/gi;
 
 function normalizePath(rawPath: string): string {
   return rawPath
-    .replace(UUID_RE, ":id")
-    .replace(NUMERIC_ID_RE, "/:id")
-    .replace(SHORT_HEX_RE, "/:id");
+    .replace(UUID_RE, ':id')
+    .replace(NUMERIC_ID_RE, '/:id')
+    .replace(SHORT_HEX_RE, '/:id');
 }
 
 const httpHeaderGetter: api.TextMapGetter<Record<string, string | string[] | undefined>> = {
@@ -49,24 +49,28 @@ export function otelSpanMiddleware(req: Request, res: Response, next: NextFuncti
   const normalizedPath = normalizePath(req.path);
   const spanName = `HTTP ${req.method} ${normalizedPath}`;
 
-  const nativeTracer = api.trace.getTracer("szl-api-server");
-  const span = nativeTracer.startSpan(spanName, {
-    kind: api.SpanKind.SERVER,
-    attributes: {
-      "http.method": req.method,
-      "http.url": req.originalUrl,
-      "http.route": normalizedPath,
-      "http.user_agent": req.headers["user-agent"] ?? "",
-      ...(correlationId ? { "szl.correlation.id": correlationId } : {}),
-      ...(requestId ? { "szl.request.id": requestId } : {}),
-      "szl.environment": process.env.NODE_ENV ?? "development",
+  const nativeTracer = api.trace.getTracer('szl-api-server');
+  const span = nativeTracer.startSpan(
+    spanName,
+    {
+      kind: api.SpanKind.SERVER,
+      attributes: {
+        'http.method': req.method,
+        'http.url': req.originalUrl,
+        'http.route': normalizedPath,
+        'http.user_agent': req.headers['user-agent'] ?? '',
+        ...(correlationId ? { 'szl.correlation.id': correlationId } : {}),
+        ...(requestId ? { 'szl.request.id': requestId } : {}),
+        'szl.environment': process.env.NODE_ENV ?? 'development',
+      },
     },
-  }, parentCtx);
+    parentCtx,
+  );
 
   const activeCtx = api.trace.setSpan(parentCtx, span);
 
   const spanCtx = span.spanContext();
-  const traceParentOut = `00-${spanCtx.traceId}-${spanCtx.spanId}-${spanCtx.traceFlags.toString(16).padStart(2, "0")}`;
+  const traceParentOut = `00-${spanCtx.traceId}-${spanCtx.spanId}-${spanCtx.traceFlags.toString(16).padStart(2, '0')}`;
   res.setHeader(W3C_TRACEPARENT_HEADER, traceParentOut);
 
   const correlationHeaderOut = correlationId ?? `${spanCtx.traceId.slice(0, 8)}-${spanCtx.spanId}`;
@@ -75,17 +79,17 @@ export function otelSpanMiddleware(req: Request, res: Response, next: NextFuncti
   const startMs = Date.now();
 
   const wrapped = api.context.bind(activeCtx, next);
-  res.on("finish", () => {
+  res.on('finish', () => {
     const durationMs = Date.now() - startMs;
 
     const routeTemplate = (req as Request & { route?: { path?: string } }).route?.path;
     if (routeTemplate) {
-      span.setAttributes({ "http.route": routeTemplate });
+      span.setAttributes({ 'http.route': routeTemplate });
     }
 
     span.setAttributes({
-      "http.status_code": res.statusCode,
-      "http.response_time_ms": durationMs,
+      'http.status_code': res.statusCode,
+      'http.response_time_ms': durationMs,
     });
 
     if (res.statusCode >= 400) {

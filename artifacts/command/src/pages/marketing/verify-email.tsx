@@ -1,25 +1,25 @@
-import { MarketingNav } from "../../components/marketing/MarketingNav";
-import { MarketingFooter } from "../../components/marketing/MarketingFooter";
-import { motion } from "framer-motion";
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { setAuthTokens } from "@szl-holdings/shared-ui/api-fetch";
-import { Link } from "wouter";
+import { setAuthTokens } from '@szl-holdings/shared-ui/api-fetch';
+import { Button } from '@szl-holdings/shared-ui/ui/button';
+import { motion } from 'framer-motion';
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'wouter';
+import { MarketingFooter } from '../../components/marketing/MarketingFooter';
+import { MarketingNav } from '../../components/marketing/MarketingNav';
 
-type VerifyState = "loading" | "success" | "error" | "expired";
+type VerifyState = 'loading' | 'success' | 'error' | 'expired';
 
 export function MarketingVerifyEmail() {
-  const [state, setState] = useState<VerifyState>("loading");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [state, setState] = useState<VerifyState>('loading');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
+    const token = params.get('token');
 
     if (!token) {
-      setState("error");
-      setErrorMessage("No verification token provided.");
+      setState('error');
+      setErrorMessage('No verification token provided.');
       return;
     }
 
@@ -28,8 +28,12 @@ export function MarketingVerifyEmail() {
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
           if (data.data?.token) {
-            sessionStorage.setItem("session_token", data.data.token);
-            if (data.data?.refreshToken && data.data?.expiresAt && data.data?.refreshTokenExpiresAt) {
+            sessionStorage.setItem('session_token', data.data.token);
+            if (
+              data.data?.refreshToken &&
+              data.data?.expiresAt &&
+              data.data?.refreshTokenExpiresAt
+            ) {
               setAuthTokens({
                 token: data.data.token,
                 refreshToken: data.data.refreshToken,
@@ -38,17 +42,17 @@ export function MarketingVerifyEmail() {
               });
             }
           }
-          setState("success");
-        } else if (res.status === 410 || data.error?.toLowerCase().includes("expired")) {
-          setState("expired");
+          setState('success');
+        } else if (res.status === 410 || data.error?.toLowerCase().includes('expired')) {
+          setState('expired');
         } else {
-          setState("error");
-          setErrorMessage(data.message ?? data.error ?? "Verification failed.");
+          setState('error');
+          setErrorMessage(data.message ?? data.error ?? 'Verification failed.');
         }
       })
       .catch(() => {
-        setState("error");
-        setErrorMessage("Could not connect to the server. Please try again.");
+        setState('error');
+        setErrorMessage('Could not connect to the server. Please try again.');
       });
   }, []);
 
@@ -63,7 +67,7 @@ export function MarketingVerifyEmail() {
           transition={{ duration: 0.4 }}
           className="w-full max-w-md text-center"
         >
-          {state === "loading" && (
+          {state === 'loading' && (
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="w-10 h-10 text-blue-400 animate-spin" />
               <h1 className="text-2xl font-bold">Verifying your email...</h1>
@@ -71,7 +75,7 @@ export function MarketingVerifyEmail() {
             </div>
           )}
 
-          {state === "success" && (
+          {state === 'success' && (
             <div className="flex flex-col items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
@@ -82,15 +86,13 @@ export function MarketingVerifyEmail() {
               </p>
               <div className="flex gap-3 mt-4">
                 <Link href="/marketing/signup">
-                  <Button className="bg-white text-black hover:bg-white/90">
-                    Choose a Plan
-                  </Button>
+                  <Button className="bg-white text-black hover:bg-white/90">Choose a Plan</Button>
                 </Link>
               </div>
             </div>
           )}
 
-          {state === "expired" && (
+          {state === 'expired' && (
             <div className="flex flex-col items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
                 <AlertCircle className="w-8 h-8 text-amber-400" />
@@ -107,7 +109,7 @@ export function MarketingVerifyEmail() {
             </div>
           )}
 
-          {state === "error" && (
+          {state === 'error' && (
             <div className="flex flex-col items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
                 <AlertCircle className="w-8 h-8 text-red-400" />

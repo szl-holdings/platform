@@ -1,5 +1,5 @@
-import { m } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { m } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface TimelineEntry {
   date: string;
@@ -14,9 +14,9 @@ interface TimelineBlockProps {
   className?: string;
 }
 
-export function TimelineBlock({ entries, accentColor = "#2563eb", className }: TimelineBlockProps) {
+export function TimelineBlock({ entries, accentColor = '#2563eb', className }: TimelineBlockProps) {
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       <div
         className="absolute left-[7px] top-2 bottom-2 w-px"
         style={{ background: `linear-gradient(to bottom, ${accentColor}40, ${accentColor}10)` }}
@@ -33,7 +33,10 @@ export function TimelineBlock({ entries, accentColor = "#2563eb", className }: T
           >
             <div
               className="absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white"
-              style={{ backgroundColor: i === 0 ? accentColor : `${accentColor}60`, boxShadow: i === 0 ? `0 0 0 3px ${accentColor}20` : "none" }}
+              style={{
+                backgroundColor: i === 0 ? accentColor : `${accentColor}60`,
+                boxShadow: i === 0 ? `0 0 0 3px ${accentColor}20` : 'none',
+              }}
             />
             <div className="flex flex-col sm:flex-row sm:items-start sm:gap-4">
               <span className="text-[11px] font-bold text-szl-text-muted uppercase tracking-wider shrink-0 mb-1 sm:mb-0 sm:w-20 sm:pt-0.5">

@@ -26,26 +26,26 @@
  *   pnpm --filter @szl-holdings/api-server exec tsx src/scripts/apply-validation-codemod.ts --dry
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync } from "fs";
-import { join, relative, dirname } from "path";
-import { fileURLToPath } from "url";
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { dirname, join, relative } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ROUTES_DIR = join(__dirname, "../routes");
-const DRY = process.argv.includes("--dry");
+const ROUTES_DIR = join(__dirname, '../routes');
+const DRY = process.argv.includes('--dry');
 
 function collectRouteFiles(dir: string, files: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     const stat = statSync(full);
     if (stat.isDirectory()) {
-      if (!["__tests__", "groups"].includes(entry)) collectRouteFiles(full, files);
+      if (!['__tests__', 'groups'].includes(entry)) collectRouteFiles(full, files);
     } else if (
-      entry.endsWith(".ts") &&
-      entry !== "index.ts" &&
-      !entry.endsWith(".test.ts") &&
-      !entry.endsWith(".spec.ts")
+      entry.endsWith('.ts') &&
+      entry !== 'index.ts' &&
+      !entry.endsWith('.test.ts') &&
+      !entry.endsWith('.spec.ts')
     ) {
       files.push(full);
     }
@@ -54,7 +54,7 @@ function collectRouteFiles(dir: string, files: string[] = []): string[] {
 }
 
 const ROUTE_CALL_RE = /\b(?:router|app|r)\s*\.\s*(get|post|put|patch|delete|all)\s*\(/g;
-const MUTATING = new Set(["post", "put", "patch", "delete"]);
+const MUTATING = new Set(['post', 'put', 'patch', 'delete']);
 
 function findMatchingParen(src: string, openIdx: number): number {
   // openIdx points at '('
@@ -64,29 +64,44 @@ function findMatchingParen(src: string, openIdx: number): number {
   let inTpl = false;
   let inLineComment = false;
   let inBlockComment = false;
-  let prev = "";
+  let prev = '';
   while (i < src.length) {
     const c = src[i];
     const next = src[i + 1];
     if (inLineComment) {
-      if (c === "\n") inLineComment = false;
+      if (c === '\n') inLineComment = false;
     } else if (inBlockComment) {
-      if (c === "*" && next === "/") { inBlockComment = false; i++; }
+      if (c === '*' && next === '/') {
+        inBlockComment = false;
+        i++;
+      }
     } else if (inStr) {
-      if (c === "\\") { i += 2; prev = ""; continue; }
+      if (c === '\\') {
+        i += 2;
+        prev = '';
+        continue;
+      }
       if (c === inStr) inStr = null;
     } else if (inTpl) {
-      if (c === "\\") { i += 2; prev = ""; continue; }
-      if (c === "`") inTpl = false;
+      if (c === '\\') {
+        i += 2;
+        prev = '';
+        continue;
+      }
+      if (c === '`') inTpl = false;
       // (template substitutions can themselves contain (), but treating them
       // as opaque is fine for our purposes since we only count top-level parens)
     } else {
-      if (c === "/" && next === "/") { inLineComment = true; i++; }
-      else if (c === "/" && next === "*") { inBlockComment = true; i++; }
-      else if (c === "'" || c === '"') inStr = c;
-      else if (c === "`") inTpl = true;
-      else if (c === "(") depth++;
-      else if (c === ")") {
+      if (c === '/' && next === '/') {
+        inLineComment = true;
+        i++;
+      } else if (c === '/' && next === '*') {
+        inBlockComment = true;
+        i++;
+      } else if (c === "'" || c === '"') inStr = c;
+      else if (c === '`') inTpl = true;
+      else if (c === '(') depth++;
+      else if (c === ')') {
         depth--;
         if (depth === 0) return i;
       }
@@ -106,7 +121,7 @@ interface FileResult {
 }
 
 function processFile(filePath: string): FileResult {
-  const original = readFileSync(filePath, "utf-8");
+  const original = readFileSync(filePath, 'utf-8');
   let src = original;
   let bodyAdds = 0;
   let queryAdds = 0;
@@ -152,24 +167,36 @@ function processFile(filePath: string): FileResult {
       // walk until matching unescaped quote
       let j = i + 1;
       while (j < closeParen) {
-        if (src[j] === "\\") { j += 2; continue; }
-        if (src[j] === firstChar) { pathEnd = j; break; }
+        if (src[j] === '\\') {
+          j += 2;
+          continue;
+        }
+        if (src[j] === firstChar) {
+          pathEnd = j;
+          break;
+        }
         j++;
       }
-    } else if (firstChar === "`") {
+    } else if (firstChar === '`') {
       let j = i + 1;
       while (j < closeParen) {
-        if (src[j] === "\\") { j += 2; continue; }
-        if (src[j] === "`") { pathEnd = j; break; }
+        if (src[j] === '\\') {
+          j += 2;
+          continue;
+        }
+        if (src[j] === '`') {
+          pathEnd = j;
+          break;
+        }
         j++;
       }
-    } else if (firstChar === "[") {
+    } else if (firstChar === '[') {
       // array of paths, e.g. router.get(["/a","/b"], ...)
       let depth = 1;
       let j = i + 1;
       while (j < closeParen && depth > 0) {
-        if (src[j] === "[") depth++;
-        else if (src[j] === "]") depth--;
+        if (src[j] === '[') depth++;
+        else if (src[j] === ']') depth--;
         j++;
       }
       pathEnd = j - 1;
@@ -182,9 +209,15 @@ function processFile(filePath: string): FileResult {
     // Insert middlewares immediately after pathEnd, before any following comma/whitespace.
     // Build insertion text.
     const inserts: string[] = [];
-    if (needsBody) { inserts.push("validateBody(jsonObjectBodySchema)"); bodyAdds++; }
-    if (needsQuery) { inserts.push("validateQuery(anyQuerySchema)"); queryAdds++; }
-    const insertText = ", " + inserts.join(", ");
+    if (needsBody) {
+      inserts.push('validateBody(jsonObjectBodySchema)');
+      bodyAdds++;
+    }
+    if (needsQuery) {
+      inserts.push('validateQuery(anyQuerySchema)');
+      queryAdds++;
+    }
+    const insertText = ', ' + inserts.join(', ');
 
     // Insert right after pathEnd (which is the closing quote/bracket index)
     src = src.slice(0, pathEnd + 1) + insertText + src.slice(pathEnd + 1);
@@ -195,9 +228,12 @@ function processFile(filePath: string): FileResult {
   }
 
   // Ensure imports are present.
-  src = ensureValidationImports(filePath, src, { needBody: bodyAdds > 0, needQuery: queryAdds > 0 });
+  src = ensureValidationImports(filePath, src, {
+    needBody: bodyAdds > 0,
+    needQuery: queryAdds > 0,
+  });
 
-  if (!DRY) writeFileSync(filePath, src, "utf-8");
+  if (!DRY) writeFileSync(filePath, src, 'utf-8');
   return { file: filePath, bodyAdds, queryAdds, routesScanned, unchangedValidated };
 }
 
@@ -207,25 +243,37 @@ function ensureValidationImports(
   needs: { needBody: boolean; needQuery: boolean },
 ): string {
   const required = new Set<string>();
-  if (needs.needBody) { required.add("validateBody"); required.add("jsonObjectBodySchema"); }
-  if (needs.needQuery) { required.add("validateQuery"); required.add("anyQuerySchema"); }
+  if (needs.needBody) {
+    required.add('validateBody');
+    required.add('jsonObjectBodySchema');
+  }
+  if (needs.needQuery) {
+    required.add('validateQuery');
+    required.add('anyQuerySchema');
+  }
 
   // Find an existing import from .../lib/validation
   const importRe = /import\s*\{([^}]*)\}\s*from\s*"((?:\.\.?\/)+lib\/validation)(\.js)?"\s*;?/m;
   const match = src.match(importRe);
   if (match) {
-    const existing = match[1].split(",").map(s => s.trim()).filter(Boolean);
+    const existing = match[1]
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
     const set = new Set(existing);
     for (const name of required) set.add(name);
-    const merged = Array.from(set).sort().join(", ");
-    const replacement = `import { ${merged} } from "${match[2]}${match[3] ?? ""}";`;
+    const merged = Array.from(set).sort().join(', ');
+    const replacement = `import { ${merged} } from "${match[2]}${match[3] ?? ''}";`;
     return src.replace(importRe, replacement);
   }
 
   // No existing validation import — compute relative path and add one.
-  const rel = relative(dirname(filePath), join(ROUTES_DIR, "..", "lib", "validation")).replace(/\\/g, "/");
-  const importPath = rel.startsWith(".") ? rel : "./" + rel;
-  const names = Array.from(required).sort().join(", ");
+  const rel = relative(dirname(filePath), join(ROUTES_DIR, '..', 'lib', 'validation')).replace(
+    /\\/g,
+    '/',
+  );
+  const importPath = rel.startsWith('.') ? rel : './' + rel;
+  const names = Array.from(required).sort().join(', ');
   const importLine = `import { ${names} } from "${importPath}";\n`;
 
   // Insert after the last existing top-of-file import statement.
@@ -241,7 +289,10 @@ function ensureValidationImports(
 const files = collectRouteFiles(ROUTES_DIR);
 const results = files.map(processFile);
 
-let totalBody = 0, totalQuery = 0, filesChanged = 0, totalRoutes = 0;
+let totalBody = 0,
+  totalQuery = 0,
+  filesChanged = 0,
+  totalRoutes = 0;
 for (const r of results) {
   totalBody += r.bodyAdds;
   totalQuery += r.queryAdds;
@@ -250,14 +301,14 @@ for (const r of results) {
 }
 
 console.log(`\n=== apply-validation-codemod ===`);
-console.log(`Mode             : ${DRY ? "DRY RUN (no writes)" : "WRITE"}`);
+console.log(`Mode             : ${DRY ? 'DRY RUN (no writes)' : 'WRITE'}`);
 console.log(`Files scanned    : ${files.length}`);
 console.log(`Files modified   : ${filesChanged}`);
 console.log(`Routes scanned   : ${totalRoutes}`);
 console.log(`validateBody adds: ${totalBody}`);
 console.log(`validateQuery adds: ${totalQuery}`);
 if (filesChanged > 0 && filesChanged <= 50) {
-  console.log("\nModified files:");
+  console.log('\nModified files:');
   for (const r of results) {
     if (r.bodyAdds || r.queryAdds) {
       console.log(`  ${relative(ROUTES_DIR, r.file)}  body+${r.bodyAdds} query+${r.queryAdds}`);

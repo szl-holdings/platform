@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
 const API = `${BASE}/api`;
 
-type Frequency = "daily" | "weekly" | "monthly" | "quarterly" | "on_demand";
+type Frequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'on_demand';
 
 interface Schedule {
   scheduleId: string;
@@ -32,59 +32,63 @@ interface Template {
 }
 
 const FREQ_LABELS: Record<Frequency, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
-  quarterly: "Quarterly",
-  on_demand: "On Demand",
+  daily: 'Daily',
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  quarterly: 'Quarterly',
+  on_demand: 'On Demand',
 };
 
 const FREQ_COLORS: Record<Frequency, string> = {
-  daily: "#3b82f6",
-  weekly: "#8b5cf6",
-  monthly: "#c2a55a",
-  quarterly: "#10b981",
-  on_demand: "#6b7280",
+  daily: '#3b82f6',
+  weekly: '#8b5cf6',
+  monthly: '#c2a55a',
+  quarterly: '#10b981',
+  on_demand: '#6b7280',
 };
 
 const DOMAIN_COLORS: Record<string, string> = {
-  szl_holdings: "#c2a55a",
-  carlota_jo: "#a855f7",
-  aegis: "#06b6d4",
-  terra: "#22c55e",
-  vessels: "#3b82f6",
-  lyte: "#8b5cf6",
-  prism: "#e879f9",
-  general: "#94a3b8",
+  szl_holdings: '#c2a55a',
+  carlota_jo: '#a855f7',
+  aegis: '#06b6d4',
+  terra: '#22c55e',
+  vessels: '#3b82f6',
+  lyte: '#8b5cf6',
+  prism: '#e879f9',
+  general: '#94a3b8',
 };
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(`${API}${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) },
     ...opts,
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Unknown error" }));
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
     throw new Error(err.error || `HTTP ${res.status}`);
   }
   return res.json();
 }
 
-function ScheduleCard({ schedule, onToggle, onRunNow }: {
+function ScheduleCard({
+  schedule,
+  onToggle,
+  onRunNow,
+}: {
   schedule: Schedule;
   onToggle: () => void;
   onRunNow: () => void;
 }) {
-  const freqColor = FREQ_COLORS[schedule.frequency] || "#6b7280";
-  const domainColor = DOMAIN_COLORS[schedule.domain] || "#94a3b8";
+  const freqColor = FREQ_COLORS[schedule.frequency] || '#6b7280';
+  const domainColor = DOMAIN_COLORS[schedule.domain] || '#94a3b8';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       className={`bg-zinc-900/60 border rounded-xl p-4 transition-all ${
-        schedule.isActive ? "border-zinc-800 hover:border-zinc-700" : "border-zinc-900 opacity-60"
+        schedule.isActive ? 'border-zinc-800 hover:border-zinc-700' : 'border-zinc-900 opacity-60'
       }`}
     >
       <div className="flex items-start justify-between gap-4">
@@ -94,7 +98,7 @@ function ScheduleCard({ schedule, onToggle, onRunNow }: {
               className="text-xs font-medium px-2 py-0.5 rounded"
               style={{ color: domainColor, backgroundColor: `${domainColor}15` }}
             >
-              {schedule.domain.replace(/_/g, " ")}
+              {schedule.domain.replace(/_/g, ' ')}
             </span>
             <span
               className="text-xs font-medium px-2 py-0.5 rounded"
@@ -105,24 +109,34 @@ function ScheduleCard({ schedule, onToggle, onRunNow }: {
             {!schedule.isActive && (
               <span className="text-xs px-2 py-0.5 rounded bg-zinc-900 text-zinc-600">Paused</span>
             )}
-            {schedule.lastStatus === "failed" && (
-              <span className="text-xs px-2 py-0.5 rounded bg-red-950 text-red-400">Last run failed</span>
+            {schedule.lastStatus === 'failed' && (
+              <span className="text-xs px-2 py-0.5 rounded bg-red-950 text-red-400">
+                Last run failed
+              </span>
             )}
           </div>
           <h3 className="text-sm font-semibold text-zinc-100 truncate">{schedule.name}</h3>
           <p className="text-xs text-zinc-500 mt-0.5">
             {schedule.recipientEmails?.length > 0
-              ? `→ ${schedule.recipientEmails.slice(0, 2).join(", ")}${schedule.recipientEmails.length > 2 ? ` +${schedule.recipientEmails.length - 2}` : ""}`
-              : "No recipients configured"}
+              ? `→ ${schedule.recipientEmails.slice(0, 2).join(', ')}${schedule.recipientEmails.length > 2 ? ` +${schedule.recipientEmails.length - 2}` : ''}`
+              : 'No recipients configured'}
           </p>
         </div>
         <div className="text-right shrink-0 space-y-0.5">
           <p className="text-xs text-zinc-600">
-            Next: {schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
+            Next:{' '}
+            {schedule.nextRunAt
+              ? new Date(schedule.nextRunAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })
+              : '—'}
           </p>
           <p className="text-xs text-zinc-600">
             Runs: <span className="text-zinc-400">{schedule.runCount ?? 0}</span>
-            {schedule.failCount ? <span className="text-red-500 ml-1">({schedule.failCount} failed)</span> : null}
+            {schedule.failCount ? (
+              <span className="text-red-500 ml-1">({schedule.failCount} failed)</span>
+            ) : null}
           </p>
         </div>
       </div>
@@ -131,7 +145,7 @@ function ScheduleCard({ schedule, onToggle, onRunNow }: {
           onClick={onToggle}
           className="text-xs px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
         >
-          {schedule.isActive ? "Pause" : "Resume"}
+          {schedule.isActive ? 'Pause' : 'Resume'}
         </button>
         <button
           onClick={onRunNow}
@@ -141,7 +155,12 @@ function ScheduleCard({ schedule, onToggle, onRunNow }: {
         </button>
         {schedule.lastRunAt && (
           <span className="text-xs text-zinc-600 ml-auto">
-            Last run: {new Date(schedule.lastRunAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            Last run:{' '}
+            {new Date(schedule.lastRunAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
           </span>
         )}
       </div>
@@ -149,41 +168,51 @@ function ScheduleCard({ schedule, onToggle, onRunNow }: {
   );
 }
 
-function CreateScheduleModal({ templates, onClose, onCreated }: {
+function CreateScheduleModal({
+  templates,
+  onClose,
+  onCreated,
+}: {
   templates: Template[];
   onClose: () => void;
   onCreated: () => void;
 }) {
   const [form, setForm] = useState({
-    name: "",
-    templateId: templates[0]?.templateId || "",
-    domain: "szl_holdings",
-    frequency: "weekly" as Frequency,
-    recipientEmails: "",
+    name: '',
+    templateId: templates[0]?.templateId || '',
+    domain: 'szl_holdings',
+    frequency: 'weekly' as Frequency,
+    recipientEmails: '',
     autoApprove: false,
-    deliveryMethod: "email" as "email" | "download",
+    deliveryMethod: 'email' as 'email' | 'download',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleTemplateChange = (id: string) => {
-    const tpl = templates.find(t => t.templateId === id);
-    setForm(f => ({ ...f, templateId: id, domain: tpl?.domain || f.domain }));
+    const tpl = templates.find((t) => t.templateId === id);
+    setForm((f) => ({ ...f, templateId: id, domain: tpl?.domain || f.domain }));
   };
 
   const handleCreate = async () => {
-    if (!form.name) { setError("Name is required"); return; }
-    if (!form.templateId) { setError("Select a template"); return; }
+    if (!form.name) {
+      setError('Name is required');
+      return;
+    }
+    if (!form.templateId) {
+      setError('Select a template');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const emails = form.recipientEmails
         .split(/[\n,]/)
-        .map(e => e.trim())
+        .map((e) => e.trim())
         .filter(Boolean);
 
-      await apiFetch("/reports/schedules", {
-        method: "POST",
+      await apiFetch('/reports/schedules', {
+        method: 'POST',
         body: JSON.stringify({
           name: form.name,
           templateId: form.templateId,
@@ -196,20 +225,31 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
       });
       onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create schedule");
+      setError(err instanceof Error ? err.message : 'Failed to create schedule');
     } finally {
       setLoading(false);
     }
   };
 
-  const DOMAINS = ["szl_holdings", "carlota_jo", "aegis", "terra", "vessels", "lyte", "prism", "general"];
+  const DOMAINS = [
+    'szl_holdings',
+    'carlota_jo',
+    'aegis',
+    'terra',
+    'vessels',
+    'lyte',
+    'prism',
+    'general',
+  ];
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-zinc-100">New Scheduled Report</h2>
-          <button onClick={onClose} className="text-zinc-600 hover:text-zinc-300 text-sm">✕</button>
+          <button onClick={onClose} className="text-zinc-600 hover:text-zinc-300 text-sm">
+            ✕
+          </button>
         </div>
 
         <div className="space-y-4">
@@ -217,7 +257,7 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
             <label className="text-xs text-zinc-500 block mb-1">Schedule Name</label>
             <input
               value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="e.g. Weekly Investor Briefing"
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 placeholder:text-zinc-600"
             />
@@ -228,11 +268,13 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
             {templates.length > 0 ? (
               <select
                 value={form.templateId}
-                onChange={e => handleTemplateChange(e.target.value)}
+                onChange={(e) => handleTemplateChange(e.target.value)}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
               >
-                {templates.map(t => (
-                  <option key={t.templateId} value={t.templateId}>{t.name}</option>
+                {templates.map((t) => (
+                  <option key={t.templateId} value={t.templateId}>
+                    {t.name}
+                  </option>
                 ))}
               </select>
             ) : (
@@ -247,11 +289,13 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
               <label className="text-xs text-zinc-500 block mb-1">Domain</label>
               <select
                 value={form.domain}
-                onChange={e => setForm(f => ({ ...f, domain: e.target.value }))}
+                onChange={(e) => setForm((f) => ({ ...f, domain: e.target.value }))}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
               >
-                {DOMAINS.map(d => (
-                  <option key={d} value={d}>{d.replace(/_/g, " ")}</option>
+                {DOMAINS.map((d) => (
+                  <option key={d} value={d}>
+                    {d.replace(/_/g, ' ')}
+                  </option>
                 ))}
               </select>
             </div>
@@ -259,11 +303,13 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
               <label className="text-xs text-zinc-500 block mb-1">Frequency</label>
               <select
                 value={form.frequency}
-                onChange={e => setForm(f => ({ ...f, frequency: e.target.value as Frequency }))}
+                onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value as Frequency }))}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500"
               >
                 {(Object.entries(FREQ_LABELS) as [Frequency, string][]).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
                 ))}
               </select>
             </div>
@@ -272,17 +318,17 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
           <div>
             <label className="text-xs text-zinc-500 block mb-1">Delivery Method</label>
             <div className="flex gap-2">
-              {(["email", "download"] as const).map(m => (
+              {(['email', 'download'] as const).map((m) => (
                 <button
                   key={m}
-                  onClick={() => setForm(f => ({ ...f, deliveryMethod: m }))}
+                  onClick={() => setForm((f) => ({ ...f, deliveryMethod: m }))}
                   className={`flex-1 py-2 text-sm rounded-lg border transition-colors ${
                     form.deliveryMethod === m
-                      ? "border-[#c2a55a] bg-[#c2a55a18] text-[#c2a55a]"
-                      : "border-zinc-700 text-zinc-500 hover:text-zinc-300"
+                      ? 'border-[#c2a55a] bg-[#c2a55a18] text-[#c2a55a]'
+                      : 'border-zinc-700 text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
-                  {m === "email" ? "Email with Attachment" : "Download Link"}
+                  {m === 'email' ? 'Email with Attachment' : 'Download Link'}
                 </button>
               ))}
             </div>
@@ -292,7 +338,7 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
             <label className="text-xs text-zinc-500 block mb-1">Recipient Emails</label>
             <textarea
               value={form.recipientEmails}
-              onChange={e => setForm(f => ({ ...f, recipientEmails: e.target.value }))}
+              onChange={(e) => setForm((f) => ({ ...f, recipientEmails: e.target.value }))}
               rows={3}
               placeholder="investor@example.com&#10;board@company.com"
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 resize-none"
@@ -303,9 +349,9 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
           <label className="flex items-center gap-3 cursor-pointer">
             <div
               className={`w-5 h-5 rounded border transition-colors flex items-center justify-center ${
-                form.autoApprove ? "bg-[#c2a55a] border-[#c2a55a]" : "border-zinc-600"
+                form.autoApprove ? 'bg-[#c2a55a] border-[#c2a55a]' : 'border-zinc-600'
               }`}
-              onClick={() => setForm(f => ({ ...f, autoApprove: !f.autoApprove }))}
+              onClick={() => setForm((f) => ({ ...f, autoApprove: !f.autoApprove }))}
             >
               {form.autoApprove && <span className="text-zinc-900 text-xs font-bold">✓</span>}
             </div>
@@ -330,7 +376,7 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-zinc-900 bg-[#c2a55a] rounded-lg hover:bg-[#d4bc82] disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create Schedule"}
+            {loading ? 'Creating...' : 'Create Schedule'}
           </button>
         </div>
       </div>
@@ -341,24 +387,24 @@ function CreateScheduleModal({ templates, onClose, onCreated }: {
 export default function ScheduledReports() {
   const qc = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
-  const [filterDomain, setFilterDomain] = useState("");
-  const [filterActive, setFilterActive] = useState<string>("");
+  const [filterDomain, setFilterDomain] = useState('');
+  const [filterActive, setFilterActive] = useState<string>('');
   const [runMsg, setRunMsg] = useState<string | null>(null);
 
   const { data: schedulesRaw, isLoading } = useStandardQuery({
-    queryKey: ["report-schedules", filterDomain, filterActive],
+    queryKey: ['report-schedules', filterDomain, filterActive],
     queryFn: () => {
       const params = new URLSearchParams();
-      if (filterDomain) params.set("domain", filterDomain);
-      if (filterActive) params.set("isActive", filterActive);
+      if (filterDomain) params.set('domain', filterDomain);
+      if (filterActive) params.set('isActive', filterActive);
       return apiFetch(`/reports/schedules?${params}`);
     },
     refetchInterval: 30_000,
   });
 
   const { data: templatesRaw } = useStandardQuery({
-    queryKey: ["report-templates-schedulable"],
-    queryFn: () => apiFetch("/reports/templates?isActive=true&limit=100"),
+    queryKey: ['report-templates-schedulable'],
+    queryFn: () => apiFetch('/reports/templates?isActive=true&limit=100'),
   });
 
   // /reports/schedules returns array directly (no meta wrapper)
@@ -370,41 +416,43 @@ export default function ScheduledReports() {
     setRunMsg(null);
     try {
       // run-due returns { processed, results } directly (no meta wrapper)
-      const result = await apiFetch("/reports/schedules/run-due", { method: "POST" });
-      setRunMsg(`Processed ${result.processed ?? 0} schedules — ${result.results?.filter((x: { status: string }) => x.status === "completed").length ?? 0} completed`);
-      qc.invalidateQueries({ queryKey: ["report-schedules"] });
+      const result = await apiFetch('/reports/schedules/run-due', { method: 'POST' });
+      setRunMsg(
+        `Processed ${result.processed ?? 0} schedules — ${result.results?.filter((x: { status: string }) => x.status === 'completed').length ?? 0} completed`,
+      );
+      qc.invalidateQueries({ queryKey: ['report-schedules'] });
     } catch {
-      setRunMsg("Failed to run schedules");
+      setRunMsg('Failed to run schedules');
     }
   };
 
   const handleToggleSchedule = async (scheduleId: string, currentlyActive: boolean) => {
     try {
       await apiFetch(`/reports/schedules/${scheduleId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({ isActive: !currentlyActive }),
       });
-      qc.invalidateQueries({ queryKey: ["report-schedules"] });
+      qc.invalidateQueries({ queryKey: ['report-schedules'] });
     } catch {
-      setRunMsg("Failed to update schedule status");
+      setRunMsg('Failed to update schedule status');
     }
   };
 
   const handleRunSchedule = async (scheduleId: string) => {
     try {
-      await apiFetch(`/reports/schedules/${scheduleId}/run`, { method: "POST" });
-      qc.invalidateQueries({ queryKey: ["report-schedules"] });
+      await apiFetch(`/reports/schedules/${scheduleId}/run`, { method: 'POST' });
+      qc.invalidateQueries({ queryKey: ['report-schedules'] });
       setRunMsg(`Schedule ${scheduleId.slice(0, 8)}… queued for immediate run`);
     } catch {
-      setRunMsg("Failed to run schedule");
+      setRunMsg('Failed to run schedule');
     }
   };
 
   const stats = {
     total: schedules.length,
-    active: schedules.filter(s => s.isActive).length,
-    paused: schedules.filter(s => !s.isActive).length,
-    failed: schedules.filter(s => s.lastStatus === "failed").length,
+    active: schedules.filter((s) => s.isActive).length,
+    paused: schedules.filter((s) => !s.isActive).length,
+    failed: schedules.filter((s) => s.lastStatus === 'failed').length,
   };
 
   return (
@@ -416,7 +464,7 @@ export default function ScheduledReports() {
             onClose={() => setShowCreate(false)}
             onCreated={() => {
               setShowCreate(false);
-              qc.invalidateQueries({ queryKey: ["report-schedules"] });
+              qc.invalidateQueries({ queryKey: ['report-schedules'] });
             }}
           />
         )}
@@ -427,10 +475,17 @@ export default function ScheduledReports() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-0.5">
-              <a href={`${BASE}/reports`} className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors">← Reports Hub</a>
+              <a
+                href={`${BASE}/reports`}
+                className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+              >
+                ← Reports Hub
+              </a>
             </div>
             <h1 className="text-xl font-bold text-zinc-100">Scheduled Reports</h1>
-            <p className="text-xs text-zinc-500 mt-0.5">Automate report delivery on a recurring schedule</p>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Automate report delivery on a recurring schedule
+            </p>
           </div>
           <div className="flex gap-2">
             <button
@@ -459,14 +514,20 @@ export default function ScheduledReports() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Total Schedules", value: stats.total, color: "#c2a55a" },
-            { label: "Active", value: stats.active, color: "#10b981" },
-            { label: "Paused", value: stats.paused, color: "#6b7280" },
-            { label: "Last Run Failed", value: stats.failed, color: stats.failed > 0 ? "#f43f5e" : "#6b7280" },
-          ].map(s => (
+            { label: 'Total Schedules', value: stats.total, color: '#c2a55a' },
+            { label: 'Active', value: stats.active, color: '#10b981' },
+            { label: 'Paused', value: stats.paused, color: '#6b7280' },
+            {
+              label: 'Last Run Failed',
+              value: stats.failed,
+              color: stats.failed > 0 ? '#f43f5e' : '#6b7280',
+            },
+          ].map((s) => (
             <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
               <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">{s.label}</p>
-              <p className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
+              <p className="text-2xl font-bold" style={{ color: s.color }}>
+                {s.value}
+              </p>
             </div>
           ))}
         </div>
@@ -475,17 +536,28 @@ export default function ScheduledReports() {
         <div className="flex gap-3 flex-wrap">
           <select
             value={filterDomain}
-            onChange={e => setFilterDomain(e.target.value)}
+            onChange={(e) => setFilterDomain(e.target.value)}
             className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600"
           >
             <option value="">All domains</option>
-            {["szl_holdings", "carlota_jo", "aegis", "terra", "vessels", "lyte", "prism", "general"].map(d => (
-              <option key={d} value={d}>{d.replace(/_/g, " ")}</option>
+            {[
+              'szl_holdings',
+              'carlota_jo',
+              'aegis',
+              'terra',
+              'vessels',
+              'lyte',
+              'prism',
+              'general',
+            ].map((d) => (
+              <option key={d} value={d}>
+                {d.replace(/_/g, ' ')}
+              </option>
             ))}
           </select>
           <select
             value={filterActive}
-            onChange={e => setFilterActive(e.target.value)}
+            onChange={(e) => setFilterActive(e.target.value)}
             className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-sm text-zinc-300 focus:outline-none focus:border-zinc-600"
           >
             <option value="">All statuses</option>
@@ -494,7 +566,10 @@ export default function ScheduledReports() {
           </select>
           {(filterDomain || filterActive) && (
             <button
-              onClick={() => { setFilterDomain(""); setFilterActive(""); }}
+              onClick={() => {
+                setFilterDomain('');
+                setFilterActive('');
+              }}
               className="text-xs text-zinc-500 hover:text-zinc-300 px-2 py-1.5 border border-zinc-800 rounded-lg"
             >
               Clear filters
@@ -504,13 +579,27 @@ export default function ScheduledReports() {
 
         {/* How it works */}
         <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-4">
-          <p className="text-xs text-zinc-500 font-medium mb-2 uppercase tracking-widest">How it works</p>
+          <p className="text-xs text-zinc-500 font-medium mb-2 uppercase tracking-widest">
+            How it works
+          </p>
           <div className="grid sm:grid-cols-3 gap-4">
             {[
-              { step: "1", title: "Select a template", desc: "Pick from your saved report templates in the Report Builder" },
-              { step: "2", title: "Set the schedule", desc: "Choose daily, weekly, monthly, or quarterly delivery frequency" },
-              { step: "3", title: "Receive reports", desc: "Get PDF reports via email or expiring download links automatically" },
-            ].map(item => (
+              {
+                step: '1',
+                title: 'Select a template',
+                desc: 'Pick from your saved report templates in the Report Builder',
+              },
+              {
+                step: '2',
+                title: 'Set the schedule',
+                desc: 'Choose daily, weekly, monthly, or quarterly delivery frequency',
+              },
+              {
+                step: '3',
+                title: 'Receive reports',
+                desc: 'Get PDF reports via email or expiring download links automatically',
+              },
+            ].map((item) => (
               <div key={item.step} className="flex gap-3">
                 <div className="w-6 h-6 rounded-full bg-[#c2a55a18] border border-[#c2a55a30] flex items-center justify-center shrink-0">
                   <span className="text-xs font-bold text-[#c2a55a]">{item.step}</span>
@@ -531,7 +620,9 @@ export default function ScheduledReports() {
           ) : schedules.length === 0 ? (
             <div className="text-center py-16 border-2 border-dashed border-zinc-800 rounded-xl">
               <p className="text-zinc-500 mb-2">No scheduled reports configured</p>
-              <p className="text-xs text-zinc-600 mb-4">Create a schedule to automate report delivery</p>
+              <p className="text-xs text-zinc-600 mb-4">
+                Create a schedule to automate report delivery
+              </p>
               <button
                 onClick={() => setShowCreate(true)}
                 className="text-sm text-[#c2a55a] hover:text-[#d4bc82] transition-colors"
@@ -540,7 +631,7 @@ export default function ScheduledReports() {
               </button>
             </div>
           ) : (
-            schedules.map(schedule => (
+            schedules.map((schedule) => (
               <ScheduleCard
                 key={schedule.scheduleId}
                 schedule={schedule}
@@ -555,8 +646,11 @@ export default function ScheduledReports() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
           <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Delivery History</p>
           <p className="text-xs text-zinc-600">
-            Full delivery history, read receipts, and download logs are available in the{" "}
-            <a href={`${BASE}/reports`} className="text-[#c2a55a] hover:text-[#d4bc82] transition-colors">
+            Full delivery history, read receipts, and download logs are available in the{' '}
+            <a
+              href={`${BASE}/reports`}
+              className="text-[#c2a55a] hover:text-[#d4bc82] transition-colors"
+            >
               Reports Hub
             </a>
             . Each generated report is tracked with status, PDF size, and distribution records.

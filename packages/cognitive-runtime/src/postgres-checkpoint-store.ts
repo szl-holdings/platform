@@ -1,8 +1,8 @@
-import { desc, eq, lt, or, type InferInsertModel } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { CheckpointEntry, CheckpointStore } from "./checkpoint.js";
-import type { CognitiveLoopRun } from "./types.js";
+import { desc, eq, type InferInsertModel, lt, or } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
+import type { CheckpointEntry, CheckpointStore } from './checkpoint.js';
+import type { CognitiveLoopRun } from './types.js';
 
 /**
  * Minimal write-target abstraction the store actually uses on the table. We
@@ -10,9 +10,9 @@ import type { CognitiveLoopRun } from "./types.js";
  * builder; this lets tests inject a fake without coupling to a live pool.
  */
 export interface CheckpointDb {
-  select: NodePgDatabase<Record<string, unknown>>["select"];
-  insert: NodePgDatabase<Record<string, unknown>>["insert"];
-  delete: NodePgDatabase<Record<string, unknown>>["delete"];
+  select: NodePgDatabase<Record<string, unknown>>['select'];
+  insert: NodePgDatabase<Record<string, unknown>>['insert'];
+  delete: NodePgDatabase<Record<string, unknown>>['delete'];
 }
 
 export interface PostgresCheckpointStoreLogger {
@@ -61,10 +61,10 @@ function buildRow(entry: CheckpointEntry): InferInsertModel<OrchestrationCheckpo
 }
 
 function fromRow(row: unknown): CheckpointEntry | undefined {
-  if (!row || typeof row !== "object") return undefined;
+  if (!row || typeof row !== 'object') return undefined;
   const r = row as { snapshot?: SnapshotEnvelope; ref?: string };
   const entry = r.snapshot?.entry;
-  if (entry && typeof entry === "object" && typeof entry.ref === "string") {
+  if (entry && typeof entry === 'object' && typeof entry.ref === 'string') {
     return entry;
   }
   return undefined;
@@ -98,7 +98,7 @@ export class PostgresCheckpointStore implements CheckpointStore {
     if (this.flushIntervalMs > 0) {
       this.flushTimer = setInterval(() => {
         void this.flush().catch((err) =>
-          this.logger?.warn?.({ err }, "[checkpoint-store] flush failed"),
+          this.logger?.warn?.({ err }, '[checkpoint-store] flush failed'),
         );
       }, this.flushIntervalMs);
       this.flushTimer.unref?.();
@@ -167,7 +167,7 @@ export class PostgresCheckpointStore implements CheckpointStore {
       }
       return count;
     } catch (err) {
-      this.logger?.warn?.({ err }, "[checkpoint-store] hydrate failed");
+      this.logger?.warn?.({ err }, '[checkpoint-store] hydrate failed');
       return 0;
     }
   }
@@ -192,17 +192,15 @@ export class PostgresCheckpointStore implements CheckpointStore {
             .values(row)
             .onConflictDoUpdate({ target: this.table.ref, set: row });
         } catch (err) {
-          this.logger?.warn?.({ err, ref }, "[checkpoint-store] upsert failed");
+          this.logger?.warn?.({ err, ref }, '[checkpoint-store] upsert failed');
           this.dirty.add(ref);
         }
       }
       for (const ref of deletedRefs) {
         try {
-          await this.db
-            .delete(this.table)
-            .where(eq(this.table.ref, ref));
+          await this.db.delete(this.table).where(eq(this.table.ref, ref));
         } catch (err) {
-          this.logger?.warn?.({ err, ref }, "[checkpoint-store] delete failed");
+          this.logger?.warn?.({ err, ref }, '[checkpoint-store] delete failed');
           this.deleted.add(ref);
         }
       }
@@ -212,7 +210,9 @@ export class PostgresCheckpointStore implements CheckpointStore {
   }
 
   /** Run retention: removes expired rows from cache + DB. */
-  async runRetention(maxAgeMs = 24 * 60 * 60 * 1000): Promise<{ cacheRemoved: number; dbRemoved: number }> {
+  async runRetention(
+    maxAgeMs = 24 * 60 * 60 * 1000,
+  ): Promise<{ cacheRemoved: number; dbRemoved: number }> {
     const cacheRemoved = this.prune(maxAgeMs);
     let dbRemoved = 0;
     try {
@@ -220,15 +220,10 @@ export class PostgresCheckpointStore implements CheckpointStore {
       const now = new Date();
       const result = await this.db
         .delete(this.table)
-        .where(
-          or(
-            lt(this.table.createdAt, cutoff),
-            lt(this.table.expiresAt, now),
-          ),
-        );
+        .where(or(lt(this.table.createdAt, cutoff), lt(this.table.expiresAt, now)));
       dbRemoved = (result as { rowCount?: number }).rowCount ?? 0;
     } catch (err) {
-      this.logger?.warn?.({ err }, "[checkpoint-store] retention sweep failed");
+      this.logger?.warn?.({ err }, '[checkpoint-store] retention sweep failed');
     }
     return { cacheRemoved, dbRemoved };
   }

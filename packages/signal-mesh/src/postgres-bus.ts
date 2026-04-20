@@ -11,20 +11,18 @@
  * to show recent activity immediately after a boot.
  */
 
-import { desc, lt, getTableColumns, sql, type SQL } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import { desc, getTableColumns, lt, type SQL, sql } from 'drizzle-orm';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 
 const BATCH_SIZE = 500;
 
-function buildExcludedSet(
-  table: PgTable,
-  sampleRow: Record<string, unknown>,
-): Record<string, SQL> {
+function buildExcludedSet(table: PgTable, sampleRow: Record<string, unknown>): Record<string, SQL> {
   // getTableColumns returns undefined for plain objects (e.g. in-memory test
   // stubs). Fall back to treating the table itself as a column-name map so
   // the upsert ON CONFLICT set clause can still be constructed.
-  const cols = (getTableColumns(table) as Record<string, { name: string }> | undefined)
-    ?? (table as unknown as Record<string, { name: string }>);
+  const cols =
+    (getTableColumns(table) as Record<string, { name: string }> | undefined) ??
+    (table as unknown as Record<string, { name: string }>);
   const set: Record<string, SQL> = {};
   for (const key of Object.keys(sampleRow)) {
     const col = cols[key];
@@ -40,9 +38,9 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { Signal } from "@workspace/ontology/signal";
-import type { SignalBusStore } from "./bus.js";
+import type { Signal } from '@workspace/ontology/signal';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { SignalBusStore } from './bus.js';
 
 export interface PostgresSignalBusLogger {
   info?: (...args: unknown[]) => void;
@@ -68,7 +66,7 @@ export class PostgresSignalBusStore implements SignalBusStore {
   private flushTimer: ReturnType<typeof setInterval> | undefined;
   private flushing = false;
   private readonly opts: Required<
-    Pick<PostgresSignalBusStoreOptions, "flushIntervalMs" | "hydrateLimit">
+    Pick<PostgresSignalBusStoreOptions, 'flushIntervalMs' | 'hydrateLimit'>
   > &
     PostgresSignalBusStoreOptions;
 
@@ -77,7 +75,7 @@ export class PostgresSignalBusStore implements SignalBusStore {
     if (this.opts.flushIntervalMs > 0) {
       this.flushTimer = setInterval(() => {
         void this.flush().catch((err) =>
-          this.opts.logger?.warn?.({ err }, "PostgresSignalBusStore: flush failed"),
+          this.opts.logger?.warn?.({ err }, 'PostgresSignalBusStore: flush failed'),
         );
       }, this.opts.flushIntervalMs);
       this.flushTimer.unref?.();
@@ -99,16 +97,16 @@ export class PostgresSignalBusStore implements SignalBusStore {
       const signals: Signal[] = [];
       for (const r of rows as Array<{ payload?: { signal?: Signal } | null }>) {
         const sig = r.payload?.signal;
-        if (sig && typeof sig === "object" && typeof sig.signalId === "string") {
+        if (sig && typeof sig === 'object' && typeof sig.signalId === 'string') {
           signals.push(sig);
         }
       }
       // Return chronological order so loadBuffer keeps newest at the tail.
       signals.reverse();
-      this.opts.logger?.info?.({ loaded: signals.length }, "PostgresSignalBusStore: hydrated");
+      this.opts.logger?.info?.({ loaded: signals.length }, 'PostgresSignalBusStore: hydrated');
       return signals;
     } catch (err) {
-      this.opts.logger?.error?.({ err }, "PostgresSignalBusStore: hydrate failed");
+      this.opts.logger?.error?.({ err }, 'PostgresSignalBusStore: hydrate failed');
       return [];
     }
   }
@@ -154,7 +152,7 @@ export class PostgresSignalBusStore implements SignalBusStore {
         } catch (err) {
           this.opts.logger?.warn?.(
             { err, batchSize: batchRows.length },
-            "PostgresSignalBusStore: batch upsert failed; re-queuing",
+            'PostgresSignalBusStore: batch upsert failed; re-queuing',
           );
           for (const signal of batchSignals) {
             this.pending.set(signal.signalId, signal);
@@ -185,12 +183,12 @@ export class PostgresSignalBusStore implements SignalBusStore {
       if (dbRemoved > 0) {
         this.opts.logger?.info?.(
           { dbRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
-          "PostgresSignalBusStore: retention pruned signals",
+          'PostgresSignalBusStore: retention pruned signals',
         );
       }
       return { dbRemoved };
     } catch (err) {
-      this.opts.logger?.warn?.({ err }, "PostgresSignalBusStore: retention failed");
+      this.opts.logger?.warn?.({ err }, 'PostgresSignalBusStore: retention failed');
       return { dbRemoved: 0 };
     }
   }

@@ -6,7 +6,7 @@
  * mutating requests.
  */
 
-import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from "../types.js";
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '../types.js';
 
 export { CSRF_COOKIE_NAME, CSRF_HEADER_NAME };
 
@@ -17,9 +17,9 @@ export { CSRF_COOKIE_NAME, CSRF_HEADER_NAME };
  * GET request to the API).
  */
 export function readCsrfTokenFromCookie(): string | null {
-  if (typeof document === "undefined") return null;
+  if (typeof document === 'undefined') return null;
   const match = document.cookie
-    .split(";")
+    .split(';')
     .map((c) => c.trim())
     .find((c) => c.startsWith(`${CSRF_COOKIE_NAME}=`));
   if (!match) return null;
@@ -47,13 +47,13 @@ export function csrfHeaders(): Record<string, string> {
  * to prime the token before the first mutating request.
  */
 export async function fetchAndStoreCsrfToken(
-  baseUrl = "/api",
+  baseUrl = '/api',
   fetchFn: typeof fetch = globalThis.fetch,
 ): Promise<string | null> {
   try {
     const res = await fetchFn(`${baseUrl}/csrf-token`, {
-      method: "GET",
-      credentials: "include",
+      method: 'GET',
+      credentials: 'include',
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { csrfToken?: string };

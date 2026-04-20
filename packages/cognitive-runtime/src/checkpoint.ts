@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
-import type { CognitiveLoopRun } from "./types.js";
+import { randomUUID } from 'crypto';
+import type { CognitiveLoopRun } from './types.js';
 
 export interface CheckpointEntry {
   ref: string;

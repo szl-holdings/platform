@@ -8,31 +8,25 @@
 
 // ─── Execution Primitives ─────────────────────────────────────────────────────
 
-export type ExecutionMode = "live" | "dry-run" | "replay" | "counterfactual";
+export type ExecutionMode = 'live' | 'dry-run' | 'replay' | 'counterfactual';
 
 export type PipelineRunStatus =
-  | "running"
-  | "completed"
-  | "failed"
-  | "pending-approval"
-  | "dry-run-complete"
-  | "cancelled";
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'pending-approval'
+  | 'dry-run-complete'
+  | 'cancelled';
 
-export type StageType =
-  | "Reason"
-  | "Retrieve"
-  | "ToolCall"
-  | "Verify"
-  | "Decide"
-  | "ApprovalGate";
+export type StageType = 'Reason' | 'Retrieve' | 'ToolCall' | 'Verify' | 'Decide' | 'ApprovalGate';
 
 export type StageResultStatus =
-  | "completed"
-  | "failed"
-  | "skipped"
-  | "pending-approval"
-  | "timed-out"
-  | "escalated";
+  | 'completed'
+  | 'failed'
+  | 'skipped'
+  | 'pending-approval'
+  | 'timed-out'
+  | 'escalated';
 
 // ─── Core Objects ─────────────────────────────────────────────────────────────
 
@@ -80,7 +74,7 @@ export interface SubmitRunResponse {
 
 // ─── Approvals ────────────────────────────────────────────────────────────────
 
-export type ApprovalVerdict = "approved" | "rejected" | "escalated";
+export type ApprovalVerdict = 'approved' | 'rejected' | 'escalated';
 
 export interface ApprovalEntry {
   id: string;
@@ -199,22 +193,22 @@ export interface SubstrateClientOptions {
 
 export interface RunEvent {
   type:
-    | "ready"
-    | "ping"
-    | "run_started"
-    | "stage_complete"
-    | "run_complete"
-    | "run_failed"
-    | "approval_required"
+    | 'ready'
+    | 'ping'
+    | 'run_started'
+    | 'stage_complete'
+    | 'run_complete'
+    | 'run_failed'
+    | 'approval_required'
     // Live runtime events streamed from the substrate journal as a workflow
     // executes (stage-by-stage progress without polling).
-    | "stage:start"
-    | "stage:complete"
-    | "stage:failed"
-    | "run:started"
-    | "run:complete"
-    | "run:failed"
-    | "run:pending-approval";
+    | 'stage:start'
+    | 'stage:complete'
+    | 'stage:failed'
+    | 'run:started'
+    | 'run:complete'
+    | 'run:failed'
+    | 'run:pending-approval';
   timestamp: number;
   runId?: string;
   data?: unknown;
@@ -235,7 +229,7 @@ export class SubstrateClientError extends Error {
 
   constructor(message: string, code: number, data?: unknown) {
     super(message);
-    this.name = "SubstrateClientError";
+    this.name = 'SubstrateClientError';
     this.code = code;
     this.data = data;
   }

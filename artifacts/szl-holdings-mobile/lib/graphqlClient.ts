@@ -1,10 +1,5 @@
-import {
-  createClient,
-  cacheExchange,
-  fetchExchange,
-  type Client,
-} from "urql";
-import { getApiBase, getCachedAuthToken } from "@/lib/apiClient";
+import { type Client, cacheExchange, createClient, fetchExchange } from 'urql';
+import { getApiBase, getCachedAuthToken } from '@/lib/apiClient';
 
 let _client: Client | null = null;
 
@@ -17,7 +12,7 @@ export function getGraphQLClient(): Client {
       const token = getCachedAuthToken();
       return {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       };

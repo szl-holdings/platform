@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { Gauge, TrendingUp, AlertTriangle, BarChart3 } from "lucide-react";
-import { apiFetch, isAuthenticated } from "../../lib/admin-api";
-import AuthGate from "@szl-holdings/shared-ui/AuthGate";
+import AuthGate from '@szl-holdings/shared-ui/AuthGate';
+import { AlertTriangle, BarChart3, Gauge, TrendingUp } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { apiFetch, isAuthenticated } from '../../lib/admin-api';
 
 interface UsageStats {
   totalRequests: number;
@@ -20,13 +20,17 @@ export default function RateLimits() {
   const [stats, setStats] = useState<UsageStats | null>(null);
   const [byEndpoint, setByEndpoint] = useState<EndpointUsage[]>([]);
   const [selectedKey, setSelectedKey] = useState<number | null>(null);
-  const [keys, setKeys] = useState<{ id: number; name: string; keyPrefix: string; rateLimit: number }[]>([]);
+  const [keys, setKeys] = useState<
+    { id: number; name: string; keyPrefix: string; rateLimit: number }[]
+  >([]);
   const [period, setPeriod] = useState(24);
   const [loading, setLoading] = useState(false);
 
   const loadKeys = useCallback(async () => {
     try {
-      const data = await apiFetch<{ keys: { id: number; name: string; keyPrefix: string; rateLimit: number }[] }>("/developer/api-keys");
+      const data = await apiFetch<{
+        keys: { id: number; name: string; keyPrefix: string; rateLimit: number }[];
+      }>('/developer/api-keys');
       setKeys(data.keys);
       if (data.keys.length > 0 && !selectedKey) {
         setSelectedKey(data.keys[0].id);
@@ -38,7 +42,9 @@ export default function RateLimits() {
     if (!selectedKey) return;
     setLoading(true);
     try {
-      const data = await apiFetch<{ stats: UsageStats; byEndpoint: EndpointUsage[] }>(`/developer/api-keys/${selectedKey}/usage?hours=${period}`);
+      const data = await apiFetch<{ stats: UsageStats; byEndpoint: EndpointUsage[] }>(
+        `/developer/api-keys/${selectedKey}/usage?hours=${period}`,
+      );
       setStats(data.stats);
       setByEndpoint(data.byEndpoint);
     } catch {
@@ -57,7 +63,13 @@ export default function RateLimits() {
   }, [selectedKey, loadUsage]);
 
   if (!isAuthenticated()) {
-    return <AuthGate title="Rate Limits & Usage" description="Sign in to view your API usage analytics." onAuth={loadKeys} />;
+    return (
+      <AuthGate
+        title="Rate Limits & Usage"
+        description="Sign in to view your API usage analytics."
+        onAuth={loadKeys}
+      />
+    );
   }
 
   const currentKey = keys.find((k) => k.id === selectedKey);
@@ -66,17 +78,19 @@ export default function RateLimits() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Rate Limits & Usage</h1>
-        <p className="text-text-secondary">Monitor your API consumption, response times, and quota utilization.</p>
+        <p className="text-text-secondary">
+          Monitor your API consumption, response times, and quota utilization.
+        </p>
       </div>
 
       <div className="bg-surface rounded-xl border border-border p-6">
         <h3 className="font-semibold mb-4">Default Rate Limits</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Global API", value: "200/min", desc: "All endpoints" },
-            { label: "Auth", value: "20/15min", desc: "Login attempts" },
-            { label: "Write Ops", value: "60/min", desc: "POST, PUT, DELETE" },
-            { label: "Webhooks", value: "100/hr", desc: "Per webhook" },
+            { label: 'Global API', value: '200/min', desc: 'All endpoints' },
+            { label: 'Auth', value: '20/15min', desc: 'Login attempts' },
+            { label: 'Write Ops', value: '60/min', desc: 'POST, PUT, DELETE' },
+            { label: 'Webhooks', value: '100/hr', desc: 'Per webhook' },
           ].map((limit) => (
             <div key={limit.label} className="p-3 bg-surface-elevated rounded-lg text-center">
               <p className="text-xl font-bold text-accent">{limit.value}</p>
@@ -89,15 +103,20 @@ export default function RateLimits() {
 
       <div className="bg-surface rounded-xl border border-border p-6">
         <h3 className="font-semibold mb-3">Rate Limit Headers</h3>
-        <p className="text-sm text-text-secondary mb-3">Every API response includes rate limit headers:</p>
+        <p className="text-sm text-text-secondary mb-3">
+          Every API response includes rate limit headers:
+        </p>
         <div className="space-y-2">
           {[
-            { header: "X-RateLimit-Limit", desc: "Maximum requests allowed in the current window" },
-            { header: "X-RateLimit-Remaining", desc: "Requests remaining in the current window" },
-            { header: "X-RateLimit-Reset", desc: "Unix timestamp when the window resets" },
-            { header: "Retry-After", desc: "Seconds to wait before retrying (only on 429)" },
+            { header: 'X-RateLimit-Limit', desc: 'Maximum requests allowed in the current window' },
+            { header: 'X-RateLimit-Remaining', desc: 'Requests remaining in the current window' },
+            { header: 'X-RateLimit-Reset', desc: 'Unix timestamp when the window resets' },
+            { header: 'Retry-After', desc: 'Seconds to wait before retrying (only on 429)' },
           ].map((h) => (
-            <div key={h.header} className="flex items-start gap-3 p-2 bg-surface-elevated rounded-lg">
+            <div
+              key={h.header}
+              className="flex items-start gap-3 p-2 bg-surface-elevated rounded-lg"
+            >
               <code className="text-xs text-accent font-mono whitespace-nowrap">{h.header}</code>
               <p className="text-xs text-text-secondary">{h.desc}</p>
             </div>
@@ -109,12 +128,14 @@ export default function RateLimits() {
         <>
           <div className="flex items-center gap-4">
             <select
-              value={selectedKey || ""}
+              value={selectedKey || ''}
               onChange={(e) => setSelectedKey(Number(e.target.value))}
               className="px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:border-accent focus:outline-none"
             >
               {keys.map((k) => (
-                <option key={k.id} value={k.id}>{k.name} ({k.keyPrefix})</option>
+                <option key={k.id} value={k.id}>
+                  {k.name} ({k.keyPrefix})
+                </option>
               ))}
             </select>
             <div className="flex gap-1">
@@ -122,7 +143,7 @@ export default function RateLimits() {
                 <button
                   key={h}
                   onClick={() => setPeriod(h)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${period === h ? "bg-accent/20 text-accent" : "bg-surface text-text-muted hover:text-text-secondary"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${period === h ? 'bg-accent/20 text-accent' : 'bg-surface text-text-muted hover:text-text-secondary'}`}
                 >
                   {h}h
                 </button>
@@ -144,10 +165,14 @@ export default function RateLimits() {
                       <div className="h-1.5 bg-surface-elevated rounded-full overflow-hidden">
                         <div
                           className="h-full bg-accent rounded-full"
-                          style={{ width: `${Math.min(100, (stats.totalRequests / currentKey.rateLimit) * 100)}%` }}
+                          style={{
+                            width: `${Math.min(100, (stats.totalRequests / currentKey.rateLimit) * 100)}%`,
+                          }}
                         />
                       </div>
-                      <p className="text-[10px] text-text-muted mt-1">{currentKey.rateLimit} quota</p>
+                      <p className="text-[10px] text-text-muted mt-1">
+                        {currentKey.rateLimit} quota
+                      </p>
                     </div>
                   )}
                 </div>
@@ -175,18 +200,34 @@ export default function RateLimits() {
                       const pct = (ep.totalRequests / maxReqs) * 100;
                       return (
                         <div key={i} className="flex items-center gap-3">
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[40px] text-center ${
-                            ep.method === "GET" ? "bg-method-get/15 text-method-get" :
-                            ep.method === "POST" ? "bg-method-post/15 text-method-post" :
-                            ep.method === "DELETE" ? "bg-method-delete/15 text-method-delete" :
-                            "bg-method-patch/15 text-method-patch"
-                          }`}>{ep.method}</span>
-                          <code className="text-xs font-mono text-text-secondary w-48 truncate">{ep.endpoint}</code>
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[40px] text-center ${
+                              ep.method === 'GET'
+                                ? 'bg-method-get/15 text-method-get'
+                                : ep.method === 'POST'
+                                  ? 'bg-method-post/15 text-method-post'
+                                  : ep.method === 'DELETE'
+                                    ? 'bg-method-delete/15 text-method-delete'
+                                    : 'bg-method-patch/15 text-method-patch'
+                            }`}
+                          >
+                            {ep.method}
+                          </span>
+                          <code className="text-xs font-mono text-text-secondary w-48 truncate">
+                            {ep.endpoint}
+                          </code>
                           <div className="flex-1 h-2 bg-surface-elevated rounded-full overflow-hidden">
-                            <div className="h-full bg-accent/50 rounded-full" style={{ width: `${pct}%` }} />
+                            <div
+                              className="h-full bg-accent/50 rounded-full"
+                              style={{ width: `${pct}%` }}
+                            />
                           </div>
-                          <span className="text-xs text-text-muted w-16 text-right">{ep.totalRequests}</span>
-                          <span className="text-xs text-text-muted w-16 text-right">{ep.avgResponseTime}ms</span>
+                          <span className="text-xs text-text-muted w-16 text-right">
+                            {ep.totalRequests}
+                          </span>
+                          <span className="text-xs text-text-muted w-16 text-right">
+                            {ep.avgResponseTime}ms
+                          </span>
                         </div>
                       );
                     })}

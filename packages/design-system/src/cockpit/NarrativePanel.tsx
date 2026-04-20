@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Cpu } from "lucide-react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import { ChevronDown, ChevronUp, Cpu } from 'lucide-react';
+import { useState } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface NarrativeParagraph {
   id: string;
@@ -21,8 +21,8 @@ export interface NarrativePanelProps {
 function highlightText(text: string, highlights: string[]): React.ReactNode {
   if (!highlights.length) return text;
   const pattern = new RegExp(
-    `(${highlights.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
-    "gi",
+    `(${highlights.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
+    'gi',
   );
   const parts = text.split(pattern);
   return parts.map((part, i) =>
@@ -30,7 +30,7 @@ function highlightText(text: string, highlights: string[]): React.ReactNode {
       <mark
         key={i}
         className="rounded-sm px-0.5"
-        style={{ background: color.accent.blue + "28", color: color.accent.blue }}
+        style={{ background: color.accent.blue + '28', color: color.accent.blue }}
       >
         {part}
       </mark>
@@ -54,7 +54,7 @@ export function NarrativePanel({
 
   return (
     <div
-      className={cn("rounded-lg px-4 py-4", className)}
+      className={cn('rounded-lg px-4 py-4', className)}
       style={{ border: `1px solid ${color.border.default}`, background: color.bg.surface }}
     >
       <div className="mb-3 border-l-2 pl-3" style={{ borderColor: accentColor }}>
@@ -75,24 +75,36 @@ export function NarrativePanel({
         <button
           onClick={() => setExpanded((v) => !v)}
           className="mt-3 inline-flex items-center gap-1 text-xs transition-colors"
-          style={{ color: color.text.muted, background: "transparent", border: "none", cursor: "pointer" }}
+          style={{
+            color: color.text.muted,
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+          }}
         >
           {expanded ? (
-            <><ChevronUp className="h-3 w-3" /> Collapse</>
+            <>
+              <ChevronUp className="h-3 w-3" /> Collapse
+            </>
           ) : (
             <>
               <ChevronDown className="h-3 w-3" />
               {paragraphs.length - (collapseAfter ?? 0)} more paragraph
-              {paragraphs.length - (collapseAfter ?? 0) !== 1 ? "s" : ""}
+              {paragraphs.length - (collapseAfter ?? 0) !== 1 ? 's' : ''}
             </>
           )}
         </button>
       )}
 
       {attribution && (
-        <div className="mt-4 flex items-center gap-1.5 pt-3" style={{ borderTop: `1px solid ${color.border.subtle}` }}>
+        <div
+          className="mt-4 flex items-center gap-1.5 pt-3"
+          style={{ borderTop: `1px solid ${color.border.subtle}` }}
+        >
           <Cpu className="h-3 w-3" style={{ color: color.text.muted }} />
-          <span className="text-xs" style={{ color: color.text.muted }}>{attribution}</span>
+          <span className="text-xs" style={{ color: color.text.muted }}>
+            {attribution}
+          </span>
         </div>
       )}
     </div>

@@ -61,7 +61,12 @@ class CognitiveWorkspace {
   private latestAttentionSchema: AttentionSchemaReport | null = null;
   private static readonly MAX_BROADCASTS = 20;
 
-  addToWorkingMemory(content: string, source: string, priority: number, tags: string[] = []): WorkingMemoryItem {
+  addToWorkingMemory(
+    content: string,
+    source: string,
+    priority: number,
+    tags: string[] = [],
+  ): WorkingMemoryItem {
     const now = new Date().toISOString();
     const item: WorkingMemoryItem = {
       id: `wm_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -83,9 +88,10 @@ class CognitiveWorkspace {
   recall(tags: string[], limit = 5): WorkingMemoryItem[] {
     this.runDecay();
 
-    const scored = this.items.map(item => {
-      const tagOverlap = tags.filter(t => item.tags.includes(t)).length;
-      const recency = 1 - Math.min(1, (Date.now() - new Date(item.lastAccessedAt).getTime()) / (30 * 60 * 1000));
+    const scored = this.items.map((item) => {
+      const tagOverlap = tags.filter((t) => item.tags.includes(t)).length;
+      const recency =
+        1 - Math.min(1, (Date.now() - new Date(item.lastAccessedAt).getTime()) / (30 * 60 * 1000));
       const score = item.priority * 0.4 + tagOverlap * 0.35 + recency * 0.25;
       return { item, score };
     });
@@ -93,7 +99,7 @@ class CognitiveWorkspace {
     const results = scored
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map(s => {
+      .map((s) => {
         s.item.lastAccessedAt = new Date().toISOString();
         s.item.accessCount++;
         return s.item;
@@ -121,17 +127,20 @@ class CognitiveWorkspace {
   }): GWTBroadcast {
     this.runDecay();
 
-    const scored = this.items.map(item => {
-      const recency = 1 - Math.min(1, (Date.now() - new Date(item.addedAt).getTime()) / (15 * 60 * 1000));
-      const domainRelevance = item.tags.some(t => input.activeDomains.includes(t)) ? 1 : 0;
+    const scored = this.items.map((item) => {
+      const recency =
+        1 - Math.min(1, (Date.now() - new Date(item.addedAt).getTime()) / (15 * 60 * 1000));
+      const domainRelevance = item.tags.some((t) => input.activeDomains.includes(t)) ? 1 : 0;
       const novelty = item.accessCount === 0 ? 1 : Math.max(0, 1 - item.accessCount * 0.15);
       const emotionalWeight = input.emotionalArousal;
-      const urgencyBoost = input.urgencySignals.some(u =>
-        item.content.toLowerCase().includes(u.toLowerCase())
-      ) ? 0.3 : 0;
+      const urgencyBoost = input.urgencySignals.some((u) =>
+        item.content.toLowerCase().includes(u.toLowerCase()),
+      )
+        ? 0.3
+        : 0;
 
       const salience =
-        item.priority / 10 * 0.25 +
+        (item.priority / 10) * 0.25 +
         recency * 0.2 +
         domainRelevance * 0.2 +
         novelty * 0.15 +
@@ -145,25 +154,26 @@ class CognitiveWorkspace {
 
     const threshold = 0.4;
     const winners = scored
-      .filter(s => s.salience >= threshold)
+      .filter((s) => s.salience >= threshold)
       .slice(0, 7)
-      .map(s => ({
+      .map((s) => ({
         itemId: s.item.id,
         salienceScore: Math.round(s.salience * 1000) / 1000,
         content: s.item.content.slice(0, 300),
       }));
 
     const losers = scored
-      .filter(s => s.salience < threshold)
+      .filter((s) => s.salience < threshold)
       .slice(0, 5)
-      .map(s => ({
+      .map((s) => ({
         itemId: s.item.id,
         salienceScore: Math.round(s.salience * 1000) / 1000,
-        reason: s.salience < 0.2 ? "Below minimum salience" : "Lost competition to higher-priority items",
+        reason:
+          s.salience < 0.2 ? 'Below minimum salience' : 'Lost competition to higher-priority items',
       }));
 
     for (const w of winners) {
-      const item = this.items.find(i => i.id === w.itemId);
+      const item = this.items.find((i) => i.id === w.itemId);
       if (item) {
         item.lastAccessedAt = new Date().toISOString();
         item.accessCount++;
@@ -187,14 +197,14 @@ class CognitiveWorkspace {
   }
 
   buildGWTContext(broadcast: GWTBroadcast): string {
-    if (broadcast.winners.length === 0) return "";
+    if (broadcast.winners.length === 0) return '';
     const lines = [
       `## Global Workspace Broadcast (${broadcast.winners.length} items reached conscious access)`,
-      ...broadcast.winners.map((w, i) =>
-        `${i + 1}. [salience ${w.salienceScore.toFixed(2)}] ${w.content.slice(0, 200)}`
+      ...broadcast.winners.map(
+        (w, i) => `${i + 1}. [salience ${w.salienceScore.toFixed(2)}] ${w.content.slice(0, 200)}`,
       ),
     ];
-    return lines.join("\n");
+    return lines.join('\n');
   }
 
   reportAttentionSchema(queryDomains: string[]): AttentionSchemaReport {
@@ -208,11 +218,15 @@ class CognitiveWorkspace {
     const queryDomainAttention = queryDomains.reduce((s, d) => s + (allocation[d] ?? 0), 0);
     const nonQueryAttention = 1 - queryDomainAttention;
 
-    if (queryDomains.length > 0 && queryDomainAttention < 0.3 && Object.keys(allocation).length > 0) {
+    if (
+      queryDomains.length > 0 &&
+      queryDomainAttention < 0.3 &&
+      Object.keys(allocation).length > 0
+    ) {
       driftDetected = true;
       const topAttention = Object.entries(allocation).sort((a, b) => b[1] - a[1])[0];
-      driftDescription = `Attention drift detected: ${(queryDomainAttention * 100).toFixed(0)}% on query domains (${queryDomains.join(", ")}), but ${(topAttention ? topAttention[1] * 100 : 0).toFixed(0)}% on ${topAttention?.[0] ?? "unknown"}`;
-      rebalanceRecommendation = `Rebalance: increase focus on ${queryDomains.join(", ")} by prioritizing relevant working memory items`;
+      driftDescription = `Attention drift detected: ${(queryDomainAttention * 100).toFixed(0)}% on query domains (${queryDomains.join(', ')}), but ${(topAttention ? topAttention[1] * 100 : 0).toFixed(0)}% on ${topAttention?.[0] ?? 'unknown'}`;
+      rebalanceRecommendation = `Rebalance: increase focus on ${queryDomains.join(', ')} by prioritizing relevant working memory items`;
     }
 
     if (Object.keys(allocation).length > 0) {
@@ -223,7 +237,9 @@ class CognitiveWorkspace {
         driftDetected = true;
         const dominant = Object.entries(allocation).sort((a, b) => b[1] - a[1])[0]!;
         driftDescription = `Attention heavily concentrated: ${(dominant[1] * 100).toFixed(0)}% on ${dominant[0]}`;
-        rebalanceRecommendation = rebalanceRecommendation ?? `Consider broadening attention — ${dominant[0]} is consuming disproportionate focus`;
+        rebalanceRecommendation =
+          rebalanceRecommendation ??
+          `Consider broadening attention — ${dominant[0]} is consuming disproportionate focus`;
       }
     }
 
@@ -255,15 +271,15 @@ class CognitiveWorkspace {
       distribution[domain] = weight / totalWeight;
     }
 
-    const recentQueryText = this.queryHistory.slice(-3).join(" ").toLowerCase();
+    const recentQueryText = this.queryHistory.slice(-3).join(' ').toLowerCase();
     const topWords = recentQueryText
       .split(/\s+/)
-      .filter(w => w.length > 3)
+      .filter((w) => w.length > 3)
       .reduce<Record<string, number>>((acc, w) => {
         acc[w] = (acc[w] ?? 0) + 1;
         return acc;
       }, {});
-    const primaryTopic = Object.entries(topWords).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "general";
+    const primaryTopic = Object.entries(topWords).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'general';
 
     return {
       primaryTopic,
@@ -279,7 +295,11 @@ class CognitiveWorkspace {
     return {
       workingMemory: [...this.items],
       attentionFocus: this.computeAttentionFocus(),
-      contextBudget: { used, total: CONTEXT_BUDGET_TOKENS, utilization: used / CONTEXT_BUDGET_TOKENS },
+      contextBudget: {
+        used,
+        total: CONTEXT_BUDGET_TOKENS,
+        utilization: used / CONTEXT_BUDGET_TOKENS,
+      },
       activeGoals: [...this.activeGoals],
       recentQueries: [...this.queryHistory],
       sessionDepth: this.sessionDepth,
@@ -290,14 +310,12 @@ class CognitiveWorkspace {
 
   buildWorkspaceContext(maxTokens = 2000): string {
     const focus = this.computeAttentionFocus();
-    const topItems = this.items
-      .sort((a, b) => b.priority - a.priority)
-      .slice(0, 5);
+    const topItems = this.items.sort((a, b) => b.priority - a.priority).slice(0, 5);
 
     const lines: string[] = [
       `## Cognitive Workspace`,
       `Session depth: ${this.sessionDepth} | Active goals: ${this.activeGoals.length}`,
-      `Attention: ${focus.primaryTopic} (${focus.activeDomains.slice(0, 3).join(", ")})`,
+      `Attention: ${focus.primaryTopic} (${focus.activeDomains.slice(0, 3).join(', ')})`,
       `Context utilization: ${(focus.contextWindowUsage * 100).toFixed(0)}%`,
     ];
 
@@ -309,23 +327,26 @@ class CognitiveWorkspace {
       lines.push(`Working memory (top ${topItems.length}):`);
       for (const item of topItems) {
         const tokenEstimate = Math.ceil(item.content.length / 4);
-        if (lines.join("\n").length / 4 + tokenEstimate > maxTokens) break;
+        if (lines.join('\n').length / 4 + tokenEstimate > maxTokens) break;
         lines.push(`  - [${item.source}] ${item.content.slice(0, 200)}`);
       }
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 
   buildFocusedContext(rawContext: string, agentDomain: string, tokenBudget = 3000): string {
     const focus = this.computeAttentionFocus();
     const domainWeight = focus.attentionDistribution[agentDomain] ?? 0.1;
-    const adjustedBudget = Math.floor(tokenBudget * Math.max(0.5, Math.min(1.5, 0.7 + domainWeight)));
+    const adjustedBudget = Math.floor(
+      tokenBudget * Math.max(0.5, Math.min(1.5, 0.7 + domainWeight)),
+    );
 
     const relevantMemory = this.recall([agentDomain], 5);
-    const memorySection = relevantMemory.length > 0
-      ? relevantMemory.map(m => `[${m.source}] ${m.content.slice(0, 150)}`).join("\n")
-      : "";
+    const memorySection =
+      relevantMemory.length > 0
+        ? relevantMemory.map((m) => `[${m.source}] ${m.content.slice(0, 150)}`).join('\n')
+        : '';
 
     const rawTokens = Math.ceil(rawContext.length / 4);
     let contextPortion: string;
@@ -334,10 +355,14 @@ class CognitiveWorkspace {
     } else {
       const charBudget = adjustedBudget * 4;
       const paragraphs = rawContext.split(/\n\n+/);
-      const scored = paragraphs.map(p => {
+      const scored = paragraphs.map((p) => {
         const domainRelevance = p.toLowerCase().includes(agentDomain) ? 2 : 0;
-        const focusRelevance = focus.activeDomains.some(d => p.toLowerCase().includes(d)) ? 1 : 0;
-        const goalRelevance = this.activeGoals.some(g => p.toLowerCase().includes(g.toLowerCase())) ? 1.5 : 0;
+        const focusRelevance = focus.activeDomains.some((d) => p.toLowerCase().includes(d)) ? 1 : 0;
+        const goalRelevance = this.activeGoals.some((g) =>
+          p.toLowerCase().includes(g.toLowerCase()),
+        )
+          ? 1.5
+          : 0;
         return { text: p, score: domainRelevance + focusRelevance + goalRelevance + 0.1 };
       });
       scored.sort((a, b) => b.score - a.score);
@@ -349,7 +374,7 @@ class CognitiveWorkspace {
         selected.push(s.text);
         usedChars += s.text.length;
       }
-      contextPortion = selected.join("\n\n");
+      contextPortion = selected.join('\n\n');
     }
 
     const parts = [
@@ -361,7 +386,7 @@ class CognitiveWorkspace {
     if (contextPortion) {
       parts.push(`### Shared Intelligence\n${contextPortion}`);
     }
-    return parts.join("\n\n");
+    return parts.join('\n\n');
   }
 
   private estimateTokenUsage(): number {
@@ -385,7 +410,7 @@ class CognitiveWorkspace {
       item.priority = Math.max(0, item.priority - decay * 0.01);
     }
 
-    this.items = this.items.filter(item => item.priority > 0.1);
+    this.items = this.items.filter((item) => item.priority > 0.1);
   }
 
   clear(): void {

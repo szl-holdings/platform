@@ -1,15 +1,22 @@
-import React, { createContext, useContext, useCallback, useEffect, useState, type ReactNode } from "react";
-import { Platform } from "react-native";
+import React, {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { Platform } from 'react-native';
 import { useAuth } from '../AuthContext';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
-  : "/api";
+  : '/api';
 
 export interface AppNotification {
   id: number;
   userId: number;
-  type: "info" | "success" | "warning" | "error" | "action_required";
+  type: 'info' | 'success' | 'warning' | 'error' | 'action_required';
   channel: string;
   title: string;
   message: string;
@@ -41,22 +48,22 @@ const NotificationContext = createContext<NotificationContextValue>({
 
 async function getAuthToken(): Promise<string | null> {
   try {
-    if (Platform.OS === "web") {
-      return typeof window !== "undefined" ? window.localStorage.getItem("cj_auth_token") : null;
+    if (Platform.OS === 'web') {
+      return typeof window !== 'undefined' ? window.localStorage.getItem('cj_auth_token') : null;
     }
-    const SecureStore = await import("expo-secure-store");
-    return SecureStore.getItemAsync("cj_auth_token");
+    const SecureStore = await import('expo-secure-store');
+    return SecureStore.getItemAsync('cj_auth_token');
   } catch {
     return null;
   }
 }
 
-async function apiCall(path: string, method = "GET", body?: unknown): Promise<Response> {
+async function apiCall(path: string, method = 'GET', body?: unknown): Promise<Response> {
   const authToken = await getAuthToken();
   return fetch(`${API_BASE}${path}`, {
     method,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
@@ -72,13 +79,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated) return;
     setIsLoading(true);
     try {
-      const res = await apiCall("/notifications");
+      const res = await apiCall('/notifications');
       if (res.ok) {
         const json = await res.json();
         setNotifications(json.data ?? json ?? []);
       }
     } catch (err) {
-      console.warn("[notifications] Failed to fetch:", err);
+      console.warn('[notifications] Failed to fetch:', err);
     } finally {
       setIsLoading(false);
     }
@@ -86,38 +93,40 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markRead = useCallback(async (id: number) => {
     try {
-      const res = await apiCall(`/notifications/${id}/read`, "PATCH");
+      const res = await apiCall(`/notifications/${id}/read`, 'PATCH');
       if (res.ok) {
         setNotifications((prev) =>
-          prev.map((n) => (n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n))
+          prev.map((n) =>
+            n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n,
+          ),
         );
       }
     } catch (err) {
-      console.warn("[notifications] Failed to mark read:", err);
+      console.warn('[notifications] Failed to mark read:', err);
     }
   }, []);
 
   const markAllRead = useCallback(async () => {
     try {
-      const res = await apiCall("/notifications/read-all", "PATCH");
+      const res = await apiCall('/notifications/read-all', 'PATCH');
       if (res.ok) {
         setNotifications((prev) =>
-          prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() }))
+          prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() })),
         );
       }
     } catch (err) {
-      console.warn("[notifications] Failed to mark all read:", err);
+      console.warn('[notifications] Failed to mark all read:', err);
     }
   }, []);
 
   const deleteNotification = useCallback(async (id: number) => {
     try {
-      const res = await apiCall(`/notifications/${id}`, "DELETE");
+      const res = await apiCall(`/notifications/${id}`, 'DELETE');
       if (res.ok) {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
       }
     } catch (err) {
-      console.warn("[notifications] Failed to delete:", err);
+      console.warn('[notifications] Failed to delete:', err);
     }
   }, []);
 
@@ -135,7 +144,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, unreadCount, isLoading, refresh, markRead, markAllRead, deleteNotification }}
+      value={{
+        notifications,
+        unreadCount,
+        isLoading,
+        refresh,
+        markRead,
+        markAllRead,
+        deleteNotification,
+      }}
     >
       {children}
     </NotificationContext.Provider>

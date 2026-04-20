@@ -17,26 +17,23 @@
  * (see global-auth-enforcer).
  */
 
-import { Router, type Request, type Response } from "express";
-import {
-  defaultEvidenceStore,
-  defaultRecommendationStore,
-} from "@szl-holdings/evidence-graph";
-import { defaultSignalBus } from "@szl-holdings/signal-mesh";
-import { defaultEntityRegistry } from "@workspace/ontology";
-import { isSeedDataAllowed, getRuntimeMode } from "@szl-holdings/config";
+import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/config';
+import { defaultEvidenceStore, defaultRecommendationStore } from '@szl-holdings/evidence-graph';
+import { defaultSignalBus } from '@szl-holdings/signal-mesh';
+import { defaultEntityRegistry } from '@workspace/ontology';
+import { type Request, type Response, Router } from 'express';
+import { COUNSEL_DEADLINE_NARRATIVE } from '../../../../packages/demo-seed/src/narrative-counsel-deadline';
 import {
   getNarrativeMeshEntry,
   registerNarrativeMeshEntry,
-} from "../../../../packages/demo-seed/src/narrative-mesh-index";
-import { SENTRA_RANSOMWARE_NARRATIVE } from "../../../../packages/demo-seed/src/narrative-sentra-ransomware";
-import { COUNSEL_DEADLINE_NARRATIVE } from "../../../../packages/demo-seed/src/narrative-counsel-deadline";
+} from '../../../../packages/demo-seed/src/narrative-mesh-index';
+import { SENTRA_RANSOMWARE_NARRATIVE } from '../../../../packages/demo-seed/src/narrative-sentra-ransomware';
 
 const router = Router();
 
 const NARRATIVES = {
-  "sentra-ransomware": SENTRA_RANSOMWARE_NARRATIVE,
-  "counsel-deadline": COUNSEL_DEADLINE_NARRATIVE,
+  'sentra-ransomware': SENTRA_RANSOMWARE_NARRATIVE,
+  'counsel-deadline': COUNSEL_DEADLINE_NARRATIVE,
 } as const;
 
 type NarrativeId = keyof typeof NARRATIVES;
@@ -67,10 +64,7 @@ function ensureNarrativeInMesh(narrativeId: NarrativeId): void {
   }
   defaultRecommendationStore.save(recommendation);
   for (const ref of recommendation.entityRefs) {
-    defaultEntityRegistry.linkRecommendation(
-      ref.entityId,
-      recommendation.recommendationId,
-    );
+    defaultEntityRegistry.linkRecommendation(ref.entityId, recommendation.recommendationId);
   }
 
   registerNarrativeMeshEntry({
@@ -88,21 +82,19 @@ function ensureNarrativeInMesh(narrativeId: NarrativeId): void {
  * production mesh by an anonymous caller.
  */
 function requireAuthInProduction(req: Request, res: Response): boolean {
-  if (process.env["NODE_ENV"] === "production" && !req.user) {
-    res
-      .status(401)
-      .json({ error: "Authentication required", code: "UNAUTHENTICATED" });
+  if (process.env['NODE_ENV'] === 'production' && !req.user) {
+    res.status(401).json({ error: 'Authentication required', code: 'UNAUTHENTICATED' });
     return false;
   }
   return true;
 }
 
-router.get("/narratives/:id", (req: Request, res: Response) => {
+router.get('/narratives/:id', (req: Request, res: Response) => {
   if (!requireAuthInProduction(req, res)) return;
 
-  const id = req.params["id"] as NarrativeId | undefined;
+  const id = req.params['id'] as NarrativeId | undefined;
   if (!id || !(id in NARRATIVES)) {
-    res.status(404).json({ error: "narrative_not_found", id });
+    res.status(404).json({ error: 'narrative_not_found', id });
     return;
   }
 
@@ -113,8 +105,8 @@ router.get("/narratives/:id", (req: Request, res: Response) => {
   if (!getNarrativeMeshEntry(id)) {
     if (!isSeedDataAllowed()) {
       res.status(403).json({
-        error: "demo_narrative_disabled",
-        code: "SEED_DATA_NOT_ALLOWED",
+        error: 'demo_narrative_disabled',
+        code: 'SEED_DATA_NOT_ALLOWED',
         runtimeMode: getRuntimeMode(),
         id,
       });
@@ -125,14 +117,14 @@ router.get("/narratives/:id", (req: Request, res: Response) => {
 
   const entry = getNarrativeMeshEntry(id);
   if (!entry) {
-    res.status(500).json({ error: "narrative_seed_failed", id });
+    res.status(500).json({ error: 'narrative_seed_failed', id });
     return;
   }
 
   const recommendation = defaultRecommendationStore.get(entry.recommendationId);
   if (!recommendation) {
     res.status(503).json({
-      error: "recommendation_missing_from_mesh",
+      error: 'recommendation_missing_from_mesh',
       id,
       recommendationId: entry.recommendationId,
     });
@@ -145,18 +137,14 @@ router.get("/narratives/:id", (req: Request, res: Response) => {
   const signals = defaultSignalBus
     .snapshot({ limit: defaultSignalBus.count() || 5000 })
     .filter((s) => signalIdSet.has(s.signalId))
-    .sort(
-      (a, b) =>
-        new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime(),
-    );
+    .sort((a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime());
 
   const narrative = NARRATIVES[id];
 
   const meshFreshness = {
     seededAt: entry.seededAt,
     recommendationCreatedAt: recommendation.createdAt,
-    latestSignalAt:
-      signals.length > 0 ? signals[signals.length - 1]!.occurredAt : null,
+    latestSignalAt: signals.length > 0 ? signals[signals.length - 1]!.occurredAt : null,
     latestEvidenceAt:
       evidenceItems.length > 0
         ? evidenceItems
@@ -166,7 +154,7 @@ router.get("/narratives/:id", (req: Request, res: Response) => {
         : null,
   };
 
-  res.setHeader("Cache-Control", "no-store");
+  res.setHeader('Cache-Control', 'no-store');
   res.json({
     id,
     title: narrative.title,
@@ -174,7 +162,7 @@ router.get("/narratives/:id", (req: Request, res: Response) => {
     org: narrative.org,
     scenario: narrative.scenario,
     fetchedAt: new Date().toISOString(),
-    source: "live-mesh",
+    source: 'live-mesh',
     meshFreshness,
     signals,
     evidenceItems,

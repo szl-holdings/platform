@@ -1,11 +1,11 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 
-export const CORRELATION_HEADER = "x-correlation-id";
-export const REQUEST_ID_HEADER = "x-request-id";
-export const TRACE_PARENT_HEADER = "traceparent";
-export const TENANT_ID_HEADER = "x-tenant-id";
-export const WORKFLOW_ID_HEADER = "x-workflow-id";
-export const SESSION_ID_HEADER = "x-session-id";
+export const CORRELATION_HEADER = 'x-correlation-id';
+export const REQUEST_ID_HEADER = 'x-request-id';
+export const TRACE_PARENT_HEADER = 'traceparent';
+export const TENANT_ID_HEADER = 'x-tenant-id';
+export const WORKFLOW_ID_HEADER = 'x-workflow-id';
+export const SESSION_ID_HEADER = 'x-session-id';
 
 const VALID_ID_PATTERN = /^[\w\-.:]{1,128}$/;
 

@@ -31,7 +31,7 @@ export function setMobileUserTimeZone(zone: string | null | undefined): void {
     return;
   }
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: zone });
+    new Intl.DateTimeFormat('en-US', { timeZone: zone });
     _mobileUserTimeZone = zone;
   } catch {
     _mobileUserTimeZone = undefined;
@@ -40,7 +40,7 @@ export function setMobileUserTimeZone(zone: string | null | undefined): void {
 
 export function resolveTimeZone(override?: string | null): string | undefined {
   if (override === null) return undefined;
-  if (typeof override === "string" && override.length > 0) return override;
+  if (typeof override === 'string' && override.length > 0) return override;
   return getUserTimeZone();
 }
 
@@ -54,17 +54,14 @@ export interface FormatDateOptions {
 }
 
 const DEFAULT_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
 };
 
-export function formatDate(
-  dateString: string | Date,
-  options: FormatDateOptions = {},
-): string {
-  const date = typeof dateString === "string" ? new Date(dateString) : dateString;
-  return new Intl.DateTimeFormat(options.locale ?? "en-US", {
+export function formatDate(dateString: string | Date, options: FormatDateOptions = {}): string {
+  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+  return new Intl.DateTimeFormat(options.locale ?? 'en-US', {
     ...(options.intlOptions ?? DEFAULT_DATE_OPTIONS),
     timeZone: resolveTimeZone(options.timeZone),
   }).format(date);

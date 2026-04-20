@@ -9,8 +9,8 @@
  * In production, swap the in-process Maps for Redis/DB-backed adapters
  * while preserving the same key-scoping conventions.
  */
-import { InMemoryStore } from "@szl-holdings/memory-core";
-import type { WorkflowRun } from "@szl-holdings/workflow-runtime";
+import { InMemoryStore } from '@szl-holdings/memory-core';
+import type { WorkflowRun } from '@szl-holdings/workflow-runtime';
 
 // ---------------------------------------------------------------------------
 // Tenant-scoped memory stores
@@ -54,7 +54,9 @@ export const runStore = {
   /** Lists all runs belonging to the specified tenant only. */
   list(tenantId: string): TenantedRun[] {
     const prefix = `${tenantId}::`;
-    return Array.from(runRegistry.values()).filter((r) => r.tenantId === tenantId && runRegistry.has(prefix + r.runId));
+    return Array.from(runRegistry.values()).filter(
+      (r) => r.tenantId === tenantId && runRegistry.has(prefix + r.runId),
+    );
   },
 
   /** Deletes a run only if it belongs to the specified tenant. Returns false if not found or wrong tenant. */

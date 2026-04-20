@@ -198,7 +198,9 @@ export const PRISM_COUNSEL_P2_RESOLVERS_STUB = {
     partnerDigestRuns: async (_: any, { firmId, digestType, limit }: any, ctx: any) => {
       return ctx.db.query.pcPartnerDigestRuns.findMany({
         where: (t: any, { eq, and }: any) =>
-          digestType ? and(eq(t.firmId, firmId), eq(t.digestType, digestType)) : eq(t.firmId, firmId),
+          digestType
+            ? and(eq(t.firmId, firmId), eq(t.digestType, digestType))
+            : eq(t.firmId, firmId),
         orderBy: (t: any, { desc }: any) => [desc(t.triggeredAt)],
         limit: limit ?? 20,
       });
@@ -212,32 +214,41 @@ export const PRISM_COUNSEL_P2_RESOLVERS_STUB = {
   },
   Mutation: {
     triggerDigestRun: async (_: any, { firmId, digestType }: any, ctx: any) => {
-      const [run] = await ctx.db.insert(ctx.schema.pcPartnerDigestRuns).values({
-        firmId,
-        digestType,
-        status: "pending",
-        triggeredBy: ctx.userId ?? "system",
-        triggeredAt: new Date(),
-        highlights: [],
-        nextActionItems: [],
-        sourceClasses: [],
-        requiresSignoff: false,
-      }).returning();
+      const [run] = await ctx.db
+        .insert(ctx.schema.pcPartnerDigestRuns)
+        .values({
+          firmId,
+          digestType,
+          status: 'pending',
+          triggeredBy: ctx.userId ?? 'system',
+          triggeredAt: new Date(),
+          highlights: [],
+          nextActionItems: [],
+          sourceClasses: [],
+          requiresSignoff: false,
+        })
+        .returning();
       return run;
     },
     submitPartnerAction: async (_: any, { input }: any, ctx: any) => {
-      const [action] = await ctx.db.insert(ctx.schema.pcPartnerActionRequests).values({
-        ...input,
-        requestedAt: new Date(),
-        status: "pending",
-      }).returning();
+      const [action] = await ctx.db
+        .insert(ctx.schema.pcPartnerActionRequests)
+        .values({
+          ...input,
+          requestedAt: new Date(),
+          status: 'pending',
+        })
+        .returning();
       return action;
     },
     recordInterventionEvent: async (_: any, { input }: any, ctx: any) => {
-      const [event] = await ctx.db.insert(ctx.schema.pcPartnerInterventionEvents).values({
-        ...input,
-        occurredAt: new Date(),
-      }).returning();
+      const [event] = await ctx.db
+        .insert(ctx.schema.pcPartnerInterventionEvents)
+        .values({
+          ...input,
+          occurredAt: new Date(),
+        })
+        .returning();
       return event;
     },
     refreshPortfolioSnapshot: async (_: any, { firmId }: any, ctx: any) => {

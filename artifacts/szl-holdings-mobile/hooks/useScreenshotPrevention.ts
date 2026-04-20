@@ -1,6 +1,6 @@
-import { useEffect, useCallback, useState } from "react";
-import { Platform } from "react-native";
-import * as ScreenCapture from "expo-screen-capture";
+import * as ScreenCapture from 'expo-screen-capture';
+import { useCallback, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 
 export interface ScreenshotPreventionConfig {
   enabled: boolean;
@@ -11,7 +11,7 @@ export function useScreenshotPrevention(config: ScreenshotPreventionConfig) {
   const { enabled, onAttempt } = config;
 
   useEffect(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === 'web') return;
 
     async function apply() {
       try {
@@ -26,14 +26,14 @@ export function useScreenshotPrevention(config: ScreenshotPreventionConfig) {
     apply();
 
     return () => {
-      if (Platform.OS !== "web") {
+      if (Platform.OS !== 'web') {
         ScreenCapture.allowScreenCaptureAsync().catch(() => {});
       }
     };
   }, [enabled]);
 
   useEffect(() => {
-    if (!enabled || !onAttempt || Platform.OS === "web") return;
+    if (!enabled || !onAttempt || Platform.OS === 'web') return;
 
     const sub = ScreenCapture.addScreenshotListener(() => {
       onAttempt();
@@ -43,11 +43,7 @@ export function useScreenshotPrevention(config: ScreenshotPreventionConfig) {
   }, [enabled, onAttempt]);
 }
 
-const PROTECTED_WORKSPACES = new Set([
-  "defense",
-  "portfolio",
-  "advisory",
-]);
+const PROTECTED_WORKSPACES = new Set(['defense', 'portfolio', 'advisory']);
 
 export function useWorkspaceScreenshotGuard(workspaceId: string) {
   const [policyOverride, setPolicyOverride] = useState<boolean | null>(null);

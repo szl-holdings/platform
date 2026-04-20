@@ -19,11 +19,11 @@
  * Skipped when DATABASE_URL is not configured (e.g. local without test DB).
  */
 
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
-import type { Request, Response, NextFunction } from "express";
-import express from "express";
-import request from "supertest";
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 const d = HAS_DB ? describe : describe.skip;
@@ -36,9 +36,9 @@ const d = HAS_DB ? describe : describe.skip;
 
 const mockAuthUser = {
   id: 0,
-  displayName: "schedule-audit-test-admin",
-  email: "schedule-audit-test@example.com",
-  roles: ["admin"] as string[],
+  displayName: 'schedule-audit-test-admin',
+  email: 'schedule-audit-test@example.com',
+  roles: ['admin'] as string[],
   orgs: [] as Array<unknown>,
 };
 
@@ -46,7 +46,7 @@ const mockAuthUser = {
 // matches and unrecognized override ids correctly map to 400.
 class MockInvalidIdError extends Error {}
 
-vi.mock("../middlewares/auth.js", () => ({
+vi.mock('../middlewares/auth.js', () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
     (req as unknown as { user: typeof mockAuthUser }).user = mockAuthUser;
     next();
@@ -61,7 +61,7 @@ vi.mock("../middlewares/auth.js", () => ({
     if (!Number.isInteger(n) || n <= 0) {
       // Throw the same class the route catches via `instanceof InvalidIdError`
       // so the route maps it to a 400, matching production behavior.
-      throw new MockInvalidIdError("invalid id");
+      throw new MockInvalidIdError('invalid id');
     }
     return n;
   },
@@ -69,20 +69,20 @@ vi.mock("../middlewares/auth.js", () => ({
 
 // Sliding window limiters are no-ops in tests so we don't trip rate limits
 // when running back-to-back operations.
-vi.mock("../middlewares/sliding-window-limiter.js", () => ({
+vi.mock('../middlewares/sliding-window-limiter.js', () => ({
   perUserApiSlidingLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
   perUserWriteSlidingLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
 async function bootApp() {
-  const { default: teamsRouter } = await import("../routes/teams.js");
+  const { default: teamsRouter } = await import('../routes/teams.js');
   const app = express();
   app.use(express.json());
-  app.use("/api", teamsRouter);
+  app.use('/api', teamsRouter);
   return app;
 }
 
-d("On-call schedule mutations write audit_logs rows (#2533)", () => {
+d('On-call schedule mutations write audit_logs rows (#2533)', () => {
   const runId = randomUUID().slice(0, 8);
   const TEAM = `audit-test-team-${runId}`;
 
@@ -91,15 +91,16 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
   let memberBUserId = 0;
 
   beforeAll(async () => {
-    const { db, usersTable } = await import("@szl-holdings/db");
-    const { sql } = await import("drizzle-orm");
+    const { db, usersTable } = await import('@szl-holdings/db');
+    const { sql } = await import('drizzle-orm');
 
     // The shared test DB schema in this workspace lags behind a few newer
     // tables (on-call rotation store from #2432). Create them defensively
     // if missing so this test is hermetic and doesn't depend on whether
     // `drizzle-kit push` has been run against the test DB. Mirrors the
     // shapes in `lib/db/src/schema/on_call.ts`.
-    await db.execute(sql.raw(`
+    await db.execute(
+      sql.raw(`
       CREATE TABLE IF NOT EXISTS on_call_schedules (
         id serial PRIMARY KEY,
         team text NOT NULL,
@@ -128,7 +129,8 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
       );
       CREATE INDEX IF NOT EXISTS on_call_shifts_team_range_idx
         ON on_call_shifts (team, start_at, end_at);
-    `));
+    `),
+    );
 
     const [actor] = await db
       .insert(usersTable)
@@ -136,7 +138,7 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
         email: `schedule-audit-actor-${runId}@example.com`,
         displayName: `audit-actor-${runId}`,
         team: TEAM,
-        platformRole: "platform_admin",
+        platformRole: 'platform_admin',
         isActive: true,
       })
       .returning();
@@ -167,14 +169,9 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
   });
 
   afterAll(async () => {
-    const {
-      db,
-      usersTable,
-      onCallShiftsTable,
-      onCallSchedulesTable,
-      auditLogsTable,
-    } = await import("@szl-holdings/db");
-    const { eq, inArray } = await import("drizzle-orm");
+    const { db, usersTable, onCallShiftsTable, onCallSchedulesTable, auditLogsTable } =
+      await import('@szl-holdings/db');
+    const { eq, inArray } = await import('drizzle-orm');
 
     // Delete schedule + shift rows (FK cascade for shifts via user).
     await db.delete(onCallSchedulesTable).where(eq(onCallSchedulesTable.team, TEAM));
@@ -199,8 +196,8 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
    * same DB can't accidentally match each other's rows.
    */
   async function findAudit(actionType: string, entityType: string, entityId?: string) {
-    const { db, auditLogsTable } = await import("@szl-holdings/db");
-    const { and, desc, eq } = await import("drizzle-orm");
+    const { db, auditLogsTable } = await import('@szl-holdings/db');
+    const { and, desc, eq } = await import('drizzle-orm');
     const predicates = [
       eq(auditLogsTable.actionType, actionType),
       eq(auditLogsTable.entityType, entityType),
@@ -219,10 +216,10 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
   let createdScheduleAuditEntityId: string | null = null;
   let createdOverrideId: number | null = null;
 
-  it("PUT /teams/:team/schedule writes an `on_call_schedule.created` audit row", async () => {
+  it('PUT /teams/:team/schedule writes an `on_call_schedule.created` audit row', async () => {
     const app = await bootApp();
 
-    const handoffAnchor = new Date("2026-01-01T00:00:00.000Z").toISOString();
+    const handoffAnchor = new Date('2026-01-01T00:00:00.000Z').toISOString();
     const memberOrder = [memberAUserId, memberBUserId];
 
     const res = await request(app)
@@ -231,22 +228,28 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
         rotationIntervalHours: 24,
         memberOrder,
         handoffAnchor,
-        timezone: "UTC",
+        timezone: 'UTC',
         warningMinutes: 15,
       });
     expect(res.status).toBe(200);
 
-    const audit = await findAudit("on_call_schedule.created", "on_call_schedule");
+    const audit = await findAudit('on_call_schedule.created', 'on_call_schedule');
     expect(audit).not.toBeNull();
     expect(audit!.actorUserId).toBe(actorUserId);
-    expect(audit!.entityType).toBe("on_call_schedule");
+    expect(audit!.entityType).toBe('on_call_schedule');
     expect(audit!.entityId).toBeTruthy();
     createdScheduleAuditEntityId = audit!.entityId!;
 
     const payload = audit!.payloadJson as {
       team: string;
       _before?: unknown;
-      _after?: { rotationIntervalHours: number; memberOrder: number[]; timezone: string; warningMinutes: number; updatedBy: number };
+      _after?: {
+        rotationIntervalHours: number;
+        memberOrder: number[];
+        timezone: string;
+        warningMinutes: number;
+        updatedBy: number;
+      };
     };
     expect(payload.team).toBe(TEAM);
     // No "before" snapshot for a create.
@@ -254,15 +257,15 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
     expect(payload._after).toBeDefined();
     expect(payload._after!.rotationIntervalHours).toBe(24);
     expect(payload._after!.memberOrder).toEqual(memberOrder);
-    expect(payload._after!.timezone).toBe("UTC");
+    expect(payload._after!.timezone).toBe('UTC');
     expect(payload._after!.warningMinutes).toBe(15);
     expect(payload._after!.updatedBy).toBe(actorUserId);
   });
 
-  it("PUT /teams/:team/schedule (second call) writes an `on_call_schedule.updated` audit row with before/after diff", async () => {
+  it('PUT /teams/:team/schedule (second call) writes an `on_call_schedule.updated` audit row with before/after diff', async () => {
     const app = await bootApp();
 
-    const handoffAnchor = new Date("2026-02-01T00:00:00.000Z").toISOString();
+    const handoffAnchor = new Date('2026-02-01T00:00:00.000Z').toISOString();
     const memberOrder = [memberBUserId, memberAUserId]; // reversed
     const res = await request(app)
       .put(`/api/teams/${encodeURIComponent(TEAM)}/schedule`)
@@ -270,14 +273,14 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
         rotationIntervalHours: 12,
         memberOrder,
         handoffAnchor,
-        timezone: "America/Los_Angeles",
+        timezone: 'America/Los_Angeles',
         warningMinutes: 45,
       });
     expect(res.status).toBe(200);
 
     const audit = await findAudit(
-      "on_call_schedule.updated",
-      "on_call_schedule",
+      'on_call_schedule.updated',
+      'on_call_schedule',
       createdScheduleAuditEntityId ?? undefined,
     );
     expect(audit).not.toBeNull();
@@ -285,24 +288,34 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
 
     const payload = audit!.payloadJson as {
       team: string;
-      _before: { rotationIntervalHours: number; memberOrder: number[]; timezone: string; warningMinutes: number };
-      _after: { rotationIntervalHours: number; memberOrder: number[]; timezone: string; warningMinutes: number };
+      _before: {
+        rotationIntervalHours: number;
+        memberOrder: number[];
+        timezone: string;
+        warningMinutes: number;
+      };
+      _after: {
+        rotationIntervalHours: number;
+        memberOrder: number[];
+        timezone: string;
+        warningMinutes: number;
+      };
     };
     expect(payload.team).toBe(TEAM);
     // Before snapshot is the originally-created row.
     expect(payload._before).toBeDefined();
     expect(payload._before.rotationIntervalHours).toBe(24);
     expect(payload._before.memberOrder).toEqual([memberAUserId, memberBUserId]);
-    expect(payload._before.timezone).toBe("UTC");
+    expect(payload._before.timezone).toBe('UTC');
     expect(payload._before.warningMinutes).toBe(15);
     // After snapshot is the new values.
     expect(payload._after.rotationIntervalHours).toBe(12);
     expect(payload._after.memberOrder).toEqual(memberOrder);
-    expect(payload._after.timezone).toBe("America/Los_Angeles");
+    expect(payload._after.timezone).toBe('America/Los_Angeles');
     expect(payload._after.warningMinutes).toBe(45);
   });
 
-  it("POST /teams/:team/schedule/overrides writes an `on_call_override.created` audit row", async () => {
+  it('POST /teams/:team/schedule/overrides writes an `on_call_override.created` audit row', async () => {
     const app = await bootApp();
 
     const startAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -315,47 +328,56 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
 
     // Pull the override id back out of the response so the audit lookup is
     // exact rather than relying on "the most recent" semantics.
-    const overrideRow = (res.body as { overrides?: Array<{ id: number; note: string | null }> })
-      .overrides?.find((o) => o.note === note);
-    expect(overrideRow, "expected override to surface in response").toBeDefined();
+    const overrideRow = (
+      res.body as { overrides?: Array<{ id: number; note: string | null }> }
+    ).overrides?.find((o) => o.note === note);
+    expect(overrideRow, 'expected override to surface in response').toBeDefined();
     createdOverrideId = overrideRow!.id;
 
     const audit = await findAudit(
-      "on_call_override.created",
-      "on_call_override",
+      'on_call_override.created',
+      'on_call_override',
       String(createdOverrideId),
     );
     expect(audit).not.toBeNull();
     expect(audit!.actorUserId).toBe(actorUserId);
-    expect(audit!.entityType).toBe("on_call_override");
+    expect(audit!.entityType).toBe('on_call_override');
     expect(audit!.entityId).toBe(String(createdOverrideId));
 
     const payload = audit!.payloadJson as {
       team: string;
       _before?: unknown;
-      _after: { userId: number; kind: string; startAt: string; endAt: string; note: string | null; createdBy: number };
+      _after: {
+        userId: number;
+        kind: string;
+        startAt: string;
+        endAt: string;
+        note: string | null;
+        createdBy: number;
+      };
     };
     expect(payload.team).toBe(TEAM);
     expect(payload._before === null || payload._before === undefined).toBe(true);
     expect(payload._after.userId).toBe(memberAUserId);
-    expect(payload._after.kind).toBe("override");
+    expect(payload._after.kind).toBe('override');
     expect(new Date(payload._after.startAt).toISOString()).toBe(startAt);
     expect(new Date(payload._after.endAt).toISOString()).toBe(endAt);
     expect(payload._after.note).toBe(note);
     expect(payload._after.createdBy).toBe(actorUserId);
   });
 
-  it("DELETE /teams/:team/schedule/overrides/:id writes an `on_call_override.deleted` audit row with the before snapshot", async () => {
+  it('DELETE /teams/:team/schedule/overrides/:id writes an `on_call_override.deleted` audit row with the before snapshot', async () => {
     expect(createdOverrideId).not.toBeNull();
     const app = await bootApp();
 
-    const res = await request(app)
-      .delete(`/api/teams/${encodeURIComponent(TEAM)}/schedule/overrides/${createdOverrideId}`);
+    const res = await request(app).delete(
+      `/api/teams/${encodeURIComponent(TEAM)}/schedule/overrides/${createdOverrideId}`,
+    );
     expect(res.status).toBe(200);
 
     const audit = await findAudit(
-      "on_call_override.deleted",
-      "on_call_override",
+      'on_call_override.deleted',
+      'on_call_override',
       String(createdOverrideId),
     );
     expect(audit).not.toBeNull();
@@ -370,17 +392,17 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
     expect(payload.team).toBe(TEAM);
     expect(payload._before).toBeDefined();
     expect(payload._before.userId).toBe(memberAUserId);
-    expect(payload._before.kind).toBe("override");
+    expect(payload._before.kind).toBe('override');
     expect(payload._before.note).toBe(`audit-override-${runId}`);
     expect(payload._before.createdBy).toBe(actorUserId);
     // Delete has no "after" snapshot.
     expect(payload._after === null || payload._after === undefined).toBe(true);
   });
 
-  it("Failed validation does NOT write an audit row", async () => {
+  it('Failed validation does NOT write an audit row', async () => {
     const app = await bootApp();
-    const { db, auditLogsTable } = await import("@szl-holdings/db");
-    const { eq, and, gt } = await import("drizzle-orm");
+    const { db, auditLogsTable } = await import('@szl-holdings/db');
+    const { eq, and, gt } = await import('drizzle-orm');
 
     // Snapshot the highest audit id touched by THIS actor before the bad
     // request so we can assert nothing new appeared after it.
@@ -395,9 +417,9 @@ d("On-call schedule mutations write audit_logs rows (#2533)", () => {
       .put(`/api/teams/${encodeURIComponent(TEAM)}/schedule`)
       .send({
         rotationIntervalHours: 24,
-        memberOrder: ["not-a-number"],
+        memberOrder: ['not-a-number'],
         handoffAnchor: new Date().toISOString(),
-        timezone: "UTC",
+        timezone: 'UTC',
       });
     expect(res.status).toBe(400);
 

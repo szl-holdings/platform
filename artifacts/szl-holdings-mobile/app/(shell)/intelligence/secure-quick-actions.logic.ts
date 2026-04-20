@@ -3,9 +3,9 @@
  * Imported by both the screen and its tests so regressions are caught.
  */
 
-export const ACCENT = "#c9a84c";
+export const ACCENT = '#c9a84c';
 
-export type ActionPriority = "low" | "medium" | "high" | "critical";
+export type ActionPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface ActionTemplate {
   id: string;
@@ -22,81 +22,81 @@ export interface ActionTemplate {
 
 export const ACTION_TEMPLATES: ActionTemplate[] = [
   {
-    id: "escalate-approval",
-    title: "Escalate Approval",
-    description: "Escalate a pending approval to senior decision-maker with reason",
-    actionClass: "compliance",
-    resourceType: "approval",
-    priority: "high",
-    icon: "arrow-up-circle",
-    accentColor: "#f97316",
+    id: 'escalate-approval',
+    title: 'Escalate Approval',
+    description: 'Escalate a pending approval to senior decision-maker with reason',
+    actionClass: 'compliance',
+    resourceType: 'approval',
+    priority: 'high',
+    icon: 'arrow-up-circle',
+    accentColor: '#f97316',
     requiresBiometric: true,
-    domain: "guardian",
+    domain: 'guardian',
   },
   {
-    id: "suspend-agent",
-    title: "Suspend Agent Run",
-    description: "Pause an active cognitive agent run pending human review",
-    actionClass: "deployment",
-    resourceType: "agent_run",
-    priority: "critical",
-    icon: "pause-circle",
-    accentColor: "#ef4444",
+    id: 'suspend-agent',
+    title: 'Suspend Agent Run',
+    description: 'Pause an active cognitive agent run pending human review',
+    actionClass: 'deployment',
+    resourceType: 'agent_run',
+    priority: 'critical',
+    icon: 'pause-circle',
+    accentColor: '#ef4444',
     requiresBiometric: true,
-    domain: "alloy",
+    domain: 'alloy',
   },
   {
-    id: "freeze-action",
-    title: "Freeze Pending Action",
-    description: "Block a guardian-queued action from executing",
-    actionClass: "compliance",
-    resourceType: "action_draft",
-    priority: "high",
-    icon: "lock",
-    accentColor: "#6366f1",
+    id: 'freeze-action',
+    title: 'Freeze Pending Action',
+    description: 'Block a guardian-queued action from executing',
+    actionClass: 'compliance',
+    resourceType: 'action_draft',
+    priority: 'high',
+    icon: 'lock',
+    accentColor: '#6366f1',
     requiresBiometric: true,
-    domain: "guardian",
+    domain: 'guardian',
   },
   {
-    id: "request-brief",
-    title: "Request Priority Brief",
-    description: "Trigger an on-demand cross-domain executive briefing",
-    actionClass: "general",
-    resourceType: "briefing",
-    priority: "medium",
-    icon: "file-text",
+    id: 'request-brief',
+    title: 'Request Priority Brief',
+    description: 'Trigger an on-demand cross-domain executive briefing',
+    actionClass: 'general',
+    resourceType: 'briefing',
+    priority: 'medium',
+    icon: 'file-text',
     accentColor: ACCENT,
     requiresBiometric: false,
-    domain: "pulse",
+    domain: 'pulse',
   },
   {
-    id: "flag-entity",
-    title: "Flag World-Model Entity",
-    description: "Flag a Constellation entity for manual review",
-    actionClass: "compliance",
-    resourceType: "cst_entity",
-    priority: "medium",
-    icon: "flag",
-    accentColor: "#ec4899",
+    id: 'flag-entity',
+    title: 'Flag World-Model Entity',
+    description: 'Flag a Constellation entity for manual review',
+    actionClass: 'compliance',
+    resourceType: 'cst_entity',
+    priority: 'medium',
+    icon: 'flag',
+    accentColor: '#ec4899',
     requiresBiometric: false,
-    domain: "cortex",
+    domain: 'cortex',
   },
   {
-    id: "rollback-request",
-    title: "Request Rollback",
-    description: "Request a rollback for a recently recorded action",
-    actionClass: "deployment",
-    resourceType: "action",
-    priority: "critical",
-    icon: "rotate-ccw",
-    accentColor: "#ef4444",
+    id: 'rollback-request',
+    title: 'Request Rollback',
+    description: 'Request a rollback for a recently recorded action',
+    actionClass: 'deployment',
+    resourceType: 'action',
+    priority: 'critical',
+    icon: 'rotate-ccw',
+    accentColor: '#ef4444',
     requiresBiometric: true,
-    domain: "guardian",
+    domain: 'guardian',
   },
 ];
 
-export const GUARDIAN_APPROVALS_PATH = "/api/approvals";
-export const RECENT_ACTIVITY_PATH = "/api/approvals?status=all&limit=10";
+export const GUARDIAN_APPROVALS_PATH = '/api/approvals';
+export const RECENT_ACTIVITY_PATH = '/api/approvals?status=all&limit=10';
 
 export interface GuardianSubmitBody {
   resourceType: string;
@@ -110,7 +110,7 @@ export interface GuardianSubmitBody {
     domain: string;
     requiresBiometric: boolean;
     rollbackPoint: string;
-    initiatedFrom: "mobile:secure-quick-actions";
+    initiatedFrom: 'mobile:secure-quick-actions';
   };
 }
 
@@ -132,7 +132,7 @@ export function buildGuardianSubmitBody(
       domain: template.domain,
       requiresBiometric: template.requiresBiometric,
       rollbackPoint: nowIso,
-      initiatedFrom: "mobile:secure-quick-actions",
+      initiatedFrom: 'mobile:secure-quick-actions',
     },
   };
 }
@@ -151,17 +151,17 @@ export async function executeSecureActionFlow(
   nowIso?: string,
 ): Promise<unknown> {
   if (!resourceId.trim()) {
-    throw new Error("Missing field: resourceId is required");
+    throw new Error('Missing field: resourceId is required');
   }
   if (template.requiresBiometric) {
-    const ok = await promptBiometric("Confirm guardian-scoped action");
+    const ok = await promptBiometric('Confirm guardian-scoped action');
     if (!ok) {
-      throw new Error("Biometric authentication cancelled");
+      throw new Error('Biometric authentication cancelled');
     }
   }
   const body = buildGuardianSubmitBody(template, resourceId.trim(), description.trim(), nowIso);
   return apiFetch(GUARDIAN_APPROVALS_PATH, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(body),
   });
 }

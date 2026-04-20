@@ -1,5 +1,5 @@
-import type { PlatformFacts, StructuralFacts } from "./schema.js";
-import { PLATFORM_FACTS } from "./registry.js";
+import { PLATFORM_FACTS } from './registry.js';
+import type { PlatformFacts, StructuralFacts } from './schema.js';
 
 export interface DriftReport {
   passed: boolean;
@@ -12,7 +12,7 @@ export interface DriftItem {
   registryValue: number | string;
   observedValue: number | string;
   delta: number | string;
-  severity: "error" | "warning" | "info";
+  severity: 'error' | 'warning' | 'info';
 }
 
 /**
@@ -28,15 +28,15 @@ export function validateFacts(
   const checks: Array<{
     fact: keyof StructuralFacts;
     tolerance?: number;
-    severity?: DriftItem["severity"];
+    severity?: DriftItem['severity'];
   }> = [
-    { fact: "packageCount", tolerance: 2 },
-    { fact: "libCount", tolerance: 1 },
-    { fact: "workerCount", tolerance: 0 },
-    { fact: "serviceCount", tolerance: 0 },
-    { fact: "appCount", tolerance: 0 },
-    { fact: "artifactCount", tolerance: 2 },
-    { fact: "activeArtifactCount", tolerance: 1 },
+    { fact: 'packageCount', tolerance: 2 },
+    { fact: 'libCount', tolerance: 1 },
+    { fact: 'workerCount', tolerance: 0 },
+    { fact: 'serviceCount', tolerance: 0 },
+    { fact: 'appCount', tolerance: 0 },
+    { fact: 'artifactCount', tolerance: 2 },
+    { fact: 'activeArtifactCount', tolerance: 1 },
   ];
 
   for (const check of checks) {
@@ -54,20 +54,20 @@ export function validateFacts(
         registryValue: registryVal,
         observedValue: observedVal,
         delta,
-        severity: delta > tolerance * 3 ? "error" : "warning",
+        severity: delta > tolerance * 3 ? 'error' : 'warning',
       });
     }
   }
 
-  const errorCount = items.filter((i) => i.severity === "error").length;
-  const warnCount = items.filter((i) => i.severity === "warning").length;
+  const errorCount = items.filter((i) => i.severity === 'error').length;
+  const warnCount = items.filter((i) => i.severity === 'warning').length;
 
   return {
     passed: errorCount === 0,
     driftItems: items,
     summary:
       items.length === 0
-        ? "No drift detected — registry matches observed filesystem state."
+        ? 'No drift detected — registry matches observed filesystem state.'
         : `Drift detected: ${errorCount} error(s), ${warnCount} warning(s). Run \`pnpm run generate-platform-metrics\` to regenerate.`,
   };
 }

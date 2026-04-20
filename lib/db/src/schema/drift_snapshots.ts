@@ -1,15 +1,15 @@
-import { pgTable, serial, timestamp, text, real, jsonb, index } from "drizzle-orm/pg-core";
+import { index, jsonb, pgTable, real, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const driftSnapshotsTable = pgTable(
-  "drift_snapshots",
+  'drift_snapshots',
   {
-    id: serial("id").primaryKey(),
-    measuredAt: timestamp("measured_at").notNull().defaultNow(),
-    overallDriftScore: real("overall_drift_score").notNull(),
-    status: text("status", { enum: ["healthy", "degraded", "critical"] }).notNull(),
-    summary: jsonb("summary").notNull(),
+    id: serial('id').primaryKey(),
+    measuredAt: timestamp('measured_at').notNull().defaultNow(),
+    overallDriftScore: real('overall_drift_score').notNull(),
+    status: text('status', { enum: ['healthy', 'degraded', 'critical'] }).notNull(),
+    summary: jsonb('summary').notNull(),
   },
-  (t) => [index("drift_snapshots_measured_at_idx").on(t.measuredAt)],
+  (t) => [index('drift_snapshots_measured_at_idx').on(t.measuredAt)],
 );
 
 export type DriftSnapshot = typeof driftSnapshotsTable.$inferSelect;

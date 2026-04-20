@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 
 export interface GatewayEventPayload {
   id: string;
@@ -7,9 +7,9 @@ export interface GatewayEventPayload {
   mcpServerId: string;
   tool: string;
   egressDomain?: string | undefined;
-  decision: "allowed" | "logged" | "blocked" | "quarantined";
+  decision: 'allowed' | 'logged' | 'blocked' | 'quarantined';
   reason: string;
-  enforcementMode: "log-only" | "block" | "quarantine";
+  enforcementMode: 'log-only' | 'block' | 'quarantine';
   linkedExposureId?: string | undefined;
   occurredAt: string;
 }
@@ -21,12 +21,12 @@ class GatewayEventBus extends EventEmitter {
   }
 
   emitEvent(event: GatewayEventPayload): void {
-    this.emit("event", event);
+    this.emit('event', event);
   }
 
   onEvent(listener: (event: GatewayEventPayload) => void): () => void {
-    this.on("event", listener);
-    return () => this.off("event", listener);
+    this.on('event', listener);
+    return () => this.off('event', listener);
   }
 }
 

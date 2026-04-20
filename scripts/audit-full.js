@@ -30,34 +30,25 @@
  *   --artifacts-dir  extra directory whose contents are copied into evidence (optional)
  */
 
-import { spawn } from "child_process";
-import {
-  mkdirSync,
-  writeFileSync,
-  cpSync,
-  existsSync,
-} from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { spawn } from 'child_process';
+import { cpSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, "..");
+const ROOT = join(__dirname, '..');
 
-const SKIP_INSTALL = process.argv.includes("--skip-install");
-const SKIP_E2E     = process.argv.includes("--skip-e2e");
-const JSON_OUTPUT  = process.argv.includes("--json");
+const SKIP_INSTALL = process.argv.includes('--skip-install');
+const SKIP_E2E = process.argv.includes('--skip-e2e');
+const JSON_OUTPUT = process.argv.includes('--json');
 
-const TIMESTAMP = new Date()
-  .toISOString()
-  .replace(/[:.]/g, "-")
-  .replace("T", "_")
-  .slice(0, 19);
+const TIMESTAMP = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
 
-const EVIDENCE_ROOT = join(ROOT, "artifacts/audit/evidence");
-const RUN_DIR       = join(EVIDENCE_ROOT, TIMESTAMP);
-const LATEST_DIR    = join(EVIDENCE_ROOT, "latest");
+const EVIDENCE_ROOT = join(ROOT, 'artifacts/audit/evidence');
+const RUN_DIR = join(EVIDENCE_ROOT, TIMESTAMP);
+const LATEST_DIR = join(EVIDENCE_ROOT, 'latest');
 
-mkdirSync(RUN_DIR,    { recursive: true });
+mkdirSync(RUN_DIR, { recursive: true });
 mkdirSync(LATEST_DIR, { recursive: true });
 
 // ─── Step registry ────────────────────────────────────────────────────────────
@@ -68,122 +59,122 @@ mkdirSync(LATEST_DIR, { recursive: true });
 // mirrored into the evidence tree (e.g. playwright-report, lighthouse).
 const STEPS = [
   {
-    id: "install",
-    label: "Install dependencies",
-    cmd: "pnpm install --frozen-lockfile",
-    priority: "P0",
+    id: 'install',
+    label: 'Install dependencies',
+    cmd: 'pnpm install --frozen-lockfile',
+    priority: 'P0',
     skip: SKIP_INSTALL,
   },
   {
-    id: "typecheck",
-    label: "Typecheck",
-    cmd: "pnpm run typecheck",
-    priority: "P0",
+    id: 'typecheck',
+    label: 'Typecheck',
+    cmd: 'pnpm run typecheck',
+    priority: 'P0',
   },
   {
-    id: "lint",
-    label: "Lint",
-    cmd: "pnpm run lint",
-    priority: "P0",
+    id: 'lint',
+    label: 'Lint',
+    cmd: 'pnpm run lint',
+    priority: 'P0',
   },
   {
-    id: "test",
-    label: "Unit tests",
-    cmd: "pnpm run test",
-    priority: "P0",
+    id: 'test',
+    label: 'Unit tests',
+    cmd: 'pnpm run test',
+    priority: 'P0',
   },
   {
-    id: "build",
-    label: "Build all packages",
-    cmd: "pnpm -r --if-present run build",
-    priority: "P0",
+    id: 'build',
+    label: 'Build all packages',
+    cmd: 'pnpm -r --if-present run build',
+    priority: 'P0',
   },
   // Core public route checks are P0 — a broken public route is a boot-level
   // failure that must block merges per the task requirement.
   {
-    id: "audit-routes",
-    label: "Audit: route registry & classification",
-    cmd: "pnpm run audit:routes",
-    priority: "P0",
+    id: 'audit-routes',
+    label: 'Audit: route registry & classification',
+    cmd: 'pnpm run audit:routes',
+    priority: 'P0',
   },
   {
-    id: "qa-site",
-    label: "QA: site (routes + links + trust + meta + empty-states + og)",
-    cmd: "pnpm run qa:site",
-    priority: "P0",
+    id: 'qa-site',
+    label: 'QA: site (routes + links + trust + meta + empty-states + og)',
+    cmd: 'pnpm run qa:site',
+    priority: 'P0',
   },
   // Advisory checks — failures recorded and reported, but do not block merges.
   {
-    id: "audit-mocks",
-    label: "Audit: mocks",
-    cmd: "pnpm run audit:mocks",
-    priority: "P1",
+    id: 'audit-mocks',
+    label: 'Audit: mocks',
+    cmd: 'pnpm run audit:mocks',
+    priority: 'P1',
   },
   {
-    id: "audit-copy",
-    label: "Audit: copy",
-    cmd: "pnpm run audit:copy",
-    priority: "P1",
+    id: 'audit-copy',
+    label: 'Audit: copy',
+    cmd: 'pnpm run audit:copy',
+    priority: 'P1',
   },
   {
-    id: "audit-deps",
-    label: "Audit: deps",
-    cmd: "pnpm run audit:deps",
-    priority: "P1",
+    id: 'audit-deps',
+    label: 'Audit: deps',
+    cmd: 'pnpm run audit:deps',
+    priority: 'P1',
   },
   {
-    id: "audit-design-system",
-    label: "Audit: design system",
-    cmd: "pnpm run audit:design-system",
-    priority: "P1",
+    id: 'audit-design-system',
+    label: 'Audit: design system',
+    cmd: 'pnpm run audit:design-system',
+    priority: 'P1',
   },
   {
-    id: "audit-broken-links",
-    label: "Audit: broken links",
-    cmd: "pnpm run audit:broken-links",
-    priority: "P1",
+    id: 'audit-broken-links',
+    label: 'Audit: broken links',
+    cmd: 'pnpm run audit:broken-links',
+    priority: 'P1',
   },
   {
-    id: "qa-a11y",
-    label: "QA: accessibility",
-    cmd: "pnpm run qa:a11y",
-    priority: "P1",
+    id: 'qa-a11y',
+    label: 'QA: accessibility',
+    cmd: 'pnpm run qa:a11y',
+    priority: 'P1',
   },
   {
-    id: "brand-check",
-    label: "Brand check",
-    cmd: "pnpm run brand:check",
-    priority: "P1",
+    id: 'brand-check',
+    label: 'Brand check',
+    cmd: 'pnpm run brand:check',
+    priority: 'P1',
   },
   {
-    id: "smoke-product-mode",
-    label: "Smoke: product mode",
-    cmd: "pnpm run smoke:product-mode",
-    priority: "P1",
+    id: 'smoke-product-mode',
+    label: 'Smoke: product mode',
+    cmd: 'pnpm run smoke:product-mode',
+    priority: 'P1',
   },
   {
-    id: "docs-claims-check",
-    label: "Docs: claims check",
-    cmd: "pnpm run docs:claims-check",
-    priority: "P1",
+    id: 'docs-claims-check',
+    label: 'Docs: claims check',
+    cmd: 'pnpm run docs:claims-check',
+    priority: 'P1',
   },
   ...(SKIP_E2E
     ? []
     : [
         {
-          id: "e2e",
-          label: "E2E tests (Playwright)",
-          cmd: "pnpm run test:e2e",
-          priority: "P1",
+          id: 'e2e',
+          label: 'E2E tests (Playwright)',
+          cmd: 'pnpm run test:e2e',
+          priority: 'P1',
           // Playwright writes reports here by default; mirror into evidence
-          artifactDirs: ["playwright-report", "test-results"],
+          artifactDirs: ['playwright-report', 'test-results'],
         },
       ]),
 ];
 
 // ─── Streaming runner ─────────────────────────────────────────────────────────
 function log(msg) {
-  if (!JSON_OUTPUT) process.stdout.write(msg + "\n");
+  if (!JSON_OUTPUT) process.stdout.write(msg + '\n');
 }
 
 /**
@@ -195,11 +186,11 @@ async function runStep(step) {
     log(`\n⏭  [SKIP] ${step.label}`);
     return {
       ...step,
-      status: "skipped",
+      status: 'skipped',
       exitCode: null,
       durationMs: 0,
-      stdout: "",
-      stderr: "",
+      stdout: '',
+      stderr: '',
     };
   }
 
@@ -218,21 +209,21 @@ async function runStep(step) {
     const child = spawn(step.cmd, {
       shell: true,
       cwd: ROOT,
-      env: { ...process.env, CI: "1", FORCE_COLOR: "0" },
+      env: { ...process.env, CI: '1', FORCE_COLOR: '0' },
     });
 
-    child.stdout.on("data", (chunk) => {
+    child.stdout.on('data', (chunk) => {
       stdoutChunks.push(chunk);
       if (!JSON_OUTPUT) process.stdout.write(chunk);
     });
 
-    child.stderr.on("data", (chunk) => {
+    child.stderr.on('data', (chunk) => {
       stderrChunks.push(chunk);
       if (!JSON_OUTPUT) process.stderr.write(chunk);
     });
 
-    child.on("close", (code) => resolve(code ?? 1));
-    child.on("error", (err) => {
+    child.on('close', (code) => resolve(code ?? 1));
+    child.on('error', (err) => {
       stderrChunks.push(Buffer.from(err.message));
       resolve(1);
     });
@@ -244,10 +235,10 @@ async function runStep(step) {
   const passed = exitCode === 0;
 
   // Write evidence
-  writeFileSync(join(stepDir, "stdout.txt"), stdout);
-  writeFileSync(join(stepDir, "stderr.txt"), stderr);
+  writeFileSync(join(stepDir, 'stdout.txt'), stdout);
+  writeFileSync(join(stepDir, 'stderr.txt'), stderr);
   writeFileSync(
-    join(stepDir, "result.json"),
+    join(stepDir, 'result.json'),
     JSON.stringify(
       {
         id: step.id,
@@ -260,13 +251,13 @@ async function runStep(step) {
         timestamp: new Date().toISOString(),
       },
       null,
-      2
-    )
+      2,
+    ),
   );
 
   // Mirror any declared artifact directories into evidence
   if (step.artifactDirs) {
-    const artifactsDir = join(stepDir, "artifacts");
+    const artifactsDir = join(stepDir, 'artifacts');
     mkdirSync(artifactsDir, { recursive: true });
     for (const relDir of step.artifactDirs) {
       const src = join(ROOT, relDir);
@@ -280,13 +271,13 @@ async function runStep(step) {
     }
   }
 
-  const icon = passed ? "✅" : "❌";
+  const icon = passed ? '✅' : '❌';
   const secs = (durationMs / 1000).toFixed(1);
   log(`   ${icon} exit ${exitCode}  (${secs}s)`);
 
   return {
     ...step,
-    status: passed ? "pass" : "fail",
+    status: passed ? 'pass' : 'fail',
     exitCode,
     durationMs,
     stdout,
@@ -300,7 +291,7 @@ log(`║  Runtime Audit Harness  —  ${TIMESTAMP}  ║`);
 log(`╚═══════════════════════════════════════════════════════╝`);
 log(`   Evidence dir: ${RUN_DIR}`);
 log(
-  `   Steps: ${STEPS.filter((s) => !s.skip).length}  (${STEPS.filter((s) => s.skip).length} skipped)`
+  `   Steps: ${STEPS.filter((s) => !s.skip).length}  (${STEPS.filter((s) => s.skip).length} skipped)`,
 );
 
 const results = [];
@@ -311,19 +302,19 @@ for (const step of STEPS) {
 
   // Abort immediately on P0 failure — downstream steps are meaningless if
   // build/typecheck/routes are broken.
-  if (r.status === "fail" && r.priority === "P0") {
+  if (r.status === 'fail' && r.priority === 'P0') {
     log(`\n🛑  P0 failure in "${r.label}" — aborting pipeline.`);
     break;
   }
 }
 
 // ─── Summary generation ───────────────────────────────────────────────────────
-const p0Results  = results.filter((r) => r.priority === "P0" && r.status !== "skipped");
-const p1Results  = results.filter((r) => r.priority === "P1" && r.status !== "skipped");
-const p0Failures = p0Results.filter((r) => r.status === "fail");
-const p1Failures = p1Results.filter((r) => r.status === "fail");
-const totalMs    = results.reduce((s, r) => s + (r.durationMs || 0), 0);
-const nowIso     = new Date().toISOString();
+const p0Results = results.filter((r) => r.priority === 'P0' && r.status !== 'skipped');
+const p1Results = results.filter((r) => r.priority === 'P1' && r.status !== 'skipped');
+const p0Failures = p0Results.filter((r) => r.status === 'fail');
+const p1Failures = p1Results.filter((r) => r.status === 'fail');
+const totalMs = results.reduce((s, r) => s + (r.durationMs || 0), 0);
+const nowIso = new Date().toISOString();
 
 // ─── Parse per-product route counts from qa:site/qa-routes stdout ─────────────
 // smoke-routes.js prints lines like:
@@ -331,11 +322,11 @@ const nowIso     = new Date().toISOString();
 //   "    passed: 11  failed: 1"
 // and the domain summary JSON block. We do a best-effort extraction.
 function extractRouteTable(steps) {
-  const siteStep = steps.find((r) => r.id === "qa-site");
-  if (!siteStep || siteStep.status === "skipped") return null;
+  const siteStep = steps.find((r) => r.id === 'qa-site');
+  if (!siteStep || siteStep.status === 'skipped') return null;
 
-  const output = siteStep.stdout + "\n" + siteStep.stderr;
-  const lines = output.split("\n");
+  const output = siteStep.stdout + '\n' + siteStep.stderr;
+  const lines = output.split('\n');
   const products = [];
 
   // Match domain headers like "  ── SZL Holdings (12 routes) @ http://..."
@@ -376,7 +367,7 @@ const summaryLines = [
   `**Run:** \`${TIMESTAMP}\`  `,
   `**Generated:** ${nowIso}  `,
   `**Total duration:** ${(totalMs / 1000).toFixed(1)}s  `,
-  `**Overall:** ${p0Failures.length === 0 ? "✅ PASS" : "❌ FAIL (P0 blocking)"}`,
+  `**Overall:** ${p0Failures.length === 0 ? '✅ PASS' : '❌ FAIL (P0 blocking)'}`,
   ``,
   `---`,
   ``,
@@ -387,12 +378,12 @@ const summaryLines = [
         `| Product | Routes | Passed | Failed | Status |`,
         `|---------|--------|--------|--------|--------|`,
         ...routeTable.map((p) => {
-          const passed = p.passed ?? "?";
-          const failed = p.failed ?? "?";
-          const status = p.failed === 0 ? "✅" : p.failed > 0 ? "❌" : "—";
+          const passed = p.passed ?? '?';
+          const failed = p.failed ?? '?';
+          const status = p.failed === 0 ? '✅' : p.failed > 0 ? '❌' : '—';
           return `| ${p.name} | ${p.total} | ${passed} | ${failed} | ${status} |`;
         }),
-      ].join("\n")
+      ].join('\n')
     : `_Route counts not available (qa:site step did not run or produced no parseable output)._`,
   ``,
   `---`,
@@ -402,18 +393,11 @@ const summaryLines = [
   `| Priority | Step | Status | Duration | Evidence |`,
   `|----------|------|--------|----------|----------|`,
   ...results.map((r) => {
-    const icon =
-      r.status === "pass"
-        ? "✅ pass"
-        : r.status === "skipped"
-        ? "⏭ skipped"
-        : "❌ fail";
-    const dur = r.durationMs ? `${(r.durationMs / 1000).toFixed(1)}s` : "—";
+    const icon = r.status === 'pass' ? '✅ pass' : r.status === 'skipped' ? '⏭ skipped' : '❌ fail';
+    const dur = r.durationMs ? `${(r.durationMs / 1000).toFixed(1)}s` : '—';
     const evidencePath =
-      r.status !== "skipped"
-        ? `[\`${r.id}/\`](../evidence/${TIMESTAMP}/${r.id}/)`
-        : "—";
-    return `| ${r.priority || "—"} | ${r.label} | ${icon} | ${dur} | ${evidencePath} |`;
+      r.status !== 'skipped' ? `[\`${r.id}/\`](../evidence/${TIMESTAMP}/${r.id}/)` : '—';
+    return `| ${r.priority || '—'} | ${r.label} | ${icon} | ${dur} | ${evidencePath} |`;
   }),
   ``,
   `---`,
@@ -425,10 +409,9 @@ const summaryLines = [
     : p0Failures
         .map(
           (r) =>
-            `### ❌ ${r.label}\n` +
-            `\`\`\`\n${(r.stderr || r.stdout || "").slice(-2000)}\n\`\`\``
+            `### ❌ ${r.label}\n` + `\`\`\`\n${(r.stderr || r.stdout || '').slice(-2000)}\n\`\`\``,
         )
-        .join("\n\n"),
+        .join('\n\n'),
   ``,
   `## P1 Failures (advisory — do not block merge)`,
   ``,
@@ -437,10 +420,9 @@ const summaryLines = [
     : p1Failures
         .map(
           (r) =>
-            `### ⚠️ ${r.label}\n` +
-            `\`\`\`\n${(r.stderr || r.stdout || "").slice(-800)}\n\`\`\``
+            `### ⚠️ ${r.label}\n` + `\`\`\`\n${(r.stderr || r.stdout || '').slice(-800)}\n\`\`\``,
         )
-        .join("\n\n"),
+        .join('\n\n'),
   ``,
   `---`,
   ``,
@@ -459,7 +441,7 @@ const summaryLines = [
   `\`\`\``,
 ];
 
-const summaryMd = summaryLines.join("\n");
+const summaryMd = summaryLines.join('\n');
 
 const indexJson = {
   timestamp: TIMESTAMP,
@@ -479,26 +461,26 @@ const indexJson = {
 };
 
 // Write to timestamped run directory
-writeFileSync(join(RUN_DIR, "summary.md"), summaryMd);
-writeFileSync(join(RUN_DIR, "index.json"), JSON.stringify(indexJson, null, 2));
+writeFileSync(join(RUN_DIR, 'summary.md'), summaryMd);
+writeFileSync(join(RUN_DIR, 'index.json'), JSON.stringify(indexJson, null, 2));
 
 // Update latest/ (stable path for CI artifacts and human reference)
-writeFileSync(join(LATEST_DIR, "summary.md"), summaryMd);
+writeFileSync(join(LATEST_DIR, 'summary.md'), summaryMd);
 writeFileSync(
-  join(LATEST_DIR, "index.json"),
-  JSON.stringify({ latestRun: TIMESTAMP, evidenceDir: RUN_DIR, ...indexJson }, null, 2)
+  join(LATEST_DIR, 'index.json'),
+  JSON.stringify({ latestRun: TIMESTAMP, evidenceDir: RUN_DIR, ...indexJson }, null, 2),
 );
 
 // ─── Terminal summary ─────────────────────────────────────────────────────────
-log("\n" + "─".repeat(60));
+log('\n' + '─'.repeat(60));
 log(`Audit complete.`);
-log(`  Steps run:    ${results.filter((r) => r.status !== "skipped").length}`);
-log(`  P0 failures:  ${p0Failures.length}  (${p0Failures.map((r) => r.id).join(", ") || "none"})`);
-log(`  P1 advisories: ${p1Failures.length}  (${p1Failures.map((r) => r.id).join(", ") || "none"})`);
+log(`  Steps run:    ${results.filter((r) => r.status !== 'skipped').length}`);
+log(`  P0 failures:  ${p0Failures.length}  (${p0Failures.map((r) => r.id).join(', ') || 'none'})`);
+log(`  P1 advisories: ${p1Failures.length}  (${p1Failures.map((r) => r.id).join(', ') || 'none'})`);
 log(`  Duration:     ${(totalMs / 1000).toFixed(1)}s`);
 log(`  Evidence:     ${RUN_DIR}`);
-log(`  Summary:      ${join(LATEST_DIR, "summary.md")}`);
-log("─".repeat(60) + "\n");
+log(`  Summary:      ${join(LATEST_DIR, 'summary.md')}`);
+log('─'.repeat(60) + '\n');
 
 if (JSON_OUTPUT) {
   process.stdout.write(
@@ -509,11 +491,11 @@ if (JSON_OUTPUT) {
         p0Failures: p0Failures.map((r) => r.id),
         p1Failures: p1Failures.map((r) => r.id),
         evidenceDir: RUN_DIR,
-        summaryPath: join(LATEST_DIR, "summary.md"),
+        summaryPath: join(LATEST_DIR, 'summary.md'),
       },
       null,
-      2
-    ) + "\n"
+      2,
+    ) + '\n',
   );
 }
 

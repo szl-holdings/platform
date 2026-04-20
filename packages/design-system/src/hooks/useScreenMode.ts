@@ -1,4 +1,4 @@
-import { useDesignSystem, type ScreenMode } from "../providers/DesignSystemProvider.js";
+import { type ScreenMode, useDesignSystem } from '../providers/DesignSystemProvider.js';
 
 export interface ScreenModeValues {
   mode: ScreenMode;
@@ -17,8 +17,8 @@ export function useScreenMode(): ScreenModeValues {
   const { screenMode, setScreenMode } = useDesignSystem();
   return {
     mode: screenMode,
-    isExecutive: screenMode === "executive",
-    isOperator: screenMode === "operator",
+    isExecutive: screenMode === 'executive',
+    isOperator: screenMode === 'operator',
     setScreenMode,
   };
 }

@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const PolicyRuleActionSchema = z.enum(["allow", "deny", "redact"]);
+export const PolicyRuleActionSchema = z.enum(['allow', 'deny', 'redact']);
 export type PolicyRuleAction = z.infer<typeof PolicyRuleActionSchema>;
 
 export const PolicyRuleSchema = z.object({

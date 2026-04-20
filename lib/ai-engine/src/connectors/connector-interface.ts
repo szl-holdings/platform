@@ -1,14 +1,14 @@
-export type ConnectorAuthType = "api_key" | "oauth2" | "basic" | "bearer" | "none";
+export type ConnectorAuthType = 'api_key' | 'oauth2' | 'basic' | 'bearer' | 'none';
 export type ConnectorCategory =
-  | "ai_service"
-  | "security"
-  | "ticketing"
-  | "communication"
-  | "observability"
-  | "data"
-  | "workflow"
-  | "maritime"
-  | "crm";
+  | 'ai_service'
+  | 'security'
+  | 'ticketing'
+  | 'communication'
+  | 'observability'
+  | 'data'
+  | 'workflow'
+  | 'maritime'
+  | 'crm';
 
 export interface ConnectorAuthConfig {
   type: ConnectorAuthType;
@@ -35,7 +35,7 @@ export interface ConnectorToolDefinition {
   description: string;
   inputSchema: Record<string, unknown>;
   outputSchema: Record<string, unknown>;
-  costEstimate: "free" | "low" | "medium" | "high";
+  costEstimate: 'free' | 'low' | 'medium' | 'high';
 }
 
 export interface ConnectorAdapter<TInput = unknown, TOutput = unknown> {
@@ -65,7 +65,7 @@ export class ConnectorError extends Error {
     public readonly retryable: boolean = false,
   ) {
     super(message);
-    this.name = "ConnectorError";
+    this.name = 'ConnectorError';
   }
 }
 
@@ -84,7 +84,7 @@ export abstract class BaseConnectorAdapter<TInput = unknown, TOutput = unknown>
   abstract tools: ConnectorToolDefinition[];
 
   isConfigured(): boolean {
-    return this.authConfig.envVarNames.every(name => !!process.env[name]);
+    return this.authConfig.envVarNames.every((name) => !!process.env[name]);
   }
 
   async healthCheck(): Promise<ConnectorHealthStatus> {
@@ -92,7 +92,7 @@ export abstract class BaseConnectorAdapter<TInput = unknown, TOutput = unknown>
       return {
         healthy: false,
         lastChecked: new Date().toISOString(),
-        error: `Missing env vars: ${this.authConfig.envVarNames.join(", ")}`,
+        error: `Missing env vars: ${this.authConfig.envVarNames.join(', ')}`,
       };
     }
     try {
@@ -120,26 +120,26 @@ export abstract class BaseConnectorAdapter<TInput = unknown, TOutput = unknown>
     if (err instanceof ConnectorError) return err;
     const message = err instanceof Error ? err.message : String(err);
     const status = (err as { status?: number })?.status;
-    return new ConnectorError(message, this.connectorId, "unknown", status, status === 429);
+    return new ConnectorError(message, this.connectorId, 'unknown', status, status === 429);
   }
 
   protected getAuthHeaders(): Record<string, string> {
     switch (this.authConfig.type) {
-      case "api_key": {
-        const key = process.env[this.authConfig.envVarNames[0] ?? ""];
+      case 'api_key': {
+        const key = process.env[this.authConfig.envVarNames[0] ?? ''];
         if (key && this.authConfig.headerName) return { [this.authConfig.headerName]: key };
-        if (key) return { "x-api-key": key };
+        if (key) return { 'x-api-key': key };
         return {};
       }
-      case "bearer": {
-        const token = process.env[this.authConfig.envVarNames[0] ?? ""];
-        return token ? { "Authorization": `Bearer ${token}` } : {};
+      case 'bearer': {
+        const token = process.env[this.authConfig.envVarNames[0] ?? ''];
+        return token ? { Authorization: `Bearer ${token}` } : {};
       }
-      case "basic": {
-        const user = process.env[this.authConfig.envVarNames[0] ?? ""];
-        const pass = process.env[this.authConfig.envVarNames[1] ?? ""];
+      case 'basic': {
+        const user = process.env[this.authConfig.envVarNames[0] ?? ''];
+        const pass = process.env[this.authConfig.envVarNames[1] ?? ''];
         if (user && pass) {
-          return { "Authorization": `Basic ${Buffer.from(`${user}:${pass}`).toString("base64")}` };
+          return { Authorization: `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}` };
         }
         return {};
       }

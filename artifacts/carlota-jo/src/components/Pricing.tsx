@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
-import { Check } from "lucide-react";
-import tiersData from "@/data/tiers.json";
+import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
+import tiersData from '@/data/tiers.json';
 
 export default function Pricing() {
   return (
@@ -32,9 +32,8 @@ export default function Pricing() {
             className="lg:col-span-7 flex items-end"
           >
             <p className="text-sm text-cream-200/40 font-light leading-relaxed max-w-xl">
-              Three engagement models calibrated to the scope and cadence of
-              your strategic needs. All engagements are scoped during an initial
-              confidential consultation.
+              Three engagement models calibrated to the scope and cadence of your strategic needs.
+              All engagements are scoped during an initial confidential consultation.
             </p>
           </motion.div>
         </div>
@@ -48,7 +47,7 @@ export default function Pricing() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               className={`relative p-8 lg:p-10 flex flex-col ${
-                tier.highlighted ? "bg-navy-900/40" : "bg-navy-950"
+                tier.highlighted ? 'bg-navy-900/40' : 'bg-navy-950'
               }`}
             >
               {tier.highlighted && (
@@ -65,18 +64,12 @@ export default function Pricing() {
                 <span className="text-[11px] font-medium tracking-[0.15em] uppercase text-cream-300/30">
                   {tier.type}
                 </span>
-                <h3 className="font-serif text-xl font-medium text-cream-50 mt-2">
-                  {tier.name}
-                </h3>
+                <h3 className="font-serif text-xl font-medium text-cream-50 mt-2">{tier.name}</h3>
               </div>
 
               <div className="mb-6">
-                <span className="font-serif text-3xl font-light text-cream-50">
-                  {tier.price}
-                </span>
-                <span className="text-sm text-cream-300/30 ml-2 font-light">
-                  {tier.priceNote}
-                </span>
+                <span className="font-serif text-3xl font-light text-cream-50">{tier.price}</span>
+                <span className="text-sm text-cream-300/30 ml-2 font-light">{tier.priceNote}</span>
               </div>
 
               <p className="text-[13px] text-cream-200/30 leading-relaxed mb-8 font-light">
@@ -89,21 +82,18 @@ export default function Pricing() {
                     key={feature}
                     className="flex items-start gap-2.5 text-sm text-cream-300/40 font-light"
                   >
-                    <Check
-                      size={13}
-                      className="text-gold-500/40 mt-0.5 shrink-0"
-                    />
+                    <Check size={13} className="text-gold-500/40 mt-0.5 shrink-0" />
                     {feature}
                   </li>
                 ))}
               </ul>
 
               <a
-                href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/book?tier=${tier.id}`}
+                href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/book?tier=${tier.id}`}
                 className={`w-full py-3.5 text-center text-xs font-medium tracking-[0.15em] uppercase transition-all duration-300 block ${
                   tier.highlighted
-                    ? "bg-gold-500 text-navy-950 hover:bg-gold-400"
-                    : "border border-cream-200/10 text-cream-200/50 hover:border-cream-200/20 hover:text-cream-50"
+                    ? 'bg-gold-500 text-navy-950 hover:bg-gold-400'
+                    : 'border border-cream-200/10 text-cream-200/50 hover:border-cream-200/20 hover:text-cream-50'
                 }`}
               >
                 {tier.cta}

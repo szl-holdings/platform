@@ -12,17 +12,17 @@
  * land everywhere immediately.
  */
 
-import { and, eq, isNull, or } from "drizzle-orm";
+import { db, type GuardianTier, guardianTiersTable } from '@szl-holdings/db';
 import {
   POLICY_TIER_DESCRIPTIONS,
+  type PolicyTier,
   TIER_CONTROLS,
   TIER_NUMBER,
   TIER_RISK_LEVEL,
-  type PolicyTier,
   type TierControlSet,
-} from "@workspace/guardian";
-import { db, guardianTiersTable, type GuardianTier } from "@szl-holdings/db";
-import { logger } from "./logger";
+} from '@workspace/guardian';
+import { and, eq, isNull, or } from 'drizzle-orm';
+import { logger } from './logger';
 
 export interface EffectiveTier {
   tier: PolicyTier;
@@ -43,13 +43,10 @@ export interface EffectiveTier {
    */
   effectiveControls: TierControlSet;
   enabled: boolean;
-  source: "org-override" | "global-override" | "constant-default";
+  source: 'org-override' | 'global-override' | 'constant-default';
 }
 
-const CACHE_TTL_MS = parseInt(
-  process.env.GUARDIAN_TIER_CACHE_TTL_MS ?? "30000",
-  10,
-);
+const CACHE_TTL_MS = parseInt(process.env.GUARDIAN_TIER_CACHE_TTL_MS ?? '30000', 10);
 
 interface CacheEntry {
   expiresAt: number;
@@ -60,7 +57,7 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>();
 
 function cacheKey(orgId: number | null | undefined): string {
-  return orgId == null ? "global" : `org:${orgId}`;
+  return orgId == null ? 'global' : `org:${orgId}`;
 }
 
 function constantTier(tier: PolicyTier): EffectiveTier {
@@ -72,7 +69,7 @@ function constantTier(tier: PolicyTier): EffectiveTier {
     controls: TIER_CONTROLS[tier] as unknown as Record<string, unknown>,
     effectiveControls: TIER_CONTROLS[tier],
     enabled: true,
-    source: "constant-default",
+    source: 'constant-default',
   };
 }
 
@@ -92,10 +89,12 @@ function rowToEffective(row: GuardianTier): EffectiveTier {
     tierNumber: row.tierNumber,
     description: row.description,
     riskLevel: row.riskLevel,
-    controls: (row.controls as Record<string, unknown> | null) ?? (TIER_CONTROLS[tier] as unknown as Record<string, unknown>),
+    controls:
+      (row.controls as Record<string, unknown> | null) ??
+      (TIER_CONTROLS[tier] as unknown as Record<string, unknown>),
     effectiveControls,
     enabled: row.enabled,
-    source: row.orgId == null ? "global-override" : "org-override",
+    source: row.orgId == null ? 'global-override' : 'org-override',
   };
 }
 
@@ -123,14 +122,14 @@ async function loadEffectiveTiers(
       const tier = row.tier as PolicyTier;
       const existing = result.get(tier);
       // Org override beats global default for the same tier name.
-      if (!existing || (existing.source === "global-override" && row.orgId != null)) {
+      if (!existing || (existing.source === 'global-override' && row.orgId != null)) {
         result.set(tier, rowToEffective(row));
       }
     }
   } catch (err) {
     logger.warn(
       { err, orgId },
-      "[effective-tiers] Failed to load tier overrides — falling back to constants",
+      '[effective-tiers] Failed to load tier overrides — falling back to constants',
     );
   }
 
@@ -195,12 +194,12 @@ export async function getAllEffectiveTiers(
 ): Promise<EffectiveTier[]> {
   const entry = await getCacheEntry(orgId);
   const tiers: PolicyTier[] = [
-    "advisory",
-    "supervised",
-    "operator-approved",
-    "dual-approved",
-    "regulated",
-    "sovereign",
+    'advisory',
+    'supervised',
+    'operator-approved',
+    'dual-approved',
+    'regulated',
+    'sovereign',
   ];
   return tiers.map((t) => entry.tiers.get(t) ?? constantTier(t));
 }
@@ -210,9 +209,7 @@ export async function getAllEffectiveTiers(
  * `guardian_tiers`. Pass an orgId to invalidate just one tenant; omit it
  * to invalidate everything (used after global-default writes).
  */
-export function invalidateEffectiveTierCache(
-  orgId?: number | null,
-): void {
+export function invalidateEffectiveTierCache(orgId?: number | null): void {
   if (orgId === undefined) {
     cache.clear();
     return;

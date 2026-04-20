@@ -17,12 +17,12 @@
  *   1 (FAIL)     — primary health unreachable, OR any failure when --strict is set
  */
 
-const PORT = process.env.PORT || "5000";
+const PORT = process.env.PORT || '5000';
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
-const TIMEOUT_MS = parseInt(process.env.HEALTH_TIMEOUT ?? "10000", 10);
-const JSON_OUTPUT = process.argv.includes("--json");
-const FAST_MODE = process.argv.includes("--fast");
-const STRICT_MODE = process.argv.includes("--strict");
+const TIMEOUT_MS = parseInt(process.env.HEALTH_TIMEOUT ?? '10000', 10);
+const JSON_OUTPUT = process.argv.includes('--json');
+const FAST_MODE = process.argv.includes('--fast');
+const STRICT_MODE = process.argv.includes('--strict');
 
 async function fetch_(url, options, timeout) {
   const controller = new AbortController();
@@ -39,26 +39,52 @@ async function fetch_(url, options, timeout) {
 }
 
 async function checkJsonEndpoint(url, name, requiredFields, timeout) {
-  const result = await fetch_(url, {
-    headers: { Accept: "application/json", "User-Agent": "SZL-Health/2.0" },
-  }, timeout);
+  const result = await fetch_(
+    url,
+    {
+      headers: { Accept: 'application/json', 'User-Agent': 'SZL-Health/2.0' },
+    },
+    timeout,
+  );
 
   let body = null;
   if (result.res) {
-    try { body = await result.res.json(); } catch { body = null; }
+    try {
+      body = await result.res.json();
+    } catch {
+      body = null;
+    }
   }
 
   if (!result.ok) {
-    return { name, url, ok: false, latency: result.latency, httpStatus: result.status, error: result.error ?? `HTTP ${result.status}`, services: {}, body };
+    return {
+      name,
+      url,
+      ok: false,
+      latency: result.latency,
+      httpStatus: result.status,
+      error: result.error ?? `HTTP ${result.status}`,
+      services: {},
+      body,
+    };
   }
 
   const missingFields = (requiredFields ?? []).filter((f) => body?.[f] === undefined);
   if (missingFields.length > 0) {
-    return { name, url, ok: false, latency: result.latency, httpStatus: result.status, error: `Missing fields: ${missingFields.join(", ")}`, services: {}, body };
+    return {
+      name,
+      url,
+      ok: false,
+      latency: result.latency,
+      httpStatus: result.status,
+      error: `Missing fields: ${missingFields.join(', ')}`,
+      services: {},
+      body,
+    };
   }
 
-  const statusVal = body?.status ?? body?.data?.status ?? "ok";
-  const validStatuses = ["ok", "healthy", "degraded", "up", "running", "pass", "200"];
+  const statusVal = body?.status ?? body?.data?.status ?? 'ok';
+  const validStatuses = ['ok', 'healthy', 'degraded', 'up', 'running', 'pass', '200'];
   const statusOk = validStatuses.includes(String(statusVal).toLowerCase());
 
   return {
@@ -78,39 +104,51 @@ function extractServices(body) {
   if (!body) return {};
   const services = {};
 
-  if (body.services && typeof body.services === "object") {
+  if (body.services && typeof body.services === 'object') {
     for (const [key, value] of Object.entries(body.services)) {
-      if (typeof value === "object" && value !== null) {
+      if (typeof value === 'object' && value !== null) {
         services[key] = {
-          status: value.status ?? value.state ?? "unknown",
+          status: value.status ?? value.state ?? 'unknown',
           latency: value.latency ?? value.responseTime ?? null,
-          ok: !["error", "down", "unhealthy", "failed", "disconnected"].includes(
-            String(value.status ?? value.state ?? "").toLowerCase()
+          ok: !['error', 'down', 'unhealthy', 'failed', 'disconnected'].includes(
+            String(value.status ?? value.state ?? '').toLowerCase(),
           ),
         };
       } else {
         const sv = String(value);
         services[key] = {
           status: sv,
-          ok: ["ok", "healthy", "up", "connected", "running"].includes(sv.toLowerCase()),
+          ok: ['ok', 'healthy', 'up', 'connected', 'running'].includes(sv.toLowerCase()),
         };
       }
     }
   }
 
-  const boolFields = { database: "database", queue: "queue", jobQueue: "queue", websocket: "websocket", graphql: "graphql", redis: "redis" };
+  const boolFields = {
+    database: 'database',
+    queue: 'queue',
+    jobQueue: 'queue',
+    websocket: 'websocket',
+    graphql: 'graphql',
+    redis: 'redis',
+  };
   for (const [field, name] of Object.entries(boolFields)) {
     if (body[field] !== undefined && !(name in services)) {
       const val = body[field];
-      if (typeof val === "boolean") {
-        services[name] = { status: val ? "up" : "down", ok: val };
-      } else if (typeof val === "string") {
-        services[name] = { status: val, ok: ["ok", "healthy", "up", "connected"].includes(val.toLowerCase()) };
-      } else if (typeof val === "object" && val !== null) {
+      if (typeof val === 'boolean') {
+        services[name] = { status: val ? 'up' : 'down', ok: val };
+      } else if (typeof val === 'string') {
         services[name] = {
-          status: val.status ?? val.state ?? "unknown",
+          status: val,
+          ok: ['ok', 'healthy', 'up', 'connected'].includes(val.toLowerCase()),
+        };
+      } else if (typeof val === 'object' && val !== null) {
+        services[name] = {
+          status: val.status ?? val.state ?? 'unknown',
           latency: val.latency ?? null,
-          ok: !["error", "down", "unhealthy", "failed"].includes(String(val.status ?? val.state ?? "").toLowerCase()),
+          ok: !['error', 'down', 'unhealthy', 'failed'].includes(
+            String(val.status ?? val.state ?? '').toLowerCase(),
+          ),
         };
       }
     }
@@ -120,96 +158,157 @@ function extractServices(body) {
 }
 
 async function probeDatabase(base, timeout) {
-  const result = await fetch_(`${base}/api/health/ready`, {
-    headers: { Accept: "application/json", "User-Agent": "SZL-Health/2.0" },
-  }, timeout);
+  const result = await fetch_(
+    `${base}/api/health/ready`,
+    {
+      headers: { Accept: 'application/json', 'User-Agent': 'SZL-Health/2.0' },
+    },
+    timeout,
+  );
 
   let body = null;
   if (result.res) {
-    try { body = await result.res.json(); } catch { body = null; }
+    try {
+      body = await result.res.json();
+    } catch {
+      body = null;
+    }
   }
 
-  const dbStatus = body?.database ?? body?.db ?? body?.services?.database ?? (result.ok ? "ok" : "error");
-  const isOk = result.ok && !["error", "down", "unhealthy", "failed"].includes(String(dbStatus).toLowerCase());
-  return { name: "Database", url: `${base}/api/health/ready`, ok: isOk, latency: result.latency, status: String(dbStatus), detail: body };
+  const dbStatus =
+    body?.database ?? body?.db ?? body?.services?.database ?? (result.ok ? 'ok' : 'error');
+  const isOk =
+    result.ok && !['error', 'down', 'unhealthy', 'failed'].includes(String(dbStatus).toLowerCase());
+  return {
+    name: 'Database',
+    url: `${base}/api/health/ready`,
+    ok: isOk,
+    latency: result.latency,
+    status: String(dbStatus),
+    detail: body,
+  };
 }
 
 async function probeJobQueue(base, timeout) {
-  const result = await fetch_(`${base}/api/health`, {
-    headers: { Accept: "application/json", "User-Agent": "SZL-Health/2.0" },
-  }, timeout);
+  const result = await fetch_(
+    `${base}/api/health`,
+    {
+      headers: { Accept: 'application/json', 'User-Agent': 'SZL-Health/2.0' },
+    },
+    timeout,
+  );
 
   let body = null;
-  if (result.res) { try { body = await result.res.json(); } catch { body = null; } }
+  if (result.res) {
+    try {
+      body = await result.res.json();
+    } catch {
+      body = null;
+    }
+  }
 
   const queueStatus =
     body?.services?.queue?.status ??
     body?.services?.jobQueue?.status ??
     body?.queue ??
     body?.jobQueue ??
-    (result.ok ? "ok" : "unknown");
+    (result.ok ? 'ok' : 'unknown');
 
-  const isOk = result.ok && !["error", "down", "unhealthy", "failed"].includes(String(queueStatus).toLowerCase());
-  return { name: "Job Queue", url: `${base}/api/health`, ok: isOk, latency: result.latency, status: String(queueStatus) };
+  const isOk =
+    result.ok &&
+    !['error', 'down', 'unhealthy', 'failed'].includes(String(queueStatus).toLowerCase());
+  return {
+    name: 'Job Queue',
+    url: `${base}/api/health`,
+    ok: isOk,
+    latency: result.latency,
+    status: String(queueStatus),
+  };
 }
 
 async function probeWebSocket(base, timeout) {
-  const result = await fetch_(`${base}/api/health/detailed`, {
-    headers: { Accept: "application/json", "User-Agent": "SZL-Health/2.0" },
-  }, timeout);
+  const result = await fetch_(
+    `${base}/api/health/detailed`,
+    {
+      headers: { Accept: 'application/json', 'User-Agent': 'SZL-Health/2.0' },
+    },
+    timeout,
+  );
 
   let body = null;
-  if (result.res) { try { body = await result.res.json(); } catch { body = null; } }
+  if (result.res) {
+    try {
+      body = await result.res.json();
+    } catch {
+      body = null;
+    }
+  }
 
   const wsStatus =
     body?.services?.websocket?.status ??
     body?.websocket ??
     body?.services?.realtime?.status ??
-    (result.ok ? "ok" : "unknown");
+    (result.ok ? 'ok' : 'unknown');
 
-  const isOk = !["error", "down", "unhealthy", "failed"].includes(String(wsStatus).toLowerCase());
-  return { name: "WebSocket / Realtime", url: `${base}/api/health/detailed`, ok: isOk && result.ok, latency: result.latency, status: String(wsStatus) };
+  const isOk = !['error', 'down', 'unhealthy', 'failed'].includes(String(wsStatus).toLowerCase());
+  return {
+    name: 'WebSocket / Realtime',
+    url: `${base}/api/health/detailed`,
+    ok: isOk && result.ok,
+    latency: result.latency,
+    status: String(wsStatus),
+  };
 }
 
 async function probeGraphQL(base, timeout) {
-  const introspectionQuery = JSON.stringify({ query: "{ __typename }" });
-  const result = await fetch_(`${base}/api/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "User-Agent": "SZL-Health/2.0",
+  const introspectionQuery = JSON.stringify({ query: '{ __typename }' });
+  const result = await fetch_(
+    `${base}/api/graphql`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': 'SZL-Health/2.0',
+      },
+      body: introspectionQuery,
     },
-    body: introspectionQuery,
-  }, timeout);
+    timeout,
+  );
 
   let body = null;
-  if (result.res) { try { body = await result.res.json(); } catch { body = null; } }
+  if (result.res) {
+    try {
+      body = await result.res.json();
+    } catch {
+      body = null;
+    }
+  }
 
   const isOk = result.ok && (body?.data !== undefined || body?.errors !== undefined);
   return {
-    name: "GraphQL",
+    name: 'GraphQL',
     url: `${base}/api/graphql`,
     ok: isOk,
     latency: result.latency,
-    status: isOk ? "ok" : (result.error ?? `HTTP ${result.status}`),
+    status: isOk ? 'ok' : (result.error ?? `HTTP ${result.status}`),
   };
 }
 
 const DOMAIN_ENDPOINTS = [
-  { path: "/api/lyte", name: "Lyte API" },
-  { path: "/api/vessels", name: "Vessels API" },
-  { path: "/api/firestorm", name: "Firestorm (Aegis) API" },
-  { path: "/api/terra", name: "Terra API" },
-  { path: "/api/prism-counsel", name: "PRISM Counsel API" },
-  { path: "/api/alloy", name: "Alloy API" },
-  { path: "/api/forge", name: "Forge Runtime API" },
-  { path: "/api/distribution-os", name: "Distribution OS API" },
-  { path: "/api/a2a", name: "A2A (Agent-to-Agent) API" },
-  { path: "/api/prism-bus", name: "PRISM Bus API" },
-  { path: "/api/analytics", name: "Analytics API" },
-  { path: "/api/notifications", name: "Notifications API" },
-  { path: "/api/jobs", name: "Jobs API" },
+  { path: '/api/lyte', name: 'Lyte API' },
+  { path: '/api/vessels', name: 'Vessels API' },
+  { path: '/api/firestorm', name: 'Firestorm (Aegis) API' },
+  { path: '/api/terra', name: 'Terra API' },
+  { path: '/api/prism-counsel', name: 'PRISM Counsel API' },
+  { path: '/api/alloy', name: 'Alloy API' },
+  { path: '/api/forge', name: 'Forge Runtime API' },
+  { path: '/api/distribution-os', name: 'Distribution OS API' },
+  { path: '/api/a2a', name: 'A2A (Agent-to-Agent) API' },
+  { path: '/api/prism-bus', name: 'PRISM Bus API' },
+  { path: '/api/analytics', name: 'Analytics API' },
+  { path: '/api/notifications', name: 'Notifications API' },
+  { path: '/api/jobs', name: 'Jobs API' },
 ];
 
 function formatLatency(ms) {
@@ -219,26 +318,30 @@ function formatLatency(ms) {
   return `${ms}ms (very slow)`;
 }
 
-function printResult(result, indent = "  ") {
-  const icon = result.ok ? "✓" : "✗";
+function printResult(result, indent = '  ') {
+  const icon = result.ok ? '✓' : '✗';
   if (result.ok) {
-    console.log(`${indent}${icon} ${result.name} — ${result.status ?? "ok"} (${formatLatency(result.latency)})`);
+    console.log(
+      `${indent}${icon} ${result.name} — ${result.status ?? 'ok'} (${formatLatency(result.latency)})`,
+    );
     for (const [svc, info] of Object.entries(result.services ?? {})) {
-      const svcIcon = info.ok !== false ? "·" : "!";
-      const latNote = info.latency ? ` ${info.latency}ms` : "";
+      const svcIcon = info.ok !== false ? '·' : '!';
+      const latNote = info.latency ? ` ${info.latency}ms` : '';
       console.log(`${indent}    ${svcIcon} ${svc}: ${info.status}${latNote}`);
     }
   } else {
-    console.error(`${indent}${icon} ${result.name} — ${result.error ?? `HTTP ${result.httpStatus ?? result.status}`} (${formatLatency(result.latency)})`);
+    console.error(
+      `${indent}${icon} ${result.name} — ${result.error ?? `HTTP ${result.httpStatus ?? result.status}`} (${formatLatency(result.latency)})`,
+    );
     console.error(`${indent}    URL: ${result.url}`);
   }
 }
 
 async function main() {
   if (!JSON_OUTPUT) {
-    console.log("\nSZL Holdings — API Health Check");
+    console.log('\nSZL Holdings — API Health Check');
     console.log(`Target:  ${BASE_URL}`);
-    console.log(`Timeout: ${TIMEOUT_MS}ms | Mode: ${FAST_MODE ? "fast" : "full"}\n`);
+    console.log(`Timeout: ${TIMEOUT_MS}ms | Mode: ${FAST_MODE ? 'fast' : 'full'}\n`);
   }
 
   const report = {
@@ -246,34 +349,50 @@ async function main() {
     target: BASE_URL,
     sections: {},
     summary: { total: 0, passed: 0, failed: 0 },
-    overallStatus: "PASS",
+    overallStatus: 'PASS',
   };
 
-  if (!JSON_OUTPUT) console.log("── Core Health Endpoints ─────────────────────────────────────");
+  if (!JSON_OUTPUT) console.log('── Core Health Endpoints ─────────────────────────────────────');
   const coreEndpoints = [
-    { path: "/api/health", name: "API Health (primary)", requiredFields: ["status"], primary: true },
-    { path: "/api/health/live", name: "Liveness Probe", requiredFields: [] },
-    { path: "/api/health/ready", name: "Readiness Probe", requiredFields: [] },
+    {
+      path: '/api/health',
+      name: 'API Health (primary)',
+      requiredFields: ['status'],
+      primary: true,
+    },
+    { path: '/api/health/live', name: 'Liveness Probe', requiredFields: [] },
+    { path: '/api/health/ready', name: 'Readiness Probe', requiredFields: [] },
   ];
 
   const coreResults = await Promise.all(
     coreEndpoints.map(({ path, name, requiredFields }) =>
-      checkJsonEndpoint(`${BASE_URL}${path}`, name, requiredFields, TIMEOUT_MS)
-    )
+      checkJsonEndpoint(`${BASE_URL}${path}`, name, requiredFields, TIMEOUT_MS),
+    ),
   );
 
-  report.sections.coreHealth = coreResults.map(({ name, url, ok, latency, httpStatus, status, error, services }) => ({
-    name, url, ok, latency, httpStatus, status: status ?? null, error: error ?? null, services,
-  }));
+  report.sections.coreHealth = coreResults.map(
+    ({ name, url, ok, latency, httpStatus, status, error, services }) => ({
+      name,
+      url,
+      ok,
+      latency,
+      httpStatus,
+      status: status ?? null,
+      error: error ?? null,
+      services,
+    }),
+  );
 
   for (const r of coreResults) {
     report.summary.total++;
-    if (r.ok) report.summary.passed++; else report.summary.failed++;
+    if (r.ok) report.summary.passed++;
+    else report.summary.failed++;
     if (!JSON_OUTPUT) printResult(r);
   }
 
   if (!FAST_MODE) {
-    if (!JSON_OUTPUT) console.log("\n── Per-Service Probes ─────────────────────────────────────────");
+    if (!JSON_OUTPUT)
+      console.log('\n── Per-Service Probes ─────────────────────────────────────────');
 
     const serviceProbes = await Promise.all([
       probeDatabase(BASE_URL, TIMEOUT_MS),
@@ -283,64 +402,87 @@ async function main() {
     ]);
 
     report.sections.serviceProbes = serviceProbes.map(({ name, url, ok, latency, status }) => ({
-      name, url, ok, latency, status,
+      name,
+      url,
+      ok,
+      latency,
+      status,
     }));
 
     for (const probe of serviceProbes) {
       report.summary.total++;
-      if (probe.ok) report.summary.passed++; else report.summary.failed++;
+      if (probe.ok) report.summary.passed++;
+      else report.summary.failed++;
       if (!JSON_OUTPUT) {
-        const icon = probe.ok ? "✓" : "✗";
+        const icon = probe.ok ? '✓' : '✗';
         console.log(`  ${icon} ${probe.name} — ${probe.status} (${formatLatency(probe.latency)})`);
       }
     }
 
-    if (!JSON_OUTPUT) console.log("\n── Domain API Endpoints ────────────────────────────────────────");
+    if (!JSON_OUTPUT)
+      console.log('\n── Domain API Endpoints ────────────────────────────────────────');
 
     const domainResults = await Promise.all(
       DOMAIN_ENDPOINTS.map(({ path, name }) =>
-        checkJsonEndpoint(`${BASE_URL}${path}`, name, [], TIMEOUT_MS)
-      )
+        checkJsonEndpoint(`${BASE_URL}${path}`, name, [], TIMEOUT_MS),
+      ),
     );
 
-    report.sections.domainEndpoints = domainResults.map(({ name, url, ok, latency, httpStatus, status, error }) => ({
-      name, url, ok, latency, httpStatus, status: status ?? null, error: error ?? null,
-    }));
+    report.sections.domainEndpoints = domainResults.map(
+      ({ name, url, ok, latency, httpStatus, status, error }) => ({
+        name,
+        url,
+        ok,
+        latency,
+        httpStatus,
+        status: status ?? null,
+        error: error ?? null,
+      }),
+    );
 
     for (const r of domainResults) {
       report.summary.total++;
-      if (r.ok) report.summary.passed++; else report.summary.failed++;
+      if (r.ok) report.summary.passed++;
+      else report.summary.failed++;
       if (!JSON_OUTPUT) printResult(r);
     }
   }
 
-  if (report.summary.failed > 0) report.overallStatus = "FAIL";
+  if (report.summary.failed > 0) report.overallStatus = 'FAIL';
 
   if (JSON_OUTPUT) {
     console.log(JSON.stringify(report, null, 2));
   } else {
-    console.log(`\nResults: ${report.summary.passed}/${report.summary.total} passed, ${report.summary.failed} failed`);
+    console.log(
+      `\nResults: ${report.summary.passed}/${report.summary.total} passed, ${report.summary.failed} failed`,
+    );
   }
 
-  const primaryResult = coreResults.find((r) => r.name.includes("primary"));
+  const primaryResult = coreResults.find((r) => r.name.includes('primary'));
   const primaryOk = !primaryResult || primaryResult.ok;
 
   if (!primaryOk) {
     if (!JSON_OUTPUT) {
-      console.error("\nFAIL — Primary health endpoint unreachable.");
-      console.error("Ensure the API server is running: pnpm --filter @workspace/api-server run dev");
+      console.error('\nFAIL — Primary health endpoint unreachable.');
+      console.error(
+        'Ensure the API server is running: pnpm --filter @workspace/api-server run dev',
+      );
     }
     process.exit(1);
   } else if (report.summary.failed > 0) {
     if (STRICT_MODE) {
-      if (!JSON_OUTPUT) console.error(`\nFAIL (strict) — ${report.summary.failed} endpoint(s) failed.`);
+      if (!JSON_OUTPUT)
+        console.error(`\nFAIL (strict) — ${report.summary.failed} endpoint(s) failed.`);
       process.exit(1);
     } else {
-      if (!JSON_OUTPUT) console.log(`\nDEGRADED — Primary OK. ${report.summary.failed} secondary endpoint(s) failed. (Use --strict to fail on secondary failures.)`);
+      if (!JSON_OUTPUT)
+        console.log(
+          `\nDEGRADED — Primary OK. ${report.summary.failed} secondary endpoint(s) failed. (Use --strict to fail on secondary failures.)`,
+        );
       process.exit(0);
     }
   } else {
-    if (!JSON_OUTPUT) console.log("\nPASS — All health checks passed.");
+    if (!JSON_OUTPUT) console.log('\nPASS — All health checks passed.');
     process.exit(0);
   }
 }

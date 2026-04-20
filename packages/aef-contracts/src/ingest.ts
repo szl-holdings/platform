@@ -1,12 +1,14 @@
-import { z } from "zod";
-import { TenantIdSchema } from "./tenant.js";
+import { z } from 'zod';
+import { TenantIdSchema } from './tenant.js';
 
 export const IngestDocumentSchema = z.object({
   sourceId: z.string().min(1),
   sourceUri: z.string().optional(),
   title: z.string().optional(),
   content: z.string().min(1),
-  contentType: z.enum(["text/plain", "text/markdown", "application/pdf", "text/html"]).default("text/plain"),
+  contentType: z
+    .enum(['text/plain', 'text/markdown', 'application/pdf', 'text/html'])
+    .default('text/plain'),
   metadata: z.record(z.unknown()).default({}),
   profileId: z.string().optional(),
 });

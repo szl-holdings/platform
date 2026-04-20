@@ -17,7 +17,7 @@
  *   import { submitPendingApprovalRequest, resolvePendingApprovalRequest } from "@workspace/approvals-inbox";
  */
 
-export type ApprovalVerdict = "approved" | "rejected" | "escalated";
+export type ApprovalVerdict = 'approved' | 'rejected' | 'escalated';
 
 export interface ApprovalAction {
   id: string;
@@ -40,7 +40,7 @@ export interface SubmitApprovalOptions {
   surface?: string;
 }
 
-export type PendingApprovalStatus = "pending" | "approved" | "rejected" | "timed_out" | "escalated";
+export type PendingApprovalStatus = 'pending' | 'approved' | 'rejected' | 'timed_out' | 'escalated';
 
 export interface PendingApprovalRequest {
   id: string;
@@ -84,32 +84,33 @@ let _seq = 1000;
 const _pendingRequests = new Map<string, PendingApprovalRequest>();
 
 function makeProofRef(verdict: ApprovalVerdict): string {
-  const prefix = verdict === "approved" ? "APP" : verdict === "rejected" ? "REJ" : "ESC";
+  const prefix = verdict === 'approved' ? 'APP' : verdict === 'rejected' ? 'REJ' : 'ESC';
   return `PROOF-${prefix}-${Date.now().toString(36).toUpperCase()}`;
 }
 
 export function submitApprovalAction(
   recommendationId: string,
   verdict: ApprovalVerdict,
-  options?: SubmitApprovalOptions
+  options?: SubmitApprovalOptions,
 ): ApprovalAction {
   const action: ApprovalAction = {
     id: `approval-${++_seq}`,
     recommendationId,
     verdict,
-    actor: options?.actor ?? "Demo Mode — LYTE-SEED-v2",
+    actor: options?.actor ?? 'Demo Mode — LYTE-SEED-v2',
     timestamp: Date.now(),
     proofRef: makeProofRef(verdict),
     simulationId: options?.simulationId,
     note: options?.note,
-    domain: options?.domain ?? "decision-center",
-    surface: options?.surface ?? "lyte",
+    domain: options?.domain ?? 'decision-center',
+    surface: options?.surface ?? 'lyte',
   };
   _inbox.push(action);
 
   const pending = _pendingRequests.get(recommendationId);
-  if (pending && pending.status === "pending") {
-    pending.status = verdict === "approved" ? "approved" : verdict === "rejected" ? "rejected" : "escalated";
+  if (pending && pending.status === 'pending') {
+    pending.status =
+      verdict === 'approved' ? 'approved' : verdict === 'rejected' ? 'rejected' : 'escalated';
     pending.resolvedAt = Date.now();
     if (options?.actor !== undefined) pending.resolvedBy = options.actor;
     if (options?.note !== undefined) pending.resolutionNote = options.note;
@@ -118,10 +119,12 @@ export function submitApprovalAction(
   return action;
 }
 
-export function submitPendingApprovalRequest(options: SubmitPendingApprovalRequestOptions): PendingApprovalRequest {
+export function submitPendingApprovalRequest(
+  options: SubmitPendingApprovalRequestOptions,
+): PendingApprovalRequest {
   const id = `${options.runId}::${options.stepId}`;
   const existing = _pendingRequests.get(id);
-  if (existing && existing.status === "pending") {
+  if (existing && existing.status === 'pending') {
     return existing;
   }
 
@@ -137,12 +140,12 @@ export function submitPendingApprovalRequest(options: SubmitPendingApprovalReque
     justification: options.justification,
     projectedImpact: options.projectedImpact,
     projectedRisk: options.projectedRisk,
-    requestedBy: options.requestedBy ?? "agents-core",
-    domain: options.domain ?? "agents-core",
-    surface: options.surface ?? "run-console",
+    requestedBy: options.requestedBy ?? 'agents-core',
+    domain: options.domain ?? 'agents-core',
+    surface: options.surface ?? 'run-console',
     submittedAt: now,
     expiresAt: now + timeoutMs,
-    status: "pending",
+    status: 'pending',
   };
   if (options.toolId !== undefined) request.toolId = options.toolId;
 
@@ -158,7 +161,7 @@ export function resolvePendingApprovalRequest(
 ): ApprovalAction | undefined {
   const id = `${runId}::${stepId}`;
   const pending = _pendingRequests.get(id);
-  if (!pending || pending.status !== "pending") return undefined;
+  if (!pending || pending.status !== 'pending') return undefined;
 
   const submitOpts: SubmitApprovalOptions = {
     domain: pending.domain,
@@ -182,17 +185,20 @@ export function getPendingApprovalRequests(filter?: {
   return results;
 }
 
-export function getPendingApprovalRequest(runId: string, stepId: string): PendingApprovalRequest | undefined {
+export function getPendingApprovalRequest(
+  runId: string,
+  stepId: string,
+): PendingApprovalRequest | undefined {
   return _pendingRequests.get(`${runId}::${stepId}`);
 }
 
 export function markPendingApprovalTimedOut(runId: string, stepId: string): void {
   const id = `${runId}::${stepId}`;
   const pending = _pendingRequests.get(id);
-  if (pending && pending.status === "pending") {
-    pending.status = "timed_out";
+  if (pending && pending.status === 'pending') {
+    pending.status = 'timed_out';
     pending.resolvedAt = Date.now();
-    pending.resolvedBy = "system:timeout";
+    pending.resolvedBy = 'system:timeout';
   }
 }
 
@@ -201,11 +207,11 @@ export function getApprovalActions(): readonly ApprovalAction[] {
 }
 
 export function getApprovalForRecommendation(recommendationId: string): ApprovalAction | undefined {
-  return [..._inbox].reverse().find(a => a.recommendationId === recommendationId);
+  return [..._inbox].reverse().find((a) => a.recommendationId === recommendationId);
 }
 
 export function getInboxByVerdict(verdict: ApprovalVerdict): readonly ApprovalAction[] {
-  return _inbox.filter(a => a.verdict === verdict);
+  return _inbox.filter((a) => a.verdict === verdict);
 }
 
 export function clearApprovalInbox(): void {
@@ -220,10 +226,10 @@ export function getInboxStats() {
   const pending = Array.from(_pendingRequests.values());
   return {
     total: _inbox.length,
-    approved: _inbox.filter(a => a.verdict === "approved").length,
-    rejected: _inbox.filter(a => a.verdict === "rejected").length,
-    escalated: _inbox.filter(a => a.verdict === "escalated").length,
-    pending: pending.filter((r) => r.status === "pending").length,
+    approved: _inbox.filter((a) => a.verdict === 'approved').length,
+    rejected: _inbox.filter((a) => a.verdict === 'rejected').length,
+    escalated: _inbox.filter((a) => a.verdict === 'escalated').length,
+    pending: pending.filter((r) => r.status === 'pending').length,
     pendingTotal: pending.length,
   };
 }
@@ -232,16 +238,16 @@ export function getInboxStats() {
 // Re-exported for convenience so consumers can import from @workspace/approvals-inbox
 // instead of @workspace/approvals-inbox/governed.
 export {
-  createApprovalRequest,
-  decideApproval,
-  getApprovalRequestById,
-  listApprovalRequests,
-  defaultGovernedApprovalStore,
-  InMemoryGovernedApprovalStore,
-  MutableGovernedApprovalStore,
-  type GovernedApprovalStoreBackend,
   type CreateApprovalRequestOptions,
+  createApprovalRequest,
   type DecideApprovalOptions,
   type DecideApprovalResult,
+  decideApproval,
+  defaultGovernedApprovalStore,
   type GovernanceMemoryRecord,
-} from "./governed-store.js";
+  type GovernedApprovalStoreBackend,
+  getApprovalRequestById,
+  InMemoryGovernedApprovalStore,
+  listApprovalRequests,
+  MutableGovernedApprovalStore,
+} from './governed-store.js';

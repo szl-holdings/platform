@@ -34,9 +34,13 @@
  *     - Status page update: automatic via Betterstack / Instatus webhook
  */
 
-import { logger } from "./logger";
-import { initializeOpenTelemetry, getOtelConfig, isOtelInitialized } from "@szl-holdings/observability";
-import { initServerSentry } from "./sentry";
+import {
+  getOtelConfig,
+  initializeOpenTelemetry,
+  isOtelInitialized,
+} from '@szl-holdings/observability';
+import { logger } from './logger';
+import { initServerSentry } from './sentry';
 
 export interface ObservabilityStatus {
   sentry: {
@@ -75,24 +79,32 @@ export async function bootstrapObservability(): Promise<void> {
   // When OFF, SDK initializes in-process only (no network export).
   // This preserves trace context propagation while preventing
   // unintentional telemetry export to unconfigured collectors.
-  const { isFlagEnabled } = await import("./platform-flags");
-  const otelExportEnabled = await isFlagEnabled("live_otel_export_enabled");
+  const { isFlagEnabled } = await import('./platform-flags');
+  const otelExportEnabled = await isFlagEnabled('live_otel_export_enabled');
 
   await initializeOpenTelemetry({
-    serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api",
-    serviceVersion: process.env.npm_package_version ?? "1.0.0",
+    serviceName: process.env.OTEL_SERVICE_NAME ?? 'szl-api',
+    serviceVersion: process.env.npm_package_version ?? '1.0.0',
     otlpEndpoint: otelExportEnabled
       ? (process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT)
       : undefined,
     exportToAzureMonitor: otelExportEnabled && !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
     exportToNewRelic: otelExportEnabled && !!process.env.NEW_RELIC_LICENSE_KEY,
-    exportToConsole: otelExportEnabled && process.env.OTEL_CONSOLE_EXPORT === "true",
-  }).catch(err => {
-    logger.warn({ err }, "[observability] OpenTelemetry initialization failed — continuing without OTel");
+    exportToConsole: otelExportEnabled && process.env.OTEL_CONSOLE_EXPORT === 'true',
+  }).catch((err) => {
+    logger.warn(
+      { err },
+      '[observability] OpenTelemetry initialization failed — continuing without OTel',
+    );
   });
 
-  if (!otelExportEnabled && (process.env.OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_ENDPOINT)) {
-    logger.info("[observability] live_otel_export_enabled flag is OFF — OTEL export skipped (set flag to activate)");
+  if (
+    !otelExportEnabled &&
+    (process.env.OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_ENDPOINT)
+  ) {
+    logger.info(
+      '[observability] live_otel_export_enabled flag is OFF — OTEL export skipped (set flag to activate)',
+    );
   }
 
   logObservabilityStatus();
@@ -105,16 +117,16 @@ export async function bootstrapObservability(): Promise<void> {
 export function getObservabilityStatus(): ObservabilityStatus {
   const otelCfg = getOtelConfig();
   const sentryDsn = process.env.SENTRY_DSN;
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === 'production';
 
   const healthHost = process.env.REPLIT_DEV_DOMAIN
     ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-    : `http://localhost:${process.env.PORT ?? "3000"}`;
+    : `http://localhost:${process.env.PORT ?? '3000'}`;
 
   return {
     sentry: {
       enabled: !!sentryDsn,
-      dsn: sentryDsn ? sentryDsn.replace(/\/[^/]+$/, "/***") : undefined,
+      dsn: sentryDsn ? sentryDsn.replace(/\/[^/]+$/, '/***') : undefined,
     },
     otel: {
       initialized: isOtelInitialized(),
@@ -122,7 +134,7 @@ export function getObservabilityStatus(): ObservabilityStatus {
       otlpEndpoint: otelCfg.otlpEndpoint,
       azureMonitor: otelCfg.azureMonitor,
       newRelic: otelCfg.newRelic,
-      consoleExport: process.env.OTEL_CONSOLE_EXPORT === "true",
+      consoleExport: process.env.OTEL_CONSOLE_EXPORT === 'true',
     },
     uptime: {
       healthEndpoint: `${healthHost}/api/health`,
@@ -139,12 +151,16 @@ export function validateProductionObservability(): string[] {
   const warnings: string[] = [];
 
   if (!process.env.SENTRY_DSN) {
-    warnings.push("SENTRY_DSN is not set — error tracking is disabled in production");
+    warnings.push('SENTRY_DSN is not set — error tracking is disabled in production');
   }
 
-  if (!process.env.OTEL_EXPORTER_OTLP_ENDPOINT && !process.env.OTLP_ENDPOINT && !process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING) {
+  if (
+    !process.env.OTEL_EXPORTER_OTLP_ENDPOINT &&
+    !process.env.OTLP_ENDPOINT &&
+    !process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING
+  ) {
     warnings.push(
-      "No OTEL exporter configured — set OTEL_EXPORTER_OTLP_ENDPOINT (or AZURE_APP_INSIGHTS_CONNECTION_STRING for Azure) to enable distributed tracing"
+      'No OTEL exporter configured — set OTEL_EXPORTER_OTLP_ENDPOINT (or AZURE_APP_INSIGHTS_CONNECTION_STRING for Azure) to enable distributed tracing',
     );
   }
 
@@ -153,22 +169,25 @@ export function validateProductionObservability(): string[] {
 
 function logObservabilityStatus(): void {
   const status = getObservabilityStatus();
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === 'production';
 
-  logger.info({
-    sentry: status.sentry.enabled ? "enabled" : "disabled (SENTRY_DSN not set)",
-    otel: status.otel.initialized
-      ? `enabled — endpoint=${status.otel.otlpEndpoint ?? "console-only"}`
-      : "disabled",
-    azureMonitor: status.otel.azureMonitor ? "enabled" : "disabled",
-    newRelic: status.otel.newRelic ? "enabled" : "disabled",
-    uptimeEndpoint: status.uptime.healthEndpoint,
-  }, "[observability] Production observability status");
+  logger.info(
+    {
+      sentry: status.sentry.enabled ? 'enabled' : 'disabled (SENTRY_DSN not set)',
+      otel: status.otel.initialized
+        ? `enabled — endpoint=${status.otel.otlpEndpoint ?? 'console-only'}`
+        : 'disabled',
+      azureMonitor: status.otel.azureMonitor ? 'enabled' : 'disabled',
+      newRelic: status.otel.newRelic ? 'enabled' : 'disabled',
+      uptimeEndpoint: status.uptime.healthEndpoint,
+    },
+    '[observability] Production observability status',
+  );
 
   if (isProduction) {
     const warnings = validateProductionObservability();
     for (const w of warnings) {
-      logger.warn({ warning: w }, "[observability] Production observability gap");
+      logger.warn({ warning: w }, '[observability] Production observability gap');
     }
   }
 }

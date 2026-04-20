@@ -7,52 +7,61 @@
  * POST   /api/onboarding/wizard/:orgSlug/complete — mark onboarding complete
  */
 
-import { Router } from "express";
-import crypto from "crypto";
-import { z } from "zod";
+import { hashIp } from '@szl-holdings/audit';
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  db, pool,
-  organizationsTable,
-  orgMembersTable,
-  orgInvitationsTable,
-  usersTable,
   auditEventsTable,
+  db,
   notificationsTable,
-} from "@szl-holdings/db";
-import { eq, and, gt } from "drizzle-orm";
-import { authMiddleware, isElevatedUser } from "../middlewares/auth";
-import { writeLimiter } from "../middlewares/rate-limiters";
-import { hashIp } from "@szl-holdings/audit";
-import { validateBody } from "../lib/validation";
-import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, sendError, handleRouteError, sendNotFound } from "../lib/api-response";
-import { sendEmail, buildOrgInviteEmail } from "../lib/email";
-import { createOrgInvitation } from "../lib/invitation-service";
-import { logger } from "../lib/logger";
-import type { Request, Response } from "express";
+  organizationsTable,
+  orgInvitationsTable,
+  orgMembersTable,
+  pool,
+  usersTable,
+} from '@szl-holdings/db';
+import crypto from 'crypto';
+import { and, eq, gt } from 'drizzle-orm';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import { z } from 'zod';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendCreated,
+  sendError,
+  sendForbidden,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { buildOrgInviteEmail, sendEmail } from '../lib/email';
+import { createOrgInvitation } from '../lib/invitation-service';
+import { logger } from '../lib/logger';
+import { validateBody } from '../lib/validation';
+import { authMiddleware, isElevatedUser } from '../middlewares/auth';
+import { writeLimiter } from '../middlewares/rate-limiters';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router = Router();
 
 const createOrgSchema = z.object({
-  name: z.string().min(2, "Organization name must be at least 2 characters").max(100),
+  name: z.string().min(2, 'Organization name must be at least 2 characters').max(100),
   slug: z
     .string()
     .min(2)
     .max(50)
-    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers and hyphens only"),
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers and hyphens only'),
   domain: z.string().optional(),
   orgType: z.string().optional(),
-  plan: z.enum(["free", "starter", "professional", "enterprise"]).default("free"),
+  plan: z.enum(['free', 'starter', 'professional', 'enterprise']).default('free'),
 });
 
 const wizardStepSchema = z.object({
-  step: z.enum(["profile", "team", "notifications", "integrations", "complete"]),
+  step: z.enum(['profile', 'team', 'notifications', 'integrations', 'complete']),
   data: z.record(z.unknown()).optional(),
 });
 
 const resendInviteSchema = z.object({
-  email: z.string().email("Valid email required"),
-  role: z.enum(["admin", "member", "viewer"]).default("member"),
+  email: z.string().email('Valid email required'),
+  role: z.enum(['admin', 'member', 'viewer']).default('member'),
 });
 
 const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -71,7 +80,7 @@ type WizardState = {
 function defaultWizardState(): WizardState {
   return {
     completedSteps: [],
-    currentStep: "profile",
+    currentStep: 'profile',
     profile: {},
     team: {},
     notifications: {},
@@ -79,7 +88,6 @@ function defaultWizardState(): WizardState {
     completedAt: null,
   };
 }
-
 
 async function getWizardState(orgId: number): Promise<WizardState> {
   const { rows } = await pool.query<{
@@ -96,11 +104,11 @@ async function getWizardState(orgId: number): Promise<WizardState> {
   const data = row.step_data ?? {};
   return {
     completedSteps: row.completed_steps ?? [],
-    currentStep: row.current_step ?? "profile",
-    profile: (data["profile"] as Record<string, unknown>) ?? {},
-    team: (data["team"] as Record<string, unknown>) ?? {},
-    notifications: (data["notifications"] as Record<string, unknown>) ?? {},
-    integrations: (data["integrations"] as Record<string, unknown>) ?? {},
+    currentStep: row.current_step ?? 'profile',
+    profile: (data['profile'] as Record<string, unknown>) ?? {},
+    team: (data['team'] as Record<string, unknown>) ?? {},
+    notifications: (data['notifications'] as Record<string, unknown>) ?? {},
+    integrations: (data['integrations'] as Record<string, unknown>) ?? {},
     completedAt: row.completed_at ?? null,
   };
 }
@@ -126,7 +134,7 @@ async function saveWizardState(orgId: number, state: WizardState): Promise<void>
 }
 
 router.post(
-  "/onboarding/org",
+  '/onboarding/org',
   writeLimiter,
   authMiddleware(),
   validateBody(createOrgSchema),
@@ -142,7 +150,7 @@ router.post(
         .limit(1);
 
       if (existing) {
-        sendBadRequest(res, "An organization with this slug already exists");
+        sendBadRequest(res, 'An organization with this slug already exists');
         return;
       }
 
@@ -153,8 +161,8 @@ router.post(
           slug,
           domain: domain ?? null,
           orgType: orgType ?? null,
-          plan: plan ?? "free",
-          status: "active",
+          plan: plan ?? 'free',
+          status: 'active',
           isActive: true,
         })
         .returning();
@@ -162,13 +170,13 @@ router.post(
       await db.insert(orgMembersTable).values({
         orgId: org.id,
         userId,
-        role: "owner",
+        role: 'owner',
       });
 
       await db.insert(auditEventsTable).values({
         userId,
-        action: "org_created",
-        entityType: "organization",
+        action: 'org_created',
+        entityType: 'organization',
         entityId: String(org.id),
         ipAddress: hashIp(req.ip ?? null),
         newValues: { name, slug, plan },
@@ -176,93 +184,105 @@ router.post(
 
       await db.insert(notificationsTable).values({
         userId,
-        type: "success",
-        channel: "in_app",
-        title: "Organization created",
+        type: 'success',
+        channel: 'in_app',
+        title: 'Organization created',
         message: `Welcome to ${name}! Complete your setup to get started.`,
         actionUrl: `/onboarding/${slug}`,
       });
 
       await saveWizardState(org.id, defaultWizardState());
 
-      logger.info({ userId, orgId: org.id, slug }, "[onboarding] Organization created");
+      logger.info({ userId, orgId: org.id, slug }, '[onboarding] Organization created');
 
       sendCreated(res, {
         org,
         wizardUrl: `/onboarding/${slug}`,
-        nextStep: "profile",
+        nextStep: 'profile',
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to create organization");
+      handleRouteError(res, err, 'Failed to create organization');
     }
   },
 );
 
-router.get(
-  "/onboarding/wizard/:orgSlug",
-  authMiddleware(),
-  async (req: Request, res: Response) => {
-    try {
-      const orgSlug = req.params["orgSlug"] as string;
-      const user = req.user!;
+router.get('/onboarding/wizard/:orgSlug', authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgSlug = req.params['orgSlug'] as string;
+    const user = req.user!;
 
-      const [org] = await db
+    const [org] = await db
+      .select()
+      .from(organizationsTable)
+      .where(eq(organizationsTable.slug, orgSlug))
+      .limit(1);
+
+    if (!org) {
+      sendNotFound(res, 'Organization');
+      return;
+    }
+
+    const isElevated = user.roles.includes('super_admin') || user.roles.includes('admin');
+    if (!isElevated) {
+      const [membership] = await db
         .select()
-        .from(organizationsTable)
-        .where(eq(organizationsTable.slug, orgSlug))
+        .from(orgMembersTable)
+        .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
         .limit(1);
-
-      if (!org) {
-        sendNotFound(res, "Organization");
+      if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']) {
+        sendForbidden(res, 'Admin access required');
         return;
       }
-
-      const isElevated = user.roles.includes("super_admin") || user.roles.includes("admin");
-      if (!isElevated) {
-        const [membership] = await db
-          .select()
-          .from(orgMembersTable)
-          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
-          .limit(1);
-        if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-          sendForbidden(res, "Admin access required");
-          return;
-        }
-      }
-
-      const state = await getWizardState(org.id);
-
-      const steps = [
-        { id: "profile", label: "Organization Profile", completed: state.completedSteps.includes("profile") },
-        { id: "team", label: "Invite Team Members", completed: state.completedSteps.includes("team") },
-        { id: "notifications", label: "Notification Preferences", completed: state.completedSteps.includes("notifications") },
-        { id: "integrations", label: "Integrations", completed: state.completedSteps.includes("integrations") },
-      ];
-
-      sendSuccess(res, {
-        org: { id: org.id, name: org.name, slug: org.slug, plan: org.plan },
-        wizard: {
-          steps,
-          currentStep: state.currentStep,
-          completedAt: state.completedAt,
-          isComplete: !!state.completedAt,
-          progress: Math.round((state.completedSteps.length / steps.length) * 100),
-        },
-      });
-    } catch (err) {
-      handleRouteError(res, err, "Failed to get wizard state");
     }
-  },
-);
+
+    const state = await getWizardState(org.id);
+
+    const steps = [
+      {
+        id: 'profile',
+        label: 'Organization Profile',
+        completed: state.completedSteps.includes('profile'),
+      },
+      {
+        id: 'team',
+        label: 'Invite Team Members',
+        completed: state.completedSteps.includes('team'),
+      },
+      {
+        id: 'notifications',
+        label: 'Notification Preferences',
+        completed: state.completedSteps.includes('notifications'),
+      },
+      {
+        id: 'integrations',
+        label: 'Integrations',
+        completed: state.completedSteps.includes('integrations'),
+      },
+    ];
+
+    sendSuccess(res, {
+      org: { id: org.id, name: org.name, slug: org.slug, plan: org.plan },
+      wizard: {
+        steps,
+        currentStep: state.currentStep,
+        completedAt: state.completedAt,
+        isComplete: !!state.completedAt,
+        progress: Math.round((state.completedSteps.length / steps.length) * 100),
+      },
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to get wizard state');
+  }
+});
 
 router.put(
-  "/onboarding/wizard/:orgSlug",
+  '/onboarding/wizard/:orgSlug',
   writeLimiter,
   authMiddleware(),
   validateBody(wizardStepSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params["orgSlug"] as string;
+      const orgSlug = req.params['orgSlug'] as string;
       const user = req.user!;
       const { step, data } = req.body as z.infer<typeof wizardStepSchema>;
 
@@ -273,45 +293,50 @@ router.put(
         .limit(1);
 
       if (!org) {
-        sendNotFound(res, "Organization");
+        sendNotFound(res, 'Organization');
         return;
       }
 
-      const isElevated = user.roles.includes("super_admin") || user.roles.includes("admin");
+      const isElevated = user.roles.includes('super_admin') || user.roles.includes('admin');
       if (!isElevated) {
         const [membership] = await db
           .select()
           .from(orgMembersTable)
           .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
           .limit(1);
-        if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-          sendForbidden(res, "Admin access required");
+        if (
+          !membership ||
+          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+        ) {
+          sendForbidden(res, 'Admin access required');
           return;
         }
       }
 
       const state = await getWizardState(org.id);
 
-      if (step !== "complete" && data) {
+      if (step !== 'complete' && data) {
         (state as Record<string, unknown>)[step] = data;
       }
 
-      if (!state.completedSteps.includes(step) && step !== "complete") {
+      if (!state.completedSteps.includes(step) && step !== 'complete') {
         state.completedSteps.push(step);
       }
 
-      const steps = ["profile", "team", "notifications", "integrations"];
+      const steps = ['profile', 'team', 'notifications', 'integrations'];
       const currentIdx = steps.indexOf(step);
-      state.currentStep = currentIdx >= 0 && currentIdx < steps.length - 1
-        ? steps[currentIdx + 1]!
-        : "complete";
+      state.currentStep =
+        currentIdx >= 0 && currentIdx < steps.length - 1 ? steps[currentIdx + 1]! : 'complete';
 
       await saveWizardState(org.id, state);
 
-      if (step === "profile" && data && typeof data === "object" && "name" in data) {
+      if (step === 'profile' && data && typeof data === 'object' && 'name' in data) {
         await db
           .update(organizationsTable)
-          .set({ name: String((data as Record<string, unknown>)["name"] ?? org.name), updatedAt: new Date() })
+          .set({
+            name: String((data as Record<string, unknown>)['name'] ?? org.name),
+            updatedAt: new Date(),
+          })
           .where(eq(organizationsTable.id, org.id));
       }
 
@@ -322,19 +347,19 @@ router.put(
         progress: Math.round((state.completedSteps.length / steps.length) * 100),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to update wizard step");
+      handleRouteError(res, err, 'Failed to update wizard step');
     }
   },
 );
 
 router.post(
-  "/onboarding/wizard/:orgSlug/complete",
+  '/onboarding/wizard/:orgSlug/complete',
   writeLimiter,
   authMiddleware(),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params["orgSlug"] as string;
+      const orgSlug = req.params['orgSlug'] as string;
       const user = req.user!;
 
       const [org] = await db
@@ -344,7 +369,7 @@ router.post(
         .limit(1);
 
       if (!org) {
-        sendNotFound(res, "Organization");
+        sendNotFound(res, 'Organization');
         return;
       }
 
@@ -354,51 +379,54 @@ router.post(
           .from(orgMembersTable)
           .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
           .limit(1);
-        if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-          sendForbidden(res, "Org admin role required");
+        if (
+          !membership ||
+          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+        ) {
+          sendForbidden(res, 'Org admin role required');
           return;
         }
       }
 
       const state = await getWizardState(org.id);
       state.completedAt = new Date().toISOString();
-      state.currentStep = "complete";
+      state.currentStep = 'complete';
       await saveWizardState(org.id, state);
 
       await db.insert(notificationsTable).values({
         userId: user.id,
-        type: "success",
-        channel: "in_app",
-        title: "Onboarding complete",
+        type: 'success',
+        channel: 'in_app',
+        title: 'Onboarding complete',
         message: `${org.name} is fully set up and ready to use.`,
         actionUrl: `/`,
       });
 
       await db.insert(auditEventsTable).values({
         userId: user.id,
-        action: "onboarding_completed",
-        entityType: "organization",
+        action: 'onboarding_completed',
+        entityType: 'organization',
         entityId: String(org.id),
         ipAddress: hashIp(req.ip ?? null),
       });
 
-      logger.info({ userId: user.id, orgId: org.id }, "[onboarding] Onboarding completed");
+      logger.info({ userId: user.id, orgId: org.id }, '[onboarding] Onboarding completed');
 
-      sendSuccess(res, { message: "Onboarding complete", completedAt: state.completedAt });
+      sendSuccess(res, { message: 'Onboarding complete', completedAt: state.completedAt });
     } catch (err) {
-      handleRouteError(res, err, "Failed to complete onboarding");
+      handleRouteError(res, err, 'Failed to complete onboarding');
     }
   },
 );
 
 router.post(
-  "/onboarding/resend-invite/:orgSlug",
+  '/onboarding/resend-invite/:orgSlug',
   writeLimiter,
   authMiddleware(),
   validateBody(resendInviteSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params["orgSlug"] as string;
+      const orgSlug = req.params['orgSlug'] as string;
       const { email, role } = req.body as z.infer<typeof resendInviteSchema>;
       const user = req.user!;
 
@@ -409,7 +437,7 @@ router.post(
         .limit(1);
 
       if (!org) {
-        sendNotFound(res, "Organization");
+        sendNotFound(res, 'Organization');
         return;
       }
 
@@ -419,8 +447,11 @@ router.post(
           .from(orgMembersTable)
           .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
           .limit(1);
-        if (!inviteMembership || (ORG_ROLE_HIERARCHY[inviteMembership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-          sendForbidden(res, "Org admin role required");
+        if (
+          !inviteMembership ||
+          (ORG_ROLE_HIERARCHY[inviteMembership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+        ) {
+          sendForbidden(res, 'Org admin role required');
           return;
         }
       }
@@ -435,16 +466,16 @@ router.post(
         role,
         invitedByUserId: user.id,
         ipAddress: req.ip,
-        conflictMode: "replace",
+        conflictMode: 'replace',
       });
 
       if (result.conflict) {
         // "replace" mode never returns conflict, but typescript narrowing.
-        sendError(res, "Invitation conflict", 409, "CONFLICT");
+        sendError(res, 'Invitation conflict', 409, 'CONFLICT');
         return;
       }
 
-      logger.info({ userId: user.id, orgId: org.id, email }, "[onboarding] Invite sent");
+      logger.info({ userId: user.id, orgId: org.id, email }, '[onboarding] Invite sent');
 
       sendCreated(res, {
         invitationId: result.invitation.id,
@@ -454,7 +485,7 @@ router.post(
         inviteUrl: result.invitation.inviteUrl,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to send invitation");
+      handleRouteError(res, err, 'Failed to send invitation');
     }
   },
 );

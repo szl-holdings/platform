@@ -1,7 +1,6 @@
-import * as React from "react";
-import { cn } from "../utils";
-import { toAlpha } from "../utils";
-import { colors, spacing } from "../tokens";
+import * as React from 'react';
+import { colors, spacing } from '../tokens';
+import { cn, toAlpha } from '../utils';
 
 export interface DashboardShellTheme {
   accentColor?: string;
@@ -18,7 +17,7 @@ export interface DashboardShellProps {
   className?: string;
   sidebarWidth?: string;
   sidebarClassName?: string;
-  sidebarEvents?: Pick<React.HTMLAttributes<HTMLElement>, "onMouseEnter" | "onMouseLeave">;
+  sidebarEvents?: Pick<React.HTMLAttributes<HTMLElement>, 'onMouseEnter' | 'onMouseLeave'>;
   collapsible?: boolean;
   defaultCollapsed?: boolean;
   collapseStorageKey?: string;
@@ -47,7 +46,7 @@ export function DashboardShell({
     if (collapsible && collapseStorageKey) {
       try {
         const stored = localStorage.getItem(collapseStorageKey);
-        if (stored !== null) return stored === "true";
+        if (stored !== null) return stored === 'true';
       } catch {}
     }
     return defaultCollapsed;
@@ -65,13 +64,13 @@ export function DashboardShell({
     });
   }, [collapsible, collapseStorageKey]);
 
-  const sidebarBg = theme?.sidebarBg ?? "#0a0c10";
-  const headerBg = theme?.headerBg ?? toAlpha("#0a0c10", 0.92);
-  const pageBg = theme?.pageBg ?? "#070810";
+  const sidebarBg = theme?.sidebarBg ?? '#0a0c10';
+  const headerBg = theme?.headerBg ?? toAlpha('#0a0c10', 0.92);
+  const pageBg = theme?.pageBg ?? '#070810';
 
   return (
     <div
-      className={cn("flex h-screen overflow-hidden text-white", className)}
+      className={cn('flex h-screen overflow-hidden text-white', className)}
       style={{ background: pageBg }}
     >
       {sidebar && (
@@ -85,9 +84,9 @@ export function DashboardShell({
           )}
           <aside
             className={cn(
-              "shrink-0 flex flex-col overflow-y-auto transition-all duration-300 z-30",
-              "fixed md:relative inset-y-0 left-0 h-screen",
-              mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+              'shrink-0 flex flex-col overflow-y-auto transition-all duration-300 z-30',
+              'fixed md:relative inset-y-0 left-0 h-screen',
+              mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
               sidebarClassName,
             )}
             style={{
@@ -103,13 +102,25 @@ export function DashboardShell({
                 onClick={toggleCollapsed}
                 className="self-end m-2 p-1.5 rounded-lg transition-colors hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsla(210_60%_58%_/_0.4)]"
                 style={{ color: colors.text.muted }}
-                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   {collapsed ? (
-                    <path d="M5 2l4 5-4 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M5 2l4 5-4 5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   ) : (
-                    <path d="M9 2L5 7l4 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M9 2L5 7l4 5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   )}
                 </svg>
               </button>

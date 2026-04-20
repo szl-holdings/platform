@@ -1,9 +1,9 @@
-import type { TraceRecord } from "./schema.js";
-import type { TraceStore } from "./store.js";
+import type { TraceRecord } from './schema.js';
+import type { TraceStore } from './store.js';
 
 export type QueuedWrite =
-  | { type: "save"; trace: TraceRecord }
-  | { type: "delete"; traceId: string };
+  | { type: 'save'; trace: TraceRecord }
+  | { type: 'delete'; traceId: string };
 
 export interface WriteQueueOptions {
   flushIntervalMs?: number;
@@ -23,7 +23,8 @@ export class WriteQueue {
     this.options = {
       flushIntervalMs: options.flushIntervalMs ?? 100,
       maxBatchSize: options.maxBatchSize ?? 256,
-      onFlushError: options.onFlushError ?? ((err) => console.error("[trace-queue] flush error", err)),
+      onFlushError:
+        options.onFlushError ?? ((err) => console.error('[trace-queue] flush error', err)),
     };
   }
 
@@ -39,7 +40,7 @@ export class WriteQueue {
     this.timer = setInterval(() => {
       void this.flush();
     }, this.options.flushIntervalMs);
-    if (typeof this.timer === "object" && this.timer !== null && "unref" in this.timer) {
+    if (typeof this.timer === 'object' && this.timer !== null && 'unref' in this.timer) {
       (this.timer as NodeJS.Timeout).unref();
     }
     return this;
@@ -58,7 +59,7 @@ export class WriteQueue {
     const batch = this.queue.splice(0, this.options.maxBatchSize);
     try {
       for (const write of batch) {
-        if (write.type === "save") {
+        if (write.type === 'save') {
           this.store.save(write.trace);
         } else {
           this.store.delete(write.traceId);
@@ -89,19 +90,24 @@ export class QueuedTraceStore implements TraceStore {
 
   save(trace: TraceRecord): void {
     this.inner.save(trace);
-    this.queue.enqueue({ type: "save", trace });
+    this.queue.enqueue({ type: 'save', trace });
   }
 
   get(traceId: string): TraceRecord | undefined {
     return this.inner.get(traceId);
   }
 
-  list(filter?: { sessionId?: string; workflowId?: string; agentId?: string; status?: TraceRecord["status"] }): TraceRecord[] {
+  list(filter?: {
+    sessionId?: string;
+    workflowId?: string;
+    agentId?: string;
+    status?: TraceRecord['status'];
+  }): TraceRecord[] {
     return this.inner.list(filter);
   }
 
   delete(traceId: string): boolean {
-    this.queue.enqueue({ type: "delete", traceId });
+    this.queue.enqueue({ type: 'delete', traceId });
     return this.inner.delete(traceId);
   }
 

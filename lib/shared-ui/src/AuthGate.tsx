@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
-import { useAuth } from "@szl-holdings/replit-auth-web";
+import { useAuth } from '@szl-holdings/replit-auth-web';
+import type { ReactNode } from 'react';
 
 export interface AuthGateProps {
   children?: ReactNode;
@@ -9,7 +9,13 @@ export interface AuthGateProps {
   fallback?: ReactNode;
 }
 
-export default function AuthGate({ children, title, description, onAuth, fallback }: AuthGateProps) {
+export default function AuthGate({
+  children,
+  title,
+  description,
+  onAuth,
+  fallback,
+}: AuthGateProps) {
   const { isLoading, isAuthenticated, login } = useAuth();
 
   if (isLoading) {

@@ -1,13 +1,13 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const RunStatusSchema = z.enum([
-  "pending",
-  "running",
-  "paused",
-  "awaiting-approval",
-  "completed",
-  "failed",
-  "rolled-back",
+  'pending',
+  'running',
+  'paused',
+  'awaiting-approval',
+  'completed',
+  'failed',
+  'rolled-back',
 ]);
 
 export const RunConfigSchema = z.object({
@@ -27,7 +27,7 @@ export const RunConfigSchema = z.object({
 export const RunStateSchema = z.object({
   runId: z.string(),
   workflowId: z.string(),
-  status: RunStatusSchema.default("pending"),
+  status: RunStatusSchema.default('pending'),
   currentStep: z.number().int().default(0),
   checkpointId: z.string().optional(),
   traceId: z.string().optional(),
@@ -80,7 +80,9 @@ export interface ApprovalGate {
     requestedById?: number | string | null;
     requestedByRole?: string;
     context: Record<string, unknown>;
-  }): Promise<{ approvalId?: number | string; status: "pending" | "approved" | "rejected" } | undefined>;
+  }): Promise<
+    { approvalId?: number | string; status: 'pending' | 'approved' | 'rejected' } | undefined
+  >;
 }
 
 export interface ModelRouterOptions {
@@ -103,7 +105,14 @@ export interface LedgerEntry {
   entryId: string;
   runId: string;
   stepId?: string;
-  type: "tool-call" | "approval" | "checkpoint" | "rollback" | "model-selection" | "workflow-start" | "workflow-end";
+  type:
+    | 'tool-call'
+    | 'approval'
+    | 'checkpoint'
+    | 'rollback'
+    | 'model-selection'
+    | 'workflow-start'
+    | 'workflow-end';
   description: string;
   timestamp: string;
   metadata: Record<string, unknown>;

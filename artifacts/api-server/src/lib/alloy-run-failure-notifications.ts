@@ -1,22 +1,22 @@
 import {
-  db,
   alloyRunFailureNotificationsTable,
   alloyWorkflowRunsTable,
   alloyWorkflowsTable,
+  db,
   usersTable,
-} from "@szl-holdings/db";
-import { and, eq } from "drizzle-orm";
-import { logger } from "./logger";
-import { sendPushToUser, isAlertCategoryAllowedForUser } from "./expo-push";
+} from '@szl-holdings/db';
+import { and, eq } from 'drizzle-orm';
+import { isAlertCategoryAllowedForUser, sendPushToUser } from './expo-push';
+import { logger } from './logger';
 
-const PUSH_APP_ID = "platform";
-const DEEP_LINK = "/(shell)/intelligence/run-review";
+const PUSH_APP_ID = 'platform';
+const DEEP_LINK = '/(shell)/intelligence/run-review';
 
-export type RunFailureKind = "failed" | "stuck";
+export type RunFailureKind = 'failed' | 'stuck';
 
 interface ResolvedRecipient {
   userId: number;
-  source: "owner" | "on_call";
+  source: 'owner' | 'on_call';
 }
 
 /**
@@ -37,7 +37,7 @@ async function resolveRecipient(
       .from(usersTable)
       .where(eq(usersTable.id, run.triggeredBy))
       .limit(1);
-    if (owner?.isActive) return { userId: owner.id, source: "owner" };
+    if (owner?.isActive) return { userId: owner.id, source: 'owner' };
   }
 
   // Fallback: on-call user for the workflow creator's team.
@@ -63,7 +63,7 @@ async function resolveRecipient(
   if (!team) return null;
 
   try {
-    const { resolveOnCall } = await import("../routes/teams");
+    const { resolveOnCall } = await import('../routes/teams');
     const memberRows = await db
       .select({
         id: usersTable.id,
@@ -76,9 +76,9 @@ async function resolveRecipient(
       .from(usersTable)
       .where(eq(usersTable.team, team));
     const { onCall } = await resolveOnCall(team, memberRows, new Date());
-    if (onCall?.isActive) return { userId: onCall.id, source: "on_call" };
+    if (onCall?.isActive) return { userId: onCall.id, source: 'on_call' };
   } catch (err) {
-    logger.debug({ err, team }, "[run-failure-notify] On-call resolution failed");
+    logger.debug({ err, team }, '[run-failure-notify] On-call resolution failed');
   }
   return null;
 }
@@ -114,14 +114,14 @@ export async function notifyRunFailure(
       .where(eq(alloyWorkflowRunsTable.id, runId))
       .limit(1);
   } catch (err) {
-    logger.warn({ err, runId, kind }, "[run-failure-notify] Failed to load run");
-    return { notified: false, reason: "lookup_failed" };
+    logger.warn({ err, runId, kind }, '[run-failure-notify] Failed to load run');
+    return { notified: false, reason: 'lookup_failed' };
   }
-  if (!run) return { notified: false, reason: "run_not_found" };
+  if (!run) return { notified: false, reason: 'run_not_found' };
 
   const recipient = await resolveRecipient(run);
   if (!recipient) {
-    return { notified: false, reason: "no_recipient" };
+    return { notified: false, reason: 'no_recipient' };
   }
   const { userId } = recipient;
 
@@ -136,11 +136,11 @@ export async function notifyRunFailure(
       .returning({ id: alloyRunFailureNotificationsTable.id });
     claimedId = claimed[0]?.id;
   } catch (err) {
-    logger.warn({ err, runId, userId, kind }, "[run-failure-notify] Dedup claim failed");
-    return { notified: false, reason: "dedup_claim_failed" };
+    logger.warn({ err, runId, userId, kind }, '[run-failure-notify] Dedup claim failed');
+    return { notified: false, reason: 'dedup_claim_failed' };
   }
   if (claimedId == null) {
-    return { notified: false, reason: "already_notified" };
+    return { notified: false, reason: 'already_notified' };
   }
 
   const releaseClaim = async (reason: string) => {
@@ -155,19 +155,25 @@ export async function notifyRunFailure(
           ),
         );
     } catch (err) {
-      logger.warn({ err, runId, userId, kind, reason }, "[run-failure-notify] Failed to release dedup claim after send failure");
+      logger.warn(
+        { err, runId, userId, kind, reason },
+        '[run-failure-notify] Failed to release dedup claim after send failure',
+      );
     }
   };
 
-  const allowed = await isAlertCategoryAllowedForUser(userId, "run_failures", {
-    severity: "high",
+  const allowed = await isAlertCategoryAllowedForUser(userId, 'run_failures', {
+    severity: 'high',
   });
   if (!allowed) {
     // Suppression by user preference is a deliberate choice, not a
     // delivery failure — keep the dedup row so we don't keep "trying"
     // every 5 minutes for the same run.
-    logger.debug({ runId, userId, kind }, "[run-failure-notify] Suppressed by user alert preferences");
-    return { notified: false, reason: "user_preference" };
+    logger.debug(
+      { runId, userId, kind },
+      '[run-failure-notify] Suppressed by user alert preferences',
+    );
+    return { notified: false, reason: 'user_preference' };
   }
 
   let workflowName = `Workflow #${run.workflowId}`;
@@ -182,10 +188,10 @@ export async function notifyRunFailure(
     // Non-fatal — fall back to the default name.
   }
 
-  const title = kind === "failed" ? "Agent run failed" : "Agent run stuck";
+  const title = kind === 'failed' ? 'Agent run failed' : 'Agent run stuck';
   const body =
-    kind === "failed"
-      ? `${workflowName} (run #${runId})${run.errorMessage ? `: ${run.errorMessage.slice(0, 80)}` : " failed."}`
+    kind === 'failed'
+      ? `${workflowName} (run #${runId})${run.errorMessage ? `: ${run.errorMessage.slice(0, 80)}` : ' failed.'}`
       : `${workflowName} (run #${runId}) has been running over the stuck threshold.`;
 
   try {
@@ -195,34 +201,41 @@ export async function notifyRunFailure(
         title,
         body,
         data: {
-          kind: kind === "failed" ? "run_failed" : "run_stuck",
+          kind: kind === 'failed' ? 'run_failed' : 'run_stuck',
           runId,
           workflowId: run.workflowId,
           deepLink: DEEP_LINK,
         },
-        sound: "default",
-        channelId: "default",
+        sound: 'default',
+        channelId: 'default',
       },
       { appId: PUSH_APP_ID },
     );
     if (result.sent === 0) {
       // No active tokens, rate-limited, or all delivery attempts failed.
       // Release the dedup slot so the next sweeper tick can retry.
-      await releaseClaim("zero_sent");
+      await releaseClaim('zero_sent');
       logger.info(
         { runId, userId, kind, recipientSource: recipient.source, failed: result.failed },
-        "[run-failure-notify] No tokens delivered; dedup slot released for retry",
+        '[run-failure-notify] No tokens delivered; dedup slot released for retry',
       );
-      return { notified: false, reason: "no_active_tokens" };
+      return { notified: false, reason: 'no_active_tokens' };
     }
     logger.info(
-      { runId, userId, kind, recipientSource: recipient.source, sent: result.sent, failed: result.failed },
-      "[run-failure-notify] Push dispatched",
+      {
+        runId,
+        userId,
+        kind,
+        recipientSource: recipient.source,
+        sent: result.sent,
+        failed: result.failed,
+      },
+      '[run-failure-notify] Push dispatched',
     );
     return { notified: true };
   } catch (err) {
-    await releaseClaim("send_threw");
-    logger.warn({ err, runId, userId, kind }, "[run-failure-notify] sendPushToUser threw");
-    return { notified: false, reason: "send_failed" };
+    await releaseClaim('send_threw');
+    logger.warn({ err, runId, userId, kind }, '[run-failure-notify] sendPushToUser threw');
+    return { notified: false, reason: 'send_failed' };
   }
 }

@@ -7,8 +7,8 @@
  * Use these in tests and when working with InMemoryGraphStore.
  */
 
-import type { GraphStore } from "./store.js";
-import type { ConstellationNode, ConstellationEdge } from "./schema.js";
+import type { ConstellationEdge, ConstellationNode } from './schema.js';
+import type { GraphStore } from './store.js';
 
 /**
  * Returns all nodes that are directly connected to `nodeId` via any edge

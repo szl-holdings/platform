@@ -6,7 +6,7 @@
  * Retained to avoid breaking imports in index.ts.
  */
 
-import { logger } from "./logger";
+import { logger } from './logger';
 
 async function publishDomainSignals(): Promise<void> {
   // Simulation engine decommissioned — no signals to publish
@@ -14,17 +14,20 @@ async function publishDomainSignals(): Promise<void> {
 }
 
 export function startMeshPublisher(intervalMs = 30_000): () => void {
-  logger.info({ intervalMs }, "[mesh-publisher] Control Tower mesh publisher disabled (simulation decommissioned)");
+  logger.info(
+    { intervalMs },
+    '[mesh-publisher] Control Tower mesh publisher disabled (simulation decommissioned)',
+  );
 
   const handle = setInterval(() => {
-    publishDomainSignals().catch(err =>
-      logger.warn({ err }, "[mesh-publisher] periodic publish failed"),
+    publishDomainSignals().catch((err) =>
+      logger.warn({ err }, '[mesh-publisher] periodic publish failed'),
     );
   }, intervalMs);
 
   return () => {
     clearInterval(handle);
-    logger.info("[mesh-publisher] Control Tower mesh publisher stopped");
+    logger.info('[mesh-publisher] Control Tower mesh publisher stopped');
   };
 }
 

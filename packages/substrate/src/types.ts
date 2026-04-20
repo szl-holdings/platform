@@ -6,45 +6,52 @@
  * The TypeScript interfaces are the primary type source for compiler/engine use.
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // ─── Execution Modes ──────────────────────────────────────────────────────────
 
-export const ExecutionModeSchema = z.enum(["live", "dry-run", "replay", "counterfactual"]);
-export type ExecutionMode = "live" | "dry-run" | "replay" | "counterfactual";
+export const ExecutionModeSchema = z.enum(['live', 'dry-run', 'replay', 'counterfactual']);
+export type ExecutionMode = 'live' | 'dry-run' | 'replay' | 'counterfactual';
 
 // ─── Side Effect Categories ───────────────────────────────────────────────────
 
 export const SideEffectCategorySchema = z.enum([
-  "read-only",
-  "write-internal",
-  "write-external",
-  "financial",
-  "notification",
-  "deletion",
-  "escalation",
-  "infrastructure",
+  'read-only',
+  'write-internal',
+  'write-external',
+  'financial',
+  'notification',
+  'deletion',
+  'escalation',
+  'infrastructure',
 ]);
 export type SideEffectCategory =
-  | "read-only"
-  | "write-internal"
-  | "write-external"
-  | "financial"
-  | "notification"
-  | "deletion"
-  | "escalation"
-  | "infrastructure";
+  | 'read-only'
+  | 'write-internal'
+  | 'write-external'
+  | 'financial'
+  | 'notification'
+  | 'deletion'
+  | 'escalation'
+  | 'infrastructure';
 
 // ─── Stage Type / Runtime / Priority ─────────────────────────────────────────
 
-export type StageType = "Reason" | "Retrieve" | "ToolCall" | "Verify" | "Decide" | "ApprovalGate";
-export const StageTypeSchema = z.enum(["Reason", "Retrieve", "ToolCall", "Verify", "Decide", "ApprovalGate"]);
+export type StageType = 'Reason' | 'Retrieve' | 'ToolCall' | 'Verify' | 'Decide' | 'ApprovalGate';
+export const StageTypeSchema = z.enum([
+  'Reason',
+  'Retrieve',
+  'ToolCall',
+  'Verify',
+  'Decide',
+  'ApprovalGate',
+]);
 
-export type StageRuntime = "typescript" | "python";
-export const StageRuntimeSchema = z.enum(["typescript", "python"]);
+export type StageRuntime = 'typescript' | 'python';
+export const StageRuntimeSchema = z.enum(['typescript', 'python']);
 
-export type StagePriority = "critical" | "high" | "normal" | "low";
-export const StagePrioritySchema = z.enum(["critical", "high", "normal", "low"]);
+export type StagePriority = 'critical' | 'high' | 'normal' | 'low';
+export const StagePrioritySchema = z.enum(['critical', 'high', 'normal', 'low']);
 
 // ─── Base Stage ───────────────────────────────────────────────────────────────
 
@@ -71,17 +78,17 @@ const BaseStageSchema = z.object({
   dependsOn: z.array(z.string()).default([]),
   timeoutMs: z.number().int().positive().default(30_000),
   maxRetries: z.number().int().nonnegative().default(2),
-  runtime: StageRuntimeSchema.default("typescript"),
+  runtime: StageRuntimeSchema.default('typescript'),
   otelTags: z.record(z.string()).default({}),
   requiredEvidence: z.array(z.string()).default([]),
   rollbackHook: z.string().optional(),
-  priority: StagePrioritySchema.default("normal"),
+  priority: StagePrioritySchema.default('normal'),
 });
 
 // ─── Stage Interfaces ─────────────────────────────────────────────────────────
 
 export interface ReasonStage extends BaseStage {
-  type: "Reason";
+  type: 'Reason';
   modelAdapterId: string;
   promptId?: string;
   inputSchema?: unknown;
@@ -89,95 +96,98 @@ export interface ReasonStage extends BaseStage {
 }
 
 export interface RetrieveStage extends BaseStage {
-  type: "Retrieve";
+  type: 'Retrieve';
   retrieverAdapterId: string;
   topK: number;
   minRelevanceScore: number;
 }
 
 export interface ToolCallStage extends BaseStage {
-  type: "ToolCall";
+  type: 'ToolCall';
   toolId: string;
   sideEffects: SideEffectCategory[];
   requiresApprovalFor: SideEffectCategory[];
 }
 
 export interface VerifyStage extends BaseStage {
-  type: "Verify";
+  type: 'Verify';
   minConfidence: number;
   modelAdapterId: string;
   allowRevision: boolean;
 }
 
 export interface DecideStage extends BaseStage {
-  type: "Decide";
+  type: 'Decide';
   sideEffects: SideEffectCategory[];
   highRiskSideEffects: SideEffectCategory[];
-  approvalPolicy: "auto" | "operator" | "manager" | "executive" | "board";
+  approvalPolicy: 'auto' | 'operator' | 'manager' | 'executive' | 'board';
   modelAdapterId: string;
 }
 
 export interface ApprovalGate extends BaseStage {
-  type: "ApprovalGate";
-  requiredTier: "operator" | "manager" | "executive" | "board";
+  type: 'ApprovalGate';
+  requiredTier: 'operator' | 'manager' | 'executive' | 'board';
   inboxPattern: string;
   approvalTimeoutMs: number;
 }
 
-export type AnyStage = ReasonStage | RetrieveStage | ToolCallStage | VerifyStage | DecideStage | ApprovalGate;
+export type AnyStage =
+  | ReasonStage
+  | RetrieveStage
+  | ToolCallStage
+  | VerifyStage
+  | DecideStage
+  | ApprovalGate;
 
 // ─── Zod Schemas for AnyStage (runtime validation only) ──────────────────────
 
 export const ReasonStageSchema = BaseStageSchema.extend({
-  type: z.literal("Reason"),
-  modelAdapterId: z.string().default("default"),
+  type: z.literal('Reason'),
+  modelAdapterId: z.string().default('default'),
   promptId: z.string().optional(),
   inputSchema: z.unknown().optional(),
   outputSchema: z.unknown().optional(),
 });
 
 export const RetrieveStageSchema = BaseStageSchema.extend({
-  type: z.literal("Retrieve"),
-  retrieverAdapterId: z.string().default("default"),
+  type: z.literal('Retrieve'),
+  retrieverAdapterId: z.string().default('default'),
   topK: z.number().int().positive().default(10),
   minRelevanceScore: z.number().min(0).max(1).default(0.5),
 });
 
 export const ToolCallStageSchema = BaseStageSchema.extend({
-  type: z.literal("ToolCall"),
+  type: z.literal('ToolCall'),
   toolId: z.string(),
   sideEffects: z.array(SideEffectCategorySchema).default([]),
-  requiresApprovalFor: z.array(SideEffectCategorySchema).default([
-    "financial",
-    "deletion",
-    "write-external",
-    "infrastructure",
-  ]),
+  requiresApprovalFor: z
+    .array(SideEffectCategorySchema)
+    .default(['financial', 'deletion', 'write-external', 'infrastructure']),
 });
 
 export const VerifyStageSchema = BaseStageSchema.extend({
-  type: z.literal("Verify"),
+  type: z.literal('Verify'),
   minConfidence: z.number().min(0).max(1).default(0.7),
-  modelAdapterId: z.string().default("verifier"),
+  modelAdapterId: z.string().default('verifier'),
   allowRevision: z.boolean().default(true),
 });
 
 export const DecideStageSchema = BaseStageSchema.extend({
-  type: z.literal("Decide"),
+  type: z.literal('Decide'),
   sideEffects: z.array(SideEffectCategorySchema).default([]),
   highRiskSideEffects: z.array(SideEffectCategorySchema).default([]),
-  approvalPolicy: z.enum(["auto", "operator", "manager", "executive", "board"]).default("operator"),
-  modelAdapterId: z.string().default("default"),
+  approvalPolicy: z.enum(['auto', 'operator', 'manager', 'executive', 'board']).default('operator'),
+  modelAdapterId: z.string().default('default'),
 });
 
 export const ApprovalGateSchema = BaseStageSchema.extend({
-  type: z.literal("ApprovalGate"),
-  requiredTier: z.enum(["operator", "manager", "executive", "board"]).default("operator"),
-  inboxPattern: z.string().default("substrate-approval"),
+  type: z.literal('ApprovalGate'),
+  requiredTier: z.enum(['operator', 'manager', 'executive', 'board']).default('operator'),
+  inboxPattern: z.string().default('substrate-approval'),
   approvalTimeoutMs: z.number().int().nonnegative().default(0),
 });
 
-export const AnyStageSchema = z.discriminatedUnion("type", [
+export const AnyStageSchema = z.discriminatedUnion('type', [
   ReasonStageSchema,
   RetrieveStageSchema,
   ToolCallStageSchema,
@@ -200,8 +210,8 @@ export const ConfidenceBudgetSchema = z.object({
   escalateAt: z.number().min(0).max(1).default(0.5),
   requireHumanBelow: z.number().min(0).max(1).default(0.3),
   minFinalConfidence: z.number().min(0).max(1).default(0.4),
-  escalationModelAdapterId: z.string().default("strong"),
-  verifierAdapterId: z.string().default("verifier"),
+  escalationModelAdapterId: z.string().default('strong'),
+  verifierAdapterId: z.string().default('verifier'),
 });
 
 // ─── Policy Profile ───────────────────────────────────────────────────────────
@@ -211,20 +221,17 @@ export interface PolicyProfile {
   name: string;
   highRiskCategories: SideEffectCategory[];
   policyIds: string[];
-  minimumApprovalTier: "operator" | "manager" | "executive" | "board";
+  minimumApprovalTier: 'operator' | 'manager' | 'executive' | 'board';
 }
 
 export const PolicyProfileSchema = z.object({
   id: z.string(),
   name: z.string(),
-  highRiskCategories: z.array(SideEffectCategorySchema).default([
-    "financial",
-    "deletion",
-    "write-external",
-    "infrastructure",
-  ]),
+  highRiskCategories: z
+    .array(SideEffectCategorySchema)
+    .default(['financial', 'deletion', 'write-external', 'infrastructure']),
   policyIds: z.array(z.string()).default([]),
-  minimumApprovalTier: z.enum(["operator", "manager", "executive", "board"]).default("operator"),
+  minimumApprovalTier: z.enum(['operator', 'manager', 'executive', 'board']).default('operator'),
 });
 
 // ─── Workflow Definition ──────────────────────────────────────────────────────
@@ -245,7 +252,7 @@ export const WorkflowDefinitionSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   description: z.string().optional(),
-  version: z.string().default("1.0.0"),
+  version: z.string().default('1.0.0'),
   domain: z.string().optional(),
   stages: z.array(AnyStageSchema).min(1),
   policy: PolicyProfileSchema,
@@ -287,7 +294,7 @@ export interface EvidenceBundle {
   toolResult?: unknown;
   citations: string[];
   confidence: number;
-  policyOutcome?: "allowed" | "blocked" | "escalated" | "pending-approval";
+  policyOutcome?: 'allowed' | 'blocked' | 'escalated' | 'pending-approval';
   inputHash: string;
   outputHash: string;
   parentHash?: string;
@@ -310,7 +317,7 @@ export const EvidenceBundleSchema = z.object({
   toolResult: z.unknown().optional(),
   citations: z.array(z.string()).default([]),
   confidence: z.number().min(0).max(1),
-  policyOutcome: z.enum(["allowed", "blocked", "escalated", "pending-approval"]).optional(),
+  policyOutcome: z.enum(['allowed', 'blocked', 'escalated', 'pending-approval']).optional(),
   inputHash: z.string(),
   outputHash: z.string(),
   parentHash: z.string().optional(),
@@ -323,12 +330,12 @@ export const EvidenceBundleSchema = z.object({
 // ─── Stage Result ─────────────────────────────────────────────────────────────
 
 export type StageResultStatus =
-  | "completed"
-  | "failed"
-  | "skipped"
-  | "pending-approval"
-  | "timed-out"
-  | "escalated";
+  | 'completed'
+  | 'failed'
+  | 'skipped'
+  | 'pending-approval'
+  | 'timed-out'
+  | 'escalated';
 
 export interface StageResult {
   stageId: string;
@@ -340,7 +347,7 @@ export interface StageResult {
   evidenceBundleId?: string;
   durationMs: number;
   attempt: number;
-  routingDecision?: "accepted" | "escalated-model" | "escalated-human" | "verified";
+  routingDecision?: 'accepted' | 'escalated-model' | 'escalated-human' | 'verified';
   approvalId?: string;
   createdAt: string;
 }
@@ -348,14 +355,16 @@ export interface StageResult {
 export const StageResultSchema = z.object({
   stageId: z.string(),
   stageType: StageTypeSchema,
-  status: z.enum(["completed", "failed", "skipped", "pending-approval", "timed-out", "escalated"]),
+  status: z.enum(['completed', 'failed', 'skipped', 'pending-approval', 'timed-out', 'escalated']),
   confidence: z.number().min(0).max(1).optional(),
   output: z.unknown().optional(),
   error: z.string().optional(),
   evidenceBundleId: z.string().optional(),
   durationMs: z.number().nonnegative(),
   attempt: z.number().int().positive().default(1),
-  routingDecision: z.enum(["accepted", "escalated-model", "escalated-human", "verified"]).optional(),
+  routingDecision: z
+    .enum(['accepted', 'escalated-model', 'escalated-human', 'verified'])
+    .optional(),
   approvalId: z.string().optional(),
   createdAt: z.string(),
 });
@@ -363,12 +372,12 @@ export const StageResultSchema = z.object({
 // ─── Pipeline Run ─────────────────────────────────────────────────────────────
 
 export type PipelineRunStatus =
-  | "running"
-  | "completed"
-  | "failed"
-  | "pending-approval"
-  | "dry-run-complete"
-  | "cancelled";
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'pending-approval'
+  | 'dry-run-complete'
+  | 'cancelled';
 
 export interface PipelineRun {
   runId: string;
@@ -397,7 +406,14 @@ export const PipelineRunSchema = z.object({
   workflowId: z.string(),
   workflowName: z.string(),
   mode: ExecutionModeSchema,
-  status: z.enum(["running", "completed", "failed", "pending-approval", "dry-run-complete", "cancelled"]),
+  status: z.enum([
+    'running',
+    'completed',
+    'failed',
+    'pending-approval',
+    'dry-run-complete',
+    'cancelled',
+  ]),
   stageResults: z.array(StageResultSchema).default([]),
   currentStageId: z.string().optional(),
   input: z.unknown(),
@@ -428,7 +444,7 @@ export interface RuntimeStartOptions {
 }
 
 export const RuntimeStartOptionsSchema = z.object({
-  mode: ExecutionModeSchema.default("live"),
+  mode: ExecutionModeSchema.default('live'),
   sourceRunId: z.string().optional(),
   counterfactualModel: z.string().optional(),
   counterfactualPolicy: PolicyProfileSchema.optional(),
@@ -450,8 +466,16 @@ export interface SubstrateHooks {
   on_low_confidence?: (run: PipelineRun, stage: AnyStage, confidence: number) => Promise<void>;
   before_tool_call?: (run: PipelineRun, stage: ToolCallStage, toolArgs: unknown) => Promise<void>;
   after_tool_call?: (run: PipelineRun, stage: ToolCallStage, result: unknown) => Promise<void>;
-  before_side_effect?: (run: PipelineRun, stage: AnyStage, effect: SideEffectCategory) => Promise<void>;
-  after_side_effect?: (run: PipelineRun, stage: AnyStage, effect: SideEffectCategory) => Promise<void>;
+  before_side_effect?: (
+    run: PipelineRun,
+    stage: AnyStage,
+    effect: SideEffectCategory,
+  ) => Promise<void>;
+  after_side_effect?: (
+    run: PipelineRun,
+    stage: AnyStage,
+    effect: SideEffectCategory,
+  ) => Promise<void>;
   before_finalize?: (run: PipelineRun) => Promise<void>;
   after_finalize?: (run: PipelineRun) => Promise<void>;
 }

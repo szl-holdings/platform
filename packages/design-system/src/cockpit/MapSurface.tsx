@@ -1,5 +1,5 @@
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface MapMarker {
   id: string;
@@ -7,7 +7,7 @@ export interface MapMarker {
   y: number;
   label: string;
   color?: string;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   pulse?: boolean;
   tooltip?: string;
 }
@@ -33,7 +33,7 @@ export function MapSurface({
 }: MapSurfaceProps) {
   return (
     <div
-      className={cn("relative rounded-lg overflow-hidden", className)}
+      className={cn('relative rounded-lg overflow-hidden', className)}
       style={{ height, border: `1px solid ${color.border.default}`, background: color.bg.surface }}
     >
       {imageUrl ? (
@@ -48,7 +48,7 @@ export function MapSurface({
             className="absolute inset-0 opacity-20"
             style={{
               backgroundImage: `linear-gradient(${color.border.default} 1px, transparent 1px), linear-gradient(90deg, ${color.border.default} 1px, transparent 1px)`,
-              backgroundSize: "40px 40px",
+              backgroundSize: '40px 40px',
             }}
           />
         )
@@ -62,7 +62,7 @@ export function MapSurface({
       />
 
       {markers.map((marker) => {
-        const r = sizeMap[marker.size ?? "md"];
+        const r = sizeMap[marker.size ?? 'md'];
         const fill = marker.color ?? color.accent.blue;
 
         return (
@@ -72,17 +72,17 @@ export function MapSurface({
             aria-label={marker.label}
             onClick={() => onMarkerClick?.(marker)}
             className={cn(
-              "absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2",
-              "transition-transform duration-150 hover:scale-125 focus:outline-none",
-              onMarkerClick ? "cursor-pointer" : "cursor-default pointer-events-none",
+              'absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2',
+              'transition-transform duration-150 hover:scale-125 focus:outline-none',
+              onMarkerClick ? 'cursor-pointer' : 'cursor-default pointer-events-none',
             )}
             style={{
               left: `${marker.x * 100}%`,
-              top:  `${marker.y * 100}%`,
-              width:  r * 2,
+              top: `${marker.y * 100}%`,
+              width: r * 2,
               height: r * 2,
               borderColor: fill,
-              backgroundColor: fill + "33",
+              backgroundColor: fill + '33',
             }}
           >
             {marker.pulse && (
@@ -102,13 +102,13 @@ export function MapSurface({
           className="absolute pointer-events-none"
           style={{
             left: `${marker.x * 100}%`,
-            top:  `calc(${marker.y * 100}% + ${sizeMap[marker.size ?? "md"] + 6}px)`,
-            transform: "translateX(-50%)",
+            top: `calc(${marker.y * 100}% + ${sizeMap[marker.size ?? 'md'] + 6}px)`,
+            transform: 'translateX(-50%)',
           }}
         >
           <span
             className="block whitespace-nowrap rounded px-1 py-0.5 text-xs font-medium"
-            style={{ color: color.text.primary, background: color.bg.base + "cc" }}
+            style={{ color: color.text.primary, background: color.bg.base + 'cc' }}
           >
             {marker.label}
           </span>

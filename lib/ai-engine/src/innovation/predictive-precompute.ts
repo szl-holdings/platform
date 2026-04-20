@@ -7,8 +7,8 @@
  * Caches results with a short TTL. When a matching query arrives,
  * serves the pre-computed result instantly and marks it as "pre-computed".
  */
-import { openai } from "../providers/openai/index.js";
-import type { AgentCallResult } from "../types.js";
+import { openai } from '../providers/openai/index.js';
+import type { AgentCallResult } from '../types.js';
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
@@ -35,11 +35,11 @@ const precomputeMemoryCache = new Map<string, PrecomputeEntry>();
 function normalizeCacheKey(query: string): string {
   return query
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/[^a-z0-9\s]/g, '')
     .split(/\s+/)
-    .filter(w => w.length > 3)
+    .filter((w) => w.length > 3)
     .sort()
-    .join("_")
+    .join('_')
     .slice(0, 80);
 }
 
@@ -49,7 +49,7 @@ export async function predictFollowUpQueries(
   synthesis: string,
 ): Promise<PredictedFollowUp[]> {
   try {
-    const domainsSeen = [...new Set(agentResponses.map(r => r.domain))].join(", ");
+    const domainsSeen = [...new Set(agentResponses.map((r) => r.domain))].join(', ');
     const synthesisSlice = synthesis.slice(0, 800);
 
     const predictionPrompt = `You are predicting follow-up queries an operator would ask after receiving this intelligence briefing.
@@ -78,23 +78,30 @@ Respond with JSON:
 }`;
 
     const result = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       max_completion_tokens: 512,
-      messages: [{ role: "user", content: predictionPrompt }],
-      response_format: { type: "json_object" },
+      messages: [{ role: 'user', content: predictionPrompt }],
+      response_format: { type: 'json_object' },
     });
 
-    const raw = result.choices[0]?.message?.content ?? "{}";
+    const raw = result.choices[0]?.message?.content ?? '{}';
     let parsed: Record<string, unknown> = {};
-    try { parsed = JSON.parse(raw) as Record<string, unknown>; } catch { return []; }
+    try {
+      parsed = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return [];
+    }
 
     const preds = Array.isArray(parsed.predictions) ? parsed.predictions : [];
-    return preds.slice(0, 3).map((p: Record<string, unknown>) => ({
-      query: String(p.query ?? ""),
-      likelihood: Math.min(1, Math.max(0, Number(p.likelihood ?? 0.5))),
-      domains: Array.isArray(p.domains) ? p.domains.map(String) : [],
-      rationale: String(p.rationale ?? ""),
-    })).filter(p => p.query.length > 10);
+    return preds
+      .slice(0, 3)
+      .map((p: Record<string, unknown>) => ({
+        query: String(p.query ?? ''),
+        likelihood: Math.min(1, Math.max(0, Number(p.likelihood ?? 0.5))),
+        domains: Array.isArray(p.domains) ? p.domains.map(String) : [],
+        rationale: String(p.rationale ?? ''),
+      }))
+      .filter((p) => p.query.length > 10);
   } catch {
     return [];
   }
@@ -105,7 +112,7 @@ export async function triggerBackgroundPrecompute(
   predictions: PredictedFollowUp[],
   orgId?: number | null,
 ): Promise<void> {
-  const { nuroMeshOrchestrator } = await import("../nuro-mesh.js");
+  const { nuroMeshOrchestrator } = await import('../nuro-mesh.js');
 
   for (const prediction of predictions.slice(0, 2)) {
     const cacheKey = normalizeCacheKey(prediction.query);
@@ -133,7 +140,7 @@ export async function triggerBackgroundPrecompute(
         precomputeMemoryCache.set(cacheKey, entry);
 
         try {
-          const { db, predictivePrecomputeCacheTable } = await import("@szl-holdings/db");
+          const { db, predictivePrecomputeCacheTable } = await import('@szl-holdings/db');
           await db.insert(predictivePrecomputeCacheTable).values({
             cacheKey,
             originalQuery: originalQuery.slice(0, 500),
@@ -149,7 +156,7 @@ export async function triggerBackgroundPrecompute(
 
         console.log(`[predictive-precompute] Pre-computed: "${prediction.query.slice(0, 60)}"`);
       } catch (err) {
-        console.warn("[predictive-precompute] Background precompute failed:", err);
+        console.warn('[predictive-precompute] Background precompute failed:', err);
       }
     })();
   }
@@ -183,7 +190,7 @@ export function getPrecomputeCacheStats() {
   return {
     cacheSize: entries.length,
     totalHits: entries.reduce((sum, e) => sum + e.hitCount, 0),
-    entries: entries.map(e => ({
+    entries: entries.map((e) => ({
       predictedQuery: e.predictedQuery.slice(0, 100),
       computedAt: new Date(e.computedAt).toISOString(),
       expiresAt: new Date(e.expiresAt).toISOString(),

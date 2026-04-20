@@ -1,13 +1,13 @@
-import * as React from "react";
-import { HelpCircle, X, ExternalLink } from "lucide-react";
-import { cn } from "../utils";
+import { ExternalLink, HelpCircle, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../utils';
 
 export interface HelpTipProps {
   title: string;
   content: string | React.ReactNode;
   learnMoreUrl?: string;
   learnMoreLabel?: string;
-  placement?: "top" | "bottom" | "left" | "right";
+  placement?: 'top' | 'bottom' | 'left' | 'right';
   accentColor?: string;
   className?: string;
   iconSize?: number;
@@ -22,11 +22,11 @@ export interface HelpTipProps {
 
 function fireHelpTipAnalytics(tipId: string, platform: string) {
   try {
-    fetch("/api/analytics/event", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    fetch('/api/analytics/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        event: "help_tip_opened",
+        event: 'help_tip_opened',
         platform,
         timestamp: new Date().toISOString(),
         properties: { platform, tipId },
@@ -39,9 +39,9 @@ export function HelpTip({
   title,
   content,
   learnMoreUrl,
-  learnMoreLabel = "Learn more",
-  placement = "bottom",
-  accentColor = "#8b7ac8",
+  learnMoreLabel = 'Learn more',
+  placement = 'bottom',
+  accentColor = '#8b7ac8',
   className,
   iconSize = 14,
   tipId,
@@ -67,42 +67,37 @@ export function HelpTip({
   React.useEffect(() => {
     if (!open) return;
     const handleClick = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
   React.useEffect(() => {
     if (!open) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === 'Escape') setOpen(false);
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
   }, [open]);
 
   const popoverPositionClass = {
-    top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
-    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
-    left: "right-full top-1/2 -translate-y-1/2 mr-2",
-    right: "left-full top-1/2 -translate-y-1/2 ml-2",
+    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
+    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
+    right: 'left-full top-1/2 -translate-y-1/2 ml-2',
   }[placement];
 
   return (
-    <div ref={containerRef} className={cn("relative inline-flex", className)}>
+    <div ref={containerRef} className={cn('relative inline-flex', className)}>
       <button
         onClick={handleToggle}
         className={cn(
-          "rounded-full p-0.5 transition-colors",
-          open
-            ? "text-foreground"
-            : "text-muted-foreground hover:text-foreground",
+          'rounded-full p-0.5 transition-colors',
+          open ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
         )}
         aria-label={`Help: ${title}`}
         aria-expanded={open}
@@ -113,7 +108,7 @@ export function HelpTip({
       {open && (
         <div
           className={cn(
-            "absolute z-50 w-64 rounded-xl border border-border bg-card shadow-xl p-4 animate-in fade-in-0 zoom-in-95",
+            'absolute z-50 w-64 rounded-xl border border-border bg-card shadow-xl p-4 animate-in fade-in-0 zoom-in-95',
             popoverPositionClass,
           )}
           style={{
@@ -134,7 +129,7 @@ export function HelpTip({
           </div>
 
           <div className="text-xs text-muted-foreground leading-relaxed">
-            {typeof content === "string" ? <p>{content}</p> : content}
+            {typeof content === 'string' ? <p>{content}</p> : content}
           </div>
 
           {learnMoreUrl && (

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 
 export interface EcosystemNode {
   id: string;
@@ -14,87 +14,87 @@ export interface EcosystemNode {
 
 const ECOSYSTEM_NODES: EcosystemNode[] = [
   {
-    id: "beacon",
-    name: "Terra",
-    icon: "📡",
+    id: 'beacon',
+    name: 'Terra',
+    icon: '📡',
     layer: 0,
-    accent: "#4a90b8",
-    path: "/terra/",
-    subtitle: "Business Telemetry",
-    description: "KPI movement & value leakage detection",
+    accent: '#4a90b8',
+    path: '/terra/',
+    subtitle: 'Business Telemetry',
+    description: 'KPI movement & value leakage detection',
     angle: 0,
   },
   {
-    id: "command",
-    name: "Command",
-    icon: "◆",
+    id: 'command',
+    name: 'Command',
+    icon: '◆',
     layer: 0,
-    accent: "#22d3ee",
-    path: "/command/",
-    subtitle: "Unified Command",
-    description: "Strategy, Operations & Infrastructure workspace",
+    accent: '#22d3ee',
+    path: '/command/',
+    subtitle: 'Unified Command',
+    description: 'Strategy, Operations & Infrastructure workspace',
     angle: 90,
   },
   {
-    id: "alloy",
-    name: "Alloy",
-    icon: "⚙️",
+    id: 'alloy',
+    name: 'Alloy',
+    icon: '⚙️',
     layer: 0,
-    accent: "#60a5fa",
-    path: "/alloy/",
-    subtitle: "Execution Fabric",
-    description: "Connector mesh, DAGs & automation orchestration",
+    accent: '#60a5fa',
+    path: '/alloy/',
+    subtitle: 'Execution Fabric',
+    description: 'Connector mesh, DAGs & automation orchestration',
     angle: 270,
   },
   {
-    id: "aegis",
-    name: "Aegis",
-    icon: "⬡",
+    id: 'aegis',
+    name: 'Aegis',
+    icon: '⬡',
     layer: 1,
-    accent: "#8b7ac8",
-    path: "/firestorm/",
-    subtitle: "Unified Defense & Intelligence",
-    description: "Security, managed operations & AI intelligence command",
+    accent: '#8b7ac8',
+    path: '/firestorm/',
+    subtitle: 'Unified Defense & Intelligence',
+    description: 'Security, managed operations & AI intelligence command',
     angle: 90,
   },
   {
-    id: "vessels",
-    name: "Vessels",
-    icon: "🚢",
+    id: 'vessels',
+    name: 'Vessels',
+    icon: '🚢',
     layer: 2,
-    accent: "#38bdf8",
-    path: "/vessels/",
-    subtitle: "Maritime Intelligence",
-    description: "Fleet operations, voyage economics & AIS anomaly detection",
+    accent: '#38bdf8',
+    path: '/vessels/',
+    subtitle: 'Maritime Intelligence',
+    description: 'Fleet operations, voyage economics & AIS anomaly detection',
     angle: 225,
   },
   {
-    id: "carlota-jo",
-    name: "Carlota Jo",
-    icon: "✨",
+    id: 'carlota-jo',
+    name: 'Carlota Jo',
+    icon: '✨',
     layer: 3,
-    accent: "#f9a8d4",
-    path: "/carlota-jo/",
-    subtitle: "Brand Intelligence",
-    description: "Brand strategy, advisory & consulting intelligence",
+    accent: '#f9a8d4',
+    path: '/carlota-jo/',
+    subtitle: 'Brand Intelligence',
+    description: 'Brand strategy, advisory & consulting intelligence',
     angle: 180,
   },
 ];
 
 const LAYER_CONFIG = [
-  { radius: 0, label: "Core Platform", sublabel: "Observe · Understand · Decide · Execute" },
-  { radius: 190, label: "Security Layer", sublabel: "Threat detection & incident response" },
-  { radius: 310, label: "Intelligence Layer", sublabel: "Domain expertise & AI research" },
-  { radius: 410, label: "Advisory Layer", sublabel: "Human-facing intelligence delivery" },
+  { radius: 0, label: 'Core Platform', sublabel: 'Observe · Understand · Decide · Execute' },
+  { radius: 190, label: 'Security Layer', sublabel: 'Threat detection & incident response' },
+  { radius: 310, label: 'Intelligence Layer', sublabel: 'Domain expertise & AI research' },
+  { radius: 410, label: 'Advisory Layer', sublabel: 'Human-facing intelligence delivery' },
 ];
 
 const CONNECTION_PAIRS: Array<[string, string, string]> = [
-  ["vessels", "aegis", "AIS anomaly → alert"],
-  ["aegis", "alloy", "Containment → playbook"],
-  ["alloy", "command", "Prediction → workflow"],
-  ["command", "alloy", "Action → execution"],
-  ["alloy", "beacon", "Result → telemetry"],
-  ["carlota-jo", "aegis", "Advisory → intelligence"],
+  ['vessels', 'aegis', 'AIS anomaly → alert'],
+  ['aegis', 'alloy', 'Containment → playbook'],
+  ['alloy', 'command', 'Prediction → workflow'],
+  ['command', 'alloy', 'Action → execution'],
+  ['alloy', 'beacon', 'Result → telemetry'],
+  ['carlota-jo', 'aegis', 'Advisory → intelligence'],
 ];
 
 function polarToCartesian(angle: number, radius: number, cx: number, cy: number) {
@@ -162,18 +162,18 @@ export function EcosystemMap({
   return (
     <div
       style={{
-        position: "relative",
+        position: 'relative',
         width: svgWidth,
         height: svgHeight,
-        maxWidth: "100%",
-        userSelect: "none",
+        maxWidth: '100%',
+        userSelect: 'none',
       }}
     >
       <svg
         width={svgWidth}
         height={svgHeight}
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-        style={{ overflow: "visible" }}
+        style={{ overflow: 'visible' }}
       >
         <defs>
           {ECOSYSTEM_NODES.map((n) => (
@@ -205,7 +205,7 @@ export function EcosystemMap({
               strokeDasharray="4 8"
               style={{
                 opacity: revealStep >= layer * 2 ? 1 : 0,
-                transition: "opacity 0.4s ease",
+                transition: 'opacity 0.4s ease',
               }}
             />
           );
@@ -226,10 +226,10 @@ export function EcosystemMap({
                   y1={fp.y}
                   x2={tp.x}
                   y2={tp.y}
-                  stroke={isHovered ? from.accent : "rgba(255,255,255,0.08)"}
+                  stroke={isHovered ? from.accent : 'rgba(255,255,255,0.08)'}
                   strokeWidth={isHovered ? 1.5 : 0.8}
-                  strokeDasharray={isHovered ? "none" : "3 6"}
-                  style={{ transition: "all 0.2s ease" }}
+                  strokeDasharray={isHovered ? 'none' : '3 6'}
+                  style={{ transition: 'all 0.2s ease' }}
                 />
                 {isHovered && showLabels && (
                   <text
@@ -253,7 +253,7 @@ export function EcosystemMap({
           cy={cy}
           r={centerRadius * 2}
           fill="url(#center-glow)"
-          style={{ opacity: revealStep >= 1 ? 1 : 0, transition: "opacity 0.6s ease" }}
+          style={{ opacity: revealStep >= 1 ? 1 : 0, transition: 'opacity 0.6s ease' }}
         />
 
         {ECOSYSTEM_NODES.map((node, idx) => {
@@ -275,10 +275,10 @@ export function EcosystemMap({
               key={node.id}
               style={{
                 opacity: visible ? 1 : 0,
-                transform: visible ? "none" : `scale(0.5)`,
+                transform: visible ? 'none' : `scale(0.5)`,
                 transformOrigin: `${pos.x}px ${pos.y}px`,
-                transition: "opacity 0.4s ease, transform 0.4s ease",
-                cursor: interactive ? "pointer" : "default",
+                transition: 'opacity 0.4s ease, transform 0.4s ease',
+                cursor: interactive ? 'pointer' : 'default',
               }}
               onMouseEnter={() => interactive && setHovered(node.id)}
               onMouseLeave={() => interactive && setHovered(null)}
@@ -296,7 +296,7 @@ export function EcosystemMap({
                   cy={pos.y}
                   r={nr + 12}
                   fill={`url(#glow-${node.id})`}
-                  style={{ filter: "url(#blur-sm)" }}
+                  style={{ filter: 'url(#blur-sm)' }}
                 />
               )}
               <circle
@@ -306,14 +306,14 @@ export function EcosystemMap({
                 fill={`${node.accent}18`}
                 stroke={isHov ? node.accent : `${node.accent}50`}
                 strokeWidth={isHov ? 2 : 1}
-                style={{ transition: "all 0.2s ease" }}
+                style={{ transition: 'all 0.2s ease' }}
               />
               <text
                 x={pos.x}
                 y={pos.y}
                 textAnchor="middle"
                 dominantBaseline="central"
-                fontSize={isCenter ? "20" : "16"}
+                fontSize={isCenter ? '20' : '16'}
               >
                 {node.icon}
               </text>
@@ -323,11 +323,11 @@ export function EcosystemMap({
                   y={labelY}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fill={isHov ? node.accent : "rgba(255,255,255,0.75)"}
+                  fill={isHov ? node.accent : 'rgba(255,255,255,0.75)'}
                   fontSize="10"
                   fontFamily="Inter, system-ui, sans-serif"
-                  fontWeight={isHov ? "600" : "500"}
-                  style={{ transition: "fill 0.2s ease", pointerEvents: "none" }}
+                  fontWeight={isHov ? '600' : '500'}
+                  style={{ transition: 'fill 0.2s ease', pointerEvents: 'none' }}
                 >
                   {node.name}
                 </text>
@@ -384,53 +384,54 @@ export function EcosystemMap({
           })}
       </svg>
 
-      {hovered && (() => {
-        const node = nodeLookup[hovered];
-        if (!node) return null;
-        return (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "16px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              background: "rgba(10,12,20,0.95)",
-              backdropFilter: "blur(12px)",
-              border: `1px solid ${node.accent}40`,
-              borderRadius: "10px",
-              padding: "10px 16px",
-              maxWidth: "280px",
-              textAlign: "center",
-              pointerEvents: "none",
-              zIndex: 100,
-            }}
-          >
+      {hovered &&
+        (() => {
+          const node = nodeLookup[hovered];
+          if (!node) return null;
+          return (
             <div
               style={{
-                fontSize: "12px",
-                fontWeight: 700,
-                color: node.accent,
-                fontFamily: "Inter, system-ui, sans-serif",
-                marginBottom: "2px",
+                position: 'absolute',
+                bottom: '16px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(10,12,20,0.95)',
+                backdropFilter: 'blur(12px)',
+                border: `1px solid ${node.accent}40`,
+                borderRadius: '10px',
+                padding: '10px 16px',
+                maxWidth: '280px',
+                textAlign: 'center',
+                pointerEvents: 'none',
+                zIndex: 100,
               }}
             >
-              {node.name} · {node.subtitle}
+              <div
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: node.accent,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  marginBottom: '2px',
+                }}
+              >
+                {node.name} · {node.subtitle}
+              </div>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.55)',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  lineHeight: 1.4,
+                }}
+              >
+                {node.description}
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "rgba(255,255,255,0.55)",
-                fontFamily: "Inter, system-ui, sans-serif",
-                lineHeight: 1.4,
-              }}
-            >
-              {node.description}
-            </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
     </div>
   );
 }
 
-export { ECOSYSTEM_NODES, LAYER_CONFIG, CONNECTION_PAIRS };
+export { CONNECTION_PAIRS, ECOSYSTEM_NODES, LAYER_CONFIG };

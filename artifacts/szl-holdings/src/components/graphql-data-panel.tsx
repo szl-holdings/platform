@@ -1,5 +1,5 @@
-import { GraphQLDataPanel } from "@szl-holdings/shared-ui/design-system";
-import { useHoldingsVentures } from "@szl-holdings/graphql-client/hooks";
+import { useHoldingsVentures } from '@szl-holdings/graphql-client/hooks';
+import { GraphQLDataPanel } from '@szl-holdings/shared-ui/design-system';
 
 export function HoldingsGraphQLPanel() {
   const { data, loading } = useHoldingsVentures({ limit: 5 });
@@ -10,12 +10,20 @@ export function HoldingsGraphQLPanel() {
       loading={loading}
       sections={[
         {
-          label: "Portfolio Ventures",
+          label: 'Portfolio Ventures',
           items: data?.holdingsVentures ?? [],
-          renderItem: (v: { id: string; name: string; slug: string; status: string; sector: string | null }) => (
+          renderItem: (v: {
+            id: string;
+            name: string;
+            slug: string;
+            status: string;
+            sector: string | null;
+          }) => (
             <div key={v.id} className="flex items-center justify-between text-xs">
               <span className="text-zinc-300">{v.name}</span>
-              <span className="text-zinc-500">{v.sector ?? "—"} · {v.status}</span>
+              <span className="text-zinc-500">
+                {v.sector ?? '—'} · {v.status}
+              </span>
             </div>
           ),
         },

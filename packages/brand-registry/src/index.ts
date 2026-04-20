@@ -1,17 +1,17 @@
-export { registry } from "./registry.js";
+export { registry } from './registry.js';
 export type {
+  ApprovedBoilerplate,
   BrandRegistry,
   CompanyFacts,
-  FounderBio,
   CompanyMetric,
+  FounderBio,
   FundingRound,
-  ProductEntry,
-  ApprovedBoilerplate,
   LegalEntityFacts,
-} from "./types.js";
+  ProductEntry,
+} from './types.js';
 
-import { registry } from "./registry.js";
-import type { ProductEntry } from "./types.js";
+import { registry } from './registry.js';
+import type { ProductEntry } from './types.js';
 
 export function getProduct(id: string): ProductEntry | undefined {
   return registry.products.find((p) => p.id === id);
@@ -22,19 +22,19 @@ export function getProductName(id: string): string {
 }
 
 export function getProductTagline(id: string): string {
-  return getProduct(id)?.tagline ?? "";
+  return getProduct(id)?.tagline ?? '';
 }
 
 export function getProductOneLiner(id: string): string {
-  return getProduct(id)?.oneLiner ?? "";
+  return getProduct(id)?.oneLiner ?? '';
 }
 
 export function getLiveProducts(): ProductEntry[] {
-  return registry.products.filter((p) => p.status === "live");
+  return registry.products.filter((p) => p.status === 'live');
 }
 
 export function getMetric(key: string): string {
-  return registry.metrics[key]?.value ?? "";
+  return registry.metrics[key]?.value ?? '';
 }
 
 export function copyrightLine(year?: number): string {

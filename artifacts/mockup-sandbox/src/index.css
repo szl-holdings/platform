@@ -58,8 +58,8 @@
   --input: 215 30% 15%;
   --ring: 195 100% 50%;
   --radius: 0.5rem;
-  --font-sans: 'Inter', 'Space Grotesk', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: "Inter", "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
 @layer base {
@@ -75,7 +75,7 @@
     @apply antialiased;
     background-color: #060b12;
     color: #c8d8e8;
-    font-family: 'Inter', 'Space Grotesk', sans-serif;
+    font-family: "Inter", "Space Grotesk", sans-serif;
   }
 
   ::-webkit-scrollbar {
@@ -96,11 +96,15 @@
 
 @layer utilities {
   .nexus-glow {
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.15), 0 0 40px rgba(0, 212, 255, 0.05);
+    box-shadow:
+      0 0 20px rgba(0, 212, 255, 0.15),
+      0 0 40px rgba(0, 212, 255, 0.05);
   }
 
   .nexus-glow-green {
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15), 0 0 40px rgba(0, 255, 136, 0.05);
+    box-shadow:
+      0 0 20px rgba(0, 255, 136, 0.15),
+      0 0 40px rgba(0, 255, 136, 0.05);
   }
 
   .text-nexus-cyan {
@@ -136,7 +140,7 @@
   }
 
   .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", monospace;
   }
 
   .scan-line {
@@ -150,8 +154,12 @@
   }
 
   @keyframes scan {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100vh); }
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(100vh);
+    }
   }
 
   .pulse-dot {
@@ -159,8 +167,15 @@
   }
 
   @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(0.8);
+    }
   }
 
   .lane-active {

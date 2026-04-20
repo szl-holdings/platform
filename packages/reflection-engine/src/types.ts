@@ -1,14 +1,14 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const FailureModeSchema = z.enum([
-  "no_failure",
-  "tool_failure",
-  "guardrail_block",
-  "retrieval_miss",
-  "timeout",
-  "policy_violation",
-  "high_cost",
-  "unknown",
+  'no_failure',
+  'tool_failure',
+  'guardrail_block',
+  'retrieval_miss',
+  'timeout',
+  'policy_violation',
+  'high_cost',
+  'unknown',
 ]);
 
 export type FailureMode = z.infer<typeof FailureModeSchema>;
@@ -31,21 +31,21 @@ export const CandidateSkillSchema = z.object({
   name: z.string(),
   description: z.string(),
   category: z.enum([
-    "analysis",
-    "synthesis",
-    "extraction",
-    "generation",
-    "validation",
-    "monitoring",
-    "research",
-    "orchestration",
+    'analysis',
+    'synthesis',
+    'extraction',
+    'generation',
+    'validation',
+    'monitoring',
+    'research',
+    'orchestration',
   ]),
   triggerKeywords: z.array(z.string()),
   inputFields: z.array(z.string()),
   outputFields: z.array(z.string()),
   estimatedTokens: z.number().int(),
   derivedFromTraceId: z.string(),
-  status: z.enum(["draft", "under-review", "active"]).default("draft"),
+  status: z.enum(['draft', 'under-review', 'active']).default('draft'),
   createdAt: z.string().datetime(),
 });
 
@@ -64,10 +64,12 @@ export const ReflectionSchema = z.object({
   bestRoute: RouteQualitySchema,
   lesson: z.string(),
   candidateSkill: CandidateSkillSchema.optional(),
-  memoryIds: z.object({
-    episodicId: z.string().optional(),
-    skillMemoryId: z.string().optional(),
-  }).default({}),
+  memoryIds: z
+    .object({
+      episodicId: z.string().optional(),
+      skillMemoryId: z.string().optional(),
+    })
+    .default({}),
 });
 
 export type Reflection = z.infer<typeof ReflectionSchema>;

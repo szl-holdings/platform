@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const WS_RECONNECT_BASE_MS = 1_000;
 const WS_RECONNECT_MAX_MS = 30_000;
@@ -11,16 +11,13 @@ export interface RealtimeChannelOptions {
 }
 
 function getWebSocketUrl(): string {
-  const base = typeof window !== "undefined" ? window.location.origin : "";
-  const wsProtocol = base.startsWith("https") ? "wss" : "ws";
-  const host = base.replace(/^https?:\/\//, "");
+  const base = typeof window !== 'undefined' ? window.location.origin : '';
+  const wsProtocol = base.startsWith('https') ? 'wss' : 'ws';
+  const host = base.replace(/^https?:\/\//, '');
   return `${wsProtocol}://${host}/ws`;
 }
 
-export function useRealtimeChannel(
-  channel: string,
-  options: RealtimeChannelOptions = {},
-) {
+export function useRealtimeChannel(channel: string, options: RealtimeChannelOptions = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
@@ -38,7 +35,7 @@ export function useRealtimeChannel(
 
       ws.onopen = () => {
         reconnectAttempts.current = 0;
-        ws.send(JSON.stringify({ type: "subscribe", channel }));
+        ws.send(JSON.stringify({ type: 'subscribe', channel }));
         setIsConnected(true);
         optionsRef.current.onConnect?.();
       };
@@ -52,13 +49,12 @@ export function useRealtimeChannel(
             data?: unknown;
           };
 
-          if (msg.type === "ping") {
-            ws.send(JSON.stringify({ type: "ping" }));
-          } else if (msg.type === "message" && msg.channel === channel) {
-            optionsRef.current.onMessage?.(msg.event ?? "unknown", msg.data);
+          if (msg.type === 'ping') {
+            ws.send(JSON.stringify({ type: 'ping' }));
+          } else if (msg.type === 'message' && msg.channel === channel) {
+            optionsRef.current.onMessage?.(msg.event ?? 'unknown', msg.data);
           }
-        } catch {
-        }
+        } catch {}
       };
 
       ws.onclose = () => {
@@ -96,11 +92,14 @@ export function useRealtimeChannel(
     };
   }, [connect]);
 
-  const send = useCallback((event: string, data: unknown) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "publish", channel, event, data }));
-    }
-  }, [channel]);
+  const send = useCallback(
+    (event: string, data: unknown) => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: 'publish', channel, event, data }));
+      }
+    },
+    [channel],
+  );
 
   return { isConnected, send };
 }
@@ -132,14 +131,12 @@ export function useFeatureFlag(flagKey: string, defaultValue = false): boolean {
       return;
     }
 
-    const baseUrl = typeof window !== "undefined"
-      ? window.location.origin
-      : "";
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
     fetch(`${baseUrl}/api/feature-flags/check/${flagKey}`, {
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     })
-      .then((r) => (r.ok ? r.json() as Promise<{ isEnabled: boolean }> : null))
+      .then((r) => (r.ok ? (r.json() as Promise<{ isEnabled: boolean }>) : null))
       .then((data) => {
         if (!cancelled && data) {
           const value = data.isEnabled;

@@ -1,41 +1,106 @@
 // @ts-nocheck
-import { useState } from "react";
-import { useSignals, useUpdateSignal } from "@lyte/hooks/use-lyte";
-import { Activity, AlertTriangle, CheckCircle, Clock, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
-import { cn } from "@lyte/lib/utils";
+
+import { useSignals, useUpdateSignal } from '@lyte/hooks/use-lyte';
+import { cn } from '@lyte/lib/utils';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  RefreshCw,
+} from 'lucide-react';
+import { useState } from 'react';
 
 const severityColors: Record<string, { text: string; bg: string; border: string; dot: string }> = {
-  critical: { text: "text-[#c45a4a]", bg: "bg-[#c45a4a]/10", border: "border-[#c45a4a]/20", dot: "bg-[#c45a4a]" },
-  high: { text: "text-[#c8953c]", bg: "bg-[#c8953c]/10", border: "border-[#c8953c]/20", dot: "bg-[#c8953c]" },
-  medium: { text: "text-[#d4a054]", bg: "bg-[#d4a054]/10", border: "border-[#d4a054]/20", dot: "bg-[#d4a054]" },
-  low: { text: "text-[#4a90b8]", bg: "bg-[#4a90b8]/10", border: "border-[#4a90b8]/20", dot: "bg-[#4a90b8]" },
+  critical: {
+    text: 'text-[#c45a4a]',
+    bg: 'bg-[#c45a4a]/10',
+    border: 'border-[#c45a4a]/20',
+    dot: 'bg-[#c45a4a]',
+  },
+  high: {
+    text: 'text-[#c8953c]',
+    bg: 'bg-[#c8953c]/10',
+    border: 'border-[#c8953c]/20',
+    dot: 'bg-[#c8953c]',
+  },
+  medium: {
+    text: 'text-[#d4a054]',
+    bg: 'bg-[#d4a054]/10',
+    border: 'border-[#d4a054]/20',
+    dot: 'bg-[#d4a054]',
+  },
+  low: {
+    text: 'text-[#4a90b8]',
+    bg: 'bg-[#4a90b8]/10',
+    border: 'border-[#4a90b8]/20',
+    dot: 'bg-[#4a90b8]',
+  },
 };
 
 const statusColors: Record<string, string> = {
-  new: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20",
-  acknowledged: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20",
-  resolved: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20",
-  closed: "text-slate-400 bg-slate-500/10 border-slate-500/20",
+  new: 'text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20',
+  acknowledged: 'text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20',
+  resolved: 'text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20',
+  closed: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
 };
 
-function SignalDrawer({ signal, onClose, onUpdate }: { signal: any; onClose: () => void; onUpdate: (id: number, status: string) => void }) {
+function SignalDrawer({
+  signal,
+  onClose,
+  onUpdate,
+}: {
+  signal: any;
+  onClose: () => void;
+  onUpdate: (id: number, status: string) => void;
+}) {
   const transitions: { label: string; status: string; color: string }[] = [
-    { label: "Acknowledge", status: "acknowledged", color: "text-[#d4a054] border-[#d4a054]/30 bg-[#d4a054]/10" },
-    { label: "Resolve", status: "resolved", color: "text-[#6b8f71] border-[#6b8f71]/30 bg-[#6b8f71]/10" },
-    { label: "Escalate", status: "escalated", color: "text-[#c45a4a] border-[#c45a4a]/30 bg-[#c45a4a]/10" },
+    {
+      label: 'Acknowledge',
+      status: 'acknowledged',
+      color: 'text-[#d4a054] border-[#d4a054]/30 bg-[#d4a054]/10',
+    },
+    {
+      label: 'Resolve',
+      status: 'resolved',
+      color: 'text-[#6b8f71] border-[#6b8f71]/30 bg-[#6b8f71]/10',
+    },
+    {
+      label: 'Escalate',
+      status: 'escalated',
+      color: 'text-[#c45a4a] border-[#c45a4a]/30 bg-[#c45a4a]/10',
+    },
   ];
   const sc = severityColors[signal.severity] ?? severityColors.medium;
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1 bg-black/40" />
-      <div className="w-full max-w-lg bg-[#0c1626] border-l border-white/10 flex flex-col h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div
+        className="w-full max-w-lg bg-[#0c1626] border-l border-white/10 flex flex-col h-full overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-5 border-b border-white/5">
           <div className="flex items-start justify-between gap-3 mb-2">
-            <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wide", sc.text, sc.bg, sc.border)}>{signal.severity}</span>
-            <button onClick={onClose} className="text-slate-400 hover:text-white text-xs">✕</button>
+            <span
+              className={cn(
+                'text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wide',
+                sc.text,
+                sc.bg,
+                sc.border,
+              )}
+            >
+              {signal.severity}
+            </span>
+            <button onClick={onClose} className="text-slate-400 hover:text-white text-xs">
+              ✕
+            </button>
           </div>
           <h2 className="text-sm font-semibold text-white">{signal.title}</h2>
-          <p className="text-[11px] text-slate-400 mt-1">{signal.source} · {signal.sourceType}</p>
+          <p className="text-[11px] text-slate-400 mt-1">
+            {signal.source} · {signal.sourceType}
+          </p>
         </div>
         {signal.body && (
           <div className="p-5 border-b border-white/5">
@@ -43,14 +108,23 @@ function SignalDrawer({ signal, onClose, onUpdate }: { signal: any; onClose: () 
           </div>
         )}
         <div className="p-5 border-b border-white/5">
-          <h3 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Signal History</h3>
+          <h3 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">
+            Signal History
+          </h3>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[11px]">
               <div className="w-1.5 h-1.5 rounded-full bg-[#d4a054]" />
               <span className="text-slate-400">Received</span>
-              <span className="text-slate-500 ml-auto">{new Date(signal.receivedAt || signal.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+              <span className="text-slate-500 ml-auto">
+                {new Date(signal.receivedAt || signal.createdAt).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
             </div>
-            {signal.status !== "new" && (
+            {signal.status !== 'new' && (
               <div className="flex items-center gap-2 text-[11px]">
                 <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                 <span className="text-slate-400">Status: {signal.status}</span>
@@ -61,11 +135,17 @@ function SignalDrawer({ signal, onClose, onUpdate }: { signal: any; onClose: () 
         <div className="p-5">
           <h3 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Actions</h3>
           <div className="flex flex-wrap gap-2">
-            {transitions.map(t => (
+            {transitions.map((t) => (
               <button
                 key={t.status}
-                onClick={() => { onUpdate(signal.id, t.status); onClose(); }}
-                className={cn("text-[10px] px-3 py-1.5 rounded-lg border font-medium transition-all hover:opacity-80", t.color)}
+                onClick={() => {
+                  onUpdate(signal.id, t.status);
+                  onClose();
+                }}
+                className={cn(
+                  'text-[10px] px-3 py-1.5 rounded-lg border font-medium transition-all hover:opacity-80',
+                  t.color,
+                )}
               >
                 {t.label}
               </button>
@@ -81,18 +161,20 @@ export default function SignalsPage() {
   const { data: signals = [], isLoading, isError, refetch } = useSignals();
   const updateSignal = useUpdateSignal();
   const [selectedSignal, setSelectedSignal] = useState<any | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [severityFilter, setSeverityFilter] = useState<string>('all');
 
-  const filtered = signals.filter(s => {
-    if (statusFilter !== "all" && s.status !== statusFilter) return false;
-    if (severityFilter !== "all" && s.severity !== severityFilter) return false;
+  const filtered = signals.filter((s) => {
+    if (statusFilter !== 'all' && s.status !== statusFilter) return false;
+    if (severityFilter !== 'all' && s.severity !== severityFilter) return false;
     return true;
   });
 
-  const criticalCount = signals.filter(s => s.severity === "critical" && s.status === "new").length;
-  const activeCount = signals.filter(s => s.status === "new").length;
-  const ackCount = signals.filter(s => s.status === "acknowledged").length;
+  const criticalCount = signals.filter(
+    (s) => s.severity === 'critical' && s.status === 'new',
+  ).length;
+  const activeCount = signals.filter((s) => s.status === 'new').length;
+  const ackCount = signals.filter((s) => s.status === 'acknowledged').length;
 
   return (
     <div className="space-y-6 max-w-[1200px]">
@@ -100,25 +182,32 @@ export default function SignalsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-4 h-4 text-[#d4a054]" />
-            <span className="text-xs font-medium uppercase tracking-widest text-[#d4a054]">Lyte · Signals Feed</span>
+            <span className="text-xs font-medium uppercase tracking-widest text-[#d4a054]">
+              Lyte · Signals Feed
+            </span>
           </div>
           <h1 className="text-2xl font-bold text-white">Signals</h1>
-          <p className="text-sm text-slate-400 mt-1">Live signal feed — all sources, all severities</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Live signal feed — all sources, all severities
+          </p>
         </div>
-        <button onClick={() => refetch()} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors"
+        >
           <RefreshCw className="w-3 h-3" /> Refresh
         </button>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Active Signals", value: activeCount, color: "text-[#c45a4a]" },
-          { label: "Acknowledged", value: ackCount, color: "text-[#d4a054]" },
-          { label: "Critical Now", value: criticalCount, color: "text-[#c45a4a]" },
-        ].map(c => (
+          { label: 'Active Signals', value: activeCount, color: 'text-[#c45a4a]' },
+          { label: 'Acknowledged', value: ackCount, color: 'text-[#d4a054]' },
+          { label: 'Critical Now', value: criticalCount, color: 'text-[#c45a4a]' },
+        ].map((c) => (
           <div key={c.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
             <div className="text-[10px] text-slate-500 mb-1">{c.label}</div>
-            <div className={cn("text-2xl font-bold", c.color)}>{c.value}</div>
+            <div className={cn('text-2xl font-bold', c.color)}>{c.value}</div>
           </div>
         ))}
       </div>
@@ -126,16 +215,34 @@ export default function SignalsPage() {
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-1">
           <span className="text-[10px] text-slate-500 mr-1">Status:</span>
-          {["all", "new", "acknowledged", "resolved"].map(f => (
-            <button key={f} onClick={() => setStatusFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", statusFilter === f ? "bg-[#d4a054]/10 border-[#d4a054]/30 text-[#d4a054]" : "border-white/5 text-slate-500 hover:text-white")}>
+          {['all', 'new', 'acknowledged', 'resolved'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              className={cn(
+                'text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all',
+                statusFilter === f
+                  ? 'bg-[#d4a054]/10 border-[#d4a054]/30 text-[#d4a054]'
+                  : 'border-white/5 text-slate-500 hover:text-white',
+              )}
+            >
               {f}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-1">
           <span className="text-[10px] text-slate-500 mr-1">Severity:</span>
-          {["all", "critical", "high", "medium", "low"].map(f => (
-            <button key={f} onClick={() => setSeverityFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", severityFilter === f ? "bg-[#d4a054]/10 border-[#d4a054]/30 text-[#d4a054]" : "border-white/5 text-slate-500 hover:text-white")}>
+          {['all', 'critical', 'high', 'medium', 'low'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setSeverityFilter(f)}
+              className={cn(
+                'text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all',
+                severityFilter === f
+                  ? 'bg-[#d4a054]/10 border-[#d4a054]/30 text-[#d4a054]'
+                  : 'border-white/5 text-slate-500 hover:text-white',
+              )}
+            >
               {f}
             </button>
           ))}
@@ -162,33 +269,69 @@ export default function SignalsPage() {
       )}
 
       <div className="space-y-2">
-        {filtered.map(signal => {
+        {filtered.map((signal) => {
           const sc = severityColors[signal.severity] ?? severityColors.medium;
           const sColor = statusColors[signal.status] ?? statusColors.new;
           return (
             <div
               key={signal.id}
-              className={cn("rounded-xl border bg-white/[0.02] p-4 cursor-pointer hover:bg-white/[0.04] transition-all", sc.border)}
+              className={cn(
+                'rounded-xl border bg-white/[0.02] p-4 cursor-pointer hover:bg-white/[0.04] transition-all',
+                sc.border,
+              )}
               onClick={() => setSelectedSignal(signal)}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                  <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", sc.dot, signal.severity === "critical" && signal.status === "new" && "animate-pulse shadow-[0_0_8px_rgba(196,90,74,0.7)]")} />
+                  <div
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full mt-1.5 shrink-0',
+                      sc.dot,
+                      signal.severity === 'critical' &&
+                        signal.status === 'new' &&
+                        'animate-pulse shadow-[0_0_8px_rgba(196,90,74,0.7)]',
+                    )}
+                  />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-white/90 leading-tight mb-1">{signal.title}</p>
+                    <p className="text-xs font-medium text-white/90 leading-tight mb-1">
+                      {signal.title}
+                    </p>
                     <div className="flex items-center gap-2 text-[10px] text-slate-500">
                       <span className={sc.text}>{signal.source}</span>
                       <span className="text-slate-700">·</span>
                       <span>{signal.sourceType}</span>
                       <span className="text-slate-700">·</span>
                       <Clock className="w-2.5 h-2.5" />
-                      <span>{new Date(signal.receivedAt || signal.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      <span>
+                        {new Date(signal.receivedAt || signal.createdAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wide", sc.text, sc.bg, sc.border)}>{signal.severity}</span>
-                  <span className={cn("text-[9px] px-1.5 py-0.5 rounded border uppercase tracking-wide", sColor)}>{signal.status}</span>
+                  <span
+                    className={cn(
+                      'text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wide',
+                      sc.text,
+                      sc.bg,
+                      sc.border,
+                    )}
+                  >
+                    {signal.severity}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-[9px] px-1.5 py-0.5 rounded border uppercase tracking-wide',
+                      sColor,
+                    )}
+                  >
+                    {signal.status}
+                  </span>
                   <ChevronRight className="w-3 h-3 text-slate-600" />
                 </div>
               </div>

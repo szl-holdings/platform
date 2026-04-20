@@ -2,7 +2,7 @@
  * AI & agent infrastructure schemas — used by trace capture, review queue,
  * job payloads, and LLM structured output parsing.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 export const aiTraceSchema = z.object({
   traceId: z.string().min(1),
@@ -11,7 +11,7 @@ export const aiTraceSchema = z.object({
   model: z.string(),
   modelProvider: z.string(),
   modelVersion: z.string().optional(),
-  routeClass: z.enum(["critical", "standard", "economy"]).optional(),
+  routeClass: z.enum(['critical', 'standard', 'economy']).optional(),
   domain: z.string().optional(),
   recommendationType: z.string().optional(),
   promptHash: z.string().optional(),
@@ -20,13 +20,13 @@ export const aiTraceSchema = z.object({
   latencyMs: z.number().min(0),
   costEstimateUsd: z.number().min(0),
   confidence: z.number().min(0).max(1).optional(),
-  riskLevel: z.enum(["low", "medium", "high", "critical"]).optional(),
+  riskLevel: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   toolsUsed: z.array(z.string()).optional(),
   requiresReview: z.boolean().optional(),
   reviewReason: z.string().optional(),
   evalScore: z.number().min(0).max(1).optional(),
   evalPassed: z.boolean().optional(),
-  status: z.enum(["pending", "evaluated", "reviewed", "flagged", "archived"]).optional(),
+  status: z.enum(['pending', 'evaluated', 'reviewed', 'flagged', 'archived']).optional(),
   capturedAt: z.coerce.date(),
 });
 export type AITrace = z.infer<typeof aiTraceSchema>;

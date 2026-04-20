@@ -1,12 +1,12 @@
 import {
+  type ApprovalAction,
+  type ApprovalVerdict,
+  getApprovalForRecommendation,
+  markPendingApprovalTimedOut,
   submitApprovalAction,
   submitPendingApprovalRequest,
-  markPendingApprovalTimedOut,
-  getApprovalForRecommendation,
-  type ApprovalVerdict,
-  type ApprovalAction,
-} from "@workspace/approvals-inbox";
-import { AgentRunError } from "./errors.js";
+} from '@workspace/approvals-inbox';
+import { AgentRunError } from './errors.js';
 
 export type { ApprovalVerdict };
 
@@ -53,10 +53,10 @@ function resolveVerdict(
   approval: ApprovalAction,
   decisionLatencyMs: number,
 ): ApprovalGateResult {
-  if (approval.verdict === "rejected") {
+  if (approval.verdict === 'rejected') {
     throw new AgentRunError({
-      message: `Approval rejected for step '${stepName}' — ${approval.note ?? "no reason given"}`,
-      category: "approval_rejected",
+      message: `Approval rejected for step '${stepName}' — ${approval.note ?? 'no reason given'}`,
+      category: 'approval_rejected',
       runId,
       stepId,
       retryable: false,
@@ -64,7 +64,7 @@ function resolveVerdict(
   }
 
   return {
-    approved: approval.verdict === "approved",
+    approved: approval.verdict === 'approved',
     verdict: approval.verdict,
     approvalId: approval.id,
     actor: approval.actor,
@@ -83,9 +83,9 @@ export async function requestApproval(req: ApprovalGateRequest): Promise<Approva
     justification,
     projectedImpact,
     projectedRisk,
-    requestedBy = "agents-core",
-    domain = "agents-core",
-    surface = "run-console",
+    requestedBy = 'agents-core',
+    domain = 'agents-core',
+    surface = 'run-console',
     timeoutMs = DEFAULT_TIMEOUT_MS,
     pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
   } = req;
@@ -128,8 +128,8 @@ export async function requestApproval(req: ApprovalGateRequest): Promise<Approva
     const elapsedMs = Date.now() - startedAt;
     markPendingApprovalTimedOut(runId, stepId);
 
-    submitApprovalAction(pendingId, "rejected", {
-      actor: "system:timeout",
+    submitApprovalAction(pendingId, 'rejected', {
+      actor: 'system:timeout',
       note: `Approval timed out after ${elapsedMs}ms — auto-rejected by agents-core`,
       domain,
       surface,
@@ -137,7 +137,7 @@ export async function requestApproval(req: ApprovalGateRequest): Promise<Approva
 
     throw new AgentRunError({
       message: `Approval gate timed out after ${elapsedMs}ms for step '${stepName}'`,
-      category: "approval_timeout",
+      category: 'approval_timeout',
       runId,
       stepId,
       retryable: false,
@@ -155,7 +155,7 @@ export function preloadApproval(
 ): void {
   const pendingId = makePendingId(runId, stepId);
   submitApprovalAction(pendingId, verdict, {
-    actor: options?.actor ?? "preloaded-approval",
+    actor: options?.actor ?? 'preloaded-approval',
     note: options?.note,
   });
 }

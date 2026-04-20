@@ -1,7 +1,16 @@
-import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { DollarSign, TrendingUp, Zap, Bot, AlertTriangle, CheckCircle, BarChart3, RefreshCw } from "lucide-react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import {
+  AlertTriangle,
+  BarChart3,
+  Bot,
+  CheckCircle,
+  DollarSign,
+  RefreshCw,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 interface SpendRecord {
   workflowId: string;
@@ -19,8 +28,21 @@ interface CostAnalytics {
   byAgent: Record<string, { spend: number; tokens: number }>;
   byWorkflow: Record<string, { spend: number; tokens: number }>;
   recentRecords: SpendRecord[];
-  modelPricing: Array<{ model: string; provider: string; inputCostPer1KTokens: number; outputCostPer1KTokens: number; tier: string }>;
-  budgetStatuses: Array<{ workflowId: string; budgetUsd: number; usedUsd: number; remainingUsd: number; percentUsed: number; status: string }>;
+  modelPricing: Array<{
+    model: string;
+    provider: string;
+    inputCostPer1KTokens: number;
+    outputCostPer1KTokens: number;
+    tier: string;
+  }>;
+  budgetStatuses: Array<{
+    workflowId: string;
+    budgetUsd: number;
+    usedUsd: number;
+    remainingUsd: number;
+    percentUsed: number;
+    status: string;
+  }>;
 }
 
 interface FlywheelStats {
@@ -30,7 +52,21 @@ interface FlywheelStats {
   avgConfidence: number;
 }
 
-function MetricCard({ label, value, sub, icon: Icon, color, bg }: { label: string; value: string; sub?: string; icon: typeof DollarSign; color: string; bg: string }) {
+function MetricCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  color,
+  bg,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon: typeof DollarSign;
+  color: string;
+  bg: string;
+}) {
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-2">
@@ -45,15 +81,35 @@ function MetricCard({ label, value, sub, icon: Icon, color, bg }: { label: strin
   );
 }
 
-function BudgetStatusBar({ workflowId, percentUsed, status, budgetUsd, usedUsd }: {
+function BudgetStatusBar({
+  workflowId,
+  percentUsed,
+  status,
+  budgetUsd,
+  usedUsd,
+}: {
   workflowId: string;
   percentUsed: number;
   status: string;
   budgetUsd: number;
   usedUsd: number;
 }) {
-  const barColor = status === "exceeded" ? "bg-red-500" : status === "critical" ? "bg-orange-500" : status === "warning" ? "bg-amber-500" : "bg-green-500";
-  const textColor = status === "exceeded" ? "text-red-400" : status === "critical" ? "text-orange-400" : status === "warning" ? "text-amber-400" : "text-green-400";
+  const barColor =
+    status === 'exceeded'
+      ? 'bg-red-500'
+      : status === 'critical'
+        ? 'bg-orange-500'
+        : status === 'warning'
+          ? 'bg-amber-500'
+          : 'bg-green-500';
+  const textColor =
+    status === 'exceeded'
+      ? 'text-red-400'
+      : status === 'critical'
+        ? 'text-orange-400'
+        : status === 'warning'
+          ? 'text-amber-400'
+          : 'text-green-400';
 
   return (
     <div className="space-y-1">
@@ -62,7 +118,10 @@ function BudgetStatusBar({ workflowId, percentUsed, status, budgetUsd, usedUsd }
         <span className={`${textColor} font-medium`}>{status.toUpperCase()}</span>
       </div>
       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-        <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${Math.min(100, percentUsed)}%` }} />
+        <div
+          className={`h-full ${barColor} rounded-full transition-all`}
+          style={{ width: `${Math.min(100, percentUsed)}%` }}
+        />
       </div>
       <div className="flex items-center justify-between text-[10px] text-white/30">
         <span>${usedUsd.toFixed(4)} spent</span>
@@ -72,11 +131,15 @@ function BudgetStatusBar({ workflowId, percentUsed, status, budgetUsd, usedUsd }
   );
 }
 
-const API_BASE = "/api";
+const API_BASE = '/api';
 
 export default function AICostAnalyticsPage() {
-  const { data: costData, isLoading, refetch } = useStandardQuery<CostAnalytics>({
-    queryKey: ["ai-cost-analytics"],
+  const {
+    data: costData,
+    isLoading,
+    refetch,
+  } = useStandardQuery<CostAnalytics>({
+    queryKey: ['ai-cost-analytics'],
     queryFn: async () => {
       const r = await fetch(`${BASE}/nuro-mesh/cost/analytics`);
       return r.json();
@@ -85,7 +148,7 @@ export default function AICostAnalyticsPage() {
   });
 
   const { data: flywheelStats } = useStandardQuery<FlywheelStats>({
-    queryKey: ["flywheel-stats"],
+    queryKey: ['flywheel-stats'],
     queryFn: async () => {
       const r = await fetch(`${BASE}/nuro-mesh/flywheel/stats`);
       return r.json();
@@ -94,9 +157,13 @@ export default function AICostAnalyticsPage() {
   });
 
   const totalTokens = Object.values(costData?.byModel ?? {}).reduce((s, m) => s + m.tokens, 0);
-  const topModel = Object.entries(costData?.byModel ?? {}).sort((a, b) => b[1].spend - a[1].spend)[0];
-  const topAgent = Object.entries(costData?.byAgent ?? {}).sort((a, b) => b[1].spend - a[1].spend)[0];
-  const activeBudgets = (costData?.budgetStatuses ?? []).filter(b => b.status !== "ok");
+  const topModel = Object.entries(costData?.byModel ?? {}).sort(
+    (a, b) => b[1].spend - a[1].spend,
+  )[0];
+  const topAgent = Object.entries(costData?.byAgent ?? {}).sort(
+    (a, b) => b[1].spend - a[1].spend,
+  )[0];
+  const activeBudgets = (costData?.budgetStatuses ?? []).filter((b) => b.status !== 'ok');
 
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
@@ -107,7 +174,9 @@ export default function AICostAnalyticsPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">AI Cost & Budget Intelligence</h1>
-            <p className="text-xs text-white/40">Real-time spend tracking, model cost breakdown, and budget management</p>
+            <p className="text-xs text-white/40">
+              Real-time spend tracking, model cost breakdown, and budget management
+            </p>
           </div>
         </div>
         <button
@@ -130,7 +199,13 @@ export default function AICostAnalyticsPage() {
         />
         <MetricCard
           label="Total Tokens"
-          value={totalTokens > 1000000 ? `${(totalTokens / 1000000).toFixed(1)}M` : totalTokens > 1000 ? `${(totalTokens / 1000).toFixed(0)}K` : String(totalTokens)}
+          value={
+            totalTokens > 1000000
+              ? `${(totalTokens / 1000000).toFixed(1)}M`
+              : totalTokens > 1000
+                ? `${(totalTokens / 1000).toFixed(0)}K`
+                : String(totalTokens)
+          }
           sub="Across all agents"
           icon={Zap}
           color="text-blue-400"
@@ -138,8 +213,8 @@ export default function AICostAnalyticsPage() {
         />
         <MetricCard
           label="Top Spend Model"
-          value={topModel?.[0] ?? "—"}
-          sub={topModel ? `$${topModel[1].spend.toFixed(4)}` : "—"}
+          value={topModel?.[0] ?? '—'}
+          sub={topModel ? `$${topModel[1].spend.toFixed(4)}` : '—'}
           icon={TrendingUp}
           color="text-purple-400"
           bg="bg-purple-500/10"
@@ -158,10 +233,12 @@ export default function AICostAnalyticsPage() {
         <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-orange-400" />
-            <span className="text-sm font-medium text-orange-300">Budget Alerts ({activeBudgets.length})</span>
+            <span className="text-sm font-medium text-orange-300">
+              Budget Alerts ({activeBudgets.length})
+            </span>
           </div>
           <div className="space-y-3">
-            {activeBudgets.map(b => (
+            {activeBudgets.map((b) => (
               <BudgetStatusBar key={b.workflowId} {...b} />
             ))}
           </div>
@@ -182,7 +259,10 @@ export default function AICostAnalyticsPage() {
                 .sort((a, b) => b[1].spend - a[1].spend)
                 .slice(0, 6)
                 .map(([model, data]) => {
-                  const maxSpend = Math.max(...Object.values(costData?.byModel ?? {}).map(m => m.spend), 0.0001);
+                  const maxSpend = Math.max(
+                    ...Object.values(costData?.byModel ?? {}).map((m) => m.spend),
+                    0.0001,
+                  );
                   const pct = (data.spend / maxSpend) * 100;
                   return (
                     <div key={model} className="space-y-1">
@@ -190,11 +270,16 @@ export default function AICostAnalyticsPage() {
                         <span className="text-white/70 truncate max-w-[200px]">{model}</span>
                         <div className="flex items-center gap-3 text-white/40">
                           <span>{data.calls} calls</span>
-                          <span className="text-white/70 font-medium">${data.spend.toFixed(4)}</span>
+                          <span className="text-white/70 font-medium">
+                            ${data.spend.toFixed(4)}
+                          </span>
                         </div>
                       </div>
                       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500/60 rounded-full" style={{ width: `${pct}%` }} />
+                        <div
+                          className="h-full bg-blue-500/60 rounded-full"
+                          style={{ width: `${pct}%` }}
+                        />
                       </div>
                     </div>
                   );
@@ -215,7 +300,10 @@ export default function AICostAnalyticsPage() {
               {Object.entries(costData?.byAgent ?? {})
                 .sort((a, b) => b[1].spend - a[1].spend)
                 .map(([agentId, data]) => {
-                  const maxSpend = Math.max(...Object.values(costData?.byAgent ?? {}).map(m => m.spend), 0.0001);
+                  const maxSpend = Math.max(
+                    ...Object.values(costData?.byAgent ?? {}).map((m) => m.spend),
+                    0.0001,
+                  );
                   const pct = (data.spend / maxSpend) * 100;
                   return (
                     <div key={agentId} className="space-y-1">
@@ -223,11 +311,16 @@ export default function AICostAnalyticsPage() {
                         <span className="text-white/70 capitalize">{agentId}</span>
                         <div className="flex items-center gap-3 text-white/40">
                           <span>{(data.tokens / 1000).toFixed(0)}K tokens</span>
-                          <span className="text-white/70 font-medium">${data.spend.toFixed(4)}</span>
+                          <span className="text-white/70 font-medium">
+                            ${data.spend.toFixed(4)}
+                          </span>
                         </div>
                       </div>
                       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500/60 rounded-full" style={{ width: `${pct}%` }} />
+                        <div
+                          className="h-full bg-purple-500/60 rounded-full"
+                          style={{ width: `${pct}%` }}
+                        />
                       </div>
                     </div>
                   );
@@ -254,17 +347,23 @@ export default function AICostAnalyticsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {(costData?.modelPricing ?? []).map(m => (
+              {(costData?.modelPricing ?? []).map((m) => (
                 <tr key={m.model} className="text-white/60">
                   <td className="py-2 font-medium text-white/80">{m.model}</td>
                   <td className="py-2 capitalize">{m.provider}</td>
                   <td className="py-2">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] ${m.tier === "premium" ? "bg-amber-500/20 text-amber-400" : m.tier === "standard" ? "bg-blue-500/20 text-blue-400" : "bg-green-500/20 text-green-400"}`}>
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[10px] ${m.tier === 'premium' ? 'bg-amber-500/20 text-amber-400' : m.tier === 'standard' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}
+                    >
                       {m.tier}
                     </span>
                   </td>
-                  <td className="py-2 text-right font-mono">${m.inputCostPer1KTokens.toFixed(5)}</td>
-                  <td className="py-2 text-right font-mono">${m.outputCostPer1KTokens.toFixed(5)}</td>
+                  <td className="py-2 text-right font-mono">
+                    ${m.inputCostPer1KTokens.toFixed(5)}
+                  </td>
+                  <td className="py-2 text-right font-mono">
+                    ${m.outputCostPer1KTokens.toFixed(5)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -277,7 +376,10 @@ export default function AICostAnalyticsPage() {
           <h3 className="text-sm font-medium text-white mb-3">Recent Spend Events</h3>
           <div className="space-y-2">
             {(costData?.recentRecords ?? []).slice(0, 10).map((record, i) => (
-              <div key={i} className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
+              <div
+                key={i}
+                className="flex items-center justify-between text-xs border-b border-white/5 pb-2"
+              >
                 <div className="flex items-center gap-3">
                   <span className="text-white/50 font-mono">{record.agentId}</span>
                   <span className="text-white/40">{record.model}</span>

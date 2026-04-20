@@ -20,17 +20,17 @@
  *     enforcement produces non-zero costUsd values.
  */
 
-import type { Request, Response, NextFunction } from "express";
 import {
-  piiRedactor,
-  scanForInjection,
+  type AgentTierName,
   costController,
   evaluatePolicy,
   modelRouter,
-  type AgentTierName,
+  piiRedactor,
   type RouteClass,
-} from "@szl-holdings/ai-control-plane";
-import { logger } from "../lib/logger";
+  scanForInjection,
+} from '@szl-holdings/ai-control-plane';
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../lib/logger';
 
 // ---------------------------------------------------------------------------
 // Approximate token pricing (USD per token) for common providers/models.
@@ -57,10 +57,11 @@ function getProviderPricing(provider: string): { inputPerToken: number; outputPe
 // ---------------------------------------------------------------------------
 
 function resolveTierFromRoles(roles: string[] = []): AgentTierName {
-  if (roles.includes("autonomous_agent")) return "autonomous";
-  if (roles.includes("super_admin") || roles.includes("admin") || roles.includes("operator")) return "operator";
-  if (roles.includes("analyst")) return "analyst";
-  return "assistant";
+  if (roles.includes('autonomous_agent')) return 'autonomous';
+  if (roles.includes('super_admin') || roles.includes('admin') || roles.includes('operator'))
+    return 'operator';
+  if (roles.includes('analyst')) return 'analyst';
+  return 'assistant';
 }
 
 // ---------------------------------------------------------------------------
@@ -79,9 +80,9 @@ function redactBodyInPlace(body: Record<string, unknown>): string[] {
   const allTypes: string[] = [];
 
   // messages array: [{role, content}]
-  if (Array.isArray(body["messages"])) {
-    for (const m of body["messages"] as Array<{ content?: unknown }>) {
-      if (typeof m?.content === "string") {
+  if (Array.isArray(body['messages'])) {
+    for (const m of body['messages'] as Array<{ content?: unknown }>) {
+      if (typeof m?.content === 'string') {
         const { redacted, types } = redactField(m.content);
         if (types.length > 0) {
           m.content = redacted;
@@ -92,9 +93,9 @@ function redactBodyInPlace(body: Record<string, unknown>): string[] {
   }
 
   // Scalar text fields
-  for (const field of ["input", "objective", "context", "query", "content", "prompt"] as const) {
+  for (const field of ['input', 'objective', 'context', 'query', 'content', 'prompt'] as const) {
     const val = body[field];
-    if (typeof val === "string") {
+    if (typeof val === 'string') {
       const { redacted, types } = redactField(val);
       if (types.length > 0) {
         body[field] = redacted;
@@ -109,15 +110,15 @@ function redactBodyInPlace(body: Record<string, unknown>): string[] {
 /** Collect all prompt text for injection scanning without modifying the body. */
 function collectPromptText(body: Record<string, unknown>): string {
   const parts: string[] = [];
-  if (Array.isArray(body["messages"])) {
-    for (const m of body["messages"] as Array<{ content?: unknown }>) {
-      if (typeof m?.content === "string") parts.push(m.content);
+  if (Array.isArray(body['messages'])) {
+    for (const m of body['messages'] as Array<{ content?: unknown }>) {
+      if (typeof m?.content === 'string') parts.push(m.content);
     }
   }
-  for (const field of ["input", "objective", "context", "query", "content", "prompt"] as const) {
-    if (typeof body[field] === "string") parts.push(body[field] as string);
+  for (const field of ['input', 'objective', 'context', 'query', 'content', 'prompt'] as const) {
+    if (typeof body[field] === 'string') parts.push(body[field] as string);
   }
-  return parts.join("\n");
+  return parts.join('\n');
 }
 
 /** Rough token estimate: ~4 chars per token. */
@@ -152,19 +153,21 @@ export interface AiControlPlaneOptions {
  * Returns an Express middleware that applies full AI control-plane checks.
  * Mount this before AI/Forge route handlers.
  */
-export function aiControlPlane(opts: AiControlPlaneOptions = {}): (req: Request, res: Response, next: NextFunction) => void {
+export function aiControlPlane(
+  opts: AiControlPlaneOptions = {},
+): (req: Request, res: Response, next: NextFunction) => void {
   const {
     policyRouteClass,
-    costRouteClass = policyRouteClass ?? "inference",
+    costRouteClass = policyRouteClass ?? 'inference',
     blockOnInjection = true,
     blockOnBudgetExceeded = true,
   } = opts;
 
   return function controlPlaneMiddleware(req: Request, res: Response, next: NextFunction): void {
     // Only process bodies with text content (skip GET, HEAD, OPTIONS, etc.)
-    const hasBody = ["POST", "PUT", "PATCH"].includes(req.method);
+    const hasBody = ['POST', 'PUT', 'PATCH'].includes(req.method);
     const body = (req.body ?? {}) as Record<string, unknown>;
-    const orgId = String(req.user?.orgs?.[0]?.orgId ?? "default");
+    const orgId = String(req.user?.orgs?.[0]?.orgId ?? 'default');
 
     // ── 1. PII redaction (in-place, field-by-field) ─────────────────────────
     let piiTypes: string[] = [];
@@ -173,43 +176,43 @@ export function aiControlPlane(opts: AiControlPlaneOptions = {}): (req: Request,
       if (piiTypes.length > 0) {
         logger.info(
           {
-            event: "ai_control_plane.pii_redacted",
+            event: 'ai_control_plane.pii_redacted',
             orgId,
             detectedTypes: piiTypes,
             count: piiTypes.length,
             path: req.path,
           },
-          "PII redacted from AI request",
+          'PII redacted from AI request',
         );
-        res.setHeader("X-AI-PII-Redacted", piiTypes.join(","));
+        res.setHeader('X-AI-PII-Redacted', piiTypes.join(','));
       }
     }
 
     // ── 2. Prompt-injection scan ────────────────────────────────────────────
     //    Scan after redaction so PII is not logged.
-    const promptText = hasBody ? collectPromptText(body) : "";
+    const promptText = hasBody ? collectPromptText(body) : '';
     if (promptText) {
       const injectionResult = scanForInjection(promptText);
       if (!injectionResult.safe) {
         logger.warn(
           {
-            event: "ai_control_plane.injection_detected",
+            event: 'ai_control_plane.injection_detected',
             orgId,
             severity: injectionResult.severity,
             path: req.path,
           },
-          "Prompt injection detected by AI control plane",
+          'Prompt injection detected by AI control plane',
         );
 
-        if (blockOnInjection && injectionResult.severity === "high") {
+        if (blockOnInjection && injectionResult.severity === 'high') {
           res.status(400).json({
-            error: "Request blocked by AI safety policy",
-            code: "PROMPT_INJECTION_DETECTED",
+            error: 'Request blocked by AI safety policy',
+            code: 'PROMPT_INJECTION_DETECTED',
             severity: injectionResult.severity,
           });
           return;
         }
-        res.setHeader("X-AI-Injection-Warning", injectionResult.severity);
+        res.setHeader('X-AI-Injection-Warning', injectionResult.severity);
       }
     }
 
@@ -224,27 +227,27 @@ export function aiControlPlane(opts: AiControlPlaneOptions = {}): (req: Request,
     });
 
     if (!policyDecision.allowed) {
-      const blocker = policyDecision.violations.find(v => v.severity === "block");
+      const blocker = policyDecision.violations.find((v) => v.severity === 'block');
       logger.warn(
         {
-          event: "ai_control_plane.policy_blocked",
+          event: 'ai_control_plane.policy_blocked',
           orgId,
           tier,
           code: blocker?.code,
           path: req.path,
         },
-        "AI request blocked by policy engine",
+        'AI request blocked by policy engine',
       );
       res.status(403).json({
-        error: "AI request blocked by policy",
-        code: blocker?.code ?? "POLICY_VIOLATION",
+        error: 'AI request blocked by policy',
+        code: blocker?.code ?? 'POLICY_VIOLATION',
         message: blocker?.message,
       });
       return;
     }
 
     if (policyDecision.requiresApproval) {
-      res.setHeader("X-AI-Approval-Required", policyDecision.approvalLevel);
+      res.setHeader('X-AI-Approval-Required', policyDecision.approvalLevel);
     }
 
     // ── 4. Control-plane model route resolution ─────────────────────────────
@@ -259,9 +262,12 @@ export function aiControlPlane(opts: AiControlPlaneOptions = {}): (req: Request,
           agentTier: tier,
           promptTokenEstimate: promptText ? estimateTokens(promptText) : undefined,
         });
-        res.locals["controlPlaneRoute"] = routeResult;
-        res.setHeader("X-AI-Route-Class", policyRouteClass);
-        res.setHeader("X-AI-Resolved-Model", `${routeResult.endpoint.provider}/${routeResult.endpoint.model}`);
+        res.locals['controlPlaneRoute'] = routeResult;
+        res.setHeader('X-AI-Route-Class', policyRouteClass);
+        res.setHeader(
+          'X-AI-Resolved-Model',
+          `${routeResult.endpoint.provider}/${routeResult.endpoint.model}`,
+        );
       } catch {
         // Route resolution failure is non-fatal — handlers fall back to their own routing.
       }
@@ -272,23 +278,23 @@ export function aiControlPlane(opts: AiControlPlaneOptions = {}): (req: Request,
     if (!budgetCheck.allowed) {
       logger.warn(
         {
-          event: "ai_control_plane.budget_exceeded",
+          event: 'ai_control_plane.budget_exceeded',
           orgId,
           tier,
           reason: budgetCheck.reason,
           path: req.path,
         },
-        "AI request blocked by budget hard-stop",
+        'AI request blocked by budget hard-stop',
       );
       if (blockOnBudgetExceeded) {
         res.status(429).json({
-          error: "AI budget limit reached",
-          code: "BUDGET_HARD_STOP",
+          error: 'AI budget limit reached',
+          code: 'BUDGET_HARD_STOP',
           message: budgetCheck.reason,
         });
         return;
       }
-      res.setHeader("X-AI-Budget-Warning", budgetCheck.reason ?? "budget_limit_approaching");
+      res.setHeader('X-AI-Budget-Warning', budgetCheck.reason ?? 'budget_limit_approaching');
     }
 
     // ── 6. Post-response cost recording ────────────────────────────────────
@@ -296,9 +302,9 @@ export function aiControlPlane(opts: AiControlPlaneOptions = {}): (req: Request,
     //    to the control-plane-resolved model endpoint for pricing context.
     const promptCharCount = promptText.length;
 
-    res.on("finish", () => {
+    res.on('finish', () => {
       try {
-        const usage = res.locals["aiUsage"] as
+        const usage = res.locals['aiUsage'] as
           | {
               promptTokens?: number;
               completionTokens?: number;
@@ -308,17 +314,29 @@ export function aiControlPlane(opts: AiControlPlaneOptions = {}): (req: Request,
             }
           | undefined;
 
-        const controlPlaneRoute = res.locals["controlPlaneRoute"] as
-          | { endpoint: { provider: string; model: string; costPerInputToken?: number; costPerOutputToken?: number } }
+        const controlPlaneRoute = res.locals['controlPlaneRoute'] as
+          | {
+              endpoint: {
+                provider: string;
+                model: string;
+                costPerInputToken?: number;
+                costPerOutputToken?: number;
+              };
+            }
           | undefined;
 
-        const provider = usage?.provider ?? controlPlaneRoute?.endpoint.provider ?? "unknown";
-        const model = usage?.model ?? controlPlaneRoute?.endpoint.model ?? "unknown";
-        const inputTokens = usage?.promptTokens ?? estimateTokens(promptCharCount > 0 ? promptText : "");
+        const provider = usage?.provider ?? controlPlaneRoute?.endpoint.provider ?? 'unknown';
+        const model = usage?.model ?? controlPlaneRoute?.endpoint.model ?? 'unknown';
+        const inputTokens =
+          usage?.promptTokens ?? estimateTokens(promptCharCount > 0 ? promptText : '');
         const outputTokens = usage?.completionTokens ?? 0;
 
-        const inputCostPerToken = controlPlaneRoute?.endpoint.costPerInputToken ?? getProviderPricing(provider).inputPerToken;
-        const outputCostPerToken = controlPlaneRoute?.endpoint.costPerOutputToken ?? getProviderPricing(provider).outputPerToken;
+        const inputCostPerToken =
+          controlPlaneRoute?.endpoint.costPerInputToken ??
+          getProviderPricing(provider).inputPerToken;
+        const outputCostPerToken =
+          controlPlaneRoute?.endpoint.costPerOutputToken ??
+          getProviderPricing(provider).outputPerToken;
 
         costController.record({
           orgId,

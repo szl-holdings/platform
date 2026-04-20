@@ -1,36 +1,85 @@
-import { useState, useMemo, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSearch } from "wouter";
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
-
-  ShieldCheck,
-  Plus,
-  Pencil,
-  Trash2,
-  RefreshCw,
   AlertTriangle,
+  Bot,
+  Check,
   ChevronDown,
   ChevronRight,
-  Check,
-  X,
-  Zap,
   Eye,
   FileText,
   Hand,
-  Bot,
-} from "lucide-react";
-import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
+  Pencil,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+  X,
+  Zap,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearch } from 'wouter';
 
-const ACCENT = "#d4a054";
+const ACCENT = '#d4a054';
 
-type PolicyMode = "observe" | "recommend" | "draft" | "approval-required" | "auto-within-guardrails";
+type PolicyMode =
+  | 'observe'
+  | 'recommend'
+  | 'draft'
+  | 'approval-required'
+  | 'auto-within-guardrails';
 
-const MODE_META: Record<PolicyMode, { label: string; description: string; color: string; bg: string; border: string; Icon: React.FC<{ className?: string }> }> = {
-  "observe":                { label: "Observe", description: "Log only — no action", color: "#7c8a9a", bg: "rgba(124,138,154,0.10)", border: "rgba(124,138,154,0.30)", Icon: Eye },
-  "recommend":              { label: "Recommend", description: "Surface recommendation, no execution", color: "#8b7ac8", bg: "rgba(139,122,200,0.10)", border: "rgba(139,122,200,0.30)", Icon: FileText },
-  "draft":                  { label: "Draft", description: "Produce draft for human review", color: "#0ea5e9", bg: "rgba(14,165,233,0.10)", border: "rgba(14,165,233,0.30)", Icon: FileText },
-  "approval-required":      { label: "Approval Required", description: "Queue for explicit human sign-off", color: "#d4a054", bg: "rgba(212,160,84,0.10)", border: "rgba(212,160,84,0.30)", Icon: Hand },
-  "auto-within-guardrails": { label: "Auto (Guardrails)", description: "Execute autonomously within limits", color: "#22c55e", bg: "rgba(34,197,94,0.10)", border: "rgba(34,197,94,0.30)", Icon: Bot },
+const MODE_META: Record<
+  PolicyMode,
+  {
+    label: string;
+    description: string;
+    color: string;
+    bg: string;
+    border: string;
+    Icon: React.FC<{ className?: string }>;
+  }
+> = {
+  observe: {
+    label: 'Observe',
+    description: 'Log only — no action',
+    color: '#7c8a9a',
+    bg: 'rgba(124,138,154,0.10)',
+    border: 'rgba(124,138,154,0.30)',
+    Icon: Eye,
+  },
+  recommend: {
+    label: 'Recommend',
+    description: 'Surface recommendation, no execution',
+    color: '#8b7ac8',
+    bg: 'rgba(139,122,200,0.10)',
+    border: 'rgba(139,122,200,0.30)',
+    Icon: FileText,
+  },
+  draft: {
+    label: 'Draft',
+    description: 'Produce draft for human review',
+    color: '#0ea5e9',
+    bg: 'rgba(14,165,233,0.10)',
+    border: 'rgba(14,165,233,0.30)',
+    Icon: FileText,
+  },
+  'approval-required': {
+    label: 'Approval Required',
+    description: 'Queue for explicit human sign-off',
+    color: '#d4a054',
+    bg: 'rgba(212,160,84,0.10)',
+    border: 'rgba(212,160,84,0.30)',
+    Icon: Hand,
+  },
+  'auto-within-guardrails': {
+    label: 'Auto (Guardrails)',
+    description: 'Execute autonomously within limits',
+    color: '#22c55e',
+    bg: 'rgba(34,197,94,0.10)',
+    border: 'rgba(34,197,94,0.30)',
+    Icon: Bot,
+  },
 };
 
 interface PolicyModeConfig {
@@ -54,19 +103,19 @@ interface ApiResponse<T> {
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
     ...init,
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
+    const text = await res.text().catch(() => '');
     throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
   }
   return res.json() as Promise<T>;
 }
 
 function ModePill({ mode }: { mode: PolicyMode }) {
-  const m = MODE_META[mode] ?? MODE_META["approval-required"];
+  const m = MODE_META[mode] ?? MODE_META['approval-required'];
   return (
     <span
       className="inline-flex items-center gap-1 text-[9px] font-mono font-semibold tracking-wider px-1.5 py-px rounded uppercase"
@@ -79,15 +128,15 @@ function ModePill({ mode }: { mode: PolicyMode }) {
 }
 
 const EMPTY_FORM = {
-  product: "",
-  actionType: "",
-  workspace: "*",
-  mode: "approval-required" as PolicyMode,
+  product: '',
+  actionType: '',
+  workspace: '*',
+  mode: 'approval-required' as PolicyMode,
   confidenceThreshold: 0.8,
-  maxCostUsd: "",
-  guardedEntitySensitivity: "internal",
-  environment: "production",
-  reason: "",
+  maxCostUsd: '',
+  guardedEntitySensitivity: 'internal',
+  environment: 'production',
+  reason: '',
 };
 
 function ModeForm({
@@ -102,110 +151,206 @@ function ModeForm({
   busy: boolean;
 }) {
   const [form, setForm] = useState(initial ?? EMPTY_FORM);
-  const set = (k: keyof typeof EMPTY_FORM, v: unknown) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: keyof typeof EMPTY_FORM, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
   const valid = form.product.trim().length > 0 && form.actionType.trim().length > 0;
 
   return (
-    <div className="rounded border p-3 flex flex-col gap-2" style={{ borderColor: `${ACCENT}25`, background: `${ACCENT}06` }}>
+    <div
+      className="rounded border p-3 flex flex-col gap-2"
+      style={{ borderColor: `${ACCENT}25`, background: `${ACCENT}06` }}
+    >
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Product *</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Product *
+          </label>
           <input
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             placeholder="e.g. vessels"
             value={form.product}
-            onChange={e => set("product", e.target.value)}
+            onChange={(e) => set('product', e.target.value)}
           />
         </div>
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Action Type *</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Action Type *
+          </label>
           <input
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             placeholder="e.g. vessel.reroute"
             value={form.actionType}
-            onChange={e => set("actionType", e.target.value)}
+            onChange={(e) => set('actionType', e.target.value)}
           />
         </div>
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Workspace</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Workspace
+          </label>
           <input
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             placeholder="* (all)"
             value={form.workspace}
-            onChange={e => set("workspace", e.target.value)}
+            onChange={(e) => set('workspace', e.target.value)}
           />
         </div>
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Mode *</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Mode *
+          </label>
           <select
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "#0c1420", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: '#0c1420',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             value={form.mode}
-            onChange={e => set("mode", e.target.value as PolicyMode)}
+            onChange={(e) => set('mode', e.target.value as PolicyMode)}
           >
-            {(Object.keys(MODE_META) as PolicyMode[]).map(m => (
-              <option key={m} value={m}>{MODE_META[m].label}</option>
+            {(Object.keys(MODE_META) as PolicyMode[]).map((m) => (
+              <option key={m} value={m}>
+                {MODE_META[m].label}
+              </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Min Confidence</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Min Confidence
+          </label>
           <input
             type="number"
-            min={0} max={1} step={0.05}
+            min={0}
+            max={1}
+            step={0.05}
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             value={form.confidenceThreshold}
-            onChange={e => set("confidenceThreshold", parseFloat(e.target.value))}
+            onChange={(e) => set('confidenceThreshold', parseFloat(e.target.value))}
           />
         </div>
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Max Cost (USD)</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Max Cost (USD)
+          </label>
           <input
             type="number"
             min={0}
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             placeholder="unlimited"
             value={form.maxCostUsd}
-            onChange={e => set("maxCostUsd", e.target.value)}
+            onChange={(e) => set('maxCostUsd', e.target.value)}
           />
         </div>
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Entity Sensitivity</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Entity Sensitivity
+          </label>
           <select
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "#0c1420", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: '#0c1420',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             value={form.guardedEntitySensitivity}
-            onChange={e => set("guardedEntitySensitivity", e.target.value)}
+            onChange={(e) => set('guardedEntitySensitivity', e.target.value)}
           >
-            {["public", "internal", "confidential", "restricted"].map(s => <option key={s} value={s}>{s}</option>)}
+            {['public', 'internal', 'confidential', 'restricted'].map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
           </select>
         </div>
         <div>
-          <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Environment</label>
+          <label
+            className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Environment
+          </label>
           <select
             className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-            style={{ background: "#0c1420", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+            style={{
+              background: '#0c1420',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.85)',
+            }}
             value={form.environment}
-            onChange={e => set("environment", e.target.value)}
+            onChange={(e) => set('environment', e.target.value)}
           >
-            {["all", "development", "staging", "production"].map(e => <option key={e} value={e}>{e}</option>)}
+            {['all', 'development', 'staging', 'production'].map((e) => (
+              <option key={e} value={e}>
+                {e}
+              </option>
+            ))}
           </select>
         </div>
       </div>
       <div>
-        <label className="text-[9px] uppercase tracking-widest font-mono mb-1 block" style={{ color: "rgba(255,255,255,0.4)" }}>Reason / Notes</label>
+        <label
+          className="text-[9px] uppercase tracking-widest font-mono mb-1 block"
+          style={{ color: 'rgba(255,255,255,0.4)' }}
+        >
+          Reason / Notes
+        </label>
         <input
           className="w-full text-[11px] px-2 py-1.5 rounded outline-none"
-          style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}
+          style={{
+            background: 'rgba(0,0,0,0.3)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.85)',
+          }}
           placeholder="Why this mode for this scope?"
           value={form.reason}
-          onChange={e => set("reason", e.target.value)}
+          onChange={(e) => set('reason', e.target.value)}
         />
       </div>
       <div className="flex items-center gap-2">
@@ -213,14 +358,18 @@ function ModeForm({
           disabled={busy || !valid}
           onClick={() => onSubmit(form)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold transition-opacity disabled:opacity-50"
-          style={{ color: "#22c55e", background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.35)" }}
+          style={{
+            color: '#22c55e',
+            background: 'rgba(34,197,94,0.10)',
+            border: '1px solid rgba(34,197,94,0.35)',
+          }}
         >
           <Check className="w-3 h-3" /> Save
         </button>
         <button
           onClick={onCancel}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
-          style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}
+          style={{ color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
           <X className="w-3 h-3" /> Cancel
         </button>
@@ -245,60 +394,73 @@ function ConfigRow({
   busy: boolean;
 }) {
   return (
-    <div className="rounded border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
+    <div
+      className="rounded border"
+      style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}
+    >
       <button
         onClick={onToggle}
         className="w-full flex items-start gap-3 px-3 py-2.5 text-left hover:bg-white/[0.02] transition-colors"
       >
-        <span style={{ color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
+        <span style={{ color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
           {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[12px] font-semibold font-mono" style={{ color: "rgba(255,255,255,0.9)" }}>
+            <span
+              className="text-[12px] font-semibold font-mono"
+              style={{ color: 'rgba(255,255,255,0.9)' }}
+            >
               {config.scope.product}
             </span>
-            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
               · {config.scope.actionType}
             </span>
-            {config.scope.workspace !== "*" && (
-              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+            {config.scope.workspace !== '*' && (
+              <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 @ {config.scope.workspace}
               </span>
             )}
             <ModePill mode={config.mode} />
           </div>
-          <div className="text-[10px] font-mono mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+          <div className="text-[10px] font-mono mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
             conf ≥ {(config.confidenceThreshold * 100).toFixed(0)}%
-            {config.maxCostUsd !== undefined ? ` · cost ≤ $${config.maxCostUsd.toLocaleString()}` : ""}
-            {" · "}{config.environment}
+            {config.maxCostUsd !== undefined
+              ? ` · cost ≤ $${config.maxCostUsd.toLocaleString()}`
+              : ''}
+            {' · '}
+            {config.environment}
           </div>
         </div>
       </button>
 
       {expanded && (
-        <div className="px-3 pb-3 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="px-3 pb-3 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
           {config.reason && (
-            <div className="text-[11px] mb-3" style={{ color: "rgba(255,255,255,0.65)" }}>
+            <div className="text-[11px] mb-3" style={{ color: 'rgba(255,255,255,0.65)' }}>
               {config.reason}
             </div>
           )}
           <div className="grid grid-cols-2 gap-2 text-[10px] font-mono mb-3">
             <div>
-              <span style={{ color: "rgba(255,255,255,0.35)" }}>Entity Sensitivity</span>{" "}
-              <span style={{ color: "rgba(255,255,255,0.75)" }}>{config.guardedEntitySensitivity}</span>
+              <span style={{ color: 'rgba(255,255,255,0.35)' }}>Entity Sensitivity</span>{' '}
+              <span style={{ color: 'rgba(255,255,255,0.75)' }}>
+                {config.guardedEntitySensitivity}
+              </span>
             </div>
             <div>
-              <span style={{ color: "rgba(255,255,255,0.35)" }}>Created By</span>{" "}
-              <span style={{ color: "rgba(255,255,255,0.75)" }}>{config.createdBy ?? "—"}</span>
+              <span style={{ color: 'rgba(255,255,255,0.35)' }}>Created By</span>{' '}
+              <span style={{ color: 'rgba(255,255,255,0.75)' }}>{config.createdBy ?? '—'}</span>
             </div>
             <div>
-              <span style={{ color: "rgba(255,255,255,0.35)" }}>Config ID</span>{" "}
-              <span style={{ color: "rgba(255,255,255,0.5)" }}>{config.id.substring(0, 16)}…</span>
+              <span style={{ color: 'rgba(255,255,255,0.35)' }}>Config ID</span>{' '}
+              <span style={{ color: 'rgba(255,255,255,0.5)' }}>{config.id.substring(0, 16)}…</span>
             </div>
             <div>
-              <span style={{ color: "rgba(255,255,255,0.35)" }}>Updated</span>{" "}
-              <span style={{ color: "rgba(255,255,255,0.5)" }}>{new Date(config.updatedAt).toLocaleString()}</span>
+              <span style={{ color: 'rgba(255,255,255,0.35)' }}>Updated</span>{' '}
+              <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+                {new Date(config.updatedAt).toLocaleString()}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -314,7 +476,11 @@ function ConfigRow({
               disabled={busy}
               onClick={onDelete}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-semibold"
-              style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }}
+              style={{
+                color: '#ef4444',
+                background: 'rgba(239,68,68,0.08)',
+                border: '1px solid rgba(239,68,68,0.25)',
+              }}
             >
               <Trash2 className="w-3 h-3" /> Delete
             </button>
@@ -334,7 +500,7 @@ export default function PolicyManagerPage() {
   const search = useSearch();
   const initialProductFilter = useMemo(() => {
     const params = new URLSearchParams(search);
-    return params.get("product") ?? "";
+    return params.get('product') ?? '';
   }, [search]);
   const [productFilter, setProductFilter] = useState<string>(initialProductFilter);
   useEffect(() => {
@@ -342,49 +508,60 @@ export default function PolicyManagerPage() {
   }, [initialProductFilter]);
 
   const modesQ = useStandardQuery<ApiResponse<PolicyModeConfig[]>>({
-    queryKey: ["policy-modes"],
-    queryFn: () => fetchJson<ApiResponse<PolicyModeConfig[]>>("/api/policy-modes"),
+    queryKey: ['policy-modes'],
+    queryFn: () => fetchJson<ApiResponse<PolicyModeConfig[]>>('/api/policy-modes'),
     refetchInterval: 30_000,
   });
 
   const metaQ = useStandardQuery<{ modes: Array<{ mode: PolicyMode; description: string }> }>({
-    queryKey: ["policy-modes-meta"],
-    queryFn: () => fetchJson("/api/policy-modes/meta"),
+    queryKey: ['policy-modes-meta'],
+    queryFn: () => fetchJson('/api/policy-modes/meta'),
     staleTime: Infinity,
   });
 
   const createMut = useStandardMutation({
-    mutationFn: (body: object) => fetchJson("/api/policy-modes", { method: "POST", body: JSON.stringify(body) }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["policy-modes"] }); setCreating(false); },
+    mutationFn: (body: object) =>
+      fetchJson('/api/policy-modes', { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['policy-modes'] });
+      setCreating(false);
+    },
   });
 
   const updateMut = useStandardMutation({
     mutationFn: ({ id, body }: { id: string; body: object }) =>
-      fetchJson(`/api/policy-modes/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["policy-modes"] }); setEditingId(null); },
+      fetchJson(`/api/policy-modes/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['policy-modes'] });
+      setEditingId(null);
+    },
   });
 
   const deleteMut = useStandardMutation({
-    mutationFn: (id: string) => fetchJson(`/api/policy-modes/${id}`, { method: "DELETE" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["policy-modes"] }),
+    mutationFn: (id: string) => fetchJson(`/api/policy-modes/${id}`, { method: 'DELETE' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['policy-modes'] }),
   });
 
   const seedMut = useStandardMutation({
-    mutationFn: () => fetchJson("/api/demo/seed-governed-scenarios", { method: "POST" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["policy-modes"] }),
+    mutationFn: () => fetchJson('/api/demo/seed-governed-scenarios', { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['policy-modes'] }),
   });
 
   const allConfigs = modesQ.data?.data ?? [];
   const configs = useMemo(() => {
     if (!productFilter) return allConfigs;
     const needle = productFilter.toLowerCase();
-    return allConfigs.filter(c => c.scope.product.toLowerCase() === needle);
+    return allConfigs.filter((c) => c.scope.product.toLowerCase() === needle);
   }, [allConfigs, productFilter]);
   const busy = createMut.isPending || updateMut.isPending || deleteMut.isPending;
 
   function handleCreate(form: typeof EMPTY_FORM) {
     const body = {
-      scope: { product: form.product || "*", actionType: form.actionType || "*", workspace: form.workspace || "*" },
+      scope: {
+        product: form.product || '*',
+        actionType: form.actionType || '*',
+        workspace: form.workspace || '*',
+      },
       mode: form.mode,
       confidenceThreshold: form.confidenceThreshold,
       maxCostUsd: form.maxCostUsd ? parseFloat(String(form.maxCostUsd)) : undefined,
@@ -397,7 +574,11 @@ export default function PolicyManagerPage() {
 
   function handleUpdate(id: string, form: typeof EMPTY_FORM) {
     const body = {
-      scope: { product: form.product || "*", actionType: form.actionType || "*", workspace: form.workspace || "*" },
+      scope: {
+        product: form.product || '*',
+        actionType: form.actionType || '*',
+        workspace: form.workspace || '*',
+      },
       mode: form.mode,
       confidenceThreshold: form.confidenceThreshold,
       maxCostUsd: form.maxCostUsd ? parseFloat(String(form.maxCostUsd)) : undefined,
@@ -415,29 +596,35 @@ export default function PolicyManagerPage() {
   }, [metaQ.data]);
 
   const EMPTY_FORM = {
-    product: "",
-    actionType: "",
-    workspace: "*",
-    mode: "approval-required" as PolicyMode,
+    product: '',
+    actionType: '',
+    workspace: '*',
+    mode: 'approval-required' as PolicyMode,
     confidenceThreshold: 0.8,
-    maxCostUsd: "",
-    guardedEntitySensitivity: "internal",
-    environment: "production",
-    reason: "",
+    maxCostUsd: '',
+    guardedEntitySensitivity: 'internal',
+    environment: 'production',
+    reason: '',
   };
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: `${ACCENT}12`, border: `1px solid ${ACCENT}30` }}>
+          <div
+            className="w-8 h-8 rounded flex items-center justify-center"
+            style={{ background: `${ACCENT}12`, border: `1px solid ${ACCENT}30` }}
+          >
             <ShieldCheck className="w-4 h-4" style={{ color: ACCENT }} />
           </div>
           <div>
-            <h1 className="text-[14px] font-bold tracking-wide" style={{ color: "rgba(255,255,255,0.95)" }}>
+            <h1
+              className="text-[14px] font-bold tracking-wide"
+              style={{ color: 'rgba(255,255,255,0.95)' }}
+            >
               Policy Mode Manager
             </h1>
-            <div className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <div className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
               Govern how every action is handled per product · action type · workspace
             </div>
           </div>
@@ -447,19 +634,27 @@ export default function PolicyManagerPage() {
             onClick={() => seedMut.mutate()}
             disabled={seedMut.isPending}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono transition-opacity disabled:opacity-50"
-            style={{ color: "#22c55e", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)" }}
+            style={{
+              color: '#22c55e',
+              background: 'rgba(34,197,94,0.08)',
+              border: '1px solid rgba(34,197,94,0.25)',
+            }}
           >
             <Zap className="w-3 h-3" /> Seed Demo Scenarios
           </button>
           <button
             onClick={() => modesQ.refetch()}
             className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}
           >
-            <RefreshCw className={`w-3 h-3 ${modesQ.isFetching ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw className={`w-3 h-3 ${modesQ.isFetching ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <button
-            onClick={() => { setCreating(true); setEditingId(null); setExpandedId(null); }}
+            onClick={() => {
+              setCreating(true);
+              setEditingId(null);
+              setExpandedId(null);
+            }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-semibold"
             style={{ color: ACCENT, background: `${ACCENT}12`, border: `1px solid ${ACCENT}30` }}
           >
@@ -471,20 +666,27 @@ export default function PolicyManagerPage() {
       {productFilter && (
         <div
           className="rounded p-2.5 mb-4 flex items-center gap-2 text-[11px]"
-          style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}30`, color: "rgba(255,255,255,0.85)" }}
+          style={{
+            background: `${ACCENT}10`,
+            border: `1px solid ${ACCENT}30`,
+            color: 'rgba(255,255,255,0.85)',
+          }}
           data-testid="policy-product-filter-banner"
         >
           <ShieldCheck className="w-3.5 h-3.5" style={{ color: ACCENT }} />
           <span>
-            Filtered by product: <span className="font-mono font-semibold" style={{ color: ACCENT }}>{productFilter}</span>
-            <span className="ml-2" style={{ color: "rgba(255,255,255,0.4)" }}>
-              ({configs.length} of {allConfigs.length} rule{allConfigs.length === 1 ? "" : "s"})
+            Filtered by product:{' '}
+            <span className="font-mono font-semibold" style={{ color: ACCENT }}>
+              {productFilter}
+            </span>
+            <span className="ml-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              ({configs.length} of {allConfigs.length} rule{allConfigs.length === 1 ? '' : 's'})
             </span>
           </span>
           <button
-            onClick={() => setProductFilter("")}
+            onClick={() => setProductFilter('')}
             className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono hover:bg-white/5"
-            style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.10)" }}
+            style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.10)' }}
             data-testid="policy-product-filter-clear"
           >
             <X className="w-3 h-3" /> Clear filter
@@ -493,9 +695,9 @@ export default function PolicyManagerPage() {
       )}
 
       <div className="grid grid-cols-5 gap-2 mb-5">
-        {(Object.keys(MODE_META) as PolicyMode[]).map(m => {
+        {(Object.keys(MODE_META) as PolicyMode[]).map((m) => {
           const meta = MODE_META[m];
-          const count = configs.filter(c => c.mode === m).length;
+          const count = configs.filter((c) => c.mode === m).length;
           return (
             <div
               key={m}
@@ -503,29 +705,49 @@ export default function PolicyManagerPage() {
               style={{ background: meta.bg, border: `1px solid ${meta.border}` }}
             >
               <div className="flex items-center gap-1.5">
-                <span style={{ color: meta.color, display: "inline-flex" }}>
+                <span style={{ color: meta.color, display: 'inline-flex' }}>
                   <meta.Icon className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-[10px] font-semibold" style={{ color: meta.color }}>{meta.label}</span>
+                <span className="text-[10px] font-semibold" style={{ color: meta.color }}>
+                  {meta.label}
+                </span>
               </div>
-              <div className="text-[18px] font-bold font-mono" style={{ color: meta.color }}>{count}</div>
-              <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.45)" }}>{modeDescriptions[m] ?? meta.description}</div>
+              <div className="text-[18px] font-bold font-mono" style={{ color: meta.color }}>
+                {count}
+              </div>
+              <div className="text-[9px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {modeDescriptions[m] ?? meta.description}
+              </div>
             </div>
           );
         })}
       </div>
 
       {modesQ.error && (
-        <div className="rounded p-3 mb-3 flex items-center gap-2 text-[11px]" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444" }}>
+        <div
+          className="rounded p-3 mb-3 flex items-center gap-2 text-[11px]"
+          style={{
+            background: 'rgba(239,68,68,0.06)',
+            border: '1px solid rgba(239,68,68,0.25)',
+            color: '#ef4444',
+          }}
+        >
           <AlertTriangle className="w-3.5 h-3.5" />
           Failed to load policy modes: {(modesQ.error as Error).message}
         </div>
       )}
 
       {(createMut.isError || updateMut.isError) && (
-        <div className="rounded p-3 mb-3 flex items-center gap-2 text-[11px]" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444" }}>
+        <div
+          className="rounded p-3 mb-3 flex items-center gap-2 text-[11px]"
+          style={{
+            background: 'rgba(239,68,68,0.06)',
+            border: '1px solid rgba(239,68,68,0.25)',
+            color: '#ef4444',
+          }}
+        >
           <AlertTriangle className="w-3.5 h-3.5" />
-          {((createMut.error ?? updateMut.error) as Error)?.message ?? "Operation failed"}
+          {((createMut.error ?? updateMut.error) as Error)?.message ?? 'Operation failed'}
         </div>
       )}
 
@@ -541,29 +763,42 @@ export default function PolicyManagerPage() {
       )}
 
       {modesQ.isLoading ? (
-        <div className="text-[11px] font-mono py-8 text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <div
+          className="text-[11px] font-mono py-8 text-center"
+          style={{ color: 'rgba(255,255,255,0.4)' }}
+        >
           Loading policy modes…
         </div>
       ) : configs.length === 0 && !creating ? (
         <div
           className="rounded py-12 text-center"
-          style={{ background: "rgba(255,255,255,0.015)", border: "1px dashed rgba(255,255,255,0.08)" }}
+          style={{
+            background: 'rgba(255,255,255,0.015)',
+            border: '1px dashed rgba(255,255,255,0.08)',
+          }}
         >
-          <ShieldCheck className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(255,255,255,0.2)" }} />
-          <div className="text-[11px] font-mono mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <ShieldCheck
+            className="w-8 h-8 mx-auto mb-2"
+            style={{ color: 'rgba(255,255,255,0.2)' }}
+          />
+          <div className="text-[11px] font-mono mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
             No policy mode rules configured. All actions default to approval-required.
           </div>
           <button
             onClick={() => seedMut.mutate()}
             className="text-[10px] px-3 py-1.5 rounded font-mono"
-            style={{ color: "#22c55e", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)" }}
+            style={{
+              color: '#22c55e',
+              background: 'rgba(34,197,94,0.08)',
+              border: '1px solid rgba(34,197,94,0.25)',
+            }}
           >
             <Zap className="w-3 h-3 inline mr-1" /> Seed Demo Scenarios
           </button>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {configs.map(c => (
+          {configs.map((c) =>
             editingId === c.id ? (
               <ModeForm
                 key={c.id}
@@ -573,12 +808,12 @@ export default function PolicyManagerPage() {
                   workspace: c.scope.workspace,
                   mode: c.mode,
                   confidenceThreshold: c.confidenceThreshold,
-                  maxCostUsd: c.maxCostUsd !== undefined ? String(c.maxCostUsd) : "",
+                  maxCostUsd: c.maxCostUsd !== undefined ? String(c.maxCostUsd) : '',
                   guardedEntitySensitivity: c.guardedEntitySensitivity,
                   environment: c.environment,
-                  reason: c.reason ?? "",
+                  reason: c.reason ?? '',
                 }}
-                onSubmit={form => handleUpdate(c.id, form)}
+                onSubmit={(form) => handleUpdate(c.id, form)}
                 onCancel={() => setEditingId(null)}
                 busy={updateMut.isPending}
               />
@@ -588,12 +823,16 @@ export default function PolicyManagerPage() {
                 config={c}
                 expanded={expandedId === c.id}
                 onToggle={() => setExpandedId(expandedId === c.id ? null : c.id)}
-                onEdit={() => { setEditingId(c.id); setCreating(false); setExpandedId(null); }}
+                onEdit={() => {
+                  setEditingId(c.id);
+                  setCreating(false);
+                  setExpandedId(null);
+                }}
                 onDelete={() => deleteMut.mutate(c.id)}
                 busy={busy}
               />
-            )
-          ))}
+            ),
+          )}
         </div>
       )}
     </div>

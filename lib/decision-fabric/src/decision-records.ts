@@ -9,22 +9,22 @@
  */
 
 import {
+  type DecisionRecord,
   db,
   decisionRecordsTable,
-  policyVersionsTable,
+  type FabricSimulationSnapshot,
   fabricSimulationSnapshotsTable,
-  type DecisionRecord,
   type InsertDecisionRecord,
   type PolicyVersion,
-  type FabricSimulationSnapshot,
-} from "@szl-holdings/db";
-import { and, desc, eq } from "drizzle-orm";
-import { linkEvent } from "./correlation";
+  policyVersionsTable,
+} from '@szl-holdings/db';
+import { and, desc, eq } from 'drizzle-orm';
+import { linkEvent } from './correlation';
 
-export type { DecisionRecord, PolicyVersion, FabricSimulationSnapshot };
+export type { DecisionRecord, FabricSimulationSnapshot, PolicyVersion };
 export type SimulationSnapshot = FabricSimulationSnapshot;
 
-export interface RecordDecisionParams extends Omit<InsertDecisionRecord, "id"> {}
+export interface RecordDecisionParams extends Omit<InsertDecisionRecord, 'id'> {}
 
 /**
  * Persist a decision record. If the caller supplies a `correlationId` and/or
@@ -43,7 +43,7 @@ export async function recordDecision(params: RecordDecisionParams): Promise<Deci
     try {
       await linkEvent({
         correlationId: row.correlationId ?? `decision:${row.id}`,
-        primitive: "decision_record",
+        primitive: 'decision_record',
         primitiveId: String(row.id),
         orgId: row.orgId,
         entityType: row.entityType ?? null,
@@ -64,7 +64,7 @@ export interface SnapshotPolicyParams {
   policyId: string;
   version: string;
   policyName: string;
-  effect: "allow" | "deny";
+  effect: 'allow' | 'deny';
   body: Record<string, unknown>;
   authoredByUserId?: number | null;
 }
@@ -88,7 +88,7 @@ export async function snapshotPolicy(params: SnapshotPolicyParams): Promise<Poli
 
 export interface SnapshotSimulationParams {
   orgId?: number | null;
-  domain?: FabricSimulationSnapshot["domain"];
+  domain?: FabricSimulationSnapshot['domain'];
   scenarioId: string;
   scenarioName: string;
   inputs?: Record<string, unknown>;
@@ -99,12 +99,14 @@ export interface SnapshotSimulationParams {
   seed?: string | null;
 }
 
-export async function snapshotSimulation(params: SnapshotSimulationParams): Promise<FabricSimulationSnapshot> {
+export async function snapshotSimulation(
+  params: SnapshotSimulationParams,
+): Promise<FabricSimulationSnapshot> {
   const [row] = await db
     .insert(fabricSimulationSnapshotsTable)
     .values({
       orgId: params.orgId ?? null,
-      domain: params.domain ?? "general",
+      domain: params.domain ?? 'general',
       scenarioId: params.scenarioId,
       scenarioName: params.scenarioName,
       inputs: params.inputs ?? {},
@@ -124,7 +126,7 @@ export interface RecordActualOutcomeParams {
   orgId: number | null;
   actualOutcome: Record<string, unknown>;
   predictionError?: number | null;
-  status?: DecisionRecord["status"];
+  status?: DecisionRecord['status'];
 }
 
 /**
@@ -134,7 +136,9 @@ export interface RecordActualOutcomeParams {
  * is platform-scoped and the caller is platform-admin, signaled by orgId
  * `null`).
  */
-export async function recordActualOutcome(params: RecordActualOutcomeParams): Promise<DecisionRecord | null> {
+export async function recordActualOutcome(
+  params: RecordActualOutcomeParams,
+): Promise<DecisionRecord | null> {
   const conditions: any[] = [eq(decisionRecordsTable.id, params.decisionId)];
   if (params.orgId != null) conditions.push(eq(decisionRecordsTable.orgId, params.orgId));
   const [row] = await db
@@ -142,7 +146,7 @@ export async function recordActualOutcome(params: RecordActualOutcomeParams): Pr
     .set({
       actualOutcome: params.actualOutcome,
       predictionError: params.predictionError ?? null,
-      status: params.status ?? "executed",
+      status: params.status ?? 'executed',
       updatedAt: new Date(),
     })
     .where(and(...conditions))
@@ -155,7 +159,10 @@ export async function recordActualOutcome(params: RecordActualOutcomeParams): Pr
  * the row is returned only if it belongs to that org (or is platform-scoped
  * and the caller is platform-admin, signaled by orgId `null`).
  */
-export async function getDecision(id: number, orgId: number | null): Promise<DecisionRecord | null> {
+export async function getDecision(
+  id: number,
+  orgId: number | null,
+): Promise<DecisionRecord | null> {
   const conditions: any[] = [eq(decisionRecordsTable.id, id)];
   if (orgId != null) conditions.push(eq(decisionRecordsTable.orgId, orgId));
   const [row] = await db
@@ -168,7 +175,7 @@ export async function getDecision(id: number, orgId: number | null): Promise<Dec
 
 export interface ListDecisionsOptions {
   orgId?: number | null;
-  domain?: DecisionRecord["domain"];
+  domain?: DecisionRecord['domain'];
   entityType?: string;
   entityId?: string;
   ownerUserId?: number;
@@ -184,11 +191,19 @@ export async function listDecisions(options: ListDecisionsOptions = {}): Promise
   if (options.domain) conditions.push(eq(decisionRecordsTable.domain, options.domain));
   if (options.entityType) conditions.push(eq(decisionRecordsTable.entityType, options.entityType));
   if (options.entityId) conditions.push(eq(decisionRecordsTable.entityId, options.entityId));
-  if (options.ownerUserId != null) conditions.push(eq(decisionRecordsTable.ownerUserId, options.ownerUserId));
-  if (options.workflowRunId) conditions.push(eq(decisionRecordsTable.workflowRunId, options.workflowRunId));
-  if (options.recommendationId) conditions.push(eq(decisionRecordsTable.recommendationId, options.recommendationId));
-  if (options.correlationId) conditions.push(eq(decisionRecordsTable.correlationId, options.correlationId));
+  if (options.ownerUserId != null)
+    conditions.push(eq(decisionRecordsTable.ownerUserId, options.ownerUserId));
+  if (options.workflowRunId)
+    conditions.push(eq(decisionRecordsTable.workflowRunId, options.workflowRunId));
+  if (options.recommendationId)
+    conditions.push(eq(decisionRecordsTable.recommendationId, options.recommendationId));
+  if (options.correlationId)
+    conditions.push(eq(decisionRecordsTable.correlationId, options.correlationId));
 
-  const q = db.select().from(decisionRecordsTable).orderBy(desc(decisionRecordsTable.decidedAt)).limit(options.limit ?? 100);
+  const q = db
+    .select()
+    .from(decisionRecordsTable)
+    .orderBy(desc(decisionRecordsTable.decidedAt))
+    .limit(options.limit ?? 100);
   return conditions.length > 0 ? await q.where(and(...conditions)) : await q;
 }

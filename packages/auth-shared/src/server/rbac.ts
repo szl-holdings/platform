@@ -11,19 +11,22 @@
  */
 
 import {
-  type PlatformRole,
   type AuthenticatedUser,
-  type OrgMembership,
   ELEVATED_ROLES,
-  READ_ONLY_ROLES,
   isElevated,
-  isReadOnly,
   isMemberOf,
-} from "../types.js";
+  isReadOnly,
+  type OrgMembership,
+  type PlatformRole,
+  READ_ONLY_ROLES,
+} from '../types.js';
 
 export type RbacVerdict =
   | { allowed: true }
-  | { allowed: false; reason: "unauthenticated" | "insufficient_role" | "read_only" | "not_org_member" };
+  | {
+      allowed: false;
+      reason: 'unauthenticated' | 'insufficient_role' | 'read_only' | 'not_org_member';
+    };
 
 // ── Role checks ──────────────────────────────────────────────────────────────
 
@@ -35,10 +38,10 @@ export function checkRole(
   user: AuthenticatedUser | null | undefined,
   ...required: PlatformRole[]
 ): RbacVerdict {
-  if (!user) return { allowed: false, reason: "unauthenticated" };
+  if (!user) return { allowed: false, reason: 'unauthenticated' };
   if (isElevated(user)) return { allowed: true };
   const ok = required.some((r) => user.roles.includes(r));
-  if (!ok) return { allowed: false, reason: "insufficient_role" };
+  if (!ok) return { allowed: false, reason: 'insufficient_role' };
   return { allowed: true };
 }
 
@@ -47,9 +50,9 @@ export function checkRole(
  * read-only roles.  Elevated users always pass.
  */
 export function checkNotReadOnly(user: AuthenticatedUser | null | undefined): RbacVerdict {
-  if (!user) return { allowed: false, reason: "unauthenticated" };
+  if (!user) return { allowed: false, reason: 'unauthenticated' };
   if (isElevated(user)) return { allowed: true };
-  if (isReadOnly(user)) return { allowed: false, reason: "read_only" };
+  if (isReadOnly(user)) return { allowed: false, reason: 'read_only' };
   return { allowed: true };
 }
 
@@ -63,9 +66,9 @@ export function checkOrgMembership(
   user: AuthenticatedUser | null | undefined,
   orgId: number,
 ): RbacVerdict {
-  if (!user) return { allowed: false, reason: "unauthenticated" };
+  if (!user) return { allowed: false, reason: 'unauthenticated' };
   if (isElevated(user)) return { allowed: true };
-  if (!isMemberOf(user, orgId)) return { allowed: false, reason: "not_org_member" };
+  if (!isMemberOf(user, orgId)) return { allowed: false, reason: 'not_org_member' };
   return { allowed: true };
 }
 
@@ -101,9 +104,9 @@ export function allowAllOrgsBypass(
 ): boolean {
   if (!user) return false;
   if (!isElevated(user)) return false;
-  return allOrgsParam === "true" || allOrgsParam === "1";
+  return allOrgsParam === 'true' || allOrgsParam === '1';
 }
 
 // ── Re-exports for convenience ───────────────────────────────────────────────
 
-export { isElevated, isReadOnly, isMemberOf, ELEVATED_ROLES, READ_ONLY_ROLES };
+export { ELEVATED_ROLES, isElevated, isMemberOf, isReadOnly, READ_ONLY_ROLES };

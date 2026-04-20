@@ -1,13 +1,18 @@
-import type { PrismDomain } from "./context.js";
+import type { PrismDomain } from './context.js';
 
-export type PrismConnectorStatus = "connected" | "disconnected" | "degraded" | "error" | "unconfigured";
+export type PrismConnectorStatus =
+  | 'connected'
+  | 'disconnected'
+  | 'degraded'
+  | 'error'
+  | 'unconfigured';
 
 export interface PrismConnectorConfig {
   id: string;
   name: string;
   description?: string;
-  type: "data" | "ai" | "messaging" | "storage" | "identity" | "external_api";
-  transport: "http" | "grpc" | "ws" | "mcp" | "native";
+  type: 'data' | 'ai' | 'messaging' | 'storage' | 'identity' | 'external_api';
+  transport: 'http' | 'grpc' | 'ws' | 'mcp' | 'native';
   domains: PrismDomain[];
   requiresAuth: boolean;
   credentials?: Record<string, string>;
@@ -32,7 +37,7 @@ export interface PrismToolDescriptor {
     required?: string[];
   };
   domains: PrismDomain[];
-  approvalClass: "observe_only" | "propose_only" | "approval_required" | "approved_execute";
+  approvalClass: 'observe_only' | 'propose_only' | 'approval_required' | 'approved_execute';
   connectorId?: string;
   tags?: string[];
 }
@@ -63,7 +68,10 @@ export class PrismConnectorRegistry {
   private resources = new Map<string, PrismResourceDescriptor>();
   private prompts = new Map<string, PrismPromptTemplate>();
 
-  registerConnector(config: PrismConnectorConfig, initialStatus: PrismConnectorStatus = "disconnected"): void {
+  registerConnector(
+    config: PrismConnectorConfig,
+    initialStatus: PrismConnectorStatus = 'disconnected',
+  ): void {
     this.connectors.set(config.id, config);
     this.states.set(config.id, {
       id: config.id,
@@ -100,14 +108,14 @@ export class PrismConnectorRegistry {
   }
 
   getConnectorsForDomain(domain: PrismDomain): PrismConnectorConfig[] {
-    return Array.from(this.connectors.values()).filter(c =>
-      c.domains.includes(domain) || c.domains.length === 0
+    return Array.from(this.connectors.values()).filter(
+      (c) => c.domains.includes(domain) || c.domains.length === 0,
     );
   }
 
   getToolsForDomain(domain: PrismDomain): PrismToolDescriptor[] {
-    return Array.from(this.tools.values()).filter(t =>
-      t.domains.includes(domain) || t.domains.includes("global" as PrismDomain)
+    return Array.from(this.tools.values()).filter(
+      (t) => t.domains.includes(domain) || t.domains.includes('global' as PrismDomain),
     );
   }
 
@@ -137,10 +145,11 @@ export class PrismConnectorRegistry {
     const states = this.getAllStates();
     return {
       total: states.length,
-      connected: states.filter(s => s.status === "connected").length,
-      degraded: states.filter(s => s.status === "degraded").length,
-      error: states.filter(s => s.status === "error").length,
-      disconnected: states.filter(s => s.status === "disconnected" || s.status === "unconfigured").length,
+      connected: states.filter((s) => s.status === 'connected').length,
+      degraded: states.filter((s) => s.status === 'degraded').length,
+      error: states.filter((s) => s.status === 'error').length,
+      disconnected: states.filter((s) => s.status === 'disconnected' || s.status === 'unconfigured')
+        .length,
     };
   }
 }

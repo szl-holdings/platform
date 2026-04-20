@@ -1,4 +1,4 @@
-import type { ActorRole, WorkflowContext, WorkflowStepResult } from "./types.js";
+import type { ActorRole, WorkflowContext, WorkflowStepResult } from './types.js';
 
 export interface ActorExecutionResult {
   output: Record<string, unknown>;
@@ -17,20 +17,20 @@ export abstract class WorkflowActor {
 }
 
 export class IngestionPlannerActor extends WorkflowActor {
-  readonly role: ActorRole = "IngestionPlanner";
+  readonly role: ActorRole = 'IngestionPlanner';
 
   async execute(
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const sourceId = String(input["sourceId"] ?? "unknown");
-    const contentLength = String(input["content"] ?? "").length;
+    const sourceId = String(input['sourceId'] ?? 'unknown');
+    const contentLength = String(input['content'] ?? '').length;
 
     const estimatedChunks = Math.max(1, Math.ceil(contentLength / 512));
 
     return {
       output: {
-        plan: "sequential-ingest",
+        plan: 'sequential-ingest',
         sourceId,
         estimatedChunks,
         contentLengthBytes: contentLength,
@@ -42,23 +42,23 @@ export class IngestionPlannerActor extends WorkflowActor {
 }
 
 export class SourceNormalizerActor extends WorkflowActor {
-  readonly role: ActorRole = "SourceNormalizer";
+  readonly role: ActorRole = 'SourceNormalizer';
 
   async execute(
     _ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const content = String(input["content"] ?? "");
+    const content = String(input['content'] ?? '');
     const normalized = content
-      .replace(/\r\n/g, "\n")
-      .replace(/\t/g, " ")
-      .replace(/[ ]{2,}/g, " ")
+      .replace(/\r\n/g, '\n')
+      .replace(/\t/g, ' ')
+      .replace(/[ ]{2,}/g, ' ')
       .trim();
 
     return {
       output: {
         normalizedLength: normalized.length,
-        contentType: String(input["contentType"] ?? "text/plain"),
+        contentType: String(input['contentType'] ?? 'text/plain'),
         normalizedAt: new Date().toISOString(),
       },
     };
@@ -71,7 +71,7 @@ export class SourceNormalizerActor extends WorkflowActor {
  * pass the profile's value through unchanged.
  */
 export interface ChunkTruncationPolicy {
-  strategy: "truncate" | "reject";
+  strategy: 'truncate' | 'reject';
   maxTokens: number;
   warnAtTokens?: number;
 }
@@ -104,10 +104,10 @@ export interface ChunkPlannerOptions {
  * if the package or model cannot be loaded (caller falls back to words).
  */
 export async function loadDefaultChunkTokenizer(
-  modelRef = "Xenova/all-MiniLM-L6-v2",
+  modelRef = 'Xenova/all-MiniLM-L6-v2',
 ): Promise<ChunkTokenizer | undefined> {
   try {
-    const specifier = "@workspace/alloy-vector-worker";
+    const specifier = '@workspace/alloy-vector-worker';
     const mod = (await import(/* @vite-ignore */ specifier)) as {
       loadTokenizer: (m: string) => Promise<ChunkTokenizer>;
     };
@@ -132,14 +132,14 @@ export interface ChunkPlanEntry {
   start: number;
   /** Exclusive end offset. */
   end: number;
-  unit: "tokens" | "words";
+  unit: 'tokens' | 'words';
   tokenCount: number;
   text?: string;
   truncated?: boolean;
 }
 
 export class ChunkPlannerActor extends WorkflowActor {
-  readonly role: ActorRole = "ChunkPlanner";
+  readonly role: ActorRole = 'ChunkPlanner';
   private tokenizer: ChunkTokenizer | undefined;
   private readonly tokenizerLoader: (() => Promise<ChunkTokenizer | undefined>) | undefined;
   private readonly truncationPolicy: ChunkTruncationPolicy | undefined;
@@ -168,13 +168,14 @@ export class ChunkPlannerActor extends WorkflowActor {
     _ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const content = String(input["content"] ?? "");
-    const chunkSize = Number(input["chunkSize"] ?? 512);
-    const chunkOverlap = Number(input["chunkOverlap"] ?? 64);
-    const policy: ChunkTruncationPolicy =
-      (input["truncationPolicy"] as ChunkTruncationPolicy | undefined) ??
+    const content = String(input['content'] ?? '');
+    const chunkSize = Number(input['chunkSize'] ?? 512);
+    const chunkOverlap = Number(input['chunkOverlap'] ?? 64);
+    const policy: ChunkTruncationPolicy = (input['truncationPolicy'] as
+      | ChunkTruncationPolicy
+      | undefined) ??
       this.truncationPolicy ?? {
-        strategy: "truncate",
+        strategy: 'truncate',
         maxTokens: 512,
       };
 
@@ -197,9 +198,7 @@ export class ChunkPlannerActor extends WorkflowActor {
       throw new Error(`ChunkPlanner: chunkSize=${chunkSize} must be > 0`);
     }
     if (chunkOverlap < 0 || chunkOverlap >= chunkSize) {
-      throw new Error(
-        `ChunkPlanner: chunkOverlap=${chunkOverlap} must be in [0, ${chunkSize})`,
-      );
+      throw new Error(`ChunkPlanner: chunkOverlap=${chunkOverlap} must be in [0, ${chunkSize})`);
     }
     const effectiveSize = chunkSize;
     const step = Math.max(1, effectiveSize - chunkOverlap);
@@ -212,7 +211,7 @@ export class ChunkPlannerActor extends WorkflowActor {
       let truncated = false;
 
       if (windowIds.length > policy.maxTokens) {
-        if (policy.strategy === "reject") {
+        if (policy.strategy === 'reject') {
           throw new Error(
             `ChunkPlanner[reject]: window of ${windowIds.length} tokens exceeds maxTokens=${policy.maxTokens}`,
           );
@@ -225,7 +224,7 @@ export class ChunkPlannerActor extends WorkflowActor {
         chunkIndex: chunks.length,
         start: cursor,
         end: cursor + windowIds.length,
-        unit: "tokens",
+        unit: 'tokens',
         tokenCount: windowIds.length,
         text: tokenizer.decode(windowIds),
         truncated,
@@ -239,7 +238,7 @@ export class ChunkPlannerActor extends WorkflowActor {
       output: {
         chunkPlan: chunks,
         totalChunks: chunks.length,
-        unit: "tokens",
+        unit: 'tokens',
         chunkSizeTokens: effectiveSize,
         chunkOverlapTokens: chunkOverlap,
         totalTokens: ids.length,
@@ -264,7 +263,7 @@ export class ChunkPlannerActor extends WorkflowActor {
       const sliceWords = words.slice(start, end);
       const tokenCountEstimate = Math.ceil(sliceWords.length * 1.3);
 
-      if (tokenCountEstimate > policy.maxTokens && policy.strategy === "reject") {
+      if (tokenCountEstimate > policy.maxTokens && policy.strategy === 'reject') {
         throw new Error(
           `ChunkPlanner[reject]: estimated ${tokenCountEstimate} tokens exceeds maxTokens=${policy.maxTokens} (no tokenizer injected)`,
         );
@@ -274,7 +273,7 @@ export class ChunkPlannerActor extends WorkflowActor {
         chunkIndex: chunks.length,
         start,
         end,
-        unit: "words",
+        unit: 'words',
         tokenCount: tokenCountEstimate,
       });
       if (end >= words.length) break;
@@ -288,7 +287,7 @@ export class ChunkPlannerActor extends WorkflowActor {
       output: {
         chunkPlan: chunks,
         totalChunks: chunks.length,
-        unit: "words",
+        unit: 'words',
         chunkSizeWords: chunkSize,
         chunkOverlapWords: chunkOverlap,
         truncationPolicy: policy,
@@ -298,22 +297,22 @@ export class ChunkPlannerActor extends WorkflowActor {
 }
 
 export class PolicyGuardActor extends WorkflowActor {
-  readonly role: ActorRole = "PolicyGuard";
+  readonly role: ActorRole = 'PolicyGuard';
 
   async execute(
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const operation = String(input["operation"] ?? "ingest");
+    const operation = String(input['operation'] ?? 'ingest');
     const tenantId = ctx.tenantId;
 
-    const isDestructive = ["rebuild_index", "rotate_profile_version"].includes(operation);
+    const isDestructive = ['rebuild_index', 'rotate_profile_version'].includes(operation);
 
     return {
       output: {
         tenantId,
         operation,
-        policyDecision: "allow",
+        policyDecision: 'allow',
         isDestructive,
         approvalRequired: ctx.approvalRequired && isDestructive,
         checkedAt: new Date().toISOString(),
@@ -323,20 +322,20 @@ export class PolicyGuardActor extends WorkflowActor {
 }
 
 export class VectorDispatchActor extends WorkflowActor {
-  readonly role: ActorRole = "VectorDispatch";
+  readonly role: ActorRole = 'VectorDispatch';
 
   async execute(
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const totalChunks = Number(input["totalChunks"] ?? 0);
+    const totalChunks = Number(input['totalChunks'] ?? 0);
 
     return {
       output: {
         dispatchedChunks: totalChunks,
-        backend: "LocalCpuBackend",
+        backend: 'LocalCpuBackend',
         profileId: ctx.profileId,
-        model: "aef-embed-v1",
+        model: 'aef-embed-v1',
         batchSize: 32,
         dispatchedAt: new Date().toISOString(),
       },
@@ -345,14 +344,14 @@ export class VectorDispatchActor extends WorkflowActor {
 }
 
 export class IndexVerifierActor extends WorkflowActor {
-  readonly role: ActorRole = "IndexVerifier";
+  readonly role: ActorRole = 'IndexVerifier';
 
   async execute(
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const expectedChunks = Number(input["expectedChunks"] ?? 0);
-    const indexedChunks = Number(input["indexedChunks"] ?? expectedChunks);
+    const expectedChunks = Number(input['expectedChunks'] ?? 0);
+    const indexedChunks = Number(input['indexedChunks'] ?? expectedChunks);
 
     const missing = expectedChunks - indexedChunks;
     const verified = missing === 0;
@@ -371,20 +370,20 @@ export class IndexVerifierActor extends WorkflowActor {
 }
 
 export class RetrievalEvaluatorActor extends WorkflowActor {
-  readonly role: ActorRole = "RetrievalEvaluator";
+  readonly role: ActorRole = 'RetrievalEvaluator';
 
   async execute(
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const queryCount = Number(input["queryCount"] ?? 0);
+    const queryCount = Number(input['queryCount'] ?? 0);
 
     return {
       output: {
         queryCount,
         profileId: ctx.profileId,
         tenantId: ctx.tenantId,
-        evalStatus: queryCount > 0 ? "completed" : "skipped",
+        evalStatus: queryCount > 0 ? 'completed' : 'skipped',
         sampleMetrics: {
           ndcg_at_10: queryCount > 0 ? 0.82 : null,
           recall_at_10: queryCount > 0 ? 0.75 : null,
@@ -396,17 +395,17 @@ export class RetrievalEvaluatorActor extends WorkflowActor {
 }
 
 export class ApprovalGateActor extends WorkflowActor {
-  readonly role: ActorRole = "ApprovalGate";
+  readonly role: ActorRole = 'ApprovalGate';
 
   async execute(
     _ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const requiresApproval = Boolean(input["requiresApproval"] ?? false);
+    const requiresApproval = Boolean(input['requiresApproval'] ?? false);
 
     return {
       output: {
-        gateResult: requiresApproval ? "approval_required" : "pass",
+        gateResult: requiresApproval ? 'approval_required' : 'pass',
         requiresApproval,
         checkedAt: new Date().toISOString(),
       },

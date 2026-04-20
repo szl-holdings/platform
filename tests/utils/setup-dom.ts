@@ -1,7 +1,7 @@
-import "@testing-library/jest-dom";
-import { vi } from "vitest";
+import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
-vi.mock("@workspace/replit-auth-web", () => ({
+vi.mock('@workspace/replit-auth-web', () => ({
   useAuth: vi.fn().mockReturnValue({
     user: null,
     isLoading: false,

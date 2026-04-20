@@ -1,6 +1,6 @@
-import { useRef, useEffect, useCallback, useState } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface GraphNode {
   id: string;
@@ -40,7 +40,7 @@ export interface GraphCanvasProps {
 export function GraphCanvas({
   nodes,
   edges,
-  width = "100%",
+  width = '100%',
   height = 320,
   className,
   onNodeClick,
@@ -59,7 +59,7 @@ export function GraphCanvas({
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const W = canvas.width;
@@ -129,7 +129,7 @@ export function GraphCanvas({
         const my = (sy + ty) / 2;
         ctx.font = "10px 'Inter', system-ui, sans-serif";
         ctx.fillStyle = color.text.muted;
-        ctx.textAlign = "center";
+        ctx.textAlign = 'center';
         ctx.fillText(edge.label, mx, my - 4);
       }
     });
@@ -144,13 +144,13 @@ export function GraphCanvas({
       if (node.ringColor) {
         ctx.beginPath();
         ctx.arc(x, y, r + 4, 0, Math.PI * 2);
-        ctx.fillStyle = node.ringColor + "33";
+        ctx.fillStyle = node.ringColor + '33';
         ctx.fill();
       }
 
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = fill + "22";
+      ctx.fillStyle = fill + '22';
       ctx.fill();
       ctx.strokeStyle = fill;
       ctx.lineWidth = 1.5;
@@ -162,7 +162,7 @@ export function GraphCanvas({
       if (showLabels) {
         ctx.font = "11px 'Inter', system-ui, sans-serif";
         ctx.fillStyle = color.text.primary;
-        ctx.textAlign = "center";
+        ctx.textAlign = 'center';
         ctx.fillText(node.label, x, y + r + 14);
       }
     });
@@ -172,12 +172,12 @@ export function GraphCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ro = new ResizeObserver(() => {
-      canvas.width  = canvas.offsetWidth;
+      canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
       draw();
     });
     ro.observe(canvas);
-    canvas.width  = canvas.offsetWidth;
+    canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     draw();
     return () => ro.disconnect();
@@ -200,7 +200,7 @@ export function GraphCanvas({
       const node = nodes[i]!;
       const nx = node.x * W;
       const ny = node.y * H;
-      const r  = (node.radius ?? 8) + 6;
+      const r = (node.radius ?? 8) + 6;
       if (Math.hypot(mx - nx, my - ny) <= r) return node;
     }
     return null;
@@ -268,16 +268,16 @@ export function GraphCanvas({
   }
 
   const cursor = dragRef.current
-    ? "grabbing"
+    ? 'grabbing'
     : hoverId
-    ? draggable
-      ? "grab"
-      : "pointer"
-    : "default";
+      ? draggable
+        ? 'grab'
+        : 'pointer'
+      : 'default';
 
   return (
     <div
-      className={cn("rounded-lg overflow-hidden", className)}
+      className={cn('rounded-lg overflow-hidden', className)}
       style={{ width, height, border: `1px solid ${color.border.default}` }}
     >
       <canvas
@@ -287,7 +287,7 @@ export function GraphCanvas({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         className="block w-full h-full select-none"
-        style={{ cursor, touchAction: "none" }}
+        style={{ cursor, touchAction: 'none' }}
         aria-label="Graph visualization"
         role="img"
       />

@@ -1,7 +1,5 @@
 const meta = import.meta as unknown as { env?: { BASE_URL?: string } };
-const API_BASE = meta.env?.BASE_URL
-  ? `${meta.env.BASE_URL}api`
-  : "/api";
+const API_BASE = meta.env?.BASE_URL ? `${meta.env.BASE_URL}api` : '/api';
 
 export interface WebPushRegistrationOptions {
   appId: string;
@@ -21,13 +19,15 @@ export async function getVapidPublicKey(): Promise<string | null> {
   }
 }
 
-export async function registerWebPush(options: WebPushRegistrationOptions): Promise<PushSubscription | null> {
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+export async function registerWebPush(
+  options: WebPushRegistrationOptions,
+): Promise<PushSubscription | null> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     return null;
   }
 
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") {
+  if (permission !== 'granted') {
     options.onPermissionDenied?.();
     return null;
   }
@@ -35,7 +35,7 @@ export async function registerWebPush(options: WebPushRegistrationOptions): Prom
   try {
     const vapidPublicKey = await getVapidPublicKey();
     if (!vapidPublicKey) {
-      throw new Error("Web push not configured on server");
+      throw new Error('Web push not configured on server');
     }
 
     const registration = await navigator.serviceWorker.ready;
@@ -62,7 +62,7 @@ export async function registerWebPush(options: WebPushRegistrationOptions): Prom
 }
 
 export async function unregisterWebPush(): Promise<void> {
-  if (!("serviceWorker" in navigator)) return;
+  if (!('serviceWorker' in navigator)) return;
   const registration = await navigator.serviceWorker.ready.catch(() => null);
   if (!registration) return;
   const subscription = await registration.pushManager.getSubscription().catch(() => null);
@@ -73,8 +73,8 @@ export async function unregisterWebPush(): Promise<void> {
 
   try {
     await fetch(`${API_BASE}/web-push/subscriptions`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ endpoint }),
     });
   } catch {
@@ -84,20 +84,27 @@ export async function unregisterWebPush(): Promise<void> {
 
 export async function checkWebPushSupport(): Promise<{
   supported: boolean;
-  permission: NotificationPermission | "unsupported";
+  permission: NotificationPermission | 'unsupported';
 }> {
-  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-    return { supported: false, permission: "unsupported" };
+  if (
+    !('serviceWorker' in navigator) ||
+    !('PushManager' in window) ||
+    !('Notification' in window)
+  ) {
+    return { supported: false, permission: 'unsupported' };
   }
   return { supported: true, permission: Notification.permission };
 }
 
-async function sendSubscriptionToServer(subscription: PushSubscription, appId: string): Promise<void> {
+async function sendSubscriptionToServer(
+  subscription: PushSubscription,
+  appId: string,
+): Promise<void> {
   const json = subscription.toJSON();
   await fetch(`${API_BASE}/web-push/subscriptions`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({
       endpoint: subscription.endpoint,
       keys: {
@@ -110,8 +117,8 @@ async function sendSubscriptionToServer(subscription: PushSubscription, appId: s
 }
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) {
@@ -120,13 +127,15 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
-export async function registerServiceWorker(swPath: string = "/sw.js"): Promise<ServiceWorkerRegistration | null> {
-  if (!("serviceWorker" in navigator)) return null;
+export async function registerServiceWorker(
+  swPath: string = '/sw.js',
+): Promise<ServiceWorkerRegistration | null> {
+  if (!('serviceWorker' in navigator)) return null;
   try {
-    const registration = await navigator.serviceWorker.register(swPath, { scope: "/" });
+    const registration = await navigator.serviceWorker.register(swPath, { scope: '/' });
     return registration;
   } catch (err) {
-    console.warn("[web-push] Service worker registration failed:", err);
+    console.warn('[web-push] Service worker registration failed:', err);
     return null;
   }
 }

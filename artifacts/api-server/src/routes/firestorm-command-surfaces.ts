@@ -14,34 +14,34 @@
  * permission class + row-level assignment checks on mutations.
  */
 
-import { Router, type IRouter } from "express";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  firestormIncidentsTable,
   firestormAlertsTable,
   firestormCasesTable,
-  firestormWorkflowActionsTable,
   firestormComplianceControlsTable,
-  firestormRiskScoresTable,
   firestormFindingsTable,
+  firestormIncidentsTable,
+  firestormRiskScoresTable,
   firestormToolAuditLogTable,
-} from "@szl-holdings/db";
-import { desc, eq, inArray, sql } from "drizzle-orm";
-import { authMiddleware } from "../middlewares/auth";
+  firestormWorkflowActionsTable,
+} from '@szl-holdings/db';
+import { desc, eq, inArray, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 import {
-  environmentLabel,
-  identityAwareRoute,
-  sessionAwareness,
-  requireStepUp,
   automationGate,
   dataControls,
-} from "../middlewares/zero-trust";
-import { sendSuccess, handleRouteError } from "../lib/api-response";
-import { logger } from "../lib/logger";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  environmentLabel,
+  identityAwareRoute,
+  requireStepUp,
+  sessionAwareness,
+} from '../middlewares/zero-trust';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
 const router: IRouter = Router();
 
 // ─── Shared zero-trust middleware stack ───────────────────────────────────────
@@ -49,31 +49,31 @@ const router: IRouter = Router();
 const ztRead = [
   environmentLabel(),
   authMiddleware({ required: true }),
-  identityAwareRoute({ require: "analyst" }),
+  identityAwareRoute({ require: 'analyst' }),
   sessionAwareness(),
 ];
 
 const ztSocManager = [
   environmentLabel(),
   authMiddleware({ required: true }),
-  identityAwareRoute({ require: "soc_manager" }),
+  identityAwareRoute({ require: 'soc_manager' }),
   sessionAwareness(),
 ];
 
 const ztExecutive = [
   environmentLabel(),
   authMiddleware({ required: true }),
-  identityAwareRoute({ require: "executive" }),
+  identityAwareRoute({ require: 'executive' }),
   sessionAwareness(),
 ];
 
-const MANAGER_CLASSES = ["soc_manager", "executive", "platform_admin"];
+const MANAGER_CLASSES = ['soc_manager', 'executive', 'platform_admin'];
 
 function isManagerClass(permClass: string | undefined): boolean {
-  return MANAGER_CLASSES.includes(permClass ?? "analyst");
+  return MANAGER_CLASSES.includes(permClass ?? 'analyst');
 }
 
-function getUserIdentity(req: import("express").Request): string | null {
+function getUserIdentity(req: import('express').Request): string | null {
   return req.user?.displayName ?? req.user?.email ?? null;
 }
 
@@ -96,7 +96,7 @@ function buildUserScopeFilter(
   manager: boolean,
 ) {
   if (manager) return undefined;
-  if (!userIdentity) return eq(field, "__denied__");
+  if (!userIdentity) return eq(field, '__denied__');
   return eq(field, userIdentity);
 }
 
@@ -110,15 +110,23 @@ function buildUserScopeFilter(
  * Data labels: CONFIDENTIAL, INTERNAL tenant, IR-90D retention
  */
 router.get(
-  "/firestorm/command/posture",
+  '/firestorm/command/posture',
   ...ztRead,
-  dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
+  dataControls({ sensitivity: 'CONFIDENTIAL', retention: 'IR-90D', exportRestricted: true }),
   async (req, res) => {
     try {
       const manager = isManagerClass(req.ztPermissionClass);
       const user = getUserIdentity(req);
-      const incidentScope = buildUserScopeFilter(firestormIncidentsTable.assignedAnalyst, user, manager);
-      const findingScope = buildUserScopeFilter(firestormFindingsTable.remediationOwner, user, manager);
+      const incidentScope = buildUserScopeFilter(
+        firestormIncidentsTable.assignedAnalyst,
+        user,
+        manager,
+      );
+      const findingScope = buildUserScopeFilter(
+        firestormFindingsTable.remediationOwner,
+        user,
+        manager,
+      );
 
       const [incidents, alerts, riskScores, findings] = await Promise.all([
         db
@@ -132,18 +140,29 @@ router.get(
           .from(firestormAlertsTable)
           .orderBy(desc(firestormAlertsTable.createdAt))
           .limit(50),
-        db.select().from(firestormRiskScoresTable).orderBy(desc(firestormRiskScoresTable.calculatedAt)).limit(1),
-        db.select().from(firestormFindingsTable).where(findingScope).orderBy(desc(firestormFindingsTable.createdAt)).limit(20),
+        db
+          .select()
+          .from(firestormRiskScoresTable)
+          .orderBy(desc(firestormRiskScoresTable.calculatedAt))
+          .limit(1),
+        db
+          .select()
+          .from(firestormFindingsTable)
+          .where(findingScope)
+          .orderBy(desc(firestormFindingsTable.createdAt))
+          .limit(20),
       ]);
 
-      const openIncidents = incidents.filter(i => i.status !== "closed");
-      const criticalAlerts = alerts.filter(a => a.severity === "critical");
+      const openIncidents = incidents.filter((i) => i.status !== 'closed');
+      const criticalAlerts = alerts.filter((a) => a.severity === 'critical');
       const latestRiskScore = riskScores[0] ?? null;
-      const unresolvedFindings = findings.filter(f => f.status === "open" || f.status === "confirmed");
+      const unresolvedFindings = findings.filter(
+        (f) => f.status === 'open' || f.status === 'confirmed',
+      );
 
       const postureSummary = {
         riskScore: latestRiskScore?.currentScore ?? null,
-        riskLevel: latestRiskScore?.trend ?? "unknown",
+        riskLevel: latestRiskScore?.trend ?? 'unknown',
         openIncidents: openIncidents.length,
         criticalAlerts: criticalAlerts.length,
         unresolvedFindings: unresolvedFindings.length,
@@ -155,7 +174,7 @@ router.get(
       };
 
       logger.info({
-        msg: "Command posture fetched",
+        msg: 'Command posture fetched',
         userId: req.user?.id,
         permissionClass: req.ztPermissionClass,
         environment: req.ztEnvironment,
@@ -163,7 +182,7 @@ router.get(
 
       sendSuccess(res, postureSummary);
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch command posture");
+      handleRouteError(res, err, 'Failed to fetch command posture');
     }
   },
 );
@@ -178,9 +197,9 @@ router.get(
  * Data labels: CONFIDENTIAL, IR-90D
  */
 router.get(
-  "/firestorm/command/investigations",
+  '/firestorm/command/investigations',
   ...ztRead,
-  dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
+  dataControls({ sensitivity: 'CONFIDENTIAL', retention: 'IR-90D', exportRestricted: true }),
   async (req, res) => {
     try {
       const manager = isManagerClass(req.ztPermissionClass);
@@ -194,10 +213,10 @@ router.get(
         .orderBy(desc(firestormCasesTable.createdAt))
         .limit(50);
 
-      const openCases = cases.filter(c => c.status !== "closed" && c.status !== "resolved");
+      const openCases = cases.filter((c) => c.status !== 'closed' && c.status !== 'resolved');
 
       // relatedIncidentIds is a jsonb array on the cases table
-      const allRelatedIds = openCases.flatMap(c => (c.relatedIncidentIds ?? []) as number[]);
+      const allRelatedIds = openCases.flatMap((c) => (c.relatedIncidentIds ?? []) as number[]);
       const uniqueIds = [...new Set(allRelatedIds)];
 
       const linkedIncidents =
@@ -208,11 +227,13 @@ router.get(
               .where(inArray(firestormIncidentsTable.id, uniqueIds))
           : [];
 
-      const incidentMap = new Map(linkedIncidents.map(i => [i.id, i]));
+      const incidentMap = new Map(linkedIncidents.map((i) => [i.id, i]));
 
-      const investigationsPayload = openCases.map(c => ({
+      const investigationsPayload = openCases.map((c) => ({
         ...c,
-        linkedIncidents: ((c.relatedIncidentIds ?? []) as number[]).map(id => incidentMap.get(id) ?? null).filter(Boolean),
+        linkedIncidents: ((c.relatedIncidentIds ?? []) as number[])
+          .map((id) => incidentMap.get(id) ?? null)
+          .filter(Boolean),
       }));
 
       sendSuccess(res, {
@@ -224,7 +245,7 @@ router.get(
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch investigations");
+      handleRouteError(res, err, 'Failed to fetch investigations');
     }
   },
 );
@@ -238,26 +259,32 @@ router.get(
  * Data labels: CONFIDENTIAL, IR-90D
  */
 router.post(
-  "/firestorm/command/investigations",
+  '/firestorm/command/investigations',
   ...ztRead,
-  automationGate({ gate: "propose_only", actionClass: "analyst_note" }),
-  dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
-  validateBody(bodyShape({
-      "caseId": z.unknown().optional(),
-      "content": z.unknown().optional(),
-      "type": z.unknown().optional(),
-    })),
+  automationGate({ gate: 'propose_only', actionClass: 'analyst_note' }),
+  dataControls({ sensitivity: 'CONFIDENTIAL', retention: 'IR-90D', exportRestricted: true }),
+  validateBody(
+    bodyShape({
+      caseId: z.unknown().optional(),
+      content: z.unknown().optional(),
+      type: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
-      const { type, content, caseId } = req.body as { type?: string; content?: string; caseId?: number };
-      if (!content || typeof content !== "string" || !content.trim()) {
-        res.status(400).json({ error: "INVALID_INPUT", message: "Note content is required." });
+      const { type, content, caseId } = req.body as {
+        type?: string;
+        content?: string;
+        caseId?: number;
+      };
+      if (!content || typeof content !== 'string' || !content.trim()) {
+        res.status(400).json({ error: 'INVALID_INPUT', message: 'Note content is required.' });
         return;
       }
 
       const noteEntry = {
         content: content.trim(),
-        author: req.user?.displayName ?? "Analyst",
+        author: req.user?.displayName ?? 'Analyst',
         at: new Date().toISOString(),
       };
 
@@ -271,7 +298,7 @@ router.post(
           .where(eq(firestormCasesTable.id, numericId));
 
         if (!existingCase) {
-          res.status(404).json({ error: "NOT_FOUND", message: "Case not found." });
+          res.status(404).json({ error: 'NOT_FOUND', message: 'Case not found.' });
           return;
         }
 
@@ -279,25 +306,28 @@ router.post(
         const user = getUserIdentity(req);
         const caseAssigned = existingCase.assignedAnalyst;
         const authorized =
-          manager ||
-          (user !== null && caseAssigned !== null && caseAssigned === user);
+          manager || (user !== null && caseAssigned !== null && caseAssigned === user);
 
         if (!authorized) {
           logger.warn({
-            msg: "Case note write denied — not assigned to actor",
+            msg: 'Case note write denied — not assigned to actor',
             userId: req.user?.id,
             caseId: numericId,
             assignedAnalyst: caseAssigned,
             permissionClass: req.ztPermissionClass,
           });
           res.status(404).json({
-            error: "NOT_FOUND",
-            message: "Case not found.",
+            error: 'NOT_FOUND',
+            message: 'Case not found.',
           });
           return;
         }
 
-        const existingNotes = (existingCase.notes ?? []) as Array<{ content: string; author: string; at: string }>;
+        const existingNotes = (existingCase.notes ?? []) as Array<{
+          content: string;
+          author: string;
+          at: string;
+        }>;
         const [updated] = await db
           .update(firestormCasesTable)
           .set({
@@ -312,26 +342,26 @@ router.post(
       // automationGate({ gate: "propose_only" }) already set X-Aegis-Automation-Gate header
 
       logger.info({
-        msg: "Analyst note submitted",
+        msg: 'Analyst note submitted',
         userId: req.user?.id,
         permissionClass: req.ztPermissionClass,
         environment: req.ztEnvironment,
         caseId: caseId ?? null,
-        noteType: type ?? "note",
+        noteType: type ?? 'note',
         persisted: !!updatedCase,
       });
 
       sendSuccess(res, {
-        status: "note_logged",
+        status: 'note_logged',
         note: noteEntry,
         persisted: !!updatedCase,
         caseId: caseId ?? null,
-        automationGate: "propose_only",
+        automationGate: 'propose_only',
         ztPermissionClass: req.ztPermissionClass,
         ztEnvironment: req.ztEnvironment,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to submit analyst note");
+      handleRouteError(res, err, 'Failed to submit analyst note');
     }
   },
 );
@@ -346,17 +376,21 @@ router.post(
  * Data labels: RESTRICTED, IR-90D
  */
 router.get(
-  "/firestorm/command/decisions",
+  '/firestorm/command/decisions',
   environmentLabel(),
   authMiddleware({ required: true }),
-  identityAwareRoute({ require: "responder" }),
+  identityAwareRoute({ require: 'responder' }),
   sessionAwareness(),
-  dataControls({ sensitivity: "RESTRICTED", retention: "IR-90D", exportRestricted: true }),
+  dataControls({ sensitivity: 'RESTRICTED', retention: 'IR-90D', exportRestricted: true }),
   async (req, res) => {
     try {
       const manager = isManagerClass(req.ztPermissionClass);
       const user = getUserIdentity(req);
-      const findingScope = buildUserScopeFilter(firestormFindingsTable.remediationOwner, user, manager);
+      const findingScope = buildUserScopeFilter(
+        firestormFindingsTable.remediationOwner,
+        user,
+        manager,
+      );
 
       const findings = await db
         .select()
@@ -365,7 +399,9 @@ router.get(
         .orderBy(desc(firestormFindingsTable.createdAt))
         .limit(50);
 
-      const pendingDecisions = findings.filter(f => f.status === "open" || f.status === "confirmed");
+      const pendingDecisions = findings.filter(
+        (f) => f.status === 'open' || f.status === 'confirmed',
+      );
 
       sendSuccess(res, {
         decisions: pendingDecisions,
@@ -376,7 +412,7 @@ router.get(
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch decisions");
+      handleRouteError(res, err, 'Failed to fetch decisions');
     }
   },
 );
@@ -391,18 +427,18 @@ router.get(
  * Data labels: RESTRICTED
  */
 router.post(
-  "/firestorm/command/decisions/:id/approve",
+  '/firestorm/command/decisions/:id/approve',
   ...ztSocManager,
   requireStepUp(),
-  automationGate({ gate: "approval_required", actionClass: "decision_approval" }),
-  dataControls({ sensitivity: "RESTRICTED", retention: "COMPLIANCE-7Y", exportRestricted: true }),
+  automationGate({ gate: 'approval_required', actionClass: 'decision_approval' }),
+  dataControls({ sensitivity: 'RESTRICTED', retention: 'COMPLIANCE-7Y', exportRestricted: true }),
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
-      const rawId = Array.isArray(req.params["id"]) ? req.params["id"][0] : req.params["id"];
-      const id = parseInt(rawId ?? "0", 10);
+      const rawId = Array.isArray(req.params['id']) ? req.params['id'][0] : req.params['id'];
+      const id = parseInt(rawId ?? '0', 10);
       if (!id || isNaN(id)) {
-        res.status(400).json({ error: "INVALID_ID", message: "Valid finding ID is required." });
+        res.status(400).json({ error: 'INVALID_ID', message: 'Valid finding ID is required.' });
         return;
       }
 
@@ -413,12 +449,12 @@ router.post(
         .limit(1);
 
       if (!finding) {
-        res.status(404).json({ error: "NOT_FOUND", message: "Finding not found." });
+        res.status(404).json({ error: 'NOT_FOUND', message: 'Finding not found.' });
         return;
       }
 
       logger.info({
-        msg: "Decision approve action queued",
+        msg: 'Decision approve action queued',
         findingId: id,
         userId: req.user?.id,
         permissionClass: req.ztPermissionClass,
@@ -427,14 +463,14 @@ router.post(
       });
 
       sendSuccess(res, {
-        status: "queued_for_approval",
+        status: 'queued_for_approval',
         findingId: id,
         approvalContext: req.ztApprovalContext,
         ztPermissionClass: req.ztPermissionClass,
         ztEnvironment: req.ztEnvironment,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to approve decision");
+      handleRouteError(res, err, 'Failed to approve decision');
     }
   },
 );
@@ -449,17 +485,21 @@ router.post(
  * Data labels: CONFIDENTIAL, IR-90D
  */
 router.get(
-  "/firestorm/command/response/playbooks",
+  '/firestorm/command/response/playbooks',
   environmentLabel(),
   authMiddleware({ required: true }),
-  identityAwareRoute({ require: "responder" }),
+  identityAwareRoute({ require: 'responder' }),
   sessionAwareness(),
-  dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
+  dataControls({ sensitivity: 'CONFIDENTIAL', retention: 'IR-90D', exportRestricted: true }),
   async (req, res) => {
     try {
       const manager = isManagerClass(req.ztPermissionClass);
       const user = getUserIdentity(req);
-      const actionScope = buildUserScopeFilter(firestormWorkflowActionsTable.assignedTo, user, manager);
+      const actionScope = buildUserScopeFilter(
+        firestormWorkflowActionsTable.assignedTo,
+        user,
+        manager,
+      );
 
       const actions = await db
         .select()
@@ -477,7 +517,7 @@ router.get(
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch playbooks");
+      handleRouteError(res, err, 'Failed to fetch playbooks');
     }
   },
 );
@@ -492,19 +532,21 @@ router.get(
  * Data labels: RESTRICTED, IR-90D
  */
 router.post(
-  "/firestorm/command/response/execute",
+  '/firestorm/command/response/execute',
   environmentLabel(),
   authMiddleware({ required: true }),
-  identityAwareRoute({ require: "responder" }),
+  identityAwareRoute({ require: 'responder' }),
   sessionAwareness(),
   requireStepUp(),
-  automationGate({ gate: "approved_execute", actionClass: "response_execution" }),
-  dataControls({ sensitivity: "RESTRICTED", retention: "IR-90D", exportRestricted: true }),
-  validateBody(bodyShape({
-      "actionType": z.unknown().optional(),
-      "notes": z.unknown().optional(),
-      "targetId": z.unknown().optional(),
-    })),
+  automationGate({ gate: 'approved_execute', actionClass: 'response_execution' }),
+  dataControls({ sensitivity: 'RESTRICTED', retention: 'IR-90D', exportRestricted: true }),
+  validateBody(
+    bodyShape({
+      actionType: z.unknown().optional(),
+      notes: z.unknown().optional(),
+      targetId: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
       const { actionType, targetId, notes } = req.body as {
@@ -515,14 +557,14 @@ router.post(
 
       if (!actionType || !targetId) {
         res.status(400).json({
-          error: "INVALID_REQUEST",
-          message: "actionType and targetId are required.",
+          error: 'INVALID_REQUEST',
+          message: 'actionType and targetId are required.',
         });
         return;
       }
 
       logger.info({
-        msg: "Response action executed",
+        msg: 'Response action executed',
         actionType,
         targetId,
         notes,
@@ -533,7 +575,7 @@ router.post(
       });
 
       sendSuccess(res, {
-        status: "executed",
+        status: 'executed',
         actionType,
         targetId,
         executedBy: req.user?.id,
@@ -544,7 +586,7 @@ router.post(
         dataLabels: req.ztDataLabels,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to execute response action");
+      handleRouteError(res, err, 'Failed to execute response action');
     }
   },
 );
@@ -560,16 +602,18 @@ router.post(
  * Data labels: RESTRICTED, COMPLIANCE-7Y
  */
 router.post(
-  "/firestorm/command/response/contain",
+  '/firestorm/command/response/contain',
   ...ztSocManager,
   requireStepUp(),
-  automationGate({ gate: "approval_required", actionClass: "containment" }),
-  dataControls({ sensitivity: "RESTRICTED", retention: "COMPLIANCE-7Y", exportRestricted: true }),
-  validateBody(bodyShape({
-      "assetId": z.unknown().optional(),
-      "containmentType": z.unknown().optional(),
-      "justification": z.unknown().optional(),
-    })),
+  automationGate({ gate: 'approval_required', actionClass: 'containment' }),
+  dataControls({ sensitivity: 'RESTRICTED', retention: 'COMPLIANCE-7Y', exportRestricted: true }),
+  validateBody(
+    bodyShape({
+      assetId: z.unknown().optional(),
+      containmentType: z.unknown().optional(),
+      justification: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
       const { containmentType, assetId, justification } = req.body as {
@@ -580,14 +624,14 @@ router.post(
 
       if (!containmentType || !assetId) {
         res.status(400).json({
-          error: "INVALID_REQUEST",
-          message: "containmentType and assetId are required.",
+          error: 'INVALID_REQUEST',
+          message: 'containmentType and assetId are required.',
         });
         return;
       }
 
       logger.info({
-        msg: "Containment action queued for approval",
+        msg: 'Containment action queued for approval',
         containmentType,
         assetId,
         justification,
@@ -598,7 +642,7 @@ router.post(
       });
 
       sendSuccess(res, {
-        status: "queued_for_approval",
+        status: 'queued_for_approval',
         containmentType,
         assetId,
         requestedBy: req.user?.id,
@@ -608,7 +652,7 @@ router.post(
         ztEnvironment: req.ztEnvironment,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to queue containment action");
+      handleRouteError(res, err, 'Failed to queue containment action');
     }
   },
 );
@@ -623,18 +667,30 @@ router.post(
  * Data labels: EXECUTIVE-ONLY, BOARD-90D, export restricted
  */
 router.get(
-  "/firestorm/command/executive/posture",
+  '/firestorm/command/executive/posture',
   ...ztExecutive,
-  dataControls({ sensitivity: "EXECUTIVE-ONLY", retention: "BOARD-90D", exportRestricted: true }),
+  dataControls({ sensitivity: 'EXECUTIVE-ONLY', retention: 'BOARD-90D', exportRestricted: true }),
   async (req, res) => {
     try {
       const manager = isManagerClass(req.ztPermissionClass);
       const user = getUserIdentity(req);
-      const incidentScope = buildUserScopeFilter(firestormIncidentsTable.assignedAnalyst, user, manager);
-      const findingScope = buildUserScopeFilter(firestormFindingsTable.remediationOwner, user, manager);
+      const incidentScope = buildUserScopeFilter(
+        firestormIncidentsTable.assignedAnalyst,
+        user,
+        manager,
+      );
+      const findingScope = buildUserScopeFilter(
+        firestormFindingsTable.remediationOwner,
+        user,
+        manager,
+      );
 
       const [riskScores, complianceControls, incidents, findings] = await Promise.all([
-        db.select().from(firestormRiskScoresTable).orderBy(desc(firestormRiskScoresTable.calculatedAt)).limit(10),
+        db
+          .select()
+          .from(firestormRiskScoresTable)
+          .orderBy(desc(firestormRiskScoresTable.calculatedAt))
+          .limit(10),
         db.select().from(firestormComplianceControlsTable).limit(50),
         db
           .select()
@@ -642,20 +698,26 @@ router.get(
           .where(incidentScope)
           .orderBy(desc(firestormIncidentsTable.createdAt))
           .limit(30),
-        db.select().from(firestormFindingsTable).where(findingScope).orderBy(desc(firestormFindingsTable.createdAt)).limit(30),
+        db
+          .select()
+          .from(firestormFindingsTable)
+          .where(findingScope)
+          .orderBy(desc(firestormFindingsTable.createdAt))
+          .limit(30),
       ]);
 
       const latestRisk = riskScores[0] ?? null;
       // compliance status: implemented|partial|not_implemented|not_applicable
-      const passedControls = complianceControls.filter(c => c.status === "implemented");
-      const failedControls = complianceControls.filter(c => c.status !== "implemented");
-      const mttr = incidents.length > 0
-        ? Math.round(incidents.reduce((sum) => sum + 180, 0) / incidents.length)
-        : 0;
+      const passedControls = complianceControls.filter((c) => c.status === 'implemented');
+      const failedControls = complianceControls.filter((c) => c.status !== 'implemented');
+      const mttr =
+        incidents.length > 0
+          ? Math.round(incidents.reduce((sum) => sum + 180, 0) / incidents.length)
+          : 0;
 
       const executivePosture = {
         riskScore: latestRisk?.currentScore ?? null,
-        riskLevel: latestRisk?.trend ?? "unknown",
+        riskLevel: latestRisk?.trend ?? 'unknown',
         compliancePassRate:
           complianceControls.length > 0
             ? Math.round((passedControls.length / complianceControls.length) * 100)
@@ -663,24 +725,26 @@ router.get(
         controlsPassed: passedControls.length,
         controlsFailed: failedControls.length,
         totalControls: complianceControls.length,
-        openIncidents: incidents.filter(i => i.status !== "closed").length,
+        openIncidents: incidents.filter((i) => i.status !== 'closed').length,
         meanTimeToRespondMinutes: mttr,
         // findings status: open|confirmed|mitigated|accepted|false_positive
-        criticalFindings: findings.filter(f => f.severity === "critical" && (f.status === "open" || f.status === "confirmed")).length,
-        riskScores: riskScores.map(r => ({
+        criticalFindings: findings.filter(
+          (f) => f.severity === 'critical' && (f.status === 'open' || f.status === 'confirmed'),
+        ).length,
+        riskScores: riskScores.map((r) => ({
           id: r.id,
           score: r.currentScore,
           riskLevel: r.trend,
           calculatedAt: r.calculatedAt,
         })),
-        controls: complianceControls.map(c => ({
+        controls: complianceControls.map((c) => ({
           id: c.id,
           controlId: c.controlId,
           title: c.controlName,
           status: c.status,
           framework: c.framework,
         })),
-        incidents: incidents.map(i => ({
+        incidents: incidents.map((i) => ({
           id: i.id,
           title: i.title,
           severity: i.severity,
@@ -689,7 +753,7 @@ router.get(
           createdAt: i.createdAt,
           resolvedAt: i.resolvedAt,
         })),
-        findings: findings.map(f => ({
+        findings: findings.map((f) => ({
           id: f.id,
           title: f.title,
           severity: f.severity,
@@ -705,7 +769,7 @@ router.get(
       };
 
       logger.info({
-        msg: "Executive posture fetched",
+        msg: 'Executive posture fetched',
         userId: req.user?.id,
         permissionClass: req.ztPermissionClass,
         environment: req.ztEnvironment,
@@ -713,7 +777,7 @@ router.get(
 
       sendSuccess(res, executivePosture);
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch executive posture");
+      handleRouteError(res, err, 'Failed to fetch executive posture');
     }
   },
 );
@@ -726,9 +790,9 @@ router.get(
  * Data labels: EXECUTIVE-ONLY, BOARD-90D
  */
 router.get(
-  "/firestorm/command/executive/compliance",
+  '/firestorm/command/executive/compliance',
   ...ztExecutive,
-  dataControls({ sensitivity: "EXECUTIVE-ONLY", retention: "BOARD-90D", exportRestricted: true }),
+  dataControls({ sensitivity: 'EXECUTIVE-ONLY', retention: 'BOARD-90D', exportRestricted: true }),
   async (req, res) => {
     try {
       const controls = await db
@@ -738,7 +802,7 @@ router.get(
         .limit(100);
 
       sendSuccess(res, {
-        controls: controls.map(c => ({
+        controls: controls.map((c) => ({
           id: c.id,
           controlId: c.controlId,
           title: c.controlName,
@@ -748,9 +812,9 @@ router.get(
         })),
         summary: {
           total: controls.length,
-          implemented: controls.filter(c => c.status === "implemented").length,
-          partial: controls.filter(c => c.status === "partial").length,
-          notImplemented: controls.filter(c => c.status === "not_implemented").length,
+          implemented: controls.filter((c) => c.status === 'implemented').length,
+          partial: controls.filter((c) => c.status === 'partial').length,
+          notImplemented: controls.filter((c) => c.status === 'not_implemented').length,
         },
         ztPermissionClass: req.ztPermissionClass,
         ztEnvironment: req.ztEnvironment,
@@ -758,38 +822,40 @@ router.get(
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch executive compliance");
+      handleRouteError(res, err, 'Failed to fetch executive compliance');
     }
   },
 );
 
 router.get(
-  "/firestorm/tool-audit-log",
+  '/firestorm/tool-audit-log',
   authMiddleware(),
   environmentLabel(),
-  identityAwareRoute({ require: "analyst" }),
-  dataControls({ sensitivity: "CONFIDENTIAL", retention: "COMPLIANCE-7Y" }),
+  identityAwareRoute({ require: 'analyst' }),
+  dataControls({ sensitivity: 'CONFIDENTIAL', retention: 'COMPLIANCE-7Y' }),
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const user = req.user;
-      const isSuperAdmin = user?.roles.includes("super_admin") || user?.roles.includes("admin");
+      const isSuperAdmin = user?.roles.includes('super_admin') || user?.roles.includes('admin');
       let tenantFilter: string | null = null;
       if (isSuperAdmin) {
-        const tenantParam = typeof req.query.tenantId === "string" ? req.query.tenantId : null;
+        const tenantParam = typeof req.query.tenantId === 'string' ? req.query.tenantId : null;
         tenantFilter = tenantParam;
       } else {
-        tenantFilter = "default";
+        tenantFilter = 'default';
       }
       const rows = await db
         .select()
         .from(firestormToolAuditLogTable)
-        .where(tenantFilter !== null ? eq(firestormToolAuditLogTable.tenantId, tenantFilter) : undefined)
+        .where(
+          tenantFilter !== null ? eq(firestormToolAuditLogTable.tenantId, tenantFilter) : undefined,
+        )
         .orderBy(desc(firestormToolAuditLogTable.createdAt))
         .limit(200);
       sendSuccess(res, rows);
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch tool audit log");
+      handleRouteError(res, err, 'Failed to fetch tool audit log');
     }
   },
 );

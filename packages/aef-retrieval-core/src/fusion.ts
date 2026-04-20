@@ -1,4 +1,4 @@
-import type { DenseHit, KeywordHit } from "./adapters.js";
+import type { DenseHit, KeywordHit } from './adapters.js';
 
 export interface FusedHit {
   chunkId: string;
@@ -34,12 +34,8 @@ export function reciprocalRankFusion(
   const denseRanks = rankMap(denseHits);
   const keywordRanks = rankMap(keywordHits);
 
-  const denseScores = new Map<string, number>(
-    denseHits.map((h) => [h.chunkId, h.score]),
-  );
-  const keywordScoreById = new Map<string, number>(
-    keywordHits.map((h) => [h.chunkId, h.score]),
-  );
+  const denseScores = new Map<string, number>(denseHits.map((h) => [h.chunkId, h.score]));
+  const keywordScoreById = new Map<string, number>(keywordHits.map((h) => [h.chunkId, h.score]));
 
   const allMetadata = new Map<string, Record<string, unknown>>();
   const allSourceIds = new Map<string, string>();
@@ -71,7 +67,7 @@ export function reciprocalRankFusion(
 
     return {
       chunkId,
-      sourceId: allSourceIds.get(chunkId) ?? "",
+      sourceId: allSourceIds.get(chunkId) ?? '',
       fusedScore,
       ...(denseScore !== undefined ? { denseScore } : {}),
       ...(keywordScore !== undefined ? { keywordScore } : {}),

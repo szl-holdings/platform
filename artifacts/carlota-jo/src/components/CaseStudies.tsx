@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import caseStudiesData from "@/data/case-studies.json";
+import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
+import caseStudiesData from '@/data/case-studies.json';
 
 export default function CaseStudies() {
   return (
@@ -32,7 +32,8 @@ export default function CaseStudies() {
             className="lg:col-span-7 flex items-end"
           >
             <p className="text-sm text-ink-600 font-light leading-relaxed max-w-xl">
-              Representative outcomes from recent advisory engagements. Client details are anonymized to protect confidentiality — the outcomes are real.
+              Representative outcomes from recent advisory engagements. Client details are
+              anonymized to protect confidentiality — the outcomes are real.
             </p>
           </motion.div>
         </div>
@@ -110,7 +111,9 @@ export default function CaseStudies() {
           className="mt-12 text-center"
         >
           <button
-            onClick={() => document.querySelector("#inquire")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() =>
+              document.querySelector('#inquire')?.scrollIntoView({ behavior: 'smooth' })
+            }
             className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.15em] uppercase text-warm-gold hover:text-warm-gold-light transition-colors"
           >
             Discuss a similar engagement

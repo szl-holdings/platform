@@ -13,15 +13,15 @@
  */
 
 import {
-  db,
-  correlationLinksTable,
   type CorrelationLink,
+  correlationLinksTable,
+  db,
   type InsertCorrelationLink,
-} from "@szl-holdings/db";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+} from '@szl-holdings/db';
+import { and, desc, eq, gte, lte } from 'drizzle-orm';
 
-export type Primitive = InsertCorrelationLink["primitive"];
-export type FabricDomain = InsertCorrelationLink["domain"];
+export type Primitive = InsertCorrelationLink['primitive'];
+export type FabricDomain = InsertCorrelationLink['domain'];
 
 export interface LinkEventParams {
   correlationId: string;
@@ -47,7 +47,7 @@ export async function linkEvent(params: LinkEventParams): Promise<CorrelationLin
       entityType: params.entityType ?? null,
       entityId: params.entityId ?? null,
       workflowRunId: params.workflowRunId ?? null,
-      domain: params.domain ?? "general",
+      domain: params.domain ?? 'general',
       metadata: params.metadata ?? {},
     })
     .returning();

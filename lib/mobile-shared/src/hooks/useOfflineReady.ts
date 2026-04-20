@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { getOutbox, getStoredCursor } from "../offline-persistence";
-import { useApiStatus } from "./useApiStatus";
+import { useCallback, useEffect, useState } from 'react';
+import { getOutbox, getStoredCursor } from '../offline-persistence';
+import { useApiStatus } from './useApiStatus';
 
 export interface OfflineReadyResult {
   isOfflineReady: boolean;
@@ -16,13 +16,12 @@ export function useOfflineReady(): OfflineReadyResult {
 
   const refresh = useCallback(async () => {
     try {
-      const [outbox, cursor] = await Promise.all([
-        getOutbox(),
-        getStoredCursor(),
-      ]);
+      const [outbox, cursor] = await Promise.all([getOutbox(), getStoredCursor()]);
       setPendingCount(outbox.length);
       setLastCursor(cursor);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   useEffect(() => {

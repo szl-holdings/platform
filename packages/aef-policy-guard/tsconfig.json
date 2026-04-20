@@ -8,9 +8,7 @@
     "composite": true,
     "types": ["node"]
   },
-  "references": [
-    { "path": "../aef-contracts" }
-  ],
+  "references": [{ "path": "../aef-contracts" }],
   "include": ["src/**/*"],
   "exclude": ["src/**/*.test.ts"]
 }

@@ -1,12 +1,17 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSandboxMode } from "@szl-holdings/shared-ui/sandbox-mode";
-import { api, type LyteIncident, type LyteAction, type LyteSavedView } from "../lib/api";
-import { lyteSignals as mockSignals, lyteIncidents as mockIncidents, lyteRecommendations as mockRecommendations, lytePlaybooks as mockPlaybooks } from "@szl-holdings/services";
+import {
+  lyteIncidents as mockIncidents,
+  lytePlaybooks as mockPlaybooks,
+  lyteRecommendations as mockRecommendations,
+  lyteSignals as mockSignals,
+} from '@szl-holdings/services';
+import { useSandboxMode } from '@szl-holdings/shared-ui/sandbox-mode';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { api, type LyteAction, type LyteIncident, type LyteSavedView } from '../lib/api';
 
 export function useSignals() {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["signals", sandboxActive ? "sandbox" : "live", resetKey],
+    queryKey: ['signals', sandboxActive ? 'sandbox' : 'live', resetKey],
     queryFn: sandboxActive ? async () => mockSignals as unknown[] : () => api.signals.list(),
   });
 }
@@ -17,18 +22,18 @@ export function useUpdateSignal() {
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       if (sandboxActive) {
-        const signal = mockSignals.find(s => s.id === id);
+        const signal = mockSignals.find((s) => s.id === id);
         if (signal) signal.status = status;
         return signal;
       }
       return await api.signals.update(id, { status });
     },
     onMutate: async ({ id, status }) => {
-      await queryClient.cancelQueries({ queryKey: ["signals"] });
-      const previous = queryClient.getQueriesData({ queryKey: ["signals"] });
-      queryClient.setQueriesData({ queryKey: ["signals"] }, (old: unknown) => {
+      await queryClient.cancelQueries({ queryKey: ['signals'] });
+      const previous = queryClient.getQueriesData({ queryKey: ['signals'] });
+      queryClient.setQueriesData({ queryKey: ['signals'] }, (old: unknown) => {
         if (!Array.isArray(old)) return old;
-        return old.map((s: Record<string, unknown>) => s.id === id ? { ...s, status } : s);
+        return old.map((s: Record<string, unknown>) => (s.id === id ? { ...s, status } : s));
       });
       return { previous };
     },
@@ -37,14 +42,14 @@ export function useUpdateSignal() {
         context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
       }
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["signals"] }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['signals'] }),
   });
 }
 
 export function useIncidents() {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["incidents", sandboxActive ? "sandbox" : "live", resetKey],
+    queryKey: ['incidents', sandboxActive ? 'sandbox' : 'live', resetKey],
     queryFn: sandboxActive ? async () => mockIncidents as unknown[] : () => api.incidents.list(),
   });
 }
@@ -59,7 +64,7 @@ export function useCreateIncident() {
       }
       return await api.incidents.create(data);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["incidents"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['incidents'] }),
   });
 }
 
@@ -69,18 +74,18 @@ export function useUpdateIncident() {
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & Partial<LyteIncident>) => {
       if (sandboxActive) {
-        const incident = mockIncidents.find(i => i.id === id);
+        const incident = mockIncidents.find((i) => i.id === id);
         if (incident) Object.assign(incident, data);
         return incident;
       }
       return await api.incidents.update(id, data);
     },
     onMutate: async ({ id, ...data }) => {
-      await queryClient.cancelQueries({ queryKey: ["incidents"] });
-      const previous = queryClient.getQueriesData({ queryKey: ["incidents"] });
-      queryClient.setQueriesData({ queryKey: ["incidents"] }, (old: unknown) => {
+      await queryClient.cancelQueries({ queryKey: ['incidents'] });
+      const previous = queryClient.getQueriesData({ queryKey: ['incidents'] });
+      queryClient.setQueriesData({ queryKey: ['incidents'] }, (old: unknown) => {
         if (!Array.isArray(old)) return old;
-        return old.map((i: Record<string, unknown>) => i.id === id ? { ...i, ...data } : i);
+        return old.map((i: Record<string, unknown>) => (i.id === id ? { ...i, ...data } : i));
       });
       return { previous };
     },
@@ -89,15 +94,17 @@ export function useUpdateIncident() {
         context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
       }
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["incidents"] }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['incidents'] }),
   });
 }
 
 export function useRecommendations() {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["recommendations", sandboxActive ? "sandbox" : "live", resetKey],
-    queryFn: sandboxActive ? async () => mockRecommendations as unknown[] : () => api.recommendations.list(),
+    queryKey: ['recommendations', sandboxActive ? 'sandbox' : 'live', resetKey],
+    queryFn: sandboxActive
+      ? async () => mockRecommendations as unknown[]
+      : () => api.recommendations.list(),
   });
 }
 
@@ -107,20 +114,20 @@ export function useUpdateRecommendation() {
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       if (sandboxActive) {
-        const rec = mockRecommendations.find(r => r.id === id);
+        const rec = mockRecommendations.find((r) => r.id === id);
         if (rec) rec.status = status;
         return rec;
       }
       return await api.recommendations.update(id, { status });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recommendations"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recommendations'] }),
   });
 }
 
 export function usePlaybooks() {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["playbooks", sandboxActive ? "sandbox" : "live", resetKey],
+    queryKey: ['playbooks', sandboxActive ? 'sandbox' : 'live', resetKey],
     queryFn: sandboxActive ? async () => mockPlaybooks as unknown[] : () => api.playbooks.list(),
   });
 }
@@ -128,7 +135,7 @@ export function usePlaybooks() {
 export function useCommandCards() {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["commandCards", sandboxActive ? "sandbox" : "live", resetKey],
+    queryKey: ['commandCards', sandboxActive ? 'sandbox' : 'live', resetKey],
     queryFn: () => api.commandCards.list(),
   });
 }
@@ -136,15 +143,15 @@ export function useCommandCards() {
 export function useExecutiveSummary() {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["executiveSummary", sandboxActive ? "sandbox" : "live", resetKey],
+    queryKey: ['executiveSummary', sandboxActive ? 'sandbox' : 'live', resetKey],
     queryFn: sandboxActive
       ? async () => ({
-          openIncidents: mockIncidents.filter(i => i.status !== "resolved").length,
-          criticalSignals: mockSignals.filter(s => s.severity === "critical").length,
+          openIncidents: mockIncidents.filter((i) => i.status !== 'resolved').length,
+          criticalSignals: mockSignals.filter((s) => s.severity === 'critical').length,
           pendingActions: 7,
           systemHealth: 91,
           riskScore: 68,
-          trend: "stable" as const,
+          trend: 'stable' as const,
         })
       : () => api.executiveSummary(),
   });
@@ -153,7 +160,7 @@ export function useExecutiveSummary() {
 export function useActions(params?: { role?: string; state?: string }) {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["actions", params, sandboxActive ? "sandbox" : "live", resetKey],
+    queryKey: ['actions', params, sandboxActive ? 'sandbox' : 'live', resetKey],
     queryFn: () => api.actions.list(params),
   });
 }
@@ -167,11 +174,11 @@ export function useUpdateAction() {
       return await api.actions.update(id, data);
     },
     onMutate: async ({ id, ...data }) => {
-      await queryClient.cancelQueries({ queryKey: ["actions"] });
-      const previous = queryClient.getQueriesData({ queryKey: ["actions"] });
-      queryClient.setQueriesData({ queryKey: ["actions"] }, (old: LyteAction[] | undefined) => {
+      await queryClient.cancelQueries({ queryKey: ['actions'] });
+      const previous = queryClient.getQueriesData({ queryKey: ['actions'] });
+      queryClient.setQueriesData({ queryKey: ['actions'] }, (old: LyteAction[] | undefined) => {
         if (!old) return old;
-        return old.map(a => a.id === id ? { ...a, ...data } : a);
+        return old.map((a) => (a.id === id ? { ...a, ...data } : a));
       });
       return { previous };
     },
@@ -180,13 +187,13 @@ export function useUpdateAction() {
         context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["actions"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['actions'] }),
   });
 }
 
 export function useSavedViews(role?: string) {
   return useQuery({
-    queryKey: ["savedViews", role],
+    queryKey: ['savedViews', role],
     queryFn: () => api.views.list(role as any),
   });
 }
@@ -195,7 +202,7 @@ export function useCreateSavedView() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<LyteSavedView>) => api.views.create(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savedViews"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['savedViews'] }),
   });
 }
 
@@ -203,14 +210,14 @@ export function useDeleteSavedView() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => api.views.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savedViews"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['savedViews'] }),
   });
 }
 
 export function useReadiness() {
   const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["readiness", sandboxActive ? "sandbox" : "live", resetKey],
+    queryKey: ['readiness', sandboxActive ? 'sandbox' : 'live', resetKey],
     queryFn: () => api.readiness.get(),
   });
 }
@@ -221,6 +228,6 @@ export function useUpdateReadinessItem() {
     mutationFn: async ({ id, ...data }: { id: number; status?: string; score?: number }) => {
       return await api.readiness.update(id, data);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["readiness"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['readiness'] }),
   });
 }

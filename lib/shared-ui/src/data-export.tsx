@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from 'react';
+import { useState } from 'react';
 
 export interface ExportColumn {
   key: string;
@@ -16,26 +17,22 @@ export interface ExportOptions {
 }
 
 function escapeCSVCell(value: unknown): string {
-  const str = value === null || value === undefined ? "" : String(value);
-  if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+  const str = value === null || value === undefined ? '' : String(value);
+  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
 }
 
-export function exportToCSV(
-  data: Record<string, unknown>[],
-  options: ExportOptions = {}
-): void {
-  const { filename = "export", columns, title, appName } = options;
+export function exportToCSV(data: Record<string, unknown>[], options: ExportOptions = {}): void {
+  const { filename = 'export', columns, title, appName } = options;
 
   if (data.length === 0) {
-    console.warn("No data to export");
+    console.warn('No data to export');
     return;
   }
 
-  const cols: ExportColumn[] = columns ??
-    Object.keys(data[0]!).map((k) => ({ key: k, label: k }));
+  const cols: ExportColumn[] = columns ?? Object.keys(data[0]!).map((k) => ({ key: k, label: k }));
 
   const lines: string[] = [];
 
@@ -43,10 +40,10 @@ export function exportToCSV(
     lines.push(escapeCSVCell(title));
     if (appName) lines.push(escapeCSVCell(`Exported from ${appName}`));
     lines.push(escapeCSVCell(`Generated: ${new Date().toLocaleString()}`));
-    lines.push("");
+    lines.push('');
   }
 
-  lines.push(cols.map((c) => escapeCSVCell(c.label)).join(","));
+  lines.push(cols.map((c) => escapeCSVCell(c.label)).join(','));
 
   for (const row of data) {
     lines.push(
@@ -56,14 +53,14 @@ export function exportToCSV(
           const formatted = c.format ? c.format(raw) : raw;
           return escapeCSVCell(formatted);
         })
-        .join(",")
+        .join(','),
     );
   }
 
-  const csvContent = lines.join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const csvContent = lines.join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.href = url;
   link.download = `${filename}-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(link);
@@ -73,18 +70,25 @@ export function exportToCSV(
 }
 
 export function exportToPDF(options: ExportOptions = {}): void {
-  const { title = "Report", subtitle, appName = "SZL Platform", accentColor = "#8b7ac8", filename = "report" } = options;
+  const {
+    title = 'Report',
+    subtitle,
+    appName = 'SZL Platform',
+    accentColor = '#8b7ac8',
+    filename = 'report',
+  } = options;
 
   const timestamp = new Date().toLocaleString();
 
-  const printWindow = window.open("", "_blank", "width=900,height=700");
+  const printWindow = window.open('', '_blank', 'width=900,height=700');
   if (!printWindow) {
-    console.warn("Could not open print window");
+    console.warn('Could not open print window');
     return;
   }
 
-  const contentEl = document.querySelector("[data-export-content]") ?? document.querySelector("main");
-  const contentHTML = contentEl?.innerHTML ?? "<p>No content available</p>";
+  const contentEl =
+    document.querySelector('[data-export-content]') ?? document.querySelector('main');
+  const contentHTML = contentEl?.innerHTML ?? '<p>No content available</p>';
 
   printWindow.document.write(`
     <!DOCTYPE html>
@@ -216,7 +220,7 @@ export function exportToPDF(options: ExportOptions = {}): void {
           <span class="header-brand-name">${appName}</span>
         </div>
         <div class="header-title">${title}</div>
-        ${subtitle ? `<div style="font-size:14px;opacity:0.6;margin-bottom:10px">${subtitle}</div>` : ""}
+        ${subtitle ? `<div style="font-size:14px;opacity:0.6;margin-bottom:10px">${subtitle}</div>` : ''}
         <div class="header-meta">
           <span><span class="header-accent"></span>${timestamp}</span>
           <span>SZL Holdings Platform</span>
@@ -248,7 +252,7 @@ interface ExportButtonProps {
   onExportCSV?: () => void;
   onExportPDF?: () => void;
   label?: string;
-  variant?: "default" | "compact" | "icon";
+  variant?: 'default' | 'compact' | 'icon';
   className?: string;
   style?: React.CSSProperties;
 }
@@ -258,8 +262,8 @@ export function ExportButton({
   options = {},
   onExportCSV,
   onExportPDF,
-  label = "Export",
-  variant = "default",
+  label = 'Export',
+  variant = 'default',
   className,
   style,
 }: ExportButtonProps) {
@@ -284,46 +288,58 @@ export function ExportButton({
   };
 
   const baseButtonStyle: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-    padding: variant === "compact" ? "4px 8px" : "6px 12px",
-    fontSize: variant === "compact" ? "11px" : "12px",
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: variant === 'compact' ? '4px 8px' : '6px 12px',
+    fontSize: variant === 'compact' ? '11px' : '12px',
     fontWeight: 500,
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.12)",
-    borderRadius: "8px",
-    color: "rgba(255,255,255,0.6)",
-    cursor: "pointer",
-    transition: "all 0.15s",
-    whiteSpace: "nowrap" as const,
-    position: "relative" as const,
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '8px',
+    color: 'rgba(255,255,255,0.6)',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    whiteSpace: 'nowrap' as const,
+    position: 'relative' as const,
     ...style,
   };
 
   return (
-    <div style={{ position: "relative", display: "inline-flex" }}>
+    <div style={{ position: 'relative', display: 'inline-flex' }}>
       <button
         style={baseButtonStyle}
         className={className}
         onClick={() => setOpen((v) => !v)}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.1)";
-          (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)";
+          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)';
+          (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)';
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
-          (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)";
+          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)';
+          (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)';
         }}
         title="Export data"
       >
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path d="M6.5 1v7M3.5 5l3 3 3-3M2 10h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M6.5 1v7M3.5 5l3 3 3-3M2 10h9"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
-        {variant !== "icon" && label}
-        {variant !== "icon" && (
+        {variant !== 'icon' && label}
+        {variant !== 'icon' && (
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M3 4l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M3 4l2 2 2-2"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         )}
       </button>
@@ -331,67 +347,67 @@ export function ExportButton({
       {open && (
         <>
           <div
-            style={{ position: "fixed", inset: 0, zIndex: 999 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 999 }}
             onClick={() => setOpen(false)}
           />
           <div
             style={{
-              position: "absolute",
-              top: "calc(100% + 4px)",
+              position: 'absolute',
+              top: 'calc(100% + 4px)',
               right: 0,
               zIndex: 1000,
-              background: "rgba(10, 12, 20, 0.98)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: "10px",
-              padding: "4px",
-              minWidth: "160px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+              background: 'rgba(10, 12, 20, 0.98)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '10px',
+              padding: '4px',
+              minWidth: '160px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
             }}
           >
             <button
               onClick={handleCSV}
               style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                background: "transparent",
-                border: "none",
-                color: "rgba(255,255,255,0.75)",
-                cursor: "pointer",
-                fontSize: "12px",
-                textAlign: "left",
-                transition: "background 0.1s",
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 10px',
+                borderRadius: '6px',
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(255,255,255,0.75)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                textAlign: 'left',
+                transition: 'background 0.1s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.07)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <span style={{ fontSize: "14px" }}>📊</span>
+              <span style={{ fontSize: '14px' }}>📊</span>
               Export as CSV
             </button>
             <button
               onClick={handlePDF}
               style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                background: "transparent",
-                border: "none",
-                color: "rgba(255,255,255,0.75)",
-                cursor: "pointer",
-                fontSize: "12px",
-                textAlign: "left",
-                transition: "background 0.1s",
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 10px',
+                borderRadius: '6px',
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(255,255,255,0.75)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                textAlign: 'left',
+                transition: 'background 0.1s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.07)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <span style={{ fontSize: "14px" }}>📄</span>
+              <span style={{ fontSize: '14px' }}>📄</span>
               Export as PDF
             </button>
           </div>
@@ -425,23 +441,34 @@ export function ExportableSection({
       {(title || data) && (
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "12px",
-            gap: "12px",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '12px',
+            gap: '12px',
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {title && (
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>
                 {title}
               </span>
             )}
             {headerExtra}
           </div>
           {data && data.length > 0 && (
-            <ExportButton data={data} options={{ ...options, ...(title !== undefined ? { title } : (options?.title !== undefined ? { title: options.title } : {})) }} variant="compact" />
+            <ExportButton
+              data={data}
+              options={{
+                ...options,
+                ...(title !== undefined
+                  ? { title }
+                  : options?.title !== undefined
+                    ? { title: options.title }
+                    : {}),
+              }}
+              variant="compact"
+            />
           )}
         </div>
       )}

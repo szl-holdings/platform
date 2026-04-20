@@ -3,7 +3,7 @@
 // into the 800–1,500 word target range while preserving voice and pillar fit.
 
 module.exports = {
-  "shipping-software-desert": `
+  'shipping-software-desert': `
 
 ## What good looks like
 
@@ -31,7 +31,7 @@ Third, the trust layer. The buyers are conservative for excellent reasons — a 
 
 The good news for builders: the customers know the incumbents are leaving money on the table. Every shipowner I've spoken to in the last twelve months has a story about a six-figure number that fell through a software crack. That's the wedge.`,
 
-  "what-i-got-wrong-about-b2b": `
+  'what-i-got-wrong-about-b2b': `
 
 ## What I'd tell my year-one self
 
@@ -49,7 +49,7 @@ One number, weekly: time from first qualified call to signed paid pilot. In year
 
 The deals we lose on speed, we lose to nobody. They simply don't happen. That's a healthier outcome than a six-month courtship that ends in a "no."`,
 
-  "first-five-hires": `
+  'first-five-hires': `
 
 ## What we got right
 
@@ -69,7 +69,7 @@ Pay above your stage. Equity is generous, salary is competitive but not extravag
 
 And: hire people who would still be your friends if the company failed. Most early-stage companies don't make it. The people who stay your friends regardless are the people you can be honest with when the numbers slip, and that honesty is the only thing that actually saves the company.`,
 
-  "inside-prism-counsel": `
+  'inside-prism-counsel': `
 
 ## How Prism Counsel is wired
 
@@ -89,7 +89,7 @@ That's the bet. Not "AI replaces lawyers" — that bet ages badly. The bet is th
 
 There are a hundred AI-legal startups chasing this market. Most are building pure-play legal-AI products for law firms. Prism is building for in-house counsel inside operating companies, which is a different surface, a different buyer, and a different sales motion. We think the in-house surface wins, because that's where the volume of routine contract work actually lives.`,
 
-  "what-i-look-for-in-term-sheet": `
+  'what-i-look-for-in-term-sheet': `
 
 ## The post-money trap
 
@@ -113,7 +113,7 @@ Two clauses do more work than the rest combined.
 
 The shortest version of all of this: read every line, ask out loud what it does in the worst case, and walk away from the round if the answer is "we lose the company." Nothing about this round is worth losing the company over.`,
 
-  "weekly-operating-rhythm": `
+  'weekly-operating-rhythm': `
 
 ## What the week buys me
 
@@ -133,7 +133,7 @@ The Monday review surfaces resourcing imbalances within the first week they happ
 
 The cost of the cadence is that it's rigid. The benefit of the cadence is that it's rigid. Founders who run on adrenaline and inbox triage cannot operate six product lines, and there's nothing clever about the rhythm that fixes that — the rhythm only works if you actually keep it.`,
 
-  "defensibility-vertical-ai": `
+  'defensibility-vertical-ai': `
 
 ## The four moats that compound
 
@@ -155,7 +155,7 @@ Vertical AI competes on integrated workflow correctness in a specific domain. Th
 
 This is why the next decade of enterprise software belongs to operator-grade command platforms with shared AI infrastructure underneath. The infrastructure compresses on horizontal-AI economics. The customer-facing surfaces compound on vertical-AI economics. We get the best of both.`,
 
-  "monetization-ladder": `
+  'monetization-ladder': `
 
 ## The shape of the ladder
 
@@ -177,7 +177,7 @@ Six rungs, from free to enterprise, each one earning the next.
 
 It protects against two failure modes that kill multi-product companies. First, the discount-pilot trap — agreeing to a $1 pilot in exchange for a logo and never converting it. Every rung above has a price floor and a stated conversion expectation. Second, the advisory-trap — letting consulting revenue substitute for product traction. Advisory is capped explicitly at 30% of revenue in year one and 15% by year three. If we miss those targets, we're a consulting firm with a software side project, which is not the company we're building.`,
 
-  "cross-posting-strategy": `
+  'cross-posting-strategy': `
 
 ## The mechanics, in order
 
@@ -201,7 +201,7 @@ A few things I've stopped doing.
 
 The honest answer is that compounding distribution comes from publishing twice a week, on schedule, for two years, with zero exceptions. There is no growth hack that substitutes for that. Everything in this essay is amplification of consistency, not a replacement for it.`,
 
-  "forge-client-delivery": `
+  'forge-client-delivery': `
 
 ## What Forge does, concretely
 
@@ -223,7 +223,7 @@ Second, Forge is the spine that lets us run multiple product lines and an adviso
 
 Forge is not a product we sell, at least not yet. It's an internal platform that may, in 18–24 months, become a product for the small number of multi-product companies that have the same problem. For now it's a moat — the operational reason we can run six product lines with a small team without dropping deliverables.`,
 
-  "q1-investor-update": `
+  'q1-investor-update': `
 
 ## What's working
 
@@ -253,7 +253,7 @@ In order of priority, the next ninety days.
 
 The shape of Q2 is one quarter of execution against the Q1 thesis, with the next strategic decision deferred to a written memo at the end of June. We will not change the thesis on adrenaline.`,
 
-  "how-i-decide-what-becomes-an-agent": `
+  'how-i-decide-what-becomes-an-agent': `
 
 ## The five questions, in order
 
@@ -283,7 +283,7 @@ Pull-request first-pass review for our internal codebase — the agent reviews d
 
 Everything else — and there are at least twenty other workflows we've considered — is assistive AI inside the operator surface, not an autonomous agent. The bar for "this runs without a human in the loop" is high, and that's the right place for the bar to be.`,
 
-  "state-of-maritime-q1": `
+  'state-of-maritime-q1': `
 
 ## Five forces shaping the quarter
 
@@ -307,7 +307,7 @@ Re-paper your charter parties for EU-ETS allocation. The standard BIMCO clause i
 
 Stress-test your counterparty exposure. With shadow-fleet enforcement tightening, secondary sanctions risk is up. If your chain includes a flag, an insurer, or a charterer that has any exposure, find out now, not when the office of foreign assets control finds out for you.`,
 
-  "lost-pilot": `
+  'lost-pilot': `
 
 ## What actually happened
 
@@ -329,7 +329,7 @@ Three things, none of them surprising in retrospect.
 
 The pilot we lost was a million-dollar lesson. Cheaper than learning it on the fifth pilot, which is when the same failure mode would have cost us materially more reputation.`,
 
-  "cortex-mobile-surface": `
+  'cortex-mobile-surface': `
 
 ## What CORTEX is, in one sentence
 
@@ -361,7 +361,7 @@ Second, mobile is where trust gets built or lost in seconds. If the operator ope
 
 We're shipping CORTEX in stages — Aegis read-only first, then Aegis read-and-act, then Vessels, Terra, and Carlota Jo each rolled in over the following two quarters. By end of year, every operator role inside the SZL portfolio has a tuned mobile surface. That's the bet.`,
 
-  "ninety-days-building-public": `
+  'ninety-days-building-public': `
 
 ## The numbers, exactly
 
@@ -395,5 +395,5 @@ The cross-posting ROI on Medium is below model. Medium views are healthy but con
 
 90 days of the same cadence, with three changes. A clearer monetization ask in two essays per quarter. A price reset on the standard paid tier. And one new pillar essay format — quarterly state-of-market pieces, syndicated to industry publications, designed to make SZL Command the citable source on each of our verticals.
 
-The bet was that publishing in public would compound trust, distribution, and pipeline faster than not publishing. 90 days in, the bet is paying. The next 90 days are the second half of the test.`
+The bet was that publishing in public would compound trust, distribution, and pipeline faster than not publishing. 90 days in, the bet is paying. The next 90 days are the second half of the test.`,
 };

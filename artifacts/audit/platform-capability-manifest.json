@@ -5,14 +5,7 @@
     "generated": "2026-04-19",
     "auditor": "Platform Engineering",
     "scope": "All in-scope products: SZL Holdings corporate, Lyte, Alloy, Aegis, Sentra, Vessels, Terra, Carlota Jo, Counsel, PRISM Counsel, Pulse, Command, API Server, SZL Holdings Mobile, Marketplace packages",
-    "status_values": [
-      "live",
-      "working_demo",
-      "partial",
-      "stub",
-      "broken",
-      "undocumented"
-    ],
+    "status_values": ["live", "working_demo", "partial", "stub", "broken", "undocumented"],
     "status_definitions": {
       "live": "Feature pulls from a real external source or a real database path — confirmed by code inspection and runtime evidence",
       "working_demo": "Feature is fully rendered and functional in the UI with realistic seeded data; backend path exists but data is not live",
@@ -23,7 +16,6 @@
     }
   },
   "capabilities": [
-
     {
       "id": "CAP-001",
       "product": "API Server",
@@ -124,7 +116,11 @@
       "status": "partial",
       "evidence": "Stripe SDK integrated, routes exist, pricing tiers defined. STRIPE_SECRET_KEY is test-mode; live key not activated. No paid tenant onboarded.",
       "test_coverage": "none",
-      "blocking_dependencies": ["STRIPE_SECRET_KEY (live)", "STRIPE_WEBHOOK_SECRET", "Stripe product/price IDs configured per tier"],
+      "blocking_dependencies": [
+        "STRIPE_SECRET_KEY (live)",
+        "STRIPE_WEBHOOK_SECRET",
+        "Stripe product/price IDs configured per tier"
+      ],
       "owner": "Platform Engineering",
       "severity": "P1"
     },
@@ -163,7 +159,9 @@
       "status": "partial",
       "evidence": "initializeOpenTelemetry() wired in index.ts; validateProductionObservability() warns at startup. OTEL_EXPORTER_OTLP_ENDPOINT not configured in production secrets.",
       "test_coverage": "none",
-      "blocking_dependencies": ["OTEL_EXPORTER_OTLP_ENDPOINT or AZURE_APP_INSIGHTS_CONNECTION_STRING"],
+      "blocking_dependencies": [
+        "OTEL_EXPORTER_OTLP_ENDPOINT or AZURE_APP_INSIGHTS_CONNECTION_STRING"
+      ],
       "owner": "Platform Engineering",
       "severity": "P1"
     },
@@ -189,7 +187,11 @@
       "status": "partial",
       "evidence": "Route file exists and is mounted; no tenant has activated SCIM; requires Azure AD enterprise tenant configuration",
       "test_coverage": "none",
-      "blocking_dependencies": ["Enterprise Azure AD tenant", "AZURE_AD_TENANT_ID", "AZURE_AD_CLIENT_ID"],
+      "blocking_dependencies": [
+        "Enterprise Azure AD tenant",
+        "AZURE_AD_TENANT_ID",
+        "AZURE_AD_CLIENT_ID"
+      ],
       "owner": "Platform Engineering",
       "severity": "P2"
     },
@@ -545,7 +547,10 @@
       "status": "stub",
       "evidence": "AIS feed stubbed — positions are seeded/simulated. DATA-003 in audit register. Live AIS requires paid provider ($15–40K/year). AIS_API_KEY not configured.",
       "test_coverage": "none",
-      "blocking_dependencies": ["AIS_API_KEY from paid AIS provider", "AIS data provider contract ($15–40K/yr)"],
+      "blocking_dependencies": [
+        "AIS_API_KEY from paid AIS provider",
+        "AIS data provider contract ($15–40K/yr)"
+      ],
       "owner": "Commercial",
       "severity": "P1"
     },
@@ -584,7 +589,10 @@
       "status": "partial",
       "evidence": "UI built for all 3 modules; not connected to DB or live data API. DATA-006 in audit register.",
       "test_coverage": "none",
-      "blocking_dependencies": ["DB schema + seed for charter/freight data", "Market data API for freight benchmarks"],
+      "blocking_dependencies": [
+        "DB schema + seed for charter/freight data",
+        "Market data API for freight benchmarks"
+      ],
       "owner": "Engineering",
       "severity": "P2"
     },
@@ -850,7 +858,9 @@
       "status": "partial",
       "evidence": "UI fully built with agent badges, confidence chips, citation panel, verifier badges; briefing content not connected to live AI model — static/seeded",
       "test_coverage": "none",
-      "blocking_dependencies": ["Live AI model connection (OpenAI/Anthropic) for briefing generation"],
+      "blocking_dependencies": [
+        "Live AI model connection (OpenAI/Anthropic) for briefing generation"
+      ],
       "owner": "Engineering",
       "severity": "P2"
     },
@@ -1087,7 +1097,9 @@
       "status": "stub",
       "evidence": "KG020d open — PII columns not field-encrypted. SEC-010 open.",
       "test_coverage": "none",
-      "blocking_dependencies": ["Encryption library integration (e.g., pgp-based or application-layer AES)"],
+      "blocking_dependencies": [
+        "Encryption library integration (e.g., pgp-based or application-layer AES)"
+      ],
       "owner": "Security Engineering",
       "severity": "P2"
     },
@@ -1178,7 +1190,10 @@
       "status": "partial",
       "evidence": "KG024 open: large vendor bundles; no Lighthouse CI or bundle size regression guard",
       "test_coverage": "none",
-      "blocking_dependencies": ["Code splitting / lazy loading implementation", "Lighthouse CI setup"],
+      "blocking_dependencies": [
+        "Code splitting / lazy loading implementation",
+        "Lighthouse CI setup"
+      ],
       "owner": "Engineering",
       "severity": "P2"
     },

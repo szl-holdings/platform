@@ -1,10 +1,7 @@
-import type { TraceRecord } from "./schema.js";
-import type { TraceStore } from "./store.js";
-import { defaultTraceStore, MutableTraceStore } from "./store.js";
-import type {
-  PostgresTraceHistoryFilter,
-  PostgresTraceHistoryResult,
-} from "./postgres-store.js";
+import type { PostgresTraceHistoryFilter, PostgresTraceHistoryResult } from './postgres-store.js';
+import type { TraceRecord } from './schema.js';
+import type { TraceStore } from './store.js';
+import { defaultTraceStore, MutableTraceStore } from './store.js';
 
 /**
  * Optional capability marker — if a TraceStore backend implements this, the
@@ -12,12 +9,14 @@ import type {
  * the full historical record, not just the in-memory cache window.
  */
 interface HistoricalTraceStore {
-  queryHistory(filter: PostgresTraceHistoryFilter): Promise<PostgresTraceHistoryResult<TraceRecord>>;
+  queryHistory(
+    filter: PostgresTraceHistoryFilter,
+  ): Promise<PostgresTraceHistoryResult<TraceRecord>>;
 }
 
 function getHistoricalBackend(store: TraceStore): HistoricalTraceStore | undefined {
   const candidate: unknown = store instanceof MutableTraceStore ? store.getBackend() : store;
-  if (candidate && typeof (candidate as { queryHistory?: unknown }).queryHistory === "function") {
+  if (candidate && typeof (candidate as { queryHistory?: unknown }).queryHistory === 'function') {
     return candidate as HistoricalTraceStore;
   }
   return undefined;
@@ -32,7 +31,7 @@ export interface TraceQueryFilter {
   userId?: string;
   domain?: string;
   entityId?: string;
-  status?: TraceRecord["status"];
+  status?: TraceRecord['status'];
   hasErrors?: boolean;
   hasPolicyBlock?: boolean;
   model?: string;
@@ -102,15 +101,13 @@ export class TraceQueryEngine {
     if (agentId) results = results.filter((t) => t.agentId === agentId);
     if (workflowId) results = results.filter((t) => t.workflowId === workflowId);
     if (sessionId) results = results.filter((t) => t.sessionId === sessionId);
-    if (domain) results = results.filter((t) => (t.metadata?.["domain"] ?? undefined) === domain);
+    if (domain) results = results.filter((t) => (t.metadata?.['domain'] ?? undefined) === domain);
     if (model) results = results.filter((t) => t.model === model);
     if (status) results = results.filter((t) => t.status === status);
     if (hasErrors === true) results = results.filter((t) => t.errors.length > 0);
     if (hasErrors === false) results = results.filter((t) => t.errors.length === 0);
     if (hasPolicyBlock === true) {
-      results = results.filter((t) =>
-        t.guardrailResults.some((g) => g.outcome === "block"),
-      );
+      results = results.filter((t) => t.guardrailResults.some((g) => g.outcome === 'block'));
     }
 
     if (entityId) {
@@ -128,9 +125,7 @@ export class TraceQueryEngine {
       results = results.filter((t) => new Date(t.startedAt).getTime() <= beforeMs);
     }
 
-    results.sort(
-      (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
-    );
+    results.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 
     const total = results.length;
     const page = results.slice(offset, offset + limit);

@@ -11,9 +11,9 @@ export interface AccessEvent {
   /** Unix timestamp in milliseconds */
   timestamp: number;
   /** Type of resource accessed */
-  resourceType: "document" | "database" | "api" | "cloud-storage" | "email" | "auth";
+  resourceType: 'document' | 'database' | 'api' | 'cloud-storage' | 'email' | 'auth';
   /** Sensitivity classification of the resource */
-  sensitivity: "public" | "internal" | "confidential" | "restricted" | "top-secret";
+  sensitivity: 'public' | 'internal' | 'confidential' | 'restricted' | 'top-secret';
   /** Bytes transferred (upload or download) */
   bytesTransferred?: number;
   /** Whether access occurred outside normal working hours */
@@ -51,14 +51,14 @@ export interface BehavioralBaseline {
 export interface DetectedAnomaly {
   id: string;
   type:
-    | "volume-spike"
-    | "off-hours-pattern"
-    | "geo-anomaly"
-    | "sensitivity-escalation"
-    | "bytes-anomaly"
-    | "unmanaged-device"
-    | "off-network";
-  severity: "critical" | "high" | "medium" | "low";
+    | 'volume-spike'
+    | 'off-hours-pattern'
+    | 'geo-anomaly'
+    | 'sensitivity-escalation'
+    | 'bytes-anomaly'
+    | 'unmanaged-device'
+    | 'off-network';
+  severity: 'critical' | 'high' | 'medium' | 'low';
   /** Z-score that triggered this detection (absolute value) */
   zScore: number;
   description: string;
@@ -74,7 +74,7 @@ export interface RiskAssessment {
   userId: string;
   /** 0-100 composite risk score */
   riskScore: number;
-  riskLevel: "critical" | "high" | "medium" | "low" | "normal";
+  riskLevel: 'critical' | 'high' | 'medium' | 'low' | 'normal';
   /** Percent deviation from baseline (e.g., 187 = 187% above baseline) */
   baselineDeviation: number;
   anomalies: DetectedAnomaly[];
@@ -111,12 +111,12 @@ function zToRisk(z: number, threshold: number = 2.0): number {
   return clamp(30 + (absZ - threshold) * 25, 0, 100);
 }
 
-function riskLevelFromScore(score: number): RiskAssessment["riskLevel"] {
-  if (score >= 80) return "critical";
-  if (score >= 60) return "high";
-  if (score >= 35) return "medium";
-  if (score >= 15) return "low";
-  return "normal";
+function riskLevelFromScore(score: number): RiskAssessment['riskLevel'] {
+  if (score >= 80) return 'critical';
+  if (score >= 60) return 'high';
+  if (score >= 35) return 'medium';
+  if (score >= 15) return 'low';
+  return 'normal';
 }
 
 // ─── Anomaly Detection ────────────────────────────────────────────────────────
@@ -129,20 +129,22 @@ function detectVolumeAnomaly(
   const z = zScore(currentWeeklyAccesses, baseline.meanWeeklyAccesses, baseline.stdWeeklyAccesses);
   if (Math.abs(z) < 2.0) return null;
 
-  const multiplier = baseline.meanWeeklyAccesses > 0
-    ? (currentWeeklyAccesses / baseline.meanWeeklyAccesses).toFixed(1)
-    : "∞";
-  const severity: DetectedAnomaly["severity"] = Math.abs(z) >= 4 ? "critical" : Math.abs(z) >= 3 ? "high" : "medium";
+  const multiplier =
+    baseline.meanWeeklyAccesses > 0
+      ? (currentWeeklyAccesses / baseline.meanWeeklyAccesses).toFixed(1)
+      : '∞';
+  const severity: DetectedAnomaly['severity'] =
+    Math.abs(z) >= 4 ? 'critical' : Math.abs(z) >= 3 ? 'high' : 'medium';
 
   return {
     id: `vol-${ts}`,
-    type: "volume-spike",
+    type: 'volume-spike',
     severity,
     zScore: z,
     description: `Access volume ${multiplier}× weekly baseline (z=${z.toFixed(2)})`,
     evidenceNarrative: `User accessed ${currentWeeklyAccesses} resources this week. Baseline: μ=${baseline.meanWeeklyAccesses.toFixed(0)}, σ=${baseline.stdWeeklyAccesses.toFixed(0)}. Statistical deviation: z=${z.toFixed(2)} — ${severity} anomaly threshold exceeded.`,
     timestamp: ts,
-    mitreTechnique: "T1005",
+    mitreTechnique: 'T1005',
   };
 }
 
@@ -156,19 +158,19 @@ function detectOffHoursAnomaly(
   // Only flag if current rate is significantly higher than baseline
   if (currentRate < 0.3 || currentRate <= baseline.offHoursRate * 1.5) return null;
 
-  const severity: DetectedAnomaly["severity"] =
-    currentRate >= 0.6 ? "critical" : currentRate >= 0.4 ? "high" : "medium";
+  const severity: DetectedAnomaly['severity'] =
+    currentRate >= 0.6 ? 'critical' : currentRate >= 0.4 ? 'high' : 'medium';
   const offHoursCount = events.filter((e) => e.offHours).length;
 
   return {
     id: `offhours-${ts}`,
-    type: "off-hours-pattern",
+    type: 'off-hours-pattern',
     severity,
     zScore: zScore(currentRate, baseline.offHoursRate, Math.max(baseline.offHoursRate * 0.3, 0.05)),
     description: `Off-hours activity: ${(currentRate * 100).toFixed(0)}% of sessions vs ${(baseline.offHoursRate * 100).toFixed(0)}% baseline`,
     evidenceNarrative: `${offHoursCount} of ${events.length} access events occurred outside standard business hours. Historical off-hours rate: ${(baseline.offHoursRate * 100).toFixed(0)}%. Current period rate: ${(currentRate * 100).toFixed(0)}% — ${severity} deviation.`,
     timestamp: ts,
-    mitreTechnique: "T1078",
+    mitreTechnique: 'T1078',
   };
 }
 
@@ -181,18 +183,18 @@ function detectGeoAnomaly(
   if (unknownGeoEvents.length === 0) return null;
 
   const unknownGeoKeys = [...new Set(unknownGeoEvents.map((e) => e.geoKey))];
-  const severity: DetectedAnomaly["severity"] =
-    unknownGeoEvents.length >= 5 ? "critical" : unknownGeoEvents.length >= 2 ? "high" : "medium";
+  const severity: DetectedAnomaly['severity'] =
+    unknownGeoEvents.length >= 5 ? 'critical' : unknownGeoEvents.length >= 2 ? 'high' : 'medium';
 
   return {
     id: `geo-${ts}`,
-    type: "geo-anomaly",
+    type: 'geo-anomaly',
     severity,
     zScore: 3.5,
-    description: `Authentication from ${unknownGeoKeys.length} unknown geographic location(s): ${unknownGeoKeys.slice(0, 3).join(", ")}`,
-    evidenceNarrative: `${unknownGeoEvents.length} access event(s) originated from geographies not present in 90-day baseline. Unknown locations: ${unknownGeoKeys.join(", ")}. Known geo profile: ${baseline.knownGeoKeys.join(", ")}.`,
+    description: `Authentication from ${unknownGeoKeys.length} unknown geographic location(s): ${unknownGeoKeys.slice(0, 3).join(', ')}`,
+    evidenceNarrative: `${unknownGeoEvents.length} access event(s) originated from geographies not present in 90-day baseline. Unknown locations: ${unknownGeoKeys.join(', ')}. Known geo profile: ${baseline.knownGeoKeys.join(', ')}.`,
     timestamp: ts,
-    mitreTechnique: "T1078.004",
+    mitreTechnique: 'T1078.004',
   };
 }
 
@@ -202,24 +204,31 @@ function detectSensitivityAnomaly(
   ts: number,
 ): DetectedAnomaly | null {
   if (events.length === 0) return null;
-  const sensitiveEvents = events.filter((e) =>
-    e.sensitivity === "confidential" || e.sensitivity === "restricted" || e.sensitivity === "top-secret",
+  const sensitiveEvents = events.filter(
+    (e) =>
+      e.sensitivity === 'confidential' ||
+      e.sensitivity === 'restricted' ||
+      e.sensitivity === 'top-secret',
   );
   const currentRate = sensitiveEvents.length / events.length;
   if (currentRate <= baseline.sensitiveAccessRate * 1.8) return null;
 
-  const severity: DetectedAnomaly["severity"] =
-    currentRate >= 0.6 ? "critical" : currentRate >= 0.4 ? "high" : "medium";
+  const severity: DetectedAnomaly['severity'] =
+    currentRate >= 0.6 ? 'critical' : currentRate >= 0.4 ? 'high' : 'medium';
 
   return {
     id: `sensitivity-${ts}`,
-    type: "sensitivity-escalation",
+    type: 'sensitivity-escalation',
     severity,
-    zScore: zScore(currentRate, baseline.sensitiveAccessRate, Math.max(baseline.sensitiveAccessRate * 0.4, 0.05)),
+    zScore: zScore(
+      currentRate,
+      baseline.sensitiveAccessRate,
+      Math.max(baseline.sensitiveAccessRate * 0.4, 0.05),
+    ),
     description: `Sensitive resource access: ${(currentRate * 100).toFixed(0)}% of accesses vs ${(baseline.sensitiveAccessRate * 100).toFixed(0)}% baseline`,
-    evidenceNarrative: `${sensitiveEvents.length} of ${events.length} events accessed confidential or restricted resources. Baseline sensitive access rate: ${(baseline.sensitiveAccessRate * 100).toFixed(0)}%. Includes ${events.filter((e) => e.sensitivity === "restricted").length} restricted resource access(es).`,
+    evidenceNarrative: `${sensitiveEvents.length} of ${events.length} events accessed confidential or restricted resources. Baseline sensitive access rate: ${(baseline.sensitiveAccessRate * 100).toFixed(0)}%. Includes ${events.filter((e) => e.sensitivity === 'restricted').length} restricted resource access(es).`,
     timestamp: ts,
-    mitreTechnique: "T1005",
+    mitreTechnique: 'T1005',
   };
 }
 
@@ -231,21 +240,26 @@ function detectDataTransferAnomaly(
   const totalBytes = events.reduce((sum, e) => sum + (e.bytesTransferred ?? 0), 0);
   if (totalBytes === 0) return null;
 
-  const z = zScore(totalBytes, baseline.meanBytesPerSession * events.length, baseline.stdBytesPerSession * Math.sqrt(events.length));
+  const z = zScore(
+    totalBytes,
+    baseline.meanBytesPerSession * events.length,
+    baseline.stdBytesPerSession * Math.sqrt(events.length),
+  );
   if (Math.abs(z) < 2.5) return null;
 
   const gb = (totalBytes / 1_073_741_824).toFixed(2);
-  const severity: DetectedAnomaly["severity"] = Math.abs(z) >= 4 ? "critical" : Math.abs(z) >= 3 ? "high" : "medium";
+  const severity: DetectedAnomaly['severity'] =
+    Math.abs(z) >= 4 ? 'critical' : Math.abs(z) >= 3 ? 'high' : 'medium';
 
   return {
     id: `bytes-${ts}`,
-    type: "bytes-anomaly",
+    type: 'bytes-anomaly',
     severity,
     zScore: z,
     description: `Abnormal data transfer: ${gb}GB (z=${z.toFixed(2)})`,
     evidenceNarrative: `Total data transfer of ${gb}GB detected across ${events.length} session events. Statistical deviation z=${z.toFixed(2)} from session transfer baseline (μ=${(baseline.meanBytesPerSession / 1024 / 1024).toFixed(1)}MB/session). Indicative of bulk data staging or exfiltration.`,
     timestamp: ts,
-    mitreTechnique: "T1567.002",
+    mitreTechnique: 'T1567.002',
   };
 }
 
@@ -260,8 +274,8 @@ function detectDeviceNetworkAnomaly(
   if (unmanagedEvents.length > 0 && baseline.managedDeviceRate >= 0.9) {
     anomalies.push({
       id: `device-${ts}`,
-      type: "unmanaged-device",
-      severity: unmanagedEvents.length >= 3 ? "high" : "medium",
+      type: 'unmanaged-device',
+      severity: unmanagedEvents.length >= 3 ? 'high' : 'medium',
       zScore: 2.8,
       description: `${unmanagedEvents.length} access event(s) from non-MDM enrolled device(s)`,
       evidenceNarrative: `${unmanagedEvents.length} session(s) from devices not enrolled in MDM. User baseline: ${(baseline.managedDeviceRate * 100).toFixed(0)}% managed device sessions. Unmanaged access to corporate resources bypasses endpoint security controls.`,
@@ -273,8 +287,8 @@ function detectDeviceNetworkAnomaly(
   if (offNetworkEvents.length >= 3 && offNetworkEvents.length / events.length > 0.4) {
     anomalies.push({
       id: `network-${ts}`,
-      type: "off-network",
-      severity: "medium",
+      type: 'off-network',
+      severity: 'medium',
       zScore: 2.1,
       description: `${offNetworkEvents.length} access events from unapproved network segments`,
       evidenceNarrative: `${offNetworkEvents.length} of ${events.length} events originated from IP ranges outside approved corporate and VPN networks. Possible rogue access point or residential access without approved VPN.`,
@@ -331,27 +345,38 @@ export function computeRiskAssessment(
     zScore(weeklyAccessCount, baseline.meanWeeklyAccesses, Math.max(baseline.stdWeeklyAccesses, 1)),
   );
 
-  const offHoursRate = events.length > 0 ? events.filter((e) => e.offHours).length / events.length : 0;
+  const offHoursRate =
+    events.length > 0 ? events.filter((e) => e.offHours).length / events.length : 0;
   const temporalRisk = zToRisk(
     zScore(offHoursRate, baseline.offHoursRate, Math.max(baseline.offHoursRate * 0.4, 0.05)),
   );
 
-  const unknownGeoFraction = events.length > 0
-    ? events.filter((e) => !baseline.knownGeoKeys.includes(e.geoKey)).length / events.length
-    : 0;
+  const unknownGeoFraction =
+    events.length > 0
+      ? events.filter((e) => !baseline.knownGeoKeys.includes(e.geoKey)).length / events.length
+      : 0;
   const geographicRisk = clamp(unknownGeoFraction * 100, 0, 100);
 
-  const currentSensitiveRate = events.length > 0
-    ? events.filter((e) => ["confidential", "restricted", "top-secret"].includes(e.sensitivity)).length / events.length
-    : 0;
+  const currentSensitiveRate =
+    events.length > 0
+      ? events.filter((e) => ['confidential', 'restricted', 'top-secret'].includes(e.sensitivity))
+          .length / events.length
+      : 0;
   const sensitivityRisk = zToRisk(
-    zScore(currentSensitiveRate, baseline.sensitiveAccessRate, Math.max(baseline.sensitiveAccessRate * 0.4, 0.05)),
+    zScore(
+      currentSensitiveRate,
+      baseline.sensitiveAccessRate,
+      Math.max(baseline.sensitiveAccessRate * 0.4, 0.05),
+    ),
   );
 
-  const unmanagedFraction = events.length > 0
-    ? events.filter((e) => !e.deviceManaged).length / events.length
-    : 0;
-  const deviceNetworkRisk = clamp(unmanagedFraction * 80 + (deviceAnomalies.length > 0 ? 20 : 0), 0, 100);
+  const unmanagedFraction =
+    events.length > 0 ? events.filter((e) => !e.deviceManaged).length / events.length : 0;
+  const deviceNetworkRisk = clamp(
+    unmanagedFraction * 80 + (deviceAnomalies.length > 0 ? 20 : 0),
+    0,
+    100,
+  );
 
   const totalBytes = events.reduce((sum, e) => sum + (e.bytesTransferred ?? 0), 0);
   const bytesZ = zScore(
@@ -363,23 +388,30 @@ export function computeRiskAssessment(
 
   // ── Composite score: weighted average of factors ──
   const weights = {
-    volumeRisk: 0.20,
+    volumeRisk: 0.2,
     temporalRisk: 0.15,
-    geographicRisk: 0.20,
-    sensitivityRisk: 0.20,
-    deviceNetworkRisk: 0.10,
+    geographicRisk: 0.2,
+    sensitivityRisk: 0.2,
+    deviceNetworkRisk: 0.1,
     dataTransferRisk: 0.15,
   };
 
-  const factorScores = { volumeRisk, temporalRisk, geographicRisk, sensitivityRisk, deviceNetworkRisk, dataTransferRisk };
+  const factorScores = {
+    volumeRisk,
+    temporalRisk,
+    geographicRisk,
+    sensitivityRisk,
+    deviceNetworkRisk,
+    dataTransferRisk,
+  };
 
   let rawScore = Object.entries(weights).reduce(
-    (sum, [key, weight]) => sum + (factorScores[key as keyof typeof factorScores] * weight),
+    (sum, [key, weight]) => sum + factorScores[key as keyof typeof factorScores] * weight,
     0,
   );
 
   // Boost for multiple correlated critical anomalies (indicator of deliberate insider threat)
-  const criticalAnomalyCount = anomalies.filter((a) => a.severity === "critical").length;
+  const criticalAnomalyCount = anomalies.filter((a) => a.severity === 'critical').length;
   if (criticalAnomalyCount >= 2) rawScore = Math.min(100, rawScore * 1.35);
   if (criticalAnomalyCount >= 3) rawScore = Math.min(100, rawScore * 1.15);
 
@@ -387,15 +419,22 @@ export function computeRiskAssessment(
   const riskLevel = riskLevelFromScore(riskScore);
 
   // Baseline deviation = percent over baseline volume
-  const baselineDeviation = baseline.meanWeeklyAccesses > 0
-    ? Math.round(((weeklyAccessCount - baseline.meanWeeklyAccesses) / baseline.meanWeeklyAccesses) * 100)
-    : 0;
+  const baselineDeviation =
+    baseline.meanWeeklyAccesses > 0
+      ? Math.round(
+          ((weeklyAccessCount - baseline.meanWeeklyAccesses) / baseline.meanWeeklyAccesses) * 100,
+        )
+      : 0;
 
   // ── Summary generation ──
-  const anomalyDescriptions = anomalies.slice(0, 3).map((a) => a.description).join("; ");
-  const summary = anomalies.length === 0
-    ? "No significant behavioral anomalies detected. User activity within normal parameters."
-    : `${anomalies.length} behavioral anomaly${anomalies.length !== 1 ? "s" : ""} detected: ${anomalyDescriptions}.${anomalies.length > 3 ? ` Plus ${anomalies.length - 3} additional finding(s).` : ""}`;
+  const anomalyDescriptions = anomalies
+    .slice(0, 3)
+    .map((a) => a.description)
+    .join('; ');
+  const summary =
+    anomalies.length === 0
+      ? 'No significant behavioral anomalies detected. User activity within normal parameters.'
+      : `${anomalies.length} behavioral anomaly${anomalies.length !== 1 ? 's' : ''} detected: ${anomalyDescriptions}.${anomalies.length > 3 ? ` Plus ${anomalies.length - 3} additional finding(s).` : ''}`;
 
   return {
     userId,
@@ -431,40 +470,49 @@ export function buildBaseline(
     weeksMap.set(weekKey, (weeksMap.get(weekKey) ?? 0) + 1);
   }
   const weekCounts = [...weeksMap.values()];
-  const meanWeeklyAccesses = weekCounts.length > 0
-    ? weekCounts.reduce((s, v) => s + v, 0) / weekCounts.length
-    : historicalEvents.length / weekCount;
+  const meanWeeklyAccesses =
+    weekCounts.length > 0
+      ? weekCounts.reduce((s, v) => s + v, 0) / weekCounts.length
+      : historicalEvents.length / weekCount;
 
-  const variance = weekCounts.length > 1
-    ? weekCounts.reduce((s, v) => s + Math.pow(v - meanWeeklyAccesses, 2), 0) / (weekCounts.length - 1)
-    : meanWeeklyAccesses * 0.3;
+  const variance =
+    weekCounts.length > 1
+      ? weekCounts.reduce((s, v) => s + (v - meanWeeklyAccesses) ** 2, 0) / (weekCounts.length - 1)
+      : meanWeeklyAccesses * 0.3;
   const stdWeeklyAccesses = Math.sqrt(variance);
 
-  const offHoursRate = historicalEvents.length > 0
-    ? historicalEvents.filter((e) => e.offHours).length / historicalEvents.length
-    : 0.05;
+  const offHoursRate =
+    historicalEvents.length > 0
+      ? historicalEvents.filter((e) => e.offHours).length / historicalEvents.length
+      : 0.05;
 
-  const sensitiveAccessRate = historicalEvents.length > 0
-    ? historicalEvents.filter((e) =>
-        e.sensitivity === "confidential" || e.sensitivity === "restricted" || e.sensitivity === "top-secret",
-      ).length / historicalEvents.length
-    : 0.1;
+  const sensitiveAccessRate =
+    historicalEvents.length > 0
+      ? historicalEvents.filter(
+          (e) =>
+            e.sensitivity === 'confidential' ||
+            e.sensitivity === 'restricted' ||
+            e.sensitivity === 'top-secret',
+        ).length / historicalEvents.length
+      : 0.1;
 
-  const sessionBytes = historicalEvents
-    .map((e) => e.bytesTransferred ?? 0)
-    .filter((b) => b > 0);
-  const meanBytesPerSession = sessionBytes.length > 0
-    ? sessionBytes.reduce((s, b) => s + b, 0) / sessionBytes.length
-    : 5_242_880; // 5MB default
-  const bytesVariance = sessionBytes.length > 1
-    ? sessionBytes.reduce((s, b) => s + Math.pow(b - meanBytesPerSession, 2), 0) / (sessionBytes.length - 1)
-    : meanBytesPerSession;
+  const sessionBytes = historicalEvents.map((e) => e.bytesTransferred ?? 0).filter((b) => b > 0);
+  const meanBytesPerSession =
+    sessionBytes.length > 0
+      ? sessionBytes.reduce((s, b) => s + b, 0) / sessionBytes.length
+      : 5_242_880; // 5MB default
+  const bytesVariance =
+    sessionBytes.length > 1
+      ? sessionBytes.reduce((s, b) => s + (b - meanBytesPerSession) ** 2, 0) /
+        (sessionBytes.length - 1)
+      : meanBytesPerSession;
   const stdBytesPerSession = Math.sqrt(bytesVariance);
 
   const knownGeoKeys = [...new Set(historicalEvents.map((e) => e.geoKey))];
-  const managedDeviceRate = historicalEvents.length > 0
-    ? historicalEvents.filter((e) => e.deviceManaged).length / historicalEvents.length
-    : 1.0;
+  const managedDeviceRate =
+    historicalEvents.length > 0
+      ? historicalEvents.filter((e) => e.deviceManaged).length / historicalEvents.length
+      : 1.0;
 
   return {
     userId,

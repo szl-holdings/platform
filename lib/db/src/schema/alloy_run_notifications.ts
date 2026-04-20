@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 /**
  * Dedup ledger for server-initiated push notifications fired when an Alloy
@@ -12,20 +12,16 @@ import { pgTable, serial, integer, text, timestamp, uniqueIndex } from "drizzle-
  *   - `stuck`   — run has been in "running" past the stuck threshold.
  */
 export const alloyRunFailureNotificationsTable = pgTable(
-  "alloy_run_failure_notifications",
+  'alloy_run_failure_notifications',
   {
-    id: serial("id").primaryKey(),
-    runId: integer("run_id").notNull(),
-    userId: integer("user_id").notNull(),
-    kind: text("kind", { enum: ["failed", "stuck"] }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    id: serial('id').primaryKey(),
+    runId: integer('run_id').notNull(),
+    userId: integer('user_id').notNull(),
+    kind: text('kind', { enum: ['failed', 'stuck'] }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    dedupIdx: uniqueIndex("alloy_run_failure_notifications_dedup").on(
-      t.runId,
-      t.userId,
-      t.kind,
-    ),
+    dedupIdx: uniqueIndex('alloy_run_failure_notifications_dedup').on(t.runId, t.userId, t.kind),
   }),
 );
 

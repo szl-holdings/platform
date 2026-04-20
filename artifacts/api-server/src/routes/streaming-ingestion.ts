@@ -1,37 +1,37 @@
-import { Router, type IRouter, type Request, type Response } from "express";
-import { logger } from "../lib/logger";
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
+import { sendBadRequest, sendError, sendNotFound, sendUnauthorized } from '../lib/api-response';
 import {
-  getBufferSnapshot,
-  subscribeToBuffer,
-  ingestEvent,
-  ingestBatch,
   enqueueWebhookEvent,
-  normalizeSiemPayload,
-  normalizeAisNmea,
-  registerDataSource,
-  pauseDataSource,
-  resumeDataSource,
-  listDataSources,
+  getBufferSnapshot,
   getDataSource,
   getIngestionStats,
-  type StreamEvent,
+  ingestBatch,
+  ingestEvent,
+  listDataSources,
+  normalizeAisNmea,
+  normalizeSiemPayload,
+  pauseDataSource,
+  registerDataSource,
+  resumeDataSource,
   type StreamCategory,
-} from "../lib/ingestion-framework";
-import { z } from "zod";
-import { validateBody } from "../lib/validation";
-import { authMiddleware } from "../middlewares/auth";
-import { sendNotFound, sendBadRequest, sendError, sendUnauthorized } from "../lib/api-response";
+  type StreamEvent,
+  subscribeToBuffer,
+} from '../lib/ingestion-framework';
+import { logger } from '../lib/logger';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const ingestSchema = z.object({
   source: z.string().min(1).max(200),
-  category: z.enum(["siem", "market", "ais"]),
+  category: z.enum(['siem', 'market', 'ais']),
   events: z.array(z.record(z.unknown())).min(1).max(1000),
 });
 
 const registerSourceSchema = z.object({
   name: z.string().min(1).max(200),
-  type: z.enum(["webhook", "polling"]),
-  category: z.enum(["siem", "market", "ais"]),
+  type: z.enum(['webhook', 'polling']),
+  category: z.enum(['siem', 'market', 'ais']),
   endpoint: z.string().url().max(2048).optional(),
   authToken: z.string().max(500).optional(),
   pollingIntervalMs: z.number().int().min(1000).max(3600000).optional(),
@@ -41,11 +41,11 @@ const streamingRouter: IRouter = Router();
 
 function sseHeaders(res: Response): void {
   res.writeHead(200, {
-    "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
-    "Connection": "keep-alive",
-    "X-Accel-Buffering": "no",
-    "Access-Control-Allow-Origin": "*",
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+    'Access-Control-Allow-Origin': '*',
   });
 }
 
@@ -59,7 +59,7 @@ function startSseStream(
   req: Request,
   res: Response,
   category: StreamCategory,
-  fallbackGenerator: (res: Response) => NodeJS.Timeout
+  fallbackGenerator: (res: Response) => NodeJS.Timeout,
 ): void {
   sseHeaders(res);
 
@@ -71,24 +71,30 @@ function startSseStream(
     writeEvent(res, evt);
   });
 
-  const hasSources = listDataSources().some(
-    s => s.category === category && s.enabled
-  );
+  const hasSources = listDataSources().some((s) => s.category === category && s.enabled);
 
   const fallbackTimer = hasSources ? null : fallbackGenerator(res);
 
-  req.on("close", () => {
+  req.on('close', () => {
     unsubscribe();
     if (fallbackTimer) clearInterval(fallbackTimer);
-    logger.debug({ category }, "[streaming] SSE client disconnected");
+    logger.debug({ category }, '[streaming] SSE client disconnected');
   });
 }
 
-streamingRouter.get("/stream/siem-events", (req: Request, res: Response) => {
-  startSseStream(req, res, "siem", (r) => {
-    const TYPES = ["port_scan", "bruteforce", "privilege_escalation", "c2_beacon", "dns_tunneling", "lateral_movement", "anomalous_login"];
-    const SOURCES = ["splunk", "qradar", "sentinel_siem"];
-    const SEVERITIES = ["low", "medium", "high", "critical"];
+streamingRouter.get('/stream/siem-events', (req: Request, res: Response) => {
+  startSseStream(req, res, 'siem', (r) => {
+    const TYPES = [
+      'port_scan',
+      'bruteforce',
+      'privilege_escalation',
+      'c2_beacon',
+      'dns_tunneling',
+      'lateral_movement',
+      'anomalous_login',
+    ];
+    const SOURCES = ['splunk', 'qradar', 'sentinel_siem'];
+    const SEVERITIES = ['low', 'medium', 'high', 'critical'];
 
     return setInterval(() => {
       if (r.writableEnded) return;
@@ -96,7 +102,7 @@ streamingRouter.get("/stream/siem-events", (req: Request, res: Response) => {
         const evt = ingestEvent({
           type: TYPES[Math.floor(Math.random() * TYPES.length)]!,
           source: SOURCES[Math.floor(Math.random() * SOURCES.length)]!,
-          category: "siem",
+          category: 'siem',
           severity: SEVERITIES[Math.floor(Math.random() * SEVERITIES.length)],
           payload: {
             host: `host-${Math.floor(Math.random() * 100)}`,
@@ -106,18 +112,21 @@ streamingRouter.get("/stream/siem-events", (req: Request, res: Response) => {
           timestamp: new Date().toISOString(),
         });
         writeEvent(r, evt);
-      } catch {
-      }
+      } catch {}
     }, 5000);
   });
 });
 
-streamingRouter.get("/stream/market-data", (req: Request, res: Response) => {
-  startSseStream(req, res, "market", (r) => {
-    const TICKERS = ["BTC-USD", "ETH-USD", "S&P500", "NASDAQ", "AAPL", "NVDA"];
+streamingRouter.get('/stream/market-data', (req: Request, res: Response) => {
+  startSseStream(req, res, 'market', (r) => {
+    const TICKERS = ['BTC-USD', 'ETH-USD', 'S&P500', 'NASDAQ', 'AAPL', 'NVDA'];
     const BASE_PRICES: Record<string, number> = {
-      "BTC-USD": 67000, "ETH-USD": 3400, "S&P500": 5200,
-      "NASDAQ": 18000, "AAPL": 190, "NVDA": 850,
+      'BTC-USD': 67000,
+      'ETH-USD': 3400,
+      'S&P500': 5200,
+      NASDAQ: 18000,
+      AAPL: 190,
+      NVDA: 850,
     };
 
     return setInterval(() => {
@@ -128,10 +137,10 @@ streamingRouter.get("/stream/market-data", (req: Request, res: Response) => {
         const price = basePrice * (1 + (Math.random() - 0.5) * 0.02);
         const change = parseFloat(((Math.random() - 0.5) * 4).toFixed(2));
         const evt = ingestEvent({
-          type: "price_update",
-          source: "market_feed_simulated",
-          category: "market",
-          severity: Math.abs(change) > 3 ? "medium" : "low",
+          type: 'price_update',
+          source: 'market_feed_simulated',
+          category: 'market',
+          severity: Math.abs(change) > 3 ? 'medium' : 'low',
           payload: {
             ticker,
             price: parseFloat(price.toFixed(2)),
@@ -141,19 +150,25 @@ streamingRouter.get("/stream/market-data", (req: Request, res: Response) => {
           timestamp: new Date().toISOString(),
         });
         writeEvent(r, evt);
-      } catch {
-      }
+      } catch {}
     }, 3000);
   });
 });
 
-streamingRouter.get("/stream/ais-tracking", (req: Request, res: Response) => {
-  startSseStream(req, res, "ais", (r) => {
+streamingRouter.get('/stream/ais-tracking', (req: Request, res: Response) => {
+  startSseStream(req, res, 'ais', (r) => {
     const vessels = [
-      { mmsi: "123456001", name: "MV PACIFIC STAR", lat: 23.4, lon: 118.7, speed: 14.2, course: 45 },
-      { mmsi: "123456002", name: "MV ATLAS", lat: 35.1, lon: -12.3, speed: 18.5, course: 270 },
-      { mmsi: "123456003", name: "MV HORIZON", lat: -4.2, lon: 39.8, speed: 11.0, course: 180 },
-      { mmsi: "123456004", name: "MV LIBERTY", lat: 51.5, lon: 1.2, speed: 8.3, course: 90 },
+      {
+        mmsi: '123456001',
+        name: 'MV PACIFIC STAR',
+        lat: 23.4,
+        lon: 118.7,
+        speed: 14.2,
+        course: 45,
+      },
+      { mmsi: '123456002', name: 'MV ATLAS', lat: 35.1, lon: -12.3, speed: 18.5, course: 270 },
+      { mmsi: '123456003', name: 'MV HORIZON', lat: -4.2, lon: 39.8, speed: 11.0, course: 180 },
+      { mmsi: '123456004', name: 'MV LIBERTY', lat: 51.5, lon: 1.2, speed: 8.3, course: 90 },
     ];
 
     return setInterval(() => {
@@ -164,9 +179,9 @@ streamingRouter.get("/stream/ais-tracking", (req: Request, res: Response) => {
         vessel.lon += (Math.random() - 0.5) * 0.01;
         vessel.speed = Math.max(0, vessel.speed + (Math.random() - 0.5) * 0.5);
         const evt = ingestEvent({
-          type: "position_update",
-          source: "ais_feed_simulated",
-          category: "ais",
+          type: 'position_update',
+          source: 'ais_feed_simulated',
+          category: 'ais',
           payload: {
             mmsi: vessel.mmsi,
             vessel: vessel.name,
@@ -174,35 +189,36 @@ streamingRouter.get("/stream/ais-tracking", (req: Request, res: Response) => {
             lon: parseFloat(vessel.lon.toFixed(4)),
             speed: parseFloat(vessel.speed.toFixed(1)),
             course: vessel.course,
-            status: "underway",
+            status: 'underway',
           },
           timestamp: new Date().toISOString(),
         });
         writeEvent(r, evt);
-      } catch {
-      }
+      } catch {}
     }, 4000);
   });
 });
 
-streamingRouter.post("/stream/webhook/:sourceToken", async (req: Request, res: Response) => {
-  const sourceToken = String(req.params["sourceToken"] ?? "");
+streamingRouter.post('/stream/webhook/:sourceToken', async (req: Request, res: Response) => {
+  const sourceToken = String(req.params['sourceToken'] ?? '');
   const body = req.body as Record<string, unknown>;
 
-  const sources = listDataSources().filter(s => s.type === "webhook" && s.authToken === sourceToken);
+  const sources = listDataSources().filter(
+    (s) => s.type === 'webhook' && s.authToken === sourceToken,
+  );
   if (sources.length === 0) {
-    sendUnauthorized(res, "Unknown or unauthorized webhook source token");
+    sendUnauthorized(res, 'Unknown or unauthorized webhook source token');
     return;
   }
 
   const source = sources[0]!;
   if (!source.enabled) {
-    sendError(res, "Data source is paused", 423, "LOCKED");
+    sendError(res, 'Data source is paused', 423, 'LOCKED');
     return;
   }
 
   const rawEvents: Record<string, unknown>[] = Array.isArray(body)
-    ? body as Record<string, unknown>[]
+    ? (body as Record<string, unknown>[])
     : [body];
 
   let accepted = 0;
@@ -213,16 +229,18 @@ streamingRouter.post("/stream/webhook/:sourceToken", async (req: Request, res: R
       enqueueWebhookEvent(source.category, full);
       ingestEvent({ ...normalized, sourceId: source.id }, source.id);
       accepted++;
-    } catch {
-    }
+    } catch {}
   }
 
-  logger.info({ sourceId: source.id, name: source.name, accepted }, "[streaming] Webhook events received");
-  res.json({ status: "accepted", accepted, timestamp: new Date().toISOString() });
+  logger.info(
+    { sourceId: source.id, name: source.name, accepted },
+    '[streaming] Webhook events received',
+  );
+  res.json({ status: 'accepted', accepted, timestamp: new Date().toISOString() });
 });
 
-streamingRouter.post("/stream/webhook-siem", async (req: Request, res: Response) => {
-  const authHeader = req.headers["authorization"];
+streamingRouter.post('/stream/webhook-siem', async (req: Request, res: Response) => {
+  const authHeader = req.headers['authorization'];
   const body = req.body as Record<string, unknown> | Record<string, unknown>[];
 
   const rawEvents: Record<string, unknown>[] = Array.isArray(body) ? body : [body];
@@ -230,24 +248,24 @@ streamingRouter.post("/stream/webhook-siem", async (req: Request, res: Response)
 
   for (const raw of rawEvents.slice(0, 100)) {
     try {
-      const normalized = normalizeSiemPayload(raw, "siem_webhook");
+      const normalized = normalizeSiemPayload(raw, 'siem_webhook');
       ingestEvent({ ...normalized }, undefined);
       accepted++;
-    } catch {
-    }
+    } catch {}
   }
 
-  logger.info({ accepted, hasAuth: !!authHeader }, "[streaming] SIEM webhook received");
-  res.json({ status: "accepted", accepted, timestamp: new Date().toISOString() });
+  logger.info({ accepted, hasAuth: !!authHeader }, '[streaming] SIEM webhook received');
+  res.json({ status: 'accepted', accepted, timestamp: new Date().toISOString() });
 });
 
-streamingRouter.post("/stream/ais-nmea", async (req: Request, res: Response) => {
+streamingRouter.post('/stream/ais-nmea', async (req: Request, res: Response) => {
   const body = req.body as { sentences?: string[] } | { sentence?: string };
-  const sentences: string[] = "sentences" in body && Array.isArray(body.sentences)
-    ? body.sentences
-    : "sentence" in body && typeof body.sentence === "string"
-      ? [body.sentence]
-      : [];
+  const sentences: string[] =
+    'sentences' in body && Array.isArray(body.sentences)
+      ? body.sentences
+      : 'sentence' in body && typeof body.sentence === 'string'
+        ? [body.sentence]
+        : [];
 
   let accepted = 0;
   for (const sentence of sentences.slice(0, 50)) {
@@ -256,132 +274,162 @@ streamingRouter.post("/stream/ais-nmea", async (req: Request, res: Response) => 
       try {
         ingestEvent(normalized, undefined);
         accepted++;
-      } catch {
-      }
+      } catch {}
     }
   }
 
-  res.json({ status: "accepted", accepted, timestamp: new Date().toISOString() });
+  res.json({ status: 'accepted', accepted, timestamp: new Date().toISOString() });
 });
 
-streamingRouter.post("/stream/ingest", validateBody(ingestSchema), async (req: Request, res: Response) => {
-  const { source, category, events } = req.body as z.infer<typeof ingestSchema>;
+streamingRouter.post(
+  '/stream/ingest',
+  validateBody(ingestSchema),
+  async (req: Request, res: Response) => {
+    const { source, category, events } = req.body as z.infer<typeof ingestSchema>;
 
-  const normalized = (events as Record<string, unknown>[]).map(e => ({
-    id: (e["id"] as string) ?? undefined,
-    type: (e["type"] as string) ?? "raw_event",
-    source: (e["source"] as string) ?? source,
-    category: category as StreamCategory,
-    severity: e["severity"] as string | undefined,
-    payload: (e["payload"] as Record<string, unknown>) ?? e,
-    timestamp: (e["timestamp"] as string) ?? new Date().toISOString(),
-  }));
+    const normalized = (events as Record<string, unknown>[]).map((e) => ({
+      id: (e['id'] as string) ?? undefined,
+      type: (e['type'] as string) ?? 'raw_event',
+      source: (e['source'] as string) ?? source,
+      category: category as StreamCategory,
+      severity: e['severity'] as string | undefined,
+      payload: (e['payload'] as Record<string, unknown>) ?? e,
+      timestamp: (e['timestamp'] as string) ?? new Date().toISOString(),
+    }));
 
-  const { ingested, dropped } = await ingestBatch(normalized, undefined);
+    const { ingested, dropped } = await ingestBatch(normalized, undefined);
 
-  logger.info({ source, category, ingested, dropped }, "[streaming] Batch ingestion accepted");
-  res.json({
-    status: "accepted",
-    source,
-    category,
-    ingested,
-    dropped,
-    timestamp: new Date().toISOString(),
-  });
-});
+    logger.info({ source, category, ingested, dropped }, '[streaming] Batch ingestion accepted');
+    res.json({
+      status: 'accepted',
+      source,
+      category,
+      ingested,
+      dropped,
+      timestamp: new Date().toISOString(),
+    });
+  },
+);
 
-streamingRouter.get("/stream/sources", (_req, res) => {
-  const sources = listDataSources().map(s => ({
+streamingRouter.get('/stream/sources', (_req, res) => {
+  const sources = listDataSources().map((s) => ({
     ...s,
-    authToken: s.authToken ? "***" : undefined,
+    authToken: s.authToken ? '***' : undefined,
   }));
   res.json({ sources, timestamp: new Date().toISOString() });
 });
 
-streamingRouter.post("/stream/sources", authMiddleware(), validateBody(registerSourceSchema), async (req: Request, res: Response) => {
-  const { name, type, category, endpoint, authToken, pollingIntervalMs } = req.body as z.infer<typeof registerSourceSchema>;
+streamingRouter.post(
+  '/stream/sources',
+  authMiddleware(),
+  validateBody(registerSourceSchema),
+  async (req: Request, res: Response) => {
+    const { name, type, category, endpoint, authToken, pollingIntervalMs } = req.body as z.infer<
+      typeof registerSourceSchema
+    >;
 
-  try {
-    const source = await registerDataSource({
-      name,
-      type,
-      category,
-      endpoint,
-      authToken,
-      pollingIntervalMs: pollingIntervalMs ?? 30000,
-      enabled: true,
-    });
-    res.status(201).json({ source: { ...source, authToken: authToken ? "***" : undefined }, timestamp: new Date().toISOString() });
-  } catch (err) {
-    logger.error({ err }, "[streaming] Failed to register source");
-    sendError(res, "Failed to register data source");
-  }
-});
+    try {
+      const source = await registerDataSource({
+        name,
+        type,
+        category,
+        endpoint,
+        authToken,
+        pollingIntervalMs: pollingIntervalMs ?? 30000,
+        enabled: true,
+      });
+      res.status(201).json({
+        source: { ...source, authToken: authToken ? '***' : undefined },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      logger.error({ err }, '[streaming] Failed to register source');
+      sendError(res, 'Failed to register data source');
+    }
+  },
+);
 
-streamingRouter.post("/stream/sources/:id/pause", authMiddleware(), async (req: Request, res: Response) => {
-  const id = parseInt(String(req.params["id"]), 10);
-  if (isNaN(id)) { sendBadRequest(res, "Invalid id"); return; }
-  try {
-    await pauseDataSource(id);
-    res.json({ status: "paused", id, timestamp: new Date().toISOString() });
-  } catch (err) {
-    sendNotFound(res, "Data source");
-  }
-});
+streamingRouter.post(
+  '/stream/sources/:id/pause',
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    const id = parseInt(String(req.params['id']), 10);
+    if (isNaN(id)) {
+      sendBadRequest(res, 'Invalid id');
+      return;
+    }
+    try {
+      await pauseDataSource(id);
+      res.json({ status: 'paused', id, timestamp: new Date().toISOString() });
+    } catch (err) {
+      sendNotFound(res, 'Data source');
+    }
+  },
+);
 
-streamingRouter.post("/stream/sources/:id/resume", authMiddleware(), async (req: Request, res: Response) => {
-  const id = parseInt(String(req.params["id"]), 10);
-  if (isNaN(id)) { sendBadRequest(res, "Invalid id"); return; }
-  try {
-    await resumeDataSource(id);
-    res.json({ status: "resumed", id, timestamp: new Date().toISOString() });
-  } catch (err) {
-    sendNotFound(res, "Data source");
-  }
-});
+streamingRouter.post(
+  '/stream/sources/:id/resume',
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    const id = parseInt(String(req.params['id']), 10);
+    if (isNaN(id)) {
+      sendBadRequest(res, 'Invalid id');
+      return;
+    }
+    try {
+      await resumeDataSource(id);
+      res.json({ status: 'resumed', id, timestamp: new Date().toISOString() });
+    } catch (err) {
+      sendNotFound(res, 'Data source');
+    }
+  },
+);
 
-streamingRouter.get("/stream/sources/:id", (req: Request, res: Response) => {
-  const id = parseInt(String(req.params["id"]), 10);
+streamingRouter.get('/stream/sources/:id', (req: Request, res: Response) => {
+  const id = parseInt(String(req.params['id']), 10);
   const source = getDataSource(id);
-  if (!source) { sendNotFound(res, "Source"); return; }
-  res.json({ source: { ...source, authToken: source.authToken ? "***" : undefined } });
+  if (!source) {
+    sendNotFound(res, 'Source');
+    return;
+  }
+  res.json({ source: { ...source, authToken: source.authToken ? '***' : undefined } });
 });
 
-streamingRouter.get("/stream/status", (_req, res) => {
+streamingRouter.get('/stream/status', (_req, res) => {
   const stats = getIngestionStats();
   res.json({
-    status: "healthy",
+    status: 'healthy',
     streams: {
-      "siem-events": {
-        status: "active",
-        protocol: "SSE",
+      'siem-events': {
+        status: 'active',
+        protocol: 'SSE',
         buffered: stats.bufferSizes.siem,
-        description: "SIEM alert stream (Splunk, QRadar, webhook receivers)",
+        description: 'SIEM alert stream (Splunk, QRadar, webhook receivers)',
       },
-      "market-data": {
-        status: "active",
-        protocol: "SSE",
+      'market-data': {
+        status: 'active',
+        protocol: 'SSE',
         buffered: stats.bufferSizes.market,
-        description: "Market data feed (CoinGecko live: BTC, ETH, SOL, LINK, AVAX)",
+        description: 'Market data feed (CoinGecko live: BTC, ETH, SOL, LINK, AVAX)',
       },
-      "ais-tracking": {
-        status: "active",
-        protocol: "SSE",
+      'ais-tracking': {
+        status: 'active',
+        protocol: 'SSE',
         buffered: stats.bufferSizes.ais,
-        description: "AIS vessel position tracking (live polling + NMEA input)",
+        description: 'AIS vessel position tracking (live polling + NMEA input)',
       },
     },
     ingestion: {
-      batchEndpoint: "/api/stream/ingest",
-      webhookSiem: "/api/stream/webhook-siem",
-      aisNmea: "/api/stream/ais-nmea",
-      sourcedWebhook: "/api/stream/webhook/:sourceToken",
+      batchEndpoint: '/api/stream/ingest',
+      webhookSiem: '/api/stream/webhook-siem',
+      aisNmea: '/api/stream/ais-nmea',
+      sourcedWebhook: '/api/stream/webhook/:sourceToken',
     },
     sourceManagement: {
-      list: "GET /api/stream/sources",
-      create: "POST /api/stream/sources",
-      pause: "POST /api/stream/sources/:id/pause",
-      resume: "POST /api/stream/sources/:id/resume",
+      list: 'GET /api/stream/sources',
+      create: 'POST /api/stream/sources',
+      pause: 'POST /api/stream/sources/:id/pause',
+      resume: 'POST /api/stream/sources/:id/resume',
     },
     activePollersCount: stats.activePollersCount,
     dataSources: stats.sources.length,

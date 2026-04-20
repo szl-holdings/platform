@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
-import { useFeatureFlag } from "./hooks";
+import type { ReactNode } from 'react';
+import { useFeatureFlag } from './hooks';
 
 export interface FeatureFlagGateProps {
   flagKey: string;

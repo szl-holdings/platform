@@ -9,10 +9,10 @@
  *   import { createWorkflowBodySchema } from "@szl-holdings/contracts/alloy";
  */
 
-export * from "./common";
-export * from "./auth";
-export * from "./alloy";
-export * from "./ai";
-export * from "./webhooks";
-export * from "./admin";
-export * from "./governance";
+export * from './admin';
+export * from './ai';
+export * from './alloy';
+export * from './auth';
+export * from './common';
+export * from './governance';
+export * from './webhooks';

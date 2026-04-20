@@ -1,13 +1,25 @@
-import { useState } from "react";
-import { DollarSign, Shield, TrendingDown, TrendingUp, AlertTriangle, RefreshCw, FileText, CheckCircle, Activity, ChevronRight, Download } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  ChevronRight,
+  DollarSign,
+  Download,
+  FileText,
+  RefreshCw,
+  Shield,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
+import { useState } from 'react';
 
 interface RiskFactor {
   id: string;
   name: string;
   score: number;
-  trend: "improving" | "worsening" | "stable";
+  trend: 'improving' | 'worsening' | 'stable';
   premiumImpact: number;
   description: string;
 }
@@ -19,26 +31,127 @@ interface PolicyRecommendation {
   recommendedValue: string;
   annualSaving: number;
   rationale: string;
-  priority: "critical" | "high" | "medium";
+  priority: 'critical' | 'high' | 'medium';
 }
 
 const RISK_FACTORS: RiskFactor[] = [
-  { id: "rf-1", name: "MFA Coverage", score: 94, trend: "improving", premiumImpact: -8, description: "94% of privileged accounts enforcing MFA. Industry benchmark: 85%." },
-  { id: "rf-2", name: "Patch Cadence", score: 72, trend: "stable", premiumImpact: 4, description: "Average patch lag of 18 days for critical CVEs. Benchmark: <7 days." },
-  { id: "rf-3", name: "Incident Response Maturity", score: 88, trend: "improving", premiumImpact: -5, description: "Tabletop exercises completed quarterly. IR plan tested and documented." },
-  { id: "rf-4", name: "Data Encryption Coverage", score: 96, trend: "stable", premiumImpact: -6, description: "AES-256 at rest, TLS 1.3 in transit across 96% of data stores." },
-  { id: "rf-5", name: "Third-Party Risk", score: 61, trend: "worsening", premiumImpact: 12, description: "34% of vendors lack SOC 2 attestation. 2 critical vendors missing security assessments." },
-  { id: "rf-6", name: "Employee Security Training", score: 82, trend: "improving", premiumImpact: -3, description: "Phishing simulation pass rate: 89%. Annual security awareness training 97% complete." },
-  { id: "rf-7", name: "Backup & Recovery", score: 91, trend: "stable", premiumImpact: -7, description: "Immutable backups with air-gap. RTO: 4h. RPO: 15min. Tested quarterly." },
-  { id: "rf-8", name: "Endpoint Detection", score: 78, trend: "improving", premiumImpact: -2, description: "EDR deployed on 92% of endpoints. 47 workstations pending agent install." },
+  {
+    id: 'rf-1',
+    name: 'MFA Coverage',
+    score: 94,
+    trend: 'improving',
+    premiumImpact: -8,
+    description: '94% of privileged accounts enforcing MFA. Industry benchmark: 85%.',
+  },
+  {
+    id: 'rf-2',
+    name: 'Patch Cadence',
+    score: 72,
+    trend: 'stable',
+    premiumImpact: 4,
+    description: 'Average patch lag of 18 days for critical CVEs. Benchmark: <7 days.',
+  },
+  {
+    id: 'rf-3',
+    name: 'Incident Response Maturity',
+    score: 88,
+    trend: 'improving',
+    premiumImpact: -5,
+    description: 'Tabletop exercises completed quarterly. IR plan tested and documented.',
+  },
+  {
+    id: 'rf-4',
+    name: 'Data Encryption Coverage',
+    score: 96,
+    trend: 'stable',
+    premiumImpact: -6,
+    description: 'AES-256 at rest, TLS 1.3 in transit across 96% of data stores.',
+  },
+  {
+    id: 'rf-5',
+    name: 'Third-Party Risk',
+    score: 61,
+    trend: 'worsening',
+    premiumImpact: 12,
+    description:
+      '34% of vendors lack SOC 2 attestation. 2 critical vendors missing security assessments.',
+  },
+  {
+    id: 'rf-6',
+    name: 'Employee Security Training',
+    score: 82,
+    trend: 'improving',
+    premiumImpact: -3,
+    description:
+      'Phishing simulation pass rate: 89%. Annual security awareness training 97% complete.',
+  },
+  {
+    id: 'rf-7',
+    name: 'Backup & Recovery',
+    score: 91,
+    trend: 'stable',
+    premiumImpact: -7,
+    description: 'Immutable backups with air-gap. RTO: 4h. RPO: 15min. Tested quarterly.',
+  },
+  {
+    id: 'rf-8',
+    name: 'Endpoint Detection',
+    score: 78,
+    trend: 'improving',
+    premiumImpact: -2,
+    description: 'EDR deployed on 92% of endpoints. 47 workstations pending agent install.',
+  },
 ];
 
 const RECOMMENDATIONS: PolicyRecommendation[] = [
-  { id: "rec-1", title: "Increase Ransomware Sublimit", currentValue: "$2M", recommendedValue: "$5M", annualSaving: 0, rationale: "Current sublimit below industry norm for organization size. Risk exposure from double-extortion attacks growing.", priority: "critical" },
-  { id: "rec-2", title: "Add Business Interruption Coverage", currentValue: "None", recommendedValue: "$10M / 90-day waiting", annualSaving: 0, rationale: "Current policy excludes BI losses from cyber events. Potential exposure: $2.4M/day in downtime.", priority: "high" },
-  { id: "rec-3", title: "Third-Party Liability Rider", currentValue: "$1M", recommendedValue: "$5M", annualSaving: 0, rationale: "MSP and SAAS exposure creates downstream liability risk. Increase sublimit.", priority: "high" },
-  { id: "rec-4", title: "Vendor Risk Program Credit", currentValue: "Not claimed", recommendedValue: "Claim VRM Credit", annualSaving: 18400, rationale: "Carrier offers 8% premium discount for documented vendor risk management programs. Currently unclaimed.", priority: "medium" },
-  { id: "rec-5", title: "Patch Management Credit", currentValue: "Not claimed", recommendedValue: "Claim after <7d lag", annualSaving: 12200, rationale: "Reducing average patch lag from 18 to 7 days qualifies for 5% carrier credit.", priority: "medium" },
+  {
+    id: 'rec-1',
+    title: 'Increase Ransomware Sublimit',
+    currentValue: '$2M',
+    recommendedValue: '$5M',
+    annualSaving: 0,
+    rationale:
+      'Current sublimit below industry norm for organization size. Risk exposure from double-extortion attacks growing.',
+    priority: 'critical',
+  },
+  {
+    id: 'rec-2',
+    title: 'Add Business Interruption Coverage',
+    currentValue: 'None',
+    recommendedValue: '$10M / 90-day waiting',
+    annualSaving: 0,
+    rationale:
+      'Current policy excludes BI losses from cyber events. Potential exposure: $2.4M/day in downtime.',
+    priority: 'high',
+  },
+  {
+    id: 'rec-3',
+    title: 'Third-Party Liability Rider',
+    currentValue: '$1M',
+    recommendedValue: '$5M',
+    annualSaving: 0,
+    rationale: 'MSP and SAAS exposure creates downstream liability risk. Increase sublimit.',
+    priority: 'high',
+  },
+  {
+    id: 'rec-4',
+    title: 'Vendor Risk Program Credit',
+    currentValue: 'Not claimed',
+    recommendedValue: 'Claim VRM Credit',
+    annualSaving: 18400,
+    rationale:
+      'Carrier offers 8% premium discount for documented vendor risk management programs. Currently unclaimed.',
+    priority: 'medium',
+  },
+  {
+    id: 'rec-5',
+    title: 'Patch Management Credit',
+    currentValue: 'Not claimed',
+    recommendedValue: 'Claim after <7d lag',
+    annualSaving: 12200,
+    rationale: 'Reducing average patch lag from 18 to 7 days qualifies for 5% carrier credit.',
+    priority: 'medium',
+  },
 ];
 
 const CURRENT_PREMIUM = 284000;
@@ -52,13 +165,20 @@ export default function CyberInsuranceIntel() {
     setGenerating(true);
     setTimeout(() => {
       setGenerating(false);
-      toast.success("Claims documentation package generated — incident timeline, financial impact, and forensic evidence bundled");
+      toast.success(
+        'Claims documentation package generated — incident timeline, financial impact, and forensic evidence bundled',
+      );
     }, 2500);
   };
 
-  const avgRiskScore = Math.round(RISK_FACTORS.reduce((s, r) => s + r.score, 0) / RISK_FACTORS.length);
-  const improvingFactors = RISK_FACTORS.filter(r => r.trend === "improving").length;
-  const totalCredits = RECOMMENDATIONS.filter(r => r.annualSaving > 0).reduce((s, r) => s + r.annualSaving, 0);
+  const avgRiskScore = Math.round(
+    RISK_FACTORS.reduce((s, r) => s + r.score, 0) / RISK_FACTORS.length,
+  );
+  const improvingFactors = RISK_FACTORS.filter((r) => r.trend === 'improving').length;
+  const totalCredits = RECOMMENDATIONS.filter((r) => r.annualSaving > 0).reduce(
+    (s, r) => s + r.annualSaving,
+    0,
+  );
 
   return (
     <div className="p-6 space-y-6 max-w-full">
@@ -68,7 +188,10 @@ export default function CyberInsuranceIntel() {
             <DollarSign className="w-5 h-5 text-emerald-400" />
             <h1 className="text-lg font-semibold text-white">Cyber Insurance Intelligence</h1>
           </div>
-          <p className="text-xs text-zinc-500">Automated cyber risk quantification in dollar terms, policy optimization recommendations, and claims documentation generation.</p>
+          <p className="text-xs text-zinc-500">
+            Automated cyber risk quantification in dollar terms, policy optimization
+            recommendations, and claims documentation generation.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -76,7 +199,15 @@ export default function CyberInsuranceIntel() {
             disabled={generating}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 transition-colors"
           >
-            {generating ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Generating...</> : <><FileText className="w-3.5 h-3.5" /> Generate Claims Docs</>}
+            {generating ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <FileText className="w-3.5 h-3.5" /> Generate Claims Docs
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -84,11 +215,35 @@ export default function CyberInsuranceIntel() {
       {/* Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Current Annual Premium", value: `$${(CURRENT_PREMIUM / 1000).toFixed(0)}K`, sub: "Renewal: Jun 2026", color: "#3b82f6", icon: DollarSign },
-          { label: "Estimated Optimized", value: `$${(ESTIMATED_PREMIUM / 1000).toFixed(0)}K`, sub: `Save $${(TOTAL_SAVINGS / 1000).toFixed(0)}K/yr`, color: "#10b981", icon: TrendingDown },
-          { label: "Risk Posture Score", value: `${avgRiskScore}/100`, sub: `${improvingFactors} factors improving`, color: "#8b5cf6", icon: Shield },
-          { label: "Unclaimed Credits", value: `$${(totalCredits / 1000).toFixed(0)}K`, sub: "available immediately", color: "#f59e0b", icon: AlertTriangle },
-        ].map(m => {
+          {
+            label: 'Current Annual Premium',
+            value: `$${(CURRENT_PREMIUM / 1000).toFixed(0)}K`,
+            sub: 'Renewal: Jun 2026',
+            color: '#3b82f6',
+            icon: DollarSign,
+          },
+          {
+            label: 'Estimated Optimized',
+            value: `$${(ESTIMATED_PREMIUM / 1000).toFixed(0)}K`,
+            sub: `Save $${(TOTAL_SAVINGS / 1000).toFixed(0)}K/yr`,
+            color: '#10b981',
+            icon: TrendingDown,
+          },
+          {
+            label: 'Risk Posture Score',
+            value: `${avgRiskScore}/100`,
+            sub: `${improvingFactors} factors improving`,
+            color: '#8b5cf6',
+            icon: Shield,
+          },
+          {
+            label: 'Unclaimed Credits',
+            value: `$${(totalCredits / 1000).toFixed(0)}K`,
+            sub: 'available immediately',
+            color: '#f59e0b',
+            icon: AlertTriangle,
+          },
+        ].map((m) => {
           const Icon = m.icon;
           return (
             <div key={m.label} className="rounded-xl border border-white/8 bg-white/3 p-4">
@@ -97,7 +252,9 @@ export default function CyberInsuranceIntel() {
                 <Icon className="w-3.5 h-3.5" style={{ color: m.color }} />
               </div>
               <div className="text-2xl font-bold text-white">{m.value}</div>
-              <div className="text-xs mt-0.5" style={{ color: m.color }}>{m.sub}</div>
+              <div className="text-xs mt-0.5" style={{ color: m.color }}>
+                {m.sub}
+              </div>
             </div>
           );
         })}
@@ -108,29 +265,42 @@ export default function CyberInsuranceIntel() {
         <div className="text-xs font-semibold text-zinc-300 mb-3">Premium Impact Waterfall</div>
         <div className="flex items-end gap-2 h-24">
           <div className="flex-1 flex flex-col items-center gap-1">
-            <div className="w-full rounded-t bg-blue-500/40" style={{ height: "100%" }} />
+            <div className="w-full rounded-t bg-blue-500/40" style={{ height: '100%' }} />
             <span className="text-[10px] text-zinc-500">Current</span>
             <span className="text-[10px] text-white font-medium">$284K</span>
           </div>
-          {RISK_FACTORS.filter(r => r.premiumImpact !== 0).slice(0, 6).map(r => (
-            <div key={r.id} className="flex-1 flex flex-col items-center gap-1">
-              <div
-                className="w-full rounded-t"
-                style={{
-                  height: `${Math.abs(r.premiumImpact) * 6}%`,
-                  background: r.premiumImpact < 0 ? "#10b98140" : "#ef444440",
-                  border: `1px solid ${r.premiumImpact < 0 ? "#10b98160" : "#ef444460"}`,
-                  minHeight: 8,
-                }}
-              />
-              <span className="text-[9px] text-zinc-500 truncate w-full text-center">{r.name.split(" ")[0]}</span>
-              <span className={cn("text-[9px] font-medium", r.premiumImpact < 0 ? "text-emerald-400" : "text-red-400")}>
-                {r.premiumImpact > 0 ? "+" : ""}{r.premiumImpact}%
-              </span>
-            </div>
-          ))}
+          {RISK_FACTORS.filter((r) => r.premiumImpact !== 0)
+            .slice(0, 6)
+            .map((r) => (
+              <div key={r.id} className="flex-1 flex flex-col items-center gap-1">
+                <div
+                  className="w-full rounded-t"
+                  style={{
+                    height: `${Math.abs(r.premiumImpact) * 6}%`,
+                    background: r.premiumImpact < 0 ? '#10b98140' : '#ef444440',
+                    border: `1px solid ${r.premiumImpact < 0 ? '#10b98160' : '#ef444460'}`,
+                    minHeight: 8,
+                  }}
+                />
+                <span className="text-[9px] text-zinc-500 truncate w-full text-center">
+                  {r.name.split(' ')[0]}
+                </span>
+                <span
+                  className={cn(
+                    'text-[9px] font-medium',
+                    r.premiumImpact < 0 ? 'text-emerald-400' : 'text-red-400',
+                  )}
+                >
+                  {r.premiumImpact > 0 ? '+' : ''}
+                  {r.premiumImpact}%
+                </span>
+              </div>
+            ))}
           <div className="flex-1 flex flex-col items-center gap-1">
-            <div className="w-full rounded-t bg-emerald-500/40" style={{ height: `${(ESTIMATED_PREMIUM / CURRENT_PREMIUM) * 100}%` }} />
+            <div
+              className="w-full rounded-t bg-emerald-500/40"
+              style={{ height: `${(ESTIMATED_PREMIUM / CURRENT_PREMIUM) * 100}%` }}
+            />
             <span className="text-[10px] text-zinc-500">Optimized</span>
             <span className="text-[10px] text-emerald-400 font-medium">$248K</span>
           </div>
@@ -140,26 +310,49 @@ export default function CyberInsuranceIntel() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Risk Factors */}
         <div>
-          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Risk Posture Factors</h2>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            Risk Posture Factors
+          </h2>
           <div className="space-y-2">
-            {RISK_FACTORS.map(factor => (
+            {RISK_FACTORS.map((factor) => (
               <div key={factor.id} className="rounded-xl border border-white/8 bg-white/3 p-3">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
-                    {factor.trend === "improving" ? <TrendingDown className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : factor.trend === "worsening" ? <TrendingUp className="w-3.5 h-3.5 text-red-400 shrink-0" /> : <Activity className="w-3.5 h-3.5 text-zinc-500 shrink-0" />}
+                    {factor.trend === 'improving' ? (
+                      <TrendingDown className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    ) : factor.trend === 'worsening' ? (
+                      <TrendingUp className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                    ) : (
+                      <Activity className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                    )}
                     <span className="text-xs font-medium text-white">{factor.name}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={cn("text-[10px]", factor.premiumImpact < 0 ? "text-emerald-400" : "text-red-400")}>
-                      {factor.premiumImpact > 0 ? "+" : ""}{factor.premiumImpact}% premium
+                    <span
+                      className={cn(
+                        'text-[10px]',
+                        factor.premiumImpact < 0 ? 'text-emerald-400' : 'text-red-400',
+                      )}
+                    >
+                      {factor.premiumImpact > 0 ? '+' : ''}
+                      {factor.premiumImpact}% premium
                     </span>
                     <span className="text-xs font-bold text-white">{factor.score}</span>
                   </div>
                 </div>
                 <div className="h-1.5 rounded-full bg-white/8 mb-1.5">
-                  <div className="h-full rounded-full" style={{ width: `${factor.score}%`, background: factor.score >= 85 ? "#10b981" : factor.score >= 70 ? "#f59e0b" : "#ef4444" }} />
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${factor.score}%`,
+                      background:
+                        factor.score >= 85 ? '#10b981' : factor.score >= 70 ? '#f59e0b' : '#ef4444',
+                    }}
+                  />
                 </div>
-                <div className="text-[10px] text-zinc-500 leading-relaxed">{factor.description}</div>
+                <div className="text-[10px] text-zinc-500 leading-relaxed">
+                  {factor.description}
+                </div>
               </div>
             ))}
           </div>
@@ -167,13 +360,36 @@ export default function CyberInsuranceIntel() {
 
         {/* Policy Recommendations */}
         <div>
-          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Policy Optimization</h2>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            Policy Optimization
+          </h2>
           <div className="space-y-2">
-            {RECOMMENDATIONS.map(rec => (
-              <div key={rec.id} className={cn("rounded-xl border p-3", rec.priority === "critical" ? "border-red-500/20 bg-red-500/5" : rec.priority === "high" ? "border-orange-500/20 bg-orange-500/5" : "border-white/8 bg-white/3")}>
+            {RECOMMENDATIONS.map((rec) => (
+              <div
+                key={rec.id}
+                className={cn(
+                  'rounded-xl border p-3',
+                  rec.priority === 'critical'
+                    ? 'border-red-500/20 bg-red-500/5'
+                    : rec.priority === 'high'
+                      ? 'border-orange-500/20 bg-orange-500/5'
+                      : 'border-white/8 bg-white/3',
+                )}
+              >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <span className="text-xs font-medium text-white">{rec.title}</span>
-                  <span className={cn("text-[10px] px-1.5 py-0.5 rounded border shrink-0 capitalize", rec.priority === "critical" ? "text-red-400 bg-red-500/10 border-red-500/30" : rec.priority === "high" ? "text-orange-400 bg-orange-500/10 border-orange-500/30" : "text-zinc-400 bg-zinc-500/10 border-zinc-500/30")}>{rec.priority}</span>
+                  <span
+                    className={cn(
+                      'text-[10px] px-1.5 py-0.5 rounded border shrink-0 capitalize',
+                      rec.priority === 'critical'
+                        ? 'text-red-400 bg-red-500/10 border-red-500/30'
+                        : rec.priority === 'high'
+                          ? 'text-orange-400 bg-orange-500/10 border-orange-500/30'
+                          : 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
+                    )}
+                  >
+                    {rec.priority}
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[10px] mb-2">
                   <div>
@@ -186,11 +402,15 @@ export default function CyberInsuranceIntel() {
                   </div>
                 </div>
                 {rec.annualSaving > 0 && (
-                  <div className="text-[10px] text-emerald-400 font-medium mb-1">💰 Save ${rec.annualSaving.toLocaleString()}/year</div>
+                  <div className="text-[10px] text-emerald-400 font-medium mb-1">
+                    💰 Save ${rec.annualSaving.toLocaleString()}/year
+                  </div>
                 )}
                 <div className="text-[10px] text-zinc-500 leading-relaxed">{rec.rationale}</div>
                 <button
-                  onClick={() => toast.success(`Recommendation flagged for renewal discussion with broker`)}
+                  onClick={() =>
+                    toast.success(`Recommendation flagged for renewal discussion with broker`)
+                  }
                   className="mt-2 text-[10px] text-blue-400 hover:text-blue-300"
                 >
                   Flag for broker →
@@ -201,15 +421,17 @@ export default function CyberInsuranceIntel() {
 
           {/* Risk Quantification */}
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 mt-3">
-            <div className="text-xs font-semibold text-emerald-300 mb-3">Annual Loss Expectancy (ALE) Estimate</div>
+            <div className="text-xs font-semibold text-emerald-300 mb-3">
+              Annual Loss Expectancy (ALE) Estimate
+            </div>
             <div className="space-y-2">
               {[
-                { scenario: "Ransomware Attack", ale: "$1.2M", probability: "18%" },
-                { scenario: "Business Email Compromise", ale: "$340K", probability: "34%" },
-                { scenario: "Data Breach (PII)", ale: "$2.8M", probability: "8%" },
-                { scenario: "DDoS / Business Interruption", ale: "$180K", probability: "22%" },
-                { scenario: "Insider Threat", ale: "$640K", probability: "6%" },
-              ].map(item => (
+                { scenario: 'Ransomware Attack', ale: '$1.2M', probability: '18%' },
+                { scenario: 'Business Email Compromise', ale: '$340K', probability: '34%' },
+                { scenario: 'Data Breach (PII)', ale: '$2.8M', probability: '8%' },
+                { scenario: 'DDoS / Business Interruption', ale: '$180K', probability: '22%' },
+                { scenario: 'Insider Threat', ale: '$640K', probability: '6%' },
+              ].map((item) => (
                 <div key={item.scenario} className="flex items-center justify-between text-[11px]">
                   <span className="text-zinc-400">{item.scenario}</span>
                   <div className="flex items-center gap-3">

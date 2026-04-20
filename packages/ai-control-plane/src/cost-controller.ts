@@ -1,6 +1,6 @@
-import { createLogger } from "./logger.js";
+import { createLogger } from './logger.js';
 
-const logger = createLogger("ai-control-plane:cost-controller");
+const logger = createLogger('ai-control-plane:cost-controller');
 
 export interface CostRecord {
   id: string;
@@ -18,7 +18,7 @@ export interface CostRecord {
 export interface BudgetPolicy {
   orgId?: string;
   agentId?: string;
-  periodType: "hourly" | "daily" | "monthly";
+  periodType: 'hourly' | 'daily' | 'monthly';
   limitUsd: number;
   alertThresholdPct: number;
   hardStop: boolean;
@@ -37,34 +37,34 @@ export interface BudgetStatus {
   hardStopTriggered: boolean;
 }
 
-function getPeriodStart(periodType: BudgetPolicy["periodType"]): Date {
+function getPeriodStart(periodType: BudgetPolicy['periodType']): Date {
   const now = new Date();
   switch (periodType) {
-    case "hourly": {
+    case 'hourly': {
       const start = new Date(now);
       start.setMinutes(0, 0, 0);
       return start;
     }
-    case "daily": {
+    case 'daily': {
       const start = new Date(now);
       start.setHours(0, 0, 0, 0);
       return start;
     }
-    case "monthly": {
+    case 'monthly': {
       const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
       return start;
     }
   }
 }
 
-function getPeriodKey(periodType: BudgetPolicy["periodType"]): string {
+function getPeriodKey(periodType: BudgetPolicy['periodType']): string {
   const now = new Date();
   switch (periodType) {
-    case "hourly":
+    case 'hourly':
       return `${now.toISOString().slice(0, 13)}`;
-    case "daily":
+    case 'daily':
       return `${now.toISOString().slice(0, 10)}`;
-    case "monthly":
+    case 'monthly':
       return `${now.toISOString().slice(0, 7)}`;
   }
 }
@@ -76,7 +76,10 @@ class CostController {
 
   addPolicy(policy: BudgetPolicy): void {
     const existing = this.policies.findIndex(
-      p => p.orgId === policy.orgId && p.agentId === policy.agentId && p.periodType === policy.periodType,
+      (p) =>
+        p.orgId === policy.orgId &&
+        p.agentId === policy.agentId &&
+        p.periodType === policy.periodType,
     );
     if (existing >= 0) {
       this.policies[existing] = policy;
@@ -84,14 +87,24 @@ class CostController {
       this.policies.push(policy);
     }
     logger.info(
-      { orgId: policy.orgId, agentId: policy.agentId, periodType: policy.periodType, limitUsd: policy.limitUsd },
-      "Budget policy registered",
+      {
+        orgId: policy.orgId,
+        agentId: policy.agentId,
+        periodType: policy.periodType,
+        limitUsd: policy.limitUsd,
+      },
+      'Budget policy registered',
     );
   }
 
-  removePolicy(orgId?: string, agentId?: string, periodType?: BudgetPolicy["periodType"]): void {
+  removePolicy(orgId?: string, agentId?: string, periodType?: BudgetPolicy['periodType']): void {
     this.policies = this.policies.filter(
-      p => !(p.orgId === orgId && p.agentId === agentId && (!periodType || p.periodType === periodType)),
+      (p) =>
+        !(
+          p.orgId === orgId &&
+          p.agentId === agentId &&
+          (!periodType || p.periodType === periodType)
+        ),
     );
   }
 
@@ -126,23 +139,23 @@ class CostController {
     this.records.unshift(record);
     if (this.records.length > this.MAX_RECORDS) this.records.length = this.MAX_RECORDS;
 
-    logger.debug({ costUsd, provider: params.provider, model: params.model }, "Cost recorded");
+    logger.debug({ costUsd, provider: params.provider, model: params.model }, 'Cost recorded');
     return record;
   }
 
   checkBudget(orgId?: string, agentId?: string): BudgetStatus[] {
     const relevant = this.policies.filter(
-      p =>
+      (p) =>
         (p.orgId === undefined || p.orgId === orgId) &&
         (p.agentId === undefined || p.agentId === agentId),
     );
 
-    return relevant.map(policy => {
+    return relevant.map((policy) => {
       const periodStart = getPeriodStart(policy.periodType);
       const periodKey = getPeriodKey(policy.periodType);
 
       const usedUsd = this.records
-        .filter(r => {
+        .filter((r) => {
           if (new Date(r.timestamp) < periodStart) return false;
           if (policy.orgId !== undefined && r.orgId !== policy.orgId) return false;
           if (policy.agentId !== undefined && r.agentId !== policy.agentId) return false;
@@ -167,11 +180,18 @@ class CostController {
     });
   }
 
-  isAllowed(orgId?: string, agentId?: string, estimatedCostUsd = 0): { allowed: boolean; reason?: string } {
+  isAllowed(
+    orgId?: string,
+    agentId?: string,
+    estimatedCostUsd = 0,
+  ): { allowed: boolean; reason?: string } {
     const statuses = this.checkBudget(orgId, agentId);
     for (const status of statuses) {
       if (status.hardStopTriggered) {
-        logger.warn({ orgId, agentId, period: status.periodType }, "Hard stop triggered — request blocked");
+        logger.warn(
+          { orgId, agentId, period: status.periodType },
+          'Hard stop triggered — request blocked',
+        );
         return {
           allowed: false,
           reason: `Budget hard stop: ${status.periodType} limit of $${status.limitUsd} exceeded`,
@@ -187,14 +207,17 @@ class CostController {
     return { allowed: true };
   }
 
-  summary(orgId?: string, agentId?: string): {
+  summary(
+    orgId?: string,
+    agentId?: string,
+  ): {
     totalCostUsd: number;
     byProvider: Record<string, number>;
     byModel: Record<string, number>;
     byRouteClass: Record<string, number>;
     recordCount: number;
   } {
-    const filtered = this.records.filter(r => {
+    const filtered = this.records.filter((r) => {
       if (orgId !== undefined && r.orgId !== orgId) return false;
       if (agentId !== undefined && r.agentId !== agentId) return false;
       return true;
@@ -222,7 +245,7 @@ class CostController {
 
 export const costController = new CostController();
 
-export function recordCost(params: Parameters<CostController["record"]>[0]): CostRecord {
+export function recordCost(params: Parameters<CostController['record']>[0]): CostRecord {
   return costController.record(params);
 }
 

@@ -14,25 +14,29 @@
  *   POST /drift/reset            — clear persisted history / new baseline
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db } from "@szl-holdings/db";
-import { cstNodes, driftSnapshotsTable } from "@szl-holdings/db";
-import { eq, sql, and, lt, desc } from "drizzle-orm";
-import {
-  sendSuccess,
-  sendBadRequest,
-  handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { validateBody } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { cstNodes, db, driftSnapshotsTable } from '@szl-holdings/db';
+import { and, desc, eq, lt, sql } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
+import { perUserApiSlidingLimiter } from '../middlewares/sliding-window-limiter';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 router.use(authMiddleware({ required: false }));
 router.use(perUserApiSlidingLimiter);
 
-const KNOWN_DOMAINS = ["terra", "prism", "vessels", "aegis", "lyte", "imperium", "carlota-jo", "platform"] as const;
+const KNOWN_DOMAINS = [
+  'terra',
+  'prism',
+  'vessels',
+  'aegis',
+  'lyte',
+  'imperium',
+  'carlota-jo',
+  'platform',
+] as const;
 
 interface DriftWindow {
   windowHours: number;
@@ -47,15 +51,15 @@ interface DomainDrift {
   confidenceDrift: number;
   freshnessWindows: DriftWindow[];
   driftScore: number;
-  status: "healthy" | "degraded" | "critical";
+  status: 'healthy' | 'degraded' | 'critical';
 }
 
 interface DriftSummary {
   measuredAt: string;
   overallDriftScore: number;
-  status: "healthy" | "degraded" | "critical";
+  status: 'healthy' | 'degraded' | 'critical';
   domains: DomainDrift[];
-  topAlerts: Array<{ domain: string; reason: string; severity: "warning" | "critical" }>;
+  topAlerts: Array<{ domain: string; reason: string; severity: 'warning' | 'critical' }>;
 }
 
 const BASELINE_CONFIDENCE = 0.85;
@@ -67,8 +71,14 @@ async function measureDomainDrift(domain: string): Promise<DomainDrift> {
   const windows = [1, 6, 24, 72];
 
   const [totalRow, avgRow] = await Promise.all([
-    db.select({ count: sql<number>`count(*)::int` }).from(cstNodes).where(eq(cstNodes.domain, domain)),
-    db.select({ avg: sql<number>`coalesce(avg(confidence), 1)::float` }).from(cstNodes).where(eq(cstNodes.domain, domain)),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(cstNodes)
+      .where(eq(cstNodes.domain, domain)),
+    db
+      .select({ avg: sql<number>`coalesce(avg(confidence), 1)::float` })
+      .from(cstNodes)
+      .where(eq(cstNodes.domain, domain)),
   ]);
 
   const total = totalRow[0]?.count ?? 0;
@@ -87,15 +97,16 @@ async function measureDomainDrift(domain: string): Promise<DomainDrift> {
         staleCount: count,
         stalePercent: total > 0 ? Math.round((count / total) * 1000) / 10 : 0,
       };
-    })
+    }),
   );
 
   const confidenceDrift = Math.max(0, BASELINE_CONFIDENCE - avgConf);
-  const stale24hFraction = total > 0 ? (freshnessWindows.find(w => w.windowHours === 24)?.staleCount ?? 0) / total : 0;
+  const stale24hFraction =
+    total > 0 ? (freshnessWindows.find((w) => w.windowHours === 24)?.staleCount ?? 0) / total : 0;
   const driftScore = Math.round((confidenceDrift * 0.5 + stale24hFraction * 0.5) * 1000) / 1000;
 
-  const status: DomainDrift["status"] =
-    driftScore > 0.4 ? "critical" : driftScore > 0.15 ? "degraded" : "healthy";
+  const status: DomainDrift['status'] =
+    driftScore > 0.4 ? 'critical' : driftScore > 0.15 ? 'degraded' : 'healthy';
 
   return {
     domain,
@@ -110,21 +121,23 @@ async function measureDomainDrift(domain: string): Promise<DomainDrift> {
 
 async function buildDriftSummary(): Promise<DriftSummary> {
   const domains = await Promise.all([...KNOWN_DOMAINS].map(measureDomainDrift));
-  const overallDrift = domains.length > 0
-    ? Math.round(domains.reduce((s, d) => s + d.driftScore, 0) / domains.length * 1000) / 1000
-    : 0;
+  const overallDrift =
+    domains.length > 0
+      ? Math.round((domains.reduce((s, d) => s + d.driftScore, 0) / domains.length) * 1000) / 1000
+      : 0;
 
-  const status: DriftSummary["status"] =
-    overallDrift > 0.4 ? "critical" : overallDrift > 0.15 ? "degraded" : "healthy";
+  const status: DriftSummary['status'] =
+    overallDrift > 0.4 ? 'critical' : overallDrift > 0.15 ? 'degraded' : 'healthy';
 
-  const topAlerts: DriftSummary["topAlerts"] = domains
-    .filter((d) => d.status !== "healthy")
+  const topAlerts: DriftSummary['topAlerts'] = domains
+    .filter((d) => d.status !== 'healthy')
     .map((d) => ({
       domain: d.domain,
-      reason: d.driftScore > 0.4
-        ? `Confidence ${(d.avgConfidence * 100).toFixed(0)}% and ${d.freshnessWindows.find(w => w.windowHours === 24)?.stalePercent ?? 0}% stale`
-        : `Freshness drift detected: ${d.freshnessWindows.find(w => w.windowHours === 6)?.stalePercent ?? 0}% stale in 6h`,
-      severity: d.status === "critical" ? "critical" : "warning",
+      reason:
+        d.driftScore > 0.4
+          ? `Confidence ${(d.avgConfidence * 100).toFixed(0)}% and ${d.freshnessWindows.find((w) => w.windowHours === 24)?.stalePercent ?? 0}% stale`
+          : `Freshness drift detected: ${d.freshnessWindows.find((w) => w.windowHours === 6)?.stalePercent ?? 0}% stale in 6h`,
+      severity: d.status === 'critical' ? 'critical' : 'warning',
     }));
 
   return {
@@ -156,22 +169,22 @@ async function persistSnapshot(summary: DriftSummary): Promise<void> {
   `);
 }
 
-router.get("/drift", async (_req: Request, res: Response) => {
+router.get('/drift', async (_req: Request, res: Response) => {
   try {
     const summary = await buildDriftSummary();
     try {
       await persistSnapshot(summary);
     } catch (persistErr) {
       // Don't fail the request if persistence has a transient hiccup.
-      console.error("[drift] failed to persist snapshot:", persistErr);
+      console.error('[drift] failed to persist snapshot:', persistErr);
     }
     return sendSuccess(res, summary);
   } catch (err) {
-    return handleRouteError(res, err, "GET /drift");
+    return handleRouteError(res, err, 'GET /drift');
   }
 });
 
-router.get("/drift/history", async (_req: Request, res: Response) => {
+router.get('/drift/history', async (_req: Request, res: Response) => {
   try {
     const rows = await db
       .select({ summary: driftSnapshotsTable.summary, measuredAt: driftSnapshotsTable.measuredAt })
@@ -185,15 +198,15 @@ router.get("/drift/history", async (_req: Request, res: Response) => {
     const snapshots = rows.map((r) => r.summary as DriftSummary).reverse();
     return sendSuccess(res, { snapshots, count: countRow?.count ?? snapshots.length });
   } catch (err) {
-    return handleRouteError(res, err, "GET /drift/history");
+    return handleRouteError(res, err, 'GET /drift/history');
   }
 });
 
-router.get("/drift/:domain", async (req: Request, res: Response) => {
+router.get('/drift/:domain', async (req: Request, res: Response) => {
   try {
     const { domain } = req.params as { domain: string };
-    if (!KNOWN_DOMAINS.includes(domain as typeof KNOWN_DOMAINS[number])) {
-      return sendBadRequest(res, `Unknown domain '${domain}'. Valid: ${KNOWN_DOMAINS.join(", ")}`);
+    if (!KNOWN_DOMAINS.includes(domain as (typeof KNOWN_DOMAINS)[number])) {
+      return sendBadRequest(res, `Unknown domain '${domain}'. Valid: ${KNOWN_DOMAINS.join(', ')}`);
     }
     const drift = await measureDomainDrift(domain);
     return sendSuccess(res, drift);
@@ -213,12 +226,12 @@ export async function sampleAndPersistDrift(): Promise<DriftSummary> {
   return summary;
 }
 
-router.post("/drift/reset", validateBody(bodyShape({})), async (_req: Request, res: Response) => {
+router.post('/drift/reset', validateBody(bodyShape({})), async (_req: Request, res: Response) => {
   try {
     await db.delete(driftSnapshotsTable);
-    return sendSuccess(res, { reset: true, message: "Drift baseline reset. History cleared." });
+    return sendSuccess(res, { reset: true, message: 'Drift baseline reset. History cleared.' });
   } catch (err) {
-    return handleRouteError(res, err, "POST /drift/reset");
+    return handleRouteError(res, err, 'POST /drift/reset');
   }
 });
 

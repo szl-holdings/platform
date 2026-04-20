@@ -2,8 +2,8 @@
  * Auth repository — typed query helpers for the auth domain.
  * Uses @szl-holdings/db as the single relational entry point.
  */
-import { db, usersTable, sessionsTable } from "@szl-holdings/db";
-import { eq, and, gt } from "drizzle-orm";
+import { db, sessionsTable, usersTable } from '@szl-holdings/db';
+import { and, eq, gt } from 'drizzle-orm';
 
 export type UserRow = typeof usersTable.$inferSelect;
 export type NewUser = typeof usersTable.$inferInsert;
@@ -16,11 +16,7 @@ export const authRepo = {
   },
 
   async findUserByEmail(email: string): Promise<UserRow | undefined> {
-    const [row] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email))
-      .limit(1);
+    const [row] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
     return row;
   },
 
@@ -47,7 +43,7 @@ export const authRepo = {
         },
       })
       .returning();
-    if (!row) throw new Error("Failed to upsert user");
+    if (!row) throw new Error('Failed to upsert user');
     return row;
   },
 

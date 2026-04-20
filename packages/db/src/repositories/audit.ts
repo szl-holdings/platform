@@ -2,8 +2,8 @@
  * Audit repository — append-only event log query helpers.
  * Uses @szl-holdings/db as the single relational entry point.
  */
-import { db, auditLogsTable } from "@szl-holdings/db";
-import { eq, desc, and, gte } from "drizzle-orm";
+import { auditLogsTable, db } from '@szl-holdings/db';
+import { and, desc, eq, gte } from 'drizzle-orm';
 
 export type AuditLogRow = typeof auditLogsTable.$inferSelect;
 export type NewAuditLog = typeof auditLogsTable.$inferInsert;
@@ -11,7 +11,7 @@ export type NewAuditLog = typeof auditLogsTable.$inferInsert;
 export const auditRepo = {
   async append(entry: NewAuditLog): Promise<AuditLogRow> {
     const [row] = await db.insert(auditLogsTable).values(entry).returning();
-    if (!row) throw new Error("Failed to write audit log entry");
+    if (!row) throw new Error('Failed to write audit log entry');
     return row;
   },
 
@@ -31,20 +31,11 @@ export const auditRepo = {
       .limit(limit);
   },
 
-  async listForEntity(
-    entityType: string,
-    entityId: string,
-    limit = 50,
-  ): Promise<AuditLogRow[]> {
+  async listForEntity(entityType: string, entityId: string, limit = 50): Promise<AuditLogRow[]> {
     return db
       .select()
       .from(auditLogsTable)
-      .where(
-        and(
-          eq(auditLogsTable.entityType, entityType),
-          eq(auditLogsTable.entityId, entityId),
-        ),
-      )
+      .where(and(eq(auditLogsTable.entityType, entityType), eq(auditLogsTable.entityId, entityId)))
       .orderBy(desc(auditLogsTable.createdAt))
       .limit(limit);
   },

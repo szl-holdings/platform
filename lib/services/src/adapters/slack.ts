@@ -1,4 +1,4 @@
-import { ServiceAdapter, type ServiceStatus } from "../base.js";
+import { ServiceAdapter, type ServiceStatus } from '../base.js';
 
 export interface SlackMessageResult {
   sent: boolean;
@@ -23,7 +23,7 @@ export interface SlackAttachment {
 }
 
 export interface SlackInteractiveMessagePayload {
-  type: "block_actions" | "interactive_message" | "dialog_submission" | "shortcut";
+  type: 'block_actions' | 'interactive_message' | 'dialog_submission' | 'shortcut';
   trigger_id?: string;
   user: { id: string; name: string; team_id: string };
   channel?: { id: string; name: string };
@@ -71,44 +71,45 @@ export interface SlackChannelInfo {
 }
 
 export interface SlackAlertRouting {
-  severity: "info" | "warning" | "critical";
+  severity: 'info' | 'warning' | 'critical';
   channel: string;
 }
 
 const DEFAULT_ALERT_ROUTING: SlackAlertRouting[] = [
-  { severity: "critical", channel: "#alerts-critical" },
-  { severity: "warning", channel: "#alerts-warning" },
-  { severity: "info", channel: "#alerts-info" },
+  { severity: 'critical', channel: '#alerts-critical' },
+  { severity: 'warning', channel: '#alerts-warning' },
+  { severity: 'info', channel: '#alerts-info' },
 ];
 
-function buildSeverityColor(severity: "info" | "warning" | "critical"): string {
-  if (severity === "critical") return "#e01e5a";
-  if (severity === "warning") return "#ecb22e";
-  return "#36a64f";
+function buildSeverityColor(severity: 'info' | 'warning' | 'critical'): string {
+  if (severity === 'critical') return '#e01e5a';
+  if (severity === 'warning') return '#ecb22e';
+  return '#36a64f';
 }
 
 export class SlackAdapter extends ServiceAdapter {
-  readonly name = "slack";
-  readonly description = "Slack — Bot API with interactive messages, slash commands, and channel-based alert routing";
-  readonly requiredEnvVars = ["SLACK_WEBHOOK_URL or SLACK_BOT_TOKEN"];
+  readonly name = 'slack';
+  readonly description =
+    'Slack — Bot API with interactive messages, slash commands, and channel-based alert routing';
+  readonly requiredEnvVars = ['SLACK_WEBHOOK_URL or SLACK_BOT_TOKEN'];
 
   private alertRouting: SlackAlertRouting[] = [...DEFAULT_ALERT_ROUTING];
 
   private get webhookUrl(): string | undefined {
-    return process.env["SLACK_WEBHOOK_URL"];
+    return process.env['SLACK_WEBHOOK_URL'];
   }
 
   private get botToken(): string | undefined {
-    return process.env["SLACK_BOT_TOKEN"];
+    return process.env['SLACK_BOT_TOKEN'];
   }
 
   private get signingSecret(): string | undefined {
-    return process.env["SLACK_SIGNING_SECRET"];
+    return process.env['SLACK_SIGNING_SECRET'];
   }
 
   get status(): ServiceStatus {
-    if (this.webhookUrl || this.botToken) return "LIVE_CONFIGURED";
-    return "MOCKED_DEMO_MODE";
+    if (this.webhookUrl || this.botToken) return 'LIVE_CONFIGURED';
+    return 'MOCKED_DEMO_MODE';
   }
 
   get isLive(): boolean {
@@ -117,40 +118,40 @@ export class SlackAdapter extends ServiceAdapter {
 
   get presentEnvVars(): string[] {
     const present: string[] = [];
-    if (this.webhookUrl) present.push("SLACK_WEBHOOK_URL");
-    if (this.botToken) present.push("SLACK_BOT_TOKEN");
-    if (this.signingSecret) present.push("SLACK_SIGNING_SECRET");
+    if (this.webhookUrl) present.push('SLACK_WEBHOOK_URL');
+    if (this.botToken) present.push('SLACK_BOT_TOKEN');
+    if (this.signingSecret) present.push('SLACK_SIGNING_SECRET');
     return present;
   }
 
   get missingEnvVars(): string[] {
     if (this.webhookUrl || this.botToken) return [];
-    return ["SLACK_WEBHOOK_URL or SLACK_BOT_TOKEN"];
+    return ['SLACK_WEBHOOK_URL or SLACK_BOT_TOKEN'];
   }
 
   protected async performHealthCheck(): Promise<void> {
     if (this.botToken) {
-      const response = await fetch("https://slack.com/api/auth.test", {
-        method: "POST",
+      const response = await fetch('https://slack.com/api/auth.test', {
+        method: 'POST',
         headers: { Authorization: `Bearer ${this.botToken}` },
       });
       if (!response.ok) throw new Error(`Slack API returned ${response.status}`);
-      const data = await response.json() as { ok: boolean; error?: string };
+      const data = (await response.json()) as { ok: boolean; error?: string };
       if (!data.ok) throw new Error(`Slack auth failed: ${data.error}`);
     } else if (this.webhookUrl) {
       const url = new URL(this.webhookUrl);
-      if (!url.hostname.includes("slack")) throw new Error("Invalid Slack webhook URL");
+      if (!url.hostname.includes('slack')) throw new Error('Invalid Slack webhook URL');
     }
   }
 
   async getBotInfo(): Promise<SlackBotInfo | null> {
     if (!this.botToken) return null;
-    const response = await fetch("https://slack.com/api/auth.test", {
-      method: "POST",
+    const response = await fetch('https://slack.com/api/auth.test', {
+      method: 'POST',
       headers: { Authorization: `Bearer ${this.botToken}` },
     });
     if (!response.ok) throw new Error(`Slack API returned ${response.status}`);
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       ok: boolean;
       bot_id?: string;
       user_id?: string;
@@ -161,11 +162,11 @@ export class SlackAdapter extends ServiceAdapter {
     };
     if (!data.ok) throw new Error(`Slack auth.test failed: ${data.error}`);
     return {
-      botId: data.bot_id ?? "",
-      userId: data.user_id ?? "",
-      teamId: data.team_id ?? "",
-      teamName: data.team ?? "",
-      appId: data.app_id ?? "",
+      botId: data.bot_id ?? '',
+      userId: data.user_id ?? '',
+      teamId: data.team_id ?? '',
+      teamName: data.team ?? '',
+      appId: data.app_id ?? '',
     };
   }
 
@@ -174,24 +175,24 @@ export class SlackAdapter extends ServiceAdapter {
     options?: { channel?: string; username?: string; iconEmoji?: string; blocks?: SlackBlock[] },
   ): Promise<SlackMessageResult> {
     if (!this.isLive) {
-      return { sent: true, channel: options?.channel ?? "#general", mock: true };
+      return { sent: true, channel: options?.channel ?? '#general', mock: true };
     }
 
     const body: Record<string, unknown> = { text };
-    if (options?.channel) body["channel"] = options.channel;
-    if (options?.username) body["username"] = options.username;
-    if (options?.iconEmoji) body["icon_emoji"] = options.iconEmoji;
-    if (options?.blocks) body["blocks"] = options.blocks;
+    if (options?.channel) body['channel'] = options.channel;
+    if (options?.username) body['username'] = options.username;
+    if (options?.iconEmoji) body['icon_emoji'] = options.iconEmoji;
+    if (options?.blocks) body['blocks'] = options.blocks;
 
     const response = await fetch(this.webhookUrl!, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) throw new Error(`Slack webhook error: ${response.status}`);
 
-    return { sent: true, channel: options?.channel ?? "#general", mock: false };
+    return { sent: true, channel: options?.channel ?? '#general', mock: false };
   }
 
   async postMessage(
@@ -214,16 +215,16 @@ export class SlackAdapter extends ServiceAdapter {
     }
 
     const body: Record<string, unknown> = { channel, text };
-    if (options?.blocks) body["blocks"] = options.blocks;
-    if (options?.attachments) body["attachments"] = options.attachments;
-    if (options?.threadTs) body["thread_ts"] = options.threadTs;
-    if (options?.unfurlLinks !== undefined) body["unfurl_links"] = options.unfurlLinks;
-    if (options?.mrkdwn !== undefined) body["mrkdwn"] = options.mrkdwn;
+    if (options?.blocks) body['blocks'] = options.blocks;
+    if (options?.attachments) body['attachments'] = options.attachments;
+    if (options?.threadTs) body['thread_ts'] = options.threadTs;
+    if (options?.unfurlLinks !== undefined) body['unfurl_links'] = options.unfurlLinks;
+    if (options?.mrkdwn !== undefined) body['mrkdwn'] = options.mrkdwn;
 
-    const response = await fetch("https://slack.com/api/chat.postMessage", {
-      method: "POST",
+    const response = await fetch('https://slack.com/api/chat.postMessage', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${this.botToken}`,
       },
       body: JSON.stringify(body),
@@ -231,7 +232,7 @@ export class SlackAdapter extends ServiceAdapter {
 
     if (!response.ok) throw new Error(`Slack API error: ${response.status}`);
 
-    const data = await response.json() as { ok: boolean; ts?: string; error?: string };
+    const data = (await response.json()) as { ok: boolean; ts?: string; error?: string };
     if (!data.ok) throw new Error(`Slack API error: ${data.error}`);
 
     return { sent: true, channel, timestamp: data.ts, mock: false };
@@ -242,41 +243,51 @@ export class SlackAdapter extends ServiceAdapter {
     alert: {
       title: string;
       message: string;
-      severity: "info" | "warning" | "critical";
+      severity: 'info' | 'warning' | 'critical';
       source?: string;
       metadata?: Record<string, string>;
-      actions?: Array<{ actionId: string; label: string; value: string; style?: "primary" | "danger" }>;
+      actions?: Array<{
+        actionId: string;
+        label: string;
+        value: string;
+        style?: 'primary' | 'danger';
+      }>;
     },
   ): Promise<SlackMessageResult> {
     const color = buildSeverityColor(alert.severity);
-    const severityEmoji = alert.severity === "critical" ? "🔴" : alert.severity === "warning" ? "🟡" : "🟢";
+    const severityEmoji =
+      alert.severity === 'critical' ? '🔴' : alert.severity === 'warning' ? '🟡' : '🟢';
 
     const blocks: SlackBlock[] = [
       {
-        type: "header",
-        text: { type: "plain_text", text: `${severityEmoji} ${alert.title}`, emoji: true },
+        type: 'header',
+        text: { type: 'plain_text', text: `${severityEmoji} ${alert.title}`, emoji: true },
       },
       {
-        type: "section",
-        text: { type: "mrkdwn", text: alert.message },
-        ...(alert.source ? { accessory: { type: "overflow", options: [], action_id: "source_overflow" } } : {}),
+        type: 'section',
+        text: { type: 'mrkdwn', text: alert.message },
+        ...(alert.source
+          ? { accessory: { type: 'overflow', options: [], action_id: 'source_overflow' } }
+          : {}),
       },
     ];
 
     if (alert.metadata && Object.keys(alert.metadata).length > 0) {
-      const fields = Object.entries(alert.metadata).slice(0, 10).map(([title, value]) => ({
-        type: "mrkdwn",
-        text: `*${title}*\n${value}`,
-      }));
-      blocks.push({ type: "section", fields: fields.slice(0, 10) });
+      const fields = Object.entries(alert.metadata)
+        .slice(0, 10)
+        .map(([title, value]) => ({
+          type: 'mrkdwn',
+          text: `*${title}*\n${value}`,
+        }));
+      blocks.push({ type: 'section', fields: fields.slice(0, 10) });
     }
 
     if (alert.actions?.length) {
       blocks.push({
-        type: "actions",
+        type: 'actions',
         elements: alert.actions.map((action) => ({
-          type: "button",
-          text: { type: "plain_text", text: action.label, emoji: true },
+          type: 'button',
+          text: { type: 'plain_text', text: action.label, emoji: true },
           value: action.value,
           action_id: action.actionId,
           ...(action.style ? { style: action.style } : {}),
@@ -285,11 +296,11 @@ export class SlackAdapter extends ServiceAdapter {
     }
 
     blocks.push({
-      type: "context",
+      type: 'context',
       elements: [
         {
-          type: "mrkdwn",
-          text: `*Source:* ${alert.source ?? "Platform"} | *Time:* <!date^${Math.floor(Date.now() / 1000)}^{date_short} at {time}|${new Date().toISOString()}>`,
+          type: 'mrkdwn',
+          text: `*Source:* ${alert.source ?? 'Platform'} | *Time:* <!date^${Math.floor(Date.now() / 1000)}^{date_short} at {time}|${new Date().toISOString()}>`,
         },
       ],
     });
@@ -299,17 +310,16 @@ export class SlackAdapter extends ServiceAdapter {
     return this.postMessage(channel, alert.title, { attachments });
   }
 
-  async routeAlertBySeverity(
-    alert: {
-      title: string;
-      message: string;
-      severity: "info" | "warning" | "critical";
-      source?: string;
-      metadata?: Record<string, string>;
-    },
-  ): Promise<SlackMessageResult> {
-    const routing = this.alertRouting.find((r) => r.severity === alert.severity)
-      ?? DEFAULT_ALERT_ROUTING.find((r) => r.severity === alert.severity)!;
+  async routeAlertBySeverity(alert: {
+    title: string;
+    message: string;
+    severity: 'info' | 'warning' | 'critical';
+    source?: string;
+    metadata?: Record<string, string>;
+  }): Promise<SlackMessageResult> {
+    const routing =
+      this.alertRouting.find((r) => r.severity === alert.severity) ??
+      DEFAULT_ALERT_ROUTING.find((r) => r.severity === alert.severity)!;
     return this.postInteractiveAlert(routing.channel, alert);
   }
 
@@ -318,7 +328,7 @@ export class SlackAdapter extends ServiceAdapter {
   }
 
   async handleSlashCommand(payload: SlackSlashCommandPayload): Promise<{
-    response_type: "in_channel" | "ephemeral";
+    response_type: 'in_channel' | 'ephemeral';
     text: string;
     blocks?: SlackBlock[];
   }> {
@@ -326,9 +336,9 @@ export class SlackAdapter extends ServiceAdapter {
     const args = text.trim().split(/\s+/).filter(Boolean);
 
     switch (command) {
-      case "/alert": {
-        const severity = (args[0] as "info" | "warning" | "critical") ?? "info";
-        const message = args.slice(1).join(" ") || "Manual alert triggered";
+      case '/alert': {
+        const severity = (args[0] as 'info' | 'warning' | 'critical') ?? 'info';
+        const message = args.slice(1).join(' ') || 'Manual alert triggered';
         await this.routeAlertBySeverity({
           title: `Manual Alert — ${severity.toUpperCase()}`,
           message,
@@ -336,60 +346,63 @@ export class SlackAdapter extends ServiceAdapter {
           source: `@${user_name}`,
         });
         return {
-          response_type: "ephemeral",
-          text: `Alert dispatched to ${this.alertRouting.find((r) => r.severity === severity)?.channel ?? "#alerts"}`,
+          response_type: 'ephemeral',
+          text: `Alert dispatched to ${this.alertRouting.find((r) => r.severity === severity)?.channel ?? '#alerts'}`,
         };
       }
 
-      case "/status": {
+      case '/status': {
         return {
-          response_type: "in_channel",
-          text: "Platform Status",
+          response_type: 'in_channel',
+          text: 'Platform Status',
           blocks: [
             {
-              type: "section",
-              text: { type: "mrkdwn", text: `*Platform Status* — requested by @${user_name}` },
+              type: 'section',
+              text: { type: 'mrkdwn', text: `*Platform Status* — requested by @${user_name}` },
             },
             {
-              type: "section",
+              type: 'section',
               fields: [
-                { type: "mrkdwn", text: `*API:* 🟢 Operational` },
-                { type: "mrkdwn", text: `*Integrations:* 🟡 Partial` },
-                { type: "mrkdwn", text: `*Data Ingestion:* 🟢 Healthy` },
-                { type: "mrkdwn", text: `*Agents:* 🟢 Active` },
+                { type: 'mrkdwn', text: `*API:* 🟢 Operational` },
+                { type: 'mrkdwn', text: `*Integrations:* 🟡 Partial` },
+                { type: 'mrkdwn', text: `*Data Ingestion:* 🟢 Healthy` },
+                { type: 'mrkdwn', text: `*Agents:* 🟢 Active` },
               ],
             },
           ],
         };
       }
 
-      case "/incident": {
+      case '/incident': {
         const subCommand = args[0];
-        if (subCommand === "create") {
-          const title = args.slice(1).join(" ") || "New incident";
+        if (subCommand === 'create') {
+          const title = args.slice(1).join(' ') || 'New incident';
           return {
-            response_type: "in_channel",
+            response_type: 'in_channel',
             text: `Incident creation initiated: "${title}"`,
             blocks: [
               {
-                type: "section",
-                text: { type: "mrkdwn", text: `🚨 *Incident Created* by @${user_name}\n*Title:* ${title}` },
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: `🚨 *Incident Created* by @${user_name}\n*Title:* ${title}`,
+                },
               },
               {
-                type: "actions",
+                type: 'actions',
                 elements: [
                   {
-                    type: "button",
-                    text: { type: "plain_text", text: "Acknowledge", emoji: true },
-                    style: "primary",
-                    action_id: "incident_acknowledge",
+                    type: 'button',
+                    text: { type: 'plain_text', text: 'Acknowledge', emoji: true },
+                    style: 'primary',
+                    action_id: 'incident_acknowledge',
                     value: title,
                   },
                   {
-                    type: "button",
-                    text: { type: "plain_text", text: "Resolve", emoji: true },
-                    style: "danger",
-                    action_id: "incident_resolve",
+                    type: 'button',
+                    text: { type: 'plain_text', text: 'Resolve', emoji: true },
+                    style: 'danger',
+                    action_id: 'incident_resolve',
                     value: title,
                   },
                 ],
@@ -397,33 +410,38 @@ export class SlackAdapter extends ServiceAdapter {
             ],
           };
         }
-        return { response_type: "ephemeral", text: `Unknown incident subcommand: ${subCommand}. Try: /incident create <title>` };
+        return {
+          response_type: 'ephemeral',
+          text: `Unknown incident subcommand: ${subCommand}. Try: /incident create <title>`,
+        };
       }
 
       default:
         return {
-          response_type: "ephemeral",
+          response_type: 'ephemeral',
           text: `Unknown command: ${command}. Available: /alert, /status, /incident`,
         };
     }
   }
 
-  async handleInteractiveAction(payload: SlackInteractiveMessagePayload): Promise<Record<string, unknown> | null> {
-    if (payload.type !== "block_actions") return null;
+  async handleInteractiveAction(
+    payload: SlackInteractiveMessagePayload,
+  ): Promise<Record<string, unknown> | null> {
+    if (payload.type !== 'block_actions') return null;
 
     const actions = payload.actions ?? [];
     const results: Record<string, unknown> = {};
 
     for (const action of actions) {
       switch (action.action_id) {
-        case "incident_acknowledge":
-          results[action.action_id] = { status: "acknowledged", value: action.value };
+        case 'incident_acknowledge':
+          results[action.action_id] = { status: 'acknowledged', value: action.value };
           break;
-        case "incident_resolve":
-          results[action.action_id] = { status: "resolved", value: action.value };
+        case 'incident_resolve':
+          results[action.action_id] = { status: 'resolved', value: action.value };
           break;
         default:
-          results[action.action_id] = { status: "handled", value: action.value };
+          results[action.action_id] = { status: 'handled', value: action.value };
       }
     }
 
@@ -438,9 +456,9 @@ export class SlackAdapter extends ServiceAdapter {
     const secret = this.signingSecret;
     if (!secret) return true;
 
-    const { verifyWebhookSignature: verify } = await import("../integrations/webhook-verifier.js");
+    const { verifyWebhookSignature: verify } = await import('../integrations/webhook-verifier.js');
     const result = verify({
-      algorithm: "slack-v0",
+      algorithm: 'slack-v0',
       secret,
       signature,
       body: rawBody,
@@ -452,9 +470,33 @@ export class SlackAdapter extends ServiceAdapter {
   async listChannels(limit = 200): Promise<SlackChannelInfo[]> {
     if (!this.botToken || !this.isLive) {
       return [
-        { id: "C001", name: "alerts-critical", isMember: true, isPrivate: false, memberCount: null, topic: null, purpose: "Critical alerts" },
-        { id: "C002", name: "alerts-warning", isMember: true, isPrivate: false, memberCount: null, topic: null, purpose: "Warning alerts" },
-        { id: "C003", name: "general", isMember: true, isPrivate: false, memberCount: null, topic: null, purpose: "General" },
+        {
+          id: 'C001',
+          name: 'alerts-critical',
+          isMember: true,
+          isPrivate: false,
+          memberCount: null,
+          topic: null,
+          purpose: 'Critical alerts',
+        },
+        {
+          id: 'C002',
+          name: 'alerts-warning',
+          isMember: true,
+          isPrivate: false,
+          memberCount: null,
+          topic: null,
+          purpose: 'Warning alerts',
+        },
+        {
+          id: 'C003',
+          name: 'general',
+          isMember: true,
+          isPrivate: false,
+          memberCount: null,
+          topic: null,
+          purpose: 'General',
+        },
       ];
     }
 
@@ -466,7 +508,7 @@ export class SlackAdapter extends ServiceAdapter {
     );
 
     if (!response.ok) throw new Error(`Slack API error: ${response.status}`);
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       ok: boolean;
       channels?: Array<{
         id: string;
@@ -504,19 +546,19 @@ export class SlackAdapter extends ServiceAdapter {
     }
 
     const body: Record<string, unknown> = { channel, ts, text };
-    if (blocks) body["blocks"] = blocks;
+    if (blocks) body['blocks'] = blocks;
 
-    const response = await fetch("https://slack.com/api/chat.update", {
-      method: "POST",
+    const response = await fetch('https://slack.com/api/chat.update', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${this.botToken}`,
       },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) throw new Error(`Slack chat.update error: ${response.status}`);
-    const data = await response.json() as { ok: boolean; ts?: string; error?: string };
+    const data = (await response.json()) as { ok: boolean; ts?: string; error?: string };
     if (!data.ok) throw new Error(`Slack chat.update failed: ${data.error}`);
 
     return { sent: true, channel, timestamp: data.ts ?? ts, mock: false };

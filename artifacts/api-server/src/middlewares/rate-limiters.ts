@@ -1,12 +1,12 @@
-import rateLimit from "express-rate-limit";
-import type { Request, Response, NextFunction, RequestHandler } from "express";
-import { sendError } from "../lib/api-response";
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import rateLimit from 'express-rate-limit';
+import { sendError } from '../lib/api-response';
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV === 'production';
 
 export function cacheControl(maxAgeSeconds: number) {
   return (_req: Request, res: Response, next: NextFunction) => {
-    res.setHeader("Cache-Control", `public, max-age=${maxAgeSeconds}, s-maxage=${maxAgeSeconds}`);
+    res.setHeader('Cache-Control', `public, max-age=${maxAgeSeconds}, s-maxage=${maxAgeSeconds}`);
     next();
   };
 }
@@ -17,13 +17,13 @@ export const LONG_CACHE = cacheControl(3600);
 
 function makeRateLimitHandler(message: string) {
   return (_req: Request, res: Response) => {
-    sendError(res, message, 429, "RATE_LIMITED");
+    sendError(res, message, 429, 'RATE_LIMITED');
   };
 }
 
 function makeServiceUnavailableHandler(message: string) {
   return (_req: Request, res: Response) => {
-    sendError(res, message, 503, "SERVICE_UNAVAILABLE");
+    sendError(res, message, 503, 'SERVICE_UNAVAILABLE');
   };
 }
 
@@ -37,12 +37,12 @@ export const globalLimiter = rateLimit({
   // by express-rate-limit on 429 responses.
   standardHeaders: true,
   legacyHeaders: true,
-  handler: makeRateLimitHandler("Too many requests, please try again later."),
+  handler: makeRateLimitHandler('Too many requests, please try again later.'),
   skip: (req) =>
-    req.path === "/api/health" ||
-    req.path === "/api/health/live" ||
-    req.path === "/api/health/ready" ||
-    req.path === "/api/ready",
+    req.path === '/api/health' ||
+    req.path === '/api/health/live' ||
+    req.path === '/api/health/ready' ||
+    req.path === '/api/ready',
 }) as unknown as RequestHandler;
 
 export const writeLimiter = rateLimit({
@@ -50,7 +50,7 @@ export const writeLimiter = rateLimit({
   max: isProduction ? 100 : 500,
   standardHeaders: true,
   legacyHeaders: true,
-  handler: makeRateLimitHandler("Too many write requests, please try again later."),
+  handler: makeRateLimitHandler('Too many write requests, please try again later.'),
 }) as unknown as RequestHandler;
 
 export const readLimiter = rateLimit({
@@ -58,7 +58,7 @@ export const readLimiter = rateLimit({
   max: isProduction ? 600 : 2000,
   standardHeaders: true,
   legacyHeaders: true,
-  handler: makeRateLimitHandler("Too many requests, please try again later."),
+  handler: makeRateLimitHandler('Too many requests, please try again later.'),
 }) as unknown as RequestHandler;
 
 export const publicSubmitLimiter = rateLimit({
@@ -66,7 +66,7 @@ export const publicSubmitLimiter = rateLimit({
   max: isProduction ? 5 : 50,
   standardHeaders: true,
   legacyHeaders: true,
-  handler: makeRateLimitHandler("Too many submissions from this IP. Please try again in an hour."),
+  handler: makeRateLimitHandler('Too many submissions from this IP. Please try again in an hour.'),
 }) as unknown as RequestHandler;
 
 // Looser bucket for public file-upload endpoints. A single deal submission
@@ -80,7 +80,7 @@ export const publicUploadLimiter = rateLimit({
   max: isProduction ? 60 : 300,
   standardHeaders: true,
   legacyHeaders: true,
-  handler: makeRateLimitHandler("Too many file uploads from this IP. Please try again in an hour."),
+  handler: makeRateLimitHandler('Too many file uploads from this IP. Please try again in an hour.'),
 }) as unknown as RequestHandler;
 
 /**
@@ -119,7 +119,9 @@ export const gdprLimiter = rateLimit({
   max: isProduction ? 3 : 30,
   standardHeaders: true,
   legacyHeaders: true,
-  handler: makeRateLimitHandler("Too many data requests from this IP. Please try again in an hour."),
+  handler: makeRateLimitHandler(
+    'Too many data requests from this IP. Please try again in an hour.',
+  ),
 }) as unknown as RequestHandler;
 
 export { makeServiceUnavailableHandler };

@@ -1,7 +1,7 @@
-export type Severity = "critical" | "high" | "medium" | "low" | "none";
-export type Trend = "up" | "down" | "flat";
-export type ActionStatus = "pending" | "approved" | "rejected" | "auto-executed" | "blocked";
-export type RiskLevel = "critical" | "high" | "medium" | "low";
+export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'none';
+export type Trend = 'up' | 'down' | 'flat';
+export type ActionStatus = 'pending' | 'approved' | 'rejected' | 'auto-executed' | 'blocked';
+export type RiskLevel = 'critical' | 'high' | 'medium' | 'low';
 
 export interface CausalEvent {
   id: string;
@@ -29,7 +29,7 @@ export interface KPIMetric {
   target?: string | number;
   domain?: string;
   domainColor?: string;
-  severity?: "good" | "warn" | "bad";
+  severity?: 'good' | 'warn' | 'bad';
 }
 
 export interface Recommendation {
@@ -37,15 +37,15 @@ export interface Recommendation {
   rank: number;
   title: string;
   description: string;
-  impact: "high" | "medium" | "low";
-  effort: "high" | "medium" | "low";
+  impact: 'high' | 'medium' | 'low';
+  effort: 'high' | 'medium' | 'low';
   domain?: string;
   domainColor?: string;
   why: string;
   signals?: string[];
   action?: string;
   owner?: string;
-  status?: "new" | "acknowledged" | "in-progress" | "done";
+  status?: 'new' | 'acknowledged' | 'in-progress' | 'done';
 }
 
 export interface RiskItem {
@@ -68,7 +68,7 @@ export interface OpportunityItem {
   domainColor: string;
   probability: number;
   value: number;
-  level: "high" | "medium" | "low";
+  level: 'high' | 'medium' | 'low';
   action?: string;
   owner?: string;
 }
@@ -78,7 +78,7 @@ export interface ValueEntry {
   label: string;
   amount: number;
   currency?: string;
-  type: "at-risk" | "protected" | "created";
+  type: 'at-risk' | 'protected' | 'created';
   domain?: string;
   domainColor?: string;
   description?: string;
@@ -89,7 +89,7 @@ export interface ActionItem {
   title: string;
   description: string;
   status: ActionStatus;
-  priority: "urgent" | "high" | "medium" | "low";
+  priority: 'urgent' | 'high' | 'medium' | 'low';
   requiredBy?: string;
   owner?: string;
   domain?: string;

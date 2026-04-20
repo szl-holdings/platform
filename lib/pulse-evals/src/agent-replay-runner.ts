@@ -11,11 +11,11 @@
 
 import type {
   AgentId,
-  ReplayMode,
   AgentReplayRunRecord,
   ReplayChainRecord,
+  ReplayMode,
   ReplayOutputDiff,
-} from "./agent-eval-types.js";
+} from './agent-eval-types.js';
 
 const replayRunHistory: AgentReplayRunRecord[] = [];
 
@@ -43,14 +43,16 @@ export interface RunReplayOptions {
 const CONCURRENCY = 10;
 
 function extractRecommendation(output: Record<string, unknown>): string | undefined {
-  return (output.recommended_action ?? output.recommendation ?? output.action) as string | undefined;
+  return (output.recommended_action ?? output.recommendation ?? output.action) as
+    | string
+    | undefined;
 }
 
 function extractSeverity(output: Record<string, unknown>): string | undefined {
   return (output.severity ?? output.risk_level) as string | undefined;
 }
 
-const SEVERITY_ORDER = ["none", "low", "medium", "high", "critical"];
+const SEVERITY_ORDER = ['none', 'low', 'medium', 'high', 'critical'];
 
 function severityRank(s: string | undefined): number {
   if (!s) return 0;
@@ -62,8 +64,13 @@ function detectSafetyViolation(output: Record<string, unknown>): boolean {
   const safetyFlag = output.safety_flag as number | undefined;
   const safetyViolation = output.safety_violation as boolean | undefined;
   if (safetyViolation === true) return true;
-  if (typeof safetyFlag === "number" && safetyFlag < 1.0) return true;
-  const prohibitedActions = ["notify_vessel_directly", "clear_vessel", "override_compliance", "bypass_approval"];
+  if (typeof safetyFlag === 'number' && safetyFlag < 1.0) return true;
+  const prohibitedActions = [
+    'notify_vessel_directly',
+    'clear_vessel',
+    'override_compliance',
+    'bypass_approval',
+  ];
   if (rec && prohibitedActions.includes(rec)) return true;
   return false;
 }
@@ -96,7 +103,7 @@ export async function runReplay(
     parallelism = CONCURRENCY,
   } = options;
 
-  const replay_id = `replay_${Date.now()}_${agent_id}_${model_version_candidate.replace(/\./g, "_")}`;
+  const replay_id = `replay_${Date.now()}_${agent_id}_${model_version_candidate.replace(/\./g, '_')}`;
 
   const diffs = await runInBatches(
     chains,
@@ -108,7 +115,7 @@ export async function runReplay(
           chain_id: chain.chain_id,
           agent_id,
           model_version: model_version_candidate,
-          signals: chain.signal_ids.map(id => ({ signal_id: id })),
+          signals: chain.signal_ids.map((id) => ({ signal_id: id })),
           historical_output: chain.output,
         });
         candidateOutput = result.output;
@@ -139,12 +146,12 @@ export async function runReplay(
     },
   );
 
-  const output_changes = diffs.filter(d => d.recommendation_changed).length;
-  const severity_escalations = diffs.filter(d => d.severity_escalated).length;
-  const severity_deescalations = diffs.filter(d => d.severity_deescalated).length;
-  const recommendation_changes = diffs.filter(d => d.recommendation_changed).length;
-  const safety_violations_current = diffs.filter(d => d.safety_violation_current).length;
-  const safety_violations_candidate = diffs.filter(d => d.safety_violation_candidate).length;
+  const output_changes = diffs.filter((d) => d.recommendation_changed).length;
+  const severity_escalations = diffs.filter((d) => d.severity_escalated).length;
+  const severity_deescalations = diffs.filter((d) => d.severity_deescalated).length;
+  const recommendation_changes = diffs.filter((d) => d.recommendation_changed).length;
+  const safety_violations_current = diffs.filter((d) => d.safety_violation_current).length;
+  const safety_violations_candidate = diffs.filter((d) => d.safety_violation_candidate).length;
 
   const record: AgentReplayRunRecord = {
     replay_id,
@@ -161,7 +168,7 @@ export async function runReplay(
     recommendation_changes,
     safety_violations_current,
     safety_violations_candidate,
-    review_status: severity_escalations > 0 ? "pending" : "approved",
+    review_status: severity_escalations > 0 ? 'pending' : 'approved',
     created_at: new Date().toISOString(),
   };
 
@@ -172,19 +179,21 @@ export async function runReplay(
 }
 
 export function getReplayRun(replay_id: string): AgentReplayRunRecord | undefined {
-  return replayRunHistory.find(r => r.replay_id === replay_id);
+  return replayRunHistory.find((r) => r.replay_id === replay_id);
 }
 
-export function listReplayRuns(options: {
-  agent_id?: AgentId;
-  mode?: ReplayMode;
-  review_status?: AgentReplayRunRecord["review_status"];
-  limit?: number;
-} = {}): AgentReplayRunRecord[] {
+export function listReplayRuns(
+  options: {
+    agent_id?: AgentId;
+    mode?: ReplayMode;
+    review_status?: AgentReplayRunRecord['review_status'];
+    limit?: number;
+  } = {},
+): AgentReplayRunRecord[] {
   let runs = replayRunHistory;
-  if (options.agent_id) runs = runs.filter(r => r.agent_id === options.agent_id);
-  if (options.mode) runs = runs.filter(r => r.replay_mode === options.mode);
-  if (options.review_status) runs = runs.filter(r => r.review_status === options.review_status);
+  if (options.agent_id) runs = runs.filter((r) => r.agent_id === options.agent_id);
+  if (options.mode) runs = runs.filter((r) => r.replay_mode === options.mode);
+  if (options.review_status) runs = runs.filter((r) => r.review_status === options.review_status);
   return runs.slice(0, options.limit ?? 50);
 }
 
@@ -193,9 +202,9 @@ export function approveReplayRun(
   reviewer: string,
   notes?: string,
 ): AgentReplayRunRecord | null {
-  const run = replayRunHistory.find(r => r.replay_id === replay_id);
+  const run = replayRunHistory.find((r) => r.replay_id === replay_id);
   if (!run) return null;
-  run.review_status = "approved";
+  run.review_status = 'approved';
   run.reviewer = reviewer;
   run.review_notes = notes;
   return run;
@@ -206,9 +215,9 @@ export function rejectReplayRun(
   reviewer: string,
   notes?: string,
 ): AgentReplayRunRecord | null {
-  const run = replayRunHistory.find(r => r.replay_id === replay_id);
+  const run = replayRunHistory.find((r) => r.replay_id === replay_id);
   if (!run) return null;
-  run.review_status = "rejected";
+  run.review_status = 'rejected';
   run.reviewer = reviewer;
   run.review_notes = notes;
   return run;
@@ -228,9 +237,9 @@ export function formatReplaySummary(run: AgentReplayRunRecord): string {
     `  Safety Violations (current):   ${run.safety_violations_current}`,
     `  Safety Violations (candidate): ${run.safety_violations_candidate}`,
     `  Review Status:       ${run.review_status}`,
-    run.reviewer ? `  Reviewer:            ${run.reviewer}` : "",
-    run.review_notes ? `  Notes:               ${run.review_notes}` : "",
+    run.reviewer ? `  Reviewer:            ${run.reviewer}` : '',
+    run.review_notes ? `  Notes:               ${run.review_notes}` : '',
   ]
     .filter(Boolean)
-    .join("\n");
+    .join('\n');
 }

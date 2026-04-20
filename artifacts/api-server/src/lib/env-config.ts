@@ -3,29 +3,29 @@
  * parseEnv() runs at module load time and throws clearly if any var is invalid.
  * All reads below use _env instead of process.env directly.
  */
-import { getEnv } from "@szl-holdings/env";
+import { getEnv } from '@szl-holdings/env';
 
 const _env = getEnv();
 
-export type AppEnvironment = "development" | "staging" | "production";
+export type AppEnvironment = 'development' | 'staging' | 'production';
 
 export function getEnvironment(): AppEnvironment {
   const nodeEnv = _env.NODE_ENV;
-  if (nodeEnv === "production") return "production";
-  if (nodeEnv === "staging") return "staging";
-  return "development";
+  if (nodeEnv === 'production') return 'production';
+  if (nodeEnv === 'staging') return 'staging';
+  return 'development';
 }
 
 export function isProduction(): boolean {
-  return getEnvironment() === "production";
+  return getEnvironment() === 'production';
 }
 
 export function isStaging(): boolean {
-  return getEnvironment() === "staging";
+  return getEnvironment() === 'staging';
 }
 
 export function isDevelopment(): boolean {
-  return getEnvironment() === "development";
+  return getEnvironment() === 'development';
 }
 
 export const ENV_CONFIG = {
@@ -44,8 +44,8 @@ export const ENV_CONFIG = {
 
   auth: {
     sessionTtlMs: _env.SESSION_TTL_MS,
-    adminRoles: ["super_admin"] as string[],
-    operatorRoles: ["super_admin", "ops", "operator"] as string[],
+    adminRoles: ['super_admin'] as string[],
+    operatorRoles: ['super_admin', 'ops', 'operator'] as string[],
   },
 
   features: {

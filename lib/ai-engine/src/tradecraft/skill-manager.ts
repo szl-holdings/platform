@@ -1,5 +1,10 @@
-import { skillRegistry, type SkillManifest, type SkillCapability, type SkillChain } from "./skill-registry.js";
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
+import {
+  type SkillCapability,
+  type SkillChain,
+  type SkillManifest,
+  skillRegistry,
+} from './skill-registry.js';
 
 export interface SkillSelectionResult {
   selected: SkillManifest[];
@@ -42,50 +47,48 @@ export class SkillManager {
 
     if (context.capabilities && context.capabilities.length > 0) {
       const capSet = new Set(context.capabilities);
-      candidates = candidates.filter(s => capSet.has(s.capability));
+      candidates = candidates.filter((s) => capSet.has(s.capability));
     }
 
     if (context.domain) {
-      candidates = candidates.filter(s => s.domain === context.domain || s.domain === "cross_domain");
+      candidates = candidates.filter(
+        (s) => s.domain === context.domain || s.domain === 'cross_domain',
+      );
     }
 
     if (context.tags && context.tags.length > 0) {
-      const tagSet = new Set(context.tags.map(t => t.toLowerCase()));
-      candidates = candidates.filter(s => s.tags.some(t => tagSet.has(t.toLowerCase())));
+      const tagSet = new Set(context.tags.map((t) => t.toLowerCase()));
+      candidates = candidates.filter((s) => s.tags.some((t) => tagSet.has(t.toLowerCase())));
     }
 
     if (context.triggerContext) {
       const triggered = skillRegistry.matchTriggers(context.triggerContext);
-      const triggeredIds = new Set(triggered.map(s => s.skillId));
-      candidates = candidates.filter(s => triggeredIds.has(s.skillId) || !context.triggerContext);
+      const triggeredIds = new Set(triggered.map((s) => s.skillId));
+      candidates = candidates.filter((s) => triggeredIds.has(s.skillId) || !context.triggerContext);
     }
 
     return candidates;
   }
 
-  select(
-    task: string,
-    context: Record<string, unknown>,
-    maxSkills = 4,
-  ): SkillSelectionResult {
+  select(task: string, context: Record<string, unknown>, maxSkills = 4): SkillSelectionResult {
     const allSkills = skillRegistry.getAll();
     const taskLower = task.toLowerCase();
     const selected: SkillManifest[] = [];
     const rejected: Array<{ skill: SkillManifest; reason: string }> = [];
 
-    const scores = allSkills.map(skill => {
+    const scores = allSkills.map((skill) => {
       let score = 0;
 
-      const keywordMatches = skill.tags.filter(t => taskLower.includes(t.toLowerCase())).length;
+      const keywordMatches = skill.tags.filter((t) => taskLower.includes(t.toLowerCase())).length;
       score += keywordMatches * 10;
 
-      if (taskLower.includes(skill.capability.replace(/_/g, " "))) score += 20;
+      if (taskLower.includes(skill.capability.replace(/_/g, ' '))) score += 20;
       if (taskLower.includes(skill.name.toLowerCase())) score += 15;
 
       const triggered = skillRegistry.matchTriggers(context);
-      if (triggered.some(t => t.skillId === skill.skillId)) score += 25;
+      if (triggered.some((t) => t.skillId === skill.skillId)) score += 25;
 
-      if (skill.domain === context["domain"]) score += 10;
+      if (skill.domain === context['domain']) score += 10;
 
       return { skill, score };
     });
@@ -98,24 +101,30 @@ export class SkillManager {
         continue;
       }
 
-      const missingRequired = skill.requiredInputs.filter(inp => !(inp.name in context) && inp.name !== "context" && inp.name !== "tenantId");
+      const missingRequired = skill.requiredInputs.filter(
+        (inp) => !(inp.name in context) && inp.name !== 'context' && inp.name !== 'tenantId',
+      );
       if (missingRequired.length > 0 && score < 20) {
-        rejected.push({ skill, reason: `Missing required inputs: ${missingRequired.map(i => i.name).join(", ")}` });
+        rejected.push({
+          skill,
+          reason: `Missing required inputs: ${missingRequired.map((i) => i.name).join(', ')}`,
+        });
         continue;
       }
 
       if (score === 0 && selected.length > 0) {
-        rejected.push({ skill, reason: "No relevance signal" });
+        rejected.push({ skill, reason: 'No relevance signal' });
         continue;
       }
 
       selected.push(skill);
     }
 
-    const reasoning = selected.length > 0
-      ? `Selected ${selected.length} skill(s): ${selected.map(s => s.name).join(", ")}. ` +
-        `Task keywords matched: ${selected.flatMap(s => s.tags.filter(t => taskLower.includes(t))).join(", ") || "none"}.`
-      : "No matching skills found for the given task and context.";
+    const reasoning =
+      selected.length > 0
+        ? `Selected ${selected.length} skill(s): ${selected.map((s) => s.name).join(', ')}. ` +
+          `Task keywords matched: ${selected.flatMap((s) => s.tags.filter((t) => taskLower.includes(t))).join(', ') || 'none'}.`
+        : 'No matching skills found for the given task and context.';
 
     return { selected, rejected, reasoning };
   }
@@ -126,7 +135,7 @@ export class SkillManager {
     description: string,
   ): ChainCompositionResult {
     const warnings: string[] = [];
-    const chainSkills: SkillChain["skills"] = [];
+    const chainSkills: SkillChain['skills'] = [];
     let totalLatency = 0;
     const parallelGroups: Array<SkillManifest[]> = [];
 
@@ -145,12 +154,14 @@ export class SkillManager {
       const prev = i > 0 ? resolvedSkills[i - 1]! : null;
 
       if (prev && !prev.chainMetadata.canChainTo.includes(skill.capability)) {
-        warnings.push(`Skill '${prev.name}' cannot directly chain to '${skill.name}'. Chain may produce incomplete inputs.`);
+        warnings.push(
+          `Skill '${prev.name}' cannot directly chain to '${skill.name}'. Chain may produce incomplete inputs.`,
+        );
       }
 
       if (skill.chainMetadata.parallelizable && i > 0) {
         const lastGroup = parallelGroups[parallelGroups.length - 1];
-        if (lastGroup && lastGroup.every(s => s.chainMetadata.parallelizable)) {
+        if (lastGroup && lastGroup.every((s) => s.chainMetadata.parallelizable)) {
           lastGroup.push(skill);
         } else {
           parallelGroups.push([skill]);
@@ -162,8 +173,9 @@ export class SkillManager {
       const inputMapping: Record<string, string> = {};
       if (prev) {
         for (const outputField of prev.chainMetadata.outputsFedToNext) {
-          const matchingInput = skill.requiredInputs.find(inp => inp.name === outputField) ||
-            skill.optionalInputs.find(inp => inp.name === outputField);
+          const matchingInput =
+            skill.requiredInputs.find((inp) => inp.name === outputField) ||
+            skill.optionalInputs.find((inp) => inp.name === outputField);
           if (matchingInput) {
             inputMapping[outputField] = `${prev.skillId}.${outputField}`;
           }
@@ -182,18 +194,20 @@ export class SkillManager {
 
     let adjustedLatency = 0;
     for (const group of parallelGroups) {
-      const maxInGroup = Math.max(...group.map(s => s.estimatedLatencyMs));
+      const maxInGroup = Math.max(...group.map((s) => s.estimatedLatencyMs));
       adjustedLatency += maxInGroup;
     }
     totalLatency = adjustedLatency;
 
-    const maxDepth = Math.max(...resolvedSkills.map(s => s.chainMetadata.maxChainDepth), 0);
+    const maxDepth = Math.max(...resolvedSkills.map((s) => s.chainMetadata.maxChainDepth), 0);
     if (capabilities.length > maxDepth && maxDepth > 0) {
-      warnings.push(`Chain depth (${capabilities.length}) exceeds maximum recommended depth (${maxDepth}).`);
+      warnings.push(
+        `Chain depth (${capabilities.length}) exceeds maximum recommended depth (${maxDepth}).`,
+      );
     }
 
     const chain: SkillChain = {
-      chainId: `chain_${randomUUID().replace(/-/g, "").slice(0, 12)}`,
+      chainId: `chain_${randomUUID().replace(/-/g, '').slice(0, 12)}`,
       name,
       description,
       skills: chainSkills,
@@ -210,7 +224,7 @@ export class SkillManager {
     const chain = this.chains.get(chainId);
     if (!chain) return null;
 
-    const phases: ChainExecutionPlan["phases"] = [];
+    const phases: ChainExecutionPlan['phases'] = [];
     let currentPhase = 0;
     const processedIds = new Set<string>();
 
@@ -222,11 +236,10 @@ export class SkillManager {
 
       let phase = 0;
       if (Object.keys(step.inputMapping).length > 0) {
-        const dependentPhases = Object.values(step.inputMapping)
-          .map(mapping => {
-            const sourceSkillId = mapping.split(".")[0]!;
-            return phaseMap.get(sourceSkillId) ?? 0;
-          });
+        const dependentPhases = Object.values(step.inputMapping).map((mapping) => {
+          const sourceSkillId = mapping.split('.')[0]!;
+          return phaseMap.get(sourceSkillId) ?? 0;
+        });
         phase = Math.max(...dependentPhases) + 1;
       } else if (skill.chainMetadata.parallelizable && currentPhase > 0) {
         phase = currentPhase;
@@ -256,7 +269,7 @@ export class SkillManager {
 
     const totalMs = phases.reduce((sum, phase) => {
       const maxSkillLatency = Math.max(
-        ...phase.skills.map(s => skillRegistry.get(s.skillId)?.estimatedLatencyMs ?? 0),
+        ...phase.skills.map((s) => skillRegistry.get(s.skillId)?.estimatedLatencyMs ?? 0),
       );
       return sum + maxSkillLatency;
     }, 0);
@@ -280,27 +293,39 @@ export class SkillManager {
     return this.chains.delete(chainId);
   }
 
-  getPrebuiltChain(scenario: "full_incident" | "quick_triage" | "compliance_review" | "executive_brief"): ChainCompositionResult {
-    const scenarios: Record<string, { capabilities: SkillCapability[]; name: string; description: string }> = {
+  getPrebuiltChain(
+    scenario: 'full_incident' | 'quick_triage' | 'compliance_review' | 'executive_brief',
+  ): ChainCompositionResult {
+    const scenarios: Record<
+      string,
+      { capabilities: SkillCapability[]; name: string; description: string }
+    > = {
       full_incident: {
-        capabilities: ["triage", "incident_assessment", "risk_scoring", "escalation", "response_planning", "executive_briefing"],
-        name: "Full Incident Response Chain",
-        description: "Complete incident lifecycle from triage through executive briefing",
+        capabilities: [
+          'triage',
+          'incident_assessment',
+          'risk_scoring',
+          'escalation',
+          'response_planning',
+          'executive_briefing',
+        ],
+        name: 'Full Incident Response Chain',
+        description: 'Complete incident lifecycle from triage through executive briefing',
       },
       quick_triage: {
-        capabilities: ["triage", "escalation"],
-        name: "Quick Triage Chain",
-        description: "Rapid triage and escalation decision for time-sensitive signals",
+        capabilities: ['triage', 'escalation'],
+        name: 'Quick Triage Chain',
+        description: 'Rapid triage and escalation decision for time-sensitive signals',
       },
       compliance_review: {
-        capabilities: ["control_gap", "risk_scoring", "executive_briefing"],
-        name: "Compliance Review Chain",
-        description: "Control gap analysis through risk assessment to executive reporting",
+        capabilities: ['control_gap', 'risk_scoring', 'executive_briefing'],
+        name: 'Compliance Review Chain',
+        description: 'Control gap analysis through risk assessment to executive reporting',
       },
       executive_brief: {
-        capabilities: ["risk_scoring", "executive_briefing"],
-        name: "Executive Brief Chain",
-        description: "Risk assessment followed by executive briefing",
+        capabilities: ['risk_scoring', 'executive_briefing'],
+        name: 'Executive Brief Chain',
+        description: 'Risk assessment followed by executive briefing',
       },
     };
 

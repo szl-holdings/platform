@@ -1,6 +1,6 @@
-import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
-import { BlurView } from "expo-blur";
+import { BlurView } from 'expo-blur';
+import React from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 
 export interface EcosystemTabBarConfig {
   accentColor: string;
@@ -12,15 +12,15 @@ export interface EcosystemTabBarConfig {
 
 export function useEcosystemTabBarScreenOptions({
   accentColor,
-  inactiveColor = "rgba(255,255,255,0.22)",
+  inactiveColor = 'rgba(255,255,255,0.22)',
   backgroundColor,
   borderColor,
   blurIntensity = 85,
 }: EcosystemTabBarConfig) {
-  const isIOS = Platform.OS === "ios";
-  const isWeb = Platform.OS === "web";
+  const isIOS = Platform.OS === 'ios';
+  const isWeb = Platform.OS === 'web';
 
-  const derivedBg = backgroundColor ?? (isIOS ? "transparent" : "#080c14");
+  const derivedBg = backgroundColor ?? (isIOS ? 'transparent' : '#080c14');
   const derivedBorder = borderColor ?? `${accentColor}15`;
 
   return {
@@ -28,7 +28,7 @@ export function useEcosystemTabBarScreenOptions({
     tabBarActiveTintColor: accentColor,
     tabBarInactiveTintColor: inactiveColor,
     tabBarStyle: {
-      position: "absolute" as const,
+      position: 'absolute' as const,
       backgroundColor: derivedBg,
       borderTopWidth: 1,
       borderTopColor: derivedBorder,
@@ -37,21 +37,15 @@ export function useEcosystemTabBarScreenOptions({
     },
     tabBarBackground: () =>
       isIOS ? (
-        <BlurView
-          intensity={blurIntensity}
-          tint="dark"
-          style={StyleSheet.absoluteFill}
-        />
+        <BlurView intensity={blurIntensity} tint="dark" style={StyleSheet.absoluteFill} />
       ) : isWeb ? (
-        <View
-          style={[StyleSheet.absoluteFill, { backgroundColor: derivedBg }]}
-        />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: derivedBg }]} />
       ) : null,
     tabBarLabelStyle: {
       fontSize: 9,
-      fontFamily: "Inter_500Medium",
+      fontFamily: 'Inter_500Medium',
       letterSpacing: 1,
-      textTransform: "uppercase" as const,
+      textTransform: 'uppercase' as const,
     },
   };
 }
@@ -65,10 +59,10 @@ export interface EcosystemTabBarBackgroundProps {
 export function EcosystemTabBarBackground({
   accentColor: _accentColor,
   blurIntensity = 85,
-  backgroundColor = "#080c14",
+  backgroundColor = '#080c14',
 }: EcosystemTabBarBackgroundProps) {
-  const isIOS = Platform.OS === "ios";
-  const isWeb = Platform.OS === "web";
+  const isIOS = Platform.OS === 'ios';
+  const isWeb = Platform.OS === 'web';
 
   if (isIOS) {
     return <BlurView intensity={blurIntensity} tint="dark" style={StyleSheet.absoluteFill} />;

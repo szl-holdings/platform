@@ -1,14 +1,14 @@
-import type { StorageAdapter, StorageAdapterOptions } from "./interface";
+import type { StorageAdapter, StorageAdapterOptions } from './interface';
 
 const DEFAULT_STORES = [
-  "offline-commands",
-  "sync-watermarks",
-  "aegis-incidents",
-  "aegis-signals",
-  "vessels-positions",
-  "vessels-fleets",
-  "conflict-queue",
-  "cache-metadata",
+  'offline-commands',
+  'sync-watermarks',
+  'aegis-incidents',
+  'aegis-signals',
+  'vessels-positions',
+  'vessels-fleets',
+  'conflict-queue',
+  'cache-metadata',
 ];
 
 export class IndexedDBAdapter implements StorageAdapter {
@@ -18,7 +18,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   private _db: IDBDatabase | null = null;
 
   constructor(options: StorageAdapterOptions = {}) {
-    this.dbName = options.dbName ?? "szl-offline-store";
+    this.dbName = options.dbName ?? 'szl-offline-store';
     this.version = options.version ?? 1;
     this.stores = options.stores ?? DEFAULT_STORES;
   }
@@ -32,7 +32,7 @@ export class IndexedDBAdapter implements StorageAdapter {
         const db = (event.target as IDBOpenDBRequest).result;
         for (const store of this.stores) {
           if (!db.objectStoreNames.contains(store)) {
-            db.createObjectStore(store, { keyPath: "key" });
+            db.createObjectStore(store, { keyPath: 'key' });
           }
         }
       };
@@ -49,9 +49,10 @@ export class IndexedDBAdapter implements StorageAdapter {
   async get<T = unknown>(store: string, key: string): Promise<T | undefined> {
     const db = await this.db();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, "readonly");
+      const tx = db.transaction(store, 'readonly');
       const req = tx.objectStore(store).get(key);
-      req.onsuccess = () => resolve(req.result ? (req.result as { key: string; value: T }).value : undefined);
+      req.onsuccess = () =>
+        resolve(req.result ? (req.result as { key: string; value: T }).value : undefined);
       req.onerror = () => reject(req.error);
     });
   }
@@ -59,7 +60,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   async put<T = unknown>(store: string, key: string, value: T): Promise<void> {
     const db = await this.db();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, "readwrite");
+      const tx = db.transaction(store, 'readwrite');
       const req = tx.objectStore(store).put({ key, value });
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
@@ -69,7 +70,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   async delete(store: string, key: string): Promise<void> {
     const db = await this.db();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, "readwrite");
+      const tx = db.transaction(store, 'readwrite');
       const req = tx.objectStore(store).delete(key);
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
@@ -79,7 +80,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   async getAll<T = unknown>(store: string): Promise<T[]> {
     const db = await this.db();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, "readonly");
+      const tx = db.transaction(store, 'readonly');
       const req = tx.objectStore(store).getAll();
       req.onsuccess = () => {
         const results = (req.result as Array<{ key: string; value: T }>).map((r) => r.value);
@@ -97,7 +98,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   async clear(store: string): Promise<void> {
     const db = await this.db();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, "readwrite");
+      const tx = db.transaction(store, 'readwrite');
       const req = tx.objectStore(store).clear();
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
@@ -107,7 +108,7 @@ export class IndexedDBAdapter implements StorageAdapter {
   async count(store: string): Promise<number> {
     const db = await this.db();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, "readonly");
+      const tx = db.transaction(store, 'readonly');
       const req = tx.objectStore(store).count();
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);

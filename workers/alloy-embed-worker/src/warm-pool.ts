@@ -1,4 +1,4 @@
-import type { EmbeddingBackend } from "./backends/interface.js";
+import type { EmbeddingBackend } from './backends/interface.js';
 
 export interface WarmPoolEntry {
   backendId: string;

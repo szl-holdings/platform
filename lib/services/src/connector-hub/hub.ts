@@ -1,16 +1,20 @@
-import type { ConnectorHealth, ConnectorHubSnapshot, ConnectorRegistryEntry } from "./types.js";
-import type { ToolConnector } from "./framework.js";
-import { JiraConnector } from "./connectors/jira.js";
-import { PagerDutyConnector } from "./connectors/pagerduty.js";
-import { SlackConnector } from "./connectors/slack.js";
-import { SalesforceConnector } from "./connectors/salesforce.js";
-import { SiemConnector } from "./connectors/siem.js";
-import { GroqConnector } from "./connectors/groq.js";
-import { FalAiConnector } from "./connectors/fal-ai.js";
-import { HoneyhiveConnector } from "./connectors/honeyhive.js";
-import { HuggingFaceConnector } from "./connectors/huggingface.js";
-import { ElevenLabsConnector } from "./connectors/elevenlabs.js";
-import type { ConnectorResult } from "./types.js";
+import { ElevenLabsConnector } from './connectors/elevenlabs.js';
+import { FalAiConnector } from './connectors/fal-ai.js';
+import { GroqConnector } from './connectors/groq.js';
+import { HoneyhiveConnector } from './connectors/honeyhive.js';
+import { HuggingFaceConnector } from './connectors/huggingface.js';
+import { JiraConnector } from './connectors/jira.js';
+import { PagerDutyConnector } from './connectors/pagerduty.js';
+import { SalesforceConnector } from './connectors/salesforce.js';
+import { SiemConnector } from './connectors/siem.js';
+import { SlackConnector } from './connectors/slack.js';
+import type { ToolConnector } from './framework.js';
+import type {
+  ConnectorHealth,
+  ConnectorHubSnapshot,
+  ConnectorRegistryEntry,
+  ConnectorResult,
+} from './types.js';
 
 export class ConnectorHub {
   private readonly connectors = new Map<string, ToolConnector>();
@@ -64,28 +68,34 @@ export class ConnectorHub {
       connectors = connectors.filter((c) => c.category === query.category);
     }
 
-    return connectors.map((c) => {
-      let capabilities = c.capabilities;
+    return connectors
+      .map((c) => {
+        let capabilities = c.capabilities;
 
-      if (query?.tags && query.tags.length > 0) {
-        capabilities = capabilities.filter((cap) =>
-          cap.tags?.some((t) => query.tags!.includes(t)),
-        );
-      }
+        if (query?.tags && query.tags.length > 0) {
+          capabilities = capabilities.filter((cap) =>
+            cap.tags?.some((t) => query.tags!.includes(t)),
+          );
+        }
 
-      if (query?.requiresAuth !== undefined) {
-        capabilities = capabilities.filter((cap) => cap.requiresAuth === query.requiresAuth);
-      }
+        if (query?.requiresAuth !== undefined) {
+          capabilities = capabilities.filter((cap) => cap.requiresAuth === query.requiresAuth);
+        }
 
-      return {
-        ...c.getRegistryEntry(),
-        connectorId: c.id,
-        capabilities,
-      };
-    }).filter((entry) => entry.capabilities.length > 0);
+        return {
+          ...c.getRegistryEntry(),
+          connectorId: c.id,
+          capabilities,
+        };
+      })
+      .filter((entry) => entry.capabilities.length > 0);
   }
 
-  async execute(connectorId: string, capabilityId: string, params: Record<string, unknown>): Promise<ConnectorResult> {
+  async execute(
+    connectorId: string,
+    capabilityId: string,
+    params: Record<string, unknown>,
+  ): Promise<ConnectorResult> {
     const connector = this.connectors.get(connectorId);
     if (!connector) {
       return {
@@ -133,8 +143,20 @@ export class ConnectorHub {
     return true;
   }
 
-  getAgentToolList(): Array<{ connectorId: string; capabilityId: string; name: string; description: string; parameters: unknown }> {
-    const tools: Array<{ connectorId: string; capabilityId: string; name: string; description: string; parameters: unknown }> = [];
+  getAgentToolList(): Array<{
+    connectorId: string;
+    capabilityId: string;
+    name: string;
+    description: string;
+    parameters: unknown;
+  }> {
+    const tools: Array<{
+      connectorId: string;
+      capabilityId: string;
+      name: string;
+      description: string;
+      parameters: unknown;
+    }> = [];
     for (const connector of this.listConnectors()) {
       for (const cap of connector.capabilities) {
         tools.push({
@@ -143,9 +165,12 @@ export class ConnectorHub {
           name: `${connector.id}__${cap.id}`,
           description: `[${connector.name}] ${cap.description}`,
           parameters: {
-            type: "object",
+            type: 'object',
             properties: Object.fromEntries(
-              cap.parameters.map((p) => [p.name, { type: p.type, description: p.description, ...(p.enum ? { enum: p.enum } : {}) }]),
+              cap.parameters.map((p) => [
+                p.name,
+                { type: p.type, description: p.description, ...(p.enum ? { enum: p.enum } : {}) },
+              ]),
             ),
             required: cap.parameters.filter((p) => p.required).map((p) => p.name),
           },

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { BarChart3, Settings, ExternalLink, AlertCircle, Loader2, Lock } from "lucide-react";
-import { cn } from "./utils";
+import { AlertCircle, BarChart3, ExternalLink, Loader2, Lock, Settings } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { cn } from './utils';
 
 export interface PowerBiEmbedConfig {
   reportId: string;
@@ -32,18 +32,21 @@ declare global {
 
 function loadPowerBiScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (window.powerbi) { resolve(); return; }
-    const existing = document.querySelector<HTMLScriptElement>("script[data-pbi]");
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Failed to load Power BI script")));
+    if (window.powerbi) {
+      resolve();
       return;
     }
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.js";
-    script.dataset.pbi = "1";
+    const existing = document.querySelector<HTMLScriptElement>('script[data-pbi]');
+    if (existing) {
+      existing.addEventListener('load', () => resolve());
+      existing.addEventListener('error', () => reject(new Error('Failed to load Power BI script')));
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.js';
+    script.dataset.pbi = '1';
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Power BI client SDK"));
+    script.onerror = () => reject(new Error('Failed to load Power BI client SDK'));
     document.head.appendChild(script);
   });
 }
@@ -60,7 +63,7 @@ function PowerBiFrame({ config, title }: { config: PowerBiEmbedConfig; title: st
         if (!mounted || !containerRef.current || !window.powerbi) return;
         const pbi = window.powerbi;
         const instance = pbi.embed(containerRef.current, {
-          type: "report",
+          type: 'report',
           id: config.reportId,
           embedUrl: config.embedUrl,
           accessToken: config.embedToken,
@@ -73,16 +76,18 @@ function PowerBiFrame({ config, title }: { config: PowerBiEmbedConfig; title: st
             },
           },
         });
-        instance.off("loaded");
+        instance.off('loaded');
         if (mounted) setLoading(false);
       })
       .catch((err: unknown) => {
         if (mounted) {
-          setError(err instanceof Error ? err.message : "Embed SDK load failed");
+          setError(err instanceof Error ? err.message : 'Embed SDK load failed');
           setLoading(false);
         }
       });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [config.reportId, config.embedToken, config.embedUrl]);
 
   if (error) {
@@ -114,26 +119,29 @@ function PowerBiFrame({ config, title }: { config: PowerBiEmbedConfig; title: st
 
 export function PowerBiEmbed({
   config,
-  title = "Power BI Report",
-  description = "Embedded analytics report",
+  title = 'Power BI Report',
+  description = 'Embedded analytics report',
   height = 520,
   className,
   onConfigureClick,
-  accentColor = "#4a90b8",
+  accentColor = '#4a90b8',
 }: PowerBiEmbedProps) {
   const isConfigured = !!(config?.embedUrl && config?.embedToken && config?.reportId);
-  const heightValue = typeof height === "number" ? `${height}px` : height;
+  const heightValue = typeof height === 'number' ? `${height}px` : height;
 
   return (
     <div
-      className={cn("rounded-2xl border border-border bg-card overflow-hidden flex flex-col", className)}
+      className={cn(
+        'rounded-2xl border border-border bg-card overflow-hidden flex flex-col',
+        className,
+      )}
       style={{ height: heightValue }}
     >
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: accentColor + "22" }}
+            style={{ background: accentColor + '22' }}
           >
             <BarChart3 className="w-4 h-4" style={{ color: accentColor }} />
           </div>
@@ -150,7 +158,7 @@ export function PowerBiEmbed({
               onClick={() =>
                 window.open(
                   `https://app.powerbi.com/groups/${config!.groupId}/reports/${config!.reportId}`,
-                  "_blank",
+                  '_blank',
                 )
               }
             >
@@ -163,7 +171,7 @@ export function PowerBiEmbed({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             >
               <Settings className="w-3 h-3" />
-              {isConfigured ? "Reconfigure" : "Connect"}
+              {isConfigured ? 'Reconfigure' : 'Connect'}
             </button>
           )}
         </div>
@@ -175,13 +183,14 @@ export function PowerBiEmbed({
             <div className="text-center max-w-xs mx-auto px-6">
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                style={{ background: accentColor + "22" }}
+                style={{ background: accentColor + '22' }}
               >
                 <BarChart3 className="w-7 h-7" style={{ color: accentColor }} />
               </div>
               <div className="text-base font-semibold text-foreground mb-1">Connect Power BI</div>
               <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                Configure your Power BI workspace credentials to embed live reports and analytics directly in this view.
+                Configure your Power BI workspace credentials to embed live reports and analytics
+                directly in this view.
               </p>
               <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center mb-4">
                 <Lock className="w-3 h-3" />
@@ -207,7 +216,9 @@ export function PowerBiEmbed({
         <div className="flex items-center justify-between px-4 py-2 border-t border-border/40 bg-muted/20 flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#6b8f71] animate-pulse" />
-            <span className="text-[10px] text-muted-foreground">Live · Power BI Embedded · Token server-minted</span>
+            <span className="text-[10px] text-muted-foreground">
+              Live · Power BI Embedded · Token server-minted
+            </span>
           </div>
           {config!.expiration && (
             <span className="text-[10px] text-muted-foreground">

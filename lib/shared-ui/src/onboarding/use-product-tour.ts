@@ -1,6 +1,6 @@
-import * as React from "react";
+import * as React from 'react';
 
-const STORAGE_PREFIX = "szl_tour_";
+const STORAGE_PREFIX = 'szl_tour_';
 
 interface TourState {
   isActive: boolean;
@@ -16,7 +16,7 @@ export function useProductTour(tourId: string): TourState {
 
   const [hasCompleted, setHasCompleted] = React.useState(() => {
     try {
-      return localStorage.getItem(storageKey) === "completed";
+      return localStorage.getItem(storageKey) === 'completed';
     } catch {
       return false;
     }
@@ -45,13 +45,13 @@ export function useProductTour(tourId: string): TourState {
 
   const dismiss = React.useCallback(() => {
     setIsActive(false);
-    persist("dismissed");
+    persist('dismissed');
     setHasCompleted(true);
   }, [persist]);
 
   const complete = React.useCallback(() => {
     setIsActive(false);
-    persist("completed");
+    persist('completed');
     setHasCompleted(true);
   }, [persist]);
 

@@ -1,16 +1,14 @@
-import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
-import * as Haptics from "expo-haptics";
-import * as SecureStore from "expo-secure-store";
-import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
-import { sendCriticalIncidentNotification } from "@/hooks/usePushNotifications";
+import { useQueryClient } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
+import { AUTH_TOKEN_KEY } from '@/context/AuthContext';
+import { sendCriticalIncidentNotification } from '@/hooks/usePushNotifications';
 
 async function getAuthToken(): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return typeof window !== "undefined"
-      ? window.localStorage.getItem(AUTH_TOKEN_KEY)
-      : null;
+  if (Platform.OS === 'web') {
+    return typeof window !== 'undefined' ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
   }
   return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
 }
@@ -41,7 +39,7 @@ export function useIncidentSubscription() {
   qcRef.current = qc;
 
   useEffect(() => {
-    if (Platform.OS === "web") return;
+    if (Platform.OS === 'web') return;
     const domain = process.env.EXPO_PUBLIC_DOMAIN;
     if (!domain) return;
 
@@ -58,14 +56,14 @@ export function useIncidentSubscription() {
           if (!ws || !alive) return;
           ws.send(
             JSON.stringify({
-              type: "subscribe",
-              channel: "aegis-incidents",
+              type: 'subscribe',
+              channel: 'aegis-incidents',
               token: token ?? undefined,
             }),
           );
           pingInterval = setInterval(() => {
             if (ws?.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: "ping" }));
+              ws.send(JSON.stringify({ type: 'ping' }));
             }
           }, 20000);
         };
@@ -75,45 +73,51 @@ export function useIncidentSubscription() {
           try {
             const msg = JSON.parse(event.data as string) as WsMessage;
 
-            if (msg.type === "message" && msg.channel === "aegis-incidents") {
+            if (msg.type === 'message' && msg.channel === 'aegis-incidents') {
               const incident = msg.data;
               if (incident) {
-                qcRef.current.invalidateQueries({ queryKey: ["aegis-incidents"] });
-                qcRef.current.invalidateQueries({ queryKey: ["aegis-incident", String(incident.id)] });
-                qcRef.current.invalidateQueries({ queryKey: ["aegis-threat-summary"] });
+                qcRef.current.invalidateQueries({ queryKey: ['aegis-incidents'] });
+                qcRef.current.invalidateQueries({
+                  queryKey: ['aegis-incident', String(incident.id)],
+                });
+                qcRef.current.invalidateQueries({ queryKey: ['aegis-threat-summary'] });
 
-                const sev = (incident.severity ?? "").toLowerCase();
-                if (sev === "critical" || sev === "high") {
+                const sev = (incident.severity ?? '').toLowerCase();
+                if (sev === 'critical' || sev === 'high') {
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(
-                    (err) => { console.warn("[WS] Haptics failed:", err); },
+                    (err) => {
+                      console.warn('[WS] Haptics failed:', err);
+                    },
                   );
                   sendCriticalIncidentNotification(incident.title, incident.severity).catch(
-                    (err) => { console.warn("[WS] Push notification failed:", err); },
+                    (err) => {
+                      console.warn('[WS] Push notification failed:', err);
+                    },
                   );
                 }
               }
-            } else if (msg.type === "error") {
-              console.warn("[WS] aegis-incidents error:", msg.code, msg.message);
+            } else if (msg.type === 'error') {
+              console.warn('[WS] aegis-incidents error:', msg.code, msg.message);
             }
           } catch (parseErr) {
-            console.warn("[WS] Failed to parse message:", parseErr);
+            console.warn('[WS] Failed to parse message:', parseErr);
           }
         };
 
         ws.onerror = (err) => {
-          console.warn("[WS] WebSocket error:", err);
+          console.warn('[WS] WebSocket error:', err);
         };
 
         ws.onclose = () => {
           if (pingInterval) clearInterval(pingInterval);
         };
       } catch (err) {
-        console.warn("[WS] Failed to connect:", err);
+        console.warn('[WS] Failed to connect:', err);
       }
     };
 
     connect().catch((err) => {
-      console.warn("[WS] Async connect failed:", err);
+      console.warn('[WS] Async connect failed:', err);
     });
 
     return () => {

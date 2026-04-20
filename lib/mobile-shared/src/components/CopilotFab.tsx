@@ -1,21 +1,21 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { getApiBaseUrl } from "../env";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  FlatList,
-  StyleSheet,
-  Modal,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   Animated,
+  Dimensions,
+  FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   Pressable,
   SafeAreaView,
-  Dimensions,
-} from "react-native";
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { getApiBaseUrl } from '../env';
 
 export interface MobileCopilotConfig {
   name: string;
@@ -32,29 +32,30 @@ export interface MobileCopilotConfig {
 
 interface ChatMessage {
   id: string;
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
 }
 
-const API_BASE = getApiBaseUrl("https://szl-holdings.replit.app") ?? "https://szl-holdings.replit.app";
+const API_BASE =
+  getApiBaseUrl('https://szl-holdings.replit.app') ?? 'https://szl-holdings.replit.app';
 
 function loadHistory(key?: string): ChatMessage[] {
   return [];
 }
 
 function MessageBubble({ message, accentColor }: { message: ChatMessage; accentColor: string }) {
-  const isUser = message.role === "user";
+  const isUser = message.role === 'user';
   return (
     <View style={[styles.bubbleRow, isUser ? styles.bubbleRowUser : styles.bubbleRowAssistant]}>
       <View
         style={[
           styles.bubble,
-          isUser
-            ? [styles.bubbleUser, { backgroundColor: accentColor }]
-            : styles.bubbleAssistant,
+          isUser ? [styles.bubbleUser, { backgroundColor: accentColor }] : styles.bubbleAssistant,
         ]}
       >
-        <Text style={[styles.bubbleText, isUser ? styles.bubbleTextUser : styles.bubbleTextAssistant]}>
+        <Text
+          style={[styles.bubbleText, isUser ? styles.bubbleTextUser : styles.bubbleTextAssistant]}
+        >
           {message.content}
         </Text>
       </View>
@@ -64,10 +65,12 @@ function MessageBubble({ message, accentColor }: { message: ChatMessage; accentC
 
 export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>(() => loadHistory(config.conversationKey));
-  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>(() =>
+    loadHistory(config.conversationKey),
+  );
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [streamingContent, setStreamingContent] = useState("");
+  const [streamingContent, setStreamingContent] = useState('');
 
   const fabScale = useRef(new Animated.Value(1)).current;
   const listRef = useRef<FlatList>(null);
@@ -91,93 +94,115 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
     setIsOpen(true);
   };
 
-  const sendMessage = useCallback(async (text?: string) => {
-    const userText = (text ?? input).trim();
-    if (!userText || isLoading) return;
+  const sendMessage = useCallback(
+    async (text?: string) => {
+      const userText = (text ?? input).trim();
+      if (!userText || isLoading) return;
 
-    setInput("");
-    const userMsg: ChatMessage = { id: `u-${Date.now()}`, role: "user", content: userText };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setIsLoading(true);
-    setStreamingContent("");
+      setInput('');
+      const userMsg: ChatMessage = { id: `u-${Date.now()}`, role: 'user', content: userText };
+      const newMessages = [...messages, userMsg];
+      setMessages(newMessages);
+      setIsLoading(true);
+      setStreamingContent('');
 
-    const apiMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
-      { role: "system", content: config.systemPrompt },
-      ...newMessages.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
-    ];
+      const apiMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+        { role: 'system', content: config.systemPrompt },
+        ...newMessages.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      ];
 
-    abortRef.current = new AbortController();
+      abortRef.current = new AbortController();
 
-    try {
-      const response = await fetch(`${API_BASE}/api/copilot/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, agentId: config.agentId }),
-        signal: abortRef.current.signal,
-      });
+      try {
+        const response = await fetch(`${API_BASE}/api/copilot/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: apiMessages, agentId: config.agentId }),
+          signal: abortRef.current.signal,
+        });
 
-      if (!response.ok) throw new Error("Network error");
+        if (!response.ok) throw new Error('Network error');
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No stream body");
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No stream body');
 
-      const decoder = new TextDecoder();
-      let accumulated = "";
-      let buffer = "";
+        const decoder = new TextDecoder();
+        let accumulated = '';
+        let buffer = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith("data: ")) continue;
-          const data = trimmed.slice(6);
-          if (data === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(data) as { content?: string; done?: boolean; error?: string };
-            if (parsed.content) {
-              accumulated += parsed.content;
-              setStreamingContent(accumulated);
-            }
-          } catch { continue; }
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') break;
+            try {
+              const parsed = JSON.parse(data) as {
+                content?: string;
+                done?: boolean;
+                error?: string;
+              };
+              if (parsed.content) {
+                accumulated += parsed.content;
+                setStreamingContent(accumulated);
+              }
+            } catch {}
+          }
         }
-      }
 
-      const finalContent = accumulated || "I'm here to help — could you rephrase that?";
-      const assistantMsg: ChatMessage = { id: `a-${Date.now()}`, role: "assistant", content: finalContent };
-      setMessages(prev => [...prev, assistantMsg]);
-      setStreamingContent("");
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === "AbortError") {
-        if (streamingContent) {
-          setMessages(prev => [...prev, { id: `a-${Date.now()}`, role: "assistant", content: streamingContent }]);
-        }
-      } else {
-        setMessages(prev => [...prev, {
+        const finalContent = accumulated || "I'm here to help — could you rephrase that?";
+        const assistantMsg: ChatMessage = {
           id: `a-${Date.now()}`,
-          role: "assistant",
-          content: "I'm having trouble connecting right now. Please try again.",
-        }]);
+          role: 'assistant',
+          content: finalContent,
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+        setStreamingContent('');
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          if (streamingContent) {
+            setMessages((prev) => [
+              ...prev,
+              { id: `a-${Date.now()}`, role: 'assistant', content: streamingContent },
+            ]);
+          }
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `a-${Date.now()}`,
+              role: 'assistant',
+              content: "I'm having trouble connecting right now. Please try again.",
+            },
+          ]);
+        }
+        setStreamingContent('');
+      } finally {
+        setIsLoading(false);
       }
-      setStreamingContent("");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [input, isLoading, messages, config, streamingContent]);
+    },
+    [input, isLoading, messages, config, streamingContent],
+  );
 
   const displayMessages: ChatMessage[] = streamingContent
-    ? [...messages, { id: "streaming", role: "assistant", content: streamingContent }]
+    ? [...messages, { id: 'streaming', role: 'assistant', content: streamingContent }]
     : messages;
 
   const showWelcome = messages.length === 0 && !streamingContent;
 
   return (
     <>
-      <Animated.View style={[styles.fab, { backgroundColor: config.accentColor, transform: [{ scale: fabScale }] }]}>
+      <Animated.View
+        style={[
+          styles.fab,
+          { backgroundColor: config.accentColor, transform: [{ scale: fabScale }] },
+        ]}
+      >
         <TouchableOpacity onPress={openFab} style={styles.fabInner} activeOpacity={0.85}>
           <Text style={styles.fabIcon}>{config.icon}</Text>
         </TouchableOpacity>
@@ -191,13 +216,15 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
         statusBarTranslucent
       >
         <SafeAreaView style={styles.modal}>
-          <View style={[styles.header, { borderBottomColor: config.accentColor + "33" }]}>
+          <View style={[styles.header, { borderBottomColor: config.accentColor + '33' }]}>
             <View style={styles.headerLeft}>
               <Text style={styles.headerIcon}>{config.icon}</Text>
               <View>
                 <Text style={styles.headerName}>{config.name}</Text>
                 {config.isAdvisoryAgent && (
-                  <Text style={[styles.advisoryBadge, { color: config.accentColor }]}>Advisory Mode</Text>
+                  <Text style={[styles.advisoryBadge, { color: config.accentColor }]}>
+                    Advisory Mode
+                  </Text>
                 )}
               </View>
             </View>
@@ -208,30 +235,39 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
 
           <KeyboardAvoidingView
             style={styles.chatContainer}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             keyboardVerticalOffset={0}
           >
             <FlatList
               ref={listRef}
               data={displayMessages}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => <MessageBubble message={item} accentColor={config.accentColor} />}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <MessageBubble message={item} accentColor={config.accentColor} />
+              )}
               contentContainerStyle={styles.messageList}
               ListHeaderComponent={
                 showWelcome ? (
                   <View style={styles.welcomeContainer}>
-                    <Text style={[styles.welcomeIcon, { color: config.accentColor }]}>{config.icon}</Text>
+                    <Text style={[styles.welcomeIcon, { color: config.accentColor }]}>
+                      {config.icon}
+                    </Text>
                     <Text style={styles.welcomeText}>{config.welcomeMessage}</Text>
                     {config.suggestedQuestions && config.suggestedQuestions.length > 0 && (
                       <View style={styles.suggestionsContainer}>
                         {config.suggestedQuestions.map((q, i) => (
                           <TouchableOpacity
                             key={i}
-                            style={[styles.suggestionChip, { borderColor: config.accentColor + "66" }]}
+                            style={[
+                              styles.suggestionChip,
+                              { borderColor: config.accentColor + '66' },
+                            ]}
                             onPress={() => sendMessage(q)}
                             activeOpacity={0.7}
                           >
-                            <Text style={[styles.suggestionText, { color: config.accentColor }]}>{q}</Text>
+                            <Text style={[styles.suggestionText, { color: config.accentColor }]}>
+                              {q}
+                            </Text>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -243,7 +279,9 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
                 isLoading && !streamingContent ? (
                   <View style={styles.typingIndicator}>
                     <ActivityIndicator size="small" color={config.accentColor} />
-                    <Text style={[styles.typingText, { color: config.accentColor }]}>Thinking…</Text>
+                    <Text style={[styles.typingText, { color: config.accentColor }]}>
+                      Thinking…
+                    </Text>
                   </View>
                 ) : null
               }
@@ -252,10 +290,10 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
 
             <View style={styles.inputRow}>
               <TextInput
-                style={[styles.input, { borderColor: config.accentColor + "66" }]}
+                style={[styles.input, { borderColor: config.accentColor + '66' }]}
                 value={input}
                 onChangeText={setInput}
-                placeholder={config.placeholderText ?? "Ask anything…"}
+                placeholder={config.placeholderText ?? 'Ask anything…'}
                 placeholderTextColor="#666"
                 multiline
                 maxLength={2000}
@@ -264,7 +302,12 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
                 blurOnSubmit={false}
               />
               <TouchableOpacity
-                style={[styles.sendBtn, { backgroundColor: input.trim() ? config.accentColor : config.accentColor + "55" }]}
+                style={[
+                  styles.sendBtn,
+                  {
+                    backgroundColor: input.trim() ? config.accentColor : config.accentColor + '55',
+                  },
+                ]}
                 onPress={() => sendMessage()}
                 disabled={!input.trim() || isLoading}
                 activeOpacity={0.8}
@@ -279,11 +322,11 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
   );
 }
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   fab: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 28,
     right: 20,
     width: 56,
@@ -291,7 +334,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     zIndex: 9999,
     elevation: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -300,28 +343,28 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   fabIcon: {
     fontSize: 24,
   },
   modal: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
+    backgroundColor: '#0a0a0a',
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    backgroundColor: "#111",
+    backgroundColor: '#111',
   },
   headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
   },
   headerIcon: {
@@ -329,20 +372,20 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   headerName: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   advisoryBadge: {
     fontSize: 11,
-    fontWeight: "500",
+    fontWeight: '500',
     opacity: 0.8,
   },
   closeBtn: {
     padding: 8,
   },
   closeBtnText: {
-    color: "#aaa",
+    color: '#aaa',
     fontSize: 18,
   },
   chatContainer: {
@@ -355,14 +398,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   bubbleRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginVertical: 3,
   },
   bubbleRowUser: {
-    justifyContent: "flex-end",
+    justifyContent: 'flex-end',
   },
   bubbleRowAssistant: {
-    justifyContent: "flex-start",
+    justifyContent: 'flex-start',
   },
   bubble: {
     maxWidth: width * 0.78,
@@ -374,23 +417,23 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 4,
   },
   bubbleAssistant: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: '#1e1e1e',
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: '#2a2a2a',
   },
   bubbleText: {
     fontSize: 15,
     lineHeight: 22,
   },
   bubbleTextUser: {
-    color: "#fff",
+    color: '#fff',
   },
   bubbleTextAssistant: {
-    color: "#e0e0e0",
+    color: '#e0e0e0',
   },
   welcomeContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 32,
     paddingHorizontal: 20,
     gap: 12,
@@ -400,13 +443,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   welcomeText: {
-    color: "#bbb",
+    color: '#bbb',
     fontSize: 15,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 22,
   },
   suggestionsContainer: {
-    width: "100%",
+    width: '100%',
     gap: 8,
     marginTop: 16,
   },
@@ -415,41 +458,41 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: "#111",
+    backgroundColor: '#111',
   },
   suggestionText: {
     fontSize: 14,
     lineHeight: 20,
   },
   typingIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   typingText: {
     fontSize: 13,
-    fontStyle: "italic",
+    fontStyle: 'italic',
     opacity: 0.8,
   },
   inputRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
+    flexDirection: 'row',
+    alignItems: 'flex-end',
     gap: 8,
     padding: 12,
     borderTopWidth: 1,
-    borderTopColor: "#1e1e1e",
-    backgroundColor: "#0d0d0d",
+    borderTopColor: '#1e1e1e',
+    backgroundColor: '#0d0d0d',
   },
   input: {
     flex: 1,
-    backgroundColor: "#111",
+    backgroundColor: '#111',
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    color: "#fff",
+    color: '#fff',
     fontSize: 15,
     maxHeight: 120,
   },
@@ -457,12 +500,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sendBtnText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

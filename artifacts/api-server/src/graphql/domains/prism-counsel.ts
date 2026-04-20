@@ -1,33 +1,38 @@
-import { db } from "@szl-holdings/db";
 import {
-  pcMattersTable, pcDeadlinesTable, pcForecastsTable, pcApprovalRequestsTable,
-  pcCommunicationsTable, pcReadinessScoresTable,
-  pcConnectorAccountsTable, pcAiRecommendationsTable,
-} from "@szl-holdings/db";
-import { eq, desc, and, sql } from "drizzle-orm";
-import type { GraphQLContext } from "../index.js";
+  db,
+  pcAiRecommendationsTable,
+  pcApprovalRequestsTable,
+  pcCommunicationsTable,
+  pcConnectorAccountsTable,
+  pcDeadlinesTable,
+  pcForecastsTable,
+  pcMattersTable,
+  pcReadinessScoresTable,
+} from '@szl-holdings/db';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import {
-  getPcMatters,
-  getPcMatter,
-  getPcDashboardSummary,
-  getPcDeadlines,
-  getPcUpcomingDeadlines,
-  getPcForecasts,
-  getPcForecastDiffs,
-  getPcPressureDimensions,
-  getPcProofChainEntries,
+  acceptPcRecommendation,
+  approvePcRequest,
+  dismissPcRecommendation,
   getPcApprovalRequests,
-  getPcMatterApprovals,
   getPcCommunications,
   getPcConnectorAccounts,
+  getPcDashboardSummary,
   getPcDataProductScores,
+  getPcDeadlines,
+  getPcForecastDiffs,
+  getPcForecasts,
+  getPcMatter,
+  getPcMatterApprovals,
+  getPcMatters,
+  getPcPressureDimensions,
+  getPcProofChainEntries,
   getPcServiceMetrics,
-  approvePcRequest,
-  rejectPcRequest,
-  acceptPcRecommendation,
-  dismissPcRecommendation,
+  getPcUpcomingDeadlines,
   type PrismCounselStoragePort,
-} from "../../lib/domain-services/prism-counsel/index.js";
+  rejectPcRequest,
+} from '../../lib/domain-services/prism-counsel/index.js';
+import type { GraphQLContext } from '../index.js';
 
 export const prismCounselTypeDefs = `#graphql
 
@@ -276,18 +281,51 @@ export const prismCounselTypeDefs = `#graphql
 function buildPrismStorage(): PrismCounselStoragePort {
   return {
     async listMatters(orgId) {
-      try { return await db.select().from(pcMattersTable).where(eq(pcMattersTable.orgId, orgId)).orderBy(desc(pcMattersTable.updatedAt)).limit(100); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcMattersTable)
+          .where(eq(pcMattersTable.orgId, orgId))
+          .orderBy(desc(pcMattersTable.updatedAt))
+          .limit(100);
+      } catch {
+        return [];
+      }
     },
     async getMatter(id) {
-      try { const [m] = await db.select().from(pcMattersTable).where(eq(pcMattersTable.id, id)); return m ?? null; } catch { return null; }
+      try {
+        const [m] = await db.select().from(pcMattersTable).where(eq(pcMattersTable.id, id));
+        return m ?? null;
+      } catch {
+        return null;
+      }
     },
     async getDashboardSummary(orgId) {
       try {
-        const [mattersCount] = await db.select({ count: sql<number>`count(*)` }).from(pcMattersTable).where(eq(pcMattersTable.orgId, orgId));
-        const [activeCnt] = await db.select({ count: sql<number>`count(*)` }).from(pcMattersTable).where(and(eq(pcMattersTable.orgId, orgId), sql`status NOT IN ('closed','archived')`));
-        const [pendingApprCnt] = await db.select({ count: sql<number>`count(*)` }).from(pcApprovalRequestsTable).where(and(sql`org_id = ${orgId}`, eq(pcApprovalRequestsTable.status, "pending")));
-        const upcoming14d = await db.select({ count: sql<number>`count(*)` }).from(pcDeadlinesTable).where(sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId}) AND due_date BETWEEN NOW() AND NOW() + INTERVAL '14 days' AND status = 'pending'`);
-        const critical = await db.select({ count: sql<number>`count(*)` }).from(pcDeadlinesTable).where(sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId}) AND priority = 'critical' AND status = 'pending'`);
+        const [mattersCount] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(pcMattersTable)
+          .where(eq(pcMattersTable.orgId, orgId));
+        const [activeCnt] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(pcMattersTable)
+          .where(and(eq(pcMattersTable.orgId, orgId), sql`status NOT IN ('closed','archived')`));
+        const [pendingApprCnt] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(pcApprovalRequestsTable)
+          .where(and(sql`org_id = ${orgId}`, eq(pcApprovalRequestsTable.status, 'pending')));
+        const upcoming14d = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(pcDeadlinesTable)
+          .where(
+            sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId}) AND due_date BETWEEN NOW() AND NOW() + INTERVAL '14 days' AND status = 'pending'`,
+          );
+        const critical = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(pcDeadlinesTable)
+          .where(
+            sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId}) AND priority = 'critical' AND status = 'pending'`,
+          );
         return {
           totalMatters: Number(mattersCount?.count ?? 0),
           activeMatters: Number(activeCnt?.count ?? 0),
@@ -299,98 +337,286 @@ function buildPrismStorage(): PrismCounselStoragePort {
           pressureAlerts: 0,
         };
       } catch {
-        return { totalMatters: 0, activeMatters: 0, pendingApprovals: 0, upcomingDeadlines14d: 0, criticalDeadlines: 0, totalExposure: null, connectorHealthSummary: null, pressureAlerts: 0 };
+        return {
+          totalMatters: 0,
+          activeMatters: 0,
+          pendingApprovals: 0,
+          upcomingDeadlines14d: 0,
+          criticalDeadlines: 0,
+          totalExposure: null,
+          connectorHealthSummary: null,
+          pressureAlerts: 0,
+        };
       }
     },
     async listDeadlines(matterId) {
-      try { return await db.select().from(pcDeadlinesTable).where(eq(pcDeadlinesTable.matterId, matterId)).orderBy(pcDeadlinesTable.dueDate); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcDeadlinesTable)
+          .where(eq(pcDeadlinesTable.matterId, matterId))
+          .orderBy(pcDeadlinesTable.dueDate);
+      } catch {
+        return [];
+      }
     },
     async listUpcomingDeadlines(orgId, days) {
       try {
-        return await db.select().from(pcDeadlinesTable)
-          .where(sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId}) AND due_date BETWEEN NOW() AND NOW() + INTERVAL '${sql.raw(String(days))} days' AND status = 'pending'`)
-          .orderBy(pcDeadlinesTable.dueDate).limit(50);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcDeadlinesTable)
+          .where(
+            sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId}) AND due_date BETWEEN NOW() AND NOW() + INTERVAL '${sql.raw(String(days))} days' AND status = 'pending'`,
+          )
+          .orderBy(pcDeadlinesTable.dueDate)
+          .limit(50);
+      } catch {
+        return [];
+      }
     },
     async listForecasts(matterId) {
-      try { return await db.select().from(pcForecastsTable).where(eq(pcForecastsTable.matterId, matterId)).orderBy(desc(pcForecastsTable.createdAt)); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcForecastsTable)
+          .where(eq(pcForecastsTable.matterId, matterId))
+          .orderBy(desc(pcForecastsTable.createdAt));
+      } catch {
+        return [];
+      }
     },
     async listForecastDiffs(matterId) {
-      try { const { pcForecastDiffsTable } = await import("@szl-holdings/db"); return await db.select().from(pcForecastDiffsTable).where(eq(pcForecastDiffsTable.matterId, matterId)).orderBy(desc(pcForecastDiffsTable.createdAt)).limit(20); } catch { return []; }
+      try {
+        const { pcForecastDiffsTable } = await import('@szl-holdings/db');
+        return await db
+          .select()
+          .from(pcForecastDiffsTable)
+          .where(eq(pcForecastDiffsTable.matterId, matterId))
+          .orderBy(desc(pcForecastDiffsTable.createdAt))
+          .limit(20);
+      } catch {
+        return [];
+      }
     },
     async listPressureDimensions(matterId) {
-      try { const { pcPressureGraphDimensionsTable } = await import("@szl-holdings/db"); return await db.select().from(pcPressureGraphDimensionsTable).where(eq(pcPressureGraphDimensionsTable.matterId, matterId)).orderBy(desc(pcPressureGraphDimensionsTable.computedAt)).limit(12); } catch { return []; }
+      try {
+        const { pcPressureGraphDimensionsTable } = await import('@szl-holdings/db');
+        return await db
+          .select()
+          .from(pcPressureGraphDimensionsTable)
+          .where(eq(pcPressureGraphDimensionsTable.matterId, matterId))
+          .orderBy(desc(pcPressureGraphDimensionsTable.computedAt))
+          .limit(12);
+      } catch {
+        return [];
+      }
     },
     async listProofChainEntries(matterId) {
-      try { const { pcProofChainEntriesTable } = await import("@szl-holdings/db"); return await db.select().from(pcProofChainEntriesTable).where(eq(pcProofChainEntriesTable.matterId, matterId)).orderBy(desc(pcProofChainEntriesTable.createdAt)).limit(50); } catch { return []; }
+      try {
+        const { pcProofChainEntriesTable } = await import('@szl-holdings/db');
+        return await db
+          .select()
+          .from(pcProofChainEntriesTable)
+          .where(eq(pcProofChainEntriesTable.matterId, matterId))
+          .orderBy(desc(pcProofChainEntriesTable.createdAt))
+          .limit(50);
+      } catch {
+        return [];
+      }
     },
     async listApprovalRequests(orgId, status) {
       try {
         const cond = status
-          ? and(sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId})`, eq(pcApprovalRequestsTable.status, status as any))
+          ? and(
+              sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId})`,
+              eq(pcApprovalRequestsTable.status, status as any),
+            )
           : sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId})`;
-        return await db.select().from(pcApprovalRequestsTable).where(cond).orderBy(desc(pcApprovalRequestsTable.requestedAt)).limit(100);
-      } catch { return []; }
+        return await db
+          .select()
+          .from(pcApprovalRequestsTable)
+          .where(cond)
+          .orderBy(desc(pcApprovalRequestsTable.requestedAt))
+          .limit(100);
+      } catch {
+        return [];
+      }
     },
     async listMatterApprovals(matterId) {
-      try { return await db.select().from(pcApprovalRequestsTable).where(eq(pcApprovalRequestsTable.matterId, matterId)).orderBy(desc(pcApprovalRequestsTable.requestedAt)); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcApprovalRequestsTable)
+          .where(eq(pcApprovalRequestsTable.matterId, matterId))
+          .orderBy(desc(pcApprovalRequestsTable.requestedAt));
+      } catch {
+        return [];
+      }
     },
     async listCommunications(matterId) {
-      try { return await db.select().from(pcCommunicationsTable).where(eq(pcCommunicationsTable.matterId, matterId)).orderBy(desc(pcCommunicationsTable.sentAt)).limit(50); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcCommunicationsTable)
+          .where(eq(pcCommunicationsTable.matterId, matterId))
+          .orderBy(desc(pcCommunicationsTable.sentAt))
+          .limit(50);
+      } catch {
+        return [];
+      }
     },
     async listConnectorAccounts(orgId) {
-      try { return await db.select().from(pcConnectorAccountsTable).where(eq(pcConnectorAccountsTable.orgId, orgId)).orderBy(pcConnectorAccountsTable.connectorType); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcConnectorAccountsTable)
+          .where(eq(pcConnectorAccountsTable.orgId, orgId))
+          .orderBy(pcConnectorAccountsTable.connectorType);
+      } catch {
+        return [];
+      }
     },
     async listDataProductScores(orgId, matterId) {
       try {
-        const { pcDataProductScoresTable } = await import("@szl-holdings/db");
-        const cond = matterId ? and(eq(pcDataProductScoresTable.orgId, orgId), eq(pcDataProductScoresTable.matterId, matterId)) : eq(pcDataProductScoresTable.orgId, orgId);
-        return await db.select().from(pcDataProductScoresTable).where(cond).orderBy(desc(pcDataProductScoresTable.computedAt)).limit(100);
-      } catch { return []; }
+        const { pcDataProductScoresTable } = await import('@szl-holdings/db');
+        const cond = matterId
+          ? and(
+              eq(pcDataProductScoresTable.orgId, orgId),
+              eq(pcDataProductScoresTable.matterId, matterId),
+            )
+          : eq(pcDataProductScoresTable.orgId, orgId);
+        return await db
+          .select()
+          .from(pcDataProductScoresTable)
+          .where(cond)
+          .orderBy(desc(pcDataProductScoresTable.computedAt))
+          .limit(100);
+      } catch {
+        return [];
+      }
     },
     async listServiceMetrics(orgId, service) {
       try {
-        const { pcServiceMetricsTable } = await import("@szl-holdings/db");
-        const cond = service ? and(eq(pcServiceMetricsTable.orgId, orgId), eq(pcServiceMetricsTable.service, service as any)) : eq(pcServiceMetricsTable.orgId, orgId);
-        return await db.select().from(pcServiceMetricsTable).where(cond).orderBy(desc(pcServiceMetricsTable.measuredAt)).limit(50);
-      } catch { return []; }
+        const { pcServiceMetricsTable } = await import('@szl-holdings/db');
+        const cond = service
+          ? and(
+              eq(pcServiceMetricsTable.orgId, orgId),
+              eq(pcServiceMetricsTable.service, service as any),
+            )
+          : eq(pcServiceMetricsTable.orgId, orgId);
+        return await db
+          .select()
+          .from(pcServiceMetricsTable)
+          .where(cond)
+          .orderBy(desc(pcServiceMetricsTable.measuredAt))
+          .limit(50);
+      } catch {
+        return [];
+      }
     },
     async getMatterDeadlines(matterId) {
-      try { return await db.select().from(pcDeadlinesTable).where(eq(pcDeadlinesTable.matterId, matterId)).orderBy(pcDeadlinesTable.dueDate); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcDeadlinesTable)
+          .where(eq(pcDeadlinesTable.matterId, matterId))
+          .orderBy(pcDeadlinesTable.dueDate);
+      } catch {
+        return [];
+      }
     },
     async getMatterForecasts(matterId) {
-      try { return await db.select().from(pcForecastsTable).where(eq(pcForecastsTable.matterId, matterId)).orderBy(desc(pcForecastsTable.createdAt)).limit(10); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcForecastsTable)
+          .where(eq(pcForecastsTable.matterId, matterId))
+          .orderBy(desc(pcForecastsTable.createdAt))
+          .limit(10);
+      } catch {
+        return [];
+      }
     },
     async getMatterCommunications(matterId) {
-      try { return await db.select().from(pcCommunicationsTable).where(eq(pcCommunicationsTable.matterId, matterId)).orderBy(desc(pcCommunicationsTable.sentAt)).limit(20); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcCommunicationsTable)
+          .where(eq(pcCommunicationsTable.matterId, matterId))
+          .orderBy(desc(pcCommunicationsTable.sentAt))
+          .limit(20);
+      } catch {
+        return [];
+      }
     },
     async getMatterReadinessScores(matterId) {
-      try { return await db.select().from(pcReadinessScoresTable).where(eq(pcReadinessScoresTable.matterId, matterId)).orderBy(desc(pcReadinessScoresTable.computedAt)); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcReadinessScoresTable)
+          .where(eq(pcReadinessScoresTable.matterId, matterId))
+          .orderBy(desc(pcReadinessScoresTable.computedAt));
+      } catch {
+        return [];
+      }
     },
     async getMatterApprovalRequests(matterId) {
-      try { return await db.select().from(pcApprovalRequestsTable).where(eq(pcApprovalRequestsTable.matterId, matterId)).orderBy(desc(pcApprovalRequestsTable.requestedAt)); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcApprovalRequestsTable)
+          .where(eq(pcApprovalRequestsTable.matterId, matterId))
+          .orderBy(desc(pcApprovalRequestsTable.requestedAt));
+      } catch {
+        return [];
+      }
     },
     async getMatterRecommendations(matterId) {
-      try { return await db.select().from(pcAiRecommendationsTable).where(eq(pcAiRecommendationsTable.matterId, matterId)).orderBy(desc(pcAiRecommendationsTable.createdAt)).limit(10); } catch { return []; }
+      try {
+        return await db
+          .select()
+          .from(pcAiRecommendationsTable)
+          .where(eq(pcAiRecommendationsTable.matterId, matterId))
+          .orderBy(desc(pcAiRecommendationsTable.createdAt))
+          .limit(10);
+      } catch {
+        return [];
+      }
     },
     async approveRequest(requestId, actorId) {
-      const [updated] = await db.update(pcApprovalRequestsTable).set({ status: "approved", approvedBy: actorId, resolvedAt: new Date() }).where(eq(pcApprovalRequestsTable.id, requestId)).returning();
-      if (!updated) throw new Error("Approval request not found");
+      const [updated] = await db
+        .update(pcApprovalRequestsTable)
+        .set({ status: 'approved', approvedBy: actorId, resolvedAt: new Date() })
+        .where(eq(pcApprovalRequestsTable.id, requestId))
+        .returning();
+      if (!updated) throw new Error('Approval request not found');
       return updated;
     },
     async rejectRequest(requestId, actorId) {
-      const [updated] = await db.update(pcApprovalRequestsTable).set({ status: "rejected", approvedBy: actorId, resolvedAt: new Date() }).where(eq(pcApprovalRequestsTable.id, requestId)).returning();
-      if (!updated) throw new Error("Approval request not found");
+      const [updated] = await db
+        .update(pcApprovalRequestsTable)
+        .set({ status: 'rejected', approvedBy: actorId, resolvedAt: new Date() })
+        .where(eq(pcApprovalRequestsTable.id, requestId))
+        .returning();
+      if (!updated) throw new Error('Approval request not found');
       return updated;
     },
     async acceptRecommendation(recommendationId, actorId) {
-      const [updated] = await db.update(pcAiRecommendationsTable).set({ status: "accepted", reviewedBy: actorId, reviewedAt: new Date() }).where(eq(pcAiRecommendationsTable.id, recommendationId)).returning();
-      if (!updated) throw new Error("Recommendation not found");
+      const [updated] = await db
+        .update(pcAiRecommendationsTable)
+        .set({ status: 'accepted', reviewedBy: actorId, reviewedAt: new Date() })
+        .where(eq(pcAiRecommendationsTable.id, recommendationId))
+        .returning();
+      if (!updated) throw new Error('Recommendation not found');
       return updated;
     },
     async dismissRecommendation(recommendationId, actorId) {
-      const [updated] = await db.update(pcAiRecommendationsTable).set({ status: "dismissed", reviewedBy: actorId, reviewedAt: new Date() }).where(eq(pcAiRecommendationsTable.id, recommendationId)).returning();
-      if (!updated) throw new Error("Recommendation not found");
+      const [updated] = await db
+        .update(pcAiRecommendationsTable)
+        .set({ status: 'dismissed', reviewedBy: actorId, reviewedAt: new Date() })
+        .where(eq(pcAiRecommendationsTable.id, recommendationId))
+        .returning();
+      if (!updated) throw new Error('Recommendation not found');
       return updated;
     },
   };
@@ -400,36 +626,74 @@ const pcStorage = buildPrismStorage();
 
 export const prismCounselResolvers = {
   Query: {
-    pcMatters: async (_: unknown, { orgId }: { orgId: number }, _ctx: GraphQLContext) => getPcMatters(pcStorage, orgId),
-    pcMatter: async (_: unknown, { id }: { id: number }, _ctx: GraphQLContext) => getPcMatter(pcStorage, id),
-    pcDashboardSummary: async (_: unknown, { orgId }: { orgId: number }, _ctx: GraphQLContext) => getPcDashboardSummary(pcStorage, orgId),
-    pcDeadlines: async (_: unknown, { matterId }: { matterId: number }) => getPcDeadlines(pcStorage, matterId),
-    pcUpcomingDeadlines: async (_: unknown, { orgId, days = 30 }: { orgId: number; days?: number }) => getPcUpcomingDeadlines(pcStorage, orgId, days),
-    pcForecasts: async (_: unknown, { matterId }: { matterId: number }) => getPcForecasts(pcStorage, matterId),
-    pcForecastDiffs: async (_: unknown, { matterId }: { matterId: number }) => getPcForecastDiffs(pcStorage, matterId),
-    pcPressureDimensions: async (_: unknown, { matterId }: { matterId: number }) => getPcPressureDimensions(pcStorage, matterId),
-    pcProofChainEntries: async (_: unknown, { matterId }: { matterId: number }) => getPcProofChainEntries(pcStorage, matterId),
-    pcApprovalRequests: async (_: unknown, { orgId, status }: { orgId: number; status?: string }) => getPcApprovalRequests(pcStorage, orgId, status),
-    pcMatterApprovals: async (_: unknown, { matterId }: { matterId: number }) => getPcMatterApprovals(pcStorage, matterId),
-    pcCommunications: async (_: unknown, { matterId }: { matterId: number }) => getPcCommunications(pcStorage, matterId),
-    pcConnectorAccounts: async (_: unknown, { orgId }: { orgId: number }) => getPcConnectorAccounts(pcStorage, orgId),
-    pcDataProductScores: async (_: unknown, { orgId, matterId }: { orgId: number; matterId?: number }) => getPcDataProductScores(pcStorage, orgId, matterId),
-    pcServiceMetrics: async (_: unknown, { orgId, service }: { orgId: number; service?: string }) => getPcServiceMetrics(pcStorage, orgId, service),
+    pcMatters: async (_: unknown, { orgId }: { orgId: number }, _ctx: GraphQLContext) =>
+      getPcMatters(pcStorage, orgId),
+    pcMatter: async (_: unknown, { id }: { id: number }, _ctx: GraphQLContext) =>
+      getPcMatter(pcStorage, id),
+    pcDashboardSummary: async (_: unknown, { orgId }: { orgId: number }, _ctx: GraphQLContext) =>
+      getPcDashboardSummary(pcStorage, orgId),
+    pcDeadlines: async (_: unknown, { matterId }: { matterId: number }) =>
+      getPcDeadlines(pcStorage, matterId),
+    pcUpcomingDeadlines: async (
+      _: unknown,
+      { orgId, days = 30 }: { orgId: number; days?: number },
+    ) => getPcUpcomingDeadlines(pcStorage, orgId, days),
+    pcForecasts: async (_: unknown, { matterId }: { matterId: number }) =>
+      getPcForecasts(pcStorage, matterId),
+    pcForecastDiffs: async (_: unknown, { matterId }: { matterId: number }) =>
+      getPcForecastDiffs(pcStorage, matterId),
+    pcPressureDimensions: async (_: unknown, { matterId }: { matterId: number }) =>
+      getPcPressureDimensions(pcStorage, matterId),
+    pcProofChainEntries: async (_: unknown, { matterId }: { matterId: number }) =>
+      getPcProofChainEntries(pcStorage, matterId),
+    pcApprovalRequests: async (_: unknown, { orgId, status }: { orgId: number; status?: string }) =>
+      getPcApprovalRequests(pcStorage, orgId, status),
+    pcMatterApprovals: async (_: unknown, { matterId }: { matterId: number }) =>
+      getPcMatterApprovals(pcStorage, matterId),
+    pcCommunications: async (_: unknown, { matterId }: { matterId: number }) =>
+      getPcCommunications(pcStorage, matterId),
+    pcConnectorAccounts: async (_: unknown, { orgId }: { orgId: number }) =>
+      getPcConnectorAccounts(pcStorage, orgId),
+    pcDataProductScores: async (
+      _: unknown,
+      { orgId, matterId }: { orgId: number; matterId?: number },
+    ) => getPcDataProductScores(pcStorage, orgId, matterId),
+    pcServiceMetrics: async (_: unknown, { orgId, service }: { orgId: number; service?: string }) =>
+      getPcServiceMetrics(pcStorage, orgId, service),
   },
 
   Mutation: {
-    pcApproveRequest: async (_: unknown, { requestId, actorId }: { requestId: number; actorId: number }, _ctx: GraphQLContext) => approvePcRequest(pcStorage, requestId, actorId),
-    pcRejectRequest: async (_: unknown, { requestId, actorId }: { requestId: number; actorId: number }, _ctx: GraphQLContext) => rejectPcRequest(pcStorage, requestId, actorId),
-    pcAcceptRecommendation: async (_: unknown, { recommendationId, actorId }: { recommendationId: number; actorId: number }, _ctx: GraphQLContext) => acceptPcRecommendation(pcStorage, recommendationId, actorId),
-    pcDismissRecommendation: async (_: unknown, { recommendationId, actorId }: { recommendationId: number; actorId: number }, _ctx: GraphQLContext) => dismissPcRecommendation(pcStorage, recommendationId, actorId),
+    pcApproveRequest: async (
+      _: unknown,
+      { requestId, actorId }: { requestId: number; actorId: number },
+      _ctx: GraphQLContext,
+    ) => approvePcRequest(pcStorage, requestId, actorId),
+    pcRejectRequest: async (
+      _: unknown,
+      { requestId, actorId }: { requestId: number; actorId: number },
+      _ctx: GraphQLContext,
+    ) => rejectPcRequest(pcStorage, requestId, actorId),
+    pcAcceptRecommendation: async (
+      _: unknown,
+      { recommendationId, actorId }: { recommendationId: number; actorId: number },
+      _ctx: GraphQLContext,
+    ) => acceptPcRecommendation(pcStorage, recommendationId, actorId),
+    pcDismissRecommendation: async (
+      _: unknown,
+      { recommendationId, actorId }: { recommendationId: number; actorId: number },
+      _ctx: GraphQLContext,
+    ) => dismissPcRecommendation(pcStorage, recommendationId, actorId),
   },
 
   PcMatter: {
     deadlines: async (matter: { id: number }) => pcStorage.getMatterDeadlines(matter.id),
     forecasts: async (matter: { id: number }) => pcStorage.getMatterForecasts(matter.id),
     communications: async (matter: { id: number }) => pcStorage.getMatterCommunications(matter.id),
-    readinessScores: async (matter: { id: number }) => pcStorage.getMatterReadinessScores(matter.id),
-    approvalRequests: async (matter: { id: number }) => pcStorage.getMatterApprovalRequests(matter.id),
-    recommendations: async (matter: { id: number }) => pcStorage.getMatterRecommendations(matter.id),
+    readinessScores: async (matter: { id: number }) =>
+      pcStorage.getMatterReadinessScores(matter.id),
+    approvalRequests: async (matter: { id: number }) =>
+      pcStorage.getMatterApprovalRequests(matter.id),
+    recommendations: async (matter: { id: number }) =>
+      pcStorage.getMatterRecommendations(matter.id),
   },
 };

@@ -6,31 +6,27 @@
  * Tenant isolation is enforced via the X-Tenant-Id header — all write
  * operations are scoped to the provided tenant.
  */
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from 'express';
 
 export interface TenantContext {
   tenantId: string;
   apiKeyPrefix: string;
 }
 
-declare module "express" {
+declare module 'express' {
   interface Request {
     tenantCtx?: TenantContext;
   }
 }
 
-export function apiKeyGuard(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void {
-  const configuredKey = process.env["ALLOY_API_KEY"];
+export function apiKeyGuard(req: Request, res: Response, next: NextFunction): void {
+  const configuredKey = process.env['ALLOY_API_KEY'];
 
   if (!configuredKey) {
-    if (process.env["NODE_ENV"] === "production") {
+    if (process.env['NODE_ENV'] === 'production') {
       res.status(503).json({
-        error: "Service misconfigured — ALLOY_API_KEY not set",
-        code: "MISSING_API_KEY_CONFIG",
+        error: 'Service misconfigured — ALLOY_API_KEY not set',
+        code: 'MISSING_API_KEY_CONFIG',
       });
       return;
     }
@@ -38,16 +34,16 @@ export function apiKeyGuard(
     return;
   }
 
-  const providedKey = req.headers["x-api-key"];
+  const providedKey = req.headers['x-api-key'];
   if (!providedKey || providedKey !== configuredKey) {
     res.status(401).json({
-      error: "Unauthorized — missing or invalid X-Api-Key header",
-      code: "INVALID_API_KEY",
+      error: 'Unauthorized — missing or invalid X-Api-Key header',
+      code: 'INVALID_API_KEY',
     });
     return;
   }
 
-  const tenantId = (req.headers["x-tenant-id"] as string | undefined) ?? "default";
+  const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? 'default';
   req.tenantCtx = {
     tenantId,
     apiKeyPrefix: String(providedKey).slice(0, 8),

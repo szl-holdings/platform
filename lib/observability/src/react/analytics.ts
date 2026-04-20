@@ -1,15 +1,15 @@
-import posthog from "posthog-js";
-import * as amplitude from "@amplitude/analytics-browser";
+import * as amplitude from '@amplitude/analytics-browser';
+import posthog from 'posthog-js';
 
-const ANALYTICS_INIT_KEY = "__szl_analytics_initialized";
+const ANALYTICS_INIT_KEY = '__szl_analytics_initialized';
 
 function isAnalyticsInitialized(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   return !!(window as unknown as Record<string, unknown>)[ANALYTICS_INIT_KEY];
 }
 
 function markAnalyticsInitialized(): void {
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     (window as unknown as Record<string, unknown>)[ANALYTICS_INIT_KEY] = true;
   }
 }
@@ -22,12 +22,12 @@ export interface AnalyticsConfig {
 }
 
 export function initAnalytics(config: AnalyticsConfig): void {
-  if (isAnalyticsInitialized() || typeof window === "undefined") return;
+  if (isAnalyticsInitialized() || typeof window === 'undefined') return;
   markAnalyticsInitialized();
 
   const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
   const phKey = config.posthogKey || env.VITE_POSTHOG_KEY;
-  const phHost = config.posthogHost || env.VITE_POSTHOG_HOST || "https://us.i.posthog.com";
+  const phHost = config.posthogHost || env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com';
   const ampKey = config.amplitudeKey || env.VITE_AMPLITUDE_API_KEY;
 
   if (phKey) {
@@ -36,14 +36,17 @@ export function initAnalytics(config: AnalyticsConfig): void {
       capture_pageview: true,
       capture_pageleave: true,
       autocapture: true,
-      persistence: "localStorage+cookie",
+      persistence: 'localStorage+cookie',
       loaded: (ph) => {
         if (env.DEV) ph.debug();
         ph.register({ app: config.appSlug });
       },
     });
   } else {
-    console.debug("[PostHog] VITE_POSTHOG_KEY not set — product analytics disabled for", config.appSlug);
+    console.debug(
+      '[PostHog] VITE_POSTHOG_KEY not set — product analytics disabled for',
+      config.appSlug,
+    );
   }
 
   if (ampKey) {
@@ -56,9 +59,12 @@ export function initAnalytics(config: AnalyticsConfig): void {
       },
       logLevel: env.DEV ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None,
     });
-    amplitude.setGroup("app", config.appSlug);
+    amplitude.setGroup('app', config.appSlug);
   } else {
-    console.debug("[Amplitude] VITE_AMPLITUDE_API_KEY not set — amplitude disabled for", config.appSlug);
+    console.debug(
+      '[Amplitude] VITE_AMPLITUDE_API_KEY not set — amplitude disabled for',
+      config.appSlug,
+    );
   }
 }
 
@@ -76,36 +82,59 @@ export function identifyAnalyticsUser(user: AnalyticsUser): void {
       name: user.name,
       plan: user.plan,
     });
-  } catch { /* noop if not initialized */ }
+  } catch {
+    /* noop if not initialized */
+  }
 
   try {
     amplitude.setUserId(user.id);
     const identifyEvent = new amplitude.Identify();
-    if (user.email) identifyEvent.set("email", user.email);
-    if (user.name) identifyEvent.set("name", user.name);
-    if (user.plan) identifyEvent.set("plan", user.plan);
+    if (user.email) identifyEvent.set('email', user.email);
+    if (user.name) identifyEvent.set('name', user.name);
+    if (user.plan) identifyEvent.set('plan', user.plan);
     amplitude.identify(identifyEvent);
-  } catch { /* noop if not initialized */ }
+  } catch {
+    /* noop if not initialized */
+  }
 }
 
 export function resetAnalyticsUser(): void {
-  try { posthog.reset(); } catch { /* noop */ }
-  try { amplitude.reset(); } catch { /* noop */ }
+  try {
+    posthog.reset();
+  } catch {
+    /* noop */
+  }
+  try {
+    amplitude.reset();
+  } catch {
+    /* noop */
+  }
 }
 
 export type CoreEventName =
-  | "page_view"
-  | "feature_used"
-  | "conversion"
-  | "cta_clicked"
-  | "form_submitted"
-  | "upgrade_clicked"
-  | "billing_portal_opened"
-  | "error_boundary_triggered"
-  | "search_performed"
-  | "export_triggered";
+  | 'page_view'
+  | 'feature_used'
+  | 'conversion'
+  | 'cta_clicked'
+  | 'form_submitted'
+  | 'upgrade_clicked'
+  | 'billing_portal_opened'
+  | 'error_boundary_triggered'
+  | 'search_performed'
+  | 'export_triggered';
 
-export function trackEvent(event: CoreEventName | string, properties?: Record<string, unknown>): void {
-  try { posthog.capture(event, properties); } catch { /* noop */ }
-  try { amplitude.track(event, properties); } catch { /* noop */ }
+export function trackEvent(
+  event: CoreEventName | string,
+  properties?: Record<string, unknown>,
+): void {
+  try {
+    posthog.capture(event, properties);
+  } catch {
+    /* noop */
+  }
+  try {
+    amplitude.track(event, properties);
+  } catch {
+    /* noop */
+  }
 }

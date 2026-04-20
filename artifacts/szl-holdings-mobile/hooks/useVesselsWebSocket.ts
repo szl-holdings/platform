@@ -1,1 +1,1 @@
-export { useVesselsWebSocket } from "./fleet/useVesselsWebSocket";
+export { useVesselsWebSocket } from './fleet/useVesselsWebSocket';

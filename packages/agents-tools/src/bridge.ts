@@ -27,9 +27,9 @@
  * 5. Durable trace persistence to trace-graph defaultTraceStore
  */
 
-import { randomUUID } from "crypto";
-import type { TypedTool } from "./typed-tool.js";
-import { defaultTypedToolGateway, type TypedToolInvocationContext } from "./gateway.js";
+import { randomUUID } from 'crypto';
+import { defaultTypedToolGateway, type TypedToolInvocationContext } from './gateway.js';
+import type { TypedTool } from './typed-tool.js';
 
 /**
  * Minimal step-context interface compatible with AgentRun.StepContext.

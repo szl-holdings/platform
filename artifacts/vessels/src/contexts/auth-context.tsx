@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useState } from 'react';
 
-export type UserRole = "exec" | "ops" | "compliance" | "maintenance";
+export type UserRole = 'exec' | 'ops' | 'compliance' | 'maintenance';
 
 export interface AuthUser {
   id: string;
@@ -17,23 +17,23 @@ interface AuthContextType {
 }
 
 const roleProfiles: Record<UserRole, { name: string; email: string }> = {
-  exec: { name: "Sarah Chen", email: "s.chen@szlholdings.com" },
-  ops: { name: "Marcus Rodriguez", email: "m.rodriguez@szlholdings.com" },
-  compliance: { name: "Aiko Tanaka", email: "a.tanaka@szlholdings.com" },
-  maintenance: { name: "Erik Johansson", email: "e.johansson@szlholdings.com" },
+  exec: { name: 'Sarah Chen', email: 's.chen@szlholdings.com' },
+  ops: { name: 'Marcus Rodriguez', email: 'm.rodriguez@szlholdings.com' },
+  compliance: { name: 'Aiko Tanaka', email: 'a.tanaka@szlholdings.com' },
+  maintenance: { name: 'Erik Johansson', email: 'e.johansson@szlholdings.com' },
 };
 
 const roleLabels: Record<UserRole, string> = {
-  exec: "Executive",
-  ops: "Operations",
-  compliance: "Compliance",
-  maintenance: "Maintenance",
+  exec: 'Executive',
+  ops: 'Operations',
+  compliance: 'Compliance',
+  maintenance: 'Maintenance',
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<UserRole>("exec");
+  const [role, setRole] = useState<UserRole>('exec');
 
   const user: AuthUser = {
     id: `user-${role}`,
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
 

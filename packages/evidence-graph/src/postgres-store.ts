@@ -6,20 +6,18 @@
  * persists records to PostgreSQL so they survive process restarts.
  */
 
-import { desc, eq, inArray, lt, getTableColumns, sql, type SQL } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import { desc, eq, getTableColumns, inArray, lt, type SQL, sql } from 'drizzle-orm';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 
 const BATCH_SIZE = 500;
 
-function buildExcludedSet(
-  table: PgTable,
-  sampleRow: Record<string, unknown>,
-): Record<string, SQL> {
+function buildExcludedSet(table: PgTable, sampleRow: Record<string, unknown>): Record<string, SQL> {
   // getTableColumns returns undefined for plain objects (e.g. in-memory test
   // stubs). Fall back to treating the table itself as a column-name map so
   // the upsert ON CONFLICT set clause can still be constructed.
-  const cols = (getTableColumns(table) as Record<string, { name: string }> | undefined)
-    ?? (table as unknown as Record<string, { name: string }>);
+  const cols =
+    (getTableColumns(table) as Record<string, { name: string }> | undefined) ??
+    (table as unknown as Record<string, { name: string }>);
   const set: Record<string, SQL> = {};
   for (const key of Object.keys(sampleRow)) {
     const col = cols[key];
@@ -34,19 +32,20 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
 }
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { EvidenceItem, Recommendation } from "@workspace/ontology";
+
+import type { EvidenceItem, Recommendation } from '@workspace/ontology';
 // Import EntitySnapshot/EntityRegistryBackend directly to avoid the
 // pre-existing name collision between the Zod-based `entity.ts` and the
 // interface-based `entity-snapshot.ts` re-exports in `@workspace/ontology`.
-import type { EntitySnapshot, EntityRegistryBackend } from "@workspace/ontology/entity";
+import type { EntityRegistryBackend, EntitySnapshot } from '@workspace/ontology/entity';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
+  type EvidenceStoreBackend,
   InMemoryEvidenceStore,
   InMemoryRecommendationStore,
-  type EvidenceStoreBackend,
   type RecommendationDecision,
   type RecommendationStoreBackend,
-} from "./store.js";
+} from './store.js';
 
 export interface PostgresStoreLogger {
   info?: (...args: unknown[]) => void;
@@ -96,7 +95,7 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
   private readonly pending = new Map<string, EvidenceItem>();
   private flushTimer: ReturnType<typeof setInterval> | undefined;
   private flushing = false;
-  private readonly opts: Required<Pick<BaseOpts, "flushIntervalMs" | "hydrateLimit">> &
+  private readonly opts: Required<Pick<BaseOpts, 'flushIntervalMs' | 'hydrateLimit'>> &
     PostgresEvidenceStoreOptions;
 
   constructor(opts: PostgresEvidenceStoreOptions) {
@@ -104,7 +103,7 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
     if (this.opts.flushIntervalMs > 0) {
       this.flushTimer = setInterval(() => {
         void this.flush().catch((err) =>
-          this.opts.logger?.warn?.({ err }, "PostgresEvidenceStore: flush failed"),
+          this.opts.logger?.warn?.({ err }, 'PostgresEvidenceStore: flush failed'),
         );
       }, this.opts.flushIntervalMs);
       this.flushTimer.unref?.();
@@ -132,7 +131,7 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
     return this.cache.forSignal(signalId);
   }
 
-  list(filter?: Parameters<EvidenceStoreBackend["list"]>[0]): EvidenceItem[] {
+  list(filter?: Parameters<EvidenceStoreBackend['list']>[0]): EvidenceItem[] {
     return this.cache.list(filter);
   }
 
@@ -151,15 +150,15 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
       let loaded = 0;
       for (const r of rows as Array<{ payload?: { evidenceItem?: EvidenceItem } | null }>) {
         const ev = r.payload?.evidenceItem;
-        if (ev && typeof ev === "object" && typeof ev.evidenceId === "string") {
+        if (ev && typeof ev === 'object' && typeof ev.evidenceId === 'string') {
           this.cache.save(ev);
           loaded++;
         }
       }
-      this.opts.logger?.info?.({ loaded }, "PostgresEvidenceStore: hydrated");
+      this.opts.logger?.info?.({ loaded }, 'PostgresEvidenceStore: hydrated');
       return loaded;
     } catch (err) {
-      this.opts.logger?.error?.({ err }, "PostgresEvidenceStore: hydrate failed");
+      this.opts.logger?.error?.({ err }, 'PostgresEvidenceStore: hydrate failed');
       return 0;
     }
   }
@@ -213,7 +212,7 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
         } catch (err) {
           this.opts.logger?.warn?.(
             { err, batchSize: batchRows.length },
-            "PostgresEvidenceStore: batch upsert failed; re-queuing",
+            'PostgresEvidenceStore: batch upsert failed; re-queuing',
           );
           for (const item of batchItems) {
             this.pending.set(item.evidenceId, item);
@@ -254,7 +253,7 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
             const affected = new Set(linkBatch.map((l) => l.evidenceId));
             this.opts.logger?.warn?.(
               { err, batchSize: linkBatch.length, affected: affected.size },
-              "PostgresEvidenceStore: entity link batch insert failed; re-queuing affected evidence",
+              'PostgresEvidenceStore: entity link batch insert failed; re-queuing affected evidence',
             );
             for (const evidenceId of affected) {
               const item = itemsByEvidenceId.get(evidenceId);
@@ -311,11 +310,11 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
       if (dbRemoved > 0 || cacheRemoved > 0) {
         this.opts.logger?.info?.(
           { dbRemoved, cacheRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
-          "PostgresEvidenceStore: retention pruned evidence",
+          'PostgresEvidenceStore: retention pruned evidence',
         );
       }
     } catch (err) {
-      this.opts.logger?.warn?.({ err }, "PostgresEvidenceStore: retention failed");
+      this.opts.logger?.warn?.({ err }, 'PostgresEvidenceStore: retention failed');
     }
     return { cacheRemoved, dbRemoved };
   }
@@ -340,7 +339,7 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
   private readonly pending = new Map<string, Recommendation>();
   private flushTimer: ReturnType<typeof setInterval> | undefined;
   private flushing = false;
-  private readonly opts: Required<Pick<BaseOpts, "flushIntervalMs" | "hydrateLimit">> &
+  private readonly opts: Required<Pick<BaseOpts, 'flushIntervalMs' | 'hydrateLimit'>> &
     PostgresRecommendationStoreOptions;
 
   constructor(opts: PostgresRecommendationStoreOptions) {
@@ -348,7 +347,7 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
     if (this.opts.flushIntervalMs > 0) {
       this.flushTimer = setInterval(() => {
         void this.flush().catch((err) =>
-          this.opts.logger?.warn?.({ err }, "PostgresRecommendationStore: flush failed"),
+          this.opts.logger?.warn?.({ err }, 'PostgresRecommendationStore: flush failed'),
         );
       }, this.opts.flushIntervalMs);
       this.flushTimer.unref?.();
@@ -364,11 +363,11 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
     return this.cache.get(id);
   }
 
-  list(filter?: Parameters<RecommendationStoreBackend["list"]>[0]): Recommendation[] {
+  list(filter?: Parameters<RecommendationStoreBackend['list']>[0]): Recommendation[] {
     return this.cache.list(filter);
   }
 
-  updateStatus(id: string, status: Recommendation["status"]): boolean {
+  updateStatus(id: string, status: Recommendation['status']): boolean {
     const ok = this.cache.updateStatus(id, status);
     const updated = this.cache.get(id);
     if (ok && updated) this.pending.set(id, updated);
@@ -404,15 +403,15 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
       let loaded = 0;
       for (const r of rows as Array<{ payload?: { recommendation?: Recommendation } | null }>) {
         const rec = r.payload?.recommendation;
-        if (rec && typeof rec === "object" && typeof rec.recommendationId === "string") {
+        if (rec && typeof rec === 'object' && typeof rec.recommendationId === 'string') {
           this.cache.save(rec);
           loaded++;
         }
       }
-      this.opts.logger?.info?.({ loaded }, "PostgresRecommendationStore: hydrated");
+      this.opts.logger?.info?.({ loaded }, 'PostgresRecommendationStore: hydrated');
       return loaded;
     } catch (err) {
-      this.opts.logger?.error?.({ err }, "PostgresRecommendationStore: hydrate failed");
+      this.opts.logger?.error?.({ err }, 'PostgresRecommendationStore: hydrate failed');
       return 0;
     }
   }
@@ -456,7 +455,7 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
         } catch (err) {
           this.opts.logger?.warn?.(
             { err, batchSize: batchRows.length },
-            "PostgresRecommendationStore: batch upsert failed; re-queuing",
+            'PostgresRecommendationStore: batch upsert failed; re-queuing',
           );
           for (const rec of batchRecs) {
             this.pending.set(rec.recommendationId, rec);
@@ -495,11 +494,11 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
       if (dbRemoved > 0 || cacheRemoved > 0) {
         this.opts.logger?.info?.(
           { dbRemoved, cacheRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
-          "PostgresRecommendationStore: retention pruned recommendations",
+          'PostgresRecommendationStore: retention pruned recommendations',
         );
       }
     } catch (err) {
-      this.opts.logger?.warn?.({ err }, "PostgresRecommendationStore: retention failed");
+      this.opts.logger?.warn?.({ err }, 'PostgresRecommendationStore: retention failed');
     }
     return { cacheRemoved, dbRemoved };
   }
@@ -524,7 +523,7 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
   private readonly pending = new Map<string, EntitySnapshot>();
   private flushTimer: ReturnType<typeof setInterval> | undefined;
   private flushing = false;
-  private readonly opts: Required<Pick<BaseOpts, "flushIntervalMs" | "hydrateLimit">> &
+  private readonly opts: Required<Pick<BaseOpts, 'flushIntervalMs' | 'hydrateLimit'>> &
     PostgresEntityRegistryOptions;
 
   constructor(opts: PostgresEntityRegistryOptions) {
@@ -532,7 +531,7 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
     if (this.opts.flushIntervalMs > 0) {
       this.flushTimer = setInterval(() => {
         void this.flush().catch((err) =>
-          this.opts.logger?.warn?.({ err }, "PostgresEntityRegistry: flush failed"),
+          this.opts.logger?.warn?.({ err }, 'PostgresEntityRegistry: flush failed'),
         );
       }, this.opts.flushIntervalMs);
       this.flushTimer.unref?.();
@@ -551,7 +550,11 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
     return this.cache.get(entityId);
   }
 
-  list(filter?: { domain?: string; entityType?: string; health?: EntitySnapshot["health"] }): EntitySnapshot[] {
+  list(filter?: {
+    domain?: string;
+    entityType?: string;
+    health?: EntitySnapshot['health'];
+  }): EntitySnapshot[] {
     let results = Array.from(this.cache.values());
     if (filter?.domain) results = results.filter((e) => e.domain === filter.domain);
     if (filter?.entityType) results = results.filter((e) => e.entityType === filter.entityType);
@@ -590,15 +593,15 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
       let loaded = 0;
       for (const r of rows as Array<{ payload?: { snapshot?: EntitySnapshot } | null }>) {
         const snap = r.payload?.snapshot;
-        if (snap && typeof snap === "object" && typeof snap.entityId === "string") {
+        if (snap && typeof snap === 'object' && typeof snap.entityId === 'string') {
           this.cache.set(snap.entityId, snap);
           loaded++;
         }
       }
-      this.opts.logger?.info?.({ loaded }, "PostgresEntityRegistry: hydrated");
+      this.opts.logger?.info?.({ loaded }, 'PostgresEntityRegistry: hydrated');
       return loaded;
     } catch (err) {
-      this.opts.logger?.error?.({ err }, "PostgresEntityRegistry: hydrate failed");
+      this.opts.logger?.error?.({ err }, 'PostgresEntityRegistry: hydrate failed');
       return 0;
     }
   }
@@ -641,7 +644,7 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
         } catch (err) {
           this.opts.logger?.warn?.(
             { err, batchSize: batchRows.length },
-            "PostgresEntityRegistry: batch upsert failed; re-queuing",
+            'PostgresEntityRegistry: batch upsert failed; re-queuing',
           );
           for (const snap of batchSnaps) {
             this.pending.set(snap.entityId, snap);
@@ -682,11 +685,11 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
       if (dbRemoved > 0 || cacheRemoved > 0) {
         this.opts.logger?.info?.(
           { dbRemoved, cacheRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
-          "PostgresEntityRegistry: retention pruned entity snapshots",
+          'PostgresEntityRegistry: retention pruned entity snapshots',
         );
       }
     } catch (err) {
-      this.opts.logger?.warn?.({ err }, "PostgresEntityRegistry: retention failed");
+      this.opts.logger?.warn?.({ err }, 'PostgresEntityRegistry: retention failed');
     }
     return { cacheRemoved, dbRemoved };
   }
@@ -702,4 +705,4 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
 
 // Re-export inArray/eq just so consumers don't need to depend on drizzle-orm
 // directly. Not strictly required but mirrors trace-graph ergonomics.
-export { inArray, eq };
+export { eq, inArray };

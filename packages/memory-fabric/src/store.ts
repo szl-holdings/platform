@@ -1,4 +1,4 @@
-import type { MemoryEntry, MemoryType } from "./types.js";
+import type { MemoryEntry, MemoryType } from './types.js';
 
 type MemoryTier = MemoryType;
 
@@ -13,7 +13,7 @@ type MemoryTier = MemoryType;
  * to "unknown") is exactly the inconsistency this enforcement removes.
  */
 export function assertMemoryDomain(entry: MemoryEntry): void {
-  if (typeof entry.domain !== "string" || entry.domain.length === 0) {
+  if (typeof entry.domain !== 'string' || entry.domain.length === 0) {
     throw new Error(
       `MemoryStore.put: entry ${entry.id} (tier=${entry.tier}, key=${entry.key}) ` +
         `is missing required 'domain' tag. Pass MEMORY_DOMAIN_UNKNOWN if the ` +
@@ -29,9 +29,9 @@ export interface MemoryStoreQuery {
   tags?: string[];
   includeStale?: boolean;
   minConfidence?: number;
-  sensitivity?: MemoryEntry["sensitivity"];
+  sensitivity?: MemoryEntry['sensitivity'];
   search?: string;
-  sortBy?: "confidence" | "freshness" | "default";
+  sortBy?: 'confidence' | 'freshness' | 'default';
 }
 
 export interface MemoryStore {
@@ -104,21 +104,22 @@ export class InMemoryStore implements MemoryStore {
     }
     if (query?.search) {
       const needle = query.search.toLowerCase();
-      results = results.filter((e) =>
-        e.key.toLowerCase().includes(needle) ||
-        (typeof e.value === "string" && e.value.toLowerCase().includes(needle)) ||
-        (e.summary && e.summary.toLowerCase().includes(needle)) ||
-        e.tags.some((t) => t.toLowerCase().includes(needle))
+      results = results.filter(
+        (e) =>
+          e.key.toLowerCase().includes(needle) ||
+          (typeof e.value === 'string' && e.value.toLowerCase().includes(needle)) ||
+          (e.summary && e.summary.toLowerCase().includes(needle)) ||
+          e.tags.some((t) => t.toLowerCase().includes(needle)),
       );
     }
 
-    if (query?.sortBy === "confidence") {
+    if (query?.sortBy === 'confidence') {
       results.sort((a, b) => b.confidence - a.confidence);
-    } else if (query?.sortBy === "freshness") {
+    } else if (query?.sortBy === 'freshness') {
       results.sort(
         (a, b) =>
           new Date(b.freshness.lastUpdatedAt).getTime() -
-          new Date(a.freshness.lastUpdatedAt).getTime()
+          new Date(a.freshness.lastUpdatedAt).getTime(),
       );
     }
 
@@ -126,7 +127,7 @@ export class InMemoryStore implements MemoryStore {
   }
 
   search(query: string, tier?: MemoryType): MemoryEntry[] {
-    return this.list({ search: query, tier, includeStale: false, sortBy: "confidence" });
+    return this.list({ search: query, tier, includeStale: false, sortBy: 'confidence' });
   }
 
   delete(id: string): boolean {
@@ -187,17 +188,33 @@ export class MutableMemoryStore implements MemoryStore {
     return this.backend;
   }
 
-  put(entry: MemoryEntry): void { this.backend.put(entry); }
-  get(id: string): MemoryEntry | undefined { return this.backend.get(id); }
+  put(entry: MemoryEntry): void {
+    this.backend.put(entry);
+  }
+  get(id: string): MemoryEntry | undefined {
+    return this.backend.get(id);
+  }
   getByKey(tier: MemoryTier, key: string, scopeId?: string): MemoryEntry | undefined {
     return this.backend.getByKey(tier, key, scopeId);
   }
-  list(query?: MemoryStoreQuery): MemoryEntry[] { return this.backend.list(query); }
-  search(query: string, tier?: MemoryType): MemoryEntry[] { return this.backend.search(query, tier); }
-  delete(id: string): boolean { return this.backend.delete(id); }
-  evictExpired(): number { return this.backend.evictExpired(); }
-  count(tier?: MemoryTier): number { return this.backend.count(tier); }
-  clear(tier?: MemoryTier): void { this.backend.clear(tier); }
+  list(query?: MemoryStoreQuery): MemoryEntry[] {
+    return this.backend.list(query);
+  }
+  search(query: string, tier?: MemoryType): MemoryEntry[] {
+    return this.backend.search(query, tier);
+  }
+  delete(id: string): boolean {
+    return this.backend.delete(id);
+  }
+  evictExpired(): number {
+    return this.backend.evictExpired();
+  }
+  count(tier?: MemoryTier): number {
+    return this.backend.count(tier);
+  }
+  clear(tier?: MemoryTier): void {
+    this.backend.clear(tier);
+  }
 }
 
 export const defaultMemoryStore: MutableMemoryStore = new MutableMemoryStore();

@@ -1,6 +1,6 @@
-declare module "expo-glass-effect" {
-  import { ViewProps } from "react-native";
-  import React from "react";
+declare module 'expo-glass-effect' {
+  import { ViewProps } from 'react-native';
+  import React from 'react';
   export interface GlassViewProps extends ViewProps {
     blurAmount?: number;
     blurType?: string;
@@ -11,10 +11,22 @@ declare module "expo-glass-effect" {
   export default GlassView;
 }
 
-declare module "expo-sensors" {
-  export interface AccelerometerMeasurement { x: number; y: number; z: number; }
-  export interface GyroscopeMeasurement { x: number; y: number; z: number; }
-  export interface MagnetometerMeasurement { x: number; y: number; z: number; }
+declare module 'expo-sensors' {
+  export interface AccelerometerMeasurement {
+    x: number;
+    y: number;
+    z: number;
+  }
+  export interface GyroscopeMeasurement {
+    x: number;
+    y: number;
+    z: number;
+  }
+  export interface MagnetometerMeasurement {
+    x: number;
+    y: number;
+    z: number;
+  }
   export interface DeviceMotionMeasurement {
     acceleration: AccelerometerMeasurement | null;
     accelerationIncludingGravity: AccelerometerMeasurement | null;
@@ -48,7 +60,7 @@ declare module "expo-sensors" {
   };
 }
 
-declare module "expo-location" {
+declare module 'expo-location' {
   export interface LocationObject {
     coords: {
       latitude: number;
@@ -62,7 +74,7 @@ declare module "expo-location" {
     timestamp: number;
   }
   export interface LocationPermissionResponse {
-    status: "granted" | "denied" | "undetermined";
+    status: 'granted' | 'denied' | 'undetermined';
     granted: boolean;
   }
   export interface LocationOptions {
@@ -72,7 +84,12 @@ declare module "expo-location" {
     mayShowUserSettingsDialog?: boolean;
   }
   export enum Accuracy {
-    Lowest = 1, Low = 2, Balanced = 3, High = 4, Highest = 5, BestForNavigation = 6,
+    Lowest = 1,
+    Low = 2,
+    Balanced = 3,
+    High = 4,
+    Highest = 5,
+    BestForNavigation = 6,
   }
   export function requestForegroundPermissionsAsync(): Promise<LocationPermissionResponse>;
   export function requestBackgroundPermissionsAsync(): Promise<LocationPermissionResponse>;
@@ -80,29 +97,31 @@ declare module "expo-location" {
   export function getCurrentPositionAsync(options?: LocationOptions): Promise<LocationObject>;
   export function watchPositionAsync(
     options: LocationOptions,
-    callback: (location: LocationObject) => void
+    callback: (location: LocationObject) => void,
   ): Promise<{ remove: () => void }>;
-  export function reverseGeocodeAsync(location: { latitude: number; longitude: number }): Promise<Array<{
-    city: string | null;
-    country: string | null;
-    district: string | null;
-    isoCountryCode: string | null;
-    name: string | null;
-    postalCode: string | null;
-    region: string | null;
-    street: string | null;
-    streetNumber: string | null;
-    subregion: string | null;
-    timezone: string | null;
-  }>>;
+  export function reverseGeocodeAsync(location: { latitude: number; longitude: number }): Promise<
+    Array<{
+      city: string | null;
+      country: string | null;
+      district: string | null;
+      isoCountryCode: string | null;
+      name: string | null;
+      postalCode: string | null;
+      region: string | null;
+      street: string | null;
+      streetNumber: string | null;
+      subregion: string | null;
+      timezone: string | null;
+    }>
+  >;
 }
 
-declare module "expo-image-picker" {
+declare module 'expo-image-picker' {
   export interface ImagePickerAsset {
     uri: string;
     width: number;
     height: number;
-    type?: "image" | "video";
+    type?: 'image' | 'video';
     fileName?: string;
     fileSize?: number;
     mimeType?: string;
@@ -115,13 +134,13 @@ declare module "expo-image-picker" {
     assets: ImagePickerAsset[] | null;
   }
   export interface MediaLibraryPermissionResponse {
-    status: "granted" | "denied" | "undetermined";
+    status: 'granted' | 'denied' | 'undetermined';
     granted: boolean;
   }
   export enum MediaTypeOptions {
-    All = "All",
-    Videos = "Videos",
-    Images = "Images",
+    All = 'All',
+    Videos = 'Videos',
+    Images = 'Images',
   }
   export function requestMediaLibraryPermissionsAsync(): Promise<MediaLibraryPermissionResponse>;
   export function requestCameraPermissionsAsync(): Promise<MediaLibraryPermissionResponse>;
@@ -144,9 +163,9 @@ declare module "expo-image-picker" {
   }): Promise<ImagePickerResult>;
 }
 
-declare module "expo-symbols" {
-  import React from "react";
-  import { ViewStyle } from "react-native";
+declare module 'expo-symbols' {
+  import React from 'react';
+  import { ViewStyle } from 'react-native';
   export interface SymbolViewProps {
     name: string;
     size?: number;
@@ -163,13 +182,22 @@ declare module "expo-symbols" {
   export type SFSymbols5_0 = string;
   export type SFSymbols4_0 = string;
   export type SFSymbol = string;
-  export type SymbolWeight = "ultralight" | "thin" | "light" | "regular" | "medium" | "semibold" | "bold" | "heavy" | "black";
-  export type SymbolScale = "small" | "medium" | "large";
-  export type SymbolType = "hierarchical" | "monochrome" | "multicolor" | "palette";
+  export type SymbolWeight =
+    | 'ultralight'
+    | 'thin'
+    | 'light'
+    | 'regular'
+    | 'medium'
+    | 'semibold'
+    | 'bold'
+    | 'heavy'
+    | 'black';
+  export type SymbolScale = 'small' | 'medium' | 'large';
+  export type SymbolType = 'hierarchical' | 'monochrome' | 'multicolor' | 'palette';
   export type SymbolAnimationEffect = object;
 }
 
-declare module "@expo-google-fonts/space-grotesk" {
+declare module '@expo-google-fonts/space-grotesk' {
   export const SpaceGrotesk_300Light: number;
   export const SpaceGrotesk_400Regular: number;
   export const SpaceGrotesk_500Medium: number;
@@ -178,14 +206,14 @@ declare module "@expo-google-fonts/space-grotesk" {
   export function useFonts(fonts: Record<string, number>): [boolean, Error | null];
 }
 
-declare module "react-native-keyboard-controller" {
-  import React from "react";
-  import { ViewProps } from "react-native";
+declare module 'react-native-keyboard-controller' {
+  import React from 'react';
+  import { ViewProps } from 'react-native';
   export interface KeyboardAwareScrollViewProps extends ViewProps {
     children?: React.ReactNode;
     bottomOffset?: number;
     disableScrollOnKeyboardHide?: boolean;
-    keyboardShouldPersistTaps?: "always" | "never" | "handled" | boolean;
+    keyboardShouldPersistTaps?: 'always' | 'never' | 'handled' | boolean;
     scrollEventThrottle?: number;
     showsVerticalScrollIndicator?: boolean;
     contentContainerStyle?: object;
@@ -194,21 +222,28 @@ declare module "react-native-keyboard-controller" {
   export const KeyboardAwareScrollView: React.FC<KeyboardAwareScrollViewProps>;
   export const KeyboardControllerView: React.FC<ViewProps>;
   export const KeyboardProvider: React.FC<{ children: React.ReactNode }>;
-  export const KeyboardAvoidingView: React.FC<ViewProps & { behavior?: string; keyboardVerticalOffset?: number; keyboardShouldPersistTaps?: string }>;
+  export const KeyboardAvoidingView: React.FC<
+    ViewProps & {
+      behavior?: string;
+      keyboardVerticalOffset?: number;
+      keyboardShouldPersistTaps?: string;
+    }
+  >;
   export function useKeyboardController(): { enabled: boolean; setEnabled: (v: boolean) => void };
-  export function useReanimatedKeyboardAnimation(): { height: { value: number }; progress: { value: number } };
+  export function useReanimatedKeyboardAnimation(): {
+    height: { value: number };
+    progress: { value: number };
+  };
 }
 
-declare module "@react-native-community/netinfo" {
+declare module '@react-native-community/netinfo' {
   export interface NetInfoState {
     type: string;
     isConnected: boolean | null;
     isInternetReachable: boolean | null;
     details: Record<string, unknown> | null;
   }
-  export interface NetInfoSubscription {
-    (): void;
-  }
+  export type NetInfoSubscription = () => void;
   export function addEventListener(listener: (state: NetInfoState) => void): NetInfoSubscription;
   export function fetch(): Promise<NetInfoState>;
   export function useNetInfo(): NetInfoState;
@@ -220,7 +255,7 @@ declare module "@react-native-community/netinfo" {
   export default NetInfo;
 }
 
-declare module "expo-document-picker" {
+declare module 'expo-document-picker' {
   export interface DocumentPickerAsset {
     uri: string;
     name: string;

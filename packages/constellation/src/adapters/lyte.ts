@@ -1,48 +1,48 @@
-import type { ConstellationAdapter } from "../adapter.js";
-import type { CstNodeTypeRegistration, CreateCstNode, CstNode } from "../types.js";
-import { upsertNode, upsertNodeAlias, lookupNodeByAlias } from "../query.js";
-import { registerAdapter } from "../registry.js";
+import type { ConstellationAdapter } from '../adapter.js';
+import { lookupNodeByAlias, upsertNode, upsertNodeAlias } from '../query.js';
+import { registerAdapter } from '../registry.js';
+import type { CreateCstNode, CstNode, CstNodeTypeRegistration } from '../types.js';
 
 const LYTE_NODE_TYPES: CstNodeTypeRegistration[] = [
   {
-    domain: "lyte",
-    typeKey: "signal",
-    displayName: "Signal",
-    description: "A Lyte platform signal or data point",
-    defaultSensitivity: "internal",
+    domain: 'lyte',
+    typeKey: 'signal',
+    displayName: 'Signal',
+    description: 'A Lyte platform signal or data point',
+    defaultSensitivity: 'internal',
   },
   {
-    domain: "lyte",
-    typeKey: "account",
-    displayName: "Account",
-    description: "A Lyte account entity",
-    defaultSensitivity: "confidential",
+    domain: 'lyte',
+    typeKey: 'account',
+    displayName: 'Account',
+    description: 'A Lyte account entity',
+    defaultSensitivity: 'confidential',
   },
   {
-    domain: "lyte",
-    typeKey: "contact",
-    displayName: "Contact",
-    description: "A contact record",
-    defaultSensitivity: "confidential",
+    domain: 'lyte',
+    typeKey: 'contact',
+    displayName: 'Contact',
+    description: 'A contact record',
+    defaultSensitivity: 'confidential',
   },
   {
-    domain: "lyte",
-    typeKey: "workflow",
-    displayName: "Workflow",
-    description: "A Lyte workflow definition",
-    defaultSensitivity: "internal",
+    domain: 'lyte',
+    typeKey: 'workflow',
+    displayName: 'Workflow',
+    description: 'A Lyte workflow definition',
+    defaultSensitivity: 'internal',
   },
 ];
 
 const lyteAdapter: ConstellationAdapter = {
-  domain: "lyte",
+  domain: 'lyte',
   nodeTypes: LYTE_NODE_TYPES,
 
   async upsertEntity(input: CreateCstNode): Promise<CstNode> {
-    const node = await upsertNode({ ...input, domain: "lyte" });
+    const node = await upsertNode({ ...input, domain: 'lyte' });
     const ext = (input.extensions ?? {}) as Record<string, unknown>;
     if (ext.signalId) {
-      await upsertNodeAlias(node.id, "lyte_signal_id", String(ext.signalId), "lyte", true);
+      await upsertNodeAlias(node.id, 'lyte_signal_id', String(ext.signalId), 'lyte', true);
     }
     return node;
   },
@@ -53,4 +53,5 @@ const lyteAdapter: ConstellationAdapter = {
 };
 
 registerAdapter(lyteAdapter);
+
 export { lyteAdapter };

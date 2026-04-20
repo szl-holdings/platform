@@ -1,36 +1,36 @@
-import { randomUUID } from "crypto";
-import type {
-  SkillDefinition,
-  SkillRun,
-  SkillRunStepRecord,
-  StepHandlerFn,
-  SkillRegistryQuery,
-} from "./types.js";
+import { randomUUID } from 'crypto';
 import {
   defaultSkillRegistry,
   defaultSkillRunStore,
   type SkillRegistry,
   type SkillRunStore,
-} from "./registry.js";
+} from './registry.js';
+import type {
+  SkillDefinition,
+  SkillRegistryQuery,
+  SkillRun,
+  SkillRunStepRecord,
+  StepHandlerFn,
+} from './types.js';
 
 export class SkillNotFoundError extends Error {
   constructor(skillId: string) {
     super(`Skill '${skillId}' not found`);
-    this.name = "SkillNotFoundError";
+    this.name = 'SkillNotFoundError';
   }
 }
 
 export class SkillDisabledError extends Error {
   constructor(skillId: string) {
     super(`Skill '${skillId}' is disabled`);
-    this.name = "SkillDisabledError";
+    this.name = 'SkillDisabledError';
   }
 }
 
 export class SkillHandlerNotFoundError extends Error {
   constructor(handlerName: string) {
     super(`Step handler '${handlerName}' is not registered`);
-    this.name = "SkillHandlerNotFoundError";
+    this.name = 'SkillHandlerNotFoundError';
   }
 }
 
@@ -43,10 +43,10 @@ export function registerSkillStepHandler(name: string, fn: StepHandlerFn): void 
 function updatePerformanceStats(
   registry: SkillRegistry,
   skill: SkillDefinition,
-  run: SkillRun
+  run: SkillRun,
 ): void {
   const now = new Date().toISOString();
-  const succeeded = run.status === "completed";
+  const succeeded = run.status === 'completed';
   const p = skill.performance;
 
   const totalRuns = p.totalRuns + 1;
@@ -56,9 +56,7 @@ function updatePerformanceStats(
 
   const latency = run.latencyMs ?? 0;
   const avgLatencyMs =
-    p.totalRuns > 0
-      ? (p.avgLatencyMs * p.totalRuns + latency) / totalRuns
-      : latency;
+    p.totalRuns > 0 ? (p.avgLatencyMs * p.totalRuns + latency) / totalRuns : latency;
 
   registry.updateSkill(skill.id, {
     performance: {
@@ -69,9 +67,7 @@ function updatePerformanceStats(
       avgLatencyMs,
       lastRunAt: now,
       lastFailureAt: succeeded ? p.lastFailureAt : now,
-      lastFailureReason: succeeded
-        ? p.lastFailureReason
-        : (run.error ?? "unknown error"),
+      lastFailureReason: succeeded ? p.lastFailureReason : (run.error ?? 'unknown error'),
     },
   });
 }
@@ -84,7 +80,7 @@ export interface RunSkillOptions {
 export async function runSkill(
   skillId: string,
   inputs: Record<string, unknown> = {},
-  opts: RunSkillOptions = {}
+  opts: RunSkillOptions = {},
 ): Promise<SkillRun> {
   const registry = opts.registry ?? defaultSkillRegistry;
   const runStore = opts.runStore ?? defaultSkillRunStore;
@@ -100,12 +96,12 @@ export async function runSkill(
     runId,
     skillId: skill.id,
     skillName: skill.name,
-    status: "running",
+    status: 'running',
     inputs,
     steps: skill.steps.map((s) => ({
       stepId: s.id,
       stepName: s.name,
-      status: "pending",
+      status: 'pending',
       startedAt: 0,
     })),
     startedAt,
@@ -119,7 +115,7 @@ export async function runSkill(
     const stepDef = skill.steps[i];
     const stepRecord: SkillRunStepRecord = run.steps[i];
 
-    stepRecord.status = "running";
+    stepRecord.status = 'running';
     stepRecord.startedAt = Date.now();
     stepRecord.inputs = stepDef.parameters;
     runStore.saveRun(run);
@@ -137,18 +133,17 @@ export async function runSkill(
         skillId: skill.id,
       });
 
-      stepRecord.status = "completed";
+      stepRecord.status = 'completed';
       stepRecord.outputs = outputs;
       stepRecord.completedAt = Date.now();
       stepOutputs.set(stepDef.id, outputs);
       runStore.saveRun(run);
     } catch (err) {
-      stepRecord.status = "failed";
-      stepRecord.error =
-        err instanceof Error ? err.message : String(err);
+      stepRecord.status = 'failed';
+      stepRecord.error = err instanceof Error ? err.message : String(err);
       stepRecord.completedAt = Date.now();
 
-      run.status = "failed";
+      run.status = 'failed';
       run.error = `Step '${stepDef.name}' failed: ${stepRecord.error}`;
       run.completedAt = Date.now();
       run.latencyMs = run.completedAt - startedAt;
@@ -159,11 +154,9 @@ export async function runSkill(
   }
 
   const lastStepOutputs =
-    stepOutputs.size > 0
-      ? stepOutputs.get(skill.steps[skill.steps.length - 1].id) ?? {}
-      : {};
+    stepOutputs.size > 0 ? (stepOutputs.get(skill.steps[skill.steps.length - 1].id) ?? {}) : {};
 
-  run.status = "completed";
+  run.status = 'completed';
   run.outputs = lastStepOutputs;
   run.completedAt = Date.now();
   run.latencyMs = run.completedAt - startedAt;
@@ -173,23 +166,17 @@ export async function runSkill(
   return run;
 }
 
-export function registerSkill(
-  skill: SkillDefinition,
-  registry?: SkillRegistry
-): void {
+export function registerSkill(skill: SkillDefinition, registry?: SkillRegistry): void {
   (registry ?? defaultSkillRegistry).registerSkill(skill);
 }
 
-export function getSkill(
-  skillId: string,
-  registry?: SkillRegistry
-): SkillDefinition | undefined {
+export function getSkill(skillId: string, registry?: SkillRegistry): SkillDefinition | undefined {
   return (registry ?? defaultSkillRegistry).getSkill(skillId);
 }
 
 export function listSkills(
   query?: SkillRegistryQuery,
-  registry?: SkillRegistry
+  registry?: SkillRegistry,
 ): SkillDefinition[] {
   return (registry ?? defaultSkillRegistry).listSkills(query);
 }

@@ -3,7 +3,7 @@ import {
   getSkillsForAgent,
   resolveSkillChain,
   type SkillPackage,
-} from "./skill-registry.js";
+} from './skill-registry.js';
 
 export interface SkillComposition {
   primarySkill: SkillPackage;
@@ -30,9 +30,7 @@ export function selectSkillsForTask(
   const discovered = discoverSkillsForQuery(query, agentId);
   const agentSkills = getSkillsForAgent(agentId);
 
-  const candidates = discovered.length > 0
-    ? discovered
-    : agentSkills.slice(0, 3);
+  const candidates = discovered.length > 0 ? discovered : agentSkills.slice(0, 3);
 
   const selected = candidates.slice(0, maxSkills);
 
@@ -49,14 +47,15 @@ export function selectSkillsForTask(
 
   if (allowChaining && primarySkill.chainable && primarySkill.chainableWith.length > 0) {
     const chain = resolveSkillChain(primarySkill.skillId, 2);
-    chainedSkills = chain.slice(1).filter(s => s.applicableAgents.includes(agentId));
+    chainedSkills = chain.slice(1).filter((s) => s.applicableAgents.includes(agentId));
   }
 
   const composition = buildComposition(primarySkill, chainedSkills);
 
-  const rationale = selected.length === 0
-    ? "No skills matched — using base agent reasoning"
-    : `Selected ${selected.map(s => s.name).join(", ")} based on query intent`;
+  const rationale =
+    selected.length === 0
+      ? 'No skills matched — using base agent reasoning'
+      : `Selected ${selected.map((s) => s.name).join(', ')} based on query intent`;
 
   return { selectedSkills: selected, composition, rationale };
 }
@@ -67,12 +66,14 @@ function buildComposition(primary: SkillPackage, chained: SkillPackage[]): Skill
 
   promptParts.push(`## Active Skills\n`);
   for (const skill of allSkills) {
-    promptParts.push(`### ${skill.name} (${skill.skillId})\n${skill.systemPromptFragment}\n**Hint:** ${skill.executionHint}`);
+    promptParts.push(
+      `### ${skill.name} (${skill.skillId})\n${skill.systemPromptFragment}\n**Hint:** ${skill.executionHint}`,
+    );
   }
 
-  const systemPromptInjection = promptParts.join("\n\n");
+  const systemPromptInjection = promptParts.join('\n\n');
   const estimatedTotalTokens = allSkills.reduce((sum, s) => sum + s.estimatedTokens, 0);
-  const executionOrder = allSkills.map(s => s.skillId);
+  const executionOrder = allSkills.map((s) => s.skillId);
 
   return {
     primarySkill: primary,

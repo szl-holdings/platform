@@ -14,15 +14,15 @@
  *   • Learning loop calibration        → learning-loop.ts
  */
 
-export * from "./correlation";
+export * from './bottlenecks';
 export type {
-  TemporalProximityOptions,
   TemporallyCorrelatedEvent,
-} from "./correlation";
-export * from "./decision-records";
-export * from "./workflow-360";
-export * from "./entity-investigation";
-export * from "./traceability";
-export * from "./bottlenecks";
-export * from "./patterns";
-export * from "./learning-loop";
+  TemporalProximityOptions,
+} from './correlation';
+export * from './correlation';
+export * from './decision-records';
+export * from './entity-investigation';
+export * from './learning-loop';
+export * from './patterns';
+export * from './traceability';
+export * from './workflow-360';

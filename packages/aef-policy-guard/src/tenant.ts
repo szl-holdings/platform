@@ -1,4 +1,4 @@
-import type { PolicyDecision, PolicyContext } from "./types.js";
+import type { PolicyContext, PolicyDecision } from './types.js';
 
 export interface TenantBoundaryConfig {
   registeredTenants: Set<string>;
@@ -23,7 +23,7 @@ export class TenantBoundaryEnforcer {
           `Tenant '${context.tenantId}' is not registered in AEF. Cross-tenant access is not permitted.`,
         ],
         redactions: [],
-        appliedRuleIds: ["tenant-boundary-enforcer"],
+        appliedRuleIds: ['tenant-boundary-enforcer'],
       };
     }
     return null;

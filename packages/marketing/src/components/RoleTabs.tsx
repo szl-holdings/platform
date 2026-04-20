@@ -1,12 +1,12 @@
-import { useState, type ReactNode } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
+import { AnimatePresence, motion } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
+import { type ReactNode, useState } from 'react';
 
-const BG = "hsl(214,16%,4%)";
-const SURFACE = "hsla(0,0%,100%,0.035)";
-const BORDER = "hsla(0,0%,100%,0.07)";
-const TEXT = "hsl(38,8%,92%)";
-const TEXT_SEC = "hsl(214,7%,55%)";
+const BG = 'hsl(214,16%,4%)';
+const SURFACE = 'hsla(0,0%,100%,0.035)';
+const BORDER = 'hsla(0,0%,100%,0.07)';
+const TEXT = 'hsl(38,8%,92%)';
+const TEXT_SEC = 'hsl(214,7%,55%)';
 
 export interface RoleTab {
   id: string;
@@ -29,10 +29,10 @@ export interface RoleTabsProps {
 }
 
 export function RoleTabs({
-  headline = "Built for every stakeholder.",
-  subheadline = "The same governed loop — different signal surfaces for different roles.",
+  headline = 'Built for every stakeholder.',
+  subheadline = 'The same governed loop — different signal surfaces for different roles.',
   tabs,
-  accentColor = "hsl(191,92%,44%)",
+  accentColor = 'hsl(191,92%,44%)',
   onTabSwitch,
 }: RoleTabsProps) {
   const [active, setActive] = useState(0);
@@ -40,7 +40,7 @@ export function RoleTabs({
 
   const handleSwitch = (i: number) => {
     setActive(i);
-    onTabSwitch?.(tabs[i]?.id ?? "");
+    onTabSwitch?.(tabs[i]?.id ?? '');
   };
 
   return (
@@ -96,11 +96,17 @@ export function RoleTabs({
                   <div className="flex items-center gap-3 mb-4">
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: `${accentColor}15`, border: `1px solid ${accentColor}30` }}
+                      style={{
+                        background: `${accentColor}15`,
+                        border: `1px solid ${accentColor}30`,
+                      }}
                     >
                       <tab.icon className="w-5 h-5" style={{ color: accentColor }} />
                     </div>
-                    <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: accentColor }}>
+                    <span
+                      className="text-xs font-semibold tracking-widest uppercase"
+                      style={{ color: accentColor }}
+                    >
                       {tab.label}
                     </span>
                   </div>
@@ -112,8 +118,8 @@ export function RoleTabs({
                     {tab.body}
                   </p>
 
-                  {tab.ctaLabel && (
-                    tab.ctaHref ? (
+                  {tab.ctaLabel &&
+                    (tab.ctaHref ? (
                       <a
                         href={tab.ctaHref}
                         onClick={tab.onCta}
@@ -130,12 +136,14 @@ export function RoleTabs({
                       >
                         {tab.ctaLabel}
                       </button>
-                    )
-                  )}
+                    ))}
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: TEXT_SEC }}>
+                  <p
+                    className="text-xs font-semibold tracking-widest uppercase mb-4"
+                    style={{ color: TEXT_SEC }}
+                  >
                     Key outcomes
                   </p>
                   <div className="flex flex-col gap-3">
@@ -143,13 +151,19 @@ export function RoleTabs({
                       <div
                         key={i}
                         className="flex items-start gap-3 p-4 rounded-xl"
-                        style={{ background: `${accentColor}06`, border: `1px solid ${accentColor}15` }}
+                        style={{
+                          background: `${accentColor}06`,
+                          border: `1px solid ${accentColor}15`,
+                        }}
                       >
                         <div
                           className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                           style={{ background: `${accentColor}20` }}
                         >
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: accentColor }} />
+                          <div
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{ background: accentColor }}
+                          />
                         </div>
                         <p className="text-sm" style={{ color: TEXT }}>
                           {point}

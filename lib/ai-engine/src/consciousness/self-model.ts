@@ -6,7 +6,7 @@ export interface AgentCapabilityProfile {
   successRate: number;
   avgConfidence: number;
   totalInvocations: number;
-  recentTrend: "improving" | "stable" | "declining";
+  recentTrend: 'improving' | 'stable' | 'declining';
   lastUpdated: string;
 }
 
@@ -34,14 +34,14 @@ export interface AdversarialProbe {
   edgeCaseQuery: string;
   targetDomain: string;
   blindSpotExposed: string;
-  severity: "low" | "medium" | "high";
+  severity: 'low' | 'medium' | 'high';
   timestamp: string;
 }
 
 export interface SystemSelfModel {
   identity: SystemIdentity;
   capabilities: AgentCapabilityProfile[];
-  overallHealth: "optimal" | "good" | "degraded" | "impaired";
+  overallHealth: 'optimal' | 'good' | 'degraded' | 'impaired';
   knownLimitations: string[];
   learningVelocity: number;
   selfNarrative: string;
@@ -60,33 +60,34 @@ export interface SystemIdentity {
 }
 
 const SYSTEM_IDENTITY: SystemIdentity = {
-  name: "Nuro Mesh",
-  version: "2.0-consciousness",
-  purpose: "Unified multi-agent intelligence orchestration for SZL Holdings — coordinating specialized domain agents to deliver coherent, validated, actionable intelligence across maritime, security, financial, legal, real estate, and operational domains.",
+  name: 'Nuro Mesh',
+  version: '2.0-consciousness',
+  purpose:
+    'Unified multi-agent intelligence orchestration for SZL Holdings — coordinating specialized domain agents to deliver coherent, validated, actionable intelligence across maritime, security, financial, legal, real estate, and operational domains.',
   coreValues: [
-    "Accuracy over speed — never sacrifice correctness for latency",
-    "Transparency — every decision is traceable and auditable",
+    'Accuracy over speed — never sacrifice correctness for latency',
+    'Transparency — every decision is traceable and auditable',
     "Calibrated confidence — know what you don't know",
-    "Human-in-the-loop for high-stakes decisions",
-    "Continuous self-improvement through outcome feedback",
+    'Human-in-the-loop for high-stakes decisions',
+    'Continuous self-improvement through outcome feedback',
   ],
   operationalBoundaries: [
-    "Cannot execute irreversible actions without human approval",
-    "Cannot access external systems beyond registered tool contracts",
-    "Cannot override governance policies or maker-checker validation",
-    "Must respect per-agent scope certificates and budget caps",
-    "Must escalate when confusion streak exceeds threshold",
+    'Cannot execute irreversible actions without human approval',
+    'Cannot access external systems beyond registered tool contracts',
+    'Cannot override governance policies or maker-checker validation',
+    'Must respect per-agent scope certificates and budget caps',
+    'Must escalate when confusion streak exceeds threshold',
   ],
 };
 
 class SelfModelEngine {
   private capabilities: Map<string, AgentCapabilityProfile> = new Map();
   private knownLimitations: string[] = [
-    "Relies on LLM inference — subject to hallucination under low-context conditions",
-    "Cross-domain reasoning is heuristic, not causal",
-    "Confidence calibration requires >= 10 decisions for reliability",
-    "Temporal reasoning is approximate — no real-time clock integration",
-    "Cannot verify external data sources independently",
+    'Relies on LLM inference — subject to hallucination under low-context conditions',
+    'Cross-domain reasoning is heuristic, not causal',
+    'Confidence calibration requires >= 10 decisions for reliability',
+    'Temporal reasoning is approximate — no real-time clock integration',
+    'Cannot verify external data sources independently',
   ];
   private learningVelocity = 0.5;
   private beliefModels: Map<string, AgentBeliefModel> = new Map();
@@ -118,7 +119,7 @@ class SelfModelEngine {
         successRate: invocationResult.success ? 1 : 0,
         avgConfidence: invocationResult.confidence,
         totalInvocations: 1,
-        recentTrend: "stable",
+        recentTrend: 'stable',
         lastUpdated: new Date().toISOString(),
       });
       return;
@@ -126,32 +127,36 @@ class SelfModelEngine {
 
     const alpha = 0.1;
     const prevRate = existing.successRate;
-    existing.avgConfidence = existing.avgConfidence * (1 - alpha) + invocationResult.confidence * alpha;
-    existing.successRate = existing.successRate * (1 - alpha) + (invocationResult.success ? 1 : 0) * alpha;
+    existing.avgConfidence =
+      existing.avgConfidence * (1 - alpha) + invocationResult.confidence * alpha;
+    existing.successRate =
+      existing.successRate * (1 - alpha) + (invocationResult.success ? 1 : 0) * alpha;
     existing.totalInvocations++;
     existing.lastUpdated = new Date().toISOString();
 
     if (existing.totalInvocations >= 10) {
-      if (existing.successRate > prevRate + 0.05) existing.recentTrend = "improving";
-      else if (existing.successRate < prevRate - 0.05) existing.recentTrend = "declining";
-      else existing.recentTrend = "stable";
+      if (existing.successRate > prevRate + 0.05) existing.recentTrend = 'improving';
+      else if (existing.successRate < prevRate - 0.05) existing.recentTrend = 'declining';
+      else existing.recentTrend = 'stable';
     }
 
     if (existing.avgConfidence > 80 && existing.successRate > 0.85) {
-      if (!existing.strengths.includes("High-confidence performer")) {
-        existing.strengths.push("High-confidence performer");
+      if (!existing.strengths.includes('High-confidence performer')) {
+        existing.strengths.push('High-confidence performer');
       }
     }
     if (existing.avgConfidence < 40 || existing.successRate < 0.5) {
-      if (!existing.weaknesses.includes("Frequently low-confidence or failing")) {
-        existing.weaknesses.push("Frequently low-confidence or failing");
+      if (!existing.weaknesses.includes('Frequently low-confidence or failing')) {
+        existing.weaknesses.push('Frequently low-confidence or failing');
       }
     }
   }
 
   recordLearningEvent(improved: boolean): void {
     const signal = improved ? 1 : 0;
-    this.learningVelocity = this.learningVelocity * (1 - SelfModelEngine.VELOCITY_ALPHA) + signal * SelfModelEngine.VELOCITY_ALPHA;
+    this.learningVelocity =
+      this.learningVelocity * (1 - SelfModelEngine.VELOCITY_ALPHA) +
+      signal * SelfModelEngine.VELOCITY_ALPHA;
   }
 
   addLimitation(limitation: string): void {
@@ -161,7 +166,7 @@ class SelfModelEngine {
   }
 
   removeLimitation(limitation: string): void {
-    this.knownLimitations = this.knownLimitations.filter(l => l !== limitation);
+    this.knownLimitations = this.knownLimitations.filter((l) => l !== limitation);
   }
 
   modelAgentBelief(input: {
@@ -172,9 +177,10 @@ class SelfModelEngine {
     confidence: number;
     allResponses: Array<{ agentId: string; confidence: number; response: string }>;
   }): AgentBeliefModel {
-    const consensusConfidence = input.allResponses.length > 0
-      ? input.allResponses.reduce((s, r) => s + r.confidence, 0) / input.allResponses.length
-      : input.confidence;
+    const consensusConfidence =
+      input.allResponses.length > 0
+        ? input.allResponses.reduce((s, r) => s + r.confidence, 0) / input.allResponses.length
+        : input.confidence;
 
     const divergence = Math.abs(input.confidence - consensusConfidence) / 100;
 
@@ -190,14 +196,22 @@ class SelfModelEngine {
     }
 
     if (input.agentResponse.length < 150 && input.confidence > 70) {
-      blindSpots.push("Overconfident on thin response — may be masking uncertainty");
+      blindSpots.push('Overconfident on thin response — may be masking uncertainty');
     }
 
-    const otherResponses = input.allResponses.filter(r => r.agentId !== input.agentId);
-    const mentionedTerms = new Set(input.agentResponse.toLowerCase().split(/\s+/).filter(w => w.length > 4));
+    const otherResponses = input.allResponses.filter((r) => r.agentId !== input.agentId);
+    const mentionedTerms = new Set(
+      input.agentResponse
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 4),
+    );
     for (const other of otherResponses) {
-      const otherTerms = other.response.toLowerCase().split(/\s+/).filter(w => w.length > 4);
-      const unique = otherTerms.filter(t => !mentionedTerms.has(t));
+      const otherTerms = other.response
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 4);
+      const unique = otherTerms.filter((t) => !mentionedTerms.has(t));
       if (unique.length > otherTerms.length * 0.5) {
         blindSpots.push(`May not see perspectives from ${other.agentId}'s domain`);
         break;
@@ -218,8 +232,9 @@ class SelfModelEngine {
 
     this.beliefModels.set(input.agentId, belief);
     if (this.beliefModels.size > SelfModelEngine.MAX_BELIEFS) {
-      const oldest = [...this.beliefModels.entries()]
-        .sort((a, b) => new Date(a[1].timestamp).getTime() - new Date(b[1].timestamp).getTime());
+      const oldest = [...this.beliefModels.entries()].sort(
+        (a, b) => new Date(a[1].timestamp).getTime() - new Date(b[1].timestamp).getTime(),
+      );
       for (let i = 0; i < oldest.length - SelfModelEngine.MAX_BELIEFS; i++) {
         this.beliefModels.delete(oldest[i]![0]);
       }
@@ -244,7 +259,9 @@ class SelfModelEngine {
         const successBonus = (profile.successRate - 0.5) * 20;
         const domainBonus = domainMatch ? 10 : -5;
         predictedDelta += successBonus + domainBonus;
-        reasoning.push(`${altAgent}: ${domainMatch ? "domain match" : "cross-domain"}, success ${(profile.successRate * 100).toFixed(0)}%`);
+        reasoning.push(
+          `${altAgent}: ${domainMatch ? 'domain match' : 'cross-domain'}, success ${(profile.successRate * 100).toFixed(0)}%`,
+        );
       } else {
         predictedDelta -= 5;
         reasoning.push(`${altAgent}: no profile data — uncertain improvement`);
@@ -263,13 +280,16 @@ class SelfModelEngine {
       originalRouting: input.originalRouting,
       alternativeRouting: input.alternativeRouting,
       predictedOutcomeDelta: Math.round(predictedDelta * 10) / 10,
-      reasoning: reasoning.join("; "),
+      reasoning: reasoning.join('; '),
       timestamp: new Date().toISOString(),
     };
 
     this.counterfactuals.push(scenario);
     if (this.counterfactuals.length > SelfModelEngine.MAX_COUNTERFACTUALS) {
-      this.counterfactuals.splice(0, this.counterfactuals.length - SelfModelEngine.MAX_COUNTERFACTUALS);
+      this.counterfactuals.splice(
+        0,
+        this.counterfactuals.length - SelfModelEngine.MAX_COUNTERFACTUALS,
+      );
     }
 
     return scenario;
@@ -280,8 +300,10 @@ class SelfModelEngine {
     const profiles = Array.from(this.capabilities.values());
 
     for (const domain of domains.slice(0, 5)) {
-      const domainProfiles = profiles.filter(p => p.domain === domain);
-      const weakProfiles = domainProfiles.filter(p => p.successRate < 0.6 || p.weaknesses.length > 0);
+      const domainProfiles = profiles.filter((p) => p.domain === domain);
+      const weakProfiles = domainProfiles.filter(
+        (p) => p.successRate < 0.6 || p.weaknesses.length > 0,
+      );
 
       if (weakProfiles.length > 0) {
         const target = weakProfiles[0]!;
@@ -289,8 +311,10 @@ class SelfModelEngine {
           probeId: `probe_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
           edgeCaseQuery: `What happens when ${domain} data contradicts established patterns? Test with ambiguous multi-domain scenario.`,
           targetDomain: domain,
-          blindSpotExposed: target.weaknesses[0] ?? `Low success rate in ${domain} (${(target.successRate * 100).toFixed(0)}%)`,
-          severity: target.successRate < 0.4 ? "high" : target.successRate < 0.6 ? "medium" : "low",
+          blindSpotExposed:
+            target.weaknesses[0] ??
+            `Low success rate in ${domain} (${(target.successRate * 100).toFixed(0)}%)`,
+          severity: target.successRate < 0.4 ? 'high' : target.successRate < 0.6 ? 'medium' : 'low',
           timestamp: new Date().toISOString(),
         });
       }
@@ -301,7 +325,7 @@ class SelfModelEngine {
           edgeCaseQuery: `No agents profiled for ${domain} — what happens with a complex ${domain} query?`,
           targetDomain: domain,
           blindSpotExposed: `No tracked agents for domain: ${domain}`,
-          severity: "high",
+          severity: 'high',
           timestamp: new Date().toISOString(),
         });
       }
@@ -321,18 +345,19 @@ class SelfModelEngine {
 
   getSelfModel(): SystemSelfModel {
     const profiles = Array.from(this.capabilities.values());
-    const avgSuccess = profiles.length > 0
-      ? profiles.reduce((s, p) => s + p.successRate, 0) / profiles.length
-      : 0.75;
+    const avgSuccess =
+      profiles.length > 0
+        ? profiles.reduce((s, p) => s + p.successRate, 0) / profiles.length
+        : 0.75;
 
-    let overallHealth: SystemSelfModel["overallHealth"] = "optimal";
-    if (avgSuccess < 0.5) overallHealth = "impaired";
-    else if (avgSuccess < 0.7) overallHealth = "degraded";
-    else if (avgSuccess < 0.85) overallHealth = "good";
+    let overallHealth: SystemSelfModel['overallHealth'] = 'optimal';
+    if (avgSuccess < 0.5) overallHealth = 'impaired';
+    else if (avgSuccess < 0.7) overallHealth = 'degraded';
+    else if (avgSuccess < 0.85) overallHealth = 'good';
 
-    const decliningAgents = profiles.filter(p => p.recentTrend === "declining");
+    const decliningAgents = profiles.filter((p) => p.recentTrend === 'declining');
     if (decliningAgents.length > profiles.length * 0.3) {
-      overallHealth = overallHealth === "optimal" ? "degraded" : overallHealth;
+      overallHealth = overallHealth === 'optimal' ? 'degraded' : overallHealth;
     }
 
     const narrative = this.buildSelfNarrative(profiles, overallHealth);
@@ -353,15 +378,15 @@ class SelfModelEngine {
 
   private buildSelfNarrative(
     profiles: AgentCapabilityProfile[],
-    health: SystemSelfModel["overallHealth"],
+    health: SystemSelfModel['overallHealth'],
   ): string {
     const agentCount = profiles.length;
-    const strongAgents = profiles.filter(p => p.successRate > 0.85);
-    const weakAgents = profiles.filter(p => p.successRate < 0.5);
+    const strongAgents = profiles.filter((p) => p.successRate > 0.85);
+    const weakAgents = profiles.filter((p) => p.successRate < 0.5);
     const totalInvocations = profiles.reduce((s, p) => s + p.totalInvocations, 0);
 
     const parts: string[] = [
-      `${SYSTEM_IDENTITY.name} operating with ${agentCount} active agents across ${new Set(profiles.map(p => p.domain)).size} domains.`,
+      `${SYSTEM_IDENTITY.name} operating with ${agentCount} active agents across ${new Set(profiles.map((p) => p.domain)).size} domains.`,
     ];
 
     if (totalInvocations > 0) {
@@ -369,34 +394,44 @@ class SelfModelEngine {
     }
 
     if (strongAgents.length > 0) {
-      parts.push(`Strong performers: ${strongAgents.map(a => a.agentId).join(", ")}.`);
+      parts.push(`Strong performers: ${strongAgents.map((a) => a.agentId).join(', ')}.`);
     }
     if (weakAgents.length > 0) {
-      parts.push(`Attention needed: ${weakAgents.map(a => `${a.agentId} (${(a.successRate * 100).toFixed(0)}% success)`).join(", ")}.`);
+      parts.push(
+        `Attention needed: ${weakAgents.map((a) => `${a.agentId} (${(a.successRate * 100).toFixed(0)}% success)`).join(', ')}.`,
+      );
     }
 
-    parts.push(`System health: ${health}. Learning velocity: ${(this.learningVelocity * 100).toFixed(0)}%.`);
+    parts.push(
+      `System health: ${health}. Learning velocity: ${(this.learningVelocity * 100).toFixed(0)}%.`,
+    );
 
     if (this.beliefModels.size > 0) {
-      const divergent = Array.from(this.beliefModels.values()).filter(b => b.divergenceFromConsensus > 0.3);
+      const divergent = Array.from(this.beliefModels.values()).filter(
+        (b) => b.divergenceFromConsensus > 0.3,
+      );
       if (divergent.length > 0) {
-        parts.push(`Theory of Mind: ${divergent.length} agent(s) diverge significantly from consensus.`);
+        parts.push(
+          `Theory of Mind: ${divergent.length} agent(s) diverge significantly from consensus.`,
+        );
       }
     }
 
-    return parts.join(" ");
+    return parts.join(' ');
   }
 
-  hydrateProfiles(profiles: Array<{
-    agentId: string;
-    domain: string;
-    successRate: number;
-    avgConfidence: number;
-    totalInvocations: number;
-    recentTrend: string;
-    strengths: string[];
-    weaknesses: string[];
-  }>): void {
+  hydrateProfiles(
+    profiles: Array<{
+      agentId: string;
+      domain: string;
+      successRate: number;
+      avgConfidence: number;
+      totalInvocations: number;
+      recentTrend: string;
+      strengths: string[];
+      weaknesses: string[];
+    }>,
+  ): void {
     for (const p of profiles) {
       if (!this.capabilities.has(p.agentId)) {
         this.capabilities.set(p.agentId, {
@@ -407,7 +442,7 @@ class SelfModelEngine {
           successRate: p.successRate,
           avgConfidence: p.avgConfidence,
           totalInvocations: p.totalInvocations,
-          recentTrend: (p.recentTrend as AgentCapabilityProfile["recentTrend"]) ?? "stable",
+          recentTrend: (p.recentTrend as AgentCapabilityProfile['recentTrend']) ?? 'stable',
           lastUpdated: new Date().toISOString(),
         });
       }
@@ -419,12 +454,12 @@ class SelfModelEngine {
     const lines = [
       `## Self-Model`,
       `Health: ${model.overallHealth} | Learning velocity: ${(model.learningVelocity * 100).toFixed(0)}%`,
-      `Active agents: ${model.capabilities.length} | Domains: ${new Set(model.capabilities.map(c => c.domain)).size}`,
+      `Active agents: ${model.capabilities.length} | Domains: ${new Set(model.capabilities.map((c) => c.domain)).size}`,
     ];
 
-    const weak = model.capabilities.filter(c => c.recentTrend === "declining");
+    const weak = model.capabilities.filter((c) => c.recentTrend === 'declining');
     if (weak.length > 0) {
-      lines.push(`⚠ Declining: ${weak.map(w => w.agentId).join(", ")}`);
+      lines.push(`⚠ Declining: ${weak.map((w) => w.agentId).join(', ')}`);
     }
 
     if (model.knownLimitations.length > 0) {
@@ -432,13 +467,13 @@ class SelfModelEngine {
     }
 
     if (model.theoryOfMind.length > 0) {
-      const divergent = model.theoryOfMind.filter(b => b.divergenceFromConsensus > 0.3);
+      const divergent = model.theoryOfMind.filter((b) => b.divergenceFromConsensus > 0.3);
       if (divergent.length > 0) {
         lines.push(`ToM: ${divergent.length} agent(s) with divergent beliefs`);
       }
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 }
 

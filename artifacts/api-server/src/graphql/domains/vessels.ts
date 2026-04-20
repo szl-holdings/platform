@@ -1,14 +1,14 @@
-import { withFilter } from "graphql-subscriptions";
-import { pubsub, VESSELS_EVENTS } from "../../lib/pubsub-bridge.js";
+import { withFilter } from 'graphql-subscriptions';
 import {
-  listVessels,
+  getVessel,
+  listVesselEvents,
   listVesselPositions,
   listVesselRoutes,
-  listVesselEvents,
-  getVessel,
+  listVessels,
   type VesselsStoragePort,
-} from "../../lib/domain-services/vessels/index.js";
-import type { GraphQLContext } from "../index.js";
+} from '../../lib/domain-services/vessels/index.js';
+import { pubsub, VESSELS_EVENTS } from '../../lib/pubsub-bridge.js';
+import type { GraphQLContext } from '../index.js';
 
 export const vesselsTypeDefs = `#graphql
   type Vessel {
@@ -61,50 +61,80 @@ export const vesselsTypeDefs = `#graphql
 `;
 
 async function buildVesselsStorage(): Promise<VesselsStoragePort> {
-  const { db } = await import("@szl-holdings/db");
-  const { vesselsTable, vesselsPositionsTable, vesselsRoutesTable, vesselsEventsTable } = await import("@szl-holdings/db/schema");
-  const { desc, eq, and } = await import("drizzle-orm");
+  const { db } = await import('@szl-holdings/db');
+  const { vesselsTable, vesselsPositionsTable, vesselsRoutesTable, vesselsEventsTable } =
+    await import('@szl-holdings/db/schema');
+  const { desc, eq, and } = await import('drizzle-orm');
 
   return {
     async listVessels(args) {
       try {
-        const q = db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt)).limit(args.limit).offset(args.offset);
+        const q = db
+          .select()
+          .from(vesselsTable)
+          .orderBy(desc(vesselsTable.createdAt))
+          .limit(args.limit)
+          .offset(args.offset);
         if (args.status) return await q.where(eq(vesselsTable.status, args.status as any));
         return await q;
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
     async getVessel(id) {
       try {
         const rows = await db.select().from(vesselsTable).where(eq(vesselsTable.id, id)).limit(1);
         return rows[0] ?? null;
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     },
     async listPositions(args) {
       try {
-        const q = db.select().from(vesselsPositionsTable).orderBy(desc(vesselsPositionsTable.recordedAt)).limit(args.limit);
+        const q = db
+          .select()
+          .from(vesselsPositionsTable)
+          .orderBy(desc(vesselsPositionsTable.recordedAt))
+          .limit(args.limit);
         if (args.vesselId) return await q.where(eq(vesselsPositionsTable.vesselId, args.vesselId));
         return await q;
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
     async listRoutes(args) {
       try {
         const conditions = [];
         if (args.vesselId) conditions.push(eq(vesselsRoutesTable.vesselId, args.vesselId));
         if (args.status) conditions.push(eq(vesselsRoutesTable.status, args.status as any));
-        const q = db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.departureAt)).limit(args.limit).offset(args.offset);
+        const q = db
+          .select()
+          .from(vesselsRoutesTable)
+          .orderBy(desc(vesselsRoutesTable.departureAt))
+          .limit(args.limit)
+          .offset(args.offset);
         if (conditions.length > 0) return await q.where(and(...conditions));
         return await q;
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
     async listEvents(args) {
       try {
         const conditions = [];
         if (args.vesselId) conditions.push(eq(vesselsEventsTable.vesselId, args.vesselId));
         if (args.severity) conditions.push(eq(vesselsEventsTable.severity, args.severity as any));
-        const q = db.select().from(vesselsEventsTable).orderBy(desc(vesselsEventsTable.occurredAt)).limit(args.limit).offset(args.offset);
+        const q = db
+          .select()
+          .from(vesselsEventsTable)
+          .orderBy(desc(vesselsEventsTable.occurredAt))
+          .limit(args.limit)
+          .offset(args.offset);
         if (conditions.length > 0) return await q.where(and(...conditions));
         return await q;
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
   };
 }
@@ -127,7 +157,10 @@ export const vesselsResolvers = {
         limit: args.limit,
       });
     },
-    vesselRoutes: async (_: unknown, args: { vesselId?: string; status?: string; limit?: number; offset?: number }) => {
+    vesselRoutes: async (
+      _: unknown,
+      args: { vesselId?: string; status?: string; limit?: number; offset?: number },
+    ) => {
       return listVesselRoutes(await buildVesselsStorage(), {
         vesselId: args.vesselId ? parseInt(args.vesselId, 10) : undefined,
         status: args.status,
@@ -135,7 +168,10 @@ export const vesselsResolvers = {
         offset: args.offset,
       });
     },
-    vesselEvents: async (_: unknown, args: { vesselId?: string; severity?: string; limit?: number; offset?: number }) => {
+    vesselEvents: async (
+      _: unknown,
+      args: { vesselId?: string; severity?: string; limit?: number; offset?: number },
+    ) => {
       return listVesselEvents(await buildVesselsStorage(), {
         vesselId: args.vesselId ? parseInt(args.vesselId, 10) : undefined,
         severity: args.severity,
@@ -148,7 +184,10 @@ export const vesselsResolvers = {
     vesselPositionUpdated: {
       subscribe: withFilter(
         () => pubsub.asyncIterableIterator(VESSELS_EVENTS.POSITION_UPDATED),
-        (payload: { vesselPositionUpdated: { vesselId: string } }, variables: { vesselId?: string }) => {
+        (
+          payload: { vesselPositionUpdated: { vesselId: string } },
+          variables: { vesselId?: string },
+        ) => {
           if (!variables.vesselId) return true;
           return payload.vesselPositionUpdated.vesselId === variables.vesselId;
         },

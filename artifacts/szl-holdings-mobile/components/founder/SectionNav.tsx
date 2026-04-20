@@ -1,14 +1,7 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  ScrollView,
-} from "react-native";
-import { BlurView } from "expo-blur";
-import { useColors } from "@/hooks/useColors";
+import { BlurView } from 'expo-blur';
+import React from 'react';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useColors } from '@/hooks/useColors';
 
 export type Section = {
   id: string;
@@ -23,14 +16,14 @@ type SectionNavProps = {
 
 export function SectionNav({ sections, activeSection, onSectionPress }: SectionNavProps) {
   const colors = useColors();
-  const isIOS = Platform.OS === "ios";
+  const isIOS = Platform.OS === 'ios';
 
   return (
     <View style={[styles.wrapper, { borderBottomColor: colors.border }]}>
       {isIOS ? (
         <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
       ) : (
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(10,10,10,0.92)" }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(10,10,10,0.92)' }]} />
       )}
       <ScrollView
         horizontal
@@ -68,24 +61,24 @@ const styles = StyleSheet.create({
   wrapper: {
     height: 44,
     borderBottomWidth: 1,
-    position: "relative",
+    position: 'relative',
   },
   scrollContent: {
     paddingHorizontal: 16,
-    alignItems: "center",
+    alignItems: 'center',
     height: 44,
   },
   tab: {
     paddingHorizontal: 14,
     height: 44,
-    justifyContent: "center",
+    justifyContent: 'center',
     borderBottomWidth: 1.5,
-    borderBottomColor: "transparent",
+    borderBottomColor: 'transparent',
   },
   tabText: {
     fontSize: 11,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 1.2,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
 });

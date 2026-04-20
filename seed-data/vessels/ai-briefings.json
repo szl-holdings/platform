@@ -48,7 +48,16 @@
       "Implement FuelEU Maritime preparedness for 2025 well-to-wake intensity targets",
       "Update voyage P&L models to include EU ETS cost per voyage for commercial team"
     ],
-    "affectedVessels": ["MAERSK EDINBURGH", "EURONAV DANUBE", "MINERVA SOPHIA", "CMA CGM BOSPHORUS", "MSC AURORA", "TORM HELLAS", "CONSTANTA SPIRIT", "DANUBIA STAR"]
+    "affectedVessels": [
+      "MAERSK EDINBURGH",
+      "EURONAV DANUBE",
+      "MINERVA SOPHIA",
+      "CMA CGM BOSPHORUS",
+      "MSC AURORA",
+      "TORM HELLAS",
+      "CONSTANTA SPIRIT",
+      "DANUBIA STAR"
+    ]
   },
   {
     "id": 4,

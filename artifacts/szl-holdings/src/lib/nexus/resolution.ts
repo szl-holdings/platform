@@ -3,24 +3,24 @@
  * Fuzzy name matching, shared identifier resolution, and confidence-scored entity linking.
  */
 
-import { EntityRecord, KNOWLEDGE_GRAPH, type KnowledgeGraph } from "./graph";
+import { type EntityRecord, KNOWLEDGE_GRAPH, type KnowledgeGraph } from './graph';
 
 export interface ResolutionMatch {
   entity: EntityRecord;
-  confidence: number;       // 0–100
+  confidence: number; // 0–100
   matchMethod: MatchMethod;
-  matchedOn: string;        // what field matched
+  matchedOn: string; // what field matched
 }
 
 export type MatchMethod =
-  | "exact_id"
-  | "identifier_match"
-  | "exact_label"
-  | "alias_match"
-  | "fuzzy_label"
-  | "fuzzy_alias"
-  | "keyword_label"
-  | "keyword_alias";
+  | 'exact_id'
+  | 'identifier_match'
+  | 'exact_label'
+  | 'alias_match'
+  | 'fuzzy_label'
+  | 'fuzzy_alias'
+  | 'keyword_label'
+  | 'keyword_alias';
 
 /**
  * Jaro-Winkler similarity — industry standard for name matching.
@@ -68,15 +68,20 @@ function jaroWinklerSimilarity(s1: string, s2: string, prefixScale: number = 0.1
   const jaro = jaroSimilarity(s1, s2);
   const prefixLength = Math.min(
     4,
-    [...s1].findIndex((c, i) => c !== s2[i]) === -1 ? Math.min(s1.length, s2.length) :
-      [...s1].findIndex((c, i) => c !== s2[i])
+    [...s1].findIndex((c, i) => c !== s2[i]) === -1
+      ? Math.min(s1.length, s2.length)
+      : [...s1].findIndex((c, i) => c !== s2[i]),
   );
   return jaro + prefixLength * prefixScale * (1 - jaro);
 }
 
 /** Normalize a string for comparison: lowercase, remove punctuation, collapse whitespace. */
 function normalize(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
@@ -96,15 +101,25 @@ export function resolveEntity(
     let bestMatch: ResolutionMatch | null = null;
 
     // 1. Exact ID match (100%)
-    if (entity.id === q || entity.id === qNorm.replace(/\s+/g, "-")) {
-      bestMatch = { entity, confidence: 100, matchMethod: "exact_id", matchedOn: "id" };
+    if (entity.id === q || entity.id === qNorm.replace(/\s+/g, '-')) {
+      bestMatch = { entity, confidence: 100, matchMethod: 'exact_id', matchedOn: 'id' };
     }
 
     // 2. Identifier match — IMO, LEI, matter IDs, etc. (100%)
     if (!bestMatch) {
       for (const [key, val] of Object.entries(entity.identifiers)) {
-        if (val && (normalize(val) === qNorm || val.toLowerCase().includes(qNorm) || qNorm.includes(val.toLowerCase()))) {
-          bestMatch = { entity, confidence: 98, matchMethod: "identifier_match", matchedOn: `identifier:${key}=${val}` };
+        if (
+          val &&
+          (normalize(val) === qNorm ||
+            val.toLowerCase().includes(qNorm) ||
+            qNorm.includes(val.toLowerCase()))
+        ) {
+          bestMatch = {
+            entity,
+            confidence: 98,
+            matchMethod: 'identifier_match',
+            matchedOn: `identifier:${key}=${val}`,
+          };
           break;
         }
       }
@@ -112,14 +127,19 @@ export function resolveEntity(
 
     // 3. Exact label match (95%)
     if (!bestMatch && normalize(entity.label) === qNorm) {
-      bestMatch = { entity, confidence: 95, matchMethod: "exact_label", matchedOn: "label" };
+      bestMatch = { entity, confidence: 95, matchMethod: 'exact_label', matchedOn: 'label' };
     }
 
     // 4. Alias exact match (90%)
     if (!bestMatch) {
       for (const alias of entity.aliases) {
         if (normalize(alias) === qNorm) {
-          bestMatch = { entity, confidence: 90, matchMethod: "alias_match", matchedOn: `alias:${alias}` };
+          bestMatch = {
+            entity,
+            confidence: 90,
+            matchMethod: 'alias_match',
+            matchedOn: `alias:${alias}`,
+          };
           break;
         }
       }
@@ -132,7 +152,7 @@ export function resolveEntity(
         bestMatch = {
           entity,
           confidence: Math.round(sim * 100),
-          matchMethod: "fuzzy_label",
+          matchMethod: 'fuzzy_label',
           matchedOn: `label:${entity.label} (sim=${sim.toFixed(2)})`,
         };
       }
@@ -146,7 +166,7 @@ export function resolveEntity(
           bestMatch = {
             entity,
             confidence: Math.round(sim * 95),
-            matchMethod: "fuzzy_alias",
+            matchMethod: 'fuzzy_alias',
             matchedOn: `alias:${alias} (sim=${sim.toFixed(2)})`,
           };
           break;
@@ -156,12 +176,12 @@ export function resolveEntity(
 
     // 7. Keyword substring in label or alias (confidence based on coverage)
     if (!bestMatch) {
-      const qWords = qNorm.split(" ").filter(w => w.length > 2);
+      const qWords = qNorm.split(' ').filter((w) => w.length > 2);
       const labelNorm = normalize(entity.label);
-      const labelWords = labelNorm.split(" ");
-      const labelHits = qWords.filter(w => labelNorm.includes(w)).length;
+      const labelWords = labelNorm.split(' ');
+      const labelHits = qWords.filter((w) => labelNorm.includes(w)).length;
       const aliasHits = entity.aliases.reduce((max, alias) => {
-        const hits = qWords.filter(w => normalize(alias).includes(w)).length;
+        const hits = qWords.filter((w) => normalize(alias).includes(w)).length;
         return Math.max(max, hits);
       }, 0);
 
@@ -173,7 +193,7 @@ export function resolveEntity(
           bestMatch = {
             entity,
             confidence,
-            matchMethod: labelHits >= aliasHits ? "keyword_label" : "keyword_alias",
+            matchMethod: labelHits >= aliasHits ? 'keyword_label' : 'keyword_alias',
             matchedOn: `${hits}/${qWords.length} keywords matched`,
           };
         }
@@ -182,21 +202,21 @@ export function resolveEntity(
       // Additional: check if query contains entity type keywords
       if (!bestMatch) {
         const typeKeywords: Record<string, string[]> = {
-          vessel: ["vessel", "ship", "imo", "tanker", "bulk carrier", "panamax"],
-          person: ["person", "individual", "principal", "owner"],
-          organization: ["company", "corp", "ltd", "llc", "organization", "maritime"],
-          property: ["property", "real estate", "loft", "plaza", "building", "address"],
-          matter: ["matter", "litigation", "case", "dispute", "fraud", "lawsuit"],
-          threat: ["threat", "sanctions", "ofac", "apt", "cyber", "indicator"],
-          asset: ["asset", "deal", "facility", "credit"],
+          vessel: ['vessel', 'ship', 'imo', 'tanker', 'bulk carrier', 'panamax'],
+          person: ['person', 'individual', 'principal', 'owner'],
+          organization: ['company', 'corp', 'ltd', 'llc', 'organization', 'maritime'],
+          property: ['property', 'real estate', 'loft', 'plaza', 'building', 'address'],
+          matter: ['matter', 'litigation', 'case', 'dispute', 'fraud', 'lawsuit'],
+          threat: ['threat', 'sanctions', 'ofac', 'apt', 'cyber', 'indicator'],
+          asset: ['asset', 'deal', 'facility', 'credit'],
         };
         const typeKws = typeKeywords[entity.type] || [];
-        const typeHit = typeKws.some(kw => qNorm.includes(kw));
+        const typeHit = typeKws.some((kw) => qNorm.includes(kw));
         if (typeHit && labelHits > 0) {
           bestMatch = {
             entity,
             confidence: Math.max(minConfidence, 45),
-            matchMethod: "keyword_label",
+            matchMethod: 'keyword_label',
             matchedOn: `type:${entity.type} + keyword`,
           };
         }
@@ -228,7 +248,7 @@ export function findLinkedEntities(
   entityId: string,
   graph: KnowledgeGraph = KNOWLEDGE_GRAPH,
 ): Array<{ entity: EntityRecord; sharedIdentifiers: string[] }> {
-  const target = graph.entities.find(e => e.id === entityId);
+  const target = graph.entities.find((e) => e.id === entityId);
   if (!target) return [];
 
   const results: Array<{ entity: EntityRecord; sharedIdentifiers: string[] }> = [];

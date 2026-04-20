@@ -13,11 +13,11 @@
  * structural counts, and writes back a type-safe registry file.
  */
 
-import { readdirSync, statSync, readFileSync, writeFileSync, existsSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
-const ROOT = resolve(import.meta.dirname ?? process.cwd(), "..");
-const DRY_RUN = process.argv.includes("--dry-run");
+const ROOT = resolve(import.meta.dirname ?? process.cwd(), '..');
+const DRY_RUN = process.argv.includes('--dry-run');
 
 function countDir(path: string): number {
   if (!existsSync(path)) return 0;
@@ -51,8 +51,8 @@ function countDbTables(schemaDir: string): number {
     const files = readdirSync(schemaDir);
     for (const file of files) {
       const full = join(schemaDir, file);
-      if (statSync(full).isFile() && (file.endsWith(".ts") || file.endsWith(".js"))) {
-        const content = readFileSync(full, "utf-8");
+      if (statSync(full).isFile() && (file.endsWith('.ts') || file.endsWith('.js'))) {
+        const content = readFileSync(full, 'utf-8');
         const matches = content.match(/pgTable\s*\(/g);
         count += matches ? matches.length : 0;
       }
@@ -64,15 +64,15 @@ function countDbTables(schemaDir: string): number {
 }
 
 function countRegisteredArtifacts(): number {
-  const replitPath = join(ROOT, ".replit");
+  const replitPath = join(ROOT, '.replit');
   if (!existsSync(replitPath)) return 0;
-  const content = readFileSync(replitPath, "utf-8");
+  const content = readFileSync(replitPath, 'utf-8');
   const matches = content.match(/\[\[artifacts\]\]/g);
   return matches ? matches.length : 0;
 }
 
 function countScripts(): number {
-  const scriptsDir = join(ROOT, "scripts");
+  const scriptsDir = join(ROOT, 'scripts');
   if (!existsSync(scriptsDir)) return 0;
   return readdirSync(scriptsDir).filter((f) => {
     const full = join(scriptsDir, f);
@@ -82,54 +82,56 @@ function countScripts(): number {
 
 // Structural counts
 const structural = {
-  artifactCount: countDir(join(ROOT, "artifacts")),
+  artifactCount: countDir(join(ROOT, 'artifacts')),
   activeArtifactCount: countRegisteredArtifacts(),
-  packageCount: countDir(join(ROOT, "packages")),
-  libCount: countDir(join(ROOT, "lib")),
-  workerCount: countDir(join(ROOT, "workers")),
-  serviceCount: countDir(join(ROOT, "services")),
-  appCount: countDir(join(ROOT, "apps")),
+  packageCount: countDir(join(ROOT, 'packages')),
+  libCount: countDir(join(ROOT, 'lib')),
+  workerCount: countDir(join(ROOT, 'workers')),
+  serviceCount: countDir(join(ROOT, 'services')),
+  appCount: countDir(join(ROOT, 'apps')),
   scriptCount: countScripts(),
 };
 
 // Schema counts
-const dbSchemaDir = join(ROOT, "lib", "db", "src", "schema");
+const dbSchemaDir = join(ROOT, 'lib', 'db', 'src', 'schema');
 const schema = {
   dbTableCount: countDbTables(dbSchemaDir),
-  dbSchemaFileCount: countFiles(dbSchemaDir, ".ts"),
+  dbSchemaFileCount: countFiles(dbSchemaDir, '.ts'),
   dbSchemaDomainCount: 10,
 };
 
-console.log("=== Platform Metrics Generator ===");
-console.log("");
-console.log("Structural facts:");
+console.log('=== Platform Metrics Generator ===');
+console.log('');
+console.log('Structural facts:');
 for (const [key, value] of Object.entries(structural)) {
   console.log(`  ${key}: ${value}`);
 }
-console.log("");
-console.log("Schema facts:");
+console.log('');
+console.log('Schema facts:');
 for (const [key, value] of Object.entries(schema)) {
   console.log(`  ${key}: ${value}`);
 }
 
 if (DRY_RUN) {
-  console.log("");
-  console.log("DRY RUN — no files written. Remove --dry-run to update registry.");
+  console.log('');
+  console.log('DRY RUN — no files written. Remove --dry-run to update registry.');
   process.exit(0);
 }
 
 // Read current registry to preserve curated facts
-const registryPath = join(ROOT, "packages", "platform-metrics-registry", "src", "registry.ts");
-const currentContent = existsSync(registryPath) ? readFileSync(registryPath, "utf-8") : "";
+const registryPath = join(ROOT, 'packages', 'platform-metrics-registry', 'src', 'registry.ts');
+const currentContent = existsSync(registryPath) ? readFileSync(registryPath, 'utf-8') : '';
 
 // Extract curated block from current file (preserve manually maintained values)
 const curatedMatch = currentContent.match(/curated:\s*\{[\s\S]*?\},\s*\n\s*\};/);
-const curatedBlock = curatedMatch ? curatedMatch[0] : `curated: {
+const curatedBlock = curatedMatch
+  ? curatedMatch[0]
+  : `curated: {
     platformVersion: "4.0.0",
     platformName: "SZL Holdings Platform",
     platformCodename: "AEEP",
     foundedYear: 2024,
-    lastAuditDate: "${new Date().toISOString().split("T")[0]}",
+    lastAuditDate: "${new Date().toISOString().split('T')[0]}",
     authProviders: ["Replit Auth (OIDC/PKCE)", "Clerk"],
     aiProviders: ["OpenAI", "Anthropic", "Google Gemini", "HuggingFace", "NVIDIA NIM"],
     externalDataSources: [],
@@ -193,12 +195,12 @@ export const AEEP_VERSION = PLATFORM_FACTS.curated.platformVersion;
 export const AEEP_CODENAME = PLATFORM_FACTS.curated.platformCodename;
 `;
 
-writeFileSync(registryPath, newContent, "utf-8");
-console.log("");
+writeFileSync(registryPath, newContent, 'utf-8');
+console.log('');
 console.log(`Registry updated: ${registryPath}`);
 
 // Regenerate docs/platform-facts.md from computed values
-const today = new Date().toISOString().split("T")[0];
+const today = new Date().toISOString().split('T')[0];
 const totalPackages = structural.packageCount + structural.libCount;
 const docsMarkdown = `# Platform Facts
 
@@ -374,7 +376,7 @@ OpenAI · Anthropic · Google Gemini · HuggingFace Inference · NVIDIA NIM
 *Run \`tsx scripts/validate-platform-facts.ts\` to verify registry against filesystem.*
 `;
 
-const docsPath = join(ROOT, "docs", "platform-facts.md");
-writeFileSync(docsPath, docsMarkdown, "utf-8");
+const docsPath = join(ROOT, 'docs', 'platform-facts.md');
+writeFileSync(docsPath, docsMarkdown, 'utf-8');
 console.log(`Docs updated:     ${docsPath}`);
-console.log("Run `tsx scripts/validate-platform-facts.ts` to verify.");
+console.log('Run `tsx scripts/validate-platform-facts.ts` to verify.');

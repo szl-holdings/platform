@@ -1,11 +1,22 @@
-import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
-import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
-import { useQueryClient } from "@tanstack/react-query";
-import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Filter, Download, ChevronRight, Play } from "lucide-react";
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { apiFetch, isAuthError } from '@szl-holdings/shared-ui/api-fetch';
+import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Download,
+  Filter,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  XCircle,
+} from 'lucide-react';
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 
 interface WorkflowRun {
   id: number;
@@ -39,14 +50,19 @@ const EMPTY_RUNS_RESP: RunsResp = { data: [], meta: { page: 1, limit: 20, total:
 
 function useRuns(state: string | null, workflowId: number | null, page: number) {
   return useStandardQuery({
-    queryKey: ["alloyRuns", state, workflowId, page],
+    queryKey: ['alloyRuns', state, workflowId, page],
     queryFn: async () => {
       try {
-        const params = new URLSearchParams({ limit: "20", page: String(page) });
-        if (state) params.set("state", state);
-        if (workflowId) params.set("workflowId", String(workflowId));
+        const params = new URLSearchParams({ limit: '20', page: String(page) });
+        if (state) params.set('state', state);
+        if (workflowId) params.set('workflowId', String(workflowId));
         const resp = await apiFetch<RunsResp | WorkflowRun[]>(`/alloy/runs?${params}`);
-        if (resp && typeof resp === "object" && "data" in resp && Array.isArray((resp as RunsResp).data)) {
+        if (
+          resp &&
+          typeof resp === 'object' &&
+          'data' in resp &&
+          Array.isArray((resp as RunsResp).data)
+        ) {
           return resp as RunsResp;
         }
         const arr = (resp as WorkflowRun[]) ?? [];
@@ -62,10 +78,13 @@ function useRuns(state: string | null, workflowId: number | null, page: number) 
 
 function useWorkflows() {
   return useStandardQuery({
-    queryKey: ["alloyWorkflowsForFilter"],
+    queryKey: ['alloyWorkflowsForFilter'],
     queryFn: async () => {
-      const resp = await apiFetch<{ data: WorkflowDef[] } | WorkflowDef[]>("/alloy/workflows?limit=100");
-      if (resp && typeof resp === "object" && "data" in resp) return (resp as { data: WorkflowDef[] }).data;
+      const resp = await apiFetch<{ data: WorkflowDef[] } | WorkflowDef[]>(
+        '/alloy/workflows?limit=100',
+      );
+      if (resp && typeof resp === 'object' && 'data' in resp)
+        return (resp as { data: WorkflowDef[] }).data;
       return (resp as WorkflowDef[]) ?? [];
     },
     staleTime: 60000,
@@ -75,30 +94,42 @@ function useWorkflows() {
 function useRetryRun() {
   const qc = useQueryClient();
   return useStandardMutation({
-    mutationFn: async (id: number) => apiFetch(`/alloy/runs/${id}/retry`, { method: "POST" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["alloyRuns"] }),
+    mutationFn: async (id: number) => apiFetch(`/alloy/runs/${id}/retry`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['alloyRuns'] }),
   });
 }
 
 function useCancelRun() {
   const qc = useQueryClient();
   return useStandardMutation({
-    mutationFn: async (id: number) => apiFetch(`/alloy/runs/${id}/cancel`, { method: "POST" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["alloyRuns"] }),
+    mutationFn: async (id: number) => apiFetch(`/alloy/runs/${id}/cancel`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['alloyRuns'] }),
   });
 }
 
-const STATE_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode; pulse?: boolean }> = {
-  completed: { color: "#10b981", label: "Completed", icon: <CheckCircle className="w-3 h-3" /> },
-  failed: { color: "#ef4444", label: "Failed", icon: <XCircle className="w-3 h-3" /> },
-  running: { color: "#4B8BDB", label: "Running", icon: <Activity className="w-3 h-3" />, pulse: true },
-  queued: { color: "#f59e0b", label: "Queued", icon: <Clock className="w-3 h-3" /> },
-  waiting_approval: { color: "#8b5cf6", label: "Awaiting Approval", icon: <AlertTriangle className="w-3 h-3" /> },
-  canceled: { color: "#6b7280", label: "Canceled", icon: <XCircle className="w-3 h-3" /> },
+const STATE_CONFIG: Record<
+  string,
+  { color: string; label: string; icon: React.ReactNode; pulse?: boolean }
+> = {
+  completed: { color: '#10b981', label: 'Completed', icon: <CheckCircle className="w-3 h-3" /> },
+  failed: { color: '#ef4444', label: 'Failed', icon: <XCircle className="w-3 h-3" /> },
+  running: {
+    color: '#4B8BDB',
+    label: 'Running',
+    icon: <Activity className="w-3 h-3" />,
+    pulse: true,
+  },
+  queued: { color: '#f59e0b', label: 'Queued', icon: <Clock className="w-3 h-3" /> },
+  waiting_approval: {
+    color: '#8b5cf6',
+    label: 'Awaiting Approval',
+    icon: <AlertTriangle className="w-3 h-3" />,
+  },
+  canceled: { color: '#6b7280', label: 'Canceled', icon: <XCircle className="w-3 h-3" /> },
 };
 
 function formatDuration(ms: number | null) {
-  if (!ms) return "—";
+  if (!ms) return '—';
   if (ms < 1000) return `${ms}ms`;
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
   const m = Math.floor(ms / 60000);
@@ -108,7 +139,7 @@ function formatDuration(ms: number | null) {
 
 function formatRelative(ts: string) {
   const ms = Date.now() - new Date(ts).getTime();
-  if (ms < 60000) return "just now";
+  if (ms < 60000) return 'just now';
   if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
   if (ms < 86400000) return `${Math.floor(ms / 3600000)}h ago`;
   return `${Math.floor(ms / 86400000)}d ago`;
@@ -128,13 +159,13 @@ function RunRow({
   onView: (id: number) => void;
 }) {
   const cfg = STATE_CONFIG[run.state] ?? STATE_CONFIG.queued;
-  const wf = workflows.find(w => w.id === run.workflowId);
+  const wf = workflows.find((w) => w.id === run.workflowId);
   const trigger = (run.input as Record<string, unknown> | null)?.trigger as string | undefined;
 
   return (
     <div
       className="border rounded-lg p-3 flex items-center gap-3 cursor-pointer transition-all hover:border-opacity-50 group"
-      style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(12,18,30,0.8)" }}
+      style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(12,18,30,0.8)' }}
       onClick={() => onView(run.id)}
     >
       <div className="flex items-center gap-1.5 shrink-0" style={{ color: cfg.color }}>
@@ -146,60 +177,85 @@ function RunRow({
           <span className="text-xs font-semibold text-white truncate">
             {wf?.name ?? `Workflow #${run.workflowId}`}
           </span>
-          <span className="text-[9px] font-mono shrink-0" style={{ color: "rgba(255,255,255,0.3)" }}>#{run.id}</span>
+          <span
+            className="text-[9px] font-mono shrink-0"
+            style={{ color: 'rgba(255,255,255,0.3)' }}
+          >
+            #{run.id}
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded border font-semibold shrink-0" style={{
-            color: cfg.color,
-            borderColor: `${cfg.color}30`,
-            background: `${cfg.color}10`,
-          }}>
+          <span
+            className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded border font-semibold shrink-0"
+            style={{
+              color: cfg.color,
+              borderColor: `${cfg.color}30`,
+              background: `${cfg.color}10`,
+            }}
+          >
             {cfg.label}
           </span>
           {trigger && (
-            <span className="text-[9px] uppercase tracking-widest shrink-0" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <span
+              className="text-[9px] uppercase tracking-widest shrink-0"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+            >
               via {trigger}
             </span>
           )}
-          <span className="text-[9px] shrink-0" style={{ color: "rgba(255,255,255,0.25)" }}>
+          <span className="text-[9px] shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }}>
             {formatRelative(run.queuedAt)}
           </span>
-          <span className="text-[9px] font-mono shrink-0" style={{ color: "rgba(255,255,255,0.3)" }}>
+          <span
+            className="text-[9px] font-mono shrink-0"
+            style={{ color: 'rgba(255,255,255,0.3)' }}
+          >
             {formatDuration(run.durationMs)}
           </span>
           {run.retryCount > 0 && (
-            <span className="text-[9px] shrink-0" style={{ color: "#f59e0b" }}>
+            <span className="text-[9px] shrink-0" style={{ color: '#f59e0b' }}>
               retry {run.retryCount}/{run.maxRetries}
             </span>
           )}
         </div>
         {run.errorMessage && (
-          <div className="text-[9px] mt-0.5 truncate" style={{ color: "#ef4444" }}>{run.errorMessage}</div>
+          <div className="text-[9px] mt-0.5 truncate" style={{ color: '#ef4444' }}>
+            {run.errorMessage}
+          </div>
         )}
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        {run.state === "failed" && (
+        {run.state === 'failed' && (
           <button
-            onClick={e => { e.stopPropagation(); onRetry(run.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRetry(run.id);
+            }}
             className="p-1.5 rounded border transition-colors"
-            style={{ borderColor: "rgba(16,185,129,0.2)", color: "#10b981" }}
+            style={{ borderColor: 'rgba(16,185,129,0.2)', color: '#10b981' }}
             title="Retry"
           >
             <RotateCcw className="w-3 h-3" />
           </button>
         )}
-        {["running", "queued"].includes(run.state) && (
+        {['running', 'queued'].includes(run.state) && (
           <button
-            onClick={e => { e.stopPropagation(); onCancel(run.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onCancel(run.id);
+            }}
             className="p-1.5 rounded border transition-colors"
-            style={{ borderColor: "rgba(239,68,68,0.2)", color: "#ef4444" }}
+            style={{ borderColor: 'rgba(239,68,68,0.2)', color: '#ef4444' }}
             title="Cancel"
           >
             <XCircle className="w-3 h-3" />
           </button>
         )}
-        <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" style={{ color: "rgba(255,255,255,0.2)" }} />
+        <ChevronRight
+          className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5"
+          style={{ color: 'rgba(255,255,255,0.2)' }}
+        />
       </div>
     </div>
   );
@@ -223,26 +279,26 @@ export default function ExecutionHistory() {
 
   function exportCSV() {
     const rows = [
-      ["ID", "Workflow", "State", "Duration (ms)", "Queued At", "Completed At", "Error"],
-      ...runs.map(r => [
+      ['ID', 'Workflow', 'State', 'Duration (ms)', 'Queued At', 'Completed At', 'Error'],
+      ...runs.map((r) => [
         r.id,
-        workflows.find(w => w.id === r.workflowId)?.name ?? r.workflowId,
+        workflows.find((w) => w.id === r.workflowId)?.name ?? r.workflowId,
         r.state,
-        r.durationMs ?? "",
+        r.durationMs ?? '',
         r.queuedAt,
-        r.completedAt ?? "",
-        r.errorMessage ?? "",
+        r.completedAt ?? '',
+        r.errorMessage ?? '',
       ]),
     ];
-    const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
+    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `alloy-runs-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
   }
 
-  const STATES = ["running", "queued", "completed", "failed", "waiting_approval", "canceled"];
+  const STATES = ['running', 'queued', 'completed', 'failed', 'waiting_approval', 'canceled'];
 
   return (
     <div className="h-full overflow-y-auto">
@@ -250,10 +306,10 @@ export default function ExecutionHistory() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Activity className="w-4 h-4" style={{ color: "#4B8BDB" }} />
+              <Activity className="w-4 h-4" style={{ color: '#4B8BDB' }} />
               <h1 className="text-base font-bold text-white">Execution History</h1>
             </div>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
               All workflow runs — filterable, paginated, with retry and export.
             </p>
           </div>
@@ -262,49 +318,63 @@ export default function ExecutionHistory() {
             <button
               onClick={exportCSV}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs border transition-colors"
-              style={{ borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}
+              style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
             >
               <Download className="w-3 h-3" />
               CSV
             </button>
             <button
-              onClick={() => qc.invalidateQueries({ queryKey: ["alloyRuns"] })}
+              onClick={() => qc.invalidateQueries({ queryKey: ['alloyRuns'] })}
               className="p-1.5 rounded-lg border"
-              style={{ borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}
+              style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        <div className="rounded-xl border p-3 space-y-3" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(12,18,30,0.8)" }}>
+        <div
+          className="rounded-xl border p-3 space-y-3"
+          style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(12,18,30,0.8)' }}
+        >
           <div className="flex items-center gap-1.5">
-            <Filter className="w-3 h-3" style={{ color: "rgba(255,255,255,0.3)" }} />
-            <span className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Status</span>
+            <Filter className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.3)' }} />
+            <span
+              className="text-[9px] uppercase tracking-widest"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+            >
+              Status
+            </span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             <button
-              onClick={() => { setStateFilter(null); setPage(1); }}
+              onClick={() => {
+                setStateFilter(null);
+                setPage(1);
+              }}
               className="px-2 py-1 rounded text-[10px] border transition-all"
               style={{
-                borderColor: !stateFilter ? "rgba(75,139,219,0.3)" : "rgba(255,255,255,0.06)",
-                background: !stateFilter ? "rgba(75,139,219,0.08)" : "transparent",
-                color: !stateFilter ? "#4B8BDB" : "rgba(255,255,255,0.35)",
+                borderColor: !stateFilter ? 'rgba(75,139,219,0.3)' : 'rgba(255,255,255,0.06)',
+                background: !stateFilter ? 'rgba(75,139,219,0.08)' : 'transparent',
+                color: !stateFilter ? '#4B8BDB' : 'rgba(255,255,255,0.35)',
               }}
             >
               All
             </button>
-            {STATES.map(s => {
+            {STATES.map((s) => {
               const cfg = STATE_CONFIG[s];
               return (
                 <button
                   key={s}
-                  onClick={() => { setStateFilter(stateFilter === s ? null : s); setPage(1); }}
+                  onClick={() => {
+                    setStateFilter(stateFilter === s ? null : s);
+                    setPage(1);
+                  }}
                   className="px-2 py-1 rounded text-[10px] border transition-all"
                   style={{
-                    borderColor: stateFilter === s ? `${cfg.color}40` : "rgba(255,255,255,0.06)",
-                    background: stateFilter === s ? `${cfg.color}12` : "transparent",
-                    color: stateFilter === s ? cfg.color : "rgba(255,255,255,0.35)",
+                    borderColor: stateFilter === s ? `${cfg.color}40` : 'rgba(255,255,255,0.06)',
+                    background: stateFilter === s ? `${cfg.color}12` : 'transparent',
+                    color: stateFilter === s ? cfg.color : 'rgba(255,255,255,0.35)',
                   }}
                 >
                   {cfg.label}
@@ -316,30 +386,47 @@ export default function ExecutionHistory() {
           {workflows.length > 0 && (
             <>
               <div className="flex items-center gap-1.5">
-                <Play className="w-3 h-3" style={{ color: "rgba(255,255,255,0.3)" }} />
-                <span className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Workflow</span>
+                <Play className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                <span
+                  className="text-[9px] uppercase tracking-widest"
+                  style={{ color: 'rgba(255,255,255,0.3)' }}
+                >
+                  Workflow
+                </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 <button
-                  onClick={() => { setWorkflowFilter(null); setPage(1); }}
+                  onClick={() => {
+                    setWorkflowFilter(null);
+                    setPage(1);
+                  }}
                   className="px-2 py-1 rounded text-[10px] border transition-all"
                   style={{
-                    borderColor: !workflowFilter ? "rgba(75,139,219,0.3)" : "rgba(255,255,255,0.06)",
-                    background: !workflowFilter ? "rgba(75,139,219,0.08)" : "transparent",
-                    color: !workflowFilter ? "#4B8BDB" : "rgba(255,255,255,0.35)",
+                    borderColor: !workflowFilter
+                      ? 'rgba(75,139,219,0.3)'
+                      : 'rgba(255,255,255,0.06)',
+                    background: !workflowFilter ? 'rgba(75,139,219,0.08)' : 'transparent',
+                    color: !workflowFilter ? '#4B8BDB' : 'rgba(255,255,255,0.35)',
                   }}
                 >
                   All Workflows
                 </button>
-                {workflows.slice(0, 10).map(wf => (
+                {workflows.slice(0, 10).map((wf) => (
                   <button
                     key={wf.id}
-                    onClick={() => { setWorkflowFilter(workflowFilter === wf.id ? null : wf.id); setPage(1); }}
+                    onClick={() => {
+                      setWorkflowFilter(workflowFilter === wf.id ? null : wf.id);
+                      setPage(1);
+                    }}
                     className="px-2 py-1 rounded text-[10px] border transition-all"
                     style={{
-                      borderColor: workflowFilter === wf.id ? "rgba(75,139,219,0.3)" : "rgba(255,255,255,0.06)",
-                      background: workflowFilter === wf.id ? "rgba(75,139,219,0.08)" : "transparent",
-                      color: workflowFilter === wf.id ? "#4B8BDB" : "rgba(255,255,255,0.35)",
+                      borderColor:
+                        workflowFilter === wf.id
+                          ? 'rgba(75,139,219,0.3)'
+                          : 'rgba(255,255,255,0.06)',
+                      background:
+                        workflowFilter === wf.id ? 'rgba(75,139,219,0.08)' : 'transparent',
+                      color: workflowFilter === wf.id ? '#4B8BDB' : 'rgba(255,255,255,0.35)',
                     }}
                   >
                     {wf.name}
@@ -351,29 +438,33 @@ export default function ExecutionHistory() {
         </div>
 
         {total > 0 && (
-          <div className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-            {total.toLocaleString()} runs {stateFilter || workflowFilter ? "matched" : "total"}
+          <div className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            {total.toLocaleString()} runs {stateFilter || workflowFilter ? 'matched' : 'total'}
           </div>
         )}
 
         <div className="space-y-2">
           {isLoading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-14 rounded-lg border border-white/5 animate-pulse" style={{ background: "rgba(12,18,30,0.8)" }} />
+              <div
+                key={i}
+                className="h-14 rounded-lg border border-white/5 animate-pulse"
+                style={{ background: 'rgba(12,18,30,0.8)' }}
+              />
             ))
           ) : runs.length === 0 ? (
-            <div className="text-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <div className="text-center py-12 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
               No runs match this filter.
             </div>
           ) : (
-            runs.map(run => (
+            runs.map((run) => (
               <RunRow
                 key={run.id}
                 run={run}
                 workflows={workflows}
-                onRetry={id => retryRun.mutate(id)}
-                onCancel={id => cancelRun.mutate(id)}
-                onView={id => navigate(`/alloy/runs/${id}`)}
+                onRetry={(id) => retryRun.mutate(id)}
+                onCancel={(id) => cancelRun.mutate(id)}
+                onView={(id) => navigate(`/alloy/runs/${id}`)}
               />
             ))
           )}
@@ -382,21 +473,21 @@ export default function ExecutionHistory() {
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 pt-2">
             <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
               className="px-3 py-1.5 rounded-lg text-xs border transition-all disabled:opacity-40"
-              style={{ borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
+              style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}
             >
               Prev
             </button>
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
               {page} / {totalPages} ({total} total)
             </span>
             <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="px-3 py-1.5 rounded-lg text-xs border transition-all disabled:opacity-40"
-              style={{ borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
+              style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}
             >
               Next
             </button>

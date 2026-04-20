@@ -7,36 +7,44 @@ export interface CapitalDocument {
   id: string;
   title: string;
   lane?: string;
-  channel: "investor" | "bank" | "angel" | "ny_state" | "federal";
-  type: "one_pager" | "memo" | "deck" | "plan" | "model" | "guide" | "checklist" | "brief" | "narrative";
+  channel: 'investor' | 'bank' | 'angel' | 'ny_state' | 'federal';
+  type:
+    | 'one_pager'
+    | 'memo'
+    | 'deck'
+    | 'plan'
+    | 'model'
+    | 'guide'
+    | 'checklist'
+    | 'brief'
+    | 'narrative';
   description: string;
   sections: DocumentSection[];
-  status: "draft" | "ready" | "final";
+  status: 'draft' | 'ready' | 'final';
   printable?: boolean;
 }
 
 export const CAPITAL_DOCUMENTS: CapitalDocument[] = [
-
   // ─── SZL HOLDINGS MASTER MATERIALS ────────────────────────────────────────
 
   {
-    id: "szl-one-pager",
-    title: "SZL Holdings — Company One-Pager",
-    lane: "SZL Holdings",
-    channel: "investor",
-    type: "one_pager",
-    description: "One-page company summary for initial investor conversations.",
-    status: "ready",
+    id: 'szl-one-pager',
+    title: 'SZL Holdings — Company One-Pager',
+    lane: 'SZL Holdings',
+    channel: 'investor',
+    type: 'one_pager',
+    description: 'One-page company summary for initial investor conversations.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Who We Are",
+        title: 'Who We Are',
         content: `SZL Holdings is a technology holding company building command-layer intelligence platforms across five high-consequence verticals: business operations, maritime logistics, cybersecurity, real estate, and premium advisory. Each platform is purpose-built, operationally deployed, and commercially distinct — all running on Alloy, a shared intelligence and automation backbone.
 
-Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficient company with six live platforms, a unified technical architecture, and a clear path to institutional revenue across government, enterprise, and mid-market segments.`
+Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficient company with six live platforms, a unified technical architecture, and a clear path to institutional revenue across government, enterprise, and mid-market segments.`,
       },
       {
-        title: "The Platform Portfolio",
+        title: 'The Platform Portfolio',
         content: `• Alloy — Shared AI and automation engine powering all SZL platforms. Workflow orchestration, signal intelligence, document automation, and connector mesh. Internal infrastructure that creates competitive moat across every product line.
 
 • Lyte — Business observability SaaS. Surfaces approval bottlenecks, ownership gaps, and workflow friction before they compound into operational failure. Serves operations teams, COOs, and process owners who have outgrown spreadsheets but can't justify enterprise BI stacks. Target market: $12B+ business observability / operational intelligence.
@@ -47,20 +55,20 @@ Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficien
 
 • Terra — NYC/NYS real estate intelligence platform. Distressed property signals, ownership intelligence, deal pipeline management, and broker command tools. Converts fragmented public data into structured broker and investor workflow. Target market: NYC distressed real estate ($3B+ proptech TAM in metro).
 
-• Carlota Jo Consulting — Premium private advisory serving high-net-worth clients, family offices, and executives. Immediate cash flow, high-margin retainer model, low capital intensity.`
+• Carlota Jo Consulting — Premium private advisory serving high-net-worth clients, family offices, and executives. Immediate cash flow, high-margin retainer model, low capital intensity.`,
       },
       {
-        title: "Business Model",
+        title: 'Business Model',
         content: `Three distinct revenue tracks:
 
 1. Services (Immediate) — Carlota Jo generates cash flow from day one via premium retainer engagements. No product risk, high margin.
 
 2. SaaS (Growth) — Lyte, Vessels, Terra, and Aegis all operate subscription or per-seat models. Recurring revenue with high expansion potential.
 
-3. Government / Enterprise (Strategic) — Aegis and Vessels target federal and enterprise contracts with high ACV and long retention cycles.`
+3. Government / Enterprise (Strategic) — Aegis and Vessels target federal and enterprise contracts with high ACV and long retention cycles.`,
       },
       {
-        title: "Traction",
+        title: 'Traction',
         content: `• Six platforms live and operational
 • Unified architecture via Alloy backbone — each platform benefits from shared capability
 • Carlota Jo: active client relationships with premium advisory revenue
@@ -68,54 +76,55 @@ Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficien
 • Aegis: SOC platform built to FedRAMP-alignment standards
 • Vessels: maritime intelligence platform live with AIS data integration
 • Lyte: observability platform live with core workflow monitoring capability
-• Capital readiness infrastructure built and operational (this document set)`
+• Capital readiness infrastructure built and operational (this document set)`,
       },
       {
-        title: "Team",
-        content: `Stephen Lutar — Founder & CEO. Builder, operator, and systems architect. Designed and operates the full SZL ecosystem across six platforms. Background in workflow design, command systems, and multi-domain intelligence. Single founder with no dilutive co-founder equity — full ownership concentration enables fast, decisive execution.`
+        title: 'Team',
+        content: `Stephen Lutar — Founder & CEO. Builder, operator, and systems architect. Designed and operates the full SZL ecosystem across six platforms. Background in workflow design, command systems, and multi-domain intelligence. Single founder with no dilutive co-founder equity — full ownership concentration enables fast, decisive execution.`,
       },
       {
-        title: "The Ask",
+        title: 'The Ask',
         content: `SZL is pursuing a combination of non-dilutive capital (SBA/bank lending, government grants, NY state programs) and strategic angel investment to accelerate go-to-market across the three revenue tracks.
 
 Primary near-term ask: $500K–$1.5M (non-dilutive preferred) to fund:
 • Engineering velocity on Lyte and Vessels revenue features
 • Sales and GTM infrastructure for enterprise outreach
 • Federal market access preparation (SAM registration, 8(a) eligibility, SBIR applications)
-• Operating runway through first institutional revenue close`
+• Operating runway through first institutional revenue close`,
       },
       {
-        title: "Contact",
+        title: 'Contact',
         content: `Stephen Lutar, Founder & CEO
 SZL Holdings
 hello@szlholdings.com
 szlholdings.com
 
-Note: All financial figures are projections and assumptions. This document is for discussion purposes only and does not constitute an offer to sell securities.`
-      }
-    ]
+Note: All financial figures are projections and assumptions. This document is for discussion purposes only and does not constitute an offer to sell securities.`,
+      },
+    ],
   },
 
   {
-    id: "szl-investor-memo",
-    title: "SZL Holdings — Investor Memo",
-    lane: "SZL Holdings",
-    channel: "investor",
-    type: "memo",
-    description: "3–5 page investor memo covering market opportunity, product portfolio, business model, competitive moat, financials, team, and use of proceeds.",
-    status: "ready",
+    id: 'szl-investor-memo',
+    title: 'SZL Holdings — Investor Memo',
+    lane: 'SZL Holdings',
+    channel: 'investor',
+    type: 'memo',
+    description:
+      '3–5 page investor memo covering market opportunity, product portfolio, business model, competitive moat, financials, team, and use of proceeds.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Executive Summary",
+        title: 'Executive Summary',
         content: `SZL Holdings is a technology holding company building command-layer intelligence platforms across five high-consequence verticals. The company is built on the thesis that most enterprise software solves problems at the feature level — SZL solves them at the system level, creating durable operational infrastructure rather than replaceable point solutions.
 
 Six platforms. One architecture. Three revenue tracks. One founder with full ownership and zero co-founder dilution.
 
-We are raising a combination of non-dilutive capital (SBA, bank, government grants, NY state programs) and strategic angel investment to fund the first institutional revenue close across Lyte, Vessels, and Carlota Jo while positioning Aegis for government contract access.`
+We are raising a combination of non-dilutive capital (SBA, bank, government grants, NY state programs) and strategic angel investment to fund the first institutional revenue close across Lyte, Vessels, and Carlota Jo while positioning Aegis for government contract access.`,
       },
       {
-        title: "Market Opportunity",
+        title: 'Market Opportunity',
         content: `The SZL portfolio addresses five distinct markets, each with compelling structural dynamics:
 
 OPERATIONAL DECISION INTELLIGENCE (Lyte)
@@ -136,10 +145,10 @@ NYC is the deepest, most data-rich distressed real estate market in the world. T
 
 PREMIUM ADVISORY (Carlota Jo)
 TAM: $12B (US HNW advisory) | SAM: $400M | SOM (3yr): $8M
-High-margin, immediate cash flow, zero product risk. Carlota Jo serves as the company's commercial flywheel — generating operating revenue while the SaaS platforms scale.`
+High-margin, immediate cash flow, zero product risk. Carlota Jo serves as the company's commercial flywheel — generating operating revenue while the SaaS platforms scale.`,
       },
       {
-        title: "Product Portfolio & Architecture",
+        title: 'Product Portfolio & Architecture',
         content: `The Alloy backbone is the core competitive moat. It is not a product sold to external customers — it is the shared intelligence and automation infrastructure that powers all six SZL platforms. This architecture means:
 
 1. Each new platform costs less to build (shared infrastructure)
@@ -155,10 +164,10 @@ Alloy capabilities powering the portfolio:
 • Document generation and template system
 • Connector mesh (API integrations)
 • AI-native query and analysis layer
-• Audit logging and compliance infrastructure`
+• Audit logging and compliance infrastructure`,
       },
       {
-        title: "Business Model & Revenue",
+        title: 'Business Model & Revenue',
         content: `TRACK 1: SERVICES (Carlota Jo)
 Model: Premium retainer / project-based advisory
 Target client: HNW individuals, family offices, executives, boards
@@ -178,10 +187,10 @@ Model: Annual contract, per-seat enterprise, MSSP reseller
 ACV target: $50K–$500K per enterprise/government relationship
 Vessels DoD/MARAD: program-based contracts via SBIR/STTR path
 Aegis federal: sole-source via 8(a) or WOSB set-aside post-certification
-Revenue potential (Yr3): $2M+ from government vertical`
+Revenue potential (Yr3): $2M+ from government vertical`,
       },
       {
-        title: "Competitive Positioning",
+        title: 'Competitive Positioning',
         content: `SZL competes differently at each product layer:
 
 Lyte vs. Datadog/ServiceNow/PagerDuty: These tools serve IT and infrastructure teams. Lyte serves operations and business process teams. Different buyer, different problem, different category.
@@ -190,10 +199,10 @@ Vessels vs. Windward/MarineTraffic/VesselFinder: Legacy AIS tools provide positi
 
 Aegis vs. CrowdStrike/Splunk/Palo Alto: Large incumbents serve Fortune 500 at $1M+ ACV. Aegis serves MSPs and mid-enterprise at $50K–$250K ACV with a unified surface designed for defensive operations, not endpoint protection.
 
-Terra vs. CoStar/Reonomy/ATTOM: Data providers without workflow. Terra converts data into broker and investor action — distress signals into deal pipeline, ownership records into outreach sequences.`
+Terra vs. CoStar/Reonomy/ATTOM: Data providers without workflow. Terra converts data into broker and investor action — distress signals into deal pipeline, ownership records into outreach sequences.`,
       },
       {
-        title: "Use of Proceeds",
+        title: 'Use of Proceeds',
         content: `12-Month Deployment ($500K round):
 • Engineering (40% / $200K): Lyte revenue feature completion, Vessels enterprise tier, Aegis compliance controls
 • Sales & GTM (25% / $125K): Outbound infrastructure, CRM, first enterprise sales motion
@@ -204,10 +213,10 @@ Terra vs. CoStar/Reonomy/ATTOM: Data providers without workflow. Terra converts 
 • Months 1–6: Lyte first paying customers ($15K ARR), Carlota Jo to $120K ARR, SAM.gov registration complete
 • Months 7–12: Vessels first fleet operator ($30K ARR), Aegis first MSP customer ($40K ARR), 8(a) application submitted
 • Months 13–18: $250K ARR combined SaaS, first government contract awarded
-• Months 19–24: $600K+ ARR, Series A trigger metrics hit`
+• Months 19–24: $600K+ ARR, Series A trigger metrics hit`,
       },
       {
-        title: "Team & Execution",
+        title: 'Team & Execution',
         content: `Stephen Lutar — Founder & CEO
 The SZL portfolio is the product of a systems-thinking operator who built six platforms, a shared infrastructure backbone, a capital readiness OS, and a procurement strategy simultaneously. This is not a team of advisors — it is a single operator who runs everything.
 
@@ -217,10 +226,10 @@ Advantages of single-founder structure:
 • Fast, decisive execution without committee approval
 • Full context across all six platforms simultaneously
 
-Scaling plan: First hires will be sales (months 3–6), then engineering (months 6–12), then government BD (months 12–18). Organizational design mirrors military command structure: clear lanes, clear authority, clear accountability.`
+Scaling plan: First hires will be sales (months 3–6), then engineering (months 6–12), then government BD (months 12–18). Organizational design mirrors military command structure: clear lanes, clear authority, clear accountability.`,
       },
       {
-        title: "Risk & Mitigation",
+        title: 'Risk & Mitigation',
         content: `Single-founder concentration risk: Mitigated by comprehensive documentation, system architecture that minimizes key-person dependency, and capital efficiency that extends runway while hiring.
 
 Market adoption timing: Mitigated by three parallel revenue tracks — if SaaS adoption is slow, services revenue covers operations. If government timeline extends, commercial SaaS covers.
@@ -229,32 +238,32 @@ Competitive entry: Mitigated by Alloy architecture — competitors cannot replic
 
 Regulatory/certification risk: Mitigated by early MWBE, 8(a), and SAM.gov preparation. Not dependent on any single certification for core revenue.
 
-Note: All financial projections are estimates based on market analysis and assumptions. They do not constitute guarantees of performance.`
-      }
-    ]
+Note: All financial projections are estimates based on market analysis and assumptions. They do not constitute guarantees of performance.`,
+      },
+    ],
   },
 
   {
-    id: "szl-pitch-deck",
-    title: "SZL Holdings — Pitch Deck Content (12-Slide Structure)",
-    lane: "SZL Holdings",
-    channel: "investor",
-    type: "deck",
-    description: "Slide-by-slide content for investor presentation deck.",
-    status: "ready",
+    id: 'szl-pitch-deck',
+    title: 'SZL Holdings — Pitch Deck Content (12-Slide Structure)',
+    lane: 'SZL Holdings',
+    channel: 'investor',
+    type: 'deck',
+    description: 'Slide-by-slide content for investor presentation deck.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Slide 1: Cover",
+        title: 'Slide 1: Cover',
         content: `SZL Holdings
 Command-Layer Intelligence for High-Consequence Operations
 
 Stephen Lutar, Founder & CEO
 hello@szlholdings.com | szlholdings.com
-[Q2 2026]`
+[Q2 2026]`,
       },
       {
-        title: "Slide 2: The Problem",
+        title: 'Slide 2: The Problem',
         content: `Organizations run on systems that can't see themselves.
 
 • Approvals disappear into inboxes and never come back
@@ -263,10 +272,10 @@ hello@szlholdings.com | szlholdings.com
 • Security teams manage 5–8 tools and still miss threats
 • Real estate professionals have data but no workflow
 
-The common thread: high-consequence domains where visibility failures are expensive. Nobody is building command-layer infrastructure for operations — just more point tools for IT.`
+The common thread: high-consequence domains where visibility failures are expensive. Nobody is building command-layer infrastructure for operations — just more point tools for IT.`,
       },
       {
-        title: "Slide 3: The Solution",
+        title: 'Slide 3: The Solution',
         content: `SZL Holdings builds command-layer intelligence platforms — not features, not dashboards, not reports. Systems.
 
 • Lyte: Business operations made legible in real time
@@ -275,10 +284,10 @@ The common thread: high-consequence domains where visibility failures are expens
 • Terra: NYC/NYS real estate intelligence — from distress signals to deal pipeline
 • Carlota Jo: Premium advisory generating immediate revenue
 
-All powered by Alloy: a shared AI and automation backbone that makes every platform smarter as the portfolio grows.`
+All powered by Alloy: a shared AI and automation backbone that makes every platform smarter as the portfolio grows.`,
       },
       {
-        title: "Slide 4: Market Size",
+        title: 'Slide 4: Market Size',
         content: `Five markets. Five distinct access points.
 
 Business Observability: $12B TAM → $2.1B SAM → $45M SOM (Yr3)
@@ -288,10 +297,10 @@ NYC Real Estate Intelligence: $4.5B TAM → $800M SAM → $18M SOM (Yr3)
 HNW Advisory: $12B TAM → $400M SAM → $8M SOM (Yr3)
 
 Combined addressable opportunity: $72B+
-First-mover position in three categories with no direct incumbent.`
+First-mover position in three categories with no direct incumbent.`,
       },
       {
-        title: "Slide 5: The Alloy Architecture",
+        title: 'Slide 5: The Alloy Architecture',
         content: `Why this is hard to replicate:
 
 Alloy is not a product — it's the operating system for all six platforms. Every platform benefits from:
@@ -301,10 +310,10 @@ Alloy is not a product — it's the operating system for all six platforms. Ever
 • Shared connector mesh (API integrations)
 • Shared audit and compliance infrastructure
 
-A competitor building one platform starts from zero. We started from the architecture and built six platforms on top. The moat compounds over time — not because of patents, but because of operational infrastructure.`
+A competitor building one platform starts from zero. We started from the architecture and built six platforms on top. The moat compounds over time — not because of patents, but because of operational infrastructure.`,
       },
       {
-        title: "Slide 6: Product Status",
+        title: 'Slide 6: Product Status',
         content: `Built and operational:
 ✓ Alloy backbone (orchestration, AI, connectors)
 ✓ Lyte platform (business observability, core monitoring)
@@ -318,10 +327,10 @@ Next 90 days:
 → Lyte: revenue tier and first paid customers
 → Vessels: enterprise fleet operator pilot
 → Aegis: first MSP partner signed
-→ SAM.gov registration and MWBE application initiated`
+→ SAM.gov registration and MWBE application initiated`,
       },
       {
-        title: "Slide 7: Business Model",
+        title: 'Slide 7: Business Model',
         content: `Three revenue tracks = three risk mitigation strategies
 
 Track 1: Services (Cash Flow Now)
@@ -331,10 +340,10 @@ Track 2: SaaS (Recurring Revenue)
 Lyte, Vessels, Terra — subscription and per-unit pricing. $1.2M ARR target in 24 months. Enterprise tiers available on all three.
 
 Track 3: Government / Enterprise (Strategic Revenue)
-Aegis + Vessels federal — contract-based, annual, $50K–$500K ACV. Supported by MWBE, 8(a), WOSB, SBIR/STTR strategy.`
+Aegis + Vessels federal — contract-based, annual, $50K–$500K ACV. Supported by MWBE, 8(a), WOSB, SBIR/STTR strategy.`,
       },
       {
-        title: "Slide 8: Traction",
+        title: 'Slide 8: Traction',
         content: `Platform milestones completed:
 • Six platforms built and live
 • Carlota Jo: active advisory relationships with premium clients
@@ -346,10 +355,10 @@ Aegis + Vessels federal — contract-based, annual, $50K–$500K ACV. Supported 
 Infrastructure milestones:
 • Capital Readiness OS built and operational
 • Federal market access preparation initiated
-• NY state program eligibility assessment complete`
+• NY state program eligibility assessment complete`,
       },
       {
-        title: "Slide 9: Go-To-Market",
+        title: 'Slide 9: Go-To-Market',
         content: `Phase 1 (Months 1–6): Commercial activation
 • Carlota Jo: outbound to 3 target HNW client segments
 • Lyte: 5 pilot deployments via direct outbound to ops-heavy SMBs
@@ -363,10 +372,10 @@ Phase 2 (Months 7–12): Enterprise and government entry
 Phase 3 (Months 13–24): Scale and raise
 • Lyte: enterprise tier launch with $50K+ ACV targets
 • Aegis: first government contract awarded
-• Series A trigger: $600K+ ARR, government contract in hand, expansion metrics positive`
+• Series A trigger: $600K+ ARR, government contract in hand, expansion metrics positive`,
       },
       {
-        title: "Slide 10: Team",
+        title: 'Slide 10: Team',
         content: `Stephen Lutar — Founder & CEO
 
 • Designed and built six platforms from architecture to deployment
@@ -375,10 +384,10 @@ Phase 3 (Months 13–24): Scale and raise
 • Full context across all six domains simultaneously
 • Zero co-founder dilution — all economics accrue to investors and the company
 
-Advisors and collaborators: Being formalized as the company raises. First advisory board seats targeted at government BD (SBIR/STTR) and enterprise SaaS GTM.`
+Advisors and collaborators: Being formalized as the company raises. First advisory board seats targeted at government BD (SBIR/STTR) and enterprise SaaS GTM.`,
       },
       {
-        title: "Slide 11: Financials",
+        title: 'Slide 11: Financials',
         content: `All figures are projections based on market analysis and operating assumptions. Not guarantees.
 
 Year 1 (2026) — Investment Activation:
@@ -393,10 +402,10 @@ Year 2 (2027) — SaaS Scale:
 
 Year 3 (2028) — Series A Ready:
 • Revenue target: $1.8M+ (SaaS dominant, government wedge open)
-• Series A raise: $4M–$8M based on ARR and government contract pipeline`
+• Series A raise: $4M–$8M based on ARR and government contract pipeline`,
       },
       {
-        title: "Slide 12: The Ask",
+        title: 'Slide 12: The Ask',
         content: `Raise: $500K–$1.5M (primary ask non-dilutive; angel equity as secondary channel)
 
 Non-dilutive sources being pursued in parallel:
@@ -411,22 +420,23 @@ Angel equity structure:
 • Structure: SAFE or convertible note preferred
 • Use: engineering velocity + GTM activation (see slide 10)
 
-Contact: Stephen Lutar | hello@szlholdings.com | szlholdings.com`
-      }
-    ]
+Contact: Stephen Lutar | hello@szlholdings.com | szlholdings.com`,
+      },
+    ],
   },
 
   {
-    id: "szl-cap-table",
-    title: "Cap Table — Placeholder Structure",
-    lane: "SZL Holdings",
-    channel: "investor",
-    type: "checklist",
-    description: "Pre-money cap table placeholder showing founder ownership and option pool structure.",
-    status: "draft",
+    id: 'szl-cap-table',
+    title: 'Cap Table — Placeholder Structure',
+    lane: 'SZL Holdings',
+    channel: 'investor',
+    type: 'checklist',
+    description:
+      'Pre-money cap table placeholder showing founder ownership and option pool structure.',
+    status: 'draft',
     sections: [
       {
-        title: "Pre-Money Cap Table (Placeholder)",
+        title: 'Pre-Money Cap Table (Placeholder)',
         content: `This is a placeholder structure only. Actual share counts and option pool percentages will be determined at close with qualified legal counsel. All figures require attorney review before external use.
 
 COMMON STOCK
@@ -451,10 +461,10 @@ NEXT STEPS
 1. Engage corporate attorney to establish formal cap table management
 2. Determine entity structure (C-Corp formation recommended for angel investment)
 3. Establish Delaware incorporation (if not already)
-4. Implement cap table management software (Carta or similar)`
+4. Implement cap table management software (Carta or similar)`,
       },
       {
-        title: "Data Room Checklist",
+        title: 'Data Room Checklist',
         content: `Documents needed for investor due diligence — organize and prepare prior to investor conversations:
 
 LEGAL DOCUMENTS
@@ -490,31 +500,32 @@ MARKET DOCUMENTS
 ☐ Market sizing analysis (TAM/SAM/SOM)
 ☐ Competitive analysis
 ☐ Go-to-market plan
-☐ Customer references or letters of intent`
-      }
-    ]
+☐ Customer references or letters of intent`,
+      },
+    ],
   },
 
   // ─── LYTE ONE-PAGER & MARKET DOCS ─────────────────────────────────────────
 
   {
-    id: "lyte-one-pager",
-    title: "Lyte — Investor Product One-Pager",
-    lane: "Lyte",
-    channel: "investor",
-    type: "one_pager",
-    description: "Product one-pager for investors: what Lyte does, who it serves, why now, competitive landscape.",
-    status: "ready",
+    id: 'lyte-one-pager',
+    title: 'Lyte — Investor Product One-Pager',
+    lane: 'Lyte',
+    channel: 'investor',
+    type: 'one_pager',
+    description:
+      'Product one-pager for investors: what Lyte does, who it serves, why now, competitive landscape.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "What Lyte Does",
+        title: 'What Lyte Does',
         content: `Lyte is a business observability platform that makes organizational operations legible in real time. It surfaces approval bottlenecks, ownership gaps, process latency, and workflow friction — before they compound into operational failure.
 
-Think of it as Datadog for business operations, not IT infrastructure. Where Datadog tells you when a server goes down, Lyte tells you when an approval has been waiting 14 days, who owns the decision, and what's blocked downstream because of it.`
+Think of it as Datadog for business operations, not IT infrastructure. Where Datadog tells you when a server goes down, Lyte tells you when an approval has been waiting 14 days, who owns the decision, and what's blocked downstream because of it.`,
       },
       {
-        title: "The Problem",
+        title: 'The Problem',
         content: `Most organizations run on invisible systems. Decisions disappear into email inboxes. Approvals stall in chains of people who don't know they're responsible. Handoffs fail silently. Process owners have no visibility into their own processes.
 
 The result: compounding operational failures that started as a 2-day delay 3 months ago. By the time leadership sees the problem, it's a $500K project overrun.
@@ -525,10 +536,10 @@ Current tools don't solve this:
 • Enterprise BPM (ServiceNow, SAP): six-figure implementations that SMBs can't afford
 • BI dashboards: historical, not operational
 
-Lyte addresses the observability gap between "we have process documentation" and "we can see our processes operating in real time."`
+Lyte addresses the observability gap between "we have process documentation" and "we can see our processes operating in real time."`,
       },
       {
-        title: "Who Buys Lyte",
+        title: 'Who Buys Lyte',
         content: `Primary buyer: Operations directors, COOs, and process owners at 50–500 person organizations who have outgrown spreadsheets but can't justify enterprise BPM stacks.
 
 Verticals with highest urgency:
@@ -538,28 +549,28 @@ Verticals with highest urgency:
 • Financial services mid-market (compliance approval workflows)
 • Government contractors (audit-ready process documentation)
 
-Secondary buyer: Department heads and project leads who are accountable for process outcomes but have no visibility into process health.`
+Secondary buyer: Department heads and project leads who are accountable for process outcomes but have no visibility into process health.`,
       },
       {
-        title: "Why Now",
+        title: 'Why Now',
         content: `Three forces converging:
 
 1. Remote and hybrid work broke the visibility layer. When teams were co-located, managers could see process failures developing. Remote work made operations invisible. Organizations are now paying the cost of 4 years of compounding invisible process debt.
 
 2. AI tools are creating new process complexity. AI-assisted workflows require new approval gates, new accountability structures, and new audit requirements. Organizations are adding AI tools without adding visibility into how those tools are operating inside their processes.
 
-3. The enterprise BPM market is consolidating upmarket, leaving mid-market exposed. ServiceNow and SAP are fighting for $500K+ contracts. Nobody is building for $18K/year.`
+3. The enterprise BPM market is consolidating upmarket, leaving mid-market exposed. ServiceNow and SAP are fighting for $500K+ contracts. Nobody is building for $18K/year.`,
       },
       {
-        title: "Market Sizing (TAM / SAM / SOM)",
+        title: 'Market Sizing (TAM / SAM / SOM)',
         content: `TAM: $12B+ — Business observability and operational intelligence broadly defined. Includes workflow analytics, process mining, BPM, and operational BI for non-IT buyers.
 
 SAM: $2.1B — US and UK SMB and mid-market organizations (50–2,000 employees) with operational complexity that warrants dedicated process observability tooling. Excludes enterprise-only BPM and IT observability.
 
-SOM (Year 3): $45M — Achievable through direct outbound to ops-heavy verticals and product-led growth. Represents ~0.4% of the serviceable market at $18K average ARR.`
+SOM (Year 3): $45M — Achievable through direct outbound to ops-heavy verticals and product-led growth. Represents ~0.4% of the serviceable market at $18K average ARR.`,
       },
       {
-        title: "Competitive Positioning",
+        title: 'Competitive Positioning',
         content: `Lyte is NOT competing with Datadog, ServiceNow, or PagerDuty. These tools serve IT teams. Lyte serves business operations teams — a different buyer, different problem, different category.
 
 Actual alternatives Lyte replaces:
@@ -571,10 +582,10 @@ Lyte's differentiation:
 • Designed for operations buyers, not IT buyers
 • Real-time process visibility, not project task tracking
 • No implementation required — connects to existing tools via Alloy
-• Priced for mid-market ($150–$400/seat/mo), not enterprise`
+• Priced for mid-market ($150–$400/seat/mo), not enterprise`,
       },
       {
-        title: "Revenue Model",
+        title: 'Revenue Model',
         content: `Per-seat SaaS with three tiers:
 
 Essential ($150/seat/mo): Core process monitoring, up to 5 workflows, 30-day history
@@ -582,10 +593,10 @@ Professional ($250/seat/mo): Unlimited workflows, governed bottleneck detection,
 Enterprise ($400/seat/mo, custom): Full platform, custom SLA, dedicated support, audit compliance reporting
 
 Typical deployment: 10–50 seats. $18K–$240K ACV per customer.
-Expansion revenue: Lyte is naturally sticky — once process visibility is established, teams expand scope, add workflows, and add seats as the platform proves value.`
+Expansion revenue: Lyte is naturally sticky — once process visibility is established, teams expand scope, add workflows, and add seats as the platform proves value.`,
       },
       {
-        title: "Pilot Customer Strategy",
+        title: 'Pilot Customer Strategy',
         content: `Phase 1 (Months 1–3): 5 pilot deployments via direct outbound
 • Target: COOs and operations directors at 50–200 person professional services firms
 • Offer: 90-day pilot at 50% of list price with success metrics defined upfront
@@ -598,31 +609,32 @@ Phase 2 (Months 4–6): Expand verticals and seed product-led growth
 
 Phase 3 (Months 7–12): Enterprise motion
 • Target 3–5 enterprise accounts in government contracting / compliance-heavy verticals
-• Partner with ops consulting firms who can resell Lyte as part of their engagements`
-      }
-    ]
+• Partner with ops consulting firms who can resell Lyte as part of their engagements`,
+      },
+    ],
   },
 
   // ─── VESSELS ONE-PAGER & MARKET DOCS ─────────────────────────────────────
 
   {
-    id: "vessels-one-pager",
-    title: "Vessels — Investor Product One-Pager",
-    lane: "Vessels",
-    channel: "investor",
-    type: "one_pager",
-    description: "Product one-pager for investors: maritime logistics visibility, who buys it, competitive gap.",
-    status: "ready",
+    id: 'vessels-one-pager',
+    title: 'Vessels — Investor Product One-Pager',
+    lane: 'Vessels',
+    channel: 'investor',
+    type: 'one_pager',
+    description:
+      'Product one-pager for investors: maritime logistics visibility, who buys it, competitive gap.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "What Vessels Does",
+        title: 'What Vessels Does',
         content: `Vessels is a maritime command intelligence platform that converts raw AIS position data and fragmented maritime data sources into operational intelligence for fleet operators, shipping companies, port authorities, maritime insurers, and commodity traders.
 
-Where legacy AIS tools answer "where is the vessel?", Vessels answers "what is the operational risk, what are the cargo implications, and what does the port situation mean for my schedule?"`
+Where legacy AIS tools answer "where is the vessel?", Vessels answers "what is the operational risk, what are the cargo implications, and what does the port situation mean for my schedule?"`,
       },
       {
-        title: "The Problem",
+        title: 'The Problem',
         content: `Maritime logistics operates on fragmented, backward-looking data. A shipping company managing a 20-vessel fleet may have:
 • AIS position feeds from three different providers
 • Port congestion data from manual email updates
@@ -632,10 +644,10 @@ Where legacy AIS tools answer "where is the vessel?", Vessels answers "what is t
 
 The result: real-time operational decisions made on 12–48 hour old data, leading to avoidable demurrage charges, missed port windows, and suboptimal routing decisions. Estimated cost of poor maritime intelligence to global shipping: $40B+ annually.
 
-Nobody has built a command layer that integrates all these signals into a unified operational view — until Vessels.`
+Nobody has built a command layer that integrates all these signals into a unified operational view — until Vessels.`,
       },
       {
-        title: "Who Buys Vessels",
+        title: 'Who Buys Vessels',
         content: `Primary buyers:
 • Ship operators and fleet managers (20–500 vessel fleets)
 • Commodity traders with exposure to shipping delays and demurrage
@@ -646,28 +658,28 @@ Secondary buyers:
 • Government agencies (MARAD, US Coast Guard, DHS) monitoring maritime domain awareness
 • Maritime logistics consultants managing operations for smaller operators
 
-Key decision criteria: Real-time visibility, risk signal quality, integration with existing systems, and compliance with reporting requirements.`
+Key decision criteria: Real-time visibility, risk signal quality, integration with existing systems, and compliance with reporting requirements.`,
       },
       {
-        title: "Why Now",
+        title: 'Why Now',
         content: `Three factors making maritime intelligence urgent:
 
 1. Supply chain disruption has revealed the fragility of maritime logistics. The past four years have made maritime visibility a board-level issue, not just an operational preference. Organizations are now investing in resilience infrastructure.
 
 2. US government maritime awareness funding is increasing. MARAD, DoD, and DHS are actively funding maritime domain awareness technology. SBIR/STTR opportunities in maritime intelligence are growing.
 
-3. IMO 2020/2023 regulatory requirements have increased reporting complexity. Vessel operators face new fuel consumption, emissions, and safety reporting requirements that require better data infrastructure.`
+3. IMO 2020/2023 regulatory requirements have increased reporting complexity. Vessel operators face new fuel consumption, emissions, and safety reporting requirements that require better data infrastructure.`,
       },
       {
-        title: "Market Sizing",
+        title: 'Market Sizing',
         content: `TAM: $8B+ — Global maritime intelligence and fleet management software, including AIS analytics, port intelligence, maritime risk management, and government maritime domain awareness.
 
 SAM: $1.4B — US and European fleet operators, maritime insurers, and commodity traders with vessels calling at major ports. Includes government maritime agencies with technology procurement authority.
 
-SOM (Year 3): $30M — Achievable through per-vessel SaaS pricing and strategic government partnerships. Represents ~2% of the serviceable market.`
+SOM (Year 3): $30M — Achievable through per-vessel SaaS pricing and strategic government partnerships. Represents ~2% of the serviceable market.`,
       },
       {
-        title: "Revenue Model",
+        title: 'Revenue Model',
         content: `Per-vessel pricing with fleet enterprise contracts:
 
 Standard ($5,000/vessel/year): Core vessel tracking, risk signals, port intelligence, basic reporting
@@ -675,10 +687,10 @@ Enterprise ($15,000/vessel/year): Full platform, API access, custom alerts, dedi
 Data-as-a-Service: Maritime intelligence data licensing to insurers, traders, and government agencies — not per-vessel but per-data-access subscription
 
 Typical enterprise deployment: 20–100 vessel fleet → $100K–$1.5M ACV
-Government contracts: Program-based, $500K–$5M via SBIR/STTR or sole-source`
+Government contracts: Program-based, $500K–$5M via SBIR/STTR or sole-source`,
       },
       {
-        title: "Strategic Partnership Targets",
+        title: 'Strategic Partnership Targets',
         content: `Commercial partnerships:
 • Maersk, MSC, CMA CGM (Tier 1 shipping lines) — for data licensing and fleet intelligence
 • Hapag-Lloyd, ONE, Evergreen — secondary Tier 1 targets
@@ -693,10 +705,10 @@ Government partnerships:
 
 Port authority partners:
 • Port Authority of New York and New Jersey: Metro-area maritime intelligence
-• Port of Los Angeles / Long Beach: West Coast congestion intelligence`
+• Port of Los Angeles / Long Beach: West Coast congestion intelligence`,
       },
       {
-        title: "MARAD / DoD / DHS Relevance Brief",
+        title: 'MARAD / DoD / DHS Relevance Brief',
         content: `Vessels aligns with three federal priorities:
 
 MARAD (Maritime Administration):
@@ -720,31 +732,32 @@ DHS / CISA:
 SBIR/STTR Target Agencies:
 • DoD SBIR: Maritime domain awareness, autonomous logistics
 • DHS SBIR: Port security, maritime critical infrastructure
-• DOT/MARAD: Maritime efficiency and emissions monitoring`
-      }
-    ]
+• DOT/MARAD: Maritime efficiency and emissions monitoring`,
+      },
+    ],
   },
 
   // ─── AEGIS ONE-PAGER & MARKET DOCS ────────────────────────────────────────
 
   {
-    id: "aegis-one-pager",
-    title: "Aegis — Investor Product One-Pager",
-    lane: "Aegis",
-    channel: "investor",
-    type: "one_pager",
-    description: "Product one-pager for investors: defensive cyber ops, SOC automation, compliance.",
-    status: "ready",
+    id: 'aegis-one-pager',
+    title: 'Aegis — Investor Product One-Pager',
+    lane: 'Aegis',
+    channel: 'investor',
+    type: 'one_pager',
+    description:
+      'Product one-pager for investors: defensive cyber ops, SOC automation, compliance.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "What Aegis Does",
+        title: 'What Aegis Does',
         content: `Aegis is a unified defense and intelligence command platform for security operations centers. It consolidates SIEM, SOAR, XDR, and managed threat intelligence into a single command surface — replacing the fragmented 5–8 tool SOC that MSPs and enterprise security teams currently manage.
 
-Aegis is designed for the security operator — the analyst sitting in a SOC managing 200 alerts, running incident investigations, and writing compliance reports simultaneously. Not the CISO's boardroom dashboard. The operator's command surface.`
+Aegis is designed for the security operator — the analyst sitting in a SOC managing 200 alerts, running incident investigations, and writing compliance reports simultaneously. Not the CISO's boardroom dashboard. The operator's command surface.`,
       },
       {
-        title: "The Problem",
+        title: 'The Problem',
         content: `The modern SOC is drowning in tools. A mid-size MSP managing 50 client environments may be running:
 • A SIEM (Splunk, QRadar, or Sentinel) — $100K+/year
 • A SOAR (Palo Alto XSOAR, Splunk SOAR) — $80K+/year
@@ -754,28 +767,28 @@ Aegis is designed for the security operator — the analyst sitting in a SOC man
 
 Total: $250K+/year in tools that don't talk to each other, generating alert noise that junior analysts can't triage effectively.
 
-The result: alert fatigue, missed threats, slow incident response, and compliance reports assembled from 5 different dashboards. And this is the MSP's problem for every client they manage.`
+The result: alert fatigue, missed threats, slow incident response, and compliance reports assembled from 5 different dashboards. And this is the MSP's problem for every client they manage.`,
       },
       {
-        title: "Who Buys Aegis",
+        title: 'Who Buys Aegis',
         content: `Primary buyer: MSPs (Managed Service Providers) who sell security services to 10–500 client environments. MSPs are the highest-leverage distribution channel — one MSP sale brings 20–100 environments.
 
 Secondary buyer: Enterprise security teams (50–500 employees) who have outgrown their current SIEM but can't afford Splunk at enterprise pricing.
 
 Government buyer: Federal agencies and contractors who need a SOC platform that aligns with CISA's security operations guidance and DoD security controls.
 
-Key decision criteria: Alert fidelity, automation coverage, compliance reporting capability, multi-tenant support (for MSPs), and total cost of ownership vs. the fragmented stack.`
+Key decision criteria: Alert fidelity, automation coverage, compliance reporting capability, multi-tenant support (for MSPs), and total cost of ownership vs. the fragmented stack.`,
       },
       {
-        title: "Market Sizing",
+        title: 'Market Sizing',
         content: `TAM: $35B+ — Combined SIEM, SOAR, XDR, managed security, and threat intelligence markets globally.
 
 SAM: $6B — US and UK MSPs, mid-enterprise security teams, and government agencies that are actively replacing or consolidating security tooling at $50K–$500K ACV.
 
-SOM (Year 3): $80M — Achievable through MSP partner channel and direct enterprise outreach. Represents ~1.3% of the serviceable market.`
+SOM (Year 3): $80M — Achievable through MSP partner channel and direct enterprise outreach. Represents ~1.3% of the serviceable market.`,
       },
       {
-        title: "Revenue Model",
+        title: 'Revenue Model',
         content: `Per-seat SOC platform with MSSP partner model:
 
 Professional ($150/seat/mo): Core SIEM, basic SOAR automation, threat intel feeds, compliance dashboard
@@ -784,10 +797,10 @@ MSSP Partner Model: Volume licensing for MSPs managing multiple client environme
 Compliance-as-a-Service: Add-on tier for CMMC, FedRAMP, SOC 2, HIPAA compliance reporting — $50/seat/mo additional
 
 Typical enterprise ACV: $50K–$250K
-Typical MSSP ACV: $100K–$500K (covers 20–100 client environments)`
+Typical MSSP ACV: $100K–$500K (covers 20–100 client environments)`,
       },
       {
-        title: "Federal Market Relevance",
+        title: 'Federal Market Relevance',
         content: `Aegis is designed from the ground up for federal market alignment:
 
 DoD / CMMC alignment:
@@ -809,10 +822,10 @@ Government contract paths:
 • SBA 8(a) sole-source contract eligibility (if owner qualifies)
 • WOSB set-aside eligibility (if ownership structure qualifies)
 • SBIR Phase I: DHS (critical infrastructure protection), DoD (cyber defense)
-• GSA Schedule 70 (IT Services) — target vehicle for government sales`
+• GSA Schedule 70 (IT Services) — target vehicle for government sales`,
       },
       {
-        title: "Competitive Positioning",
+        title: 'Competitive Positioning',
         content: `Aegis vs. CrowdStrike: CrowdStrike is endpoint protection, not SOC command. $1M+ ACV for enterprise. Aegis is defensive operations at $50K–$250K ACV, positioned as the command layer above the endpoint tool.
 
 Aegis vs. Splunk: Splunk is a data platform that requires specialized engineers to configure and maintain. Aegis is a purpose-built SOC command surface that analysts can use on day one.
@@ -821,31 +834,32 @@ Aegis vs. Palo Alto Networks: Palo Alto competes at the network perimeter. Aegis
 
 Aegis vs. Microsoft Sentinel: Sentinel is a capable SIEM but requires significant Azure ecosystem investment. Aegis is cloud-agnostic and designed for MSPs who manage multi-cloud, multi-vendor client environments.
 
-The Aegis position: Unified SOC command for the operator, not the vendor. Designed around the analyst's workflow, not the vendor's product roadmap.`
-      }
-    ]
+The Aegis position: Unified SOC command for the operator, not the vendor. Designed around the analyst's workflow, not the vendor's product roadmap.`,
+      },
+    ],
   },
 
   // ─── TERRA ONE-PAGER ──────────────────────────────────────────────────────
 
   {
-    id: "terra-one-pager",
-    title: "Terra — Investor Product One-Pager",
-    lane: "Terra",
-    channel: "investor",
-    type: "one_pager",
-    description: "Product one-pager for investors: distress intelligence, broker command, conversion engine.",
-    status: "ready",
+    id: 'terra-one-pager',
+    title: 'Terra — Investor Product One-Pager',
+    lane: 'Terra',
+    channel: 'investor',
+    type: 'one_pager',
+    description:
+      'Product one-pager for investors: distress intelligence, broker command, conversion engine.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "What Terra Does",
+        title: 'What Terra Does',
         content: `Terra is a NYC/NYS real estate intelligence platform that converts fragmented public data into structured deal workflow. It surfaces distressed property signals, maps ownership, tracks legal proceedings, and converts raw data into actionable broker and investor pipeline.
 
-Terra answers: "Which properties are in distress right now, who owns them, what is the legal situation, and how do I get in front of them first?"`
+Terra answers: "Which properties are in distress right now, who owns them, what is the legal situation, and how do I get in front of them first?"`,
       },
       {
-        title: "The Problem",
+        title: 'The Problem',
         content: `NYC real estate professionals have more data than ever and fewer tools to act on it. Public records (ACRIS, DOF, SSCEF, eCourts, HPD) contain thousands of distress signals. The problem: they're fragmented across 7+ separate systems, updated on inconsistent schedules, and readable only by specialists.
 
 Brokers and investors currently:
@@ -854,20 +868,20 @@ Brokers and investors currently:
 • Hire researchers to compile distress reports manually
 • Miss opportunities because they can't monitor continuously
 
-Terra automates the signal collection, normalizes the data, and delivers it as workflow — not a database to query, but a pipeline to act on.`
+Terra automates the signal collection, normalizes the data, and delivers it as workflow — not a database to query, but a pipeline to act on.`,
       },
       {
-        title: "Market Sizing",
+        title: 'Market Sizing',
         content: `TAM: $4.5B — NYC/NYS proptech market, including CRE data services, broker tools, investor intelligence platforms, and real estate workflow automation.
 
 SAM: $800M — NYC commercial real estate brokers, distressed property investors, real estate attorneys, and lenders with active NYC portfolios who would pay for a specialized distress intelligence platform.
 
 SOM (Year 3): $18M — Achievable through direct broker outreach and investor community distribution. ~500 broker accounts at $3K/year + 100 investor accounts at $60K/year.
 
-NYC market context: NYC has the deepest distressed real estate market in the US. 2023–2025 saw record commercial foreclosure filings, hundreds of tax lien sales, and significant office distress. The market is active and the data is rich.`
+NYC market context: NYC has the deepest distressed real estate market in the US. 2023–2025 saw record commercial foreclosure filings, hundreds of tax lien sales, and significant office distress. The market is active and the data is rich.`,
       },
       {
-        title: "Revenue Model",
+        title: 'Revenue Model',
         content: `Broker subscription: $299–$799/month per broker account
 • Access to distress signal feed, ownership search, deal pipeline tools
 • Standard tier: NYC metro coverage, 30-day signal history
@@ -878,10 +892,10 @@ Investor / fund tier: $1,500–$5,000/month per fund account
 • Custom alert configurations, portfolio tracking
 • Dedicated onboarding and quarterly market briefings
 
-Data licensing: Normalized NYC distress data licensed to lenders, attorneys, and data aggregators on an annual license basis — $25K–$100K/year per licensee`
+Data licensing: Normalized NYC distress data licensed to lenders, attorneys, and data aggregators on an annual license basis — $25K–$100K/year per licensee`,
       },
       {
-        title: "NYC/NYS Market Brief",
+        title: 'NYC/NYS Market Brief',
         content: `Why NYC is the optimal beachhead:
 
 Foreclosure volume: NYC commercial and residential foreclosure filings hit multi-year highs in 2023–2025, driven by COVID-era loan modifications expiring, office distress, and rising interest rates. The distress cycle is active and expected to continue through 2027.
@@ -892,42 +906,42 @@ Court proceedings: NYC courts process thousands of foreclosure proceedings throu
 
 Ownership complexity: NYC has the most complex property ownership structure in the US — LLCs, trusts, partnerships, and offshore entities. Terra's ownership mapping layer navigates this complexity.
 
-Regulatory density: NYC's regulatory environment (HPD violations, DOB orders, SCA compliance) creates additional distress signals that Terra monitors.`
-      }
-    ]
+Regulatory density: NYC's regulatory environment (HPD violations, DOB orders, SCA compliance) creates additional distress signals that Terra monitors.`,
+      },
+    ],
   },
 
   // ─── CARLOTA JO SERVICE OVERVIEW ─────────────────────────────────────────
 
   {
-    id: "carlota-jo-lender-overview",
-    title: "Carlota Jo Consulting — Service Overview for Lenders",
-    lane: "Carlota Jo",
-    channel: "bank",
-    type: "brief",
-    description: "Service overview for lenders: what services, who pays, revenue model, retention.",
-    status: "ready",
+    id: 'carlota-jo-lender-overview',
+    title: 'Carlota Jo Consulting — Service Overview for Lenders',
+    lane: 'Carlota Jo',
+    channel: 'bank',
+    type: 'brief',
+    description: 'Service overview for lenders: what services, who pays, revenue model, retention.',
+    status: 'ready',
     sections: [
       {
-        title: "Business Overview",
+        title: 'Business Overview',
         content: `Carlota Jo Consulting is a premium private advisory practice serving high-net-worth individuals, family offices, executives, and board members who require sophisticated, confidential operational and strategic guidance.
 
 The practice operates on a retained advisory model — clients pay monthly retainers for ongoing access to senior advisory services, supplemented by project-based engagements for defined-scope assignments.
 
-Carlota Jo is a wholly-owned operating brand of SZL Holdings, Inc.`
+Carlota Jo is a wholly-owned operating brand of SZL Holdings, Inc.`,
       },
       {
-        title: "Services Offered",
+        title: 'Services Offered',
         content: `Executive Operations Advisory: Retainer-based advisory for founders, executives, and board members managing organizational complexity. Includes operational systems design, decision support, and strategic planning facilitation.
 
 Family Office Intelligence: Confidential advisory for family offices and UHNW individuals managing multi-entity structures, investment portfolios, and generational planning. Intelligence-grade organization and discretion.
 
 Private Client Workflow Systems: Design and implementation of custom operational systems for high-net-worth clients managing complex personal or business affairs. Includes document organization, advisory team coordination, and operational continuity planning.
 
-Strategic Project Engagements: Defined-scope advisory projects for clients requiring specific analysis, system design, or strategic planning deliverables. Priced per-project at $10K–$75K depending on scope.`
+Strategic Project Engagements: Defined-scope advisory projects for clients requiring specific analysis, system design, or strategic planning deliverables. Priced per-project at $10K–$75K depending on scope.`,
       },
       {
-        title: "Revenue Model",
+        title: 'Revenue Model',
         content: `Monthly retainer: $12,500–$35,000/month per client relationship
 • Tier 1 (Executive Advisory): $12,500/month — Regular advisory sessions, on-call access, strategic planning
 • Tier 2 (Family Office Intelligence): $22,500/month — Full-service intelligence advisory, multi-entity support
@@ -942,10 +956,10 @@ Revenue projection (projections, not guarantees):
 • 6 clients at blended Tier 1/2: $1.1M ARR
 • 2–3 project engagements/year: +$60K–$150K
 
-Margin: 80%+ (practice is expertise-intensive, low overhead)`
+Margin: 80%+ (practice is expertise-intensive, low overhead)`,
       },
       {
-        title: "Client Acquisition",
+        title: 'Client Acquisition',
         content: `Carlota Jo's client acquisition model is referral-based and relationship-driven. Primary channels:
 
 1. Existing professional relationships: Stephen Lutar's professional network across finance, law, and technology provides direct access to target clients.
@@ -956,10 +970,10 @@ Margin: 80%+ (practice is expertise-intensive, low overhead)`
 
 4. SZL Holdings platform network: Clients of other SZL platforms (Carlota Jo target clients often intersect with Vessels, Terra, and Aegis enterprise clients).
 
-Note: Carlota Jo does not engage in public marketing or social media advertising. All acquisition is through confidential, relationship-based channels.`
+Note: Carlota Jo does not engage in public marketing or social media advertising. All acquisition is through confidential, relationship-based channels.`,
       },
       {
-        title: "Retention Model",
+        title: 'Retention Model',
         content: `Carlota Jo's retention is driven by three factors:
 
 1. Relationship depth: Advisory relationships are personal and confidential. Switching to a new advisor requires rebuilding institutional knowledge that takes months to develop.
@@ -968,25 +982,25 @@ Note: Carlota Jo does not engage in public marketing or social media advertising
 
 3. Continuous value: Retainer relationships are structured around ongoing deliverables — weekly/monthly advisory sessions, quarterly strategic reviews, and real-time on-call access — creating continuous touchpoints.
 
-Historical retention: Advisory relationships in this market segment typically renew at 85%+ and last 3–7 years when managed well.`
-      }
-    ]
+Historical retention: Advisory relationships in this market segment typically renew at 85%+ and last 3–7 years when managed well.`,
+      },
+    ],
   },
 
   // ─── BANK / SBA LENDER PACKAGE ────────────────────────────────────────────
 
   {
-    id: "bank-business-plan",
-    title: "SZL Holdings — Bank-Ready Business Plan",
-    lane: "SZL Holdings",
-    channel: "bank",
-    type: "plan",
-    description: "Complete bank-ready business plan with all required sections.",
-    status: "ready",
+    id: 'bank-business-plan',
+    title: 'SZL Holdings — Bank-Ready Business Plan',
+    lane: 'SZL Holdings',
+    channel: 'bank',
+    type: 'plan',
+    description: 'Complete bank-ready business plan with all required sections.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Executive Summary",
+        title: 'Executive Summary',
         content: `SZL Holdings, Inc. is a technology holding company headquartered in New York, New York. The company designs, builds, and operates a portfolio of six command-layer intelligence platforms: Alloy (automation backbone), Lyte (business observability), Vessels (maritime intelligence), Aegis (cybersecurity operations), Terra (real estate intelligence), and Carlota Jo Consulting (premium advisory).
 
 Loan Request: $[AMOUNT — TO BE DETERMINED BASED ON LENDER PROGRAM] for working capital and operating expense support during the company's commercial scaling phase.
@@ -997,10 +1011,10 @@ Repayment Source: Operating revenue from Carlota Jo (immediate), combined with S
 
 Owner: Stephen Lutar, 100% ownership. [Personal financial information to be provided as part of application package.]
 
-Note: All projections in this business plan are estimates based on market analysis and operating assumptions. They do not constitute guarantees of performance. Financial projections should be reviewed by a CPA prior to submission.`
+Note: All projections in this business plan are estimates based on market analysis and operating assumptions. They do not constitute guarantees of performance. Financial projections should be reviewed by a CPA prior to submission.`,
       },
       {
-        title: "Company Description",
+        title: 'Company Description',
         content: `Legal Name: SZL Holdings, Inc. [or LLC — to be confirmed with attorney]
 State of Incorporation/Formation: [New York / Delaware — to be confirmed]
 Federal Tax ID (EIN): [TO BE PROVIDED]
@@ -1013,10 +1027,10 @@ Industry: Technology / Software Publishing / Professional Services
 
 SZL Holdings operates as a technology holding company with six distinct business lines, each targeting a specific vertical with a purpose-built software or service product. The parent company provides shared infrastructure, capital allocation, and strategic direction across all six brands.
 
-The company was founded on the principle that most enterprise software solves problems at the feature level rather than the system level. SZL builds systems — interconnected operational infrastructure that compounds in value as each platform matures and feeds intelligence to the others.`
+The company was founded on the principle that most enterprise software solves problems at the feature level rather than the system level. SZL builds systems — interconnected operational infrastructure that compounds in value as each platform matures and feeds intelligence to the others.`,
       },
       {
-        title: "Market Analysis",
+        title: 'Market Analysis',
         content: `SZL operates across five distinct markets:
 
 1. BUSINESS OBSERVABILITY (Lyte)
@@ -1047,10 +1061,10 @@ Competitive gap: No distress-focused workflow platform for NYC market
 Market size: $12B+ US HNW advisory market
 Current state: Fragmented providers without operational sophistication
 Growth driver: UHNW complexity increasing, privacy and discretion increasingly valued
-Competitive gap: No advisory practice combining operational systems design with traditional advisory`
+Competitive gap: No advisory practice combining operational systems design with traditional advisory`,
       },
       {
-        title: "Organization & Management",
+        title: 'Organization & Management',
         content: `OWNERSHIP
 Stephen Lutar — 100% owner, sole founder. Personal net worth statement and personal tax returns will be provided as required by lender.
 
@@ -1063,10 +1077,10 @@ SZL Holdings operates with a flat, founder-led organizational structure. All mat
 PLANNED HIRES (funded by loan proceeds):
 • Month 3–6: Sales / Business Development (1 hire, $80K–$120K salary + commission)
 • Month 6–12: Senior Software Engineer (1 hire, $120K–$160K salary)
-• Month 12–18: Government BD / Proposal Writer (1 hire, $90K–$130K salary)`
+• Month 12–18: Government BD / Proposal Writer (1 hire, $90K–$130K salary)`,
       },
       {
-        title: "Products & Services",
+        title: 'Products & Services',
         content: `ALLOY (Internal Infrastructure — Not Sold Externally)
 Description: Shared AI and automation backbone powering all SZL platforms
 Function: Workflow orchestration, signal intelligence, document automation, connector mesh
@@ -1105,10 +1119,10 @@ Description: Premium private advisory practice
 Target customers: HNW individuals, family offices, executives
 Revenue model: Monthly retainer, $12,500–$35,000/month per client
 Estimated Year 1 revenue: $120K (1 full-year relationship)
-Estimated Year 2 revenue: $360K (3 sustained relationships)`
+Estimated Year 2 revenue: $360K (3 sustained relationships)`,
       },
       {
-        title: "Marketing & Sales Strategy",
+        title: 'Marketing & Sales Strategy',
         content: `BRAND AND POSITIONING
 SZL Holdings positions itself as a command infrastructure company — not a feature vendor. Each platform is marketed independently with its own brand, but all benefit from the parent company's unified architecture narrative.
 
@@ -1124,10 +1138,10 @@ Terra: Direct outbound to NYC commercial brokers and distressed property investo
 
 Carlota Jo: Referral-only. Private network. No public marketing.
 
-YEAR 1 MARKETING BUDGET: $25K–$35K (primarily outbound tooling, content, and event attendance)`
+YEAR 1 MARKETING BUDGET: $25K–$35K (primarily outbound tooling, content, and event attendance)`,
       },
       {
-        title: "Financial Projections (Projections — Not Guarantees)",
+        title: 'Financial Projections (Projections — Not Guarantees)',
         content: `All projections are estimates based on market analysis, industry benchmarks, and operating assumptions. They should be reviewed by a CPA prior to submission.
 
 YEAR 1 (2026) REVENUE PROJECTION
@@ -1166,10 +1180,10 @@ G&A: $30,000
 Total Operating Expenses: $810,000
 
 YEAR 2 EBITDA: $650,000 (44% margin)
-Debt service capability: Full loan service coverage from Year 2 revenue`
+Debt service capability: Full loan service coverage from Year 2 revenue`,
       },
       {
-        title: "Funding Request",
+        title: 'Funding Request',
         content: `LOAN REQUEST
 Amount: $[TO BE DETERMINED BASED ON PROGRAM — see Use of Funds section]
 Term: 5–7 years preferred
@@ -1185,23 +1199,23 @@ Working capital reserve: 20%
 REPAYMENT PLAN
 Primary repayment source: Operating revenue from Carlota Jo (immediate) + SaaS subscription revenue (scaling over 12–24 months)
 Secondary repayment source: Personal assets of Stephen Lutar (personal guarantee)
-Debt service coverage: Projected DSCR of 1.3x by Month 18, 2.5x+ by Month 24`
-      }
-    ]
+Debt service coverage: Projected DSCR of 1.3x by Month 18, 2.5x+ by Month 24`,
+      },
+    ],
   },
 
   {
-    id: "use-of-funds-memo",
-    title: "Use of Funds Memo — 12 & 24 Month",
-    lane: "SZL Holdings",
-    channel: "bank",
-    type: "memo",
-    description: "Detailed use-of-funds memo showing 12-month and 24-month deployment horizons.",
-    status: "ready",
+    id: 'use-of-funds-memo',
+    title: 'Use of Funds Memo — 12 & 24 Month',
+    lane: 'SZL Holdings',
+    channel: 'bank',
+    type: 'memo',
+    description: 'Detailed use-of-funds memo showing 12-month and 24-month deployment horizons.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "12-Month Deployment (Month 1–12)",
+        title: '12-Month Deployment (Month 1–12)',
         content: `Total Funds (assuming $500K raise): $500,000
 
 ENGINEERING & PRODUCT DEVELOPMENT (35% / $175,000)
@@ -1236,10 +1250,10 @@ Security and compliance tooling: $10,000
 Office and administrative: $7,000
 
 WORKING CAPITAL RESERVE (15% / $75,000)
-Three months of operating expenses held in reserve to provide buffer against revenue timing risk`
+Three months of operating expenses held in reserve to provide buffer against revenue timing risk`,
       },
       {
-        title: "24-Month Deployment (Month 13–24)",
+        title: '24-Month Deployment (Month 13–24)',
         content: `Projected Additional Capital (from revenue or second raise): $[TO BE DETERMINED]
 
 Month 13–18 priorities:
@@ -1257,31 +1271,31 @@ Month 19–24 priorities:
 24-Month Revenue Target: $1,460,000 ARR
 24-Month Expense Target: $810,000
 24-Month EBITDA Target: $650,000
-Debt service from Month 18+: Full loan service coverage from operating revenue`
+Debt service from Month 18+: Full loan service coverage from operating revenue`,
       },
       {
-        title: "Risk Disclosure",
+        title: 'Risk Disclosure',
         content: `This use of funds memo is based on projections and assumptions. Actual deployment may vary based on:
 • Revenue timing — if any revenue stream is slower than projected, funds will be reallocated to extend runway
 • Hiring timing — hires may be accelerated or deferred based on revenue performance
 • Government program timelines — SBIR, 8(a), and MWBE programs have unpredictable timelines that may affect government revenue
 
-All financial projections require independent CPA review before submission to lenders.`
-      }
-    ]
+All financial projections require independent CPA review before submission to lenders.`,
+      },
+    ],
   },
 
   {
-    id: "operating-model-12m",
-    title: "12-Month Operating Model",
-    lane: "SZL Holdings",
-    channel: "bank",
-    type: "model",
-    description: "Month-by-month revenue, expense, and cash flow model.",
-    status: "draft",
+    id: 'operating-model-12m',
+    title: '12-Month Operating Model',
+    lane: 'SZL Holdings',
+    channel: 'bank',
+    type: 'model',
+    description: 'Month-by-month revenue, expense, and cash flow model.',
+    status: 'draft',
     sections: [
       {
-        title: "Revenue Assumptions",
+        title: 'Revenue Assumptions',
         content: `All figures are projections and assumptions. Not guarantees.
 
 CARLOTA JO
@@ -1317,10 +1331,10 @@ Month 6: $15,000 first MSP contract
 Month 9+: $8,000/month recurring
 12-Month total: ~$40,000
 
-TOTAL 12-MONTH REVENUE PROJECTION: $280,000–$320,000`
+TOTAL 12-MONTH REVENUE PROJECTION: $280,000–$320,000`,
       },
       {
-        title: "Expense Model",
+        title: 'Expense Model',
         content: `Month 1–3 Burn Rate: $22,000/month
 • Founder draw: $8,000/month
 • Cloud infrastructure: $3,000/month
@@ -1346,10 +1360,10 @@ Month 7–12 Burn Rate: $37,000/month (operating scale)
 • G&A: $1,500/month
 
 TOTAL 12-MONTH EXPENSES (projected): $360,000–$400,000
-NET CASH POSITION (with $500K loan): Positive through Month 12 with ~$100K–$150K reserve`
+NET CASH POSITION (with $500K loan): Positive through Month 12 with ~$100K–$150K reserve`,
       },
       {
-        title: "Debt Service Coverage",
+        title: 'Debt Service Coverage',
         content: `Loan terms assumed for analysis: $500,000 at 6.5% over 7 years
 Monthly payment: ~$7,400/month ($88,800/year)
 
@@ -1361,23 +1375,24 @@ Month 10–12: Revenue ~$40,000–$55,000/month, expenses ~$37,000/month. Cash f
 Year 1 ending DSCR: ~0.85x (below 1.0x — expected for early-stage; reserve coverage planned)
 Year 2 projected DSCR: ~3.0x based on $1.46M revenue projection and $810K expense projection
 
-This analysis assumes conservative revenue projections. Carlota Jo achieving 3 clients by Month 9 is the primary revenue hedge. If Carlota Jo is delayed, DSCR recovers in Month 14–18 from SaaS revenue.`
-      }
-    ]
+This analysis assumes conservative revenue projections. Carlota Jo achieving 3 clients by Month 9 is the primary revenue hedge. If Carlota Jo is delayed, DSCR recovers in Month 14–18 from SaaS revenue.`,
+      },
+    ],
   },
 
   {
-    id: "operating-model-24m",
-    title: "24-Month Operating Model & Cash Flow Schedule",
-    lane: "SZL Holdings",
-    channel: "bank",
-    type: "model",
-    description: "Month-by-month 24-month revenue, expense, headcount, and cash flow projection with quarterly roll-ups.",
-    status: "ready",
+    id: 'operating-model-24m',
+    title: '24-Month Operating Model & Cash Flow Schedule',
+    lane: 'SZL Holdings',
+    channel: 'bank',
+    type: 'model',
+    description:
+      'Month-by-month 24-month revenue, expense, headcount, and cash flow projection with quarterly roll-ups.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Revenue Forecast — Month 1–24 (Monthly Detail)",
+        title: 'Revenue Forecast — Month 1–24 (Monthly Detail)',
         content: `All figures are projections and assumptions. Not guarantees. Requires CPA review before lender submission.
 
 MONTH 1: $0 (all lines in startup/pilot mode)
@@ -1406,10 +1421,10 @@ MONTH 22: $148,000 (CJ: $28,500; Terra: $15,500; Lyte: $42,000; Vessels: $30,000
 MONTH 23: $152,000 (CJ: $28,500; Terra: $15,500; Lyte: $44,000; Vessels: $32,000; Aegis: $32,000)
 MONTH 24: $158,000 (CJ: $28,500; Terra: $16,000; Lyte: $46,000; Vessels: $34,000; Aegis: $33,500)
 
-24-MONTH CUMULATIVE REVENUE: $1,988,500`
+24-MONTH CUMULATIVE REVENUE: $1,988,500`,
       },
       {
-        title: "Quarterly Revenue Roll-Up",
+        title: 'Quarterly Revenue Roll-Up',
         content: `Q1 (Month 1–3): $12,500
 Q2 (Month 4–6): $70,500
 Q3 (Month 7–9): $145,500
@@ -1431,10 +1446,10 @@ REVENUE MIX AT MONTH 24:
 • Lyte: $46,000/mo (29.1%)
 • Vessels: $34,000/mo (21.5%)
 • Terra: $16,000/mo (10.1%)
-• Aegis: $33,500/mo (21.2%)`
+• Aegis: $33,500/mo (21.2%)`,
       },
       {
-        title: "Expense Forecast — Month 1–24 (Monthly Detail)",
+        title: 'Expense Forecast — Month 1–24 (Monthly Detail)',
         content: `MONTH 1–3 (Pre-Hire): $22,000/month
 • Founder draw: $8,000
 • Cloud infrastructure: $3,000
@@ -1484,10 +1499,10 @@ MONTH 19–24 (Scale Phase): $68,000/month
 • G&A: $2,000
 
 24-MONTH CUMULATIVE EXPENSES: $1,137,000
-(M1–3: $66K + M4–6: $96K + M7–9: $111K + M10–12: $126K = Year 1 $399K; M13–18: $330K + M19–24: $408K = Year 2 $738K)`
+(M1–3: $66K + M4–6: $96K + M7–9: $111K + M10–12: $126K = Year 1 $399K; M13–18: $330K + M19–24: $408K = Year 2 $738K)`,
       },
       {
-        title: "Headcount Plan",
+        title: 'Headcount Plan',
         content: `MONTH 1–3: 1 (Founder only)
 Founder handles all product, engineering, BD, and operations.
 
@@ -1509,10 +1524,10 @@ Focus: SBIR applications, SAM.gov management, 8(a) preparation, contract pursuit
 
 MONTH 19–24: 5 (+ Junior Engineer or Customer Success)
 Junior Engineer OR Customer Success Manager: $70K–$90K
-Focus: Customer onboarding, platform support, feature velocity`
+Focus: Customer onboarding, platform support, feature velocity`,
       },
       {
-        title: "Cash Flow Schedule (Monthly Net Position)",
+        title: 'Cash Flow Schedule (Monthly Net Position)',
         content: `All figures are projections. Net = Revenue - Expenses. Cumulative includes loan proceeds ($500K at Month 0).
 
 MONTH 0: +$500,000 (loan proceeds received)
@@ -1559,10 +1574,10 @@ DSCR at Month 12 (Year 1 trailing): 0.65x (below 1.0x — early-stage, reserve-f
 DSCR at Month 18 (M7–18 trailing): 5.3x (strong — SaaS revenue fully ramped)
 DSCR at Month 24 (Year 2 trailing): 8.9x (excellent — all lines contributing)
 
-Note: Year 1 DSCR is below 1.0x due to startup ramp, consistent with the 12-month operating model. The $500K loan reserve is sized to cover this period. Business achieves cash-flow breakeven at Month 6 and sustains positive monthly cash flow from Month 7 onward.`
+Note: Year 1 DSCR is below 1.0x due to startup ramp, consistent with the 12-month operating model. The $500K loan reserve is sized to cover this period. Business achieves cash-flow breakeven at Month 6 and sustains positive monthly cash flow from Month 7 onward.`,
       },
       {
-        title: "Key Assumptions & Sensitivity",
+        title: 'Key Assumptions & Sensitivity',
         content: `BASE CASE ASSUMPTIONS:
 • Carlota Jo ramp: 1 client by Month 3, 2 by Month 6, 3 by Month 9 (steady state)
 • Lyte ramp: First paying customer Month 4, growing $3K–$5K MRR per month
@@ -1583,22 +1598,22 @@ Year 1 revenue: $620K (SBIR $275K + faster commercial)
 Year 2 revenue: $2,100K (Phase II + enterprise contracts)
 DSCR at Month 18: 3.5x+
 
-All projections require CPA review before submission. Actual results will vary.`
-      }
-    ]
+All projections require CPA review before submission. Actual results will vary.`,
+      },
+    ],
   },
 
   {
-    id: "founder-background",
-    title: "Founder Background Summary — Stephen Lutar",
-    lane: "SZL Holdings",
-    channel: "bank",
-    type: "brief",
-    description: "Founder bio, experience, and qualifications for lender package.",
-    status: "ready",
+    id: 'founder-background',
+    title: 'Founder Background Summary — Stephen Lutar',
+    lane: 'SZL Holdings',
+    channel: 'bank',
+    type: 'brief',
+    description: 'Founder bio, experience, and qualifications for lender package.',
+    status: 'ready',
     sections: [
       {
-        title: "Professional Background",
+        title: 'Professional Background',
         content: `Stephen Lutar is the founder and sole owner of SZL Holdings, Inc. He is a systems architect, builder, and operator with a background spanning workflow design, command systems, multi-domain intelligence, and technology platform development.
 
 Stephen conceived, designed, and built all six SZL platforms from architecture through deployment — including the shared Alloy backbone that powers the entire portfolio. This is not a management background; it is an operational and technical background demonstrated through shipped product.
@@ -1608,10 +1623,10 @@ Key areas of expertise:
 • Workflow automation and process intelligence
 • Command and control system design (applied to business, maritime, and security domains)
 • Multi-stakeholder coordination and intelligence analysis
-• Capital readiness, compliance infrastructure, and government procurement`
+• Capital readiness, compliance infrastructure, and government procurement`,
       },
       {
-        title: "Qualifications Relevant to This Loan",
+        title: 'Qualifications Relevant to This Loan',
         content: `Business management: Full ownership and management of SZL Holdings across six active business lines. Demonstrated ability to manage capital allocation, product development, and business operations simultaneously.
 
 Financial management: Manages all financial operations of SZL Holdings including revenue recognition, expense management, and capital planning. Personal financial records available for review.
@@ -1620,10 +1635,10 @@ Industry expertise: Deep domain expertise in all five verticals served by SZL pl
 
 Technology credentials: Designed and shipped production-grade software across six distinct domains. Technical depth reduces key-person risk from a product standpoint — the systems are built and documented.
 
-Character and reputation: [Personal and professional references to be provided upon request. No adverse legal history, no bankruptcies, no criminal record.]`
+Character and reputation: [Personal and professional references to be provided upon request. No adverse legal history, no bankruptcies, no criminal record.]`,
       },
       {
-        title: "Personal Financial Summary",
+        title: 'Personal Financial Summary',
         content: `[This section will be completed with actual personal financial data as required by the lender application:
 • Personal tax returns — most recent 2 years
 • Personal financial statement (assets, liabilities, net worth)
@@ -1631,22 +1646,22 @@ Character and reputation: [Personal and professional references to be provided u
 • Government-issued photo ID
 • Personal background/reference contacts]
 
-Note: Stephen Lutar is the 100% owner and will provide a personal guarantee on any business loan. Personal financial documentation will be provided in full as part of the application package.`
-      }
-    ]
+Note: Stephen Lutar is the 100% owner and will provide a personal guarantee on any business loan. Personal financial documentation will be provided in full as part of the application package.`,
+      },
+    ],
   },
 
   {
-    id: "risk-mitigation-sheet",
-    title: "Risk / Mitigation Sheet",
-    lane: "SZL Holdings",
-    channel: "bank",
-    type: "brief",
-    description: "Key business risks with corresponding mitigation strategies.",
-    status: "ready",
+    id: 'risk-mitigation-sheet',
+    title: 'Risk / Mitigation Sheet',
+    lane: 'SZL Holdings',
+    channel: 'bank',
+    type: 'brief',
+    description: 'Key business risks with corresponding mitigation strategies.',
+    status: 'ready',
     sections: [
       {
-        title: "Risk Matrix",
+        title: 'Risk Matrix',
         content: `RISK 1: Single-Founder Key-Person Risk
 Description: Stephen Lutar is the sole founder and operator. Loss of ability to operate could impact business continuity.
 Probability: Low | Impact: High
@@ -1693,22 +1708,22 @@ Mitigation:
 • Government revenue is not required for loan repayment — loan is repayable from commercial SaaS revenue
 • Multiple certification tracks being pursued simultaneously (MWBE, 8(a), WOSB)
 • SAM.gov registration (prerequisite) is straightforward and low-risk
-• SBIR revenue is additive, not required for base case`
-      }
-    ]
+• SBIR revenue is additive, not required for base case`,
+      },
+    ],
   },
 
   {
-    id: "entity-banking-checklist",
-    title: "Entity & Banking Documentation Checklist",
-    lane: "SZL Holdings",
-    channel: "bank",
-    type: "checklist",
-    description: "Checklist of required legal and banking documents for lender package.",
-    status: "ready",
+    id: 'entity-banking-checklist',
+    title: 'Entity & Banking Documentation Checklist',
+    lane: 'SZL Holdings',
+    channel: 'bank',
+    type: 'checklist',
+    description: 'Checklist of required legal and banking documents for lender package.',
+    status: 'ready',
     sections: [
       {
-        title: "Entity Documents",
+        title: 'Entity Documents',
         content: `FORMATION DOCUMENTS
 ☐ Articles of Organization or Incorporation (state-certified)
 ☐ Certificate of Formation (if LLC)
@@ -1745,25 +1760,26 @@ FINANCIAL RECORDS
 INSURANCE
 ☐ Current business insurance policy certificate (general liability)
 ☐ Professional liability / E&O insurance (if applicable)
-☐ Key-man life insurance (to be obtained prior to close)`
-      }
-    ]
+☐ Key-man life insurance (to be obtained prior to close)`,
+      },
+    ],
   },
 
   // ─── NY STATE PROGRAMS ────────────────────────────────────────────────────
 
   {
-    id: "ny-mwbe-guide",
-    title: "NY MWBE Certification Readiness Guide",
-    lane: "SZL Holdings",
-    channel: "ny_state",
-    type: "guide",
-    description: "Complete MWBE certification readiness guide based on Empire State Development requirements.",
-    status: "ready",
+    id: 'ny-mwbe-guide',
+    title: 'NY MWBE Certification Readiness Guide',
+    lane: 'SZL Holdings',
+    channel: 'ny_state',
+    type: 'guide',
+    description:
+      'Complete MWBE certification readiness guide based on Empire State Development requirements.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Overview",
+        title: 'Overview',
         content: `The New York State Minority and Women-Owned Business Enterprise (MWBE) certification, administered by Empire State Development (ESD), provides certified businesses with access to New York State government contract set-asides and programs designed to increase MWBE participation in state procurement.
 
 Certifying body: New York State Empire State Development
@@ -1777,10 +1793,10 @@ CERTIFICATION BENEFITS:
 • Preferred vendor status on many state agency procurements
 • NYC SBS MWBE certification eligibility (separate process, but NY ESD certification helps)
 • Marketing and visibility in ESD's certified vendor directory
-• Access to MWBE technical assistance programs`
+• Access to MWBE technical assistance programs`,
       },
       {
-        title: "Eligibility Requirements",
+        title: 'Eligibility Requirements',
         content: `51%+ OWNERSHIP by qualifying individuals:
 The business must be at least 51% owned by one or more individuals who are members of a minority group or women. Qualifying groups include: Black Americans, Hispanic Americans, Asian-Pacific Americans, Asian-Indian Americans, and Women.
 
@@ -1801,10 +1817,10 @@ PERSONAL NET WORTH LIMITS:
 For MWBE certification: Personal net worth of qualifying owner(s) must not exceed $3.5 million (excluding primary residence and business value). Personal financial disclosure is required.
 
 SBA SIZE STANDARDS:
-The business must qualify as a small business under applicable SBA size standards for its primary NAICS code. For software publishers (NAICS 511210): $47.5M average annual revenue limit.`
+The business must qualify as a small business under applicable SBA size standards for its primary NAICS code. For software publishers (NAICS 511210): $47.5M average annual revenue limit.`,
       },
       {
-        title: "Required Documentation Checklist",
+        title: 'Required Documentation Checklist',
         content: `OWNERSHIP AND CONTROL DOCUMENTS
 ☐ Signed, certified personal statement from qualifying owner
 ☐ Operating Agreement or Bylaws showing 51%+ ownership stake
@@ -1841,10 +1857,10 @@ MANAGEMENT AND CONTROL DOCUMENTATION
 ADDITIONAL DOCUMENTS (may be required)
 ☐ Customer list (top 10 clients)
 ☐ Copies of significant contracts (may be redacted)
-☐ Loan documents (if business has outstanding debt)`
+☐ Loan documents (if business has outstanding debt)`,
       },
       {
-        title: "Application Process & Timeline",
+        title: 'Application Process & Timeline',
         content: `PHASE 1: Pre-Application Preparation (4–8 weeks)
 • Gather all required documents
 • Attorney review of operating agreement and ownership structure
@@ -1872,10 +1888,10 @@ PHASE 4: Certification Issued
 
 TOTAL TIMELINE: 6–10 months from decision to apply to certification received
 ATTORNEY COST: $3,000–$7,000 typical for application assistance
-KEY RISK: Ownership and control documentation is the most common failure point — attorney review is essential`
+KEY RISK: Ownership and control documentation is the most common failure point — attorney review is essential`,
       },
       {
-        title: "SZL Eligibility Notes",
+        title: 'SZL Eligibility Notes',
         content: `CRITICAL NOTE: All eligibility analysis is for informational purposes only. No determination of MWBE eligibility can be made without a formal review by qualified legal counsel. The following is a framework for analysis, not a legal opinion.
 
 OWNERSHIP: SZL Holdings is 100% owned by Stephen Lutar. MWBE certification requires 51%+ ownership by a qualifying minority or woman individual. Whether Stephen Lutar qualifies requires attorney review based on his specific demographic background and applicable definitions.
@@ -1889,22 +1905,23 @@ RECOMMENDED NEXT STEPS:
 2. Provide attorney with all ownership documents, demographic information, and operating agreement
 3. Attorney advises on eligibility and optimal application strategy
 4. Gather financial documentation with CPA assistance
-5. Proceed to application if eligibility is confirmed`
-      }
-    ]
+5. Proceed to application if eligibility is confirmed`,
+      },
+    ],
   },
 
   {
-    id: "ny-excelsior-guide",
-    title: "NY Excelsior Jobs Program — Eligibility Analysis",
-    lane: "SZL Holdings",
-    channel: "ny_state",
-    type: "guide",
-    description: "Excelsior Jobs Program eligibility and tax credit structure for SZL as a technology company.",
-    status: "ready",
+    id: 'ny-excelsior-guide',
+    title: 'NY Excelsior Jobs Program — Eligibility Analysis',
+    lane: 'SZL Holdings',
+    channel: 'ny_state',
+    type: 'guide',
+    description:
+      'Excelsior Jobs Program eligibility and tax credit structure for SZL as a technology company.',
+    status: 'ready',
     sections: [
       {
-        title: "Program Overview",
+        title: 'Program Overview',
         content: `The Excelsior Jobs Program, administered by Empire State Development, provides refundable tax credits to eligible businesses in strategic industries that commit to creating new jobs and/or making significant capital investments in New York State.
 
 PROGRAM CREDITS:
@@ -1916,10 +1933,10 @@ PROGRAM CREDITS:
 Credits are refundable (paid as cash even if business has no tax liability) and awarded for 5–10 years based on commitment.
 
 ADMINISTERING AGENCY: Empire State Development (ESD)
-APPLICATION: Through ESD's Business Incentives program`
+APPLICATION: Through ESD's Business Incentives program`,
       },
       {
-        title: "SZL Eligibility Analysis",
+        title: 'SZL Eligibility Analysis',
         content: `STRATEGIC INDUSTRY ALIGNMENT:
 Excelsior Jobs Program targets "strategic industries" — SZL qualifies under multiple:
 
@@ -1948,22 +1965,22 @@ R&D Credit (if qualifying): 50% × [federal R&D credit on qualifying R&D expense
 RECOMMENDED ACTION:
 1. Consult with NY tax advisor specializing in Excelsior/ESD programs
 2. Document all R&D activities for federal and state R&D credit qualification
-3. Apply through ESD's Business Incentives portal with hiring plan and wage commitment`
-      }
-    ]
+3. Apply through ESD's Business Incentives portal with hiring plan and wage commitment`,
+      },
+    ],
   },
 
   {
-    id: "nystar-guide",
-    title: "NYSTAR / Innovation Hot Spot Program",
-    lane: "SZL Holdings",
-    channel: "ny_state",
-    type: "guide",
-    description: "NYSTAR incubator and accelerator program eligibility analysis.",
-    status: "draft",
+    id: 'nystar-guide',
+    title: 'NYSTAR / Innovation Hot Spot Program',
+    lane: 'SZL Holdings',
+    channel: 'ny_state',
+    type: 'guide',
+    description: 'NYSTAR incubator and accelerator program eligibility analysis.',
+    status: 'draft',
     sections: [
       {
-        title: "Program Overview",
+        title: 'Program Overview',
         content: `NYSTAR (New York State Foundation for Science, Technology and Innovation) supports technology companies through incubator programs, innovation hot spots, and university-affiliated research partnerships. The program provides:
 
 • Access to incubator space at reduced or no cost
@@ -1975,10 +1992,10 @@ RECOMMENDED ACTION:
 KEY PROGRAMS:
 Innovation Hot Spots: 10 designated business incubators affiliated with NY universities. Companies in Innovation Hot Spots receive benefits including tax exemptions under the START-UP NY program.
 
-NYSTAR Small Business Research Assistance (SBRA): Assistance navigating federal SBIR/STTR applications from NY state.`
+NYSTAR Small Business Research Assistance (SBRA): Assistance navigating federal SBIR/STTR applications from NY state.`,
       },
       {
-        title: "SZL Alignment Analysis",
+        title: 'SZL Alignment Analysis',
         content: `INNOVATION HOT SPOT ELIGIBILITY:
 SZL qualifies as a technology company developing innovative software platforms. Relevant hot spots include:
 
@@ -1998,22 +2015,22 @@ NYSTAR's SBRA program can provide direct assistance navigating federal SBIR appl
 RECOMMENDED ACTION:
 1. Contact NYSTAR (nystar.suny.edu) to identify the closest aligned Innovation Hot Spot
 2. Apply for SBRA assistance to support SBIR Phase I applications
-3. Explore START-UP NY benefits if co-located with a qualifying university affiliate`
-      }
-    ]
+3. Explore START-UP NY benefits if co-located with a qualifying university affiliate`,
+      },
+    ],
   },
 
   {
-    id: "nyc-sbs-guide",
-    title: "NYC Small Business Services — M/WBE Certification",
-    lane: "SZL Holdings",
-    channel: "ny_state",
-    type: "guide",
-    description: "NYC SBS M/WBE certification guide and procurement alignment.",
-    status: "ready",
+    id: 'nyc-sbs-guide',
+    title: 'NYC Small Business Services — M/WBE Certification',
+    lane: 'SZL Holdings',
+    channel: 'ny_state',
+    type: 'guide',
+    description: 'NYC SBS M/WBE certification guide and procurement alignment.',
+    status: 'ready',
     sections: [
       {
-        title: "NYC vs. NY State MWBE",
+        title: 'NYC vs. NY State MWBE',
         content: `New York City has its own separate M/WBE certification program administered by NYC Small Business Services (SBS), distinct from the NY State ESD MWBE certification. A business seeking NYC government contracts must obtain NYC SBS certification separately.
 
 KEY DIFFERENCES:
@@ -2024,10 +2041,10 @@ KEY DIFFERENCES:
 NYC CERTIFICATION TYPES:
 • MBE (Minority Business Enterprise): 51%+ owned by qualifying minority individuals
 • WBE (Women Business Enterprise): 51%+ owned by qualifying women
-• Emerging Business Enterprise (EBE): Small businesses not meeting MBE/WBE criteria but meeting size requirements`
+• Emerging Business Enterprise (EBE): Small businesses not meeting MBE/WBE criteria but meeting size requirements`,
       },
       {
-        title: "NYC Procurement Alignment",
+        title: 'NYC Procurement Alignment',
         content: `NYC agencies relevant to SZL's platforms:
 
 DOITT / DoITT (Department of Information Technology & Telecommunications):
@@ -2045,22 +2062,22 @@ Technology and innovation partnership. SZL's platform portfolio and capital read
 RECOMMENDED ACTION:
 1. Register on NYC's PASSPort vendor portal (vendor.cityofnewyork.us)
 2. Review NYC SBS certification eligibility (nyc.gov/sbs)
-3. Monitor NYC agency RFPs through PASSPort for Aegis and Lyte opportunities`
-      }
-    ]
+3. Monitor NYC agency RFPs through PASSPort for Aegis and Lyte opportunities`,
+      },
+    ],
   },
 
   {
-    id: "esd-lending-guide",
-    title: "NY Forward / ESD Small Business Programs",
-    lane: "SZL Holdings",
-    channel: "ny_state",
-    type: "guide",
-    description: "Empire State Development lending programs and small business resources.",
-    status: "ready",
+    id: 'esd-lending-guide',
+    title: 'NY Forward / ESD Small Business Programs',
+    lane: 'SZL Holdings',
+    channel: 'ny_state',
+    type: 'guide',
+    description: 'Empire State Development lending programs and small business resources.',
+    status: 'ready',
     sections: [
       {
-        title: "ESD Lending Programs",
+        title: 'ESD Lending Programs',
         content: `Empire State Development offers several small business financing programs:
 
 NY FORWARD LOAN FUND:
@@ -2088,25 +2105,25 @@ CDFI PARTNERS (Community Development Financial Institutions):
 • Community Reinvestment Fund: US CDFI with NY presence
 
 RECOMMENDED STRATEGY:
-Pursue ESD and CDFI lending as a complement to SBA lending — CDFI loans often have more flexible underwriting criteria and are specifically designed for early-stage businesses.`
-      }
-    ]
+Pursue ESD and CDFI lending as a complement to SBA lending — CDFI loans often have more flexible underwriting criteria and are specifically designed for early-stage businesses.`,
+      },
+    ],
   },
 
   // ─── FEDERAL PROGRAMS ─────────────────────────────────────────────────────
 
   {
-    id: "sba-8a-guide",
-    title: "SBA 8(a) Business Development Program — Eligibility & Checklist",
-    lane: "SZL Holdings",
-    channel: "federal",
-    type: "guide",
-    description: "SBA 8(a) eligibility analysis and complete application checklist.",
-    status: "ready",
+    id: 'sba-8a-guide',
+    title: 'SBA 8(a) Business Development Program — Eligibility & Checklist',
+    lane: 'SZL Holdings',
+    channel: 'federal',
+    type: 'guide',
+    description: 'SBA 8(a) eligibility analysis and complete application checklist.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Program Overview",
+        title: 'Program Overview',
         content: `The SBA 8(a) Business Development Program is a 9-year federal business development program for small disadvantaged businesses. It provides access to sole-source and set-aside federal contracts, mentorship, and business development resources.
 
 PROGRAM BENEFITS:
@@ -2120,10 +2137,10 @@ ADMINISTERING AGENCY: US Small Business Administration (certify.sba.gov)
 
 PROGRAM DURATION: 9 years (4-year developmental stage + 5-year transitional stage)
 
-NOTE: Eligibility for 8(a) depends on personal demographic and financial characteristics of the business owner. All eligibility analysis is informational only. A formal determination requires SBA review. Consult qualified legal counsel before investing in the application.`
+NOTE: Eligibility for 8(a) depends on personal demographic and financial characteristics of the business owner. All eligibility analysis is informational only. A formal determination requires SBA review. Consult qualified legal counsel before investing in the application.`,
       },
       {
-        title: "Eligibility Requirements",
+        title: 'Eligibility Requirements',
         content: `SOCIAL DISADVANTAGE:
 The owner must be a member of a socially disadvantaged group. Designated groups: Black Americans, Hispanic Americans, Native Americans, Asian-Pacific Americans, Subcontinent Asian Americans, and other individuals who can demonstrate social disadvantage on a case-by-case basis.
 
@@ -2145,10 +2162,10 @@ OPERATING HISTORY:
 • Business must be in business for at least 2 years (with limited exceptions for very-established firms)
 
 GOOD CHARACTER:
-• Owner must demonstrate "good character" — no serious criminal history, no debarment, no prior 8(a) participation`
+• Owner must demonstrate "good character" — no serious criminal history, no debarment, no prior 8(a) participation`,
       },
       {
-        title: "Application Checklist",
+        title: 'Application Checklist',
         content: `PERSONAL DOCUMENTATION (for qualifying owner)
 ☐ Social Security Number
 ☐ Government-issued photo ID (passport or driver's license)
@@ -2178,10 +2195,10 @@ NAICS CODE DOCUMENTATION
 ☐ Primary NAICS code selection and justification
 ☐ Employee count and payroll documentation (for size determination)
 
-NOTE: SBA 8(a) applications are complex and failure rates are high without experienced counsel. Attorney and CPA review strongly recommended.`
+NOTE: SBA 8(a) applications are complex and failure rates are high without experienced counsel. Attorney and CPA review strongly recommended.`,
       },
       {
-        title: "SZL Eligibility Notes",
+        title: 'SZL Eligibility Notes',
         content: `IMPORTANT DISCLAIMER: The following analysis is for planning purposes only. It is not a legal opinion. SBA 8(a) eligibility determination is made by the SBA, not by the applicant. Consult qualified legal counsel (8(a) experienced attorney) before investing in the application process.
 
 SOCIAL DISADVANTAGE: Whether Stephen Lutar qualifies as a member of a socially disadvantaged group requires formal review with a qualified attorney based on his specific background, demographic characteristics, and the applicable SBA definitions. This is the threshold eligibility question and must be answered first.
@@ -2194,22 +2211,22 @@ NEXT STEPS:
 1. Consult with an 8(a)-specialized attorney (many offer free initial consultations)
 2. Gather 3 years of personal tax returns for initial analysis
 3. Prepare personal financial statement (SBA Form 413)
-4. Have attorney assess social disadvantage eligibility before investing in full application`
-      }
-    ]
+4. Have attorney assess social disadvantage eligibility before investing in full application`,
+      },
+    ],
   },
 
   {
-    id: "wosb-guide",
-    title: "WOSB / EDWOSB Certification — Eligibility & Path",
-    lane: "SZL Holdings",
-    channel: "federal",
-    type: "guide",
-    description: "Women-Owned Small Business eligibility and certification paths.",
-    status: "draft",
+    id: 'wosb-guide',
+    title: 'WOSB / EDWOSB Certification — Eligibility & Path',
+    lane: 'SZL Holdings',
+    channel: 'federal',
+    type: 'guide',
+    description: 'Women-Owned Small Business eligibility and certification paths.',
+    status: 'draft',
     sections: [
       {
-        title: "Program Overview",
+        title: 'Program Overview',
         content: `The Women-Owned Small Business (WOSB) Federal Contract Program provides contracting preferences for women-owned small businesses on certain federal contracts. The Economically Disadvantaged Women-Owned Small Business (EDWOSB) designation provides additional preference for businesses meeting economic disadvantage criteria.
 
 CERTIFICATION TYPES:
@@ -2228,23 +2245,24 @@ CERTIFICATION PATHS:
 
 ELIGIBILITY NOTE: SZL Holdings is 100% owned by Stephen Lutar. WOSB certification requires 51%+ ownership by qualifying women. This certification path is not applicable unless ownership structure changes.
 
-PLANNING NOTE: If SZL Holdings ownership structure changes in the future (e.g., a woman co-founder or investor acquires 51%+), WOSB certification should be re-evaluated at that time.`
-      }
-    ]
+PLANNING NOTE: If SZL Holdings ownership structure changes in the future (e.g., a woman co-founder or investor acquires 51%+), WOSB certification should be re-evaluated at that time.`,
+      },
+    ],
   },
 
   {
-    id: "sbir-sttr-guide",
-    title: "SBIR / STTR Grant Readiness Guide",
-    lane: "SZL Holdings",
-    channel: "federal",
-    type: "guide",
-    description: "SBIR/STTR agency alignment by product lane with specific solicitation categories.",
-    status: "ready",
+    id: 'sbir-sttr-guide',
+    title: 'SBIR / STTR Grant Readiness Guide',
+    lane: 'SZL Holdings',
+    channel: 'federal',
+    type: 'guide',
+    description:
+      'SBIR/STTR agency alignment by product lane with specific solicitation categories.',
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "Program Overview",
+        title: 'Program Overview',
         content: `The Small Business Innovation Research (SBIR) and Small Business Technology Transfer (STTR) programs are the largest federal grant programs for small technology companies. Combined, they provide $3B+ per year to small businesses developing innovative technology solutions for federal agencies.
 
 SBIR PHASES:
@@ -2263,10 +2281,10 @@ ELIGIBILITY:
 ANNUAL SOLICITATION CYCLE:
 Most agencies release solicitations 2–4 times per year. NSF releases continuously. Key dates vary by agency — must monitor agency websites.
 
-NYSTAR SBRA ASSISTANCE: NY State provides free SBIR application assistance through NYSTAR's SBRA program. Highly recommended for first-time applicants.`
+NYSTAR SBRA ASSISTANCE: NY State provides free SBIR application assistance through NYSTAR's SBRA program. Highly recommended for first-time applicants.`,
       },
       {
-        title: "Lyte — NSF SBIR Alignment",
+        title: 'Lyte — NSF SBIR Alignment',
         content: `TARGET AGENCY: National Science Foundation (NSF)
 SBIR PROGRAM OFFICE: NSF SBIR/STTR America's Seed Fund
 
@@ -2295,10 +2313,10 @@ PHASE I BUDGET STRUCTURE (sample):
 • Equipment and computing: $20,000
 • Travel and dissemination: $5,000
 • Indirect costs (negotiated rate): $50,000
-Total: ~$275,000`
+Total: ~$275,000`,
       },
       {
-        title: "Vessels — DoD and DHS/MARAD SBIR Alignment",
+        title: 'Vessels — DoD and DHS/MARAD SBIR Alignment',
         content: `TARGET AGENCIES:
 • DoD SBIR (Naval/Maritime topics)
 • DHS Science & Technology Directorate
@@ -2324,10 +2342,10 @@ The global shipping disruptions of 2020–2024 made maritime domain awareness a 
 PHASE I PITCH (DoD format):
 Technical Innovation: Vessels' multi-source maritime intelligence fusion engine — combining AIS, satellite imagery, port call data, and vessel specification data into a unified risk-scored intelligence feed. DoD need: identifying commercially-available vessels for defense logistics without full military-grade tracking cost.
 
-Commercial Potential: $8B+ global maritime intelligence market. Immediate commercial customers in fleet management, maritime insurance, and port operations.`
+Commercial Potential: $8B+ global maritime intelligence market. Immediate commercial customers in fleet management, maritime insurance, and port operations.`,
       },
       {
-        title: "Aegis — DoD and DHS SBIR Alignment",
+        title: 'Aegis — DoD and DHS SBIR Alignment',
         content: `TARGET AGENCIES:
 • DoD SBIR (CYBERCOM, DIA, NSA-adjacent programs)
 • DHS Science & Technology Directorate (Cybersecurity Division)
@@ -2352,10 +2370,10 @@ While CISA does not directly run SBIR programs, Aegis aligns with CISA's Joint C
 PHASE I PITCH (DHS format):
 Technical Innovation: governed SOC command platform that reduces analyst-to-alert ratio by 10x through automated triage and context enrichment. Current federal SOC platforms require 5–8 analysts for 200-alert environments. Aegis reduces to 1–2 analysts with equivalent coverage.
 
-Commercial Potential: $35B+ global SIEM/SOAR/XDR market. Immediate commercial customers in MSP market (20,000+ US MSPs managing security for small businesses).`
+Commercial Potential: $35B+ global SIEM/SOAR/XDR market. Immediate commercial customers in MSP market (20,000+ US MSPs managing security for small businesses).`,
       },
       {
-        title: "SAM.gov Registration Checklist",
+        title: 'SAM.gov Registration Checklist',
         content: `SAM.gov registration is the prerequisite for ALL federal contracting and federal grant applications. It must be completed before applying for SBIR grants, 8(a) certification, or any federal contract.
 
 PRE-REGISTRATION REQUIREMENTS
@@ -2394,10 +2412,10 @@ SOCIOECONOMIC CERTIFICATIONS (complete as applicable):
 ☐ HUBZone (if business located in qualified HUBZone area)
 
 ANNUAL RENEWAL
-SAM registration expires annually. Lapses disqualify from all federal bidding and grant applications. Set calendar reminder 60 days before expiration.`
+SAM registration expires annually. Lapses disqualify from all federal bidding and grant applications. Set calendar reminder 60 days before expiration.`,
       },
       {
-        title: "FedRAMP Readiness Assessment",
+        title: 'FedRAMP Readiness Assessment',
         content: `Federal Risk and Authorization Management Program (FedRAMP) is the federal government's authorization process for cloud services used by federal agencies. FedRAMP authorization is required for cloud products sold to federal agencies.
 
 RELEVANCE TO SZL:
@@ -2442,25 +2460,26 @@ Phase 2: FedRAMP Ready designation
 Cost reduction strategies:
 • Use FedRAMP-approved infrastructure providers (AWS GovCloud, Azure Government)
 • Partner with an established MSSP who has FedRAMP authority (resell through their authorization)
-• Target DoD Impact Level 2 first (similar requirements, different authorization body)`
-      }
-    ]
+• Target DoD Impact Level 2 first (similar requirements, different authorization body)`,
+      },
+    ],
   },
 
   // ─── ANGEL / EQUITY PACKAGE ───────────────────────────────────────────────
 
   {
-    id: "angel-narrative-memo",
-    title: "Angel Investor Narrative Memo — The Why Now Story",
-    lane: "SZL Holdings",
-    channel: "angel",
-    type: "narrative",
-    description: "Investor narrative memo: the 'why now' story, platform company thesis, commercial wedge strategy.",
-    status: "ready",
+    id: 'angel-narrative-memo',
+    title: 'Angel Investor Narrative Memo — The Why Now Story',
+    lane: 'SZL Holdings',
+    channel: 'angel',
+    type: 'narrative',
+    description:
+      "Investor narrative memo: the 'why now' story, platform company thesis, commercial wedge strategy.",
+    status: 'ready',
     printable: true,
     sections: [
       {
-        title: "The Why Now",
+        title: 'The Why Now',
         content: `We are at an unusual moment in the history of software. For three decades, software was built for function. You had a problem (track inventory, send email, manage projects) and you bought a tool that solved it. The tool proliferated. More tools were added. Now the average mid-size organization runs 150+ SaaS applications.
 
 The problem isn't too few tools. It's too many. And they don't talk to each other. And they require humans to translate between them. And those humans are the bottleneck in every process that matters.
@@ -2477,10 +2496,10 @@ This is the SZL thesis. Not because it's intellectually interesting (though it i
 
 4. The vertical SaaS market is experiencing a second wave. After the first wave of vertical SaaS (construction, healthcare, retail), a second wave is forming around intelligence-layered verticals — platforms that don't just manage data but derive and act on intelligence from it. Vessels, Aegis, and Terra are second-wave plays.
 
-We built the platform engine first (Alloy). Now we're deploying it across five verticals simultaneously, with each deployment funding the next.`
+We built the platform engine first (Alloy). Now we're deploying it across five verticals simultaneously, with each deployment funding the next.`,
       },
       {
-        title: "The Commercial Wedge Strategy",
+        title: 'The Commercial Wedge Strategy',
         content: `SZL is not a single-product company pretending to be a platform. It is genuinely a platform company that happens to have five products.
 
 The wedge architecture works like this:
@@ -2500,10 +2519,10 @@ AEGIS = THE GOVERNMENT WEDGE
 Aegis is the platform designed to open federal government revenue. Government cybersecurity contracts are large (>$1M ACV), long (5+ years), and sticky (switching costs measured in years). Aegis, positioned with 8(a) or WOSB set-aside access, creates a government revenue stream that is structurally different from commercial SaaS. This is the highest-multiple acquisition or partnership target in the portfolio.
 
 TERRA = THE GEOGRAPHIC WEDGE
-Terra establishes SZL in the NYC real estate market — the deepest, most data-rich property market in the US. Geographic focus creates data density that makes the platform increasingly valuable as coverage deepens. NYC success validates the model for expansion to other high-distress, high-data markets.`
+Terra establishes SZL in the NYC real estate market — the deepest, most data-rich property market in the US. Geographic focus creates data density that makes the platform increasingly valuable as coverage deepens. NYC success validates the model for expansion to other high-distress, high-data markets.`,
       },
       {
-        title: "Traction & Roadmap Narrative",
+        title: 'Traction & Roadmap Narrative',
         content: `WHAT'S BUILT:
 The SZL portfolio was built in reverse order from most companies: we built the infrastructure first, then the products. The Alloy backbone — workflow orchestration, AI intelligence, signal processing, document automation — was designed and built before the first product was deployed. This is why six production platforms can exist with one founding team.
 
@@ -2529,10 +2548,10 @@ WHAT'S NEXT (12-Month Milestones):
 □ $300K+ ARR across all platforms
 □ First government contract awarded (SBIR Phase I or 8(a) sole-source)
 □ MWBE certification received (if eligible)
-□ Series A trigger metrics in view ($600K+ ARR, government contract in hand)`
+□ Series A trigger metrics in view ($600K+ ARR, government contract in hand)`,
       },
       {
-        title: "Milestone-Based Raise Plan",
+        title: 'Milestone-Based Raise Plan',
         content: `SZL is pursuing capital in tranches aligned with value milestones — not raising to survive, but raising to unlock.
 
 PRE-SEED TRANCHE (Current)
@@ -2559,10 +2578,10 @@ Trigger for next round: $600K+ ARR, government contract award, clear path to $3M
 SERIES A (24–36 Months)
 Target: $8M–$15M
 Use: Geographic expansion (Vessels: international markets), Aegis federal scale, Lyte enterprise tier
-Trigger: $3M+ ARR, $1M+ government revenue, 2+ validated enterprise verticals`
+Trigger: $3M+ ARR, $1M+ government revenue, 2+ validated enterprise verticals`,
       },
       {
-        title: "Use of Proceeds — Investor Round",
+        title: 'Use of Proceeds — Investor Round',
         content: `$500K ANGEL ROUND DEPLOYMENT (illustrative)
 
 Engineering (40% / $200,000):
@@ -2599,36 +2618,36 @@ ROI CASE FOR ANGEL INVESTORS:
 At Series A ($8M raise at $24M pre-money): $500K angel at $4M pre-money → 12.5% ownership → 12.5% × $24M = $3M value → 6x return
 At acquisition ($50M at 5x ARR on $10M ARR): Same position → $6.25M → 12.5x return
 
-Note: All return projections are illustrative only. Actual returns cannot be guaranteed.`
-      }
-    ]
+Note: All return projections are illustrative only. Actual returns cannot be guaranteed.`,
+      },
+    ],
   },
 ];
 
-export function getDocumentsByChannel(channel: CapitalDocument["channel"]): CapitalDocument[] {
-  return CAPITAL_DOCUMENTS.filter(d => d.channel === channel);
+export function getDocumentsByChannel(channel: CapitalDocument['channel']): CapitalDocument[] {
+  return CAPITAL_DOCUMENTS.filter((d) => d.channel === channel);
 }
 
 export function getDocumentById(id: string): CapitalDocument | undefined {
-  return CAPITAL_DOCUMENTS.find(d => d.id === id);
+  return CAPITAL_DOCUMENTS.find((d) => d.id === id);
 }
 
 export function getDocumentsByLane(lane: string): CapitalDocument[] {
-  return CAPITAL_DOCUMENTS.filter(d => d.lane === lane);
+  return CAPITAL_DOCUMENTS.filter((d) => d.lane === lane);
 }
 
-export const CHANNEL_LABELS: Record<CapitalDocument["channel"], string> = {
-  investor: "Investor Materials",
-  bank: "Bank / SBA Package",
-  angel: "Angel / Equity Package",
-  ny_state: "NY State Programs",
-  federal: "Federal Programs",
+export const CHANNEL_LABELS: Record<CapitalDocument['channel'], string> = {
+  investor: 'Investor Materials',
+  bank: 'Bank / SBA Package',
+  angel: 'Angel / Equity Package',
+  ny_state: 'NY State Programs',
+  federal: 'Federal Programs',
 };
 
-export const CHANNEL_COLORS: Record<CapitalDocument["channel"], string> = {
-  investor: "#3b82f6",
-  bank: "#10b981",
-  angel: "#f59e0b",
-  ny_state: "#6366f1",
-  federal: "#ef4444",
+export const CHANNEL_COLORS: Record<CapitalDocument['channel'], string> = {
+  investor: '#3b82f6',
+  bank: '#10b981',
+  angel: '#f59e0b',
+  ny_state: '#6366f1',
+  federal: '#ef4444',
 };

@@ -1,6 +1,6 @@
-import { useLyte } from "@/context/LyteContext";
-import { useNotifications } from "@/context/NotificationContext";
-import { useCriticalAlertNotifier } from "@/hooks/useCriticalAlertNotifier";
+import { useLyte } from '@/context/LyteContext';
+import { useNotifications } from '@/context/NotificationContext';
+import { useCriticalAlertNotifier } from '@/hooks/useCriticalAlertNotifier';
 
 export function AlertNotifierBridge() {
   const { signals } = useLyte();

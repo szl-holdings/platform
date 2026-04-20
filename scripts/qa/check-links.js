@@ -8,28 +8,28 @@
  *   node scripts/qa/check-links.js  (defaults to http://localhost:3000)
  */
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 const PAGES_TO_CHECK = [
-  "/",
-  "/platform",
-  "/lyte",
-  "/alloy-fabric",
-  "/solutions",
-  "/solutions/aegis",
-  "/solutions/vessels",
-  "/solutions/terra",
-  "/solutions/prism-counsel",
-  "/contact",
-  "/trust-center",
-  "/trust",
+  '/',
+  '/platform',
+  '/lyte',
+  '/alloy-fabric',
+  '/solutions',
+  '/solutions/aegis',
+  '/solutions/vessels',
+  '/solutions/terra',
+  '/solutions/prism-counsel',
+  '/contact',
+  '/trust-center',
+  '/trust',
 ];
 
 async function fetchPage(url) {
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "SZL-QA-LinkCheck/1.0" },
-      redirect: "follow",
+      headers: { 'User-Agent': 'SZL-QA-LinkCheck/1.0' },
+      redirect: 'follow',
     });
     if (!res.ok) return null;
     return await res.text();
@@ -44,16 +44,12 @@ function extractLinks(html, baseUrl) {
   let match;
   while ((match = hrefRegex.exec(html)) !== null) {
     const href = match[1];
-    if (
-      href.startsWith("#") ||
-      href.startsWith("mailto:") ||
-      href.startsWith("tel:")
-    ) {
+    if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
       continue;
     }
-    if (href.startsWith("http://") || href.startsWith("https://")) {
+    if (href.startsWith('http://') || href.startsWith('https://')) {
       links.add(href);
-    } else if (href.startsWith("/")) {
+    } else if (href.startsWith('/')) {
       links.add(baseUrl + href);
     }
   }
@@ -66,9 +62,9 @@ async function checkLink(url, timeout = 10000) {
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      method: "HEAD",
-      redirect: "follow",
-      headers: { "User-Agent": "SZL-QA-LinkCheck/1.0" },
+      method: 'HEAD',
+      redirect: 'follow',
+      headers: { 'User-Agent': 'SZL-QA-LinkCheck/1.0' },
     });
     clearTimeout(timer);
     return { url, status: res.status, ok: res.status < 400 };

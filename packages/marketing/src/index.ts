@@ -1,28 +1,22 @@
-export { Hero } from "./components/Hero";
-export type { HeroProps, HeroAction, HeroBadge } from "./components/Hero";
-
-export { HowItWorks } from "./components/HowItWorks";
-export type { HowItWorksProps, HowItWorksStep } from "./components/HowItWorks";
-
-export { DiagnosticFunnel } from "./components/DiagnosticFunnel";
+export type {
+  ArchitectureLayer,
+  ArchitectureSectionProps,
+  TrustPoint,
+} from './components/ArchitectureSection';
+export { ArchitectureSection } from './components/ArchitectureSection';
 export type {
   DiagnosticFunnelProps,
-  FunnelQuestion,
   DiagnosticResult,
-} from "./components/DiagnosticFunnel";
-
-export { RoleTabs } from "./components/RoleTabs";
-export type { RoleTabsProps, RoleTab } from "./components/RoleTabs";
-
-export { ArchitectureSection } from "./components/ArchitectureSection";
-export type {
-  ArchitectureSectionProps,
-  ArchitectureLayer,
-  TrustPoint,
-} from "./components/ArchitectureSection";
-
-export { PricingCTA } from "./components/PricingCTA";
-export type { PricingCTAProps, PricingTier } from "./components/PricingCTA";
-
-export { useLeadQualification } from "./hooks/useLeadQualification";
-export type { FunnelEvent, FunnelEventName } from "./hooks/useLeadQualification";
+  FunnelQuestion,
+} from './components/DiagnosticFunnel';
+export { DiagnosticFunnel } from './components/DiagnosticFunnel';
+export type { HeroAction, HeroBadge, HeroProps } from './components/Hero';
+export { Hero } from './components/Hero';
+export type { HowItWorksProps, HowItWorksStep } from './components/HowItWorks';
+export { HowItWorks } from './components/HowItWorks';
+export type { PricingCTAProps, PricingTier } from './components/PricingCTA';
+export { PricingCTA } from './components/PricingCTA';
+export type { RoleTab, RoleTabsProps } from './components/RoleTabs';
+export { RoleTabs } from './components/RoleTabs';
+export type { FunnelEvent, FunnelEventName } from './hooks/useLeadQualification';
+export { useLeadQualification } from './hooks/useLeadQualification';

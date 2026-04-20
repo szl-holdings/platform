@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback } from 'react';
 
 let tokenCounter = 0;
 
@@ -10,21 +10,18 @@ function generateStepUpToken(): string {
 }
 
 export function useStepUp() {
-  const requestStepUp = useCallback(
-    (actionDescription: string): Promise<string | null> => {
-      return new Promise((resolve) => {
-        const confirmed = window.confirm(
-          `⚠ STEP-UP VERIFICATION REQUIRED\n\nAction: ${actionDescription}\n\nThis is a sensitive operation that requires explicit operator confirmation.\n\nProceed?`
-        );
-        if (confirmed) {
-          resolve(generateStepUpToken());
-        } else {
-          resolve(null);
-        }
-      });
-    },
-    []
-  );
+  const requestStepUp = useCallback((actionDescription: string): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const confirmed = window.confirm(
+        `⚠ STEP-UP VERIFICATION REQUIRED\n\nAction: ${actionDescription}\n\nThis is a sensitive operation that requires explicit operator confirmation.\n\nProceed?`,
+      );
+      if (confirmed) {
+        resolve(generateStepUpToken());
+      } else {
+        resolve(null);
+      }
+    });
+  }, []);
 
   return { requestStepUp };
 }

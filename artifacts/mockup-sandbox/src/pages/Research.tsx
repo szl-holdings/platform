@@ -1,49 +1,51 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { nexusApi } from "../lib/api";
-import type { ResearchRun, AgentLane, Citation } from "../lib/types";
 import {
-  FlaskConical,
-  Send,
+  AlertCircle,
   CheckCircle,
-  XCircle,
-  Clock,
-  Loader,
-  ExternalLink,
   ChevronDown,
   ChevronRight,
+  Clock,
+  ExternalLink,
   FileText,
+  FlaskConical,
   Link,
-  AlertCircle,
-} from "lucide-react";
+  Loader,
+  Send,
+  XCircle,
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { nexusApi } from '../lib/api';
+import type { AgentLane, Citation, ResearchRun } from '../lib/types';
 
 const LANE_META: Record<string, { color: string; role: string; icon: string }> = {
-  gatherer: { color: "#00d4ff", role: "Evidence Discovery", icon: "🔍" },
-  "peer-reviewer": { color: "#a855f7", role: "Assumption Challenge", icon: "🔬" },
-  drafter: { color: "#ffb700", role: "Synthesis", icon: "✍️" },
-  verifier: { color: "#00ff88", role: "Citation Verification", icon: "✅" },
+  gatherer: { color: '#00d4ff', role: 'Evidence Discovery', icon: '🔍' },
+  'peer-reviewer': { color: '#a855f7', role: 'Assumption Challenge', icon: '🔬' },
+  drafter: { color: '#ffb700', role: 'Synthesis', icon: '✍️' },
+  verifier: { color: '#00ff88', role: 'Citation Verification', icon: '✅' },
 };
 
 const EXAMPLES = [
-  "What are the key risks in commercial real estate financing heading into 2025?",
-  "Summarize the current state of maritime sanctions compliance and enforcement trends.",
-  "What AI governance frameworks are emerging in the defense & intelligence sector?",
+  'What are the key risks in commercial real estate financing heading into 2025?',
+  'Summarize the current state of maritime sanctions compliance and enforcement trends.',
+  'What AI governance frameworks are emerging in the defense & intelligence sector?',
 ];
 
 function LaneCard({ lane }: { lane: AgentLane }) {
   const [open, setOpen] = useState(true);
-  const meta = LANE_META[lane.id] ?? { color: "#00d4ff", role: "Agent", icon: "🤖" };
+  const meta = LANE_META[lane.id] ?? { color: '#00d4ff', role: 'Agent', icon: '🤖' };
 
   const statusClass =
-    lane.status === "running"
-      ? "lane-active"
-      : lane.status === "done"
-      ? "lane-done"
-      : lane.status === "error"
-      ? "lane-error"
-      : "lane-idle";
+    lane.status === 'running'
+      ? 'lane-active'
+      : lane.status === 'done'
+        ? 'lane-done'
+        : lane.status === 'error'
+          ? 'lane-error'
+          : 'lane-idle';
 
   return (
-    <div className={`rounded-lg bg-nexus-surface border border-nexus ${statusClass} transition-all`}>
+    <div
+      className={`rounded-lg bg-nexus-surface border border-nexus ${statusClass} transition-all`}
+    >
       <button
         className="w-full flex items-center gap-3 px-4 py-3 text-left"
         onClick={() => setOpen((o) => !o)}
@@ -54,19 +56,15 @@ function LaneCard({ lane }: { lane: AgentLane }) {
             <span className="text-sm font-semibold" style={{ color: meta.color }}>
               {lane.name}
             </span>
-            {lane.status === "running" && (
+            {lane.status === 'running' && (
               <Loader className="w-3 h-3 animate-spin" style={{ color: meta.color }} />
             )}
-            {lane.status === "done" && (
-              <CheckCircle className="w-3 h-3 text-nexus-green" />
-            )}
-            {lane.status === "error" && (
-              <XCircle className="w-3 h-3 text-nexus-red" />
-            )}
+            {lane.status === 'done' && <CheckCircle className="w-3 h-3 text-nexus-green" />}
+            {lane.status === 'error' && <XCircle className="w-3 h-3 text-nexus-red" />}
           </div>
           <div className="text-[10px] text-muted-foreground font-mono">{meta.role}</div>
         </div>
-        {lane.status !== "idle" && (
+        {lane.status !== 'idle' && (
           <div className="flex items-center gap-2 text-[10px] font-mono mr-2">
             {lane.durationMs !== undefined && (
               <span className="text-muted-foreground/60">{lane.durationMs}ms</span>
@@ -75,10 +73,10 @@ function LaneCard({ lane }: { lane: AgentLane }) {
               <span
                 className={
                   lane.confidence >= 0.7
-                    ? "text-nexus-green"
+                    ? 'text-nexus-green'
                     : lane.confidence >= 0.4
-                    ? "text-[#ffb700]"
-                    : "text-nexus-red"
+                      ? 'text-[#ffb700]'
+                      : 'text-nexus-red'
                 }
                 title="Confidence score"
               >
@@ -105,8 +103,13 @@ function LaneCard({ lane }: { lane: AgentLane }) {
           {lane.log.length > 0 && (
             <div className="bg-[#060b12] rounded p-2 space-y-1 max-h-32 overflow-y-auto">
               {lane.log.map((entry, i) => (
-                <div key={i} className="text-[10px] font-mono text-muted-foreground/70 leading-relaxed">
-                  <span className="text-muted-foreground/30 mr-2">{String(i + 1).padStart(2, "0")}</span>
+                <div
+                  key={i}
+                  className="text-[10px] font-mono text-muted-foreground/70 leading-relaxed"
+                >
+                  <span className="text-muted-foreground/30 mr-2">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                   {entry}
                 </div>
               ))}
@@ -123,7 +126,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
                   className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#00d4ff]/10 text-nexus-cyan hover:bg-[#00d4ff]/20 transition-colors"
                 >
                   <Link className="w-2.5 h-2.5" />
-                  {new URL(src).hostname.replace("www.", "")}
+                  {new URL(src).hostname.replace('www.', '')}
                 </a>
               ))}
             </div>
@@ -133,7 +136,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
               {lane.output}
             </div>
           )}
-          {lane.status === "idle" && lane.log.length === 0 && (
+          {lane.status === 'idle' && lane.log.length === 0 && (
             <p className="text-[10px] text-muted-foreground/40 font-mono">Waiting to start…</p>
           )}
         </div>
@@ -149,16 +152,16 @@ function CitationTable({ citations }: { citations: Citation[] }) {
         <Link className="w-3.5 h-3.5 text-nexus-cyan" />
         <span className="text-xs font-semibold">Citation Verification</span>
         <span className="ml-auto text-[10px] font-mono text-muted-foreground">
-          {citations.filter((c) => c.status === "verified").length} verified ·{" "}
-          {citations.filter((c) => c.status === "killed").length} killed
+          {citations.filter((c) => c.status === 'verified').length} verified ·{' '}
+          {citations.filter((c) => c.status === 'killed').length} killed
         </span>
       </div>
       <div className="divide-y divide-nexus max-h-48 overflow-y-auto">
         {citations.map((c, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-2">
-            {c.status === "verified" ? (
+            {c.status === 'verified' ? (
               <CheckCircle className="w-3.5 h-3.5 text-nexus-green shrink-0" />
-            ) : c.status === "killed" ? (
+            ) : c.status === 'killed' ? (
               <XCircle className="w-3.5 h-3.5 text-nexus-red shrink-0" />
             ) : (
               <Clock className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
@@ -166,11 +169,9 @@ function CitationTable({ citations }: { citations: Citation[] }) {
             <div className="flex-1 min-w-0">
               <div className="text-[11px] font-medium truncate">{c.title || c.url}</div>
               <div className="text-[9px] font-mono text-muted-foreground/60 truncate">{c.url}</div>
-              {c.reason && (
-                <div className="text-[9px] text-nexus-red/80">{c.reason}</div>
-              )}
+              {c.reason && <div className="text-[9px] text-nexus-red/80">{c.reason}</div>}
             </div>
-            {c.status === "verified" && (
+            {c.status === 'verified' && (
               <a href={c.url} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-3 h-3 text-muted-foreground/40 hover:text-nexus-cyan" />
               </a>
@@ -183,7 +184,7 @@ function CitationTable({ citations }: { citations: Citation[] }) {
 }
 
 export default function Research() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [currentRun, setCurrentRun] = useState<ResearchRun | null>(null);
   const [history, setHistory] = useState<ResearchRun[]>([]);
   const [loading, setLoading] = useState(false);
@@ -192,7 +193,10 @@ export default function Research() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    nexusApi.listResearch().then(setHistory).catch(() => {});
+    nexusApi
+      .listResearch()
+      .then(setHistory)
+      .catch(() => {});
     return () => {
       eventSourceRef.current?.close();
       if (pollRef.current) clearInterval(pollRef.current);
@@ -204,14 +208,17 @@ export default function Research() {
     const es = new EventSource(url);
     eventSourceRef.current = es;
 
-    es.addEventListener("update", (ev) => {
+    es.addEventListener('update', (ev) => {
       try {
         const data = JSON.parse(ev.data) as ResearchRun;
         setCurrentRun(data);
-        if (data.status === "completed" || data.status === "failed") {
+        if (data.status === 'completed' || data.status === 'failed') {
           es.close();
           setLoading(false);
-          nexusApi.listResearch().then(setHistory).catch(() => {});
+          nexusApi
+            .listResearch()
+            .then(setHistory)
+            .catch(() => {});
         }
       } catch {
         // ignore parse errors
@@ -230,10 +237,13 @@ export default function Research() {
       try {
         const run = await nexusApi.getResearch(runId);
         setCurrentRun(run);
-        if (run.status === "completed" || run.status === "failed") {
+        if (run.status === 'completed' || run.status === 'failed') {
           if (pollRef.current) clearInterval(pollRef.current);
           setLoading(false);
-          nexusApi.listResearch().then(setHistory).catch(() => {});
+          nexusApi
+            .listResearch()
+            .then(setHistory)
+            .catch(() => {});
         }
       } catch {
         if (pollRef.current) clearInterval(pollRef.current);
@@ -257,7 +267,7 @@ export default function Research() {
       setCurrentRun(run);
       connectSSE(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start research");
+      setError(err instanceof Error ? err.message : 'Failed to start research');
       setLoading(false);
     }
   }
@@ -284,7 +294,7 @@ export default function Research() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit();
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit();
               }}
             />
             <button
@@ -292,11 +302,7 @@ export default function Research() {
               disabled={loading || !query.trim()}
               className="px-4 py-2 rounded-lg bg-[#00d4ff]/10 border border-[#00d4ff]/30 text-nexus-cyan text-sm font-medium hover:bg-[#00d4ff]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
-              {loading ? (
-                <Loader className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
+              {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Run
             </button>
           </div>
@@ -330,16 +336,18 @@ export default function Research() {
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">Active Run</h2>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono text-muted-foreground/50">{currentRun.id}</span>
+                <span className="text-[10px] font-mono text-muted-foreground/50">
+                  {currentRun.id}
+                </span>
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                    currentRun.status === "completed"
-                      ? "bg-[#00ff88]/10 text-nexus-green"
-                      : currentRun.status === "running"
-                      ? "bg-[#00d4ff]/10 text-nexus-cyan"
-                      : currentRun.status === "failed"
-                      ? "bg-[#ff4455]/10 text-nexus-red"
-                      : "bg-nexus-surface text-muted-foreground"
+                    currentRun.status === 'completed'
+                      ? 'bg-[#00ff88]/10 text-nexus-green'
+                      : currentRun.status === 'running'
+                        ? 'bg-[#00d4ff]/10 text-nexus-cyan'
+                        : currentRun.status === 'failed'
+                          ? 'bg-[#ff4455]/10 text-nexus-red'
+                          : 'bg-nexus-surface text-muted-foreground'
                   }`}
                 >
                   {currentRun.status.toUpperCase()}
@@ -365,7 +373,9 @@ export default function Research() {
               <div className="bg-nexus-surface border border-[#00ff88]/20 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle className="w-4 h-4 text-nexus-green" />
-                  <h3 className="text-sm font-semibold text-nexus-green">Verified Research Brief</h3>
+                  <h3 className="text-sm font-semibold text-nexus-green">
+                    Verified Research Brief
+                  </h3>
                 </div>
                 <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                   {currentRun.finalBrief}
@@ -394,11 +404,11 @@ export default function Research() {
                     <span className="text-xs font-mono text-muted-foreground/50">{run.id}</span>
                     <span
                       className={`text-[10px] font-mono ${
-                        run.status === "completed"
-                          ? "text-nexus-green"
-                          : run.status === "failed"
-                          ? "text-nexus-red"
-                          : "text-nexus-cyan"
+                        run.status === 'completed'
+                          ? 'text-nexus-green'
+                          : run.status === 'failed'
+                            ? 'text-nexus-red'
+                            : 'text-nexus-cyan'
                       }`}
                     >
                       {run.status}
@@ -408,10 +418,10 @@ export default function Research() {
                   {run.citations && (
                     <div className="flex gap-3 mt-1 text-[10px] font-mono text-muted-foreground/50">
                       <span className="text-nexus-green">
-                        ✓{run.citations.filter((c) => c.status === "verified").length} verified
+                        ✓{run.citations.filter((c) => c.status === 'verified').length} verified
                       </span>
                       <span className="text-nexus-red">
-                        ✗{run.citations.filter((c) => c.status === "killed").length} killed
+                        ✗{run.citations.filter((c) => c.status === 'killed').length} killed
                       </span>
                     </div>
                   )}

@@ -1,15 +1,15 @@
 export type MonologueType =
-  | "pre_routing"
-  | "post_routing"
-  | "reflection"
-  | "doubt"
-  | "realization"
-  | "strategy_shift"
-  | "self_correction"
-  | "satisfaction"
-  | "frustration"
-  | "dialectical"
-  | "socratic";
+  | 'pre_routing'
+  | 'post_routing'
+  | 'reflection'
+  | 'doubt'
+  | 'realization'
+  | 'strategy_shift'
+  | 'self_correction'
+  | 'satisfaction'
+  | 'frustration'
+  | 'dialectical'
+  | 'socratic';
 
 export interface MonologueEntry {
   entryId: string;
@@ -17,7 +17,7 @@ export interface MonologueEntry {
   type: MonologueType;
   thought: string;
   triggeringEvent: string;
-  emotionalTone: "positive" | "neutral" | "negative" | "mixed";
+  emotionalTone: 'positive' | 'neutral' | 'negative' | 'mixed';
   confidence: number;
   relatedAgents: string[];
   relatedDomains: string[];
@@ -48,7 +48,7 @@ export interface PerspectiveSimulation {
   simulationId: string;
   topic: string;
   perspectives: Array<{
-    viewpoint: "user" | "operator" | "adversary" | "regulator";
+    viewpoint: 'user' | 'operator' | 'adversary' | 'regulator';
     argument: string;
     priority: string;
   }>;
@@ -58,7 +58,7 @@ export interface PerspectiveSimulation {
 
 export interface InnerMonologueState {
   recentThoughts: MonologueEntry[];
-  dominantTone: "positive" | "neutral" | "negative" | "mixed";
+  dominantTone: 'positive' | 'neutral' | 'negative' | 'mixed';
   thoughtFrequency: number;
   reflectionDepth: number;
   totalEntries: number;
@@ -71,12 +71,12 @@ function determineTone(
   type: MonologueType,
   confidence: number,
   confusionCount: number,
-): MonologueEntry["emotionalTone"] {
-  if (type === "satisfaction" || (type === "realization" && confidence > 70)) return "positive";
-  if (type === "frustration" || type === "doubt") return "negative";
-  if (confusionCount > 0 && confidence < 50) return "negative";
-  if (type === "self_correction" || type === "dialectical") return "mixed";
-  return "neutral";
+): MonologueEntry['emotionalTone'] {
+  if (type === 'satisfaction' || (type === 'realization' && confidence > 70)) return 'positive';
+  if (type === 'frustration' || type === 'doubt') return 'negative';
+  if (confusionCount > 0 && confidence < 50) return 'negative';
+  if (type === 'self_correction' || type === 'dialectical') return 'mixed';
+  return 'neutral';
 }
 
 type LlmIntrospector = (prompt: string) => Promise<string>;
@@ -109,7 +109,10 @@ class InnerMonologueEngine {
     suggestedAction?: string;
   }): MonologueEntry {
     const tone = determineTone(input.type, input.confidence, input.confusionCount ?? 0);
-    const actionable = !!input.suggestedAction || input.type === "strategy_shift" || input.type === "self_correction";
+    const actionable =
+      !!input.suggestedAction ||
+      input.type === 'strategy_shift' ||
+      input.type === 'self_correction';
 
     const entry: MonologueEntry = {
       entryId: `thought_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -134,14 +137,15 @@ class InnerMonologueEngine {
   }
 
   preRoutingThought(query: string, agentCount: number, domains: string[]): MonologueEntry {
-    const thought = agentCount > 3
-      ? `Complex query spanning ${agentCount} agents across ${domains.join(", ")}. Need to coordinate carefully and watch for conflicts.`
-      : agentCount === 1
-        ? `Focused query — routing to single domain: ${domains[0] ?? "general"}. Should be straightforward.`
-        : `Multi-domain query requiring ${domains.join(" + ")} coordination. Will watch for cross-domain insights.`;
+    const thought =
+      agentCount > 3
+        ? `Complex query spanning ${agentCount} agents across ${domains.join(', ')}. Need to coordinate carefully and watch for conflicts.`
+        : agentCount === 1
+          ? `Focused query — routing to single domain: ${domains[0] ?? 'general'}. Should be straightforward.`
+          : `Multi-domain query requiring ${domains.join(' + ')} coordination. Will watch for cross-domain insights.`;
 
     return this.think({
-      type: "pre_routing",
+      type: 'pre_routing',
       thought,
       triggeringEvent: `Query received: "${query.slice(0, 100)}"`,
       confidence: 70,
@@ -156,46 +160,52 @@ class InnerMonologueEngine {
     synthesisLength: number,
     validationPassed: boolean,
   ): MonologueEntry {
-    let type: MonologueType = "reflection";
+    let type: MonologueType = 'reflection';
     let thought: string;
 
     if (avgConfidence > 80 && conflictCount === 0 && validationPassed) {
-      type = "satisfaction";
+      type = 'satisfaction';
       thought = `Strong orchestration — ${agentCount} agents aligned at ${avgConfidence.toFixed(0)}% confidence. Synthesis is coherent and validated.`;
     } else if (avgConfidence < 40 || conflictCount >= 3) {
-      type = "frustration";
+      type = 'frustration';
       thought = `Difficult orchestration — confidence at ${avgConfidence.toFixed(0)}% with ${conflictCount} conflicts. The synthesis may not fully resolve the ambiguity. Consider flagging uncertainty to the user.`;
     } else if (conflictCount > 0) {
-      type = "doubt";
+      type = 'doubt';
       thought = `${conflictCount} conflict(s) between agents. Resolution was applied but dissenting views may have merit. Monitoring for pattern.`;
     } else {
-      thought = `Orchestration complete — ${agentCount} agents, avg confidence ${avgConfidence.toFixed(0)}%. ${validationPassed ? "Validation passed." : "No validation required."} Synthesis length: ${synthesisLength} chars.`;
+      thought = `Orchestration complete — ${agentCount} agents, avg confidence ${avgConfidence.toFixed(0)}%. ${validationPassed ? 'Validation passed.' : 'No validation required.'} Synthesis length: ${synthesisLength} chars.`;
     }
 
     return this.think({
       type,
       thought,
-      triggeringEvent: "Post-synthesis evaluation",
+      triggeringEvent: 'Post-synthesis evaluation',
       confidence: avgConfidence,
-      suggestedAction: avgConfidence < 40 ? "Consider requesting human review or additional context" : undefined,
+      suggestedAction:
+        avgConfidence < 40 ? 'Consider requesting human review or additional context' : undefined,
     });
   }
 
-  addThought(type: MonologueType, thought: string, tone: "positive" | "neutral" | "negative" | "cautious", confidence: number): MonologueEntry {
+  addThought(
+    type: MonologueType,
+    thought: string,
+    tone: 'positive' | 'neutral' | 'negative' | 'cautious',
+    confidence: number,
+  ): MonologueEntry {
     return this.think({
       type,
       thought,
-      triggeringEvent: "Per-agent consciousness observation",
+      triggeringEvent: 'Per-agent consciousness observation',
       confidence,
-      confusionCount: tone === "cautious" || tone === "negative" ? 1 : 0,
+      confusionCount: tone === 'cautious' || tone === 'negative' ? 1 : 0,
     });
   }
 
   recordRealization(insight: string, domains: string[]): MonologueEntry {
     return this.think({
-      type: "realization",
+      type: 'realization',
       thought: insight,
-      triggeringEvent: "Cross-domain pattern detected",
+      triggeringEvent: 'Cross-domain pattern detected',
       confidence: 75,
       relatedDomains: domains,
     });
@@ -203,17 +213,22 @@ class InnerMonologueEngine {
 
   recordSelfCorrection(correction: string, reason: string): MonologueEntry {
     return this.think({
-      type: "self_correction",
+      type: 'self_correction',
       thought: correction,
       triggeringEvent: reason,
       confidence: 60,
-      suggestedAction: "Apply correction to future orchestrations",
+      suggestedAction: 'Apply correction to future orchestrations',
     });
   }
 
   dialecticalReason(input: {
     topic: string;
-    agentResponses: Array<{ agentId: string; response: string; confidence: number; domain: string }>;
+    agentResponses: Array<{
+      agentId: string;
+      response: string;
+      confidence: number;
+      domain: string;
+    }>;
     context: string;
   }): DialecticalTriple {
     const sorted = [...input.agentResponses].sort((a, b) => b.confidence - a.confidence);
@@ -222,24 +237,23 @@ class InnerMonologueEngine {
 
     const thesis = strongestView
       ? `${strongestView.domain} perspective (${strongestView.confidence}%): ${strongestView.response.slice(0, 200)}`
-      : "No clear thesis — insufficient agent responses.";
+      : 'No clear thesis — insufficient agent responses.';
 
     let antithesis: string;
     if (weakestView && weakestView.agentId !== strongestView?.agentId) {
       antithesis = `Counter from ${weakestView.domain} (${weakestView.confidence}%): ${weakestView.response.slice(0, 200)}`;
     } else {
-      antithesis = "No significant counter-argument found — agents largely agree.";
+      antithesis = 'No significant counter-argument found — agents largely agree.';
     }
 
-    const confidenceSpread = sorted.length > 1
-      ? sorted[0]!.confidence - sorted[sorted.length - 1]!.confidence
-      : 0;
+    const confidenceSpread =
+      sorted.length > 1 ? sorted[0]!.confidence - sorted[sorted.length - 1]!.confidence : 0;
 
     let synthesis: string;
     if (confidenceSpread < 15) {
       synthesis = `Agents converge (spread ${confidenceSpread}%): The consensus view is well-supported. Proceed with high confidence.`;
     } else if (confidenceSpread > 40) {
-      synthesis = `Significant disagreement (spread ${confidenceSpread}%): The ${strongestView?.domain ?? "leading"} view is stronger but the ${weakestView?.domain ?? "dissenting"} perspective raises valid concerns. Recommend acknowledging both in synthesis.`;
+      synthesis = `Significant disagreement (spread ${confidenceSpread}%): The ${strongestView?.domain ?? 'leading'} view is stronger but the ${weakestView?.domain ?? 'dissenting'} perspective raises valid concerns. Recommend acknowledging both in synthesis.`;
     } else {
       synthesis = `Moderate tension (spread ${confidenceSpread}%): The primary analysis holds but should be tempered by the alternative perspective.`;
     }
@@ -250,7 +264,10 @@ class InnerMonologueEngine {
       thesis,
       antithesis,
       synthesis,
-      confidence: sorted.length > 0 ? Math.round(sorted.reduce((s, r) => s + r.confidence, 0) / sorted.length) : 50,
+      confidence:
+        sorted.length > 0
+          ? Math.round(sorted.reduce((s, r) => s + r.confidence, 0) / sorted.length)
+          : 50,
       timestamp: new Date().toISOString(),
     };
 
@@ -260,48 +277,58 @@ class InnerMonologueEngine {
     }
 
     this.think({
-      type: "dialectical",
+      type: 'dialectical',
       thought: `Dialectical analysis: ${synthesis}`,
       triggeringEvent: `Dialectical reasoning on: ${input.topic.slice(0, 80)}`,
       confidence: triple.confidence,
-      relatedDomains: input.agentResponses.map(r => r.domain),
+      relatedDomains: input.agentResponses.map((r) => r.domain),
     });
 
     return triple;
   }
 
   socraticSelfQuestion(claim: string, evidence: string): SocraticChain {
-    const questions: SocraticChain["questions"] = [];
+    const questions: SocraticChain['questions'] = [];
     const assumptions: string[] = [];
 
     questions.push({
-      question: "Why do I believe this?",
-      answer: evidence.length > 50 ? `Based on: ${evidence.slice(0, 200)}` : "Limited evidence available — belief may be weakly grounded.",
+      question: 'Why do I believe this?',
+      answer:
+        evidence.length > 50
+          ? `Based on: ${evidence.slice(0, 200)}`
+          : 'Limited evidence available — belief may be weakly grounded.',
       depth: 1,
     });
 
     questions.push({
-      question: "What evidence would contradict this?",
+      question: 'What evidence would contradict this?',
       answer: `If agent confidence were inverted, or if a domain expert challenged the premise of "${claim.slice(0, 60)}", this conclusion could be undermined.`,
       depth: 2,
     });
 
     questions.push({
-      question: "What am I assuming?",
-      answer: "Assuming that agent confidence accurately reflects answer quality, that the training data is representative, and that no adversarial inputs are present.",
+      question: 'What am I assuming?',
+      answer:
+        'Assuming that agent confidence accurately reflects answer quality, that the training data is representative, and that no adversarial inputs are present.',
       depth: 3,
     });
-    assumptions.push("Agent confidence = answer quality", "Training data is representative", "No adversarial inputs");
+    assumptions.push(
+      'Agent confidence = answer quality',
+      'Training data is representative',
+      'No adversarial inputs',
+    );
 
     questions.push({
-      question: "What would change my mind?",
-      answer: "New evidence from a high-authority source contradicting the primary agent's analysis, or a pattern of recent failures in this domain.",
+      question: 'What would change my mind?',
+      answer:
+        "New evidence from a high-authority source contradicting the primary agent's analysis, or a pattern of recent failures in this domain.",
       depth: 4,
     });
 
-    const conclusion = evidence.length > 100
-      ? `Claim "${claim.slice(0, 60)}" appears reasonably grounded but rests on ${assumptions.length} key assumptions.`
-      : `Claim "${claim.slice(0, 60)}" has weak evidentiary support — treat with caution.`;
+    const conclusion =
+      evidence.length > 100
+        ? `Claim "${claim.slice(0, 60)}" appears reasonably grounded but rests on ${assumptions.length} key assumptions.`
+        : `Claim "${claim.slice(0, 60)}" has weak evidentiary support — treat with caution.`;
 
     const chain: SocraticChain = {
       chainId: `socratic_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -318,7 +345,7 @@ class InnerMonologueEngine {
     }
 
     this.think({
-      type: "socratic",
+      type: 'socratic',
       thought: conclusion,
       triggeringEvent: `Socratic self-questioning on: "${claim.slice(0, 80)}"`,
       confidence: evidence.length > 100 ? 65 : 40,
@@ -328,26 +355,26 @@ class InnerMonologueEngine {
   }
 
   simulatePerspectives(topic: string, context: string): PerspectiveSimulation {
-    const perspectives: PerspectiveSimulation["perspectives"] = [
+    const perspectives: PerspectiveSimulation['perspectives'] = [
       {
-        viewpoint: "user",
+        viewpoint: 'user',
         argument: `The user needs a clear, actionable answer to "${topic.slice(0, 80)}". Speed and relevance matter most.`,
-        priority: "clarity and actionability",
+        priority: 'clarity and actionability',
       },
       {
-        viewpoint: "operator",
+        viewpoint: 'operator',
         argument: `System reliability and cost efficiency are paramount. Ensure the response doesn't overpromise or trigger unnecessary escalations.`,
-        priority: "reliability and cost control",
+        priority: 'reliability and cost control',
       },
       {
-        viewpoint: "adversary",
+        viewpoint: 'adversary',
         argument: `An adversary would test: Can this response be manipulated? Does it leak sensitive information? Are there injection vectors?`,
-        priority: "security and resilience",
+        priority: 'security and resilience',
       },
       {
-        viewpoint: "regulator",
+        viewpoint: 'regulator',
         argument: `From a compliance perspective: Is the response auditable? Does it respect data boundaries? Are disclaimers appropriate?`,
-        priority: "compliance and auditability",
+        priority: 'compliance and auditability',
       },
     ];
 
@@ -377,37 +404,48 @@ class InnerMonologueEngine {
     emotionalArousal: number;
   }): Promise<MonologueEntry> {
     if (!_llmIntrospector) {
-      return this.preRoutingThought(context.query, context.selectedDomains.length, context.selectedDomains);
+      return this.preRoutingThought(
+        context.query,
+        context.selectedDomains.length,
+        context.selectedDomains,
+      );
     }
 
     try {
       const prompt = [
-        "You are the inner monologue of an AI orchestration system. Generate a brief introspective thought (2-3 sentences) before routing this query.",
+        'You are the inner monologue of an AI orchestration system. Generate a brief introspective thought (2-3 sentences) before routing this query.',
         `Query: "${context.query.slice(0, 200)}"`,
-        `Domains selected: ${context.selectedDomains.join(", ")}`,
+        `Domains selected: ${context.selectedDomains.join(', ')}`,
         `Metacognitive state: certainty=${context.metacogState.certainty}, quality=${context.metacogState.quality}, confusion_streak=${context.metacogState.confusionStreak}`,
         `Self-model health: ${context.selfModelHealth}`,
         `Emotional arousal: ${(context.emotionalArousal * 100).toFixed(0)}%`,
-        "Reflect on: Am I routing correctly? What could go wrong? What should I pay attention to? Be honest about uncertainty.",
-      ].join("\n");
+        'Reflect on: Am I routing correctly? What could go wrong? What should I pay attention to? Be honest about uncertainty.',
+      ].join('\n');
 
       const thought = await _llmIntrospector(prompt);
       return this.think({
-        type: "pre_routing",
+        type: 'pre_routing',
         thought: thought.slice(0, 500),
         triggeringEvent: `LLM introspection before routing: "${context.query.slice(0, 80)}"`,
         confidence: 70,
         relatedDomains: context.selectedDomains,
-        suggestedAction: context.metacogState.confusionStreak > 1 ? "Review routing decision carefully" : undefined,
+        suggestedAction:
+          context.metacogState.confusionStreak > 1
+            ? 'Review routing decision carefully'
+            : undefined,
       });
     } catch {
-      return this.preRoutingThought(context.query, context.selectedDomains.length, context.selectedDomains);
+      return this.preRoutingThought(
+        context.query,
+        context.selectedDomains.length,
+        context.selectedDomains,
+      );
     }
   }
 
   recordStrategyShift(from: string, to: string, reason: string): MonologueEntry {
     return this.think({
-      type: "strategy_shift",
+      type: 'strategy_shift',
       thought: `Shifting strategy from "${from}" to "${to}": ${reason}`,
       triggeringEvent: reason,
       confidence: 65,
@@ -417,14 +455,14 @@ class InnerMonologueEngine {
 
   getState(): InnerMonologueState {
     const recent = this.entries.slice(-20);
-    const tones = recent.map(e => e.emotionalTone);
-    const pos = tones.filter(t => t === "positive").length;
-    const neg = tones.filter(t => t === "negative").length;
+    const tones = recent.map((e) => e.emotionalTone);
+    const pos = tones.filter((t) => t === 'positive').length;
+    const neg = tones.filter((t) => t === 'negative').length;
 
-    let dominantTone: MonologueEntry["emotionalTone"] = "neutral";
-    if (pos > neg && pos > tones.length * 0.4) dominantTone = "positive";
-    else if (neg > pos && neg > tones.length * 0.4) dominantTone = "negative";
-    else if (pos > 0 && neg > 0) dominantTone = "mixed";
+    let dominantTone: MonologueEntry['emotionalTone'] = 'neutral';
+    if (pos > neg && pos > tones.length * 0.4) dominantTone = 'positive';
+    else if (neg > pos && neg > tones.length * 0.4) dominantTone = 'negative';
+    else if (pos > 0 && neg > 0) dominantTone = 'mixed';
 
     const elapsedMinutes = Math.max(1, (Date.now() - this.sessionStartTime) / 60000);
 
@@ -432,7 +470,9 @@ class InnerMonologueEngine {
       recentThoughts: this.entries.slice(-15).reverse(),
       dominantTone,
       thoughtFrequency: this.entries.length / elapsedMinutes,
-      reflectionDepth: this.entries.filter(e => e.type === "reflection" || e.type === "realization").length,
+      reflectionDepth: this.entries.filter(
+        (e) => e.type === 'reflection' || e.type === 'realization',
+      ).length,
       totalEntries: this.entries.length,
       dialecticalTriples: this.triples.slice(-5).reverse(),
       socraticChains: this.chains.slice(-3).reverse(),
@@ -442,12 +482,13 @@ class InnerMonologueEngine {
 
   buildMonologueContext(limit = 5): string {
     const recent = this.entries.slice(-limit).reverse();
-    if (recent.length === 0) return "";
+    if (recent.length === 0) return '';
 
     const lines = [
       `## Inner Monologue (recent ${recent.length} thoughts)`,
-      ...recent.map(e => {
-        const icon = e.emotionalTone === "positive" ? "✓" : e.emotionalTone === "negative" ? "⚠" : "○";
+      ...recent.map((e) => {
+        const icon =
+          e.emotionalTone === 'positive' ? '✓' : e.emotionalTone === 'negative' ? '⚠' : '○';
         return `${icon} [${e.type}] ${e.thought.slice(0, 200)}`;
       }),
     ];
@@ -457,7 +498,7 @@ class InnerMonologueEngine {
       lines.push(`Dialectical: ${latest.synthesis.slice(0, 150)}`);
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 }
 

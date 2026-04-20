@@ -1,14 +1,14 @@
-import { db } from "@szl-holdings/db";
 import {
-  terraDistressPropertiesTable,
-  terraDistressAlertsTable,
-  terraIngestionRunsTable,
-  type InsertTerraDistressProperty,
+  db,
   type InsertTerraDistressAlert,
+  type InsertTerraDistressProperty,
   type TerraDistressProperty,
-} from "@szl-holdings/db";
-import { eq, and, gte, lte, ilike, or, desc, asc, sql, isNull, isNotNull } from "drizzle-orm";
-import { logger } from "./logger";
+  terraDistressAlertsTable,
+  terraDistressPropertiesTable,
+  terraIngestionRunsTable,
+} from '@szl-holdings/db';
+import { and, asc, desc, eq, gte, ilike, isNotNull, isNull, lte, or, sql } from 'drizzle-orm';
+import { logger } from './logger';
 
 export interface DistressSearchParams {
   borough?: string;
@@ -65,7 +65,9 @@ export async function searchDistressedProperties(params: DistressSearchParams) {
   const conditions = [eq(terraDistressPropertiesTable.isActive, true)];
 
   if (params.borough) {
-    conditions.push(eq(terraDistressPropertiesTable.borough, params.borough as TerraDistressProperty["borough"]));
+    conditions.push(
+      eq(terraDistressPropertiesTable.borough, params.borough as TerraDistressProperty['borough']),
+    );
   }
   if (params.county) {
     conditions.push(ilike(terraDistressPropertiesTable.county, `%${params.county}%`));
@@ -74,10 +76,20 @@ export async function searchDistressedProperties(params: DistressSearchParams) {
     conditions.push(eq(terraDistressPropertiesTable.zipCode, params.zip));
   }
   if (params.propertyType) {
-    conditions.push(eq(terraDistressPropertiesTable.propertyType, params.propertyType as TerraDistressProperty["propertyType"]));
+    conditions.push(
+      eq(
+        terraDistressPropertiesTable.propertyType,
+        params.propertyType as TerraDistressProperty['propertyType'],
+      ),
+    );
   }
   if (params.distressType) {
-    conditions.push(eq(terraDistressPropertiesTable.distressType, params.distressType as TerraDistressProperty["distressType"]));
+    conditions.push(
+      eq(
+        terraDistressPropertiesTable.distressType,
+        params.distressType as TerraDistressProperty['distressType'],
+      ),
+    );
   }
   if (params.minValue !== undefined) {
     conditions.push(gte(terraDistressPropertiesTable.estimatedValue, String(params.minValue)));
@@ -86,13 +98,13 @@ export async function searchDistressedProperties(params: DistressSearchParams) {
     conditions.push(lte(terraDistressPropertiesTable.estimatedValue, String(params.maxValue)));
   }
   if (params.q) {
-    const tsQuery = params.q.trim().split(/\s+/).join(" & ");
+    const tsQuery = params.q.trim().split(/\s+/).join(' & ');
     conditions.push(
       or(
         sql`to_tsvector('english', ${terraDistressPropertiesTable.address} || ' ' || ${terraDistressPropertiesTable.ownerName} || ' ' || COALESCE(${terraDistressPropertiesTable.zipCode}, '') || ' ' || ${terraDistressPropertiesTable.borough}) @@ to_tsquery('english', ${tsQuery})`,
         ilike(terraDistressPropertiesTable.address, `%${params.q}%`),
-        ilike(terraDistressPropertiesTable.ownerName, `%${params.q}%`)
-      )!
+        ilike(terraDistressPropertiesTable.ownerName, `%${params.q}%`),
+      )!,
     );
   }
 
@@ -102,37 +114,64 @@ export async function searchDistressedProperties(params: DistressSearchParams) {
 
   let rows: TerraDistressProperty[];
 
-  if (params.sort === "newest") {
-    rows = await db.select().from(terraDistressPropertiesTable).where(whereClause)
-      .orderBy(desc(terraDistressPropertiesTable.filingDate)).limit(limit).offset(offset) as TerraDistressProperty[];
-  } else if (params.sort === "highest-value") {
-    rows = await db.select().from(terraDistressPropertiesTable).where(whereClause)
-      .orderBy(desc(terraDistressPropertiesTable.estimatedValue)).limit(limit).offset(offset) as TerraDistressProperty[];
-  } else if (params.sort === "highest-risk") {
-    rows = await db.select().from(terraDistressPropertiesTable).where(whereClause)
-      .orderBy(desc(terraDistressPropertiesTable.opportunityScore)).limit(limit).offset(offset) as TerraDistressProperty[];
-  } else if (params.sort === "closest-auction") {
-    rows = await db.select().from(terraDistressPropertiesTable).where(whereClause)
+  if (params.sort === 'newest') {
+    rows = (await db
+      .select()
+      .from(terraDistressPropertiesTable)
+      .where(whereClause)
+      .orderBy(desc(terraDistressPropertiesTable.filingDate))
+      .limit(limit)
+      .offset(offset)) as TerraDistressProperty[];
+  } else if (params.sort === 'highest-value') {
+    rows = (await db
+      .select()
+      .from(terraDistressPropertiesTable)
+      .where(whereClause)
+      .orderBy(desc(terraDistressPropertiesTable.estimatedValue))
+      .limit(limit)
+      .offset(offset)) as TerraDistressProperty[];
+  } else if (params.sort === 'highest-risk') {
+    rows = (await db
+      .select()
+      .from(terraDistressPropertiesTable)
+      .where(whereClause)
+      .orderBy(desc(terraDistressPropertiesTable.opportunityScore))
+      .limit(limit)
+      .offset(offset)) as TerraDistressProperty[];
+  } else if (params.sort === 'closest-auction') {
+    rows = (await db
+      .select()
+      .from(terraDistressPropertiesTable)
+      .where(whereClause)
       .orderBy(
         sql`CASE WHEN ${terraDistressPropertiesTable.auctionDate} IS NULL THEN 1 ELSE 0 END`,
-        asc(terraDistressPropertiesTable.auctionDate)
-      ).limit(limit).offset(offset) as TerraDistressProperty[];
+        asc(terraDistressPropertiesTable.auctionDate),
+      )
+      .limit(limit)
+      .offset(offset)) as TerraDistressProperty[];
   } else {
-    rows = await db.select().from(terraDistressPropertiesTable).where(whereClause)
-      .orderBy(desc(terraDistressPropertiesTable.opportunityScore)).limit(limit).offset(offset) as TerraDistressProperty[];
+    rows = (await db
+      .select()
+      .from(terraDistressPropertiesTable)
+      .where(whereClause)
+      .orderBy(desc(terraDistressPropertiesTable.opportunityScore))
+      .limit(limit)
+      .offset(offset)) as TerraDistressProperty[];
   }
 
-  return rows.map(r => toPropertyShape(r));
+  return rows.map((r) => toPropertyShape(r));
 }
 
 export async function getDistressPropertyById(idOrExternal: string) {
   const byExternal = await db
     .select()
     .from(terraDistressPropertiesTable)
-    .where(and(
-      eq(terraDistressPropertiesTable.externalId, idOrExternal),
-      eq(terraDistressPropertiesTable.isActive, true)
-    ))
+    .where(
+      and(
+        eq(terraDistressPropertiesTable.externalId, idOrExternal),
+        eq(terraDistressPropertiesTable.isActive, true),
+      ),
+    )
     .limit(1);
 
   if (byExternal.length > 0) return toPropertyShape(byExternal[0]!);
@@ -142,10 +181,12 @@ export async function getDistressPropertyById(idOrExternal: string) {
     const byId = await db
       .select()
       .from(terraDistressPropertiesTable)
-      .where(and(
-        eq(terraDistressPropertiesTable.id, numericId),
-        eq(terraDistressPropertiesTable.isActive, true)
-      ))
+      .where(
+        and(
+          eq(terraDistressPropertiesTable.id, numericId),
+          eq(terraDistressPropertiesTable.isActive, true),
+        ),
+      )
       .limit(1);
     if (byId.length > 0) return toPropertyShape(byId[0]!);
   }
@@ -167,10 +208,14 @@ export async function searchDistressAlerts(params: AlertSearchParams) {
     conditions.push(ilike(terraDistressAlertsTable.borough, params.borough));
   }
   if (params.type) {
-    conditions.push(eq(terraDistressAlertsTable.alertType, params.type as TerraDistressAlert["alertType"]));
+    conditions.push(
+      eq(terraDistressAlertsTable.alertType, params.type as TerraDistressAlert['alertType']),
+    );
   }
   if (params.severity) {
-    conditions.push(eq(terraDistressAlertsTable.severity, params.severity as TerraDistressAlert["severity"]));
+    conditions.push(
+      eq(terraDistressAlertsTable.severity, params.severity as TerraDistressAlert['severity']),
+    );
   }
 
   const query = db
@@ -182,7 +227,7 @@ export async function searchDistressAlerts(params: AlertSearchParams) {
 
   const rows = await query;
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     id: row.externalId ?? String(row.id),
     type: row.alertType,
     message: row.message,
@@ -199,12 +244,12 @@ type TerraDistressAlert = typeof terraDistressAlertsTable.$inferSelect;
 export async function generateAlertsForProperty(
   property: InsertTerraDistressProperty,
   dbPropertyId: number,
-  externalId: string
+  externalId: string,
 ): Promise<number> {
   const alerts: InsertTerraDistressAlert[] = [];
   const today = new Date();
 
-  if (property.distressType === "auction" && property.auctionDate) {
+  if (property.distressType === 'auction' && property.auctionDate) {
     const auctionDate = new Date(property.auctionDate);
     const daysUntilAuction = Math.ceil((auctionDate.getTime() - today.getTime()) / 86400000);
 
@@ -213,9 +258,9 @@ export async function generateAlertsForProperty(
         externalId: `alert-auction-${externalId}`,
         propertyId: dbPropertyId,
         propertyExternalId: externalId,
-        alertType: "auction",
+        alertType: 'auction',
         message: `${property.address} auction in ${daysUntilAuction} days — ${property.borough} ${property.propertyType}`,
-        severity: "critical",
+        severity: 'critical',
         borough: property.borough ?? undefined,
         zipCode: property.zipCode ?? undefined,
         metadata: { auctionDate: property.auctionDate, daysUntil: daysUntilAuction },
@@ -223,7 +268,7 @@ export async function generateAlertsForProperty(
     }
   }
 
-  if (property.distressType === "foreclosure" || property.distressType === "pre-foreclosure") {
+  if (property.distressType === 'foreclosure' || property.distressType === 'pre-foreclosure') {
     const filingDate = property.filingDate ? new Date(property.filingDate) : null;
     const daysSinceFiling = filingDate
       ? Math.ceil((today.getTime() - filingDate.getTime()) / 86400000)
@@ -234,9 +279,9 @@ export async function generateAlertsForProperty(
         externalId: `alert-foreclosure-${externalId}`,
         propertyId: dbPropertyId,
         propertyExternalId: externalId,
-        alertType: "foreclosure",
+        alertType: 'foreclosure',
         message: `New ${property.distressType} filed in ZIP ${property.zipCode} — ${property.address}`,
-        severity: "high",
+        severity: 'high',
         borough: property.borough ?? undefined,
         zipCode: property.zipCode ?? undefined,
         metadata: { filingDate: property.filingDate, daysAgo: daysSinceFiling },
@@ -244,16 +289,20 @@ export async function generateAlertsForProperty(
     }
   }
 
-  if (property.distressType === "tax-lien" && property.lienAmount !== undefined && property.lienAmount !== null) {
+  if (
+    property.distressType === 'tax-lien' &&
+    property.lienAmount !== undefined &&
+    property.lienAmount !== null
+  ) {
     const lienVal = Number(property.lienAmount);
     if (lienVal >= 100000) {
       alerts.push({
         externalId: `alert-lien-${externalId}`,
         propertyId: dbPropertyId,
         propertyExternalId: externalId,
-        alertType: "lien",
+        alertType: 'lien',
         message: `Tax lien escalated — ${property.address}: $${lienVal.toLocaleString()}`,
-        severity: lienVal >= 200000 ? "high" : "medium",
+        severity: lienVal >= 200000 ? 'high' : 'medium',
         borough: property.borough ?? undefined,
         zipCode: property.zipCode ?? undefined,
         metadata: { lienAmount: lienVal },
@@ -261,14 +310,14 @@ export async function generateAlertsForProperty(
     }
   }
 
-  if (property.distressType === "reo") {
+  if (property.distressType === 'reo') {
     alerts.push({
       externalId: `alert-reo-${externalId}`,
       propertyId: dbPropertyId,
       propertyExternalId: externalId,
-      alertType: "reo",
+      alertType: 'reo',
       message: `REO/Bank-owned property available — ${property.address}, ${property.borough}`,
-      severity: "medium",
+      severity: 'medium',
       borough: property.borough ?? undefined,
       zipCode: property.zipCode ?? undefined,
       metadata: { ownerName: property.ownerName },
@@ -287,7 +336,7 @@ export async function generateAlertsForProperty(
         .returning({ id: terraDistressAlertsTable.id });
       if (result.length > 0) inserted++;
     } catch (err) {
-      logger.warn({ err, alertId: alert.externalId }, "Failed to insert distress alert");
+      logger.warn({ err, alertId: alert.externalId }, 'Failed to insert distress alert');
     }
   }
 
@@ -297,60 +346,71 @@ export async function generateAlertsForProperty(
 export async function normalizeAddress(raw: string): Promise<string> {
   return raw
     .trim()
-    .replace(/\s+/g, " ")
-    .replace(/\bAVE\b/gi, "Ave")
-    .replace(/\bST\b/gi, "St")
-    .replace(/\bBLVD\b/gi, "Blvd")
-    .replace(/\bRD\b/gi, "Rd")
-    .replace(/\bPL\b/gi, "Pl")
-    .replace(/\bDR\b/gi, "Dr")
-    .replace(/\bLN\b/gi, "Ln")
-    .replace(/\bCT\b/gi, "Ct")
-    .replace(/\bTERR\b/gi, "Terrace")
-    .replace(/\bPKWY\b/gi, "Pkwy");
+    .replace(/\s+/g, ' ')
+    .replace(/\bAVE\b/gi, 'Ave')
+    .replace(/\bST\b/gi, 'St')
+    .replace(/\bBLVD\b/gi, 'Blvd')
+    .replace(/\bRD\b/gi, 'Rd')
+    .replace(/\bPL\b/gi, 'Pl')
+    .replace(/\bDR\b/gi, 'Dr')
+    .replace(/\bLN\b/gi, 'Ln')
+    .replace(/\bCT\b/gi, 'Ct')
+    .replace(/\bTERR\b/gi, 'Terrace')
+    .replace(/\bPKWY\b/gi, 'Pkwy');
 }
 
-export function mapBoroughFromCounty(county: string): "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island" | null {
+export function mapBoroughFromCounty(
+  county: string,
+): 'Manhattan' | 'Brooklyn' | 'Queens' | 'Bronx' | 'Staten Island' | null {
   const c = county.toLowerCase().trim();
-  if (c === "new york" || c === "new york county") return "Manhattan";
-  if (c === "kings" || c === "kings county") return "Brooklyn";
-  if (c === "queens" || c === "queens county") return "Queens";
-  if (c === "bronx" || c === "bronx county") return "Bronx";
-  if (c === "richmond" || c === "richmond county") return "Staten Island";
+  if (c === 'new york' || c === 'new york county') return 'Manhattan';
+  if (c === 'kings' || c === 'kings county') return 'Brooklyn';
+  if (c === 'queens' || c === 'queens county') return 'Queens';
+  if (c === 'bronx' || c === 'bronx county') return 'Bronx';
+  if (c === 'richmond' || c === 'richmond county') return 'Staten Island';
   return null;
 }
 
 export function mapCountyFromBorough(borough: string): string {
   const b = borough.toLowerCase().trim();
-  if (b === "manhattan") return "New York";
-  if (b === "brooklyn") return "Kings";
-  if (b === "queens") return "Queens";
-  if (b === "bronx") return "Bronx";
-  if (b === "staten island") return "Richmond";
+  if (b === 'manhattan') return 'New York';
+  if (b === 'brooklyn') return 'Kings';
+  if (b === 'queens') return 'Queens';
+  if (b === 'bronx') return 'Bronx';
+  if (b === 'staten island') return 'Richmond';
   return borough;
 }
 
 export function classifyDistressType(
   source: string,
-  stage?: string
-): "pre-foreclosure" | "foreclosure" | "auction" | "reo" | "tax-lien" | "expired-listing" {
+  stage?: string,
+): 'pre-foreclosure' | 'foreclosure' | 'auction' | 'reo' | 'tax-lien' | 'expired-listing' {
   const s = source.toLowerCase();
-  const st = (stage ?? "").toLowerCase();
+  const st = (stage ?? '').toLowerCase();
 
-  if (s.includes("tax lien") || s.includes("dof") || s.includes("dept of finance")) return "tax-lien";
-  if (s.includes("reo") || s.includes("fdic") || s.includes("bank-owned") || st.includes("bank-owned")) return "reo";
-  if (s.includes("auction") || st.includes("auction") || st.includes("scheduled")) return "auction";
-  if (s.includes("lis pendens") || st.includes("lis-pendens") || st.includes("filing")) return "pre-foreclosure";
-  if (s.includes("foreclosure") || st.includes("foreclosure") || st.includes("notice")) return "foreclosure";
-  if (s.includes("expired") || st.includes("expired")) return "expired-listing";
-  if (s.includes("hpd") || s.includes("violation")) return "pre-foreclosure";
+  if (s.includes('tax lien') || s.includes('dof') || s.includes('dept of finance'))
+    return 'tax-lien';
+  if (
+    s.includes('reo') ||
+    s.includes('fdic') ||
+    s.includes('bank-owned') ||
+    st.includes('bank-owned')
+  )
+    return 'reo';
+  if (s.includes('auction') || st.includes('auction') || st.includes('scheduled')) return 'auction';
+  if (s.includes('lis pendens') || st.includes('lis-pendens') || st.includes('filing'))
+    return 'pre-foreclosure';
+  if (s.includes('foreclosure') || st.includes('foreclosure') || st.includes('notice'))
+    return 'foreclosure';
+  if (s.includes('expired') || st.includes('expired')) return 'expired-listing';
+  if (s.includes('hpd') || s.includes('violation')) return 'pre-foreclosure';
 
-  return "pre-foreclosure";
+  return 'pre-foreclosure';
 }
 
 export async function upsertDistressProperty(
   data: InsertTerraDistressProperty,
-  runId?: number
+  runId?: number,
 ): Promise<{ dbId: number; isNew: boolean }> {
   if (runId !== undefined) {
     data.ingestRunId = runId;
@@ -373,18 +433,25 @@ export async function upsertDistressProperty(
   }
 
   if (data.address) {
-    const normalizedAddr = data.address.trim().toLowerCase().replace(/\s+/g, " ");
+    const normalizedAddr = data.address.trim().toLowerCase().replace(/\s+/g, ' ');
     const addrConditions: ReturnType<typeof eq>[] = [
-      sql`lower(trim(${terraDistressPropertiesTable.address})) = ${normalizedAddr}` as unknown as ReturnType<typeof eq>,
+      sql`lower(trim(${terraDistressPropertiesTable.address})) = ${normalizedAddr}` as unknown as ReturnType<
+        typeof eq
+      >,
     ];
     if (data.zipCode) {
       addrConditions.push(eq(terraDistressPropertiesTable.zipCode, data.zipCode));
     } else if (data.borough) {
-      addrConditions.push(eq(terraDistressPropertiesTable.borough, data.borough as TerraDistressProperty["borough"]));
+      addrConditions.push(
+        eq(terraDistressPropertiesTable.borough, data.borough as TerraDistressProperty['borough']),
+      );
     }
 
     const byAddress = await db
-      .select({ id: terraDistressPropertiesTable.id, externalId: terraDistressPropertiesTable.externalId })
+      .select({
+        id: terraDistressPropertiesTable.id,
+        externalId: terraDistressPropertiesTable.externalId,
+      })
       .from(terraDistressPropertiesTable)
       .where(and(...addrConditions))
       .limit(1);
@@ -411,10 +478,13 @@ export async function upsertDistressProperty(
   return { dbId: inserted!.id, isNew: true };
 }
 
-export async function startIngestionRun(source: string, metadata?: Record<string, unknown>): Promise<number> {
+export async function startIngestionRun(
+  source: string,
+  metadata?: Record<string, unknown>,
+): Promise<number> {
   const [run] = await db
     .insert(terraIngestionRunsTable)
-    .values({ source, status: "running", metadata: metadata ?? {} })
+    .values({ source, status: 'running', metadata: metadata ?? {} })
     .returning({ id: terraIngestionRunsTable.id });
   return run!.id;
 }
@@ -428,13 +498,13 @@ export async function completeIngestionRun(
     recordsFailed: number;
     alertsGenerated: number;
     errorMessage?: string;
-    status?: "completed" | "failed" | "partial";
-  }
+    status?: 'completed' | 'failed' | 'partial';
+  },
 ) {
   await db
     .update(terraIngestionRunsTable)
     .set({
-      status: stats.status ?? "completed",
+      status: stats.status ?? 'completed',
       recordsFetched: stats.recordsFetched,
       recordsInserted: stats.recordsInserted,
       recordsSkipped: stats.recordsSkipped,
@@ -478,8 +548,8 @@ export async function getIngestionStats() {
 
   return {
     totalProperties: total?.count ?? 0,
-    byBorough: Object.fromEntries(byBorough.map(r => [r.borough, r.count])),
-    byDistressType: Object.fromEntries(byType.map(r => [r.distressType, r.count])),
+    byBorough: Object.fromEntries(byBorough.map((r) => [r.borough, r.count])),
+    byDistressType: Object.fromEntries(byType.map((r) => [r.distressType, r.count])),
     recentRuns,
   };
 }

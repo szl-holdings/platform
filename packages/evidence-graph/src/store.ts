@@ -15,7 +15,7 @@
  * `mesh_evidence_entity_links`).
  */
 
-import type { EvidenceItem, Recommendation } from "@workspace/ontology";
+import type { EvidenceItem, Recommendation } from '@workspace/ontology';
 
 export interface EvidenceEntityLink {
   evidenceId: string;
@@ -33,14 +33,14 @@ export interface EvidenceStoreBackend {
   forSignal(signalId: string): EvidenceItem[];
   list(filter?: {
     domain?: string;
-    type?: EvidenceItem["type"];
+    type?: EvidenceItem['type'];
     limit?: number;
     offset?: number;
   }): EvidenceItem[];
   count(): number;
 }
 
-export type RecommendationDecisionType = "approve" | "reject" | "escalate" | "defer";
+export type RecommendationDecisionType = 'approve' | 'reject' | 'escalate' | 'defer';
 
 export interface RecommendationDecision {
   decisionId: string;
@@ -49,9 +49,9 @@ export interface RecommendationDecision {
   actorId: string;
   actorRole?: string;
   justification?: string;
-  policyOutcome: "allow" | "require-approval" | "block" | "pending";
-  previousStatus: Recommendation["status"];
-  newStatus: Recommendation["status"];
+  policyOutcome: 'allow' | 'require-approval' | 'block' | 'pending';
+  previousStatus: Recommendation['status'];
+  newStatus: Recommendation['status'];
   decidedAt: string;
 }
 
@@ -60,15 +60,12 @@ export interface RecommendationStoreBackend {
   get(recommendationId: string): Recommendation | undefined;
   list(filter?: {
     domain?: string;
-    status?: Recommendation["status"];
+    status?: Recommendation['status'];
     tenantId?: string;
     limit?: number;
     offset?: number;
   }): Recommendation[];
-  updateStatus(
-    recommendationId: string,
-    status: Recommendation["status"],
-  ): boolean;
+  updateStatus(recommendationId: string, status: Recommendation['status']): boolean;
   forEntity(entityId: string): Recommendation[];
   count(): number;
   recordDecision(decision: RecommendationDecision): void;
@@ -116,7 +113,7 @@ export class InMemoryEvidenceStore implements EvidenceStoreBackend {
 
   list(filter?: {
     domain?: string;
-    type?: EvidenceItem["type"];
+    type?: EvidenceItem['type'];
     limit?: number;
     offset?: number;
   }): EvidenceItem[] {
@@ -169,7 +166,7 @@ export class InMemoryRecommendationStore implements RecommendationStoreBackend {
 
   list(filter?: {
     domain?: string;
-    status?: Recommendation["status"];
+    status?: Recommendation['status'];
     tenantId?: string;
     limit?: number;
     offset?: number;
@@ -184,13 +181,13 @@ export class InMemoryRecommendationStore implements RecommendationStoreBackend {
     return results.slice(offset, offset + limit);
   }
 
-  updateStatus(recommendationId: string, status: Recommendation["status"]): boolean {
+  updateStatus(recommendationId: string, status: Recommendation['status']): boolean {
     const rec = this.recs.get(recommendationId);
     if (!rec) return false;
     this.recs.set(recommendationId, {
       ...rec,
       status,
-      resolvedAt: ["accepted", "rejected", "completed", "failed"].includes(status)
+      resolvedAt: ['accepted', 'rejected', 'completed', 'failed'].includes(status)
         ? new Date().toISOString()
         : rec.resolvedAt,
     });
@@ -265,7 +262,7 @@ export class EvidenceStore implements EvidenceStoreBackend {
 
   list(filter?: {
     domain?: string;
-    type?: EvidenceItem["type"];
+    type?: EvidenceItem['type'];
     limit?: number;
     offset?: number;
   }): EvidenceItem[] {
@@ -277,7 +274,7 @@ export class EvidenceStore implements EvidenceStoreBackend {
   }
 }
 
-export type RecommendationEventKind = "saved" | "status-changed";
+export type RecommendationEventKind = 'saved' | 'status-changed';
 
 export interface RecommendationEvent {
   kind: RecommendationEventKind;
@@ -316,14 +313,14 @@ export class RecommendationStore implements RecommendationStoreBackend {
       try {
         h(event);
       } catch (err) {
-        console.error("[RecommendationStore] listener error:", err);
+        console.error('[RecommendationStore] listener error:', err);
       }
     }
   }
 
   save(rec: Recommendation): void {
     this.backend.save(rec);
-    this.emit({ kind: "saved", recommendation: rec });
+    this.emit({ kind: 'saved', recommendation: rec });
   }
 
   get(recommendationId: string): Recommendation | undefined {
@@ -332,7 +329,7 @@ export class RecommendationStore implements RecommendationStoreBackend {
 
   list(filter?: {
     domain?: string;
-    status?: Recommendation["status"];
+    status?: Recommendation['status'];
     tenantId?: string;
     limit?: number;
     offset?: number;
@@ -340,14 +337,11 @@ export class RecommendationStore implements RecommendationStoreBackend {
     return this.backend.list(filter);
   }
 
-  updateStatus(
-    recommendationId: string,
-    status: Recommendation["status"],
-  ): boolean {
+  updateStatus(recommendationId: string, status: Recommendation['status']): boolean {
     const ok = this.backend.updateStatus(recommendationId, status);
     if (ok) {
       const updated = this.backend.get(recommendationId);
-      if (updated) this.emit({ kind: "status-changed", recommendation: updated });
+      if (updated) this.emit({ kind: 'status-changed', recommendation: updated });
     }
     return ok;
   }

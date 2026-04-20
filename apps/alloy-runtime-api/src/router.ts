@@ -35,31 +35,31 @@
  *
  *   POST   /v1/evals/run               — run an evaluation suite
  */
-import { Router } from "express";
-import { apiKeyGuard } from "./middleware/auth.js";
-import tasksRouter from "./routes/v1/tasks.js";
-import memoryRouter from "./routes/v1/memory.js";
-import workflowsRouter from "./routes/v1/workflows.js";
-import searchRouter from "./routes/v1/search.js";
-import embedRouter from "./routes/v1/embed.js";
-import indexRouter from "./routes/v1/index.js";
-import evalsRouter from "./routes/v1/evals.js";
+import { Router } from 'express';
+import { apiKeyGuard } from './middleware/auth.js';
+import embedRouter from './routes/v1/embed.js';
+import evalsRouter from './routes/v1/evals.js';
+import indexRouter from './routes/v1/index.js';
+import memoryRouter from './routes/v1/memory.js';
+import searchRouter from './routes/v1/search.js';
+import tasksRouter from './routes/v1/tasks.js';
+import workflowsRouter from './routes/v1/workflows.js';
 
 const V1_ENDPOINTS = {
-  tasks: ["POST /v1/tasks/plan", "POST /v1/tasks/execute"],
-  memory: ["POST /v1/memory/write", "POST /v1/memory/query", "DELETE /v1/memory/evict-stale"],
+  tasks: ['POST /v1/tasks/plan', 'POST /v1/tasks/execute'],
+  memory: ['POST /v1/memory/write', 'POST /v1/memory/query', 'DELETE /v1/memory/evict-stale'],
   workflows: [
-    "POST /v1/workflows/start",
-    "GET /v1/workflows",
-    "GET /v1/workflows/:runId",
-    "POST /v1/workflows/:runId/resume",
-    "POST /v1/workflows/:runId/approve",
-    "DELETE /v1/workflows/:runId",
+    'POST /v1/workflows/start',
+    'GET /v1/workflows',
+    'GET /v1/workflows/:runId',
+    'POST /v1/workflows/:runId/resume',
+    'POST /v1/workflows/:runId/approve',
+    'DELETE /v1/workflows/:runId',
   ],
-  search: ["POST /v1/search/hybrid"],
-  embeddings: ["POST /v1/embed", "POST /v1/rerank", "POST /v1/openai/embeddings"],
-  index: ["POST /v1/index/rebuild", "GET /v1/index/verify"],
-  evals: ["POST /v1/evals/run"],
+  search: ['POST /v1/search/hybrid'],
+  embeddings: ['POST /v1/embed', 'POST /v1/rerank', 'POST /v1/openai/embeddings'],
+  index: ['POST /v1/index/rebuild', 'GET /v1/index/verify'],
+  evals: ['POST /v1/evals/run'],
 };
 
 const ALL_V1_ENDPOINTS = Object.values(V1_ENDPOINTS).flat();
@@ -67,53 +67,53 @@ const ALL_V1_ENDPOINTS = Object.values(V1_ENDPOINTS).flat();
 export function createRouter(): Router {
   const router = Router();
 
-  router.get("/health", (_req, res) => {
+  router.get('/health', (_req, res) => {
     res.status(200).json({
-      status: "ok",
-      service: "alloy-runtime-api",
-      version: "0.2.0",
+      status: 'ok',
+      service: 'alloy-runtime-api',
+      version: '0.2.0',
       timestamp: new Date().toISOString(),
       v1EndpointCount: ALL_V1_ENDPOINTS.length,
       endpoints: V1_ENDPOINTS,
     });
   });
 
-  router.get("/metrics", (_req, res) => {
+  router.get('/metrics', (_req, res) => {
     res.status(200).json({
-      service: "alloy-runtime-api",
-      version: "0.2.0",
+      service: 'alloy-runtime-api',
+      version: '0.2.0',
       timestamp: new Date().toISOString(),
       v1EndpointCount: ALL_V1_ENDPOINTS.length,
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      note: "Full Prometheus metrics scrape endpoint pending — connect cognitive-observability exporter.",
+      note: 'Full Prometheus metrics scrape endpoint pending — connect cognitive-observability exporter.',
     });
   });
 
-  router.get("/docs", (_req, res) => {
+  router.get('/docs', (_req, res) => {
     res.status(200).json({
-      service: "alloy-runtime-api",
-      version: "0.2.0",
-      description: "AEEP Alloy Execution and Evidence Platform — unified v1 runtime API",
+      service: 'alloy-runtime-api',
+      version: '0.2.0',
+      description: 'AEEP Alloy Execution and Evidence Platform — unified v1 runtime API',
       authentication: {
-        method: "API Key",
-        header: "X-Api-Key",
-        tenantHeader: "X-Tenant-Id",
-        note: "All mutation endpoints require a valid API key. Reads are also tenant-scoped.",
+        method: 'API Key',
+        header: 'X-Api-Key',
+        tenantHeader: 'X-Tenant-Id',
+        note: 'All mutation endpoints require a valid API key. Reads are also tenant-scoped.',
       },
       v1Endpoints: ALL_V1_ENDPOINTS,
       endpointsByGroup: V1_ENDPOINTS,
-      platformFacts: "/docs redirects to platform-facts.md for full registry details.",
+      platformFacts: '/docs redirects to platform-facts.md for full registry details.',
     });
   });
 
-  router.use("/v1/tasks", apiKeyGuard, tasksRouter);
-  router.use("/v1/memory", apiKeyGuard, memoryRouter);
-  router.use("/v1/workflows", apiKeyGuard, workflowsRouter);
-  router.use("/v1/search", apiKeyGuard, searchRouter);
-  router.use("/v1", apiKeyGuard, embedRouter);
-  router.use("/v1/index", apiKeyGuard, indexRouter);
-  router.use("/v1/evals", apiKeyGuard, evalsRouter);
+  router.use('/v1/tasks', apiKeyGuard, tasksRouter);
+  router.use('/v1/memory', apiKeyGuard, memoryRouter);
+  router.use('/v1/workflows', apiKeyGuard, workflowsRouter);
+  router.use('/v1/search', apiKeyGuard, searchRouter);
+  router.use('/v1', apiKeyGuard, embedRouter);
+  router.use('/v1/index', apiKeyGuard, indexRouter);
+  router.use('/v1/evals', apiKeyGuard, evalsRouter);
 
   return router;
 }

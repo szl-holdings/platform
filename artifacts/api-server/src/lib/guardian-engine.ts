@@ -1,22 +1,22 @@
-import { randomUUID } from "crypto";
-import { eq } from "drizzle-orm";
-import {
-  GuardianDecisionEngine,
-  type GuardianRule,
-  type DecisionRequest,
-  type DecisionResult,
-  type PolicyTier,
-} from "@workspace/guardian";
 import {
   db,
-  guardianPoliciesTable,
-  guardianActionsTable,
   type GuardianPolicy,
-} from "@szl-holdings/db";
-import { logger } from "./logger";
-import { publishToSse } from "./sse-server";
+  guardianActionsTable,
+  guardianPoliciesTable,
+} from '@szl-holdings/db';
+import {
+  type DecisionRequest,
+  type DecisionResult,
+  GuardianDecisionEngine,
+  type GuardianRule,
+  type PolicyTier,
+} from '@workspace/guardian';
+import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm';
+import { logger } from './logger';
+import { publishToSse } from './sse-server';
 
-export const GUARDIAN_LEDGER_SSE_CHANNEL = "guardian:ledger";
+export const GUARDIAN_LEDGER_SSE_CHANNEL = 'guardian:ledger';
 
 /**
  * Shape of a streamed guardian decision event. Mirrors the row shape returned
@@ -67,9 +67,12 @@ export function publishGuardianDecisionEvent(row: StreamedGuardianDecision): voi
   try {
     const tenantId = row.orgId !== null ? String(row.orgId) : null;
     const adminOnly = row.orgId === null;
-    publishToSse(GUARDIAN_LEDGER_SSE_CHANNEL, "decision", row, tenantId, { adminOnly });
+    publishToSse(GUARDIAN_LEDGER_SSE_CHANNEL, 'decision', row, tenantId, { adminOnly });
   } catch (err) {
-    logger.debug({ err, requestId: row.requestId }, "[guardian-engine] Failed to publish decision event (non-fatal)");
+    logger.debug(
+      { err, requestId: row.requestId },
+      '[guardian-engine] Failed to publish decision event (non-fatal)',
+    );
   }
 }
 
@@ -78,7 +81,7 @@ let lastSyncedAt = 0;
 let initialized = false;
 
 const POLICY_SYNC_INTERVAL_MS = parseInt(
-  process.env.GUARDIAN_POLICY_SYNC_INTERVAL_MS ?? "30000",
+  process.env.GUARDIAN_POLICY_SYNC_INTERVAL_MS ?? '30000',
   10,
 );
 
@@ -90,9 +93,9 @@ function policyRowToRule(row: GuardianPolicy): GuardianRule {
     id: `policy-${row.id}`,
     name: row.name,
     description: row.description ?? undefined,
-    tier: row.tier as GuardianRule["tier"],
-    conditions: ((row.conditions as unknown[]) ?? []) as GuardianRule["conditions"],
-    action: row.action as GuardianRule["action"],
+    tier: row.tier as GuardianRule['tier'],
+    conditions: ((row.conditions as unknown[]) ?? []) as GuardianRule['conditions'],
+    action: row.action as GuardianRule['action'],
     priority: row.priority,
     enabled: row.enabled,
     owner: row.owner ?? undefined,
@@ -122,36 +125,32 @@ function policyRowToRule(row: GuardianPolicy): GuardianRule {
  * category used when a route prefix is unmapped.
  */
 const FALLBACK_DOMAINS = [
-  "general",
-  "alloy",
-  "agents",
-  "ai",
-  "memory",
-  "skills",
-  "verifier",
-  "self-model",
-  "decisions",
-  "governance",
-  "plans",
-  "reflections",
-  "nexus",
-  "signals",
-  "graph",
-  "documents",
-  "data",
-  "communication",
-  "finance",
-  "legal",
-  "security",
-  "infrastructure",
-  "analytics",
+  'general',
+  'alloy',
+  'agents',
+  'ai',
+  'memory',
+  'skills',
+  'verifier',
+  'self-model',
+  'decisions',
+  'governance',
+  'plans',
+  'reflections',
+  'nexus',
+  'signals',
+  'graph',
+  'documents',
+  'data',
+  'communication',
+  'finance',
+  'legal',
+  'security',
+  'infrastructure',
+  'analytics',
 ] as const;
 
-const FALLBACK_TIERS: PolicyTier[] = [
-  "advisory",
-  "supervised",
-  "operator-approved",
-];
+const FALLBACK_TIERS: PolicyTier[] = ['advisory', 'supervised', 'operator-approved'];
 
 function installFallbackRules(): void {
   for (const tier of FALLBACK_TIERS) {
@@ -159,14 +158,14 @@ function installFallbackRules(): void {
       engine.addRule({
         id: `fallback-${domain}-${tier}`,
         name: `Fallback allow ${domain} (${tier})`,
-        description: "Bootstrap fallback rule installed at startup",
+        description: 'Bootstrap fallback rule installed at startup',
         tier,
-        conditions: [{ field: "domain", operator: "eq", value: domain }],
-        action: "allow",
+        conditions: [{ field: 'domain', operator: 'eq', value: domain }],
+        action: 'allow',
         priority: 9990,
         enabled: true,
-        owner: "guardian-engine-bootstrap",
-        tags: ["fallback", "bootstrap", domain],
+        owner: 'guardian-engine-bootstrap',
+        tags: ['fallback', 'bootstrap', domain],
       });
     }
   }
@@ -192,7 +191,7 @@ export async function syncGuardianPolicies(force = false): Promise<number> {
     for (const row of rows) engine.addRule(policyRowToRule(row));
     return rows.length;
   } catch (err) {
-    logger.warn({ err }, "[guardian-engine] Policy sync failed");
+    logger.warn({ err }, '[guardian-engine] Policy sync failed');
     return engine.getRules().length;
   }
 }
@@ -209,13 +208,16 @@ export async function initGuardianEngine(): Promise<void> {
       const loaded = await syncGuardianPolicies(true);
       logger.info(
         { rulesLoaded: loaded, totalRules: engine.getRules().length },
-        "[guardian-engine] Decision engine hydrated from policies table",
+        '[guardian-engine] Decision engine hydrated from policies table',
       );
     } catch (err) {
-      logger.warn({ err }, "[guardian-engine] Initial policy hydration failed — using fallback rules only");
+      logger.warn(
+        { err },
+        '[guardian-engine] Initial policy hydration failed — using fallback rules only',
+      );
     }
   } else {
-    logger.info("[guardian-engine] DATABASE_URL not set — running with fallback rules only");
+    logger.info('[guardian-engine] DATABASE_URL not set — running with fallback rules only');
   }
   initialized = true;
 }
@@ -259,12 +261,12 @@ export async function recordGuardianAction(params: {
         sessionId: params.request.sessionId ?? null,
         workflowId: params.request.workflowId ?? null,
         orgId: params.orgId ?? null,
-        tier: (params.request.tier ?? "advisory") as GuardianPolicy["tier"],
+        tier: (params.request.tier ?? 'advisory') as GuardianPolicy['tier'],
         action: params.request.action,
         toolId: params.request.toolId ?? null,
         model: params.request.model ?? null,
         environment: params.request.environment ?? null,
-        outcome: params.result.outcome === "deny" ? "block" : params.result.outcome,
+        outcome: params.result.outcome === 'deny' ? 'block' : params.result.outcome,
         matchedRuleId: params.result.matchedRuleId ?? null,
         reason: params.result.reason,
         rollbackRequired: false,
@@ -288,12 +290,12 @@ export async function recordGuardianAction(params: {
       sessionId: params.request.sessionId ?? null,
       workflowId: params.request.workflowId ?? null,
       orgId: params.orgId ?? null,
-      tier: (params.request.tier ?? "advisory") as string,
+      tier: (params.request.tier ?? 'advisory') as string,
       action: params.request.action,
       toolId: params.request.toolId ?? null,
       model: params.request.model ?? null,
       environment: params.request.environment ?? null,
-      decision: params.result.outcome === "deny" ? "block" : params.result.outcome,
+      decision: params.result.outcome === 'deny' ? 'block' : params.result.outcome,
       matchedRuleId: params.result.matchedRuleId ?? null,
       reason: params.result.reason,
       rollbackRequired: false,
@@ -305,7 +307,10 @@ export async function recordGuardianAction(params: {
       decidedAt: new Date(params.result.decidedAt ?? Date.now()).toISOString(),
     });
   } catch (err) {
-    logger.debug({ err, requestId: params.request.requestId }, "[guardian-engine] Failed to record action ledger entry (non-fatal)");
+    logger.debug(
+      { err, requestId: params.request.requestId },
+      '[guardian-engine] Failed to record action ledger entry (non-fatal)',
+    );
   }
 }
 
@@ -313,6 +318,6 @@ export async function recordGuardianAction(params: {
  * Build a request id suitable for both the decision call and the
  * audit-log row (must be unique per call).
  */
-export function makeGuardianRequestId(prefix = "req"): string {
+export function makeGuardianRequestId(prefix = 'req'): string {
   return `${prefix}-${randomUUID()}`;
 }

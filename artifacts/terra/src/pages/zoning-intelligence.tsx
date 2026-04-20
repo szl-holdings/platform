@@ -1,15 +1,27 @@
-import { useState, useMemo } from "react";
-import { motion as m, AnimatePresence } from "framer-motion";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { AnimatePresence, motion as m } from 'framer-motion';
 import {
-
-  Building2, Layers, MapPin, DollarSign, TrendingUp, ChevronRight,
-  BarChart3, Eye, Grid3X3, Maximize2, ArrowUpRight, Scale, FileText, Box, ArrowLeft, Loader2
-} from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { useRoute, Link } from "wouter";
-
-import { api } from "@/lib/api";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+  ArrowLeft,
+  ArrowUpRight,
+  BarChart3,
+  Box,
+  Building2,
+  ChevronRight,
+  DollarSign,
+  Eye,
+  FileText,
+  Grid3X3,
+  Layers,
+  Loader2,
+  MapPin,
+  Maximize2,
+  Scale,
+  TrendingUp,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Link, useRoute } from 'wouter';
+import { api } from '@/lib/api';
 
 interface ZoningParcel {
   id: string;
@@ -50,26 +62,35 @@ interface VarianceRecord {
   year: number;
   type: string;
   requested: string;
-  result: "approved" | "denied" | "withdrawn";
+  result: 'approved' | 'denied' | 'withdrawn';
   conditions: string;
 }
 
-const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`;
+const fmt = (n: number) =>
+  n >= 1_000_000
+    ? `$${(n / 1_000_000).toFixed(1)}M`
+    : n >= 1000
+      ? `$${(n / 1000).toFixed(0)}K`
+      : `$${n}`;
 const fmtSqft = (n: number) => `${n.toLocaleString()} SF`;
 
 export default function ZoningIntelligencePage() {
-  const [, params] = useRoute<{ propertyId: string }>("/zoning-intelligence/:propertyId");
+  const [, params] = useRoute<{ propertyId: string }>('/zoning-intelligence/:propertyId');
   const propertyId = params?.propertyId;
 
   const { data: propertyData, isLoading: propertyLoading } = useStandardQuery({
-    queryKey: ["terra-zoning", propertyId],
+    queryKey: ['terra-zoning', propertyId],
     queryFn: () => api.properties.zoning(propertyId!),
     enabled: !!propertyId,
     staleTime: 300_000,
   });
 
-  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useStandardQuery({
-    queryKey: ["terra-portfolio-zoning"],
+  const {
+    data: portfolioData,
+    isLoading: portfolioLoading,
+    isError: portfolioError,
+  } = useStandardQuery({
+    queryKey: ['terra-portfolio-zoning'],
     queryFn: () => api.portfolio.zoning(),
     enabled: !propertyId,
     staleTime: 300_000,
@@ -79,41 +100,84 @@ export default function ZoningIntelligencePage() {
 
   const [selectedParcel, setSelectedParcel] = useState<string | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
-  const parcel = PARCELS.find(p => p.id === (selectedParcel ?? PARCELS[0]?.id));
-  const scenario = parcel?.scenarios.find(s => s.id === selectedScenario);
+  const parcel = PARCELS.find((p) => p.id === (selectedParcel ?? PARCELS[0]?.id));
+  const scenario = parcel?.scenarios.find((s) => s.id === selectedScenario);
 
   const utilizationPct = parcel ? Math.round((parcel.currentFar / parcel.maxFar) * 100) : 0;
 
   if (propertyId) {
     const d = propertyData?.data;
     return (
-      <div className="min-h-screen" style={{ background: "#0a0c10" }}>
+      <div className="min-h-screen" style={{ background: '#0a0c10' }}>
         <div className="mx-auto max-w-5xl px-6 py-8">
           <Link href={`/property/${propertyId}`}>
-            <span className="inline-flex items-center gap-1 text-xs mb-5 cursor-pointer" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <span
+              className="inline-flex items-center gap-1 text-xs mb-5 cursor-pointer"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+            >
               <ArrowLeft className="w-3.5 h-3.5" /> Back to Property
             </span>
           </Link>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Generative Zoning</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Zoning Intelligence &amp; Development Scenarios</h1>
-          <p className="mt-1 text-sm mb-8" style={{ color: "rgba(255,255,255,0.4)" }}>Property-specific zoning analysis for <code style={{ color: "#2d6a4f" }}>{propertyId}</code></p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">
+            Generative Zoning
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+            Zoning Intelligence &amp; Development Scenarios
+          </h1>
+          <p className="mt-1 text-sm mb-8" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Property-specific zoning analysis for{' '}
+            <code style={{ color: '#2d6a4f' }}>{propertyId}</code>
+          </p>
 
           {propertyLoading || !d ? (
-            <div className="flex items-center gap-3 p-8 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#2d6a4f" }} />
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Fetching zoning data…</p>
+            <div
+              className="flex items-center gap-3 p-8 rounded-xl"
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#2d6a4f' }} />
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Fetching zoning data…
+              </p>
             </div>
           ) : (
             <>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
                 {[
-                  { label: "Current Zoning", value: d.currentZoning, sub: d.zoningDescription, color: "#2d6a4f" },
-                  { label: "Max FAR", value: d.maxFar.toFixed(1), sub: `Current: ${d.currentFar.toFixed(1)}`, color: "#60a5fa" },
-                  { label: "Max Units", value: d.maxUnits.toString(), sub: `Currently ${d.currentUnits} units`, color: "#a78bfa" },
-                  { label: "Variance Probability", value: `${d.varianceProbability}%`, sub: "approval likelihood", color: d.varianceProbability >= 60 ? "#34d399" : "#fbbf24" },
-                ].map(mm => (
-                  <div key={mm.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-white/35 mb-2">{mm.label}</div>
+                  {
+                    label: 'Current Zoning',
+                    value: d.currentZoning,
+                    sub: d.zoningDescription,
+                    color: '#2d6a4f',
+                  },
+                  {
+                    label: 'Max FAR',
+                    value: d.maxFar.toFixed(1),
+                    sub: `Current: ${d.currentFar.toFixed(1)}`,
+                    color: '#60a5fa',
+                  },
+                  {
+                    label: 'Max Units',
+                    value: d.maxUnits.toString(),
+                    sub: `Currently ${d.currentUnits} units`,
+                    color: '#a78bfa',
+                  },
+                  {
+                    label: 'Variance Probability',
+                    value: `${d.varianceProbability}%`,
+                    sub: 'approval likelihood',
+                    color: d.varianceProbability >= 60 ? '#34d399' : '#fbbf24',
+                  },
+                ].map((mm) => (
+                  <div
+                    key={mm.label}
+                    className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4"
+                  >
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-white/35 mb-2">
+                      {mm.label}
+                    </div>
                     <div className="text-xl font-semibold text-white">{mm.value}</div>
                     <div className="text-[10px] text-white/30 mt-0.5">{mm.sub}</div>
                   </div>
@@ -123,7 +187,17 @@ export default function ZoningIntelligencePage() {
               {d.overlayDistricts?.length > 0 && (
                 <div className="flex gap-2 mb-6">
                   {(d.overlayDistricts as string[]).map((od: string) => (
-                    <span key={od} className="text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{ background: "#2d6a4f15", color: "#2d6a4f", border: "1px solid #2d6a4f25" }}>{od}</span>
+                    <span
+                      key={od}
+                      className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                      style={{
+                        background: '#2d6a4f15',
+                        color: '#2d6a4f',
+                        border: '1px solid #2d6a4f25',
+                      }}
+                    >
+                      {od}
+                    </span>
                   ))}
                 </div>
               )}
@@ -136,29 +210,45 @@ export default function ZoningIntelligencePage() {
                       const profit = s.estimatedRevenue - s.constructionCost - s.landValue;
                       const margin = (profit / s.estimatedRevenue) * 100;
                       return (
-                        <div key={s.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                        <div
+                          key={s.name}
+                          className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                        >
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-sm font-medium text-white">{s.name}</div>
                             {!s.requiresVariance ? (
-                              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#34d39915", color: "#34d399" }}>As-of-Right</span>
+                              <span
+                                className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                                style={{ background: '#34d39915', color: '#34d399' }}
+                              >
+                                As-of-Right
+                              </span>
                             ) : (
-                              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#fbbf2415", color: "#fbbf24" }}>Variance ({s.varianceProbability}%)</span>
+                              <span
+                                className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                                style={{ background: '#fbbf2415', color: '#fbbf24' }}
+                              >
+                                Variance ({s.varianceProbability}%)
+                              </span>
                             )}
                           </div>
                           <div className="grid grid-cols-4 gap-2 text-center">
                             {[
-                              { l: "Revenue", v: fmt(s.estimatedRevenue) },
-                              { l: "Cost", v: fmt(s.constructionCost) },
-                              { l: "Profit", v: fmt(profit) },
-                              { l: "Margin", v: `${margin.toFixed(1)}%` },
-                            ].map(item => (
+                              { l: 'Revenue', v: fmt(s.estimatedRevenue) },
+                              { l: 'Cost', v: fmt(s.constructionCost) },
+                              { l: 'Profit', v: fmt(profit) },
+                              { l: 'Margin', v: `${margin.toFixed(1)}%` },
+                            ].map((item) => (
                               <div key={item.l} className="rounded-lg bg-white/[0.03] px-2 py-1.5">
                                 <div className="text-xs font-semibold text-white">{item.v}</div>
                                 <div className="text-[9px] text-white/30">{item.l}</div>
                               </div>
                             ))}
                           </div>
-                          <div className="text-[10px] text-white/30 mt-2">{s.units} units · FAR {s.far} · {s.stories} stories · {s.timelineMonths}mo timeline</div>
+                          <div className="text-[10px] text-white/30 mt-2">
+                            {s.units} units · FAR {s.far} · {s.stories} stories · {s.timelineMonths}
+                            mo timeline
+                          </div>
                         </div>
                       );
                     })}
@@ -169,7 +259,9 @@ export default function ZoningIntelligencePage() {
                   <h3 className="text-sm font-semibold text-white mb-4">AI Summary</h3>
                   <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                     <p className="text-sm text-white/60 leading-relaxed">{d.aiSummary}</p>
-                    <p className="text-[9px] mt-4" style={{ color: "rgba(255,255,255,0.2)" }}>Source: {d.dataSource}</p>
+                    <p className="text-[9px] mt-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                      Source: {d.dataSource}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -182,9 +274,18 @@ export default function ZoningIntelligencePage() {
 
   if (portfolioLoading || (!parcel && !portfolioError)) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0c10" }}>
-        <div className="flex items-center gap-3 px-6 py-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-          <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#2d6a4f" }} />
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: '#0a0c10' }}
+      >
+        <div
+          className="flex items-center gap-3 px-6 py-4 rounded-xl"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.06)',
+          }}
+        >
+          <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#2d6a4f' }} />
           <p className="text-sm text-white/50">Loading zoning portfolio…</p>
         </div>
       </div>
@@ -193,8 +294,14 @@ export default function ZoningIntelligencePage() {
 
   if (portfolioError || !parcel) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0c10" }}>
-        <div className="px-6 py-4 rounded-xl" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: '#0a0c10' }}
+      >
+        <div
+          className="px-6 py-4 rounded-xl"
+          style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)' }}
+        >
           <p className="text-sm text-red-400">Unable to load zoning portfolio.</p>
         </div>
       </div>
@@ -202,39 +309,84 @@ export default function ZoningIntelligencePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "#0a0c10" }}>
+    <div className="min-h-screen" style={{ background: '#0a0c10' }}>
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
         <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Generative Zoning</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Zoning Intelligence & Development Scenarios</h1>
-          <p className="mt-1 text-sm text-white/40">Governed zoning code analysis, maximum-density development scenarios, revenue projections, and variance probability scoring.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">
+            Generative Zoning
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+            Zoning Intelligence & Development Scenarios
+          </h1>
+          <p className="mt-1 text-sm text-white/40">
+            Governed zoning code analysis, maximum-density development scenarios, revenue
+            projections, and variance probability scoring.
+          </p>
         </div>
 
         <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
-          {PARCELS.map(p => (
+          {PARCELS.map((p) => (
             <button
               key={p.id}
-              onClick={() => { setSelectedParcel(p.id); setSelectedScenario(null); }}
-              className={cn("flex-shrink-0 rounded-xl border px-4 py-3 text-left transition min-w-[240px]",
-                p.id === selectedParcel ? "border-[#2d6a4f]/40 bg-[#2d6a4f]/10" : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+              onClick={() => {
+                setSelectedParcel(p.id);
+                setSelectedScenario(null);
+              }}
+              className={cn(
+                'flex-shrink-0 rounded-xl border px-4 py-3 text-left transition min-w-[240px]',
+                p.id === selectedParcel
+                  ? 'border-[#2d6a4f]/40 bg-[#2d6a4f]/10'
+                  : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]',
               )}
             >
               <div className="text-sm font-medium text-white truncate">{p.address}</div>
-              <div className="text-[10px] text-white/40 mt-0.5">{p.currentZoning} · {fmtSqft(p.lotSizeSqft)} · Max {p.maxUnits} units</div>
+              <div className="text-[10px] text-white/40 mt-0.5">
+                {p.currentZoning} · {fmtSqft(p.lotSizeSqft)} · Max {p.maxUnits} units
+              </div>
             </button>
           ))}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-8">
           {[
-            { label: "Current Zoning", value: parcel.currentZoning, sub: parcel.zoningDescription, color: "#2d6a4f" },
-            { label: "FAR Utilization", value: `${parcel.currentFar} / ${parcel.maxFar}`, sub: `${utilizationPct}% utilized`, color: utilizationPct < 50 ? "#34d399" : "#fbbf24" },
-            { label: "Max Height", value: `${parcel.maxHeight} ft`, sub: `Setbacks: F${parcel.setbacks.front}' S${parcel.setbacks.side}' R${parcel.setbacks.rear}'`, color: "#60a5fa" },
-            { label: "Max Density", value: `${parcel.maxUnits} units`, sub: `Currently ${parcel.currentUnits}`, color: "#a78bfa" },
-            { label: "Scenarios", value: String(parcel.scenarios.length), sub: `${parcel.scenarios.filter(s => !s.requiresVariance).length} as-of-right`, color: "#fbbf24" },
-          ].map(m => (
-            <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-white/35 mb-2">{m.label}</div>
+            {
+              label: 'Current Zoning',
+              value: parcel.currentZoning,
+              sub: parcel.zoningDescription,
+              color: '#2d6a4f',
+            },
+            {
+              label: 'FAR Utilization',
+              value: `${parcel.currentFar} / ${parcel.maxFar}`,
+              sub: `${utilizationPct}% utilized`,
+              color: utilizationPct < 50 ? '#34d399' : '#fbbf24',
+            },
+            {
+              label: 'Max Height',
+              value: `${parcel.maxHeight} ft`,
+              sub: `Setbacks: F${parcel.setbacks.front}' S${parcel.setbacks.side}' R${parcel.setbacks.rear}'`,
+              color: '#60a5fa',
+            },
+            {
+              label: 'Max Density',
+              value: `${parcel.maxUnits} units`,
+              sub: `Currently ${parcel.currentUnits}`,
+              color: '#a78bfa',
+            },
+            {
+              label: 'Scenarios',
+              value: String(parcel.scenarios.length),
+              sub: `${parcel.scenarios.filter((s) => !s.requiresVariance).length} as-of-right`,
+              color: '#fbbf24',
+            },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4"
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-white/35 mb-2">
+                {m.label}
+              </div>
               <div className="text-lg font-semibold text-white">{m.value}</div>
               <div className="text-[10px] text-white/30 mt-0.5">{m.sub}</div>
             </div>
@@ -243,8 +395,14 @@ export default function ZoningIntelligencePage() {
 
         {parcel.overlayDistricts.length > 0 && (
           <div className="flex gap-2 mb-6">
-            {parcel.overlayDistricts.map(d => (
-              <span key={d} className="text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{ background: "#2d6a4f15", color: "#2d6a4f", border: "1px solid #2d6a4f25" }}>{d}</span>
+            {parcel.overlayDistricts.map((d) => (
+              <span
+                key={d}
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                style={{ background: '#2d6a4f15', color: '#2d6a4f', border: '1px solid #2d6a4f25' }}
+              >
+                {d}
+              </span>
             ))}
           </div>
         )}
@@ -253,35 +411,50 @@ export default function ZoningIntelligencePage() {
           <div>
             <h3 className="text-sm font-semibold text-white mb-4">Development Scenarios</h3>
             <div className="space-y-3">
-              {parcel.scenarios.map(s => {
+              {parcel.scenarios.map((s) => {
                 const profit = s.estimatedRevenue - s.constructionCost - s.landValue;
                 const margin = (profit / s.estimatedRevenue) * 100;
                 return (
                   <button
                     key={s.id}
                     onClick={() => setSelectedScenario(s.id === selectedScenario ? null : s.id)}
-                    className={cn("w-full text-left rounded-xl border p-4 transition",
-                      s.id === selectedScenario ? "border-[#2d6a4f]/40 bg-[#2d6a4f]/10" : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+                    className={cn(
+                      'w-full text-left rounded-xl border p-4 transition',
+                      s.id === selectedScenario
+                        ? 'border-[#2d6a4f]/40 bg-[#2d6a4f]/10'
+                        : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]',
                     )}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <div className="text-sm font-medium text-white">{s.name}</div>
-                        <div className="text-[10px] text-white/40">{s.type} · {s.stories} stories · {fmtSqft(s.grossSqft)}</div>
+                        <div className="text-[10px] text-white/40">
+                          {s.type} · {s.stories} stories · {fmtSqft(s.grossSqft)}
+                        </div>
                       </div>
                       {!s.requiresVariance ? (
-                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#34d39915", color: "#34d399" }}>As-of-Right</span>
+                        <span
+                          className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: '#34d39915', color: '#34d399' }}
+                        >
+                          As-of-Right
+                        </span>
                       ) : (
-                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#fbbf2415", color: "#fbbf24" }}>Variance ({s.varianceProbability}%)</span>
+                        <span
+                          className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: '#fbbf2415', color: '#fbbf24' }}
+                        >
+                          Variance ({s.varianceProbability}%)
+                        </span>
                       )}
                     </div>
                     <div className="grid grid-cols-4 gap-2 text-center">
                       {[
-                        { l: "Revenue", v: fmt(s.estimatedRevenue) },
-                        { l: "Cost", v: fmt(s.constructionCost) },
-                        { l: "Profit", v: fmt(profit) },
-                        { l: "Margin", v: `${margin.toFixed(1)}%` },
-                      ].map(item => (
+                        { l: 'Revenue', v: fmt(s.estimatedRevenue) },
+                        { l: 'Cost', v: fmt(s.constructionCost) },
+                        { l: 'Profit', v: fmt(profit) },
+                        { l: 'Margin', v: `${margin.toFixed(1)}%` },
+                      ].map((item) => (
                         <div key={item.l} className="rounded-lg bg-white/[0.03] px-2 py-1.5">
                           <div className="text-xs font-semibold text-white">{item.v}</div>
                           <div className="text-[9px] text-white/30">{item.l}</div>
@@ -289,7 +462,9 @@ export default function ZoningIntelligencePage() {
                       ))}
                     </div>
                     <div className="flex items-center gap-4 mt-2 text-[10px] text-white/30">
-                      <span>{s.units} units · {s.parkingSpaces} parking · FAR {s.far}</span>
+                      <span>
+                        {s.units} units · {s.parkingSpaces} parking · FAR {s.far}
+                      </span>
                       <span>Timeline: {s.timelineMonths}mo</span>
                     </div>
                   </button>
@@ -303,36 +478,83 @@ export default function ZoningIntelligencePage() {
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
               <div className="flex items-center gap-4 mb-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: "#34d399" }}>{Math.round((parcel.varianceHistory.filter(v => v.result === "approved").length / parcel.varianceHistory.length) * 100)}%</div>
+                  <div className="text-2xl font-bold" style={{ color: '#34d399' }}>
+                    {Math.round(
+                      (parcel.varianceHistory.filter((v) => v.result === 'approved').length /
+                        parcel.varianceHistory.length) *
+                        100,
+                    )}
+                    %
+                  </div>
                   <div className="text-[9px] text-white/30">Approval Rate</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{parcel.varianceHistory.length}</div>
+                  <div className="text-2xl font-bold text-white">
+                    {parcel.varianceHistory.length}
+                  </div>
                   <div className="text-[9px] text-white/30">Applications</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: "#60a5fa" }}>{parcel.varianceHistory.filter(v => v.result === "approved").length}</div>
+                  <div className="text-2xl font-bold" style={{ color: '#60a5fa' }}>
+                    {parcel.varianceHistory.filter((v) => v.result === 'approved').length}
+                  </div>
                   <div className="text-[9px] text-white/30">Approved</div>
                 </div>
               </div>
 
               <div className="space-y-2.5">
                 {parcel.varianceHistory.map((v, i) => (
-                  <div key={i} className="flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.015] p-3">
-                    <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full" style={{
-                      background: v.result === "approved" ? "#34d39915" : v.result === "denied" ? "#ef444415" : "#fbbf2415"
-                    }}>
-                      <span className="text-[10px] font-bold" style={{
-                        color: v.result === "approved" ? "#34d399" : v.result === "denied" ? "#ef4444" : "#fbbf24"
-                      }}>{v.year}</span>
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.015] p-3"
+                  >
+                    <div
+                      className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full"
+                      style={{
+                        background:
+                          v.result === 'approved'
+                            ? '#34d39915'
+                            : v.result === 'denied'
+                              ? '#ef444415'
+                              : '#fbbf2415',
+                      }}
+                    >
+                      <span
+                        className="text-[10px] font-bold"
+                        style={{
+                          color:
+                            v.result === 'approved'
+                              ? '#34d399'
+                              : v.result === 'denied'
+                                ? '#ef4444'
+                                : '#fbbf24',
+                        }}
+                      >
+                        {v.year}
+                      </span>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-white">{v.type} Variance</span>
-                        <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full" style={{
-                          background: v.result === "approved" ? "#34d39915" : v.result === "denied" ? "#ef444415" : "#fbbf2415",
-                          color: v.result === "approved" ? "#34d399" : v.result === "denied" ? "#ef4444" : "#fbbf24"
-                        }}>{v.result}</span>
+                        <span
+                          className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full"
+                          style={{
+                            background:
+                              v.result === 'approved'
+                                ? '#34d39915'
+                                : v.result === 'denied'
+                                  ? '#ef444415'
+                                  : '#fbbf2415',
+                            color:
+                              v.result === 'approved'
+                                ? '#34d399'
+                                : v.result === 'denied'
+                                  ? '#ef4444'
+                                  : '#fbbf24',
+                          }}
+                        >
+                          {v.result}
+                        </span>
                       </div>
                       <p className="text-[10px] text-white/40 mt-0.5">{v.requested}</p>
                       <p className="text-[10px] text-white/30 mt-0.5">{v.conditions}</p>
@@ -344,21 +566,37 @@ export default function ZoningIntelligencePage() {
 
             <AnimatePresence>
               {scenario && (
-                <m.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mt-4">
+                <m.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4"
+                >
                   <div className="rounded-2xl border border-[#2d6a4f]/30 bg-[#2d6a4f]/[0.05] p-5">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#2d6a4f" }}>Scenario Detail — {scenario.name}</h4>
+                    <h4
+                      className="text-xs font-semibold uppercase tracking-wider mb-3"
+                      style={{ color: '#2d6a4f' }}
+                    >
+                      Scenario Detail — {scenario.name}
+                    </h4>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { l: "Gross SF", v: fmtSqft(scenario.grossSqft) },
-                        { l: "FAR", v: scenario.far.toFixed(1) },
-                        { l: "Stories", v: String(scenario.stories) },
-                        { l: "Units", v: String(scenario.units) },
-                        { l: "Parking", v: String(scenario.parkingSpaces) },
-                        { l: "Timeline", v: `${scenario.timelineMonths} months` },
-                        { l: "Residual Land Value", v: fmt(scenario.residualLandValue) },
-                        { l: "Yield on Cost", v: `${((scenario.estimatedRevenue - scenario.constructionCost) / scenario.constructionCost * 100).toFixed(1)}%` },
-                      ].map(item => (
-                        <div key={item.l} className="rounded-lg bg-white/[0.03] border border-white/[0.05] px-3 py-2">
+                        { l: 'Gross SF', v: fmtSqft(scenario.grossSqft) },
+                        { l: 'FAR', v: scenario.far.toFixed(1) },
+                        { l: 'Stories', v: String(scenario.stories) },
+                        { l: 'Units', v: String(scenario.units) },
+                        { l: 'Parking', v: String(scenario.parkingSpaces) },
+                        { l: 'Timeline', v: `${scenario.timelineMonths} months` },
+                        { l: 'Residual Land Value', v: fmt(scenario.residualLandValue) },
+                        {
+                          l: 'Yield on Cost',
+                          v: `${(((scenario.estimatedRevenue - scenario.constructionCost) / scenario.constructionCost) * 100).toFixed(1)}%`,
+                        },
+                      ].map((item) => (
+                        <div
+                          key={item.l}
+                          className="rounded-lg bg-white/[0.03] border border-white/[0.05] px-3 py-2"
+                        >
                           <div className="text-[10px] text-white/30">{item.l}</div>
                           <div className="text-sm font-semibold text-white">{item.v}</div>
                         </div>

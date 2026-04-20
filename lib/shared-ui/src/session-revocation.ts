@@ -1,23 +1,23 @@
-export const SESSION_REVOKED_CODE = "SESSION_REVOKED";
-export const REFRESH_TOKEN_REPLAY_CODE = "REFRESH_TOKEN_REPLAY";
+export const SESSION_REVOKED_CODE = 'SESSION_REVOKED';
+export const REFRESH_TOKEN_REPLAY_CODE = 'REFRESH_TOKEN_REPLAY';
 
 export const SESSION_REVOCATION_CODES: ReadonlySet<string> = new Set([
   SESSION_REVOKED_CODE,
   REFRESH_TOKEN_REPLAY_CODE,
 ]);
 
-export const SESSION_REVOCATION_FLAG_KEY = "szl:session-revocation-reason";
-export const SESSION_REVOCATION_EVENT = "szl:session-revoked";
+export const SESSION_REVOCATION_FLAG_KEY = 'szl:session-revocation-reason';
+export const SESSION_REVOCATION_EVENT = 'szl:session-revoked';
 
 const KNOWN_AUTH_TOKEN_KEYS = [
-  "cortex_auth_token",
-  "szl_auth_token",
-  "auth_token",
-  "access_token",
-  "refresh_token",
-  "refreshToken",
-  "szl:refresh-token",
-  "pulse-demo-token",
+  'cortex_auth_token',
+  'szl_auth_token',
+  'auth_token',
+  'access_token',
+  'refresh_token',
+  'refreshToken',
+  'szl:refresh-token',
+  'pulse-demo-token',
 ];
 
 export interface SessionRevocationDetail {
@@ -27,21 +27,21 @@ export interface SessionRevocationDetail {
 
 function defaultMessage(code: string): string {
   if (code === REFRESH_TOKEN_REPLAY_CODE) {
-    return "Your session was ended for security reasons — please sign in again.";
+    return 'Your session was ended for security reasons — please sign in again.';
   }
-  return "An administrator updated your access — please sign in again.";
+  return 'An administrator updated your access — please sign in again.';
 }
 
 export function detectSessionRevocationCode(body: unknown): string | null {
-  if (!body || typeof body !== "object") return null;
+  if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
   const candidates: unknown[] = [
-    record["code"],
-    (record["error"] as Record<string, unknown> | undefined)?.["code"],
-    (record["data"] as Record<string, unknown> | undefined)?.["code"],
+    record['code'],
+    (record['error'] as Record<string, unknown> | undefined)?.['code'],
+    (record['data'] as Record<string, unknown> | undefined)?.['code'],
   ];
   for (const value of candidates) {
-    if (typeof value === "string" && SESSION_REVOCATION_CODES.has(value)) {
+    if (typeof value === 'string' && SESSION_REVOCATION_CODES.has(value)) {
       return value;
     }
   }
@@ -49,23 +49,23 @@ export function detectSessionRevocationCode(body: unknown): string | null {
 }
 
 export function extractServerMessage(body: unknown): string | null {
-  if (!body || typeof body !== "object") return null;
+  if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
-  const error = record["error"];
-  if (typeof error === "string" && error.trim()) return error;
-  if (error && typeof error === "object") {
-    const msg = (error as Record<string, unknown>)["message"];
-    if (typeof msg === "string" && msg.trim()) return msg;
+  const error = record['error'];
+  if (typeof error === 'string' && error.trim()) return error;
+  if (error && typeof error === 'object') {
+    const msg = (error as Record<string, unknown>)['message'];
+    if (typeof msg === 'string' && msg.trim()) return msg;
   }
-  const message = record["message"];
-  if (typeof message === "string" && message.trim()) return message;
+  const message = record['message'];
+  if (typeof message === 'string' && message.trim()) return message;
   return null;
 }
 
 let lastNotifiedAt = 0;
 
 function clearKnownAuthTokens(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     for (const key of KNOWN_AUTH_TOKEN_KEYS) {
       window.localStorage?.removeItem(key);
@@ -76,30 +76,30 @@ function clearKnownAuthTokens(): void {
 }
 
 function showFallbackBanner(message: string): void {
-  if (typeof document === "undefined") return;
-  const id = "szl-session-revoked-banner";
+  if (typeof document === 'undefined') return;
+  const id = 'szl-session-revoked-banner';
   if (document.getElementById(id)) return;
-  const el = document.createElement("div");
+  const el = document.createElement('div');
   el.id = id;
-  el.setAttribute("role", "status");
+  el.setAttribute('role', 'status');
   el.textContent = message;
   Object.assign(el.style, {
-    position: "fixed",
-    top: "16px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "rgba(20,20,28,0.95)",
-    color: "#f5f3e8",
-    padding: "12px 20px",
-    borderRadius: "10px",
-    border: "1px solid rgba(201,168,76,0.35)",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    fontSize: "14px",
-    letterSpacing: "0.2px",
-    boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
-    zIndex: "2147483646",
-    maxWidth: "min(540px, 92vw)",
-    textAlign: "center",
+    position: 'fixed',
+    top: '16px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: 'rgba(20,20,28,0.95)',
+    color: '#f5f3e8',
+    padding: '12px 20px',
+    borderRadius: '10px',
+    border: '1px solid rgba(201,168,76,0.35)',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontSize: '14px',
+    letterSpacing: '0.2px',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+    zIndex: '2147483646',
+    maxWidth: 'min(540px, 92vw)',
+    textAlign: 'center',
   } as Partial<CSSStyleDeclaration>);
   document.body.appendChild(el);
   window.setTimeout(() => {
@@ -126,7 +126,7 @@ export interface NotifyOptions {
  * Safe to call multiple times — repeat calls within 5s are coalesced.
  */
 export function notifySessionRevoked(code: string, options: NotifyOptions = {}): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   const now = Date.now();
   if (now - lastNotifiedAt < 5000) return;
   lastNotifiedAt = now;
@@ -147,7 +147,9 @@ export function notifySessionRevoked(code: string, options: NotifyOptions = {}):
 
   let toastShown = false;
   try {
-    window.dispatchEvent(new CustomEvent<SessionRevocationDetail>(SESSION_REVOCATION_EVENT, { detail }));
+    window.dispatchEvent(
+      new CustomEvent<SessionRevocationDetail>(SESSION_REVOCATION_EVENT, { detail }),
+    );
     toastShown = true;
   } catch {
     /* ignore */
@@ -155,13 +157,13 @@ export function notifySessionRevoked(code: string, options: NotifyOptions = {}):
 
   // Fallback banner if no app-level listener mounted (e.g. login redirect happens before React hydrates).
   // We always show it; subscribed app shells can choose to also display their own toast.
-  if (!toastShown || !document.querySelector("[data-szl-session-toast]")) {
+  if (!toastShown || !document.querySelector('[data-szl-session-toast]')) {
     showFallbackBanner(message);
   }
 
   if (options.redirect !== false) {
     const delay = options.redirectDelayMs ?? 1500;
-    const target = options.loginPath ?? "/login";
+    const target = options.loginPath ?? '/login';
     window.setTimeout(() => {
       try {
         const current = window.location.pathname + window.location.search;
@@ -180,13 +182,13 @@ export function notifySessionRevoked(code: string, options: NotifyOptions = {}):
  * screen to display the message after the redirect.
  */
 export function consumeSessionRevocationReason(): SessionRevocationDetail | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === 'undefined') return null;
   try {
     const raw = window.sessionStorage?.getItem(SESSION_REVOCATION_FLAG_KEY);
     if (!raw) return null;
     window.sessionStorage?.removeItem(SESSION_REVOCATION_FLAG_KEY);
     const parsed = JSON.parse(raw) as Partial<SessionRevocationDetail>;
-    if (typeof parsed?.code === "string" && typeof parsed?.message === "string") {
+    if (typeof parsed?.code === 'string' && typeof parsed?.message === 'string') {
       return { code: parsed.code, message: parsed.message };
     }
   } catch {
@@ -199,7 +201,7 @@ export function consumeSessionRevocationReason(): SessionRevocationDetail | null
  * Subscribe to the session-revoked event; returns an unsubscribe function.
  */
 export function onSessionRevoked(handler: (detail: SessionRevocationDetail) => void): () => void {
-  if (typeof window === "undefined") return () => {};
+  if (typeof window === 'undefined') return () => {};
   const listener = (event: Event) => {
     const detail = (event as CustomEvent<SessionRevocationDetail>).detail;
     if (detail) handler(detail);

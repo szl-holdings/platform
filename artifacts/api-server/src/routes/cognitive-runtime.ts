@@ -1,48 +1,47 @@
-import { Router } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { randomUUID } from "crypto";
-import { sendSuccess, sendError } from "../lib/api-response";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { logger } from "../lib/logger";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  run,
+  type CognitiveContext,
   defaultCheckpointStore,
   loadCheckpoint,
-  type CognitiveContext,
-} from "@workspace/cognitive-runtime";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
-import { defaultTraceStore } from "@workspace/trace-graph";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  run,
+} from '@workspace/cognitive-runtime';
+import { defaultMemoryStore } from '@workspace/memory-fabric';
+import { defaultTraceStore } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
+import { Router } from 'express';
+import { z } from 'zod';
+import { sendError, sendSuccess } from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router = Router();
 
 // Roles that may trigger/resume cognitive loops
-const ALLOWED_ROLES = ["admin", "super_admin", "operator"] as const;
+const ALLOWED_ROLES = ['admin', 'super_admin', 'operator'] as const;
 
 // Admins/super_admins see all checkpoints; operators see only their own
 function isAdminLevel(roles: string[]): boolean {
-  return roles.some((r) => r === "admin" || r === "super_admin");
+  return roles.some((r) => r === 'admin' || r === 'super_admin');
 }
 
 // Express req.user.id is numeric — coerce to string for all agentId / ownership uses
 function toAgentId(userId: number | string | undefined): string {
-  if (userId === undefined || userId === null) return "api-agent";
+  if (userId === undefined || userId === null) return 'api-agent';
   return String(userId);
 }
 
 router.post(
-  "/cognitive-runtime/run",
+  '/cognitive-runtime/run',
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
-  validateBody(bodyShape({})), async (req, res) => {
-    const {
-      objective,
-      context = {},
-    }: { objective?: string; context?: CognitiveContext } = req.body ?? {};
+  validateBody(bodyShape({})),
+  async (req, res) => {
+    const { objective, context = {} }: { objective?: string; context?: CognitiveContext } =
+      req.body ?? {};
 
-    if (!objective || typeof objective !== "string" || !objective.trim()) {
-      sendError(res, "objective is required", 400);
+    if (!objective || typeof objective !== 'string' || !objective.trim()) {
+      sendError(res, 'objective is required', 400);
       return;
     }
 
@@ -52,9 +51,7 @@ router.post(
     // Only admins can run on behalf of another agentId; operators are bound
     // to their own authenticated identity to prevent cross-agent impersonation.
     const effectiveAgentId =
-      isAdminLevel(userRoles) && context.agentId
-        ? context.agentId
-        : requestingAgentId;
+      isAdminLevel(userRoles) && context.agentId ? context.agentId : requestingAgentId;
 
     const ctx: CognitiveContext = {
       ...context,
@@ -66,7 +63,7 @@ router.post(
 
     logger.info(
       { objective: objective.slice(0, 100), agentId: ctx.agentId },
-      "Cognitive loop triggered via API",
+      'Cognitive loop triggered via API',
     );
 
     try {
@@ -98,20 +95,20 @@ router.post(
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      logger.error({ err, objective: objective.slice(0, 100) }, "Cognitive loop error");
+      logger.error({ err, objective: objective.slice(0, 100) }, 'Cognitive loop error');
       sendError(res, `Cognitive loop error: ${msg}`, 500);
     }
   },
 );
 
 router.get(
-  "/cognitive-runtime/checkpoint/:ref",
+  '/cognitive-runtime/checkpoint/:ref',
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
   (req, res) => {
     const ref = req.params.ref as string;
     if (!ref) {
-      sendError(res, "checkpoint ref required", 400);
+      sendError(res, 'checkpoint ref required', 400);
       return;
     }
 
@@ -127,7 +124,7 @@ router.get(
     const requesterId = toAgentId(req.user?.id);
     const userRoles: string[] = (req.user as unknown as { roles?: string[] })?.roles ?? [];
     if (!isAdminLevel(userRoles) && entry.agentId !== requesterId) {
-      sendError(res, "Forbidden: checkpoint belongs to a different agent", 403);
+      sendError(res, 'Forbidden: checkpoint belongs to a different agent', 403);
       return;
     }
 
@@ -146,7 +143,7 @@ router.get(
 );
 
 router.get(
-  "/cognitive-runtime/checkpoints",
+  '/cognitive-runtime/checkpoints',
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
   validateQuery(listQuerySchema),
@@ -176,10 +173,12 @@ router.get(
 );
 
 router.post(
-  "/cognitive-runtime/resume",
+  '/cognitive-runtime/resume',
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
-  validateBody(bodyShape({})), validateQuery(listQuerySchema), async (req, res) => {
+  validateBody(bodyShape({})),
+  validateQuery(listQuerySchema),
+  async (req, res) => {
     const {
       checkpointRef,
       objective,
@@ -187,7 +186,7 @@ router.post(
     }: { checkpointRef?: string; objective?: string; context?: CognitiveContext } = req.body ?? {};
 
     if (!checkpointRef) {
-      sendError(res, "checkpointRef is required", 400);
+      sendError(res, 'checkpointRef is required', 400);
       return;
     }
 
@@ -203,7 +202,7 @@ router.post(
     const requesterId = toAgentId(req.user?.id);
     const userRoles: string[] = (req.user as unknown as { roles?: string[] })?.roles ?? [];
     if (!isAdminLevel(userRoles) && entry.agentId !== requesterId) {
-      sendError(res, "Forbidden: checkpoint belongs to a different agent", 403);
+      sendError(res, 'Forbidden: checkpoint belongs to a different agent', 403);
       return;
     }
 
@@ -213,9 +212,7 @@ router.post(
     // cross-agent attribution via a caller-supplied context.agentId override.
     // Admins may explicitly supply a different agentId for on-behalf operations.
     const effectiveAgentId =
-      isAdminLevel(userRoles) && context.agentId
-        ? context.agentId
-        : entry.agentId ?? requesterId;
+      isAdminLevel(userRoles) && context.agentId ? context.agentId : (entry.agentId ?? requesterId);
 
     const ctx: CognitiveContext = {
       ...context,

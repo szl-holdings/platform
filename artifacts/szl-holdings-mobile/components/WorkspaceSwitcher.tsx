@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import { router } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
 import {
   Animated,
   Dimensions,
@@ -9,13 +10,12 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { useWorkspace, WORKSPACES, type WorkspaceDomain } from "@/context/WorkspaceContext";
-import { useColors } from "@/hooks/useColors";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useWorkspace, WORKSPACES, type WorkspaceDomain } from '@/context/WorkspaceContext';
+import { useColors } from '@/hooks/useColors';
 
-const SCREEN_W = Dimensions.get("window").width;
+const SCREEN_W = Dimensions.get('window').width;
 const DRAWER_W = Math.min(300, SCREEN_W * 0.78);
 
 export function WorkspaceSwitcher() {
@@ -43,17 +43,17 @@ export function WorkspaceSwitcher() {
 
   if (!drawerOpen && (slideAnim as any)._value === -DRAWER_W) return null;
 
-  const handleSelect = (ws: typeof WORKSPACES[number]) => {
+  const handleSelect = (ws: (typeof WORKSPACES)[number]) => {
     setActiveWorkspace(ws.id as WorkspaceDomain);
     closeDrawer();
     router.navigate(ws.route as never);
   };
 
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents={drawerOpen ? "auto" : "none"}>
+    <View style={StyleSheet.absoluteFillObject} pointerEvents={drawerOpen ? 'auto' : 'none'}>
       <Animated.View
         style={[styles.backdrop, { opacity: backdropAnim }]}
-        pointerEvents={drawerOpen ? "auto" : "none"}
+        pointerEvents={drawerOpen ? 'auto' : 'none'}
       >
         <Pressable style={StyleSheet.absoluteFillObject} onPress={closeDrawer} />
       </Animated.View>
@@ -73,12 +73,19 @@ export function WorkspaceSwitcher() {
       >
         <View style={styles.header}>
           <View style={styles.logoRow}>
-            <View style={[styles.logoMark, { backgroundColor: "rgba(201,168,76,0.1)", borderColor: "rgba(201,168,76,0.2)" }]}>
+            <View
+              style={[
+                styles.logoMark,
+                { backgroundColor: 'rgba(201,168,76,0.1)', borderColor: 'rgba(201,168,76,0.2)' },
+              ]}
+            >
               <Text style={[styles.logoText, { color: colors.gold }]}>C</Text>
             </View>
             <View>
               <Text style={[styles.appName, { color: colors.foreground }]}>CORTEX</Text>
-              <Text style={[styles.appSub, { color: colors.mutedForeground }]}>Unified Command</Text>
+              <Text style={[styles.appSub, { color: colors.mutedForeground }]}>
+                Unified Command
+              </Text>
             </View>
           </View>
         </View>
@@ -100,7 +107,7 @@ export function WorkspaceSwitcher() {
                     backgroundColor: `${ws.accent}14`,
                     borderColor: `${ws.accent}30`,
                   },
-                  !isActive && { borderColor: "transparent" },
+                  !isActive && { borderColor: 'transparent' },
                 ]}
                 activeOpacity={0.7}
               >
@@ -113,24 +120,25 @@ export function WorkspaceSwitcher() {
                       styles.itemLabel,
                       {
                         color: isActive ? ws.accent : colors.foreground,
-                        fontFamily: isActive ? "Inter_600SemiBold" : "Inter_400Regular",
+                        fontFamily: isActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
                       },
                     ]}
                   >
                     {ws.label}
                   </Text>
-                  <Text style={[styles.itemDesc, { color: colors.mutedForeground }]} numberOfLines={1}>
+                  <Text
+                    style={[styles.itemDesc, { color: colors.mutedForeground }]}
+                    numberOfLines={1}
+                  >
                     {ws.description}
                   </Text>
                 </View>
                 {badge > 0 && (
                   <View style={[styles.badge, { backgroundColor: ws.accent }]}>
-                    <Text style={styles.badgeText}>{badge > 99 ? "99+" : String(badge)}</Text>
+                    <Text style={styles.badgeText}>{badge > 99 ? '99+' : String(badge)}</Text>
                   </View>
                 )}
-                {isActive && (
-                  <View style={[styles.activeDot, { backgroundColor: ws.accent }]} />
-                )}
+                {isActive && <View style={[styles.activeDot, { backgroundColor: ws.accent }]} />}
               </TouchableOpacity>
             );
           })}
@@ -175,12 +183,12 @@ export function WorkspaceTrigger({
       activeOpacity={0.7}
     >
       <Text style={[styles.triggerIcon, { color: accent, fontSize: size * 0.45 }]}>
-        {ws?.icon ?? "⬡"}
+        {ws?.icon ?? '⬡'}
       </Text>
       {totalBadges > 0 && (
-        <View style={[styles.triggerBadge, { backgroundColor: "#ef4444" }]}>
+        <View style={[styles.triggerBadge, { backgroundColor: '#ef4444' }]}>
           <Text style={styles.triggerBadgeText}>
-            {totalBadges > 9 ? "9+" : String(totalBadges)}
+            {totalBadges > 9 ? '9+' : String(totalBadges)}
           </Text>
         </View>
       )}
@@ -191,15 +199,15 @@ export function WorkspaceTrigger({
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
   drawer: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     bottom: 0,
     borderRightWidth: 1,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 4, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
@@ -210,8 +218,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   logoRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   logoMark: {
@@ -219,24 +227,24 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 10,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoText: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 1,
   },
   appName: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 2,
   },
   appSub: {
     fontSize: 10,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     letterSpacing: 1,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     marginTop: 1,
   },
   divider: {
@@ -249,8 +257,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   item: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 10,
@@ -262,8 +270,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconText: {
     fontSize: 16,
@@ -283,13 +291,13 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     paddingHorizontal: 5,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   badgeText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
   },
   activeDot: {
     width: 6,
@@ -302,33 +310,33 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 10,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     letterSpacing: 1,
-    textTransform: "uppercase",
-    textAlign: "center",
+    textTransform: 'uppercase',
+    textAlign: 'center',
   },
   trigger: {
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   triggerIcon: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
   },
   triggerBadge: {
-    position: "absolute",
+    position: 'absolute',
     top: -3,
     right: -3,
     minWidth: 14,
     height: 14,
     borderRadius: 7,
     paddingHorizontal: 3,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   triggerBadgeText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 8,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
   },
 });

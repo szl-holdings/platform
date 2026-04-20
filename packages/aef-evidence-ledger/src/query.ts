@@ -1,5 +1,5 @@
-import type { EvidenceEntry } from "./types.js";
-import type { LedgerStore } from "./store.js";
+import type { LedgerStore } from './store.js';
+import type { EvidenceEntry } from './types.js';
 
 export function queryByRequestId(store: LedgerStore, requestId: string): EvidenceEntry[] {
   return store.query({ requestId });

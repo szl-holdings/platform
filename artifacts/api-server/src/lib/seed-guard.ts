@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * Centralized production guard for seed/demo-data endpoints.
@@ -16,10 +16,7 @@ import type { Request, Response, NextFunction } from "express";
  */
 
 export function isProductionEnvironment(): boolean {
-  return (
-    process.env.NODE_ENV === "production" ||
-    process.env.APP_ENV === "production"
-  );
+  return process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
 }
 
 /**
@@ -34,7 +31,7 @@ export function isProductionEnvironment(): boolean {
  */
 export function guardSeedInProduction(res: Response): boolean {
   if (isProductionEnvironment()) {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
+    res.status(404).json({ error: 'Not found', code: 'SEED_DISABLED_IN_PRODUCTION' });
     return true;
   }
   return false;
@@ -48,7 +45,7 @@ export function guardSeedInProduction(res: Response): boolean {
  */
 export function seedProductionGuard(_req: Request, res: Response, next: NextFunction): void {
   if (isProductionEnvironment()) {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
+    res.status(404).json({ error: 'Not found', code: 'SEED_DISABLED_IN_PRODUCTION' });
     return;
   }
   next();

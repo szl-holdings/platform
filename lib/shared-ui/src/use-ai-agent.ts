@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-const API_BASE = "/api";
+const API_BASE = '/api';
 
-export type AgentHealthStatus = "healthy" | "degraded" | "offline";
+export type AgentHealthStatus = 'healthy' | 'degraded' | 'offline';
 
 export interface AgentStatusMetrics {
   totalAgents: number;
@@ -55,11 +55,11 @@ async function apiFetch<T>(path: string, ttlMs = CACHE_TTL_MS): Promise<T | null
   if (cached && Date.now() - cached.ts < ttlMs) return cached.data as T;
   try {
     const res = await fetch(`${API_BASE}${path}`, {
-      credentials: "include",
+      credentials: 'include',
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return null;
-    const data = await res.json() as T;
+    const data = (await res.json()) as T;
     SESSION_CACHE.set(path, { data, ts: Date.now() });
     return data;
   } catch {
@@ -67,18 +67,22 @@ async function apiFetch<T>(path: string, ttlMs = CACHE_TTL_MS): Promise<T | null
   }
 }
 
-export function useAgentStatus(pollIntervalMs = 30_000): AgentStatusMetrics & { refresh: () => void } {
+export function useAgentStatus(
+  pollIntervalMs = 30_000,
+): AgentStatusMetrics & { refresh: () => void } {
   const [metrics, setMetrics] = useState<AgentStatusMetrics>({
     totalAgents: 0,
     activeAgents: 0,
     avgSuccessRate: 0,
     avgLatencyMs: 0,
-    status: "offline",
+    status: 'offline',
     lastFetched: null,
   });
 
   const fetch_ = useCallback(async () => {
-    const data = await apiFetch<{ overall: Record<string, number> }>("/ai/mastra/agentops/metrics?windowHours=1");
+    const data = await apiFetch<{ overall: Record<string, number> }>(
+      '/ai/mastra/agentops/metrics?windowHours=1',
+    );
     if (!data) return;
     const o = data.overall ?? {};
     const healthy = o.healthyAgents ?? 0;
@@ -90,7 +94,7 @@ export function useAgentStatus(pollIntervalMs = 30_000): AgentStatusMetrics & { 
       activeAgents: healthy + degraded,
       avgSuccessRate: o.avgSuccessRate ?? 0,
       avgLatencyMs: o.avgLatencyMs ?? 0,
-      status: total === 0 ? "offline" : breached > 0 || degraded > 0 ? "degraded" : "healthy",
+      status: total === 0 ? 'offline' : breached > 0 || degraded > 0 ? 'degraded' : 'healthy',
       lastFetched: new Date(),
     });
   }, []);
@@ -141,7 +145,13 @@ export function useMeshFeed(opts?: {
   severity?: string;
   limit?: number;
   pollIntervalMs?: number;
-}): { signals: MeshSignal[]; isLoading: boolean; isStale: boolean; lastUpdated: Date | null; refresh: () => void } {
+}): {
+  signals: MeshSignal[];
+  isLoading: boolean;
+  isStale: boolean;
+  lastUpdated: Date | null;
+  refresh: () => void;
+} {
   const { targetVenture, signalType, severity, limit = 10, pollIntervalMs = 45_000 } = opts ?? {};
   const [signals, setSignals] = useState<MeshSignal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -150,10 +160,10 @@ export function useMeshFeed(opts?: {
 
   const buildPath = useCallback(() => {
     const params = new URLSearchParams();
-    if (targetVenture) params.set("targetVenture", targetVenture);
-    if (signalType) params.set("signalType", signalType);
-    if (severity) params.set("severity", severity);
-    params.set("limit", String(limit));
+    if (targetVenture) params.set('targetVenture', targetVenture);
+    if (signalType) params.set('signalType', signalType);
+    if (severity) params.set('severity', severity);
+    params.set('limit', String(limit));
     return `/intelligence-mesh/feed?${params.toString()}`;
   }, [targetVenture, signalType, severity, limit]);
 
@@ -178,34 +188,41 @@ export function useMeshFeed(opts?: {
   return { signals, isLoading, isStale, lastUpdated, refresh: fetch_ };
 }
 
-export function useCopilotBridge(): { openCopilot: () => void; isOpen: boolean; close: () => void } {
+export function useCopilotBridge(): {
+  openCopilot: () => void;
+  isOpen: boolean;
+  close: () => void;
+} {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const onOpen = () => setIsOpen(true);
     const onClose = () => setIsOpen(false);
-    window.addEventListener("szl:open-copilot", onOpen);
-    window.addEventListener("szl:close-copilot", onClose);
+    window.addEventListener('szl:open-copilot', onOpen);
+    window.addEventListener('szl:close-copilot', onClose);
     return () => {
-      window.removeEventListener("szl:open-copilot", onOpen);
-      window.removeEventListener("szl:close-copilot", onClose);
+      window.removeEventListener('szl:open-copilot', onOpen);
+      window.removeEventListener('szl:close-copilot', onClose);
     };
   }, []);
 
   const openCopilot = useCallback(() => {
     setIsOpen(true);
-    window.dispatchEvent(new CustomEvent("szl:open-copilot"));
+    window.dispatchEvent(new CustomEvent('szl:open-copilot'));
   }, []);
 
   const close = useCallback(() => {
     setIsOpen(false);
-    window.dispatchEvent(new CustomEvent("szl:close-copilot"));
+    window.dispatchEvent(new CustomEvent('szl:close-copilot'));
   }, []);
 
   return { openCopilot, isOpen, close };
 }
 
-export function useAgentTraces(limit = 20, pollIntervalMs = 30_000): {
+export function useAgentTraces(
+  limit = 20,
+  pollIntervalMs = 30_000,
+): {
   traces: AgentTrace[];
   isLoading: boolean;
   refresh: () => void;
@@ -214,7 +231,10 @@ export function useAgentTraces(limit = 20, pollIntervalMs = 30_000): {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetch_ = useCallback(async () => {
-    const data = await apiFetch<{ traces: typeof traces }>(`/ai/mastra/agentops/traces?limit=${limit}`, 15_000);
+    const data = await apiFetch<{ traces: typeof traces }>(
+      `/ai/mastra/agentops/traces?limit=${limit}`,
+      15_000,
+    );
     if (data && Array.isArray(data.traces)) {
       setTraces(data.traces);
     }

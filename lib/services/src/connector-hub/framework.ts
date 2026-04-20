@@ -1,14 +1,14 @@
 import type {
   AuthConfig,
   Capability,
+  CircuitBreakerState,
   ConnectorCategory,
   ConnectorHealth,
   ConnectorHealthStatus,
-  ConnectorResult,
   ConnectorRegistryEntry,
-  CircuitBreakerState,
+  ConnectorResult,
   RateLimitState,
-} from "./types.js";
+} from './types.js';
 
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
 const CIRCUIT_BREAKER_RECOVERY_MS = 60_000;
@@ -31,7 +31,7 @@ export abstract class ToolConnector {
   private _lastCheckedAt: string | null = null;
   private _lastSuccessAt: string | null = null;
   private _lastError: string | null = null;
-  private _circuitBreakerState: CircuitBreakerState = "closed";
+  private _circuitBreakerState: CircuitBreakerState = 'closed';
   private _circuitOpenedAt: number | null = null;
   private _consecutiveFailures: number = 0;
   private _rateLimitState: RateLimitState = {
@@ -51,21 +51,21 @@ export abstract class ToolConnector {
 
   get configuredCorrectly(): boolean {
     return this.authConfig.requiredEnvVars.every(
-      (v) => process.env[v] !== undefined && process.env[v] !== "",
+      (v) => process.env[v] !== undefined && process.env[v] !== '',
     );
   }
 
   get missingEnvVars(): string[] {
     return this.authConfig.requiredEnvVars.filter(
-      (v) => process.env[v] === undefined || process.env[v] === "",
+      (v) => process.env[v] === undefined || process.env[v] === '',
     );
   }
 
   get circuitBreakerState(): CircuitBreakerState {
-    if (this._circuitBreakerState === "open") {
+    if (this._circuitBreakerState === 'open') {
       const elapsed = Date.now() - (this._circuitOpenedAt ?? 0);
       if (elapsed >= CIRCUIT_BREAKER_RECOVERY_MS) {
-        this._circuitBreakerState = "half_open";
+        this._circuitBreakerState = 'half_open';
       }
     }
     return this._circuitBreakerState;
@@ -78,13 +78,15 @@ export abstract class ToolConnector {
 
   get averageLatencyMs(): number | null {
     if (this._latencySamples.length === 0) return null;
-    return Math.round(this._latencySamples.reduce((a, b) => a + b, 0) / this._latencySamples.length);
+    return Math.round(
+      this._latencySamples.reduce((a, b) => a + b, 0) / this._latencySamples.length,
+    );
   }
 
   private checkCircuitBreaker(): void {
     if (this._consecutiveFailures >= CIRCUIT_BREAKER_FAILURE_THRESHOLD) {
-      if (this._circuitBreakerState === "closed") {
-        this._circuitBreakerState = "open";
+      if (this._circuitBreakerState === 'closed') {
+        this._circuitBreakerState = 'open';
         this._circuitOpenedAt = Date.now();
       }
     }
@@ -96,8 +98,8 @@ export abstract class ToolConnector {
     this._lastSuccessAt = new Date().toISOString();
     this._latencySamples.push(latencyMs);
     if (this._latencySamples.length > 50) this._latencySamples.shift();
-    if (this._circuitBreakerState === "half_open") {
-      this._circuitBreakerState = "closed";
+    if (this._circuitBreakerState === 'half_open') {
+      this._circuitBreakerState = 'closed';
       this._circuitOpenedAt = null;
     }
   }
@@ -164,7 +166,7 @@ export abstract class ToolConnector {
         connectorId: this.id,
         capability: capabilityId,
         data: null,
-        error: `Connector '${this.id}' is not configured — missing env vars: ${this.missingEnvVars.join(", ")}`,
+        error: `Connector '${this.id}' is not configured — missing env vars: ${this.missingEnvVars.join(', ')}`,
         latencyMs: 0,
         timestamp,
         fromCache: false,
@@ -173,7 +175,7 @@ export abstract class ToolConnector {
     }
 
     const state = this.circuitBreakerState;
-    if (state === "open") {
+    if (state === 'open') {
       return {
         success: false,
         connectorId: this.id,
@@ -201,7 +203,7 @@ export abstract class ToolConnector {
       };
     }
 
-    let lastError: string = "Unknown error";
+    let lastError: string = 'Unknown error';
     for (let attempt = 0; attempt <= DEFAULT_RETRY_ATTEMPTS; attempt++) {
       try {
         if (attempt > 0) {
@@ -262,32 +264,45 @@ export abstract class ToolConnector {
     this._lastCheckedAt = new Date().toISOString();
 
     if (!this._enabled) {
-      return this.buildHealth("disabled", Date.now() - start, "Connector is disabled");
+      return this.buildHealth('disabled', Date.now() - start, 'Connector is disabled');
     }
 
     if (!this.configuredCorrectly) {
-      return this.buildHealth("unconfigured", Date.now() - start, `Missing env vars: ${this.missingEnvVars.join(", ")}`);
+      return this.buildHealth(
+        'unconfigured',
+        Date.now() - start,
+        `Missing env vars: ${this.missingEnvVars.join(', ')}`,
+      );
     }
 
-    if (this.circuitBreakerState === "open") {
-      return this.buildHealth("down", Date.now() - start, "Circuit breaker is open — connector is failing repeatedly");
+    if (this.circuitBreakerState === 'open') {
+      return this.buildHealth(
+        'down',
+        Date.now() - start,
+        'Circuit breaker is open — connector is failing repeatedly',
+      );
     }
 
     try {
       await this.performHealthCheck();
       const latencyMs = Date.now() - start;
       this.recordSuccess(latencyMs);
-      const status: ConnectorHealthStatus = this.circuitBreakerState === "half_open" ? "degraded" : "healthy";
-      return this.buildHealth(status, latencyMs, "Health check passed");
+      const status: ConnectorHealthStatus =
+        this.circuitBreakerState === 'half_open' ? 'degraded' : 'healthy';
+      return this.buildHealth(status, latencyMs, 'Health check passed');
     } catch (err) {
       const latencyMs = Date.now() - start;
       const errorMsg = err instanceof Error ? err.message : String(err);
       this.recordFailure(errorMsg, latencyMs);
-      return this.buildHealth("degraded", latencyMs, `Health check failed: ${errorMsg}`);
+      return this.buildHealth('degraded', latencyMs, `Health check failed: ${errorMsg}`);
     }
   }
 
-  private buildHealth(status: ConnectorHealthStatus, latencyMs: number, message: string): ConnectorHealth {
+  private buildHealth(
+    status: ConnectorHealthStatus,
+    latencyMs: number,
+    message: string,
+  ): ConnectorHealth {
     return {
       connectorId: this.id,
       status,
@@ -316,7 +331,10 @@ export abstract class ToolConnector {
     };
   }
 
-  protected abstract performCapability(capabilityId: string, params: Record<string, unknown>): Promise<unknown>;
+  protected abstract performCapability(
+    capabilityId: string,
+    params: Record<string, unknown>,
+  ): Promise<unknown>;
 
   protected async performHealthCheck(): Promise<void> {
     return;

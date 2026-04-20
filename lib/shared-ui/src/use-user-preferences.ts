@@ -18,9 +18,9 @@
  * Keys defined in UserPreferences below.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
-export type UiDensity = "comfortable" | "compact";
+export type UiDensity = 'comfortable' | 'compact';
 
 export interface UserPreferences {
   sidebar_collapsed: boolean;
@@ -37,12 +37,12 @@ const DEFAULTS: UserPreferences = {
   sidebar_collapsed: false,
   notification_sound: true,
   accent_color: null,
-  density: "comfortable",
+  density: 'comfortable',
   time_zone: null,
 };
 
-const LS_KEY = "szl-ui-preferences";
-const NAMESPACE = "szl.ui.preferences";
+const LS_KEY = 'szl-ui-preferences';
+const NAMESPACE = 'szl.ui.preferences';
 const DEBOUNCE_MS = 800;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,18 +57,18 @@ function isValidPreference<K extends keyof UserPreferences>(
   value: unknown,
 ): value is UserPreferences[K] {
   switch (key) {
-    case "sidebar_collapsed":
-    case "notification_sound":
-      return typeof value === "boolean";
-    case "accent_color":
-      return value === null || (typeof value === "string" && HEX_COLOR_RE.test(value));
-    case "density":
-      return value === "comfortable" || value === "compact";
-    case "time_zone":
+    case 'sidebar_collapsed':
+    case 'notification_sound':
+      return typeof value === 'boolean';
+    case 'accent_color':
+      return value === null || (typeof value === 'string' && HEX_COLOR_RE.test(value));
+    case 'density':
+      return value === 'comfortable' || value === 'compact';
+    case 'time_zone':
       if (value === null) return true;
-      if (typeof value !== "string" || value.length === 0 || value.length > 64) return false;
+      if (typeof value !== 'string' || value.length === 0 || value.length > 64) return false;
       try {
-        new Intl.DateTimeFormat("en-US", { timeZone: value });
+        new Intl.DateTimeFormat('en-US', { timeZone: value });
         return true;
       } catch {
         return false;
@@ -115,10 +115,10 @@ function subscribe(listener: Listener): () => void {
 let _baselineStyleInjected = false;
 
 function ensureBaselineStyle() {
-  if (_baselineStyleInjected || typeof document === "undefined") return;
+  if (_baselineStyleInjected || typeof document === 'undefined') return;
   _baselineStyleInjected = true;
-  const style = document.createElement("style");
-  style.setAttribute("data-szl-preferences", "baseline");
+  const style = document.createElement('style');
+  style.setAttribute('data-szl-preferences', 'baseline');
   // Density rules:
   //   - Root font-size shifts so all rem-based Tailwind spacing (p-*, gap-*,
   //     etc.) tightens proportionally — this carries shell, header, and
@@ -154,14 +154,14 @@ html[data-szl-density="compact"] [data-szl-density-card-stack] > * + * {
 }
 
 function applyPreferencesToDocument(prefs: UserPreferences) {
-  if (typeof document === "undefined") return;
+  if (typeof document === 'undefined') return;
   ensureBaselineStyle();
   const root = document.documentElement;
   root.dataset.szlDensity = prefs.density;
   if (prefs.accent_color) {
-    root.style.setProperty("--szl-user-accent", prefs.accent_color);
+    root.style.setProperty('--szl-user-accent', prefs.accent_color);
   } else {
-    root.style.removeProperty("--szl-user-accent");
+    root.style.removeProperty('--szl-user-accent');
   }
 }
 
@@ -170,13 +170,13 @@ function applyPreferencesToDocument(prefs: UserPreferences) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function getCsrfToken(): string {
-  if (typeof document === "undefined") return "";
+  if (typeof document === 'undefined') return '';
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-  return match ? decodeURIComponent(match[1]!) : "";
+  return match ? decodeURIComponent(match[1]!) : '';
 }
 
 function readLocalStorageSync(): Partial<UserPreferences> {
-  if (typeof window === "undefined") return {};
+  if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return {};
@@ -200,7 +200,7 @@ function sanitizePartial(input: Record<string, unknown>): Partial<UserPreference
 }
 
 function writeLocalStorage(prefs: UserPreferences): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(prefs));
   } catch {
@@ -214,7 +214,7 @@ function mergePrefs(base: UserPreferences, patch: Partial<UserPreferences>): Use
 
 async function fetchApiPreferences(): Promise<Partial<UserPreferences>> {
   try {
-    const res = await fetch("/api/preferences", { credentials: "include" });
+    const res = await fetch('/api/preferences', { credentials: 'include' });
     if (!res.ok) return {};
     const json = await res.json();
     const data: Record<string, unknown> = json.data ?? json;
@@ -229,12 +229,12 @@ async function patchApiPreference<K extends keyof UserPreferences>(
   value: UserPreferences[K],
 ): Promise<void> {
   try {
-    await fetch("/api/preferences", {
-      method: "PATCH",
-      credentials: "include",
+    await fetch('/api/preferences', {
+      method: 'PATCH',
+      credentials: 'include',
       headers: {
-        "Content-Type": "application/json",
-        "x-csrf-token": getCsrfToken(),
+        'Content-Type': 'application/json',
+        'x-csrf-token': getCsrfToken(),
       },
       body: JSON.stringify({ [key]: value }),
     });
@@ -250,7 +250,7 @@ async function patchApiPreference<K extends keyof UserPreferences>(
 let _fetchStarted = false;
 
 function ensureApiFetch(): void {
-  if (_fetchStarted || typeof window === "undefined") return;
+  if (_fetchStarted || typeof window === 'undefined') return;
   _fetchStarted = true;
   fetchApiPreferences().then((apiPrefs) => {
     _prefs = mergePrefs(_prefs, apiPrefs);
@@ -265,8 +265,8 @@ function ensureApiFetch(): void {
 applyPreferencesToDocument(_prefs);
 
 // Cross-tab synchronization via storage events
-if (typeof window !== "undefined") {
-  window.addEventListener("storage", (e) => {
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
     if (e.key !== LS_KEY) return;
     if (e.newValue == null) {
       // Key was removed/cleared in another tab — reset to defaults

@@ -7,15 +7,15 @@
  * API server restarts. Without this hookup the registry silently resets every
  * tenant back to the default profile version on each reboot.
  */
-import { db, profileRegistryPointersTable } from "@szl-holdings/db";
+import { db, profileRegistryPointersTable } from '@szl-holdings/db';
 import {
+  type AEFDomain,
   defaultProfileRegistry,
   type ProfilePointerStore,
   type TenantProfilePointer,
-  type AEFDomain,
-} from "@workspace/aef-domain-profiles";
-import { sql } from "drizzle-orm";
-import { logger } from "./logger";
+} from '@workspace/aef-domain-profiles';
+import { sql } from 'drizzle-orm';
+import { logger } from './logger';
 
 const pgStore: ProfilePointerStore = {
   async loadAll(): Promise<TenantProfilePointer[]> {
@@ -25,7 +25,7 @@ const pgStore: ProfilePointerStore = {
       domain: r.domain as AEFDomain,
       activeProfileId: r.activeProfileId,
       activeVersion: r.activeVersion,
-      history: Array.isArray(r.history) ? (r.history as TenantProfilePointer["history"]) : [],
+      history: Array.isArray(r.history) ? (r.history as TenantProfilePointer['history']) : [],
       rollbackAvailable: r.rollbackAvailable,
     }));
   },
@@ -66,12 +66,12 @@ export async function initAefProfileRegistryPersistence(): Promise<void> {
     const loaded = await defaultProfileRegistry.hydrate();
     logger.info(
       { loaded },
-      "[aef-profile-registry] Hydrated tenant profile pointers from profile_registry_pointers",
+      '[aef-profile-registry] Hydrated tenant profile pointers from profile_registry_pointers',
     );
   } catch (err) {
     logger.warn(
       { err },
-      "[aef-profile-registry] Failed to hydrate tenant profile pointers — continuing with in-memory defaults",
+      '[aef-profile-registry] Failed to hydrate tenant profile pointers — continuing with in-memory defaults',
     );
   }
 }

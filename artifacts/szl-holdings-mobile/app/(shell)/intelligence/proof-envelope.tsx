@@ -1,51 +1,51 @@
-import React, { useState, useCallback } from "react";
+import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
+  Platform,
   Pressable,
   RefreshControl,
-  Platform,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import * as Haptics from "expo-haptics";
-import { apiFetch } from "@/lib/apiClient";
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { apiFetch } from '@/lib/apiClient';
 
-const ACCENT = "#14b8a6";
-const BG = "#060b12";
-const SURFACE = "#0d1520";
-const OVERLAY = "#111c2a";
-const BORDER = "#1a2535";
-const TEXT_PRIMARY = "#c8d8e8";
-const TEXT_SECONDARY = "#7a99b8";
-const TEXT_MUTED = "#4a6070";
+const ACCENT = '#14b8a6';
+const BG = '#060b12';
+const SURFACE = '#0d1520';
+const OVERLAY = '#111c2a';
+const BORDER = '#1a2535';
+const TEXT_PRIMARY = '#c8d8e8';
+const TEXT_SECONDARY = '#7a99b8';
+const TEXT_MUTED = '#4a6070';
 
-type PolicyState = "allowed" | "requires-approval" | "blocked";
-type AutonomyMode = "observe" | "recommend" | "draft" | "ask-to-act" | "approved-act";
+type PolicyState = 'allowed' | 'requires-approval' | 'blocked';
+type AutonomyMode = 'observe' | 'recommend' | 'draft' | 'ask-to-act' | 'approved-act';
 
 const POLICY_COLORS: Record<PolicyState, string> = {
-  "allowed": "#00e878",
-  "requires-approval": "#ffb700",
-  "blocked": "#ff4455",
+  allowed: '#00e878',
+  'requires-approval': '#ffb700',
+  blocked: '#ff4455',
 };
 
 const AUTONOMY_LABELS: Record<AutonomyMode, string> = {
-  observe: "OBS",
-  recommend: "REC",
-  draft: "DFT",
-  "ask-to-act": "ASK",
-  "approved-act": "ACT",
+  observe: 'OBS',
+  recommend: 'REC',
+  draft: 'DFT',
+  'ask-to-act': 'ASK',
+  'approved-act': 'ACT',
 };
 
 const AUTONOMY_COLORS: Record<AutonomyMode, string> = {
-  observe: "#4a6070",
-  recommend: "#7a99b8",
-  draft: "#00d4ff",
-  "ask-to-act": "#ffb700",
-  "approved-act": "#00e878",
+  observe: '#4a6070',
+  recommend: '#7a99b8',
+  draft: '#00d4ff',
+  'ask-to-act': '#ffb700',
+  'approved-act': '#00e878',
 };
 
 interface EvidenceSource {
@@ -79,7 +79,7 @@ interface ProofCardProps {
 interface AutonomyDecisionPayload {
   policyState: PolicyState;
   policyReason?: string;
-  disposition: "execute" | "queue" | "draft" | "block";
+  disposition: 'execute' | 'queue' | 'draft' | 'block';
   mode: AutonomyMode;
 }
 
@@ -89,18 +89,18 @@ async function patchAutonomyMode(
 ): Promise<AutonomyDecisionPayload | null> {
   try {
     const res = await apiFetch<{ data?: { decision?: AutonomyDecisionPayload } }>(
-      "/api/alloy/autonomy-mode",
+      '/api/alloy/autonomy-mode',
       {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({ domain, mode }),
       },
     );
     return res?.data?.decision ?? null;
   } catch (err) {
     return {
-      policyState: "blocked",
+      policyState: 'blocked',
       policyReason: `Could not reach Alloy autonomy service — mode not persisted (${(err as Error).message}).`,
-      disposition: "block",
+      disposition: 'block',
       mode,
     };
   }
@@ -120,9 +120,9 @@ function ConfidenceBar({ value, color }: { value: number; color: string }) {
 function PolicyChip({ state, reason }: { state: PolicyState; reason?: string }) {
   const color = POLICY_COLORS[state];
   const labels: Record<PolicyState, string> = {
-    "allowed": "Allowed",
-    "requires-approval": "Requires Approval",
-    "blocked": "Blocked",
+    allowed: 'Allowed',
+    'requires-approval': 'Requires Approval',
+    blocked: 'Blocked',
   };
   return (
     <View style={[styles.chip, { backgroundColor: `${color}18`, borderColor: `${color}40` }]}>
@@ -142,7 +142,7 @@ function AutonomyToggle({
   domain?: string;
   disabled?: boolean;
 }) {
-  const modes: AutonomyMode[] = ["observe", "recommend", "draft", "ask-to-act", "approved-act"];
+  const modes: AutonomyMode[] = ['observe', 'recommend', 'draft', 'ask-to-act', 'approved-act'];
   return (
     <View style={styles.autonomyToggle}>
       {modes.map((mode) => {
@@ -153,7 +153,7 @@ function AutonomyToggle({
             key={mode}
             disabled={disabled}
             onPress={() => {
-              if (Platform.OS !== "web") Haptics.selectionAsync();
+              if (Platform.OS !== 'web') Haptics.selectionAsync();
               onChange(mode);
             }}
             style={[
@@ -161,7 +161,7 @@ function AutonomyToggle({
               active && { backgroundColor: color },
               disabled && !active && { opacity: 0.4 },
             ]}
-            accessibilityLabel={`Set autonomy mode to ${mode}${domain ? ` for ${domain}` : ""}`}
+            accessibilityLabel={`Set autonomy mode to ${mode}${domain ? ` for ${domain}` : ''}`}
           >
             <Text style={[styles.autonomyBtnText, { color: active ? BG : TEXT_MUTED }]}>
               {AUTONOMY_LABELS[mode]}
@@ -179,8 +179,10 @@ function EvidenceList({ sources }: { sources: EvidenceSource[] }) {
     <View style={styles.evidenceContainer}>
       <Pressable onPress={() => setExpanded((v) => !v)} style={styles.evidenceToggle}>
         <Feather name="file-text" size={12} color={TEXT_MUTED} />
-        <Text style={styles.evidenceCount}>{sources.length} evidence source{sources.length !== 1 ? "s" : ""}</Text>
-        <Feather name={expanded ? "chevron-up" : "chevron-down"} size={12} color={TEXT_MUTED} />
+        <Text style={styles.evidenceCount}>
+          {sources.length} evidence source{sources.length !== 1 ? 's' : ''}
+        </Text>
+        <Feather name={expanded ? 'chevron-up' : 'chevron-down'} size={12} color={TEXT_MUTED} />
       </Pressable>
       {expanded && (
         <View style={styles.evidenceList}>
@@ -213,7 +215,13 @@ function ProofCard({
   actionLabel,
 }: ProofCardProps) {
   const confColor =
-    confidence >= 85 ? "#00e878" : confidence >= 70 ? "#84cc16" : confidence >= 50 ? "#ffb700" : "#ff4455";
+    confidence >= 85
+      ? '#00e878'
+      : confidence >= 70
+        ? '#84cc16'
+        : confidence >= 50
+          ? '#ffb700'
+          : '#ff4455';
 
   const [liveDecision, setLiveDecision] = useState<AutonomyDecisionPayload | null>(null);
   const [pending, setPending] = useState(false);
@@ -242,8 +250,8 @@ function ProofCard({
         <View style={styles.cardChips}>
           <PolicyChip state={effectivePolicyState} reason={effectivePolicyReason} />
           {contradiction && (
-            <View style={[styles.chip, { backgroundColor: "#a855f718", borderColor: "#a855f740" }]}>
-              <Text style={[styles.chipText, { color: "#a855f7" }]}>DISSENT</Text>
+            <View style={[styles.chip, { backgroundColor: '#a855f718', borderColor: '#a855f740' }]}>
+              <Text style={[styles.chipText, { color: '#a855f7' }]}>DISSENT</Text>
             </View>
           )}
         </View>
@@ -280,7 +288,7 @@ function ProofCard({
       </View>
 
       <View style={styles.autonomySection}>
-        <Text style={styles.proofMeta}>Autonomy Mode{domain ? ` · ${domain}` : ""}</Text>
+        <Text style={styles.proofMeta}>Autonomy Mode{domain ? ` · ${domain}` : ''}</Text>
         <AutonomyToggle
           value={autonomyMode}
           onChange={handleAutonomy}
@@ -303,26 +311,80 @@ const FRESH_10M = new Date(Date.now() - 10 * 60_000).toISOString();
 const AGING_40M = new Date(Date.now() - 40 * 60_000).toISOString();
 
 const FUND_EVIDENCE: EvidenceSource[] = [
-  { id: "e1", label: "LP Capital Account Valuation — Q1 2026", type: "document", timestamp: FRESH_10M, excerpt: "Fund NAV: $142.3M. IRR since inception: 24.1%. Benchmark: 19.8%." },
-  { id: "e2", label: "Portfolio Health Scores — Alloy", type: "model", timestamp: FRESH_3M, excerpt: "Composite health: 7.3/10. Revenue growth YoY: +67% blended." },
-  { id: "e3", label: "Market Comparable Benchmarking", type: "api", timestamp: FRESH_10M, excerpt: "Portfolio entry multiples: 6.4x ARR. Implied appreciation potential: 28%." },
+  {
+    id: 'e1',
+    label: 'LP Capital Account Valuation — Q1 2026',
+    type: 'document',
+    timestamp: FRESH_10M,
+    excerpt: 'Fund NAV: $142.3M. IRR since inception: 24.1%. Benchmark: 19.8%.',
+  },
+  {
+    id: 'e2',
+    label: 'Portfolio Health Scores — Alloy',
+    type: 'model',
+    timestamp: FRESH_3M,
+    excerpt: 'Composite health: 7.3/10. Revenue growth YoY: +67% blended.',
+  },
+  {
+    id: 'e3',
+    label: 'Market Comparable Benchmarking',
+    type: 'api',
+    timestamp: FRESH_10M,
+    excerpt: 'Portfolio entry multiples: 6.4x ARR. Implied appreciation potential: 28%.',
+  },
 ];
 
 const THREAT_EVIDENCE: EvidenceSource[] = [
-  { id: "e4", label: "Cross-Domain Signal Aggregation", type: "model", timestamp: FRESH_3M, excerpt: "Aegis: 3 critical threats. Vessels: 6 alerts. Correlation: 0.71." },
-  { id: "e5", label: "Alloy Risk Classifier", type: "model", timestamp: FRESH_3M, excerpt: "Market regime: Late cycle / Rate stress. Drawdown base rate: 18%." },
-  { id: "e6", label: "Approval Queue Monitor", type: "api", timestamp: FRESH_3M, excerpt: "3 open approvals. Combined exposure: $4.7M. All within SLA." },
+  {
+    id: 'e4',
+    label: 'Cross-Domain Signal Aggregation',
+    type: 'model',
+    timestamp: FRESH_3M,
+    excerpt: 'Aegis: 3 critical threats. Vessels: 6 alerts. Correlation: 0.71.',
+  },
+  {
+    id: 'e5',
+    label: 'Alloy Risk Classifier',
+    type: 'model',
+    timestamp: FRESH_3M,
+    excerpt: 'Market regime: Late cycle / Rate stress. Drawdown base rate: 18%.',
+  },
+  {
+    id: 'e6',
+    label: 'Approval Queue Monitor',
+    type: 'api',
+    timestamp: FRESH_3M,
+    excerpt: '3 open approvals. Combined exposure: $4.7M. All within SLA.',
+  },
 ];
 
 const VESSELS_EVIDENCE: EvidenceSource[] = [
-  { id: "e7", label: "Vessels Health Score", type: "model", timestamp: FRESH_10M, excerpt: "Health declining — 6.8/10 vs 7.4 prior period. 6 active alerts." },
-  { id: "e8", label: "Counterparty Risk Screening", type: "api", timestamp: FRESH_3M, excerpt: "1 OFAC SDN match (94% confidence). Transaction blocked pending review." },
-  { id: "e9", label: "Predictive Maintenance Signal", type: "signal", timestamp: FRESH_3M, excerpt: "MV Horizon Star: cylinder 4 anomaly. P(failure) = 31%." },
+  {
+    id: 'e7',
+    label: 'Vessels Health Score',
+    type: 'model',
+    timestamp: FRESH_10M,
+    excerpt: 'Health declining — 6.8/10 vs 7.4 prior period. 6 active alerts.',
+  },
+  {
+    id: 'e8',
+    label: 'Counterparty Risk Screening',
+    type: 'api',
+    timestamp: FRESH_3M,
+    excerpt: '1 OFAC SDN match (94% confidence). Transaction blocked pending review.',
+  },
+  {
+    id: 'e9',
+    label: 'Predictive Maintenance Signal',
+    type: 'signal',
+    timestamp: FRESH_3M,
+    excerpt: 'MV Horizon Star: cylinder 4 anomaly. P(failure) = 31%.',
+  },
 ];
 
 export default function ProofEnvelopeScreen() {
   const insets = useSafeAreaInsets();
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('ask-to-act');
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(() => {
@@ -350,15 +412,17 @@ export default function ProofEnvelopeScreen() {
 
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />
+        }
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.kpiRow}>
           {[
-            { label: "Fund NAV", value: "$142M", color: ACCENT },
-            { label: "Portfolio IRR", value: "24.1%", color: "#00e878" },
-            { label: "Open Approvals", value: "3", color: "#ffb700" },
-            { label: "Active Threats", value: "3", color: "#ff4455" },
+            { label: 'Fund NAV', value: '$142M', color: ACCENT },
+            { label: 'Portfolio IRR', value: '24.1%', color: '#00e878' },
+            { label: 'Open Approvals', value: '3', color: '#ffb700' },
+            { label: 'Active Threats', value: '3', color: '#ff4455' },
           ].map(({ label, value, color }) => (
             <View key={label} style={styles.kpiCard}>
               <Text style={styles.kpiLabel}>{label}</Text>
@@ -377,9 +441,9 @@ export default function ProofEnvelopeScreen() {
           evidence={FUND_EVIDENCE}
           accentColor={ACCENT}
           metrics={[
-            { label: "Fund NAV", value: "$142.3M", color: ACCENT },
-            { label: "IRR", value: "24.1%", color: "#00e878" },
-            { label: "TVPI", value: "1.42x", color: ACCENT },
+            { label: 'Fund NAV', value: '$142.3M', color: ACCENT },
+            { label: 'IRR', value: '24.1%', color: '#00e878' },
+            { label: 'TVPI', value: '1.42x', color: ACCENT },
           ]}
           domain="holdings.fund-performance"
           actionLabel="Publish LP performance briefing"
@@ -396,9 +460,9 @@ export default function ProofEnvelopeScreen() {
           evidence={THREAT_EVIDENCE}
           accentColor="#ffb700"
           metrics={[
-            { label: "Correlated Domains", value: "3", color: "#ffb700" },
-            { label: "Open Approvals", value: "3", color: "#ffb700" },
-            { label: "Decision Exposure", value: "$4.7M", color: "#7a99b8" },
+            { label: 'Correlated Domains', value: '3', color: '#ffb700' },
+            { label: 'Open Approvals', value: '3', color: '#ffb700' },
+            { label: 'Decision Exposure', value: '$4.7M', color: '#7a99b8' },
           ]}
           domain="holdings.cross-domain-actions"
           actionLabel="Execute correlated cross-domain mitigation"
@@ -415,9 +479,9 @@ export default function ProofEnvelopeScreen() {
           evidence={VESSELS_EVIDENCE}
           accentColor="#00d4ff"
           metrics={[
-            { label: "Health Score", value: "6.8/10", color: "#ffb700" },
-            { label: "Failure Risk", value: "31%", color: "#ff4455" },
-            { label: "Downtime Saving", value: "$340K", color: "#00e878" },
+            { label: 'Health Score', value: '6.8/10', color: '#ffb700' },
+            { label: 'Failure Risk', value: '31%', color: '#ff4455' },
+            { label: 'Downtime Saving', value: '$340K', color: '#00e878' },
           ]}
           domain="vessels.charter-actions"
           actionLabel="Schedule unplanned maintenance port call (MV Horizon Star)"
@@ -433,9 +497,9 @@ const styles = StyleSheet.create({
     backgroundColor: BG,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
@@ -444,7 +508,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: '700',
     color: TEXT_PRIMARY,
   },
   headerSub: {
@@ -453,8 +517,8 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   liveIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 5,
   },
   liveDot: {
@@ -465,7 +529,7 @@ const styles = StyleSheet.create({
   },
   liveText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: '700',
     color: ACCENT,
     letterSpacing: 1,
   },
@@ -481,7 +545,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   kpiRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 8,
     marginBottom: 4,
   },
@@ -496,13 +560,13 @@ const styles = StyleSheet.create({
   kpiLabel: {
     fontSize: 9,
     color: TEXT_MUTED,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 3,
   },
   kpiValue: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   card: {
     backgroundColor: SURFACE,
@@ -511,7 +575,7 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
     padding: 14,
     gap: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.4,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
@@ -521,14 +585,14 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: '700',
     color: TEXT_PRIMARY,
     lineHeight: 18,
   },
   cardChips: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 6,
-    flexWrap: "wrap",
+    flexWrap: 'wrap',
   },
   chip: {
     borderRadius: 4,
@@ -538,9 +602,9 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: '700',
     letterSpacing: 0.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
   cardSummary: {
     fontSize: 12,
@@ -548,14 +612,14 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   policyReason: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 5,
     backgroundColor: `${OVERLAY}`,
     borderRadius: 6,
     padding: 8,
     borderWidth: 1,
-    borderColor: "#ffb70030",
+    borderColor: '#ffb70030',
   },
   policyReasonText: {
     fontSize: 11,
@@ -563,7 +627,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   metricsRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: BG,
     borderRadius: 8,
     borderWidth: 1,
@@ -573,18 +637,18 @@ const styles = StyleSheet.create({
   },
   metricItem: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   metricLabel: {
     fontSize: 9,
     color: TEXT_MUTED,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 2,
   },
   metricValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   proofFooter: {
     borderTopWidth: 1,
@@ -598,17 +662,17 @@ const styles = StyleSheet.create({
   proofMeta: {
     fontSize: 9,
     color: TEXT_MUTED,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 4,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   confidenceWrapper: {
     gap: 4,
   },
   confidenceRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   confidenceTrack: {
@@ -616,24 +680,24 @@ const styles = StyleSheet.create({
     height: 5,
     backgroundColor: OVERLAY,
     borderRadius: 3,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   confidenceFill: {
-    height: "100%",
+    height: '100%',
     borderRadius: 3,
   },
   confidenceLabel: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: '700',
     minWidth: 32,
-    textAlign: "right",
+    textAlign: 'right',
   },
   evidenceContainer: {
     gap: 6,
   },
   evidenceToggle: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 5,
   },
   evidenceCount: {
@@ -655,7 +719,7 @@ const styles = StyleSheet.create({
   },
   evidenceLabel: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: '600',
     color: TEXT_PRIMARY,
   },
   evidenceType: {
@@ -676,7 +740,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   autonomyToggle: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: BG,
     borderRadius: 8,
     borderWidth: 1,
@@ -687,12 +751,12 @@ const styles = StyleSheet.create({
   autonomyBtn: {
     flex: 1,
     paddingVertical: 6,
-    alignItems: "center",
+    alignItems: 'center',
     borderRadius: 6,
   },
   autonomyBtnText: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
   alloyDecisionText: {
@@ -703,7 +767,7 @@ const styles = StyleSheet.create({
   },
   alloyDecisionLabel: {
     color: TEXT_MUTED,
-    fontWeight: "700",
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
 });

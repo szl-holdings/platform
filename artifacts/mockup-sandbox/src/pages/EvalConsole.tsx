@@ -1,29 +1,29 @@
-import { useState, useEffect, useCallback } from "react";
 import {
-  FlaskConical,
-  RefreshCw,
-  PlayCircle,
   AlertCircle,
-  CheckCircle,
-  XCircle,
   BarChart2,
+  CheckCircle,
+  FlaskConical,
   Loader,
+  Minus,
+  PlayCircle,
+  RefreshCw,
+  Shield,
   TrendingDown,
   TrendingUp,
-  Minus,
-  Shield,
-} from "lucide-react";
+  XCircle,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
-const API = "/api";
+const API = '/api';
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const r = await fetch(`${API}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
     ...opts,
   });
   if (!r.ok) throw new Error(`${r.status}`);
-  const json = await r.json() as { data?: T } & T;
-  return (json as { data?: T }).data ?? json as T;
+  const json = (await r.json()) as { data?: T } & T;
+  return (json as { data?: T }).data ?? (json as T);
 }
 
 interface DomainInfo {
@@ -61,7 +61,7 @@ interface RegressionEntry {
   baseScore: number;
   currentScore?: number;
   scoreDelta?: number;
-  status: "ok" | "regressed" | "improved" | "no_current";
+  status: 'ok' | 'regressed' | 'improved' | 'no_current';
   recordedAt: string;
 }
 
@@ -71,7 +71,8 @@ interface RegressionDashboard {
 
 function PassRateBadge({ rate }: { rate: number }) {
   const pct = (rate * 100).toFixed(1);
-  const color = rate >= 0.85 ? "text-nexus-green" : rate >= 0.7 ? "text-nexus-amber" : "text-nexus-red";
+  const color =
+    rate >= 0.85 ? 'text-nexus-green' : rate >= 0.7 ? 'text-nexus-amber' : 'text-nexus-red';
   return <span className={`font-mono text-sm font-bold ${color}`}>{pct}%</span>;
 }
 
@@ -89,7 +90,7 @@ function EvalReportCard({ report }: { report: EvalReport }) {
         <div>
           <div className="text-sm font-semibold">{report.suiteName ?? report.suiteId}</div>
           <div className="text-[10px] text-muted-foreground/60 font-mono mt-0.5">
-            model: {report.model} · {report.domains?.join(", ")}
+            model: {report.model} · {report.domains?.join(', ')}
           </div>
         </div>
         <div className="text-right">
@@ -111,13 +112,15 @@ function EvalReportCard({ report }: { report: EvalReport }) {
           <div className="text-[9px] text-muted-foreground/60">failed</div>
         </div>
         <div className="rounded border border-nexus bg-nexus-bg py-2">
-          <div className="text-lg font-mono font-bold text-muted-foreground/80">{report.avgLatencyMs.toFixed(0)}ms</div>
+          <div className="text-lg font-mono font-bold text-muted-foreground/80">
+            {report.avgLatencyMs.toFixed(0)}ms
+          </div>
           <div className="text-[9px] text-muted-foreground/60">avg latency</div>
         </div>
       </div>
       <div className="flex items-center gap-2 text-[10px] text-muted-foreground/60">
         <BarChart2 className="w-3 h-3" />
-        avg score: {(report.avgScore).toFixed(1)} · cost: ${report.totalCostUsd.toFixed(5)}
+        avg score: {report.avgScore.toFixed(1)} · cost: ${report.totalCostUsd.toFixed(5)}
         {report.completedAt && (
           <span className="ml-auto">{new Date(report.completedAt).toLocaleTimeString()}</span>
         )}
@@ -142,9 +145,9 @@ export default function EvalConsole() {
     setError(null);
     try {
       const [ds, reg] = await Promise.all([
-        apiFetch<DatasetInfo>("/pulse-evals/datasets").catch(() => null),
-        apiFetch<{ dashboard: RegressionDashboard }>("/pulse-evals/regression-dashboard")
-          .then(r => r.dashboard)
+        apiFetch<DatasetInfo>('/pulse-evals/datasets').catch(() => null),
+        apiFetch<{ dashboard: RegressionDashboard }>('/pulse-evals/regression-dashboard')
+          .then((r) => r.dashboard)
           .catch(() => null),
       ]);
       setDatasets(ds);
@@ -156,27 +159,29 @@ export default function EvalConsole() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   function toggleDomain(domain: string) {
-    setSelectedDomains(prev =>
-      prev.includes(domain) ? prev.filter(d => d !== domain) : [...prev, domain]
+    setSelectedDomains((prev) =>
+      prev.includes(domain) ? prev.filter((d) => d !== domain) : [...prev, domain],
     );
   }
 
   async function runEvals() {
-    const key = selectedDomains.join(",") || "all";
+    const key = selectedDomains.join(',') || 'all';
     setRunning(key);
     setError(null);
     try {
-      const result = await apiFetch<{ report: EvalReport }>("/pulse-evals/run", {
-        method: "POST",
+      const result = await apiFetch<{ report: EvalReport }>('/pulse-evals/run', {
+        method: 'POST',
         body: JSON.stringify({
           domains: selectedDomains.length > 0 ? selectedDomains : undefined,
           includeRedTeam,
         }),
       });
-      setReports(prev => [result.report, ...prev.slice(0, 4)]);
+      setReports((prev) => [result.report, ...prev.slice(0, 4)]);
     } catch (e) {
       setError(`Eval run failed: ${String(e)} — requires operator role`);
     } finally {
@@ -188,11 +193,11 @@ export default function EvalConsole() {
     setRedTeamRunning(true);
     setError(null);
     try {
-      const result = await apiFetch<{ report: EvalReport }>("/pulse-evals/run-red-team", {
-        method: "POST",
+      const result = await apiFetch<{ report: EvalReport }>('/pulse-evals/run-red-team', {
+        method: 'POST',
         body: JSON.stringify({}),
       });
-      setReports(prev => [result.report, ...prev.slice(0, 4)]);
+      setReports((prev) => [result.report, ...prev.slice(0, 4)]);
     } catch (e) {
       setError(`Red team run failed: ${String(e)} — requires admin role`);
     } finally {
@@ -218,7 +223,7 @@ export default function EvalConsole() {
           disabled={loading}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-nexus-surface border border-nexus text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </button>
       </div>
@@ -243,16 +248,18 @@ export default function EvalConsole() {
 
         {datasets && (
           <div className="space-y-2">
-            <div className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-mono">Select domains (empty = all)</div>
+            <div className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-mono">
+              Select domains (empty = all)
+            </div>
             <div className="flex flex-wrap gap-1.5">
-              {datasets.domains.map(d => (
+              {datasets.domains.map((d) => (
                 <button
                   key={d.domain}
                   onClick={() => toggleDomain(d.domain)}
                   className={`flex items-center gap-1.5 px-2 py-1 rounded border text-[10px] font-mono transition-colors ${
                     selectedDomains.includes(d.domain)
-                      ? "border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan"
-                      : "border-nexus bg-nexus-bg text-muted-foreground/60 hover:text-foreground"
+                      ? 'border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan'
+                      : 'border-nexus bg-nexus-bg text-muted-foreground/60 hover:text-foreground'
                   }`}
                 >
                   {d.domain}
@@ -269,7 +276,7 @@ export default function EvalConsole() {
             <input
               type="checkbox"
               checked={includeRedTeam}
-              onChange={e => setIncludeRedTeam(e.target.checked)}
+              onChange={(e) => setIncludeRedTeam(e.target.checked)}
               className="w-3 h-3 rounded border-nexus"
             />
             Include red-team cases
@@ -282,15 +289,23 @@ export default function EvalConsole() {
             disabled={running !== null || redTeamRunning}
             className="flex items-center gap-2 px-4 py-2 rounded border border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan text-xs hover:bg-nexus-cyan/20 transition-colors disabled:opacity-50"
           >
-            {running !== null ? <Loader className="w-3 h-3 animate-spin" /> : <PlayCircle className="w-3 h-3" />}
-            {running !== null ? "Running…" : "Run Evals"}
+            {running !== null ? (
+              <Loader className="w-3 h-3 animate-spin" />
+            ) : (
+              <PlayCircle className="w-3 h-3" />
+            )}
+            {running !== null ? 'Running…' : 'Run Evals'}
           </button>
           <button
             onClick={runRedTeam}
             disabled={running !== null || redTeamRunning}
             className="flex items-center gap-2 px-4 py-2 rounded border border-nexus-amber/40 bg-nexus-amber/10 text-nexus-amber text-xs hover:bg-nexus-amber/20 transition-colors disabled:opacity-50"
           >
-            {redTeamRunning ? <Loader className="w-3 h-3 animate-spin" /> : <Shield className="w-3 h-3" />}
+            {redTeamRunning ? (
+              <Loader className="w-3 h-3 animate-spin" />
+            ) : (
+              <Shield className="w-3 h-3" />
+            )}
             Red Team Run
           </button>
         </div>
@@ -298,7 +313,9 @@ export default function EvalConsole() {
 
       {reports.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-xs font-mono text-muted-foreground/60 uppercase tracking-widest">Recent Runs</h2>
+          <h2 className="text-xs font-mono text-muted-foreground/60 uppercase tracking-widest">
+            Recent Runs
+          </h2>
           {reports.map((r, i) => (
             <EvalReportCard key={`${r.suiteId}-${i}`} report={r} />
           ))}
@@ -309,10 +326,12 @@ export default function EvalConsole() {
         <div className="rounded-lg bg-nexus-surface border border-nexus p-4 space-y-3">
           <div className="flex items-center gap-2">
             <BarChart2 className="w-4 h-4 text-nexus-amber" />
-            <h2 className="text-sm font-semibold text-nexus-amber font-mono">REGRESSION DASHBOARD</h2>
+            <h2 className="text-sm font-semibold text-nexus-amber font-mono">
+              REGRESSION DASHBOARD
+            </h2>
           </div>
           <div className="space-y-1.5">
-            {baselines.map(b => (
+            {baselines.map((b) => (
               <div
                 key={`${b.suiteId}-${b.model}`}
                 className="rounded border border-nexus bg-nexus-bg px-3 py-2 flex items-center gap-3"
@@ -322,23 +341,40 @@ export default function EvalConsole() {
                   <div className="text-[10px] text-muted-foreground/60">{b.model}</div>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] font-mono">
-                  <span className="text-muted-foreground/60">base: {(b.basePassRate * 100).toFixed(1)}%</span>
+                  <span className="text-muted-foreground/60">
+                    base: {(b.basePassRate * 100).toFixed(1)}%
+                  </span>
                   {b.currentPassRate != null && (
                     <>
-                      <span className="text-foreground">{(b.currentPassRate * 100).toFixed(1)}%</span>
+                      <span className="text-foreground">
+                        {(b.currentPassRate * 100).toFixed(1)}%
+                      </span>
                       <TrendIcon delta={b.passRateDelta} />
                       {b.passRateDelta != null && (
-                        <span className={b.passRateDelta > 0 ? "text-nexus-green" : b.passRateDelta < 0 ? "text-nexus-red" : "text-muted-foreground"}>
-                          {b.passRateDelta > 0 ? "+" : ""}{(b.passRateDelta * 100).toFixed(1)}%
+                        <span
+                          className={
+                            b.passRateDelta > 0
+                              ? 'text-nexus-green'
+                              : b.passRateDelta < 0
+                                ? 'text-nexus-red'
+                                : 'text-muted-foreground'
+                          }
+                        >
+                          {b.passRateDelta > 0 ? '+' : ''}
+                          {(b.passRateDelta * 100).toFixed(1)}%
                         </span>
                       )}
                     </>
                   )}
                   <div className="ml-2">
-                    {b.status === "ok" && <CheckCircle className="w-3.5 h-3.5 text-nexus-green" />}
-                    {b.status === "regressed" && <XCircle className="w-3.5 h-3.5 text-nexus-red" />}
-                    {b.status === "improved" && <CheckCircle className="w-3.5 h-3.5 text-nexus-cyan" />}
-                    {b.status === "no_current" && <AlertCircle className="w-3.5 h-3.5 text-muted-foreground/40" />}
+                    {b.status === 'ok' && <CheckCircle className="w-3.5 h-3.5 text-nexus-green" />}
+                    {b.status === 'regressed' && <XCircle className="w-3.5 h-3.5 text-nexus-red" />}
+                    {b.status === 'improved' && (
+                      <CheckCircle className="w-3.5 h-3.5 text-nexus-cyan" />
+                    )}
+                    {b.status === 'no_current' && (
+                      <AlertCircle className="w-3.5 h-3.5 text-muted-foreground/40" />
+                    )}
                   </div>
                 </div>
               </div>

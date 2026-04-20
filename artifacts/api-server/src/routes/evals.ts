@@ -1,50 +1,53 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { randomUUID } from "crypto";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, dosAnalyticsEventsTable } from '@szl-holdings/db';
+import { promptRegistry } from '@szl-holdings/prompt-registry';
+import type { AgentEvalRunContract } from '@szl-holdings/telemetry-standards';
 import {
-  FORGE_SUITES as ALL_SUITES,
-  FORGE_SUITE_BY_ID as SUITE_BY_ID,
-  FORGE_SUITE_BY_DOMAIN as SUITE_BY_DOMAIN,
-  runEvalSuite,
-  checkRunRegression,
-  runNightlyEvals,
-  scheduleNightlyRun,
-  ALL_EVAL_TYPES,
-  type EvalRunReport,
-  type EvalSuiteDef,
-  type EvalForgeMetrics,
-} from "@workspace/eval-forge";
-import { run as runCognitiveLoop, type CognitiveContext } from "@workspace/cognitive-runtime";
-import { defaultTraceStore } from "@workspace/trace-graph";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
-import type { AgentEvalRunContract } from "@szl-holdings/telemetry-standards";
-import { db, dosAnalyticsEventsTable } from "@szl-holdings/db";
-import { promptRegistry } from "@szl-holdings/prompt-registry";
-import { logger } from "../lib/logger";
-import {
-  upsertEvalForgeSuites,
-  persistEvalForgeRun,
-  loadRecentRunsFromDb,
-} from "../lib/eval-forge-store";
-import { defaultExecutorFactory, buildDefaultExecutor } from "../lib/eval-executors";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
-import {
-  defaultProfileRegistry,
-  type AEFDomain,
   AEF_DOMAIN_PROFILE_DOMAINS,
-} from "@workspace/aef-domain-profiles";
+  type AEFDomain,
+  defaultProfileRegistry,
+} from '@workspace/aef-domain-profiles';
 import {
-  runRetrievalEval,
-  type RetrievalAdapter,
-  type RetrievedResult,
-  type GoldenQuery,
-  type MetricResult,
   ALL_GOLDEN_QUERIES,
   ALL_MOCK_CORPORA,
-} from "@workspace/aef-evals";
+  type GoldenQuery,
+  type MetricResult,
+  type RetrievalAdapter,
+  type RetrievedResult,
+  runRetrievalEval,
+} from '@workspace/aef-evals';
+import { type CognitiveContext, run as runCognitiveLoop } from '@workspace/cognitive-runtime';
+import {
+  ALL_EVAL_TYPES,
+  FORGE_SUITES as ALL_SUITES,
+  checkRunRegression,
+  type EvalForgeMetrics,
+  type EvalRunReport,
+  type EvalSuiteDef,
+  runEvalSuite,
+  runNightlyEvals,
+  FORGE_SUITE_BY_DOMAIN as SUITE_BY_DOMAIN,
+  FORGE_SUITE_BY_ID as SUITE_BY_ID,
+  scheduleNightlyRun,
+} from '@workspace/eval-forge';
+import { defaultMemoryStore } from '@workspace/memory-fabric';
+import { defaultTraceStore } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { buildDefaultExecutor, defaultExecutorFactory } from '../lib/eval-executors';
+import {
+  loadRecentRunsFromDb,
+  persistEvalForgeRun,
+  upsertEvalForgeSuites,
+} from '../lib/eval-forge-store';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
+import {
+  perUserApiSlidingLimiter,
+  perUserWriteSlidingLimiter,
+} from '../middlewares/sliding-window-limiter';
 
 /** Zod schema mirroring GoldenQuery — used to validate caller-supplied queries. */
 const GoldenQuerySchema = z.object({
@@ -82,9 +85,9 @@ const aefRunStore = new Map<string, AEFRunRecord>();
  * via AEF_API_URL for external deployments.
  */
 const AEF_INTERNAL_BASE = (() => {
-  const envUrl = process.env["AEF_API_URL"];
-  if (envUrl) return envUrl.replace(/\/$/, "");
-  const port = process.env["PORT"] ?? "5000";
+  const envUrl = process.env['AEF_API_URL'];
+  if (envUrl) return envUrl.replace(/\/$/, '');
+  const port = process.env['PORT'] ?? '5000';
   return `http://localhost:${port}/alloy-embedding-api`;
 })();
 
@@ -96,8 +99,8 @@ function buildLiveAEFAdapter(tenantId: string): RetrievalAdapter {
   return {
     async retrieve(query: string, _profileId: string, k: number): Promise<RetrievedResult[]> {
       const response = await fetch(`${AEF_INTERNAL_BASE}/v1/hybrid-search`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-tenant-id": tenantId },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
         body: JSON.stringify({
           requestId: randomUUID(),
           tenantId,
@@ -112,7 +115,7 @@ function buildLiveAEFAdapter(tenantId: string): RetrievalAdapter {
       if (!response.ok) {
         throw new Error(`AEF hybrid-search returned HTTP ${response.status}`);
       }
-      const data = await response.json() as {
+      const data = (await response.json()) as {
         hits?: Array<{ chunkId: string; finalScore: number }>;
       };
       return (data.hits ?? []).slice(0, k).map((h) => ({
@@ -139,7 +142,9 @@ function buildMockCorpusAdapter(domain: AEFDomain): RetrievalAdapter {
         let score = 0;
         const words = qLower.split(/\s+/).filter((w) => w.length > 3);
         let wordHits = 0;
-        for (const w of words) { if (textLower.includes(w)) wordHits++; }
+        for (const w of words) {
+          if (textLower.includes(w)) wordHits++;
+        }
         score += (wordHits / Math.max(words.length, 1)) * 0.6;
         const boostHits: string[] = [];
         for (const term of boostTerms) {
@@ -163,33 +168,32 @@ function buildMockCorpusAdapter(domain: AEFDomain): RetrievalAdapter {
 const router: IRouter = Router();
 
 const runStore = new Map<string, EvalRunReport>();
-const suiteStore = new Map<string, EvalSuiteDef>(
-  ALL_SUITES.map((s: any) => [s.suiteId, s]),
-);
+const suiteStore = new Map<string, EvalSuiteDef>(ALL_SUITES.map((s: any) => [s.suiteId, s]));
 
 upsertEvalForgeSuites(ALL_SUITES).catch(() => {});
 
-loadRecentRunsFromDb(200).then((runs) => {
-  for (const r of runs) {
-    if (!runStore.has(r.runId)) {
-      runStore.set(r.runId, r);
+loadRecentRunsFromDb(200)
+  .then((runs) => {
+    for (const r of runs) {
+      if (!runStore.has(r.runId)) {
+        runStore.set(r.runId, r);
+      }
     }
-  }
-}).catch(() => {});
+  })
+  .catch(() => {});
 
 async function runAndPersistNightly(): Promise<void> {
   try {
     const baselineStore = new Map<string, EvalRunReport>(
-      Array.from(runStore.values())
-        .reduce((acc, r) => {
-          if (!acc.has(r.suiteId) || acc.get(r.suiteId)!.runAt < r.runAt) {
-            acc.set(r.suiteId, r);
-          }
-          return acc;
-        }, new Map<string, EvalRunReport>()),
+      Array.from(runStore.values()).reduce((acc, r) => {
+        if (!acc.has(r.suiteId) || acc.get(r.suiteId)!.runAt < r.runAt) {
+          acc.set(r.suiteId, r);
+        }
+        return acc;
+      }, new Map<string, EvalRunReport>()),
     );
     const summary = await runNightlyEvals({
-      triggeredBy: "nightly-cron",
+      triggeredBy: 'nightly-cron',
       baselineStore,
       executorFactory: defaultExecutorFactory,
       verbose: false,
@@ -201,10 +205,14 @@ async function runAndPersistNightly(): Promise<void> {
   } catch {}
 }
 
-scheduleNightlyRun(2, { triggeredBy: "nightly-cron", executorFactory: defaultExecutorFactory, verbose: false })
+scheduleNightlyRun(2, {
+  triggeredBy: 'nightly-cron',
+  executorFactory: defaultExecutorFactory,
+  verbose: false,
+})
   .then(({ unschedule }: { unschedule: () => void }) => {
-    process.once("SIGTERM", unschedule);
-    process.once("SIGINT", unschedule);
+    process.once('SIGTERM', unschedule);
+    process.once('SIGINT', unschedule);
   })
   .catch(() => {});
 
@@ -230,44 +238,76 @@ scheduleNightlyRun(2, { triggeredBy: "nightly-cron", executorFactory: defaultExe
 // Pricing in USD per 1K tokens. Used to derive cost from the runtime's actual
 // token usage when a variant model is selected.
 const MODEL_PRICING_PER_1K: Record<string, number> = {
-  "gpt-4o":            0.00500,
-  "gpt-4o-mini":       0.00060,
-  "claude-3-5-sonnet": 0.00600,
-  "claude-3-haiku":    0.00050,
-  "gemini-1.5-pro":    0.00400,
+  'gpt-4o': 0.005,
+  'gpt-4o-mini': 0.0006,
+  'claude-3-5-sonnet': 0.006,
+  'claude-3-haiku': 0.0005,
+  'gemini-1.5-pro': 0.004,
 };
 
 // Map a variant model name → (provider, canonical model) used by the
 // cognitive runtime / model router. Allows the eval UI to talk in friendly
 // names while the loop pins routing to a real provider+model pair.
 const MODEL_TO_PROVIDER: Record<string, { provider: string; model: string }> = {
-  "gpt-4o":            { provider: "openai",    model: "gpt-4o" },
-  "gpt-4o-mini":       { provider: "openai",    model: "gpt-4o-mini" },
-  "claude-3-5-sonnet": { provider: "anthropic", model: "claude-3-5-sonnet" },
-  "claude-3-haiku":    { provider: "anthropic", model: "claude-3-haiku" },
-  "gemini-1.5-pro":    { provider: "google",    model: "gemini-1.5-pro" },
+  'gpt-4o': { provider: 'openai', model: 'gpt-4o' },
+  'gpt-4o-mini': { provider: 'openai', model: 'gpt-4o-mini' },
+  'claude-3-5-sonnet': { provider: 'anthropic', model: 'claude-3-5-sonnet' },
+  'claude-3-haiku': { provider: 'anthropic', model: 'claude-3-haiku' },
+  'gemini-1.5-pro': { provider: 'google', model: 'gemini-1.5-pro' },
 };
 
 // Map orchestration strategy → cognitive-runtime knobs that change loop behavior.
 const STRATEGY_TO_RUNTIME: Record<
   string,
-  { agentTier: "assistant" | "analyst" | "operator" | "autonomous"; verifierEnabled: boolean; reflectionEnabled: boolean; maxVerifyRevisions: number }
+  {
+    agentTier: 'assistant' | 'analyst' | 'operator' | 'autonomous';
+    verifierEnabled: boolean;
+    reflectionEnabled: boolean;
+    maxVerifyRevisions: number;
+  }
 > = {
-  "default":          { agentTier: "analyst",    verifierEnabled: true,  reflectionEnabled: false, maxVerifyRevisions: 1 },
-  "chain-of-thought": { agentTier: "analyst",    verifierEnabled: true,  reflectionEnabled: false, maxVerifyRevisions: 2 },
-  "react":            { agentTier: "operator",   verifierEnabled: true,  reflectionEnabled: true,  maxVerifyRevisions: 2 },
-  "reflection":       { agentTier: "operator",   verifierEnabled: true,  reflectionEnabled: true,  maxVerifyRevisions: 3 },
-  "multi-agent":      { agentTier: "autonomous", verifierEnabled: true,  reflectionEnabled: true,  maxVerifyRevisions: 3 },
+  default: {
+    agentTier: 'analyst',
+    verifierEnabled: true,
+    reflectionEnabled: false,
+    maxVerifyRevisions: 1,
+  },
+  'chain-of-thought': {
+    agentTier: 'analyst',
+    verifierEnabled: true,
+    reflectionEnabled: false,
+    maxVerifyRevisions: 2,
+  },
+  react: {
+    agentTier: 'operator',
+    verifierEnabled: true,
+    reflectionEnabled: true,
+    maxVerifyRevisions: 2,
+  },
+  reflection: {
+    agentTier: 'operator',
+    verifierEnabled: true,
+    reflectionEnabled: true,
+    maxVerifyRevisions: 3,
+  },
+  'multi-agent': {
+    agentTier: 'autonomous',
+    verifierEnabled: true,
+    reflectionEnabled: true,
+    maxVerifyRevisions: 3,
+  },
 };
 
 function objectiveFromInput(input: any, caseId: string, domain: string): string {
-  if (typeof input === "string") return input;
-  if (input && typeof input === "object") {
-    if (typeof input.objective === "string") return input.objective;
-    if (typeof input.prompt === "string")    return input.prompt;
-    if (typeof input.query === "string")     return input.query;
-    if (typeof input.question === "string")  return input.question;
-    try { return `Eval case ${caseId} (${domain}): ${JSON.stringify(input).slice(0, 400)}`; } catch {}
+  if (typeof input === 'string') return input;
+  if (input && typeof input === 'object') {
+    if (typeof input.objective === 'string') return input.objective;
+    if (typeof input.prompt === 'string') return input.prompt;
+    if (typeof input.query === 'string') return input.query;
+    if (typeof input.question === 'string') return input.question;
+    try {
+      return `Eval case ${caseId} (${domain}): ${JSON.stringify(input).slice(0, 400)}`;
+    } catch {}
   }
   return `Eval case ${caseId} (${domain})`;
 }
@@ -277,31 +317,48 @@ function objectiveFromInput(input: any, caseId: string, domain: string): string 
 // the active version is used). Returns null if nothing resolves so the
 // executor can fall back to the cognitive runtime's default prompt selection
 // (and surface a metadata flag so the UI / contract record reflects that).
-function resolveVariantPrompt(promptId: string): { versionId: string; provider?: string; model?: string } | null {
+function resolveVariantPrompt(
+  promptId: string,
+): { versionId: string; provider?: string; model?: string } | null {
   if (!promptId) return null;
   // Direct version match (e.g. "foo@v2").
-  const directDefId = promptId.includes("@") ? promptId.split("@")[0]! : promptId;
+  const directDefId = promptId.includes('@') ? promptId.split('@')[0]! : promptId;
   const def = promptRegistry.get(directDefId) ?? null;
-  if (promptId.includes("@")) {
+  if (promptId.includes('@')) {
     const v = def ? promptRegistry.getVersion(directDefId, promptId) : undefined;
-    if (v) return { versionId: v.versionId, provider: v.modelHints.preferredProvider, model: v.modelHints.preferredModel };
+    if (v)
+      return {
+        versionId: v.versionId,
+        provider: v.modelHints.preferredProvider,
+        model: v.modelHints.preferredModel,
+      };
   }
   if (def) {
     const v = promptRegistry.getActiveVersion(def.id);
-    if (v) return { versionId: v.versionId, provider: v.modelHints.preferredProvider, model: v.modelHints.preferredModel };
+    if (v)
+      return {
+        versionId: v.versionId,
+        provider: v.modelHints.preferredProvider,
+        model: v.modelHints.preferredModel,
+      };
   }
   return null;
 }
 
-function buildVariantExecutor(model: string, strategy: string, promptId: string, suiteDomain?: string) {
-  const runtimeKnobs = STRATEGY_TO_RUNTIME[strategy] ?? STRATEGY_TO_RUNTIME["default"]!;
-  const pricePer1K = MODEL_PRICING_PER_1K[model] ?? MODEL_PRICING_PER_1K["gpt-4o-mini"]!;
+function buildVariantExecutor(
+  model: string,
+  strategy: string,
+  promptId: string,
+  suiteDomain?: string,
+) {
+  const runtimeKnobs = STRATEGY_TO_RUNTIME[strategy] ?? STRATEGY_TO_RUNTIME['default']!;
+  const pricePer1K = MODEL_PRICING_PER_1K[model] ?? MODEL_PRICING_PER_1K['gpt-4o-mini']!;
   const providerMap = MODEL_TO_PROVIDER[model];
   const promptResolution = resolveVariantPrompt(promptId);
   // Variant-pinned routing: prefer the explicit model→provider mapping, else
   // honor whatever provider/model the prompt version's modelHints suggest.
   const preferredProvider = providerMap?.provider ?? promptResolution?.provider;
-  const preferredModel    = providerMap?.model    ?? promptResolution?.model ?? model;
+  const preferredModel = providerMap?.model ?? promptResolution?.model ?? model;
 
   return async (input: any, caseId: string, domain: string) => {
     const objective = objectiveFromInput(input, caseId, domain);
@@ -328,7 +385,7 @@ function buildVariantExecutor(model: string, strategy: string, promptId: string,
       // perceive/orient/plan/execute pipeline.
       dryRun: true,
       perceiveInput: {
-        eventType: "eval-case",
+        eventType: 'eval-case',
         sourceDomain: domain || suiteDomain,
         sourceId: caseId,
         rawSignals: [{ caseId, domain, payload: input }],
@@ -350,19 +407,25 @@ function buildVariantExecutor(model: string, strategy: string, promptId: string,
         memoryStore: defaultMemoryStore,
       });
 
-      const latencyMs = result.run.durationMs ?? (Date.now() - startedAt);
+      const latencyMs = result.run.durationMs ?? Date.now() - startedAt;
       // Token estimate: cognitive-runtime doesn't expose per-loop token counts
       // in the public RunResult, so we estimate from objective + output size
       // (~4 chars/token) which is consistent with how MODEL_PRICING_PER_1K
       // is calibrated.
-      const outputStr = typeof result.run.output === "string"
-        ? result.run.output
-        : JSON.stringify(result.run.output ?? {});
+      const outputStr =
+        typeof result.run.output === 'string'
+          ? result.run.output
+          : JSON.stringify(result.run.output ?? {});
       const tokensUsed = Math.max(1, Math.ceil((objective.length + outputStr.length) / 4));
       const costUsd = (tokensUsed / 1000) * pricePer1K;
 
       return {
-        output: { summary: result.summary, output: result.run.output, status: result.run.status, phases: result.run.phases.map((p) => p.phase) },
+        output: {
+          summary: result.summary,
+          output: result.run.output,
+          status: result.run.status,
+          phases: result.run.phases.map((p) => p.phase),
+        },
         model,
         latencyMs,
         tokensUsed,
@@ -390,24 +453,24 @@ function buildVariantExecutor(model: string, strategy: string, promptId: string,
 async function emitAgentEvalRunContract(contract: AgentEvalRunContract): Promise<void> {
   try {
     await db.insert(dosAnalyticsEventsTable).values({
-      eventType: "page_view" as const,
+      eventType: 'page_view' as const,
       path: null,
       metadata: {
-        app: "api-server",
-        eventName: "agent.eval.run",
-        contract: "AgentEvalRunContract",
+        app: 'api-server',
+        eventName: 'agent.eval.run',
+        contract: 'AgentEvalRunContract',
         ...contract,
       },
     });
   } catch (err) {
-    logger.warn({ err }, "[evals] failed to persist AgentEvalRunContract");
+    logger.warn({ err }, '[evals] failed to persist AgentEvalRunContract');
   }
 }
 
 router.get(
-  "/evals",
+  '/evals',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "analyst"),
+  requireRole('admin', 'operator', 'analyst'),
   perUserApiSlidingLimiter,
   (_req, res) => {
     const suites = Array.from(suiteStore.values()).map((s) => ({
@@ -431,7 +494,7 @@ router.get(
         suiteId: r.suiteId,
         suiteName: r.suiteName,
         domain: r.domain,
-        status: r.totalCases > 0 ? "completed" : "empty",
+        status: r.totalCases > 0 ? 'completed' : 'empty',
         passRate: r.passRate,
         avgScore: r.avgScore,
         totalCases: r.totalCases,
@@ -450,22 +513,20 @@ router.get(
       evalTypes: ALL_EVAL_TYPES,
       totalSuites: suiteStore.size,
       totalRuns: runStore.size,
-      version: "eval-forge-v1",
+      version: 'eval-forge-v1',
     });
   },
 );
 
 router.get(
-  "/evals/suites",
+  '/evals/suites',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "analyst"),
+  requireRole('admin', 'operator', 'analyst'),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   (req, res) => {
     const domain = req.query.domain as string | undefined;
-    const suites = domain
-      ? (SUITE_BY_DOMAIN[domain] ?? [])
-      : Array.from(suiteStore.values());
+    const suites = domain ? (SUITE_BY_DOMAIN[domain] ?? []) : Array.from(suiteStore.values());
 
     res.json({
       suites: suites.map((s) => ({
@@ -486,15 +547,17 @@ router.get(
 );
 
 router.get(
-  "/evals/suites/:suiteId",
+  '/evals/suites/:suiteId',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "analyst"),
+  requireRole('admin', 'operator', 'analyst'),
   perUserApiSlidingLimiter,
   (req, res) => {
     const suiteId = req.params.suiteId as string;
     const suite = SUITE_BY_ID[suiteId] ?? suiteStore.get(suiteId);
     if (!suite) {
-      res.status(404).json({ error: "Suite not found", availableSuiteIds: Array.from(suiteStore.keys()) });
+      res
+        .status(404)
+        .json({ error: 'Suite not found', availableSuiteIds: Array.from(suiteStore.keys()) });
       return;
     }
 
@@ -508,9 +571,9 @@ router.get(
 );
 
 router.get(
-  "/evals/runs",
+  '/evals/runs',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "analyst"),
+  requireRole('admin', 'operator', 'analyst'),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   (req, res) => {
@@ -522,7 +585,7 @@ router.get(
     if (suiteId) runs = runs.filter((r) => r.suiteId === suiteId);
     if (domain) runs = runs.filter((r) => r.domain === domain);
     if (hasRegression !== undefined && hasRegression !== null) {
-      const rFlag = hasRegression === "true";
+      const rFlag = hasRegression === 'true';
       runs = runs.filter((r) => r.hasRegression === rFlag);
     }
 
@@ -554,15 +617,15 @@ router.get(
 );
 
 router.get(
-  "/evals/runs/:runId",
+  '/evals/runs/:runId',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "analyst"),
+  requireRole('admin', 'operator', 'analyst'),
   perUserApiSlidingLimiter,
   (req, res) => {
     const runId = req.params.runId as string;
     const run = runStore.get(runId);
     if (!run) {
-      res.status(404).json({ error: "Run not found" });
+      res.status(404).json({ error: 'Run not found' });
       return;
     }
     res.json(run);
@@ -570,16 +633,16 @@ router.get(
 );
 
 router.get(
-  "/evals/:id",
+  '/evals/:id',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "analyst"),
+  requireRole('admin', 'operator', 'analyst'),
   perUserApiSlidingLimiter,
   (req, res) => {
     const id = req.params.id as string;
     const suite = SUITE_BY_ID[id] ?? suiteStore.get(id);
     if (suite) {
       res.json({
-        type: "suite",
+        type: 'suite',
         ...suite,
         caseCount: suite.cases.length,
         redTeamCount: suite.cases.filter((c: { isRedTeam?: boolean }) => c.isRedTeam).length,
@@ -589,34 +652,41 @@ router.get(
     }
     const run = runStore.get(id);
     if (run) {
-      res.json({ type: "run", ...run });
+      res.json({ type: 'run', ...run });
       return;
     }
-    res.status(404).json({ error: "Not found", id });
+    res.status(404).json({ error: 'Not found', id });
   },
 );
 
 router.post(
-  "/evals/run",
+  '/evals/run',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-      "suiteId": z.unknown().optional(),
-      "triggeredBy": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      suiteId: z.unknown().optional(),
+      triggeredBy: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
-      const { suiteId, triggeredBy = "api" } = req.body as { suiteId?: string; triggeredBy?: string };
+      const { suiteId, triggeredBy = 'api' } = req.body as {
+        suiteId?: string;
+        triggeredBy?: string;
+      };
 
       if (!suiteId) {
-        res.status(400).json({ error: "suiteId is required" });
+        res.status(400).json({ error: 'suiteId is required' });
         return;
       }
 
       const suite = SUITE_BY_ID[suiteId] ?? suiteStore.get(suiteId);
       if (!suite) {
-        res.status(404).json({ error: "Suite not found", availableSuiteIds: Array.from(suiteStore.keys()) });
+        res
+          .status(404)
+          .json({ error: 'Suite not found', availableSuiteIds: Array.from(suiteStore.keys()) });
         return;
       }
 
@@ -660,7 +730,7 @@ router.post(
         runAt: report.runAt,
       });
     } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" });
+      res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
     }
   },
 );
@@ -674,25 +744,27 @@ router.post(
 // real time, then a terminal `complete` event with the full report and
 // regression diff against the baseline.
 router.post(
-  "/evals/suites/:suiteId/runs/variant",
+  '/evals/suites/:suiteId/runs/variant',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-      "baselineRunId": z.unknown().optional(),
-      "model": z.unknown().optional(),
-      "promptId": z.unknown().optional(),
-      "strategy": z.unknown().optional(),
-      "triggeredBy": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      baselineRunId: z.unknown().optional(),
+      model: z.unknown().optional(),
+      promptId: z.unknown().optional(),
+      strategy: z.unknown().optional(),
+      triggeredBy: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     const suiteId = req.params.suiteId as string;
     const {
-      model = "gpt-4o-mini",
-      strategy = "default",
-      promptId = "v2",
+      model = 'gpt-4o-mini',
+      strategy = 'default',
+      promptId = 'v2',
       baselineRunId,
-      triggeredBy = "variant-compare",
+      triggeredBy = 'variant-compare',
     } = req.body as {
       model?: string;
       strategy?: string;
@@ -703,21 +775,21 @@ router.post(
 
     const suite = SUITE_BY_ID[suiteId] ?? suiteStore.get(suiteId);
     if (!suite) {
-      res.status(404).json({ error: "Suite not found", suiteId });
+      res.status(404).json({ error: 'Suite not found', suiteId });
       return;
     }
 
     let baseline = baselineRunId
-      ? runStore.get(baselineRunId) ?? null
-      : Array.from(runStore.values())
+      ? (runStore.get(baselineRunId) ?? null)
+      : (Array.from(runStore.values())
           .filter((r) => r.suiteId === suiteId)
-          .sort((a, b) => b.runAt.localeCompare(a.runAt))[0] ?? null;
+          .sort((a, b) => b.runAt.localeCompare(a.runAt))[0] ?? null);
     // Reject a baseline that belongs to a different suite — comparing the
     // variant against the wrong suite's run produces meaningless regression
     // reports. Be explicit when an explicit baselineRunId is supplied.
     if (baselineRunId && baseline && baseline.suiteId !== suiteId) {
       res.status(400).json({
-        error: "baseline_suite_mismatch",
+        error: 'baseline_suite_mismatch',
         message: `baselineRunId ${baselineRunId} belongs to suite ${baseline.suiteId}, not ${suiteId}`,
       });
       return;
@@ -726,10 +798,10 @@ router.post(
     // a match — but defensively ignore any mismatch here too.
     if (baseline && baseline.suiteId !== suiteId) baseline = null;
 
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Accel-Buffering", "no");
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders?.();
 
     const send = (event: string, payload: unknown) => {
@@ -738,10 +810,12 @@ router.post(
     };
 
     let aborted = false;
-    req.on("close", () => { aborted = true; });
+    req.on('close', () => {
+      aborted = true;
+    });
 
     try {
-      send("start", {
+      send('start', {
         suiteId,
         suiteName: suite.name,
         domain: suite.domain,
@@ -761,7 +835,7 @@ router.post(
         metadata: { variantModel: model, variantStrategy: strategy, variantPromptId: promptId },
         onCaseComplete: (result: any, progress: { completed: number; total: number }) => {
           if (aborted) return;
-          send("case", {
+          send('case', {
             caseId: result.caseId,
             label: result.label,
             domain: result.domain,
@@ -803,7 +877,7 @@ router.post(
         passed: report.passed,
         failed: report.failed,
         hasRegression: report.hasRegression ?? false,
-        regressionSeverity: report.regressionSeverity ?? "none",
+        regressionSeverity: report.regressionSeverity ?? 'none',
         triggeredBy: report.triggeredBy,
         avgLatencyMs: report.avgLatencyMs,
         totalCostUsd: report.totalCostUsd,
@@ -814,7 +888,7 @@ router.post(
       };
       emitAgentEvalRunContract(evalContract).catch(() => {});
 
-      send("complete", {
+      send('complete', {
         runId: report.runId,
         suiteId: report.suiteId,
         suiteName: report.suiteName,
@@ -828,7 +902,7 @@ router.post(
         totalCostUsd: report.totalCostUsd,
         totalTokensUsed: report.totalTokensUsed,
         hasRegression: report.hasRegression ?? false,
-        regressionSeverity: report.regressionSeverity ?? "none",
+        regressionSeverity: report.regressionSeverity ?? 'none',
         regressionNotes: report.regressionNotes ?? [],
         improvementNotes: report.improvementNotes ?? [],
         baselineRunId: report.baselineRunId ?? null,
@@ -840,31 +914,31 @@ router.post(
       });
       res.end();
     } catch (err) {
-      send("error", { message: err instanceof Error ? err.message : "Variant replay failed" });
+      send('error', { message: err instanceof Error ? err.message : 'Variant replay failed' });
       res.end();
     }
   },
 );
 
 router.post(
-  "/evals/run-all",
+  '/evals/run-all',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-      "domain": z.unknown().optional(),
-      "triggeredBy": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      domain: z.unknown().optional(),
+      triggeredBy: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
-      const { triggeredBy = "api", domain } = req.body as { triggeredBy?: string; domain?: string };
+      const { triggeredBy = 'api', domain } = req.body as { triggeredBy?: string; domain?: string };
 
-      const suitesToRun = domain
-        ? (SUITE_BY_DOMAIN[domain] ?? [])
-        : ALL_SUITES;
+      const suitesToRun = domain ? (SUITE_BY_DOMAIN[domain] ?? []) : ALL_SUITES;
 
       if (suitesToRun.length === 0) {
-        res.status(404).json({ error: "No suites found", domain });
+        res.status(404).json({ error: 'No suites found', domain });
         return;
       }
 
@@ -905,30 +979,32 @@ router.post(
         runIds: summary.suiteReports.map((r: any) => r.runId),
       });
     } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" });
+      res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
     }
   },
 );
 
 router.patch(
-  "/evals/scores/:scoreId/human-label",
+  '/evals/scores/:scoreId/human-label',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-      "label": z.unknown().optional(),
-      "labeledBy": z.unknown().optional(),
-      "notes": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      label: z.unknown().optional(),
+      labeledBy: z.unknown().optional(),
+      notes: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     const { scoreId } = req.params;
     const { label, notes, labeledBy } = req.body as {
-      label: "pass" | "partial" | "fail";
+      label: 'pass' | 'partial' | 'fail';
       notes?: string;
       labeledBy?: string;
     };
 
-    if (!["pass", "partial", "fail"].includes(label)) {
+    if (!['pass', 'partial', 'fail'].includes(label)) {
       res.status(400).json({ error: "label must be 'pass', 'partial', or 'fail'" });
       return;
     }
@@ -948,24 +1024,26 @@ router.patch(
       }
     }
 
-    res.status(404).json({ error: "Score not found", scoreId });
+    res.status(404).json({ error: 'Score not found', scoreId });
   },
 );
 
 router.post(
-  "/v1/evals/run",
+  '/v1/evals/run',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "analyst"),
+  requireRole('admin', 'operator', 'analyst'),
   perUserWriteSlidingLimiter,
-  validateBody(bodyShape({
-    "evalId": z.string().optional(),
-    "domain": z.string().optional(),
-    "profileId": z.string().optional(),
-    "version": z.string().optional(),
-    "queries": z.array(GoldenQuerySchema).optional(),
-    "topK": z.number().int().positive().optional(),
-    "useGoldenFixtures": z.boolean().optional(),
-  })),
+  validateBody(
+    bodyShape({
+      evalId: z.string().optional(),
+      domain: z.string().optional(),
+      profileId: z.string().optional(),
+      version: z.string().optional(),
+      queries: z.array(GoldenQuerySchema).optional(),
+      topK: z.number().int().positive().optional(),
+      useGoldenFixtures: z.boolean().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
       const {
@@ -993,26 +1071,29 @@ router.post(
 
       if (!resolvedDomain) {
         res.status(400).json({
-          error: "Valid domain or profileId is required",
+          error: 'Valid domain or profileId is required',
           validDomains: AEF_DOMAIN_PROFILE_DOMAINS,
         });
         return;
       }
 
       const tenantId = String(
-        (req as { user?: { orgs?: Array<{ orgId?: number }> } }).user?.orgs?.[0]?.orgId ?? "default",
+        (req as { user?: { orgs?: Array<{ orgId?: number }> } }).user?.orgs?.[0]?.orgId ??
+          'default',
       );
 
       // If caller pins a specific profile version, use that exact version.
       // Otherwise resolve the tenant-active pointer for this domain.
-      const profile = (profileId && version)
-        ? defaultProfileRegistry.getProfile(profileId, version)
-        : defaultProfileRegistry.getActiveProfileForTenant(tenantId, resolvedDomain);
+      const profile =
+        profileId && version
+          ? defaultProfileRegistry.getProfile(profileId, version)
+          : defaultProfileRegistry.getActiveProfileForTenant(tenantId, resolvedDomain);
 
       if (!profile) {
-        const detail = (profileId && version)
-          ? `Profile ${profileId}@${version} not found`
-          : `No active profile for domain: ${resolvedDomain}`;
+        const detail =
+          profileId && version
+            ? `Profile ${profileId}@${version} not found`
+            : `No active profile for domain: ${resolvedDomain}`;
         res.status(404).json({ error: detail });
         return;
       }
@@ -1030,17 +1111,17 @@ router.post(
           : queries;
 
       if (goldenQueries.length === 0) {
-        res.status(400).json({ error: "No queries provided and no golden fixtures available" });
+        res.status(400).json({ error: 'No queries provided and no golden fixtures available' });
         return;
       }
 
-      const triggeredBy = (req as { user?: { id?: string } }).user?.id ?? "api";
+      const triggeredBy = (req as { user?: { id?: string } }).user?.id ?? 'api';
 
       // Use the live AEF hybrid-search stack by default. Fall back to the
       // fixture-corpus mock when useGoldenFixtures is explicitly requested,
       // or when the live endpoint is unreachable (dev/CI environments).
       const fixtureMode = useGoldenFixtures;
-      let adapterMode: "live" | "fixture" = fixtureMode ? "fixture" : "live";
+      let adapterMode: 'live' | 'fixture' = fixtureMode ? 'fixture' : 'live';
       const liveAdapter = buildLiveAEFAdapter(tenantId);
       const mockFallback = buildMockCorpusAdapter(resolvedDomain);
 
@@ -1050,10 +1131,10 @@ router.post(
           try {
             return await liveAdapter.retrieve(query, profileId, k);
           } catch (liveErr) {
-            adapterMode = "fixture";
+            adapterMode = 'fixture';
             logger.warn(
               { liveErr, domain: resolvedDomain },
-              "[aef-evals] live AEF adapter unavailable, falling back to fixture corpus",
+              '[aef-evals] live AEF adapter unavailable, falling back to fixture corpus',
             );
             return mockFallback.retrieve(query, profileId, k);
           }
@@ -1068,9 +1149,9 @@ router.post(
         topK,
       });
 
-      const avgRecall = result.aggregateMetrics.find((m) => m.metric === "recall")?.value ?? 0;
-      const avgNdcg  = result.aggregateMetrics.find((m) => m.metric === "ndcg")?.value ?? 0;
-      const avgMrr   = result.aggregateMetrics.find((m) => m.metric === "mrr")?.value ?? 0;
+      const avgRecall = result.aggregateMetrics.find((m) => m.metric === 'recall')?.value ?? 0;
+      const avgNdcg = result.aggregateMetrics.find((m) => m.metric === 'ndcg')?.value ?? 0;
+      const avgMrr = result.aggregateMetrics.find((m) => m.metric === 'mrr')?.value ?? 0;
 
       const forgeMetrics: EvalForgeMetrics = {
         correctness: {
@@ -1146,7 +1227,7 @@ router.post(
         suiteId: `aef-retrieval:${resolvedDomain}`,
         suiteName: `AEF Retrieval — ${profile.displayName}`,
         domain: resolvedDomain,
-        evalType: "memory-retrieval",
+        evalType: 'memory-retrieval',
         triggeredBy,
         totalCases: result.queryCount,
         passed: result.successCount,
@@ -1171,7 +1252,7 @@ router.post(
 
       runStore.set(forgeReport.runId, forgeReport);
       persistEvalForgeRun(forgeReport).catch((err: unknown) => {
-        logger.warn({ err }, "[aef-evals] failed to persist eval run to eval_forge_runs");
+        logger.warn({ err }, '[aef-evals] failed to persist eval run to eval_forge_runs');
       });
 
       const runRecord: AEFRunRecord = {
@@ -1208,8 +1289,8 @@ router.post(
         ranAt: result.ranAt,
       });
     } catch (err) {
-      logger.error({ err }, "[aef-evals] POST /v1/evals/run failed");
-      res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" });
+      logger.error({ err }, '[aef-evals] POST /v1/evals/run failed');
+      res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
     }
   },
 );

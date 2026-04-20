@@ -8,16 +8,16 @@
 
 export const motion = {
   duration: {
-    instant: "0ms",
-    fast: "100ms",
-    base: "150ms",
-    slow: "200ms",
+    instant: '0ms',
+    fast: '100ms',
+    base: '150ms',
+    slow: '200ms',
   },
   easing: {
-    standard: "cubic-bezier(0.2, 0, 0, 1)",
-    decelerate: "cubic-bezier(0, 0, 0.2, 1)",
-    accelerate: "cubic-bezier(0.4, 0, 1, 1)",
-    sharp: "cubic-bezier(0.4, 0, 0.6, 1)",
+    standard: 'cubic-bezier(0.2, 0, 0, 1)',
+    decelerate: 'cubic-bezier(0, 0, 0.2, 1)',
+    accelerate: 'cubic-bezier(0.4, 0, 1, 1)',
+    sharp: 'cubic-bezier(0.4, 0, 0.6, 1)',
   },
 } as const;
 

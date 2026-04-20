@@ -1,6 +1,6 @@
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import type { ErrorFallbackProps } from "@szl-holdings/mobile-shared";
+import type { ErrorFallbackProps } from '@szl-holdings/mobile-shared';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   return (
@@ -17,32 +17,32 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#090810",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#090810',
     padding: 24,
   },
   title: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#c9a84c",
+    fontWeight: '700',
+    color: '#c9a84c',
     marginBottom: 8,
   },
   message: {
     fontSize: 13,
-    color: "rgba(240,238,255,0.35)",
-    textAlign: "center",
+    color: 'rgba(240,238,255,0.35)',
+    textAlign: 'center',
     marginBottom: 24,
   },
   button: {
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 6,
-    backgroundColor: "#c9a84c",
+    backgroundColor: '#c9a84c',
   },
   buttonText: {
-    color: "#090810",
+    color: '#090810',
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });

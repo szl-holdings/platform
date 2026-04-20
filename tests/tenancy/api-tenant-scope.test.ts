@@ -31,18 +31,19 @@
  *  - `artifacts/api-server/src/routes/__tests__/tenant-isolation.test.ts` — middleware-gate variant
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express, { type Request, type Response, type NextFunction } from "express";
-import request from "supertest";
+import express, { type NextFunction, type Request, type Response } from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ── DB mock — only hydrateOrgMemberships touches the DB ─────────────────────
 
 // Queue of results returned by successive db.select() calls.
 // Tests that trigger hydrateOrgMemberships (when req.user.orgs is empty)
 // push the expected rows here.
-const _hydrateQueue: Array<{ orgId: number; orgSlug: string; orgName: string; role: string }[]> = [];
+const _hydrateQueue: Array<{ orgId: number; orgSlug: string; orgName: string; role: string }[]> =
+  [];
 
-vi.mock("@szl-holdings/db", () => ({
+vi.mock('@szl-holdings/db', () => ({
   db: {
     select() {
       const result = _hydrateQueue.shift() ?? [];
@@ -56,21 +57,21 @@ vi.mock("@szl-holdings/db", () => ({
       return chain;
     },
   },
-  orgMembersTable: { orgId: "org_id", userId: "user_id" },
-  organizationsTable: { id: "id", slug: "slug", name: "name" },
+  orgMembersTable: { orgId: 'org_id', userId: 'user_id' },
+  organizationsTable: { id: 'id', slug: 'slug', name: 'name' },
 }));
 
-vi.mock("drizzle-orm", () => ({
-  eq: (_col: unknown, _val: unknown) => ({ op: "eq" }),
-  and: (..._conds: unknown[]) => ({ op: "and" }),
-  inArray: (_col: unknown, _vals: unknown) => ({ op: "inArray" }),
+vi.mock('drizzle-orm', () => ({
+  eq: (_col: unknown, _val: unknown) => ({ op: 'eq' }),
+  and: (..._conds: unknown[]) => ({ op: 'and' }),
+  inArray: (_col: unknown, _vals: unknown) => ({ op: 'inArray' }),
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/logger", () => ({
+vi.mock('../../artifacts/api-server/src/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("@szl-holdings/observability", () => ({
+vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: {
     recordAuthFailure: vi.fn(),
     recordRequest: vi.fn(),
@@ -80,12 +81,12 @@ vi.mock("@szl-holdings/observability", () => ({
   },
 }));
 
-vi.mock("../../artifacts/api-server/src/middlewares/global-auth-enforcer", () => ({
+vi.mock('../../artifacts/api-server/src/middlewares/global-auth-enforcer', () => ({
   isAllowlistedPublicPath: () => false,
   fullApiPath: (path: string) => path,
 }));
 
-import { tenantScope } from "../../artifacts/api-server/src/middlewares/tenant-scope.js";
+import { tenantScope } from '../../artifacts/api-server/src/middlewares/tenant-scope.js';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -101,39 +102,39 @@ type TestUser = {
 function orgA(): TestUser {
   return {
     id: 1,
-    displayName: "Alice",
-    email: "alice@org-a.test",
-    roles: ["operator"],
-    orgs: [{ orgId: 1, orgSlug: "org-a", orgName: "Org A", role: "member" }],
+    displayName: 'Alice',
+    email: 'alice@org-a.test',
+    roles: ['operator'],
+    orgs: [{ orgId: 1, orgSlug: 'org-a', orgName: 'Org A', role: 'member' }],
   };
 }
 
 function orgB(): TestUser {
   return {
     id: 2,
-    displayName: "Bob",
-    email: "bob@org-b.test",
-    roles: ["operator"],
-    orgs: [{ orgId: 2, orgSlug: "org-b", orgName: "Org B", role: "member" }],
+    displayName: 'Bob',
+    email: 'bob@org-b.test',
+    roles: ['operator'],
+    orgs: [{ orgId: 2, orgSlug: 'org-b', orgName: 'Org B', role: 'member' }],
   };
 }
 
 function adminUser(): TestUser {
   return {
     id: 99,
-    displayName: "Admin",
-    email: "admin@szl.test",
-    roles: ["super_admin"],
-    orgs: [{ orgId: 1, orgSlug: "org-a", orgName: "Org A", role: "owner" }],
+    displayName: 'Admin',
+    email: 'admin@szl.test',
+    roles: ['super_admin'],
+    orgs: [{ orgId: 1, orgSlug: 'org-a', orgName: 'Org A', role: 'owner' }],
   };
 }
 
 function noOrgUser(): TestUser {
   return {
     id: 10,
-    displayName: "NoOrg",
-    email: "noorg@szl.test",
-    roles: ["operator"],
+    displayName: 'NoOrg',
+    email: 'noorg@szl.test',
+    roles: ['operator'],
     orgs: [],
   };
 }
@@ -141,12 +142,12 @@ function noOrgUser(): TestUser {
 function multiOrgUser(): TestUser {
   return {
     id: 20,
-    displayName: "MultiOrg",
-    email: "multi@szl.test",
-    roles: ["operator"],
+    displayName: 'MultiOrg',
+    email: 'multi@szl.test',
+    roles: ['operator'],
     orgs: [
-      { orgId: 1, orgSlug: "org-a", orgName: "Org A", role: "member" },
-      { orgId: 3, orgSlug: "org-c", orgName: "Org C", role: "viewer" },
+      { orgId: 1, orgSlug: 'org-a', orgName: 'Org A', role: 'member' },
+      { orgId: 3, orgSlug: 'org-c', orgName: 'Org C', role: 'viewer' },
     ],
   };
 }
@@ -195,7 +196,7 @@ function buildOrgSlugApp(prefix: string, userFactory: () => TestUser) {
   const slugRouter = express.Router({ mergeParams: true });
   slugRouter.use(tenantScope({ required: true }) as express.RequestHandler);
   slugRouter.use((_req: Request, res: Response) => res.status(200).json({ ok: true }));
-  router.use("/:orgSlug", slugRouter as express.RequestHandler);
+  router.use('/:orgSlug', slugRouter as express.RequestHandler);
 
   app.use(`/${prefix}`, router as express.RequestHandler);
   return app;
@@ -208,174 +209,174 @@ beforeEach(() => {
 
 // ── Vessels — tenant isolation ───────────────────────────────────────────────
 
-describe("HTTP tenancy — Vessels domain", () => {
-  it("Org A user accesses Vessels with their own org → 200", async () => {
-    const app = buildDomainApp("vessels", orgA);
-    const res = await request(app).get("/vessels/fleets");
+describe('HTTP tenancy — Vessels domain', () => {
+  it('Org A user accesses Vessels with their own org → 200', async () => {
+    const app = buildDomainApp('vessels', orgA);
+    const res = await request(app).get('/vessels/fleets');
     expect(res.status).toBe(200);
   });
 
-  it("User with no org membership → 403", async () => {
-    const app = buildDomainApp("vessels", noOrgUser);
-    const res = await request(app).get("/vessels/fleets");
+  it('User with no org membership → 403', async () => {
+    const app = buildDomainApp('vessels', noOrgUser);
+    const res = await request(app).get('/vessels/fleets');
     expect(res.status).toBe(403);
   });
 
-  it("Org A user accessing /vessels/org-b/* via forged orgSlug → 403", async () => {
-    const app = buildOrgSlugApp("vessels", orgA);
-    const res = await request(app).get("/vessels/org-b/data");
+  it('Org A user accessing /vessels/org-b/* via forged orgSlug → 403', async () => {
+    const app = buildOrgSlugApp('vessels', orgA);
+    const res = await request(app).get('/vessels/org-b/data');
     expect(res.status).toBe(403);
   });
 
-  it("Org A user accessing /vessels/org-a/* → 200 (own org)", async () => {
-    const app = buildOrgSlugApp("vessels", orgA);
-    const res = await request(app).get("/vessels/org-a/data");
+  it('Org A user accessing /vessels/org-a/* → 200 (own org)', async () => {
+    const app = buildOrgSlugApp('vessels', orgA);
+    const res = await request(app).get('/vessels/org-a/data');
     expect(res.status).toBe(200);
   });
 
-  it("Admin user accessing /vessels/org-b/* → 200 (elevated bypass)", async () => {
-    const app = buildOrgSlugApp("vessels", adminUser);
-    const res = await request(app).get("/vessels/org-b/data");
+  it('Admin user accessing /vessels/org-b/* → 200 (elevated bypass)', async () => {
+    const app = buildOrgSlugApp('vessels', adminUser);
+    const res = await request(app).get('/vessels/org-b/data');
     expect(res.status).toBe(200);
   });
 
-  it("POST mutation from Org A user → 200 (own org, correct tenant)", async () => {
-    const app = buildDomainApp("vessels", orgA);
-    const res = await request(app).post("/vessels/alerts").send({ name: "test" });
+  it('POST mutation from Org A user → 200 (own org, correct tenant)', async () => {
+    const app = buildDomainApp('vessels', orgA);
+    const res = await request(app).post('/vessels/alerts').send({ name: 'test' });
     expect(res.status).toBe(200);
   });
 
-  it("No-org user cannot POST Vessels resources → 403", async () => {
-    const app = buildDomainApp("vessels", noOrgUser);
-    const res = await request(app).post("/vessels/alerts").send({ name: "test" });
+  it('No-org user cannot POST Vessels resources → 403', async () => {
+    const app = buildDomainApp('vessels', noOrgUser);
+    const res = await request(app).post('/vessels/alerts').send({ name: 'test' });
     expect(res.status).toBe(403);
   });
 });
 
 // ── Terra — tenant isolation ─────────────────────────────────────────────────
 
-describe("HTTP tenancy — Terra domain", () => {
-  it("Org A user accesses Terra properties → 200", async () => {
-    const app = buildDomainApp("terra", orgA);
-    const res = await request(app).get("/terra/properties");
+describe('HTTP tenancy — Terra domain', () => {
+  it('Org A user accesses Terra properties → 200', async () => {
+    const app = buildDomainApp('terra', orgA);
+    const res = await request(app).get('/terra/properties');
     expect(res.status).toBe(200);
   });
 
   it("Org B user cannot access Org A's Terra data via forged orgSlug → 403", async () => {
-    const app = buildOrgSlugApp("terra", orgB);
-    const res = await request(app).get("/terra/org-a/properties");
+    const app = buildOrgSlugApp('terra', orgB);
+    const res = await request(app).get('/terra/org-a/properties');
     expect(res.status).toBe(403);
   });
 
   it("Org B user accessing their own org's Terra resources → 200", async () => {
-    const app = buildOrgSlugApp("terra", orgB);
-    const res = await request(app).get("/terra/org-b/properties");
+    const app = buildOrgSlugApp('terra', orgB);
+    const res = await request(app).get('/terra/org-b/properties');
     expect(res.status).toBe(200);
   });
 
   it("Admin user can access any org's Terra data → 200", async () => {
-    const app = buildOrgSlugApp("terra", adminUser);
-    const res = await request(app).get("/terra/org-b/properties");
+    const app = buildOrgSlugApp('terra', adminUser);
+    const res = await request(app).get('/terra/org-b/properties');
     expect(res.status).toBe(200);
   });
 });
 
 // ── PRISM Counsel — tenant isolation ─────────────────────────────────────────
 
-describe("HTTP tenancy — PRISM Counsel domain", () => {
-  it("Org A user accesses own PRISM matters → 200", async () => {
-    const app = buildDomainApp("prism", orgA);
-    const res = await request(app).get("/prism/matters");
+describe('HTTP tenancy — PRISM Counsel domain', () => {
+  it('Org A user accesses own PRISM matters → 200', async () => {
+    const app = buildDomainApp('prism', orgA);
+    const res = await request(app).get('/prism/matters');
     expect(res.status).toBe(200);
   });
 
-  it("Org B user forging Org A orgSlug in PRISM → 403", async () => {
-    const app = buildOrgSlugApp("prism", orgB);
-    const res = await request(app).get("/prism/org-a/matters");
+  it('Org B user forging Org A orgSlug in PRISM → 403', async () => {
+    const app = buildOrgSlugApp('prism', orgB);
+    const res = await request(app).get('/prism/org-a/matters');
     expect(res.status).toBe(403);
   });
 
-  it("No-org user cannot access PRISM → 403", async () => {
-    const app = buildDomainApp("prism", noOrgUser);
-    const res = await request(app).get("/prism/matters");
+  it('No-org user cannot access PRISM → 403', async () => {
+    const app = buildDomainApp('prism', noOrgUser);
+    const res = await request(app).get('/prism/matters');
     expect(res.status).toBe(403);
   });
 });
 
 // ── Firestorm — tenant isolation ──────────────────────────────────────────────
 
-describe("HTTP tenancy — Firestorm domain", () => {
-  it("Org A user accesses own Firestorm findings → 200", async () => {
-    const app = buildDomainApp("firestorm", orgA);
-    const res = await request(app).get("/firestorm/findings");
+describe('HTTP tenancy — Firestorm domain', () => {
+  it('Org A user accesses own Firestorm findings → 200', async () => {
+    const app = buildDomainApp('firestorm', orgA);
+    const res = await request(app).get('/firestorm/findings');
     expect(res.status).toBe(200);
   });
 
-  it("Org B user forging Org A orgSlug in Firestorm → 403", async () => {
-    const app = buildOrgSlugApp("firestorm", orgB);
-    const res = await request(app).get("/firestorm/org-a/findings");
+  it('Org B user forging Org A orgSlug in Firestorm → 403', async () => {
+    const app = buildOrgSlugApp('firestorm', orgB);
+    const res = await request(app).get('/firestorm/org-a/findings');
     expect(res.status).toBe(403);
   });
 });
 
 // ── Lyte — tenant isolation ───────────────────────────────────────────────────
 
-describe("HTTP tenancy — Lyte domain", () => {
-  it("Org A user accesses Lyte scenarios → 200", async () => {
-    const app = buildDomainApp("lyte", orgA);
-    const res = await request(app).get("/lyte/scenarios");
+describe('HTTP tenancy — Lyte domain', () => {
+  it('Org A user accesses Lyte scenarios → 200', async () => {
+    const app = buildDomainApp('lyte', orgA);
+    const res = await request(app).get('/lyte/scenarios');
     expect(res.status).toBe(200);
   });
 
-  it("Cross-tenant Lyte access via forged orgSlug → 403", async () => {
-    const app = buildOrgSlugApp("lyte", orgA);
-    const res = await request(app).get("/lyte/org-b/scenarios");
+  it('Cross-tenant Lyte access via forged orgSlug → 403', async () => {
+    const app = buildOrgSlugApp('lyte', orgA);
+    const res = await request(app).get('/lyte/org-b/scenarios');
     expect(res.status).toBe(403);
   });
 });
 
 // ── Signals — tenant isolation ────────────────────────────────────────────────
 
-describe("HTTP tenancy — Signals domain", () => {
-  it("Org A user accesses Signals → 200", async () => {
-    const app = buildDomainApp("signals", orgA);
-    const res = await request(app).get("/signals");
+describe('HTTP tenancy — Signals domain', () => {
+  it('Org A user accesses Signals → 200', async () => {
+    const app = buildDomainApp('signals', orgA);
+    const res = await request(app).get('/signals');
     expect(res.status).toBe(200);
   });
 
-  it("No-org user cannot access Signals → 403", async () => {
-    const app = buildDomainApp("signals", noOrgUser);
-    const res = await request(app).get("/signals");
+  it('No-org user cannot access Signals → 403', async () => {
+    const app = buildDomainApp('signals', noOrgUser);
+    const res = await request(app).get('/signals');
     expect(res.status).toBe(403);
   });
 });
 
 // ── Multi-org user ────────────────────────────────────────────────────────────
 
-describe("HTTP tenancy — multi-org user access matrix", () => {
-  it("Multi-org user can access org-a resources → 200", async () => {
-    const app = buildOrgSlugApp("vessels", multiOrgUser);
-    const res = await request(app).get("/vessels/org-a/data");
+describe('HTTP tenancy — multi-org user access matrix', () => {
+  it('Multi-org user can access org-a resources → 200', async () => {
+    const app = buildOrgSlugApp('vessels', multiOrgUser);
+    const res = await request(app).get('/vessels/org-a/data');
     expect(res.status).toBe(200);
   });
 
-  it("Multi-org user can access org-c resources → 200", async () => {
-    const app = buildOrgSlugApp("vessels", multiOrgUser);
-    const res = await request(app).get("/vessels/org-c/data");
+  it('Multi-org user can access org-c resources → 200', async () => {
+    const app = buildOrgSlugApp('vessels', multiOrgUser);
+    const res = await request(app).get('/vessels/org-c/data');
     expect(res.status).toBe(200);
   });
 
-  it("Multi-org user is blocked from org-b (not a member) → 403", async () => {
-    const app = buildOrgSlugApp("vessels", multiOrgUser);
-    const res = await request(app).get("/vessels/org-b/data");
+  it('Multi-org user is blocked from org-b (not a member) → 403', async () => {
+    const app = buildOrgSlugApp('vessels', multiOrgUser);
+    const res = await request(app).get('/vessels/org-b/data');
     expect(res.status).toBe(403);
   });
 });
 
 // ── Elevated admin bypass ─────────────────────────────────────────────────────
 
-describe("HTTP tenancy — elevated admin bypass matrix", () => {
-  const domains = ["vessels", "terra", "prism", "firestorm", "lyte", "signals", "alloy", "aegis"];
+describe('HTTP tenancy — elevated admin bypass matrix', () => {
+  const domains = ['vessels', 'terra', 'prism', 'firestorm', 'lyte', 'signals', 'alloy', 'aegis'];
 
   for (const domain of domains) {
     it(`admin can access ${domain} cross-tenant → 200`, async () => {
@@ -388,17 +389,17 @@ describe("HTTP tenancy — elevated admin bypass matrix", () => {
 
 // ── Internal agent token bypass ───────────────────────────────────────────────
 
-describe("HTTP tenancy — internal agent has no orgs but should bypass", () => {
-  it("internal agent (isInternalAgent=true) bypasses tenant scope → 200", async () => {
+describe('HTTP tenancy — internal agent has no orgs but should bypass', () => {
+  it('internal agent (isInternalAgent=true) bypasses tenant scope → 200', async () => {
     const app = express();
     app.use(express.json());
 
     app.use((req: Request, _res: Response, next: NextFunction) => {
       (req as Record<string, unknown>).user = {
         id: 0,
-        displayName: "Internal Agent (alloy-runner)",
+        displayName: 'Internal Agent (alloy-runner)',
         email: null,
-        roles: ["ops"],
+        roles: ['ops'],
         orgs: [],
       };
       (req as Record<string, unknown>).isInternalAgent = true;
@@ -408,9 +409,9 @@ describe("HTTP tenancy — internal agent has no orgs but should bypass", () => 
     const router = express.Router({ mergeParams: true });
     router.use(tenantScope({ required: false }) as express.RequestHandler);
     router.use((_req: Request, res: Response) => res.status(200).json({ ok: true }));
-    app.use("/internal", router as express.RequestHandler);
+    app.use('/internal', router as express.RequestHandler);
 
-    const res = await request(app).get("/internal/data");
+    const res = await request(app).get('/internal/data');
     expect(res.status).toBe(200);
   });
 });

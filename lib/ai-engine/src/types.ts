@@ -4,7 +4,7 @@ export interface AgentDefinition {
   domain: string;
   systemPrompt: string;
   preferredModel: string;
-  preferredProvider: "openai" | "anthropic" | "gemini";
+  preferredProvider: 'openai' | 'anthropic' | 'gemini';
   highStakesDomains: string[];
   tools: string[];
   semanticIntents?: string[];
@@ -20,7 +20,7 @@ export interface ValidationResult {
   validated: boolean;
   validatorNotes: string;
   adjustedOutput: string;
-  status: "APPROVED" | "APPROVED_WITH_NOTES" | "REJECTED";
+  status: 'APPROVED' | 'APPROVED_WITH_NOTES' | 'REJECTED';
 }
 
 export interface AgentCallResult {
@@ -42,17 +42,17 @@ export interface RAGChunk {
   metadata?: Record<string, unknown>;
 }
 
-export type SensitivityLevel = "public" | "internal" | "confidential" | "restricted";
+export type SensitivityLevel = 'public' | 'internal' | 'confidential' | 'restricted';
 
 export type RagSourceType =
-  | "ai_decision"
-  | "case_memory"
-  | "incident"
-  | "agent_knowledge"
-  | "document"
-  | "playbook"
-  | "evidence"
-  | "alert";
+  | 'ai_decision'
+  | 'case_memory'
+  | 'incident'
+  | 'agent_knowledge'
+  | 'document'
+  | 'playbook'
+  | 'evidence'
+  | 'alert';
 
 export interface ToolDefinition {
   name: string;
@@ -87,7 +87,7 @@ export interface CrossAgentInsight {
   sourceAgentId: string;
   sourceDomain: string;
   linkedDomains: string[];
-  insightType: "risk_flag" | "opportunity" | "data_point" | "recommendation" | "alert";
+  insightType: 'risk_flag' | 'opportunity' | 'data_point' | 'recommendation' | 'alert';
   content: string;
   importance: number;
   tags: string[];
@@ -136,7 +136,7 @@ export interface ProactiveActivation {
   triggeredDomain: string;
   reason: string;
   correlatedSignals: SignalCorrelation[];
-  urgency: "low" | "medium" | "high" | "critical";
+  urgency: 'low' | 'medium' | 'high' | 'critical';
   suggestedQuery: string;
 }
 
@@ -164,9 +164,18 @@ export interface AgentPerformanceProfile {
 
 export interface ConflictResolution {
   conflictId: string;
-  agents: Array<{ agentId: string; position: string; confidence: number; evidenceStrength: number }>;
+  agents: Array<{
+    agentId: string;
+    position: string;
+    confidence: number;
+    evidenceStrength: number;
+  }>;
   resolution: string;
-  resolutionMethod: "authority_weight" | "evidence_strength" | "confidence_calibration" | "consensus";
+  resolutionMethod:
+    | 'authority_weight'
+    | 'evidence_strength'
+    | 'confidence_calibration'
+    | 'consensus';
   winningAgentId: string;
   dissent: string | null;
 }

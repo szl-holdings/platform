@@ -1,7 +1,12 @@
-import type { CovenantDecision, CovenantRequest, CovenantPermission } from "./engine.js";
-import { covenantEngine } from "./engine.js";
-import type { CovenantSubject, CovenantResource } from "./engine.js";
-import type { PrismRole } from "@szl-holdings/prism-bus";
+import type { PrismRole } from '@szl-holdings/prism-bus';
+import type {
+  CovenantDecision,
+  CovenantPermission,
+  CovenantRequest,
+  CovenantResource,
+  CovenantSubject,
+} from './engine.js';
+import { covenantEngine } from './engine.js';
 
 export interface CovenantCheckResult {
   allowed: boolean;
@@ -22,7 +27,7 @@ export function checkPermission(
     subjectAttributes?: Record<string, unknown>;
     resourceAttributes?: Record<string, unknown>;
     context?: Record<string, unknown>;
-  } = {}
+  } = {},
 ): CovenantCheckResult {
   const subject: CovenantSubject = {
     userId: options.userId,
@@ -34,7 +39,7 @@ export function checkPermission(
   const resource: CovenantResource = {
     type: resourceType,
     id: options.resourceId ?? null,
-    domain: options.domain as CovenantResource["domain"] ?? null,
+    domain: (options.domain as CovenantResource['domain']) ?? null,
     actionClass: options.actionClass ?? null,
     attributes: options.resourceAttributes,
   };
@@ -54,14 +59,14 @@ export function assertPermission(
   roles: PrismRole[],
   action: CovenantPermission,
   resourceType: string,
-  options: Parameters<typeof checkPermission>[3] = {}
+  options: Parameters<typeof checkPermission>[3] = {},
 ): void {
   const result = checkPermission(roles, action, resourceType, options);
   if (!result.allowed) {
     const err = new Error(
-      result.reason ?? `COVENANT: Permission denied — action '${action}' on '${resourceType}'`
+      result.reason ?? `COVENANT: Permission denied — action '${action}' on '${resourceType}'`,
     );
-    Object.assign(err, { code: "COVENANT_DENIED", decision: result.decision });
+    Object.assign(err, { code: 'COVENANT_DENIED', decision: result.decision });
     throw err;
   }
 }
@@ -71,12 +76,12 @@ export function getRecentDecisions(limit = 50): CovenantDecision[] {
 }
 
 export function getDeniedDecisions(limit = 50): CovenantDecision[] {
-  return covenantEngine.getDecisionLog({ limit, effect: "deny" });
+  return covenantEngine.getDecisionLog({ limit, effect: 'deny' });
 }
 
 export interface CovenantVisibleDecision {
   requestId: string;
-  effect: "allow" | "deny";
+  effect: 'allow' | 'deny';
   action: CovenantPermission;
   resourceType: string;
   domain?: string | null;

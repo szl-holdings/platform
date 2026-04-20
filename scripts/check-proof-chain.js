@@ -45,20 +45,20 @@
  * calls or deeply nested code.
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, extname, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { extname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL("..", import.meta.url).pathname;
+const ROOT = new URL('..', import.meta.url).pathname;
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
 const SCAN_DIRS = [
-  "packages",
+  'packages',
   // Only scan api-server (the only artifact that calls executeWorkflow)
-  "artifacts/api-server/src",
+  'artifacts/api-server/src',
 ];
 
 const IGNORE_PATTERNS = [
@@ -79,7 +79,7 @@ const IGNORE_PATTERNS = [
   /\.spec\.(ts|tsx|js)$/,
 ];
 
-const TS_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".mjs"]);
+const TS_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.mjs']);
 
 // ---------------------------------------------------------------------------
 // Utilities
@@ -130,29 +130,29 @@ function shouldIgnore(filePath) {
  * end of a truncated file read).
  */
 export function extractArgBlock(src, fromIdx) {
-  const openIdx = src.indexOf("(", fromIdx);
+  const openIdx = src.indexOf('(', fromIdx);
   if (openIdx === -1) return src.slice(fromIdx, Math.min(fromIdx + 5000, src.length));
 
   let depth = 0;
   let inString = false;
-  let stringChar = "";
+  let stringChar = '';
   let i = openIdx;
 
   while (i < src.length && i < openIdx + 50_000) {
     const ch = src[i];
 
     if (inString) {
-      if (ch === "\\" && i + 1 < src.length) {
+      if (ch === '\\' && i + 1 < src.length) {
         i += 2; // skip escaped character
         continue;
       }
       if (ch === stringChar) inString = false;
-    } else if (ch === '"' || ch === "'" || ch === "`") {
+    } else if (ch === '"' || ch === "'" || ch === '`') {
       inString = true;
       stringChar = ch;
-    } else if (ch === "(") {
+    } else if (ch === '(') {
       depth++;
-    } else if (ch === ")") {
+    } else if (ch === ')') {
       depth--;
       if (depth === 0) return src.slice(fromIdx, i + 1);
     }
@@ -169,11 +169,11 @@ export function extractArgBlock(src, fromIdx) {
 function isDefinitionOrMeta(lineText, fnName) {
   const trimmed = lineText.trimStart();
   return (
-    trimmed.startsWith("//") ||
-    trimmed.startsWith("*") ||
-    trimmed.startsWith("import ") ||
-    trimmed.includes(" type ") ||
-    trimmed.includes(" interface ") ||
+    trimmed.startsWith('//') ||
+    trimmed.startsWith('*') ||
+    trimmed.startsWith('import ') ||
+    trimmed.includes(' type ') ||
+    trimmed.includes(' interface ') ||
     new RegExp(`function\\s+${fnName}`).test(lineText) ||
     new RegExp(`'[^']*${fnName}`).test(lineText) ||
     new RegExp(`\`[^\`]*${fnName}`).test(lineText) ||
@@ -203,19 +203,19 @@ export function checkExecuteWorkflowCalls(filePath, src) {
   let searchFrom = 0;
 
   while (true) {
-    const callIdx = src.indexOf("executeWorkflow(", searchFrom);
+    const callIdx = src.indexOf('executeWorkflow(', searchFrom);
     if (callIdx === -1) break;
 
-    const lineStart = src.lastIndexOf("\n", callIdx) + 1;
-    const lineText = src.slice(lineStart, src.indexOf("\n", callIdx));
+    const lineStart = src.lastIndexOf('\n', callIdx) + 1;
+    const lineText = src.slice(lineStart, src.indexOf('\n', callIdx));
 
     if (
-      lineText.trimStart().startsWith("import ") ||
-      lineText.trimStart().startsWith("export") ||
-      lineText.trimStart().startsWith("//") ||
-      lineText.trimStart().startsWith("*") ||
-      lineText.includes("type ") ||
-      lineText.includes("interface ") ||
+      lineText.trimStart().startsWith('import ') ||
+      lineText.trimStart().startsWith('export') ||
+      lineText.trimStart().startsWith('//') ||
+      lineText.trimStart().startsWith('*') ||
+      lineText.includes('type ') ||
+      lineText.includes('interface ') ||
       /function\s+executeWorkflow/.test(lineText)
     ) {
       searchFrom = callIdx + 1;
@@ -228,8 +228,7 @@ export function checkExecuteWorkflowCalls(filePath, src) {
     // Real policyEvaluation (not the Override variant) — any value is acceptable here;
     // the action-engine's Zod schema validates the shape at runtime.
     const hasPolicyEvaluation =
-      /\bpolicyEvaluation\s*:(?!\s*Override)/.test(block) ||
-      /\bpolicyEvaluation\s*,/.test(block);
+      /\bpolicyEvaluation\s*:(?!\s*Override)/.test(block) || /\bpolicyEvaluation\s*,/.test(block);
 
     // Bypass markers require the literal boolean `true` — dynamic expressions (variables,
     // ternaries, null-coalescing) do NOT qualify because they may be false on the live path.
@@ -238,12 +237,12 @@ export function checkExecuteWorkflowCalls(filePath, src) {
     const hasIsSimulation = /\bisSimulation\s*:\s*true\b/.test(block);
 
     if (!hasPolicyEvaluation && !hasPolicyOverride && !hasIsDryRun && !hasIsSimulation) {
-      const lineNum = src.slice(0, callIdx).split("\n").length;
+      const lineNum = src.slice(0, callIdx).split('\n').length;
       violations.push({
         file: relative(ROOT, filePath),
         line: lineNum,
         issue:
-          "executeWorkflow() call missing policyEvaluation, policyEvaluationOverride: true, isDryRun: true, or isSimulation: true — dynamic bypass expressions (e.g. isDryRun: req.isDryRun ?? false) are not accepted because they may be false on the live execution path",
+          'executeWorkflow() call missing policyEvaluation, policyEvaluationOverride: true, isDryRun: true, or isSimulation: true — dynamic bypass expressions (e.g. isDryRun: req.isDryRun ?? false) are not accepted because they may be false on the live execution path',
       });
     }
 
@@ -274,22 +273,22 @@ export function checkBuildPolicyEvaluationCalls(filePath, src) {
   const violations = [];
 
   const REQUIRED_ARGS = [
-    "evidenceChain",
-    "freshnessScore",
-    "confidence",
-    "projectedImpact",
-    "projectedRisk",
+    'evidenceChain',
+    'freshnessScore',
+    'confidence',
+    'projectedImpact',
+    'projectedRisk',
   ];
 
   let searchFrom = 0;
   while (true) {
-    const callIdx = src.indexOf("buildPolicyEvaluation(", searchFrom);
+    const callIdx = src.indexOf('buildPolicyEvaluation(', searchFrom);
     if (callIdx === -1) break;
 
-    const lineStart = src.lastIndexOf("\n", callIdx) + 1;
-    const lineText = src.slice(lineStart, src.indexOf("\n", callIdx));
+    const lineStart = src.lastIndexOf('\n', callIdx) + 1;
+    const lineText = src.slice(lineStart, src.indexOf('\n', callIdx));
 
-    if (isDefinitionOrMeta(lineText, "buildPolicyEvaluation")) {
+    if (isDefinitionOrMeta(lineText, 'buildPolicyEvaluation')) {
       searchFrom = callIdx + 1;
       continue;
     }
@@ -309,11 +308,11 @@ export function checkBuildPolicyEvaluationCalls(filePath, src) {
     });
 
     if (missing.length > 0) {
-      const lineNum = src.slice(0, callIdx).split("\n").length;
+      const lineNum = src.slice(0, callIdx).split('\n').length;
       violations.push({
         file: relative(ROOT, filePath),
         line: lineNum,
-        issue: `buildPolicyEvaluation() call at line ${lineNum} is missing required proof-chain arg(s): ${missing.join(", ")}`,
+        issue: `buildPolicyEvaluation() call at line ${lineNum} is missing required proof-chain arg(s): ${missing.join(', ')}`,
       });
     }
 
@@ -350,25 +349,25 @@ export function checkCreateRecommendationCalls(filePath, src) {
   //   projectedRisk     — human-readable risk statement if action is NOT taken
   //   policyEvaluation  — explicit policy status at construction time (must not be omitted)
   const REQUIRED_ARGS = [
-    "evidenceIds",
-    "confidence",
-    "freshness",
-    "rationale",
-    "domain",
-    "projectedImpact",
-    "projectedRisk",
-    "policyEvaluation",
+    'evidenceIds',
+    'confidence',
+    'freshness',
+    'rationale',
+    'domain',
+    'projectedImpact',
+    'projectedRisk',
+    'policyEvaluation',
   ];
 
   let searchFrom = 0;
   while (true) {
-    const callIdx = src.indexOf("createRecommendation(", searchFrom);
+    const callIdx = src.indexOf('createRecommendation(', searchFrom);
     if (callIdx === -1) break;
 
-    const lineStart = src.lastIndexOf("\n", callIdx) + 1;
-    const lineText = src.slice(lineStart, src.indexOf("\n", callIdx));
+    const lineStart = src.lastIndexOf('\n', callIdx) + 1;
+    const lineText = src.slice(lineStart, src.indexOf('\n', callIdx));
 
-    if (isDefinitionOrMeta(lineText, "createRecommendation")) {
+    if (isDefinitionOrMeta(lineText, 'createRecommendation')) {
       searchFrom = callIdx + 1;
       continue;
     }
@@ -382,11 +381,11 @@ export function checkCreateRecommendationCalls(filePath, src) {
     });
 
     if (missing.length > 0) {
-      const lineNum = src.slice(0, callIdx).split("\n").length;
+      const lineNum = src.slice(0, callIdx).split('\n').length;
       violations.push({
         file: relative(ROOT, filePath),
         line: lineNum,
-        issue: `createRecommendation() call at line ${lineNum} is missing required proof-chain arg(s): ${missing.join(", ")}`,
+        issue: `createRecommendation() call at line ${lineNum} is missing required proof-chain arg(s): ${missing.join(', ')}`,
       });
     }
 
@@ -429,17 +428,17 @@ export function checkRecommendationTypeAssertions(filePath, src) {
   while ((match = asPattern.exec(src)) !== null) {
     // Allow in type-only positions: function parameter type annotations (`param: Recommendation`)
     // are fine, but `as Recommendation` is always a value-space type assertion.
-    const lineNum = src.slice(0, match.index).split("\n").length;
-    const lineStart = src.lastIndexOf("\n", match.index) + 1;
-    const lineText = src.slice(lineStart, src.indexOf("\n", match.index));
+    const lineNum = src.slice(0, match.index).split('\n').length;
+    const lineStart = src.lastIndexOf('\n', match.index) + 1;
+    const lineText = src.slice(lineStart, src.indexOf('\n', match.index));
 
     // Skip JSDoc/comment lines and import/type lines
     if (
-      lineText.trimStart().startsWith("//") ||
-      lineText.trimStart().startsWith("*") ||
-      lineText.includes("import ") ||
-      lineText.includes("type ") ||
-      lineText.includes("interface ")
+      lineText.trimStart().startsWith('//') ||
+      lineText.trimStart().startsWith('*') ||
+      lineText.includes('import ') ||
+      lineText.includes('type ') ||
+      lineText.includes('interface ')
     ) {
       continue;
     }
@@ -448,8 +447,8 @@ export function checkRecommendationTypeAssertions(filePath, src) {
       file: relative(ROOT, filePath),
       line: lineNum,
       issue:
-        "`as Recommendation` type assertion bypasses createRecommendation() and proof-chain validation. " +
-        "Deserialize fields and pass them through createRecommendation() instead.",
+        '`as Recommendation` type assertion bypasses createRecommendation() and proof-chain validation. ' +
+        'Deserialize fields and pass them through createRecommendation() instead.',
     });
   }
 
@@ -459,17 +458,17 @@ export function checkRecommendationTypeAssertions(filePath, src) {
   // Must not match generic type parameters like Array<Recommendation> or Map<string, Recommendation>.
   const legacyPattern = /<Recommendation>/g;
   while ((match = legacyPattern.exec(src)) !== null) {
-    const lineNum = src.slice(0, match.index).split("\n").length;
-    const lineStart = src.lastIndexOf("\n", match.index) + 1;
-    const lineText = src.slice(lineStart, src.indexOf("\n", match.index));
+    const lineNum = src.slice(0, match.index).split('\n').length;
+    const lineStart = src.lastIndexOf('\n', match.index) + 1;
+    const lineText = src.slice(lineStart, src.indexOf('\n', match.index));
 
     // Skip comment/import/type lines
     if (
-      lineText.trimStart().startsWith("//") ||
-      lineText.trimStart().startsWith("*") ||
-      lineText.includes("import ") ||
-      lineText.includes("type ") ||
-      lineText.includes("interface ")
+      lineText.trimStart().startsWith('//') ||
+      lineText.trimStart().startsWith('*') ||
+      lineText.includes('import ') ||
+      lineText.includes('type ') ||
+      lineText.includes('interface ')
     ) {
       continue;
     }
@@ -486,8 +485,8 @@ export function checkRecommendationTypeAssertions(filePath, src) {
       file: relative(ROOT, filePath),
       line: lineNum,
       issue:
-        "`<Recommendation>` legacy cast assertion bypasses createRecommendation() and proof-chain validation. " +
-        "Deserialize fields and pass them through createRecommendation() instead.",
+        '`<Recommendation>` legacy cast assertion bypasses createRecommendation() and proof-chain validation. ' +
+        'Deserialize fields and pass them through createRecommendation() instead.',
     });
   }
 
@@ -516,13 +515,13 @@ export function removeNestedBraces(src) {
   // This ensures that field-name searches only match top-level argument keys,
   // not identically-named fields inside nested evidence objects or arrays.
 
-  let result = "";
+  let result = '';
   let depth = 0;
   let inString = false;
-  let stringChar = "";
+  let stringChar = '';
 
   // Skip to just after the outer opening `(` of the function call.
-  const openParen = src.indexOf("(");
+  const openParen = src.indexOf('(');
   if (openParen === -1) return src;
   let i = openParen + 1;
 
@@ -530,20 +529,23 @@ export function removeNestedBraces(src) {
     const ch = src[i];
 
     if (inString) {
-      if (ch === "\\" && i + 1 < src.length) { i += 2; continue; }
+      if (ch === '\\' && i + 1 < src.length) {
+        i += 2;
+        continue;
+      }
       if (ch === stringChar) inString = false;
       if (depth === 1) result += ch; // capture string content at top level
-    } else if (ch === '"' || ch === "'" || ch === "`") {
+    } else if (ch === '"' || ch === "'" || ch === '`') {
       inString = true;
       stringChar = ch;
       if (depth === 1) result += ch;
-    } else if (ch === "{" || ch === "[") {
+    } else if (ch === '{' || ch === '[') {
       depth++;
       // Do not emit the bracket itself — we only need the key names.
-    } else if (ch === "}" || ch === "]") {
+    } else if (ch === '}' || ch === ']') {
       depth--;
       if (depth < 0) break; // exited the outer argument list
-    } else if (ch === ")" && depth === 0) {
+    } else if (ch === ')' && depth === 0) {
       break; // end of the outer call paren
     } else if (depth === 1) {
       result += ch; // capture key names, colons, commas, scalar values
@@ -575,7 +577,7 @@ if (isMain) {
       try {
         const stat = statSync(filePath);
         if (stat.size > 500_000) continue; // skip very large generated files
-        src = readFileSync(filePath, "utf8");
+        src = readFileSync(filePath, 'utf8');
       } catch {
         continue;
       }
@@ -592,7 +594,7 @@ if (isMain) {
   // -------------------------------------------------------------------------
 
   if (allViolations.length === 0) {
-    console.log("✅  proof-chain check passed — no violations found.");
+    console.log('✅  proof-chain check passed — no violations found.');
     process.exit(0);
   } else {
     console.error(`\n❌  proof-chain check found ${allViolations.length} violation(s):\n`);
@@ -601,20 +603,20 @@ if (isMain) {
       console.error(`    → ${v.issue}\n`);
     }
     console.error(
-      "Fix:\n" +
-      "  Gate 1 — executeWorkflow() must supply one of:\n" +
-      "    policyEvaluation: <PolicyEvaluation>  (production path)\n" +
-      "    policyEvaluationOverride: true        (test/demo override — must be literal true)\n" +
-      "    isDryRun: true                        (dry-run path — must be literal true)\n" +
-      "    isSimulation: true                    (simulation path — must be literal true)\n" +
-      "  Note: dynamic expressions (e.g. isDryRun: req.isDryRun ?? false) are NOT accepted.\n" +
-      "  Gate 2 — buildPolicyEvaluation() must supply all 5 proof-chain args:\n" +
-      "    evidenceChain, freshnessScore, confidence, projectedImpact, projectedRisk\n" +
-      "  Gate 3 — createRecommendation() must supply all 8 proof-chain fields:\n" +
-      "    evidenceIds, confidence, freshness, rationale, domain,\n" +
-      "    projectedImpact, projectedRisk, policyEvaluation\n" +
-      "  Gate 4 — `as Recommendation` type assertions are banned in production files.\n" +
-      "    Pass fields through createRecommendation() to ensure proof-chain validation.\n"
+      'Fix:\n' +
+        '  Gate 1 — executeWorkflow() must supply one of:\n' +
+        '    policyEvaluation: <PolicyEvaluation>  (production path)\n' +
+        '    policyEvaluationOverride: true        (test/demo override — must be literal true)\n' +
+        '    isDryRun: true                        (dry-run path — must be literal true)\n' +
+        '    isSimulation: true                    (simulation path — must be literal true)\n' +
+        '  Note: dynamic expressions (e.g. isDryRun: req.isDryRun ?? false) are NOT accepted.\n' +
+        '  Gate 2 — buildPolicyEvaluation() must supply all 5 proof-chain args:\n' +
+        '    evidenceChain, freshnessScore, confidence, projectedImpact, projectedRisk\n' +
+        '  Gate 3 — createRecommendation() must supply all 8 proof-chain fields:\n' +
+        '    evidenceIds, confidence, freshness, rationale, domain,\n' +
+        '    projectedImpact, projectedRisk, policyEvaluation\n' +
+        '  Gate 4 — `as Recommendation` type assertions are banned in production files.\n' +
+        '    Pass fields through createRecommendation() to ensure proof-chain validation.\n',
     );
     process.exit(1);
   }

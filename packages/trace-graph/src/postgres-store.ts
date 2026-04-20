@@ -1,8 +1,19 @@
-import { and, desc, eq, gte, lte, sql, type InferInsertModel, type SQL, inArray, lt } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { TraceRecord } from "./schema.js";
-import type { TraceStore } from "./store.js";
+import {
+  and,
+  desc,
+  eq,
+  gte,
+  type InferInsertModel,
+  inArray,
+  lt,
+  lte,
+  type SQL,
+  sql,
+} from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
+import type { TraceRecord } from './schema.js';
+import type { TraceStore } from './store.js';
 
 export interface PostgresTraceStoreLogger {
   info?: (...args: unknown[]) => void;
@@ -80,7 +91,7 @@ interface TraceRowShape {
 
 function buildRow(trace: TraceRecord): InferInsertModel<TracesTableLike> {
   const md = trace.metadata ?? {};
-  const domain = typeof md["domain"] === "string" ? (md["domain"] as string) : null;
+  const domain = typeof md['domain'] === 'string' ? (md['domain'] as string) : null;
   const row = {
     traceId: trace.traceId,
     requestId: trace.requestId ?? null,
@@ -108,10 +119,10 @@ function buildRow(trace: TraceRecord): InferInsertModel<TracesTableLike> {
 }
 
 function fromRow(row: unknown): TraceRecord | undefined {
-  if (!row || typeof row !== "object") return undefined;
+  if (!row || typeof row !== 'object') return undefined;
   const r = row as Partial<TraceRowShape>;
   const rec = r.outputs?.record;
-  if (rec && typeof rec === "object" && typeof (rec as TraceRecord).traceId === "string") {
+  if (rec && typeof rec === 'object' && typeof (rec as TraceRecord).traceId === 'string') {
     return rec as TraceRecord;
   }
   return undefined;
@@ -124,7 +135,7 @@ export class PostgresTraceStore implements TraceStore {
   private flushing = false;
   private flushTimer: ReturnType<typeof setInterval> | undefined;
   private readonly opts: Required<
-    Pick<PostgresTraceStoreOptions, "flushIntervalMs" | "hydrateLimit" | "retentionDays">
+    Pick<PostgresTraceStoreOptions, 'flushIntervalMs' | 'hydrateLimit' | 'retentionDays'>
   > &
     PostgresTraceStoreOptions;
 
@@ -138,7 +149,7 @@ export class PostgresTraceStore implements TraceStore {
     if (this.opts.flushIntervalMs > 0) {
       this.flushTimer = setInterval(() => {
         void this.flush().catch((err) =>
-          this.opts.logger?.warn?.({ err }, "PostgresTraceStore: scheduled flush failed"),
+          this.opts.logger?.warn?.({ err }, 'PostgresTraceStore: scheduled flush failed'),
         );
       }, this.opts.flushIntervalMs);
       this.flushTimer.unref?.();
@@ -160,7 +171,7 @@ export class PostgresTraceStore implements TraceStore {
     sessionId?: string;
     workflowId?: string;
     agentId?: string;
-    status?: TraceRecord["status"];
+    status?: TraceRecord['status'];
   }): TraceRecord[] {
     let results = Array.from(this.cache.values());
     if (filter?.sessionId) results = results.filter((t) => t.sessionId === filter.sessionId);
@@ -239,17 +250,14 @@ export class PostgresTraceStore implements TraceStore {
       if (filter.hasErrors === true) traces = traces.filter((t) => t.errors.length > 0);
       if (filter.hasErrors === false) traces = traces.filter((t) => t.errors.length === 0);
       if (filter.hasPolicyBlock === true) {
-        traces = traces.filter((t) => t.guardrailResults.some((g) => g.outcome === "block"));
+        traces = traces.filter((t) => t.guardrailResults.some((g) => g.outcome === 'block'));
       }
 
       const total = (totals[0]?.count as number | undefined) ?? traces.length;
 
       return { traces, total, limit, offset };
     } catch (err) {
-      this.opts.logger?.error?.(
-        { err },
-        "PostgresTraceStore: queryHistory failed",
-      );
+      this.opts.logger?.error?.({ err }, 'PostgresTraceStore: queryHistory failed');
       return { traces: [], total: 0, limit, offset };
     }
   }
@@ -270,16 +278,10 @@ export class PostgresTraceStore implements TraceStore {
           loaded++;
         }
       }
-      this.opts.logger?.info?.(
-        { loaded, max },
-        "PostgresTraceStore: hydrated cache from database",
-      );
+      this.opts.logger?.info?.({ loaded, max }, 'PostgresTraceStore: hydrated cache from database');
       return loaded;
     } catch (err) {
-      this.opts.logger?.error?.(
-        { err },
-        "PostgresTraceStore: failed to hydrate from database",
-      );
+      this.opts.logger?.error?.({ err }, 'PostgresTraceStore: failed to hydrate from database');
       return 0;
     }
   }
@@ -301,18 +303,15 @@ export class PostgresTraceStore implements TraceStore {
       for (const trace of writes) {
         try {
           const row = buildRow(trace);
-          await this.opts.db
-            .insert(this.opts.tracesTable)
-            .values(row)
-            .onConflictDoUpdate({
-              target: this.opts.tracesTable.traceId,
-              set: row,
-            });
+          await this.opts.db.insert(this.opts.tracesTable).values(row).onConflictDoUpdate({
+            target: this.opts.tracesTable.traceId,
+            set: row,
+          });
           saved++;
         } catch (err) {
           this.opts.logger?.warn?.(
             { err, traceId: trace.traceId },
-            "PostgresTraceStore: upsert failed; re-queuing",
+            'PostgresTraceStore: upsert failed; re-queuing',
           );
           this.pendingWrites.set(trace.traceId, trace);
         }
@@ -324,10 +323,7 @@ export class PostgresTraceStore implements TraceStore {
             .where(inArray(this.opts.tracesTable.traceId, deletes));
           deleted = deletes.length;
         } catch (err) {
-          this.opts.logger?.warn?.(
-            { err },
-            "PostgresTraceStore: bulk delete failed; re-queuing",
-          );
+          this.opts.logger?.warn?.({ err }, 'PostgresTraceStore: bulk delete failed; re-queuing');
           for (const id of deletes) this.pendingDeletes.add(id);
         }
       }
@@ -356,11 +352,11 @@ export class PostgresTraceStore implements TraceStore {
         .where(lt(this.opts.tracesTable.startedAt, cutoff));
       dbRemoved = (result as { rowCount?: number | null }).rowCount ?? 0;
     } catch (err) {
-      this.opts.logger?.warn?.({ err }, "PostgresTraceStore: retention sweep failed");
+      this.opts.logger?.warn?.({ err }, 'PostgresTraceStore: retention sweep failed');
     }
     this.opts.logger?.info?.(
       { cacheRemoved, dbRemoved, cutoff: cutoff.toISOString() },
-      "PostgresTraceStore: retention sweep complete",
+      'PostgresTraceStore: retention sweep complete',
     );
     return { cacheRemoved, dbRemoved };
   }

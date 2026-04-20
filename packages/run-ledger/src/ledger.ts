@@ -1,15 +1,15 @@
-import { randomUUID } from "crypto";
 import {
-  RunLedgerEntrySchema,
-  type RunLedgerEntry,
-  type LedgerToolCall,
-  type LedgerSource,
   type LedgerApprovalEvent,
-  type LedgerPolicyOutcome,
   type LedgerEvalScore,
+  type LedgerPolicyOutcome,
+  type LedgerSource,
   type LedgerStageTiming,
+  type LedgerToolCall,
   type QualityGateResult,
-} from "@szl-holdings/contracts/governance";
+  type RunLedgerEntry,
+  RunLedgerEntrySchema,
+} from '@szl-holdings/contracts/governance';
+import { randomUUID } from 'crypto';
 
 // ─── Store ───────────────────────────────────────────────────────────────────
 
@@ -20,7 +20,7 @@ export interface RunLedgerStore {
   getByTraceId(traceId: string): RunLedgerEntry[];
   list(filter?: {
     tenantId?: string;
-    gateStatus?: RunLedgerEntry["gateStatus"];
+    gateStatus?: RunLedgerEntry['gateStatus'];
     limit?: number;
     offset?: number;
   }): RunLedgerEntry[];
@@ -61,13 +61,11 @@ export class InMemoryRunLedgerStore implements RunLedgerStore {
 
   list(filter?: {
     tenantId?: string;
-    gateStatus?: RunLedgerEntry["gateStatus"];
+    gateStatus?: RunLedgerEntry['gateStatus'];
     limit?: number;
     offset?: number;
   }): RunLedgerEntry[] {
-    let all = Array.from(this.entries.values()).sort(
-      (a, b) => b.createdAt - a.createdAt,
-    );
+    let all = Array.from(this.entries.values()).sort((a, b) => b.createdAt - a.createdAt);
     if (filter?.tenantId) all = all.filter((e) => e.tenantId === filter.tenantId);
     if (filter?.gateStatus) all = all.filter((e) => e.gateStatus === filter.gateStatus);
     const offset = filter?.offset ?? 0;
@@ -95,12 +93,24 @@ export class MutableRunLedgerStore implements RunLedgerStore {
     return this.backend;
   }
 
-  save(entry: RunLedgerEntry): void { this.backend.save(entry); }
-  get(ledgerId: string): RunLedgerEntry | undefined { return this.backend.get(ledgerId); }
-  getByRunId(runId: string): RunLedgerEntry | undefined { return this.backend.getByRunId(runId); }
-  getByTraceId(traceId: string): RunLedgerEntry[] { return this.backend.getByTraceId(traceId); }
-  list(filter?: Parameters<RunLedgerStore["list"]>[0]): RunLedgerEntry[] { return this.backend.list(filter); }
-  count(): number { return this.backend.count(); }
+  save(entry: RunLedgerEntry): void {
+    this.backend.save(entry);
+  }
+  get(ledgerId: string): RunLedgerEntry | undefined {
+    return this.backend.get(ledgerId);
+  }
+  getByRunId(runId: string): RunLedgerEntry | undefined {
+    return this.backend.getByRunId(runId);
+  }
+  getByTraceId(traceId: string): RunLedgerEntry[] {
+    return this.backend.getByTraceId(traceId);
+  }
+  list(filter?: Parameters<RunLedgerStore['list']>[0]): RunLedgerEntry[] {
+    return this.backend.list(filter);
+  }
+  count(): number {
+    return this.backend.count();
+  }
 }
 
 export const defaultRunLedgerStore = new MutableRunLedgerStore();
@@ -216,7 +226,7 @@ export class RunLedgerBuilder {
       startedAt: this.startedAt,
       completedAt,
       totalDurationMs: completedAt - this.startedAt,
-      gateStatus: gateResult?.status ?? "pending",
+      gateStatus: gateResult?.status ?? 'pending',
       gateResult,
       createdAt: this.createdAt,
     });
@@ -267,15 +277,11 @@ export function buildLedgerFromRun(opts: {
 
   for (const step of opts.stepResults ?? []) {
     builder.addToolCall({
-      toolId: step.toolId ?? "default",
+      toolId: step.toolId ?? 'default',
       stepId: step.stepId,
       latencyMs: step.durationMs ?? 0,
       outcome:
-        step.status === "completed"
-          ? "success"
-          : step.status === "skipped"
-          ? "skipped"
-          : "failure",
+        step.status === 'completed' ? 'success' : step.status === 'skipped' ? 'skipped' : 'failure',
       error: step.error,
     });
   }

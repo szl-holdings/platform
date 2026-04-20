@@ -1,23 +1,18 @@
-import { Router, type IRouter } from "express";
-import {
-  db,
-  usersTable,
-  sessionsTable,
-  apiKeysTable,
-} from "@szl-holdings/db";
-import { eq, sql } from "drizzle-orm";
-import { authMiddleware } from "../middlewares/auth";
-import { sendSuccess, sendNoContent, handleRouteError } from "../lib/api-response";
-import { logger } from "../lib/logger";
-import { z } from "zod";
-import { validateBody } from "../lib/validation";
-import { gdprLimiter } from "../middlewares/rate-limiters";
-import { hashEmail } from "./contact";
+import { apiKeysTable, db, sessionsTable, usersTable } from '@szl-holdings/db';
+import { eq, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { handleRouteError, sendNoContent, sendSuccess } from '../lib/api-response';
+import { logger } from '../lib/logger';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
+import { gdprLimiter } from '../middlewares/rate-limiters';
+import { hashEmail } from './contact';
 
 const router: IRouter = Router();
 
 const erasureBodySchema = z.object({
-  confirmation: z.literal("DELETE MY DATA", {
+  confirmation: z.literal('DELETE MY DATA', {
     errorMap: () => ({ message: 'confirmation must equal exactly "DELETE MY DATA"' }),
   }),
   reason: z.string().max(500).optional(),
@@ -38,34 +33,43 @@ const erasureBodySchema = z.object({
  * FIELD_ENCRYPTION_KEY used for AES-256-GCM encryption, matching the emailHash stored
  * at submission time. Rows matching that hash are hard-deleted before user row deletion.
  */
-router.post("/gdpr/erasure", authMiddleware(), gdprLimiter, validateBody(erasureBodySchema), async (req, res) => {
-  try {
-    const userId = req.user!.id;
-    const userEmail = req.user!.email;
+router.post(
+  '/gdpr/erasure',
+  authMiddleware(),
+  gdprLimiter,
+  validateBody(erasureBodySchema),
+  async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const userEmail = req.user!.email;
 
-    logger.info({ userId }, "[gdpr] Right-to-erasure requested — initiating atomic hard delete");
+      logger.info({ userId }, '[gdpr] Right-to-erasure requested — initiating atomic hard delete');
 
-    const emailHash = userEmail ? hashEmail(userEmail) : null;
+      const emailHash = userEmail ? hashEmail(userEmail) : null;
 
-    await db.transaction(async (tx) => {
-      if (emailHash) {
-        await tx.execute(
-          sql`DELETE FROM platform_contact_requests WHERE email_hash = ${emailHash}`
-        );
-      }
-      await tx.delete(usersTable).where(eq(usersTable.id, userId));
-    });
+      await db.transaction(async (tx) => {
+        if (emailHash) {
+          await tx.execute(
+            sql`DELETE FROM platform_contact_requests WHERE email_hash = ${emailHash}`,
+          );
+        }
+        await tx.delete(usersTable).where(eq(usersTable.id, userId));
+      });
 
-    logger.info({ userId, ip: req.ip, reason: "gdpr_erasure", action: "user_hard_deleted" }, "[gdpr] AUDIT: user data erased under GDPR Article 17 — contact submissions and user row deleted atomically; all FK-cascaded tables purged by DB engine");
+      logger.info(
+        { userId, ip: req.ip, reason: 'gdpr_erasure', action: 'user_hard_deleted' },
+        '[gdpr] AUDIT: user data erased under GDPR Article 17 — contact submissions and user row deleted atomically; all FK-cascaded tables purged by DB engine',
+      );
 
-    sendNoContent(res);
-  } catch (err) {
-    logger.error({ err }, "[gdpr] Erasure failed");
-    handleRouteError(res, err, "Data erasure failed");
-  }
-});
+      sendNoContent(res);
+    } catch (err) {
+      logger.error({ err }, '[gdpr] Erasure failed');
+      handleRouteError(res, err, 'Data erasure failed');
+    }
+  },
+);
 
-router.get("/gdpr/export", authMiddleware(), gdprLimiter, async (req, res) => {
+router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
   try {
     const userId = req.user!.id;
 
@@ -107,11 +111,11 @@ router.get("/gdpr/export", authMiddleware(), gdprLimiter, async (req, res) => {
 
     let activityLogs: unknown[] = [];
     try {
-      const { queryAuditEvents } = await import("@szl-holdings/audit");
+      const { queryAuditEvents } = await import('@szl-holdings/audit');
       const events = await queryAuditEvents({ userId, limit: 1000 });
       activityLogs = events ?? [];
     } catch (_err) {
-      logger.warn({ userId }, "[gdpr] Could not load audit events for export (non-fatal)");
+      logger.warn({ userId }, '[gdpr] Could not load audit events for export (non-fatal)');
     }
 
     const exportPayload = {
@@ -122,126 +126,133 @@ router.get("/gdpr/export", authMiddleware(), gdprLimiter, async (req, res) => {
       apiKeys,
       activityLogs,
       dataProcessingBasis: {
-        legalBasis: "legitimate_interest",
-        purpose: "Platform service delivery and security",
-        retentionPeriod: "Data retained for 36 months from last activity, then purged",
+        legalBasis: 'legitimate_interest',
+        purpose: 'Platform service delivery and security',
+        retentionPeriod: 'Data retained for 36 months from last activity, then purged',
         thirdPartyProcessors: [
-          { name: "Replit", purpose: "Infrastructure hosting", dataAccess: "Platform environment" },
-          { name: "Stripe", purpose: "Payment processing", dataAccess: "Billing data only (handled by Stripe)" },
+          { name: 'Replit', purpose: 'Infrastructure hosting', dataAccess: 'Platform environment' },
+          {
+            name: 'Stripe',
+            purpose: 'Payment processing',
+            dataAccess: 'Billing data only (handled by Stripe)',
+          },
         ],
       },
     };
 
     try {
-      const { logActivity } = await import("../lib/activity-logger");
-      await logActivity(req, "read", "user_export", String(userId));
+      const { logActivity } = await import('../lib/activity-logger');
+      await logActivity(req, 'read', 'user_export', String(userId));
     } catch (_logErr) {
-      logger.warn({ userId }, "[gdpr] Export audit log failed (non-fatal)");
+      logger.warn({ userId }, '[gdpr] Export audit log failed (non-fatal)');
     }
 
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Content-Disposition", `attachment; filename="user-data-export-${userId}-${Date.now()}.json"`);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="user-data-export-${userId}-${Date.now()}.json"`,
+    );
     res.status(200).json(exportPayload);
   } catch (err) {
-    logger.error({ err }, "[gdpr] Export failed");
-    handleRouteError(res, err, "Data export failed");
+    logger.error({ err }, '[gdpr] Export failed');
+    handleRouteError(res, err, 'Data export failed');
   }
 });
 
-router.get("/gdpr/data-processing-records", authMiddleware(), gdprLimiter, async (_req, res) => {
+router.get('/gdpr/data-processing-records', authMiddleware(), gdprLimiter, async (_req, res) => {
   try {
     const records = {
       controller: {
-        name: "SZL Holdings",
-        contact: "privacy@szlholdings.com",
-        address: "On file with DPA",
+        name: 'SZL Holdings',
+        contact: 'privacy@szlholdings.com',
+        address: 'On file with DPA',
       },
       processingActivities: [
         {
-          id: "auth",
-          name: "Authentication & Session Management",
-          legalBasis: "Contract performance",
-          dataCategories: ["identity", "authentication_tokens", "ip_addresses"],
-          retentionPeriod: "30 days for sessions, 36 months for audit logs",
-          recipients: ["Internal systems only"],
+          id: 'auth',
+          name: 'Authentication & Session Management',
+          legalBasis: 'Contract performance',
+          dataCategories: ['identity', 'authentication_tokens', 'ip_addresses'],
+          retentionPeriod: '30 days for sessions, 36 months for audit logs',
+          recipients: ['Internal systems only'],
           crossBorderTransfer: false,
-          erasurePolicy: "Hard-deleted via CASCADE on user deletion",
+          erasurePolicy: 'Hard-deleted via CASCADE on user deletion',
         },
         {
-          id: "analytics",
-          name: "Usage Analytics & Observability",
-          legalBasis: "Legitimate interest",
-          dataCategories: ["usage_patterns", "performance_metrics", "error_logs"],
-          retentionPeriod: "90 days",
-          recipients: ["Internal engineering and operations teams"],
+          id: 'analytics',
+          name: 'Usage Analytics & Observability',
+          legalBasis: 'Legitimate interest',
+          dataCategories: ['usage_patterns', 'performance_metrics', 'error_logs'],
+          retentionPeriod: '90 days',
+          recipients: ['Internal engineering and operations teams'],
           crossBorderTransfer: false,
         },
         {
-          id: "notifications",
-          name: "Push Notifications",
-          legalBasis: "Consent",
-          dataCategories: ["device_tokens", "notification_preferences"],
-          retentionPeriod: "Until consent withdrawn or account deleted",
-          recipients: ["Expo push notification service"],
+          id: 'notifications',
+          name: 'Push Notifications',
+          legalBasis: 'Consent',
+          dataCategories: ['device_tokens', 'notification_preferences'],
+          retentionPeriod: 'Until consent withdrawn or account deleted',
+          recipients: ['Expo push notification service'],
           crossBorderTransfer: true,
-          safeguards: "Standard Contractual Clauses",
-          erasurePolicy: "Hard-deleted via CASCADE on user deletion",
+          safeguards: 'Standard Contractual Clauses',
+          erasurePolicy: 'Hard-deleted via CASCADE on user deletion',
         },
         {
-          id: "billing",
-          name: "Billing & Payments",
-          legalBasis: "Contract performance",
-          dataCategories: ["billing_contact", "payment_method_references"],
-          retentionPeriod: "7 years (legal requirement)",
-          recipients: ["Stripe Inc."],
+          id: 'billing',
+          name: 'Billing & Payments',
+          legalBasis: 'Contract performance',
+          dataCategories: ['billing_contact', 'payment_method_references'],
+          retentionPeriod: '7 years (legal requirement)',
+          recipients: ['Stripe Inc.'],
           crossBorderTransfer: true,
-          safeguards: "Standard Contractual Clauses, Stripe DPA",
+          safeguards: 'Standard Contractual Clauses, Stripe DPA',
         },
         {
-          id: "documents",
-          name: "Legal & Business Documents",
-          legalBasis: "Contract performance",
-          dataCategories: ["document_content", "metadata", "signatories"],
-          retentionPeriod: "7 years or as required by applicable law",
-          recipients: ["Internal systems only"],
+          id: 'documents',
+          name: 'Legal & Business Documents',
+          legalBasis: 'Contract performance',
+          dataCategories: ['document_content', 'metadata', 'signatories'],
+          retentionPeriod: '7 years or as required by applicable law',
+          recipients: ['Internal systems only'],
           crossBorderTransfer: false,
         },
         {
-          id: "contact_requests",
-          name: "Contact & Demo Requests",
-          legalBasis: "Legitimate interest",
-          dataCategories: ["name_encrypted", "email_encrypted", "company", "inquiry_content"],
-          retentionPeriod: "24 months",
-          recipients: ["Internal sales and customer success teams"],
+          id: 'contact_requests',
+          name: 'Contact & Demo Requests',
+          legalBasis: 'Legitimate interest',
+          dataCategories: ['name_encrypted', 'email_encrypted', 'company', 'inquiry_content'],
+          retentionPeriod: '24 months',
+          recipients: ['Internal sales and customer success teams'],
           crossBorderTransfer: false,
           encryptionAtRest: true,
-          encryptionScheme: "AES-256-GCM with per-context HMAC-SHA256 key derivation",
+          encryptionScheme: 'AES-256-GCM with per-context HMAC-SHA256 key derivation',
         },
         {
-          id: "api_keys",
-          name: "API Access Credentials",
-          legalBasis: "Contract performance",
-          dataCategories: ["key_hash", "key_prefix", "scopes"],
-          retentionPeriod: "Until revoked or account deleted",
-          recipients: ["Internal systems only"],
+          id: 'api_keys',
+          name: 'API Access Credentials',
+          legalBasis: 'Contract performance',
+          dataCategories: ['key_hash', 'key_prefix', 'scopes'],
+          retentionPeriod: 'Until revoked or account deleted',
+          recipients: ['Internal systems only'],
           crossBorderTransfer: false,
-          erasurePolicy: "Hard-deleted via CASCADE on user deletion",
+          erasurePolicy: 'Hard-deleted via CASCADE on user deletion',
         },
       ],
       userRights: [
-        "Right of access (GET /api/gdpr/export)",
-        "Right to erasure (POST /api/gdpr/erasure) — triggers hard-delete with DB cascade",
-        "Right to rectification (contact support)",
-        "Right to data portability (GET /api/gdpr/export)",
-        "Right to object to processing (contact support)",
+        'Right of access (GET /api/gdpr/export)',
+        'Right to erasure (POST /api/gdpr/erasure) — triggers hard-delete with DB cascade',
+        'Right to rectification (contact support)',
+        'Right to data portability (GET /api/gdpr/export)',
+        'Right to object to processing (contact support)',
       ],
-      supervisoryAuthority: "National data protection authority of your country of residence",
-      updatedAt: "2025-04-01T00:00:00Z",
+      supervisoryAuthority: 'National data protection authority of your country of residence',
+      updatedAt: '2025-04-01T00:00:00Z',
     };
 
     sendSuccess(res, records);
   } catch (err) {
-    handleRouteError(res, err, "Failed to retrieve data processing records");
+    handleRouteError(res, err, 'Failed to retrieve data processing records');
   }
 });
 

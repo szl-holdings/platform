@@ -1,28 +1,46 @@
-import { CookieBanner } from "@szl-holdings/shared-ui/cookie-banner";
-import { lazy, Suspense, useEffect, useRef } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
-import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner, useSandboxMode } from "@szl-holdings/shared-ui/sandbox-mode";
-import { DemoNarrativeSidebar } from "@szl-holdings/shared-ui/demo-narrative-sidebar";
-import { TERRA_DEMO_NARRATIVE } from "@/data/demo-narrative";
-import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
-import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
-import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { persistQueryClient } from "@tanstack/query-persist-client-core";
-import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
-import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
-import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
-import { TerraLayout } from "@/components/terra-layout";
-import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
-import { PrivateAppGuard } from "@szl-holdings/shared-ui/PrivateAppGuard";
-import { useAuth } from "@szl-holdings/replit-auth-web";
-import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
-import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
-import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
+import { McpOverlay } from '@szl-holdings/mcp-client';
+import {
+  clearUser as clearSentryUser,
+  identifyAnalyticsUser,
+  resetAnalyticsUser,
+  setUser as setSentryUser,
+} from '@szl-holdings/observability/react';
+import { PrismBusProvider } from '@szl-holdings/prism-bus';
+import { useAuth } from '@szl-holdings/replit-auth-web';
+import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
+import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
+import {
+  type CommandItem,
+  CommandPalette,
+  createBaselineWebActions,
+  getEcosystemSwitchCommands,
+  useCommandPalette,
+} from '@szl-holdings/shared-ui/command-palette';
+import { CookieBanner } from '@szl-holdings/shared-ui/cookie-banner';
+import { AgentCopilot } from '@szl-holdings/shared-ui/copilot';
+import { beaconConfig } from '@szl-holdings/shared-ui/copilot-configs';
+import { DemoNarrativeSidebar } from '@szl-holdings/shared-ui/demo-narrative-sidebar';
+import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
+import {
+  type KeyboardShortcut,
+  PowerUserProvider,
+} from '@szl-holdings/shared-ui/keyboard-shortcuts';
+import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
+import { PrivateAppGuard } from '@szl-holdings/shared-ui/PrivateAppGuard';
+import {
+  SandboxModeBanner,
+  SandboxModeProvider,
+  useSandboxMode,
+} from '@szl-holdings/shared-ui/sandbox-mode';
+import { StaleIndicator } from '@szl-holdings/shared-ui/stale-indicator';
+import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { persistQueryClient } from '@tanstack/query-persist-client-core';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { Redirect, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+import { TerraLayout } from '@/components/terra-layout';
+import { TERRA_DEMO_NARRATIVE } from '@/data/demo-narrative';
 
 const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 
@@ -30,105 +48,114 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
 });
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   persistQueryClient({
     queryClient,
-    persister: createSyncStoragePersister({ storage: window.localStorage, key: "terra-web-rq-cache" }),
+    persister: createSyncStoragePersister({
+      storage: window.localStorage,
+      key: 'terra-web-rq-cache',
+    }),
     maxAge: 1000 * 60 * 60,
-    buster: "v1",
+    buster: 'v1',
   });
 }
 
-const TerraPulse = lazy(() => import("@/pages/pulse"));
-const AefKnowledgeSearchPage = lazy(() => import("@/pages/aef-knowledge-search"));
-const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
-const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
-const TerraAtlasExecutePage = lazy(() => import("@/pages/atlas-execute"));
-const Dashboard = lazy(() => import("@/pages/dashboard"));
-const DistressEngine = lazy(() => import("@/pages/distress-engine"));
-const Deals = lazy(() => import("@/pages/deals"));
-const Listings = lazy(() => import("@/pages/listings"));
-const Leads = lazy(() => import("@/pages/leads"));
-const Team = lazy(() => import("@/pages/team"));
-const Market = lazy(() => import("@/pages/market"));
-const Transactions = lazy(() => import("@/pages/transactions"));
-const Documents = lazy(() => import("@/pages/documents"));
-const Offers = lazy(() => import("@/pages/offers"));
-const Predictions = lazy(() => import("@/pages/predictions"));
-const Automations = lazy(() => import("@/pages/automations"));
-const BrokerOverview = lazy(() => import("@/pages/broker-overview"));
-const Ingestion = lazy(() => import("@/pages/ingestion"));
-const InvestorMode = lazy(() => import("@/pages/investor-mode"));
-const TerraEvidencePage = lazy(() => import("@/pages/evidence"));
-const Pipeline = lazy(() => import("@/pages/pipeline"));
-const TerraMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
-const InvestmentReadinessPage = lazy(() => import("@/pages/investment-readiness"));
-const CommercialIntelligence = lazy(() => import("@/pages/commercial-intelligence"));
-const MarketIntelligence = lazy(() => import("@/pages/market-intelligence"));
-const MarketAnalytics = lazy(() => import("@/pages/market-analytics"));
-const ComparableSales = lazy(() => import("@/pages/comparable-sales"));
-const PortfolioDashboard = lazy(() => import("@/pages/portfolio-dashboard"));
-const DistressPipeline = lazy(() => import("@/pages/distress-pipeline"));
-const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
-const PropertyMapPage = lazy(() => import("@/pages/property-map-page"));
-const PropertyDetail = lazy(() => import("@/pages/property-detail"));
-const PropertyTwinView = lazy(() => import("@/pages/property-twin-view"));
-const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
-const DocumentEngine = lazy(() => import("@/pages/document-engine"));
-const InquiriesPage = lazy(() => import("@/pages/inquiries-command"));
-const AgentsPage = lazy(() => import("@/pages/agents-command"));
-const CaseStudyPage = lazy(() => import("@/pages/case-study"));
-const TerraPerricingPage = lazy(() => import("@/pages/pricing"));
-const LenderReport = lazy(() => import("@/pages/lender-report"));
-const PropertyDesk = lazy(() => import("@/pages/property-desk"));
-const WhatChanged = lazy(() => import("@/pages/what-changed"));
-const DiligencePrep = lazy(() => import("@/pages/diligence-prep"));
-const ReadinessBoard = lazy(() => import("@/pages/readiness-board"));
-const ApprovalReview = lazy(() => import("@/pages/approval-review"));
-const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
-const DistressRadar = lazy(() => import("@/pages/distress-radar"));
-const NeighborhoodMomentum = lazy(() => import("@/pages/neighborhood-momentum"));
-const SellerMotivation = lazy(() => import("@/pages/seller-motivation"));
-const PortfolioScenario = lazy(() => import("@/pages/portfolio-scenario"));
-const ClimateRiskEnhanced = lazy(() => import("@/pages/climate-risk-enhanced"));
-const ComputerVision = lazy(() => import("@/pages/computer-vision"));
-const ZoningIntelligence = lazy(() => import("@/pages/zoning-intelligence"));
-const AvmEngine = lazy(() => import("@/pages/avm-engine"));
-const RentRoll = lazy(() => import("@/pages/rent-roll"));
-const TitleIntelligence = lazy(() => import("@/pages/title-intelligence"));
-const ConstructionCost = lazy(() => import("@/pages/construction-cost"));
-const SpatialWalkthrough = lazy(() => import("@/pages/spatial-walkthrough"));
-const LeaseAbstraction = lazy(() => import("@/pages/lease-abstraction"));
-const ProForma = lazy(() => import("@/pages/pro-forma"));
-const Exchange1031 = lazy(() => import("@/pages/exchange-1031"));
-const TaxAppeal = lazy(() => import("@/pages/tax-appeal"));
-const WaterfallCalculator = lazy(() => import("@/pages/waterfall-calculator"));
-const ConstructionMonitor = lazy(() => import("@/pages/construction-monitor"));
-const TenantScreening = lazy(() => import("@/pages/tenant-screening"));
-const TerraAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
-const TerraReplayPage = lazy(() => import("@/pages/replay"));
-const TerraScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
-const TerraConstellationPage = lazy(() => import("@/pages/constellation"));
-const OwnershipGraphPage = lazy(() => import("@/pages/ownership-graph"));
-const LenderExposureMapPage = lazy(() => import("@/pages/lender-exposure-map"));
-const CovenantMonitoringPage = lazy(() => import("@/pages/covenant-monitoring"));
-const DistressForecastPage = lazy(() => import("@/pages/distress-forecast"));
-const UnderwritingCopilotPage = lazy(() => import("@/pages/underwriting-copilot"));
-const DiligenceRoomPage = lazy(() => import("@/pages/diligence-room"));
-const RiskSimulationPage = lazy(() => import("@/pages/risk-simulation"));
-const WhyThisPropertyNow = lazy(() => import("@/pages/why-this-property-now"));
+const TerraPulse = lazy(() => import('@/pages/pulse'));
+const AefKnowledgeSearchPage = lazy(() => import('@/pages/aef-knowledge-search'));
+const DecisionCenterPage = lazy(() => import('@/pages/decision-center'));
+const TerraAtlasArtifactsPage = lazy(() => import('@/pages/atlas-artifacts'));
+const TerraAtlasExecutePage = lazy(() => import('@/pages/atlas-execute'));
+const Dashboard = lazy(() => import('@/pages/dashboard'));
+const DistressEngine = lazy(() => import('@/pages/distress-engine'));
+const Deals = lazy(() => import('@/pages/deals'));
+const Listings = lazy(() => import('@/pages/listings'));
+const Leads = lazy(() => import('@/pages/leads'));
+const Team = lazy(() => import('@/pages/team'));
+const Market = lazy(() => import('@/pages/market'));
+const Transactions = lazy(() => import('@/pages/transactions'));
+const Documents = lazy(() => import('@/pages/documents'));
+const Offers = lazy(() => import('@/pages/offers'));
+const Predictions = lazy(() => import('@/pages/predictions'));
+const Automations = lazy(() => import('@/pages/automations'));
+const BrokerOverview = lazy(() => import('@/pages/broker-overview'));
+const Ingestion = lazy(() => import('@/pages/ingestion'));
+const InvestorMode = lazy(() => import('@/pages/investor-mode'));
+const TerraEvidencePage = lazy(() => import('@/pages/evidence'));
+const Pipeline = lazy(() => import('@/pages/pipeline'));
+const TerraMarketingLanding = lazy(() => import('@/pages/marketing-landing'));
+const InvestmentReadinessPage = lazy(() => import('@/pages/investment-readiness'));
+const CommercialIntelligence = lazy(() => import('@/pages/commercial-intelligence'));
+const MarketIntelligence = lazy(() => import('@/pages/market-intelligence'));
+const MarketAnalytics = lazy(() => import('@/pages/market-analytics'));
+const ComparableSales = lazy(() => import('@/pages/comparable-sales'));
+const PortfolioDashboard = lazy(() => import('@/pages/portfolio-dashboard'));
+const DistressPipeline = lazy(() => import('@/pages/distress-pipeline'));
+const GovernedCockpitPage = lazy(() => import('@/pages/governed-cockpit'));
+const PropertyMapPage = lazy(() => import('@/pages/property-map-page'));
+const PropertyDetail = lazy(() => import('@/pages/property-detail'));
+const PropertyTwinView = lazy(() => import('@/pages/property-twin-view'));
+const PowerBiReport = lazy(() => import('@/pages/powerbi-report'));
+const DocumentEngine = lazy(() => import('@/pages/document-engine'));
+const InquiriesPage = lazy(() => import('@/pages/inquiries-command'));
+const AgentsPage = lazy(() => import('@/pages/agents-command'));
+const CaseStudyPage = lazy(() => import('@/pages/case-study'));
+const TerraPerricingPage = lazy(() => import('@/pages/pricing'));
+const LenderReport = lazy(() => import('@/pages/lender-report'));
+const PropertyDesk = lazy(() => import('@/pages/property-desk'));
+const WhatChanged = lazy(() => import('@/pages/what-changed'));
+const DiligencePrep = lazy(() => import('@/pages/diligence-prep'));
+const ReadinessBoard = lazy(() => import('@/pages/readiness-board'));
+const ApprovalReview = lazy(() => import('@/pages/approval-review'));
+const TrustProvenancePage = lazy(() => import('@/pages/trust-provenance'));
+const DistressRadar = lazy(() => import('@/pages/distress-radar'));
+const NeighborhoodMomentum = lazy(() => import('@/pages/neighborhood-momentum'));
+const SellerMotivation = lazy(() => import('@/pages/seller-motivation'));
+const PortfolioScenario = lazy(() => import('@/pages/portfolio-scenario'));
+const ClimateRiskEnhanced = lazy(() => import('@/pages/climate-risk-enhanced'));
+const ComputerVision = lazy(() => import('@/pages/computer-vision'));
+const ZoningIntelligence = lazy(() => import('@/pages/zoning-intelligence'));
+const AvmEngine = lazy(() => import('@/pages/avm-engine'));
+const RentRoll = lazy(() => import('@/pages/rent-roll'));
+const TitleIntelligence = lazy(() => import('@/pages/title-intelligence'));
+const ConstructionCost = lazy(() => import('@/pages/construction-cost'));
+const SpatialWalkthrough = lazy(() => import('@/pages/spatial-walkthrough'));
+const LeaseAbstraction = lazy(() => import('@/pages/lease-abstraction'));
+const ProForma = lazy(() => import('@/pages/pro-forma'));
+const Exchange1031 = lazy(() => import('@/pages/exchange-1031'));
+const TaxAppeal = lazy(() => import('@/pages/tax-appeal'));
+const WaterfallCalculator = lazy(() => import('@/pages/waterfall-calculator'));
+const ConstructionMonitor = lazy(() => import('@/pages/construction-monitor'));
+const TenantScreening = lazy(() => import('@/pages/tenant-screening'));
+const TerraAtlasRuntimePage = lazy(() => import('@/pages/atlas-runtime'));
+const TerraReplayPage = lazy(() => import('@/pages/replay'));
+const TerraScenarioBranchesPage = lazy(() => import('@/pages/scenario-branches'));
+const TerraConstellationPage = lazy(() => import('@/pages/constellation'));
+const OwnershipGraphPage = lazy(() => import('@/pages/ownership-graph'));
+const LenderExposureMapPage = lazy(() => import('@/pages/lender-exposure-map'));
+const CovenantMonitoringPage = lazy(() => import('@/pages/covenant-monitoring'));
+const DistressForecastPage = lazy(() => import('@/pages/distress-forecast'));
+const UnderwritingCopilotPage = lazy(() => import('@/pages/underwriting-copilot'));
+const DiligenceRoomPage = lazy(() => import('@/pages/diligence-room'));
+const RiskSimulationPage = lazy(() => import('@/pages/risk-simulation'));
+const WhyThisPropertyNow = lazy(() => import('@/pages/why-this-property-now'));
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(45,106,79,0.2)", borderTopColor: TERRA_ACCENT }} />
+      <div
+        className="w-5 h-5 border-2 rounded-full animate-spin"
+        style={{ borderColor: 'rgba(45,106,79,0.2)', borderTopColor: TERRA_ACCENT }}
+      />
     </div>
   );
 }
 
 function NotFound() {
   return (
-    <div className="flex items-center justify-center h-64 text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>
+    <div
+      className="flex items-center justify-center h-64 text-sm"
+      style={{ color: 'rgba(255,255,255,0.3)' }}
+    >
       Page not found
     </div>
   );
@@ -232,34 +259,118 @@ function PrivateRouter() {
 }
 
 const terraCommands: CommandItem[] = [
-  { id: "nav-dashboard", label: "Overview", icon: "◼", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard"); } },
-  { id: "nav-distress", label: "Watchlists", icon: "⚠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/distress-engine"); } },
-  { id: "nav-market", label: "Market", icon: "↑", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/market"); } },
-  { id: "nav-pipeline", label: "Pipeline", icon: "◈", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/pipeline"); } },
-  { id: "nav-investor", label: "Ownership", icon: "⊛", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/investor-mode"); } },
-  { id: "nav-deals", label: "Deals", icon: "◈", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/deals"); } },
-  { id: "nav-leads", label: "Brokers", icon: "◎", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/leads"); } },
-  { id: "nav-listings", label: "Portfolio", icon: "□", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/listings"); } },
-  { id: "nav-approvals", label: "Approvals", icon: "✓", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/transactions"); } },
-  { id: "nav-admin", label: "Admin", icon: "⊙", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/broker-overview"); } },
+  {
+    id: 'nav-dashboard',
+    label: 'Overview',
+    icon: '◼',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/dashboard');
+    },
+  },
+  {
+    id: 'nav-distress',
+    label: 'Watchlists',
+    icon: '⚠',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/distress-engine');
+    },
+  },
+  {
+    id: 'nav-market',
+    label: 'Market',
+    icon: '↑',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/market');
+    },
+  },
+  {
+    id: 'nav-pipeline',
+    label: 'Pipeline',
+    icon: '◈',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/pipeline');
+    },
+  },
+  {
+    id: 'nav-investor',
+    label: 'Ownership',
+    icon: '⊛',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/investor-mode');
+    },
+  },
+  {
+    id: 'nav-deals',
+    label: 'Deals',
+    icon: '◈',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/deals');
+    },
+  },
+  {
+    id: 'nav-leads',
+    label: 'Brokers',
+    icon: '◎',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/leads');
+    },
+  },
+  {
+    id: 'nav-listings',
+    label: 'Portfolio',
+    icon: '□',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/listings');
+    },
+  },
+  {
+    id: 'nav-approvals',
+    label: 'Approvals',
+    icon: '✓',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/transactions');
+    },
+  },
+  {
+    id: 'nav-admin',
+    label: 'Admin',
+    icon: '⊙',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/broker-overview');
+    },
+  },
   ...createBaselineWebActions(
-    (path) => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, path); },
+    (path) => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, path);
+    },
     {
-      helpUrl: "https://szlholdings.com/docs",
+      helpUrl: 'https://szlholdings.com/docs',
       themeToggle: {
-        label: "Toggle Theme",
-        action: () => { document.documentElement.classList.toggle("light"); },
+        label: 'Toggle Theme',
+        action: () => {
+          document.documentElement.classList.toggle('light');
+        },
       },
-    }
+    },
   ),
-  ...getEcosystemSwitchCommands("terra"),
+  ...getEcosystemSwitchCommands('terra'),
 ];
 
 const terraShortcuts: KeyboardShortcut[] = [
-  { key: "D", description: "Watchlists", category: "Navigation" },
-  { key: "P", description: "Pipeline", category: "Navigation" },
-  { key: "M", description: "Market", category: "Navigation" },
-  { key: "E", description: "Deals", category: "Navigation" },
+  { key: 'D', description: 'Watchlists', category: 'Navigation' },
+  { key: 'P', description: 'Pipeline', category: 'Navigation' },
+  { key: 'M', description: 'Market', category: 'Navigation' },
+  { key: 'E', description: 'Deals', category: 'Navigation' },
 ];
 
 function TerraDemoNarrativeOverlay() {
@@ -276,11 +387,21 @@ function TerraDemoNarrativeOverlay() {
   );
 }
 
-function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+function PrivateApp({
+  cmdOpen,
+  setCmdOpen,
+}: {
+  cmdOpen: boolean;
+  setCmdOpen: (v: boolean) => void;
+}) {
   return (
     <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor={TERRA_ACCENT}>
-      <div className="flex flex-col h-screen" style={{ background: "#0a0c10" }}>
-        <EcosystemNav currentAppId="terra" currentAppName="Terra — Property Intelligence" accentColor={TERRA_ACCENT} />
+      <div className="flex flex-col h-screen" style={{ background: '#0a0c10' }}>
+        <EcosystemNav
+          currentAppId="terra"
+          currentAppName="Terra — Property Intelligence"
+          accentColor={TERRA_ACCENT}
+        />
         <SandboxModeBanner />
         <div className="flex-1 overflow-hidden">
           <TerraLayout>
@@ -300,15 +421,21 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   );
 }
 
-function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+function AppContent({
+  cmdOpen,
+  setCmdOpen,
+}: {
+  cmdOpen: boolean;
+  setCmdOpen: (v: boolean) => void;
+}) {
   const { user, isLoading, isAuthenticated, login } = useAuth();
   const [location, navigate] = useLocation();
   const prevAuth = useRef(isAuthenticated);
 
   const params = new URLSearchParams(window.location.search);
-  const hasDemoParam = params.get("view") === "app" || params.get("demo") === "true";
+  const hasDemoParam = params.get('view') === 'app' || params.get('demo') === 'true';
   const hasDemoToken =
-    typeof window !== "undefined" && !!window.sessionStorage.getItem("szl-demo-token");
+    typeof window !== 'undefined' && !!window.sessionStorage.getItem('szl-demo-token');
   const demoMode = hasDemoParam || hasDemoToken;
   const { sandboxActive, enableSandbox } = useSandboxMode();
 
@@ -320,7 +447,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 
   useEffect(() => {
     if (!prevAuth.current && isAuthenticated) {
-      navigate("/dashboard");
+      navigate('/dashboard');
     }
     prevAuth.current = isAuthenticated;
   }, [isAuthenticated, navigate]);
@@ -338,26 +465,51 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     }
   }, [user?.id]);
 
-  const normalizedPath = location.replace(/\/+$/, "") || "/";
-  if (normalizedPath === "/pulse") {
-    return <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}><TerraPulse /></Suspense>;
+  const normalizedPath = location.replace(/\/+$/, '') || '/';
+  if (normalizedPath === '/pulse') {
+    return (
+      <Suspense fallback={<div style={{ height: '100vh', background: '#0a0c10' }} />}>
+        <TerraPulse />
+      </Suspense>
+    );
   }
 
-  if (normalizedPath === "/market-assessment") {
-    return <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}><InvestmentReadinessPage /></Suspense>;
+  if (normalizedPath === '/market-assessment') {
+    return (
+      <Suspense fallback={<div style={{ height: '100vh', background: '#0a0c10' }} />}>
+        <InvestmentReadinessPage />
+      </Suspense>
+    );
   }
 
   if (isLoading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#0a0c10" }}>
-        <div style={{ width: 22, height: 22, border: "2px solid rgba(45,106,79,0.2)", borderTopColor: TERRA_ACCENT, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: '#0a0c10',
+        }}
+      >
+        <div
+          style={{
+            width: 22,
+            height: 22,
+            border: '2px solid rgba(45,106,79,0.2)',
+            borderTopColor: TERRA_ACCENT,
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }}
+        />
       </div>
     );
   }
 
   if (!isAuthenticated && !demoMode) {
     return (
-      <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}>
+      <Suspense fallback={<div style={{ height: '100vh', background: '#0a0c10' }} />}>
         <TerraMarketingLanding onSignIn={login} />
       </Suspense>
     );
@@ -375,23 +527,23 @@ function App() {
 
   return (
     <AppModeProvider>
-    <AppModeBanner />
-    <AnalyticsProvider appName="terra">
-    <PrismBusProvider domain="terra">
-    <SandboxModeProvider>
-      <QueryClientProvider client={queryClient}>
-        <StaleIndicator accentColor={TERRA_ACCENT} />
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-          <AgentCopilot config={beaconConfig} />
-          <Toaster />
-          <McpOverlay domain="terra" />
-        </WouterRouter>
-      </QueryClientProvider>
-    </SandboxModeProvider>
-    </PrismBusProvider>
-    <CookieBanner privacyUrl="/legal/privacy" />
-    </AnalyticsProvider>
+      <AppModeBanner />
+      <AnalyticsProvider appName="terra">
+        <PrismBusProvider domain="terra">
+          <SandboxModeProvider>
+            <QueryClientProvider client={queryClient}>
+              <StaleIndicator accentColor={TERRA_ACCENT} />
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+                <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+                <AgentCopilot config={beaconConfig} />
+                <Toaster />
+                <McpOverlay domain="terra" />
+              </WouterRouter>
+            </QueryClientProvider>
+          </SandboxModeProvider>
+        </PrismBusProvider>
+        <CookieBanner privacyUrl="/legal/privacy" />
+      </AnalyticsProvider>
     </AppModeProvider>
   );
 }

@@ -1,6 +1,6 @@
-import type { StorageAdapter, StorageAdapterOptions } from "./interface";
+import type { StorageAdapter, StorageAdapterOptions } from './interface';
 
-const PREFIX = "szl-offline:";
+const PREFIX = 'szl-offline:';
 
 type AsyncStorageInterface = {
   getItem(key: string): Promise<string | null>;
@@ -12,8 +12,8 @@ type AsyncStorageInterface = {
 
 async function getStorage(): Promise<AsyncStorageInterface | null> {
   try {
-    // @ts-ignore - optional react-native dependency
-    const mod = await import("@react-native-async-storage/async-storage");
+    // @ts-expect-error - optional react-native dependency
+    const mod = await import('@react-native-async-storage/async-storage');
     return mod.default as AsyncStorageInterface;
   } catch {
     return null;
@@ -24,7 +24,7 @@ export class AsyncStorageAdapter implements StorageAdapter {
   private prefix: string;
 
   constructor(options: StorageAdapterOptions = {}) {
-    this.prefix = `${PREFIX}${options.dbName ?? "store"}:`;
+    this.prefix = `${PREFIX}${options.dbName ?? 'store'}:`;
   }
 
   private storeKey(store: string, key: string): string {

@@ -1,7 +1,7 @@
-import { ZodError } from "zod";
-import type { TypedTool } from "./typed-tool.js";
-import { defaultTypedToolRegistry, type TypedToolRegistry } from "./registry.js";
-import { ToolInvocationError, ToolSchemaValidationError } from "./errors.js";
+import { ZodError } from 'zod';
+import { ToolInvocationError, ToolSchemaValidationError } from './errors.js';
+import { defaultTypedToolRegistry, type TypedToolRegistry } from './registry.js';
+import type { TypedTool } from './typed-tool.js';
 
 export interface TypedToolInvocationContext {
   requestId: string;
@@ -59,7 +59,7 @@ export class TypedToolGateway {
       validatedInput = tool.inputSchema.parse(rawInput);
     } catch (err) {
       if (err instanceof ZodError) {
-        throw new ToolSchemaValidationError(toolId, "input", err.issues);
+        throw new ToolSchemaValidationError(toolId, 'input', err.issues);
       }
       throw err;
     }
@@ -106,7 +106,7 @@ export class TypedToolGateway {
         output = tool.outputSchema.parse(raw) as TOutput;
       } catch (err) {
         if (err instanceof ZodError) {
-          throw new ToolSchemaValidationError(toolId, "output", err.issues);
+          throw new ToolSchemaValidationError(toolId, 'output', err.issues);
         }
         throw err;
       }

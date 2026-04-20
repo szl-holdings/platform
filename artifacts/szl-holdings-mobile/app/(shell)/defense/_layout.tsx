@@ -1,10 +1,10 @@
-import React from "react";
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
+import React from 'react';
 
 export default function DefenseLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false, animation: "slide_from_right" }}>
-      <Stack.Screen name="(tabs)" options={{ animation: "none" }} />
+    <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
       <Stack.Screen name="incident/[id]" />
       <Stack.Screen name="finding/[id]" />
       <Stack.Screen name="approvals" />

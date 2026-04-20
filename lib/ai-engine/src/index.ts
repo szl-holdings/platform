@@ -1,629 +1,674 @@
 export {
-  computeRiskAssessment,
-  buildBaseline,
-  batchRiskAssessment,
-} from "./sentinel/behavioral-analytics.js";
+  type DelegationRequest,
+  type DelegationResult,
+  type DelegationStatus,
+  type DelegationTaskRecord,
+  delegateTask,
+  getDelegationHistory,
+  getDelegationTask,
+} from './a2a-delegation.js';
+export {
+  A2ARegistryService,
+  type AgentCard,
+  a2aRegistry,
+  type DiscoveryQuery,
+  type DiscoveryResult,
+} from './a2a-registry.js';
+export {
+  type ChatInterface,
+  type ConversationMessage,
+  DomainAgentRunner,
+  getOrCreateConversation,
+  MAX_TOOL_ROUNDS,
+  type NativeToolCall,
+  type StructuredCompletionResult,
+} from './domain-agent-runner.js';
+export {
+  type EmbeddingAnalyticsReport,
+  embeddingAnalytics,
+} from './embedding/analytics.js';
+export {
+  createEmbeddingAnalyticsRouter,
+  getEmbeddingAnalytics,
+} from './embedding/analytics-endpoint.js';
+export {
+  type DomainEmbeddingConfig,
+  type EmbeddingDomain,
+  getAllDomainConfigs,
+  getDomainModelConfig,
+  inferDomain,
+  RAG_DB_DIMENSIONS,
+} from './embedding/domain-config.js';
+export {
+  type BatchEmbeddingResult,
+  type BatchEmbedOptions,
+  EmbeddingPipeline,
+  type EmbeddingProviderType,
+  type EmbeddingResult,
+  type EmbedOptions,
+  embeddingPipeline,
+  getEmbedding,
+  type ProviderHealth,
+} from './embedding/provider.js';
+export {
+  aggregateHookStats,
+  type DomainEvalContext,
+  type EvalAssertion,
+  type EvalHookFn,
+  type EvalHookResult,
+  getEvaluatorHook,
+  getHookResults,
+  listEvaluatorHooks,
+  type RegisteredEvalHook,
+  registerEvaluatorHook,
+  runEvaluatorHooksForTrace,
+  unregisterEvaluatorHook,
+} from './evals/evaluator-hooks.js';
+export { GOLDEN_SET } from './evals/golden-set.js';
+export {
+  autoEnqueueTrace,
+  enqueueForReview,
+  getReviewItem,
+  getReviewQueueStats,
+  hydrateReviewQueue,
+  listReviewQueue,
+  markInReview,
+  type ReviewDecisionInput,
+  type ReviewPriority,
+  type ReviewQueueItem,
+  type ReviewQueueStats,
+  type ReviewVerdict,
+  recordReviewDecision,
+  registerReviewQueueSink,
+} from './evals/review-queue.js';
+export { type EvalReport, type EvalResult, runEvals } from './evals/run-evals.js';
+export {
+  type AITrace,
+  aggregateTraces,
+  captureTrace,
+  getTrace,
+  hydrateTraces,
+  listTraces,
+  REVIEW_CONFIDENCE_THRESHOLD,
+  REVIEW_COST_THRESHOLD_USD,
+  REVIEW_HIGH_RISK_LEVELS,
+  type RecommendationType,
+  registerTraceSink,
+  registerTraceUpdateSink,
+  type TraceAggregate,
+  type TraceCaptureInput,
+  type TraceDomain,
+  type TraceStatus,
+  updateTraceStatus,
+} from './evals/trace-capture.js';
+export {
+  type DatasetExportResult,
+  type ExportFormat,
+  exportTrainingData,
+  type HuggingFaceSample,
+  type OpenAITrainingSample,
+  serializeToHuggingFaceJSON,
+  serializeToJSONL,
+} from './fine-tuning/dataset-exporter.js';
+export {
+  type CuratedDatasetResult,
+  curateAllDomainDatasets,
+  curateDatasetForAgent,
+  DOMAIN_CURATOR_CONFIGS,
+  type DomainCuratorConfig,
+  getAllSupportedAgents,
+  getDomainCuratorConfig,
+} from './fine-tuning/domain-curators.js';
+export {
+  cancelFineTuningJob,
+  type FineTuningJobRequest,
+  type FineTuningJobStatus,
+  type FineTuningProvider,
+  listFineTuningJobs,
+  pollJobStatus,
+  submitFineTuningJob,
+} from './fine-tuning/job-manager.js';
+export {
+  deprecateFineTunedModel,
+  type FineTunedModelInfo,
+  getActiveFineTunedModel,
+  getAllFineTunedModels,
+  getModelLineage,
+  invalidateModelCache,
+  resolveModelForAgent,
+} from './fine-tuning/model-registry-extension.js';
+export {
+  type ModelEvalScores,
+  promoteFineTunedModel,
+  runValidationGate,
+  type ValidationGateResult,
+} from './fine-tuning/validation-gate.js';
+export {
+  type CorrectionRecord,
+  getRelevantCorrections,
+  storeCorrection,
+} from './learning/agent-corrections.js';
+export {
+  computeAgentCalibrations,
+  getEvalHistory,
+  getLatestEvalReport,
+  persistEvalReport,
+  startScheduledEvals,
+  stopScheduledEvals,
+} from './learning/eval-pipeline.js';
+export {
+  buildCalibrationInstruction,
+  type ConfidenceCalibration,
+  getConfidenceCalibration,
+  getRelevantOutcomes,
+  type OutcomeRecord,
+  type OutcomeType,
+  recordOutcome,
+} from './learning/outcome-learning.js';
+export { detectCrossPatterns, runPatternDetectionAndStore } from './learning/pattern-detector.js';
+export {
+  checkTenantPolicy,
+  getRouterConfig,
+  type ModelRouterTelemetry,
+  type RouterCallOptions,
+  type RouterCallResult,
+  type RouterConfig,
+  registerTelemetryHandler,
+  routerCall,
+  type TenantFeatureToggles,
+} from './model-router.js';
+export {
+  AGENT_REGISTRY,
+  AgentTelemetryTracker,
+  agentTelemetry,
+  CAUSAL_PATTERNS,
+  CausalReasoningEngine,
+  ConfidenceCalibrator,
+  ConflictResolver,
+  callAgent,
+  causalEngine,
+  computeRoutingScores,
+  confidenceCalibrator,
+  conflictResolver,
+  consultAgent,
+  DOMAIN_ROUTING_RULES,
+  getSharedContext,
+  NuroMeshOrchestrator,
+  nuroMeshOrchestrator,
+  routeToAgents,
+  routeToAgentsWithA2A,
+  runMakerChecker,
+  SignalCorrelator,
+  signalCorrelator,
+  storeInsight,
+} from './nuro-mesh.js';
+export {
+  chatCompletion,
+  chatCompletionWithFallback,
+  type HFChatMessage,
+  type HFCompletionResult,
+  type HFToolDef,
+  structuredCompletion,
+} from './providers/hf-client.js';
+export {
+  getModelSlots,
+  getRouteConfig,
+  type ModelSlot,
+  type RouteClass,
+  type RouteResult,
+  routeModel,
+} from './providers/hf-router.js';
+
+export {
+  type ChunkMetadata,
+  chunkByParagraphs,
+  chunkWithOverlap,
+  createChunks,
+  generateEmbedding,
+  ingestAgentKnowledge,
+  ingestAiDecision,
+  ingestCaseMemory,
+  ingestDocument,
+  ingestIncidentReport,
+  ingestToVectorStore,
+  type RawChunk,
+  runFullReindex,
+} from './rag-ingestion.js';
+export { chunkText, RAGPipeline } from './rag-pipeline.js';
+export {
+  deleteChunksByObjectId,
+  getChunkCount,
+  getKnowledgeBaseStats,
+  type HybridSearchOptions,
+  hybridSearch,
+  type KeywordSearchOptions,
+  keywordSearch,
+  type RagChunk,
+  type RagSearchResult,
+  type SemanticSearchOptions,
+  semanticSearch,
+  upsertChunk,
+  upsertChunksBatch,
+} from './rag-vector-store.js';
+export {
+  AlloyRetrievalEngine,
+  alloyRetrieval,
+  type RerankResult,
+  type RetrievalChunk,
+  type RetrievalResult,
+  type ScoredChunk,
+} from './retrieval/alloy-retrieval.js';
+export {
+  ACTION_DECISION_SCHEMA,
+  type ActionDecision,
+  type AuditRecord,
+  type DecisionMetadata,
+  type EvidenceItem,
+  safeFallbackDecision,
+  validateActionDecision,
+} from './schemas/action-decision.js';
+export {
+  type ApprovalRecommendation,
+  validateApprovalRecommendation,
+} from './schemas/approval-recommendation.js';
+export {
+  type EscalationRecommendation,
+  validateEscalationRecommendation,
+} from './schemas/escalation-recommendation.js';
+export { type ExecutiveSummary, validateExecutiveSummary } from './schemas/executive-summary.js';
+export {
+  EXTRACT_ENTITY_SCHEMA,
+  type ExtractedEntities,
+  type ExtractedEntity,
+  validateExtractedEntities,
+} from './schemas/extract-entity.js';
+export {
+  type OwnershipAssignment,
+  validateOwnershipAssignment,
+} from './schemas/ownership-assignment.js';
+export { type ResolutionSummary, validateResolutionSummary } from './schemas/resolution-summary.js';
+export {
+  RISK_DECISION_SCHEMA,
+  type RiskDecision,
+  validateRiskDecision,
+} from './schemas/risk-decision.js';
+export {
+  TRIAGE_DECISION_SCHEMA,
+  type TriageDecision,
+  validateTriageDecision,
+} from './schemas/triage-decision.js';
 export type {
   AccessEvent,
   BehavioralBaseline,
   DetectedAnomaly,
   RiskAssessment,
-} from "./sentinel/behavioral-analytics.js";
-
+} from './sentinel/behavioral-analytics.js';
 export {
-  NuroMeshOrchestrator,
-  nuroMeshOrchestrator,
-  AGENT_REGISTRY,
-  DOMAIN_ROUTING_RULES,
-  routeToAgents,
-  routeToAgentsWithA2A,
-  computeRoutingScores,
-  callAgent,
-  consultAgent,
-  storeInsight,
-  runMakerChecker,
-  getSharedContext,
-  CAUSAL_PATTERNS,
-  CausalReasoningEngine,
-  SignalCorrelator,
-  ConfidenceCalibrator,
-  ConflictResolver,
-  AgentTelemetryTracker,
-  causalEngine,
-  signalCorrelator,
-  confidenceCalibrator,
-  conflictResolver,
-  agentTelemetry,
-} from "./nuro-mesh.js";
-
+  batchRiskAssessment,
+  buildBaseline,
+  computeRiskAssessment,
+} from './sentinel/behavioral-analytics.js';
+export {
+  ALLOY_TOOL_DEFINITIONS,
+  checkToolPolicy,
+  type ExecutionMode,
+  executeToolCall,
+  getExecutionMode,
+  isHighRiskTool,
+  type ToolAuditEntry,
+  type ToolExecutionResult,
+} from './tools/alloy-tools.js';
 export type {
-  AgentDefinition,
-  DomainRoutingRule,
-  ValidationResult,
   AgentCallResult,
-  RAGChunk,
-  ToolDefinition,
-  DomainAgentConfig,
   AgentConsultationRequest,
   AgentConsultationResult,
+  AgentDefinition,
+  AgentPerformanceProfile,
+  CausalChain,
+  CausalLink,
+  ConfidenceCalibrationEntry,
+  ConflictResolution,
   CrossAgentInsight,
+  DomainAgentConfig,
+  DomainRoutingRule,
+  OrchestrationTelemetry,
+  ProactiveActivation,
+  RAGChunk,
+  RagSourceType,
+  SemanticRoutingScore,
+  SensitivityLevel,
+  SignalCorrelation,
   StructuredToolCall,
   StructuredToolResult,
-  SemanticRoutingScore,
-  CausalLink,
-  CausalChain,
-  ProactiveActivation,
-  SignalCorrelation,
-  AgentPerformanceProfile,
-  ConflictResolution,
-  ConfidenceCalibrationEntry,
-  OrchestrationTelemetry,
-  SensitivityLevel,
-  RagSourceType,
-} from "./types.js";
-
-export { RAGPipeline, chunkText } from "./rag-pipeline.js";
-
-export {
-  EmbeddingPipeline,
-  embeddingPipeline,
-  getEmbedding,
-  type EmbeddingResult,
-  type BatchEmbeddingResult,
-  type EmbedOptions,
-  type BatchEmbedOptions,
-  type ProviderHealth,
-  type EmbeddingProviderType,
-} from "./embedding/provider.js";
-
-export {
-  getDomainModelConfig,
-  inferDomain,
-  getAllDomainConfigs,
-  RAG_DB_DIMENSIONS,
-  type EmbeddingDomain,
-  type DomainEmbeddingConfig,
-} from "./embedding/domain-config.js";
-
-export {
-  embeddingAnalytics,
-  type EmbeddingAnalyticsReport,
-} from "./embedding/analytics.js";
-
-export {
-  createEmbeddingAnalyticsRouter,
-  getEmbeddingAnalytics,
-} from "./embedding/analytics-endpoint.js";
-
-export { DomainAgentRunner, getOrCreateConversation, MAX_TOOL_ROUNDS, type ConversationMessage, type ChatInterface, type NativeToolCall, type StructuredCompletionResult } from "./domain-agent-runner.js";
-
-export { routeModel, getModelSlots, getRouteConfig, type RouteClass, type ModelSlot, type RouteResult } from "./providers/hf-router.js";
-export {
-  routerCall,
-  checkTenantPolicy,
-  getRouterConfig,
-  registerTelemetryHandler,
-  type RouterCallOptions,
-  type RouterCallResult,
-  type ModelRouterTelemetry,
-  type TenantFeatureToggles,
-  type RouterConfig,
-} from "./model-router.js";
-export { chatCompletion, chatCompletionWithFallback, structuredCompletion, type HFChatMessage, type HFToolDef, type HFCompletionResult } from "./providers/hf-client.js";
-
-export { type ActionDecision, type EvidenceItem, type DecisionMetadata, type AuditRecord, ACTION_DECISION_SCHEMA, validateActionDecision, safeFallbackDecision } from "./schemas/action-decision.js";
-export { type RiskDecision, RISK_DECISION_SCHEMA, validateRiskDecision } from "./schemas/risk-decision.js";
-export { type TriageDecision, TRIAGE_DECISION_SCHEMA, validateTriageDecision } from "./schemas/triage-decision.js";
-export { type ExtractedEntities, type ExtractedEntity, EXTRACT_ENTITY_SCHEMA, validateExtractedEntities } from "./schemas/extract-entity.js";
-export { type OwnershipAssignment, validateOwnershipAssignment } from "./schemas/ownership-assignment.js";
-export { type EscalationRecommendation, validateEscalationRecommendation } from "./schemas/escalation-recommendation.js";
-export { type ApprovalRecommendation, validateApprovalRecommendation } from "./schemas/approval-recommendation.js";
-export { type ExecutiveSummary, validateExecutiveSummary } from "./schemas/executive-summary.js";
-export { type ResolutionSummary, validateResolutionSummary } from "./schemas/resolution-summary.js";
-
-export { ALLOY_TOOL_DEFINITIONS, executeToolCall, checkToolPolicy, isHighRiskTool, getExecutionMode, type ToolExecutionResult, type ToolAuditEntry, type ExecutionMode } from "./tools/alloy-tools.js";
-
-export { AlloyRetrievalEngine, alloyRetrieval, type RetrievalChunk, type RetrievalResult, type ScoredChunk, type RerankResult } from "./retrieval/alloy-retrieval.js";
-
-export {
-  upsertChunk,
-  upsertChunksBatch,
-  semanticSearch,
-  keywordSearch,
-  hybridSearch,
-  getChunkCount,
-  getKnowledgeBaseStats,
-  deleteChunksByObjectId,
-  type RagChunk,
-  type RagSearchResult,
-  type SemanticSearchOptions,
-  type KeywordSearchOptions,
-  type HybridSearchOptions,
-} from "./rag-vector-store.js";
-
-export {
-  createChunks,
-  chunkWithOverlap,
-  chunkByParagraphs,
-  generateEmbedding,
-  ingestToVectorStore,
-  ingestAiDecision,
-  ingestCaseMemory,
-  ingestIncidentReport,
-  ingestAgentKnowledge,
-  ingestDocument,
-  runFullReindex,
-  type RawChunk,
-  type ChunkMetadata,
-} from "./rag-ingestion.js";
-
-export { GOLDEN_SET } from "./evals/golden-set.js";
-export { runEvals, type EvalResult, type EvalReport } from "./evals/run-evals.js";
-export {
-  captureTrace,
-  getTrace,
-  listTraces,
-  updateTraceStatus,
-  aggregateTraces,
-  registerTraceSink,
-  registerTraceUpdateSink,
-  hydrateTraces,
-  REVIEW_CONFIDENCE_THRESHOLD,
-  REVIEW_HIGH_RISK_LEVELS,
-  REVIEW_COST_THRESHOLD_USD,
-  type AITrace,
-  type TraceCaptureInput,
-  type TraceStatus,
-  type TraceDomain,
-  type RecommendationType,
-  type TraceAggregate,
-} from "./evals/trace-capture.js";
-export {
-  registerEvaluatorHook,
-  unregisterEvaluatorHook,
-  listEvaluatorHooks,
-  getEvaluatorHook,
-  runEvaluatorHooksForTrace,
-  getHookResults,
-  aggregateHookStats,
-  type RegisteredEvalHook,
-  type EvalHookResult,
-  type EvalHookFn,
-  type DomainEvalContext,
-  type EvalAssertion,
-} from "./evals/evaluator-hooks.js";
-export {
-  enqueueForReview,
-  autoEnqueueTrace,
-  getReviewItem,
-  listReviewQueue,
-  recordReviewDecision,
-  markInReview,
-  getReviewQueueStats,
-  registerReviewQueueSink,
-  hydrateReviewQueue,
-  type ReviewQueueItem,
-  type ReviewVerdict,
-  type ReviewPriority,
-  type ReviewDecisionInput,
-  type ReviewQueueStats,
-} from "./evals/review-queue.js";
-
-export {
-  exportTrainingData,
-  serializeToJSONL,
-  serializeToHuggingFaceJSON,
-  type ExportFormat,
-  type DatasetExportResult,
-  type OpenAITrainingSample,
-  type HuggingFaceSample,
-} from "./fine-tuning/dataset-exporter.js";
-
-export {
-  curateDatasetForAgent,
-  curateAllDomainDatasets,
-  getDomainCuratorConfig,
-  getAllSupportedAgents,
-  DOMAIN_CURATOR_CONFIGS,
-  type DomainCuratorConfig,
-  type CuratedDatasetResult,
-} from "./fine-tuning/domain-curators.js";
-
-export {
-  submitFineTuningJob,
-  pollJobStatus,
-  listFineTuningJobs,
-  cancelFineTuningJob,
-  type FineTuningProvider,
-  type FineTuningJobRequest,
-  type FineTuningJobStatus,
-} from "./fine-tuning/job-manager.js";
-
-export {
-  runValidationGate,
-  promoteFineTunedModel,
-  type ModelEvalScores,
-  type ValidationGateResult,
-} from "./fine-tuning/validation-gate.js";
-
-export {
-  getActiveFineTunedModel,
-  resolveModelForAgent,
-  getAllFineTunedModels,
-  deprecateFineTunedModel,
-  invalidateModelCache,
-  getModelLineage,
-  type FineTunedModelInfo,
-} from "./fine-tuning/model-registry-extension.js";
-
-export { startScheduledEvals, stopScheduledEvals, persistEvalReport, getLatestEvalReport, getEvalHistory, computeAgentCalibrations } from "./learning/eval-pipeline.js";
-export { recordOutcome, getRelevantOutcomes, getConfidenceCalibration, buildCalibrationInstruction, type OutcomeRecord, type OutcomeType, type ConfidenceCalibration } from "./learning/outcome-learning.js";
-export { storeCorrection, getRelevantCorrections, type CorrectionRecord } from "./learning/agent-corrections.js";
-export { detectCrossPatterns, runPatternDetectionAndStore } from "./learning/pattern-detector.js";
-
-export {
-  A2ARegistryService,
-  a2aRegistry,
-  type AgentCard,
-  type DiscoveryQuery,
-  type DiscoveryResult,
-} from "./a2a-registry.js";
-
-export {
-  delegateTask,
-  getDelegationTask,
-  getDelegationHistory,
-  type DelegationRequest,
-  type DelegationResult,
-  type DelegationStatus,
-  type DelegationTaskRecord,
-} from "./a2a-delegation.js";
+  ToolDefinition,
+  ValidationResult,
+} from './types.js';
 
 export async function startCognitiveLearning(): Promise<void> {
-  const { evidencePipeline } = await import("./tradecraft/evidence-pipeline.js");
-  const { caseMemory } = await import("./tradecraft/case-memory.js");
-  const { startScheduledEvals: _startScheduledEvals } = await import("./learning/eval-pipeline.js");
-  await Promise.all([
-    evidencePipeline.hydrateFromDb(),
-    caseMemory.hydrateFromDb(),
-  ]);
+  const { evidencePipeline } = await import('./tradecraft/evidence-pipeline.js');
+  const { caseMemory } = await import('./tradecraft/case-memory.js');
+  const { startScheduledEvals: _startScheduledEvals } = await import('./learning/eval-pipeline.js');
+  await Promise.all([evidencePipeline.hydrateFromDb(), caseMemory.hydrateFromDb()]);
   await _startScheduledEvals();
 }
 
 export {
-  createAlloyDecision,
-  validateAlloyDecision,
-  getApprovalPolicy,
-  mapConfidenceToRisk,
-  APPROVAL_MATRIX,
-  type AlloyDecision,
-  type AlloyDecisionEvidenceRef,
-  type RiskLevel,
-  type DecisionStatus,
-} from "./schemas/alloy-decision.js";
-
-export {
-  TRADECRAFT_PROMPT_LIBRARY,
-  buildTradecraftPrompt,
-  CONFIDENCE_RUBRIC,
-  ANALYTIC_NOTE_TEMPLATES,
-  validateAndBuildTriageDecision,
-  validateAndBuildIncidentAssessment,
-  validateAndBuildRiskDecision,
-  validateAndBuildEscalationDecision,
-  validateAndBuildApprovalRecommendation,
-  validateAndBuildResponsePlan,
-  validateAndBuildExecutiveBrief,
-  validateAndBuildControlGapFinding,
-  EvidencePipeline,
-  evidencePipeline,
-  CaseMemoryStore,
-  caseMemory,
-  validateAndBuildDecision,
-  type AnalyticMode,
-  type TradecraftPromptTemplate,
-  type DecisionObjectType,
-  type ImpactLevel,
-  type UrgencyLevel,
-  type ConfidenceLabel,
-  type EvidenceRef,
-  type AnalyticAssumption,
-  type AlternativeHypothesis,
-  type BaseDecisionObject,
-  type TriageDecisionObject,
-  type IncidentAssessmentObject,
-  type RiskDecisionObject,
-  type EscalationDecisionObject,
-  type ApprovalRecommendationObject,
-  type ResponsePlanObject,
-  type ExecutiveBriefObject,
-  type ControlGapFindingObject,
-  type AnyDecisionObject,
-  type EvidenceSourceType,
-  type EvidenceIndexEntry,
-  type EvidenceQuery,
-  type EvidenceQueryResult,
-  type CaseMemoryEntry,
-  type DecisionDiff,
-  SkillRegistry,
-  skillRegistry,
-  SkillManager,
-  skillManager,
-  ScoringEngine,
-  scoringEngine,
-  buildSelfReflectionContext,
-  applyConfidenceAdjustment,
-  injectReflectionIntoPrompt,
-  persistReflectionSnapshot,
-  ConfidenceMonitor,
-  confidenceMonitor,
-  type SkillManifest,
-  type SkillCapability,
-  type SkillDomain,
-  type SkillInputField,
-  type SkillOutputField,
-  type SkillTriggerCondition,
-  type SkillChainMetadata,
-  type SkillChain,
-  type SkillSelectionResult,
-  type ChainCompositionResult,
-  type ChainExecutionPlan,
-  type DecisionOutcomeRecord,
-  type AgentAccuracyScore,
-  type ConfidenceCalibrationScore,
-  type SkillEffectivenessScore,
-  type ScoringWindowConfig,
-  type SelfReflectionContext,
-  type ReasoningAdjustment,
-  type SelfReflectionConfig,
-  type ConfidenceAlert,
-  type AlertSeverity,
-  type AlertType,
-  type MonitorConfig,
-} from "./tradecraft/index.js";
-
-export {
-  executeWithKernel,
-  issueScopeCertificate,
-  getKernelAuditTrail,
-  verifyAuditChainIntegrity,
-  kernelAuditChain,
-  type ScopeCertificate,
-  type KernelAuditEntry,
-  type KernelExecutionOptions,
-  type KernelExecutionResult,
-} from "./kernel/agent-kernel.js";
-
-export {
-  rlMemoryManager,
-  type MemoryEntry,
-  type MemoryTier,
-  type MemoryOperation,
-  type MemoryOperationResult,
-  type MemoryRewardSignal,
-} from "./memory/rl-memory.js";
-
-export {
-  trajectoryStore,
-  type OrchestrateTrajectory,
-  type AgentRoutingStep,
-  type ToolCallRecord,
-  type QualityDimensions,
-  type TrajectoryStatus,
-} from "./flywheel/trajectory-store.js";
-
-export {
-  behavioralTracer,
-  type ExecutionTrace,
-  type DecisionFork,
-  type JudgeEvaluation,
-  type DecisionTreeNode,
-  type DecisionForkType,
-} from "./observability/behavioral-tracer.js";
-
-export {
-  budgetManager,
-  MODEL_PRICING,
-  type ModelPricing,
-  type BudgetConfig,
-  type BudgetUsage,
-  type CostEstimate,
-  type SpendRecord,
-} from "./cost/budget-manager.js";
-
-export {
-  buildAgentCard,
-  buildMeshAgentIndex,
-  a2aTaskManager,
   type A2AAgentCard,
-  type A2ASkill,
-  type A2ATask,
   type A2AJsonRpcRequest,
   type A2AJsonRpcResponse,
-} from "./a2a/agent-cards.js";
-
+  type A2ASkill,
+  type A2ATask,
+  a2aTaskManager,
+  buildAgentCard,
+  buildMeshAgentIndex,
+} from './a2a/agent-cards.js';
 export {
-  buildDataTableComponent,
-  buildChartComponent,
-  buildApprovalFormComponent,
-  buildMetricCardComponent,
-  buildTimelineComponent,
-  isUIComponentResponse,
-  MCP_APP_TOOLS,
-  type UIComponentResponse,
-  type UIComponentType,
-  type DataTableConfig,
-  type ChartConfig,
-  type ApprovalFormConfig,
-  type MetricCardConfig,
-  type TimelineConfig,
-} from "./mcp-apps/ui-tools.js";
-
-export {
-  metacognitiveMonitor,
-  selfModelEngine,
-  cognitiveWorkspace,
-  innerMonologue,
-  goalEngine,
-  emotionalSignals,
-  temporalAwareness,
-  captureConsciousnessSnapshot,
-  buildConsciousnessContext,
-  type ConsciousnessSnapshot,
-  type MetacognitiveAssessment,
-  type MetacognitiveState,
-  type CertaintyLevel,
-  type ReasoningQuality,
-  type CognitiveLoad,
+  type AdversarialProbe,
+  type AffectiveForecast,
+  type AgentBeliefModel,
   type AgentCapabilityProfile,
-  type SystemSelfModel,
-  type SystemIdentity,
-  type WorkingMemoryItem,
   type AttentionFocus,
-  type CognitiveWorkspaceState,
-  type MonologueEntry,
-  type MonologueType,
-  type InnerMonologueState,
+  type AttentionSchemaReport,
+  buildConsciousnessContext,
+  type CertaintyLevel,
   type CognitiveGoal,
+  type CognitiveLoad,
+  type CognitiveWorkspaceState,
+  type ConsciousnessSnapshot,
+  type ConsolidationReport,
+  type CounterfactualScenario,
   type CuriositySignal,
+  captureConsciousnessSnapshot,
+  cognitiveWorkspace,
+  type DialecticalTriple,
+  type DiscoveredPattern,
+  type DreamConsolidationState,
+  type DreamReplay,
+  dreamConsolidation,
+  type EmotionalSignal,
+  type EmotionalState,
+  type EmotionalValence,
+  type EmotionRegulationStrategy,
+  type EmotionType,
+  type EpisodicFutureSimulation,
+  emotionalSignals,
+  type FreeEnergyState,
+  type GoalEngineState,
+  type GoalInterference,
   type GoalPriority,
   type GoalStatus,
-  type GoalEngineState,
-  type EmotionalSignal,
-  type EmotionalValence,
-  type EmotionalState,
-  type EmotionType,
-  type TemporalMarker,
-  type TemporalPattern,
-  type TemporalAwarenessState,
-  type PredictiveUncertainty,
-  type HallucinationRisk,
-  type MultiHypothesisBranch,
   type GWTBroadcast,
-  type AttentionSchemaReport,
-  type DialecticalTriple,
-  type SocraticChain,
-  type PerspectiveSimulation,
+  goalEngine,
+  type HallucinationRisk,
+  type InnerMonologueState,
   type IntrinsicMotivation,
-  type GoalInterference,
+  innerMonologue,
+  type MetacognitiveAssessment,
+  type MetacognitiveState,
   type MetaGoal,
-  type SchererAppraisal,
-  type EmotionRegulationStrategy,
-  type AffectiveForecast,
-  type ProspectiveMemoryItem,
-  type TemporalDiscount,
-  type EpisodicFutureSimulation,
-  type AgentBeliefModel,
-  type CounterfactualScenario,
-  type AdversarialProbe,
-  predictiveProcessing,
-  type PredictionModel,
+  type MonologueEntry,
+  type MonologueType,
+  type MultiHypothesisBranch,
+  metacognitiveMonitor,
+  type PerspectiveSimulation,
   type Prediction,
   type PredictionError,
-  type FreeEnergyState,
+  type PredictionModel,
   type PredictiveProcessingState,
-  dreamConsolidation,
-  type DreamReplay,
-  type DiscoveredPattern,
-  type ConsolidationReport,
-  type DreamConsolidationState,
-} from "./consciousness/index.js";
-
+  type PredictiveUncertainty,
+  type ProspectiveMemoryItem,
+  predictiveProcessing,
+  type ReasoningQuality,
+  type SchererAppraisal,
+  type SocraticChain,
+  type SystemIdentity,
+  type SystemSelfModel,
+  selfModelEngine,
+  type TemporalAwarenessState,
+  type TemporalDiscount,
+  type TemporalMarker,
+  type TemporalPattern,
+  temporalAwareness,
+  type WorkingMemoryItem,
+} from './consciousness/index.js';
 export {
-  OntologyEngine,
-  ontologyEngine,
-  type OntologyEntityType,
-  type RelationshipType,
-  type OntologyEntity,
-  type OntologyRelationship,
-  type GraphNode,
-  type GraphTraversalResult,
-  type EvidenceLink,
-  type CrossDomainConnection,
-  type GraphQueryResult,
-} from "./ontology/ontology-engine.js";
-
+  type BudgetConfig,
+  type BudgetUsage,
+  budgetManager,
+  type CostEstimate,
+  MODEL_PRICING,
+  type ModelPricing,
+  type SpendRecord,
+} from './cost/budget-manager.js';
 export {
-  GraphRAGEngine,
-  graphRAGEngine,
-  type GraphRAGQuery,
-  type GraphRAGResult,
-  type GraphScoredChunk,
-  type CrossDomainInsight,
-  type ReasoningStep,
-} from "./ontology/graph-rag.js";
-
-export {
-  twinRegistry,
-  vesselTwin,
-  propertyTwin,
-  postureTwin,
-  type TwinType,
-  type TwinStatus,
-  type TwinState,
-  type PredictedState,
-  type TwinAlert,
-  type SimulationScenario,
-  type SimulationResult,
-  type VesselTwinState,
-  type PropertyTwinState,
   type PostureTwinState,
-} from "./digital-twins/twin-engine.js";
-
+  type PredictedState,
+  type PropertyTwinState,
+  postureTwin,
+  propertyTwin,
+  type SimulationResult,
+  type SimulationScenario,
+  type TwinAlert,
+  type TwinState,
+  type TwinStatus,
+  type TwinType,
+  twinRegistry,
+  type VesselTwinState,
+  vesselTwin,
+} from './digital-twins/twin-engine.js';
 export {
-  matterTwin,
-  portfolioTwin,
-  incidentTwin,
-  portTwin,
+  branchScenario,
+  compareSnapshots,
+  detectDrift,
   type ExtendedTwinType,
-  type MatterTwinState,
-  type PortfolioTwinState,
+  getSnapshotHistory,
+  IncidentTwin,
   type IncidentTwinState,
+  incidentTwin,
+  MatterTwin,
+  type MatterTwinState,
+  matterTwin,
+  PortfolioTwin,
+  type PortfolioTwinState,
+  PortTwin,
   type PortTwinState,
   persistSnapshot,
-  getSnapshotHistory,
-  compareSnapshots,
-  branchScenario,
+  portfolioTwin,
+  portTwin,
   replayState,
-  detectDrift,
-  MatterTwin,
-  PortfolioTwin,
-  IncidentTwin,
-  PortTwin,
-} from "./digital-twins/twin-engine-spatial.js";
-
+} from './digital-twins/twin-engine-spatial.js';
 export {
-  FusionCortex,
-  fusionCortex,
+  type AgentRoutingStep,
+  type OrchestrateTrajectory,
+  type QualityDimensions,
+  type ToolCallRecord,
+  type TrajectoryStatus,
+  trajectoryStore,
+} from './flywheel/trajectory-store.js';
+export {
   type FusionAlert,
-  type FusionAlertSeverity,
   type FusionAlertCategory,
+  type FusionAlertSeverity,
+  FusionCortex,
+  type FusionCortexStats,
   type FusionEvidenceItem,
   type FusionPattern,
   type FusionScanResult,
-  type FusionCortexStats,
-} from "./fusion/fusion-cortex.js";
-
+  fusionCortex,
+} from './fusion/fusion-cortex.js';
 export {
-  PatternLibrary,
-  patternLibrary,
   type CorrelationPattern,
-  type PatternFeedback,
-  type PatternEvidence,
   type PatternCategory,
+  type PatternEvidence,
+  type PatternFeedback,
+  PatternLibrary,
   type PatternStatus,
-} from "./fusion/pattern-library.js";
-
+  patternLibrary,
+} from './fusion/pattern-library.js';
 export {
-  PredictiveCascadeEngine,
-  predictiveCascadeEngine,
-  type CascadeTree,
-  type CascadeNode,
   type CascadeHorizon,
   type CascadeImpactLevel,
-  type PredictiveAlert,
+  type CascadeNode,
+  type CascadeTree,
   type DomainKey,
-} from "./fusion/predictive-cascade.js";
-
+  type PredictiveAlert,
+  PredictiveCascadeEngine,
+  predictiveCascadeEngine,
+} from './fusion/predictive-cascade.js';
+export {
+  executeWithKernel,
+  getKernelAuditTrail,
+  issueScopeCertificate,
+  type KernelAuditEntry,
+  type KernelExecutionOptions,
+  type KernelExecutionResult,
+  kernelAuditChain,
+  type ScopeCertificate,
+  verifyAuditChainIntegrity,
+} from './kernel/agent-kernel.js';
+export {
+  type ApprovalFormConfig,
+  buildApprovalFormComponent,
+  buildChartComponent,
+  buildDataTableComponent,
+  buildMetricCardComponent,
+  buildTimelineComponent,
+  type ChartConfig,
+  type DataTableConfig,
+  isUIComponentResponse,
+  MCP_APP_TOOLS,
+  type MetricCardConfig,
+  type TimelineConfig,
+  type UIComponentResponse,
+  type UIComponentType,
+} from './mcp-apps/ui-tools.js';
+export {
+  type MemoryEntry,
+  type MemoryOperation,
+  type MemoryOperationResult,
+  type MemoryRewardSignal,
+  type MemoryTier,
+  rlMemoryManager,
+} from './memory/rl-memory.js';
 // ML Pipeline Infrastructure
-export * from "./ml-pipeline/index.js";
+export * from './ml-pipeline/index.js';
+export {
+  behavioralTracer,
+  type DecisionFork,
+  type DecisionForkType,
+  type DecisionTreeNode,
+  type ExecutionTrace,
+  type JudgeEvaluation,
+} from './observability/behavioral-tracer.js';
+export {
+  type CrossDomainInsight,
+  GraphRAGEngine,
+  type GraphRAGQuery,
+  type GraphRAGResult,
+  type GraphScoredChunk,
+  graphRAGEngine,
+  type ReasoningStep,
+} from './ontology/graph-rag.js';
+export {
+  type CrossDomainConnection,
+  type EvidenceLink,
+  type GraphNode,
+  type GraphQueryResult,
+  type GraphTraversalResult,
+  OntologyEngine,
+  type OntologyEntity,
+  type OntologyEntityType,
+  type OntologyRelationship,
+  ontologyEngine,
+  type RelationshipType,
+} from './ontology/ontology-engine.js';
+export {
+  type AlloyDecision,
+  type AlloyDecisionEvidenceRef,
+  APPROVAL_MATRIX,
+  createAlloyDecision,
+  type DecisionStatus,
+  getApprovalPolicy,
+  mapConfidenceToRisk,
+  type RiskLevel,
+  validateAlloyDecision,
+} from './schemas/alloy-decision.js';
+export {
+  type AgentAccuracyScore,
+  type AlertSeverity,
+  type AlertType,
+  type AlternativeHypothesis,
+  ANALYTIC_NOTE_TEMPLATES,
+  type AnalyticAssumption,
+  type AnalyticMode,
+  type AnyDecisionObject,
+  type ApprovalRecommendationObject,
+  applyConfidenceAdjustment,
+  type BaseDecisionObject,
+  buildSelfReflectionContext,
+  buildTradecraftPrompt,
+  type CaseMemoryEntry,
+  CaseMemoryStore,
+  type ChainCompositionResult,
+  type ChainExecutionPlan,
+  CONFIDENCE_RUBRIC,
+  type ConfidenceAlert,
+  type ConfidenceCalibrationScore,
+  type ConfidenceLabel,
+  ConfidenceMonitor,
+  type ControlGapFindingObject,
+  caseMemory,
+  confidenceMonitor,
+  type DecisionDiff,
+  type DecisionObjectType,
+  type DecisionOutcomeRecord,
+  type EscalationDecisionObject,
+  type EvidenceIndexEntry,
+  EvidencePipeline,
+  type EvidenceQuery,
+  type EvidenceQueryResult,
+  type EvidenceRef,
+  type EvidenceSourceType,
+  type ExecutiveBriefObject,
+  evidencePipeline,
+  type ImpactLevel,
+  type IncidentAssessmentObject,
+  injectReflectionIntoPrompt,
+  type MonitorConfig,
+  persistReflectionSnapshot,
+  type ReasoningAdjustment,
+  type ResponsePlanObject,
+  type RiskDecisionObject,
+  ScoringEngine,
+  type ScoringWindowConfig,
+  type SelfReflectionConfig,
+  type SelfReflectionContext,
+  type SkillCapability,
+  type SkillChain,
+  type SkillChainMetadata,
+  type SkillDomain,
+  type SkillEffectivenessScore,
+  type SkillInputField,
+  SkillManager,
+  type SkillManifest,
+  type SkillOutputField,
+  SkillRegistry,
+  type SkillSelectionResult,
+  type SkillTriggerCondition,
+  scoringEngine,
+  skillManager,
+  skillRegistry,
+  TRADECRAFT_PROMPT_LIBRARY,
+  type TradecraftPromptTemplate,
+  type TriageDecisionObject,
+  type UrgencyLevel,
+  validateAndBuildApprovalRecommendation,
+  validateAndBuildControlGapFinding,
+  validateAndBuildDecision,
+  validateAndBuildEscalationDecision,
+  validateAndBuildExecutiveBrief,
+  validateAndBuildIncidentAssessment,
+  validateAndBuildResponsePlan,
+  validateAndBuildRiskDecision,
+  validateAndBuildTriageDecision,
+} from './tradecraft/index.js';

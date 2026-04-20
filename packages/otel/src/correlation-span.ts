@@ -3,11 +3,11 @@
  * Propagates the SZL correlation ID into the active OTel span
  * so that logs, traces, and downstream calls are all linked.
  */
-import * as api from "@opentelemetry/api";
+import * as api from '@opentelemetry/api';
 
-const SZL_CORRELATION_ATTR = "szl.correlation_id";
-const SZL_REQUEST_ID_ATTR = "szl.request_id";
-const SZL_ORG_ID_ATTR = "szl.org_id";
+const SZL_CORRELATION_ATTR = 'szl.correlation_id';
+const SZL_REQUEST_ID_ATTR = 'szl.request_id';
+const SZL_ORG_ID_ATTR = 'szl.org_id';
 
 export interface CorrelationContext {
   correlationId?: string;
@@ -24,7 +24,7 @@ export async function withCorrelationSpan<T>(
   context: CorrelationContext,
   callback: (span: api.Span) => Promise<T>,
 ): Promise<T> {
-  const tracer = api.trace.getTracer("@szl-holdings/otel");
+  const tracer = api.trace.getTracer('@szl-holdings/otel');
   return tracer.startActiveSpan(name, async (span) => {
     if (context.correlationId) {
       span.setAttribute(SZL_CORRELATION_ATTR, context.correlationId);
@@ -36,7 +36,7 @@ export async function withCorrelationSpan<T>(
       span.setAttribute(SZL_ORG_ID_ATTR, context.orgId);
     }
     if (context.userId) {
-      span.setAttribute("szl.user_id", context.userId);
+      span.setAttribute('szl.user_id', context.userId);
     }
 
     try {
@@ -63,5 +63,5 @@ export function annotateActiveSpan(context: CorrelationContext): void {
   if (context.correlationId) span.setAttribute(SZL_CORRELATION_ATTR, context.correlationId);
   if (context.requestId) span.setAttribute(SZL_REQUEST_ID_ATTR, context.requestId);
   if (context.orgId) span.setAttribute(SZL_ORG_ID_ATTR, context.orgId);
-  if (context.userId) span.setAttribute("szl.user_id", context.userId);
+  if (context.userId) span.setAttribute('szl.user_id', context.userId);
 }

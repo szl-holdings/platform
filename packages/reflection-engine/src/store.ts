@@ -1,4 +1,4 @@
-import type { Reflection } from "./types.js";
+import type { Reflection } from './types.js';
 
 export interface ReflectionStoreQuery {
   traceId?: string;
@@ -12,7 +12,7 @@ export interface ReflectionStore {
   get(reflectionId: string): Reflection | undefined;
   getByTrace(traceId: string): Reflection | undefined;
   list(query?: ReflectionStoreQuery): Reflection[];
-  count(query?: Omit<ReflectionStoreQuery, "limit" | "offset">): number;
+  count(query?: Omit<ReflectionStoreQuery, 'limit' | 'offset'>): number;
 }
 
 export class InMemoryReflectionStore implements ReflectionStore {
@@ -43,17 +43,14 @@ export class InMemoryReflectionStore implements ReflectionStore {
       results = results.filter((r) => r.failureMode === query.failureMode);
     }
 
-    results.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const offset = query?.offset ?? 0;
     const limit = query?.limit ?? 50;
     return results.slice(offset, offset + limit);
   }
 
-  count(query?: Omit<ReflectionStoreQuery, "limit" | "offset">): number {
+  count(query?: Omit<ReflectionStoreQuery, 'limit' | 'offset'>): number {
     if (!query?.traceId && !query?.failureMode) return this.entries.size;
     let results = Array.from(this.entries.values());
     if (query.traceId) results = results.filter((r) => r.traceId === query.traceId);

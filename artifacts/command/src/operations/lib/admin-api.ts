@@ -1,4 +1,4 @@
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 
 export { apiFetch };
 

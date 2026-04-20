@@ -1,13 +1,24 @@
-
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-
-  Shield, Ship, Zap, TrendingDown, AlertTriangle, CheckCircle, Clock,
-  ArrowRight, ExternalLink, Activity, BarChart3, Eye, User,
-  GitBranch, Package, Navigation
-} from "lucide-react";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  ExternalLink,
+  Eye,
+  GitBranch,
+  Navigation,
+  Package,
+  Shield,
+  Ship,
+  TrendingDown,
+  User,
+  Zap,
+} from 'lucide-react';
 
 interface LyteAction {
   priority?: string;
@@ -54,26 +65,54 @@ interface WorkflowRun {
 }
 
 const DOMAIN_LINKS = [
-  { id: "lyte", label: "Lyte", description: "Business Observability", color: "#06b6d4", href: "/command/operations/", icon: Zap },
-  { id: "vessels", label: "Vessels", description: "Maritime Command", color: "#3b82f6", href: "/vessels/", icon: Ship },
-  { id: "terra", label: "Terra", description: "Broker Platform", color: "#a07848", href: "/terra/", icon: Navigation },
-  { id: "alloy", label: "Alloy", description: "Intelligence Engine", color: "#60a5fa", href: "/alloy/", icon: GitBranch },
+  {
+    id: 'lyte',
+    label: 'Lyte',
+    description: 'Business Observability',
+    color: '#06b6d4',
+    href: '/command/operations/',
+    icon: Zap,
+  },
+  {
+    id: 'vessels',
+    label: 'Vessels',
+    description: 'Maritime Command',
+    color: '#3b82f6',
+    href: '/vessels/',
+    icon: Ship,
+  },
+  {
+    id: 'terra',
+    label: 'Terra',
+    description: 'Broker Platform',
+    color: '#a07848',
+    href: '/terra/',
+    icon: Navigation,
+  },
+  {
+    id: 'alloy',
+    label: 'Alloy',
+    description: 'Intelligence Engine',
+    color: '#60a5fa',
+    href: '/alloy/',
+    icon: GitBranch,
+  },
 ];
 
 const DOMAIN_COLORS: Record<string, string> = {
-  lyte: "text-amber-400",
-  vessels: "text-sky-400",
-  terra: "text-orange-400",
-  alloy: "text-cyan-400",
+  lyte: 'text-amber-400',
+  vessels: 'text-sky-400',
+  terra: 'text-orange-400',
+  alloy: 'text-cyan-400',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  critical: "bg-red-500/15 text-red-400 border-red-500/30",
-  urgent: "bg-red-500/15 text-red-400 border-red-500/30",
-  high: "bg-orange-500/15 text-orange-400 border-orange-500/30",
-  medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  watch: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  warning: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  critical: 'bg-red-500/15 text-red-400 border-red-500/30',
+  urgent: 'bg-red-500/15 text-red-400 border-red-500/30',
+  high: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+  medium: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  watch: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  warning: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
 };
 
 function formatCurrency(val: number): string {
@@ -83,7 +122,7 @@ function formatCurrency(val: number): string {
 }
 
 function formatTimeSince(isoDate: string | null): string {
-  if (!isoDate) return "Running";
+  if (!isoDate) return 'Running';
   const diff = Date.now() - new Date(isoDate).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins}m ago`;
@@ -92,20 +131,20 @@ function formatTimeSince(isoDate: string | null): string {
 
 export default function UnifiedCommandDashboard() {
   const { data: rawLyteActions } = useStandardQuery({
-    queryKey: ["unified-lyte-actions"],
-    queryFn: () => apiFetch<LyteAction[]>("/lyte/actions?state=new"),
+    queryKey: ['unified-lyte-actions'],
+    queryFn: () => apiFetch<LyteAction[]>('/lyte/actions?state=new'),
     placeholderData: [],
   });
 
   const { data: rawVesselEvents } = useStandardQuery({
-    queryKey: ["unified-vessel-events"],
-    queryFn: () => apiFetch<VesselEvent[]>("/vessels/events?status=open"),
+    queryKey: ['unified-vessel-events'],
+    queryFn: () => apiFetch<VesselEvent[]>('/vessels/events?status=open'),
     placeholderData: [],
   });
 
   const { data: rawTerraSignals } = useStandardQuery({
-    queryKey: ["unified-terra-signals"],
-    queryFn: () => apiFetch<TerraSignal[]>("/terra/signals"),
+    queryKey: ['unified-terra-signals'],
+    queryFn: () => apiFetch<TerraSignal[]>('/terra/signals'),
     placeholderData: [],
   });
 
@@ -116,34 +155,40 @@ export default function UnifiedCommandDashboard() {
   const data = {
     lyte: {
       openActions: lyteActions.length,
-      escalated: lyteActions.filter((a) => a.priority === "critical" || a.priority === "urgent").length,
+      escalated: lyteActions.filter((a) => a.priority === 'critical' || a.priority === 'urgent')
+        .length,
       valueAtRisk: lyteActions.reduce((sum, a) => sum + (Number(a.valueAtRisk) || 0), 0),
       topActions: lyteActions.slice(0, 3).map((a) => ({
-        title: a.title ?? a.name ?? "Untitled action",
-        priority: a.priority ?? "medium",
-        category: a.category ?? a.actionType ?? "",
+        title: a.title ?? a.name ?? 'Untitled action',
+        priority: a.priority ?? 'medium',
+        category: a.category ?? a.actionType ?? '',
         valueAtRisk: Number(a.valueAtRisk) || 0,
       })),
     },
     vessels: {
-      criticalEvents: vesselEvents.filter((e) => e.severity === "critical").length,
+      criticalEvents: vesselEvents.filter((e) => e.severity === 'critical').length,
       openExceptions: vesselEvents.length,
-      consequenceImpact: vesselEvents.reduce((sum, e) => sum + (Number(e.consequenceImpactCents ?? e.financialImpact ?? 0) / 100), 0),
+      consequenceImpact: vesselEvents.reduce(
+        (sum, e) => sum + Number(e.consequenceImpactCents ?? e.financialImpact ?? 0) / 100,
+        0,
+      ),
       topEvents: vesselEvents.slice(0, 3).map((e) => ({
-        title: e.title ?? e.name ?? "Untitled event",
-        severity: e.severity ?? "warning",
-        type: e.eventType ?? e.type ?? "",
+        title: e.title ?? e.name ?? 'Untitled event',
+        severity: e.severity ?? 'warning',
+        type: e.eventType ?? e.type ?? '',
         impact: Number(e.consequenceImpactCents ?? 0) / 100,
       })),
     },
     terra: {
-      activeListings: terraSignals.filter((s) => s.signalType === "listing" || s.type === "listing").length,
-      stalledDeals: terraSignals.filter((s) => s.signalType === "stall" || s.status === "stalled").length,
-      pipelineValue: terraSignals.reduce((sum, s) => sum + (Number(s.estimatedValue ?? 0)), 0),
+      activeListings: terraSignals.filter((s) => s.signalType === 'listing' || s.type === 'listing')
+        .length,
+      stalledDeals: terraSignals.filter((s) => s.signalType === 'stall' || s.status === 'stalled')
+        .length,
+      pipelineValue: terraSignals.reduce((sum, s) => sum + Number(s.estimatedValue ?? 0), 0),
       topSignals: terraSignals.slice(0, 3).map((s) => ({
-        title: s.title ?? s.name ?? "Untitled signal",
-        severity: s.severity ?? "warning",
-        type: s.signalType ?? s.type ?? "",
+        title: s.title ?? s.name ?? 'Untitled signal',
+        severity: s.severity ?? 'warning',
+        type: s.signalType ?? s.type ?? '',
         impact: Number(s.estimatedValue ?? 0),
       })),
     },
@@ -159,7 +204,9 @@ export default function UnifiedCommandDashboard() {
             <Eye className="w-6 h-6 text-sky-400" />
             Unified Command
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Cross-domain intelligence — highest priority items across Lyte, Vessels, and Terra</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Cross-domain intelligence — highest priority items across Lyte, Vessels, and Terra
+          </p>
         </div>
         <div className="flex items-center gap-1 text-[10px] text-slate-500">
           <Activity className="w-3 h-3 text-emerald-400" />
@@ -173,7 +220,7 @@ export default function UnifiedCommandDashboard() {
             key={id}
             href={href}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all hover:opacity-80"
-            style={{ borderColor: color + "40", background: color + "10", color }}
+            style={{ borderColor: color + '40', background: color + '10', color }}
           >
             <Icon className="w-3.5 h-3.5" />
             {label}
@@ -186,8 +233,8 @@ export default function UnifiedCommandDashboard() {
       <div className="grid grid-cols-3 gap-4">
         <div
           className="rounded-xl border p-4 cursor-pointer hover:opacity-90 transition-all"
-          style={{ borderColor: "#f59e0b40", background: "#f59e0b08" }}
-          onClick={() => window.location.href = "/command/operations/"}
+          style={{ borderColor: '#f59e0b40', background: '#f59e0b08' }}
+          onClick={() => (window.location.href = '/command/operations/')}
         >
           <div className="flex items-center gap-2 mb-3">
             <Zap className="w-4 h-4 text-amber-400" />
@@ -203,13 +250,19 @@ export default function UnifiedCommandDashboard() {
               <div className="text-[10px] text-slate-500">Escalated</div>
             </div>
           </div>
-          <div className="text-xs text-amber-400 font-medium">{formatCurrency(data.lyte.valueAtRisk)} value at risk</div>
+          <div className="text-xs text-amber-400 font-medium">
+            {formatCurrency(data.lyte.valueAtRisk)} value at risk
+          </div>
           <div className="mt-3 space-y-1.5">
             {data.lyte.topActions.map((action, i) => (
               <div key={i} className="text-[10px] flex items-center gap-1.5 text-slate-400">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${action.priority === "urgent" ? "bg-red-400" : "bg-orange-400"}`} />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${action.priority === 'urgent' ? 'bg-red-400' : 'bg-orange-400'}`}
+                />
                 <span className="truncate">{action.title}</span>
-                <span className="ml-auto text-amber-400/80 flex-shrink-0">{formatCurrency(action.valueAtRisk)}</span>
+                <span className="ml-auto text-amber-400/80 flex-shrink-0">
+                  {formatCurrency(action.valueAtRisk)}
+                </span>
               </div>
             ))}
           </div>
@@ -217,8 +270,8 @@ export default function UnifiedCommandDashboard() {
 
         <div
           className="rounded-xl border p-4 cursor-pointer hover:opacity-90 transition-all"
-          style={{ borderColor: "#0ea5e940", background: "#0ea5e908" }}
-          onClick={() => window.location.href = "/vessels/"}
+          style={{ borderColor: '#0ea5e940', background: '#0ea5e908' }}
+          onClick={() => (window.location.href = '/vessels/')}
         >
           <div className="flex items-center gap-2 mb-3">
             <Ship className="w-4 h-4 text-sky-400" />
@@ -230,17 +283,27 @@ export default function UnifiedCommandDashboard() {
               <div className="text-[10px] text-slate-500">Critical Events</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-400">{data.vessels.openExceptions}</div>
+              <div className="text-2xl font-bold text-orange-400">
+                {data.vessels.openExceptions}
+              </div>
               <div className="text-[10px] text-slate-500">Open Exceptions</div>
             </div>
           </div>
-          <div className="text-xs text-sky-400 font-medium">{formatCurrency(data.vessels.consequenceImpact)} consequence impact</div>
+          <div className="text-xs text-sky-400 font-medium">
+            {formatCurrency(data.vessels.consequenceImpact)} consequence impact
+          </div>
           <div className="mt-3 space-y-1.5">
             {data.vessels.topEvents.map((ev, i) => (
               <div key={i} className="text-[10px] flex items-center gap-1.5 text-slate-400">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ev.severity === "critical" ? "bg-red-400" : "bg-amber-400"}`} />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ev.severity === 'critical' ? 'bg-red-400' : 'bg-amber-400'}`}
+                />
                 <span className="truncate">{ev.title}</span>
-                {ev.impact > 0 && <span className="ml-auto text-sky-400/80 flex-shrink-0">{formatCurrency(ev.impact)}</span>}
+                {ev.impact > 0 && (
+                  <span className="ml-auto text-sky-400/80 flex-shrink-0">
+                    {formatCurrency(ev.impact)}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -248,8 +311,8 @@ export default function UnifiedCommandDashboard() {
 
         <div
           className="rounded-xl border p-4 cursor-pointer hover:opacity-90 transition-all"
-          style={{ borderColor: "#a0784840", background: "#a0784808" }}
-          onClick={() => window.location.href = "/terra/"}
+          style={{ borderColor: '#a0784840', background: '#a0784808' }}
+          onClick={() => (window.location.href = '/terra/')}
         >
           <div className="flex items-center gap-2 mb-3">
             <Navigation className="w-4 h-4 text-orange-400" />
@@ -265,16 +328,24 @@ export default function UnifiedCommandDashboard() {
               <div className="text-[10px] text-slate-500">Stalled Deals</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-emerald-400">{formatCurrency(data.terra.pipelineValue)}</div>
+              <div className="text-2xl font-bold text-emerald-400">
+                {formatCurrency(data.terra.pipelineValue)}
+              </div>
               <div className="text-[10px] text-slate-500">Pipeline</div>
             </div>
           </div>
           <div className="mt-3 space-y-1.5">
             {data.terra.topSignals.map((s, i) => (
               <div key={i} className="text-[10px] flex items-center gap-1.5 text-slate-400">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.severity === "critical" ? "bg-red-400" : "bg-orange-400"}`} />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.severity === 'critical' ? 'bg-red-400' : 'bg-orange-400'}`}
+                />
                 <span className="truncate">{s.title}</span>
-                {s.impact > 0 && <span className="ml-auto text-orange-400/80 flex-shrink-0">{formatCurrency(s.impact)}</span>}
+                {s.impact > 0 && (
+                  <span className="ml-auto text-orange-400/80 flex-shrink-0">
+                    {formatCurrency(s.impact)}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -289,18 +360,33 @@ export default function UnifiedCommandDashboard() {
           </div>
           <div className="space-y-3">
             {data.recommendations.map((rec) => (
-              <div key={rec.id} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
-                <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5 ${DOMAIN_COLORS[rec.domain] ? `bg-${rec.domain === "lyte" ? "amber" : rec.domain === "vessels" ? "sky" : "orange"}-500/10` : ""}`}>
-                  {rec.domain === "lyte" ? <Zap className="w-3 h-3 text-amber-400" /> :
-                   rec.domain === "vessels" ? <Ship className="w-3 h-3 text-sky-400" /> :
-                   <Navigation className="w-3 h-3 text-orange-400" />}
+              <div
+                key={rec.id}
+                className="flex items-start gap-2.5 p-2.5 rounded-lg bg-white/[0.02] border border-white/5"
+              >
+                <div
+                  className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5 ${DOMAIN_COLORS[rec.domain] ? `bg-${rec.domain === 'lyte' ? 'amber' : rec.domain === 'vessels' ? 'sky' : 'orange'}-500/10` : ''}`}
+                >
+                  {rec.domain === 'lyte' ? (
+                    <Zap className="w-3 h-3 text-amber-400" />
+                  ) : rec.domain === 'vessels' ? (
+                    <Ship className="w-3 h-3 text-sky-400" />
+                  ) : (
+                    <Navigation className="w-3 h-3 text-orange-400" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border ${PRIORITY_COLORS[rec.priority] || ""}`}>
+                    <span
+                      className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border ${PRIORITY_COLORS[rec.priority] || ''}`}
+                    >
                       {rec.priority}
                     </span>
-                    <span className={`text-[10px] font-medium capitalize ${DOMAIN_COLORS[rec.domain] || "text-slate-400"}`}>{rec.domain}</span>
+                    <span
+                      className={`text-[10px] font-medium capitalize ${DOMAIN_COLORS[rec.domain] || 'text-slate-400'}`}
+                    >
+                      {rec.domain}
+                    </span>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-relaxed">{rec.text}</p>
                 </div>
@@ -313,23 +399,38 @@ export default function UnifiedCommandDashboard() {
           <div className="flex items-center gap-2 mb-3">
             <GitBranch className="w-4 h-4 text-cyan-400" />
             <span className="text-sm font-semibold text-white">Recent Workflow Runs</span>
-            <a href="/alloy" className="ml-auto text-[10px] text-cyan-400 flex items-center gap-1 hover:opacity-80">
+            <a
+              href="/alloy"
+              className="ml-auto text-[10px] text-cyan-400 flex items-center gap-1 hover:opacity-80"
+            >
               View All <ExternalLink className="w-2.5 h-2.5" />
             </a>
           </div>
           <div className="space-y-2.5">
             {data.workflows.recentRuns.map((wf) => (
-              <div key={wf.id} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+              <div
+                key={wf.id}
+                className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-white/[0.02] border border-white/5"
+              >
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${wf.status === "completed" ? "bg-emerald-400" : wf.status === "in_progress" ? "bg-amber-400 animate-pulse" : "bg-zinc-400"}`} />
+                  <div
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${wf.status === 'completed' ? 'bg-emerald-400' : wf.status === 'in_progress' ? 'bg-amber-400 animate-pulse' : 'bg-zinc-400'}`}
+                  />
                   <div>
                     <div className="text-xs text-white font-medium">{wf.name}</div>
-                    <div className={`text-[10px] capitalize ${DOMAIN_COLORS[wf.domain] || "text-slate-400"}`}>{wf.domain}</div>
+                    <div
+                      className={`text-[10px] capitalize ${DOMAIN_COLORS[wf.domain] || 'text-slate-400'}`}
+                    >
+                      {wf.domain}
+                    </div>
                   </div>
                 </div>
                 <div className="text-[10px] text-slate-500 flex-shrink-0">
-                  {wf.status === "in_progress" ? (
-                    <span className="text-amber-400 flex items-center gap-1"><Clock className="w-3 h-3" />Running</span>
+                  {wf.status === 'in_progress' ? (
+                    <span className="text-amber-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Running
+                    </span>
                   ) : (
                     <span>{formatTimeSince(wf.completedAt)}</span>
                   )}
@@ -339,16 +440,21 @@ export default function UnifiedCommandDashboard() {
           </div>
 
           <div className="mt-4 pt-3 border-t border-white/5">
-            <div className="text-[10px] text-slate-500 mb-2 font-medium uppercase tracking-wider">Quick Actions</div>
+            <div className="text-[10px] text-slate-500 mb-2 font-medium uppercase tracking-wider">
+              Quick Actions
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {[
-                { label: "View Lyte Action Queue", href: "/command/operations/action-queue" },
-                { label: "Vessels Exceptions", href: "/vessels/exceptions" },
-                { label: "Terra Listings", href: "/terra/listings" },
-                { label: "Alloy Workflows", href: "/alloy/" },
+                { label: 'View Lyte Action Queue', href: '/command/operations/action-queue' },
+                { label: 'Vessels Exceptions', href: '/vessels/exceptions' },
+                { label: 'Terra Listings', href: '/terra/listings' },
+                { label: 'Alloy Workflows', href: '/alloy/' },
               ].map(({ label, href }) => (
-                <a key={href} href={href}
-                  className="text-[10px] px-2 py-1 rounded border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all flex items-center gap-1">
+                <a
+                  key={href}
+                  href={href}
+                  className="text-[10px] px-2 py-1 rounded border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all flex items-center gap-1"
+                >
                   {label}
                   <ArrowRight className="w-2.5 h-2.5" />
                 </a>

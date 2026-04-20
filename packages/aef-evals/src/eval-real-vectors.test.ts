@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll } from "vitest";
-import { LocalCpuBackend } from "@workspace/alloy-vector-worker";
-import { runEval } from "./runner.js";
-import { ALL_FIXTURE_SETS } from "./fixtures/index.js";
-import type { GoldenFixtureSet, RetrievalAdapter, RetrievalResult } from "./types.js";
+import { LocalCpuBackend } from '@workspace/alloy-vector-worker';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { ALL_FIXTURE_SETS } from './fixtures/index.js';
+import { runEval } from './runner.js';
+import type { GoldenFixtureSet, RetrievalAdapter, RetrievalResult } from './types.js';
 
 const MIN_NDCG = 0.7;
 const TOP_K = 10;
@@ -32,7 +32,7 @@ async function buildAdapter(
       text: c.text,
       modelRef: backend.modelRef,
       profileId: fixtureSet.profileId,
-      inputType: "passage" as const,
+      inputType: 'passage' as const,
     })),
   );
 
@@ -46,20 +46,20 @@ async function buildAdapter(
       const start = Date.now();
       const [embedding] = await backend.embed([
         {
-          chunkId: "query",
+          chunkId: 'query',
           text: query,
           modelRef: backend.modelRef,
           profileId: fixtureSet.profileId,
-          inputType: "query",
+          inputType: 'query',
         },
       ]);
-      if (!embedding) throw new Error("query embedding missing");
+      if (!embedding) throw new Error('query embedding missing');
       const scored = index
         .map((c) => ({ chunkId: c.chunkId, score: cosine(embedding.vector, c.vector) }))
         .sort((a, b) => b.score - a.score)
         .slice(0, topK);
       return {
-        queryId: "real",
+        queryId: 'real',
         retrievedChunkIds: scored.map((s) => s.chunkId),
         latencyMs: Date.now() - start,
       };
@@ -67,7 +67,7 @@ async function buildAdapter(
   };
 }
 
-describe("aef-evals — golden fixtures with real ONNX vectors", () => {
+describe('aef-evals — golden fixtures with real ONNX vectors', () => {
   let backend: LocalCpuBackend;
 
   beforeAll(async () => {
@@ -75,11 +75,11 @@ describe("aef-evals — golden fixtures with real ONNX vectors", () => {
     // Warm the model so per-fixture timing is more representative.
     await backend.embed([
       {
-        chunkId: "warm",
-        text: "warm-up",
+        chunkId: 'warm',
+        text: 'warm-up',
         modelRef: backend.modelRef,
-        profileId: "warm",
-        inputType: "passage",
+        profileId: 'warm',
+        inputType: 'passage',
       },
     ]);
   }, 240_000);
@@ -89,10 +89,10 @@ describe("aef-evals — golden fixtures with real ONNX vectors", () => {
       const adapter = await buildAdapter(backend, fixtureSet);
       const result = await runEval(fixtureSet, adapter, {
         topK: TOP_K,
-        metrics: ["ndcg", "recall", "precision", "mrr"],
+        metrics: ['ndcg', 'recall', 'precision', 'mrr'],
       });
 
-      const ndcg = result.metrics.find((m) => m.metric === "ndcg");
+      const ndcg = result.metrics.find((m) => m.metric === 'ndcg');
       expect(ndcg, `nDCG missing for ${fixtureSet.profileId}`).toBeDefined();
       expect(
         ndcg!.value,

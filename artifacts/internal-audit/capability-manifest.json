@@ -69,7 +69,12 @@
     { "name": "szl-holdings: web", "status": "running", "port": 21130 },
     { "name": "api-server: api", "status": "running", "port": 8080 },
     { "name": "command: web", "status": "running", "port": 5000 },
-    { "name": "lyte-command-center: web", "status": "running", "port": 7099, "fixedThisAudit": true },
+    {
+      "name": "lyte-command-center: web",
+      "status": "running",
+      "port": 7099,
+      "fixedThisAudit": true
+    },
     { "name": "terra: web", "status": "running", "port": 6000 },
     { "name": "aegis: web", "status": "running", "port": 3002 },
     { "name": "vessels: web", "status": "running", "port": 8099 },
@@ -81,7 +86,11 @@
     { "name": "mockup-sandbox: web", "status": "running", "port": 8008 },
     { "name": "szl-holdings-mobile: expo", "status": "running", "port": 8085 },
     { "name": "szl-demo-video: web", "status": "running", "port": 8765 },
-    { "name": "smoke-test-integrations", "status": "passed", "note": "8/8 integrations configured" },
+    {
+      "name": "smoke-test-integrations",
+      "status": "passed",
+      "note": "8/8 integrations configured"
+    },
     { "name": "check-deprecated-links", "status": "passed", "note": "No deprecated nav links" }
   ],
   "commercialSwitches": [
@@ -97,25 +106,96 @@
     { "name": "AIS Live Feed", "status": "mock", "fix": "Add MARINETRAFFIC_API_KEY" }
   ],
   "liveDataSources": [
-    { "source": "NYC Open Data", "domain": "Terra", "classification": "LIVE", "license": "CC0", "pollInterval": "on-demand" },
-    { "source": "STIX/TAXII (MISP)", "domain": "Aegis", "classification": "LIVE", "pollInterval": 900 },
-    { "source": "OFAC SDN List", "domain": "Aegis, Vessels", "classification": "LIVE", "pollInterval": 21600 },
-    { "source": "EU Consolidated List", "domain": "Aegis, Vessels", "classification": "LIVE", "pollInterval": 21600 },
-    { "source": "UN Security Council List", "domain": "Aegis, Vessels", "classification": "LIVE", "pollInterval": 21600 },
-    { "source": "Stripe (test mode)", "domain": "Platform", "classification": "LIVE", "note": "Test keys" }
+    {
+      "source": "NYC Open Data",
+      "domain": "Terra",
+      "classification": "LIVE",
+      "license": "CC0",
+      "pollInterval": "on-demand"
+    },
+    {
+      "source": "STIX/TAXII (MISP)",
+      "domain": "Aegis",
+      "classification": "LIVE",
+      "pollInterval": 900
+    },
+    {
+      "source": "OFAC SDN List",
+      "domain": "Aegis, Vessels",
+      "classification": "LIVE",
+      "pollInterval": 21600
+    },
+    {
+      "source": "EU Consolidated List",
+      "domain": "Aegis, Vessels",
+      "classification": "LIVE",
+      "pollInterval": 21600
+    },
+    {
+      "source": "UN Security Council List",
+      "domain": "Aegis, Vessels",
+      "classification": "LIVE",
+      "pollInterval": 21600
+    },
+    {
+      "source": "Stripe (test mode)",
+      "domain": "Platform",
+      "classification": "LIVE",
+      "note": "Test keys"
+    }
   ],
   "gaps": {
     "p1": [
-      { "id": "GAP-001", "description": "Email not activated", "fix": "Add RESEND_API_KEY", "effort": "5 minutes" },
-      { "id": "GAP-002", "description": "Carlota Jo Stripe checkout not wired", "fix": "Build /checkout page", "effort": "1 day" },
-      { "id": "GAP-003", "description": "Vessels AIS demo-only", "fix": "Add MARINETRAFFIC_API_KEY", "effort": "2 hours" }
+      {
+        "id": "GAP-001",
+        "description": "Email not activated",
+        "fix": "Add RESEND_API_KEY",
+        "effort": "5 minutes"
+      },
+      {
+        "id": "GAP-002",
+        "description": "Carlota Jo Stripe checkout not wired",
+        "fix": "Build /checkout page",
+        "effort": "1 day"
+      },
+      {
+        "id": "GAP-003",
+        "description": "Vessels AIS demo-only",
+        "fix": "Add MARINETRAFFIC_API_KEY",
+        "effort": "2 hours"
+      }
     ],
     "p2": [
-      { "id": "GAP-004", "description": "DB tables missing", "fix": "pnpm seed:all", "effort": "2 hours" },
-      { "id": "GAP-005", "description": "SSO not configured", "fix": "Configure IdP", "effort": "3 days" },
-      { "id": "GAP-006", "description": "Pulse not AI-generated", "fix": "Connect AI provider", "effort": "3 days" },
-      { "id": "GAP-007", "description": "Terra ETL no health UI", "fix": "Build ingestion status page", "effort": "1 day" },
-      { "id": "GAP-008", "description": "SIEM connectors stubbed", "fix": "Wire one reference vendor", "effort": "1 week" }
+      {
+        "id": "GAP-004",
+        "description": "DB tables missing",
+        "fix": "pnpm seed:all",
+        "effort": "2 hours"
+      },
+      {
+        "id": "GAP-005",
+        "description": "SSO not configured",
+        "fix": "Configure IdP",
+        "effort": "3 days"
+      },
+      {
+        "id": "GAP-006",
+        "description": "Pulse not AI-generated",
+        "fix": "Connect AI provider",
+        "effort": "3 days"
+      },
+      {
+        "id": "GAP-007",
+        "description": "Terra ETL no health UI",
+        "fix": "Build ingestion status page",
+        "effort": "1 day"
+      },
+      {
+        "id": "GAP-008",
+        "description": "SIEM connectors stubbed",
+        "fix": "Wire one reference vendor",
+        "effort": "1 week"
+      }
     ]
   },
   "generatedBy": "SZL Singularity Program — Task #2239",

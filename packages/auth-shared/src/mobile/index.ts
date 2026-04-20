@@ -6,5 +6,5 @@
  * mobile app can swap implementations in tests.
  */
 
-export * from "./token-store.js";
-export * from "./pkce.js";
+export * from './pkce.js';
+export * from './token-store.js';

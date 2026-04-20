@@ -1,5 +1,5 @@
-import { promptRegistry } from "./registry.js";
-import type { PromptDefinition, PromptVersion } from "./registry.js";
+import type { PromptDefinition, PromptVersion } from './registry.js';
+import { promptRegistry } from './registry.js';
 
 export interface PromptLookupResult {
   prompt: PromptDefinition;
@@ -7,7 +7,10 @@ export interface PromptLookupResult {
   rendered: string;
 }
 
-export function loadActivePrompt(id: string, variables: Record<string, unknown> = {}): PromptLookupResult {
+export function loadActivePrompt(
+  id: string,
+  variables: Record<string, unknown> = {},
+): PromptLookupResult {
   const prompt = promptRegistry.get(id);
   if (!prompt) throw new Error(`Prompt '${id}' not found`);
 
@@ -18,7 +21,11 @@ export function loadActivePrompt(id: string, variables: Record<string, unknown> 
   return { prompt, version, rendered };
 }
 
-export function loadPromptVersion(id: string, versionId: string, variables: Record<string, unknown> = {}): PromptLookupResult {
+export function loadPromptVersion(
+  id: string,
+  versionId: string,
+  variables: Record<string, unknown> = {},
+): PromptLookupResult {
   const prompt = promptRegistry.get(id);
   if (!prompt) throw new Error(`Prompt '${id}' not found`);
 
@@ -33,8 +40,8 @@ function renderTemplate(template: string, variables: Record<string, unknown>): s
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
     const value = variables[key];
     if (value === undefined) return `{{${key}}}`;
-    if (Array.isArray(value)) return value.join(", ");
-    if (typeof value === "object") return JSON.stringify(value);
+    if (Array.isArray(value)) return value.join(', ');
+    if (typeof value === 'object') return JSON.stringify(value);
     return String(value);
   });
 }

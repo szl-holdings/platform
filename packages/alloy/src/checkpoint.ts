@@ -1,4 +1,4 @@
-import type { RunState } from "./types.js";
+import type { RunState } from './types.js';
 
 export interface CheckpointStore {
   save(checkpoint: Checkpoint): void;

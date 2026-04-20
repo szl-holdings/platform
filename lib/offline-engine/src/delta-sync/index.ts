@@ -1,4 +1,4 @@
-import type { StorageAdapter } from "../storage/interface";
+import type { StorageAdapter } from '../storage/interface';
 
 export interface DeltaSyncWatermark {
   domain: string;
@@ -30,7 +30,7 @@ export interface DeltaSyncOptions {
   watermarkStore?: string;
 }
 
-const WATERMARK_STORE = "sync-watermarks";
+const WATERMARK_STORE = 'sync-watermarks';
 
 export class DeltaSyncClient {
   private storage: StorageAdapter;
@@ -41,7 +41,7 @@ export class DeltaSyncClient {
 
   constructor(options: DeltaSyncOptions) {
     this.storage = options.storage;
-    this.baseUrl = options.baseUrl.replace(/\/$/, "");
+    this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.getHeaders = options.getHeaders;
     this.pageSize = options.pageSize ?? 100;
     this.watermarkStore = options.watermarkStore ?? WATERMARK_STORE;
@@ -60,9 +60,10 @@ export class DeltaSyncClient {
   async fetchDeltas<T = unknown>(
     domain: string,
     since?: number,
-    cursor?: string
+    cursor?: string,
   ): Promise<DeltaSyncResponse<T>> {
-    const watermark: { lastSyncedAt: number; cursor?: string } = since !== undefined ? { lastSyncedAt: since } : await this.getWatermark(domain);
+    const watermark: { lastSyncedAt: number; cursor?: string } =
+      since !== undefined ? { lastSyncedAt: since } : await this.getWatermark(domain);
     const headers = await this.getHeaders();
 
     const params = new URLSearchParams({
@@ -70,7 +71,7 @@ export class DeltaSyncClient {
       limit: String(this.pageSize),
     });
     if (cursor ?? watermark.cursor) {
-      params.set("cursor", (cursor ?? watermark.cursor)!);
+      params.set('cursor', (cursor ?? watermark.cursor)!);
     }
 
     const url = `${this.baseUrl}/api/${domain}/sync?${params.toString()}`;
@@ -85,7 +86,7 @@ export class DeltaSyncClient {
 
   async syncDomain<T = unknown>(
     domain: string,
-    onChanges: (changes: DeltaChange<T>[], domain: string) => Promise<void>
+    onChanges: (changes: DeltaChange<T>[], domain: string) => Promise<void>,
   ): Promise<{ synced: number; hasMore: boolean }> {
     const watermark = await this.getWatermark(domain);
     let cursor = watermark.cursor;

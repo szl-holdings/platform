@@ -1,16 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useApiStatus } from "./useApiStatus";
-import { getDomainBaseUrl } from "../env";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getDomainBaseUrl } from '../env';
 import {
-  getLocalReplica,
   applyDeltaToReplica,
   enqueueOutbox,
+  getLocalReplica,
   getOutbox,
-  removeFromOutbox,
   getStoredCursor,
-  saveStoredCursor,
   type LocalReplica,
-} from "../offline-persistence";
+  removeFromOutbox,
+  saveStoredCursor,
+} from '../offline-persistence';
+import { useApiStatus } from './useApiStatus';
 
 const API_BASE = getDomainBaseUrl();
 
@@ -42,7 +42,7 @@ export function useMobileCrdt(
   entityType: string,
   entityId: string,
   actorId: string,
-  initialValues: Record<string, unknown> = {}
+  initialValues: Record<string, unknown> = {},
 ): UseMobileCrdtResult {
   const { isOffline } = useApiStatus();
   const [fields, setFields] = useState<Record<string, unknown>>(initialValues);
@@ -65,7 +65,7 @@ export function useMobileCrdt(
           fieldStatesRef.current[k] = {
             value: v,
             timestamp: 0,
-            actorId: "__initial__",
+            actorId: '__initial__',
             clock: {},
           };
         }
@@ -77,7 +77,9 @@ export function useMobileCrdt(
       if (!cancelled) setPendingCount(outbox.length);
     });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [entityType, entityId]);
 
   const setField = useCallback(
@@ -101,15 +103,15 @@ export function useMobileCrdt(
       } else {
         try {
           await fetch(`${API_BASE}/api/changes`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               entityType,
               entityId,
               actorId,
               delta,
               crdtClock: clock,
-              appSource: "mobile",
+              appSource: 'mobile',
             }),
           });
         } catch {
@@ -118,7 +120,7 @@ export function useMobileCrdt(
         }
       }
     },
-    [entityType, entityId, actorId, isOffline]
+    [entityType, entityId, actorId, isOffline],
   );
 
   const syncNow = useCallback(async () => {
@@ -134,19 +136,21 @@ export function useMobileCrdt(
     for (const entry of outbox) {
       try {
         const res = await fetch(`${API_BASE}/api/changes`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             entityType: entry.entityType,
             entityId: entry.entityId,
             actorId: entry.actorId,
             delta: entry.delta,
             crdtClock: entry.clock,
-            appSource: "mobile",
+            appSource: 'mobile',
           }),
         });
         if (res.ok) flushed.push(entry.id);
-      } catch { /* retry next time */ }
+      } catch {
+        /* retry next time */
+      }
     }
 
     if (flushed.length > 0) {
@@ -163,10 +167,10 @@ export function useMobileCrdt(
     try {
       const cursor = await getStoredCursor();
       const url = `${API_BASE}/api/changes?cursor=${cursor}&entity=${encodeURIComponent(entityType)}&entityId=${encodeURIComponent(entityId)}&limit=100`;
-      const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
       if (!res.ok) return;
 
-      const body = await res.json() as {
+      const body = (await res.json()) as {
         events: Array<{
           cursor: number;
           entityType: string;
@@ -188,7 +192,12 @@ export function useMobileCrdt(
         if (event.actorId === actorId) continue;
         if (event.entityType !== entityType || event.entityId !== entityId) continue;
 
-        const replica = await applyDeltaToReplica(event.entityType, event.entityId, event.delta, event.actorId);
+        const replica = await applyDeltaToReplica(
+          event.entityType,
+          event.entityId,
+          event.delta,
+          event.actorId,
+        );
 
         setFields((prev) => {
           const next = { ...prev };
@@ -214,7 +223,9 @@ export function useMobileCrdt(
       if (newCursor > cursor) {
         await saveStoredCursor(newCursor);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [entityType, entityId, actorId]);
 
   useEffect(() => {

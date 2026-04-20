@@ -132,6 +132,31 @@ The monorepo has been evolved into AEEP. The following new packages form the AEE
 
 **Substrate Command Center:** A cross-vertical operator UI for the governed decision substrate, integrated into the `command` artifact at `/command/substrate/`. It offers four operator perspectives, a live trajectory map of in-flight runs, detailed run views, a counterfactual diff viewer, and a unified approval queue.
 
+## Series-A Reset Pass (2026-04-20)
+
+The following changes were applied as part of the Series-A one-pass foundation, inventory, and sanitation reset:
+
+**Fixes Applied:**
+- Biome auto-fix applied across 4,397 files (consistent formatting, single quotes enforced)
+- `scripts/shared-proxy.mjs` regex fixed to handle both `'` and `"` quote styles in proxy-routes.ts
+- `artifacts/szl-holdings-mobile/scripts/health-proxy.js` same regex fix
+- Root `tsconfig.json` updated with 7 missing package references (`env`, `auth-shared`, `brand-registry`, `design-system`, `db`, `contracts`, `shared-contracts`)
+- `packages/env/tsconfig.json` — added `composite: true`
+- `lib/db/tsconfig.json` — added `references` array
+- `artifacts/szl-holdings/vite.config.ts` — `buildWorkspaceAliases()` refactored to also scan `packages/` directory
+- `artifacts/pulse/vite.config.ts` — same `buildWorkspaceAliases()` fix
+- Manual symlinks created: `@szl-holdings/contracts`, `@szl-holdings/auth-shared`, `@szl-holdings/env` in all 16 artifact node_modules
+- `artifacts/api-server/src/routes/__tests__/group-protected-attestation.test.ts` — regex updated to match single-quoted strings (biome reformatted the source file)
+- `artifacts/api-server/src/middlewares/tenant-scope.ts` — wrapped `serverTelemetry.recordTenantIsolationViolation()` in try/catch to prevent telemetry errors from converting 403 → 500
+
+**Audit Reports Created:**
+- `audit/inventory/` — 7 JSON files (ci.json, deployments.json, env-usage.json, files.json, media.json, packages.json, routes.json) + stack.md
+- `audit/code/` — dead-code-report.md, redundancy-report.md, dependency-cleanup.md, refactor-map.md
+- `audit/tests/` — build-results.md, debug-fixes-applied.md, static-verification.md
+
+**Test Results:**
+- api-server unit tests: 180 failures → ~6 failures (all remaining are pre-existing DB migration issues)
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth

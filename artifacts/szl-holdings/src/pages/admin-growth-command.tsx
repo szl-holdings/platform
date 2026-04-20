@@ -1,18 +1,28 @@
-import { useStandardQuery } from "@szl-holdings/api-client-react";
-import React, { useState } from "react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
-  TrendingUp, AlertTriangle, CheckCircle2,
-  Users, BarChart3, Activity, Zap, RefreshCw, ExternalLink,
-  AlertCircle, ChevronRight,
-  ArrowUpRight, ArrowDownRight, Minus,
-} from "lucide-react";
-import { Link } from "wouter";
-import { cn } from "@/lib/utils";
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  CheckCircle2,
+  ChevronRight,
+  ExternalLink,
+  Minus,
+  RefreshCw,
+  TrendingUp,
+  Users,
+  Zap,
+} from 'lucide-react';
+import React, { useState } from 'react';
+import { Link } from 'wouter';
+import { cn } from '@/lib/utils';
 
 async function adminFetch<T>(path: string): Promise<T> {
   const res = await fetch(`/api${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -62,29 +72,33 @@ interface HealthData {
   memory: { heapUsedMb: number; heapTotalMb: number; rssMb: number };
 }
 
-function parseTelemetryDetail(details?: string): { p95: string; errorRate: string; alerts: string } {
-  if (!details) return { p95: "—", errorRate: "—", alerts: "0" };
+function parseTelemetryDetail(details?: string): {
+  p95: string;
+  errorRate: string;
+  alerts: string;
+} {
+  if (!details) return { p95: '—', errorRate: '—', alerts: '0' };
   const p95m = details.match(/p95=([\d.]+)ms/);
   const errm = details.match(/error_rate=([\d.]+)%/);
   const alm = details.match(/active_alerts=(\d+)/);
   return {
-    p95: p95m ? `${p95m[1]}ms` : "—",
-    errorRate: errm ? `${errm[1]}%` : "—",
-    alerts: alm ? alm[1] : "0",
+    p95: p95m ? `${p95m[1]}ms` : '—',
+    errorRate: errm ? `${errm[1]}%` : '—',
+    alerts: alm ? alm[1] : '0',
   };
 }
 
 function parseQueueDetail(details?: string): { pending: string; failed: string } {
-  if (!details) return { pending: "0", failed: "0" };
+  if (!details) return { pending: '0', failed: '0' };
   const pm = details.match(/pending=(\d+)/);
   const fm = details.match(/failed=(\d+)/);
-  return { pending: pm ? pm[1] : "0", failed: fm ? fm[1] : "0" };
+  return { pending: pm ? pm[1] : '0', failed: fm ? fm[1] : '0' };
 }
 
 function formatTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const h = Math.floor(diff / 3600000);
-  if (h < 1) return "< 1h ago";
+  if (h < 1) return '< 1h ago';
   if (h < 24) return `${h}h ago`;
   const d = Math.floor(h / 24);
   return `${d}d ago`;
@@ -92,14 +106,14 @@ function formatTimeAgo(dateStr: string): string {
 
 function StatusDot({ status }: { status: string }) {
   const color =
-    status === "ok" || status === "connected" || status === "healthy"
-      ? "bg-emerald-400"
-      : status === "backpressure" || status === "warning" || status === "elevated_errors"
-      ? "bg-amber-400"
-      : status === "degraded" || status === "unreachable" || status === "unavailable"
-      ? "bg-red-400"
-      : "bg-zinc-500";
-  return <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", color)} />;
+    status === 'ok' || status === 'connected' || status === 'healthy'
+      ? 'bg-emerald-400'
+      : status === 'backpressure' || status === 'warning' || status === 'elevated_errors'
+        ? 'bg-amber-400'
+        : status === 'degraded' || status === 'unreachable' || status === 'unavailable'
+          ? 'bg-red-400'
+          : 'bg-zinc-500';
+  return <span className={cn('inline-block w-2 h-2 rounded-full shrink-0', color)} />;
 }
 
 function KpiCard({
@@ -117,16 +131,14 @@ function KpiCard({
   icon: React.ElementType;
   alert?: boolean;
 }) {
-  const hasUp = typeof delta === "number" && delta > 0;
-  const hasDown = typeof delta === "number" && delta < 0;
-  const neutral = typeof delta === "number" && delta === 0;
+  const hasUp = typeof delta === 'number' && delta > 0;
+  const hasDown = typeof delta === 'number' && delta < 0;
+  const neutral = typeof delta === 'number' && delta === 0;
   return (
     <div
       className={cn(
-        "relative rounded-xl border p-5 space-y-3",
-        alert
-          ? "bg-red-950/30 border-red-500/30"
-          : "bg-zinc-900/60 border-zinc-800/60",
+        'relative rounded-xl border p-5 space-y-3',
+        alert ? 'bg-red-950/30 border-red-500/30' : 'bg-zinc-900/60 border-zinc-800/60',
       )}
     >
       <div className="flex items-center justify-between">
@@ -135,14 +147,24 @@ function KpiCard({
       </div>
       <div className="text-3xl font-bold text-zinc-100 tabular-nums">{value}</div>
       <div className="flex items-center gap-2">
-        {typeof delta === "number" && (
+        {typeof delta === 'number' && (
           <span
             className={cn(
-              "inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded",
-              hasUp ? "text-emerald-400 bg-emerald-400/10" : hasDown ? "text-red-400 bg-red-400/10" : "text-zinc-400 bg-zinc-800",
+              'inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded',
+              hasUp
+                ? 'text-emerald-400 bg-emerald-400/10'
+                : hasDown
+                  ? 'text-red-400 bg-red-400/10'
+                  : 'text-zinc-400 bg-zinc-800',
             )}
           >
-            {hasUp ? <ArrowUpRight className="w-3 h-3" /> : hasDown ? <ArrowDownRight className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+            {hasUp ? (
+              <ArrowUpRight className="w-3 h-3" />
+            ) : hasDown ? (
+              <ArrowDownRight className="w-3 h-3" />
+            ) : (
+              <Minus className="w-3 h-3" />
+            )}
             {Math.abs(delta)} WoW
           </span>
         )}
@@ -180,32 +202,32 @@ interface FunnelData {
 }
 
 const TOP_CONTENT = [
-  { path: "/platform", views: 540 },
-  { path: "/demo", views: 210 },
-  { path: "/solutions", views: 480 },
-  { path: "/trust", views: 160 },
-  { path: "/insights", views: 340 },
-  { path: "/pricing", views: 140 },
+  { path: '/platform', views: 540 },
+  { path: '/demo', views: 210 },
+  { path: '/solutions', views: 480 },
+  { path: '/trust', views: 160 },
+  { path: '/insights', views: 340 },
+  { path: '/pricing', views: 140 },
 ];
 
 export default function AdminGrowthCommandPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const growthQuery = useStandardQuery<GrowthData>({
-    queryKey: ["admin-growth-inquiries", refreshKey],
-    queryFn: () => adminFetch<GrowthData>("/admin/inquiries"),
+    queryKey: ['admin-growth-inquiries', refreshKey],
+    queryFn: () => adminFetch<GrowthData>('/admin/inquiries'),
     refetchInterval: 60_000,
   });
 
   const funnelQuery = useStandardQuery<FunnelData>({
-    queryKey: ["admin-funnel", refreshKey],
-    queryFn: () => adminFetch<FunnelData>("/admin/analytics/funnel?window=7d"),
+    queryKey: ['admin-funnel', refreshKey],
+    queryFn: () => adminFetch<FunnelData>('/admin/analytics/funnel?window=7d'),
     refetchInterval: 60_000,
   });
 
   const healthQuery = useStandardQuery<HealthData>({
-    queryKey: ["admin-health-detailed", refreshKey],
-    queryFn: () => adminFetch<HealthData>("/health/detailed"),
+    queryKey: ['admin-health-detailed', refreshKey],
+    queryFn: () => adminFetch<HealthData>('/health/detailed'),
     refetchInterval: 30_000,
   });
 
@@ -219,7 +241,7 @@ export default function AdminGrowthCommandPage() {
   const totalThisWeek = growth?.thisWeek.count ?? 0;
   const delta = growth?.thisWeek.delta ?? 0;
   const unrespondedCount = growth?.unresponded.length ?? 0;
-  const dbStatus = health?.checks?.database?.status ?? "—";
+  const dbStatus = health?.checks?.database?.status ?? '—';
   const dbLatency = health?.checks?.database?.latencyMs;
 
   const maxProduct = Math.max(...(growth?.productBreakdown.map((p) => p.count) ?? [1]), 1);
@@ -227,15 +249,18 @@ export default function AdminGrowthCommandPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-zinc-100">Founder Command</h1>
             <p className="text-xs text-zinc-500 mt-0.5">
-              Web &amp; conversion metrics · Last 7 days ·{" "}
+              Web &amp; conversion metrics · Last 7 days ·{' '}
               <span className="font-medium text-zinc-400">
-                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'short',
+                  day: 'numeric',
+                })}
               </span>
             </p>
           </div>
@@ -250,7 +275,7 @@ export default function AdminGrowthCommandPage() {
               onClick={() => setRefreshKey((k) => k + 1)}
               className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
             >
-              <RefreshCw className={cn("w-3.5 h-3.5", growthQuery.isFetching && "animate-spin")} />
+              <RefreshCw className={cn('w-3.5 h-3.5', growthQuery.isFetching && 'animate-spin')} />
               Refresh
             </button>
           </div>
@@ -258,28 +283,18 @@ export default function AdminGrowthCommandPage() {
 
         {/* ── Primary KPIs ────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard
-            label="Site Visits (7d)"
-            value="—"
-            sub="Plausible"
-            icon={BarChart3}
-          />
+          <KpiCard label="Site Visits (7d)" value="—" sub="Plausible" icon={BarChart3} />
           <KpiCard
             label="Demo Requests"
-            value={growthQuery.isLoading ? "…" : totalThisWeek}
+            value={growthQuery.isLoading ? '…' : totalThisWeek}
             delta={growthQuery.isLoading ? undefined : delta}
             sub="this week"
             icon={Users}
           />
-          <KpiCard
-            label="Visit → Demo Conv."
-            value="—"
-            sub="Plausible + DB"
-            icon={TrendingUp}
-          />
+          <KpiCard label="Visit → Demo Conv." value="—" sub="Plausible + DB" icon={TrendingUp} />
           <KpiCard
             label="Unresponded > 48h"
-            value={growthQuery.isLoading ? "…" : unrespondedCount}
+            value={growthQuery.isLoading ? '…' : unrespondedCount}
             sub="open inquiries"
             icon={AlertCircle}
             alert={unrespondedCount > 0}
@@ -304,16 +319,22 @@ export default function AdminGrowthCommandPage() {
               src={PLAUSIBLE_SHARED_URL}
               title="Plausible Analytics Dashboard"
               className="w-full border-0"
-              style={{ height: "600px" }}
+              style={{ height: '600px' }}
               loading="lazy"
             />
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-zinc-700/50 bg-zinc-900/20 px-5 py-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-zinc-400">Web Analytics — Plausible not configured</p>
+              <p className="text-sm font-medium text-zinc-400">
+                Web Analytics — Plausible not configured
+              </p>
               <p className="text-xs text-zinc-600 mt-0.5">
-                Set <code className="text-zinc-500 bg-zinc-800 px-1 py-0.5 rounded text-[10px]">VITE_PLAUSIBLE_SHARED_URL</code> to embed your Plausible shared dashboard here.
+                Set{' '}
+                <code className="text-zinc-500 bg-zinc-800 px-1 py-0.5 rounded text-[10px]">
+                  VITE_PLAUSIBLE_SHARED_URL
+                </code>{' '}
+                to embed your Plausible shared dashboard here.
               </p>
             </div>
             <BarChart3 className="w-5 h-5 text-zinc-700 shrink-0" />
@@ -322,7 +343,6 @@ export default function AdminGrowthCommandPage() {
 
         {/* ── Two-column middle ───────────────────────────────────── */}
         <div className="grid lg:grid-cols-2 gap-6">
-
           {/* Demo requests by product */}
           <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5">
             <SectionHeader
@@ -336,7 +356,9 @@ export default function AdminGrowthCommandPage() {
                 ))}
               </div>
             ) : growthQuery.isError ? (
-              <p className="text-xs text-red-400">Failed to load — {(growthQuery.error as Error).message}</p>
+              <p className="text-xs text-red-400">
+                Failed to load — {(growthQuery.error as Error).message}
+              </p>
             ) : (growth?.productBreakdown.length ?? 0) === 0 ? (
               <p className="text-xs text-zinc-500">No submissions this week.</p>
             ) : (
@@ -377,12 +399,12 @@ export default function AdminGrowthCommandPage() {
                   </span>
                   <span className="text-zinc-200 text-xs font-mono">
                     {dbStatus}
-                    {dbLatency != null ? ` · ${dbLatency}ms` : ""}
+                    {dbLatency != null ? ` · ${dbLatency}ms` : ''}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="flex items-center gap-2 text-zinc-400">
-                    <StatusDot status={health?.checks?.job_queue?.status ?? "unavailable"} />
+                    <StatusDot status={health?.checks?.job_queue?.status ?? 'unavailable'} />
                     Job Queue
                   </span>
                   <span className="text-zinc-200 text-xs font-mono">
@@ -391,15 +413,15 @@ export default function AdminGrowthCommandPage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="flex items-center gap-2 text-zinc-400">
-                    <StatusDot status={health?.checks?.telemetry?.status ?? "unavailable"} />
+                    <StatusDot status={health?.checks?.telemetry?.status ?? 'unavailable'} />
                     API Error Rate
                   </span>
                   <span
                     className={cn(
-                      "text-xs font-mono",
-                      telemetry.errorRate !== "—" && parseFloat(telemetry.errorRate) > 1
-                        ? "text-red-400"
-                        : "text-zinc-200",
+                      'text-xs font-mono',
+                      telemetry.errorRate !== '—' && parseFloat(telemetry.errorRate) > 1
+                        ? 'text-red-400'
+                        : 'text-zinc-200',
                     )}
                   >
                     {telemetry.errorRate}
@@ -412,10 +434,10 @@ export default function AdminGrowthCommandPage() {
                   </span>
                   <span
                     className={cn(
-                      "text-xs font-mono",
-                      telemetry.p95 !== "—" && parseInt(telemetry.p95) > 750
-                        ? "text-amber-400"
-                        : "text-zinc-200",
+                      'text-xs font-mono',
+                      telemetry.p95 !== '—' && parseInt(telemetry.p95) > 750
+                        ? 'text-amber-400'
+                        : 'text-zinc-200',
                     )}
                   >
                     {telemetry.p95}
@@ -428,8 +450,8 @@ export default function AdminGrowthCommandPage() {
                   </span>
                   <span
                     className={cn(
-                      "text-xs font-mono",
-                      parseInt(telemetry.alerts) > 0 ? "text-amber-400" : "text-zinc-200",
+                      'text-xs font-mono',
+                      parseInt(telemetry.alerts) > 0 ? 'text-amber-400' : 'text-zinc-200',
                     )}
                   >
                     {telemetry.alerts}
@@ -441,14 +463,15 @@ export default function AdminGrowthCommandPage() {
                     Memory (heap)
                   </span>
                   <span className="text-xs font-mono text-zinc-200">
-                    {health?.memory.heapUsedMb ?? "—"} / {health?.memory.heapTotalMb ?? "—"} MB
+                    {health?.memory.heapUsedMb ?? '—'} / {health?.memory.heapTotalMb ?? '—'} MB
                   </span>
                 </div>
                 <div className="pt-1 border-t border-zinc-800">
                   <div className="flex items-center gap-1.5">
-                    <StatusDot status={health?.status ?? "unavailable"} />
+                    <StatusDot status={health?.status ?? 'unavailable'} />
                     <span className="text-xs text-zinc-400 capitalize">
-                      Overall: <span className="font-semibold text-zinc-300">{health?.status ?? "—"}</span>
+                      Overall:{' '}
+                      <span className="font-semibold text-zinc-300">{health?.status ?? '—'}</span>
                     </span>
                   </div>
                 </div>
@@ -463,14 +486,12 @@ export default function AdminGrowthCommandPage() {
             title="Funnel Breakdown"
             sub={
               funnelQuery.isLoading
-                ? "Loading…"
+                ? 'Loading…'
                 : funnel
-                ? `Visits → Product → Trust → Demo CTA → Form Submit → Confirmed · last 7 days${
-                    !funnel.hasClientData
-                      ? " · waiting for first client-side events"
-                      : ""
-                  }`
-                : "Funnel data unavailable"
+                  ? `Visits → Product → Trust → Demo CTA → Form Submit → Confirmed · last 7 days${
+                      !funnel.hasClientData ? ' · waiting for first client-side events' : ''
+                    }`
+                  : 'Funnel data unavailable'
             }
           />
           {funnelQuery.isLoading ? (
@@ -485,7 +506,9 @@ export default function AdminGrowthCommandPage() {
                 return (
                   <React.Fragment key={stage.key}>
                     <div className="flex flex-col items-center gap-2 min-w-[100px] flex-1">
-                      <div className="text-xs font-medium text-zinc-400 text-center">{stage.label}</div>
+                      <div className="text-xs font-medium text-zinc-400 text-center">
+                        {stage.label}
+                      </div>
                       <div
                         className="w-full rounded-lg bg-sky-600/30 border border-sky-600/20 flex flex-col items-center justify-center px-2 py-1"
                         style={{ height: `${Math.max(heightPct * 0.9, 28)}px` }}
@@ -518,7 +541,6 @@ export default function AdminGrowthCommandPage() {
 
         {/* ── Top content + Unresponded ─────────────────────────── */}
         <div className="grid lg:grid-cols-2 gap-6">
-
           {/* Top content */}
           <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5">
             <SectionHeader
@@ -566,7 +588,9 @@ export default function AdminGrowthCommandPage() {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-zinc-200 truncate">{item.fullName}</p>
+                        <p className="text-sm font-medium text-zinc-200 truncate">
+                          {item.fullName}
+                        </p>
                         <p className="text-xs text-zinc-500 truncate">{item.email}</p>
                       </div>
                       <div className="flex flex-col items-end gap-0.5 shrink-0">
@@ -623,7 +647,7 @@ export default function AdminGrowthCommandPage() {
                   {growth!.recent.map((item) => (
                     <tr key={item.id} className="hover:bg-zinc-800/20 transition-colors">
                       <td className="py-2.5 pr-4 text-zinc-200 font-medium">{item.fullName}</td>
-                      <td className="py-2.5 pr-4 text-zinc-400">{item.company ?? "—"}</td>
+                      <td className="py-2.5 pr-4 text-zinc-400">{item.company ?? '—'}</td>
                       <td className="py-2.5 pr-4">
                         <span className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 text-[10px] font-medium">
                           {item.product}
@@ -632,14 +656,14 @@ export default function AdminGrowthCommandPage() {
                       <td className="py-2.5 pr-4">
                         <span
                           className={cn(
-                            "px-1.5 py-0.5 rounded text-[10px] font-medium",
-                            item.status === "qualified"
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : item.status === "contacted"
-                              ? "bg-sky-500/10 text-sky-400"
-                              : item.status === "closed" || item.status === "lost"
-                              ? "bg-zinc-700/50 text-zinc-500"
-                              : "bg-amber-500/10 text-amber-400",
+                            'px-1.5 py-0.5 rounded text-[10px] font-medium',
+                            item.status === 'qualified'
+                              ? 'bg-emerald-500/10 text-emerald-400'
+                              : item.status === 'contacted'
+                                ? 'bg-sky-500/10 text-sky-400'
+                                : item.status === 'closed' || item.status === 'lost'
+                                  ? 'bg-zinc-700/50 text-zinc-500'
+                                  : 'bg-amber-500/10 text-amber-400',
                           )}
                         >
                           {item.status}
@@ -666,7 +690,9 @@ export default function AdminGrowthCommandPage() {
         {/* ── Investor funnel strip ─────────────────────────────── */}
         <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 px-5 py-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Investor Funnel</span>
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+              Investor Funnel
+            </span>
             <div className="flex items-center gap-6 text-xs">
               <div className="text-center">
                 <div className="text-zinc-200 font-semibold">—</div>
@@ -684,7 +710,6 @@ export default function AdminGrowthCommandPage() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { parseIntId } from "../utils.js";
+import { parseIntId } from '../utils.js';
 
 export const proofChainTypeDefs = `#graphql
   type ProofChainRecord {
@@ -74,30 +74,43 @@ type GQLContext = {
 export const proofChainResolvers = {
   Query: {
     proofChainRecord: async (_: unknown, args: { id: string }) => {
-      const { db, proofChainTable } = await import("@szl-holdings/db");
-      const { eq } = await import("drizzle-orm");
-      const [row] = await db.select().from(proofChainTable).where(eq(proofChainTable.id, parseIntId(args.id)));
+      const { db, proofChainTable } = await import('@szl-holdings/db');
+      const { eq } = await import('drizzle-orm');
+      const [row] = await db
+        .select()
+        .from(proofChainTable)
+        .where(eq(proofChainTable.id, parseIntId(args.id)));
       return row ?? null;
     },
 
     proofChainByContent: async (_: unknown, args: { contentType: string; contentId: string }) => {
-      const { getProofByContent } = await import("@szl-holdings/proof-chain");
+      const { getProofByContent } = await import('@szl-holdings/proof-chain');
       return getProofByContent(args.contentId, args.contentType) ?? null;
     },
 
     proofChainList: async (
       _: unknown,
-      args: { orgId?: number; reviewState?: string; sourceClass?: string; contentType?: string; limit?: number },
+      args: {
+        orgId?: number;
+        reviewState?: string;
+        sourceClass?: string;
+        contentType?: string;
+        limit?: number;
+      },
       ctx: GQLContext,
     ) => {
-      const { listProofChain } = await import("@szl-holdings/proof-chain");
+      const { listProofChain } = await import('@szl-holdings/proof-chain');
       const user = ctx?.req?.user;
-      const isAdminUser = user?.roles?.some(r => ["super_admin", "admin"].includes(r)) ?? false;
-      const orgId = args.orgId ?? (isAdminUser ? undefined : user?.orgs?.[0]?.orgId ?? undefined);
+      const isAdminUser = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
+      const orgId = args.orgId ?? (isAdminUser ? undefined : (user?.orgs?.[0]?.orgId ?? undefined));
       return listProofChain({
         orgId,
-        reviewState: args.reviewState as import("@szl-holdings/proof-chain").ProofReviewState | undefined,
-        sourceClass: args.sourceClass as import("@szl-holdings/proof-chain").ProvenanceSourceClass | undefined,
+        reviewState: args.reviewState as
+          | import('@szl-holdings/proof-chain').ProofReviewState
+          | undefined,
+        sourceClass: args.sourceClass as
+          | import('@szl-holdings/proof-chain').ProvenanceSourceClass
+          | undefined,
         contentType: args.contentType,
         limit: args.limit ?? 100,
       });
@@ -121,13 +134,13 @@ export const proofChainResolvers = {
       },
       ctx: GQLContext,
     ) => {
-      const { tagAIContent } = await import("@szl-holdings/proof-chain");
+      const { tagAIContent } = await import('@szl-holdings/proof-chain');
       const user = ctx?.req?.user;
       return tagAIContent({
         orgId: user?.orgs?.[0]?.orgId ?? null,
         contentId: args.contentId,
         contentType: args.contentType,
-        sourceClass: args.sourceClass as import("@szl-holdings/proof-chain").ProvenanceSourceClass,
+        sourceClass: args.sourceClass as import('@szl-holdings/proof-chain').ProvenanceSourceClass,
         confidenceScore: args.confidenceScore,
         modelLane: args.modelLane,
         modelId: args.modelId,
@@ -136,7 +149,7 @@ export const proofChainResolvers = {
         parentProofId: args.parentProofId,
         generatedByUserId: user?.id ?? null,
         correlationId: ctx?.req?.correlationId,
-        serviceAttribution: "graphql",
+        serviceAttribution: 'graphql',
         metadata: args.metadata,
       });
     },
@@ -146,15 +159,17 @@ export const proofChainResolvers = {
       args: { id: string; reviewState: string; reviewNote?: string; exportSafetyState?: string },
       ctx: GQLContext,
     ) => {
-      const { reviewProof } = await import("@szl-holdings/proof-chain");
+      const { reviewProof } = await import('@szl-holdings/proof-chain');
       const user = ctx?.req?.user;
-      if (!user?.id) throw new Error("AUTHENTICATION_REQUIRED");
+      if (!user?.id) throw new Error('AUTHENTICATION_REQUIRED');
       return reviewProof({
         proofId: parseIntId(args.id),
         reviewedBy: user.id,
-        reviewState: args.reviewState as import("@szl-holdings/proof-chain").ProofReviewState,
+        reviewState: args.reviewState as import('@szl-holdings/proof-chain').ProofReviewState,
         reviewNote: args.reviewNote,
-        exportSafetyState: args.exportSafetyState as import("@szl-holdings/proof-chain").ProofExportSafetyState | undefined,
+        exportSafetyState: args.exportSafetyState as
+          | import('@szl-holdings/proof-chain').ProofExportSafetyState
+          | undefined,
       });
     },
   },

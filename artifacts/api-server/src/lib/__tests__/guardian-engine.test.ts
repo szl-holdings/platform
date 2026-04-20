@@ -14,18 +14,12 @@
  *      the engine state correctly from the persisted policies.
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import {
-  db,
-  guardianPoliciesTable,
-} from "@szl-holdings/db";
-import { eq, like } from "drizzle-orm";
-import {
-  getGuardianEngine,
-  syncGuardianPolicies,
-} from "../guardian-engine";
+import { db, guardianPoliciesTable } from '@szl-holdings/db';
+import { eq, like } from 'drizzle-orm';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getGuardianEngine, syncGuardianPolicies } from '../guardian-engine';
 
-const TEST_NAME_PREFIX = "test-engine-";
+const TEST_NAME_PREFIX = 'test-engine-';
 
 async function deleteTestPolicies(): Promise<void> {
   await db
@@ -34,13 +28,13 @@ async function deleteTestPolicies(): Promise<void> {
 }
 
 type PolicyTier =
-  | "advisory"
-  | "supervised"
-  | "operator-approved"
-  | "dual-approved"
-  | "regulated"
-  | "sovereign";
-type PolicyAction = "allow" | "deny" | "require-approval" | "log-only";
+  | 'advisory'
+  | 'supervised'
+  | 'operator-approved'
+  | 'dual-approved'
+  | 'regulated'
+  | 'sovereign';
+type PolicyAction = 'allow' | 'deny' | 'require-approval' | 'log-only';
 
 async function insertTestPolicy(opts: {
   name: string;
@@ -55,14 +49,14 @@ async function insertTestPolicy(opts: {
     .values({
       orgId: null,
       name: opts.name,
-      description: "engine resync test",
-      tier: opts.tier ?? "advisory",
-      conditions: [{ field: "domain", operator: "eq", value: opts.domain ?? "general" }],
-      action: opts.action ?? "allow",
+      description: 'engine resync test',
+      tier: opts.tier ?? 'advisory',
+      conditions: [{ field: 'domain', operator: 'eq', value: opts.domain ?? 'general' }],
+      action: opts.action ?? 'allow',
       priority: opts.priority ?? 100,
       enabled: opts.enabled ?? true,
-      owner: "test-suite",
-      tags: ["test"],
+      owner: 'test-suite',
+      tags: ['test'],
     })
     .returning({ id: guardianPoliciesTable.id });
   return { id: row.id };
@@ -72,13 +66,13 @@ beforeEach(async () => {
   await deleteTestPolicies();
 });
 
-describe("syncGuardianPolicies — DB → engine resync", () => {
-  it("reloads enabled rows from the DB into the engine", async () => {
+describe('syncGuardianPolicies — DB → engine resync', () => {
+  it('reloads enabled rows from the DB into the engine', async () => {
     const { id } = await insertTestPolicy({
       name: `${TEST_NAME_PREFIX}allow-general`,
-      tier: "advisory",
-      action: "allow",
-      domain: "general",
+      tier: 'advisory',
+      action: 'allow',
+      domain: 'general',
     });
     await syncGuardianPolicies(true);
     const engine = getGuardianEngine();
@@ -86,7 +80,7 @@ describe("syncGuardianPolicies — DB → engine resync", () => {
     expect(ids).toContain(`policy-${id}`);
   });
 
-  it("excludes disabled rows from the engine", async () => {
+  it('excludes disabled rows from the engine', async () => {
     const { id } = await insertTestPolicy({
       name: `${TEST_NAME_PREFIX}disabled`,
       enabled: false,
@@ -96,61 +90,80 @@ describe("syncGuardianPolicies — DB → engine resync", () => {
     expect(engine.getRules().map((r) => r.id)).not.toContain(`policy-${id}`);
   });
 
-  it("removes a previously-loaded rule from the engine after it is deleted", async () => {
+  it('removes a previously-loaded rule from the engine after it is deleted', async () => {
     const { id } = await insertTestPolicy({
       name: `${TEST_NAME_PREFIX}to-delete`,
     });
     await syncGuardianPolicies(true);
-    expect(getGuardianEngine().getRules().map((r) => r.id)).toContain(`policy-${id}`);
+    expect(
+      getGuardianEngine()
+        .getRules()
+        .map((r) => r.id),
+    ).toContain(`policy-${id}`);
 
     await db.delete(guardianPoliciesTable).where(eq(guardianPoliciesTable.id, id));
     await syncGuardianPolicies(true);
-    expect(getGuardianEngine().getRules().map((r) => r.id)).not.toContain(`policy-${id}`);
+    expect(
+      getGuardianEngine()
+        .getRules()
+        .map((r) => r.id),
+    ).not.toContain(`policy-${id}`);
   });
 
-  it("flipping enabled=false on a loaded rule removes it from the engine on next sync", async () => {
+  it('flipping enabled=false on a loaded rule removes it from the engine on next sync', async () => {
     const { id } = await insertTestPolicy({
       name: `${TEST_NAME_PREFIX}flip`,
       enabled: true,
     });
     await syncGuardianPolicies(true);
-    expect(getGuardianEngine().getRules().map((r) => r.id)).toContain(`policy-${id}`);
+    expect(
+      getGuardianEngine()
+        .getRules()
+        .map((r) => r.id),
+    ).toContain(`policy-${id}`);
 
     await db
       .update(guardianPoliciesTable)
       .set({ enabled: false })
       .where(eq(guardianPoliciesTable.id, id));
     await syncGuardianPolicies(true);
-    expect(getGuardianEngine().getRules().map((r) => r.id)).not.toContain(`policy-${id}`);
+    expect(
+      getGuardianEngine()
+        .getRules()
+        .map((r) => r.id),
+    ).not.toContain(`policy-${id}`);
   });
 
-  it("always re-installs the bootstrap fallback rules (engine never empty)", async () => {
+  it('always re-installs the bootstrap fallback rules (engine never empty)', async () => {
     await syncGuardianPolicies(true);
     const fallback = getGuardianEngine()
       .getRules()
-      .filter((r) => r.id.startsWith("fallback-"));
+      .filter((r) => r.id.startsWith('fallback-'));
     expect(fallback.length).toBeGreaterThan(0);
   });
 
   it("simulated 'server restart' rebuilds the engine from persisted policies", async () => {
     const { id } = await insertTestPolicy({
       name: `${TEST_NAME_PREFIX}survive-restart`,
-      tier: "supervised",
-      action: "allow",
-      domain: "general",
+      tier: 'supervised',
+      action: 'allow',
+      domain: 'general',
     });
 
     // Reset module cache: a fresh import of guardian-engine simulates a
     // process restart — the in-memory engine starts empty and must hydrate
     // entirely from the persisted DB rows.
     vi.resetModules();
-    const fresh = await import("../guardian-engine");
+    const fresh = await import('../guardian-engine');
     await fresh.syncGuardianPolicies(true);
-    const ids = fresh.getGuardianEngine().getRules().map((r) => r.id);
+    const ids = fresh
+      .getGuardianEngine()
+      .getRules()
+      .map((r) => r.id);
     expect(ids).toContain(`policy-${id}`);
   });
 
-  it("returns the count of loaded enabled policies", async () => {
+  it('returns the count of loaded enabled policies', async () => {
     await insertTestPolicy({ name: `${TEST_NAME_PREFIX}c1` });
     await insertTestPolicy({ name: `${TEST_NAME_PREFIX}c2` });
     const count = await syncGuardianPolicies(true);

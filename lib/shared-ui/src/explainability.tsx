@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from 'react';
+import { useState } from 'react';
 
 export interface ExplainabilityMetadata {
   triggerSource: string;
@@ -22,25 +23,39 @@ export interface ExplainabilityDrawerProps {
 
 function ConfidenceMeter({ score, color }: { score: number; color: string }) {
   const pct = Math.min(100, Math.max(0, Math.round(score * 100)));
-  const label = pct >= 80 ? "High" : pct >= 60 ? "Moderate" : pct >= 40 ? "Low" : "Very Low";
+  const label = pct >= 80 ? 'High' : pct >= 60 ? 'Moderate' : pct >= 40 ? 'Low' : 'Very Low';
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span
+          style={{
+            fontSize: '11px',
+            color: 'rgba(255,255,255,0.5)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
+        >
           Confidence
         </span>
-        <span style={{ fontSize: "13px", fontWeight: 700, color }}>
+        <span style={{ fontSize: '13px', fontWeight: 700, color }}>
           {pct}% · {label}
         </span>
       </div>
-      <div style={{ height: "4px", borderRadius: "2px", background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+      <div
+        style={{
+          height: '4px',
+          borderRadius: '2px',
+          background: 'rgba(255,255,255,0.1)',
+          overflow: 'hidden',
+        }}
+      >
         <div
           style={{
-            height: "100%",
+            height: '100%',
             width: `${pct}%`,
-            borderRadius: "2px",
+            borderRadius: '2px',
             background: color,
-            transition: "width 0.4s ease",
+            transition: 'width 0.4s ease',
           }}
         />
       </div>
@@ -50,8 +65,16 @@ function ConfidenceMeter({ score, color }: { score: number; color: string }) {
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <span style={{ fontSize: "10px", fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "1px" }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <span
+        style={{
+          fontSize: '10px',
+          fontWeight: 700,
+          color: 'rgba(255,255,255,0.35)',
+          textTransform: 'uppercase',
+          letterSpacing: '1px',
+        }}
+      >
         {label}
       </span>
       {children}
@@ -62,79 +85,81 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 export function ExplainabilityDrawer({
   open,
   onClose,
-  title = "AI Reasoning",
+  title = 'AI Reasoning',
   metadata,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
 }: ExplainabilityDrawerProps) {
   if (!open) return null;
 
   return (
     <div
       style={{
-        position: "fixed",
+        position: 'fixed',
         inset: 0,
         zIndex: 9000,
-        display: "flex",
-        justifyContent: "flex-end",
+        display: 'flex',
+        justifyContent: 'flex-end',
       }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         style={{
-          position: "fixed",
+          position: 'fixed',
           inset: 0,
-          background: "rgba(0,0,0,0.5)",
-          backdropFilter: "blur(4px)",
+          background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(4px)',
         }}
         onClick={onClose}
       />
       <div
         style={{
-          position: "relative",
+          position: 'relative',
           zIndex: 9001,
-          width: "400px",
-          maxWidth: "100vw",
-          height: "100%",
-          background: "rgba(8,10,18,0.98)",
+          width: '400px',
+          maxWidth: '100vw',
+          height: '100%',
+          background: 'rgba(8,10,18,0.98)',
           borderLeft: `1px solid ${accentColor}30`,
           boxShadow: `-20px 0 60px rgba(0,0,0,0.6)`,
-          display: "flex",
-          flexDirection: "column",
-          overflowY: "auto",
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
         }}
       >
         <div
           style={{
-            padding: "20px 24px 16px",
-            borderBottom: "1px solid rgba(255,255,255,0.07)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            padding: '20px 24px 16px',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             flexShrink: 0,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "8px",
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
                 background: `${accentColor}20`,
                 border: `1px solid ${accentColor}40`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "14px",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
               }}
             >
               🔍
             </div>
             <div>
-              <div style={{ fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
                 {title}
               </div>
               {metadata.sourceApp && (
-                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", marginTop: "1px" }}>
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>
                   Source: {metadata.sourceApp}
                 </div>
               )}
@@ -143,31 +168,33 @@ export function ExplainabilityDrawer({
           <button
             onClick={onClose}
             style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "6px",
-              color: "rgba(255,255,255,0.5)",
-              cursor: "pointer",
-              fontSize: "12px",
-              padding: "4px 8px",
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '6px',
+              color: 'rgba(255,255,255,0.5)',
+              cursor: 'pointer',
+              fontSize: '12px',
+              padding: '4px 8px',
             }}
           >
             ✕ Close
           </button>
         </div>
 
-        <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div
+          style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}
+        >
           <ConfidenceMeter score={metadata.confidenceScore} color={accentColor} />
 
           <Section label="What Triggered This">
             <div
               style={{
-                padding: "10px 12px",
+                padding: '10px 12px',
                 background: `${accentColor}10`,
                 border: `1px solid ${accentColor}20`,
-                borderRadius: "8px",
-                fontSize: "13px",
-                color: "rgba(255,255,255,0.8)",
+                borderRadius: '8px',
+                fontSize: '13px',
+                color: 'rgba(255,255,255,0.8)',
                 lineHeight: 1.5,
               }}
             >
@@ -176,22 +203,22 @@ export function ExplainabilityDrawer({
           </Section>
 
           <Section label="Contributing Data Sources">
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {metadata.contributingData.map((d, i) => (
                 <div
                   key={i}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "6px 10px",
-                    background: "rgba(255,255,255,0.04)",
-                    borderRadius: "6px",
-                    fontSize: "12px",
-                    color: "rgba(255,255,255,0.7)",
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 10px',
+                    background: 'rgba(255,255,255,0.04)',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    color: 'rgba(255,255,255,0.7)',
                   }}
                 >
-                  <span style={{ color: accentColor, fontSize: "10px" }}>▸</span>
+                  <span style={{ color: accentColor, fontSize: '10px' }}>▸</span>
                   {d}
                 </div>
               ))}
@@ -201,11 +228,11 @@ export function ExplainabilityDrawer({
           <Section label="Confidence Explanation">
             <div
               style={{
-                padding: "10px 12px",
-                background: "rgba(255,255,255,0.04)",
-                borderRadius: "8px",
-                fontSize: "12px",
-                color: "rgba(255,255,255,0.65)",
+                padding: '10px 12px',
+                background: 'rgba(255,255,255,0.04)',
+                borderRadius: '8px',
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.65)',
                 lineHeight: 1.5,
               }}
             >
@@ -215,24 +242,33 @@ export function ExplainabilityDrawer({
 
           {metadata.assumptions.length > 0 && (
             <Section label="Assumptions">
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {metadata.assumptions.map((a, i) => (
                   <div
                     key={i}
                     style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: "8px",
-                      padding: "6px 10px",
-                      background: "rgba(245,158,11,0.06)",
-                      border: "1px solid rgba(245,158,11,0.15)",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      color: "rgba(255,255,255,0.65)",
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '8px',
+                      padding: '6px 10px',
+                      background: 'rgba(245,158,11,0.06)',
+                      border: '1px solid rgba(245,158,11,0.15)',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.65)',
                       lineHeight: 1.4,
                     }}
                   >
-                    <span style={{ color: "#d4a054", fontSize: "10px", marginTop: "2px", flexShrink: 0 }}>⚠</span>
+                    <span
+                      style={{
+                        color: '#d4a054',
+                        fontSize: '10px',
+                        marginTop: '2px',
+                        flexShrink: 0,
+                      }}
+                    >
+                      ⚠
+                    </span>
                     {a}
                   </div>
                 ))}
@@ -243,11 +279,11 @@ export function ExplainabilityDrawer({
           <Section label="Suggested Next Action">
             <div
               style={{
-                padding: "12px",
+                padding: '12px',
                 background: `${accentColor}12`,
                 border: `1px solid ${accentColor}30`,
-                borderRadius: "8px",
-                fontSize: "13px",
+                borderRadius: '8px',
+                fontSize: '13px',
                 color: accentColor,
                 fontWeight: 600,
                 lineHeight: 1.5,
@@ -261,11 +297,11 @@ export function ExplainabilityDrawer({
             <Section label="Business Impact">
               <div
                 style={{
-                  padding: "10px 12px",
-                  background: "rgba(255,255,255,0.04)",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  color: "rgba(255,255,255,0.65)",
+                  padding: '10px 12px',
+                  background: 'rgba(255,255,255,0.04)',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: 'rgba(255,255,255,0.65)',
                   lineHeight: 1.5,
                 }}
               >
@@ -275,7 +311,14 @@ export function ExplainabilityDrawer({
           )}
 
           {metadata.generatedAt && (
-            <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", textAlign: "center", paddingTop: "8px" }}>
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'rgba(255,255,255,0.2)',
+                textAlign: 'center',
+                paddingTop: '8px',
+              }}
+            >
               Generated at {new Date(metadata.generatedAt).toLocaleString()}
             </div>
           )}
@@ -288,7 +331,7 @@ export function ExplainabilityDrawer({
 export function useExplainability() {
   const [open, setOpen] = useState(false);
   const [metadata, setMetadata] = useState<ExplainabilityMetadata | null>(null);
-  const [title, setTitle] = useState<string>("AI Reasoning");
+  const [title, setTitle] = useState<string>('AI Reasoning');
 
   const explain = (meta: ExplainabilityMetadata, drawerTitle?: string) => {
     setMetadata(meta);
@@ -303,8 +346,8 @@ export function useExplainability() {
 
 export function ExplainButton({
   onClick,
-  accentColor = "#8b7ac8",
-  label = "Explain",
+  accentColor = '#8b7ac8',
+  label = 'Explain',
 }: {
   onClick: () => void;
   accentColor?: string;
@@ -314,19 +357,19 @@ export function ExplainButton({
     <button
       onClick={onClick}
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "4px",
-        padding: "3px 8px",
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '3px 8px',
         background: `${accentColor}12`,
         border: `1px solid ${accentColor}30`,
-        borderRadius: "5px",
+        borderRadius: '5px',
         color: accentColor,
-        fontSize: "10px",
+        fontSize: '10px',
         fontWeight: 600,
-        cursor: "pointer",
-        letterSpacing: "0.3px",
-        transition: "all 0.15s ease",
+        cursor: 'pointer',
+        letterSpacing: '0.3px',
+        transition: 'all 0.15s ease',
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.background = `${accentColor}20`;

@@ -1,45 +1,45 @@
-export * from "./events";
-export { configurePlausible, trackEvent, trackPageView } from "./plausible";
+export * from './events';
+export { configurePlausible, trackEvent, trackPageView } from './plausible';
 
-import { trackEvent } from "./plausible";
 import type {
-  PageViewProperties,
-  CTAClickProperties,
-  FormSubmitProperties,
-  DemoRequestProperties,
   AccessRequestProperties,
-  PrivateInquiryProperties,
-  AuthProperties,
-  DashboardViewProperties,
   ArticleViewProperties,
+  AuthProperties,
   CheckoutProperties,
-} from "./events";
+  CTAClickProperties,
+  DashboardViewProperties,
+  DemoRequestProperties,
+  FormSubmitProperties,
+  PageViewProperties,
+  PrivateInquiryProperties,
+} from './events';
+import { trackEvent } from './plausible';
 
 export const analytics = {
-  pageView: (props?: PageViewProperties) => trackEvent("page_view", props),
+  pageView: (props?: PageViewProperties) => trackEvent('page_view', props),
 
-  ctaClick: (props: CTAClickProperties) => trackEvent("cta_click", props),
+  ctaClick: (props: CTAClickProperties) => trackEvent('cta_click', props),
 
-  formSubmit: (props: FormSubmitProperties) => trackEvent("form_submit", props),
+  formSubmit: (props: FormSubmitProperties) => trackEvent('form_submit', props),
 
-  demoRequest: (props?: DemoRequestProperties) => trackEvent("demo_request", props),
+  demoRequest: (props?: DemoRequestProperties) => trackEvent('demo_request', props),
 
-  accessRequest: (props?: AccessRequestProperties) => trackEvent("access_request", props),
+  accessRequest: (props?: AccessRequestProperties) => trackEvent('access_request', props),
 
   privateInquirySubmit: (props?: PrivateInquiryProperties) =>
-    trackEvent("private_inquiry_submit", props),
+    trackEvent('private_inquiry_submit', props),
 
-  signIn: (props?: AuthProperties) => trackEvent("sign_in", props),
+  signIn: (props?: AuthProperties) => trackEvent('sign_in', props),
 
-  signUp: (props?: AuthProperties) => trackEvent("sign_up", props),
+  signUp: (props?: AuthProperties) => trackEvent('sign_up', props),
 
-  dashboardView: (props?: DashboardViewProperties) => trackEvent("dashboard_view", props),
+  dashboardView: (props?: DashboardViewProperties) => trackEvent('dashboard_view', props),
 
-  articleView: (props: ArticleViewProperties) => trackEvent("article_view", props),
+  articleView: (props: ArticleViewProperties) => trackEvent('article_view', props),
 
-  checkoutStarted: (props?: CheckoutProperties) => trackEvent("checkout_started", props),
+  checkoutStarted: (props?: CheckoutProperties) => trackEvent('checkout_started', props),
 
-  checkoutCompleted: (props?: CheckoutProperties) => trackEvent("checkout_completed", props),
+  checkoutCompleted: (props?: CheckoutProperties) => trackEvent('checkout_completed', props),
 } as const;
 
 export type Analytics = typeof analytics;
@@ -49,7 +49,7 @@ let trackedDepths: number[] = [];
 
 export function initScrollDepthTracking(
   pageSlug: string,
-  thresholds: number[] = scrollDepthThresholds
+  thresholds: number[] = scrollDepthThresholds,
 ): () => void {
   trackedDepths = [];
   scrollDepthThresholds = thresholds;
@@ -62,11 +62,11 @@ export function initScrollDepthTracking(
     for (const threshold of scrollDepthThresholds) {
       if (pct >= threshold && !trackedDepths.includes(threshold)) {
         trackedDepths.push(threshold);
-        trackEvent("page_view", { page: pageSlug, scroll_depth: threshold });
+        trackEvent('page_view', { page: pageSlug, scroll_depth: threshold });
       }
     }
   };
 
-  window.addEventListener("scroll", handler, { passive: true });
-  return () => window.removeEventListener("scroll", handler);
+  window.addEventListener('scroll', handler, { passive: true });
+  return () => window.removeEventListener('scroll', handler);
 }

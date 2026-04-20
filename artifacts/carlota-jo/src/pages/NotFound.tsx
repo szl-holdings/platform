@@ -1,5 +1,5 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 
 export default function NotFound() {
   return (
@@ -8,9 +8,7 @@ export default function NotFound() {
       <main className="flex-1 flex items-center justify-center pt-20">
         <div className="max-w-lg mx-auto px-6 text-center">
           <h1 className="font-serif text-6xl text-gold-400/30 mb-4">404</h1>
-          <h2 className="font-serif text-2xl text-cream-50 mb-4">
-            Page Not Found
-          </h2>
+          <h2 className="font-serif text-2xl text-cream-50 mb-4">Page Not Found</h2>
           <p className="text-sm text-cream-300/50 mb-8">
             The page you're looking for doesn't exist or has been moved.
           </p>

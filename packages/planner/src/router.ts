@@ -1,15 +1,12 @@
-import { modelRouter } from "@szl-holdings/ai-control-plane/router";
-import type { PlanStep, ResolvedPlanContext, RouteDecision } from "./types.js";
+import { modelRouter } from '@szl-holdings/ai-control-plane/router';
+import type { PlanStep, ResolvedPlanContext, RouteDecision } from './types.js';
 
 /**
  * Resolve a routing decision for each step using @workspace/ai-control-plane's
  * model router. If routing fails for any reason, leave the existing route in
  * place and mark `selectedBy = "manual"` so callers know it was not auto-routed.
  */
-export function routePlanSteps(
-  steps: PlanStep[],
-  context: ResolvedPlanContext,
-): PlanStep[] {
+export function routePlanSteps(steps: PlanStep[], context: ResolvedPlanContext): PlanStep[] {
   return steps.map((step) => {
     try {
       const result = modelRouter.route({
@@ -32,7 +29,7 @@ export function routePlanSteps(
       };
       return { ...step, route };
     } catch {
-      return { ...step, route: { ...step.route, selectedBy: "manual" } };
+      return { ...step, route: { ...step.route, selectedBy: 'manual' } };
     }
   });
 }

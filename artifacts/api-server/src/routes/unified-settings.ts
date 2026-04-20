@@ -16,41 +16,56 @@
  *   GET  /settings/audit            — settings change audit log
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db, platformSettingsTable, tenantSettingsTable, userSettingsTable, settingsAuditLogTable, usersTable } from "@szl-holdings/db";
-import { hashIp } from "@szl-holdings/audit";
-import { eq, and, desc, asc, like, gte, lte } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { assertTenantAccess, recordTenantIsolationViolation } from "../middlewares/tenant-scope";
-import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { hashIp } from '@szl-holdings/audit';
+import { bodyShape } from '@szl-holdings/contracts/common';
+import {
+  db,
+  platformSettingsTable,
+  settingsAuditLogTable,
+  tenantSettingsTable,
+  userSettingsTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { and, asc, desc, eq, gte, like, lte } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendCreated,
+  sendForbidden,
+  sendNoContent,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
+import { assertTenantAccess, recordTenantIsolationViolation } from '../middlewares/tenant-scope';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
 const router: IRouter = Router();
 
-const SUPER_ADMIN_ROLES = ["super_admin"] as const;
-const ADMIN_ROLES = ["admin", "super_admin"] as const;
+const SUPER_ADMIN_ROLES = ['super_admin'] as const;
+const ADMIN_ROLES = ['admin', 'super_admin'] as const;
 
-const ORG_ADMIN_ROLES = new Set(["owner", "admin"]);
+const ORG_ADMIN_ROLES = new Set(['owner', 'admin']);
 
 function assertTenantAdminAccess(req: Request, res: Response, orgId: number): boolean {
   const user = req.user!;
-  if (user.roles.includes("super_admin") || user.roles.includes("admin")) return true;
+  if (user.roles.includes('super_admin') || user.roles.includes('admin')) return true;
   const membership = user.orgs.find((o) => o.orgId === orgId);
   if (!membership) {
-    recordTenantIsolationViolation(req, user, orgId, "settings cross-tenant write");
-    sendForbidden(res, "Cross-tenant access denied");
+    recordTenantIsolationViolation(req, user, orgId, 'settings cross-tenant write');
+    sendForbidden(res, 'Cross-tenant access denied');
     return false;
   }
   if (!ORG_ADMIN_ROLES.has(membership.role)) {
-    sendForbidden(res, "Org admin role required to modify tenant settings");
+    sendForbidden(res, 'Org admin role required to modify tenant settings');
     return false;
   }
   return true;
 }
 
-type Tier = "platform" | "tenant" | "user";
+type Tier = 'platform' | 'tenant' | 'user';
 
 async function writeAudit(params: {
   tier: Tier;
@@ -60,7 +75,7 @@ async function writeAudit(params: {
   orgId?: number | null;
   userId?: number | null;
   actorId?: number | null;
-  action: "create" | "update" | "delete";
+  action: 'create' | 'update' | 'delete';
   oldValue?: unknown;
   newValue?: unknown;
   ipAddress?: string;
@@ -92,21 +107,25 @@ async function writeAudit(params: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/settings/resolve",
+  '/settings/resolve',
   authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const user = req.user!;
       const namespace = req.query.namespace as string | undefined;
-      const keys = req.query.keys ? String(req.query.keys).split(",").map(k => k.trim()) : undefined;
+      const keys = req.query.keys
+        ? String(req.query.keys)
+            .split(',')
+            .map((k) => k.trim())
+        : undefined;
 
       // Explicit orgId overrides the default primary org — validate access
       let orgId: number | null = null;
       if (req.query.orgId) {
         const requestedOrgId = parseInt(req.query.orgId as string, 10);
         if (isNaN(requestedOrgId)) {
-          sendBadRequest(res, "Invalid orgId");
+          sendBadRequest(res, 'Invalid orgId');
           return;
         }
         if (!assertTenantAccess(req, res, requestedOrgId)) return;
@@ -116,49 +135,67 @@ router.get(
       }
 
       const [platformRows, tenantRows, userRows] = await Promise.all([
-        db.select().from(platformSettingsTable)
+        db
+          .select()
+          .from(platformSettingsTable)
           .where(namespace ? eq(platformSettingsTable.namespace, namespace) : undefined)
           .orderBy(asc(platformSettingsTable.namespace), asc(platformSettingsTable.key)),
         orgId
-          ? db.select().from(tenantSettingsTable)
-            .where(and(
-              eq(tenantSettingsTable.orgId, orgId),
-              namespace ? eq(tenantSettingsTable.namespace, namespace) : undefined,
-            ))
-            .orderBy(asc(tenantSettingsTable.namespace), asc(tenantSettingsTable.key))
+          ? db
+              .select()
+              .from(tenantSettingsTable)
+              .where(
+                and(
+                  eq(tenantSettingsTable.orgId, orgId),
+                  namespace ? eq(tenantSettingsTable.namespace, namespace) : undefined,
+                ),
+              )
+              .orderBy(asc(tenantSettingsTable.namespace), asc(tenantSettingsTable.key))
           : Promise.resolve([]),
-        db.select().from(userSettingsTable)
-          .where(and(
-            eq(userSettingsTable.userId, user.id),
-            orgId ? eq(userSettingsTable.orgId, orgId) : undefined,
-            namespace ? eq(userSettingsTable.namespace, namespace) : undefined,
-          ))
+        db
+          .select()
+          .from(userSettingsTable)
+          .where(
+            and(
+              eq(userSettingsTable.userId, user.id),
+              orgId ? eq(userSettingsTable.orgId, orgId) : undefined,
+              namespace ? eq(userSettingsTable.namespace, namespace) : undefined,
+            ),
+          )
           .orderBy(asc(userSettingsTable.namespace), asc(userSettingsTable.key)),
       ]);
 
-      const resolved: Record<string, { value: unknown; tier: Tier; namespace: string; key: string }> = {};
+      const resolved: Record<
+        string,
+        { value: unknown; tier: Tier; namespace: string; key: string }
+      > = {};
 
       for (const row of platformRows) {
         const k = `${row.namespace}:${row.key}`;
-        resolved[k] = { value: row.value, tier: "platform", namespace: row.namespace, key: row.key };
+        resolved[k] = {
+          value: row.value,
+          tier: 'platform',
+          namespace: row.namespace,
+          key: row.key,
+        };
       }
       for (const row of tenantRows) {
         const k = `${row.namespace}:${row.key}`;
-        resolved[k] = { value: row.value, tier: "tenant", namespace: row.namespace, key: row.key };
+        resolved[k] = { value: row.value, tier: 'tenant', namespace: row.namespace, key: row.key };
       }
       for (const row of userRows) {
         const k = `${row.namespace}:${row.key}`;
-        resolved[k] = { value: row.value, tier: "user", namespace: row.namespace, key: row.key };
+        resolved[k] = { value: row.value, tier: 'user', namespace: row.namespace, key: row.key };
       }
 
       let result = Object.values(resolved);
       if (keys) {
-        result = result.filter(r => keys.includes(r.key));
+        result = result.filter((r) => keys.includes(r.key));
       }
 
       sendSuccess(res, { settings: result, resolvedFor: { userId: user.id, orgId } });
     } catch (err) {
-      handleRouteError(res, err, "Failed to resolve settings");
+      handleRouteError(res, err, 'Failed to resolve settings');
     }
   },
 );
@@ -168,7 +205,7 @@ router.get(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/settings/platform",
+  '/settings/platform',
   authMiddleware(),
   requireRole(...SUPER_ADMIN_ROLES),
   validateQuery(listQuerySchema),
@@ -177,65 +214,79 @@ router.get(
       const namespace = req.query.namespace as string | undefined;
       const category = req.query.category as string | undefined;
 
-      const rows = await db.select().from(platformSettingsTable)
-        .where(and(
-          namespace ? eq(platformSettingsTable.namespace, namespace) : undefined,
-          category ? eq(platformSettingsTable.category, category) : undefined,
-        ))
+      const rows = await db
+        .select()
+        .from(platformSettingsTable)
+        .where(
+          and(
+            namespace ? eq(platformSettingsTable.namespace, namespace) : undefined,
+            category ? eq(platformSettingsTable.category, category) : undefined,
+          ),
+        )
         .orderBy(asc(platformSettingsTable.namespace), asc(platformSettingsTable.key));
 
       sendSuccess(res, rows);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list platform settings");
+      handleRouteError(res, err, 'Failed to list platform settings');
     }
   },
 );
 
 router.post(
-  "/settings/platform",
+  '/settings/platform',
   authMiddleware(),
   requireRole(...SUPER_ADMIN_ROLES),
-  validateBody(bodyShape({
-      "category": z.unknown().optional(),
-      "description": z.unknown().optional(),
-      "isPublic": z.unknown().optional(),
-      "key": z.unknown().optional(),
-      "label": z.unknown().optional(),
-      "namespace": z.unknown().optional(),
-      "value": z.unknown().optional(),
-      "valueType": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
+  validateBody(
+    bodyShape({
+      category: z.unknown().optional(),
+      description: z.unknown().optional(),
+      isPublic: z.unknown().optional(),
+      key: z.unknown().optional(),
+      label: z.unknown().optional(),
+      namespace: z.unknown().optional(),
+      value: z.unknown().optional(),
+      valueType: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
     try {
-      const { namespace, key, value, valueType, label, description, category, isPublic } = req.body as {
-        namespace: string;
-        key: string;
-        value: unknown;
-        valueType?: string;
-        label?: string;
-        description?: string;
-        category?: string;
-        isPublic?: boolean;
-      };
+      const { namespace, key, value, valueType, label, description, category, isPublic } =
+        req.body as {
+          namespace: string;
+          key: string;
+          value: unknown;
+          valueType?: string;
+          label?: string;
+          description?: string;
+          category?: string;
+          isPublic?: boolean;
+        };
 
       if (!namespace || !key) {
-        sendBadRequest(res, "namespace and key are required");
+        sendBadRequest(res, 'namespace and key are required');
         return;
       }
 
       const actorId = req.user!.id;
 
-      const [existing] = await db.select().from(platformSettingsTable)
-        .where(and(
-          eq(platformSettingsTable.namespace, namespace),
-          eq(platformSettingsTable.key, key),
-        ))
+      const [existing] = await db
+        .select()
+        .from(platformSettingsTable)
+        .where(
+          and(eq(platformSettingsTable.namespace, namespace), eq(platformSettingsTable.key, key)),
+        )
         .limit(1);
 
       if (existing) {
-        const [updated] = await db.update(platformSettingsTable)
+        const [updated] = await db
+          .update(platformSettingsTable)
           .set({
             value: value as never,
-            valueType: (valueType ?? existing.valueType) as "string" | "number" | "boolean" | "json",
+            valueType: (valueType ?? existing.valueType) as
+              | 'string'
+              | 'number'
+              | 'boolean'
+              | 'json',
             label: label ?? existing.label,
             description: description ?? existing.description,
             category: category ?? existing.category,
@@ -247,34 +298,52 @@ router.post(
           .returning();
 
         await writeAudit({
-          tier: "platform", settingId: existing.id, namespace, key,
-          actorId, action: "update", oldValue: existing.value, newValue: value,
-          ipAddress: req.ip, userAgent: req.headers["user-agent"],
+          tier: 'platform',
+          settingId: existing.id,
+          namespace,
+          key,
+          actorId,
+          action: 'update',
+          oldValue: existing.value,
+          newValue: value,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
         });
 
         sendSuccess(res, updated);
       } else {
-        const [created] = await db.insert(platformSettingsTable)
+        const [created] = await db
+          .insert(platformSettingsTable)
           .values({
-            namespace, key, value: value as never,
-            valueType: (valueType ?? "string") as "string" | "number" | "boolean" | "json",
-            label, description,
-            category: category ?? "general",
+            namespace,
+            key,
+            value: value as never,
+            valueType: (valueType ?? 'string') as 'string' | 'number' | 'boolean' | 'json',
+            label,
+            description,
+            category: category ?? 'general',
             isPublic: isPublic ?? false,
-            createdBy: actorId, updatedBy: actorId,
+            createdBy: actorId,
+            updatedBy: actorId,
           })
           .returning();
 
         await writeAudit({
-          tier: "platform", settingId: created!.id, namespace, key,
-          actorId, action: "create", newValue: value,
-          ipAddress: req.ip, userAgent: req.headers["user-agent"],
+          tier: 'platform',
+          settingId: created!.id,
+          namespace,
+          key,
+          actorId,
+          action: 'create',
+          newValue: value,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
         });
 
         sendCreated(res, created);
       }
     } catch (err) {
-      handleRouteError(res, err, "Failed to upsert platform setting");
+      handleRouteError(res, err, 'Failed to upsert platform setting');
     }
   },
 );
@@ -284,7 +353,7 @@ router.post(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/settings/tenant/:orgId",
+  '/settings/tenant/:orgId',
   authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
@@ -295,32 +364,39 @@ router.get(
       const namespace = req.query.namespace as string | undefined;
       const category = req.query.category as string | undefined;
 
-      const rows = await db.select().from(tenantSettingsTable)
-        .where(and(
-          eq(tenantSettingsTable.orgId, orgId),
-          namespace ? eq(tenantSettingsTable.namespace, namespace) : undefined,
-          category ? eq(tenantSettingsTable.category, category) : undefined,
-        ))
+      const rows = await db
+        .select()
+        .from(tenantSettingsTable)
+        .where(
+          and(
+            eq(tenantSettingsTable.orgId, orgId),
+            namespace ? eq(tenantSettingsTable.namespace, namespace) : undefined,
+            category ? eq(tenantSettingsTable.category, category) : undefined,
+          ),
+        )
         .orderBy(asc(tenantSettingsTable.namespace), asc(tenantSettingsTable.key));
 
       sendSuccess(res, rows);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list tenant settings");
+      handleRouteError(res, err, 'Failed to list tenant settings');
     }
   },
 );
 
 router.post(
-  "/settings/tenant/:orgId",
+  '/settings/tenant/:orgId',
   authMiddleware(),
-  validateBody(bodyShape({
-      "category": z.unknown().optional(),
-      "key": z.unknown().optional(),
-      "label": z.unknown().optional(),
-      "namespace": z.unknown().optional(),
-      "value": z.unknown().optional(),
-      "valueType": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
+  validateBody(
+    bodyShape({
+      category: z.unknown().optional(),
+      key: z.unknown().optional(),
+      label: z.unknown().optional(),
+      namespace: z.unknown().optional(),
+      value: z.unknown().optional(),
+      valueType: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
       if (!assertTenantAdminAccess(req, res, orgId)) return;
@@ -335,25 +411,34 @@ router.post(
       };
 
       if (!namespace || !key) {
-        sendBadRequest(res, "namespace and key are required");
+        sendBadRequest(res, 'namespace and key are required');
         return;
       }
 
       const actorId = req.user!.id;
 
-      const [existing] = await db.select().from(tenantSettingsTable)
-        .where(and(
-          eq(tenantSettingsTable.orgId, orgId),
-          eq(tenantSettingsTable.namespace, namespace),
-          eq(tenantSettingsTable.key, key),
-        ))
+      const [existing] = await db
+        .select()
+        .from(tenantSettingsTable)
+        .where(
+          and(
+            eq(tenantSettingsTable.orgId, orgId),
+            eq(tenantSettingsTable.namespace, namespace),
+            eq(tenantSettingsTable.key, key),
+          ),
+        )
         .limit(1);
 
       if (existing) {
-        const [updated] = await db.update(tenantSettingsTable)
+        const [updated] = await db
+          .update(tenantSettingsTable)
           .set({
             value: value as never,
-            valueType: (valueType ?? existing.valueType) as "string" | "number" | "boolean" | "json",
+            valueType: (valueType ?? existing.valueType) as
+              | 'string'
+              | 'number'
+              | 'boolean'
+              | 'json',
             label: label ?? existing.label,
             category: category ?? existing.category,
             updatedBy: actorId,
@@ -363,32 +448,53 @@ router.post(
           .returning();
 
         await writeAudit({
-          tier: "tenant", settingId: existing.id, namespace, key, orgId,
-          actorId, action: "update", oldValue: existing.value, newValue: value,
-          ipAddress: req.ip, userAgent: req.headers["user-agent"],
+          tier: 'tenant',
+          settingId: existing.id,
+          namespace,
+          key,
+          orgId,
+          actorId,
+          action: 'update',
+          oldValue: existing.value,
+          newValue: value,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
         });
 
         sendSuccess(res, updated);
       } else {
-        const [created] = await db.insert(tenantSettingsTable)
+        const [created] = await db
+          .insert(tenantSettingsTable)
           .values({
-            orgId, namespace, key, value: value as never,
-            valueType: (valueType ?? "string") as "string" | "number" | "boolean" | "json",
-            label, category: category ?? "general",
-            createdBy: actorId, updatedBy: actorId,
+            orgId,
+            namespace,
+            key,
+            value: value as never,
+            valueType: (valueType ?? 'string') as 'string' | 'number' | 'boolean' | 'json',
+            label,
+            category: category ?? 'general',
+            createdBy: actorId,
+            updatedBy: actorId,
           })
           .returning();
 
         await writeAudit({
-          tier: "tenant", settingId: created!.id, namespace, key, orgId,
-          actorId, action: "create", newValue: value,
-          ipAddress: req.ip, userAgent: req.headers["user-agent"],
+          tier: 'tenant',
+          settingId: created!.id,
+          namespace,
+          key,
+          orgId,
+          actorId,
+          action: 'create',
+          newValue: value,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
         });
 
         sendCreated(res, created);
       }
     } catch (err) {
-      handleRouteError(res, err, "Failed to upsert tenant setting");
+      handleRouteError(res, err, 'Failed to upsert tenant setting');
     }
   },
 );
@@ -398,7 +504,7 @@ router.post(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/settings/user",
+  '/settings/user',
   authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
@@ -408,41 +514,57 @@ router.get(
       let orgId: number | null = null;
       if (req.query.orgId) {
         const requestedOrgId = parseInt(req.query.orgId as string, 10);
-        if (isNaN(requestedOrgId)) { sendBadRequest(res, "Invalid orgId"); return; }
+        if (isNaN(requestedOrgId)) {
+          sendBadRequest(res, 'Invalid orgId');
+          return;
+        }
         if (!assertTenantAccess(req, res, requestedOrgId)) return;
         orgId = requestedOrgId;
       } else {
         orgId = user.orgs[0]?.orgId ?? null;
       }
 
-      const rows = await db.select().from(userSettingsTable)
-        .where(and(
-          eq(userSettingsTable.userId, user.id),
-          orgId ? eq(userSettingsTable.orgId, orgId) : undefined,
-          namespace ? eq(userSettingsTable.namespace, namespace) : undefined,
-        ))
+      const rows = await db
+        .select()
+        .from(userSettingsTable)
+        .where(
+          and(
+            eq(userSettingsTable.userId, user.id),
+            orgId ? eq(userSettingsTable.orgId, orgId) : undefined,
+            namespace ? eq(userSettingsTable.namespace, namespace) : undefined,
+          ),
+        )
         .orderBy(asc(userSettingsTable.namespace), asc(userSettingsTable.key));
 
       sendSuccess(res, rows);
     } catch (err) {
-      handleRouteError(res, err, "Failed to list user settings");
+      handleRouteError(res, err, 'Failed to list user settings');
     }
   },
 );
 
 router.post(
-  "/settings/user",
+  '/settings/user',
   authMiddleware(),
-  validateBody(bodyShape({
-      "key": z.unknown().optional(),
-      "namespace": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "value": z.unknown().optional(),
-      "valueType": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
+  validateBody(
+    bodyShape({
+      key: z.unknown().optional(),
+      namespace: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      value: z.unknown().optional(),
+      valueType: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
     try {
       const user = req.user!;
-      const { namespace, key, value, valueType, orgId: bodyOrgId } = req.body as {
+      const {
+        namespace,
+        key,
+        value,
+        valueType,
+        orgId: bodyOrgId,
+      } = req.body as {
         namespace: string;
         key: string;
         value: unknown;
@@ -451,7 +573,7 @@ router.post(
       };
 
       if (!namespace || !key) {
-        sendBadRequest(res, "namespace and key are required");
+        sendBadRequest(res, 'namespace and key are required');
         return;
       }
 
@@ -463,50 +585,81 @@ router.post(
         orgId = user.orgs[0]?.orgId ?? null;
       }
 
-      const [existing] = await db.select().from(userSettingsTable)
-        .where(and(
-          eq(userSettingsTable.userId, user.id),
-          orgId ? eq(userSettingsTable.orgId, orgId) : undefined,
-          eq(userSettingsTable.namespace, namespace),
-          eq(userSettingsTable.key, key),
-        ))
+      const [existing] = await db
+        .select()
+        .from(userSettingsTable)
+        .where(
+          and(
+            eq(userSettingsTable.userId, user.id),
+            orgId ? eq(userSettingsTable.orgId, orgId) : undefined,
+            eq(userSettingsTable.namespace, namespace),
+            eq(userSettingsTable.key, key),
+          ),
+        )
         .limit(1);
 
       if (existing) {
-        const [updated] = await db.update(userSettingsTable)
+        const [updated] = await db
+          .update(userSettingsTable)
           .set({
             value: value as never,
-            valueType: (valueType ?? existing.valueType) as "string" | "number" | "boolean" | "json",
+            valueType: (valueType ?? existing.valueType) as
+              | 'string'
+              | 'number'
+              | 'boolean'
+              | 'json',
             updatedAt: new Date(),
           })
           .where(eq(userSettingsTable.id, existing.id))
           .returning();
 
         await writeAudit({
-          tier: "user", settingId: existing.id, namespace, key, orgId, userId: user.id,
-          actorId: user.id, action: "update", oldValue: existing.value, newValue: value,
-          ipAddress: req.ip, userAgent: req.headers["user-agent"],
+          tier: 'user',
+          settingId: existing.id,
+          namespace,
+          key,
+          orgId,
+          userId: user.id,
+          actorId: user.id,
+          action: 'update',
+          oldValue: existing.value,
+          newValue: value,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
         });
 
         sendSuccess(res, updated);
       } else {
-        const [created] = await db.insert(userSettingsTable)
+        const [created] = await db
+          .insert(userSettingsTable)
           .values({
-            userId: user.id, orgId, namespace, key, value: value as never,
-            valueType: (valueType ?? "string") as "string" | "number" | "boolean" | "json",
+            userId: user.id,
+            orgId,
+            namespace,
+            key,
+            value: value as never,
+            valueType: (valueType ?? 'string') as 'string' | 'number' | 'boolean' | 'json',
           })
           .returning();
 
         await writeAudit({
-          tier: "user", settingId: created!.id, namespace, key, orgId, userId: user.id,
-          actorId: user.id, action: "create", newValue: value,
-          ipAddress: req.ip, userAgent: req.headers["user-agent"],
+          tier: 'user',
+          settingId: created!.id,
+          namespace,
+          key,
+          orgId,
+          userId: user.id,
+          actorId: user.id,
+          action: 'create',
+          newValue: value,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
         });
 
         sendCreated(res, created);
       }
     } catch (err) {
-      handleRouteError(res, err, "Failed to upsert user setting");
+      handleRouteError(res, err, 'Failed to upsert user setting');
     }
   },
 );
@@ -516,7 +669,8 @@ router.post(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.delete(
-  "/settings/:tier/:id", validateBody(bodyShape({})),
+  '/settings/:tier/:id',
+  validateBody(bodyShape({})),
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {
@@ -525,40 +679,91 @@ router.delete(
       const user = req.user!;
       const actorId = user.id;
 
-      if (!["platform", "tenant", "user"].includes(tier)) {
-        sendBadRequest(res, "Invalid tier");
+      if (!['platform', 'tenant', 'user'].includes(tier)) {
+        sendBadRequest(res, 'Invalid tier');
         return;
       }
 
-      if (tier === "platform") {
-        if (!user.roles.includes("super_admin")) {
-          sendForbidden(res, "super_admin required");
+      if (tier === 'platform') {
+        if (!user.roles.includes('super_admin')) {
+          sendForbidden(res, 'super_admin required');
           return;
         }
-        const [row] = await db.select().from(platformSettingsTable).where(eq(platformSettingsTable.id, id)).limit(1);
-        if (!row) { sendNotFound(res, "Setting"); return; }
+        const [row] = await db
+          .select()
+          .from(platformSettingsTable)
+          .where(eq(platformSettingsTable.id, id))
+          .limit(1);
+        if (!row) {
+          sendNotFound(res, 'Setting');
+          return;
+        }
         await db.delete(platformSettingsTable).where(eq(platformSettingsTable.id, id));
-        await writeAudit({ tier, settingId: id, namespace: row.namespace, key: row.key, actorId, action: "delete", oldValue: row.value, ipAddress: req.ip });
-      } else if (tier === "tenant") {
-        const [row] = await db.select().from(tenantSettingsTable).where(eq(tenantSettingsTable.id, id)).limit(1);
-        if (!row) { sendNotFound(res, "Setting"); return; }
+        await writeAudit({
+          tier,
+          settingId: id,
+          namespace: row.namespace,
+          key: row.key,
+          actorId,
+          action: 'delete',
+          oldValue: row.value,
+          ipAddress: req.ip,
+        });
+      } else if (tier === 'tenant') {
+        const [row] = await db
+          .select()
+          .from(tenantSettingsTable)
+          .where(eq(tenantSettingsTable.id, id))
+          .limit(1);
+        if (!row) {
+          sendNotFound(res, 'Setting');
+          return;
+        }
         if (!assertTenantAdminAccess(req, res, row.orgId)) return;
         await db.delete(tenantSettingsTable).where(eq(tenantSettingsTable.id, id));
-        await writeAudit({ tier, settingId: id, namespace: row.namespace, key: row.key, orgId: row.orgId, actorId, action: "delete", oldValue: row.value, ipAddress: req.ip });
+        await writeAudit({
+          tier,
+          settingId: id,
+          namespace: row.namespace,
+          key: row.key,
+          orgId: row.orgId,
+          actorId,
+          action: 'delete',
+          oldValue: row.value,
+          ipAddress: req.ip,
+        });
       } else {
-        const [row] = await db.select().from(userSettingsTable).where(eq(userSettingsTable.id, id)).limit(1);
-        if (!row) { sendNotFound(res, "Setting"); return; }
-        if (row.userId !== user.id && !user.roles.includes("super_admin")) {
+        const [row] = await db
+          .select()
+          .from(userSettingsTable)
+          .where(eq(userSettingsTable.id, id))
+          .limit(1);
+        if (!row) {
+          sendNotFound(res, 'Setting');
+          return;
+        }
+        if (row.userId !== user.id && !user.roles.includes('super_admin')) {
           sendForbidden(res, "Cannot delete another user's settings");
           return;
         }
         await db.delete(userSettingsTable).where(eq(userSettingsTable.id, id));
-        await writeAudit({ tier, settingId: id, namespace: row.namespace, key: row.key, orgId: row.orgId, userId: row.userId, actorId, action: "delete", oldValue: row.value, ipAddress: req.ip });
+        await writeAudit({
+          tier,
+          settingId: id,
+          namespace: row.namespace,
+          key: row.key,
+          orgId: row.orgId,
+          userId: row.userId,
+          actorId,
+          action: 'delete',
+          oldValue: row.value,
+          ipAddress: req.ip,
+        });
       }
 
       sendNoContent(res);
     } catch (err) {
-      handleRouteError(res, err, "Failed to delete setting");
+      handleRouteError(res, err, 'Failed to delete setting');
     }
   },
 );
@@ -568,17 +773,17 @@ router.delete(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.get(
-  "/settings/audit",
+  '/settings/audit',
   authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const user = req.user!;
-      const isAdmin = user.roles.includes("super_admin") || user.roles.includes("admin");
+      const isAdmin = user.roles.includes('super_admin') || user.roles.includes('admin');
 
       const tier = req.query.tier as string | undefined;
       const namespace = req.query.namespace as string | undefined;
-      const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 500);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10), 500);
       const after = req.query.after ? new Date(req.query.after as string) : undefined;
       // Make `before` inclusive of the full selected day (23:59:59.999 UTC)
       let before: Date | undefined;
@@ -594,7 +799,7 @@ router.get(
       if (req.query.orgId) {
         const requested = parseInt(req.query.orgId as string, 10);
         if (isNaN(requested)) {
-          sendBadRequest(res, "Invalid orgId");
+          sendBadRequest(res, 'Invalid orgId');
           return;
         }
         if (!isAdmin && !assertTenantAccess(req, res, requested)) return;
@@ -616,8 +821,8 @@ router.get(
       }
 
       const conditions = [];
-      if (tier && ["platform", "tenant", "user"].includes(tier)) {
-        conditions.push(eq(settingsAuditLogTable.tier, tier as "platform" | "tenant" | "user"));
+      if (tier && ['platform', 'tenant', 'user'].includes(tier)) {
+        conditions.push(eq(settingsAuditLogTable.tier, tier as 'platform' | 'tenant' | 'user'));
       }
       // Org scoping
       if (!isAdmin) {
@@ -668,7 +873,7 @@ router.get(
 
       sendSuccess(res, rows);
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch settings audit log");
+      handleRouteError(res, err, 'Failed to fetch settings audit log');
     }
   },
 );

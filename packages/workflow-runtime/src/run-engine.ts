@@ -11,12 +11,13 @@
  * This is a reference implementation. Production deployments
  * should wire this to a durable execution engine (Temporal, etc.)
  */
+
+import { createRunContext } from '@szl-holdings/agent-core';
 import type {
+  StepRunState,
   WorkflowDescriptor,
   WorkflowRunState,
-  StepRunState,
-} from "@szl-holdings/shared-contracts";
-import { createRunContext } from "@szl-holdings/agent-core";
+} from '@szl-holdings/shared-contracts';
 
 export interface StepRunRecord {
   stepId: string;
@@ -45,8 +46,11 @@ export interface WorkflowRun {
 
 export interface RunEngineOptions {
   onStateChange?: (run: WorkflowRun) => void;
-  onApprovalRequired?: (run: WorkflowRun, step: StepRunRecord) => Promise<"approved" | "rejected">;
-  stepExecutor?: (step: StepRunRecord, run: WorkflowRun) => Promise<{ success: boolean; error?: string }>;
+  onApprovalRequired?: (run: WorkflowRun, step: StepRunRecord) => Promise<'approved' | 'rejected'>;
+  stepExecutor?: (
+    step: StepRunRecord,
+    run: WorkflowRun,
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 function generateRunId(workflowId: string): string {
@@ -66,7 +70,7 @@ export function createWorkflowRun(
     runId,
     workflowId: descriptor.id,
     workflowName: descriptor.name,
-    state: "queued",
+    state: 'queued',
     ...(options?.profileId !== undefined ? { profileId: options.profileId } : {}),
     ...(options?.triggeredBy !== undefined ? { triggeredBy: options.triggeredBy } : {}),
     startedAt: new Date().toISOString(),
@@ -81,7 +85,7 @@ export function createWorkflowRun(
       return {
         stepId: step.stepId,
         name: step.name,
-        state: "pending" as StepRunState,
+        state: 'pending' as StepRunState,
         traceId: ctx.traceId,
         requiresApproval: step.requiresApproval ?? false,
       };
@@ -99,36 +103,40 @@ export async function executeWorkflowRun(
 ): Promise<WorkflowRun> {
   const { onStateChange, onApprovalRequired, stepExecutor } = options;
 
-  const mutableRun: WorkflowRun = { ...run, state: "running", steps: run.steps.map((s) => ({ ...s })) };
+  const mutableRun: WorkflowRun = {
+    ...run,
+    state: 'running',
+    steps: run.steps.map((s) => ({ ...s })),
+  };
   onStateChange?.(mutableRun);
 
   for (const step of mutableRun.steps) {
-    step.state = "running";
+    step.state = 'running';
     step.startedAt = new Date().toISOString();
     onStateChange?.({ ...mutableRun });
 
     if (step.requiresApproval) {
-      step.state = "approval-required";
+      step.state = 'approval-required';
       onStateChange?.({ ...mutableRun });
 
       if (!onApprovalRequired) {
-        mutableRun.state = "approval-required";
+        mutableRun.state = 'approval-required';
         mutableRun.completedAt = new Date().toISOString();
         onStateChange?.({ ...mutableRun });
         return mutableRun;
       }
 
       const decision = await onApprovalRequired({ ...mutableRun }, step);
-      if (decision === "rejected") {
-        step.state = "rejected";
-        mutableRun.state = "rejected";
+      if (decision === 'rejected') {
+        step.state = 'rejected';
+        mutableRun.state = 'rejected';
         mutableRun.completedAt = new Date().toISOString();
         onStateChange?.({ ...mutableRun });
         return mutableRun;
       }
-      step.state = "approved";
+      step.state = 'approved';
       onStateChange?.({ ...mutableRun });
-      step.state = "running";
+      step.state = 'running';
     }
 
     const start = Date.now();
@@ -138,11 +146,11 @@ export async function executeWorkflowRun(
         step.durationMs = Date.now() - start;
         step.completedAt = new Date().toISOString();
         if (result.success) {
-          step.state = "complete";
+          step.state = 'complete';
         } else {
-          step.state = "failed";
-          step.error = result.error ?? "Step execution failed";
-          mutableRun.state = "failed";
+          step.state = 'failed';
+          step.error = result.error ?? 'Step execution failed';
+          mutableRun.state = 'failed';
           mutableRun.completedAt = new Date().toISOString();
           onStateChange?.({ ...mutableRun });
           return mutableRun;
@@ -151,14 +159,14 @@ export async function executeWorkflowRun(
         await new Promise((r) => setTimeout(r, 100));
         step.durationMs = Date.now() - start;
         step.completedAt = new Date().toISOString();
-        step.state = "complete";
+        step.state = 'complete';
       }
     } catch (err) {
       step.durationMs = Date.now() - start;
       step.completedAt = new Date().toISOString();
-      step.state = "failed";
+      step.state = 'failed';
       step.error = err instanceof Error ? err.message : String(err);
-      mutableRun.state = "failed";
+      mutableRun.state = 'failed';
       mutableRun.completedAt = new Date().toISOString();
       onStateChange?.({ ...mutableRun });
       return mutableRun;
@@ -167,7 +175,7 @@ export async function executeWorkflowRun(
     onStateChange?.({ ...mutableRun });
   }
 
-  mutableRun.state = "success";
+  mutableRun.state = 'success';
   mutableRun.completedAt = new Date().toISOString();
   onStateChange?.({ ...mutableRun });
   return mutableRun;

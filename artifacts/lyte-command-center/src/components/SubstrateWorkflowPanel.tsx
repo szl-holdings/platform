@@ -1,9 +1,18 @@
-import { useState } from "react";
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { Cpu, Play, CheckCircle2, Loader, ChevronDown, ChevronUp, Shield, AlertTriangle } from "lucide-react";
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Cpu,
+  Loader,
+  Play,
+  Shield,
+} from 'lucide-react';
+import { useState } from 'react';
 
-type RunMode = "dry-run" | "live";
-type PanelStatus = "idle" | "running" | "completed" | "pending-approval" | "failed";
+type RunMode = 'dry-run' | 'live';
+type PanelStatus = 'idle' | 'running' | 'completed' | 'pending-approval' | 'failed';
 
 interface StageTrace {
   stageId: string;
@@ -38,46 +47,47 @@ type PipelineStageResult = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  completed: "text-emerald-400",
-  "dry-run-complete": "text-sky-400",
-  failed: "text-red-400",
-  "pending-approval": "text-amber-400",
-  running: "text-amber-400",
+  completed: 'text-emerald-400',
+  'dry-run-complete': 'text-sky-400',
+  failed: 'text-red-400',
+  'pending-approval': 'text-amber-400',
+  running: 'text-amber-400',
 };
 
-type RetrieverSource = "adapter" | "synthetic" | "inline" | "dry-run";
+type RetrieverSource = 'adapter' | 'synthetic' | 'inline' | 'dry-run';
 
 interface RetrieverSourceMeta {
   source: RetrieverSource;
   adapterId: string | null;
 }
 
-const RETRIEVER_SOURCE_STYLE: Record<RetrieverSource, { label: string; cls: string; tip: string }> = {
-  adapter: {
-    label: "LIVE INDEX",
-    cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-    tip: "Backed by the configured live retriever adapter.",
-  },
-  synthetic: {
-    label: "SYNTHETIC",
-    cls: "border-amber-400/50 bg-amber-400/10 text-amber-200",
-    tip: "Demo-only synthetic corpus — not real evidence.",
-  },
-  inline: {
-    label: "INLINE CORPUS",
-    cls: "border-sky-500/40 bg-sky-500/10 text-sky-300",
-    tip: "Caller supplied an inline corpus instead of querying an index.",
-  },
-  "dry-run": {
-    label: "DRY-RUN",
-    cls: "border-sky-500/40 bg-sky-500/10 text-sky-300",
-    tip: "Dry-run — no retrieval was performed.",
-  },
-};
+const RETRIEVER_SOURCE_STYLE: Record<RetrieverSource, { label: string; cls: string; tip: string }> =
+  {
+    adapter: {
+      label: 'LIVE INDEX',
+      cls: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+      tip: 'Backed by the configured live retriever adapter.',
+    },
+    synthetic: {
+      label: 'SYNTHETIC',
+      cls: 'border-amber-400/50 bg-amber-400/10 text-amber-200',
+      tip: 'Demo-only synthetic corpus — not real evidence.',
+    },
+    inline: {
+      label: 'INLINE CORPUS',
+      cls: 'border-sky-500/40 bg-sky-500/10 text-sky-300',
+      tip: 'Caller supplied an inline corpus instead of querying an index.',
+    },
+    'dry-run': {
+      label: 'DRY-RUN',
+      cls: 'border-sky-500/40 bg-sky-500/10 text-sky-300',
+      tip: 'Dry-run — no retrieval was performed.',
+    },
+  };
 
 function extractRetrieverSource(stages: PipelineStageResult[]): RetrieverSourceMeta | null {
-  const retrieve = stages.find((s) => s.stageType === "Retrieve");
-  if (!retrieve || typeof retrieve.output !== "object" || retrieve.output === null) return null;
+  const retrieve = stages.find((s) => s.stageType === 'Retrieve');
+  if (!retrieve || typeof retrieve.output !== 'object' || retrieve.output === null) return null;
   const out = retrieve.output as { retrieverSource?: string; retrieverAdapterId?: string | null };
   if (!out.retrieverSource) return null;
   if (!(out.retrieverSource in RETRIEVER_SOURCE_STYLE)) return null;
@@ -88,57 +98,57 @@ function extractRetrieverSource(stages: PipelineStageResult[]): RetrieverSourceM
 }
 
 function parsePipelineRun(run: Record<string, unknown>): RunResult {
-  const rawStages = (run["stageResults"] as PipelineStageResult[]) ?? [];
+  const rawStages = (run['stageResults'] as PipelineStageResult[]) ?? [];
   const stages: StageTrace[] = rawStages.map((sr) => ({
     stageId: sr.stageId,
     stageName: sr.stageName ?? sr.stageId,
-    stageType: sr.stageType ?? "Stage",
+    stageType: sr.stageType ?? 'Stage',
     status: sr.status,
     confidence: sr.confidence,
     durationMs: sr.durationMs,
   }));
   return {
-    runId: run["runId"] as string,
-    workflowId: run["workflowId"] as string,
-    status: run["status"] as string,
-    mode: run["mode"] as string,
-    finalConfidence: typeof run["finalConfidence"] === "number" ? run["finalConfidence"] : 0.84,
+    runId: run['runId'] as string,
+    workflowId: run['workflowId'] as string,
+    status: run['status'] as string,
+    mode: run['mode'] as string,
+    finalConfidence: typeof run['finalConfidence'] === 'number' ? run['finalConfidence'] : 0.84,
     stageCount: stages.length,
     stages,
-    startedAt: run["startedAt"] as string,
-    durationMs: run["durationMs"] as number | undefined,
+    startedAt: run['startedAt'] as string,
+    durationMs: run['durationMs'] as number | undefined,
     retriever: extractRetrieverSource(rawStages),
   };
 }
 
 export function SubstrateWorkflowPanel() {
-  const [mode, setMode] = useState<RunMode>("dry-run");
-  const [status, setStatus] = useState<PanelStatus>("idle");
+  const [mode, setMode] = useState<RunMode>('dry-run');
+  const [status, setStatus] = useState<PanelStatus>('idle');
   const [result, setResult] = useState<RunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
 
   async function handleRun() {
-    setStatus("running");
+    setStatus('running');
     setResult(null);
     setError(null);
     try {
-      const run = await apiFetch<Record<string, unknown>>("/control-tower/substrate/run", {
-        method: "POST",
+      const run = await apiFetch<Record<string, unknown>>('/control-tower/substrate/run', {
+        method: 'POST',
         body: JSON.stringify({
-          workflowId: "lyte-operational-drift",
-          input: { services: ["all"], lookbackHours: 72, driftThreshold: 0.15 },
+          workflowId: 'lyte-operational-drift',
+          input: { services: ['all'], lookbackHours: 72, driftThreshold: 0.15 },
           mode,
         }),
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
       const parsed = parsePipelineRun(run);
       setResult(parsed);
-      setStatus(parsed.status === "pending-approval" ? "pending-approval" : "completed");
+      setStatus(parsed.status === 'pending-approval' ? 'pending-approval' : 'completed');
       setExpanded(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Substrate run failed");
-      setStatus("failed");
+      setError(err instanceof Error ? err.message : 'Substrate run failed');
+      setStatus('failed');
     }
   }
 
@@ -152,13 +162,15 @@ export function SubstrateWorkflowPanel() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-amber-100">Operational Drift Review</p>
-              <p className="text-[10px] text-amber-400/50 mt-0.5 font-mono">Substrate · lyte-operational-drift · Phase 2</p>
+              <p className="text-[10px] text-amber-400/50 mt-0.5 font-mono">
+                Substrate · lyte-operational-drift · Phase 2
+              </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <select
                 value={mode}
-                onChange={e => setMode(e.target.value as RunMode)}
-                disabled={status === "running"}
+                onChange={(e) => setMode(e.target.value as RunMode)}
+                disabled={status === 'running'}
                 className="text-[10px] font-mono bg-amber-950/40 border border-amber-500/20 text-amber-300 rounded px-1.5 py-0.5 focus:outline-none"
               >
                 <option value="dry-run">dry-run</option>
@@ -166,30 +178,59 @@ export function SubstrateWorkflowPanel() {
               </select>
               <button
                 onClick={handleRun}
-                disabled={status === "running"}
+                disabled={status === 'running'}
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-mono hover:bg-amber-500/25 transition-colors disabled:opacity-40"
               >
-                {status === "running"
-                  ? <><Loader className="w-3 h-3 animate-spin" />Running…</>
-                  : <><Play className="w-3 h-3" />Run on Substrate</>}
+                {status === 'running' ? (
+                  <>
+                    <Loader className="w-3 h-3 animate-spin" />
+                    Running…
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3 h-3" />
+                    Run on Substrate
+                  </>
+                )}
               </button>
             </div>
           </div>
 
           <p className="text-[10px] text-amber-100/40 mt-1.5 leading-relaxed">
-            Detects SLO creep, configuration divergence, and capacity trends. Requires operator approval before corrective actions.
+            Detects SLO creep, configuration divergence, and capacity trends. Requires operator
+            approval before corrective actions.
           </p>
 
-          {status !== "idle" && (
+          {status !== 'idle' && (
             <div className="mt-2 flex items-center gap-2">
-              {status === "running" && <span className="text-[9px] font-mono text-amber-400 animate-pulse">● RUNNING</span>}
-              {status === "completed" && <span className="text-[9px] font-mono text-emerald-400"><CheckCircle2 className="w-2.5 h-2.5 inline mr-0.5" />COMPLETED</span>}
-              {status === "pending-approval" && <span className="text-[9px] font-mono text-amber-400">⏳ PENDING APPROVAL</span>}
-              {status === "failed" && <span className="text-[9px] font-mono text-red-400">✗ FAILED</span>}
-              {result && <span className="text-[9px] font-mono text-amber-400/40">{result.runId}</span>}
+              {status === 'running' && (
+                <span className="text-[9px] font-mono text-amber-400 animate-pulse">● RUNNING</span>
+              )}
+              {status === 'completed' && (
+                <span className="text-[9px] font-mono text-emerald-400">
+                  <CheckCircle2 className="w-2.5 h-2.5 inline mr-0.5" />
+                  COMPLETED
+                </span>
+              )}
+              {status === 'pending-approval' && (
+                <span className="text-[9px] font-mono text-amber-400">⏳ PENDING APPROVAL</span>
+              )}
+              {status === 'failed' && (
+                <span className="text-[9px] font-mono text-red-400">✗ FAILED</span>
+              )}
+              {result && (
+                <span className="text-[9px] font-mono text-amber-400/40">{result.runId}</span>
+              )}
               {(result || error) && (
-                <button onClick={() => setExpanded(v => !v)} className="ml-auto text-amber-400/40 hover:text-amber-400 transition-colors">
-                  {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <button
+                  onClick={() => setExpanded((v) => !v)}
+                  className="ml-auto text-amber-400/40 hover:text-amber-400 transition-colors"
+                >
+                  {expanded ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
                 </button>
               )}
             </div>
@@ -215,26 +256,41 @@ export function SubstrateWorkflowPanel() {
             </div>
             <div className="cockpit-panel p-2">
               <p className="text-[9px] font-mono text-amber-400/40 uppercase mb-0.5">Confidence</p>
-              <p className="text-sm font-mono font-bold text-amber-300">{(result.finalConfidence * 100).toFixed(0)}%</p>
+              <p className="text-sm font-mono font-bold text-amber-300">
+                {(result.finalConfidence * 100).toFixed(0)}%
+              </p>
             </div>
             <div className="cockpit-panel p-2">
               <p className="text-[9px] font-mono text-amber-400/40 uppercase mb-0.5">Status</p>
-              <p className={`text-[10px] font-mono font-bold truncate ${STATUS_COLOR[result.status] ?? "text-amber-300"}`}>{result.status}</p>
+              <p
+                className={`text-[10px] font-mono font-bold truncate ${STATUS_COLOR[result.status] ?? 'text-amber-300'}`}
+              >
+                {result.status}
+              </p>
             </div>
           </div>
           {result.stages.length > 0 && (
             <div className="space-y-1">
               <p className="text-[9px] font-mono text-amber-400/30 uppercase">Pipeline Trace</p>
-              {result.stages.map(s => (
-                <div key={s.stageId} className="flex items-center justify-between bg-amber-500/4 border border-amber-500/12 rounded px-2.5 py-1.5">
+              {result.stages.map((s) => (
+                <div
+                  key={s.stageId}
+                  className="flex items-center justify-between bg-amber-500/4 border border-amber-500/12 rounded px-2.5 py-1.5"
+                >
                   <div>
                     <p className="text-[10px] font-mono text-amber-100/70">{s.stageName}</p>
                     <p className="text-[9px] text-amber-400/40">{s.stageType}</p>
                   </div>
                   <div className="text-right">
-                    <p className={`text-[9px] font-mono font-bold ${STATUS_COLOR[s.status] ?? "text-slate-400"}`}>{s.status}</p>
+                    <p
+                      className={`text-[9px] font-mono font-bold ${STATUS_COLOR[s.status] ?? 'text-slate-400'}`}
+                    >
+                      {s.status}
+                    </p>
                     {s.confidence !== undefined && (
-                      <p className="text-[9px] font-mono text-amber-400/40">{(s.confidence * 100).toFixed(0)}%</p>
+                      <p className="text-[9px] font-mono text-amber-400/40">
+                        {(s.confidence * 100).toFixed(0)}%
+                      </p>
                     )}
                   </div>
                 </div>
@@ -265,17 +321,18 @@ export function SubstrateWorkflowPanel() {
               evidence-signed
             </span>
           </div>
-          {mode === "dry-run" && (
+          {mode === 'dry-run' && (
             <div className="bg-sky-500/5 border border-sky-500/15 rounded p-2">
               <p className="text-[9px] font-mono text-sky-400">
                 DRY-RUN — all writes suppressed. Switch to live mode to commit corrections.
               </p>
             </div>
           )}
-          {status === "pending-approval" && (
+          {status === 'pending-approval' && (
             <div className="bg-amber-500/5 border border-amber-500/20 rounded p-2">
               <p className="text-[9px] font-mono text-amber-400">
-                PENDING APPROVAL — run is paused at approval gate. Check the approvals inbox to resume.
+                PENDING APPROVAL — run is paused at approval gate. Check the approvals inbox to
+                resume.
               </p>
             </div>
           )}

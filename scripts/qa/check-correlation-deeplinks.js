@@ -22,12 +22,12 @@
  *   node scripts/qa/check-correlation-deeplinks.js
  */
 
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, "../..");
+const ROOT = join(__dirname, '../..');
 
 // ---------------------------------------------------------------------------
 // Inline copies of the helpers from
@@ -37,21 +37,28 @@ const ROOT = join(__dirname, "../..");
 // ---------------------------------------------------------------------------
 const PRODUCT_LINKS_PATH = join(
   ROOT,
-  "artifacts/command/src/pages/cross-platform/product-links.ts",
+  'artifacts/command/src/pages/cross-platform/product-links.ts',
 );
-const productLinksSrc = readFileSync(PRODUCT_LINKS_PATH, "utf8");
+const productLinksSrc = readFileSync(PRODUCT_LINKS_PATH, 'utf8');
 
 const enc = (s) => encodeURIComponent(s);
 
 function productDashboardUrl(product) {
   switch (String(product).toLowerCase()) {
-    case "vessels": return "/vessels/dashboard";
-    case "terra": return "/terra/dashboard";
-    case "carlota": return "/carlota-jo/";
-    case "aegis": return "/aegis/";
-    case "prism": return "/operations/prism";
-    case "lyte": return "/operations";
-    default: return "/";
+    case 'vessels':
+      return '/vessels/dashboard';
+    case 'terra':
+      return '/terra/dashboard';
+    case 'carlota':
+      return '/carlota-jo/';
+    case 'aegis':
+      return '/aegis/';
+    case 'prism':
+      return '/operations/prism';
+    case 'lyte':
+      return '/operations';
+    default:
+      return '/';
   }
 }
 
@@ -59,35 +66,76 @@ function productEntityUrl(product, entityId) {
   if (!entityId) return null;
   const id = enc(entityId);
   switch (String(product).toLowerCase()) {
-    case "vessels": return `/vessels/vessels/${id}`;
-    case "terra": return `/terra/property/${id}`;
-    case "carlota": return `/carlota-jo/inquiries?entity=${id}`;
-    case "prism": return `/operations/prism?entity=${id}`;
-    case "aegis": return `/aegis/?entity=${id}`;
-    case "lyte": return `/operations?entity=${id}`;
-    default: return null;
+    case 'vessels':
+      return `/vessels/vessels/${id}`;
+    case 'terra':
+      return `/terra/property/${id}`;
+    case 'carlota':
+      return `/carlota-jo/inquiries?entity=${id}`;
+    case 'prism':
+      return `/operations/prism?entity=${id}`;
+    case 'aegis':
+      return `/aegis/?entity=${id}`;
+    case 'lyte':
+      return `/operations?entity=${id}`;
+    default:
+      return null;
   }
 }
 
 function inferProductForEntity(entityId, candidateProducts = []) {
   const id = String(entityId).toLowerCase();
-  if (id.startsWith("imo") || id.startsWith("mmsi") || id.startsWith("vessel") ||
-      id.startsWith("voyage") || id.startsWith("port-")) return "vessels";
-  if (id.startsWith("bbl") || id.startsWith("bin-") || id.startsWith("dp-") ||
-      id.startsWith("prop") || id.startsWith("nyc-") || id.startsWith("parcel") ||
-      id.startsWith("listing")) return "terra";
-  if (id.startsWith("matter") || id.startsWith("case-") || id.startsWith("prism") ||
-      id.startsWith("filing")) return "prism";
-  if (id.startsWith("cve") || id.startsWith("finding") || id.startsWith("threat") ||
-      id.startsWith("ioc-") || id.startsWith("aegis")) return "aegis";
-  if (id.startsWith("carlota") || id.startsWith("engagement") ||
-      id.startsWith("partner") || id.startsWith("inq-")) return "carlota";
-  if (id.startsWith("inc-") || id.startsWith("incident") || id.startsWith("lyte") ||
-      id.startsWith("run-")) return "lyte";
+  if (
+    id.startsWith('imo') ||
+    id.startsWith('mmsi') ||
+    id.startsWith('vessel') ||
+    id.startsWith('voyage') ||
+    id.startsWith('port-')
+  )
+    return 'vessels';
+  if (
+    id.startsWith('bbl') ||
+    id.startsWith('bin-') ||
+    id.startsWith('dp-') ||
+    id.startsWith('prop') ||
+    id.startsWith('nyc-') ||
+    id.startsWith('parcel') ||
+    id.startsWith('listing')
+  )
+    return 'terra';
+  if (
+    id.startsWith('matter') ||
+    id.startsWith('case-') ||
+    id.startsWith('prism') ||
+    id.startsWith('filing')
+  )
+    return 'prism';
+  if (
+    id.startsWith('cve') ||
+    id.startsWith('finding') ||
+    id.startsWith('threat') ||
+    id.startsWith('ioc-') ||
+    id.startsWith('aegis')
+  )
+    return 'aegis';
+  if (
+    id.startsWith('carlota') ||
+    id.startsWith('engagement') ||
+    id.startsWith('partner') ||
+    id.startsWith('inq-')
+  )
+    return 'carlota';
+  if (
+    id.startsWith('inc-') ||
+    id.startsWith('incident') ||
+    id.startsWith('lyte') ||
+    id.startsWith('run-')
+  )
+    return 'lyte';
   const fallback = candidateProducts[0]?.toLowerCase();
-  const known = ["lyte", "vessels", "terra", "prism", "aegis", "carlota"];
+  const known = ['lyte', 'vessels', 'terra', 'prism', 'aegis', 'carlota'];
   if (fallback && known.includes(fallback)) return fallback;
-  return "lyte";
+  return 'lyte';
 }
 
 // Drift guard — every URL string that productDashboardUrl/productEntityUrl
@@ -106,10 +154,12 @@ const REQUIRED_SOURCE_STRINGS = [
 ];
 const driftErrors = REQUIRED_SOURCE_STRINGS.filter((s) => !productLinksSrc.includes(s));
 if (driftErrors.length > 0) {
-  console.error("✗ Inline helper copy in this script has drifted from product-links.ts.");
-  console.error("  Source no longer contains:");
+  console.error('✗ Inline helper copy in this script has drifted from product-links.ts.');
+  console.error('  Source no longer contains:');
   for (const s of driftErrors) console.error(`    ${s}`);
-  console.error("  Update scripts/qa/check-correlation-deeplinks.js to match the new helper output.");
+  console.error(
+    '  Update scripts/qa/check-correlation-deeplinks.js to match the new helper output.',
+  );
   process.exit(1);
 }
 
@@ -119,10 +169,10 @@ if (driftErrors.length > 0) {
 // match against the absolute URLs the helpers produce.
 // ---------------------------------------------------------------------------
 const ARTIFACTS = [
-  { product: "vessels", base: "/vessels", appPath: "artifacts/vessels/src/App.tsx" },
-  { product: "terra", base: "/terra", appPath: "artifacts/terra/src/App.tsx" },
-  { product: "carlota", base: "/carlota-jo", appPath: "artifacts/carlota-jo/src/App.tsx" },
-  { product: "aegis", base: "/aegis", appPath: "artifacts/aegis/src/App.tsx" },
+  { product: 'vessels', base: '/vessels', appPath: 'artifacts/vessels/src/App.tsx' },
+  { product: 'terra', base: '/terra', appPath: 'artifacts/terra/src/App.tsx' },
+  { product: 'carlota', base: '/carlota-jo', appPath: 'artifacts/carlota-jo/src/App.tsx' },
+  { product: 'aegis', base: '/aegis', appPath: 'artifacts/aegis/src/App.tsx' },
 ];
 
 const ROUTE_WITH_PATH_RX = /<Route\s+path=["']([^"']+)["']/g;
@@ -133,7 +183,7 @@ const ROUTE_BARE_RX = /<Route\s*>/g;
 function extractRoutes(appPath) {
   let src;
   try {
-    src = readFileSync(join(ROOT, appPath), "utf8");
+    src = readFileSync(join(ROOT, appPath), 'utf8');
   } catch {
     return { patterns: [], hasCatchAll: false };
   }
@@ -154,17 +204,17 @@ function extractRoutes(appPath) {
 //   *             — generic wildcard
 function patternToRegex(pattern) {
   const re = pattern
-    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
     // Optional slash-prefixed params: /:foo?
-    .replace(/\/:[A-Za-z_][A-Za-z0-9_]*\?/g, "(?:/[^/?#]+)?")
+    .replace(/\/:[A-Za-z_][A-Za-z0-9_]*\?/g, '(?:/[^/?#]+)?')
     // Wildcard slash-prefixed params: /:foo*
-    .replace(/\/:[A-Za-z_][A-Za-z0-9_]*\*/g, "(?:/.*)?")
+    .replace(/\/:[A-Za-z_][A-Za-z0-9_]*\*/g, '(?:/.*)?')
     // Required slash-prefixed params: /:foo
-    .replace(/\/:[A-Za-z_][A-Za-z0-9_]*/g, "/[^/?#]+")
+    .replace(/\/:[A-Za-z_][A-Za-z0-9_]*/g, '/[^/?#]+')
     // Inline params after a literal prefix in the same segment: prefix:foo
-    .replace(/:[A-Za-z_][A-Za-z0-9_]*/g, "[^/?#]+")
+    .replace(/:[A-Za-z_][A-Za-z0-9_]*/g, '[^/?#]+')
     // Generic glob
-    .replace(/\*/g, ".*");
+    .replace(/\*/g, '.*');
   return new RegExp(`^${re}$`);
 }
 
@@ -188,23 +238,20 @@ function resolveUrl(url) {
   const pathOnly = url.split(/[?#]/)[0];
 
   for (const art of ARTIFACT_ROUTES) {
-    if (
-      pathOnly === art.base ||
-      pathOnly.startsWith(art.base + "/")
-    ) {
+    if (pathOnly === art.base || pathOnly.startsWith(art.base + '/')) {
       // Strip artifact base. Wouter routes inside the app are relative.
       let rel = pathOnly.slice(art.base.length);
-      if (rel === "") rel = "/";
+      if (rel === '') rel = '/';
       const match = art.regexes.find((r) => r.rx.test(rel));
       let matchedPattern = match?.pattern ?? null;
-      let ok = Boolean(match);
+      const ok = Boolean(match);
       // If only a bare <Route> (catch-all / 404 sink) would satisfy the URL,
       // record that explicitly and FAIL the check — the requirement is that
       // generated deep-links land on a dedicated detail page, not a generic
       // fallback. The catch-all signal is reported so it is obvious why the
       // check failed.
       if (!ok && art.hasCatchAll) {
-        matchedPattern = "<catch-all-only>";
+        matchedPattern = '<catch-all-only>';
       }
       return { artifact: art.product, relPath: rel, ok, matchedPattern };
     }
@@ -217,18 +264,18 @@ function resolveUrl(url) {
 // like the IDs the correlation engine emits in production.
 // ---------------------------------------------------------------------------
 const ENTITY_FIXTURES = {
-  vessels: ["IMO9876543", "MMSI367123456", "vessel-123", "VOYAGE-2025-AB12"],
-  terra: ["BBL-1-00207-7501", "BIN-1234567", "PROP-XYZ", "NYC-BK-001"],
+  vessels: ['IMO9876543', 'MMSI367123456', 'vessel-123', 'VOYAGE-2025-AB12'],
+  terra: ['BBL-1-00207-7501', 'BIN-1234567', 'PROP-XYZ', 'NYC-BK-001'],
   // Aegis/PRISM/Carlota/Lyte are best-effort surfaces; we still verify the
   // dashboard URL resolves, but per-entity URLs use query params and may
   // legitimately land on the dashboard route.
-  prism: ["matter-001", "filing-2025-alpha"],
-  aegis: ["CVE-2025-0001", "finding-42"],
-  carlota: ["INQ-2025-001"],
-  lyte: ["INC-001"],
+  prism: ['matter-001', 'filing-2025-alpha'],
+  aegis: ['CVE-2025-0001', 'finding-42'],
+  carlota: ['INQ-2025-001'],
+  lyte: ['INC-001'],
 };
 
-const VERIFIED_PRODUCTS = ["vessels", "terra", "carlota", "aegis"];
+const VERIFIED_PRODUCTS = ['vessels', 'terra', 'carlota', 'aegis'];
 
 let failures = 0;
 const results = [];
@@ -242,13 +289,13 @@ function check(label, url, opts = {}) {
   if (!ok) failures += 1;
 }
 
-console.log("→ checking productDashboardUrl(...) targets");
+console.log('→ checking productDashboardUrl(...) targets');
 for (const product of VERIFIED_PRODUCTS) {
   const url = productDashboardUrl(product);
   check(`dashboard:${product}`, url, { expectArtifact: product });
 }
 
-console.log("→ checking productEntityUrl(...) targets");
+console.log('→ checking productEntityUrl(...) targets');
 for (const product of VERIFIED_PRODUCTS) {
   const ids = ENTITY_FIXTURES[product] ?? [];
   for (const id of ids) {
@@ -256,7 +303,7 @@ for (const product of VERIFIED_PRODUCTS) {
     if (!url) {
       results.push({
         label: `entity:${product}:${id}`,
-        url: "(null)",
+        url: '(null)',
         artifact: null,
         relPath: null,
         ok: false,
@@ -269,22 +316,22 @@ for (const product of VERIFIED_PRODUCTS) {
   }
 }
 
-console.log("→ checking inferProductForEntity(...) routing for mixed IDs");
+console.log('→ checking inferProductForEntity(...) routing for mixed IDs');
 const inferenceCases = [
-  { id: "IMO9876543", expect: "vessels" },
-  { id: "MMSI367123456", expect: "vessels" },
-  { id: "vessel-abc", expect: "vessels" },
-  { id: "voyage-2025-XX", expect: "vessels" },
-  { id: "BBL-1-00207-7501", expect: "terra" },
-  { id: "BIN-1234567", expect: "terra" },
-  { id: "PROP-001", expect: "terra" },
-  { id: "matter-001", expect: "prism" },
-  { id: "CVE-2025-0001", expect: "aegis" },
-  { id: "finding-42", expect: "aegis" },
-  { id: "carlota-001", expect: "carlota" },
-  { id: "engagement-q1", expect: "carlota" },
-  { id: "INC-001", expect: "lyte" },
-  { id: "incident-99", expect: "lyte" },
+  { id: 'IMO9876543', expect: 'vessels' },
+  { id: 'MMSI367123456', expect: 'vessels' },
+  { id: 'vessel-abc', expect: 'vessels' },
+  { id: 'voyage-2025-XX', expect: 'vessels' },
+  { id: 'BBL-1-00207-7501', expect: 'terra' },
+  { id: 'BIN-1234567', expect: 'terra' },
+  { id: 'PROP-001', expect: 'terra' },
+  { id: 'matter-001', expect: 'prism' },
+  { id: 'CVE-2025-0001', expect: 'aegis' },
+  { id: 'finding-42', expect: 'aegis' },
+  { id: 'carlota-001', expect: 'carlota' },
+  { id: 'engagement-q1', expect: 'carlota' },
+  { id: 'INC-001', expect: 'lyte' },
+  { id: 'incident-99', expect: 'lyte' },
 ];
 for (const tc of inferenceCases) {
   const got = inferProductForEntity(tc.id, []);
@@ -303,20 +350,20 @@ for (const tc of inferenceCases) {
 // ---------------------------------------------------------------------------
 // Report
 // ---------------------------------------------------------------------------
-console.log("");
-console.log("Correlation deep-link resolution report");
-console.log("═".repeat(72));
+console.log('');
+console.log('Correlation deep-link resolution report');
+console.log('═'.repeat(72));
 for (const r of results) {
-  const icon = r.ok ? "✓" : "✗";
+  const icon = r.ok ? '✓' : '✗';
   const pad = r.label.padEnd(34);
   const matchInfo = r.matchedPattern
     ? `→ ${r.artifact}${r.matchedPattern}`
     : r.artifact
       ? `→ ${r.artifact} (no match)`
-      : "(no artifact prefix)";
+      : '(no artifact prefix)';
   console.log(`  ${icon} ${pad} ${r.url}  ${r.ok ? matchInfo : matchInfo}`);
 }
-console.log("═".repeat(72));
+console.log('═'.repeat(72));
 
 // Known pre-existing failures, tracked by follow-up tasks. The check stays
 // strict (catch-all-only = failure) but does not turn CI red while the
@@ -327,9 +374,9 @@ const KNOWN_FAILURES = new Map([
   // <SlideDeck> catch-all, so productEntityUrl URLs land on the deck rather
   // than a dedicated entity surface. Either drop entity URLs from the helper
   // for aegis or add real entity routes to artifacts/aegis/src/App.tsx.
-  ["dashboard:aegis", "followup-#2010"],
-  ["entity:aegis:CVE-2025-0001", "followup-#2010"],
-  ["entity:aegis:finding-42", "followup-#2010"],
+  ['dashboard:aegis', 'followup-#2010'],
+  ['entity:aegis:CVE-2025-0001', 'followup-#2010'],
+  ['entity:aegis:finding-42', 'followup-#2010'],
 ]);
 
 const unexpected = results.filter((r) => !r.ok && !KNOWN_FAILURES.has(r.label));
@@ -337,7 +384,7 @@ const expected = results.filter((r) => !r.ok && KNOWN_FAILURES.has(r.label));
 
 if (expected.length > 0) {
   console.warn(
-    `\n⚠  ${expected.length} known pre-existing deep-link failure${expected.length === 1 ? "" : "s"} (allow-listed, tracked by follow-up):`,
+    `\n⚠  ${expected.length} known pre-existing deep-link failure${expected.length === 1 ? '' : 's'} (allow-listed, tracked by follow-up):`,
   );
   for (const r of expected) {
     console.warn(`    - ${r.label}  (${KNOWN_FAILURES.get(r.label)})  url=${r.url}`);
@@ -346,21 +393,15 @@ if (expected.length > 0) {
 
 if (unexpected.length > 0) {
   console.error(
-    `\n✗ ${unexpected.length} correlation deep-link${unexpected.length === 1 ? "" : "s"} fail to resolve to a registered route.`,
+    `\n✗ ${unexpected.length} correlation deep-link${unexpected.length === 1 ? '' : 's'} fail to resolve to a registered route.`,
   );
   for (const r of unexpected) {
-    console.error(`    - ${r.label}  url=${r.url}  artifact=${r.artifact ?? "?"}`);
+    console.error(`    - ${r.label}  url=${r.url}  artifact=${r.artifact ?? '?'}`);
   }
-  console.error(
-    "\n  Fix by updating artifacts/command/src/pages/cross-platform/product-links.ts",
-  );
-  console.error(
-    "  or the target artifact's App.tsx so the generated URL lands on a real page.",
-  );
-  console.error(
-    "  If the failure is being deferred to a follow-up task, add it to KNOWN_FAILURES",
-  );
-  console.error("  in this script with the tracking task id.");
+  console.error('\n  Fix by updating artifacts/command/src/pages/cross-platform/product-links.ts');
+  console.error("  or the target artifact's App.tsx so the generated URL lands on a real page.");
+  console.error('  If the failure is being deferred to a follow-up task, add it to KNOWN_FAILURES');
+  console.error('  in this script with the tracking task id.');
   process.exit(1);
 }
 
@@ -368,7 +409,7 @@ const passing = results.length - expected.length;
 if (expected.length > 0) {
   console.log(
     `\n✓ ${passing} / ${results.length} correlation deep-links resolve to a registered route ` +
-      `(${expected.length} known failure${expected.length === 1 ? "" : "s"} allow-listed; see KNOWN_FAILURES above).`,
+      `(${expected.length} known failure${expected.length === 1 ? '' : 's'} allow-listed; see KNOWN_FAILURES above).`,
   );
 } else {
   console.log(

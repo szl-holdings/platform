@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react";
-import { FileText, ExternalLink, ChevronDown } from "lucide-react";
-import { cn } from "../utils";
-import { v } from "../tokens/vars.js";
+import { ChevronDown, ExternalLink, FileText } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { v } from '../tokens/vars.js';
+import { cn } from '../utils';
 
 export interface EvidenceSource {
   id: string;
   label: string;
-  type?: "document" | "signal" | "api" | "user" | "model";
+  type?: 'document' | 'signal' | 'api' | 'user' | 'model';
   url?: string;
   timestamp?: string;
   excerpt?: string;
@@ -28,17 +28,17 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const count = sources.length;
 
   return (
-    <div ref={ref} className={cn("relative inline-flex", className)}>
+    <div ref={ref} className={cn('relative inline-flex', className)}>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        aria-label={`${count} evidence source${count !== 1 ? "s" : ""}`}
+        aria-label={`${count} evidence source${count !== 1 ? 's' : ''}`}
         aria-expanded={open}
         style={{
           borderColor: v.borderDefault,
@@ -57,10 +57,12 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
       >
         <FileText className="h-3 w-3 shrink-0" />
         {!compact && <span>{count}</span>}
-        {!compact && <ChevronDown className={cn("h-3 w-3 transition-transform duration-150", open && "rotate-180")} />}
-        {compact && (
-          <span className="ml-0.5 tabular-nums">{count}</span>
+        {!compact && (
+          <ChevronDown
+            className={cn('h-3 w-3 transition-transform duration-150', open && 'rotate-180')}
+          />
         )}
+        {compact && <span className="ml-0.5 tabular-nums">{count}</span>}
       </button>
 
       {open && (
@@ -74,8 +76,11 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
           className="absolute left-0 top-full z-50 mt-1.5 w-72 rounded-lg border shadow-lg animate-in fade-in slide-in-from-top-1 duration-150"
         >
           <div style={{ borderColor: v.borderSubtle }} className="border-b px-3 py-2">
-            <p style={{ color: v.textMuted }} className="text-[11px] font-semibold uppercase tracking-wider">
-              Evidence — {count} source{count !== 1 ? "s" : ""}
+            <p
+              style={{ color: v.textMuted }}
+              className="text-[11px] font-semibold uppercase tracking-wider"
+            >
+              Evidence — {count} source{count !== 1 ? 's' : ''}
             </p>
           </div>
           <ul style={{ borderColor: v.borderSubtle }} className="max-h-64 overflow-y-auto divide-y">
@@ -83,17 +88,29 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
               <li key={src.id} style={{ borderColor: v.borderSubtle }} className="px-3 py-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p style={{ color: v.textPrimary }} className="truncate text-xs font-medium">{src.label}</p>
+                    <p style={{ color: v.textPrimary }} className="truncate text-xs font-medium">
+                      {src.label}
+                    </p>
                     {src.type && (
-                      <span style={{ color: v.textMuted }} className="mt-0.5 inline-block text-[10px] uppercase tracking-wide">
+                      <span
+                        style={{ color: v.textMuted }}
+                        className="mt-0.5 inline-block text-[10px] uppercase tracking-wide"
+                      >
                         {src.type}
                       </span>
                     )}
                     {src.excerpt && (
-                      <p style={{ color: v.textSecondary }} className="mt-1 line-clamp-2 text-[11px]">{src.excerpt}</p>
+                      <p
+                        style={{ color: v.textSecondary }}
+                        className="mt-1 line-clamp-2 text-[11px]"
+                      >
+                        {src.excerpt}
+                      </p>
                     )}
                     {src.timestamp && (
-                      <p style={{ color: v.textMuted }} className="mt-1 text-[10px]">{src.timestamp}</p>
+                      <p style={{ color: v.textMuted }} className="mt-1 text-[10px]">
+                        {src.timestamp}
+                      </p>
                     )}
                   </div>
                   {src.url && (
@@ -104,8 +121,12 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
                       style={{ color: v.textSecondary }}
                       className="shrink-0 transition-colors"
                       aria-label={`Open ${src.label}`}
-                      onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = v.accentBlue)}
-                      onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = v.textSecondary)}
+                      onMouseEnter={(e) =>
+                        ((e.currentTarget as HTMLAnchorElement).style.color = v.accentBlue)
+                      }
+                      onMouseLeave={(e) =>
+                        ((e.currentTarget as HTMLAnchorElement).style.color = v.textSecondary)
+                      }
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>

@@ -1,7 +1,7 @@
-import type { StorageAdapter } from "../storage/interface";
+import type { StorageAdapter } from '../storage/interface';
 
-export type ConflictSeverity = "low" | "medium" | "high" | "critical";
-export type ConflictResolution = "auto-local" | "auto-server" | "pending-review";
+export type ConflictSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type ConflictResolution = 'auto-local' | 'auto-server' | 'pending-review';
 
 export interface ConflictRecord {
   id: string;
@@ -26,7 +26,7 @@ export interface ConflictDetectionOptions {
   autoResolveSeverities?: ConflictSeverity[];
 }
 
-const STORE_NAME = "conflict-queue";
+const STORE_NAME = 'conflict-queue';
 
 export class ConflictResolver {
   private storage: StorageAdapter;
@@ -36,9 +36,7 @@ export class ConflictResolver {
   constructor(options: ConflictDetectionOptions) {
     this.storage = options.storage;
     this.storeName = options.storeName ?? STORE_NAME;
-    this.autoResolveSeverities = new Set(
-      options.autoResolveSeverities ?? ["low", "medium"]
-    );
+    this.autoResolveSeverities = new Set(options.autoResolveSeverities ?? ['low', 'medium']);
   }
 
   async detect(params: {
@@ -56,11 +54,9 @@ export class ConflictResolver {
       return null;
     }
 
-    const severity = params.severity ?? "medium";
+    const severity = params.severity ?? 'medium';
     const isAutoResolvable = this.autoResolveSeverities.has(severity);
-    const resolution: ConflictResolution = isAutoResolvable
-      ? "auto-server"
-      : "pending-review";
+    const resolution: ConflictResolution = isAutoResolvable ? 'auto-server' : 'pending-review';
 
     const conflict: ConflictRecord = {
       id: `conflict-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -77,7 +73,7 @@ export class ConflictResolver {
       createdAt: Date.now(),
     };
 
-    if (resolution === "pending-review") {
+    if (resolution === 'pending-review') {
       await this.storage.put(this.storeName, conflict.id, conflict);
     } else {
       conflict.resolvedAt = Date.now();
@@ -95,15 +91,15 @@ export class ConflictResolver {
 
   async resolve(
     conflictId: string,
-    resolution: "local" | "server",
-    resolvedBy?: string
+    resolution: 'local' | 'server',
+    resolvedBy?: string,
   ): Promise<ConflictRecord | null> {
     const conflict = await this.storage.get<ConflictRecord>(this.storeName, conflictId);
     if (!conflict) return null;
 
     const updated: ConflictRecord = {
       ...conflict,
-      resolution: resolution === "local" ? "auto-local" : "auto-server",
+      resolution: resolution === 'local' ? 'auto-local' : 'auto-server',
       resolvedAt: Date.now(),
       resolvedBy,
     };

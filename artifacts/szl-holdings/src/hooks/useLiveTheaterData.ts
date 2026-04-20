@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { apiRequest } from "@/lib/api";
+import { useCallback, useEffect, useState } from 'react';
+import { apiRequest } from '@/lib/api';
 
 export interface LiveMetrics {
   beacon: {
@@ -54,7 +54,7 @@ export interface LiveAuditRecord {
 }
 
 export interface LiveTheaterData {
-  status: "idle" | "loading" | "success" | "error";
+  status: 'idle' | 'loading' | 'success' | 'error';
   metrics: LiveMetrics | null;
   recommendations: LiveRecommendation[];
   auditRecords: LiveAuditRecord[];
@@ -65,20 +65,26 @@ export interface LiveTheaterData {
   refetch: () => void;
 }
 
-async function fetchAuditRecords(): Promise<{ records: LiveAuditRecord[]; total: number; source: string | null }> {
+async function fetchAuditRecords(): Promise<{
+  records: LiveAuditRecord[];
+  total: number;
+  source: string | null;
+}> {
   try {
-    const res = await apiRequest<{ success: boolean; data: LiveAuditRecord[]; meta: { total: number } }>(
-      "GET",
-      "/api/audit/activity?limit=10",
-    );
-    return { records: res.data ?? [], total: res.meta?.total ?? 0, source: "/api/audit/activity" };
+    const res = await apiRequest<{
+      success: boolean;
+      data: LiveAuditRecord[];
+      meta: { total: number };
+    }>('GET', '/api/audit/activity?limit=10');
+    return { records: res.data ?? [], total: res.meta?.total ?? 0, source: '/api/audit/activity' };
   } catch {
     try {
-      const res = await apiRequest<{ success: boolean; data: LiveAuditRecord[]; meta: { total: number } }>(
-        "GET",
-        "/api/core/audit?limit=10",
-      );
-      return { records: res.data ?? [], total: res.meta?.total ?? 0, source: "/api/core/audit" };
+      const res = await apiRequest<{
+        success: boolean;
+        data: LiveAuditRecord[];
+        meta: { total: number };
+      }>('GET', '/api/core/audit?limit=10');
+      return { records: res.data ?? [], total: res.meta?.total ?? 0, source: '/api/core/audit' };
     } catch {
       return { records: [], total: 0, source: null };
     }
@@ -86,7 +92,7 @@ async function fetchAuditRecords(): Promise<{ records: LiveAuditRecord[]; total:
 }
 
 export function useLiveTheaterData(enabled: boolean): LiveTheaterData {
-  const [status, setStatus] = useState<LiveTheaterData["status"]>("idle");
+  const [status, setStatus] = useState<LiveTheaterData['status']>('idle');
   const [metrics, setMetrics] = useState<LiveMetrics | null>(null);
   const [recommendations, setRecommendations] = useState<LiveRecommendation[]>([]);
   const [auditRecords, setAuditRecords] = useState<LiveAuditRecord[]>([]);
@@ -96,20 +102,23 @@ export function useLiveTheaterData(enabled: boolean): LiveTheaterData {
   const [lastFetchedAt, setLastFetchedAt] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
 
-  const refetch = useCallback(() => setFetchKey(k => k + 1), []);
+  const refetch = useCallback(() => setFetchKey((k) => k + 1), []);
 
   useEffect(() => {
     if (!enabled) return;
 
     let cancelled = false;
-    setStatus("loading");
+    setStatus('loading');
     setError(null);
 
     async function load() {
       try {
         const [metricsRes, recsRes, auditRes] = await Promise.all([
-          apiRequest<{ success: boolean; data: LiveMetrics }>("GET", "/api/core/metrics"),
-          apiRequest<{ success: boolean; data: LiveRecommendation[]; meta: { total: number } }>("GET", "/api/core/recommendations?limit=8"),
+          apiRequest<{ success: boolean; data: LiveMetrics }>('GET', '/api/core/metrics'),
+          apiRequest<{ success: boolean; data: LiveRecommendation[]; meta: { total: number } }>(
+            'GET',
+            '/api/core/recommendations?limit=8',
+          ),
           fetchAuditRecords(),
         ]);
 
@@ -121,17 +130,29 @@ export function useLiveTheaterData(enabled: boolean): LiveTheaterData {
         setAuditTotal(auditRes.total);
         setAuditSource(auditRes.source);
         setLastFetchedAt(new Date().toISOString());
-        setStatus("success");
+        setStatus('success');
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : String(err));
-        setStatus("error");
+        setStatus('error');
       }
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [enabled, fetchKey]);
 
-  return { status, metrics, recommendations, auditRecords, auditTotal, auditSource, error, lastFetchedAt, refetch };
+  return {
+    status,
+    metrics,
+    recommendations,
+    auditRecords,
+    auditTotal,
+    auditSource,
+    error,
+    lastFetchedAt,
+    refetch,
+  };
 }

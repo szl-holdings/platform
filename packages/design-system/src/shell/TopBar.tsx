@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface TopBarProps {
   title?: string;
@@ -25,8 +25,8 @@ export function TopBar({
 }: TopBarProps) {
   return (
     <header
-      className={cn("flex items-center gap-3 px-4 border-b flex-shrink-0", className)}
-      style={{ height: "48px", background: color.bg.surface, borderColor: color.border.subtle }}
+      className={cn('flex items-center gap-3 px-4 border-b flex-shrink-0', className)}
+      style={{ height: '48px', background: color.bg.surface, borderColor: color.border.subtle }}
     >
       {left}
 
@@ -34,17 +34,16 @@ export function TopBar({
         <nav className="flex items-center gap-1" aria-label="Breadcrumb">
           {breadcrumbs.map((crumb, idx) => (
             <React.Fragment key={idx}>
-              {idx > 0 && (
-                <span style={{ color: color.text.muted, fontSize: "12px" }}>/</span>
-              )}
+              {idx > 0 && <span style={{ color: color.text.muted, fontSize: '12px' }}>/</span>}
               {crumb.href ? (
                 <a
                   href={crumb.href}
                   className="transition-colors"
                   style={{
-                    color: idx === breadcrumbs.length - 1 ? color.text.primary : color.text.secondary,
-                    fontSize: "13px",
-                    textDecoration: "none",
+                    color:
+                      idx === breadcrumbs.length - 1 ? color.text.primary : color.text.secondary,
+                    fontSize: '13px',
+                    textDecoration: 'none',
                   }}
                 >
                   {crumb.label}
@@ -52,8 +51,9 @@ export function TopBar({
               ) : (
                 <span
                   style={{
-                    color: idx === breadcrumbs.length - 1 ? color.text.primary : color.text.secondary,
-                    fontSize: "13px",
+                    color:
+                      idx === breadcrumbs.length - 1 ? color.text.primary : color.text.secondary,
+                    fontSize: '13px',
                   }}
                 >
                   {crumb.label}
@@ -81,12 +81,12 @@ export function TopBar({
             background: color.bg.overlay,
             border: `1px solid ${color.border.subtle}`,
             color: color.text.secondary,
-            height: "26px",
+            height: '26px',
           }}
         >
           <span
             className="rounded-full"
-            style={{ width: "5px", height: "5px", background: color.accent.green }}
+            style={{ width: '5px', height: '5px', background: color.accent.green }}
           />
           {tenantLabel}
         </div>

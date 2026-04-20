@@ -1,6 +1,12 @@
-import { logger } from "./logger";
+import { logger } from './logger';
 
-export type InferenceProvider = "openai" | "anthropic" | "replit-proxy" | "gemini" | "huggingface" | "mock";
+export type InferenceProvider =
+  | 'openai'
+  | 'anthropic'
+  | 'replit-proxy'
+  | 'gemini'
+  | 'huggingface'
+  | 'mock';
 
 export interface InferenceRecord {
   id: string;
@@ -16,7 +22,7 @@ export interface InferenceRecord {
   estimatedCostUsd: number;
   success: boolean;
   errorType?: string;
-  routingStrategy: "fastest" | "cheapest" | "preferred" | "fallback" | "direct";
+  routingStrategy: 'fastest' | 'cheapest' | 'preferred' | 'fallback' | 'direct';
   retryCount: number;
   cached: boolean;
 }
@@ -56,21 +62,37 @@ export interface TelemetrySummary {
   successRate: number;
   providerBreakdown: ProviderStats[];
   modelBreakdown: ModelStats[];
-  topAgents: Array<{ agentId: string; domain: string; count: number; avgLatencyMs: number; totalCostUsd: number }>;
-  recentErrors: Array<{ timestamp: number; provider: InferenceProvider; model: string; errorType: string; agentId: string }>;
+  topAgents: Array<{
+    agentId: string;
+    domain: string;
+    count: number;
+    avgLatencyMs: number;
+    totalCostUsd: number;
+  }>;
+  recentErrors: Array<{
+    timestamp: number;
+    provider: InferenceProvider;
+    model: string;
+    errorType: string;
+    agentId: string;
+  }>;
   throughputPerMinute: number;
 }
 
 const COST_PER_1K_TOKENS: Record<string, { input: number; output: number }> = {
-  "gpt-5.2": { input: 0.005, output: 0.015 },
-  "gpt-4o": { input: 0.0025, output: 0.01 },
-  "gpt-4o-mini": { input: 0.00015, output: 0.0006 },
-  "claude-sonnet-4-6": { input: 0.003, output: 0.015 },
-  "claude-sonnet-4-20250514": { input: 0.003, output: 0.015 },
-  "claude-3-haiku-20240307": { input: 0.00025, output: 0.00125 },
+  'gpt-5.2': { input: 0.005, output: 0.015 },
+  'gpt-4o': { input: 0.0025, output: 0.01 },
+  'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
+  'claude-sonnet-4-6': { input: 0.003, output: 0.015 },
+  'claude-sonnet-4-20250514': { input: 0.003, output: 0.015 },
+  'claude-3-haiku-20240307': { input: 0.00025, output: 0.00125 },
 };
 
-export function estimateCost(model: string, promptTokens: number, completionTokens: number): number {
+export function estimateCost(
+  model: string,
+  promptTokens: number,
+  completionTokens: number,
+): number {
   const rates = COST_PER_1K_TOKENS[model];
   if (!rates) return 0;
   return (promptTokens / 1000) * rates.input + (completionTokens / 1000) * rates.output;
@@ -89,7 +111,9 @@ class InferenceTelemetryStore {
   private records: InferenceRecord[] = [];
   private idCounter = 0;
 
-  record(partial: Omit<InferenceRecord, "id" | "timestamp" | "totalTokens" | "estimatedCostUsd">): InferenceRecord {
+  record(
+    partial: Omit<InferenceRecord, 'id' | 'timestamp' | 'totalTokens' | 'estimatedCostUsd'>,
+  ): InferenceRecord {
     const totalTokens = partial.promptTokens + partial.completionTokens;
     const entry: InferenceRecord = {
       ...partial,
@@ -104,23 +128,40 @@ class InferenceTelemetryStore {
       this.records.length = MAX_RECORDS;
     }
 
-    logger.debug({ id: entry.id, provider: entry.provider, model: entry.model, latencyMs: entry.latencyMs, success: entry.success }, "Inference telemetry recorded");
+    logger.debug(
+      {
+        id: entry.id,
+        provider: entry.provider,
+        model: entry.model,
+        latencyMs: entry.latencyMs,
+        success: entry.success,
+      },
+      'Inference telemetry recorded',
+    );
     return entry;
   }
 
-  getRecords(options: { windowMs?: number; provider?: InferenceProvider; agentId?: string; model?: string; limit?: number } = {}): InferenceRecord[] {
+  getRecords(
+    options: {
+      windowMs?: number;
+      provider?: InferenceProvider;
+      agentId?: string;
+      model?: string;
+      limit?: number;
+    } = {},
+  ): InferenceRecord[] {
     const windowMs = options.windowMs ?? DEFAULT_WINDOW_MS;
     const cutoff = Date.now() - windowMs;
-    let results = this.records.filter(r => r.timestamp >= cutoff);
-    if (options.provider) results = results.filter(r => r.provider === options.provider);
-    if (options.agentId) results = results.filter(r => r.agentId === options.agentId);
-    if (options.model) results = results.filter(r => r.model === options.model);
+    let results = this.records.filter((r) => r.timestamp >= cutoff);
+    if (options.provider) results = results.filter((r) => r.provider === options.provider);
+    if (options.agentId) results = results.filter((r) => r.agentId === options.agentId);
+    if (options.model) results = results.filter((r) => r.model === options.model);
     return results.slice(0, options.limit ?? 200);
   }
 
   getProviderStats(windowMs = DEFAULT_WINDOW_MS): ProviderStats[] {
     const cutoff = Date.now() - windowMs;
-    const recent = this.records.filter(r => r.timestamp >= cutoff);
+    const recent = this.records.filter((r) => r.timestamp >= cutoff);
     const byProvider = new Map<InferenceProvider, InferenceRecord[]>();
 
     for (const r of recent) {
@@ -131,16 +172,22 @@ class InferenceTelemetryStore {
 
     const stats: ProviderStats[] = [];
     for (const [provider, recs] of byProvider) {
-      const latencies = recs.filter(r => r.success).map(r => r.latencyMs).sort((a, b) => a - b);
-      const successes = recs.filter(r => r.success).length;
-      const failures = recs.filter(r => !r.success).length;
+      const latencies = recs
+        .filter((r) => r.success)
+        .map((r) => r.latencyMs)
+        .sort((a, b) => a - b);
+      const successes = recs.filter((r) => r.success).length;
+      const failures = recs.filter((r) => !r.success).length;
 
       stats.push({
         provider,
         totalRequests: recs.length,
         successCount: successes,
         failureCount: failures,
-        avgLatencyMs: latencies.length > 0 ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length) : 0,
+        avgLatencyMs:
+          latencies.length > 0
+            ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length)
+            : 0,
         p50LatencyMs: percentile(latencies, 50),
         p95LatencyMs: percentile(latencies, 95),
         p99LatencyMs: percentile(latencies, 99),
@@ -157,7 +204,7 @@ class InferenceTelemetryStore {
 
   getModelStats(windowMs = DEFAULT_WINDOW_MS): ModelStats[] {
     const cutoff = Date.now() - windowMs;
-    const recent = this.records.filter(r => r.timestamp >= cutoff);
+    const recent = this.records.filter((r) => r.timestamp >= cutoff);
     const byModel = new Map<string, InferenceRecord[]>();
 
     for (const r of recent) {
@@ -170,14 +217,17 @@ class InferenceTelemetryStore {
     const stats: ModelStats[] = [];
     for (const [, recs] of byModel) {
       const first = recs[0]!;
-      const latencies = recs.filter(r => r.success).map(r => r.latencyMs);
-      const failures = recs.filter(r => !r.success).length;
+      const latencies = recs.filter((r) => r.success).map((r) => r.latencyMs);
+      const failures = recs.filter((r) => !r.success).length;
 
       stats.push({
         model: first.model,
         provider: first.provider,
         totalRequests: recs.length,
-        avgLatencyMs: latencies.length > 0 ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length) : 0,
+        avgLatencyMs:
+          latencies.length > 0
+            ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length)
+            : 0,
         avgTokensPerRequest: Math.round(recs.reduce((s, r) => s + r.totalTokens, 0) / recs.length),
         totalCostUsd: parseFloat(recs.reduce((s, r) => s + r.estimatedCostUsd, 0).toFixed(6)),
         errorRate: recs.length > 0 ? parseFloat((failures / recs.length).toFixed(4)) : 0,
@@ -189,13 +239,16 @@ class InferenceTelemetryStore {
 
   getSummary(windowMs = DEFAULT_WINDOW_MS): TelemetrySummary {
     const cutoff = Date.now() - windowMs;
-    const recent = this.records.filter(r => r.timestamp >= cutoff);
-    const successes = recent.filter(r => r.success);
-    const latencies = successes.map(r => r.latencyMs);
+    const recent = this.records.filter((r) => r.timestamp >= cutoff);
+    const successes = recent.filter((r) => r.success);
+    const latencies = successes.map((r) => r.latencyMs);
     const totalTokens = recent.reduce((s, r) => s + r.totalTokens, 0);
     const totalCostUsd = parseFloat(recent.reduce((s, r) => s + r.estimatedCostUsd, 0).toFixed(6));
 
-    const agentMap = new Map<string, { domain: string; count: number; totalLatency: number; totalCost: number }>();
+    const agentMap = new Map<
+      string,
+      { domain: string; count: number; totalLatency: number; totalCost: number }
+    >();
     for (const r of recent) {
       const existing = agentMap.get(r.agentId);
       if (existing) {
@@ -203,7 +256,12 @@ class InferenceTelemetryStore {
         existing.totalLatency += r.latencyMs;
         existing.totalCost += r.estimatedCostUsd;
       } else {
-        agentMap.set(r.agentId, { domain: r.domain, count: 1, totalLatency: r.latencyMs, totalCost: r.estimatedCostUsd });
+        agentMap.set(r.agentId, {
+          domain: r.domain,
+          count: 1,
+          totalLatency: r.latencyMs,
+          totalCost: r.estimatedCostUsd,
+        });
       }
     }
 
@@ -219,26 +277,31 @@ class InferenceTelemetryStore {
       .slice(0, 10);
 
     const recentErrors = recent
-      .filter(r => !r.success)
+      .filter((r) => !r.success)
       .slice(0, 20)
-      .map(r => ({
+      .map((r) => ({
         timestamp: r.timestamp,
         provider: r.provider,
         model: r.model,
-        errorType: r.errorType ?? "unknown",
+        errorType: r.errorType ?? 'unknown',
         agentId: r.agentId,
       }));
 
     const windowMinutes = windowMs / 60000;
-    const throughputPerMinute = windowMinutes > 0 ? parseFloat((recent.length / windowMinutes).toFixed(2)) : 0;
+    const throughputPerMinute =
+      windowMinutes > 0 ? parseFloat((recent.length / windowMinutes).toFixed(2)) : 0;
 
     return {
       windowMs,
       totalInferences: recent.length,
       totalTokens,
       totalCostUsd,
-      avgLatencyMs: latencies.length > 0 ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length) : 0,
-      successRate: recent.length > 0 ? parseFloat((successes.length / recent.length).toFixed(4)) : 1,
+      avgLatencyMs:
+        latencies.length > 0
+          ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length)
+          : 0,
+      successRate:
+        recent.length > 0 ? parseFloat((successes.length / recent.length).toFixed(4)) : 1,
       providerBreakdown: this.getProviderStats(windowMs),
       modelBreakdown: this.getModelStats(windowMs),
       topAgents,
@@ -247,18 +310,24 @@ class InferenceTelemetryStore {
     };
   }
 
-  getProviderLatencyForModel(provider: InferenceProvider, model: string, windowMs = DEFAULT_WINDOW_MS): number {
+  getProviderLatencyForModel(
+    provider: InferenceProvider,
+    model: string,
+    windowMs = DEFAULT_WINDOW_MS,
+  ): number {
     const cutoff = Date.now() - windowMs;
-    const matching = this.records.filter(r => r.timestamp >= cutoff && r.provider === provider && r.model === model && r.success);
+    const matching = this.records.filter(
+      (r) => r.timestamp >= cutoff && r.provider === provider && r.model === model && r.success,
+    );
     if (matching.length === 0) return Infinity;
     return matching.reduce((s, r) => s + r.latencyMs, 0) / matching.length;
   }
 
   getProviderErrorRate(provider: InferenceProvider, windowMs = DEFAULT_WINDOW_MS): number {
     const cutoff = Date.now() - windowMs;
-    const matching = this.records.filter(r => r.timestamp >= cutoff && r.provider === provider);
+    const matching = this.records.filter((r) => r.timestamp >= cutoff && r.provider === provider);
     if (matching.length === 0) return 0;
-    return matching.filter(r => !r.success).length / matching.length;
+    return matching.filter((r) => !r.success).length / matching.length;
   }
 
   clear(): void {

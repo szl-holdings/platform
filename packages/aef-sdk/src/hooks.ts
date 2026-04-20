@@ -1,7 +1,7 @@
-import { useState, useCallback, useRef } from "react";
-import type { HybridSearchResponse } from "@workspace/aef-contracts";
-import type { AefClientConfig } from "./config.js";
-import { AefClient } from "./client.js";
+import type { HybridSearchResponse } from '@workspace/aef-contracts';
+import { useCallback, useRef, useState } from 'react';
+import { AefClient } from './client.js';
+import type { AefClientConfig } from './config.js';
 
 export interface UseAefSearchOptions {
   profileId: string;
@@ -32,19 +32,19 @@ function resolveClientConfig(opts: UseAefSearchOptions): Partial<AefClientConfig
   const gatewayUrl =
     opts.gatewayUrl ??
     opts.clientConfig?.gatewayUrl ??
-    getViteEnv("AEF_GATEWAY_URL") ??
-    getViteEnv("VITE_AEF_GATEWAY_URL");
+    getViteEnv('AEF_GATEWAY_URL') ??
+    getViteEnv('VITE_AEF_GATEWAY_URL');
   const apiKey =
     opts.apiKey ??
     opts.clientConfig?.apiKey ??
-    getViteEnv("AEF_API_KEY") ??
-    getViteEnv("VITE_AEF_API_KEY");
+    getViteEnv('AEF_API_KEY') ??
+    getViteEnv('VITE_AEF_API_KEY');
   const tenantId =
     opts.tenantId ??
     opts.clientConfig?.tenantId ??
-    getViteEnv("AEF_TENANT_ID") ??
-    getViteEnv("VITE_AEF_TENANT_ID") ??
-    "szl-holdings";
+    getViteEnv('AEF_TENANT_ID') ??
+    getViteEnv('VITE_AEF_TENANT_ID') ??
+    'szl-holdings';
 
   if (!gatewayUrl || !apiKey) return null;
   return { ...(opts.clientConfig ?? {}), gatewayUrl, apiKey, tenantId };
@@ -55,7 +55,7 @@ function getViteEnv(key: string): string | undefined {
   if (viteEnv) {
     return viteEnv[key] ?? viteEnv[`VITE_${key}`] ?? undefined;
   }
-  if (typeof process !== "undefined" && process.env) {
+  if (typeof process !== 'undefined' && process.env) {
     return process.env[key] ?? undefined;
   }
   return undefined;
@@ -69,7 +69,7 @@ export function useAefSearch(options: UseAefSearchOptions): UseAefSearchReturn {
     loading: false,
     results: null,
     error: null,
-    query: "",
+    query: '',
     configured: isConfigured,
   });
 
@@ -96,7 +96,7 @@ export function useAefSearch(options: UseAefSearchOptions): UseAefSearchReturn {
         setState((prev) => ({
           ...prev,
           error: new Error(
-            "AEF is not configured. Set VITE_AEF_GATEWAY_URL and VITE_AEF_API_KEY in your environment. See docs/aef/RUNBOOK.md.",
+            'AEF is not configured. Set VITE_AEF_GATEWAY_URL and VITE_AEF_API_KEY in your environment. See docs/aef/RUNBOOK.md.',
           ),
           configured: false,
         }));
@@ -126,11 +126,18 @@ export function useAefSearch(options: UseAefSearchOptions): UseAefSearchReturn {
         }));
       }
     },
-    [getClient, options.profileId, options.topK, options.rerankEnabled, options.denseWeight, options.keywordWeight],
+    [
+      getClient,
+      options.profileId,
+      options.topK,
+      options.rerankEnabled,
+      options.denseWeight,
+      options.keywordWeight,
+    ],
   );
 
   const reset = useCallback(() => {
-    setState({ loading: false, results: null, error: null, query: "", configured: isConfigured });
+    setState({ loading: false, results: null, error: null, query: '', configured: isConfigured });
   }, [isConfigured]);
 
   return { ...state, search, reset };
@@ -161,7 +168,9 @@ export function useAefEmbed(options: UseAefEmbedOptions = {}) {
     async (texts: string[]) => {
       const client = getClient();
       if (!client) {
-        const e = new Error("AEF not configured for embed. Check VITE_AEF_GATEWAY_URL and VITE_AEF_API_KEY.");
+        const e = new Error(
+          'AEF not configured for embed. Check VITE_AEF_GATEWAY_URL and VITE_AEF_API_KEY.',
+        );
         setError(e);
         throw e;
       }

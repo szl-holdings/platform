@@ -1,4 +1,4 @@
-import { ServiceAdapter } from "../base.js";
+import { ServiceAdapter } from '../base.js';
 
 export interface OneDriveFile {
   id: string;
@@ -11,31 +11,31 @@ export interface OneDriveFile {
 
 const MOCK_FILES: OneDriveFile[] = [
   {
-    id: "od_001",
-    name: "Board Presentation.pptx",
+    id: 'od_001',
+    name: 'Board Presentation.pptx',
     size: 4194304,
-    webUrl: "https://onedrive.live.com/mock/board-presentation",
-    lastModified: "2026-03-22T11:00:00Z",
-    mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    webUrl: 'https://onedrive.live.com/mock/board-presentation',
+    lastModified: '2026-03-22T11:00:00Z',
+    mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   },
   {
-    id: "od_002",
-    name: "Budget 2026.xlsx",
+    id: 'od_002',
+    name: 'Budget 2026.xlsx',
     size: 262144,
-    webUrl: "https://onedrive.live.com/mock/budget-2026",
-    lastModified: "2026-03-15T09:30:00Z",
-    mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    webUrl: 'https://onedrive.live.com/mock/budget-2026',
+    lastModified: '2026-03-15T09:30:00Z',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   },
 ];
 
 export class OneDriveAdapter extends ServiceAdapter {
-  readonly name = "onedrive";
-  readonly description = "Microsoft OneDrive file storage";
-  readonly requiredEnvVars = ["ONEDRIVE_CLIENT_ID", "ONEDRIVE_CLIENT_SECRET"];
+  readonly name = 'onedrive';
+  readonly description = 'Microsoft OneDrive file storage';
+  readonly requiredEnvVars = ['ONEDRIVE_CLIENT_ID', 'ONEDRIVE_CLIENT_SECRET'];
 
   protected async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
-    if (!result.connected) throw new Error("OneDrive connection verification failed");
+    if (!result.connected) throw new Error('OneDrive connection verification failed');
   }
 
   async testConnection(): Promise<{ connected: boolean }> {

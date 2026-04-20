@@ -1,12 +1,15 @@
-import { randomUUID } from "crypto";
-import { reflect } from "@workspace/reflection-engine";
-import { defaultTraceStore } from "@workspace/trace-graph";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
-import { defaultReflectionStore, defaultCandidateSkillLibrary } from "@workspace/reflection-engine";
-import type { TraceStore } from "@workspace/trace-graph";
-import type { MemoryStore } from "@workspace/memory-fabric";
-import type { Reflection } from "@workspace/reflection-engine";
-import type { PhaseResult } from "../types.js";
+import type { MemoryStore } from '@workspace/memory-fabric';
+import { defaultMemoryStore } from '@workspace/memory-fabric';
+import type { Reflection } from '@workspace/reflection-engine';
+import {
+  defaultCandidateSkillLibrary,
+  defaultReflectionStore,
+  reflect,
+} from '@workspace/reflection-engine';
+import type { TraceStore } from '@workspace/trace-graph';
+import { defaultTraceStore } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
+import type { PhaseResult } from '../types.js';
 
 export interface ReflectPhaseOptions {
   traceId: string;
@@ -18,13 +21,13 @@ export interface ReflectPhaseOutput {
   reflectionId: string;
   traceId: string;
   qualityScore: number;
-  failureMode: Reflection["failureMode"];
+  failureMode: Reflection['failureMode'];
   lesson: string;
   whatWorked: string[];
   whatFailed: string[];
   whatToTryNext: string[];
   candidateSkillDrafted: boolean;
-  memoryIds: Reflection["memoryIds"];
+  memoryIds: Reflection['memoryIds'];
   summary: string;
 }
 
@@ -49,25 +52,25 @@ export async function reflectPhase(
       reflectionId,
       traceId: opts.traceId,
       qualityScore: 0,
-      failureMode: "unknown",
+      failureMode: 'unknown',
       lesson: `Reflection skipped: trace ${opts.traceId} not available in store. This is expected for in-memory traces.`,
       whatWorked: [],
-      whatFailed: ["Trace not persisted to trace store"],
-      whatToTryNext: ["Ensure trace is written to store before reflecting"],
+      whatFailed: ['Trace not persisted to trace store'],
+      whatToTryNext: ['Ensure trace is written to store before reflecting'],
       candidateSkillDrafted: false,
       memoryIds: {},
       summary: `Reflection skipped — trace not found in store (${err instanceof Error ? err.message : String(err)}).`,
     };
     const completedAt = Date.now();
     return {
-      phase: "reflect",
-      status: "skipped",
+      phase: 'reflect',
+      status: 'skipped',
       startedAt,
       completedAt,
       durationMs: completedAt - startedAt,
       output: fallbackOutput,
       retryCount: 0,
-      metadata: { skipped: true, reason: "trace_not_found" },
+      metadata: { skipped: true, reason: 'trace_not_found' },
     };
   }
 
@@ -86,13 +89,13 @@ export async function reflectPhase(
       `Reflected on trace ${opts.traceId}. ` +
       `Quality=${reflection.qualityScore.toFixed(2)}, ` +
       `FailureMode=${reflection.failureMode}. ` +
-      `Lesson: "${reflection.lesson.slice(0, 100)}${reflection.lesson.length > 100 ? "..." : ""}"`,
+      `Lesson: "${reflection.lesson.slice(0, 100)}${reflection.lesson.length > 100 ? '...' : ''}"`,
   };
 
   const completedAt = Date.now();
   return {
-    phase: "reflect",
-    status: "ok",
+    phase: 'reflect',
+    status: 'ok',
     startedAt,
     completedAt,
     durationMs: completedAt - startedAt,

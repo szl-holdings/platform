@@ -1,2 +1,2 @@
-export { anthropic } from "./client";
-export { batchProcess, batchProcessWithSSE, isRateLimitError, type BatchOptions } from "./batch";
+export { type BatchOptions, batchProcess, batchProcessWithSSE, isRateLimitError } from './batch';
+export { anthropic } from './client';

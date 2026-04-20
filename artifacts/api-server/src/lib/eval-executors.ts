@@ -1,11 +1,11 @@
-import { gatewayInfer } from "./ai-gateway";
-import { logger } from "./logger";
 import {
   buildSuiteExecutor,
   type EvalExecutor,
   type EvalInferFn,
   type EvalSuiteDef,
-} from "@workspace/eval-forge";
+} from '@workspace/eval-forge';
+import { gatewayInfer } from './ai-gateway';
+import { logger } from './logger';
 
 /**
  * Eval-Forge inference adapter.
@@ -25,10 +25,10 @@ export const defaultEvalInfer: EvalInferFn = async (req) => {
   try {
     const response = await gatewayInfer({
       messages: [
-        { role: "system", content: req.systemPrompt },
-        { role: "user", content: req.userPrompt },
+        { role: 'system', content: req.systemPrompt },
+        { role: 'user', content: req.userPrompt },
       ],
-      strategy: "fastest",
+      strategy: 'fastest',
       maxTokens: req.maxTokens ?? 600,
       agentId: `eval-forge:${req.evalType}`,
       domain: req.domain,
@@ -53,7 +53,9 @@ export const defaultEvalInfer: EvalInferFn = async (req) => {
  * gateway. Falls back to the heuristic executor (no infer fn) when the AI
  * gateway is unavailable so the eval pipeline is never blocked end-to-end.
  */
-export function buildDefaultExecutor(suite: Pick<EvalSuiteDef, "evalType" | "suiteId">): EvalExecutor {
+export function buildDefaultExecutor(
+  suite: Pick<EvalSuiteDef, 'evalType' | 'suiteId'>,
+): EvalExecutor {
   return buildSuiteExecutor(suite, defaultEvalInfer);
 }
 
@@ -74,7 +76,7 @@ export function noteEvalInferFailure(err: unknown): void {
   if (fallbackActivations === 1 || fallbackActivations % 25 === 0) {
     logger.warn(
       { err, fallbackActivations },
-      "[eval-forge] gateway inference failed; eval executors falling back to heuristic output",
+      '[eval-forge] gateway inference failed; eval executors falling back to heuristic output',
     );
   }
 }

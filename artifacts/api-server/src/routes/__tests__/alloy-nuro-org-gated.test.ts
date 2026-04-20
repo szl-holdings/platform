@@ -28,9 +28,9 @@
  * or live LLM/DB calls.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express, { type Request, type Response, type NextFunction } from "express";
-import request from "supertest";
+import express, { type NextFunction, type Request, type Response } from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ---------- @szl-holdings/db -----------------------------------------------
 // tenantScope hydrates org memberships from the DB when req.user.orgs is
@@ -38,7 +38,7 @@ import request from "supertest";
 // has no orgs after hydration. The chain itself is thenable AND exposes
 // `.offset()` so handlers like `/alloy/policies` and `/alloy/skills`
 // (which call `.limit(n).offset(m)`) resolve to an empty array.
-vi.mock("@szl-holdings/db", () => {
+vi.mock('@szl-holdings/db', () => {
   const chain: Record<string, unknown> = {};
   Object.assign(chain, {
     from: () => chain,
@@ -66,38 +66,38 @@ vi.mock("@szl-holdings/db", () => {
     },
     pool: { query: vi.fn().mockResolvedValue({ rows: [], rowCount: 0 }) },
     // Tables referenced by the routers under test or by tenant-scope itself.
-    orgMembersTable: { orgId: "org_id", userId: "user_id" },
-    organizationsTable: { id: "id", slug: "slug", name: "name" },
+    orgMembersTable: { orgId: 'org_id', userId: 'user_id' },
+    organizationsTable: { id: 'id', slug: 'slug', name: 'name' },
     // alloy-skills + alloy-governance
     alloySkillRegistryTable: {
-      skillId: "skill_id",
-      capability: "capability",
-      domain: "domain",
-      isActive: "is_active",
-      isBuiltin: "is_builtin",
-      updatedAt: "updated_at",
+      skillId: 'skill_id',
+      capability: 'capability',
+      domain: 'domain',
+      isActive: 'is_active',
+      isBuiltin: 'is_builtin',
+      updatedAt: 'updated_at',
     },
     alloyPoliciesTable: {
-      id: "id",
-      orgId: "org_id",
-      kind: "kind",
-      status: "status",
-      updatedAt: "updated_at",
+      id: 'id',
+      orgId: 'org_id',
+      kind: 'kind',
+      status: 'status',
+      updatedAt: 'updated_at',
     },
     alloyGovernanceIncidentsTable: {
-      id: "id",
-      orgId: "org_id",
-      resolvedAt: "resolved_at",
+      id: 'id',
+      orgId: 'org_id',
+      resolvedAt: 'resolved_at',
     },
-    alloyConfidenceAlerts: { resolvedAt: "resolved_at" },
-    alloyUsageEventsTable: { orgId: "org_id", recordedAt: "recorded_at" },
+    alloyConfidenceAlerts: { resolvedAt: 'resolved_at' },
+    alloyUsageEventsTable: { orgId: 'org_id', recordedAt: 'recorded_at' },
     // nuro-mesh
     agentMemoryFacts: {
-      agentId: "agent_id",
-      domain: "domain",
-      expiresAt: "expires_at",
+      agentId: 'agent_id',
+      domain: 'domain',
+      expiresAt: 'expires_at',
     },
-    agentUsageStats: { agentId: "agent_id", recordedAt: "recorded_at" },
+    agentUsageStats: { agentId: 'agent_id', recordedAt: 'recorded_at' },
     agentToolCalls: {},
     advisoryFindings: {},
     orchestrationTelemetryTable: {},
@@ -107,27 +107,29 @@ vi.mock("@szl-holdings/db", () => {
   };
 });
 
-vi.mock("drizzle-orm", () => {
-  const sqlFn = (_s: TemplateStringsArray, ..._v: unknown[]) => ({ op: "sql" });
-  (sqlFn as unknown as { join: (parts: unknown[], sep: unknown) => unknown }).join =
-    (parts: unknown[], sep: unknown) => ({ op: "sql.join", parts, sep });
+vi.mock('drizzle-orm', () => {
+  const sqlFn = (_s: TemplateStringsArray, ..._v: unknown[]) => ({ op: 'sql' });
+  (sqlFn as unknown as { join: (parts: unknown[], sep: unknown) => unknown }).join = (
+    parts: unknown[],
+    sep: unknown,
+  ) => ({ op: 'sql.join', parts, sep });
   return {
-    eq: (col: unknown, val: unknown) => ({ op: "eq", col, val }),
-    and: (...conds: unknown[]) => ({ op: "and", conds }),
-    or: (...conds: unknown[]) => ({ op: "or", conds }),
-    not: (c: unknown) => ({ op: "not", c }),
-    desc: (_c: unknown) => ({ op: "desc" }),
-    asc: (_c: unknown) => ({ op: "asc" }),
-    gt: (_c: unknown, _v: unknown) => ({ op: "gt" }),
-    gte: (_c: unknown, _v: unknown) => ({ op: "gte" }),
-    lt: (_c: unknown, _v: unknown) => ({ op: "lt" }),
-    lte: (_c: unknown, _v: unknown) => ({ op: "lte" }),
-    isNull: (_c: unknown) => ({ op: "isNull" }),
-    isNotNull: (_c: unknown) => ({ op: "isNotNull" }),
-    inArray: (_c: unknown, _v: unknown[]) => ({ op: "inArray" }),
-    count: () => ({ op: "count" }),
-    sum: () => ({ op: "sum" }),
-    avg: () => ({ op: "avg" }),
+    eq: (col: unknown, val: unknown) => ({ op: 'eq', col, val }),
+    and: (...conds: unknown[]) => ({ op: 'and', conds }),
+    or: (...conds: unknown[]) => ({ op: 'or', conds }),
+    not: (c: unknown) => ({ op: 'not', c }),
+    desc: (_c: unknown) => ({ op: 'desc' }),
+    asc: (_c: unknown) => ({ op: 'asc' }),
+    gt: (_c: unknown, _v: unknown) => ({ op: 'gt' }),
+    gte: (_c: unknown, _v: unknown) => ({ op: 'gte' }),
+    lt: (_c: unknown, _v: unknown) => ({ op: 'lt' }),
+    lte: (_c: unknown, _v: unknown) => ({ op: 'lte' }),
+    isNull: (_c: unknown) => ({ op: 'isNull' }),
+    isNotNull: (_c: unknown) => ({ op: 'isNotNull' }),
+    inArray: (_c: unknown, _v: unknown[]) => ({ op: 'inArray' }),
+    count: () => ({ op: 'count' }),
+    sum: () => ({ op: 'sum' }),
+    avg: () => ({ op: 'avg' }),
     sql: sqlFn,
   };
 });
@@ -136,15 +138,15 @@ vi.mock("drizzle-orm", () => {
 // The user is injected by the per-test middleware below. authMiddleware,
 // requireRole, etc. are stubbed so the test isolates the tenantScope guard
 // from per-route role checks.
-vi.mock("../../middlewares/auth", () => ({
+vi.mock('../../middlewares/auth', () => ({
   authMiddleware: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   requireRole: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   requireAnyAuth: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   denyIfReadOnly: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
-vi.mock("../../lib/validation", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../lib/validation")>();
+vi.mock('../../lib/validation', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../lib/validation')>();
   return {
     ...actual,
     validateBody: () => (_req: Request, _res: Response, next: NextFunction) => next(),
@@ -152,35 +154,35 @@ vi.mock("../../lib/validation", async (importOriginal) => {
   };
 });
 
-vi.mock("../../lib/logger", () => ({
+vi.mock('../../lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("../../lib/internal-tokens", () => ({
+vi.mock('../../lib/internal-tokens', () => ({
   verifyInternalHeader: () => null,
   tokenHasScope: () => false,
 }));
 
-vi.mock("@szl-holdings/observability", () => ({
+vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: { recordAuthFailure: vi.fn() },
 }));
 
-vi.mock("@szl-holdings/contracts/common", () => ({
+vi.mock('@szl-holdings/contracts/common', () => ({
   bodyShape: (_shape: unknown) => ({ parse: (v: unknown) => v }),
 }));
 
 // ---------- Router-specific external deps ----------------------------------
-vi.mock("@szl-holdings/ai-engine", () => ({
+vi.mock('@szl-holdings/ai-engine', () => ({
   skillRegistry: { getAll: () => [], get: () => undefined },
 }));
 
-vi.mock("@szl-holdings/ai-engine/providers/openai", () => ({
+vi.mock('@szl-holdings/ai-engine/providers/openai', () => ({
   openai: {
     chat: { completions: { create: vi.fn().mockResolvedValue({ choices: [] }) } },
   },
 }));
 
-vi.mock("@szl-holdings/ai-engine/providers/anthropic", () => ({
+vi.mock('@szl-holdings/ai-engine/providers/anthropic', () => ({
   anthropic: {
     messages: {
       create: vi.fn().mockResolvedValue({ content: [] }),
@@ -189,11 +191,11 @@ vi.mock("@szl-holdings/ai-engine/providers/anthropic", () => ({
   },
 }));
 
-vi.mock("@szl-holdings/ai-engine/providers/gemini", () => ({
-  ai: { generateContent: vi.fn().mockResolvedValue({ text: "" }) },
+vi.mock('@szl-holdings/ai-engine/providers/gemini', () => ({
+  ai: { generateContent: vi.fn().mockResolvedValue({ text: '' }) },
 }));
 
-vi.mock("express-rate-limit", () => ({
+vi.mock('express-rate-limit', () => ({
   default: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
@@ -209,24 +211,30 @@ type TestUser = {
 };
 
 function noOrgUser(): TestUser {
-  return { id: 100, displayName: "Eve", email: "eve@nowhere.example", roles: ["member"], orgs: [] };
+  return { id: 100, displayName: 'Eve', email: 'eve@nowhere.example', roles: ['member'], orgs: [] };
 }
 
 function superAdminUser(): TestUser {
-  return { id: 1, displayName: "Root", email: "root@szl.example", roles: ["super_admin"], orgs: [] };
+  return {
+    id: 1,
+    displayName: 'Root',
+    email: 'root@szl.example',
+    roles: ['super_admin'],
+    orgs: [],
+  };
 }
 
 function adminUser(): TestUser {
-  return { id: 2, displayName: "Admin", email: "admin@szl.example", roles: ["admin"], orgs: [] };
+  return { id: 2, displayName: 'Admin', email: 'admin@szl.example', roles: ['admin'], orgs: [] };
 }
 
 function orgMemberUser(): TestUser {
   return {
     id: 10,
-    displayName: "Alice",
-    email: "alice@org-a.example",
-    roles: ["member"],
-    orgs: [{ orgId: 1, orgSlug: "org-a", orgName: "Org A", role: "member" }],
+    displayName: 'Alice',
+    email: 'alice@org-a.example',
+    roles: ['member'],
+    orgs: [{ orgId: 1, orgSlug: 'org-a', orgName: 'Org A', role: 'member' }],
   };
 }
 
@@ -238,9 +246,9 @@ function injectUser(factory: () => TestUser) {
 }
 
 const routerLoaders = {
-  "nuro-mesh": () => import("../nuro-mesh"),
-  "alloy-skills": () => import("../alloy-skills"),
-  "alloy-governance": () => import("../alloy-governance"),
+  'nuro-mesh': () => import('../nuro-mesh'),
+  'alloy-skills': () => import('../alloy-skills'),
+  'alloy-governance': () => import('../alloy-governance'),
 } as const;
 
 async function buildApp(routerSpec: keyof typeof routerLoaders, userFactory: () => TestUser) {
@@ -257,55 +265,55 @@ type RouterName = keyof typeof routerLoaders;
 
 interface RouteCase {
   name: RouterName;
-  method: "get" | "post";
+  method: 'get' | 'post';
   path: string;
   body?: Record<string, unknown>;
 }
 
 const cases: RouteCase[] = [
-  { name: "nuro-mesh",        method: "get", path: "/nuro-mesh/agents" },
-  { name: "alloy-skills",     method: "get", path: "/alloy/skills" },
-  { name: "alloy-governance", method: "get", path: "/alloy/policies" },
+  { name: 'nuro-mesh', method: 'get', path: '/nuro-mesh/agents' },
+  { name: 'alloy-skills', method: 'get', path: '/alloy/skills' },
+  { name: 'alloy-governance', method: 'get', path: '/alloy/policies' },
 ];
 
 async function send(
   app: express.Express,
-  method: "get" | "post",
+  method: 'get' | 'post',
   path: string,
   body?: Record<string, unknown>,
 ): Promise<{ status: number; body: { error?: string } }> {
   const agent = request(app);
-  const req = method === "get" ? agent.get(path) : agent.post(path).send(body ?? {});
+  const req = method === 'get' ? agent.get(path) : agent.post(path).send(body ?? {});
   return req as unknown as Promise<{ status: number; body: { error?: string } }>;
 }
 
-describe("Alloy/Nuro org-gated routers reject unauthorized callers (regression for task #2635)", () => {
+describe('Alloy/Nuro org-gated routers reject unauthorized callers (regression for task #2635)', () => {
   beforeEach(() => {
-    process.env["NODE_ENV"] = "test";
+    process.env['NODE_ENV'] = 'test';
   });
 
   for (const c of cases) {
     describe(`${c.name} router — ${c.method.toUpperCase()} ${c.path}`, () => {
-      it("returns 403 when the caller has a valid auth context but NO org membership", async () => {
+      it('returns 403 when the caller has a valid auth context but NO org membership', async () => {
         const app = await buildApp(c.name, noOrgUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(403);
         expect(res.body?.error).toMatch(/no organization membership/i);
       });
 
-      it("returns 200 for super_admin callers (org check bypassed)", async () => {
+      it('returns 200 for super_admin callers (org check bypassed)', async () => {
         const app = await buildApp(c.name, superAdminUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(200);
       });
 
-      it("returns 200 for admin callers (org check bypassed)", async () => {
+      it('returns 200 for admin callers (org check bypassed)', async () => {
         const app = await buildApp(c.name, adminUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(200);
       });
 
-      it("returns 200 for callers with a valid org membership", async () => {
+      it('returns 200 for callers with a valid org membership', async () => {
         const app = await buildApp(c.name, orgMemberUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(200);

@@ -1,5 +1,5 @@
-import { sample } from "./distributions.js";
-import type { ScenarioDefinition } from "./schema.js";
+import { sample } from './distributions.js';
+import type { ScenarioDefinition } from './schema.js';
 
 export interface MonteCarloOutputStat {
   label: string;
@@ -67,13 +67,12 @@ function percentile(sorted: number[], p: number): number {
 
 function computeStdDev(values: number[], mean: number): number {
   if (values.length < 2) return 0;
-  const variance =
-    values.reduce((s, v) => s + (v - mean) ** 2, 0) / (values.length - 1);
+  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / (values.length - 1);
   return Math.sqrt(variance);
 }
 
 function nowMs(): number {
-  return typeof performance !== "undefined" && typeof performance.now === "function"
+  return typeof performance !== 'undefined' && typeof performance.now === 'function'
     ? performance.now()
     : Date.now();
 }
@@ -145,11 +144,7 @@ export function simulateScenarioShard(
     } catch {
       /* constraint or calculation violation */
     }
-    if (
-      progressInterval > 0 &&
-      (i + 1) % progressInterval === 0 &&
-      i + 1 < iterations
-    ) {
+    if (progressInterval > 0 && (i + 1) % progressInterval === 0 && i + 1 < iterations) {
       onProgress!({
         completed: i + 1,
         total: iterations,
@@ -192,12 +187,11 @@ export function aggregateScenarioShards(
     }
   }
 
-  const metrics: MonteCarloResult["metrics"] = {};
+  const metrics: MonteCarloResult['metrics'] = {};
   for (const out of scenario.outputs) {
     const values = outputAccum[out.id] ?? [];
     const sorted = [...values].sort((a, b) => a - b);
-    const mean =
-      values.length > 0 ? values.reduce((s, v) => s + v, 0) / values.length : 0;
+    const mean = values.length > 0 ? values.reduce((s, v) => s + v, 0) / values.length : 0;
     metrics[out.id] = {
       label: out.label,
       format: out.format,
@@ -215,24 +209,19 @@ export function aggregateScenarioShards(
   }
 
   const primaryOutput = scenario.outputs[0];
-  const baseOutputs = primaryOutput ? outputAccum[primaryOutput.id] ?? [] : [];
+  const baseOutputs = primaryOutput ? (outputAccum[primaryOutput.id] ?? []) : [];
   const baseMean =
-    baseOutputs.length > 0
-      ? baseOutputs.reduce((s, v) => s + v, 0) / baseOutputs.length
-      : 0;
+    baseOutputs.length > 0 ? baseOutputs.reduce((s, v) => s + v, 0) / baseOutputs.length : 0;
   const baseVar =
     baseOutputs.length > 0
-      ? baseOutputs.reduce((s, v) => s + (v - baseMean) ** 2, 0) /
-        baseOutputs.length
+      ? baseOutputs.reduce((s, v) => s + (v - baseMean) ** 2, 0) / baseOutputs.length
       : 0;
 
   const inputSensitivity = scenario.inputs
     .map((inp) => {
       const inputVals = inputAccum[inp.id] ?? [];
       const inputMean =
-        inputVals.length > 0
-          ? inputVals.reduce((s, v) => s + v, 0) / inputVals.length
-          : 0;
+        inputVals.length > 0 ? inputVals.reduce((s, v) => s + v, 0) / inputVals.length : 0;
       let cov = 0;
       const n = Math.min(inputVals.length, baseOutputs.length);
       for (let i = 0; i < n; i++) {
@@ -241,11 +230,9 @@ export function aggregateScenarioShards(
       cov /= inputVals.length || 1;
       const inputVar =
         inputVals.length > 0
-          ? inputVals.reduce((s, v) => s + (v - inputMean) ** 2, 0) /
-            inputVals.length
+          ? inputVals.reduce((s, v) => s + (v - inputMean) ** 2, 0) / inputVals.length
           : 0;
-      const r2 =
-        baseVar > 0 && inputVar > 0 ? (cov * cov) / (inputVar * baseVar) : 0;
+      const r2 = baseVar > 0 && inputVar > 0 ? (cov * cov) / (inputVar * baseVar) : 0;
       return { inputId: inp.id, label: inp.label, impact: Math.sqrt(r2) };
     })
     .sort((a, b) => b.impact - a.impact);

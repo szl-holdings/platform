@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap");
 @import "tailwindcss";
 
 @theme inline {
@@ -51,7 +51,9 @@
 }
 
 @layer base {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 }
@@ -70,7 +72,12 @@ body {
   font-weight: 300;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
   letter-spacing: -0.01em;
   font-weight: 400;
@@ -103,7 +110,9 @@ h1, h2, h3, h4, h5, h6 {
   background: #ffffff;
   border: 1px solid var(--color-stone-200);
   border-radius: 0.25rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .cj-card:hover {
   border-color: var(--color-stone-300);
@@ -121,7 +130,13 @@ h1, h2, h3, h4, h5, h6 {
 /* Gold accent rule — horizontal dividers */
 .cj-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-gold-border) 30%, var(--color-gold-border) 70%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold-border) 30%,
+    var(--color-gold-border) 70%,
+    transparent
+  );
 }
 
 /* Eyebrow — for section labels */
@@ -140,11 +155,15 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--color-stone-200);
   border-radius: 0.25rem;
   padding: 2rem 2rem;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 .cj-service:hover {
   border-color: var(--color-gold-border);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--color-gold-border);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.06),
+    0 0 0 1px var(--color-gold-border);
 }
 
 /* Testimonial / proof block */
@@ -167,7 +186,9 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0.75rem 1.75rem;
   border-radius: 0.125rem;
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -187,7 +208,9 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0.75rem 1.75rem;
   border-radius: 0.125rem;
   cursor: pointer;
-  transition: border-color 0.25s ease, color 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -218,28 +241,62 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ─── Elegant motion — near-static, refined ─── */
 @keyframes elegant-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes gentle-rise {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes soft-reveal {
-  from { opacity: 0; transform: translateX(-8px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.animate-elegant-fade { animation: elegant-fade 0.7s ease both; }
-.animate-gentle-rise { animation: gentle-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-soft-reveal { animation: soft-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-elegant-fade {
+  animation: elegant-fade 0.7s ease both;
+}
+.animate-gentle-rise {
+  animation: gentle-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-soft-reveal {
+  animation: soft-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
-.stagger-1 { animation-delay: 0.08s; }
-.stagger-2 { animation-delay: 0.16s; }
-.stagger-3 { animation-delay: 0.24s; }
-.stagger-4 { animation-delay: 0.32s; }
-.stagger-5 { animation-delay: 0.40s; }
-.stagger-6 { animation-delay: 0.48s; }
+.stagger-1 {
+  animation-delay: 0.08s;
+}
+.stagger-2 {
+  animation-delay: 0.16s;
+}
+.stagger-3 {
+  animation-delay: 0.24s;
+}
+.stagger-4 {
+  animation-delay: 0.32s;
+}
+.stagger-5 {
+  animation-delay: 0.4s;
+}
+.stagger-6 {
+  animation-delay: 0.48s;
+}
 
 /* ─── Input styling ─── */
 .cj-input {
@@ -270,7 +327,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

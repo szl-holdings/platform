@@ -1,8 +1,8 @@
-import { randomUUID } from "crypto";
-import { verify } from "@workspace/verifier/engine";
-import type { VerifierOutput, VerifierContext, VerifierDecision } from "@workspace/verifier";
-import type { PhaseResult } from "../types.js";
-import type { ExecutePhaseOutput } from "./execute.js";
+import type { VerifierContext, VerifierDecision, VerifierOutput } from '@workspace/verifier';
+import { verify } from '@workspace/verifier/engine';
+import { randomUUID } from 'crypto';
+import type { PhaseResult } from '../types.js';
+import type { ExecutePhaseOutput } from './execute.js';
 
 export interface VerifyPhaseOptions {
   traceId: string;
@@ -17,7 +17,7 @@ export interface VerifyPhaseOutput {
   verifierId: string;
   decision: VerifierDecision;
   passed: boolean;
-  action: VerifierDecision["action"];
+  action: VerifierDecision['action'];
   overallScore: number;
   blockerCount: number;
   warningCount: number;
@@ -36,15 +36,15 @@ export async function verifyPhase(
   const revisionNumber = opts.currentRevision ?? 0;
 
   const outputText = executeOutput.stepResults
-    .filter((r) => r.status === "completed")
+    .filter((r) => r.status === 'completed')
     .map((r) => JSON.stringify(r.output))
-    .join("\n");
+    .join('\n');
 
   const verifierOutput: VerifierOutput = {
-    text: outputText || "No output produced.",
+    text: outputText || 'No output produced.',
     confidence: executeOutput.completedSteps / Math.max(1, executeOutput.stepResults.length),
     providedFields: executeOutput.stepResults
-      .filter((r) => r.status === "completed")
+      .filter((r) => r.status === 'completed')
       .map((r) => r.stepId),
     requiredFields: executeOutput.stepResults.map((r) => r.stepId),
     metadata: {
@@ -58,7 +58,7 @@ export async function verifyPhase(
     domain: opts.domain,
     evidenceMinPerClaim: 0,
     maxUncitedClaims: 999,
-    disabledChecks: opts.disabledChecks ?? ["evidence", "citation"],
+    disabledChecks: opts.disabledChecks ?? ['evidence', 'citation'],
     metadata: {
       traceId: opts.traceId,
       planId: opts.planId,
@@ -67,7 +67,7 @@ export async function verifyPhase(
   };
 
   const target = {
-    targetType: "output" as const,
+    targetType: 'output' as const,
     targetId: verifierId,
     traceId: opts.traceId,
     planId: opts.planId,
@@ -75,10 +75,10 @@ export async function verifyPhase(
 
   const decision = verify(verifierOutput, target, verifierContext);
 
-  const passed = decision.action === "approve";
+  const passed = decision.action === 'approve';
   const needsRevision =
     !passed &&
-    (decision.action === "revise" || decision.action === "request_more_evidence") &&
+    (decision.action === 'revise' || decision.action === 'request_more_evidence') &&
     revisionNumber < (opts.maxRevisions ?? 2);
 
   const output: VerifyPhaseOutput = {
@@ -101,17 +101,14 @@ export async function verifyPhase(
 
   const completedAt = Date.now();
   return {
-    phase: "verify",
-    status: decision.action === "block" ? "blocked" : "ok",
+    phase: 'verify',
+    status: decision.action === 'block' ? 'blocked' : 'ok',
     startedAt,
     completedAt,
     durationMs: completedAt - startedAt,
     output,
     retryCount: revisionNumber,
     metadata: { verifierId, action: decision.action, passed },
-    error:
-      decision.action === "block"
-        ? `Verifier blocked: ${decision.reasoning}`
-        : undefined,
+    error: decision.action === 'block' ? `Verifier blocked: ${decision.reasoning}` : undefined,
   };
 }

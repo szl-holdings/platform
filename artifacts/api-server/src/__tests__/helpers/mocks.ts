@@ -8,8 +8,8 @@
  * websocket channel only needs to be updated in one place.
  */
 
-import { vi } from "vitest";
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from 'express';
+import { vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // @szl-holdings/observability
@@ -42,12 +42,10 @@ export function createObservabilityMock() {
 // ---------------------------------------------------------------------------
 
 function makeDbChain(): unknown {
-  const target: unknown = function () {
-    return makeDbChain();
-  };
+  const target: unknown = () => makeDbChain();
   return new Proxy(target as object, {
     get(_t, prop) {
-      if (prop === "then") {
+      if (prop === 'then') {
         return (resolve: (v: unknown[]) => void, reject?: (e: unknown) => void) =>
           Promise.resolve([]).then(resolve, reject);
       }
@@ -167,9 +165,9 @@ export interface MockAuthUser {
 
 export const DEFAULT_MOCK_AUTH_USER: MockAuthUser = {
   id: 99,
-  email: "tester@example.com",
-  roles: ["member"],
-  orgs: [{ orgId: 1, orgSlug: "test-org", orgName: "Test Org", role: "member" }],
+  email: 'tester@example.com',
+  roles: ['member'],
+  orgs: [{ orgId: 1, orgSlug: 'test-org', orgName: 'Test Org', role: 'member' }],
 };
 
 export function createAuthMiddlewareMock(user: MockAuthUser = DEFAULT_MOCK_AUTH_USER) {
@@ -181,7 +179,7 @@ export function createAuthMiddlewareMock(user: MockAuthUser = DEFAULT_MOCK_AUTH_
     parseIdParam: (paramName: string) => (req: Request, res: Response, next: NextFunction) => {
       const val = req.params[paramName];
       if (!val || isNaN(Number(val))) {
-        res.status(400).json({ error: "Invalid ID" });
+        res.status(400).json({ error: 'Invalid ID' });
         return;
       }
       next();
@@ -212,18 +210,18 @@ export function createAuthMiddlewareMock(user: MockAuthUser = DEFAULT_MOCK_AUTH_
  * channel that tests need to assert against.
  */
 const KNOWN_WS_CHANNELS: Record<string, string> = {
-  GENERAL: "general",
-  NOTIFICATIONS: "notifications",
-  MONTE_CARLO_PROGRESS: "monte-carlo:progress",
+  GENERAL: 'general',
+  NOTIFICATIONS: 'notifications',
+  MONTE_CARLO_PROGRESS: 'monte-carlo:progress',
 };
 
 export function createWebsocketMock(overrides: Record<string, string> = {}) {
   const channels = { ...KNOWN_WS_CHANNELS, ...overrides };
   const WS_CHANNELS = new Proxy(channels, {
     get(target, prop) {
-      if (typeof prop !== "string") return undefined;
+      if (typeof prop !== 'string') return undefined;
       if (prop in target) return target[prop];
-      return prop.toLowerCase().replace(/_/g, "-");
+      return prop.toLowerCase().replace(/_/g, '-');
     },
   });
   return {
@@ -231,7 +229,7 @@ export function createWebsocketMock(overrides: Record<string, string> = {}) {
     publish: vi.fn(),
     getMessagesSince: vi.fn(() => []),
     getPresence: vi.fn(() => []),
-    issueWsTicket: vi.fn(() => "ticket-mock"),
+    issueWsTicket: vi.fn(() => 'ticket-mock'),
   };
 }
 
@@ -243,7 +241,7 @@ export function createForgeRuntimeMock() {
   return {
     forgeRuntime: { execute: vi.fn(async () => ({})), isAvailable: () => false },
     durableJobQueue: {
-      enqueue: vi.fn(async () => ({ id: "job-1" })),
+      enqueue: vi.fn(async () => ({ id: 'job-1' })),
     },
   };
 }

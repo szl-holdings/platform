@@ -1,27 +1,31 @@
-import type { Router, Request, Response } from "express";
-import { OpenAIEmbedRequestSchema } from "@workspace/aef-contracts";
-import { getTenantId } from "../middleware/tenant.js";
-import { getRequestId } from "../middleware/request-id.js";
-import { tenantEnforcer, policyEngine, defaultLedgerStore } from "../context.js";
-import { logger } from "../logger.js";
-import type { PolicyContext } from "@workspace/aef-policy-guard";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
+import { OpenAIEmbedRequestSchema } from '@workspace/aef-contracts';
+import type { PolicyContext } from '@workspace/aef-policy-guard';
+import type { Request, Response, Router } from 'express';
+import { defaultLedgerStore, policyEngine, tenantEnforcer } from '../context.js';
+import { logger } from '../logger.js';
+import { getRequestId } from '../middleware/request-id.js';
+import { getTenantId } from '../middleware/tenant.js';
 
 function stubEmbedVector(text: string, dims = 1536): number[] {
   const v = new Array<number>(dims).fill(0);
   for (let i = 0; i < text.length; i++) {
-    v[i % dims] = (v[i % dims]! + text.charCodeAt(i) / 255);
+    v[i % dims] = v[i % dims]! + text.charCodeAt(i) / 255;
   }
   const norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
   return v.map((x) => x / norm);
 }
 
 export function registerOpenAICompatRoute(router: Router): void {
-  router.post("/v1/openai/embeddings", (req: Request, res: Response) => {
+  router.post('/v1/openai/embeddings', (req: Request, res: Response) => {
     const parsed = OpenAIEmbedRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({
-        error: { message: "Invalid request", type: "invalid_request_error", code: "validation_error" },
+        error: {
+          message: 'Invalid request',
+          type: 'invalid_request_error',
+          code: 'validation_error',
+        },
       });
       return;
     }
@@ -36,21 +40,21 @@ export function registerOpenAICompatRoute(router: Router): void {
     const policyCtx: PolicyContext = { requestId: reqId, tenantId, hasProvenance: true };
     const tenantDecision = tenantEnforcer.enforce(policyCtx);
     if (tenantDecision !== null && !tenantDecision.allow) {
-      res.status(403).json({ error: "tenant_not_registered", reasons: tenantDecision.reasons });
+      res.status(403).json({ error: 'tenant_not_registered', reasons: tenantDecision.reasons });
       return;
     }
     const policyDecision = policyEngine.evaluate(policyCtx);
     if (!policyDecision.allow) {
-      res.status(403).json({ error: "policy_denied", reasons: policyDecision.reasons });
+      res.status(403).json({ error: 'policy_denied', reasons: policyDecision.reasons });
       return;
     }
 
     const texts = Array.isArray(input) ? input : [input];
     const dims = dimensions ?? 1536;
-    const resolvedModel = model ?? "aef-embed-cpu-v1";
+    const resolvedModel = model ?? 'aef-embed-cpu-v1';
 
     const data = texts.map((text, index) => ({
-      object: "embedding" as const,
+      object: 'embedding' as const,
       embedding: stubEmbedVector(text, dims),
       index,
     }));
@@ -81,14 +85,19 @@ export function registerOpenAICompatRoute(router: Router): void {
         });
       } catch (err) {
         ledgerFailures++;
-        logger.error("openai-embed ledger write failed", { chunkId, reqId, err: String(err) });
+        logger.error('openai-embed ledger write failed', { chunkId, reqId, err: String(err) });
       }
     }
 
-    logger.info("openai-embed completed", { reqId, tenantId, count: texts.length, processingMs: Date.now() - startMs });
+    logger.info('openai-embed completed', {
+      reqId,
+      tenantId,
+      count: texts.length,
+      processingMs: Date.now() - startMs,
+    });
 
     res.json({
-      object: "list" as const,
+      object: 'list' as const,
       data,
       model: resolvedModel,
       usage: { prompt_tokens: totalTokens, total_tokens: totalTokens },

@@ -1,7 +1,12 @@
-import { getDomainModelConfig, type EmbeddingDomain } from "./domain-config.js";
-import { embeddingAnalytics } from "./analytics.js";
+import { embeddingAnalytics } from './analytics.js';
+import { type EmbeddingDomain, getDomainModelConfig } from './domain-config.js';
 
-export type EmbeddingProviderType = "huggingface" | "openai-compatible" | "replit-proxy" | "local-sentence-transformers" | "mock";
+export type EmbeddingProviderType =
+  | 'huggingface'
+  | 'openai-compatible'
+  | 'replit-proxy'
+  | 'local-sentence-transformers'
+  | 'mock';
 
 export interface EmbeddingResult {
   embedding: number[];
@@ -85,7 +90,9 @@ class EmbeddingCache {
     this.cache.set(key, { result, expiry: Date.now() + CACHE_TTL_MS });
   }
 
-  get size(): number { return this.cache.size; }
+  get size(): number {
+    return this.cache.size;
+  }
 }
 
 const PROVIDER_RECOVERY_COOLDOWN_MS = 60 * 1000;
@@ -137,29 +144,29 @@ abstract class BaseEmbeddingProvider {
 }
 
 class HuggingFaceEmbeddingProvider extends BaseEmbeddingProvider {
-  readonly type: EmbeddingProviderType = "huggingface";
+  readonly type: EmbeddingProviderType = 'huggingface';
   private readonly apiKey: string | undefined;
   private readonly baseUrl: string;
 
   constructor() {
     super();
-    this.apiKey = process.env["HUGGINGFACE_API_KEY"];
-    this.baseUrl = process.env["HF_INFERENCE_URL"] || "https://api-inference.huggingface.co/models";
+    this.apiKey = process.env['HUGGINGFACE_API_KEY'];
+    this.baseUrl = process.env['HF_INFERENCE_URL'] || 'https://api-inference.huggingface.co/models';
   }
 
   async embed(text: string, model?: string): Promise<number[]> {
-    const targetModel = model || process.env["HF_EMBED_MODEL"] || "BAAI/bge-m3";
+    const targetModel = model || process.env['HF_EMBED_MODEL'] || 'BAAI/bge-m3';
     const start = Date.now();
 
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
 
     try {
       const response = await fetch(`${this.baseUrl}/${targetModel}`, {
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify({ inputs: text.slice(0, 8000) }),
         signal: controller.signal,
@@ -169,14 +176,14 @@ class HuggingFaceEmbeddingProvider extends BaseEmbeddingProvider {
         throw new Error(`HuggingFace API error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json() as unknown;
+      const data = (await response.json()) as unknown;
       let vector: number[];
       if (Array.isArray(data) && Array.isArray((data as unknown[][])[0])) {
         vector = (data as number[][])[0]!;
-      } else if (Array.isArray(data) && typeof (data as unknown[])[0] === "number") {
+      } else if (Array.isArray(data) && typeof (data as unknown[])[0] === 'number') {
         vector = data as number[];
       } else {
-        throw new Error("Unexpected HuggingFace embedding response format");
+        throw new Error('Unexpected HuggingFace embedding response format');
       }
 
       this.recordSuccess(Date.now() - start);
@@ -191,15 +198,18 @@ class HuggingFaceEmbeddingProvider extends BaseEmbeddingProvider {
 }
 
 class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
-  readonly type: EmbeddingProviderType = "openai-compatible";
+  readonly type: EmbeddingProviderType = 'openai-compatible';
   private readonly config: ProviderConfig;
 
   constructor() {
     super();
     this.config = {
-      baseUrl: process.env["OPENAI_EMBED_BASE_URL"] || process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] || "https://api.openai.com/v1",
-      apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"],
-      defaultModel: process.env["OPENAI_EMBED_MODEL"] || "text-embedding-3-small",
+      baseUrl:
+        process.env['OPENAI_EMBED_BASE_URL'] ||
+        process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ||
+        'https://api.openai.com/v1',
+      apiKey: process.env['AI_INTEGRATIONS_OPENAI_API_KEY'],
+      defaultModel: process.env['OPENAI_EMBED_MODEL'] || 'text-embedding-3-small',
       maxInputLength: 8000,
     };
     if (!this.config.apiKey) {
@@ -209,7 +219,7 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
 
   async embed(text: string, model?: string): Promise<number[]> {
     if (!this.config.apiKey) {
-      throw new Error("OpenAI API key not configured");
+      throw new Error('OpenAI API key not configured');
     }
 
     const targetModel = model || this.config.defaultModel;
@@ -220,10 +230,10 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
 
     try {
       const response = await fetch(`${this.config.baseUrl}/embeddings`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.config.apiKey}`,
         },
         body: JSON.stringify({
           model: targetModel,
@@ -236,9 +246,9 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
         throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json() as { data?: Array<{ embedding: number[] }> };
+      const data = (await response.json()) as { data?: Array<{ embedding: number[] }> };
       const vector = data.data?.[0]?.embedding;
-      if (!vector) throw new Error("No embedding in OpenAI response");
+      if (!vector) throw new Error('No embedding in OpenAI response');
 
       this.recordSuccess(Date.now() - start);
       return vector;
@@ -252,15 +262,16 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
 }
 
 class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
-  readonly type: EmbeddingProviderType = "local-sentence-transformers";
+  readonly type: EmbeddingProviderType = 'local-sentence-transformers';
   private readonly baseUrl: string;
   private readonly defaultModel: string;
 
   constructor() {
     super();
-    this.baseUrl = process.env["LOCAL_EMBED_URL"] || "http://localhost:8765";
-    this.defaultModel = process.env["LOCAL_EMBED_MODEL"] || "sentence-transformers/all-MiniLM-L6-v2";
-    if (!process.env["LOCAL_EMBED_URL"]) {
+    this.baseUrl = process.env['LOCAL_EMBED_URL'] || 'http://localhost:8765';
+    this.defaultModel =
+      process.env['LOCAL_EMBED_MODEL'] || 'sentence-transformers/all-MiniLM-L6-v2';
+    if (!process.env['LOCAL_EMBED_URL']) {
       this.health.available = false;
     }
   }
@@ -274,8 +285,8 @@ class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
 
     try {
       const response = await fetch(`${this.baseUrl}/embeddings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: targetModel,
           input: text.slice(0, 8000),
@@ -284,10 +295,12 @@ class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
       });
 
       if (!response.ok) {
-        throw new Error(`Local sentence-transformers error: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Local sentence-transformers error: ${response.status} ${response.statusText}`,
+        );
       }
 
-      const data = await response.json() as
+      const data = (await response.json()) as
         | { data?: Array<{ embedding: number[] }> }
         | { embedding?: number[] }
         | number[];
@@ -295,12 +308,12 @@ class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
       let vector: number[];
       if (Array.isArray(data)) {
         vector = data as number[];
-      } else if ("data" in data && Array.isArray(data.data) && data.data[0]?.embedding) {
+      } else if ('data' in data && Array.isArray(data.data) && data.data[0]?.embedding) {
         vector = data.data[0].embedding;
-      } else if ("embedding" in data && Array.isArray(data.embedding)) {
+      } else if ('embedding' in data && Array.isArray(data.embedding)) {
         vector = data.embedding as number[];
       } else {
-        throw new Error("Unexpected local sentence-transformers response format");
+        throw new Error('Unexpected local sentence-transformers response format');
       }
 
       this.recordSuccess(Date.now() - start);
@@ -315,12 +328,12 @@ class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
 }
 
 class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
-  readonly type: EmbeddingProviderType = "replit-proxy";
+  readonly type: EmbeddingProviderType = 'replit-proxy';
   private readonly defaultModel: string;
 
   constructor() {
     super();
-    this.defaultModel = process.env["REPLIT_EMBED_MODEL"] || "text-embedding-3-small";
+    this.defaultModel = process.env['REPLIT_EMBED_MODEL'] || 'text-embedding-3-small';
   }
 
   async embed(text: string, model?: string): Promise<number[]> {
@@ -328,13 +341,13 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
     const start = Date.now();
 
     try {
-      const { openai } = await import("../providers/openai/index.js");
+      const { openai } = await import('../providers/openai/index.js');
       const response = await openai.embeddings.create({
         model: targetModel,
         input: text.slice(0, 8000),
       });
       const vector = response.data[0]?.embedding;
-      if (!vector) throw new Error("No embedding in Replit proxy response");
+      if (!vector) throw new Error('No embedding in Replit proxy response');
 
       this.recordSuccess(Date.now() - start);
       return vector;
@@ -346,13 +359,13 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
 }
 
 class MockEmbeddingProvider extends BaseEmbeddingProvider {
-  readonly type: EmbeddingProviderType = "mock";
+  readonly type: EmbeddingProviderType = 'mock';
 
   async embed(_text: string, _model?: string): Promise<number[]> {
     const dim = 384;
     const vec = Array.from({ length: dim }, () => (Math.random() - 0.5) * 2);
     const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0));
-    return vec.map(v => v / norm);
+    return vec.map((v) => v / norm);
   }
 }
 
@@ -369,11 +382,14 @@ export class EmbeddingPipeline {
       new MockEmbeddingProvider(),
     ];
 
-    const order = (process.env["EMBEDDING_PROVIDER_ORDER"] || "").split(",").map(s => s.trim()).filter(Boolean);
+    const order = (process.env['EMBEDDING_PROVIDER_ORDER'] || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
     if (order.length > 0) {
       const sorted: BaseEmbeddingProvider[] = [];
       for (const name of order) {
-        const p = this.providers.find(p => p.type === name);
+        const p = this.providers.find((p) => p.type === name);
         if (p) sorted.push(p);
       }
       for (const p of this.providers) {
@@ -389,13 +405,13 @@ export class EmbeddingPipeline {
 
     const orderedProviders = preferredProvider
       ? [
-          ...this.providers.filter(p => p.type === preferredProvider),
-          ...this.providers.filter(p => p.type !== preferredProvider),
+          ...this.providers.filter((p) => p.type === preferredProvider),
+          ...this.providers.filter((p) => p.type !== preferredProvider),
         ]
       : this.providers;
 
-    const canonicalModel = options.model || domainConfig?.model || "text-embedding-3-small";
-    const cacheKey = this.cache.key(text, canonicalModel + (options.domain || ""));
+    const canonicalModel = options.model || domainConfig?.model || 'text-embedding-3-small';
+    const cacheKey = this.cache.key(text, canonicalModel + (options.domain || ''));
     const cached = this.cache.get(cacheKey);
     if (cached) {
       embeddingAnalytics.recordCacheHit(cached.provider, canonicalModel);
@@ -405,16 +421,17 @@ export class EmbeddingPipeline {
     const expectedDimensions = domainConfig?.dimensions ?? null;
 
     for (const provider of orderedProviders) {
-      if (!provider.getHealth().available && provider.type !== "mock") continue;
+      if (!provider.getHealth().available && provider.type !== 'mock') continue;
 
       const start = Date.now();
       try {
-        const isHfLike = provider.type === "huggingface" || provider.type === "local-sentence-transformers";
+        const isHfLike =
+          provider.type === 'huggingface' || provider.type === 'local-sentence-transformers';
         const modelForProvider = options.model
           ? options.model
           : isHfLike
-            ? (domainConfig?.hfModel || process.env["HF_EMBED_MODEL"] || "BAAI/bge-m3")
-            : (domainConfig?.model || "text-embedding-3-small");
+            ? domainConfig?.hfModel || process.env['HF_EMBED_MODEL'] || 'BAAI/bge-m3'
+            : domainConfig?.model || 'text-embedding-3-small';
 
         const vector = await provider.embed(text, modelForProvider);
         const latencyMs = Date.now() - start;
@@ -422,7 +439,7 @@ export class EmbeddingPipeline {
         if (expectedDimensions !== null && vector.length !== expectedDimensions) {
           console.warn(
             `[embedding-pipeline] Dimension mismatch for domain "${options.domain}": ` +
-            `expected ${expectedDimensions}, got ${vector.length} from ${provider.type}/${modelForProvider}`,
+              `expected ${expectedDimensions}, got ${vector.length} from ${provider.type}/${modelForProvider}`,
           );
         }
 
@@ -436,26 +453,50 @@ export class EmbeddingPipeline {
         };
 
         this.cache.set(cacheKey, result);
-        embeddingAnalytics.recordEmbedding(provider.type, modelForProvider, latencyMs, true, options.domain);
+        embeddingAnalytics.recordEmbedding(
+          provider.type,
+          modelForProvider,
+          latencyMs,
+          true,
+          options.domain,
+        );
         return result;
       } catch (err) {
-        embeddingAnalytics.recordEmbedding(provider.type, canonicalModel, Date.now() - start, false, options.domain);
-        console.warn(`[embedding-pipeline] Provider ${provider.type} failed:`, err instanceof Error ? err.message : String(err));
+        embeddingAnalytics.recordEmbedding(
+          provider.type,
+          canonicalModel,
+          Date.now() - start,
+          false,
+          options.domain,
+        );
+        console.warn(
+          `[embedding-pipeline] Provider ${provider.type} failed:`,
+          err instanceof Error ? err.message : String(err),
+        );
       }
     }
 
-    throw new Error("[embedding-pipeline] All embedding providers failed");
+    throw new Error('[embedding-pipeline] All embedding providers failed');
   }
 
-  async embedBatch(texts: string[], options: BatchEmbedOptions = {}): Promise<BatchEmbeddingResult> {
+  async embedBatch(
+    texts: string[],
+    options: BatchEmbedOptions = {},
+  ): Promise<BatchEmbeddingResult> {
     const rawConcurrency = options.concurrency ?? 5;
-    const concurrency = Math.max(1, Math.min(50, Number.isFinite(rawConcurrency) && rawConcurrency > 0 ? Math.floor(rawConcurrency) : 5));
+    const concurrency = Math.max(
+      1,
+      Math.min(
+        50,
+        Number.isFinite(rawConcurrency) && rawConcurrency > 0 ? Math.floor(rawConcurrency) : 5,
+      ),
+    );
     const totalStart = Date.now();
-    const results: BatchEmbeddingResult["results"] = new Array(texts.length);
+    const results: BatchEmbeddingResult['results'] = new Array(texts.length);
     let successCount = 0;
     let errorCount = 0;
-    let lastProvider: EmbeddingProviderType = "mock";
-    let lastModel = "unknown";
+    let lastProvider: EmbeddingProviderType = 'mock';
+    let lastModel = 'unknown';
 
     const queue = texts.map((text, index) => ({ text, index }));
     let completed = 0;
@@ -475,8 +516,8 @@ export class EmbeddingPipeline {
             results[index] = {
               embedding: mockVec,
               dimensions: mockDim,
-              model: "error-fallback",
-              provider: "mock",
+              model: 'error-fallback',
+              provider: 'mock',
               latencyMs: 0,
               cached: false,
               text,
@@ -488,7 +529,7 @@ export class EmbeddingPipeline {
             completed++;
             options.onProgress?.(completed, texts.length);
           }
-        })
+        }),
       );
     };
 

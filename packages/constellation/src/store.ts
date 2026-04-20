@@ -1,4 +1,4 @@
-import type { ConstellationNode, ConstellationEdge } from "./schema.js";
+import type { ConstellationEdge, ConstellationNode } from './schema.js';
 
 export interface GraphStore {
   upsertNode(node: ConstellationNode): void;
@@ -7,8 +7,12 @@ export interface GraphStore {
   getEdge(id: string): ConstellationEdge | undefined;
   deleteNode(id: string): boolean;
   deleteEdge(id: string): boolean;
-  listNodes(filter?: Partial<Pick<ConstellationNode, "type" | "domain">>): ConstellationNode[];
-  listEdges(filter?: { fromNodeId?: string; toNodeId?: string; type?: string }): ConstellationEdge[];
+  listNodes(filter?: Partial<Pick<ConstellationNode, 'type' | 'domain'>>): ConstellationNode[];
+  listEdges(filter?: {
+    fromNodeId?: string;
+    toNodeId?: string;
+    type?: string;
+  }): ConstellationEdge[];
   lookupByAlias(aliasType: string, aliasValue: string): ConstellationNode | undefined;
   nodeCount(): number;
   edgeCount(): number;
@@ -64,14 +68,18 @@ export class InMemoryGraphStore implements GraphStore {
     return this.edges.delete(id);
   }
 
-  listNodes(filter?: Partial<Pick<ConstellationNode, "type" | "domain">>): ConstellationNode[] {
+  listNodes(filter?: Partial<Pick<ConstellationNode, 'type' | 'domain'>>): ConstellationNode[] {
     let results = Array.from(this.nodes.values());
     if (filter?.type) results = results.filter((n) => n.type === filter.type);
     if (filter?.domain) results = results.filter((n) => n.domain === filter.domain);
     return results;
   }
 
-  listEdges(filter?: { fromNodeId?: string; toNodeId?: string; type?: string }): ConstellationEdge[] {
+  listEdges(filter?: {
+    fromNodeId?: string;
+    toNodeId?: string;
+    type?: string;
+  }): ConstellationEdge[] {
     let results = Array.from(this.edges.values());
     if (filter?.fromNodeId) results = results.filter((e) => e.fromNodeId === filter.fromNodeId);
     if (filter?.toNodeId) results = results.filter((e) => e.toNodeId === filter.toNodeId);

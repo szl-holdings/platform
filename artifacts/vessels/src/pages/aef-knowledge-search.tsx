@@ -1,9 +1,21 @@
-import { useState } from "react";
-import { Search, Database, AlertTriangle, Loader2, ChevronDown, ChevronUp, Shield, BarChart3, Route, FileText, Anchor } from "lucide-react";
-import { useAefSearch } from "@workspace/aef-sdk/hooks";
-import type { SearchHit } from "@workspace/aef-contracts";
+import type { SearchHit } from '@workspace/aef-contracts';
+import { useAefSearch } from '@workspace/aef-sdk/hooks';
+import {
+  AlertTriangle,
+  Anchor,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  Database,
+  FileText,
+  Loader2,
+  Route,
+  Search,
+  Shield,
+} from 'lucide-react';
+import { useState } from 'react';
 
-const PROFILE_ID = "vessels_maritime_risk";
+const PROFILE_ID = 'vessels_maritime_risk';
 
 function ScoreBar({ label, value, color }: { label: string; value?: number; color: string }) {
   if (value === undefined) return null;
@@ -22,11 +34,12 @@ function ScoreBar({ label, value, color }: { label: string; value?: number; colo
 function HitCard({ hit }: { hit: SearchHit }) {
   const [expanded, setExpanded] = useState(false);
   const rerankerScore = hit.rerankerScore ?? hit.rerankScore;
-  const pathway = rerankerScore !== undefined
-    ? "dense+keyword → fusion → rerank"
-    : hit.keywordScore !== undefined
-      ? "dense+keyword → fusion"
-      : "dense";
+  const pathway =
+    rerankerScore !== undefined
+      ? 'dense+keyword → fusion → rerank'
+      : hit.keywordScore !== undefined
+        ? 'dense+keyword → fusion'
+        : 'dense';
 
   return (
     <div className="rounded-lg border border-sky-500/15 bg-slate-900/60">
@@ -40,23 +53,34 @@ function HitCard({ hit }: { hit: SearchHit }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-100 truncate">{hit.title ?? hit.sourceId}</p>
-              <p className="text-[10px] font-mono text-sky-400/40 mt-0.5 truncate">{hit.sourceUri ?? hit.chunkId}</p>
+              <p className="text-xs font-semibold text-slate-100 truncate">
+                {hit.title ?? hit.sourceId}
+              </p>
+              <p className="text-[10px] font-mono text-sky-400/40 mt-0.5 truncate">
+                {hit.sourceUri ?? hit.chunkId}
+              </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border text-emerald-400 bg-emerald-500/8 border-emerald-500/20">
                 {Math.round(hit.finalScore * 100)}%
               </span>
-              {expanded ? <ChevronUp className="w-3.5 h-3.5 text-sky-400/40" /> : <ChevronDown className="w-3.5 h-3.5 text-sky-400/40" />}
+              {expanded ? (
+                <ChevronUp className="w-3.5 h-3.5 text-sky-400/40" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 text-sky-400/40" />
+              )}
             </div>
           </div>
           <p className="text-xs text-slate-300/60 mt-2 leading-snug line-clamp-2">{hit.text}</p>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-[9px] font-mono text-sky-400/30 flex items-center gap-1">
-              <Route className="w-2.5 h-2.5" />{pathway}
+              <Route className="w-2.5 h-2.5" />
+              {pathway}
             </span>
             {hit.boostApplied && (
-              <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-sky-500/10 border border-sky-500/20 text-sky-400/60">BOOST</span>
+              <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-sky-500/10 border border-sky-500/20 text-sky-400/60">
+                BOOST
+              </span>
             )}
           </div>
         </div>
@@ -77,7 +101,9 @@ function HitCard({ hit }: { hit: SearchHit }) {
           {(hit.rationale ?? hit.selectedRationale) && (
             <div className="rounded bg-sky-500/4 border border-sky-500/12 p-3">
               <p className="text-[9px] font-mono text-sky-400/40 mb-1">RATIONALE</p>
-              <p className="text-xs text-slate-100/70 leading-relaxed">{hit.rationale ?? hit.selectedRationale}</p>
+              <p className="text-xs text-slate-100/70 leading-relaxed">
+                {hit.rationale ?? hit.selectedRationale}
+              </p>
             </div>
           )}
           <div className="grid grid-cols-2 gap-2">
@@ -101,7 +127,7 @@ function HitCard({ hit }: { hit: SearchHit }) {
 }
 
 export default function AefKnowledgeSearch() {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const { search, loading, results, error, query, configured } = useAefSearch({
     profileId: PROFILE_ID,
     topK: 8,
@@ -121,7 +147,9 @@ export default function AefKnowledgeSearch() {
         </div>
         <div>
           <h1 className="text-sm font-semibold text-slate-100">AEF Maritime Intelligence Search</h1>
-          <p className="text-[10px] font-mono text-sky-400/40">Profile: {PROFILE_ID} · Vessels Maritime Risk</p>
+          <p className="text-[10px] font-mono text-sky-400/40">
+            Profile: {PROFILE_ID} · Vessels Maritime Risk
+          </p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <Shield className="w-3 h-3 text-sky-400/40" />
@@ -145,7 +173,11 @@ export default function AefKnowledgeSearch() {
           disabled={loading || !inputValue.trim()}
           className="px-4 py-2.5 rounded bg-sky-500/15 border border-sky-500/30 text-xs font-mono text-sky-300 hover:bg-sky-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
         >
-          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+          {loading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Search className="w-3.5 h-3.5" />
+          )}
           Search
         </button>
       </form>
@@ -156,7 +188,9 @@ export default function AefKnowledgeSearch() {
           <div>
             <p className="text-xs font-semibold text-sky-200">AEF Not Configured</p>
             <p className="text-[10px] text-sky-400/60 mt-1 leading-relaxed">
-              Set <code className="font-mono text-sky-300">VITE_AEF_GATEWAY_URL</code> and <code className="font-mono text-sky-300">VITE_AEF_API_KEY</code> in your environment. See <code className="font-mono text-sky-300">docs/aef/RUNBOOK.md</code>.
+              Set <code className="font-mono text-sky-300">VITE_AEF_GATEWAY_URL</code> and{' '}
+              <code className="font-mono text-sky-300">VITE_AEF_API_KEY</code> in your environment.
+              See <code className="font-mono text-sky-300">docs/aef/RUNBOOK.md</code>.
             </p>
           </div>
         </div>
@@ -167,7 +201,9 @@ export default function AefKnowledgeSearch() {
           <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-xs font-semibold text-red-200">Retrieval Error</p>
-            <p className="text-[10px] text-red-400/70 mt-1 leading-relaxed font-mono">{error.message}</p>
+            <p className="text-[10px] text-red-400/70 mt-1 leading-relaxed font-mono">
+              {error.message}
+            </p>
           </div>
         </div>
       )}
@@ -178,17 +214,22 @@ export default function AefKnowledgeSearch() {
             <div className="flex items-center gap-2">
               <BarChart3 className="w-3.5 h-3.5 text-sky-400/40" />
               <span className="text-[10px] font-mono text-sky-400/40">
-                {results.hits.length} of {results.totalCandidates} candidates · query: &quot;{query}&quot;
+                {results.hits.length} of {results.totalCandidates} candidates · query: &quot;{query}
+                &quot;
               </span>
             </div>
             {results.processingMs !== undefined && (
-              <span className="text-[9px] font-mono text-sky-400/30">{results.processingMs.toFixed(0)}ms</span>
+              <span className="text-[9px] font-mono text-sky-400/30">
+                {results.processingMs.toFixed(0)}ms
+              </span>
             )}
           </div>
 
           {results.hits.length === 0 ? (
             <div className="rounded-lg border border-sky-500/10 bg-slate-900/40 p-8 text-center">
-              <p className="text-xs text-sky-400/40 font-mono">No maritime documents matched the query above the score threshold.</p>
+              <p className="text-xs text-sky-400/40 font-mono">
+                No maritime documents matched the query above the score threshold.
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -202,7 +243,12 @@ export default function AefKnowledgeSearch() {
             <Route className="w-3 h-3 text-sky-400/40 shrink-0" />
             <div className="flex gap-1.5 flex-wrap">
               {results.retrievalPath.map((stage, i) => (
-                <span key={i} className="text-[9px] font-mono text-sky-400/40 after:content-['→'] after:mx-1 after:text-sky-400/20 last:after:content-['']">{stage}</span>
+                <span
+                  key={i}
+                  className="text-[9px] font-mono text-sky-400/40 after:content-['→'] after:mx-1 after:text-sky-400/20 last:after:content-['']"
+                >
+                  {stage}
+                </span>
               ))}
             </div>
           </div>

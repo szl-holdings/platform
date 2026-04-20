@@ -1,8 +1,8 @@
-import { randomUUID } from "crypto";
-import { MEMORY_DOMAIN_UNKNOWN } from "./types.js";
-import type { MemoryEntry } from "./types.js";
-import type { MemoryStore } from "./store.js";
-import { isExpired, isLowValue, isProvenPlaybook, markStale } from "./retention.js";
+import { randomUUID } from 'crypto';
+import { isExpired, isLowValue, isProvenPlaybook, markStale } from './retention.js';
+import type { MemoryStore } from './store.js';
+import type { MemoryEntry } from './types.js';
+import { MEMORY_DOMAIN_UNKNOWN } from './types.js';
 
 export interface SummarizationResult {
   summary: MemoryEntry;
@@ -23,11 +23,11 @@ export interface RetentionEnforcementResult {
 export function summarizeEpisodes(
   store: MemoryStore,
   scopeId: string,
-  options: { minEpisodes?: number; summarizeFn?: (entries: MemoryEntry[]) => string } = {}
+  options: { minEpisodes?: number; summarizeFn?: (entries: MemoryEntry[]) => string } = {},
 ): SummarizationResult | null {
   const { minEpisodes = 3, summarizeFn } = options;
 
-  const episodes = store.list({ tier: "episodic", scopeId, includeStale: false });
+  const episodes = store.list({ tier: 'episodic', scopeId, includeStale: false });
 
   if (episodes.length < minEpisodes) return null;
 
@@ -37,14 +37,14 @@ export function summarizeEpisodes(
 
   const summaryEntry: MemoryEntry = {
     id: randomUUID(),
-    tier: "semantic",
-    memoryType: "semantic",
+    tier: 'semantic',
+    memoryType: 'semantic',
     key: `episode-summary:${scopeId}:${Date.now()}`,
     value: summaryText,
     summary: summaryText,
     provenance: {
-      source: "memory-fabric:summarizer",
-      method: "derived",
+      source: 'memory-fabric:summarizer',
+      method: 'derived',
       createdAt: now,
     },
     freshness: {
@@ -52,12 +52,12 @@ export function summarizeEpisodes(
       isStale: false,
     },
     confidence: Math.min(...episodes.map((e) => e.confidence)),
-    retention: { policy: "persistent", pinned: false },
+    retention: { policy: 'persistent', pinned: false },
     sensitivity: highestSensitivity(episodes.map((e) => e.sensitivity)),
     linkedEntities: unique(episodes.flatMap((e) => e.linkedEntities)),
     linkedTraces: unique(episodes.flatMap((e) => e.linkedTraces)),
     linkedActions: unique(episodes.flatMap((e) => e.linkedActions)),
-    tags: ["episodic-summary", ...(scopeId ? [`scope:${scopeId}`] : [])],
+    tags: ['episodic-summary', ...(scopeId ? [`scope:${scopeId}`] : [])],
     scopeId,
     domain: dominantDomain(episodes),
     metadata: { collapsedCount: episodes.length, collapsedIds: episodes.map((e) => e.id) },
@@ -74,11 +74,11 @@ export function summarizeEpisodes(
 
 export function distillLessons(
   store: MemoryStore,
-  options: { minFeedback?: number; distillFn?: (entries: MemoryEntry[]) => string } = {}
+  options: { minFeedback?: number; distillFn?: (entries: MemoryEntry[]) => string } = {},
 ): DistillationResult | null {
   const { minFeedback = 2, distillFn } = options;
 
-  const feedbackEntries = store.list({ tier: "operator-feedback", includeStale: false });
+  const feedbackEntries = store.list({ tier: 'operator-feedback', includeStale: false });
   const highValueFeedback = feedbackEntries.filter((e) => e.confidence >= 0.7);
 
   if (highValueFeedback.length < minFeedback) return null;
@@ -89,14 +89,14 @@ export function distillLessons(
 
   const lessonEntry: MemoryEntry = {
     id: randomUUID(),
-    tier: "skill",
-    memoryType: "skill",
+    tier: 'skill',
+    memoryType: 'skill',
     key: `lesson:${Date.now()}`,
     value: lessonText,
     summary: lessonText,
     provenance: {
-      source: "memory-fabric:distiller",
-      method: "derived",
+      source: 'memory-fabric:distiller',
+      method: 'derived',
       createdAt: now,
     },
     freshness: {
@@ -104,12 +104,12 @@ export function distillLessons(
       isStale: false,
     },
     confidence: average(highValueFeedback.map((e) => e.confidence)),
-    retention: { policy: "persistent", pinned: true },
+    retention: { policy: 'persistent', pinned: true },
     sensitivity: highestSensitivity(highValueFeedback.map((e) => e.sensitivity)),
     linkedEntities: unique(highValueFeedback.flatMap((e) => e.linkedEntities)),
     linkedTraces: unique(highValueFeedback.flatMap((e) => e.linkedTraces)),
     linkedActions: unique(highValueFeedback.flatMap((e) => e.linkedActions)),
-    tags: ["distilled-lesson", "skill"],
+    tags: ['distilled-lesson', 'skill'],
     domain: dominantDomain(highValueFeedback),
     metadata: { sourceIds: highValueFeedback.map((e) => e.id) },
   };
@@ -179,7 +179,7 @@ export interface FreshnessDecayResult {
  */
 export function applyFreshnessDecay(
   store: MemoryStore,
-  options: { halfLifeDays?: number; staleThreshold?: number } = {}
+  options: { halfLifeDays?: number; staleThreshold?: number } = {},
 ): FreshnessDecayResult {
   const { halfLifeDays = 7, staleThreshold = 0.2 } = options;
   const now = new Date();
@@ -197,7 +197,7 @@ export function applyFreshnessDecay(
 
     if (ageMs <= 0) continue;
 
-    const decayFactor = Math.pow(0.5, ageMs / halfLifeMs);
+    const decayFactor = 0.5 ** (ageMs / halfLifeMs);
     const newConfidence = Math.max(0, Math.min(1, entry.confidence * decayFactor));
 
     if (Math.abs(newConfidence - entry.confidence) < 0.001) continue;
@@ -221,23 +221,23 @@ export function applyFreshnessDecay(
 }
 
 function defaultEpisodeSummarizer(entries: MemoryEntry[]): string {
-  const keys = entries.map((e) => e.key).join(", ");
+  const keys = entries.map((e) => e.key).join(', ');
   return `Episodic summary of ${entries.length} episodes: ${keys}`;
 }
 
 function defaultLessonDistiller(entries: MemoryEntry[]): string {
-  const keys = entries.map((e) => e.key).join(", ");
+  const keys = entries.map((e) => e.key).join(', ');
   return `Distilled lesson from ${entries.length} operator feedback items: ${keys}`;
 }
 
-function highestSensitivity(levels: MemoryEntry["sensitivity"][]): MemoryEntry["sensitivity"] {
-  const order: MemoryEntry["sensitivity"][] = ["public", "internal", "confidential", "restricted"];
+function highestSensitivity(levels: MemoryEntry['sensitivity'][]): MemoryEntry['sensitivity'] {
+  const order: MemoryEntry['sensitivity'][] = ['public', 'internal', 'confidential', 'restricted'];
   let max = 0;
   for (const lvl of levels) {
     const idx = order.indexOf(lvl);
     if (idx > max) max = idx;
   }
-  return order[max] ?? "internal";
+  return order[max] ?? 'internal';
 }
 
 function unique<T>(arr: T[]): T[] {
@@ -252,7 +252,7 @@ function unique<T>(arr: T[]): T[] {
 function dominantDomain(entries: MemoryEntry[]): string {
   const counts = new Map<string, number>();
   for (const e of entries) {
-    if (typeof e.domain === "string" && e.domain.length > 0) {
+    if (typeof e.domain === 'string' && e.domain.length > 0) {
       counts.set(e.domain, (counts.get(e.domain) ?? 0) + 1);
     }
   }

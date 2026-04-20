@@ -1,16 +1,16 @@
-import * as api from "@opentelemetry/api";
+import * as api from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import { W3CTraceContextPropagator } from '@opentelemetry/core';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
   BasicTracerProvider,
-  SimpleSpanProcessor,
   BatchSpanProcessor,
   ConsoleSpanExporter,
   InMemorySpanExporter,
-} from "@opentelemetry/sdk-trace-base";
-import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
-import { W3CTraceContextPropagator } from "@opentelemetry/core";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { resourceFromAttributes } from "@opentelemetry/resources";
-import { getEnv } from "@szl-holdings/env";
+  SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-base';
+import { getEnv } from '@szl-holdings/env';
 
 let otelInitialized = false;
 let provider: BasicTracerProvider | null = null;
@@ -27,7 +27,7 @@ export interface OtelConfig {
 
 export interface ActorContext {
   actorId?: string;
-  actorType?: "human" | "agent" | "system" | "external";
+  actorType?: 'human' | 'agent' | 'system' | 'external';
   actorRole?: string;
   actorDisplayName?: string;
   actorSessionId?: string;
@@ -52,7 +52,7 @@ export interface SpanContext {
 export interface Span {
   setAttributes(attributes: Record<string, string | number | boolean>): Span;
   addEvent(name: string, attributes?: Record<string, string | number | boolean>): Span;
-  setStatus(status: "ok" | "error", message?: string): Span;
+  setStatus(status: 'ok' | 'error', message?: string): Span;
   end(): void;
   spanContext(): api.SpanContext;
 }
@@ -70,9 +70,9 @@ class OtelSpanWrapper implements Span {
     return this;
   }
 
-  setStatus(status: "ok" | "error", message?: string): Span {
+  setStatus(status: 'ok' | 'error', message?: string): Span {
     this.nativeSpan.setStatus({
-      code: status === "ok" ? api.SpanStatusCode.OK : api.SpanStatusCode.ERROR,
+      code: status === 'ok' ? api.SpanStatusCode.OK : api.SpanStatusCode.ERROR,
       ...(message !== undefined ? { message } : {}),
     });
     return this;
@@ -88,12 +88,18 @@ class OtelSpanWrapper implements Span {
 }
 
 class NoOpSpan implements Span {
-  setAttributes(_: Record<string, string | number | boolean>): Span { return this; }
-  addEvent(_: string, __?: Record<string, string | number | boolean>): Span { return this; }
-  setStatus(_: "ok" | "error", __?: string): Span { return this; }
+  setAttributes(_: Record<string, string | number | boolean>): Span {
+    return this;
+  }
+  addEvent(_: string, __?: Record<string, string | number | boolean>): Span {
+    return this;
+  }
+  setStatus(_: 'ok' | 'error', __?: string): Span {
+    return this;
+  }
   end(): void {}
   spanContext(): api.SpanContext {
-    return { traceId: "0".repeat(32), spanId: "0".repeat(16), traceFlags: 0, isRemote: false };
+    return { traceId: '0'.repeat(32), spanId: '0'.repeat(16), traceFlags: 0, isRemote: false };
   }
 }
 
@@ -101,28 +107,28 @@ type SpanCallback<T> = (span: Span) => T | Promise<T>;
 
 export function buildActorAttributes(actor: ActorContext): Record<string, string> {
   const attrs: Record<string, string> = {};
-  if (actor.actorId) attrs["szl.actor.id"] = actor.actorId;
-  if (actor.actorType) attrs["szl.actor.type"] = actor.actorType;
-  if (actor.actorRole) attrs["szl.actor.role"] = actor.actorRole;
-  if (actor.actorDisplayName) attrs["szl.actor.display_name"] = actor.actorDisplayName;
-  if (actor.actorSessionId) attrs["szl.actor.session.id"] = actor.actorSessionId;
+  if (actor.actorId) attrs['szl.actor.id'] = actor.actorId;
+  if (actor.actorType) attrs['szl.actor.type'] = actor.actorType;
+  if (actor.actorRole) attrs['szl.actor.role'] = actor.actorRole;
+  if (actor.actorDisplayName) attrs['szl.actor.display_name'] = actor.actorDisplayName;
+  if (actor.actorSessionId) attrs['szl.actor.session.id'] = actor.actorSessionId;
   return attrs;
 }
 
 export function buildContextAttributes(ctx: SpanContext): Record<string, string | number> {
   const attrs: Record<string, string | number> = {};
-  if (ctx.correlationId) attrs["szl.correlation.id"] = ctx.correlationId;
-  if (ctx.requestId) attrs["szl.request.id"] = ctx.requestId;
-  if (ctx.workspaceId) attrs["szl.workspace.id"] = ctx.workspaceId;
-  if (ctx.workspaceName) attrs["szl.workspace.name"] = ctx.workspaceName;
-  if (ctx.organizationId) attrs["szl.organization.id"] = ctx.organizationId;
-  attrs["szl.environment"] = ctx.environment ?? getEnv().NODE_ENV;
-  if (ctx.workflowId) attrs["szl.workflow.id"] = ctx.workflowId;
-  if (ctx.workflowType) attrs["szl.workflow.type"] = ctx.workflowType;
-  if (ctx.workflowStep) attrs["szl.workflow.step"] = ctx.workflowStep;
-  if (ctx.workflowStepIndex !== undefined) attrs["szl.workflow.step.index"] = ctx.workflowStepIndex;
-  if (ctx.policyId) attrs["szl.policy.id"] = ctx.policyId;
-  if (ctx.approvalId) attrs["szl.approval.id"] = ctx.approvalId;
+  if (ctx.correlationId) attrs['szl.correlation.id'] = ctx.correlationId;
+  if (ctx.requestId) attrs['szl.request.id'] = ctx.requestId;
+  if (ctx.workspaceId) attrs['szl.workspace.id'] = ctx.workspaceId;
+  if (ctx.workspaceName) attrs['szl.workspace.name'] = ctx.workspaceName;
+  if (ctx.organizationId) attrs['szl.organization.id'] = ctx.organizationId;
+  attrs['szl.environment'] = ctx.environment ?? getEnv().NODE_ENV;
+  if (ctx.workflowId) attrs['szl.workflow.id'] = ctx.workflowId;
+  if (ctx.workflowType) attrs['szl.workflow.type'] = ctx.workflowType;
+  if (ctx.workflowStep) attrs['szl.workflow.step'] = ctx.workflowStep;
+  if (ctx.workflowStepIndex !== undefined) attrs['szl.workflow.step.index'] = ctx.workflowStepIndex;
+  if (ctx.policyId) attrs['szl.policy.id'] = ctx.policyId;
+  if (ctx.approvalId) attrs['szl.approval.id'] = ctx.approvalId;
   if (ctx.actor) Object.assign(attrs, buildActorAttributes(ctx.actor));
   return attrs;
 }
@@ -151,7 +157,11 @@ class OtelTracer {
     }
   }
 
-  async withSpan<T>(name: string, fn: SpanCallback<T>, attributes?: Record<string, string | number | boolean>): Promise<T> {
+  async withSpan<T>(
+    name: string,
+    fn: SpanCallback<T>,
+    attributes?: Record<string, string | number | boolean>,
+  ): Promise<T> {
     const nativeSpan = this.tracer.startSpan(name, {
       attributes: attributes as api.Attributes,
     });
@@ -178,9 +188,17 @@ class OtelTracer {
     return this.withSpan(name, fn, attrs as Record<string, string | number | boolean>);
   }
 
-  async withActorSpan<T>(name: string, actor: ActorContext, fn: SpanCallback<T>, extraAttrs?: Record<string, string | number | boolean>): Promise<T> {
+  async withActorSpan<T>(
+    name: string,
+    actor: ActorContext,
+    fn: SpanCallback<T>,
+    extraAttrs?: Record<string, string | number | boolean>,
+  ): Promise<T> {
     const actorAttrs = buildActorAttributes(actor);
-    const allAttrs: Record<string, string | number | boolean> = { ...actorAttrs, ...(extraAttrs ?? {}) };
+    const allAttrs: Record<string, string | number | boolean> = {
+      ...actorAttrs,
+      ...(extraAttrs ?? {}),
+    };
     return this.withSpan(name, fn, allAttrs);
   }
 
@@ -218,15 +236,15 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
   api.propagation.setGlobalPropagator(new W3CTraceContextPropagator());
 
   const activeExporters: string[] = [];
-  const spanProcessors: import("@opentelemetry/sdk-trace-base").SpanProcessor[] = [];
+  const spanProcessors: import('@opentelemetry/sdk-trace-base').SpanProcessor[] = [];
 
   const _env = getEnv();
-  const isDevMode = _env.NODE_ENV !== "production";
+  const isDevMode = _env.NODE_ENV !== 'production';
   const enableInMemory = isDevMode || _env.OTEL_IN_MEMORY;
   if (enableInMemory) {
     inMemoryExporter = new InMemorySpanExporter();
     spanProcessors.push(new SimpleSpanProcessor(inMemoryExporter));
-    activeExporters.push("in-memory");
+    activeExporters.push('in-memory');
     const MAX_IN_MEMORY_SPANS = 2000;
     const memoryRotationTimer = setInterval(() => {
       const count = inMemoryExporter?.getFinishedSpans().length ?? 0;
@@ -234,19 +252,19 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
         inMemoryExporter?.reset();
       }
     }, 30_000);
-    if (typeof memoryRotationTimer !== "number" && memoryRotationTimer.unref) {
+    if (typeof memoryRotationTimer !== 'number' && memoryRotationTimer.unref) {
       memoryRotationTimer.unref();
     }
   }
 
   const otlpEndpoint =
-    config.otlpEndpoint ??
-    _env.OTLP_ENDPOINT ??
-    _env.OTEL_EXPORTER_OTLP_ENDPOINT;
+    config.otlpEndpoint ?? _env.OTLP_ENDPOINT ?? _env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
   if (otlpEndpoint) {
-    const normalizedEndpoint = otlpEndpoint.replace(/\/+$/, "");
-    const otlpUrl = normalizedEndpoint.endsWith("/v1/traces") ? normalizedEndpoint : `${normalizedEndpoint}/v1/traces`;
+    const normalizedEndpoint = otlpEndpoint.replace(/\/+$/, '');
+    const otlpUrl = normalizedEndpoint.endsWith('/v1/traces')
+      ? normalizedEndpoint
+      : `${normalizedEndpoint}/v1/traces`;
     console.info(`[otel] OTLP exporter configured: ${otlpUrl}`);
     const otlpExporter = new OTLPTraceExporter({ url: otlpUrl });
     spanProcessors.push(new BatchSpanProcessor(otlpExporter));
@@ -255,13 +273,13 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
 
   if (config.exportToConsole || _env.OTEL_CONSOLE_EXPORT) {
     spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-    activeExporters.push("console");
+    activeExporters.push('console');
   }
 
   const resource = resourceFromAttributes({
-    "service.name": config.serviceName,
-    "service.version": config.serviceVersion ?? process.env.npm_package_version ?? "0.0.0",
-    "deployment.environment": _env.NODE_ENV,
+    'service.name': config.serviceName,
+    'service.version': config.serviceVersion ?? process.env.npm_package_version ?? '0.0.0',
+    'deployment.environment': _env.NODE_ENV,
   });
 
   const tracerProvider = new BasicTracerProvider({ spanProcessors, resource });
@@ -273,7 +291,9 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
   globalTracer.refreshTracer();
 
   otelInitialized = true;
-  console.info(`[otel] OpenTelemetry SDK initialized: service=${config.serviceName}, exporters=[${activeExporters.join(", ")}], contextManager=AsyncLocalStorage, propagator=W3CTraceContext`);
+  console.info(
+    `[otel] OpenTelemetry SDK initialized: service=${config.serviceName}, exporters=[${activeExporters.join(', ')}], contextManager=AsyncLocalStorage, propagator=W3CTraceContext`,
+  );
 }
 
 export function isOtelInitialized(): boolean {

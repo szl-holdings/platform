@@ -6,8 +6,11 @@
  * Built-in: rate limiting, deduplication via content hashing, error isolation.
  */
 
-import { createHash } from "crypto";
-import type { OntologyEntity, OntologyRelationship } from "@szl-holdings/ai-engine/ontology/ontology-engine";
+import type {
+  OntologyEntity,
+  OntologyRelationship,
+} from '@szl-holdings/ai-engine/ontology/ontology-engine';
+import { createHash } from 'crypto';
 
 export interface FeedAdapterConfig {
   id: string;
@@ -30,7 +33,7 @@ export interface FeedAdapterConfig {
 export interface FeedHealthStatus {
   feedId: string;
   feedName: string;
-  status: "healthy" | "degraded" | "down" | "initializing";
+  status: 'healthy' | 'degraded' | 'down' | 'initializing';
   lastPollAt: string | null;
   lastSuccessAt: string | null;
   lastErrorAt: string | null;
@@ -45,12 +48,12 @@ export interface FeedHealthStatus {
 }
 
 export interface NormalizedFeedPayload {
-  entities: Array<Omit<OntologyEntity, "id" | "lastUpdated"> & { externalId?: string }>;
+  entities: Array<Omit<OntologyEntity, 'id' | 'lastUpdated'> & { externalId?: string }>;
   relationships: Array<{
     fromExternalId: string;
     toExternalId: string;
-    type: OntologyRelationship["type"];
-    strength: OntologyRelationship["strength"];
+    type: OntologyRelationship['type'];
+    strength: OntologyRelationship['strength'];
     metadata: Record<string, unknown>;
   }>;
   feedId: string;
@@ -98,7 +101,7 @@ class RateLimiter {
     }
 
     const waitMs = (1 - this.tokens) / this.refillRatePerMs;
-    await new Promise(resolve => setTimeout(resolve, Math.ceil(waitMs)));
+    await new Promise((resolve) => setTimeout(resolve, Math.ceil(waitMs)));
     this.tokens = 0;
   }
 }
@@ -109,7 +112,7 @@ export class DeduplicationCache {
   private readonly MAX_SIZE = 100000;
 
   hash(content: string): string {
-    return createHash("sha256").update(content).digest("hex").slice(0, 32);
+    return createHash('sha256').update(content).digest('hex').slice(0, 32);
   }
 
   isDuplicate(contentHash: string): boolean {
@@ -140,12 +143,15 @@ export abstract class BaseFeedAdapter {
 
   constructor(config: FeedAdapterConfig) {
     this.config = config;
-    this.rateLimiter = new RateLimiter(config.rateLimit.requestsPerMinute, config.rateLimit.burstAllowed);
+    this.rateLimiter = new RateLimiter(
+      config.rateLimit.requestsPerMinute,
+      config.rateLimit.burstAllowed,
+    );
     this.dedup = new DeduplicationCache();
     this.health = {
       feedId: config.id,
       feedName: config.name,
-      status: "initializing",
+      status: 'initializing',
       lastPollAt: null,
       lastSuccessAt: null,
       lastErrorAt: null,
@@ -190,12 +196,18 @@ export abstract class BaseFeedAdapter {
         this.health.successfulPolls++;
         this.health.consecutiveFailures = 0;
         this.health.lastSuccessAt = new Date().toISOString();
-        this.health.status = "healthy";
+        this.health.status = 'healthy';
 
         let recordsNew = 0;
         let recordsDuplicate = 0;
         for (const entity of payload.entities) {
-          const hash = this.dedup.hash(JSON.stringify({ name: entity.name, type: entity.type, externalId: (entity as { externalId?: string }).externalId }));
+          const hash = this.dedup.hash(
+            JSON.stringify({
+              name: entity.name,
+              type: entity.type,
+              externalId: (entity as { externalId?: string }).externalId,
+            }),
+          );
           if (this.dedup.isDuplicate(hash)) {
             recordsDuplicate++;
           } else {
@@ -221,10 +233,10 @@ export abstract class BaseFeedAdapter {
         attempt++;
         if (attempt <= this.config.retryPolicy.maxRetries) {
           const backoff = Math.min(
-            this.config.retryPolicy.backoffBaseMs * Math.pow(2, attempt - 1),
+            this.config.retryPolicy.backoffBaseMs * 2 ** (attempt - 1),
             this.config.retryPolicy.maxBackoffMs,
           );
-          await new Promise(resolve => setTimeout(resolve, backoff));
+          await new Promise((resolve) => setTimeout(resolve, backoff));
         }
       }
     }
@@ -233,8 +245,8 @@ export abstract class BaseFeedAdapter {
     this.health.failedPolls++;
     this.health.consecutiveFailures++;
     this.health.lastErrorAt = new Date().toISOString();
-    this.health.lastError = lastError?.message ?? "Unknown error";
-    this.health.status = this.health.consecutiveFailures >= 3 ? "down" : "degraded";
+    this.health.lastError = lastError?.message ?? 'Unknown error';
+    this.health.status = this.health.consecutiveFailures >= 3 ? 'down' : 'degraded';
 
     return {
       feedId: this.config.id,
@@ -245,7 +257,7 @@ export abstract class BaseFeedAdapter {
       entitiesUpserted: 0,
       relationshipsCreated: 0,
       durationMs,
-      error: lastError?.message ?? "Unknown error",
+      error: lastError?.message ?? 'Unknown error',
       payload: null,
     };
   }

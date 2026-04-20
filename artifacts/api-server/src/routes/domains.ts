@@ -24,24 +24,28 @@
  *   activeEdgesOnly  exclude edges where active=false (default: false)
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db } from "@szl-holdings/db";
-import { cstNodes, cstEdges } from "@szl-holdings/db";
-import { eq, and, or, sql, inArray, notInArray } from "drizzle-orm";
-import {
-  sendSuccess,
-  sendBadRequest,
-  handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { cstEdges, cstNodes, db } from '@szl-holdings/db';
+import { and, eq, inArray, notInArray, or, sql } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { authMiddleware } from '../middlewares/auth';
+import { perUserApiSlidingLimiter } from '../middlewares/sliding-window-limiter';
 
 const router: IRouter = Router();
 router.use(authMiddleware({ required: false }));
 router.use(perUserApiSlidingLimiter);
 
-const KNOWN_DOMAINS = ["terra", "prism", "vessels", "aegis", "lyte", "imperium", "carlota-jo", "platform"] as const;
-type KnownDomain = typeof KNOWN_DOMAINS[number];
+const KNOWN_DOMAINS = [
+  'terra',
+  'prism',
+  'vessels',
+  'aegis',
+  'lyte',
+  'imperium',
+  'carlota-jo',
+  'platform',
+] as const;
+type KnownDomain = (typeof KNOWN_DOMAINS)[number];
 
 async function buildDomainGraph(
   domain: string,
@@ -52,7 +56,7 @@ async function buildDomainGraph(
     offset: number;
     includeCross: boolean;
     activeEdgesOnly: boolean;
-  }
+  },
 ) {
   const nodeConditions = [eq(cstNodes.domain, domain)];
   if (opts.entityType) nodeConditions.push(eq(cstNodes.entityType, opts.entityType));
@@ -84,16 +88,10 @@ async function buildDomainGraph(
     if (opts.includeCross) {
       const whereExpr = opts.activeEdgesOnly
         ? and(
-            or(
-              inArray(cstEdges.fromNodeId, nodeIds),
-              inArray(cstEdges.toNodeId, nodeIds),
-            ),
+            or(inArray(cstEdges.fromNodeId, nodeIds), inArray(cstEdges.toNodeId, nodeIds)),
             eq(cstEdges.active, true),
           )
-        : or(
-            inArray(cstEdges.fromNodeId, nodeIds),
-            inArray(cstEdges.toNodeId, nodeIds),
-          );
+        : or(inArray(cstEdges.fromNodeId, nodeIds), inArray(cstEdges.toNodeId, nodeIds));
       edges = await db
         .select()
         .from(cstEdges)
@@ -197,18 +195,18 @@ async function buildDomainGraph(
 function domainHandler(domain: string) {
   return async (req: Request, res: Response) => {
     try {
-      const rawLimit = parseInt((req.query.limit as string) ?? "100", 10);
-      const rawOffset = parseInt((req.query.offset as string) ?? "0", 10);
+      const rawLimit = parseInt((req.query.limit as string) ?? '100', 10);
+      const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
       if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
-        return sendBadRequest(res, "limit must be 1–500");
+        return sendBadRequest(res, 'limit must be 1–500');
       }
       if (isNaN(rawOffset) || rawOffset < 0) {
-        return sendBadRequest(res, "offset must be >= 0");
+        return sendBadRequest(res, 'offset must be >= 0');
       }
-      const includeCross = req.query.includeCross !== "false";
+      const includeCross = req.query.includeCross !== 'false';
       const isActiveRaw = req.query.isActive as string | undefined;
-      const isActive = isActiveRaw === "all" ? undefined : isActiveRaw !== "false";
-      const activeEdgesOnly = req.query.activeEdgesOnly === "true";
+      const isActive = isActiveRaw === 'all' ? undefined : isActiveRaw !== 'false';
+      const activeEdgesOnly = req.query.activeEdgesOnly === 'true';
 
       const graph = await buildDomainGraph(domain, {
         entityType: req.query.entityType as string | undefined,
@@ -225,16 +223,16 @@ function domainHandler(domain: string) {
   };
 }
 
-router.get("/domains/terra/graph", domainHandler("terra"));
-router.get("/domains/prism/graph", domainHandler("prism"));
-router.get("/domains/vessels/graph", domainHandler("vessels"));
-router.get("/domains/aegis/graph", domainHandler("aegis"));
-router.get("/domains/lyte/graph", domainHandler("lyte"));
+router.get('/domains/terra/graph', domainHandler('terra'));
+router.get('/domains/prism/graph', domainHandler('prism'));
+router.get('/domains/vessels/graph', domainHandler('vessels'));
+router.get('/domains/aegis/graph', domainHandler('aegis'));
+router.get('/domains/lyte/graph', domainHandler('lyte'));
 
-router.get("/domains/:domain/graph", async (req: Request, res: Response) => {
+router.get('/domains/:domain/graph', async (req: Request, res: Response) => {
   const { domain } = req.params as { domain: string };
   if (!KNOWN_DOMAINS.includes(domain as KnownDomain)) {
-    return sendBadRequest(res, `Unknown domain '${domain}'. Known: ${KNOWN_DOMAINS.join(", ")}`);
+    return sendBadRequest(res, `Unknown domain '${domain}'. Known: ${KNOWN_DOMAINS.join(', ')}`);
   }
   return domainHandler(domain)(req, res);
 });

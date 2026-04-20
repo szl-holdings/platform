@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type RealtimeConnectionStatus = "connected" | "reconnecting" | "offline";
-export type RealtimeTransport = "websocket" | "sse";
+export type RealtimeConnectionStatus = 'connected' | 'reconnecting' | 'offline';
+export type RealtimeTransport = 'websocket' | 'sse';
 
 export interface RealtimeChannelMessage<T = unknown> {
   channel: string;
@@ -39,36 +39,36 @@ const DEFAULT_MAX_DELAY_MS = 30_000;
 const MAX_MESSAGES = 200;
 
 const SENSITIVE_CHANNELS = new Set([
-  "aegis-incidents",
-  "aegis:alert-feed",
-  "workflow-runs",
-  "bookings",
-  "lyte-metrics",
-  "lyte:metrics-stream",
-  "vessel-positions",
-  "vessels:fleet-positions",
-  "terra-signals",
-  "nexus:intelligence-feed",
+  'aegis-incidents',
+  'aegis:alert-feed',
+  'workflow-runs',
+  'bookings',
+  'lyte-metrics',
+  'lyte:metrics-stream',
+  'vessel-positions',
+  'vessels:fleet-positions',
+  'terra-signals',
+  'nexus:intelligence-feed',
 ]);
 
 function getWebSocketUrl(): string {
-  if (typeof window === "undefined") return "";
-  const proto = window.location.protocol === "https:" ? "wss" : "ws";
+  if (typeof window === 'undefined') return '';
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
   return `${proto}://${window.location.host}/ws`;
 }
 
 function getSseUrl(channel: string, apiBaseUrl: string): string {
-  const base = apiBaseUrl.endsWith("/") ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
+  const base = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
   return `${base}/realtime/sse?channel=${encodeURIComponent(channel)}`;
 }
 
 async function fetchWsTicket(apiBaseUrl: string): Promise<string | undefined> {
   try {
-    const base = apiBaseUrl.endsWith("/") ? apiBaseUrl : `${apiBaseUrl}/`;
+    const base = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
     const res = await fetch(`${base}auth/ws-ticket`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
     });
     if (!res.ok) return undefined;
     const body = (await res.json()) as { ticket?: string; data?: { ticket?: string } };
@@ -87,7 +87,7 @@ export function useRealtimeChannel<T = unknown>(
     baseReconnectDelayMs = DEFAULT_BASE_DELAY_MS,
     maxReconnectDelayMs = DEFAULT_MAX_DELAY_MS,
     token: optionToken,
-    apiBaseUrl = "/api",
+    apiBaseUrl = '/api',
     enableSseFallback = true,
     displayName,
     onConnect,
@@ -95,7 +95,7 @@ export function useRealtimeChannel<T = unknown>(
   } = options;
 
   const [messages, setMessages] = useState<RealtimeChannelMessage<T>[]>([]);
-  const [status, setStatus] = useState<RealtimeConnectionStatus>("offline");
+  const [status, setStatus] = useState<RealtimeConnectionStatus>('offline');
   const [transport, setTransport] = useState<RealtimeTransport | null>(null);
   const [lastSeq, setLastSeq] = useState(0);
 
@@ -111,10 +111,18 @@ export function useRealtimeChannel<T = unknown>(
   const onConnectRef = useRef(onConnect);
   const onDisconnectRef = useRef(onDisconnect);
 
-  useEffect(() => { onConnectRef.current = onConnect; }, [onConnect]);
-  useEffect(() => { onDisconnectRef.current = onDisconnect; }, [onDisconnect]);
-  useEffect(() => { channelRef.current = channel; }, [channel]);
-  useEffect(() => { tokenRef.current = optionToken; }, [optionToken]);
+  useEffect(() => {
+    onConnectRef.current = onConnect;
+  }, [onConnect]);
+  useEffect(() => {
+    onDisconnectRef.current = onDisconnect;
+  }, [onDisconnect]);
+  useEffect(() => {
+    channelRef.current = channel;
+  }, [channel]);
+  useEffect(() => {
+    tokenRef.current = optionToken;
+  }, [optionToken]);
 
   const isSensitive = SENSITIVE_CHANNELS.has(channel);
 
@@ -133,18 +141,18 @@ export function useRealtimeChannel<T = unknown>(
 
   const connectSse = useCallback(() => {
     if (!mountedRef.current) return;
-    if (typeof EventSource === "undefined") return;
+    if (typeof EventSource === 'undefined') return;
 
     const url = getSseUrl(channelRef.current, apiBaseUrl);
     const evtSource = new EventSource(url, { withCredentials: true });
     sseRef.current = evtSource;
 
-    evtSource.addEventListener("connected", () => {
+    evtSource.addEventListener('connected', () => {
       if (!mountedRef.current) return;
       attemptsRef.current = 0;
-      setStatus("connected");
-      setTransport("sse");
-      onConnectRef.current?.("sse");
+      setStatus('connected');
+      setTransport('sse');
+      onConnectRef.current?.('sse');
     });
 
     evtSource.onmessage = (ev) => {
@@ -160,16 +168,18 @@ export function useRealtimeChannel<T = unknown>(
         if (raw.channel === channelRef.current) {
           pushMessage(raw);
         }
-      } catch { /* ignore parse errors */ }
+      } catch {
+        /* ignore parse errors */
+      }
     };
 
     evtSource.onerror = () => {
       if (!mountedRef.current) return;
-      setStatus("reconnecting");
+      setStatus('reconnecting');
       evtSource.close();
       sseRef.current = null;
       const delay = Math.min(
-        baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
+        baseReconnectDelayMs * 1.5 ** attemptsRef.current,
         maxReconnectDelayMs,
       );
       attemptsRef.current++;
@@ -178,7 +188,7 @@ export function useRealtimeChannel<T = unknown>(
           if (mountedRef.current) connectSse();
         }, delay);
       } else {
-        setStatus("offline");
+        setStatus('offline');
         onDisconnectRef.current?.();
       }
     };
@@ -192,7 +202,7 @@ export function useRealtimeChannel<T = unknown>(
         attemptsRef.current = 0;
         connectSse();
       } else {
-        setStatus("offline");
+        setStatus('offline');
         onDisconnectRef.current?.();
       }
       return;
@@ -209,11 +219,14 @@ export function useRealtimeChannel<T = unknown>(
       wsRef.current = ws;
 
       ws.onopen = () => {
-        if (!mountedRef.current) { ws.close(); return; }
+        if (!mountedRef.current) {
+          ws.close();
+          return;
+        }
 
         const sendSubscribe = (tok?: string) => {
           const msg: Record<string, unknown> = {
-            type: "subscribe",
+            type: 'subscribe',
             channel: channelRef.current,
             sinceSeq: lastSeqRef.current,
           };
@@ -249,13 +262,13 @@ export function useRealtimeChannel<T = unknown>(
             code?: string;
           };
 
-          if (parsed.type === "connected") return;
+          if (parsed.type === 'connected') return;
 
-          if (parsed.type === "subscribed") {
+          if (parsed.type === 'subscribed') {
             attemptsRef.current = 0;
-            setStatus("connected");
-            setTransport("websocket");
-            onConnectRef.current?.("websocket");
+            setStatus('connected');
+            setTransport('websocket');
+            onConnectRef.current?.('websocket');
             if (parsed.missedMessages?.length) {
               for (const m of parsed.missedMessages) {
                 pushMessage(m as RealtimeChannelMessage<T>);
@@ -264,17 +277,17 @@ export function useRealtimeChannel<T = unknown>(
             return;
           }
 
-          if (parsed.type === "catchup_response" && parsed.messages) {
+          if (parsed.type === 'catchup_response' && parsed.messages) {
             for (const m of parsed.messages) {
               pushMessage(m as RealtimeChannelMessage<T>);
             }
             return;
           }
 
-          if (parsed.type === "message" && parsed.channel === channelRef.current) {
+          if (parsed.type === 'message' && parsed.channel === channelRef.current) {
             pushMessage({
               channel: parsed.channel,
-              event: parsed.event ?? "message",
+              event: parsed.event ?? 'message',
               data: parsed.data as T,
               timestamp: parsed.timestamp ?? Date.now(),
               ...(parsed.seq !== undefined ? { seq: parsed.seq } : {}),
@@ -282,22 +295,24 @@ export function useRealtimeChannel<T = unknown>(
             return;
           }
 
-          if (parsed.type === "ping") {
-            ws.send(JSON.stringify({ type: "pong", timestamp: Date.now() }));
+          if (parsed.type === 'ping') {
+            ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
           }
 
-          if (parsed.type === "error" && parsed.code === "unauthorized") {
+          if (parsed.type === 'error' && parsed.code === 'unauthorized') {
             tokenRef.current = undefined;
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       };
 
       ws.onclose = () => {
         if (!mountedRef.current) return;
-        setStatus("reconnecting");
+        setStatus('reconnecting');
         onDisconnectRef.current?.();
         const delay = Math.min(
-          baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
+          baseReconnectDelayMs * 1.5 ** attemptsRef.current,
           maxReconnectDelayMs,
         );
         attemptsRef.current++;
@@ -308,11 +323,11 @@ export function useRealtimeChannel<T = unknown>(
 
       ws.onerror = () => {
         if (!mountedRef.current) return;
-        setStatus("reconnecting");
+        setStatus('reconnecting');
       };
     } catch {
       const delay = Math.min(
-        baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
+        baseReconnectDelayMs * 1.5 ** attemptsRef.current,
         maxReconnectDelayMs,
       );
       attemptsRef.current++;
@@ -360,7 +375,7 @@ export function useRealtimeChannel<T = unknown>(
     messages,
     lastMessage: messages[messages.length - 1] ?? null,
     status,
-    isConnected: status === "connected",
+    isConnected: status === 'connected',
     transport,
     lastSeq,
     clearMessages,

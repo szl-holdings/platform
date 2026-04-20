@@ -1,14 +1,14 @@
-import type { ToolManifest } from "./manifest.js";
-import type { ToolRegistry } from "./registry.js";
-import { defaultToolRegistry } from "./registry.js";
-import type { ToolHandler, GatewayInvocationResult } from "./gateway.js";
-import { ToolMeshGateway, defaultGateway } from "./gateway.js";
+import type { GatewayInvocationResult, ToolHandler } from './gateway.js';
+import { defaultGateway, type ToolMeshGateway } from './gateway.js';
+import type { ToolManifest } from './manifest.js';
+import type { ToolRegistry } from './registry.js';
+import { defaultToolRegistry } from './registry.js';
 
 export interface McpToolDefinition {
   name: string;
   description: string;
   inputSchema: {
-    type: "object";
+    type: 'object';
     properties: Record<string, unknown>;
     required?: string[];
   };
@@ -21,7 +21,7 @@ export interface McpCallRequest {
 }
 
 export interface McpCallResult {
-  content: Array<{ type: "text"; text: string }>;
+  content: Array<{ type: 'text'; text: string }>;
   isError?: boolean | undefined;
   traceId?: string | undefined;
 }
@@ -33,7 +33,7 @@ export interface McpServerInfo {
   tools: McpToolDefinition[];
 }
 
-const MCP_PROTOCOL_VERSION = "2024-11-05";
+const MCP_PROTOCOL_VERSION = '2024-11-05';
 
 function manifestToMcpTool(manifest: ToolManifest): McpToolDefinition {
   const schema = manifest.inputSchema;
@@ -41,24 +41,28 @@ function manifestToMcpTool(manifest: ToolManifest): McpToolDefinition {
   let required: string[] | undefined;
 
   if (schema) {
-    const schemaProperties = schema["properties"];
-    if (schemaProperties && typeof schemaProperties === "object" && !Array.isArray(schemaProperties)) {
+    const schemaProperties = schema['properties'];
+    if (
+      schemaProperties &&
+      typeof schemaProperties === 'object' &&
+      !Array.isArray(schemaProperties)
+    ) {
       properties = schemaProperties as Record<string, unknown>;
     }
-    const schemaRequired = schema["required"];
-    if (Array.isArray(schemaRequired) && schemaRequired.every((f) => typeof f === "string")) {
+    const schemaRequired = schema['required'];
+    if (Array.isArray(schemaRequired) && schemaRequired.every((f) => typeof f === 'string')) {
       required = schemaRequired as string[];
     }
   }
 
-  const inputSchema: McpToolDefinition["inputSchema"] = { type: "object", properties };
+  const inputSchema: McpToolDefinition['inputSchema'] = { type: 'object', properties };
   if (required && required.length > 0) {
     inputSchema.required = required;
   }
 
   return {
     name: manifest.id,
-    description: `[${manifest.domainTags.join(",")}] ${manifest.description}`,
+    description: `[${manifest.domainTags.join(',')}] ${manifest.description}`,
     inputSchema,
   };
 }
@@ -81,8 +85,8 @@ export class ToolMeshMcpBridge {
   constructor(
     registry: ToolRegistry = defaultToolRegistry,
     gateway: ToolMeshGateway = defaultGateway,
-    serverName = "szl-tool-mesh-mcp",
-    serverVersion = "2.0.0",
+    serverName = 'szl-tool-mesh-mcp',
+    serverVersion = '2.0.0',
   ) {
     this.registry = registry;
     this.gateway = gateway;
@@ -99,25 +103,25 @@ export class ToolMeshMcpBridge {
   }
 
   getServerInfo(): McpServerInfo {
-    const registryTools = this.registry
-      .list({ enabled: true })
-      .map((m) => manifestToMcpTool(m));
+    const registryTools = this.registry.list({ enabled: true }).map((m) => manifestToMcpTool(m));
 
-    const externalMcpTools: McpToolDefinition[] = Array.from(this.externalTools.values()).map((ext) => {
-      const rawSchema = ext.inputSchema;
-      const properties: Record<string, unknown> = {};
-      const required: string[] = [];
-      for (const [key, val] of Object.entries(rawSchema)) {
-        if (key === "required" && Array.isArray(val)) {
-          required.push(...(val as string[]));
-        } else {
-          properties[key] = val;
+    const externalMcpTools: McpToolDefinition[] = Array.from(this.externalTools.values()).map(
+      (ext) => {
+        const rawSchema = ext.inputSchema;
+        const properties: Record<string, unknown> = {};
+        const required: string[] = [];
+        for (const [key, val] of Object.entries(rawSchema)) {
+          if (key === 'required' && Array.isArray(val)) {
+            required.push(...(val as string[]));
+          } else {
+            properties[key] = val;
+          }
         }
-      }
-      const inputSchema: McpToolDefinition["inputSchema"] = { type: "object", properties };
-      if (required.length > 0) inputSchema.required = required;
-      return { name: ext.name, description: ext.description, inputSchema };
-    });
+        const inputSchema: McpToolDefinition['inputSchema'] = { type: 'object', properties };
+        if (required.length > 0) inputSchema.required = required;
+        return { name: ext.name, description: ext.description, inputSchema };
+      },
+    );
 
     return {
       name: this.serverName,
@@ -141,18 +145,23 @@ export class ToolMeshMcpBridge {
     if (externalTool) {
       if (externalTool.requiresApproval) {
         return {
-          content: [{ type: "text", text: `Error: External tool '${req.name}' requires human approval before execution` }],
+          content: [
+            {
+              type: 'text',
+              text: `Error: External tool '${req.name}' requires human approval before execution`,
+            },
+          ],
           isError: true,
         };
       }
       try {
         const output = await externalTool.handler(req.arguments ?? {});
-        const text = typeof output === "string" ? output : JSON.stringify(output, null, 2);
-        return { content: [{ type: "text", text }] };
+        const text = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
+        return { content: [{ type: 'text', text }] };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         return {
-          content: [{ type: "text", text: `Error: ${message}` }],
+          content: [{ type: 'text', text: `Error: ${message}` }],
           isError: true,
         };
       }
@@ -166,14 +175,12 @@ export class ToolMeshMcpBridge {
 
     if (result.success) {
       const text =
-        typeof result.output === "string"
-          ? result.output
-          : JSON.stringify(result.output, null, 2);
-      return { content: [{ type: "text", text }], traceId: result.traceId };
+        typeof result.output === 'string' ? result.output : JSON.stringify(result.output, null, 2);
+      return { content: [{ type: 'text', text }], traceId: result.traceId };
     }
 
     return {
-      content: [{ type: "text", text: `Error: ${result.error}` }],
+      content: [{ type: 'text', text: `Error: ${result.error}` }],
       isError: true,
       traceId: result.traceId,
     };

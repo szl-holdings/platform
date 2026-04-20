@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface FilterOption {
   id: string;
@@ -27,8 +27,8 @@ export function FilterBar({
 }: FilterBarProps) {
   return (
     <div
-      className={cn("flex items-center gap-3 px-4 border-b", className)}
-      style={{ height: "44px", background: color.bg.surface, borderColor: color.border.subtle }}
+      className={cn('flex items-center gap-3 px-4 border-b', className)}
+      style={{ height: '44px', background: color.bg.surface, borderColor: color.border.subtle }}
     >
       {filters && (
         <div className="flex items-center gap-1" role="tablist">
@@ -43,11 +43,11 @@ export function FilterBar({
                 onClick={() => onFilterChange?.(filter.id)}
                 className="flex items-center gap-1.5 px-3 rounded text-xs transition-colors"
                 style={{
-                  height: "28px",
-                  background: isActive ? color.bg.active : "transparent",
+                  height: '28px',
+                  background: isActive ? color.bg.active : 'transparent',
                   color: isActive ? color.text.primary : color.text.secondary,
-                  cursor: "pointer",
-                  border: "none",
+                  cursor: 'pointer',
+                  border: 'none',
                 }}
               >
                 {filter.label}
@@ -57,9 +57,9 @@ export function FilterBar({
                     style={{
                       background: isActive ? color.border.default : color.bg.overlay,
                       color: color.text.secondary,
-                      fontSize: "10px",
-                      minWidth: "18px",
-                      textAlign: "center",
+                      fontSize: '10px',
+                      minWidth: '18px',
+                      textAlign: 'center',
                     }}
                   >
                     {filter.count}

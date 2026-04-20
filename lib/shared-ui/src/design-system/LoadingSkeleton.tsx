@@ -1,8 +1,8 @@
-import * as React from "react";
-import { cn } from "../utils";
+import type * as React from 'react';
+import { cn } from '../utils';
 
 export interface LoadingSkeletonProps {
-  variant?: "line" | "block" | "card" | "avatar" | "table" | "page";
+  variant?: 'line' | 'block' | 'card' | 'avatar' | 'table' | 'page';
   lines?: number;
   rows?: number;
   columns?: number;
@@ -21,18 +21,14 @@ interface BoneProps {
 function Bone({ className, dark, style }: BoneProps) {
   return (
     <div
-      className={cn(
-        "rounded animate-pulse",
-        dark ? "bg-white/8" : "bg-neutral-200",
-        className
-      )}
+      className={cn('rounded animate-pulse', dark ? 'bg-white/8' : 'bg-neutral-200', className)}
       style={style}
     />
   );
 }
 
 export function LoadingSkeleton({
-  variant = "line",
+  variant = 'line',
   lines = 3,
   rows = 5,
   columns = 4,
@@ -41,36 +37,29 @@ export function LoadingSkeleton({
   width,
   height,
 }: LoadingSkeletonProps) {
-  if (variant === "line") {
+  if (variant === 'line') {
     return (
-      <div className={cn("space-y-2", className)}>
+      <div className={cn('space-y-2', className)}>
         {Array.from({ length: lines }).map((_, i) => (
-          <Bone
-            key={i}
-            dark={dark}
-            className={cn(
-              "h-4",
-              i === lines - 1 ? "w-3/4" : "w-full"
-            )}
-          />
+          <Bone key={i} dark={dark} className={cn('h-4', i === lines - 1 ? 'w-3/4' : 'w-full')} />
         ))}
       </div>
     );
   }
 
-  if (variant === "block") {
+  if (variant === 'block') {
     return (
       <Bone
         dark={dark}
         {...(className !== undefined ? { className } : {})}
-        style={{ width: width ?? "100%", height: height ?? "120px" } as React.CSSProperties}
+        style={{ width: width ?? '100%', height: height ?? '120px' } as React.CSSProperties}
       />
     );
   }
 
-  if (variant === "avatar") {
+  if (variant === 'avatar') {
     return (
-      <div className={cn("flex items-center gap-3", className)}>
+      <div className={cn('flex items-center gap-3', className)}>
         <Bone dark={dark} className="w-10 h-10 rounded-full shrink-0" />
         <div className="flex-1 space-y-2">
           <Bone dark={dark} className="h-4 w-1/3" />
@@ -80,13 +69,13 @@ export function LoadingSkeleton({
     );
   }
 
-  if (variant === "card") {
+  if (variant === 'card') {
     return (
       <div
         className={cn(
-          "rounded-2xl border p-5 space-y-4",
-          dark ? "border-white/8 bg-white/3" : "border-neutral-200 bg-white",
-          className
+          'rounded-2xl border p-5 space-y-4',
+          dark ? 'border-white/8 bg-white/3' : 'border-neutral-200 bg-white',
+          className,
         )}
       >
         <div className="flex items-start justify-between">
@@ -103,13 +92,13 @@ export function LoadingSkeleton({
     );
   }
 
-  if (variant === "table") {
+  if (variant === 'table') {
     return (
       <div className={className}>
         <div
           className={cn(
-            "border-b px-4 py-3 grid gap-4",
-            dark ? "border-white/8" : "border-neutral-200"
+            'border-b px-4 py-3 grid gap-4',
+            dark ? 'border-white/8' : 'border-neutral-200',
           )}
           style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
         >
@@ -121,8 +110,8 @@ export function LoadingSkeleton({
           <div
             key={ri}
             className={cn(
-              "border-b px-4 py-3 grid gap-4",
-              dark ? "border-white/5" : "border-neutral-100"
+              'border-b px-4 py-3 grid gap-4',
+              dark ? 'border-white/5' : 'border-neutral-100',
             )}
             style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
           >
@@ -131,7 +120,11 @@ export function LoadingSkeleton({
                 key={ci}
                 dark={dark}
                 className="h-4"
-                style={{ width: ci === 0 ? "80%" : ci === columns - 1 ? "50%" : "90%" } as React.CSSProperties}
+                style={
+                  {
+                    width: ci === 0 ? '80%' : ci === columns - 1 ? '50%' : '90%',
+                  } as React.CSSProperties
+                }
               />
             ))}
           </div>
@@ -140,9 +133,9 @@ export function LoadingSkeleton({
     );
   }
 
-  if (variant === "page") {
+  if (variant === 'page') {
     return (
-      <div className={cn("space-y-6 p-6", className)}>
+      <div className={cn('space-y-6 p-6', className)}>
         <div className="space-y-2">
           <Bone dark={dark} className="h-8 w-1/2" />
           <Bone dark={dark} className="h-4 w-1/3" />

@@ -11,7 +11,7 @@
  * all named flags in the system.
  */
 
-export type RuntimeMode = "local-dev" | "internal-preview" | "demo" | "production";
+export type RuntimeMode = 'local-dev' | 'internal-preview' | 'demo' | 'production';
 
 export interface FeatureFlag {
   id: string;
@@ -22,65 +22,59 @@ export interface FeatureFlag {
 
 export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
   DEMO_BANNERS: {
-    id: "DEMO_BANNERS",
-    description:
-      "Show DemoModeBanner on all views that display seeded or simulated data.",
-    enabledFor: ["demo", "internal-preview"],
-    notes: "Must be visible in demo mode. Do not enable in production unless data is genuinely seeded.",
+    id: 'DEMO_BANNERS',
+    description: 'Show DemoModeBanner on all views that display seeded or simulated data.',
+    enabledFor: ['demo', 'internal-preview'],
+    notes:
+      'Must be visible in demo mode. Do not enable in production unless data is genuinely seeded.',
   },
   PULSE_FALLBACK_LABEL: {
-    id: "PULSE_FALLBACK_LABEL",
+    id: 'PULSE_FALLBACK_LABEL',
     description:
       "Show 'Synthesized (no AI provider)' label on Pulse briefings generated via fallback drift path.",
-    enabledFor: ["demo", "internal-preview", "local-dev"],
-    notes: "Required to prevent silent fallback impersonating live AI briefings.",
+    enabledFor: ['demo', 'internal-preview', 'local-dev'],
+    notes: 'Required to prevent silent fallback impersonating live AI briefings.',
   },
   AEGIS_UNWIRED_MODULES: {
-    id: "AEGIS_UNWIRED_MODULES",
-    description:
-      "Show 8 Aegis modules that are not yet wired to live API. Hidden by default.",
-    enabledFor: ["local-dev"],
-    notes: "These modules are stubs. Do not show in investor demos or production.",
+    id: 'AEGIS_UNWIRED_MODULES',
+    description: 'Show 8 Aegis modules that are not yet wired to live API. Hidden by default.',
+    enabledFor: ['local-dev'],
+    notes: 'These modules are stubs. Do not show in investor demos or production.',
   },
   VESSELS_COMMERCIAL_MODULES: {
-    id: "VESSELS_COMMERCIAL_MODULES",
-    description:
-      "Show Vessels commercial modules (insurance, trading, platform) not wired to DB.",
-    enabledFor: ["local-dev"],
-    notes: "Stubs only. Do not show in demos until wired.",
+    id: 'VESSELS_COMMERCIAL_MODULES',
+    description: 'Show Vessels commercial modules (insurance, trading, platform) not wired to DB.',
+    enabledFor: ['local-dev'],
+    notes: 'Stubs only. Do not show in demos until wired.',
   },
   DEMO_RESET_BUTTON: {
-    id: "DEMO_RESET_BUTTON",
-    description:
-      "Show in-app one-click demo reset button in the platform operator UI.",
-    enabledFor: ["demo", "internal-preview"],
-    notes: "Enables presenter recovery without terminal access.",
+    id: 'DEMO_RESET_BUTTON',
+    description: 'Show in-app one-click demo reset button in the platform operator UI.',
+    enabledFor: ['demo', 'internal-preview'],
+    notes: 'Enables presenter recovery without terminal access.',
   },
   PDF_EXPORT_PULSE: {
-    id: "PDF_EXPORT_PULSE",
-    description: "Enable PDF export button in Pulse briefing reader.",
+    id: 'PDF_EXPORT_PULSE',
+    description: 'Enable PDF export button in Pulse briefing reader.',
     enabledFor: [],
-    notes: "Not implemented. Flag gates the button until implementation is complete.",
+    notes: 'Not implemented. Flag gates the button until implementation is complete.',
   },
   PERSONA_SWITCHER: {
-    id: "PERSONA_SWITCHER",
-    description: "Show interactive persona switcher for investor demos.",
-    enabledFor: ["demo"],
-    notes: "Demo mode only; shows role-based view switching.",
+    id: 'PERSONA_SWITCHER',
+    description: 'Show interactive persona switcher for investor demos.',
+    enabledFor: ['demo'],
+    notes: 'Demo mode only; shows role-based view switching.',
   },
   NEXUS_PUBLIC_ACCESS: {
-    id: "NEXUS_PUBLIC_ACCESS",
-    description: "Allow unauthenticated access to NEXUS mockup-sandbox preview.",
+    id: 'NEXUS_PUBLIC_ACCESS',
+    description: 'Allow unauthenticated access to NEXUS mockup-sandbox preview.',
     enabledFor: [],
     notes:
-      "Disabled by default. NEXUS is an internal prototype and should not be publicly accessible.",
+      'Disabled by default. NEXUS is an internal prototype and should not be publicly accessible.',
   },
 };
 
-export function isFlagEnabled(
-  flagId: string,
-  runtimeMode: RuntimeMode
-): boolean {
+export function isFlagEnabled(flagId: string, runtimeMode: RuntimeMode): boolean {
   const flag = FEATURE_FLAGS[flagId];
   if (!flag) return false;
   return flag.enabledFor.includes(runtimeMode);

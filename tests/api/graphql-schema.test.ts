@@ -18,9 +18,9 @@
  *   - @szl-holdings/db (for resolvers that access db directly)
  */
 
-import { graphql, type DocumentNode } from "graphql";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { vi, beforeAll, describe, it, expect } from "vitest";
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { type DocumentNode, graphql } from 'graphql';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // ── Stub factories ─────────────────────────────────────────────────────────────
 
@@ -29,11 +29,11 @@ const makeVessel = (id = 1) => ({
   name: `Test Vessel ${id}`,
   imo: `IMO100000${id}`,
   mmsi: null,
-  vesselType: "cargo",
-  flag: "US",
+  vesselType: 'cargo',
+  flag: 'US',
   yearBuilt: 2020,
-  grossTonnage: "50000.00",
-  status: "active",
+  grossTonnage: '50000.00',
+  status: 'active',
   fleetId: null,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -44,10 +44,10 @@ const makeVenture = (id = 1) => ({
   slug: `venture-${id}`,
   name: `Test Venture ${id}`,
   description: null,
-  sector: "tech",
-  status: "active",
-  stage: "growth",
-  founded: "2020",
+  sector: 'tech',
+  status: 'active',
+  stage: 'growth',
+  founded: '2020',
   website: null,
   logo: null,
   color: null,
@@ -60,9 +60,9 @@ const makeVenture = (id = 1) => ({
 const makeIncident = (id = 1) => ({
   id,
   title: `Incident ${id}`,
-  severity: "high",
-  status: "open",
-  impactArea: "production",
+  severity: 'high',
+  status: 'open',
+  impactArea: 'production',
   rootCause: null,
   resolution: null,
   createdAt: new Date().toISOString(),
@@ -71,12 +71,12 @@ const makeIncident = (id = 1) => ({
 
 const makeSignal = (id = 1) => ({
   id,
-  source: "prometheus",
-  severity: "medium",
+  source: 'prometheus',
+  severity: 'medium',
   title: `Signal ${id}`,
-  summary: "test signal",
-  status: "active",
-  domain: "lyte",
+  summary: 'test signal',
+  status: 'active',
+  domain: 'lyte',
   metadata: null,
   createdAt: new Date().toISOString(),
 });
@@ -84,14 +84,30 @@ const makeSignal = (id = 1) => ({
 // ── Drizzle chain mock (for domains that use db directly) ─────────────────────
 const makeChain = (result: unknown[] = []) => {
   const chain: Record<string, unknown> = {};
-  const methods = ["select", "from", "where", "orderBy", "limit", "offset",
-    "innerJoin", "leftJoin", "groupBy", "having", "insert", "into", "values",
-    "returning", "update", "set", "delete"];
+  const methods = [
+    'select',
+    'from',
+    'where',
+    'orderBy',
+    'limit',
+    'offset',
+    'innerJoin',
+    'leftJoin',
+    'groupBy',
+    'having',
+    'insert',
+    'into',
+    'values',
+    'returning',
+    'update',
+    'set',
+    'delete',
+  ];
   for (const m of methods) {
     chain[m] = () => chain;
   }
   chain.then = (resolve: (v: unknown) => unknown) => Promise.resolve(resolve(result));
-  chain[Symbol.toStringTag] = "Promise";
+  chain[Symbol.toStringTag] = 'Promise';
   return chain;
 };
 
@@ -103,22 +119,25 @@ const mockDb = {
 };
 
 // ── Mock: @szl-holdings/db ────────────────────────────────────────────────────
-const tableProxy = new Proxy({}, { get: (_t, p) => ({ name: String(p), columnType: "text" }) });
+const tableProxy = new Proxy({}, { get: (_t, p) => ({ name: String(p), columnType: 'text' }) });
 
-vi.mock("@szl-holdings/db", () => ({
+vi.mock('@szl-holdings/db', () => ({
   db: mockDb,
-  ...new Proxy({}, {
-    get: (_t, p: string) => {
-      if (p === "db") return mockDb;
-      if (p === "default") return {};
-      if (p === "pool") return { end: vi.fn(), query: vi.fn() };
-      return tableProxy;
+  ...new Proxy(
+    {},
+    {
+      get: (_t, p: string) => {
+        if (p === 'db') return mockDb;
+        if (p === 'default') return {};
+        if (p === 'pool') return { end: vi.fn(), query: vi.fn() };
+        return tableProxy;
+      },
     },
-  }),
+  ),
 }));
 
 // ── Mock: domain service modules ──────────────────────────────────────────────
-vi.mock("../../artifacts/api-server/src/lib/domain-services/vessels/index.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/domain-services/vessels/index.js', () => ({
   buildVesselsStorage: vi.fn().mockResolvedValue({
     listVessels: vi.fn().mockResolvedValue([makeVessel(1), makeVessel(2)]),
     getVessel: vi.fn().mockResolvedValue(makeVessel(1)),
@@ -134,7 +153,7 @@ vi.mock("../../artifacts/api-server/src/lib/domain-services/vessels/index.js", (
   domainEventBus: { emit: vi.fn(), on: vi.fn(), off: vi.fn() },
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/domain-services/holdings/index.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/domain-services/holdings/index.js', () => ({
   buildHoldingsStorage: vi.fn().mockResolvedValue({
     listVentures: vi.fn().mockResolvedValue([makeVenture(1)]),
     getVenture: vi.fn().mockResolvedValue(makeVenture(1)),
@@ -142,7 +161,7 @@ vi.mock("../../artifacts/api-server/src/lib/domain-services/holdings/index.js", 
     listMetrics: vi.fn().mockResolvedValue([]),
     listMilestones: vi.fn().mockResolvedValue([]),
     listInquiries: vi.fn().mockResolvedValue([]),
-    createInquiry: vi.fn().mockResolvedValue({ id: 1, name: "Test" }),
+    createInquiry: vi.fn().mockResolvedValue({ id: 1, name: 'Test' }),
   }),
   listHoldingsVentures: vi.fn().mockResolvedValue([makeVenture(1)]),
   getHoldingsVenture: vi.fn().mockResolvedValue(makeVenture(1)),
@@ -150,14 +169,19 @@ vi.mock("../../artifacts/api-server/src/lib/domain-services/holdings/index.js", 
   listHoldingsMetrics: vi.fn().mockResolvedValue([]),
   listHoldingsMilestones: vi.fn().mockResolvedValue([]),
   listHoldingsInquiries: vi.fn().mockResolvedValue([]),
-  createHoldingsInquiry: vi.fn().mockResolvedValue({ id: 1, name: "Test", email: "t@t.com", subject: "s", message: "m" }),
+  createHoldingsInquiry: vi
+    .fn()
+    .mockResolvedValue({ id: 1, name: 'Test', email: 't@t.com', subject: 's', message: 'm' }),
   getTrustCenterStatus: vi.fn().mockResolvedValue({
-    lastAuditDate: "2025-01-01", nextReviewDate: "2026-01-01",
-    overallScore: 95, frameworks: [], certifications: [],
+    lastAuditDate: '2025-01-01',
+    nextReviewDate: '2026-01-01',
+    overallScore: 95,
+    frameworks: [],
+    certifications: [],
   }),
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/domain-services/lyte/index.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/domain-services/lyte/index.js', () => ({
   buildLyteStorage: vi.fn().mockResolvedValue({
     listIncidents: vi.fn().mockResolvedValue([makeIncident(1)]),
     getIncident: vi.fn().mockResolvedValue(makeIncident(1)),
@@ -170,7 +194,7 @@ vi.mock("../../artifacts/api-server/src/lib/domain-services/lyte/index.js", () =
   listLyteActions: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/domain-services/terra/index.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/domain-services/terra/index.js', () => ({
   buildTerraStorage: vi.fn().mockResolvedValue({
     listListings: vi.fn().mockResolvedValue([]),
     getMarketStats: vi.fn().mockResolvedValue({ totalListings: 0, avgPrice: 0 }),
@@ -179,7 +203,7 @@ vi.mock("../../artifacts/api-server/src/lib/domain-services/terra/index.js", () 
   getTerraMarketStats: vi.fn().mockResolvedValue({ totalListings: 0, avgPrice: 0 }),
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/domain-services/carlota-jo/index.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/domain-services/carlota-jo/index.js', () => ({
   buildCarlotaJoStorage: vi.fn().mockResolvedValue({
     listServices: vi.fn().mockResolvedValue([]),
     listInquiries: vi.fn().mockResolvedValue([]),
@@ -190,7 +214,7 @@ vi.mock("../../artifacts/api-server/src/lib/domain-services/carlota-jo/index.js"
   createCarlotaInquiry: vi.fn().mockResolvedValue({ id: 1 }),
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/domain-services/firestorm/index.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/domain-services/firestorm/index.js', () => ({
   buildFirestormStorage: vi.fn().mockResolvedValue({
     listIncidents: vi.fn().mockResolvedValue([]),
     listAlerts: vi.fn().mockResolvedValue([]),
@@ -206,29 +230,29 @@ vi.mock("../../artifacts/api-server/src/lib/domain-services/firestorm/index.js",
 }));
 
 // ── Mock: infrastructure (pubsub, WS, events) ─────────────────────────────────
-vi.mock("../../artifacts/api-server/src/lib/pubsub-bridge.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/pubsub-bridge.js', () => ({
   pubsub: { publish: vi.fn(), asyncIterator: vi.fn(() => ({ [Symbol.asyncIterator]: vi.fn() })) },
   broadcastWs: vi.fn(),
   withFilter: vi.fn((fn) => fn),
-  VESSELS_EVENTS: { POSITION_UPDATED: "VPU" },
-  TERRA_EVENTS: { LISTING_UPDATED: "TLU" },
-  LYTE_EVENTS: { INCIDENT_CREATED: "LIC" },
-  FIRESTORM_EVENTS: { INCIDENT_CREATED: "FIC" },
-  ALLOY_EVENTS: { DECISION_CREATED: "ADC" },
-  CARLOTA_EVENTS: { INQUIRY_CREATED: "CIC" },
+  VESSELS_EVENTS: { POSITION_UPDATED: 'VPU' },
+  TERRA_EVENTS: { LISTING_UPDATED: 'TLU' },
+  LYTE_EVENTS: { INCIDENT_CREATED: 'LIC' },
+  FIRESTORM_EVENTS: { INCIDENT_CREATED: 'FIC' },
+  ALLOY_EVENTS: { DECISION_CREATED: 'ADC' },
+  CARLOTA_EVENTS: { INQUIRY_CREATED: 'CIC' },
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/websocket.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/websocket.js', () => ({
   publish: vi.fn(),
   WS_CHANNELS: {},
-  issueWsTicket: vi.fn(() => "mock-ticket"),
+  issueWsTicket: vi.fn(() => 'mock-ticket'),
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/domain-events/index.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/domain-events/index.js', () => ({
   domainEventBus: { emit: vi.fn(), on: vi.fn(), off: vi.fn(), removeListener: vi.fn() },
 }));
 
-vi.mock("../../artifacts/api-server/src/lib/activity-logger.js", () => ({
+vi.mock('../../artifacts/api-server/src/lib/activity-logger.js', () => ({
   logActivity: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -237,7 +261,7 @@ vi.mock("../../artifacts/api-server/src/lib/activity-logger.js", () => ({
 let schema: ReturnType<typeof makeExecutableSchema>;
 
 beforeAll(async () => {
-  const { typeDefs, resolvers } = await import("../../artifacts/api-server/src/graphql/schema");
+  const { typeDefs, resolvers } = await import('../../artifacts/api-server/src/graphql/schema');
   schema = makeExecutableSchema({ typeDefs, resolvers });
 });
 
@@ -250,14 +274,14 @@ async function runQuery(source: string, variables?: Record<string, unknown>) {
 
 // ── Test Suite: Schema Validity ────────────────────────────────────────────────
 
-describe("GraphQL Schema — introspection and type validity", () => {
-  it("schema builds without type errors", () => {
+describe('GraphQL Schema — introspection and type validity', () => {
+  it('schema builds without type errors', () => {
     expect(schema).toBeDefined();
-    expect(typeof schema.getQueryType).toBe("function");
+    expect(typeof schema.getQueryType).toBe('function');
     expect(schema.getQueryType()).not.toBeNull();
   });
 
-  it("schema introspection returns all expected domain types", async () => {
+  it('schema introspection returns all expected domain types', async () => {
     const result = await runQuery(`
       {
         __schema {
@@ -268,26 +292,28 @@ describe("GraphQL Schema — introspection and type validity", () => {
       }
     `);
     expect(result.errors).toBeUndefined();
-    const typeNames = (result.data as { __schema: { types: { name: string }[] } })
-      .__schema.types.map((t) => t.name);
-    expect(typeNames).toContain("Vessel");
-    expect(typeNames).toContain("HoldingsVenture");
-    expect(typeNames).toContain("LyteIncident");
-    expect(typeNames).toContain("FirestormIncident");
+    const typeNames = (
+      result.data as { __schema: { types: { name: string }[] } }
+    ).__schema.types.map((t) => t.name);
+    expect(typeNames).toContain('Vessel');
+    expect(typeNames).toContain('HoldingsVenture');
+    expect(typeNames).toContain('LyteIncident');
+    expect(typeNames).toContain('FirestormIncident');
   });
 
-  it("_version query resolves without error", async () => {
+  it('_version query resolves without error', async () => {
     const result = await runQuery(`{ _version }`);
     expect(result.errors).toBeUndefined();
-    expect(typeof result.data?._version).toBe("string");
+    expect(typeof result.data?._version).toBe('string');
   });
 });
 
 // ── Test Suite: Vessels frontend queries ───────────────────────────────────────
 
-describe("GraphQL Schema — Vessels domain (frontend query documents)", () => {
-  it("GET_VESSELS query executes and returns vessels array", async () => {
-    const result = await runQuery(`
+describe('GraphQL Schema — Vessels domain (frontend query documents)', () => {
+  it('GET_VESSELS query executes and returns vessels array', async () => {
+    const result = await runQuery(
+      `
       query GetVessels($status: String, $limit: Int, $offset: Int) {
         vessels(status: $status, limit: $limit, offset: $offset) {
           id
@@ -299,19 +325,22 @@ describe("GraphQL Schema — Vessels domain (frontend query documents)", () => {
           createdAt
         }
       }
-    `, { limit: 10 });
+    `,
+      { limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.vessels)).toBe(true);
     const vessels = result.data?.vessels as { id: string; name: string; vesselType: string }[];
     if (vessels.length > 0) {
-      expect(vessels[0]).toHaveProperty("id");
-      expect(vessels[0]).toHaveProperty("name");
-      expect(vessels[0]).toHaveProperty("vesselType");
+      expect(vessels[0]).toHaveProperty('id');
+      expect(vessels[0]).toHaveProperty('name');
+      expect(vessels[0]).toHaveProperty('vesselType');
     }
   });
 
-  it("GET_VESSEL query executes and returns a single vessel", async () => {
-    const result = await runQuery(`
+  it('GET_VESSEL query executes and returns a single vessel', async () => {
+    const result = await runQuery(
+      `
       query GetVessel($id: ID!) {
         vessel(id: $id) {
           id
@@ -323,17 +352,20 @@ describe("GraphQL Schema — Vessels domain (frontend query documents)", () => {
           createdAt
         }
       }
-    `, { id: "1" });
+    `,
+      { id: '1' },
+    );
     expect(result.errors).toBeUndefined();
     const vessel = result.data?.vessel as { id: string; name: string } | null;
     if (vessel) {
-      expect(vessel).toHaveProperty("id");
-      expect(vessel).toHaveProperty("name");
+      expect(vessel).toHaveProperty('id');
+      expect(vessel).toHaveProperty('name');
     }
   });
 
-  it("GET_VESSEL_POSITIONS query executes and returns array", async () => {
-    const result = await runQuery(`
+  it('GET_VESSEL_POSITIONS query executes and returns array', async () => {
+    const result = await runQuery(
+      `
       query GetVesselPositions($vesselId: ID, $limit: Int) {
         vesselPositions(vesselId: $vesselId, limit: $limit) {
           vesselId
@@ -343,13 +375,16 @@ describe("GraphQL Schema — Vessels domain (frontend query documents)", () => {
           recordedAt
         }
       }
-    `, { limit: 10 });
+    `,
+      { limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.vesselPositions)).toBe(true);
   });
 
-  it("GET_VESSEL_ROUTES query executes and returns array", async () => {
-    const result = await runQuery(`
+  it('GET_VESSEL_ROUTES query executes and returns array', async () => {
+    const result = await runQuery(
+      `
       query GetVesselRoutes($vesselId: ID, $status: String, $limit: Int, $offset: Int) {
         vesselRoutes(vesselId: $vesselId, status: $status, limit: $limit, offset: $offset) {
           id
@@ -360,7 +395,9 @@ describe("GraphQL Schema — Vessels domain (frontend query documents)", () => {
           status
         }
       }
-    `, { limit: 10, offset: 0 });
+    `,
+      { limit: 10, offset: 0 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.vesselRoutes)).toBe(true);
   });
@@ -368,9 +405,10 @@ describe("GraphQL Schema — Vessels domain (frontend query documents)", () => {
 
 // ── Test Suite: Holdings frontend queries ─────────────────────────────────────
 
-describe("GraphQL Schema — Holdings domain (frontend query documents)", () => {
-  it("GET_HOLDINGS_VENTURES query executes and returns ventures array", async () => {
-    const result = await runQuery(`
+describe('GraphQL Schema — Holdings domain (frontend query documents)', () => {
+  it('GET_HOLDINGS_VENTURES query executes and returns ventures array', async () => {
+    const result = await runQuery(
+      `
       query GetHoldingsVentures($status: String, $limit: Int, $offset: Int) {
         holdingsVentures(status: $status, limit: $limit, offset: $offset) {
           id
@@ -381,18 +419,21 @@ describe("GraphQL Schema — Holdings domain (frontend query documents)", () => 
           createdAt
         }
       }
-    `, { limit: 10 });
+    `,
+      { limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.holdingsVentures)).toBe(true);
     const ventures = result.data?.holdingsVentures as { id: string; slug: string }[];
     if (ventures.length > 0) {
-      expect(ventures[0]).toHaveProperty("id");
-      expect(ventures[0]).toHaveProperty("slug");
+      expect(ventures[0]).toHaveProperty('id');
+      expect(ventures[0]).toHaveProperty('slug');
     }
   });
 
-  it("GET_HOLDINGS_VENTURE_BY_SLUG query executes and returns a venture or null", async () => {
-    const result = await runQuery(`
+  it('GET_HOLDINGS_VENTURE_BY_SLUG query executes and returns a venture or null', async () => {
+    const result = await runQuery(
+      `
       query GetHoldingsVentureBySlug($slug: String!) {
         holdingsVentureBySlug(slug: $slug) {
           id
@@ -403,12 +444,15 @@ describe("GraphQL Schema — Holdings domain (frontend query documents)", () => 
           createdAt
         }
       }
-    `, { slug: "venture-1" });
+    `,
+      { slug: 'venture-1' },
+    );
     expect(result.errors).toBeUndefined();
   });
 
-  it("GET_HOLDINGS_METRICS query executes and returns metrics array", async () => {
-    const result = await runQuery(`
+  it('GET_HOLDINGS_METRICS query executes and returns metrics array', async () => {
+    const result = await runQuery(
+      `
       query GetHoldingsMetrics($ventureId: ID!, $limit: Int) {
         holdingsMetrics(ventureId: $ventureId, limit: $limit) {
           id
@@ -420,13 +464,16 @@ describe("GraphQL Schema — Holdings domain (frontend query documents)", () => 
           createdAt
         }
       }
-    `, { ventureId: "1", limit: 10 });
+    `,
+      { ventureId: '1', limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.holdingsMetrics)).toBe(true);
   });
 
-  it("GET_HOLDINGS_MILESTONES query executes and returns milestones array", async () => {
-    const result = await runQuery(`
+  it('GET_HOLDINGS_MILESTONES query executes and returns milestones array', async () => {
+    const result = await runQuery(
+      `
       query GetHoldingsMilestones($ventureId: ID!, $limit: Int) {
         holdingsMilestones(ventureId: $ventureId, limit: $limit) {
           id
@@ -437,7 +484,9 @@ describe("GraphQL Schema — Holdings domain (frontend query documents)", () => 
           createdAt
         }
       }
-    `, { ventureId: "1", limit: 10 });
+    `,
+      { ventureId: '1', limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.holdingsMilestones)).toBe(true);
   });
@@ -445,9 +494,10 @@ describe("GraphQL Schema — Holdings domain (frontend query documents)", () => 
 
 // ── Test Suite: Lyte frontend queries ─────────────────────────────────────────
 
-describe("GraphQL Schema — Lyte domain (frontend query documents)", () => {
-  it("GET_LYTE_INCIDENTS query executes and returns incidents array", async () => {
-    const result = await runQuery(`
+describe('GraphQL Schema — Lyte domain (frontend query documents)', () => {
+  it('GET_LYTE_INCIDENTS query executes and returns incidents array', async () => {
+    const result = await runQuery(
+      `
       query GetLyteIncidents($status: String, $severity: String, $limit: Int, $offset: Int) {
         lyteIncidents(status: $status, severity: $severity, limit: $limit, offset: $offset) {
           id
@@ -458,13 +508,16 @@ describe("GraphQL Schema — Lyte domain (frontend query documents)", () => {
           createdAt
         }
       }
-    `, { limit: 10 });
+    `,
+      { limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.lyteIncidents)).toBe(true);
   });
 
-  it("GET_LYTE_SIGNALS query executes and returns signals array", async () => {
-    const result = await runQuery(`
+  it('GET_LYTE_SIGNALS query executes and returns signals array', async () => {
+    const result = await runQuery(
+      `
       query GetLyteSignals($severity: String, $status: String, $limit: Int, $offset: Int) {
         lyteSignals(severity: $severity, status: $status, limit: $limit, offset: $offset) {
           id
@@ -475,13 +528,16 @@ describe("GraphQL Schema — Lyte domain (frontend query documents)", () => {
           createdAt
         }
       }
-    `, { limit: 10 });
+    `,
+      { limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.lyteSignals)).toBe(true);
   });
 
-  it("GET_LYTE_ACTIONS query executes and returns actions array", async () => {
-    const result = await runQuery(`
+  it('GET_LYTE_ACTIONS query executes and returns actions array', async () => {
+    const result = await runQuery(
+      `
       query GetLyteActions($state: String, $limit: Int, $offset: Int) {
         lyteActions(state: $state, limit: $limit, offset: $offset) {
           id
@@ -491,7 +547,9 @@ describe("GraphQL Schema — Lyte domain (frontend query documents)", () => {
           createdAt
         }
       }
-    `, { limit: 10 });
+    `,
+      { limit: 10 },
+    );
     expect(result.errors).toBeUndefined();
     expect(Array.isArray(result.data?.lyteActions)).toBe(true);
   });
@@ -499,8 +557,8 @@ describe("GraphQL Schema — Lyte domain (frontend query documents)", () => {
 
 // ── Test Suite: Schema field contract enforcement ─────────────────────────────
 
-describe("GraphQL Schema — Field contract enforcement", () => {
-  it("querying a non-existent field on Vessel produces a schema validation error", async () => {
+describe('GraphQL Schema — Field contract enforcement', () => {
+  it('querying a non-existent field on Vessel produces a schema validation error', async () => {
     const result = await graphql({
       schema,
       source: `query { vessels { id nonExistentField123 } }`,
@@ -510,7 +568,7 @@ describe("GraphQL Schema — Field contract enforcement", () => {
     expect(result.errors![0].message).toMatch(/nonExistentField123/);
   });
 
-  it("querying a non-existent field on HoldingsVenture produces a schema validation error", async () => {
+  it('querying a non-existent field on HoldingsVenture produces a schema validation error', async () => {
     const result = await graphql({
       schema,
       source: `query { holdingsVentures { id slug ghostField999 } }`,
@@ -519,7 +577,7 @@ describe("GraphQL Schema — Field contract enforcement", () => {
     expect(result.errors![0].message).toMatch(/ghostField999/);
   });
 
-  it("querying a non-existent root query produces a schema validation error", async () => {
+  it('querying a non-existent root query produces a schema validation error', async () => {
     const result = await graphql({
       schema,
       source: `query { completelyMadeUpQuery { id } }`,

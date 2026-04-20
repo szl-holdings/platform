@@ -1,14 +1,14 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { genAITelemetry } from "@szl-holdings/observability";
-import { validateBody, genaiSpanSchema, validateQuery, listQuerySchema } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { genAITelemetry } from '@szl-holdings/observability';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { genaiSpanSchema, listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
 router.post(
-  "/genai-telemetry/spans",
+  '/genai-telemetry/spans',
   authMiddleware({ required: true }),
   validateBody(genaiSpanSchema),
   (req, res) => {
@@ -16,19 +16,19 @@ router.post(
       const span = req.body;
 
       switch (span.kind) {
-        case "model_call":
+        case 'model_call':
           genAITelemetry.recordModelCall({
-            traceId: span.traceId ?? "unknown",
-            model: span.model ?? "unknown",
-            modelProvider: span.modelProvider ?? "unknown",
-            routeClass: span.routeClass ?? "unknown",
+            traceId: span.traceId ?? 'unknown',
+            model: span.model ?? 'unknown',
+            modelProvider: span.modelProvider ?? 'unknown',
+            routeClass: span.routeClass ?? 'unknown',
             promptTokens: span.promptTokens ?? 0,
             completionTokens: span.completionTokens ?? 0,
             totalTokens: span.totalTokens ?? 0,
             latencyMs: span.latencyMs ?? 0,
             costEstimateUsd: span.costEstimateUsd ?? 0,
             usedFallback: span.usedFallback ?? false,
-            status: span.status ?? "ok",
+            status: span.status ?? 'ok',
             error: span.error,
             correlationId: span.correlationId,
             tenantId: span.tenantId,
@@ -37,14 +37,14 @@ router.post(
             metadata: span.metadata,
           });
           break;
-        case "tool_call":
+        case 'tool_call':
           genAITelemetry.recordToolCall({
-            traceId: span.traceId ?? "unknown",
-            toolName: span.toolName ?? "unknown",
+            traceId: span.traceId ?? 'unknown',
+            toolName: span.toolName ?? 'unknown',
             toolInput: span.toolInput ?? {},
             toolOutput: span.toolOutput,
             latencyMs: span.latencyMs ?? 0,
-            status: span.status ?? "ok",
+            status: span.status ?? 'ok',
             error: span.error,
             riskLevel: span.riskLevel,
             policyApplied: span.policyApplied,
@@ -53,59 +53,59 @@ router.post(
             timestamp: span.timestamp ?? Date.now(),
           });
           break;
-        case "agent_step":
+        case 'agent_step':
           genAITelemetry.recordAgentStep({
-            traceId: span.traceId ?? "unknown",
-            agentId: span.agentId ?? "unknown",
-            agentDomain: span.agentDomain ?? "unknown",
+            traceId: span.traceId ?? 'unknown',
+            agentId: span.agentId ?? 'unknown',
+            agentDomain: span.agentDomain ?? 'unknown',
             stepIndex: span.stepIndex ?? 0,
-            stepType: span.stepType ?? "think",
+            stepType: span.stepType ?? 'think',
             inputSummary: span.inputSummary,
             outputSummary: span.outputSummary,
             latencyMs: span.latencyMs ?? 0,
-            status: span.status ?? "ok",
+            status: span.status ?? 'ok',
             error: span.error,
             correlationId: span.correlationId,
             timestamp: span.timestamp ?? Date.now(),
           });
           break;
-        case "retrieval":
+        case 'retrieval':
           genAITelemetry.recordRetrieval({
-            traceId: span.traceId ?? "unknown",
-            query: span.query ?? "",
-            engine: span.engine ?? "unknown",
+            traceId: span.traceId ?? 'unknown',
+            query: span.query ?? '',
+            engine: span.engine ?? 'unknown',
             chunksRetrieved: span.chunksRetrieved ?? 0,
             chunksUsed: span.chunksUsed ?? 0,
             topScore: span.topScore,
             latencyMs: span.latencyMs ?? 0,
-            status: span.status ?? "ok",
+            status: span.status ?? 'ok',
             error: span.error,
             correlationId: span.correlationId,
             timestamp: span.timestamp ?? Date.now(),
           });
           break;
-        case "approval":
+        case 'approval':
           genAITelemetry.recordApproval({
-            traceId: span.traceId ?? "unknown",
-            decisionId: span.decisionId ?? "unknown",
-            decisionType: span.decisionType ?? "unknown",
-            requiredApprovalLevel: span.requiredApprovalLevel ?? "human",
+            traceId: span.traceId ?? 'unknown',
+            decisionId: span.decisionId ?? 'unknown',
+            decisionType: span.decisionType ?? 'unknown',
+            requiredApprovalLevel: span.requiredApprovalLevel ?? 'human',
             approvedByUserId: span.approvedByUserId,
             approvalDelayMs: span.approvalDelayMs,
-            outcome: span.outcome ?? "pending",
+            outcome: span.outcome ?? 'pending',
             overrideApplied: span.overrideApplied,
             correlationId: span.correlationId,
             timestamp: span.timestamp ?? Date.now(),
           });
           break;
-        case "artifact_job":
+        case 'artifact_job':
           genAITelemetry.recordArtifactJob({
-            traceId: span.traceId ?? "unknown",
-            jobId: span.jobId ?? "unknown",
-            jobType: span.jobType ?? "unknown",
+            traceId: span.traceId ?? 'unknown',
+            jobId: span.jobId ?? 'unknown',
+            jobType: span.jobType ?? 'unknown',
             artifactType: span.artifactType,
             latencyMs: span.latencyMs ?? 0,
-            status: span.status ?? "ok",
+            status: span.status ?? 'ok',
             error: span.error,
             outputSize: span.outputSize,
             exportSafe: span.exportSafe,
@@ -113,14 +113,14 @@ router.post(
             timestamp: span.timestamp ?? Date.now(),
           });
           break;
-        case "execution_run":
+        case 'execution_run':
           genAITelemetry.recordExecutionRun({
-            traceId: span.traceId ?? "unknown",
-            runId: span.runId ?? "unknown",
-            executionType: span.executionType ?? "unknown",
-            domain: span.domain ?? "unknown",
+            traceId: span.traceId ?? 'unknown',
+            runId: span.runId ?? 'unknown',
+            executionType: span.executionType ?? 'unknown',
+            domain: span.domain ?? 'unknown',
             latencyMs: span.latencyMs ?? 0,
-            status: span.status ?? "ok",
+            status: span.status ?? 'ok',
             error: span.error,
             retryCount: span.retryCount,
             totalModelCalls: span.totalModelCalls,
@@ -143,16 +143,18 @@ router.post(
 );
 
 router.post(
-  "/genai-telemetry/spans/batch",
+  '/genai-telemetry/spans/batch',
   authMiddleware({ required: true }),
-  validateBody(bodyShape({
-      "spans": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      spans: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     try {
       const { spans } = req.body;
       if (!Array.isArray(spans)) {
-        res.status(400).json({ error: "spans must be an array" });
+        res.status(400).json({ error: 'spans must be an array' });
         return;
       }
 
@@ -163,23 +165,29 @@ router.post(
         try {
           if (!span?.kind) continue;
           switch (span.kind) {
-            case "model_call":
+            case 'model_call':
               genAITelemetry.recordModelCall({ ...span, timestamp: span.timestamp ?? Date.now() });
               break;
-            case "tool_call":
+            case 'tool_call':
               genAITelemetry.recordToolCall({ ...span, timestamp: span.timestamp ?? Date.now() });
               break;
-            case "retrieval":
+            case 'retrieval':
               genAITelemetry.recordRetrieval({ ...span, timestamp: span.timestamp ?? Date.now() });
               break;
-            case "approval":
+            case 'approval':
               genAITelemetry.recordApproval({ ...span, timestamp: span.timestamp ?? Date.now() });
               break;
-            case "artifact_job":
-              genAITelemetry.recordArtifactJob({ ...span, timestamp: span.timestamp ?? Date.now() });
+            case 'artifact_job':
+              genAITelemetry.recordArtifactJob({
+                ...span,
+                timestamp: span.timestamp ?? Date.now(),
+              });
               break;
-            case "execution_run":
-              genAITelemetry.recordExecutionRun({ ...span, timestamp: span.timestamp ?? Date.now() });
+            case 'execution_run':
+              genAITelemetry.recordExecutionRun({
+                ...span,
+                timestamp: span.timestamp ?? Date.now(),
+              });
               break;
           }
           recorded++;
@@ -196,9 +204,9 @@ router.post(
 );
 
 router.get(
-  "/genai-telemetry/snapshot",
+  '/genai-telemetry/snapshot',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "viewer"),
+  requireRole('admin', 'operator', 'viewer'),
   validateQuery(listQuerySchema),
   (req, res) => {
     try {
@@ -212,9 +220,9 @@ router.get(
 );
 
 router.get(
-  "/genai-telemetry/spans",
+  '/genai-telemetry/spans',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   validateQuery(listQuerySchema),
   (req, res) => {
     try {
@@ -229,9 +237,9 @@ router.get(
 );
 
 router.get(
-  "/genai-telemetry/trace/:traceId",
+  '/genai-telemetry/trace/:traceId',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   (req, res) => {
     try {
       const traceId = req.params.traceId as string;
@@ -244,19 +252,16 @@ router.get(
 );
 
 router.get(
-  "/genai-telemetry/langfuse/:traceId",
+  '/genai-telemetry/langfuse/:traceId',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const nameParam = req.query.name;
       const langfuseTraceId = req.params.traceId as string;
-      const traceName = typeof nameParam === "string" ? nameParam : `Trace ${langfuseTraceId}`;
-      const exported = genAITelemetry.exportLangfuseTrace(
-        langfuseTraceId,
-        traceName,
-      );
+      const traceName = typeof nameParam === 'string' ? nameParam : `Trace ${langfuseTraceId}`;
+      const exported = genAITelemetry.exportLangfuseTrace(langfuseTraceId, traceName);
       res.json(exported);
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -265,9 +270,9 @@ router.get(
 );
 
 router.get(
-  "/genai-telemetry/dashboard/:appSlug",
+  '/genai-telemetry/dashboard/:appSlug',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "viewer"),
+  requireRole('admin', 'operator', 'viewer'),
   validateQuery(listQuerySchema),
   (req, res) => {
     try {

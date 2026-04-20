@@ -1,4 +1,4 @@
-import { gql, useQuery, useSubscription } from "@apollo/client";
+import { gql, useQuery, useSubscription } from '@apollo/client';
 
 export const GET_VESSELS = gql`
   query GetVessels($status: String, $limit: Int, $offset: Int) {
@@ -90,11 +90,21 @@ export function useVesselPositions(variables?: { vesselId?: string; limit?: numb
   return useQuery(GET_VESSEL_POSITIONS, { variables });
 }
 
-export function useVesselRoutes(variables?: { vesselId?: string; status?: string; limit?: number; offset?: number }) {
+export function useVesselRoutes(variables?: {
+  vesselId?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_VESSEL_ROUTES, { variables });
 }
 
-export function useVesselEvents(variables?: { vesselId?: string; severity?: string; limit?: number; offset?: number }) {
+export function useVesselEvents(variables?: {
+  vesselId?: string;
+  severity?: string;
+  limit?: number;
+  offset?: number;
+}) {
   return useQuery(GET_VESSEL_EVENTS, { variables });
 }
 

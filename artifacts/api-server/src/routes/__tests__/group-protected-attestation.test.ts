@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
 
 /**
  * GROUP-PROTECTED route attestation guardrail.
@@ -27,161 +27,157 @@ import path from "node:path";
  * (with explicit middleware in the file) or PUBLIC.
  */
 
-const ROUTES_DIR = path.join(__dirname, "..");
-const GROUPS_DIR = path.join(ROUTES_DIR, "groups");
-const SCRIPT_PATH = path.join(__dirname, "../../scripts/route-security-matrix.ts");
-const ENFORCER_PATH = path.join(__dirname, "../../middlewares/global-auth-enforcer.ts");
-const ADMIN_INDEX_PATH = path.join(ROUTES_DIR, "admin/index.ts");
-const MAIN_INDEX_PATH = path.join(ROUTES_DIR, "index.ts");
+const ROUTES_DIR = path.join(__dirname, '..');
+const GROUPS_DIR = path.join(ROUTES_DIR, 'groups');
+const SCRIPT_PATH = path.join(__dirname, '../../scripts/route-security-matrix.ts');
+const ENFORCER_PATH = path.join(__dirname, '../../middlewares/global-auth-enforcer.ts');
+const ADMIN_INDEX_PATH = path.join(ROUTES_DIR, 'admin/index.ts');
+const MAIN_INDEX_PATH = path.join(ROUTES_DIR, 'index.ts');
 
 function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function readGroupProtectedBasenames(): Set<string> {
-  const src = fs.readFileSync(SCRIPT_PATH, "utf-8");
-  const block = src.match(
-    /const\s+GROUP_PROTECTED_BASENAMES\s*=\s*new Set\(\[([\s\S]*?)\]\)/,
-  );
+  const src = fs.readFileSync(SCRIPT_PATH, 'utf-8');
+  const block = src.match(/const\s+GROUP_PROTECTED_BASENAMES\s*=\s*new Set\(\[([\s\S]*?)\]\)/);
   if (!block) {
-    throw new Error(
-      "Could not locate GROUP_PROTECTED_BASENAMES in route-security-matrix.ts",
-    );
+    throw new Error('Could not locate GROUP_PROTECTED_BASENAMES in route-security-matrix.ts');
   }
   const set = new Set<string>();
-  for (const m of block[1].matchAll(/"([^"]+)"/g)) set.add(m[1]);
+  for (const m of block[1].matchAll(/['"]([^'"]+)['"]/g)) set.add(m[1]);
   return set;
 }
 
 type Attestation =
   // Mounted in `groupFile`; that file applies tenantScope({required:true})
   // at `gatePrefix` (which covers the router's internal paths).
-  | { kind: "tenant-scope-gate"; groupFile: string; gatePrefix: string }
+  | { kind: 'tenant-scope-gate'; groupFile: string; gatePrefix: string }
   // Lives under `routes/admin/`. Gated by admin/index.ts which applies
   // authMiddleware() + requireRole("admin") to /admin.
-  | { kind: "admin-subroute" }
+  | { kind: 'admin-subroute' }
   // Helper module sub-required by other route files (not directly registered
   // on a router). Protected by virtue of its callers being protected.
-  | { kind: "transitive-helper"; requiredBy: string[] }
+  | { kind: 'transitive-helper'; requiredBy: string[] }
   // File enforces its own auth via inline isAuthenticated()/req.user checks.
-  | { kind: "inline-auth" }
+  | { kind: 'inline-auth' }
   // File is intentionally public read-only (no per-tenant data, no req.user)
   // — protection comes from the global enforcer allowlist.
-  | { kind: "public-read-only" }
+  | { kind: 'public-read-only' }
   // File serves only paths that are in PUBLIC_PREFIXES of the global enforcer.
-  | { kind: "public-via-enforcer"; pathPrefix: string }
+  | { kind: 'public-via-enforcer'; pathPrefix: string }
   // Mounted directly in routes/index.ts (not in any group file). Protection
   // for the non-public surface comes from the deny-by-default global
   // enforcer (NODE_ENV === "production"). Some endpoints are intentionally
   // public via the enforcer allowlist; others require auth implicitly.
-  | { kind: "main-index-mount" };
+  | { kind: 'main-index-mount' };
 
 const ATTESTATIONS: Record<string, Attestation> = {
   // ---- platform.ts group ----
-  "changelog.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "platform.ts",
-    gatePrefix: "/changelog",
+  'changelog.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'platform.ts',
+    gatePrefix: '/changelog',
   },
   // privacy.ts only serves GET /privacy/policy and similar read-only policy
   // text. No req.user, no per-tenant data. Effectively public information.
-  "privacy.ts": { kind: "public-read-only" },
+  'privacy.ts': { kind: 'public-read-only' },
 
   // ---- data-services.ts group ----
-  "analytics.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "data-services.ts",
-    gatePrefix: "/analytics",
+  'analytics.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'data-services.ts',
+    gatePrefix: '/analytics',
   },
-  "analytics-engine.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "data-services.ts",
-    gatePrefix: "/analytics-engine",
+  'analytics-engine.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'data-services.ts',
+    gatePrefix: '/analytics-engine',
   },
-  "telemetry.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "data-services.ts",
-    gatePrefix: "/telemetry",
+  'telemetry.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'data-services.ts',
+    gatePrefix: '/telemetry',
   },
 
   // ---- billing.ts group ----
-  "services.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "billing.ts",
-    gatePrefix: "/services",
+  'services.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'billing.ts',
+    gatePrefix: '/services',
   },
 
   // ---- core.ts group ----
   // config.ts is mounted in core.ts at root; it self-protects with inline
   // isAuthenticated() + role checks in every handler.
-  "config.ts": { kind: "inline-auth" },
+  'config.ts': { kind: 'inline-auth' },
   // oidc-auth.ts handles /api/auth/* which is in PUBLIC_PREFIXES.
-  "oidc-auth.ts": { kind: "public-via-enforcer", pathPrefix: "/api/auth/" },
+  'oidc-auth.ts': { kind: 'public-via-enforcer', pathPrefix: '/api/auth/' },
 
   // ---- ai.ts group ----
-  "a2a.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "ai.ts",
-    gatePrefix: "/a2a",
+  'a2a.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'ai.ts',
+    gatePrefix: '/a2a',
   },
-  "ai-safety.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "ai.ts",
-    gatePrefix: "/ai-safety",
+  'ai-safety.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'ai.ts',
+    gatePrefix: '/ai-safety',
   },
-  "fine-tuning.ts": {
-    kind: "tenant-scope-gate",
-    groupFile: "ai.ts",
-    gatePrefix: "/fine-tuning",
+  'fine-tuning.ts': {
+    kind: 'tenant-scope-gate',
+    groupFile: 'ai.ts',
+    gatePrefix: '/fine-tuning',
   },
 
   // ---- admin/* — gated by admin/index.ts (authMiddleware + requireRole) ----
-  "admin/flags.ts": { kind: "admin-subroute" },
-  "admin/growth.ts": { kind: "admin-subroute" },
-  "admin/integrations.ts": { kind: "admin-subroute" },
-  "admin/seed.ts": { kind: "admin-subroute" },
-  "admin/support.ts": { kind: "admin-subroute" },
-  "admin/system.ts": { kind: "admin-subroute" },
-  "admin/usage.ts": { kind: "admin-subroute" },
+  'admin/flags.ts': { kind: 'admin-subroute' },
+  'admin/growth.ts': { kind: 'admin-subroute' },
+  'admin/integrations.ts': { kind: 'admin-subroute' },
+  'admin/seed.ts': { kind: 'admin-subroute' },
+  'admin/support.ts': { kind: 'admin-subroute' },
+  'admin/system.ts': { kind: 'admin-subroute' },
+  'admin/usage.ts': { kind: 'admin-subroute' },
 
   // ---- transitive helpers (sub-required by other protected route files) ----
-  "control-tower/shared.ts": {
-    kind: "transitive-helper",
+  'control-tower/shared.ts': {
+    kind: 'transitive-helper',
     requiredBy: [
-      "control-tower/sense.ts",
-      "control-tower/decide.ts",
-      "control-tower/act.ts",
-      "control-tower/govern-evolve.ts",
+      'control-tower/sense.ts',
+      'control-tower/decide.ts',
+      'control-tower/act.ts',
+      'control-tower/govern-evolve.ts',
     ],
   },
-  "domain-agents/configs.ts": {
-    kind: "transitive-helper",
-    requiredBy: ["domain-agents/index.ts", "domain-agents/runner.ts"],
+  'domain-agents/configs.ts': {
+    kind: 'transitive-helper',
+    requiredBy: ['domain-agents/index.ts', 'domain-agents/runner.ts'],
   },
-  "domain-agents/runner.ts": {
-    kind: "transitive-helper",
-    requiredBy: ["domain-agents/index.ts"],
+  'domain-agents/runner.ts': {
+    kind: 'transitive-helper',
+    requiredBy: ['domain-agents/index.ts'],
   },
-  "lyte-cognitive-helpers.ts": {
-    kind: "transitive-helper",
-    requiredBy: ["lyte-cognitive.ts"],
+  'lyte-cognitive-helpers.ts': {
+    kind: 'transitive-helper',
+    requiredBy: ['lyte-cognitive.ts'],
   },
 
   // ---- mounted directly in routes/index.ts (not in any group file) ----
   // These rely on the global deny-by-default enforcer for their protected
   // surface. The matrix script tracks them as "GROUP-PROTECTED" because
   // they're not self-protected, but they are also not in a group file.
-  "fund-inbound-deals.ts": { kind: "main-index-mount" },
-  "executive-briefings.ts": { kind: "main-index-mount" },
-  "aegis-pcap.ts": { kind: "main-index-mount" },
-  "trust-provenance.ts": { kind: "main-index-mount" },
-  "maps.ts": { kind: "main-index-mount" },
+  'fund-inbound-deals.ts': { kind: 'main-index-mount' },
+  'executive-briefings.ts': { kind: 'main-index-mount' },
+  'aegis-pcap.ts': { kind: 'main-index-mount' },
+  'trust-provenance.ts': { kind: 'main-index-mount' },
+  'maps.ts': { kind: 'main-index-mount' },
 };
 
-describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
+describe('GROUP_PROTECTED_BASENAMES attestation guardrail', () => {
   const attested = readGroupProtectedBasenames();
 
-  it("every basename in GROUP_PROTECTED_BASENAMES has an attestation entry in this test", () => {
+  it('every basename in GROUP_PROTECTED_BASENAMES has an attestation entry in this test', () => {
     const missing: string[] = [];
     for (const b of attested) {
       if (!(b in ATTESTATIONS)) missing.push(b);
@@ -190,12 +186,12 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
       missing,
       `Basename(s) added to GROUP_PROTECTED_BASENAMES without an attestation ` +
         `entry in routes/__tests__/group-protected-attestation.test.ts: ` +
-        `${missing.join(", ")}. Add an entry describing exactly how the file ` +
+        `${missing.join(', ')}. Add an entry describing exactly how the file ` +
         `is protected (which group file gates it, at which prefix, etc.).`,
     ).toEqual([]);
   });
 
-  it("every attestation entry corresponds to a basename in GROUP_PROTECTED_BASENAMES", () => {
+  it('every attestation entry corresponds to a basename in GROUP_PROTECTED_BASENAMES', () => {
     const stale: string[] = [];
     for (const b of Object.keys(ATTESTATIONS)) {
       if (!attested.has(b)) stale.push(b);
@@ -203,7 +199,7 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
     expect(
       stale,
       `Attestation entries no longer present in GROUP_PROTECTED_BASENAMES: ` +
-        `${stale.join(", ")}. Either remove the stale entries from this test ` +
+        `${stale.join(', ')}. Either remove the stale entries from this test ` +
         `or re-add the basenames to GROUP_PROTECTED_BASENAMES in ` +
         `route-security-matrix.ts.`,
     ).toEqual([]);
@@ -213,23 +209,21 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
     describe(basename, () => {
       const filePath = path.join(ROUTES_DIR, basename);
 
-      it("route file still exists on disk", () => {
+      it('route file still exists on disk', () => {
         expect(
           fs.existsSync(filePath),
           `${basename} is attested as group-protected but no file exists at ${filePath}`,
         ).toBe(true);
       });
 
-      if (att.kind === "tenant-scope-gate") {
+      if (att.kind === 'tenant-scope-gate') {
         it(`${att.groupFile} still imports it, mounts it, AND applies tenantScope({ required: true }) at ${att.gatePrefix}`, () => {
           const groupPath = path.join(GROUPS_DIR, att.groupFile);
-          const rawSrc = fs.readFileSync(groupPath, "utf-8");
+          const rawSrc = fs.readFileSync(groupPath, 'utf-8');
           // Strip comments so commented-out router.use(...) lines don't
           // satisfy the import/mount/gate checks.
-          const src = rawSrc
-            .replace(/\/\*[\s\S]*?\*\//g, "")
-            .replace(/\/\/.*$/gm, "");
-          const moduleName = basename.replace(/\.ts$/, "");
+          const src = rawSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+          const moduleName = basename.replace(/\.ts$/, '');
 
           // 1. The group file must still import the router from this module.
           //    Capture the binding name so we can verify it's actually mounted.
@@ -252,14 +246,10 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
           //    We iterate every import statement in the file rather than
           //    using a single regex, because non-greedy `[\s\S]*?` can leak
           //    across earlier import statements and capture the wrong clause.
-          const importStmtRe =
-            /import\s+(?!type\b)([\s\S]+?)\s+from\s+["']([^"']+)["']/g;
+          const importStmtRe = /import\s+(?!type\b)([\s\S]+?)\s+from\s+["']([^"']+)["']/g;
           let importMatch: RegExpExecArray | null = null;
-          for (
-            let m: RegExpExecArray | null;
-            (m = importStmtRe.exec(src)) !== null;
-          ) {
-            const spec = m[2].replace(/\.js$/, "");
+          for (let m: RegExpExecArray | null; (m = importStmtRe.exec(src)) !== null; ) {
+            const spec = m[2].replace(/\.js$/, '');
             if (spec === `../${moduleName}`) {
               importMatch = m;
               break;
@@ -309,8 +299,11 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
           if (nsMatch) {
             bindings.push(nsMatch[1]);
           } else if (namedMatch) {
-            for (const piece of namedMatch[1].split(",")) {
-              const name = piece.trim().split(/\s+as\s+/).pop();
+            for (const piece of namedMatch[1].split(',')) {
+              const name = piece
+                .trim()
+                .split(/\s+as\s+/)
+                .pop();
               if (name) bindings.push(name);
             }
           } else {
@@ -319,8 +312,11 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
             if (def) bindings.push(def[1]);
             // Plus any named imports tagged on after the default.
             if (namedMatch) {
-              for (const piece of namedMatch[1].split(",")) {
-                const name = piece.trim().split(/\s+as\s+/).pop();
+              for (const piece of namedMatch[1].split(',')) {
+                const name = piece
+                  .trim()
+                  .split(/\s+as\s+/)
+                  .pop();
                 if (name) bindings.push(name);
               }
             }
@@ -335,18 +331,14 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
           //    call. Otherwise the import is dead and the route is unreachable
           //    via this group file.
           const isMounted = bindings.some((name) => {
-            const useRe = new RegExp(
-              `router\\.use\\([^)]*\\b${escapeRegex(name)}\\b`,
-            );
-            const registerRe = new RegExp(
-              `\\b${escapeRegex(name)}\\.register\\s*\\(`,
-            );
+            const useRe = new RegExp(`router\\.use\\([^)]*\\b${escapeRegex(name)}\\b`);
+            const registerRe = new RegExp(`\\b${escapeRegex(name)}\\.register\\s*\\(`);
             return useRe.test(src) || registerRe.test(src);
           });
           expect(
             isMounted,
             `${att.groupFile} imports "../${moduleName}" but no longer mounts ` +
-              `it via router.use(${bindings.join("|")}) or ` +
+              `it via router.use(${bindings.join('|')}) or ` +
               `${bindings[0]}.register(router). ` +
               `Either restore the registration, remove the dead import, or ` +
               `remove ${basename} from GROUP_PROTECTED_BASENAMES.`,
@@ -368,25 +360,18 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
         });
       }
 
-      if (att.kind === "admin-subroute") {
-        it("admin/index.ts still imports it AND applies authMiddleware + requireRole(\"admin\") at /admin", () => {
-          const src = fs.readFileSync(ADMIN_INDEX_PATH, "utf-8");
-          const moduleName = basename
-            .replace(/^admin\//, "")
-            .replace(/\.ts$/, "");
+      if (att.kind === 'admin-subroute') {
+        it('admin/index.ts still imports it AND applies authMiddleware + requireRole("admin") at /admin', () => {
+          const src = fs.readFileSync(ADMIN_INDEX_PATH, 'utf-8');
+          const moduleName = basename.replace(/^admin\//, '').replace(/\.ts$/, '');
 
-          const importRe = new RegExp(
-            `from\\s+["']\\./${escapeRegex(moduleName)}(?:\\.js)?["']`,
+          const importRe = new RegExp(`from\\s+["']\\./${escapeRegex(moduleName)}(?:\\.js)?["']`);
+          expect(importRe.test(src), `admin/index.ts no longer imports "./${moduleName}".`).toBe(
+            true,
           );
-          expect(
-            importRe.test(src),
-            `admin/index.ts no longer imports "./${moduleName}".`,
-          ).toBe(true);
 
           expect(
-            /adminRouter\.use\(\s*["']\/admin["']\s*,\s*authMiddleware\(\s*\)\s*\)/.test(
-              src,
-            ),
+            /adminRouter\.use\(\s*["']\/admin["']\s*,\s*authMiddleware\(\s*\)\s*\)/.test(src),
             `admin/index.ts no longer applies authMiddleware() at /admin. ` +
               `Restore it or reclassify each admin/* file as PROTECTED.`,
           ).toBe(true);
@@ -401,40 +386,35 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
         });
       }
 
-      if (att.kind === "transitive-helper") {
-        it(`still imported by at least one of [${att.requiredBy.join(", ")}]`, () => {
-          const helperModule = basename.replace(/\.ts$/, "");
+      if (att.kind === 'transitive-helper') {
+        it(`still imported by at least one of [${att.requiredBy.join(', ')}]`, () => {
+          const helperModule = basename.replace(/\.ts$/, '');
           const matches: string[] = [];
           for (const requirer of att.requiredBy) {
             const reqPath = path.join(ROUTES_DIR, requirer);
             if (!fs.existsSync(reqPath)) continue;
-            const src = fs.readFileSync(reqPath, "utf-8");
+            const src = fs.readFileSync(reqPath, 'utf-8');
             // Compute the relative module-specifier the requirer would use.
             // helperModule and requirer share a directory, so the import is
             // typically `./<basename-without-ext>`.
             const requirerDir = path.dirname(requirer);
-            const helperRel = path.relative(
-              requirerDir,
-              helperModule,
-            ).split(path.sep).join("/");
-            const spec = helperRel.startsWith(".") ? helperRel : `./${helperRel}`;
-            const importRe = new RegExp(
-              `from\\s+["']${escapeRegex(spec)}(?:\\.js)?["']`,
-            );
+            const helperRel = path.relative(requirerDir, helperModule).split(path.sep).join('/');
+            const spec = helperRel.startsWith('.') ? helperRel : `./${helperRel}`;
+            const importRe = new RegExp(`from\\s+["']${escapeRegex(spec)}(?:\\.js)?["']`);
             if (importRe.test(src)) matches.push(requirer);
           }
           expect(
             matches.length > 0,
-            `${basename} is no longer imported by any of [${att.requiredBy.join(", ")}]. ` +
+            `${basename} is no longer imported by any of [${att.requiredBy.join(', ')}]. ` +
               `Either remove ${basename} from GROUP_PROTECTED_BASENAMES (it's ` +
               `dead code) or update the requiredBy list in this attestation.`,
           ).toBe(true);
         });
       }
 
-      if (att.kind === "inline-auth") {
-        it("file still self-protects with inline isAuthenticated()/req.user check", () => {
-          const src = fs.readFileSync(filePath, "utf-8");
+      if (att.kind === 'inline-auth') {
+        it('file still self-protects with inline isAuthenticated()/req.user check', () => {
+          const src = fs.readFileSync(filePath, 'utf-8');
           const hasInline =
             /\bisAuthenticated\s*\(\s*\)/.test(src) ||
             /\breq\.user\b/.test(src) ||
@@ -449,14 +429,12 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
         });
       }
 
-      if (att.kind === "public-read-only") {
-        it("file is still public read-only (no per-user/per-tenant data access)", () => {
-          const src = fs.readFileSync(filePath, "utf-8");
+      if (att.kind === 'public-read-only') {
+        it('file is still public read-only (no per-user/per-tenant data access)', () => {
+          const src = fs.readFileSync(filePath, 'utf-8');
           // Strip line/block comments so JSDoc references to req.user don't
           // produce false positives.
-          const stripped = src
-            .replace(/\/\*[\s\S]*?\*\//g, "")
-            .replace(/\/\/.*$/gm, "");
+          const stripped = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
           const leakedUser =
             /\breq\.user\b/.test(stripped) ||
             /\breq\.oidcUser\b/.test(stripped) ||
@@ -481,12 +459,10 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
         });
       }
 
-      if (att.kind === "public-via-enforcer") {
+      if (att.kind === 'public-via-enforcer') {
         it(`${att.pathPrefix} still listed in global-auth-enforcer PUBLIC_PREFIXES`, () => {
-          const src = fs.readFileSync(ENFORCER_PATH, "utf-8");
-          const found =
-            src.includes(`"${att.pathPrefix}"`) ||
-            src.includes(`'${att.pathPrefix}'`);
+          const src = fs.readFileSync(ENFORCER_PATH, 'utf-8');
+          const found = src.includes(`"${att.pathPrefix}"`) || src.includes(`'${att.pathPrefix}'`);
           expect(
             found,
             `${att.pathPrefix} no longer present in global-auth-enforcer.ts. ` +
@@ -496,15 +472,13 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
         });
       }
 
-      if (att.kind === "main-index-mount") {
-        it("still mounted (imported) in routes/index.ts", () => {
-          const src = fs.readFileSync(MAIN_INDEX_PATH, "utf-8");
-          const moduleName = basename.replace(/\.ts$/, "");
+      if (att.kind === 'main-index-mount') {
+        it('still mounted (imported) in routes/index.ts', () => {
+          const src = fs.readFileSync(MAIN_INDEX_PATH, 'utf-8');
+          const moduleName = basename.replace(/\.ts$/, '');
           // Accept either a static `from "./X"` import or a lazy
           // `lazyMount/lazyMatch(... import("./X") ...)` mount expression.
-          const staticRe = new RegExp(
-            `from\\s+["']\\./${escapeRegex(moduleName)}(?:\\.js)?["']`,
-          );
+          const staticRe = new RegExp(`from\\s+["']\\./${escapeRegex(moduleName)}(?:\\.js)?["']`);
           const lazyRe = new RegExp(
             `(?:lazyMount|lazyMatch|lazyRegister|lazyRegisterMatch)\\(` +
               `[\\s\\S]*?import\\(\\s*["']\\./${escapeRegex(moduleName)}(?:\\.js)?["']\\s*\\)`,

@@ -21,21 +21,24 @@
  * network is required.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NormalizedFeedPayload } from "@szl-holdings/intelligence-feeds/feed-adapter";
-import type { OntologyEntity, OntologyRelationship } from "@szl-holdings/ai-engine/ontology/ontology-engine";
+import type {
+  OntologyEntity,
+  OntologyRelationship,
+} from '@szl-holdings/ai-engine/ontology/ontology-engine';
+import type { NormalizedFeedPayload } from '@szl-holdings/intelligence-feeds/feed-adapter';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-type FeedEntity = NormalizedFeedPayload["entities"][number];
+type FeedEntity = NormalizedFeedPayload['entities'][number];
 
 type IngestionFn = (
-  entities: NormalizedFeedPayload["entities"],
-  relationships: NormalizedFeedPayload["relationships"],
+  entities: NormalizedFeedPayload['entities'],
+  relationships: NormalizedFeedPayload['relationships'],
   source: string,
 ) => Promise<{ entitiesUpserted: OntologyEntity[]; relationshipsCreated: OntologyRelationship[] }>;
 
-function makeFeedEntity(name: string, source = "test-source"): FeedEntity {
+function makeFeedEntity(name: string, source = 'test-source'): FeedEntity {
   return {
-    type: "asset",
+    type: 'asset',
     name,
     domain: source,
     metadata: {},
@@ -43,10 +46,14 @@ function makeFeedEntity(name: string, source = "test-source"): FeedEntity {
   };
 }
 
-function makeUpsertResult(name: string, wasCreated: boolean, source = "test-source"): OntologyEntity & { wasCreated: boolean } {
+function makeUpsertResult(
+  name: string,
+  wasCreated: boolean,
+  source = 'test-source',
+): OntologyEntity & { wasCreated: boolean } {
   return {
     id: `id-${name}`,
-    type: "asset",
+    type: 'asset',
     name,
     domain: source,
     metadata: {},
@@ -65,14 +72,14 @@ interface SummaryLogFields {
 }
 
 function isSummaryFields(value: unknown): value is SummaryLogFields {
-  if (!value || typeof value !== "object") return false;
+  if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
   return (
-    typeof v.entitiesUpserted === "number" &&
-    typeof v.entitiesCreated === "number" &&
-    typeof v.entitiesMerged === "number" &&
-    typeof v.relationshipsCreated === "number" &&
-    typeof v.source === "string"
+    typeof v.entitiesUpserted === 'number' &&
+    typeof v.entitiesCreated === 'number' &&
+    typeof v.entitiesMerged === 'number' &&
+    typeof v.relationshipsCreated === 'number' &&
+    typeof v.source === 'string'
   );
 }
 
@@ -80,10 +87,10 @@ function findSummary(calls: unknown[][]): { fields: SummaryLogFields; message: s
   for (const call of calls) {
     const [first, second] = call;
     if (isSummaryFields(first)) {
-      return { fields: first, message: typeof second === "string" ? second : "" };
+      return { fields: first, message: typeof second === 'string' ? second : '' };
     }
   }
-  throw new Error("Summary log call with entitiesUpserted field not found");
+  throw new Error('Summary log call with entitiesUpserted field not found');
 }
 
 let capturedIngestionFn: IngestionFn | null = null;
@@ -91,11 +98,11 @@ const loggerInfo = vi.fn();
 const loggerWarn = vi.fn();
 const loggerDebug = vi.fn();
 
-vi.mock("../lib/logger", () => ({
+vi.mock('../lib/logger', () => ({
   logger: { info: loggerInfo, warn: loggerWarn, debug: loggerDebug, error: vi.fn() },
 }));
 
-vi.mock("../lib/platform-flags", () => ({
+vi.mock('../lib/platform-flags', () => ({
   isFlagEnabled: vi.fn().mockResolvedValue(true),
 }));
 
@@ -107,7 +114,7 @@ interface RecordIngestionPayload {
 }
 const recordIngestion = vi.fn<(source: string, payload: RecordIngestionPayload) => void>();
 
-vi.mock("@szl-holdings/intelligence-feeds/feed-scheduler", () => ({
+vi.mock('@szl-holdings/intelligence-feeds/feed-scheduler', () => ({
   feedScheduler: {
     register: vi.fn(),
     setEntityIngestionFn: (fn: IngestionFn): void => {
@@ -115,22 +122,30 @@ vi.mock("@szl-holdings/intelligence-feeds/feed-scheduler", () => ({
     },
     start: vi.fn().mockResolvedValue(undefined),
     stop: vi.fn(),
-    recordIngestion: (source: string, payload: RecordIngestionPayload) => recordIngestion(source, payload),
+    recordIngestion: (source: string, payload: RecordIngestionPayload) =>
+      recordIngestion(source, payload),
     getSchedulerStatus: (): { feedCount: number } => ({ feedCount: 0 }),
     getAllHealth: (): unknown[] => [],
   },
 }));
 
 class StubAdapter {}
-vi.mock("@szl-holdings/intelligence-feeds/adapters/ais", () => ({ AISFeedAdapter: StubAdapter }));
-vi.mock("@szl-holdings/intelligence-feeds/adapters/stix-taxii", () => ({ STIXTAXIIFeedAdapter: StubAdapter }));
-vi.mock("@szl-holdings/intelligence-feeds/adapters/sanctions", () => ({ SanctionsFeedAdapter: StubAdapter }));
-vi.mock("@szl-holdings/intelligence-feeds/adapters/legal-records", () => ({ LegalRecordsFeedAdapter: StubAdapter }));
+vi.mock('@szl-holdings/intelligence-feeds/adapters/ais', () => ({ AISFeedAdapter: StubAdapter }));
+vi.mock('@szl-holdings/intelligence-feeds/adapters/stix-taxii', () => ({
+  STIXTAXIIFeedAdapter: StubAdapter,
+}));
+vi.mock('@szl-holdings/intelligence-feeds/adapters/sanctions', () => ({
+  SanctionsFeedAdapter: StubAdapter,
+}));
+vi.mock('@szl-holdings/intelligence-feeds/adapters/legal-records', () => ({
+  LegalRecordsFeedAdapter: StubAdapter,
+}));
 
-const upsertEntity = vi.fn<(entity: FeedEntity) => Promise<OntologyEntity & { wasCreated: boolean }>>();
+const upsertEntity =
+  vi.fn<(entity: FeedEntity) => Promise<OntologyEntity & { wasCreated: boolean }>>();
 const createRelationship = vi.fn<(...args: unknown[]) => Promise<OntologyRelationship>>();
 
-vi.mock("@szl-holdings/ai-engine/ontology/ontology-engine", () => ({
+vi.mock('@szl-holdings/ai-engine/ontology/ontology-engine', () => ({
   ontologyEngine: {
     upsertEntity: (entity: FeedEntity) => upsertEntity(entity),
     createRelationship: (...args: unknown[]) => createRelationship(...args),
@@ -145,7 +160,7 @@ interface DbStub {
   where: () => DbStub;
   limit: () => Promise<Array<{ id: string }>>;
 }
-vi.mock("@szl-holdings/db", () => {
+vi.mock('@szl-holdings/db', () => {
   const chain: DbStub = {
     select: () => chain,
     from: () => chain,
@@ -158,11 +173,11 @@ vi.mock("@szl-holdings/db", () => {
   };
 });
 
-vi.mock("drizzle-orm", () => ({
+vi.mock('drizzle-orm', () => ({
   eq: () => ({}),
 }));
 
-describe("intelligence feeds ingestion summary log (created + merged === upserted)", () => {
+describe('intelligence feeds ingestion summary log (created + merged === upserted)', () => {
   beforeEach(() => {
     capturedIngestionFn = null;
     loggerInfo.mockReset();
@@ -172,14 +187,14 @@ describe("intelligence feeds ingestion summary log (created + merged === upserte
     createRelationship.mockReset();
   });
 
-  it("logs entitiesCreated + entitiesMerged === entitiesUpserted from wasCreated flags", async () => {
+  it('logs entitiesCreated + entitiesMerged === entitiesUpserted from wasCreated flags', async () => {
     // Force a fresh module evaluation so the `started` guard in
     // intelligence-feeds-init does not short-circuit the registration.
     vi.resetModules();
-    const { startIntelligenceFeeds } = await import("../lib/intelligence-feeds-init");
+    const { startIntelligenceFeeds } = await import('../lib/intelligence-feeds-init');
 
     await startIntelligenceFeeds();
-    if (!capturedIngestionFn) throw new Error("Ingestion callback was not registered");
+    if (!capturedIngestionFn) throw new Error('Ingestion callback was not registered');
 
     // Three "new" entities, two "existing" — mix of created/merged.
     const sequence: boolean[] = [true, false, true, false, true];
@@ -190,7 +205,7 @@ describe("intelligence feeds ingestion summary log (created + merged === upserte
     });
 
     const entities: FeedEntity[] = sequence.map((_, idx) => makeFeedEntity(`entity-${idx}`));
-    const result = await capturedIngestionFn(entities, [], "test-source");
+    const result = await capturedIngestionFn(entities, [], 'test-source');
 
     expect(result.entitiesUpserted).toHaveLength(sequence.length);
 
@@ -204,30 +219,32 @@ describe("intelligence feeds ingestion summary log (created + merged === upserte
     expect(fields.entitiesMerged).toBe(expectedMerged);
     // The core invariant the task is locking in:
     expect(fields.entitiesCreated + fields.entitiesMerged).toBe(fields.entitiesUpserted);
-    expect(fields.source).toBe("test-source");
+    expect(fields.source).toBe('test-source');
 
     // The human-readable message should also reflect the same counts.
     expect(message).toContain(`${expectedCreated} created`);
     expect(message).toContain(`${expectedMerged} merged`);
   });
 
-  it("classifies a wholly-new batch as all created and a wholly-merged batch as all merged", async () => {
+  it('classifies a wholly-new batch as all created and a wholly-merged batch as all merged', async () => {
     vi.resetModules();
-    const { startIntelligenceFeeds } = await import("../lib/intelligence-feeds-init");
+    const { startIntelligenceFeeds } = await import('../lib/intelligence-feeds-init');
     await startIntelligenceFeeds();
-    if (!capturedIngestionFn) throw new Error("Ingestion callback was not registered");
+    if (!capturedIngestionFn) throw new Error('Ingestion callback was not registered');
 
     upsertEntity.mockImplementation(async (entity: FeedEntity) =>
       makeUpsertResult(entity.name, true),
     );
 
-    const batch: FeedEntity[] = [makeFeedEntity("new-1"), makeFeedEntity("new-2")];
-    await capturedIngestionFn(batch, [], "test-source");
+    const batch: FeedEntity[] = [makeFeedEntity('new-1'), makeFeedEntity('new-2')];
+    await capturedIngestionFn(batch, [], 'test-source');
 
     const allCreated = findSummary(loggerInfo.mock.calls).fields;
     expect(allCreated.entitiesCreated).toBe(2);
     expect(allCreated.entitiesMerged).toBe(0);
-    expect(allCreated.entitiesCreated + allCreated.entitiesMerged).toBe(allCreated.entitiesUpserted);
+    expect(allCreated.entitiesCreated + allCreated.entitiesMerged).toBe(
+      allCreated.entitiesUpserted,
+    );
 
     // Reset and run a second batch where everything is a merge.
     loggerInfo.mockReset();
@@ -235,7 +252,7 @@ describe("intelligence feeds ingestion summary log (created + merged === upserte
       makeUpsertResult(entity.name, false),
     );
 
-    await capturedIngestionFn(batch, [], "test-source");
+    await capturedIngestionFn(batch, [], 'test-source');
 
     const allMerged = findSummary(loggerInfo.mock.calls).fields;
     expect(allMerged.entitiesCreated).toBe(0);

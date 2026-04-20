@@ -1,14 +1,15 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach } from "vitest";
-import { act, renderHook } from "@testing-library/react";
 
-import { useUserPreferences, setUserPreference } from "./use-user-preferences";
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-const LS_KEY = "szl-ui-preferences";
+import { setUserPreference, useUserPreferences } from './use-user-preferences';
+
+const LS_KEY = 'szl-ui-preferences';
 
 function dispatchStorage(newValue: string | null): void {
   // happy-dom supports the StorageEvent constructor.
-  const event = new StorageEvent("storage", {
+  const event = new StorageEvent('storage', {
     key: LS_KEY,
     newValue,
     oldValue: null,
@@ -18,7 +19,7 @@ function dispatchStorage(newValue: string | null): void {
   window.dispatchEvent(event);
 }
 
-describe("useUserPreferences cross-tab sync", () => {
+describe('useUserPreferences cross-tab sync', () => {
   beforeEach(() => {
     // Reset the singleton store back to defaults between tests by simulating
     // another tab clearing the key, then clear our own storage.
@@ -28,7 +29,7 @@ describe("useUserPreferences cross-tab sync", () => {
     window.localStorage.clear();
   });
 
-  it("updates hook state when another tab writes new preferences via a storage event", () => {
+  it('updates hook state when another tab writes new preferences via a storage event', () => {
     const { result } = renderHook(() => useUserPreferences());
 
     expect(result.current.prefs.sidebar_collapsed).toBe(false);
@@ -39,8 +40,8 @@ describe("useUserPreferences cross-tab sync", () => {
         JSON.stringify({
           sidebar_collapsed: true,
           notification_sound: false,
-          accent_color: "#abcdef",
-          density: "compact",
+          accent_color: '#abcdef',
+          density: 'compact',
           time_zone: null,
         }),
       );
@@ -48,18 +49,16 @@ describe("useUserPreferences cross-tab sync", () => {
 
     expect(result.current.prefs.sidebar_collapsed).toBe(true);
     expect(result.current.prefs.notification_sound).toBe(false);
-    expect(result.current.prefs.accent_color).toBe("#abcdef");
-    expect(result.current.prefs.density).toBe("compact");
+    expect(result.current.prefs.accent_color).toBe('#abcdef');
+    expect(result.current.prefs.density).toBe('compact');
   });
 
-  it("ignores malformed JSON in storage events and keeps the existing prefs", () => {
+  it('ignores malformed JSON in storage events and keeps the existing prefs', () => {
     const { result } = renderHook(() => useUserPreferences());
 
     // Seed a known good state from "another tab" first.
     act(() => {
-      dispatchStorage(
-        JSON.stringify({ sidebar_collapsed: true, notification_sound: false }),
-      );
+      dispatchStorage(JSON.stringify({ sidebar_collapsed: true, notification_sound: false }));
     });
     expect(result.current.prefs.sidebar_collapsed).toBe(true);
     expect(result.current.prefs.notification_sound).toBe(false);
@@ -67,23 +66,23 @@ describe("useUserPreferences cross-tab sync", () => {
     // Now dispatch malformed JSON — handler must swallow the parse error and
     // leave the singleton store untouched.
     act(() => {
-      dispatchStorage("{not-valid-json");
+      dispatchStorage('{not-valid-json');
     });
 
     expect(result.current.prefs.sidebar_collapsed).toBe(true);
     expect(result.current.prefs.notification_sound).toBe(false);
   });
 
-  it("drops invalid field values from storage events but keeps the valid ones", () => {
+  it('drops invalid field values from storage events but keeps the valid ones', () => {
     const { result } = renderHook(() => useUserPreferences());
 
     act(() => {
       dispatchStorage(
         JSON.stringify({
-          sidebar_collapsed: "yes-please", // invalid: not a boolean
+          sidebar_collapsed: 'yes-please', // invalid: not a boolean
           notification_sound: false, // valid
-          accent_color: "not-a-hex-color", // invalid
-          density: "ultra-compact", // invalid
+          accent_color: 'not-a-hex-color', // invalid
+          density: 'ultra-compact', // invalid
         }),
       );
     });
@@ -92,15 +91,15 @@ describe("useUserPreferences cross-tab sync", () => {
     expect(result.current.prefs.sidebar_collapsed).toBe(false);
     expect(result.current.prefs.notification_sound).toBe(false);
     expect(result.current.prefs.accent_color).toBeNull();
-    expect(result.current.prefs.density).toBe("comfortable");
+    expect(result.current.prefs.density).toBe('comfortable');
   });
 
-  it("resets to defaults when another tab clears the storage key", () => {
+  it('resets to defaults when another tab clears the storage key', () => {
     const { result } = renderHook(() => useUserPreferences());
 
     act(() => {
-      setUserPreference("sidebar_collapsed", true);
-      setUserPreference("notification_sound", false);
+      setUserPreference('sidebar_collapsed', true);
+      setUserPreference('notification_sound', false);
     });
     expect(result.current.prefs.sidebar_collapsed).toBe(true);
     expect(result.current.prefs.notification_sound).toBe(false);

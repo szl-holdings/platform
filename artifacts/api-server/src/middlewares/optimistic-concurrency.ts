@@ -1,11 +1,11 @@
-import type { Request, Response, NextFunction } from "express";
-import { createHash } from "crypto";
-import { logger } from "../lib/logger";
+import { createHash } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../lib/logger';
 
 export function computeETag(body: unknown): string {
   try {
-    const content = typeof body === "string" ? body : JSON.stringify(body);
-    const hash = createHash("sha256").update(content).digest("base64url");
+    const content = typeof body === 'string' ? body : JSON.stringify(body);
+    const hash = createHash('sha256').update(content).digest('base64url');
     return `"${hash}"`;
   } catch {
     return `"${Date.now().toString(36)}"`;
@@ -13,7 +13,7 @@ export function computeETag(body: unknown): string {
 }
 
 export function etagMiddleware(req: Request, res: Response, next: NextFunction): void {
-  if (req.method !== "GET") {
+  if (req.method !== 'GET') {
     next();
     return;
   }
@@ -22,10 +22,10 @@ export function etagMiddleware(req: Request, res: Response, next: NextFunction):
   res.json = (body: unknown): Response => {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       const etag = computeETag(body);
-      res.setHeader("ETag", etag);
-      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader('ETag', etag);
+      res.setHeader('Cache-Control', 'no-cache');
 
-      const ifNoneMatch = req.headers["if-none-match"];
+      const ifNoneMatch = req.headers['if-none-match'];
       if (ifNoneMatch && ifNoneMatch === etag) {
         res.status(304).end();
         return res;
@@ -40,9 +40,9 @@ export function etagMiddleware(req: Request, res: Response, next: NextFunction):
 export async function validateIfMatch(
   req: Request,
   res: Response,
-  fetchCurrent: () => Promise<unknown>
+  fetchCurrent: () => Promise<unknown>,
 ): Promise<boolean> {
-  const ifMatch = req.headers["if-match"] as string | undefined;
+  const ifMatch = req.headers['if-match'] as string | undefined;
   if (!ifMatch) return true;
 
   try {
@@ -52,14 +52,12 @@ export async function validateIfMatch(
     const serverETag = computeETag(current);
 
     if (serverETag !== ifMatch) {
-      logger.debug(
-        { path: req.path, ifMatch, serverETag },
-        "ETag conflict — stale write detected"
-      );
+      logger.debug({ path: req.path, ifMatch, serverETag }, 'ETag conflict — stale write detected');
       res.status(409).json({
-        error: "Conflict",
-        message: "The resource was modified since you last fetched it. Fetch the latest version and retry.",
-        code: "OPTIMISTIC_CONCURRENCY_CONFLICT",
+        error: 'Conflict',
+        message:
+          'The resource was modified since you last fetched it. Fetch the latest version and retry.',
+        code: 'OPTIMISTIC_CONCURRENCY_CONFLICT',
         statusCode: 409,
         serverVersion: current,
         clientVersion: req.body,
@@ -69,7 +67,7 @@ export async function validateIfMatch(
       return false;
     }
   } catch (err) {
-    logger.error({ err, path: req.path }, "validateIfMatch fetch failed — allowing write");
+    logger.error({ err, path: req.path }, 'validateIfMatch fetch failed — allowing write');
   }
 
   return true;

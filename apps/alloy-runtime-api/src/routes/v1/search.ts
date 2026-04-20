@@ -8,9 +8,10 @@
  * a well-typed response envelope so downstream consumers can code against the
  * contract immediately.
  */
-import { Router, type IRouter } from "express";
-import type { Request, Response } from "express";
-import { z } from "zod";
+
+import type { Request, Response } from 'express';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
 
 const router: IRouter = Router();
 
@@ -22,15 +23,15 @@ const HybridSearchSchema = z.object({
   scoreThreshold: z.number().min(0).max(1).optional(),
 });
 
-router.post("/hybrid", (req: Request, res: Response): void => {
+router.post('/hybrid', (req: Request, res: Response): void => {
   const parse = HybridSearchSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: "Validation failed", issues: parse.error.issues });
+    res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
 
   const { query, topK, filters, profileId, scoreThreshold } = parse.data;
-  const tenantId = req.tenantCtx?.tenantId ?? "default";
+  const tenantId = req.tenantCtx?.tenantId ?? 'default';
 
   res.status(200).json({
     query,
@@ -42,8 +43,8 @@ router.post("/hybrid", (req: Request, res: Response): void => {
     totalHits: 0,
     topK,
     latencyMs: 0,
-    backend: "retrieval-core/hybrid",
-    note: "Retrieval backend not yet wired — returns empty result set. Connect retrieval-core HybridSearchPipeline.",
+    backend: 'retrieval-core/hybrid',
+    note: 'Retrieval backend not yet wired — returns empty result set. Connect retrieval-core HybridSearchPipeline.',
   });
 });
 

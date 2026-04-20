@@ -1,18 +1,34 @@
-import { Package, Terminal, Zap, RefreshCw, Shield, Globe } from "lucide-react";
+import { Globe, Package, RefreshCw, Shield, Terminal, Zap } from 'lucide-react';
 
 export default function SdkGuide() {
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-2">TypeScript SDK</h1>
-        <p className="text-text-secondary">The official <code className="text-accent">@szl-holdings/sdk</code> package provides type-safe access to every API domain with built-in retry logic, error handling, and WebSocket support.</p>
+        <p className="text-text-secondary">
+          The official <code className="text-accent">@szl-holdings/sdk</code> package provides
+          type-safe access to every API domain with built-in retry logic, error handling, and
+          WebSocket support.
+        </p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
         {[
-          { icon: Zap, title: "Type Safe", desc: "Full TypeScript types for all requests, responses, and errors" },
-          { icon: RefreshCw, title: "Auto Retry", desc: "Exponential backoff on 429s and 5xx errors with configurable retries" },
-          { icon: Shield, title: "Dual Auth", desc: "API key and Bearer token authentication out of the box" },
+          {
+            icon: Zap,
+            title: 'Type Safe',
+            desc: 'Full TypeScript types for all requests, responses, and errors',
+          },
+          {
+            icon: RefreshCw,
+            title: 'Auto Retry',
+            desc: 'Exponential backoff on 429s and 5xx errors with configurable retries',
+          },
+          {
+            icon: Shield,
+            title: 'Dual Auth',
+            desc: 'API key and Bearer token authentication out of the box',
+          },
         ].map((f) => (
           <div key={f.title} className="p-4 bg-surface rounded-xl border border-border">
             <f.icon className="w-5 h-5 text-accent mb-2" />
@@ -24,14 +40,21 @@ export default function SdkGuide() {
 
       <div className="bg-surface rounded-xl border border-border p-6 space-y-4">
         <h2 className="text-xl font-semibold">Installation</h2>
-        <pre><code className="text-accent">npm install @szl-holdings/sdk</code></pre>
-        <p className="text-sm text-text-muted">Or if you're working within the SZL Holdings monorepo:</p>
-        <pre><code className="text-accent">{`"@szl-holdings/sdk": "workspace:*"`}</code></pre>
+        <pre>
+          <code className="text-accent">npm install @szl-holdings/sdk</code>
+        </pre>
+        <p className="text-sm text-text-muted">
+          Or if you're working within the SZL Holdings monorepo:
+        </p>
+        <pre>
+          <code className="text-accent">{`"@szl-holdings/sdk": "workspace:*"`}</code>
+        </pre>
       </div>
 
       <div className="bg-surface rounded-xl border border-border p-6 space-y-4">
         <h2 className="text-xl font-semibold">Client Initialization</h2>
-        <pre><code>{`import { SZLClient } from "@szl-holdings/sdk";
+        <pre>
+          <code>{`import { SZLClient } from "@szl-holdings/sdk";
 
 // Using API key authentication
 const client = new SZLClient({
@@ -48,18 +71,21 @@ const client = new SZLClient({
 const client = new SZLClient({
   baseUrl: "https://szlholdings.com",
   bearerToken: "your_session_token",
-});`}</code></pre>
+});`}</code>
+        </pre>
       </div>
 
       <div className="bg-surface rounded-xl border border-border p-6 space-y-6">
         <h2 className="text-xl font-semibold">Domain Clients</h2>
-        <p className="text-text-secondary text-sm">The SDK organizes endpoints into domain-specific clients:</p>
+        <p className="text-text-secondary text-sm">
+          The SDK organizes endpoints into domain-specific clients:
+        </p>
 
         {[
           {
-            name: "Security",
+            name: 'Security',
             icon: Shield,
-            color: "text-tag-security",
+            color: 'text-tag-security',
             code: `// ROSIE threat detection
 const threats = await client.security.getAegisThreats();
 
@@ -70,9 +96,9 @@ const compliance = await client.security.getAegisCompliance();
 const scenarios = await client.security.getScenarios();`,
           },
           {
-            name: "Analytics",
+            name: 'Analytics',
             icon: Globe,
-            color: "text-tag-analytics",
+            color: 'text-tag-analytics',
             code: `// Lyte analytics
 const metrics = await client.analytics.getLyteMetrics();
 const projects = await client.analytics.getLyteProjects();
@@ -82,18 +108,18 @@ const services = await client.analytics.getLyteServices();
 const alerts = await client.analytics.getLyteAlerts();`,
           },
           {
-            name: "Maritime",
+            name: 'Maritime',
             icon: Globe,
-            color: "text-tag-maritime",
+            color: 'text-tag-maritime',
             code: `// Vessels fleet management
 const fleet = await client.maritime.getFleet();
 const voyages = await client.maritime.getVoyages();
 const alerts = await client.maritime.getAlerts();`,
           },
           {
-            name: "AI / ML",
+            name: 'AI / ML',
             icon: Zap,
-            color: "text-tag-ai",
+            color: 'text-tag-ai',
             code: `// Alloy signal queue
 const signals = await client.alloy.getSignals();
 
@@ -101,9 +127,9 @@ const signals = await client.alloy.getSignals();
 const campaigns = await client.ai.getCampaigns();`,
           },
           {
-            name: "Infrastructure",
+            name: 'Infrastructure',
             icon: Globe,
-            color: "text-tag-infrastructure",
+            color: 'text-tag-infrastructure',
             code: `// Zeus topology
 const topology = await client.infrastructure.getZeusTopology();
 
@@ -111,9 +137,9 @@ const topology = await client.infrastructure.getZeusTopology();
 const templates = await client.infrastructure.getAlloyWorkflowTemplates();`,
           },
           {
-            name: "Developer",
+            name: 'Developer',
             icon: Package,
-            color: "text-tag-developer",
+            color: 'text-tag-developer',
             code: `// Manage API keys
 const keys = await client.developer.listApiKeys();
 const newKey = await client.developer.createApiKey({
@@ -133,17 +159,22 @@ await client.developer.createWebhook({
           <div key={domain.name}>
             <h3 className={`font-medium flex items-center gap-2 mb-2 ${domain.color}`}>
               <domain.icon className="w-4 h-4" />
-              client.{domain.name.toLowerCase().replace(/ \/ /g, "").replace(/ /g, "")}
+              client.{domain.name.toLowerCase().replace(/ \/ /g, '').replace(/ /g, '')}
             </h3>
-            <pre><code>{domain.code}</code></pre>
+            <pre>
+              <code>{domain.code}</code>
+            </pre>
           </div>
         ))}
       </div>
 
       <div className="bg-surface rounded-xl border border-border p-6 space-y-4">
         <h2 className="text-xl font-semibold">WebSocket Streaming</h2>
-        <p className="text-text-secondary text-sm">Connect to real-time events using the WebSocket client:</p>
-        <pre><code>{`import { SZLWebSocket } from "@szl-holdings/sdk";
+        <p className="text-text-secondary text-sm">
+          Connect to real-time events using the WebSocket client:
+        </p>
+        <pre>
+          <code>{`import { SZLWebSocket } from "@szl-holdings/sdk";
 
 const ws = new SZLWebSocket({
   url: "wss://szlholdings.com/ws",
@@ -168,12 +199,14 @@ ws.onAny((type, data) => {
 ws.send("subscribe", { channels: ["security", "analytics"] });
 
 // Cleanup
-ws.close();`}</code></pre>
+ws.close();`}</code>
+        </pre>
       </div>
 
       <div className="bg-surface rounded-xl border border-border p-6 space-y-4">
         <h2 className="text-xl font-semibold">Error Handling</h2>
-        <pre><code>{`import type { ApiError } from "@szl-holdings/sdk";
+        <pre>
+          <code>{`import type { ApiError } from "@szl-holdings/sdk";
 
 try {
   const data = await client.security.getAegisThreats();
@@ -192,7 +225,8 @@ try {
   if (apiError.status === 401) {
     // Token expired — refresh and retry
   }
-}`}</code></pre>
+}`}</code>
+        </pre>
       </div>
     </div>
   );

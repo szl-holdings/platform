@@ -4,25 +4,26 @@
  *
  * Auth is enforced by the calling mount point.
  */
-import { Router, type IRouter, type Request, type Response } from "express";
-import { defaultRunLedgerStore } from "@workspace/run-ledger";
-import { runsLedgerQuerySchema } from "@szl-holdings/contracts/governance";
+
+import { runsLedgerQuerySchema } from '@szl-holdings/contracts/governance';
+import { defaultRunLedgerStore } from '@workspace/run-ledger';
+import { type IRouter, type Request, type Response, Router } from 'express';
 import {
-  sendSuccess,
-  sendNotFound,
+  handleRouteError,
   sendBadRequest,
   sendForbidden,
-  handleRouteError,
-} from "../lib/api-response";
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
 
 const router: IRouter = Router();
 
 // GET /v1/runs
-router.get("/", (req: Request, res: Response) => {
+router.get('/', (req: Request, res: Response) => {
   try {
     const query = runsLedgerQuerySchema.safeParse(req.query);
     if (!query.success) {
-      return sendBadRequest(res, "Invalid query parameters", query.error.flatten().fieldErrors);
+      return sendBadRequest(res, 'Invalid query parameters', query.error.flatten().fieldErrors);
     }
     const { traceId, gateStatus, limit, offset } = query.data;
 
@@ -32,9 +33,7 @@ router.get("/", (req: Request, res: Response) => {
     const user = req.user as
       | { roles?: string[]; orgs?: Array<{ orgSlug: string; orgId: number }> }
       | undefined;
-    const isPrivileged =
-      user?.roles?.includes("super_admin") ||
-      user?.roles?.includes("admin");
+    const isPrivileged = user?.roles?.includes('super_admin') || user?.roles?.includes('admin');
 
     let effectiveTenantId = query.data.tenantId;
     if (!isPrivileged) {
@@ -59,34 +58,30 @@ router.get("/", (req: Request, res: Response) => {
 
     return sendSuccess(res, items, 200, { total: items.length, limit, offset });
   } catch (err) {
-    return handleRouteError(res, err, "v1-runs:list");
+    return handleRouteError(res, err, 'v1-runs:list');
   }
 });
 
 // GET /v1/runs/:id/ledger
-router.get("/:id/ledger", (req: Request, res: Response) => {
+router.get('/:id/ledger', (req: Request, res: Response) => {
   try {
     const entry = defaultRunLedgerStore.getByRunId(req.params.id!);
-    if (!entry) return sendNotFound(res, "Run Ledger entry not found");
+    if (!entry) return sendNotFound(res, 'Run Ledger entry not found');
 
     // ─── Tenant ownership ────────────────────────────────────────────────────
     // Non-privileged callers may only read ledger entries for their own tenant.
-    const user = req.user as
-      | { roles?: string[]; orgs?: Array<{ orgSlug: string }> }
-      | undefined;
-    const isPrivileged =
-      user?.roles?.includes("super_admin") ||
-      user?.roles?.includes("admin");
+    const user = req.user as { roles?: string[]; orgs?: Array<{ orgSlug: string }> } | undefined;
+    const isPrivileged = user?.roles?.includes('super_admin') || user?.roles?.includes('admin');
     if (!isPrivileged && entry.tenantId !== undefined) {
       const callerHasAccess = user?.orgs?.some((o) => o.orgSlug === entry.tenantId) ?? false;
       if (!callerHasAccess) {
-        return sendForbidden(res, "Access denied: record belongs to a different tenant");
+        return sendForbidden(res, 'Access denied: record belongs to a different tenant');
       }
     }
 
     return sendSuccess(res, entry);
   } catch (err) {
-    return handleRouteError(res, err, "v1-runs:ledger");
+    return handleRouteError(res, err, 'v1-runs:ledger');
   }
 });
 

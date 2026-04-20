@@ -1,4 +1,9 @@
-import type { RerankBackend, RerankBackendDescriptor, RawRerankRequest, RawRerankResponse } from "./interface.js";
+import type {
+  RawRerankRequest,
+  RawRerankResponse,
+  RerankBackend,
+  RerankBackendDescriptor,
+} from './interface.js';
 
 function termFrequencyScore(query: string, text: string): number {
   const queryTerms = query
@@ -19,10 +24,10 @@ function termFrequencyScore(query: string, text: string): number {
 
 export class DeterministicFallbackRerankBackend implements RerankBackend {
   readonly descriptor: RerankBackendDescriptor = {
-    backendId: "fallback-deterministic",
-    displayName: "Deterministic TF Fallback Reranker",
-    kind: "fallback-deterministic",
-    supportedModels: ["aef-fallback"],
+    backendId: 'fallback-deterministic',
+    displayName: 'Deterministic TF Fallback Reranker',
+    kind: 'fallback-deterministic',
+    supportedModels: ['aef-fallback'],
     isFallback: true,
   };
 
@@ -50,12 +55,12 @@ export class DeterministicFallbackRerankBackend implements RerankBackend {
 
     return {
       results,
-      model: "aef-fallback",
+      model: 'aef-fallback',
       backendLatencyMs: Date.now() - start,
     };
   }
 
   async health(): Promise<{ healthy: boolean; latencyMs?: number; detail?: string }> {
-    return { healthy: true, latencyMs: 0, detail: "deterministic fallback — always healthy" };
+    return { healthy: true, latencyMs: 0, detail: 'deterministic fallback — always healthy' };
   }
 }

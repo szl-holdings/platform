@@ -9,21 +9,21 @@
  * code change and redeploy.
  */
 
-import type { IRouter } from "express";
-import { db, appsRegistryTable, activityLogTable, usersTable } from "@szl-holdings/db";
-import { and, asc, desc, eq } from "drizzle-orm";
-import { z } from "zod";
-import { logActivity } from "../../lib/activity-logger.js";
-import { validateBody } from "../../lib/validation.js";
+import { activityLogTable, appsRegistryTable, db, usersTable } from '@szl-holdings/db';
+import { and, asc, desc, eq } from 'drizzle-orm';
+import type { IRouter } from 'express';
+import { z } from 'zod';
+import { logActivity } from '../../lib/activity-logger.js';
 import {
   sendBadRequest,
   sendConflict,
   sendCreated,
   sendError,
   sendNotFound,
-} from "../../lib/api-response.js";
+} from '../../lib/api-response.js';
+import { validateBody } from '../../lib/validation.js';
 
-const APP_STATUSES = ["active", "coming_soon", "maintenance", "deprecated"] as const;
+const APP_STATUSES = ['active', 'coming_soon', 'maintenance', 'deprecated'] as const;
 type AppStatus = (typeof APP_STATUSES)[number];
 
 const slugSchema = z
@@ -31,7 +31,7 @@ const slugSchema = z
   .trim()
   .min(2)
   .max(64)
-  .regex(/^[a-z0-9][a-z0-9-]*$/, "Slug must be lowercase letters, numbers, and dashes");
+  .regex(/^[a-z0-9][a-z0-9-]*$/, 'Slug must be lowercase letters, numbers, and dashes');
 
 const ownerTeamSchema = z.object({
   ownerTeam: z
@@ -46,7 +46,7 @@ const ownerTeamSchema = z.object({
 const createAppSchema = z.object({
   slug: slugSchema,
   name: z.string().trim().min(1).max(120),
-  status: z.enum(APP_STATUSES).default("coming_soon"),
+  status: z.enum(APP_STATUSES).default('coming_soon'),
   ownerTeam: z
     .string()
     .trim()
@@ -77,13 +77,13 @@ function serialize(row: {
 }
 
 export function register(router: IRouter): void {
-  router.get("/admin/apps/activity", async (req, res) => {
+  router.get('/admin/apps/activity', async (req, res) => {
     try {
-      const slug = typeof req.query["slug"] === "string" ? req.query["slug"] : undefined;
-      const limitRaw = Number(req.query["limit"] ?? 50);
+      const slug = typeof req.query['slug'] === 'string' ? req.query['slug'] : undefined;
+      const limitRaw = Number(req.query['limit'] ?? 50);
       const limit = Math.min(Math.max(Number.isFinite(limitRaw) ? limitRaw : 50, 1), 200);
 
-      const conditions = [eq(activityLogTable.resource, "app_registry")];
+      const conditions = [eq(activityLogTable.resource, 'app_registry')];
       if (slug) conditions.push(eq(activityLogTable.resourceId, slug));
 
       const rows = await db
@@ -110,16 +110,15 @@ export function register(router: IRouter): void {
           slug: r.resourceId,
           description: r.description,
           createdAt: r.createdAt.toISOString(),
-          actor:
-            r.actorDisplayName || r.actorEmail || (r.userId ? `user #${r.userId}` : "system"),
+          actor: r.actorDisplayName || r.actorEmail || (r.userId ? `user #${r.userId}` : 'system'),
         })),
       });
     } catch {
-      sendError(res, "Failed to fetch app registry activity", 500, "INTERNAL_ERROR");
+      sendError(res, 'Failed to fetch app registry activity', 500, 'INTERNAL_ERROR');
     }
   });
 
-  router.get("/admin/apps", async (_req, res) => {
+  router.get('/admin/apps', async (_req, res) => {
     try {
       const rows = await db
         .select({
@@ -133,11 +132,11 @@ export function register(router: IRouter): void {
         .orderBy(asc(appsRegistryTable.name));
       res.json({ apps: rows.map(serialize) });
     } catch {
-      sendError(res, "Failed to fetch apps registry", 500, "INTERNAL_ERROR");
+      sendError(res, 'Failed to fetch apps registry', 500, 'INTERNAL_ERROR');
     }
   });
 
-  router.post("/admin/apps", validateBody(createAppSchema), async (req, res) => {
+  router.post('/admin/apps', validateBody(createAppSchema), async (req, res) => {
     const body = req.body as {
       slug: string;
       name: string;
@@ -164,92 +163,84 @@ export function register(router: IRouter): void {
         })
         .returning();
       if (!created) {
-        sendError(res, "Failed to create app", 500, "INTERNAL_ERROR");
+        sendError(res, 'Failed to create app', 500, 'INTERNAL_ERROR');
         return;
       }
       await logActivity(
         req,
-        "create",
-        "app_registry",
+        'create',
+        'app_registry',
         created.slug,
         `Added ${created.slug} (${created.name}) to the apps registry`,
       ).catch(() => {});
       sendCreated(res, serialize(created));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "";
-      if (msg.includes("duplicate") || msg.includes("unique")) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('duplicate') || msg.includes('unique')) {
         sendConflict(res, `App "${body.slug}" already exists`);
         return;
       }
-      sendError(res, "Failed to create app", 500, "INTERNAL_ERROR");
+      sendError(res, 'Failed to create app', 500, 'INTERNAL_ERROR');
     }
   });
 
-  router.put(
-    "/admin/apps/:slug/owner-team",
-    validateBody(ownerTeamSchema),
-    async (req, res) => {
-      try {
-        const slug = req.params["slug"] as string;
-        const { ownerTeam } = req.body as { ownerTeam: string | null };
-        const [updated] = await db
-          .update(appsRegistryTable)
-          .set({ ownerTeam, updatedAt: new Date() })
-          .where(eq(appsRegistryTable.slug, slug))
-          .returning();
-        if (!updated) {
-          sendNotFound(res, "App");
-          return;
-        }
-        await logActivity(
-          req,
-          "update",
-          "app_registry",
-          updated.slug,
-          `Set owning team for ${slug} to ${ownerTeam ?? "(unassigned)"}`,
-        ).catch(() => {});
-        res.json(serialize(updated));
-      } catch {
-        sendError(res, "Failed to update app owner team", 500, "INTERNAL_ERROR");
-      }
-    },
-  );
-
-  router.put(
-    "/admin/apps/:slug/status",
-    validateBody(updateStatusSchema),
-    async (req, res) => {
-      try {
-        const slug = req.params["slug"] as string;
-        const { status } = req.body as { status: AppStatus };
-        const [updated] = await db
-          .update(appsRegistryTable)
-          .set({ status, updatedAt: new Date() })
-          .where(eq(appsRegistryTable.slug, slug))
-          .returning();
-        if (!updated) {
-          sendNotFound(res, "App");
-          return;
-        }
-        await logActivity(
-          req,
-          "update",
-          "app_registry",
-          updated.slug,
-          `Set status for ${slug} to ${status}`,
-        ).catch(() => {});
-        res.json(serialize(updated));
-      } catch {
-        sendError(res, "Failed to update app status", 500, "INTERNAL_ERROR");
-      }
-    },
-  );
-
-  router.delete("/admin/apps/:slug", async (req, res) => {
+  router.put('/admin/apps/:slug/owner-team', validateBody(ownerTeamSchema), async (req, res) => {
     try {
-      const slug = req.params["slug"] as string;
+      const slug = req.params['slug'] as string;
+      const { ownerTeam } = req.body as { ownerTeam: string | null };
+      const [updated] = await db
+        .update(appsRegistryTable)
+        .set({ ownerTeam, updatedAt: new Date() })
+        .where(eq(appsRegistryTable.slug, slug))
+        .returning();
+      if (!updated) {
+        sendNotFound(res, 'App');
+        return;
+      }
+      await logActivity(
+        req,
+        'update',
+        'app_registry',
+        updated.slug,
+        `Set owning team for ${slug} to ${ownerTeam ?? '(unassigned)'}`,
+      ).catch(() => {});
+      res.json(serialize(updated));
+    } catch {
+      sendError(res, 'Failed to update app owner team', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.put('/admin/apps/:slug/status', validateBody(updateStatusSchema), async (req, res) => {
+    try {
+      const slug = req.params['slug'] as string;
+      const { status } = req.body as { status: AppStatus };
+      const [updated] = await db
+        .update(appsRegistryTable)
+        .set({ status, updatedAt: new Date() })
+        .where(eq(appsRegistryTable.slug, slug))
+        .returning();
+      if (!updated) {
+        sendNotFound(res, 'App');
+        return;
+      }
+      await logActivity(
+        req,
+        'update',
+        'app_registry',
+        updated.slug,
+        `Set status for ${slug} to ${status}`,
+      ).catch(() => {});
+      res.json(serialize(updated));
+    } catch {
+      sendError(res, 'Failed to update app status', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.delete('/admin/apps/:slug', async (req, res) => {
+    try {
+      const slug = req.params['slug'] as string;
       if (!slug) {
-        sendBadRequest(res, "Missing slug");
+        sendBadRequest(res, 'Missing slug');
         return;
       }
       const [deleted] = await db
@@ -257,19 +248,19 @@ export function register(router: IRouter): void {
         .where(eq(appsRegistryTable.slug, slug))
         .returning();
       if (!deleted) {
-        sendNotFound(res, "App");
+        sendNotFound(res, 'App');
         return;
       }
       await logActivity(
         req,
-        "delete",
-        "app_registry",
+        'delete',
+        'app_registry',
         deleted.slug,
         `Removed ${deleted.slug} (${deleted.name}) from the apps registry`,
       ).catch(() => {});
       res.json({ ok: true, slug: deleted.slug });
     } catch {
-      sendError(res, "Failed to delete app", 500, "INTERNAL_ERROR");
+      sendError(res, 'Failed to delete app', 500, 'INTERNAL_ERROR');
     }
   });
 }

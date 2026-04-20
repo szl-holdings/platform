@@ -1,7 +1,6 @@
-export * from "./tiers.js";
-export * from "./schema.js";
-export * from "./decision-engine.js";
+export { checkAction, getRegisteredPolicies, registerPolicy } from '@szl-holdings/policy-engine';
+export * from './decision-engine.js';
+export * from './schema.js';
+export * from './tiers.js';
 
-export { checkAction, registerPolicy, getRegisteredPolicies } from "@szl-holdings/policy-engine";
-
-export const GUARDIAN_VERSION = "2.0.0" as const;
+export const GUARDIAN_VERSION = '2.0.0' as const;

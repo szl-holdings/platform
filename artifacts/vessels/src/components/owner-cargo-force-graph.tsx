@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface ForceNode {
   id: string;
-  type: "vessel" | "owner" | "charterer" | "port" | "cargo";
+  type: 'vessel' | 'owner' | 'charterer' | 'port' | 'cargo';
   label: string;
   sanctionExposure?: boolean;
   hazardClass?: string;
@@ -35,20 +35,26 @@ interface Props {
 }
 
 const RISK_RING: Record<string, string> = {
-  low: "#34d399",
-  medium: "#fbbf24",
-  high: "#f87171",
-  critical: "#ef4444",
+  low: '#34d399',
+  medium: '#fbbf24',
+  high: '#f87171',
+  critical: '#ef4444',
 };
 
 function radiusFor(n: ForceNode): number {
   switch (n.type) {
-    case "owner": return 14;
-    case "vessel": return 11;
-    case "port": return 12;
-    case "charterer": return 10;
-    case "cargo": return 9;
-    default: return 10;
+    case 'owner':
+      return 14;
+    case 'vessel':
+      return 11;
+    case 'port':
+      return 12;
+    case 'charterer':
+      return 10;
+    case 'cargo':
+      return 9;
+    default:
+      return 10;
   }
 }
 
@@ -68,7 +74,9 @@ export function OwnerCargoForceGraph({
   const [width, setWidth] = useState(800);
   const [, force] = useState(0);
   const [transform, setTransform] = useState({ k: 1, tx: 0, ty: 0 });
-  const [hoverEdge, setHoverEdge] = useState<{ edge: ForceEdge; x: number; y: number } | null>(null);
+  const [hoverEdge, setHoverEdge] = useState<{ edge: ForceEdge; x: number; y: number } | null>(
+    null,
+  );
   const [hoverNode, setHoverNode] = useState<string | null>(null);
   const dragRef = useRef<{ id: string; pointerId: number } | null>(null);
   const panRef = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
@@ -132,8 +140,14 @@ export function OwnerCargoForceGraph({
           const d = Math.sqrt(dx * dx + dy * dy) || 1;
           const target = 120;
           const f = ((d - target) / d) * alpha * 0.04;
-          if (!a.fixed) { a.vx += dx * f; a.vy += dy * f; }
-          if (!b.fixed) { b.vx -= dx * f; b.vy -= dy * f; }
+          if (!a.fixed) {
+            a.vx += dx * f;
+            a.vy += dy * f;
+          }
+          if (!b.fixed) {
+            b.vx -= dx * f;
+            b.vy -= dy * f;
+          }
         }
         // Repulsion (O(n²) is fine for typical demo sizes <200).
         for (let i = 0; i < sim.length; i++) {
@@ -147,15 +161,25 @@ export function OwnerCargoForceGraph({
             const k = (180 * alpha) / d2;
             const fx = (dx / d) * k;
             const fy = (dy / d) * k;
-            if (!a.fixed) { a.vx -= fx; a.vy -= fy; }
-            if (!b.fixed) { b.vx += fx; b.vy += fy; }
+            if (!a.fixed) {
+              a.vx -= fx;
+              a.vy -= fy;
+            }
+            if (!b.fixed) {
+              b.vx += fx;
+              b.vy += fy;
+            }
           }
         }
         // Centering + damping + integrate.
         const cx = width / 2;
         const cy = height / 2;
         for (const n of sim) {
-          if (n.fixed) { n.vx = 0; n.vy = 0; continue; }
+          if (n.fixed) {
+            n.vx = 0;
+            n.vy = 0;
+            continue;
+          }
           n.vx += (cx - n.x) * 0.008 * alpha;
           n.vy += (cy - n.y) * 0.008 * alpha;
           n.vx *= 0.82;
@@ -178,7 +202,9 @@ export function OwnerCargoForceGraph({
     };
   }, [visibleEdges, width, height]);
 
-  const reheat = () => { alphaRef.current = Math.max(alphaRef.current, 0.6); };
+  const reheat = () => {
+    alphaRef.current = Math.max(alphaRef.current, 0.6);
+  };
 
   // Pointer → SVG coordinate (account for zoom/pan).
   const toSvgCoords = (clientX: number, clientY: number) => {
@@ -255,7 +281,7 @@ export function OwnerCargoForceGraph({
   const nodeById = useMemo(() => new Map(sim.map((n) => [n.id, n] as const)), [sim, width, height]);
 
   return (
-    <div ref={wrapRef} style={{ position: "relative", width: "100%", height }}>
+    <div ref={wrapRef} style={{ position: 'relative', width: '100%', height }}>
       <svg
         ref={svgRef}
         width="100%"
@@ -264,7 +290,11 @@ export function OwnerCargoForceGraph({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onWheel={onWheel}
-        style={{ display: "block", cursor: panRef.current ? "grabbing" : "grab", touchAction: "none" }}
+        style={{
+          display: 'block',
+          cursor: panRef.current ? 'grabbing' : 'grab',
+          touchAction: 'none',
+        }}
       >
         <defs>
           <radialGradient id="ocg-bg" cx="50%" cy="50%" r="65%">
@@ -292,13 +322,17 @@ export function OwnerCargoForceGraph({
                 y1={a.y}
                 x2={b.x}
                 y2={b.y}
-                stroke={isIncident ? "#7dd3fc" : "rgba(125,211,252,0.28)"}
+                stroke={isIncident ? '#7dd3fc' : 'rgba(125,211,252,0.28)'}
                 strokeOpacity={dim ? 0.08 : 1}
                 strokeWidth={Math.max(0.6, Math.min(2.4, e.weight * 1.2)) * (isIncident ? 1.6 : 1)}
-                style={{ cursor: "pointer", pointerEvents: "stroke" }}
+                style={{ cursor: 'pointer', pointerEvents: 'stroke' }}
                 onMouseMove={(ev) => {
                   const p = toSvgCoords(ev.clientX, ev.clientY);
-                  setHoverEdge({ edge: e, x: p.x * transform.k + transform.tx, y: p.y * transform.k + transform.ty });
+                  setHoverEdge({
+                    edge: e,
+                    x: p.x * transform.k + transform.tx,
+                    y: p.y * transform.k + transform.ty,
+                  });
                 }}
                 onMouseLeave={() => setHoverEdge(null)}
               />
@@ -306,17 +340,20 @@ export function OwnerCargoForceGraph({
           })}
           {/* Nodes */}
           {sim.map((n) => {
-            const color = typeColors[n.type] ?? "#7dd3fc";
+            const color = typeColors[n.type] ?? '#7dd3fc';
             const isSelected = selectedId === n.id;
             const isHover = hoverNode === n.id;
             const ring = n.sanctionExposure
-              ? "#ef4444"
+              ? '#ef4444'
               : n.hazardClass
-              ? "#fbbf24"
-              : n.riskTier
-              ? RISK_RING[n.riskTier] ?? "rgba(255,255,255,0.2)"
-              : "rgba(255,255,255,0.18)";
-            const dim = (selectedId || hoverNode) && !isSelected && !isHover &&
+                ? '#fbbf24'
+                : n.riskTier
+                  ? (RISK_RING[n.riskTier] ?? 'rgba(255,255,255,0.2)')
+                  : 'rgba(255,255,255,0.18)';
+            const dim =
+              (selectedId || hoverNode) &&
+              !isSelected &&
+              !isHover &&
               !visibleEdges.some(
                 (e) =>
                   (e.source === n.id && (e.target === selectedId || e.target === hoverNode)) ||
@@ -326,7 +363,7 @@ export function OwnerCargoForceGraph({
               <g
                 key={n.id}
                 transform={`translate(${n.x} ${n.y})`}
-                style={{ cursor: "pointer", opacity: dim ? 0.25 : 1 }}
+                style={{ cursor: 'pointer', opacity: dim ? 0.25 : 1 }}
                 onPointerDown={(e) => onNodePointerDown(e, n.id)}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -336,11 +373,23 @@ export function OwnerCargoForceGraph({
                 onMouseLeave={() => setHoverNode(null)}
               >
                 {(isSelected || isHover) && (
-                  <circle r={n.r + 6} fill="none" stroke={color} strokeOpacity={0.4} strokeWidth={1.5} />
+                  <circle
+                    r={n.r + 6}
+                    fill="none"
+                    stroke={color}
+                    strokeOpacity={0.4}
+                    strokeWidth={1.5}
+                  />
                 )}
                 <circle r={n.r} fill={color} fillOpacity={0.85} stroke={ring} strokeWidth={2} />
                 {n.sanctionExposure && (
-                  <circle r={n.r + 2} fill="none" stroke="#ef4444" strokeWidth={1} strokeDasharray="2 2" />
+                  <circle
+                    r={n.r + 2}
+                    fill="none"
+                    stroke="#ef4444"
+                    strokeWidth={1}
+                    strokeDasharray="2 2"
+                  />
                 )}
                 {(isSelected || isHover || transform.k > 1.2) && (
                   <text
@@ -348,9 +397,9 @@ export function OwnerCargoForceGraph({
                     textAnchor="middle"
                     fontSize={10}
                     fill="#e0f2fe"
-                    style={{ pointerEvents: "none", userSelect: "none" }}
+                    style={{ pointerEvents: 'none', userSelect: 'none' }}
                   >
-                    {n.label.length > 22 ? n.label.slice(0, 21) + "…" : n.label}
+                    {n.label.length > 22 ? n.label.slice(0, 21) + '…' : n.label}
                   </text>
                 )}
               </g>
@@ -362,18 +411,18 @@ export function OwnerCargoForceGraph({
       {/* Zoom controls */}
       <div
         style={{
-          position: "absolute",
+          position: 'absolute',
           right: 10,
           top: 10,
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           gap: 4,
         }}
       >
         {[
-          { label: "+", op: () => setTransform((t) => ({ ...t, k: Math.min(4, t.k * 1.2) })) },
-          { label: "−", op: () => setTransform((t) => ({ ...t, k: Math.max(0.3, t.k / 1.2) })) },
-          { label: "⤾", op: resetView },
+          { label: '+', op: () => setTransform((t) => ({ ...t, k: Math.min(4, t.k * 1.2) })) },
+          { label: '−', op: () => setTransform((t) => ({ ...t, k: Math.max(0.3, t.k / 1.2) })) },
+          { label: '⤾', op: resetView },
         ].map((b) => (
           <button
             key={b.label}
@@ -382,11 +431,11 @@ export function OwnerCargoForceGraph({
               width: 26,
               height: 26,
               borderRadius: 6,
-              border: "1px solid rgba(125,211,252,0.25)",
-              background: "rgba(10,22,40,0.85)",
-              color: "#7dd3fc",
+              border: '1px solid rgba(125,211,252,0.25)',
+              background: 'rgba(10,22,40,0.85)',
+              color: '#7dd3fc',
               fontSize: 13,
-              cursor: "pointer",
+              cursor: 'pointer',
             }}
             aria-label={b.label}
           >
@@ -399,36 +448,36 @@ export function OwnerCargoForceGraph({
       {hoverEdge && (
         <div
           style={{
-            position: "absolute",
+            position: 'absolute',
             left: hoverEdge.x + 10,
             top: hoverEdge.y + 10,
-            pointerEvents: "none",
-            background: "rgba(10,22,40,0.95)",
-            border: "1px solid rgba(125,211,252,0.3)",
-            color: "#e0f2fe",
+            pointerEvents: 'none',
+            background: 'rgba(10,22,40,0.95)',
+            border: '1px solid rgba(125,211,252,0.3)',
+            color: '#e0f2fe',
             fontSize: 10,
-            padding: "4px 7px",
+            padding: '4px 7px',
             borderRadius: 6,
-            textTransform: "capitalize",
-            whiteSpace: "nowrap",
+            textTransform: 'capitalize',
+            whiteSpace: 'nowrap',
             zIndex: 5,
           }}
         >
-          {hoverEdge.edge.label.replace(/_/g, " ")}
+          {hoverEdge.edge.label.replace(/_/g, ' ')}
         </div>
       )}
 
       {/* Hint */}
       <div
         style={{
-          position: "absolute",
+          position: 'absolute',
           left: 10,
           bottom: 8,
           fontSize: 9,
-          color: "rgba(125,211,252,0.5)",
-          letterSpacing: "0.05em",
-          textTransform: "uppercase",
-          pointerEvents: "none",
+          color: 'rgba(125,211,252,0.5)',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          pointerEvents: 'none',
         }}
       >
         Drag nodes · Scroll to zoom · Drag background to pan · Click to inspect

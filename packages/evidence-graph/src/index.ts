@@ -10,8 +10,8 @@
  *   const why = defaultEvidenceGraphQuery.why(entityId);
  */
 
-export * from "./store.js";
-export * from "./query.js";
-export * from "./postgres-store.js";
+export * from './postgres-store.js';
+export * from './query.js';
+export * from './store.js';
 
-export const EVIDENCE_GRAPH_VERSION = "1.0.0" as const;
+export const EVIDENCE_GRAPH_VERSION = '1.0.0' as const;

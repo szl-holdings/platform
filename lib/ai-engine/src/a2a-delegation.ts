@@ -5,28 +5,27 @@
  * with timeout enforcement and fallback handling.
  */
 
-import { db } from "@szl-holdings/db";
-import { a2aDelegationTasks } from "@szl-holdings/db";
-import { eq } from "drizzle-orm";
-import { randomUUID } from "crypto";
-import { callAgent, AGENT_REGISTRY } from "./nuro-mesh.js";
-import { a2aRegistry } from "./a2a-registry.js";
+import { a2aDelegationTasks, db } from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm';
+import { a2aRegistry } from './a2a-registry.js';
+import { AGENT_REGISTRY, callAgent } from './nuro-mesh.js';
 
 export type DelegationStatus =
-  | "pending"
-  | "accepted"
-  | "running"
-  | "completed"
-  | "rejected"
-  | "failed"
-  | "timeout";
+  | 'pending'
+  | 'accepted'
+  | 'running'
+  | 'completed'
+  | 'rejected'
+  | 'failed'
+  | 'timeout';
 
 export interface DelegationRequest {
   requestingAgentId: string;
   targetAgentId: string;
   query: string;
   context?: string;
-  priority?: "low" | "normal" | "high" | "critical";
+  priority?: 'low' | 'normal' | 'high' | 'critical';
   timeoutMs?: number;
   orchestrationId?: string;
   orgId?: number | null;
@@ -77,9 +76,9 @@ async function persistTask(req: DelegationRequest, taskId: string): Promise<void
     requestingAgentId: req.requestingAgentId,
     targetAgentId: req.targetAgentId,
     query: req.query,
-    context: req.context ?? "",
-    status: "pending",
-    priority: req.priority ?? "normal",
+    context: req.context ?? '',
+    status: 'pending',
+    priority: req.priority ?? 'normal',
     timeoutMs: Math.min(req.timeoutMs ?? DEFAULT_TIMEOUT_MS, MAX_TIMEOUT_MS),
     requestedAt: Date.now(),
     orchestrationId: req.orchestrationId,
@@ -105,18 +104,20 @@ async function updateTaskStatus(
     .catch(() => {});
 }
 
-async function canAcceptTask(targetAgentId: string): Promise<{ accepted: boolean; reason?: string }> {
+async function canAcceptTask(
+  targetAgentId: string,
+): Promise<{ accepted: boolean; reason?: string }> {
   const card = await a2aRegistry.getAgentCard(targetAgentId).catch(() => null);
 
   if (!card) {
-    const inRegistry = AGENT_REGISTRY.find(a => a.id === targetAgentId);
+    const inRegistry = AGENT_REGISTRY.find((a) => a.id === targetAgentId);
     if (!inRegistry) {
       return { accepted: false, reason: `Agent '${targetAgentId}' not found in registry` };
     }
     return { accepted: true };
   }
 
-  if (card.status === "offline") {
+  if (card.status === 'offline') {
     return { accepted: false, reason: `Agent '${targetAgentId}' is offline` };
   }
 
@@ -133,80 +134,83 @@ export async function delegateTask(req: DelegationRequest): Promise<DelegationRe
   const acceptance = await canAcceptTask(req.targetAgentId);
   if (!acceptance.accepted) {
     await updateTaskStatus(taskId, {
-      status: "rejected",
+      status: 'rejected',
       errorMessage: acceptance.reason,
       completedAt: Date.now(),
     });
     return {
       taskId,
-      status: "rejected",
+      status: 'rejected',
       errorMessage: acceptance.reason,
     };
   }
 
   await updateTaskStatus(taskId, {
-    status: "accepted",
+    status: 'accepted',
     acceptedAt: Date.now(),
   });
 
-  const targetAgent = AGENT_REGISTRY.find(a => a.id === req.targetAgentId);
+  const targetAgent = AGENT_REGISTRY.find((a) => a.id === req.targetAgentId);
   if (!targetAgent) {
     await updateTaskStatus(taskId, {
-      status: "failed",
+      status: 'failed',
       errorMessage: `Agent definition not found: ${req.targetAgentId}`,
       completedAt: Date.now(),
     });
-    return { taskId, status: "failed", errorMessage: `Agent '${req.targetAgentId}' definition not found` };
+    return {
+      taskId,
+      status: 'failed',
+      errorMessage: `Agent '${req.targetAgentId}' definition not found`,
+    };
   }
 
-  await updateTaskStatus(taskId, { status: "running" });
+  await updateTaskStatus(taskId, { status: 'running' });
 
-  const executionPromise = callAgent(
-    targetAgent,
-    req.query,
-    req.context ?? "",
-    {
-      orgId: req.orgId ?? null,
-      callerUserId: req.callerUserId ?? null,
-      callerRoles: req.callerRoles ?? [],
-      action: "delegation",
-    },
-  );
+  const executionPromise = callAgent(targetAgent, req.query, req.context ?? '', {
+    orgId: req.orgId ?? null,
+    callerUserId: req.callerUserId ?? null,
+    callerRoles: req.callerRoles ?? [],
+    action: 'delegation',
+  });
 
   const timeoutPromise = new Promise<null>((_, reject) => {
-    setTimeout(() => reject(new Error("DELEGATION_TIMEOUT")), timeoutMs);
+    setTimeout(() => reject(new Error('DELEGATION_TIMEOUT')), timeoutMs);
   });
 
   try {
-    const callResult = await Promise.race([executionPromise, timeoutPromise]) as Awaited<typeof executionPromise>;
+    const callResult = (await Promise.race([executionPromise, timeoutPromise])) as Awaited<
+      typeof executionPromise
+    >;
     const durationMs = Date.now() - startTime;
 
     await updateTaskStatus(taskId, {
-      status: "completed",
+      status: 'completed',
       result: callResult.response,
       resultConfidence: callResult.confidence / 100,
       completedAt: Date.now(),
       durationMs,
     });
 
-    void a2aRegistry.updateAgentMetrics(req.targetAgentId, {
-      avgLatencyMs: durationMs,
-      successRate: 0.95,
-    }).catch(() => {});
+    void a2aRegistry
+      .updateAgentMetrics(req.targetAgentId, {
+        avgLatencyMs: durationMs,
+        successRate: 0.95,
+      })
+      .catch(() => {});
 
     return {
       taskId,
-      status: "completed",
+      status: 'completed',
       result: callResult.response,
       confidence: callResult.confidence / 100,
       durationMs,
     };
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    const isTimeout = err instanceof Error && err.message === "DELEGATION_TIMEOUT";
+    const isTimeout = err instanceof Error && err.message === 'DELEGATION_TIMEOUT';
 
     await updateTaskStatus(taskId, {
-      status: isTimeout ? "timeout" : "failed",
+      status: isTimeout ? 'timeout' : 'failed',
       errorMessage: isTimeout
         ? `Task timed out after ${timeoutMs}ms`
         : String(err instanceof Error ? err.message : err),
@@ -214,14 +218,18 @@ export async function delegateTask(req: DelegationRequest): Promise<DelegationRe
       durationMs,
     });
 
-    void a2aRegistry.updateAgentMetrics(req.targetAgentId, {
-      successRate: 0.85,
-    }).catch(() => {});
+    void a2aRegistry
+      .updateAgentMetrics(req.targetAgentId, {
+        successRate: 0.85,
+      })
+      .catch(() => {});
 
     return {
       taskId,
-      status: isTimeout ? "timeout" : "failed",
-      errorMessage: isTimeout ? `Delegation timed out after ${timeoutMs}ms` : String(err instanceof Error ? err.message : err),
+      status: isTimeout ? 'timeout' : 'failed',
+      errorMessage: isTimeout
+        ? `Delegation timed out after ${timeoutMs}ms`
+        : String(err instanceof Error ? err.message : err),
       durationMs,
     };
   }
@@ -256,23 +264,20 @@ export async function getDelegationTask(taskId: string): Promise<DelegationTaskR
 }
 
 export async function getDelegationHistory(
-  options: {
-    requestingAgentId?: string;
-    targetAgentId?: string;
-    limit?: number;
-  } = {},
+  options: { requestingAgentId?: string; targetAgentId?: string; limit?: number } = {},
 ): Promise<DelegationTaskRecord[]> {
-  let query = db.select().from(a2aDelegationTasks).orderBy(a2aDelegationTasks.id);
+  const query = db.select().from(a2aDelegationTasks).orderBy(a2aDelegationTasks.id);
 
   const rows = await query.limit(options.limit ?? 50);
 
   return rows
-    .filter(r => {
-      if (options.requestingAgentId && r.requestingAgentId !== options.requestingAgentId) return false;
+    .filter((r) => {
+      if (options.requestingAgentId && r.requestingAgentId !== options.requestingAgentId)
+        return false;
       if (options.targetAgentId && r.targetAgentId !== options.targetAgentId) return false;
       return true;
     })
-    .map(r => ({
+    .map((r) => ({
       taskId: r.taskId,
       requestingAgentId: r.requestingAgentId,
       targetAgentId: r.targetAgentId,

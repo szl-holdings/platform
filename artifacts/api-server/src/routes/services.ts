@@ -1,9 +1,9 @@
-import { Router, type IRouter } from "express";
-import { services } from "@szl-holdings/services";
-import { APP_INTEGRATIONS } from "@szl-holdings/config";
-import { integrationActivityLog, type IntegrationActivity } from "./admin/index.js";
+import { APP_INTEGRATIONS } from '@szl-holdings/config';
+import { services } from '@szl-holdings/services';
+import { type IRouter, Router } from 'express';
+import { type IntegrationActivity, integrationActivityLog } from './admin/index.js';
 
-function logActivity(entry: Omit<IntegrationActivity, "id" | "timestamp">) {
+function logActivity(entry: Omit<IntegrationActivity, 'id' | 'timestamp'>) {
   integrationActivityLog.unshift({
     ...entry,
     id: `act_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -14,13 +14,13 @@ function logActivity(entry: Omit<IntegrationActivity, "id" | "timestamp">) {
 
 const servicesRouter: IRouter = Router();
 
-servicesRouter.get("/services/health", (_req, res) => {
+servicesRouter.get('/services/health', (_req, res) => {
   const matrix = services.getHealthMatrix();
   res.json(matrix);
 });
 
-servicesRouter.get("/services/health/app/:appSlug", (req, res) => {
-  const appSlug = req.params["appSlug"]!;
+servicesRouter.get('/services/health/app/:appSlug', (req, res) => {
+  const appSlug = req.params['appSlug']!;
   const mapping = APP_INTEGRATIONS[appSlug];
   if (!mapping) {
     res.status(404).json({ error: `No integration mapping found for app: ${appSlug}` });
@@ -34,8 +34,8 @@ servicesRouter.get("/services/health/app/:appSlug", (req, res) => {
   });
 });
 
-servicesRouter.post("/services/health/app/:appSlug/test", async (req, res) => {
-  const appSlug = req.params["appSlug"]!;
+servicesRouter.post('/services/health/app/:appSlug/test', async (req, res) => {
+  const appSlug = req.params['appSlug']!;
   const mapping = APP_INTEGRATIONS[appSlug];
   if (!mapping) {
     res.status(404).json({ error: `No integration mapping found for app: ${appSlug}` });
@@ -46,36 +46,39 @@ servicesRouter.post("/services/health/app/:appSlug/test", async (req, res) => {
       const result = await services.testConnection(connectorName);
       if (result) {
         logActivity({
-          type: "health_check",
+          type: 'health_check',
           connector: result.name,
           app: appSlug,
-          status: result.success ? "success" : "error",
+          status: result.success ? 'success' : 'error',
           message: result.message,
           responseTimeMs: result.responseTimeMs,
         });
       }
       return result;
-    })
+    }),
   );
   res.json({ app: appSlug, results: results.filter(Boolean) });
 });
 
-servicesRouter.post("/services/health/verify-all", async (_req, res) => {
+servicesRouter.post('/services/health/verify-all', async (_req, res) => {
   const appSlugs = Object.keys(APP_INTEGRATIONS);
-  const results: Record<string, {
-    app: string;
-    connectors: Array<{
-      name: string;
-      success: boolean;
-      status: string;
-      fallbackMode: boolean;
-      message: string;
-      responseTimeMs: number;
-    }>;
-    allHealthy: boolean;
-    fallbackCount: number;
-    failedCount: number;
-  }> = {};
+  const results: Record<
+    string,
+    {
+      app: string;
+      connectors: Array<{
+        name: string;
+        success: boolean;
+        status: string;
+        fallbackMode: boolean;
+        message: string;
+        responseTimeMs: number;
+      }>;
+      allHealthy: boolean;
+      fallbackCount: number;
+      failedCount: number;
+    }
+  > = {};
 
   for (const slug of appSlugs) {
     const mapping = APP_INTEGRATIONS[slug]!;
@@ -84,10 +87,10 @@ servicesRouter.post("/services/health/verify-all", async (_req, res) => {
         const result = await services.testConnection(connectorName);
         if (result) {
           logActivity({
-            type: "health_check",
+            type: 'health_check',
             connector: result.name,
             app: slug,
-            status: result.success ? "success" : "error",
+            status: result.success ? 'success' : 'error',
             message: `E2E verification: ${result.message}`,
             responseTimeMs: result.responseTimeMs,
           });
@@ -95,7 +98,7 @@ servicesRouter.post("/services/health/verify-all", async (_req, res) => {
             name: result.name,
             success: result.success,
             status: result.status,
-            fallbackMode: result.status === "MOCKED_DEMO_MODE",
+            fallbackMode: result.status === 'MOCKED_DEMO_MODE',
             message: result.message,
             responseTimeMs: result.responseTimeMs,
           };
@@ -103,12 +106,12 @@ servicesRouter.post("/services/health/verify-all", async (_req, res) => {
         return {
           name: connectorName,
           success: false,
-          status: "UNKNOWN",
+          status: 'UNKNOWN',
           fallbackMode: false,
           message: `Connector '${connectorName}' not found in registry`,
           responseTimeMs: 0,
         };
-      })
+      }),
     );
 
     results[slug] = {
@@ -133,11 +136,11 @@ servicesRouter.post("/services/health/verify-all", async (_req, res) => {
   });
 });
 
-servicesRouter.get("/services/health/summary", (_req, res) => {
+servicesRouter.get('/services/health/summary', (_req, res) => {
   const matrix = services.getHealthMatrix();
   res.json({
-    unhealthyCount: matrix.services.filter((s) => s.status === "MANUAL_REQUIRED").length,
-    demoCount: matrix.services.filter((s) => s.status === "MOCKED_DEMO_MODE").length,
+    unhealthyCount: matrix.services.filter((s) => s.status === 'MANUAL_REQUIRED').length,
+    demoCount: matrix.services.filter((s) => s.status === 'MOCKED_DEMO_MODE').length,
     liveCount: matrix.summary.liveConfigured,
     total: matrix.summary.total,
     hasDemoMode: matrix.summary.mockedDemoMode > 0,

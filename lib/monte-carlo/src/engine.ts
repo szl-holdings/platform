@@ -1,8 +1,22 @@
-import { sample, distributionStats, buildHistogram, buildCDF, type DistributionStats, type HistogramBucket, type CDFPoint } from "./distributions.js";
-import type { ScenarioDefinition, RunConfig, OutputMetric, PartialOutputSnapshot, PartialResultCallback } from "./schema.js";
-import type { SerializableScenario } from "./dsl.js";
-import { buildScenarioCalculate } from "./dsl.js";
-import { runParallelChunks } from "./parallel.js";
+import {
+  buildCDF,
+  buildHistogram,
+  type CDFPoint,
+  type DistributionStats,
+  distributionStats,
+  type HistogramBucket,
+  sample,
+} from './distributions.js';
+import type { SerializableScenario } from './dsl.js';
+import { buildScenarioCalculate } from './dsl.js';
+import { runParallelChunks } from './parallel.js';
+import type {
+  OutputMetric,
+  PartialOutputSnapshot,
+  PartialResultCallback,
+  RunConfig,
+  ScenarioDefinition,
+} from './schema.js';
 
 export interface SimulationProgress {
   iteration: number;
@@ -38,15 +52,40 @@ export interface SimulationResult {
 
 export type ProgressCallback = (progress: SimulationProgress) => void;
 
-function buildPartialSnapshots(outputs: OutputMetric[], accumulators: Record<string, number[]>, validIterations: number): PartialOutputSnapshot[] {
+function buildPartialSnapshots(
+  outputs: OutputMetric[],
+  accumulators: Record<string, number[]>,
+  validIterations: number,
+): PartialOutputSnapshot[] {
   return outputs.map((m) => {
     const vals = accumulators[m.id] ?? [];
-    if (vals.length === 0) return { outputId: m.id, outputLabel: m.label, count: 0, mean: 0, p25: 0, p50: 0, p75: 0, min: 0, max: 0 };
+    if (vals.length === 0)
+      return {
+        outputId: m.id,
+        outputLabel: m.label,
+        count: 0,
+        mean: 0,
+        p25: 0,
+        p50: 0,
+        p75: 0,
+        min: 0,
+        max: 0,
+      };
     const sorted = [...vals].sort((a, b) => a - b);
     const n = sorted.length;
     const mean = vals.reduce((s, v) => s + v, 0) / n;
-    const p = (pct: number) => sorted[Math.max(0, Math.floor(n * pct / 100) - 1)] ?? 0;
-    return { outputId: m.id, outputLabel: m.label, count: validIterations, mean, p25: p(25), p50: p(50), p75: p(75), min: sorted[0]!, max: sorted[n - 1]! };
+    const p = (pct: number) => sorted[Math.max(0, Math.floor((n * pct) / 100) - 1)] ?? 0;
+    return {
+      outputId: m.id,
+      outputLabel: m.label,
+      count: validIterations,
+      mean,
+      p25: p(25),
+      p50: p(50),
+      p75: p(75),
+      min: sorted[0]!,
+      max: sorted[n - 1]!,
+    };
   });
 }
 
@@ -54,7 +93,7 @@ export async function runSimulation(
   scenario: ScenarioDefinition,
   config: Partial<RunConfig> = {},
   onProgress?: ProgressCallback,
-  onPartialResult?: PartialResultCallback
+  onPartialResult?: PartialResultCallback,
 ): Promise<SimulationResult> {
   const cfg: RunConfig = {
     iterations: Math.min(config.iterations ?? 10_000, 100_000),
@@ -129,7 +168,11 @@ export async function runSimulation(
 
       const snapshotInterval = cfg.snapshotInterval ?? 0;
       if (onPartialResult && snapshotInterval > 0 && validIterations % snapshotInterval === 0) {
-        onPartialResult(validIterations, totalIterations, buildPartialSnapshots(scenario.outputs, outputAccumulators, validIterations));
+        onPartialResult(
+          validIterations,
+          totalIterations,
+          buildPartialSnapshots(scenario.outputs, outputAccumulators, validIterations),
+        );
       }
     }
 
@@ -153,7 +196,11 @@ export async function runSimulation(
 
   const didTimeout = completed < cfg.iterations;
   const results = buildResults(scenario.outputs, outputAccumulators, constraintViolations);
-  const correlationMatrix = computeCorrelationMatrix(validInputSamples, outputAccumulators, scenario.inputs.map((i) => i.id));
+  const correlationMatrix = computeCorrelationMatrix(
+    validInputSamples,
+    outputAccumulators,
+    scenario.inputs.map((i) => i.id),
+  );
 
   return {
     scenarioId: scenario.id,
@@ -174,7 +221,7 @@ export async function runSimulation(
 export async function runSerializableSimulation(
   scenario: SerializableScenario,
   config: Partial<RunConfig> = {},
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
 ): Promise<SimulationResult> {
   const cfg: RunConfig = {
     iterations: Math.min(config.iterations ?? 10_000, 100_000),
@@ -189,7 +236,13 @@ export async function runSerializableSimulation(
   const scenarioJson = JSON.stringify(scenario);
 
   if (onProgress) {
-    onProgress({ iteration: 0, totalIterations: cfg.iterations, percentComplete: 0, elapsedMs: 0, estimatedRemainingMs: cfg.timeoutMs ?? 120_000 });
+    onProgress({
+      iteration: 0,
+      totalIterations: cfg.iterations,
+      percentComplete: 0,
+      elapsedMs: 0,
+      estimatedRemainingMs: cfg.timeoutMs ?? 120_000,
+    });
   }
 
   const chunkResult = await runParallelChunks(scenarioJson, {
@@ -214,22 +267,37 @@ export async function runSerializableSimulation(
 
   if (onProgress) {
     const elapsed = Date.now() - startMs;
-    onProgress({ iteration: cfg.iterations, totalIterations: cfg.iterations, percentComplete: 100, elapsedMs: elapsed, estimatedRemainingMs: 0 });
+    onProgress({
+      iteration: cfg.iterations,
+      totalIterations: cfg.iterations,
+      percentComplete: 100,
+      elapsedMs: elapsed,
+      estimatedRemainingMs: 0,
+    });
   }
 
   const outputMetrics: OutputMetric[] = scenario.outputs.map((o) => ({
     id: o.id,
     label: o.label,
     unit: o.unit,
-    format: o.format as OutputMetric["format"],
+    format: o.format as OutputMetric['format'],
     higherIsBetter: o.higherIsBetter,
   }));
 
-  const results = buildResults(outputMetrics, chunkResult.outputSamples, chunkResult.violationCount);
-  const corrInputSamples = Object.keys(chunkResult.validInputSamples ?? {}).length > 0
-    ? chunkResult.validInputSamples
-    : chunkResult.inputSamples;
-  const correlationMatrix = computeCorrelationMatrix(corrInputSamples, chunkResult.outputSamples, scenario.inputs.map((i) => i.id));
+  const results = buildResults(
+    outputMetrics,
+    chunkResult.outputSamples,
+    chunkResult.violationCount,
+  );
+  const corrInputSamples =
+    Object.keys(chunkResult.validInputSamples ?? {}).length > 0
+      ? chunkResult.validInputSamples
+      : chunkResult.inputSamples;
+  const correlationMatrix = computeCorrelationMatrix(
+    corrInputSamples,
+    chunkResult.outputSamples,
+    scenario.inputs.map((i) => i.id),
+  );
 
   return {
     scenarioId: scenario.id,
@@ -250,7 +318,7 @@ export async function runSerializableSimulation(
 function buildResults(
   outputs: OutputMetric[],
   outputAccumulators: Record<string, number[]>,
-  constraintViolations: number
+  constraintViolations: number,
 ): Record<string, MetricResult> {
   const results: Record<string, MetricResult> = {};
   for (const m of outputs) {
@@ -271,13 +339,13 @@ function buildResults(
 function computeCorrelationMatrix(
   inputSamples: Record<string, number[]>,
   outputSamples: Record<string, number[]>,
-  inputIds: string[]
+  inputIds: string[],
 ): Record<string, Record<string, number>> {
   const matrix: Record<string, Record<string, number>> = {};
   const n = Math.min(
     ...Object.values(outputSamples).map((v) => v.length),
     ...Object.values(inputSamples).map((v) => v.length),
-    1000
+    1000,
   );
   const allSeries: Record<string, number[]> = {};
 
@@ -300,9 +368,14 @@ function computeCorrelationMatrix(
 function pearsonCorrelation(xs: number[], ys: number[]): number {
   const n = Math.min(xs.length, ys.length);
   if (n < 2) return 0;
-  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+  let sumX = 0,
+    sumY = 0,
+    sumXY = 0,
+    sumX2 = 0,
+    sumY2 = 0;
   for (let i = 0; i < n; i++) {
-    sumX += xs[i]!; sumY += ys[i]!;
+    sumX += xs[i]!;
+    sumY += ys[i]!;
     sumXY += xs[i]! * ys[i]!;
     sumX2 += xs[i]! * xs[i]!;
     sumY2 += ys[i]! * ys[i]!;
@@ -316,9 +389,9 @@ export function compareScenarios(
   results: SimulationResult[],
   outputId: string,
   scenarioWeights?: number[],
-  higherIsBetter = true
+  higherIsBetter = true,
 ): ScenarioComparison {
-  if (results.length === 0) throw new Error("No results to compare");
+  if (results.length === 0) throw new Error('No results to compare');
 
   const scenarios = results.map((r) => {
     const metric = r.results[outputId];
@@ -333,16 +406,17 @@ export function compareScenarios(
   });
 
   const best = higherIsBetter
-    ? scenarios.reduce((b, s) => s.stats.mean > b.stats.mean ? s : b)
-    : scenarios.reduce((b, s) => s.stats.mean < b.stats.mean ? s : b);
-  const lowestRisk = scenarios.reduce((b, s) => s.stats.stdDev < b.stats.stdDev ? s : b);
+    ? scenarios.reduce((b, s) => (s.stats.mean > b.stats.mean ? s : b))
+    : scenarios.reduce((b, s) => (s.stats.mean < b.stats.mean ? s : b));
+  const lowestRisk = scenarios.reduce((b, s) => (s.stats.stdDev < b.stats.stdDev ? s : b));
 
   let normalizedWeights: number[];
   if (scenarioWeights && scenarioWeights.length === scenarios.length) {
     const wTotal = scenarioWeights.reduce((s, w) => s + Math.max(0, w), 0);
-    normalizedWeights = wTotal > 0
-      ? scenarioWeights.map((w) => Math.max(0, w) / wTotal)
-      : scenarios.map(() => 1 / scenarios.length);
+    normalizedWeights =
+      wTotal > 0
+        ? scenarioWeights.map((w) => Math.max(0, w) / wTotal)
+        : scenarios.map(() => 1 / scenarios.length);
   } else {
     normalizedWeights = scenarios.map(() => 1 / scenarios.length);
   }
@@ -356,8 +430,12 @@ export function compareScenarios(
     bestCase: s.stats.p95,
     volatility: s.stats.stdDev,
     sharpeProxy: s.stats.stdDev > 0 ? s.stats.mean / s.stats.stdDev : 0,
-    recommendation: s.scenarioId === best.scenarioId ? "Preferred" :
-      s.scenarioId === lowestRisk.scenarioId ? "Low-risk alternative" : "Consider",
+    recommendation:
+      s.scenarioId === best.scenarioId
+        ? 'Preferred'
+        : s.scenarioId === lowestRisk.scenarioId
+          ? 'Low-risk alternative'
+          : 'Consider',
   }));
 
   return {

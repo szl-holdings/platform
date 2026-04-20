@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, CheckCircle, AlertTriangle, Loader2, Lock } from "lucide-react";
-import { toast } from "@szl-holdings/shared-ui/ui/sonner";
-import { useDemoPersona } from "@szl-holdings/shared-ui/demo-persona-switcher";
+import { useDemoPersona } from '@szl-holdings/shared-ui/demo-persona-switcher';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { AlertTriangle, CheckCircle, Loader2, Lock, RefreshCw } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 interface NarrativeOption {
   id: string;
@@ -26,10 +26,10 @@ interface ResetResponse {
 }
 
 type ResetState =
-  | { kind: "idle" }
-  | { kind: "running"; startedAt: number }
-  | { kind: "success"; result: ResetResponse }
-  | { kind: "error"; message: string };
+  | { kind: 'idle' }
+  | { kind: 'running'; startedAt: number }
+  | { kind: 'success'; result: ResetResponse }
+  | { kind: 'error'; message: string };
 
 /**
  * In-platform demo reset toolbar. Renders only when the API reports
@@ -38,19 +38,19 @@ type ResetState =
  */
 export function DemoResetToolbar() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
-  const [narrative, setNarrative] = useState<string>("all");
-  const [state, setState] = useState<ResetState>({ kind: "idle" });
+  const [narrative, setNarrative] = useState<string>('all');
+  const [state, setState] = useState<ResetState>({ kind: 'idle' });
   const { persona, permissions } = useDemoPersona();
   const canReset = permissions.canExecute;
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${BASE}/api/demo/reset/status`, { credentials: "include" })
+    fetch(`${BASE}/api/demo/reset/status`, { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
       .then((body) => {
         if (cancelled) return;
         const data = body?.data ?? body;
-        if (data && typeof data.enabled === "boolean") {
+        if (data && typeof data.enabled === 'boolean') {
           setStatus(data);
         }
       })
@@ -63,13 +63,13 @@ export function DemoResetToolbar() {
   }, []);
 
   const elapsedLabel = useMemo(() => {
-    if (state.kind === "running") {
-      return "Reset in progress…";
+    if (state.kind === 'running') {
+      return 'Reset in progress…';
     }
-    if (state.kind === "success") {
+    if (state.kind === 'success') {
       return `Ready in ${(state.result.durationMs / 1000).toFixed(1)}s`;
     }
-    if (state.kind === "error") {
+    if (state.kind === 'error') {
       return state.message;
     }
     return null;
@@ -78,19 +78,19 @@ export function DemoResetToolbar() {
   if (!status?.enabled) return null;
 
   const handleReset = async () => {
-    if (state.kind === "running") return;
+    if (state.kind === 'running') return;
     if (!canReset) {
       const msg = `${persona.name} (${persona.title}) is not permitted to execute resets in this demo persona.`;
-      setState({ kind: "error", message: msg });
+      setState({ kind: 'error', message: msg });
       toast.error(msg);
       return;
     }
-    setState({ kind: "running", startedAt: Date.now() });
+    setState({ kind: 'running', startedAt: Date.now() });
     try {
       const response = await fetch(`${BASE}/api/demo/reset`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ narrative }),
       });
       const body = await response.json().catch(() => null);
@@ -98,63 +98,71 @@ export function DemoResetToolbar() {
         const errMsg =
           body?.error ||
           body?.message ||
-          (response.status === 401 ? "Sign in as an admin to reset demo data." :
-           response.status === 403 ? "Admin role required to reset demo data." :
-           response.status === 404 ? "Demo reset endpoint disabled." :
-           `Reset failed (HTTP ${response.status})`);
-        setState({ kind: "error", message: errMsg });
+          (response.status === 401
+            ? 'Sign in as an admin to reset demo data.'
+            : response.status === 403
+              ? 'Admin role required to reset demo data.'
+              : response.status === 404
+                ? 'Demo reset endpoint disabled.'
+                : `Reset failed (HTTP ${response.status})`);
+        setState({ kind: 'error', message: errMsg });
         toast.error(errMsg);
         return;
       }
       const data: ResetResponse = body?.data ?? body;
-      setState({ kind: "success", result: data });
-      toast.success(`Demo reset complete in ${(data.durationMs / 1000).toFixed(1)}s — ${data.narrativeLabel}`);
+      setState({ kind: 'success', result: data });
+      toast.success(
+        `Demo reset complete in ${(data.durationMs / 1000).toFixed(1)}s — ${data.narrativeLabel}`,
+      );
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Network error during demo reset";
-      setState({ kind: "error", message: msg });
+      const msg = err instanceof Error ? err.message : 'Network error during demo reset';
+      setState({ kind: 'error', message: msg });
       toast.error(msg);
     }
   };
 
   const indicator = (() => {
-    if (state.kind === "running") return <Loader2 size={12} className="animate-spin" style={{ color: "hsl(192,72%,55%)" }} />;
-    if (state.kind === "success") return <CheckCircle size={12} style={{ color: "hsl(142,55%,60%)" }} />;
-    if (state.kind === "error") return <AlertTriangle size={12} style={{ color: "hsl(0,72%,60%)" }} />;
-    return <RefreshCw size={12} style={{ color: "hsl(210,5%,52%)" }} />;
+    if (state.kind === 'running')
+      return <Loader2 size={12} className="animate-spin" style={{ color: 'hsl(192,72%,55%)' }} />;
+    if (state.kind === 'success')
+      return <CheckCircle size={12} style={{ color: 'hsl(142,55%,60%)' }} />;
+    if (state.kind === 'error')
+      return <AlertTriangle size={12} style={{ color: 'hsl(0,72%,60%)' }} />;
+    return <RefreshCw size={12} style={{ color: 'hsl(210,5%,52%)' }} />;
   })();
 
-  const isRunning = state.kind === "running";
+  const isRunning = state.kind === 'running';
 
   return (
     <div
       data-testid="demo-reset-toolbar"
       style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: "0.625rem",
-        padding: "0.625rem 0.875rem",
-        borderRadius: "0.5rem",
-        background: "hsla(38,72%,58%,0.06)",
-        border: "1px solid hsla(38,72%,58%,0.22)",
-        marginBottom: "1.25rem",
-        fontSize: "12.5px",
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: '0.625rem',
+        padding: '0.625rem 0.875rem',
+        borderRadius: '0.5rem',
+        background: 'hsla(38,72%,58%,0.06)',
+        border: '1px solid hsla(38,72%,58%,0.22)',
+        marginBottom: '1.25rem',
+        fontSize: '12.5px',
       }}
     >
       <span
         style={{
-          fontFamily: "var(--font-mono, ui-monospace, monospace)",
+          fontFamily: 'var(--font-mono, ui-monospace, monospace)',
           fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          fontSize: "10px",
-          color: "hsl(38,72%,72%)",
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          fontSize: '10px',
+          color: 'hsl(38,72%,72%)',
         }}
       >
         Demo Mode
       </span>
 
-      <label htmlFor="demo-reset-narrative" style={{ color: "hsl(210,5%,62%)" }}>
+      <label htmlFor="demo-reset-narrative" style={{ color: 'hsl(210,5%,62%)' }}>
         Narrative:
       </label>
       <select
@@ -164,13 +172,13 @@ export function DemoResetToolbar() {
         onChange={(e) => setNarrative(e.target.value)}
         disabled={isRunning}
         style={{
-          padding: "0.3rem 0.5rem",
-          borderRadius: "5px",
-          background: "hsla(0,0%,100%,0.04)",
-          border: "1px solid hsla(0,0%,100%,0.1)",
-          color: "hsl(38,12%,88%)",
-          fontSize: "12px",
-          cursor: isRunning ? "not-allowed" : "pointer",
+          padding: '0.3rem 0.5rem',
+          borderRadius: '5px',
+          background: 'hsla(0,0%,100%,0.04)',
+          border: '1px solid hsla(0,0%,100%,0.1)',
+          color: 'hsl(38,12%,88%)',
+          fontSize: '12px',
+          cursor: isRunning ? 'not-allowed' : 'pointer',
         }}
       >
         {status.narratives.map((n) => (
@@ -183,46 +191,50 @@ export function DemoResetToolbar() {
       <button
         type="button"
         data-testid="demo-reset-button"
-        data-persona-can-execute={canReset ? "true" : "false"}
+        data-persona-can-execute={canReset ? 'true' : 'false'}
         onClick={handleReset}
         disabled={isRunning || !canReset}
         title={canReset ? undefined : `${persona.title} cannot execute demo resets in this persona`}
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "0.375rem",
-          padding: "0.375rem 0.75rem",
-          borderRadius: "5px",
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.375rem',
+          padding: '0.375rem 0.75rem',
+          borderRadius: '5px',
           background: !canReset
-            ? "hsla(0,0%,100%,0.03)"
+            ? 'hsla(0,0%,100%,0.03)'
             : isRunning
-            ? "hsla(38,72%,58%,0.05)"
-            : "hsla(38,72%,58%,0.14)",
-          border: !canReset ? "1px solid hsla(0,0%,100%,0.08)" : "1px solid hsla(38,72%,58%,0.4)",
-          color: !canReset ? "hsl(210,5%,45%)" : "hsl(38,72%,72%)",
-          fontSize: "12px",
+              ? 'hsla(38,72%,58%,0.05)'
+              : 'hsla(38,72%,58%,0.14)',
+          border: !canReset ? '1px solid hsla(0,0%,100%,0.08)' : '1px solid hsla(38,72%,58%,0.4)',
+          color: !canReset ? 'hsl(210,5%,45%)' : 'hsl(38,72%,72%)',
+          fontSize: '12px',
           fontWeight: 600,
-          cursor: isRunning || !canReset ? "not-allowed" : "pointer",
-          transition: "all 0.18s",
+          cursor: isRunning || !canReset ? 'not-allowed' : 'pointer',
+          transition: 'all 0.18s',
         }}
       >
-        {!canReset ? <Lock size={11} /> : <RefreshCw size={11} className={isRunning ? "animate-spin" : ""} />}
-        {!canReset ? "Reset locked for this persona" : isRunning ? "Resetting…" : "Reset Demo"}
+        {!canReset ? (
+          <Lock size={11} />
+        ) : (
+          <RefreshCw size={11} className={isRunning ? 'animate-spin' : ''} />
+        )}
+        {!canReset ? 'Reset locked for this persona' : isRunning ? 'Resetting…' : 'Reset Demo'}
       </button>
 
       {elapsedLabel && (
         <span
           data-testid="demo-reset-status"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.375rem",
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
             color:
-              state.kind === "error"
-                ? "hsl(0,72%,72%)"
-                : state.kind === "success"
-                ? "hsl(142,55%,68%)"
-                : "hsl(210,5%,68%)",
+              state.kind === 'error'
+                ? 'hsl(0,72%,72%)'
+                : state.kind === 'success'
+                  ? 'hsl(142,55%,68%)'
+                  : 'hsl(210,5%,68%)',
           }}
         >
           {indicator}
@@ -230,7 +242,7 @@ export function DemoResetToolbar() {
         </span>
       )}
 
-      <span style={{ color: "hsl(210,5%,42%)", marginLeft: "auto", fontSize: "11px" }}>
+      <span style={{ color: 'hsl(210,5%,42%)', marginLeft: 'auto', fontSize: '11px' }}>
         Reset typically completes in &lt; 60 seconds.
       </span>
     </div>

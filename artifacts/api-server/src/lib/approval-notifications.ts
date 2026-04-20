@@ -1,31 +1,31 @@
-import { and, eq, inArray } from "drizzle-orm";
 import {
-  db,
-  notificationsTable,
-  notificationPreferencesTable,
-  rolesTable,
-  userRolesTable,
-  orgMembersTable,
-  usersTable,
-} from "@szl-holdings/db";
-import {
-  setApprovalCreatedHook,
   type ApprovalCreatedHook,
   type ApprovalRequest,
-} from "@szl-holdings/covenant-policy";
-import { sendEmail, hasEmailProviderConfigured } from "./email";
-import { logger } from "./logger";
+  setApprovalCreatedHook,
+} from '@szl-holdings/covenant-policy';
+import {
+  db,
+  notificationPreferencesTable,
+  notificationsTable,
+  orgMembersTable,
+  rolesTable,
+  userRolesTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { and, eq, inArray } from 'drizzle-orm';
+import { hasEmailProviderConfigured, sendEmail } from './email';
+import { logger } from './logger';
 
-const APPROVALS_URL = "/alloy/operator/approvals";
+const APPROVALS_URL = '/alloy/operator/approvals';
 
-const SUPER_ADMIN_ROLES = ["super_admin", "admin"] as const;
-const FALLBACK_OPERATOR_ROLES = ["ops", "compliance"] as const;
+const SUPER_ADMIN_ROLES = ['super_admin', 'admin'] as const;
+const FALLBACK_OPERATOR_ROLES = ['ops', 'compliance'] as const;
 
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
-const SLACK_ALERT_CHANNEL = process.env.SLACK_ALERT_CHANNEL || "#alerts";
+const SLACK_ALERT_CHANNEL = process.env.SLACK_ALERT_CHANNEL || '#alerts';
 
-type ApprovalSeverity = "warning" | "critical";
+type ApprovalSeverity = 'warning' | 'critical';
 
 interface RecipientUser {
   id: number;
@@ -37,11 +37,11 @@ interface RecipientUser {
 }
 
 function severityFor(approval: ApprovalRequest): ApprovalSeverity {
-  if (approval.priority === "critical") return "critical";
+  if (approval.priority === 'critical') return 'critical';
   const tier = (approval.payload as { tier?: string } | null)?.tier;
-  if (tier && /tier[\s_-]?8|tier-8|tier8/i.test(tier)) return "critical";
-  if (approval.actionClass === "human-approval-mandatory") return "critical";
-  return "warning";
+  if (tier && /tier[\s_-]?8|tier-8|tier8/i.test(tier)) return 'critical';
+  if (approval.actionClass === 'human-approval-mandatory') return 'critical';
+  return 'warning';
 }
 
 /**
@@ -65,13 +65,23 @@ async function resolveApproverUserIds(approval: ApprovalRequest): Promise<number
     const roleRows = await db
       .select({ id: rolesTable.id, name: rolesTable.name })
       .from(rolesTable)
-      .where(inArray(rolesTable.name, Array.from(wantedRoles) as Array<typeof rolesTable.$inferSelect.name>));
+      .where(
+        inArray(
+          rolesTable.name,
+          Array.from(wantedRoles) as Array<typeof rolesTable.$inferSelect.name>,
+        ),
+      );
 
     if (roleRows.length > 0) {
       const userRows = await db
         .select({ userId: userRolesTable.userId })
         .from(userRolesTable)
-        .where(inArray(userRolesTable.roleId, roleRows.map((r) => r.id)));
+        .where(
+          inArray(
+            userRolesTable.roleId,
+            roleRows.map((r) => r.id),
+          ),
+        );
       candidateIds = Array.from(new Set(userRows.map((r) => r.userId)));
     }
 
@@ -96,12 +106,22 @@ async function resolveApproverUserIds(approval: ApprovalRequest): Promise<number
       const adminRoleRows = await db
         .select({ id: rolesTable.id })
         .from(rolesTable)
-        .where(inArray(rolesTable.name, SUPER_ADMIN_ROLES as unknown as Array<typeof rolesTable.$inferSelect.name>));
+        .where(
+          inArray(
+            rolesTable.name,
+            SUPER_ADMIN_ROLES as unknown as Array<typeof rolesTable.$inferSelect.name>,
+          ),
+        );
       if (adminRoleRows.length > 0) {
         const adminUserRows = await db
           .select({ userId: userRolesTable.userId })
           .from(userRolesTable)
-          .where(inArray(userRolesTable.roleId, adminRoleRows.map((r) => r.id)));
+          .where(
+            inArray(
+              userRolesTable.roleId,
+              adminRoleRows.map((r) => r.id),
+            ),
+          );
         const adminIds = adminUserRows.map((r) => r.userId);
         candidateIds = Array.from(new Set([...candidateIds, ...adminIds]));
       }
@@ -130,7 +150,10 @@ async function resolveApproverUserIds(approval: ApprovalRequest): Promise<number
 
     return candidateIds;
   } catch (err) {
-    logger.warn({ err, approvalId: approval.id }, "[approval-notifications] Failed to resolve approver users");
+    logger.warn(
+      { err, approvalId: approval.id },
+      '[approval-notifications] Failed to resolve approver users',
+    );
     return [];
   }
 }
@@ -145,7 +168,7 @@ async function loadRecipients(userIds: number[]): Promise<RecipientUser[]> {
       .from(usersTable)
       .where(and(inArray(usersTable.id, userIds), eq(usersTable.isActive, true)));
   } catch (err) {
-    logger.warn({ err }, "[approval-notifications] Failed to load recipient users");
+    logger.warn({ err }, '[approval-notifications] Failed to load recipient users');
     return [];
   }
 
@@ -166,7 +189,10 @@ async function loadRecipients(userIds: number[]): Promise<RecipientUser[]> {
       .from(notificationPreferencesTable)
       .where(inArray(notificationPreferencesTable.userId, userIds));
   } catch (err) {
-    logger.warn({ err }, "[approval-notifications] Failed to load notification preferences — assuming defaults");
+    logger.warn(
+      { err },
+      '[approval-notifications] Failed to load notification preferences — assuming defaults',
+    );
   }
 
   const prefsByUser = new Map(prefRows.map((p) => [p.userId, p]));
@@ -185,12 +211,16 @@ async function loadRecipients(userIds: number[]): Promise<RecipientUser[]> {
 }
 
 function buildSubject(approval: ApprovalRequest, severity: ApprovalSeverity): string {
-  const tag = severity === "critical" ? "CRITICAL" : "PENDING";
-  const role = approval.requiredApproverRole ? ` [${approval.requiredApproverRole}]` : "";
+  const tag = severity === 'critical' ? 'CRITICAL' : 'PENDING';
+  const role = approval.requiredApproverRole ? ` [${approval.requiredApproverRole}]` : '';
   return `[Guardian ${tag}]${role} ${approval.title}`;
 }
 
-function buildPlaintext(approval: ApprovalRequest, severity: ApprovalSeverity, userName: string): string {
+function buildPlaintext(
+  approval: ApprovalRequest,
+  severity: ApprovalSeverity,
+  userName: string,
+): string {
   const tier = (approval.payload as { tier?: string; reason?: string } | null)?.tier;
   const reason = (approval.payload as { reason?: string } | null)?.reason;
   const lines = [
@@ -208,19 +238,23 @@ function buildPlaintext(approval: ApprovalRequest, severity: ApprovalSeverity, u
     ...(approval.description ? [``, `Description: ${approval.description}`] : []),
     ...(reason ? [`Guardian reason: ${reason}`] : []),
     ``,
-    `Open the operator queue: ${process.env.VITE_APP_URL || ""}${APPROVALS_URL}?approval=${approval.id}`,
+    `Open the operator queue: ${process.env.VITE_APP_URL || ''}${APPROVALS_URL}?approval=${approval.id}`,
     ``,
     `Approval #${approval.id} · created ${approval.createdAt.toISOString()}`,
   ];
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
-function buildHtml(approval: ApprovalRequest, severity: ApprovalSeverity, userName: string): string {
-  const color = severity === "critical" ? "#dc2626" : "#d97706";
-  const bg = severity === "critical" ? "#fee2e2" : "#fff7ed";
+function buildHtml(
+  approval: ApprovalRequest,
+  severity: ApprovalSeverity,
+  userName: string,
+): string {
+  const color = severity === 'critical' ? '#dc2626' : '#d97706';
+  const bg = severity === 'critical' ? '#fee2e2' : '#fff7ed';
   const tier = (approval.payload as { tier?: string } | null)?.tier;
   const reason = (approval.payload as { reason?: string } | null)?.reason;
-  const link = `${process.env.VITE_APP_URL || ""}${APPROVALS_URL}?approval=${approval.id}`;
+  const link = `${process.env.VITE_APP_URL || ''}${APPROVALS_URL}?approval=${approval.id}`;
   return `<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;background:#f5f5f5;margin:0;padding:0">
 <div style="max-width:560px;margin:0 auto;padding:32px 16px">
   <div style="background:#fff;border-radius:12px;padding:36px;border:1px solid #e5e7eb">
@@ -233,11 +267,11 @@ function buildHtml(approval: ApprovalRequest, severity: ApprovalSeverity, userNa
       <tr><td style="padding:4px 0;color:#6b7280">Priority</td><td style="padding:4px 0"><strong>${approval.priority}</strong></td></tr>
       <tr><td style="padding:4px 0;color:#6b7280">Resource</td><td style="padding:4px 0;font-family:monospace">${approval.resourceType}/${approval.resourceId}</td></tr>
       <tr><td style="padding:4px 0;color:#6b7280">Action</td><td style="padding:4px 0">${approval.actionClass}</td></tr>
-      ${tier ? `<tr><td style="padding:4px 0;color:#6b7280">Tier</td><td style="padding:4px 0;font-family:monospace">${tier}</td></tr>` : ""}
-      ${approval.requiredApproverRole ? `<tr><td style="padding:4px 0;color:#6b7280">Approver</td><td style="padding:4px 0;font-family:monospace">${approval.requiredApproverRole}</td></tr>` : ""}
+      ${tier ? `<tr><td style="padding:4px 0;color:#6b7280">Tier</td><td style="padding:4px 0;font-family:monospace">${tier}</td></tr>` : ''}
+      ${approval.requiredApproverRole ? `<tr><td style="padding:4px 0;color:#6b7280">Approver</td><td style="padding:4px 0;font-family:monospace">${approval.requiredApproverRole}</td></tr>` : ''}
     </table>
-    ${approval.description ? `<p style="font-size:13px;color:#4b5563;line-height:1.6;margin:0 0 12px">${approval.description}</p>` : ""}
-    ${reason ? `<p style="font-size:13px;color:#4b5563;line-height:1.6;margin:0 0 12px"><strong>Guardian reason:</strong> ${reason}</p>` : ""}
+    ${approval.description ? `<p style="font-size:13px;color:#4b5563;line-height:1.6;margin:0 0 12px">${approval.description}</p>` : ''}
+    ${reason ? `<p style="font-size:13px;color:#4b5563;line-height:1.6;margin:0 0 12px"><strong>Guardian reason:</strong> ${reason}</p>` : ''}
     <p style="margin:20px 0 0"><a href="${link}" style="display:inline-block;padding:10px 18px;background:#6366f1;color:white;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px">Review approval</a></p>
     <div style="font-size:11px;color:#9ca3af;margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb">SZL Holdings · Approval #${approval.id} · ${approval.createdAt.toISOString()}</div>
   </div>
@@ -267,7 +301,11 @@ async function dispatchEmails(
         text: buildPlaintext(approval, severity, r.displayName),
       });
       if (result.success) sent++;
-      else logger.warn({ userId: r.id, error: result.error }, "[approval-notifications] Email delivery failed");
+      else
+        logger.warn(
+          { userId: r.id, error: result.error },
+          '[approval-notifications] Email delivery failed',
+        );
     }),
   );
 
@@ -283,38 +321,41 @@ async function dispatchSlack(
   const slackTargets = recipients.filter((r) => r.slackEnabled);
   if (slackTargets.length === 0) return false;
 
-  const emoji = severity === "critical" ? ":rotating_light:" : ":warning:";
+  const emoji = severity === 'critical' ? ':rotating_light:' : ':warning:';
   const tier = (approval.payload as { tier?: string } | null)?.tier;
-  const link = `${process.env.VITE_APP_URL || ""}${APPROVALS_URL}?approval=${approval.id}`;
-  const mentionList = slackTargets.map((r) => r.displayName).join(", ");
+  const link = `${process.env.VITE_APP_URL || ''}${APPROVALS_URL}?approval=${approval.id}`;
+  const mentionList = slackTargets.map((r) => r.displayName).join(', ');
   const lines = [
     `${emoji} *Guardian approval needed* — ${approval.title}`,
-    `${approval.resourceType}/${approval.resourceId} · ${approval.actionClass}${tier ? ` · ${tier}` : ""}`,
+    `${approval.resourceType}/${approval.resourceId} · ${approval.actionClass}${tier ? ` · ${tier}` : ''}`,
     approval.requiredApproverRole ? `Approver role: \`${approval.requiredApproverRole}\`` : null,
     `For: ${mentionList}`,
     `<${link}|Open approval queue>`,
   ].filter(Boolean);
-  const text = lines.join("\n");
+  const text = lines.join('\n');
 
   try {
     if (SLACK_WEBHOOK_URL) {
       const res = await fetch(SLACK_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       });
       if (!res.ok) {
-        logger.warn({ status: res.status }, "[approval-notifications] Slack webhook post failed");
+        logger.warn({ status: res.status }, '[approval-notifications] Slack webhook post failed');
         return false;
       }
     } else if (SLACK_BOT_TOKEN) {
-      const res = await fetch("https://slack.com/api/chat.postMessage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SLACK_BOT_TOKEN}` },
+      const res = await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SLACK_BOT_TOKEN}` },
         body: JSON.stringify({ channel: SLACK_ALERT_CHANNEL, text }),
       });
       if (!res.ok) {
-        logger.warn({ status: res.status }, "[approval-notifications] Slack bot post failed (HTTP)");
+        logger.warn(
+          { status: res.status },
+          '[approval-notifications] Slack bot post failed (HTTP)',
+        );
         return false;
       }
       // Slack returns HTTP 200 with { ok: false, error: "..." } on
@@ -324,17 +365,17 @@ async function dispatchSlack(
       try {
         body = (await res.json()) as { ok?: boolean; error?: string };
       } catch {
-        logger.warn("[approval-notifications] Slack bot post: non-JSON response");
+        logger.warn('[approval-notifications] Slack bot post: non-JSON response');
         return false;
       }
       if (!body.ok) {
-        logger.warn({ slackError: body.error }, "[approval-notifications] Slack bot post rejected");
+        logger.warn({ slackError: body.error }, '[approval-notifications] Slack bot post rejected');
         return false;
       }
     }
     return true;
   } catch (err) {
-    logger.warn({ err }, "[approval-notifications] Slack dispatch error");
+    logger.warn({ err }, '[approval-notifications] Slack dispatch error');
     return false;
   }
 }
@@ -347,10 +388,11 @@ async function persistInAppNotifications(
   const targets = recipients.filter((r) => r.inAppEnabled);
   if (targets.length === 0) return [];
 
-  const type = severity === "critical" ? "action_required" : "warning";
-  const title = severity === "critical"
-    ? `Guardian approval required (critical): ${approval.title}`
-    : `Guardian approval pending: ${approval.title}`;
+  const type = severity === 'critical' ? 'action_required' : 'warning';
+  const title =
+    severity === 'critical'
+      ? `Guardian approval required (critical): ${approval.title}`
+      : `Guardian approval pending: ${approval.title}`;
   const message = approval.description?.trim()
     ? approval.description.trim()
     : `${approval.actionClass} on ${approval.resourceType}/${approval.resourceId} is awaiting operator review.`;
@@ -359,8 +401,8 @@ async function persistInAppNotifications(
     await db.insert(notificationsTable).values(
       targets.map((r) => ({
         userId: r.id,
-        type: type as "action_required" | "warning",
-        channel: "in_app" as const,
+        type: type as 'action_required' | 'warning',
+        channel: 'in_app' as const,
         title,
         message,
         actionUrl: `${APPROVALS_URL}?approval=${approval.id}`,
@@ -368,7 +410,10 @@ async function persistInAppNotifications(
     );
     return targets.map((r) => r.id);
   } catch (err) {
-    logger.warn({ err, approvalId: approval.id }, "[approval-notifications] Failed to persist in-app notifications");
+    logger.warn(
+      { err, approvalId: approval.id },
+      '[approval-notifications] Failed to persist in-app notifications',
+    );
     return [];
   }
 }
@@ -379,8 +424,12 @@ const approvalCreatedHook: ApprovalCreatedHook = async (approval) => {
     const userIds = await resolveApproverUserIds(approval);
     if (userIds.length === 0) {
       logger.info(
-        { approvalId: approval.id, orgId: approval.orgId, requiredApproverRole: approval.requiredApproverRole },
-        "[approval-notifications] No eligible operator recipients — skipping",
+        {
+          approvalId: approval.id,
+          orgId: approval.orgId,
+          requiredApproverRole: approval.requiredApproverRole,
+        },
+        '[approval-notifications] No eligible operator recipients — skipping',
       );
       return;
     }
@@ -413,10 +462,10 @@ const approvalCreatedHook: ApprovalCreatedHook = async (approval) => {
         emailsSent,
         slackSent,
       },
-      "[approval-notifications] On-call operators notified of new approval request",
+      '[approval-notifications] On-call operators notified of new approval request',
     );
   } catch (err) {
-    logger.warn({ err, approvalId: approval.id }, "[approval-notifications] Hook failed");
+    logger.warn({ err, approvalId: approval.id }, '[approval-notifications] Hook failed');
   }
 };
 
@@ -426,7 +475,7 @@ export function registerApprovalNotificationHook(): void {
   if (registered) return;
   setApprovalCreatedHook(approvalCreatedHook);
   registered = true;
-  logger.info("[approval-notifications] Registered approval-created notification hook");
+  logger.info('[approval-notifications] Registered approval-created notification hook');
 }
 
 // Exported for testing.

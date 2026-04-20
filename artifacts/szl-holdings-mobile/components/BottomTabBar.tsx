@@ -1,94 +1,89 @@
-import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router, usePathname } from "expo-router";
-import { Feather } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
-import { useWorkspace, type WorkspaceDomain } from "@/context/WorkspaceContext";
-import { useColors } from "@/hooks/useColors";
-import { apiFetch } from "@/lib/apiClient";
-import { useNotificationCountContext } from "@/context/NotificationCountContext";
-import { OfflineQueueLauncher } from "@/components/OfflineQueueLauncher";
+import { Feather } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
+import { router, usePathname } from 'expo-router';
+import type React from 'react';
+import { useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { OfflineQueueLauncher } from '@/components/OfflineQueueLauncher';
+import { useNotificationCountContext } from '@/context/NotificationCountContext';
+import { useWorkspace, type WorkspaceDomain } from '@/context/WorkspaceContext';
+import { useColors } from '@/hooks/useColors';
+import { apiFetch } from '@/lib/apiClient';
 
 interface TabItem {
   id: WorkspaceDomain;
   label: string;
-  icon: React.ComponentProps<typeof Feather>["name"];
+  icon: React.ComponentProps<typeof Feather>['name'];
   accent: string;
   route: string;
 }
 
 const TABS: TabItem[] = [
   {
-    id: "command",
-    label: "Command",
-    icon: "grid",
-    accent: "#c9a84c",
-    route: "/(shell)/",
+    id: 'command',
+    label: 'Command',
+    icon: 'grid',
+    accent: '#c9a84c',
+    route: '/(shell)/',
   },
   {
-    id: "intelligence",
-    label: "CORTEX",
-    icon: "cpu",
-    accent: "#8b7ac8",
-    route: "/(shell)/intelligence",
+    id: 'intelligence',
+    label: 'CORTEX',
+    icon: 'cpu',
+    accent: '#8b7ac8',
+    route: '/(shell)/intelligence',
   },
   {
-    id: "defense",
-    label: "Defense",
-    icon: "shield",
-    accent: "#ef4444",
-    route: "/(shell)/defense",
+    id: 'defense',
+    label: 'Defense',
+    icon: 'shield',
+    accent: '#ef4444',
+    route: '/(shell)/defense',
   },
   {
-    id: "fleet",
-    label: "Fleet",
-    icon: "anchor",
-    accent: "#0ea5e9",
-    route: "/(shell)/fleet",
+    id: 'fleet',
+    label: 'Fleet',
+    icon: 'anchor',
+    accent: '#0ea5e9',
+    route: '/(shell)/fleet',
   },
   {
-    id: "portfolio",
-    label: "Portfolio",
-    icon: "briefcase",
-    accent: "#94a3b8",
-    route: "/(shell)/portfolio",
+    id: 'portfolio',
+    label: 'Portfolio',
+    icon: 'briefcase',
+    accent: '#94a3b8',
+    route: '/(shell)/portfolio',
   },
 ];
 
-const HIDDEN_ROUTES = [
-  "/(shell)/notifications",
-  "/(shell)/usage",
-];
+const HIDDEN_ROUTES = ['/(shell)/notifications', '/(shell)/usage'];
 
 function useCortexBadge() {
   const { setBadge } = useWorkspace();
 
   const feedQuery = useQuery<{ stats?: { critical?: number; active?: number } }>({
-    queryKey: ["bottom-tab-cortex-feed"],
+    queryKey: ['bottom-tab-cortex-feed'],
     queryFn: () =>
-      apiFetch<{ stats?: { critical?: number; active?: number } }>(
-        "/api/cortex/intelligence-feed"
-      ),
+      apiFetch<{ stats?: { critical?: number; active?: number } }>('/api/cortex/intelligence-feed'),
     refetchInterval: 60000,
     staleTime: 30000,
   });
 
   const draftsQuery = useQuery<{ pendingCount?: number }>({
-    queryKey: ["bottom-tab-cortex-drafts"],
-    queryFn: () =>
-      apiFetch<{ pendingCount?: number }>(
-        "/api/cortex/action-drafts?status=pending"
-      ),
+    queryKey: ['bottom-tab-cortex-drafts'],
+    queryFn: () => apiFetch<{ pendingCount?: number }>('/api/cortex/action-drafts?status=pending'),
     refetchInterval: 30000,
     staleTime: 15000,
   });
 
-  const approvalsQuery = useQuery<{ data?: Array<{ id: number }>; count?: number } | Array<{ id: number }>>({
-    queryKey: ["bottom-tab-pending-approvals"],
+  const approvalsQuery = useQuery<
+    { data?: Array<{ id: number }>; count?: number } | Array<{ id: number }>
+  >({
+    queryKey: ['bottom-tab-pending-approvals'],
     queryFn: () =>
       apiFetch<{ data?: Array<{ id: number }>; count?: number } | Array<{ id: number }>>(
-        "/api/approvals?status=pending&limit=99"
+        '/api/approvals?status=pending&limit=99',
       ),
     refetchInterval: 30000,
     staleTime: 15000,
@@ -102,10 +97,10 @@ function useCortexBadge() {
       ? Array.isArray(raw)
         ? raw.length
         : ((raw as { data?: Array<{ id: number }>; count?: number }).count ??
-           (raw as { data?: Array<{ id: number }> }).data?.length ??
-           0)
+          (raw as { data?: Array<{ id: number }> }).data?.length ??
+          0)
       : 0;
-    setBadge("intelligence", critical + pending + approvalCount);
+    setBadge('intelligence', critical + pending + approvalCount);
   }, [feedQuery.data, draftsQuery.data, approvalsQuery.data, setBadge]);
 }
 
@@ -118,7 +113,7 @@ export function BottomTabBar() {
 
   useCortexBadge();
 
-  if (HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"))) {
+  if (HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
     return null;
   }
 
@@ -128,9 +123,8 @@ export function BottomTabBar() {
   };
 
   const isSettingsActive =
-    pathname === "/(shell)/settings" || pathname.startsWith("/(shell)/settings/");
-  const isCommandDeckActive =
-    pathname === "/(shell)/quick-actions";
+    pathname === '/(shell)/settings' || pathname.startsWith('/(shell)/settings/');
+  const isCommandDeckActive = pathname === '/(shell)/quick-actions';
 
   return (
     <View
@@ -157,22 +151,15 @@ export function BottomTabBar() {
           >
             <View style={styles.tabInner}>
               {isActive && (
-                <View
-                  style={[styles.activeIndicator, { backgroundColor: tab.accent }]}
-                />
+                <View style={[styles.activeIndicator, { backgroundColor: tab.accent }]} />
               )}
               <View style={styles.iconWrap}>
                 <Feather name={tab.icon} size={20} color={color} />
                 {badge > 0 && (
                   <View
-                    style={[
-                      styles.badge,
-                      { backgroundColor: isActive ? tab.accent : "#ef4444" },
-                    ]}
+                    style={[styles.badge, { backgroundColor: isActive ? tab.accent : '#ef4444' }]}
                   >
-                    <Text style={styles.badgeText}>
-                      {badge > 99 ? "99+" : String(badge)}
-                    </Text>
+                    <Text style={styles.badgeText}>{badge > 99 ? '99+' : String(badge)}</Text>
                   </View>
                 )}
               </View>
@@ -181,9 +168,7 @@ export function BottomTabBar() {
                   styles.label,
                   {
                     color,
-                    fontFamily: isActive
-                      ? "Inter_600SemiBold"
-                      : "Inter_400Regular",
+                    fontFamily: isActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
                   },
                 ]}
               >
@@ -195,27 +180,27 @@ export function BottomTabBar() {
       })}
 
       <TouchableOpacity
-        onPress={() => router.navigate("/(shell)/quick-actions" as never)}
+        onPress={() => router.navigate('/(shell)/quick-actions' as never)}
         style={styles.tab}
         activeOpacity={0.7}
       >
         <View style={styles.tabInner}>
           {isCommandDeckActive && (
-            <View style={[styles.activeIndicator, { backgroundColor: "#c9a84c" }]} />
+            <View style={[styles.activeIndicator, { backgroundColor: '#c9a84c' }]} />
           )}
           <View style={styles.iconWrap}>
             <Feather
               name="zap"
               size={20}
-              color={isCommandDeckActive ? "#c9a84c" : colors.mutedForeground}
+              color={isCommandDeckActive ? '#c9a84c' : colors.mutedForeground}
             />
           </View>
           <Text
             style={[
               styles.label,
               {
-                color: isCommandDeckActive ? "#c9a84c" : colors.mutedForeground,
-                fontFamily: isCommandDeckActive ? "Inter_600SemiBold" : "Inter_400Regular",
+                color: isCommandDeckActive ? '#c9a84c' : colors.mutedForeground,
+                fontFamily: isCommandDeckActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
               },
             ]}
           >
@@ -227,7 +212,7 @@ export function BottomTabBar() {
       <OfflineQueueLauncher />
 
       <TouchableOpacity
-        onPress={() => router.navigate("/(shell)/settings" as never)}
+        onPress={() => router.navigate('/(shell)/settings' as never)}
         style={styles.tab}
         activeOpacity={0.7}
       >
@@ -242,9 +227,9 @@ export function BottomTabBar() {
               color={isSettingsActive ? colors.foreground : colors.mutedForeground}
             />
             {unreadCount > 0 && (
-              <View style={[styles.badge, { backgroundColor: "#ef4444" }]}>
+              <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
                 <Text style={styles.badgeText}>
-                  {unreadCount > 99 ? "99+" : String(unreadCount)}
+                  {unreadCount > 99 ? '99+' : String(unreadCount)}
                 </Text>
               </View>
             )}
@@ -254,7 +239,7 @@ export function BottomTabBar() {
               styles.label,
               {
                 color: isSettingsActive ? colors.foreground : colors.mutedForeground,
-                fontFamily: isSettingsActive ? "Inter_600SemiBold" : "Inter_400Regular",
+                fontFamily: isSettingsActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
               },
             ]}
           >
@@ -268,44 +253,44 @@ export function BottomTabBar() {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
+    flexDirection: 'row',
     borderTopWidth: 1,
     paddingTop: 8,
   },
   tab: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   tabInner: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: 3,
     paddingHorizontal: 4,
   },
   activeIndicator: {
-    position: "absolute",
+    position: 'absolute',
     top: -9,
     width: 28,
     height: 2,
     borderRadius: 1,
   },
   iconWrap: {
-    position: "relative",
+    position: 'relative',
   },
   badge: {
-    position: "absolute",
+    position: 'absolute',
     top: -5,
     right: -8,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
     paddingHorizontal: 3,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   badgeText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 9,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
   },
   label: {
     fontSize: 10,

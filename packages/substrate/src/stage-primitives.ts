@@ -6,16 +6,16 @@
  */
 
 import type {
+  ApprovalGate,
+  ConfidenceBudget,
+  DecideStage,
+  PolicyProfile,
   ReasonStage,
   RetrieveStage,
+  SideEffectCategory,
   ToolCallStage,
   VerifyStage,
-  DecideStage,
-  ApprovalGate,
-  SideEffectCategory,
-  PolicyProfile,
-  ConfidenceBudget,
-} from "./types.js";
+} from './types.js';
 
 // ─── Stage Builders ───────────────────────────────────────────────────────────
 
@@ -23,82 +23,99 @@ const BASE_DEFAULTS = {
   dependsOn: [] as string[],
   timeoutMs: 30_000,
   maxRetries: 2,
-  runtime: "typescript" as const,
+  runtime: 'typescript' as const,
   otelTags: {} as Record<string, string>,
   requiredEvidence: [] as string[],
-  priority: "normal" as const,
+  priority: 'normal' as const,
 };
 
-export function Reason(opts: Partial<Omit<ReasonStage, "type">> & { id: string; name: string }): ReasonStage {
+export function Reason(
+  opts: Partial<Omit<ReasonStage, 'type'>> & { id: string; name: string },
+): ReasonStage {
   return {
     ...BASE_DEFAULTS,
-    modelAdapterId: "default",
+    modelAdapterId: 'default',
     ...opts,
-    type: "Reason",
+    type: 'Reason',
   };
 }
 
-export function Retrieve(opts: Partial<Omit<RetrieveStage, "type">> & { id: string; name: string }): RetrieveStage {
+export function Retrieve(
+  opts: Partial<Omit<RetrieveStage, 'type'>> & { id: string; name: string },
+): RetrieveStage {
   return {
     ...BASE_DEFAULTS,
     timeoutMs: 45_000,
-    retrieverAdapterId: "default",
+    retrieverAdapterId: 'default',
     topK: 10,
     minRelevanceScore: 0.5,
     ...opts,
-    type: "Retrieve",
+    type: 'Retrieve',
   };
 }
 
-export function ToolCall(opts: Partial<Omit<ToolCallStage, "type">> & { id: string; name: string; toolId: string }): ToolCallStage {
+export function ToolCall(
+  opts: Partial<Omit<ToolCallStage, 'type'>> & { id: string; name: string; toolId: string },
+): ToolCallStage {
   return {
     ...BASE_DEFAULTS,
     maxRetries: 1,
     sideEffects: [] as SideEffectCategory[],
-    requiresApprovalFor: ["financial", "deletion", "write-external", "infrastructure"] as SideEffectCategory[],
+    requiresApprovalFor: [
+      'financial',
+      'deletion',
+      'write-external',
+      'infrastructure',
+    ] as SideEffectCategory[],
     ...opts,
-    type: "ToolCall",
+    type: 'ToolCall',
   };
 }
 
-export function Verify(opts: Partial<Omit<VerifyStage, "type">> & { id: string; name: string }): VerifyStage {
+export function Verify(
+  opts: Partial<Omit<VerifyStage, 'type'>> & { id: string; name: string },
+): VerifyStage {
   return {
     ...BASE_DEFAULTS,
     timeoutMs: 20_000,
     maxRetries: 1,
     minConfidence: 0.7,
-    modelAdapterId: "verifier",
+    modelAdapterId: 'verifier',
     allowRevision: true,
     ...opts,
-    type: "Verify",
+    type: 'Verify',
   };
 }
 
-export function Decide(opts: Partial<Omit<DecideStage, "type">> & { id: string; name: string }): DecideStage {
+export function Decide(
+  opts: Partial<Omit<DecideStage, 'type'>> & { id: string; name: string },
+): DecideStage {
   return {
     ...BASE_DEFAULTS,
     maxRetries: 1,
-    priority: "critical",
+    priority: 'critical',
     sideEffects: [] as SideEffectCategory[],
     highRiskSideEffects: [] as SideEffectCategory[],
-    approvalPolicy: "operator" as const,
-    modelAdapterId: "default",
+    approvalPolicy: 'operator' as const,
+    modelAdapterId: 'default',
     ...opts,
-    type: "Decide",
+    type: 'Decide',
   };
 }
 
-export function ApprovalGate(opts: Partial<Omit<ApprovalGate, "type">> & { id: string; name: string }): ApprovalGate {
+export function ApprovalGate(
+  opts: Partial<Omit<ApprovalGate, 'type'>> & { id: string; name: string },
+): ApprovalGate {
   return {
     ...BASE_DEFAULTS,
     timeoutMs: 0,
     maxRetries: 0,
-    priority: "critical",
-    requiredTier: "operator" as const,
-    inboxPattern: "substrate-approval",
+    priority: 'critical',
+    requiredTier: 'operator' as const,
+    inboxPattern: 'substrate-approval',
     approvalTimeoutMs: 0,
     ...opts,
-    type: "ApprovalGate",
+    type: 'ApprovalGate',
   };
 }
 
@@ -109,19 +126,19 @@ export function definePolicy(opts: {
   name: string;
   highRiskCategories?: SideEffectCategory[];
   policyIds?: string[];
-  minimumApprovalTier?: "operator" | "manager" | "executive" | "board";
+  minimumApprovalTier?: 'operator' | 'manager' | 'executive' | 'board';
 }): PolicyProfile {
   return {
     id: opts.id,
     name: opts.name,
     highRiskCategories: opts.highRiskCategories ?? [
-      "financial",
-      "deletion",
-      "write-external",
-      "infrastructure",
+      'financial',
+      'deletion',
+      'write-external',
+      'infrastructure',
     ],
     policyIds: opts.policyIds ?? [],
-    minimumApprovalTier: opts.minimumApprovalTier ?? "operator",
+    minimumApprovalTier: opts.minimumApprovalTier ?? 'operator',
   };
 }
 
@@ -138,7 +155,7 @@ export function defineBudget(opts?: {
     escalateAt: opts?.escalateAt ?? 0.5,
     requireHumanBelow: opts?.requireHumanBelow ?? 0.3,
     minFinalConfidence: opts?.minFinalConfidence ?? 0.4,
-    escalationModelAdapterId: opts?.escalationModelAdapterId ?? "strong",
-    verifierAdapterId: opts?.verifierAdapterId ?? "verifier",
+    escalationModelAdapterId: opts?.escalationModelAdapterId ?? 'strong',
+    verifierAdapterId: opts?.verifierAdapterId ?? 'verifier',
   };
 }

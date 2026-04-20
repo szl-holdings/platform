@@ -1,7 +1,16 @@
-import * as React from "react";
-import { Plus, Image as ImageIcon, GripVertical, Clock, Camera, Sun, Users, Clapperboard } from "lucide-react";
-import { useStoryboards, useCreateStoryboard } from "@/alloy/hooks/use-creative";
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
+import {
+  Camera,
+  Clapperboard,
+  Clock,
+  GripVertical,
+  Image as ImageIcon,
+  Plus,
+  Sun,
+  Users,
+} from 'lucide-react';
+import * as React from 'react';
+import { useCreateStoryboard, useStoryboards } from '@/alloy/hooks/use-creative';
 
 export function StoryboardBoard({ campaignId }: { campaignId: string }) {
   const { data: scenes, isLoading } = useStoryboards(campaignId);
@@ -9,14 +18,22 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
 
   const handleAddScene = () => {
     const nextNum = (scenes?.length || 0) + 1;
-    createScene.mutate({ campaignId: parseInt(campaignId, 10), sceneNumber: nextNum, visual: "New scene description...", duration: "3s" });
+    createScene.mutate({
+      campaignId: parseInt(campaignId, 10),
+      sceneNumber: nextNum,
+      visual: 'New scene description...',
+      duration: '3s',
+    });
   };
 
-  if (isLoading) return (
-    <div className="animate-pulse flex gap-6 overflow-hidden">
-      {[1,2,3].map(i => <div key={i} className="w-80 h-96 bg-white/5 border border-white/8 rounded-xl shrink-0" />)}
-    </div>
-  );
+  if (isLoading)
+    return (
+      <div className="animate-pulse flex gap-6 overflow-hidden">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="w-80 h-96 bg-white/5 border border-white/8 rounded-xl shrink-0" />
+        ))}
+      </div>
+    );
 
   return (
     <div className="h-full flex flex-col">
@@ -25,7 +42,10 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
           <h2 className="font-semibold text-lg flex items-center gap-2 text-white">
             <Clapperboard className="w-5 h-5 text-blue-400" /> Scene Layout
           </h2>
-          <p className="text-xs text-slate-500 mt-1">{scenes?.length || 0} scenes · {scenes?.reduce((acc, s) => acc + parseInt(s.duration || "0"), 0) || 0}s total runtime</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {scenes?.length || 0} scenes ·{' '}
+            {scenes?.reduce((acc, s) => acc + parseInt(s.duration || '0'), 0) || 0}s total runtime
+          </p>
         </div>
         <button
           onClick={handleAddScene}
@@ -38,8 +58,8 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
 
       <div className="flex-1 overflow-x-auto overflow-y-hidden pb-6 -mx-2 px-2 flex gap-6">
         {scenes?.map((scene) => (
-          <motion.div 
-            key={scene.id} 
+          <motion.div
+            key={scene.id}
             layoutId={String(scene.id)}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -52,7 +72,11 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
 
               <div className="h-48 bg-white/3 border-b border-white/8 relative shrink-0">
                 {scene.thumbnailUrl ? (
-                  <img src={scene.thumbnailUrl} alt={`Scene ${scene.sceneNumber}`} className="w-full h-full object-cover" />
+                  <img
+                    src={scene.thumbnailUrl}
+                    alt={`Scene ${scene.sceneNumber}`}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600">
                     <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
@@ -83,13 +107,17 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
                 )}
 
                 <div>
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Visual Description</h4>
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    Visual Description
+                  </h4>
                   <p className="text-sm text-slate-200 leading-relaxed">{scene.visual}</p>
                 </div>
 
                 {scene.dialogue && (
                   <div>
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Audio / Dialogue</h4>
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Audio / Dialogue
+                    </h4>
                     <div className="bg-white/3 p-3 rounded-lg border border-white/8 text-sm italic border-l-2 border-l-cyan-400 text-slate-300">
                       {scene.dialogue}
                     </div>
@@ -114,7 +142,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
           </motion.div>
         ))}
 
-        <button 
+        <button
           onClick={handleAddScene}
           className="w-[340px] shrink-0 h-[700px] border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-slate-600 hover:text-blue-400 hover:border-blue-400/30 hover:bg-blue-400/3 transition-all"
         >

@@ -1,6 +1,6 @@
-import React, { useState, type ReactNode } from "react";
-import { cn } from "../utils.js";
-import { color } from "../tokens/index.js";
+import React, { type ReactNode, useState } from 'react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface InspectorTab {
   id: string;
@@ -15,11 +15,11 @@ export interface InspectorTabsProps {
 }
 
 export function InspectorTabs({ tabs, defaultTab, className }: InspectorTabsProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab ?? tabs[0]?.id ?? "");
+  const [activeTab, setActiveTab] = useState(defaultTab ?? tabs[0]?.id ?? '');
   const activeContent = tabs.find((t) => t.id === activeTab)?.content;
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn('flex flex-col h-full', className)}>
       <div
         className="flex border-b flex-shrink-0"
         style={{ borderColor: color.border.subtle }}
@@ -36,16 +36,14 @@ export function InspectorTabs({ tabs, defaultTab, className }: InspectorTabsProp
               onClick={() => setActiveTab(tab.id)}
               className="px-3 text-xs font-medium transition-colors"
               style={{
-                height: "36px",
-                borderBottom: isActive
-                  ? `2px solid ${color.accent.blue}`
-                  : "2px solid transparent",
-                borderTop: "none",
-                borderLeft: "none",
-                borderRight: "none",
+                height: '36px',
+                borderBottom: isActive ? `2px solid ${color.accent.blue}` : '2px solid transparent',
+                borderTop: 'none',
+                borderLeft: 'none',
+                borderRight: 'none',
                 color: isActive ? color.text.primary : color.text.secondary,
-                background: "transparent",
-                cursor: "pointer",
+                background: 'transparent',
+                cursor: 'pointer',
               }}
             >
               {tab.label}

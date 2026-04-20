@@ -1,27 +1,21 @@
-import type { GraphNode, GraphEdge } from "@szl-holdings/design-system";
-import { getObligationStatusColor } from "@/data/matters";
-import type {
-  Matter,
-  Obligation,
-  Party,
-  PartyRole,
-  ProofChainEntry,
-} from "@/data/matters";
+import type { GraphEdge, GraphNode } from '@szl-holdings/design-system';
+import type { Matter, Obligation, Party, PartyRole, ProofChainEntry } from '@/data/matters';
+import { getObligationStatusColor } from '@/data/matters';
 
-export const ACCENT = "#a78bfa";
-export const FILING_COLOR = "#fbbf24";
-export const CRITICAL_COLOR = "#ef4444";
+export const ACCENT = '#a78bfa';
+export const FILING_COLOR = '#fbbf24';
+export const CRITICAL_COLOR = '#ef4444';
 
 export const ROLE_COLORS: Record<PartyRole, string> = {
-  client: "#a78bfa",
-  "opposing-counsel": "#f97316",
-  regulator: "#ef4444",
-  "third-party": "#6b7280",
-  expert: "#38bdf8",
-  "co-counsel": "#c4b5fd",
+  client: '#a78bfa',
+  'opposing-counsel': '#f97316',
+  regulator: '#ef4444',
+  'third-party': '#6b7280',
+  expert: '#38bdf8',
+  'co-counsel': '#c4b5fd',
 };
 
-export type GraphNodeKind = "party" | "obligation" | "filing";
+export type GraphNodeKind = 'party' | 'obligation' | 'filing';
 
 export interface NodeData {
   kind: GraphNodeKind;
@@ -65,8 +59,8 @@ function computeLayout(
   const sim: SimNode[] = nodeIds.map((id) => {
     const kind = nodeKinds[id];
     let baseX = 0.5;
-    if (kind === "party") baseX = 0.18;
-    else if (kind === "filing") baseX = 0.82;
+    if (kind === 'party') baseX = 0.18;
+    else if (kind === 'filing') baseX = 0.82;
     return {
       id,
       x: baseX + (rand() - 0.5) * 0.2,
@@ -123,8 +117,8 @@ function computeLayout(
 
     for (const n of sim) {
       const kind = nodeKinds[n.id];
-      const targetX = kind === "party" ? 0.18 : kind === "filing" ? 0.82 : 0.5;
-      n.vx += (targetX - n.x) * (kind === "obligation" ? CENTER : CENTER * 8);
+      const targetX = kind === 'party' ? 0.18 : kind === 'filing' ? 0.82 : 0.5;
+      n.vx += (targetX - n.x) * (kind === 'obligation' ? CENTER : CENTER * 8);
       n.vy += (0.5 - n.y) * CENTER;
 
       n.vx *= DAMP;
@@ -153,7 +147,7 @@ export function computeCriticalPath(obligations: Obligation[]): Set<string> {
     }
   }
 
-  const seeds = obligations.filter((o) => o.status === "at-risk" || o.status === "overdue");
+  const seeds = obligations.filter((o) => o.status === 'at-risk' || o.status === 'overdue');
   for (const seed of seeds) {
     const stackUp = [seed.id];
     while (stackUp.length) {
@@ -199,7 +193,7 @@ export interface BuildGraphOptions {
 
 export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): BuiltGraph {
   const { selectedId = null, compact = false, overrides = {} } = options;
-  const filings = matter.proofChain.filter((p) => p.eventType === "filing");
+  const filings = matter.proofChain.filter((p) => p.eventType === 'filing');
   const criticalObligIds = computeCriticalPath(matter.obligations);
   const criticalIds = new Set<string>();
 
@@ -211,23 +205,23 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
   for (const p of matter.parties) {
     const id = `party:${p.id}`;
     ids.push(id);
-    nodeKinds[id] = "party";
-    nodeData[id] = { kind: "party", party: p };
+    nodeKinds[id] = 'party';
+    nodeData[id] = { kind: 'party', party: p };
   }
 
   for (const o of matter.obligations) {
     const id = `oblig:${o.id}`;
     ids.push(id);
-    nodeKinds[id] = "obligation";
-    nodeData[id] = { kind: "obligation", obligation: o };
+    nodeKinds[id] = 'obligation';
+    nodeData[id] = { kind: 'obligation', obligation: o };
     if (criticalObligIds.has(o.id)) criticalIds.add(id);
   }
 
   for (const f of filings) {
     const id = `filing:${f.id}`;
     ids.push(id);
-    nodeKinds[id] = "filing";
-    nodeData[id] = { kind: "filing", filing: f };
+    nodeKinds[id] = 'filing';
+    nodeData[id] = { kind: 'filing', filing: f };
   }
 
   for (const o of matter.obligations) {
@@ -240,7 +234,7 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
     }
   }
 
-  const client = matter.parties.find((p) => p.role === "client");
+  const client = matter.parties.find((p) => p.role === 'client');
   if (client) {
     const clientId = `party:${client.id}`;
     for (const o of matter.obligations) {
@@ -251,11 +245,11 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
   }
 
   for (const p of matter.parties) {
-    if (p.role !== "regulator" && p.role !== "opposing-counsel") continue;
+    if (p.role !== 'regulator' && p.role !== 'opposing-counsel') continue;
     const partyId = `party:${p.id}`;
     let connected = false;
     for (const o of matter.obligations) {
-      if (o.courtId && p.role === "regulator") {
+      if (o.courtId && p.role === 'regulator') {
         edgesIn.push({ source: `oblig:${o.id}`, target: partyId });
         connected = true;
       }
@@ -267,9 +261,11 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
   }
 
   for (const p of matter.parties) {
-    if (p.role !== "expert" && p.role !== "third-party" && p.role !== "co-counsel") continue;
+    if (p.role !== 'expert' && p.role !== 'third-party' && p.role !== 'co-counsel') continue;
     const partyId = `party:${p.id}`;
-    const target = matter.obligations.find((o) => o.status === "in-progress" || o.status === "at-risk");
+    const target = matter.obligations.find(
+      (o) => o.status === 'in-progress' || o.status === 'at-risk',
+    );
     if (target) edgesIn.push({ source: partyId, target: `oblig:${target.id}` });
   }
 
@@ -291,12 +287,12 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
     const isSelected = selectedId === id;
     const isCritical = criticalIds.has(id);
 
-    if (data.kind === "party") {
+    if (data.kind === 'party') {
       const p = data.party!;
       const color = ROLE_COLORS[p.role];
       return {
         id,
-        label: p.name.length > 22 ? p.name.slice(0, 20) + "…" : p.name,
+        label: p.name.length > 22 ? p.name.slice(0, 20) + '…' : p.name,
         x: pos.x,
         y: pos.y,
         radius: (isSelected ? 12 : 9) * radiusScale,
@@ -304,13 +300,13 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
         ringColor: isSelected ? color : undefined,
       };
     }
-    if (data.kind === "obligation") {
+    if (data.kind === 'obligation') {
       const o = data.obligation!;
       const color = getObligationStatusColor(o.status);
       const ring = isCritical ? CRITICAL_COLOR : isSelected ? color : undefined;
       return {
         id,
-        label: o.title.length > 26 ? o.title.slice(0, 24) + "…" : o.title,
+        label: o.title.length > 26 ? o.title.slice(0, 24) + '…' : o.title,
         x: pos.x,
         y: pos.y,
         radius: (isSelected ? 13 : isCritical ? 11 : 9) * radiusScale,
@@ -321,7 +317,7 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
     const f = data.filing!;
     return {
       id,
-      label: f.title.length > 24 ? f.title.slice(0, 22) + "…" : f.title,
+      label: f.title.length > 24 ? f.title.slice(0, 22) + '…' : f.title,
       x: pos.x,
       y: pos.y,
       radius: (isSelected ? 12 : 9) * radiusScale,
@@ -333,15 +329,21 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
   const graphEdges: GraphEdge[] = edgesIn.map((e, i) => {
     const srcKind = nodeData[e.source]?.kind;
     const tgtKind = nodeData[e.target]?.kind;
-    const isDep = srcKind === "obligation" && tgtKind === "obligation";
-    const isFilingFlow = srcKind === "obligation" && tgtKind === "filing";
+    const isDep = srcKind === 'obligation' && tgtKind === 'obligation';
+    const isFilingFlow = srcKind === 'obligation' && tgtKind === 'filing';
     const isDirected = isDep || isFilingFlow;
     const onCritical = isDep && criticalIds.has(e.source) && criticalIds.has(e.target);
     return {
       id: `e${i}:${e.source}->${e.target}`,
       source: e.source,
       target: e.target,
-      color: onCritical ? CRITICAL_COLOR : isDep ? "rgba(167,139,250,0.55)" : isFilingFlow ? "rgba(251,191,36,0.45)" : "rgba(255,255,255,0.10)",
+      color: onCritical
+        ? CRITICAL_COLOR
+        : isDep
+          ? 'rgba(167,139,250,0.55)'
+          : isFilingFlow
+            ? 'rgba(251,191,36,0.45)'
+            : 'rgba(255,255,255,0.10)',
       weight: (onCritical ? 1.8 : isDep ? 1.3 : isFilingFlow ? 1.1 : 0.8) * (compact ? 0.7 : 1),
       dashed: !isDirected,
       directed: isDirected && !compact,

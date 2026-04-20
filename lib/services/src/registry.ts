@@ -1,72 +1,72 @@
-import { type ServiceAdapter, type ServiceHealthReport, type ConnectionTestResult } from "./base.js";
-import { AIAdapter } from "./adapters/ai.js";
-import { WeatherAdapter } from "./adapters/weather.js";
-import { ShippingAdapter } from "./adapters/shipping.js";
-import { StripeAdapter } from "./adapters/stripe.js";
-import { SlackAdapter } from "./adapters/slack.js";
-import { TwilioAdapter } from "./adapters/twilio.js";
-import { GoogleAdapter } from "./adapters/google.js";
-import { NotionAdapter } from "./adapters/notion.js";
-import { StorageAdapter } from "./adapters/storage.js";
-import { MonitoringAdapter } from "./adapters/monitoring.js";
-import { GitHubAdapter } from "./adapters/github.js";
-import { GoogleCalendarAdapter } from "./adapters/google-calendar.js";
-import { GoogleDocsAdapter } from "./adapters/google-docs.js";
-import { GoogleDriveAdapter } from "./adapters/google-drive.js";
-import { DropboxAdapter } from "./adapters/dropbox.js";
-import { OneDriveAdapter } from "./adapters/onedrive.js";
-import { StormGlassAdapter } from "./adapters/stormglass.js";
-import { PostHogAdapter } from "./adapters/posthog.js";
-import { GmailAdapter } from "./adapters/gmail.js";
-import { ConfluenceAdapter } from "./adapters/confluence.js";
-import { HubSpotAdapter } from "./adapters/hubspot.js";
-import { ElevenLabsAdapter } from "./adapters/elevenlabs.js";
-import { FigmaAdapter } from "./adapters/figma.js";
-import { HuggingFaceAdapter } from "./adapters/huggingface.js";
-import { CisaAdapter } from "./adapters/cisa.js";
-import { ArxivAdapter } from "./adapters/arxiv.js";
-import { AbuseIPDBAdapter } from "./adapters/abuseipdb.js";
-import { NOAAAdapter } from "./adapters/noaa.js";
-import { NVDAdapter } from "./adapters/nvd.js";
-import { BLSAdapter } from "./adapters/bls.js";
-import { WorldBankAdapter } from "./adapters/worldbank.js";
-import { OpenMeteoAdapter } from "./adapters/openmeteo.js";
-import { MITREAdapter } from "./adapters/mitre.js";
-import { GDELTAdapter } from "./adapters/gdelt.js";
-import { MicrosoftGraphAdapter } from "./adapters/microsoft-graph.js";
-import { ResoMlsAdapter } from "./adapters/reso-mls.js";
-import { CoStarAdapter } from "./adapters/costar.js";
-import { CompStakAdapter } from "./adapters/compstak.js";
-import { DataverseAdapter } from "./adapters/dataverse.js";
-import { Dynamics365Adapter } from "./adapters/dynamics365.js";
-import { SharePointSPFxAdapter } from "./adapters/sharepoint-spfx.js";
-import { SalesforceAdapter } from "./adapters/salesforce.js";
-import { JiraAdapter } from "./adapters/jira.js";
-import { PagerDutyAdapter } from "./adapters/pagerduty.js";
-import { SiemAdapter } from "./adapters/siem.js";
-import { XTwitterAdapter } from "./adapters/x-twitter.js";
-import { MediumAdapter } from "./adapters/medium.js";
-import { SubstackAdapter } from "./adapters/substack.js";
-import { LinkedInAdapter } from "./adapters/linkedin.js";
-import { SecEdgarAdapter } from "./adapters/edgar.js";
-import { FredAdapter } from "./adapters/fred.js";
-import { MarketDataAdapter } from "./adapters/market-data.js";
-import { NewRelicAdapter } from "./adapters/new-relic.js";
-import { NvidiaDcgmAdapter } from "./adapters/nvidia-dcgm.js";
-import { MispTaxiiAdapter } from "./adapters/misp-taxii.js";
-import { MarineTrafficAdapter } from "./adapters/marine-traffic.js";
-import { VesselFinderAdapter } from "./adapters/vesselfinder.js";
-import { ZillowAdapter } from "./adapters/zillow.js";
-import { CoreLogicAdapter } from "./adapters/corelogic.js";
-import { RedfinAdapter } from "./adapters/redfin.js";
-import { PACERAdapter } from "./adapters/pacer.js";
-import { CourtListenerAdapter } from "./adapters/courtlistener.js";
-import { VirusTotalAdapter } from "./adapters/virustotal.js";
-import { ShodanAdapter } from "./adapters/shodan.js";
-import { AlienVaultOTXAdapter } from "./adapters/alienvault-otx.js";
-import { AlphaVantageAdapter } from "./adapters/alpha-vantage.js";
-import { DunBradstreetAdapter } from "./adapters/dun-bradstreet.js";
-import { CrunchbaseAdapter } from "./adapters/crunchbase.js";
+import { AbuseIPDBAdapter } from './adapters/abuseipdb.js';
+import { AIAdapter } from './adapters/ai.js';
+import { AlienVaultOTXAdapter } from './adapters/alienvault-otx.js';
+import { AlphaVantageAdapter } from './adapters/alpha-vantage.js';
+import { ArxivAdapter } from './adapters/arxiv.js';
+import { BLSAdapter } from './adapters/bls.js';
+import { CisaAdapter } from './adapters/cisa.js';
+import { CompStakAdapter } from './adapters/compstak.js';
+import { ConfluenceAdapter } from './adapters/confluence.js';
+import { CoreLogicAdapter } from './adapters/corelogic.js';
+import { CoStarAdapter } from './adapters/costar.js';
+import { CourtListenerAdapter } from './adapters/courtlistener.js';
+import { CrunchbaseAdapter } from './adapters/crunchbase.js';
+import { DataverseAdapter } from './adapters/dataverse.js';
+import { DropboxAdapter } from './adapters/dropbox.js';
+import { DunBradstreetAdapter } from './adapters/dun-bradstreet.js';
+import { Dynamics365Adapter } from './adapters/dynamics365.js';
+import { SecEdgarAdapter } from './adapters/edgar.js';
+import { ElevenLabsAdapter } from './adapters/elevenlabs.js';
+import { FigmaAdapter } from './adapters/figma.js';
+import { FredAdapter } from './adapters/fred.js';
+import { GDELTAdapter } from './adapters/gdelt.js';
+import { GitHubAdapter } from './adapters/github.js';
+import { GmailAdapter } from './adapters/gmail.js';
+import { GoogleAdapter } from './adapters/google.js';
+import { GoogleCalendarAdapter } from './adapters/google-calendar.js';
+import { GoogleDocsAdapter } from './adapters/google-docs.js';
+import { GoogleDriveAdapter } from './adapters/google-drive.js';
+import { HubSpotAdapter } from './adapters/hubspot.js';
+import { HuggingFaceAdapter } from './adapters/huggingface.js';
+import { JiraAdapter } from './adapters/jira.js';
+import { LinkedInAdapter } from './adapters/linkedin.js';
+import { MarineTrafficAdapter } from './adapters/marine-traffic.js';
+import { MarketDataAdapter } from './adapters/market-data.js';
+import { MediumAdapter } from './adapters/medium.js';
+import { MicrosoftGraphAdapter } from './adapters/microsoft-graph.js';
+import { MispTaxiiAdapter } from './adapters/misp-taxii.js';
+import { MITREAdapter } from './adapters/mitre.js';
+import { MonitoringAdapter } from './adapters/monitoring.js';
+import { NewRelicAdapter } from './adapters/new-relic.js';
+import { NOAAAdapter } from './adapters/noaa.js';
+import { NotionAdapter } from './adapters/notion.js';
+import { NVDAdapter } from './adapters/nvd.js';
+import { NvidiaDcgmAdapter } from './adapters/nvidia-dcgm.js';
+import { OneDriveAdapter } from './adapters/onedrive.js';
+import { OpenMeteoAdapter } from './adapters/openmeteo.js';
+import { PACERAdapter } from './adapters/pacer.js';
+import { PagerDutyAdapter } from './adapters/pagerduty.js';
+import { PostHogAdapter } from './adapters/posthog.js';
+import { RedfinAdapter } from './adapters/redfin.js';
+import { ResoMlsAdapter } from './adapters/reso-mls.js';
+import { SalesforceAdapter } from './adapters/salesforce.js';
+import { SharePointSPFxAdapter } from './adapters/sharepoint-spfx.js';
+import { ShippingAdapter } from './adapters/shipping.js';
+import { ShodanAdapter } from './adapters/shodan.js';
+import { SiemAdapter } from './adapters/siem.js';
+import { SlackAdapter } from './adapters/slack.js';
+import { StorageAdapter } from './adapters/storage.js';
+import { StormGlassAdapter } from './adapters/stormglass.js';
+import { StripeAdapter } from './adapters/stripe.js';
+import { SubstackAdapter } from './adapters/substack.js';
+import { TwilioAdapter } from './adapters/twilio.js';
+import { VesselFinderAdapter } from './adapters/vesselfinder.js';
+import { VirusTotalAdapter } from './adapters/virustotal.js';
+import { WeatherAdapter } from './adapters/weather.js';
+import { WorldBankAdapter } from './adapters/worldbank.js';
+import { XTwitterAdapter } from './adapters/x-twitter.js';
+import { ZillowAdapter } from './adapters/zillow.js';
+import type { ConnectionTestResult, ServiceAdapter, ServiceHealthReport } from './base.js';
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -300,9 +300,9 @@ export class ServiceRegistry {
       services,
       summary: {
         total: services.length,
-        liveConfigured: services.filter((s) => s.status === "LIVE_CONFIGURED").length,
-        mockedDemoMode: services.filter((s) => s.status === "MOCKED_DEMO_MODE").length,
-        manualRequired: services.filter((s) => s.status === "MANUAL_REQUIRED").length,
+        liveConfigured: services.filter((s) => s.status === 'LIVE_CONFIGURED').length,
+        mockedDemoMode: services.filter((s) => s.status === 'MOCKED_DEMO_MODE').length,
+        manualRequired: services.filter((s) => s.status === 'MANUAL_REQUIRED').length,
       },
     };
   }
@@ -331,7 +331,9 @@ export class ServiceRegistry {
       .filter((a): a is ServiceAdapter => a !== undefined);
   }
 
-  getAppHealthMatrix(connectorNames: string[]): IntegrationHealthMatrix & { unknownConnectors: string[] } {
+  getAppHealthMatrix(
+    connectorNames: string[],
+  ): IntegrationHealthMatrix & { unknownConnectors: string[] } {
     const adapters: ServiceAdapter[] = [];
     const unknownConnectors: string[] = [];
 
@@ -350,20 +352,21 @@ export class ServiceRegistry {
       services,
       summary: {
         total: connectorNames.length,
-        liveConfigured: services.filter((s) => s.status === "LIVE_CONFIGURED").length,
-        mockedDemoMode: services.filter((s) => s.status === "MOCKED_DEMO_MODE").length,
-        manualRequired: services.filter((s) => s.status === "MANUAL_REQUIRED").length + unknownConnectors.length,
+        liveConfigured: services.filter((s) => s.status === 'LIVE_CONFIGURED').length,
+        mockedDemoMode: services.filter((s) => s.status === 'MOCKED_DEMO_MODE').length,
+        manualRequired:
+          services.filter((s) => s.status === 'MANUAL_REQUIRED').length + unknownConnectors.length,
       },
       unknownConnectors,
     };
   }
 
   getUnhealthyCount(): number {
-    return this.adapters.filter((a) => a.status === "MANUAL_REQUIRED").length;
+    return this.adapters.filter((a) => a.status === 'MANUAL_REQUIRED').length;
   }
 
   getDemoModeCount(): number {
-    return this.adapters.filter((a) => a.status === "MOCKED_DEMO_MODE").length;
+    return this.adapters.filter((a) => a.status === 'MOCKED_DEMO_MODE').length;
   }
 }
 

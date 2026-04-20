@@ -12,18 +12,15 @@
  *   NODE_ENV                    — production | development
  */
 
-import express from "express";
-import { listWorkflows } from "@szl/substrate";
-import { createHttpTransport } from "./transport/http.js";
-import { startStdioTransport } from "./transport/stdio.js";
-import { SERVER_INFO } from "./descriptor.js";
+import { listWorkflows } from '@szl/substrate';
+import express from 'express';
+import { SERVER_INFO } from './descriptor.js';
+import { createHttpTransport } from './transport/http.js';
+import { startStdioTransport } from './transport/stdio.js';
 
-const IS_STDIO = process.argv.includes("--stdio");
-const PORT = parseInt(
-  process.env["SUBSTRATE_GATEWAY_PORT"] ?? process.env["PORT"] ?? "3700",
-  10,
-);
-const IS_PRODUCTION = process.env["NODE_ENV"] === "production";
+const IS_STDIO = process.argv.includes('--stdio');
+const PORT = parseInt(process.env['SUBSTRATE_GATEWAY_PORT'] ?? process.env['PORT'] ?? '3700', 10);
+const IS_PRODUCTION = process.env['NODE_ENV'] === 'production';
 
 // Startup check: warn loudly if the workflow registry is empty. Without any
 // registerWorkflow() calls in this process, every substrate_submit_run will
@@ -32,24 +29,24 @@ function warnIfRegistryEmpty(log: (msg: string) => void): void {
   const registered = listWorkflows();
   if (registered.length === 0) {
     log(
-      "[substrate-mcp-gateway] WARNING: workflow registry is EMPTY. " +
-      "No workflows have been registered via registerWorkflow(). " +
-      "Every substrate_submit_run call will fail until at least one workflow is registered.",
+      '[substrate-mcp-gateway] WARNING: workflow registry is EMPTY. ' +
+        'No workflows have been registered via registerWorkflow(). ' +
+        'Every substrate_submit_run call will fail until at least one workflow is registered.',
     );
   } else {
     log(
       `[substrate-mcp-gateway] Workflow registry: ${registered.length} workflow(s) registered ` +
-      `(${registered.map((w) => w.id).join(", ")})`,
+        `(${registered.map((w) => w.id).join(', ')})`,
     );
   }
 }
 
 // Fail-fast: refuse to start in production without an API key.
 // In development a warning is logged by auth.ts and unauthenticated mode is used.
-if (IS_PRODUCTION && !process.env["SUBSTRATE_GATEWAY_API_KEY"]) {
+if (IS_PRODUCTION && !process.env['SUBSTRATE_GATEWAY_API_KEY']) {
   console.error(
-    "[substrate-mcp-gateway] FATAL: SUBSTRATE_GATEWAY_API_KEY is not set. " +
-    "The gateway cannot start in production without an API key.",
+    '[substrate-mcp-gateway] FATAL: SUBSTRATE_GATEWAY_API_KEY is not set. ' +
+      'The gateway cannot start in production without an API key.',
   );
   process.exit(1);
 }
@@ -62,47 +59,46 @@ if (IS_STDIO) {
   warnIfRegistryEmpty((msg) => console.warn(msg));
   const app = express();
 
-  app.disable("x-powered-by");
-  app.set("trust proxy", 1);
+  app.disable('x-powered-by');
+  app.set('trust proxy', 1);
 
   // MCP gateway mounted at /mcp
-  app.use("/mcp", createHttpTransport());
+  app.use('/mcp', createHttpTransport());
 
   // Root redirect for discoverability
-  app.get("/", (_req, res) => {
+  app.get('/', (_req, res) => {
     res.json({
       service: SERVER_INFO.name,
       version: SERVER_INFO.version,
       protocol: SERVER_INFO.protocolVersion,
       endpoints: {
-        health: "GET /mcp/health",
-        tools: "GET /mcp/tools",
-        resources: "GET /mcp/resources",
-        prompts: "GET /mcp/prompts",
-        jsonrpc: "POST /mcp",
-        sse: "GET /mcp/sse",
+        health: 'GET /mcp/health',
+        tools: 'GET /mcp/tools',
+        resources: 'GET /mcp/resources',
+        prompts: 'GET /mcp/prompts',
+        jsonrpc: 'POST /mcp',
+        sse: 'GET /mcp/sse',
       },
     });
   });
 
-  const server = app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(
       `[substrate-mcp-gateway] ${SERVER_INFO.name} v${SERVER_INFO.version} ` +
-      `listening on port ${PORT}`,
+        `listening on port ${PORT}`,
     );
     console.log(
-      `[substrate-mcp-gateway] Endpoints: ` +
-      `POST /mcp (JSON-RPC), GET /mcp/sse, GET /mcp/health`,
+      `[substrate-mcp-gateway] Endpoints: ` + `POST /mcp (JSON-RPC), GET /mcp/sse, GET /mcp/health`,
     );
   });
 
   // Graceful shutdown
-  process.on("SIGTERM", () => {
-    console.log("[substrate-mcp-gateway] Received SIGTERM — shutting down gracefully");
+  process.on('SIGTERM', () => {
+    console.log('[substrate-mcp-gateway] Received SIGTERM — shutting down gracefully');
     server.close(() => process.exit(0));
   });
 
-  process.on("SIGINT", () => {
+  process.on('SIGINT', () => {
     server.close(() => process.exit(0));
   });
 }

@@ -179,9 +179,29 @@
             { "name": "Route Smoke Tests", "tests": 14, "passed": 14, "status": "GREEN" },
             { "name": "Trust Center", "tests": 3, "passed": 3, "status": "GREEN" },
             { "name": "Investor & Platform Pages", "tests": 3, "passed": 3, "status": "GREEN" },
-            { "name": "Authentication Flow", "tests": 2, "passed": 1, "skipped": 1, "status": "GREEN", "note": "Protected route test skipped — client-side auth only" },
-            { "name": "API Health Endpoint", "tests": 2, "skipped": 2, "status": "SKIPPED", "note": "API_BASE_URL not configured in test environment" },
-            { "name": "User Journey: Platform Navigation", "tests": 3, "passed": 2, "skipped": 1, "status": "GREEN", "note": "Nexus nav test skipped — nexus app (/nexus design sandbox) not running; test.skip() applied instead of failing" },
+            {
+              "name": "Authentication Flow",
+              "tests": 2,
+              "passed": 1,
+              "skipped": 1,
+              "status": "GREEN",
+              "note": "Protected route test skipped — client-side auth only"
+            },
+            {
+              "name": "API Health Endpoint",
+              "tests": 2,
+              "skipped": 2,
+              "status": "SKIPPED",
+              "note": "API_BASE_URL not configured in test environment"
+            },
+            {
+              "name": "User Journey: Platform Navigation",
+              "tests": 3,
+              "passed": 2,
+              "skipped": 1,
+              "status": "GREEN",
+              "note": "Nexus nav test skipped — nexus app (/nexus design sandbox) not running; test.skip() applied instead of failing"
+            },
             { "name": "Mobile Viewport", "tests": 3, "passed": 3, "status": "GREEN" }
           ]
         },
@@ -213,7 +233,13 @@
           "task": "Task #767",
           "failureType": "accessibility-violations",
           "violations": [
-            { "rule": "color-contrast", "impact": "serious", "affectedRoutes": ["/", "/about", "/contact", "/trust-center", "/ecosystem"], "nodeCount": "23–31 per page", "note": "WCAG 2 AA color contrast failure (4.5:1 required). --color-szl-text-faint color (#494c50, #5a6068) used on dark backgrounds has insufficient contrast. No CRITICAL impact violations found — all violations are 'serious'. See OPEN-006." }
+            {
+              "rule": "color-contrast",
+              "impact": "serious",
+              "affectedRoutes": ["/", "/about", "/contact", "/trust-center", "/ecosystem"],
+              "nodeCount": "23–31 per page",
+              "note": "WCAG 2 AA color contrast failure (4.5:1 required). --color-szl-text-faint color (#494c50, #5a6068) used on dark backgrounds has insufficient contrast. No CRITICAL impact violations found — all violations are 'serious'. See OPEN-006."
+            }
           ],
           "note": "Newly executed in Task #767. 3 structural tests pass (title, main landmark, interactive elements). 5 color-contrast tests fail on all public routes. Violations are 'serious' (not 'critical') in WCAG terms — the expect.soft() assertion captures serious violations as failures too. Tracked as OPEN-006."
         },
@@ -424,10 +450,7 @@
       "smokeTest": "PASS",
       "dbIntegration": "N/A",
       "stressTest": "N/A",
-      "endpointsCovered": [
-        "GET /autopilot/summary",
-        "GET /autopilot/next-best-actions"
-      ],
+      "endpointsCovered": ["GET /autopilot/summary", "GET /autopilot/next-best-actions"],
       "bodyShapeAsserted": true,
       "status": "GREEN",
       "note": "Newly added smoke coverage in Task #667. Routes corrected to match actual implementation."
@@ -438,10 +461,7 @@
       "smokeTest": "PASS",
       "dbIntegration": "N/A",
       "stressTest": "N/A",
-      "endpointsCovered": [
-        "GET /snapshot (ecosystem snapshot)",
-        "GET /search?q=holdings (search)"
-      ],
+      "endpointsCovered": ["GET /snapshot (ecosystem snapshot)", "GET /search?q=holdings (search)"],
       "bodyShapeAsserted": true,
       "status": "GREEN",
       "note": "Newly added smoke coverage in Task #667. Routes corrected to /snapshot and /search."
@@ -501,7 +521,14 @@
     "suiteFile": "tests/api/stress.test.ts",
     "concurrentLoad": {
       "description": "20 concurrent GET requests per domain endpoint, all must return < 5xx",
-      "domains": ["vessels/fleets", "lyte/workspaces", "firestorm/scenarios", "holdings/ventures", "prism-counsel/matters", "terra/market-intelligence"],
+      "domains": [
+        "vessels/fleets",
+        "lyte/workspaces",
+        "firestorm/scenarios",
+        "holdings/ventures",
+        "prism-counsel/matters",
+        "terra/market-intelligence"
+      ],
       "concurrency": 20,
       "status": "PASS",
       "metrics": {

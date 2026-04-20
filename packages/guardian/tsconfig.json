@@ -8,9 +8,7 @@
     "composite": true,
     "types": ["node"]
   },
-  "references": [
-    { "path": "../policy-engine" }
-  ],
+  "references": [{ "path": "../policy-engine" }],
   "include": ["src/**/*"],
   "exclude": ["src/**/*.test.ts"]
 }

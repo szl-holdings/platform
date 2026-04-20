@@ -9,15 +9,15 @@
  * on every write before the in-memory update, so the seam is clean and non-breaking.
  */
 
-import { useSyncExternalStore } from "react";
 import type {
-  DecisionTwinAuditEvent,
-  TwinAuditPersistenceAdapter,
   DecisionTwinAction,
+  DecisionTwinAuditEvent,
   PRISMImpact,
-} from "@workspace/simulation";
+  TwinAuditPersistenceAdapter,
+} from '@workspace/simulation';
+import { useSyncExternalStore } from 'react';
 
-export type TwinVerdict = "accepted" | "rejected" | "modified";
+export type TwinVerdict = 'accepted' | 'rejected' | 'modified';
 
 export type { DecisionTwinAuditEvent };
 
@@ -40,7 +40,7 @@ function generateProofRef(signalId: string, action: string, verdict: string): st
 }
 
 function notify() {
-  _listeners.forEach(l => l());
+  _listeners.forEach((l) => l());
 }
 
 export function writeTwinAuditEvent(
@@ -60,7 +60,7 @@ export function writeTwinAuditEvent(
     scenarioId,
     action,
     verdict,
-    operator: opts?.operator ?? "Demo Operator",
+    operator: opts?.operator ?? 'Demo Operator',
     prismSnapshot,
     overallRiskBefore,
     overallRiskAfter,
@@ -84,7 +84,7 @@ export function getTwinAuditLog(): DecisionTwinAuditEvent[] {
 }
 
 export function getTwinAuditForSignal(signalId: string): DecisionTwinAuditEvent[] {
-  return _auditLog.filter(e => e.signalId === signalId);
+  return _auditLog.filter((e) => e.signalId === signalId);
 }
 
 export function getLatestTwinAuditForSignal(signalId: string): DecisionTwinAuditEvent | null {
@@ -94,7 +94,7 @@ export function getLatestTwinAuditForSignal(signalId: string): DecisionTwinAudit
 export function subscribeTwinAudit(listener: () => void): () => void {
   _listeners = [..._listeners, listener];
   return () => {
-    _listeners = _listeners.filter(l => l !== listener);
+    _listeners = _listeners.filter((l) => l !== listener);
   };
 }
 

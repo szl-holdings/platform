@@ -1,19 +1,19 @@
-import i18n, { type i18n as I18nInstance } from "i18next";
-import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
+import i18n, { type i18n as I18nInstance } from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import { initReactI18next } from 'react-i18next';
 
-export type SupportedLocale = "en" | "es";
+export type SupportedLocale = 'en' | 'es';
 
-export const SUPPORTED_LOCALES: SupportedLocale[] = ["en", "es"];
+export const SUPPORTED_LOCALES: SupportedLocale[] = ['en', 'es'];
 
 export const LOCALE_LABELS: Record<SupportedLocale, string> = {
-  en: "English",
-  es: "Español",
+  en: 'English',
+  es: 'Español',
 };
 
 export const LOCALE_FLAGS: Record<SupportedLocale, string> = {
-  en: "🇺🇸",
-  es: "🇪🇸",
+  en: '🇺🇸',
+  es: '🇪🇸',
 };
 
 export interface I18nConfig {
@@ -27,7 +27,7 @@ export function createI18n(config: I18nConfig): I18nInstance {
   const {
     namespace,
     resources,
-    defaultLocale = "en",
+    defaultLocale = 'en',
     supportedLocales = SUPPORTED_LOCALES,
   } = config;
 
@@ -41,7 +41,7 @@ export function createI18n(config: I18nConfig): I18nInstance {
         Object.entries(resources).map(([lng, translations]) => [
           lng,
           { [namespace]: translations },
-        ])
+        ]),
       ),
       defaultNS: namespace,
       ns: [namespace],
@@ -52,11 +52,11 @@ export function createI18n(config: I18nConfig): I18nInstance {
         escapeValue: false,
       },
       detection: {
-        order: ["querystring", "cookie", "localStorage", "navigator"],
-        lookupQuerystring: "lang",
-        lookupCookie: "i18n_lang",
-        lookupLocalStorage: "i18n_lang",
-        caches: ["localStorage", "cookie"],
+        order: ['querystring', 'cookie', 'localStorage', 'navigator'],
+        lookupQuerystring: 'lang',
+        lookupCookie: 'i18n_lang',
+        lookupLocalStorage: 'i18n_lang',
+        caches: ['localStorage', 'cookie'],
       },
     });
 

@@ -1,17 +1,17 @@
-import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import rateLimit from "express-rate-limit";
-import { sendBadRequest, handleRouteError } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { logger } from "../lib/logger";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
+import { handleRouteError, sendBadRequest } from '../lib/api-response';
 import {
-  sendEmail,
   buildCarlotaInvoiceEmail,
   CARLOTA_ADMIN_EMAIL,
   type CarlotaInvoiceEmailData,
-} from "../lib/email";
-import { validateBody } from "../lib/validation";
+  sendEmail,
+} from '../lib/email';
+import { logger } from '../lib/logger';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -20,27 +20,30 @@ const invoiceEmailLimit = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Invoice email rate limit exceeded. Please wait a few minutes." },
+  message: { error: 'Invoice email rate limit exceeded. Please wait a few minutes.' },
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
 router.post(
-  "/booking/invoices/email",
+  '/booking/invoices/email',
   invoiceEmailLimit,
   authMiddleware(),
-  validateBody(bodyShape({
-      "amount": z.unknown().optional(),
-      "ccAdmin": z.unknown().optional(),
-      "clientName": z.unknown().optional(),
-      "currency": z.unknown().optional(),
-      "dueDate": z.unknown().optional(),
-      "engagement": z.unknown().optional(),
-      "invoiceId": z.unknown().optional(),
-      "issuedDate": z.unknown().optional(),
-      "items": z.unknown().optional(),
-      "notes": z.unknown().optional(),
-      "recipientEmail": z.unknown().optional(),
-    })), async (req: Request, res: Response) => {
+  validateBody(
+    bodyShape({
+      amount: z.unknown().optional(),
+      ccAdmin: z.unknown().optional(),
+      clientName: z.unknown().optional(),
+      currency: z.unknown().optional(),
+      dueDate: z.unknown().optional(),
+      engagement: z.unknown().optional(),
+      invoiceId: z.unknown().optional(),
+      issuedDate: z.unknown().optional(),
+      items: z.unknown().optional(),
+      notes: z.unknown().optional(),
+      recipientEmail: z.unknown().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
     try {
       const body = req.body as Partial<CarlotaInvoiceEmailData> & {
         recipientEmail?: string;
@@ -61,11 +64,11 @@ router.post(
       } = body;
 
       if (!recipientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
-        sendBadRequest(res, "A valid recipientEmail is required.");
+        sendBadRequest(res, 'A valid recipientEmail is required.');
         return;
       }
-      if (!invoiceId || !clientName || !engagement || typeof amount !== "number") {
-        sendBadRequest(res, "invoiceId, clientName, engagement, and amount are required.");
+      if (!invoiceId || !clientName || !engagement || typeof amount !== 'number') {
+        sendBadRequest(res, 'invoiceId, clientName, engagement, and amount are required.');
         return;
       }
 
@@ -75,17 +78,21 @@ router.post(
         engagement,
         issuedDate:
           issuedDate ||
-          new Date().toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" }),
-        dueDate: dueDate || "Net 15",
+          new Date().toLocaleDateString('en-GB', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          }),
+        dueDate: dueDate || 'Net 15',
         amount,
-        currency: currency || "GBP",
+        currency: currency || 'GBP',
         items: Array.isArray(items) ? items : undefined,
         notes,
       };
 
       const html = buildCarlotaInvoiceEmail(invoiceData);
       const symbol =
-        invoiceData.currency === "GBP" ? "£" : invoiceData.currency === "EUR" ? "€" : "$";
+        invoiceData.currency === 'GBP' ? '£' : invoiceData.currency === 'EUR' ? '€' : '$';
       const subject = `Invoice ${invoiceId} from Carlota Jo Advisory — ${symbol}${amount.toLocaleString()}`;
 
       const sends: Array<Promise<{ success: boolean; error?: string; messageId?: string }>> = [
@@ -107,11 +114,11 @@ router.post(
       if (!primary.success) {
         logger.warn(
           { error: primary.error, invoiceId, recipientEmail },
-          "[email] Carlota Jo invoice send failed",
+          '[email] Carlota Jo invoice send failed',
         );
         res.status(502).json({
           success: false,
-          error: primary.error || "Email delivery failed",
+          error: primary.error || 'Email delivery failed',
           message:
             "We couldn't deliver the invoice email. Please verify the recipient address and try again.",
         });
@@ -126,7 +133,7 @@ router.post(
         adminCopySent: adminCopy?.success ?? false,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to email invoice");
+      handleRouteError(res, err, 'Failed to email invoice');
     }
   },
 );

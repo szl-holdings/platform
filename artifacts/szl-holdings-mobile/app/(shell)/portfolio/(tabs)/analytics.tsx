@@ -1,25 +1,19 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { trackEvent } from "@/lib/analytics";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  RefreshControl,
-  Platform,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
-import * as Haptics from "expo-haptics";
-import { useColors } from "@/hooks/useColors";
-import { apiFetch } from "@/lib/apiClient";
-import { SkeletonLoader } from "@szl-holdings/mobile-shared";
+import { Feather } from '@expo/vector-icons';
+import { SkeletonLoader } from '@szl-holdings/mobile-shared';
+import { useQuery } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
+import { trackEvent } from '@/lib/analytics';
+import { apiFetch } from '@/lib/apiClient';
 
-const ACCENT = "#c9a84c";
+const ACCENT = '#c9a84c';
 
-type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
+type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
 
 interface MetricsSummary {
   mrr: number;
@@ -57,9 +51,11 @@ interface ApiEnvelope<T> {
 
 function useInvestorMetrics() {
   return useQuery<InvestorMetrics>({
-    queryKey: ["investor-analytics-metrics"],
+    queryKey: ['investor-analytics-metrics'],
     queryFn: async (): Promise<InvestorMetrics> => {
-      const envelope = await apiFetch<ApiEnvelope<InvestorMetrics>>("/api/investor-analytics/metrics");
+      const envelope = await apiFetch<ApiEnvelope<InvestorMetrics>>(
+        '/api/investor-analytics/metrics',
+      );
       return envelope.data;
     },
     refetchInterval: 300000,
@@ -67,29 +63,32 @@ function useInvestorMetrics() {
   });
 }
 
-function fmt(n: number | undefined | null, opts?: { currency?: boolean; compact?: boolean }): string {
-  if (n == null || isNaN(n)) return "—";
+function fmt(
+  n: number | undefined | null,
+  opts?: { currency?: boolean; compact?: boolean },
+): string {
+  if (n == null || isNaN(n)) return '—';
   if (opts?.currency) {
     if (opts?.compact) {
       if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
       if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
       return `$${n.toFixed(0)}`;
     }
-    return `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return `$${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   }
   if (opts?.compact) {
     if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (Math.abs(n) >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
     return `${n.toFixed(0)}`;
   }
-  return n.toLocaleString("en-US");
+  return n.toLocaleString('en-US');
 }
 
 function growthColor(val: number | undefined | null): string {
-  if (val == null) return "#94a3b8";
-  if (val > 0) return "#10b981";
-  if (val < 0) return "#ef4444";
-  return "#94a3b8";
+  if (val == null) return '#94a3b8';
+  if (val > 0) return '#10b981';
+  if (val < 0) return '#ef4444';
+  return '#94a3b8';
 }
 
 interface KpiCardProps {
@@ -104,16 +103,27 @@ interface KpiCardProps {
 function KpiCard({ label, value, sub, subColor, icon, iconColor = ACCENT }: KpiCardProps) {
   const colors = useColors();
   return (
-    <View style={[kpiCardStyles.card, { backgroundColor: colors.card, borderColor: colors.borderSubtle }]}>
+    <View
+      style={[
+        kpiCardStyles.card,
+        { backgroundColor: colors.card, borderColor: colors.borderSubtle },
+      ]}
+    >
       <View style={[kpiCardStyles.iconWrap, { backgroundColor: `${iconColor}15` }]}>
         <Feather name={icon} size={14} color={iconColor} />
       </View>
       <Text style={[kpiCardStyles.label, { color: colors.mutedForeground }]}>{label}</Text>
-      <Text style={[kpiCardStyles.value, { color: colors.cream }]} numberOfLines={1} adjustsFontSizeToFit>
+      <Text
+        style={[kpiCardStyles.value, { color: colors.cream }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
         {value}
       </Text>
       {sub != null && (
-        <Text style={[kpiCardStyles.sub, { color: subColor ?? colors.mutedForeground }]}>{sub}</Text>
+        <Text style={[kpiCardStyles.sub, { color: subColor ?? colors.mutedForeground }]}>
+          {sub}
+        </Text>
       )}
     </View>
   );
@@ -132,24 +142,24 @@ const kpiCardStyles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 2,
   },
   label: {
     fontSize: 9,
-    fontFamily: "Inter_500Medium",
+    fontFamily: 'Inter_500Medium',
     letterSpacing: 0.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
   value: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     lineHeight: 22,
   },
   sub: {
     fontSize: 10,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
   },
 });
 
@@ -168,7 +178,9 @@ function FunnelBar({ name, count, conversionToNext, maxCount }: FunnelBarProps) 
     <View style={funnelStyles.row}>
       <View style={funnelStyles.labelRow}>
         <Text style={[funnelStyles.stageName, { color: colors.cream }]}>{name}</Text>
-        <Text style={[funnelStyles.stageCount, { color: ACCENT }]}>{fmt(count, { compact: true })}</Text>
+        <Text style={[funnelStyles.stageCount, { color: ACCENT }]}>
+          {fmt(count, { compact: true })}
+        </Text>
       </View>
       <View style={[funnelStyles.track, { backgroundColor: colors.borderSubtle }]}>
         <View
@@ -193,12 +205,12 @@ function FunnelBar({ name, count, conversionToNext, maxCount }: FunnelBarProps) 
 
 const funnelStyles = StyleSheet.create({
   row: { gap: 4, marginBottom: 12 },
-  labelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  stageName: { fontSize: 12, fontFamily: "Inter_500Medium" },
-  stageCount: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  track: { height: 6, borderRadius: 3, overflow: "hidden" },
+  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  stageName: { fontSize: 12, fontFamily: 'Inter_500Medium' },
+  stageCount: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  track: { height: 6, borderRadius: 3, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3 },
-  convRate: { fontSize: 9, fontFamily: "Inter_400Regular" },
+  convRate: { fontSize: 9, fontFamily: 'Inter_400Regular' },
 });
 
 function SectionHeader({ label, icon }: { label: string; icon: FeatherIconName }) {
@@ -206,18 +218,20 @@ function SectionHeader({ label, icon }: { label: string; icon: FeatherIconName }
   return (
     <View style={sectionHeaderStyles.row}>
       <Feather name={icon} size={12} color={ACCENT} />
-      <Text style={[sectionHeaderStyles.label, { color: colors.goldSubtle ?? ACCENT }]}>{label}</Text>
+      <Text style={[sectionHeaderStyles.label, { color: colors.goldSubtle ?? ACCENT }]}>
+        {label}
+      </Text>
     </View>
   );
 }
 
 const sectionHeaderStyles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   label: {
     fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 1,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
 });
 
@@ -233,14 +247,14 @@ function MetricRow({ label, value, color }: { label: string; value: string; colo
 
 const metricRowStyles = StyleSheet.create({
   row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 9,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  label: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  value: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  label: { fontSize: 12, fontFamily: 'Inter_400Regular' },
+  value: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 });
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
@@ -257,18 +271,18 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 }
 
 const errorStyles = StyleSheet.create({
-  wrap: { alignItems: "center", paddingVertical: 24, gap: 8 },
-  msg: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center" },
-  retry: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  wrap: { alignItems: 'center', paddingVertical: 24, gap: 8 },
+  msg: { fontSize: 12, fontFamily: 'Inter_400Regular', textAlign: 'center' },
+  retry: { fontSize: 12, fontFamily: 'Inter_500Medium' },
 });
 
 function buildFunnelStages(
-  metrics: InvestorMetrics
+  metrics: InvestorMetrics,
 ): Array<{ name: string; count: number; conversionToNext: number | null }> {
   const counts: Array<{ name: string; count: number }> = [
-    { name: "Monthly Active Users", count: metrics.summary.activeUsers30d },
-    { name: "Customers", count: metrics.summary.totalCustomers },
-    { name: "Active Subscriptions", count: metrics.activeSubscriptions ?? 0 },
+    { name: 'Monthly Active Users', count: metrics.summary.activeUsers30d },
+    { name: 'Customers', count: metrics.summary.totalCustomers },
+    { name: 'Active Subscriptions', count: metrics.activeSubscriptions ?? 0 },
   ];
 
   return counts.map((stage, i) => {
@@ -287,7 +301,7 @@ export default function AnalyticsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    trackEvent("page_view", { page: "analytics", product: "szl-holdings-mobile" });
+    trackEvent('page_view', { page: 'analytics', product: 'szl-holdings-mobile' });
   }, []);
 
   const {
@@ -304,21 +318,15 @@ export default function AnalyticsScreen() {
     setRefreshing(false);
   }, [refetchMetrics]);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
+  const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const bottomPad = Platform.OS === 'web' ? 34 + 84 : 90;
 
   const s = metrics?.summary;
   const mrrGrowthColor = growthColor(s?.mrrGrowth);
   const custGrowthColor = growthColor(s?.customerGrowth);
-  const nrrColor = s == null ? "#94a3b8" : s.nrr >= 100 ? "#10b981" : "#ef4444";
+  const nrrColor = s == null ? '#94a3b8' : s.nrr >= 100 ? '#10b981' : '#ef4444';
   const churnColor =
-    s == null
-      ? "#94a3b8"
-      : s.churnRate < 3
-      ? "#10b981"
-      : s.churnRate < 7
-      ? "#f59e0b"
-      : "#ef4444";
+    s == null ? '#94a3b8' : s.churnRate < 3 ? '#10b981' : s.churnRate < 7 ? '#f59e0b' : '#ef4444';
 
   const funnelStages = metrics != null ? buildFunnelStages(metrics) : [];
   const maxFunnelCount = funnelStages[0]?.count ?? 1;
@@ -328,20 +336,25 @@ export default function AnalyticsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
-        colors={["rgba(201,168,76,0.06)", "transparent"]}
+        colors={['rgba(201,168,76,0.06)', 'transparent']}
         style={[styles.headerGradient, { height: topPad + 140 }]}
       />
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: topPad + 16, paddingBottom: bottomPad }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: topPad + 16, paddingBottom: bottomPad },
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />
         }
       >
         <View style={styles.header}>
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle ?? ACCENT }]}>INVESTOR ANALYTICS</Text>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle ?? ACCENT }]}>
+            INVESTOR ANALYTICS
+          </Text>
           <Text style={[styles.title, { color: colors.cream }]}>Business Metrics</Text>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
             Live SaaS performance · platform data
@@ -371,7 +384,7 @@ export default function AnalyticsScreen() {
                   value={fmt(s?.mrr, { currency: true, compact: true })}
                   sub={
                     s?.mrrGrowth != null
-                      ? `${s.mrrGrowth >= 0 ? "+" : ""}${s.mrrGrowth.toFixed(1)}% MoM`
+                      ? `${s.mrrGrowth >= 0 ? '+' : ''}${s.mrrGrowth.toFixed(1)}% MoM`
                       : undefined
                   }
                   subColor={mrrGrowthColor}
@@ -386,25 +399,25 @@ export default function AnalyticsScreen() {
                 <KpiCard
                   label="Churn Rate"
                   icon="user-minus"
-                  value={s?.churnRate != null ? `${s.churnRate.toFixed(1)}%` : "—"}
+                  value={s?.churnRate != null ? `${s.churnRate.toFixed(1)}%` : '—'}
                   iconColor={churnColor}
                   subColor={churnColor}
                   sub={
                     s?.churnRate != null
                       ? s.churnRate < 3
-                        ? "Healthy"
+                        ? 'Healthy'
                         : s.churnRate < 7
-                        ? "Elevated"
-                        : "High"
+                          ? 'Elevated'
+                          : 'High'
                       : undefined
                   }
                 />
                 <KpiCard
                   label="NRR"
                   icon="repeat"
-                  value={s?.nrr != null ? `${s.nrr.toFixed(0)}%` : "—"}
+                  value={s?.nrr != null ? `${s.nrr.toFixed(0)}%` : '—'}
                   iconColor={nrrColor}
-                  sub={s?.nrr != null ? (s.nrr >= 100 ? "Expanding" : "Contracting") : undefined}
+                  sub={s?.nrr != null ? (s.nrr >= 100 ? 'Expanding' : 'Contracting') : undefined}
                   subColor={nrrColor}
                 />
               </View>
@@ -415,7 +428,7 @@ export default function AnalyticsScreen() {
                   value={fmt(s?.totalCustomers, { compact: true })}
                   sub={
                     s?.customerGrowth != null
-                      ? `${s.customerGrowth >= 0 ? "+" : ""}${s.customerGrowth.toFixed(1)}% MoM`
+                      ? `${s.customerGrowth >= 0 ? '+' : ''}${s.customerGrowth.toFixed(1)}% MoM`
                       : undefined
                   }
                   subColor={custGrowthColor}
@@ -438,31 +451,36 @@ export default function AnalyticsScreen() {
         {!metricsError && !metricsLoading && s != null && (
           <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
             <SectionHeader label="Unit Economics" icon="zap" />
-            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.borderSubtle }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors.card, borderColor: colors.borderSubtle },
+              ]}
+            >
               <MetricRow
                 label="LTV / CAC Ratio"
-                value={s.ltvCacRatio != null ? `${s.ltvCacRatio.toFixed(1)}×` : "—"}
+                value={s.ltvCacRatio != null ? `${s.ltvCacRatio.toFixed(1)}×` : '—'}
                 color={
                   s.ltvCacRatio == null
                     ? undefined
                     : s.ltvCacRatio >= 3
-                    ? "#10b981"
-                    : s.ltvCacRatio >= 1
-                    ? "#f59e0b"
-                    : "#ef4444"
+                      ? '#10b981'
+                      : s.ltvCacRatio >= 1
+                        ? '#f59e0b'
+                        : '#ef4444'
                 }
               />
               <MetricRow
                 label="CAC Payback"
-                value={s.cacPayback != null ? `${s.cacPayback.toFixed(0)} mo` : "—"}
+                value={s.cacPayback != null ? `${s.cacPayback.toFixed(0)} mo` : '—'}
                 color={
                   s.cacPayback == null
                     ? undefined
                     : s.cacPayback <= 12
-                    ? "#10b981"
-                    : s.cacPayback <= 24
-                    ? "#f59e0b"
-                    : "#ef4444"
+                      ? '#10b981'
+                      : s.cacPayback <= 24
+                        ? '#f59e0b'
+                        : '#ef4444'
                 }
               />
               <MetricRow
@@ -476,7 +494,12 @@ export default function AnalyticsScreen() {
         {!metricsError && !metricsLoading && metrics != null && funnelStages.length > 0 && (
           <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
             <SectionHeader label="Funnel Summary" icon="filter" />
-            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.borderSubtle }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors.card, borderColor: colors.borderSubtle },
+              ]}
+            >
               {funnelStages.map((stage) => (
                 <FunnelBar
                   key={stage.name}
@@ -493,30 +516,70 @@ export default function AnalyticsScreen() {
         {!metricsError && !metricsLoading && recentTimeSeries.length > 0 && (
           <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
             <SectionHeader label="Monthly Trend" icon="calendar" />
-            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.borderSubtle }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors.card, borderColor: colors.borderSubtle },
+              ]}
+            >
               <View style={[monthlyStyles.header, { borderBottomColor: colors.borderSubtle }]}>
-                <Text style={[monthlyStyles.col, monthlyStyles.colLabel, { color: colors.mutedForeground }]}>
+                <Text
+                  style={[
+                    monthlyStyles.col,
+                    monthlyStyles.colLabel,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
                   Month
                 </Text>
-                <Text style={[monthlyStyles.col, monthlyStyles.colRight, { color: colors.mutedForeground }]}>
+                <Text
+                  style={[
+                    monthlyStyles.col,
+                    monthlyStyles.colRight,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
                   MRR
                 </Text>
-                <Text style={[monthlyStyles.col, monthlyStyles.colRight, { color: colors.mutedForeground }]}>
+                <Text
+                  style={[
+                    monthlyStyles.col,
+                    monthlyStyles.colRight,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
                   Customers
                 </Text>
-                <Text style={[monthlyStyles.col, monthlyStyles.colRight, { color: colors.mutedForeground }]}>
+                <Text
+                  style={[
+                    monthlyStyles.col,
+                    monthlyStyles.colRight,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
                   Churn
                 </Text>
               </View>
               {recentTimeSeries.map((row) => (
-                <View key={row.month} style={[monthlyStyles.row, { borderBottomColor: colors.borderSubtle }]}>
-                  <Text style={[monthlyStyles.col, monthlyStyles.colLabel, { color: colors.mutedForeground, fontSize: 10 }]}>
+                <View
+                  key={row.month}
+                  style={[monthlyStyles.row, { borderBottomColor: colors.borderSubtle }]}
+                >
+                  <Text
+                    style={[
+                      monthlyStyles.col,
+                      monthlyStyles.colLabel,
+                      { color: colors.mutedForeground, fontSize: 10 },
+                    ]}
+                  >
                     {row.month}
                   </Text>
                   <Text style={[monthlyStyles.col, monthlyStyles.colRight, { color: ACCENT }]}>
                     {fmt(row.mrr, { currency: true, compact: true })}
                   </Text>
-                  <Text style={[monthlyStyles.col, monthlyStyles.colRight, { color: colors.cream }]}>
+                  <Text
+                    style={[monthlyStyles.col, monthlyStyles.colRight, { color: colors.cream }]}
+                  >
                     {row.customers}
                   </Text>
                   <Text
@@ -525,11 +588,7 @@ export default function AnalyticsScreen() {
                       monthlyStyles.colRight,
                       {
                         color:
-                          row.churnRate < 3
-                            ? "#10b981"
-                            : row.churnRate < 7
-                            ? "#f59e0b"
-                            : "#ef4444",
+                          row.churnRate < 3 ? '#10b981' : row.churnRate < 7 ? '#f59e0b' : '#ef4444',
                       },
                     ]}
                   >
@@ -559,34 +618,34 @@ export default function AnalyticsScreen() {
 
 const monthlyStyles = StyleSheet.create({
   header: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingBottom: 8,
     marginBottom: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 7,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   col: {
     flex: 1,
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
   },
   colLabel: {
     flex: 1.2,
   },
   colRight: {
-    textAlign: "right",
-    fontFamily: "Inter_500Medium",
+    textAlign: 'right',
+    fontFamily: 'Inter_500Medium',
   },
 });
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   headerGradient: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -596,19 +655,19 @@ const styles = StyleSheet.create({
   header: { marginBottom: 24, gap: 2 },
   eyebrow: {
     fontSize: 9,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 1.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     marginBottom: 2,
   },
   title: {
     fontSize: 26,
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     lineHeight: 30,
   },
   subtitle: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     marginTop: 2,
   },
   section: {
@@ -616,10 +675,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   kpiGrid: { gap: 8 },
-  kpiRow: { flexDirection: "row", gap: 8 },
+  kpiRow: { flexDirection: 'row', gap: 8 },
   skeletonGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   card: {
@@ -629,8 +688,8 @@ const styles = StyleSheet.create({
   },
   footerNote: {
     fontSize: 9,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
     marginTop: 20,
     marginBottom: 8,
   },

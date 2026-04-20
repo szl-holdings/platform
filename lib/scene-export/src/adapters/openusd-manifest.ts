@@ -1,7 +1,7 @@
-import type { OpenUSDManifest, ExportAdapterContract, ExportAdapterResult } from "../types.js";
+import type { ExportAdapterContract, ExportAdapterResult, OpenUSDManifest } from '../types.js';
 
-const ADAPTER_NAME = "OpenUSDManifestAdapter";
-const ADAPTER_VERSION = "1.0.0";
+const ADAPTER_NAME = 'OpenUSDManifestAdapter';
+const ADAPTER_VERSION = '1.0.0';
 
 /**
  * OpenUSD Manifest Adapter — Stub
@@ -42,7 +42,7 @@ const ADAPTER_VERSION = "1.0.0";
 export interface OpenUSDManifestOutput {
   $schema: string;
   adapterVersion: string;
-  format: "openusd_manifest";
+  format: 'openusd_manifest';
   manifest: OpenUSDManifest;
   usdaText: string;
   integrationNotice: string;
@@ -60,33 +60,37 @@ function serializeToUsdText(manifest: OpenUSDManifest): string {
   lines.push(``);
 
   for (const prim of manifest.prims) {
-    lines.push(`def ${prim.typeName} "${prim.path.replace(/\//g, "_")}" (`);
+    lines.push(`def ${prim.typeName} "${prim.path.replace(/\//g, '_')}" (`);
     if (prim.metadata?.doc) {
       lines.push(`    doc = "${prim.metadata.doc}"`);
     }
     lines.push(`)`);
     lines.push(`{`);
     for (const [attr, def] of Object.entries(prim.attributes)) {
-      const valueStr = typeof def.value === "string" ? `"${def.value}"` : String(def.value);
+      const valueStr = typeof def.value === 'string' ? `"${def.value}"` : String(def.value);
       lines.push(`    ${def.type} ${attr} = ${valueStr}`);
     }
     lines.push(`}`);
     lines.push(``);
   }
 
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
-export class OpenUSDManifestAdapter implements ExportAdapterContract<OpenUSDManifest, OpenUSDManifestOutput> {
+export class OpenUSDManifestAdapter
+  implements ExportAdapterContract<OpenUSDManifest, OpenUSDManifestOutput>
+{
   readonly adapterName = ADAPTER_NAME;
   readonly adapterVersion = ADAPTER_VERSION;
-  readonly outputFormat = "openusd_manifest";
+  readonly outputFormat = 'openusd_manifest';
 
   validate(input: OpenUSDManifest): void {
-    if (!input.stage) throw new Error("OpenUSDManifestAdapter: stage is required");
-    if (!input.domain) throw new Error("OpenUSDManifestAdapter: domain is required");
-    if (!Array.isArray(input.layers)) throw new Error("OpenUSDManifestAdapter: layers must be an array");
-    if (!Array.isArray(input.prims)) throw new Error("OpenUSDManifestAdapter: prims must be an array");
+    if (!input.stage) throw new Error('OpenUSDManifestAdapter: stage is required');
+    if (!input.domain) throw new Error('OpenUSDManifestAdapter: domain is required');
+    if (!Array.isArray(input.layers))
+      throw new Error('OpenUSDManifestAdapter: layers must be an array');
+    if (!Array.isArray(input.prims))
+      throw new Error('OpenUSDManifestAdapter: prims must be an array');
   }
 
   serialize(input: OpenUSDManifest): OpenUSDManifestOutput {
@@ -96,21 +100,21 @@ export class OpenUSDManifestAdapter implements ExportAdapterContract<OpenUSDMani
       ...input,
       customLayerData: {
         ...input.customLayerData,
-        szlAtlasVersion: "1.0.0",
+        szlAtlasVersion: '1.0.0',
         exportedAt: new Date().toISOString(),
         notice:
-          "ATLAS OpenUSD export stub. True OpenUSD/Omniverse/RTX/NIM integration requires NVIDIA USD SDK and Nucleus server. See adapter source for integration guidance.",
+          'ATLAS OpenUSD export stub. True OpenUSD/Omniverse/RTX/NIM integration requires NVIDIA USD SDK and Nucleus server. See adapter source for integration guidance.',
       },
     };
 
     return {
-      $schema: "https://szlholdings.com/schemas/atlas/openusd-manifest/v1.json",
+      $schema: 'https://szlholdings.com/schemas/atlas/openusd-manifest/v1.json',
       adapterVersion: ADAPTER_VERSION,
-      format: "openusd_manifest",
+      format: 'openusd_manifest',
       manifest,
       usdaText: serializeToUsdText(manifest),
       integrationNotice:
-        "This is a stub export. Production deployment requires NVIDIA OpenUSD SDK (pxr.Usd), Omniverse Nucleus for staging, RTX Farm for rendering, and NIM endpoints for spatial inference. See docs/architecture/atlas-spatial-runtime.md for the full integration roadmap.",
+        'This is a stub export. Production deployment requires NVIDIA OpenUSD SDK (pxr.Usd), Omniverse Nucleus for staging, RTX Farm for rendering, and NIM endpoints for spatial inference. See docs/architecture/atlas-spatial-runtime.md for the full integration roadmap.',
       exportedAt: new Date().toISOString(),
     };
   }
@@ -121,12 +125,12 @@ export class OpenUSDManifestAdapter implements ExportAdapterContract<OpenUSDMani
     return {
       format: this.outputFormat,
       payload: output,
-      sizeEstimateBytes: Buffer.byteLength(json, "utf8"),
+      sizeEstimateBytes: Buffer.byteLength(json, 'utf8'),
       generatedAt: output.exportedAt,
       adapterVersion: ADAPTER_VERSION,
       warnings: [
-        "OpenUSD output is a stub. Binary .usdc requires NVIDIA OpenUSD SDK.",
-        "Omniverse Nucleus staging not performed — ENABLE_NIM_PROVIDER must be active in production.",
+        'OpenUSD output is a stub. Binary .usdc requires NVIDIA OpenUSD SDK.',
+        'Omniverse Nucleus staging not performed — ENABLE_NIM_PROVIDER must be active in production.',
       ],
     };
   }
@@ -145,32 +149,35 @@ export function buildOpenUSDManifest(params: {
 }): OpenUSDManifest {
   const prims = Object.entries(params.sceneState).map(([key, value]) => ({
     path: `/ATLAS/${params.domain}/${key}`,
-    typeName: "Xform",
+    typeName: 'Xform',
     attributes: {
-      atlasKey: { type: "string", value: key },
-      atlasValue: { type: "string", value: typeof value === "string" ? value : JSON.stringify(value) },
+      atlasKey: { type: 'string', value: key },
+      atlasValue: {
+        type: 'string',
+        value: typeof value === 'string' ? value : JSON.stringify(value),
+      },
     },
   }));
 
   return {
-    manifestVersion: "1.0",
+    manifestVersion: '1.0',
     stage: params.stage,
     domain: params.domain,
     layers: [
       {
         identifier: `atlas_${params.domain}_root.usda`,
-        layerType: "root",
-        documentation: "Root layer generated by ATLAS Spatial Runtime",
+        layerType: 'root',
+        documentation: 'Root layer generated by ATLAS Spatial Runtime',
       },
     ],
     prims,
     customLayerData: {
-      szlAtlasVersion: "1.0.0",
+      szlAtlasVersion: '1.0.0',
       exportedAt: new Date().toISOString(),
       domain: params.domain,
       entityId: params.entityId,
       proofChainId: params.proofChainId ?? null,
-      notice: "",
+      notice: '',
     },
   };
 }

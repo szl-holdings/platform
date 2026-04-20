@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Platform } from "react-native";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 
-export type RealtimeConnectionStatus = "connected" | "reconnecting" | "offline";
+export type RealtimeConnectionStatus = 'connected' | 'reconnecting' | 'offline';
 
 export interface RealtimeChannelMessage<T = unknown> {
   channel: string;
@@ -52,7 +52,7 @@ export function useRealtimeChannel<T = unknown>(
   } = options;
 
   const [messages, setMessages] = useState<RealtimeChannelMessage<T>[]>([]);
-  const [status, setStatus] = useState<RealtimeConnectionStatus>("offline");
+  const [status, setStatus] = useState<RealtimeConnectionStatus>('offline');
   const [lastSeq, setLastSeq] = useState(0);
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -65,10 +65,18 @@ export function useRealtimeChannel<T = unknown>(
   const onConnectRef = useRef(onConnect);
   const onDisconnectRef = useRef(onDisconnect);
 
-  useEffect(() => { channelRef.current = channel; }, [channel]);
-  useEffect(() => { tokenRef.current = token; }, [token]);
-  useEffect(() => { onConnectRef.current = onConnect; }, [onConnect]);
-  useEffect(() => { onDisconnectRef.current = onDisconnect; }, [onDisconnect]);
+  useEffect(() => {
+    channelRef.current = channel;
+  }, [channel]);
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
+  useEffect(() => {
+    onConnectRef.current = onConnect;
+  }, [onConnect]);
+  useEffect(() => {
+    onDisconnectRef.current = onDisconnect;
+  }, [onDisconnect]);
 
   const pushMessage = useCallback((msg: RealtimeChannelMessage<T>) => {
     if (msg.seq !== undefined && msg.seq > lastSeqRef.current) {
@@ -86,10 +94,10 @@ export function useRealtimeChannel<T = unknown>(
   const connect = useCallback(() => {
     if (!mountedRef.current) return;
 
-    if (Platform.OS === "web") return;
+    if (Platform.OS === 'web') return;
 
     if (attemptsRef.current >= maxReconnectAttempts) {
-      setStatus("offline");
+      setStatus('offline');
       onDisconnectRef.current?.();
       return;
     }
@@ -101,9 +109,12 @@ export function useRealtimeChannel<T = unknown>(
       wsRef.current = ws;
 
       ws.onopen = () => {
-        if (!mountedRef.current) { ws.close(); return; }
+        if (!mountedRef.current) {
+          ws.close();
+          return;
+        }
         const subscribeMsg: Record<string, unknown> = {
-          type: "subscribe",
+          type: 'subscribe',
           channel: channelRef.current,
           sinceSeq: lastSeqRef.current,
         };
@@ -126,11 +137,11 @@ export function useRealtimeChannel<T = unknown>(
             messages?: RealtimeChannelMessage<T>[];
           };
 
-          if (parsed.type === "connected") return;
+          if (parsed.type === 'connected') return;
 
-          if (parsed.type === "subscribed") {
+          if (parsed.type === 'subscribed') {
             attemptsRef.current = 0;
-            setStatus("connected");
+            setStatus('connected');
             onConnectRef.current?.();
             if (parsed.missedMessages?.length) {
               for (const m of parsed.missedMessages) {
@@ -140,17 +151,17 @@ export function useRealtimeChannel<T = unknown>(
             return;
           }
 
-          if (parsed.type === "catchup_response" && parsed.messages) {
+          if (parsed.type === 'catchup_response' && parsed.messages) {
             for (const m of parsed.messages) {
               pushMessage(m as RealtimeChannelMessage<T>);
             }
             return;
           }
 
-          if (parsed.type === "message" && parsed.channel === channelRef.current) {
+          if (parsed.type === 'message' && parsed.channel === channelRef.current) {
             pushMessage({
               channel: parsed.channel,
-              event: parsed.event ?? "message",
+              event: parsed.event ?? 'message',
               data: parsed.data as T,
               timestamp: parsed.timestamp ?? Date.now(),
               seq: parsed.seq,
@@ -158,18 +169,20 @@ export function useRealtimeChannel<T = unknown>(
             return;
           }
 
-          if (parsed.type === "ping") {
-            ws.send(JSON.stringify({ type: "pong", timestamp: Date.now() }));
+          if (parsed.type === 'ping') {
+            ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       };
 
       ws.onclose = () => {
         if (!mountedRef.current) return;
-        setStatus("reconnecting");
+        setStatus('reconnecting');
         onDisconnectRef.current?.();
         const delay = Math.min(
-          baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
+          baseReconnectDelayMs * 1.5 ** attemptsRef.current,
           maxReconnectDelayMs,
         );
         attemptsRef.current++;
@@ -180,11 +193,11 @@ export function useRealtimeChannel<T = unknown>(
 
       ws.onerror = () => {
         if (!mountedRef.current) return;
-        setStatus("reconnecting");
+        setStatus('reconnecting');
       };
     } catch {
       const delay = Math.min(
-        baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
+        baseReconnectDelayMs * 1.5 ** attemptsRef.current,
         maxReconnectDelayMs,
       );
       attemptsRef.current++;
@@ -192,7 +205,14 @@ export function useRealtimeChannel<T = unknown>(
         if (mountedRef.current) connect();
       }, delay);
     }
-  }, [wsUrl, maxReconnectAttempts, baseReconnectDelayMs, maxReconnectDelayMs, displayName, pushMessage]);
+  }, [
+    wsUrl,
+    maxReconnectAttempts,
+    baseReconnectDelayMs,
+    maxReconnectDelayMs,
+    displayName,
+    pushMessage,
+  ]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -216,7 +236,7 @@ export function useRealtimeChannel<T = unknown>(
     messages,
     lastMessage: messages[messages.length - 1] ?? null,
     status,
-    isConnected: status === "connected",
+    isConnected: status === 'connected',
     lastSeq,
     clearMessages,
   };

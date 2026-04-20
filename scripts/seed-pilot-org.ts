@@ -14,30 +14,34 @@
  */
 
 import {
+  auditEventsTable,
+  azureTenantsTable,
   db,
   organizationsTable,
   orgMembersTable,
-  usersTable,
   rolesTable,
   userRolesTable,
-  azureTenantsTable,
-  auditEventsTable,
-} from "@szl-holdings/db";
-import { eq } from "drizzle-orm";
+  usersTable,
+} from '@szl-holdings/db';
+import { eq } from 'drizzle-orm';
 
-const PILOT_ORG_SLUG = "pilot-customer-1";
+const PILOT_ORG_SLUG = 'pilot-customer-1';
 
 async function seedPilotOrg() {
-  console.log("[seed-pilot] Creating pilot organization...");
+  console.log('[seed-pilot] Creating pilot organization...');
 
-  const [org] = await db.insert(organizationsTable).values({
-    name: "Acme Corp (Pilot)",
-    slug: PILOT_ORG_SLUG,
-    orgType: "pilot",
-    status: "active",
-    plan: "professional",
-    domain: "acmecorp.example.com",
-  }).onConflictDoNothing().returning();
+  const [org] = await db
+    .insert(organizationsTable)
+    .values({
+      name: 'Acme Corp (Pilot)',
+      slug: PILOT_ORG_SLUG,
+      orgType: 'pilot',
+      status: 'active',
+      plan: 'professional',
+      domain: 'acmecorp.example.com',
+    })
+    .onConflictDoNothing()
+    .returning();
 
   const orgId = org?.id;
   if (!orgId) {
@@ -46,8 +50,8 @@ async function seedPilotOrg() {
       .from(organizationsTable)
       .where(eq(organizationsTable.slug, PILOT_ORG_SLUG))
       .limit(1);
-    if (!existing) throw new Error("Could not create or find pilot org");
-    console.log("[seed-pilot] Pilot org already exists, updating users...");
+    if (!existing) throw new Error('Could not create or find pilot org');
+    console.log('[seed-pilot] Pilot org already exists, updating users...');
     return existing.id;
   }
 
@@ -56,23 +60,50 @@ async function seedPilotOrg() {
 }
 
 const PILOT_USER_CONFIGS = [
-  { displayName: "Dana Reyes", email: "dana.reyes@acmecorp.example.com", bio: "IT Admin — Pilot", roleName: "admin", orgRole: "admin" as const },
-  { displayName: "Marcus Webb", email: "marcus.webb@acmecorp.example.com", bio: "Operations Lead — Pilot", roleName: "member", orgRole: "member" as const },
-  { displayName: "Priya Sharma", email: "priya.sharma@acmecorp.example.com", bio: "Security Analyst — Pilot", roleName: "member", orgRole: "member" as const },
-  { displayName: "Casey Jordan", email: "casey.jordan@acmecorp.example.com", bio: "Executive Viewer — Pilot", roleName: "viewer", orgRole: "viewer" as const },
+  {
+    displayName: 'Dana Reyes',
+    email: 'dana.reyes@acmecorp.example.com',
+    bio: 'IT Admin — Pilot',
+    roleName: 'admin',
+    orgRole: 'admin' as const,
+  },
+  {
+    displayName: 'Marcus Webb',
+    email: 'marcus.webb@acmecorp.example.com',
+    bio: 'Operations Lead — Pilot',
+    roleName: 'member',
+    orgRole: 'member' as const,
+  },
+  {
+    displayName: 'Priya Sharma',
+    email: 'priya.sharma@acmecorp.example.com',
+    bio: 'Security Analyst — Pilot',
+    roleName: 'member',
+    orgRole: 'member' as const,
+  },
+  {
+    displayName: 'Casey Jordan',
+    email: 'casey.jordan@acmecorp.example.com',
+    bio: 'Executive Viewer — Pilot',
+    roleName: 'viewer',
+    orgRole: 'viewer' as const,
+  },
 ];
 
 async function seedPilotUsers(orgId: number) {
-  console.log("[seed-pilot] Creating pilot users...");
+  console.log('[seed-pilot] Creating pilot users...');
 
   let created = 0;
   for (const config of PILOT_USER_CONFIGS) {
-    await db.insert(usersTable).values({
-      displayName: config.displayName,
-      email: config.email,
-      bio: config.bio,
-      isActive: true,
-    }).onConflictDoNothing();
+    await db
+      .insert(usersTable)
+      .values({
+        displayName: config.displayName,
+        email: config.email,
+        bio: config.bio,
+        isActive: true,
+      })
+      .onConflictDoNothing();
 
     const [user] = await db
       .select({ id: usersTable.id })
@@ -92,14 +123,20 @@ async function seedPilotUsers(orgId: number) {
       .limit(1);
 
     if (role) {
-      await db.insert(userRolesTable).values({ userId: user.id, roleId: role.id }).onConflictDoNothing();
+      await db
+        .insert(userRolesTable)
+        .values({ userId: user.id, roleId: role.id })
+        .onConflictDoNothing();
     }
 
-    await db.insert(orgMembersTable).values({
-      orgId,
-      userId: user.id,
-      role: config.orgRole,
-    }).onConflictDoNothing();
+    await db
+      .insert(orgMembersTable)
+      .values({
+        orgId,
+        userId: user.id,
+        role: config.orgRole,
+      })
+      .onConflictDoNothing();
 
     created++;
   }
@@ -108,54 +145,57 @@ async function seedPilotUsers(orgId: number) {
 }
 
 async function seedPilotAzureTenant(orgId: number) {
-  console.log("[seed-pilot] Creating pilot Azure tenant stub...");
+  console.log('[seed-pilot] Creating pilot Azure tenant stub...');
 
-  await db.insert(azureTenantsTable).values({
-    azureTenantId: "pilot-tenant-00000000-0000-0000-0000-000000000001",
-    displayName: "Acme Corp Azure AD",
-    domain: "acmecorp.example.com",
-    status: "pending",
-    adminConsentGranted: "pending",
-    organizationId: orgId,
-  }).onConflictDoNothing();
+  await db
+    .insert(azureTenantsTable)
+    .values({
+      azureTenantId: 'pilot-tenant-00000000-0000-0000-0000-000000000001',
+      displayName: 'Acme Corp Azure AD',
+      domain: 'acmecorp.example.com',
+      status: 'pending',
+      adminConsentGranted: 'pending',
+      organizationId: orgId,
+    })
+    .onConflictDoNothing();
 
-  console.log("[seed-pilot] Azure tenant stub created (status: pending — awaiting admin consent)");
+  console.log('[seed-pilot] Azure tenant stub created (status: pending — awaiting admin consent)');
 }
 
 async function seedPilotAuditBootstrap(orgId: number) {
-  console.log("[seed-pilot] Writing pilot bootstrap audit events...");
+  console.log('[seed-pilot] Writing pilot bootstrap audit events...');
 
   type AuditInsert = typeof auditEventsTable.$inferInsert;
   const auditRows: AuditInsert[] = [
     {
-      action: "org_created",
-      entityType: "organization",
+      action: 'org_created',
+      entityType: 'organization',
       entityId: String(orgId),
-      newValues: { slug: PILOT_ORG_SLUG, type: "pilot", createdBy: "platform_admin" },
+      newValues: { slug: PILOT_ORG_SLUG, type: 'pilot', createdBy: 'platform_admin' },
     },
     {
-      action: "pilot_onboarding_started",
-      entityType: "organization",
+      action: 'pilot_onboarding_started',
+      entityType: 'organization',
       entityId: String(orgId),
-      newValues: { phase: "provisioning", sspEnabled: false, scimEnabled: false },
+      newValues: { phase: 'provisioning', sspEnabled: false, scimEnabled: false },
     },
   ];
   await db.insert(auditEventsTable).values(auditRows).onConflictDoNothing();
 
-  console.log("[seed-pilot] Audit events written");
+  console.log('[seed-pilot] Audit events written');
 }
 
 async function main() {
-  console.log("=== Pilot Org Seed ===\n");
+  console.log('=== Pilot Org Seed ===\n');
   try {
     const orgId = await seedPilotOrg();
     await seedPilotUsers(orgId);
     await seedPilotAzureTenant(orgId);
     await seedPilotAuditBootstrap(orgId);
-    console.log("\n=== Pilot seed complete ===");
+    console.log('\n=== Pilot seed complete ===');
     process.exit(0);
   } catch (err) {
-    console.error("[seed-pilot] Failed:", err);
+    console.error('[seed-pilot] Failed:', err);
     process.exit(1);
   }
 }

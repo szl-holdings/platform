@@ -1,9 +1,14 @@
-import { db, selfHealingPatternsTable, selfHealingRunsTable, platformSettingsTable } from "@szl-holdings/db";
-import { and, eq, sql } from "drizzle-orm";
-import { logger } from "./logger";
+import {
+  db,
+  platformSettingsTable,
+  selfHealingPatternsTable,
+  selfHealingRunsTable,
+} from '@szl-holdings/db';
+import { and, eq, sql } from 'drizzle-orm';
+import { logger } from './logger';
 
-const SEED_MARKER_NAMESPACE = "self_healing";
-const PATTERNS_SEED_MARKER_KEY = "patterns_demo_seeded";
+const SEED_MARKER_NAMESPACE = 'self_healing';
+const PATTERNS_SEED_MARKER_KEY = 'patterns_demo_seeded';
 
 /**
  * Returns true if the given platform_settings marker has been recorded,
@@ -32,15 +37,20 @@ export async function setSeedMarker(namespace: string, key: string): Promise<voi
       namespace,
       key,
       value: { seededAt: new Date().toISOString() },
-      valueType: "json",
-      category: "demo_seed",
+      valueType: 'json',
+      category: 'demo_seed',
       isPublic: false,
     })
     .onConflictDoNothing();
 }
 
-export type RemediationStatus = "executing" | "pending_approval" | "completed" | "failed" | "queued";
-export type StepStatus = "done" | "running" | "pending" | "failed";
+export type RemediationStatus =
+  | 'executing'
+  | 'pending_approval'
+  | 'completed'
+  | 'failed'
+  | 'queued';
+export type StepStatus = 'done' | 'running' | 'pending' | 'failed';
 
 export interface RemediationStep {
   id: string;
@@ -92,7 +102,7 @@ let runSeq = 0;
 function nextRunKey(): string {
   runSeq = (runSeq + 1) % 1_000_000;
   const ts = Date.now().toString(36).toUpperCase();
-  return `REM-${ts}-${runSeq.toString().padStart(4, "0")}`;
+  return `REM-${ts}-${runSeq.toString().padStart(4, '0')}`;
 }
 
 function nextAuditRef(): string {
@@ -111,7 +121,7 @@ async function patternIsEnabled(patternKey: string): Promise<boolean | null> {
     if (rows.length === 0) return null;
     return rows[0].enabled;
   } catch (err) {
-    logger.warn({ err, patternKey }, "self-healing-runtime: pattern lookup failed");
+    logger.warn({ err, patternKey }, 'self-healing-runtime: pattern lookup failed');
     return null;
   }
 }
@@ -131,22 +141,28 @@ export async function startRemediation(opts: StartOptions): Promise<string | nul
 
   const enabled = await patternIsEnabled(opts.patternKey);
   if (enabled === null) {
-    logger.debug({ patternKey: opts.patternKey }, "self-healing-runtime: unknown pattern, skipping run");
+    logger.debug(
+      { patternKey: opts.patternKey },
+      'self-healing-runtime: unknown pattern, skipping run',
+    );
     return null;
   }
   if (!enabled) {
-    logger.debug({ patternKey: opts.patternKey }, "self-healing-runtime: pattern disabled, skipping run");
+    logger.debug(
+      { patternKey: opts.patternKey },
+      'self-healing-runtime: pattern disabled, skipping run',
+    );
     return null;
   }
 
   const runKey = nextRunKey();
   const auditRef = opts.auditRef ?? nextAuditRef();
   const detectedAt = new Date();
-  const status: RemediationStatus = opts.requireApproval ? "pending_approval" : "executing";
+  const status: RemediationStatus = opts.requireApproval ? 'pending_approval' : 'executing';
   const steps: RemediationStep[] = opts.plannedSteps.map((s, i) => ({
     id: s.id,
     action: s.action,
-    status: opts.requireApproval ? "pending" : i === 0 ? "running" : "pending",
+    status: opts.requireApproval ? 'pending' : i === 0 ? 'running' : 'pending',
   }));
 
   try {
@@ -165,7 +181,10 @@ export async function startRemediation(opts: StartOptions): Promise<string | nul
       auditRef,
     });
   } catch (err) {
-    logger.warn({ err, runKey, patternKey: opts.patternKey }, "self-healing-runtime: insert failed");
+    logger.warn(
+      { err, runKey, patternKey: opts.patternKey },
+      'self-healing-runtime: insert failed',
+    );
     return null;
   }
 
@@ -183,7 +202,7 @@ export async function startRemediation(opts: StartOptions): Promise<string | nul
 
   logger.info(
     { runKey, patternKey: opts.patternKey, service: opts.service, status },
-    "self-healing-runtime: remediation run recorded"
+    'self-healing-runtime: remediation run recorded',
   );
   return runKey;
 }
@@ -195,7 +214,7 @@ async function persistSteps(runKey: string, steps: RemediationStep[]): Promise<v
       .set({ steps })
       .where(eq(selfHealingRunsTable.runKey, runKey));
   } catch (err) {
-    logger.warn({ err, runKey }, "self-healing-runtime: step persist failed");
+    logger.warn({ err, runKey }, 'self-healing-runtime: step persist failed');
   }
 }
 
@@ -208,14 +227,14 @@ export async function advanceRemediation(patternKey: string, service: string): P
   const now = Date.now();
   run.steps[run.currentStepIdx] = {
     ...run.steps[run.currentStepIdx],
-    status: "done",
+    status: 'done',
     durationMs: now - run.stepStartedAt,
   };
   run.currentStepIdx++;
   if (run.currentStepIdx < run.steps.length) {
     run.steps[run.currentStepIdx] = {
       ...run.steps[run.currentStepIdx],
-      status: "running",
+      status: 'running',
     };
     run.stepStartedAt = now;
   }
@@ -234,22 +253,25 @@ export async function approveRemediation(
   run.stepStartedAt = nowMs;
   run.startedAt = nowMs;
   if (run.steps.length > 0) {
-    run.steps[0] = { ...run.steps[0], status: "running" };
+    run.steps[0] = { ...run.steps[0], status: 'running' };
   }
   try {
     await db
       .update(selfHealingRunsTable)
       .set({
-        status: "executing",
+        status: 'executing',
         startedAt: new Date(nowMs),
         steps: run.steps,
         approver,
       })
       .where(eq(selfHealingRunsTable.runKey, run.runKey));
-    logger.info({ runKey: run.runKey, patternKey, service, approver }, "self-healing-runtime: remediation approved");
+    logger.info(
+      { runKey: run.runKey, patternKey, service, approver },
+      'self-healing-runtime: remediation approved',
+    );
     return true;
   } catch (err) {
-    logger.warn({ err, runKey: run.runKey }, "self-healing-runtime: approve failed");
+    logger.warn({ err, runKey: run.runKey }, 'self-healing-runtime: approve failed');
     return false;
   }
 }
@@ -263,7 +285,11 @@ export function findActiveByRunKey(runKey: string): { patternKey: string; servic
 }
 
 /** Returns true if the active run has been executing longer than EXECUTION_TIMEOUT_MS. */
-export function isExecutionExpired(patternKey: string, service: string, now: number = Date.now()): boolean {
+export function isExecutionExpired(
+  patternKey: string,
+  service: string,
+  now: number = Date.now(),
+): boolean {
   const run = activeRuns.get(activeKey(patternKey, service));
   if (!run || run.startedAt == null) return false;
   return now - run.startedAt > EXECUTION_TIMEOUT_MS;
@@ -281,13 +307,13 @@ export async function completeRemediation(
   if (run.currentStepIdx >= 0 && run.currentStepIdx < run.steps.length) {
     run.steps[run.currentStepIdx] = {
       ...run.steps[run.currentStepIdx],
-      status: "done",
+      status: 'done',
       durationMs: now - run.stepStartedAt,
     };
   }
   for (let i = Math.max(0, run.currentStepIdx + 1); i < run.steps.length; i++) {
-    if (run.steps[i].status !== "done") {
-      run.steps[i] = { ...run.steps[i], status: "done", durationMs: 0 };
+    if (run.steps[i].status !== 'done') {
+      run.steps[i] = { ...run.steps[i], status: 'done', durationMs: 0 };
     }
   }
 
@@ -303,7 +329,7 @@ export async function completeRemediation(
         .where(
           and(
             eq(selfHealingRunsTable.patternKey, patternKey),
-            eq(selfHealingRunsTable.status, "completed"),
+            eq(selfHealingRunsTable.status, 'completed'),
           ),
         );
       avg = aggRows[0]?.avg ?? 0;
@@ -318,7 +344,7 @@ export async function completeRemediation(
     await db
       .update(selfHealingRunsTable)
       .set({
-        status: "completed",
+        status: 'completed',
         completedAt: new Date(),
         steps: run.steps,
         mttrSavedMins,
@@ -326,12 +352,12 @@ export async function completeRemediation(
       })
       .where(eq(selfHealingRunsTable.runKey, run.runKey));
   } catch (err) {
-    logger.warn({ err, runKey: run.runKey }, "self-healing-runtime: complete failed");
+    logger.warn({ err, runKey: run.runKey }, 'self-healing-runtime: complete failed');
   }
   activeRuns.delete(activeKey(patternKey, service));
   logger.info(
     { runKey: run.runKey, patternKey, service, mttrSavedMins },
-    "self-healing-runtime: remediation completed",
+    'self-healing-runtime: remediation completed',
   );
 }
 
@@ -345,7 +371,7 @@ export async function failRemediation(
   if (run.currentStepIdx >= 0 && run.currentStepIdx < run.steps.length) {
     run.steps[run.currentStepIdx] = {
       ...run.steps[run.currentStepIdx],
-      status: "failed",
+      status: 'failed',
       durationMs: Date.now() - run.stepStartedAt,
     };
   }
@@ -353,16 +379,19 @@ export async function failRemediation(
     await db
       .update(selfHealingRunsTable)
       .set({
-        status: "failed",
+        status: 'failed',
         completedAt: new Date(),
         steps: run.steps,
       })
       .where(eq(selfHealingRunsTable.runKey, run.runKey));
   } catch (err) {
-    logger.warn({ err, runKey: run.runKey, reason }, "self-healing-runtime: fail update error");
+    logger.warn({ err, runKey: run.runKey, reason }, 'self-healing-runtime: fail update error');
   }
   activeRuns.delete(activeKey(patternKey, service));
-  logger.warn({ runKey: run.runKey, patternKey, service, reason }, "self-healing-runtime: remediation failed");
+  logger.warn(
+    { runKey: run.runKey, patternKey, service, reason },
+    'self-healing-runtime: remediation failed',
+  );
 }
 
 interface ActiveRunSummary {
@@ -373,7 +402,7 @@ interface ActiveRunSummary {
 }
 
 export function listActiveRuns(): ActiveRunSummary[] {
-  return [...activeRuns.values()].map(r => ({
+  return [...activeRuns.values()].map((r) => ({
     patternKey: r.patternKey,
     service: r.service,
     runKey: r.runKey,
@@ -384,16 +413,51 @@ export function listActiveRuns(): ActiveRunSummary[] {
 const SEED_PATTERN_DEFS: Array<{
   patternKey: string;
   name: string;
-  type: "restart" | "scale" | "failover" | "clear_queue" | "rollback";
+  type: 'restart' | 'scale' | 'failover' | 'clear_queue' | 'rollback';
   trigger: string;
   runbook: string;
   enabled: boolean;
 }> = [
-  { patternKey: "p1", name: "Service Restart on OOM", type: "restart", trigger: "OOM kill detected on pod", runbook: "RUNBOOK-001: Drain → Restart → Health-check → Reroute", enabled: true },
-  { patternKey: "p2", name: "Auto-Scale on CPU Saturation", type: "scale", trigger: "CPU > 85% for 5 consecutive minutes", runbook: "RUNBOOK-002: Scale +2 replicas → Verify HPA → Alert", enabled: true },
-  { patternKey: "p3", name: "DB Failover on Primary Failure", type: "failover", trigger: "Primary DB health check failures > 3", runbook: "RUNBOOK-003: Promote replica → Update DNS → Validate", enabled: true },
-  { patternKey: "p4", name: "Queue Drain on Backlog Overflow", type: "clear_queue", trigger: "Queue depth > 50k messages for 3 min", runbook: "RUNBOOK-004: Pause producers → Drain → Flush DLQ → Resume", enabled: true },
-  { patternKey: "p5", name: "Canary Rollback on Error Spike", type: "rollback", trigger: "Error rate delta > 5% vs baseline on new deploy", runbook: "RUNBOOK-005: Halt canary → Shift traffic → Rollback image", enabled: false },
+  {
+    patternKey: 'p1',
+    name: 'Service Restart on OOM',
+    type: 'restart',
+    trigger: 'OOM kill detected on pod',
+    runbook: 'RUNBOOK-001: Drain → Restart → Health-check → Reroute',
+    enabled: true,
+  },
+  {
+    patternKey: 'p2',
+    name: 'Auto-Scale on CPU Saturation',
+    type: 'scale',
+    trigger: 'CPU > 85% for 5 consecutive minutes',
+    runbook: 'RUNBOOK-002: Scale +2 replicas → Verify HPA → Alert',
+    enabled: true,
+  },
+  {
+    patternKey: 'p3',
+    name: 'DB Failover on Primary Failure',
+    type: 'failover',
+    trigger: 'Primary DB health check failures > 3',
+    runbook: 'RUNBOOK-003: Promote replica → Update DNS → Validate',
+    enabled: true,
+  },
+  {
+    patternKey: 'p4',
+    name: 'Queue Drain on Backlog Overflow',
+    type: 'clear_queue',
+    trigger: 'Queue depth > 50k messages for 3 min',
+    runbook: 'RUNBOOK-004: Pause producers → Drain → Flush DLQ → Resume',
+    enabled: true,
+  },
+  {
+    patternKey: 'p5',
+    name: 'Canary Rollback on Error Spike',
+    type: 'rollback',
+    trigger: 'Error rate delta > 5% vs baseline on new deploy',
+    runbook: 'RUNBOOK-005: Halt canary → Shift traffic → Rollback image',
+    enabled: false,
+  },
 ];
 
 let patternSeedPromise: Promise<void> | null = null;
@@ -421,10 +485,7 @@ export async function ensurePatternsSeeded(): Promise<void> {
         .limit(1);
 
       if (existing.length === 0) {
-        await db
-          .insert(selfHealingPatternsTable)
-          .values(SEED_PATTERN_DEFS)
-          .onConflictDoNothing();
+        await db.insert(selfHealingPatternsTable).values(SEED_PATTERN_DEFS).onConflictDoNothing();
       }
       // Whether we just seeded an empty table or detected a pre-existing
       // seeded environment, record the marker so future calls short-circuit.
@@ -451,21 +512,19 @@ export async function recoverActiveRuns(): Promise<number> {
     const rows = await db
       .select()
       .from(selfHealingRunsTable)
-      .where(
-        sql`${selfHealingRunsTable.status} IN ('executing','pending_approval')`,
-      );
+      .where(sql`${selfHealingRunsTable.status} IN ('executing','pending_approval')`);
     let recovered = 0;
     for (const r of rows) {
       const steps = (r.steps ?? []) as RemediationStep[];
       let currentStepIdx = -1;
-      if (r.status === "executing") {
-        currentStepIdx = steps.findIndex(s => s.status === "running");
+      if (r.status === 'executing') {
+        currentStepIdx = steps.findIndex((s) => s.status === 'running');
         if (currentStepIdx < 0) {
           // No running step recorded — resume at the first non-done step.
-          currentStepIdx = steps.findIndex(s => s.status !== "done");
+          currentStepIdx = steps.findIndex((s) => s.status !== 'done');
           if (currentStepIdx < 0) currentStepIdx = Math.max(0, steps.length - 1);
           if (steps[currentStepIdx]) {
-            steps[currentStepIdx] = { ...steps[currentStepIdx], status: "running" };
+            steps[currentStepIdx] = { ...steps[currentStepIdx], status: 'running' };
           }
         }
       }
@@ -483,11 +542,11 @@ export async function recoverActiveRuns(): Promise<number> {
       recovered++;
     }
     if (recovered > 0) {
-      logger.info({ recovered }, "self-healing-runtime: recovered open runs from database");
+      logger.info({ recovered }, 'self-healing-runtime: recovered open runs from database');
     }
     return recovered;
   } catch (err) {
-    logger.warn({ err }, "self-healing-runtime: recovery failed (non-fatal)");
+    logger.warn({ err }, 'self-healing-runtime: recovery failed (non-fatal)');
     return 0;
   }
 }

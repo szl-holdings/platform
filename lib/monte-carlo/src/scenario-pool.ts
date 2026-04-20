@@ -2,21 +2,21 @@ import {
   aggregateScenarioShards,
   type MonteCarloResult,
   type ScenarioShardSamples,
-} from "./scenario-simulation.js";
-import type { ScenarioDefinition } from "./schema.js";
+} from './scenario-simulation.js';
 import type {
   ScenarioSimulationRequest,
   ScenarioSimulationResponse,
-} from "./scenario-simulation.worker.js";
+} from './scenario-simulation.worker.js';
+import type { ScenarioDefinition } from './schema.js';
 
 export type WorkerLike = {
   postMessage: (msg: ScenarioSimulationRequest) => void;
   addEventListener: (
-    type: "message",
+    type: 'message',
     listener: (event: MessageEvent<ScenarioSimulationResponse>) => void,
   ) => void;
   removeEventListener: (
-    type: "message",
+    type: 'message',
     listener: (event: MessageEvent<ScenarioSimulationResponse>) => void,
   ) => void;
   terminate: () => void;
@@ -58,7 +58,7 @@ export interface PoolProgress {
 }
 
 function detectHardwareConcurrency(): number {
-  if (typeof navigator !== "undefined" && typeof navigator.hardwareConcurrency === "number") {
+  if (typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number') {
     return Math.max(1, navigator.hardwareConcurrency);
   }
   return 1;
@@ -95,7 +95,7 @@ export function planPoolSize(
 }
 
 function nowMs(): number {
-  return typeof performance !== "undefined" && typeof performance.now === "function"
+  return typeof performance !== 'undefined' && typeof performance.now === 'function'
     ? performance.now()
     : Date.now();
 }
@@ -114,28 +114,28 @@ function runOneShard(
     const handler = (event: MessageEvent<ScenarioSimulationResponse>) => {
       const data = event.data;
       if (data.requestId !== requestId) return;
-      if (data.type === "progress") {
+      if (data.type === 'progress') {
         onShardProgress?.(data.completed, data.validIterations);
         return;
       }
-      worker.removeEventListener("message", handler);
+      worker.removeEventListener('message', handler);
       clearTimeout(timer);
       if (!data.ok) {
         reject(new Error(data.error));
         return;
       }
-      if (data.mode === "shard") {
+      if (data.mode === 'shard') {
         resolve({ shard: data.shard, durationMs: data.durationMs });
         return;
       }
-      reject(new Error("Worker returned unexpected response shape for shard request"));
+      reject(new Error('Worker returned unexpected response shape for shard request'));
     };
     const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
-      worker.removeEventListener("message", handler);
+      worker.removeEventListener('message', handler);
       reject(new Error(`Worker shard timed out after ${timeoutMs}ms`));
     }, timeoutMs);
-    worker.addEventListener("message", handler);
-    worker.postMessage({ requestId, scenarioId, iterations, mode: "shard" });
+    worker.addEventListener('message', handler);
+    worker.postMessage({ requestId, scenarioId, iterations, mode: 'shard' });
   });
 }
 
@@ -148,9 +148,7 @@ function runOneShard(
  * single-core environments) this still works correctly — it just runs one
  * shard.
  */
-export async function runScenarioInPool(
-  options: ScenarioPoolOptions,
-): Promise<MonteCarloResult> {
+export async function runScenarioInPool(options: ScenarioPoolOptions): Promise<MonteCarloResult> {
   const {
     scenario,
     iterations,
@@ -189,13 +187,19 @@ export async function runScenarioInPool(
     const shardPromises = shardSizes.map((shardIters, idx) => {
       const w = workerFactory();
       workers.push(w);
-      return runOneShard(w, scenario.id, shardIters, timeoutMs, emitAggregate
-        ? (completed, validIterations) => {
-            shardCompleted[idx] = completed;
-            shardValid[idx] = validIterations;
-            emitAggregate();
-          }
-        : undefined);
+      return runOneShard(
+        w,
+        scenario.id,
+        shardIters,
+        timeoutMs,
+        emitAggregate
+          ? (completed, validIterations) => {
+              shardCompleted[idx] = completed;
+              shardValid[idx] = validIterations;
+              emitAggregate();
+            }
+          : undefined,
+      );
     });
     const results = await Promise.all(shardPromises);
     const durationMs = nowMs() - start;

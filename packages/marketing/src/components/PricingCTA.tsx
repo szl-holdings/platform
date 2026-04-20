@@ -1,12 +1,12 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { ArrowRight, ChevronRight, Handshake } from "lucide-react";
+import { motion, useInView } from 'framer-motion';
+import { ArrowRight, ChevronRight, Handshake } from 'lucide-react';
+import { useRef } from 'react';
 
-const BG = "hsl(214,16%,4%)";
-const SURFACE = "hsla(0,0%,100%,0.035)";
-const BORDER = "hsla(0,0%,100%,0.07)";
-const TEXT = "hsl(38,8%,92%)";
-const TEXT_SEC = "hsl(214,7%,55%)";
+const BG = 'hsl(214,16%,4%)';
+const SURFACE = 'hsla(0,0%,100%,0.035)';
+const BORDER = 'hsla(0,0%,100%,0.07)';
+const TEXT = 'hsl(38,8%,92%)';
+const TEXT_SEC = 'hsl(214,7%,55%)';
 
 export interface PricingTier {
   name: string;
@@ -36,14 +36,14 @@ export interface PricingCTAProps {
 }
 
 export function PricingCTA({
-  headline = "Engagement options",
-  subheadline = "We work with enterprise operators across domains. Start with a scoped pilot.",
+  headline = 'Engagement options',
+  subheadline = 'We work with enterprise operators across domains. Start with a scoped pilot.',
   tiers,
   designPartnerBlock,
-  accentColor = "hsl(191,92%,44%)",
+  accentColor = 'hsl(191,92%,44%)',
 }: PricingCTAProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
     <section ref={ref} style={{ background: BG }} className="py-24 px-4">
@@ -54,7 +54,10 @@ export function PricingCTA({
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4" style={{ color: TEXT }}>
+          <h2
+            className="text-3xl sm:text-4xl font-bold tracking-tight mb-4"
+            style={{ color: TEXT }}
+          >
             {headline}
           </h2>
           <p className="text-base max-w-xl mx-auto" style={{ color: TEXT_SEC }}>
@@ -63,7 +66,9 @@ export function PricingCTA({
         </motion.div>
 
         {tiers && tiers.length > 0 && (
-          <div className={`grid gap-5 mb-8 ${tiers.length === 2 ? "md:grid-cols-2" : tiers.length >= 3 ? "md:grid-cols-3" : ""}`}>
+          <div
+            className={`grid gap-5 mb-8 ${tiers.length === 2 ? 'md:grid-cols-2' : tiers.length >= 3 ? 'md:grid-cols-3' : ''}`}
+          >
             {tiers.map((tier, i) => (
               <motion.div
                 key={i}
@@ -85,7 +90,10 @@ export function PricingCTA({
                   </div>
                 )}
                 <div className="mb-4">
-                  <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: accentColor }}>
+                  <p
+                    className="text-xs font-semibold tracking-widest uppercase mb-2"
+                    style={{ color: accentColor }}
+                  >
                     {tier.name}
                   </p>
                   <div className="flex items-baseline gap-1 mb-2">
@@ -110,7 +118,10 @@ export function PricingCTA({
                         className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                         style={{ background: `${accentColor}20` }}
                       >
-                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: accentColor }} />
+                        <div
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ background: accentColor }}
+                        />
                       </div>
                       {f}
                     </li>
@@ -125,7 +136,7 @@ export function PricingCTA({
                     style={{
                       background: tier.highlighted ? accentColor : SURFACE,
                       color: tier.highlighted ? BG : TEXT,
-                      border: tier.highlighted ? "none" : `1px solid ${BORDER}`,
+                      border: tier.highlighted ? 'none' : `1px solid ${BORDER}`,
                     }}
                   >
                     {tier.ctaLabel}
@@ -138,7 +149,7 @@ export function PricingCTA({
                     style={{
                       background: tier.highlighted ? accentColor : SURFACE,
                       color: tier.highlighted ? BG : TEXT,
-                      border: tier.highlighted ? "none" : `1px solid ${BORDER}`,
+                      border: tier.highlighted ? 'none' : `1px solid ${BORDER}`,
                     }}
                   >
                     {tier.ctaLabel}
@@ -158,7 +169,10 @@ export function PricingCTA({
             className="p-8 rounded-2xl flex flex-col md:flex-row items-start md:items-center gap-6"
             style={{ background: `${accentColor}06`, border: `1px solid ${accentColor}25` }}
           >
-            <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: `${accentColor}15` }}>
+            <div
+              className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center"
+              style={{ background: `${accentColor}15` }}
+            >
               <Handshake className="w-6 h-6" style={{ color: accentColor }} />
             </div>
             <div className="flex-1">

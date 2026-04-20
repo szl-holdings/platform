@@ -10,12 +10,12 @@
  * Domain data is passed via props. The branching UI and interaction model
  * are shared across all surfaces.
  */
-import React, { useState } from "react";
-import { cn } from "./utils";
+import React, { useState } from 'react';
+import { cn } from './utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
-export type ScenarioCase = "base" | "bull" | "bear" | "tail" | "custom";
+export type ScenarioCase = 'base' | 'bull' | 'bear' | 'tail' | 'custom';
 
 export interface ScenarioMetric {
   label: string;
@@ -53,20 +53,20 @@ export interface ScenarioBranchesPanelProps {
 // ─── Internal tokens ─────────────────────────────────────────────────────
 
 const CASE_CFG: Record<ScenarioCase, { label: string; color: string; bg: string }> = {
-  base:   { label: "Base",   color: "#3b82f6", bg: "rgba(59,130,246,0.10)" },
-  bull:   { label: "Bull",   color: "#22c55e", bg: "rgba(34,197,94,0.10)" },
-  bear:   { label: "Bear",   color: "#ef4444", bg: "rgba(239,68,68,0.10)" },
-  tail:   { label: "Tail",   color: "#8b5cf6", bg: "rgba(139,92,246,0.10)" },
-  custom: { label: "Custom", color: "#f59e0b", bg: "rgba(245,158,11,0.10)" },
+  base: { label: 'Base', color: '#3b82f6', bg: 'rgba(59,130,246,0.10)' },
+  bull: { label: 'Bull', color: '#22c55e', bg: 'rgba(34,197,94,0.10)' },
+  bear: { label: 'Bear', color: '#ef4444', bg: 'rgba(239,68,68,0.10)' },
+  tail: { label: 'Tail', color: '#8b5cf6', bg: 'rgba(139,92,246,0.10)' },
+  custom: { label: 'Custom', color: '#f59e0b', bg: 'rgba(245,158,11,0.10)' },
 };
 
-const BG = { card: "#0c1018", selected: "#0f1828" } as const;
-const BORDER = "rgba(255,255,255,0.07)";
-const BORDER_SELECTED = "rgba(255,255,255,0.14)";
+const BG = { card: '#0c1018', selected: '#0f1828' } as const;
+const BORDER = 'rgba(255,255,255,0.07)';
+const BORDER_SELECTED = 'rgba(255,255,255,0.14)';
 const TEXT = {
-  primary: "rgba(255,255,255,0.88)",
-  secondary: "rgba(255,255,255,0.52)",
-  muted: "rgba(255,255,255,0.28)",
+  primary: 'rgba(255,255,255,0.88)',
+  secondary: 'rgba(255,255,255,0.52)',
+  muted: 'rgba(255,255,255,0.28)',
 } as const;
 
 // ─── Sub-components ───────────────────────────────────────────────────────
@@ -75,13 +75,13 @@ function ProbabilityBar({ value, color }: { value: number; color: string }) {
   const pct = Math.round(value * 100);
   return (
     <div className="flex items-center gap-2">
-      <div className="w-24 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div
-          className="h-1.5 rounded-full"
-          style={{ width: `${pct}%`, background: color }}
-        />
+      <div className="w-24 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
+        <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: color }} />
       </div>
-      <span className="text-[11px] font-mono tabular-nums w-7 text-right" style={{ color: TEXT.muted }}>
+      <span
+        className="text-[11px] font-mono tabular-nums w-7 text-right"
+        style={{ color: TEXT.muted }}
+      >
         {pct}%
       </span>
     </div>
@@ -95,22 +95,33 @@ function MetricChip({ metric }: { metric: ScenarioMetric }) {
   return (
     <div
       className="flex flex-col px-3 py-2 rounded-lg min-w-[90px]"
-      style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER}` }}
+      style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${BORDER}` }}
     >
       <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: TEXT.muted }}>
         {metric.label}
       </span>
       <div className="flex items-baseline gap-1 mt-0.5">
-        <span className="text-[13px] font-semibold font-mono tabular-nums" style={{ color: TEXT.primary }}>
+        <span
+          className="text-[13px] font-semibold font-mono tabular-nums"
+          style={{ color: TEXT.primary }}
+        >
           {metric.value}
-          {metric.unit && <span className="text-[10px] ml-0.5" style={{ color: TEXT.muted }}>{metric.unit}</span>}
+          {metric.unit && (
+            <span className="text-[10px] ml-0.5" style={{ color: TEXT.muted }}>
+              {metric.unit}
+            </span>
+          )}
         </span>
         {metric.delta !== undefined && (
           <span
             className="text-[10px] font-mono"
-            style={{ color: hasPositiveDelta ? "#22c55e" : hasNegativeDelta ? "#ef4444" : TEXT.muted }}
+            style={{
+              color: hasPositiveDelta ? '#22c55e' : hasNegativeDelta ? '#ef4444' : TEXT.muted,
+            }}
           >
-            {hasPositiveDelta ? "+" : ""}{metric.delta}{metric.unit ?? ""}
+            {hasPositiveDelta ? '+' : ''}
+            {metric.delta}
+            {metric.unit ?? ''}
           </span>
         )}
       </div>
@@ -131,7 +142,10 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
   const isSelected = branch.selected;
 
   return (
-    <div className={cn("flex flex-col", depth > 0 && "ml-4 pl-4 border-l")} style={depth > 0 ? { borderColor: BORDER } : undefined}>
+    <div
+      className={cn('flex flex-col', depth > 0 && 'ml-4 pl-4 border-l')}
+      style={depth > 0 ? { borderColor: BORDER } : undefined}
+    >
       <div
         className="rounded-xl overflow-hidden cursor-pointer transition-all"
         style={{
@@ -142,27 +156,44 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
         role="button"
         aria-pressed={isSelected}
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect?.(branch); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect?.(branch);
+          }
+        }}
       >
         {/* Header */}
         <div className="px-4 py-3" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <span
               className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
-              style={{ background: caseCfg.bg, color: caseCfg.color, border: `1px solid ${caseCfg.color}25` }}
+              style={{
+                background: caseCfg.bg,
+                color: caseCfg.color,
+                border: `1px solid ${caseCfg.color}25`,
+              }}
             >
               {caseCfg.label}
             </span>
             {isSelected && (
               <span
                 className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
-                style={{ background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}30` }}
+                style={{
+                  background: `${accentColor}15`,
+                  color: accentColor,
+                  border: `1px solid ${accentColor}30`,
+                }}
               >
                 Selected
               </span>
             )}
             {branch.tags?.map((t) => (
-              <span key={t} className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.04)", color: TEXT.muted }}>
+              <span
+                key={t}
+                className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(255,255,255,0.04)', color: TEXT.muted }}
+              >
                 {t}
               </span>
             ))}
@@ -181,7 +212,12 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
 
         {/* Metrics */}
         {branch.metrics.length > 0 && (
-          <div className="flex gap-2 flex-wrap px-4 py-3" style={{ borderBottom: branch.childBranches?.length ? `1px solid ${BORDER}` : undefined }}>
+          <div
+            className="flex gap-2 flex-wrap px-4 py-3"
+            style={{
+              borderBottom: branch.childBranches?.length ? `1px solid ${BORDER}` : undefined,
+            }}
+          >
             {branch.metrics.map((m, i) => (
               <MetricChip key={i} metric={m} />
             ))}
@@ -189,7 +225,10 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
         )}
 
         {/* Footer: confidence + evidence + child branches toggle */}
-        <div className="flex items-center gap-3 px-4 py-2 text-[10px] font-mono" style={{ color: TEXT.muted }}>
+        <div
+          className="flex items-center gap-3 px-4 py-2 text-[10px] font-mono"
+          style={{ color: TEXT.muted }}
+        >
           <span>Confidence {Math.round(branch.confidence * 100)}%</span>
           {branch.evidenceCount !== undefined && (
             <>
@@ -201,11 +240,16 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
             <>
               <div className="flex-1" />
               <button
-                onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpanded((v) => !v);
+                }}
                 className="transition-opacity hover:opacity-70"
                 style={{ color: TEXT.muted }}
               >
-                {expanded ? "▲ Collapse" : `▼ ${branch.childBranches.length} sub-scenario${branch.childBranches.length !== 1 ? "s" : ""}`}
+                {expanded
+                  ? '▲ Collapse'
+                  : `▼ ${branch.childBranches.length} sub-scenario${branch.childBranches.length !== 1 ? 's' : ''}`}
               </button>
             </>
           )}
@@ -213,11 +257,17 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
       </div>
 
       {/* Child branches */}
-      {expanded && branch.childBranches?.map((child) => (
-        <div key={child.id} className="mt-2">
-          <BranchCard branch={child} accentColor={accentColor} depth={depth + 1} {...(onSelect !== undefined ? { onSelect } : {})} />
-        </div>
-      ))}
+      {expanded &&
+        branch.childBranches?.map((child) => (
+          <div key={child.id} className="mt-2">
+            <BranchCard
+              branch={child}
+              accentColor={accentColor}
+              depth={depth + 1}
+              {...(onSelect !== undefined ? { onSelect } : {})}
+            />
+          </div>
+        ))}
     </div>
   );
 }
@@ -225,10 +275,10 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
 // ─── Main Component ───────────────────────────────────────────────────────
 
 export function ScenarioBranchesPanel({
-  title = "Scenario Branches",
+  title = 'Scenario Branches',
   description,
   branches,
-  accentColor = "#8b7ac8",
+  accentColor = '#8b7ac8',
   onSelectBranch,
   onRunSimulation,
   onExport,
@@ -237,7 +287,7 @@ export function ScenarioBranchesPanel({
   const totalProb = branches.reduce((s, b) => s + b.probability, 0);
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
+    <div className={cn('flex flex-col gap-4', className)}>
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -250,7 +300,8 @@ export function ScenarioBranchesPanel({
             </p>
           )}
           <div className="text-[10px] font-mono mt-1" style={{ color: TEXT.muted }}>
-            {branches.length} scenario{branches.length !== 1 ? "s" : ""} · Σ probability {Math.round(totalProb * 100)}%
+            {branches.length} scenario{branches.length !== 1 ? 's' : ''} · Σ probability{' '}
+            {Math.round(totalProb * 100)}%
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -258,7 +309,11 @@ export function ScenarioBranchesPanel({
             <button
               onClick={onRunSimulation}
               className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:opacity-80"
-              style={{ background: `${accentColor}15`, border: `1px solid ${accentColor}30`, color: accentColor }}
+              style={{
+                background: `${accentColor}15`,
+                border: `1px solid ${accentColor}30`,
+                color: accentColor,
+              }}
             >
               Run Simulation
             </button>
@@ -267,7 +322,11 @@ export function ScenarioBranchesPanel({
             <button
               onClick={onExport}
               className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:opacity-80"
-              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER}`, color: TEXT.secondary }}
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: `1px solid ${BORDER}`,
+                color: TEXT.secondary,
+              }}
             >
               Export
             </button>
@@ -294,7 +353,11 @@ export function ScenarioBranchesPanel({
             <button
               onClick={onRunSimulation}
               className="mt-4 px-4 py-2 rounded-lg text-[12px] font-medium transition-colors hover:opacity-80"
-              style={{ background: `${accentColor}15`, border: `1px solid ${accentColor}30`, color: accentColor }}
+              style={{
+                background: `${accentColor}15`,
+                border: `1px solid ${accentColor}30`,
+                color: accentColor,
+              }}
             >
               Run First Simulation
             </button>

@@ -1,15 +1,33 @@
-
-import { motion as m } from "framer-motion";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { motion as m } from 'framer-motion';
 import {
+  Activity,
+  AlertTriangle,
+  Brain,
+  Clock,
+  Compass,
+  Crosshair,
+  Eye,
+  Gauge,
+  GitBranch,
+  Heart,
+  Layers,
+  Lightbulb,
+  MessageSquare,
+  Minus,
+  Moon,
+  Radio,
+  Scale,
+  Shield,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Zap,
+} from 'lucide-react';
 
-  Brain, Eye, Heart, Target, Clock, MessageSquare, Compass,
-  Activity, AlertTriangle, TrendingUp, TrendingDown, Minus,
-  Sparkles, Lightbulb, Zap, Moon, Radio, Shield, GitBranch,
-  Users, Crosshair, Scale, Gauge, Layers
-} from "lucide-react";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
-
-const API = "/api/nuro-mesh/consciousness";
+const API = '/api/nuro-mesh/consciousness';
 
 interface PredictiveState {
   model: {
@@ -99,15 +117,50 @@ interface SnapshotData {
     totalAssessments: number;
   };
   selfModel: {
-    identity: { name: string; version: string; purpose: string; coreValues: string[]; operationalBoundaries: string[] };
-    capabilities: Array<{ agentId: string; domain: string; successRate: number; avgConfidence: number; totalInvocations: number; recentTrend: string }>;
+    identity: {
+      name: string;
+      version: string;
+      purpose: string;
+      coreValues: string[];
+      operationalBoundaries: string[];
+    };
+    capabilities: Array<{
+      agentId: string;
+      domain: string;
+      successRate: number;
+      avgConfidence: number;
+      totalInvocations: number;
+      recentTrend: string;
+    }>;
     overallHealth: string;
     knownLimitations: string[];
     learningVelocity: number;
     selfNarrative: string;
-    theoryOfMind: Array<{ agentId: string; domain: string; queryInterpretation: string; beliefConfidence: number; divergenceFromConsensus: number; blindSpots: string[]; timestamp: string }>;
-    recentCounterfactuals: Array<{ scenarioId: string; originalRouting: string[]; alternativeRouting: string[]; predictedOutcomeDelta: number; reasoning: string; timestamp: string }>;
-    adversarialProbes: Array<{ probeId: string; edgeCaseQuery: string; targetDomain: string; blindSpotExposed: string; severity: string; timestamp: string }>;
+    theoryOfMind: Array<{
+      agentId: string;
+      domain: string;
+      queryInterpretation: string;
+      beliefConfidence: number;
+      divergenceFromConsensus: number;
+      blindSpots: string[];
+      timestamp: string;
+    }>;
+    recentCounterfactuals: Array<{
+      scenarioId: string;
+      originalRouting: string[];
+      alternativeRouting: string[];
+      predictedOutcomeDelta: number;
+      reasoning: string;
+      timestamp: string;
+    }>;
+    adversarialProbes: Array<{
+      probeId: string;
+      edgeCaseQuery: string;
+      targetDomain: string;
+      blindSpotExposed: string;
+      severity: string;
+      timestamp: string;
+    }>;
   };
   workspace: {
     workingMemory: Array<{ id: string; content: string; source: string; priority: number }>;
@@ -115,36 +168,142 @@ interface SnapshotData {
     contextBudget: { used: number; total: number; utilization: number };
     sessionDepth: number;
     recentQueries: string[];
-    recentBroadcasts: Array<{ broadcastId: string; winners: Array<{ itemId: string; salienceScore: number; content: string }>; losers: Array<{ itemId: string; salienceScore: number; reason: string }>; broadcastedTo: string[]; timestamp: string }>;
-    attentionSchema: { reportId: string; allocationSummary: Record<string, number>; driftDetected: boolean; driftDescription: string | null; rebalanceRecommendation: string | null; timestamp: string } | null;
+    recentBroadcasts: Array<{
+      broadcastId: string;
+      winners: Array<{ itemId: string; salienceScore: number; content: string }>;
+      losers: Array<{ itemId: string; salienceScore: number; reason: string }>;
+      broadcastedTo: string[];
+      timestamp: string;
+    }>;
+    attentionSchema: {
+      reportId: string;
+      allocationSummary: Record<string, number>;
+      driftDetected: boolean;
+      driftDescription: string | null;
+      rebalanceRecommendation: string | null;
+      timestamp: string;
+    } | null;
   };
   monologue: {
-    recentThoughts: Array<{ entryId: string; type: string; thought: string; emotionalTone: string; confidence: number; timestamp: string }>;
+    recentThoughts: Array<{
+      entryId: string;
+      type: string;
+      thought: string;
+      emotionalTone: string;
+      confidence: number;
+      timestamp: string;
+    }>;
     dominantTone: string;
     thoughtFrequency: number;
     reflectionDepth: number;
     totalEntries: number;
-    dialecticalTriples: Array<{ tripleId: string; topic: string; thesis: string; antithesis: string; synthesis: string; confidence: number; timestamp: string }>;
-    socraticChains: Array<{ chainId: string; originalClaim: string; questions: Array<{ question: string; answer: string; depth: number }>; conclusion: string; assumptionsExposed: string[]; timestamp: string }>;
-    perspectiveSimulations: Array<{ simulationId: string; topic: string; perspectives: Array<{ viewpoint: string; argument: string; priority: string }>; synthesis: string; timestamp: string }>;
+    dialecticalTriples: Array<{
+      tripleId: string;
+      topic: string;
+      thesis: string;
+      antithesis: string;
+      synthesis: string;
+      confidence: number;
+      timestamp: string;
+    }>;
+    socraticChains: Array<{
+      chainId: string;
+      originalClaim: string;
+      questions: Array<{ question: string; answer: string; depth: number }>;
+      conclusion: string;
+      assumptionsExposed: string[];
+      timestamp: string;
+    }>;
+    perspectiveSimulations: Array<{
+      simulationId: string;
+      topic: string;
+      perspectives: Array<{ viewpoint: string; argument: string; priority: string }>;
+      synthesis: string;
+      timestamp: string;
+    }>;
   };
   goals: {
-    activeGoals: Array<{ goalId: string; title: string; priority: string; progress: number; status: string }>;
+    activeGoals: Array<{
+      goalId: string;
+      title: string;
+      priority: string;
+      progress: number;
+      status: string;
+    }>;
     completedGoals: number;
     blockedGoals: Array<{ goalId: string; title: string }>;
     curiosityQueue: Array<{ signalId: string; topic: string; intensity: number; source: string }>;
     overallProgress: number;
-    intrinsicMotivation: { informationGain: number; competenceGrowth: number; noveltySeeking: number; overallDrive: number; timestamp: string };
-    goalInterferences: Array<{ interferenceId: string; goalA: string; goalB: string; interferenceType: string; severity: number; resolution: string }>;
-    metaGoals: Array<{ metaGoalId: string; title: string; metric: string; currentValue: number; targetValue: number; trend: string; timestamp: string }>;
+    intrinsicMotivation: {
+      informationGain: number;
+      competenceGrowth: number;
+      noveltySeeking: number;
+      overallDrive: number;
+      timestamp: string;
+    };
+    goalInterferences: Array<{
+      interferenceId: string;
+      goalA: string;
+      goalB: string;
+      interferenceType: string;
+      severity: number;
+      resolution: string;
+    }>;
+    metaGoals: Array<{
+      metaGoalId: string;
+      title: string;
+      metric: string;
+      currentValue: number;
+      targetValue: number;
+      trend: string;
+      timestamp: string;
+    }>;
   };
   emotions: {
-    activeSignals: Array<{ signalId: string; emotion: string; intensity: number; trigger: string; effectiveIntensity: number }>;
-    valence: { positive: number; negative: number; arousal: number; dominantEmotion: string; emotionalStability: number };
+    activeSignals: Array<{
+      signalId: string;
+      emotion: string;
+      intensity: number;
+      trigger: string;
+      effectiveIntensity: number;
+    }>;
+    valence: {
+      positive: number;
+      negative: number;
+      arousal: number;
+      dominantEmotion: string;
+      emotionalStability: number;
+    };
     moodTrajectory: string;
-    recentAppraisals: Array<{ appraisalId: string; novelty: number; intrinsicPleasantness: number; goalRelevance: number; copingPotential: number; normCompatibility: number; resultingEmotion: string; resultingIntensity: number; breakdown: string; timestamp: string }>;
-    activeRegulations: Array<{ strategyId: string; type: string; trigger: string; action: string; effectivenessEstimate: number; applied: boolean; timestamp: string }>;
-    recentForecasts: Array<{ forecastId: string; scenario: string; predictedEmotion: string; predictedIntensity: number; confidence: number; timestamp: string }>;
+    recentAppraisals: Array<{
+      appraisalId: string;
+      novelty: number;
+      intrinsicPleasantness: number;
+      goalRelevance: number;
+      copingPotential: number;
+      normCompatibility: number;
+      resultingEmotion: string;
+      resultingIntensity: number;
+      breakdown: string;
+      timestamp: string;
+    }>;
+    activeRegulations: Array<{
+      strategyId: string;
+      type: string;
+      trigger: string;
+      action: string;
+      effectivenessEstimate: number;
+      applied: boolean;
+      timestamp: string;
+    }>;
+    recentForecasts: Array<{
+      forecastId: string;
+      scenario: string;
+      predictedEmotion: string;
+      predictedIntensity: number;
+      confidence: number;
+      timestamp: string;
+    }>;
   };
   temporal: {
     currentTime: string;
@@ -163,23 +322,35 @@ interface SnapshotData {
 
 function useCSnapshot() {
   return useStandardQuery<SnapshotData>({
-    queryKey: ["consciousness-snapshot"],
+    queryKey: ['consciousness-snapshot'],
     queryFn: async () => {
       const r = await fetch(`${API}/snapshot`);
-      if (!r.ok) throw new Error("Failed to fetch consciousness snapshot");
+      if (!r.ok) throw new Error('Failed to fetch consciousness snapshot');
       return r.json();
     },
     refetchInterval: 10000,
   });
 }
 
-function Card({ title, icon: Icon, children, className = "", accent = "red" }: { title: string; icon: React.ElementType; children: React.ReactNode; className?: string; accent?: string }) {
+function Card({
+  title,
+  icon: Icon,
+  children,
+  className = '',
+  accent = 'red',
+}: {
+  title: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+  className?: string;
+  accent?: string;
+}) {
   const accentMap: Record<string, { bg: string; text: string; border: string }> = {
-    red: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/10" },
-    blue: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/10" },
-    purple: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/10" },
-    amber: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/10" },
-    cyan: { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/10" },
+    red: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/10' },
+    blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/10' },
+    purple: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/10' },
+    amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/10' },
+    cyan: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/10' },
   };
   const a = accentMap[accent] ?? accentMap.red!;
   return (
@@ -202,35 +373,48 @@ function Card({ title, icon: Icon, children, className = "", accent = "red" }: {
 
 function CertaintyBadge({ level }: { level: string }) {
   const colors: Record<string, string> = {
-    very_high: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    high: "bg-green-500/20 text-green-400 border-green-500/30",
-    moderate: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    low: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    very_low: "bg-red-500/20 text-red-400 border-red-500/30",
+    very_high: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    high: 'bg-green-500/20 text-green-400 border-green-500/30',
+    moderate: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    low: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    very_low: 'bg-red-500/20 text-red-400 border-red-500/30',
   };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${colors[level] ?? "bg-gray-500/20 text-gray-400 border-gray-500/30"}`}>
-      {level.replace(/_/g, " ").toUpperCase()}
+    <span
+      className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${colors[level] ?? 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}
+    >
+      {level.replace(/_/g, ' ').toUpperCase()}
     </span>
   );
 }
 
 function TrendIcon({ trend }: { trend: string }) {
-  if (trend === "improving") return <TrendingUp className="w-3 h-3 text-emerald-400" />;
-  if (trend === "declining") return <TrendingDown className="w-3 h-3 text-red-400" />;
+  if (trend === 'improving') return <TrendingUp className="w-3 h-3 text-emerald-400" />;
+  if (trend === 'declining') return <TrendingDown className="w-3 h-3 text-red-400" />;
   return <Minus className="w-3 h-3 text-gray-500" />;
 }
 
-function MiniBar({ value, max = 1, color = "bg-red-500/60" }: { value: number; max?: number; color?: string }) {
+function MiniBar({
+  value,
+  max = 1,
+  color = 'bg-red-500/60',
+}: {
+  value: number;
+  max?: number;
+  color?: string;
+}) {
   const pct = Math.min(100, Math.max(0, (value / max) * 100));
   return (
     <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-      <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+      <div
+        className={`h-full ${color} rounded-full transition-all duration-500`}
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }
 
-function MetacognitionPanel({ data }: { data: SnapshotData["metacognition"] }) {
+function MetacognitionPanel({ data }: { data: SnapshotData['metacognition'] }) {
   const a = data.currentAssessment;
   return (
     <Card title="Metacognition" icon={Brain}>
@@ -262,11 +446,17 @@ function MetacognitionPanel({ data }: { data: SnapshotData["metacognition"] }) {
             </div>
             <div>
               <span className="text-gray-500">Conf-in-conf:</span>
-              <span className="text-red-50 ml-1">{(a.confidenceInConfidence * 100).toFixed(0)}%</span>
+              <span className="text-red-50 ml-1">
+                {(a.confidenceInConfidence * 100).toFixed(0)}%
+              </span>
             </div>
             <div>
               <span className="text-gray-500">Confusion streak:</span>
-              <span className={`ml-1 ${data.confusionStreak > 0 ? "text-amber-400" : "text-red-50"}`}>{data.confusionStreak}</span>
+              <span
+                className={`ml-1 ${data.confusionStreak > 0 ? 'text-amber-400' : 'text-red-50'}`}
+              >
+                {data.confusionStreak}
+              </span>
             </div>
           </div>
 
@@ -276,7 +466,9 @@ function MetacognitionPanel({ data }: { data: SnapshotData["metacognition"] }) {
                 <AlertTriangle className="w-3 h-3" /> Confusion Signals
               </div>
               {a.confusionSignals.map((s, i) => (
-                <div key={i} className="text-[10px] text-gray-400 pl-4">• {s}</div>
+                <div key={i} className="text-[10px] text-gray-400 pl-4">
+                  • {s}
+                </div>
               ))}
             </div>
           )}
@@ -289,10 +481,14 @@ function MetacognitionPanel({ data }: { data: SnapshotData["metacognition"] }) {
 
           <div className="flex gap-2">
             {a.shouldSeekClarification && (
-              <span className="px-2 py-0.5 text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full">SEEK CLARIFICATION</span>
+              <span className="px-2 py-0.5 text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full">
+                SEEK CLARIFICATION
+              </span>
             )}
             {a.shouldDeferToHuman && (
-              <span className="px-2 py-0.5 text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">DEFER TO HUMAN</span>
+              <span className="px-2 py-0.5 text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">
+                DEFER TO HUMAN
+              </span>
             )}
           </div>
         </div>
@@ -303,33 +499,42 @@ function MetacognitionPanel({ data }: { data: SnapshotData["metacognition"] }) {
   );
 }
 
-function SelfModelPanel({ data }: { data: SnapshotData["selfModel"] }) {
+function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
   const healthColors: Record<string, string> = {
-    optimal: "text-emerald-400",
-    good: "text-green-400",
-    degraded: "text-amber-400",
-    impaired: "text-red-400",
+    optimal: 'text-emerald-400',
+    good: 'text-green-400',
+    degraded: 'text-amber-400',
+    impaired: 'text-red-400',
   };
   return (
     <Card title="Self-Model & Theory of Mind" icon={Eye}>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500">System Health</div>
-          <span className={`text-sm font-bold ${healthColors[data.overallHealth] ?? "text-gray-400"}`}>
+          <span
+            className={`text-sm font-bold ${healthColors[data.overallHealth] ?? 'text-gray-400'}`}
+          >
             {data.overallHealth.toUpperCase()}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500">Learning Velocity</div>
-          <span className="text-sm font-bold text-red-50">{(data.learningVelocity * 100).toFixed(0)}%</span>
+          <span className="text-sm font-bold text-red-50">
+            {(data.learningVelocity * 100).toFixed(0)}%
+          </span>
         </div>
 
         {data.capabilities.length > 0 && (
           <div className="space-y-1">
-            <div className="text-[10px] text-gray-500 font-medium">Agent Profiles ({data.capabilities.length})</div>
+            <div className="text-[10px] text-gray-500 font-medium">
+              Agent Profiles ({data.capabilities.length})
+            </div>
             <div className="max-h-32 overflow-y-auto space-y-1">
-              {data.capabilities.slice(0, 8).map(cap => (
-                <div key={cap.agentId} className="flex items-center justify-between text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+              {data.capabilities.slice(0, 8).map((cap) => (
+                <div
+                  key={cap.agentId}
+                  className="flex items-center justify-between text-[10px] px-2 py-1 bg-white/[0.02] rounded"
+                >
                   <div className="flex items-center gap-1">
                     <TrendIcon trend={cap.recentTrend} />
                     <span className="text-red-50 font-medium">{cap.agentId}</span>
@@ -351,17 +556,26 @@ function SelfModelPanel({ data }: { data: SnapshotData["selfModel"] }) {
               <Users className="w-3 h-3" /> Theory of Mind ({data.theoryOfMind.length})
             </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
-              {data.theoryOfMind.slice(0, 5).map(belief => (
-                <div key={`${belief.agentId}-${belief.timestamp}`} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+              {data.theoryOfMind.slice(0, 5).map((belief) => (
+                <div
+                  key={`${belief.agentId}-${belief.timestamp}`}
+                  className="text-[10px] px-2 py-1 bg-white/[0.02] rounded"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-red-50 font-medium">{belief.agentId}</span>
-                    <span className={`${belief.divergenceFromConsensus > 0.3 ? "text-amber-400" : "text-gray-500"}`}>
+                    <span
+                      className={`${belief.divergenceFromConsensus > 0.3 ? 'text-amber-400' : 'text-gray-500'}`}
+                    >
                       {(belief.beliefConfidence * 100).toFixed(0)}% conf
                     </span>
                   </div>
-                  <div className="text-gray-500 truncate">{belief.queryInterpretation.slice(0, 60)}</div>
+                  <div className="text-gray-500 truncate">
+                    {belief.queryInterpretation.slice(0, 60)}
+                  </div>
                   {belief.divergenceFromConsensus > 0.3 && (
-                    <div className="text-amber-400/70 text-[9px]">Divergence: {(belief.divergenceFromConsensus * 100).toFixed(0)}%</div>
+                    <div className="text-amber-400/70 text-[9px]">
+                      Divergence: {(belief.divergenceFromConsensus * 100).toFixed(0)}%
+                    </div>
                   )}
                 </div>
               ))}
@@ -374,10 +588,13 @@ function SelfModelPanel({ data }: { data: SnapshotData["selfModel"] }) {
             <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1">
               <Scale className="w-3 h-3" /> Counterfactuals
             </div>
-            {data.recentCounterfactuals.slice(0, 2).map(cf => (
+            {data.recentCounterfactuals.slice(0, 2).map((cf) => (
               <div key={cf.scenarioId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
-                <span className={`${cf.predictedOutcomeDelta > 0 ? "text-emerald-400" : cf.predictedOutcomeDelta < -5 ? "text-red-400" : "text-gray-400"}`}>
-                  {cf.predictedOutcomeDelta > 0 ? "+" : ""}{cf.predictedOutcomeDelta.toFixed(1)}%
+                <span
+                  className={`${cf.predictedOutcomeDelta > 0 ? 'text-emerald-400' : cf.predictedOutcomeDelta < -5 ? 'text-red-400' : 'text-gray-400'}`}
+                >
+                  {cf.predictedOutcomeDelta > 0 ? '+' : ''}
+                  {cf.predictedOutcomeDelta.toFixed(1)}%
                 </span>
                 <span className="text-gray-500 ml-1">{cf.reasoning.slice(0, 60)}</span>
               </div>
@@ -391,7 +608,9 @@ function SelfModelPanel({ data }: { data: SnapshotData["selfModel"] }) {
               <Shield className="w-3 h-3 text-amber-400/60" /> Known Limitations
             </div>
             {data.knownLimitations.slice(0, 3).map((l, i) => (
-              <div key={i} className="text-[10px] text-gray-500 pl-4">• {l.slice(0, 80)}</div>
+              <div key={i} className="text-[10px] text-gray-500 pl-4">
+                • {l.slice(0, 80)}
+              </div>
             ))}
           </div>
         )}
@@ -402,24 +621,24 @@ function SelfModelPanel({ data }: { data: SnapshotData["selfModel"] }) {
   );
 }
 
-function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
+function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
   const toneColors: Record<string, string> = {
-    positive: "text-emerald-400",
-    neutral: "text-gray-400",
-    negative: "text-red-400",
-    mixed: "text-amber-400",
+    positive: 'text-emerald-400',
+    neutral: 'text-gray-400',
+    negative: 'text-red-400',
+    mixed: 'text-amber-400',
   };
   const typeIcons: Record<string, string> = {
-    pre_routing: "\u2192",
-    post_routing: "\u2190",
-    reflection: "\u25c6",
-    doubt: "?",
-    realization: "!",
-    strategy_shift: "\u21c4",
-    self_correction: "\u21bb",
-    satisfaction: "\u2713",
-    frustration: "\u2717",
-    dialectical: "\u2261",
+    pre_routing: '\u2192',
+    post_routing: '\u2190',
+    reflection: '\u25c6',
+    doubt: '?',
+    realization: '!',
+    strategy_shift: '\u21c4',
+    self_correction: '\u21bb',
+    satisfaction: '\u2713',
+    frustration: '\u2717',
+    dialectical: '\u2261',
   };
 
   return (
@@ -428,7 +647,11 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
         <div className="flex items-center gap-4 text-xs">
           <div>
             <span className="text-gray-500">Dominant tone:</span>
-            <span className={`ml-1 font-medium ${toneColors[data.dominantTone] ?? "text-gray-400"}`}>{data.dominantTone}</span>
+            <span
+              className={`ml-1 font-medium ${toneColors[data.dominantTone] ?? 'text-gray-400'}`}
+            >
+              {data.dominantTone}
+            </span>
           </div>
           <div>
             <span className="text-gray-500">Thoughts:</span>
@@ -442,16 +665,20 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
 
         {data.recentThoughts.length > 0 ? (
           <div className="space-y-2 max-h-32 overflow-y-auto">
-            {data.recentThoughts.slice(0, 6).map(t => (
+            {data.recentThoughts.slice(0, 6).map((t) => (
               <m.div
                 key={t.entryId}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="flex gap-2 text-[11px]"
               >
-                <span className="text-red-500/40 shrink-0 w-4 text-center">{typeIcons[t.type] ?? "\u25cb"}</span>
+                <span className="text-red-500/40 shrink-0 w-4 text-center">
+                  {typeIcons[t.type] ?? '\u25cb'}
+                </span>
                 <div className="flex-1">
-                  <span className={`${toneColors[t.emotionalTone] ?? "text-gray-400"}`}>{t.thought.slice(0, 300)}</span>
+                  <span className={`${toneColors[t.emotionalTone] ?? 'text-gray-400'}`}>
+                    {t.thought.slice(0, 300)}
+                  </span>
                   <span className="text-gray-600 ml-2">{t.confidence}%</span>
                 </div>
               </m.div>
@@ -464,15 +691,27 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
         {data.dialecticalTriples && data.dialecticalTriples.length > 0 && (
           <div className="space-y-1 mt-2">
             <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1">
-              <Layers className="w-3 h-3" /> Dialectical Reasoning ({data.dialecticalTriples.length})
+              <Layers className="w-3 h-3" /> Dialectical Reasoning ({data.dialecticalTriples.length}
+              )
             </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
-              {data.dialecticalTriples.slice(0, 3).map(dt => (
-                <div key={dt.tripleId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded space-y-0.5">
-                  <div className="text-gray-400"><span className="text-blue-400">T:</span> {dt.thesis.slice(0, 60)}</div>
-                  <div className="text-gray-400"><span className="text-red-400/80">A:</span> {dt.antithesis.slice(0, 60)}</div>
-                  <div className="text-gray-400"><span className="text-purple-400">S:</span> {dt.synthesis.slice(0, 60)}</div>
-                  <div className="text-gray-600 text-[9px]">{(dt.confidence * 100).toFixed(0)}% conf</div>
+              {data.dialecticalTriples.slice(0, 3).map((dt) => (
+                <div
+                  key={dt.tripleId}
+                  className="text-[10px] px-2 py-1 bg-white/[0.02] rounded space-y-0.5"
+                >
+                  <div className="text-gray-400">
+                    <span className="text-blue-400">T:</span> {dt.thesis.slice(0, 60)}
+                  </div>
+                  <div className="text-gray-400">
+                    <span className="text-red-400/80">A:</span> {dt.antithesis.slice(0, 60)}
+                  </div>
+                  <div className="text-gray-400">
+                    <span className="text-purple-400">S:</span> {dt.synthesis.slice(0, 60)}
+                  </div>
+                  <div className="text-gray-600 text-[9px]">
+                    {(dt.confidence * 100).toFixed(0)}% conf
+                  </div>
                 </div>
               ))}
             </div>
@@ -484,12 +723,16 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
             <div className="text-[10px] text-cyan-400 font-medium flex items-center gap-1">
               <Crosshair className="w-3 h-3" /> Socratic Inquiry ({data.socraticChains.length})
             </div>
-            {data.socraticChains.slice(0, 2).map(sc => (
+            {data.socraticChains.slice(0, 2).map((sc) => (
               <div key={sc.chainId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                 <div className="text-gray-400 truncate">Claim: {sc.originalClaim.slice(0, 60)}</div>
-                <div className="text-cyan-400/70">{sc.questions.length} questions → {sc.conclusion.slice(0, 60)}</div>
+                <div className="text-cyan-400/70">
+                  {sc.questions.length} questions → {sc.conclusion.slice(0, 60)}
+                </div>
                 {sc.assumptionsExposed.length > 0 && (
-                  <div className="text-amber-400/60 text-[9px]">Assumptions: {sc.assumptionsExposed.slice(0, 2).join("; ").slice(0, 80)}</div>
+                  <div className="text-amber-400/60 text-[9px]">
+                    Assumptions: {sc.assumptionsExposed.slice(0, 2).join('; ').slice(0, 80)}
+                  </div>
                 )}
               </div>
             ))}
@@ -499,13 +742,22 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
         {data.perspectiveSimulations && data.perspectiveSimulations.length > 0 && (
           <div className="space-y-1 mt-1">
             <div className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
-              <Users className="w-3 h-3" /> Perspective Simulations ({data.perspectiveSimulations.length})
+              <Users className="w-3 h-3" /> Perspective Simulations (
+              {data.perspectiveSimulations.length})
             </div>
-            {data.perspectiveSimulations.slice(0, 2).map(ps => (
-              <div key={ps.simulationId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
+            {data.perspectiveSimulations.slice(0, 2).map((ps) => (
+              <div
+                key={ps.simulationId}
+                className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded"
+              >
                 <div className="flex gap-1 flex-wrap mb-0.5">
                   {ps.perspectives.map((p, i) => (
-                    <span key={i} className="px-1 py-0.5 text-[9px] bg-blue-500/10 text-blue-400/70 rounded">{p.viewpoint}</span>
+                    <span
+                      key={i}
+                      className="px-1 py-0.5 text-[9px] bg-blue-500/10 text-blue-400/70 rounded"
+                    >
+                      {p.viewpoint}
+                    </span>
                   ))}
                 </div>
                 <div className="text-gray-500 truncate">{ps.synthesis.slice(0, 80)}</div>
@@ -518,9 +770,16 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
   );
 }
 
-function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
+function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
   const v = data.valence;
-  const trajectoryIcon = data.moodTrajectory === "improving" ? <TrendingUp className="w-3 h-3 text-emerald-400" /> : data.moodTrajectory === "declining" ? <TrendingDown className="w-3 h-3 text-red-400" /> : <Minus className="w-3 h-3 text-gray-500" />;
+  const trajectoryIcon =
+    data.moodTrajectory === 'improving' ? (
+      <TrendingUp className="w-3 h-3 text-emerald-400" />
+    ) : data.moodTrajectory === 'declining' ? (
+      <TrendingDown className="w-3 h-3 text-red-400" />
+    ) : (
+      <Minus className="w-3 h-3 text-gray-500" />
+    );
 
   return (
     <Card title="Emotional Appraisal" icon={Heart}>
@@ -565,8 +824,11 @@ function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
         {data.activeSignals.length > 0 && (
           <div className="space-y-1">
             <div className="text-[10px] text-gray-500 font-medium">Active Signals</div>
-            {data.activeSignals.slice(0, 4).map(s => (
-              <div key={s.signalId} className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
+            {data.activeSignals.slice(0, 4).map((s) => (
+              <div
+                key={s.signalId}
+                className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.02] rounded"
+              >
                 <span className="text-red-50">{s.emotion}</span>
                 <span className="text-gray-500">{(s.effectiveIntensity * 100).toFixed(0)}%</span>
               </div>
@@ -580,11 +842,13 @@ function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
               <Gauge className="w-3 h-3" /> Scherer Appraisals ({data.recentAppraisals.length})
             </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
-              {data.recentAppraisals.slice(0, 3).map(ap => (
+              {data.recentAppraisals.slice(0, 3).map((ap) => (
                 <div key={ap.appraisalId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                   <div className="flex items-center justify-between mb-0.5">
                     <span className="text-red-50 font-medium">{ap.resultingEmotion}</span>
-                    <span className="text-gray-500">{(ap.resultingIntensity * 100).toFixed(0)}%</span>
+                    <span className="text-gray-500">
+                      {(ap.resultingIntensity * 100).toFixed(0)}%
+                    </span>
                   </div>
                   <div className="grid grid-cols-5 gap-1">
                     <div className="text-center">
@@ -617,10 +881,17 @@ function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
         {data.activeRegulations && data.activeRegulations.length > 0 && (
           <div className="space-y-1">
             <div className="text-[10px] text-gray-500 font-medium">Emotion Regulation</div>
-            {data.activeRegulations.slice(0, 2).map(reg => (
-              <div key={reg.strategyId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between">
-                <span className="text-red-50">{reg.type}: {reg.action.slice(0, 40)}</span>
-                <span className="text-gray-500">{(reg.effectivenessEstimate * 100).toFixed(0)}%</span>
+            {data.activeRegulations.slice(0, 2).map((reg) => (
+              <div
+                key={reg.strategyId}
+                className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between"
+              >
+                <span className="text-red-50">
+                  {reg.type}: {reg.action.slice(0, 40)}
+                </span>
+                <span className="text-gray-500">
+                  {(reg.effectivenessEstimate * 100).toFixed(0)}%
+                </span>
               </div>
             ))}
           </div>
@@ -630,13 +901,13 @@ function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
   );
 }
 
-function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
+function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
   const prioColors: Record<string, string> = {
-    critical: "text-red-400",
-    high: "text-orange-400",
-    medium: "text-amber-400",
-    low: "text-gray-400",
-    exploratory: "text-purple-400",
+    critical: 'text-red-400',
+    high: 'text-orange-400',
+    medium: 'text-amber-400',
+    low: 'text-gray-400',
+    exploratory: 'text-purple-400',
   };
 
   return (
@@ -669,10 +940,13 @@ function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
 
         {data.activeGoals.length > 0 && (
           <div className="space-y-1 max-h-24 overflow-y-auto">
-            {data.activeGoals.slice(0, 5).map(g => (
-              <div key={g.goalId} className="flex items-center justify-between text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+            {data.activeGoals.slice(0, 5).map((g) => (
+              <div
+                key={g.goalId}
+                className="flex items-center justify-between text-[10px] px-2 py-1 bg-white/[0.02] rounded"
+              >
                 <div className="flex items-center gap-1">
-                  <span className={prioColors[g.priority] ?? "text-gray-400"}>{"\u25cf"}</span>
+                  <span className={prioColors[g.priority] ?? 'text-gray-400'}>{'\u25cf'}</span>
                   <span className="text-red-50">{g.title.slice(0, 40)}</span>
                 </div>
                 <span className="text-gray-500">{g.progress}%</span>
@@ -689,19 +963,27 @@ function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
             <div className="grid grid-cols-4 gap-1">
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">INFO</div>
-                <div className="text-[10px] text-red-50">{(data.intrinsicMotivation.informationGain * 100).toFixed(0)}%</div>
+                <div className="text-[10px] text-red-50">
+                  {(data.intrinsicMotivation.informationGain * 100).toFixed(0)}%
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">COMP</div>
-                <div className="text-[10px] text-red-50">{(data.intrinsicMotivation.competenceGrowth * 100).toFixed(0)}%</div>
+                <div className="text-[10px] text-red-50">
+                  {(data.intrinsicMotivation.competenceGrowth * 100).toFixed(0)}%
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">NOV</div>
-                <div className="text-[10px] text-red-50">{(data.intrinsicMotivation.noveltySeeking * 100).toFixed(0)}%</div>
+                <div className="text-[10px] text-red-50">
+                  {(data.intrinsicMotivation.noveltySeeking * 100).toFixed(0)}%
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">DRIVE</div>
-                <div className="text-[10px] font-bold text-blue-400">{(data.intrinsicMotivation.overallDrive * 100).toFixed(0)}%</div>
+                <div className="text-[10px] font-bold text-blue-400">
+                  {(data.intrinsicMotivation.overallDrive * 100).toFixed(0)}%
+                </div>
               </div>
             </div>
             <MiniBar value={data.intrinsicMotivation.overallDrive} color="bg-blue-500/60" />
@@ -710,15 +992,22 @@ function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
 
         {data.metaGoals && data.metaGoals.length > 0 && (
           <div className="space-y-1">
-            <div className="text-[10px] text-cyan-400 font-medium">Meta-Goals ({data.metaGoals.length})</div>
+            <div className="text-[10px] text-cyan-400 font-medium">
+              Meta-Goals ({data.metaGoals.length})
+            </div>
             <div className="max-h-20 overflow-y-auto space-y-1">
-              {data.metaGoals.slice(0, 4).map(mg => (
-                <div key={mg.metaGoalId} className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
+              {data.metaGoals.slice(0, 4).map((mg) => (
+                <div
+                  key={mg.metaGoalId}
+                  className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.02] rounded"
+                >
                   <div className="flex items-center gap-1">
                     <TrendIcon trend={mg.trend} />
                     <span className="text-red-50">{mg.title.slice(0, 30)}</span>
                   </div>
-                  <span className="text-gray-500">{mg.currentValue.toFixed(0)}/{mg.targetValue.toFixed(0)}</span>
+                  <span className="text-gray-500">
+                    {mg.currentValue.toFixed(0)}/{mg.targetValue.toFixed(0)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -730,9 +1019,9 @@ function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
             <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1 mb-1">
               <Lightbulb className="w-3 h-3" /> Curiosity Queue ({data.curiosityQueue.length})
             </div>
-            {data.curiosityQueue.slice(0, 3).map(c => (
+            {data.curiosityQueue.slice(0, 3).map((c) => (
               <div key={c.signalId} className="text-[10px] text-gray-400 pl-4">
-                {"\u2022"} {c.topic} ({(c.intensity * 100).toFixed(0)}%)
+                {'\u2022'} {c.topic} ({(c.intensity * 100).toFixed(0)}%)
               </div>
             ))}
           </div>
@@ -742,9 +1031,12 @@ function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
   );
 }
 
-function TemporalPanel({ data }: { data: SnapshotData["temporal"] }) {
+function TemporalPanel({ data }: { data: SnapshotData['temporal'] }) {
   const uptimeHrs = (data.uptimeMs / 3600000).toFixed(1);
-  const avgIntervalMin = data.averageOrchestrationInterval > 0 ? (data.averageOrchestrationInterval / 60000).toFixed(1) : "\u2014";
+  const avgIntervalMin =
+    data.averageOrchestrationInterval > 0
+      ? (data.averageOrchestrationInterval / 60000).toFixed(1)
+      : '\u2014';
 
   return (
     <Card title="Temporal Awareness" icon={Clock}>
@@ -752,12 +1044,14 @@ function TemporalPanel({ data }: { data: SnapshotData["temporal"] }) {
         <div className="grid grid-cols-2 gap-2">
           <div>
             <span className="text-gray-500">Time:</span>
-            <span className="text-red-50 ml-1">{data.dayOfWeek} {data.timeOfDay}</span>
+            <span className="text-red-50 ml-1">
+              {data.dayOfWeek} {data.timeOfDay}
+            </span>
           </div>
           <div>
             <span className="text-gray-500">Business hrs:</span>
-            <span className={`ml-1 ${data.isBusinessHours ? "text-emerald-400" : "text-gray-500"}`}>
-              {data.isBusinessHours ? "Yes" : "No"}
+            <span className={`ml-1 ${data.isBusinessHours ? 'text-emerald-400' : 'text-gray-500'}`}>
+              {data.isBusinessHours ? 'Yes' : 'No'}
             </span>
           </div>
           <div>
@@ -778,7 +1072,7 @@ function TemporalPanel({ data }: { data: SnapshotData["temporal"] }) {
   );
 }
 
-function WorkspacePanel({ data }: { data: SnapshotData["workspace"] }) {
+function WorkspacePanel({ data }: { data: SnapshotData['workspace'] }) {
   return (
     <Card title="GWT Workspace" icon={Compass} accent="cyan">
       <div className="space-y-3">
@@ -789,27 +1083,34 @@ function WorkspacePanel({ data }: { data: SnapshotData["workspace"] }) {
           </div>
           <div>
             <span className="text-gray-500">Context usage:</span>
-            <span className="text-red-50 ml-1">{(data.contextBudget.utilization * 100).toFixed(0)}%</span>
+            <span className="text-red-50 ml-1">
+              {(data.contextBudget.utilization * 100).toFixed(0)}%
+            </span>
           </div>
         </div>
 
         <div>
           <div className="flex justify-between text-[10px] mb-1">
             <span className="text-gray-500">Context Budget</span>
-            <span className="text-cyan-400">{data.contextBudget.used}/{data.contextBudget.total}</span>
+            <span className="text-cyan-400">
+              {data.contextBudget.used}/{data.contextBudget.total}
+            </span>
           </div>
           <MiniBar value={data.contextBudget.utilization} color="bg-cyan-500/60" />
         </div>
 
         <div>
           <div className="text-[10px] text-gray-500 mb-1">Attention Focus</div>
-          <div className="text-[11px] text-red-50">
-            Primary: {data.attentionFocus.primaryTopic}
-          </div>
+          <div className="text-[11px] text-red-50">Primary: {data.attentionFocus.primaryTopic}</div>
           {data.attentionFocus.activeDomains.length > 0 && (
             <div className="flex gap-1 mt-1 flex-wrap">
-              {data.attentionFocus.activeDomains.slice(0, 5).map(d => (
-                <span key={d} className="px-1.5 py-0.5 text-[9px] bg-cyan-500/10 text-cyan-400/70 rounded">{d}</span>
+              {data.attentionFocus.activeDomains.slice(0, 5).map((d) => (
+                <span
+                  key={d}
+                  className="px-1.5 py-0.5 text-[9px] bg-cyan-500/10 text-cyan-400/70 rounded"
+                >
+                  {d}
+                </span>
               ))}
             </div>
           )}
@@ -817,9 +1118,11 @@ function WorkspacePanel({ data }: { data: SnapshotData["workspace"] }) {
 
         {data.workingMemory.length > 0 && (
           <div>
-            <div className="text-[10px] text-gray-500 mb-1">Working Memory ({data.workingMemory.length} items)</div>
+            <div className="text-[10px] text-gray-500 mb-1">
+              Working Memory ({data.workingMemory.length} items)
+            </div>
             <div className="max-h-20 overflow-y-auto space-y-1">
-              {data.workingMemory.slice(0, 4).map(wm => (
+              {data.workingMemory.slice(0, 4).map((wm) => (
                 <div key={wm.id} className="text-[10px] text-gray-400 truncate">
                   [{wm.source}] {wm.content.slice(0, 80)}
                 </div>
@@ -833,9 +1136,10 @@ function WorkspacePanel({ data }: { data: SnapshotData["workspace"] }) {
 }
 
 function PredictivePanel({ data }: { data: PredictiveState }) {
-  const accuracy = data.model.totalPredictions > 0
-    ? ((data.model.correctPredictions / data.model.totalPredictions) * 100).toFixed(1)
-    : "0.0";
+  const accuracy =
+    data.model.totalPredictions > 0
+      ? ((data.model.correctPredictions / data.model.totalPredictions) * 100).toFixed(1)
+      : '0.0';
   const fe = data.freeEnergy;
 
   const topDomains = Object.entries(data.routingPriors)
@@ -843,10 +1147,10 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
     .slice(0, 6);
 
   const surpriseLevelColors: Record<string, string> = {
-    expected: "text-emerald-400",
-    mild_surprise: "text-amber-400",
-    strong_surprise: "text-orange-400",
-    anomalous: "text-red-400",
+    expected: 'text-emerald-400',
+    mild_surprise: 'text-amber-400',
+    strong_surprise: 'text-orange-400',
+    anomalous: 'text-red-400',
   };
 
   return (
@@ -862,7 +1166,9 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
             <div className="text-[10px] text-gray-500">Predictions</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-amber-400">{fe.currentFreeEnergy.toFixed(2)}</div>
+            <div className="text-lg font-bold text-amber-400">
+              {fe.currentFreeEnergy.toFixed(2)}
+            </div>
             <div className="text-[10px] text-gray-500">Free Energy</div>
           </div>
         </div>
@@ -894,12 +1200,17 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
 
         {data.recentErrors.length > 0 && (
           <div>
-            <div className="text-[10px] text-gray-500 font-medium mb-1">Recent Prediction Errors</div>
+            <div className="text-[10px] text-gray-500 font-medium mb-1">
+              Recent Prediction Errors
+            </div>
             <div className="max-h-20 overflow-y-auto space-y-1">
-              {data.recentErrors.slice(0, 4).map(e => (
-                <div key={e.errorId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between">
-                  <span className={surpriseLevelColors[e.surpriseLevel] ?? "text-gray-400"}>
-                    {e.surpriseLevel.replace(/_/g, " ")}
+              {data.recentErrors.slice(0, 4).map((e) => (
+                <div
+                  key={e.errorId}
+                  className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between"
+                >
+                  <span className={surpriseLevelColors[e.surpriseLevel] ?? 'text-gray-400'}>
+                    {e.surpriseLevel.replace(/_/g, ' ')}
                   </span>
                   <span className="text-gray-500">{(e.errorMagnitude * 100).toFixed(0)}%</span>
                 </div>
@@ -914,9 +1225,9 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
 
 function DreamPanel({ data }: { data: DreamState }) {
   const outcomeColors: Record<string, string> = {
-    positive: "text-emerald-400",
-    negative: "text-red-400",
-    neutral: "text-gray-400",
+    positive: 'text-emerald-400',
+    negative: 'text-red-400',
+    neutral: 'text-gray-400',
   };
 
   return (
@@ -939,8 +1250,10 @@ function DreamPanel({ data }: { data: DreamState }) {
 
         <div className="flex items-center justify-between text-xs">
           <span className="text-gray-500">Status</span>
-          <span className={`px-2 py-0.5 rounded-full text-[9px] font-medium border ${data.isRunning ? "bg-purple-500/20 text-purple-400 border-purple-500/30" : "bg-gray-500/20 text-gray-400 border-gray-500/30"}`}>
-            {data.isRunning ? "DREAMING" : "AWAKE"}
+          <span
+            className={`px-2 py-0.5 rounded-full text-[9px] font-medium border ${data.isRunning ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}
+          >
+            {data.isRunning ? 'DREAMING' : 'AWAKE'}
           </span>
         </div>
 
@@ -956,13 +1269,21 @@ function DreamPanel({ data }: { data: DreamState }) {
               <GitBranch className="w-3 h-3" /> Discovered Patterns
             </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
-              {data.discoveredPatterns.slice(0, 5).map(p => {
-                const sigColors: Record<string, string> = { high: "text-red-400", medium: "text-amber-400", low: "text-gray-400" };
+              {data.discoveredPatterns.slice(0, 5).map((p) => {
+                const sigColors: Record<string, string> = {
+                  high: 'text-red-400',
+                  medium: 'text-amber-400',
+                  low: 'text-gray-400',
+                };
                 return (
                   <div key={p.patternId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                     <div className="flex items-center justify-between">
-                      <span className="text-red-50 truncate max-w-[120px]">{p.description.slice(0, 50)}</span>
-                      <span className={sigColors[p.significance] ?? "text-gray-400"}>{p.significance}</span>
+                      <span className="text-red-50 truncate max-w-[120px]">
+                        {p.description.slice(0, 50)}
+                      </span>
+                      <span className={sigColors[p.significance] ?? 'text-gray-400'}>
+                        {p.significance}
+                      </span>
                     </div>
                     <div className="text-gray-500 truncate">{p.actionableInsight.slice(0, 80)}</div>
                   </div>
@@ -981,10 +1302,15 @@ function DreamPanel({ data }: { data: DreamState }) {
                 <div className="text-[10px] px-2 py-1 bg-white/[0.02] rounded space-y-0.5">
                   <div className="flex justify-between text-gray-400">
                     <span>Cycle #{r.cycleNumber}</span>
-                    <span>{r.replaysProcessed} replays, {r.patternsDiscovered.length} patterns, {r.memoriesPruned} pruned</span>
+                    <span>
+                      {r.replaysProcessed} replays, {r.patternsDiscovered.length} patterns,{' '}
+                      {r.memoriesPruned} pruned
+                    </span>
                   </div>
                   {r.insightsGenerated.slice(0, 2).map((insight, i) => (
-                    <div key={i} className="text-purple-400/70 truncate">{"\u2022"} {insight}</div>
+                    <div key={i} className="text-purple-400/70 truncate">
+                      {'\u2022'} {insight}
+                    </div>
                   ))}
                 </div>
               );
@@ -996,12 +1322,20 @@ function DreamPanel({ data }: { data: DreamState }) {
           <div>
             <div className="text-[10px] text-gray-500 font-medium mb-1">Recent Replays</div>
             <div className="max-h-16 overflow-y-auto space-y-0.5">
-              {data.replayBuffer.slice(-4).reverse().map(r => (
-                <div key={r.replayId} className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.01] rounded">
-                  <span className="text-gray-400 truncate max-w-[160px]">{r.query.slice(0, 40)}</span>
-                  <span className={outcomeColors[r.outcome] ?? "text-gray-400"}>{r.outcome}</span>
-                </div>
-              ))}
+              {data.replayBuffer
+                .slice(-4)
+                .reverse()
+                .map((r) => (
+                  <div
+                    key={r.replayId}
+                    className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.01] rounded"
+                  >
+                    <span className="text-gray-400 truncate max-w-[160px]">
+                      {r.query.slice(0, 40)}
+                    </span>
+                    <span className={outcomeColors[r.outcome] ?? 'text-gray-400'}>{r.outcome}</span>
+                  </div>
+                ))}
             </div>
           </div>
         )}
@@ -1010,46 +1344,60 @@ function DreamPanel({ data }: { data: DreamState }) {
   );
 }
 
-function GWTBroadcastPanel({ data }: { data: SnapshotData["workspace"] }) {
+function GWTBroadcastPanel({ data }: { data: SnapshotData['workspace'] }) {
   return (
     <Card title="GWT Broadcast & Attention" icon={Radio} accent="cyan">
       <div className="space-y-2 text-xs">
         <div>
           <span className="text-gray-500">Context Window:</span>
-          <span className="text-red-50 ml-1">{(data.attentionFocus.contextWindowUsage * 100).toFixed(0)}% used</span>
+          <span className="text-red-50 ml-1">
+            {(data.attentionFocus.contextWindowUsage * 100).toFixed(0)}% used
+          </span>
         </div>
         <MiniBar value={data.attentionFocus.contextWindowUsage} color="bg-cyan-500/60" />
 
         {data.attentionSchema && (
           <div className="space-y-1">
             <div className="text-[10px] text-cyan-400 font-medium">Attention Schema</div>
-            {Object.entries(data.attentionSchema.allocationSummary).slice(0, 5).map(([key, val]) => (
-              <div key={key} className="flex items-center gap-2 text-[10px]">
-                <span className="text-red-50 w-16 truncate">{key}</span>
-                <div className="flex-1"><MiniBar value={val} color="bg-cyan-500/40" /></div>
-                <span className="text-gray-500 w-8 text-right">{(val * 100).toFixed(0)}%</span>
-              </div>
-            ))}
+            {Object.entries(data.attentionSchema.allocationSummary)
+              .slice(0, 5)
+              .map(([key, val]) => (
+                <div key={key} className="flex items-center gap-2 text-[10px]">
+                  <span className="text-red-50 w-16 truncate">{key}</span>
+                  <div className="flex-1">
+                    <MiniBar value={val} color="bg-cyan-500/40" />
+                  </div>
+                  <span className="text-gray-500 w-8 text-right">{(val * 100).toFixed(0)}%</span>
+                </div>
+              ))}
             {data.attentionSchema.driftDetected && (
               <div className="text-[9px] text-amber-400 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> {data.attentionSchema.driftDescription ?? "Drift detected"}
+                <AlertTriangle className="w-3 h-3" />{' '}
+                {data.attentionSchema.driftDescription ?? 'Drift detected'}
               </div>
             )}
             {data.attentionSchema.rebalanceRecommendation && (
-              <div className="text-[9px] text-cyan-400/70">{data.attentionSchema.rebalanceRecommendation.slice(0, 80)}</div>
+              <div className="text-[9px] text-cyan-400/70">
+                {data.attentionSchema.rebalanceRecommendation.slice(0, 80)}
+              </div>
             )}
           </div>
         )}
 
         {data.recentBroadcasts && data.recentBroadcasts.length > 0 && (
           <div className="space-y-1">
-            <div className="text-[10px] text-gray-500 font-medium">Recent Broadcasts ({data.recentBroadcasts.length})</div>
+            <div className="text-[10px] text-gray-500 font-medium">
+              Recent Broadcasts ({data.recentBroadcasts.length})
+            </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
-              {data.recentBroadcasts.slice(0, 3).map(b => (
+              {data.recentBroadcasts.slice(0, 3).map((b) => (
                 <div key={b.broadcastId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                   <div className="flex gap-1 mb-0.5">
-                    {b.winners.slice(0, 2).map(w => (
-                      <span key={w.itemId} className="px-1 py-0.5 text-[9px] bg-emerald-500/10 text-emerald-400/80 rounded truncate max-w-[100px]">
+                    {b.winners.slice(0, 2).map((w) => (
+                      <span
+                        key={w.itemId}
+                        className="px-1 py-0.5 text-[9px] bg-emerald-500/10 text-emerald-400/80 rounded truncate max-w-[100px]"
+                      >
                         {w.content.slice(0, 30)}
                       </span>
                     ))}
@@ -1069,8 +1417,13 @@ function GWTBroadcastPanel({ data }: { data: SnapshotData["workspace"] }) {
           <div>
             <div className="text-[10px] text-gray-500 mb-1">Active Domains</div>
             <div className="flex gap-1 flex-wrap">
-              {data.attentionFocus.activeDomains.map(d => (
-                <span key={d} className="px-1.5 py-0.5 text-[9px] bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 rounded">{d}</span>
+              {data.attentionFocus.activeDomains.map((d) => (
+                <span
+                  key={d}
+                  className="px-1.5 py-0.5 text-[9px] bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 rounded"
+                >
+                  {d}
+                </span>
               ))}
             </div>
           </div>
@@ -1096,7 +1449,10 @@ export default function ConsciousnessPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-red-50">Consciousness Layer v2</h1>
-            <p className="text-xs text-gray-500">GWT, Predictive Processing, Dialectical Reasoning, Appraisal Theory, Dream Consolidation</p>
+            <p className="text-xs text-gray-500">
+              GWT, Predictive Processing, Dialectical Reasoning, Appraisal Theory, Dream
+              Consolidation
+            </p>
           </div>
         </div>
         {data?.timestamp && (

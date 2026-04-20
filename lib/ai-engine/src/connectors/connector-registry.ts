@@ -1,4 +1,4 @@
-import type { ConnectorAdapter, ConnectorHealthStatus } from "./connector-interface.js";
+import type { ConnectorAdapter, ConnectorHealthStatus } from './connector-interface.js';
 
 class ConnectorRegistry {
   private connectors = new Map<string, ConnectorAdapter>();
@@ -18,11 +18,11 @@ class ConnectorRegistry {
   }
 
   getByCategory(category: string): ConnectorAdapter[] {
-    return this.getAll().filter(c => c.category === category);
+    return this.getAll().filter((c) => c.category === category);
   }
 
   getConfigured(): ConnectorAdapter[] {
-    return this.getAll().filter(c => c.isConfigured());
+    return this.getAll().filter((c) => c.isConfigured());
   }
 
   async checkHealth(connectorId: string): Promise<ConnectorHealthStatus> {
@@ -33,7 +33,11 @@ class ConnectorRegistry {
 
     const adapter = this.get(connectorId);
     if (!adapter) {
-      return { healthy: false, lastChecked: new Date().toISOString(), error: "Connector not found" };
+      return {
+        healthy: false,
+        lastChecked: new Date().toISOString(),
+        error: 'Connector not found',
+      };
     }
 
     const status = await adapter.healthCheck();
@@ -44,9 +48,9 @@ class ConnectorRegistry {
   async checkAllHealth(): Promise<Record<string, ConnectorHealthStatus>> {
     const results: Record<string, ConnectorHealthStatus> = {};
     await Promise.all(
-      this.getAll().map(async connector => {
+      this.getAll().map(async (connector) => {
         results[connector.connectorId] = await this.checkHealth(connector.connectorId);
-      })
+      }),
     );
     return results;
   }
@@ -54,7 +58,8 @@ class ConnectorRegistry {
   async execute(connectorId: string, toolName: string, input: unknown): Promise<unknown> {
     const adapter = this.get(connectorId);
     if (!adapter) throw new Error(`Connector not found: ${connectorId}`);
-    if (!adapter.isConfigured()) throw new Error(`Connector ${connectorId} is not configured (missing API keys)`);
+    if (!adapter.isConfigured())
+      throw new Error(`Connector ${connectorId} is not configured (missing API keys)`);
     return adapter.execute(toolName, input);
   }
 
@@ -67,14 +72,14 @@ class ConnectorRegistry {
     toolCount: number;
     tools: string[];
   }> {
-    return this.getAll().map(c => ({
+    return this.getAll().map((c) => ({
       connectorId: c.connectorId,
       displayName: c.displayName,
       category: c.category,
       vendor: c.vendor,
       configured: c.isConfigured(),
       toolCount: c.tools.length,
-      tools: c.tools.map(t => t.name),
+      tools: c.tools.map((t) => t.name),
     }));
   }
 }

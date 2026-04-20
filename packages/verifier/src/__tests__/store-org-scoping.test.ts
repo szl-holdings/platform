@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { InMemoryVerifierStore, verify, type VerifierTarget } from "../index.js";
+import { describe, expect, it } from 'vitest';
+import { InMemoryVerifierStore, type VerifierTarget, verify } from '../index.js';
 
-const target: VerifierTarget = { targetType: "output", targetId: "shared-target" };
+const target: VerifierTarget = { targetType: 'output', targetId: 'shared-target' };
 
 function decisionForOrg(orgId: number | null, evaluatedAt: number) {
   const d = verify({ text: `result-${orgId}-${evaluatedAt}` }, target, { orgId });
@@ -9,8 +9,8 @@ function decisionForOrg(orgId: number | null, evaluatedAt: number) {
   return d;
 }
 
-describe("InMemoryVerifierStore — org scoping", () => {
-  it("list filters by orgIds and excludes other tenants and null-org rows", async () => {
+describe('InMemoryVerifierStore — org scoping', () => {
+  it('list filters by orgIds and excludes other tenants and null-org rows', async () => {
     const store = new InMemoryVerifierStore();
     await store.save(decisionForOrg(1, 1000));
     await store.save(decisionForOrg(1, 1100));
@@ -36,7 +36,7 @@ describe("InMemoryVerifierStore — org scoping", () => {
     expect(all.total).toBe(4);
   });
 
-  it("get returns undefined when the record belongs to a different org", async () => {
+  it('get returns undefined when the record belongs to a different org', async () => {
     const store = new InMemoryVerifierStore();
     const d = decisionForOrg(7, 1000);
     await store.save(d);
@@ -48,19 +48,19 @@ describe("InMemoryVerifierStore — org scoping", () => {
     expect(await store.get(d.verifierId)).toBeDefined();
   });
 
-  it("latestForTarget hides records owned by other orgs", async () => {
+  it('latestForTarget hides records owned by other orgs', async () => {
     const store = new InMemoryVerifierStore();
     await store.save(decisionForOrg(1, 1000));
     await store.save(decisionForOrg(2, 5000)); // newer but other tenant
 
-    const latestForOrg1 = await store.latestForTarget("output", target.targetId, { orgIds: [1] });
+    const latestForOrg1 = await store.latestForTarget('output', target.targetId, { orgIds: [1] });
     expect(latestForOrg1?.orgId).toBe(1);
 
-    const latestForOrg9 = await store.latestForTarget("output", target.targetId, { orgIds: [9] });
+    const latestForOrg9 = await store.latestForTarget('output', target.targetId, { orgIds: [9] });
     expect(latestForOrg9).toBeUndefined();
   });
 
-  it("delete is a no-op (returns false) when the record belongs to a different org", async () => {
+  it('delete is a no-op (returns false) when the record belongs to a different org', async () => {
     const store = new InMemoryVerifierStore();
     const d = decisionForOrg(1, 1000);
     await store.save(d);

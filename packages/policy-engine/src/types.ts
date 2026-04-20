@@ -1,14 +1,20 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const PolicyScopeSchema = z.enum(["tenant", "domain", "action"]);
+export const PolicyScopeSchema = z.enum(['tenant', 'domain', 'action']);
 export type PolicyScope = z.infer<typeof PolicyScopeSchema>;
 
-export const PolicyEffectSchema = z.enum(["allow", "require_approval", "escalate", "block", "audit_only"]);
+export const PolicyEffectSchema = z.enum([
+  'allow',
+  'require_approval',
+  'escalate',
+  'block',
+  'audit_only',
+]);
 export type PolicyEffect = z.infer<typeof PolicyEffectSchema>;
 
 export const PolicyConditionSchema = z.object({
   field: z.string(),
-  operator: z.enum(["eq", "neq", "gt", "gte", "lt", "lte", "in", "not_in", "contains", "matches"]),
+  operator: z.enum(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in', 'not_in', 'contains', 'matches']),
   value: z.unknown(),
 });
 export type PolicyCondition = z.infer<typeof PolicyConditionSchema>;
@@ -90,10 +96,10 @@ export interface PolicyEvaluation {
   product?: string;
   workspace?: string;
   subjectRoles: string[];
-  entitySensitivity: "public" | "internal" | "confidential" | "restricted";
+  entitySensitivity: 'public' | 'internal' | 'confidential' | 'restricted';
   confidence: number;
   freshnessScore: number;
-  environment: "development" | "staging" | "production";
+  environment: 'development' | 'staging' | 'production';
   windowValid: boolean;
   projectedCostUsd?: number;
   projectedImpact: string;
@@ -123,24 +129,28 @@ export const PolicyEvaluationSchema = z.object({
   product: z.string().optional(),
   workspace: z.string().optional(),
   subjectRoles: z.array(z.string()),
-  entitySensitivity: z.enum(["public", "internal", "confidential", "restricted"]),
+  entitySensitivity: z.enum(['public', 'internal', 'confidential', 'restricted']),
   confidence: z.number().min(0).max(1),
   freshnessScore: z.number().min(0).max(1),
-  environment: z.enum(["development", "staging", "production"]),
+  environment: z.enum(['development', 'staging', 'production']),
   windowValid: z.boolean(),
   projectedCostUsd: z.number().optional(),
   projectedImpact: z.string().min(1),
   projectedRisk: z.string().min(1),
-  evidenceChain: z.array(z.object({
-    source: z.string(),
-    summary: z.string(),
-    confidence: z.number(),
-    freshness: z.number(),
-  })),
-  policyResult: z.object({
-    effect: z.string(),
-    allowed: z.boolean(),
-  }).passthrough(),
+  evidenceChain: z.array(
+    z.object({
+      source: z.string(),
+      summary: z.string(),
+      confidence: z.number(),
+      freshness: z.number(),
+    }),
+  ),
+  policyResult: z
+    .object({
+      effect: z.string(),
+      allowed: z.boolean(),
+    })
+    .passthrough(),
   blockedReason: z.string().optional(),
   evaluatedAt: z.number(),
   evaluatedBy: z.string().optional(),

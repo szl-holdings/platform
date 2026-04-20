@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const ToolCallRecordSchema = z.object({
   toolId: z.string(),
@@ -26,7 +26,7 @@ export const RetrievalRecordSchema = z.object({
 
 export const MemoryIORecordSchema = z.object({
   tier: z.string(),
-  operation: z.enum(["read", "write", "evict"]),
+  operation: z.enum(['read', 'write', 'evict']),
   key: z.string().optional(),
   hit: z.boolean(),
   latencyMs: z.number().optional(),
@@ -42,7 +42,7 @@ export const CitationRecordSchema = z.object({
 export const GuardrailResultSchema = z.object({
   guardId: z.string(),
   tier: z.string(),
-  outcome: z.enum(["pass", "block", "warn", "require-approval"]),
+  outcome: z.enum(['pass', 'block', 'warn', 'require-approval']),
   reason: z.string().optional(),
 });
 
@@ -54,30 +54,32 @@ export const TraceSpanSchema = z.object({
   endedAt: z.string().datetime().optional(),
   latencyMs: z.number().optional(),
   attributes: z.record(z.unknown()).default({}),
-  status: z.enum(["ok", "error", "pending"]).default("ok"),
+  status: z.enum(['ok', 'error', 'pending']).default('ok'),
   errorMessage: z.string().optional(),
 });
 
 export const PlanNodeSchema = z.object({
   nodeId: z.string(),
   label: z.string(),
-  nodeType: z.enum(["task", "decision", "tool", "model", "memory", "output"]).default("task"),
-  status: z.enum(["pending", "running", "completed", "failed", "skipped"]).default("pending"),
+  nodeType: z.enum(['task', 'decision', 'tool', 'model', 'memory', 'output']).default('task'),
+  status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']).default('pending'),
   dependsOn: z.array(z.string()).default([]),
   metadata: z.record(z.unknown()).default({}),
 });
 
 export const PlanGraphSchema = z.object({
   nodes: z.array(PlanNodeSchema).default([]),
-  edges: z.array(z.object({ from: z.string(), to: z.string(), label: z.string().optional() })).default([]),
-  version: z.string().default("1.0"),
+  edges: z
+    .array(z.object({ from: z.string(), to: z.string(), label: z.string().optional() }))
+    .default([]),
+  version: z.string().default('1.0'),
   createdAt: z.string().datetime().optional(),
 });
 
 export const VerifierDecisionSchema = z.object({
   verifierId: z.string(),
   step: z.string(),
-  outcome: z.enum(["pass", "fail", "warn", "abstain"]),
+  outcome: z.enum(['pass', 'fail', 'warn', 'abstain']),
   score: z.number().min(0).max(1).optional(),
   reason: z.string().optional(),
   timestamp: z.string().datetime(),
@@ -152,18 +154,26 @@ export const TraceRecordSchema = z.object({
   completionTokens: z.number().int().optional(),
   costUsd: z.number().optional(),
 
-  approvals: z.array(z.object({
-    approvalId: z.string(),
-    approver: z.string(),
-    decision: z.enum(["approved", "denied", "pending"]),
-    timestamp: z.string().datetime(),
-  })).default([]),
+  approvals: z
+    .array(
+      z.object({
+        approvalId: z.string(),
+        approver: z.string(),
+        decision: z.enum(['approved', 'denied', 'pending']),
+        timestamp: z.string().datetime(),
+      }),
+    )
+    .default([]),
 
-  errors: z.array(z.object({
-    code: z.string(),
-    message: z.string(),
-    timestamp: z.string().datetime(),
-  })).default([]),
+  errors: z
+    .array(
+      z.object({
+        code: z.string(),
+        message: z.string(),
+        timestamp: z.string().datetime(),
+      }),
+    )
+    .default([]),
 
   retries: z.number().int().default(0),
   rollbackId: z.string().optional(),
@@ -173,13 +183,15 @@ export const TraceRecordSchema = z.object({
   operatorComments: z.array(OperatorCommentSchema).default([]),
   grade: RunGradeSchema.optional(),
 
-  businessImpact: z.object({
-    valueCreatedUsd: z.number().optional(),
-    valueAtRiskUsd: z.number().optional(),
-    description: z.string().optional(),
-  }).optional(),
+  businessImpact: z
+    .object({
+      valueCreatedUsd: z.number().optional(),
+      valueAtRiskUsd: z.number().optional(),
+      description: z.string().optional(),
+    })
+    .optional(),
 
-  status: z.enum(["running", "completed", "failed", "rolled-back"]).default("running"),
+  status: z.enum(['running', 'completed', 'failed', 'rolled-back']).default('running'),
   startedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
   metadata: z.record(z.unknown()).default({}),

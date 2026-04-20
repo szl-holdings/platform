@@ -1,10 +1,10 @@
 export type WorkflowStatus =
-  | "pending"
-  | "running"
-  | "paused"
-  | "completed"
-  | "failed"
-  | "cancelled";
+  | 'pending'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
 export interface WorkflowTransition {
   from: WorkflowStatus | WorkflowStatus[];
@@ -24,20 +24,42 @@ export interface WorkflowContext {
 }
 
 const TRANSITIONS: WorkflowTransition[] = [
-  { from: "pending", to: "running", effect: ctx => { ctx.startedAt = new Date(); } },
-  { from: "running", to: "paused" },
-  { from: "paused", to: "running" },
-  { from: "running", to: "completed", effect: ctx => { ctx.completedAt = new Date(); } },
-  { from: ["running", "paused"], to: "failed", effect: ctx => { ctx.failedAt = new Date(); } },
-  { from: ["pending", "running", "paused"], to: "cancelled" },
+  {
+    from: 'pending',
+    to: 'running',
+    effect: (ctx) => {
+      ctx.startedAt = new Date();
+    },
+  },
+  { from: 'running', to: 'paused' },
+  { from: 'paused', to: 'running' },
+  {
+    from: 'running',
+    to: 'completed',
+    effect: (ctx) => {
+      ctx.completedAt = new Date();
+    },
+  },
+  {
+    from: ['running', 'paused'],
+    to: 'failed',
+    effect: (ctx) => {
+      ctx.failedAt = new Date();
+    },
+  },
+  { from: ['pending', 'running', 'paused'], to: 'cancelled' },
 ];
 
 export class WorkflowStateMachine {
   private context: WorkflowContext;
   private transitions: WorkflowTransition[];
 
-  constructor(id: string, metadata: Record<string, unknown> = {}, transitions: WorkflowTransition[] = TRANSITIONS) {
-    this.context = { id, status: "pending", metadata };
+  constructor(
+    id: string,
+    metadata: Record<string, unknown> = {},
+    transitions: WorkflowTransition[] = TRANSITIONS,
+  ) {
+    this.context = { id, status: 'pending', metadata };
     this.transitions = transitions;
   }
 
@@ -50,7 +72,7 @@ export class WorkflowStateMachine {
   }
 
   canTransition(to: WorkflowStatus): boolean {
-    return this.transitions.some(t => {
+    return this.transitions.some((t) => {
       const fromMatch = Array.isArray(t.from)
         ? t.from.includes(this.context.status)
         : t.from === this.context.status;
@@ -58,8 +80,11 @@ export class WorkflowStateMachine {
     });
   }
 
-  async transition(to: WorkflowStatus, options: { error?: string; metadata?: Record<string, unknown> } = {}): Promise<void> {
-    const transition = this.transitions.find(t => {
+  async transition(
+    to: WorkflowStatus,
+    options: { error?: string; metadata?: Record<string, unknown> } = {},
+  ): Promise<void> {
+    const transition = this.transitions.find((t) => {
       const fromMatch = Array.isArray(t.from)
         ? t.from.includes(this.context.status)
         : t.from === this.context.status;
@@ -68,7 +93,7 @@ export class WorkflowStateMachine {
 
     if (!transition) {
       throw new Error(
-        `Invalid transition: ${this.context.status} → ${to} for workflow "${this.context.id}"`
+        `Invalid transition: ${this.context.status} → ${to} for workflow "${this.context.id}"`,
       );
     }
 
@@ -86,10 +111,22 @@ export class WorkflowStateMachine {
     }
   }
 
-  async start(): Promise<void> { return this.transition("running"); }
-  async pause(): Promise<void> { return this.transition("paused"); }
-  async resume(): Promise<void> { return this.transition("running"); }
-  async complete(): Promise<void> { return this.transition("completed"); }
-  async fail(error: string): Promise<void> { return this.transition("failed", { error }); }
-  async cancel(): Promise<void> { return this.transition("cancelled"); }
+  async start(): Promise<void> {
+    return this.transition('running');
+  }
+  async pause(): Promise<void> {
+    return this.transition('paused');
+  }
+  async resume(): Promise<void> {
+    return this.transition('running');
+  }
+  async complete(): Promise<void> {
+    return this.transition('completed');
+  }
+  async fail(error: string): Promise<void> {
+    return this.transition('failed', { error });
+  }
+  async cancel(): Promise<void> {
+    return this.transition('cancelled');
+  }
 }

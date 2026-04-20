@@ -12,17 +12,17 @@
  *  7. globalAuthEnforcer — deny-by-default for /api/* with no public prefix
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import express, { type Request, type Response, type NextFunction } from "express";
-import request from "supertest";
-import { createHmac, timingSafeEqual } from "crypto";
-import { z } from "zod";
+import { createHmac, timingSafeEqual } from 'crypto';
+import express, { type NextFunction, type Request, type Response } from 'express';
+import request from 'supertest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
 // Shared mocks
 // ---------------------------------------------------------------------------
 
-vi.mock("@szl-holdings/observability", () => ({
+vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: {
     recordAuthFailure: vi.fn(),
     recordRequest: vi.fn(),
@@ -36,10 +36,10 @@ const mockDbInnerJoin = vi.fn(() => ({ where: mockDbWhere }));
 const mockDbFrom = vi.fn(() => ({ innerJoin: mockDbInnerJoin, where: mockDbWhere }));
 const mockDbSelect = vi.fn(() => ({ from: mockDbFrom }));
 
-vi.mock("@szl-holdings/db", () => ({
+vi.mock('@szl-holdings/db', () => ({
   db: { select: mockDbSelect },
-  orgMembersTable: { orgId: "orgId", userId: "userId" },
-  organizationsTable: { id: "id", slug: "slug", name: "name" },
+  orgMembersTable: { orgId: 'orgId', userId: 'userId' },
+  organizationsTable: { id: 'id', slug: 'slug', name: 'name' },
   ROLE_HIERARCHY: {},
   isReadOnlyRole: () => false,
   toCanonicalRole: (r: string) => r,
@@ -49,9 +49,9 @@ vi.mock("@szl-holdings/db", () => ({
 // Import after mocks
 // ---------------------------------------------------------------------------
 
-const { globalAuthEnforcer } = await import("../middlewares/global-auth-enforcer.js");
-const { validateBody } = await import("../lib/validation.js");
-const { tenantScope } = await import("../middlewares/tenant-scope.js");
+const { globalAuthEnforcer } = await import('../middlewares/global-auth-enforcer.js');
+const { validateBody } = await import('../lib/validation.js');
+const { tenantScope } = await import('../middlewares/tenant-scope.js');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -68,7 +68,11 @@ function successHandler(_req: Request, res: Response) {
   res.json({ ok: true });
 }
 
-function authedRequest(app: express.Express, method: "get" | "post" | "put" | "delete", path: string) {
+function authedRequest(
+  app: express.Express,
+  method: 'get' | 'post' | 'put' | 'delete',
+  path: string,
+) {
   const req = request(app)[method](path);
   (req as any).app = app;
   return req;
@@ -78,7 +82,7 @@ function authedRequest(app: express.Express, method: "get" | "post" | "put" | "d
 // 1. Timing-safe token comparison
 // ---------------------------------------------------------------------------
 
-describe("timingSafeEqual token comparison — HMAC digest approach", () => {
+describe('timingSafeEqual token comparison — HMAC digest approach', () => {
   /**
    * admin-guard.ts hashes both the configured secret and the header with
    * HMAC-SHA256 before calling timingSafeEqual.  This produces 32-byte
@@ -86,13 +90,13 @@ describe("timingSafeEqual token comparison — HMAC digest approach", () => {
    * length side-channel that the previous implementation exposed when it
    * returned false early on byteLength mismatch.
    */
-  const HMAC_KEY = Buffer.from("szl-internal-token-comparison-key", "utf8");
+  const HMAC_KEY = Buffer.from('szl-internal-token-comparison-key', 'utf8');
   const digest = (val: string) =>
-    createHmac("sha256", HMAC_KEY).update(Buffer.from(val, "utf8")).digest();
+    createHmac('sha256', HMAC_KEY).update(Buffer.from(val, 'utf8')).digest();
 
-  it("different-length tokens produce equal-length HMAC digests (eliminates length side-channel)", () => {
-    const secret = "correct-secret-value-here";
-    const shorter = "short";
+  it('different-length tokens produce equal-length HMAC digests (eliminates length side-channel)', () => {
+    const secret = 'correct-secret-value-here';
+    const shorter = 'short';
     const a = digest(secret);
     const b = digest(shorter);
     // Both digests MUST be 32 bytes — only then can timingSafeEqual run without branching on length
@@ -102,37 +106,37 @@ describe("timingSafeEqual token comparison — HMAC digest approach", () => {
     expect(timingSafeEqual(a, b)).toBe(false);
   });
 
-  it("matching tokens produce equal HMAC digests and compare true", () => {
-    const secret = "my-secret-token-value";
+  it('matching tokens produce equal HMAC digests and compare true', () => {
+    const secret = 'my-secret-token-value';
     expect(timingSafeEqual(digest(secret), digest(secret))).toBe(true);
   });
 
-  it("tokens that differ by one character produce different digests", () => {
-    const secret = "my-secret-token-value";
-    const tampered = "my-secret-token-valuX";
+  it('tokens that differ by one character produce different digests', () => {
+    const secret = 'my-secret-token-value';
+    const tampered = 'my-secret-token-valuX';
     expect(timingSafeEqual(digest(secret), digest(tampered))).toBe(false);
   });
 
-  it("internal-token comparison source uses createHmac + timingSafeEqual (not Buffer.equals or raw length compare)", async () => {
+  it('internal-token comparison source uses createHmac + timingSafeEqual (not Buffer.equals or raw length compare)', async () => {
     // Internal-token comparison was extracted from admin-guard into the
     // scoped registry (lib/internal-tokens.ts) as part of GAP-016. The
     // architectural property — constant-time HMAC digest comparison, no
     // length side-channel — is enforced there now and consumed by
     // admin-guard, csrf, global-auth-enforcer, and auth.
-    const { readFileSync } = await import("fs");
-    const { fileURLToPath } = await import("url");
-    const { dirname, resolve } = await import("path");
+    const { readFileSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const { dirname, resolve } = await import('path');
     const dir = dirname(fileURLToPath(import.meta.url));
-    const src = readFileSync(resolve(dir, "../lib/internal-tokens.ts"), "utf8");
-    expect(src).toContain("createHmac");
-    expect(src).toContain("timingSafeEqual");
+    const src = readFileSync(resolve(dir, '../lib/internal-tokens.ts'), 'utf8');
+    expect(src).toContain('createHmac');
+    expect(src).toContain('timingSafeEqual');
     expect(src).not.toMatch(/\.equals\s*\(/);
     // Confirm no early-exit branch on byteLength (the length side-channel pattern)
     expect(src).not.toMatch(/byteLength\s*!==\s*byteLength/);
 
     // And admin-guard must still delegate to the scoped registry (no
     // local raw-string compare slipped in).
-    const adminSrc = readFileSync(resolve(dir, "../middlewares/admin-guard.ts"), "utf8");
+    const adminSrc = readFileSync(resolve(dir, '../middlewares/admin-guard.ts'), 'utf8');
     expect(adminSrc).toMatch(/verifyInternalHeader|matchInternalToken/);
     expect(adminSrc).not.toMatch(/\.equals\s*\(/);
   });
@@ -147,7 +151,7 @@ describe("timingSafeEqual token comparison — HMAC digest approach", () => {
 // 3. Zod validation — malicious payloads
 // ---------------------------------------------------------------------------
 
-describe("Zod validation — malicious payload blocking", () => {
+describe('Zod validation — malicious payload blocking', () => {
   const schema = z.object({
     name: z.string().min(1).max(200).trim(),
     email: z.string().email(),
@@ -155,57 +159,55 @@ describe("Zod validation — malicious payload blocking", () => {
   });
 
   const app = makeApp(validateBody(schema));
-  app.post("/test", successHandler);
+  app.post('/test', successHandler);
 
-  it("allows safe string content through (SQL-like strings are valid; parameterized queries protect the DB)", async () => {
+  it('allows safe string content through (SQL-like strings are valid; parameterized queries protect the DB)', async () => {
     const res = await request(app)
-      .post("/test")
-      .send({ name: "'; DROP TABLE users; --", email: "test@example.com", count: 1 });
+      .post('/test')
+      .send({ name: "'; DROP TABLE users; --", email: 'test@example.com', count: 1 });
     expect(res.status).toBe(200);
   });
 
-  it("blocks malformed email addresses", async () => {
+  it('blocks malformed email addresses', async () => {
     const res = await request(app)
-      .post("/test")
-      .send({ name: "Alice", email: "not-an-email", count: 1 });
+      .post('/test')
+      .send({ name: 'Alice', email: 'not-an-email', count: 1 });
     expect(res.status).toBe(400);
     expect(res.body.error).toBeDefined();
   });
 
-  it("blocks field type coercion attack (string where number expected)", async () => {
+  it('blocks field type coercion attack (string where number expected)', async () => {
     const res = await request(app)
-      .post("/test")
-      .send({ name: "valid", email: "a@b.com", count: "999999999999" });
+      .post('/test')
+      .send({ name: 'valid', email: 'a@b.com', count: '999999999999' });
     expect(res.status).toBe(400);
   });
 
-  it("blocks excessively long strings", async () => {
+  it('blocks excessively long strings', async () => {
     const res = await request(app)
-      .post("/test")
-      .send({ name: "a".repeat(201), email: "a@b.com", count: 1 });
+      .post('/test')
+      .send({ name: 'a'.repeat(201), email: 'a@b.com', count: 1 });
     expect(res.status).toBe(400);
   });
 
-  it("blocks missing required fields", async () => {
-    const res = await request(app)
-      .post("/test")
-      .send({ name: "valid" });
+  it('blocks missing required fields', async () => {
+    const res = await request(app).post('/test').send({ name: 'valid' });
     expect(res.status).toBe(400);
     expect(res.body.error).toBeDefined();
   });
 
-  it("allows well-formed payloads through", async () => {
+  it('allows well-formed payloads through', async () => {
     const res = await request(app)
-      .post("/test")
-      .send({ name: "Alice", email: "alice@example.com", count: 42 });
+      .post('/test')
+      .send({ name: 'Alice', email: 'alice@example.com', count: 42 });
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
 
-  it("rejects negative numbers outside range", async () => {
+  it('rejects negative numbers outside range', async () => {
     const res = await request(app)
-      .post("/test")
-      .send({ name: "valid", email: "a@b.com", count: -1 });
+      .post('/test')
+      .send({ name: 'valid', email: 'a@b.com', count: -1 });
     expect(res.status).toBe(400);
   });
 });
@@ -214,50 +216,48 @@ describe("Zod validation — malicious payload blocking", () => {
 // 4. globalAuthEnforcer — deny-by-default
 // ---------------------------------------------------------------------------
 
-describe("globalAuthEnforcer — deny-by-default", () => {
+describe('globalAuthEnforcer — deny-by-default', () => {
   const app = express();
   app.use(express.json());
   app.use(globalAuthEnforcer as express.RequestHandler);
-  app.get("/api/secret", successHandler);
-  app.get("/api/health", successHandler);
+  app.get('/api/secret', successHandler);
+  app.get('/api/health', successHandler);
 
-  it("returns 401 for unauthenticated requests to /api/secret", async () => {
-    const res = await request(app).get("/api/secret");
+  it('returns 401 for unauthenticated requests to /api/secret', async () => {
+    const res = await request(app).get('/api/secret');
     expect(res.status).toBe(401);
   });
 
-  it("allows unauthenticated access to /api/health (public prefix)", async () => {
-    const res = await request(app).get("/api/health");
+  it('allows unauthenticated access to /api/health (public prefix)', async () => {
+    const res = await request(app).get('/api/health');
     expect(res.status).toBe(200);
   });
 
-  it("allows authenticated users through", async () => {
+  it('allows authenticated users through', async () => {
     const authApp = express();
     authApp.use(express.json());
     authApp.use((req: Request, _res: Response, next: NextFunction) => {
-      (req as any).user = { id: 1, roles: ["user"], orgs: [] };
+      (req as any).user = { id: 1, roles: ['user'], orgs: [] };
       next();
     });
     authApp.use(globalAuthEnforcer as express.RequestHandler);
-    authApp.get("/api/secret", successHandler);
+    authApp.get('/api/secret', successHandler);
 
-    const res = await request(authApp).get("/api/secret");
+    const res = await request(authApp).get('/api/secret');
     expect(res.status).toBe(200);
   });
 
-  it("allows internal token access on a legacy-allowed prefix", async () => {
+  it('allows internal token access on a legacy-allowed prefix', async () => {
     const tokenApp = express();
     tokenApp.use(express.json());
-    const token = "a".repeat(32);
+    const token = 'a'.repeat(32);
     process.env.ALLOY_INTERNAL_TOKEN = token;
     tokenApp.use(globalAuthEnforcer as express.RequestHandler);
     // GAP-016: legacy ALLOY_INTERNAL_TOKEN is now path-restricted to its
     // historical surface (`/api/internal/`, `/api/alloy/agent/`, etc).
-    tokenApp.get("/api/internal/secret", successHandler);
+    tokenApp.get('/api/internal/secret', successHandler);
 
-    const res = await request(tokenApp)
-      .get("/api/internal/secret")
-      .set("x-internal-token", token);
+    const res = await request(tokenApp).get('/api/internal/secret').set('x-internal-token', token);
     expect(res.status).toBe(200);
 
     delete process.env.ALLOY_INTERNAL_TOKEN;
@@ -268,7 +268,7 @@ describe("globalAuthEnforcer — deny-by-default", () => {
 // 5. tenantScope — cross-tenant access blocked
 // ---------------------------------------------------------------------------
 
-describe("tenantScope middleware", () => {
+describe('tenantScope middleware', () => {
   beforeEach(() => {
     mockDbWhere.mockReset();
     mockDbInnerJoin.mockReset().mockReturnValue({ where: mockDbWhere });
@@ -276,57 +276,57 @@ describe("tenantScope middleware", () => {
     mockDbSelect.mockReset().mockReturnValue({ from: mockDbFrom });
   });
 
-  it("returns 401 when req.user is not set and required=true", async () => {
+  it('returns 401 when req.user is not set and required=true', async () => {
     const app = express();
     app.use(express.json());
-    app.get("/vessels/fleets", tenantScope() as express.RequestHandler, successHandler);
+    app.get('/vessels/fleets', tenantScope() as express.RequestHandler, successHandler);
 
-    const res = await request(app).get("/vessels/fleets");
+    const res = await request(app).get('/vessels/fleets');
     expect(res.status).toBe(401);
   });
 
-  it("returns 403 when user has no org memberships", async () => {
+  it('returns 403 when user has no org memberships', async () => {
     mockDbWhere.mockResolvedValue([]);
 
     const app = express();
     app.use(express.json());
     app.use((req: Request, _res: Response, next: NextFunction) => {
-      (req as any).user = { id: 99, roles: ["user"], orgs: [] };
+      (req as any).user = { id: 99, roles: ['user'], orgs: [] };
       next();
     });
-    app.get("/vessels/fleets", tenantScope() as express.RequestHandler, successHandler);
+    app.get('/vessels/fleets', tenantScope() as express.RequestHandler, successHandler);
 
-    const res = await request(app).get("/vessels/fleets");
+    const res = await request(app).get('/vessels/fleets');
     expect(res.status).toBe(403);
   });
 
-  it("allows super_admin to bypass tenant check", async () => {
+  it('allows super_admin to bypass tenant check', async () => {
     const app = express();
     app.use(express.json());
     app.use((req: Request, _res: Response, next: NextFunction) => {
-      (req as any).user = { id: 1, roles: ["super_admin"], orgs: [] };
+      (req as any).user = { id: 1, roles: ['super_admin'], orgs: [] };
       next();
     });
-    app.get("/vessels/fleets", tenantScope() as express.RequestHandler, successHandler);
+    app.get('/vessels/fleets', tenantScope() as express.RequestHandler, successHandler);
 
-    const res = await request(app).get("/vessels/fleets");
+    const res = await request(app).get('/vessels/fleets');
     expect(res.status).toBe(200);
   });
 
-  it("allows users with valid org membership", async () => {
+  it('allows users with valid org membership', async () => {
     mockDbWhere.mockResolvedValue([
-      { orgId: 7, orgSlug: "acme", orgName: "ACME Corp", role: "ops" },
+      { orgId: 7, orgSlug: 'acme', orgName: 'ACME Corp', role: 'ops' },
     ] as any);
 
     const app = express();
     app.use(express.json());
     app.use((req: Request, _res: Response, next: NextFunction) => {
-      (req as any).user = { id: 5, roles: ["ops"], orgs: [] };
+      (req as any).user = { id: 5, roles: ['ops'], orgs: [] };
       next();
     });
-    app.get("/vessels/fleets", tenantScope() as express.RequestHandler, successHandler);
+    app.get('/vessels/fleets', tenantScope() as express.RequestHandler, successHandler);
 
-    const res = await request(app).get("/vessels/fleets");
+    const res = await request(app).get('/vessels/fleets');
     expect(res.status).toBe(200);
   });
 });
@@ -335,25 +335,25 @@ describe("tenantScope middleware", () => {
 // 6. CONNECTOR_ENCRYPTION_KEY format validation
 // ---------------------------------------------------------------------------
 
-describe("CONNECTOR_ENCRYPTION_KEY validation", () => {
-  const validKey = "a".repeat(64);
-  const shortKey = "a".repeat(32);
-  const nonHexKey = "g".repeat(64);
+describe('CONNECTOR_ENCRYPTION_KEY validation', () => {
+  const validKey = 'a'.repeat(64);
+  const shortKey = 'a'.repeat(32);
+  const nonHexKey = 'g'.repeat(64);
 
-  it("validates a 64-char hex key as correct format", () => {
+  it('validates a 64-char hex key as correct format', () => {
     expect(/^[0-9a-fA-F]{64}$/.test(validKey)).toBe(true);
   });
 
-  it("rejects a key shorter than 64 chars", () => {
+  it('rejects a key shorter than 64 chars', () => {
     expect(/^[0-9a-fA-F]{64}$/.test(shortKey)).toBe(false);
   });
 
-  it("rejects a key with non-hex characters", () => {
+  it('rejects a key with non-hex characters', () => {
     expect(/^[0-9a-fA-F]{64}$/.test(nonHexKey)).toBe(false);
   });
 
-  it("accepts mixed-case hex", () => {
-    const mixedCase = "aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123456789aAbBcCdDeEfF01234567";
+  it('accepts mixed-case hex', () => {
+    const mixedCase = 'aAbBcCdDeEfF0123456789aAbBcCdDeEfF0123456789aAbBcCdDeEfF01234567';
     expect(/^[0-9a-fA-F]{64}$/.test(mixedCase)).toBe(true);
   });
 });

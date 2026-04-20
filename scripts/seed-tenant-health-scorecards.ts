@@ -19,12 +19,12 @@
 import {
   db,
   organizationsTable,
-  tenantHealthScorecardsTable,
   orgMembersTable,
-} from "@szl-holdings/db";
-import { count, eq } from "drizzle-orm";
+  tenantHealthScorecardsTable,
+} from '@szl-holdings/db';
+import { count, eq } from 'drizzle-orm';
 
-type Tier = "critical" | "at_risk" | "healthy" | "champion";
+type Tier = 'critical' | 'at_risk' | 'healthy' | 'champion';
 
 interface RawSignals {
   activeUsers: number;
@@ -32,7 +32,7 @@ interface RawSignals {
   featureAdoptionPct: number;
   slaAdherencePct: number;
   errorRatePct: number;
-  billingStatus: "current" | "overdue" | "churned" | "trial" | "unknown";
+  billingStatus: 'current' | 'overdue' | 'churned' | 'trial' | 'unknown';
 }
 
 const TIER_PROFILES: Record<Tier, () => RawSignals> = {
@@ -42,7 +42,7 @@ const TIER_PROFILES: Record<Tier, () => RawSignals> = {
     featureAdoptionPct: rand(82, 97),
     slaAdherencePct: rand(98, 100),
     errorRatePct: rand(0, 1),
-    billingStatus: "current",
+    billingStatus: 'current',
   }),
   healthy: () => ({
     activeUsers: 0,
@@ -50,7 +50,7 @@ const TIER_PROFILES: Record<Tier, () => RawSignals> = {
     featureAdoptionPct: rand(58, 78),
     slaAdherencePct: rand(94, 99),
     errorRatePct: rand(1, 3),
-    billingStatus: "current",
+    billingStatus: 'current',
   }),
   at_risk: () => ({
     activeUsers: 0,
@@ -58,7 +58,7 @@ const TIER_PROFILES: Record<Tier, () => RawSignals> = {
     featureAdoptionPct: rand(28, 50),
     slaAdherencePct: rand(82, 92),
     errorRatePct: rand(4, 9),
-    billingStatus: pick(["current", "overdue", "trial"]),
+    billingStatus: pick(['current', 'overdue', 'trial']),
   }),
   critical: () => ({
     activeUsers: 0,
@@ -66,7 +66,7 @@ const TIER_PROFILES: Record<Tier, () => RawSignals> = {
     featureAdoptionPct: rand(5, 22),
     slaAdherencePct: rand(60, 78),
     errorRatePct: rand(10, 18),
-    billingStatus: pick(["overdue", "churned", "unknown"]),
+    billingStatus: pick(['overdue', 'churned', 'unknown']),
   }),
 };
 
@@ -80,15 +80,19 @@ function pick<T>(arr: readonly T[]): T {
 
 function userRatioForTier(tier: Tier): number {
   switch (tier) {
-    case "champion": return rand(0.78, 0.95);
-    case "healthy": return rand(0.55, 0.78);
-    case "at_risk": return rand(0.25, 0.45);
-    case "critical": return rand(0.05, 0.20);
+    case 'champion':
+      return rand(0.78, 0.95);
+    case 'healthy':
+      return rand(0.55, 0.78);
+    case 'at_risk':
+      return rand(0.25, 0.45);
+    case 'critical':
+      return rand(0.05, 0.2);
   }
 }
 
 function tierForOrgIdAndOffset(orgId: number, monthsAgo: number): Tier {
-  const order: Tier[] = ["champion", "healthy", "at_risk", "critical"];
+  const order: Tier[] = ['champion', 'healthy', 'at_risk', 'critical'];
   const base = order[orgId % 4]!;
   if (monthsAgo === 0) return base;
   // Older periods drift one notch healthier or sicker for visible deltas
@@ -106,21 +110,22 @@ function computeHealthScore(signals: RawSignals): { score: number; tier: Tier } 
   const slaScore = Math.min(signals.slaAdherencePct, 100);
   const errorScore = Math.max(0, 100 - signals.errorRatePct * 5);
   const billingScoreMap: Record<string, number> = {
-    current: 100, trial: 80, overdue: 30, churned: 0, unknown: 60,
+    current: 100,
+    trial: 80,
+    overdue: 30,
+    churned: 0,
+    unknown: 60,
   };
   const billingScore = billingScoreMap[signals.billingStatus] ?? 60;
   const score =
-    userScore * 0.30 +
+    userScore * 0.3 +
     adoptionScore * 0.25 +
-    slaScore * 0.20 +
+    slaScore * 0.2 +
     errorScore * 0.15 +
-    billingScore * 0.10;
+    billingScore * 0.1;
   const rounded = Math.round(score * 10) / 10;
   const tier: Tier =
-    rounded >= 80 ? "champion"
-    : rounded >= 60 ? "healthy"
-    : rounded >= 40 ? "at_risk"
-    : "critical";
+    rounded >= 80 ? 'champion' : rounded >= 60 ? 'healthy' : rounded >= 40 ? 'at_risk' : 'critical';
   return { score: rounded, tier };
 }
 
@@ -139,7 +144,7 @@ async function buildSignalsFor(
 ): Promise<RawSignals> {
   const tier = tierForOrgIdAndOffset(orgId, monthsAgo);
   const profile = TIER_PROFILES[tier]();
-  const totalUsers = Math.max(totalMembers, tier === "champion" ? 8 : tier === "healthy" ? 5 : 3);
+  const totalUsers = Math.max(totalMembers, tier === 'champion' ? 8 : tier === 'healthy' ? 5 : 3);
   const ratio = userRatioForTier(tier);
   return {
     ...profile,
@@ -167,14 +172,22 @@ async function seedOrg(orgId: number, orgName: string) {
       0,
       Math.round(
         signals.activeUsers *
-          (healthTier === "champion" ? 280 : healthTier === "healthy" ? 180 : healthTier === "at_risk" ? 90 : 30),
+          (healthTier === 'champion'
+            ? 280
+            : healthTier === 'healthy'
+              ? 180
+              : healthTier === 'at_risk'
+                ? 90
+                : 30),
       ),
     );
     const apiCallCount = Math.round(sessionCount * (3 + Math.random() * 4));
     const supportTicketVolume =
-      healthTier === "critical" ? Math.round(rand(8, 22))
-      : healthTier === "at_risk" ? Math.round(rand(3, 9))
-      : Math.round(rand(0, 3));
+      healthTier === 'critical'
+        ? Math.round(rand(8, 22))
+        : healthTier === 'at_risk'
+          ? Math.round(rand(3, 9))
+          : Math.round(rand(0, 3));
 
     const healthScoreDelta = prev ? Math.round((healthScore - prev.score) * 10) / 10 : null;
     const activeUsersDelta = prev ? signals.activeUsers - prev.activeUsers : null;
@@ -183,44 +196,31 @@ async function seedOrg(orgId: number, orgName: string) {
       userActivity: {
         activeUsers: signals.activeUsers,
         totalUsers: signals.totalUsers,
-        userRatio: signals.totalUsers > 0 ? Math.round((signals.activeUsers / signals.totalUsers) * 100) : 0,
+        userRatio:
+          signals.totalUsers > 0 ? Math.round((signals.activeUsers / signals.totalUsers) * 100) : 0,
       },
       featureAdoption: {
         used: Math.round((signals.featureAdoptionPct / 100) * 24),
         total: 24,
         pct: Math.round(signals.featureAdoptionPct),
       },
-      support: { ticketVolume: supportTicketVolume, hardViolations: Math.round(supportTicketVolume * 0.4) },
+      support: {
+        ticketVolume: supportTicketVolume,
+        hardViolations: Math.round(supportTicketVolume * 0.4),
+      },
       sla: { adherencePct: Math.round(signals.slaAdherencePct) },
       billing: { status: signals.billingStatus },
       errors: { ratePct: Math.round(signals.errorRatePct * 10) / 10, totalEvents: sessionCount },
-      seedSource: "seed-tenant-health-scorecards",
+      seedSource: 'seed-tenant-health-scorecards',
     };
 
-    await db.insert(tenantHealthScorecardsTable).values({
-      orgId,
-      computedAt: new Date(),
-      periodStart: start,
-      periodEnd: end,
-      activeUsers: signals.activeUsers,
-      totalUsers: signals.totalUsers,
-      sessionCount,
-      featureAdoptionPct: Math.round(signals.featureAdoptionPct),
-      supportTicketVolume,
-      slaAdherencePct: Math.round(signals.slaAdherencePct),
-      billingStatus: signals.billingStatus,
-      apiCallCount,
-      errorRatePct: Math.round(signals.errorRatePct * 10) / 10,
-      avgResponseTimeMs: Math.round(rand(80, 480)),
-      healthScore,
-      healthTier,
-      healthScoreDelta,
-      activeUsersDelta,
-      signalBreakdown,
-    }).onConflictDoUpdate({
-      target: [tenantHealthScorecardsTable.orgId, tenantHealthScorecardsTable.periodStart],
-      set: {
+    await db
+      .insert(tenantHealthScorecardsTable)
+      .values({
+        orgId,
         computedAt: new Date(),
+        periodStart: start,
+        periodEnd: end,
         activeUsers: signals.activeUsers,
         totalUsers: signals.totalUsers,
         sessionCount,
@@ -236,19 +236,43 @@ async function seedOrg(orgId: number, orgName: string) {
         healthScoreDelta,
         activeUsersDelta,
         signalBreakdown,
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: [tenantHealthScorecardsTable.orgId, tenantHealthScorecardsTable.periodStart],
+        set: {
+          computedAt: new Date(),
+          activeUsers: signals.activeUsers,
+          totalUsers: signals.totalUsers,
+          sessionCount,
+          featureAdoptionPct: Math.round(signals.featureAdoptionPct),
+          supportTicketVolume,
+          slaAdherencePct: Math.round(signals.slaAdherencePct),
+          billingStatus: signals.billingStatus,
+          apiCallCount,
+          errorRatePct: Math.round(signals.errorRatePct * 10) / 10,
+          avgResponseTimeMs: Math.round(rand(80, 480)),
+          healthScore,
+          healthTier,
+          healthScoreDelta,
+          activeUsersDelta,
+          signalBreakdown,
+        },
+      });
 
     prev = { score: healthScore, activeUsers: signals.activeUsers };
-    console.log(`  org ${orgId} (${orgName}) period ${start.toISOString().slice(0, 7)} → ${healthTier} ${healthScore}`);
+    console.log(
+      `  org ${orgId} (${orgName}) period ${start.toISOString().slice(0, 7)} → ${healthTier} ${healthScore}`,
+    );
   }
 }
 
 async function main() {
-  console.log("=== Tenant Health Scorecard Seed ===\n");
-  const orgs = await db.select({ id: organizationsTable.id, name: organizationsTable.name }).from(organizationsTable);
+  console.log('=== Tenant Health Scorecard Seed ===\n');
+  const orgs = await db
+    .select({ id: organizationsTable.id, name: organizationsTable.name })
+    .from(organizationsTable);
   if (orgs.length === 0) {
-    console.warn("[seed-tenant-health] No organizations exist — nothing to seed.");
+    console.warn('[seed-tenant-health] No organizations exist — nothing to seed.');
     process.exit(0);
   }
   console.log(`Seeding 3 months of scorecards for ${orgs.length} organization(s).\n`);
@@ -268,16 +292,16 @@ async function main() {
   const tally: Record<Tier, number> = { critical: 0, at_risk: 0, healthy: 0, champion: 0 };
   for (const row of persisted) tally[row.tier as Tier] = row.cnt;
 
-  console.log("\nCurrent-period tier distribution (persisted):");
+  console.log('\nCurrent-period tier distribution (persisted):');
   console.log(`  champion: ${tally.champion}`);
   console.log(`  healthy:  ${tally.healthy}`);
   console.log(`  at_risk:  ${tally.at_risk}`);
   console.log(`  critical: ${tally.critical}`);
-  console.log("\n=== Tenant health scorecard seed complete ===");
+  console.log('\n=== Tenant health scorecard seed complete ===');
   process.exit(0);
 }
 
 main().catch((err) => {
-  console.error("[seed-tenant-health] Failed:", err);
+  console.error('[seed-tenant-health] Failed:', err);
   process.exit(1);
 });

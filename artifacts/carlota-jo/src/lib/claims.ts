@@ -12,19 +12,15 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import { FOUNDER_YEARS_EXPERIENCE } from "@szl-holdings/config/public-claims";
-import {
-  makeClaimResolver,
-  metricDisplay,
-  type ClaimValue,
-} from "@szl-holdings/domain-claims";
+import { FOUNDER_YEARS_EXPERIENCE } from '@szl-holdings/config/public-claims';
+import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/domain-claims';
 
 export type { ClaimValue };
 export { metricDisplay };
 
-const resolveClaim = makeClaimResolver("carlota-jo/claims");
+const resolveClaim = makeClaimResolver('carlota-jo/claims');
 
-export const CARLOTA_JO_RETENTION = resolveClaim("carlota-jo-retention", "98%");
+export const CARLOTA_JO_RETENTION = resolveClaim('carlota-jo-retention', '98%');
 
 /**
  * Founder experience years is computed from the registered start year so the
@@ -33,6 +29,6 @@ export const CARLOTA_JO_RETENTION = resolveClaim("carlota-jo-retention", "98%");
 export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
   value: `${FOUNDER_YEARS_EXPERIENCE} years`,
   label: null,
-  truthValue: "verified",
+  truthValue: 'verified',
   displayWithLabel: `${FOUNDER_YEARS_EXPERIENCE} years`,
 };

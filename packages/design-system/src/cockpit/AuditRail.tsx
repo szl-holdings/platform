@@ -1,27 +1,36 @@
-import { cn } from "../utils.js";
-import { Shield, User, Bot, GitCommit, CheckCircle, XCircle, AlertTriangle, Clock } from "lucide-react";
-import { color } from "../tokens/index.js";
+import {
+  AlertTriangle,
+  Bot,
+  CheckCircle,
+  Clock,
+  GitCommit,
+  Shield,
+  User,
+  XCircle,
+} from 'lucide-react';
+import { color } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export type AuditEventKind =
-  | "approval"
-  | "rejection"
-  | "policy-gate"
-  | "model-invocation"
-  | "tool-call"
-  | "human-handoff"
-  | "agent-action"
-  | "override"
-  | "system";
+  | 'approval'
+  | 'rejection'
+  | 'policy-gate'
+  | 'model-invocation'
+  | 'tool-call'
+  | 'human-handoff'
+  | 'agent-action'
+  | 'override'
+  | 'system';
 
 export interface AuditEvent {
   eventId: string;
   kind: AuditEventKind;
   actor: string;
-  actorType: "human" | "agent" | "system";
+  actorType: 'human' | 'agent' | 'system';
   action: string;
   detail?: string;
   timestamp: string | Date;
-  outcome?: "success" | "failure" | "blocked" | "pending";
+  outcome?: 'success' | 'failure' | 'blocked' | 'pending';
   traceRef?: string;
 }
 
@@ -34,24 +43,24 @@ export interface AuditRailProps {
 }
 
 const KIND_CONFIG: Record<AuditEventKind, { color: string; icon: typeof Shield }> = {
-  "approval":          { color: color.accent.green,  icon: CheckCircle },
-  "rejection":         { color: color.accent.red,    icon: XCircle },
-  "policy-gate":       { color: color.accent.amber,  icon: Shield },
-  "model-invocation":  { color: color.accent.violet, icon: Bot },
-  "tool-call":         { color: color.accent.blue,   icon: GitCommit },
-  "human-handoff":     { color: color.accent.violet, icon: User },
-  "agent-action":      { color: color.accent.amber,  icon: Bot },
-  "override":          { color: color.accent.amber,  icon: AlertTriangle },
-  "system":            { color: color.text.muted,    icon: Clock },
+  approval: { color: color.accent.green, icon: CheckCircle },
+  rejection: { color: color.accent.red, icon: XCircle },
+  'policy-gate': { color: color.accent.amber, icon: Shield },
+  'model-invocation': { color: color.accent.violet, icon: Bot },
+  'tool-call': { color: color.accent.blue, icon: GitCommit },
+  'human-handoff': { color: color.accent.violet, icon: User },
+  'agent-action': { color: color.accent.amber, icon: Bot },
+  override: { color: color.accent.amber, icon: AlertTriangle },
+  system: { color: color.text.muted, icon: Clock },
 };
 
-const ACTOR_TYPE_ICON: Record<AuditEvent["actorType"], typeof Shield> = {
-  human:  User,
-  agent:  Bot,
+const ACTOR_TYPE_ICON: Record<AuditEvent['actorType'], typeof Shield> = {
+  human: User,
+  agent: Bot,
   system: Clock,
 };
 
-const OUTCOME_COLOR: Record<NonNullable<AuditEvent["outcome"]>, string> = {
+const OUTCOME_COLOR: Record<NonNullable<AuditEvent['outcome']>, string> = {
   success: color.accent.green,
   failure: color.accent.red,
   blocked: color.accent.amber,
@@ -59,27 +68,27 @@ const OUTCOME_COLOR: Record<NonNullable<AuditEvent["outcome"]>, string> = {
 };
 
 function relTs(ts: string | Date): string {
-  const d = typeof ts === "string" ? new Date(ts) : ts;
+  const d = typeof ts === 'string' ? new Date(ts) : ts;
   const ms = Date.now() - d.getTime();
-  const s  = Math.round(ms / 1000);
-  if (s < 60)   return `${s}s ago`;
+  const s = Math.round(ms / 1000);
+  if (s < 60) return `${s}s ago`;
   const m = Math.round(s / 60);
-  if (m < 60)   return `${m}m ago`;
+  if (m < 60) return `${m}m ago`;
   const h = Math.round(m / 60);
-  if (h < 24)   return `${h}h ago`;
+  if (h < 24) return `${h}h ago`;
   return `${Math.round(h / 24)}d ago`;
 }
 
 export function AuditRail({
   events,
-  maxHeight = "480px",
+  maxHeight = '480px',
   className,
-  emptyMessage = "No audit events",
+  emptyMessage = 'No audit events',
   relative = true,
 }: AuditRailProps) {
   return (
     <div
-      className={cn("rounded-lg overflow-hidden", className)}
+      className={cn('rounded-lg overflow-hidden', className)}
       style={{ border: `1px solid ${color.border.subtle}`, background: color.bg.surface }}
     >
       <div
@@ -88,18 +97,24 @@ export function AuditRail({
       >
         <div className="flex items-center gap-2">
           <Shield className="h-3.5 w-3.5" style={{ color: color.text.muted }} />
-          <span className="text-xs font-bold uppercase tracking-wider" style={{ color: color.text.muted }}>
+          <span
+            className="text-xs font-bold uppercase tracking-wider"
+            style={{ color: color.text.muted }}
+          >
             Audit Rail
           </span>
         </div>
         <span className="text-xs" style={{ color: color.text.muted }}>
-          {events.length} event{events.length !== 1 ? "s" : ""}
+          {events.length} event{events.length !== 1 ? 's' : ''}
         </span>
       </div>
 
       <div className="overflow-y-auto" style={{ maxHeight }}>
         {events.length === 0 && (
-          <div className="flex items-center justify-center py-12 text-xs" style={{ color: color.text.muted }}>
+          <div
+            className="flex items-center justify-center py-12 text-xs"
+            style={{ color: color.text.muted }}
+          >
             {emptyMessage}
           </div>
         )}
@@ -150,13 +165,17 @@ export function AuditRail({
                       )}
                     </div>
                     <span className="shrink-0 text-xs" style={{ color: color.text.muted }}>
-                      {relative ? relTs(event.timestamp) : new Date(event.timestamp).toLocaleTimeString()}
+                      {relative
+                        ? relTs(event.timestamp)
+                        : new Date(event.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
 
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <ActorIcon className="h-2.5 w-2.5" style={{ color: color.text.muted }} />
-                    <span className="text-xs" style={{ color: color.text.secondary }}>{event.actor}</span>
+                    <span className="text-xs" style={{ color: color.text.secondary }}>
+                      {event.actor}
+                    </span>
                     {event.traceRef && (
                       <span className="font-mono text-xs" style={{ color: color.text.muted }}>
                         #{event.traceRef.slice(0, 8)}
@@ -165,7 +184,10 @@ export function AuditRail({
                   </div>
 
                   {event.detail && (
-                    <p className="mt-1 text-xs leading-relaxed" style={{ color: color.text.secondary }}>
+                    <p
+                      className="mt-1 text-xs leading-relaxed"
+                      style={{ color: color.text.secondary }}
+                    >
                       {event.detail}
                     </p>
                   )}

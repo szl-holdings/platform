@@ -1,33 +1,33 @@
-import type { ProofBundle, ExportAdapterContract, ExportAdapterResult } from "../types.js";
+import type { ExportAdapterContract, ExportAdapterResult, ProofBundle } from '../types.js';
 
-const ADAPTER_NAME = "ProofBundleAdapter";
-const ADAPTER_VERSION = "1.0.0";
+const ADAPTER_NAME = 'ProofBundleAdapter';
+const ADAPTER_VERSION = '1.0.0';
 
 export interface ProofBundleOutput {
   $schema: string;
   adapterVersion: string;
-  format: "proof_bundle";
+  format: 'proof_bundle';
   bundle: ProofBundle;
   integrity: {
     citationCount: number;
     approvalSteps: number;
     isFullyApproved: boolean;
-    finalDecision: "approved" | "rejected" | "escalated" | "pending";
+    finalDecision: 'approved' | 'rejected' | 'escalated' | 'pending';
     confidenceScore: number;
   };
   exportedAt: string;
 }
 
-function computeIntegrity(bundle: ProofBundle): ProofBundleOutput["integrity"] {
+function computeIntegrity(bundle: ProofBundle): ProofBundleOutput['integrity'] {
   const steps = bundle.approvalChain.length;
-  const lastDecision = bundle.approvalChain[steps - 1]?.decision ?? "pending";
-  const isFullyApproved = steps > 0 && lastDecision === "approved";
+  const lastDecision = bundle.approvalChain[steps - 1]?.decision ?? 'pending';
+  const isFullyApproved = steps > 0 && lastDecision === 'approved';
 
   return {
     citationCount: bundle.citations.length,
     approvalSteps: steps,
     isFullyApproved,
-    finalDecision: lastDecision as ProofBundleOutput["integrity"]["finalDecision"],
+    finalDecision: lastDecision as ProofBundleOutput['integrity']['finalDecision'],
     confidenceScore: bundle.confidenceScore,
   };
 }
@@ -35,29 +35,33 @@ function computeIntegrity(bundle: ProofBundle): ProofBundleOutput["integrity"] {
 export class ProofBundleAdapter implements ExportAdapterContract<ProofBundle, ProofBundleOutput> {
   readonly adapterName = ADAPTER_NAME;
   readonly adapterVersion = ADAPTER_VERSION;
-  readonly outputFormat = "proof_bundle";
+  readonly outputFormat = 'proof_bundle';
 
   validate(input: ProofBundle): void {
-    if (!input.bundleId) throw new Error("ProofBundleAdapter: bundleId is required");
-    if (!input.contentId) throw new Error("ProofBundleAdapter: contentId is required");
-    if (!input.contentType) throw new Error("ProofBundleAdapter: contentType is required");
-    if (typeof input.confidenceScore !== "number" || input.confidenceScore < 0 || input.confidenceScore > 1) {
-      throw new Error("ProofBundleAdapter: confidenceScore must be a number between 0 and 1");
+    if (!input.bundleId) throw new Error('ProofBundleAdapter: bundleId is required');
+    if (!input.contentId) throw new Error('ProofBundleAdapter: contentId is required');
+    if (!input.contentType) throw new Error('ProofBundleAdapter: contentType is required');
+    if (
+      typeof input.confidenceScore !== 'number' ||
+      input.confidenceScore < 0 ||
+      input.confidenceScore > 1
+    ) {
+      throw new Error('ProofBundleAdapter: confidenceScore must be a number between 0 and 1');
     }
     if (!Array.isArray(input.citations)) {
-      throw new Error("ProofBundleAdapter: citations must be an array");
+      throw new Error('ProofBundleAdapter: citations must be an array');
     }
     if (!Array.isArray(input.approvalChain)) {
-      throw new Error("ProofBundleAdapter: approvalChain must be an array");
+      throw new Error('ProofBundleAdapter: approvalChain must be an array');
     }
   }
 
   serialize(input: ProofBundle): ProofBundleOutput {
     this.validate(input);
     return {
-      $schema: "https://szlholdings.com/schemas/atlas/proof-bundle/v1.json",
+      $schema: 'https://szlholdings.com/schemas/atlas/proof-bundle/v1.json',
       adapterVersion: ADAPTER_VERSION,
-      format: "proof_bundle",
+      format: 'proof_bundle',
       bundle: {
         bundleId: input.bundleId,
         contentId: input.contentId,
@@ -83,7 +87,7 @@ export class ProofBundleAdapter implements ExportAdapterContract<ProofBundle, Pr
     return {
       format: this.outputFormat,
       payload: output,
-      sizeEstimateBytes: Buffer.byteLength(json, "utf8"),
+      sizeEstimateBytes: Buffer.byteLength(json, 'utf8'),
       generatedAt: output.exportedAt,
       adapterVersion: ADAPTER_VERSION,
     };

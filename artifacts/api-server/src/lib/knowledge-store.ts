@@ -1,13 +1,14 @@
 export {
-  KnowledgeStore,
-  knowledgeStore,
   createKnowledgeEntry,
-  persistAgentRun,
-  type KnowledgeEntryType,
   type KnowledgeDomain,
   type KnowledgeEntry,
+  type KnowledgeEntryType,
   type KnowledgeQuery,
-} from "@szl-holdings/forge-runtime";
+  KnowledgeStore,
+  knowledgeStore,
+  persistAgentRun,
+} from '@szl-holdings/forge-runtime';
 
-import { logger } from "./logger";
-logger.info("Knowledge store initialized");
+import { logger } from './logger';
+
+logger.info('Knowledge store initialized');

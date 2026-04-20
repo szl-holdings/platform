@@ -1,10 +1,10 @@
-import { and, desc, eq, type InferInsertModel, inArray, lt, or } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { MEMORY_DOMAIN_UNKNOWN } from "./types.js";
-import type { MemoryEntry, MemoryTier } from "./types.js";
-import { assertMemoryDomain } from "./store.js";
-import type { MemoryStore, MemoryStoreQuery } from "./store.js";
+import { and, desc, eq, type InferInsertModel, inArray, lt, or } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
+import type { MemoryStore, MemoryStoreQuery } from './store.js';
+import { assertMemoryDomain } from './store.js';
+import type { MemoryEntry, MemoryTier } from './types.js';
+import { MEMORY_DOMAIN_UNKNOWN } from './types.js';
 
 export interface PostgresMemoryStoreLogger {
   info?: (...args: unknown[]) => void;
@@ -38,15 +38,15 @@ interface MemoryRowShape {
   value: unknown;
   scopeId: string | null;
   confidence: string | number | null;
-  sensitivity: MemoryEntry["sensitivity"];
-  retentionPolicy: MemoryEntry["retention"]["policy"];
+  sensitivity: MemoryEntry['sensitivity'];
+  retentionPolicy: MemoryEntry['retention']['policy'];
   expiresAt: Date | null;
   maxAgeDays: number | null;
   isStale: boolean | null;
-  provenanceSource: MemoryEntry["provenance"]["source"];
+  provenanceSource: MemoryEntry['provenance']['source'];
   provenanceSourceId: string | null;
   provenanceAuthor: string | null;
-  provenanceMethod: MemoryEntry["provenance"]["method"];
+  provenanceMethod: MemoryEntry['provenance']['method'];
   linkedEntities: string[] | null;
   linkedTraces: string[] | null;
   linkedActions: string[] | null;
@@ -94,46 +94,41 @@ function buildRow(entry: MemoryEntry): InferInsertModel<MemoryRecordsTableLike> 
 }
 
 function rowToEntry(raw: unknown): MemoryEntry | undefined {
-  if (!raw || typeof raw !== "object") return undefined;
+  if (!raw || typeof raw !== 'object') return undefined;
   const row = raw as Partial<MemoryRowShape>;
-  if (typeof row.externalId !== "string") return undefined;
+  if (typeof row.externalId !== 'string') return undefined;
   // Recover the canonical domain from the mirrored `metadata.domain` column;
   // hydration must always produce a domain-tagged entry so the in-process
   // store passes its own `assertMemoryDomain` check on subsequent puts.
   const metadataDomain =
-    row.metadata && typeof row.metadata === "object"
-      ? (row.metadata as Record<string, unknown>)["domain"]
+    row.metadata && typeof row.metadata === 'object'
+      ? (row.metadata as Record<string, unknown>)['domain']
       : undefined;
   const domain =
-    typeof metadataDomain === "string" && metadataDomain.length > 0
+    typeof metadataDomain === 'string' && metadataDomain.length > 0
       ? metadataDomain
       : MEMORY_DOMAIN_UNKNOWN;
   return {
     id: row.externalId,
     tier: row.tier as MemoryTier,
-    key: row.key ?? "",
+    key: row.key ?? '',
     value: row.value ?? undefined,
     scopeId: row.scopeId ?? undefined,
     domain,
-    confidence:
-      typeof row.confidence === "string"
-        ? Number(row.confidence)
-        : row.confidence ?? 1,
-    sensitivity: row.sensitivity as MemoryEntry["sensitivity"],
+    confidence: typeof row.confidence === 'string' ? Number(row.confidence) : (row.confidence ?? 1),
+    sensitivity: row.sensitivity as MemoryEntry['sensitivity'],
     provenance: {
-      source: row.provenanceSource as MemoryEntry["provenance"]["source"],
+      source: row.provenanceSource as MemoryEntry['provenance']['source'],
       sourceId: row.provenanceSourceId ?? undefined,
       author: row.provenanceAuthor ?? undefined,
-      method: row.provenanceMethod as MemoryEntry["provenance"]["method"],
+      method: row.provenanceMethod as MemoryEntry['provenance']['method'],
       createdAt: (row.createdAt instanceof Date
         ? row.createdAt
         : new Date(Date.now())
       ).toISOString(),
     },
     freshness: {
-      lastAccessedAt: row.lastAccessedAt
-        ? new Date(row.lastAccessedAt).toISOString()
-        : undefined,
+      lastAccessedAt: row.lastAccessedAt ? new Date(row.lastAccessedAt).toISOString() : undefined,
       lastUpdatedAt: (row.lastUpdatedAt instanceof Date
         ? row.lastUpdatedAt
         : new Date(Date.now())
@@ -141,7 +136,7 @@ function rowToEntry(raw: unknown): MemoryEntry | undefined {
       isStale: !!row.isStale,
     },
     retention: {
-      policy: row.retentionPolicy as MemoryEntry["retention"]["policy"],
+      policy: row.retentionPolicy as MemoryEntry['retention']['policy'],
       expiresAt: row.expiresAt ? new Date(row.expiresAt).toISOString() : undefined,
       maxAgeDays: row.maxAgeDays ?? undefined,
       pinned: false,
@@ -150,8 +145,7 @@ function rowToEntry(raw: unknown): MemoryEntry | undefined {
     linkedTraces: Array.isArray(row.linkedTraces) ? row.linkedTraces : [],
     linkedActions: Array.isArray(row.linkedActions) ? row.linkedActions : [],
     tags: Array.isArray(row.tags) ? row.tags : [],
-    metadata:
-      row.metadata && typeof row.metadata === "object" ? row.metadata : {},
+    metadata: row.metadata && typeof row.metadata === 'object' ? row.metadata : {},
   };
 }
 
@@ -162,7 +156,7 @@ export class PostgresMemoryStore implements MemoryStore {
   private flushing = false;
   private flushTimer: ReturnType<typeof setInterval> | undefined;
   private readonly opts: Required<
-    Pick<PostgresMemoryStoreOptions, "flushIntervalMs" | "hydrateLimit">
+    Pick<PostgresMemoryStoreOptions, 'flushIntervalMs' | 'hydrateLimit'>
   > &
     PostgresMemoryStoreOptions;
 
@@ -171,10 +165,7 @@ export class PostgresMemoryStore implements MemoryStore {
     if (this.opts.flushIntervalMs > 0) {
       this.flushTimer = setInterval(() => {
         void this.flush().catch((err) =>
-          this.opts.logger?.warn?.(
-            { err },
-            "PostgresMemoryStore: scheduled flush failed",
-          ),
+          this.opts.logger?.warn?.({ err }, 'PostgresMemoryStore: scheduled flush failed'),
         );
       }, this.opts.flushIntervalMs);
       this.flushTimer.unref?.();
@@ -228,10 +219,11 @@ export class PostgresMemoryStore implements MemoryStore {
     }
     if (query?.search) {
       const needle = query.search.toLowerCase();
-      results = results.filter((e) =>
-        e.key.toLowerCase().includes(needle) ||
-        (typeof e.value === "string" && e.value.toLowerCase().includes(needle)) ||
-        e.tags.some((t) => t.toLowerCase().includes(needle)),
+      results = results.filter(
+        (e) =>
+          e.key.toLowerCase().includes(needle) ||
+          (typeof e.value === 'string' && e.value.toLowerCase().includes(needle)) ||
+          e.tags.some((t) => t.toLowerCase().includes(needle)),
       );
     }
     if (!query?.includeStale) {
@@ -317,14 +309,11 @@ export class PostgresMemoryStore implements MemoryStore {
       }
       this.opts.logger?.info?.(
         { loaded, max },
-        "PostgresMemoryStore: hydrated cache from database",
+        'PostgresMemoryStore: hydrated cache from database',
       );
       return loaded;
     } catch (err) {
-      this.opts.logger?.error?.(
-        { err },
-        "PostgresMemoryStore: failed to hydrate from database",
-      );
+      this.opts.logger?.error?.({ err }, 'PostgresMemoryStore: failed to hydrate from database');
       return 0;
     }
   }
@@ -346,18 +335,15 @@ export class PostgresMemoryStore implements MemoryStore {
       for (const entry of writes) {
         try {
           const row = buildRow(entry);
-          await this.opts.db
-            .insert(this.opts.memoryRecordsTable)
-            .values(row)
-            .onConflictDoUpdate({
-              target: this.opts.memoryRecordsTable.externalId,
-              set: row,
-            });
+          await this.opts.db.insert(this.opts.memoryRecordsTable).values(row).onConflictDoUpdate({
+            target: this.opts.memoryRecordsTable.externalId,
+            set: row,
+          });
           saved++;
         } catch (err) {
           this.opts.logger?.warn?.(
             { err, id: entry.id },
-            "PostgresMemoryStore: upsert failed; re-queuing",
+            'PostgresMemoryStore: upsert failed; re-queuing',
           );
           this.pendingWrites.set(entry.id, entry);
         }
@@ -369,10 +355,7 @@ export class PostgresMemoryStore implements MemoryStore {
             .where(inArray(this.opts.memoryRecordsTable.externalId, deletes));
           deleted = deletes.length;
         } catch (err) {
-          this.opts.logger?.warn?.(
-            { err },
-            "PostgresMemoryStore: bulk delete failed; re-queuing",
-          );
+          this.opts.logger?.warn?.({ err }, 'PostgresMemoryStore: bulk delete failed; re-queuing');
           for (const id of deletes) this.pendingDeletes.add(id);
         }
       }
@@ -392,14 +375,12 @@ export class PostgresMemoryStore implements MemoryStore {
   ): Promise<{ cacheRemoved: number; dbRemoved: number }> {
     let cacheRemoved = this.evictExpired();
     const now = new Date();
-    const ephemeralCutoff = new Date(
-      Date.now() - (opts.ephemeralMaxAgeMinutes ?? 60) * 60 * 1000,
-    );
+    const ephemeralCutoff = new Date(Date.now() - (opts.ephemeralMaxAgeMinutes ?? 60) * 60 * 1000);
     // Evict ephemeral-over-age entries from cache so the in-process view stays
     // consistent with the database after the retention sweep below.
     for (const [id, entry] of this.cache) {
       if (
-        entry.retention.policy === "ephemeral" &&
+        entry.retention.policy === 'ephemeral' &&
         new Date(entry.freshness.lastUpdatedAt) < ephemeralCutoff
       ) {
         this.cache.delete(id);
@@ -416,18 +397,18 @@ export class PostgresMemoryStore implements MemoryStore {
           or(
             lt(this.opts.memoryRecordsTable.expiresAt, now),
             and(
-              eq(this.opts.memoryRecordsTable.retentionPolicy, "ephemeral"),
+              eq(this.opts.memoryRecordsTable.retentionPolicy, 'ephemeral'),
               lt(this.opts.memoryRecordsTable.lastUpdatedAt, ephemeralCutoff),
             ),
           ),
         );
       dbRemoved = (result as { rowCount?: number | null }).rowCount ?? 0;
     } catch (err) {
-      this.opts.logger?.warn?.({ err }, "PostgresMemoryStore: retention sweep failed");
+      this.opts.logger?.warn?.({ err }, 'PostgresMemoryStore: retention sweep failed');
     }
     this.opts.logger?.info?.(
       { cacheRemoved, dbRemoved },
-      "PostgresMemoryStore: retention sweep complete",
+      'PostgresMemoryStore: retention sweep complete',
     );
     return { cacheRemoved, dbRemoved };
   }

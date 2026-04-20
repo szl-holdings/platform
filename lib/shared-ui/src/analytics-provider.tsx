@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useEffect, type ReactNode } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect } from 'react';
 
 interface AnalyticsEvent {
   name: string;
@@ -36,10 +36,10 @@ async function flushEvents(appName: string): Promise<void> {
   if (EVENT_QUEUE.length === 0) return;
   const batch = EVENT_QUEUE.splice(0, FLUSH_BATCH_SIZE);
   try {
-    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const res = await fetch(`${baseUrl}/api/telemetry/events`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ app: appName, events: batch }),
     });
     if (!res.ok) {
@@ -60,21 +60,34 @@ export function AnalyticsProvider({ appName, children, enabled = true }: Analyti
     return () => clearInterval(interval);
   }, [appName, enabled]);
 
-  const track = useCallback((name: string, properties?: Record<string, unknown>) => {
-    if (!enabled) return;
-    EVENT_QUEUE.push({ name, ...(properties !== undefined ? { properties } : {}), timestamp: Date.now() });
-    if (EVENT_QUEUE.length >= FLUSH_BATCH_SIZE) {
-      flushEvents(appName);
-    }
-  }, [appName, enabled]);
+  const track = useCallback(
+    (name: string, properties?: Record<string, unknown>) => {
+      if (!enabled) return;
+      EVENT_QUEUE.push({
+        name,
+        ...(properties !== undefined ? { properties } : {}),
+        timestamp: Date.now(),
+      });
+      if (EVENT_QUEUE.length >= FLUSH_BATCH_SIZE) {
+        flushEvents(appName);
+      }
+    },
+    [appName, enabled],
+  );
 
-  const page = useCallback((name: string, properties?: Record<string, unknown>) => {
-    track("page_view", { page: name, ...properties });
-  }, [track]);
+  const page = useCallback(
+    (name: string, properties?: Record<string, unknown>) => {
+      track('page_view', { page: name, ...properties });
+    },
+    [track],
+  );
 
-  const identify = useCallback((userId: string, traits?: Record<string, unknown>) => {
-    track("identify", { userId, ...traits });
-  }, [track]);
+  const identify = useCallback(
+    (userId: string, traits?: Record<string, unknown>) => {
+      track('identify', { userId, ...traits });
+    },
+    [track],
+  );
 
   return (
     <AnalyticsContext.Provider value={{ track, page, identify }}>

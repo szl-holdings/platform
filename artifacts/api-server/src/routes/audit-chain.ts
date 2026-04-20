@@ -11,42 +11,53 @@
  *   GET  /audit-chain/export  — export chain as JSON (ops/analyst only)
  */
 
-import { Router, type IRouter } from "express";
-import { createHash } from "crypto";
-import { db, auditChainEventsTable } from "@szl-holdings/db";
-import { desc, eq, and, gte, ilike, or, count } from "drizzle-orm";
+import { auditChainEventsTable, db } from '@szl-holdings/db';
+import { createHash } from 'crypto';
+import { and, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
 import {
-  sendSuccess,
-  sendCreated,
-  sendBadRequest,
-  sendForbidden,
   handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { logger } from "../lib/logger";
-import { validateBody, auditChainEventSchema, validateQuery, listQuerySchema } from "../lib/validation";
+  sendBadRequest,
+  sendCreated,
+  sendForbidden,
+  sendSuccess,
+} from '../lib/api-response';
+import { logger } from '../lib/logger';
+import {
+  auditChainEventSchema,
+  listQuerySchema,
+  validateBody,
+  validateQuery,
+} from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
+import {
+  perUserApiSlidingLimiter,
+  perUserWriteSlidingLimiter,
+} from '../middlewares/sliding-window-limiter';
 
 const router: IRouter = Router();
 
-function computeEventHash(prevHash: string, payload: {
-  action: string;
-  actor: string;
-  domain: string;
-  actionType: string;
-  entityId?: string | null;
-  createdAt: string;
-}): string {
+function computeEventHash(
+  prevHash: string,
+  payload: {
+    action: string;
+    actor: string;
+    domain: string;
+    actionType: string;
+    entityId?: string | null;
+    createdAt: string;
+  },
+): string {
   const data = [
     prevHash,
     payload.action,
     payload.actor,
     payload.domain,
     payload.actionType,
-    payload.entityId ?? "",
+    payload.entityId ?? '',
     payload.createdAt,
-  ].join("|");
-  return createHash("sha256").update(data).digest("hex");
+  ].join('|');
+  return createHash('sha256').update(data).digest('hex');
 }
 
 async function getLastEvent(orgId?: number | null) {
@@ -61,19 +72,19 @@ async function getLastEvent(orgId?: number | null) {
 }
 
 router.get(
-  "/audit-chain/events",
+  '/audit-chain/events',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const limit = Math.min(Number(req.query["limit"] ?? 50), 200);
-      const offset = Number(req.query["offset"] ?? 0);
-      const domain = req.query["domain"] as string | undefined;
-      const actionType = req.query["actionType"] as string | undefined;
-      const riskLevel = req.query["riskLevel"] as string | undefined;
-      const search = req.query["search"] as string | undefined;
-      const since = req.query["since"] as string | undefined;
+      const limit = Math.min(Number(req.query['limit'] ?? 50), 200);
+      const offset = Number(req.query['offset'] ?? 0);
+      const domain = req.query['domain'] as string | undefined;
+      const actionType = req.query['actionType'] as string | undefined;
+      const riskLevel = req.query['riskLevel'] as string | undefined;
+      const search = req.query['search'] as string | undefined;
+      const since = req.query['since'] as string | undefined;
 
       const conditions: ReturnType<typeof eq>[] = [];
       if (domain) conditions.push(eq(auditChainEventsTable.domain, domain));
@@ -93,7 +104,9 @@ router.get(
               ilike(auditChainEventsTable.domain, `%${search}%`),
             ),
           )
-        : conditions.length > 0 ? and(...(conditions as Parameters<typeof and>)) : undefined;
+        : conditions.length > 0
+          ? and(...(conditions as Parameters<typeof and>))
+          : undefined;
 
       const [events, [totRow]] = await Promise.all([
         db
@@ -103,10 +116,7 @@ router.get(
           .orderBy(desc(auditChainEventsTable.createdAt))
           .limit(limit)
           .offset(offset),
-        db
-          .select({ total: count() })
-          .from(auditChainEventsTable)
-          .where(whereClause),
+        db.select({ total: count() }).from(auditChainEventsTable).where(whereClause),
       ]);
 
       sendSuccess(res, {
@@ -116,13 +126,13 @@ router.get(
         offset,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to fetch audit chain events");
+      handleRouteError(res, err, 'Failed to fetch audit chain events');
     }
-  }
+  },
 );
 
 router.post(
-  "/audit-chain/events",
+  '/audit-chain/events',
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   validateBody(auditChainEventSchema),
@@ -148,11 +158,11 @@ router.post(
       const now = new Date();
 
       const last = await getLastEvent(orgId);
-      const prevHash = last?.eventHash ?? "genesis";
+      const prevHash = last?.eventHash ?? 'genesis';
 
       const eventHash = computeEventHash(prevHash, {
         action,
-        actor: actorLabel ?? req.user?.displayName ?? "system",
+        actor: actorLabel ?? req.user?.displayName ?? 'system',
         domain,
         actionType,
         entityId: entityId ?? null,
@@ -164,15 +174,15 @@ router.post(
         .values({
           orgId,
           actorUserId,
-          actorLabel: actorLabel ?? req.user?.displayName ?? "system",
+          actorLabel: actorLabel ?? req.user?.displayName ?? 'system',
           action,
           actionType,
           domain,
           entityId: entityId ?? null,
           entityType: entityType ?? null,
-          riskLevel: riskLevel ?? "low",
+          riskLevel: riskLevel ?? 'low',
           complianceTags: Array.isArray(complianceTags) ? complianceTags : [],
-          outcome: outcome ?? "success",
+          outcome: outcome ?? 'success',
           details: details ?? null,
           metadata: metadata ?? {},
           prevHash,
@@ -181,21 +191,21 @@ router.post(
         .returning();
 
       logger.info(
-        { id: inserted.id, domain, actionType, eventHash: eventHash.substring(0, 16) + "..." },
-        "[AuditChain] Event appended"
+        { id: inserted.id, domain, actionType, eventHash: eventHash.substring(0, 16) + '...' },
+        '[AuditChain] Event appended',
       );
 
       sendCreated(res, inserted);
     } catch (err) {
-      handleRouteError(res, err, "Failed to append audit chain event");
+      handleRouteError(res, err, 'Failed to append audit chain event');
     }
-  }
+  },
 );
 
 router.get(
-  "/audit-chain/verify",
+  '/audit-chain/verify',
   authMiddleware({ required: false }),
-  requireRole("ops", "analyst", "admin"),
+  requireRole('ops', 'analyst', 'admin'),
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
@@ -213,7 +223,7 @@ router.get(
 
       for (let i = 0; i < events.length; i++) {
         const ev = events[i]!;
-        const expectedPrev = i === 0 ? "genesis" : events[i - 1]!.eventHash;
+        const expectedPrev = i === 0 ? 'genesis' : events[i - 1]!.eventHash;
 
         if (ev.prevHash !== expectedPrev) {
           intact = false;
@@ -244,15 +254,15 @@ router.get(
         verifiedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Chain verification failed");
+      handleRouteError(res, err, 'Chain verification failed');
     }
-  }
+  },
 );
 
 router.get(
-  "/audit-chain/export",
+  '/audit-chain/export',
   authMiddleware(),
-  requireRole("ops", "analyst"),
+  requireRole('ops', 'analyst'),
   async (req, res) => {
     try {
       const orgId = (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;
@@ -271,9 +281,9 @@ router.get(
         events,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to export audit chain");
+      handleRouteError(res, err, 'Failed to export audit chain');
     }
-  }
+  },
 );
 
 export default router;

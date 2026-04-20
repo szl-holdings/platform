@@ -1,4 +1,4 @@
-import type { PlatformFacts } from "./schema.js";
+import type { PlatformFacts } from './schema.js';
 
 /**
  * Platform facts registry.
@@ -8,8 +8,8 @@ import type { PlatformFacts } from "./schema.js";
  * Curated facts are preserved across regenerations.
  */
 export const PLATFORM_FACTS: PlatformFacts = {
-  generatedAt: "2026-04-20T18:50:43.455Z",
-  generatedBy: "generate-platform-metrics",
+  generatedAt: '2026-04-20T18:50:43.455Z',
+  generatedBy: 'generate-platform-metrics',
 
   structural: {
     artifactCount: 20,
@@ -45,34 +45,34 @@ export const PLATFORM_FACTS: PlatformFacts = {
   },
 
   deployment: {
-    deploymentTargets: ["Reserved VM", "Autoscale", "External Workers"],
-    primaryRegion: "us-east",
+    deploymentTargets: ['Reserved VM', 'Autoscale', 'External Workers'],
+    primaryRegion: 'us-east',
   },
 
   curated: {
-    platformVersion: "4.0.0",
-    platformName: "SZL Holdings Platform",
-    platformCodename: "AEEP",
+    platformVersion: '4.0.0',
+    platformName: 'SZL Holdings Platform',
+    platformCodename: 'AEEP',
     foundedYear: 2024,
-    lastAuditDate: "2026-04-20",
-    authProviders: ["Replit Auth (OIDC/PKCE)", "Clerk"],
-    aiProviders: ["OpenAI", "Anthropic", "Google Gemini", "HuggingFace", "NVIDIA NIM"],
+    lastAuditDate: '2026-04-20',
+    authProviders: ['Replit Auth (OIDC/PKCE)', 'Clerk'],
+    aiProviders: ['OpenAI', 'Anthropic', 'Google Gemini', 'HuggingFace', 'NVIDIA NIM'],
     externalDataSources: [
-      "AIS Maritime (MarineTraffic, AISHub, Digitraffic, BarentsWatch)",
-      "STIX/TAXII Threat Intelligence",
-      "AlienVault OTX",
-      "MISP OSINT",
-      "OFAC/UN/EU Sanctions Lists",
-      "CISA KEV",
-      "NVD CVE",
-      "MITRE ATT&CK",
-      "CourtListener Legal",
-      "SEC EDGAR",
-      "NYC Open Data",
-      "Open-Meteo Marine Weather",
-      "Mapbox Geospatial",
-      "GitHub",
-      "HubSpot CRM",
+      'AIS Maritime (MarineTraffic, AISHub, Digitraffic, BarentsWatch)',
+      'STIX/TAXII Threat Intelligence',
+      'AlienVault OTX',
+      'MISP OSINT',
+      'OFAC/UN/EU Sanctions Lists',
+      'CISA KEV',
+      'NVD CVE',
+      'MITRE ATT&CK',
+      'CourtListener Legal',
+      'SEC EDGAR',
+      'NYC Open Data',
+      'Open-Meteo Marine Weather',
+      'Mapbox Geospatial',
+      'GitHub',
+      'HubSpot CRM',
     ],
   },
 };

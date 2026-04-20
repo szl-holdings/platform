@@ -1,5 +1,5 @@
-import { z } from "zod";
-import type { RunErrorCategory } from "./errors.js";
+import { z } from 'zod';
+import type { RunErrorCategory } from './errors.js';
 
 export const DeadLetterEntrySchema = z.object({
   runId: z.string(),
@@ -7,13 +7,13 @@ export const DeadLetterEntrySchema = z.object({
   objective: z.string(),
   failedAt: z.number(),
   errorCategory: z.enum([
-    "timeout",
-    "validation",
-    "provider",
-    "policy",
-    "approval_rejected",
-    "approval_timeout",
-    "unknown",
+    'timeout',
+    'validation',
+    'provider',
+    'policy',
+    'approval_rejected',
+    'approval_timeout',
+    'unknown',
   ]),
   errorMessage: z.string(),
   attemptCount: z.number().int().nonnegative(),
@@ -71,7 +71,8 @@ export function getDeadLetterEntries(options?: {
 }): readonly DeadLetterEntry[] {
   let results = store as DeadLetterEntry[];
   if (options?.unresolved) results = results.filter((e) => !e.manuallyResolved);
-  if (options?.errorCategory) results = results.filter((e) => e.errorCategory === options.errorCategory);
+  if (options?.errorCategory)
+    results = results.filter((e) => e.errorCategory === options.errorCategory);
   return results;
 }
 
@@ -80,9 +81,15 @@ export function getDeadLetterStats() {
     total: store.length,
     unresolved: store.filter((e) => !e.manuallyResolved).length,
     byCategory: Object.fromEntries(
-      ["timeout", "validation", "provider", "policy", "approval_rejected", "approval_timeout", "unknown"].map(
-        (cat) => [cat, store.filter((e) => e.errorCategory === cat).length],
-      ),
+      [
+        'timeout',
+        'validation',
+        'provider',
+        'policy',
+        'approval_rejected',
+        'approval_timeout',
+        'unknown',
+      ].map((cat) => [cat, store.filter((e) => e.errorCategory === cat).length]),
     ),
   };
 }

@@ -1,4 +1,4 @@
-import { PUBLIC_CLAIMS, type ClaimTruthValue } from "@szl-holdings/platform-registry/public-claims";
+import { type ClaimTruthValue, PUBLIC_CLAIMS } from '@szl-holdings/platform-registry/public-claims';
 
 export type { ClaimTruthValue };
 
@@ -17,7 +17,7 @@ export function makeClaimResolver(namespace: string) {
       key,
       namespace,
       value: registered?.claim ?? defaultValue,
-      truthValue: registered?.truthValue ?? "demo-data",
+      truthValue: registered?.truthValue ?? 'demo-data',
       displayLabel: registered?.displayLabel ?? null,
     };
   };

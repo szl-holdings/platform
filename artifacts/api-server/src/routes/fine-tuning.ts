@@ -9,159 +9,176 @@
  * - Tracking cumulative training costs
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db } from "@szl-holdings/db";
-import { fineTuningJobs, fineTunedModelRegistry, fineTuningDatasets } from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
 import {
-  submitFineTuningJob,
-  pollJobStatus,
-  listFineTuningJobs,
   cancelFineTuningJob,
-  getAllFineTunedModels,
-  deprecateFineTunedModel,
-  getModelLineage,
-  resolveModelForAgent,
-  promoteFineTunedModel,
   curateDatasetForAgent,
-  getAllSupportedAgents,
+  deprecateFineTunedModel,
   exportTrainingData,
-  serializeToJSONL,
-  serializeToHuggingFaceJSON,
   type FineTuningProvider,
-} from "@szl-holdings/ai-engine";
-import { z } from "zod";
-import { validateBody } from "../lib/validation";
-import { sendNotFound, sendError, sendBadRequest } from "../lib/api-response";
+  getAllFineTunedModels,
+  getAllSupportedAgents,
+  getModelLineage,
+  listFineTuningJobs,
+  pollJobStatus,
+  promoteFineTunedModel,
+  resolveModelForAgent,
+  serializeToHuggingFaceJSON,
+  serializeToJSONL,
+  submitFineTuningJob,
+} from '@szl-holdings/ai-engine';
+import { db, fineTunedModelRegistry, fineTuningDatasets, fineTuningJobs } from '@szl-holdings/db';
+import { desc, eq } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { z } from 'zod';
+import { sendBadRequest, sendError, sendNotFound } from '../lib/api-response';
+import { validateBody } from '../lib/validation';
 
 const fineTuningRouter: IRouter = Router();
 
 const submitJobSchema = z.object({
   agentId: z.string().min(1).max(100),
-  provider: z.enum(["openai", "huggingface"]).optional(),
+  provider: z.enum(['openai', 'huggingface']).optional(),
   baseModel: z.string().max(200).optional(),
-  hyperparameters: z.object({
-    nEpochs: z.number().int().min(1).max(50).optional(),
-    batchSize: z.number().int().min(1).max(256).optional(),
-    learningRateMultiplier: z.number().positive().max(100).optional(),
-  }).optional(),
-  options: z.object({
-    minSamples: z.number().int().min(1).optional(),
-  }).optional(),
+  hyperparameters: z
+    .object({
+      nEpochs: z.number().int().min(1).max(50).optional(),
+      batchSize: z.number().int().min(1).max(256).optional(),
+      learningRateMultiplier: z.number().positive().max(100).optional(),
+    })
+    .optional(),
+  options: z
+    .object({
+      minSamples: z.number().int().min(1).optional(),
+    })
+    .optional(),
 });
 
 const datasetPreviewSchema = z.object({
   agentId: z.string().min(1).max(100),
-  format: z.enum(["openai-jsonl", "huggingface-json"]).optional(),
+  format: z.enum(['openai-jsonl', 'huggingface-json']).optional(),
   curate: z.boolean().optional(),
 });
 
 const lifecycleSchema = z.object({
-  lifecycle: z.enum(["staging", "canary", "active", "deprecated"]),
+  lifecycle: z.enum(['staging', 'canary', 'active', 'deprecated']),
 });
 
-fineTuningRouter.get("/fine-tuning/jobs", async (req: Request, res: Response) => {
+fineTuningRouter.get('/fine-tuning/jobs', async (req: Request, res: Response) => {
   try {
-    const agentId = req.query["agentId"] as string | undefined;
+    const agentId = req.query['agentId'] as string | undefined;
     const jobs = await listFineTuningJobs(agentId);
     res.json({ jobs, total: jobs.length });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to list fine-tuning jobs";
+    const msg = err instanceof Error ? err.message : 'Failed to list fine-tuning jobs';
     sendError(res, msg);
   }
 });
 
-fineTuningRouter.get("/fine-tuning/jobs/:jobId", async (req: Request, res: Response) => {
+fineTuningRouter.get('/fine-tuning/jobs/:jobId', async (req: Request, res: Response) => {
   try {
-    const jobId = String(req.params["jobId"]);
+    const jobId = String(req.params['jobId']);
     const status = await pollJobStatus(jobId);
     res.json(status);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to get job status";
-    const statusCode = msg.includes("not found") ? 404 : 500;
-    sendError(res, msg, statusCode, statusCode === 404 ? "NOT_FOUND" : "INTERNAL_ERROR");
+    const msg = err instanceof Error ? err.message : 'Failed to get job status';
+    const statusCode = msg.includes('not found') ? 404 : 500;
+    sendError(res, msg, statusCode, statusCode === 404 ? 'NOT_FOUND' : 'INTERNAL_ERROR');
   }
 });
 
-fineTuningRouter.post("/fine-tuning/jobs", validateBody(submitJobSchema), async (req: Request, res: Response) => {
-  try {
-    const {
-      agentId,
-      provider = "openai",
-      baseModel,
-      hyperparameters,
-      options,
-    } = req.body as z.infer<typeof submitJobSchema>;
+fineTuningRouter.post(
+  '/fine-tuning/jobs',
+  validateBody(submitJobSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        agentId,
+        provider = 'openai',
+        baseModel,
+        hyperparameters,
+        options,
+      } = req.body as z.infer<typeof submitJobSchema>;
 
-    const supportedAgents = getAllSupportedAgents();
-    if (!supportedAgents.includes(agentId)) {
-      sendBadRequest(res, `Agent '${agentId}' not supported for fine-tuning`, { supportedAgents });
-      return;
+      const supportedAgents = getAllSupportedAgents();
+      if (!supportedAgents.includes(agentId)) {
+        sendBadRequest(res, `Agent '${agentId}' not supported for fine-tuning`, {
+          supportedAgents,
+        });
+        return;
+      }
+
+      const defaultModels: Record<FineTuningProvider, string> = {
+        openai: 'gpt-4o-mini-2024-07-18',
+        huggingface: 'Qwen/Qwen3-8B',
+      };
+
+      const job = await submitFineTuningJob({
+        agentId,
+        provider,
+        baseModel: baseModel ?? defaultModels[provider],
+        hyperparameters,
+        options,
+      });
+
+      res.status(202).json({
+        message: 'Fine-tuning job submitted',
+        job,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to submit fine-tuning job';
+      const statusCode = msg.includes('Insufficient') ? 422 : 500;
+      sendError(
+        res,
+        msg,
+        statusCode,
+        statusCode === 422 ? 'UNPROCESSABLE_ENTITY' : 'INTERNAL_ERROR',
+      );
     }
+  },
+);
 
-    const defaultModels: Record<FineTuningProvider, string> = {
-      openai: "gpt-4o-mini-2024-07-18",
-      huggingface: "Qwen/Qwen3-8B",
-    };
-
-    const job = await submitFineTuningJob({
-      agentId,
-      provider,
-      baseModel: baseModel ?? defaultModels[provider],
-      hyperparameters,
-      options,
-    });
-
-    res.status(202).json({
-      message: "Fine-tuning job submitted",
-      job,
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to submit fine-tuning job";
-    const statusCode = msg.includes("Insufficient") ? 422 : 500;
-    sendError(res, msg, statusCode, statusCode === 422 ? "UNPROCESSABLE_ENTITY" : "INTERNAL_ERROR");
-  }
-});
-
-fineTuningRouter.post("/fine-tuning/jobs/:jobId/cancel", async (req: Request, res: Response) => {
+fineTuningRouter.post('/fine-tuning/jobs/:jobId/cancel', async (req: Request, res: Response) => {
   try {
-    const jobId = String(req.params["jobId"]);
+    const jobId = String(req.params['jobId']);
     await cancelFineTuningJob(jobId);
     res.json({ success: true, message: `Job ${jobId} cancelled` });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to cancel job";
+    const msg = err instanceof Error ? err.message : 'Failed to cancel job';
     sendError(res, msg);
   }
 });
 
-fineTuningRouter.get("/fine-tuning/models", async (_req: Request, res: Response) => {
+fineTuningRouter.get('/fine-tuning/models', async (_req: Request, res: Response) => {
   try {
     const models = await getAllFineTunedModels();
     res.json({ models, total: models.length });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to list fine-tuned models";
+    const msg = err instanceof Error ? err.message : 'Failed to list fine-tuned models';
     sendError(res, msg);
   }
 });
 
-fineTuningRouter.get("/fine-tuning/models/:modelId/lineage", async (req: Request, res: Response) => {
-  try {
-    const modelId = decodeURIComponent(String(req.params["modelId"]));
-    const lineage = await getModelLineage(modelId);
-    if (!lineage.model) {
-      sendNotFound(res, "Model");
-      return;
+fineTuningRouter.get(
+  '/fine-tuning/models/:modelId/lineage',
+  async (req: Request, res: Response) => {
+    try {
+      const modelId = decodeURIComponent(String(req.params['modelId']));
+      const lineage = await getModelLineage(modelId);
+      if (!lineage.model) {
+        sendNotFound(res, 'Model');
+        return;
+      }
+      res.json(lineage);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to get model lineage';
+      sendError(res, msg);
     }
-    res.json(lineage);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to get model lineage";
-    sendError(res, msg);
-  }
-});
+  },
+);
 
-fineTuningRouter.get("/fine-tuning/models/:modelId/evals", async (req: Request, res: Response) => {
+fineTuningRouter.get('/fine-tuning/models/:modelId/evals', async (req: Request, res: Response) => {
   try {
-    const modelId = decodeURIComponent(String(req.params["modelId"]));
+    const modelId = decodeURIComponent(String(req.params['modelId']));
     const [model] = await db
       .select()
       .from(fineTunedModelRegistry)
@@ -169,7 +186,7 @@ fineTuningRouter.get("/fine-tuning/models/:modelId/evals", async (req: Request, 
       .limit(1);
 
     if (!model) {
-      sendNotFound(res, "Model");
+      sendNotFound(res, 'Model');
       return;
     }
 
@@ -187,101 +204,147 @@ fineTuningRouter.get("/fine-tuning/models/:modelId/evals", async (req: Request, 
       fineTunedScores: model.evalScores,
       baseModelScores: model.baseModelEvalScores ?? job?.baseModelEvalScores,
       baseModel: model.baseModel,
-      comparison: model.evalScores && model.baseModelEvalScores
-        ? buildComparison(model.evalScores as Record<string, unknown>, model.baseModelEvalScores as Record<string, unknown>)
-        : null,
+      comparison:
+        model.evalScores && model.baseModelEvalScores
+          ? buildComparison(
+              model.evalScores as Record<string, unknown>,
+              model.baseModelEvalScores as Record<string, unknown>,
+            )
+          : null,
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to get eval scores";
+    const msg = err instanceof Error ? err.message : 'Failed to get eval scores';
     sendError(res, msg);
   }
 });
 
-fineTuningRouter.patch("/fine-tuning/models/:modelId/lifecycle", validateBody(lifecycleSchema), async (req: Request, res: Response) => {
-  try {
-    const modelId = decodeURIComponent(String(req.params["modelId"]));
-    const { lifecycle } = req.body as z.infer<typeof lifecycleSchema>;
+fineTuningRouter.patch(
+  '/fine-tuning/models/:modelId/lifecycle',
+  validateBody(lifecycleSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const modelId = decodeURIComponent(String(req.params['modelId']));
+      const { lifecycle } = req.body as z.infer<typeof lifecycleSchema>;
 
-    if (lifecycle === "deprecated") {
-      await deprecateFineTunedModel(modelId);
-    } else {
-      await promoteFineTunedModel(modelId, lifecycle as "canary" | "active");
+      if (lifecycle === 'deprecated') {
+        await deprecateFineTunedModel(modelId);
+      } else {
+        await promoteFineTunedModel(modelId, lifecycle as 'canary' | 'active');
+      }
+
+      res.json({ success: true, modelId, lifecycle });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update lifecycle';
+      sendError(res, msg);
     }
+  },
+);
 
-    res.json({ success: true, modelId, lifecycle });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to update lifecycle";
-    sendError(res, msg);
-  }
-});
-
-fineTuningRouter.get("/fine-tuning/datasets", async (req: Request, res: Response) => {
+fineTuningRouter.get('/fine-tuning/datasets', async (req: Request, res: Response) => {
   try {
-    const agentId = req.query["agentId"] as string | undefined;
+    const agentId = req.query['agentId'] as string | undefined;
     const query = agentId
-      ? db.select().from(fineTuningDatasets).where(eq(fineTuningDatasets.agentId, agentId)).orderBy(desc(fineTuningDatasets.createdAt)).limit(50)
+      ? db
+          .select()
+          .from(fineTuningDatasets)
+          .where(eq(fineTuningDatasets.agentId, agentId))
+          .orderBy(desc(fineTuningDatasets.createdAt))
+          .limit(50)
       : db.select().from(fineTuningDatasets).orderBy(desc(fineTuningDatasets.createdAt)).limit(100);
 
     const datasets = await query;
     res.json({ datasets, total: datasets.length });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to list datasets";
+    const msg = err instanceof Error ? err.message : 'Failed to list datasets';
     sendError(res, msg);
   }
 });
 
-fineTuningRouter.post("/fine-tuning/datasets/preview", validateBody(datasetPreviewSchema), async (req: Request, res: Response) => {
-  try {
-    const { agentId, format = "openai-jsonl", curate = true } = req.body as z.infer<typeof datasetPreviewSchema>;
+fineTuningRouter.post(
+  '/fine-tuning/datasets/preview',
+  validateBody(datasetPreviewSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        agentId,
+        format = 'openai-jsonl',
+        curate = true,
+      } = req.body as z.infer<typeof datasetPreviewSchema>;
 
-    const result = curate
-      ? await curateDatasetForAgent(agentId, format)
-      : await exportTrainingData(agentId, format, { maxSamples: 50 });
+      const result = curate
+        ? await curateDatasetForAgent(agentId, format)
+        : await exportTrainingData(agentId, format, { maxSamples: 50 });
 
-    const preview = result.samples.slice(0, 5);
+      const preview = result.samples.slice(0, 5);
 
-    res.json({
-      agentId,
-      format,
-      version: result.version,
-      sampleCount: result.sampleCount,
-      sourceBreakdown: result.sourceBreakdown,
-      preview,
-      exportedAt: result.exportedAt,
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to generate dataset preview";
-    sendError(res, msg);
-  }
-});
-
-fineTuningRouter.get("/fine-tuning/datasets/:agentId/export", async (req: Request, res: Response) => {
-  try {
-    const agentId = String(req.params["agentId"]);
-    const format = (req.query["format"] as string ?? "openai-jsonl") as "openai-jsonl" | "huggingface-json";
-
-    const result = await curateDatasetForAgent(agentId, format);
-
-    if (format === "openai-jsonl") {
-      const content = serializeToJSONL(result.samples as Array<{ messages: Array<{ role: "system" | "user" | "assistant"; content: string }> }>);
-      res.setHeader("Content-Type", "application/jsonl");
-      res.setHeader("Content-Disposition", `attachment; filename="${agentId}-${result.version}.jsonl"`);
-      res.send(content);
-    } else {
-      const content = serializeToHuggingFaceJSON(result.samples as Array<{ instruction: string; input: string; output: string; domain: string; agentId: string; source: string; quality: number }>);
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader("Content-Disposition", `attachment; filename="${agentId}-${result.version}.json"`);
-      res.send(content);
+      res.json({
+        agentId,
+        format,
+        version: result.version,
+        sampleCount: result.sampleCount,
+        sourceBreakdown: result.sourceBreakdown,
+        preview,
+        exportedAt: result.exportedAt,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to generate dataset preview';
+      sendError(res, msg);
     }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to export dataset";
-    sendError(res, msg);
-  }
-});
+  },
+);
 
-fineTuningRouter.get("/fine-tuning/costs", async (req: Request, res: Response) => {
+fineTuningRouter.get(
+  '/fine-tuning/datasets/:agentId/export',
+  async (req: Request, res: Response) => {
+    try {
+      const agentId = String(req.params['agentId']);
+      const format = ((req.query['format'] as string) ?? 'openai-jsonl') as
+        | 'openai-jsonl'
+        | 'huggingface-json';
+
+      const result = await curateDatasetForAgent(agentId, format);
+
+      if (format === 'openai-jsonl') {
+        const content = serializeToJSONL(
+          result.samples as Array<{
+            messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+          }>,
+        );
+        res.setHeader('Content-Type', 'application/jsonl');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${agentId}-${result.version}.jsonl"`,
+        );
+        res.send(content);
+      } else {
+        const content = serializeToHuggingFaceJSON(
+          result.samples as Array<{
+            instruction: string;
+            input: string;
+            output: string;
+            domain: string;
+            agentId: string;
+            source: string;
+            quality: number;
+          }>,
+        );
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${agentId}-${result.version}.json"`,
+        );
+        res.send(content);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to export dataset';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.get('/fine-tuning/costs', async (req: Request, res: Response) => {
   try {
-    const agentId = req.query["agentId"] as string | undefined;
+    const agentId = req.query['agentId'] as string | undefined;
 
     const query = agentId
       ? db.select().from(fineTuningJobs).where(eq(fineTuningJobs.agentId, agentId))
@@ -312,26 +375,33 @@ fineTuningRouter.get("/fine-tuning/costs", async (req: Request, res: Response) =
     res.json({
       totalCostUsd: parseFloat(totalCost.toFixed(4)),
       totalJobs: jobs.length,
-      succeededJobs: jobs.filter(j => j.status === "succeeded" || j.status === "registered").length,
+      succeededJobs: jobs.filter((j) => j.status === 'succeeded' || j.status === 'registered')
+        .length,
       byAgent: Object.fromEntries(
-        Array.from(byAgent.entries()).map(([id, data]) => [id, { ...data, cost: parseFloat(data.cost.toFixed(4)) }])
+        Array.from(byAgent.entries()).map(([id, data]) => [
+          id,
+          { ...data, cost: parseFloat(data.cost.toFixed(4)) },
+        ]),
       ),
       byProvider: Object.fromEntries(
-        Array.from(byProvider.entries()).map(([p, data]) => [p, { ...data, cost: parseFloat(data.cost.toFixed(4)) }])
+        Array.from(byProvider.entries()).map(([p, data]) => [
+          p,
+          { ...data, cost: parseFloat(data.cost.toFixed(4)) },
+        ]),
       ),
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to get cost summary";
+    const msg = err instanceof Error ? err.message : 'Failed to get cost summary';
     sendError(res, msg);
   }
 });
 
-fineTuningRouter.get("/fine-tuning/router/:agentId", async (req: Request, res: Response) => {
+fineTuningRouter.get('/fine-tuning/router/:agentId', async (req: Request, res: Response) => {
   try {
-    const agentId = String(req.params["agentId"]);
-    const baseModel = (req.query["baseModel"] as string) ?? "gpt-5.2";
-    const preferFineTuned = req.query["preferFineTuned"] !== "false";
-    const minLifecycle = (req.query["minLifecycle"] as "staging" | "canary" | "active") ?? "canary";
+    const agentId = String(req.params['agentId']);
+    const baseModel = (req.query['baseModel'] as string) ?? 'gpt-5.2';
+    const preferFineTuned = req.query['preferFineTuned'] !== 'false';
+    const minLifecycle = (req.query['minLifecycle'] as 'staging' | 'canary' | 'active') ?? 'canary';
 
     const resolution = await resolveModelForAgent(agentId, baseModel, {
       preferFineTuned,
@@ -347,12 +417,12 @@ fineTuningRouter.get("/fine-tuning/router/:agentId", async (req: Request, res: R
       fallbackModel: resolution.isFineTuned ? baseModel : undefined,
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to resolve model";
+    const msg = err instanceof Error ? err.message : 'Failed to resolve model';
     sendError(res, msg);
   }
 });
 
-fineTuningRouter.get("/fine-tuning/summary", async (_req: Request, res: Response) => {
+fineTuningRouter.get('/fine-tuning/summary', async (_req: Request, res: Response) => {
   try {
     const [jobs, models, datasets] = await Promise.all([
       db.select().from(fineTuningJobs).orderBy(desc(fineTuningJobs.createdAt)).limit(10),
@@ -369,9 +439,9 @@ fineTuningRouter.get("/fine-tuning/summary", async (_req: Request, res: Response
         registeredDatasets: datasets.length,
         totalTrainingCostUsd: parseFloat(totalCost.toFixed(4)),
       },
-      jobStatusBreakdown: countByField(jobs, "status"),
-      modelLifecycleBreakdown: countByField(models, "lifecycle"),
-      recentJobs: jobs.slice(0, 5).map(j => ({
+      jobStatusBreakdown: countByField(jobs, 'status'),
+      modelLifecycleBreakdown: countByField(models, 'lifecycle'),
+      recentJobs: jobs.slice(0, 5).map((j) => ({
         jobId: j.jobId,
         agentId: j.agentId,
         status: j.status,
@@ -382,15 +452,18 @@ fineTuningRouter.get("/fine-tuning/summary", async (_req: Request, res: Response
       supportedAgents: getAllSupportedAgents(),
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to get summary";
+    const msg = err instanceof Error ? err.message : 'Failed to get summary';
     sendError(res, msg);
   }
 });
 
-function countByField<T extends Record<string, unknown>>(items: T[], field: string): Record<string, number> {
+function countByField<T extends Record<string, unknown>>(
+  items: T[],
+  field: string,
+): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const item of items) {
-    const val = String(item[field] ?? "unknown");
+    const val = String(item[field] ?? 'unknown');
     counts[val] = (counts[val] ?? 0) + 1;
   }
   return counts;
@@ -400,12 +473,12 @@ function buildComparison(
   fineTuned: Record<string, unknown>,
   base: Record<string, unknown>,
 ): Array<{ metric: string; base: unknown; fineTuned: unknown; delta: string }> {
-  const metrics = ["passRate", "passed", "failed", "avgLatencyMs"];
-  return metrics.map(metric => {
+  const metrics = ['passRate', 'passed', 'failed', 'avgLatencyMs'];
+  return metrics.map((metric) => {
     const baseVal = base[metric];
     const ftVal = fineTuned[metric];
-    let delta = "—";
-    if (typeof baseVal === "number" && typeof ftVal === "number") {
+    let delta = '—';
+    if (typeof baseVal === 'number' && typeof ftVal === 'number') {
       const diff = ftVal - baseVal;
       delta = diff >= 0 ? `+${diff.toFixed(3)}` : diff.toFixed(3);
     }

@@ -1,23 +1,23 @@
-import type { Request, Response, NextFunction } from "express";
-import { serverTelemetry, getTracer } from "@szl-holdings/observability";
+import { getTracer, serverTelemetry } from '@szl-holdings/observability';
+import type { NextFunction, Request, Response } from 'express';
 
 const INSTRUMENTED_PREFIXES = [
-  "/alloy/",
-  "/signals",
-  "/lyte/",
-  "/vessels",
-  "/connectors",
-  "/terra",
-  "/auth",
-  "/users",
-  "/services",
-  "/graphql",
-  "/organizations",
-  "/apm",
+  '/alloy/',
+  '/signals',
+  '/lyte/',
+  '/vessels',
+  '/connectors',
+  '/terra',
+  '/auth',
+  '/users',
+  '/services',
+  '/graphql',
+  '/organizations',
+  '/apm',
 ];
 
 function isInstrumented(path: string): boolean {
-  return INSTRUMENTED_PREFIXES.some(p => path.startsWith(p));
+  return INSTRUMENTED_PREFIXES.some((p) => path.startsWith(p));
 }
 
 export function telemetryMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -27,7 +27,7 @@ export function telemetryMiddleware(req: Request, res: Response, next: NextFunct
 
   if (instrumented) {
     const origJson = res.json.bind(res);
-    res.json = function(body: unknown) {
+    res.json = (body: unknown) => {
       const s = process.hrtime.bigint();
       const result = origJson(body);
       serStart.current = process.hrtime.bigint() - s;
@@ -35,7 +35,7 @@ export function telemetryMiddleware(req: Request, res: Response, next: NextFunct
     };
   }
 
-  res.on("finish", () => {
+  res.on('finish', () => {
     const totalMs = Number(process.hrtime.bigint() - start) / 1e6;
     const serializationMs = Number(serStart.current) / 1e6;
     const apmReq = req as Request & { _apmDbMs?: number; _apmExtMs?: number };
@@ -65,15 +65,17 @@ export function telemetryMiddleware(req: Request, res: Response, next: NextFunct
       });
 
       const tracer = getTracer();
-      tracer.startSpan(`http.${req.method.toLowerCase()}.${req.path.replace(/\/\d+/g, "/:id")}`, {
-        "http.method": req.method,
-        "http.route": req.path,
-        "http.status_code": res.statusCode,
-        "duration_ms": Math.round(totalMs),
-        "db_query_ms": Math.round(dbQueryMs),
-        "external_api_ms": Math.round(externalApiMs),
-        "serialization_ms": Math.round(serializationMs),
-      }).end();
+      tracer
+        .startSpan(`http.${req.method.toLowerCase()}.${req.path.replace(/\/\d+/g, '/:id')}`, {
+          'http.method': req.method,
+          'http.route': req.path,
+          'http.status_code': res.statusCode,
+          duration_ms: Math.round(totalMs),
+          db_query_ms: Math.round(dbQueryMs),
+          external_api_ms: Math.round(externalApiMs),
+          serialization_ms: Math.round(serializationMs),
+        })
+        .end();
     }
   });
 
@@ -92,14 +94,21 @@ export function recordExternalTime(req: Request, provider: string, durationMs: n
   serverTelemetry.recordExternalCall({ provider, durationMs, timestamp: Date.now() });
 }
 
-export async function withDbSpan<T>(req: Request, fn: () => Promise<T>, query?: string): Promise<T> {
+export async function withDbSpan<T>(
+  req: Request,
+  fn: () => Promise<T>,
+  query?: string,
+): Promise<T> {
   const tracer = getTracer();
   return tracer.withSpan(`db.query ${query ?? req.path}`, async (span) => {
     const start = process.hrtime.bigint();
     try {
       const result = await fn();
       const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
-      span.setAttributes({ "db.duration_ms": Math.round(durationMs), "db.query": query ?? req.path });
+      span.setAttributes({
+        'db.duration_ms': Math.round(durationMs),
+        'db.query': query ?? req.path,
+      });
       recordDbTime(req, durationMs, query);
       return result;
     } catch (err) {
@@ -110,14 +119,21 @@ export async function withDbSpan<T>(req: Request, fn: () => Promise<T>, query?: 
   });
 }
 
-export async function withExternalSpan<T>(req: Request, provider: string, fn: () => Promise<T>): Promise<T> {
+export async function withExternalSpan<T>(
+  req: Request,
+  provider: string,
+  fn: () => Promise<T>,
+): Promise<T> {
   const tracer = getTracer();
   return tracer.withSpan(`external.${provider}`, async (span) => {
     const start = process.hrtime.bigint();
     try {
       const result = await fn();
       const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
-      span.setAttributes({ "external.provider": provider, "external.duration_ms": Math.round(durationMs) });
+      span.setAttributes({
+        'external.provider': provider,
+        'external.duration_ms': Math.round(durationMs),
+      });
       recordExternalTime(req, provider, durationMs);
       return result;
     } catch (err) {

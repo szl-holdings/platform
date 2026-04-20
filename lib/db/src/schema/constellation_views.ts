@@ -1,16 +1,16 @@
+import { sql } from 'drizzle-orm';
 import {
+  index,
+  integer,
+  jsonb,
   pgTable,
   serial,
   text,
-  jsonb,
-  integer,
   timestamp,
   uniqueIndex,
-  index,
-} from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
-import { usersTable } from "./auth";
-import { organizationsTable } from "./organizations";
+} from 'drizzle-orm/pg-core';
+import { usersTable } from './auth';
+import { organizationsTable } from './organizations';
 
 /**
  * Saved Constellation views.
@@ -30,37 +30,35 @@ import { organizationsTable } from "./organizations";
  * named one to the org.
  */
 export const constellationSavedViewsTable = pgTable(
-  "constellation_saved_views",
+  'constellation_saved_views',
   {
-    id: serial("id").primaryKey(),
-    userId: integer("user_id")
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
       .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    orgId: integer("org_id").references(() => organizationsTable.id, {
-      onDelete: "cascade",
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    orgId: integer('org_id').references(() => organizationsTable.id, {
+      onDelete: 'cascade',
     }),
-    visibility: text("visibility", { enum: ["private", "org"] })
+    visibility: text('visibility', { enum: ['private', 'org'] })
       .notNull()
-      .default("private"),
-    domain: text("domain").notNull(),
-    name: text("name").notNull(),
-    filters: jsonb("filters").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+      .default('private'),
+    domain: text('domain').notNull(),
+    name: text('name').notNull(),
+    filters: jsonb('filters').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("constellation_saved_views_user_domain_name_uq")
+    uniqueIndex('constellation_saved_views_user_domain_name_uq')
       .on(t.userId, t.domain, t.name)
       .where(sql`${t.visibility} = 'private'`),
-    uniqueIndex("constellation_saved_views_org_domain_name_uq")
+    uniqueIndex('constellation_saved_views_org_domain_name_uq')
       .on(t.orgId, t.domain, t.name)
       .where(sql`${t.visibility} = 'org'`),
-    index("constellation_saved_views_user_domain_idx").on(t.userId, t.domain),
-    index("constellation_saved_views_org_domain_idx").on(t.orgId, t.domain),
+    index('constellation_saved_views_user_domain_idx').on(t.userId, t.domain),
+    index('constellation_saved_views_org_domain_idx').on(t.orgId, t.domain),
   ],
 );
 
-export type InsertConstellationSavedView =
-  typeof constellationSavedViewsTable.$inferInsert;
-export type ConstellationSavedView =
-  typeof constellationSavedViewsTable.$inferSelect;
+export type InsertConstellationSavedView = typeof constellationSavedViewsTable.$inferInsert;
+export type ConstellationSavedView = typeof constellationSavedViewsTable.$inferSelect;

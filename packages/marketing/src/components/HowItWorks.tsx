@@ -1,12 +1,12 @@
-import { useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
+import { motion, useInView } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
+import { useRef, useState } from 'react';
 
-const BG = "hsl(214,16%,4%)";
-const SURFACE = "hsla(0,0%,100%,0.035)";
-const BORDER = "hsla(0,0%,100%,0.07)";
-const TEXT = "hsl(38,8%,92%)";
-const TEXT_SEC = "hsl(214,7%,55%)";
+const BG = 'hsl(214,16%,4%)';
+const SURFACE = 'hsla(0,0%,100%,0.035)';
+const BORDER = 'hsla(0,0%,100%,0.07)';
+const TEXT = 'hsl(38,8%,92%)';
+const TEXT_SEC = 'hsl(214,7%,55%)';
 
 export interface HowItWorksStep {
   number: string;
@@ -25,29 +25,25 @@ export interface HowItWorksProps {
 }
 
 export function HowItWorks({
-  headline = "Every consequential decision follows one canonical loop.",
-  subheadline = "Nine steps. Every domain. The governance does not change.",
+  headline = 'Every consequential decision follows one canonical loop.',
+  subheadline = 'Nine steps. Every domain. The governance does not change.',
   steps,
-  accentColor = "hsl(191,92%,44%)",
+  accentColor = 'hsl(191,92%,44%)',
   onStepView,
 }: HowItWorksProps) {
   const [active, setActive] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: '-100px' });
 
   const handleStepClick = (i: number) => {
     setActive(i);
-    onStepView?.(i + 1, steps[i]?.label ?? "");
+    onStepView?.(i + 1, steps[i]?.label ?? '');
   };
 
   const step = steps[active];
 
   return (
-    <section
-      ref={ref}
-      style={{ background: BG }}
-      className="py-24 px-4"
-    >
+    <section ref={ref} style={{ background: BG }} className="py-24 px-4">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -80,8 +76,8 @@ export function HowItWorks({
                   onClick={() => handleStepClick(i)}
                   className="flex-shrink-0 flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 whitespace-nowrap lg:whitespace-normal"
                   style={{
-                    background: isActive ? `${s.color}12` : "transparent",
-                    border: `1px solid ${isActive ? `${s.color}40` : "transparent"}`,
+                    background: isActive ? `${s.color}12` : 'transparent',
+                    border: `1px solid ${isActive ? `${s.color}40` : 'transparent'}`,
                   }}
                 >
                   <span

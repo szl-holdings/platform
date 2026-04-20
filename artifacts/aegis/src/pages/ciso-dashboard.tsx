@@ -1,45 +1,43 @@
-import { Link } from "wouter";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
-import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { api } from "@/lib/api";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+import { Button } from '@szl-holdings/shared-ui/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
-
-  Shield,
-  ShieldCheck,
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle2,
   Cloud,
-  Users,
-  FileLock2,
-  Mail,
+  DollarSign,
+  Download,
   Eye,
   Factory,
+  FileLock2,
   Globe2,
+  type LucideIcon,
+  Mail,
+  Shield,
+  ShieldCheck,
+  Target,
   TrendingDown,
   TrendingUp,
-  DollarSign,
-  AlertTriangle,
-  CheckCircle2,
-  ArrowUpRight,
-  Download,
-  Target,
-  type LucideIcon,
-} from "lucide-react";
+  Users,
+} from 'lucide-react';
 import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
+  Bar,
+  BarChart,
   CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  Legend,
-  BarChart,
-  Bar,
-  RadialBarChart,
-  RadialBar,
-} from "recharts";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+} from 'recharts';
+import { Link } from 'wouter';
+import { api } from '@/lib/api';
 
 type Module = {
   key: string;
@@ -50,229 +48,237 @@ type Module = {
   metricLabel: string;
   metricValue: string;
   delta: string;
-  deltaTrend: "up" | "down" | "flat";
+  deltaTrend: 'up' | 'down' | 'flat';
   deltaIsGood: boolean;
-  status: "Healthy" | "Watch" | "Action";
+  status: 'Healthy' | 'Watch' | 'Action';
   caseCount: number;
   summary: string;
 };
 
 const modules: Module[] = [
   {
-    key: "asm",
-    name: "Attack Surface Management",
-    short: "ASM",
+    key: 'asm',
+    name: 'Attack Surface Management',
+    short: 'ASM',
     icon: Globe2,
-    route: "/asset-inventory",
-    metricLabel: "Exposed Assets",
-    metricValue: "184",
-    delta: "-23% QoQ",
-    deltaTrend: "down",
+    route: '/asset-inventory',
+    metricLabel: 'Exposed Assets',
+    metricValue: '184',
+    delta: '-23% QoQ',
+    deltaTrend: 'down',
     deltaIsGood: true,
-    status: "Watch",
+    status: 'Watch',
     caseCount: 12,
-    summary: "8,412 internet-facing assets discovered. 184 still exposed; 12 critical CVEs awaiting patch.",
+    summary:
+      '8,412 internet-facing assets discovered. 184 still exposed; 12 critical CVEs awaiting patch.',
   },
   {
-    key: "cspm",
-    name: "Cloud Security Posture",
-    short: "CSPM",
+    key: 'cspm',
+    name: 'Cloud Security Posture',
+    short: 'CSPM',
     icon: Cloud,
-    route: "/hardening-controls",
-    metricLabel: "Misconfigurations",
-    metricValue: "47",
-    delta: "-38% QoQ",
-    deltaTrend: "down",
+    route: '/hardening-controls',
+    metricLabel: 'Misconfigurations',
+    metricValue: '47',
+    delta: '-38% QoQ',
+    deltaTrend: 'down',
     deltaIsGood: true,
-    status: "Healthy",
+    status: 'Healthy',
     caseCount: 6,
-    summary: "AWS, Azure, GCP scored against CIS benchmarks. 47 high-severity drifts open across 11 accounts.",
+    summary:
+      'AWS, Azure, GCP scored against CIS benchmarks. 47 high-severity drifts open across 11 accounts.',
   },
   {
-    key: "itdr",
-    name: "Identity Threat Detection",
-    short: "ITDR",
+    key: 'itdr',
+    name: 'Identity Threat Detection',
+    short: 'ITDR',
     icon: Users,
-    route: "/identity-threat",
-    metricLabel: "Identity Threats",
-    metricValue: "9",
-    delta: "+2 vs last Q",
-    deltaTrend: "up",
+    route: '/identity-threat',
+    metricLabel: 'Identity Threats',
+    metricValue: '9',
+    delta: '+2 vs last Q',
+    deltaTrend: 'up',
     deltaIsGood: false,
-    status: "Action",
+    status: 'Action',
     caseCount: 9,
-    summary: "Token theft, OAuth abuse, and Tier 0 lateral movement attempts detected on 3 service principals.",
+    summary:
+      'Token theft, OAuth abuse, and Tier 0 lateral movement attempts detected on 3 service principals.',
   },
   {
-    key: "dlp",
-    name: "Data Loss Prevention",
-    short: "DLP",
+    key: 'dlp',
+    name: 'Data Loss Prevention',
+    short: 'DLP',
     icon: FileLock2,
-    route: "/findings",
-    metricLabel: "Sensitive Egress Blocks",
-    metricValue: "1,284",
-    delta: "+12% QoQ",
-    deltaTrend: "up",
+    route: '/findings',
+    metricLabel: 'Sensitive Egress Blocks',
+    metricValue: '1,284',
+    delta: '+12% QoQ',
+    deltaTrend: 'up',
     deltaIsGood: true,
-    status: "Healthy",
+    status: 'Healthy',
     caseCount: 4,
-    summary: "PII, PHI, and regulated IP exfiltration attempts blocked across email, SaaS, and endpoint.",
+    summary:
+      'PII, PHI, and regulated IP exfiltration attempts blocked across email, SaaS, and endpoint.',
   },
   {
-    key: "ztna",
-    name: "Zero Trust Maturity",
-    short: "ZTMM",
+    key: 'ztna',
+    name: 'Zero Trust Maturity',
+    short: 'ZTMM',
     icon: ShieldCheck,
-    route: "/zero-trust-scorecard",
-    metricLabel: "NSA ZT Score",
-    metricValue: "78 / 100",
-    delta: "+11 pts QoQ",
-    deltaTrend: "up",
+    route: '/zero-trust-scorecard',
+    metricLabel: 'NSA ZT Score',
+    metricValue: '78 / 100',
+    delta: '+11 pts QoQ',
+    deltaTrend: 'up',
     deltaIsGood: true,
-    status: "Watch",
+    status: 'Watch',
     caseCount: 3,
-    summary: "Identity & Device pillars at Advanced. Network and Automation pillars still in Initial tier.",
+    summary:
+      'Identity & Device pillars at Advanced. Network and Automation pillars still in Initial tier.',
   },
   {
-    key: "phish",
-    name: "Phishing Simulation",
-    short: "Phish Sim",
+    key: 'phish',
+    name: 'Phishing Simulation',
+    short: 'Phish Sim',
     icon: Mail,
-    route: "/purple-team",
-    metricLabel: "Click Rate",
-    metricValue: "3.4%",
-    delta: "-1.8 pts QoQ",
-    deltaTrend: "down",
+    route: '/purple-team',
+    metricLabel: 'Click Rate',
+    metricValue: '3.4%',
+    delta: '-1.8 pts QoQ',
+    deltaTrend: 'down',
     deltaIsGood: true,
-    status: "Healthy",
+    status: 'Healthy',
     caseCount: 0,
-    summary: "21,840 simulations sent this quarter. 738 clicks, 41 credential entries, 92% report rate.",
+    summary:
+      '21,840 simulations sent this quarter. 738 clicks, 41 credential entries, 92% report rate.',
   },
   {
-    key: "deception",
-    name: "Deception Grid",
-    short: "Decoys",
+    key: 'deception',
+    name: 'Deception Grid',
+    short: 'Decoys',
     icon: Eye,
-    route: "/deception-grid",
-    metricLabel: "Adversary Engagements",
-    metricValue: "27",
-    delta: "+9 vs last Q",
-    deltaTrend: "up",
+    route: '/deception-grid',
+    metricLabel: 'Adversary Engagements',
+    metricValue: '27',
+    delta: '+9 vs last Q',
+    deltaTrend: 'up',
     deltaIsGood: true,
-    status: "Watch",
+    status: 'Watch',
     caseCount: 5,
-    summary: "27 confirmed adversary touches on honey-tokens and decoy services. Avg dwell time 14 minutes.",
+    summary:
+      '27 confirmed adversary touches on honey-tokens and decoy services. Avg dwell time 14 minutes.',
   },
   {
-    key: "ot",
-    name: "OT / ICS Security",
-    short: "OT/ICS",
+    key: 'ot',
+    name: 'OT / ICS Security',
+    short: 'OT/ICS',
     icon: Factory,
-    route: "/adaptive-defense-shield",
-    metricLabel: "ICS Risk Score",
-    metricValue: "62 / 100",
-    delta: "-6 pts QoQ",
-    deltaTrend: "down",
+    route: '/adaptive-defense-shield',
+    metricLabel: 'ICS Risk Score',
+    metricValue: '62 / 100',
+    delta: '-6 pts QoQ',
+    deltaTrend: 'down',
     deltaIsGood: true,
-    status: "Action",
+    status: 'Action',
     caseCount: 7,
-    summary: "Purdue Levels 1–3 monitored across 4 plants. 7 unauthorized PLC programming attempts blocked.",
+    summary:
+      'Purdue Levels 1–3 monitored across 4 plants. 7 unauthorized PLC programming attempts blocked.',
   },
 ];
 
 const trendData = [
-  { week: "W1", current: 78, previous: 64 },
-  { week: "W2", current: 75, previous: 66 },
-  { week: "W3", current: 71, previous: 68 },
-  { week: "W4", current: 73, previous: 70 },
-  { week: "W5", current: 69, previous: 71 },
-  { week: "W6", current: 66, previous: 73 },
-  { week: "W7", current: 64, previous: 74 },
-  { week: "W8", current: 62, previous: 72 },
-  { week: "W9", current: 60, previous: 70 },
-  { week: "W10", current: 58, previous: 71 },
-  { week: "W11", current: 55, previous: 69 },
-  { week: "W12", current: 53, previous: 70 },
+  { week: 'W1', current: 78, previous: 64 },
+  { week: 'W2', current: 75, previous: 66 },
+  { week: 'W3', current: 71, previous: 68 },
+  { week: 'W4', current: 73, previous: 70 },
+  { week: 'W5', current: 69, previous: 71 },
+  { week: 'W6', current: 66, previous: 73 },
+  { week: 'W7', current: 64, previous: 74 },
+  { week: 'W8', current: 62, previous: 72 },
+  { week: 'W9', current: 60, previous: 70 },
+  { week: 'W10', current: 58, previous: 71 },
+  { week: 'W11', current: 55, previous: 69 },
+  { week: 'W12', current: 53, previous: 70 },
 ];
 
 const domainCompare = [
-  { domain: "ASM", current: 18, previous: 41 },
-  { domain: "CSPM", current: 47, previous: 76 },
-  { domain: "ITDR", current: 9, previous: 7 },
-  { domain: "DLP", current: 12, previous: 19 },
-  { domain: "Zero Trust", current: 22, previous: 38 },
-  { domain: "Phish", current: 34, previous: 52 },
-  { domain: "Decoys", current: 27, previous: 18 },
-  { domain: "OT/ICS", current: 62, previous: 68 },
+  { domain: 'ASM', current: 18, previous: 41 },
+  { domain: 'CSPM', current: 47, previous: 76 },
+  { domain: 'ITDR', current: 9, previous: 7 },
+  { domain: 'DLP', current: 12, previous: 19 },
+  { domain: 'Zero Trust', current: 22, previous: 38 },
+  { domain: 'Phish', current: 34, previous: 52 },
+  { domain: 'Decoys', current: 27, previous: 18 },
+  { domain: 'OT/ICS', current: 62, previous: 68 },
 ];
 
 const compliance = [
-  { framework: "SOC 2 Type II", score: 91, status: "Compliant", route: "/cr/scorecards" },
-  { framework: "NIST CSF 2.0", score: 84, status: "Mature", route: "/cr/scorecards" },
-  { framework: "ISO 27001:2022", score: 82, status: "Compliant", route: "/cr/scorecards" },
-  { framework: "CMMC 2.0 L2", score: 76, status: "In Progress", route: "/cr/scorecards" },
-  { framework: "FedRAMP Moderate", score: 74, status: "Assessment", route: "/cr/scorecards" },
-  { framework: "NIS2 / DORA", score: 71, status: "Remediation", route: "/cr/scorecards" },
-  { framework: "PCI DSS 4.0", score: 88, status: "Compliant", route: "/cr/scorecards" },
-  { framework: "HIPAA Security", score: 86, status: "Compliant", route: "/cr/scorecards" },
+  { framework: 'SOC 2 Type II', score: 91, status: 'Compliant', route: '/cr/scorecards' },
+  { framework: 'NIST CSF 2.0', score: 84, status: 'Mature', route: '/cr/scorecards' },
+  { framework: 'ISO 27001:2022', score: 82, status: 'Compliant', route: '/cr/scorecards' },
+  { framework: 'CMMC 2.0 L2', score: 76, status: 'In Progress', route: '/cr/scorecards' },
+  { framework: 'FedRAMP Moderate', score: 74, status: 'Assessment', route: '/cr/scorecards' },
+  { framework: 'NIS2 / DORA', score: 71, status: 'Remediation', route: '/cr/scorecards' },
+  { framework: 'PCI DSS 4.0', score: 88, status: 'Compliant', route: '/cr/scorecards' },
+  { framework: 'HIPAA Security', score: 86, status: 'Compliant', route: '/cr/scorecards' },
 ];
 
 const roiPanel = [
   {
-    module: "Attack Surface Management",
-    intervention: "204 critical exposures remediated < 24h SLA",
+    module: 'Attack Surface Management',
+    intervention: '204 critical exposures remediated < 24h SLA',
     avoided: 8.4,
     icon: Globe2,
-    route: "/asset-inventory",
+    route: '/asset-inventory',
   },
   {
-    module: "Cloud Security Posture",
-    intervention: "Public S3 bucket auto-quarantine + IAM drift recovery",
+    module: 'Cloud Security Posture',
+    intervention: 'Public S3 bucket auto-quarantine + IAM drift recovery',
     avoided: 6.1,
     icon: Cloud,
-    route: "/hardening-controls",
+    route: '/hardening-controls',
   },
   {
-    module: "Identity Threat Detection",
-    intervention: "Token theft response + Tier 0 isolation playbook",
+    module: 'Identity Threat Detection',
+    intervention: 'Token theft response + Tier 0 isolation playbook',
     avoided: 11.7,
     icon: Users,
-    route: "/identity-threat",
+    route: '/identity-threat',
   },
   {
-    module: "Data Loss Prevention",
-    intervention: "1,284 sensitive egress blocks across email/SaaS/endpoint",
+    module: 'Data Loss Prevention',
+    intervention: '1,284 sensitive egress blocks across email/SaaS/endpoint',
     avoided: 4.9,
     icon: FileLock2,
-    route: "/findings",
+    route: '/findings',
   },
   {
-    module: "Zero Trust Program",
-    intervention: "ZT score +11 pts; lateral movement reduction modeled",
+    module: 'Zero Trust Program',
+    intervention: 'ZT score +11 pts; lateral movement reduction modeled',
     avoided: 3.6,
     icon: ShieldCheck,
-    route: "/zero-trust-scorecard",
+    route: '/zero-trust-scorecard',
   },
   {
-    module: "Phishing Simulation",
-    intervention: "Click rate 5.2% → 3.4%; BEC risk reduction",
+    module: 'Phishing Simulation',
+    intervention: 'Click rate 5.2% → 3.4%; BEC risk reduction',
     avoided: 2.8,
     icon: Mail,
-    route: "/purple-team",
+    route: '/purple-team',
   },
   {
-    module: "Deception Grid",
-    intervention: "Early detection on 27 adversary engagements",
+    module: 'Deception Grid',
+    intervention: 'Early detection on 27 adversary engagements',
     avoided: 5.3,
     icon: Eye,
-    route: "/deception-grid",
+    route: '/deception-grid',
   },
   {
-    module: "OT / ICS Security",
-    intervention: "7 unauthorized PLC programming attempts blocked",
+    module: 'OT / ICS Security',
+    intervention: '7 unauthorized PLC programming attempts blocked',
     avoided: 18.2,
     icon: Factory,
-    route: "/adaptive-defense-shield",
+    route: '/adaptive-defense-shield',
   },
 ];
 
@@ -281,19 +287,51 @@ const programSpend = 14.2;
 const roiMultiple = (totalAvoided / programSpend).toFixed(1);
 
 const STATIC_HEADLINE_KPIS = [
-  { label: "Aggregate Risk Score", value: "53", suffix: "/ 100", trend: "-19 QoQ", good: true, icon: Shield },
-  { label: "Open Critical Findings", value: "46", suffix: "", trend: "-31% QoQ", good: true, icon: AlertTriangle },
-  { label: "Mean Time to Contain", value: "18", suffix: "min", trend: "-42% QoQ", good: true, icon: TrendingDown },
-  { label: "Breach Cost Avoided", value: `$${totalAvoided.toFixed(1)}M`, suffix: "QTD", trend: `${roiMultiple}× ROI`, good: true, icon: DollarSign },
+  {
+    label: 'Aggregate Risk Score',
+    value: '53',
+    suffix: '/ 100',
+    trend: '-19 QoQ',
+    good: true,
+    icon: Shield,
+  },
+  {
+    label: 'Open Critical Findings',
+    value: '46',
+    suffix: '',
+    trend: '-31% QoQ',
+    good: true,
+    icon: AlertTriangle,
+  },
+  {
+    label: 'Mean Time to Contain',
+    value: '18',
+    suffix: 'min',
+    trend: '-42% QoQ',
+    good: true,
+    icon: TrendingDown,
+  },
+  {
+    label: 'Breach Cost Avoided',
+    value: `$${totalAvoided.toFixed(1)}M`,
+    suffix: 'QTD',
+    trend: `${roiMultiple}× ROI`,
+    good: true,
+    icon: DollarSign,
+  },
 ];
 
-function statusBadge(status: Module["status"]) {
+function statusBadge(status: Module['status']) {
   const map = {
-    Healthy: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-    Watch: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-    Action: "bg-rose-500/15 text-rose-300 border-rose-500/30",
+    Healthy: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+    Watch: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+    Action: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
   } as const;
-  return <Badge variant="outline" className={map[status]}>{status}</Badge>;
+  return (
+    <Badge variant="outline" className={map[status]}>
+      {status}
+    </Badge>
+  );
 }
 
 interface ThreatSummaryData {
@@ -307,28 +345,33 @@ interface ComplianceSummaryData {
   overallScore?: number;
   dbControls?: { total?: number; passing?: number; failing?: number; inProgress?: number };
 }
-interface AssetRiskItem { entity?: string; type?: string; risk?: number; status?: string }
+interface AssetRiskItem {
+  entity?: string;
+  type?: string;
+  risk?: number;
+  status?: string;
+}
 interface AssetRiskData {
   dbAssets?: AssetRiskItem[];
   aptEntities?: AssetRiskItem[];
 }
 export default function CisoDashboard() {
-  const radial = [{ name: "ZT", uv: 78, fill: "#22d3ee" }];
+  const radial = [{ name: 'ZT', uv: 78, fill: '#22d3ee' }];
 
   const threatSummary = useStandardQuery<ThreatSummaryData>({
-    queryKey: ["ciso", "threat-summary"],
+    queryKey: ['ciso', 'threat-summary'],
     queryFn: () => api.liveData.threatSummary() as Promise<ThreatSummaryData>,
     staleTime: 60_000,
     retry: false,
   });
   const complianceQuery = useStandardQuery<ComplianceSummaryData>({
-    queryKey: ["ciso", "compliance-summary"],
+    queryKey: ['ciso', 'compliance-summary'],
     queryFn: () => api.liveData.complianceSummary() as Promise<ComplianceSummaryData>,
     staleTime: 60_000,
     retry: false,
   });
   const assetRisk = useStandardQuery<AssetRiskData>({
-    queryKey: ["ciso", "asset-risk"],
+    queryKey: ['ciso', 'asset-risk'],
     queryFn: () => api.liveData.assetRisk() as Promise<AssetRiskData>,
     staleTime: 60_000,
     retry: false,
@@ -340,27 +383,58 @@ export default function CisoDashboard() {
   const liveLoaded = !!(ts || cp || ar);
 
   const dbAssets = ar?.dbAssets ?? [];
-  const aggregateRisk = dbAssets.length > 0
-    ? Math.round(dbAssets.reduce((s, a) => s + (a.risk ?? 0), 0) / dbAssets.length)
-    : null;
+  const aggregateRisk =
+    dbAssets.length > 0
+      ? Math.round(dbAssets.reduce((s, a) => s + (a.risk ?? 0), 0) / dbAssets.length)
+      : null;
   const openCriticals = ts ? (ts.criticalAlerts ?? 0) + (ts.incidentsOpenLast24h ?? 0) : null;
   const mttr = ts?.meanTimeToRespond ?? null;
   const overallCompliance = cp?.overallScore ?? null;
 
-  const headlineKpis = liveLoaded ? [
-    aggregateRisk != null
-      ? { label: "Aggregate Risk Score", value: String(aggregateRisk), suffix: "/ 100", trend: "Live · /firestorm/live/asset-risk", good: aggregateRisk < 60, icon: Shield }
-      : STATIC_HEADLINE_KPIS[0],
-    openCriticals != null
-      ? { label: "Open Critical Findings", value: String(openCriticals), suffix: "", trend: `${ts?.activeThreats ?? 0} active threats live`, good: openCriticals < 10, icon: AlertTriangle }
-      : STATIC_HEADLINE_KPIS[1],
-    mttr
-      ? { label: "Mean Time to Respond", value: mttr, suffix: "", trend: `MTTD ${ts?.meanTimeToDetect ?? "—"}`, good: true, icon: TrendingDown }
-      : STATIC_HEADLINE_KPIS[2],
-    overallCompliance != null
-      ? { label: "Compliance Posture", value: `${overallCompliance}`, suffix: "%", trend: `${cp?.dbControls?.passing ?? 0}/${cp?.dbControls?.total ?? 0} controls passing`, good: overallCompliance >= 75, icon: DollarSign }
-      : STATIC_HEADLINE_KPIS[3],
-  ] : STATIC_HEADLINE_KPIS;
+  const headlineKpis = liveLoaded
+    ? [
+        aggregateRisk != null
+          ? {
+              label: 'Aggregate Risk Score',
+              value: String(aggregateRisk),
+              suffix: '/ 100',
+              trend: 'Live · /firestorm/live/asset-risk',
+              good: aggregateRisk < 60,
+              icon: Shield,
+            }
+          : STATIC_HEADLINE_KPIS[0],
+        openCriticals != null
+          ? {
+              label: 'Open Critical Findings',
+              value: String(openCriticals),
+              suffix: '',
+              trend: `${ts?.activeThreats ?? 0} active threats live`,
+              good: openCriticals < 10,
+              icon: AlertTriangle,
+            }
+          : STATIC_HEADLINE_KPIS[1],
+        mttr
+          ? {
+              label: 'Mean Time to Respond',
+              value: mttr,
+              suffix: '',
+              trend: `MTTD ${ts?.meanTimeToDetect ?? '—'}`,
+              good: true,
+              icon: TrendingDown,
+            }
+          : STATIC_HEADLINE_KPIS[2],
+        overallCompliance != null
+          ? {
+              label: 'Compliance Posture',
+              value: `${overallCompliance}`,
+              suffix: '%',
+              trend: `${cp?.dbControls?.passing ?? 0}/${cp?.dbControls?.total ?? 0} controls passing`,
+              good: overallCompliance >= 75,
+              icon: DollarSign,
+            }
+          : STATIC_HEADLINE_KPIS[3],
+      ]
+    : STATIC_HEADLINE_KPIS;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -371,12 +445,16 @@ export default function CisoDashboard() {
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-cyan-300/80">
               <Shield className="h-3.5 w-3.5" /> CISO Executive Dashboard
             </div>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight" data-testid="text-page-title">
+            <h1
+              className="mt-1 text-3xl font-semibold tracking-tight"
+              data-testid="text-page-title"
+            >
               Unified Security Posture — Q1 vs Q4
             </h1>
             <p className="mt-1 max-w-3xl text-sm text-slate-400">
-              Single pane-of-glass aggregating ASM, CSPM, ITDR, DLP, Zero Trust, Phishing Simulation, Deception Grid,
-              and OT/ICS into board-ready KPIs, trend charts, and breach-cost-avoided ROI.
+              Single pane-of-glass aggregating ASM, CSPM, ITDR, DLP, Zero Trust, Phishing
+              Simulation, Deception Grid, and OT/ICS into board-ready KPIs, trend charts, and
+              breach-cost-avoided ROI.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -397,15 +475,23 @@ export default function CisoDashboard() {
               <Card key={k.label} className="border-slate-800 bg-slate-900/60">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs uppercase tracking-wider text-slate-400">{k.label}</span>
+                    <span className="text-xs uppercase tracking-wider text-slate-400">
+                      {k.label}
+                    </span>
                     <Icon className="h-4 w-4 text-cyan-300" />
                   </div>
                   <div className="mt-2 flex items-baseline gap-1">
                     <span className="text-3xl font-semibold text-white">{k.value}</span>
                     <span className="text-sm text-slate-400">{k.suffix}</span>
                   </div>
-                  <div className={`mt-2 flex items-center gap-1 text-xs ${k.good ? "text-emerald-300" : "text-rose-300"}`}>
-                    {k.good ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+                  <div
+                    className={`mt-2 flex items-center gap-1 text-xs ${k.good ? 'text-emerald-300' : 'text-rose-300'}`}
+                  >
+                    {k.good ? (
+                      <TrendingDown className="h-3 w-3" />
+                    ) : (
+                      <TrendingUp className="h-3 w-3" />
+                    )}
                     <span>{k.trend}</span>
                   </div>
                 </CardContent>
@@ -435,7 +521,9 @@ export default function CisoDashboard() {
                           <span className="rounded-md bg-cyan-500/10 p-1.5 text-cyan-300">
                             <Icon className="h-4 w-4" />
                           </span>
-                          <span className="text-xs uppercase tracking-wider text-slate-400">{m.short}</span>
+                          <span className="text-xs uppercase tracking-wider text-slate-400">
+                            {m.short}
+                          </span>
                         </div>
                         {statusBadge(m.status)}
                       </div>
@@ -449,10 +537,10 @@ export default function CisoDashboard() {
                         </div>
                         <div
                           className={`flex items-center gap-1 text-xs ${
-                            m.deltaIsGood ? "text-emerald-300" : "text-rose-300"
+                            m.deltaIsGood ? 'text-emerald-300' : 'text-rose-300'
                           }`}
                         >
-                          {m.deltaTrend === "down" ? (
+                          {m.deltaTrend === 'down' ? (
                             <TrendingDown className="h-3 w-3" />
                           ) : (
                             <TrendingUp className="h-3 w-3" />
@@ -462,7 +550,9 @@ export default function CisoDashboard() {
                       </div>
                       <p className="text-xs leading-relaxed text-slate-400">{m.summary}</p>
                       <div className="flex items-center justify-between border-t border-slate-800 pt-2 text-xs text-slate-400">
-                        <span>{m.caseCount} open case{m.caseCount === 1 ? "" : "s"}</span>
+                        <span>
+                          {m.caseCount} open case{m.caseCount === 1 ? '' : 's'}
+                        </span>
                         <span className="flex items-center gap-1 text-cyan-300">
                           Open module <ArrowUpRight className="h-3 w-3" />
                         </span>
@@ -477,12 +567,17 @@ export default function CisoDashboard() {
 
         {/* Risk trend + domain compare */}
         <section className="grid gap-4 lg:grid-cols-3">
-          <Card className="border-slate-800 bg-slate-900/60 lg:col-span-2" data-testid="risk-trend-chart">
+          <Card
+            className="border-slate-800 bg-slate-900/60 lg:col-span-2"
+            data-testid="risk-trend-chart"
+          >
             <CardHeader>
-              <CardTitle className="text-base">Aggregate Risk Trend — This Quarter vs Last Quarter</CardTitle>
+              <CardTitle className="text-base">
+                Aggregate Risk Trend — This Quarter vs Last Quarter
+              </CardTitle>
               <p className="text-xs text-slate-400">
-                Composite of ASM exposure, CSPM drift, ITDR signal, DLP egress, ZT maturity, phish risk, decoy
-                engagements, and OT/ICS posture (lower is better).
+                Composite of ASM exposure, CSPM drift, ITDR signal, DLP egress, ZT maturity, phish
+                risk, decoy engagements, and OT/ICS posture (lower is better).
               </p>
             </CardHeader>
             <CardContent className="h-72">
@@ -492,12 +587,30 @@ export default function CisoDashboard() {
                   <XAxis dataKey="week" stroke="#64748b" fontSize={11} />
                   <YAxis stroke="#64748b" fontSize={11} />
                   <Tooltip
-                    contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 8 }}
-                    labelStyle={{ color: "#e2e8f0" }}
+                    contentStyle={{
+                      background: '#0f172a',
+                      border: '1px solid #1e293b',
+                      borderRadius: 8,
+                    }}
+                    labelStyle={{ color: '#e2e8f0' }}
                   />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="previous" name="Last Quarter" stroke="#64748b" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="current" name="This Quarter" stroke="#22d3ee" strokeWidth={2} dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="previous"
+                    name="Last Quarter"
+                    stroke="#64748b"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="current"
+                    name="This Quarter"
+                    stroke="#22d3ee"
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -506,14 +619,26 @@ export default function CisoDashboard() {
           <Card className="border-slate-800 bg-slate-900/60" data-testid="zt-radial">
             <CardHeader>
               <CardTitle className="text-base">Zero Trust Maturity</CardTitle>
-              <p className="text-xs text-slate-400">NSA ZT Maturity Model rollup across 5 pillars.</p>
+              <p className="text-xs text-slate-400">
+                NSA ZT Maturity Model rollup across 5 pillars.
+              </p>
             </CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart innerRadius="60%" outerRadius="100%" data={radial} startAngle={90} endAngle={-270}>
+                <RadialBarChart
+                  innerRadius="60%"
+                  outerRadius="100%"
+                  data={radial}
+                  startAngle={90}
+                  endAngle={-270}
+                >
                   <RadialBar background dataKey="uv" cornerRadius={12} fill="#22d3ee" />
                   <Tooltip
-                    contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 8 }}
+                    contentStyle={{
+                      background: '#0f172a',
+                      border: '1px solid #1e293b',
+                      borderRadius: 8,
+                    }}
                   />
                 </RadialBarChart>
               </ResponsiveContainer>
@@ -539,7 +664,11 @@ export default function CisoDashboard() {
                 <XAxis dataKey="domain" stroke="#64748b" fontSize={11} />
                 <YAxis stroke="#64748b" fontSize={11} />
                 <Tooltip
-                  contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 8 }}
+                  contentStyle={{
+                    background: '#0f172a',
+                    border: '1px solid #1e293b',
+                    borderRadius: 8,
+                  }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="previous" name="Last Quarter" fill="#475569" radius={[4, 4, 0, 0]} />
@@ -555,7 +684,8 @@ export default function CisoDashboard() {
             <div>
               <CardTitle className="text-base">Regulatory Readiness Summary</CardTitle>
               <p className="text-xs text-slate-400">
-                Linked to existing compliance framework scorecards. Click a row to open detailed evidence.
+                Linked to existing compliance framework scorecards. Click a row to open detailed
+                evidence.
               </p>
             </div>
             <Link href="/compliance">
@@ -570,7 +700,7 @@ export default function CisoDashboard() {
                 <Link key={c.framework} href={c.route}>
                   <div
                     className="cursor-pointer rounded-lg border border-slate-800 bg-slate-950/40 p-3 transition hover:border-cyan-500/40"
-                    data-testid={`compliance-${c.framework.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
+                    data-testid={`compliance-${c.framework.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-white">{c.framework}</span>
@@ -589,7 +719,11 @@ export default function CisoDashboard() {
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
                       <div
                         className={`h-full ${
-                          c.score >= 85 ? "bg-emerald-400" : c.score >= 75 ? "bg-amber-300" : "bg-rose-400"
+                          c.score >= 85
+                            ? 'bg-emerald-400'
+                            : c.score >= 75
+                              ? 'bg-amber-300'
+                              : 'bg-rose-400'
                         }`}
                         style={{ width: `${c.score}%` }}
                       />
@@ -608,8 +742,8 @@ export default function CisoDashboard() {
               <div>
                 <CardTitle className="text-base">Security Investment ROI</CardTitle>
                 <p className="text-xs text-slate-400">
-                  Breach cost avoided this quarter, attributed to specific module interventions. Methodology aligned to
-                  IBM Cost of a Data Breach 2024.
+                  Breach cost avoided this quarter, attributed to specific module interventions.
+                  Methodology aligned to IBM Cost of a Data Breach 2024.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -643,7 +777,10 @@ export default function CisoDashboard() {
                   {roiPanel.map((r) => {
                     const Icon = r.icon;
                     return (
-                      <tr key={r.module} className="border-t border-slate-800 hover:bg-slate-900/60">
+                      <tr
+                        key={r.module}
+                        className="border-t border-slate-800 hover:bg-slate-900/60"
+                      >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <Icon className="h-4 w-4 text-cyan-300" />
@@ -656,7 +793,11 @@ export default function CisoDashboard() {
                         </td>
                         <td className="px-4 py-3 text-right">
                           <Link href={r.route}>
-                            <Button size="sm" variant="ghost" className="text-cyan-300 hover:text-cyan-200">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-cyan-300 hover:text-cyan-200"
+                            >
                               Drill in <ArrowUpRight className="ml-1 h-3 w-3" />
                             </Button>
                           </Link>

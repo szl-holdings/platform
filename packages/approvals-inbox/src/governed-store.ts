@@ -10,14 +10,15 @@
  * escalations write a governance_memory stub that callers may forward to
  * memory-fabric.
  */
-import { randomUUID } from "crypto";
+
 import {
-  ApprovalRequestSchema,
-  ApprovalDecisionSchema,
-  type ApprovalRequest,
   type ApprovalDecision,
+  ApprovalDecisionSchema,
   type ApprovalInterruptSpec,
-} from "@szl-holdings/contracts/governance";
+  type ApprovalRequest,
+  ApprovalRequestSchema,
+} from '@szl-holdings/contracts/governance';
+import { randomUUID } from 'crypto';
 
 // ─── Store ───────────────────────────────────────────────────────────────────
 
@@ -25,7 +26,7 @@ export interface GovernedApprovalStoreBackend {
   saveRequest(req: ApprovalRequest): void;
   getRequest(id: string): ApprovalRequest | undefined;
   listRequests(filter?: {
-    status?: ApprovalRequest["status"];
+    status?: ApprovalRequest['status'];
     tenantId?: string;
     profileId?: string;
     limit?: number;
@@ -49,15 +50,13 @@ export class InMemoryGovernedApprovalStore implements GovernedApprovalStoreBacke
   }
 
   listRequests(filter?: {
-    status?: ApprovalRequest["status"];
+    status?: ApprovalRequest['status'];
     tenantId?: string;
     profileId?: string;
     limit?: number;
     offset?: number;
   }): ApprovalRequest[] {
-    let all = Array.from(this.requests.values()).sort(
-      (a, b) => b.requestedAt - a.requestedAt,
-    );
+    let all = Array.from(this.requests.values()).sort((a, b) => b.requestedAt - a.requestedAt);
     if (filter?.status) all = all.filter((r) => r.status === filter.status);
     if (filter?.tenantId) all = all.filter((r) => r.tenantId === filter.tenantId);
     if (filter?.profileId) all = all.filter((r) => r.profileId === filter.profileId);
@@ -98,12 +97,24 @@ export class MutableGovernedApprovalStore implements GovernedApprovalStoreBacken
     return this.backend;
   }
 
-  saveRequest(req: ApprovalRequest): void { this.backend.saveRequest(req); }
-  getRequest(id: string): ApprovalRequest | undefined { return this.backend.getRequest(id); }
-  listRequests(f?: Parameters<GovernedApprovalStoreBackend["listRequests"]>[0]): ApprovalRequest[] { return this.backend.listRequests(f); }
-  saveDecision(d: ApprovalDecision): void { this.backend.saveDecision(d); }
-  getDecision(requestId: string): ApprovalDecision | undefined { return this.backend.getDecision(requestId); }
-  listDecisions(requestId: string): ApprovalDecision[] { return this.backend.listDecisions(requestId); }
+  saveRequest(req: ApprovalRequest): void {
+    this.backend.saveRequest(req);
+  }
+  getRequest(id: string): ApprovalRequest | undefined {
+    return this.backend.getRequest(id);
+  }
+  listRequests(f?: Parameters<GovernedApprovalStoreBackend['listRequests']>[0]): ApprovalRequest[] {
+    return this.backend.listRequests(f);
+  }
+  saveDecision(d: ApprovalDecision): void {
+    this.backend.saveDecision(d);
+  }
+  getDecision(requestId: string): ApprovalDecision | undefined {
+    return this.backend.getDecision(requestId);
+  }
+  listDecisions(requestId: string): ApprovalDecision[] {
+    return this.backend.listDecisions(requestId);
+  }
 }
 
 export const defaultGovernedApprovalStore = new MutableGovernedApprovalStore();
@@ -136,7 +147,7 @@ export function createApprovalRequest(
     stepName: opts.stepName,
     checkpointRef: opts.checkpointRef,
     interrupt: opts.interrupt,
-    status: "pending",
+    status: 'pending',
     requestedAt: now,
     expiresAt: opts.interrupt.expiresAt,
   });
@@ -146,7 +157,7 @@ export function createApprovalRequest(
 
 export interface DecideApprovalOptions {
   requestId: string;
-  verdict: "approve" | "deny" | "escalate";
+  verdict: 'approve' | 'deny' | 'escalate';
   actor: string;
   reason: string;
   /** Caller-supplied idempotency key. When provided, subsequent calls with the
@@ -156,10 +167,10 @@ export interface DecideApprovalOptions {
 }
 
 export interface GovernanceMemoryRecord {
-  kind: "governance_memory";
+  kind: 'governance_memory';
   requestId: string;
   runId: string;
-  verdict: "deny" | "escalate";
+  verdict: 'deny' | 'escalate';
   actor: string;
   reason: string;
   decidedAt: number;
@@ -208,13 +219,13 @@ export function decideApproval(
     // Different decisionId: the request is already resolved — reject
     throw new Error(
       `ApprovalRequest ${opts.requestId} already has a recorded decision (verdict: ${existing.verdict}). ` +
-      `Provide the original decisionId to retrieve the existing decision.`,
+        `Provide the original decisionId to retrieve the existing decision.`,
     );
   }
 
   const now = Date.now();
   const resolvedDecisionId = opts.decisionId ?? randomUUID();
-  const signature = Buffer.from(`${opts.actor}:${now}:${opts.verdict}`).toString("base64");
+  const signature = Buffer.from(`${opts.actor}:${now}:${opts.verdict}`).toString('base64');
   const decision = ApprovalDecisionSchema.parse({
     decisionId: resolvedDecisionId,
     requestId: opts.requestId,
@@ -227,10 +238,8 @@ export function decideApproval(
 
   store.saveDecision(decision);
 
-  const newStatus: ApprovalRequest["status"] =
-    opts.verdict === "approve" ? "approved" :
-    opts.verdict === "deny" ? "denied" :
-    "escalated";
+  const newStatus: ApprovalRequest['status'] =
+    opts.verdict === 'approve' ? 'approved' : opts.verdict === 'deny' ? 'denied' : 'escalated';
 
   const updatedReq: ApprovalRequest = {
     ...req,
@@ -241,9 +250,9 @@ export function decideApproval(
   store.saveRequest(updatedReq);
 
   let governanceMemory: GovernanceMemoryRecord | undefined;
-  if (opts.verdict === "deny" || opts.verdict === "escalate") {
+  if (opts.verdict === 'deny' || opts.verdict === 'escalate') {
     governanceMemory = {
-      kind: "governance_memory",
+      kind: 'governance_memory',
       requestId: opts.requestId,
       runId: req.runId,
       verdict: opts.verdict,
@@ -267,7 +276,7 @@ export function getApprovalRequestById(
 }
 
 export function listApprovalRequests(
-  filter?: Parameters<GovernedApprovalStoreBackend["listRequests"]>[0],
+  filter?: Parameters<GovernedApprovalStoreBackend['listRequests']>[0],
   store: GovernedApprovalStoreBackend = defaultGovernedApprovalStore,
 ): ApprovalRequest[] {
   return store.listRequests(filter);

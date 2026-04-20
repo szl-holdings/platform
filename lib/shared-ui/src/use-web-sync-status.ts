@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import type { SyncState } from "./sync-status-badge";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { SyncState } from './sync-status-badge';
 
 export interface WebSyncStatusOptions {
-  domain: "aegis" | "vessels" | "alloy";
+  domain: 'aegis' | 'vessels' | 'alloy';
   syncEndpoint: string;
   getAuthToken?: () => Promise<string | null> | string | null;
   syncIntervalMs?: number;
@@ -19,7 +19,7 @@ export interface WebSyncStatus {
   triggerSync: () => void;
 }
 
-const WATERMARK_KEY_PREFIX = "szl:sync-watermark:";
+const WATERMARK_KEY_PREFIX = 'szl:sync-watermark:';
 const MAX_PAGES = 20;
 
 export function useWebSyncStatus({
@@ -31,7 +31,7 @@ export function useWebSyncStatus({
   getConflictCount,
   countPollIntervalMs = 30_000,
 }: WebSyncStatusOptions): WebSyncStatus {
-  const [syncState, setSyncState] = useState<SyncState>("synced");
+  const [syncState, setSyncState] = useState<SyncState>('synced');
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [conflictCount, setConflictCount] = useState(0);
@@ -49,9 +49,9 @@ export function useWebSyncStatus({
       setPendingCount(pending);
       setConflictCount(conflict);
       if (conflict > 0) {
-        setSyncState("conflict");
+        setSyncState('conflict');
       } else if (pending > 0) {
-        setSyncState((prev) => prev === "synced" || prev === "conflict" ? "pending" : prev);
+        setSyncState((prev) => (prev === 'synced' || prev === 'conflict' ? 'pending' : prev));
       }
     } catch {}
   }, [getPendingCount, getConflictCount]);
@@ -59,7 +59,7 @@ export function useWebSyncStatus({
   const doSync = useCallback(async () => {
     if (syncingRef.current) return;
     syncingRef.current = true;
-    setSyncState("syncing");
+    setSyncState('syncing');
 
     try {
       let sinceTs = 0;
@@ -71,7 +71,7 @@ export function useWebSyncStatus({
       const headers: Record<string, string> = {};
       if (getAuthToken) {
         const token = await getAuthToken();
-        if (token) headers["Authorization"] = `Bearer ${token}`;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
       }
 
       let currentCursor: string | undefined;
@@ -89,15 +89,15 @@ export function useWebSyncStatus({
         const res = await fetch(url, {
           headers,
           signal: controller.signal,
-          credentials: "include",
+          credentials: 'include',
         });
         clearTimeout(timeout);
 
         if (!res.ok) {
           if (res.status === 401 || res.status === 403) {
-            setSyncState("synced");
+            setSyncState('synced');
           } else {
-            setSyncState("error");
+            setSyncState('error');
           }
           return;
         }
@@ -121,16 +121,16 @@ export function useWebSyncStatus({
         } catch {}
       }
 
-      setSyncState("synced");
+      setSyncState('synced');
       setLastSyncedAt(new Date());
       await refreshCounts();
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === "AbortError") {
-        setSyncState("error");
+      if (err instanceof Error && err.name === 'AbortError') {
+        setSyncState('error');
       } else if (!navigator.onLine) {
-        setSyncState("offline");
+        setSyncState('offline');
       } else {
-        setSyncState("error");
+        setSyncState('error');
       }
     } finally {
       syncingRef.current = false;
@@ -142,21 +142,21 @@ export function useWebSyncStatus({
       doSync();
     }
     function handleOffline() {
-      setSyncState("offline");
+      setSyncState('offline');
     }
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     if (!navigator.onLine) {
-      setSyncState("offline");
+      setSyncState('offline');
     } else {
       doSync();
     }
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, [doSync]);
 

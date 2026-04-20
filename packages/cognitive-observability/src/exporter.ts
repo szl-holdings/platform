@@ -1,5 +1,5 @@
-import type { CognitiveMetric } from "./metrics.js";
-import type { MetricCollector } from "./collector.js";
+import type { MetricCollector } from './collector.js';
+import type { CognitiveMetric } from './metrics.js';
 
 export interface OtelMetricExporter {
   export(metrics: CognitiveMetric[]): Promise<void>;
@@ -7,9 +7,9 @@ export interface OtelMetricExporter {
 }
 
 export interface OtelResourceAttributes {
-  "service.name": string;
-  "service.version"?: string;
-  "deployment.environment"?: string;
+  'service.name': string;
+  'service.version'?: string;
+  'deployment.environment'?: string;
   [key: string]: string | undefined;
 }
 
@@ -64,7 +64,7 @@ export class ConsoleOtelExporter implements OtelMetricExporter {
   private readonly resource: OtelResourceAttributes;
 
   constructor(opts: OtelExporterOptions = {}) {
-    this.resource = opts.resource ?? { "service.name": "szl-cognitive-platform" };
+    this.resource = opts.resource ?? { 'service.name': 'szl-cognitive-platform' };
   }
 
   async export(metrics: CognitiveMetric[]): Promise<void> {
@@ -73,7 +73,7 @@ export class ConsoleOtelExporter implements OtelMetricExporter {
       metrics: toOtelFormat(metrics),
       exportedAt: new Date().toISOString(),
     };
-    console.log("[CognitiveObservability] OTel export:", JSON.stringify(payload, null, 2));
+    console.log('[CognitiveObservability] OTel export:', JSON.stringify(payload, null, 2));
   }
 
   async shutdown(): Promise<void> {}
@@ -87,7 +87,7 @@ export class HttpOtelExporter implements OtelMetricExporter {
   constructor(opts: OtelExporterOptions & { endpoint: string }) {
     this.endpoint = opts.endpoint;
     this.headers = opts.headers ?? {};
-    this.resource = opts.resource ?? { "service.name": "szl-cognitive-platform" };
+    this.resource = opts.resource ?? { 'service.name': 'szl-cognitive-platform' };
   }
 
   async export(metrics: CognitiveMetric[]): Promise<void> {
@@ -98,8 +98,8 @@ export class HttpOtelExporter implements OtelMetricExporter {
     };
 
     await fetch(this.endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...this.headers },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.headers },
       body: JSON.stringify(payload),
     });
   }
@@ -145,7 +145,10 @@ export class BatchingExporter implements OtelMetricExporter {
   }
 }
 
-export function toOtelPayload(metrics: CognitiveMetric[], resource: OtelResourceAttributes): unknown {
+export function toOtelPayload(
+  metrics: CognitiveMetric[],
+  resource: OtelResourceAttributes,
+): unknown {
   return {
     resource,
     metrics: toOtelFormat(metrics),

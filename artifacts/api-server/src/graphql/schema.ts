@@ -1,17 +1,20 @@
-import { authTypeDefs, authResolvers } from "./domains/auth.js";
-import { alloyTypeDefs, alloyResolvers, pubsub } from "./domains/alloy.js";
-import { firestormTypeDefs, firestormResolvers } from "./domains/firestorm.js";
-import { vesselsTypeDefs, vesselsResolvers } from "./domains/vessels.js";
-import { terraTypeDefs, terraResolvers } from "./domains/terra.js";
-import { lyteTypeDefs, lyteResolvers } from "./domains/lyte.js";
-import { holdingsTypeDefs, holdingsResolvers } from "./domains/holdings.js";
-import { stephenTypeDefs, stephenResolvers } from "./domains/stephen.js";
-import { carlotaJoTypeDefs, carlotaJoResolvers } from "./domains/carlota-jo.js";
-import { prismCounselTypeDefs, prismCounselResolvers } from "./domains/prism-counsel.js";
-import { prismCounselPilotOneTypeDefs, prismCounselPilotOneResolvers } from "./domains/prism-counsel-pilot-one.js";
-import { directiveTypeDefs } from "./directives.js";
-import { approvalsTypeDefs, approvalsResolvers } from "./domains/approvals.js";
-import { proofChainTypeDefs, proofChainResolvers } from "./domains/proof-chain.js";
+import { directiveTypeDefs } from './directives.js';
+import { alloyResolvers, alloyTypeDefs, pubsub } from './domains/alloy.js';
+import { approvalsResolvers, approvalsTypeDefs } from './domains/approvals.js';
+import { authResolvers, authTypeDefs } from './domains/auth.js';
+import { carlotaJoResolvers, carlotaJoTypeDefs } from './domains/carlota-jo.js';
+import { firestormResolvers, firestormTypeDefs } from './domains/firestorm.js';
+import { holdingsResolvers, holdingsTypeDefs } from './domains/holdings.js';
+import { lyteResolvers, lyteTypeDefs } from './domains/lyte.js';
+import { prismCounselResolvers, prismCounselTypeDefs } from './domains/prism-counsel.js';
+import {
+  prismCounselPilotOneResolvers,
+  prismCounselPilotOneTypeDefs,
+} from './domains/prism-counsel-pilot-one.js';
+import { proofChainResolvers, proofChainTypeDefs } from './domains/proof-chain.js';
+import { stephenResolvers, stephenTypeDefs } from './domains/stephen.js';
+import { terraResolvers, terraTypeDefs } from './domains/terra.js';
+import { vesselsResolvers, vesselsTypeDefs } from './domains/vessels.js';
 
 const baseTypeDefs = `#graphql
   type Query {
@@ -61,14 +64,14 @@ function mergeResolversSimple(...resolverMaps: Record<string, Record<string, unk
 export const resolvers = mergeResolversSimple(
   {
     Query: {
-      _version: () => "1.0.0",
+      _version: () => '1.0.0',
     },
     Mutation: {
       _noop: () => null,
     },
     Subscription: {
       _heartbeat: {
-        subscribe: () => pubsub.asyncIterableIterator("_HEARTBEAT"),
+        subscribe: () => pubsub.asyncIterableIterator('_HEARTBEAT'),
       },
     },
   },

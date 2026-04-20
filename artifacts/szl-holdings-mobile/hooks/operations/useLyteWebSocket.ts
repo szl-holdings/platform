@@ -1,15 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Platform } from "react-native";
-import { useWebSocket, type WsStatus } from "@szl-holdings/mobile-shared";
-import { LyteSignal } from "@/context/LyteContext";
+import { useWebSocket, type WsStatus } from '@szl-holdings/mobile-shared';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
+import type { LyteSignal } from '@/context/LyteContext';
 
 async function getToken(): Promise<string | null> {
   try {
-    if (typeof window !== "undefined" && window.localStorage) {
-      return window.localStorage.getItem("lyte_session_token");
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return window.localStorage.getItem('lyte_session_token');
     }
-    const { default: SecureStore } = await import("expo-secure-store");
-    return SecureStore.getItemAsync("lyte_session_token");
+    const { default: SecureStore } = await import('expo-secure-store');
+    return SecureStore.getItemAsync('lyte_session_token');
   } catch {
     return null;
   }
@@ -23,13 +23,13 @@ interface UseLyteWebSocketOptions {
 export function useLyteWebSocket({ onNewSignal, onConnect }: UseLyteWebSocketOptions = {}) {
   const [token, setToken] = useState<string | null | undefined>(undefined);
   const domain = process.env.EXPO_PUBLIC_DOMAIN;
-  const url = domain && Platform.OS !== "web" ? `wss://${domain}/ws` : null;
+  const url = domain && Platform.OS !== 'web' ? `wss://${domain}/ws` : null;
 
   const onNewSignalRef = useRef(onNewSignal);
   onNewSignalRef.current = onNewSignal;
   const onConnectRef = useRef(onConnect);
   onConnectRef.current = onConnect;
-  const prevStatusRef = useRef<WsStatus>("idle");
+  const prevStatusRef = useRef<WsStatus>('idle');
 
   useEffect(() => {
     getToken().then(setToken);
@@ -41,14 +41,14 @@ export function useLyteWebSocket({ onNewSignal, onConnect }: UseLyteWebSocketOpt
 
   const { status } = useWebSocket<LyteSignal>({
     url,
-    channel: "lyte-signals",
+    channel: 'lyte-signals',
     token: token ?? undefined,
     onMessage: handleMessage,
-    enabled: token !== undefined && Platform.OS !== "web",
+    enabled: token !== undefined && Platform.OS !== 'web',
   });
 
   useEffect(() => {
-    if (prevStatusRef.current !== "connected" && status === "connected") {
+    if (prevStatusRef.current !== 'connected' && status === 'connected') {
       onConnectRef.current?.();
     }
     prevStatusRef.current = status;

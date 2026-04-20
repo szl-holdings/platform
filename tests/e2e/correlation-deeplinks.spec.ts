@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { expect, type Page, test } from '@playwright/test';
 
 // E2E coverage for Task #1897 — verify the URLs that the cross-platform
 // correlation card and evidence registry produce
@@ -8,18 +8,14 @@ import { test, expect, type Page } from "@playwright/test";
 // out; aegis / carlota / prism / lyte deep-links are static-checked by
 // scripts/qa/check-correlation-deeplinks.js.
 
-const COMMAND_BASE = process.env.COMMAND_BASE_PATH ?? "/command";
-const VESSELS_BASE = process.env.VESSELS_BASE_PATH ?? "/vessels";
-const TERRA_BASE = process.env.TERRA_BASE_PATH ?? "/terra";
+const COMMAND_BASE = process.env.COMMAND_BASE_PATH ?? '/command';
+const VESSELS_BASE = process.env.VESSELS_BASE_PATH ?? '/vessels';
+const TERRA_BASE = process.env.TERRA_BASE_PATH ?? '/terra';
 
-const VESSEL_FIXTURE_ID = process.env.E2E_VESSEL_ID ?? "9821045";
-const TERRA_FIXTURE_ID = process.env.E2E_TERRA_PROPERTY_ID ?? "prop-001";
+const VESSEL_FIXTURE_ID = process.env.E2E_VESSEL_ID ?? '9821045';
+const TERRA_FIXTURE_ID = process.env.E2E_TERRA_PROPERTY_ID ?? 'prop-001';
 
-const NOT_FOUND_PATTERNS = [
-  /page not found/i,
-  /\b404\b/,
-  /not found/i,
-];
+const NOT_FOUND_PATTERNS = [/page not found/i, /\b404\b/, /not found/i];
 
 async function isReachable(page: Page, url: string): Promise<boolean> {
   // Try a few times — the Replit dev proxy briefly shows "Upstream not ready"
@@ -27,12 +23,15 @@ async function isReachable(page: Page, url: string): Promise<boolean> {
   // an artifact as unreachable just because the proxy was mid-warmup.
   for (let i = 0; i < 4; i++) {
     try {
-      const resp = await page.goto(url, { timeout: 10_000, waitUntil: "domcontentloaded" });
+      const resp = await page.goto(url, { timeout: 10_000, waitUntil: 'domcontentloaded' });
       if (!resp || resp.status() >= 500) {
         await page.waitForTimeout(1500);
         continue;
       }
-      const text = await page.locator("body").innerText().catch(() => "");
+      const text = await page
+        .locator('body')
+        .innerText()
+        .catch(() => '');
       if (/upstream not ready/i.test(text)) {
         await page.waitForTimeout(1500);
         continue;
@@ -49,18 +48,25 @@ async function navigateWithUpstreamRetry(page: Page, url: string, attempts = 4) 
   // The Replit dev proxy occasionally returns "Upstream not ready on port N"
   // while a workflow is warming up, even though the workflow itself is healthy.
   // Retry a handful of times with a short backoff before giving up.
-  let lastBodyText = "";
+  let lastBodyText = '';
   for (let i = 0; i < attempts; i++) {
-    await page.goto(url, { waitUntil: "domcontentloaded" });
-    await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => null);
-    lastBodyText = await page.locator("body").innerText().catch(() => "");
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => null);
+    lastBodyText = await page
+      .locator('body')
+      .innerText()
+      .catch(() => '');
     if (!/upstream not ready/i.test(lastBodyText)) return lastBodyText;
     await page.waitForTimeout(1500);
   }
   return lastBodyText;
 }
 
-async function assertNotGenericNotFound(page: Page, testInfo: import("@playwright/test").TestInfo, bodyText: string) {
+async function assertNotGenericNotFound(
+  page: Page,
+  testInfo: import('@playwright/test').TestInfo,
+  bodyText: string,
+) {
   // Skip if the dev proxy is still warming up — that's environmental, not a
   // routing regression in the artifact under test.
   if (/upstream not ready/i.test(bodyText)) testInfo.skip();
@@ -78,8 +84,8 @@ let commandAvailable = true;
 let aegisAvailable = true;
 let carlotaAvailable = true;
 
-const AEGIS_BASE = process.env.AEGIS_BASE_PATH ?? "/aegis";
-const CARLOTA_BASE = process.env.CARLOTA_BASE_PATH ?? "/carlota-jo";
+const AEGIS_BASE = process.env.AEGIS_BASE_PATH ?? '/aegis';
+const CARLOTA_BASE = process.env.CARLOTA_BASE_PATH ?? '/carlota-jo';
 
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
@@ -91,10 +97,15 @@ test.beforeAll(async ({ browser }) => {
   await page.close();
 });
 
-test.describe("Correlation deep-links — drill-through to detail pages", () => {
-  test("vessels: /vessels/vessels/:id renders the VesselDetailEnhancedPage", async ({ page }, testInfo) => {
+test.describe('Correlation deep-links — drill-through to detail pages', () => {
+  test('vessels: /vessels/vessels/:id renders the VesselDetailEnhancedPage', async ({
+    page,
+  }, testInfo) => {
     if (!vesselsAvailable) testInfo.skip();
-    const body = await navigateWithUpstreamRetry(page, `${VESSELS_BASE}/vessels/${VESSEL_FIXTURE_ID}`);
+    const body = await navigateWithUpstreamRetry(
+      page,
+      `${VESSELS_BASE}/vessels/${VESSEL_FIXTURE_ID}`,
+    );
     await assertNotGenericNotFound(page, testInfo, body);
 
     // The VesselDetailEnhancedPage renders vessel-domain text whether the id
@@ -111,15 +122,18 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     ).toBe(true);
   });
 
-  test("terra: /terra/property/:id renders the PropertyDetail page", async ({ page }, testInfo) => {
+  test('terra: /terra/property/:id renders the PropertyDetail page', async ({ page }, testInfo) => {
     if (!terraAvailable) testInfo.skip();
-    const body = await navigateWithUpstreamRetry(page, `${TERRA_BASE}/property/${TERRA_FIXTURE_ID}`);
+    const body = await navigateWithUpstreamRetry(
+      page,
+      `${TERRA_BASE}/property/${TERRA_FIXTURE_ID}`,
+    );
     await assertNotGenericNotFound(page, testInfo, body);
 
     // prop-001 is "Meridian Tower" at "1200 Meridian Ave, Miami, FL".
     const matchesPropertyDomain =
       /meridian|miami|property|address|portfolio|noi|occupancy|cap rate|units?/i.test(body);
-    expect(matchesPropertyDomain, "terra detail page lacks property-domain content").toBe(true);
+    expect(matchesPropertyDomain, 'terra detail page lacks property-domain content').toBe(true);
   });
 
   // The valid drill-through URL shapes — covers BOTH productDashboardUrl()
@@ -130,15 +144,15 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
   // artifacts/command/src/pages/cross-platform/product-links.ts.
   const VALID_DRILLTHROUGH_HREF = new RegExp(
     [
-      "^/vessels/dashboard(?:[/?#]|$)",
-      "^/vessels/vessels/[^/?#]+",
-      "^/terra/dashboard(?:[/?#]|$)",
-      "^/terra/property/[^/?#]+",
-      "^/carlota-jo(?:/.*)?$",
-      "^/carlota-jo/inquiries(?:\\?.*)?$",
-      "^/aegis(?:/.*)?(?:\\?.*)?$",
-      "^/operations(?:/prism)?(?:[/?#].*)?$",
-    ].join("|"),
+      '^/vessels/dashboard(?:[/?#]|$)',
+      '^/vessels/vessels/[^/?#]+',
+      '^/terra/dashboard(?:[/?#]|$)',
+      '^/terra/property/[^/?#]+',
+      '^/carlota-jo(?:/.*)?$',
+      '^/carlota-jo/inquiries(?:\\?.*)?$',
+      '^/aegis(?:/.*)?(?:\\?.*)?$',
+      '^/operations(?:/prism)?(?:[/?#].*)?$',
+    ].join('|'),
   );
 
   // Captures every artifact-prefixed href so the test can detect malformed
@@ -152,22 +166,29 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     return /^\/vessels\/vessels\/[^/?#]+/.test(href) || /^\/terra\/property\/[^/?#]+/.test(href);
   }
 
-  test("command: cross-platform evidence registry renders entity links shaped like productEntityUrl(...)", async ({ page }, testInfo) => {
+  test('command: cross-platform evidence registry renders entity links shaped like productEntityUrl(...)', async ({
+    page,
+  }, testInfo) => {
     if (!commandAvailable) testInfo.skip();
-    const body = await navigateWithUpstreamRetry(page, `${COMMAND_BASE}/strategy/cross-platform/evidence`);
+    const body = await navigateWithUpstreamRetry(
+      page,
+      `${COMMAND_BASE}/strategy/cross-platform/evidence`,
+    );
     if (/upstream not ready/i.test(body)) testInfo.skip();
 
-    const errorBoundary = page.locator("text=Something went wrong").first();
+    const errorBoundary = page.locator('text=Something went wrong').first();
     expect(await errorBoundary.isVisible().catch(() => false)).toBe(false);
 
     // Pull EVERY artifact-prefixed href without pre-filtering to known-good
     // prefixes. Anything that points at another artifact must match the
     // productEntityUrl shape; anything else is a malformed link bug.
-    const allArtifactHrefs = await page.locator("a[href]").evaluateAll((els) =>
-      (els as HTMLAnchorElement[])
-        .map((a) => a.getAttribute("href") ?? "")
-        .filter((h) => h.startsWith("/") && !h.startsWith("//")),
-    );
+    const allArtifactHrefs = await page
+      .locator('a[href]')
+      .evaluateAll((els) =>
+        (els as HTMLAnchorElement[])
+          .map((a) => a.getAttribute('href') ?? '')
+          .filter((h) => h.startsWith('/') && !h.startsWith('//')),
+      );
     const artifactHrefs = allArtifactHrefs.filter((h) => ARTIFACT_PREFIX.test(h));
 
     for (const href of artifactHrefs) {
@@ -198,20 +219,25 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     const entityChip = page
       .locator(`a[href="${clickable}"][target="_blank"][title^="Open "]`)
       .first();
-    const link = (await entityChip.count()) > 0
-      ? entityChip
-      : page.locator(`a[href="${clickable}"]`).first();
-    const popupPromise = page.context().waitForEvent("page", { timeout: 8_000 }).catch(() => null);
+    const link =
+      (await entityChip.count()) > 0 ? entityChip : page.locator(`a[href="${clickable}"]`).first();
+    const popupPromise = page
+      .context()
+      .waitForEvent('page', { timeout: 8_000 })
+      .catch(() => null);
     await link.click();
     const popup = await popupPromise;
     const dest: Page = popup ?? page;
-    await dest.waitForLoadState("domcontentloaded", { timeout: 20_000 }).catch(() => null);
-    await dest.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => null);
+    await dest.waitForLoadState('domcontentloaded', { timeout: 20_000 }).catch(() => null);
+    await dest.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => null);
     expect(dest.url(), `evidence-row click-through landed on unexpected URL`).toContain(clickable);
-    const destText = await dest.locator("body").innerText().catch(() => "");
+    const destText = await dest
+      .locator('body')
+      .innerText()
+      .catch(() => '');
     if (!/upstream not ready/i.test(destText)) {
       await assertNotGenericNotFound(dest, testInfo, destText);
-      const destDomain = clickable.startsWith("/vessels/")
+      const destDomain = clickable.startsWith('/vessels/')
         ? /vessel|fleet|imo|mmsi|voyage|return to fleet/i
         : /property|terra|portfolio|tower|leas|tenant/i;
       expect(
@@ -222,25 +248,28 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     if (popup) await popup.close().catch(() => null);
   });
 
-  test("command: cross-platform correlation page wires real product drill-through links", async ({ page }, testInfo) => {
+  test('command: cross-platform correlation page wires real product drill-through links', async ({
+    page,
+  }, testInfo) => {
     if (!commandAvailable) testInfo.skip();
     const body = await navigateWithUpstreamRetry(page, `${COMMAND_BASE}/strategy/cross-platform`);
     if (/upstream not ready/i.test(body)) testInfo.skip();
 
-    const errorBoundary = page.locator("text=Something went wrong").first();
+    const errorBoundary = page.locator('text=Something went wrong').first();
     expect(await errorBoundary.isVisible().catch(() => false)).toBe(false);
 
-    const hasContent =
-      /correlation|cross-platform|signal|no correlations detected/i.test(body);
+    const hasContent = /correlation|cross-platform|signal|no correlations detected/i.test(body);
     expect(hasContent).toBe(true);
 
     // Same contract as evidence registry: every artifact-prefixed link must
     // be a valid productEntityUrl/productDashboardUrl shape — no pre-filter.
-    const allArtifactHrefs = await page.locator("a[href]").evaluateAll((els) =>
-      (els as HTMLAnchorElement[])
-        .map((a) => a.getAttribute("href") ?? "")
-        .filter((h) => h.startsWith("/") && !h.startsWith("//")),
-    );
+    const allArtifactHrefs = await page
+      .locator('a[href]')
+      .evaluateAll((els) =>
+        (els as HTMLAnchorElement[])
+          .map((a) => a.getAttribute('href') ?? '')
+          .filter((h) => h.startsWith('/') && !h.startsWith('//')),
+      );
     const artifactHrefs = allArtifactHrefs.filter((h) => ARTIFACT_PREFIX.test(h));
 
     for (const href of artifactHrefs) {
@@ -262,17 +291,23 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     // Mandatory click-through.
     const clickable = vesselsTerraEntityHrefs[0];
     const link = page.locator(`a[href="${clickable}"]`).first();
-    const popupPromise = page.context().waitForEvent("page", { timeout: 8_000 }).catch(() => null);
+    const popupPromise = page
+      .context()
+      .waitForEvent('page', { timeout: 8_000 })
+      .catch(() => null);
     await link.click();
     const popup = await popupPromise;
     const dest: Page = popup ?? page;
-    await dest.waitForLoadState("domcontentloaded", { timeout: 20_000 }).catch(() => null);
-    await dest.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => null);
+    await dest.waitForLoadState('domcontentloaded', { timeout: 20_000 }).catch(() => null);
+    await dest.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => null);
     expect(dest.url(), `correlation card click landed on unexpected URL`).toContain(clickable);
-    const destText = await dest.locator("body").innerText().catch(() => "");
+    const destText = await dest
+      .locator('body')
+      .innerText()
+      .catch(() => '');
     if (!/upstream not ready/i.test(destText)) {
       await assertNotGenericNotFound(dest, testInfo, destText);
-      const destDomain = clickable.startsWith("/vessels/")
+      const destDomain = clickable.startsWith('/vessels/')
         ? /vessel|fleet|imo|mmsi|voyage|return to fleet/i
         : /property|terra|portfolio|tower|leas|tenant/i;
       expect(
@@ -307,10 +342,10 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     domain: RegExp;
   };
 
-  const PRISM_FIXTURE_ID = process.env.E2E_PRISM_MATTER_ID ?? "matter-001";
-  const AEGIS_FIXTURE_ID = process.env.E2E_AEGIS_FINDING_ID ?? "finding-001";
-  const CARLOTA_FIXTURE_ID = process.env.E2E_CARLOTA_INQUIRY_ID ?? "inq-001";
-  const LYTE_FIXTURE_ID = process.env.E2E_LYTE_ENTITY_ID ?? "inc-001";
+  const PRISM_FIXTURE_ID = process.env.E2E_PRISM_MATTER_ID ?? 'matter-001';
+  const AEGIS_FIXTURE_ID = process.env.E2E_AEGIS_FINDING_ID ?? 'finding-001';
+  const CARLOTA_FIXTURE_ID = process.env.E2E_CARLOTA_INQUIRY_ID ?? 'inq-001';
+  const LYTE_FIXTURE_ID = process.env.E2E_LYTE_ENTITY_ID ?? 'inc-001';
 
   // Mirror of productDashboardUrl + productEntityUrl for the keys not
   // covered by the more specific tests above. Domain regexes are loose
@@ -318,28 +353,28 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
   // generic 404, not asserting product UX content.
   const PRODUCT_COVERAGE: ProductCoverage[] = [
     {
-      product: "prism",
+      product: 'prism',
       available: () => commandAvailable,
       dashboardUrl: `${COMMAND_BASE}/operations/prism`,
       entityUrl: `${COMMAND_BASE}/operations/prism?entity=${encodeURIComponent(PRISM_FIXTURE_ID)}`,
       domain: /prism|matter|legal|counsel|obligation|deadline|filing|operations/i,
     },
     {
-      product: "aegis",
+      product: 'aegis',
       available: () => aegisAvailable,
       dashboardUrl: `${AEGIS_BASE}/`,
       entityUrl: `${AEGIS_BASE}/?entity=${encodeURIComponent(AEGIS_FIXTURE_ID)}`,
       domain: /aegis|szl|investor|pitch|deck|slide|holdings|governed|autonomy/i,
     },
     {
-      product: "carlota",
+      product: 'carlota',
       available: () => carlotaAvailable,
       dashboardUrl: `${CARLOTA_BASE}/`,
       entityUrl: `${CARLOTA_BASE}/inquiries?entity=${encodeURIComponent(CARLOTA_FIXTURE_ID)}`,
       domain: /carlota|consulting|inquir|engage|advisory|client|services|methodology/i,
     },
     {
-      product: "lyte",
+      product: 'lyte',
       available: () => commandAvailable,
       dashboardUrl: `${COMMAND_BASE}/operations`,
       entityUrl: `${COMMAND_BASE}/operations?entity=${encodeURIComponent(LYTE_FIXTURE_ID)}`,
@@ -348,7 +383,9 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
   ];
 
   for (const cov of PRODUCT_COVERAGE) {
-    test(`${cov.product}: productDashboardUrl(${cov.product}) renders a real surface, not a 404`, async ({ page }, testInfo) => {
+    test(`${cov.product}: productDashboardUrl(${cov.product}) renders a real surface, not a 404`, async ({
+      page,
+    }, testInfo) => {
       if (!cov.available()) testInfo.skip();
       const body = await navigateWithUpstreamRetry(page, cov.dashboardUrl);
       await assertNotGenericNotFound(page, testInfo, body);
@@ -358,7 +395,9 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
       ).toBe(true);
     });
 
-    test(`${cov.product}: productEntityUrl(${cov.product}, ...) renders a real surface, not a 404`, async ({ page }, testInfo) => {
+    test(`${cov.product}: productEntityUrl(${cov.product}, ...) renders a real surface, not a 404`, async ({
+      page,
+    }, testInfo) => {
       if (!cov.available()) testInfo.skip();
       const body = await navigateWithUpstreamRetry(page, cov.entityUrl);
       await assertNotGenericNotFound(page, testInfo, body);
@@ -374,10 +413,10 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
   // this spec is not extended to cover it. Vessels + terra are covered
   // by the dedicated detail-page tests above, the rest by
   // PRODUCT_COVERAGE.
-  test("coverage: every ProductKey in product-links.ts has a deep-link test", () => {
-    const PRODUCT_KEYS = ["lyte", "vessels", "terra", "prism", "aegis", "carlota"] as const;
+  test('coverage: every ProductKey in product-links.ts has a deep-link test', () => {
+    const PRODUCT_KEYS = ['lyte', 'vessels', 'terra', 'prism', 'aegis', 'carlota'] as const;
     const coveredByTable = new Set(PRODUCT_COVERAGE.map((c) => c.product));
-    const coveredByDetailTests = new Set(["vessels", "terra"]);
+    const coveredByDetailTests = new Set(['vessels', 'terra']);
     const missing = PRODUCT_KEYS.filter(
       (k) => !coveredByTable.has(k) && !coveredByDetailTests.has(k),
     );
@@ -390,7 +429,9 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
 
     // And no stale entries — the table must not list a product that is
     // no longer in ProductKey.
-    const stale = [...coveredByTable].filter((p) => !(PRODUCT_KEYS as readonly string[]).includes(p));
+    const stale = [...coveredByTable].filter(
+      (p) => !(PRODUCT_KEYS as readonly string[]).includes(p),
+    );
     expect(
       stale,
       `PRODUCT_COVERAGE references unknown product(s): ${JSON.stringify(stale)}. ` +

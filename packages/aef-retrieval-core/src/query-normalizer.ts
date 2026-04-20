@@ -7,9 +7,7 @@ export interface NormalizeOptions {
   maxLength?: number;
 }
 
-export interface ProfilePromptTransformHook {
-  (rawQuery: string, profileId: string): string;
-}
+export type ProfilePromptTransformHook = (rawQuery: string, profileId: string) => string;
 
 const registeredTransforms = new Map<string, ProfilePromptTransformHook>();
 
@@ -20,20 +18,17 @@ export function registerProfileTransform(
   registeredTransforms.set(profileId, hook);
 }
 
-export function normalizeQuery(
-  raw: string,
-  options: NormalizeOptions = {},
-): string {
+export function normalizeQuery(raw: string, options: NormalizeOptions = {}): string {
   const { lowercase = true, stripPunctuation = false, maxLength = 4096 } = options;
 
-  let q = raw.trim().replace(WHITESPACE_RE, " ");
+  let q = raw.trim().replace(WHITESPACE_RE, ' ');
 
   if (lowercase) {
     q = q.toLowerCase();
   }
 
   if (stripPunctuation) {
-    q = q.replace(PUNCTUATION_RE, "").replace(WHITESPACE_RE, " ").trim();
+    q = q.replace(PUNCTUATION_RE, '').replace(WHITESPACE_RE, ' ').trim();
   }
 
   if (q.length > maxLength) {

@@ -5,15 +5,15 @@
  * These satisfy the storage interfaces without requiring external services.
  */
 
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 import type {
-  RawDocument,
-  RawDocumentStore,
   Chunk,
   ChunkStore,
   IndexPointer,
   IndexStore,
-} from "./interfaces.js";
+  RawDocument,
+  RawDocumentStore,
+} from './interfaces.js';
 
 // ─── In-Memory Raw Document Store ────────────────────────────────────────────
 
@@ -131,7 +131,11 @@ export class InMemoryIndexStore implements IndexStore {
     this.store.set(this.key(pointer.tenantId, pointer.profileId), { ...pointer });
   }
 
-  async swapPointer(tenantId: string, profileId: string, newVersion: string): Promise<IndexPointer> {
+  async swapPointer(
+    tenantId: string,
+    profileId: string,
+    newVersion: string,
+  ): Promise<IndexPointer> {
     const existing = await this.getPointer(tenantId, profileId);
     const updated: IndexPointer = {
       pointerId: existing?.pointerId ?? randomUUID(),
@@ -153,7 +157,7 @@ export class InMemoryIndexStore implements IndexStore {
       pointerId: existing?.pointerId ?? randomUUID(),
       tenantId,
       profileId,
-      activeVersion: existing?.activeVersion ?? "initial",
+      activeVersion: existing?.activeVersion ?? 'initial',
       pendingVersion: snapshotVersion,
       chunkCount: existing?.chunkCount ?? 0,
       metadata: existing?.metadata ?? {},

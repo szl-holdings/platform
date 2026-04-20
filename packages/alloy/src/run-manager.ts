@@ -1,12 +1,19 @@
-import type { RunConfig, RunState, WorkflowStep, StepContext, StepResult, ApprovalGate } from "./types.js";
-import { RunConfigSchema, RunStateSchema } from "./types.js";
-import type { CheckpointStore } from "./checkpoint.js";
-import { InMemoryCheckpointStore, createCheckpoint } from "./checkpoint.js";
-import type { ActionLedgerWriter } from "./types.js";
-import { InMemoryActionLedger, makeLedgerEntry } from "./ledger.js";
-import { GuardianDecisionEngine } from "@workspace/guardian/decision-engine";
-import { InMemoryTraceStore } from "@workspace/trace-graph/store";
-import { TraceWriter } from "@workspace/trace-graph/writer";
+import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
+import { InMemoryTraceStore } from '@workspace/trace-graph/store';
+import { TraceWriter } from '@workspace/trace-graph/writer';
+import type { CheckpointStore } from './checkpoint.js';
+import { createCheckpoint, InMemoryCheckpointStore } from './checkpoint.js';
+import { InMemoryActionLedger, makeLedgerEntry } from './ledger.js';
+import type {
+  ActionLedgerWriter,
+  ApprovalGate,
+  RunConfig,
+  RunState,
+  StepContext,
+  StepResult,
+  WorkflowStep,
+} from './types.js';
+import { RunConfigSchema, RunStateSchema } from './types.js';
 
 export interface RunManagerOptions {
   checkpointStore?: CheckpointStore;
@@ -32,7 +39,10 @@ export class RunManager {
   private readonly guardian: GuardianDecisionEngine;
   private readonly traceWriter: TraceWriter;
   private readonly approvalGate: ApprovalGate | undefined;
-  private readonly pendingApprovals = new Map<string, { runId: string; approvalId: number | string; stepId: string }>();
+  private readonly pendingApprovals = new Map<
+    string,
+    { runId: string; approvalId: number | string; stepId: string }
+  >();
   private readonly parked = new Map<string, ParkedRun>();
 
   constructor(opts: RunManagerOptions = {}) {
@@ -46,12 +56,15 @@ export class RunManager {
   async recordApprovalDecision(params: {
     runId?: string;
     approvalId: number | string;
-    decision: "approved" | "rejected" | "revised" | "escalated";
+    decision: 'approved' | 'rejected' | 'revised' | 'escalated';
     actorId?: number | string | null;
     actorRole?: string;
     note?: string;
     stepId?: string;
-  }): Promise<{ runId: string; approvalId: number | string; resumed: boolean; finalState?: RunState } | undefined> {
+  }): Promise<
+    | { runId: string; approvalId: number | string; resumed: boolean; finalState?: RunState }
+    | undefined
+  > {
     const key = String(params.approvalId);
     const tracked = this.pendingApprovals.get(key);
     const runId = params.runId ?? tracked?.runId;
@@ -61,25 +74,37 @@ export class RunManager {
     // the in-memory map was lost (process restart) so long as the parked run
     // is still hydrated.
     const stepId = tracked?.stepId ?? params.stepId;
-    this.ledger.record(makeLedgerEntry(runId, "approval", `Operator ${params.decision} approval ${params.approvalId}${params.note ? `: ${params.note}` : ""}`, {
-      stepId,
-      metadata: {
-        approvalId: params.approvalId,
-        decision: params.decision,
-        actorId: params.actorId ?? null,
-        actorRole: params.actorRole ?? null,
-        note: params.note ?? null,
-      },
-    }));
+    this.ledger.record(
+      makeLedgerEntry(
+        runId,
+        'approval',
+        `Operator ${params.decision} approval ${params.approvalId}${params.note ? `: ${params.note}` : ''}`,
+        {
+          stepId,
+          metadata: {
+            approvalId: params.approvalId,
+            decision: params.decision,
+            actorId: params.actorId ?? null,
+            actorRole: params.actorRole ?? null,
+            note: params.note ?? null,
+          },
+        },
+      ),
+    );
 
     let resumed = false;
     let finalState: RunState | undefined;
     const state = this.runs.get(runId);
     const parkedRun = this.parked.get(runId);
 
-    if (params.decision === "approved") {
+    if (params.decision === 'approved') {
       if (state) {
-        const updated: RunState = { ...state, status: "running", error: undefined, updatedAt: new Date().toISOString() };
+        const updated: RunState = {
+          ...state,
+          status: 'running',
+          error: undefined,
+          updatedAt: new Date().toISOString(),
+        };
         this.runs.set(runId, updated);
       }
       if (parkedRun) {
@@ -92,25 +117,30 @@ export class RunManager {
           const message = err instanceof Error ? err.message : String(err);
           const failedState = this.runs.get(runId);
           if (failedState) {
-            const f: RunState = { ...failedState, status: "failed", error: message, updatedAt: new Date().toISOString() };
+            const f: RunState = {
+              ...failedState,
+              status: 'failed',
+              error: message,
+              updatedAt: new Date().toISOString(),
+            };
             this.runs.set(runId, f);
             finalState = f;
           }
         }
       }
-    } else if (params.decision === "rejected") {
+    } else if (params.decision === 'rejected') {
       if (state) {
         const updated: RunState = {
           ...state,
-          status: "failed",
-          error: `Operator rejected approval ${params.approvalId}${params.note ? `: ${params.note}` : ""}`,
+          status: 'failed',
+          error: `Operator rejected approval ${params.approvalId}${params.note ? `: ${params.note}` : ''}`,
           updatedAt: new Date().toISOString(),
         };
         this.runs.set(runId, updated);
         finalState = updated;
       }
       if (parkedRun) {
-        this.traceWriter.completeTrace(parkedRun.traceId, { status: "failed" });
+        this.traceWriter.completeTrace(parkedRun.traceId, { status: 'failed' });
         this.parked.delete(runId);
       }
       this.pendingApprovals.delete(key);
@@ -124,14 +154,20 @@ export class RunManager {
     const state = RunStateSchema.parse({
       runId: parsed.runId,
       workflowId: parsed.workflowId,
-      status: "pending",
+      status: 'pending',
       currentStep: 0,
       startedAt: now,
       updatedAt: now,
       ledgerEntries: [],
     });
     this.runs.set(state.runId, state);
-    this.ledger.record(makeLedgerEntry(state.runId, "workflow-start", `Run ${state.runId} created for workflow ${state.workflowId}`));
+    this.ledger.record(
+      makeLedgerEntry(
+        state.runId,
+        'workflow-start',
+        `Run ${state.runId} created for workflow ${state.workflowId}`,
+      ),
+    );
     return state;
   }
 
@@ -143,7 +179,7 @@ export class RunManager {
     let state = this.runs.get(runId);
     if (!state) throw new Error(`Run not found: ${runId}`);
 
-    state = { ...state, status: "running", updatedAt: new Date().toISOString() };
+    state = { ...state, status: 'running', updatedAt: new Date().toISOString() };
     this.runs.set(runId, state);
 
     const traceId = `run-${runId}-${Date.now()}`;
@@ -183,19 +219,24 @@ export class RunManager {
           agentId: config.agentId,
           workflowId: config.workflowId,
           action: `step:${step.id}`,
-          tier: config.policyTier as Parameters<GuardianDecisionEngine["decide"]>[0]["tier"],
+          tier: config.policyTier as Parameters<GuardianDecisionEngine['decide']>[0]['tier'],
           context: { stepId: step.id, stepIndex: i },
         });
 
-        if (decision.outcome === "deny") {
-          state = { ...state, status: "failed", error: `Guardian denied step ${step.id}: ${decision.reason}`, updatedAt: new Date().toISOString() };
+        if (decision.outcome === 'deny') {
+          state = {
+            ...state,
+            status: 'failed',
+            error: `Guardian denied step ${step.id}: ${decision.reason}`,
+            updatedAt: new Date().toISOString(),
+          };
           this.runs.set(runId, state);
-          this.traceWriter.completeTrace(traceId, { status: "failed" });
+          this.traceWriter.completeTrace(traceId, { status: 'failed' });
           this.parked.delete(runId);
           return state;
         }
 
-        if (decision.outcome === "require-approval") {
+        if (decision.outcome === 'require-approval') {
           let approvalId: number | string | undefined;
           let gateError: string | undefined;
           if (this.approvalGate) {
@@ -211,16 +252,24 @@ export class RunManager {
                 requiredApprovers: decision.requiredApprovers ?? [],
                 matchedRuleId: decision.matchedRuleId,
                 tier: config.policyTier,
-                orgId: (meta["orgId"] as number | string | null | undefined) ?? null,
-                requestedById: (meta["requestedById"] as number | string | null | undefined) ?? null,
-                requestedByRole: typeof meta["requestedByRole"] === "string" ? (meta["requestedByRole"] as string) : undefined,
+                orgId: (meta['orgId'] as number | string | null | undefined) ?? null,
+                requestedById:
+                  (meta['requestedById'] as number | string | null | undefined) ?? null,
+                requestedByRole:
+                  typeof meta['requestedByRole'] === 'string'
+                    ? (meta['requestedByRole'] as string)
+                    : undefined,
                 context: { stepId: step.id, stepIndex: i, ...meta },
               });
               approvalId = gateResult?.approvalId;
               if (approvalId !== undefined) {
-                this.pendingApprovals.set(String(approvalId), { runId, approvalId, stepId: step.id });
+                this.pendingApprovals.set(String(approvalId), {
+                  runId,
+                  approvalId,
+                  stepId: step.id,
+                });
               } else {
-                gateError = "approval gate returned no approvalId";
+                gateError = 'approval gate returned no approvalId';
               }
             } catch (err) {
               gateError = err instanceof Error ? err.message : String(err);
@@ -230,14 +279,24 @@ export class RunManager {
           // If a gate is configured but persistence failed, fail the run
           // immediately rather than parking it invisibly to operators.
           if (this.approvalGate && (approvalId === undefined || gateError)) {
-            const errMsg = `Guardian required approval for step ${step.id} but persistence failed: ${gateError ?? "no approvalId returned"}`;
-            this.ledger.record(makeLedgerEntry(runId, "approval", errMsg, {
-              stepId: step.id,
-              metadata: { matchedRuleId: decision.matchedRuleId ?? null, tier: config.policyTier ?? null },
-            }));
-            state = { ...state, status: "failed", error: errMsg, updatedAt: new Date().toISOString() };
+            const errMsg = `Guardian required approval for step ${step.id} but persistence failed: ${gateError ?? 'no approvalId returned'}`;
+            this.ledger.record(
+              makeLedgerEntry(runId, 'approval', errMsg, {
+                stepId: step.id,
+                metadata: {
+                  matchedRuleId: decision.matchedRuleId ?? null,
+                  tier: config.policyTier ?? null,
+                },
+              }),
+            );
+            state = {
+              ...state,
+              status: 'failed',
+              error: errMsg,
+              updatedAt: new Date().toISOString(),
+            };
             this.runs.set(runId, state);
-            this.traceWriter.completeTrace(traceId, { status: "failed" });
+            this.traceWriter.completeTrace(traceId, { status: 'failed' });
             this.parked.delete(runId);
             return state;
           }
@@ -251,16 +310,36 @@ export class RunManager {
             traceId,
             approvedSteps,
           });
-          state = { ...state, status: "awaiting-approval", error: `Guardian requires approval for step ${step.id}: ${decision.reason}`, updatedAt: new Date().toISOString() };
+          state = {
+            ...state,
+            status: 'awaiting-approval',
+            error: `Guardian requires approval for step ${step.id}: ${decision.reason}`,
+            updatedAt: new Date().toISOString(),
+          };
           this.runs.set(runId, state);
-          this.ledger.record(makeLedgerEntry(runId, "approval", `Approval required for step ${step.id}: ${decision.reason}`, {
-            stepId: step.id,
-            metadata: { approvalId: approvalId ?? null, matchedRuleId: decision.matchedRuleId ?? null, tier: config.policyTier ?? null },
-          }));
+          this.ledger.record(
+            makeLedgerEntry(
+              runId,
+              'approval',
+              `Approval required for step ${step.id}: ${decision.reason}`,
+              {
+                stepId: step.id,
+                metadata: {
+                  approvalId: approvalId ?? null,
+                  matchedRuleId: decision.matchedRuleId ?? null,
+                  tier: config.policyTier ?? null,
+                },
+              },
+            ),
+          );
           return state;
         }
       } else if (approvedSteps.has(step.id)) {
-        this.ledger.record(makeLedgerEntry(runId, "approval", `Resuming step ${step.id} under operator approval`, { stepId: step.id }));
+        this.ledger.record(
+          makeLedgerEntry(runId, 'approval', `Resuming step ${step.id} under operator approval`, {
+            stepId: step.id,
+          }),
+        );
       }
 
       const ctx: StepContext = {
@@ -283,7 +362,7 @@ export class RunManager {
           startedAt: new Date(Date.now() - latencyMs).toISOString(),
           endedAt: new Date().toISOString(),
           latencyMs,
-          status: result.success ? "ok" : "error",
+          status: result.success ? 'ok' : 'error',
           attributes: { stepId: step.id, stepIndex: i },
         });
 
@@ -295,22 +374,31 @@ export class RunManager {
           this.checkpointStore.save(checkpoint);
           state = { ...state, checkpointId: checkpoint.checkpointId };
           this.runs.set(runId, state);
-          this.ledger.record(makeLedgerEntry(runId, "checkpoint", `Checkpoint saved at step ${i + 1}`, { stepId: step.id }));
+          this.ledger.record(
+            makeLedgerEntry(runId, 'checkpoint', `Checkpoint saved at step ${i + 1}`, {
+              stepId: step.id,
+            }),
+          );
         }
 
         if (!result.success) {
-          state = { ...state, status: "failed", error: result.error, updatedAt: new Date().toISOString() };
+          state = {
+            ...state,
+            status: 'failed',
+            error: result.error,
+            updatedAt: new Date().toISOString(),
+          };
           this.runs.set(runId, state);
-          this.traceWriter.completeTrace(traceId, { status: "failed" });
+          this.traceWriter.completeTrace(traceId, { status: 'failed' });
           this.parked.delete(runId);
           return state;
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        this.traceWriter.recordError(traceId, "STEP_ERROR", message);
-        state = { ...state, status: "failed", error: message, updatedAt: new Date().toISOString() };
+        this.traceWriter.recordError(traceId, 'STEP_ERROR', message);
+        state = { ...state, status: 'failed', error: message, updatedAt: new Date().toISOString() };
         this.runs.set(runId, state);
-        this.traceWriter.completeTrace(traceId, { status: "failed" });
+        this.traceWriter.completeTrace(traceId, { status: 'failed' });
         this.parked.delete(runId);
         return state;
       }
@@ -319,14 +407,16 @@ export class RunManager {
     const lastResult = previousResults[previousResults.length - 1];
     state = {
       ...state,
-      status: "completed",
+      status: 'completed',
       output: lastResult?.output,
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     this.runs.set(runId, state);
-    this.traceWriter.completeTrace(traceId, { status: "completed" });
-    this.ledger.record(makeLedgerEntry(runId, "workflow-end", `Run ${runId} completed successfully`));
+    this.traceWriter.completeTrace(traceId, { status: 'completed' });
+    this.ledger.record(
+      makeLedgerEntry(runId, 'workflow-end', `Run ${runId} completed successfully`),
+    );
     this.parked.delete(runId);
 
     return state;

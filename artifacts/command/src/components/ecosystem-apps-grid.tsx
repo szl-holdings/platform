@@ -1,33 +1,35 @@
-import { Crown, Zap, Globe, Cpu, ExternalLink } from "lucide-react";
+import { Cpu, Crown, ExternalLink, Globe, Zap } from 'lucide-react';
 
 export const ECOSYSTEM_APPS = [
   {
-    href: "/imperium/",
-    label: "IMPERIUM",
-    description: "Infrastructure command center — resource orchestration, governance, and security perimeter",
+    href: '/imperium/',
+    label: 'IMPERIUM',
+    description:
+      'Infrastructure command center — resource orchestration, governance, and security perimeter',
     icon: Crown,
-    color: "#d4a054",
+    color: '#d4a054',
   },
   {
-    href: "/lyte-command-center/",
-    label: "Lyte Command Center",
-    description: "AIOps observability hub — autonomous NOC, SLO tracking, and self-healing workflows",
+    href: '/lyte-command-center/',
+    label: 'Lyte Command Center',
+    description:
+      'AIOps observability hub — autonomous NOC, SLO tracking, and self-healing workflows',
     icon: Zap,
-    color: "#22c55e",
+    color: '#22c55e',
   },
   {
-    href: "/stephen-site/",
-    label: "Stephen Site",
-    description: "Personal portfolio and thought-leadership platform for executive communications",
+    href: '/stephen-site/',
+    label: 'Stephen Site',
+    description: 'Personal portfolio and thought-leadership platform for executive communications',
     icon: Globe,
-    color: "#0ea5e9",
+    color: '#0ea5e9',
   },
   {
-    href: "/cortex-mobile/",
-    label: "CORTEX Mobile",
-    description: "Mobile command interface — governed decision loop and briefings on the go",
+    href: '/cortex-mobile/',
+    label: 'CORTEX Mobile',
+    description: 'Mobile command interface — governed decision loop and briefings on the go',
     icon: Cpu,
-    color: "#f97316",
+    color: '#f97316',
   },
 ];
 
@@ -35,10 +37,13 @@ export function EcosystemAppsGrid() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--color-fg-muted)" }}>
+        <h2
+          className="text-xs font-bold tracking-widest uppercase"
+          style={{ color: 'var(--color-fg-muted)' }}
+        >
           Ecosystem Apps
         </h2>
-        <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
+        <span className="text-[10px] font-mono" style={{ color: 'var(--color-fg-muted)' }}>
           {ECOSYSTEM_APPS.length} apps
         </span>
       </div>
@@ -53,8 +58,8 @@ export function EcosystemAppsGrid() {
               rel="noopener noreferrer"
               className="relative flex flex-col gap-3 p-4 rounded-xl text-left transition-all hover:scale-[1.02] no-underline"
               style={{
-                backgroundColor: "var(--color-surface-base)",
-                border: "1px solid var(--color-surface-border)",
+                backgroundColor: 'var(--color-surface-base)',
+                border: '1px solid var(--color-surface-border)',
               }}
             >
               <div className="flex items-center justify-between">
@@ -67,13 +72,22 @@ export function EcosystemAppsGrid() {
                 >
                   <Icon className="w-4 h-4" style={{ color: app.color }} />
                 </div>
-                <ExternalLink className="w-3 h-3" style={{ color: "var(--color-fg-muted)", opacity: 0.5 }} />
+                <ExternalLink
+                  className="w-3 h-3"
+                  style={{ color: 'var(--color-fg-muted)', opacity: 0.5 }}
+                />
               </div>
               <div>
-                <div className="text-sm font-bold mb-0.5" style={{ color: "var(--color-fg-primary)" }}>
+                <div
+                  className="text-sm font-bold mb-0.5"
+                  style={{ color: 'var(--color-fg-primary)' }}
+                >
                   {app.label}
                 </div>
-                <div className="text-[10px] leading-relaxed" style={{ color: "var(--color-fg-muted)" }}>
+                <div
+                  className="text-[10px] leading-relaxed"
+                  style={{ color: 'var(--color-fg-muted)' }}
+                >
                   {app.description}
                 </div>
               </div>

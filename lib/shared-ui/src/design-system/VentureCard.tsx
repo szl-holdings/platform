@@ -1,7 +1,7 @@
-import * as React from "react";
-import { cn } from "../utils";
+import type * as React from 'react';
+import { cn } from '../utils';
 
-export type VentureStatus = "live" | "beta" | "dev" | "acquired" | "sunset";
+export type VentureStatus = 'live' | 'beta' | 'dev' | 'acquired' | 'sunset';
 
 export interface VentureMetric {
   label: string;
@@ -23,32 +23,32 @@ export interface VentureCardData {
 export interface VentureCardProps {
   venture: VentureCardData;
   index?: number;
-  size?: "default" | "featured";
+  size?: 'default' | 'featured';
   onClick?: (venture: VentureCardData) => void;
   renderLink?: (href: string, children: React.ReactNode, onClick?: () => void) => React.ReactNode;
   className?: string;
 }
 
 const STATUS_COLORS: Record<VentureStatus, string> = {
-  live: "bg-[#6b8f71] text-white",
-  beta: "bg-[#d4a054] text-white",
-  dev: "bg-neutral-300 text-neutral-700",
-  acquired: "bg-sky-500 text-white",
-  sunset: "bg-neutral-400 text-white",
+  live: 'bg-[#6b8f71] text-white',
+  beta: 'bg-[#d4a054] text-white',
+  dev: 'bg-neutral-300 text-neutral-700',
+  acquired: 'bg-sky-500 text-white',
+  sunset: 'bg-neutral-400 text-white',
 };
 
 const STATUS_LABELS: Record<VentureStatus, string> = {
-  live: "Live",
-  beta: "Beta",
-  dev: "Dev",
-  acquired: "Acquired",
-  sunset: "Sunset",
+  live: 'Live',
+  beta: 'Beta',
+  dev: 'Dev',
+  acquired: 'Acquired',
+  sunset: 'Sunset',
 };
 
 export function VentureCard({
   venture,
   index = 0,
-  size = "default",
+  size = 'default',
   onClick,
   renderLink,
   className,
@@ -58,9 +58,9 @@ export function VentureCard({
   const card = (
     <div
       className={cn(
-        "group relative rounded-2xl border border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-md hover:shadow-black/5 transition-all duration-300 cursor-pointer overflow-hidden h-full",
-        size === "featured" ? "p-7" : "p-6",
-        className
+        'group relative rounded-2xl border border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-md hover:shadow-black/5 transition-all duration-300 cursor-pointer overflow-hidden h-full',
+        size === 'featured' ? 'p-7' : 'p-6',
+        className,
       )}
     >
       <div
@@ -82,11 +82,11 @@ export function VentureCard({
         </div>
         <span
           className={cn(
-            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold",
-            STATUS_COLORS[venture.status]
+            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold',
+            STATUS_COLORS[venture.status],
           )}
         >
-          {venture.status === "live" && (
+          {venture.status === 'live' && (
             <span className="w-1 h-1 rounded-full bg-white/80 animate-pulse" />
           )}
           {STATUS_LABELS[venture.status]}
@@ -95,10 +95,10 @@ export function VentureCard({
 
       <h3
         className={cn(
-          "font-bold text-neutral-900 mb-1 group-hover:transition-colors",
-          size === "featured" ? "text-xl" : "text-base"
+          'font-bold text-neutral-900 mb-1 group-hover:transition-colors',
+          size === 'featured' ? 'text-xl' : 'text-base',
         )}
-        style={{ "--hover-color": venture.accentColor } as React.CSSProperties}
+        style={{ '--hover-color': venture.accentColor } as React.CSSProperties}
       >
         {venture.name}
       </h3>
@@ -109,7 +109,7 @@ export function VentureCard({
         {venture.oneLiner}
       </p>
 
-      {size === "featured" && venture.metrics && venture.metrics.length > 0 && (
+      {size === 'featured' && venture.metrics && venture.metrics.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-5">
           {venture.metrics.slice(0, 2).map((m) => (
             <div key={m.label} className="rounded-lg bg-neutral-50 p-3">
@@ -138,11 +138,7 @@ export function VentureCard({
   }
 
   return (
-    <a
-      href={venture.path ?? "#"}
-      onClick={handleClick}
-      className="block"
-    >
+    <a href={venture.path ?? '#'} onClick={handleClick} className="block">
       {card}
     </a>
   );

@@ -1,6 +1,6 @@
-import { pgTable, text, serial, timestamp, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
+import { index, integer, pgTable, serial, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-zod';
+import type { z } from 'zod/v4';
 
 /**
  * Persisted operator action state for Command Inbox alerts.
@@ -22,29 +22,29 @@ import { z } from "zod/v4";
  *   - (alertId, tenantId) is a real UNIQUE index, used as the conflict
  *     target for upserts.
  */
-export const GLOBAL_TENANT_SENTINEL = "_global_" as const;
+export const GLOBAL_TENANT_SENTINEL = '_global_' as const;
 
 export const commandInboxAlertStatesTable = pgTable(
-  "command_inbox_alert_states",
+  'command_inbox_alert_states',
   {
-    id: serial("id").primaryKey(),
-    alertId: text("alert_id").notNull(),
-    tenantId: text("tenant_id").notNull().default(GLOBAL_TENANT_SENTINEL),
-    state: text("state", {
-      enum: ["acknowledged", "snoozed", "resolved"],
+    id: serial('id').primaryKey(),
+    alertId: text('alert_id').notNull(),
+    tenantId: text('tenant_id').notNull().default(GLOBAL_TENANT_SENTINEL),
+    state: text('state', {
+      enum: ['acknowledged', 'snoozed', 'resolved'],
     }).notNull(),
-    snoozedUntil: timestamp("snoozed_until", { withTimezone: true }),
-    updatedById: integer("updated_by_id"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    snoozedUntil: timestamp('snoozed_until', { withTimezone: true }),
+    updatedById: integer('updated_by_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
-    alertTenantUnique: uniqueIndex("command_inbox_alert_states_alert_tenant_uq").on(
+    alertTenantUnique: uniqueIndex('command_inbox_alert_states_alert_tenant_uq').on(
       t.alertId,
       t.tenantId,
     ),
-    alertIdx: index("command_inbox_alert_states_alert_idx").on(t.alertId),
-    tenantIdx: index("command_inbox_alert_states_tenant_idx").on(t.tenantId),
+    alertIdx: index('command_inbox_alert_states_alert_idx').on(t.alertId),
+    tenantIdx: index('command_inbox_alert_states_tenant_idx').on(t.tenantId),
   }),
 );
 

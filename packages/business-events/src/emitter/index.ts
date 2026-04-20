@@ -1,15 +1,15 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 import type {
+  ATLASActor,
+  ATLASBaseEvent,
+  ATLASBusinessValue,
+  ATLASDomain,
   ATLASEvent,
   ATLASEventClass,
   ATLASEventHandler,
-  ATLASBaseEvent,
-  ATLASActor,
-  ATLASBusinessValue,
-  ATLASSLOImpact,
   ATLASSeverity,
-  ATLASDomain,
-} from "../types.js";
+  ATLASSLOImpact,
+} from '../types.js';
 
 export type EventSubscription = { unsubscribe: () => void };
 
@@ -20,7 +20,7 @@ class ATLASEventEmitter {
   private readonly MAX_BUFFER = 2000;
 
   on<T extends ATLASEvent>(
-    eventClass: T["eventClass"],
+    eventClass: T['eventClass'],
     handler: ATLASEventHandler<T>,
   ): EventSubscription {
     const set = this.handlers.get(eventClass) ?? new Set();
@@ -51,17 +51,11 @@ class ATLASEventEmitter {
           const result = handler(event);
           if (result instanceof Promise) {
             result.catch((err: unknown) => {
-              console.error(
-                `[business-events] Handler error for ${event.eventClass}:`,
-                err,
-              );
+              console.error(`[business-events] Handler error for ${event.eventClass}:`, err);
             });
           }
         } catch (err) {
-          console.error(
-            `[business-events] Handler error for ${event.eventClass}:`,
-            err,
-          );
+          console.error(`[business-events] Handler error for ${event.eventClass}:`, err);
         }
       }
     }
@@ -71,11 +65,11 @@ class ATLASEventEmitter {
         const result = handler(event);
         if (result instanceof Promise) {
           result.catch((err: unknown) => {
-            console.error("[business-events] Wildcard handler error:", err);
+            console.error('[business-events] Wildcard handler error:', err);
           });
         }
       } catch (err) {
-        console.error("[business-events] Wildcard handler error:", err);
+        console.error('[business-events] Wildcard handler error:', err);
       }
     }
   }
@@ -86,13 +80,8 @@ class ATLASEventEmitter {
     return this.buffer.filter((e) => e.timestamp >= cutoff);
   }
 
-  getByClass(
-    eventClass: ATLASEventClass,
-    windowMs?: number,
-  ): ATLASEvent[] {
-    return this.getBuffer(windowMs).filter(
-      (e) => e.eventClass === eventClass,
-    );
+  getByClass(eventClass: ATLASEventClass, windowMs?: number): ATLASEvent[] {
+    return this.getBuffer(windowMs).filter((e) => e.eventClass === eventClass);
   }
 
   getByDomain(domain: ATLASDomain, windowMs?: number): ATLASEvent[] {
@@ -128,10 +117,7 @@ export interface EmitOptions {
   metadata?: Record<string, unknown>;
 }
 
-function baseEvent(
-  eventClass: ATLASEventClass,
-  opts: EmitOptions,
-): ATLASBaseEvent {
+function baseEvent(eventClass: ATLASEventClass, opts: EmitOptions): ATLASBaseEvent {
   return {
     eventId: randomUUID(),
     eventClass,
@@ -147,7 +133,7 @@ function baseEvent(
     tags: opts.tags,
     metadata: opts.metadata,
     timestamp: Date.now(),
-    schemaVersion: "1.0",
+    schemaVersion: '1.0',
   };
 }
 
@@ -156,8 +142,8 @@ export const atlas = {
     opts: EmitOptions & { transactionType: string; transactionId?: string },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("business.transaction.started", opts),
-      eventClass: "business.transaction.started",
+      ...baseEvent('business.transaction.started', opts),
+      eventClass: 'business.transaction.started',
       transactionType: opts.transactionType,
       transactionId: opts.transactionId ?? randomUUID(),
     });
@@ -168,16 +154,16 @@ export const atlas = {
       transactionType: string;
       transactionId: string;
       durationMs: number;
-      outcome?: "success" | "partial" | "compensated";
+      outcome?: 'success' | 'partial' | 'compensated';
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("business.transaction.completed", opts),
-      eventClass: "business.transaction.completed",
+      ...baseEvent('business.transaction.completed', opts),
+      eventClass: 'business.transaction.completed',
       transactionType: opts.transactionType,
       transactionId: opts.transactionId,
       durationMs: opts.durationMs,
-      outcome: opts.outcome ?? "success",
+      outcome: opts.outcome ?? 'success',
     });
   },
 
@@ -192,8 +178,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("business.transaction.failed", opts),
-      eventClass: "business.transaction.failed",
+      ...baseEvent('business.transaction.failed', opts),
+      eventClass: 'business.transaction.failed',
       transactionType: opts.transactionType,
       transactionId: opts.transactionId,
       durationMs: opts.durationMs,
@@ -212,8 +198,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("business.risk.detected", opts),
-      eventClass: "business.risk.detected",
+      ...baseEvent('business.risk.detected', opts),
+      eventClass: 'business.risk.detected',
       riskType: opts.riskType,
       riskScore: opts.riskScore,
       riskFactors: opts.riskFactors,
@@ -230,8 +216,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("business.opportunity.created", opts),
-      eventClass: "business.opportunity.created",
+      ...baseEvent('business.opportunity.created', opts),
+      eventClass: 'business.opportunity.created',
       opportunityType: opts.opportunityType,
       opportunityId: opts.opportunityId ?? randomUUID(),
       estimatedValue: opts.estimatedValue,
@@ -249,8 +235,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("policy.violation.detected", opts),
-      eventClass: "policy.violation.detected",
+      ...baseEvent('policy.violation.detected', opts),
+      eventClass: 'policy.violation.detected',
       policyId: opts.policyId,
       policyName: opts.policyName,
       violationType: opts.violationType,
@@ -269,8 +255,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("recommendation.generated", opts),
-      eventClass: "recommendation.generated",
+      ...baseEvent('recommendation.generated', opts),
+      eventClass: 'recommendation.generated',
       recommendationType: opts.recommendationType,
       recommendationId: opts.recommendationId ?? randomUUID(),
       confidence: opts.confidence,
@@ -285,12 +271,12 @@ export const atlas = {
       actionType: string;
       approvedByUserId?: string;
       approvalDelayMs?: number;
-      approvalLevel: "auto" | "human" | "executive";
+      approvalLevel: 'auto' | 'human' | 'executive';
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("action.approved", opts),
-      eventClass: "action.approved",
+      ...baseEvent('action.approved', opts),
+      eventClass: 'action.approved',
       actionId: opts.actionId,
       actionType: opts.actionType,
       approvedByUserId: opts.approvedByUserId,
@@ -309,8 +295,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("action.executed", opts),
-      eventClass: "action.executed",
+      ...baseEvent('action.executed', opts),
+      eventClass: 'action.executed',
       actionId: opts.actionId,
       actionType: opts.actionType,
       executorId: opts.executorId,
@@ -330,8 +316,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("action.failed", opts),
-      eventClass: "action.failed",
+      ...baseEvent('action.failed', opts),
+      eventClass: 'action.failed',
       actionId: opts.actionId,
       actionType: opts.actionType,
       durationMs: opts.durationMs,
@@ -352,8 +338,8 @@ export const atlas = {
     },
   ): void {
     atlasEventBus.emit({
-      ...baseEvent("outcome.realized", opts),
-      eventClass: "outcome.realized",
+      ...baseEvent('outcome.realized', opts),
+      eventClass: 'outcome.realized',
       outcomeType: opts.outcomeType,
       outcomeId: opts.outcomeId,
       measuredValue: opts.measuredValue,

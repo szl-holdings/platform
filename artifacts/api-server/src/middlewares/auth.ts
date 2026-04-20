@@ -1,20 +1,30 @@
-import type { Request, Response, NextFunction } from "express";
-import { sendUnauthorized, sendForbidden, sendError } from "../lib/api-response";
-import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
-import { eq, and, gt, isNull } from "drizzle-orm";
-import type { RoleName } from "@szl-holdings/db";
-import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@szl-holdings/db";
-import { serverTelemetry } from "@szl-holdings/observability";
-import { logger } from "../lib/logger";
-import { getSessionMinCreatedAt } from "./session-policy";
-import { readSessionCookie } from "../lib/auth";
+import type { OrgMembership as SharedOrgMembership } from '@szl-holdings/auth-shared';
+import type { RoleName } from '@szl-holdings/db';
 import {
-  verifyInternalHeader,
+  db,
+  isReadOnlyRole,
+  organizationsTable,
+  orgMembersTable,
+  ROLE_HIERARCHY,
+  rolesTable,
+  sessionsTable,
+  toCanonicalRole,
+  userRolesTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { serverTelemetry } from '@szl-holdings/observability';
+import { and, eq, gt, isNull } from 'drizzle-orm';
+import type { NextFunction, Request, Response } from 'express';
+import { sendError, sendForbidden, sendUnauthorized } from '../lib/api-response';
+import { readSessionCookie } from '../lib/auth';
+import {
   type InternalAgentContext,
   type InternalScope,
   tokenHasScope,
-} from "../lib/internal-tokens";
-import type { OrgMembership as SharedOrgMembership } from "@szl-holdings/auth-shared";
+  verifyInternalHeader,
+} from '../lib/internal-tokens';
+import { logger } from '../lib/logger';
+import { getSessionMinCreatedAt } from './session-policy';
 
 /**
  * OrgMembership is the canonical type from @szl-holdings/auth-shared.
@@ -62,7 +72,7 @@ declare global {
  * external-user launch requires.
  */
 function buildInternalAgentUser(ctx: InternalAgentContext): AuthenticatedUser {
-  const roles: RoleName[] = ["ops"];
+  const roles: RoleName[] = ['ops'];
   return {
     id: 0,
     displayName: `Internal Agent (${ctx.name})`,
@@ -82,7 +92,7 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function checkInternalToken(req: Request): InternalAgentContext | null {
-  const header = req.headers["x-internal-token"] as string | undefined;
+  const header = req.headers['x-internal-token'] as string | undefined;
   if (!header) return null;
   const match = verifyInternalHeader(header, req.originalUrl || req.url);
   if (!match) {
@@ -90,26 +100,32 @@ function checkInternalToken(req: Request): InternalAgentContext | null {
     // *some* token but failed the path check vs. didn't match at all; the
     // registry helper logs neither case. Emit a single low-noise debug-level
     // notice for visibility without alerting on every probe.
-    logger.debug({ method: req.method, path: req.path, ip: req.ip }, "[auth] Internal token header rejected");
+    logger.debug(
+      { method: req.method, path: req.path, ip: req.ip },
+      '[auth] Internal token header rejected',
+    );
     return null;
   }
   logger.info(
-    { method: req.method, path: req.path, ip: req.ip, tokenName: match.context.name, legacy: match.context.legacy },
-    "[auth] Internal agent token accepted"
+    {
+      method: req.method,
+      path: req.path,
+      ip: req.ip,
+      tokenName: match.context.name,
+      legacy: match.context.legacy,
+    },
+    '[auth] Internal agent token accepted',
   );
   return match.context;
 }
 
 type SessionResolution =
-  | { kind: "ok"; user: AuthenticatedUser }
+  | { kind: 'ok'; user: AuthenticatedUser }
   | {
-      kind: "revoked";
-      reason:
-        | "session_version_mismatch"
-        | "session_revoked"
-        | "session_pre_secret_rotation";
+      kind: 'revoked';
+      reason: 'session_version_mismatch' | 'session_revoked' | 'session_pre_secret_rotation';
     }
-  | { kind: "missing" };
+  | { kind: 'missing' };
 
 async function resolveUserFromToken(token: string): Promise<SessionResolution> {
   const [session] = await db
@@ -120,7 +136,7 @@ async function resolveUserFromToken(token: string): Promise<SessionResolution> {
         eq(sessionsTable.token, token),
         gt(sessionsTable.expiresAt, new Date()),
         isNull(sessionsTable.revokedAt),
-      )
+      ),
     );
 
   if (!session) {
@@ -132,9 +148,9 @@ async function resolveUserFromToken(token: string): Promise<SessionResolution> {
       .where(eq(sessionsTable.token, token))
       .limit(1);
     if (revoked) {
-      return { kind: "revoked", reason: "session_revoked" };
+      return { kind: 'revoked', reason: 'session_revoked' };
     }
-    return { kind: "missing" };
+    return { kind: 'missing' };
   }
 
   // Global SESSION_SECRET-rotation cutoff (AF-012). Any session created before
@@ -144,19 +160,16 @@ async function resolveUserFromToken(token: string): Promise<SessionResolution> {
   // exchanged for an authenticated request.
   const cutoff = getSessionMinCreatedAt();
   if (cutoff && session.createdAt < cutoff) {
-    return { kind: "revoked", reason: "session_pre_secret_rotation" };
+    return { kind: 'revoked', reason: 'session_pre_secret_rotation' };
   }
 
-  const [user] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, session.userId));
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, session.userId));
 
-  if (!user || !user.isActive) return { kind: "missing" };
+  if (!user || !user.isActive) return { kind: 'missing' };
 
   // Session-version check — bumped on role/org-membership change.
-  if (typeof user.sessionVersion === "number" && session.sessionVersion !== user.sessionVersion) {
-    return { kind: "revoked", reason: "session_version_mismatch" };
+  if (typeof user.sessionVersion === 'number' && session.sessionVersion !== user.sessionVersion) {
+    return { kind: 'revoked', reason: 'session_version_mismatch' };
   }
 
   const [userRoles, orgMemberships] = await Promise.all([
@@ -178,7 +191,7 @@ async function resolveUserFromToken(token: string): Promise<SessionResolution> {
   ]);
 
   return {
-    kind: "ok",
+    kind: 'ok',
     user: {
       id: user.id,
       displayName: user.displayName,
@@ -219,14 +232,14 @@ export function authMiddleware(options: { required?: boolean } = {}) {
 
       let user: AuthenticatedUser | null = null;
       let revokedReason:
-        | "session_version_mismatch"
-        | "session_revoked"
-        | "session_pre_secret_rotation"
+        | 'session_version_mismatch'
+        | 'session_revoked'
+        | 'session_pre_secret_rotation'
         | null = null;
 
       let token: string | undefined;
       const authHeader = req.headers.authorization;
-      if (authHeader?.startsWith("Bearer ")) {
+      if (authHeader?.startsWith('Bearer ')) {
         token = authHeader.slice(7);
       } else {
         // Reads `__Host-sid` first, falling back to the legacy `sid` cookie
@@ -235,9 +248,9 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       }
       if (token) {
         const resolved = await resolveUserFromToken(token);
-        if (resolved.kind === "ok") {
+        if (resolved.kind === 'ok') {
           user = resolved.user;
-        } else if (resolved.kind === "revoked") {
+        } else if (resolved.kind === 'revoked') {
           revokedReason = resolved.reason;
         }
       }
@@ -245,12 +258,7 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       if (!user && required) {
         serverTelemetry.recordAuthFailure();
         if (revokedReason) {
-          sendError(
-            res,
-            "Session has been revoked. Please sign in again.",
-            401,
-            "SESSION_REVOKED",
-          );
+          sendError(res, 'Session has been revoked. Please sign in again.', 401, 'SESSION_REVOKED');
           return;
         }
         sendUnauthorized(res);
@@ -260,8 +268,8 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       req.user = user ?? undefined;
       next();
     } catch (err) {
-      logger.error({ err }, "Auth middleware error");
-      sendError(res, "Authentication error", 500, "INTERNAL_ERROR");
+      logger.error({ err }, 'Auth middleware error');
+      sendError(res, 'Authentication error', 500, 'INTERNAL_ERROR');
     }
   };
 }
@@ -273,7 +281,7 @@ export function requireRole(...allowedRoles: RoleName[]) {
       return;
     }
 
-    if (req.user.roles.includes("super_admin") || req.user.roles.includes("admin")) {
+    if (req.user.roles.includes('super_admin') || req.user.roles.includes('admin')) {
       next();
       return;
     }
@@ -286,7 +294,7 @@ export function requireRole(...allowedRoles: RoleName[]) {
 
     const hasRole = allowedRoles.some((role) => userGrantedRoles.has(role));
     if (!hasRole) {
-      sendForbidden(res, "Insufficient permissions");
+      sendForbidden(res, 'Insufficient permissions');
       return;
     }
 
@@ -318,7 +326,10 @@ export function denyIfReadOnly() {
     }
     if (isReadOnlyRole(req.user.roles)) {
       const canonical = toCanonicalRole(req.user.roles);
-      sendForbidden(res, `Read-only access — write operations are not permitted for role: ${canonical ?? "unknown"}`);
+      sendForbidden(
+        res,
+        `Read-only access — write operations are not permitted for role: ${canonical ?? 'unknown'}`,
+      );
       return;
     }
     next();
@@ -327,8 +338,8 @@ export function denyIfReadOnly() {
 
 export class InvalidIdError extends Error {
   constructor() {
-    super("Invalid ID parameter");
-    this.name = "InvalidIdError";
+    super('Invalid ID parameter');
+    this.name = 'InvalidIdError';
   }
 }
 
@@ -339,7 +350,10 @@ export function parseIdParam(raw: string | string[]): number {
   return id;
 }
 
-export function requireOrgMembership(orgSlug: string, minRole: "owner" | "admin" | "member" | "viewer" = "viewer") {
+export function requireOrgMembership(
+  orgSlug: string,
+  minRole: 'owner' | 'admin' | 'member' | 'viewer' = 'viewer',
+) {
   const roleHierarchy: Record<string, number> = { owner: 4, admin: 3, member: 2, viewer: 1 };
 
   return (req: Request, res: Response, next: NextFunction) => {
@@ -348,19 +362,19 @@ export function requireOrgMembership(orgSlug: string, minRole: "owner" | "admin"
       return;
     }
 
-    if (req.user.roles.includes("super_admin") || req.user.roles.includes("admin")) {
+    if (req.user.roles.includes('super_admin') || req.user.roles.includes('admin')) {
       next();
       return;
     }
 
     const membership = req.user.orgs.find((o) => o.orgSlug === orgSlug);
     if (!membership) {
-      sendForbidden(res, "Not a member of this organization");
+      sendForbidden(res, 'Not a member of this organization');
       return;
     }
 
     if ((roleHierarchy[membership.role] ?? 0) < (roleHierarchy[minRole] ?? 0)) {
-      sendForbidden(res, "Insufficient organization role");
+      sendForbidden(res, 'Insufficient organization role');
       return;
     }
 
@@ -368,8 +382,16 @@ export function requireOrgMembership(orgSlug: string, minRole: "owner" | "admin"
   };
 }
 
-export function canAccessOrgRecord(user: AuthenticatedUser, recordOrgId: number | null | undefined): boolean {
-  if (user.roles.includes("super_admin") || user.roles.includes("admin") || user.roles.includes("exec") || user.roles.includes("ops")) {
+export function canAccessOrgRecord(
+  user: AuthenticatedUser,
+  recordOrgId: number | null | undefined,
+): boolean {
+  if (
+    user.roles.includes('super_admin') ||
+    user.roles.includes('admin') ||
+    user.roles.includes('exec') ||
+    user.roles.includes('ops')
+  ) {
     return true;
   }
   if (recordOrgId == null) return false;
@@ -377,7 +399,7 @@ export function canAccessOrgRecord(user: AuthenticatedUser, recordOrgId: number 
 }
 
 export function isElevatedUser(user: AuthenticatedUser): boolean {
-  const elevated = new Set(["super_admin", "admin", "exec", "ops", "compliance"]);
+  const elevated = new Set(['super_admin', 'admin', 'exec', 'ops', 'compliance']);
   return user.roles.some((r) => elevated.has(r));
 }
 
@@ -398,13 +420,18 @@ export function requireInternalScope(required: InternalScope) {
       return;
     }
     logger.warn(
-      { tokenName: req.internalAgent?.name, required, scopes: Array.from(req.internalAgent?.scopes ?? []), path: req.path },
-      "[auth] Internal token lacks required scope"
+      {
+        tokenName: req.internalAgent?.name,
+        required,
+        scopes: Array.from(req.internalAgent?.scopes ?? []),
+        path: req.path,
+      },
+      '[auth] Internal token lacks required scope',
     );
     res.status(403).json({
-      error: "Forbidden",
+      error: 'Forbidden',
       message: `Internal token missing required scope: ${required}`,
-      code: "INTERNAL_SCOPE_MISSING",
+      code: 'INTERNAL_SCOPE_MISSING',
     });
   };
 }

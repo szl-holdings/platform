@@ -6,25 +6,25 @@
  *
  * Run:  pnpm --filter @workspace/api-server smoke:cognitive-runtime
  */
-import { db } from "@szl-holdings/db";
 import {
-  selfModelsTable,
-  selfModelSnapshotsTable,
-  entityAliasesTable,
-  entityEdgesTable,
-  skillsTable,
-  skillRunsTable,
-  plansTable,
-  planStepsTable,
-  verifierResultsTable,
-  reflectionsTable,
-  policiesTable,
   cogActionsTable,
   cognitiveRollbackEventsTable,
-} from "@szl-holdings/db";
-import { eq } from "drizzle-orm";
+  db,
+  entityAliasesTable,
+  entityEdgesTable,
+  planStepsTable,
+  plansTable,
+  policiesTable,
+  reflectionsTable,
+  selfModelSnapshotsTable,
+  selfModelsTable,
+  skillRunsTable,
+  skillsTable,
+  verifierResultsTable,
+} from '@szl-holdings/db';
+import { eq } from 'drizzle-orm';
 
-const AGENT_ID = "smoke-agent-cog-runtime";
+const AGENT_ID = 'smoke-agent-cog-runtime';
 const errors: string[] = [];
 
 async function check<T extends { id: string }>(
@@ -36,7 +36,7 @@ async function check<T extends { id: string }>(
   try {
     const row = await insert();
     const readback = await read(row.id);
-    if (!readback) throw new Error("read-after-write returned nothing");
+    if (!readback) throw new Error('read-after-write returned nothing');
     console.log(`[smoke] ✓  ${label.padEnd(22)} id=${row.id}`);
     await del(row.id);
     return row;
@@ -48,28 +48,28 @@ async function check<T extends { id: string }>(
 }
 
 async function run() {
-  console.log("[smoke] Starting cognitive runtime schema smoke test...\n");
+  console.log('[smoke] Starting cognitive runtime schema smoke test...\n');
 
   // ── self_models + self_model_snapshots ───────────────────────────────────────
   const smRow = await check(
-    "self_models",
+    'self_models',
     async () => {
       const [r] = await db
         .insert(selfModelsTable)
         .values({
           agentId: AGENT_ID,
           version: 1,
-          status: "active",
-          capabilities: ["reasoning"],
+          status: 'active',
+          capabilities: ['reasoning'],
           goals: [],
           constraints: [],
           beliefs: {},
           identity: {},
           performanceProfile: {},
           confidence: 0.95,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: { test: true },
         })
         .returning();
@@ -84,7 +84,7 @@ async function run() {
 
   if (smRow) {
     await check(
-      "self_model_snapshots",
+      'self_model_snapshots',
       async () => {
         const [r] = await db
           .insert(selfModelSnapshotsTable)
@@ -92,12 +92,12 @@ async function run() {
             selfModelId: smRow.id,
             agentId: AGENT_ID,
             version: 1,
-            snapshotData: { capabilities: ["reasoning"] },
-            changeReason: "smoke test",
+            snapshotData: { capabilities: ['reasoning'] },
+            changeReason: 'smoke test',
             confidence: 0.95,
-            sensitivityTier: "internal",
-            provenanceSource: "agent",
-            provenanceMethod: "agent",
+            sensitivityTier: 'internal',
+            provenanceSource: 'agent',
+            provenanceMethod: 'agent',
             metadata: { test: true },
           })
           .returning();
@@ -119,16 +119,16 @@ async function run() {
 
   // ── entity_aliases ────────────────────────────────────────────────────────────
   await check(
-    "entity_aliases",
+    'entity_aliases',
     async () => {
       const [r] = await db
         .insert(entityAliasesTable)
         .values({
-          entityId: "entity-smoke-001",
-          alias: "ACME Corp",
-          aliasType: "display",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          entityId: 'entity-smoke-001',
+          alias: 'ACME Corp',
+          aliasType: 'display',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           confidence: 0.9,
           metadata: {},
         })
@@ -146,20 +146,20 @@ async function run() {
 
   // ── entity_edges ──────────────────────────────────────────────────────────────
   await check(
-    "entity_edges",
+    'entity_edges',
     async () => {
       const [r] = await db
         .insert(entityEdgesTable)
         .values({
-          fromEntityId: "entity-smoke-A",
-          toEntityId: "entity-smoke-B",
-          edgeType: "relates-to",
+          fromEntityId: 'entity-smoke-A',
+          toEntityId: 'entity-smoke-B',
+          edgeType: 'relates-to',
           weight: 0.8,
           bidirectional: false,
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           confidence: 0.9,
-          sensitivityTier: "internal",
+          sensitivityTier: 'internal',
           metadata: {},
         })
         .returning();
@@ -176,26 +176,26 @@ async function run() {
 
   // ── skills ────────────────────────────────────────────────────────────────────
   const skillRow = await check(
-    "skills",
+    'skills',
     async () => {
       const [r] = await db
         .insert(skillsTable)
         .values({
-          skillId: "smoke-skill-reasoning",
+          skillId: 'smoke-skill-reasoning',
           version: 1,
           latestVersion: 1,
-          name: "Smoke Reasoning Skill",
-          domain: "general",
-          capability: "reasoning",
-          status: "active",
+          name: 'Smoke Reasoning Skill',
+          domain: 'general',
+          capability: 'reasoning',
+          status: 'active',
           inputSchema: {},
           outputSchema: {},
           implementation: {},
           triggerConditions: [],
           confidence: 0.9,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
@@ -210,21 +210,21 @@ async function run() {
 
   // ── skill_runs ────────────────────────────────────────────────────────────────
   await check(
-    "skill_runs",
+    'skill_runs',
     async () => {
       const [r] = await db
         .insert(skillRunsTable)
         .values({
-          skillId: "smoke-skill-reasoning",
+          skillId: 'smoke-skill-reasoning',
           skillVersion: 1,
           agentId: AGENT_ID,
-          status: "completed",
-          inputs: { query: "smoke test" },
-          outputs: { result: "ok" },
+          status: 'completed',
+          inputs: { query: 'smoke test' },
+          outputs: { result: 'ok' },
           latencyMs: 42,
           confidence: 0.9,
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
@@ -245,21 +245,21 @@ async function run() {
 
   // ── plans + plan_steps ────────────────────────────────────────────────────────
   const planRow = await check(
-    "plans",
+    'plans',
     async () => {
       const [r] = await db
         .insert(plansTable)
         .values({
-          planId: "smoke-plan-001",
+          planId: 'smoke-plan-001',
           agentId: AGENT_ID,
-          title: "Smoke Test Plan",
-          goal: { objective: "test schema" },
-          status: "draft",
+          title: 'Smoke Test Plan',
+          goal: { objective: 'test schema' },
+          status: 'draft',
           totalSteps: 1,
           confidence: 0.8,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
@@ -274,15 +274,15 @@ async function run() {
 
   if (planRow) {
     await check(
-      "plan_steps",
+      'plan_steps',
       async () => {
         const [r] = await db
           .insert(planStepsTable)
           .values({
             planId: planRow.id,
             stepIndex: 0,
-            title: "Step 1",
-            status: "pending",
+            title: 'Step 1',
+            status: 'pending',
             inputs: {},
             dependsOnStepIds: [],
             confidence: 0.8,
@@ -304,23 +304,23 @@ async function run() {
 
   // ── verifier_results ──────────────────────────────────────────────────────────
   await check(
-    "verifier_results",
+    'verifier_results',
     async () => {
       const [r] = await db
         .insert(verifierResultsTable)
         .values({
-          verifierId: "smoke-verifier",
-          targetType: "plan",
-          targetId: "smoke-plan-001",
-          outcome: "pass",
-          checks: [{ name: "smoke-check", outcome: "pass" }],
+          verifierId: 'smoke-verifier',
+          targetType: 'plan',
+          targetId: 'smoke-plan-001',
+          outcome: 'pass',
+          checks: [{ name: 'smoke-check', outcome: 'pass' }],
           blockerCount: 0,
           warningCount: 0,
           passCount: 1,
           confidence: 0.95,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
@@ -340,26 +340,26 @@ async function run() {
 
   // ── reflections ───────────────────────────────────────────────────────────────
   await check(
-    "reflections",
+    'reflections',
     async () => {
       const [r] = await db
         .insert(reflectionsTable)
         .values({
-          reflectionId: "smoke-reflection-001",
+          reflectionId: 'smoke-reflection-001',
           agentId: AGENT_ID,
-          type: "post-task",
-          summary: "Smoke test reflection — schema is functional.",
+          type: 'post-task',
+          summary: 'Smoke test reflection — schema is functional.',
           observations: [],
           improvements: [],
           policyBreaches: [],
           confidenceAdjustment: 0,
-          overallHealth: "good",
+          overallHealth: 'good',
           actionable: false,
           suggestedActions: [],
           confidence: 0.9,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
@@ -376,25 +376,25 @@ async function run() {
 
   // ── policies ─────────────────────────────────────────────────────────────────
   await check(
-    "policies",
+    'policies',
     async () => {
       const [r] = await db
         .insert(policiesTable)
         .values({
-          policyId: "smoke-policy-001",
+          policyId: 'smoke-policy-001',
           version: 1,
           latestVersion: 1,
-          name: "Smoke Test Policy",
-          domain: "general",
-          scope: "global",
-          effect: "allow",
+          name: 'Smoke Test Policy',
+          domain: 'general',
+          scope: 'global',
+          effect: 'allow',
           conditions: [],
           priority: 100,
           enabled: true,
           confidence: 0.95,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
@@ -411,24 +411,24 @@ async function run() {
 
   // ── cog_actions ───────────────────────────────────────────────────────────────
   const cogActionRow = await check(
-    "cog_actions",
+    'cog_actions',
     async () => {
       const [r] = await db
         .insert(cogActionsTable)
         .values({
-          actionId: "smoke-action-001",
+          actionId: 'smoke-action-001',
           agentId: AGENT_ID,
-          domain: "general",
-          actionType: "analysis",
-          description: "Smoke test action",
-          status: "completed",
+          domain: 'general',
+          actionType: 'analysis',
+          description: 'Smoke test action',
+          status: 'completed',
           inputs: {},
-          outputs: { result: "ok" },
+          outputs: { result: 'ok' },
           isReversible: true,
           confidence: 0.9,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
@@ -443,31 +443,34 @@ async function run() {
 
   // ── rollback_events ───────────────────────────────────────────────────────────
   await check(
-    "rollback_events",
+    'rollback_events',
     async () => {
       const [r] = await db
         .insert(cognitiveRollbackEventsTable)
         .values({
-          rollbackId: "smoke-rollback-001",
+          rollbackId: 'smoke-rollback-001',
           agentId: AGENT_ID,
-          trigger: "agent",
-          reason: "Smoke test rollback",
-          targetType: "cog_action",
-          targetId: "smoke-action-001",
-          stateBeforeRollback: { status: "running" },
-          stateAfterRollback: { status: "pending" },
+          trigger: 'agent',
+          reason: 'Smoke test rollback',
+          targetType: 'cog_action',
+          targetId: 'smoke-action-001',
+          stateBeforeRollback: { status: 'running' },
+          stateAfterRollback: { status: 'pending' },
           success: true,
           confidence: 0.9,
-          sensitivityTier: "internal",
-          provenanceSource: "agent",
-          provenanceMethod: "agent",
+          sensitivityTier: 'internal',
+          provenanceSource: 'agent',
+          provenanceMethod: 'agent',
           metadata: {},
         })
         .returning();
       return r;
     },
     async (id) => {
-      const [r] = await db.select().from(cognitiveRollbackEventsTable).where(eq(cognitiveRollbackEventsTable.id, id));
+      const [r] = await db
+        .select()
+        .from(cognitiveRollbackEventsTable)
+        .where(eq(cognitiveRollbackEventsTable.id, id));
       return r;
     },
     async (id) => {
@@ -480,9 +483,9 @@ async function run() {
   }
 
   // ── Summary ──────────────────────────────────────────────────────────────────
-  console.log("\n─────────────────────────────────────────");
+  console.log('\n─────────────────────────────────────────');
   if (errors.length === 0) {
-    console.log("[smoke] ✓  All cognitive runtime tables PASSED");
+    console.log('[smoke] ✓  All cognitive runtime tables PASSED');
   } else {
     console.error(`[smoke] ✗  ${errors.length} table(s) FAILED:`);
     errors.forEach((e) => console.error(`         • ${e}`));
@@ -492,6 +495,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  console.error("[smoke] Unexpected error:", err);
+  console.error('[smoke] Unexpected error:', err);
   process.exit(1);
 });

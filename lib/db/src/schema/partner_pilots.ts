@@ -1,6 +1,6 @@
-import { pgTable, text, serial, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
+import { integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-zod';
+import type { z } from 'zod/v4';
 
 /**
  * partner_pilots — pilot / design-partner / prospect pipeline.
@@ -17,24 +17,24 @@ import { z } from "zod/v4";
  *   at-risk   — degraded health on the joined trace activity
  *   inactive  — paused or churned
  */
-export const partnerPilotsTable = pgTable("partner_pilots", {
-  id: serial("id").primaryKey(),
-  externalId: text("external_id").notNull().unique(),
-  organizationId: integer("organization_id"),
-  name: text("name").notNull(),
-  product: text("product").notNull(), // lyte | vessels | terra | prism | aegis | carlota
-  status: text("status").notNull().default("prospect"),
-  tier: text("tier").notNull().default("design-partner"),
-  region: text("region"),
-  industry: text("industry"),
-  primaryContact: text("primary_contact"),
-  contactEmail: text("contact_email"),
-  pilotStartedAt: timestamp("pilot_started_at"),
-  contractValueUsd: integer("contract_value_usd").notNull().default(0),
-  notes: text("notes"),
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+export const partnerPilotsTable = pgTable('partner_pilots', {
+  id: serial('id').primaryKey(),
+  externalId: text('external_id').notNull().unique(),
+  organizationId: integer('organization_id'),
+  name: text('name').notNull(),
+  product: text('product').notNull(), // lyte | vessels | terra | prism | aegis | carlota
+  status: text('status').notNull().default('prospect'),
+  tier: text('tier').notNull().default('design-partner'),
+  region: text('region'),
+  industry: text('industry'),
+  primaryContact: text('primary_contact'),
+  contactEmail: text('contact_email'),
+  pilotStartedAt: timestamp('pilot_started_at'),
+  contractValueUsd: integer('contract_value_usd').notNull().default(0),
+  notes: text('notes'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 export const insertPartnerPilotSchema = createInsertSchema(partnerPilotsTable).omit({

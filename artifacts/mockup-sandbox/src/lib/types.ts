@@ -1,17 +1,17 @@
 export type Page =
-  | "home"
-  | "research"
-  | "memory"
-  | "skills"
-  | "patterns"
-  | "bridge"
-  | "orchestrator"
-  | "ingest"
-  | "design-system"
-  | "ai-quality"
-  | "prompt-registry"
-  | "eval-console"
-  | "audit";
+  | 'home'
+  | 'research'
+  | 'memory'
+  | 'skills'
+  | 'patterns'
+  | 'bridge'
+  | 'orchestrator'
+  | 'ingest'
+  | 'design-system'
+  | 'ai-quality'
+  | 'prompt-registry'
+  | 'eval-console'
+  | 'audit';
 
 export interface NexusStatus {
   activeSwarms: number;
@@ -21,7 +21,7 @@ export interface NexusStatus {
   orchestrationsToday: number;
 }
 
-export type AgentLaneStatus = "idle" | "running" | "done" | "error";
+export type AgentLaneStatus = 'idle' | 'running' | 'done' | 'error';
 
 export interface AgentLane {
   id: string;
@@ -42,7 +42,7 @@ export interface AgentLane {
 export interface ResearchRun {
   id: string;
   query: string;
-  status: "pending" | "running" | "completed" | "failed";
+  status: 'pending' | 'running' | 'completed' | 'failed';
   lanes: AgentLane[];
   finalBrief?: string;
   citations?: Citation[];
@@ -53,7 +53,7 @@ export interface ResearchRun {
 export interface Citation {
   url: string;
   title: string;
-  status: "verified" | "killed" | "pending";
+  status: 'verified' | 'killed' | 'pending';
   reason?: string;
 }
 
@@ -61,8 +61,8 @@ export interface MemoryItem {
   id: string;
   key: string;
   value: string;
-  type: "fact" | "preference" | "entity" | "claim" | "context";
-  tier: "working" | "session" | "episodic" | "semantic";
+  type: 'fact' | 'preference' | 'entity' | 'claim' | 'context';
+  tier: 'working' | 'session' | 'episodic' | 'semantic';
   pinned: boolean;
   confidence: number;
   source?: string;
@@ -79,7 +79,7 @@ export interface Skill {
   sourceUrl: string;
   license: string;
   pattern: string;
-  primitiveType: "Skill" | "Hook" | "Command" | "Agent" | "MemorySchema" | "RAGStrategy" | "Tool";
+  primitiveType: 'Skill' | 'Hook' | 'Command' | 'Agent' | 'MemorySchema' | 'RAGStrategy' | 'Tool';
   enabled: boolean;
   usageCount: number;
   nexusAdaptation: string;
@@ -104,7 +104,7 @@ export interface ProtocolTool {
   id: string;
   name: string;
   description: string;
-  protocol: "MCP" | "A2A" | "ACP" | "ANP";
+  protocol: 'MCP' | 'A2A' | 'ACP' | 'ANP';
   inputSchema: Record<string, unknown>;
   domain: string;
   tags: string[];
@@ -124,7 +124,7 @@ export interface CustomizationsResetResult {
 export interface ToolCallResult {
   toolId: string;
   protocol: string;
-  status: "success" | "error";
+  status: 'success' | 'error';
   output: unknown;
   durationMs: number;
   traceId: string;
@@ -133,7 +133,7 @@ export interface ToolCallResult {
 export interface OrchestrationPlan {
   id: string;
   intent: string;
-  status: "planning" | "running" | "completed" | "failed";
+  status: 'planning' | 'running' | 'completed' | 'failed';
   steps: OrchestrationStep[];
   stitchedOutput?: string;
   planGraph?: PlanNode[];
@@ -147,7 +147,7 @@ export interface OrchestrationStep {
   appSlug: string;
   action: string;
   endpoint: string;
-  status: "pending" | "running" | "done" | "error";
+  status: 'pending' | 'running' | 'done' | 'error';
   output?: string;
   durationMs?: number;
   rawPayload?: string;
@@ -158,7 +158,7 @@ export interface OrchestrationStep {
 export interface PlanNode {
   id: string;
   label: string;
-  type: "start" | "app" | "stitch" | "end";
+  type: 'start' | 'app' | 'stitch' | 'end';
   dependsOn: string[];
 }
 
@@ -170,7 +170,7 @@ export interface AuditEntry {
   intent: string;
   action: string;
   endpoint: string;
-  status: "success" | "error" | "skipped";
+  status: 'success' | 'error' | 'skipped';
   durationMs: number;
   reasoning: string;
   alternativesConsidered: string[];
@@ -193,7 +193,7 @@ export interface IngestJob {
   id: string;
   repoUrl: string;
   repoName: string;
-  status: "queued" | "fetching" | "adapting" | "publishing" | "done" | "failed";
+  status: 'queued' | 'fetching' | 'adapting' | 'publishing' | 'done' | 'failed';
   skillsGenerated: number;
   patternsFound: string[];
   log: string[];

@@ -1,6 +1,6 @@
-import * as React from "react";
-import { useState, useEffect } from "react";
-import { cn } from "../utils";
+import type * as React from 'react';
+import { useEffect, useState } from 'react';
+import { cn } from '../utils';
 
 export interface NavItem {
   label: string;
@@ -25,17 +25,17 @@ export interface SiteHeaderProps {
 
 export function SiteHeader({
   logo,
-  logoText = "Brand",
+  logoText = 'Brand',
   navItems = [],
   ctaLabel,
   ctaHref,
   onNavClick,
   onCtaClick,
-  currentPath = "/",
+  currentPath = '/',
   className,
   transparent = false,
   invertOnScroll = true,
-  accentColor = "hsl(215 45% 32%)",
+  accentColor = 'hsl(215 45% 32%)',
 }: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,8 +43,8 @@ export function SiteHeader({
   useEffect(() => {
     if (!invertOnScroll) return;
     const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, [invertOnScroll]);
 
   const handleNavClick = (label: string, href: string) => {
@@ -57,11 +57,11 @@ export function SiteHeader({
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         isScrolled
-          ? "bg-white/95 backdrop-blur-xl border-b border-neutral-200/80 shadow-sm"
-          : "bg-transparent",
-        className
+          ? 'bg-white/95 backdrop-blur-xl border-b border-neutral-200/80 shadow-sm'
+          : 'bg-transparent',
+        className,
       )}
       role="banner"
     >
@@ -69,7 +69,7 @@ export function SiteHeader({
         <a
           href="/"
           className="flex items-center gap-2.5 shrink-0"
-          onClick={() => handleNavClick(logoText, "/")}
+          onClick={() => handleNavClick(logoText, '/')}
         >
           {logo ?? (
             <div
@@ -91,14 +91,14 @@ export function SiteHeader({
             <a
               key={item.href}
               href={item.href}
-              target={item.external ? "_blank" : undefined}
-              rel={item.external ? "noopener noreferrer" : undefined}
+              target={item.external ? '_blank' : undefined}
+              rel={item.external ? 'noopener noreferrer' : undefined}
               onClick={() => handleNavClick(item.label, item.href)}
               className={cn(
-                "text-sm font-medium transition-colors duration-200",
+                'text-sm font-medium transition-colors duration-200',
                 currentPath === item.href
-                  ? "text-neutral-900"
-                  : "text-neutral-500 hover:text-neutral-900"
+                  ? 'text-neutral-900'
+                  : 'text-neutral-500 hover:text-neutral-900',
               )}
             >
               {item.label}
@@ -106,7 +106,7 @@ export function SiteHeader({
           ))}
           {ctaLabel && (
             <a
-              href={ctaHref ?? "#"}
+              href={ctaHref ?? '#'}
               onClick={onCtaClick}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
               style={{ backgroundColor: accentColor }}
@@ -119,7 +119,7 @@ export function SiteHeader({
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden p-1.5 text-neutral-500 hover:text-neutral-900"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
         >
           <span className="block w-5 h-px bg-current mb-1 transition-all" />
@@ -143,7 +143,7 @@ export function SiteHeader({
             ))}
             {ctaLabel && (
               <a
-                href={ctaHref ?? "#"}
+                href={ctaHref ?? '#'}
                 onClick={onCtaClick}
                 className="mt-1 px-4 py-3 rounded-xl text-white text-sm font-semibold text-center"
                 style={{ backgroundColor: accentColor }}

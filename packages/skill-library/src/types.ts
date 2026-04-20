@@ -1,14 +1,14 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const SkillCategorySchema = z.enum([
-  "graph-query",
-  "research",
-  "synthesis",
-  "workflow",
-  "reporting",
-  "analysis",
-  "remediation",
-  "executive-brief",
+  'graph-query',
+  'research',
+  'synthesis',
+  'workflow',
+  'reporting',
+  'analysis',
+  'remediation',
+  'executive-brief',
 ]);
 
 export type SkillCategory = z.infer<typeof SkillCategorySchema>;
@@ -69,7 +69,7 @@ export const SkillDefinitionSchema = z.object({
   performance: SkillPerformanceSchema.default({}),
   isBuiltin: z.boolean().default(false),
   enabled: z.boolean().default(true),
-  version: z.string().default("1.0.0"),
+  version: z.string().default('1.0.0'),
   tags: z.array(z.string()).default([]),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -77,14 +77,14 @@ export const SkillDefinitionSchema = z.object({
 
 export type SkillDefinition = z.infer<typeof SkillDefinitionSchema>;
 
-export const SkillRunStatusSchema = z.enum(["running", "completed", "failed"]);
+export const SkillRunStatusSchema = z.enum(['running', 'completed', 'failed']);
 
 export type SkillRunStatus = z.infer<typeof SkillRunStatusSchema>;
 
 export const SkillRunStepRecordSchema = z.object({
   stepId: z.string(),
   stepName: z.string(),
-  status: z.enum(["pending", "running", "completed", "failed"]),
+  status: z.enum(['pending', 'running', 'completed', 'failed']),
   startedAt: z.number(),
   completedAt: z.number().optional(),
   inputs: z.record(z.unknown()).optional(),
@@ -129,5 +129,5 @@ export interface SkillRunQuery {
 export type StepHandlerFn = (
   parameters: Record<string, unknown>,
   inputs: Record<string, unknown>,
-  context: { runId: string; stepId: string; skillId: string }
+  context: { runId: string; stepId: string; skillId: string },
 ) => Promise<Record<string, unknown>>;

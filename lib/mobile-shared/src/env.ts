@@ -14,33 +14,29 @@
  *   const apiBase = getDomainBaseUrl();
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
-const emptyToUndefined = (v: unknown) =>
-  typeof v === "string" && v.trim() === "" ? undefined : v;
+const emptyToUndefined = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? undefined : v);
 
 const domainInner = z
   .string()
   .min(1)
   .regex(/^[A-Za-z0-9.-]+(:\d+)?$/, {
     message:
-      "must be a bare hostname without a scheme or path (e.g. \"example.com\", not \"https://example.com\")",
+      'must be a bare hostname without a scheme or path (e.g. "example.com", not "https://example.com")',
   });
 
-const domainSchema = z.preprocess(
-  emptyToUndefined,
-  domainInner.optional(),
-) as z.ZodType<string | undefined>;
+const domainSchema = z.preprocess(emptyToUndefined, domainInner.optional()) as z.ZodType<
+  string | undefined
+>;
 
-const optionalUrlSchema = z.preprocess(
-  emptyToUndefined,
-  z.string().url().optional(),
-) as z.ZodType<string | undefined>;
+const optionalUrlSchema = z.preprocess(emptyToUndefined, z.string().url().optional()) as z.ZodType<
+  string | undefined
+>;
 
-const optionalNonEmpty = z.preprocess(
-  emptyToUndefined,
-  z.string().min(1).optional(),
-) as z.ZodType<string | undefined>;
+const optionalNonEmpty = z.preprocess(emptyToUndefined, z.string().min(1).optional()) as z.ZodType<
+  string | undefined
+>;
 
 export const mobileEnvSchema = z.object({
   EXPO_PUBLIC_DOMAIN: domainSchema,
@@ -56,7 +52,7 @@ function readRawEnv(): Record<string, string | undefined> {
   // Each reference MUST be a literal `process.env.EXPO_PUBLIC_*` access — Expo's
   // metro bundler replaces those at build time. Aliasing `process.env` defeats
   // that static replacement and would yield `undefined` in the bundled app.
-  if (typeof process === "undefined" || !process.env) return {};
+  if (typeof process === 'undefined' || !process.env) return {};
   return {
     EXPO_PUBLIC_DOMAIN: process.env.EXPO_PUBLIC_DOMAIN,
     EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
@@ -68,17 +64,13 @@ function readRawEnv(): Record<string, string | undefined> {
 
 let _env: MobileEnv | null = null;
 
-export function parseMobileEnv(
-  raw: Record<string, string | undefined> = readRawEnv(),
-): MobileEnv {
+export function parseMobileEnv(raw: Record<string, string | undefined> = readRawEnv()): MobileEnv {
   const result = mobileEnvSchema.safeParse(raw);
   if (!result.success) {
     const issues = result.error.issues
-      .map((i) => `  • ${i.path.join(".") || "(env)"}: ${i.message}`)
-      .join("\n");
-    throw new Error(
-      `[mobile-env] EXPO_PUBLIC_* environment validation failed:\n${issues}`,
-    );
+      .map((i) => `  • ${i.path.join('.') || '(env)'}: ${i.message}`)
+      .join('\n');
+    throw new Error(`[mobile-env] EXPO_PUBLIC_* environment validation failed:\n${issues}`);
   }
   _env = result.data;
   return _env;
@@ -116,6 +108,6 @@ export function getApiBaseUrl(fallback: string | null = null): string | null {
     env.EXPO_PUBLIC_API_URL ??
     env.EXPO_PUBLIC_API_BASE_URL ??
     (env.EXPO_PUBLIC_DOMAIN ? `https://${env.EXPO_PUBLIC_DOMAIN}` : null);
-  if (url) return url.replace(/\/$/, "");
+  if (url) return url.replace(/\/$/, '');
   return fallback;
 }

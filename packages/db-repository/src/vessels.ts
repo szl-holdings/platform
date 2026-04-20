@@ -1,13 +1,8 @@
 /**
  * Vessels Repository — typed access to vessel fleet and voyage tables.
  */
-import {
-  db,
-  vesselsTable,
-  voyagesTable,
-  vesselPositionsTable,
-} from "@szl-holdings/db";
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { db, vesselPositionsTable, vesselsTable, voyagesTable } from '@szl-holdings/db';
+import { and, desc, eq, gte, lte } from 'drizzle-orm';
 
 export class VesselsRepository {
   async findVesselById(id: number) {

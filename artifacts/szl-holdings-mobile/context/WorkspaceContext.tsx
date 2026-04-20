@@ -1,16 +1,16 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 
 export type WorkspaceDomain =
-  | "command"
-  | "defense"
-  | "fleet"
-  | "properties"
-  | "operations"
-  | "advisory"
-  | "portfolio"
-  | "founder"
-  | "intelligence";
+  | 'command'
+  | 'defense'
+  | 'fleet'
+  | 'properties'
+  | 'operations'
+  | 'advisory'
+  | 'portfolio'
+  | 'founder'
+  | 'intelligence';
 
 export interface WorkspaceConfig {
   id: WorkspaceDomain;
@@ -23,76 +23,76 @@ export interface WorkspaceConfig {
 
 export const WORKSPACES: WorkspaceConfig[] = [
   {
-    id: "command",
-    label: "Command Feed",
-    icon: "⬡",
-    accent: "#c9a84c",
-    route: "/(shell)/",
-    description: "Cross-domain situational awareness",
+    id: 'command',
+    label: 'Command Feed',
+    icon: '⬡',
+    accent: '#c9a84c',
+    route: '/(shell)/',
+    description: 'Cross-domain situational awareness',
   },
   {
-    id: "intelligence",
-    label: "CORTEX",
-    icon: "◈",
-    accent: "#8b7ac8",
-    route: "/(shell)/intelligence",
-    description: "Cross-domain fusion intelligence engine",
+    id: 'intelligence',
+    label: 'CORTEX',
+    icon: '◈',
+    accent: '#8b7ac8',
+    route: '/(shell)/intelligence',
+    description: 'Cross-domain fusion intelligence engine',
   },
   {
-    id: "defense",
-    label: "Defense",
-    icon: "🛡",
-    accent: "#ef4444",
-    route: "/(shell)/defense",
-    description: "Aegis SOC & threat intelligence",
+    id: 'defense',
+    label: 'Defense',
+    icon: '🛡',
+    accent: '#ef4444',
+    route: '/(shell)/defense',
+    description: 'Aegis SOC & threat intelligence',
   },
   {
-    id: "fleet",
-    label: "Fleet",
-    icon: "⚓",
-    accent: "#0ea5e9",
-    route: "/(shell)/fleet",
-    description: "Vessels maritime intelligence",
+    id: 'fleet',
+    label: 'Fleet',
+    icon: '⚓',
+    accent: '#0ea5e9',
+    route: '/(shell)/fleet',
+    description: 'Vessels maritime intelligence',
   },
   {
-    id: "properties",
-    label: "Properties",
-    icon: "🏛",
-    accent: "#c87941",
-    route: "/(shell)/properties",
-    description: "Terra real estate intelligence",
+    id: 'properties',
+    label: 'Properties',
+    icon: '🏛',
+    accent: '#c87941',
+    route: '/(shell)/properties',
+    description: 'Terra real estate intelligence',
   },
   {
-    id: "operations",
-    label: "Operations",
-    icon: "⚡",
-    accent: "#22d3ee",
-    route: "/(shell)/operations",
-    description: "Lyte AIOps & business observability",
+    id: 'operations',
+    label: 'Operations',
+    icon: '⚡',
+    accent: '#22d3ee',
+    route: '/(shell)/operations',
+    description: 'Lyte AIOps & business observability',
   },
   {
-    id: "advisory",
-    label: "Advisory",
-    icon: "◉",
-    accent: "#d4b896",
-    route: "/(shell)/advisory",
-    description: "Carlota Jo client advisory",
+    id: 'advisory',
+    label: 'Advisory',
+    icon: '◉',
+    accent: '#d4b896',
+    route: '/(shell)/advisory',
+    description: 'Carlota Jo client advisory',
   },
   {
-    id: "portfolio",
-    label: "Portfolio",
-    icon: "◆",
-    accent: "#94a3b8",
-    route: "/(shell)/portfolio",
-    description: "SZL Holdings executive command",
+    id: 'portfolio',
+    label: 'Portfolio',
+    icon: '◆',
+    accent: '#94a3b8',
+    route: '/(shell)/portfolio',
+    description: 'SZL Holdings executive command',
   },
   {
-    id: "founder",
-    label: "Founder",
-    icon: "○",
-    accent: "#94a3b8",
-    route: "/(shell)/founder",
-    description: "Stephen personal command",
+    id: 'founder',
+    label: 'Founder',
+    icon: '○',
+    accent: '#94a3b8',
+    route: '/(shell)/founder',
+    description: 'Stephen personal command',
   },
 ];
 
@@ -114,7 +114,7 @@ interface WorkspaceContextValue {
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue>({
-  activeWorkspace: "command",
+  activeWorkspace: 'command',
   setActiveWorkspace: () => {},
   drawerOpen: false,
   openDrawer: () => {},
@@ -125,10 +125,10 @@ const WorkspaceContext = createContext<WorkspaceContextValue>({
   totalBadges: 0,
 });
 
-const STORAGE_KEY = "cortex_active_workspace";
+const STORAGE_KEY = 'cortex_active_workspace';
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const [activeWorkspace, setActiveWorkspaceState] = useState<WorkspaceDomain>("command");
+  const [activeWorkspace, setActiveWorkspaceState] = useState<WorkspaceDomain>('command');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [badges, setBadges] = useState<Record<WorkspaceDomain, number>>({
     command: 0,

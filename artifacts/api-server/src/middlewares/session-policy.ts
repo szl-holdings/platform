@@ -12,19 +12,26 @@
  *   IMPERSONATION_TTL      = 1 hour
  */
 
-import type { Request, Response, NextFunction } from "express";
-import crypto from "crypto";
-import { db, sessionsTable, usersTable, auditEventsTable, userRolesTable, rolesTable } from "@szl-holdings/db";
-import { eq, and, gt, desc, isNull, sql } from "drizzle-orm";
-import { SESSION_COOKIE, SESSION_TTL, setSessionCookie } from "../lib/auth";
-import { logger } from "../lib/logger";
-import { hashIp } from "@szl-holdings/audit";
-import type { RoleName } from "@szl-holdings/db";
-import type { AuthenticatedUser } from "./auth";
+import { hashIp } from '@szl-holdings/audit';
+import type { RoleName } from '@szl-holdings/db';
+import {
+  auditEventsTable,
+  db,
+  rolesTable,
+  sessionsTable,
+  userRolesTable,
+  usersTable,
+} from '@szl-holdings/db';
+import crypto from 'crypto';
+import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
+import type { NextFunction, Request, Response } from 'express';
+import { SESSION_COOKIE, SESSION_TTL, setSessionCookie } from '../lib/auth';
+import { logger } from '../lib/logger';
+import type { AuthenticatedUser } from './auth';
 
 export const SESSION_REFRESH_WINDOW = 24 * 60 * 60 * 1000;
 export const IMPERSONATION_TTL = 60 * 60 * 1000;
-export const IMPERSONATION_HEADER = "x-impersonation-session";
+export const IMPERSONATION_HEADER = 'x-impersonation-session';
 
 declare global {
   namespace Express {
@@ -65,13 +72,17 @@ export function sessionRefreshPolicy() {
 
       // Impersonation tokens must not be extended — they have a hard 1-hour TTL
       // enforced at creation and must not be prolonged by the sliding refresh policy.
-      if (token.startsWith("imp_")) {
+      if (token.startsWith('imp_')) {
         next();
         return;
       }
 
       const [session] = await db
-        .select({ id: sessionsTable.id, expiresAt: sessionsTable.expiresAt, createdAt: sessionsTable.createdAt })
+        .select({
+          id: sessionsTable.id,
+          expiresAt: sessionsTable.expiresAt,
+          createdAt: sessionsTable.createdAt,
+        })
         .from(sessionsTable)
         .where(and(eq(sessionsTable.token, token), gt(sessionsTable.expiresAt, new Date())))
         .limit(1);
@@ -104,7 +115,7 @@ export function sessionRefreshPolicy() {
 
       next();
     } catch (err) {
-      logger.warn({ err }, "Session refresh policy error — non-fatal");
+      logger.warn({ err }, 'Session refresh policy error — non-fatal');
       next();
     }
   };
@@ -112,7 +123,7 @@ export function sessionRefreshPolicy() {
 
 function extractBearerToken(req: Request): string | undefined {
   const h = req.headers.authorization;
-  if (h?.startsWith("Bearer ")) return h.slice(7);
+  if (h?.startsWith('Bearer ')) return h.slice(7);
   return undefined;
 }
 
@@ -142,7 +153,7 @@ export async function writeAuditEvent(params: {
     };
     await db.insert(auditEventsTable).values(row);
   } catch (err) {
-    logger.error({ err }, "Failed to write audit event");
+    logger.error({ err }, 'Failed to write audit event');
   }
 }
 
@@ -164,7 +175,7 @@ export async function writeAuditEvent(params: {
  */
 let _cachedCutoff: { raw: string; value: Date | null } | null = null;
 export function getSessionMinCreatedAt(): Date | null {
-  const raw = process.env["SESSION_MIN_CREATED_AT"]?.trim();
+  const raw = process.env['SESSION_MIN_CREATED_AT']?.trim();
   if (!raw) {
     _cachedCutoff = null;
     return null;
@@ -174,7 +185,7 @@ export function getSessionMinCreatedAt(): Date | null {
   if (Number.isNaN(parsed.getTime())) {
     logger.warn(
       { rawValue: raw },
-      "SESSION_MIN_CREATED_AT is set but not a valid ISO-8601 timestamp — ignoring",
+      'SESSION_MIN_CREATED_AT is set but not a valid ISO-8601 timestamp — ignoring',
     );
     _cachedCutoff = { raw, value: null };
     return null;
@@ -191,7 +202,7 @@ export function getSessionMinCreatedAt(): Date | null {
   if (parsed.getTime() > now + FUTURE_TOLERANCE_MS) {
     logger.warn(
       { rawValue: raw, parsedIso: parsed.toISOString(), nowIso: new Date(now).toISOString() },
-      "SESSION_MIN_CREATED_AT is more than 5 minutes in the future — ignoring to avoid locking out all users (likely clock-skew or timezone misconfig)",
+      'SESSION_MIN_CREATED_AT is more than 5 minutes in the future — ignoring to avoid locking out all users (likely clock-skew or timezone misconfig)',
     );
     return null;
   }
@@ -254,14 +265,14 @@ export async function revokeUserSessionsOnRoleChange(params: {
   if (sessions.length > 0) {
     await db
       .update(sessionsTable)
-      .set({ revokedAt: now, revokedReason: reason ?? "role_change" })
+      .set({ revokedAt: now, revokedReason: reason ?? 'role_change' })
       .where(and(eq(sessionsTable.userId, userId), isNull(sessionsTable.revokedAt)));
   }
 
   await writeAuditEvent({
     userId: changedByUserId,
-    action: "session.invalidate",
-    entityType: "user",
+    action: 'session.invalidate',
+    entityType: 'user',
     entityId: String(userId),
     ipAddress,
     userAgent,
@@ -269,13 +280,13 @@ export async function revokeUserSessionsOnRoleChange(params: {
       targetUserId: userId,
       revokedSessionCount: sessions.length,
       newSessionVersion: newVersion,
-      reason: reason ?? "role change",
+      reason: reason ?? 'role change',
     },
   });
 
   logger.info(
     { userId, changedByUserId, revokedCount: sessions.length, newSessionVersion: newVersion },
-    "Sessions revoked on role change",
+    'Sessions revoked on role change',
   );
 
   return { revokedCount: sessions.length };
@@ -291,8 +302,8 @@ export const REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60 * 1000;
  */
 export function generateTokenPair(): { token: string; refreshToken: string } {
   return {
-    token: crypto.randomBytes(32).toString("hex"),
-    refreshToken: `rt_${crypto.randomBytes(32).toString("hex")}`,
+    token: crypto.randomBytes(32).toString('hex'),
+    refreshToken: `rt_${crypto.randomBytes(32).toString('hex')}`,
   };
 }
 
@@ -345,13 +356,13 @@ export async function createSessionWithRefresh(params: {
 
   await writeAuditEvent({
     userId: params.userId,
-    action: "session.create",
-    entityType: "session",
+    action: 'session.create',
+    entityType: 'session',
     entityId: String(row.id),
     ipAddress: params.ipAddress,
     userAgent: params.userAgent,
     newValues: {
-      reason: params.reason ?? "login",
+      reason: params.reason ?? 'login',
       sessionVersion,
       tokenPrefix: token.slice(0, 8),
     },
@@ -369,15 +380,15 @@ export async function createSessionWithRefresh(params: {
 
 export class RefreshTokenReplayError extends Error {
   constructor() {
-    super("Refresh token replay detected");
-    this.name = "RefreshTokenReplayError";
+    super('Refresh token replay detected');
+    this.name = 'RefreshTokenReplayError';
   }
 }
 
 export class RefreshTokenInvalidError extends Error {
-  constructor(message = "Invalid or expired refresh token") {
+  constructor(message = 'Invalid or expired refresh token') {
     super(message);
-    this.name = "RefreshTokenInvalidError";
+    this.name = 'RefreshTokenInvalidError';
   }
 }
 
@@ -414,15 +425,15 @@ export async function rotateRefreshToken(params: {
     const now = new Date();
     await db
       .update(sessionsTable)
-      .set({ revokedAt: now, revokedReason: "refresh_token_replay" })
+      .set({ revokedAt: now, revokedReason: 'refresh_token_replay' })
       .where(and(eq(sessionsTable.userId, session.userId), isNull(sessionsTable.revokedAt)));
 
     await bumpUserSessionVersion(session.userId);
 
     await writeAuditEvent({
       userId: session.userId,
-      action: "session.refresh.replay",
-      entityType: "session",
+      action: 'session.refresh.replay',
+      entityType: 'session',
       entityId: String(session.id),
       ipAddress,
       userAgent,
@@ -436,24 +447,28 @@ export async function rotateRefreshToken(params: {
   }
 
   if (session.revokedAt) {
-    throw new RefreshTokenInvalidError("Session has been revoked");
+    throw new RefreshTokenInvalidError('Session has been revoked');
   }
 
   if (session.refreshTokenExpiresAt && session.refreshTokenExpiresAt.getTime() < Date.now()) {
-    throw new RefreshTokenInvalidError("Refresh token expired");
+    throw new RefreshTokenInvalidError('Refresh token expired');
   }
 
   // Confirm the user is still active and pull the live session_version so
   // the new session reflects any role changes that occurred during the old
   // session's lifetime.
   const [user] = await db
-    .select({ id: usersTable.id, isActive: usersTable.isActive, sessionVersion: usersTable.sessionVersion })
+    .select({
+      id: usersTable.id,
+      isActive: usersTable.isActive,
+      sessionVersion: usersTable.sessionVersion,
+    })
     .from(usersTable)
     .where(eq(usersTable.id, session.userId))
     .limit(1);
 
   if (!user || !user.isActive) {
-    throw new RefreshTokenInvalidError("User is not active");
+    throw new RefreshTokenInvalidError('User is not active');
   }
 
   // Atomically CLAIM the refresh token before minting anything new. The
@@ -467,7 +482,7 @@ export async function rotateRefreshToken(params: {
     .set({
       refreshTokenUsedAt: usedAt,
       revokedAt: usedAt,
-      revokedReason: "rotated",
+      revokedReason: 'rotated',
     })
     .where(
       and(
@@ -487,14 +502,14 @@ export async function rotateRefreshToken(params: {
     // above and trigger the full session-version bump.
     await writeAuditEvent({
       userId: session.userId,
-      action: "session.refresh.replay",
-      entityType: "session",
+      action: 'session.refresh.replay',
+      entityType: 'session',
       entityId: String(session.id),
       ipAddress,
       userAgent,
       newValues: {
         replayedRefreshTokenPrefix: refreshToken.slice(0, 8),
-        cause: "concurrent_rotation_race",
+        cause: 'concurrent_rotation_race',
       },
     });
     throw new RefreshTokenReplayError();
@@ -504,7 +519,7 @@ export async function rotateRefreshToken(params: {
     userId: session.userId,
     ipAddress,
     userAgent,
-    reason: "refresh",
+    reason: 'refresh',
   });
 
   // Backfill the replaced_by pointer now that the new session id is known.
@@ -515,8 +530,8 @@ export async function rotateRefreshToken(params: {
 
   await writeAuditEvent({
     userId: session.userId,
-    action: "session.refresh",
-    entityType: "session",
+    action: 'session.refresh',
+    entityType: 'session',
     entityId: String(next.sessionId),
     ipAddress,
     userAgent,
@@ -551,7 +566,7 @@ export async function startImpersonation(params: {
     .limit(1);
 
   if (!target || !target.isActive) {
-    throw new Error("Target user not found or inactive");
+    throw new Error('Target user not found or inactive');
   }
 
   const impersonatorRoleRows = await db
@@ -570,18 +585,19 @@ export async function startImpersonation(params: {
 
   const targetRoleNames = targetRoleRows.map((r) => r.roleName as RoleName);
 
-  const impersonatorIsSuperAdmin = impersonatorRoleNames.includes("super_admin");
-  const targetIsElevated = targetRoleNames.includes("super_admin") || targetRoleNames.includes("admin");
+  const impersonatorIsSuperAdmin = impersonatorRoleNames.includes('super_admin');
+  const targetIsElevated =
+    targetRoleNames.includes('super_admin') || targetRoleNames.includes('admin');
 
   if (!impersonatorIsSuperAdmin && targetIsElevated) {
-    throw new Error("Cannot impersonate a user with higher or equal privileges");
+    throw new Error('Cannot impersonate a user with higher or equal privileges');
   }
 
-  if (!impersonatorRoleNames.includes("super_admin") && !impersonatorRoleNames.includes("admin")) {
-    throw new Error("Impersonation requires admin or super_admin role");
+  if (!impersonatorRoleNames.includes('super_admin') && !impersonatorRoleNames.includes('admin')) {
+    throw new Error('Impersonation requires admin or super_admin role');
   }
 
-  const token = `imp_${crypto.randomBytes(32).toString("hex")}`;
+  const token = `imp_${crypto.randomBytes(32).toString('hex')}`;
   const expiresAt = new Date(Date.now() + IMPERSONATION_TTL);
 
   const impersonationMeta = JSON.stringify({ impersonatorId, realUserAgent: userAgent });
@@ -596,8 +612,8 @@ export async function startImpersonation(params: {
 
   await writeAuditEvent({
     userId: impersonatorId,
-    action: "impersonation_start",
-    entityType: "user",
+    action: 'impersonation_start',
+    entityType: 'user',
     entityId: String(targetUserId),
     ipAddress,
     userAgent,
@@ -605,15 +621,12 @@ export async function startImpersonation(params: {
       impersonatorId,
       targetUserId,
       expiresAt: expiresAt.toISOString(),
-      reason: reason ?? "not specified",
+      reason: reason ?? 'not specified',
       tokenPrefix: token.slice(0, 8),
     },
   });
 
-  logger.info(
-    { impersonatorId, targetUserId },
-    "Admin impersonation session started",
-  );
+  logger.info({ impersonatorId, targetUserId }, 'Admin impersonation session started');
 
   return { token, expiresAt };
 }
@@ -637,18 +650,22 @@ export async function endImpersonation(params: {
 }): Promise<void> {
   const { impersonatorId, impersonationToken, ipAddress, userAgent } = params;
 
-  if (!impersonationToken.startsWith("imp_")) {
-    throw new Error("Invalid impersonation token format");
+  if (!impersonationToken.startsWith('imp_')) {
+    throw new Error('Invalid impersonation token format');
   }
 
   const [session] = await db
-    .select({ id: sessionsTable.id, userId: sessionsTable.userId, userAgent: sessionsTable.userAgent })
+    .select({
+      id: sessionsTable.id,
+      userId: sessionsTable.userId,
+      userAgent: sessionsTable.userAgent,
+    })
     .from(sessionsTable)
     .where(eq(sessionsTable.token, impersonationToken))
     .limit(1);
 
   if (!session) {
-    throw new Error("Impersonation session not found");
+    throw new Error('Impersonation session not found');
   }
 
   let sessionImpersonatorId: number | null = null;
@@ -668,11 +685,11 @@ export async function endImpersonation(params: {
     .where(eq(userRolesTable.userId, impersonatorId));
 
   const callerRoleNames = callerRoleRows.map((r) => r.roleName as RoleName);
-  const callerIsSuperAdmin = callerRoleNames.includes("super_admin");
+  const callerIsSuperAdmin = callerRoleNames.includes('super_admin');
 
   if (!callerIsSuperAdmin) {
     if (sessionImpersonatorId !== impersonatorId) {
-      throw new Error("Not authorized to end this impersonation session");
+      throw new Error('Not authorized to end this impersonation session');
     }
   }
 
@@ -680,8 +697,8 @@ export async function endImpersonation(params: {
 
   await writeAuditEvent({
     userId: impersonatorId,
-    action: "impersonation_end",
-    entityType: "user",
+    action: 'impersonation_end',
+    entityType: 'user',
     entityId: String(session.userId),
     ipAddress,
     userAgent,
@@ -693,7 +710,7 @@ export async function endImpersonation(params: {
 
   logger.info(
     { impersonatorId, targetUserId: session.userId },
-    "Admin impersonation session ended",
+    'Admin impersonation session ended',
   );
 }
 
@@ -721,8 +738,8 @@ export async function forceTerminateUserSessions(params: {
 
   await writeAuditEvent({
     userId: adminUserId,
-    action: "admin_force_logout",
-    entityType: "user",
+    action: 'admin_force_logout',
+    entityType: 'user',
     entityId: String(targetUserId),
     ipAddress,
     userAgent,
@@ -730,13 +747,13 @@ export async function forceTerminateUserSessions(params: {
       adminUserId,
       targetUserId,
       deletedSessionCount: sessions.length,
-      reason: reason ?? "not specified",
+      reason: reason ?? 'not specified',
     },
   });
 
   logger.info(
     { adminUserId, targetUserId, deletedCount: sessions.length },
-    "Admin force-terminated user sessions",
+    'Admin force-terminated user sessions',
   );
 
   return { deletedCount: sessions.length };

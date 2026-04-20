@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { TenantIdSchema } from "./tenant.js";
+import { z } from 'zod';
+import { TenantIdSchema } from './tenant.js';
 
 export const AefEvidenceObjectSchema = z.object({
   evidenceId: z.string().min(1),

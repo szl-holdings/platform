@@ -29,8 +29,8 @@
  * Exits 0 on full pass, 1 on any failure.
  */
 
-import { readFileSync, existsSync, readdirSync, appendFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { appendFileSync, existsSync, readdirSync, readFileSync } from 'fs';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -79,9 +79,7 @@ function extractTableFirstColRoles(mdText, sectionHeading) {
   // Stop at the next heading line (any level: ##, ###, ####) that is NOT the heading itself
   const afterHeading = mdText.slice(idx + sectionHeading.length);
   const nextHeadingMatch = afterHeading.match(/\n#{2,}\s/);
-  const slice = nextHeadingMatch
-    ? afterHeading.slice(0, nextHeadingMatch.index)
-    : afterHeading;
+  const slice = nextHeadingMatch ? afterHeading.slice(0, nextHeadingMatch.index) : afterHeading;
   // Match table rows: | `identifier` | ...
   const rows = slice.match(/^\|\s*`([a-z][a-z0-9_]*)`\s*\|/gm);
   if (!rows) return [];
@@ -92,7 +90,9 @@ function extractTableFirstColRoles(mdText, sectionHeading) {
 
 const GH_SUMMARY = process.env.GITHUB_STEP_SUMMARY || null;
 const summaryLines = [];
-function addSummary(line) { summaryLines.push(line); }
+function addSummary(line) {
+  summaryLines.push(line);
+}
 
 // ─── result tracking ──────────────────────────────────────────────────────────
 
@@ -125,11 +125,11 @@ function section(title) {
 
 // ─── load source files ────────────────────────────────────────────────────────
 
-const authSchema      = readFile('lib/db/src/schema/auth.ts');
-const csrfMiddleware  = readFile('artifacts/api-server/src/middlewares/csrf.ts');
-const routesIndex     = readFile('artifacts/api-server/src/routes/index.ts');
-const accessMatrix    = readFile('ACCESS-CONTROL-MATRIX.md');
-const apiSpec         = readFile('API-SPEC.md');
+const authSchema = readFile('lib/db/src/schema/auth.ts');
+const csrfMiddleware = readFile('artifacts/api-server/src/middlewares/csrf.ts');
+const routesIndex = readFile('artifacts/api-server/src/routes/index.ts');
+const accessMatrix = readFile('ACCESS-CONTROL-MATRIX.md');
+const apiSpec = readFile('API-SPEC.md');
 const securityChecklist = readFile('SECURITY-CHECKLIST.md');
 
 // ─── header ───────────────────────────────────────────────────────────────────
@@ -168,13 +168,13 @@ if (!authSchema) {
       if (inDocNotCode.length > 0) {
         fail(
           'ACCESS-CONTROL-MATRIX.md documents platform roles not found in auth.ts enum',
-          'Missing from code: ' + inDocNotCode.join(', ')
+          'Missing from code: ' + inDocNotCode.join(', '),
         );
       }
       if (inCodeNotDoc.length > 0) {
         fail(
           'auth.ts platform_role enum has values not documented in ACCESS-CONTROL-MATRIX.md',
-          'Undocumented roles: ' + inCodeNotDoc.join(', ')
+          'Undocumented roles: ' + inCodeNotDoc.join(', '),
         );
       }
       if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
@@ -211,20 +211,27 @@ if (!authSchema) {
     })();
 
     if (!rolesIncludeLine) {
-      fail('Could not find "Roles include:" sentence in Extended Roles Table section of ACCESS-CONTROL-MATRIX.md');
+      fail(
+        'Could not find "Roles include:" sentence in Extended Roles Table section of ACCESS-CONTROL-MATRIX.md',
+      );
     }
 
     // Extract only the portion of the line that comes AFTER "Roles include:" so that
     // table/schema names mentioned earlier in the same sentence are not captured.
     const docRoles = rolesIncludeLine
       ? (() => {
-          const afterMarker = rolesIncludeLine.slice(rolesIncludeLine.indexOf('Roles include:') + 'Roles include:'.length);
+          const afterMarker = rolesIncludeLine.slice(
+            rolesIncludeLine.indexOf('Roles include:') + 'Roles include:'.length,
+          );
           return (afterMarker.match(/`([a-z][a-z0-9_]+)`/g) || []).map((s) => s.replace(/`/g, ''));
         })()
       : [];
 
     if (docRoles.length === 0) {
-      fail('Could not extract role names from "Extended Roles Table" section', 'no backtick-quoted role identifiers found in the "Roles include:" sentence');
+      fail(
+        'Could not extract role names from "Extended Roles Table" section',
+        'no backtick-quoted role identifiers found in the "Roles include:" sentence',
+      );
     } else {
       const inDocNotCode = docRoles.filter((r) => !liveRoles.includes(r));
       const inCodeNotDoc = liveRoles.filter((r) => !docRoles.includes(r));
@@ -232,13 +239,13 @@ if (!authSchema) {
       if (inDocNotCode.length > 0) {
         fail(
           'ACCESS-CONTROL-MATRIX.md Extended Roles Table lists roles absent from auth.ts',
-          'Missing from code: ' + inDocNotCode.join(', ')
+          'Missing from code: ' + inDocNotCode.join(', '),
         );
       }
       if (inCodeNotDoc.length > 0) {
         fail(
           'auth.ts rolesTable has values not listed in ACCESS-CONTROL-MATRIX.md Extended Roles Table',
-          'Undocumented: ' + inCodeNotDoc.join(', ')
+          'Undocumented: ' + inCodeNotDoc.join(', '),
         );
       }
       if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
@@ -279,7 +286,7 @@ if (!csrfMiddleware) {
     } else {
       fail(
         'Documented CSRF-exempt path not found in csrf.ts EXEMPT_PATHS',
-        exemptPath + ' — API-SPEC.md claims this path is CSRF-exempt but it is not in the source'
+        exemptPath + ' — API-SPEC.md claims this path is CSRF-exempt but it is not in the source',
       );
     }
   }
@@ -315,7 +322,7 @@ if (!csrfMiddleware) {
     } else {
       fail(
         'Documented CSRF prefix exemption not found in csrf.ts isExempt()',
-        desc + ' — pattern not found in source'
+        desc + ' — pattern not found in source',
       );
     }
   }
@@ -350,7 +357,8 @@ if (!routesIndex) {
     } else {
       fail(
         'Documented route group not found in routes/index.ts',
-        desc + ' — expected pattern not present; update API-SPEC.md if the route was intentionally removed'
+        desc +
+          ' — expected pattern not present; update API-SPEC.md if the route was intentionally removed',
       );
     }
   }
@@ -382,7 +390,7 @@ for (const relPath of SECURITY_REFERENCED_FILES) {
   } else {
     fail(
       'File referenced in SECURITY-CHECKLIST.md no longer exists',
-      relPath + ' — update SECURITY-CHECKLIST.md evidence column if the file was moved or renamed'
+      relPath + ' — update SECURITY-CHECKLIST.md evidence column if the file was moved or renamed',
     );
   }
 }
@@ -395,10 +403,10 @@ section('DB table references — docs-cited table names exist in lib/db/src/sche
 
 // Map: table name → which doc cited it.
 const DOCUMENTED_TABLES = {
-  sessions:             'ACCESS-CONTROL-MATRIX.md (session management)',
-  users:                'ACCESS-CONTROL-MATRIX.md / SECURITY-CHECKLIST.md',
-  roles:                'ACCESS-CONTROL-MATRIX.md (roles-table section)',
-  user_roles:           'ACCESS-CONTROL-MATRIX.md (user_roles join)',
+  sessions: 'ACCESS-CONTROL-MATRIX.md (session management)',
+  users: 'ACCESS-CONTROL-MATRIX.md / SECURITY-CHECKLIST.md',
+  roles: 'ACCESS-CONTROL-MATRIX.md (roles-table section)',
+  user_roles: 'ACCESS-CONTROL-MATRIX.md (user_roles join)',
   rag_knowledge_chunks: 'SECURITY-CHECKLIST.md (T6 — tenant isolation migration)',
 };
 
@@ -440,7 +448,7 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
   } else {
     fail(
       'Documented table not found in lib/db/src/schema/',
-      '"' + tableName + '" — cited by ' + citation + '. Update docs if table was renamed/removed.'
+      '"' + tableName + '" — cited by ' + citation + '. Update docs if table was renamed/removed.',
     );
   }
 }
@@ -452,10 +460,12 @@ console.log('  Result: ' + passes + ' check(s) passed, ' + failures + ' failure(
 
 if (failures > 0) {
   console.error(
-    '\n  \u274c ' + failures + ' documented claim(s) no longer match the codebase.\n' +
-    '  Update the relevant docs (API-SPEC.md, ACCESS-CONTROL-MATRIX.md,\n' +
-    '  SECURITY-CHECKLIST.md) to reflect the current implementation, or\n' +
-    '  revert the code change that caused the divergence.\n'
+    '\n  \u274c ' +
+      failures +
+      ' documented claim(s) no longer match the codebase.\n' +
+      '  Update the relevant docs (API-SPEC.md, ACCESS-CONTROL-MATRIX.md,\n' +
+      '  SECURITY-CHECKLIST.md) to reflect the current implementation, or\n' +
+      '  revert the code change that caused the divergence.\n',
   );
 } else {
   console.log('\n  \u2713 All documented claims are consistent with the codebase.\n');
@@ -468,9 +478,11 @@ if (GH_SUMMARY) {
   if (failures > 0) {
     addSummary('');
     addSummary(
-      '> **' + failures + ' documented claim(s) no longer match the codebase.**\n' +
-      '> Update API-SPEC.md, ACCESS-CONTROL-MATRIX.md, or SECURITY-CHECKLIST.md\n' +
-      '> to match the current implementation, or revert the offending code change.'
+      '> **' +
+        failures +
+        ' documented claim(s) no longer match the codebase.**\n' +
+        '> Update API-SPEC.md, ACCESS-CONTROL-MATRIX.md, or SECURITY-CHECKLIST.md\n' +
+        '> to match the current implementation, or revert the offending code change.',
     );
   }
   try {

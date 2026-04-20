@@ -1,7 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
-import { Webhook, Plus, Trash2, ChevronDown, AlertCircle, CheckCircle2, XCircle, Clock } from "lucide-react";
-import { apiFetch, isAuthenticated } from "../../lib/admin-api";
-import AuthGate from "@szl-holdings/shared-ui/AuthGate";
+import AuthGate from '@szl-holdings/shared-ui/AuthGate';
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  Plus,
+  Trash2,
+  Webhook,
+  XCircle,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { apiFetch, isAuthenticated } from '../../lib/admin-api';
 
 interface WebhookData {
   id: number;
@@ -32,35 +41,35 @@ const STATUS_ICONS: Record<string, typeof CheckCircle2> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  delivered: "text-success",
-  failed: "text-error",
-  pending: "text-warning",
-  retrying: "text-warning",
+  delivered: 'text-success',
+  failed: 'text-error',
+  pending: 'text-warning',
+  retrying: 'text-warning',
 };
 
 export default function Webhooks() {
   const [webhooks, setWebhooks] = useState<WebhookData[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [newUrl, setNewUrl] = useState("");
+  const [newUrl, setNewUrl] = useState('');
   const [newEvents, setNewEvents] = useState<string[]>([]);
-  const [newDesc, setNewDesc] = useState("");
+  const [newDesc, setNewDesc] = useState('');
   const [availableEvents, setAvailableEvents] = useState<Record<string, string[]>>({});
   const [expandedWebhook, setExpandedWebhook] = useState<number | null>(null);
   const [deliveries, setDeliveries] = useState<DeliveryData[]>([]);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const loadWebhooks = useCallback(async () => {
     setLoading(true);
     try {
       const [webhookData, eventData] = await Promise.all([
-        apiFetch<{ webhooks: WebhookData[] }>("/developer/webhooks"),
-        apiFetch<{ byDomain: Record<string, string[]> }>("/developer/webhook-events"),
+        apiFetch<{ webhooks: WebhookData[] }>('/developer/webhooks'),
+        apiFetch<{ byDomain: Record<string, string[]> }>('/developer/webhook-events'),
       ]);
       setWebhooks(webhookData.webhooks);
       setAvailableEvents(eventData.byDomain);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load webhooks");
+      setError(err instanceof Error ? err.message : 'Failed to load webhooks');
     }
     setLoading(false);
   }, []);
@@ -70,40 +79,40 @@ export default function Webhooks() {
   }, [loadWebhooks]);
 
   const createWebhook = async () => {
-    setError("");
+    setError('');
     try {
-      await apiFetch("/developer/webhooks", {
-        method: "POST",
+      await apiFetch('/developer/webhooks', {
+        method: 'POST',
         body: JSON.stringify({ url: newUrl, events: newEvents, description: newDesc || undefined }),
       });
       setShowCreate(false);
-      setNewUrl("");
+      setNewUrl('');
       setNewEvents([]);
-      setNewDesc("");
+      setNewDesc('');
       loadWebhooks();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create webhook");
+      setError(err instanceof Error ? err.message : 'Failed to create webhook');
     }
   };
 
   const deleteWebhook = async (id: number) => {
     try {
-      await apiFetch(`/developer/webhooks/${id}`, { method: "DELETE" });
+      await apiFetch(`/developer/webhooks/${id}`, { method: 'DELETE' });
       loadWebhooks();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete webhook");
+      setError(err instanceof Error ? err.message : 'Failed to delete webhook');
     }
   };
 
   const toggleWebhook = async (id: number, active: boolean) => {
     try {
       await apiFetch(`/developer/webhooks/${id}`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: JSON.stringify({ active: !active }),
       });
       loadWebhooks();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update webhook");
+      setError(err instanceof Error ? err.message : 'Failed to update webhook');
     }
   };
 
@@ -113,7 +122,9 @@ export default function Webhooks() {
       return;
     }
     try {
-      const data = await apiFetch<{ deliveries: DeliveryData[] }>(`/developer/webhooks/${webhookId}/deliveries`);
+      const data = await apiFetch<{ deliveries: DeliveryData[] }>(
+        `/developer/webhooks/${webhookId}/deliveries`,
+      );
       setDeliveries(data.deliveries);
       setExpandedWebhook(webhookId);
     } catch {
@@ -123,11 +134,19 @@ export default function Webhooks() {
   };
 
   const toggleEvent = (event: string) => {
-    setNewEvents((prev) => prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event]);
+    setNewEvents((prev) =>
+      prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event],
+    );
   };
 
   if (!isAuthenticated()) {
-    return <AuthGate title="Webhook Management" description="Sign in to register and manage webhook endpoints." onAuth={loadWebhooks} />;
+    return (
+      <AuthGate
+        title="Webhook Management"
+        description="Sign in to register and manage webhook endpoints."
+        onAuth={loadWebhooks}
+      />
+    );
   }
 
   return (
@@ -135,7 +154,9 @@ export default function Webhooks() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Webhooks</h1>
-          <p className="text-text-secondary">Receive real-time event notifications when things happen across the platform.</p>
+          <p className="text-text-secondary">
+            Receive real-time event notifications when things happen across the platform.
+          </p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
@@ -187,8 +208,8 @@ export default function Webhooks() {
                         onClick={() => toggleEvent(event)}
                         className={`px-2 py-1 rounded text-xs font-mono transition-colors ${
                           newEvents.includes(event)
-                            ? "bg-accent/20 text-accent"
-                            : "bg-surface-elevated text-text-muted hover:text-text-secondary"
+                            ? 'bg-accent/20 text-accent'
+                            : 'bg-surface-elevated text-text-muted hover:text-text-secondary'
                         }`}
                       >
                         {event}
@@ -207,7 +228,10 @@ export default function Webhooks() {
             >
               Create Webhook
             </button>
-            <button onClick={() => setShowCreate(false)} className="px-4 py-2 bg-surface-elevated border border-border rounded-lg text-sm text-text-secondary">
+            <button
+              onClick={() => setShowCreate(false)}
+              className="px-4 py-2 bg-surface-elevated border border-border rounded-lg text-sm text-text-secondary"
+            >
               Cancel
             </button>
           </div>
@@ -221,7 +245,9 @@ export default function Webhooks() {
           <div className="text-center py-12 bg-surface rounded-xl border border-border">
             <Webhook className="w-12 h-12 text-text-muted mx-auto mb-3" />
             <p className="text-text-secondary">No webhooks configured</p>
-            <p className="text-sm text-text-muted">Register a webhook to receive real-time event notifications</p>
+            <p className="text-sm text-text-muted">
+              Register a webhook to receive real-time event notifications
+            </p>
           </div>
         ) : (
           webhooks.map((wh) => (
@@ -231,16 +257,29 @@ export default function Webhooks() {
                   <div className="flex items-center gap-2 mb-1">
                     <Webhook className="w-4 h-4 text-accent" />
                     <code className="text-sm font-mono truncate">{wh.url}</code>
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${wh.active ? "bg-success/15 text-success" : "bg-text-muted/15 text-text-muted"}`}>
-                      {wh.active ? "Active" : "Paused"}
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${wh.active ? 'bg-success/15 text-success' : 'bg-text-muted/15 text-text-muted'}`}
+                    >
+                      {wh.active ? 'Active' : 'Paused'}
                     </span>
                   </div>
-                  {wh.description && <p className="text-xs text-text-muted mb-1">{wh.description}</p>}
+                  {wh.description && (
+                    <p className="text-xs text-text-muted mb-1">{wh.description}</p>
+                  )}
                   <div className="flex flex-wrap gap-1">
                     {wh.events.slice(0, 3).map((e) => (
-                      <span key={e} className="px-1.5 py-0.5 bg-surface-elevated rounded text-[10px] font-mono text-text-muted">{e}</span>
+                      <span
+                        key={e}
+                        className="px-1.5 py-0.5 bg-surface-elevated rounded text-[10px] font-mono text-text-muted"
+                      >
+                        {e}
+                      </span>
                     ))}
-                    {wh.events.length > 3 && <span className="text-[10px] text-text-muted">+{wh.events.length - 3} more</span>}
+                    {wh.events.length > 3 && (
+                      <span className="text-[10px] text-text-muted">
+                        +{wh.events.length - 3} more
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -249,14 +288,16 @@ export default function Webhooks() {
                     className="p-2 text-text-muted hover:text-text-primary transition-colors"
                     title="View deliveries"
                   >
-                    <ChevronDown className={`w-4 h-4 transition-transform ${expandedWebhook === wh.id ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${expandedWebhook === wh.id ? 'rotate-180' : ''}`}
+                    />
                   </button>
                   <button
                     onClick={() => toggleWebhook(wh.id, wh.active)}
-                    className={`p-2 transition-colors ${wh.active ? "text-success hover:text-warning" : "text-text-muted hover:text-success"}`}
-                    title={wh.active ? "Pause" : "Activate"}
+                    className={`p-2 transition-colors ${wh.active ? 'text-success hover:text-warning' : 'text-text-muted hover:text-success'}`}
+                    title={wh.active ? 'Pause' : 'Activate'}
                   >
-                    {wh.active ? "⏸" : "▶"}
+                    {wh.active ? '⏸' : '▶'}
                   </button>
                   <button
                     onClick={() => deleteWebhook(wh.id)}
@@ -278,11 +319,17 @@ export default function Webhooks() {
                         const StatusIcon = STATUS_ICONS[d.status] || Clock;
                         return (
                           <div key={d.id} className="flex items-center gap-3 py-1.5 text-xs">
-                            <StatusIcon className={`w-3 h-3 ${STATUS_COLORS[d.status] || "text-text-muted"}`} />
+                            <StatusIcon
+                              className={`w-3 h-3 ${STATUS_COLORS[d.status] || 'text-text-muted'}`}
+                            />
                             <code className="text-text-secondary font-mono">{d.event}</code>
                             <span className="text-text-muted">{d.status}</span>
-                            {d.httpStatus && <span className="text-text-muted">HTTP {d.httpStatus}</span>}
-                            <span className="text-text-muted ml-auto">{new Date(d.createdAt).toLocaleString()}</span>
+                            {d.httpStatus && (
+                              <span className="text-text-muted">HTTP {d.httpStatus}</span>
+                            )}
+                            <span className="text-text-muted ml-auto">
+                              {new Date(d.createdAt).toLocaleString()}
+                            </span>
                           </div>
                         );
                       })}
@@ -297,8 +344,12 @@ export default function Webhooks() {
 
       <div className="bg-surface rounded-xl border border-border p-6">
         <h3 className="font-semibold mb-3">Webhook Signature Verification</h3>
-        <p className="text-sm text-text-secondary mb-4">Each webhook delivery includes an <code className="text-accent">X-Webhook-Signature</code> header — an HMAC-SHA256 hex digest of the request body using your webhook secret.</p>
-        <pre><code>{`import crypto from "crypto";
+        <p className="text-sm text-text-secondary mb-4">
+          Each webhook delivery includes an <code className="text-accent">X-Webhook-Signature</code>{' '}
+          header — an HMAC-SHA256 hex digest of the request body using your webhook secret.
+        </p>
+        <pre>
+          <code>{`import crypto from "crypto";
 
 function verifyWebhook(body: string, signature: string, secret: string): boolean {
   const expected = crypto
@@ -309,7 +360,8 @@ function verifyWebhook(body: string, signature: string, secret: string): boolean
     Buffer.from(signature),
     Buffer.from(expected)
   );
-}`}</code></pre>
+}`}</code>
+        </pre>
       </div>
     </div>
   );

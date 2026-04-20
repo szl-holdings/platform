@@ -1,5 +1,14 @@
-import { useState, useEffect } from "react";
-import { CreditCard, Package, ArrowUpRight, Loader2, CheckCircle, AlertTriangle, ExternalLink, ShoppingCart } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle,
+  CreditCard,
+  ExternalLink,
+  Loader2,
+  Package,
+  ShoppingCart,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface StripeProduct {
   id: string;
@@ -16,7 +25,7 @@ interface StripeProduct {
 
 interface StripeConfig {
   stripeConnected: boolean;
-  stripeMode: "live" | "test" | "mock";
+  stripeMode: 'live' | 'test' | 'mock';
   webhookSecretConfigured: boolean;
   priceIdsConfigured: number;
   priceIdsTotal: number;
@@ -24,7 +33,7 @@ interface StripeConfig {
 }
 
 function formatPrice(amount: number, currency: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount / 100);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount / 100);
 }
 
 export default function Commerce() {
@@ -37,8 +46,8 @@ export default function Commerce() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/billing/products").then((r) => r.json()),
-      fetch("/api/billing/stripe-config").then((r) => r.json()),
+      fetch('/api/billing/products').then((r) => r.json()),
+      fetch('/api/billing/stripe-config').then((r) => r.json()),
     ])
       .then(([productsData, configData]) => {
         if (Array.isArray(productsData)) {
@@ -58,13 +67,13 @@ export default function Commerce() {
     setCheckoutLoading(priceId);
     setCheckoutError(null);
     try {
-      const successUrl = window.location.origin + window.location.pathname + "?checkout=success";
-      const cancelUrl = window.location.origin + window.location.pathname + "?checkout=cancel";
-      const mode = interval ? "subscription" : "payment";
+      const successUrl = window.location.origin + window.location.pathname + '?checkout=success';
+      const cancelUrl = window.location.origin + window.location.pathname + '?checkout=cancel';
+      const mode = interval ? 'subscription' : 'payment';
 
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           priceId,
           mode,
@@ -75,14 +84,16 @@ export default function Commerce() {
 
       const data = await res.json();
       if (data?.data?.url) {
-        window.open(data.data.url, "_blank");
+        window.open(data.data.url, '_blank');
       } else if (data?.url) {
-        window.open(data.url, "_blank");
+        window.open(data.url, '_blank');
       } else {
-        setCheckoutError(`Checkout failed for ${productName}: ${data?.error || "No checkout URL returned"}`);
+        setCheckoutError(
+          `Checkout failed for ${productName}: ${data?.error || 'No checkout URL returned'}`,
+        );
       }
     } catch (err) {
-      setCheckoutError(`Checkout failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+      setCheckoutError(`Checkout failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setCheckoutLoading(null);
     }
@@ -97,18 +108,20 @@ export default function Commerce() {
   }
 
   const modeColor =
-    config?.stripeMode === "live"
-      ? "text-[#6b8f71] border-[#6b8f71]/30 bg-[#6b8f71]/10"
-      : config?.stripeMode === "test"
-        ? "text-[#d4a054] border-[#d4a054]/30 bg-[#d4a054]/10"
-        : "text-slate-400 border-slate-500/30 bg-slate-500/10";
+    config?.stripeMode === 'live'
+      ? 'text-[#6b8f71] border-[#6b8f71]/30 bg-[#6b8f71]/10'
+      : config?.stripeMode === 'test'
+        ? 'text-[#d4a054] border-[#d4a054]/30 bg-[#d4a054]/10'
+        : 'text-slate-400 border-slate-500/30 bg-slate-500/10';
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h2 className="text-3xl font-display font-bold text-white mb-2">Commerce & Products</h2>
-          <p className="text-slate-400 text-lg">Stripe product catalog and payment status across the SZL portfolio.</p>
+          <p className="text-slate-400 text-lg">
+            Stripe product catalog and payment status across the SZL portfolio.
+          </p>
         </div>
         {config && (
           <span className={`text-xs px-3 py-1.5 rounded-full font-semibold border ${modeColor}`}>
@@ -131,7 +144,7 @@ export default function Commerce() {
         </div>
       )}
 
-      {config && config.stripeMode === "mock" && (
+      {config && config.stripeMode === 'mock' && (
         <div className="rounded-xl border border-[#d4a054]/30 bg-[#d4a054]/5 p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-[#d4a054] shrink-0 mt-0.5" />
@@ -149,7 +162,9 @@ export default function Commerce() {
             <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
               <Package className="w-4 h-4 text-cyan-400" />
             </div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Total Products</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">
+              Total Products
+            </span>
           </div>
           <div className="text-3xl font-bold text-white">{products.length}</div>
         </div>
@@ -159,9 +174,13 @@ export default function Commerce() {
             <div className="w-8 h-8 rounded-lg bg-[#6b8f71]/20 flex items-center justify-center">
               <CheckCircle className="w-4 h-4 text-[#6b8f71]" />
             </div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Active Products</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">
+              Active Products
+            </span>
           </div>
-          <div className="text-3xl font-bold text-white">{products.filter((p) => p.active).length}</div>
+          <div className="text-3xl font-bold text-white">
+            {products.filter((p) => p.active).length}
+          </div>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
@@ -169,9 +188,13 @@ export default function Commerce() {
             <div className="w-8 h-8 rounded-lg bg-[#8b7ac8]/20 flex items-center justify-center">
               <CreditCard className="w-4 h-4 text-[#8b7ac8]" />
             </div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Total Price Points</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">
+              Total Price Points
+            </span>
           </div>
-          <div className="text-3xl font-bold text-white">{products.reduce((sum, p) => sum + p.prices.length, 0)}</div>
+          <div className="text-3xl font-bold text-white">
+            {products.reduce((sum, p) => sum + p.prices.length, 0)}
+          </div>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
@@ -179,10 +202,12 @@ export default function Commerce() {
             <div className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center">
               <ArrowUpRight className="w-4 h-4 text-sky-400" />
             </div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Price IDs Set</span>
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">
+              Price IDs Set
+            </span>
           </div>
           <div className="text-3xl font-bold text-white">
-            {config ? `${config.priceIdsConfigured}/${config.priceIdsTotal}` : "—"}
+            {config ? `${config.priceIdsConfigured}/${config.priceIdsTotal}` : '—'}
           </div>
         </div>
       </div>
@@ -198,9 +223,9 @@ export default function Commerce() {
             <Package className="w-12 h-12 text-slate-600 mb-4" />
             <p className="text-slate-400 text-sm">No products found in Stripe</p>
             <p className="text-slate-500 text-xs mt-1">
-              {config?.stripeMode === "mock"
-                ? "Connect Stripe and create products to see them here"
-                : "Create products in your Stripe dashboard to see them here"}
+              {config?.stripeMode === 'mock'
+                ? 'Connect Stripe and create products to see them here'
+                : 'Create products in your Stripe dashboard to see them here'}
             </p>
           </div>
         ) : (
@@ -211,10 +236,14 @@ export default function Commerce() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h4 className="text-base font-semibold text-white">{product.name}</h4>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        product.active ? "bg-[#6b8f71]/10 text-[#6b8f71] border border-[#6b8f71]/30" : "bg-[#c45a4a]/10 text-[#c45a4a] border border-[#c45a4a]/30"
-                      }`}>
-                        {product.active ? "Active" : "Inactive"}
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          product.active
+                            ? 'bg-[#6b8f71]/10 text-[#6b8f71] border border-[#6b8f71]/30'
+                            : 'bg-[#c45a4a]/10 text-[#c45a4a] border border-[#c45a4a]/30'
+                        }`}
+                      >
+                        {product.active ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                     {product.description && (
@@ -225,9 +254,11 @@ export default function Commerce() {
                         <div key={price.id} className="flex items-center gap-2">
                           <span className="text-sm px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono">
                             {formatPrice(price.amount, price.currency)}
-                            {price.interval && <span className="text-cyan-400/60">/{price.interval}</span>}
+                            {price.interval && (
+                              <span className="text-cyan-400/60">/{price.interval}</span>
+                            )}
                           </span>
-                          {product.active && config?.stripeMode !== "mock" && (
+                          {product.active && config?.stripeMode !== 'mock' && (
                             <button
                               onClick={() => handleCheckout(price.id, product.name, price.interval)}
                               disabled={checkoutLoading === price.id}
@@ -268,21 +299,27 @@ export default function Commerce() {
         <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
           <div className="p-5 border-b border-white/5">
             <h3 className="text-lg font-semibold text-white">Stripe Configuration</h3>
-            <p className="text-sm text-slate-400 mt-1">Price ID configuration status for each product checkout flow</p>
+            <p className="text-sm text-slate-400 mt-1">
+              Price ID configuration status for each product checkout flow
+            </p>
           </div>
           <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-3">
             {config && (
               <>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
                   <span className="text-sm text-slate-300">Stripe Secret Key</span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${config.stripeConnected ? "bg-[#6b8f71]/10 text-[#6b8f71]" : "bg-[#c45a4a]/10 text-[#c45a4a]"}`}>
-                    {config.stripeConnected ? "Configured" : "Missing"}
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${config.stripeConnected ? 'bg-[#6b8f71]/10 text-[#6b8f71]' : 'bg-[#c45a4a]/10 text-[#c45a4a]'}`}
+                  >
+                    {config.stripeConnected ? 'Configured' : 'Missing'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
                   <span className="text-sm text-slate-300">Webhook Secret</span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${config.webhookSecretConfigured ? "bg-[#6b8f71]/10 text-[#6b8f71]" : "bg-[#d4a054]/10 text-[#d4a054]"}`}>
-                    {config.webhookSecretConfigured ? "Configured" : "Missing"}
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${config.webhookSecretConfigured ? 'bg-[#6b8f71]/10 text-[#6b8f71]' : 'bg-[#d4a054]/10 text-[#d4a054]'}`}
+                  >
+                    {config.webhookSecretConfigured ? 'Configured' : 'Missing'}
                   </span>
                 </div>
               </>

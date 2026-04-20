@@ -1,47 +1,64 @@
-import { useQuery } from "@tanstack/react-query";
-import type { DriftItem, PressureCell, DebtItem, ReplayScenario, BoardMetric, BoardRisk } from "./seed";
+import { useQuery } from '@tanstack/react-query';
+import type {
+  BoardMetric,
+  BoardRisk,
+  DebtItem,
+  DriftItem,
+  PressureCell,
+  ReplayScenario,
+} from './seed';
 
 async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(path, { credentials: "include" });
+  const res = await fetch(path, { credentials: 'include' });
   if (!res.ok) throw new Error(`Request failed (${res.status}): ${path}`);
   return res.json() as Promise<T>;
 }
 
-export interface DriftHistoryPoint { date: string; count: number }
-export interface DebtHistoryPoint { date: string; critical: number; high: number; medium: number }
+export interface DriftHistoryPoint {
+  date: string;
+  count: number;
+}
+export interface DebtHistoryPoint {
+  date: string;
+  critical: number;
+  high: number;
+  medium: number;
+}
 
 export function useOwnershipDrift() {
   return useQuery({
-    queryKey: ["lyte", "ownership-drift"],
-    queryFn: () => getJson<{ items: DriftItem[]; history: DriftHistoryPoint[] }>("/api/lyte/ownership-drift"),
+    queryKey: ['lyte', 'ownership-drift'],
+    queryFn: () =>
+      getJson<{ items: DriftItem[]; history: DriftHistoryPoint[] }>('/api/lyte/ownership-drift'),
   });
 }
 
 export function usePressureMap() {
   return useQuery({
-    queryKey: ["lyte", "pressure-map"],
-    queryFn: () => getJson<{ cells: PressureCell[] }>("/api/lyte/pressure-map"),
+    queryKey: ['lyte', 'pressure-map'],
+    queryFn: () => getJson<{ cells: PressureCell[] }>('/api/lyte/pressure-map'),
   });
 }
 
 export function useActionDebt() {
   return useQuery({
-    queryKey: ["lyte", "action-debt"],
-    queryFn: () => getJson<{ items: DebtItem[]; history: DebtHistoryPoint[] }>("/api/lyte/action-debt"),
+    queryKey: ['lyte', 'action-debt'],
+    queryFn: () =>
+      getJson<{ items: DebtItem[]; history: DebtHistoryPoint[] }>('/api/lyte/action-debt'),
   });
 }
 
 export function useDecisionReplay() {
   return useQuery({
-    queryKey: ["lyte", "decision-replay"],
-    queryFn: () => getJson<{ scenarios: ReplayScenario[] }>("/api/lyte/decision-replay"),
+    queryKey: ['lyte', 'decision-replay'],
+    queryFn: () => getJson<{ scenarios: ReplayScenario[] }>('/api/lyte/decision-replay'),
   });
 }
 
 export function useBoardView() {
   return useQuery({
-    queryKey: ["lyte", "board-view"],
-    queryFn: () => getJson<{ metrics: BoardMetric[]; risks: BoardRisk[] }>("/api/lyte/board-view"),
+    queryKey: ['lyte', 'board-view'],
+    queryFn: () => getJson<{ metrics: BoardMetric[]; risks: BoardRisk[] }>('/api/lyte/board-view'),
   });
 }
 
@@ -53,7 +70,7 @@ export interface StepLogEntryDTO {
   runId: string;
   stepId: string;
   stepName: string;
-  level: "debug" | "info" | "warn" | "error";
+  level: 'debug' | 'info' | 'warn' | 'error';
   message: string;
   durationMs?: number;
   data?: Record<string, unknown>;
@@ -62,12 +79,12 @@ export interface StepLogEntryDTO {
 
 export function useAgentRunStepLog(runId: string | undefined, opts?: { intervalMs?: number }) {
   return useQuery({
-    queryKey: ["agents", "step-log", runId ?? ""],
+    queryKey: ['agents', 'step-log', runId ?? ''],
     enabled: Boolean(runId),
     refetchInterval: opts?.intervalMs ?? 4000,
     queryFn: () =>
       getJson<{ runId: string; count: number; entries: StepLogEntryDTO[] }>(
-        `/api/agents/runs/${encodeURIComponent(runId ?? "")}/step-log`,
+        `/api/agents/runs/${encodeURIComponent(runId ?? '')}/step-log`,
       ),
   });
 }
@@ -87,20 +104,24 @@ export interface PendingApprovalDTO {
   surface: string;
   submittedAt: number;
   expiresAt: number;
-  status: "pending" | "approved" | "rejected" | "timed_out" | "escalated";
+  status: 'pending' | 'approved' | 'rejected' | 'timed_out' | 'escalated';
 }
 
-export function usePendingApprovals(filter?: { runId?: string; domain?: string; intervalMs?: number }) {
+export function usePendingApprovals(filter?: {
+  runId?: string;
+  domain?: string;
+  intervalMs?: number;
+}) {
   const params = new URLSearchParams();
-  if (filter?.runId) params.set("runId", filter.runId);
-  if (filter?.domain) params.set("domain", filter.domain);
+  if (filter?.runId) params.set('runId', filter.runId);
+  if (filter?.domain) params.set('domain', filter.domain);
   const qs = params.toString();
   return useQuery({
-    queryKey: ["agents", "approvals", filter?.runId ?? "", filter?.domain ?? ""],
+    queryKey: ['agents', 'approvals', filter?.runId ?? '', filter?.domain ?? ''],
     refetchInterval: filter?.intervalMs ?? 5000,
     queryFn: () =>
       getJson<{ count: number; pending: PendingApprovalDTO[] }>(
-        `/api/agents/approvals/pending${qs ? `?${qs}` : ""}`,
+        `/api/agents/approvals/pending${qs ? `?${qs}` : ''}`,
       ),
   });
 }
@@ -118,10 +139,12 @@ export interface AutoSuiteDTO {
 
 export function useAutoEvalSuites() {
   return useQuery({
-    queryKey: ["agents", "auto-suites"],
+    queryKey: ['agents', 'auto-suites'],
     queryFn: () =>
-      getJson<{ toolSuites: AutoSuiteDTO[]; promptSuites: AutoSuiteDTO[]; totals: { tools: number; prompts: number; cases: number } }>(
-        "/api/agents/evals/auto-suites",
-      ),
+      getJson<{
+        toolSuites: AutoSuiteDTO[];
+        promptSuites: AutoSuiteDTO[];
+        totals: { tools: number; prompts: number; cases: number };
+      }>('/api/agents/evals/auto-suites'),
   });
 }

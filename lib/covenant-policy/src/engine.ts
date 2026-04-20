@@ -1,6 +1,6 @@
-import type { PrismDomain, PrismPermission, PrismRole } from "@szl-holdings/prism-bus";
+import type { PrismDomain, PrismPermission, PrismRole } from '@szl-holdings/prism-bus';
 
-export type CovenantEffect = "allow" | "deny";
+export type CovenantEffect = 'allow' | 'deny';
 
 export type CovenantPermission = PrismPermission;
 export type CovenantRole = PrismRole;
@@ -21,9 +21,9 @@ export interface CovenantPolicy {
 }
 
 export interface CovenantCondition {
-  type: "time_window" | "ip_range" | "domain_match" | "action_class" | "attribute_match";
+  type: 'time_window' | 'ip_range' | 'domain_match' | 'action_class' | 'attribute_match';
   field?: string;
-  operator: "eq" | "neq" | "in" | "nin" | "gt" | "lt" | "contains" | "matches";
+  operator: 'eq' | 'neq' | 'in' | 'nin' | 'gt' | 'lt' | 'contains' | 'matches';
   value: unknown;
 }
 
@@ -64,22 +64,22 @@ export interface CovenantDecision {
 }
 
 const HIGH_RISK_ACTIONS = new Set([
-  "deploy",
-  "delete_tenant",
-  "export_all",
-  "modify_policy",
-  "escalate_privilege",
-  "bypass_sandbox",
-  "force_approve",
-  "purge_data",
-  "external_transfer",
-  "modify_audit_log",
+  'deploy',
+  'delete_tenant',
+  'export_all',
+  'modify_policy',
+  'escalate_privilege',
+  'bypass_sandbox',
+  'force_approve',
+  'purge_data',
+  'external_transfer',
+  'modify_audit_log',
 ]);
 
 export type SimulateHook = (
   request: CovenantRequest,
   decision: CovenantDecision,
-  explanation: string[]
+  explanation: string[],
 ) => void;
 
 export class CovenantPolicyEngine {
@@ -106,20 +106,21 @@ export class CovenantPolicyEngine {
 
     const now = Date.now();
     const applicablePolicies = Array.from(this.policies.values())
-      .filter(p => {
+      .filter((p) => {
         if (p.expiresAt != null && p.expiresAt < now) return false;
-        const roleMatch = p.roles.length === 0 || request.subject.roles.some(r => p.roles.includes(r));
+        const roleMatch =
+          p.roles.length === 0 || request.subject.roles.some((r) => p.roles.includes(r));
         const domainMatch =
           p.domains.length === 0 ||
           !request.resource.domain ||
           p.domains.includes(request.resource.domain) ||
-          p.domains.includes("global" as PrismDomain);
+          p.domains.includes('global' as PrismDomain);
         const permissionMatch = p.permissions.includes(request.action);
         return roleMatch && domainMatch && permissionMatch;
       })
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
-    let effect: CovenantEffect = "deny";
+    let effect: CovenantEffect = 'deny';
     let deniedBy: string | null = null;
     let reason: string | undefined;
     const matchedPolicies: string[] = [];
@@ -129,35 +130,35 @@ export class CovenantPolicyEngine {
 
       matchedPolicies.push(policy.id);
 
-      if (policy.effect === "deny") {
-        effect = "deny";
+      if (policy.effect === 'deny') {
+        effect = 'deny';
         deniedBy = policy.id;
         reason = `Denied by policy: ${policy.name}`;
         break;
       }
 
-      if (policy.effect === "allow") {
-        effect = "allow";
+      if (policy.effect === 'allow') {
+        effect = 'allow';
         reason = `Allowed by policy: ${policy.name}`;
       }
     }
 
     if (matchedPolicies.length === 0) {
-      effect = "deny";
-      reason = "No applicable policy found (default deny)";
+      effect = 'deny';
+      reason = 'No applicable policy found (default deny)';
     }
 
     if (
-      effect === "allow" &&
+      effect === 'allow' &&
       request.context?.actionName &&
       HIGH_RISK_ACTIONS.has(String(request.context.actionName))
     ) {
-      const hasApproverRole = request.subject.roles.some(r =>
-        (["approver", "tenant_admin", "super_admin"] as CovenantRole[]).includes(r)
+      const hasApproverRole = request.subject.roles.some((r) =>
+        (['approver', 'tenant_admin', 'super_admin'] as CovenantRole[]).includes(r),
       );
       if (!hasApproverRole) {
-        effect = "deny";
-        deniedBy = "covenant:high-risk-action-guard";
+        effect = 'deny';
+        deniedBy = 'covenant:high-risk-action-guard';
         reason = `High-risk action '${request.context.actionName}' requires approver or admin role`;
       }
     }
@@ -165,7 +166,7 @@ export class CovenantPolicyEngine {
     const decision: CovenantDecision = {
       requestId,
       effect,
-      allowed: effect === "allow",
+      allowed: effect === 'allow',
       matchedPolicies,
       deniedBy: deniedBy ?? null,
       reason,
@@ -189,19 +190,25 @@ export class CovenantPolicyEngine {
     const explanation: string[] = [];
 
     explanation.push(`COVENANT POLICY ENGINE — Simulation`);
-    explanation.push(`Subject roles: [${request.subject.roles.join(", ")}]`);
-    explanation.push(`Resource: ${request.resource.type}${request.resource.domain ? ` in domain '${request.resource.domain}'` : ""}`);
+    explanation.push(`Subject roles: [${request.subject.roles.join(', ')}]`);
+    explanation.push(
+      `Resource: ${request.resource.type}${request.resource.domain ? ` in domain '${request.resource.domain}'` : ''}`,
+    );
     explanation.push(`Action: ${request.action}`);
     explanation.push(`Effect: ${decision.effect.toUpperCase()}`);
     if (decision.reason) explanation.push(`Reason: ${decision.reason}`);
     if (decision.matchedPolicies.length > 0) {
-      explanation.push(`Matched policies: ${decision.matchedPolicies.join(", ")}`);
+      explanation.push(`Matched policies: ${decision.matchedPolicies.join(', ')}`);
     } else {
-      explanation.push("No policies matched — default deny applied");
+      explanation.push('No policies matched — default deny applied');
     }
 
     for (const hook of this.simulateHooks) {
-      try { hook(request, decision, explanation); } catch { /* non-fatal */ }
+      try {
+        hook(request, decision, explanation);
+      } catch {
+        /* non-fatal */
+      }
     }
 
     return { decision, explanation };
@@ -217,44 +224,45 @@ export class CovenantPolicyEngine {
   private evaluateCondition(condition: CovenantCondition, request: CovenantRequest): boolean {
     try {
       switch (condition.type) {
-        case "time_window": {
+        case 'time_window': {
           const now = new Date();
           const hour = now.getHours();
           const range = condition.value as { start: number; end: number };
-          if (condition.operator === "in") {
+          if (condition.operator === 'in') {
             return hour >= range.start && hour <= range.end;
           }
           return true;
         }
-        case "domain_match": {
-          if (condition.operator === "eq") {
+        case 'domain_match': {
+          if (condition.operator === 'eq') {
             return request.resource.domain === condition.value;
           }
-          if (condition.operator === "in") {
-            return (condition.value as string[]).includes(request.resource.domain ?? "");
+          if (condition.operator === 'in') {
+            return (condition.value as string[]).includes(request.resource.domain ?? '');
           }
           return true;
         }
-        case "action_class": {
-          if (condition.operator === "eq") {
+        case 'action_class': {
+          if (condition.operator === 'eq') {
             return request.resource.actionClass === condition.value;
           }
-          if (condition.operator === "in") {
-            return (condition.value as string[]).includes(request.resource.actionClass ?? "");
+          if (condition.operator === 'in') {
+            return (condition.value as string[]).includes(request.resource.actionClass ?? '');
           }
           return true;
         }
-        case "attribute_match": {
+        case 'attribute_match': {
           const attrs = {
             ...request.subject.attributes,
             ...request.resource.attributes,
             ...request.context,
           };
           const fieldValue = condition.field ? attrs[condition.field] : undefined;
-          if (condition.operator === "eq") return fieldValue === condition.value;
-          if (condition.operator === "neq") return fieldValue !== condition.value;
-          if (condition.operator === "in") return (condition.value as unknown[]).includes(fieldValue);
-          if (condition.operator === "contains" && typeof fieldValue === "string") {
+          if (condition.operator === 'eq') return fieldValue === condition.value;
+          if (condition.operator === 'neq') return fieldValue !== condition.value;
+          if (condition.operator === 'in')
+            return (condition.value as unknown[]).includes(fieldValue);
+          if (condition.operator === 'contains' && typeof fieldValue === 'string') {
             return fieldValue.includes(String(condition.value));
           }
           return true;
@@ -267,14 +275,12 @@ export class CovenantPolicyEngine {
     }
   }
 
-  getDecisionLog(options: {
-    limit?: number;
-    effect?: CovenantEffect;
-    action?: CovenantPermission;
-  } = {}): CovenantDecision[] {
+  getDecisionLog(
+    options: { limit?: number; effect?: CovenantEffect; action?: CovenantPermission } = {},
+  ): CovenantDecision[] {
     let results = this.decisionLog;
-    if (options.effect) results = results.filter(d => d.effect === options.effect);
-    if (options.action) results = results.filter(d => d.action === options.action);
+    if (options.effect) results = results.filter((d) => d.effect === options.effect);
+    if (options.action) results = results.filter((d) => d.action === options.action);
     return results.slice(0, options.limit ?? 100);
   }
 
@@ -296,7 +302,7 @@ export class CovenantPolicyEngine {
 
   getStats() {
     const total = this.decisionLog.length;
-    const allowed = this.decisionLog.filter(d => d.allowed).length;
+    const allowed = this.decisionLog.filter((d) => d.allowed).length;
     const denied = total - allowed;
     return { total, allowed, denied, policyCount: this.policies.size };
   }

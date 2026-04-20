@@ -1,23 +1,23 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { randomUUID } from "crypto";
-import { logger } from "../lib/logger";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { db } from "@szl-holdings/db";
-import { analyticsEventsTable } from "@szl-holdings/db/schema";
-import { eq, and, gte, desc, sql } from "drizzle-orm";
 import type {
   ATLASEvent,
-  KPIIngestionRecord,
-  DomainTransactionRecord,
   BatchIngestionResult,
-} from "@szl-holdings/business-events";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  DomainTransactionRecord,
+  KPIIngestionRecord,
+} from '@szl-holdings/business-events';
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db } from '@szl-holdings/db';
+import { analyticsEventsTable } from '@szl-holdings/db/schema';
+import { randomUUID } from 'crypto';
+import { and, desc, eq, gte, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-const SOURCE_APP = "business-events";
+const SOURCE_APP = 'business-events';
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 
 function atlasEventToRow(event: ATLASEvent) {
@@ -39,11 +39,11 @@ function rowToAtlasEvent(row: typeof analyticsEventsTable.$inferSelect): ATLASEv
   const props = (row.properties ?? {}) as Record<string, unknown>;
   return {
     eventId: row.eventId,
-    eventClass: row.eventName as ATLASEvent["eventClass"],
+    eventClass: row.eventName as ATLASEvent['eventClass'],
     domain: row.domain,
     tenantId: row.tenantId ?? undefined,
     timestamp: row.occurredAt.getTime(),
-    schemaVersion: (props.schemaVersion as string | undefined) ?? "1.0",
+    schemaVersion: (props.schemaVersion as string | undefined) ?? '1.0',
     ...props,
   } as ATLASEvent;
 }
@@ -57,7 +57,7 @@ function kpiToAtlasEvent(record: KPIIngestionRecord): ATLASEvent {
     correlationId: record.correlationId,
     entityIds: record.entityIds,
     timestamp: record.timestamp ?? Date.now(),
-    schemaVersion: "1.0" as const,
+    schemaVersion: '1.0' as const,
     metadata: {
       kpiName: record.kpiName,
       value: record.value,
@@ -66,37 +66,37 @@ function kpiToAtlasEvent(record: KPIIngestionRecord): ATLASEvent {
     },
   };
 
-  if (name.includes("risk") || name.includes("threat") || name.includes("violation")) {
+  if (name.includes('risk') || name.includes('threat') || name.includes('violation')) {
     return {
       ...base,
-      eventClass: "business.risk.detected",
+      eventClass: 'business.risk.detected',
       riskType: record.kpiName,
       riskScore: Math.min(100, Math.max(0, record.value)),
     };
   }
 
-  if (name.includes("opportunity") || name.includes("lead") || name.includes("pipeline")) {
+  if (name.includes('opportunity') || name.includes('lead') || name.includes('pipeline')) {
     return {
       ...base,
-      eventClass: "business.opportunity.created",
+      eventClass: 'business.opportunity.created',
       opportunityType: record.kpiName,
       opportunityId: base.eventId,
       estimatedValue: {
         amount: record.value,
-        currency: record.unit ?? "USD",
-        type: "estimated",
+        currency: record.unit ?? 'USD',
+        type: 'estimated',
       },
     };
   }
 
   return {
     ...base,
-    eventClass: "outcome.realized",
+    eventClass: 'outcome.realized',
     outcomeType: record.kpiName,
     measuredValue: {
       amount: record.value,
-      currency: record.unit ?? "USD",
-      type: "created",
+      currency: record.unit ?? 'USD',
+      type: 'created',
     },
   };
 }
@@ -109,31 +109,32 @@ function domainTxToAtlasEvent(record: DomainTransactionRecord): ATLASEvent {
     correlationId: record.correlationId,
     workflowId: record.workflowId,
     timestamp: Date.now(),
-    schemaVersion: "1.0" as const,
+    schemaVersion: '1.0' as const,
     metadata: record.metadata,
   };
 
   if (record.success) {
     return {
       ...base,
-      eventClass: "business.transaction.completed",
+      eventClass: 'business.transaction.completed',
       transactionType: record.transactionType,
       transactionId: record.transactionId,
       durationMs: record.durationMs,
-      outcome: "success",
-      businessValue: record.businessValueAmount != null
-        ? {
-            amount: record.businessValueAmount,
-            currency: record.businessValueCurrency ?? "USD",
-            type: "created",
-          }
-        : undefined,
+      outcome: 'success',
+      businessValue:
+        record.businessValueAmount != null
+          ? {
+              amount: record.businessValueAmount,
+              currency: record.businessValueCurrency ?? 'USD',
+              type: 'created',
+            }
+          : undefined,
     };
   }
 
   return {
     ...base,
-    eventClass: "business.transaction.failed",
+    eventClass: 'business.transaction.failed',
     transactionType: record.transactionType,
     transactionId: record.transactionId,
     durationMs: record.durationMs,
@@ -143,11 +144,13 @@ function domainTxToAtlasEvent(record: DomainTransactionRecord): ATLASEvent {
 }
 
 router.post(
-  "/business-events/kpi",
+  '/business-events/kpi',
   authMiddleware({ required: false }),
-  validateBody(bodyShape({
-      "records": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      records: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
       const body = req.body as {
@@ -155,7 +158,7 @@ router.post(
       };
 
       if (!Array.isArray(body.records) || body.records.length === 0) {
-        res.status(400).json({ error: "records[] is required" });
+        res.status(400).json({ error: 'records[] is required' });
         return;
       }
 
@@ -169,7 +172,7 @@ router.post(
       for (const record of body.records.slice(0, 200)) {
         try {
           if (!record.domain || !record.kpiName) {
-            throw new Error("domain and kpiName required");
+            throw new Error('domain and kpiName required');
           }
           const event = kpiToAtlasEvent(record);
           await db.insert(analyticsEventsTable).values(atlasEventToRow(event));
@@ -182,18 +185,20 @@ router.post(
 
       res.status(202).json({ ok: true, result });
     } catch (err) {
-      logger.error({ err }, "[business-events] kpi ingest error");
-      res.status(500).json({ error: "ingest failed" });
+      logger.error({ err }, '[business-events] kpi ingest error');
+      res.status(500).json({ error: 'ingest failed' });
     }
   },
 );
 
 router.post(
-  "/business-events/transactions",
+  '/business-events/transactions',
   authMiddleware({ required: false }),
-  validateBody(bodyShape({
-      "transactions": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      transactions: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
       const body = req.body as {
@@ -201,7 +206,7 @@ router.post(
       };
 
       if (!Array.isArray(body.transactions) || body.transactions.length === 0) {
-        res.status(400).json({ error: "transactions[] is required" });
+        res.status(400).json({ error: 'transactions[] is required' });
         return;
       }
 
@@ -211,7 +216,7 @@ router.post(
       for (const tx of body.transactions.slice(0, 100)) {
         try {
           if (!tx.domain || !tx.transactionType) {
-            throw new Error("domain and transactionType required");
+            throw new Error('domain and transactionType required');
           }
           const event = domainTxToAtlasEvent(tx);
           await db.insert(analyticsEventsTable).values(atlasEventToRow(event));
@@ -226,27 +231,29 @@ router.post(
         result: { total: body.transactions.length, succeeded, failed: errors.length, errors },
       });
     } catch (err) {
-      logger.error({ err }, "[business-events] transaction ingest error");
-      res.status(500).json({ error: "ingest failed" });
+      logger.error({ err }, '[business-events] transaction ingest error');
+      res.status(500).json({ error: 'ingest failed' });
     }
   },
 );
 
 router.post(
-  "/business-events/emit",
+  '/business-events/emit',
   authMiddleware({ required: true }),
-  validateBody(bodyShape({
-      "domain": z.unknown().optional(),
-      "eventClass": z.unknown().optional(),
-      "eventId": z.unknown().optional(),
-      "timestamp": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      domain: z.unknown().optional(),
+      eventClass: z.unknown().optional(),
+      eventId: z.unknown().optional(),
+      timestamp: z.unknown().optional(),
+    }),
+  ),
   async (req, res) => {
     try {
       const event = req.body as Partial<ATLASEvent>;
 
       if (!event.eventClass || !event.domain) {
-        res.status(400).json({ error: "eventClass and domain are required" });
+        res.status(400).json({ error: 'eventClass and domain are required' });
         return;
       }
 
@@ -254,22 +261,22 @@ router.post(
         ...event,
         eventId: event.eventId ?? randomUUID(),
         timestamp: event.timestamp ?? Date.now(),
-        schemaVersion: "1.0",
+        schemaVersion: '1.0',
       } as ATLASEvent;
 
       await db.insert(analyticsEventsTable).values(atlasEventToRow(complete));
       res.status(201).json({ ok: true, eventId: complete.eventId });
     } catch (err) {
-      logger.error({ err }, "[business-events] emit error");
-      res.status(500).json({ error: "emit failed" });
+      logger.error({ err }, '[business-events] emit error');
+      res.status(500).json({ error: 'emit failed' });
     }
   },
 );
 
 router.get(
-  "/business-events/summary",
+  '/business-events/summary',
   authMiddleware(),
-  requireRole("ops", "admin", "viewer"),
+  requireRole('ops', 'admin', 'viewer'),
   async (_req, res) => {
     try {
       const cutoff = new Date(Date.now() - WINDOW_MS);
@@ -329,7 +336,7 @@ router.get(
       const totalEvents = Object.values(byEventClass).reduce((s, v) => s + v, 0);
       const recentEvents = recentRows.map(rowToAtlasEvent);
 
-      res.setHeader("Cache-Control", "no-store");
+      res.setHeader('Cache-Control', 'no-store');
       res.json({
         timestamp: new Date().toISOString(),
         windowHours: 24,
@@ -339,16 +346,16 @@ router.get(
         recentEvents,
       });
     } catch (err) {
-      logger.error({ err }, "[business-events] summary error");
-      res.status(500).json({ error: "summary failed" });
+      logger.error({ err }, '[business-events] summary error');
+      res.status(500).json({ error: 'summary failed' });
     }
   },
 );
 
 router.get(
-  "/business-events/events",
+  '/business-events/events',
   authMiddleware(),
-  requireRole("ops", "admin"),
+  requireRole('ops', 'admin'),
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
@@ -368,11 +375,11 @@ router.get(
         .limit(limit);
 
       const events = rows.map(rowToAtlasEvent);
-      res.setHeader("Cache-Control", "no-store");
+      res.setHeader('Cache-Control', 'no-store');
       res.json({ events, count: events.length });
     } catch (err) {
-      logger.error({ err }, "[business-events] events list error");
-      res.status(500).json({ error: "list failed" });
+      logger.error({ err }, '[business-events] events list error');
+      res.status(500).json({ error: 'list failed' });
     }
   },
 );

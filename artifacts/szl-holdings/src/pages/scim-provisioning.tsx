@@ -1,20 +1,39 @@
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
-import { m } from "framer-motion";
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { m } from 'framer-motion';
 import {
-  Users, Shield, Key, RefreshCw, CheckCircle2, AlertCircle, Clock,
-  Copy, Check, Plus, Trash2, Activity, ChevronRight, ChevronDown,
-  Eye, EyeOff, Loader2, ArrowLeft, X, UserCheck, UserX, Database,
-} from "lucide-react";
-import { Link } from "wouter";
-import { cn } from "@/lib/utils";
+  Activity,
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Copy,
+  Database,
+  Eye,
+  EyeOff,
+  Key,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Shield,
+  Trash2,
+  UserCheck,
+  Users,
+  UserX,
+  X,
+} from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'wouter';
+import { cn } from '@/lib/utils';
 
-const API = "/api";
+const API = '/api';
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
-    headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
     ...opts,
   });
   if (!res.ok) {
@@ -96,39 +115,48 @@ interface TokensResponse {
 
 function StatusBadge({ active }: { active: boolean }) {
   return (
-    <span className={cn(
-      "text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider",
-      active
-        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-        : "bg-red-500/10 text-red-500 border-red-500/20"
-    )}>
-      {active ? "Active" : "Inactive"}
+    <span
+      className={cn(
+        'text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider',
+        active
+          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+          : 'bg-red-500/10 text-red-500 border-red-500/20',
+      )}
+    >
+      {active ? 'Active' : 'Inactive'}
     </span>
   );
 }
 
 function TenantStatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    active: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-    pending: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    suspended: "bg-red-500/10 text-red-500 border-red-500/20",
+    active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+    pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+    suspended: 'bg-red-500/10 text-red-500 border-red-500/20',
   };
   return (
-    <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider", map[status] ?? "bg-muted text-muted-foreground border-border")}>
+    <span
+      className={cn(
+        'text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider',
+        map[status] ?? 'bg-muted text-muted-foreground border-border',
+      )}
+    >
       {status}
     </span>
   );
 }
 
 function OperationBadge({ op, status }: { op: string; status: string }) {
-  const isError = status === "error";
+  const isError = status === 'error';
   return (
-    <span className={cn(
-      "text-[10px] font-mono px-2 py-0.5 rounded border",
-      isError
-        ? "bg-red-500/10 text-red-500 border-red-500/20"
-        : "bg-blue-500/10 text-blue-500 border-blue-500/20"
-    )}>
+    <span
+      className={cn(
+        'text-[10px] font-mono px-2 py-0.5 rounded border',
+        isError
+          ? 'bg-red-500/10 text-red-500 border-red-500/20'
+          : 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+      )}
+    >
       {op}
     </span>
   );
@@ -137,7 +165,7 @@ function OperationBadge({ op, status }: { op: string; status: string }) {
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
+  if (minutes < 1) return 'just now';
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
@@ -153,14 +181,15 @@ function CreateTokenModal({
   onClose: () => void;
   onCreated: (token: { rawToken: string; label: string; prefix: string }) => void;
 }) {
-  const [label, setLabel] = useState("default");
-  const [expiry, setExpiry] = useState("");
+  const [label, setLabel] = useState('default');
+  const [expiry, setExpiry] = useState('');
 
   const mutation = useStandardMutation({
-    mutationFn: () => apiFetch(`/admin/tenants/${tenantId}/scim/tokens`, {
-      method: "POST",
-      body: JSON.stringify({ label, expiresInDays: expiry ? parseInt(expiry, 10) : undefined }),
-    }),
+    mutationFn: () =>
+      apiFetch(`/admin/tenants/${tenantId}/scim/tokens`, {
+        method: 'POST',
+        body: JSON.stringify({ label, expiresInDays: expiry ? parseInt(expiry, 10) : undefined }),
+      }),
     onSuccess: (data: unknown) => {
       const d = data as { rawToken: string; token: { label: string; tokenPrefix: string } };
       onCreated({ rawToken: d.rawToken, label: d.token.label, prefix: d.token.tokenPrefix });
@@ -177,7 +206,9 @@ function CreateTokenModal({
         <div className="flex items-center justify-between mb-5">
           <div>
             <h3 className="font-semibold text-foreground">Create SCIM Token</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Generate a bearer token for IdP SCIM provisioning</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Generate a bearer token for IdP SCIM provisioning
+            </p>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
             <X className="w-4 h-4" />
@@ -186,7 +217,9 @@ function CreateTokenModal({
 
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-muted-foreground block mb-1.5">Token Label</label>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">
+              Token Label
+            </label>
             <input
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               value={label}
@@ -195,7 +228,9 @@ function CreateTokenModal({
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground block mb-1.5">Expiry (days, optional)</label>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">
+              Expiry (days, optional)
+            </label>
             <input
               type="number"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -230,7 +265,11 @@ function CreateTokenModal({
             disabled={mutation.isPending || !label.trim()}
             className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
           >
-            {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+            {mutation.isPending ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <Plus className="w-3 h-3" />
+            )}
             Create Token
           </button>
         </div>
@@ -275,23 +314,36 @@ function NewTokenDisplay({
         </div>
 
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 mb-4">
-          <p className="text-xs font-semibold text-amber-600 mb-2">Store this token now — it will not be shown again</p>
+          <p className="text-xs font-semibold text-amber-600 mb-2">
+            Store this token now — it will not be shown again
+          </p>
           <div className="flex items-center gap-2">
             <code className="flex-1 text-xs font-mono text-foreground bg-black/20 rounded px-2 py-1.5 overflow-hidden">
-              {visible ? rawToken : rawToken.slice(0, 12) + "•".repeat(40)}
+              {visible ? rawToken : rawToken.slice(0, 12) + '•'.repeat(40)}
             </code>
-            <button onClick={() => setVisible(!visible)} className="text-muted-foreground hover:text-foreground p-1">
+            <button
+              onClick={() => setVisible(!visible)}
+              className="text-muted-foreground hover:text-foreground p-1"
+            >
               {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
             <button onClick={copy} className="text-muted-foreground hover:text-foreground p-1">
-              {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>
 
         <div className="rounded-lg bg-muted p-3 mb-4">
-          <p className="text-xs font-medium text-foreground mb-1">Usage in your IdP configuration:</p>
-          <code className="text-xs font-mono text-muted-foreground">Authorization: Bearer {rawToken.slice(0, 12)}…</code>
+          <p className="text-xs font-medium text-foreground mb-1">
+            Usage in your IdP configuration:
+          </p>
+          <code className="text-xs font-mono text-muted-foreground">
+            Authorization: Bearer {rawToken.slice(0, 12)}…
+          </code>
         </div>
 
         <button
@@ -308,28 +360,33 @@ function NewTokenDisplay({
 function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
   const queryClient = useQueryClient();
   const [showCreateToken, setShowCreateToken] = useState(false);
-  const [newToken, setNewToken] = useState<{ rawToken: string; label: string; prefix: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<"users" | "tokens" | "activity">("users");
+  const [newToken, setNewToken] = useState<{
+    rawToken: string;
+    label: string;
+    prefix: string;
+  } | null>(null);
+  const [activeTab, setActiveTab] = useState<'users' | 'tokens' | 'activity'>('users');
 
   const { data: dashboard, isLoading: dashLoading } = useStandardQuery<ScimDashboardData>({
-    queryKey: ["scim-dashboard", tenant.id],
+    queryKey: ['scim-dashboard', tenant.id],
     queryFn: () => apiFetch(`/admin/tenants/${tenant.id}/scim/provisioned-users`),
     refetchInterval: 30000,
   });
 
   const { data: tokensData, isLoading: tokensLoading } = useStandardQuery<TokensResponse>({
-    queryKey: ["scim-tokens", tenant.id],
+    queryKey: ['scim-tokens', tenant.id],
     queryFn: () => apiFetch(`/admin/tenants/${tenant.id}/scim/tokens`),
   });
 
   const syncMutation = useStandardMutation({
-    mutationFn: () => apiFetch(`/admin/tenants/${tenant.id}/scim/sync`, { method: "POST" }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scim-dashboard", tenant.id] }),
+    mutationFn: () => apiFetch(`/admin/tenants/${tenant.id}/scim/sync`, { method: 'POST' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['scim-dashboard', tenant.id] }),
   });
 
   const revokeTokenMutation = useStandardMutation({
-    mutationFn: (tokenId: number) => apiFetch(`/admin/tenants/${tenant.id}/scim/tokens/${tokenId}`, { method: "DELETE" }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scim-tokens", tenant.id] }),
+    mutationFn: (tokenId: number) =>
+      apiFetch(`/admin/tenants/${tenant.id}/scim/tokens/${tokenId}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['scim-tokens', tenant.id] }),
   });
 
   const scim = dashboard?.scim;
@@ -338,24 +395,51 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Provisioned Users", value: scim?.provisionedUsersCount ?? "–", icon: Users, color: "blue" },
-          { label: "Active", value: scim?.activeUsersCount ?? "–", icon: UserCheck, color: "emerald" },
-          { label: "Inactive", value: scim?.inactiveUsersCount ?? "–", icon: UserX, color: "amber" },
-          { label: "Sync Errors", value: scim?.errorCount ?? "–", icon: AlertCircle, color: "red" },
+          {
+            label: 'Provisioned Users',
+            value: scim?.provisionedUsersCount ?? '–',
+            icon: Users,
+            color: 'blue',
+          },
+          {
+            label: 'Active',
+            value: scim?.activeUsersCount ?? '–',
+            icon: UserCheck,
+            color: 'emerald',
+          },
+          {
+            label: 'Inactive',
+            value: scim?.inactiveUsersCount ?? '–',
+            icon: UserX,
+            color: 'amber',
+          },
+          { label: 'Sync Errors', value: scim?.errorCount ?? '–', icon: AlertCircle, color: 'red' },
         ].map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="bg-muted/40 border border-border/50 rounded-xl p-4">
-            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center mb-2",
-              color === "blue" ? "bg-blue-500/10" :
-              color === "emerald" ? "bg-emerald-500/10" :
-              color === "amber" ? "bg-amber-500/10" :
-              "bg-red-500/10"
-            )}>
-              <Icon className={cn("w-3.5 h-3.5",
-                color === "blue" ? "text-blue-500" :
-                color === "emerald" ? "text-emerald-500" :
-                color === "amber" ? "text-amber-500" :
-                "text-red-500"
-              )} />
+            <div
+              className={cn(
+                'w-7 h-7 rounded-lg flex items-center justify-center mb-2',
+                color === 'blue'
+                  ? 'bg-blue-500/10'
+                  : color === 'emerald'
+                    ? 'bg-emerald-500/10'
+                    : color === 'amber'
+                      ? 'bg-amber-500/10'
+                      : 'bg-red-500/10',
+              )}
+            >
+              <Icon
+                className={cn(
+                  'w-3.5 h-3.5',
+                  color === 'blue'
+                    ? 'text-blue-500'
+                    : color === 'emerald'
+                      ? 'text-emerald-500'
+                      : color === 'amber'
+                        ? 'text-amber-500'
+                        : 'text-red-500',
+                )}
+              />
             </div>
             <div className="text-lg font-bold text-foreground">{value}</div>
             <div className="text-xs text-muted-foreground">{label}</div>
@@ -365,16 +449,22 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
 
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-          {(["users", "tokens", "activity"] as const).map((tab) => (
+          {(['users', 'tokens', 'activity'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "px-3 py-1.5 rounded-md text-xs font-medium transition-all capitalize",
-                activeTab === tab ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"
+                'px-3 py-1.5 rounded-md text-xs font-medium transition-all capitalize',
+                activeTab === tab
+                  ? 'bg-background shadow text-foreground'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              {tab === "users" ? "Provisioned Users" : tab === "tokens" ? "SCIM Tokens" : "Sync Activity"}
+              {tab === 'users'
+                ? 'Provisioned Users'
+                : tab === 'tokens'
+                  ? 'SCIM Tokens'
+                  : 'Sync Activity'}
             </button>
           ))}
         </div>
@@ -389,13 +479,13 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
             disabled={syncMutation.isPending}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-xs font-medium transition-colors"
           >
-            <RefreshCw className={cn("w-3 h-3", syncMutation.isPending && "animate-spin")} />
+            <RefreshCw className={cn('w-3 h-3', syncMutation.isPending && 'animate-spin')} />
             Sync Now
           </button>
         </div>
       </div>
 
-      {activeTab === "users" && (
+      {activeTab === 'users' && (
         <div>
           {dashLoading ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -405,18 +495,30 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
             <div className="text-center py-12 text-muted-foreground">
               <Users className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">No users provisioned yet</p>
-              <p className="text-xs mt-1">Configure your IdP to push users via SCIM to this tenant</p>
+              <p className="text-xs mt-1">
+                Configure your IdP to push users via SCIM to this tenant
+              </p>
             </div>
           ) : (
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">User</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">SCIM Username</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Role</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Status</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Last Sync</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      User
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      SCIM Username
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Role
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Last Sync
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -424,19 +526,23 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
                     <tr key={u.id} className="hover:bg-muted/20 transition-colors">
                       <td className="px-4 py-3">
                         <div className="font-medium text-foreground text-xs">{u.displayName}</div>
-                        <div className="text-muted-foreground text-xs">{u.email ?? "—"}</div>
+                        <div className="text-muted-foreground text-xs">{u.email ?? '—'}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <code className="text-xs font-mono text-muted-foreground">{u.scimUserName}</code>
+                        <code className="text-xs font-mono text-muted-foreground">
+                          {u.scimUserName}
+                        </code>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs text-muted-foreground font-mono">{u.provisionedRole}</span>
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {u.provisionedRole}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge active={u.active} />
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {u.lastSyncAt ? timeAgo(u.lastSyncAt) : "—"}
+                        {u.lastSyncAt ? timeAgo(u.lastSyncAt) : '—'}
                       </td>
                     </tr>
                   ))}
@@ -447,7 +553,7 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
         </div>
       )}
 
-      {activeTab === "tokens" && (
+      {activeTab === 'tokens' && (
         <div>
           <div className="flex justify-end mb-3">
             <button
@@ -467,18 +573,30 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
             <div className="text-center py-12 text-muted-foreground">
               <Key className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">No SCIM tokens yet</p>
-              <p className="text-xs mt-1">Create a bearer token to authenticate your IdP SCIM client</p>
+              <p className="text-xs mt-1">
+                Create a bearer token to authenticate your IdP SCIM client
+              </p>
             </div>
           ) : (
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Label</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Prefix</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Status</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Last Used</th>
-                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Expires</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Label
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Prefix
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Last Used
+                    </th>
+                    <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">
+                      Expires
+                    </th>
                     <th className="px-4 py-2.5"></th>
                   </tr>
                 </thead>
@@ -487,14 +605,18 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
                     <tr key={t.id} className="hover:bg-muted/20 transition-colors">
                       <td className="px-4 py-3 font-medium text-xs text-foreground">{t.label}</td>
                       <td className="px-4 py-3">
-                        <code className="text-xs font-mono text-muted-foreground">{t.tokenPrefix}…</code>
+                        <code className="text-xs font-mono text-muted-foreground">
+                          {t.tokenPrefix}…
+                        </code>
                       </td>
-                      <td className="px-4 py-3"><StatusBadge active={t.isActive} /></td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {t.lastUsedAt ? timeAgo(t.lastUsedAt) : "Never"}
+                      <td className="px-4 py-3">
+                        <StatusBadge active={t.isActive} />
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {t.expiresAt ? new Date(t.expiresAt).toLocaleDateString() : "Never"}
+                        {t.lastUsedAt ? timeAgo(t.lastUsedAt) : 'Never'}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {t.expiresAt ? new Date(t.expiresAt).toLocaleDateString() : 'Never'}
                       </td>
                       <td className="px-4 py-3">
                         {t.isActive && (
@@ -517,7 +639,7 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
         </div>
       )}
 
-      {activeTab === "activity" && (
+      {activeTab === 'activity' && (
         <div>
           {dashLoading ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -531,29 +653,40 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
           ) : (
             <div className="space-y-1">
               {dashboard.recentActivity.map((a) => (
-                <div key={a.id} className={cn(
-                  "flex items-start gap-3 px-4 py-3 rounded-lg",
-                  a.status === "error" ? "bg-red-500/5" : "hover:bg-muted/20"
-                )}>
-                  <div className={cn(
-                    "w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0",
-                    a.status === "success" ? "bg-emerald-500" :
-                    a.status === "error" ? "bg-red-500" :
-                    "bg-amber-500"
-                  )} />
+                <div
+                  key={a.id}
+                  className={cn(
+                    'flex items-start gap-3 px-4 py-3 rounded-lg',
+                    a.status === 'error' ? 'bg-red-500/5' : 'hover:bg-muted/20',
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0',
+                      a.status === 'success'
+                        ? 'bg-emerald-500'
+                        : a.status === 'error'
+                          ? 'bg-red-500'
+                          : 'bg-amber-500',
+                    )}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <OperationBadge op={a.operation} status={a.status} />
                       <span className="text-xs text-muted-foreground">{a.resourceType}</span>
                       {a.externalId && (
-                        <code className="text-xs font-mono text-muted-foreground opacity-60">{a.externalId}</code>
+                        <code className="text-xs font-mono text-muted-foreground opacity-60">
+                          {a.externalId}
+                        </code>
                       )}
                     </div>
                     {a.errorMessage && (
                       <p className="text-xs text-red-400 mt-1">{a.errorMessage}</p>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground flex-shrink-0">{timeAgo(a.createdAt)}</span>
+                  <span className="text-xs text-muted-foreground flex-shrink-0">
+                    {timeAgo(a.createdAt)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -568,7 +701,7 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
           onCreated={(token) => {
             setShowCreateToken(false);
             setNewToken(token);
-            queryClient.invalidateQueries({ queryKey: ["scim-tokens", tenant.id] });
+            queryClient.invalidateQueries({ queryKey: ['scim-tokens', tenant.id] });
           }}
         />
       )}
@@ -586,15 +719,21 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
 
 export default function ScimProvisioningPage() {
   const [selectedTenant, setSelectedTenant] = useState<AzureTenant | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
-  const { data: tenantsData, isLoading } = useStandardQuery<{ count: number; tenants: AzureTenant[] }>({
-    queryKey: ["azure-tenants"],
-    queryFn: () => apiFetch("/admin/tenants"),
+  const { data: tenantsData, isLoading } = useStandardQuery<{
+    count: number;
+    tenants: AzureTenant[];
+  }>({
+    queryKey: ['azure-tenants'],
+    queryFn: () => apiFetch('/admin/tenants'),
   });
 
-  const tenants = (tenantsData?.tenants ?? []).filter((t) =>
-    !search || t.displayName.toLowerCase().includes(search.toLowerCase()) || t.domain?.toLowerCase().includes(search.toLowerCase())
+  const tenants = (tenantsData?.tenants ?? []).filter(
+    (t) =>
+      !search ||
+      t.displayName.toLowerCase().includes(search.toLowerCase()) ||
+      t.domain?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -630,7 +769,9 @@ export default function ScimProvisioningPage() {
                 All Tenants
               </button>
               <span className="text-muted-foreground">/</span>
-              <span className="text-sm font-medium text-foreground">{selectedTenant.displayName}</span>
+              <span className="text-sm font-medium text-foreground">
+                {selectedTenant.displayName}
+              </span>
               <TenantStatusBadge status={selectedTenant.status} />
             </div>
 
@@ -645,7 +786,9 @@ export default function ScimProvisioningPage() {
                 <div className="text-right text-xs text-muted-foreground">
                   <div className="font-mono opacity-60">{selectedTenant.azureTenantId}</div>
                   {selectedTenant.provisionedAt && (
-                    <div className="mt-0.5">Provisioned {new Date(selectedTenant.provisionedAt).toLocaleDateString()}</div>
+                    <div className="mt-0.5">
+                      Provisioned {new Date(selectedTenant.provisionedAt).toLocaleDateString()}
+                    </div>
                   )}
                 </div>
               </div>
@@ -688,8 +831,10 @@ export default function ScimProvisioningPage() {
                 <p className="text-sm">No tenants found</p>
                 <p className="text-xs mt-1">
                   <Link href="/admin/azure-onboarding">
-                    <span className="text-primary hover:underline cursor-pointer">Provision a tenant</span>
-                  </Link>{" "}
+                    <span className="text-primary hover:underline cursor-pointer">
+                      Provision a tenant
+                    </span>
+                  </Link>{' '}
                   to enable SCIM provisioning
                 </p>
               </div>
@@ -709,7 +854,9 @@ export default function ScimProvisioningPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-foreground">{tenant.displayName}</span>
+                            <span className="font-medium text-sm text-foreground">
+                              {tenant.displayName}
+                            </span>
                             <TenantStatusBadge status={tenant.status} />
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5">
@@ -721,7 +868,7 @@ export default function ScimProvisioningPage() {
                         <div className="text-right text-xs text-muted-foreground">
                           {tenant.provisionedAt
                             ? `Provisioned ${new Date(tenant.provisionedAt).toLocaleDateString()}`
-                            : "Not provisioned"}
+                            : 'Not provisioned'}
                         </div>
                         <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                       </div>

@@ -12,28 +12,38 @@
  *   counterfactual — replay with model/policy substitution; produces diff
  */
 
-import { randomUUID } from "crypto";
+import { submitApprovalAction } from '@workspace/approvals-inbox';
+import { randomUUID } from 'crypto';
+import { modelAdapterRegistry, policyAdapterRegistry, toolAdapterRegistry } from './adapters.js';
+import {
+  aggregatePipelineConfidence,
+  routeByBudget,
+  validateFinalConfidence,
+} from './budget-router.js';
+import { compile } from './compiler.js';
+import {
+  defaultJournal,
+  defaultRunStore,
+  emitStageStart,
+  type RunStore,
+  type SubstrateJournal,
+} from './journal.js';
+import { defaultPythonWorkerChannel } from './python-worker.js';
+import { SubstrateTelemetry } from './telemetry.js';
 import type {
-  WorkflowDefinition,
-  PipelineRun,
   AnyStage,
+  CompiledGraph,
+  EvidenceBundle,
+  PipelineRun,
+  RuntimeStartOptions,
+  SideEffectCategory,
+  StageExecutorFn,
   StageResult,
   StageResultStatus,
-  EvidenceBundle,
-  RuntimeStartOptions,
   SubstrateHooks,
-  StageExecutorFn,
-  CompiledGraph,
   ToolCallStage,
-  SideEffectCategory,
-} from "./types.js";
-import { compile } from "./compiler.js";
-import { SubstrateJournal, defaultJournal, defaultRunStore, emitStageStart, type RunStore } from "./journal.js";
-import { routeByBudget, aggregatePipelineConfidence, validateFinalConfidence } from "./budget-router.js";
-import { SubstrateTelemetry } from "./telemetry.js";
-import { modelAdapterRegistry, toolAdapterRegistry, policyAdapterRegistry } from "./adapters.js";
-import { defaultPythonWorkerChannel } from "./python-worker.js";
-import { submitApprovalAction } from "@workspace/approvals-inbox";
+  WorkflowDefinition,
+} from './types.js';
 
 // ─── Workflow Registry ────────────────────────────────────────────────────────
 //
@@ -75,105 +85,153 @@ export function clearWorkflowRegistry(): void {
  * side-effecting operations. This constant is used to gate all mutating stage types.
  */
 function isNonLiveMode(mode: string): boolean {
-  return mode !== "live";
+  return mode !== 'live';
 }
 
 const defaultStageExecutor: StageExecutorFn = async (stage, input, ctx) => {
   const mode = ctx.mode;
-  const isDryRun = mode === "dry-run";
+  const isDryRun = mode === 'dry-run';
 
   switch (stage.type) {
-    case "Reason": {
+    case 'Reason': {
       // Counterfactual substitution: use overridden adapter when provided
       const adapterId = ctx.counterfactualModelAdapterId ?? stage.modelAdapterId;
-      const adapter = modelAdapterRegistry.get(adapterId) ?? modelAdapterRegistry.getOrThrow("default");
+      const adapter =
+        modelAdapterRegistry.get(adapterId) ?? modelAdapterRegistry.getOrThrow('default');
       const result = await adapter.infer({
-        prompt: typeof input === "string" ? input : JSON.stringify(input),
-        context: { stageId: stage.id, workflowId: ctx.workflowId, mode, counterfactual: !!ctx.counterfactualModelAdapterId },
+        prompt: typeof input === 'string' ? input : JSON.stringify(input),
+        context: {
+          stageId: stage.id,
+          workflowId: ctx.workflowId,
+          mode,
+          counterfactual: !!ctx.counterfactualModelAdapterId,
+        },
       });
       return { output: result.content, confidence: result.confidence };
     }
 
-    case "Retrieve": {
+    case 'Retrieve': {
       // Python-runtime stages are dispatched to the Python worker channel.
       // In live mode, dispatch fails closed (throws) if the worker is unreachable —
       // a simulated fallback must never be used for governed live decisions.
-      if (stage.runtime === "python") {
-        const result = await defaultPythonWorkerChannel.dispatch({
-          runId: ctx.runId,
-          workflowId: ctx.workflowId,
-          stageId: stage.id,
-          stageType: stage.type,
-          stageConfig: {
-            retrieverAdapterId: stage.retrieverAdapterId,
-            topK: stage.topK,
-            minRelevanceScore: stage.minRelevanceScore,
+      if (stage.runtime === 'python') {
+        const result = await defaultPythonWorkerChannel.dispatch(
+          {
+            runId: ctx.runId,
+            workflowId: ctx.workflowId,
+            stageId: stage.id,
+            stageType: stage.type,
+            stageConfig: {
+              retrieverAdapterId: stage.retrieverAdapterId,
+              topK: stage.topK,
+              minRelevanceScore: stage.minRelevanceScore,
+            },
+            input,
+            budgetConfig: {
+              escalateAt: ctx.budget.escalateAt,
+              requireHumanBelow: ctx.budget.requireHumanBelow,
+            },
+            traceId: ctx.runId,
+            mode: ctx.mode,
           },
-          input,
-          budgetConfig: {
-            escalateAt: ctx.budget.escalateAt,
-            requireHumanBelow: ctx.budget.requireHumanBelow,
-          },
-          traceId: ctx.runId,
-          mode: ctx.mode,
-        }, stage.timeoutMs > 0 ? stage.timeoutMs : 60_000);
+          stage.timeoutMs > 0 ? stage.timeoutMs : 60_000,
+        );
         return { output: result.output, confidence: result.confidence };
       }
       // TypeScript-runtime: use registered retriever adapter
-      const { retrieverAdapterRegistry } = await import("./adapters.js");
-      const adapter = retrieverAdapterRegistry.get(stage.retrieverAdapterId) ?? retrieverAdapterRegistry.getOrThrow("default");
+      const { retrieverAdapterRegistry } = await import('./adapters.js');
+      const adapter =
+        retrieverAdapterRegistry.get(stage.retrieverAdapterId) ??
+        retrieverAdapterRegistry.getOrThrow('default');
       const docs = await adapter.retrieve({
-        query: typeof input === "string" ? input : JSON.stringify(input),
+        query: typeof input === 'string' ? input : JSON.stringify(input),
         topK: stage.topK,
         minRelevanceScore: stage.minRelevanceScore,
       });
-      const confidence = docs.length > 0
-        ? docs.reduce((sum, d) => sum + d.relevanceScore, 0) / docs.length
-        : 0;
+      const confidence =
+        docs.length > 0 ? docs.reduce((sum, d) => sum + d.relevanceScore, 0) / docs.length : 0;
       return { output: docs, confidence };
     }
 
-    case "ToolCall": {
+    case 'ToolCall': {
       // GOVERNANCE: Side-effecting tool calls are suppressed in all non-live modes.
       // replay/counterfactual runs must never mutate production state.
       if (isNonLiveMode(mode)) {
         return {
-          output: { suppressed: true, toolId: stage.toolId, args: input, mode, reason: "non-live mode" },
+          output: {
+            suppressed: true,
+            toolId: stage.toolId,
+            args: input,
+            mode,
+            reason: 'non-live mode',
+          },
           confidence: 0.9,
         };
       }
-      const adapter = toolAdapterRegistry.get("tool-mesh") ?? toolAdapterRegistry.getOrThrow("default");
+      const adapter =
+        toolAdapterRegistry.get('tool-mesh') ?? toolAdapterRegistry.getOrThrow('default');
       const result = await adapter.execute({ toolId: stage.toolId, args: input }, ctx);
       return { output: result.result, confidence: 0.85 };
     }
 
-    case "Verify": {
+    case 'Verify': {
       // Counterfactual substitution: use overridden adapter when provided
       const adapterId = ctx.counterfactualModelAdapterId ?? stage.modelAdapterId;
-      const adapter = modelAdapterRegistry.get(adapterId) ?? modelAdapterRegistry.get("verifier") ?? modelAdapterRegistry.getOrThrow("default");
+      const adapter =
+        modelAdapterRegistry.get(adapterId) ??
+        modelAdapterRegistry.get('verifier') ??
+        modelAdapterRegistry.getOrThrow('default');
       const result = await adapter.infer({
         prompt: `Verify the following output meets quality and accuracy requirements:\n${JSON.stringify(input)}`,
-        systemPrompt: "You are a verification agent. Assess whether the provided output is accurate, complete, and meets policy requirements. Respond with confidence score 0-1 and reasoning.",
-        context: { stageId: stage.id, workflowId: ctx.workflowId, mode, counterfactual: !!ctx.counterfactualModelAdapterId },
+        systemPrompt:
+          'You are a verification agent. Assess whether the provided output is accurate, complete, and meets policy requirements. Respond with confidence score 0-1 and reasoning.',
+        context: {
+          stageId: stage.id,
+          workflowId: ctx.workflowId,
+          mode,
+          counterfactual: !!ctx.counterfactualModelAdapterId,
+        },
       });
       const confidence = result.confidence;
       const passed = confidence >= stage.minConfidence;
-      return { output: { passed, confidence, reasoning: result.content, verifiedAt: new Date().toISOString() }, confidence };
+      return {
+        output: {
+          passed,
+          confidence,
+          reasoning: result.content,
+          verifiedAt: new Date().toISOString(),
+        },
+        confidence,
+      };
     }
 
-    case "Decide": {
+    case 'Decide': {
       // Counterfactual substitution: use overridden adapter when provided
       const adapterId = ctx.counterfactualModelAdapterId ?? stage.modelAdapterId;
-      const adapter = modelAdapterRegistry.get(adapterId) ?? modelAdapterRegistry.getOrThrow("default");
+      const adapter =
+        modelAdapterRegistry.get(adapterId) ?? modelAdapterRegistry.getOrThrow('default');
       const result = await adapter.infer({
         prompt: `Based on the following evidence, make a decision:\n${JSON.stringify(input)}`,
-        systemPrompt: "You are a decision agent. Analyze the evidence and produce a clear, actionable decision with confidence score 0-1.",
-        context: { stageId: stage.id, workflowId: ctx.workflowId, mode, counterfactual: !!ctx.counterfactualModelAdapterId },
+        systemPrompt:
+          'You are a decision agent. Analyze the evidence and produce a clear, actionable decision with confidence score 0-1.',
+        context: {
+          stageId: stage.id,
+          workflowId: ctx.workflowId,
+          mode,
+          counterfactual: !!ctx.counterfactualModelAdapterId,
+        },
       });
-      return { output: { decision: result.content, confidence: result.confidence, decidedAt: new Date().toISOString() }, confidence: result.confidence };
+      return {
+        output: {
+          decision: result.content,
+          confidence: result.confidence,
+          decidedAt: new Date().toISOString(),
+        },
+        confidence: result.confidence,
+      };
     }
 
-    case "ApprovalGate": {
+    case 'ApprovalGate': {
       // ApprovalGate is handled separately by the engine; the executor is not called
       return { output: { approved: true, gatePassed: true }, confidence: 1 };
     }
@@ -216,7 +274,7 @@ export class SubstrateRuntime {
     options: Partial<RuntimeStartOptions> = {},
   ): Promise<PipelineRun> {
     const opts = {
-      mode: "live" as const,
+      mode: 'live' as const,
       replayDiffOnly: false,
       metadata: {},
       ...options,
@@ -232,9 +290,8 @@ export class SubstrateRuntime {
     // Compile the graph using the effective policy — for counterfactual runs this
     // validates that the substituted policy's approval requirements are also met
     // in the workflow topology (gate tier, high-risk categories).
-    const effectiveWorkflow = effectivePolicy === workflow.policy
-      ? workflow
-      : { ...workflow, policy: effectivePolicy };
+    const effectiveWorkflow =
+      effectivePolicy === workflow.policy ? workflow : { ...workflow, policy: effectivePolicy };
     const graph = compile(effectiveWorkflow);
 
     const runId = randomUUID();
@@ -246,7 +303,7 @@ export class SubstrateRuntime {
       workflowId: workflow.id,
       workflowName: workflow.name,
       mode: opts.mode,
-      status: "running",
+      status: 'running',
       stageResults: [],
       input,
       startedAt,
@@ -255,25 +312,38 @@ export class SubstrateRuntime {
         ...opts.metadata,
         ...(opts.sourceRunId ? { sourceRunId: opts.sourceRunId } : {}),
         ...(opts.counterfactualModel ? { counterfactualModel: opts.counterfactualModel } : {}),
-        ...(opts.counterfactualPolicy ? { counterfactualPolicyId: opts.counterfactualPolicy.id } : {}),
+        ...(opts.counterfactualPolicy
+          ? { counterfactualPolicyId: opts.counterfactualPolicy.id }
+          : {}),
         // Persist the workflow definition so replay can locate it by runId without
         // depending on the in-memory workflowRegistry surviving across restarts.
         __workflowSnapshot: workflow as unknown as Record<string, unknown>,
       },
       ...(opts.sourceRunId ? { replaySourceRunId: opts.sourceRunId } : {}),
       ...(opts.counterfactualModel ? { counterfactualModelAdapter: opts.counterfactualModel } : {}),
-      ...(opts.counterfactualPolicy ? { counterfactualPolicyProfile: opts.counterfactualPolicy.id } : {}),
+      ...(opts.counterfactualPolicy
+        ? { counterfactualPolicyProfile: opts.counterfactualPolicy.id }
+        : {}),
     };
 
     await this.runStore.save(run);
 
     const telemetry = new SubstrateTelemetry(run);
     telemetry.pipelineStarted(run);
-    await this.journal.writePipelineTransition({ run, event: "started" });
+    await this.journal.writePipelineTransition({ run, event: 'started' });
 
-    await this.fireHook("before_pipeline", run);
+    await this.fireHook('before_pipeline', run);
 
-    return this._walkGraph(run, workflow, graph, effectivePolicy, opts.mode, opts.sourceRunId, opts.replayDiffOnly ?? false, telemetry);
+    return this._walkGraph(
+      run,
+      workflow,
+      graph,
+      effectivePolicy,
+      opts.mode,
+      opts.sourceRunId,
+      opts.replayDiffOnly ?? false,
+      telemetry,
+    );
   }
 
   // ─── Graph Walk (shared by start() and resume()) ────────────────────────────
@@ -282,7 +352,7 @@ export class SubstrateRuntime {
     run: PipelineRun,
     workflow: WorkflowDefinition,
     graph: CompiledGraph,
-    effectivePolicy: WorkflowDefinition["policy"],
+    effectivePolicy: WorkflowDefinition['policy'],
     mode: string,
     sourceRunId: string | undefined,
     replayDiffOnly: boolean,
@@ -294,7 +364,7 @@ export class SubstrateRuntime {
     // Load source run bundles + stage results for replay modes
     let sourceRunBundles: EvidenceBundle[] = [];
     const sourceStageOutputs = new Map<string, unknown>();
-    if ((mode === "replay" || mode === "counterfactual") && sourceRunId) {
+    if ((mode === 'replay' || mode === 'counterfactual') && sourceRunId) {
       sourceRunBundles = await this.journal.getRunBundles(sourceRunId);
       // Also load stage results so carry-forward stages use the actual source output
       // (not a placeholder) — preserving outputHash stability for verifyReplayStability()
@@ -313,10 +383,10 @@ export class SubstrateRuntime {
     // multiple dependsOn, its input is a structured merge of all upstream
     // outputs rather than just the immediately-preceding stage's output.
     const completedOutputs = new Map<string, unknown>();
-    const lastCompleted = run.stageResults.filter((r) => r.status === "completed").at(-1);
+    const lastCompleted = run.stageResults.filter((r) => r.status === 'completed').at(-1);
     // Seed the map from already-completed stages (for resume continuations)
     for (const r of run.stageResults) {
-      if (r.status === "completed") {
+      if (r.status === 'completed') {
         completedOutputs.set(r.stageId, r.output);
       }
     }
@@ -326,8 +396,12 @@ export class SubstrateRuntime {
 
     // Pre-populate stageConfidences from already-completed stages (for resume)
     for (const r of run.stageResults) {
-      if (r.status === "completed" && r.confidence !== undefined) {
-        stageConfidences.push({ stageId: r.stageId, stageType: r.stageType, confidence: r.confidence });
+      if (r.status === 'completed' && r.confidence !== undefined) {
+        stageConfidences.push({
+          stageId: r.stageId,
+          stageType: r.stageType,
+          confidence: r.confidence,
+        });
       }
     }
 
@@ -338,13 +412,13 @@ export class SubstrateRuntime {
 
         // Skip stages not yet ready (wait for deps)
         const depsReady = stage.dependsOn.every((depId) =>
-          run.stageResults.some((r) => r.stageId === depId && r.status === "completed"),
+          run.stageResults.some((r) => r.stageId === depId && r.status === 'completed'),
         );
         if (stage.dependsOn.length > 0 && !depsReady) continue;
 
         // Resume/continuation: skip stages already completed in this run
         const existingCompleted = run.stageResults.find(
-          (r) => r.stageId === stageId && r.status === "completed",
+          (r) => r.stageId === stageId && r.status === 'completed',
         );
         if (existingCompleted) {
           lastOutput = existingCompleted.output;
@@ -355,7 +429,7 @@ export class SubstrateRuntime {
         // Replay: carry-forward unchanged stages from source run.
         // We use the actual source stage output so outputHash matches exactly and
         // verifyReplayStability() reports stable (same input → same output hash).
-        if (mode === "replay" && replayDiffOnly) {
+        if (mode === 'replay' && replayDiffOnly) {
           const sourceBundle = sourceRunBundles.find((b) => b.stageId === stageId);
           if (sourceBundle) {
             // Capture stage input BEFORE updating lastOutput (for correct inputHash in journal)
@@ -369,16 +443,18 @@ export class SubstrateRuntime {
               return merged;
             })();
             // Use actual source output to preserve outputHash stability
-            const carryOutput = sourceStageOutputs.has(stageId) ? sourceStageOutputs.get(stageId) : undefined;
+            const carryOutput = sourceStageOutputs.has(stageId)
+              ? sourceStageOutputs.get(stageId)
+              : undefined;
             const replayedResult: StageResult = {
               stageId,
               stageType: stage.type,
-              status: "completed",
+              status: 'completed',
               confidence: sourceBundle.confidence,
               output: carryOutput,
               durationMs: 0,
               attempt: 1,
-              routingDecision: "accepted",
+              routingDecision: 'accepted',
               createdAt: new Date().toISOString(),
             };
             run.stageResults.push(replayedResult);
@@ -388,7 +464,7 @@ export class SubstrateRuntime {
               stage,
               result: replayedResult,
               input: carryStageInput,
-              policyOutcome: "allowed",
+              policyOutcome: 'allowed',
               metadata: { mode, replayedUnchanged: true, sourceRunId: sourceBundle.runId },
             });
             priorEvidence.push(carryBundle);
@@ -401,11 +477,11 @@ export class SubstrateRuntime {
         run.currentStageId = stageId;
         await this.runStore.save(run);
 
-        await this.fireHook("before_stage", run, stage);
+        await this.fireHook('before_stage', run, stage);
         emitStageStart(run, stage);
 
         // ApprovalGate handling — pause in live mode, auto-approve in all others
-        if (stage.type === "ApprovalGate") {
+        if (stage.type === 'ApprovalGate') {
           const gateInput = lastOutput;
           const gateResult = await this.handleApprovalGate(stage, run, telemetry, mode);
           run.stageResults.push(gateResult);
@@ -416,16 +492,17 @@ export class SubstrateRuntime {
             stage,
             result: gateResult,
             input: gateInput,
-            policyOutcome: gateResult.status === "pending-approval" ? "pending-approval" : "allowed",
+            policyOutcome:
+              gateResult.status === 'pending-approval' ? 'pending-approval' : 'allowed',
             metadata: { mode, approvalGate: true, gateStatus: gateResult.status },
           });
           priorEvidence.push(gateBundle);
-          if (gateResult.status === "pending-approval") {
-            run.status = "pending-approval";
+          if (gateResult.status === 'pending-approval') {
+            run.status = 'pending-approval';
             await this.runStore.save(run);
-            await this.journal.writePipelineTransition({ run, event: "pending-approval" });
+            await this.journal.writePipelineTransition({ run, event: 'pending-approval' });
             telemetry.pipelineCompleted(run, Date.now() - startMs);
-            await this.fireHook("after_pipeline", run);
+            await this.fireHook('after_pipeline', run);
             return run;
           }
           continue;
@@ -448,10 +525,10 @@ export class SubstrateRuntime {
         })();
 
         // Fire tool-call / side-effect hooks before execution
-        if (stage.type === "ToolCall") {
-          await this.fireHook("before_tool_call", run, stage, stageInput);
+        if (stage.type === 'ToolCall') {
+          await this.fireHook('before_tool_call', run, stage, stageInput);
           for (const effect of stage.sideEffects) {
-            await this.fireHook("before_side_effect", run, stage, effect);
+            await this.fireHook('before_side_effect', run, stage, effect);
           }
         }
 
@@ -468,29 +545,29 @@ export class SubstrateRuntime {
         );
 
         // Fire tool-call / side-effect hooks after execution
-        if (stage.type === "ToolCall") {
-          await this.fireHook("after_tool_call", run, stage, result.output);
+        if (stage.type === 'ToolCall') {
+          await this.fireHook('after_tool_call', run, stage, result.output);
           for (const effect of stage.sideEffects) {
-            await this.fireHook("after_side_effect", run, stage, effect);
+            await this.fireHook('after_side_effect', run, stage, effect);
           }
         }
 
         run.stageResults.push(result);
         await this.runStore.save(run);
-        await this.fireHook("after_stage", run, stage, result);
+        await this.fireHook('after_stage', run, stage, result);
 
-        if (result.status === "failed" || result.status === "timed-out") {
-          run.status = "failed";
+        if (result.status === 'failed' || result.status === 'timed-out') {
+          run.status = 'failed';
           run.error = result.error ?? `Stage '${stageId}' failed`;
           break;
         }
 
-        if (result.status === "pending-approval") {
-          run.status = "pending-approval";
+        if (result.status === 'pending-approval') {
+          run.status = 'pending-approval';
           await this.runStore.save(run);
-          await this.journal.writePipelineTransition({ run, event: "pending-approval" });
+          await this.journal.writePipelineTransition({ run, event: 'pending-approval' });
           telemetry.pipelineCompleted(run, Date.now() - startMs);
-          await this.fireHook("after_pipeline", run);
+          await this.fireHook('after_pipeline', run);
           return run;
         }
 
@@ -500,7 +577,7 @@ export class SubstrateRuntime {
           stage,
           result,
           input: stageInput,
-          policyOutcome: "allowed",
+          policyOutcome: 'allowed',
           metadata: { mode, stageType: stage.type },
         });
 
@@ -521,14 +598,21 @@ export class SubstrateRuntime {
 
       // Validate final confidence against budget
       const confidenceFailure = validateFinalConfidence(finalConfidence, effectiveBudget);
-      if (confidenceFailure && run.status === "running") {
-        run.status = "failed";
+      if (confidenceFailure && run.status === 'running') {
+        run.status = 'failed';
         run.error = confidenceFailure;
-        await this.fireHook("on_low_confidence", run, run.stageResults.at(-1) ? graph.nodes.get(run.stageResults.at(-1)!.stageId)!.stage : workflow.stages[0]!, finalConfidence);
+        await this.fireHook(
+          'on_low_confidence',
+          run,
+          run.stageResults.at(-1)
+            ? graph.nodes.get(run.stageResults.at(-1)!.stageId)!.stage
+            : workflow.stages[0]!,
+          finalConfidence,
+        );
       }
 
-      if (run.status === "running") {
-        run.status = mode === "dry-run" ? "dry-run-complete" : "completed";
+      if (run.status === 'running') {
+        run.status = mode === 'dry-run' ? 'dry-run-complete' : 'completed';
       }
 
       const durationMs = Date.now() - startMs;
@@ -536,24 +620,26 @@ export class SubstrateRuntime {
       run.durationMs = (run.durationMs ?? 0) + durationMs;
 
       await this.runStore.save(run);
-      await this.journal.writePipelineTransition({ run, event: run.status === "failed" ? "failed" : "completed" });
+      await this.journal.writePipelineTransition({
+        run,
+        event: run.status === 'failed' ? 'failed' : 'completed',
+      });
 
-      await this.fireHook("before_finalize", run);
+      await this.fireHook('before_finalize', run);
       telemetry.pipelineCompleted(run, durationMs);
-      await this.fireHook("after_finalize", run);
-      await this.fireHook("after_pipeline", run);
-
+      await this.fireHook('after_finalize', run);
+      await this.fireHook('after_pipeline', run);
     } catch (err) {
-      run.status = "failed";
+      run.status = 'failed';
       run.error = err instanceof Error ? err.message : String(err);
       run.completedAt = new Date().toISOString();
       const durationMs = Date.now() - startMs;
       run.durationMs = (run.durationMs ?? 0) + durationMs;
 
       await this.runStore.save(run);
-      await this.journal.writePipelineTransition({ run, event: "failed" });
+      await this.journal.writePipelineTransition({ run, event: 'failed' });
       telemetry.pipelineCompleted(run, durationMs);
-      await this.fireHook("after_pipeline", run);
+      await this.fireHook('after_pipeline', run);
     }
 
     return run;
@@ -567,8 +653,8 @@ export class SubstrateRuntime {
     run: PipelineRun,
     graph: CompiledGraph,
     priorEvidence: EvidenceBundle[],
-    policy: WorkflowDefinition["policy"],
-    budget: WorkflowDefinition["budget"],
+    policy: WorkflowDefinition['policy'],
+    budget: WorkflowDefinition['budget'],
     telemetry: SubstrateTelemetry,
     mode: string,
   ): Promise<StageResult> {
@@ -583,10 +669,11 @@ export class SubstrateRuntime {
         // Pass the effective policy profile so adapters can filter by active
         // policy IDs and enforce the substituted profile's minimum approval tier.
         // This makes counterfactual policy substitution visible to policy adapters.
-        const policyAdapter = policyAdapterRegistry.get("policy-engine") ?? policyAdapterRegistry.getOrThrow("default");
+        const policyAdapter =
+          policyAdapterRegistry.get('policy-engine') ?? policyAdapterRegistry.getOrThrow('default');
         const policyCheck = await policyAdapter.evaluate({
           action: `stage:${stage.type}:${stage.id}`,
-          agentId: "substrate-engine",
+          agentId: 'substrate-engine',
           riskLevel: this.stageRiskLevel(stage),
           context: {
             workflowId: run.workflowId,
@@ -601,14 +688,14 @@ export class SubstrateRuntime {
         });
 
         if (!policyCheck.allowed && !policyCheck.requiresApproval) {
-          const reason = policyCheck.blockedReason ?? "Policy violation";
-          await this.fireHook("on_policy_violation", run, stage, reason);
-          telemetry.recordPolicyOutcome(stage, "blocked", spanId);
+          const reason = policyCheck.blockedReason ?? 'Policy violation';
+          await this.fireHook('on_policy_violation', run, stage, reason);
+          telemetry.recordPolicyOutcome(stage, 'blocked', spanId);
           const durationMs = Date.now() - stageStartMs;
           const result: StageResult = {
             stageId: stage.id,
             stageType: stage.type,
-            status: "failed",
+            status: 'failed',
             error: `Policy blocked: ${reason}`,
             durationMs,
             attempt,
@@ -622,10 +709,10 @@ export class SubstrateRuntime {
         let output: unknown;
         let confidence: number;
 
-        const executionCtx: import("./types.js").StageExecutorContext = {
+        const executionCtx: import('./types.js').StageExecutorContext = {
           runId: run.runId,
           workflowId: run.workflowId,
-          mode: mode as "live" | "dry-run" | "replay" | "counterfactual",
+          mode: mode as 'live' | 'dry-run' | 'replay' | 'counterfactual',
           stageId: stage.id,
           budget,
           policy,
@@ -660,18 +747,18 @@ export class SubstrateRuntime {
         const routingDecision = routeByBudget(confidence, stage, budget, run);
         telemetry.recordRoutingDecision(stage, routingDecision, spanId);
 
-        if (routingDecision.action === "escalate-human") {
-          await this.fireHook("on_low_confidence", run, stage, confidence);
+        if (routingDecision.action === 'escalate-human') {
+          await this.fireHook('on_low_confidence', run, stage, confidence);
           const approvalId = `sub-approval-${randomUUID().slice(0, 8)}`;
           const result: StageResult = {
             stageId: stage.id,
             stageType: stage.type,
-            status: "pending-approval",
+            status: 'pending-approval',
             confidence,
             output,
             durationMs: Date.now() - stageStartMs,
             attempt,
-            routingDecision: "escalated-human",
+            routingDecision: 'escalated-human',
             approvalId,
             createdAt: new Date().toISOString(),
           };
@@ -679,10 +766,12 @@ export class SubstrateRuntime {
           return result;
         }
 
-        if (routingDecision.action === "escalate-model") {
-          const strongAdapter = modelAdapterRegistry.get(routingDecision.targetAdapterId) ?? modelAdapterRegistry.getOrThrow("default");
+        if (routingDecision.action === 'escalate-model') {
+          const strongAdapter =
+            modelAdapterRegistry.get(routingDecision.targetAdapterId) ??
+            modelAdapterRegistry.getOrThrow('default');
           const escalatedResult = await strongAdapter.infer({
-            prompt: typeof input === "string" ? input : JSON.stringify(input),
+            prompt: typeof input === 'string' ? input : JSON.stringify(input),
             context: { stageId: stage.id, escalated: true },
           });
           output = escalatedResult.content;
@@ -693,25 +782,25 @@ export class SubstrateRuntime {
         const result: StageResult = {
           stageId: stage.id,
           stageType: stage.type,
-          status: "completed",
+          status: 'completed',
           confidence,
           output,
           durationMs,
           attempt,
-          routingDecision: routingDecision.action === "escalate-model" ? "escalated-model" : "accepted",
+          routingDecision:
+            routingDecision.action === 'escalate-model' ? 'escalated-model' : 'accepted',
           createdAt: new Date().toISOString(),
         };
 
         telemetry.stageCompleted(stage, result, spanId);
         return result;
-
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
         const durationMs = Date.now() - stageStartMs;
 
         if (attempt <= stage.maxRetries) {
           // Exponential backoff
-          const backoffMs = Math.min(500 * Math.pow(2, attempt - 1), 10_000);
+          const backoffMs = Math.min(500 * 2 ** (attempt - 1), 10_000);
           await new Promise<void>((r) => setTimeout(r, backoffMs));
           continue;
         }
@@ -719,14 +808,14 @@ export class SubstrateRuntime {
         const result: StageResult = {
           stageId: stage.id,
           stageType: stage.type,
-          status: durationMs >= stage.timeoutMs ? "timed-out" : "failed",
+          status: durationMs >= stage.timeoutMs ? 'timed-out' : 'failed',
           error: lastError.message,
           durationMs,
           attempt,
           createdAt: new Date().toISOString(),
         };
 
-        await this.fireHook("on_validation_error", run, stage, lastError);
+        await this.fireHook('on_validation_error', run, stage, lastError);
         telemetry.stageCompleted(stage, result, spanId);
         return result;
       }
@@ -736,8 +825,8 @@ export class SubstrateRuntime {
     return {
       stageId: stage.id,
       stageType: stage.type,
-      status: "failed",
-      error: lastError?.message ?? "Unknown error",
+      status: 'failed',
+      error: lastError?.message ?? 'Unknown error',
       durationMs: 0,
       attempt: stage.maxRetries + 1,
       createdAt: new Date().toISOString(),
@@ -752,24 +841,24 @@ export class SubstrateRuntime {
     telemetry: SubstrateTelemetry,
     mode: string,
   ): Promise<StageResult> {
-    if (stage.type !== "ApprovalGate") {
-      throw new Error("handleApprovalGate called on non-ApprovalGate stage");
+    if (stage.type !== 'ApprovalGate') {
+      throw new Error('handleApprovalGate called on non-ApprovalGate stage');
     }
 
     const spanId = telemetry.stageStarted(stage, 1).spanId;
     const startMs = Date.now();
 
     // Non-live modes: auto-approve so replay/counterfactual produce complete deterministic diffs
-    if (mode === "dry-run" || mode === "replay" || mode === "counterfactual") {
+    if (mode === 'dry-run' || mode === 'replay' || mode === 'counterfactual') {
       const result: StageResult = {
         stageId: stage.id,
-        stageType: "ApprovalGate",
-        status: "completed",
+        stageType: 'ApprovalGate',
+        status: 'completed',
         confidence: 1,
         output: { approved: true, autoApproved: true, mode },
         durationMs: 1,
         attempt: 1,
-        routingDecision: "accepted",
+        routingDecision: 'accepted',
         createdAt: new Date().toISOString(),
       };
       telemetry.stageCompleted(stage, result, spanId);
@@ -778,9 +867,9 @@ export class SubstrateRuntime {
 
     // In live mode: submit to approvals-inbox and mark pending
     const approvalId = `sub-gate-${randomUUID().slice(0, 8)}`;
-    submitApprovalAction(approvalId, "escalated", {
+    submitApprovalAction(approvalId, 'escalated', {
       domain: run.workflowId,
-      surface: "substrate-engine",
+      surface: 'substrate-engine',
       note: `Approval gate '${stage.id}' in workflow '${run.workflowName}' awaiting human review`,
     });
 
@@ -788,8 +877,8 @@ export class SubstrateRuntime {
 
     const result: StageResult = {
       stageId: stage.id,
-      stageType: "ApprovalGate",
-      status: "pending-approval",
+      stageType: 'ApprovalGate',
+      status: 'pending-approval',
       confidence: 0,
       durationMs: Date.now() - startMs,
       attempt: 1,
@@ -807,22 +896,22 @@ export class SubstrateRuntime {
     const run = await this.runStore.get(runId);
     if (!run) return null;
 
-    if (run.status !== "pending-approval") return run;
+    if (run.status !== 'pending-approval') return run;
 
     // Look up the workflow definition: first try the persisted snapshot embedded
     // in run metadata (written by start() for restart-safe durability), then fall
     // back to the in-memory registry for same-session resumes.
-    const snapshotDef = run.metadata?.["__workflowSnapshot"] as WorkflowDefinition | undefined;
+    const snapshotDef = run.metadata?.['__workflowSnapshot'] as WorkflowDefinition | undefined;
     const workflow = snapshotDef ?? workflowRegistry.get(run.workflowId);
 
     // Mark the pending approval gate as approved in-place on the existing run
-    const pendingGate = run.stageResults.find((r) => r.status === "pending-approval");
+    const pendingGate = run.stageResults.find((r) => r.status === 'pending-approval');
     if (pendingGate) {
       const approvedAt = new Date().toISOString();
-      pendingGate.status = "completed";
+      pendingGate.status = 'completed';
       pendingGate.output = {
         approved: true,
-        approvedBy: approvedBy ?? "operator",
+        approvedBy: approvedBy ?? 'operator',
         approvedAt,
       };
       pendingGate.confidence = 1;
@@ -838,10 +927,10 @@ export class SubstrateRuntime {
             stage: gateStage,
             result: pendingGate,
             input: null, // input was recorded at pending-approval time
-            policyOutcome: "allowed",
+            policyOutcome: 'allowed',
             metadata: {
-              event: "approval-gate-approved",
-              approvedBy: approvedBy ?? "operator",
+              event: 'approval-gate-approved',
+              approvedBy: approvedBy ?? 'operator',
               approvedAt,
               runId,
             },
@@ -850,8 +939,8 @@ export class SubstrateRuntime {
       }
     }
 
-    run.status = "running";
-    run.metadata = { ...run.metadata, resumedFrom: runId, approvedBy: approvedBy ?? "operator" };
+    run.status = 'running';
+    run.metadata = { ...run.metadata, resumedFrom: runId, approvedBy: approvedBy ?? 'operator' };
     await this.runStore.save(run);
 
     if (!workflow) {
@@ -865,8 +954,8 @@ export class SubstrateRuntime {
     // _walkGraph() skips any stageResult already in run.stageResults with status "completed".
     const graph = compile(workflow);
     const telemetry = new SubstrateTelemetry(run);
-    await this.journal.writePipelineTransition({ run, event: "started" });
-    await this.fireHook("before_pipeline", run);
+    await this.journal.writePipelineTransition({ run, event: 'started' });
+    await this.fireHook('before_pipeline', run);
 
     return this._walkGraph(
       run,
@@ -891,17 +980,17 @@ export class SubstrateRuntime {
   async reject(runId: string, rejectedBy?: string, reason?: string): Promise<PipelineRun | null> {
     const run = await this.runStore.get(runId);
     if (!run) return null;
-    if (run.status !== "pending-approval") return run;
+    if (run.status !== 'pending-approval') return run;
 
-    const snapshotDef = run.metadata?.["__workflowSnapshot"] as WorkflowDefinition | undefined;
+    const snapshotDef = run.metadata?.['__workflowSnapshot'] as WorkflowDefinition | undefined;
     const workflow = snapshotDef ?? workflowRegistry.get(run.workflowId);
 
-    const rejector = rejectedBy ?? "operator";
+    const rejector = rejectedBy ?? 'operator';
     const rejectedAt = new Date().toISOString();
 
-    const pendingGate = run.stageResults.find((r) => r.status === "pending-approval");
+    const pendingGate = run.stageResults.find((r) => r.status === 'pending-approval');
     if (pendingGate) {
-      pendingGate.status = "failed";
+      pendingGate.status = 'failed';
       pendingGate.output = {
         approved: false,
         rejectedBy: rejector,
@@ -917,9 +1006,9 @@ export class SubstrateRuntime {
             stage: gateStage,
             result: pendingGate,
             input: null,
-            policyOutcome: "blocked",
+            policyOutcome: 'blocked',
             metadata: {
-              event: "approval-gate-rejected",
+              event: 'approval-gate-rejected',
               rejectedBy: rejector,
               rejectedAt,
               runId,
@@ -930,7 +1019,7 @@ export class SubstrateRuntime {
       }
     }
 
-    run.status = "failed";
+    run.status = 'failed';
     run.error = reason ? `Rejected by ${rejector}: ${reason}` : `Rejected by ${rejector}`;
     run.metadata = { ...run.metadata, rejectedBy: rejector, rejectedAt };
     await this.runStore.save(run);
@@ -939,19 +1028,19 @@ export class SubstrateRuntime {
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
-  private stageRiskLevel(stage: AnyStage): "low" | "medium" | "high" | "critical" {
-    if (stage.type === "Decide") {
+  private stageRiskLevel(stage: AnyStage): 'low' | 'medium' | 'high' | 'critical' {
+    if (stage.type === 'Decide') {
       const highRisk = stage.highRiskSideEffects;
-      if (highRisk.includes("financial") || highRisk.includes("infrastructure")) return "critical";
-      if (highRisk.includes("deletion") || highRisk.includes("write-external")) return "high";
-      if (highRisk.length > 0) return "medium";
+      if (highRisk.includes('financial') || highRisk.includes('infrastructure')) return 'critical';
+      if (highRisk.includes('deletion') || highRisk.includes('write-external')) return 'high';
+      if (highRisk.length > 0) return 'medium';
     }
-    if (stage.type === "ToolCall") {
+    if (stage.type === 'ToolCall') {
       const effects = stage.sideEffects;
-      if (effects.includes("financial") || effects.includes("infrastructure")) return "high";
-      if (effects.includes("deletion") || effects.includes("write-external")) return "medium";
+      if (effects.includes('financial') || effects.includes('infrastructure')) return 'high';
+      if (effects.includes('deletion') || effects.includes('write-external')) return 'medium';
     }
-    return "low";
+    return 'low';
   }
 
   private async fireHook<K extends keyof SubstrateHooks>(

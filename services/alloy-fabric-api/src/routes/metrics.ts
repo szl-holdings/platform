@@ -1,4 +1,4 @@
-import type { IRouter, Request, Response, RequestHandler } from "express";
+import type { IRouter, Request, RequestHandler, Response } from 'express';
 
 interface RouteStats {
   requests: number;
@@ -41,7 +41,7 @@ export function recordApprovalWait(waitMs: number): void {
 }
 
 export function recordBackendRequest(kind: string, model: string, warm: boolean): void {
-  const key = `${kind}:${model}:${warm ? "warm" : "cold"}`;
+  const key = `${kind}:${model}:${warm ? 'warm' : 'cold'}`;
   ops.backendRequests.set(key, (ops.backendRequests.get(key) ?? 0) + 1);
 }
 
@@ -55,7 +55,7 @@ function getOrCreateRoute(route: string): RouteStats {
   if (!s) {
     const latencyBuckets: Record<string, number> = {};
     for (const b of HISTOGRAM_BOUNDS) latencyBuckets[String(b)] = 0;
-    latencyBuckets["+Inf"] = 0;
+    latencyBuckets['+Inf'] = 0;
     s = { requests: 0, errors: 0, latencySumMs: 0, latencyBuckets };
     routeStats.set(route, s);
   }
@@ -74,7 +74,7 @@ export function recordRequest(route: string, latencyMs: number, isError: boolean
   for (const b of HISTOGRAM_BOUNDS) {
     if (latencyMs <= b) s.latencyBuckets[String(b)]!++;
   }
-  s.latencyBuckets["+Inf"]!++;
+  s.latencyBuckets['+Inf']!++;
 
   recentLatencies.push(latencyMs);
   if (recentLatencies.length > MAX_LATENCY_SAMPLES) recentLatencies.shift();
@@ -90,76 +90,82 @@ function buildPrometheusText(): string {
   const lines: string[] = [];
   const uptime = (Date.now() - processStartMs) / 1000;
 
-  lines.push("# HELP aef_requests_total Total HTTP requests");
-  lines.push("# TYPE aef_requests_total counter");
+  lines.push('# HELP aef_requests_total Total HTTP requests');
+  lines.push('# TYPE aef_requests_total counter');
   lines.push(`aef_requests_total ${totalRequests}`);
 
-  lines.push("# HELP aef_errors_total Total HTTP error responses (4xx/5xx)");
-  lines.push("# TYPE aef_errors_total counter");
+  lines.push('# HELP aef_errors_total Total HTTP error responses (4xx/5xx)');
+  lines.push('# TYPE aef_errors_total counter');
   lines.push(`aef_errors_total ${totalErrors}`);
 
-  lines.push("# HELP aef_uptime_seconds Service uptime in seconds");
-  lines.push("# TYPE aef_uptime_seconds gauge");
+  lines.push('# HELP aef_uptime_seconds Service uptime in seconds');
+  lines.push('# TYPE aef_uptime_seconds gauge');
   lines.push(`aef_uptime_seconds ${uptime.toFixed(2)}`);
 
-  lines.push("# HELP aef_route_requests_total Requests per route");
-  lines.push("# TYPE aef_route_requests_total counter");
+  lines.push('# HELP aef_route_requests_total Requests per route');
+  lines.push('# TYPE aef_route_requests_total counter');
   for (const [route, s] of routeStats) {
     const label = `route="${route}"`;
     lines.push(`aef_route_requests_total{${label}} ${s.requests}`);
   }
 
-  lines.push("# HELP aef_route_errors_total Errors per route");
-  lines.push("# TYPE aef_route_errors_total counter");
+  lines.push('# HELP aef_route_errors_total Errors per route');
+  lines.push('# TYPE aef_route_errors_total counter');
   for (const [route, s] of routeStats) {
     const label = `route="${route}"`;
     lines.push(`aef_route_errors_total{${label}} ${s.errors}`);
   }
 
-  lines.push("# HELP aef_request_latency_ms_bucket Request latency histogram (ms)");
-  lines.push("# TYPE aef_request_latency_ms_bucket histogram");
+  lines.push('# HELP aef_request_latency_ms_bucket Request latency histogram (ms)');
+  lines.push('# TYPE aef_request_latency_ms_bucket histogram');
   for (const [route, s] of routeStats) {
     const label = `route="${route}"`;
     for (const b of HISTOGRAM_BOUNDS) {
-      lines.push(`aef_request_latency_ms_bucket{${label},le="${b}"} ${s.latencyBuckets[String(b)]}`);
+      lines.push(
+        `aef_request_latency_ms_bucket{${label},le="${b}"} ${s.latencyBuckets[String(b)]}`,
+      );
     }
-    lines.push(`aef_request_latency_ms_bucket{${label},le="+Inf"} ${s.latencyBuckets["+Inf"]}`);
+    lines.push(`aef_request_latency_ms_bucket{${label},le="+Inf"} ${s.latencyBuckets['+Inf']}`);
     lines.push(`aef_request_latency_ms_sum{${label}} ${s.latencySumMs}`);
     lines.push(`aef_request_latency_ms_count{${label}} ${s.requests}`);
   }
 
-  lines.push("# HELP aef_rebuild_duration_ms_sum Total rebuild duration (ms)");
-  lines.push("# TYPE aef_rebuild_duration_ms_sum gauge");
+  lines.push('# HELP aef_rebuild_duration_ms_sum Total rebuild duration (ms)');
+  lines.push('# TYPE aef_rebuild_duration_ms_sum gauge');
   lines.push(`aef_rebuild_duration_ms_sum ${ops.rebuildDurationSumMs.toFixed(2)}`);
 
-  lines.push("# HELP aef_rebuild_requests_total Total index rebuild requests");
-  lines.push("# TYPE aef_rebuild_requests_total counter");
+  lines.push('# HELP aef_rebuild_requests_total Total index rebuild requests');
+  lines.push('# TYPE aef_rebuild_requests_total counter');
   lines.push(`aef_rebuild_requests_total ${ops.rebuildRequests}`);
 
   if (ops.approvalWaitCount > 0) {
-    lines.push("# HELP aef_approval_wait_ms_avg Average approval wait time (ms)");
-    lines.push("# TYPE aef_approval_wait_ms_avg gauge");
-    lines.push(`aef_approval_wait_ms_avg ${(ops.approvalWaitSumMs / ops.approvalWaitCount).toFixed(2)}`);
+    lines.push('# HELP aef_approval_wait_ms_avg Average approval wait time (ms)');
+    lines.push('# TYPE aef_approval_wait_ms_avg gauge');
+    lines.push(
+      `aef_approval_wait_ms_avg ${(ops.approvalWaitSumMs / ops.approvalWaitCount).toFixed(2)}`,
+    );
   }
 
   if (ops.backendRequests.size > 0) {
-    lines.push("# HELP aef_backend_requests_total Requests per embedding backend");
-    lines.push("# TYPE aef_backend_requests_total counter");
+    lines.push('# HELP aef_backend_requests_total Requests per embedding backend');
+    lines.push('# TYPE aef_backend_requests_total counter');
     for (const [key, count] of ops.backendRequests) {
-      const [kind, model, warmth] = key.split(":");
-      lines.push(`aef_backend_requests_total{kind="${kind}",model="${model}",warmth="${warmth}"} ${count}`);
+      const [kind, model, warmth] = key.split(':');
+      lines.push(
+        `aef_backend_requests_total{kind="${kind}",model="${model}",warmth="${warmth}"} ${count}`,
+      );
     }
   }
 
-  return lines.join("\n") + "\n";
+  return lines.join('\n') + '\n';
 }
 
 export function metricsInstrumentationMiddleware(): RequestHandler {
   return (req: Request, res: Response, next) => {
     const startMs = Date.now();
-    res.on("finish", () => {
+    res.on('finish', () => {
       const latencyMs = Date.now() - startMs;
-      const route = req.route?.path ?? req.path ?? "unknown";
+      const route = req.route?.path ?? req.path ?? 'unknown';
       const isError = res.statusCode >= 400;
       recordRequest(route, latencyMs, isError);
     });
@@ -168,10 +174,10 @@ export function metricsInstrumentationMiddleware(): RequestHandler {
 }
 
 export function registerMetricsRoute(router: IRouter): void {
-  router.get("/metrics", (_req: Request, res: Response) => {
-    const accept = _req.headers["accept"] ?? "";
-    if (accept.includes("text/plain") || accept.includes("*/*") || accept === "") {
-      res.setHeader("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+  router.get('/metrics', (_req: Request, res: Response) => {
+    const accept = _req.headers['accept'] ?? '';
+    if (accept.includes('text/plain') || accept.includes('*/*') || accept === '') {
+      res.setHeader('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
       res.send(buildPrometheusText());
       return;
     }
@@ -179,7 +185,7 @@ export function registerMetricsRoute(router: IRouter): void {
     const sorted = [...recentLatencies].sort((a, b) => a - b);
 
     res.json({
-      service: "alloy-fabric-api",
+      service: 'alloy-fabric-api',
       uptimeSeconds: Math.floor((Date.now() - processStartMs) / 1000),
       requests: {
         total: totalRequests,

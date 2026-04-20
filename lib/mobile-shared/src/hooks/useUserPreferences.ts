@@ -19,7 +19,7 @@
  * (density, accent colour, etc.) are not used by the native shell.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 let AsyncStorage: {
   getItem(key: string): Promise<string | null>;
@@ -28,7 +28,7 @@ let AsyncStorage: {
 try {
   // Optional peer dependency — gracefully degrade in environments without it.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  AsyncStorage = require("@react-native-async-storage/async-storage").default;
+  AsyncStorage = require('@react-native-async-storage/async-storage').default;
 } catch {
   AsyncStorage = null;
 }
@@ -42,9 +42,9 @@ const DEFAULTS: UserPreferences = {
   time_zone: null,
 };
 
-const STORAGE_KEY = "szl-mobile-user-preferences";
+const STORAGE_KEY = 'szl-mobile-user-preferences';
 const DEBOUNCE_MS = 800;
-const API_PATH = "/api/preferences";
+const API_PATH = '/api/preferences';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Validation
@@ -52,9 +52,9 @@ const API_PATH = "/api/preferences";
 
 function isValidTimeZone(value: unknown): value is string | null {
   if (value === null) return true;
-  if (typeof value !== "string" || value.length === 0 || value.length > 64) return false;
+  if (typeof value !== 'string' || value.length === 0 || value.length > 64) return false;
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    new Intl.DateTimeFormat('en-US', { timeZone: value });
     return true;
   } catch {
     return false;
@@ -66,7 +66,7 @@ function isValidPreference<K extends keyof UserPreferences>(
   value: unknown,
 ): value is UserPreferences[K] {
   switch (key) {
-    case "time_zone":
+    case 'time_zone':
       return isValidTimeZone(value);
     default:
       return false;
@@ -171,8 +171,7 @@ async function fetchApiPreferences(): Promise<Partial<UserPreferences>> {
   try {
     const json = await _apiFetcher(API_PATH);
     if (!json) return {};
-    const data: Record<string, unknown> =
-      (json.data as Record<string, unknown>) ?? json;
+    const data: Record<string, unknown> = (json.data as Record<string, unknown>) ?? json;
     return sanitizePartial(data);
   } catch {
     return {};
@@ -186,8 +185,8 @@ async function patchApiPreference<K extends keyof UserPreferences>(
   if (!_apiFetcher) return;
   try {
     await _apiFetcher(API_PATH, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ [key]: value }),
     });
   } catch {

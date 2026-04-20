@@ -1,26 +1,26 @@
 /**
  * Alloy workflow engine contracts — request/response schemas.
  */
-import { z } from "zod";
-import { paginationQuerySchema, idParamSchema, sortQuerySchema } from "./common";
+import { z } from 'zod';
+import { idParamSchema, paginationQuerySchema, sortQuerySchema } from './common';
 
 export const workflowStatusSchema = z.enum([
-  "pending",
-  "in_progress",
-  "completed",
-  "cancelled",
-  "blocked",
-  "failed",
+  'pending',
+  'in_progress',
+  'completed',
+  'cancelled',
+  'blocked',
+  'failed',
 ]);
 export type WorkflowStatus = z.infer<typeof workflowStatusSchema>;
 
-export const workflowPrioritySchema = z.enum(["critical", "high", "medium", "low"]);
+export const workflowPrioritySchema = z.enum(['critical', 'high', 'medium', 'low']);
 export type WorkflowPriority = z.infer<typeof workflowPrioritySchema>;
 
 export const createWorkflowBodySchema = z.object({
   title: z.string().min(1).max(256),
   type: z.string().min(1).max(128),
-  priority: workflowPrioritySchema.optional().default("medium"),
+  priority: workflowPrioritySchema.optional().default('medium'),
   assignedTo: z.number().int().positive().optional(),
   dueAt: z.coerce.date().optional(),
   metadata: z.record(z.unknown()).optional(),

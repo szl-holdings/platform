@@ -1,13 +1,13 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { defineConfig } from 'vite';
 
-process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
+process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
 const port = Number(process.env.PORT) || 8008;
-const basePath = process.env.BASE_PATH || "/nexus/";
+const basePath = process.env.BASE_PATH || '/nexus/';
 
 export default defineConfig({
   base: basePath,
@@ -15,12 +15,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
+    ...(process.env.NODE_ENV !== 'production' && process.env.REPL_ID !== undefined
       ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
+          await import('@replit/vite-plugin-cartographer').then((m) =>
             m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
+              root: path.resolve(import.meta.dirname, '..'),
             }),
           ),
         ]
@@ -28,25 +27,25 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "src"),
+      '@': path.resolve(import.meta.dirname, 'src'),
     },
-    dedupe: ["react", "react-dom"],
+    dedupe: ['react', 'react-dom'],
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, 'dist/public'),
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks(id): string | undefined {
-          if (id.includes("node_modules")) {
-            if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
-            if (id.includes("framer-motion")) return "vendor-motion";
-            if (id.includes("@radix-ui")) return "vendor-radix";
-            if (id.includes("lucide-react")) return "vendor-icons";
-            if (id.includes("react-dom")) return "vendor-react";
-            if (id.includes("react/")) return "vendor-react";
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('@radix-ui')) return 'vendor-radix';
+            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('react-dom')) return 'vendor-react';
+            if (id.includes('react/')) return 'vendor-react';
           }
           return undefined;
         },
@@ -58,16 +57,16 @@ export default defineConfig({
   },
   server: {
     port,
-    host: "::",
+    host: '::',
     allowedHosts: true,
     hmr: { clientPort: 443 },
     fs: {
       strict: false,
-      deny: ["**/.*"],
+      deny: ['**/.*'],
     },
     proxy: {
-      "/api": {
-        target: "http://localhost:8080",
+      '/api': {
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       },
@@ -75,7 +74,7 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "0.0.0.0",
+    host: '0.0.0.0',
     allowedHosts: true,
   },
 });

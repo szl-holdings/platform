@@ -5,21 +5,18 @@
  * for the SZL Intelligence OS.
  */
 
-export { BaseFeedAdapter, DeduplicationCache } from "./feed-adapter.js";
+export { AISFeedAdapter, createAISConfig } from './adapters/ais.js';
+export { createLegalRecordsConfig, LegalRecordsFeedAdapter } from './adapters/legal-records.js';
+export { createSanctionsConfig, SanctionsFeedAdapter } from './adapters/sanctions.js';
+export { createSTIXConfig, STIXTAXIIFeedAdapter } from './adapters/stix-taxii.js';
 export type {
   FeedAdapterConfig,
   FeedHealthStatus,
   NormalizedFeedPayload,
   PollResult,
-} from "./feed-adapter.js";
-
-export { AISFeedAdapter, createAISConfig } from "./adapters/ais.js";
-export { STIXTAXIIFeedAdapter, createSTIXConfig } from "./adapters/stix-taxii.js";
-export { SanctionsFeedAdapter, createSanctionsConfig } from "./adapters/sanctions.js";
-export { LegalRecordsFeedAdapter, createLegalRecordsConfig } from "./adapters/legal-records.js";
-
-export { fusionEngine, FusionEngine } from "./fusion-engine.js";
-export type { FusionAlert, FusionPatternType, FusionEngineStats } from "./fusion-engine.js";
-
-export { feedScheduler, FeedScheduler } from "./feed-scheduler.js";
-export type { SchedulerConfig } from "./feed-scheduler.js";
+} from './feed-adapter.js';
+export { BaseFeedAdapter, DeduplicationCache } from './feed-adapter.js';
+export type { SchedulerConfig } from './feed-scheduler.js';
+export { FeedScheduler, feedScheduler } from './feed-scheduler.js';
+export type { FusionAlert, FusionEngineStats, FusionPatternType } from './fusion-engine.js';
+export { FusionEngine, fusionEngine } from './fusion-engine.js';

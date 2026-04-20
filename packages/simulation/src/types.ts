@@ -1,8 +1,15 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const SimulationActionSchema = z.object({
   id: z.string(),
-  type: z.enum(["execute_recommendation", "partial_action", "escalation", "reassign", "void_chain", "no_action"]),
+  type: z.enum([
+    'execute_recommendation',
+    'partial_action',
+    'escalation',
+    'reassign',
+    'void_chain',
+    'no_action',
+  ]),
   recommendationId: z.string().optional(),
   targetEntityId: z.string().optional(),
   targetEntityType: z.string().optional(),
@@ -15,7 +22,7 @@ export const DownstreamEffectSchema = z.object({
   entityLabel: z.string(),
   entityType: z.string().optional(),
   effect: z.string(),
-  magnitude: z.enum(["high", "medium", "low"]),
+  magnitude: z.enum(['high', 'medium', 'low']),
   timeToEffect: z.string().optional(),
   confidence: z.number().min(0).max(1).optional(),
 });
@@ -43,13 +50,17 @@ export const SimulationResultSchema = z.object({
   projectedOutcome: ProjectedOutcomeSchema,
   downstreamEffects: z.array(DownstreamEffectSchema),
   riskIfNotTaken: z.string().optional(),
-  alternativeScenarios: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    closeProbability: z.number().optional(),
-    valueCapture: z.number().optional(),
-    confidence: z.number().optional(),
-  })).optional(),
+  alternativeScenarios: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        closeProbability: z.number().optional(),
+        valueCapture: z.number().optional(),
+        confidence: z.number().optional(),
+      }),
+    )
+    .optional(),
   simulatedAt: z.number(),
   engineVersion: z.string(),
 });

@@ -1,9 +1,18 @@
-export type AnalyticsGranularity = "minute" | "hour" | "day" | "week" | "month";
-export type AttributionModel = "first_touch" | "last_touch" | "linear" | "time_decay";
-export type AnomalyType = "spike" | "drop" | "trend_change" | "seasonal_deviation" | "missing";
-export type AnomalySeverity = "low" | "medium" | "high" | "critical";
-export type VisualizationType = "line" | "bar" | "area" | "number" | "table" | "heatmap" | "funnel";
-export type CalculationType = "count" | "sum" | "avg" | "min" | "max" | "distinct_count" | "rate" | "ratio" | "percentile";
+export type AnalyticsGranularity = 'minute' | 'hour' | 'day' | 'week' | 'month';
+export type AttributionModel = 'first_touch' | 'last_touch' | 'linear' | 'time_decay';
+export type AnomalyType = 'spike' | 'drop' | 'trend_change' | 'seasonal_deviation' | 'missing';
+export type AnomalySeverity = 'low' | 'medium' | 'high' | 'critical';
+export type VisualizationType = 'line' | 'bar' | 'area' | 'number' | 'table' | 'heatmap' | 'funnel';
+export type CalculationType =
+  | 'count'
+  | 'sum'
+  | 'avg'
+  | 'min'
+  | 'max'
+  | 'distinct_count'
+  | 'rate'
+  | 'ratio'
+  | 'percentile';
 
 // ---------------------------------------------------------------------------
 // Event Tracking
@@ -40,7 +49,7 @@ export interface TrackEventPayload {
 
 export interface FilterCondition {
   field: string;
-  operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains";
+  operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'contains';
   value: unknown;
 }
 
@@ -59,7 +68,7 @@ export interface MetricDefinitionInput {
   visualizationType?: VisualizationType;
   thresholdWarning?: number;
   thresholdCritical?: number;
-  thresholdDirection?: "above" | "below";
+  thresholdDirection?: 'above' | 'below';
 }
 
 // ---------------------------------------------------------------------------
@@ -83,7 +92,7 @@ export interface MetricQueryResult {
   currentValue: number;
   previousValue?: number;
   changePercent?: number;
-  trend?: "up" | "down" | "stable";
+  trend?: 'up' | 'down' | 'stable';
 }
 
 // ---------------------------------------------------------------------------
@@ -133,7 +142,7 @@ export interface CohortDefinitionInput {
   entityType: string;
   entryConditions?: FilterCondition[];
   entryEventName?: string;
-  analysisType?: "retention" | "ltv" | "engagement" | "conversion";
+  analysisType?: 'retention' | 'ltv' | 'engagement' | 'conversion';
   windowDays?: number;
 }
 
@@ -250,7 +259,7 @@ export interface BulkQueryParams {
 
 export interface DashboardWidget {
   id: string;
-  type: "metric_card" | "time_series" | "funnel" | "cohort" | "anomaly_feed" | "table";
+  type: 'metric_card' | 'time_series' | 'funnel' | 'cohort' | 'anomaly_feed' | 'table';
   metricId?: string;
   funnelId?: string;
   cohortId?: string;

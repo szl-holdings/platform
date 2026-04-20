@@ -21,19 +21,19 @@
  *
  * Rotation policy: see docs/SECRETS_POLICY.md (Internal Service Tokens).
  */
-import { createHmac, timingSafeEqual } from "crypto";
-import { logger } from "./logger";
+import { createHmac, timingSafeEqual } from 'crypto';
+import { logger } from './logger';
 
 export type InternalScope =
-  | "alloy:read"
-  | "alloy:write"
-  | "agent:read"
-  | "agent:write"
-  | "health:read"
-  | "health:write"
-  | "internal:read"
-  | "internal:write"
-  | "usage-events:write";
+  | 'alloy:read'
+  | 'alloy:write'
+  | 'agent:read'
+  | 'agent:write'
+  | 'health:read'
+  | 'health:write'
+  | 'internal:read'
+  | 'internal:write'
+  | 'usage-events:write';
 
 export interface InternalServiceToken {
   name: string;
@@ -52,15 +52,15 @@ export interface InternalAgentContext {
 }
 
 const VALID_SCOPES: ReadonlySet<InternalScope> = new Set<InternalScope>([
-  "alloy:read",
-  "alloy:write",
-  "agent:read",
-  "agent:write",
-  "health:read",
-  "health:write",
-  "internal:read",
-  "internal:write",
-  "usage-events:write",
+  'alloy:read',
+  'alloy:write',
+  'agent:read',
+  'agent:write',
+  'health:read',
+  'health:write',
+  'internal:read',
+  'internal:write',
+  'usage-events:write',
 ]);
 
 /**
@@ -72,12 +72,12 @@ const VALID_SCOPES: ReadonlySet<InternalScope> = new Set<InternalScope>([
  * allowlist below.
  */
 const LEGACY_DEFAULT_SCOPES: InternalScope[] = [
-  "alloy:read",
-  "alloy:write",
-  "agent:read",
-  "agent:write",
-  "internal:read",
-  "health:read",
+  'alloy:read',
+  'alloy:write',
+  'agent:read',
+  'agent:write',
+  'internal:read',
+  'health:read',
 ];
 
 /**
@@ -94,17 +94,17 @@ const LEGACY_DEFAULT_SCOPES: InternalScope[] = [
  * `INTERNAL_SERVICE_TOKENS` entry with explicit pathPrefixes.
  */
 const LEGACY_DEFAULT_PATH_PREFIXES: string[] = [
-  "/api/internal/",
-  "/api/alloy/agent/",
-  "/api/health",
-  "/health",
-  "/api/env-registry",
+  '/api/internal/',
+  '/api/alloy/agent/',
+  '/api/health',
+  '/health',
+  '/api/env-registry',
 ];
 
-const HMAC_KEY = Buffer.from("szl-internal-token-comparison-key-v2", "utf8");
+const HMAC_KEY = Buffer.from('szl-internal-token-comparison-key-v2', 'utf8');
 
 function tokenDigest(value: string): Buffer {
-  return createHmac("sha256", HMAC_KEY).update(Buffer.from(value, "utf8")).digest();
+  return createHmac('sha256', HMAC_KEY).update(Buffer.from(value, 'utf8')).digest();
 }
 
 function constantTimeEqual(a: string, b: string): boolean {
@@ -116,60 +116,60 @@ function constantTimeEqual(a: string, b: string): boolean {
 }
 
 function parseScopedTokens(): InternalServiceToken[] {
-  const raw = process.env["INTERNAL_SERVICE_TOKENS"];
+  const raw = process.env['INTERNAL_SERVICE_TOKENS'];
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) {
-      logger.warn("[internal-tokens] INTERNAL_SERVICE_TOKENS is not a JSON array — ignoring");
+      logger.warn('[internal-tokens] INTERNAL_SERVICE_TOKENS is not a JSON array — ignoring');
       return [];
     }
     const tokens: InternalServiceToken[] = [];
     for (const entry of parsed) {
-      if (!entry || typeof entry !== "object") continue;
+      if (!entry || typeof entry !== 'object') continue;
       const e = entry as Record<string, unknown>;
-      const name = typeof e["name"] === "string" ? (e["name"] as string) : "";
-      const token = typeof e["token"] === "string" ? (e["token"] as string) : "";
-      const rawScopes = Array.isArray(e["scopes"]) ? (e["scopes"] as unknown[]) : [];
-      const pathPrefixes = Array.isArray(e["pathPrefixes"])
-        ? (e["pathPrefixes"] as unknown[]).filter((p): p is string => typeof p === "string")
+      const name = typeof e['name'] === 'string' ? (e['name'] as string) : '';
+      const token = typeof e['token'] === 'string' ? (e['token'] as string) : '';
+      const rawScopes = Array.isArray(e['scopes']) ? (e['scopes'] as unknown[]) : [];
+      const pathPrefixes = Array.isArray(e['pathPrefixes'])
+        ? (e['pathPrefixes'] as unknown[]).filter((p): p is string => typeof p === 'string')
         : [];
 
       if (!name || !token) {
-        logger.warn({ name }, "[internal-tokens] Skipping token entry — missing name or token");
+        logger.warn({ name }, '[internal-tokens] Skipping token entry — missing name or token');
         continue;
       }
       const scopes: InternalScope[] = [];
       for (const s of rawScopes) {
-        if (typeof s === "string" && VALID_SCOPES.has(s as InternalScope)) {
+        if (typeof s === 'string' && VALID_SCOPES.has(s as InternalScope)) {
           scopes.push(s as InternalScope);
         } else {
-          logger.warn({ name, scope: s }, "[internal-tokens] Ignoring unknown scope on token");
+          logger.warn({ name, scope: s }, '[internal-tokens] Ignoring unknown scope on token');
         }
       }
       if (scopes.length === 0) {
-        logger.warn({ name }, "[internal-tokens] Token has no valid scopes — entry ignored");
+        logger.warn({ name }, '[internal-tokens] Token has no valid scopes — entry ignored');
         continue;
       }
       tokens.push({ name, token, scopes, pathPrefixes, legacy: false });
     }
     return tokens;
   } catch (err) {
-    logger.warn({ err }, "[internal-tokens] Failed to parse INTERNAL_SERVICE_TOKENS — ignoring");
+    logger.warn({ err }, '[internal-tokens] Failed to parse INTERNAL_SERVICE_TOKENS — ignoring');
     return [];
   }
 }
 
 let _registry: InternalServiceToken[] | null = null;
-let _registryEnvKey = "";
+let _registryEnvKey = '';
 let _legacyDeprecationWarned = false;
 
 function loadRegistry(): InternalServiceToken[] {
   const tokens = parseScopedTokens();
-  const legacy = process.env["ALLOY_INTERNAL_TOKEN"];
+  const legacy = process.env['ALLOY_INTERNAL_TOKEN'];
   if (legacy) {
     tokens.push({
-      name: "alloy-internal-legacy",
+      name: 'alloy-internal-legacy',
       token: legacy,
       scopes: [...LEGACY_DEFAULT_SCOPES],
       pathPrefixes: [...LEGACY_DEFAULT_PATH_PREFIXES],
@@ -180,7 +180,7 @@ function loadRegistry(): InternalServiceToken[] {
 }
 
 function currentEnvKey(): string {
-  return `${process.env["INTERNAL_SERVICE_TOKENS"] ?? ""}\u0000${process.env["ALLOY_INTERNAL_TOKEN"] ?? ""}`;
+  return `${process.env['INTERNAL_SERVICE_TOKENS'] ?? ''}\u0000${process.env['ALLOY_INTERNAL_TOKEN'] ?? ''}`;
 }
 
 export function getInternalTokenRegistry(): InternalServiceToken[] {
@@ -197,7 +197,7 @@ export function getInternalTokenRegistry(): InternalServiceToken[] {
 /** Test/runtime hook to force-reload after env changes. */
 export function resetInternalTokenRegistry(): void {
   _registry = null;
-  _registryEnvKey = "";
+  _registryEnvKey = '';
   _legacyDeprecationWarned = false;
 }
 
@@ -236,7 +236,7 @@ export function matchInternalToken(presented: string | undefined): InternalToken
             scopes: token.scopes,
             allowedPathPrefixes: token.pathPrefixes,
           },
-          "[internal-tokens] ALLOY_INTERNAL_TOKEN is DEPRECATED — migrate to INTERNAL_SERVICE_TOKENS with explicit per-domain scopes. See docs/SECRETS_POLICY.md."
+          '[internal-tokens] ALLOY_INTERNAL_TOKEN is DEPRECATED — migrate to INTERNAL_SERVICE_TOKENS with explicit per-domain scopes. See docs/SECRETS_POLICY.md.',
         );
       }
       return {
@@ -269,22 +269,25 @@ export function matchInternalToken(presented: string | undefined): InternalToken
 export function assertInternalTokenPolicy(opts: { isProduction: boolean }): void {
   if (!opts.isProduction) return;
   const scoped = parseScopedTokens();
-  const hasLegacy = !!process.env["ALLOY_INTERNAL_TOKEN"];
+  const hasLegacy = !!process.env['ALLOY_INTERNAL_TOKEN'];
   if (scoped.length > 0) return;
   if (!hasLegacy) return;
-  if (process.env["INTERNAL_TOKENS_ALLOW_LEGACY_ONLY"] === "true") {
+  if (process.env['INTERNAL_TOKENS_ALLOW_LEGACY_ONLY'] === 'true') {
     logger.warn(
-      "[internal-tokens] Production startup ALLOWED with only ALLOY_INTERNAL_TOKEN configured because INTERNAL_TOKENS_ALLOW_LEGACY_ONLY=true. This is a temporary migration affordance — define INTERNAL_SERVICE_TOKENS and remove the override."
+      '[internal-tokens] Production startup ALLOWED with only ALLOY_INTERNAL_TOKEN configured because INTERNAL_TOKENS_ALLOW_LEGACY_ONLY=true. This is a temporary migration affordance — define INTERNAL_SERVICE_TOKENS and remove the override.',
     );
     return;
   }
   throw new Error(
-    "[internal-tokens] Refusing to start: ALLOY_INTERNAL_TOKEN is configured but no INTERNAL_SERVICE_TOKENS are defined. " +
-      "Define at least one scoped token (see docs/SECRETS_POLICY.md) or set INTERNAL_TOKENS_ALLOW_LEGACY_ONLY=true to opt into temporary legacy-only operation."
+    '[internal-tokens] Refusing to start: ALLOY_INTERNAL_TOKEN is configured but no INTERNAL_SERVICE_TOKENS are defined. ' +
+      'Define at least one scoped token (see docs/SECRETS_POLICY.md) or set INTERNAL_TOKENS_ALLOW_LEGACY_ONLY=true to opt into temporary legacy-only operation.',
   );
 }
 
-export function tokenHasScope(ctx: InternalAgentContext | undefined, required: InternalScope): boolean {
+export function tokenHasScope(
+  ctx: InternalAgentContext | undefined,
+  required: InternalScope,
+): boolean {
   if (!ctx) return false;
   return ctx.scopes.has(required);
 }

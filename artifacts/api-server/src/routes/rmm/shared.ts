@@ -1,55 +1,78 @@
-import { Router, type IRouter } from "express";
-import { db, mspDevicesTable, mspClientsTable } from "@szl-holdings/db";
-import { eq, desc, sql, and } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../../lib/api-response";
-import { authMiddleware, requireRole } from "../../middlewares/auth";
-import { logger } from "../../lib/logger";
-import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
+import { db, mspClientsTable, mspDevicesTable } from '@szl-holdings/db';
+import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
+import { and, desc, eq, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendCreated,
+  sendNotFound,
+  sendSuccess,
+} from '../../lib/api-response';
+import { logger } from '../../lib/logger';
+import { authMiddleware, requireRole } from '../../middlewares/auth';
+import {
+  clearProviderCache,
+  createRmmProvider,
+  getCachedProvider,
+  type RmmProviderConfig,
+  setCachedProvider,
+} from '../../services/rmm-provider';
 
-export const SUPPORTED_PROVIDERS = ["ninjaone", "connectwise_automate", "connectwise_manage", "halopsa", "datto_rmm", "autotask_psa"] as const;
+export const SUPPORTED_PROVIDERS = [
+  'ninjaone',
+  'connectwise_automate',
+  'connectwise_manage',
+  'halopsa',
+  'datto_rmm',
+  'autotask_psa',
+] as const;
 
 const ENCRYPTION_KEY = (() => {
   const key = process.env.CONNECTOR_ENCRYPTION_KEY;
   if (!key) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("CONNECTOR_ENCRYPTION_KEY environment variable is required in production for credential encryption");
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'CONNECTOR_ENCRYPTION_KEY environment variable is required in production for credential encryption',
+      );
     }
-    logger.warn("CONNECTOR_ENCRYPTION_KEY not set — using derived development key. Set this variable before deploying to production.");
-    return scryptSync(process.env.DATABASE_URL ?? "rmm-dev-only-key", "rmm-connector-salt", 32);
+    logger.warn(
+      'CONNECTOR_ENCRYPTION_KEY not set — using derived development key. Set this variable before deploying to production.',
+    );
+    return scryptSync(process.env.DATABASE_URL ?? 'rmm-dev-only-key', 'rmm-connector-salt', 32);
   }
-  return scryptSync(key, "rmm-connector-salt", 32);
+  return scryptSync(key, 'rmm-connector-salt', 32);
 })();
 
 export function encryptConfig(config: Record<string, unknown>): string {
   const iv = randomBytes(16);
-  const cipher = createCipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
+  const cipher = createCipheriv('aes-256-gcm', ENCRYPTION_KEY, iv);
   const plaintext = JSON.stringify(config);
-  const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
-  return `enc:${iv.toString("hex")}:${tag.toString("hex")}:${encrypted.toString("hex")}`;
+  return `enc:${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`;
 }
 
 export function decryptConfig(data: unknown): Record<string, unknown> {
-  if (typeof data === "string" && data.startsWith("enc:")) {
-    const parts = data.split(":");
+  if (typeof data === 'string' && data.startsWith('enc:')) {
+    const parts = data.split(':');
     if (parts.length !== 4) return {};
-    const iv = Buffer.from(parts[1], "hex");
-    const tag = Buffer.from(parts[2], "hex");
-    const encrypted = Buffer.from(parts[3], "hex");
-    const decipher = createDecipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
+    const iv = Buffer.from(parts[1], 'hex');
+    const tag = Buffer.from(parts[2], 'hex');
+    const encrypted = Buffer.from(parts[3], 'hex');
+    const decipher = createDecipheriv('aes-256-gcm', ENCRYPTION_KEY, iv);
     decipher.setAuthTag(tag);
     const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-    return JSON.parse(decrypted.toString("utf8"));
+    return JSON.parse(decrypted.toString('utf8'));
   }
-  if (typeof data === "object" && data !== null) return data as Record<string, unknown>;
+  if (typeof data === 'object' && data !== null) return data as Record<string, unknown>;
   return {};
 }
 
 export const auth = authMiddleware({ required: true });
 export const authWrite = authMiddleware({ required: true });
-export const roleAdmin = requireRole("admin");
-export const roleOperator = requireRole("admin", "operator", "ops");
+export const roleAdmin = requireRole('admin');
+export const roleOperator = requireRole('admin', 'operator', 'ops');
 
 type ConnectorRow = {
   id: number;
@@ -156,8 +179,12 @@ export async function queryConnectorById(id: number): Promise<ConnectorRow | nul
 export function stripSecrets(config: Record<string, unknown>): Record<string, unknown> {
   const safe: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(config)) {
-    if (["clientSecret", "password", "apiKey"].includes(k) && typeof v === "string" && v.length > 4) {
-      safe[k] = `${"*".repeat(v.length - 4)}${v.slice(-4)}`;
+    if (
+      ['clientSecret', 'password', 'apiKey'].includes(k) &&
+      typeof v === 'string' &&
+      v.length > 4
+    ) {
+      safe[k] = `${'*'.repeat(v.length - 4)}${v.slice(-4)}`;
     } else {
       safe[k] = v;
     }
@@ -169,7 +196,7 @@ export function buildProviderConfig(row: ConnectorRow): RmmProviderConfig {
   const cfg = decryptConfig(row.config);
   return {
     provider: row.provider,
-    authType: row.authType as RmmProviderConfig["authType"],
+    authType: row.authType as RmmProviderConfig['authType'],
     baseUrl: cfg.baseUrl as string | undefined,
     apiKey: cfg.apiKey as string | undefined,
     clientId: cfg.clientId as string | undefined,

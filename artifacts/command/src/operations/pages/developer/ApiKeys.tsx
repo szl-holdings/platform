@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { Key, Plus, Trash2, Copy, Check, AlertCircle, Eye, EyeOff } from "lucide-react";
-import { apiFetch, isAuthenticated } from "../../lib/admin-api";
-import AuthGate from "@szl-holdings/shared-ui/AuthGate";
+import AuthGate from '@szl-holdings/shared-ui/AuthGate';
+import { AlertCircle, Check, Copy, Eye, EyeOff, Key, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { apiFetch, isAuthenticated } from '../../lib/admin-api';
 
 interface ApiKeyData {
   id: number;
@@ -15,29 +15,38 @@ interface ApiKeyData {
   createdAt: string;
 }
 
-const SCOPES = ["security", "analytics", "maritime", "finance", "ai", "platform", "infrastructure", "observability"];
-const PERMISSIONS = ["read", "write", "admin"];
+const SCOPES = [
+  'security',
+  'analytics',
+  'maritime',
+  'finance',
+  'ai',
+  'platform',
+  'infrastructure',
+  'observability',
+];
+const PERMISSIONS = ['read', 'write', 'admin'];
 
 export default function ApiKeys() {
   const [keys, setKeys] = useState<ApiKeyData[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyName, setNewKeyName] = useState('');
   const [newKeyScopes, setNewKeyScopes] = useState<string[]>([]);
-  const [newKeyPermission, setNewKeyPermission] = useState("read");
+  const [newKeyPermission, setNewKeyPermission] = useState('read');
   const [newKeyRateLimit, setNewKeyRateLimit] = useState(1000);
   const [newKeyExpiry, setNewKeyExpiry] = useState(90);
-  const [createdKey, setCreatedKey] = useState("");
+  const [createdKey, setCreatedKey] = useState('');
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const loadKeys = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiFetch<{ keys: ApiKeyData[] }>("/developer/api-keys");
+      const data = await apiFetch<{ keys: ApiKeyData[] }>('/developer/api-keys');
       setKeys(data.keys);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load API keys");
+      setError(err instanceof Error ? err.message : 'Failed to load API keys');
     }
     setLoading(false);
   }, []);
@@ -47,10 +56,10 @@ export default function ApiKeys() {
   }, [loadKeys]);
 
   const createKey = async () => {
-    setError("");
+    setError('');
     try {
-      const data = await apiFetch<ApiKeyData & { key: string }>("/developer/api-keys", {
-        method: "POST",
+      const data = await apiFetch<ApiKeyData & { key: string }>('/developer/api-keys', {
+        method: 'POST',
         body: JSON.stringify({
           name: newKeyName,
           scopes: newKeyScopes,
@@ -61,20 +70,20 @@ export default function ApiKeys() {
       });
       setCreatedKey(data.key);
       setShowCreate(false);
-      setNewKeyName("");
+      setNewKeyName('');
       setNewKeyScopes([]);
       loadKeys();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create key");
+      setError(err instanceof Error ? err.message : 'Failed to create key');
     }
   };
 
   const revokeKey = async (id: number) => {
     try {
-      await apiFetch(`/developer/api-keys/${id}`, { method: "DELETE" });
+      await apiFetch(`/developer/api-keys/${id}`, { method: 'DELETE' });
       loadKeys();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to revoke key");
+      setError(err instanceof Error ? err.message : 'Failed to revoke key');
     }
   };
 
@@ -85,7 +94,13 @@ export default function ApiKeys() {
   };
 
   if (!isAuthenticated()) {
-    return <AuthGate title="API Key Management" description="Sign in to create and manage your API keys." onAuth={loadKeys} />;
+    return (
+      <AuthGate
+        title="API Key Management"
+        description="Sign in to create and manage your API keys."
+        onAuth={loadKeys}
+      />
+    );
   }
 
   return (
@@ -93,7 +108,9 @@ export default function ApiKeys() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">API Keys</h1>
-          <p className="text-text-secondary">Generate and manage scoped API keys for authenticating with the SZL API.</p>
+          <p className="text-text-secondary">
+            Generate and manage scoped API keys for authenticating with the SZL API.
+          </p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
@@ -113,14 +130,30 @@ export default function ApiKeys() {
 
       {createdKey && (
         <div className="p-4 bg-success/10 border border-success/20 rounded-xl">
-          <p className="text-sm font-medium text-success mb-2">API key created! Copy it now — it won't be shown again.</p>
+          <p className="text-sm font-medium text-success mb-2">
+            API key created! Copy it now — it won't be shown again.
+          </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 px-3 py-2 bg-surface rounded-lg text-sm font-mono text-text-primary border border-border">{createdKey}</code>
-            <button onClick={copyKey} className="p-2 bg-surface rounded-lg border border-border hover:border-border-bright transition-colors">
-              {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4 text-text-secondary" />}
+            <code className="flex-1 px-3 py-2 bg-surface rounded-lg text-sm font-mono text-text-primary border border-border">
+              {createdKey}
+            </code>
+            <button
+              onClick={copyKey}
+              className="p-2 bg-surface rounded-lg border border-border hover:border-border-bright transition-colors"
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-success" />
+              ) : (
+                <Copy className="w-4 h-4 text-text-secondary" />
+              )}
             </button>
           </div>
-          <button onClick={() => setCreatedKey("")} className="text-xs text-text-muted mt-2 hover:text-text-secondary">Dismiss</button>
+          <button
+            onClick={() => setCreatedKey('')}
+            className="text-xs text-text-muted mt-2 hover:text-text-secondary"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -142,8 +175,12 @@ export default function ApiKeys() {
               {SCOPES.map((scope) => (
                 <button
                   key={scope}
-                  onClick={() => setNewKeyScopes((prev) => prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope])}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${newKeyScopes.includes(scope) ? "bg-accent/20 text-accent" : "bg-surface-elevated text-text-muted hover:text-text-secondary"}`}
+                  onClick={() =>
+                    setNewKeyScopes((prev) =>
+                      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
+                    )
+                  }
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${newKeyScopes.includes(scope) ? 'bg-accent/20 text-accent' : 'bg-surface-elevated text-text-muted hover:text-text-secondary'}`}
                 >
                   {scope}
                 </button>
@@ -158,7 +195,11 @@ export default function ApiKeys() {
                 onChange={(e) => setNewKeyPermission(e.target.value)}
                 className="w-full px-3 py-2 bg-surface-elevated border border-border rounded-lg text-sm focus:border-accent focus:outline-none"
               >
-                {PERMISSIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                {PERMISSIONS.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -188,7 +229,10 @@ export default function ApiKeys() {
             >
               Create Key
             </button>
-            <button onClick={() => setShowCreate(false)} className="px-4 py-2 bg-surface-elevated border border-border rounded-lg text-sm text-text-secondary hover:text-text-primary">
+            <button
+              onClick={() => setShowCreate(false)}
+              className="px-4 py-2 bg-surface-elevated border border-border rounded-lg text-sm text-text-secondary hover:text-text-primary"
+            >
               Cancel
             </button>
           </div>
@@ -202,11 +246,16 @@ export default function ApiKeys() {
           <div className="text-center py-12 bg-surface rounded-xl border border-border">
             <Key className="w-12 h-12 text-text-muted mx-auto mb-3" />
             <p className="text-text-secondary">No API keys yet</p>
-            <p className="text-sm text-text-muted">Create your first API key to start using the API</p>
+            <p className="text-sm text-text-muted">
+              Create your first API key to start using the API
+            </p>
           </div>
         ) : (
           keys.map((key) => (
-            <div key={key.id} className="bg-surface rounded-xl border border-border p-4 flex items-center justify-between">
+            <div
+              key={key.id}
+              className="bg-surface rounded-xl border border-border p-4 flex items-center justify-between"
+            >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Key className="w-4 h-4 text-accent" />
@@ -214,13 +263,21 @@ export default function ApiKeys() {
                   <code className="text-xs text-text-muted font-mono">{key.keyPrefix}</code>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <span className="px-1.5 py-0.5 bg-surface-elevated rounded">{key.permissions}</span>
+                  <span className="px-1.5 py-0.5 bg-surface-elevated rounded">
+                    {key.permissions}
+                  </span>
                   {key.scopes.map((s) => (
-                    <span key={s} className="px-1.5 py-0.5 bg-surface-elevated rounded">{s}</span>
+                    <span key={s} className="px-1.5 py-0.5 bg-surface-elevated rounded">
+                      {s}
+                    </span>
                   ))}
                   <span>• {key.rateLimit} req/hr</span>
-                  {key.lastUsedAt && <span>• Last used {new Date(key.lastUsedAt).toLocaleDateString()}</span>}
-                  {key.expiresAt && <span>• Expires {new Date(key.expiresAt).toLocaleDateString()}</span>}
+                  {key.lastUsedAt && (
+                    <span>• Last used {new Date(key.lastUsedAt).toLocaleDateString()}</span>
+                  )}
+                  {key.expiresAt && (
+                    <span>• Expires {new Date(key.expiresAt).toLocaleDateString()}</span>
+                  )}
                 </div>
               </div>
               <button

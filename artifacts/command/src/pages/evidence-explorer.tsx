@@ -1,56 +1,80 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
-
-import { Search, Database, GitBranch, AlertTriangle, CheckCircle, Clock, ExternalLink, ChevronRight } from "lucide-react";
-import { apiUrl, fetchJson, tracedFetch, emitSpan, ACCENT, AGENT_RUN_ATTRS } from "./cognitive/shared";
-import { ConfidenceMeter } from "@szl-holdings/design-system/proof/confidence-meter";
-import { FreshnessChip } from "@szl-holdings/design-system/proof/freshness-chip";
-import { PolicyStateChip, type PolicyState } from "@szl-holdings/design-system/proof/policy-state-chip";
-import { EvidenceDrawer } from "@szl-holdings/design-system/cockpit/evidence-drawer";
-import { RecommendationCard } from "@szl-holdings/design-system/cockpit/recommendation-card";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { EvidenceDrawer } from '@szl-holdings/design-system/cockpit/evidence-drawer';
+import { RecommendationCard } from '@szl-holdings/design-system/cockpit/recommendation-card';
+import { ConfidenceMeter } from '@szl-holdings/design-system/proof/confidence-meter';
+import { FreshnessChip } from '@szl-holdings/design-system/proof/freshness-chip';
+import {
+  type PolicyState,
+  PolicyStateChip,
+} from '@szl-holdings/design-system/proof/policy-state-chip';
+import {
+  AlertTriangle,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Database,
+  ExternalLink,
+  GitBranch,
+  Search,
+} from 'lucide-react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ACCENT,
+  AGENT_RUN_ATTRS,
+  apiUrl,
+  emitSpan,
+  fetchJson,
+  tracedFetch,
+} from './cognitive/shared';
 
 function toPolicy(status: string | undefined): PolicyState | undefined {
   if (!status) return undefined;
-  if (status === "approved" || status === "allowed") return "allowed";
-  if (status === "blocked" || status === "rejected" || status === "denied") return "blocked";
-  if (status === "pending" || status === "review" || status === "escalated") return "requires-approval";
+  if (status === 'approved' || status === 'allowed') return 'allowed';
+  if (status === 'blocked' || status === 'rejected' || status === 'denied') return 'blocked';
+  if (status === 'pending' || status === 'review' || status === 'escalated')
+    return 'requires-approval';
   return undefined;
 }
 
 const DOMAIN_COLORS: Record<string, string> = {
-  maritime:       "#0ea5e9",
-  "real-estate":  "#22c55e",
-  legal:          "#a855f7",
-  security:       "#ef4444",
-  finance:        "#f59e0b",
-  platform:       "#8b7ac8",
-  ai:             "#06b6d4",
+  maritime: '#0ea5e9',
+  'real-estate': '#22c55e',
+  legal: '#a855f7',
+  security: '#ef4444',
+  finance: '#f59e0b',
+  platform: '#8b7ac8',
+  ai: '#06b6d4',
 };
 
 const HEALTH_CONFIG: Record<string, { color: string; icon: React.ReactNode }> = {
-  healthy:     { color: "#22c55e", icon: <CheckCircle className="h-3 w-3" /> },
-  degraded:    { color: "#f59e0b", icon: <AlertTriangle className="h-3 w-3" /> },
-  stale:       { color: "#64748b", icon: <Clock className="h-3 w-3" /> },
-  unknown:     { color: "#334155", icon: <Clock className="h-3 w-3" /> },
+  healthy: { color: '#22c55e', icon: <CheckCircle className="h-3 w-3" /> },
+  degraded: { color: '#f59e0b', icon: <AlertTriangle className="h-3 w-3" /> },
+  stale: { color: '#64748b', icon: <Clock className="h-3 w-3" /> },
+  unknown: { color: '#334155', icon: <Clock className="h-3 w-3" /> },
 };
 
-type Tab = "entities" | "recommendations";
+type Tab = 'entities' | 'recommendations';
 
 const REFRESH_INTERVAL_MS = 30_000;
 const FLASH_DURATION_MS = 2_000;
 
 function usePageVisible(): boolean {
-  const [visible, setVisible] = useState(typeof document === "undefined" ? true : !document.hidden);
+  const [visible, setVisible] = useState(typeof document === 'undefined' ? true : !document.hidden);
   useEffect(() => {
-    if (typeof document === "undefined") return;
+    if (typeof document === 'undefined') return;
     const onChange = () => setVisible(!document.hidden);
-    document.addEventListener("visibilitychange", onChange);
-    return () => document.removeEventListener("visibilitychange", onChange);
+    document.addEventListener('visibilitychange', onChange);
+    return () => document.removeEventListener('visibilitychange', onChange);
   }, []);
   return visible;
 }
 
-function useFlashOnChange<T>(items: T[] | undefined, getId: (it: T) => string, getStamp: (it: T) => string): Set<string> {
+function useFlashOnChange<T>(
+  items: T[] | undefined,
+  getId: (it: T) => string,
+  getStamp: (it: T) => string,
+): Set<string> {
   const prevRef = useRef<Map<string, string> | null>(null);
   const [flashIds, setFlashIds] = useState<Set<string>>(new Set());
   useEffect(() => {
@@ -139,19 +163,24 @@ interface RecommendationChainResponse {
   meta?: { meshVersion: string };
 }
 
-function deriveFreshness(capturedAt: string | undefined): "fresh" | "aging" | "stale" | "unknown" {
-  if (!capturedAt) return "unknown";
+function deriveFreshness(capturedAt: string | undefined): 'fresh' | 'aging' | 'stale' | 'unknown' {
+  if (!capturedAt) return 'unknown';
   const ageMs = Date.now() - new Date(capturedAt).getTime();
-  if (isNaN(ageMs)) return "unknown";
-  if (ageMs < 3_600_000) return "fresh";
-  if (ageMs < 86_400_000) return "aging";
-  return "stale";
+  if (isNaN(ageMs)) return 'unknown';
+  if (ageMs < 3_600_000) return 'fresh';
+  if (ageMs < 86_400_000) return 'aging';
+  return 'stale';
 }
 
-function buildEvidenceItems(raw: EvidenceItem[]): import("@szl-holdings/design-system/cockpit/evidence-drawer").EvidenceItem[] {
+function buildEvidenceItems(
+  raw: EvidenceItem[],
+): import('@szl-holdings/design-system/cockpit/evidence-drawer').EvidenceItem[] {
   return raw.map((e) => ({
     evidenceId: e.evidenceId,
-    kind: (["raw", "normalized", "derived"].includes(e.kind) ? e.kind : "raw") as "raw" | "normalized" | "derived",
+    kind: (['raw', 'normalized', 'derived'].includes(e.kind) ? e.kind : 'raw') as
+      | 'raw'
+      | 'normalized'
+      | 'derived',
     source: e.source,
     ref: e.ref,
     summary: e.summary,
@@ -177,7 +206,10 @@ function EntityList({
 }) {
   if (entities.length === 0) {
     return (
-      <div className="flex items-center justify-center py-16 text-[13px]" style={{ color: "#475569" }}>
+      <div
+        className="flex items-center justify-center py-16 text-[13px]"
+        style={{ color: '#475569' }}
+      >
         No entities found
       </div>
     );
@@ -186,7 +218,7 @@ function EntityList({
   return (
     <div>
       {entities.map((entity) => {
-        const domainColor = DOMAIN_COLORS[entity.domain] ?? "#475569";
+        const domainColor = DOMAIN_COLORS[entity.domain] ?? '#475569';
         const health = HEALTH_CONFIG[entity.health] ?? HEALTH_CONFIG.unknown;
         const isSelected = selected?.entityId === entity.entityId;
         const isFlashing = flashIds.has(entity.entityId);
@@ -196,16 +228,16 @@ function EntityList({
             key={entity.entityId}
             onClick={() => onSelect(entity)}
             style={{
-              display: "flex",
-              alignItems: "center",
+              display: 'flex',
+              alignItems: 'center',
               gap: 12,
-              padding: "12px 16px",
-              borderBottom: "1px solid rgba(255,255,255,0.04)",
-              cursor: "pointer",
-              background: isSelected ? `${ACCENT}0a` : "transparent",
-              borderLeft: isSelected ? `2px solid ${ACCENT}` : "2px solid transparent",
-              transition: "background 0.1s",
-              animation: isFlashing ? "evidenceFlash 2s ease-out" : undefined,
+              padding: '12px 16px',
+              borderBottom: '1px solid rgba(255,255,255,0.04)',
+              cursor: 'pointer',
+              background: isSelected ? `${ACCENT}0a` : 'transparent',
+              borderLeft: isSelected ? `2px solid ${ACCENT}` : '2px solid transparent',
+              transition: 'background 0.1s',
+              animation: isFlashing ? 'evidenceFlash 2s ease-out' : undefined,
             }}
           >
             <div
@@ -215,9 +247,9 @@ function EntityList({
                 borderRadius: 8,
                 background: `${domainColor}15`,
                 border: `1px solid ${domainColor}30`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 flexShrink: 0,
                 color: domainColor,
               }}
@@ -226,17 +258,19 @@ function EntityList({
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#e2e8f0" }}>{entity.label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                  {entity.label}
+                </span>
                 <span
                   style={{
                     fontSize: 9,
                     fontWeight: 700,
                     color: domainColor,
                     background: `${domainColor}12`,
-                    padding: "1px 6px",
+                    padding: '1px 6px',
                     borderRadius: 3,
-                    textTransform: "uppercase",
+                    textTransform: 'uppercase',
                     letterSpacing: 0.5,
                     border: `1px solid ${domainColor}25`,
                   }}
@@ -244,7 +278,15 @@ function EntityList({
                   {entity.domain}
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 11, color: "#475569" }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  fontSize: 11,
+                  color: '#475569',
+                }}
+              >
                 <span>{entity.entityType}</span>
                 {entity.evidenceCount !== undefined && <span>{entity.evidenceCount} evidence</span>}
                 {entity.signalCount !== undefined && <span>{entity.signalCount} signals</span>}
@@ -252,12 +294,20 @@ function EntityList({
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 6, color: health.color, flexShrink: 0 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                color: health.color,
+                flexShrink: 0,
+              }}
+            >
               {health.icon}
               <span style={{ fontSize: 10, fontWeight: 600 }}>{entity.health}</span>
             </div>
 
-            <ChevronRight className="h-4 w-4" style={{ color: "#334155", flexShrink: 0 }} />
+            <ChevronRight className="h-4 w-4" style={{ color: '#334155', flexShrink: 0 }} />
           </div>
         );
       })}
@@ -273,12 +323,16 @@ function EntityDetailPanel({
   onViewEvidence: (evidence: EvidenceItem[]) => void;
 }) {
   const { data, isLoading, error } = useStandardQuery<WhyResponse>({
-    queryKey: ["evidence-explorer", "why", entity.entityId],
-    queryFn: () => tracedFetch<WhyResponse>(
-      "evidence_explorer.entity_why.fetch",
-      apiUrl(`/evidence-graph/why/${entity.entityId}`),
-      { [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: entity.entityId, [AGENT_RUN_ATTRS.RUN_DOMAIN]: entity.domain }
-    ),
+    queryKey: ['evidence-explorer', 'why', entity.entityId],
+    queryFn: () =>
+      tracedFetch<WhyResponse>(
+        'evidence_explorer.entity_why.fetch',
+        apiUrl(`/evidence-graph/why/${entity.entityId}`),
+        {
+          [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: entity.entityId,
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: entity.domain,
+        },
+      ),
     staleTime: 15_000,
     refetchInterval: REFRESH_INTERVAL_MS,
     refetchIntervalInBackground: false,
@@ -287,41 +341,96 @@ function EntityDetailPanel({
   const why = data?.why;
 
   return (
-    <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20, position: "sticky", top: 20, height: "fit-content" }}>
+    <div
+      style={{
+        background: 'rgba(255,255,255,0.02)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 12,
+        padding: 20,
+        position: 'sticky',
+        top: 20,
+        height: 'fit-content',
+      }}
+    >
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>{entity.label}</div>
-        <div style={{ fontSize: 11, color: "#475569" }}>{entity.entityType} · {entity.domain}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>
+          {entity.label}
+        </div>
+        <div style={{ fontSize: 11, color: '#475569' }}>
+          {entity.entityType} · {entity.domain}
+        </div>
       </div>
 
       {isLoading && (
-        <div style={{ textAlign: "center", padding: "30px 0" }}>
-          <div style={{ width: 20, height: 20, border: `2px solid ${ACCENT}`, borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto" }} />
+        <div style={{ textAlign: 'center', padding: '30px 0' }}>
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              border: `2px solid ${ACCENT}`,
+              borderTop: '2px solid transparent',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite',
+              margin: '0 auto',
+            }}
+          />
         </div>
       )}
 
-      {error && (
-        <div style={{ color: "#ef4444", fontSize: 12 }}>Failed to load evidence</div>
-      )}
+      {error && <div style={{ color: '#ef4444', fontSize: 12 }}>Failed to load evidence</div>}
 
       {why && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {why.evidence.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#475569',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                  marginBottom: 10,
+                }}
+              >
                 Evidence ({why.evidence.length})
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
                 {why.evidence.slice(0, 3).map((ev) => (
-                  <div key={ev.evidenceId} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 7, padding: "8px 10px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: "#8b7ac8", background: "#8b7ac815", padding: "1px 6px", borderRadius: 3 }}>
+                  <div
+                    key={ev.evidenceId}
+                    style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      borderRadius: 7,
+                      padding: '8px 10px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: '#8b7ac8',
+                          background: '#8b7ac815',
+                          padding: '1px 6px',
+                          borderRadius: 3,
+                        }}
+                      >
                         {ev.kind}
                       </span>
-                      <span style={{ fontSize: 11, color: "#64748b" }}>{ev.source}</span>
+                      <span style={{ fontSize: 11, color: '#64748b' }}>{ev.source}</span>
                     </div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.5, marginBottom: 6 }}>{ev.summary}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <ConfidenceMeter value={Math.round((ev.confidence ?? 0.8) * 100)} variant="compact" />
+                    <div
+                      style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.5, marginBottom: 6 }}
+                    >
+                      {ev.summary}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <ConfidenceMeter
+                        value={Math.round((ev.confidence ?? 0.8) * 100)}
+                        variant="compact"
+                      />
                       <FreshnessChip timestamp={ev.capturedAt} />
                     </div>
                   </div>
@@ -330,7 +439,17 @@ function EntityDetailPanel({
               {why.evidence.length > 3 && (
                 <button
                   onClick={() => onViewEvidence(why.evidence)}
-                  style={{ width: "100%", background: `${ACCENT}12`, border: `1px solid ${ACCENT}30`, borderRadius: 6, padding: "7px 0", color: ACCENT, fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                  style={{
+                    width: '100%',
+                    background: `${ACCENT}12`,
+                    border: `1px solid ${ACCENT}30`,
+                    borderRadius: 6,
+                    padding: '7px 0',
+                    color: ACCENT,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
                 >
                   View all {why.evidence.length} evidence items
                 </button>
@@ -338,7 +457,17 @@ function EntityDetailPanel({
               {why.evidence.length <= 3 && why.evidence.length > 0 && (
                 <button
                   onClick={() => onViewEvidence(why.evidence)}
-                  style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 6, padding: "7px 0", color: "#64748b", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    borderRadius: 6,
+                    padding: '7px 0',
+                    color: '#64748b',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
                 >
                   Open Evidence Drawer
                 </button>
@@ -348,20 +477,45 @@ function EntityDetailPanel({
 
           {why.recommendations.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#475569',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                  marginBottom: 8,
+                }}
+              >
                 Linked Recommendations ({why.recommendations.length})
               </div>
               {why.recommendations.slice(0, 2).map((rec) => (
-                <div key={rec.recommendationId} style={{ padding: "8px 10px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 7, marginBottom: 6 }}>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "#e2e8f0", marginBottom: 4 }}>{rec.title}</div>
-                  <ConfidenceMeter value={Math.round((rec.confidence ?? 0.8) * 100)} variant="compact" />
+                <div
+                  key={rec.recommendationId}
+                  style={{
+                    padding: '8px 10px',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: 7,
+                    marginBottom: 6,
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#e2e8f0', marginBottom: 4 }}>
+                    {rec.title}
+                  </div>
+                  <ConfidenceMeter
+                    value={Math.round((rec.confidence ?? 0.8) * 100)}
+                    variant="compact"
+                  />
                 </div>
               ))}
             </div>
           )}
 
           {why.evidence.length === 0 && why.recommendations.length === 0 && (
-            <div style={{ textAlign: "center", padding: "20px 0", color: "#334155", fontSize: 12 }}>No evidence recorded for this entity</div>
+            <div style={{ textAlign: 'center', padding: '20px 0', color: '#334155', fontSize: 12 }}>
+              No evidence recorded for this entity
+            </div>
           )}
         </div>
       )}
@@ -370,97 +524,119 @@ function EntityDetailPanel({
 }
 
 export default function EvidenceExplorer() {
-  const [tab, setTab] = useState<Tab>("entities");
-  const [search, setSearch] = useState("");
-  const [domainFilter, setDomainFilter] = useState("all");
+  const [tab, setTab] = useState<Tab>('entities');
+  const [search, setSearch] = useState('');
+  const [domainFilter, setDomainFilter] = useState('all');
   const pageVisible = usePageVisible();
   const [selectedEntity, setSelectedEntity] = useState<EntitySnapshot | null>(null);
   const [drawerEvidence, setDrawerEvidence] = useState<EvidenceItem[]>([]);
-  const [drawerTitle, setDrawerTitle] = useState("Evidence");
+  const [drawerTitle, setDrawerTitle] = useState('Evidence');
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const pageLoadRef = useRef(performance.now());
   useEffect(() => {
     const loadedAt = performance.now();
     emitSpan({
-      name: "page.load",
+      name: 'page.load',
       attributes: {
-        [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer",
+        [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: '/operations/evidence-explorer',
         [AGENT_RUN_ATTRS.PAGE_LOAD_LATENCY_MS]: Math.round(loadedAt - pageLoadRef.current),
-        [AGENT_RUN_ATTRS.RUN_DOMAIN]: "platform",
+        [AGENT_RUN_ATTRS.RUN_DOMAIN]: 'platform',
       },
       durationMs: Math.round(loadedAt - pageLoadRef.current),
-      status: "ok",
+      status: 'ok',
     });
   }, []);
 
   const { data: entitiesData, isLoading: entitiesLoading } = useStandardQuery({
-    queryKey: ["evidence-explorer", "entities", domainFilter],
+    queryKey: ['evidence-explorer', 'entities', domainFilter],
     queryFn: () => {
       const params = new URLSearchParams();
-      if (domainFilter !== "all") params.set("domain", domainFilter);
+      if (domainFilter !== 'all') params.set('domain', domainFilter);
       const url = apiUrl(`/evidence-graph/entities?${params}`);
       return tracedFetch<{ entities: EntitySnapshot[]; total: number }>(
-        "evidence_explorer.entities.fetch",
+        'evidence_explorer.entities.fetch',
         url,
-        { [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer", [AGENT_RUN_ATTRS.EVIDENCE_KIND]: "normalized", domain: domainFilter }
+        {
+          [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: '/operations/evidence-explorer',
+          [AGENT_RUN_ATTRS.EVIDENCE_KIND]: 'normalized',
+          domain: domainFilter,
+        },
       );
     },
     staleTime: 15_000,
-    enabled: tab === "entities",
-    refetchInterval: tab === "entities" && pageVisible ? REFRESH_INTERVAL_MS : false,
+    enabled: tab === 'entities',
+    refetchInterval: tab === 'entities' && pageVisible ? REFRESH_INTERVAL_MS : false,
     refetchIntervalInBackground: false,
   });
 
   const { data: recsData, isLoading: recsLoading } = useStandardQuery({
-    queryKey: ["evidence-explorer", "recommendations", domainFilter],
+    queryKey: ['evidence-explorer', 'recommendations', domainFilter],
     queryFn: () => {
-      const params = new URLSearchParams({ limit: "100" });
-      if (domainFilter !== "all") params.set("domain", domainFilter);
+      const params = new URLSearchParams({ limit: '100' });
+      if (domainFilter !== 'all') params.set('domain', domainFilter);
       const url = apiUrl(`/evidence-graph/recommendations?${params}`);
       return tracedFetch<{ recommendations: Recommendation[]; total: number }>(
-        "evidence_explorer.recommendations.fetch",
+        'evidence_explorer.recommendations.fetch',
         url,
-        { [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer", domain: domainFilter }
+        { [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: '/operations/evidence-explorer', domain: domainFilter },
       );
     },
     staleTime: 15_000,
-    enabled: tab === "recommendations",
-    refetchInterval: tab === "recommendations" && pageVisible ? REFRESH_INTERVAL_MS : false,
+    enabled: tab === 'recommendations',
+    refetchInterval: tab === 'recommendations' && pageVisible ? REFRESH_INTERVAL_MS : false,
     refetchIntervalInBackground: false,
   });
 
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const { data: recChainData } = useStandardQuery<RecommendationChainResponse>({
-    queryKey: ["evidence-explorer", "rec-chain", selectedRec?.recommendationId],
-    queryFn: () => tracedFetch<RecommendationChainResponse>(
-      "evidence_explorer.rec_chain.fetch",
-      apiUrl(`/evidence-graph/recommendations/${selectedRec!.recommendationId}`),
-      {
-        [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: selectedRec!.recommendationId,
-        [AGENT_RUN_ATTRS.RUN_DOMAIN]: selectedRec!.domain,
-        [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer",
-      }
-    ),
+    queryKey: ['evidence-explorer', 'rec-chain', selectedRec?.recommendationId],
+    queryFn: () =>
+      tracedFetch<RecommendationChainResponse>(
+        'evidence_explorer.rec_chain.fetch',
+        apiUrl(`/evidence-graph/recommendations/${selectedRec!.recommendationId}`),
+        {
+          [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: selectedRec!.recommendationId,
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: selectedRec!.domain,
+          [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: '/operations/evidence-explorer',
+        },
+      ),
     staleTime: 15_000,
     enabled: !!selectedRec,
     refetchInterval: selectedRec && pageVisible ? REFRESH_INTERVAL_MS : false,
     refetchIntervalInBackground: false,
   });
 
-  const domains = ["all", "maritime", "real-estate", "legal", "security", "finance", "platform", "ai"];
+  const domains = [
+    'all',
+    'maritime',
+    'real-estate',
+    'legal',
+    'security',
+    'finance',
+    'platform',
+    'ai',
+  ];
 
-  const filteredEntities = (entitiesData?.entities ?? []).filter((e) =>
-    !search || e.label.toLowerCase().includes(search.toLowerCase()) || e.entityType.toLowerCase().includes(search.toLowerCase())
+  const filteredEntities = (entitiesData?.entities ?? []).filter(
+    (e) =>
+      !search ||
+      e.label.toLowerCase().includes(search.toLowerCase()) ||
+      e.entityType.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const filteredRecs = (recsData?.recommendations ?? []).filter((r) =>
-    !search || r.title.toLowerCase().includes(search.toLowerCase()) || r.summary.toLowerCase().includes(search.toLowerCase())
+  const filteredRecs = (recsData?.recommendations ?? []).filter(
+    (r) =>
+      !search ||
+      r.title.toLowerCase().includes(search.toLowerCase()) ||
+      r.summary.toLowerCase().includes(search.toLowerCase()),
   );
 
   useEffect(() => {
     if (!selectedRec || !recsData?.recommendations) return;
-    const updated = recsData.recommendations.find((r) => r.recommendationId === selectedRec.recommendationId);
+    const updated = recsData.recommendations.find(
+      (r) => r.recommendationId === selectedRec.recommendationId,
+    );
     if (!updated) return;
     if (
       updated.confidence !== selectedRec.confidence ||
@@ -492,69 +668,113 @@ export default function EvidenceExplorer() {
   const entityFlashIds = useFlashOnChange(
     entitiesData?.entities,
     (e) => e.entityId,
-    (e) => `${e.updatedAt}|${e.signalCount ?? ""}|${e.evidenceCount ?? ""}|${e.health}`,
+    (e) => `${e.updatedAt}|${e.signalCount ?? ''}|${e.evidenceCount ?? ''}|${e.health}`,
   );
   const recFlashIds = useFlashOnChange(
     recsData?.recommendations,
     (r) => r.recommendationId,
-    (r) => `${r.generatedAt}|${r.confidence}|${r.status}|${r.evidenceCount ?? ""}`,
+    (r) => `${r.generatedAt}|${r.confidence}|${r.status}|${r.evidenceCount ?? ''}`,
   );
 
   const openDrawerForEntity = useCallback((evidence: EvidenceItem[], entityLabel?: string) => {
     setDrawerEvidence(evidence);
-    setDrawerTitle(`Evidence — ${entityLabel ?? "Entity"}`);
+    setDrawerTitle(`Evidence — ${entityLabel ?? 'Entity'}`);
     setDrawerOpen(true);
   }, []);
 
-  const openDrawerForRec = useCallback((rec: Recommendation) => {
-    if (recChainData?.chain?.evidence) {
-      setDrawerEvidence(recChainData.chain.evidence);
-      setDrawerTitle(`Evidence — ${rec.title}`);
-      setDrawerOpen(true);
-    }
-  }, [recChainData]);
+  const openDrawerForRec = useCallback(
+    (rec: Recommendation) => {
+      if (recChainData?.chain?.evidence) {
+        setDrawerEvidence(recChainData.chain.evidence);
+        setDrawerTitle(`Evidence — ${rec.title}`);
+        setDrawerOpen(true);
+      }
+    },
+    [recChainData],
+  );
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "entities", label: "Entity View" },
-    { id: "recommendations", label: "Recommendation View" },
+    { id: 'entities', label: 'Entity View' },
+    { id: 'recommendations', label: 'Recommendation View' },
   ];
 
   const meshStatus = entitiesData
     ? `${entitiesData.total} entities`
     : recsData
-    ? `${recsData.total} recommendations`
-    : "Loading…";
+      ? `${recsData.total} recommendations`
+      : 'Loading…';
 
   return (
-    <div style={{ background: "#080c14", minHeight: "100vh", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" }}>
-      <div style={{ maxWidth: 1440, margin: "0 auto", padding: "24px 20px" }}>
+    <div
+      style={{
+        background: '#080c14',
+        minHeight: '100vh',
+        color: '#e2e8f0',
+        fontFamily: 'system-ui, sans-serif',
+      }}
+    >
+      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '24px 20px' }}>
         <div style={{ marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: "#e2e8f0" }}>Evidence Explorer</span>
-            <span style={{ fontSize: 11, color: ACCENT, background: `${ACCENT}20`, padding: "2px 10px", borderRadius: 20, border: `1px solid ${ACCENT}40`, fontWeight: 600 }}>LIVE</span>
-            <span style={{ fontSize: 11, color: "#475569", marginLeft: "auto" }}>{meshStatus}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+            <span style={{ fontSize: 22, fontWeight: 700, color: '#e2e8f0' }}>
+              Evidence Explorer
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                color: ACCENT,
+                background: `${ACCENT}20`,
+                padding: '2px 10px',
+                borderRadius: 20,
+                border: `1px solid ${ACCENT}40`,
+                fontWeight: 600,
+              }}
+            >
+              LIVE
+            </span>
+            <span style={{ fontSize: 11, color: '#475569', marginLeft: 'auto' }}>{meshStatus}</span>
           </div>
-          <p style={{ color: "#64748b", fontSize: 13, margin: 0 }}>
-            Inspect evidence behind every entity and recommendation — raw signals, normalized facts, confidence, freshness, and what changed recently.
+          <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+            Inspect evidence behind every entity and recommendation — raw signals, normalized facts,
+            confidence, freshness, and what changed recently.
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", background: "rgba(255,255,255,0.03)", borderRadius: 8, padding: 4 }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            marginBottom: 20,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              background: 'rgba(255,255,255,0.03)',
+              borderRadius: 8,
+              padding: 4,
+            }}
+          >
             {tabs.map((t) => (
               <button
                 key={t.id}
-                onClick={() => { setTab(t.id); setSelectedEntity(null); setSelectedRec(null); }}
+                onClick={() => {
+                  setTab(t.id);
+                  setSelectedEntity(null);
+                  setSelectedRec(null);
+                }}
                 style={{
-                  background: tab === t.id ? ACCENT : "transparent",
-                  color: tab === t.id ? "#fff" : "#64748b",
-                  border: "none",
+                  background: tab === t.id ? ACCENT : 'transparent',
+                  color: tab === t.id ? '#fff' : '#64748b',
+                  border: 'none',
                   borderRadius: 6,
-                  padding: "7px 18px",
+                  padding: '7px 18px',
                   fontSize: 12,
                   fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
                 }}
               >
                 {t.label}
@@ -562,60 +782,100 @@ export default function EvidenceExplorer() {
             ))}
           </div>
 
-          <div style={{ position: "relative", flex: 1, maxWidth: 360 }}>
-            <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "#475569" }} />
+          <div style={{ position: 'relative', flex: 1, maxWidth: 360 }}>
+            <Search
+              style={{
+                position: 'absolute',
+                left: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: 14,
+                height: 14,
+                color: '#475569',
+              }}
+            />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={tab === "entities" ? "Search entities…" : "Search recommendations…"}
+              placeholder={tab === 'entities' ? 'Search entities…' : 'Search recommendations…'}
               style={{
-                width: "100%",
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                width: '100%',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 8,
-                color: "#e2e8f0",
+                color: '#e2e8f0',
                 fontSize: 12,
-                padding: "8px 10px 8px 30px",
-                outline: "none",
+                padding: '8px 10px 8px 30px',
+                outline: 'none',
               }}
             />
           </div>
 
-          <div style={{ display: "flex", gap: 4 }}>
+          <div style={{ display: 'flex', gap: 4 }}>
             {domains.slice(0, 6).map((d) => (
               <button
                 key={d}
                 onClick={() => setDomainFilter(d)}
                 style={{
-                  background: domainFilter === d ? (DOMAIN_COLORS[d] ?? ACCENT) : "rgba(255,255,255,0.04)",
-                  color: domainFilter === d ? "#fff" : "#64748b",
-                  border: "none",
+                  background:
+                    domainFilter === d ? (DOMAIN_COLORS[d] ?? ACCENT) : 'rgba(255,255,255,0.04)',
+                  color: domainFilter === d ? '#fff' : '#64748b',
+                  border: 'none',
                   borderRadius: 5,
-                  padding: "5px 10px",
+                  padding: '5px 10px',
                   fontSize: 10,
                   fontWeight: 700,
-                  cursor: "pointer",
-                  textTransform: "uppercase",
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
                   letterSpacing: 0.5,
-                  transition: "all 0.12s",
+                  transition: 'all 0.12s',
                 }}
               >
-                {d === "all" ? "All" : d}
+                {d === 'all' ? 'All' : d}
               </button>
             ))}
           </div>
         </div>
 
-        {tab === "entities" && (
-          <div style={{ display: "grid", gridTemplateColumns: selectedEntity ? "1fr 380px" : "1fr", gap: 20, alignItems: "start" }}>
-            <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, overflow: "hidden" }}>
+        {tab === 'entities' && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: selectedEntity ? '1fr 380px' : '1fr',
+              gap: 20,
+              alignItems: 'start',
+            }}
+          >
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 12,
+                overflow: 'hidden',
+              }}
+            >
               {entitiesLoading ? (
-                <div style={{ textAlign: "center", padding: "60px 0" }}>
-                  <div style={{ width: 24, height: 24, border: `2px solid ${ACCENT}`, borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto" }} />
+                <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      border: `2px solid ${ACCENT}`,
+                      borderTop: '2px solid transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite',
+                      margin: '0 auto',
+                    }}
+                  />
                 </div>
               ) : (
-                <EntityList entities={filteredEntities} selected={selectedEntity} onSelect={setSelectedEntity} flashIds={entityFlashIds} />
+                <EntityList
+                  entities={filteredEntities}
+                  selected={selectedEntity}
+                  onSelect={setSelectedEntity}
+                  flashIds={entityFlashIds}
+                />
               )}
             </div>
 
@@ -628,86 +888,200 @@ export default function EvidenceExplorer() {
           </div>
         )}
 
-        {tab === "recommendations" && (
-          <div style={{ display: "grid", gridTemplateColumns: selectedRec ? "1fr 360px" : "1fr", gap: 20, alignItems: "start" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {tab === 'recommendations' && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: selectedRec ? '1fr 360px' : '1fr',
+              gap: 20,
+              alignItems: 'start',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {recsLoading ? (
-                <div style={{ textAlign: "center", padding: "60px 0" }}>
-                  <div style={{ width: 24, height: 24, border: `2px solid ${ACCENT}`, borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto" }} />
+                <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      border: `2px solid ${ACCENT}`,
+                      borderTop: '2px solid transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite',
+                      margin: '0 auto',
+                    }}
+                  />
                 </div>
               ) : filteredRecs.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#475569", fontSize: 13 }}>No recommendations found</div>
+                <div
+                  style={{ textAlign: 'center', padding: '60px 0', color: '#475569', fontSize: 13 }}
+                >
+                  No recommendations found
+                </div>
               ) : (
                 filteredRecs.map((rec) => (
                   <div
                     key={rec.recommendationId}
                     style={{
                       borderRadius: 12,
-                      animation: recFlashIds.has(rec.recommendationId) ? "evidenceFlash 2s ease-out" : undefined,
+                      animation: recFlashIds.has(rec.recommendationId)
+                        ? 'evidenceFlash 2s ease-out'
+                        : undefined,
                     }}
                   >
-                  <RecommendationCard
-                    recommendationId={rec.recommendationId}
-                    title={rec.title}
-                    summary={rec.summary}
-                    confidence={Math.round((rec.confidence ?? 0.8) * 100)}
-                    domain={rec.domain}
-                    generatedAt={rec.generatedAt}
-                    evidenceCount={rec.evidenceCount}
-                    modelId={rec.modelId}
-                    policyState={toPolicy(rec.status)}
-                    onInspect={() => setSelectedRec(rec)}
-                    variant="full"
-                    className={selectedRec?.recommendationId === rec.recommendationId ? "border-[#8b7ac850]" : ""}
-                  />
+                    <RecommendationCard
+                      recommendationId={rec.recommendationId}
+                      title={rec.title}
+                      summary={rec.summary}
+                      confidence={Math.round((rec.confidence ?? 0.8) * 100)}
+                      domain={rec.domain}
+                      generatedAt={rec.generatedAt}
+                      evidenceCount={rec.evidenceCount}
+                      modelId={rec.modelId}
+                      policyState={toPolicy(rec.status)}
+                      onInspect={() => setSelectedRec(rec)}
+                      variant="full"
+                      className={
+                        selectedRec?.recommendationId === rec.recommendationId
+                          ? 'border-[#8b7ac850]'
+                          : ''
+                      }
+                    />
                   </div>
                 ))
               )}
             </div>
 
             {selectedRec && (
-              <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 20, position: "sticky", top: 20 }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: 12,
+                  padding: 20,
+                  position: 'sticky',
+                  top: 20,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    marginBottom: 14,
+                  }}
+                >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0", marginBottom: 6, lineHeight: 1.4 }}>{selectedRec.title}</div>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                      <ConfidenceMeter value={Math.round((selectedRec.confidence ?? 0.8) * 100)} variant="compact" />
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: '#e2e8f0',
+                        marginBottom: 6,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {selectedRec.title}
+                    </div>
+                    <div
+                      style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
+                    >
+                      <ConfidenceMeter
+                        value={Math.round((selectedRec.confidence ?? 0.8) * 100)}
+                        variant="compact"
+                      />
                       <FreshnessChip timestamp={selectedRec.generatedAt} />
                       {toPolicy(selectedRec.status) && (
                         <PolicyStateChip state={toPolicy(selectedRec.status)!} />
                       )}
                     </div>
                   </div>
-                  <button onClick={() => setSelectedRec(null)} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 18, marginLeft: 10 }}>×</button>
+                  <button
+                    onClick={() => setSelectedRec(null)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#64748b',
+                      cursor: 'pointer',
+                      fontSize: 18,
+                      marginLeft: 10,
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
 
-                <p style={{ fontSize: 12, color: "#64748b", lineHeight: 1.6, marginBottom: 14 }}>{selectedRec.summary}</p>
+                <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 14 }}>
+                  {selectedRec.summary}
+                </p>
 
                 {recChainData?.chain?.evidence && recChainData.chain.evidence.length > 0 ? (
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: '#475569',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
+                        marginBottom: 10,
+                      }}
+                    >
                       Evidence Chain ({recChainData.chain.evidence.length})
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {recChainData.chain.evidence.slice(0, 3).map((ev) => (
-                        <div key={ev.evidenceId} style={{ padding: "8px 10px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 7 }}>
-                          <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>{ev.summary}</div>
-                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                            <ConfidenceMeter value={Math.round((ev.confidence ?? 0.8) * 100)} variant="compact" />
-                            <span style={{ fontSize: 10, color: "#475569" }}>{ev.source}</span>
+                        <div
+                          key={ev.evidenceId}
+                          style={{
+                            padding: '8px 10px',
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.06)',
+                            borderRadius: 7,
+                          }}
+                        >
+                          <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>
+                            {ev.summary}
+                          </div>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <ConfidenceMeter
+                              value={Math.round((ev.confidence ?? 0.8) * 100)}
+                              variant="compact"
+                            />
+                            <span style={{ fontSize: 10, color: '#475569' }}>{ev.source}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                     <button
                       onClick={() => openDrawerForRec(selectedRec)}
-                      style={{ width: "100%", marginTop: 10, background: `${ACCENT}12`, border: `1px solid ${ACCENT}30`, borderRadius: 6, padding: "8px 0", color: ACCENT, fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                      style={{
+                        width: '100%',
+                        marginTop: 10,
+                        background: `${ACCENT}12`,
+                        border: `1px solid ${ACCENT}30`,
+                        borderRadius: 6,
+                        padding: '8px 0',
+                        color: ACCENT,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
                     >
                       Open Full Evidence Drawer
                     </button>
                   </div>
                 ) : (
-                  <div style={{ textAlign: "center", padding: "20px 0", color: "#334155", fontSize: 12 }}>Loading evidence chain…</div>
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      padding: '20px 0',
+                      color: '#334155',
+                      fontSize: 12,
+                    }}
+                  >
+                    Loading evidence chain…
+                  </div>
                 )}
               </div>
             )}

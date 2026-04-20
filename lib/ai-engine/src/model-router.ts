@@ -9,11 +9,13 @@
  */
 
 import {
-  routeModel,
-  type RouteClass,
-  type RouteResult,
-} from "./providers/hf-router.js";
-import { chatCompletion, chatCompletionWithFallback, type HFChatMessage, type HFToolDef, type HFCompletionResult } from "./providers/hf-client.js";
+  chatCompletion,
+  chatCompletionWithFallback,
+  type HFChatMessage,
+  type HFCompletionResult,
+  type HFToolDef,
+} from './providers/hf-client.js';
+import { type RouteClass, type RouteResult, routeModel } from './providers/hf-router.js';
 
 export type { RouteClass, RouteResult };
 
@@ -45,17 +47,17 @@ export interface TenantFeatureToggles {
   overrideModel?: Partial<Record<RouteClass, string>>;
 }
 
-const HIGH_RISK_LANES: RouteClass[] = ["planning", "reasoning", "tool_calling"];
+const HIGH_RISK_LANES: RouteClass[] = ['planning', 'reasoning', 'tool_calling'];
 
 const COST_PER_TOKEN_USD: Record<string, number> = {
-  "Qwen/Qwen3-8B": 0.0000002,
-  "Qwen/Qwen3-0.6B": 0.00000005,
-  "Qwen/Qwen2.5-VL-7B-Instruct": 0.0000002,
+  'Qwen/Qwen3-8B': 0.0000002,
+  'Qwen/Qwen3-0.6B': 0.00000005,
+  'Qwen/Qwen2.5-VL-7B-Instruct': 0.0000002,
   default: 0.0000002,
 };
 
 function estimateCost(model: string, totalTokens: number): number {
-  const ratePerToken = COST_PER_TOKEN_USD[model] ?? COST_PER_TOKEN_USD["default"]!;
+  const ratePerToken = COST_PER_TOKEN_USD[model] ?? COST_PER_TOKEN_USD['default']!;
   return ratePerToken * totalTokens;
 }
 
@@ -69,8 +71,7 @@ async function emitTelemetry(t: ModelRouterTelemetry): Promise<void> {
   for (const handler of _telemetryHandlers) {
     try {
       await handler(t);
-    } catch {
-    }
+    } catch {}
   }
 }
 
@@ -81,15 +82,22 @@ export function checkTenantPolicy(
   if (!toggles) return { allowed: true };
 
   if (toggles.disabledLanes?.includes(routeClass)) {
-    return { allowed: false, reason: `Lane '${routeClass}' is disabled for tenant ${toggles.tenantId ?? "global"}` };
+    return {
+      allowed: false,
+      reason: `Lane '${routeClass}' is disabled for tenant ${toggles.tenantId ?? 'global'}`,
+    };
   }
 
   const requiresApproval =
     toggles.requireApprovalForLanes?.includes(routeClass) ||
-    (process.env["AI_REQUIRE_APPROVAL_FOR_HIGH_RISK"] === "true" && HIGH_RISK_LANES.includes(routeClass));
+    (process.env['AI_REQUIRE_APPROVAL_FOR_HIGH_RISK'] === 'true' &&
+      HIGH_RISK_LANES.includes(routeClass));
 
   if (requiresApproval) {
-    return { allowed: false, reason: `Lane '${routeClass}' requires explicit approval before execution` };
+    return {
+      allowed: false,
+      reason: `Lane '${routeClass}' requires explicit approval before execution`,
+    };
   }
 
   return { allowed: true };
@@ -99,7 +107,7 @@ export interface RouterCallOptions {
   messages: HFChatMessage[];
   routeClass: RouteClass;
   tools?: HFToolDef[];
-  responseFormat?: { type: "json_object" } | { type: "text" };
+  responseFormat?: { type: 'json_object' } | { type: 'text' };
   overrideModel?: string;
   overrideMaxTokens?: number;
   overrideTemperature?: number;
@@ -134,18 +142,21 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
   if (!policyCheck.allowed) {
     throw Object.assign(
       new Error(policyCheck.reason ?? `Route class '${routeClass}' not allowed`),
-      { code: "POLICY_DENIED", routeClass },
+      { code: 'POLICY_DENIED', routeClass },
     );
   }
 
-  let modelOverride = overrideModel ?? tenantToggles?.overrideModel?.[routeClass];
+  const modelOverride = overrideModel ?? tenantToggles?.overrideModel?.[routeClass];
 
-  if (tenantToggles?.allowedProviders?.length && !tenantToggles.allowedProviders.includes(
-    routeModel(routeClass).provider,
-  )) {
+  if (
+    tenantToggles?.allowedProviders?.length &&
+    !tenantToggles.allowedProviders.includes(routeModel(routeClass).provider)
+  ) {
     throw Object.assign(
-      new Error(`Provider '${routeModel(routeClass).provider}' not in allowed providers for tenant`),
-      { code: "PROVIDER_NOT_ALLOWED" },
+      new Error(
+        `Provider '${routeModel(routeClass).provider}' not in allowed providers for tenant`,
+      ),
+      { code: 'PROVIDER_NOT_ALLOWED' },
     );
   }
 
@@ -163,7 +174,7 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     try {
       completion = await chatCompletion(messages, route, { tools, responseFormat });
     } catch (primaryErr) {
-      const fallbackRoute = routeModel("background_batch", { model: modelOverride });
+      const fallbackRoute = routeModel('background_batch', { model: modelOverride });
       try {
         completion = await chatCompletion(messages, fallbackRoute, { tools, responseFormat });
         usedFallback = true;
@@ -181,8 +192,10 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
 
   if (tenantToggles?.maxCostPerCallUsd != null && costUsd > tenantToggles.maxCostPerCallUsd) {
     throw Object.assign(
-      new Error(`Cost ceiling exceeded: ${costUsd.toFixed(6)} USD > ${tenantToggles.maxCostPerCallUsd} USD limit`),
-      { code: "COST_CEILING_EXCEEDED" },
+      new Error(
+        `Cost ceiling exceeded: ${costUsd.toFixed(6)} USD > ${tenantToggles.maxCostPerCallUsd} USD limit`,
+      ),
+      { code: 'COST_CEILING_EXCEEDED' },
     );
   }
 
@@ -217,10 +230,22 @@ export interface RouterConfig {
 export function getRouterConfig(): RouterConfig {
   return {
     routes: Object.fromEntries(
-      (["classification", "triage", "reasoning", "planning", "tool_calling", "vision_understanding", "background_batch", "extraction", "summarization"] as RouteClass[]).map(rc => [rc, routeModel(rc)])
+      (
+        [
+          'classification',
+          'triage',
+          'reasoning',
+          'planning',
+          'tool_calling',
+          'vision_understanding',
+          'background_batch',
+          'extraction',
+          'summarization',
+        ] as RouteClass[]
+      ).map((rc) => [rc, routeModel(rc)]),
     ),
     highRiskLanes: HIGH_RISK_LANES,
-    requireApprovalForHighRisk: process.env["AI_REQUIRE_APPROVAL_FOR_HIGH_RISK"] !== "false",
-    executionMode: process.env["AI_EXECUTION_MODE"] ?? "propose_only",
+    requireApprovalForHighRisk: process.env['AI_REQUIRE_APPROVAL_FOR_HIGH_RISK'] !== 'false',
+    executionMode: process.env['AI_EXECUTION_MODE'] ?? 'propose_only',
   };
 }

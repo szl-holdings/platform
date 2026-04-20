@@ -6,18 +6,23 @@
  * replayState(), and detectDrift() to the core twin engine.
  */
 
-import { db, spatialTwinSnapshotsTable, type SpatialTwinCategory } from "@szl-holdings/db";
-import { eq, and, desc, asc } from "drizzle-orm";
-import { randomUUID } from "crypto";
-import { twinRegistry, type TwinState, type SimulationScenario, type SimulationResult } from "./twin-engine.js";
+import { db, type SpatialTwinCategory, spatialTwinSnapshotsTable } from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, asc, desc, eq } from 'drizzle-orm';
+import {
+  type SimulationResult,
+  type SimulationScenario,
+  type TwinState,
+  twinRegistry,
+} from './twin-engine.js';
 
 export type ExtendedTwinType = SpatialTwinCategory;
 
 export interface MatterTwinState {
   matterId: string;
   matterName: string;
-  matterType: "litigation" | "arbitration" | "regulatory" | "transaction" | "advisory";
-  status: "active" | "closed" | "pending" | "on_hold";
+  matterType: 'litigation' | 'arbitration' | 'regulatory' | 'transaction' | 'advisory';
+  status: 'active' | 'closed' | 'pending' | 'on_hold';
   phase: string;
   exposureAmount: number;
   probabilityOfSuccess: number;
@@ -43,16 +48,16 @@ export interface PortfolioTwinState {
   sharpeRatio: number;
   maxDrawdown: number;
   var95: number;
-  riskRating: "conservative" | "moderate" | "aggressive" | "very_aggressive";
+  riskRating: 'conservative' | 'moderate' | 'aggressive' | 'very_aggressive';
   rebalanceDue: boolean;
   lastRebalancedAt: string;
 }
 
 export interface IncidentTwinState {
   incidentId: string;
-  incidentType: "cyber" | "physical" | "maritime" | "operational" | "reputational" | "regulatory";
-  severity: "low" | "medium" | "high" | "critical";
-  status: "open" | "investigating" | "contained" | "resolved" | "post_mortem";
+  incidentType: 'cyber' | 'physical' | 'maritime' | 'operational' | 'reputational' | 'regulatory';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'investigating' | 'contained' | 'resolved' | 'post_mortem';
   affectedSystems: string[];
   affectedEntities: string[];
   detectedAt: string;
@@ -72,7 +77,7 @@ export interface PortTwinState {
   unLocode: string;
   countryCode: string;
   coordinates: { lat: number; lon: number };
-  congestionLevel: "low" | "moderate" | "high" | "critical";
+  congestionLevel: 'low' | 'moderate' | 'high' | 'critical';
   avgBerthingTime: number;
   avgTurnaroundHours: number;
   waitingVessels: number;
@@ -81,8 +86,8 @@ export interface PortTwinState {
   sanctionsRisk: boolean;
   weatherAlert: boolean;
   strikesOrDisputes: boolean;
-  tideCondition: "favorable" | "neutral" | "adverse";
-  operationalStatus: "normal" | "degraded" | "restricted" | "closed";
+  tideCondition: 'favorable' | 'neutral' | 'adverse';
+  operationalStatus: 'normal' | 'degraded' | 'restricted' | 'closed';
 }
 
 export async function persistSnapshot(
@@ -107,24 +112,27 @@ export async function persistSnapshot(
 
   const nextSequence = (existing[0]?.sequenceNumber ?? -1) + 1;
 
-  const [inserted] = await db.insert(spatialTwinSnapshotsTable).values({
-    orgId: orgId ?? null,
-    twinId: twin.id,
-    entityId: twin.entityId,
-    twinCategory: category,
-    sequenceNumber: nextSequence,
-    state: twin.currentState,
-    predictedStates: twin.predictedStates,
-    alerts: twin.alerts,
-    confidenceScore: twin.confidenceScore,
-    parentSnapshotId: options?.parentSnapshotId ?? null,
-    derivedBranchId: options?.derivedBranchId ?? null,
-    modelLane: options?.modelLane ?? null,
-    promptHash: options?.promptHash ?? null,
-    sourceEvidenceList: options?.sourceEvidenceList ?? [],
-    spatialContext: twin.metadata,
-    metadata: {},
-  }).returning({ id: spatialTwinSnapshotsTable.id });
+  const [inserted] = await db
+    .insert(spatialTwinSnapshotsTable)
+    .values({
+      orgId: orgId ?? null,
+      twinId: twin.id,
+      entityId: twin.entityId,
+      twinCategory: category,
+      sequenceNumber: nextSequence,
+      state: twin.currentState,
+      predictedStates: twin.predictedStates,
+      alerts: twin.alerts,
+      confidenceScore: twin.confidenceScore,
+      parentSnapshotId: options?.parentSnapshotId ?? null,
+      derivedBranchId: options?.derivedBranchId ?? null,
+      modelLane: options?.modelLane ?? null,
+      promptHash: options?.promptHash ?? null,
+      sourceEvidenceList: options?.sourceEvidenceList ?? [],
+      spatialContext: twin.metadata,
+      metadata: {},
+    })
+    .returning({ id: spatialTwinSnapshotsTable.id });
 
   return inserted.id;
 }
@@ -132,7 +140,15 @@ export async function persistSnapshot(
 export async function getSnapshotHistory(
   twinId: string,
   options?: { limit?: number; orgId?: number },
-): Promise<Array<{ id: number; sequenceNumber: number; confidenceScore: number; snapshotAt: Date; state: unknown }>> {
+): Promise<
+  Array<{
+    id: number;
+    sequenceNumber: number;
+    confidenceScore: number;
+    snapshotAt: Date;
+    state: unknown;
+  }>
+> {
   const conditions = [eq(spatialTwinSnapshotsTable.twinId, twinId)];
   if (options?.orgId != null) conditions.push(eq(spatialTwinSnapshotsTable.orgId, options.orgId));
 
@@ -161,27 +177,46 @@ export async function compareSnapshots(
   deltaValues: Record<string, { before: unknown; after: unknown; changePercent?: number }>;
   confidenceDelta: number;
 }> {
-  const condA = orgId != null
-    ? and(eq(spatialTwinSnapshotsTable.id, snapshotIdA), eq(spatialTwinSnapshotsTable.orgId, orgId))
-    : eq(spatialTwinSnapshotsTable.id, snapshotIdA);
-  const condB = orgId != null
-    ? and(eq(spatialTwinSnapshotsTable.id, snapshotIdB), eq(spatialTwinSnapshotsTable.orgId, orgId))
-    : eq(spatialTwinSnapshotsTable.id, snapshotIdB);
+  const condA =
+    orgId != null
+      ? and(
+          eq(spatialTwinSnapshotsTable.id, snapshotIdA),
+          eq(spatialTwinSnapshotsTable.orgId, orgId),
+        )
+      : eq(spatialTwinSnapshotsTable.id, snapshotIdA);
+  const condB =
+    orgId != null
+      ? and(
+          eq(spatialTwinSnapshotsTable.id, snapshotIdB),
+          eq(spatialTwinSnapshotsTable.orgId, orgId),
+        )
+      : eq(spatialTwinSnapshotsTable.id, snapshotIdB);
 
   const [snapA, snapB] = await Promise.all([
-    db.select().from(spatialTwinSnapshotsTable).where(condA).then(r => r[0]),
-    db.select().from(spatialTwinSnapshotsTable).where(condB).then(r => r[0]),
+    db
+      .select()
+      .from(spatialTwinSnapshotsTable)
+      .where(condA)
+      .then((r) => r[0]),
+    db
+      .select()
+      .from(spatialTwinSnapshotsTable)
+      .where(condB)
+      .then((r) => r[0]),
   ]);
 
   if (!snapA || !snapB) {
-    throw Object.assign(new Error("One or both snapshots not found or not accessible"), { code: "NOT_FOUND" });
+    throw Object.assign(new Error('One or both snapshots not found or not accessible'), {
+      code: 'NOT_FOUND',
+    });
   }
 
   const stateA = (snapA.state as Record<string, unknown>) ?? {};
   const stateB = (snapB.state as Record<string, unknown>) ?? {};
   const allKeys = new Set([...Object.keys(stateA), ...Object.keys(stateB)]);
   const changedFields: string[] = [];
-  const deltaValues: Record<string, { before: unknown; after: unknown; changePercent?: number }> = {};
+  const deltaValues: Record<string, { before: unknown; after: unknown; changePercent?: number }> =
+    {};
 
   for (const key of allKeys) {
     const before = stateA[key];
@@ -189,7 +224,7 @@ export async function compareSnapshots(
     if (before !== after) {
       changedFields.push(key);
       const entry: { before: unknown; after: unknown; changePercent?: number } = { before, after };
-      if (typeof before === "number" && typeof after === "number" && before !== 0) {
+      if (typeof before === 'number' && typeof after === 'number' && before !== 0) {
         entry.changePercent = ((after - before) / Math.abs(before)) * 100;
       }
       deltaValues[key] = entry;
@@ -213,37 +248,45 @@ export async function branchScenario(
 ): Promise<{ branchId: string; snapshotId: number }> {
   const twin = twinRegistry.get(twinId);
   if (!twin) {
-    throw Object.assign(new Error(`Twin ${twinId} not found in registry`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Twin ${twinId} not found in registry`), { code: 'NOT_FOUND' });
   }
 
   const baseSnapshot = await db
     .select()
     .from(spatialTwinSnapshotsTable)
     .where(eq(spatialTwinSnapshotsTable.id, baseSnapshotId))
-    .then(r => r[0]);
+    .then((r) => r[0]);
 
   if (!baseSnapshot) {
-    throw Object.assign(new Error(`Base snapshot ${baseSnapshotId} not found`), { code: "NOT_FOUND" });
+    throw Object.assign(new Error(`Base snapshot ${baseSnapshotId} not found`), {
+      code: 'NOT_FOUND',
+    });
   }
 
   const branchId = `branch-${randomUUID()}`;
-  const branchedState = { ...(baseSnapshot.state as Record<string, unknown>), ...scenario.parameters };
+  const branchedState = {
+    ...(baseSnapshot.state as Record<string, unknown>),
+    ...scenario.parameters,
+  };
 
-  const [branchSnapshot] = await db.insert(spatialTwinSnapshotsTable).values({
-    orgId: orgId ?? null,
-    twinId,
-    entityId: twin.entityId,
-    twinCategory: twin.twinType as SpatialTwinCategory,
-    sequenceNumber: (baseSnapshot.sequenceNumber ?? 0) + 1,
-    state: branchedState,
-    predictedStates: baseSnapshot.predictedStates ?? [],
-    alerts: [],
-    confidenceScore: Math.max(0, (baseSnapshot.confidenceScore ?? 0.5) - 0.05),
-    parentSnapshotId: baseSnapshotId,
-    derivedBranchId: branchId,
-    spatialContext: baseSnapshot.spatialContext ?? {},
-    metadata: { scenarioName: scenario.name, description: scenario.description },
-  }).returning({ id: spatialTwinSnapshotsTable.id });
+  const [branchSnapshot] = await db
+    .insert(spatialTwinSnapshotsTable)
+    .values({
+      orgId: orgId ?? null,
+      twinId,
+      entityId: twin.entityId,
+      twinCategory: twin.twinType as SpatialTwinCategory,
+      sequenceNumber: (baseSnapshot.sequenceNumber ?? 0) + 1,
+      state: branchedState,
+      predictedStates: baseSnapshot.predictedStates ?? [],
+      alerts: [],
+      confidenceScore: Math.max(0, (baseSnapshot.confidenceScore ?? 0.5) - 0.05),
+      parentSnapshotId: baseSnapshotId,
+      derivedBranchId: branchId,
+      spatialContext: baseSnapshot.spatialContext ?? {},
+      metadata: { scenarioName: scenario.name, description: scenario.description },
+    })
+    .returning({ id: spatialTwinSnapshotsTable.id });
 
   return { branchId, snapshotId: branchSnapshot.id };
 }
@@ -273,11 +316,11 @@ export async function replayState(
   return {
     ...twin,
     currentState: (snapshot.state as Record<string, unknown>) ?? {},
-    predictedStates: (snapshot.predictedStates as TwinState["predictedStates"]) ?? [],
-    alerts: (snapshot.alerts as TwinState["alerts"]) ?? [],
+    predictedStates: (snapshot.predictedStates as TwinState['predictedStates']) ?? [],
+    alerts: (snapshot.alerts as TwinState['alerts']) ?? [],
     confidenceScore: snapshot.confidenceScore,
     lastSyncedAt: snapshot.snapshotAt.toISOString(),
-    status: "active" as const,
+    status: 'active' as const,
   };
 }
 
@@ -317,7 +360,7 @@ export async function detectDrift(
     const after = currentState[key];
     if (before !== after) {
       changedFields.push(key);
-      if (typeof before === "number" && typeof after === "number" && before !== 0) {
+      if (typeof before === 'number' && typeof after === 'number' && before !== 0) {
         totalDivergence += Math.abs(after - before) / Math.abs(before);
       } else if (before !== after) {
         totalDivergence += 1;
@@ -325,7 +368,8 @@ export async function detectDrift(
     }
   }
 
-  const driftScore = changedFields.length > 0 ? Math.min(1, totalDivergence / changedFields.length) : 0;
+  const driftScore =
+    changedFields.length > 0 ? Math.min(1, totalDivergence / changedFields.length) : 0;
 
   return {
     hasDrift: driftScore > 0.1,
@@ -341,8 +385,8 @@ export class MatterTwin {
       id: `matter-twin-${entityId}`,
       entityId,
       entityName: initialState.matterName,
-      twinType: "matter",
-      status: "active",
+      twinType: 'matter',
+      status: 'active',
       currentState: initialState as unknown as Record<string, unknown>,
       predictedStates: [],
       lastSyncedAt: new Date().toISOString(),
@@ -361,10 +405,26 @@ export class MatterTwin {
   private computeAlerts(state: MatterTwinState) {
     const alerts = [];
     if (state.exposureAmount > 10_000_000) {
-      alerts.push({ id: "high-exposure", severity: "critical" as const, message: `High exposure: $${(state.exposureAmount / 1_000_000).toFixed(1)}M`, metric: "exposureAmount", currentValue: state.exposureAmount, threshold: 10_000_000, triggeredAt: new Date().toISOString() });
+      alerts.push({
+        id: 'high-exposure',
+        severity: 'critical' as const,
+        message: `High exposure: $${(state.exposureAmount / 1_000_000).toFixed(1)}M`,
+        metric: 'exposureAmount',
+        currentValue: state.exposureAmount,
+        threshold: 10_000_000,
+        triggeredAt: new Date().toISOString(),
+      });
     }
     if (state.billedHours > state.budgetedHours * 0.9) {
-      alerts.push({ id: "budget-overrun", severity: "warning" as const, message: "Matter approaching budget ceiling", metric: "billedHours", currentValue: state.billedHours, threshold: state.budgetedHours, triggeredAt: new Date().toISOString() });
+      alerts.push({
+        id: 'budget-overrun',
+        severity: 'warning' as const,
+        message: 'Matter approaching budget ceiling',
+        metric: 'billedHours',
+        currentValue: state.billedHours,
+        threshold: state.budgetedHours,
+        triggeredAt: new Date().toISOString(),
+      });
     }
     return alerts;
   }
@@ -377,17 +437,35 @@ export class MatterTwin {
     const settlementProbability = (scenario.parameters.settlementProbability as number) ?? 0.5;
     const damageReduction = (scenario.parameters.damageReduction as number) ?? 0;
     const simulatedExposure = original.exposureAmount * (1 - damageReduction);
-    const simulatedSuccess = Math.min(1, original.probabilityOfSuccess + settlementProbability * 0.2);
+    const simulatedSuccess = Math.min(
+      1,
+      original.probabilityOfSuccess + settlementProbability * 0.2,
+    );
     return {
       scenarioName: scenario.name,
       originalState: twin.currentState,
-      simulatedState: { ...original, exposureAmount: simulatedExposure, probabilityOfSuccess: simulatedSuccess } as unknown as Record<string, unknown>,
+      simulatedState: {
+        ...original,
+        exposureAmount: simulatedExposure,
+        probabilityOfSuccess: simulatedSuccess,
+      } as unknown as Record<string, unknown>,
       deltaMetrics: {
-        exposureAmount: { before: original.exposureAmount, after: simulatedExposure, changePercent: ((simulatedExposure - original.exposureAmount) / original.exposureAmount) * 100 },
+        exposureAmount: {
+          before: original.exposureAmount,
+          after: simulatedExposure,
+          changePercent:
+            ((simulatedExposure - original.exposureAmount) / original.exposureAmount) * 100,
+        },
         probabilityOfSuccess: { before: original.probabilityOfSuccess, after: simulatedSuccess },
       },
-      riskAssessment: simulatedExposure > 5_000_000 ? "HIGH: Exposure remains elevated post-scenario" : "MODERATE: Scenario reduces exposure to manageable levels",
-      recommendedActions: settlementProbability > 0.7 ? ["Pursue settlement negotiation", "Prepare mediation brief"] : ["Proceed to litigation", "File dispositive motions"],
+      riskAssessment:
+        simulatedExposure > 5_000_000
+          ? 'HIGH: Exposure remains elevated post-scenario'
+          : 'MODERATE: Scenario reduces exposure to manageable levels',
+      recommendedActions:
+        settlementProbability > 0.7
+          ? ['Pursue settlement negotiation', 'Prepare mediation brief']
+          : ['Proceed to litigation', 'File dispositive motions'],
       confidenceScore: 0.78,
       runDurationMs: Date.now() - start,
     };
@@ -400,8 +478,8 @@ export class PortfolioTwin {
       id: `portfolio-twin-${entityId}`,
       entityId,
       entityName: initialState.portfolioName,
-      twinType: "portfolio",
-      status: "active",
+      twinType: 'portfolio',
+      status: 'active',
       currentState: initialState as unknown as Record<string, unknown>,
       predictedStates: [],
       lastSyncedAt: new Date().toISOString(),
@@ -416,10 +494,26 @@ export class PortfolioTwin {
   private computeAlerts(state: PortfolioTwinState) {
     const alerts = [];
     if (state.maxDrawdown < -0.15) {
-      alerts.push({ id: "drawdown-breach", severity: "critical" as const, message: `Drawdown ${(state.maxDrawdown * 100).toFixed(1)}% breaches -15% threshold`, metric: "maxDrawdown", currentValue: state.maxDrawdown, threshold: -0.15, triggeredAt: new Date().toISOString() });
+      alerts.push({
+        id: 'drawdown-breach',
+        severity: 'critical' as const,
+        message: `Drawdown ${(state.maxDrawdown * 100).toFixed(1)}% breaches -15% threshold`,
+        metric: 'maxDrawdown',
+        currentValue: state.maxDrawdown,
+        threshold: -0.15,
+        triggeredAt: new Date().toISOString(),
+      });
     }
     if (state.rebalanceDue) {
-      alerts.push({ id: "rebalance-due", severity: "warning" as const, message: "Portfolio rebalancing required — allocation drift detected", metric: "rebalanceDue", currentValue: true, threshold: false, triggeredAt: new Date().toISOString() });
+      alerts.push({
+        id: 'rebalance-due',
+        severity: 'warning' as const,
+        message: 'Portfolio rebalancing required — allocation drift detected',
+        metric: 'rebalanceDue',
+        currentValue: true,
+        threshold: false,
+        triggeredAt: new Date().toISOString(),
+      });
     }
     return alerts;
   }
@@ -435,13 +529,23 @@ export class PortfolioTwin {
     return {
       scenarioName: scenario.name,
       originalState: twin.currentState,
-      simulatedState: { ...original, totalAUM: newAUM, overallReturn: newReturn } as unknown as Record<string, unknown>,
+      simulatedState: {
+        ...original,
+        totalAUM: newAUM,
+        overallReturn: newReturn,
+      } as unknown as Record<string, unknown>,
       deltaMetrics: {
         totalAUM: { before: original.totalAUM, after: newAUM, changePercent: marketShock * 100 },
         overallReturn: { before: original.overallReturn, after: newReturn },
       },
-      riskAssessment: marketShock < -0.1 ? "HIGH: Portfolio stress scenario exceeds -10% threshold" : "MODERATE: Scenario within stress test parameters",
-      recommendedActions: marketShock < -0.1 ? ["Increase defensive allocation", "Review hedge positions", "Notify LPs"] : ["Monitor positions", "Review rebalancing schedule"],
+      riskAssessment:
+        marketShock < -0.1
+          ? 'HIGH: Portfolio stress scenario exceeds -10% threshold'
+          : 'MODERATE: Scenario within stress test parameters',
+      recommendedActions:
+        marketShock < -0.1
+          ? ['Increase defensive allocation', 'Review hedge positions', 'Notify LPs']
+          : ['Monitor positions', 'Review rebalancing schedule'],
       confidenceScore: 0.82,
       runDurationMs: Date.now() - start,
     };
@@ -454,14 +558,18 @@ export class IncidentTwin {
       id: `incident-twin-${entityId}`,
       entityId,
       entityName: `${initialState.incidentType} incident ${initialState.incidentId}`,
-      twinType: "incident",
-      status: initialState.status === "open" ? "active" : "degraded",
+      twinType: 'incident',
+      status: initialState.status === 'open' ? 'active' : 'degraded',
       currentState: initialState as unknown as Record<string, unknown>,
       predictedStates: [],
       lastSyncedAt: new Date().toISOString(),
-      confidenceScore: 0.80,
+      confidenceScore: 0.8,
       alerts: this.computeAlerts(initialState),
-      metadata: { incidentType: initialState.incidentType, severity: initialState.severity, impactScore: initialState.impactScore },
+      metadata: {
+        incidentType: initialState.incidentType,
+        severity: initialState.severity,
+        impactScore: initialState.impactScore,
+      },
     };
     twinRegistry.register(twin);
     return twin;
@@ -469,11 +577,27 @@ export class IncidentTwin {
 
   private computeAlerts(state: IncidentTwinState) {
     const alerts = [];
-    if (state.severity === "critical") {
-      alerts.push({ id: "critical-incident", severity: "critical" as const, message: `Critical ${state.incidentType} incident active — immediate response required`, metric: "severity", currentValue: state.severity, threshold: "high", triggeredAt: new Date().toISOString() });
+    if (state.severity === 'critical') {
+      alerts.push({
+        id: 'critical-incident',
+        severity: 'critical' as const,
+        message: `Critical ${state.incidentType} incident active — immediate response required`,
+        metric: 'severity',
+        currentValue: state.severity,
+        threshold: 'high',
+        triggeredAt: new Date().toISOString(),
+      });
     }
     if (state.meanTimeToRespond > 240) {
-      alerts.push({ id: "slow-response", severity: "warning" as const, message: `Response time ${state.meanTimeToRespond}min exceeds 4h SLA`, metric: "meanTimeToRespond", currentValue: state.meanTimeToRespond, threshold: 240, triggeredAt: new Date().toISOString() });
+      alerts.push({
+        id: 'slow-response',
+        severity: 'warning' as const,
+        message: `Response time ${state.meanTimeToRespond}min exceeds 4h SLA`,
+        metric: 'meanTimeToRespond',
+        currentValue: state.meanTimeToRespond,
+        threshold: 240,
+        triggeredAt: new Date().toISOString(),
+      });
     }
     return alerts;
   }
@@ -484,18 +608,34 @@ export class IncidentTwin {
     const start = Date.now();
     const original = twin.currentState as unknown as IncidentTwinState;
     const escalates = (scenario.parameters.escalates as boolean) ?? false;
-    const newSeverity = escalates ? "critical" : original.severity;
+    const newSeverity = escalates ? 'critical' : original.severity;
     const newImpact = original.impactScore * (escalates ? 1.5 : 0.8);
     return {
       scenarioName: scenario.name,
       originalState: twin.currentState,
-      simulatedState: { ...original, severity: newSeverity, impactScore: newImpact } as unknown as Record<string, unknown>,
+      simulatedState: {
+        ...original,
+        severity: newSeverity,
+        impactScore: newImpact,
+      } as unknown as Record<string, unknown>,
       deltaMetrics: {
         severity: { before: original.severity, after: newSeverity },
-        impactScore: { before: original.impactScore, after: newImpact, changePercent: ((newImpact - original.impactScore) / original.impactScore) * 100 },
+        impactScore: {
+          before: original.impactScore,
+          after: newImpact,
+          changePercent: ((newImpact - original.impactScore) / original.impactScore) * 100,
+        },
       },
-      riskAssessment: escalates ? "CRITICAL: Incident escalation scenario — blast radius expansion detected" : "MODERATE: Containment scenario — impact trajectory declining",
-      recommendedActions: escalates ? ["Invoke crisis management protocol", "Notify executive leadership", "Engage external incident response"] : ["Continue containment measures", "Prepare post-mortem timeline"],
+      riskAssessment: escalates
+        ? 'CRITICAL: Incident escalation scenario — blast radius expansion detected'
+        : 'MODERATE: Containment scenario — impact trajectory declining',
+      recommendedActions: escalates
+        ? [
+            'Invoke crisis management protocol',
+            'Notify executive leadership',
+            'Engage external incident response',
+          ]
+        : ['Continue containment measures', 'Prepare post-mortem timeline'],
       confidenceScore: 0.75,
       runDurationMs: Date.now() - start,
     };
@@ -508,14 +648,18 @@ export class PortTwin {
       id: `port-twin-${entityId}`,
       entityId,
       entityName: `${initialState.portName} (${initialState.unLocode})`,
-      twinType: "port",
-      status: initialState.operationalStatus === "normal" ? "active" : "degraded",
+      twinType: 'port',
+      status: initialState.operationalStatus === 'normal' ? 'active' : 'degraded',
       currentState: initialState as unknown as Record<string, unknown>,
       predictedStates: [],
       lastSyncedAt: new Date().toISOString(),
       confidenceScore: 0.87,
       alerts: this.computeAlerts(initialState),
-      metadata: { unLocode: initialState.unLocode, congestionLevel: initialState.congestionLevel, sanctionsRisk: initialState.sanctionsRisk },
+      metadata: {
+        unLocode: initialState.unLocode,
+        congestionLevel: initialState.congestionLevel,
+        sanctionsRisk: initialState.sanctionsRisk,
+      },
     };
     twinRegistry.register(twin);
     return twin;
@@ -524,13 +668,37 @@ export class PortTwin {
   private computeAlerts(state: PortTwinState) {
     const alerts = [];
     if (state.sanctionsRisk) {
-      alerts.push({ id: "sanctions-risk", severity: "critical" as const, message: `Port ${state.unLocode} under sanctions risk — halt calls pending compliance review`, metric: "sanctionsRisk", currentValue: true, threshold: false, triggeredAt: new Date().toISOString() });
+      alerts.push({
+        id: 'sanctions-risk',
+        severity: 'critical' as const,
+        message: `Port ${state.unLocode} under sanctions risk — halt calls pending compliance review`,
+        metric: 'sanctionsRisk',
+        currentValue: true,
+        threshold: false,
+        triggeredAt: new Date().toISOString(),
+      });
     }
-    if (state.congestionLevel === "critical") {
-      alerts.push({ id: "port-congestion", severity: "warning" as const, message: `Critical congestion at ${state.portName} — ${state.waitingVessels} vessels waiting`, metric: "congestionLevel", currentValue: state.congestionLevel, threshold: "high", triggeredAt: new Date().toISOString() });
+    if (state.congestionLevel === 'critical') {
+      alerts.push({
+        id: 'port-congestion',
+        severity: 'warning' as const,
+        message: `Critical congestion at ${state.portName} — ${state.waitingVessels} vessels waiting`,
+        metric: 'congestionLevel',
+        currentValue: state.congestionLevel,
+        threshold: 'high',
+        triggeredAt: new Date().toISOString(),
+      });
     }
-    if (state.operationalStatus === "closed") {
-      alerts.push({ id: "port-closed", severity: "critical" as const, message: `Port ${state.unLocode} is closed — reroute affected vessels`, metric: "operationalStatus", currentValue: "closed", threshold: "normal", triggeredAt: new Date().toISOString() });
+    if (state.operationalStatus === 'closed') {
+      alerts.push({
+        id: 'port-closed',
+        severity: 'critical' as const,
+        message: `Port ${state.unLocode} is closed — reroute affected vessels`,
+        metric: 'operationalStatus',
+        currentValue: 'closed',
+        threshold: 'normal',
+        triggeredAt: new Date().toISOString(),
+      });
     }
     return alerts;
   }
@@ -541,18 +709,36 @@ export class PortTwin {
     const start = Date.now();
     const original = twin.currentState as unknown as PortTwinState;
     const strikeEvent = (scenario.parameters.strikeEvent as boolean) ?? false;
-    const newCongestion = strikeEvent ? "critical" : original.congestionLevel;
+    const newCongestion = strikeEvent ? 'critical' : original.congestionLevel;
     const newWaiting = strikeEvent ? original.waitingVessels * 3 : original.waitingVessels;
     return {
       scenarioName: scenario.name,
       originalState: twin.currentState,
-      simulatedState: { ...original, congestionLevel: newCongestion, waitingVessels: newWaiting, strikesOrDisputes: strikeEvent } as unknown as Record<string, unknown>,
+      simulatedState: {
+        ...original,
+        congestionLevel: newCongestion,
+        waitingVessels: newWaiting,
+        strikesOrDisputes: strikeEvent,
+      } as unknown as Record<string, unknown>,
       deltaMetrics: {
         congestionLevel: { before: original.congestionLevel, after: newCongestion },
-        waitingVessels: { before: original.waitingVessels, after: newWaiting, changePercent: ((newWaiting - original.waitingVessels) / (original.waitingVessels || 1)) * 100 },
+        waitingVessels: {
+          before: original.waitingVessels,
+          after: newWaiting,
+          changePercent:
+            ((newWaiting - original.waitingVessels) / (original.waitingVessels || 1)) * 100,
+        },
       },
-      riskAssessment: strikeEvent ? "CRITICAL: Industrial strike scenario causes port closure — significant operational disruption" : "LOW: Operational continuity maintained within normal parameters",
-      recommendedActions: strikeEvent ? ["Reroute inbound vessels to alternate ports", "Notify cargo owners of delay", "Monitor strike resolution timeline"] : ["Continue normal operations", "Monitor congestion metrics"],
+      riskAssessment: strikeEvent
+        ? 'CRITICAL: Industrial strike scenario causes port closure — significant operational disruption'
+        : 'LOW: Operational continuity maintained within normal parameters',
+      recommendedActions: strikeEvent
+        ? [
+            'Reroute inbound vessels to alternate ports',
+            'Notify cargo owners of delay',
+            'Monitor strike resolution timeline',
+          ]
+        : ['Continue normal operations', 'Monitor congestion metrics'],
       confidenceScore: 0.84,
       runDurationMs: Date.now() - start,
     };

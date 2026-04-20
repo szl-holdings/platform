@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Brain, ChevronUp, ChevronDown, X } from "lucide-react";
-import { cn } from "./utils";
+import { Brain, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from './utils';
 
 export interface AgentModeConfig {
   agentName: string;
-  systemType: "fast" | "deep";
-  status?: "active" | "monitoring" | "standby" | "processing";
+  systemType: 'fast' | 'deep';
+  status?: 'active' | 'monitoring' | 'standby' | 'processing';
   currentTask?: string;
   confidence?: number;
   actionsToday?: number;
@@ -16,16 +16,20 @@ interface AgentModeIndicatorProps extends AgentModeConfig {
 }
 
 const STATUS_CONFIG = {
-  active: { label: "Active", dotClass: "bg-[#6b8f71] animate-pulse", textClass: "text-[#6b8f71]" },
-  monitoring: { label: "Monitoring", dotClass: "bg-[#d4a054]", textClass: "text-[#d4a054]" },
-  standby: { label: "Standby", dotClass: "bg-slate-500", textClass: "text-slate-400" },
-  processing: { label: "Processing", dotClass: "bg-blue-400 animate-pulse", textClass: "text-[#4a90b8]" },
+  active: { label: 'Active', dotClass: 'bg-[#6b8f71] animate-pulse', textClass: 'text-[#6b8f71]' },
+  monitoring: { label: 'Monitoring', dotClass: 'bg-[#d4a054]', textClass: 'text-[#d4a054]' },
+  standby: { label: 'Standby', dotClass: 'bg-slate-500', textClass: 'text-slate-400' },
+  processing: {
+    label: 'Processing',
+    dotClass: 'bg-blue-400 animate-pulse',
+    textClass: 'text-[#4a90b8]',
+  },
 };
 
 export function AgentModeIndicator({
   agentName,
   systemType,
-  status = "active",
+  status = 'active',
   currentTask,
   confidence,
   actionsToday,
@@ -37,45 +41,61 @@ export function AgentModeIndicator({
   if (dismissed) return null;
 
   const statusCfg = STATUS_CONFIG[status];
-  const isFast = systemType === "fast";
+  const isFast = systemType === 'fast';
 
   return (
-    <div className={cn("fixed bottom-4 right-4 z-50 select-none", className)}>
-      <div className={cn(
-        "rounded-xl border bg-card/95 backdrop-blur-md shadow-xl transition-all",
-        "border-[#d4a054]/20",
-        expanded ? "w-72" : "w-auto"
-      )}>
+    <div className={cn('fixed bottom-4 right-4 z-50 select-none', className)}>
+      <div
+        className={cn(
+          'rounded-xl border bg-card/95 backdrop-blur-md shadow-xl transition-all',
+          'border-[#d4a054]/20',
+          expanded ? 'w-72' : 'w-auto',
+        )}
+      >
         <button
-          onClick={() => setExpanded(e => !e)}
+          onClick={() => setExpanded((e) => !e)}
           className="flex items-center gap-2.5 px-3 py-2 w-full hover:bg-[#d4a054]/5 transition-colors rounded-xl"
         >
           <div className="relative w-7 h-7 rounded-lg bg-[#d4a054]/10 flex items-center justify-center shrink-0">
             <Brain className="w-3.5 h-3.5 text-[#d4a054]" />
-            <span className={cn("absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-card", statusCfg.dotClass)} />
+            <span
+              className={cn(
+                'absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-card',
+                statusCfg.dotClass,
+              )}
+            />
           </div>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[11px] font-bold text-[#d4a054] truncate leading-none mb-0.5">
               {agentName}
             </p>
-            <p className="text-[9px] text-muted-foreground/60 font-mono truncate">{statusCfg.label}</p>
+            <p className="text-[9px] text-muted-foreground/60 font-mono truncate">
+              {statusCfg.label}
+            </p>
           </div>
-          <span className={cn(
-            "text-[9px] px-1.5 py-0.5 rounded-full font-mono shrink-0",
-            isFast ? "bg-yellow-400/10 text-yellow-400" : "bg-indigo-400/10 text-indigo-400"
-          )}>
-            {isFast ? "☀ Fast" : "◑ Deep"}
+          <span
+            className={cn(
+              'text-[9px] px-1.5 py-0.5 rounded-full font-mono shrink-0',
+              isFast ? 'bg-yellow-400/10 text-yellow-400' : 'bg-indigo-400/10 text-indigo-400',
+            )}
+          >
+            {isFast ? '☀ Fast' : '◑ Deep'}
           </span>
-          {expanded
-            ? <ChevronDown className="w-3 h-3 text-muted-foreground" />
-            : <ChevronUp className="w-3 h-3 text-muted-foreground" />}
+          {expanded ? (
+            <ChevronDown className="w-3 h-3 text-muted-foreground" />
+          ) : (
+            <ChevronUp className="w-3 h-3 text-muted-foreground" />
+          )}
         </button>
 
         {expanded && (
           <div className="px-3 pb-3 border-t border-[#d4a054]/10 mt-0 pt-2 space-y-2">
             <div className="flex items-center justify-end">
               <button
-                onClick={(e) => { e.stopPropagation(); setDismissed(true); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDismissed(true);
+                }}
                 className="text-muted-foreground/30 hover:text-muted-foreground transition-colors p-0.5"
               >
                 <X className="w-3 h-3" />
@@ -84,7 +104,9 @@ export function AgentModeIndicator({
 
             {currentTask && (
               <div className="bg-muted/10 rounded-lg p-2.5">
-                <p className="text-[10px] text-muted-foreground/50 mb-1 font-mono uppercase tracking-wider">Current Task</p>
+                <p className="text-[10px] text-muted-foreground/50 mb-1 font-mono uppercase tracking-wider">
+                  Current Task
+                </p>
                 <p className="text-[11px] text-foreground leading-relaxed">{currentTask}</p>
               </div>
             )}
@@ -100,14 +122,20 @@ export function AgentModeIndicator({
                         style={{ width: `${Math.round(confidence * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-mono text-[#d4a054]">{Math.round(confidence * 100)}%</span>
+                    <span className="text-[10px] font-mono text-[#d4a054]">
+                      {Math.round(confidence * 100)}%
+                    </span>
                   </div>
                 </div>
               )}
               {actionsToday !== undefined && (
                 <div className="bg-muted/10 rounded-lg p-2">
-                  <p className="text-[9px] text-muted-foreground/50 mb-1 font-mono">ACTIONS TODAY</p>
-                  <p className="text-sm font-bold text-foreground">{actionsToday.toLocaleString()}</p>
+                  <p className="text-[9px] text-muted-foreground/50 mb-1 font-mono">
+                    ACTIONS TODAY
+                  </p>
+                  <p className="text-sm font-bold text-foreground">
+                    {actionsToday.toLocaleString()}
+                  </p>
                 </div>
               )}
             </div>

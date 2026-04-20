@@ -1,47 +1,61 @@
-import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import L from 'leaflet';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
-  Globe2, Wifi, Building2, Users, CloudRain,
-  ShieldAlert, Shield, CheckCircle, AlertTriangle,
-  X, Signal, Clock, Eye
-} from "lucide-react";
-import {
+  type Classification,
   GEO_PINS,
-  GeoPin,
-  GeoLayer,
-  GeoThreat,
-  Classification,
+  type GeoLayer,
+  type GeoPin,
+  type GeoThreat,
   getClassificationColor,
-} from "@imp/lib/imperium-data";
-import { cn } from "@imp/lib/utils";
+} from '@imp/lib/imperium-data';
+import { cn } from '@imp/lib/utils';
+import {
+  AlertTriangle,
+  Building2,
+  CheckCircle,
+  Clock,
+  CloudRain,
+  Eye,
+  Globe2,
+  Shield,
+  ShieldAlert,
+  Signal,
+  Users,
+  Wifi,
+  X,
+} from 'lucide-react';
 
 const LAYER_CONFIG: Record<GeoLayer, { label: string; icon: React.ElementType; color: string }> = {
-  SIGINT: { label: "SIGINT", icon: Signal, color: "#ef4444" },
-  INFRASTRUCTURE: { label: "INFRASTRUCTURE", icon: Building2, color: "#c9a227" },
-  PERSONNEL: { label: "PERSONNEL", icon: Users, color: "#60a5fa" },
-  WEATHER: { label: "WEATHER", icon: CloudRain, color: "#a78bfa" },
+  SIGINT: { label: 'SIGINT', icon: Signal, color: '#ef4444' },
+  INFRASTRUCTURE: { label: 'INFRASTRUCTURE', icon: Building2, color: '#c9a227' },
+  PERSONNEL: { label: 'PERSONNEL', icon: Users, color: '#60a5fa' },
+  WEATHER: { label: 'WEATHER', icon: CloudRain, color: '#a78bfa' },
 };
 
 const THREAT_CONFIG: Record<GeoThreat, { color: string; icon: React.ElementType }> = {
-  CRITICAL: { color: "#ef4444", icon: ShieldAlert },
-  HIGH: { color: "#f97316", icon: ShieldAlert },
-  MEDIUM: { color: "#facc15", icon: AlertTriangle },
-  LOW: { color: "#60a5fa", icon: Shield },
-  NOMINAL: { color: "#4ade80", icon: CheckCircle },
+  CRITICAL: { color: '#ef4444', icon: ShieldAlert },
+  HIGH: { color: '#f97316', icon: ShieldAlert },
+  MEDIUM: { color: '#facc15', icon: AlertTriangle },
+  LOW: { color: '#60a5fa', icon: Shield },
+  NOMINAL: { color: '#4ade80', icon: CheckCircle },
 };
 
 function makePinIcon(layer: GeoLayer, threat: GeoThreat, selected: boolean): L.DivIcon {
   const layerColor = LAYER_CONFIG[layer].color;
   const threatColor = THREAT_CONFIG[threat].color;
   const size = selected ? 20 : 14;
-  const ring = selected ? `box-shadow:0 0 0 3px ${layerColor}60,0 0 14px ${layerColor}60;` : `box-shadow:0 0 6px ${layerColor}80;`;
-  const pulse = threat === "CRITICAL" || threat === "HIGH"
-    ? `<span style="position:absolute;inset:-4px;border-radius:50%;background:${threatColor}20;animation:ping 1.4s cubic-bezier(0,0,0.2,1) infinite;"></span>`
-    : "";
+  const ring = selected
+    ? `box-shadow:0 0 0 3px ${layerColor}60,0 0 14px ${layerColor}60;`
+    : `box-shadow:0 0 6px ${layerColor}80;`;
+  const pulse =
+    threat === 'CRITICAL' || threat === 'HIGH'
+      ? `<span style="position:absolute;inset:-4px;border-radius:50%;background:${threatColor}20;animation:ping 1.4s cubic-bezier(0,0,0.2,1) infinite;"></span>`
+      : '';
   return L.divIcon({
-    className: "",
+    className: '',
     iconAnchor: [size / 2, size / 2],
     html: `
       <div style="position:relative;display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:${layerColor};border:2px solid ${threatColor};${ring}">
@@ -56,7 +70,7 @@ function MapDarkStyle() {
   const map = useMap();
   useEffect(() => {
     const container = map.getContainer();
-    container.style.background = "#060810";
+    container.style.background = '#060810';
     map.invalidateSize();
   }, [map]);
   return null;
@@ -64,7 +78,7 @@ function MapDarkStyle() {
 
 function FitBounds({ pins }: { pins: GeoPin[] }) {
   const map = useMap();
-  const pinKey = pins.map((p) => p.id).join(",");
+  const pinKey = pins.map((p) => p.id).join(',');
   const latLngs: [number, number][] = pins.map((p) => [p.lat, p.lng]);
   useEffect(() => {
     if (latLngs.length === 0) return;
@@ -118,28 +132,28 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
     <div
       className="absolute top-4 right-4 z-[1000] w-80 rounded-lg border overflow-hidden"
       style={{
-        background: "rgba(6,8,16,0.96)",
-        borderColor: "rgba(201,162,39,0.25)",
-        backdropFilter: "blur(12px)",
+        background: 'rgba(6,8,16,0.96)',
+        borderColor: 'rgba(201,162,39,0.25)',
+        backdropFilter: 'blur(12px)',
       }}
     >
       <div
         className="flex items-center justify-between px-4 py-3 border-b"
-        style={{ borderColor: "rgba(201,162,39,0.15)" }}
+        style={{ borderColor: 'rgba(201,162,39,0.15)' }}
       >
         <div className="flex items-center gap-2">
           <div
             className="w-2.5 h-2.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: layer.color, boxShadow: `0 0 6px ${layer.color}` }}
           />
-          <span className="font-display text-[10px] tracking-[0.15em] font-semibold uppercase" style={{ color: layer.color }}>
+          <span
+            className="font-display text-[10px] tracking-[0.15em] font-semibold uppercase"
+            style={{ color: layer.color }}
+          >
             {pin.layer}
           </span>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-white/10 transition-colors"
-        >
+        <button onClick={onClose} className="p-1 rounded hover:bg-white/10 transition-colors">
           <X className="w-3.5 h-3.5 text-slate-500" />
         </button>
       </div>
@@ -153,7 +167,11 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
         <div className="flex items-center gap-2">
           <div
             className="flex items-center gap-1.5 px-2 py-1 rounded border"
-            style={{ color: threat.color, borderColor: `${threat.color}40`, background: `${threat.color}10` }}
+            style={{
+              color: threat.color,
+              borderColor: `${threat.color}40`,
+              background: `${threat.color}10`,
+            }}
           >
             <ThreatIcon className="w-3 h-3" />
             <span className="font-mono text-[9px] tracking-widest">{pin.threat}</span>
@@ -163,32 +181,39 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
 
         <div
           className="rounded p-3 border text-xs text-slate-400 leading-relaxed"
-          style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.05)" }}
+          style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}
         >
           {pin.detail.summary}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded p-2 text-center" style={{ background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded p-2 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Eye className="w-3 h-3 text-slate-500" />
-              <span className="font-mono text-xs font-bold" style={{ color: pin.detail.confidence >= 90 ? "#4ade80" : "#facc15" }}>
+              <span
+                className="font-mono text-xs font-bold"
+                style={{ color: pin.detail.confidence >= 90 ? '#4ade80' : '#facc15' }}
+              >
                 {pin.detail.confidence}%
               </span>
             </div>
             <div className="text-[9px] text-slate-600 tracking-wider">CONFIDENCE</div>
           </div>
-          <div className="rounded p-2 text-center" style={{ background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded p-2 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Clock className="w-3 h-3 text-slate-500" />
-              <span className="font-mono text-xs font-bold text-slate-300">{pin.detail.timestamp}</span>
+              <span className="font-mono text-xs font-bold text-slate-300">
+                {pin.detail.timestamp}
+              </span>
             </div>
             <div className="text-[9px] text-slate-600 tracking-wider">LAST SEEN</div>
           </div>
         </div>
 
         <div>
-          <div className="text-[9px] font-mono text-slate-600 tracking-widest uppercase mb-1.5">Source</div>
+          <div className="text-[9px] font-mono text-slate-600 tracking-widest uppercase mb-1.5">
+            Source
+          </div>
           <p className="text-[10px] text-slate-500 font-mono">{pin.detail.source}</p>
         </div>
 
@@ -197,7 +222,11 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
             <span
               key={tag}
               className="font-mono text-[9px] tracking-wider px-1.5 py-0.5 rounded"
-              style={{ background: "rgba(201,162,39,0.08)", color: "rgba(201,162,39,0.6)", border: "1px solid rgba(201,162,39,0.15)" }}
+              style={{
+                background: 'rgba(201,162,39,0.08)',
+                color: 'rgba(201,162,39,0.6)',
+                border: '1px solid rgba(201,162,39,0.15)',
+              }}
             >
               {tag}
             </span>
@@ -210,7 +239,7 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
 
 export default function GeospatialIntelligence() {
   const [activeLayers, setActiveLayers] = useState<Set<GeoLayer>>(
-    new Set(["SIGINT", "INFRASTRUCTURE", "PERSONNEL", "WEATHER"])
+    new Set(['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER']),
   );
   const [selected, setSelected] = useState<GeoPin | null>(null);
   const [mapReady, setMapReady] = useState(false);
@@ -232,15 +261,18 @@ export default function GeospatialIntelligence() {
   }
 
   const counts = (Object.keys(LAYER_CONFIG) as GeoLayer[]).reduce<Record<GeoLayer, number>>(
-    (acc, l) => { acc[l] = GEO_PINS.filter((p) => p.layer === l).length; return acc; },
-    {} as Record<GeoLayer, number>
+    (acc, l) => {
+      acc[l] = GEO_PINS.filter((p) => p.layer === l).length;
+      return acc;
+    },
+    {} as Record<GeoLayer, number>,
   );
 
   return (
     <div className="space-y-4 h-full flex flex-col">
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <Globe2 className="w-5 h-5" style={{ color: "#c9a227" }} />
+          <Globe2 className="w-5 h-5" style={{ color: '#c9a227' }} />
           <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
             Geospatial Intelligence
           </h1>
@@ -251,41 +283,46 @@ export default function GeospatialIntelligence() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(Object.entries(LAYER_CONFIG) as [GeoLayer, typeof LAYER_CONFIG[GeoLayer]][]).map(([layer, cfg]) => {
-          const Icon = cfg.icon;
-          const active = activeLayers.has(layer);
-          return (
-            <button
-              key={layer}
-              onClick={() => toggleLayer(layer)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded border text-[10px] font-display tracking-[0.12em] font-semibold uppercase transition-all duration-200",
-                active ? "opacity-100" : "opacity-40"
-              )}
-              style={{
-                color: active ? cfg.color : "rgba(148,163,184,0.6)",
-                borderColor: active ? `${cfg.color}50` : "rgba(255,255,255,0.08)",
-                background: active ? `${cfg.color}12` : "transparent",
-              }}
-            >
-              <Icon className="w-3 h-3" />
-              {cfg.label}
-              <span
-                className="ml-1 font-mono text-[9px] px-1 rounded"
-                style={{ background: active ? `${cfg.color}20` : "rgba(255,255,255,0.05)" }}
+        {(Object.entries(LAYER_CONFIG) as [GeoLayer, (typeof LAYER_CONFIG)[GeoLayer]][]).map(
+          ([layer, cfg]) => {
+            const Icon = cfg.icon;
+            const active = activeLayers.has(layer);
+            return (
+              <button
+                key={layer}
+                onClick={() => toggleLayer(layer)}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded border text-[10px] font-display tracking-[0.12em] font-semibold uppercase transition-all duration-200',
+                  active ? 'opacity-100' : 'opacity-40',
+                )}
+                style={{
+                  color: active ? cfg.color : 'rgba(148,163,184,0.6)',
+                  borderColor: active ? `${cfg.color}50` : 'rgba(255,255,255,0.08)',
+                  background: active ? `${cfg.color}12` : 'transparent',
+                }}
               >
-                {counts[layer]}
-              </span>
-            </button>
-          );
-        })}
+                <Icon className="w-3 h-3" />
+                {cfg.label}
+                <span
+                  className="ml-1 font-mono text-[9px] px-1 rounded"
+                  style={{ background: active ? `${cfg.color}20` : 'rgba(255,255,255,0.05)' }}
+                >
+                  {counts[layer]}
+                </span>
+              </button>
+            );
+          },
+        )}
         <div className="ml-auto flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
           <Wifi className="w-3 h-3 text-green-400" />
           <span>{visiblePins.length} ACTIVE SIGNALS</span>
         </div>
       </div>
 
-      <div className="flex-1 relative rounded-lg overflow-hidden border min-h-[480px]" style={{ borderColor: "rgba(201,162,39,0.2)" }}>
+      <div
+        className="flex-1 relative rounded-lg overflow-hidden border min-h-[480px]"
+        style={{ borderColor: 'rgba(201,162,39,0.2)' }}
+      >
         <style>{`
           .leaflet-container { background: #060810 !important; }
           .leaflet-tile { filter: brightness(0.7) saturate(0.4) hue-rotate(200deg); }
@@ -299,7 +336,7 @@ export default function GeospatialIntelligence() {
         <MapContainer
           center={[30, 10]}
           zoom={2}
-          style={{ height: "100%", width: "100%", background: "#060810" }}
+          style={{ height: '100%', width: '100%', background: '#060810' }}
           zoomControl
           attributionControl
           whenReady={() => setMapReady(true)}
@@ -312,75 +349,101 @@ export default function GeospatialIntelligence() {
           />
           <MapDarkStyle />
           <FitBounds pins={visiblePins} />
-          <PinMarkers
-            pins={visiblePins}
-            selected={selected}
-            onSelect={setSelected}
-          />
+          <PinMarkers pins={visiblePins} selected={selected} onSelect={setSelected} />
         </MapContainer>
 
-        {selected && (
-          <DetailPanel pin={selected} onClose={() => setSelected(null)} />
-        )}
+        {selected && <DetailPanel pin={selected} onClose={() => setSelected(null)} />}
 
         <div
           className="absolute bottom-4 left-4 z-[1000] rounded border p-3 space-y-1.5"
-          style={{ background: "rgba(6,8,16,0.92)", borderColor: "rgba(201,162,39,0.2)", backdropFilter: "blur(8px)" }}
+          style={{
+            background: 'rgba(6,8,16,0.92)',
+            borderColor: 'rgba(201,162,39,0.2)',
+            backdropFilter: 'blur(8px)',
+          }}
         >
-          <div className="font-display text-[9px] tracking-widest text-slate-500 uppercase mb-2">Threat Legend</div>
-          {(Object.entries(THREAT_CONFIG) as [GeoThreat, typeof THREAT_CONFIG[GeoThreat]][]).map(([threat, cfg]) => {
-            const Icon = cfg.icon;
-            return (
-              <div key={threat} className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full border-2 flex-shrink-0" style={{ backgroundColor: cfg.color, borderColor: cfg.color }} />
-                <span className="font-mono text-[9px] tracking-wider" style={{ color: cfg.color }}>{threat}</span>
-              </div>
-            );
-          })}
+          <div className="font-display text-[9px] tracking-widest text-slate-500 uppercase mb-2">
+            Threat Legend
+          </div>
+          {(Object.entries(THREAT_CONFIG) as [GeoThreat, (typeof THREAT_CONFIG)[GeoThreat]][]).map(
+            ([threat, cfg]) => {
+              const Icon = cfg.icon;
+              return (
+                <div key={threat} className="flex items-center gap-2">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full border-2 flex-shrink-0"
+                    style={{ backgroundColor: cfg.color, borderColor: cfg.color }}
+                  />
+                  <span
+                    className="font-mono text-[9px] tracking-wider"
+                    style={{ color: cfg.color }}
+                  >
+                    {threat}
+                  </span>
+                </div>
+              );
+            },
+          )}
         </div>
 
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#060810] z-[2000]">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(201,162,39,0.2)", borderTopColor: "#c9a227" }} />
-              <span className="font-display text-xs tracking-widest text-gold-dim uppercase">Acquiring satellite lock…</span>
+              <div
+                className="w-8 h-8 border-2 rounded-full animate-spin"
+                style={{ borderColor: 'rgba(201,162,39,0.2)', borderTopColor: '#c9a227' }}
+              />
+              <span className="font-display text-xs tracking-widest text-gold-dim uppercase">
+                Acquiring satellite lock…
+              </span>
             </div>
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {(Object.entries(LAYER_CONFIG) as [GeoLayer, typeof LAYER_CONFIG[GeoLayer]][]).map(([layer, cfg]) => {
-          const pinsByLayer = GEO_PINS.filter((p) => p.layer === layer);
-          const highThreat = pinsByLayer.filter((p) => p.threat === "HIGH" || p.threat === "CRITICAL").length;
-          const Icon = cfg.icon;
-          return (
-            <div
-              key={layer}
-              className="rounded-lg border p-3 cursor-pointer transition-all duration-200"
-              style={{
-                background: activeLayers.has(layer) ? `${cfg.color}08` : "rgba(255,255,255,0.02)",
-                borderColor: activeLayers.has(layer) ? `${cfg.color}30` : "rgba(255,255,255,0.06)",
-              }}
-              onClick={() => toggleLayer(layer)}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
-                <span className="font-display text-[9px] tracking-[0.12em] font-semibold uppercase" style={{ color: cfg.color }}>
-                  {cfg.label}
-                </span>
+        {(Object.entries(LAYER_CONFIG) as [GeoLayer, (typeof LAYER_CONFIG)[GeoLayer]][]).map(
+          ([layer, cfg]) => {
+            const pinsByLayer = GEO_PINS.filter((p) => p.layer === layer);
+            const highThreat = pinsByLayer.filter(
+              (p) => p.threat === 'HIGH' || p.threat === 'CRITICAL',
+            ).length;
+            const Icon = cfg.icon;
+            return (
+              <div
+                key={layer}
+                className="rounded-lg border p-3 cursor-pointer transition-all duration-200"
+                style={{
+                  background: activeLayers.has(layer) ? `${cfg.color}08` : 'rgba(255,255,255,0.02)',
+                  borderColor: activeLayers.has(layer)
+                    ? `${cfg.color}30`
+                    : 'rgba(255,255,255,0.06)',
+                }}
+                onClick={() => toggleLayer(layer)}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
+                  <span
+                    className="font-display text-[9px] tracking-[0.12em] font-semibold uppercase"
+                    style={{ color: cfg.color }}
+                  >
+                    {cfg.label}
+                  </span>
+                </div>
+                <div className="font-mono text-xl font-bold" style={{ color: cfg.color }}>
+                  {pinsByLayer.length}
+                </div>
+                <div className="text-[10px] text-slate-600 mt-0.5">
+                  {highThreat > 0 ? (
+                    <span style={{ color: '#f97316' }}>{highThreat} elevated</span>
+                  ) : (
+                    <span className="text-green-500">all nominal</span>
+                  )}
+                </div>
               </div>
-              <div className="font-mono text-xl font-bold" style={{ color: cfg.color }}>{pinsByLayer.length}</div>
-              <div className="text-[10px] text-slate-600 mt-0.5">
-                {highThreat > 0 ? (
-                  <span style={{ color: "#f97316" }}>{highThreat} elevated</span>
-                ) : (
-                  <span className="text-green-500">all nominal</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          },
+        )}
       </div>
     </div>
   );

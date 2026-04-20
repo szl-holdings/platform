@@ -1,7 +1,7 @@
-import { logger } from "./logger";
-import type { InferenceProvider } from "./inference-telemetry";
+import type { InferenceProvider } from './inference-telemetry';
+import { logger } from './logger';
 
-export type HealthStatus = "healthy" | "degraded" | "down";
+export type HealthStatus = 'healthy' | 'degraded' | 'down';
 
 export interface ProviderHealthRecord {
   provider: InferenceProvider;
@@ -37,7 +37,7 @@ const LATENCY_WINDOW = 20;
 const DEGRADED_LATENCY_MS = 5000;
 const PROBE_INTERVAL_MS = 120_000;
 
-const KNOWN_PROVIDERS: InferenceProvider[] = ["replit-proxy", "huggingface"];
+const KNOWN_PROVIDERS: InferenceProvider[] = ['replit-proxy', 'huggingface'];
 
 class ProviderHealthMonitor {
   private providers: Map<InferenceProvider, ProviderHealthRecord> = new Map();
@@ -48,7 +48,7 @@ class ProviderHealthMonitor {
     if (!record) {
       record = {
         provider,
-        status: "healthy",
+        status: 'healthy',
         lastCheckedAt: Date.now(),
         consecutiveFailures: 0,
         consecutiveSuccesses: 0,
@@ -72,7 +72,7 @@ class ProviderHealthMonitor {
       record.recentLatencies.shift();
     }
     record.avgLatencyMs = Math.round(
-      record.recentLatencies.reduce((s, l) => s + l, 0) / record.recentLatencies.length
+      record.recentLatencies.reduce((s, l) => s + l, 0) / record.recentLatencies.length,
     );
 
     this.evaluateStatus(record);
@@ -87,31 +87,37 @@ class ProviderHealthMonitor {
     record.consecutiveSuccesses = 0;
 
     this.evaluateStatus(record);
-    logger.warn({ provider, consecutiveFailures: record.consecutiveFailures, status: record.status }, "Provider failure recorded");
+    logger.warn(
+      { provider, consecutiveFailures: record.consecutiveFailures, status: record.status },
+      'Provider failure recorded',
+    );
   }
 
   private evaluateStatus(record: ProviderHealthRecord): void {
     const previousStatus = record.status;
 
     if (record.consecutiveFailures >= DOWN_THRESHOLD_FAILURES) {
-      record.status = "down";
+      record.status = 'down';
       if (!record.downSince) record.downSince = Date.now();
       record.degradedSince = undefined;
     } else if (
       record.consecutiveFailures >= DEGRADED_THRESHOLD_FAILURES ||
       record.avgLatencyMs > DEGRADED_LATENCY_MS
     ) {
-      record.status = "degraded";
+      record.status = 'degraded';
       if (!record.degradedSince) record.degradedSince = Date.now();
       record.downSince = undefined;
     } else if (record.consecutiveSuccesses >= RECOVERY_THRESHOLD_SUCCESSES) {
-      record.status = "healthy";
+      record.status = 'healthy';
       record.degradedSince = undefined;
       record.downSince = undefined;
     }
 
     if (previousStatus !== record.status) {
-      logger.info({ provider: record.provider, from: previousStatus, to: record.status }, "Provider health status changed");
+      logger.info(
+        { provider: record.provider, from: previousStatus, to: record.status },
+        'Provider health status changed',
+      );
     }
   }
 
@@ -121,13 +127,13 @@ class ProviderHealthMonitor {
 
   getSummary(): HealthSummary {
     const allProviders = Array.from(this.providers.values());
-    const healthy = allProviders.filter(p => p.status === "healthy").length;
-    const degraded = allProviders.filter(p => p.status === "degraded").length;
-    const down = allProviders.filter(p => p.status === "down").length;
+    const healthy = allProviders.filter((p) => p.status === 'healthy').length;
+    const degraded = allProviders.filter((p) => p.status === 'degraded').length;
+    const down = allProviders.filter((p) => p.status === 'down').length;
 
-    let overallStatus: HealthStatus = "healthy";
-    if (down > 0) overallStatus = "degraded";
-    if (healthy === 0 && allProviders.length > 0) overallStatus = "down";
+    let overallStatus: HealthStatus = 'healthy';
+    if (down > 0) overallStatus = 'degraded';
+    if (healthy === 0 && allProviders.length > 0) overallStatus = 'down';
 
     return {
       providers: allProviders,
@@ -142,7 +148,7 @@ class ProviderHealthMonitor {
 
   reset(provider: InferenceProvider): void {
     this.providers.delete(provider);
-    logger.info({ provider }, "Provider health record reset");
+    logger.info({ provider }, 'Provider health record reset');
   }
 
   startActiveProbes(): void {
@@ -153,19 +159,22 @@ class ProviderHealthMonitor {
     }
 
     this.probeTimer = setInterval(() => {
-      this.runProbes().catch(err => {
-        logger.error({ error: String(err) }, "Active health probe cycle failed");
+      this.runProbes().catch((err) => {
+        logger.error({ error: String(err) }, 'Active health probe cycle failed');
       });
     }, PROBE_INTERVAL_MS);
 
-    logger.info({ intervalMs: PROBE_INTERVAL_MS, providers: KNOWN_PROVIDERS }, "Active health probing started");
+    logger.info(
+      { intervalMs: PROBE_INTERVAL_MS, providers: KNOWN_PROVIDERS },
+      'Active health probing started',
+    );
   }
 
   stopActiveProbes(): void {
     if (this.probeTimer) {
       clearInterval(this.probeTimer);
       this.probeTimer = null;
-      logger.info("Active health probing stopped");
+      logger.info('Active health probing stopped');
     }
   }
 
@@ -182,7 +191,7 @@ class ProviderHealthMonitor {
         if (ok) {
           this.recordSuccess(provider, latencyMs);
         } else {
-          this.recordFailure(provider, "probe returned not-ok");
+          this.recordFailure(provider, 'probe returned not-ok');
         }
       } catch (err) {
         record.lastProbeAt = Date.now();
@@ -194,18 +203,22 @@ class ProviderHealthMonitor {
 
   private async probeProvider(provider: InferenceProvider): Promise<boolean> {
     const probeEndpoints: Record<string, string | undefined> = {
-      "replit-proxy": process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ? `${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL}/models` : undefined,
-      "huggingface": process.env.HUGGINGFACE_API_KEY ? "https://api-inference.huggingface.co/status" : undefined,
+      'replit-proxy': process.env.AI_INTEGRATIONS_OPENAI_BASE_URL
+        ? `${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL}/models`
+        : undefined,
+      huggingface: process.env.HUGGINGFACE_API_KEY
+        ? 'https://api-inference.huggingface.co/status'
+        : undefined,
     };
 
     const endpoint = probeEndpoints[provider];
     if (!endpoint) return true;
 
     const headers: Record<string, string> = {};
-    if (provider === "replit-proxy" && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-      headers["Authorization"] = `Bearer ${process.env.AI_INTEGRATIONS_OPENAI_API_KEY}`;
-    } else if (provider === "huggingface" && process.env.HUGGINGFACE_API_KEY) {
-      headers["Authorization"] = `Bearer ${process.env.HUGGINGFACE_API_KEY}`;
+    if (provider === 'replit-proxy' && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+      headers['Authorization'] = `Bearer ${process.env.AI_INTEGRATIONS_OPENAI_API_KEY}`;
+    } else if (provider === 'huggingface' && process.env.HUGGINGFACE_API_KEY) {
+      headers['Authorization'] = `Bearer ${process.env.HUGGINGFACE_API_KEY}`;
     }
 
     const controller = new AbortController();
@@ -213,7 +226,7 @@ class ProviderHealthMonitor {
 
     try {
       const resp = await fetch(endpoint, {
-        method: "GET",
+        method: 'GET',
         headers,
         signal: controller.signal,
       });

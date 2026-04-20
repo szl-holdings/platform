@@ -1,1 +1,1 @@
-export { default } from "./(tabs)/prism";
+export { default } from './(tabs)/prism';

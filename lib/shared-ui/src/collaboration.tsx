@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { MessageCircle, Send, Clock, ChevronDown, ChevronUp, Activity, Trash2 } from "lucide-react";
-import { apiFetch } from "./api-fetch";
+import { Activity, ChevronDown, ChevronUp, Clock, MessageCircle, Send, Trash2 } from 'lucide-react';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { apiFetch } from './api-fetch';
 
 export interface Comment {
   id: number;
@@ -21,7 +22,7 @@ function formatRelativeTime(iso: string): string {
   const now = Date.now();
   const ts = new Date(iso).getTime();
   const diff = Math.floor((now - ts) / 1000);
-  if (diff < 60) return "just now";
+  if (diff < 60) return 'just now';
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
@@ -37,7 +38,10 @@ function renderMarkdown(content: string): React.ReactNode {
     {
       regex: /`([^`]+)`/,
       render: (m) => (
-        <code key={key++} className="bg-muted/60 text-primary/90 px-1 py-0.5 rounded text-[10px] font-mono">
+        <code
+          key={key++}
+          className="bg-muted/60 text-primary/90 px-1 py-0.5 rounded text-[10px] font-mono"
+        >
           {m[1]}
         </code>
       ),
@@ -69,7 +73,11 @@ function renderMarkdown(content: string): React.ReactNode {
   ];
 
   while (remaining.length > 0) {
-    let earliest: { index: number; match: RegExpExecArray; render: (m: RegExpExecArray) => React.ReactNode } | null = null;
+    let earliest: {
+      index: number;
+      match: RegExpExecArray;
+      render: (m: RegExpExecArray) => React.ReactNode;
+    } | null = null;
 
     for (const { regex, render } of patterns) {
       const m = regex.exec(remaining);
@@ -94,13 +102,18 @@ function renderMarkdown(content: string): React.ReactNode {
 }
 
 const AVATAR_COLORS = [
-  "bg-blue-500", "bg-violet-500", "bg-[#6b8f71]",
-  "bg-[#d4a054]", "bg-rose-500", "bg-cyan-500",
-  "bg-orange-500", "bg-teal-500",
+  'bg-blue-500',
+  'bg-violet-500',
+  'bg-[#6b8f71]',
+  'bg-[#d4a054]',
+  'bg-rose-500',
+  'bg-cyan-500',
+  'bg-orange-500',
+  'bg-teal-500',
 ];
 
 function Avatar({ initials, name }: { initials: string; name: string }) {
-  const idx = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % AVATAR_COLORS.length;
+  const idx = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % AVATAR_COLORS.length;
   return (
     <div
       className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${AVATAR_COLORS[idx]}`}
@@ -119,8 +132,7 @@ interface CommentItemProps {
 
 function CommentItem({ comment, onDelete, currentUserName }: CommentItemProps) {
   const canDelete =
-    currentUserName &&
-    (comment.authorName === currentUserName || currentUserName === "Admin");
+    currentUserName && (comment.authorName === currentUserName || currentUserName === 'Admin');
 
   return (
     <div className="flex gap-2.5 group">
@@ -160,12 +172,12 @@ interface CommentInputProps {
 
 function CommentInput({
   onSubmit,
-  placeholder = "Add a comment... Use @name to mention, **bold**, *italic*, `code`",
+  placeholder = 'Add a comment... Use @name to mention, **bold**, *italic*, `code`',
   authorName,
   onAuthorNameChange,
   showNameInput,
 }: CommentInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -174,14 +186,14 @@ function CommentInput({
     setSubmitting(true);
     try {
       await onSubmit(trimmed);
-      setValue("");
+      setValue('');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       void handleSubmit();
     }
@@ -193,7 +205,7 @@ function CommentInput({
         <input
           className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
           placeholder="Your name"
-          value={authorName || ""}
+          value={authorName || ''}
           onChange={(e) => onAuthorNameChange?.(e.target.value)}
           maxLength={80}
         />
@@ -220,7 +232,9 @@ function CommentInput({
           )}
         </button>
       </div>
-      <p className="text-[10px] text-muted-foreground">⌘+Enter to submit · Markdown: **bold** *italic* `code`</p>
+      <p className="text-[10px] text-muted-foreground">
+        ⌘+Enter to submit · Markdown: **bold** *italic* `code`
+      </p>
     </div>
   );
 }
@@ -238,16 +252,16 @@ export interface CommentThreadProps {
 export function CommentThread({
   entityType,
   entityId,
-  title = "Discussion",
+  title = 'Discussion',
   collapsible = true,
   defaultCollapsed = false,
   currentUserName,
-  className = "",
+  className = '',
 }: CommentThreadProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
-  const [authorName, setAuthorName] = useState(currentUserName || "");
+  const [authorName, setAuthorName] = useState(currentUserName || '');
 
   const entityIdStr = String(entityId);
 
@@ -269,15 +283,15 @@ export function CommentThread({
   const handleSubmit = async (content: string) => {
     const mentions = Array.from(content.matchAll(/@(\w[\w.-]*)/g)).map((m) => m[1]);
     await apiFetch(`/comments/${entityType}/${entityIdStr}`, {
-      method: "POST",
-      body: JSON.stringify({ content, mentions, authorName: authorName || "Team Member" }),
+      method: 'POST',
+      body: JSON.stringify({ content, mentions, authorName: authorName || 'Team Member' }),
     });
     await fetchComments();
   };
 
   const handleDelete = async (id: number) => {
     await apiFetch(`/comments/${id}`, {
-      method: "DELETE",
+      method: 'DELETE',
       body: JSON.stringify({ authorName }),
     });
     setComments((prev) => prev.filter((c) => c.id !== id));
@@ -289,7 +303,7 @@ export function CommentThread({
     <div className={`rounded-xl border border-border bg-card overflow-hidden ${className}`}>
       <button
         type="button"
-        className={`w-full px-4 py-3 flex items-center justify-between border-b border-border bg-muted/30 ${collapsible ? "cursor-pointer hover:bg-muted/50 transition-colors" : "cursor-default"}`}
+        className={`w-full px-4 py-3 flex items-center justify-between border-b border-border bg-muted/30 ${collapsible ? 'cursor-pointer hover:bg-muted/50 transition-colors' : 'cursor-default'}`}
         onClick={() => collapsible && setCollapsed(!collapsed)}
         disabled={!collapsible}
       >
@@ -300,13 +314,12 @@ export function CommentThread({
             {comments.length}
           </span>
         </div>
-        {collapsible && (
-          collapsed ? (
+        {collapsible &&
+          (collapsed ? (
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           ) : (
             <ChevronUp className="w-4 h-4 text-muted-foreground" />
-          )
-        )}
+          ))}
       </button>
 
       {!collapsed && (
@@ -327,7 +340,9 @@ export function CommentThread({
           ) : comments.length === 0 ? (
             <div className="text-center py-4">
               <MessageCircle className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">No comments yet. Start the discussion.</p>
+              <p className="text-xs text-muted-foreground">
+                No comments yet. Start the discussion.
+              </p>
             </div>
           ) : (
             <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
@@ -357,15 +372,15 @@ export function CommentThread({
 }
 
 const entityLabels: Record<string, string> = {
-  vessel: "Vessel",
-  alert: "Alert",
-  incident: "Incident",
-  ticket: "Ticket",
-  property: "Property",
-  experiment: "Experiment",
-  campaign: "Campaign",
-  risk: "Risk",
-  milestone: "Milestone",
+  vessel: 'Vessel',
+  alert: 'Alert',
+  incident: 'Incident',
+  ticket: 'Ticket',
+  property: 'Property',
+  experiment: 'Experiment',
+  campaign: 'Campaign',
+  risk: 'Risk',
+  milestone: 'Milestone',
 };
 
 const entityPaths: Record<string, (id: string) => string> = {
@@ -390,8 +405,8 @@ export interface ActivityFeedProps {
 export function ActivityFeed({
   entityType,
   limit = 10,
-  title = "Recent Activity",
-  className = "",
+  title = 'Recent Activity',
+  className = '',
   compact = false,
 }: ActivityFeedProps) {
   const [items, setItems] = useState<Comment[]>([]);
@@ -399,7 +414,7 @@ export function ActivityFeed({
 
   useEffect(() => {
     const params = new URLSearchParams({ limit: String(limit) });
-    if (entityType) params.set("entityType", entityType);
+    if (entityType) params.set('entityType', entityType);
     apiFetch<Comment[]>(`/comments/activity-feed?${params}`)
       .then((raw) => {
         setItems(Array.isArray(raw) ? raw : []);
@@ -420,9 +435,9 @@ export function ActivityFeed({
         )}
       </div>
 
-      <div className={compact ? "divide-y divide-border/50" : "p-4 space-y-3"}>
+      <div className={compact ? 'divide-y divide-border/50' : 'p-4 space-y-3'}>
         {loading ? (
-          <div className={compact ? "p-4" : ""}>
+          <div className={compact ? 'p-4' : ''}>
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex gap-2.5 animate-pulse">
@@ -449,7 +464,11 @@ export function ActivityFeed({
             return (
               <div
                 key={item.id}
-                className={compact ? "flex gap-2.5 px-4 py-3 hover:bg-muted/20 transition-colors" : "flex gap-2.5"}
+                className={
+                  compact
+                    ? 'flex gap-2.5 px-4 py-3 hover:bg-muted/20 transition-colors'
+                    : 'flex gap-2.5'
+                }
               >
                 <Avatar initials={item.authorInitials} name={item.authorName} />
                 <div className="flex-1 min-w-0">
@@ -464,7 +483,9 @@ export function ActivityFeed({
                         {entityDisplay}
                       </a>
                     ) : (
-                      <span className="text-[10px] font-medium text-primary/80">{entityDisplay}</span>
+                      <span className="text-[10px] font-medium text-primary/80">
+                        {entityDisplay}
+                      </span>
                     )}
                     <span className="text-[10px] text-muted-foreground ml-auto">
                       {formatRelativeTime(item.createdAt)}

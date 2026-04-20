@@ -1,11 +1,11 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 const trustPoints = [
   "Tailored to each principal's priorities",
-  "Absolute discretion, always",
-  "Single point of contact",
-  "Premium coordination and communication",
-  "Calm execution under complexity",
+  'Absolute discretion, always',
+  'Single point of contact',
+  'Premium coordination and communication',
+  'Calm execution under complexity',
 ];
 
 export default function ApproachSection() {
@@ -27,7 +27,8 @@ export default function ApproachSection() {
                 of support.
               </h2>
               <p className="text-sm text-ink-500 font-light leading-relaxed">
-                Thoughtful coordination and the belief that premium support should feel seamless and invisible. The emphasis is on precision, trust, and execution without noise.
+                Thoughtful coordination and the belief that premium support should feel seamless and
+                invisible. The emphasis is on precision, trust, and execution without noise.
               </p>
             </motion.div>
 
@@ -70,7 +71,8 @@ export default function ApproachSection() {
                 client-centered.
               </h2>
               <p className="text-sm text-ink-500 font-light leading-relaxed">
-                Shaped by real-world service experience and a commitment to calm, precise execution. Designed for principals who expect more.
+                Shaped by real-world service experience and a commitment to calm, precise execution.
+                Designed for principals who expect more.
               </p>
             </motion.div>
           </div>
@@ -95,13 +97,17 @@ export default function ApproachSection() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
-                onClick={() => document.querySelector("#inquire")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() =>
+                  document.querySelector('#inquire')?.scrollIntoView({ behavior: 'smooth' })
+                }
                 className="cj-btn-primary"
               >
                 Inquire privately
               </button>
               <button
-                onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() =>
+                  document.querySelector('#services')?.scrollIntoView({ behavior: 'smooth' })
+                }
                 className="cj-btn-secondary"
               >
                 Review services

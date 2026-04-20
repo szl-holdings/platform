@@ -1,10 +1,10 @@
-import { MarketingNav } from "../../../components/marketing/MarketingNav";
-import { MarketingFooter } from "../../../components/marketing/MarketingFooter";
-import { motion } from "framer-motion";
-import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { Link, useParams } from "wouter";
-import { CheckCircle2, ArrowRight } from "lucide-react";
-import { OPS_FEATURES } from "./data";
+import { Button } from '@szl-holdings/shared-ui/ui/button';
+import { motion } from 'framer-motion';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Link, useParams } from 'wouter';
+import { MarketingFooter } from '../../../components/marketing/MarketingFooter';
+import { MarketingNav } from '../../../components/marketing/MarketingNav';
+import { OPS_FEATURES } from './data';
 
 export function MarketingOpsFeaturePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -88,8 +88,12 @@ export function MarketingOpsFeaturePage() {
       <section className="py-24 border-b border-white/[0.04]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Core Capabilities</h2>
-            <p className="text-white/50 text-lg font-light">Built on real platform data, not synthetic dashboards.</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+              Core Capabilities
+            </h2>
+            <p className="text-white/50 text-lg font-light">
+              Built on real platform data, not synthetic dashboards.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {feature.capabilities.map((c, i) => (
@@ -115,14 +119,20 @@ export function MarketingOpsFeaturePage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="mb-10">
             <h2 className="text-3xl font-bold tracking-tight mb-3">Versus the Status Quo</h2>
-            <p className="text-white/50 font-light">Why teams replace point tools with the Command Ops Center.</p>
+            <p className="text-white/50 font-light">
+              Why teams replace point tools with the Command Ops Center.
+            </p>
           </div>
           <div className="rounded-2xl border border-white/10 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-white/[0.02] border-b border-white/10">
-                  <th className="text-left p-4 pl-6 text-white/50 font-medium w-1/3">Compared To</th>
-                  <th className="text-left p-4 font-semibold" style={{ color: accent }}>Command Ops</th>
+                  <th className="text-left p-4 pl-6 text-white/50 font-medium w-1/3">
+                    Compared To
+                  </th>
+                  <th className="text-left p-4 font-semibold" style={{ color: accent }}>
+                    Command Ops
+                  </th>
                   <th className="text-left p-4 text-white/60 font-medium">Status Quo</th>
                 </tr>
               </thead>
@@ -150,7 +160,7 @@ export function MarketingOpsFeaturePage() {
               <span
                 key={tier}
                 className="px-4 py-2 rounded-full bg-white/[0.04] border border-white/10 text-sm text-white/80"
-                data-testid={`tier-pill-${tier.toLowerCase().replace(/\s+/g, "-")}`}
+                data-testid={`tier-pill-${tier.toLowerCase().replace(/\s+/g, '-')}`}
               >
                 {tier}
               </span>

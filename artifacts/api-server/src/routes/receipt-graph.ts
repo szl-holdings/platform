@@ -1,52 +1,54 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { authMiddleware, requireRole } from "../middlewares/auth";
+import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  createReceipt,
   approveReceipt,
-  rejectReceipt,
-  retractReceipt,
-  recordPostExecutionDelta,
+  buildAuditPacket,
+  createReceipt,
+  getExecutiveTrustSummary,
   getReceipt,
   getReceiptByContent,
   getReceiptGraph,
-  buildAuditPacket,
-  getExecutiveTrustSummary,
-  listReceipts,
   linkReceipts,
+  listReceipts,
   type ReceiptClass,
   type ReceiptStatus,
-} from "@szl-holdings/receipt-graph";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  recordPostExecutionDelta,
+  rejectReceipt,
+  retractReceipt,
+} from '@szl-holdings/receipt-graph';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
 router.post(
-  "/receipt-graph/receipts",
+  '/receipt-graph/receipts',
   authMiddleware({ required: true }),
-  validateBody(bodyShape({
-      "assumptions": z.unknown().optional(),
-      "confidenceScore": z.unknown().optional(),
-      "contentId": z.unknown().optional(),
-      "contentType": z.unknown().optional(),
-      "correlationId": z.unknown().optional(),
-      "metadata": z.unknown().optional(),
-      "modelId": z.unknown().optional(),
-      "modelLane": z.unknown().optional(),
-      "modelProvider": z.unknown().optional(),
-      "modelVersion": z.unknown().optional(),
-      "orgId": z.unknown().optional(),
-      "parentReceiptId": z.unknown().optional(),
-      "policyClass": z.unknown().optional(),
-      "promptText": z.unknown().optional(),
-      "receiptClass": z.unknown().optional(),
-      "serviceAttribution": z.unknown().optional(),
-      "traceId": z.unknown().optional(),
-      "whatWasIgnored": z.unknown().optional(),
-      "whatWasSeen": z.unknown().optional(),
-      "whatWasUsed": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      assumptions: z.unknown().optional(),
+      confidenceScore: z.unknown().optional(),
+      contentId: z.unknown().optional(),
+      contentType: z.unknown().optional(),
+      correlationId: z.unknown().optional(),
+      metadata: z.unknown().optional(),
+      modelId: z.unknown().optional(),
+      modelLane: z.unknown().optional(),
+      modelProvider: z.unknown().optional(),
+      modelVersion: z.unknown().optional(),
+      orgId: z.unknown().optional(),
+      parentReceiptId: z.unknown().optional(),
+      policyClass: z.unknown().optional(),
+      promptText: z.unknown().optional(),
+      receiptClass: z.unknown().optional(),
+      serviceAttribution: z.unknown().optional(),
+      traceId: z.unknown().optional(),
+      whatWasIgnored: z.unknown().optional(),
+      whatWasSeen: z.unknown().optional(),
+      whatWasUsed: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     try {
       const {
@@ -73,7 +75,7 @@ router.post(
       } = req.body;
 
       if (!contentId || !contentType || !receiptClass) {
-        res.status(400).json({ error: "contentId, contentType, and receiptClass are required" });
+        res.status(400).json({ error: 'contentId, contentType, and receiptClass are required' });
         return;
       }
 
@@ -109,19 +111,12 @@ router.post(
 );
 
 router.get(
-  "/receipt-graph/receipts",
+  '/receipt-graph/receipts',
   authMiddleware({ required: true }),
   validateQuery(listQuerySchema),
   (req, res) => {
     try {
-      const {
-        orgId,
-        contentType,
-        receiptClass,
-        status,
-        limit,
-        sinceMs,
-      } = req.query;
+      const { orgId, contentType, receiptClass, status, limit, sinceMs } = req.query;
 
       const receipts = listReceipts({
         orgId: orgId ? Number(orgId) : (req.user?.orgs?.[0]?.orgId ?? undefined),
@@ -139,29 +134,28 @@ router.get(
   },
 );
 
-router.get(
-  "/receipt-graph/receipts/:receiptId",
-  authMiddleware({ required: true }),
-  (req, res) => {
-    try {
-      const receipt = getReceipt(req.params.receiptId as string);
-      if (!receipt) {
-        res.status(404).json({ error: "Receipt not found" });
-        return;
-      }
-      res.json({ receipt });
-    } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+router.get('/receipt-graph/receipts/:receiptId', authMiddleware({ required: true }), (req, res) => {
+  try {
+    const receipt = getReceipt(req.params.receiptId as string);
+    if (!receipt) {
+      res.status(404).json({ error: 'Receipt not found' });
+      return;
     }
-  },
-);
+    res.json({ receipt });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
 
 router.get(
-  "/receipt-graph/by-content/:contentType/:contentId",
+  '/receipt-graph/by-content/:contentType/:contentId',
   authMiddleware({ required: true }),
   (req, res) => {
     try {
-      const receipts = getReceiptByContent(req.params.contentType as string, req.params.contentId as string);
+      const receipts = getReceiptByContent(
+        req.params.contentType as string,
+        req.params.contentId as string,
+      );
       res.json({ receipts, count: receipts.length });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -170,7 +164,7 @@ router.get(
 );
 
 router.get(
-  "/receipt-graph/graph/:receiptId",
+  '/receipt-graph/graph/:receiptId',
   authMiddleware({ required: true }),
   validateQuery(listQuerySchema),
   (req, res) => {
@@ -185,12 +179,14 @@ router.get(
 );
 
 router.post(
-  "/receipt-graph/receipts/:receiptId/approve",
+  '/receipt-graph/receipts/:receiptId/approve',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
-  validateBody(bodyShape({
-      "approvalNote": z.unknown().optional(),
-    })),
+  requireRole('admin', 'operator'),
+  validateBody(
+    bodyShape({
+      approvalNote: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -202,8 +198,8 @@ router.post(
       res.json({ receipt });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code === "NOT_FOUND") {
-        res.status(404).json({ error: "Receipt not found" });
+      if (code === 'NOT_FOUND') {
+        res.status(404).json({ error: 'Receipt not found' });
         return;
       }
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -212,12 +208,14 @@ router.post(
 );
 
 router.post(
-  "/receipt-graph/receipts/:receiptId/reject",
+  '/receipt-graph/receipts/:receiptId/reject',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
-  validateBody(bodyShape({
-      "approvalNote": z.unknown().optional(),
-    })),
+  requireRole('admin', 'operator'),
+  validateBody(
+    bodyShape({
+      approvalNote: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -229,8 +227,8 @@ router.post(
       res.json({ receipt });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code === "NOT_FOUND") {
-        res.status(404).json({ error: "Receipt not found" });
+      if (code === 'NOT_FOUND') {
+        res.status(404).json({ error: 'Receipt not found' });
         return;
       }
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -239,12 +237,14 @@ router.post(
 );
 
 router.post(
-  "/receipt-graph/receipts/:receiptId/retract",
+  '/receipt-graph/receipts/:receiptId/retract',
   authMiddleware({ required: true }),
-  requireRole("admin"),
-  validateBody(bodyShape({
-      "approvalNote": z.unknown().optional(),
-    })),
+  requireRole('admin'),
+  validateBody(
+    bodyShape({
+      approvalNote: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -256,8 +256,8 @@ router.post(
       res.json({ receipt });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code === "NOT_FOUND") {
-        res.status(404).json({ error: "Receipt not found" });
+      if (code === 'NOT_FOUND') {
+        res.status(404).json({ error: 'Receipt not found' });
         return;
       }
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -266,18 +266,20 @@ router.post(
 );
 
 router.post(
-  "/receipt-graph/receipts/:receiptId/delta",
+  '/receipt-graph/receipts/:receiptId/delta',
   authMiddleware({ required: true }),
-  validateBody(bodyShape({
-      "after": z.unknown().optional(),
-      "before": z.unknown().optional(),
-      "field": z.unknown().optional(),
-    })),
+  validateBody(
+    bodyShape({
+      after: z.unknown().optional(),
+      before: z.unknown().optional(),
+      field: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     try {
       const { field, before, after } = req.body;
       if (!field) {
-        res.status(400).json({ error: "field is required" });
+        res.status(400).json({ error: 'field is required' });
         return;
       }
       const receipt = recordPostExecutionDelta({
@@ -290,8 +292,8 @@ router.post(
       res.json({ receipt });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code === "NOT_FOUND") {
-        res.status(404).json({ error: "Receipt not found" });
+      if (code === 'NOT_FOUND') {
+        res.status(404).json({ error: 'Receipt not found' });
         return;
       }
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -300,23 +302,25 @@ router.post(
 );
 
 router.post(
-  "/receipt-graph/link",
+  '/receipt-graph/link',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
-  validateBody(bodyShape({
-      "childId": z.unknown().optional(),
-      "parentId": z.unknown().optional(),
-      "relationship": z.unknown().optional(),
-    })),
+  requireRole('admin', 'operator'),
+  validateBody(
+    bodyShape({
+      childId: z.unknown().optional(),
+      parentId: z.unknown().optional(),
+      relationship: z.unknown().optional(),
+    }),
+  ),
   (req, res) => {
     try {
       const { parentId, childId, relationship } = req.body;
       if (!parentId || !childId) {
-        res.status(400).json({ error: "parentId and childId are required" });
+        res.status(400).json({ error: 'parentId and childId are required' });
         return;
       }
       linkReceipts(parentId, childId, relationship);
-      res.json({ success: true, parentId, childId, relationship: relationship ?? "derived_from" });
+      res.json({ success: true, parentId, childId, relationship: relationship ?? 'derived_from' });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
@@ -324,17 +328,17 @@ router.post(
 );
 
 router.get(
-  "/receipt-graph/audit/:receiptId",
+  '/receipt-graph/audit/:receiptId',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator"),
+  requireRole('admin', 'operator'),
   (req, res) => {
     try {
       const packet = buildAuditPacket(req.params.receiptId as string, req.user?.id);
       res.json({ packet });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code === "NOT_FOUND") {
-        res.status(404).json({ error: "Receipt not found" });
+      if (code === 'NOT_FOUND') {
+        res.status(404).json({ error: 'Receipt not found' });
         return;
       }
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -343,9 +347,9 @@ router.get(
 );
 
 router.get(
-  "/receipt-graph/executive-summary",
+  '/receipt-graph/executive-summary',
   authMiddleware({ required: true }),
-  requireRole("admin", "operator", "viewer"),
+  requireRole('admin', 'operator', 'viewer'),
   validateQuery(listQuerySchema),
   (req, res) => {
     try {

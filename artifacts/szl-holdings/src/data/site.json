@@ -104,10 +104,22 @@
     "attribution": "SZL Holdings",
     "vision": "We operate at the intersection of platforms, advisory capabilities, and operating ideas designed for clarity, scale, and long-term value. Our thesis is simple: structured ventures with clear direction create durable, compounding value.",
     "values": [
-      { "title": "Structured thinking", "description": "We build ventures shaped by clear frameworks, premium execution, and long-term strategic direction." },
-      { "title": "Visibility and trust", "description": "Every platform and service model we develop is built around the belief that trust comes from clarity and transparency." },
-      { "title": "Advisory-grade execution", "description": "Our service design reflects the standards we hold across the portfolio — deliberate, considered, and built to last." },
-      { "title": "Long-term value", "description": "We are positioned for longevity, not short-term noise. Each venture contributes to a broader operating vision." }
+      {
+        "title": "Structured thinking",
+        "description": "We build ventures shaped by clear frameworks, premium execution, and long-term strategic direction."
+      },
+      {
+        "title": "Visibility and trust",
+        "description": "Every platform and service model we develop is built around the belief that trust comes from clarity and transparency."
+      },
+      {
+        "title": "Advisory-grade execution",
+        "description": "Our service design reflects the standards we hold across the portfolio — deliberate, considered, and built to last."
+      },
+      {
+        "title": "Long-term value",
+        "description": "We are positioned for longevity, not short-term noise. Each venture contributes to a broader operating vision."
+      }
     ]
   },
   "contact": {

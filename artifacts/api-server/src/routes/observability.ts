@@ -1,15 +1,15 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { services } from "@szl-holdings/services";
-import { logger } from "../lib/logger";
-import { MetricCollector, serverTelemetry, clientTelemetry } from "@szl-holdings/observability";
-import type { WebVitalsReport } from "@szl-holdings/observability";
-import { ALL_CONFIGS, getConfigBySlug } from "@szl-holdings/observability/configs";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { db, platformJobRunsTable, artifactApprovalsTable } from "@szl-holdings/db";
-import { sql, eq, and, gt } from "drizzle-orm";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { artifactApprovalsTable, db, platformJobRunsTable } from '@szl-holdings/db';
+import type { WebVitalsReport } from '@szl-holdings/observability';
+import { clientTelemetry, MetricCollector, serverTelemetry } from '@szl-holdings/observability';
+import { ALL_CONFIGS, getConfigBySlug } from '@szl-holdings/observability/configs';
+import { services } from '@szl-holdings/services';
+import { and, eq, gt, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
+import { logger } from '../lib/logger';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -24,9 +24,9 @@ function injectRealServiceHealth(collector: MetricCollector, connectors: string[
   const liveCount = healthMatrix.summary.liveConfigured;
   const total = healthMatrix.summary.total;
   const healthPct = total > 0 ? (liveCount / total) * 100 : 100;
-  collector.record("integration_health_pct", healthPct);
-  collector.record("live_integrations", liveCount);
-  collector.record("unhealthy_integrations", healthMatrix.summary.manualRequired);
+  collector.record('integration_health_pct', healthPct);
+  collector.record('live_integrations', liveCount);
+  collector.record('unhealthy_integrations', healthMatrix.summary.manualRequired);
 }
 
 setInterval(() => {
@@ -41,41 +41,45 @@ setInterval(() => {
 
   const telemetrySnapshot = serverTelemetry.getSnapshot();
   for (const collector of collectors.values()) {
-    collector.record("api_p95_latency", telemetrySnapshot.p95Latency);
-    collector.record("api_error_rate", telemetrySnapshot.errorRate * 100);
-    collector.record("api_throughput", telemetrySnapshot.throughputPerHour);
+    collector.record('api_p95_latency', telemetrySnapshot.p95Latency);
+    collector.record('api_error_rate', telemetrySnapshot.errorRate * 100);
+    collector.record('api_throughput', telemetrySnapshot.throughputPerHour);
   }
 }, 10000);
 
 function buildDataSources(isAuthenticated: boolean) {
-  const sources: string[] = ["domain_simulation"];
-  sources.push("server_telemetry");
+  const sources: string[] = ['domain_simulation'];
+  sources.push('server_telemetry');
   if (isAuthenticated) {
-    sources.push("integration_health");
-    sources.push("client_vitals");
+    sources.push('integration_health');
+    sources.push('client_vitals');
   }
   return sources;
 }
 
-router.get("/observability/:appSlug", authMiddleware(), (req, res) => {
+router.get('/observability/:appSlug', authMiddleware(), (req, res) => {
   const appSlug = String(req.params.appSlug);
   const config = getConfigBySlug(appSlug);
   const collector = collectors.get(appSlug);
 
   if (!config || !collector) {
-    res.status(404).json({ error: "App not found", availableApps: ALL_CONFIGS.map((c) => c.appSlug) });
+    res
+      .status(404)
+      .json({ error: 'App not found', availableApps: ALL_CONFIGS.map((c) => c.appSlug) });
     return;
   }
 
-  res.setHeader("Cache-Control", "private, no-store");
+  res.setHeader('Cache-Control', 'private, no-store');
 
   const snapshot = collector.getSnapshot();
 
-  const lensMetadata = config.domainLensLabels ? {
-    postureScoreName: config.domainLensLabels.postureScoreName,
-    topSignalLabel: config.domainLensLabels.topSignalLabel,
-    velocityTrendLabel: config.domainLensLabels.velocityTrendLabel,
-  } : null;
+  const lensMetadata = config.domainLensLabels
+    ? {
+        postureScoreName: config.domainLensLabels.postureScoreName,
+        topSignalLabel: config.domainLensLabels.topSignalLabel,
+        velocityTrendLabel: config.domainLensLabels.velocityTrendLabel,
+      }
+    : null;
 
   const connectors = config.connectors || [];
   const healthMatrix = services.getAppHealthMatrix(connectors);
@@ -113,8 +117,8 @@ router.get("/observability/:appSlug", authMiddleware(), (req, res) => {
   res.json(response);
 });
 
-router.get("/observability", authMiddleware(), (req, res) => {
-  res.setHeader("Cache-Control", "private, no-store");
+router.get('/observability', authMiddleware(), (req, res) => {
+  res.setHeader('Cache-Control', 'private, no-store');
 
   const allApps = ALL_CONFIGS.map((config) => {
     const collector = collectors.get(config.appSlug)!;
@@ -144,289 +148,385 @@ router.get("/observability", authMiddleware(), (req, res) => {
   });
 
   const portfolioScore = Math.round(
-    allApps.reduce((s, a) => s + (a.overallScore as number), 0) / allApps.length
+    allApps.reduce((s, a) => s + (a.overallScore as number), 0) / allApps.length,
   );
 
   res.json({
     timestamp: new Date().toISOString(),
     portfolioScore,
-    portfolioStatus: portfolioScore >= 80 ? "healthy" : portfolioScore >= 50 ? "degraded" : "critical",
+    portfolioStatus:
+      portfolioScore >= 80 ? 'healthy' : portfolioScore >= 50 ? 'degraded' : 'critical',
     apps: allApps,
     dataSources: buildDataSources(true),
     serverTelemetry: serverTelemetry.getSnapshot(),
   });
 });
 
-router.post("/observability/vitals", validateBody(bodyShape({
-      "appSlug": z.unknown().optional(),
-      "cls": z.unknown().optional(),
-      "fcp": z.unknown().optional(),
-      "fid": z.unknown().optional(),
-      "inp": z.unknown().optional(),
-      "lcp": z.unknown().optional(),
-      "pathname": z.unknown().optional(),
-      "ttfb": z.unknown().optional(),
-    })), (req, res) => {
-  const body = req.body;
-  if (!body || !body.appSlug) {
-    res.status(400).json({ error: "appSlug is required" });
-    return;
-  }
+router.post(
+  '/observability/vitals',
+  validateBody(
+    bodyShape({
+      appSlug: z.unknown().optional(),
+      cls: z.unknown().optional(),
+      fcp: z.unknown().optional(),
+      fid: z.unknown().optional(),
+      inp: z.unknown().optional(),
+      lcp: z.unknown().optional(),
+      pathname: z.unknown().optional(),
+      ttfb: z.unknown().optional(),
+    }),
+  ),
+  (req, res) => {
+    const body = req.body;
+    if (!body || !body.appSlug) {
+      res.status(400).json({ error: 'appSlug is required' });
+      return;
+    }
 
-  const report: WebVitalsReport = {
-    appSlug: body.appSlug,
-    lcp: typeof body.lcp === "number" ? body.lcp : undefined,
-    fid: typeof body.fid === "number" ? body.fid : undefined,
-    cls: typeof body.cls === "number" ? body.cls : undefined,
-    fcp: typeof body.fcp === "number" ? body.fcp : undefined,
-    ttfb: typeof body.ttfb === "number" ? body.ttfb : undefined,
-    inp: typeof body.inp === "number" ? body.inp : undefined,
-    timestamp: Date.now(),
-    userAgent: req.headers["user-agent"],
-    pathname: typeof body.pathname === "string" ? body.pathname : undefined,
-  };
-
-  clientTelemetry.recordVitals(report);
-
-  serverTelemetry.recordBusinessEvent({
-    type: "web_vitals_received",
-    domain: body.appSlug,
-    metadata: { pathname: report.pathname, lcp: report.lcp, cls: report.cls },
-  });
-
-  res.status(204).end();
-});
-
-router.post("/observability/client-errors", validateBody(bodyShape({
-      "app": z.unknown().optional(),
-      "errorId": z.unknown().optional(),
-      "message": z.unknown().optional(),
-      "timestamp": z.unknown().optional(),
-      "url": z.unknown().optional(),
-    })), (req, res) => {
-  const body = req.body;
-  if (!body || !body.app) {
-    res.status(400).json({ error: "app is required" });
-    return;
-  }
-
-  serverTelemetry.recordBusinessEvent({
-    type: "client_error",
-    domain: body.app,
-    metadata: {
-      errorId: body.errorId,
-      message: String(body.message || "").slice(0, 500),
-      url: body.url,
-      timestamp: body.timestamp,
-    },
-  });
-
-  logger.error({ app: body.app, errorId: body.errorId, url: body.url }, `[ClientError] ${String(body.message || "").slice(0, 200)}`);
-  res.status(204).end();
-});
-
-router.post("/observability/error-feedback", validateBody(bodyShape({
-      "app": z.unknown().optional(),
-      "description": z.unknown().optional(),
-      "errorId": z.unknown().optional(),
-      "timestamp": z.unknown().optional(),
-      "url": z.unknown().optional(),
-    })), (req, res) => {
-  const body = req.body;
-  if (!body || !body.app) {
-    res.status(400).json({ error: "app is required" });
-    return;
-  }
-
-  serverTelemetry.recordBusinessEvent({
-    type: "error_feedback",
-    domain: body.app,
-    metadata: {
-      errorId: body.errorId,
-      description: String(body.description || "").slice(0, 1000),
-      url: body.url,
-      timestamp: body.timestamp,
-    },
-  });
-
-  logger.info({ app: body.app, errorId: body.errorId, url: body.url }, `[ErrorFeedback] ${String(body.description || "").slice(0, 200)}`);
-  res.status(204).end();
-});
-
-router.get("/observability/alerts", authMiddleware(), requireRole("ops", "admin"), validateQuery(listQuerySchema), (req, res) => {
-  const includeResolved = req.query["includeResolved"] === "true";
-  const alerts = includeResolved
-    ? serverTelemetry.getAllAlerts()
-    : serverTelemetry.getActiveAlerts();
-  res.setHeader("Cache-Control", "no-store");
-  res.json({
-    timestamp: new Date().toISOString(),
-    activeCount: serverTelemetry.getActiveAlerts().length,
-    alerts,
-  });
-});
-
-router.post("/observability/alerts/:id/resolve", authMiddleware(), requireRole("ops"), validateBody(bodyShape({})), (req, res) => {
-  const { id } = req.params;
-  if (!id || typeof id !== "string") {
-    res.status(400).json({ error: "Alert ID is required" });
-    return;
-  }
-  serverTelemetry.resolveAlert(id);
-  res.json({ success: true, id });
-});
-
-router.get("/observability/business-events", authMiddleware(), requireRole("ops", "admin"), (req, res) => {
-  const snapshot = serverTelemetry.getSnapshot();
-  res.setHeader("Cache-Control", "no-store");
-  res.json({
-    timestamp: new Date().toISOString(),
-    windowMs: 300_000,
-    eventCounts: snapshot.businessEvents,
-    eventsByDomain: snapshot.eventsByDomain,
-    jobFailures: snapshot.jobFailures,
-    workflowCompletions: snapshot.workflowCompletions,
-    authFailures: snapshot.authFailures,
-    retryCount: snapshot.retryCount,
-  });
-});
-
-router.get("/observability/telemetry/technical", authMiddleware(), requireRole("ops", "admin"), (_req, res) => {
-  const snapshot = serverTelemetry.getSnapshot();
-  res.setHeader("Cache-Control", "no-store");
-  res.json({
-    timestamp: new Date().toISOString(),
-    requestLatency: {
-      p50: snapshot.p50Latency,
-      p95: snapshot.p95Latency,
-      p99: snapshot.p99Latency,
-      avg: snapshot.avgResponseTime,
-    },
-    endpointErrorRate: snapshot.errorRate,
-    clientErrorRate: snapshot.clientErrorRate,
-    requestCount: snapshot.requestCount,
-    throughputPerHour: snapshot.throughputPerHour,
-    jobDuration: {
-      failures: snapshot.jobFailures,
-      completions: snapshot.workflowCompletions,
-    },
-    workflowFailureRate: snapshot.workflowCompletions > 0
-      ? snapshot.jobFailures / (snapshot.jobFailures + snapshot.workflowCompletions)
-      : 0,
-    retryCount: snapshot.retryCount,
-    authFailures: snapshot.authFailures,
-    uptimeSeconds: snapshot.uptimeSeconds,
-    activeAlerts: snapshot.activeAlerts,
-  });
-});
-
-router.get("/observability/telemetry/product", authMiddleware(), requireRole("ops", "admin"), async (_req, res) => {
-  res.setHeader("Cache-Control", "no-store");
-  try {
-    const windowStart = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-    const [jobStats, approvalStats, recentJobs] = await Promise.all([
-      db.select({
-        workflowType: platformJobRunsTable.workflowType,
-        status: platformJobRunsTable.status,
-        count: sql<number>`COUNT(*)::int`,
-        avgDurationMs: sql<number>`AVG(EXTRACT(EPOCH FROM (completed_at - started_at)) * 1000)::int`,
-      })
-        .from(platformJobRunsTable)
-        .where(gt(platformJobRunsTable.createdAt, windowStart))
-        .groupBy(platformJobRunsTable.workflowType, platformJobRunsTable.status),
-
-      db.select({
-        status: artifactApprovalsTable.status,
-        count: sql<number>`COUNT(*)::int`,
-        avgWaitMs: sql<number>`AVG(EXTRACT(EPOCH FROM (COALESCE(reviewed_at, NOW()) - requested_at)) * 1000)::int`,
-      })
-        .from(artifactApprovalsTable)
-        .where(gt(artifactApprovalsTable.requestedAt, windowStart))
-        .groupBy(artifactApprovalsTable.status),
-
-      db.select({
-        workflowType: platformJobRunsTable.workflowType,
-        status: platformJobRunsTable.status,
-        result: platformJobRunsTable.result,
-        durationMs: sql<number>`EXTRACT(EPOCH FROM (completed_at - started_at)) * 1000`,
-      })
-        .from(platformJobRunsTable)
-        .where(and(
-          gt(platformJobRunsTable.createdAt, windowStart),
-          eq(platformJobRunsTable.status, "completed"),
-        ))
-        .orderBy(sql`created_at DESC`)
-        .limit(100),
-    ]);
-
-    const byType = (type: string) => jobStats.filter(r => r.workflowType === type);
-    const countForType = (type: string, status?: string) => {
-      const rows = status ? byType(type).filter(r => r.status === status) : byType(type);
-      return rows.reduce((s, r) => s + (r.count ?? 0), 0);
-    };
-    const avgDurationForType = (type: string) => {
-      const rows = byType(type).filter(r => r.avgDurationMs != null);
-      if (rows.length === 0) return null;
-      return Math.round(rows.reduce((s, r) => s + (r.avgDurationMs ?? 0), 0) / rows.length);
+    const report: WebVitalsReport = {
+      appSlug: body.appSlug,
+      lcp: typeof body.lcp === 'number' ? body.lcp : undefined,
+      fid: typeof body.fid === 'number' ? body.fid : undefined,
+      cls: typeof body.cls === 'number' ? body.cls : undefined,
+      fcp: typeof body.fcp === 'number' ? body.fcp : undefined,
+      ttfb: typeof body.ttfb === 'number' ? body.ttfb : undefined,
+      inp: typeof body.inp === 'number' ? body.inp : undefined,
+      timestamp: Date.now(),
+      userAgent: req.headers['user-agent'],
+      pathname: typeof body.pathname === 'string' ? body.pathname : undefined,
     };
 
-    const latestJobResult = (type: string) => {
-      const match = recentJobs.find(r => r.workflowType === type);
-      return (match?.result as Record<string, unknown>) ?? null;
-    };
+    clientTelemetry.recordVitals(report);
 
-    const lyteResult = latestJobResult("lyte_digest");
-    const readinessResult = latestJobResult("readiness_digest");
+    serverTelemetry.recordBusinessEvent({
+      type: 'web_vitals_received',
+      domain: body.appSlug,
+      metadata: { pathname: report.pathname, lcp: report.lcp, cls: report.cls },
+    });
 
-    const pendingApprovals = approvalStats.find(r => r.status === "pending")?.count ?? 0;
-    const approvedApprovals = approvalStats.find(r => r.status === "approved")?.count ?? 0;
-    const avgApprovalWaitMs = approvalStats.find(r => r.status === "approved")?.avgWaitMs ?? null;
+    res.status(204).end();
+  },
+);
 
-    const jobRunCounts = {
-      lyteDigest: { runs: countForType("lyte_digest"), avgDurationMs: avgDurationForType("lyte_digest") },
-      readinessDigest: { runs: countForType("readiness_digest"), avgDurationMs: avgDurationForType("readiness_digest") },
-      vesselEtaRefresh: { runs: countForType("vessel_eta_refresh"), avgDurationMs: avgDurationForType("vessel_eta_refresh") },
-      routePressureScan: { runs: countForType("route_pressure_scan"), avgDurationMs: avgDurationForType("route_pressure_scan") },
-      staleActionScan: { runs: countForType("stale_action_scan"), avgDurationMs: avgDurationForType("stale_action_scan") },
-      artifactGeneration: { runs: countForType("artifact_generation"), avgDurationMs: avgDurationForType("artifact_generation") },
-      featureFlagSync: { runs: countForType("feature_flag_sync"), avgDurationMs: avgDurationForType("feature_flag_sync") },
-    };
+router.post(
+  '/observability/client-errors',
+  validateBody(
+    bodyShape({
+      app: z.unknown().optional(),
+      errorId: z.unknown().optional(),
+      message: z.unknown().optional(),
+      timestamp: z.unknown().optional(),
+      url: z.unknown().optional(),
+    }),
+  ),
+  (req, res) => {
+    const body = req.body;
+    if (!body || !body.app) {
+      res.status(400).json({ error: 'app is required' });
+      return;
+    }
 
-    const totalFailed = jobStats.filter(r => r.status === "failed").reduce((s, r) => s + r.count, 0);
-    const totalWarnings = jobStats.filter(r => r.status === "completed_with_warnings").reduce((s, r) => s + r.count, 0);
-    const totalCompleted = jobStats.filter(r => r.status === "completed").reduce((s, r) => s + r.count, 0);
-
-    res.json({
-      timestamp: new Date().toISOString(),
-      windowHours: 24,
-      lyte: {
-        unresolvedActionCount: typeof lyteResult?.["unresolvedActionCount"] === "number" ? lyteResult["unresolvedActionCount"] : null,
-        criticalSignalCount: typeof lyteResult?.["criticalCount"] === "number" ? lyteResult["criticalCount"] : null,
-        totalSignalCount: typeof lyteResult?.["signalCount"] === "number" ? lyteResult["signalCount"] : null,
-      },
-      readiness: {
-        blockerCount: typeof readinessResult?.["blockerCount"] === "number" ? readinessResult["blockerCount"] : null,
-        avgScore: typeof readinessResult?.["avgScore"] === "number" ? readinessResult["avgScore"] : null,
-      },
-      approvals: {
-        pending: pendingApprovals,
-        approved: approvedApprovals,
-        avgApprovalWaitMs,
-      },
-      jobRuns: jobRunCounts,
-      jobHealth: {
-        totalFailed,
-        totalWithWarnings: totalWarnings,
-        totalCompleted,
-        failureRate: (totalFailed + totalCompleted + totalWarnings) > 0
-          ? totalFailed / (totalFailed + totalCompleted + totalWarnings)
-          : 0,
+    serverTelemetry.recordBusinessEvent({
+      type: 'client_error',
+      domain: body.app,
+      metadata: {
+        errorId: body.errorId,
+        message: String(body.message || '').slice(0, 500),
+        url: body.url,
+        timestamp: body.timestamp,
       },
     });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to generate product telemetry", details: String(err) });
-  }
-});
+
+    logger.error(
+      { app: body.app, errorId: body.errorId, url: body.url },
+      `[ClientError] ${String(body.message || '').slice(0, 200)}`,
+    );
+    res.status(204).end();
+  },
+);
+
+router.post(
+  '/observability/error-feedback',
+  validateBody(
+    bodyShape({
+      app: z.unknown().optional(),
+      description: z.unknown().optional(),
+      errorId: z.unknown().optional(),
+      timestamp: z.unknown().optional(),
+      url: z.unknown().optional(),
+    }),
+  ),
+  (req, res) => {
+    const body = req.body;
+    if (!body || !body.app) {
+      res.status(400).json({ error: 'app is required' });
+      return;
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: 'error_feedback',
+      domain: body.app,
+      metadata: {
+        errorId: body.errorId,
+        description: String(body.description || '').slice(0, 1000),
+        url: body.url,
+        timestamp: body.timestamp,
+      },
+    });
+
+    logger.info(
+      { app: body.app, errorId: body.errorId, url: body.url },
+      `[ErrorFeedback] ${String(body.description || '').slice(0, 200)}`,
+    );
+    res.status(204).end();
+  },
+);
+
+router.get(
+  '/observability/alerts',
+  authMiddleware(),
+  requireRole('ops', 'admin'),
+  validateQuery(listQuerySchema),
+  (req, res) => {
+    const includeResolved = req.query['includeResolved'] === 'true';
+    const alerts = includeResolved
+      ? serverTelemetry.getAllAlerts()
+      : serverTelemetry.getActiveAlerts();
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+      timestamp: new Date().toISOString(),
+      activeCount: serverTelemetry.getActiveAlerts().length,
+      alerts,
+    });
+  },
+);
+
+router.post(
+  '/observability/alerts/:id/resolve',
+  authMiddleware(),
+  requireRole('ops'),
+  validateBody(bodyShape({})),
+  (req, res) => {
+    const { id } = req.params;
+    if (!id || typeof id !== 'string') {
+      res.status(400).json({ error: 'Alert ID is required' });
+      return;
+    }
+    serverTelemetry.resolveAlert(id);
+    res.json({ success: true, id });
+  },
+);
+
+router.get(
+  '/observability/business-events',
+  authMiddleware(),
+  requireRole('ops', 'admin'),
+  (req, res) => {
+    const snapshot = serverTelemetry.getSnapshot();
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+      timestamp: new Date().toISOString(),
+      windowMs: 300_000,
+      eventCounts: snapshot.businessEvents,
+      eventsByDomain: snapshot.eventsByDomain,
+      jobFailures: snapshot.jobFailures,
+      workflowCompletions: snapshot.workflowCompletions,
+      authFailures: snapshot.authFailures,
+      retryCount: snapshot.retryCount,
+    });
+  },
+);
+
+router.get(
+  '/observability/telemetry/technical',
+  authMiddleware(),
+  requireRole('ops', 'admin'),
+  (_req, res) => {
+    const snapshot = serverTelemetry.getSnapshot();
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+      timestamp: new Date().toISOString(),
+      requestLatency: {
+        p50: snapshot.p50Latency,
+        p95: snapshot.p95Latency,
+        p99: snapshot.p99Latency,
+        avg: snapshot.avgResponseTime,
+      },
+      endpointErrorRate: snapshot.errorRate,
+      clientErrorRate: snapshot.clientErrorRate,
+      requestCount: snapshot.requestCount,
+      throughputPerHour: snapshot.throughputPerHour,
+      jobDuration: {
+        failures: snapshot.jobFailures,
+        completions: snapshot.workflowCompletions,
+      },
+      workflowFailureRate:
+        snapshot.workflowCompletions > 0
+          ? snapshot.jobFailures / (snapshot.jobFailures + snapshot.workflowCompletions)
+          : 0,
+      retryCount: snapshot.retryCount,
+      authFailures: snapshot.authFailures,
+      uptimeSeconds: snapshot.uptimeSeconds,
+      activeAlerts: snapshot.activeAlerts,
+    });
+  },
+);
+
+router.get(
+  '/observability/telemetry/product',
+  authMiddleware(),
+  requireRole('ops', 'admin'),
+  async (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      const windowStart = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      const [jobStats, approvalStats, recentJobs] = await Promise.all([
+        db
+          .select({
+            workflowType: platformJobRunsTable.workflowType,
+            status: platformJobRunsTable.status,
+            count: sql<number>`COUNT(*)::int`,
+            avgDurationMs: sql<number>`AVG(EXTRACT(EPOCH FROM (completed_at - started_at)) * 1000)::int`,
+          })
+          .from(platformJobRunsTable)
+          .where(gt(platformJobRunsTable.createdAt, windowStart))
+          .groupBy(platformJobRunsTable.workflowType, platformJobRunsTable.status),
+
+        db
+          .select({
+            status: artifactApprovalsTable.status,
+            count: sql<number>`COUNT(*)::int`,
+            avgWaitMs: sql<number>`AVG(EXTRACT(EPOCH FROM (COALESCE(reviewed_at, NOW()) - requested_at)) * 1000)::int`,
+          })
+          .from(artifactApprovalsTable)
+          .where(gt(artifactApprovalsTable.requestedAt, windowStart))
+          .groupBy(artifactApprovalsTable.status),
+
+        db
+          .select({
+            workflowType: platformJobRunsTable.workflowType,
+            status: platformJobRunsTable.status,
+            result: platformJobRunsTable.result,
+            durationMs: sql<number>`EXTRACT(EPOCH FROM (completed_at - started_at)) * 1000`,
+          })
+          .from(platformJobRunsTable)
+          .where(
+            and(
+              gt(platformJobRunsTable.createdAt, windowStart),
+              eq(platformJobRunsTable.status, 'completed'),
+            ),
+          )
+          .orderBy(sql`created_at DESC`)
+          .limit(100),
+      ]);
+
+      const byType = (type: string) => jobStats.filter((r) => r.workflowType === type);
+      const countForType = (type: string, status?: string) => {
+        const rows = status ? byType(type).filter((r) => r.status === status) : byType(type);
+        return rows.reduce((s, r) => s + (r.count ?? 0), 0);
+      };
+      const avgDurationForType = (type: string) => {
+        const rows = byType(type).filter((r) => r.avgDurationMs != null);
+        if (rows.length === 0) return null;
+        return Math.round(rows.reduce((s, r) => s + (r.avgDurationMs ?? 0), 0) / rows.length);
+      };
+
+      const latestJobResult = (type: string) => {
+        const match = recentJobs.find((r) => r.workflowType === type);
+        return (match?.result as Record<string, unknown>) ?? null;
+      };
+
+      const lyteResult = latestJobResult('lyte_digest');
+      const readinessResult = latestJobResult('readiness_digest');
+
+      const pendingApprovals = approvalStats.find((r) => r.status === 'pending')?.count ?? 0;
+      const approvedApprovals = approvalStats.find((r) => r.status === 'approved')?.count ?? 0;
+      const avgApprovalWaitMs =
+        approvalStats.find((r) => r.status === 'approved')?.avgWaitMs ?? null;
+
+      const jobRunCounts = {
+        lyteDigest: {
+          runs: countForType('lyte_digest'),
+          avgDurationMs: avgDurationForType('lyte_digest'),
+        },
+        readinessDigest: {
+          runs: countForType('readiness_digest'),
+          avgDurationMs: avgDurationForType('readiness_digest'),
+        },
+        vesselEtaRefresh: {
+          runs: countForType('vessel_eta_refresh'),
+          avgDurationMs: avgDurationForType('vessel_eta_refresh'),
+        },
+        routePressureScan: {
+          runs: countForType('route_pressure_scan'),
+          avgDurationMs: avgDurationForType('route_pressure_scan'),
+        },
+        staleActionScan: {
+          runs: countForType('stale_action_scan'),
+          avgDurationMs: avgDurationForType('stale_action_scan'),
+        },
+        artifactGeneration: {
+          runs: countForType('artifact_generation'),
+          avgDurationMs: avgDurationForType('artifact_generation'),
+        },
+        featureFlagSync: {
+          runs: countForType('feature_flag_sync'),
+          avgDurationMs: avgDurationForType('feature_flag_sync'),
+        },
+      };
+
+      const totalFailed = jobStats
+        .filter((r) => r.status === 'failed')
+        .reduce((s, r) => s + r.count, 0);
+      const totalWarnings = jobStats
+        .filter((r) => r.status === 'completed_with_warnings')
+        .reduce((s, r) => s + r.count, 0);
+      const totalCompleted = jobStats
+        .filter((r) => r.status === 'completed')
+        .reduce((s, r) => s + r.count, 0);
+
+      res.json({
+        timestamp: new Date().toISOString(),
+        windowHours: 24,
+        lyte: {
+          unresolvedActionCount:
+            typeof lyteResult?.['unresolvedActionCount'] === 'number'
+              ? lyteResult['unresolvedActionCount']
+              : null,
+          criticalSignalCount:
+            typeof lyteResult?.['criticalCount'] === 'number' ? lyteResult['criticalCount'] : null,
+          totalSignalCount:
+            typeof lyteResult?.['signalCount'] === 'number' ? lyteResult['signalCount'] : null,
+        },
+        readiness: {
+          blockerCount:
+            typeof readinessResult?.['blockerCount'] === 'number'
+              ? readinessResult['blockerCount']
+              : null,
+          avgScore:
+            typeof readinessResult?.['avgScore'] === 'number' ? readinessResult['avgScore'] : null,
+        },
+        approvals: {
+          pending: pendingApprovals,
+          approved: approvedApprovals,
+          avgApprovalWaitMs,
+        },
+        jobRuns: jobRunCounts,
+        jobHealth: {
+          totalFailed,
+          totalWithWarnings: totalWarnings,
+          totalCompleted,
+          failureRate:
+            totalFailed + totalCompleted + totalWarnings > 0
+              ? totalFailed / (totalFailed + totalCompleted + totalWarnings)
+              : 0,
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to generate product telemetry', details: String(err) });
+    }
+  },
+);
 
 export default router;

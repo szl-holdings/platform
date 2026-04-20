@@ -1,7 +1,16 @@
 export type AgentType =
-  | "inca" | "vessels" | "szl-holdings" | "carlota-jo"
-  | "firestorm" | "lyte" | "dreamscape"
-  | "readiness-report" | "msp" | "terra" | "admin" | "stephen";
+  | 'inca'
+  | 'vessels'
+  | 'szl-holdings'
+  | 'carlota-jo'
+  | 'firestorm'
+  | 'lyte'
+  | 'dreamscape'
+  | 'readiness-report'
+  | 'msp'
+  | 'terra'
+  | 'admin'
+  | 'stephen';
 
 export interface ToolDefinition {
   name: string;
@@ -222,142 +231,322 @@ You are a professional portfolio assistant who helps visitors learn about Stephe
 
 export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
   inca: {
-    name: "INCA Research Intelligence Agent",
+    name: 'INCA Research Intelligence Agent',
     systemPrompt: INCA_SYSTEM_PROMPT,
     tools: [
-      { name: "get_experiments", description: "List recent AI experiments", parameters: { type: "object", properties: { status: { type: "string", description: "Filter by status" } } } },
-      { name: "get_models", description: "List deployed models and their metrics", parameters: { type: "object", properties: {} } },
-      { name: "get_insights", description: "Get recent AI research insights", parameters: { type: "object", properties: { limit: { type: "number", description: "Max results" } } } },
-      { name: "analyze_experiment", description: "Analyze an experiment's results", parameters: { type: "object", properties: { experimentId: { type: "string" } }, required: ["experimentId"] } },
+      {
+        name: 'get_experiments',
+        description: 'List recent AI experiments',
+        parameters: {
+          type: 'object',
+          properties: { status: { type: 'string', description: 'Filter by status' } },
+        },
+      },
+      {
+        name: 'get_models',
+        description: 'List deployed models and their metrics',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_insights',
+        description: 'Get recent AI research insights',
+        parameters: {
+          type: 'object',
+          properties: { limit: { type: 'number', description: 'Max results' } },
+        },
+      },
+      {
+        name: 'analyze_experiment',
+        description: "Analyze an experiment's results",
+        parameters: {
+          type: 'object',
+          properties: { experimentId: { type: 'string' } },
+          required: ['experimentId'],
+        },
+      },
     ],
-    executeTool: createDomainToolExecutor("inca"),
+    executeTool: createDomainToolExecutor('inca'),
   },
   vessels: {
-    name: "Vessels Maritime Operations Agent",
+    name: 'Vessels Maritime Operations Agent',
     systemPrompt: VESSELS_SYSTEM_PROMPT,
     tools: [
-      { name: "get_fleet_status", description: "Get current fleet positions and status", parameters: { type: "object", properties: {} } },
-      { name: "get_weather_alerts", description: "Get active marine weather alerts", parameters: { type: "object", properties: { region: { type: "string" } } } },
-      { name: "get_chokepoint_status", description: "Get maritime chokepoint congestion data", parameters: { type: "object", properties: {} } },
-      { name: "get_vessel_detail", description: "Get detailed info on a specific vessel", parameters: { type: "object", properties: { vesselId: { type: "string" } }, required: ["vesselId"] } },
-      { name: "get_sanctions_list", description: "Check sanctioned vessels list", parameters: { type: "object", properties: {} } },
+      {
+        name: 'get_fleet_status',
+        description: 'Get current fleet positions and status',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_weather_alerts',
+        description: 'Get active marine weather alerts',
+        parameters: { type: 'object', properties: { region: { type: 'string' } } },
+      },
+      {
+        name: 'get_chokepoint_status',
+        description: 'Get maritime chokepoint congestion data',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_vessel_detail',
+        description: 'Get detailed info on a specific vessel',
+        parameters: {
+          type: 'object',
+          properties: { vesselId: { type: 'string' } },
+          required: ['vesselId'],
+        },
+      },
+      {
+        name: 'get_sanctions_list',
+        description: 'Check sanctioned vessels list',
+        parameters: { type: 'object', properties: {} },
+      },
     ],
-    executeTool: createDomainToolExecutor("vessels"),
+    executeTool: createDomainToolExecutor('vessels'),
   },
-  "szl-holdings": {
-    name: "SZL Holdings Portfolio Concierge",
+  'szl-holdings': {
+    name: 'SZL Holdings Portfolio Concierge',
     systemPrompt: SZL_HOLDINGS_SYSTEM_PROMPT,
     tools: [
-      { name: "get_portfolio", description: "Get the full SZL Holdings platform portfolio", parameters: { type: "object", properties: {} } },
-      { name: "get_platform_status", description: "Get health status of all platforms", parameters: { type: "object", properties: {} } },
+      {
+        name: 'get_portfolio',
+        description: 'Get the full SZL Holdings platform portfolio',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_platform_status',
+        description: 'Get health status of all platforms',
+        parameters: { type: 'object', properties: {} },
+      },
     ],
-    executeTool: createDomainToolExecutor("szl-holdings"),
+    executeTool: createDomainToolExecutor('szl-holdings'),
   },
-  "carlota-jo": {
-    name: "Carlota Jo Strategic Engagement Agent",
+  'carlota-jo': {
+    name: 'Carlota Jo Strategic Engagement Agent',
     systemPrompt: CARLOTA_JO_SYSTEM_PROMPT,
     tools: [
-      { name: "get_services", description: "List consulting service offerings", parameters: { type: "object", properties: {} } },
-      { name: "get_case_studies", description: "Get client case studies", parameters: { type: "object", properties: { industry: { type: "string" } } } },
+      {
+        name: 'get_services',
+        description: 'List consulting service offerings',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_case_studies',
+        description: 'Get client case studies',
+        parameters: { type: 'object', properties: { industry: { type: 'string' } } },
+      },
     ],
-    executeTool: createDomainToolExecutor("carlota-jo"),
+    executeTool: createDomainToolExecutor('carlota-jo'),
   },
   firestorm: {
-    name: "Firestorm Incident Response Strategist",
+    name: 'Firestorm Incident Response Strategist',
     systemPrompt: FIRESTORM_SYSTEM_PROMPT,
     tools: [
-      { name: "get_threat_feed", description: "Get latest threat intelligence", parameters: { type: "object", properties: { severity: { type: "string" } } } },
-      { name: "get_vulnerabilities", description: "Get recent CVEs and vulnerabilities", parameters: { type: "object", properties: {} } },
-      { name: "get_incidents", description: "List active security incidents", parameters: { type: "object", properties: {} } },
-      { name: "get_mitre_mapping", description: "Map an attack to MITRE ATT&CK", parameters: { type: "object", properties: { technique: { type: "string" } }, required: ["technique"] } },
-      { name: "get_risk_score", description: "Calculate risk score for an asset", parameters: { type: "object", properties: { asset: { type: "string" } }, required: ["asset"] } },
+      {
+        name: 'get_threat_feed',
+        description: 'Get latest threat intelligence',
+        parameters: { type: 'object', properties: { severity: { type: 'string' } } },
+      },
+      {
+        name: 'get_vulnerabilities',
+        description: 'Get recent CVEs and vulnerabilities',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_incidents',
+        description: 'List active security incidents',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_mitre_mapping',
+        description: 'Map an attack to MITRE ATT&CK',
+        parameters: {
+          type: 'object',
+          properties: { technique: { type: 'string' } },
+          required: ['technique'],
+        },
+      },
+      {
+        name: 'get_risk_score',
+        description: 'Calculate risk score for an asset',
+        parameters: {
+          type: 'object',
+          properties: { asset: { type: 'string' } },
+          required: ['asset'],
+        },
+      },
     ],
-    executeTool: createDomainToolExecutor("firestorm"),
+    executeTool: createDomainToolExecutor('firestorm'),
   },
   lyte: {
-    name: "Lyte Observability Engineer",
+    name: 'Lyte Observability Engineer',
     systemPrompt: LYTE_SYSTEM_PROMPT,
     tools: [
-      { name: "get_system_health", description: "Get current system health metrics", parameters: { type: "object", properties: {} } },
-      { name: "get_active_alerts", description: "List active monitoring alerts", parameters: { type: "object", properties: {} } },
-      { name: "get_service_topology", description: "Get service dependency map", parameters: { type: "object", properties: {} } },
-      { name: "analyze_logs", description: "Analyze recent log patterns", parameters: { type: "object", properties: { service: { type: "string" }, timeRange: { type: "string" } } } },
+      {
+        name: 'get_system_health',
+        description: 'Get current system health metrics',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_active_alerts',
+        description: 'List active monitoring alerts',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_service_topology',
+        description: 'Get service dependency map',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'analyze_logs',
+        description: 'Analyze recent log patterns',
+        parameters: {
+          type: 'object',
+          properties: { service: { type: 'string' }, timeRange: { type: 'string' } },
+        },
+      },
     ],
-    executeTool: createDomainToolExecutor("lyte"),
+    executeTool: createDomainToolExecutor('lyte'),
   },
   dreamscape: {
-    name: "Dreamscape World-Building Companion",
+    name: 'Dreamscape World-Building Companion',
     systemPrompt: DREAMSCAPE_SYSTEM_PROMPT,
     tools: [
-      { name: "get_campaigns", description: "List creative campaigns", parameters: { type: "object", properties: {} } },
-      { name: "get_content_calendar", description: "Get upcoming content schedule", parameters: { type: "object", properties: {} } },
-      { name: "generate_concepts", description: "Generate creative concepts for a brief", parameters: { type: "object", properties: { brief: { type: "string" } }, required: ["brief"] } },
+      {
+        name: 'get_campaigns',
+        description: 'List creative campaigns',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_content_calendar',
+        description: 'Get upcoming content schedule',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'generate_concepts',
+        description: 'Generate creative concepts for a brief',
+        parameters: {
+          type: 'object',
+          properties: { brief: { type: 'string' } },
+          required: ['brief'],
+        },
+      },
     ],
-    executeTool: createDomainToolExecutor("dreamscape"),
+    executeTool: createDomainToolExecutor('dreamscape'),
   },
-  "readiness-report": {
-    name: "Lyte Readiness Agent",
+  'readiness-report': {
+    name: 'Lyte Readiness Agent',
     systemPrompt: READINESS_SYSTEM_PROMPT,
     tools: [
-      { name: "get_platform_info", description: "Get information about this platform", parameters: { type: "object", properties: {} } },
+      {
+        name: 'get_platform_info',
+        description: 'Get information about this platform',
+        parameters: { type: 'object', properties: {} },
+      },
     ],
-    executeTool: createStaticToolExecutor("readiness-report"),
+    executeTool: createStaticToolExecutor('readiness-report'),
   },
   msp: {
-    name: "MSP Command Agent",
+    name: 'MSP Command Agent',
     systemPrompt: MSP_SYSTEM_PROMPT,
     tools: [
-      { name: "get_client_health", description: "Get client infrastructure health summary", parameters: { type: "object", properties: {} } },
-      { name: "get_sla_status", description: "Get SLA compliance status", parameters: { type: "object", properties: {} } },
-      { name: "get_ticket_queue", description: "Get current support ticket queue", parameters: { type: "object", properties: {} } },
+      {
+        name: 'get_client_health',
+        description: 'Get client infrastructure health summary',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_sla_status',
+        description: 'Get SLA compliance status',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_ticket_queue',
+        description: 'Get current support ticket queue',
+        parameters: { type: 'object', properties: {} },
+      },
     ],
-    executeTool: createDomainToolExecutor("msp"),
+    executeTool: createDomainToolExecutor('msp'),
   },
   terra: {
-    name: "Terra Real Estate Intelligence Agent",
+    name: 'Terra Real Estate Intelligence Agent',
     systemPrompt: TERRA_SYSTEM_PROMPT,
     tools: [
-      { name: "get_market_overview", description: "Get real estate market overview", parameters: { type: "object", properties: { region: { type: "string" } } } },
-      { name: "get_property_analysis", description: "Analyze a property listing", parameters: { type: "object", properties: { address: { type: "string" } }, required: ["address"] } },
+      {
+        name: 'get_market_overview',
+        description: 'Get real estate market overview',
+        parameters: { type: 'object', properties: { region: { type: 'string' } } },
+      },
+      {
+        name: 'get_property_analysis',
+        description: 'Analyze a property listing',
+        parameters: {
+          type: 'object',
+          properties: { address: { type: 'string' } },
+          required: ['address'],
+        },
+      },
     ],
-    executeTool: createDomainToolExecutor("terra"),
+    executeTool: createDomainToolExecutor('terra'),
   },
   admin: {
-    name: "Admin Control Agent",
+    name: 'Admin Control Agent',
     systemPrompt: ADMIN_SYSTEM_PROMPT,
     tools: [
-      { name: "get_platform_health", description: "Get overall platform health", parameters: { type: "object", properties: {} } },
-      { name: "get_user_stats", description: "Get user statistics", parameters: { type: "object", properties: {} } },
+      {
+        name: 'get_platform_health',
+        description: 'Get overall platform health',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        name: 'get_user_stats',
+        description: 'Get user statistics',
+        parameters: { type: 'object', properties: {} },
+      },
     ],
-    executeTool: createDomainToolExecutor("admin"),
+    executeTool: createDomainToolExecutor('admin'),
   },
   stephen: {
-    name: "Lutar Command Agent",
+    name: 'Lutar Command Agent',
     systemPrompt: STEPHEN_SYSTEM_PROMPT,
     tools: [
-      { name: "get_platform_info", description: "Get information about this platform", parameters: { type: "object", properties: {} } },
+      {
+        name: 'get_platform_info',
+        description: 'Get information about this platform',
+        parameters: { type: 'object', properties: {} },
+      },
     ],
-    executeTool: createStaticToolExecutor("stephen"),
+    executeTool: createStaticToolExecutor('stephen'),
   },
 };
 
 function createStaticToolExecutor(appKey: string) {
   const platformInfo: Record<string, object> = {
-    "readiness-report": {
-      platform: "Aegis",
-      description: "Lyte Readiness and governance assessment platform",
-      features: ["Comprehensive readiness scoring", "Risk matrices and heatmaps", "Go/no-go decision support", "Launch checklist management", "Stakeholder readiness tracking"],
+    'readiness-report': {
+      platform: 'Aegis',
+      description: 'Lyte Readiness and governance assessment platform',
+      features: [
+        'Comprehensive readiness scoring',
+        'Risk matrices and heatmaps',
+        'Go/no-go decision support',
+        'Launch checklist management',
+        'Stakeholder readiness tracking',
+      ],
     },
     stephen: {
-      platform: "Stephen Lutar",
-      description: "Professional portfolio and career showcase",
-      features: ["Professional profile and achievements", "Technology vision and leadership", "Career timeline and milestones", "Skills and expertise showcase"],
+      platform: 'Stephen Lutar',
+      description: 'Professional portfolio and career showcase',
+      features: [
+        'Professional profile and achievements',
+        'Technology vision and leadership',
+        'Career timeline and milestones',
+        'Skills and expertise showcase',
+      ],
     },
   };
 
   return async (name: string, _args: Record<string, unknown>): Promise<string> => {
-    if (name === "get_platform_info") {
-      return JSON.stringify(platformInfo[appKey] || { error: "Platform info not configured" });
+    if (name === 'get_platform_info') {
+      return JSON.stringify(platformInfo[appKey] || { error: 'Platform info not configured' });
     }
     return JSON.stringify({ error: `Unknown tool: ${name}` });
   };
@@ -367,59 +556,61 @@ function createDomainToolExecutor(domain: string) {
   return async (name: string, args: Record<string, unknown>): Promise<string> => {
     try {
       const devDomain = process.env.REPLIT_DEV_DOMAIN;
-      const baseUrl = devDomain ? `https://${devDomain}` : `http://localhost:${process.env["PORT"] || 3000}`;
+      const baseUrl = devDomain
+        ? `https://${devDomain}`
+        : `http://localhost:${process.env['PORT'] || 3000}`;
       const toolRoutes: Record<string, Record<string, string>> = {
         inca: {
-          get_experiments: "/api/inca/experiments",
-          get_models: "/api/inca/models",
-          get_insights: "/api/inca/insights",
-          analyze_experiment: "/api/inca/experiments",
+          get_experiments: '/api/inca/experiments',
+          get_models: '/api/inca/models',
+          get_insights: '/api/inca/insights',
+          analyze_experiment: '/api/inca/experiments',
         },
         vessels: {
-          get_fleet_status: "/api/intelligence/maritime/vessels",
-          get_weather_alerts: "/api/intelligence/maritime/weather",
-          get_chokepoint_status: "/api/intelligence/maritime/chokepoints",
-          get_vessel_detail: "/api/intelligence/maritime/vessels",
-          get_sanctions_list: "/api/intelligence/maritime/sanctions",
+          get_fleet_status: '/api/intelligence/maritime/vessels',
+          get_weather_alerts: '/api/intelligence/maritime/weather',
+          get_chokepoint_status: '/api/intelligence/maritime/chokepoints',
+          get_vessel_detail: '/api/intelligence/maritime/vessels',
+          get_sanctions_list: '/api/intelligence/maritime/sanctions',
         },
         firestorm: {
-          get_threat_feed: "/api/intelligence/threats",
-          get_vulnerabilities: "/api/intelligence/cves",
-          get_incidents: "/api/firestorm/scenarios",
-          get_mitre_mapping: "/api/firestorm/findings",
-          get_risk_score: "/api/firestorm/risk-scores",
+          get_threat_feed: '/api/intelligence/threats',
+          get_vulnerabilities: '/api/intelligence/cves',
+          get_incidents: '/api/firestorm/scenarios',
+          get_mitre_mapping: '/api/firestorm/findings',
+          get_risk_score: '/api/firestorm/risk-scores',
         },
         lyte: {
-          get_system_health: "/api/lyte/executive-summary",
-          get_active_alerts: "/api/lyte/signals",
-          get_service_topology: "/api/lyte/workspaces",
-          analyze_logs: "/api/lyte/signals",
+          get_system_health: '/api/lyte/executive-summary',
+          get_active_alerts: '/api/lyte/signals',
+          get_service_topology: '/api/lyte/workspaces',
+          analyze_logs: '/api/lyte/signals',
         },
         dreamscape: {
-          get_campaigns: "/api/dreamscape/campaigns",
-          get_content_calendar: "/api/dreamscape/campaigns",
-          generate_concepts: "/api/dreamscape/campaigns",
+          get_campaigns: '/api/dreamscape/campaigns',
+          get_content_calendar: '/api/dreamscape/campaigns',
+          generate_concepts: '/api/dreamscape/campaigns',
         },
         msp: {
-          get_client_health: "/api/services/health",
-          get_sla_status: "/api/services/health",
-          get_ticket_queue: "/api/services/health",
+          get_client_health: '/api/services/health',
+          get_sla_status: '/api/services/health',
+          get_ticket_queue: '/api/services/health',
         },
         terra: {
-          get_market_overview: "/api/intelligence/geopolitical",
-          get_property_analysis: "/api/intelligence/geopolitical",
+          get_market_overview: '/api/intelligence/geopolitical',
+          get_property_analysis: '/api/intelligence/geopolitical',
         },
-        "szl-holdings": {
-          get_portfolio: "/api/holdings/ventures",
-          get_platform_status: "/api/services/health",
+        'szl-holdings': {
+          get_portfolio: '/api/holdings/ventures',
+          get_platform_status: '/api/services/health',
         },
-        "carlota-jo": {
-          get_services: "/api/booking/services",
-          get_case_studies: "/api/booking/services",
+        'carlota-jo': {
+          get_services: '/api/booking/services',
+          get_case_studies: '/api/booking/services',
         },
         admin: {
-          get_platform_health: "/api/services/health",
-          get_user_stats: "/api/services/health",
+          get_platform_health: '/api/services/health',
+          get_user_stats: '/api/services/health',
         },
       };
 
@@ -433,19 +624,22 @@ function createDomainToolExecutor(domain: string) {
       try {
         const resp = await fetch(`${baseUrl}${route}`, {
           signal: controller.signal,
-          headers: { Accept: "application/json" },
+          headers: { Accept: 'application/json' },
         });
         if (!resp.ok) {
           return JSON.stringify({ error: `API returned ${resp.status}`, tool: name });
         }
         const data = await resp.json();
         const str = JSON.stringify(data);
-        return str.length > 8000 ? str.slice(0, 8000) + "..." : str;
+        return str.length > 8000 ? str.slice(0, 8000) + '...' : str;
       } finally {
         clearTimeout(timer);
       }
     } catch (err) {
-      return JSON.stringify({ error: `Tool execution failed: ${err instanceof Error ? err.message : "unknown"}`, tool: name });
+      return JSON.stringify({
+        error: `Tool execution failed: ${err instanceof Error ? err.message : 'unknown'}`,
+        tool: name,
+      });
     }
   };
 }

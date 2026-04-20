@@ -1,25 +1,25 @@
-import type { ToolManifest, ToolPolicyTier } from "./manifest.js";
-import type { ToolRegistry } from "./registry.js";
-import { defaultToolRegistry } from "./registry.js";
-import { ToolRateLimiter } from "./rate-limiter.js";
-import { validateAgainstSchema } from "./schema-validator.js";
-import { GuardianDecisionEngine } from "@workspace/guardian/decision-engine";
-import type { PolicyTier } from "@workspace/guardian";
-import { InMemoryTraceStore } from "@workspace/trace-graph/store";
-import { TraceWriter } from "@workspace/trace-graph/writer";
-import { globalCollector } from "@workspace/cognitive-observability";
+import { globalCollector } from '@workspace/cognitive-observability';
+import type { PolicyTier } from '@workspace/guardian';
+import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
+import { InMemoryTraceStore } from '@workspace/trace-graph/store';
+import { TraceWriter } from '@workspace/trace-graph/writer';
+import type { ToolManifest, ToolPolicyTier } from './manifest.js';
+import { ToolRateLimiter } from './rate-limiter.js';
+import type { ToolRegistry } from './registry.js';
+import { defaultToolRegistry } from './registry.js';
+import { validateAgainstSchema } from './schema-validator.js';
 
 export type ToolHandler = (input: unknown, manifest: ToolManifest) => Promise<unknown>;
 
 const TOOL_TIER_TO_GUARDIAN_TIER: Record<ToolPolicyTier, PolicyTier> = {
-  "advisory-only": "advisory",
-  "internal-workflow": "supervised",
-  "operator-assisted": "operator-approved",
-  "executive-facing": "dual-approved",
-  "regulated-workflow": "regulated",
-  "external-client-facing": "supervised",
-  "autonomous-reversible": "sovereign",
-  "human-approval-mandatory": "operator-approved",
+  'advisory-only': 'advisory',
+  'internal-workflow': 'supervised',
+  'operator-assisted': 'operator-approved',
+  'executive-facing': 'dual-approved',
+  'regulated-workflow': 'regulated',
+  'external-client-facing': 'supervised',
+  'autonomous-reversible': 'sovereign',
+  'human-approval-mandatory': 'operator-approved',
 };
 
 export interface GatewayInvocationResult {
@@ -89,7 +89,7 @@ export class ToolMeshGateway {
       return {
         success: false,
         error: `Tool '${toolId}' is missing required inputSchema — runtime invocation requires a schema-bound contract. Register a JSON Schema inputSchema on the manifest.`,
-        schemaErrors: ["inputSchema is absent"],
+        schemaErrors: ['inputSchema is absent'],
       };
     }
 
@@ -111,7 +111,7 @@ export class ToolMeshGateway {
       };
     }
 
-    const guardianTier = TOOL_TIER_TO_GUARDIAN_TIER[manifest.policyTier] ?? "supervised";
+    const guardianTier = TOOL_TIER_TO_GUARDIAN_TIER[manifest.policyTier] ?? 'supervised';
     const decision = this.guardian.decide({
       requestId: context.requestId,
       agentId: context.agentId,
@@ -125,26 +125,29 @@ export class ToolMeshGateway {
 
     const needsApproval =
       manifest.approvalRequired ||
-      decision.outcome === "require-approval" ||
-      decision.outcome === "require-dual-approval";
+      decision.outcome === 'require-approval' ||
+      decision.outcome === 'require-dual-approval';
 
     if (needsApproval) {
       const reason =
-        decision.outcome === "require-approval" || decision.outcome === "require-dual-approval"
+        decision.outcome === 'require-approval' || decision.outcome === 'require-dual-approval'
           ? decision.reason
           : `tool '${toolId}' is approval-gated (approvalRequired=true)`;
       return {
         success: false,
         error: `Tool invocation requires human approval: ${reason}`,
-        decisionOutcome: decision.outcome === "require-dual-approval" ? "require-dual-approval" : "require-approval",
+        decisionOutcome:
+          decision.outcome === 'require-dual-approval'
+            ? 'require-dual-approval'
+            : 'require-approval',
       };
     }
 
-    if (decision.outcome === "deny") {
+    if (decision.outcome === 'deny') {
       return {
         success: false,
         error: `Guardian denied tool invocation: ${decision.reason}`,
-        decisionOutcome: "deny",
+        decisionOutcome: 'deny',
       };
     }
 
@@ -157,7 +160,7 @@ export class ToolMeshGateway {
           input,
           message: `Dry run — no side effects executed for tool '${manifest.name}'`,
         },
-        decisionOutcome: "allow",
+        decisionOutcome: 'allow',
       };
     }
 
@@ -189,23 +192,23 @@ export class ToolMeshGateway {
           approvalRequired: manifest.approvalRequired,
           latencyMs,
         });
-        this.traceWriter.completeTrace(traceId, { status: "completed", latencyMs });
+        this.traceWriter.completeTrace(traceId, { status: 'completed', latencyMs });
       }
 
       if (manifest.observabilityHooks.emitMetrics) {
-        globalCollector.recordKnown("latency_ms", latencyMs, {
+        globalCollector.recordKnown('latency_ms', latencyMs, {
           toolId,
           toolName: manifest.name,
-          domain: manifest.domainTags[0] ?? "custom",
+          domain: manifest.domainTags[0] ?? 'custom',
         });
-        globalCollector.recordKnown("tool_error_rate", 0, { toolId });
+        globalCollector.recordKnown('tool_error_rate', 0, { toolId });
       }
 
       return {
         success: true,
         output,
         traceId: trace.traceId,
-        decisionOutcome: "allow",
+        decisionOutcome: 'allow',
         latencyMs,
       };
     } catch (err) {
@@ -221,18 +224,18 @@ export class ToolMeshGateway {
           retries: 0,
           approvalRequired: manifest.approvalRequired,
           latencyMs,
-          errorCode: "TOOL_ERROR",
+          errorCode: 'TOOL_ERROR',
         });
-        this.traceWriter.recordError(traceId, "TOOL_ERROR", message);
+        this.traceWriter.recordError(traceId, 'TOOL_ERROR', message);
       }
 
       if (manifest.observabilityHooks.emitMetrics) {
-        globalCollector.recordKnown("latency_ms", latencyMs, {
+        globalCollector.recordKnown('latency_ms', latencyMs, {
           toolId,
           toolName: manifest.name,
-          domain: manifest.domainTags[0] ?? "custom",
+          domain: manifest.domainTags[0] ?? 'custom',
         });
-        globalCollector.recordKnown("tool_error_rate", 1, { toolId });
+        globalCollector.recordKnown('tool_error_rate', 1, { toolId });
       }
 
       if (fallbackDepth < ToolMeshGateway.MAX_FALLBACK_DEPTH) {
@@ -246,7 +249,7 @@ export class ToolMeshGateway {
         if (fallbackResult) {
           if (emitTrace) {
             this.traceWriter.completeTrace(traceId, {
-              status: "completed",
+              status: 'completed',
               latencyMs: fallbackResult.latencyMs ?? latencyMs,
             });
           }
@@ -255,14 +258,14 @@ export class ToolMeshGateway {
       }
 
       if (emitTrace) {
-        this.traceWriter.completeTrace(traceId, { status: "failed", latencyMs });
+        this.traceWriter.completeTrace(traceId, { status: 'failed', latencyMs });
       }
 
       return {
         success: false,
         error: message,
         traceId: trace.traceId,
-        decisionOutcome: "allow",
+        decisionOutcome: 'allow',
         latencyMs,
       };
     }

@@ -6,8 +6,8 @@
  * its quota, the presigned URL request is rejected before any GCS call is made.
  */
 
-import { db, filesTable } from "@szl-holdings/db";
-import { eq, sum, and, isNotNull } from "drizzle-orm";
+import { db, filesTable } from '@szl-holdings/db';
+import { and, eq, isNotNull, sum } from 'drizzle-orm';
 
 const DEFAULT_ORG_QUOTA_BYTES = parseInt(
   process.env.DEFAULT_ORG_STORAGE_QUOTA_BYTES ?? String(10 * 1024 * 1024 * 1024), // 10 GB
@@ -49,12 +49,7 @@ export async function checkOrgStorageQuota(
   const [row] = await db
     .select({ total: sum(filesTable.size) })
     .from(filesTable)
-    .where(
-      and(
-        eq(filesTable.orgId, orgId),
-        isNotNull(filesTable.size),
-      ),
-    );
+    .where(and(eq(filesTable.orgId, orgId), isNotNull(filesTable.size)));
 
   const currentUsageBytes = Number(row?.total ?? 0);
   const remainingBytes = Math.max(0, quotaBytes - currentUsageBytes);

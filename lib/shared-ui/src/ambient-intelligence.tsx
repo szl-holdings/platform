@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { cn } from "./utils";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { cn } from './utils';
 
 export interface AmbientSignal {
   id: string;
   domain: string;
   title: string;
   summary: string;
-  severity: "critical" | "high" | "medium" | "low" | "info";
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
   score: number;
   timestamp: number;
   actionUrl?: string;
@@ -23,15 +23,15 @@ export interface AmbientIntelligenceConfig {
   roleWeights?: Record<string, number>;
 }
 
-const SEVERITY_COLORS: Record<AmbientSignal["severity"], string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "#3b82f6",
-  info: "#6b7280",
+const SEVERITY_COLORS: Record<AmbientSignal['severity'], string> = {
+  critical: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#3b82f6',
+  info: '#6b7280',
 };
 
-const SEVERITY_PRIORITY: Record<AmbientSignal["severity"], number> = {
+const SEVERITY_PRIORITY: Record<AmbientSignal['severity'], number> = {
   critical: 100,
   high: 75,
   medium: 50,
@@ -41,7 +41,7 @@ const SEVERITY_PRIORITY: Record<AmbientSignal["severity"], number> = {
 
 function temporalDecay(timestamp: number, halfLifeMs: number = 3600000): number {
   const age = Date.now() - timestamp;
-  return Math.pow(0.5, age / halfLifeMs);
+  return 0.5 ** (age / halfLifeMs);
 }
 
 function scoreSignal(signal: AmbientSignal): number {
@@ -75,7 +75,7 @@ export interface AmbientBarProps {
 export function AmbientBar({
   signals,
   appDomain,
-  accentColor = "#8b5cf6",
+  accentColor = '#8b5cf6',
   onSignalClick,
   className,
   compact = false,
@@ -87,10 +87,7 @@ export function AmbientBar({
 
   return (
     <div
-      className={cn(
-        "w-full border-b backdrop-blur-sm transition-all",
-        className,
-      )}
+      className={cn('w-full border-b backdrop-blur-sm transition-all', className)}
       style={{
         background: `linear-gradient(135deg, ${accentColor}08 0%, ${accentColor}04 100%)`,
         borderColor: `${accentColor}20`,
@@ -119,12 +116,8 @@ export function AmbientBar({
               {topSignal.severity}
             </span>
           </div>
-          <p className="text-sm font-medium truncate mt-0.5 text-white/90">
-            {topSignal.title}
-          </p>
-          {!compact && (
-            <p className="text-xs text-white/50 truncate">{topSignal.summary}</p>
-          )}
+          <p className="text-sm font-medium truncate mt-0.5 text-white/90">{topSignal.title}</p>
+          {!compact && <p className="text-xs text-white/50 truncate">{topSignal.summary}</p>}
         </div>
 
         {topSignal.actionUrl && (
@@ -136,7 +129,7 @@ export function AmbientBar({
               color: accentColor,
             }}
           >
-            {topSignal.actionLabel ?? "View"}
+            {topSignal.actionLabel ?? 'View'}
           </button>
         )}
 
@@ -145,7 +138,7 @@ export function AmbientBar({
             onClick={() => setExpanded(!expanded)}
             className="text-xs text-white/40 hover:text-white/60 transition-colors shrink-0"
           >
-            {expanded ? "▲" : `+${topThree.length - 1} more`}
+            {expanded ? '▲' : `+${topThree.length - 1} more`}
           </button>
         )}
       </div>
@@ -164,7 +157,10 @@ export function AmbientBar({
               />
               <span className="text-xs text-white/70 truncate flex-1">{signal.title}</span>
               <span className="text-[10px] text-white/30">
-                {new Date(signal.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {new Date(signal.timestamp).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
             </div>
           ))}

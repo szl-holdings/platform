@@ -1,52 +1,52 @@
-import { useState, useEffect, useRef } from "react";
-import { nexusApi } from "../lib/api";
-import type { OrchestrationPlan, OrchestrationStep } from "../lib/types";
 import {
-  Workflow,
-  Send,
-  Loader,
   AlertCircle,
   CheckCircle,
-  XCircle,
-  Clock,
-  Zap,
-  Play,
-  Lightbulb,
   ChevronRight,
-  X,
+  Clock,
   Gauge,
+  Lightbulb,
+  Loader,
+  Play,
   RotateCw,
-} from "lucide-react";
+  Send,
+  Workflow,
+  X,
+  XCircle,
+  Zap,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { nexusApi } from '../lib/api';
+import type { OrchestrationPlan, OrchestrationStep } from '../lib/types';
 
 const EXAMPLE_INTENTS = [
   {
-    label: "Risk Brief",
+    label: 'Risk Brief',
     intent:
       "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in Pulse format.",
   },
   {
-    label: "Portfolio Snapshot",
+    label: 'Portfolio Snapshot',
     intent:
-      "Pull the latest KPIs from SZL Holdings, Terra, and Vessels, and compile a cross-portfolio snapshot.",
+      'Pull the latest KPIs from SZL Holdings, Terra, and Vessels, and compile a cross-portfolio snapshot.',
   },
   {
-    label: "Compliance Check",
+    label: 'Compliance Check',
     intent:
-      "Cross-reference Prism Counsel open matters against Aegis threat intel and flag any intersecting risk vectors.",
+      'Cross-reference Prism Counsel open matters against Aegis threat intel and flag any intersecting risk vectors.',
   },
 ];
 
 const APP_COLORS: Record<string, string> = {
-  aegis: "#ff4455",
-  vessels: "#00d4ff",
-  terra: "#00ff88",
-  pulse: "#ffb700",
-  command: "#a855f7",
-  "szl-holdings": "#22d3ee",
-  "carlota-jo": "#f472b6",
-  "prism-counsel": "#818cf8",
-  lyte: "#fb923c",
-  imperium: "#34d399",
+  aegis: '#ff4455',
+  vessels: '#00d4ff',
+  terra: '#00ff88',
+  pulse: '#ffb700',
+  command: '#a855f7',
+  'szl-holdings': '#22d3ee',
+  'carlota-jo': '#f472b6',
+  'prism-counsel': '#818cf8',
+  lyte: '#fb923c',
+  imperium: '#34d399',
 };
 
 const RATE_LIMITS: Record<string, { rpm: number; used: number; tpm: number; tUsed: number }> = {
@@ -55,92 +55,115 @@ const RATE_LIMITS: Record<string, { rpm: number; used: number; tpm: number; tUse
   terra: { rpm: 60, used: 22, tpm: 150000, tUsed: 41200 },
   pulse: { rpm: 60, used: 4, tpm: 150000, tUsed: 8100 },
   command: { rpm: 60, used: 31, tpm: 150000, tUsed: 59600 },
-  "szl-holdings": { rpm: 60, used: 9, tpm: 150000, tUsed: 17300 },
-  "carlota-jo": { rpm: 60, used: 3, tpm: 150000, tUsed: 5200 },
-  "prism-counsel": { rpm: 60, used: 18, tpm: 150000, tUsed: 34800 },
+  'szl-holdings': { rpm: 60, used: 9, tpm: 150000, tUsed: 17300 },
+  'carlota-jo': { rpm: 60, used: 3, tpm: 150000, tUsed: 5200 },
+  'prism-counsel': { rpm: 60, used: 18, tpm: 150000, tUsed: 34800 },
   lyte: { rpm: 60, used: 11, tpm: 150000, tUsed: 21900 },
   imperium: { rpm: 60, used: 5, tpm: 150000, tUsed: 9700 },
 };
 
-const STEP_EXPLANATIONS: Record<string, {
-  why: string;
-  how: string;
-  alternatives: string[];
-  confidence: number;
-}> = {
+const STEP_EXPLANATIONS: Record<
+  string,
+  {
+    why: string;
+    how: string;
+    alternatives: string[];
+    confidence: number;
+  }
+> = {
   aegis: {
-    why: "Aegis was selected first because the intent mentions threat risk — Aegis owns the threat-intelligence domain and its output is required by the Pulse stitching step.",
-    how: "Dispatched `GET /api/aegis/threat-summary` with tenant-scoped auth. Response includes CVSS-weighted top threats, active incident count, and MITRE technique coverage.",
-    alternatives: ["Pull from Vessels first (rejected — no threat context dependency)", "Use cached threat snapshot (rejected — staleness > 15 min at call time)"],
+    why: 'Aegis was selected first because the intent mentions threat risk — Aegis owns the threat-intelligence domain and its output is required by the Pulse stitching step.',
+    how: 'Dispatched `GET /api/aegis/threat-summary` with tenant-scoped auth. Response includes CVSS-weighted top threats, active incident count, and MITRE technique coverage.',
+    alternatives: [
+      'Pull from Vessels first (rejected — no threat context dependency)',
+      'Use cached threat snapshot (rejected — staleness > 15 min at call time)',
+    ],
     confidence: 0.94,
   },
   vessels: {
-    why: "Vessels was included because maritime risk is part of the SZL cross-portfolio surface area and the Fleet Command module has recent high-severity alerts.",
-    how: "Called `GET /api/vessels/fleet-risk` returning per-vessel risk scores and one port-call flag. Result fed into Pulse stitching alongside Aegis output.",
-    alternatives: ["Skip Vessels (rejected — user's portfolio includes maritime exposure)", "Use AIS snapshot (rejected — live position data available within rate limit)"],
+    why: 'Vessels was included because maritime risk is part of the SZL cross-portfolio surface area and the Fleet Command module has recent high-severity alerts.',
+    how: 'Called `GET /api/vessels/fleet-risk` returning per-vessel risk scores and one port-call flag. Result fed into Pulse stitching alongside Aegis output.',
+    alternatives: [
+      "Skip Vessels (rejected — user's portfolio includes maritime exposure)",
+      'Use AIS snapshot (rejected — live position data available within rate limit)',
+    ],
     confidence: 0.88,
   },
   terra: {
-    why: "Terra distress signals are part of the SZL portfolio KPI roll-up. 3 properties crossed the distress threshold since last brief.",
-    how: "Called `GET /api/terra/distress-summary` with `?top=5&since=24h`. Returns property IDs, distress scores, and recommended actions.",
-    alternatives: ["Use cached portfolio snapshot (rejected — 3 new distress signals since cache)", "Only return properties in active deal pipeline (rejected — monitors all holdings)"],
+    why: 'Terra distress signals are part of the SZL portfolio KPI roll-up. 3 properties crossed the distress threshold since last brief.',
+    how: 'Called `GET /api/terra/distress-summary` with `?top=5&since=24h`. Returns property IDs, distress scores, and recommended actions.',
+    alternatives: [
+      'Use cached portfolio snapshot (rejected — 3 new distress signals since cache)',
+      'Only return properties in active deal pipeline (rejected — monitors all holdings)',
+    ],
     confidence: 0.91,
   },
   pulse: {
-    why: "Pulse is the final stitching step — it takes structured outputs from all domain agents and compiles the executive brief format.",
+    why: 'Pulse is the final stitching step — it takes structured outputs from all domain agents and compiles the executive brief format.',
     how: "Called `POST /api/pulse/compile` with the structured domain outputs. Pulse applies BLUF ranking, deduplication, and the user's preferred brief format.",
-    alternatives: ["Stitch inline in orchestrator (rejected — Pulse has the briefing schema and user preference model)", "Skip Pulse and return raw domain outputs (rejected — not exec-readable)"],
+    alternatives: [
+      'Stitch inline in orchestrator (rejected — Pulse has the briefing schema and user preference model)',
+      'Skip Pulse and return raw domain outputs (rejected — not exec-readable)',
+    ],
     confidence: 0.96,
   },
   command: {
-    why: "Command provides the cross-domain correlation layer — it detects when signals from Aegis and Vessels share a threat actor or geo region.",
-    how: "Called `GET /api/command/correlations?domains=aegis,vessels` with the current run ID. Returns correlated events with confidence scores.",
-    alternatives: ["Manual correlation in stitching step (rejected — Command has pre-built correlation graph)", "Skip correlation (rejected — cross-domain insight is the core value here)"],
+    why: 'Command provides the cross-domain correlation layer — it detects when signals from Aegis and Vessels share a threat actor or geo region.',
+    how: 'Called `GET /api/command/correlations?domains=aegis,vessels` with the current run ID. Returns correlated events with confidence scores.',
+    alternatives: [
+      'Manual correlation in stitching step (rejected — Command has pre-built correlation graph)',
+      'Skip correlation (rejected — cross-domain insight is the core value here)',
+    ],
     confidence: 0.89,
   },
-  "szl-holdings": {
-    why: "SZL Holdings contains the consolidated KPI store — governance score, Alloy run metrics, and portfolio health index.",
-    how: "Called `GET /api/holdings/kpi-snapshot` returning the 12 canonical KPIs with trend deltas. Snapshot is tenant-scoped and auth-gated.",
-    alternatives: ["Pull KPIs from individual domain APIs (rejected — Holdings aggregates and normalizes units)", "Use investor-facing snapshot (rejected — too high-level for operational brief)"],
+  'szl-holdings': {
+    why: 'SZL Holdings contains the consolidated KPI store — governance score, Alloy run metrics, and portfolio health index.',
+    how: 'Called `GET /api/holdings/kpi-snapshot` returning the 12 canonical KPIs with trend deltas. Snapshot is tenant-scoped and auth-gated.',
+    alternatives: [
+      'Pull KPIs from individual domain APIs (rejected — Holdings aggregates and normalizes units)',
+      'Use investor-facing snapshot (rejected — too high-level for operational brief)',
+    ],
     confidence: 0.93,
   },
-  "carlota-jo": {
-    why: "Carlota Jo client engagement data was requested as part of the advisory portfolio snapshot.",
-    how: "Called `GET /api/carlota-jo/engagement-summary` returning active engagements, upcoming deliverables, and open invoices.",
-    alternatives: ["Skip (rejected — user explicitly requested advisory portfolio data)", "Use CRM export (rejected — less structured than the API response)"],
+  'carlota-jo': {
+    why: 'Carlota Jo client engagement data was requested as part of the advisory portfolio snapshot.',
+    how: 'Called `GET /api/carlota-jo/engagement-summary` returning active engagements, upcoming deliverables, and open invoices.',
+    alternatives: [
+      'Skip (rejected — user explicitly requested advisory portfolio data)',
+      'Use CRM export (rejected — less structured than the API response)',
+    ],
     confidence: 0.82,
   },
-  "prism-counsel": {
-    why: "Prism Counsel legal matters were included because the compliance check intent requires open matter cross-reference.",
-    how: "Called `GET /api/prism/matters?status=open` returning matter IDs, risk classifications, and associated entities.",
-    alternatives: ["Use matter summary only (rejected — entity list needed for cross-reference)", "Pull full matter text (rejected — exceeds token budget; entity list is sufficient)"],
+  'prism-counsel': {
+    why: 'Prism Counsel legal matters were included because the compliance check intent requires open matter cross-reference.',
+    how: 'Called `GET /api/prism/matters?status=open` returning matter IDs, risk classifications, and associated entities.',
+    alternatives: [
+      'Use matter summary only (rejected — entity list needed for cross-reference)',
+      'Pull full matter text (rejected — exceeds token budget; entity list is sufficient)',
+    ],
     confidence: 0.87,
   },
 };
 
 function RateLimitMiniBar({ used, total }: { used: number; total: number }) {
   const pct = (used / total) * 100;
-  const color = pct >= 95 ? "#ff4455" : pct >= 80 ? "#ffb700" : "#00ff88";
+  const color = pct >= 95 ? '#ff4455' : pct >= 80 ? '#ffb700' : '#00ff88';
   return (
     <div className="flex items-center gap-1.5">
       <div className="h-1 w-12 rounded-full bg-nexus-bg overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
-      <span className="text-[9px] font-mono" style={{ color }}>{Math.round(pct)}%</span>
+      <span className="text-[9px] font-mono" style={{ color }}>
+        {Math.round(pct)}%
+      </span>
     </div>
   );
 }
 
-function ExplainPanel({
-  step,
-  onClose,
-}: {
-  step: OrchestrationStep;
-  onClose: () => void;
-}) {
+function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () => void }) {
   const explanation = STEP_EXPLANATIONS[step.appSlug];
   const rl = RATE_LIMITS[step.appSlug];
-  const color = APP_COLORS[step.appSlug] ?? "#8896aa";
+  const color = APP_COLORS[step.appSlug] ?? '#8896aa';
 
   return (
     <div className="fixed inset-y-0 right-0 w-96 bg-nexus-surface border-l border-[#a3e635]/20 z-50 flex flex-col shadow-2xl overflow-hidden">
@@ -166,7 +189,9 @@ function ExplainPanel({
             {step.appSlug.slice(0, 3).toUpperCase()}
           </div>
           <div>
-            <div className="text-sm font-semibold" style={{ color }}>{step.app}</div>
+            <div className="text-sm font-semibold" style={{ color }}>
+              {step.app}
+            </div>
             <div className="text-[10px] font-mono text-muted-foreground/50">{step.action}</div>
           </div>
         </div>
@@ -174,29 +199,39 @@ function ExplainPanel({
         {explanation ? (
           <>
             <div className="bg-nexus-bg rounded-lg p-3">
-              <div className="text-[10px] font-mono text-[#a3e635] mb-1.5 uppercase tracking-widest">Why chosen</div>
+              <div className="text-[10px] font-mono text-[#a3e635] mb-1.5 uppercase tracking-widest">
+                Why chosen
+              </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{explanation.why}</p>
             </div>
 
             <div className="bg-nexus-bg rounded-lg p-3">
-              <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">How it ran</div>
+              <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">
+                How it ran
+              </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{explanation.how}</p>
             </div>
 
             <div className="bg-nexus-bg rounded-lg p-3">
-              <div className="text-[10px] font-mono text-muted-foreground/40 mb-1.5 uppercase tracking-widest">Alternatives rejected</div>
+              <div className="text-[10px] font-mono text-muted-foreground/40 mb-1.5 uppercase tracking-widest">
+                Alternatives rejected
+              </div>
               <ul className="space-y-1.5">
                 {explanation.alternatives.map((alt, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <XCircle className="w-3 h-3 text-nexus-red/50 mt-0.5 shrink-0" />
-                    <span className="text-[10px] text-muted-foreground/60 leading-relaxed">{alt}</span>
+                    <span className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                      {alt}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div className="bg-nexus-bg rounded-lg p-3">
-              <div className="text-[10px] font-mono text-[#ffb700] mb-1.5 uppercase tracking-widest">Confidence</div>
+              <div className="text-[10px] font-mono text-[#ffb700] mb-1.5 uppercase tracking-widest">
+                Confidence
+              </div>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-2 bg-nexus-surface rounded-full overflow-hidden">
                   <div
@@ -204,13 +239,17 @@ function ExplainPanel({
                     style={{ width: `${explanation.confidence * 100}%` }}
                   />
                 </div>
-                <span className="text-xs font-mono text-nexus-green">{(explanation.confidence * 100).toFixed(0)}%</span>
+                <span className="text-xs font-mono text-nexus-green">
+                  {(explanation.confidence * 100).toFixed(0)}%
+                </span>
               </div>
             </div>
           </>
         ) : (
           <div className="bg-nexus-bg rounded-lg p-3">
-            <p className="text-xs text-muted-foreground/50">No reasoning trace available for this step.</p>
+            <p className="text-xs text-muted-foreground/50">
+              No reasoning trace available for this step.
+            </p>
           </div>
         )}
 
@@ -218,20 +257,30 @@ function ExplainPanel({
           <div className="bg-nexus-bg rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-2">
               <Gauge className="w-3 h-3 text-[#ffb700]" />
-              <span className="text-[10px] font-mono text-[#ffb700] uppercase tracking-widest">Rate Limits</span>
+              <span className="text-[10px] font-mono text-[#ffb700] uppercase tracking-widest">
+                Rate Limits
+              </span>
             </div>
             <div className="space-y-2">
               <div>
                 <div className="flex justify-between mb-0.5">
-                  <span className="text-[9px] font-mono text-muted-foreground/40">Requests / min</span>
-                  <span className="text-[9px] font-mono text-muted-foreground/60">{rl.used} / {rl.rpm}</span>
+                  <span className="text-[9px] font-mono text-muted-foreground/40">
+                    Requests / min
+                  </span>
+                  <span className="text-[9px] font-mono text-muted-foreground/60">
+                    {rl.used} / {rl.rpm}
+                  </span>
                 </div>
                 <RateLimitMiniBar used={rl.used} total={rl.rpm} />
               </div>
               <div>
                 <div className="flex justify-between mb-0.5">
-                  <span className="text-[9px] font-mono text-muted-foreground/40">Tokens / min</span>
-                  <span className="text-[9px] font-mono text-muted-foreground/60">{rl.tUsed.toLocaleString()} / {rl.tpm.toLocaleString()}</span>
+                  <span className="text-[9px] font-mono text-muted-foreground/40">
+                    Tokens / min
+                  </span>
+                  <span className="text-[9px] font-mono text-muted-foreground/60">
+                    {rl.tUsed.toLocaleString()} / {rl.tpm.toLocaleString()}
+                  </span>
                 </div>
                 <RateLimitMiniBar used={rl.tUsed} total={rl.tpm} />
               </div>
@@ -241,13 +290,25 @@ function ExplainPanel({
 
         {step.output && (
           <div className="bg-nexus-bg rounded-lg p-3">
-            <div className="text-[10px] font-mono text-nexus-green mb-1.5 uppercase tracking-widest">Summary</div>
+            <div className="text-[10px] font-mono text-nexus-green mb-1.5 uppercase tracking-widest">
+              Summary
+            </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">{step.output}</p>
             <div className="flex gap-3 mt-2 text-[9px] font-mono text-muted-foreground/40">
               {step.durationMs !== undefined && <span>{step.durationMs}ms</span>}
-              {step.httpStatus !== undefined && step.httpStatus > 0 && <span>HTTP {step.httpStatus}</span>}
+              {step.httpStatus !== undefined && step.httpStatus > 0 && (
+                <span>HTTP {step.httpStatus}</span>
+              )}
               {step.confidence !== undefined && (
-                <span className={step.confidence >= 0.7 ? "text-nexus-green" : step.confidence >= 0.4 ? "text-[#ffb700]" : "text-nexus-red"}>
+                <span
+                  className={
+                    step.confidence >= 0.7
+                      ? 'text-nexus-green'
+                      : step.confidence >= 0.4
+                        ? 'text-[#ffb700]'
+                        : 'text-nexus-red'
+                  }
+                >
                   conf {(step.confidence * 100).toFixed(0)}%
                 </span>
               )}
@@ -257,9 +318,11 @@ function ExplainPanel({
 
         {step.rawPayload && (
           <div className="bg-nexus-bg rounded-lg p-3">
-            <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">Raw API Payload</div>
+            <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">
+              Raw API Payload
+            </div>
             <pre className="text-[9px] font-mono text-muted-foreground/80 leading-snug whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-[#060b12] rounded p-2 border border-nexus">
-{step.rawPayload}
+              {step.rawPayload}
             </pre>
           </div>
         )}
@@ -273,19 +336,27 @@ function ExplainPanel({
   );
 }
 
-function StepCard({ step, onExplain }: { step: OrchestrationStep; onExplain: (s: OrchestrationStep) => void }) {
-  const color = APP_COLORS[step.appSlug] ?? "#8896aa";
+function StepCard({
+  step,
+  onExplain,
+}: {
+  step: OrchestrationStep;
+  onExplain: (s: OrchestrationStep) => void;
+}) {
+  const color = APP_COLORS[step.appSlug] ?? '#8896aa';
   const rl = RATE_LIMITS[step.appSlug];
   return (
-    <div className={`rounded-lg border p-3 ${
-      step.status === "running"
-        ? "border-[#00d4ff]/40 bg-[#00d4ff]/05"
-        : step.status === "done"
-        ? "border-[#00ff88]/30 bg-[#00ff88]/04"
-        : step.status === "error"
-        ? "border-[#ff4455]/30"
-        : "border-nexus"
-    } bg-nexus-surface`}>
+    <div
+      className={`rounded-lg border p-3 ${
+        step.status === 'running'
+          ? 'border-[#00d4ff]/40 bg-[#00d4ff]/05'
+          : step.status === 'done'
+            ? 'border-[#00ff88]/30 bg-[#00ff88]/04'
+            : step.status === 'error'
+              ? 'border-[#ff4455]/30'
+              : 'border-nexus'
+      } bg-nexus-surface`}
+    >
       <div className="flex items-center gap-3 mb-2">
         <div
           className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-mono font-bold shrink-0"
@@ -294,15 +365,19 @@ function StepCard({ step, onExplain }: { step: OrchestrationStep; onExplain: (s:
           {step.appSlug.slice(0, 2).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-xs font-semibold" style={{ color }}>{step.app}</div>
-          <div className="text-[10px] text-muted-foreground/70 font-mono truncate">{step.action}</div>
+          <div className="text-xs font-semibold" style={{ color }}>
+            {step.app}
+          </div>
+          <div className="text-[10px] text-muted-foreground/70 font-mono truncate">
+            {step.action}
+          </div>
         </div>
         <div className="shrink-0">
-          {step.status === "running" ? (
+          {step.status === 'running' ? (
             <Loader className="w-3.5 h-3.5 animate-spin text-nexus-cyan" />
-          ) : step.status === "done" ? (
+          ) : step.status === 'done' ? (
             <CheckCircle className="w-3.5 h-3.5 text-nexus-green" />
-          ) : step.status === "error" ? (
+          ) : step.status === 'error' ? (
             <XCircle className="w-3.5 h-3.5 text-nexus-red" />
           ) : (
             <Clock className="w-3.5 h-3.5 text-muted-foreground/40" />
@@ -315,17 +390,30 @@ function StepCard({ step, onExplain }: { step: OrchestrationStep; onExplain: (s:
           {step.output}
         </div>
       )}
-      {(step.durationMs !== undefined || step.confidence !== undefined || (step.httpStatus !== undefined && step.httpStatus > 0)) && step.status !== "pending" && (
-        <div className="flex gap-2 text-[9px] font-mono text-muted-foreground/40 mt-1">
-          {step.durationMs !== undefined && <span>{step.durationMs}ms</span>}
-          {step.httpStatus !== undefined && step.httpStatus > 0 && <span>HTTP {step.httpStatus}</span>}
-          {step.confidence !== undefined && (
-            <span className={step.confidence >= 0.7 ? "text-nexus-green" : step.confidence >= 0.4 ? "text-[#ffb700]" : "text-nexus-red"}>
-              conf {(step.confidence * 100).toFixed(0)}%
-            </span>
-          )}
-        </div>
-      )}
+      {(step.durationMs !== undefined ||
+        step.confidence !== undefined ||
+        (step.httpStatus !== undefined && step.httpStatus > 0)) &&
+        step.status !== 'pending' && (
+          <div className="flex gap-2 text-[9px] font-mono text-muted-foreground/40 mt-1">
+            {step.durationMs !== undefined && <span>{step.durationMs}ms</span>}
+            {step.httpStatus !== undefined && step.httpStatus > 0 && (
+              <span>HTTP {step.httpStatus}</span>
+            )}
+            {step.confidence !== undefined && (
+              <span
+                className={
+                  step.confidence >= 0.7
+                    ? 'text-nexus-green'
+                    : step.confidence >= 0.4
+                      ? 'text-[#ffb700]'
+                      : 'text-nexus-red'
+                }
+              >
+                conf {(step.confidence * 100).toFixed(0)}%
+              </span>
+            )}
+          </div>
+        )}
 
       {rl && (
         <div className="flex items-center gap-2 mt-2 pt-2 border-t border-nexus">
@@ -347,7 +435,7 @@ function StepCard({ step, onExplain }: { step: OrchestrationStep; onExplain: (s:
 }
 
 export default function Orchestrator() {
-  const [intent, setIntent] = useState("");
+  const [intent, setIntent] = useState('');
   const [plan, setPlan] = useState<OrchestrationPlan | null>(null);
   const [history, setHistory] = useState<OrchestrationPlan[]>([]);
   const [loading, setLoading] = useState(false);
@@ -357,8 +445,13 @@ export default function Orchestrator() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    nexusApi.listOrchestrations().then(setHistory).catch(() => {});
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+    nexusApi
+      .listOrchestrations()
+      .then(setHistory)
+      .catch(() => {});
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
   }, []);
 
   function startPolling(id: string) {
@@ -367,10 +460,13 @@ export default function Orchestrator() {
       try {
         const updated = await nexusApi.getOrchestration(id);
         setPlan(updated);
-        if (updated.status === "completed" || updated.status === "failed") {
+        if (updated.status === 'completed' || updated.status === 'failed') {
           if (pollRef.current) clearInterval(pollRef.current);
           setLoading(false);
-          nexusApi.listOrchestrations().then(setHistory).catch(() => {});
+          nexusApi
+            .listOrchestrations()
+            .then(setHistory)
+            .catch(() => {});
         }
       } catch {
         if (pollRef.current) clearInterval(pollRef.current);
@@ -394,7 +490,7 @@ export default function Orchestrator() {
       setPlan(initial);
       startPolling(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Orchestration failed");
+      setError(err instanceof Error ? err.message : 'Orchestration failed');
       setLoading(false);
     }
   }
@@ -410,7 +506,7 @@ export default function Orchestrator() {
       setPlan(refreshed);
       startPolling(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Retry failed");
+      setError(err instanceof Error ? err.message : 'Retry failed');
       setLoading(false);
     } finally {
       setRetrying(false);
@@ -419,13 +515,16 @@ export default function Orchestrator() {
 
   return (
     <div className="min-h-full bg-nexus-bg p-6">
-      <div className={`max-w-5xl mx-auto transition-all duration-200 ${explainStep ? "mr-[24rem]" : ""}`}>
+      <div
+        className={`max-w-5xl mx-auto transition-all duration-200 ${explainStep ? 'mr-[24rem]' : ''}`}
+      >
         <div className="flex items-center gap-3 mb-6">
           <Workflow className="w-5 h-5 text-[#ffb700]" />
           <div>
             <h1 className="text-lg font-semibold">Cross-App Orchestrator</h1>
             <p className="text-xs text-muted-foreground">
-              Agent of agents · Routes to 10 SZL artifacts · Stitches results · Click any step to explain
+              Agent of agents · Routes to 10 SZL artifacts · Stitches results · Click any step to
+              explain
             </p>
           </div>
         </div>
@@ -439,7 +538,7 @@ export default function Orchestrator() {
               value={intent}
               onChange={(e) => setIntent(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleRun();
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleRun();
               }}
             />
             <button
@@ -447,11 +546,7 @@ export default function Orchestrator() {
               disabled={loading || !intent.trim()}
               className="px-4 py-2 rounded-lg bg-[#ffb700]/10 border border-[#ffb700]/30 text-[#ffb700] text-sm font-medium hover:bg-[#ffb700]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
-              {loading ? (
-                <Loader className="w-4 h-4 animate-spin" />
-              ) : (
-                <Play className="w-4 h-4" />
-              )}
+              {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
               Run
             </button>
           </div>
@@ -486,7 +581,7 @@ export default function Orchestrator() {
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">Orchestration Plan</h2>
               <div className="flex items-center gap-2">
-                {plan.status === "failed" && (
+                {plan.status === 'failed' && (
                   <button
                     onClick={() => handleRetry(plan.id)}
                     disabled={retrying}
@@ -502,13 +597,13 @@ export default function Orchestrator() {
                 )}
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                    plan.status === "completed"
-                      ? "bg-[#00ff88]/10 text-nexus-green"
-                      : plan.status === "running" || plan.status === "planning"
-                      ? "bg-[#00d4ff]/10 text-nexus-cyan"
-                      : plan.status === "failed"
-                      ? "bg-[#ff4455]/10 text-nexus-red"
-                      : "bg-nexus-surface text-muted-foreground"
+                    plan.status === 'completed'
+                      ? 'bg-[#00ff88]/10 text-nexus-green'
+                      : plan.status === 'running' || plan.status === 'planning'
+                        ? 'bg-[#00d4ff]/10 text-nexus-cyan'
+                        : plan.status === 'failed'
+                          ? 'bg-[#ff4455]/10 text-nexus-red'
+                          : 'bg-nexus-surface text-muted-foreground'
                   }`}
                 >
                   {plan.status.toUpperCase()}
@@ -562,7 +657,11 @@ export default function Orchestrator() {
                       <span className="text-xs font-mono text-muted-foreground/50">{h.id}</span>
                       <span
                         className={`text-[10px] font-mono ${
-                          h.status === "completed" ? "text-nexus-green" : h.status === "failed" ? "text-nexus-red" : "text-nexus-cyan"
+                          h.status === 'completed'
+                            ? 'text-nexus-green'
+                            : h.status === 'failed'
+                              ? 'text-nexus-red'
+                              : 'text-nexus-cyan'
                         }`}
                       >
                         {h.status}
@@ -573,7 +672,7 @@ export default function Orchestrator() {
                       {h.steps.length} steps
                     </div>
                   </button>
-                  {h.status === "failed" && (
+                  {h.status === 'failed' && (
                     <div className="mt-2 pt-2 border-t border-nexus flex justify-end">
                       <button
                         onClick={(e) => {
@@ -603,9 +702,7 @@ export default function Orchestrator() {
         )}
       </div>
 
-      {explainStep && (
-        <ExplainPanel step={explainStep} onClose={() => setExplainStep(null)} />
-      )}
+      {explainStep && <ExplainPanel step={explainStep} onClose={() => setExplainStep(null)} />}
     </div>
   );
 }

@@ -1,16 +1,21 @@
-import type { EmbeddingBackend, EmbeddingBackendDescriptor, RawEmbedRequest, RawEmbedResponse } from "./interface.js";
+import type {
+  EmbeddingBackend,
+  EmbeddingBackendDescriptor,
+  RawEmbedRequest,
+  RawEmbedResponse,
+} from './interface.js';
 
-const SUBSTRATE_EMBED_URL = process.env["SUBSTRATE_EMBED_URL"] ?? "http://localhost:9800";
+const SUBSTRATE_EMBED_URL = process.env['SUBSTRATE_EMBED_URL'] ?? 'http://localhost:9800';
 
 export class CpuLocalEmbeddingBackend implements EmbeddingBackend {
   readonly descriptor: EmbeddingBackendDescriptor = {
-    backendId: "cpu-local",
-    displayName: "CPU Local (substrate-py-workers)",
-    kind: "cpu-local",
-    supportedModels: ["aef-dev-hash", "aef-default"],
+    backendId: 'cpu-local',
+    displayName: 'CPU Local (substrate-py-workers)',
+    kind: 'cpu-local',
+    supportedModels: ['aef-dev-hash', 'aef-default'],
     maxTokens: 512,
-    defaultPooling: "mean",
-    defaultTruncation: "truncate",
+    defaultPooling: 'mean',
+    defaultTruncation: 'truncate',
   };
 
   private readonly baseUrl: string;
@@ -26,8 +31,8 @@ export class CpuLocalEmbeddingBackend implements EmbeddingBackend {
     let response: Response;
     try {
       response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           texts: req.texts,
           model: req.model,
@@ -36,13 +41,11 @@ export class CpuLocalEmbeddingBackend implements EmbeddingBackend {
         }),
       });
     } catch (err) {
-      throw new Error(
-        `CpuLocalEmbeddingBackend: network error calling ${url}: ${String(err)}`,
-      );
+      throw new Error(`CpuLocalEmbeddingBackend: network error calling ${url}: ${String(err)}`);
     }
 
     if (!response.ok) {
-      const body = await response.text().catch(() => "<unreadable>");
+      const body = await response.text().catch(() => '<unreadable>');
       throw new Error(
         `CpuLocalEmbeddingBackend: upstream returned HTTP ${response.status}: ${body}`,
       );

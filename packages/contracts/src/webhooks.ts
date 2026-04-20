@@ -1,7 +1,7 @@
 /**
  * Webhook contracts — inbound webhook body schemas.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 export const stripeWebhookBodySchema = z.object({
   id: z.string(),

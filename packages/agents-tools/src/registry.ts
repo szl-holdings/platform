@@ -1,5 +1,5 @@
-import type { TypedTool } from "./typed-tool.js";
-import { ToolRegistrationError } from "./errors.js";
+import { ToolRegistrationError } from './errors.js';
+import type { TypedTool } from './typed-tool.js';
 
 export interface TypedToolRegistry {
   register<TInput, TOutput>(tool: TypedTool<TInput, TOutput>): void;
@@ -14,16 +14,22 @@ export class InMemoryTypedToolRegistry implements TypedToolRegistry {
 
   register<TInput, TOutput>(tool: TypedTool<TInput, TOutput>): void {
     if (!tool.manifest.id) {
-      throw new ToolRegistrationError("(unknown)", "Tool manifest must have an id");
+      throw new ToolRegistrationError('(unknown)', 'Tool manifest must have an id');
     }
     if (!tool.inputSchema) {
-      throw new ToolRegistrationError(tool.manifest.id, "inputSchema is required — untyped tools are rejected");
+      throw new ToolRegistrationError(
+        tool.manifest.id,
+        'inputSchema is required — untyped tools are rejected',
+      );
     }
     if (!tool.outputSchema) {
-      throw new ToolRegistrationError(tool.manifest.id, "outputSchema is required — untyped tools are rejected");
+      throw new ToolRegistrationError(
+        tool.manifest.id,
+        'outputSchema is required — untyped tools are rejected',
+      );
     }
-    if (typeof tool.handler !== "function") {
-      throw new ToolRegistrationError(tool.manifest.id, "handler must be a function");
+    if (typeof tool.handler !== 'function') {
+      throw new ToolRegistrationError(tool.manifest.id, 'handler must be a function');
     }
     this.tools.set(tool.manifest.id, tool as TypedTool);
   }

@@ -13,8 +13,8 @@
  * High-reward memories get boosted importance; low-reward memories decay faster.
  */
 
-export type MemoryTier = "episodic" | "semantic" | "procedural";
-export type MemoryOperation = "store" | "retrieve" | "update" | "summarize" | "discard";
+export type MemoryTier = 'episodic' | 'semantic' | 'procedural';
+export type MemoryOperation = 'store' | 'retrieve' | 'update' | 'summarize' | 'discard';
 
 export interface MemoryEntry {
   id: string;
@@ -76,17 +76,23 @@ function computeEffectiveImportance(entry: MemoryEntry): number {
 }
 
 function cosineSimilarityText(a: string, b: string): number {
-  const tokenize = (s: string) => s.toLowerCase().split(/\W+/).filter(w => w.length > 2);
+  const tokenize = (s: string) =>
+    s
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 2);
   const aTokens = tokenize(a);
   const bTokens = tokenize(b);
   const vocab = new Set([...aTokens, ...bTokens]);
   const vecA: number[] = [];
   const vecB: number[] = [];
   for (const term of vocab) {
-    vecA.push(aTokens.filter(t => t === term).length);
-    vecB.push(bTokens.filter(t => t === term).length);
+    vecA.push(aTokens.filter((t) => t === term).length);
+    vecB.push(bTokens.filter((t) => t === term).length);
   }
-  let dot = 0, magA = 0, magB = 0;
+  let dot = 0,
+    magA = 0,
+    magB = 0;
   for (let i = 0; i < vecA.length; i++) {
     dot += vecA[i]! * vecB[i]!;
     magA += vecA[i]! * vecA[i]!;
@@ -98,7 +104,12 @@ function cosineSimilarityText(a: string, b: string): number {
 export class RLMemoryManager {
   private memories: Map<string, MemoryEntry[]> = new Map();
   private rewardHistory: Map<string, number[]> = new Map();
-  private operationLog: Array<{ agentId: string; operation: MemoryOperation; timestamp: string; reward: number }> = [];
+  private operationLog: Array<{
+    agentId: string;
+    operation: MemoryOperation;
+    timestamp: string;
+    reward: number;
+  }> = [];
 
   private getAgentMemories(agentId: string): MemoryEntry[] {
     if (!this.memories.has(agentId)) this.memories.set(agentId, []);
@@ -129,24 +140,27 @@ export class RLMemoryManager {
     importance: number = 5,
     metadata: Record<string, unknown> = {},
   ): Promise<MemoryOperationResult> {
-    const expectedReward = this.getExpectedReward(agentId, "store");
+    const expectedReward = this.getExpectedReward(agentId, 'store');
     const memories = this.getAgentMemories(agentId);
 
-    const similar = memories.find(m => m.tier === tier && cosineSimilarityText(m.content, content) > 0.85);
+    const similar = memories.find(
+      (m) => m.tier === tier && cosineSimilarityText(m.content, content) > 0.85,
+    );
     if (similar) {
       similar.content = content;
       similar.importance = Math.min(10, similar.importance + 1);
       similar.accessCount++;
       similar.lastAccessedAt = new Date().toISOString();
       similar.metadata = { ...similar.metadata, ...metadata };
-      this.learnFromReward(agentId, "store", 0.7);
+      this.learnFromReward(agentId, 'store', 0.7);
       return {
-        operation: "store",
+        operation: 'store',
         success: true,
         entries: [similar],
         rewardSignal: 0.7,
-        policyAction: "merged_duplicate",
-        reasoning: "Similar memory found — merged to avoid redundancy (RL policy: deduplication improves retrieval quality)",
+        policyAction: 'merged_duplicate',
+        reasoning:
+          'Similar memory found — merged to avoid redundancy (RL policy: deduplication improves retrieval quality)',
       };
     }
 
@@ -167,14 +181,14 @@ export class RLMemoryManager {
     };
 
     memories.push(entry);
-    this.learnFromReward(agentId, "store", 1.0);
+    this.learnFromReward(agentId, 'store', 1.0);
 
     return {
-      operation: "store",
+      operation: 'store',
       success: true,
       entries: [entry],
       rewardSignal: 1.0,
-      policyAction: "stored_new",
+      policyAction: 'stored_new',
       reasoning: `New ${tier} memory stored with importance ${importance}/10`,
     };
   }
@@ -189,12 +203,15 @@ export class RLMemoryManager {
     const now = new Date();
 
     const candidates = memories
-      .filter(m => (!tier || m.tier === tier) && new Date(m.expiresAt) > now)
-      .map(m => ({
+      .filter((m) => (!tier || m.tier === tier) && new Date(m.expiresAt) > now)
+      .map((m) => ({
         entry: m,
-        score: cosineSimilarityText(query, `${m.content} ${m.tags.join(" ")}`) * computeEffectiveImportance(m) / 10,
+        score:
+          (cosineSimilarityText(query, `${m.content} ${m.tags.join(' ')}`) *
+            computeEffectiveImportance(m)) /
+          10,
       }))
-      .filter(c => c.score > 0.05)
+      .filter((c) => c.score > 0.05)
       .sort((a, b) => b.score - a.score)
       .slice(0, maxResults);
 
@@ -204,14 +221,14 @@ export class RLMemoryManager {
     }
 
     const reward = candidates.length > 0 ? Math.min(1.0, candidates.length / maxResults) : 0;
-    this.learnFromReward(agentId, "retrieve", reward);
+    this.learnFromReward(agentId, 'retrieve', reward);
 
     return {
-      operation: "retrieve",
+      operation: 'retrieve',
       success: true,
-      entries: candidates.map(c => c.entry),
+      entries: candidates.map((c) => c.entry),
       rewardSignal: reward,
-      policyAction: candidates.length > 0 ? "retrieved" : "empty_result",
+      policyAction: candidates.length > 0 ? 'retrieved' : 'empty_result',
       reasoning: `Retrieved ${candidates.length} memories for query "${query.slice(0, 50)}..."`,
     };
   }
@@ -219,38 +236,66 @@ export class RLMemoryManager {
   async update(
     agentId: string,
     memoryId: string,
-    updates: Partial<Pick<MemoryEntry, "content" | "importance" | "tags" | "metadata">>,
+    updates: Partial<Pick<MemoryEntry, 'content' | 'importance' | 'tags' | 'metadata'>>,
   ): Promise<MemoryOperationResult> {
     const memories = this.getAgentMemories(agentId);
-    const entry = memories.find(m => m.id === memoryId);
+    const entry = memories.find((m) => m.id === memoryId);
 
     if (!entry) {
-      this.learnFromReward(agentId, "update", 0);
-      return { operation: "update", success: false, entries: [], rewardSignal: 0, policyAction: "not_found", reasoning: `Memory ${memoryId} not found` };
+      this.learnFromReward(agentId, 'update', 0);
+      return {
+        operation: 'update',
+        success: false,
+        entries: [],
+        rewardSignal: 0,
+        policyAction: 'not_found',
+        reasoning: `Memory ${memoryId} not found`,
+      };
     }
 
     if (updates.content !== undefined) entry.content = updates.content;
-    if (updates.importance !== undefined) entry.importance = Math.min(10, Math.max(0, updates.importance));
+    if (updates.importance !== undefined)
+      entry.importance = Math.min(10, Math.max(0, updates.importance));
     if (updates.tags !== undefined) entry.tags = updates.tags;
     if (updates.metadata !== undefined) entry.metadata = { ...entry.metadata, ...updates.metadata };
     entry.lastAccessedAt = new Date().toISOString();
 
-    this.learnFromReward(agentId, "update", 0.8);
-    return { operation: "update", success: true, entries: [entry], rewardSignal: 0.8, policyAction: "updated", reasoning: `Memory updated with ${Object.keys(updates).join(", ")}` };
+    this.learnFromReward(agentId, 'update', 0.8);
+    return {
+      operation: 'update',
+      success: true,
+      entries: [entry],
+      rewardSignal: 0.8,
+      policyAction: 'updated',
+      reasoning: `Memory updated with ${Object.keys(updates).join(', ')}`,
+    };
   }
 
-  async summarize(agentId: string, tier: MemoryTier, maxEntries = 10): Promise<MemoryOperationResult> {
+  async summarize(
+    agentId: string,
+    tier: MemoryTier,
+    maxEntries = 10,
+  ): Promise<MemoryOperationResult> {
     const memories = this.getAgentMemories(agentId);
     const candidates = memories
-      .filter(m => m.tier === tier && computeEffectiveImportance(m) >= IMPORTANCE_THRESHOLDS.summarize)
+      .filter(
+        (m) => m.tier === tier && computeEffectiveImportance(m) >= IMPORTANCE_THRESHOLDS.summarize,
+      )
       .sort((a, b) => computeEffectiveImportance(b) - computeEffectiveImportance(a))
       .slice(0, maxEntries);
 
     if (candidates.length < 2) {
-      return { operation: "summarize", success: false, entries: [], rewardSignal: 0, policyAction: "insufficient_entries", reasoning: "Not enough memories to summarize" };
+      return {
+        operation: 'summarize',
+        success: false,
+        entries: [],
+        rewardSignal: 0,
+        policyAction: 'insufficient_entries',
+        reasoning: 'Not enough memories to summarize',
+      };
     }
 
-    const summaryContent = `[Summarized ${candidates.length} ${tier} memories] Key themes: ${candidates.map(m => m.content.slice(0, 80)).join(" | ")}`;
+    const summaryContent = `[Summarized ${candidates.length} ${tier} memories] Key themes: ${candidates.map((m) => m.content.slice(0, 80)).join(' | ')}`;
     const avgImportance = candidates.reduce((s, m) => s + m.importance, 0) / candidates.length;
 
     const summaryEntry: MemoryEntry = {
@@ -258,7 +303,7 @@ export class RLMemoryManager {
       agentId,
       tier,
       content: summaryContent,
-      tags: [...new Set(candidates.flatMap(m => m.tags))],
+      tags: [...new Set(candidates.flatMap((m) => m.tags))],
       importance: Math.min(10, avgImportance + 1),
       accessCount: 0,
       rewardSignal: 0.9,
@@ -266,7 +311,7 @@ export class RLMemoryManager {
       lastAccessedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + TTL_MS[tier] * 2).toISOString(),
-      metadata: { summarizedCount: candidates.length, originalIds: candidates.map(m => m.id) },
+      metadata: { summarizedCount: candidates.length, originalIds: candidates.map((m) => m.id) },
     };
 
     for (const candidate of candidates) {
@@ -275,20 +320,36 @@ export class RLMemoryManager {
     }
 
     memories.push(summaryEntry);
-    this.learnFromReward(agentId, "summarize", 0.9);
+    this.learnFromReward(agentId, 'summarize', 0.9);
 
-    return { operation: "summarize", success: true, entries: [summaryEntry, ...candidates], rewardSignal: 0.9, policyAction: "summarized", reasoning: `Compressed ${candidates.length} memories into summary` };
+    return {
+      operation: 'summarize',
+      success: true,
+      entries: [summaryEntry, ...candidates],
+      rewardSignal: 0.9,
+      policyAction: 'summarized',
+      reasoning: `Compressed ${candidates.length} memories into summary`,
+    };
   }
 
-  async discard(agentId: string, tier?: MemoryTier, aggressiveness: "conservative" | "moderate" | "aggressive" = "moderate"): Promise<MemoryOperationResult> {
+  async discard(
+    agentId: string,
+    tier?: MemoryTier,
+    aggressiveness: 'conservative' | 'moderate' | 'aggressive' = 'moderate',
+  ): Promise<MemoryOperationResult> {
     const memories = this.getAgentMemories(agentId);
-    const thresholds = { conservative: IMPORTANCE_THRESHOLDS.discard * 0.5, moderate: IMPORTANCE_THRESHOLDS.discard, aggressive: IMPORTANCE_THRESHOLDS.discard * 1.5 };
+    const thresholds = {
+      conservative: IMPORTANCE_THRESHOLDS.discard * 0.5,
+      moderate: IMPORTANCE_THRESHOLDS.discard,
+      aggressive: IMPORTANCE_THRESHOLDS.discard * 1.5,
+    };
     const threshold = thresholds[aggressiveness];
     const now = new Date();
 
-    const toDiscard = memories.filter(m =>
-      (!tier || m.tier === tier) &&
-      (new Date(m.expiresAt) <= now || computeEffectiveImportance(m) < threshold)
+    const toDiscard = memories.filter(
+      (m) =>
+        (!tier || m.tier === tier) &&
+        (new Date(m.expiresAt) <= now || computeEffectiveImportance(m) < threshold),
     );
 
     const discarded: MemoryEntry[] = [];
@@ -300,21 +361,29 @@ export class RLMemoryManager {
       }
     }
 
-    const reward = Math.min(1.0, discarded.length / Math.max(1, memories.length) * 5);
-    this.learnFromReward(agentId, "discard", reward);
+    const reward = Math.min(1.0, (discarded.length / Math.max(1, memories.length)) * 5);
+    this.learnFromReward(agentId, 'discard', reward);
 
-    return { operation: "discard", success: true, entries: discarded, rewardSignal: reward, policyAction: "discarded", reasoning: `Discarded ${discarded.length} low-value memories (threshold: ${threshold})` };
+    return {
+      operation: 'discard',
+      success: true,
+      entries: discarded,
+      rewardSignal: reward,
+      policyAction: 'discarded',
+      reasoning: `Discarded ${discarded.length} low-value memories (threshold: ${threshold})`,
+    };
   }
 
   applyRewardSignal(signals: MemoryRewardSignal[]): void {
     for (const signal of signals) {
       for (const memories of this.memories.values()) {
-        const entry = memories.find(m => m.id === signal.memoryId);
+        const entry = memories.find((m) => m.id === signal.memoryId);
         if (entry) {
-          const rawReward = (signal.taskSuccess ? 1 : 0) * 0.4
-            + Math.max(-1, Math.min(1, signal.userFeedbackScore / 5)) * 0.3
-            + Math.max(-0.5, Math.min(0.5, signal.confidenceDelta)) * 0.2
-            + (signal.latencyImpactMs < 0 ? 0.1 : -0.1);
+          const rawReward =
+            (signal.taskSuccess ? 1 : 0) * 0.4 +
+            Math.max(-1, Math.min(1, signal.userFeedbackScore / 5)) * 0.3 +
+            Math.max(-0.5, Math.min(0.5, signal.confidenceDelta)) * 0.2 +
+            (signal.latencyImpactMs < 0 ? 0.1 : -0.1);
           const alpha = 0.3;
           entry.rewardSignal = (1 - alpha) * entry.rewardSignal + alpha * rawReward;
           if (signal.taskSuccess) {
@@ -336,7 +405,9 @@ export class RLMemoryManager {
   } {
     const memories = this.getAgentMemories(agentId);
     const byTier: Record<MemoryTier, number> = { episodic: 0, semantic: 0, procedural: 0 };
-    let totalImportance = 0, totalReward = 0, totalAccess = 0;
+    let totalImportance = 0,
+      totalReward = 0,
+      totalAccess = 0;
 
     for (const m of memories) {
       byTier[m.tier]++;

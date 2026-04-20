@@ -1,10 +1,10 @@
-import { z } from "zod";
-import { randomUUID } from "node:crypto";
-import { AefClient } from "@workspace/aef-sdk/client";
-import { AefUnavailableError, AefAuthError, AefPolicyError } from "@workspace/aef-sdk/errors";
-import type { SearchHit } from "@workspace/aef-contracts";
-import type { ToolManifest } from "../manifest.js";
-import type { ToolHandler } from "../gateway.js";
+import { randomUUID } from 'node:crypto';
+import type { SearchHit } from '@workspace/aef-contracts';
+import { AefClient } from '@workspace/aef-sdk/client';
+import { AefAuthError, AefPolicyError, AefUnavailableError } from '@workspace/aef-sdk/errors';
+import { z } from 'zod';
+import type { ToolHandler } from '../gateway.js';
+import type { ToolManifest } from '../manifest.js';
 
 export const DocumentRetrievalInputSchema = z.object({
   query: z.string().min(1),
@@ -56,58 +56,75 @@ export interface DocumentRetrievalOutput {
   hits: DocumentRetrievalHit[];
   totalCandidates: number;
   processingMs?: number | undefined;
-  policyDecision?: {
-    allow: boolean;
-    redactions: string[];
-    appliedRuleIds: string[];
-  } | undefined;
+  policyDecision?:
+    | {
+        allow: boolean;
+        redactions: string[];
+        appliedRuleIds: string[];
+      }
+    | undefined;
 }
 
 export const DOCUMENT_RETRIEVAL_TOOL_MANIFEST: ToolManifest = {
-  id: "document-retrieval",
-  name: "Document Retrieval",
-  version: "2.0.0",
+  id: 'document-retrieval',
+  name: 'Document Retrieval',
+  version: '2.0.0',
   description:
-    "Retrieve relevant documents from the AEF knowledge base using hybrid dense+keyword search with optional reranking. Returns results with full evidence breakdown: source, dense/keyword/fusion/rerank scores, retrieval pathway, and rationale. All results carry a traceId and evidenceId for audit. Fails explicitly if AEF is unreachable — no silent fallbacks.",
-  domainTags: ["documents", "data", "custom"],
-  policyTier: "internal-workflow",
-  allowedEnvironments: ["development", "staging", "production"],
+    'Retrieve relevant documents from the AEF knowledge base using hybrid dense+keyword search with optional reranking. Returns results with full evidence breakdown: source, dense/keyword/fusion/rerank scores, retrieval pathway, and rationale. All results carry a traceId and evidenceId for audit. Fails explicitly if AEF is unreachable — no silent fallbacks.',
+  domainTags: ['documents', 'data', 'custom'],
+  policyTier: 'internal-workflow',
+  allowedEnvironments: ['development', 'staging', 'production'],
   inputSchema: {
-    type: "object",
+    type: 'object',
     properties: {
-      query: { type: "string", description: "Semantic search query" },
-      domain: { type: "string", description: "Domain scope (e.g. lyte, vessels, terra)" },
-      profileId: { type: "string", description: "AEF domain profile ID override" },
-      topK: { type: "integer", minimum: 1, description: "Maximum number of documents to return" },
-      minScore: { type: "number", minimum: 0, maximum: 1, description: "Minimum final score threshold" },
-      rerankEnabled: { type: "boolean", description: "Enable cross-encoder reranking" },
-      denseWeight: { type: "number", minimum: 0, maximum: 1, description: "Dense vector weight in fusion (0–1)" },
-      keywordWeight: { type: "number", minimum: 0, maximum: 1, description: "BM25 keyword weight in fusion (0–1)" },
-      filters: { type: "object", description: "Optional key-value metadata filters" },
-      includeEvidence: { type: "boolean", description: "Include full evidence breakdown per hit" },
+      query: { type: 'string', description: 'Semantic search query' },
+      domain: { type: 'string', description: 'Domain scope (e.g. lyte, vessels, terra)' },
+      profileId: { type: 'string', description: 'AEF domain profile ID override' },
+      topK: { type: 'integer', minimum: 1, description: 'Maximum number of documents to return' },
+      minScore: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+        description: 'Minimum final score threshold',
+      },
+      rerankEnabled: { type: 'boolean', description: 'Enable cross-encoder reranking' },
+      denseWeight: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+        description: 'Dense vector weight in fusion (0–1)',
+      },
+      keywordWeight: {
+        type: 'number',
+        minimum: 0,
+        maximum: 1,
+        description: 'BM25 keyword weight in fusion (0–1)',
+      },
+      filters: { type: 'object', description: 'Optional key-value metadata filters' },
+      includeEvidence: { type: 'boolean', description: 'Include full evidence breakdown per hit' },
     },
-    required: ["query"],
+    required: ['query'],
   },
   outputSchema: {
-    type: "object",
+    type: 'object',
     properties: {
-      requestId: { type: "string" },
-      traceId: { type: "string" },
-      retrievalPath: { type: "array", items: { type: "string" } },
-      hits: { type: "array" },
-      totalCandidates: { type: "integer" },
+      requestId: { type: 'string' },
+      traceId: { type: 'string' },
+      retrievalPath: { type: 'array', items: { type: 'string' } },
+      hits: { type: 'array' },
+      totalCandidates: { type: 'integer' },
     },
-    required: ["requestId", "traceId", "retrievalPath", "hits", "totalCandidates"],
+    required: ['requestId', 'traceId', 'retrievalPath', 'hits', 'totalCandidates'],
   },
   rateLimits: { requestsPerMinute: 120 },
   timeoutMs: 15000,
   failureModes: [
-    { type: "timeout", retryable: true, maxRetries: 3 },
-    { type: "unavailable", retryable: false, maxRetries: 0 },
-    { type: "policy-block", retryable: false, maxRetries: 0 },
+    { type: 'timeout', retryable: true, maxRetries: 3 },
+    { type: 'unavailable', retryable: false, maxRetries: 0 },
+    { type: 'policy-block', retryable: false, maxRetries: 0 },
   ],
   approvalRequired: false,
-  observabilityHooks: { emitTrace: true, emitMetrics: true, sensitiveFields: ["filters"] },
+  observabilityHooks: { emitTrace: true, emitMetrics: true, sensitiveFields: ['filters'] },
   enabled: true,
 };
 
@@ -115,10 +132,10 @@ function mapHit(hit: SearchHit): DocumentRetrievalHit {
   const rerankerScore = hit.rerankerScore ?? hit.rerankScore;
   const pathway =
     rerankerScore !== undefined
-      ? "dense+keyword→fusion→rerank"
+      ? 'dense+keyword→fusion→rerank'
       : hit.keywordScore !== undefined
-        ? "dense+keyword→fusion"
-        : "dense";
+        ? 'dense+keyword→fusion'
+        : 'dense';
 
   return {
     chunkId: hit.chunkId,
@@ -147,14 +164,14 @@ function mapHit(hit: SearchHit): DocumentRetrievalHit {
 function resolveProfileId(input: DocumentRetrievalInput): string | undefined {
   if (input.profileId) return input.profileId;
   const domainMap: Record<string, string> = {
-    lyte: "lyte_governance_ops",
-    vessels: "vessels_maritime_risk",
-    terra: "terra_real_estate_intel",
-    aegis: "aegis_security_incident",
-    prism: "prism_legal_matter",
-    "prism-counsel": "prism_legal_matter",
-    carlota: "carlota_private_advisory",
-    "carlota-jo": "carlota_private_advisory",
+    lyte: 'lyte_governance_ops',
+    vessels: 'vessels_maritime_risk',
+    terra: 'terra_real_estate_intel',
+    aegis: 'aegis_security_incident',
+    prism: 'prism_legal_matter',
+    'prism-counsel': 'prism_legal_matter',
+    carlota: 'carlota_private_advisory',
+    'carlota-jo': 'carlota_private_advisory',
   };
   if (input.domain && domainMap[input.domain]) return domainMap[input.domain];
   return undefined;
@@ -163,20 +180,20 @@ function resolveProfileId(input: DocumentRetrievalInput): string | undefined {
 export const documentRetrievalHandler: ToolHandler = async (input) => {
   const parsed = DocumentRetrievalInputSchema.parse(input);
 
-  const gatewayUrl = process.env["AEF_GATEWAY_URL"];
-  const apiKey = process.env["AEF_API_KEY"];
+  const gatewayUrl = process.env['AEF_GATEWAY_URL'];
+  const apiKey = process.env['AEF_API_KEY'];
 
   if (!gatewayUrl || !apiKey) {
     throw new Error(
-      "Document retrieval is not configured: AEF_GATEWAY_URL and AEF_API_KEY must be set. " +
-        "See docs/aef/RUNBOOK.md for setup instructions.",
+      'Document retrieval is not configured: AEF_GATEWAY_URL and AEF_API_KEY must be set. ' +
+        'See docs/aef/RUNBOOK.md for setup instructions.',
     );
   }
 
   const client = new AefClient({
     gatewayUrl,
     apiKey,
-    tenantId: parsed.tenantId ?? process.env["AEF_TENANT_ID"] ?? "szl-holdings",
+    tenantId: parsed.tenantId ?? process.env['AEF_TENANT_ID'] ?? 'szl-holdings',
   });
 
   const requestId = randomUUID();
@@ -217,11 +234,11 @@ export const documentRetrievalHandler: ToolHandler = async (input) => {
     if (err instanceof AefUnavailableError) {
       throw new Error(
         `[document-retrieval] AEF gateway unreachable. ${err.message} ` +
-          "Verify AEF_GATEWAY_URL is correct and the AEF API service is running.",
+          'Verify AEF_GATEWAY_URL is correct and the AEF API service is running.',
       );
     }
     if (err instanceof AefAuthError) {
-      throw new Error("[document-retrieval] AEF authentication failed. Check AEF_API_KEY.");
+      throw new Error('[document-retrieval] AEF authentication failed. Check AEF_API_KEY.');
     }
     if (err instanceof AefPolicyError) {
       throw new Error(

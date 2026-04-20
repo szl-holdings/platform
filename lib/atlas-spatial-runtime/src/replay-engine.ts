@@ -1,12 +1,12 @@
 import {
   db,
-  spatialTwinSnapshotsTable,
   driftAssessmentsTable,
-  worldlineSignalOverlaysTable,
   type SpatialTwinCategory,
-} from "@szl-holdings/db";
-import { eq, and, gte, lte, asc, desc, sql } from "drizzle-orm";
-import type { ReplayFrame, ReplayTimeline, DriftStatus } from "./types.js";
+  spatialTwinSnapshotsTable,
+  worldlineSignalOverlaysTable,
+} from '@szl-holdings/db';
+import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import type { DriftStatus, ReplayFrame, ReplayTimeline } from './types.js';
 
 export interface ReplayOptions {
   twinId: string;
@@ -24,9 +24,12 @@ export async function buildReplayTimeline(options: ReplayOptions): Promise<Repla
 
   if (options.orgId != null) conditions.push(eq(spatialTwinSnapshotsTable.orgId, options.orgId));
   if (options.entityId) conditions.push(eq(spatialTwinSnapshotsTable.entityId, options.entityId));
-  if (options.twinCategory) conditions.push(eq(spatialTwinSnapshotsTable.twinCategory, options.twinCategory));
+  if (options.twinCategory)
+    conditions.push(eq(spatialTwinSnapshotsTable.twinCategory, options.twinCategory));
   if (options.startAt) {
-    conditions.push(sql`${spatialTwinSnapshotsTable.snapshotAt} >= ${options.startAt}::timestamptz`);
+    conditions.push(
+      sql`${spatialTwinSnapshotsTable.snapshotAt} >= ${options.startAt}::timestamptz`,
+    );
   }
   if (options.endAt) {
     conditions.push(sql`${spatialTwinSnapshotsTable.snapshotAt} <= ${options.endAt}::timestamptz`);
@@ -42,8 +45,8 @@ export async function buildReplayTimeline(options: ReplayOptions): Promise<Repla
   if (snapshots.length === 0) {
     return {
       twinId: options.twinId,
-      entityId: options.entityId ?? "",
-      twinCategory: (options.twinCategory ?? "vessel") as SpatialTwinCategory,
+      entityId: options.entityId ?? '',
+      twinCategory: (options.twinCategory ?? 'vessel') as SpatialTwinCategory,
       frames: [],
       totalFrames: 0,
       startAt: options.startAt ?? new Date().toISOString(),
@@ -53,7 +56,7 @@ export async function buildReplayTimeline(options: ReplayOptions): Promise<Repla
     };
   }
 
-  const snapshotIds = snapshots.map(s => s.id);
+  const snapshotIds = snapshots.map((s) => s.id);
   const firstSnapshot = snapshots[0]!;
   const lastSnapshot = snapshots[snapshots.length - 1]!;
 
@@ -69,7 +72,7 @@ export async function buildReplayTimeline(options: ReplayOptions): Promise<Repla
         ),
       )
       .limit(50);
-    activeOverlayIds = overlayRows.map(r => r.overlayId);
+    activeOverlayIds = overlayRows.map((r) => r.overlayId);
   }
 
   const driftRows = await db
@@ -89,7 +92,7 @@ export async function buildReplayTimeline(options: ReplayOptions): Promise<Repla
   }
 
   const frames: ReplayFrame[] = snapshots.map((snapshot, index) => {
-    const closestDrift = driftRows.find(d => d.assessedAt <= snapshot.snapshotAt);
+    const closestDrift = driftRows.find((d) => d.assessedAt <= snapshot.snapshotAt);
     const driftStatus = closestDrift ? (closestDrift.driftStatus as DriftStatus) : null;
 
     return {
@@ -174,12 +177,12 @@ export class ReplayEngine {
       entityId: frame.entityId,
       twinCategory: frame.twinCategory,
       confidence: `${(frame.confidenceScore * 100).toFixed(0)}%`,
-      driftStatus: frame.driftStatus ?? "unknown",
+      driftStatus: frame.driftStatus ?? 'unknown',
       alertCount: frame.alerts.length,
-      criticalAlerts: frame.alerts.filter(a => a.severity === "critical").length,
+      criticalAlerts: frame.alerts.filter((a) => a.severity === 'critical').length,
       statePreview: Object.fromEntries(Object.entries(frame.state).slice(0, 5)),
       overlaysActive: frame.overlaysActive.length,
-      renderType: "card_2d",
+      renderType: 'card_2d',
     };
   }
 }

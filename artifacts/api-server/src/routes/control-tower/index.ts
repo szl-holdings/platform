@@ -1,11 +1,11 @@
-import { type IRouter } from "express";
-import { authMiddleware } from "../../middlewares/auth";
-import { register as registerSense } from "./sense.js";
-import { register as registerDecide } from "./decide.js";
-import { register as registerAct } from "./act.js";
-import { register as registerGovernEvolve } from "./govern-evolve.js";
-import { register as registerSubstrateReplay } from "./substrate-replay.js";
-import { registerSubstrateLyteRetriever } from "../../lib/substrate-lyte-retriever.js";
+import type { IRouter } from 'express';
+import { registerSubstrateLyteRetriever } from '../../lib/substrate-lyte-retriever.js';
+import { authMiddleware } from '../../middlewares/auth';
+import { register as registerAct } from './act.js';
+import { register as registerDecide } from './decide.js';
+import { register as registerGovernEvolve } from './govern-evolve.js';
+import { register as registerSense } from './sense.js';
+import { register as registerSubstrateReplay } from './substrate-replay.js';
 
 export function register(router: IRouter): void {
   router.use(authMiddleware({ required: true }));

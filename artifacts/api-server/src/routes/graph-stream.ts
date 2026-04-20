@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { type IRouter, type Request, type Response, Router } from 'express';
 
 /**
  * SSE stream of incremental World Model graph updates.
@@ -23,7 +23,7 @@ const router: IRouter = Router();
 interface CandidateNode {
   id: string;
   label: string;
-  type: "domain" | "entity" | "concept" | "agent";
+  type: 'domain' | 'entity' | 'concept' | 'agent';
   domain: string;
   confidence: number;
   freshness: number;
@@ -36,42 +36,212 @@ interface CandidateEdge {
   source: string;
   target: string;
   label: string;
-  type: "causal" | "associative" | "hierarchical" | "temporal" | "dependency";
+  type: 'causal' | 'associative' | 'hierarchical' | 'temporal' | 'dependency';
   confidence: number;
   strength: number;
 }
 
 const CANDIDATE_NODES: CandidateNode[] = [
-  { id: "e-voyage-vyg-217", label: "VYG-217", type: "entity", domain: "vessels", confidence: 0.92, freshness: 1.0, provenance: ["AIS live"], description: "New voyage VYG-217 — Singapore → Rotterdam, ETA 14d." },
-  { id: "e-asset-dfw-19", label: "DFW-19", type: "entity", domain: "terra", confidence: 0.86, freshness: 1.0, provenance: ["LP Reports"], description: "Industrial asset DFW-19 onboarded into Q2 portfolio rollup." },
-  { id: "e-cve-2026-441", label: "CVE-2026-441", type: "entity", domain: "aegis", confidence: 0.88, freshness: 1.0, provenance: ["NVD feed"], description: "New CVE flagged — affects two production services. CISO review pending." },
-  { id: "e-slo-distress", label: "Distress SLO", type: "entity", domain: "lyte", confidence: 0.84, freshness: 1.0, provenance: ["API metrics"], description: "Distress engine SLO recovered — P95 back below 250ms after index rebuild." },
-  { id: "e-deal-q2-7", label: "Deal Q2-07", type: "entity", domain: "prism", confidence: 0.79, freshness: 1.0, provenance: ["CRM"], description: "Enterprise deal Q2-07 advanced to legal review stage." },
-  { id: "c-supply-risk", label: "Supply-Chain Risk", type: "concept", domain: "szl-holdings", confidence: 0.77, freshness: 1.0, provenance: ["ATLAS synthesis"], description: "Newly synthesized concept linking port congestion to LP-portfolio exposure." },
-  { id: "a-recon-2", label: "Recon-Agent-2", type: "agent", domain: "cognitive", confidence: 0.71, freshness: 1.0, provenance: ["Self-model"], description: "Spawned by ATLAS to enrich CVE-2026-441 context. Running step 4 of 9." },
-  { id: "e-fleet-charter-88", label: "Charter-88", type: "entity", domain: "vessels", confidence: 0.83, freshness: 1.0, provenance: ["Charter DB"], description: "New charter executed — adds two vessels to active fleet for 90 days." },
-  { id: "c-cyber-financial", label: "Cyber→Financial", type: "concept", domain: "szl-holdings", confidence: 0.74, freshness: 1.0, provenance: ["ATLAS synthesis"], description: "Cross-domain concept linking Aegis posture to LP capital-call timing." },
-  { id: "a-counsel-7", label: "Counsel-Agent-7", type: "agent", domain: "cognitive", confidence: 0.69, freshness: 1.0, provenance: ["Runtime state"], description: "Reviewing Deal Q2-07 contract clauses. Awaiting counsel approval." },
+  {
+    id: 'e-voyage-vyg-217',
+    label: 'VYG-217',
+    type: 'entity',
+    domain: 'vessels',
+    confidence: 0.92,
+    freshness: 1.0,
+    provenance: ['AIS live'],
+    description: 'New voyage VYG-217 — Singapore → Rotterdam, ETA 14d.',
+  },
+  {
+    id: 'e-asset-dfw-19',
+    label: 'DFW-19',
+    type: 'entity',
+    domain: 'terra',
+    confidence: 0.86,
+    freshness: 1.0,
+    provenance: ['LP Reports'],
+    description: 'Industrial asset DFW-19 onboarded into Q2 portfolio rollup.',
+  },
+  {
+    id: 'e-cve-2026-441',
+    label: 'CVE-2026-441',
+    type: 'entity',
+    domain: 'aegis',
+    confidence: 0.88,
+    freshness: 1.0,
+    provenance: ['NVD feed'],
+    description: 'New CVE flagged — affects two production services. CISO review pending.',
+  },
+  {
+    id: 'e-slo-distress',
+    label: 'Distress SLO',
+    type: 'entity',
+    domain: 'lyte',
+    confidence: 0.84,
+    freshness: 1.0,
+    provenance: ['API metrics'],
+    description: 'Distress engine SLO recovered — P95 back below 250ms after index rebuild.',
+  },
+  {
+    id: 'e-deal-q2-7',
+    label: 'Deal Q2-07',
+    type: 'entity',
+    domain: 'prism',
+    confidence: 0.79,
+    freshness: 1.0,
+    provenance: ['CRM'],
+    description: 'Enterprise deal Q2-07 advanced to legal review stage.',
+  },
+  {
+    id: 'c-supply-risk',
+    label: 'Supply-Chain Risk',
+    type: 'concept',
+    domain: 'szl-holdings',
+    confidence: 0.77,
+    freshness: 1.0,
+    provenance: ['ATLAS synthesis'],
+    description: 'Newly synthesized concept linking port congestion to LP-portfolio exposure.',
+  },
+  {
+    id: 'a-recon-2',
+    label: 'Recon-Agent-2',
+    type: 'agent',
+    domain: 'cognitive',
+    confidence: 0.71,
+    freshness: 1.0,
+    provenance: ['Self-model'],
+    description: 'Spawned by ATLAS to enrich CVE-2026-441 context. Running step 4 of 9.',
+  },
+  {
+    id: 'e-fleet-charter-88',
+    label: 'Charter-88',
+    type: 'entity',
+    domain: 'vessels',
+    confidence: 0.83,
+    freshness: 1.0,
+    provenance: ['Charter DB'],
+    description: 'New charter executed — adds two vessels to active fleet for 90 days.',
+  },
+  {
+    id: 'c-cyber-financial',
+    label: 'Cyber→Financial',
+    type: 'concept',
+    domain: 'szl-holdings',
+    confidence: 0.74,
+    freshness: 1.0,
+    provenance: ['ATLAS synthesis'],
+    description: 'Cross-domain concept linking Aegis posture to LP capital-call timing.',
+  },
+  {
+    id: 'a-counsel-7',
+    label: 'Counsel-Agent-7',
+    type: 'agent',
+    domain: 'cognitive',
+    confidence: 0.69,
+    freshness: 1.0,
+    provenance: ['Runtime state'],
+    description: 'Reviewing Deal Q2-07 contract clauses. Awaiting counsel approval.',
+  },
 ];
 
 const CANDIDATE_EDGES: CandidateEdge[] = [
-  { id: "se-1", source: "e-voyage-vyg-217", target: "d-vessels", label: "operates", type: "hierarchical", confidence: 0.92, strength: 0.9 },
-  { id: "se-2", source: "e-asset-dfw-19", target: "e-lp", label: "rolls into", type: "hierarchical", confidence: 0.86, strength: 0.85 },
-  { id: "se-3", source: "e-cve-2026-441", target: "e-threat", label: "added to", type: "associative", confidence: 0.84, strength: 0.7 },
-  { id: "se-4", source: "e-cve-2026-441", target: "c-risk", label: "elevates", type: "causal", confidence: 0.78, strength: 0.8 },
-  { id: "se-5", source: "a-recon-2", target: "e-cve-2026-441", label: "enriching", type: "dependency", confidence: 0.74, strength: 0.7 },
-  { id: "se-6", source: "c-supply-risk", target: "c-risk", label: "feeds", type: "causal", confidence: 0.73, strength: 0.65 },
-  { id: "se-7", source: "e-fleet-charter-88", target: "e-fleet", label: "extends", type: "hierarchical", confidence: 0.83, strength: 0.8 },
-  { id: "se-8", source: "a-counsel-7", target: "e-deal-q2-7", label: "reviewing", type: "dependency", confidence: 0.69, strength: 0.7 },
-  { id: "se-9", source: "c-cyber-financial", target: "e-lp", label: "informs timing", type: "causal", confidence: 0.74, strength: 0.6 },
-  { id: "se-10", source: "e-slo-distress", target: "c-risk", label: "reduces", type: "associative", confidence: 0.7, strength: 0.55 },
+  {
+    id: 'se-1',
+    source: 'e-voyage-vyg-217',
+    target: 'd-vessels',
+    label: 'operates',
+    type: 'hierarchical',
+    confidence: 0.92,
+    strength: 0.9,
+  },
+  {
+    id: 'se-2',
+    source: 'e-asset-dfw-19',
+    target: 'e-lp',
+    label: 'rolls into',
+    type: 'hierarchical',
+    confidence: 0.86,
+    strength: 0.85,
+  },
+  {
+    id: 'se-3',
+    source: 'e-cve-2026-441',
+    target: 'e-threat',
+    label: 'added to',
+    type: 'associative',
+    confidence: 0.84,
+    strength: 0.7,
+  },
+  {
+    id: 'se-4',
+    source: 'e-cve-2026-441',
+    target: 'c-risk',
+    label: 'elevates',
+    type: 'causal',
+    confidence: 0.78,
+    strength: 0.8,
+  },
+  {
+    id: 'se-5',
+    source: 'a-recon-2',
+    target: 'e-cve-2026-441',
+    label: 'enriching',
+    type: 'dependency',
+    confidence: 0.74,
+    strength: 0.7,
+  },
+  {
+    id: 'se-6',
+    source: 'c-supply-risk',
+    target: 'c-risk',
+    label: 'feeds',
+    type: 'causal',
+    confidence: 0.73,
+    strength: 0.65,
+  },
+  {
+    id: 'se-7',
+    source: 'e-fleet-charter-88',
+    target: 'e-fleet',
+    label: 'extends',
+    type: 'hierarchical',
+    confidence: 0.83,
+    strength: 0.8,
+  },
+  {
+    id: 'se-8',
+    source: 'a-counsel-7',
+    target: 'e-deal-q2-7',
+    label: 'reviewing',
+    type: 'dependency',
+    confidence: 0.69,
+    strength: 0.7,
+  },
+  {
+    id: 'se-9',
+    source: 'c-cyber-financial',
+    target: 'e-lp',
+    label: 'informs timing',
+    type: 'causal',
+    confidence: 0.74,
+    strength: 0.6,
+  },
+  {
+    id: 'se-10',
+    source: 'e-slo-distress',
+    target: 'c-risk',
+    label: 'reduces',
+    type: 'associative',
+    confidence: 0.7,
+    strength: 0.55,
+  },
 ];
 
-router.get("/graph/stream", (req: Request, res: Response) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache, no-transform");
-  res.setHeader("Connection", "keep-alive");
-  res.setHeader("X-Accel-Buffering", "no");
+router.get('/graph/stream', (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
   const send = (event: string, data: unknown): void => {
@@ -83,7 +253,7 @@ router.get("/graph/stream", (req: Request, res: Response) => {
     }
   };
 
-  send("hello", { now: Date.now() });
+  send('hello', { now: Date.now() });
 
   // Per-connection randomized order so two viewers see slightly different
   // sequences and the demo doesn't feel scripted.
@@ -104,11 +274,11 @@ router.get("/graph/stream", (req: Request, res: Response) => {
     nodeIdx++;
     const runtimeId = `${tpl.id}-${Date.now().toString(36)}`;
     runtimeIdByTemplate.set(tpl.id, runtimeId);
-    send("entity.added", {
+    send('entity.added', {
       ...tpl,
       // Per-connection unique id so reconnects don't collide on the client.
       id: runtimeId,
-      lastSeen: "just now",
+      lastSeen: 'just now',
       lastSeenTs: Date.now(),
       discoveredTs: Date.now(),
     });
@@ -136,12 +306,12 @@ router.get("/graph/stream", (req: Request, res: Response) => {
       const target = resolveEndpoint(tpl.target);
       if (source && target) {
         edgeIdx = edgeIdx + attempts + 1;
-        send("edge.added", {
+        send('edge.added', {
           ...tpl,
           id: `${tpl.id}-${Date.now().toString(36)}`,
           source,
           target,
-          lastActive: "just now",
+          lastActive: 'just now',
           lastActiveTs: Date.now(),
         });
         return;
@@ -154,10 +324,10 @@ router.get("/graph/stream", (req: Request, res: Response) => {
   const firstTimer = setTimeout(emitEntity, 2_000);
   const entityTimer = setInterval(emitEntity, 9_000);
   const edgeTimer = setInterval(emitEdge, 11_000);
-  const decayTimer = setInterval(() => send("freshness.tick", { now: Date.now() }), 5_000);
+  const decayTimer = setInterval(() => send('freshness.tick', { now: Date.now() }), 5_000);
   const heartbeat = setInterval(() => {
     if (res.writableEnded) return;
-    res.write(": heartbeat\n\n");
+    res.write(': heartbeat\n\n');
   }, 25_000);
 
   const cleanup = (): void => {
@@ -168,8 +338,8 @@ router.get("/graph/stream", (req: Request, res: Response) => {
     clearInterval(heartbeat);
   };
 
-  req.on("close", cleanup);
-  req.on("error", cleanup);
+  req.on('close', cleanup);
+  req.on('error', cleanup);
 });
 
 export default router;

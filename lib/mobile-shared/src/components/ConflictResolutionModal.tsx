@@ -1,20 +1,20 @@
-import React, { useContext } from "react";
+import React, { useContext } from 'react';
 import {
   Modal,
-  View,
-  Text,
-  TouchableOpacity,
+  Platform,
   ScrollView,
   StyleSheet,
-  Platform,
-} from "react-native";
-import { SyncEngineContext, type ConflictInfo } from "../context/SyncEngineContext";
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { type ConflictInfo, SyncEngineContext } from '../context/SyncEngineContext';
 
 interface Props {
   accentColor?: string;
 }
 
-export function ConflictResolutionModal({ accentColor = "#6366f1" }: Props) {
+export function ConflictResolutionModal({ accentColor = '#6366f1' }: Props) {
   const ctx = useContext(SyncEngineContext);
   const conflicts = ctx?.conflicts ?? [];
   const resolveConflict = ctx?.resolveConflict;
@@ -25,20 +25,15 @@ export function ConflictResolutionModal({ accentColor = "#6366f1" }: Props) {
   if (!currentConflict) return null;
 
   return (
-    <Modal
-      visible={conflicts.length > 0}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-    >
+    <Modal visible={conflicts.length > 0} transparent animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.sheet}>
           <ConflictCard
             conflict={currentConflict}
             remaining={conflicts.length}
             accentColor={accentColor}
-            onKeepMine={() => resolveConflict?.(currentConflict.id, "keep-mine")}
-            onKeepTheirs={() => resolveConflict?.(currentConflict.id, "keep-theirs")}
+            onKeepMine={() => resolveConflict?.(currentConflict.id, 'keep-mine')}
+            onKeepTheirs={() => resolveConflict?.(currentConflict.id, 'keep-theirs')}
             onDismiss={() => dismissConflict?.(currentConflict.id)}
           />
         </View>
@@ -65,7 +60,7 @@ function ConflictCard({
   onDismiss,
 }: ConflictCardProps) {
   const method = conflict.mutation.method;
-  const url = conflict.mutation.url.replace(/.*\/api/, "/api");
+  const url = conflict.mutation.url.replace(/.*\/api/, '/api');
 
   const clientStr = safeStringify(conflict.clientVersion);
   const serverStr = safeStringify(conflict.serverVersion);
@@ -73,17 +68,15 @@ function ConflictCard({
   return (
     <View>
       <View style={styles.header}>
-        <View style={[styles.badge, { backgroundColor: "#ef4444" }]}>
+        <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
           <Text style={styles.badgeText}>Conflict</Text>
         </View>
-        {remaining > 1 && (
-          <Text style={styles.remainingText}>{remaining} conflicts</Text>
-        )}
+        {remaining > 1 && <Text style={styles.remainingText}>{remaining} conflicts</Text>}
       </View>
 
       <Text style={styles.title}>Sync Conflict</Text>
       <Text style={styles.subtitle}>
-        Another user changed this record while you were offline.{"\n"}
+        Another user changed this record while you were offline.{'\n'}
         Choose which version to keep.
       </Text>
       <Text style={styles.metaText}>
@@ -112,10 +105,7 @@ function ConflictCard({
         >
           <Text style={styles.btnText}>Keep Mine</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.btn, styles.btnSecondary]}
-          onPress={onKeepTheirs}
-        >
+        <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={onKeepTheirs}>
           <Text style={[styles.btnText, styles.btnTextSecondary]}>Keep Server's</Text>
         </TouchableOpacity>
       </View>
@@ -128,8 +118,8 @@ function ConflictCard({
 }
 
 function safeStringify(value: unknown): string {
-  if (value === null || value === undefined) return "(empty)";
-  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return '(empty)';
+  if (typeof value === 'string') return value;
   try {
     return JSON.stringify(value, null, 2);
   } catch {
@@ -140,20 +130,20 @@ function safeStringify(value: unknown): string {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: "#1a1a2e",
+    backgroundColor: '#1a1a2e',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
-    maxHeight: "85%",
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    maxHeight: '85%',
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     marginBottom: 12,
   },
@@ -163,58 +153,58 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   badgeText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 11,
-    fontWeight: "700",
-    textTransform: "uppercase",
+    fontWeight: '700',
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   remainingText: {
-    color: "#94a3b8",
+    color: '#94a3b8',
     fontSize: 12,
   },
   title: {
-    color: "#f8fafc",
+    color: '#f8fafc',
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: '700',
     marginBottom: 6,
   },
   subtitle: {
-    color: "#94a3b8",
+    color: '#94a3b8',
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 10,
   },
   metaText: {
-    color: "#64748b",
+    color: '#64748b',
     fontSize: 11,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     marginBottom: 16,
   },
   versionsRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 10,
     marginBottom: 16,
   },
   versionBox: {
     flex: 1,
-    backgroundColor: "#0f172a",
+    backgroundColor: '#0f172a',
     borderRadius: 10,
     padding: 10,
     borderWidth: 1,
     maxHeight: 160,
   },
   versionBoxLeft: {
-    borderColor: "#6366f1",
+    borderColor: '#6366f1',
   },
   versionBoxRight: {
-    borderColor: "#475569",
+    borderColor: '#475569',
   },
   versionLabel: {
-    color: "#94a3b8",
+    color: '#94a3b8',
     fontSize: 10,
-    fontWeight: "600",
-    textTransform: "uppercase",
+    fontWeight: '600',
+    textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
   },
@@ -222,13 +212,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   versionCode: {
-    color: "#e2e8f0",
+    color: '#e2e8f0',
     fontSize: 11,
-    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     lineHeight: 16,
   },
   actions: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 10,
     marginBottom: 10,
   },
@@ -236,27 +226,27 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 13,
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   btnSecondary: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   btnText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   btnTextSecondary: {
-    color: "#e2e8f0",
+    color: '#e2e8f0',
   },
   dismissBtn: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 8,
   },
   dismissText: {
-    color: "#64748b",
+    color: '#64748b',
     fontSize: 13,
   },
 });

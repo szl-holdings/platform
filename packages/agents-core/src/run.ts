@@ -1,33 +1,33 @@
-import { randomUUID } from "crypto";
-import { z } from "zod";
-import { globalCollector } from "@workspace/cognitive-observability";
-import { TraceWriter, defaultTraceStore } from "@workspace/trace-graph";
-import { withRetry, type RetryPolicy, DEFAULT_RETRY_POLICY } from "./retry.js";
-import { requestApproval, type ApprovalGateRequest } from "./approval-gate.js";
-import { sendToDeadLetter } from "./dead-letter.js";
-import { emitStepLog, makeStepLogger } from "./step-log.js";
-import { AgentRunError, categorizeError } from "./errors.js";
-import type { RunErrorCategory } from "./errors.js";
-import { saveStepIO } from "./step-io-store.js";
+import { globalCollector } from '@workspace/cognitive-observability';
+import { defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
+import { z } from 'zod';
+import { type ApprovalGateRequest, requestApproval } from './approval-gate.js';
+import { sendToDeadLetter } from './dead-letter.js';
+import type { RunErrorCategory } from './errors.js';
+import { AgentRunError, categorizeError } from './errors.js';
+import { DEFAULT_RETRY_POLICY, type RetryPolicy, withRetry } from './retry.js';
+import { saveStepIO } from './step-io-store.js';
+import { emitStepLog, makeStepLogger } from './step-log.js';
 
 export const RunStatusSchema = z.enum([
-  "idle",
-  "running",
-  "pending_approval",
-  "completed",
-  "failed",
-  "dead_lettered",
+  'idle',
+  'running',
+  'pending_approval',
+  'completed',
+  'failed',
+  'dead_lettered',
 ]);
 export type RunStatus = z.infer<typeof RunStatusSchema>;
 
 export const StepStatusSchema = z.enum([
-  "pending",
-  "running",
-  "completed",
-  "failed",
-  "skipped",
-  "pending_approval",
-  "approval_rejected",
+  'pending',
+  'running',
+  'completed',
+  'failed',
+  'skipped',
+  'pending_approval',
+  'approval_rejected',
 ]);
 export type StepStatus = z.infer<typeof StepStatusSchema>;
 
@@ -51,7 +51,9 @@ export interface StepContext {
   stepName: string;
   attemptNumber: number;
   logger: ReturnType<typeof makeStepLogger>;
-  requestApproval: (req: Omit<ApprovalGateRequest, "runId" | "stepId" | "stepName">) => Promise<void>;
+  requestApproval: (
+    req: Omit<ApprovalGateRequest, 'runId' | 'stepId' | 'stepName'>,
+  ) => Promise<void>;
 }
 
 export interface StepResult<TOutput = unknown> {
@@ -103,8 +105,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
       reject(new Error(`Timeout: '${label}' exceeded ${ms}ms`));
     }, ms);
     promise.then(
-      (v) => { clearTimeout(timer); resolve(v); },
-      (e) => { clearTimeout(timer); reject(e); },
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
     );
   });
 }
@@ -113,7 +121,7 @@ export class AgentRun {
   readonly runId: string;
   readonly traceId: string;
   readonly objective: string;
-  private _status: RunStatus = "idle";
+  private _status: RunStatus = 'idle';
   private readonly stepResults: StepResult[] = [];
   private readonly options: AgentRunOptions;
   private readonly startedAt: number;
@@ -137,7 +145,7 @@ export class AgentRun {
 
   private async setStatus(status: RunStatus): Promise<void> {
     this._status = status;
-    globalCollector.recordKnown("run_status_transition", 1, {
+    globalCollector.recordKnown('run_status_transition', 1, {
       runId: this.runId,
       status,
     });
@@ -147,34 +155,34 @@ export class AgentRun {
   }
 
   async start(): Promise<void> {
-    await this.setStatus("running");
+    await this.setStatus('running');
 
     this.traceWriter.startTrace({
       traceId: this.traceId,
       runId: this.runId,
-      agentId: this.options.agentId ?? "agents-core",
+      agentId: this.options.agentId ?? 'agents-core',
       objective: this.objective,
     });
 
     await emitStepLog({
       runId: this.runId,
-      stepId: "run:start",
-      stepName: "run.start",
-      level: "info",
+      stepId: 'run:start',
+      stepName: 'run.start',
+      level: 'info',
       message: `Agent run started: ${this.objective}`,
       data: { objective: this.objective, metadata: this.options.metadata },
     });
-    globalCollector.recordKnown("run_started", 1, { runId: this.runId });
+    globalCollector.recordKnown('run_started', 1, { runId: this.runId });
   }
 
   async step<TInput, TOutput>(
     definition: StepDefinition<TInput, TOutput>,
     input: TInput,
   ): Promise<TOutput> {
-    if (this._status !== "running") {
+    if (this._status !== 'running') {
       throw new AgentRunError({
         message: `Cannot execute step '${definition.name}' — run is in status '${this._status}'`,
-        category: "validation",
+        category: 'validation',
         runId: this.runId,
         stepId: definition.id,
         retryable: false,
@@ -185,9 +193,9 @@ export class AgentRun {
     const logger = makeStepLogger(this.runId, definition.id, definition.name);
     const spanId = randomUUID();
 
-    await logger.info("Step starting", { stepId: definition.id });
+    await logger.info('Step starting', { stepId: definition.id });
 
-    globalCollector.recordKnown("step_started", 1, {
+    globalCollector.recordKnown('step_started', 1, {
       runId: this.runId,
       stepId: definition.id,
       stepName: definition.name,
@@ -201,14 +209,14 @@ export class AgentRun {
       attemptNumber: 1,
       logger,
       requestApproval: async (req) => {
-        await this.setStatus("pending_approval");
+        await this.setStatus('pending_approval');
         await requestApproval({
           runId: this.runId,
           stepId: definition.id,
           stepName: definition.name,
           ...req,
         });
-        await this.setStatus("running");
+        await this.setStatus('running');
       },
     };
 
@@ -217,7 +225,7 @@ export class AgentRun {
 
     try {
       if (definition.requiresApproval) {
-        await this.setStatus("pending_approval");
+        await this.setStatus('pending_approval');
         await requestApproval({
           runId: this.runId,
           stepId: definition.id,
@@ -227,12 +235,12 @@ export class AgentRun {
           justification:
             definition.approvalJustification ??
             `Step '${definition.name}' requires approval before execution`,
-          projectedImpact: definition.projectedImpact ?? "medium",
-          projectedRisk: definition.projectedRisk ?? "medium",
+          projectedImpact: definition.projectedImpact ?? 'medium',
+          projectedRisk: definition.projectedRisk ?? 'medium',
           domain: this.options.domain,
           surface: this.options.surface,
         });
-        await this.setStatus("running");
+        await this.setStatus('running');
       }
 
       const retryResult = await withRetry(
@@ -282,7 +290,7 @@ export class AgentRun {
         startedAt: new Date(stepStart).toISOString(),
         endedAt: new Date(completedAt).toISOString(),
         latencyMs: durationMs,
-        status: "ok",
+        status: 'ok',
         attributes: {
           toolId: definition.toolId,
           promptId: definition.promptId,
@@ -295,7 +303,7 @@ export class AgentRun {
         stepName: definition.name,
         toolId: definition.toolId,
         promptId: definition.promptId,
-        status: "completed",
+        status: 'completed',
         output: retryResult.value,
         startedAt: stepStart,
         completedAt,
@@ -305,14 +313,14 @@ export class AgentRun {
       };
 
       this.stepResults.push(stepResult);
-      globalCollector.recordKnown("step_completed", durationMs, {
+      globalCollector.recordKnown('step_completed', durationMs, {
         runId: this.runId,
         stepId: definition.id,
         retries: retryResult.attempts - 1,
         spanId,
       });
 
-      await logger.info("Step completed", {
+      await logger.info('Step completed', {
         durationMs,
         retries: stepResult.retryCount,
         otelSpanId: spanId,
@@ -346,7 +354,7 @@ export class AgentRun {
         startedAt: new Date(stepStart).toISOString(),
         endedAt: new Date(completedAt).toISOString(),
         latencyMs: durationMs,
-        status: "error",
+        status: 'error',
         errorMessage: message,
         attributes: { errorCategory: category },
       });
@@ -356,7 +364,7 @@ export class AgentRun {
         stepName: definition.name,
         toolId: definition.toolId,
         promptId: definition.promptId,
-        status: "failed",
+        status: 'failed',
         error: message,
         errorCategory: category,
         startedAt: stepStart,
@@ -367,14 +375,14 @@ export class AgentRun {
       };
 
       this.stepResults.push(stepResult);
-      globalCollector.recordKnown("step_failed", durationMs, {
+      globalCollector.recordKnown('step_failed', durationMs, {
         runId: this.runId,
         stepId: definition.id,
         errorCategory: category,
         spanId,
       });
 
-      await logger.error("Step failed", { error: message, category, otelSpanId: spanId });
+      await logger.error('Step failed', { error: message, category, otelSpanId: spanId });
 
       if (this.options.onStepComplete) {
         await this.options.onStepComplete(stepResult);
@@ -385,29 +393,29 @@ export class AgentRun {
   }
 
   async complete(summary?: string): Promise<AgentRunSummary> {
-    await this.setStatus("completed");
+    await this.setStatus('completed');
     const completedAt = Date.now();
     const durationMs = completedAt - this.startedAt;
 
     try {
       this.traceWriter.completeTrace(this.traceId, {
-        status: "completed",
+        status: 'completed',
         latencyMs: durationMs,
       });
     } catch (traceErr) {
-      console.error("[agents-core] Failed to finalize trace on complete:", traceErr);
+      console.error('[agents-core] Failed to finalize trace on complete:', traceErr);
     }
 
     await emitStepLog({
       runId: this.runId,
-      stepId: "run:complete",
-      stepName: "run.complete",
-      level: "info",
-      message: summary ?? "Agent run completed successfully",
+      stepId: 'run:complete',
+      stepName: 'run.complete',
+      level: 'info',
+      message: summary ?? 'Agent run completed successfully',
       data: { stepCount: this.stepResults.length },
     });
 
-    globalCollector.recordKnown("run_completed", durationMs, {
+    globalCollector.recordKnown('run_completed', durationMs, {
       runId: this.runId,
       stepCount: this.stepResults.length,
     });
@@ -419,40 +427,40 @@ export class AgentRun {
     const category = categorizeError(error);
     const message = error instanceof Error ? error.message : String(error);
 
-    await this.setStatus("failed");
+    await this.setStatus('failed');
     const completedAt = Date.now();
     const durationMs = completedAt - this.startedAt;
 
     try {
       this.traceWriter.recordError(this.traceId, category, message);
       this.traceWriter.completeTrace(this.traceId, {
-        status: "failed",
+        status: 'failed',
         latencyMs: durationMs,
       });
     } catch (traceErr) {
-      console.error("[agents-core] Failed to finalize trace on fail:", traceErr);
+      console.error('[agents-core] Failed to finalize trace on fail:', traceErr);
     }
 
     await emitStepLog({
       runId: this.runId,
-      stepId: "run:fail",
-      stepName: "run.fail",
-      level: "error",
+      stepId: 'run:fail',
+      stepName: 'run.fail',
+      level: 'error',
       message: `Agent run failed: ${message}`,
       data: { errorCategory: category },
     });
 
-    globalCollector.recordKnown("run_failed", completedAt - this.startedAt, {
+    globalCollector.recordKnown('run_failed', completedAt - this.startedAt, {
       runId: this.runId,
       errorCategory: category,
     });
 
-    const failedSteps = this.stepResults.filter((s) => s.status === "failed");
+    const failedSteps = this.stepResults.filter((s) => s.status === 'failed');
     const totalAttempts = failedSteps.reduce((sum, s) => sum + s.retryCount + 1, 0);
     const maxAttempts = (this.options.retryPolicy ?? DEFAULT_RETRY_POLICY).maxAttempts;
 
     if (failedSteps.length > 0 && totalAttempts >= maxAttempts) {
-      await this.setStatus("dead_lettered");
+      await this.setStatus('dead_lettered');
       sendToDeadLetter({
         runId: this.runId,
         objective: this.objective,
@@ -466,7 +474,11 @@ export class AgentRun {
     return this.toSummary(completedAt, message, category);
   }
 
-  toSummary(completedAt?: number, errorMessage?: string, errorCategory?: RunErrorCategory): AgentRunSummary {
+  toSummary(
+    completedAt?: number,
+    errorMessage?: string,
+    errorCategory?: RunErrorCategory,
+  ): AgentRunSummary {
     const now = completedAt ?? Date.now();
     return {
       runId: this.runId,

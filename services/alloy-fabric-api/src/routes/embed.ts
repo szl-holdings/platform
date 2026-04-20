@@ -1,22 +1,22 @@
-import type { Router, Request, Response } from "express";
-import { EmbedRequestSchema } from "@workspace/aef-contracts";
-import { LocalCpuBackend, createDefaultBackend } from "@workspace/alloy-vector-worker";
-import type { EmbedInput } from "@workspace/alloy-vector-worker";
-import { getRequestId } from "../middleware/request-id.js";
-import { getTenantId } from "../middleware/tenant.js";
-import { storageBundle, tenantEnforcer, policyEngine, defaultLedgerStore } from "../context.js";
-import { logger } from "../logger.js";
-import type { PolicyContext } from "@workspace/aef-policy-guard";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
+import { EmbedRequestSchema } from '@workspace/aef-contracts';
+import type { PolicyContext } from '@workspace/aef-policy-guard';
+import type { EmbedInput } from '@workspace/alloy-vector-worker';
+import { createDefaultBackend, LocalCpuBackend } from '@workspace/alloy-vector-worker';
+import type { Request, Response, Router } from 'express';
+import { defaultLedgerStore, policyEngine, storageBundle, tenantEnforcer } from '../context.js';
+import { logger } from '../logger.js';
+import { getRequestId } from '../middleware/request-id.js';
+import { getTenantId } from '../middleware/tenant.js';
 
 // Select backend based on environment — defaults to LocalCpuBackend on Replit
 const embeddingBackend = createDefaultBackend();
 
 export function registerEmbedRoute(router: Router): void {
-  router.post("/v1/embed", async (req: Request, res: Response) => {
+  router.post('/v1/embed', async (req: Request, res: Response) => {
     const parsed = EmbedRequestSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "validation_error", issues: parsed.error.issues });
+      res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });
       return;
     }
 
@@ -35,12 +35,20 @@ export function registerEmbedRoute(router: Router): void {
     };
     const tenantDecision = tenantEnforcer.enforce(policyCtx);
     if (tenantDecision !== null && !tenantDecision.allow) {
-      res.status(403).json({ error: "tenant_not_registered", reasons: tenantDecision.reasons, appliedRuleIds: tenantDecision.appliedRuleIds });
+      res.status(403).json({
+        error: 'tenant_not_registered',
+        reasons: tenantDecision.reasons,
+        appliedRuleIds: tenantDecision.appliedRuleIds,
+      });
       return;
     }
     const policyDecision = policyEngine.evaluate(policyCtx);
     if (!policyDecision.allow) {
-      res.status(403).json({ error: "policy_denied", reasons: policyDecision.reasons, appliedRuleIds: policyDecision.appliedRuleIds });
+      res.status(403).json({
+        error: 'policy_denied',
+        reasons: policyDecision.reasons,
+        appliedRuleIds: policyDecision.appliedRuleIds,
+      });
       return;
     }
 
@@ -53,8 +61,8 @@ export function registerEmbedRoute(router: Router): void {
       chunkId: `embed-${reqId}-${index}`,
       text,
       modelRef: resolvedModel,
-      profileId: profileId ?? "default",
-      inputType: "passage" as const,
+      profileId: profileId ?? 'default',
+      inputType: 'passage' as const,
     }));
 
     const outputs = await backend.embed(inputs);
@@ -87,11 +95,21 @@ export function registerEmbedRoute(router: Router): void {
         });
       } catch (err) {
         ledgerFailures++;
-        logger.error("embed ledger write failed", { chunkId: output.chunkId, reqId, err: String(err) });
+        logger.error('embed ledger write failed', {
+          chunkId: output.chunkId,
+          reqId,
+          err: String(err),
+        });
       }
     }
 
-    logger.info("embed completed", { reqId, tenantId, count: outputs.length, backend: backend.kind, processingMs: Date.now() - startMs });
+    logger.info('embed completed', {
+      reqId,
+      tenantId,
+      count: outputs.length,
+      backend: backend.kind,
+      processingMs: Date.now() - startMs,
+    });
 
     res.json({
       requestId: reqId,

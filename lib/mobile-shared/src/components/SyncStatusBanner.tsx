@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SyncEngineContext } from "../context/SyncEngineContext";
+import React, { useContext, useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SyncEngineContext } from '../context/SyncEngineContext';
 
 interface Props {
   accentColor?: string;
   textColor?: string;
 }
 
-export function SyncStatusBanner({ accentColor = "#6366f1", textColor = "#fff" }: Props) {
+export function SyncStatusBanner({ accentColor = '#6366f1', textColor = '#fff' }: Props) {
   const ctx = useContext(SyncEngineContext);
   const slideAnim = useRef(new Animated.Value(-48)).current;
 
@@ -20,20 +20,20 @@ export function SyncStatusBanner({ accentColor = "#6366f1", textColor = "#fff" }
   const visible = syncing || pending > 0 || conflicts > 0 || failedCount > 0;
 
   let bannerColor = accentColor;
-  let label = "";
+  let label = '';
 
   if (conflicts > 0) {
-    bannerColor = "#ef4444";
-    label = `${conflicts} conflict${conflicts === 1 ? "" : "s"} need resolution`;
+    bannerColor = '#ef4444';
+    label = `${conflicts} conflict${conflicts === 1 ? '' : 's'} need resolution`;
   } else if (failedCount > 0) {
-    bannerColor = "#f59e0b";
-    label = `${failedCount} change${failedCount === 1 ? "" : "s"} failed to sync`;
+    bannerColor = '#f59e0b';
+    label = `${failedCount} change${failedCount === 1 ? '' : 's'} failed to sync`;
   } else if (syncing) {
     bannerColor = accentColor;
-    label = `Syncing ${pending} pending change${pending === 1 ? "" : "s"}…`;
+    label = `Syncing ${pending} pending change${pending === 1 ? '' : 's'}…`;
   } else if (pending > 0) {
-    bannerColor = "#64748b";
-    label = `${pending} pending change${pending === 1 ? "" : "s"} — waiting for connection`;
+    bannerColor = '#64748b';
+    label = `${pending} pending change${pending === 1 ? '' : 's'} — waiting for connection`;
   }
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export function SyncStatusBanner({ accentColor = "#6366f1", textColor = "#fff" }
         styles.banner,
         { backgroundColor: bannerColor, transform: [{ translateY: slideAnim }] },
       ]}
-      pointerEvents={visible ? "auto" : "none"}
+      pointerEvents={visible ? 'auto' : 'none'}
     >
       <View style={styles.row}>
         <PulsingDot color={textColor} active={syncing} />
@@ -64,14 +64,15 @@ export function SyncStatusBanner({ accentColor = "#6366f1", textColor = "#fff" }
           {label}
         </Text>
         {showRetry && (
-          <TouchableOpacity onPress={handleRetry} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity
+            onPress={handleRetry}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Text style={[styles.actionText, { color: textColor }]}>Retry</Text>
           </TouchableOpacity>
         )}
         {lastSyncedAt && !syncing && !pending && !failedCount && !conflicts && (
-          <Text style={[styles.timestampText, { color: textColor }]}>
-            Synced
-          </Text>
+          <Text style={[styles.timestampText, { color: textColor }]}>Synced</Text>
         )}
       </View>
     </Animated.View>
@@ -87,7 +88,7 @@ function PulsingDot({ color, active }: { color: string; active: boolean }) {
         Animated.sequence([
           Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
           Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: true }),
-        ])
+        ]),
       );
       anim.start();
       return () => anim.stop();
@@ -96,31 +97,27 @@ function PulsingDot({ color, active }: { color: string; active: boolean }) {
     }
   }, [active, opacity]);
 
-  return (
-    <Animated.View
-      style={[styles.dot, { backgroundColor: color, opacity }]}
-    />
-  );
+  return <Animated.View style={[styles.dot, { backgroundColor: color, opacity }]} />;
 }
 
 const styles = StyleSheet.create({
   banner: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     zIndex: 9998,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 6,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   dot: {
@@ -131,12 +128,12 @@ const styles = StyleSheet.create({
   text: {
     flex: 1,
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   actionText: {
     fontSize: 12,
-    fontWeight: "700",
-    textDecorationLine: "underline",
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
   timestampText: {
     fontSize: 11,

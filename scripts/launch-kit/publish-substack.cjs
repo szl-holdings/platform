@@ -40,11 +40,17 @@ function mdToHtml(md) {
   let listType = null; // 'ul' | 'ol' | null
 
   const flush = () => {
-    if (inParagraph) { out.push('</p>'); inParagraph = false; }
+    if (inParagraph) {
+      out.push('</p>');
+      inParagraph = false;
+    }
   };
 
   const flushList = () => {
-    if (listType) { out.push(`</${listType}>`); listType = null; }
+    if (listType) {
+      out.push(`</${listType}>`);
+      listType = null;
+    }
   };
 
   const openList = (type) => {
@@ -60,10 +66,7 @@ function mdToHtml(md) {
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code>$1</code>')
-      .replace(
-        /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
-        '<a href="$2">$1</a>',
-      );
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2">$1</a>');
 
   for (const raw of lines) {
     const line = raw.trimEnd();
@@ -77,14 +80,16 @@ function mdToHtml(md) {
 
     // h2
     if (line.startsWith('## ')) {
-      flush(); flushList();
+      flush();
+      flushList();
       out.push(`<h2>${inline(line.slice(3))}</h2>`);
       continue;
     }
 
     // h3
     if (line.startsWith('### ')) {
-      flush(); flushList();
+      flush();
+      flushList();
       out.push(`<h3>${inline(line.slice(4))}</h3>`);
       continue;
     }
@@ -139,7 +144,9 @@ function jsonPost(urlStr, headers, body) {
 
     const req = https.request(options, (res) => {
       let data = '';
-      res.on('data', (chunk) => { data += chunk; });
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
       res.on('end', () => {
         try {
           resolve({ status: res.statusCode, body: JSON.parse(data) });
@@ -159,7 +166,7 @@ function jsonPost(urlStr, headers, body) {
 
 async function main() {
   const session = requireEnv('SUBSTACK_SESSION');
-  const pubUrl  = requireEnv('SUBSTACK_PUBLICATION_URL').replace(/\/$/, '');
+  const pubUrl = requireEnv('SUBSTACK_PUBLICATION_URL').replace(/\/$/, '');
 
   const posts = POSTS.slice(0, 3);
 
@@ -169,18 +176,18 @@ async function main() {
     console.log(`  → [${post.id}] "${post.title}"`);
 
     const draftBody = {
-      draft_title:    post.title,
+      draft_title: post.title,
       draft_subtitle: post.subtitle,
-      draft_body:     mdToHtml(post.body),
-      audience:       'everyone',
-      type:           'newsletter',
+      draft_body: mdToHtml(post.body),
+      audience: 'everyone',
+      type: 'newsletter',
     };
 
     const result = await jsonPost(
       `${pubUrl}/api/v1/drafts`,
       {
-        Cookie:     `substack.sid=${session}`,
-        Referer:    pubUrl,
+        Cookie: `substack.sid=${session}`,
+        Referer: pubUrl,
         'User-Agent': 'SZL-publish-script/1.0',
       },
       draftBody,
@@ -188,7 +195,7 @@ async function main() {
 
     if (result.status === 200 || result.status === 201) {
       const draft = result.body;
-      const id    = draft.id ?? draft.draft_id ?? '(unknown)';
+      const id = draft.id ?? draft.draft_id ?? '(unknown)';
       console.log(`     ✓ draft created  id=${id}`);
       console.log(`       ${pubUrl}/publish/post/${id}`);
     } else {

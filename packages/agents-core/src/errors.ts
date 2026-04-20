@@ -1,13 +1,13 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const RunErrorCategorySchema = z.enum([
-  "timeout",
-  "validation",
-  "provider",
-  "policy",
-  "approval_rejected",
-  "approval_timeout",
-  "unknown",
+  'timeout',
+  'validation',
+  'provider',
+  'policy',
+  'approval_rejected',
+  'approval_timeout',
+  'unknown',
 ]);
 
 export type RunErrorCategory = z.infer<typeof RunErrorCategorySchema>;
@@ -28,7 +28,7 @@ export class AgentRunError extends Error {
     cause?: unknown;
   }) {
     super(params.message, { cause: params.cause });
-    this.name = "AgentRunError";
+    this.name = 'AgentRunError';
     this.category = params.category;
     this.runId = params.runId;
     this.stepId = params.stepId;
@@ -52,18 +52,20 @@ export function categorizeError(err: unknown): RunErrorCategory {
   if (err instanceof AgentRunError) return err.category;
   if (err instanceof Error) {
     const msg = err.message.toLowerCase();
-    if (msg.includes("timeout") || msg.includes("timed out")) return "timeout";
-    if (msg.includes("zod") || msg.includes("validation") || msg.includes("parse")) return "validation";
-    if (msg.includes("policy") || msg.includes("block") || msg.includes("guardrail")) return "policy";
-    if (msg.includes("model") || msg.includes("provider") || msg.includes("llm")) return "provider";
+    if (msg.includes('timeout') || msg.includes('timed out')) return 'timeout';
+    if (msg.includes('zod') || msg.includes('validation') || msg.includes('parse'))
+      return 'validation';
+    if (msg.includes('policy') || msg.includes('block') || msg.includes('guardrail'))
+      return 'policy';
+    if (msg.includes('model') || msg.includes('provider') || msg.includes('llm')) return 'provider';
   }
-  return "unknown";
+  return 'unknown';
 }
 
 export const RETRYABLE_CATEGORIES: ReadonlySet<RunErrorCategory> = new Set<RunErrorCategory>([
-  "timeout",
-  "provider",
-  "unknown",
+  'timeout',
+  'provider',
+  'unknown',
 ]);
 
 export function isRetryable(category: RunErrorCategory): boolean {

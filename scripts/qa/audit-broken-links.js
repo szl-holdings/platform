@@ -8,32 +8,31 @@
  *   node scripts/qa/audit-broken-links.js
  */
 
-import { readFileSync, existsSync, readdirSync } from "fs";
-import { join, extname, relative, dirname as pathDirname, resolve } from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { existsSync, readdirSync, readFileSync } from 'fs';
+import { dirname, extname, join, dirname as pathDirname, relative, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, "../..");
+const ROOT = join(__dirname, '../..');
 
 const APP_CONFIGS = [
   {
-    name: "SZL Holdings",
-    srcDir: join(ROOT, "artifacts/szl-holdings/src"),
-    appFile: "App.tsx",
+    name: 'SZL Holdings',
+    srcDir: join(ROOT, 'artifacts/szl-holdings/src'),
+    appFile: 'App.tsx',
   },
   {
-    name: "Lyte Command Center",
-    srcDir: join(ROOT, "artifacts/lyte-command-center/src"),
-    appFile: "App.tsx",
+    name: 'Lyte Command Center',
+    srcDir: join(ROOT, 'artifacts/lyte-command-center/src'),
+    appFile: 'App.tsx',
   },
 ];
 
-const SKIP_DIRS = ["node_modules", ".git", "dist", "build", ".cache"];
-const SCAN_EXTENSIONS = new Set([".ts", ".tsx"]);
+const SKIP_DIRS = ['node_modules', '.git', 'dist', 'build', '.cache'];
+const SCAN_EXTENSIONS = new Set(['.ts', '.tsx']);
 
 // External links and anchors to ignore
-const ALLOWED_EXTERNAL = ["http://", "https://", "mailto:", "tel:", "#", "javascript:"];
+const ALLOWED_EXTERNAL = ['http://', 'https://', 'mailto:', 'tel:', '#', 'javascript:'];
 
 function walkDir(dir) {
   const files = [];
@@ -71,7 +70,7 @@ function extractImports(content, filePath) {
 }
 
 function resolveImportPath(importPath, fromFile, srcDir) {
-  if (importPath.startsWith("@/")) {
+  if (importPath.startsWith('@/')) {
     const rel = importPath.slice(2);
     return join(srcDir, rel);
   }
@@ -79,7 +78,7 @@ function resolveImportPath(importPath, fromFile, srcDir) {
 }
 
 function fileExists(basePath) {
-  const extensions = [".ts", ".tsx", ".js", ".jsx", "/index.ts", "/index.tsx", "/index.js"];
+  const extensions = ['.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx', '/index.js'];
   for (const ext of extensions) {
     if (existsSync(basePath + ext)) return true;
   }
@@ -95,7 +94,7 @@ function auditApp(config) {
   for (const file of files) {
     let content;
     try {
-      content = readFileSync(file, "utf8");
+      content = readFileSync(file, 'utf8');
     } catch {
       continue;
     }
@@ -104,7 +103,12 @@ function auditApp(config) {
     const imports = extractImports(content, file);
     for (const { path: importPath, lazy } of imports) {
       // Skip workspace imports
-      if (importPath.startsWith("@workspace/") || importPath.startsWith("wouter") || importPath.startsWith("react")) continue;
+      if (
+        importPath.startsWith('@workspace/') ||
+        importPath.startsWith('wouter') ||
+        importPath.startsWith('react')
+      )
+        continue;
 
       const resolved = resolveImportPath(importPath, file, srcDir);
       if (!fileExists(resolved)) {
@@ -113,8 +117,8 @@ function auditApp(config) {
           file: relative(ROOT, file),
           importPath,
           resolved: relative(ROOT, resolved),
-          type: lazy ? "lazy import" : "import",
-          severity: "error",
+          type: lazy ? 'lazy import' : 'import',
+          severity: 'error',
         });
       }
     }
@@ -124,8 +128,8 @@ function auditApp(config) {
 }
 
 function main() {
-  console.log("\nSZL Holdings — Broken Link & Import Audit");
-  console.log("Checking for broken imports and internal link references...\n");
+  console.log('\nSZL Holdings — Broken Link & Import Audit');
+  console.log('Checking for broken imports and internal link references...\n');
 
   const allFindings = [];
 
@@ -134,8 +138,8 @@ function main() {
     allFindings.push(...auditApp(config));
   }
 
-  const errors = allFindings.filter((f) => f.severity === "error");
-  const warnings = allFindings.filter((f) => f.severity === "warning");
+  const errors = allFindings.filter((f) => f.severity === 'error');
+  const warnings = allFindings.filter((f) => f.severity === 'warning');
 
   if (errors.length > 0) {
     console.log(`\nBROKEN IMPORTS (${errors.length}):`);
@@ -149,10 +153,10 @@ function main() {
   console.log(`\nSummary: ${errors.length} broken import(s), ${warnings.length} warning(s)`);
 
   if (errors.length > 0) {
-    console.error("\nFAIL — Broken imports found. Fix before building.");
+    console.error('\nFAIL — Broken imports found. Fix before building.');
     process.exit(1);
   } else {
-    console.log("\nPASS — No broken imports detected.");
+    console.log('\nPASS — No broken imports detected.');
     process.exit(0);
   }
 }

@@ -1,11 +1,15 @@
-import { Lock, ArrowLeft } from "lucide-react";
-import { useLocation } from "wouter";
-import { useCrumbs, popToPath } from "../lib/cognitive-nav";
+import { ArrowLeft, Lock } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { popToPath, useCrumbs } from '../lib/cognitive-nav';
 
 const DS = {
-  surface: "rgba(255,255,255,0.03)",
-  border: "rgba(255,255,255,0.07)",
-  text: { primary: "rgba(255,255,255,0.9)", secondary: "rgba(255,255,255,0.55)", muted: "rgba(255,255,255,0.4)" },
+  surface: 'rgba(255,255,255,0.03)',
+  border: 'rgba(255,255,255,0.07)',
+  text: {
+    primary: 'rgba(255,255,255,0.9)',
+    secondary: 'rgba(255,255,255,0.55)',
+    muted: 'rgba(255,255,255,0.4)',
+  },
 };
 
 export class HttpError extends Error {
@@ -13,20 +17,20 @@ export class HttpError extends Error {
   constructor(status: number, message: string) {
     super(message);
     this.status = status;
-    this.name = "HttpError";
+    this.name = 'HttpError';
   }
 }
 
 export function isAccessDenied(err: unknown): boolean {
-  if (!err || typeof err !== "object") return false;
+  if (!err || typeof err !== 'object') return false;
   const status = (err as { status?: unknown }).status;
   return status === 401 || status === 403;
 }
 
 export function AccessDeniedNotice({
   status,
-  accent = "#ef4444",
-  resourceLabel = "this view",
+  accent = '#ef4444',
+  resourceLabel = 'this view',
 }: {
   status: 401 | 403 | number;
   accent?: string;
@@ -41,11 +45,11 @@ export function AccessDeniedNotice({
       popToPath(previous.path);
       navigate(previous.path);
     } else {
-      navigate("/");
+      navigate('/');
     }
   };
 
-  const title = status === 401 ? "Sign-in required" : "Access denied";
+  const title = status === 401 ? 'Sign-in required' : 'Access denied';
   const detail =
     status === 401
       ? `You need to be signed in to view ${resourceLabel}.`
@@ -77,7 +81,7 @@ export function AccessDeniedNotice({
         style={{ background: `${accent}10`, color: accent, border: `1px solid ${accent}33` }}
       >
         <ArrowLeft className="w-3 h-3" />
-        {previous ? `Back to ${previous.label}` : "Back to home"}
+        {previous ? `Back to ${previous.label}` : 'Back to home'}
       </button>
     </div>
   );

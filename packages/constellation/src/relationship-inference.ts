@@ -7,13 +7,14 @@
  *  - Cross-domain co-occurrence: if two nodes share the same alias value
  *    across different domains, suggest a "similar-to" edge.
  */
-import type { GraphStore } from "./store.js";
-import type { ConstellationEdge } from "./schema.js";
+
+import type { ConstellationEdge } from './schema.js';
+import type { GraphStore } from './store.js';
 
 export interface InferredEdge {
   fromNodeId: string;
   toNodeId: string;
-  type: ConstellationEdge["type"];
+  type: ConstellationEdge['type'];
   confidence: number;
   reason: string;
 }
@@ -24,13 +25,11 @@ export interface InferredEdge {
  */
 export function inferTransitiveEdges(
   store: GraphStore,
-  edgeType: ConstellationEdge["type"],
+  edgeType: ConstellationEdge['type'],
   maxHops = 2,
 ): InferredEdge[] {
   const existing = new Set(
-    store
-      .listEdges({ type: edgeType })
-      .map((e) => `${e.fromNodeId}→${e.toNodeId}`),
+    store.listEdges({ type: edgeType }).map((e) => `${e.fromNodeId}→${e.toNodeId}`),
   );
 
   const results: InferredEdge[] = [];
@@ -92,7 +91,7 @@ export function inferCrossDomainSimilarity(store: GraphStore): InferredEdge[] {
   }
 
   const existingKeys = new Set(
-    store.listEdges({ type: "similar-to" }).map((e) => `${e.fromNodeId}→${e.toNodeId}`),
+    store.listEdges({ type: 'similar-to' }).map((e) => `${e.fromNodeId}→${e.toNodeId}`),
   );
 
   const results: InferredEdge[] = [];
@@ -108,7 +107,7 @@ export function inferCrossDomainSimilarity(store: GraphStore): InferredEdge[] {
         const nodeB = store.getNode(b);
         if (!nodeA || !nodeB) continue;
         if (nodeA.domain === nodeB.domain) continue;
-        const key = [a, b].sort().join("↔");
+        const key = [a, b].sort().join('↔');
         if (seen.has(key)) continue;
         seen.add(key);
         const fwd = `${a}→${b}`;
@@ -117,9 +116,9 @@ export function inferCrossDomainSimilarity(store: GraphStore): InferredEdge[] {
           results.push({
             fromNodeId: a,
             toNodeId: b,
-            type: "similar-to",
+            type: 'similar-to',
             confidence: 0.7,
-            reason: "cross-domain-alias-match",
+            reason: 'cross-domain-alias-match',
           });
         }
       }

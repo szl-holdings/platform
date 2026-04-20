@@ -10,9 +10,9 @@
  *   import { alloyRepository } from "@szl-holdings/db-repository/alloy";
  */
 
-export { AuthRepository, authRepository } from "./auth";
-export { AlloyRepository, alloyRepository } from "./alloy";
-export { AuditRepository, auditRepository, type AuditEntry } from "./audit";
-export { VesselsRepository, vesselsRepository } from "./vessels";
-export { TerraRepository, terraRepository } from "./terra";
-export { FirestormRepository, firestormRepository } from "./firestorm";
+export { AlloyRepository, alloyRepository } from './alloy';
+export { type AuditEntry, AuditRepository, auditRepository } from './audit';
+export { AuthRepository, authRepository } from './auth';
+export { FirestormRepository, firestormRepository } from './firestorm';
+export { TerraRepository, terraRepository } from './terra';
+export { VesselsRepository, vesselsRepository } from './vessels';

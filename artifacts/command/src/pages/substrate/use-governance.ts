@@ -8,14 +8,14 @@
  *   GET  /api/v1/runs/:id/ledger
  *   GET  /api/v1/runs?traceId=...
  */
-import { useState, useEffect, useCallback } from "react";
-import { apiUrl, fetchJson } from "../cognitive/shared";
+import { useCallback, useEffect, useState } from 'react';
+import { apiUrl, fetchJson } from '../cognitive/shared';
 import type {
-  ApprovalRequest,
   ApprovalDecision,
-  RunLedgerEntry,
+  ApprovalRequest,
   QualityGateResult,
-} from "./governance-types";
+  RunLedgerEntry,
+} from './governance-types';
 
 // ─── Governed approvals ───────────────────────────────────────────────────────
 
@@ -27,7 +27,7 @@ export interface UseGovernedApprovalsResult {
 }
 
 export function useGovernedApprovals(
-  status?: "pending" | "approved" | "denied" | "escalated" | "timed_out",
+  status?: 'pending' | 'approved' | 'denied' | 'escalated' | 'timed_out',
 ): UseGovernedApprovalsResult {
   const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,10 +36,10 @@ export function useGovernedApprovals(
   const fetch_ = useCallback(() => {
     setLoading(true);
     setError(null);
-    const url = apiUrl(`/v1/approvals${status ? `?status=${status}` : ""}`);
+    const url = apiUrl(`/v1/approvals${status ? `?status=${status}` : ''}`);
     fetchJson<ApprovalRequest[] | { data: ApprovalRequest[] }>(url)
       .then((res) => {
-        const items = Array.isArray(res) ? res : (res as { data: ApprovalRequest[] }).data ?? [];
+        const items = Array.isArray(res) ? res : ((res as { data: ApprovalRequest[] }).data ?? []);
         setApprovals(items);
       })
       .catch((err: Error) => setError(err.message))
@@ -56,7 +56,7 @@ export function useGovernedApprovals(
 }
 
 export interface DecideApprovalPayload {
-  verdict: "approve" | "deny" | "escalate";
+  verdict: 'approve' | 'deny' | 'escalate';
   actor: string;
   reason: string;
 }
@@ -73,7 +73,7 @@ export async function decideGovernedApproval(
 ): Promise<DecideApprovalResult> {
   const url = apiUrl(`/v1/approvals/${requestId}/decide`);
   return fetchJson<DecideApprovalResult>(url, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(payload),
   });
 }
@@ -124,7 +124,7 @@ export interface UseRunLedgerListResult {
 
 export function useRunLedgerList(opts?: {
   traceId?: string;
-  gateStatus?: RunLedgerEntry["gateStatus"];
+  gateStatus?: RunLedgerEntry['gateStatus'];
 }): UseRunLedgerListResult {
   const [entries, setEntries] = useState<RunLedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,12 +134,14 @@ export function useRunLedgerList(opts?: {
     setLoading(true);
     setError(null);
     const params = new URLSearchParams();
-    if (opts?.traceId) params.set("traceId", opts.traceId);
-    if (opts?.gateStatus) params.set("gateStatus", opts.gateStatus);
+    if (opts?.traceId) params.set('traceId', opts.traceId);
+    if (opts?.gateStatus) params.set('gateStatus', opts.gateStatus);
     const qs = params.toString();
-    fetchJson<RunLedgerEntry[] | { data: RunLedgerEntry[] }>(apiUrl(`/v1/runs${qs ? `?${qs}` : ""}`))
+    fetchJson<RunLedgerEntry[] | { data: RunLedgerEntry[] }>(
+      apiUrl(`/v1/runs${qs ? `?${qs}` : ''}`),
+    )
       .then((res) => {
-        const items = Array.isArray(res) ? res : (res as { data: RunLedgerEntry[] }).data ?? [];
+        const items = Array.isArray(res) ? res : ((res as { data: RunLedgerEntry[] }).data ?? []);
         setEntries(items);
       })
       .catch((err: Error) => setError(err.message))

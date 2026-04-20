@@ -6,14 +6,14 @@
  * or a verifier — declaratively, not via ad-hoc if-statements in agent code.
  */
 
-import type { ConfidenceBudget, AnyStage, PipelineRun } from "./types.js";
+import type { AnyStage, ConfidenceBudget, PipelineRun } from './types.js';
 
 export type RoutingDecision =
-  | { action: "accept"; reason: string }
-  | { action: "escalate-model"; reason: string; targetAdapterId: string }
-  | { action: "escalate-human"; reason: string; approvalRequired: true }
-  | { action: "verify"; reason: string; verifierAdapterId: string }
-  | { action: "fail"; reason: string };
+  | { action: 'accept'; reason: string }
+  | { action: 'escalate-model'; reason: string; targetAdapterId: string }
+  | { action: 'escalate-human'; reason: string; approvalRequired: true }
+  | { action: 'verify'; reason: string; verifierAdapterId: string }
+  | { action: 'fail'; reason: string };
 
 /**
  * Given a stage's emitted confidence score, return the routing decision
@@ -35,7 +35,7 @@ export function routeByBudget(
 ): RoutingDecision {
   if (confidence < budget.requireHumanBelow) {
     return {
-      action: "escalate-human",
+      action: 'escalate-human',
       reason:
         `Confidence ${(confidence * 100).toFixed(1)}% is below the human-review threshold ` +
         `${(budget.requireHumanBelow * 100).toFixed(1)}% for stage '${stage.id}'.`,
@@ -45,7 +45,7 @@ export function routeByBudget(
 
   if (confidence < budget.escalateAt) {
     return {
-      action: "escalate-model",
+      action: 'escalate-model',
       reason:
         `Confidence ${(confidence * 100).toFixed(1)}% is below the model-escalation threshold ` +
         `${(budget.escalateAt * 100).toFixed(1)}% for stage '${stage.id}'. ` +
@@ -55,7 +55,7 @@ export function routeByBudget(
   }
 
   return {
-    action: "accept",
+    action: 'accept',
     reason: `Confidence ${(confidence * 100).toFixed(1)}% meets budget threshold for stage '${stage.id}'.`,
   };
 }

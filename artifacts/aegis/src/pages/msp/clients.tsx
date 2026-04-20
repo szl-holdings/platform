@@ -1,50 +1,86 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus, CheckCircle, Activity } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-
-import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { clients as fallbackClients, type Client } from "@/data/seed-data";
-import { ExportButton } from "@szl-holdings/shared-ui/data-export";
-import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { ExportButton } from '@szl-holdings/shared-ui/data-export';
+import { Skeleton } from '@szl-holdings/shared-ui/ui/skeleton';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { motion } from 'framer-motion';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowUpDown,
+  Building2,
+  CheckCircle,
+  ChevronRight,
+  Filter,
+  Monitor,
+  Plus,
+  Search,
+  Ticket,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
+import { useState } from 'react';
+import { type Client, clients as fallbackClients } from '@/data/seed-data';
 
 interface ApiClient {
   id: number;
   name: string;
   industry?: string | null;
-  status: "active" | "inactive" | "at-risk" | "churned";
+  status: 'active' | 'inactive' | 'at-risk' | 'churned';
   healthScore?: number | null;
   mrr?: number | null;
   deviceCount?: number | null;
   openTickets?: number | null;
   criticalAlerts?: number | null;
-  contractStatus?: "active" | "expiring" | "expired" | "pending" | null;
+  contractStatus?: 'active' | 'expiring' | 'expired' | 'pending' | null;
   slaCompliance?: number | null;
   sites?: number | null;
 }
 
 function HealthBadge({ score }: { score: number }) {
-  const color = score >= 90 ? "text-emerald-400 bg-emerald-500/10" : score >= 75 ? "text-amber-400 bg-amber-500/10" : "text-red-400 bg-red-500/10";
+  const color =
+    score >= 90
+      ? 'text-emerald-400 bg-emerald-500/10'
+      : score >= 75
+        ? 'text-amber-400 bg-amber-500/10'
+        : 'text-red-400 bg-red-500/10';
   return (
-    <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold", color)}>
-      {score >= 90 ? <TrendingUp className="w-3 h-3" /> : score >= 75 ? null : <TrendingDown className="w-3 h-3" />}
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold',
+        color,
+      )}
+    >
+      {score >= 90 ? (
+        <TrendingUp className="w-3 h-3" />
+      ) : score >= 75 ? null : (
+        <TrendingDown className="w-3 h-3" />
+      )}
       {score}
     </span>
   );
 }
 
-type ContractStatus = "active" | "expiring" | "expired" | "pending";
+type ContractStatus = 'active' | 'expiring' | 'expired' | 'pending';
 
 function ContractBadge({ status }: { status: ContractStatus | null | undefined }) {
   const styles: Record<ContractStatus, string> = {
-    active: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    expiring: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-    expired: "text-red-400 bg-red-500/10 border-red-500/20",
-    pending: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    expiring: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    expired: 'text-red-400 bg-red-500/10 border-red-500/20',
+    pending: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
   };
-  const s = status ?? "pending";
-  return <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium border", styles[s as ContractStatus] ?? styles.pending)}>{s}</span>;
+  const s = status ?? 'pending';
+  return (
+    <span
+      className={cn(
+        'px-2 py-0.5 rounded-full text-xs font-medium border',
+        styles[s as ContractStatus] ?? styles.pending,
+      )}
+    >
+      {s}
+    </span>
+  );
 }
 
 function ApiClientRow({ client, index }: { client: ApiClient; index: number }) {
@@ -62,11 +98,15 @@ function ApiClientRow({ client, index }: { client: ApiClient; index: number }) {
           <Building2 className="w-5 h-5 text-primary" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{client.name}</p>
-          <p className="text-xs text-muted-foreground">{client.industry ?? "—"}</p>
+          <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+            {client.name}
+          </p>
+          <p className="text-xs text-muted-foreground">{client.industry ?? '—'}</p>
         </div>
       </div>
-      <div className="col-span-1 text-center"><HealthBadge score={health} /></div>
+      <div className="col-span-1 text-center">
+        <HealthBadge score={health} />
+      </div>
       <div className="col-span-1 text-center">
         <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
           <Monitor className="w-3.5 h-3.5" /> {client.deviceCount ?? 0}
@@ -86,17 +126,29 @@ function ApiClientRow({ client, index }: { client: ApiClient; index: number }) {
           <span className="text-xs text-muted-foreground/50">—</span>
         )}
       </div>
-      <div className="col-span-1 text-center"><ContractBadge status={client.contractStatus} /></div>
-      <div className="col-span-1 text-center text-sm font-semibold text-foreground">${(client.mrr ?? 0).toLocaleString()}</div>
+      <div className="col-span-1 text-center">
+        <ContractBadge status={client.contractStatus} />
+      </div>
+      <div className="col-span-1 text-center text-sm font-semibold text-foreground">
+        ${(client.mrr ?? 0).toLocaleString()}
+      </div>
       <div className="col-span-1 text-center">
         <div className="flex items-center justify-center gap-1">
           <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
-            <div className={cn("h-full rounded-full", sla >= 99 ? "bg-emerald-400" : sla >= 95 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${sla}%` }} />
+            <div
+              className={cn(
+                'h-full rounded-full',
+                sla >= 99 ? 'bg-emerald-400' : sla >= 95 ? 'bg-amber-400' : 'bg-red-400',
+              )}
+              style={{ width: `${sla}%` }}
+            />
           </div>
           <span className="text-xs text-muted-foreground">{sla}%</span>
         </div>
       </div>
-      <div className="col-span-1 text-center text-xs text-muted-foreground">{client.sites ?? 1}</div>
+      <div className="col-span-1 text-center text-xs text-muted-foreground">
+        {client.sites ?? 1}
+      </div>
       <div className="col-span-1 text-right">
         <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors ml-auto" />
       </div>
@@ -117,11 +169,15 @@ function FallbackClientRow({ client, index }: { client: Client; index: number })
           <Building2 className="w-5 h-5 text-primary" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{client.name}</p>
+          <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+            {client.name}
+          </p>
           <p className="text-xs text-muted-foreground">{client.industry}</p>
         </div>
       </div>
-      <div className="col-span-1 text-center"><HealthBadge score={client.healthScore} /></div>
+      <div className="col-span-1 text-center">
+        <HealthBadge score={client.healthScore} />
+      </div>
       <div className="col-span-1 text-center">
         <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
           <Monitor className="w-3.5 h-3.5" /> {client.deviceCount}
@@ -141,12 +197,26 @@ function FallbackClientRow({ client, index }: { client: Client; index: number })
           <span className="text-xs text-muted-foreground/50">—</span>
         )}
       </div>
-      <div className="col-span-1 text-center"><ContractBadge status={client.contractStatus} /></div>
-      <div className="col-span-1 text-center text-sm font-semibold text-foreground">${client.mrr.toLocaleString()}</div>
+      <div className="col-span-1 text-center">
+        <ContractBadge status={client.contractStatus} />
+      </div>
+      <div className="col-span-1 text-center text-sm font-semibold text-foreground">
+        ${client.mrr.toLocaleString()}
+      </div>
       <div className="col-span-1 text-center">
         <div className="flex items-center justify-center gap-1">
           <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
-            <div className={cn("h-full rounded-full", client.slaCompliance >= 99 ? "bg-emerald-400" : client.slaCompliance >= 95 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${client.slaCompliance}%` }} />
+            <div
+              className={cn(
+                'h-full rounded-full',
+                client.slaCompliance >= 99
+                  ? 'bg-emerald-400'
+                  : client.slaCompliance >= 95
+                    ? 'bg-amber-400'
+                    : 'bg-red-400',
+              )}
+              style={{ width: `${client.slaCompliance}%` }}
+            />
           </div>
           <span className="text-xs text-muted-foreground">{client.slaCompliance}%</span>
         </div>
@@ -160,13 +230,13 @@ function FallbackClientRow({ client, index }: { client: Client; index: number })
 }
 
 export default function ClientsPage() {
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"name" | "health" | "mrr">("health");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'health' | 'mrr'>('health');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   const { data, isLoading } = useStandardQuery<{ clients: ApiClient[] }>({
-    queryKey: ["msp-clients"],
-    queryFn: () => apiFetch<{ clients: ApiClient[] }>("/msp/clients?limit=100"),
+    queryKey: ['msp-clients'],
+    queryFn: () => apiFetch<{ clients: ApiClient[] }>('/msp/clients?limit=100'),
     staleTime: 60000,
     retry: 1,
   });
@@ -176,52 +246,71 @@ export default function ClientsPage() {
   const displayClients = useApi ? apiClients : fallbackClients;
 
   const filteredApi = apiClients
-    .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.industry ?? "").toLowerCase().includes(search.toLowerCase()))
-    .filter(c => filterStatus === "all" || c.contractStatus === filterStatus)
+    .filter(
+      (c) =>
+        !search ||
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        (c.industry ?? '').toLowerCase().includes(search.toLowerCase()),
+    )
+    .filter((c) => filterStatus === 'all' || c.contractStatus === filterStatus)
     .sort((a, b) => {
-      if (sortBy === "health") return (b.healthScore ?? 0) - (a.healthScore ?? 0);
-      if (sortBy === "mrr") return (b.mrr ?? 0) - (a.mrr ?? 0);
+      if (sortBy === 'health') return (b.healthScore ?? 0) - (a.healthScore ?? 0);
+      if (sortBy === 'mrr') return (b.mrr ?? 0) - (a.mrr ?? 0);
       return a.name.localeCompare(b.name);
     });
 
   const filteredFallback = fallbackClients
-    .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.industry.toLowerCase().includes(search.toLowerCase()))
-    .filter(c => filterStatus === "all" || c.contractStatus === filterStatus)
+    .filter(
+      (c) =>
+        !search ||
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.industry.toLowerCase().includes(search.toLowerCase()),
+    )
+    .filter((c) => filterStatus === 'all' || c.contractStatus === filterStatus)
     .sort((a, b) => {
-      if (sortBy === "health") return b.healthScore - a.healthScore;
-      if (sortBy === "mrr") return b.mrr - a.mrr;
+      if (sortBy === 'health') return b.healthScore - a.healthScore;
+      if (sortBy === 'mrr') return b.mrr - a.mrr;
       return a.name.localeCompare(b.name);
     });
 
   const totalDevices = displayClients.reduce((s, c) => s + (c.deviceCount ?? 0), 0);
   const totalTickets = displayClients.reduce((s, c) => s + (c.openTickets ?? 0), 0);
   const totalMRR = displayClients.reduce((s, c) => s + (c.mrr ?? 0), 0);
-  const avgHealth = displayClients.length > 0
-    ? Math.round(displayClients.reduce((s, c) => s + (c.healthScore ?? 0), 0) / displayClients.length)
-    : 0;
+  const avgHealth =
+    displayClients.length > 0
+      ? Math.round(
+          displayClients.reduce((s, c) => s + (c.healthScore ?? 0), 0) / displayClients.length,
+        )
+      : 0;
   const activeCount = useApi
-    ? apiClients.filter(c => c.status === "active").length
-    : fallbackClients.filter(c => c.contractStatus === "active").length;
+    ? apiClients.filter((c) => c.status === 'active').length
+    : fallbackClients.filter((c) => c.contractStatus === 'active').length;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Client Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">Client health, contract status, and endpoint coverage across managed accounts</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Client health, contract status, and endpoint coverage across managed accounts
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <ExportButton
-            data={(useApi ? apiClients : fallbackClients).map(c => ({
+            data={(useApi ? apiClients : fallbackClients).map((c) => ({
               Name: c.name,
-              Industry: c.industry ?? "",
-              "Contract Status": c.contractStatus ?? "",
-              "Health Score": c.healthScore ?? 0,
+              Industry: c.industry ?? '',
+              'Contract Status': c.contractStatus ?? '',
+              'Health Score': c.healthScore ?? 0,
               Devices: c.deviceCount ?? 0,
-              "Open Tickets": c.openTickets ?? 0,
-              "MRR ($)": c.mrr ?? 0,
+              'Open Tickets': c.openTickets ?? 0,
+              'MRR ($)': c.mrr ?? 0,
             }))}
-            options={{ filename: "msp-clients", title: "Client Management Report", accentColor: "#3b82f6" }}
+            options={{
+              filename: 'msp-clients',
+              title: 'Client Management Report',
+              accentColor: '#3b82f6',
+            }}
           />
           <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
             <Plus className="w-4 h-4" /> Add Client
@@ -231,17 +320,49 @@ export default function ClientsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Clients", value: displayClients.length.toString(), sub: `${activeCount} active`, color: "text-primary", icon: CheckCircle },
-          { label: "Avg Health Score", value: avgHealth.toString(), sub: avgHealth >= 85 ? "Good" : "Needs Attention", color: avgHealth >= 85 ? "text-emerald-400" : "text-amber-400", icon: Activity },
-          { label: "Total Devices", value: totalDevices.toLocaleString(), sub: `${displayClients.length} organizations`, color: "text-cyan-400", icon: Monitor },
-          { label: "Monthly Revenue", value: `$${(totalMRR / 1000).toFixed(1)}K`, sub: `${totalTickets} open tickets`, color: "text-violet-400", icon: Building2 },
+          {
+            label: 'Total Clients',
+            value: displayClients.length.toString(),
+            sub: `${activeCount} active`,
+            color: 'text-primary',
+            icon: CheckCircle,
+          },
+          {
+            label: 'Avg Health Score',
+            value: avgHealth.toString(),
+            sub: avgHealth >= 85 ? 'Good' : 'Needs Attention',
+            color: avgHealth >= 85 ? 'text-emerald-400' : 'text-amber-400',
+            icon: Activity,
+          },
+          {
+            label: 'Total Devices',
+            value: totalDevices.toLocaleString(),
+            sub: `${displayClients.length} organizations`,
+            color: 'text-cyan-400',
+            icon: Monitor,
+          },
+          {
+            label: 'Monthly Revenue',
+            value: `$${(totalMRR / 1000).toFixed(1)}K`,
+            sub: `${totalTickets} open tickets`,
+            color: 'text-violet-400',
+            icon: Building2,
+          },
         ].map((stat, i) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="glass-card rounded-xl p-5"
+          >
             <div className="flex items-center justify-between mb-1">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
-              <stat.icon className={cn("w-4 h-4", stat.color)} />
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                {stat.label}
+              </p>
+              <stat.icon className={cn('w-4 h-4', stat.color)} />
             </div>
-            <p className={cn("text-2xl font-display font-bold", stat.color)}>{stat.value}</p>
+            <p className={cn('text-2xl font-display font-bold', stat.color)}>{stat.value}</p>
             <p className="text-xs text-muted-foreground mt-1">{stat.sub}</p>
           </motion.div>
         ))}
@@ -251,21 +372,45 @@ export default function ClientsPage() {
         <div className="px-5 py-4 border-b border-border/40 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input type="text" placeholder="Search clients..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border/50 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+            <input
+              type="text"
+              placeholder="Search clients..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border/50 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+            />
           </div>
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
-            {["all", "active", "expiring", "expired", "pending"].map(s => (
-              <button key={s} onClick={() => setFilterStatus(s)} className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-colors", filterStatus === s ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50")}>
-                {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+            {['all', 'active', 'expiring', 'expired', 'pending'].map((s) => (
+              <button
+                key={s}
+                onClick={() => setFilterStatus(s)}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                  filterStatus === s
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                )}
+              >
+                {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
           <div className="flex items-center gap-2">
             <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
-            {(["health", "mrr", "name"] as const).map(s => (
-              <button key={s} onClick={() => setSortBy(s)} className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-colors", sortBy === s ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50")}>
-                {s === "mrr" ? "MRR" : s.charAt(0).toUpperCase() + s.slice(1)}
+            {(['health', 'mrr', 'name'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setSortBy(s)}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                  sortBy === s
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                )}
+              >
+                {s === 'mrr' ? 'MRR' : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
@@ -286,16 +431,24 @@ export default function ClientsPage() {
 
         {isLoading ? (
           <div className="p-4 space-y-2">
-            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-lg" />
+            ))}
           </div>
         ) : (
           <div>
             {useApi
-              ? filteredApi.map((client, i) => <ApiClientRow key={client.id} client={client} index={i} />)
-              : filteredFallback.map((client, i) => <FallbackClientRow key={client.id} client={client} index={i} />)
-            }
-            {((useApi && filteredApi.length === 0) || (!useApi && filteredFallback.length === 0)) && (
-              <div className="px-5 py-12 text-center text-muted-foreground">No clients match your search criteria</div>
+              ? filteredApi.map((client, i) => (
+                  <ApiClientRow key={client.id} client={client} index={i} />
+                ))
+              : filteredFallback.map((client, i) => (
+                  <FallbackClientRow key={client.id} client={client} index={i} />
+                ))}
+            {((useApi && filteredApi.length === 0) ||
+              (!useApi && filteredFallback.length === 0)) && (
+              <div className="px-5 py-12 text-center text-muted-foreground">
+                No clients match your search criteria
+              </div>
             )}
           </div>
         )}

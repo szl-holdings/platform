@@ -83,7 +83,9 @@ export interface VectorStore {
     tenantId: string;
     profileId?: string;
     metadataFilter?: Record<string, unknown>;
-  }): Promise<Array<{ chunkId: string; sourceId: string; score: number; metadata: Record<string, unknown> }>>;
+  }): Promise<
+    Array<{ chunkId: string; sourceId: string; score: number; metadata: Record<string, unknown> }>
+  >;
   delete(chunkId: string): Promise<boolean>;
   deleteBySource(sourceId: string, tenantId: string): Promise<number>;
   count(tenantId: string): Promise<number>;
@@ -97,7 +99,15 @@ export interface MetadataIndexStore {
     topK: number;
     tenantId: string;
     metadataFilter?: Record<string, unknown>;
-  }): Promise<Array<{ chunkId: string; sourceId: string; score: number; highlights: string[]; metadata: Record<string, unknown> }>>;
+  }): Promise<
+    Array<{
+      chunkId: string;
+      sourceId: string;
+      score: number;
+      highlights: string[];
+      metadata: Record<string, unknown>;
+    }>
+  >;
   delete(chunkId: string): Promise<boolean>;
   deleteBySource(sourceId: string, tenantId: string): Promise<number>;
   count(tenantId: string): Promise<number>;

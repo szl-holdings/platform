@@ -10,16 +10,16 @@
  */
 
 import {
+  type DecisionRecord,
   db,
   decisionRecordsTable,
-  outcomeGraphLearningJobsTable,
-  type DecisionRecord,
   type OutcomeGraphLearningJob,
-} from "@szl-holdings/db";
-import { and, eq, gte, sql } from "drizzle-orm";
+  outcomeGraphLearningJobsTable,
+} from '@szl-holdings/db';
+import { and, eq, gte, sql } from 'drizzle-orm';
 
 export interface CalibrationReport {
-  domain: DecisionRecord["domain"];
+  domain: DecisionRecord['domain'];
   totalDecisions: number;
   meanAbsError: number | null;
   rollbackRate: number;
@@ -89,7 +89,7 @@ export async function runLearningCycle(
     confidenceMultiplier = Math.max(0.5, Math.min(1.5, confidenceMultiplier));
 
     return {
-      domain: r.domain as DecisionRecord["domain"],
+      domain: r.domain as DecisionRecord['domain'],
       totalDecisions: total,
       meanAbsError,
       rollbackRate,
@@ -102,16 +102,16 @@ export async function runLearningCycle(
     .insert(outcomeGraphLearningJobsTable)
     .values({
       orgId: options.orgId ?? null,
-      jobType: "confidence_calibration",
-      status: "completed",
+      jobType: 'confidence_calibration',
+      status: 'completed',
       inputSampleSize: reports.reduce((acc, r) => acc + r.totalDecisions, 0),
       outputSummary: {
-        kind: "decision_fabric_calibration",
+        kind: 'decision_fabric_calibration',
         windowDays: options.windowDays ?? 30,
         reports,
       } as unknown as Record<string, unknown>,
       changesApplied: [],
-      triggeredBy: options.triggeredBy ?? "decision-fabric",
+      triggeredBy: options.triggeredBy ?? 'decision-fabric',
       startedAt: new Date(),
       completedAt: new Date(),
     })

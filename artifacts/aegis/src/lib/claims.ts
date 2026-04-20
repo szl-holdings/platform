@@ -14,27 +14,23 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import {
-  makeClaimResolver,
-  metricDisplay,
-  type ClaimValue,
-} from "@szl-holdings/domain-claims";
+import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/domain-claims';
 
 export type { ClaimValue };
 export { metricDisplay };
 
-const resolveClaim = makeClaimResolver("aegis/claims");
+const resolveClaim = makeClaimResolver('aegis/claims');
 
-export const AEGIS_SIMULATIONS = resolveClaim("aegis-simulations", "31,200+");
+export const AEGIS_SIMULATIONS = resolveClaim('aegis-simulations', '31,200+');
 export const AEGIS_MITRE_COVERAGE = resolveClaim(
-  "aegis-mitre-coverage",
-  "MITRE ATT&CK techniques covered"
+  'aegis-mitre-coverage',
+  'MITRE ATT&CK techniques covered',
 );
 export const AEGIS_MARKET_MARITIME = resolveClaim(
-  "market-maritime-size",
-  "$4.2B maritime intelligence market"
+  'market-maritime-size',
+  '$4.2B maritime intelligence market',
 );
 export const AEGIS_MARKET_GOVERNED_DECISION = resolveClaim(
-  "market-governed-decision",
-  "$50.1B governed decision infrastructure market by 2030"
+  'market-governed-decision',
+  '$50.1B governed decision infrastructure market by 2030',
 );

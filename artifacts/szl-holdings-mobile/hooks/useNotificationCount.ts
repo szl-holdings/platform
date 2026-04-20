@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { apiFetch, getApiBase, getCachedAuthToken } from "@/lib/apiClient";
+import { useEffect, useRef, useState } from 'react';
+import { apiFetch, getApiBase, getCachedAuthToken } from '@/lib/apiClient';
 
 interface NotificationCountResult {
   unreadCount: number;
@@ -16,10 +16,12 @@ export function useNotificationCount(): NotificationCountResult {
 
     async function fetchCount() {
       try {
-        const data = await apiFetch<{ data?: Array<{ isRead: boolean }> } | Array<{ isRead: boolean }>>(
-          "/api/notifications?limit=50"
-        );
-        const arr = Array.isArray(data) ? data : ((data as { data?: Array<{ isRead: boolean }> }).data ?? []);
+        const data = await apiFetch<
+          { data?: Array<{ isRead: boolean }> } | Array<{ isRead: boolean }>
+        >('/api/notifications?limit=50');
+        const arr = Array.isArray(data)
+          ? data
+          : ((data as { data?: Array<{ isRead: boolean }> }).data ?? []);
         const count = arr.filter((n) => !n.isRead).length;
         if (mounted) setUnreadCount(count);
       } catch {
@@ -37,13 +39,13 @@ export function useNotificationCount(): NotificationCountResult {
       if (deadRef.current) return;
       const base = getApiBase();
       if (!base) return;
-      const wsUrl = base.replace(/^https?/, (p) => (p === "https" ? "wss" : "ws")) + "/api/ws";
+      const wsUrl = base.replace(/^https?/, (p) => (p === 'https' ? 'wss' : 'ws')) + '/api/ws';
       const token = getCachedAuthToken();
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        const subMsg: Record<string, string> = { type: "subscribe", channel: "notifications" };
+        const subMsg: Record<string, string> = { type: 'subscribe', channel: 'notifications' };
         if (token) subMsg.token = token;
         ws.send(JSON.stringify(subMsg));
       };
@@ -51,7 +53,7 @@ export function useNotificationCount(): NotificationCountResult {
       ws.onmessage = (ev) => {
         try {
           const msg = JSON.parse(ev.data as string) as { type: string; channel?: string };
-          if (msg.type === "message" && msg.channel === "notifications") {
+          if (msg.type === 'message' && msg.channel === 'notifications') {
             void fetchCount();
           }
         } catch {

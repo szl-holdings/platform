@@ -1,38 +1,59 @@
-import { z } from "zod";
-import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
-import rateLimit from "express-rate-limit";
-import crypto from "crypto";
-import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
-import { authMiddleware, requireRole } from "../../middlewares/auth";
-import { logActivity } from "../../lib/activity-logger";
-import { dataverseConnectionActionSchema, tenantCreateSchema, tenantDeleteSchema, tenantStatusSchema, validateBody } from "../../lib/validation";
-import { db } from "@szl-holdings/db";
 import {
-  azureTenantsTable,
   auditLogsTable,
+  azureTenantsTable,
   dataverseConnectionsTable,
-  orgMembersTable,
-  usersTable,
-  scimTokensTable,
-  scimProvisionedUsersTable,
-  scimSyncLogsTable,
-  tenantBrandingTable,
+  db,
   type InsertAzureTenant,
   type InsertDataverseConnection,
   type InsertTenantBranding,
-} from "@szl-holdings/db";
-import { eq, desc, and, count, sql, inArray } from "drizzle-orm";
-import { services } from "@szl-holdings/services";
-import { encryptSecret, decryptSecret } from "../../lib/crypto";
-import { tenantRateLimit, updateProvisioningConfigSchema, createDataverseConnectionSchema, linkOrganizationSchema, buildAdminConsentUrl, buildMultiTenantLoginUrl, PBI_SETTINGS_KEY } from "./shared";
+  orgMembersTable,
+  scimProvisionedUsersTable,
+  scimSyncLogsTable,
+  scimTokensTable,
+  tenantBrandingTable,
+  usersTable,
+} from '@szl-holdings/db';
+import { services } from '@szl-holdings/services';
+import crypto from 'crypto';
+import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
+import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
+import { logActivity } from '../../lib/activity-logger';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendError,
+  sendForbidden,
+  sendNotFound,
+  sendSuccess,
+} from '../../lib/api-response';
+import { decryptSecret, encryptSecret } from '../../lib/crypto';
+import {
+  dataverseConnectionActionSchema,
+  tenantCreateSchema,
+  tenantDeleteSchema,
+  tenantStatusSchema,
+  validateBody,
+} from '../../lib/validation';
+import { authMiddleware, requireRole } from '../../middlewares/auth';
+import {
+  buildAdminConsentUrl,
+  buildMultiTenantLoginUrl,
+  createDataverseConnectionSchema,
+  linkOrganizationSchema,
+  PBI_SETTINGS_KEY,
+  tenantRateLimit,
+  updateProvisioningConfigSchema,
+} from './shared';
 
 const router: IRouter = Router();
 
 router.get(
-  "/admin/tenants",
+  '/admin/tenants',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   async (_req: Request, res: Response) => {
     try {
       const tenants = await db
@@ -40,7 +61,7 @@ router.get(
         .from(azureTenantsTable)
         .orderBy(desc(azureTenantsTable.createdAt));
 
-      const realTenants = tenants.filter(t => t.azureTenantId !== PBI_SETTINGS_KEY);
+      const realTenants = tenants.filter((t) => t.azureTenantId !== PBI_SETTINGS_KEY);
 
       const userCountRows = await db
         .select({
@@ -49,7 +70,7 @@ router.get(
         })
         .from(orgMembersTable)
         .groupBy(orgMembersTable.orgId);
-      const userCountByOrg = new Map(userCountRows.map(r => [r.orgId, Number(r.userCount)]));
+      const userCountByOrg = new Map(userCountRows.map((r) => [r.orgId, Number(r.userCount)]));
 
       sendSuccess(res, {
         count: realTenants.length,
@@ -68,20 +89,26 @@ router.get(
         })),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to list tenants");
+      handleRouteError(res, err, 'Failed to list tenants');
     }
   },
 );
 
 router.post(
-  "/admin/tenants",
+  '/admin/tenants',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   validateBody(tenantCreateSchema),
   async (req: Request, res: Response) => {
     try {
-      const { azureTenantId: rawAzureTenantId, displayName, domain, organizationId, config } = req.body;
+      const {
+        azureTenantId: rawAzureTenantId,
+        displayName,
+        domain,
+        organizationId,
+        config,
+      } = req.body;
 
       const azureTenantId = rawAzureTenantId.trim().toLowerCase();
 
@@ -92,7 +119,7 @@ router.post(
         .limit(1);
 
       if (existing.length > 0) {
-        sendError(res, "Tenant already provisioned", 409, "CONFLICT");
+        sendError(res, 'Tenant already provisioned', 409, 'CONFLICT');
         return;
       }
 
@@ -100,51 +127,59 @@ router.post(
         azureTenantId,
         displayName: displayName.trim(),
         domain: domain ? String(domain).trim() : null,
-        status: "pending",
-        adminConsentGranted: "pending",
+        status: 'pending',
+        adminConsentGranted: 'pending',
         organizationId: organizationId ? Number(organizationId) : null,
         config: config ?? {},
         provisionedByUserId: req.user?.id ? String(req.user.id) : null,
       };
 
-      const [created] = await db
-        .insert(azureTenantsTable)
-        .values(newTenant)
-        .returning();
+      const [created] = await db.insert(azureTenantsTable).values(newTenant).returning();
 
-      await logActivity(req, "create", "tenant", String(created.id), `Tenant provisioned: ${displayName} (${azureTenantId})`).catch(() => {});
+      await logActivity(
+        req,
+        'create',
+        'tenant',
+        String(created.id),
+        `Tenant provisioned: ${displayName} (${azureTenantId})`,
+      ).catch(() => {});
 
-      const origin = `${req.headers["x-forwarded-proto"] ?? "https"}://${req.headers["x-forwarded-host"] ?? req.headers.host}`;
+      const origin = `${req.headers['x-forwarded-proto'] ?? 'https'}://${req.headers['x-forwarded-host'] ?? req.headers.host}`;
       const redirectUri = `${origin}/api/azure-ad/callback`;
-      const adminConsentUrl = buildAdminConsentUrl(azureTenantId, process.env["AZURE_AD_CLIENT_ID"] ?? "", redirectUri);
+      const adminConsentUrl = buildAdminConsentUrl(
+        azureTenantId,
+        process.env['AZURE_AD_CLIENT_ID'] ?? '',
+        redirectUri,
+      );
 
       sendSuccess(res, {
-        message: "Tenant provisioned successfully. Share the admin consent URL with the customer's Azure AD administrator.",
+        message:
+          "Tenant provisioned successfully. Share the admin consent URL with the customer's Azure AD administrator.",
         tenant: created,
         adminConsentUrl,
         nextSteps: [
           "Share the adminConsentUrl with the customer's Azure AD global administrator.",
-          "The admin must visit the URL and grant consent for the SZL application in their tenant.",
+          'The admin must visit the URL and grant consent for the SZL application in their tenant.',
           "Once consent is granted, update the tenant status to 'active'.",
-          "Users from this tenant can then sign in via Azure AD SSO.",
+          'Users from this tenant can then sign in via Azure AD SSO.',
         ],
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to provision tenant");
+      handleRouteError(res, err, 'Failed to provision tenant');
     }
   },
 );
 
 router.get(
-  "/admin/tenants/:id",
+  '/admin/tenants/:id',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) {
-        sendBadRequest(res, "Invalid tenant ID");
+        sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
 
@@ -155,7 +190,7 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
@@ -165,9 +200,13 @@ router.get(
         .where(eq(dataverseConnectionsTable.azureTenantId, tenant.azureTenantId))
         .orderBy(desc(dataverseConnectionsTable.createdAt));
 
-      const origin = `${req.headers["x-forwarded-proto"] ?? "https"}://${req.headers["x-forwarded-host"] ?? req.headers.host}`;
+      const origin = `${req.headers['x-forwarded-proto'] ?? 'https'}://${req.headers['x-forwarded-host'] ?? req.headers.host}`;
       const redirectUri = `${origin}/api/azure-ad/callback`;
-      const adminConsentUrl = buildAdminConsentUrl(tenant.azureTenantId, process.env["AZURE_AD_CLIENT_ID"] ?? "", redirectUri);
+      const adminConsentUrl = buildAdminConsentUrl(
+        tenant.azureTenantId,
+        process.env['AZURE_AD_CLIENT_ID'] ?? '',
+        redirectUri,
+      );
       const loginUrl = buildMultiTenantLoginUrl(tenant.azureTenantId, redirectUri);
 
       sendSuccess(res, {
@@ -186,41 +225,44 @@ router.get(
         loginUrl,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to get tenant");
+      handleRouteError(res, err, 'Failed to get tenant');
     }
   },
 );
 
 router.patch(
-  "/admin/tenants/:id/status",
+  '/admin/tenants/:id/status',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   validateBody(tenantStatusSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) {
-        sendBadRequest(res, "Invalid tenant ID");
+        sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
 
       const { status, adminConsentGranted } = req.body ?? {};
       if (!status && !adminConsentGranted) {
-        sendBadRequest(res, "status or adminConsentGranted is required");
+        sendBadRequest(res, 'status or adminConsentGranted is required');
         return;
       }
 
-      const validStatuses = ["pending", "active", "suspended"];
-      const validConsentStatuses = ["pending", "granted", "revoked"];
+      const validStatuses = ['pending', 'active', 'suspended'];
+      const validConsentStatuses = ['pending', 'granted', 'revoked'];
 
       if (status && !validStatuses.includes(status)) {
-        sendBadRequest(res, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
+        sendBadRequest(res, `Invalid status. Must be one of: ${validStatuses.join(', ')}`);
         return;
       }
 
       if (adminConsentGranted && !validConsentStatuses.includes(adminConsentGranted)) {
-        sendBadRequest(res, `Invalid adminConsentGranted. Must be one of: ${validConsentStatuses.join(", ")}`);
+        sendBadRequest(
+          res,
+          `Invalid adminConsentGranted. Must be one of: ${validConsentStatuses.join(', ')}`,
+        );
         return;
       }
 
@@ -229,7 +271,7 @@ router.patch(
       };
       if (status) updates.status = status;
       if (adminConsentGranted) updates.adminConsentGranted = adminConsentGranted;
-      if (status === "active") updates.provisionedAt = new Date();
+      if (status === 'active') updates.provisionedAt = new Date();
 
       const [updated] = await db
         .update(azureTenantsTable)
@@ -238,36 +280,43 @@ router.patch(
         .returning();
 
       if (!updated) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
-      await logActivity(req, "update", "tenant", String(updated.id),
-        `Tenant status updated: ${updated.displayName} → status=${updated.status ?? "unchanged"}, consent=${updated.adminConsentGranted ?? "unchanged"}`
+      await logActivity(
+        req,
+        'update',
+        'tenant',
+        String(updated.id),
+        `Tenant status updated: ${updated.displayName} → status=${updated.status ?? 'unchanged'}, consent=${updated.adminConsentGranted ?? 'unchanged'}`,
       ).catch(() => {});
 
-      sendSuccess(res, { tenant: updated, message: "Tenant status updated" });
+      sendSuccess(res, { tenant: updated, message: 'Tenant status updated' });
     } catch (err) {
-      handleRouteError(res, err, "Failed to update tenant status");
+      handleRouteError(res, err, 'Failed to update tenant status');
     }
   },
 );
 
 router.patch(
-  "/admin/tenants/:id/provisioning-config",
+  '/admin/tenants/:id/provisioning-config',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   validateBody(updateProvisioningConfigSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
+      if (isNaN(id)) {
+        sendBadRequest(res, 'Invalid tenant ID');
+        return;
+      }
 
       const body = req.body ?? {};
       const provisioningConfig = {
         autoProvisionUsers: body.autoProvisionUsers ?? true,
-        defaultRole: body.defaultRole ?? "viewer",
+        defaultRole: body.defaultRole ?? 'viewer',
         syncGroupsEnabled: body.syncGroupsEnabled ?? false,
         scimEnabled: body.scimEnabled ?? false,
         sessionTimeoutHours: Number(body.sessionTimeoutHours ?? 8),
@@ -277,32 +326,44 @@ router.patch(
         .select({ config: azureTenantsTable.config })
         .from(azureTenantsTable)
         .where(eq(azureTenantsTable.id, id));
-      if (!existing) { sendNotFound(res, "Tenant"); return; }
+      if (!existing) {
+        sendNotFound(res, 'Tenant');
+        return;
+      }
 
-      const mergedConfig = { ...(existing.config as Record<string, unknown> ?? {}), provisioning: provisioningConfig };
+      const mergedConfig = {
+        ...((existing.config as Record<string, unknown>) ?? {}),
+        provisioning: provisioningConfig,
+      };
       const [updated] = await db
         .update(azureTenantsTable)
-        .set({ config: mergedConfig, status: "active", provisionedAt: new Date(), updatedAt: new Date() })
+        .set({
+          config: mergedConfig,
+          status: 'active',
+          provisionedAt: new Date(),
+          updatedAt: new Date(),
+        })
         .where(eq(azureTenantsTable.id, id))
         .returning();
 
-      sendSuccess(res, { tenant: updated, message: "Provisioning configuration saved" });
+      sendSuccess(res, { tenant: updated, message: 'Provisioning configuration saved' });
     } catch (err) {
-      handleRouteError(res, err, "Failed to save provisioning config");
+      handleRouteError(res, err, 'Failed to save provisioning config');
     }
   },
 );
 
 router.delete(
-  "/admin/tenants/:id", validateBody(tenantDeleteSchema),
+  '/admin/tenants/:id',
+  validateBody(tenantDeleteSchema),
   tenantRateLimit,
   authMiddleware(),
-  requireRole("super_admin"),
+  requireRole('super_admin'),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) {
-        sendBadRequest(res, "Invalid tenant ID");
+        sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
 
@@ -312,29 +373,35 @@ router.delete(
         .returning();
 
       if (!deleted) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
-      await logActivity(req, "delete", "tenant", String(id), `Tenant deleted: ${deleted.displayName} (${deleted.azureTenantId})`).catch(() => {});
+      await logActivity(
+        req,
+        'delete',
+        'tenant',
+        String(id),
+        `Tenant deleted: ${deleted.displayName} (${deleted.azureTenantId})`,
+      ).catch(() => {});
 
-      sendSuccess(res, { message: "Tenant deleted", deleted });
+      sendSuccess(res, { message: 'Tenant deleted', deleted });
     } catch (err) {
-      handleRouteError(res, err, "Failed to delete tenant");
+      handleRouteError(res, err, 'Failed to delete tenant');
     }
   },
 );
 
 router.get(
-  "/admin/tenants/:id/admin-consent-url",
+  '/admin/tenants/:id/admin-consent-url',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) {
-        sendBadRequest(res, "Invalid tenant ID");
+        sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
 
@@ -345,39 +412,43 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
-      const origin = `${req.headers["x-forwarded-proto"] ?? "https"}://${req.headers["x-forwarded-host"] ?? req.headers.host}`;
+      const origin = `${req.headers['x-forwarded-proto'] ?? 'https'}://${req.headers['x-forwarded-host'] ?? req.headers.host}`;
       const redirectUri = `${origin}/api/azure-ad/callback`;
-      const clientId = process.env["AZURE_AD_CLIENT_ID"] ?? "";
+      const clientId = process.env['AZURE_AD_CLIENT_ID'] ?? '';
 
       const adminConsentUrl = buildAdminConsentUrl(tenant.azureTenantId, clientId, redirectUri);
 
       sendSuccess(res, {
-        tenant: { id: tenant.id, azureTenantId: tenant.azureTenantId, displayName: tenant.displayName },
+        tenant: {
+          id: tenant.id,
+          azureTenantId: tenant.azureTenantId,
+          displayName: tenant.displayName,
+        },
         adminConsentUrl,
         clientId,
         instructions: `Share this URL with the Azure AD Global Administrator of '${tenant.displayName}'. They must visit this URL and click 'Accept' to grant the SZL platform access to their Azure AD tenant.`,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to generate admin consent URL");
+      handleRouteError(res, err, 'Failed to generate admin consent URL');
     }
   },
 );
 
 router.post(
-  "/admin/tenants/:id/dataverse/connections",
+  '/admin/tenants/:id/dataverse/connections',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   validateBody(createDataverseConnectionSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) {
-        sendBadRequest(res, "Invalid tenant ID");
+        sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
 
@@ -388,20 +459,20 @@ router.post(
         .limit(1);
 
       if (!tenant) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
       const body = req.body ?? {};
-      if (!body.orgUrl || typeof body.orgUrl !== "string") {
-        sendBadRequest(res, "orgUrl is required (e.g. https://yourorg.api.crm.dynamics.com)");
+      if (!body.orgUrl || typeof body.orgUrl !== 'string') {
+        sendBadRequest(res, 'orgUrl is required (e.g. https://yourorg.api.crm.dynamics.com)');
         return;
       }
 
-      const orgUrl = body.orgUrl.trim().replace(/\/$/, "");
-      const authMethod = body.authMethod ?? "client_credentials";
+      const orgUrl = body.orgUrl.trim().replace(/\/$/, '');
+      const authMethod = body.authMethod ?? 'client_credentials';
 
-      if (!["client_credentials", "delegated"].includes(authMethod)) {
+      if (!['client_credentials', 'delegated'].includes(authMethod)) {
         sendBadRequest(res, "authMethod must be 'client_credentials' or 'delegated'");
         return;
       }
@@ -413,9 +484,9 @@ router.post(
         authMethod,
         clientId: body.clientId ? String(body.clientId) : null,
         clientSecret: body.clientSecret ? encryptSecret(String(body.clientSecret)) : null,
-        status: "pending",
+        status: 'pending',
         syncConfig: body.syncConfig ?? {
-          entities: ["accounts", "contacts", "leads", "opportunities", "activities"],
+          entities: ['accounts', 'contacts', 'leads', 'opportunities', 'activities'],
           syncIntervalMinutes: 60,
         },
       };
@@ -439,17 +510,18 @@ router.post(
         await db
           .update(dataverseConnectionsTable)
           .set({
-            status: testResult.connected ? "active" : "error",
-            lastSyncStatus: testResult.connected ? "connection_test_passed" : "connection_test_failed",
-            lastSyncError: testResult.connected ? null : (testResult.error ?? "Unknown error"),
+            status: testResult.connected ? 'active' : 'error',
+            lastSyncStatus: testResult.connected
+              ? 'connection_test_passed'
+              : 'connection_test_failed',
+            lastSyncError: testResult.connected ? null : (testResult.error ?? 'Unknown error'),
             updatedAt: new Date(),
           })
           .where(eq(dataverseConnectionsTable.id, created.id));
-
       } catch {
         await db
           .update(dataverseConnectionsTable)
-          .set({ status: "error", lastSyncStatus: "connection_test_failed", updatedAt: new Date() })
+          .set({ status: 'error', lastSyncStatus: 'connection_test_failed', updatedAt: new Date() })
           .where(eq(dataverseConnectionsTable.id, created.id));
       }
 
@@ -461,8 +533,8 @@ router.post(
 
       sendSuccess(res, {
         message: testResult.connected
-          ? "Dataverse connection established and verified"
-          : "Dataverse connection created but connection test failed. Check credentials and org URL.",
+          ? 'Dataverse connection established and verified'
+          : 'Dataverse connection created but connection test failed. Check credentials and org URL.',
         connection: {
           id: finalConnection?.id,
           orgUrl: finalConnection?.orgUrl,
@@ -473,21 +545,21 @@ router.post(
         testResult,
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to create Dataverse connection");
+      handleRouteError(res, err, 'Failed to create Dataverse connection');
     }
   },
 );
 
 router.get(
-  "/admin/tenants/:id/dataverse/connections",
+  '/admin/tenants/:id/dataverse/connections',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) {
-        sendBadRequest(res, "Invalid tenant ID");
+        sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
 
@@ -498,7 +570,7 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
@@ -528,16 +600,16 @@ router.get(
         })),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to list Dataverse connections");
+      handleRouteError(res, err, 'Failed to list Dataverse connections');
     }
   },
 );
 
 router.post(
-  "/admin/tenants/:id/dataverse/connections/:connectionId/test",
+  '/admin/tenants/:id/dataverse/connections/:connectionId/test',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   validateBody(dataverseConnectionActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -545,7 +617,7 @@ router.post(
       const connectionId = parseInt(String(req.params.connectionId), 10);
 
       if (isNaN(tenantId) || isNaN(connectionId)) {
-        sendBadRequest(res, "Invalid ID parameters");
+        sendBadRequest(res, 'Invalid ID parameters');
         return;
       }
 
@@ -556,7 +628,7 @@ router.post(
         .limit(1);
 
       if (!tenant) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
@@ -572,7 +644,7 @@ router.post(
         .limit(1);
 
       if (!connection) {
-        sendNotFound(res, "Connection");
+        sendNotFound(res, 'Connection');
         return;
       }
 
@@ -587,9 +659,13 @@ router.post(
       await db
         .update(dataverseConnectionsTable)
         .set({
-          status: testResult.connected ? "active" : "error",
-          lastSyncStatus: testResult.connected ? "connection_test_passed" : "connection_test_failed",
-          lastSyncError: testResult.connected ? null : (testResult.error ?? "Connection test failed"),
+          status: testResult.connected ? 'active' : 'error',
+          lastSyncStatus: testResult.connected
+            ? 'connection_test_passed'
+            : 'connection_test_failed',
+          lastSyncError: testResult.connected
+            ? null
+            : (testResult.error ?? 'Connection test failed'),
           updatedAt: new Date(),
         })
         .where(eq(dataverseConnectionsTable.id, connectionId));
@@ -599,16 +675,16 @@ router.post(
         testedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to test Dataverse connection");
+      handleRouteError(res, err, 'Failed to test Dataverse connection');
     }
   },
 );
 
 router.post(
-  "/admin/tenants/:id/dataverse/connections/:connectionId/sync",
+  '/admin/tenants/:id/dataverse/connections/:connectionId/sync',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("admin"),
+  requireRole('admin'),
   validateBody(dataverseConnectionActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -616,7 +692,7 @@ router.post(
       const connectionId = parseInt(String(req.params.connectionId), 10);
 
       if (isNaN(tenantId) || isNaN(connectionId)) {
-        sendBadRequest(res, "Invalid ID parameters");
+        sendBadRequest(res, 'Invalid ID parameters');
         return;
       }
 
@@ -627,7 +703,7 @@ router.post(
         .limit(1);
 
       if (!tenant) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
@@ -643,7 +719,7 @@ router.post(
         .limit(1);
 
       if (!connection) {
-        sendNotFound(res, "Connection");
+        sendNotFound(res, 'Connection');
         return;
       }
 
@@ -663,9 +739,9 @@ router.post(
       await db
         .update(dataverseConnectionsTable)
         .set({
-          status: "active",
+          status: 'active',
           lastSyncAt: new Date(),
-          lastSyncStatus: "success",
+          lastSyncStatus: 'success',
           lastSyncError: null,
           entitySyncCounts: entityCounts,
           updatedAt: new Date(),
@@ -673,7 +749,7 @@ router.post(
         .where(eq(dataverseConnectionsTable.id, connectionId));
 
       sendSuccess(res, {
-        message: "Sync completed",
+        message: 'Sync completed',
         tenantId: tenant.azureTenantId,
         tenantName: tenant.displayName,
         orgUrl: connection.orgUrl,
@@ -682,23 +758,23 @@ router.post(
         syncedAt: new Date().toISOString(),
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to sync Dataverse connection");
+      handleRouteError(res, err, 'Failed to sync Dataverse connection');
     }
   },
 );
 
 router.get(
-  "/admin/tenants/:id/dataverse/connections/:connectionId/signals",
+  '/admin/tenants/:id/dataverse/connections/:connectionId/signals',
   tenantRateLimit,
   authMiddleware(),
-  requireRole("analyst"),
+  requireRole('analyst'),
   async (req: Request, res: Response) => {
     try {
       const tenantId = parseInt(String(req.params.id), 10);
       const connectionId = parseInt(String(req.params.connectionId), 10);
 
       if (isNaN(tenantId) || isNaN(connectionId)) {
-        sendBadRequest(res, "Invalid ID parameters");
+        sendBadRequest(res, 'Invalid ID parameters');
         return;
       }
 
@@ -709,7 +785,7 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        sendNotFound(res, "Tenant");
+        sendNotFound(res, 'Tenant');
         return;
       }
 
@@ -725,7 +801,7 @@ router.get(
         .limit(1);
 
       if (!connection) {
-        sendNotFound(res, "Connection");
+        sendNotFound(res, 'Connection');
         return;
       }
 
@@ -738,7 +814,7 @@ router.get(
       );
 
       sendSuccess(res, {
-        source: "Dynamics 365 Dataverse — CRM Signal Analysis",
+        source: 'Dynamics 365 Dataverse — CRM Signal Analysis',
         tenantId: tenant.azureTenantId,
         tenantName: tenant.displayName,
         orgUrl: connection.orgUrl,
@@ -746,19 +822,19 @@ router.get(
         signals,
         detectedAt: new Date().toISOString(),
         signalBreakdown: {
-          staleOpportunities: signals.filter(s => s.type === "stale_opportunity").length,
-          pipelineAnomalies: signals.filter(s => s.type === "pipeline_anomaly").length,
-          dealStageConflicts: signals.filter(s => s.type === "deal_stage_conflict").length,
-          highValueLeads: signals.filter(s => s.type === "high_value_lead").length,
-          overdueActivities: signals.filter(s => s.type === "overdue_activity").length,
+          staleOpportunities: signals.filter((s) => s.type === 'stale_opportunity').length,
+          pipelineAnomalies: signals.filter((s) => s.type === 'pipeline_anomaly').length,
+          dealStageConflicts: signals.filter((s) => s.type === 'deal_stage_conflict').length,
+          highValueLeads: signals.filter((s) => s.type === 'high_value_lead').length,
+          overdueActivities: signals.filter((s) => s.type === 'overdue_activity').length,
         },
       });
     } catch (err) {
-      handleRouteError(res, err, "Failed to generate Lyte signals from Dataverse");
+      handleRouteError(res, err, 'Failed to generate Lyte signals from Dataverse');
     }
   },
 );
 
-
-
-export function register(r: IRouter): void { r.use(router); }
+export function register(r: IRouter): void {
+  r.use(router);
+}

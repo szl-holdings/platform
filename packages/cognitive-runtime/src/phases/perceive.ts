@@ -1,7 +1,7 @@
-import { randomUUID } from "crypto";
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
-import type { MemoryEntry, MemoryStore } from "@workspace/memory-fabric";
-import type { PerceiveInput, PhaseResult } from "../types.js";
+import type { MemoryEntry, MemoryStore } from '@workspace/memory-fabric';
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import { randomUUID } from 'crypto';
+import type { PerceiveInput, PhaseResult } from '../types.js';
 
 export interface PerceivePhaseOptions {
   memoryStore?: MemoryStore;
@@ -17,7 +17,7 @@ export interface PerceiveOutput {
   storedMemoryIds: string[];
   summary: string;
   detectedEventTypes: string[];
-  priorityLevel: PerceiveInput["priority"];
+  priorityLevel: PerceiveInput['priority'];
   raw: PerceiveInput;
 }
 
@@ -33,7 +33,7 @@ export async function perceivePhase(
   const detectedEventTypes: string[] = [];
 
   for (const signal of input.rawSignals) {
-    const eventType = (signal["type"] ?? signal["eventType"] ?? "unknown") as string;
+    const eventType = (signal['type'] ?? signal['eventType'] ?? 'unknown') as string;
     if (!detectedEventTypes.includes(eventType)) {
       detectedEventTypes.push(eventType);
     }
@@ -41,15 +41,15 @@ export async function perceivePhase(
     const memId = `percept-signal-${randomUUID()}`;
     const entry: MemoryEntry = {
       id: memId,
-      tier: "working",
+      tier: 'working',
       key: `perception:${perceptionId}:${memId}`,
       value: signal,
       summary: `Signal of type '${eventType}' perceived at ${new Date().toISOString()}`,
       provenance: {
-        source: "cognitive-runtime:perceive",
+        source: 'cognitive-runtime:perceive',
         sourceId: opts.traceId,
         author: opts.agentId,
-        method: "agent",
+        method: 'agent',
         createdAt: new Date().toISOString(),
       },
       freshness: {
@@ -57,12 +57,12 @@ export async function perceivePhase(
         isStale: false,
       },
       confidence: 1,
-      retention: { policy: "session-scoped", pinned: false },
-      sensitivity: "internal",
+      retention: { policy: 'session-scoped', pinned: false },
+      sensitivity: 'internal',
       linkedEntities: [],
       linkedTraces: [opts.traceId],
       linkedActions: [],
-      tags: ["perception", eventType, input.sourceDomain ?? "unknown"].filter(Boolean),
+      tags: ['perception', eventType, input.sourceDomain ?? 'unknown'].filter(Boolean),
       scopeId: opts.scopeId,
       domain: input.sourceDomain ?? MEMORY_DOMAIN_UNKNOWN,
       metadata: { perceptionId, agentId: opts.agentId },
@@ -73,8 +73,8 @@ export async function perceivePhase(
 
   const summary =
     input.rawSignals.length === 0
-      ? "No signals perceived — clean slate for objective."
-      : `Perceived ${input.rawSignals.length} signal(s) across ${detectedEventTypes.length} event type(s): ${detectedEventTypes.join(", ")}.`;
+      ? 'No signals perceived — clean slate for objective.'
+      : `Perceived ${input.rawSignals.length} signal(s) across ${detectedEventTypes.length} event type(s): ${detectedEventTypes.join(', ')}.`;
 
   const output: PerceiveOutput = {
     perceptionId,
@@ -88,8 +88,8 @@ export async function perceivePhase(
 
   const completedAt = Date.now();
   return {
-    phase: "perceive",
-    status: "ok",
+    phase: 'perceive',
+    status: 'ok',
     startedAt,
     completedAt,
     durationMs: completedAt - startedAt,

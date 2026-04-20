@@ -12,38 +12,38 @@
  * `super_admin` supersedes all other roles on every access check.
  */
 export const PLATFORM_ROLES = [
-  "anonymous_visitor",
-  "pilot_customer_user",
-  "service_coordinator",
-  "maritime_ops_user",
-  "sales_delivery_user",
-  "ops_manager",
-  "executive_viewer",
-  "analyst",
-  "operator",
-  "ops",
-  "platform_admin",
-  "admin",
-  "founder_admin",
-  "super_admin",
+  'anonymous_visitor',
+  'pilot_customer_user',
+  'service_coordinator',
+  'maritime_ops_user',
+  'sales_delivery_user',
+  'ops_manager',
+  'executive_viewer',
+  'analyst',
+  'operator',
+  'ops',
+  'platform_admin',
+  'admin',
+  'founder_admin',
+  'super_admin',
 ] as const;
 
 export type PlatformRole = (typeof PLATFORM_ROLES)[number];
 
 /** Roles that may not perform write operations. */
 export const READ_ONLY_ROLES = new Set<PlatformRole>([
-  "anonymous_visitor",
-  "executive_viewer",
-  "pilot_customer_user",
+  'anonymous_visitor',
+  'executive_viewer',
+  'pilot_customer_user',
 ]);
 
 /** Roles that bypass org-scoping checks (platform-wide access). */
-export const ELEVATED_ROLES = new Set<PlatformRole>(["super_admin", "admin"]);
+export const ELEVATED_ROLES = new Set<PlatformRole>(['super_admin', 'admin']);
 
 // ── Org membership ──────────────────────────────────────────────────────────
 
 /** The four org-level membership tiers. */
-export type OrgRole = "owner" | "admin" | "member" | "viewer";
+export type OrgRole = 'owner' | 'admin' | 'member' | 'viewer';
 
 /** A single org membership attached to a session user. */
 export interface OrgMembership {
@@ -73,7 +73,7 @@ export interface AuthenticatedUser {
 // ── Session ─────────────────────────────────────────────────────────────────
 
 /** Opaque 64-char hex session token stored in the `sid` cookie. */
-export type SessionToken = string & { __brand: "SessionToken" };
+export type SessionToken = string & { __brand: 'SessionToken' };
 
 /** Session metadata returned from a validated token look-up. */
 export interface SessionRecord {
@@ -88,8 +88,8 @@ export interface SessionRecord {
 
 // ── CSRF ────────────────────────────────────────────────────────────────────
 
-export const CSRF_COOKIE_NAME = "csrf_token" as const;
-export const CSRF_HEADER_NAME = "x-csrf-token" as const;
+export const CSRF_COOKIE_NAME = 'csrf_token' as const;
+export const CSRF_HEADER_NAME = 'x-csrf-token' as const;
 
 /** Result of a CSRF token fetch from `GET /api/csrf-token`. */
 export interface CsrfTokenResponse {

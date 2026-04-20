@@ -1,18 +1,18 @@
-import { MarketingNav } from "../../components/marketing/MarketingNav";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { Input } from "@szl-holdings/shared-ui/ui/input";
-import { Label } from "@szl-holdings/shared-ui/ui/label";
-import { Link, useLocation } from "wouter";
-import { useState, useEffect, useRef } from "react";
-import { ArrowRight, ShieldCheck, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
+import { Button } from '@szl-holdings/shared-ui/ui/button';
+import { Input } from '@szl-holdings/shared-ui/ui/input';
+import { Label } from '@szl-holdings/shared-ui/ui/label';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, ArrowRight, CheckCircle2, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { Link, useLocation } from 'wouter';
+import { MarketingNav } from '../../components/marketing/MarketingNav';
 
 const SOCIAL_PROOF = [
-  { initials: "DL", name: "Director of Logistics", company: "Vantage Global" },
-  { initials: "JS", name: "CTO", company: "Ironclad Maritime" },
-  { initials: "AM", name: "VP Intelligence", company: "Kairos Defense" },
-  { initials: "PR", name: "Head of Operations", company: "Meridian Capital" },
+  { initials: 'DL', name: 'Director of Logistics', company: 'Vantage Global' },
+  { initials: 'JS', name: 'CTO', company: 'Ironclad Maritime' },
+  { initials: 'AM', name: 'VP Intelligence', company: 'Kairos Defense' },
+  { initials: 'PR', name: 'Head of Operations', company: 'Meridian Capital' },
 ];
 
 export function MarketingSignup() {
@@ -25,15 +25,15 @@ export function MarketingSignup() {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  const [capturedEmail, setCapturedEmail] = useState("");
+  const [capturedEmail, setCapturedEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("success") === "true") {
+    if (params.get('success') === 'true') {
       setStep(3);
     }
-    const saved = sessionStorage.getItem("mkt_signup_email");
+    const saved = sessionStorage.getItem('mkt_signup_email');
     if (saved) setCapturedEmail(saved);
   }, []);
 
@@ -42,67 +42,71 @@ export function MarketingSignup() {
     setError(null);
     setIsLoading(true);
 
-    const name = nameRef.current?.value?.trim() ?? "";
-    const email = emailRef.current?.value?.trim() ?? "";
-    const password = passwordRef.current?.value ?? "";
+    const name = nameRef.current?.value?.trim() ?? '';
+    const email = emailRef.current?.value?.trim() ?? '';
+    const password = passwordRef.current?.value ?? '';
 
     if (!name || !email || !password) {
-      setError("Name, email, and password are required.");
+      setError('Name, email, and password are required.');
       setIsLoading(false);
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError('Password must be at least 8 characters.');
       setIsLoading(false);
       return;
     }
 
     setCapturedEmail(email);
-    sessionStorage.setItem("mkt_signup_email", email);
+    sessionStorage.setItem('mkt_signup_email', email);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ displayName: name, email, password }),
       });
 
       if (res.status === 201) {
         setStep(2);
       } else if (res.status === 409) {
-        setError("An account with this email already exists. Please log in or use a different email.");
+        setError(
+          'An account with this email already exists. Please log in or use a different email.',
+        );
       } else {
         const body = await res.json().catch(() => ({}));
         setError(body.message ?? `Registration failed (${res.status}). Please try again.`);
       }
     } catch {
-      setError("Could not connect to the server. Please check your connection and try again.");
+      setError('Could not connect to the server. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePlanSelect = async (plan: "free" | "pro") => {
-    if (plan === "free") {
+  const handlePlanSelect = async (plan: 'free' | 'pro') => {
+    if (plan === 'free') {
       setStep(3);
       return;
     }
 
     setIsLoading(true);
     try {
-      const res = await fetch("/api/billing/command/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/billing/command/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          planId: "command-pro-monthly",
-          successUrl: window.location.origin + "/command/marketing/signup?success=true",
-          cancelUrl: window.location.origin + "/command/marketing/signup",
+          planId: 'command-pro-monthly',
+          successUrl: window.location.origin + '/command/marketing/signup?success=true',
+          cancelUrl: window.location.origin + '/command/marketing/signup',
           email: capturedEmail || undefined,
         }),
       });
 
       if (res.status === 503) {
-        toast.error("Pro subscriptions are not yet configured. Please select the Free plan to continue, or contact sales@szlholdings.com for Pro access.");
+        toast.error(
+          'Pro subscriptions are not yet configured. Please select the Free plan to continue, or contact sales@szlholdings.com for Pro access.',
+        );
         setIsLoading(false);
         return;
       }
@@ -113,21 +117,23 @@ export function MarketingSignup() {
 
       const data = await res.json();
       const url = data.url ?? data.data?.url;
-      if (url && url.startsWith("http")) {
+      if (url && url.startsWith('http')) {
         window.location.href = url;
         return;
       } else {
-        throw new Error("Checkout session did not return a payment URL.");
+        throw new Error('Checkout session did not return a payment URL.');
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unknown error";
-      toast.error(`Payment initialization failed: ${msg}. Please select the free plan or try again.`);
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(
+        `Payment initialization failed: ${msg}. Please select the free plan or try again.`,
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const stepLabels = ["Create Account", "Choose Plan", "Access Granted"];
+  const stepLabels = ['Create Account', 'Choose Plan', 'Access Granted'];
 
   return (
     <div className="min-h-[100dvh] bg-black text-white font-sans flex flex-col">
@@ -145,10 +151,10 @@ export function MarketingSignup() {
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
                         step > i + 1
-                          ? "bg-emerald-500 text-white"
+                          ? 'bg-emerald-500 text-white'
                           : step === i + 1
-                          ? "bg-blue-500 text-white"
-                          : "bg-white/10 text-white/30"
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white/10 text-white/30'
                       }`}
                       data-testid={`step-indicator-${i + 1}`}
                     >
@@ -156,7 +162,7 @@ export function MarketingSignup() {
                     </div>
                     <span
                       className={`text-[9px] mt-1 text-center leading-tight transition-colors ${
-                        step === i + 1 ? "text-white/60" : "text-white/25"
+                        step === i + 1 ? 'text-white/60' : 'text-white/25'
                       }`}
                     >
                       {label}
@@ -165,7 +171,7 @@ export function MarketingSignup() {
                   {i < stepLabels.length - 1 && (
                     <div
                       className={`h-px flex-1 mb-4 transition-colors ${
-                        step > i + 1 ? "bg-emerald-500/50" : "bg-white/10"
+                        step > i + 1 ? 'bg-emerald-500/50' : 'bg-white/10'
                       }`}
                     />
                   )}
@@ -184,7 +190,9 @@ export function MarketingSignup() {
                 >
                   <div className="mb-8">
                     <h1 className="text-3xl font-bold tracking-tight mb-2">Create Your Account</h1>
-                    <p className="text-white/50 text-sm">Join 200+ elite teams already on the platform.</p>
+                    <p className="text-white/50 text-sm">
+                      Join 200+ elite teams already on the platform.
+                    </p>
                   </div>
 
                   {error && (
@@ -196,7 +204,9 @@ export function MarketingSignup() {
 
                   <form onSubmit={handleRegistration} className="space-y-5">
                     <div className="space-y-1.5">
-                      <Label htmlFor="signup-name" className="text-white/70 text-sm">Full Name</Label>
+                      <Label htmlFor="signup-name" className="text-white/70 text-sm">
+                        Full Name
+                      </Label>
                       <Input
                         id="signup-name"
                         ref={nameRef}
@@ -207,7 +217,9 @@ export function MarketingSignup() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="signup-email" className="text-white/70 text-sm">Work Email</Label>
+                      <Label htmlFor="signup-email" className="text-white/70 text-sm">
+                        Work Email
+                      </Label>
                       <Input
                         id="signup-email"
                         ref={emailRef}
@@ -219,12 +231,14 @@ export function MarketingSignup() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="signup-password" className="text-white/70 text-sm">Password</Label>
+                      <Label htmlFor="signup-password" className="text-white/70 text-sm">
+                        Password
+                      </Label>
                       <div className="relative">
                         <Input
                           id="signup-password"
                           ref={passwordRef}
-                          type={showPassword ? "text" : "password"}
+                          type={showPassword ? 'text' : 'password'}
                           required
                           minLength={8}
                           className="bg-white/5 border-white/10 text-white h-11 pr-10"
@@ -235,9 +249,13 @@ export function MarketingSignup() {
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
-                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          {showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -247,13 +265,25 @@ export function MarketingSignup() {
                       className="w-full h-11 bg-white text-black hover:bg-white/90 font-medium mt-2"
                       data-testid="button-create-account"
                     >
-                      {isLoading ? "Creating account..." : <>Create Account <ArrowRight className="ml-2 w-4 h-4" /></>}
+                      {isLoading ? (
+                        'Creating account...'
+                      ) : (
+                        <>
+                          Create Account <ArrowRight className="ml-2 w-4 h-4" />
+                        </>
+                      )}
                     </Button>
                   </form>
                   <p className="text-center text-white/30 text-xs mt-5">
-                    By signing up you agree to our{" "}
-                    <span className="underline cursor-pointer hover:text-white/50 transition-colors">Terms of Service</span> and{" "}
-                    <span className="underline cursor-pointer hover:text-white/50 transition-colors">Privacy Policy</span>.
+                    By signing up you agree to our{' '}
+                    <span className="underline cursor-pointer hover:text-white/50 transition-colors">
+                      Terms of Service
+                    </span>{' '}
+                    and{' '}
+                    <span className="underline cursor-pointer hover:text-white/50 transition-colors">
+                      Privacy Policy
+                    </span>
+                    .
                   </p>
                 </motion.div>
               )}
@@ -268,9 +298,14 @@ export function MarketingSignup() {
                 >
                   <div className="mb-8">
                     <h2 className="text-2xl font-bold tracking-tight mb-2">Choose Your Plan</h2>
-                    <p className="text-white/50 text-sm">Start free, upgrade anytime. No credit card required for the free plan.</p>
+                    <p className="text-white/50 text-sm">
+                      Start free, upgrade anytime. No credit card required for the free plan.
+                    </p>
                     {capturedEmail && (
-                      <p className="text-xs text-white/35 mt-2">Account registered for <span className="text-white/55">{capturedEmail}</span></p>
+                      <p className="text-xs text-white/35 mt-2">
+                        Account registered for{' '}
+                        <span className="text-white/55">{capturedEmail}</span>
+                      </p>
                     )}
                   </div>
 
@@ -283,7 +318,7 @@ export function MarketingSignup() {
 
                   <div className="space-y-4">
                     <button
-                      onClick={() => handlePlanSelect("free")}
+                      onClick={() => handlePlanSelect('free')}
                       disabled={isLoading}
                       className="w-full p-5 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] cursor-pointer transition-all text-left group disabled:opacity-50"
                       data-testid="plan-select-free"
@@ -291,23 +326,31 @@ export function MarketingSignup() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-semibold mb-0.5">Initiate — Free</div>
-                          <div className="text-sm text-white/50">1 User, 1 Platform, community support</div>
+                          <div className="text-sm text-white/50">
+                            1 User, 1 Platform, community support
+                          </div>
                         </div>
                         <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white transition-colors" />
                       </div>
                     </button>
 
                     <button
-                      onClick={() => handlePlanSelect("pro")}
+                      onClick={() => handlePlanSelect('pro')}
                       disabled={isLoading}
                       className="w-full p-5 rounded-xl border border-blue-500/40 bg-blue-500/10 hover:bg-blue-500/15 cursor-pointer transition-all text-left group disabled:opacity-50"
                       data-testid="plan-select-pro"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-semibold text-blue-300 mb-0.5">Command Pro — $99/mo</div>
-                          <div className="text-sm text-blue-200/50">10 Users, All Platforms, 14-day free trial</div>
-                          <div className="text-xs text-blue-200/35 mt-1">→ Redirects to secure payment</div>
+                          <div className="font-semibold text-blue-300 mb-0.5">
+                            Command Pro — $99/mo
+                          </div>
+                          <div className="text-sm text-blue-200/50">
+                            10 Users, All Platforms, 14-day free trial
+                          </div>
+                          <div className="text-xs text-blue-200/35 mt-1">
+                            → Redirects to secure payment
+                          </div>
                         </div>
                         <ArrowRight className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-all" />
                       </div>
@@ -338,20 +381,24 @@ export function MarketingSignup() {
                     <ShieldCheck className="w-10 h-10 text-emerald-400" />
                   </div>
                   <h2 className="text-3xl font-bold tracking-tight mb-3">Access Granted</h2>
-                  <p className="text-white/55 text-sm mb-2">Welcome to the SZL Command Ecosystem.</p>
+                  <p className="text-white/55 text-sm mb-2">
+                    Welcome to the SZL Command Ecosystem.
+                  </p>
                   {capturedEmail && (
-                    <p className="text-white/35 text-xs mb-8">Account registered: {capturedEmail}</p>
+                    <p className="text-white/35 text-xs mb-8">
+                      Account registered: {capturedEmail}
+                    </p>
                   )}
                   {!capturedEmail && <div className="mb-8" />}
                   <Button
-                    onClick={() => setLocation("/marketing/onboarding")}
+                    onClick={() => setLocation('/marketing/onboarding')}
                     className="w-full h-11 bg-white text-black hover:bg-white/90 font-medium"
                     data-testid="button-enter-onboarding"
                   >
                     Configure Your Platforms
                   </Button>
                   <button
-                    onClick={() => setLocation("/")}
+                    onClick={() => setLocation('/')}
                     className="block w-full text-center text-white/30 text-xs mt-4 hover:text-white/50 transition-colors"
                     data-testid="button-skip-onboarding"
                   >
@@ -378,28 +425,30 @@ export function MarketingSignup() {
                   </div>
                 ))}
               </div>
-              <div className="text-sm text-white/60 font-medium">Join 200+ elite teams worldwide</div>
+              <div className="text-sm text-white/60 font-medium">
+                Join 200+ elite teams worldwide
+              </div>
             </div>
 
             {[
               {
                 quote:
-                  "SZL Command replaced 14 disparate tools with a single, unified intelligence layer. Our operational tempo increased by 40% in the first quarter.",
-                author: "Director of Operations",
-                org: "Global Logistics Firm",
+                  'SZL Command replaced 14 disparate tools with a single, unified intelligence layer. Our operational tempo increased by 40% in the first quarter.',
+                author: 'Director of Operations',
+                org: 'Global Logistics Firm',
               },
               {
                 quote:
                   "The cross-domain signal correlation is unlike anything we've seen. We caught a supply chain risk 6 weeks before it would have materialized.",
-                author: "VP of Intelligence",
-                org: "Kairos Defense",
+                author: 'VP of Intelligence',
+                org: 'Kairos Defense',
               },
             ].map((t, i) => (
               <div
                 key={i}
                 className="p-5 rounded-xl bg-white/[0.025] border border-white/[0.06] backdrop-blur-md"
               >
-                <div className="flex text-amber-400 mb-3 text-xs">{"★★★★★"}</div>
+                <div className="flex text-amber-400 mb-3 text-xs">{'★★★★★'}</div>
                 <p className="text-white/80 text-sm leading-relaxed mb-3 font-light">"{t.quote}"</p>
                 <div>
                   <div className="font-medium text-white text-sm">{t.author}</div>
@@ -409,7 +458,7 @@ export function MarketingSignup() {
             ))}
 
             <div className="flex items-center gap-3 flex-wrap">
-              {["SOC 2 Type II", "GDPR Compliant", "E2E Encrypted"].map((badge, i) => (
+              {['SOC 2 Type II', 'GDPR Compliant', 'E2E Encrypted'].map((badge, i) => (
                 <span
                   key={i}
                   className="text-xs text-white/40 border border-white/[0.08] rounded-full px-3 py-1"

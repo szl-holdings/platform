@@ -2,18 +2,19 @@
  * Report Store
  * Versioning, history, data snapshots, and audit trail for generated reports.
  */
-import { randomUUID } from "crypto";
-import { db } from "@szl-holdings/db";
+
 import {
-  reportTemplatesTable,
-  reportGenerationsTable,
+  db,
   reportApprovalsTable,
   reportDistributionsTable,
+  reportGenerationsTable,
   reportSchedulesTable,
-} from "@szl-holdings/db";
-import { eq, desc, and, sql, gte, lte, ilike, or, asc } from "drizzle-orm";
-import { logger } from "./logger";
-import type { ReportTemplate, ReportBlock, BrandTheme } from "./report-engine";
+  reportTemplatesTable,
+} from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, asc, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
+import { logger } from './logger';
+import type { BrandTheme, ReportBlock, ReportTemplate } from './report-engine';
 
 // ─── Template Operations ──────────────────────────────────────────────────────
 
@@ -33,7 +34,15 @@ export async function createReportTemplate(params: {
     templateId,
     name: params.name,
     description: params.description,
-    domain: params.domain as "szl_holdings" | "carlota_jo" | "aegis" | "terra" | "vessels" | "lyte" | "prism" | "general",
+    domain: params.domain as
+      | 'szl_holdings'
+      | 'carlota_jo'
+      | 'aegis'
+      | 'terra'
+      | 'vessels'
+      | 'lyte'
+      | 'prism'
+      | 'general',
     reportType: params.reportType,
     brandTheme: params.brandTheme,
     blocks: params.blocks as unknown[],
@@ -41,7 +50,7 @@ export async function createReportTemplate(params: {
     isSchedulable: params.isSchedulable ?? false,
     createdByUserId: params.createdByUserId ?? null,
   });
-  logger.info({ templateId, name: params.name, domain: params.domain }, "Report template created");
+  logger.info({ templateId, name: params.name, domain: params.domain }, 'Report template created');
   return templateId;
 }
 
@@ -54,15 +63,27 @@ export async function getReportTemplate(templateId: string) {
   return template ?? null;
 }
 
-export async function listReportTemplates(opts: {
-  domain?: string;
-  isActive?: boolean;
-  limit?: number;
-  offset?: number;
-} = {}) {
+export async function listReportTemplates(
+  opts: { domain?: string; isActive?: boolean; limit?: number; offset?: number } = {},
+) {
   const conditions = [];
-  if (opts.domain) conditions.push(eq(reportTemplatesTable.domain, opts.domain as "szl_holdings" | "carlota_jo" | "aegis" | "terra" | "vessels" | "lyte" | "prism" | "general"));
-  if (opts.isActive !== undefined) conditions.push(eq(reportTemplatesTable.isActive, opts.isActive));
+  if (opts.domain)
+    conditions.push(
+      eq(
+        reportTemplatesTable.domain,
+        opts.domain as
+          | 'szl_holdings'
+          | 'carlota_jo'
+          | 'aegis'
+          | 'terra'
+          | 'vessels'
+          | 'lyte'
+          | 'prism'
+          | 'general',
+      ),
+    );
+  if (opts.isActive !== undefined)
+    conditions.push(eq(reportTemplatesTable.isActive, opts.isActive));
 
   const rows = await db
     .select()
@@ -79,13 +100,16 @@ export async function listReportTemplates(opts: {
   return { templates: rows, total: count };
 }
 
-export async function updateReportTemplate(templateId: string, updates: {
-  name?: string;
-  description?: string;
-  blocks?: ReportBlock[];
-  isActive?: boolean;
-  isSchedulable?: boolean;
-}) {
+export async function updateReportTemplate(
+  templateId: string,
+  updates: {
+    name?: string;
+    description?: string;
+    blocks?: ReportBlock[];
+    isActive?: boolean;
+    isSchedulable?: boolean;
+  },
+) {
   await db
     .update(reportTemplatesTable)
     .set({
@@ -126,13 +150,13 @@ export async function createReportGeneration(params: CreateReportParams): Promis
     title: params.title,
     domain: params.domain,
     reportType: params.reportType,
-    status: "draft",
+    status: 'draft',
     brandTheme: params.brandTheme,
     dataSnapshot: params.dataSnapshot as unknown,
     snapshotAt: params.dataSnapshot ? new Date() : undefined,
     renderedBlocks: params.renderedBlocks as unknown,
     narrativeSections: params.narrativeSections as unknown,
-    pdfBuffer: params.pdfBuffer ? params.pdfBuffer.toString("base64") : null,
+    pdfBuffer: params.pdfBuffer ? params.pdfBuffer.toString('base64') : null,
     pdfSizeBytes: params.pdfBuffer ? params.pdfBuffer.length : null,
     generationDurationMs: params.generationDurationMs,
     scheduledRunId: params.scheduledRunId,
@@ -142,7 +166,10 @@ export async function createReportGeneration(params: CreateReportParams): Promis
     generatedByUserId: params.generatedByUserId ?? null,
   });
 
-  logger.info({ reportId, title: params.title, domain: params.domain }, "Report generation created");
+  logger.info(
+    { reportId, title: params.title, domain: params.domain },
+    'Report generation created',
+  );
   return reportId;
 }
 
@@ -158,22 +185,30 @@ export async function getReportGeneration(reportId: string) {
 export async function getReportPdfBuffer(reportId: string): Promise<Buffer | null> {
   const report = await getReportGeneration(reportId);
   if (!report?.pdfBuffer) return null;
-  return Buffer.from(report.pdfBuffer, "base64");
+  return Buffer.from(report.pdfBuffer, 'base64');
 }
 
-export async function listReportGenerations(opts: {
-  domain?: string;
-  status?: string;
-  templateId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-  search?: string;
-  limit?: number;
-  offset?: number;
-} = {}) {
+export async function listReportGenerations(
+  opts: {
+    domain?: string;
+    status?: string;
+    templateId?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+) {
   const conditions = [];
   if (opts.domain) conditions.push(eq(reportGenerationsTable.domain, opts.domain));
-  if (opts.status) conditions.push(eq(reportGenerationsTable.status, opts.status as "draft" | "review" | "approved" | "distributed" | "archived"));
+  if (opts.status)
+    conditions.push(
+      eq(
+        reportGenerationsTable.status,
+        opts.status as 'draft' | 'review' | 'approved' | 'distributed' | 'archived',
+      ),
+    );
   if (opts.templateId) conditions.push(eq(reportGenerationsTable.templateId, opts.templateId));
   if (opts.dateFrom) conditions.push(gte(reportGenerationsTable.generatedAt, opts.dateFrom));
   if (opts.dateTo) conditions.push(lte(reportGenerationsTable.generatedAt, opts.dateTo));
@@ -213,12 +248,16 @@ export async function listReportGenerations(opts: {
   return { reports: rows, total: count };
 }
 
-export async function updateReportStatus(reportId: string, status: "draft" | "review" | "approved" | "distributed" | "archived", notes?: string) {
+export async function updateReportStatus(
+  reportId: string,
+  status: 'draft' | 'review' | 'approved' | 'distributed' | 'archived',
+  notes?: string,
+) {
   await db
     .update(reportGenerationsTable)
     .set({ status, notes: notes ?? undefined, updatedAt: new Date() })
     .where(eq(reportGenerationsTable.reportId, reportId));
-  logger.info({ reportId, status }, "Report status updated");
+  logger.info({ reportId, status }, 'Report status updated');
 }
 
 export async function getReportVersionHistory(parentReportId: string) {
@@ -235,8 +274,8 @@ export async function getReportVersionHistory(parentReportId: string) {
     .where(
       or(
         eq(reportGenerationsTable.reportId, parentReportId),
-        eq(reportGenerationsTable.parentReportId, parentReportId)
-      )!
+        eq(reportGenerationsTable.parentReportId, parentReportId),
+      )!,
     )
     .orderBy(asc(reportGenerationsTable.versionNumber));
 }
@@ -254,18 +293,21 @@ export async function createApprovalRequest(params: {
     reportId: params.reportId,
     requestedByUserId: params.requestedByUserId ?? null,
     reviewerUserId: params.reviewerUserId ?? null,
-    status: "pending",
+    status: 'pending',
   });
-  await updateReportStatus(params.reportId, "review");
-  logger.info({ approvalId, reportId: params.reportId }, "Approval request created");
+  await updateReportStatus(params.reportId, 'review');
+  logger.info({ approvalId, reportId: params.reportId }, 'Approval request created');
   return approvalId;
 }
 
-export async function reviewApproval(approvalId: string, params: {
-  status: "approved" | "rejected" | "revision_requested";
-  comment?: string;
-  annotations?: unknown[];
-}) {
+export async function reviewApproval(
+  approvalId: string,
+  params: {
+    status: 'approved' | 'rejected' | 'revision_requested';
+    comment?: string;
+    annotations?: unknown[];
+  },
+) {
   await db
     .update(reportApprovalsTable)
     .set({
@@ -283,11 +325,11 @@ export async function reviewApproval(approvalId: string, params: {
     .limit(1);
 
   if (approval) {
-    const newStatus = params.status === "approved" ? "approved" : "draft";
-    await updateReportStatus(approval.reportId, newStatus as "draft" | "approved");
+    const newStatus = params.status === 'approved' ? 'approved' : 'draft';
+    await updateReportStatus(approval.reportId, newStatus as 'draft' | 'approved');
   }
 
-  logger.info({ approvalId, status: params.status }, "Approval reviewed");
+  logger.info({ approvalId, status: params.status }, 'Approval reviewed');
 }
 
 export async function getApprovalForReport(reportId: string) {
@@ -306,7 +348,7 @@ export async function createDistribution(params: {
   reportId: string;
   recipientEmail: string;
   recipientName?: string;
-  channel?: "email" | "webhook" | "dashboard" | "download";
+  channel?: 'email' | 'webhook' | 'dashboard' | 'download';
   distributedByUserId?: number | null;
 }) {
   const distributionId = randomUUID();
@@ -315,8 +357,8 @@ export async function createDistribution(params: {
     reportId: params.reportId,
     recipientEmail: params.recipientEmail,
     recipientName: params.recipientName,
-    channel: params.channel ?? "email",
-    status: "pending",
+    channel: params.channel ?? 'email',
+    status: 'pending',
     distributedByUserId: params.distributedByUserId ?? null,
   });
   return distributionId;
@@ -325,21 +367,21 @@ export async function createDistribution(params: {
 export async function markDistributionSent(distributionId: string) {
   await db
     .update(reportDistributionsTable)
-    .set({ status: "sent", sentAt: new Date() })
+    .set({ status: 'sent', sentAt: new Date() })
     .where(eq(reportDistributionsTable.distributionId, distributionId));
 }
 
 export async function markDistributionFailed(distributionId: string, errorMessage?: string) {
   await db
     .update(reportDistributionsTable)
-    .set({ status: "failed", errorMessage: errorMessage ?? null })
+    .set({ status: 'failed', errorMessage: errorMessage ?? null })
     .where(eq(reportDistributionsTable.distributionId, distributionId));
 }
 
 export async function markDistributionOpened(distributionId: string) {
   await db
     .update(reportDistributionsTable)
-    .set({ status: "opened", openedAt: new Date() })
+    .set({ status: 'opened', openedAt: new Date() })
     .where(eq(reportDistributionsTable.distributionId, distributionId));
 }
 
@@ -352,7 +394,7 @@ export async function listDistributionsForReport(reportId: string) {
 }
 
 export async function markReportDistributed(reportId: string) {
-  await updateReportStatus(reportId, "distributed");
+  await updateReportStatus(reportId, 'distributed');
 }
 
 // ─── Schedule Operations ──────────────────────────────────────────────────────
@@ -361,7 +403,7 @@ export async function createReportSchedule(params: {
   name: string;
   templateId: string;
   domain: string;
-  frequency: "daily" | "weekly" | "monthly" | "quarterly" | "on_demand";
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'on_demand';
   dataConfig?: Record<string, unknown>;
   recipientEmails?: string[];
   autoApprove?: boolean;
@@ -384,7 +426,10 @@ export async function createReportSchedule(params: {
     createdByUserId: params.createdByUserId ?? null,
   });
 
-  logger.info({ scheduleId, name: params.name, frequency: params.frequency }, "Report schedule created");
+  logger.info(
+    { scheduleId, name: params.name, frequency: params.frequency },
+    'Report schedule created',
+  );
   return scheduleId;
 }
 
@@ -407,7 +452,8 @@ export async function getReportScheduleById(scheduleId: string) {
 export async function listReportSchedules(opts: { domain?: string; isActive?: boolean } = {}) {
   const conditions = [];
   if (opts.domain) conditions.push(eq(reportSchedulesTable.domain, opts.domain));
-  if (opts.isActive !== undefined) conditions.push(eq(reportSchedulesTable.isActive, opts.isActive));
+  if (opts.isActive !== undefined)
+    conditions.push(eq(reportSchedulesTable.isActive, opts.isActive));
 
   return db
     .select()
@@ -416,20 +462,15 @@ export async function listReportSchedules(opts: { domain?: string; isActive?: bo
     .orderBy(desc(reportSchedulesTable.createdAt));
 }
 
-export async function getSchedulesDue(): Promise<typeof reportSchedulesTable.$inferSelect[]> {
+export async function getSchedulesDue(): Promise<(typeof reportSchedulesTable.$inferSelect)[]> {
   const now = new Date();
   return db
     .select()
     .from(reportSchedulesTable)
-    .where(
-      and(
-        eq(reportSchedulesTable.isActive, true),
-        lte(reportSchedulesTable.nextRunAt, now)
-      )
-    );
+    .where(and(eq(reportSchedulesTable.isActive, true), lte(reportSchedulesTable.nextRunAt, now)));
 }
 
-export async function markScheduleRun(scheduleId: string, status: "completed" | "failed") {
+export async function markScheduleRun(scheduleId: string, status: 'completed' | 'failed') {
   const [schedule] = await db
     .select()
     .from(reportSchedulesTable)
@@ -438,7 +479,9 @@ export async function markScheduleRun(scheduleId: string, status: "completed" | 
 
   if (!schedule) return;
 
-  const nextRunAt = computeNextRunAt(schedule.frequency as "daily" | "weekly" | "monthly" | "quarterly" | "on_demand");
+  const nextRunAt = computeNextRunAt(
+    schedule.frequency as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'on_demand',
+  );
 
   await db
     .update(reportSchedulesTable)
@@ -447,28 +490,32 @@ export async function markScheduleRun(scheduleId: string, status: "completed" | 
       lastStatus: status,
       nextRunAt,
       runCount: (schedule.runCount || 0) + 1,
-      failCount: status === "failed" ? (schedule.failCount || 0) + 1 : schedule.failCount,
+      failCount: status === 'failed' ? (schedule.failCount || 0) + 1 : schedule.failCount,
       updatedAt: new Date(),
     })
     .where(eq(reportSchedulesTable.scheduleId, scheduleId));
 }
 
-function computeNextRunAt(frequency: "daily" | "weekly" | "monthly" | "quarterly" | "on_demand"): Date {
+function computeNextRunAt(
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'on_demand',
+): Date {
   const now = new Date();
   switch (frequency) {
-    case "daily": return new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    case "weekly": return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    case "monthly": {
+    case 'daily':
+      return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    case 'weekly':
+      return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    case 'monthly': {
       const next = new Date(now);
       next.setMonth(next.getMonth() + 1);
       return next;
     }
-    case "quarterly": {
+    case 'quarterly': {
       const next = new Date(now);
       next.setMonth(next.getMonth() + 3);
       return next;
     }
-    case "on_demand":
+    case 'on_demand':
     default:
       return new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   }
@@ -477,19 +524,22 @@ function computeNextRunAt(frequency: "daily" | "weekly" | "monthly" | "quarterly
 // ─── Audit & Analytics ────────────────────────────────────────────────────────
 
 export async function getReportStats() {
-  const [stats] = await db.select({
-    total: sql<number>`count(*)::int`,
-    drafts: sql<number>`count(*) filter (where status = 'draft')::int`,
-    reviews: sql<number>`count(*) filter (where status = 'review')::int`,
-    approved: sql<number>`count(*) filter (where status = 'approved')::int`,
-    distributed: sql<number>`count(*) filter (where status = 'distributed')::int`,
-    archived: sql<number>`count(*) filter (where status = 'archived')::int`,
-  }).from(reportGenerationsTable);
+  const [stats] = await db
+    .select({
+      total: sql<number>`count(*)::int`,
+      drafts: sql<number>`count(*) filter (where status = 'draft')::int`,
+      reviews: sql<number>`count(*) filter (where status = 'review')::int`,
+      approved: sql<number>`count(*) filter (where status = 'approved')::int`,
+      distributed: sql<number>`count(*) filter (where status = 'distributed')::int`,
+      archived: sql<number>`count(*) filter (where status = 'archived')::int`,
+    })
+    .from(reportGenerationsTable);
 
-  const domainStats = await db.select({
-    domain: reportGenerationsTable.domain,
-    count: sql<number>`count(*)::int`,
-  })
+  const domainStats = await db
+    .select({
+      domain: reportGenerationsTable.domain,
+      count: sql<number>`count(*)::int`,
+    })
     .from(reportGenerationsTable)
     .groupBy(reportGenerationsTable.domain)
     .orderBy(desc(sql`count(*)`));

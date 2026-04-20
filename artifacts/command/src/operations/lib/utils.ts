@@ -1,1 +1,1 @@
-export { cn } from "@szl-holdings/shared-ui/utils";
+export { cn } from '@szl-holdings/shared-ui/utils';

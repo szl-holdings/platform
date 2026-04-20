@@ -22,28 +22,30 @@
  * and the real `tenantScope({ required: true })` middleware.
  */
 
-import { describe, it, expect, vi } from "vitest";
-import express from "express";
-import type { Request, Response, NextFunction } from "express";
-import request from "supertest";
+import type { NextFunction, Request, Response } from 'express';
+import express from 'express';
+import request from 'supertest';
+import { describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Mocks — hoisted before any route import
 // ---------------------------------------------------------------------------
 
-vi.mock("@szl-holdings/db", () => {
+vi.mock('@szl-holdings/db', () => {
   const makeChain = (): unknown => {
-    const target: unknown = function () { return makeChain(); };
+    const target: unknown = () => makeChain();
     return new Proxy(target as object, {
       get(_t, prop) {
-        if (prop === "then") {
+        if (prop === 'then') {
           return (resolve: (v: unknown[]) => void, reject?: (e: unknown) => void) =>
             Promise.resolve([]).then(resolve, reject);
         }
         if (prop === Symbol.toPrimitive) return undefined;
         return () => makeChain();
       },
-      apply() { return makeChain(); },
+      apply() {
+        return makeChain();
+      },
     });
   };
   const db = {
@@ -52,26 +54,29 @@ vi.mock("@szl-holdings/db", () => {
     update: () => makeChain(),
     delete: () => makeChain(),
   };
-  return new Proxy({ db }, {
-    get(target, prop) {
-      if (prop in target) return (target as Record<string | symbol, unknown>)[prop];
-      // Auto-stub any imported table/symbol the routes reference.
-      return {};
+  return new Proxy(
+    { db },
+    {
+      get(target, prop) {
+        if (prop in target) return (target as Record<string | symbol, unknown>)[prop];
+        // Auto-stub any imported table/symbol the routes reference.
+        return {};
+      },
     },
-  });
+  );
 });
 
 const mockUser = {
   id: 7,
-  displayName: "Cognitive Test User",
-  email: "cog-test@example.com",
-  roles: ["admin"],
-  orgs: [{ orgId: 1, orgSlug: "test-org", orgName: "Test Org", role: "admin" }],
+  displayName: 'Cognitive Test User',
+  email: 'cog-test@example.com',
+  roles: ['admin'],
+  orgs: [{ orgId: 1, orgSlug: 'test-org', orgName: 'Test Org', role: 'admin' }],
 };
 
-vi.mock("../middlewares/auth.js", () => ({
+vi.mock('../middlewares/auth.js', () => ({
   authMiddleware: () => (req: Request, _res: Response, next: NextFunction) => {
-    if (req.headers["x-test-auth"] === "yes") {
+    if (req.headers['x-test-auth'] === 'yes') {
       (req as Request & { user: typeof mockUser }).user = mockUser;
     }
     next();
@@ -86,14 +91,14 @@ vi.mock("../middlewares/auth.js", () => ({
 // Build app — mount tenantScope (real) + cognitive router behind it
 // ---------------------------------------------------------------------------
 
-const { tenantScope } = await import("../middlewares/tenant-scope.js");
-const { default: cognitiveRouter } = await import("../routes/vessels-cognitive.js");
+const { tenantScope } = await import('../middlewares/tenant-scope.js');
+const { default: cognitiveRouter } = await import('../routes/vessels-cognitive.js');
 
 // A lightweight auth simulator at the app boundary that reads the same
 // `x-test-auth` header used by the mocked authMiddleware. tenantScope
 // inspects `req.user` and short-circuits with 401 when absent.
 const authSimulator = (req: Request, _res: Response, next: NextFunction) => {
-  if (req.headers["x-test-auth"] === "yes") {
+  if (req.headers['x-test-auth'] === 'yes') {
     (req as Request & { user: typeof mockUser }).user = mockUser;
   }
   next();
@@ -101,12 +106,10 @@ const authSimulator = (req: Request, _res: Response, next: NextFunction) => {
 
 const app = express();
 app.use(express.json());
-app.use("/api", authSimulator, tenantScope({ required: true }), cognitiveRouter);
-app.use(
-  (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    res.status(500).json({ error: err.message });
-  },
-);
+app.use('/api', authSimulator, tenantScope({ required: true }), cognitiveRouter);
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  res.status(500).json({ error: err.message });
+});
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -124,28 +127,28 @@ function expectProvenance(prov: unknown): void {
   expect(prov).toBeDefined();
   const p = prov as ProvenanceShape;
   expect(p.verifierApproved).toBe(true);
-  expect(typeof p.attestation).toBe("string");
-  expect(p.attestation).toContain("NEXUS-VERIFIER");
+  expect(typeof p.attestation).toBe('string');
+  expect(p.attestation).toContain('NEXUS-VERIFIER');
   expect(p.freshness).toBeDefined();
-  expect(typeof p.freshness.fetchedAt).toBe("string");
+  expect(typeof p.freshness.fetchedAt).toBe('string');
   const t = Date.parse(p.freshness.fetchedAt);
   expect(Number.isNaN(t)).toBe(false);
   expect(new Date(t).toISOString()).toBe(p.freshness.fetchedAt);
 }
 
 const COGNITIVE_PATHS: Array<{ name: string; path: string }> = [
-  { name: "owner-graph", path: "/api/vessels/cognitive/owner-graph" },
-  { name: "route-anomalies", path: "/api/vessels/cognitive/route-anomalies" },
-  { name: "sanctions-chain", path: "/api/vessels/cognitive/sanctions-chain/9234567" },
-  { name: "counterparty-risk", path: "/api/vessels/cognitive/counterparty-risk" },
-  { name: "voyage-twin", path: "/api/vessels/cognitive/voyage-twin/VOY-2026-001" },
+  { name: 'owner-graph', path: '/api/vessels/cognitive/owner-graph' },
+  { name: 'route-anomalies', path: '/api/vessels/cognitive/route-anomalies' },
+  { name: 'sanctions-chain', path: '/api/vessels/cognitive/sanctions-chain/9234567' },
+  { name: 'counterparty-risk', path: '/api/vessels/cognitive/counterparty-risk' },
+  { name: 'voyage-twin', path: '/api/vessels/cognitive/voyage-twin/VOY-2026-001' },
 ];
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("Vessels cognitive endpoints — unauthenticated requests return 401", () => {
+describe('Vessels cognitive endpoints — unauthenticated requests return 401', () => {
   for (const { name, path } of COGNITIVE_PATHS) {
     it(`${name}: returns 401 without auth`, async () => {
       const res = await request(app).get(path);
@@ -154,11 +157,11 @@ describe("Vessels cognitive endpoints — unauthenticated requests return 401", 
   }
 });
 
-describe("GET /vessels/cognitive/owner-graph — happy path", () => {
-  it("returns 200 with graph + provenance", async () => {
+describe('GET /vessels/cognitive/owner-graph — happy path', () => {
+  it('returns 200 with graph + provenance', async () => {
     const res = await request(app)
-      .get("/api/vessels/cognitive/owner-graph")
-      .set("x-test-auth", "yes");
+      .get('/api/vessels/cognitive/owner-graph')
+      .set('x-test-auth', 'yes');
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
     expect(body.graph).toBeDefined();
@@ -172,11 +175,11 @@ describe("GET /vessels/cognitive/owner-graph — happy path", () => {
   });
 });
 
-describe("GET /vessels/cognitive/route-anomalies — happy path", () => {
-  it("returns 200 with alerts + provenance", async () => {
+describe('GET /vessels/cognitive/route-anomalies — happy path', () => {
+  it('returns 200 with alerts + provenance', async () => {
     const res = await request(app)
-      .get("/api/vessels/cognitive/route-anomalies")
-      .set("x-test-auth", "yes");
+      .get('/api/vessels/cognitive/route-anomalies')
+      .set('x-test-auth', 'yes');
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
     expect(Array.isArray(body.alerts)).toBe(true);
@@ -186,59 +189,59 @@ describe("GET /vessels/cognitive/route-anomalies — happy path", () => {
   });
 });
 
-describe("GET /vessels/cognitive/sanctions-chain/:vesselImo — happy path", () => {
-  it("returns 200 with chain + analysis + provenance for a known IMO", async () => {
+describe('GET /vessels/cognitive/sanctions-chain/:vesselImo — happy path', () => {
+  it('returns 200 with chain + analysis + provenance for a known IMO', async () => {
     const res = await request(app)
-      .get("/api/vessels/cognitive/sanctions-chain/9234567")
-      .set("x-test-auth", "yes");
+      .get('/api/vessels/cognitive/sanctions-chain/9234567')
+      .set('x-test-auth', 'yes');
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
-    expect(body.vesselImo).toBe("9234567");
+    expect(body.vesselImo).toBe('9234567');
     expect(Array.isArray(body.chain)).toBe(true);
     expect((body.chain as unknown[]).length).toBeGreaterThan(0);
     expect(body.analysis).toBeDefined();
     expect(Array.isArray(body.sanctionLists)).toBe(true);
-    expect(typeof body.recommendation).toBe("string");
+    expect(typeof body.recommendation).toBe('string');
     expectProvenance(body.provenance);
   });
 
-  it("returns 200 with default chain for an unknown IMO", async () => {
+  it('returns 200 with default chain for an unknown IMO', async () => {
     const res = await request(app)
-      .get("/api/vessels/cognitive/sanctions-chain/0000000")
-      .set("x-test-auth", "yes");
+      .get('/api/vessels/cognitive/sanctions-chain/0000000')
+      .set('x-test-auth', 'yes');
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
-    expect(body.vesselImo).toBe("0000000");
+    expect(body.vesselImo).toBe('0000000');
     expect(Array.isArray(body.chain)).toBe(true);
     expectProvenance(body.provenance);
   });
 });
 
-describe("GET /vessels/cognitive/counterparty-risk — happy path", () => {
-  it("returns 200 with counterparties + portfolio + provenance", async () => {
+describe('GET /vessels/cognitive/counterparty-risk — happy path', () => {
+  it('returns 200 with counterparties + portfolio + provenance', async () => {
     const res = await request(app)
-      .get("/api/vessels/cognitive/counterparty-risk")
-      .set("x-test-auth", "yes");
+      .get('/api/vessels/cognitive/counterparty-risk')
+      .set('x-test-auth', 'yes');
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
     expect(Array.isArray(body.counterparties)).toBe(true);
     expect((body.counterparties as unknown[]).length).toBeGreaterThan(0);
     expect(body.portfolio).toBeDefined();
     const portfolio = body.portfolio as Record<string, unknown>;
-    expect(typeof portfolio.totalExposureUsd).toBe("number");
-    expect(typeof portfolio.totalCounterparties).toBe("number");
+    expect(typeof portfolio.totalExposureUsd).toBe('number');
+    expect(typeof portfolio.totalCounterparties).toBe('number');
     expectProvenance(body.provenance);
   });
 });
 
-describe("GET /vessels/cognitive/voyage-twin/:voyageRef — happy path", () => {
-  it("returns 200 with snapshots + timeline + provenance for a known ref", async () => {
+describe('GET /vessels/cognitive/voyage-twin/:voyageRef — happy path', () => {
+  it('returns 200 with snapshots + timeline + provenance for a known ref', async () => {
     const res = await request(app)
-      .get("/api/vessels/cognitive/voyage-twin/VOY-2026-001")
-      .set("x-test-auth", "yes");
+      .get('/api/vessels/cognitive/voyage-twin/VOY-2026-001')
+      .set('x-test-auth', 'yes');
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
-    expect(body.voyageRef).toBe("VOY-2026-001");
+    expect(body.voyageRef).toBe('VOY-2026-001');
     expect(Array.isArray(body.snapshots)).toBe(true);
     expect((body.snapshots as unknown[]).length).toBeGreaterThan(0);
     expect(body.timeline).toBeDefined();
@@ -249,11 +252,11 @@ describe("GET /vessels/cognitive/voyage-twin/:voyageRef — happy path", () => {
 
   it("normalises 'latest' to the default voyage reference", async () => {
     const res = await request(app)
-      .get("/api/vessels/cognitive/voyage-twin/latest")
-      .set("x-test-auth", "yes");
+      .get('/api/vessels/cognitive/voyage-twin/latest')
+      .set('x-test-auth', 'yes');
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
-    expect(body.voyageRef).toBe("VOY-2026-001");
+    expect(body.voyageRef).toBe('VOY-2026-001');
     expectProvenance(body.provenance);
   });
 });

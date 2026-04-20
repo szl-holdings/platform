@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 interface Particle {
   x: number;
@@ -21,14 +21,14 @@ interface ParticleFieldProps {
   color?: string;
   particleCount?: number;
   className?: string;
-  density?: "sparse" | "normal" | "dense";
+  density?: 'sparse' | 'normal' | 'dense';
 }
 
 export function ParticleField({
-  color = "201, 169, 110",
+  color = '201, 169, 110',
   particleCount,
-  className = "",
-  density = "normal",
+  className = '',
+  density = 'normal',
 }: ParticleFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number>(0);
@@ -39,7 +39,7 @@ export function ParticleField({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const densityMap = { sparse: 0.4, normal: 0.65, dense: 1 };

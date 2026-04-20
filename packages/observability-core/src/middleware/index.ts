@@ -1,16 +1,16 @@
-import type { Request, Response, NextFunction } from "express";
-import { randomUUID } from "crypto";
+import { getEnv } from '@szl-holdings/env';
+import { randomUUID } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
+import { runWithContext } from '../context/index.js';
 import {
   CORRELATION_HEADER,
-  REQUEST_ID_HEADER,
-  TRACE_PARENT_HEADER,
-  TENANT_ID_HEADER,
-  WORKFLOW_ID_HEADER,
-  SESSION_ID_HEADER,
   extractCorrelationId,
-} from "../correlation/index.js";
-import { runWithContext } from "../context/index.js";
-import { getEnv } from "@szl-holdings/env";
+  REQUEST_ID_HEADER,
+  SESSION_ID_HEADER,
+  TENANT_ID_HEADER,
+  TRACE_PARENT_HEADER,
+  WORKFLOW_ID_HEADER,
+} from '../correlation/index.js';
 
 export interface OtelMiddlewareOptions {
   recordSpans?: boolean;
@@ -18,14 +18,8 @@ export interface OtelMiddlewareOptions {
 }
 
 export function createCorrelationMiddleware() {
-  return function correlationMiddleware(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void {
-    const correlationId = extractCorrelationId(
-      req.headers as Record<string, string | undefined>,
-    );
+  return function correlationMiddleware(req: Request, res: Response, next: NextFunction): void {
+    const correlationId = extractCorrelationId(req.headers as Record<string, string | undefined>);
     const requestId = randomUUID();
     const traceParent = req.headers[TRACE_PARENT_HEADER] as string | undefined;
     const tenantId = req.headers[TENANT_ID_HEADER] as string | undefined;
@@ -46,17 +40,13 @@ export function createCorrelationMiddleware() {
 export function createOtelSpanMiddleware(options: OtelMiddlewareOptions = {}) {
   const { spanNameFn } = options;
 
-  return function otelSpanMiddleware(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void {
+  return function otelSpanMiddleware(req: Request, res: Response, next: NextFunction): void {
     const start = process.hrtime.bigint();
     const spanName = spanNameFn
       ? spanNameFn(req)
-      : `http.${req.method.toLowerCase()}.${req.path.replace(/\/\d+/g, "/:id")}`;
+      : `http.${req.method.toLowerCase()}.${req.path.replace(/\/\d+/g, '/:id')}`;
 
-    res.on("finish", () => {
+    res.on('finish', () => {
       const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
 
       if (getEnv().OTEL_CONSOLE_EXPORT) {
@@ -81,11 +71,7 @@ export function createInstrumentationMiddleware(options: OtelMiddlewareOptions =
   const correlationFn = createCorrelationMiddleware();
   const spanFn = createOtelSpanMiddleware(options);
 
-  return function instrumentationMiddleware(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void {
+  return function instrumentationMiddleware(req: Request, res: Response, next: NextFunction): void {
     correlationFn(req, res, () => {
       spanFn(req, res, next);
     });

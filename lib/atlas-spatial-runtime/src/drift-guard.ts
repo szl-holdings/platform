@@ -1,11 +1,11 @@
 import {
   db,
   driftAssessmentsTable,
-  spatialTwinSnapshotsTable,
   type SpatialTwinCategory,
-} from "@szl-holdings/db";
-import { eq, and, desc } from "drizzle-orm";
-import type { DriftAssessment, DriftGuardInput } from "./types.js";
+  spatialTwinSnapshotsTable,
+} from '@szl-holdings/db';
+import { and, desc, eq } from 'drizzle-orm';
+import type { DriftAssessment, DriftGuardInput } from './types.js';
 
 const DRIFT_THRESHOLDS = {
   stable: 0.2,
@@ -17,7 +17,12 @@ function computeFieldDivergence(
   current: Record<string, unknown>,
   trusted: Record<string, unknown>,
 ): Array<{ field: string; currentValue: unknown; trustedValue: unknown; divergenceScore: number }> {
-  const divergent: Array<{ field: string; currentValue: unknown; trustedValue: unknown; divergenceScore: number }> = [];
+  const divergent: Array<{
+    field: string;
+    currentValue: unknown;
+    trustedValue: unknown;
+    divergenceScore: number;
+  }> = [];
 
   for (const [field, trustedValue] of Object.entries(trusted)) {
     const currentValue = current[field];
@@ -25,7 +30,7 @@ function computeFieldDivergence(
 
     let divergenceScore = 0;
 
-    if (typeof currentValue === "number" && typeof trustedValue === "number") {
+    if (typeof currentValue === 'number' && typeof trustedValue === 'number') {
       if (trustedValue !== 0) {
         divergenceScore = Math.abs(currentValue - trustedValue) / Math.abs(trustedValue);
       } else if (currentValue !== 0) {
@@ -43,23 +48,23 @@ function computeFieldDivergence(
   return divergent;
 }
 
-function classifyDrift(driftScore: number, divergentCount: number): DriftAssessment["driftStatus"] {
-  if (driftScore >= DRIFT_THRESHOLDS.degraded || divergentCount > 5) return "blocked";
-  if (driftScore >= DRIFT_THRESHOLDS.watch || divergentCount > 2) return "degraded";
-  if (driftScore >= DRIFT_THRESHOLDS.stable || divergentCount > 0) return "watch";
-  return "stable";
+function classifyDrift(driftScore: number, divergentCount: number): DriftAssessment['driftStatus'] {
+  if (driftScore >= DRIFT_THRESHOLDS.degraded || divergentCount > 5) return 'blocked';
+  if (driftScore >= DRIFT_THRESHOLDS.watch || divergentCount > 2) return 'degraded';
+  if (driftScore >= DRIFT_THRESHOLDS.stable || divergentCount > 0) return 'watch';
+  return 'stable';
 }
 
 function adjustConfidence(
   originalConfidence: number,
   driftScore: number,
-  driftStatus: DriftAssessment["driftStatus"],
+  driftStatus: DriftAssessment['driftStatus'],
 ): { adjustedConfidence: number; reason: string | null } {
-  if (driftStatus === "stable") {
+  if (driftStatus === 'stable') {
     return { adjustedConfidence: originalConfidence, reason: null };
   }
 
-  const degradeMap: Record<DriftAssessment["driftStatus"], number> = {
+  const degradeMap: Record<DriftAssessment['driftStatus'], number> = {
     stable: 0,
     watch: 0.05,
     degraded: 0.15,
@@ -90,9 +95,10 @@ export async function assessDrift(input: DriftGuardInput): Promise<DriftAssessme
   }
 
   const divergentFields = [...uniqueFields.values()];
-  const driftScore = divergentFields.length > 0
-    ? divergentFields.reduce((sum, d) => sum + d.divergenceScore, 0) / divergentFields.length
-    : 0;
+  const driftScore =
+    divergentFields.length > 0
+      ? divergentFields.reduce((sum, d) => sum + d.divergenceScore, 0) / divergentFields.length
+      : 0;
 
   const driftStatus = classifyDrift(driftScore, divergentFields.length);
   const { adjustedConfidence, reason } = adjustConfidence(
@@ -101,9 +107,10 @@ export async function assessDrift(input: DriftGuardInput): Promise<DriftAssessme
     driftStatus,
   );
 
-  const blockedReason = driftStatus === "blocked"
-    ? `Output blocked: drift score ${driftScore.toFixed(3)} exceeds threshold. ${divergentFields.length} divergent fields detected.`
-    : null;
+  const blockedReason =
+    driftStatus === 'blocked'
+      ? `Output blocked: drift score ${driftScore.toFixed(3)} exceeds threshold. ${divergentFields.length} divergent fields detected.`
+      : null;
 
   const assessment: DriftAssessment = {
     twinId: input.twinId,
@@ -120,23 +127,26 @@ export async function assessDrift(input: DriftGuardInput): Promise<DriftAssessme
     assessedAt: new Date().toISOString(),
   };
 
-  const [inserted] = await db.insert(driftAssessmentsTable).values({
-    orgId: input.orgId ?? null,
-    twinId: input.twinId,
-    entityId: input.entityId,
-    twinCategory: input.twinCategory,
-    currentSnapshotId: input.currentSnapshotId ?? null,
-    approvedSnapshotId: input.approvedSnapshotId ?? null,
-    driftStatus,
-    driftScore,
-    divergentFields,
-    trustedSourceDeltas: input.trustedSourceDeltas ?? [],
-    confidenceDowngradeReason: reason,
-    originalConfidence: input.currentConfidence,
-    adjustedConfidence,
-    blockedReason,
-    assessedAt: new Date(),
-  }).returning();
+  const [inserted] = await db
+    .insert(driftAssessmentsTable)
+    .values({
+      orgId: input.orgId ?? null,
+      twinId: input.twinId,
+      entityId: input.entityId,
+      twinCategory: input.twinCategory,
+      currentSnapshotId: input.currentSnapshotId ?? null,
+      approvedSnapshotId: input.approvedSnapshotId ?? null,
+      driftStatus,
+      driftScore,
+      divergentFields,
+      trustedSourceDeltas: input.trustedSourceDeltas ?? [],
+      confidenceDowngradeReason: reason,
+      originalConfidence: input.currentConfidence,
+      adjustedConfidence,
+      blockedReason,
+      assessedAt: new Date(),
+    })
+    .returning();
 
   return { ...assessment, id: inserted.id };
 }
@@ -162,10 +172,10 @@ export async function getLatestDriftAssessment(
     twinId: row.twinId,
     entityId: row.entityId,
     twinCategory: row.twinCategory as SpatialTwinCategory,
-    driftStatus: row.driftStatus as DriftAssessment["driftStatus"],
+    driftStatus: row.driftStatus as DriftAssessment['driftStatus'],
     driftScore: row.driftScore,
-    divergentFields: (row.divergentFields as DriftAssessment["divergentFields"]) ?? [],
-    trustedSourceDeltas: (row.trustedSourceDeltas as DriftAssessment["trustedSourceDeltas"]) ?? [],
+    divergentFields: (row.divergentFields as DriftAssessment['divergentFields']) ?? [],
+    trustedSourceDeltas: (row.trustedSourceDeltas as DriftAssessment['trustedSourceDeltas']) ?? [],
     confidenceDowngradeReason: row.confidenceDowngradeReason ?? null,
     originalConfidence: row.originalConfidence ?? 0,
     adjustedConfidence: row.adjustedConfidence ?? 0,
@@ -184,7 +194,7 @@ export class DriftGuard {
   }
 
   isOutputSafe(assessment: DriftAssessment): boolean {
-    return assessment.driftStatus !== "blocked";
+    return assessment.driftStatus !== 'blocked';
   }
 }
 

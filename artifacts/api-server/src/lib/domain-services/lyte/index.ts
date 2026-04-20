@@ -1,34 +1,93 @@
-import { domainEventBus } from "../../domain-events/index.js";
+import { domainEventBus } from '../../domain-events/index.js';
 
 // ─── Domain Types ─────────────────────────────────────────────────────────────
 
-export type SignalSeverity = "critical" | "high" | "medium" | "low" | "info";
-export type SignalStatus = "new" | "acknowledged" | "resolved" | "dismissed";
-export type IncidentSeverity = "critical" | "high" | "medium" | "low";
-export type IncidentStatus = "open" | "investigating" | "mitigating" | "resolved" | "closed";
-export type ActionState = "new" | "acknowledged" | "assigned" | "escalated" | "resolved" | "dismissed";
-export type ActionPriority = "urgent" | "high" | "medium" | "low";
+export type SignalSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+export type SignalStatus = 'new' | 'acknowledged' | 'resolved' | 'dismissed';
+export type IncidentSeverity = 'critical' | 'high' | 'medium' | 'low';
+export type IncidentStatus = 'open' | 'investigating' | 'mitigating' | 'resolved' | 'closed';
+export type ActionState =
+  | 'new'
+  | 'acknowledged'
+  | 'assigned'
+  | 'escalated'
+  | 'resolved'
+  | 'dismissed';
+export type ActionPriority = 'urgent' | 'high' | 'medium' | 'low';
 
-export const VALID_SIGNAL_SEVERITIES = new Set<SignalSeverity>(["critical", "high", "medium", "low", "info"]);
-export const VALID_SIGNAL_STATUSES = new Set<SignalStatus>(["new", "acknowledged", "resolved", "dismissed"]);
-export const VALID_INCIDENT_SEVERITIES = new Set<IncidentSeverity>(["critical", "high", "medium", "low"]);
-export const VALID_INCIDENT_STATUSES = new Set<IncidentStatus>(["open", "investigating", "mitigating", "resolved", "closed"]);
-export const VALID_ACTION_STATES = new Set<ActionState>(["new", "acknowledged", "assigned", "escalated", "resolved", "dismissed"]);
-export const VALID_ACTION_PRIORITIES = new Set<ActionPriority>(["urgent", "high", "medium", "low"]);
+export const VALID_SIGNAL_SEVERITIES = new Set<SignalSeverity>([
+  'critical',
+  'high',
+  'medium',
+  'low',
+  'info',
+]);
+export const VALID_SIGNAL_STATUSES = new Set<SignalStatus>([
+  'new',
+  'acknowledged',
+  'resolved',
+  'dismissed',
+]);
+export const VALID_INCIDENT_SEVERITIES = new Set<IncidentSeverity>([
+  'critical',
+  'high',
+  'medium',
+  'low',
+]);
+export const VALID_INCIDENT_STATUSES = new Set<IncidentStatus>([
+  'open',
+  'investigating',
+  'mitigating',
+  'resolved',
+  'closed',
+]);
+export const VALID_ACTION_STATES = new Set<ActionState>([
+  'new',
+  'acknowledged',
+  'assigned',
+  'escalated',
+  'resolved',
+  'dismissed',
+]);
+export const VALID_ACTION_PRIORITIES = new Set<ActionPriority>(['urgent', 'high', 'medium', 'low']);
 
-export const SEVERITY_RANK: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
+export const SEVERITY_RANK: Record<string, number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+  info: 0,
+};
 
 // ─── Port Interfaces ───────────────────────────────────────────────────────────
 
 export interface LyteStoragePort {
   listWorkspaces(args: { limit: number; offset: number }): Promise<unknown[]>;
-  listSignals(args: { severity?: string; status?: string; source?: string; limit: number; offset: number }): Promise<unknown[]>;
+  listSignals(args: {
+    severity?: string;
+    status?: string;
+    source?: string;
+    limit: number;
+    offset: number;
+  }): Promise<unknown[]>;
   getSignal(id: number): Promise<unknown | null>;
   updateSignal(id: number, data: Record<string, unknown>): Promise<unknown>;
-  listActions(args: { state?: string; priority?: string; assignee?: string; limit: number; offset: number }): Promise<unknown[]>;
+  listActions(args: {
+    state?: string;
+    priority?: string;
+    assignee?: string;
+    limit: number;
+    offset: number;
+  }): Promise<unknown[]>;
   getAction(id: number): Promise<unknown | null>;
   updateAction(id: number, data: Record<string, unknown>): Promise<unknown>;
-  listIncidents(args: { status?: string; severity?: string; assignee?: string; limit: number; offset: number }): Promise<unknown[]>;
+  listIncidents(args: {
+    status?: string;
+    severity?: string;
+    assignee?: string;
+    limit: number;
+    offset: number;
+  }): Promise<unknown[]>;
   getIncident(id: number): Promise<unknown | null>;
   updateIncident(id: number, data: Record<string, unknown>): Promise<unknown>;
   countSignals(filters: { severity?: string; status?: string }): Promise<Record<string, number>>;
@@ -40,9 +99,9 @@ export interface LyteStoragePort {
 
 export function deriveSignalAssignee(s: Record<string, unknown>): string | null {
   const assignee = s.assignee;
-  if (typeof assignee === "string" && assignee) return assignee;
+  if (typeof assignee === 'string' && assignee) return assignee;
   const meta = s.metadata as Record<string, unknown> | null;
-  if (meta && typeof meta.assignee === "string" && meta.assignee) return meta.assignee;
+  if (meta && typeof meta.assignee === 'string' && meta.assignee) return meta.assignee;
   return null;
 }
 
@@ -55,10 +114,10 @@ export function deriveEscalationPaths(meta: Record<string, unknown>): Record<str
       id: String(idx + 1),
       level: idx + 1,
       label: `Escalation L${idx + 1}`,
-      targetRole: typeof entry.targetRole === "string" ? entry.targetRole : "unspecified",
+      targetRole: typeof entry.targetRole === 'string' ? entry.targetRole : 'unspecified',
       targetUserId: null,
       notifyChannels: [],
-      triggeredAt: typeof entry.escalatedAt === "string" ? entry.escalatedAt : null,
+      triggeredAt: typeof entry.escalatedAt === 'string' ? entry.escalatedAt : null,
       resolvedAt: null,
       active: true,
     };
@@ -72,13 +131,28 @@ export function deriveAuditHistory(meta: Record<string, unknown>): Record<string
     const entry = (h as Record<string, unknown>) ?? {};
     return {
       id: String(idx + 1),
-      action: typeof entry.state === "string" ? `state_changed_to_${entry.state}` : typeof entry.action === "string" ? entry.action : "updated",
-      actor: typeof entry.actor === "string" ? entry.actor : "system",
-      actorType: "system",
+      action:
+        typeof entry.state === 'string'
+          ? `state_changed_to_${entry.state}`
+          : typeof entry.action === 'string'
+            ? entry.action
+            : 'updated',
+      actor: typeof entry.actor === 'string' ? entry.actor : 'system',
+      actorType: 'system',
       previousState: null,
-      newState: typeof entry.state === "string" ? entry.state : null,
-      notes: typeof entry.rationale === "string" ? entry.rationale : typeof entry.reason === "string" ? entry.reason : null,
-      timestamp: typeof entry.changedAt === "string" ? entry.changedAt : typeof entry.escalatedAt === "string" ? entry.escalatedAt : new Date().toISOString(),
+      newState: typeof entry.state === 'string' ? entry.state : null,
+      notes:
+        typeof entry.rationale === 'string'
+          ? entry.rationale
+          : typeof entry.reason === 'string'
+            ? entry.reason
+            : null,
+      timestamp:
+        typeof entry.changedAt === 'string'
+          ? entry.changedAt
+          : typeof entry.escalatedAt === 'string'
+            ? entry.escalatedAt
+            : new Date().toISOString(),
     };
   });
 }
@@ -88,8 +162,8 @@ export function enrichSignal(s: Record<string, unknown>): Record<string, unknown
   return {
     ...s,
     assignee: deriveSignalAssignee(s),
-    rationale: typeof meta.rationale === "string" ? meta.rationale : null,
-    nextAction: typeof meta.nextAction === "string" ? meta.nextAction : null,
+    rationale: typeof meta.rationale === 'string' ? meta.rationale : null,
+    nextAction: typeof meta.nextAction === 'string' ? meta.nextAction : null,
     escalationPaths: deriveEscalationPaths(meta),
     auditHistory: deriveAuditHistory(meta),
   };
@@ -107,7 +181,9 @@ export function enrichIncident(i: Record<string, unknown>): Record<string, unkno
 export function enrichAction(a: Record<string, unknown>): Record<string, unknown> {
   const history = (a.stateHistory as unknown[]) ?? [];
   const historyMeta = { stateHistory: history };
-  const escalations = history.filter((h: unknown) => (h as Record<string, unknown>).state === "escalated");
+  const escalations = history.filter(
+    (h: unknown) => (h as Record<string, unknown>).state === 'escalated',
+  );
   return {
     ...a,
     escalationPaths: escalations.map((e: unknown, idx: number) => {
@@ -116,10 +192,10 @@ export function enrichAction(a: Record<string, unknown>): Record<string, unknown
         id: String(idx + 1),
         level: idx + 1,
         label: `Escalation L${idx + 1}`,
-        targetRole: typeof entry.targetRole === "string" ? entry.targetRole : "unspecified",
+        targetRole: typeof entry.targetRole === 'string' ? entry.targetRole : 'unspecified',
         targetUserId: null,
         notifyChannels: [],
-        triggeredAt: typeof entry.changedAt === "string" ? entry.changedAt : null,
+        triggeredAt: typeof entry.changedAt === 'string' ? entry.changedAt : null,
         resolvedAt: null,
         active: true,
       };
@@ -131,7 +207,7 @@ export function enrichAction(a: Record<string, unknown>): Record<string, unknown
 export function buildSignalQueueItem(s: Record<string, unknown>): Record<string, unknown> {
   return {
     id: `signal-${s.id}`,
-    entityType: "signal",
+    entityType: 'signal',
     entityId: s.id,
     title: s.title ?? `Signal #${s.id}`,
     severity: s.severity ?? null,
@@ -146,7 +222,7 @@ export function buildSignalQueueItem(s: Record<string, unknown>): Record<string,
 export function buildIncidentQueueItem(i: Record<string, unknown>): Record<string, unknown> {
   return {
     id: `incident-${i.id}`,
-    entityType: "incident",
+    entityType: 'incident',
     entityId: i.id,
     title: i.title ?? i.impactArea ?? `Incident #${i.id}`,
     severity: i.severity ?? null,
@@ -161,7 +237,7 @@ export function buildIncidentQueueItem(i: Record<string, unknown>): Record<strin
 export function buildActionQueueItem(a: Record<string, unknown>): Record<string, unknown> {
   return {
     id: `action-${a.id}`,
-    entityType: "action",
+    entityType: 'action',
     entityId: a.id,
     title: a.title ?? `Action #${a.id}`,
     severity: null,
@@ -175,13 +251,23 @@ export function buildActionQueueItem(a: Record<string, unknown>): Record<string,
 
 // ─── Domain Service Functions ─────────────────────────────────────────────────
 
-export async function listLyteWorkspaces(storage: LyteStoragePort, args: { limit?: number; offset?: number }) {
+export async function listLyteWorkspaces(
+  storage: LyteStoragePort,
+  args: { limit?: number; offset?: number },
+) {
   return storage.listWorkspaces({ limit: args.limit ?? 50, offset: args.offset ?? 0 });
 }
 
-export async function listLyteSignals(storage: LyteStoragePort, args: { severity?: string; status?: string; domain?: string; limit?: number; offset?: number }) {
-  const severityFilter = args.severity && VALID_SIGNAL_SEVERITIES.has(args.severity as SignalSeverity) ? args.severity : undefined;
-  const statusFilter = args.status && VALID_SIGNAL_STATUSES.has(args.status as SignalStatus) ? args.status : undefined;
+export async function listLyteSignals(
+  storage: LyteStoragePort,
+  args: { severity?: string; status?: string; domain?: string; limit?: number; offset?: number },
+) {
+  const severityFilter =
+    args.severity && VALID_SIGNAL_SEVERITIES.has(args.severity as SignalSeverity)
+      ? args.severity
+      : undefined;
+  const statusFilter =
+    args.status && VALID_SIGNAL_STATUSES.has(args.status as SignalStatus) ? args.status : undefined;
   const signals = await storage.listSignals({
     severity: severityFilter,
     status: statusFilter,
@@ -189,7 +275,7 @@ export async function listLyteSignals(storage: LyteStoragePort, args: { severity
     limit: args.limit ?? 50,
     offset: args.offset ?? 0,
   });
-  return signals.map(s => enrichSignal(s as Record<string, unknown>));
+  return signals.map((s) => enrichSignal(s as Record<string, unknown>));
 }
 
 export async function getLyteSignal(storage: LyteStoragePort, id: number) {
@@ -198,9 +284,16 @@ export async function getLyteSignal(storage: LyteStoragePort, id: number) {
   return enrichSignal(signal as Record<string, unknown>);
 }
 
-export async function listLyteActions(storage: LyteStoragePort, args: { state?: string; priority?: string; assignee?: string; limit?: number; offset?: number }) {
-  const stateFilter = args.state && VALID_ACTION_STATES.has(args.state as ActionState) ? args.state : undefined;
-  const priorityFilter = args.priority && VALID_ACTION_PRIORITIES.has(args.priority as ActionPriority) ? args.priority : undefined;
+export async function listLyteActions(
+  storage: LyteStoragePort,
+  args: { state?: string; priority?: string; assignee?: string; limit?: number; offset?: number },
+) {
+  const stateFilter =
+    args.state && VALID_ACTION_STATES.has(args.state as ActionState) ? args.state : undefined;
+  const priorityFilter =
+    args.priority && VALID_ACTION_PRIORITIES.has(args.priority as ActionPriority)
+      ? args.priority
+      : undefined;
   const rows = await storage.listActions({
     state: stateFilter,
     priority: priorityFilter,
@@ -208,7 +301,7 @@ export async function listLyteActions(storage: LyteStoragePort, args: { state?: 
     limit: args.limit ?? 50,
     offset: args.offset ?? 0,
   });
-  return rows.map(a => enrichAction(a as Record<string, unknown>));
+  return rows.map((a) => enrichAction(a as Record<string, unknown>));
 }
 
 export async function getLyteAction(storage: LyteStoragePort, id: number) {
@@ -217,9 +310,18 @@ export async function getLyteAction(storage: LyteStoragePort, id: number) {
   return enrichAction(action as Record<string, unknown>);
 }
 
-export async function listLyteIncidents(storage: LyteStoragePort, args: { status?: string; severity?: string; assignee?: string; limit?: number; offset?: number }) {
-  const statusFilter = args.status && VALID_INCIDENT_STATUSES.has(args.status as IncidentStatus) ? args.status : undefined;
-  const severityFilter = args.severity && VALID_INCIDENT_SEVERITIES.has(args.severity as IncidentSeverity) ? args.severity : undefined;
+export async function listLyteIncidents(
+  storage: LyteStoragePort,
+  args: { status?: string; severity?: string; assignee?: string; limit?: number; offset?: number },
+) {
+  const statusFilter =
+    args.status && VALID_INCIDENT_STATUSES.has(args.status as IncidentStatus)
+      ? args.status
+      : undefined;
+  const severityFilter =
+    args.severity && VALID_INCIDENT_SEVERITIES.has(args.severity as IncidentSeverity)
+      ? args.severity
+      : undefined;
   const rows = await storage.listIncidents({
     status: statusFilter,
     severity: severityFilter,
@@ -227,7 +329,7 @@ export async function listLyteIncidents(storage: LyteStoragePort, args: { status
     limit: args.limit ?? 50,
     offset: args.offset ?? 0,
   });
-  return rows.map(i => enrichIncident(i as Record<string, unknown>));
+  return rows.map((i) => enrichIncident(i as Record<string, unknown>));
 }
 
 export async function getLyteIncident(storage: LyteStoragePort, id: number) {
@@ -241,13 +343,13 @@ export async function triageLyteSignal(
   id: number,
   args: { status: string; rationale?: string; nextAction?: string },
 ) {
-  const signal = await storage.getSignal(id) as Record<string, unknown> | null;
+  const signal = (await storage.getSignal(id)) as Record<string, unknown> | null;
   if (!signal) throw new Error(`Signal not found: ${id}`);
 
   const meta = (signal.metadata as Record<string, unknown>) ?? {};
   const auditEntry = {
     state: args.status,
-    actor: "system",
+    actor: 'system',
     changedAt: new Date().toISOString(),
     rationale: args.rationale ?? null,
   };
@@ -269,7 +371,7 @@ export async function triageLyteSignal(
     updatedAt: new Date(),
   });
 
-  domainEventBus.publish("lyte.signal-triaged", {
+  domainEventBus.publish('lyte.signal-triaged', {
     signalId: id,
     status: args.status,
     severity: signal.severity as string | null,
@@ -279,8 +381,12 @@ export async function triageLyteSignal(
   return enrichSignal(updated as Record<string, unknown>);
 }
 
-export async function assignLyteSignalOwner(storage: LyteStoragePort, id: number, assignee: string) {
-  const signal = await storage.getSignal(id) as Record<string, unknown> | null;
+export async function assignLyteSignalOwner(
+  storage: LyteStoragePort,
+  id: number,
+  assignee: string,
+) {
+  const signal = (await storage.getSignal(id)) as Record<string, unknown> | null;
   if (!signal) throw new Error(`Signal not found: ${id}`);
 
   const meta = (signal.metadata as Record<string, unknown>) ?? {};
@@ -293,15 +399,19 @@ export async function assignLyteSignalOwner(storage: LyteStoragePort, id: number
   return enrichSignal(updated as Record<string, unknown>);
 }
 
-export async function escalateLyteSignal(storage: LyteStoragePort, id: number, args: { reason?: string; targetRole: string }) {
-  const signal = await storage.getSignal(id) as Record<string, unknown> | null;
+export async function escalateLyteSignal(
+  storage: LyteStoragePort,
+  id: number,
+  args: { reason?: string; targetRole: string },
+) {
+  const signal = (await storage.getSignal(id)) as Record<string, unknown> | null;
   if (!signal) throw new Error(`Signal not found: ${id}`);
 
   const meta = (signal.metadata as Record<string, unknown>) ?? {};
   const escalations = Array.isArray(meta.escalations) ? meta.escalations : [];
 
   const updated = await storage.updateSignal(id, {
-    status: "acknowledged",
+    status: 'acknowledged',
     metadata: {
       ...meta,
       escalations: [
@@ -323,19 +433,23 @@ export async function updateLyteIncident(storage: LyteStoragePort, id: number, s
   return enrichIncident(updated as Record<string, unknown>);
 }
 
-export async function resolveLyteIncident(storage: LyteStoragePort, id: number, args: { resolution: string; rootCause?: string }) {
-  const incident = await storage.getIncident(id) as Record<string, unknown> | null;
+export async function resolveLyteIncident(
+  storage: LyteStoragePort,
+  id: number,
+  args: { resolution: string; rootCause?: string },
+) {
+  const incident = (await storage.getIncident(id)) as Record<string, unknown> | null;
   if (!incident) throw new Error(`Incident not found: ${id}`);
 
   const updated = await storage.updateIncident(id, {
-    status: "resolved",
+    status: 'resolved',
     resolution: args.resolution,
     rootCause: args.rootCause ?? null,
     resolvedAt: new Date(),
     updatedAt: new Date(),
   });
 
-  domainEventBus.publish("lyte.incident-resolved", {
+  domainEventBus.publish('lyte.incident-resolved', {
     incidentId: id,
     resolution: args.resolution,
     rootCause: args.rootCause ?? null,
@@ -344,15 +458,19 @@ export async function resolveLyteIncident(storage: LyteStoragePort, id: number, 
   return enrichIncident(updated as Record<string, unknown>);
 }
 
-export async function escalateLyteIncident(storage: LyteStoragePort, id: number, args: { reason?: string; targetRole: string }) {
-  const incident = await storage.getIncident(id) as Record<string, unknown> | null;
+export async function escalateLyteIncident(
+  storage: LyteStoragePort,
+  id: number,
+  args: { reason?: string; targetRole: string },
+) {
+  const incident = (await storage.getIncident(id)) as Record<string, unknown> | null;
   if (!incident) throw new Error(`Incident not found: ${id}`);
 
   const meta = (incident.metadata as Record<string, unknown>) ?? {};
   const escalations = Array.isArray(meta.escalations) ? meta.escalations : [];
 
   const updated = await storage.updateIncident(id, {
-    status: "investigating",
+    status: 'investigating',
     metadata: {
       ...meta,
       escalations: [
@@ -363,7 +481,7 @@ export async function escalateLyteIncident(storage: LyteStoragePort, id: number,
     updatedAt: new Date(),
   });
 
-  domainEventBus.publish("lyte.incident-escalated", {
+  domainEventBus.publish('lyte.incident-escalated', {
     incidentId: id,
     severity: incident.severity as string | null,
     targetRole: args.targetRole,
@@ -373,50 +491,72 @@ export async function escalateLyteIncident(storage: LyteStoragePort, id: number,
   return enrichIncident(updated as Record<string, unknown>);
 }
 
-export async function assignLyteIncidentOwner(storage: LyteStoragePort, id: number, assignee: string) {
-  const incident = await storage.getIncident(id) as Record<string, unknown> | null;
+export async function assignLyteIncidentOwner(
+  storage: LyteStoragePort,
+  id: number,
+  assignee: string,
+) {
+  const incident = (await storage.getIncident(id)) as Record<string, unknown> | null;
   if (!incident) throw new Error(`Incident not found: ${id}`);
   const updated = await storage.updateIncident(id, { assignee, updatedAt: new Date() });
   return enrichIncident(updated as Record<string, unknown>);
 }
 
-export async function updateLyteActionState(storage: LyteStoragePort, id: number, args: { state: string; rationale?: string }) {
+export async function updateLyteActionState(
+  storage: LyteStoragePort,
+  id: number,
+  args: { state: string; rationale?: string },
+) {
   if (!VALID_ACTION_STATES.has(args.state as ActionState)) {
     throw new Error(`Invalid action state: ${args.state}`);
   }
-  const action = await storage.getAction(id) as Record<string, unknown> | null;
+  const action = (await storage.getAction(id)) as Record<string, unknown> | null;
   if (!action) throw new Error(`Action not found: ${id}`);
 
   const history = Array.isArray(action.stateHistory) ? action.stateHistory : [];
   const updated = await storage.updateAction(id, {
     state: args.state,
-    stateHistory: [...history, { state: args.state, changedAt: new Date().toISOString(), rationale: args.rationale }],
+    stateHistory: [
+      ...history,
+      { state: args.state, changedAt: new Date().toISOString(), rationale: args.rationale },
+    ],
     updatedAt: new Date(),
   });
 
   return enrichAction(updated as Record<string, unknown>);
 }
 
-export async function assignLyteActionOwner(storage: LyteStoragePort, id: number, assignedTo: string) {
-  const action = await storage.getAction(id) as Record<string, unknown> | null;
+export async function assignLyteActionOwner(
+  storage: LyteStoragePort,
+  id: number,
+  assignedTo: string,
+) {
+  const action = (await storage.getAction(id)) as Record<string, unknown> | null;
   if (!action) throw new Error(`Action not found: ${id}`);
   const updated = await storage.updateAction(id, { assignedTo, updatedAt: new Date() });
   return enrichAction(updated as Record<string, unknown>);
 }
 
-export async function escalateLyteAction(storage: LyteStoragePort, id: number, args: { reason?: string; targetRole: string }) {
-  const action = await storage.getAction(id) as Record<string, unknown> | null;
+export async function escalateLyteAction(
+  storage: LyteStoragePort,
+  id: number,
+  args: { reason?: string; targetRole: string },
+) {
+  const action = (await storage.getAction(id)) as Record<string, unknown> | null;
   if (!action) throw new Error(`Action not found: ${id}`);
 
   const history = Array.isArray(action.stateHistory) ? action.stateHistory : [];
   const updated = await storage.updateAction(id, {
-    state: "escalated",
-    stateHistory: [...history, {
-      state: "escalated",
-      changedAt: new Date().toISOString(),
-      targetRole: args.targetRole,
-      reason: args.reason,
-    }],
+    state: 'escalated',
+    stateHistory: [
+      ...history,
+      {
+        state: 'escalated',
+        changedAt: new Date().toISOString(),
+        targetRole: args.targetRole,
+        reason: args.reason,
+      },
+    ],
     updatedAt: new Date(),
   });
 

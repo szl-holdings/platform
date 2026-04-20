@@ -1,5 +1,5 @@
-import React from "react";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery } from '@apollo/client';
+import React from 'react';
 
 const GET_VERSION = gql`
   query GetVersion {
@@ -9,7 +9,7 @@ const GET_VERSION = gql`
 
 export function GraphQLStatusBadge() {
   const { data, loading, error } = useQuery(GET_VERSION, {
-    fetchPolicy: "network-only",
+    fetchPolicy: 'network-only',
   });
 
   if (loading) return null;
@@ -19,22 +19,22 @@ export function GraphQLStatusBadge() {
     <span
       title={`GraphQL API v${data._version}`}
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "4px",
-        fontSize: "11px",
-        color: "rgb(134 239 172)",
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        fontSize: '11px',
+        color: 'rgb(134 239 172)',
         opacity: 0.7,
-        userSelect: "none",
+        userSelect: 'none',
       }}
     >
       <span
         style={{
-          width: "6px",
-          height: "6px",
-          borderRadius: "50%",
-          background: "rgb(134 239 172)",
-          display: "inline-block",
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          background: 'rgb(134 239 172)',
+          display: 'inline-block',
         }}
       />
       GQL

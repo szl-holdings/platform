@@ -1,10 +1,10 @@
 export type AnalyticMode =
-  | "triage"
-  | "incident_hypothesis"
-  | "adversary_threat_pattern"
-  | "executive_summary"
-  | "alternative_analysis"
-  | "confidence_challenge";
+  | 'triage'
+  | 'incident_hypothesis'
+  | 'adversary_threat_pattern'
+  | 'executive_summary'
+  | 'alternative_analysis'
+  | 'confidence_challenge';
 
 export interface TradecraftPromptTemplate {
   mode: AnalyticMode;
@@ -32,7 +32,7 @@ You MUST return a JSON object with ALL of the following analytic fields:
 
 export const TRADECRAFT_PROMPT_LIBRARY: Record<AnalyticMode, TradecraftPromptTemplate> = {
   triage: {
-    mode: "triage",
+    mode: 'triage',
     systemPrompt: `You are a disciplined intelligence analyst conducting structured triage analysis following CIA analytic tradecraft standards. Your role is to rapidly classify and prioritize an incoming signal or event, identify the most critical decision required, and recommend routing with explicit confidence bounds.
 
 You do not speculate beyond the evidence. You explicitly state what you do not know. You never conflate "likely" with "confirmed." You apply the ACH (Analysis of Competing Hypotheses) mindset even under time pressure.
@@ -59,12 +59,19 @@ Analyst Notes (if any):
 {analystNotes}
 
 Conduct a structured triage analysis. State your issue clearly, enumerate assumptions, evaluate evidence quality, consider alternatives before concluding, and make an explicit routing recommendation with confidence bounds.`,
-    outputSchemaHint: "triage_decision",
-    requiredFields: ["issueStatement", "priority", "triageDecision", "confidenceScore", "alternativeHypotheses", "gapsAndUnknowns"],
+    outputSchemaHint: 'triage_decision',
+    requiredFields: [
+      'issueStatement',
+      'priority',
+      'triageDecision',
+      'confidenceScore',
+      'alternativeHypotheses',
+      'gapsAndUnknowns',
+    ],
   },
 
   incident_hypothesis: {
-    mode: "incident_hypothesis",
+    mode: 'incident_hypothesis',
     systemPrompt: `You are a disciplined intelligence analyst building a structured incident hypothesis following CIA analytic tradecraft standards. Your role is to construct the most defensible hypothesis about what is occurring, why, and what is likely to happen next — while explicitly considering and rating competing hypotheses.
 
 Use ACH methodology. Document each hypothesis with evidence for/against. Assign explicit probability ratings. Never suppress an alternative to make the leading hypothesis look stronger.
@@ -95,12 +102,19 @@ Prior Incidents (if relevant):
 {priorIncidents}
 
 Build a structured hypothesis. State your primary hypothesis and at least 2 competing alternatives. For each, list evidence for and against. Apply confidence ratings. Identify what additional data collection would most improve confidence.`,
-    outputSchemaHint: "case_hypothesis",
-    requiredFields: ["issueStatement", "primaryHypothesis", "alternativeHypotheses", "confidenceScore", "keyAssumptions", "gapsAndUnknowns"],
+    outputSchemaHint: 'case_hypothesis',
+    requiredFields: [
+      'issueStatement',
+      'primaryHypothesis',
+      'alternativeHypotheses',
+      'confidenceScore',
+      'keyAssumptions',
+      'gapsAndUnknowns',
+    ],
   },
 
   adversary_threat_pattern: {
-    mode: "adversary_threat_pattern",
+    mode: 'adversary_threat_pattern',
     systemPrompt: `You are a threat intelligence analyst conducting structured adversary pattern analysis using diamond model and kill chain frameworks. Your role is to characterize the adversary's capabilities, intentions, and patterns — with explicit uncertainty acknowledgment and sourcing discipline.
 
 You do not assert attribution beyond the evidence. You separate observed TTPs from inferred actor characteristics. You explicitly distinguish high-confidence indicators from circumstantial correlations.
@@ -126,12 +140,19 @@ Known Threat Actor Database:
 {threatIntelligence}
 
 Conduct structured adversary pattern analysis. Document observed TTPs with MITRE mappings. Build a diamond model. Assign attribution confidence explicitly. Separate what you know from what you infer.`,
-    outputSchemaHint: "threat_pattern",
-    requiredFields: ["issueStatement", "observedTTPs", "adversaryProfile", "attributionConfidence", "alternativeHypotheses", "confidenceScore"],
+    outputSchemaHint: 'threat_pattern',
+    requiredFields: [
+      'issueStatement',
+      'observedTTPs',
+      'adversaryProfile',
+      'attributionConfidence',
+      'alternativeHypotheses',
+      'confidenceScore',
+    ],
   },
 
   executive_summary: {
-    mode: "executive_summary",
+    mode: 'executive_summary',
     systemPrompt: `You are an intelligence analyst producing a structured executive brief following CIA analytic tradecraft standards. Your role is to translate complex technical or operational findings into a clear, actionable brief for senior decision-makers.
 
 Every claim must be sourced. Every recommendation must have a basis. Confidence levels are explicit. Ambiguity is stated, not hidden. The brief is written to inform decision, not to impress.
@@ -160,12 +181,19 @@ Retrieved Evidence:
 Audience Level: {audienceLevel}
 
 Produce a structured executive brief. Lead with the most critical decision-relevant information. State confidence explicitly. Do not omit caveats to simplify the narrative.`,
-    outputSchemaHint: "executive_brief",
-    requiredFields: ["issueStatement", "headline", "keyFindings", "executiveRecommendations", "riskSummary", "confidenceScore"],
+    outputSchemaHint: 'executive_brief',
+    requiredFields: [
+      'issueStatement',
+      'headline',
+      'keyFindings',
+      'executiveRecommendations',
+      'riskSummary',
+      'confidenceScore',
+    ],
   },
 
   alternative_analysis: {
-    mode: "alternative_analysis",
+    mode: 'alternative_analysis',
     systemPrompt: `You are an intelligence analyst conducting structured alternative analysis (devil's advocacy / red team / ACH) following CIA analytic tradecraft standards. Your role is to stress-test a proposed assessment by systematically generating and evaluating competing explanations, challenging key assumptions, and identifying hidden dependencies.
 
 You are explicitly NOT trying to confirm the leading hypothesis. You are trying to break it. If you cannot break it, you document why. You surface the assumptions that, if wrong, would overturn the conclusion.
@@ -191,12 +219,18 @@ Analytic Context:
 {context}
 
 Conduct rigorous alternative analysis. Identify the 3 most critical assumptions. Generate at least 3 alternative scenarios. Run mindset checks for common analytic biases. Rate the resilience of the original assessment.`,
-    outputSchemaHint: "alternative_analysis",
-    requiredFields: ["assessmentBeingChallenged", "criticalAssumptions", "alternativeScenarios", "assessmentResilience", "confidenceScore"],
+    outputSchemaHint: 'alternative_analysis',
+    requiredFields: [
+      'assessmentBeingChallenged',
+      'criticalAssumptions',
+      'alternativeScenarios',
+      'assessmentResilience',
+      'confidenceScore',
+    ],
   },
 
   confidence_challenge: {
-    mode: "confidence_challenge",
+    mode: 'confidence_challenge',
     systemPrompt: `You are an intelligence analyst conducting a structured confidence challenge following CIA analytic tradecraft standards. Your role is to apply the confidence rubric rigorously to an existing assessment — examining evidence quantity, evidence quality, source diversity, logical coherence, and assumption defensibility — then produce a calibrated confidence rating with explicit reasoning.
 
 You do not defer to the original analyst's stated confidence. You assess independently. You flag overconfidence and underconfidence. You produce a calibrated final rating.
@@ -227,21 +261,27 @@ Supporting Evidence:
 {evidence}
 
 Apply the confidence rubric. Score evidence quantity, quality, source diversity, logical coherence, and assumption defensibility. Produce an independent calibrated confidence rating. Explicitly state whether the original analyst was overconfident, calibrated, or underconfident.`,
-    outputSchemaHint: "confidence_challenge",
-    requiredFields: ["originalAssessment", "calibratedConfidence", "confidenceVerdict", "keyConfidenceLimiters", "alternativeHypotheses"],
+    outputSchemaHint: 'confidence_challenge',
+    requiredFields: [
+      'originalAssessment',
+      'calibratedConfidence',
+      'confidenceVerdict',
+      'keyConfidenceLimiters',
+      'alternativeHypotheses',
+    ],
   },
 };
 
 export function buildTradecraftPrompt(
   mode: AnalyticMode,
-  variables: Record<string, string>
+  variables: Record<string, string>,
 ): { system: string; user: string; mode: AnalyticMode; schemaHint: string } {
   const template = TRADECRAFT_PROMPT_LIBRARY[mode];
   let userPrompt = template.userPromptTemplate;
   for (const [key, value] of Object.entries(variables)) {
-    userPrompt = userPrompt.replace(new RegExp(`\\{${key}\\}`, "g"), value || "[not provided]");
+    userPrompt = userPrompt.replace(new RegExp(`\\{${key}\\}`, 'g'), value || '[not provided]');
   }
-  userPrompt = userPrompt.replace(/\{[a-z_]+\}/g, "[not provided]");
+  userPrompt = userPrompt.replace(/\{[a-z_]+\}/g, '[not provided]');
   return {
     system: template.systemPrompt,
     user: userPrompt,
@@ -252,26 +292,69 @@ export function buildTradecraftPrompt(
 
 export const CONFIDENCE_RUBRIC = {
   levels: [
-    { label: "High Confidence", range: [0.75, 1.0], description: "Evidence is strong, diverse, and consistent. Assumptions are well-grounded. Few significant gaps. Alternative hypotheses have been considered and found less compelling." },
-    { label: "Moderate Confidence", range: [0.5, 0.74], description: "Evidence is adequate but not exhaustive. Some assumptions are less certain. Notable gaps exist. Alternative hypotheses are possible but less likely." },
-    { label: "Low Confidence", range: [0.25, 0.49], description: "Evidence is limited, fragmented, or of uncertain quality. Key assumptions are questionable. Significant gaps. Multiple alternatives remain plausible." },
-    { label: "Insufficient Evidence", range: [0.0, 0.24], description: "Evidence is too sparse or poor quality to support meaningful assessment. Assessment is largely speculative. Should not drive consequential decisions without additional collection." },
+    {
+      label: 'High Confidence',
+      range: [0.75, 1.0],
+      description:
+        'Evidence is strong, diverse, and consistent. Assumptions are well-grounded. Few significant gaps. Alternative hypotheses have been considered and found less compelling.',
+    },
+    {
+      label: 'Moderate Confidence',
+      range: [0.5, 0.74],
+      description:
+        'Evidence is adequate but not exhaustive. Some assumptions are less certain. Notable gaps exist. Alternative hypotheses are possible but less likely.',
+    },
+    {
+      label: 'Low Confidence',
+      range: [0.25, 0.49],
+      description:
+        'Evidence is limited, fragmented, or of uncertain quality. Key assumptions are questionable. Significant gaps. Multiple alternatives remain plausible.',
+    },
+    {
+      label: 'Insufficient Evidence',
+      range: [0.0, 0.24],
+      description:
+        'Evidence is too sparse or poor quality to support meaningful assessment. Assessment is largely speculative. Should not drive consequential decisions without additional collection.',
+    },
   ],
   scoringDimensions: [
-    { dimension: "Evidence Quantity", weight: 0.2, description: "How much evidence is available?" },
-    { dimension: "Evidence Quality", weight: 0.25, description: "How reliable are the sources? Is the evidence direct or circumstantial?" },
-    { dimension: "Source Diversity", weight: 0.15, description: "Do multiple independent sources corroborate?" },
-    { dimension: "Logical Coherence", weight: 0.25, description: "Does the evidence logically support the conclusion without gaps?" },
-    { dimension: "Assumption Defensibility", weight: 0.15, description: "How well-grounded are the key assumptions?" },
+    { dimension: 'Evidence Quantity', weight: 0.2, description: 'How much evidence is available?' },
+    {
+      dimension: 'Evidence Quality',
+      weight: 0.25,
+      description: 'How reliable are the sources? Is the evidence direct or circumstantial?',
+    },
+    {
+      dimension: 'Source Diversity',
+      weight: 0.15,
+      description: 'Do multiple independent sources corroborate?',
+    },
+    {
+      dimension: 'Logical Coherence',
+      weight: 0.25,
+      description: 'Does the evidence logically support the conclusion without gaps?',
+    },
+    {
+      dimension: 'Assumption Defensibility',
+      weight: 0.15,
+      description: 'How well-grounded are the key assumptions?',
+    },
   ],
-  calculateScore(scores: { quantity: number; quality: number; diversity: number; coherence: number; assumptions: number }): number {
+  calculateScore(scores: {
+    quantity: number;
+    quality: number;
+    diversity: number;
+    coherence: number;
+    assumptions: number;
+  }): number {
     return (
-      scores.quantity * 0.2 +
-      scores.quality * 0.25 +
-      scores.diversity * 0.15 +
-      scores.coherence * 0.25 +
-      scores.assumptions * 0.15
-    ) / 10;
+      (scores.quantity * 0.2 +
+        scores.quality * 0.25 +
+        scores.diversity * 0.15 +
+        scores.coherence * 0.25 +
+        scores.assumptions * 0.15) /
+      10
+    );
   },
 };
 

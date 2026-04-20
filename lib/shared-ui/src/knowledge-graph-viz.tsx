@@ -5,7 +5,8 @@
  * for exploring the cross-domain knowledge graph.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import type React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -58,28 +59,28 @@ export interface KnowledgeGraphVizProps {
 // ─── Domain Colour Palette ────────────────────────────────────────────────────
 
 const DOMAIN_COLORS: Record<string, string> = {
-  prism: "#8B5CF6",
-  vessels: "#0EA5E9",
-  aegis: "#EF4444",
-  terra: "#10B981",
-  lyte: "#F59E0B",
-  "carlota-jo": "#EC4899",
-  stephen: "#6B7280",
-  orchestration: "#1D4ED8",
-  intelligence: "#DC2626",
-  maritime: "#0284C7",
-  legal: "#7C3AED",
-  default: "#6B7280",
+  prism: '#8B5CF6',
+  vessels: '#0EA5E9',
+  aegis: '#EF4444',
+  terra: '#10B981',
+  lyte: '#F59E0B',
+  'carlota-jo': '#EC4899',
+  stephen: '#6B7280',
+  orchestration: '#1D4ED8',
+  intelligence: '#DC2626',
+  maritime: '#0284C7',
+  legal: '#7C3AED',
+  default: '#6B7280',
 };
 
 const ENTITY_TYPE_SHAPES: Record<string, string> = {
-  person: "circle",
-  organization: "rect",
-  asset: "diamond",
-  threat: "triangle",
-  concept: "hexagon",
-  vessel: "ship",
-  default: "circle",
+  person: 'circle',
+  organization: 'rect',
+  asset: 'diamond',
+  threat: 'triangle',
+  concept: 'hexagon',
+  vessel: 'ship',
+  default: 'circle',
 };
 
 function getDomainColor(domain: string): string {
@@ -170,14 +171,20 @@ export function KnowledgeGraphViz({
   highlightPath,
   showLabels = true,
   colorByDomain = true,
-  className = "",
+  className = '',
 }: KnowledgeGraphVizProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [nodes, setNodes] = useState<GraphVizNode[]>([]);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
-  const [dragging, setDragging] = useState<{ nodeId: string; startX: number; startY: number } | null>(null);
-  const [panStart, setPanStart] = useState<{ x: number; y: number; tx: number; ty: number } | null>(null);
+  const [dragging, setDragging] = useState<{
+    nodeId: string;
+    startX: number;
+    startY: number;
+  } | null>(null);
+  const [panStart, setPanStart] = useState<{ x: number; y: number; tx: number; ty: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (data.nodes.length === 0) {
@@ -186,7 +193,7 @@ export function KnowledgeGraphViz({
     }
     const positioned = runForceSimulation(data.nodes, data.edges, width, height);
     setNodes(positioned);
-  }, [data.nodes.map((n) => n.id).join(","), data.edges.length, width, height]);
+  }, [data.nodes.map((n) => n.id).join(','), data.edges.length, width, height]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -197,31 +204,42 @@ export function KnowledgeGraphViz({
     }));
   }, []);
 
-  const handleSvgMouseDown = useCallback((e: React.MouseEvent) => {
-    if ((e.target as Element).tagName === "svg") {
-      setPanStart({ x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y });
-    }
-  }, [transform]);
+  const handleSvgMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if ((e.target as Element).tagName === 'svg') {
+        setPanStart({ x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y });
+      }
+    },
+    [transform],
+  );
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (panStart) {
-      setTransform((t) => ({
-        ...t,
-        x: panStart.tx + (e.clientX - panStart.x),
-        y: panStart.ty + (e.clientY - panStart.y),
-      }));
-    }
-    if (dragging) {
-      setNodes((prev) =>
-        prev.map((n) =>
-          n.id === dragging.nodeId
-            ? { ...n, x: (n.x ?? 0) + (e.clientX - dragging.startX) / transform.scale, y: (n.y ?? 0) + (e.clientY - dragging.startY) / transform.scale, pinned: true }
-            : n,
-        ),
-      );
-      setDragging((d) => d ? { ...d, startX: e.clientX, startY: e.clientY } : null);
-    }
-  }, [panStart, dragging, transform.scale]);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (panStart) {
+        setTransform((t) => ({
+          ...t,
+          x: panStart.tx + (e.clientX - panStart.x),
+          y: panStart.ty + (e.clientY - panStart.y),
+        }));
+      }
+      if (dragging) {
+        setNodes((prev) =>
+          prev.map((n) =>
+            n.id === dragging.nodeId
+              ? {
+                  ...n,
+                  x: (n.x ?? 0) + (e.clientX - dragging.startX) / transform.scale,
+                  y: (n.y ?? 0) + (e.clientY - dragging.startY) / transform.scale,
+                  pinned: true,
+                }
+              : n,
+          ),
+        );
+        setDragging((d) => (d ? { ...d, startX: e.clientX, startY: e.clientY } : null));
+      }
+    },
+    [panStart, dragging, transform.scale],
+  );
 
   const handleMouseUp = useCallback(() => {
     setPanStart(null);
@@ -244,14 +262,20 @@ export function KnowledgeGraphViz({
 
   if (data.nodes.length === 0) {
     return (
-      <div className={`flex items-center justify-center text-gray-500 text-sm ${className}`} style={{ width, height }}>
+      <div
+        className={`flex items-center justify-center text-gray-500 text-sm ${className}`}
+        style={{ width, height }}
+      >
         No graph data to display
       </div>
     );
   }
 
   return (
-    <div className={`relative overflow-hidden bg-gray-950 rounded-lg border border-gray-800 ${className}`} style={{ width, height }}>
+    <div
+      className={`relative overflow-hidden bg-gray-950 rounded-lg border border-gray-800 ${className}`}
+      style={{ width, height }}
+    >
       <svg
         ref={svgRef}
         width={width}
@@ -261,13 +285,20 @@ export function KnowledgeGraphViz({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        style={{ cursor: panStart ? "grabbing" : "grab" }}
+        style={{ cursor: panStart ? 'grabbing' : 'grab' }}
       >
         <defs>
           <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
             <path d="M0,0 L0,6 L8,3 Z" fill="#4B5563" />
           </marker>
-          <marker id="arrowhead-highlight" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <marker
+            id="arrowhead-highlight"
+            markerWidth="8"
+            markerHeight="8"
+            refX="6"
+            refY="3"
+            orient="auto"
+          >
             <path d="M0,0 L0,6 L8,3 Z" fill="#60A5FA" />
           </marker>
         </defs>
@@ -280,13 +311,24 @@ export function KnowledgeGraphViz({
             const isHighlighted = highlightSet.has(edge.fromId) && highlightSet.has(edge.toId);
             const isHovered = hoveredNode === edge.fromId || hoveredNode === edge.toId;
             return (
-              <g key={edge.id} onClick={() => onEdgeClick?.(edge)} style={{ cursor: "pointer" }}>
+              <g key={edge.id} onClick={() => onEdgeClick?.(edge)} style={{ cursor: 'pointer' }}>
                 <line
-                  x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                  stroke={isHighlighted ? "#60A5FA" : isHovered ? "#9CA3AF" : edge.isCrossDomain ? "#8B5CF6" : "#374151"}
+                  x1={from.x}
+                  y1={from.y}
+                  x2={to.x}
+                  y2={to.y}
+                  stroke={
+                    isHighlighted
+                      ? '#60A5FA'
+                      : isHovered
+                        ? '#9CA3AF'
+                        : edge.isCrossDomain
+                          ? '#8B5CF6'
+                          : '#374151'
+                  }
                   strokeWidth={isHighlighted ? 2 : 1}
-                  strokeDasharray={edge.isCrossDomain ? "4 2" : undefined}
-                  markerEnd={`url(#${isHighlighted ? "arrowhead-highlight" : "arrowhead"})`}
+                  strokeDasharray={edge.isCrossDomain ? '4 2' : undefined}
+                  markerEnd={`url(#${isHighlighted ? 'arrowhead-highlight' : 'arrowhead'})`}
                   opacity={isHighlighted || isHovered ? 1 : 0.6}
                 />
                 {isHovered && (
@@ -306,7 +348,7 @@ export function KnowledgeGraphViz({
 
           {nodes.map((node) => {
             const r = getNodeRadius(node);
-            const color = colorByDomain ? getDomainColor(node.domain) : "#6B7280";
+            const color = colorByDomain ? getDomainColor(node.domain) : '#6B7280';
             const isHighlighted = highlightNodeId === node.id || highlightSet.has(node.id);
             const isHovered = hoveredNode === node.id;
             const opacity = highlightNodeId && !isHighlighted ? 0.3 : 1;
@@ -319,28 +361,34 @@ export function KnowledgeGraphViz({
                 onMouseEnter={() => setHoveredNode(node.id)}
                 onMouseLeave={() => setHoveredNode(null)}
                 onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: 'pointer' }}
                 opacity={opacity}
               >
                 <circle
                   r={r + (isHighlighted ? 3 : 0)}
-                  fill={isHighlighted ? "#1E40AF" : "transparent"}
+                  fill={isHighlighted ? '#1E40AF' : 'transparent'}
                   stroke={color}
                   strokeWidth={isHighlighted ? 2.5 : isHovered ? 2 : 1.5}
                 />
                 <circle r={r - 2} fill={color} fillOpacity={0.25} />
-                <text textAnchor="middle" dominantBaseline="middle" fontSize="9" fill={color} fontWeight="600">
+                <text
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize="9"
+                  fill={color}
+                  fontWeight="600"
+                >
                   {node.entityType.slice(0, 2).toUpperCase()}
                 </text>
                 {(showLabels || isHovered) && (
                   <text
                     y={r + 10}
                     textAnchor="middle"
-                    fontSize={isHovered ? "11" : "9"}
-                    fill={isHovered ? "#E5E7EB" : "#9CA3AF"}
-                    style={{ pointerEvents: "none" }}
+                    fontSize={isHovered ? '11' : '9'}
+                    fill={isHovered ? '#E5E7EB' : '#9CA3AF'}
+                    style={{ pointerEvents: 'none' }}
                   >
-                    {node.name.length > 18 ? node.name.slice(0, 18) + "…" : node.name}
+                    {node.name.length > 18 ? node.name.slice(0, 18) + '…' : node.name}
                   </text>
                 )}
               </g>
@@ -350,7 +398,7 @@ export function KnowledgeGraphViz({
       </svg>
 
       <div className="absolute top-2 right-2 flex flex-col gap-1">
-        {["+", "-", "⌂"].map((btn, i) => (
+        {['+', '-', '⌂'].map((btn, i) => (
           <button
             key={btn}
             onClick={() => {
@@ -405,7 +453,10 @@ function buildHierarchicalLayout(
   }
 
   const roots = nodes.filter((n) => (inDegree.get(n.id) ?? 0) === 0);
-  const starts = roots.length > 0 ? roots : [nodes.reduce((a, b) => ((a.degree ?? 0) > (b.degree ?? 0) ? a : b))];
+  const starts =
+    roots.length > 0
+      ? roots
+      : [nodes.reduce((a, b) => ((a.degree ?? 0) > (b.degree ?? 0) ? a : b))];
 
   const level = new Map<string, number>();
   const queue: Array<{ id: string; depth: number }> = starts.map((n) => ({ id: n.id, depth: 0 }));
@@ -453,27 +504,31 @@ export function HierarchicalGraphViz({
   highlightNodeId,
   showLabels = true,
   colorByDomain = true,
-  className = "",
+  className = '',
 }: HierarchicalGraphVizProps) {
-  const nodes = useMemo(() => buildHierarchicalLayout(data.nodes, data.edges, width, height), [
-    data.nodes.map((n) => n.id).join(","),
-    data.edges.length,
-    width,
-    height,
-  ]);
+  const nodes = useMemo(
+    () => buildHierarchicalLayout(data.nodes, data.edges, width, height),
+    [data.nodes.map((n) => n.id).join(','), data.edges.length, width, height],
+  );
   const nodeMap = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
   if (data.nodes.length === 0) {
     return (
-      <div className={`flex items-center justify-center text-gray-500 text-sm ${className}`} style={{ width, height }}>
+      <div
+        className={`flex items-center justify-center text-gray-500 text-sm ${className}`}
+        style={{ width, height }}
+      >
         No graph data to display
       </div>
     );
   }
 
   return (
-    <div className={`relative overflow-hidden bg-gray-950 rounded-lg border border-gray-800 ${className}`} style={{ width, height }}>
+    <div
+      className={`relative overflow-hidden bg-gray-950 rounded-lg border border-gray-800 ${className}`}
+      style={{ width, height }}
+    >
       <div className="absolute top-1 left-2 text-xs text-gray-600 font-medium">Hierarchical</div>
       <svg width={width} height={height}>
         <defs>
@@ -491,21 +546,26 @@ export function HierarchicalGraphViz({
           return (
             <g key={edge.id}>
               <line
-                x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                stroke={edge.isCrossDomain ? "#8B5CF6" : isHovered ? "#9CA3AF" : "#374151"}
+                x1={from.x}
+                y1={from.y}
+                x2={to.x}
+                y2={to.y}
+                stroke={edge.isCrossDomain ? '#8B5CF6' : isHovered ? '#9CA3AF' : '#374151'}
                 strokeWidth={isHovered ? 1.5 : 1}
-                strokeDasharray={edge.isCrossDomain ? "4 2" : undefined}
+                strokeDasharray={edge.isCrossDomain ? '4 2' : undefined}
                 markerEnd="url(#h-arrow)"
                 opacity={isHovered ? 1 : 0.6}
               />
               {isHovered && (
-                <text x={midX} y={midY - 5} textAnchor="middle" fontSize="8" fill="#9CA3AF">{edge.relationshipType}</text>
+                <text x={midX} y={midY - 5} textAnchor="middle" fontSize="8" fill="#9CA3AF">
+                  {edge.relationshipType}
+                </text>
               )}
             </g>
           );
         })}
         {nodes.map((node) => {
-          const color = colorByDomain ? getDomainColor(node.domain) : "#6B7280";
+          const color = colorByDomain ? getDomainColor(node.domain) : '#6B7280';
           const isHighlighted = highlightNodeId === node.id;
           const isHovered = hoveredNode === node.id;
           const r = Math.min(20, 8 + (node.degree ?? 0) * 1.2);
@@ -516,22 +576,37 @@ export function HierarchicalGraphViz({
               onClick={() => onNodeClick?.(node)}
               onMouseEnter={() => setHoveredNode(node.id)}
               onMouseLeave={() => setHoveredNode(null)}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: 'pointer' }}
             >
               <rect
-                x={-r} y={-r / 1.4} width={r * 2} height={r * 1.4 * 1.4}
-                rx={node.entityType === "organization" ? 3 : r}
+                x={-r}
+                y={-r / 1.4}
+                width={r * 2}
+                height={r * 1.4 * 1.4}
+                rx={node.entityType === 'organization' ? 3 : r}
                 fill={color}
                 fillOpacity={0.2}
                 stroke={color}
                 strokeWidth={isHighlighted || isHovered ? 2 : 1.5}
               />
-              <text textAnchor="middle" dominantBaseline="middle" fontSize="8" fill={color} fontWeight="600">
+              <text
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="8"
+                fill={color}
+                fontWeight="600"
+              >
                 {node.entityType.slice(0, 2).toUpperCase()}
               </text>
               {(showLabels || isHovered) && (
-                <text y={r + 9} textAnchor="middle" fontSize="8" fill={isHovered ? "#E5E7EB" : "#9CA3AF"} style={{ pointerEvents: "none" }}>
-                  {node.name.length > 16 ? node.name.slice(0, 16) + "…" : node.name}
+                <text
+                  y={r + 9}
+                  textAnchor="middle"
+                  fontSize="8"
+                  fill={isHovered ? '#E5E7EB' : '#9CA3AF'}
+                  style={{ pointerEvents: 'none' }}
+                >
+                  {node.name.length > 16 ? node.name.slice(0, 16) + '…' : node.name}
                 </text>
               )}
             </g>
@@ -563,10 +638,10 @@ export interface TimelineGraphVizProps {
 function extractEdgeTimestamp(edge: GraphVizEdge): number | null {
   const p = (edge as GraphVizEdge & { properties?: Record<string, unknown> }).properties;
   if (!p) return null;
-  for (const key of ["timestamp", "createdAt", "created_at", "date", "occurred_at"]) {
+  for (const key of ['timestamp', 'createdAt', 'created_at', 'date', 'occurred_at']) {
     const val = p[key];
-    if (typeof val === "string" || typeof val === "number") {
-      const ms = typeof val === "number" ? val : Date.parse(val);
+    if (typeof val === 'string' || typeof val === 'number') {
+      const ms = typeof val === 'number' ? val : Date.parse(val);
       if (!isNaN(ms)) return ms;
     }
   }
@@ -579,15 +654,21 @@ export function TimelineGraphViz({
   height = 400,
   onNodeClick,
   onEdgeClick,
-  className = "",
+  className = '',
 }: TimelineGraphVizProps) {
   const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
 
-  const PAD_L = 80, PAD_R = 20, PAD_T = 40, PAD_B = 32;
+  const PAD_L = 80,
+    PAD_R = 20,
+    PAD_T = 40,
+    PAD_B = 32;
   const innerW = width - PAD_L - PAD_R;
   const innerH = height - PAD_T - PAD_B;
 
-  const domains = useMemo(() => Array.from(new Set(data.nodes.map((n) => n.domain))).sort(), [data.nodes]);
+  const domains = useMemo(
+    () => Array.from(new Set(data.nodes.map((n) => n.domain))).sort(),
+    [data.nodes],
+  );
   const domainY = useMemo(() => {
     const step = innerH / Math.max(domains.length, 1);
     return new Map(domains.map((d, i) => [d, PAD_T + step * i + step / 2]));
@@ -604,19 +685,27 @@ export function TimelineGraphViz({
   const edgeX = (edge: GraphVizEdge, index: number): number => {
     const ts = extractEdgeTimestamp(edge);
     if (hasTimestamps && ts !== null) return PAD_L + ((ts - minTs) / tsRange) * innerW;
-    return PAD_L + (data.edges.length > 1 ? (index / (data.edges.length - 1)) * innerW : innerW / 2);
+    return (
+      PAD_L + (data.edges.length > 1 ? (index / (data.edges.length - 1)) * innerW : innerW / 2)
+    );
   };
 
   if (data.nodes.length === 0) {
     return (
-      <div className={`flex items-center justify-center text-gray-500 text-sm ${className}`} style={{ width, height }}>
+      <div
+        className={`flex items-center justify-center text-gray-500 text-sm ${className}`}
+        style={{ width, height }}
+      >
         No graph data to display
       </div>
     );
   }
 
   return (
-    <div className={`relative overflow-hidden bg-gray-950 rounded-lg border border-gray-800 ${className}`} style={{ width, height }}>
+    <div
+      className={`relative overflow-hidden bg-gray-950 rounded-lg border border-gray-800 ${className}`}
+      style={{ width, height }}
+    >
       <div className="absolute top-1 left-2 text-xs text-gray-600 font-medium">Timeline</div>
       <svg width={width} height={height}>
         {domains.map((domain) => {
@@ -624,8 +713,15 @@ export function TimelineGraphViz({
           return (
             <g key={domain}>
               <line x1={PAD_L} y1={y} x2={width - PAD_R} y2={y} stroke="#1F2937" strokeWidth={1} />
-              <text x={PAD_L - 6} y={y} textAnchor="end" dominantBaseline="middle" fontSize="9" fill={getDomainColor(domain)}>
-                {domain.length > 10 ? domain.slice(0, 10) + "…" : domain}
+              <text
+                x={PAD_L - 6}
+                y={y}
+                textAnchor="end"
+                dominantBaseline="middle"
+                fontSize="9"
+                fill={getDomainColor(domain)}
+              >
+                {domain.length > 10 ? domain.slice(0, 10) + '…' : domain}
               </text>
             </g>
           );
@@ -635,23 +731,45 @@ export function TimelineGraphViz({
           const fromNode = nodeMap.get(edge.fromId);
           const toNode = nodeMap.get(edge.toId);
           const x = edgeX(edge, i);
-          const fromY = domainY.get(fromNode?.domain ?? "") ?? PAD_T + innerH / 2;
-          const toY = domainY.get(toNode?.domain ?? "") ?? PAD_T + innerH / 2;
+          const fromY = domainY.get(fromNode?.domain ?? '') ?? PAD_T + innerH / 2;
+          const toY = domainY.get(toNode?.domain ?? '') ?? PAD_T + innerH / 2;
           const isHovered = hoveredEdge === edge.id;
-          const color = edge.isCrossDomain ? "#8B5CF6" : "#374151";
+          const color = edge.isCrossDomain ? '#8B5CF6' : '#374151';
           return (
             <g
               key={edge.id}
               onClick={() => onEdgeClick?.(edge)}
               onMouseEnter={() => setHoveredEdge(edge.id)}
               onMouseLeave={() => setHoveredEdge(null)}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: 'pointer' }}
             >
-              <line x1={x} y1={fromY} x2={x} y2={toY} stroke={isHovered ? "#60A5FA" : color} strokeWidth={isHovered ? 2 : 1} strokeDasharray={edge.isCrossDomain ? "3 2" : undefined} />
-              <circle cx={x} cy={fromY} r={4} fill={getDomainColor(fromNode?.domain ?? "")} opacity={isHovered ? 1 : 0.7} />
-              <circle cx={x} cy={toY} r={4} fill={getDomainColor(toNode?.domain ?? "")} opacity={isHovered ? 1 : 0.7} />
+              <line
+                x1={x}
+                y1={fromY}
+                x2={x}
+                y2={toY}
+                stroke={isHovered ? '#60A5FA' : color}
+                strokeWidth={isHovered ? 2 : 1}
+                strokeDasharray={edge.isCrossDomain ? '3 2' : undefined}
+              />
+              <circle
+                cx={x}
+                cy={fromY}
+                r={4}
+                fill={getDomainColor(fromNode?.domain ?? '')}
+                opacity={isHovered ? 1 : 0.7}
+              />
+              <circle
+                cx={x}
+                cy={toY}
+                r={4}
+                fill={getDomainColor(toNode?.domain ?? '')}
+                opacity={isHovered ? 1 : 0.7}
+              />
               {isHovered && (
-                <text x={x + 5} y={Math.min(fromY, toY) - 4} fontSize="8" fill="#9CA3AF">{edge.relationshipType}</text>
+                <text x={x + 5} y={Math.min(fromY, toY) - 4} fontSize="8" fill="#9CA3AF">
+                  {edge.relationshipType}
+                </text>
               )}
             </g>
           );
@@ -661,16 +779,26 @@ export function TimelineGraphViz({
           const fromNode = nodeMap.get(edge.fromId);
           const x = edgeX(edge, i);
           const ts = extractEdgeTimestamp(edge);
-          const label = ts ? new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : String(i + 1);
+          const label = ts
+            ? new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+            : String(i + 1);
           return (
-            <text key={`lbl-${edge.id}`} x={x} y={height - PAD_B + 12} textAnchor="middle" fontSize="7" fill="#4B5563" style={{ pointerEvents: "none" }}>
+            <text
+              key={`lbl-${edge.id}`}
+              x={x}
+              y={height - PAD_B + 12}
+              textAnchor="middle"
+              fontSize="7"
+              fill="#4B5563"
+              style={{ pointerEvents: 'none' }}
+            >
               {fromNode?.name.slice(0, 6) ?? label}
             </text>
           );
         })}
       </svg>
       <div className="absolute bottom-2 right-2 text-xs text-gray-600">
-        {data.edges.length} relationships · {hasTimestamps ? "time-ordered" : "insertion order"}
+        {data.edges.length} relationships · {hasTimestamps ? 'time-ordered' : 'insertion order'}
       </div>
     </div>
   );
@@ -678,7 +806,7 @@ export function TimelineGraphViz({
 
 // ─── Unified Graph View (layout switcher) ─────────────────────────────────────
 
-export type GraphLayout = "force" | "hierarchical" | "timeline";
+export type GraphLayout = 'force' | 'hierarchical' | 'timeline';
 
 export interface UnifiedKnowledgeGraphVizProps {
   data: KnowledgeGraphData;
@@ -691,15 +819,19 @@ export interface UnifiedKnowledgeGraphVizProps {
 
 export function UnifiedKnowledgeGraphViz({
   data,
-  defaultLayout = "force",
+  defaultLayout = 'force',
   width = 800,
   height = 600,
   onNodeClick,
-  className = "",
+  className = '',
 }: UnifiedKnowledgeGraphVizProps) {
   const [layout, setLayout] = useState<GraphLayout>(defaultLayout);
 
-  const layoutLabels: Record<GraphLayout, string> = { force: "Force", hierarchical: "Hierarchy", timeline: "Timeline" };
+  const layoutLabels: Record<GraphLayout, string> = {
+    force: 'Force',
+    hierarchical: 'Hierarchy',
+    timeline: 'Timeline',
+  };
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
@@ -710,17 +842,38 @@ export function UnifiedKnowledgeGraphViz({
             onClick={() => setLayout(l)}
             className={`px-2 py-0.5 rounded text-xs border transition-colors ${
               layout === l
-                ? "bg-blue-900 border-blue-700 text-blue-200"
-                : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600"
+                ? 'bg-blue-900 border-blue-700 text-blue-200'
+                : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600'
             }`}
           >
             {layoutLabels[l]}
           </button>
         ))}
       </div>
-      {layout === "force" && <KnowledgeGraphViz data={data} width={width} height={height} {...(onNodeClick !== undefined ? { onNodeClick } : {})} />}
-      {layout === "hierarchical" && <HierarchicalGraphViz data={data} width={width} height={height} {...(onNodeClick !== undefined ? { onNodeClick } : {})} />}
-      {layout === "timeline" && <TimelineGraphViz data={data} width={width} height={height} {...(onNodeClick !== undefined ? { onNodeClick } : {})} />}
+      {layout === 'force' && (
+        <KnowledgeGraphViz
+          data={data}
+          width={width}
+          height={height}
+          {...(onNodeClick !== undefined ? { onNodeClick } : {})}
+        />
+      )}
+      {layout === 'hierarchical' && (
+        <HierarchicalGraphViz
+          data={data}
+          width={width}
+          height={height}
+          {...(onNodeClick !== undefined ? { onNodeClick } : {})}
+        />
+      )}
+      {layout === 'timeline' && (
+        <TimelineGraphViz
+          data={data}
+          width={width}
+          height={height}
+          {...(onNodeClick !== undefined ? { onNodeClick } : {})}
+        />
+      )}
     </div>
   );
 }
@@ -732,7 +885,7 @@ export interface GraphLegendProps {
   className?: string;
 }
 
-export function GraphLegend({ domains, className = "" }: GraphLegendProps) {
+export function GraphLegend({ domains, className = '' }: GraphLegendProps) {
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       {domains.map((domain) => (
@@ -760,7 +913,7 @@ export interface NodeDetailPanelProps {
   className?: string;
 }
 
-export function NodeDetailPanel({ node, onClose, className = "" }: NodeDetailPanelProps) {
+export function NodeDetailPanel({ node, onClose, className = '' }: NodeDetailPanelProps) {
   if (!node) return null;
   const color = getDomainColor(node.domain);
 
@@ -774,7 +927,9 @@ export function NodeDetailPanel({ node, onClose, className = "" }: NodeDetailPan
           <span className="text-xs text-gray-500">{node.domain}</span>
         </div>
         {onClose && (
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-400 text-xs">✕</button>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-400 text-xs">
+            ✕
+          </button>
         )}
       </div>
 
@@ -807,14 +962,18 @@ export function NodeDetailPanel({ node, onClose, className = "" }: NodeDetailPan
 
       {node.properties && Object.keys(node.properties).length > 0 && (
         <details className="mt-3">
-          <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-400">Properties</summary>
+          <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-400">
+            Properties
+          </summary>
           <div className="mt-2 space-y-1">
-            {Object.entries(node.properties).slice(0, 6).map(([key, val]) => (
-              <div key={key} className="flex gap-2 text-xs">
-                <span className="text-gray-600 capitalize">{key.replace(/_/g, " ")}</span>
-                <span className="text-gray-400 truncate">{String(val)}</span>
-              </div>
-            ))}
+            {Object.entries(node.properties)
+              .slice(0, 6)
+              .map(([key, val]) => (
+                <div key={key} className="flex gap-2 text-xs">
+                  <span className="text-gray-600 capitalize">{key.replace(/_/g, ' ')}</span>
+                  <span className="text-gray-400 truncate">{String(val)}</span>
+                </div>
+              ))}
           </div>
         </details>
       )}
@@ -837,16 +996,16 @@ export function GraphStatsCard({
   totalRelationships,
   crossDomainLinks,
   byDomain,
-  className = "",
+  className = '',
 }: GraphStatsCardProps) {
   return (
     <div className={`bg-gray-900 border border-gray-800 rounded-lg p-4 ${className}`}>
       <h3 className="text-sm font-semibold text-white mb-3">Knowledge Graph</h3>
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: "Entities", value: totalEntities.toLocaleString() },
-          { label: "Relationships", value: totalRelationships.toLocaleString() },
-          { label: "Cross-Domain", value: crossDomainLinks.toLocaleString() },
+          { label: 'Entities', value: totalEntities.toLocaleString() },
+          { label: 'Relationships', value: totalRelationships.toLocaleString() },
+          { label: 'Cross-Domain', value: crossDomainLinks.toLocaleString() },
         ].map(({ label, value }) => (
           <div key={label} className="text-center">
             <div className="text-lg font-bold text-white">{value}</div>
@@ -872,7 +1031,11 @@ export function GraphStatsCard({
                   <div className="flex-1 bg-gray-800 rounded-full h-1.5">
                     <div
                       className="h-1.5 rounded-full"
-                      style={{ width: `${pct}%`, backgroundColor: getDomainColor(domain), opacity: 0.7 }}
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: getDomainColor(domain),
+                        opacity: 0.7,
+                      }}
                     />
                   </div>
                   <span className="text-xs text-gray-500 w-8 text-right">{count}</span>

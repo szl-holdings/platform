@@ -1,4 +1,4 @@
-import type { Evidence } from "./types.js";
+import type { Evidence } from './types.js';
 
 export interface ConfidenceInput {
   baseConfidence: number;
@@ -46,11 +46,11 @@ export function computeConfidence(input: ConfidenceInput): ConfidenceResult {
 
   const breakdown = [
     `base=${baseConfidence.toFixed(3)}`,
-    `evidence=${evidenceAdjustment >= 0 ? "+" : ""}${evidenceAdjustment.toFixed(3)}`,
-    `freshness=${freshnessAdjustment >= 0 ? "+" : ""}${freshnessAdjustment.toFixed(3)}`,
+    `evidence=${evidenceAdjustment >= 0 ? '+' : ''}${evidenceAdjustment.toFixed(3)}`,
+    `freshness=${freshnessAdjustment >= 0 ? '+' : ''}${freshnessAdjustment.toFixed(3)}`,
     `policy=${policyAdjustment.toFixed(3)}`,
     `final=${score.toFixed(3)}`,
-  ].join(" ");
+  ].join(' ');
 
   return {
     score,
@@ -62,10 +62,12 @@ export function computeConfidence(input: ConfidenceInput): ConfidenceResult {
   };
 }
 
-export function confidenceTier(score: number): "very-low" | "low" | "medium" | "high" | "very-high" {
-  if (score >= 0.85) return "very-high";
-  if (score >= 0.7) return "high";
-  if (score >= 0.5) return "medium";
-  if (score >= 0.3) return "low";
-  return "very-low";
+export function confidenceTier(
+  score: number,
+): 'very-low' | 'low' | 'medium' | 'high' | 'very-high' {
+  if (score >= 0.85) return 'very-high';
+  if (score >= 0.7) return 'high';
+  if (score >= 0.5) return 'medium';
+  if (score >= 0.3) return 'low';
+  return 'very-low';
 }

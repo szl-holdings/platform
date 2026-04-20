@@ -10,7 +10,7 @@
  * the existing makeExecutableSchema setup.
  */
 
-import { logger } from "../lib/logger.js";
+import { logger } from '../lib/logger.js';
 
 export const directiveTypeDefs = `#graphql
   directive @requireRole(roles: [String!]!) on FIELD_DEFINITION
@@ -32,11 +32,11 @@ function getUserRoles(context: GraphQLContext): string[] {
 }
 
 function getUserOrgIds(context: GraphQLContext): number[] {
-  return context?.req?.user?.orgs?.map(o => o.orgId) ?? [];
+  return context?.req?.user?.orgs?.map((o) => o.orgId) ?? [];
 }
 
 function isAdmin(context: GraphQLContext): boolean {
-  return getUserRoles(context).some(r => ["super_admin", "admin"].includes(r));
+  return getUserRoles(context).some((r) => ['super_admin', 'admin'].includes(r));
 }
 
 /**
@@ -48,10 +48,10 @@ export function requireRole<TSource, TArgs, TContext extends GraphQLContext>(
 ) {
   return async (source: TSource, args: TArgs, context: TContext, info: unknown) => {
     const user = context?.req?.user;
-    if (!user) throw new Error("AUTHENTICATION_REQUIRED");
+    if (!user) throw new Error('AUTHENTICATION_REQUIRED');
     const userRoles = getUserRoles(context);
-    if (!roles.some(r => userRoles.includes(r))) {
-      throw new Error(`PERMISSION_DENIED: requires one of [${roles.join(", ")}]`);
+    if (!roles.some((r) => userRoles.includes(r))) {
+      throw new Error(`PERMISSION_DENIED: requires one of [${roles.join(', ')}]`);
     }
     return resolver(source, args, context, info);
   };
@@ -65,7 +65,7 @@ export function requireTenantScope<TSource, TArgs, TContext extends GraphQLConte
 ) {
   return async (source: TSource, args: TArgs, context: TContext, info: unknown) => {
     if (!isAdmin(context) && getUserOrgIds(context).length === 0) {
-      throw new Error("TENANT_SCOPE_REQUIRED: No organization membership");
+      throw new Error('TENANT_SCOPE_REQUIRED: No organization membership');
     }
     return resolver(source, args, context, info);
   };
@@ -84,7 +84,7 @@ export function auditField<TSource, TArgs, TContext extends GraphQLContext>(
     const fieldName = (info as { fieldName?: string })?.fieldName;
 
     logger.info({
-      msg: "GraphQL sensitive field accessed",
+      msg: 'GraphQL sensitive field accessed',
       actionClass,
       field: fieldName,
       userId: user?.id,
@@ -92,19 +92,18 @@ export function auditField<TSource, TArgs, TContext extends GraphQLContext>(
     });
 
     try {
-      const { writeEnrichedAudit } = await import("@szl-holdings/audit");
+      const { writeEnrichedAudit } = await import('@szl-holdings/audit');
       await writeEnrichedAudit({
         orgId: user?.orgs?.[0]?.orgId ?? null,
         userId: user?.id ?? null,
         action: actionClass,
-        resourceType: "graphql_field",
+        resourceType: 'graphql_field',
         resourceId: fieldName,
         correlationId,
-        serviceAttribution: "graphql",
-        adminActionClass: "security_action",
+        serviceAttribution: 'graphql',
+        adminActionClass: 'security_action',
       });
-    } catch {
-    }
+    } catch {}
 
     return resolver(source, args, context, info);
   };
@@ -115,18 +114,22 @@ export function auditField<TSource, TArgs, TContext extends GraphQLContext>(
  * In development/test, bypasses the check.
  * In production, requires approvalId in args or header.
  */
-export function requireApproval<TSource, TArgs extends Record<string, unknown>, TContext extends GraphQLContext>(
+export function requireApproval<
+  TSource,
+  TArgs extends Record<string, unknown>,
+  TContext extends GraphQLContext,
+>(
   actionClass: string,
   resolver: (source: TSource, args: TArgs, context: TContext, info: unknown) => unknown,
 ) {
   return async (source: TSource, args: TArgs, context: TContext, info: unknown) => {
-    const isDev = process.env["NODE_ENV"] === "development" || process.env["NODE_ENV"] === "test";
-    const approvalId = args?.approvalId ?? context?.req?.headers?.["x-approval-id"];
+    const isDev = process.env['NODE_ENV'] === 'development' || process.env['NODE_ENV'] === 'test';
+    const approvalId = args?.approvalId ?? context?.req?.headers?.['x-approval-id'];
     const user = context?.req?.user;
 
     if (!approvalId && !isDev) {
       logger.warn({
-        msg: "GraphQL @requireApproval: no approvalId",
+        msg: 'GraphQL @requireApproval: no approvalId',
         actionClass,
         userId: user?.id,
       });
@@ -149,7 +152,7 @@ export async function auditMutationContext(
 ): Promise<void> {
   try {
     const user = context?.req?.user;
-    const { writeEnrichedAudit } = await import("@szl-holdings/audit");
+    const { writeEnrichedAudit } = await import('@szl-holdings/audit');
     await writeEnrichedAudit({
       orgId: user?.orgs?.[0]?.orgId ?? null,
       userId: user?.id ?? null,
@@ -157,9 +160,8 @@ export async function auditMutationContext(
       resourceType,
       resourceId,
       correlationId: context?.req?.correlationId,
-      serviceAttribution: "graphql",
-      adminActionClass: "system_action",
+      serviceAttribution: 'graphql',
+      adminActionClass: 'system_action',
     });
-  } catch {
-  }
+  } catch {}
 }

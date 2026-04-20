@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cn } from "../utils";
-import { colors, effects } from "../tokens";
+import type * as React from 'react';
+import { colors, effects } from '../tokens';
+import { cn } from '../utils';
 
 export interface ChartContainerProps {
   title?: string;
@@ -24,16 +24,16 @@ export function ChartContainer({
   footer,
   legend,
   loading = false,
-  emptyMessage = "No data to display",
+  emptyMessage = 'No data to display',
   empty = false,
   accentColor,
-  minHeight = "200px",
+  minHeight = '200px',
   className,
   children,
 }: ChartContainerProps) {
   return (
     <div
-      className={cn("flex flex-col rounded-xl border", className)}
+      className={cn('flex flex-col rounded-xl border', className)}
       style={{
         background: effects.surface.card.background,
         border: effects.surface.card.border,
@@ -48,7 +48,7 @@ export function ChartContainer({
             {title && (
               <p
                 className="text-[14px] font-semibold tracking-tight truncate"
-                style={{ color: colors.text.primary, letterSpacing: "-0.005em" }}
+                style={{ color: colors.text.primary, letterSpacing: '-0.005em' }}
               >
                 {title}
               </p>
@@ -59,9 +59,7 @@ export function ChartContainer({
               </p>
             )}
           </div>
-          {controls && (
-            <div className="flex items-center gap-1.5 shrink-0">{controls}</div>
-          )}
+          {controls && <div className="flex items-center gap-1.5 shrink-0">{controls}</div>}
         </div>
       )}
 

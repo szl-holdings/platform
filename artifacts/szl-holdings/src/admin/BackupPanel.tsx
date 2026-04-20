@@ -1,17 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
-  HardDrive, Download, CheckCircle2, AlertCircle, Loader2, RefreshCw,
-  Database, Clock, Activity, Shield, X, FileText, Save, Plus,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { apiFetchAdmin } from "./api";
+  Activity,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Database,
+  Download,
+  FileText,
+  HardDrive,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Save,
+  Shield,
+  X,
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { apiFetchAdmin } from './api';
 
-const API = "/api";
+const API = '/api';
 function getCsrfToken(): string {
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-  return match ? decodeURIComponent(match[1]) : "";
+  return match ? decodeURIComponent(match[1]) : '';
 }
 
 // ─── Backup & Recovery Panel ─────────────────────────────────────────────────
@@ -20,12 +32,12 @@ interface BackupFile {
   filename: string;
   sizeBytes: number;
   createdAt: string;
-  label: "daily" | "weekly";
+  label: 'daily' | 'weekly';
 }
 
 interface BackupStatus {
   health: {
-    status: "ok" | "warning" | "error";
+    status: 'ok' | 'warning' | 'error';
     lastBackupAt: string | null;
     lastBackupSizeBytes: number;
     ageHours: number | null;
@@ -40,10 +52,10 @@ interface BackupStatus {
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB"];
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
+  return `${(bytes / 1024 ** i).toFixed(1)} ${units[i]}`;
 }
 
 function BackupPanel() {
@@ -52,14 +64,14 @@ function BackupPanel() {
   const [exportError, setExportError] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useStandardQuery<BackupStatus>({
-    queryKey: ["backup-status"],
-    queryFn: () => apiFetchAdmin<BackupStatus>("/admin/backup/status"),
+    queryKey: ['backup-status'],
+    queryFn: () => apiFetchAdmin<BackupStatus>('/admin/backup/status'),
     refetchInterval: 30000,
   });
 
   const runBackupMutation = useStandardMutation({
-    mutationFn: () => apiFetchAdmin("/admin/backup/run", { method: "POST" }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["backup-status"] }),
+    mutationFn: () => apiFetchAdmin('/admin/backup/run', { method: 'POST' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['backup-status'] }),
   });
 
   const handleExport = async () => {
@@ -67,32 +79,33 @@ function BackupPanel() {
     setExportError(null);
     try {
       const res = await fetch(`${API}/admin/backup/export-tenant`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orgId: undefined }),
       });
       if (!res.ok) throw new Error(`Export failed (${res.status})`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = `tenant-export-${new Date().toISOString().split("T")[0]}.zip`;
+      a.download = `tenant-export-${new Date().toISOString().split('T')[0]}.zip`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: unknown) {
-      setExportError(err instanceof Error ? err.message : "Export failed");
+      setExportError(err instanceof Error ? err.message : 'Export failed');
     } finally {
       setExportLoading(false);
     }
   };
 
   const health = data?.health;
-  const statusColor = health?.status === "ok"
-    ? "text-emerald-600 bg-emerald-500/10 border-emerald-500/20"
-    : health?.status === "warning"
-    ? "text-amber-600 bg-amber-500/10 border-amber-500/20"
-    : "text-red-600 bg-red-500/10 border-red-500/20";
+  const statusColor =
+    health?.status === 'ok'
+      ? 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20'
+      : health?.status === 'warning'
+        ? 'text-amber-600 bg-amber-500/10 border-amber-500/20'
+        : 'text-red-600 bg-red-500/10 border-red-500/20';
 
   return (
     <div className="space-y-6">
@@ -111,7 +124,11 @@ function BackupPanel() {
             disabled={exportLoading}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-foreground hover:bg-muted/30 transition-colors disabled:opacity-50"
           >
-            {exportLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            {exportLoading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
             Export All Data
           </button>
           <button
@@ -119,7 +136,11 @@ function BackupPanel() {
             disabled={runBackupMutation.isPending}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            {runBackupMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <HardDrive className="w-3.5 h-3.5" />}
+            {runBackupMutation.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <HardDrive className="w-3.5 h-3.5" />
+            )}
             Run Backup Now
           </button>
         </div>
@@ -165,8 +186,13 @@ function BackupPanel() {
                   <Activity className="w-4 h-4 text-primary" />
                   <span className="text-sm font-semibold text-foreground">Backup Health</span>
                 </div>
-                <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider", statusColor)}>
-                  {health?.status ?? "unknown"}
+                <span
+                  className={cn(
+                    'text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider',
+                    statusColor,
+                  )}
+                >
+                  {health?.status ?? 'unknown'}
                 </span>
               </div>
               <div className="space-y-2">
@@ -175,13 +201,13 @@ function BackupPanel() {
                   <span className="text-xs font-medium text-foreground">
                     {health?.lastBackupAt
                       ? new Date(health.lastBackupAt).toLocaleString()
-                      : "Never"}
+                      : 'Never'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-1.5 border-b border-border/50">
                   <span className="text-xs text-muted-foreground">Backup Age</span>
                   <span className="text-xs font-medium text-foreground">
-                    {health?.ageHours != null ? `${health.ageHours}h ago` : "N/A"}
+                    {health?.ageHours != null ? `${health.ageHours}h ago` : 'N/A'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-1.5 border-b border-border/50">
@@ -192,7 +218,9 @@ function BackupPanel() {
                 </div>
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-xs text-muted-foreground">Details</span>
-                  <span className="text-xs text-muted-foreground max-w-[60%] text-right">{health?.details ?? "—"}</span>
+                  <span className="text-xs text-muted-foreground max-w-[60%] text-right">
+                    {health?.details ?? '—'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -235,26 +263,39 @@ function BackupPanel() {
               <div className="py-12 text-center">
                 <HardDrive className="w-6 h-6 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">No backup files found.</p>
-                <p className="text-xs text-muted-foreground mt-1">Run a backup to create the first file.</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Run a backup to create the first file.
+                </p>
               </div>
             ) : (
               <div className="divide-y divide-border">
-                {data.backups.slice(0, 15).map(backup => (
-                  <div key={backup.filename} className="flex items-center justify-between px-5 py-3 hover:bg-muted/20 transition-colors">
+                {data.backups.slice(0, 15).map((backup) => (
+                  <div
+                    key={backup.filename}
+                    className="flex items-center justify-between px-5 py-3 hover:bg-muted/20 transition-colors"
+                  >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={cn(
-                        "text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider shrink-0",
-                        backup.label === "weekly"
-                          ? "text-violet-600 bg-violet-500/10 border-violet-500/20"
-                          : "text-blue-600 bg-blue-500/10 border-blue-500/20"
-                      )}>
+                      <div
+                        className={cn(
+                          'text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider shrink-0',
+                          backup.label === 'weekly'
+                            ? 'text-violet-600 bg-violet-500/10 border-violet-500/20'
+                            : 'text-blue-600 bg-blue-500/10 border-blue-500/20',
+                        )}
+                      >
                         {backup.label}
                       </div>
-                      <span className="text-xs font-mono text-foreground truncate">{backup.filename}</span>
+                      <span className="text-xs font-mono text-foreground truncate">
+                        {backup.filename}
+                      </span>
                     </div>
                     <div className="flex items-center gap-4 shrink-0 ml-2">
-                      <span className="text-xs text-muted-foreground">{formatBytes(backup.sizeBytes)}</span>
-                      <span className="text-xs text-muted-foreground">{new Date(backup.createdAt).toLocaleDateString()}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatBytes(backup.sizeBytes)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(backup.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -268,15 +309,19 @@ function BackupPanel() {
                 <Download className="w-3.5 h-3.5 text-primary" /> Data Export (GDPR)
               </h3>
               <p className="text-xs text-muted-foreground mb-4">
-                Export all tenant data as a ZIP archive containing JSON files for each
-                database table. Use for GDPR data portability requests or offline analysis.
+                Export all tenant data as a ZIP archive containing JSON files for each database
+                table. Use for GDPR data portability requests or offline analysis.
               </p>
               <button
                 onClick={handleExport}
                 disabled={exportLoading}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary border border-primary/20 text-xs font-semibold hover:bg-primary/20 transition-colors disabled:opacity-50"
               >
-                {exportLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                {exportLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
                 Download Full Export
               </button>
             </div>
@@ -286,15 +331,15 @@ function BackupPanel() {
                 <Shield className="w-3.5 h-3.5 text-primary" /> Recovery Documentation
               </h3>
               <p className="text-xs text-muted-foreground mb-3">
-                Full disaster recovery playbook including point-in-time restore,
-                migration rollbacks, and data retention policy.
+                Full disaster recovery playbook including point-in-time restore, migration
+                rollbacks, and data retention policy.
               </p>
               <div className="space-y-1">
                 {[
-                  "docs/disaster-recovery.md",
-                  "scripts/rollback/README.md",
-                  "scripts/backup-db.sh",
-                ].map(doc => (
+                  'docs/disaster-recovery.md',
+                  'scripts/rollback/README.md',
+                  'scripts/backup-db.sh',
+                ].map((doc) => (
                   <div key={doc} className="flex items-center gap-2 text-xs text-muted-foreground">
                     <FileText className="w-3 h-3 text-primary/60 shrink-0" />
                     <span className="font-mono">{doc}</span>
@@ -308,6 +353,5 @@ function BackupPanel() {
     </div>
   );
 }
-
 
 export { BackupPanel };

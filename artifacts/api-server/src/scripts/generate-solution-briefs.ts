@@ -9,31 +9,31 @@
  * and proof points. Wired into scripts/post-merge.sh so briefs stay in
  * sync with manifest edits.
  */
-import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import PDFDocument from "pdfkit";
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import PDFDocument from 'pdfkit';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const REPO_ROOT = resolve(__dirname, "../../../..");
-const MANIFEST_PATH = resolve(REPO_ROOT, "artifacts/audit/platform-capability-manifest.json");
-const OUT_DIR = resolve(REPO_ROOT, "artifacts/szl-holdings/public/briefs");
-const INDEX_PATH = resolve(OUT_DIR, "index.json");
+const REPO_ROOT = resolve(__dirname, '../../../..');
+const MANIFEST_PATH = resolve(REPO_ROOT, 'artifacts/audit/platform-capability-manifest.json');
+const OUT_DIR = resolve(REPO_ROOT, 'artifacts/szl-holdings/public/briefs');
+const INDEX_PATH = resolve(OUT_DIR, 'index.json');
 
 const BRAND = {
-  bg: "#0a0c10",
-  surface: "#111318",
-  border: "#1e2230",
-  primary: "#c2a55a",
-  text: "#e8e0d0",
-  muted: "#7a8099",
-  emerald: "#10b981",
-  blue: "#3b82f6",
-  amber: "#f59e0b",
-  rose: "#f43f5e",
-  violet: "#8b5cf6",
-  slate: "#6b7280",
+  bg: '#0a0c10',
+  surface: '#111318',
+  border: '#1e2230',
+  primary: '#c2a55a',
+  text: '#e8e0d0',
+  muted: '#7a8099',
+  emerald: '#10b981',
+  blue: '#3b82f6',
+  amber: '#f59e0b',
+  rose: '#f43f5e',
+  violet: '#8b5cf6',
+  slate: '#6b7280',
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -46,12 +46,12 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  live: "Live",
-  working_demo: "Working Demo",
-  partial: "Partial",
-  stub: "Stub",
-  broken: "Broken",
-  undocumented: "Undocumented",
+  live: 'Live',
+  working_demo: 'Working Demo',
+  partial: 'Partial',
+  stub: 'Stub',
+  broken: 'Broken',
+  undocumented: 'Undocumented',
 };
 
 interface Capability {
@@ -88,44 +88,44 @@ interface BriefSpec {
 
 const BRIEFS: BriefSpec[] = [
   {
-    slug: "lyte",
-    productKey: "Lyte (Business Observability)",
-    displayName: "Lyte — Decision Intelligence",
-    tagline: "Multi-model AI routing and portfolio-wide signal observability.",
+    slug: 'lyte',
+    productKey: 'Lyte (Business Observability)',
+    displayName: 'Lyte — Decision Intelligence',
+    tagline: 'Multi-model AI routing and portfolio-wide signal observability.',
     positioning:
-      "Lyte is the decision intelligence layer of the SZL ecosystem — it ingests signals from every platform, routes work across an LLM model fleet with cost and policy awareness, and exposes the operational state of the business as a single observable surface.",
+      'Lyte is the decision intelligence layer of the SZL ecosystem — it ingests signals from every platform, routes work across an LLM model fleet with cost and policy awareness, and exposes the operational state of the business as a single observable surface.',
   },
   {
-    slug: "aegis",
-    productKey: "Aegis (Defense & Intelligence)",
-    displayName: "Aegis — Unified Defense & Intelligence",
-    tagline: "SOC operations, threat intelligence, and MSP management converged.",
+    slug: 'aegis',
+    productKey: 'Aegis (Defense & Intelligence)',
+    displayName: 'Aegis — Unified Defense & Intelligence',
+    tagline: 'SOC operations, threat intelligence, and MSP management converged.',
     positioning:
-      "Aegis converges security operations, managed-service ticketing, and threat intelligence into a single command surface. Designed for organizations that cannot tolerate operational drift between security and infrastructure tooling.",
+      'Aegis converges security operations, managed-service ticketing, and threat intelligence into a single command surface. Designed for organizations that cannot tolerate operational drift between security and infrastructure tooling.',
   },
   {
-    slug: "vessels",
-    productKey: "Vessels (Maritime Intelligence)",
-    displayName: "Vessels — Maritime Intelligence",
-    tagline: "Fleet command, voyage economics, and sanctions screening.",
+    slug: 'vessels',
+    productKey: 'Vessels (Maritime Intelligence)',
+    displayName: 'Vessels — Maritime Intelligence',
+    tagline: 'Fleet command, voyage economics, and sanctions screening.',
     positioning:
-      "Vessels turns AIS, voyage, and sanctions data into a fleet command surface. Operators and underwriters work from the same intelligence layer rather than reconciling spreadsheets across vendors.",
+      'Vessels turns AIS, voyage, and sanctions data into a fleet command surface. Operators and underwriters work from the same intelligence layer rather than reconciling spreadsheets across vendors.',
   },
   {
-    slug: "terra",
-    productKey: "Terra (Real Estate Intelligence)",
-    displayName: "Terra — Real Estate Intelligence",
-    tagline: "Distress-first NYC market intelligence for brokers and investors.",
+    slug: 'terra',
+    productKey: 'Terra (Real Estate Intelligence)',
+    displayName: 'Terra — Real Estate Intelligence',
+    tagline: 'Distress-first NYC market intelligence for brokers and investors.',
     positioning:
-      "Terra is a distress-first real-estate intelligence platform built around a multi-factor distress scoring engine, NYC PostGIS coverage, and a deal pipeline tuned for opportunistic capital.",
+      'Terra is a distress-first real-estate intelligence platform built around a multi-factor distress scoring engine, NYC PostGIS coverage, and a deal pipeline tuned for opportunistic capital.',
   },
   {
-    slug: "carlota-jo",
-    productKey: "Carlota Jo (Private Advisory)",
-    displayName: "Carlota Jo — Private Advisory",
-    tagline: "Strategic advisory with client portal and AI-augmented sessions.",
+    slug: 'carlota-jo',
+    productKey: 'Carlota Jo (Private Advisory)',
+    displayName: 'Carlota Jo — Private Advisory',
+    tagline: 'Strategic advisory with client portal and AI-augmented sessions.',
     positioning:
-      "Carlota Jo packages senior advisory engagements with a working client portal, engagement workspace, and AI-augmented session intelligence. Built for partners who run a real practice, not a pitch deck.",
+      'Carlota Jo packages senior advisory engagements with a working client portal, engagement workspace, and AI-augmented session intelligence. Built for partners who run a real practice, not a pitch deck.',
   },
 ];
 
@@ -135,7 +135,7 @@ function hex(c: string): [number, number, number] {
 }
 
 function loadManifest(): Manifest {
-  const raw = readFileSync(MANIFEST_PATH, "utf8");
+  const raw = readFileSync(MANIFEST_PATH, 'utf8');
   return JSON.parse(raw) as Manifest;
 }
 
@@ -150,16 +150,27 @@ interface ProductSummary {
 
 function summarize(caps: Capability[]): ProductSummary {
   const counts: Record<string, number> = {
-    live: 0, working_demo: 0, partial: 0, stub: 0, broken: 0, undocumented: 0,
+    live: 0,
+    working_demo: 0,
+    partial: 0,
+    stub: 0,
+    broken: 0,
+    undocumented: 0,
   };
   for (const c of caps) {
     if (c.status in counts) counts[c.status]++;
   }
-  const readinessScore = caps.length === 0 ? 0 : Math.round(
-    ((counts.live * 1.0 + counts.working_demo * 0.75 + counts.partial * 0.4) / caps.length) * 100
+  const readinessScore =
+    caps.length === 0
+      ? 0
+      : Math.round(
+          ((counts.live * 1.0 + counts.working_demo * 0.75 + counts.partial * 0.4) / caps.length) *
+            100,
+        );
+  const proven = caps.filter((c) => c.status === 'live' || c.status === 'working_demo');
+  const risks = caps.filter(
+    (c) => c.status === 'stub' || c.status === 'broken' || c.status === 'undocumented',
   );
-  const proven = caps.filter(c => c.status === "live" || c.status === "working_demo");
-  const risks = caps.filter(c => c.status === "stub" || c.status === "broken" || c.status === "undocumented");
   return { total: caps.length, counts, capabilities: caps, readinessScore, proven, risks };
 }
 
@@ -175,17 +186,28 @@ function drawHeader(doc: PDFKit.PDFDocument, brief: BriefSpec, generated: string
   const [tr, tg, tb] = hex(BRAND.text);
 
   doc.rect(72, 72, doc.page.width - 144, 3).fill([pr, pg, pb]);
-  doc.font("Helvetica").fontSize(8).fillColor([mr, mg, mb])
-    .text("SZL HOLDINGS  ·  SOLUTION BRIEF", 72, 92, { characterSpacing: 2 });
-  doc.font("Helvetica-Bold").fontSize(22).fillColor([tr, tg, tb])
-    .text(brief.displayName, 72, 110);
-  doc.font("Helvetica").fontSize(11).fillColor([mr, mg, mb])
+  doc
+    .font('Helvetica')
+    .fontSize(8)
+    .fillColor([mr, mg, mb])
+    .text('SZL HOLDINGS  ·  SOLUTION BRIEF', 72, 92, { characterSpacing: 2 });
+  doc.font('Helvetica-Bold').fontSize(22).fillColor([tr, tg, tb]).text(brief.displayName, 72, 110);
+  doc
+    .font('Helvetica')
+    .fontSize(11)
+    .fillColor([mr, mg, mb])
     .text(brief.tagline, 72, 140, { width: doc.page.width - 144 });
-  doc.font("Helvetica").fontSize(8).fillColor([mr, mg, mb])
+  doc
+    .font('Helvetica')
+    .fontSize(8)
+    .fillColor([mr, mg, mb])
     .text(`Manifest snapshot · ${generated}`, 72, 160);
 
   const [br, bg, bb] = hex(BRAND.border);
-  doc.rect(72, 178, doc.page.width - 144, 0.5).fillColor([br, bg, bb]).fill();
+  doc
+    .rect(72, 178, doc.page.width - 144, 0.5)
+    .fillColor([br, bg, bb])
+    .fill();
   return 192;
 }
 
@@ -196,12 +218,19 @@ function drawFooter(doc: PDFKit.PDFDocument, brief: BriefSpec): void {
     const [mr, mg, mb] = hex(BRAND.muted);
     const [br, bg, bb] = hex(BRAND.border);
     const y = doc.page.height - 50;
-    doc.rect(72, y, doc.page.width - 144, 0.5).fillColor([br, bg, bb]).fill();
-    doc.font("Helvetica").fontSize(8).fillColor([mr, mg, mb])
+    doc
+      .rect(72, y, doc.page.width - 144, 0.5)
+      .fillColor([br, bg, bb])
+      .fill();
+    doc
+      .font('Helvetica')
+      .fontSize(8)
+      .fillColor([mr, mg, mb])
       .text(
         `SZL Holdings — ${brief.displayName}  ·  Page ${i + 1} of ${range.count}  ·  Generated from platform-capability-manifest.json`,
-        72, y + 10,
-        { align: "center", width: doc.page.width - 144 }
+        72,
+        y + 10,
+        { align: 'center', width: doc.page.width - 144 },
       );
   }
 }
@@ -209,16 +238,26 @@ function drawFooter(doc: PDFKit.PDFDocument, brief: BriefSpec): void {
 function sectionTitle(doc: PDFKit.PDFDocument, label: string, y: number): number {
   const [pr, pg, pb] = hex(BRAND.primary);
   const [mr, mg, mb] = hex(BRAND.muted);
-  doc.font("Helvetica").fontSize(7.5).fillColor([mr, mg, mb])
+  doc
+    .font('Helvetica')
+    .fontSize(7.5)
+    .fillColor([mr, mg, mb])
     .text(label.toUpperCase(), 72, y, { characterSpacing: 1.5 });
-  doc.rect(72, y + 14, doc.page.width - 144, 0.5).fillColor([pr, pg, pb]).fillOpacity(0.5).fill();
+  doc
+    .rect(72, y + 14, doc.page.width - 144, 0.5)
+    .fillColor([pr, pg, pb])
+    .fillOpacity(0.5)
+    .fill();
   doc.fillOpacity(1);
   return y + 24;
 }
 
 function bodyText(doc: PDFKit.PDFDocument, text: string, y: number): number {
   const [tr, tg, tb] = hex(BRAND.text);
-  doc.font("Helvetica").fontSize(10).fillColor([tr, tg, tb])
+  doc
+    .font('Helvetica')
+    .fontSize(10)
+    .fillColor([tr, tg, tb])
     .text(text, 72, y, { width: doc.page.width - 144, lineGap: 3 });
   return doc.y + 8;
 }
@@ -234,11 +273,15 @@ function ensureSpace(doc: PDFKit.PDFDocument, needed: number, currentY: number):
 
 function metricCards(doc: PDFKit.PDFDocument, summary: ProductSummary, y: number): number {
   const cards: Array<{ label: string; value: string; color: string }> = [
-    { label: "Total Capabilities", value: String(summary.total), color: BRAND.text },
-    { label: "Readiness Score", value: `${summary.readinessScore}%`, color: BRAND.primary },
-    { label: "Live", value: String(summary.counts.live), color: BRAND.emerald },
-    { label: "Working Demo", value: String(summary.counts.working_demo), color: BRAND.blue },
-    { label: "Partial / At Risk", value: String(summary.counts.partial + summary.counts.stub + summary.counts.broken), color: BRAND.amber },
+    { label: 'Total Capabilities', value: String(summary.total), color: BRAND.text },
+    { label: 'Readiness Score', value: `${summary.readinessScore}%`, color: BRAND.primary },
+    { label: 'Live', value: String(summary.counts.live), color: BRAND.emerald },
+    { label: 'Working Demo', value: String(summary.counts.working_demo), color: BRAND.blue },
+    {
+      label: 'Partial / At Risk',
+      value: String(summary.counts.partial + summary.counts.stub + summary.counts.broken),
+      color: BRAND.amber,
+    },
   ];
   const colW = (doc.page.width - 144) / cards.length;
   cards.forEach((c, i) => {
@@ -246,18 +289,28 @@ function metricCards(doc: PDFKit.PDFDocument, summary: ProductSummary, y: number
     const [br, bg, bb] = hex(BRAND.border);
     const [mr, mg, mb] = hex(BRAND.muted);
     const [vr, vg, vb] = hex(c.color);
-    doc.rect(x + 4, y, colW - 8, 56).fillColor([br, bg, bb]).fillOpacity(0.45).fill();
+    doc
+      .rect(x + 4, y, colW - 8, 56)
+      .fillColor([br, bg, bb])
+      .fillOpacity(0.45)
+      .fill();
     doc.fillOpacity(1);
-    doc.font("Helvetica").fontSize(7).fillColor([mr, mg, mb])
+    doc
+      .font('Helvetica')
+      .fontSize(7)
+      .fillColor([mr, mg, mb])
       .text(c.label.toUpperCase(), x + 12, y + 8, { width: colW - 20, characterSpacing: 0.6 });
-    doc.font("Helvetica-Bold").fontSize(16).fillColor([vr, vg, vb])
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(16)
+      .fillColor([vr, vg, vb])
       .text(c.value, x + 12, y + 24, { width: colW - 20 });
   });
   return y + 70;
 }
 
 function statusMix(doc: PDFKit.PDFDocument, summary: ProductSummary, y: number): number {
-  const order = ["live", "working_demo", "partial", "stub", "broken", "undocumented"] as const;
+  const order = ['live', 'working_demo', 'partial', 'stub', 'broken', 'undocumented'] as const;
   const totalWidth = doc.page.width - 144;
   let x = 72;
   for (const status of order) {
@@ -276,8 +329,14 @@ function statusMix(doc: PDFKit.PDFDocument, summary: ProductSummary, y: number):
     const n = summary.counts[status] ?? 0;
     if (n === 0) continue;
     const [r, g, b] = hex(STATUS_COLORS[status]);
-    doc.rect(legendX, legendY + 2, 7, 7).fillColor([r, g, b]).fill();
-    doc.font("Helvetica").fontSize(8.5).fillColor([tr, tg, tb])
+    doc
+      .rect(legendX, legendY + 2, 7, 7)
+      .fillColor([r, g, b])
+      .fill();
+    doc
+      .font('Helvetica')
+      .fontSize(8.5)
+      .fillColor([tr, tg, tb])
       .text(`${STATUS_LABELS[status]} ${n}`, legendX + 11, legendY);
     legendX += 110;
     if (legendX > doc.page.width - 144) {
@@ -286,7 +345,9 @@ function statusMix(doc: PDFKit.PDFDocument, summary: ProductSummary, y: number):
     }
   }
   // suppress unused warning while keeping muted color centralised
-  void mr; void mg; void mb;
+  void mr;
+  void mg;
+  void mb;
   return legendY + 20;
 }
 
@@ -299,15 +360,28 @@ function proofPoints(doc: PDFKit.PDFDocument, items: Capability[], y: number): n
     y = ensureSpace(doc, 70, y);
     doc.rect(72, y, 3, 50).fillColor([pr, pg, pb]).fillOpacity(0.7).fill();
     doc.fillOpacity(1);
-    doc.font("Helvetica-Bold").fontSize(10).fillColor([tr, tg, tb])
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(10)
+      .fillColor([tr, tg, tb])
       .text(`${cap.id} · ${cap.capability_name}`, 84, y + 2, { width: doc.page.width - 168 });
     const headerEnd = doc.y + 4;
-    doc.font("Helvetica").fontSize(8.5).fillColor([mr, mg, mb])
+    doc
+      .font('Helvetica')
+      .fontSize(8.5)
+      .fillColor([mr, mg, mb])
       .text(cap.evidence, 84, headerEnd, { width: doc.page.width - 168, lineGap: 1.5 });
     const evidenceEnd = doc.y + 4;
-    doc.font("Helvetica-Oblique").fontSize(7.5).fillColor([mr, mg, mb])
-      .text(`status: ${STATUS_LABELS[cap.status] ?? cap.status}  ·  module: ${cap.route_or_module}`,
-        84, evidenceEnd, { width: doc.page.width - 168 });
+    doc
+      .font('Helvetica-Oblique')
+      .fontSize(7.5)
+      .fillColor([mr, mg, mb])
+      .text(
+        `status: ${STATUS_LABELS[cap.status] ?? cap.status}  ·  module: ${cap.route_or_module}`,
+        84,
+        evidenceEnd,
+        { width: doc.page.width - 168 },
+      );
     y = doc.y + 10;
   }
   return y;
@@ -315,70 +389,92 @@ function proofPoints(doc: PDFKit.PDFDocument, items: Capability[], y: number): n
 
 function risksList(doc: PDFKit.PDFDocument, items: Capability[], y: number): number {
   if (items.length === 0) {
-    return bodyText(doc, "No capabilities currently flagged as stub, broken, or undocumented for this product.", y);
+    return bodyText(
+      doc,
+      'No capabilities currently flagged as stub, broken, or undocumented for this product.',
+      y,
+    );
   }
   const [tr, tg, tb] = hex(BRAND.text);
   const [mr, mg, mb] = hex(BRAND.muted);
   for (const cap of items.slice(0, 5)) {
     y = ensureSpace(doc, 38, y);
     const [r, g, b] = hex(STATUS_COLORS[cap.status] ?? BRAND.amber);
-    doc.circle(80, y + 6, 2.6).fillColor([r, g, b]).fill();
-    doc.font("Helvetica-Bold").fontSize(9.5).fillColor([tr, tg, tb])
+    doc
+      .circle(80, y + 6, 2.6)
+      .fillColor([r, g, b])
+      .fill();
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(9.5)
+      .fillColor([tr, tg, tb])
       .text(`${cap.id} · ${cap.capability_name}`, 92, y, { width: doc.page.width - 164 });
-    doc.font("Helvetica").fontSize(8.5).fillColor([mr, mg, mb])
-      .text(`${STATUS_LABELS[cap.status] ?? cap.status} · ${cap.evidence}`,
-        92, doc.y + 2, { width: doc.page.width - 164, lineGap: 1.5 });
+    doc
+      .font('Helvetica')
+      .fontSize(8.5)
+      .fillColor([mr, mg, mb])
+      .text(`${STATUS_LABELS[cap.status] ?? cap.status} · ${cap.evidence}`, 92, doc.y + 2, {
+        width: doc.page.width - 164,
+        lineGap: 1.5,
+      });
     y = doc.y + 8;
   }
   return y;
 }
 
-async function generateBrief(brief: BriefSpec, manifest: Manifest): Promise<{ slug: string; bytes: number; capabilityCount: number }> {
-  const caps = manifest.capabilities.filter(c => c.product === brief.productKey);
+async function generateBrief(
+  brief: BriefSpec,
+  manifest: Manifest,
+): Promise<{ slug: string; bytes: number; capabilityCount: number }> {
+  const caps = manifest.capabilities.filter((c) => c.product === brief.productKey);
   const summary = summarize(caps);
 
   const buffer = await new Promise<Buffer>((resolve, reject) => {
     const doc = new PDFDocument({
-      size: "letter",
+      size: 'letter',
       margins: { top: 72, bottom: 72, left: 72, right: 72 },
       info: {
         Title: `${brief.displayName} — Solution Brief`,
-        Author: "SZL Holdings",
-        Subject: "Solution brief generated from platform capability manifest",
-        Creator: "SZL Holdings",
-        Producer: "SZL Document Engine",
+        Author: 'SZL Holdings',
+        Subject: 'Solution brief generated from platform capability manifest',
+        Creator: 'SZL Holdings',
+        Producer: 'SZL Document Engine',
       },
       bufferPages: true,
     });
     const chunks: Buffer[] = [];
-    doc.on("data", (c: Buffer) => chunks.push(c));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
+    doc.on('data', (c: Buffer) => chunks.push(c));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
 
     let y = drawHeader(doc, brief, manifest.meta.generated);
-    y = sectionTitle(doc, "Positioning", y);
+    y = sectionTitle(doc, 'Positioning', y);
     y = bodyText(doc, brief.positioning, y);
 
-    y = sectionTitle(doc, "Capability Snapshot", y + 6);
+    y = sectionTitle(doc, 'Capability Snapshot', y + 6);
     y = metricCards(doc, summary, y);
-    y = sectionTitle(doc, "Status Mix", y + 6);
+    y = sectionTitle(doc, 'Status Mix', y + 6);
     y = statusMix(doc, summary, y);
 
-    y = sectionTitle(doc, "Top Proof Points", y + 4);
+    y = sectionTitle(doc, 'Top Proof Points', y + 4);
     if (summary.proven.length === 0) {
-      y = bodyText(doc, "No live or working-demo capabilities currently registered for this product in the manifest.", y);
+      y = bodyText(
+        doc,
+        'No live or working-demo capabilities currently registered for this product in the manifest.',
+        y,
+      );
     } else {
       y = proofPoints(doc, summary.proven, y);
     }
 
-    y = sectionTitle(doc, "Open Risks & Gaps", y + 4);
+    y = sectionTitle(doc, 'Open Risks & Gaps', y + 4);
     y = risksList(doc, summary.risks, y);
 
-    y = sectionTitle(doc, "Methodology", y + 6);
+    y = sectionTitle(doc, 'Methodology', y + 6);
     y = bodyText(
       doc,
       `Every figure in this brief is derived from artifacts/audit/platform-capability-manifest.json (manifest version ${manifest.meta.version}). The readiness score weights live capabilities at 1.0, working demos at 0.75, and partials at 0.4. Capability statuses use SZL's published status definitions: live, working_demo, partial, stub, broken, undocumented. This brief is regenerated whenever the manifest changes — no manually edited claims.`,
-      y
+      y,
     );
 
     drawFooter(doc, brief);
@@ -394,10 +490,18 @@ async function generateBrief(brief: BriefSpec, manifest: Manifest): Promise<{ sl
 async function main(): Promise<void> {
   const manifest = loadManifest();
   mkdirSync(OUT_DIR, { recursive: true });
-  const results: Array<{ slug: string; displayName: string; productKey: string; capabilityCount: number; readinessScore: number; bytes: number; file: string }> = [];
+  const results: Array<{
+    slug: string;
+    displayName: string;
+    productKey: string;
+    capabilityCount: number;
+    readinessScore: number;
+    bytes: number;
+    file: string;
+  }> = [];
 
   for (const brief of BRIEFS) {
-    const caps = manifest.capabilities.filter(c => c.product === brief.productKey);
+    const caps = manifest.capabilities.filter((c) => c.product === brief.productKey);
     const summary = summarize(caps);
     const out = await generateBrief(brief, manifest);
     results.push({
@@ -410,7 +514,9 @@ async function main(): Promise<void> {
       file: `/briefs/${brief.slug}-solution-brief.pdf`,
     });
     // eslint-disable-next-line no-console
-    console.log(`✓ ${brief.slug.padEnd(12)} ${out.bytes.toString().padStart(8)} bytes  ${out.capabilityCount} capabilities`);
+    console.log(
+      `✓ ${brief.slug.padEnd(12)} ${out.bytes.toString().padStart(8)} bytes  ${out.capabilityCount} capabilities`,
+    );
   }
 
   const index = {
@@ -424,8 +530,8 @@ async function main(): Promise<void> {
   console.log(`\nWrote ${results.length} solution briefs and index.json to ${OUT_DIR}`);
 }
 
-main().catch(err => {
+main().catch((err) => {
   // eslint-disable-next-line no-console
-  console.error("generate-solution-briefs failed:", err);
+  console.error('generate-solution-briefs failed:', err);
   process.exit(1);
 });

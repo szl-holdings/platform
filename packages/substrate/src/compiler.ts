@@ -11,21 +11,21 @@
  */
 
 import type {
-  WorkflowDefinition,
   AnyStage,
   CompiledGraph,
   CompiledStageNode,
   PolicyProfile,
   SideEffectCategory,
-} from "./types.js";
+  WorkflowDefinition,
+} from './types.js';
 
 export class SubstrateCompilerError extends Error {
   constructor(
     message: string,
     public readonly violations: string[],
   ) {
-    super(`[SubstrateCompiler] ${message}\n${violations.map((v) => `  • ${v}`).join("\n")}`);
-    this.name = "SubstrateCompilerError";
+    super(`[SubstrateCompiler] ${message}\n${violations.map((v) => `  • ${v}`).join('\n')}`);
+    this.name = 'SubstrateCompilerError';
   }
 }
 
@@ -62,15 +62,15 @@ function topoSort(stages: AnyStage[]): string[] {
   while (queue.length > 0) {
     const id = queue.shift()!;
     sorted.push(id);
-    for (const next of (adj.get(id) ?? [])) {
+    for (const next of adj.get(id) ?? []) {
       inDegree.set(next, (inDegree.get(next) ?? 0) - 1);
       if (inDegree.get(next) === 0) queue.push(next);
     }
   }
 
   if (sorted.length !== stages.length) {
-    throw new SubstrateCompilerError("Workflow graph contains a cycle", [
-      "Cycle detected in stage dependency graph — substrate does not support cyclic workflows",
+    throw new SubstrateCompilerError('Workflow graph contains a cycle', [
+      'Cycle detected in stage dependency graph — substrate does not support cyclic workflows',
     ]);
   }
 
@@ -86,17 +86,14 @@ function computeAncestors(stageId: string, stageMap: Map<string, AnyStage>): Set
     const id = stack.pop()!;
     if (visited.has(id)) continue;
     visited.add(id);
-    for (const dep of (stageMap.get(id)?.dependsOn ?? [])) {
+    for (const dep of stageMap.get(id)?.dependsOn ?? []) {
       if (!visited.has(dep)) stack.push(dep);
     }
   }
   return visited;
 }
 
-function computeDescendants(
-  stageId: string,
-  stageMap: Map<string, AnyStage>,
-): Set<string> {
+function computeDescendants(stageId: string, stageMap: Map<string, AnyStage>): Set<string> {
   const reverseAdj = new Map<string, string[]>();
   for (const stage of stageMap.values()) {
     for (const dep of stage.dependsOn) {
@@ -111,7 +108,7 @@ function computeDescendants(
     const id = stack.pop()!;
     if (visited.has(id)) continue;
     visited.add(id);
-    for (const child of (reverseAdj.get(id) ?? [])) {
+    for (const child of reverseAdj.get(id) ?? []) {
       if (!visited.has(child)) stack.push(child);
     }
   }
@@ -139,8 +136,9 @@ function hasApprovalGateAncestor(
 
   for (const ancestorId of ancestors) {
     const ancestor = stageMap.get(ancestorId);
-    if (ancestor?.type === "ApprovalGate") {
-      const gateTierNum = tierOrder[(ancestor as { requiredTier?: string }).requiredTier ?? "operator"] ?? 0;
+    if (ancestor?.type === 'ApprovalGate') {
+      const gateTierNum =
+        tierOrder[(ancestor as { requiredTier?: string }).requiredTier ?? 'operator'] ?? 0;
       if (gateTierNum >= requiredTierNum) return true;
     }
   }
@@ -152,9 +150,9 @@ function hasApprovalGateAncestor(
 function stageHasHighRiskSideEffect(stage: AnyStage, policy: PolicyProfile): boolean {
   let sideEffects: SideEffectCategory[] = [];
 
-  if (stage.type === "ToolCall") {
+  if (stage.type === 'ToolCall') {
     sideEffects = stage.sideEffects;
-  } else if (stage.type === "Decide") {
+  } else if (stage.type === 'Decide') {
     // DecideStage declares high-risk side effects in BOTH sideEffects (general) and
     // highRiskSideEffects (governance-explicit). The union must be checked; a workflow
     // author who populates only highRiskSideEffects must not silently bypass gate
@@ -180,8 +178,8 @@ export function compile(workflow: WorkflowDefinition): CompiledGraph {
   const { stages, policy } = workflow;
 
   if (stages.length === 0) {
-    throw new SubstrateCompilerError("Workflow must have at least one stage", [
-      "Empty stage list is not allowed",
+    throw new SubstrateCompilerError('Workflow must have at least one stage', [
+      'Empty stage list is not allowed',
     ]);
   }
 
@@ -195,7 +193,10 @@ export function compile(workflow: WorkflowDefinition): CompiledGraph {
       if (seen.has(s.id)) duplicates.push(s.id);
       seen.add(s.id);
     }
-    throw new SubstrateCompilerError("Duplicate stage IDs detected", duplicates.map((d) => `Duplicate ID: '${d}'`));
+    throw new SubstrateCompilerError(
+      'Duplicate stage IDs detected',
+      duplicates.map((d) => `Duplicate ID: '${d}'`),
+    );
   }
 
   // 2. Topological sort (also validates deps and detects cycles)
@@ -206,7 +207,10 @@ export function compile(workflow: WorkflowDefinition): CompiledGraph {
   for (const stage of stages) {
     const ancestors = computeAncestors(stage.id, stageMap);
     const descendants = computeDescendants(stage.id, stageMap);
-    const depth = ancestors.size === 0 ? 0 : Math.max(...[...ancestors].map((a) => nodes.get(a)?.depth ?? 0)) + 1;
+    const depth =
+      ancestors.size === 0
+        ? 0
+        : Math.max(...[...ancestors].map((a) => nodes.get(a)?.depth ?? 0)) + 1;
     const hasApprovalGate = hasApprovalGateAncestor(ancestors, stageMap, policy);
 
     nodes.set(stage.id, {
@@ -234,9 +238,9 @@ export function compile(workflow: WorkflowDefinition): CompiledGraph {
       ];
       violations.push(
         `Stage '${stage.id}' (${stage.type}) has high-risk side effects ` +
-        `[${[...new Set(allEffects)].join(", ")}] ` +
-        `but no matching ApprovalGate (tier ≥ '${policy.minimumApprovalTier}') is reachable in its ancestor chain. ` +
-        `Add an ApprovalGate before '${stage.id}' in the stage dependency chain.`,
+          `[${[...new Set(allEffects)].join(', ')}] ` +
+          `but no matching ApprovalGate (tier ≥ '${policy.minimumApprovalTier}') is reachable in its ancestor chain. ` +
+          `Add an ApprovalGate before '${stage.id}' in the stage dependency chain.`,
       );
     }
   }
@@ -249,13 +253,15 @@ export function compile(workflow: WorkflowDefinition): CompiledGraph {
   }
 
   // 5. Warnings (non-fatal policy observations)
-  const decideStages = stages.filter((s) => s.type === "Decide");
+  const decideStages = stages.filter((s) => s.type === 'Decide');
   if (decideStages.length === 0) {
-    warnings.push("Workflow has no Decide stage — consider adding one if this workflow produces decisions");
+    warnings.push(
+      'Workflow has no Decide stage — consider adding one if this workflow produces decisions',
+    );
   }
-  const verifyStages = stages.filter((s) => s.type === "Verify");
+  const verifyStages = stages.filter((s) => s.type === 'Verify');
   if (verifyStages.length === 0) {
-    warnings.push("Workflow has no Verify stage — output quality is unverified");
+    warnings.push('Workflow has no Verify stage — output quality is unverified');
   }
 
   return {

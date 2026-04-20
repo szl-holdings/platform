@@ -16,24 +16,22 @@
  *   });
  */
 
-export {
-  initOtel,
-  getOtelConfig,
-  isOtelInitialized,
-  getInMemorySpans,
-  flushInMemorySpans,
-  getTracer,
-  buildActorAttributes,
-  buildContextAttributes,
-} from "@szl-holdings/observability";
-
 export type {
+  ActorContext,
   OtelConfig,
   Span,
-  ActorContext,
   SpanContext,
-} from "@szl-holdings/observability";
-
-export { startSpan, toolCallSpan, dbSpan, httpOutboundSpan, jobSpan } from "./spans";
-export { withCorrelationSpan } from "./correlation-span";
-export { createDrizzleInstrumentation } from "./drizzle-instrumentation";
+} from '@szl-holdings/observability';
+export {
+  buildActorAttributes,
+  buildContextAttributes,
+  flushInMemorySpans,
+  getInMemorySpans,
+  getOtelConfig,
+  getTracer,
+  initOtel,
+  isOtelInitialized,
+} from '@szl-holdings/observability';
+export { withCorrelationSpan } from './correlation-span';
+export { createDrizzleInstrumentation } from './drizzle-instrumentation';
+export { dbSpan, httpOutboundSpan, jobSpan, startSpan, toolCallSpan } from './spans';

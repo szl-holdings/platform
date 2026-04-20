@@ -38,24 +38,21 @@
  * Exit 0 = clean; Exit 1 = violations (or stale allow-list entry).
  */
 
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, "..");
+const REPO_ROOT = path.resolve(__dirname, '..');
 
 export const SCAN_DIRS = [
-  "artifacts/aegis/src/pages",
-  "artifacts/vessels/src/pages",
-  "artifacts/terra/src/pages",
+  'artifacts/aegis/src/pages',
+  'artifacts/vessels/src/pages',
+  'artifacts/terra/src/pages',
 ];
 
-export const ALLOWLIST_PATH = path.join(
-  __dirname,
-  "check-placeholder-empty-states.allowlist.json",
-);
+export const ALLOWLIST_PATH = path.join(__dirname, 'check-placeholder-empty-states.allowlist.json');
 
 /**
  * Patterns that indicate a generic placeholder empty state.
@@ -63,11 +60,7 @@ export const ALLOWLIST_PATH = path.join(
  * (JSX text nodes, short standalone string literals) to
  * avoid false-positives on prose.
  */
-const PLACEHOLDER_PHRASES = [
-  "No data",
-  "No results",
-  "No items found",
-];
+const PLACEHOLDER_PHRASES = ['No data', 'No results', 'No items found'];
 
 const INLINE_ALLOW_MARKER = /\/\/\s*empty-state-lint-allow(?::|\b)/;
 
@@ -88,20 +81,17 @@ const INLINE_ALLOW_MARKER = /\/\/\s*empty-state-lint-allow(?::|\b)/;
  */
 export function findPlaceholderPhrase(line) {
   for (const phrase of PLACEHOLDER_PHRASES) {
-    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     // JSX text node: `>` then optional whitespace then phrase
     // then up to 60 chars of trailing copy then `<`.
-    const jsxRe = new RegExp(`>\\s*${escaped}\\b[^<>{]{0,60}<`, "i");
+    const jsxRe = new RegExp(`>\\s*${escaped}\\b[^<>{]{0,60}<`, 'i');
     if (jsxRe.test(line)) return phrase;
 
     // Standalone string literal that *starts* with the phrase
     // (case-insensitive), with up to 40 chars of trailing
     // punctuation or short copy before the closing quote.
-    const strRe = new RegExp(
-      `(["'\`])\\s*${escaped}\\b[^"'\`\\n]{0,40}\\1`,
-      "i",
-    );
+    const strRe = new RegExp(`(["'\`])\\s*${escaped}\\b[^"'\`\\n]{0,40}\\1`, 'i');
     const m = strRe.exec(line);
     if (m) {
       // Reject if the line clearly continues prose by ending
@@ -136,19 +126,17 @@ function listSourceFiles(dir) {
 
 function loadAllowlist() {
   if (!fs.existsSync(ALLOWLIST_PATH)) return [];
-  const raw = fs.readFileSync(ALLOWLIST_PATH, "utf8");
+  const raw = fs.readFileSync(ALLOWLIST_PATH, 'utf8');
   const parsed = JSON.parse(raw);
   if (!Array.isArray(parsed)) {
-    throw new Error(
-      `Allow-list ${ALLOWLIST_PATH} must be a JSON array of entries.`,
-    );
+    throw new Error(`Allow-list ${ALLOWLIST_PATH} must be a JSON array of entries.`);
   }
   for (const entry of parsed) {
     if (
-      typeof entry.file !== "string" ||
-      typeof entry.line !== "number" ||
-      typeof entry.match !== "string" ||
-      typeof entry.reason !== "string"
+      typeof entry.file !== 'string' ||
+      typeof entry.line !== 'number' ||
+      typeof entry.match !== 'string' ||
+      typeof entry.reason !== 'string'
     ) {
       throw new Error(
         `Invalid allow-list entry: ${JSON.stringify(entry)}. ` +
@@ -196,7 +184,7 @@ export function runScan({
     const abs = path.join(repoRoot, dir);
     for (const file of listSourceFiles(abs)) {
       const rel = path.relative(repoRoot, file);
-      const src = fs.readFileSync(file, "utf8");
+      const src = fs.readFileSync(file, 'utf8');
       for (const v of scanSource(rel, src)) {
         allViolations.push(v);
       }
@@ -216,9 +204,7 @@ export function runScan({
     return true;
   });
 
-  const unusedAllowlist = allowlist.filter(
-    (a) => !usedKeys.has(`${a.file}:${a.line}:${a.match}`),
-  );
+  const unusedAllowlist = allowlist.filter((a) => !usedKeys.has(`${a.file}:${a.line}:${a.match}`));
 
   return { violations: filtered, unusedAllowlist };
 }
@@ -253,20 +239,19 @@ function main() {
       console.error(`    ${v.snippet}\n`);
     }
     console.error(
-      "Fix:\n" +
-        "  • Replace the placeholder with the shared <EmptyState /> component\n" +
-        "    from @workspace/shared-ui (lib/shared-ui/src/EmptyState.tsx),\n" +
-        "    providing a contextual headline, description, and action.\n" +
-        "  • If the string is a legitimate exception (quoted prose, test\n" +
-        "    fixture, etc.), either:\n" +
-        "      - Add an entry to scripts/check-placeholder-empty-states.allowlist.json, OR\n" +
-        "      - Append `// empty-state-lint-allow: <reason>` to the line.\n",
+      'Fix:\n' +
+        '  • Replace the placeholder with the shared <EmptyState /> component\n' +
+        '    from @workspace/shared-ui (lib/shared-ui/src/EmptyState.tsx),\n' +
+        '    providing a contextual headline, description, and action.\n' +
+        '  • If the string is a legitimate exception (quoted prose, test\n' +
+        '    fixture, etc.), either:\n' +
+        '      - Add an entry to scripts/check-placeholder-empty-states.allowlist.json, OR\n' +
+        '      - Append `// empty-state-lint-allow: <reason>` to the line.\n',
     );
   }
 
   process.exit(1);
 }
 
-const isMain =
-  process.argv[1] && path.resolve(process.argv[1]) === __filename;
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === __filename;
 if (isMain) main();

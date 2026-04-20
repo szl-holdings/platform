@@ -7,12 +7,11 @@
  * without centralized routing logic.
  */
 
-import { db } from "@szl-holdings/db";
-import { a2aAgentCards, a2aAgentHeartbeats, a2aDiscoveryQueries } from "@szl-holdings/db";
-import { eq, and, gte, desc, sql } from "drizzle-orm";
-import { AGENT_REGISTRY, DOMAIN_ROUTING_RULES } from "./nuro-mesh.js";
-import type { AgentDefinition } from "./types.js";
-import { randomUUID } from "crypto";
+import { a2aAgentCards, a2aAgentHeartbeats, a2aDiscoveryQueries, db } from '@szl-holdings/db';
+import { randomUUID } from 'crypto';
+import { and, desc, eq, gte, sql } from 'drizzle-orm';
+import { AGENT_REGISTRY, DOMAIN_ROUTING_RULES } from './nuro-mesh.js';
+import type { AgentDefinition } from './types.js';
 
 export interface AgentCard {
   agentId: string;
@@ -29,7 +28,7 @@ export interface AgentCard {
   costPerCallUsd: number;
   avgLatencyMs: number;
   successRate: number;
-  status: "online" | "offline" | "degraded" | "busy";
+  status: 'online' | 'offline' | 'degraded' | 'busy';
   lastHeartbeatAt: Date;
   metadata?: Record<string, unknown>;
 }
@@ -58,19 +57,18 @@ export interface DiscoveryResult {
 
 const HEARTBEAT_STALE_THRESHOLD_MS = 60_000;
 
-function agentDefinitionToCard(agent: AgentDefinition): Omit<AgentCard, "lastHeartbeatAt"> {
+function agentDefinitionToCard(agent: AgentDefinition): Omit<AgentCard, 'lastHeartbeatAt'> {
   const domainKeywords = DOMAIN_ROUTING_RULES[agent.domain] ?? [];
-  const capabilities = [
-    ...( agent.semanticIntents ?? []),
-    ...domainKeywords.slice(0, 5),
-  ].filter((c, i, arr) => arr.indexOf(c) === i).slice(0, 20);
+  const capabilities = [...(agent.semanticIntents ?? []), ...domainKeywords.slice(0, 5)]
+    .filter((c, i, arr) => arr.indexOf(c) === i)
+    .slice(0, 20);
 
   return {
     agentId: agent.id,
     name: agent.name,
     domain: agent.domain,
-    version: "1.0.0",
-    description: agent.systemPrompt.split(".")[0]?.trim() ?? agent.name,
+    version: '1.0.0',
+    description: agent.systemPrompt.split('.')[0]?.trim() ?? agent.name,
     capabilities,
     preferredModel: agent.preferredModel,
     preferredProvider: agent.preferredProvider,
@@ -78,15 +76,21 @@ function agentDefinitionToCard(agent: AgentDefinition): Omit<AgentCard, "lastHea
     costPerCallUsd: 0.002,
     avgLatencyMs: 2500,
     successRate: 0.95,
-    status: "online",
-    inputSchema: { type: "object", properties: { query: { type: "string" }, context: { type: "string" } } },
-    outputSchema: { type: "object", properties: { response: { type: "string" }, confidence: { type: "number" } } },
+    status: 'online',
+    inputSchema: {
+      type: 'object',
+      properties: { query: { type: 'string' }, context: { type: 'string' } },
+    },
+    outputSchema: {
+      type: 'object',
+      properties: { response: { type: 'string' }, confidence: { type: 'number' } },
+    },
   };
 }
 
 function computeRelevanceScore(query: DiscoveryQuery, card: AgentCard): number {
   let score = 0;
-  const lower = (query.queryText ?? "").toLowerCase();
+  const lower = (query.queryText ?? '').toLowerCase();
 
   if (query.domain && card.domain === query.domain) {
     score += 0.5;
@@ -103,21 +107,23 @@ function computeRelevanceScore(query: DiscoveryQuery, card: AgentCard): number {
   }
 
   if (lower) {
-    const queryWords = lower.split(/\s+/).filter(w => w.length > 2);
+    const queryWords = lower.split(/\s+/).filter((w) => w.length > 2);
     let capMatches = 0;
     for (const cap of card.capabilities) {
       const capLower = cap.toLowerCase();
       if (lower.includes(capLower)) {
-        capMatches += capLower.split(" ").length > 1 ? 0.06 : 0.03;
+        capMatches += capLower.split(' ').length > 1 ? 0.06 : 0.03;
       } else {
         const capWords = capLower.split(/\s+/);
-        const overlap = capWords.filter(cw => queryWords.some(qw => qw.includes(cw) || cw.includes(qw))).length;
+        const overlap = capWords.filter((cw) =>
+          queryWords.some((qw) => qw.includes(cw) || cw.includes(qw)),
+        ).length;
         if (overlap > 0) capMatches += (overlap / capWords.length) * 0.02;
       }
     }
     score += Math.min(0.5, capMatches);
 
-    if (card.domain && lower.includes(card.domain.replace("_", " "))) {
+    if (card.domain && lower.includes(card.domain.replace('_', ' '))) {
       score += 0.1;
     }
   }
@@ -158,7 +164,7 @@ export class A2ARegistryService {
             costPerCallUsd: card.costPerCallUsd,
             avgLatencyMs: card.avgLatencyMs,
             successRate: card.successRate,
-            status: "online",
+            status: 'online',
             lastHeartbeatAt: now,
             registeredAt: now,
             updatedAt: now,
@@ -174,7 +180,7 @@ export class A2ARegistryService {
               preferredModel: card.preferredModel,
               preferredProvider: card.preferredProvider,
               collaboratesWith: card.collaboratesWith,
-              status: "online",
+              status: 'online',
               lastHeartbeatAt: now,
               updatedAt: now,
             },
@@ -185,7 +191,7 @@ export class A2ARegistryService {
     }
   }
 
-  async registerAgent(card: Omit<AgentCard, "lastHeartbeatAt">): Promise<AgentCard> {
+  async registerAgent(card: Omit<AgentCard, 'lastHeartbeatAt'>): Promise<AgentCard> {
     const now = new Date();
     await db
       .insert(a2aAgentCards)
@@ -255,21 +261,21 @@ export class A2ARegistryService {
     let rows = await db.select().from(a2aAgentCards);
 
     if (query.requireOnline !== false) {
-      rows = rows.filter(r =>
-        (r.status === "online" || r.status === "busy") &&
-        r.lastHeartbeatAt >= staleThreshold,
+      rows = rows.filter(
+        (r) =>
+          (r.status === 'online' || r.status === 'busy') && r.lastHeartbeatAt >= staleThreshold,
       );
     }
 
     if (query.domain) {
-      const domainRows = rows.filter(r => r.domain === query.domain);
+      const domainRows = rows.filter((r) => r.domain === query.domain);
       if (domainRows.length > 0) rows = domainRows;
     }
 
-    const cards = rows.map(r => this.rowToCard(r));
+    const cards = rows.map((r) => this.rowToCard(r));
 
     const scored = cards
-      .map(card => ({
+      .map((card) => ({
         card,
         score: computeRelevanceScore(query, card),
       }))
@@ -279,15 +285,17 @@ export class A2ARegistryService {
 
     if (query.requestingAgentId) {
       const queryId = randomUUID();
-      db.insert(a2aDiscoveryQueries).values({
-        queryId,
-        requestingAgentId: query.requestingAgentId,
-        capability: query.capability,
-        domain: query.domain,
-        queryText: query.queryText,
-        resultCount: scored.length,
-        topMatchAgentId: scored[0]?.card.agentId,
-      }).catch(() => {});
+      db.insert(a2aDiscoveryQueries)
+        .values({
+          queryId,
+          requestingAgentId: query.requestingAgentId,
+          capability: query.capability,
+          domain: query.domain,
+          queryText: query.queryText,
+          resultCount: scored.length,
+          topMatchAgentId: scored[0]?.card.agentId,
+        })
+        .catch(() => {});
     }
 
     return scored.map(({ card, score }) => ({
@@ -304,27 +312,35 @@ export class A2ARegistryService {
     }));
   }
 
-  async heartbeat(agentId: string, status: string = "online", load: number = 0, activeTasks: number = 0): Promise<void> {
+  async heartbeat(
+    agentId: string,
+    status: string = 'online',
+    load: number = 0,
+    activeTasks: number = 0,
+  ): Promise<void> {
     const now = new Date();
     await db
       .update(a2aAgentCards)
       .set({ status, lastHeartbeatAt: now, updatedAt: now })
       .where(eq(a2aAgentCards.agentId, agentId));
 
-    await db.insert(a2aAgentHeartbeats).values({
-      agentId,
-      status,
-      load,
-      activeTasks,
-      recordedAt: now,
-    }).catch(() => {});
+    await db
+      .insert(a2aAgentHeartbeats)
+      .values({
+        agentId,
+        status,
+        load,
+        activeTasks,
+        recordedAt: now,
+      })
+      .catch(() => {});
   }
 
   async markAgentsStale(): Promise<void> {
     const staleThreshold = new Date(Date.now() - HEARTBEAT_STALE_THRESHOLD_MS * 2);
     await db
       .update(a2aAgentCards)
-      .set({ status: "offline", updatedAt: new Date() })
+      .set({ status: 'offline', updatedAt: new Date() })
       .where(
         and(
           sql`${a2aAgentCards.lastHeartbeatAt} < ${staleThreshold}`,
@@ -336,10 +352,13 @@ export class A2ARegistryService {
   async getAllCards(): Promise<AgentCard[]> {
     await this.ensureInitialized();
     const rows = await db.select().from(a2aAgentCards).orderBy(desc(a2aAgentCards.updatedAt));
-    return rows.map(r => this.rowToCard(r));
+    return rows.map((r) => this.rowToCard(r));
   }
 
-  async updateAgentMetrics(agentId: string, update: { avgLatencyMs?: number; successRate?: number; costPerCallUsd?: number }): Promise<void> {
+  async updateAgentMetrics(
+    agentId: string,
+    update: { avgLatencyMs?: number; successRate?: number; costPerCallUsd?: number },
+  ): Promise<void> {
     await db
       .update(a2aAgentCards)
       .set({ ...update, updatedAt: new Date() })
@@ -362,7 +381,7 @@ export class A2ARegistryService {
       costPerCallUsd: row.costPerCallUsd,
       avgLatencyMs: row.avgLatencyMs,
       successRate: row.successRate,
-      status: row.status as AgentCard["status"],
+      status: row.status as AgentCard['status'],
       lastHeartbeatAt: row.lastHeartbeatAt,
       metadata: row.metadata as Record<string, unknown> | undefined,
     };

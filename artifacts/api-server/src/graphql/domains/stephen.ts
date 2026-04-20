@@ -41,15 +41,24 @@ export const stephenTypeDefs = `#graphql
 
 export const stephenResolvers = {
   Query: {
-    stephenContentBlocks: async (_: unknown, args: { type?: string; featured?: boolean; limit?: number; offset?: number }) => {
+    stephenContentBlocks: async (
+      _: unknown,
+      args: { type?: string; featured?: boolean; limit?: number; offset?: number },
+    ) => {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { stephenContentBlocksTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq, and } = await import("drizzle-orm");
+        const { db } = await import('@szl-holdings/db');
+        const { stephenContentBlocksTable } = await import('@szl-holdings/db/schema');
+        const { desc, eq, and } = await import('drizzle-orm');
         const conditions = [];
         if (args.type) conditions.push(eq(stephenContentBlocksTable.type, args.type as any));
-        if (args.featured != null) conditions.push(eq(stephenContentBlocksTable.featured, args.featured as any));
-        const query = db.select().from(stephenContentBlocksTable).orderBy(desc(stephenContentBlocksTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
+        if (args.featured != null)
+          conditions.push(eq(stephenContentBlocksTable.featured, args.featured as any));
+        const query = db
+          .select()
+          .from(stephenContentBlocksTable)
+          .orderBy(desc(stephenContentBlocksTable.createdAt))
+          .limit(args.limit ?? 50)
+          .offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
         }
@@ -58,12 +67,20 @@ export const stephenResolvers = {
         return [];
       }
     },
-    stephenCaseStudies: async (_: unknown, args: { featured?: boolean; limit?: number; offset?: number }) => {
+    stephenCaseStudies: async (
+      _: unknown,
+      args: { featured?: boolean; limit?: number; offset?: number },
+    ) => {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { stephenCaseStudiesTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(stephenCaseStudiesTable).orderBy(desc(stephenCaseStudiesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
+        const { db } = await import('@szl-holdings/db');
+        const { stephenCaseStudiesTable } = await import('@szl-holdings/db/schema');
+        const { desc, eq } = await import('drizzle-orm');
+        const query = db
+          .select()
+          .from(stephenCaseStudiesTable)
+          .orderBy(desc(stephenCaseStudiesTable.createdAt))
+          .limit(args.limit ?? 50)
+          .offset(args.offset ?? 0);
         if (args.featured != null) {
           return await query.where(eq(stephenCaseStudiesTable.featured, args.featured as any));
         }
@@ -74,21 +91,33 @@ export const stephenResolvers = {
     },
     stephenCaseStudy: async (_: unknown, args: { slug: string }) => {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { stephenCaseStudiesTable } = await import("@szl-holdings/db/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(stephenCaseStudiesTable).where(eq(stephenCaseStudiesTable.slug, args.slug as any)).limit(1);
+        const { db } = await import('@szl-holdings/db');
+        const { stephenCaseStudiesTable } = await import('@szl-holdings/db/schema');
+        const { eq } = await import('drizzle-orm');
+        const rows = await db
+          .select()
+          .from(stephenCaseStudiesTable)
+          .where(eq(stephenCaseStudiesTable.slug, args.slug as any))
+          .limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
       }
     },
-    stephenBookingRequests: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
+    stephenBookingRequests: async (
+      _: unknown,
+      args: { status?: string; limit?: number; offset?: number },
+    ) => {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { stephenBookingRequestsTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(stephenBookingRequestsTable).orderBy(desc(stephenBookingRequestsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
+        const { db } = await import('@szl-holdings/db');
+        const { stephenBookingRequestsTable } = await import('@szl-holdings/db/schema');
+        const { desc, eq } = await import('drizzle-orm');
+        const query = db
+          .select()
+          .from(stephenBookingRequestsTable)
+          .orderBy(desc(stephenBookingRequestsTable.createdAt))
+          .limit(args.limit ?? 50)
+          .offset(args.offset ?? 0);
         if (args.status) {
           return await query.where(eq(stephenBookingRequestsTable.status, args.status as any));
         }
@@ -99,13 +128,16 @@ export const stephenResolvers = {
     },
   },
   Mutation: {
-    createStephenBookingRequest: async (_: unknown, args: { name: string; email: string; type: string }) => {
+    createStephenBookingRequest: async (
+      _: unknown,
+      args: { name: string; email: string; type: string },
+    ) => {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { stephenBookingRequestsTable } = await import("@szl-holdings/db/schema");
+        const { db } = await import('@szl-holdings/db');
+        const { stephenBookingRequestsTable } = await import('@szl-holdings/db/schema');
         const rows = await db
           .insert(stephenBookingRequestsTable)
-          .values({ name: args.name, email: args.email, type: args.type, status: "pending" } as any)
+          .values({ name: args.name, email: args.email, type: args.type, status: 'pending' } as any)
           .returning();
         return rows[0];
       } catch (err) {

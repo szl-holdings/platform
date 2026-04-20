@@ -24,16 +24,16 @@
  * validation, or live LLM/DB calls.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import express, { type Request, type Response, type NextFunction } from "express";
-import request from "supertest";
+import express, { type NextFunction, type Request, type Response } from 'express';
+import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ---------- @szl-holdings/db -----------------------------------------------
 // tenantScope hydrates org memberships from the DB when req.user.orgs is
 // empty. We return a chain that resolves to [] so the no-org user truly
 // has no orgs after hydration. Other route handlers that touch the DB
 // are isolated by mocking auth/validation downstream.
-vi.mock("@szl-holdings/db", () => {
+vi.mock('@szl-holdings/db', () => {
   const chain: Record<string, unknown> = {};
   Object.assign(chain, {
     from: () => chain,
@@ -60,48 +60,48 @@ vi.mock("@szl-holdings/db", () => {
     },
     pool: { query: vi.fn().mockResolvedValue({ rows: [], rowCount: 0 }) },
     // Tables referenced by the routers under test or by tenant-scope itself.
-    orgMembersTable: { orgId: "org_id", userId: "user_id" },
-    organizationsTable: { id: "id", slug: "slug", name: "name" },
-    consciousnessSnapshotsTable: { createdAt: "created_at" },
-    consciousnessMonologueTable: { createdAt: "created_at" },
-    consciousnessGoalsTable: { createdAt: "created_at" },
+    orgMembersTable: { orgId: 'org_id', userId: 'user_id' },
+    organizationsTable: { id: 'id', slug: 'slug', name: 'name' },
+    consciousnessSnapshotsTable: { createdAt: 'created_at' },
+    consciousnessMonologueTable: { createdAt: 'created_at' },
+    consciousnessGoalsTable: { createdAt: 'created_at' },
     consciousnessAgentProfilesTable: {},
-    consciousnessEmotionalHistoryTable: { createdAt: "created_at" },
-    consciousnessTemporalMetricsTable: { createdAt: "created_at" },
-    alloyWorkflows: { status: "status", createdAt: "created_at" },
+    consciousnessEmotionalHistoryTable: { createdAt: 'created_at' },
+    consciousnessTemporalMetricsTable: { createdAt: 'created_at' },
+    alloyWorkflows: { status: 'status', createdAt: 'created_at' },
     alloyApprovals: {},
-    alloySignals: { severity: "severity", createdAt: "created_at" },
+    alloySignals: { severity: 'severity', createdAt: 'created_at' },
     alloyActions: {},
-    notificationPreferencesTable: { userId: "user_id", digestConfig: "digest_config" },
+    notificationPreferencesTable: { userId: 'user_id', digestConfig: 'digest_config' },
     auditEventsTable: {},
   };
 });
 
-vi.mock("drizzle-orm", () => ({
-  eq: (col: unknown, val: unknown) => ({ op: "eq", col, val }),
-  and: (...conds: unknown[]) => ({ op: "and", conds }),
-  desc: (_c: unknown) => ({ op: "desc" }),
-  asc: (_c: unknown) => ({ op: "asc" }),
-  gte: (_c: unknown, _v: unknown) => ({ op: "gte" }),
-  count: () => ({ op: "count" }),
-  sum: () => ({ op: "sum" }),
-  avg: () => ({ op: "avg" }),
-  sql: (_s: TemplateStringsArray, ..._v: unknown[]) => ({ op: "sql" }),
+vi.mock('drizzle-orm', () => ({
+  eq: (col: unknown, val: unknown) => ({ op: 'eq', col, val }),
+  and: (...conds: unknown[]) => ({ op: 'and', conds }),
+  desc: (_c: unknown) => ({ op: 'desc' }),
+  asc: (_c: unknown) => ({ op: 'asc' }),
+  gte: (_c: unknown, _v: unknown) => ({ op: 'gte' }),
+  count: () => ({ op: 'count' }),
+  sum: () => ({ op: 'sum' }),
+  avg: () => ({ op: 'avg' }),
+  sql: (_s: TemplateStringsArray, ..._v: unknown[]) => ({ op: 'sql' }),
 }));
 
 // ---------- Auth middleware passthrough ------------------------------------
 // The user is injected by the per-test middleware below. authMiddleware,
 // requireRole, etc. are stubbed so the test isolates the tenantScope guard
 // from per-route role checks.
-vi.mock("../../middlewares/auth", () => ({
+vi.mock('../../middlewares/auth', () => ({
   authMiddleware: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   requireRole: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   requireAnyAuth: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   denyIfReadOnly: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
-vi.mock("../../lib/validation", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../lib/validation")>();
+vi.mock('../../lib/validation', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../lib/validation')>();
   return {
     ...actual,
     validateBody: () => (_req: Request, _res: Response, next: NextFunction) => next(),
@@ -109,25 +109,25 @@ vi.mock("../../lib/validation", async (importOriginal) => {
   };
 });
 
-vi.mock("../../lib/logger", () => ({
+vi.mock('../../lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock("../../lib/internal-tokens", () => ({
+vi.mock('../../lib/internal-tokens', () => ({
   verifyInternalHeader: () => null,
   tokenHasScope: () => false,
 }));
 
-vi.mock("@szl-holdings/observability", () => ({
+vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: { recordAuthFailure: vi.fn() },
 }));
 
-vi.mock("@szl-holdings/contracts/common", () => ({
+vi.mock('@szl-holdings/contracts/common', () => ({
   bodyShape: (_shape: unknown) => ({ parse: (v: unknown) => v }),
 }));
 
 // ---------- Router-specific external deps ----------------------------------
-vi.mock("@szl-holdings/ai-engine", () => ({
+vi.mock('@szl-holdings/ai-engine', () => ({
   captureConsciousnessSnapshot: () => ({ ok: true }),
   metacognitiveMonitor: { getState: () => ({}) },
   selfModelEngine: { getSelfModel: () => ({}) },
@@ -140,53 +140,58 @@ vi.mock("@szl-holdings/ai-engine", () => ({
   dreamConsolidation: { getState: () => ({}) },
 }));
 
-vi.mock("@szl-holdings/ai-engine/providers/openai", () => ({
+vi.mock('@szl-holdings/ai-engine/providers/openai', () => ({
   openai: {
     chat: {
       completions: {
         create: vi.fn().mockResolvedValue({
-          choices: [{ message: { content: "hello from test" } }],
+          choices: [{ message: { content: 'hello from test' } }],
         }),
       },
     },
   },
 }));
 
-vi.mock("@szl-holdings/ai-engine/providers/anthropic", () => ({
+vi.mock('@szl-holdings/ai-engine/providers/anthropic', () => ({
   anthropic: {
     messages: {
       create: vi.fn().mockResolvedValue({
-        content: [{ type: "text", text: "hello from test" }],
+        content: [{ type: 'text', text: 'hello from test' }],
       }),
       stream: vi.fn(),
     },
   },
 }));
 
-vi.mock("express-rate-limit", () => ({
+vi.mock('express-rate-limit', () => ({
   default: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
-vi.mock("@szl-holdings/services", () => ({
+vi.mock('@szl-holdings/services', () => ({
   services: {
-    ai: { chatCompletion: vi.fn().mockResolvedValue({ content: "" }) },
+    ai: { chatCompletion: vi.fn().mockResolvedValue({ content: '' }) },
   },
 }));
 
-vi.mock("../../lib/agent-scheduler", () => ({
+vi.mock('../../lib/agent-scheduler', () => ({
   agentScheduler: {
     getStats: () => ({ schedules: [], isRunning: true, agentCount: 0 }),
     getRunHistory: () => [],
-    runAgent: vi.fn().mockResolvedValue({ id: "x" }),
+    runAgent: vi.fn().mockResolvedValue({ id: 'x' }),
   },
 }));
 
-vi.mock("../../lib/knowledge-store", () => ({
+vi.mock('../../lib/knowledge-store', () => ({
   knowledgeStore: { getStats: () => ({}), search: () => [] },
 }));
 
-vi.mock("../../lib/event-bus", () => ({
-  agentEventBus: { getStats: () => ({}), getEvents: () => [], getDomainFeed: () => [], getCrossDomainFeed: () => [] },
+vi.mock('../../lib/event-bus', () => ({
+  agentEventBus: {
+    getStats: () => ({}),
+    getEvents: () => [],
+    getDomainFeed: () => [],
+    getCrossDomainFeed: () => [],
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -203,9 +208,9 @@ type TestUser = {
 function noOrgUser(): TestUser {
   return {
     id: 100,
-    displayName: "Eve",
-    email: "eve@nowhere.example",
-    roles: ["member"],
+    displayName: 'Eve',
+    email: 'eve@nowhere.example',
+    roles: ['member'],
     orgs: [],
   };
 }
@@ -213,9 +218,9 @@ function noOrgUser(): TestUser {
 function superAdminUser(): TestUser {
   return {
     id: 1,
-    displayName: "Root",
-    email: "root@szl.example",
-    roles: ["super_admin"],
+    displayName: 'Root',
+    email: 'root@szl.example',
+    roles: ['super_admin'],
     orgs: [],
   };
 }
@@ -223,9 +228,9 @@ function superAdminUser(): TestUser {
 function adminUser(): TestUser {
   return {
     id: 2,
-    displayName: "Admin",
-    email: "admin@szl.example",
-    roles: ["admin"],
+    displayName: 'Admin',
+    email: 'admin@szl.example',
+    roles: ['admin'],
     orgs: [],
   };
 }
@@ -233,10 +238,10 @@ function adminUser(): TestUser {
 function orgMemberUser(): TestUser {
   return {
     id: 10,
-    displayName: "Alice",
-    email: "alice@org-a.example",
-    roles: ["member"],
-    orgs: [{ orgId: 1, orgSlug: "org-a", orgName: "Org A", role: "member" }],
+    displayName: 'Alice',
+    email: 'alice@org-a.example',
+    roles: ['member'],
+    orgs: [{ orgId: 1, orgSlug: 'org-a', orgName: 'Org A', role: 'member' }],
   };
 }
 
@@ -248,10 +253,10 @@ function injectUser(factory: () => TestUser) {
 }
 
 const routerLoaders = {
-  consciousness: () => import("../consciousness"),
-  "agent-os": () => import("../agent-os"),
-  "alloy-digest": () => import("../alloy-digest"),
-  copilot: () => import("../copilot"),
+  consciousness: () => import('../consciousness'),
+  'agent-os': () => import('../agent-os'),
+  'alloy-digest': () => import('../alloy-digest'),
+  copilot: () => import('../copilot'),
 } as const;
 
 async function buildApp(routerSpec: keyof typeof routerLoaders, userFactory: () => TestUser) {
@@ -275,22 +280,22 @@ type RouterName = keyof typeof routerLoaders;
 
 interface RouteCase {
   name: RouterName;
-  method: "get" | "post";
+  method: 'get' | 'post';
   path: string;
   /** Body sent on the request — must produce 200 from the real handler when the user is allowed in. */
   body?: Record<string, unknown>;
 }
 
 const cases: RouteCase[] = [
-  { name: "consciousness", method: "get",  path: "/nuro-mesh/consciousness/snapshot" },
-  { name: "agent-os",      method: "get",  path: "/agent-os/status" },
-  { name: "alloy-digest",  method: "get",  path: "/alloy/digest/history" },
+  { name: 'consciousness', method: 'get', path: '/nuro-mesh/consciousness/snapshot' },
+  { name: 'agent-os', method: 'get', path: '/agent-os/status' },
+  { name: 'alloy-digest', method: 'get', path: '/alloy/digest/history' },
   {
-    name: "copilot",
-    method: "post",
-    path: "/copilot/chat",
+    name: 'copilot',
+    method: 'post',
+    path: '/copilot/chat',
     body: {
-      messages: [{ role: "user", content: "hi" }],
+      messages: [{ role: 'user', content: 'hi' }],
       stream: false,
     },
   },
@@ -298,43 +303,42 @@ const cases: RouteCase[] = [
 
 async function send(
   app: express.Express,
-  method: "get" | "post",
+  method: 'get' | 'post',
   path: string,
   body?: Record<string, unknown>,
 ): Promise<{ status: number; body: { error?: string } }> {
   const agent = request(app);
-  const req =
-    method === "get" ? agent.get(path) : agent.post(path).send(body ?? {});
+  const req = method === 'get' ? agent.get(path) : agent.post(path).send(body ?? {});
   return req as unknown as Promise<{ status: number; body: { error?: string } }>;
 }
 
-describe("Org-gated routers reject unauthorized callers (task #1329 / regression for #718)", () => {
+describe('Org-gated routers reject unauthorized callers (task #1329 / regression for #718)', () => {
   beforeEach(() => {
-    process.env["NODE_ENV"] = "test";
+    process.env['NODE_ENV'] = 'test';
   });
 
   for (const c of cases) {
     describe(`${c.name} router — ${c.method.toUpperCase()} ${c.path}`, () => {
-      it("returns 403 when the caller has a valid auth context but NO org membership", async () => {
+      it('returns 403 when the caller has a valid auth context but NO org membership', async () => {
         const app = await buildApp(c.name, noOrgUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(403);
         expect(res.body?.error).toMatch(/no organization membership/i);
       });
 
-      it("returns 200 for super_admin callers (org check bypassed)", async () => {
+      it('returns 200 for super_admin callers (org check bypassed)', async () => {
         const app = await buildApp(c.name, superAdminUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(200);
       });
 
-      it("returns 200 for admin callers (org check bypassed)", async () => {
+      it('returns 200 for admin callers (org check bypassed)', async () => {
         const app = await buildApp(c.name, adminUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(200);
       });
 
-      it("returns 200 for callers with a valid org membership", async () => {
+      it('returns 200 for callers with a valid org membership', async () => {
         const app = await buildApp(c.name, orgMemberUser);
         const res = await send(app, c.method, c.path, c.body);
         expect(res.status).toBe(200);

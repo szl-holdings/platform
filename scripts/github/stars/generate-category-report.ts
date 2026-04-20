@@ -13,14 +13,13 @@
  * If no input file is found, prints manual fallback instructions.
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from 'fs';
+import * as path from 'path';
 
 const INPUT_FILE =
-  process.argv[2] ||
-  path.join(process.cwd(), "exports", "github-stars", "starred-repos.json");
+  process.argv[2] || path.join(process.cwd(), 'exports', 'github-stars', 'starred-repos.json');
 
-const OUTPUT_DIR = path.join(process.cwd(), "exports", "github-stars", "reports");
+const OUTPUT_DIR = path.join(process.cwd(), 'exports', 'github-stars', 'reports');
 
 interface StarredRepo {
   name: string;
@@ -34,174 +33,167 @@ interface StarredRepo {
 }
 
 // Taxonomy: each list has keyword hints for auto-classification
-const TAXONOMY: Record<
-  string,
-  { slug: string; description: string; keywords: string[] }
-> = {
-  "Design/UI": {
-    slug: "design-ui",
-    description: "Visual systems, component libraries, animation, design tokens",
+const TAXONOMY: Record<string, { slug: string; description: string; keywords: string[] }> = {
+  'Design/UI': {
+    slug: 'design-ui',
+    description: 'Visual systems, component libraries, animation, design tokens',
     keywords: [
-      "design",
-      "ui",
-      "ux",
-      "animation",
-      "motion",
-      "css",
-      "token",
-      "theme",
-      "figma",
-      "storybook",
-      "tailwind",
-      "styled",
-      "framer",
-      "shadcn",
-      "radix",
-      "headless",
+      'design',
+      'ui',
+      'ux',
+      'animation',
+      'motion',
+      'css',
+      'token',
+      'theme',
+      'figma',
+      'storybook',
+      'tailwind',
+      'styled',
+      'framer',
+      'shadcn',
+      'radix',
+      'headless',
     ],
   },
-  "AI/Agents/RAG": {
-    slug: "ai-agents-rag",
-    description: "LLM orchestration, agent frameworks, retrieval systems",
+  'AI/Agents/RAG': {
+    slug: 'ai-agents-rag',
+    description: 'LLM orchestration, agent frameworks, retrieval systems',
     keywords: [
-      "llm",
-      "ai",
-      "agent",
-      "rag",
-      "retrieval",
-      "embedding",
-      "vector",
-      "langchain",
-      "openai",
-      "anthropic",
-      "gpt",
-      "claude",
-      "llama",
-      "transformer",
-      "ml",
-      "nlp",
+      'llm',
+      'ai',
+      'agent',
+      'rag',
+      'retrieval',
+      'embedding',
+      'vector',
+      'langchain',
+      'openai',
+      'anthropic',
+      'gpt',
+      'claude',
+      'llama',
+      'transformer',
+      'ml',
+      'nlp',
     ],
   },
   Observability: {
-    slug: "observability",
-    description: "Logging, tracing, metrics, APM tools",
+    slug: 'observability',
+    description: 'Logging, tracing, metrics, APM tools',
     keywords: [
-      "observability",
-      "logging",
-      "tracing",
-      "metrics",
-      "monitoring",
-      "telemetry",
-      "otel",
-      "opentelemetry",
-      "prometheus",
-      "grafana",
-      "jaeger",
-      "apm",
-      "trace",
-      "log",
+      'observability',
+      'logging',
+      'tracing',
+      'metrics',
+      'monitoring',
+      'telemetry',
+      'otel',
+      'opentelemetry',
+      'prometheus',
+      'grafana',
+      'jaeger',
+      'apm',
+      'trace',
+      'log',
     ],
   },
-  "Security/Trust": {
-    slug: "security-trust",
-    description: "Auth, RBAC, secrets, compliance, audit patterns",
+  'Security/Trust': {
+    slug: 'security-trust',
+    description: 'Auth, RBAC, secrets, compliance, audit patterns',
     keywords: [
-      "security",
-      "auth",
-      "authentication",
-      "authorization",
-      "rbac",
-      "oauth",
-      "jwt",
-      "secrets",
-      "vault",
-      "opa",
-      "casbin",
-      "policy",
-      "compliance",
-      "audit",
-      "zero-trust",
+      'security',
+      'auth',
+      'authentication',
+      'authorization',
+      'rbac',
+      'oauth',
+      'jwt',
+      'secrets',
+      'vault',
+      'opa',
+      'casbin',
+      'policy',
+      'compliance',
+      'audit',
+      'zero-trust',
     ],
   },
-  "Infra/DevOps": {
-    slug: "infra-devops",
-    description: "CI/CD, deployment, infrastructure-as-code",
+  'Infra/DevOps': {
+    slug: 'infra-devops',
+    description: 'CI/CD, deployment, infrastructure-as-code',
     keywords: [
-      "infrastructure",
-      "devops",
-      "ci",
-      "cd",
-      "terraform",
-      "pulumi",
-      "docker",
-      "kubernetes",
-      "k8s",
-      "deployment",
-      "pipeline",
-      "ansible",
-      "helm",
-      "azure",
-      "iac",
+      'infrastructure',
+      'devops',
+      'ci',
+      'cd',
+      'terraform',
+      'pulumi',
+      'docker',
+      'kubernetes',
+      'k8s',
+      'deployment',
+      'pipeline',
+      'ansible',
+      'helm',
+      'azure',
+      'iac',
     ],
   },
-  "Docs/README": {
-    slug: "docs-readme",
-    description: "Documentation excellence, README patterns",
+  'Docs/README': {
+    slug: 'docs-readme',
+    description: 'Documentation excellence, README patterns',
     keywords: [
-      "docs",
-      "documentation",
-      "readme",
-      "wiki",
-      "changelog",
-      "adr",
-      "docusaurus",
-      "starlight",
-      "mdx",
-      "writing",
-      "guide",
+      'docs',
+      'documentation',
+      'readme',
+      'wiki',
+      'changelog',
+      'adr',
+      'docusaurus',
+      'starlight',
+      'mdx',
+      'writing',
+      'guide',
     ],
   },
-  "Component Libraries": {
-    slug: "component-libraries",
-    description: "Shared UI component systems, headless components",
+  'Component Libraries': {
+    slug: 'component-libraries',
+    description: 'Shared UI component systems, headless components',
     keywords: [
-      "component",
-      "library",
-      "headless",
-      "primitives",
-      "react-native",
-      "expo",
-      "components",
-      "ui-kit",
-      "design-system",
+      'component',
+      'library',
+      'headless',
+      'primitives',
+      'react-native',
+      'expo',
+      'components',
+      'ui-kit',
+      'design-system',
     ],
   },
-  "Competitive/Reference": {
-    slug: "competitive-reference",
-    description: "Direct competitors, category leaders, reference implementations",
+  'Competitive/Reference': {
+    slug: 'competitive-reference',
+    description: 'Direct competitors, category leaders, reference implementations',
     keywords: [
-      "platform",
-      "saas",
-      "dashboard",
-      "analytics",
-      "observability-platform",
-      "fleet",
-      "maritime",
-      "real-estate",
-      "intelligence",
-      "command",
-      "soc",
+      'platform',
+      'saas',
+      'dashboard',
+      'analytics',
+      'observability-platform',
+      'fleet',
+      'maritime',
+      'real-estate',
+      'intelligence',
+      'command',
+      'soc',
     ],
   },
 };
 
 function classifyRepo(repo: StarredRepo): string {
-  const text = [
-    repo.name,
-    repo.description || "",
-    (repo.topics || []).join(" "),
-  ]
-    .join(" ")
+  const text = [repo.name, repo.description || '', (repo.topics || []).join(' ')]
+    .join(' ')
     .toLowerCase();
 
   for (const [category, { keywords }] of Object.entries(TAXONOMY)) {
@@ -210,15 +202,12 @@ function classifyRepo(repo: StarredRepo): string {
     }
   }
 
-  return "Uncategorized";
+  return 'Uncategorized';
 }
 
-function generateCategoryReport(
-  category: string,
-  repos: StarredRepo[]
-): string {
-  const { description } = TAXONOMY[category] || { description: "Miscellaneous" };
-  const now = new Date().toISOString().split("T")[0];
+function generateCategoryReport(category: string, repos: StarredRepo[]): string {
+  const { description } = TAXONOMY[category] || { description: 'Miscellaneous' };
+  const now = new Date().toISOString().split('T')[0];
 
   let md = `# ${category} — Stars Report\n\n`;
   md += `**Category:** ${category}  \n`;
@@ -235,31 +224,32 @@ function generateCategoryReport(
 
   // Sort by last push date (most recent first)
   const sorted = [...repos].sort(
-    (a, b) =>
-      new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime()
+    (a, b) => new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime(),
   );
 
   for (const repo of sorted) {
-    const lastPush = repo.pushed_at ? repo.pushed_at.split("T")[0] : "unknown";
-    const stale =
-      new Date(repo.pushed_at) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+    const lastPush = repo.pushed_at ? repo.pushed_at.split('T')[0] : 'unknown';
+    const stale = new Date(repo.pushed_at) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
 
-    md += `### [${repo.full_name}](${repo.html_url})${stale ? " ⚠️ STALE" : ""}\n\n`;
+    md += `### [${repo.full_name}](${repo.html_url})${stale ? ' ⚠️ STALE' : ''}\n\n`;
     if (repo.description) {
       md += `${repo.description}\n\n`;
     }
     md += `| Field | Value |\n`;
     md += `|-------|-------|\n`;
-    md += `| Language | ${repo.language || "—"} |\n`;
+    md += `| Language | ${repo.language || '—'} |\n`;
     md += `| Stars | ${repo.stargazers_count.toLocaleString()} |\n`;
-    md += `| Last push | ${lastPush}${stale ? " (**stale — review for removal**)" : ""} |\n`;
+    md += `| Last push | ${lastPush}${stale ? ' (**stale — review for removal**)' : ''} |\n`;
     if (repo.topics && repo.topics.length > 0) {
-      md += `| Topics | ${repo.topics.join(", ")} |\n`;
+      md += `| Topics | ${repo.topics.join(', ')} |\n`;
     }
-    md += "\n";
+    md += '\n';
   }
 
-  if (repos.filter((r) => new Date(r.pushed_at) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)).length > 0) {
+  if (
+    repos.filter((r) => new Date(r.pushed_at) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000))
+      .length > 0
+  ) {
     md += `---\n\n`;
     md += `> ⚠️ Stale repos (last push > 12 months ago) are marked above. Review during monthly pass.\n`;
   }
@@ -268,32 +258,28 @@ function generateCategoryReport(
 }
 
 function printManualFallback() {
-  console.log("\n================================================================");
-  console.log("  MANUAL FALLBACK — Input File Not Found");
-  console.log("================================================================\n");
-  console.log("The category report generator needs a starred repos JSON export.\n");
-  console.log("To generate the input file:\n");
-  console.log("  1. Run the export script first:");
-  console.log("     npx tsx scripts/github/stars/export-starred-repos.ts\n");
-  console.log("  2. Then run this report generator:");
+  console.log('\n================================================================');
+  console.log('  MANUAL FALLBACK — Input File Not Found');
+  console.log('================================================================\n');
+  console.log('The category report generator needs a starred repos JSON export.\n');
+  console.log('To generate the input file:\n');
+  console.log('  1. Run the export script first:');
+  console.log('     npx tsx scripts/github/stars/export-starred-repos.ts\n');
+  console.log('  2. Then run this report generator:');
+  console.log('     npx tsx scripts/github/stars/generate-category-report.ts\n');
   console.log(
-    "     npx tsx scripts/github/stars/generate-category-report.ts\n"
+    '  Or provide a custom JSON path:\n' +
+      '     npx tsx scripts/github/stars/generate-category-report.ts /path/to/repos.json\n',
   );
-  console.log(
-    "  Or provide a custom JSON path:\n" +
-      "     npx tsx scripts/github/stars/generate-category-report.ts /path/to/repos.json\n"
-  );
-  console.log("The JSON file should be an array of GitHub repo objects.");
-  console.log(
-    "Use the GitHub API format: https://api.github.com/users/{username}/starred\n"
-  );
-  console.log("================================================================\n");
+  console.log('The JSON file should be an array of GitHub repo objects.');
+  console.log('Use the GitHub API format: https://api.github.com/users/{username}/starred\n');
+  console.log('================================================================\n');
 }
 
 function main() {
-  console.log("================================================================");
-  console.log("  SZL Holdings — Stars Category Report Generator");
-  console.log("================================================================\n");
+  console.log('================================================================');
+  console.log('  SZL Holdings — Stars Category Report Generator');
+  console.log('================================================================\n');
 
   if (!fs.existsSync(INPUT_FILE)) {
     console.error(`Input file not found: ${INPUT_FILE}`);
@@ -302,13 +288,13 @@ function main() {
   }
 
   console.log(`Reading: ${INPUT_FILE}`);
-  const raw = fs.readFileSync(INPUT_FILE, "utf-8");
+  const raw = fs.readFileSync(INPUT_FILE, 'utf-8');
   let repos: StarredRepo[];
 
   try {
     repos = JSON.parse(raw);
   } catch {
-    console.error("Failed to parse JSON. Ensure the file is valid.");
+    console.error('Failed to parse JSON. Ensure the file is valid.');
     process.exit(1);
   }
 
@@ -316,7 +302,7 @@ function main() {
 
   // Classify
   const classified: Record<string, StarredRepo[]> = {};
-  for (const category of [...Object.keys(TAXONOMY), "Uncategorized"]) {
+  for (const category of [...Object.keys(TAXONOMY), 'Uncategorized']) {
     classified[category] = [];
   }
 
@@ -331,7 +317,7 @@ function main() {
   // Generate reports
   const summary: string[] = [];
   for (const [category, categoryRepos] of Object.entries(classified)) {
-    const { slug } = TAXONOMY[category] || { slug: "uncategorized" };
+    const { slug } = TAXONOMY[category] || { slug: 'uncategorized' };
     const report = generateCategoryReport(category, categoryRepos);
     const outPath = path.join(OUTPUT_DIR, `${slug}.md`);
     fs.writeFileSync(outPath, report);
@@ -340,20 +326,20 @@ function main() {
   }
 
   // Combined report
-  const combinedPath = path.join(OUTPUT_DIR, "all-categories.md");
+  const combinedPath = path.join(OUTPUT_DIR, 'all-categories.md');
   const allMd =
     `# Stars by Category — All Lists\n\n` +
-    `**Generated:** ${new Date().toISOString().split("T")[0]}\n\n` +
+    `**Generated:** ${new Date().toISOString().split('T')[0]}\n\n` +
     `| Category | Count |\n|----------|-------|\n` +
-    summary.join("\n") +
-    "\n\n---\n\n" +
+    summary.join('\n') +
+    '\n\n---\n\n' +
     Object.entries(classified)
       .map(([cat, r]) => generateCategoryReport(cat, r))
-      .join("\n---\n\n");
+      .join('\n---\n\n');
   fs.writeFileSync(combinedPath, allMd);
 
   console.log(`\nCombined report: ${combinedPath}`);
-  console.log("\nDone.");
+  console.log('\nDone.');
 }
 
 main();

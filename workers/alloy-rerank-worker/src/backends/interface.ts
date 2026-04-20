@@ -20,7 +20,7 @@ export interface RawRerankResponse {
 export interface RerankBackendDescriptor {
   backendId: string;
   displayName: string;
-  kind: "cross-encoder-http" | "fallback-deterministic";
+  kind: 'cross-encoder-http' | 'fallback-deterministic';
   supportedModels: string[];
   isFallback: boolean;
 }

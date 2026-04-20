@@ -1,15 +1,15 @@
 import React, {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useState,
-  type ReactNode,
-} from "react";
-import { Appearance, type ColorSchemeName } from "react-native";
+} from 'react';
+import { Appearance, type ColorSchemeName } from 'react-native';
 
-export type ThemeMode = "light" | "dark" | "system";
-export type ResolvedTheme = "light" | "dark";
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type ResolvedTheme = 'light' | 'dark';
 
 interface ThemeContextValue {
   mode: ThemeMode;
@@ -20,24 +20,24 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  mode: "dark",
-  resolved: "dark",
+  mode: 'dark',
+  resolved: 'dark',
   isDark: true,
   setMode: () => {},
   toggle: () => {},
 });
 
 function resolveScheme(mode: ThemeMode, systemScheme: ColorSchemeName): ResolvedTheme {
-  if (mode === "system") return systemScheme === "light" ? "light" : "dark";
+  if (mode === 'system') return systemScheme === 'light' ? 'light' : 'dark';
   return mode;
 }
 
 async function readStorage(key: string): Promise<string | null> {
   try {
-    if (typeof window !== "undefined" && window.localStorage) {
+    if (typeof window !== 'undefined' && window.localStorage) {
       return window.localStorage.getItem(key);
     }
-    const AS = (await import("@react-native-async-storage/async-storage")).default;
+    const AS = (await import('@react-native-async-storage/async-storage')).default;
     return AS.getItem(key);
   } catch {
     return null;
@@ -46,17 +46,17 @@ async function readStorage(key: string): Promise<string | null> {
 
 async function writeStorage(key: string, value: string): Promise<void> {
   try {
-    if (typeof window !== "undefined" && window.localStorage) {
+    if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem(key, value);
       return;
     }
-    const AS = (await import("@react-native-async-storage/async-storage")).default;
+    const AS = (await import('@react-native-async-storage/async-storage')).default;
     await AS.setItem(key, value);
   } catch {}
 }
 
 function isThemeMode(v: string): v is ThemeMode {
-  return v === "light" || v === "dark" || v === "system";
+  return v === 'light' || v === 'dark' || v === 'system';
 }
 
 interface ThemeProviderProps {
@@ -65,11 +65,7 @@ interface ThemeProviderProps {
   storageKey?: string;
 }
 
-export function ThemeProvider({
-  children,
-  defaultMode = "dark",
-  storageKey,
-}: ThemeProviderProps) {
+export function ThemeProvider({ children, defaultMode = 'dark', storageKey }: ThemeProviderProps) {
   const systemScheme = Appearance.getColorScheme();
   const [mode, setModeState] = useState<ThemeMode>(defaultMode);
   const [hydrated, setHydrated] = useState(!storageKey);
@@ -99,12 +95,12 @@ export function ThemeProvider({
         writeStorage(storageKey, newMode);
       }
     },
-    [storageKey]
+    [storageKey],
   );
 
   const toggle = useCallback(() => {
     setModeState((prev) => {
-      const next = prev === "dark" ? "light" : prev === "light" ? "system" : "dark";
+      const next = prev === 'dark' ? 'light' : prev === 'light' ? 'system' : 'dark';
       if (storageKey) {
         writeStorage(storageKey, next);
       }
@@ -113,7 +109,7 @@ export function ThemeProvider({
   }, [storageKey]);
 
   const resolved = resolveScheme(mode, systemResolve);
-  const isDark = resolved === "dark";
+  const isDark = resolved === 'dark';
 
   if (!hydrated) return null;
 

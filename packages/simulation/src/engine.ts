@@ -6,9 +6,9 @@
  * Used by the Decision Center "Simulate" panel to preview likely effects before approval.
  */
 
-import type { SimulationRequest, SimulationResult, SimulationScenario } from "./types.js";
+import type { SimulationRequest, SimulationResult, SimulationScenario } from './types.js';
 
-export const SIMULATION_ENGINE_VERSION = "1.0.0" as const;
+export const SIMULATION_ENGINE_VERSION = '1.0.0' as const;
 
 const URGENCY_MULTIPLIERS: Record<string, number> = {
   critical: 1.4,
@@ -21,28 +21,32 @@ const CONFIDENCE_DAMPENING = 0.92;
 
 export function runSimulation(request: SimulationRequest): SimulationResult {
   const now = Date.now();
-  const urgencyMultiplier = URGENCY_MULTIPLIERS[String(request.context?.["urgency"] ?? "moderate")];
-  const baseConfidence = Number(request.context?.["baseConfidence"] ?? 0.75);
-  const projectedConfidence = Math.min(0.99, baseConfidence * urgencyMultiplier * CONFIDENCE_DAMPENING);
+  const urgencyMultiplier = URGENCY_MULTIPLIERS[String(request.context?.['urgency'] ?? 'moderate')];
+  const baseConfidence = Number(request.context?.['baseConfidence'] ?? 0.75);
+  const projectedConfidence = Math.min(
+    0.99,
+    baseConfidence * urgencyMultiplier * CONFIDENCE_DAMPENING,
+  );
 
   return {
     id: `sim-result-${now}`,
     scenarioId: request.action.id,
-    scenarioName: String(request.context?.["scenarioName"] ?? "Simulation"),
-    scenarioDescription: String(request.context?.["scenarioDescription"] ?? ""),
+    scenarioName: String(request.context?.['scenarioName'] ?? 'Simulation'),
+    scenarioDescription: String(request.context?.['scenarioDescription'] ?? ''),
     action: request.action,
     projectedOutcome: {
-      primaryMetricLabel: String(request.context?.["primaryMetricLabel"] ?? "Close Probability"),
-      primaryMetricBefore: Number(request.context?.["primaryMetricBefore"] ?? 0.3),
-      primaryMetricAfter: Number(request.context?.["primaryMetricAfter"] ?? 0.74),
-      primaryMetricUnit: String(request.context?.["primaryMetricUnit"] ?? "%"),
-      daysToRecovery: Number(request.context?.["daysToRecovery"] ?? 3),
-      estimatedValueCapture: Number(request.context?.["estimatedValueCapture"] ?? 0),
+      primaryMetricLabel: String(request.context?.['primaryMetricLabel'] ?? 'Close Probability'),
+      primaryMetricBefore: Number(request.context?.['primaryMetricBefore'] ?? 0.3),
+      primaryMetricAfter: Number(request.context?.['primaryMetricAfter'] ?? 0.74),
+      primaryMetricUnit: String(request.context?.['primaryMetricUnit'] ?? '%'),
+      daysToRecovery: Number(request.context?.['daysToRecovery'] ?? 3),
+      estimatedValueCapture: Number(request.context?.['estimatedValueCapture'] ?? 0),
       confidence: projectedConfidence,
       confidenceReason: `Based on ${Math.round(projectedConfidence * 100)}% historical pattern match across comparable scenarios.`,
     },
-    downstreamEffects: (request.context?.["downstreamEffects"] as SimulationResult["downstreamEffects"]) ?? [],
-    riskIfNotTaken: String(request.context?.["riskIfNotTaken"] ?? ""),
+    downstreamEffects:
+      (request.context?.['downstreamEffects'] as SimulationResult['downstreamEffects']) ?? [],
+    riskIfNotTaken: String(request.context?.['riskIfNotTaken'] ?? ''),
     simulatedAt: now,
     engineVersion: SIMULATION_ENGINE_VERSION,
   };
@@ -58,10 +62,10 @@ export function compareScenarios(scenarios: SimulationScenario[]): SimulationSce
 }
 
 export function simulationConfidenceLabel(confidence: number): string {
-  if (confidence >= 0.85) return "High";
-  if (confidence >= 0.70) return "Moderate";
-  if (confidence >= 0.55) return "Low";
-  return "Very Low";
+  if (confidence >= 0.85) return 'High';
+  if (confidence >= 0.7) return 'Moderate';
+  if (confidence >= 0.55) return 'Low';
+  return 'Very Low';
 }
 
 export function formatCurrencyImpact(valueUsd: number): string {

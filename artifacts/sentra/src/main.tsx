@@ -1,30 +1,30 @@
-import { createRoot } from "react-dom/client";
-import { ErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
-import { configurePlausible } from "@szl-holdings/analytics";
-import { initSentry, initWebVitals, initAnalytics } from "@szl-holdings/observability/react";
-import { GraphQLProvider } from "@szl-holdings/graphql-client/provider";
-import App from "./App";
-import "./index.css";
+import { configurePlausible } from '@szl-holdings/analytics';
+import { GraphQLProvider } from '@szl-holdings/graphql-client/provider';
+import { initAnalytics, initSentry, initWebVitals } from '@szl-holdings/observability/react';
+import { ErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
 
 configurePlausible({
-  domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || "sentra.szlholdings.com",
+  domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || 'sentra.szlholdings.com',
   debugMode: import.meta.env.DEV,
   trackLocalhost: false,
 });
 
-initSentry({ appSlug: "sentra", tracesSampleRate: 0.2 });
-initWebVitals("sentra", "/api/");
-initAnalytics({ appSlug: "sentra" });
+initSentry({ appSlug: 'sentra', tracesSampleRate: 0.2 });
+initWebVitals('sentra', '/api/');
+initAnalytics({ appSlug: 'sentra' });
 
-if ("serviceWorker" in navigator && !import.meta.env.DEV) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sentra/sw.js", { scope: "/sentra/" }).catch((err) => {
-      console.warn("[Sentra SW] Registration failed:", err);
+if ('serviceWorker' in navigator && !import.meta.env.DEV) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sentra/sw.js', { scope: '/sentra/' }).catch((err) => {
+      console.warn('[Sentra SW] Registration failed:', err);
     });
   });
 }
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <ErrorBoundary appName="Sentra Cyber Resilience Command" accentColor="#ef4444">
     <GraphQLProvider>
       <App />

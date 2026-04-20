@@ -1,5 +1,5 @@
-import Redis from "ioredis";
-import { logger } from "./logger.js";
+import Redis from 'ioredis';
+import { logger } from './logger.js';
 
 let _client: Redis | null = null;
 let _initialized = false;
@@ -18,12 +18,12 @@ export function getRedisClient(): Redis | null {
       lazyConnect: true,
       enableOfflineQueue: false,
     });
-    _client.on("error", (err: Error) => {
-      logger.warn({ err: err.message }, "Redis connection error");
+    _client.on('error', (err: Error) => {
+      logger.warn({ err: err.message }, 'Redis connection error');
     });
-    logger.info("Redis client initialized");
+    logger.info('Redis client initialized');
   } catch (err) {
-    logger.warn({ err }, "Failed to initialize Redis client — using DB/LRU cache only");
+    logger.warn({ err }, 'Failed to initialize Redis client — using DB/LRU cache only');
     _client = null;
   }
   return _client;
@@ -45,7 +45,7 @@ export async function redisSet(key: string, data: unknown, ttlMs: number): Promi
   const client = getRedisClient();
   if (!client) return;
   try {
-    await client.set(key, JSON.stringify(data), "PX", ttlMs);
+    await client.set(key, JSON.stringify(data), 'PX', ttlMs);
   } catch {}
 }
 
@@ -59,24 +59,27 @@ export async function redisDel(key: string): Promise<void> {
 
 export function isRedisAvailable(): boolean {
   const client = getRedisClient();
-  return client !== null && client.status === "ready";
+  return client !== null && client.status === 'ready';
 }
 
 export async function pingRedis(): Promise<void> {
   const url = process.env.REDIS_URL ?? process.env.AZURE_REDIS_CONNECTION_STRING;
   if (!url) {
-    logger.info("[redis] REDIS_URL not set — cache layer: DB/LRU fallback only");
+    logger.info('[redis] REDIS_URL not set — cache layer: DB/LRU fallback only');
     return;
   }
   const client = getRedisClient();
   if (!client) {
-    logger.warn("[redis] Redis client failed to initialize — cache layer: DB/LRU fallback only");
+    logger.warn('[redis] Redis client failed to initialize — cache layer: DB/LRU fallback only');
     return;
   }
   try {
     await client.ping();
-    logger.info("[redis] Redis connected — cache layer: Redis primary + DB/LRU fallback");
+    logger.info('[redis] Redis connected — cache layer: Redis primary + DB/LRU fallback');
   } catch (err) {
-    logger.warn({ err }, "[redis] Redis ping failed at startup — cache layer: DB/LRU fallback until Redis recovers");
+    logger.warn(
+      { err },
+      '[redis] Redis ping failed at startup — cache layer: DB/LRU fallback until Redis recovers',
+    );
   }
 }

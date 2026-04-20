@@ -1,60 +1,55 @@
-export * from "./types.js";
-export * from "./evidence.js";
-export * from "./confidence.js";
-export * from "./session.js";
-export { recommend, type RecommendParams } from "./recommend.js";
-export { run, type RunOptions, type AlloyRunHandle } from "./run.js";
-
+export {
+  type BusinessImpact,
+  type DecisionEngineResult,
+  evaluateSignalBatch,
+  type Recommendation,
+  rankSignalGroups,
+  type Signal,
+  scoreBusinessImpact,
+  scoreConfidence,
+  scoreUrgency,
+} from '@szl-holdings/decision-engine';
+export {
+  checkAction,
+  type EvaluationRequest,
+  evaluatePolicies,
+  getRegisteredPolicies,
+  type Policy,
+  type PolicyEvaluationResult,
+  type PolicyRule,
+  registerPolicy,
+  unregisterPolicy,
+} from '@szl-holdings/policy-engine';
+export { createCheckpoint, InMemoryCheckpointStore } from '@workspace/alloy/checkpoint';
+export { defaultLedger, InMemoryActionLedger, makeLedgerEntry } from '@workspace/alloy/ledger';
 export {
   RunManager,
   type RunManagerOptions,
-} from "@workspace/alloy/run-manager";
+} from '@workspace/alloy/run-manager';
 export type {
+  ApprovalGate,
   RunConfig,
   RunState,
   RunStatus,
-  WorkflowStep,
   StepContext,
   StepResult,
-  ApprovalGate,
-} from "@workspace/alloy/types";
-export { InMemoryCheckpointStore, createCheckpoint } from "@workspace/alloy/checkpoint";
-export { InMemoryActionLedger, makeLedgerEntry, defaultLedger } from "@workspace/alloy/ledger";
-
+  WorkflowStep,
+} from '@workspace/alloy/types';
 export {
-  type Policy,
-  type PolicyRule,
-  type EvaluationRequest,
-  type PolicyEvaluationResult,
-  evaluatePolicies,
-  checkAction,
-  registerPolicy,
-  unregisterPolicy,
-  getRegisteredPolicies,
-} from "@szl-holdings/policy-engine";
-
-export {
-  type Recommendation,
-  type Signal,
-  type BusinessImpact,
-  type DecisionEngineResult,
-  scoreConfidence,
-  scoreBusinessImpact,
-  scoreUrgency,
-  rankSignalGroups,
-  evaluateSignalBatch,
-} from "@szl-holdings/decision-engine";
-
-export {
-  TraceWriter,
-  type TraceRecord,
-  InMemoryTraceStore,
-} from "@workspace/trace-graph";
-
-export {
+  InMemoryStore as InMemoryMemoryStore,
   type MemoryEntry,
   type MemoryType,
-  InMemoryStore as InMemoryMemoryStore,
-} from "@workspace/memory-fabric";
+} from '@workspace/memory-fabric';
+export {
+  InMemoryTraceStore,
+  type TraceRecord,
+  TraceWriter,
+} from '@workspace/trace-graph';
+export * from './confidence.js';
+export * from './evidence.js';
+export { type RecommendParams, recommend } from './recommend.js';
+export { type AlloyRunHandle, type RunOptions, run } from './run.js';
+export * from './session.js';
+export * from './types.js';
 
-export const ALLOY_VERSION = "1.0.0" as const;
+export const ALLOY_VERSION = '1.0.0' as const;

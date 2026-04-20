@@ -1,23 +1,23 @@
-import { useState, useEffect, useCallback } from "react";
-import { nexusApi } from "../lib/api";
-import type { ProtocolTool, ToolCallResult } from "../lib/types";
 import {
-  Network,
-  Loader,
   AlertCircle,
-  Play,
   CheckCircle,
-  XCircle,
   ChevronDown,
   ChevronRight,
   Clock,
+  Loader,
+  Network,
+  Play,
   Sparkles,
-} from "lucide-react";
+  XCircle,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { nexusApi } from '../lib/api';
+import type { ProtocolTool, ToolCallResult } from '../lib/types';
 
 function formatRelative(iso?: string): string {
-  if (!iso) return "";
+  if (!iso) return '';
   const ms = Date.now() - new Date(iso).getTime();
-  if (Number.isNaN(ms) || ms < 0) return "";
+  if (Number.isNaN(ms) || ms < 0) return '';
   const sec = Math.floor(ms / 1000);
   if (sec < 60) return `${sec}s ago`;
   const min = Math.floor(sec / 60);
@@ -28,34 +28,34 @@ function formatRelative(iso?: string): string {
   return `${day}d ago`;
 }
 
-const PROTOCOLS = ["MCP", "A2A", "ACP", "ANP"] as const;
+const PROTOCOLS = ['MCP', 'A2A', 'ACP', 'ANP'] as const;
 
 const PROTOCOL_META: Record<string, { color: string; description: string; badge: string }> = {
   MCP: {
-    color: "#00d4ff",
-    description: "Model Context Protocol — Anthropic standard for tool calling",
-    badge: "Live",
+    color: '#00d4ff',
+    description: 'Model Context Protocol — Anthropic standard for tool calling',
+    badge: 'Live',
   },
   A2A: {
-    color: "#a855f7",
-    description: "Agent-to-Agent protocol — Google standard for agent interop",
-    badge: "Loopback",
+    color: '#a855f7',
+    description: 'Agent-to-Agent protocol — Google standard for agent interop',
+    badge: 'Loopback',
   },
   ACP: {
-    color: "#00ff88",
-    description: "Agent Communication Protocol — IBM standard for enterprise agents",
-    badge: "Loopback",
+    color: '#00ff88',
+    description: 'Agent Communication Protocol — IBM standard for enterprise agents',
+    badge: 'Loopback',
   },
   ANP: {
-    color: "#ffb700",
-    description: "Agent Network Protocol — decentralized agent discovery",
-    badge: "Loopback",
+    color: '#ffb700',
+    description: 'Agent Network Protocol — decentralized agent discovery',
+    badge: 'Loopback',
   },
 };
 
 export default function Bridge() {
   const [tools, setTools] = useState<ProtocolTool[]>([]);
-  const [protocolFilter, setProtocolFilter] = useState<string>("all");
+  const [protocolFilter, setProtocolFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [calling, setCalling] = useState<string | null>(null);
@@ -66,11 +66,11 @@ export default function Bridge() {
   const fetchTools = useCallback(async () => {
     try {
       const data = await nexusApi.listBridgeTools(
-        protocolFilter === "all" ? undefined : protocolFilter
+        protocolFilter === 'all' ? undefined : protocolFilter,
       );
       setTools(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load tools");
+      setError(err instanceof Error ? err.message : 'Failed to load tools');
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ export default function Bridge() {
       const raw = callArgs[tool.id];
       if (raw) args = JSON.parse(raw);
     } catch {
-      setError("Invalid JSON in call arguments");
+      setError('Invalid JSON in call arguments');
       return;
     }
 
@@ -97,7 +97,7 @@ export default function Bridge() {
       const result = await nexusApi.invokeTool(tool.protocol, tool.id, args);
       setResults((prev) => ({ ...prev, [tool.id]: result }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Tool call failed");
+      setError(err instanceof Error ? err.message : 'Tool call failed');
     } finally {
       setCalling(null);
     }
@@ -119,7 +119,7 @@ export default function Bridge() {
               MCP · A2A · ACP · ANP — one façade, any tool
               {(() => {
                 const customCount = tools.filter((t) => t.isCustom).length;
-                return customCount > 0 ? ` · ${customCount} custom` : "";
+                return customCount > 0 ? ` · ${customCount} custom` : '';
               })()}
             </p>
           </div>
@@ -132,17 +132,18 @@ export default function Bridge() {
             return (
               <button
                 key={proto}
-                onClick={() => setProtocolFilter(protocolFilter === proto ? "all" : proto)}
+                onClick={() => setProtocolFilter(protocolFilter === proto ? 'all' : proto)}
                 className={`rounded-lg border p-3 text-left transition-all ${
                   protocolFilter === proto
-                    ? "border-opacity-50"
-                    : "border-nexus hover:border-opacity-30"
+                    ? 'border-opacity-50'
+                    : 'border-nexus hover:border-opacity-30'
                 }`}
                 style={{
                   borderColor: protocolFilter === proto ? meta.color : undefined,
-                  background: protocolFilter === proto
-                    ? `linear-gradient(135deg, ${meta.color}08 0%, transparent 100%)`
-                    : "#0d1520",
+                  background:
+                    protocolFilter === proto
+                      ? `linear-gradient(135deg, ${meta.color}08 0%, transparent 100%)`
+                      : '#0d1520',
                 }}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -204,13 +205,9 @@ export default function Bridge() {
                         calling={calling === tool.id}
                         result={results[tool.id]}
                         expanded={expandedTool === tool.id}
-                        onExpand={() =>
-                          setExpandedTool((e) => (e === tool.id ? null : tool.id))
-                        }
-                        args={callArgs[tool.id] ?? "{}"}
-                        onArgsChange={(v) =>
-                          setCallArgs((prev) => ({ ...prev, [tool.id]: v }))
-                        }
+                        onExpand={() => setExpandedTool((e) => (e === tool.id ? null : tool.id))}
+                        args={callArgs[tool.id] ?? '{}'}
+                        onArgsChange={(v) => setCallArgs((prev) => ({ ...prev, [tool.id]: v }))}
                       />
                     ))}
                   </div>
@@ -256,7 +253,7 @@ function ToolCard({
   return (
     <div
       className="rounded-lg border overflow-hidden bg-nexus-surface transition-all"
-      style={{ borderColor: expanded ? `${color}30` : "#1a2535" }}
+      style={{ borderColor: expanded ? `${color}30` : '#1a2535' }}
     >
       <div className="flex items-center gap-3 px-4 py-3">
         <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0 text-left">
@@ -287,7 +284,10 @@ function ToolCard({
               {!tool.isCustom && tool.lastModifiedAt && (
                 <span
                   className="text-[9px] font-mono px-1.5 py-0.5 rounded text-[#ffb700] bg-[#ffb700]/10 border border-[#ffb700]/30"
-                  title={`Last modified ${new Date(tool.lastModifiedAt).toLocaleString()}` + (tool.lastModifiedBy ? ` by ${tool.lastModifiedBy}` : "")}
+                  title={
+                    `Last modified ${new Date(tool.lastModifiedAt).toLocaleString()}` +
+                    (tool.lastModifiedBy ? ` by ${tool.lastModifiedBy}` : '')
+                  }
                 >
                   modified
                 </span>
@@ -298,7 +298,10 @@ function ToolCard({
               {tool.lastModifiedAt && (
                 <span
                   className="text-[9px] font-mono text-muted-foreground/40 shrink-0 flex items-center gap-1"
-                  title={`Last modified ${new Date(tool.lastModifiedAt).toLocaleString()}` + (tool.lastModifiedBy ? ` by ${tool.lastModifiedBy}` : "")}
+                  title={
+                    `Last modified ${new Date(tool.lastModifiedAt).toLocaleString()}` +
+                    (tool.lastModifiedBy ? ` by ${tool.lastModifiedBy}` : '')
+                  }
                 >
                   <Clock className="w-2.5 h-2.5" />
                   {formatRelative(tool.lastModifiedAt)}
@@ -310,13 +313,12 @@ function ToolCard({
         </button>
 
         <div className="flex items-center gap-2 shrink-0">
-          {result && (
-            result.status === "success" ? (
+          {result &&
+            (result.status === 'success' ? (
               <CheckCircle className="w-3.5 h-3.5 text-nexus-green" />
             ) : (
               <XCircle className="w-3.5 h-3.5 text-nexus-red" />
-            )
-          )}
+            ))}
           <button
             onClick={onCall}
             disabled={calling}
@@ -327,11 +329,7 @@ function ToolCard({
               border: `1px solid ${color}30`,
             }}
           >
-            {calling ? (
-              <Loader className="w-3 h-3 animate-spin" />
-            ) : (
-              <Play className="w-3 h-3" />
-            )}
+            {calling ? <Loader className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
             Call
           </button>
         </div>

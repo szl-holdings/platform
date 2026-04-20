@@ -1,7 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@szl-holdings/replit-auth-web";
+import { useAuth } from '@szl-holdings/replit-auth-web';
+import { useQuery } from '@tanstack/react-query';
 
-export type AppRole = "admin" | "super_admin" | "investor" | "security" | "operator" | "viewer" | "ops" | "analyst" | "exec";
+export type AppRole =
+  | 'admin'
+  | 'super_admin'
+  | 'investor'
+  | 'security'
+  | 'operator'
+  | 'viewer'
+  | 'ops'
+  | 'analyst'
+  | 'exec';
 
 export interface UserRoles {
   roles: AppRole[];
@@ -32,14 +41,14 @@ export function useRole(): UserRoles & { isLoading: boolean } {
   const { isAuthenticated } = useAuth();
 
   const { data: roles = [], isLoading } = useQuery<AppRole[]>({
-    queryKey: ["user-roles"],
+    queryKey: ['user-roles'],
     queryFn: async () => {
-      const apiBase = "/api";
+      const apiBase = '/api';
       const res = await fetch(`${apiBase}/auth/my-roles`, {
-        credentials: "include",
+        credentials: 'include',
       });
       if (!res.ok) return [];
-      const json = await res.json() as { roles?: AppRole[] };
+      const json = (await res.json()) as { roles?: AppRole[] };
       return json.roles ?? [];
     },
     enabled: isAuthenticated,
@@ -52,10 +61,10 @@ export function useRole(): UserRoles & { isLoading: boolean } {
   return {
     isLoading,
     roles,
-    isAdmin: hasRole("admin"),
-    isInvestor: hasRole("investor"),
-    isSecurity: hasRole("security"),
-    isOperator: hasRole("operator"),
+    isAdmin: hasRole('admin'),
+    isInvestor: hasRole('investor'),
+    isSecurity: hasRole('security'),
+    isOperator: hasRole('operator'),
     hasRole,
   };
 }

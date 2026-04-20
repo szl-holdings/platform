@@ -1,27 +1,27 @@
-import * as oidc from "openid-client";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
-import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import * as oidc from 'openid-client';
+import { z } from 'zod';
 import {
-  getOidcConfig,
-  getAzureAdConfig,
-  getSessionToken,
-  setSessionCookie,
   clearSessionCookie,
-  setOidcCookie,
-  getSafeReturnTo,
-  getOrigin,
-  upsertUserFromOidc,
-  upsertUserFromAzureAd,
   createOidcSession,
   deleteOidcSession,
+  getAzureAdConfig,
+  getOidcConfig,
+  getOrigin,
+  getSafeReturnTo,
+  getSessionToken,
   ISSUER_URL,
-  isOidcConfigured,
   isAzureAdConfigured,
+  isOidcConfigured,
   isProvisionedTenant,
-} from "../lib/auth";
-import { createSessionWithRefresh } from "../middlewares/session-policy";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  setOidcCookie,
+  setSessionCookie,
+  upsertUserFromAzureAd,
+  upsertUserFromOidc,
+} from '../lib/auth';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { createSessionWithRefresh } from '../middlewares/session-policy';
 
 const router: IRouter = Router();
 
@@ -33,7 +33,7 @@ const ExchangeMobileAuthorizationCodeBody = z.object({
   nonce: z.string().optional().nullable(),
 });
 
-router.get("/auth/user", (req: Request, res: Response) => {
+router.get('/auth/user', (req: Request, res: Response) => {
   const user = req.oidcUser ?? null;
   res.json({
     user: user
@@ -48,9 +48,9 @@ router.get("/auth/user", (req: Request, res: Response) => {
   });
 });
 
-router.get("/login", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get('/login', validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   if (!isOidcConfigured()) {
-    res.status(503).json({ error: "OIDC not configured" });
+    res.status(503).json({ error: 'OIDC not configured' });
     return;
   }
 
@@ -66,29 +66,29 @@ router.get("/login", validateQuery(listQuerySchema), async (req: Request, res: R
 
     const redirectTo = oidc.buildAuthorizationUrl(config, {
       redirect_uri: callbackUrl,
-      scope: "openid email profile offline_access",
+      scope: 'openid email profile offline_access',
       code_challenge: codeChallenge,
-      code_challenge_method: "S256",
-      prompt: "login consent",
+      code_challenge_method: 'S256',
+      prompt: 'login consent',
       state,
       nonce,
     });
 
-    setOidcCookie(res, "code_verifier", codeVerifier);
-    setOidcCookie(res, "nonce", nonce);
-    setOidcCookie(res, "state", state);
-    setOidcCookie(res, "return_to", returnTo);
+    setOidcCookie(res, 'code_verifier', codeVerifier);
+    setOidcCookie(res, 'nonce', nonce);
+    setOidcCookie(res, 'state', state);
+    setOidcCookie(res, 'return_to', returnTo);
 
     res.redirect(redirectTo.href);
   } catch (err) {
-    req.log?.error({ err }, "Login initiation failed");
-    res.status(500).json({ error: "Login initiation failed" });
+    req.log?.error({ err }, 'Login initiation failed');
+    res.status(500).json({ error: 'Login initiation failed' });
   }
 });
 
-router.get("/callback", async (req: Request, res: Response) => {
+router.get('/callback', async (req: Request, res: Response) => {
   if (!isOidcConfigured()) {
-    res.redirect("/");
+    res.redirect('/');
     return;
   }
 
@@ -101,7 +101,7 @@ router.get("/callback", async (req: Request, res: Response) => {
     const expectedState = req.cookies?.state;
 
     if (!codeVerifier || !expectedState) {
-      res.redirect("/api/login");
+      res.redirect('/api/login');
       return;
     }
 
@@ -118,20 +118,20 @@ router.get("/callback", async (req: Request, res: Response) => {
         idTokenExpected: true,
       });
     } catch {
-      res.redirect("/api/login");
+      res.redirect('/api/login');
       return;
     }
 
     const returnTo = getSafeReturnTo(req.cookies?.return_to);
 
-    res.clearCookie("code_verifier", { path: "/" });
-    res.clearCookie("nonce", { path: "/" });
-    res.clearCookie("state", { path: "/" });
-    res.clearCookie("return_to", { path: "/" });
+    res.clearCookie('code_verifier', { path: '/' });
+    res.clearCookie('nonce', { path: '/' });
+    res.clearCookie('state', { path: '/' });
+    res.clearCookie('return_to', { path: '/' });
 
     const claims = tokens.claims();
     if (!claims) {
-      res.redirect("/api/login");
+      res.redirect('/api/login');
       return;
     }
 
@@ -139,18 +139,18 @@ router.get("/callback", async (req: Request, res: Response) => {
     const token = await createOidcSession(
       user.id,
       req.ip ?? null,
-      req.headers["user-agent"] ?? null,
+      req.headers['user-agent'] ?? null,
     );
 
     setSessionCookie(res, token);
     res.redirect(returnTo);
   } catch (err) {
-    req.log?.error({ err }, "OIDC callback failed");
-    res.redirect("/api/login");
+    req.log?.error({ err }, 'OIDC callback failed');
+    res.redirect('/api/login');
   }
 });
 
-router.get("/logout", async (req: Request, res: Response) => {
+router.get('/logout', async (req: Request, res: Response) => {
   try {
     const token = getSessionToken(req);
     if (token) {
@@ -173,140 +173,155 @@ router.get("/logout", async (req: Request, res: Response) => {
       }
     }
 
-    res.redirect("/");
+    res.redirect('/');
   } catch (err) {
-    req.log?.error({ err }, "Logout failed");
-    res.redirect("/");
+    req.log?.error({ err }, 'Logout failed');
+    res.redirect('/');
   }
 });
 
-router.post("/mobile-auth/token-exchange", validateBody(bodyShape({})), async (req: Request, res: Response) => {
-  const parsed = ExchangeMobileAuthorizationCodeBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Missing or invalid required parameters" });
-    return;
-  }
-
-  if (!isOidcConfigured()) {
-    res.status(503).json({ error: "OIDC not configured" });
-    return;
-  }
-
-  const { code, code_verifier, redirect_uri, state, nonce } = parsed.data;
-
-  try {
-    const config = await getOidcConfig();
-
-    const callbackUrl = new URL(redirect_uri);
-    callbackUrl.searchParams.set("code", code);
-    callbackUrl.searchParams.set("state", state);
-    callbackUrl.searchParams.set("iss", ISSUER_URL);
-
-    const tokens = await oidc.authorizationCodeGrant(config, callbackUrl, {
-      pkceCodeVerifier: code_verifier,
-      expectedNonce: nonce ?? undefined,
-      expectedState: state,
-      idTokenExpected: true,
-    });
-
-    const claims = tokens.claims();
-    if (!claims) {
-      res.status(401).json({ error: "No claims in ID token" });
+router.post(
+  '/mobile-auth/token-exchange',
+  validateBody(bodyShape({})),
+  async (req: Request, res: Response) => {
+    const parsed = ExchangeMobileAuthorizationCodeBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Missing or invalid required parameters' });
       return;
     }
 
-    const user = await upsertUserFromOidc(claims as unknown as Record<string, unknown>);
-    const created = await createSessionWithRefresh({
-      userId: user.id,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers["user-agent"] ?? null,
-      reason: "mobile_token_exchange",
-    });
+    if (!isOidcConfigured()) {
+      res.status(503).json({ error: 'OIDC not configured' });
+      return;
+    }
 
-    res.json({
-      token: created.token,
-      refreshToken: created.refreshToken,
-      expiresAt: created.expiresAt.toISOString(),
-      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
-    });
-  } catch (err) {
-    req.log?.error({ err }, "Mobile token exchange error");
-    res.status(500).json({ error: "Token exchange failed" });
-  }
-});
+    const { code, code_verifier, redirect_uri, state, nonce } = parsed.data;
 
-router.post("/mobile-auth/logout", validateBody(bodyShape({})), async (req: Request, res: Response) => {
-  const token = getSessionToken(req);
-  if (token) {
-    await deleteOidcSession(token);
-  }
-  res.json({ success: true });
-});
+    try {
+      const config = await getOidcConfig();
 
-router.get("/auth/providers", (_req: Request, res: Response) => {
+      const callbackUrl = new URL(redirect_uri);
+      callbackUrl.searchParams.set('code', code);
+      callbackUrl.searchParams.set('state', state);
+      callbackUrl.searchParams.set('iss', ISSUER_URL);
+
+      const tokens = await oidc.authorizationCodeGrant(config, callbackUrl, {
+        pkceCodeVerifier: code_verifier,
+        expectedNonce: nonce ?? undefined,
+        expectedState: state,
+        idTokenExpected: true,
+      });
+
+      const claims = tokens.claims();
+      if (!claims) {
+        res.status(401).json({ error: 'No claims in ID token' });
+        return;
+      }
+
+      const user = await upsertUserFromOidc(claims as unknown as Record<string, unknown>);
+      const created = await createSessionWithRefresh({
+        userId: user.id,
+        ipAddress: req.ip ?? null,
+        userAgent: req.headers['user-agent'] ?? null,
+        reason: 'mobile_token_exchange',
+      });
+
+      res.json({
+        token: created.token,
+        refreshToken: created.refreshToken,
+        expiresAt: created.expiresAt.toISOString(),
+        refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
+      });
+    } catch (err) {
+      req.log?.error({ err }, 'Mobile token exchange error');
+      res.status(500).json({ error: 'Token exchange failed' });
+    }
+  },
+);
+
+router.post(
+  '/mobile-auth/logout',
+  validateBody(bodyShape({})),
+  async (req: Request, res: Response) => {
+    const token = getSessionToken(req);
+    if (token) {
+      await deleteOidcSession(token);
+    }
+    res.json({ success: true });
+  },
+);
+
+router.get('/auth/providers', (_req: Request, res: Response) => {
   const providers = [
-    ...(isOidcConfigured() ? [{ id: "replit", name: "Replit", loginUrl: "/api/login" }] : []),
-    ...(isAzureAdConfigured() ? [{ id: "azure_ad", name: "Microsoft Azure AD", loginUrl: "/api/azure-ad/login" }] : []),
+    ...(isOidcConfigured() ? [{ id: 'replit', name: 'Replit', loginUrl: '/api/login' }] : []),
+    ...(isAzureAdConfigured()
+      ? [{ id: 'azure_ad', name: 'Microsoft Azure AD', loginUrl: '/api/azure-ad/login' }]
+      : []),
   ];
   res.json({ providers });
 });
 
-router.get("/azure-ad/login", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
-  if (!isAzureAdConfigured()) {
-    res.status(503).json({ error: "Azure AD SSO not configured" });
-    return;
-  }
+router.get(
+  '/azure-ad/login',
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    if (!isAzureAdConfigured()) {
+      res.status(503).json({ error: 'Azure AD SSO not configured' });
+      return;
+    }
 
-  try {
-    const requestedTenantId = req.query.tenantId as string | undefined;
+    try {
+      const requestedTenantId = req.query.tenantId as string | undefined;
 
-    if (requestedTenantId) {
-      const provisioned = await isProvisionedTenant(requestedTenantId);
-      if (!provisioned) {
-        res.status(403).json({
-          error: "Tenant not provisioned",
-          message: "Your organization has not been provisioned for access to this platform. Contact your administrator.",
-        });
-        return;
+      if (requestedTenantId) {
+        const provisioned = await isProvisionedTenant(requestedTenantId);
+        if (!provisioned) {
+          res.status(403).json({
+            error: 'Tenant not provisioned',
+            message:
+              'Your organization has not been provisioned for access to this platform. Contact your administrator.',
+          });
+          return;
+        }
       }
+
+      const config = await getAzureAdConfig(requestedTenantId);
+      const callbackUrl = `${getOrigin(req)}/api/azure-ad/callback`;
+      const returnTo = getSafeReturnTo(req.query.returnTo);
+
+      const state = oidc.randomState();
+      const nonce = oidc.randomNonce();
+      const codeVerifier = oidc.randomPKCECodeVerifier();
+      const codeChallenge = await oidc.calculatePKCECodeChallenge(codeVerifier);
+
+      const redirectTo = oidc.buildAuthorizationUrl(config, {
+        redirect_uri: callbackUrl,
+        scope: 'openid email profile offline_access User.Read',
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        state,
+        nonce,
+      });
+
+      setOidcCookie(res, 'aad_code_verifier', codeVerifier);
+      setOidcCookie(res, 'aad_nonce', nonce);
+      setOidcCookie(res, 'aad_state', state);
+      setOidcCookie(res, 'aad_return_to', returnTo);
+      if (requestedTenantId) {
+        setOidcCookie(res, 'aad_tenant_id', requestedTenantId);
+      }
+
+      res.redirect(redirectTo.href);
+    } catch (err) {
+      req.log?.error({ err }, 'Azure AD login initiation failed');
+      res.status(500).json({ error: 'Azure AD login initiation failed' });
     }
+  },
+);
 
-    const config = await getAzureAdConfig(requestedTenantId);
-    const callbackUrl = `${getOrigin(req)}/api/azure-ad/callback`;
-    const returnTo = getSafeReturnTo(req.query.returnTo);
-
-    const state = oidc.randomState();
-    const nonce = oidc.randomNonce();
-    const codeVerifier = oidc.randomPKCECodeVerifier();
-    const codeChallenge = await oidc.calculatePKCECodeChallenge(codeVerifier);
-
-    const redirectTo = oidc.buildAuthorizationUrl(config, {
-      redirect_uri: callbackUrl,
-      scope: "openid email profile offline_access User.Read",
-      code_challenge: codeChallenge,
-      code_challenge_method: "S256",
-      state,
-      nonce,
-    });
-
-    setOidcCookie(res, "aad_code_verifier", codeVerifier);
-    setOidcCookie(res, "aad_nonce", nonce);
-    setOidcCookie(res, "aad_state", state);
-    setOidcCookie(res, "aad_return_to", returnTo);
-    if (requestedTenantId) {
-      setOidcCookie(res, "aad_tenant_id", requestedTenantId);
-    }
-
-    res.redirect(redirectTo.href);
-  } catch (err) {
-    req.log?.error({ err }, "Azure AD login initiation failed");
-    res.status(500).json({ error: "Azure AD login initiation failed" });
-  }
-});
-
-router.get("/azure-ad/callback", async (req: Request, res: Response) => {
+router.get('/azure-ad/callback', async (req: Request, res: Response) => {
   if (!isAzureAdConfigured()) {
-    res.redirect("/");
+    res.redirect('/');
     return;
   }
 
@@ -320,7 +335,7 @@ router.get("/azure-ad/callback", async (req: Request, res: Response) => {
     const cookieTenantId = req.cookies?.aad_tenant_id as string | undefined;
 
     if (!codeVerifier || !expectedState) {
-      res.redirect("/api/azure-ad/login");
+      res.redirect('/api/azure-ad/login');
       return;
     }
 
@@ -339,19 +354,19 @@ router.get("/azure-ad/callback", async (req: Request, res: Response) => {
         idTokenExpected: true,
       });
     } catch {
-      res.redirect("/api/azure-ad/login");
+      res.redirect('/api/azure-ad/login');
       return;
     }
 
-    res.clearCookie("aad_code_verifier", { path: "/" });
-    res.clearCookie("aad_nonce", { path: "/" });
-    res.clearCookie("aad_state", { path: "/" });
-    res.clearCookie("aad_return_to", { path: "/" });
-    res.clearCookie("aad_tenant_id", { path: "/" });
+    res.clearCookie('aad_code_verifier', { path: '/' });
+    res.clearCookie('aad_nonce', { path: '/' });
+    res.clearCookie('aad_state', { path: '/' });
+    res.clearCookie('aad_return_to', { path: '/' });
+    res.clearCookie('aad_tenant_id', { path: '/' });
 
     const claims = tokens.claims();
     if (!claims) {
-      res.redirect("/api/azure-ad/login");
+      res.redirect('/api/azure-ad/login');
       return;
     }
 
@@ -362,10 +377,11 @@ router.get("/azure-ad/callback", async (req: Request, res: Response) => {
       if (!isOwnerTenant) {
         const isProvisioned = await isProvisionedTenant(azureTenantId);
         if (!isProvisioned) {
-          req.log?.warn({ azureTenantId }, "Azure AD login attempt from unprovisioned tenant");
+          req.log?.warn({ azureTenantId }, 'Azure AD login attempt from unprovisioned tenant');
           res.status(403).json({
-            error: "Tenant not provisioned",
-            message: "Your organization has not been provisioned for access to this platform. Contact your administrator.",
+            error: 'Tenant not provisioned',
+            message:
+              'Your organization has not been provisioned for access to this platform. Contact your administrator.',
           });
           return;
         }
@@ -376,14 +392,14 @@ router.get("/azure-ad/callback", async (req: Request, res: Response) => {
     const token = await createOidcSession(
       user.id,
       req.ip ?? null,
-      req.headers["user-agent"] ?? null,
+      req.headers['user-agent'] ?? null,
     );
 
     setSessionCookie(res, token);
     res.redirect(returnTo);
   } catch (err) {
-    req.log?.error({ err }, "Azure AD callback failed");
-    res.redirect("/api/azure-ad/login");
+    req.log?.error({ err }, 'Azure AD callback failed');
+    res.redirect('/api/azure-ad/login');
   }
 });
 

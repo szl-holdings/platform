@@ -1,5 +1,5 @@
-import { ShieldAlert, AlertTriangle, Info, Clock, ExternalLink } from "lucide-react";
-import { sentraTwin } from "@/data/sentra-twin";
+import { AlertTriangle, Clock, ExternalLink, Info, ShieldAlert } from 'lucide-react';
+import { sentraTwin } from '@/data/sentra-twin';
 
 export default function ThreatOverview() {
   return (
@@ -26,10 +26,14 @@ export default function ThreatOverview() {
               <td className="px-6 py-4 text-sm font-mono text-red-400">45.227.252.12</td>
               <td className="px-6 py-4 text-xs text-slate-400">IPv4 / C2 Node</td>
               <td className="px-6 py-4">
-                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">CRITICAL</span>
+                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">
+                  CRITICAL
+                </span>
               </td>
               <td className="px-6 py-4">
-                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">RED</span>
+                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">
+                  RED
+                </span>
               </td>
               <td className="px-6 py-4 text-xs text-emerald-400 font-mono">ACTIVE</td>
               <td className="px-6 py-4 text-xs text-slate-500 font-mono">4m ago</td>
@@ -38,10 +42,14 @@ export default function ThreatOverview() {
               <td className="px-6 py-4 text-sm font-mono text-red-400">k7s-update.cc</td>
               <td className="px-6 py-4 text-xs text-slate-400">FQDN / Malware Staging</td>
               <td className="px-6 py-4">
-                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">CRITICAL</span>
+                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">
+                  CRITICAL
+                </span>
               </td>
               <td className="px-6 py-4">
-                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">RED</span>
+                <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">
+                  RED
+                </span>
               </td>
               <td className="px-6 py-4 text-xs text-emerald-400 font-mono">ACTIVE</td>
               <td className="px-6 py-4 text-xs text-slate-500 font-mono">12m ago</td>
@@ -50,10 +58,14 @@ export default function ThreatOverview() {
               <td className="px-6 py-4 text-sm font-mono text-slate-300">8d1e3f...a290</td>
               <td className="px-6 py-4 text-xs text-slate-400">SHA256 / Payload</td>
               <td className="px-6 py-4">
-                <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-mono">HIGH</span>
+                <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-mono">
+                  HIGH
+                </span>
               </td>
               <td className="px-6 py-4">
-                <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-mono">AMBER</span>
+                <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-mono">
+                  AMBER
+                </span>
               </td>
               <td className="px-6 py-4 text-xs text-slate-400 font-mono">MONITORING</td>
               <td className="px-6 py-4 text-xs text-slate-500 font-mono">1h ago</td>
@@ -70,15 +82,20 @@ export default function ThreatOverview() {
           </h2>
           <div className="space-y-4">
             <p className="text-sm text-slate-400">
-              Linked to recent campaign targeting OT infrastructure in the region. Uses custom encrypted payloads to disable PLC controllers after initial access via exposed HMI.
+              Linked to recent campaign targeting OT infrastructure in the region. Uses custom
+              encrypted payloads to disable PLC controllers after initial access via exposed HMI.
             </p>
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="p-3 rounded bg-slate-800/50 border border-slate-700">
-                <div className="text-[10px] text-slate-500 uppercase font-mono mb-1">Motivations</div>
+                <div className="text-[10px] text-slate-500 uppercase font-mono mb-1">
+                  Motivations
+                </div>
                 <div className="text-xs text-slate-300 font-medium">Financial / Distruption</div>
               </div>
               <div className="p-3 rounded bg-slate-800/50 border border-slate-700">
-                <div className="text-[10px] text-slate-500 uppercase font-mono mb-1">Sophistication</div>
+                <div className="text-[10px] text-slate-500 uppercase font-mono mb-1">
+                  Sophistication
+                </div>
                 <div className="text-xs text-slate-300 font-medium">Advanced</div>
               </div>
             </div>
@@ -95,14 +112,18 @@ export default function ThreatOverview() {
               <div className="w-1 bg-sky-500 rounded-full shrink-0" />
               <div>
                 <div className="text-xs font-bold text-slate-200">Firewall Rule Deployed</div>
-                <p className="text-[11px] text-slate-500 mt-1">Blocked outbound traffic to 45.x.x.x across all DMZ segments.</p>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Blocked outbound traffic to 45.x.x.x across all DMZ segments.
+                </p>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="w-1 bg-sky-500 rounded-full shrink-0" />
               <div>
                 <div className="text-xs font-bold text-slate-200">EDR Profile Updated</div>
-                <p className="text-[11px] text-slate-500 mt-1">New behavior detection for TA-2891 staging patterns enabled.</p>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  New behavior detection for TA-2891 staging patterns enabled.
+                </p>
               </div>
             </div>
           </div>

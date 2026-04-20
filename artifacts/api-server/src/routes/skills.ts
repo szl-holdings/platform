@@ -1,49 +1,47 @@
-import { Router, type IRouter } from "express";
-import { bodyShape } from "@szl-holdings/contracts/common";
-import { z } from "zod";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import {
+  runSkill,
+  type SkillCategory,
+  SkillDisabledError,
+  SkillNotFoundError,
+} from '@workspace/skill-library';
 import {
   defaultSkillRegistry,
   defaultSkillRunStore,
   type SkillRegistryQuery,
-} from "@workspace/skill-library/registry";
+} from '@workspace/skill-library/registry';
+import { type IRouter, Router } from 'express';
+import { z } from 'zod';
 import {
-  runSkill,
-  SkillNotFoundError,
-  SkillDisabledError,
-  type SkillCategory,
-} from "@workspace/skill-library";
-import { authMiddleware } from "../middlewares/auth";
-import {
-  sendSuccess,
-  sendCreated,
   handleRouteError,
-  sendNotFound,
   sendBadRequest,
-} from "../lib/api-response";
-import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+  sendCreated,
+  sendNotFound,
+  sendSuccess,
+} from '../lib/api-response';
+import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-router.get("/skills", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get('/skills', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query: SkillRegistryQuery = {};
 
     if (req.query.category) query.category = req.query.category as SkillCategory;
-    if (req.query.enabled !== undefined)
-      query.enabled = req.query.enabled === "true";
-    if (req.query.isBuiltin !== undefined)
-      query.isBuiltin = req.query.isBuiltin === "true";
+    if (req.query.enabled !== undefined) query.enabled = req.query.enabled === 'true';
+    if (req.query.isBuiltin !== undefined) query.isBuiltin = req.query.isBuiltin === 'true';
     if (req.query.tag) query.tag = req.query.tag as string;
 
-    const rawLimit = parseInt((req.query.limit as string) ?? "50", 10);
-    const rawOffset = parseInt((req.query.offset as string) ?? "0", 10);
+    const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
+    const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
 
     if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
-      sendBadRequest(res, "limit must be between 1 and 500");
+      sendBadRequest(res, 'limit must be between 1 and 500');
       return;
     }
     if (isNaN(rawOffset) || rawOffset < 0) {
-      sendBadRequest(res, "offset must be >= 0");
+      sendBadRequest(res, 'offset must be >= 0');
       return;
     }
 
@@ -60,11 +58,11 @@ router.get("/skills", authMiddleware(), validateQuery(listQuerySchema), async (r
 
     sendSuccess(res, { items, total, limit: rawLimit, offset: rawOffset });
   } catch (err) {
-    handleRouteError(res, err, "Failed to list skills");
+    handleRouteError(res, err, 'Failed to list skills');
   }
 });
 
-router.get("/skills/:id", authMiddleware(), async (req, res) => {
+router.get('/skills/:id', authMiddleware(), async (req, res) => {
   try {
     const skill = defaultSkillRegistry.getSkill(req.params.id as string);
     if (!skill) {
@@ -73,11 +71,11 @@ router.get("/skills/:id", authMiddleware(), async (req, res) => {
     }
     sendSuccess(res, skill);
   } catch (err) {
-    handleRouteError(res, err, "Failed to get skill");
+    handleRouteError(res, err, 'Failed to get skill');
   }
 });
 
-router.post("/skills/:id/run", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
+router.post('/skills/:id/run', authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const { inputs = {} } = req.body as { inputs?: Record<string, unknown> };
 
@@ -96,45 +94,50 @@ router.post("/skills/:id/run", authMiddleware(), validateBody(bodyShape({})), as
       sendBadRequest(res, err.message);
       return;
     }
-    handleRouteError(res, err, "Failed to run skill");
+    handleRouteError(res, err, 'Failed to run skill');
   }
 });
 
-router.get("/skills/:id/runs", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
-  try {
-    const skill = defaultSkillRegistry.getSkill(req.params.id as string);
-    if (!skill) {
-      sendNotFound(res, `Skill '${req.params.id}' not found`);
-      return;
+router.get(
+  '/skills/:id/runs',
+  authMiddleware(),
+  validateQuery(listQuerySchema),
+  async (req, res) => {
+    try {
+      const skill = defaultSkillRegistry.getSkill(req.params.id as string);
+      if (!skill) {
+        sendNotFound(res, `Skill '${req.params.id}' not found`);
+        return;
+      }
+
+      const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
+      const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
+
+      if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
+        sendBadRequest(res, 'limit must be between 1 and 500');
+        return;
+      }
+
+      if (isNaN(rawOffset) || rawOffset < 0) {
+        sendBadRequest(res, 'offset must be >= 0');
+        return;
+      }
+
+      const runs = defaultSkillRunStore.listRuns({
+        skillId: req.params.id as string,
+        limit: rawLimit,
+        offset: rawOffset,
+      });
+
+      const total = defaultSkillRunStore.countRuns({ skillId: req.params.id as string });
+      sendSuccess(res, { items: runs, total, limit: rawLimit, offset: rawOffset });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to list skill runs');
     }
+  },
+);
 
-    const rawLimit = parseInt((req.query.limit as string) ?? "50", 10);
-    const rawOffset = parseInt((req.query.offset as string) ?? "0", 10);
-
-    if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
-      sendBadRequest(res, "limit must be between 1 and 500");
-      return;
-    }
-
-    if (isNaN(rawOffset) || rawOffset < 0) {
-      sendBadRequest(res, "offset must be >= 0");
-      return;
-    }
-
-    const runs = defaultSkillRunStore.listRuns({
-      skillId: req.params.id as string,
-      limit: rawLimit,
-      offset: rawOffset,
-    });
-
-    const total = defaultSkillRunStore.countRuns({ skillId: req.params.id as string });
-    sendSuccess(res, { items: runs, total, limit: rawLimit, offset: rawOffset });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to list skill runs");
-  }
-});
-
-router.get("/skill-runs/:runId", authMiddleware(), async (req, res) => {
+router.get('/skill-runs/:runId', authMiddleware(), async (req, res) => {
   try {
     const run = defaultSkillRunStore.getRun(req.params.runId as string);
     if (!run) {
@@ -143,7 +146,7 @@ router.get("/skill-runs/:runId", authMiddleware(), async (req, res) => {
     }
     sendSuccess(res, run);
   } catch (err) {
-    handleRouteError(res, err, "Failed to get skill run");
+    handleRouteError(res, err, 'Failed to get skill run');
   }
 });
 

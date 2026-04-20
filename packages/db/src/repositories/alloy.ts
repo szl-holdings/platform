@@ -5,8 +5,8 @@
  * Note: Full workflow/approval CRUD is handled in artifacts/api-server/src/routes/alloy.ts.
  * This repository exposes read-optimized helpers for cross-domain consumers.
  */
-import { db } from "@szl-holdings/db";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { db } from '@szl-holdings/db';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 
 // raw-sql: workflow tables were added via canonical.ts; use direct db access with typed selects
 export const alloyRepo = {
@@ -26,8 +26,16 @@ export const alloyRepo = {
     return Number(row?.count ?? 0);
   },
 
-  async getRecentFailedJobs(orgId: number, limitN = 10): Promise<Array<{ id: number; type: string; error: string | null; createdAt: Date }>> {
-    const result = await db.execute<{ id: number; type: string; error: string | null; created_at: Date }>(
+  async getRecentFailedJobs(
+    orgId: number,
+    limitN = 10,
+  ): Promise<Array<{ id: number; type: string; error: string | null; createdAt: Date }>> {
+    const result = await db.execute<{
+      id: number;
+      type: string;
+      error: string | null;
+      created_at: Date;
+    }>(
       `SELECT id, type, error, created_at FROM alloy_runs
        WHERE org_id = ${orgId} AND status = 'failed'
        ORDER BY created_at DESC

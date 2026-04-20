@@ -1,27 +1,27 @@
+import { setMobileUserTimeZone } from '@szl-holdings/mobile-shared/utils';
+import * as AuthSession from 'expo-auth-session';
+import * as SecureStore from 'expo-secure-store';
+import * as WebBrowser from 'expo-web-browser';
 import React, {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
-  type ReactNode,
-} from "react";
-import * as AuthSession from "expo-auth-session";
-import * as SecureStore from "expo-secure-store";
-import * as WebBrowser from "expo-web-browser";
-import { AppState, Platform, type AppStateStatus } from "react-native";
-import { identifyUser, resetUser } from "@/lib/analytics";
-import { setSentryUser, clearSentryUser } from "@/lib/sentry";
-import { setMobileUserTimeZone } from "@szl-holdings/mobile-shared/utils";
+} from 'react';
+import { AppState, type AppStateStatus, Platform } from 'react-native';
+import { identifyUser, resetUser } from '@/lib/analytics';
+import { clearSentryUser, setSentryUser } from '@/lib/sentry';
 
 WebBrowser.maybeCompleteAuthSession();
 
-export const AUTH_TOKEN_KEY = "cortex_auth_token";
-export const AUTH_REFRESH_TOKEN_KEY = "cortex_refresh_token";
-export const AUTH_TOKEN_EXPIRES_AT_KEY = "cortex_token_expires_at";
-export const AUTH_REFRESH_EXPIRES_AT_KEY = "cortex_refresh_token_expires_at";
-const ISSUER_URL = process.env.EXPO_PUBLIC_ISSUER_URL ?? "https://replit.com/oidc";
+export const AUTH_TOKEN_KEY = 'cortex_auth_token';
+export const AUTH_REFRESH_TOKEN_KEY = 'cortex_refresh_token';
+export const AUTH_TOKEN_EXPIRES_AT_KEY = 'cortex_token_expires_at';
+export const AUTH_REFRESH_EXPIRES_AT_KEY = 'cortex_refresh_token_expires_at';
+const ISSUER_URL = process.env.EXPO_PUBLIC_ISSUER_URL ?? 'https://replit.com/oidc';
 const REFRESH_LEAD_MS = 5 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
@@ -33,7 +33,7 @@ const REFRESH_LEAD_MS = 5 * 60 * 1000;
 // on the sign-in screen instead of silently bouncing the user.
 
 export interface SessionRevocationInfo {
-  code: "SESSION_REVOKED" | "REFRESH_TOKEN_REPLAY" | string;
+  code: 'SESSION_REVOKED' | 'REFRESH_TOKEN_REPLAY' | string;
   message: string;
   at: string;
 }
@@ -42,10 +42,10 @@ const REVOCATION_LISTENERS = new Set<(info: SessionRevocationInfo | null) => voi
 let _latestRevocation: SessionRevocationInfo | null = null;
 
 function defaultRevocationMessage(code: string): string {
-  if (code === "REFRESH_TOKEN_REPLAY") {
-    return "Your session was ended for security reasons — please sign in again.";
+  if (code === 'REFRESH_TOKEN_REPLAY') {
+    return 'Your session was ended for security reasons — please sign in again.';
   }
-  return "An administrator updated your access — please sign in again.";
+  return 'An administrator updated your access — please sign in again.';
 }
 
 /** Called by apiClient when an API response carries a revocation code. */
@@ -80,28 +80,30 @@ export function getSessionRevocation(): SessionRevocationInfo | null {
   return _latestRevocation;
 }
 
-function subscribeSessionRevocation(listener: (info: SessionRevocationInfo | null) => void): () => void {
+function subscribeSessionRevocation(
+  listener: (info: SessionRevocationInfo | null) => void,
+): () => void {
   REVOCATION_LISTENERS.add(listener);
   return () => {
     REVOCATION_LISTENERS.delete(listener);
   };
 }
 
-const REVOCATION_CODES = new Set(["SESSION_REVOKED", "REFRESH_TOKEN_REPLAY"]);
+const REVOCATION_CODES = new Set(['SESSION_REVOKED', 'REFRESH_TOKEN_REPLAY']);
 
 function pickRevocationCodeFromBody(body: unknown): string | null {
-  if (!body || typeof body !== "object") return null;
-  const code = (body as Record<string, unknown>)["code"];
-  return typeof code === "string" && REVOCATION_CODES.has(code) ? code : null;
+  if (!body || typeof body !== 'object') return null;
+  const code = (body as Record<string, unknown>)['code'];
+  return typeof code === 'string' && REVOCATION_CODES.has(code) ? code : null;
 }
 
 function pickServerMessageFromBody(body: unknown): string | null {
-  if (!body || typeof body !== "object") return null;
+  if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
-  const error = record["error"];
-  if (typeof error === "string" && error.trim()) return error;
-  const message = record["message"];
-  if (typeof message === "string" && message.trim()) return message;
+  const error = record['error'];
+  if (typeof error === 'string' && error.trim()) return error;
+  const message = record['message'];
+  if (typeof message === 'string' && message.trim()) return message;
   return null;
 }
 
@@ -144,8 +146,8 @@ export const AuthContext = createContext<AuthContextValue>({
   login: async () => {},
   logout: async () => {},
   signOut: async () => {},
-  buildHeaders: (extra) => ({ "Content-Type": "application/json", ...extra }),
-  buildWsAuthMessage: () => ({ type: "auth", token: "" }),
+  buildHeaders: (extra) => ({ 'Content-Type': 'application/json', ...extra }),
+  buildWsAuthMessage: () => ({ type: 'auth', token: '' }),
   signals: [],
   sessionRevocation: null,
   dismissSessionRevocation: () => {},
@@ -155,31 +157,31 @@ function getApiBaseUrl(): string {
   if (process.env.EXPO_PUBLIC_DOMAIN) {
     return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
   }
-  return "";
+  return '';
 }
 
 function getClientId(): string {
-  return process.env.EXPO_PUBLIC_REPL_ID ?? "";
+  return process.env.EXPO_PUBLIC_REPL_ID ?? '';
 }
 
 async function secureGet(key: string): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+  if (Platform.OS === 'web') {
+    return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
   }
   return SecureStore.getItemAsync(key);
 }
 
 async function secureSet(key: string, value: string): Promise<void> {
-  if (Platform.OS === "web") {
-    if (typeof window !== "undefined") window.localStorage.setItem(key, value);
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') window.localStorage.setItem(key, value);
     return;
   }
   return SecureStore.setItemAsync(key, value);
 }
 
 async function secureDel(key: string): Promise<void> {
-  if (Platform.OS === "web") {
-    if (typeof window !== "undefined") window.localStorage.removeItem(key);
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') window.localStorage.removeItem(key);
     return;
   }
   return SecureStore.deleteItemAsync(key);
@@ -224,26 +226,25 @@ function tokenIsNearExpiry(expiresAt: string | null, now = Date.now()): boolean 
 }
 
 const DEMO_MODE =
-  process.env.EXPO_PUBLIC_DEMO_MODE === "1" ||
-  process.env.EXPO_PUBLIC_DEMO_MODE === "true";
+  process.env.EXPO_PUBLIC_DEMO_MODE === '1' || process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
 
 const DEMO_USER: AuthUser = {
-  id: "demo-compliance-officer",
-  displayName: "Avery Chen",
-  username: "avery.chen",
-  email: "avery.chen@szlholdings.example",
+  id: 'demo-compliance-officer',
+  displayName: 'Avery Chen',
+  username: 'avery.chen',
+  email: 'avery.chen@szlholdings.example',
   avatarUrl: null,
-  roles: ["compliance_officer", "approver", "operator"],
+  roles: ['compliance_officer', 'approver', 'operator'],
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(DEMO_MODE ? DEMO_USER : null);
   const [accessToken, setAccessToken] = useState<string | null>(
-    DEMO_MODE ? "demo-access-token" : null,
+    DEMO_MODE ? 'demo-access-token' : null,
   );
   const [isLoading, setIsLoading] = useState(!DEMO_MODE);
-  const [sessionRevocation, setSessionRevocation] = useState<SessionRevocationInfo | null>(
-    () => getSessionRevocation(),
+  const [sessionRevocation, setSessionRevocation] = useState<SessionRevocationInfo | null>(() =>
+    getSessionRevocation(),
   );
 
   const tokensRef = useRef<StoredTokens | null>(null);
@@ -273,7 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
       clientId: getClientId(),
-      scopes: ["openid", "email", "profile", "offline_access"],
+      scopes: ['openid', 'email', 'profile', 'offline_access'],
       redirectUri,
       prompt: AuthSession.Prompt.Login,
     },
@@ -295,16 +296,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const apiBase = getApiBaseUrl();
         const res = await fetch(`${apiBase}/api/auth/refresh`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refreshToken: current.refreshToken }),
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) {
-          if (json?.code === "REFRESH_TOKEN_REPLAY") {
-            console.warn("[Auth] Refresh token replay detected; forcing re-login");
+          if (json?.code === 'REFRESH_TOKEN_REPLAY') {
+            console.warn('[Auth] Refresh token replay detected; forcing re-login');
             recordSessionRevocation({
-              code: "REFRESH_TOKEN_REPLAY",
+              code: 'REFRESH_TOKEN_REPLAY',
               message: pickServerMessageFromBody(json) ?? undefined,
             });
             await wipeAuth();
@@ -318,7 +319,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         const data = json?.data ?? json;
         if (!data?.token || !data?.refreshToken) {
-          throw new Error("Malformed refresh response");
+          throw new Error('Malformed refresh response');
         }
         const next: StoredTokens = {
           token: data.token,
@@ -340,7 +341,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUser = useCallback(async () => {
     if (DEMO_MODE) {
       setUser(DEMO_USER);
-      setAccessToken("demo-access-token");
+      setAccessToken('demo-access-token');
       setIsLoading(false);
       return;
     }
@@ -367,7 +368,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (res.status === 401) {
         // Before trying refresh, clone the response to check for revocation codes in the original failure.
-        const body = await res.clone().json().catch(() => null);
+        const body = await res
+          .clone()
+          .json()
+          .catch(() => null);
         const code = pickRevocationCodeFromBody(body);
 
         if (stored.refreshToken && !code) {
@@ -398,7 +402,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // If we're still here, it means refresh failed or was skipped.
         // If we didn't check for revocation code yet (because we tried refresh), check now.
-        const finalBody = res === (await res.clone()) ? body : await res.clone().json().catch(() => null);
+        const finalBody =
+          res === (await res.clone())
+            ? body
+            : await res
+                .clone()
+                .json()
+                .catch(() => null);
         const finalCode = pickRevocationCodeFromBody(finalBody) || code;
 
         if (finalCode) {
@@ -449,13 +459,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Refresh on app foreground — silently extends the session so users
   // who background the app for hours don't get bounced back to login.
   useEffect(() => {
-    const sub = AppState.addEventListener("change", (state: AppStateStatus) => {
-      if (state !== "active") return;
+    const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state !== 'active') return;
       const stored = tokensRef.current;
       if (!stored?.refreshToken) return;
       if (tokenIsNearExpiry(stored.expiresAt)) {
         refreshTokens().catch((err) => {
-          console.warn("[Auth] Foreground refresh failed:", err);
+          console.warn('[Auth] Foreground refresh failed:', err);
         });
       }
     });
@@ -464,8 +474,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user) {
-      identifyUser({ id: user.id, email: user.email ?? undefined, name: user.displayName ?? undefined });
-      setSentryUser({ id: user.id, email: user.email ?? undefined, username: user.displayName ?? undefined });
+      identifyUser({
+        id: user.id,
+        email: user.email ?? undefined,
+        name: user.displayName ?? undefined,
+      });
+      setSentryUser({
+        id: user.id,
+        email: user.email ?? undefined,
+        username: user.displayName ?? undefined,
+      });
     } else {
       resetUser();
       clearSentryUser();
@@ -491,10 +509,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const json = await res.json().catch(() => null);
         const prefs = json?.data ?? json;
         const zone = prefs?.time_zone;
-        setMobileUserTimeZone(typeof zone === "string" ? zone : null);
+        setMobileUserTimeZone(typeof zone === 'string' ? zone : null);
       } catch (err) {
         if (!cancelled) {
-          console.warn("[Auth] Failed to load user preferences:", err);
+          console.warn('[Auth] Failed to load user preferences:', err);
         }
       }
     })();
@@ -504,20 +522,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, accessToken]);
 
   useEffect(() => {
-    if (!response || response.type !== "success" || !request) return;
+    if (!response || response.type !== 'success' || !request) return;
     (async () => {
       try {
         setIsLoading(true);
         const { code, state } = response.params;
         const apiBase = getApiBaseUrl();
         const tokenResp = await fetch(`${apiBase}/api/mobile-auth/token-exchange`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code,
             redirect_uri: redirectUri,
             code_verifier: request.codeVerifier,
-            state: state ?? "",
+            state: state ?? '',
           }),
         });
         if (!tokenResp.ok) {
@@ -541,7 +559,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAccessToken(stored.token);
         await fetchUser();
       } catch (err) {
-        console.error("[Auth] Token exchange error:", err);
+        console.error('[Auth] Token exchange error:', err);
         setIsLoading(false);
       }
     })();
@@ -553,7 +571,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await promptAsync();
     } catch (err) {
-      console.error("[Auth] Login error:", err);
+      console.error('[Auth] Login error:', err);
     }
   }, [promptAsync]);
 
@@ -567,7 +585,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (stored?.token) {
         const apiBase = getApiBaseUrl();
         await fetch(`${apiBase}/api/mobile-auth/logout`, {
-          method: "POST",
+          method: 'POST',
           headers: { Authorization: `Bearer ${stored.token}` },
         });
       }
@@ -588,12 +606,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         signOut: logout,
         buildHeaders: (extra?: Record<string, string>) => {
-          const headers: Record<string, string> = { "Content-Type": "application/json", ...extra };
-          if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+          const headers: Record<string, string> = { 'Content-Type': 'application/json', ...extra };
+          if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
           return headers;
         },
         buildWsAuthMessage: () => {
-          return { type: "auth", token: accessToken ?? "" };
+          return { type: 'auth', token: accessToken ?? '' };
         },
         signals: [],
         sessionRevocation,

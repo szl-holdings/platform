@@ -1,1 +1,1 @@
-export * from "./DetailDrawer.js";
+export * from './DetailDrawer.js';

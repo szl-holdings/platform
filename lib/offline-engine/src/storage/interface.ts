@@ -8,7 +8,7 @@ export interface StorageAdapter {
   count(store: string): Promise<number>;
 }
 
-export type StoragePlatform = "web" | "mobile" | "auto";
+export type StoragePlatform = 'web' | 'mobile' | 'auto';
 
 export interface StorageAdapterOptions {
   dbName?: string;

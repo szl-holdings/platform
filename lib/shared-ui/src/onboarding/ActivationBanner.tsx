@@ -1,6 +1,6 @@
-import * as React from "react";
-import { X, ChevronRight, Sparkles, AlertCircle } from "lucide-react";
-import { cn } from "../utils";
+import { AlertCircle, ChevronRight, Sparkles, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../utils';
 
 export interface ActivationStep {
   id: string;
@@ -19,22 +19,22 @@ export interface ActivationBannerProps {
   onNavigate?: (href: string) => void;
   storageKey?: string;
   className?: string;
-  variant?: "banner" | "card";
+  variant?: 'banner' | 'card';
 }
 
 export function ActivationBanner({
   steps,
-  title = "Complete your setup",
-  accentColor = "#8b7ac8",
+  title = 'Complete your setup',
+  accentColor = '#8b7ac8',
   onDismiss,
   onNavigate,
-  storageKey = "activation_banner",
+  storageKey = 'activation_banner',
   className,
-  variant = "banner",
+  variant = 'banner',
 }: ActivationBannerProps) {
   const [dismissed, setDismissed] = React.useState(() => {
     try {
-      return localStorage.getItem(`szl_${storageKey}_dismissed`) === "true";
+      return localStorage.getItem(`szl_${storageKey}_dismissed`) === 'true';
     } catch {
       return false;
     }
@@ -47,7 +47,7 @@ export function ActivationBanner({
 
   const handleDismiss = React.useCallback(() => {
     try {
-      localStorage.setItem(`szl_${storageKey}_dismissed`, "true");
+      localStorage.setItem(`szl_${storageKey}_dismissed`, 'true');
     } catch {}
     setDismissed(true);
     onDismiss?.();
@@ -69,14 +69,9 @@ export function ActivationBanner({
 
   if (dismissed || pending.length === 0) return null;
 
-  if (variant === "card") {
+  if (variant === 'card') {
     return (
-      <div
-        className={cn(
-          "w-72 rounded-2xl border border-border bg-card p-4 shadow-sm",
-          className
-        )}
-      >
+      <div className={cn('w-72 rounded-2xl border border-border bg-card p-4 shadow-sm', className)}>
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
             <div
@@ -120,18 +115,12 @@ export function ActivationBanner({
             className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/50 transition-colors group"
           >
             <div className="text-left">
-              <p className="text-sm font-medium text-foreground">
-                {nextStep.label}
-              </p>
+              <p className="text-sm font-medium text-foreground">{nextStep.label}</p>
               {nextStep.description && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {nextStep.description}
-                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">{nextStep.description}</p>
               )}
             </div>
-            <ChevronRight
-              className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0"
-            />
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
           </button>
         )}
       </div>
@@ -140,10 +129,7 @@ export function ActivationBanner({
 
   return (
     <div
-      className={cn(
-        "flex items-center gap-3 px-4 py-2.5 rounded-xl border",
-        className
-      )}
+      className={cn('flex items-center gap-3 px-4 py-2.5 rounded-xl border', className)}
       style={{
         backgroundColor: `${accentColor}08`,
         borderColor: `${accentColor}25`,
@@ -151,13 +137,9 @@ export function ActivationBanner({
     >
       <Sparkles className="w-4 h-4 shrink-0" style={{ color: accentColor }} />
       <div className="flex-1 min-w-0">
-        <span className="text-sm text-foreground font-medium">
-          {nextStep?.label}
-        </span>
+        <span className="text-sm text-foreground font-medium">{nextStep?.label}</span>
         {nextStep?.description && (
-          <span className="text-sm text-muted-foreground ml-2">
-            — {nextStep.description}
-          </span>
+          <span className="text-sm text-muted-foreground ml-2">— {nextStep.description}</span>
         )}
       </div>
       {nextStep && (
@@ -168,7 +150,7 @@ export function ActivationBanner({
             background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
           }}
         >
-          {nextStep.label.startsWith("Connect") ? "Connect" : "Set up"}
+          {nextStep.label.startsWith('Connect') ? 'Connect' : 'Set up'}
         </button>
       )}
       <button
@@ -191,7 +173,7 @@ export interface SetupAlertProps {
     onNavigate?: (href: string) => void;
   };
   onDismiss?: () => void;
-  severity?: "info" | "warning" | "error";
+  severity?: 'info' | 'warning' | 'error';
   className?: string;
 }
 
@@ -199,24 +181,21 @@ export function SetupAlert({
   message,
   action,
   onDismiss,
-  severity = "warning",
+  severity = 'warning',
   className,
 }: SetupAlertProps) {
   const [dismissed, setDismissed] = React.useState(false);
   if (dismissed) return null;
 
   const colors = {
-    info: { bg: "rgba(99,102,241,0.08)", border: "rgba(99,102,241,0.25)", icon: "#6366f1" },
-    warning: { bg: "rgba(234,179,8,0.08)", border: "rgba(234,179,8,0.25)", icon: "#ca8a04" },
-    error: { bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.25)", icon: "#dc2626" },
+    info: { bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.25)', icon: '#6366f1' },
+    warning: { bg: 'rgba(234,179,8,0.08)', border: 'rgba(234,179,8,0.25)', icon: '#ca8a04' },
+    error: { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', icon: '#dc2626' },
   }[severity];
 
   return (
     <div
-      className={cn(
-        "flex items-center gap-3 px-4 py-2.5 rounded-xl border",
-        className
-      )}
+      className={cn('flex items-center gap-3 px-4 py-2.5 rounded-xl border', className)}
       style={{ backgroundColor: colors.bg, borderColor: colors.border }}
     >
       <AlertCircle className="w-4 h-4 shrink-0" style={{ color: colors.icon }} />

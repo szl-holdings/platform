@@ -23,24 +23,20 @@
  * user is currently operating under.
  */
 
-import { Router, type IRouter, type Request, type Response } from "express";
-import { db, userSettingsTable } from "@szl-holdings/db";
-import { and, eq, isNull } from "drizzle-orm";
-import {
-  sendSuccess,
-  sendBadRequest,
-  handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { validateBody } from "../lib/validation";
+import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, userSettingsTable } from '@szl-holdings/db';
+import { and, eq, isNull } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
+import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 
-import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
-const NAMESPACE = "szl.ui.preferences";
+const NAMESPACE = 'szl.ui.preferences';
 
 type PrefValue = boolean | string | null;
-type PrefValueType = "boolean" | "string";
+type PrefValueType = 'boolean' | 'string';
 
 interface KeyDef {
   default: PrefValue;
@@ -55,37 +51,37 @@ const HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const KEY_DEFS: Record<string, KeyDef> = {
   sidebar_collapsed: {
     default: false,
-    valueType: "boolean",
-    validate: (v) => (typeof v === "boolean" ? v : undefined),
+    valueType: 'boolean',
+    validate: (v) => (typeof v === 'boolean' ? v : undefined),
   },
   notification_sound: {
     default: true,
-    valueType: "boolean",
-    validate: (v) => (typeof v === "boolean" ? v : undefined),
+    valueType: 'boolean',
+    validate: (v) => (typeof v === 'boolean' ? v : undefined),
   },
   accent_color: {
     default: null,
-    valueType: "string",
+    valueType: 'string',
     validate: (v) => {
       if (v === null) return null;
-      if (typeof v === "string" && HEX_COLOR_RE.test(v)) return v.toLowerCase();
+      if (typeof v === 'string' && HEX_COLOR_RE.test(v)) return v.toLowerCase();
       return undefined;
     },
   },
   density: {
-    default: "comfortable",
-    valueType: "string",
-    validate: (v) => (v === "comfortable" || v === "compact" ? v : undefined),
+    default: 'comfortable',
+    valueType: 'string',
+    validate: (v) => (v === 'comfortable' || v === 'compact' ? v : undefined),
   },
   time_zone: {
     default: null,
-    valueType: "string",
+    valueType: 'string',
     validate: (v) => {
       if (v === null) return null;
-      if (typeof v !== "string" || v.length === 0 || v.length > 64) return undefined;
+      if (typeof v !== 'string' || v.length === 0 || v.length > 64) return undefined;
       try {
         // Throws RangeError for unknown / malformed IANA identifiers.
-        new Intl.DateTimeFormat("en-US", { timeZone: v });
+        new Intl.DateTimeFormat('en-US', { timeZone: v });
         return v;
       } catch {
         return undefined;
@@ -94,28 +90,28 @@ const KEY_DEFS: Record<string, KeyDef> = {
   },
   alerts_approvals_enabled: {
     default: true,
-    valueType: "boolean",
-    validate: (v) => (typeof v === "boolean" ? v : undefined),
+    valueType: 'boolean',
+    validate: (v) => (typeof v === 'boolean' ? v : undefined),
   },
   alerts_run_failures_enabled: {
     default: true,
-    valueType: "boolean",
-    validate: (v) => (typeof v === "boolean" ? v : undefined),
+    valueType: 'boolean',
+    validate: (v) => (typeof v === 'boolean' ? v : undefined),
   },
   alerts_quiet_hours_enabled: {
     default: false,
-    valueType: "boolean",
-    validate: (v) => (typeof v === "boolean" ? v : undefined),
+    valueType: 'boolean',
+    validate: (v) => (typeof v === 'boolean' ? v : undefined),
   },
   alerts_quiet_hours_start: {
-    default: "22:00",
-    valueType: "string",
-    validate: (v) => (typeof v === "string" && HHMM_RE.test(v) ? v : undefined),
+    default: '22:00',
+    valueType: 'string',
+    validate: (v) => (typeof v === 'string' && HHMM_RE.test(v) ? v : undefined),
   },
   alerts_quiet_hours_end: {
-    default: "07:00",
-    valueType: "string",
-    validate: (v) => (typeof v === "string" && HHMM_RE.test(v) ? v : undefined),
+    default: '07:00',
+    valueType: 'string',
+    validate: (v) => (typeof v === 'string' && HHMM_RE.test(v) ? v : undefined),
   },
 };
 
@@ -161,12 +157,12 @@ async function loadPreferences(userId: number): Promise<Preferences> {
 // GET /preferences
 // ─────────────────────────────────────────────────────────────────────────────
 
-router.get("/preferences", authMiddleware(), async (req: Request, res: Response) => {
+router.get('/preferences', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const prefs = await loadPreferences(req.user!.id);
     sendSuccess(res, prefs);
   } catch (err) {
-    handleRouteError(res, err, "Failed to load preferences");
+    handleRouteError(res, err, 'Failed to load preferences');
   }
 });
 
@@ -175,7 +171,7 @@ router.get("/preferences", authMiddleware(), async (req: Request, res: Response)
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.patch(
-  "/preferences",
+  '/preferences',
   authMiddleware(),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
@@ -199,7 +195,7 @@ router.patch(
       if (updates.length === 0) {
         sendBadRequest(
           res,
-          "No valid preference keys provided. Allowed: " + [...ALLOWED_KEYS].join(", "),
+          'No valid preference keys provided. Allowed: ' + [...ALLOWED_KEYS].join(', '),
         );
         return;
       }
@@ -239,7 +235,7 @@ router.patch(
       const prefs = await loadPreferences(userId);
       sendSuccess(res, prefs);
     } catch (err) {
-      handleRouteError(res, err, "Failed to save preferences");
+      handleRouteError(res, err, 'Failed to save preferences');
     }
   },
 );

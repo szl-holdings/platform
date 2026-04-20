@@ -10,9 +10,5 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "references": [
-    { "path": "../db" },
-    { "path": "../proof-chain" },
-    { "path": "../worldline" }
-  ]
+  "references": [{ "path": "../db" }, { "path": "../proof-chain" }, { "path": "../worldline" }]
 }

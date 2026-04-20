@@ -1,1 +1,1 @@
-module.exports = { Platform: { OS: "ios" }, Alert: { alert: jest.fn() } };
+module.exports = { Platform: { OS: 'ios' }, Alert: { alert: jest.fn() } };

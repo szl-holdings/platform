@@ -1,4 +1,9 @@
-import type { FunnelDefinitionInput, FunnelAnalysisResult, FunnelStepResult, FilterCondition } from "./types.js";
+import type {
+  FilterCondition,
+  FunnelAnalysisResult,
+  FunnelDefinitionInput,
+  FunnelStepResult,
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Funnel event record
@@ -18,22 +23,31 @@ export interface FunnelEvent {
 function matchesStep(
   event: FunnelEvent,
   stepEventName: string,
-  conditions?: FilterCondition[]
+  conditions?: FilterCondition[],
 ): boolean {
   if (event.eventName !== stepEventName) return false;
   if (!conditions || conditions.length === 0) return true;
-  return conditions.every(cond => {
+  return conditions.every((cond) => {
     const val = event.properties?.[cond.field];
     switch (cond.operator) {
-      case "eq": return val === cond.value;
-      case "neq": return val !== cond.value;
-      case "gt": return typeof val === "number" && val > (cond.value as number);
-      case "gte": return typeof val === "number" && val >= (cond.value as number);
-      case "lt": return typeof val === "number" && val < (cond.value as number);
-      case "lte": return typeof val === "number" && val <= (cond.value as number);
-      case "in": return Array.isArray(cond.value) && (cond.value as unknown[]).includes(val);
-      case "contains": return typeof val === "string" && val.includes(String(cond.value));
-      default: return true;
+      case 'eq':
+        return val === cond.value;
+      case 'neq':
+        return val !== cond.value;
+      case 'gt':
+        return typeof val === 'number' && val > (cond.value as number);
+      case 'gte':
+        return typeof val === 'number' && val >= (cond.value as number);
+      case 'lt':
+        return typeof val === 'number' && val < (cond.value as number);
+      case 'lte':
+        return typeof val === 'number' && val <= (cond.value as number);
+      case 'in':
+        return Array.isArray(cond.value) && (cond.value as unknown[]).includes(val);
+      case 'contains':
+        return typeof val === 'string' && val.includes(String(cond.value));
+      default:
+        return true;
     }
   });
 }
@@ -51,7 +65,7 @@ interface EntityFunnelTrace {
 
 function traceEntityFunnel(
   entityEvents: FunnelEvent[],
-  definition: FunnelDefinitionInput
+  definition: FunnelDefinitionInput,
 ): EntityFunnelTrace {
   const { steps, windowHours = 168 } = definition;
   const sorted = [...entityEvents].sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
@@ -86,7 +100,7 @@ function traceEntityFunnel(
   }
 
   return {
-    entityId: sorted[0]?.entityId ?? "",
+    entityId: sorted[0]?.entityId ?? '',
     completedSteps: currentStepIndex,
     stepTimestamps,
     stepToStepMs,
@@ -102,11 +116,11 @@ export function runFunnelAnalysis(
   events: FunnelEvent[],
   from: Date,
   to: Date,
-  segmentDimension?: string
+  segmentDimension?: string,
 ): FunnelAnalysisResult {
   const { steps, funnelId, domain } = definition;
 
-  const inWindow = events.filter(e => e.occurredAt >= from && e.occurredAt <= to);
+  const inWindow = events.filter((e) => e.occurredAt >= from && e.occurredAt <= to);
 
   const byEntity = new Map<string, FunnelEvent[]>();
   for (const event of inWindow) {
@@ -120,20 +134,22 @@ export function runFunnelAnalysis(
     traces.push(traceEntityFunnel(entityEvents, definition));
   }
 
-  const totalEntries = traces.filter(t => t.completedSteps >= 1).length;
-  const totalCompletions = traces.filter(t => t.completedSteps >= steps.length).length;
+  const totalEntries = traces.filter((t) => t.completedSteps >= 1).length;
+  const totalCompletions = traces.filter((t) => t.completedSteps >= steps.length).length;
   const overallConversionRate = totalEntries > 0 ? (totalCompletions / totalEntries) * 100 : 0;
 
   const stepResults: FunnelStepResult[] = steps.map((step, idx) => {
-    const reachedThis = traces.filter(t => t.completedSteps > idx).length;
-    const reachedPrev = idx === 0 ? totalEntries : traces.filter(t => t.completedSteps > idx - 1).length;
+    const reachedThis = traces.filter((t) => t.completedSteps > idx).length;
+    const reachedPrev =
+      idx === 0 ? totalEntries : traces.filter((t) => t.completedSteps > idx - 1).length;
 
     const timesToStep = traces
-      .filter(t => t.stepToStepMs[idx] !== undefined)
-      .map(t => t.stepToStepMs[idx]!);
-    const avgTimeToStep = timesToStep.length > 0
-      ? timesToStep.reduce((s, v) => s + v, 0) / timesToStep.length / 1000
-      : undefined;
+      .filter((t) => t.stepToStepMs[idx] !== undefined)
+      .map((t) => t.stepToStepMs[idx]!);
+    const avgTimeToStep =
+      timesToStep.length > 0
+        ? timesToStep.reduce((s, v) => s + v, 0) / timesToStep.length / 1000
+        : undefined;
 
     const segments: Record<string, number> | undefined = undefined;
 
@@ -170,17 +186,17 @@ export function drillDownFunnelBySegment(
   events: FunnelEvent[],
   from: Date,
   to: Date,
-  segmentKey: string
+  segmentKey: string,
 ): Map<string, FunnelAnalysisResult> {
   const segmentValues = new Set<string>();
   for (const event of events) {
     const segVal = event.properties?.[segmentKey];
-    if (typeof segVal === "string") segmentValues.add(segVal);
+    if (typeof segVal === 'string') segmentValues.add(segVal);
   }
 
   const results = new Map<string, FunnelAnalysisResult>();
   for (const segValue of segmentValues) {
-    const segEvents = events.filter(e => e.properties?.[segmentKey] === segValue);
+    const segEvents = events.filter((e) => e.properties?.[segmentKey] === segValue);
     results.set(segValue, runFunnelAnalysis(definition, segEvents, from, to, segmentKey));
   }
   return results;

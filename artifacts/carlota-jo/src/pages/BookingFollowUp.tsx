@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
-import { CalendarCheck, Mail, Phone } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { motion } from 'framer-motion';
+import { CalendarCheck, Mail, Phone } from 'lucide-react';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 
 export default function BookingFollowUp() {
   return (
@@ -22,8 +22,8 @@ export default function BookingFollowUp() {
               What Happens Next
             </h1>
             <p className="text-sm text-cream-300/50 leading-relaxed max-w-md mx-auto">
-              Thank you for scheduling a consultation with Carlota Jo. Here's what
-              you can expect in the coming days.
+              Thank you for scheduling a consultation with Carlota Jo. Here's what you can expect in
+              the coming days.
             </p>
           </motion.div>
 
@@ -39,13 +39,11 @@ export default function BookingFollowUp() {
                   <span className="text-sm font-serif">1</span>
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-cream-50 mb-2">
-                    Confirmation Email
-                  </h3>
+                  <h3 className="font-serif text-lg text-cream-50 mb-2">Confirmation Email</h3>
                   <p className="text-sm text-cream-300/50 leading-relaxed">
-                    Within the next hour, you will receive a detailed confirmation
-                    email with your booking reference, selected service, engagement
-                    tier, and scheduled date and time.
+                    Within the next hour, you will receive a detailed confirmation email with your
+                    booking reference, selected service, engagement tier, and scheduled date and
+                    time.
                   </p>
                 </div>
               </div>
@@ -57,14 +55,11 @@ export default function BookingFollowUp() {
                   <span className="text-sm font-serif">2</span>
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-cream-50 mb-2">
-                    Pre-Engagement Briefing
-                  </h3>
+                  <h3 className="font-serif text-lg text-cream-50 mb-2">Pre-Engagement Briefing</h3>
                   <p className="text-sm text-cream-300/50 leading-relaxed">
-                    A senior partner will reach out within one business day to
-                    introduce themselves, discuss preliminary objectives, and share
-                    a brief pre-engagement questionnaire to ensure your consultation
-                    is as productive as possible.
+                    A senior partner will reach out within one business day to introduce themselves,
+                    discuss preliminary objectives, and share a brief pre-engagement questionnaire
+                    to ensure your consultation is as productive as possible.
                   </p>
                 </div>
               </div>
@@ -76,13 +71,11 @@ export default function BookingFollowUp() {
                   <span className="text-sm font-serif">3</span>
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg text-cream-50 mb-2">
-                    Your Consultation
-                  </h3>
+                  <h3 className="font-serif text-lg text-cream-50 mb-2">Your Consultation</h3>
                   <p className="text-sm text-cream-300/50 leading-relaxed">
-                    On the scheduled date, your dedicated advisory team will meet
-                    with you to explore your strategic challenge, present initial
-                    frameworks, and outline a recommended path forward.
+                    On the scheduled date, your dedicated advisory team will meet with you to
+                    explore your strategic challenge, present initial frameworks, and outline a
+                    recommended path forward.
                   </p>
                 </div>
               </div>
@@ -98,9 +91,9 @@ export default function BookingFollowUp() {
                     Post-Session Deliverables
                   </h3>
                   <p className="text-sm text-cream-300/50 leading-relaxed">
-                    Within five business days of your session, you will receive a
-                    written executive summary, strategic options analysis, and
-                    recommended next steps tailored to your situation.
+                    Within five business days of your session, you will receive a written executive
+                    summary, strategic options analysis, and recommended next steps tailored to your
+                    situation.
                   </p>
                 </div>
               </div>

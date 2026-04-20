@@ -1,14 +1,10 @@
-import type { Request, Response, NextFunction } from "express";
-import { randomUUID } from "crypto";
-import {
-  defaultTraceStore,
-  TraceWriter,
-  defaultQueryEngine,
-} from "@workspace/trace-graph";
+import { defaultQueryEngine, defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
+import { randomUUID } from 'crypto';
+import type { NextFunction, Request, Response } from 'express';
 
 const writer = new TraceWriter(defaultTraceStore);
 
-const SKIP_PREFIXES = ["/health", "/api/health", "/api/apm", "/api/traces"];
+const SKIP_PREFIXES = ['/health', '/api/health', '/api/apm', '/api/traces'];
 
 function shouldSkip(path: string): boolean {
   return SKIP_PREFIXES.some((p) => path.startsWith(p));
@@ -35,18 +31,17 @@ export function traceEmitMiddleware(req: Request, res: Response, next: NextFunct
       metadata: {
         method: req.method,
         path: req.path,
-        userAgent: req.headers["user-agent"],
-        domain: req.path.split("/")[2] ?? "api",
+        userAgent: req.headers['user-agent'],
+        domain: req.path.split('/')[2] ?? 'api',
       },
     });
-  } catch {
-  }
+  } catch {}
 
-  res.on("finish", () => {
+  res.on('finish', () => {
     const latencyMs = Number(process.hrtime.bigint() - start) / 1e6;
     try {
       writer.completeTrace(traceId, {
-        status: res.statusCode >= 500 ? "failed" : "completed",
+        status: res.statusCode >= 500 ? 'failed' : 'completed',
         latencyMs,
       });
       if (res.statusCode >= 400) {
@@ -56,8 +51,7 @@ export function traceEmitMiddleware(req: Request, res: Response, next: NextFunct
           `Request to ${req.method} ${req.path} returned ${res.statusCode}`,
         );
       }
-    } catch {
-    }
+    } catch {}
   });
 
   next();

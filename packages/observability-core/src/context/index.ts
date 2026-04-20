@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from "async_hooks";
+import { AsyncLocalStorage } from 'async_hooks';
 
 export interface RequestContext {
   correlationId: string;
@@ -33,13 +33,10 @@ export function getTenantId(): string | undefined {
   return storage.getStore()?.tenantId;
 }
 
-export function withEnrichedContext<T>(
-  partial: Partial<RequestContext>,
-  fn: () => T,
-): T {
+export function withEnrichedContext<T>(partial: Partial<RequestContext>, fn: () => T): T {
   const current = storage.getStore();
   const merged: RequestContext = {
-    correlationId: partial.correlationId ?? current?.correlationId ?? "unknown",
+    correlationId: partial.correlationId ?? current?.correlationId ?? 'unknown',
     ...current,
     ...partial,
   };

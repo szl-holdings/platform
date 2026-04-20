@@ -5,9 +5,14 @@
  * Supports full evidence chain traversal: recommendation → evidence items → signals → entities.
  */
 
-import type { EvidenceItem, Recommendation, EntitySnapshot } from "@workspace/ontology";
-import { defaultEntityRegistry } from "@workspace/ontology";
-import { defaultEvidenceStore, defaultRecommendationStore, type EvidenceStore, type RecommendationStore } from "./store.js";
+import type { EntitySnapshot, EvidenceItem, Recommendation } from '@workspace/ontology';
+import { defaultEntityRegistry } from '@workspace/ontology';
+import {
+  defaultEvidenceStore,
+  defaultRecommendationStore,
+  type EvidenceStore,
+  type RecommendationStore,
+} from './store.js';
 
 export interface EvidenceChain {
   recommendation: Recommendation;
@@ -16,7 +21,7 @@ export interface EvidenceChain {
   summary: string;
   confidenceBreakdown: Array<{
     evidenceId: string;
-    type: EvidenceItem["type"];
+    type: EvidenceItem['type'];
     summary: string;
     confidence: number;
     weight: number;
@@ -68,13 +73,20 @@ export class EvidenceGraphQuery {
         ? evidenceItems.reduce((sum, e) => sum + e.confidence * e.weight, 0) / totalWeight
         : rec.confidence;
 
-    const entityNames = entities.map((e) => e.displayName).join(", ") || "unknown entity";
+    const entityNames = entities.map((e) => e.displayName).join(', ') || 'unknown entity';
     const summary =
       `${rec.title} — The system recommends "${rec.suggestedAction}" for ${entityNames}. ` +
       `Aggregate confidence: ${(aggregateConfidence * 100).toFixed(0)}%. ` +
       `${evidenceItems.length} evidence item(s) support this recommendation.`;
 
-    return { recommendation: rec, evidenceItems, entities, summary, confidenceBreakdown, aggregateConfidence };
+    return {
+      recommendation: rec,
+      evidenceItems,
+      entities,
+      summary,
+      confidenceBreakdown,
+      aggregateConfidence,
+    };
   }
 
   why(entityId: string): WhyResult {
@@ -83,7 +95,7 @@ export class EvidenceGraphQuery {
     const allEvidenceItems = this.evidenceStore.forEntity(entityId);
 
     const activeRecommendations = recs
-      .filter((r) => r.status === "pending" || r.status === "accepted")
+      .filter((r) => r.status === 'pending' || r.status === 'accepted')
       .map((r) => this.getEvidenceChain(r.recommendationId))
       .filter((chain): chain is EvidenceChain => chain !== null);
 
@@ -93,17 +105,17 @@ export class EvidenceGraphQuery {
         ? `${entityName} has ${activeRecommendations.length} active recommendation(s). ` +
           activeRecommendations
             .map((c) => `"${c.recommendation.suggestedAction}": ${c.recommendation.rationale}`)
-            .join(" | ")
+            .join(' | ')
         : `No active recommendations for ${entityName}.`;
 
     return { entityId, entitySnapshot, activeRecommendations, allEvidenceItems, narrative };
   }
 
-  listRecommendations(filter?: Parameters<RecommendationStore["list"]>[0]): Recommendation[] {
+  listRecommendations(filter?: Parameters<RecommendationStore['list']>[0]): Recommendation[] {
     return this.recommendationStore.list(filter);
   }
 
-  listEvidence(filter?: Parameters<EvidenceStore["list"]>[0]): EvidenceItem[] {
+  listEvidence(filter?: Parameters<EvidenceStore['list']>[0]): EvidenceItem[] {
     return this.evidenceStore.list(filter);
   }
 }

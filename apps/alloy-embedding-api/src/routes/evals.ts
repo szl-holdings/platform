@@ -1,15 +1,15 @@
-import { Router } from "express";
-import type { Request, Response } from "express";
-import { EvalRunRequestSchema } from "@workspace/aef-contracts";
-import { logger } from "../middleware/logger.js";
-import { submitRetrievalEval } from "@workspace/alloy-ingestion-orchestrator/client";
+import { EvalRunRequestSchema } from '@workspace/aef-contracts';
+import { submitRetrievalEval } from '@workspace/alloy-ingestion-orchestrator/client';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import { logger } from '../middleware/logger.js';
 
 export const evalsRouter = Router();
 
-evalsRouter.post("/v1/evals/run", async (req: Request, res: Response) => {
+evalsRouter.post('/v1/evals/run', async (req: Request, res: Response) => {
   const parseResult = EvalRunRequestSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: "Validation failed", detail: parseResult.error.issues });
+    res.status(400).json({ error: 'Validation failed', detail: parseResult.error.issues });
     return;
   }
 
@@ -18,7 +18,7 @@ evalsRouter.post("/v1/evals/run", async (req: Request, res: Response) => {
 
   logger.info(
     { traceId, requestId: body.requestId, profileId: body.profileId, datasetId: body.datasetId },
-    "evals/run dispatched to orchestrator",
+    'evals/run dispatched to orchestrator',
   );
 
   try {
@@ -32,16 +32,18 @@ evalsRouter.post("/v1/evals/run", async (req: Request, res: Response) => {
         relevantChunkIds: q.relevantChunkIds,
       })),
       topK: body.topK,
-      metrics: body.metrics as Array<"ndcg" | "recall" | "precision" | "mrr"> | undefined,
+      metrics: body.metrics as Array<'ndcg' | 'recall' | 'precision' | 'mrr'> | undefined,
     });
 
-    const evalStep = run.stepResults.find((r) => r.actor === "RetrievalEvaluator");
-    const output = evalStep?.output as {
-      queryCount?: number;
-      metrics?: Array<{ metric: string; value: number; atK: number }>;
-      completedAt?: string;
-      processingMs?: number;
-    } | undefined;
+    const evalStep = run.stepResults.find((r) => r.actor === 'RetrievalEvaluator');
+    const output = evalStep?.output as
+      | {
+          queryCount?: number;
+          metrics?: Array<{ metric: string; value: number; atK: number }>;
+          completedAt?: string;
+          processingMs?: number;
+        }
+      | undefined;
 
     res.status(200).json({
       requestId: body.requestId,
@@ -58,7 +60,7 @@ evalsRouter.post("/v1/evals/run", async (req: Request, res: Response) => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    logger.error({ traceId, error: message }, "orchestrator evals/run failed");
+    logger.error({ traceId, error: message }, 'orchestrator evals/run failed');
     res.status(500).json({ error: message, traceId });
   }
 });

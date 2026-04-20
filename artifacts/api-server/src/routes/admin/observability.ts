@@ -12,20 +12,21 @@
  *   - AI ops summary (@szl-holdings/observability)
  *   - DB queries for job queue stats
  */
-import type { IRouter, Request, Response } from "express";
-import { db } from "@szl-holdings/db";
-import { serverTelemetry } from "@szl-holdings/observability";
-import { getInMemorySpans } from "@szl-holdings/otel";
-import { validateQuery } from "../../lib/validation.js";
-import { sendSuccess, sendError } from "../../lib/api-response.js";
-import { logger } from "../../lib/logger.js";
-import { observabilityTimeRangeQuerySchema } from "@szl-holdings/contracts/admin";
+
+import { observabilityTimeRangeQuerySchema } from '@szl-holdings/contracts/admin';
+import { db } from '@szl-holdings/db';
+import { serverTelemetry } from '@szl-holdings/observability';
+import { getInMemorySpans } from '@szl-holdings/otel';
+import type { IRouter, Request, Response } from 'express';
+import { sendError, sendSuccess } from '../../lib/api-response.js';
+import { logger } from '../../lib/logger.js';
+import { validateQuery } from '../../lib/validation.js';
 
 const WINDOW_MS: Record<string, number> = {
-  "1h": 60 * 60 * 1000,
-  "6h": 6 * 60 * 60 * 1000,
-  "24h": 24 * 60 * 60 * 1000,
-  "7d": 7 * 24 * 60 * 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '6h': 6 * 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+  '7d': 7 * 24 * 60 * 60 * 1000,
 };
 
 async function getJobStats(windowMs: number): Promise<{
@@ -57,10 +58,10 @@ async function getJobStats(windowMs: number): Promise<{
       retryCount += Number(row.retries);
     }
     return {
-      pending: byStatus["pending"] ?? 0,
-      running: byStatus["in_progress"] ?? 0,
-      failed: byStatus["failed"] ?? 0,
-      completed: byStatus["completed"] ?? 0,
+      pending: byStatus['pending'] ?? 0,
+      running: byStatus['in_progress'] ?? 0,
+      failed: byStatus['failed'] ?? 0,
+      completed: byStatus['completed'] ?? 0,
       retryCount,
     };
   } catch {
@@ -124,12 +125,12 @@ function computePercentiles(values: number[]): { p50: number; p95: number } {
 
 export function register(router: IRouter): void {
   router.get(
-    "/admin/observability",
+    '/admin/observability',
     validateQuery(observabilityTimeRangeQuerySchema),
     async (req: Request, res: Response) => {
       try {
-        const { window: windowKey = "24h" } = req.query as { window?: string };
-        const windowMs = WINDOW_MS[windowKey] ?? WINDOW_MS["24h"]!;
+        const { window: windowKey = '24h' } = req.query as { window?: string };
+        const windowMs = WINDOW_MS[windowKey] ?? WINDOW_MS['24h']!;
 
         const [jobStats, agentToolStats] = await Promise.all([
           getJobStats(windowMs),
@@ -137,8 +138,9 @@ export function register(router: IRouter): void {
         ]);
 
         const spans = getInMemorySpans?.() ?? [];
-        const httpSpans = spans.filter((s: { name?: string; durationMs?: number }) =>
-          s.name?.startsWith?.("http.") && typeof s.durationMs === "number",
+        const httpSpans = spans.filter(
+          (s: { name?: string; durationMs?: number }) =>
+            s.name?.startsWith?.('http.') && typeof s.durationMs === 'number',
         );
         const latencies = httpSpans.map((s: { durationMs: number }) => s.durationMs);
         const { p50: httpP50, p95: httpP95 } = computePercentiles(latencies);
@@ -181,8 +183,8 @@ export function register(router: IRouter): void {
           errorHotspots,
         });
       } catch (err) {
-        logger.error({ err }, "Failed to load observability metrics");
-        return sendError(res, "Failed to load observability metrics", 500);
+        logger.error({ err }, 'Failed to load observability metrics');
+        return sendError(res, 'Failed to load observability metrics', 500);
       }
     },
   );

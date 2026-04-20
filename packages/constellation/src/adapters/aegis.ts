@@ -1,48 +1,48 @@
-import type { ConstellationAdapter } from "../adapter.js";
-import type { CstNodeTypeRegistration, CreateCstNode, CstNode } from "../types.js";
-import { upsertNode, upsertNodeAlias, lookupNodeByAlias } from "../query.js";
-import { registerAdapter } from "../registry.js";
+import type { ConstellationAdapter } from '../adapter.js';
+import { lookupNodeByAlias, upsertNode, upsertNodeAlias } from '../query.js';
+import { registerAdapter } from '../registry.js';
+import type { CreateCstNode, CstNode, CstNodeTypeRegistration } from '../types.js';
 
 const AEGIS_NODE_TYPES: CstNodeTypeRegistration[] = [
   {
-    domain: "aegis",
-    typeKey: "asset",
-    displayName: "Asset",
-    description: "A cyber or physical asset",
-    defaultSensitivity: "internal",
+    domain: 'aegis',
+    typeKey: 'asset',
+    displayName: 'Asset',
+    description: 'A cyber or physical asset',
+    defaultSensitivity: 'internal',
   },
   {
-    domain: "aegis",
-    typeKey: "identity",
-    displayName: "Identity",
-    description: "A user, system, or service identity",
-    defaultSensitivity: "confidential",
+    domain: 'aegis',
+    typeKey: 'identity',
+    displayName: 'Identity',
+    description: 'A user, system, or service identity',
+    defaultSensitivity: 'confidential',
   },
   {
-    domain: "aegis",
-    typeKey: "control",
-    displayName: "Security Control",
-    description: "A security control or countermeasure",
-    defaultSensitivity: "internal",
+    domain: 'aegis',
+    typeKey: 'control',
+    displayName: 'Security Control',
+    description: 'A security control or countermeasure',
+    defaultSensitivity: 'internal',
   },
   {
-    domain: "aegis",
-    typeKey: "incident",
-    displayName: "Security Incident",
-    description: "An active or historical security incident",
-    defaultSensitivity: "restricted",
+    domain: 'aegis',
+    typeKey: 'incident',
+    displayName: 'Security Incident',
+    description: 'An active or historical security incident',
+    defaultSensitivity: 'restricted',
   },
 ];
 
 const aegisAdapter: ConstellationAdapter = {
-  domain: "aegis",
+  domain: 'aegis',
   nodeTypes: AEGIS_NODE_TYPES,
 
   async upsertEntity(input: CreateCstNode): Promise<CstNode> {
-    const node = await upsertNode({ ...input, domain: "aegis" });
+    const node = await upsertNode({ ...input, domain: 'aegis' });
     const ext = (input.extensions ?? {}) as Record<string, unknown>;
     if (ext.assetId) {
-      await upsertNodeAlias(node.id, "aegis_asset_id", String(ext.assetId), "aegis", true);
+      await upsertNodeAlias(node.id, 'aegis_asset_id', String(ext.assetId), 'aegis', true);
     }
     return node;
   },
@@ -53,4 +53,5 @@ const aegisAdapter: ConstellationAdapter = {
 };
 
 registerAdapter(aegisAdapter);
+
 export { aegisAdapter };

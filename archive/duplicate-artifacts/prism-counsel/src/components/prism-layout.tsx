@@ -1,15 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { GettingStartedChecklist } from '@szl-holdings/shared-ui/onboarding';
 import {
-  LayoutDashboard, Network, BarChart3, FileStack, Shield, Settings, Database,
-  ChevronLeft, ChevronRight, Scale, Bell, Search, Menu, X
-} from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { useUserPreferences, useEffectiveAccent } from "@szl-holdings/shared-ui/use-user-preferences";
-import { GettingStartedChecklist } from "@szl-holdings/shared-ui/onboarding";
-import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
+  useEffectiveAccent,
+  useUserPreferences,
+} from '@szl-holdings/shared-ui/use-user-preferences';
+import { cn } from '@szl-holdings/shared-ui/utils';
+import {
+  BarChart3,
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  Database,
+  FileStack,
+  LayoutDashboard,
+  Menu,
+  Network,
+  Scale,
+  Search,
+  Settings,
+  Shield,
+  X,
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'wouter';
+import { PRISM_ONBOARDING_CONFIG } from '@/onboarding-config';
 
-const PRISM_BRAND_ACCENT = "#a78bfa";
+const PRISM_BRAND_ACCENT = '#a78bfa';
 
 interface NavItem {
   id: string;
@@ -27,29 +42,70 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    id: "command",
-    label: "Command",
+    id: 'command',
+    label: 'Command',
     items: [
-      { id: "matters", label: "Matter Board", icon: <LayoutDashboard className="w-3.5 h-3.5" />, href: "/matters", badge: "6" },
-      { id: "obligation-graph", label: "Obligation Graph", icon: <Network className="w-3.5 h-3.5" />, href: "/obligation-graph" },
-      { id: "deadline-heatmap", label: "Deadline Heatmap", icon: <BarChart3 className="w-3.5 h-3.5" />, href: "/deadline-heatmap" },
-      { id: "proof-chain", label: "Proof Chain Export", icon: <FileStack className="w-3.5 h-3.5" />, href: "/proof-chain" },
-      { id: "evidence", label: "Evidence", icon: <Database className="w-3.5 h-3.5" />, href: "/evidence" },
+      {
+        id: 'matters',
+        label: 'Matter Board',
+        icon: <LayoutDashboard className="w-3.5 h-3.5" />,
+        href: '/matters',
+        badge: '6',
+      },
+      {
+        id: 'obligation-graph',
+        label: 'Obligation Graph',
+        icon: <Network className="w-3.5 h-3.5" />,
+        href: '/obligation-graph',
+      },
+      {
+        id: 'deadline-heatmap',
+        label: 'Deadline Heatmap',
+        icon: <BarChart3 className="w-3.5 h-3.5" />,
+        href: '/deadline-heatmap',
+      },
+      {
+        id: 'proof-chain',
+        label: 'Proof Chain Export',
+        icon: <FileStack className="w-3.5 h-3.5" />,
+        href: '/proof-chain',
+      },
+      {
+        id: 'evidence',
+        label: 'Evidence',
+        icon: <Database className="w-3.5 h-3.5" />,
+        href: '/evidence',
+      },
     ],
   },
   {
-    id: "governance",
-    label: "Governance",
+    id: 'governance',
+    label: 'Governance',
     items: [
-      { id: "privilege", label: "Privilege Controls", icon: <Shield className="w-3.5 h-3.5" />, href: "/privilege" },
-      { id: "audit", label: "Audit Trail", icon: <Scale className="w-3.5 h-3.5" />, href: "/audit" },
+      {
+        id: 'privilege',
+        label: 'Privilege Controls',
+        icon: <Shield className="w-3.5 h-3.5" />,
+        href: '/privilege',
+      },
+      {
+        id: 'audit',
+        label: 'Audit Trail',
+        icon: <Scale className="w-3.5 h-3.5" />,
+        href: '/audit',
+      },
     ],
   },
   {
-    id: "settings",
-    label: "Settings",
+    id: 'settings',
+    label: 'Settings',
     items: [
-      { id: "settings", label: "Settings", icon: <Settings className="w-3.5 h-3.5" />, href: "/settings" },
+      {
+        id: 'settings',
+        label: 'Settings',
+        icon: <Settings className="w-3.5 h-3.5" />,
+        href: '/settings',
+      },
     ],
   },
 ];
@@ -74,25 +130,41 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
     userOverriddenSidebarRef.current = true;
     setCollapsed((v) => {
       const next = !v;
-      setPreference("sidebar_collapsed", next);
+      setPreference('sidebar_collapsed', next);
       return next;
     });
   }, [setPreference]);
 
   const isActive = (href: string) => {
-    const clean = location.replace(/\/$/, "") || "/";
-    return clean === href || clean.startsWith(href + "/");
+    const clean = location.replace(/\/$/, '') || '/';
+    return clean === href || clean.startsWith(href + '/');
   };
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <div className="flex flex-col h-full">
-      <div className={cn("flex items-center gap-3 px-4 py-4 border-b border-white/5 shrink-0", collapsed && "justify-center px-2")}>
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(167,139,250,0.15)", border: "1px solid rgba(167,139,250,0.3)" }}>
+      <div
+        className={cn(
+          'flex items-center gap-3 px-4 py-4 border-b border-white/5 shrink-0',
+          collapsed && 'justify-center px-2',
+        )}
+      >
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+          style={{
+            background: 'rgba(167,139,250,0.15)',
+            border: '1px solid rgba(167,139,250,0.3)',
+          }}
+        >
           <Scale className="w-3.5 h-3.5" style={{ color: PRISM_BRAND_ACCENT }} />
         </div>
         {!collapsed && (
           <div>
-            <p className="text-xs font-semibold tracking-wide font-display" style={{ color: PRISM_BRAND_ACCENT }}>PRISM</p>
+            <p
+              className="text-xs font-semibold tracking-wide font-display"
+              style={{ color: PRISM_BRAND_ACCENT }}
+            >
+              PRISM
+            </p>
             <p className="text-[10px] text-white/30 -mt-0.5">Legal Command</p>
           </div>
         )}
@@ -102,7 +174,9 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
         {NAV_SECTIONS.map((section) => (
           <div key={section.id}>
             {!collapsed && (
-              <p className="text-[9px] font-semibold uppercase tracking-widest text-white/20 px-2 mb-1">{section.label}</p>
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-white/20 px-2 mb-1">
+                {section.label}
+              </p>
             )}
             <div className="space-y-0.5">
               {section.items.map((item) => {
@@ -113,21 +187,27 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     onClick={onItemClick}
                     className={cn(
-                      "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-all",
+                      'flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-all',
                       active
-                        ? "text-white/90"
-                        : "text-white/40 hover:text-white/70 hover:bg-white/5",
-                      collapsed && "justify-center px-2"
+                        ? 'text-white/90'
+                        : 'text-white/40 hover:text-white/70 hover:bg-white/5',
+                      collapsed && 'justify-center px-2',
                     )}
-                    style={active ? { background: "rgba(167,139,250,0.12)", color: ACCENT } : {}}
+                    style={active ? { background: 'rgba(167,139,250,0.12)', color: ACCENT } : {}}
                     title={collapsed ? item.label : undefined}
                   >
-                    <span className={cn("shrink-0", active ? "" : "opacity-70")} style={active ? { color: ACCENT } : {}}>
+                    <span
+                      className={cn('shrink-0', active ? '' : 'opacity-70')}
+                      style={active ? { color: ACCENT } : {}}
+                    >
                       {item.icon}
                     </span>
                     {!collapsed && <span className="truncate">{item.label}</span>}
                     {!collapsed && item.badge && (
-                      <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-full" style={{ background: "rgba(167,139,250,0.15)", color: ACCENT }}>
+                      <span
+                        className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-full"
+                        style={{ background: 'rgba(167,139,250,0.15)', color: ACCENT }}
+                      >
                         {item.badge}
                       </span>
                     )}
@@ -154,22 +234,32 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
       <div className="shrink-0 p-3 border-t border-white/5">
         <button
           onClick={toggle}
-          className={cn("flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-xs text-white/30 hover:text-white/60 hover:bg-white/5 transition-all", collapsed && "justify-center")}
+          className={cn(
+            'flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-xs text-white/30 hover:text-white/60 hover:bg-white/5 transition-all',
+            collapsed && 'justify-center',
+          )}
         >
-          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <><ChevronLeft className="w-3.5 h-3.5" /><span>Collapse</span></>}
+          {collapsed ? (
+            <ChevronRight className="w-3.5 h-3.5" />
+          ) : (
+            <>
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Collapse</span>
+            </>
+          )}
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="flex h-full overflow-hidden" style={{ background: "#080810" }}>
+    <div className="flex h-full overflow-hidden" style={{ background: '#080810' }}>
       <aside
         className={cn(
-          "hidden md:flex flex-col shrink-0 border-r border-white/5 transition-all duration-200",
-          collapsed ? "w-12" : "w-52"
+          'hidden md:flex flex-col shrink-0 border-r border-white/5 transition-all duration-200',
+          collapsed ? 'w-12' : 'w-52',
         )}
-        style={{ background: "#0a0a14" }}
+        style={{ background: '#0a0a14' }}
       >
         <SidebarContent />
       </aside>
@@ -177,9 +267,15 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-64 flex flex-col border-r border-white/5" style={{ background: "#0a0a14" }}>
+          <aside
+            className="relative w-64 flex flex-col border-r border-white/5"
+            style={{ background: '#0a0a14' }}
+          >
             <div className="absolute top-3 right-3">
-              <button onClick={() => setMobileOpen(false)} className="p-1 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5">
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-1 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -189,7 +285,10 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="flex items-center gap-3 px-4 py-2.5 border-b border-white/5 shrink-0" style={{ background: "#0a0a14" }}>
+        <header
+          className="flex items-center gap-3 px-4 py-2.5 border-b border-white/5 shrink-0"
+          style={{ background: '#0a0a14' }}
+        >
           <button
             className="md:hidden p-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5"
             onClick={() => setMobileOpen(true)}
@@ -205,9 +304,17 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 ml-auto">
             <button className="relative p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors">
               <Bell className="w-3.5 h-3.5" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444" }} />
+              <span
+                className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
+                style={{ background: '#ef4444' }}
+              />
             </button>
-            <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: "rgba(167,139,250,0.15)", color: ACCENT }}>P</div>
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
+              style={{ background: 'rgba(167,139,250,0.15)', color: ACCENT }}
+            >
+              P
+            </div>
           </div>
         </header>
         <main data-szl-shell-main className="flex-1 overflow-y-auto">

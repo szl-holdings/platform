@@ -1,54 +1,60 @@
-import { useState } from "react";
-import { Link } from "wouter";
-import { Shield, Flame, Loader2, CheckCircle, AlertTriangle, ChevronRight, ArrowLeft } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  ChevronRight,
+  Flame,
+  Loader2,
+  Shield,
+} from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'wouter';
 
 const ADD_ONS = [
-  { id: "xdr", label: "Extended Detection & Response (XDR)" },
-  { id: "threat-hunting", label: "Managed Threat Hunting" },
-  { id: "soc", label: "24/7 SOC-as-a-Service" },
-  { id: "compliance", label: "Compliance Automation (SOC 2 / ISO 27001)" },
-  { id: "deception", label: "Deception Technology" },
-  { id: "ir", label: "Incident Response Retainer" },
+  { id: 'xdr', label: 'Extended Detection & Response (XDR)' },
+  { id: 'threat-hunting', label: 'Managed Threat Hunting' },
+  { id: 'soc', label: '24/7 SOC-as-a-Service' },
+  { id: 'compliance', label: 'Compliance Automation (SOC 2 / ISO 27001)' },
+  { id: 'deception', label: 'Deception Technology' },
+  { id: 'ir', label: 'Incident Response Retainer' },
 ];
 
-type Status = "idle" | "loading" | "success" | "error";
+type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export default function EnterpriseDemo() {
   const [form, setForm] = useState({
-    companyName: "",
-    contactName: "",
-    email: "",
-    seats: "",
-    notes: "",
+    companyName: '',
+    contactName: '',
+    email: '',
+    seats: '',
+    notes: '',
     addOns: [] as string[],
   });
-  const [status, setStatus] = useState<Status>("idle");
-  const [resultMessage, setResultMessage] = useState("");
+  const [status, setStatus] = useState<Status>('idle');
+  const [resultMessage, setResultMessage] = useState('');
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const toggleAddOn = (id: string) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      addOns: prev.addOns.includes(id)
-        ? prev.addOns.filter(a => a !== id)
-        : [...prev.addOns, id],
+      addOns: prev.addOns.includes(id) ? prev.addOns.filter((a) => a !== id) : [...prev.addOns, id],
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.companyName || !form.email) return;
-    setStatus("loading");
-    setResultMessage("");
+    setStatus('loading');
+    setResultMessage('');
     setCheckoutUrl(null);
     try {
-      const baseUrl = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-      const successUrl = window.location.origin + baseUrl + "/demo?quote=success";
-      const cancelUrl = window.location.origin + baseUrl + "/demo?quote=cancel";
+      const baseUrl = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+      const successUrl = window.location.origin + baseUrl + '/demo?quote=success';
+      const cancelUrl = window.location.origin + baseUrl + '/demo?quote=cancel';
 
-      const res = await fetch("/api/billing/aegis/enterprise-quote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/billing/aegis/enterprise-quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           companyName: form.companyName,
           contactName: form.contactName,
@@ -64,26 +70,34 @@ export default function EnterpriseDemo() {
       const payload = data?.data ?? data;
 
       if (!res.ok) {
-        setStatus("error");
-        setResultMessage(payload?.error ?? "Request failed. Please try again.");
+        setStatus('error');
+        setResultMessage(payload?.error ?? 'Request failed. Please try again.');
         return;
       }
 
       if (payload?.url) {
         setCheckoutUrl(payload.url);
-        setStatus("success");
-        setResultMessage("Your enterprise profile is ready. Complete payment to activate your Aegis environment.");
+        setStatus('success');
+        setResultMessage(
+          'Your enterprise profile is ready. Complete payment to activate your Aegis environment.',
+        );
       } else if (payload?.hostedInvoiceUrl) {
         setCheckoutUrl(payload.hostedInvoiceUrl);
-        setStatus("success");
-        setResultMessage(payload?.message ?? "Your enterprise invoice has been sent. Review and pay to activate your Aegis environment.");
+        setStatus('success');
+        setResultMessage(
+          payload?.message ??
+            'Your enterprise invoice has been sent. Review and pay to activate your Aegis environment.',
+        );
       } else {
-        setStatus("success");
-        setResultMessage(payload?.message ?? "Request received. A threat briefing specialist will contact you within 1 business day.");
+        setStatus('success');
+        setResultMessage(
+          payload?.message ??
+            'Request received. A threat briefing specialist will contact you within 1 business day.',
+        );
       }
     } catch {
-      setStatus("error");
-      setResultMessage("Network error. Please check your connection and try again.");
+      setStatus('error');
+      setResultMessage('Network error. Please check your connection and try again.');
     }
   };
 
@@ -108,18 +122,20 @@ export default function EnterpriseDemo() {
         <div className="mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-500/20 bg-red-500/5 mb-6">
             <Shield className="w-3.5 h-3.5 text-red-400" />
-            <span className="text-[11px] font-semibold text-red-400/80 tracking-[0.1em] uppercase">Enterprise Briefing</span>
+            <span className="text-[11px] font-semibold text-red-400/80 tracking-[0.1em] uppercase">
+              Enterprise Briefing
+            </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
             Schedule a private threat briefing.
           </h1>
           <p className="text-gray-400 text-[15px] leading-relaxed max-w-xl">
-            Our security engineers will assess your current posture and walk you through a live Aegis demo
-            tailored to your threat profile. Zero commitment.
+            Our security engineers will assess your current posture and walk you through a live
+            Aegis demo tailored to your threat profile. Zero commitment.
           </p>
         </div>
 
-        {status === "success" ? (
+        {status === 'success' ? (
           <div className="bg-[#110e0e]/80 border border-white/8 rounded-2xl p-8 sm:p-10">
             <div className="flex items-start gap-4 mb-6">
               <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
@@ -146,7 +162,10 @@ export default function EnterpriseDemo() {
             )}
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-[#110e0e]/80 border border-white/8 rounded-2xl p-8 sm:p-10 space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-[#110e0e]/80 border border-white/8 rounded-2xl p-8 sm:p-10 space-y-6"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] mb-2">
@@ -156,7 +175,7 @@ export default function EnterpriseDemo() {
                   required
                   type="text"
                   value={form.companyName}
-                  onChange={e => setForm(p => ({ ...p, companyName: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, companyName: e.target.value }))}
                   placeholder="Acme Corp"
                   className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors"
                 />
@@ -168,7 +187,7 @@ export default function EnterpriseDemo() {
                 <input
                   type="text"
                   value={form.contactName}
-                  onChange={e => setForm(p => ({ ...p, contactName: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, contactName: e.target.value }))}
                   placeholder="Jane Smith"
                   className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors"
                 />
@@ -184,7 +203,7 @@ export default function EnterpriseDemo() {
                   required
                   type="email"
                   value={form.email}
-                  onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                   placeholder="jane@acme.com"
                   className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors"
                 />
@@ -195,14 +214,24 @@ export default function EnterpriseDemo() {
                 </label>
                 <select
                   value={form.seats}
-                  onChange={e => setForm(p => ({ ...p, seats: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, seats: e.target.value }))}
                   className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white focus:outline-none focus:border-red-500/40 transition-colors"
                 >
-                  <option value="" className="bg-[#1a1515]">Select range</option>
-                  <option value="10" className="bg-[#1a1515]">1–25 people</option>
-                  <option value="50" className="bg-[#1a1515]">26–100 people</option>
-                  <option value="250" className="bg-[#1a1515]">101–500 people</option>
-                  <option value="1000" className="bg-[#1a1515]">500+ people</option>
+                  <option value="" className="bg-[#1a1515]">
+                    Select range
+                  </option>
+                  <option value="10" className="bg-[#1a1515]">
+                    1–25 people
+                  </option>
+                  <option value="50" className="bg-[#1a1515]">
+                    26–100 people
+                  </option>
+                  <option value="250" className="bg-[#1a1515]">
+                    101–500 people
+                  </option>
+                  <option value="1000" className="bg-[#1a1515]">
+                    500+ people
+                  </option>
                 </select>
               </div>
             </div>
@@ -212,23 +241,33 @@ export default function EnterpriseDemo() {
                 Areas of Interest
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {ADD_ONS.map(addon => (
+                {ADD_ONS.map((addon) => (
                   <button
                     key={addon.id}
                     type="button"
                     onClick={() => toggleAddOn(addon.id)}
                     className={`flex items-center gap-2.5 px-4 py-3 rounded-lg border text-left transition-all text-[13px] ${
                       form.addOns.includes(addon.id)
-                        ? "border-red-500/40 bg-red-500/8 text-white"
-                        : "border-white/8 bg-white/2 text-gray-400 hover:border-white/15 hover:text-gray-300"
+                        ? 'border-red-500/40 bg-red-500/8 text-white'
+                        : 'border-white/8 bg-white/2 text-gray-400 hover:border-white/15 hover:text-gray-300'
                     }`}
                   >
-                    <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${
-                      form.addOns.includes(addon.id) ? "border-red-500 bg-red-500" : "border-gray-600"
-                    }`}>
+                    <div
+                      className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${
+                        form.addOns.includes(addon.id)
+                          ? 'border-red-500 bg-red-500'
+                          : 'border-gray-600'
+                      }`}
+                    >
                       {form.addOns.includes(addon.id) && (
                         <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                          <path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <path
+                            d="M1 3L3 5L7 1"
+                            stroke="white"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
                         </svg>
                       )}
                     </div>
@@ -244,14 +283,14 @@ export default function EnterpriseDemo() {
               </label>
               <textarea
                 value={form.notes}
-                onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+                onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
                 rows={4}
                 placeholder="Tell us about your current threat landscape, stack, or pain points..."
                 className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors resize-none"
               />
             </div>
 
-            {status === "error" && (
+            {status === 'error' && (
               <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/8 border border-red-500/20">
                 <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <p className="text-[13px] text-red-300">{resultMessage}</p>
@@ -260,13 +299,17 @@ export default function EnterpriseDemo() {
 
             <button
               type="submit"
-              disabled={status === "loading" || !form.companyName || !form.email}
+              disabled={status === 'loading' || !form.companyName || !form.email}
               className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-bold rounded-xl transition-all text-[14px] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/20"
             >
-              {status === "loading" ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</>
+              {status === 'loading' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Submitting…
+                </>
               ) : (
-                <>Request Threat Briefing <ChevronRight className="w-4 h-4" /></>
+                <>
+                  Request Threat Briefing <ChevronRight className="w-4 h-4" />
+                </>
               )}
             </button>
 

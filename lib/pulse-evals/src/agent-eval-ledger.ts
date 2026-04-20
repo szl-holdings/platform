@@ -8,7 +8,7 @@
  * the eval back to the agent and model version for traceability.
  */
 
-import type { AgentEvalRunRecord, EvalLedgerEntry } from "./agent-eval-types.js";
+import type { AgentEvalRunRecord, EvalLedgerEntry } from './agent-eval-types.js';
 
 const ledgerEntries: EvalLedgerEntry[] = [];
 const MAX_LEDGER_ENTRIES = 10000;
@@ -21,7 +21,7 @@ export function registerLedgerSink(sink: (entry: EvalLedgerEntry) => Promise<voi
 
 export function recordEvalRunToLedger(run: AgentEvalRunRecord): EvalLedgerEntry {
   const entry: EvalLedgerEntry = {
-    ledger_entry_type: "eval_run",
+    ledger_entry_type: 'eval_run',
     eval_id: run.eval_id,
     agent_id: run.agent_id,
     model_version: run.model_version,
@@ -47,21 +47,25 @@ export function recordEvalRunToLedger(run: AgentEvalRunRecord): EvalLedgerEntry 
 }
 
 export function getLedgerEntry(eval_id: string): EvalLedgerEntry | undefined {
-  return ledgerEntries.find(e => e.eval_id === eval_id);
+  return ledgerEntries.find((e) => e.eval_id === eval_id);
 }
 
-export function listLedgerEntries(options: {
-  agent_id?: string;
-  model_version?: string;
-  promotion_approved?: boolean;
-  since?: Date;
-  limit?: number;
-} = {}): EvalLedgerEntry[] {
+export function listLedgerEntries(
+  options: {
+    agent_id?: string;
+    model_version?: string;
+    promotion_approved?: boolean;
+    since?: Date;
+    limit?: number;
+  } = {},
+): EvalLedgerEntry[] {
   let entries = ledgerEntries;
-  if (options.agent_id) entries = entries.filter(e => e.agent_id === options.agent_id);
-  if (options.model_version) entries = entries.filter(e => e.model_version === options.model_version);
-  if (options.promotion_approved != null) entries = entries.filter(e => e.promotion_approved === options.promotion_approved);
-  if (options.since) entries = entries.filter(e => new Date(e.recorded_at) >= options.since!);
+  if (options.agent_id) entries = entries.filter((e) => e.agent_id === options.agent_id);
+  if (options.model_version)
+    entries = entries.filter((e) => e.model_version === options.model_version);
+  if (options.promotion_approved != null)
+    entries = entries.filter((e) => e.promotion_approved === options.promotion_approved);
+  if (options.since) entries = entries.filter((e) => new Date(e.recorded_at) >= options.since!);
   return entries.slice(0, options.limit ?? 100);
 }
 
@@ -89,21 +93,17 @@ export function getLedgerSummary(): LedgerSummary {
   }
 
   const avgAggregateScore =
-    entries.length > 0
-      ? entries.reduce((s, e) => s + e.aggregate_score, 0) / entries.length
-      : 0;
+    entries.length > 0 ? entries.reduce((s, e) => s + e.aggregate_score, 0) / entries.length : 0;
 
   const avgPassRate =
-    entries.length > 0
-      ? entries.reduce((s, e) => s + e.pass_rate, 0) / entries.length
-      : 0;
+    entries.length > 0 ? entries.reduce((s, e) => s + e.pass_rate, 0) / entries.length : 0;
 
-  const safetyViolationRuns = entries.filter(e => e.safety_flag_score < 1.0).length;
+  const safetyViolationRuns = entries.filter((e) => e.safety_flag_score < 1.0).length;
 
   return {
     total_eval_runs: entries.length,
-    promoted: entries.filter(e => e.promotion_approved).length,
-    blocked: entries.filter(e => !e.promotion_approved).length,
+    promoted: entries.filter((e) => e.promotion_approved).length,
+    blocked: entries.filter((e) => !e.promotion_approved).length,
     avg_aggregate_score: avgAggregateScore,
     avg_pass_rate: avgPassRate,
     safety_violation_runs: safetyViolationRuns,

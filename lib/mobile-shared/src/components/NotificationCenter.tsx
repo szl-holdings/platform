@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -8,26 +8,26 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNotifications, type AppNotification } from "../context/NotificationContext";
-import { formatInUserTimeZone } from "../format-time";
-import { useUserPreferences } from "../hooks/useUserPreferences";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { type AppNotification, useNotifications } from '../context/NotificationContext';
+import { formatInUserTimeZone } from '../format-time';
+import { useUserPreferences } from '../hooks/useUserPreferences';
 
-const TYPE_ICONS: Record<AppNotification["type"], string> = {
-  info: "ℹ",
-  success: "✓",
-  warning: "⚠",
-  error: "✕",
-  action_required: "⚡",
+const TYPE_ICONS: Record<AppNotification['type'], string> = {
+  info: 'ℹ',
+  success: '✓',
+  warning: '⚠',
+  error: '✕',
+  action_required: '⚡',
 };
 
-const TYPE_COLORS: Record<AppNotification["type"], string> = {
-  info: "#6E9BD1",
-  success: "#6BB88E",
-  warning: "#D4A55B",
-  error: "#C05050",
-  action_required: "#C8A96A",
+const TYPE_COLORS: Record<AppNotification['type'], string> = {
+  info: '#6E9BD1',
+  success: '#6BB88E',
+  warning: '#D4A55B',
+  error: '#C05050',
+  action_required: '#C8A96A',
 };
 
 function formatTimeAgo(dateStr: string): string {
@@ -35,11 +35,11 @@ function formatTimeAgo(dateStr: string): string {
   const date = new Date(dateStr).getTime();
   const diff = now - date;
 
-  if (diff < 60_000) return "just now";
+  if (diff < 60_000) return 'just now';
   if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
   if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
   if (diff < 604_800_000) return `${Math.floor(diff / 86_400_000)}d ago`;
-  return formatInUserTimeZone(dateStr, { year: "numeric", month: "short", day: "numeric" });
+  return formatInUserTimeZone(dateStr, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 interface NotificationRowProps {
@@ -57,7 +57,7 @@ function NotificationRow({
   onDelete,
   onNavigate,
 }: NotificationRowProps) {
-  const iconText = TYPE_ICONS[notification.type] ?? "•";
+  const iconText = TYPE_ICONS[notification.type] ?? '•';
   const iconColor = TYPE_COLORS[notification.type] ?? accentColor;
 
   const handlePress = useCallback(() => {
@@ -68,7 +68,7 @@ function NotificationRow({
       try {
         onNavigate(notification.actionUrl);
       } catch {
-        console.warn("[NotificationCenter] Navigate failed:", notification.actionUrl);
+        console.warn('[NotificationCenter] Navigate failed:', notification.actionUrl);
       }
     }
   }, [notification, onMarkRead, onNavigate]);
@@ -85,9 +85,7 @@ function NotificationRow({
             styles.row,
             {
               opacity: pressed ? 0.75 : 1,
-              backgroundColor: notification.isRead
-                ? "transparent"
-                : `${accentColor}08`,
+              backgroundColor: notification.isRead ? 'transparent' : `${accentColor}08`,
             },
           ]}
         >
@@ -99,10 +97,7 @@ function NotificationRow({
           </View>
           <View style={styles.rowContent}>
             <Text
-              style={[
-                styles.rowTitle,
-                { fontWeight: notification.isRead ? "400" : "600" },
-              ]}
+              style={[styles.rowTitle, { fontWeight: notification.isRead ? '400' : '600' }]}
               numberOfLines={1}
             >
               {notification.title}
@@ -131,8 +126,8 @@ export interface NotificationBellProps {
 
 export function NotificationBell({
   size = 20,
-  accentColor = "#C8A96A",
-  iconColor = "#E8EAF0",
+  accentColor = '#C8A96A',
+  iconColor = '#E8EAF0',
 }: NotificationBellProps) {
   const { unreadCount } = useNotifications();
   const [modalVisible, setModalVisible] = useState(false);
@@ -149,9 +144,7 @@ export function NotificationBell({
         <Text style={[styles.bellIcon, { fontSize: size, color: iconColor }]}>🔔</Text>
         {unreadCount > 0 && (
           <View style={[styles.badge, { backgroundColor: accentColor }]}>
-            <Text style={styles.badgeText}>
-              {unreadCount > 9 ? "9+" : String(unreadCount)}
-            </Text>
+            <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : String(unreadCount)}</Text>
           </View>
         )}
       </Pressable>
@@ -176,17 +169,24 @@ export interface NotificationCenterModalProps {
 export function NotificationCenterModal({
   visible,
   onClose,
-  accentColor = "#C8A96A",
-  backgroundColor = "#080B12",
+  accentColor = '#C8A96A',
+  backgroundColor = '#080B12',
   onNavigate,
 }: NotificationCenterModalProps) {
   const insets = useSafeAreaInsets();
-  const { notifications, unreadCount, isLoading, refresh, markRead, markAllRead, deleteNotification } =
-    useNotifications();
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    refresh,
+    markRead,
+    markAllRead,
+    deleteNotification,
+  } = useNotifications();
   // Subscribe so the rendered timestamps refresh when the user changes time zone.
   useUserPreferences();
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = Platform.OS === 'web' ? 67 : insets.top;
 
   return (
     <Modal
@@ -197,7 +197,12 @@ export function NotificationCenterModal({
     >
       <View style={[styles.modal, { backgroundColor }]}>
         <View style={[styles.header, { paddingTop: topPad + 16 }]}>
-          <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" accessibilityRole="button">
+          <Pressable
+            onPress={onClose}
+            hitSlop={12}
+            accessibilityLabel="Close"
+            accessibilityRole="button"
+          >
             <Text style={styles.closeBtn}>✕</Text>
           </Pressable>
           <Text style={styles.headerTitle}>Notifications</Text>
@@ -219,18 +224,14 @@ export function NotificationCenterModal({
         {unreadCount > 0 && (
           <View style={styles.unreadBanner}>
             <View style={[styles.unreadDotLarge, { backgroundColor: accentColor }]} />
-            <Text style={[styles.unreadLabel, { color: accentColor }]}>
-              {unreadCount} unread
-            </Text>
+            <Text style={[styles.unreadLabel, { color: accentColor }]}>{unreadCount} unread</Text>
           </View>
         )}
 
         <ScrollView
           style={styles.list}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={
-            notifications.length === 0 ? styles.emptyContainer : undefined
-          }
+          contentContainerStyle={notifications.length === 0 ? styles.emptyContainer : undefined}
         >
           {isLoading && notifications.length === 0 ? (
             <View style={styles.emptyContainer}>
@@ -267,41 +268,41 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(232,234,240,0.06)",
+    borderBottomColor: 'rgba(232,234,240,0.06)',
   },
   headerTitle: {
-    color: "#E8EAF0",
+    color: '#E8EAF0',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
     letterSpacing: 0.5,
   },
   headerAction: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: '500',
     letterSpacing: 0.5,
   },
   closeBtn: {
-    color: "rgba(232,234,240,0.5)",
+    color: 'rgba(232,234,240,0.5)',
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   refreshBtn: {
     fontSize: 18,
   },
   unreadBanner: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(232,234,240,0.06)",
+    borderBottomColor: 'rgba(232,234,240,0.06)',
   },
   unreadDotLarge: {
     width: 7,
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
   },
   unreadLabel: {
     fontSize: 11,
-    fontWeight: "500",
+    fontWeight: '500',
     letterSpacing: 1,
   },
   list: {
@@ -318,12 +319,12 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 80,
   },
   emptyInner: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: 12,
     paddingHorizontal: 40,
     paddingVertical: 80,
@@ -332,29 +333,29 @@ const styles = StyleSheet.create({
     fontSize: 40,
   },
   emptyTitle: {
-    color: "rgba(232,234,240,0.5)",
+    color: 'rgba(232,234,240,0.5)',
     fontSize: 16,
-    fontWeight: "500",
-    textAlign: "center",
+    fontWeight: '500',
+    textAlign: 'center',
   },
   emptySubtitle: {
-    color: "rgba(232,234,240,0.3)",
+    color: 'rgba(232,234,240,0.3)',
     fontSize: 12,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 18,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(232,234,240,0.06)",
+    borderBottomColor: 'rgba(232,234,240,0.06)',
     gap: 12,
-    position: "relative",
+    position: 'relative',
   },
   unreadDot: {
-    position: "absolute",
+    position: 'absolute',
     left: 8,
     top: 20,
     width: 5,
@@ -366,25 +367,25 @@ const styles = StyleSheet.create({
     height: 32,
     borderWidth: 1,
     borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   iconText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   rowContent: {
     flex: 1,
     gap: 3,
   },
   rowTitle: {
-    color: "#E8EAF0",
+    color: '#E8EAF0',
     fontSize: 13,
     letterSpacing: 0.2,
   },
   rowMessage: {
-    color: "rgba(232,234,240,0.5)",
+    color: 'rgba(232,234,240,0.5)',
     fontSize: 12,
     lineHeight: 17,
   },
@@ -397,29 +398,29 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   deleteText: {
-    color: "rgba(232,234,240,0.25)",
+    color: 'rgba(232,234,240,0.25)',
     fontSize: 12,
   },
   bellWrap: {
-    position: "relative",
+    position: 'relative',
   },
   bellIcon: {
     lineHeight: undefined,
   },
   badge: {
-    position: "absolute",
+    position: 'absolute',
     top: -5,
     right: -6,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 3,
   },
   badgeText: {
     fontSize: 9,
-    fontWeight: "700",
-    color: "#080B12",
+    fontWeight: '700',
+    color: '#080B12',
   },
 });

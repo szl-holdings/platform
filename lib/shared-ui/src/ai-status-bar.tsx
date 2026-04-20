@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-const API_BASE = "/api";
+const API_BASE = '/api';
 
-export type AgentHealthStatus = "healthy" | "degraded" | "offline";
+export type AgentHealthStatus = 'healthy' | 'degraded' | 'offline';
 
 export interface AIStatusBarMetrics {
   activeAgents: number;
@@ -27,7 +27,7 @@ async function fetchAgentMetrics(): Promise<AIStatusBarMetrics | null> {
     const breached = overall.breachedAgents ?? 0;
     const total = healthy + degraded + breached;
     const status: AgentHealthStatus =
-      breached > 0 ? "degraded" : degraded > 0 ? "degraded" : total === 0 ? "offline" : "healthy";
+      breached > 0 ? 'degraded' : degraded > 0 ? 'degraded' : total === 0 ? 'offline' : 'healthy';
     return {
       activeAgents: healthy + degraded,
       totalAgents: total,
@@ -55,13 +55,13 @@ function PulseDot({ color }: { color: string }) {
   return (
     <span
       style={{
-        display: "inline-block",
+        display: 'inline-block',
         width: 7,
         height: 7,
-        borderRadius: "50%",
+        borderRadius: '50%',
         background: color,
         boxShadow: `0 0 6px ${color}88`,
-        animation: "aiStatusPulse 2s ease-in-out infinite",
+        animation: 'aiStatusPulse 2s ease-in-out infinite',
         flexShrink: 0,
       }}
     />
@@ -77,7 +77,7 @@ export interface AIStatusBarProps {
 
 export function AIStatusBar({
   onOpenCopilot,
-  accentColor = "hsl(258, 80%, 62%)",
+  accentColor = 'hsl(258, 80%, 62%)',
   domain,
   compact = false,
 }: AIStatusBarProps) {
@@ -101,7 +101,7 @@ export function AIStatusBar({
         avgLatencyMs: 0,
         activeRuns: 0,
         lastRefreshed: new Date(),
-        status: "offline",
+        status: 'offline',
       });
     }
     setIsLoading(false);
@@ -114,23 +114,23 @@ export function AIStatusBar({
   }, [refresh]);
 
   useEffect(() => {
-    const t = setInterval(() => setTick(n => n + 1), 10_000);
+    const t = setInterval(() => setTick((n) => n + 1), 10_000);
     return () => clearInterval(t);
   }, []);
 
   const statusColor =
-    !metrics || metrics.status === "offline"
-      ? "hsl(0, 0%, 40%)"
-      : metrics.status === "degraded"
-      ? "hsl(38, 88%, 52%)"
-      : "hsl(142, 70%, 45%)";
+    !metrics || metrics.status === 'offline'
+      ? 'hsl(0, 0%, 40%)'
+      : metrics.status === 'degraded'
+        ? 'hsl(38, 88%, 52%)'
+        : 'hsl(142, 70%, 45%)';
 
   const statusLabel =
-    !metrics || metrics.status === "offline"
-      ? "Offline"
-      : metrics.status === "degraded"
-      ? "Degraded"
-      : "Healthy";
+    !metrics || metrics.status === 'offline'
+      ? 'Offline'
+      : metrics.status === 'degraded'
+        ? 'Degraded'
+        : 'Healthy';
 
   if (compact) {
     return (
@@ -143,20 +143,23 @@ export function AIStatusBar({
         `}</style>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             gap: 8,
-            fontSize: "0.7rem",
-            fontFamily: "monospace",
-            color: "rgba(255,255,255,0.5)",
-            cursor: onOpenCopilot ? "pointer" : "default",
-            padding: "3px 8px",
+            fontSize: '0.7rem',
+            fontFamily: 'monospace',
+            color: 'rgba(255,255,255,0.5)',
+            cursor: onOpenCopilot ? 'pointer' : 'default',
+            padding: '3px 8px',
             borderRadius: 6,
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(255,255,255,0.025)",
-            transition: "all 0.15s",
+            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(255,255,255,0.025)',
+            transition: 'all 0.15s',
           }}
-          onClick={() => { onOpenCopilot?.(); window.dispatchEvent(new CustomEvent("szl:open-copilot")); }}
+          onClick={() => {
+            onOpenCopilot?.();
+            window.dispatchEvent(new CustomEvent('szl:open-copilot'));
+          }}
           title="AI Intelligence Status"
         >
           <PulseDot color={statusColor} />
@@ -166,9 +169,7 @@ export function AIStatusBar({
               {metrics.activeAgents}/{metrics.totalAgents} agents
             </span>
           )}
-          {cachedAt && (
-            <span style={{ opacity: 0.4 }}>{formatFreshness(cachedAt)}</span>
-          )}
+          {cachedAt && <span style={{ opacity: 0.4 }}>{formatFreshness(cachedAt)}</span>}
         </div>
       </>
     );
@@ -188,71 +189,99 @@ export function AIStatusBar({
       `}</style>
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           gap: 16,
-          padding: "6px 16px",
-          background: "rgba(0,0,0,0.3)",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
-          fontSize: "0.7rem",
-          fontFamily: "monospace",
-          color: "rgba(255,255,255,0.45)",
+          padding: '6px 16px',
+          background: 'rgba(0,0,0,0.3)',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          fontSize: '0.7rem',
+          fontFamily: 'monospace',
+          color: 'rgba(255,255,255,0.45)',
           flexShrink: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.25)" }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span
+            style={{
+              fontSize: '0.6rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'rgba(255,255,255,0.25)',
+            }}
+          >
             AI Intelligence
           </span>
-          <PulseDot color={isLoading ? "rgba(255,255,255,0.2)" : statusColor} />
-          <span style={{ color: isLoading ? "rgba(255,255,255,0.3)" : statusColor, fontWeight: 600, fontSize: "0.68rem" }}>
-            {isLoading ? "Connecting…" : statusLabel}
+          <PulseDot color={isLoading ? 'rgba(255,255,255,0.2)' : statusColor} />
+          <span
+            style={{
+              color: isLoading ? 'rgba(255,255,255,0.3)' : statusColor,
+              fontWeight: 600,
+              fontSize: '0.68rem',
+            }}
+          >
+            {isLoading ? 'Connecting…' : statusLabel}
           </span>
         </div>
 
         {metrics && metrics.totalAgents > 0 && (
           <>
-            <div style={{ width: 1, height: 12, background: "rgba(255,255,255,0.08)" }} />
+            <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
             <span>
-              <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>{metrics.activeAgents}</span>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
+                {metrics.activeAgents}
+              </span>
               <span style={{ opacity: 0.5 }}>/{metrics.totalAgents} agents</span>
             </span>
             {metrics.activeRuns > 0 && (
               <>
-                <div style={{ width: 1, height: 12, background: "rgba(255,255,255,0.08)" }} />
+                <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
                 <span>
                   <span style={{ color: accentColor, fontWeight: 600 }}>{metrics.activeRuns}</span>
                   <span style={{ opacity: 0.5 }}> active runs</span>
                 </span>
               </>
             )}
-            <div style={{ width: 1, height: 12, background: "rgba(255,255,255,0.08)" }} />
+            <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
             <span>
-              <span style={{ color: metrics.avgSuccessRate > 0.95 ? "hsl(142,70%,50%)" : metrics.avgSuccessRate > 0.8 ? "hsl(38,88%,52%)" : "hsl(0,72%,55%)", fontWeight: 600 }}>
+              <span
+                style={{
+                  color:
+                    metrics.avgSuccessRate > 0.95
+                      ? 'hsl(142,70%,50%)'
+                      : metrics.avgSuccessRate > 0.8
+                        ? 'hsl(38,88%,52%)'
+                        : 'hsl(0,72%,55%)',
+                  fontWeight: 600,
+                }}
+              >
                 {(metrics.avgSuccessRate * 100).toFixed(0)}%
               </span>
               <span style={{ opacity: 0.5 }}> success</span>
             </span>
-            <div style={{ width: 1, height: 12, background: "rgba(255,255,255,0.08)" }} />
-            <span style={{ opacity: 0.6 }}>
-              avg {metrics.avgLatencyMs}ms
-            </span>
+            <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
+            <span style={{ opacity: 0.6 }}>avg {metrics.avgLatencyMs}ms</span>
           </>
         )}
 
         {cachedAt && (
           <>
-            <div style={{ width: 1, height: 12, background: "rgba(255,255,255,0.08)" }} />
-            <span style={{ opacity: 0.4 }}>
-              refreshed {formatFreshness(cachedAt)}
-            </span>
+            <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
+            <span style={{ opacity: 0.4 }}>refreshed {formatFreshness(cachedAt)}</span>
           </>
         )}
 
         {domain && (
           <>
-            <div style={{ width: 1, height: 12, background: "rgba(255,255,255,0.08)" }} />
-            <span style={{ opacity: 0.35, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.6rem" }}>
+            <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.08)' }} />
+            <span
+              style={{
+                opacity: 0.35,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                fontSize: '0.6rem',
+              }}
+            >
               {domain} domain
             </span>
           </>
@@ -262,21 +291,24 @@ export function AIStatusBar({
 
         <button
           className="ai-status-bar-btn"
-          onClick={() => { onOpenCopilot?.(); window.dispatchEvent(new CustomEvent("szl:open-copilot")); }}
+          onClick={() => {
+            onOpenCopilot?.();
+            window.dispatchEvent(new CustomEvent('szl:open-copilot'));
+          }}
           style={{
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             gap: 5,
-            padding: "3px 10px",
+            padding: '3px 10px',
             borderRadius: 5,
             border: `1px solid ${accentColor}40`,
             background: `${accentColor}10`,
             color: accentColor,
-            cursor: "pointer",
-            fontSize: "0.68rem",
+            cursor: 'pointer',
+            fontSize: '0.68rem',
             fontWeight: 600,
-            letterSpacing: "0.04em",
-            transition: "all 0.15s",
+            letterSpacing: '0.04em',
+            transition: 'all 0.15s',
           }}
         >
           ✦ AI Copilot

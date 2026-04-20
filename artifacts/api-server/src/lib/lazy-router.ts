@@ -1,5 +1,5 @@
-import { Router, type RequestHandler, type IRouter } from "express";
-import { logger } from "./logger";
+import { type IRouter, type RequestHandler, Router } from 'express';
+import { logger } from './logger';
 
 type RouterModule = { default: RequestHandler | Router } | RequestHandler | Router;
 type Loader = () => Promise<RouterModule>;
@@ -39,12 +39,12 @@ export function lazyMount(loader: Loader, label?: string): RequestHandler {
       pending = loader()
         .then((mod) => {
           const resolved =
-            (mod && typeof mod === "object" && "default" in (mod as Record<string, unknown>))
-              ? ((mod as { default: RequestHandler | Router }).default)
+            mod && typeof mod === 'object' && 'default' in (mod as Record<string, unknown>)
+              ? (mod as { default: RequestHandler | Router }).default
               : (mod as RequestHandler | Router);
-          if (typeof resolved !== "function") {
+          if (typeof resolved !== 'function') {
             throw new Error(
-              `[lazy-mount] Loader for ${label ?? "<unknown>"} did not resolve to an Express handler`
+              `[lazy-mount] Loader for ${label ?? '<unknown>'} did not resolve to an Express handler`,
             );
           }
           cached = resolved;
@@ -60,7 +60,7 @@ export function lazyMount(loader: Loader, label?: string): RequestHandler {
     pending
       .then((handler) => (handler as RequestHandler)(req, res, next))
       .catch((err) => {
-        logger.error({ err, label }, "[lazy-mount] Failed to load lazy route module");
+        logger.error({ err, label }, '[lazy-mount] Failed to load lazy route module');
         next(err);
       });
   };
@@ -87,9 +87,9 @@ export function lazyRegister(
     if (!pending) {
       pending = loader()
         .then((mod) => {
-          if (!mod || typeof mod.register !== "function") {
+          if (!mod || typeof mod.register !== 'function') {
             throw new Error(
-              `[lazy-register] Loader for ${label ?? "<unknown>"} did not export a register() function`
+              `[lazy-register] Loader for ${label ?? '<unknown>'} did not export a register() function`,
             );
           }
           const sub = Router();
@@ -106,7 +106,7 @@ export function lazyRegister(
     pending
       .then((sub) => (sub as unknown as RequestHandler)(req, res, next))
       .catch((err) => {
-        logger.error({ err, label }, "[lazy-register] Failed to load lazy route group");
+        logger.error({ err, label }, '[lazy-register] Failed to load lazy route group');
         next(err);
       });
   };
@@ -114,9 +114,9 @@ export function lazyRegister(
 }
 
 function pathMatchesPrefix(reqPath: string, prefix: string): boolean {
-  if (prefix === "/" || prefix === "") return true;
+  if (prefix === '/' || prefix === '') return true;
   if (reqPath === prefix) return true;
-  return reqPath.startsWith(prefix + "/");
+  return reqPath.startsWith(prefix + '/');
 }
 
 /**

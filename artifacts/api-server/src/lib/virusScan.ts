@@ -15,9 +15,9 @@
  *   - "skipped"  — scan not performed (e.g., object storage not configured)
  */
 
-import { logger } from "./logger";
+import { logger } from './logger';
 
-export type VirusScanStatus = "pending" | "scanning" | "clean" | "infected" | "error" | "skipped";
+export type VirusScanStatus = 'pending' | 'scanning' | 'clean' | 'infected' | 'error' | 'skipped';
 
 export interface VirusScanResult {
   fileId: number;
@@ -40,14 +40,14 @@ export async function dispatchVirusScan(
   const queuedAt = new Date().toISOString();
 
   logger.info(
-    { fileId, objectPath, scanStatus: "pending", queuedAt },
-    "[virus-scan-stub] Virus scan queued — no scanner integration configured. Status: pending.",
+    { fileId, objectPath, scanStatus: 'pending', queuedAt },
+    '[virus-scan-stub] Virus scan queued — no scanner integration configured. Status: pending.',
   );
 
   return {
     fileId,
     objectPath,
-    status: "pending",
+    status: 'pending',
     queuedAt,
   };
 }

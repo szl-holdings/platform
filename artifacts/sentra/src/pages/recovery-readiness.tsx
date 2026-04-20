@@ -1,6 +1,6 @@
-import { RotateCcw, ShieldCheck, AlertTriangle, Activity, Database, Clock } from "lucide-react";
-import { sentraTwin } from "@/data/sentra-twin";
-import { cn } from "@szl-holdings/shared-ui/utils";
+import { cn } from '@szl-holdings/shared-ui/utils';
+import { Activity, AlertTriangle, Clock, Database, RotateCcw, ShieldCheck } from 'lucide-react';
+import { sentraTwin } from '@/data/sentra-twin';
 
 export default function RecoveryReadiness() {
   const posture = sentraTwin.recoveryPosture;
@@ -35,18 +35,25 @@ export default function RecoveryReadiness() {
                 strokeDasharray={552}
                 strokeDashoffset={552 - (552 * posture) / 100}
                 className={cn(
-                  "transition-all duration-1000",
-                  posture < 50 ? "text-red-500" : posture < 80 ? "text-amber-500" : "text-emerald-500"
+                  'transition-all duration-1000',
+                  posture < 50
+                    ? 'text-red-500'
+                    : posture < 80
+                      ? 'text-amber-500'
+                      : 'text-emerald-500',
                 )}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-5xl font-display font-bold">{posture}%</span>
-              <span className="text-xs text-slate-500 uppercase tracking-widest mt-1">Posture Score</span>
+              <span className="text-xs text-slate-500 uppercase tracking-widest mt-1">
+                Posture Score
+              </span>
             </div>
           </div>
           <p className="text-sm text-slate-400 px-4">
-            Current recovery posture is degraded due to stale backups on {sentraTwin.assets.filter(a => a.backupStatus === 'stale').length} critical servers.
+            Current recovery posture is degraded due to stale backups on{' '}
+            {sentraTwin.assets.filter((a) => a.backupStatus === 'stale').length} critical servers.
           </p>
         </div>
 
@@ -57,31 +64,37 @@ export default function RecoveryReadiness() {
               Backup Staleness Indicators
             </h2>
             <div className="space-y-4">
-              {sentraTwin.assets.filter(a => a.backupStatus !== 'current').map(asset => (
-                <div key={asset.id} className="sentra-card p-4 flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-slate-800 flex items-center justify-center">
-                      <Database className="w-5 h-5 text-slate-400" />
+              {sentraTwin.assets
+                .filter((a) => a.backupStatus !== 'current')
+                .map((asset) => (
+                  <div key={asset.id} className="sentra-card p-4 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded bg-slate-800 flex items-center justify-center">
+                        <Database className="w-5 h-5 text-slate-400" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-200">{asset.name}</div>
+                        <div className="text-xs text-slate-500 font-mono">{asset.id}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-bold text-slate-200">{asset.name}</div>
-                      <div className="text-xs text-slate-500 font-mono">{asset.id}</div>
+                    <div className="text-right">
+                      <div
+                        className={cn(
+                          'text-xs font-bold font-mono',
+                          asset.backupStatus === 'stale' ? 'text-amber-500' : 'text-red-500',
+                        )}
+                      >
+                        {asset.backupStatus.toUpperCase()}
+                      </div>
+                      <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-1 justify-end">
+                        <Clock className="w-3 h-3" />
+                        {asset.lastBackupAt
+                          ? `${Math.floor((Date.now() - new Date(asset.lastBackupAt).getTime()) / 3600000)}h ago`
+                          : 'NEVER'}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className={cn(
-                      "text-xs font-bold font-mono",
-                      asset.backupStatus === 'stale' ? "text-amber-500" : "text-red-500"
-                    )}>
-                      {asset.backupStatus.toUpperCase()}
-                    </div>
-                    <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-1 justify-end">
-                      <Clock className="w-3 h-3" />
-                      {asset.lastBackupAt ? `${Math.floor((Date.now() - new Date(asset.lastBackupAt).getTime()) / 3600000)}h ago` : 'NEVER'}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
 

@@ -11,19 +11,19 @@
  * coordinates everything else.
  */
 
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 
-export const PYTHON_WORKER_PROTOCOL_VERSION = "1.0" as const;
+export const PYTHON_WORKER_PROTOCOL_VERSION = '1.0' as const;
 
 // ─── Message Types ────────────────────────────────────────────────────────────
 
 export type PythonWorkerMessageType =
-  | "stage.claim"       // Worker claims a stage
-  | "stage.heartbeat"   // Worker signals it's still alive
-  | "stage.result"      // Worker completed successfully
-  | "stage.error"       // Worker encountered an error
-  | "worker.register"   // Worker announces availability
-  | "worker.shutdown";  // Worker is shutting down
+  | 'stage.claim' // Worker claims a stage
+  | 'stage.heartbeat' // Worker signals it's still alive
+  | 'stage.result' // Worker completed successfully
+  | 'stage.error' // Worker encountered an error
+  | 'worker.register' // Worker announces availability
+  | 'worker.shutdown'; // Worker is shutting down
 
 // ─── Message Schemas ──────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ export interface PythonWorkerBaseMessage {
 }
 
 export interface WorkerRegisterMessage extends PythonWorkerBaseMessage {
-  type: "worker.register";
+  type: 'worker.register';
   workerId: string;
   workerCapabilities: {
     /** Stage types this worker can handle */
@@ -49,7 +49,7 @@ export interface WorkerRegisterMessage extends PythonWorkerBaseMessage {
 }
 
 export interface StageClaimMessage extends PythonWorkerBaseMessage {
-  type: "stage.claim";
+  type: 'stage.claim';
   workerId: string;
   runId: string;
   workflowId: string;
@@ -68,11 +68,11 @@ export interface StageClaimMessage extends PythonWorkerBaseMessage {
    * Execution mode. live mode requires a real Python worker — no simulation
    * fallback is permitted when decisions will affect production state.
    */
-  mode?: "live" | "dry-run" | "replay" | "counterfactual";
+  mode?: 'live' | 'dry-run' | 'replay' | 'counterfactual';
 }
 
 export interface StageHeartbeatMessage extends PythonWorkerBaseMessage {
-  type: "stage.heartbeat";
+  type: 'stage.heartbeat';
   workerId: string;
   runId: string;
   stageId: string;
@@ -81,7 +81,7 @@ export interface StageHeartbeatMessage extends PythonWorkerBaseMessage {
 }
 
 export interface StageResultMessage extends PythonWorkerBaseMessage {
-  type: "stage.result";
+  type: 'stage.result';
   workerId: string;
   runId: string;
   stageId: string;
@@ -94,7 +94,7 @@ export interface StageResultMessage extends PythonWorkerBaseMessage {
 }
 
 export interface StageErrorMessage extends PythonWorkerBaseMessage {
-  type: "stage.error";
+  type: 'stage.error';
   workerId: string;
   runId: string;
   stageId: string;
@@ -121,20 +121,28 @@ function makeBase(): PythonWorkerBaseMessage {
   };
 }
 
-export function makeClaimMessage(opts: Omit<StageClaimMessage, keyof PythonWorkerBaseMessage | "type">): StageClaimMessage {
-  return { ...makeBase(), type: "stage.claim", ...opts };
+export function makeClaimMessage(
+  opts: Omit<StageClaimMessage, keyof PythonWorkerBaseMessage | 'type'>,
+): StageClaimMessage {
+  return { ...makeBase(), type: 'stage.claim', ...opts };
 }
 
-export function makeHeartbeatMessage(opts: Omit<StageHeartbeatMessage, keyof PythonWorkerBaseMessage | "type">): StageHeartbeatMessage {
-  return { ...makeBase(), type: "stage.heartbeat", ...opts };
+export function makeHeartbeatMessage(
+  opts: Omit<StageHeartbeatMessage, keyof PythonWorkerBaseMessage | 'type'>,
+): StageHeartbeatMessage {
+  return { ...makeBase(), type: 'stage.heartbeat', ...opts };
 }
 
-export function makeResultMessage(opts: Omit<StageResultMessage, keyof PythonWorkerBaseMessage | "type">): StageResultMessage {
-  return { ...makeBase(), type: "stage.result", ...opts };
+export function makeResultMessage(
+  opts: Omit<StageResultMessage, keyof PythonWorkerBaseMessage | 'type'>,
+): StageResultMessage {
+  return { ...makeBase(), type: 'stage.result', ...opts };
 }
 
-export function makeErrorMessage(opts: Omit<StageErrorMessage, keyof PythonWorkerBaseMessage | "type">): StageErrorMessage {
-  return { ...makeBase(), type: "stage.error", ...opts };
+export function makeErrorMessage(
+  opts: Omit<StageErrorMessage, keyof PythonWorkerBaseMessage | 'type'>,
+): StageErrorMessage {
+  return { ...makeBase(), type: 'stage.error', ...opts };
 }
 
 // ─── Python Worker Channel ────────────────────────────────────────────────────
@@ -151,7 +159,7 @@ export interface PythonWorkerChannel {
    * non-live modes (dry-run, replay, counterfactual).
    */
   dispatch(
-    opts: Omit<StageClaimMessage, keyof PythonWorkerBaseMessage | "type" | "workerId">,
+    opts: Omit<StageClaimMessage, keyof PythonWorkerBaseMessage | 'type' | 'workerId'>,
     timeoutMs?: number,
   ): Promise<StageResultMessage>;
 
@@ -164,7 +172,7 @@ export interface PythonWorkerChannel {
 
 export interface RegisteredWorker {
   workerId: string;
-  capabilities: WorkerRegisterMessage["workerCapabilities"];
+  capabilities: WorkerRegisterMessage['workerCapabilities'];
   registeredAt: string;
   lastHeartbeatAt: string;
   activeStageClaims: number;
@@ -185,11 +193,14 @@ export interface RegisteredWorker {
 
 class SubstratePythonWorkerChannel implements PythonWorkerChannel {
   private readonly workers = new Map<string, RegisteredWorker>();
-  private readonly pendingClaims = new Map<string, {
-    resolve: (result: StageResultMessage) => void;
-    reject: (err: Error) => void;
-    timer: ReturnType<typeof setTimeout>;
-  }>();
+  private readonly pendingClaims = new Map<
+    string,
+    {
+      resolve: (result: StageResultMessage) => void;
+      reject: (err: Error) => void;
+      timer: ReturnType<typeof setTimeout>;
+    }
+  >();
 
   registerWorker(msg: WorkerRegisterMessage): void {
     this.workers.set(msg.workerId, {
@@ -227,12 +238,12 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
   }
 
   async dispatch(
-    opts: Omit<StageClaimMessage, keyof PythonWorkerBaseMessage | "type" | "workerId">,
+    opts: Omit<StageClaimMessage, keyof PythonWorkerBaseMessage | 'type' | 'workerId'>,
     timeoutMs = 60_000,
   ): Promise<StageResultMessage> {
     const startMs = Date.now();
-    const workerUrl = process.env["SUBSTRATE_PYTHON_WORKER_URL"];
-    const isLive = opts.mode === "live";
+    const workerUrl = process.env['SUBSTRATE_PYTHON_WORKER_URL'];
+    const isLive = opts.mode === 'live';
 
     // ── Fail-closed gate for live mode ───────────────────────────────────────
     // In live mode, the Python worker must be explicitly configured and reachable.
@@ -241,8 +252,8 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
     if (isLive && !workerUrl) {
       throw new Error(
         `[substrate/python-worker] Live mode requires SUBSTRATE_PYTHON_WORKER_URL to be set. ` +
-        `Stage '${opts.stageId}' (runtime: python) cannot fall back to in-process simulation ` +
-        `in live mode. Set SUBSTRATE_PYTHON_WORKER_URL or switch to dry-run mode.`,
+          `Stage '${opts.stageId}' (runtime: python) cannot fall back to in-process simulation ` +
+          `in live mode. Set SUBSTRATE_PYTHON_WORKER_URL or switch to dry-run mode.`,
       );
     }
 
@@ -252,16 +263,16 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
     // (dry-run, replay, counterfactual), the channel falls back to in-process
     // simulation so development environments remain functional.
     if (workerUrl) {
-      const claimMessage = makeClaimMessage({ ...opts, workerId: "substrate-ts-engine" });
+      const claimMessage = makeClaimMessage({ ...opts, workerId: 'substrate-ts-engine' });
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
       try {
         const response = await fetch(`${workerUrl}/claim`, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
-            "X-Protocol-Version": PYTHON_WORKER_PROTOCOL_VERSION,
+            'Content-Type': 'application/json',
+            'X-Protocol-Version': PYTHON_WORKER_PROTOCOL_VERSION,
           },
           body: JSON.stringify(claimMessage),
           signal: controller.signal,
@@ -270,38 +281,40 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
         clearTimeout(timeout);
 
         if (!response.ok) {
-          const text = await response.text().catch(() => "(no body)");
+          const text = await response.text().catch(() => '(no body)');
           throw new Error(`HTTP ${response.status}: ${text}`);
         }
 
-        const body = await response.json() as StageResultMessage | StageErrorMessage;
+        const body = (await response.json()) as StageResultMessage | StageErrorMessage;
 
-        if (body.type === "stage.error") {
+        if (body.type === 'stage.error') {
           const errMsg = body as StageErrorMessage;
           throw new Error(`Worker error [${errMsg.errorCode}]: ${errMsg.errorMessage}`);
         }
 
         return body as StageResultMessage;
-
       } catch (err) {
         clearTimeout(timeout);
-        const reason = err instanceof Error && err.name === "AbortError"
-          ? `timed out after ${timeoutMs}ms`
-          : (err instanceof Error ? err.message : String(err));
+        const reason =
+          err instanceof Error && err.name === 'AbortError'
+            ? `timed out after ${timeoutMs}ms`
+            : err instanceof Error
+              ? err.message
+              : String(err);
 
         // In live mode: fail closed — rethrow so the engine marks the stage failed
         // rather than producing a decision from fabricated simulation data.
         if (isLive) {
           throw new Error(
             `[substrate/python-worker] Live-mode HTTP dispatch to '${workerUrl}/claim' failed ` +
-            `for stage '${opts.stageId}': ${reason}`,
+              `for stage '${opts.stageId}': ${reason}`,
           );
         }
 
         // Non-live modes: gracefully fall back to in-process simulation
         console.warn(
           `[substrate/python-worker] HTTP dispatch to '${workerUrl}/claim' failed (${reason}); ` +
-          `using in-process simulation fallback for stage '${opts.stageId}'`,
+            `using in-process simulation fallback for stage '${opts.stageId}'`,
         );
         // fall through to in-process simulation
       }
@@ -313,7 +326,7 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
     if (!workerUrl) {
       console.debug(
         `[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_URL not configured — ` +
-        `using in-process simulation for stage '${opts.stageId}' (mode: ${opts.mode ?? "unset"})`,
+          `using in-process simulation for stage '${opts.stageId}' (mode: ${opts.mode ?? 'unset'})`,
       );
     }
 
@@ -321,32 +334,34 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
     return new Promise<StageResultMessage>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pendingClaims.delete(claimKey);
-        reject(new Error(`Python worker timed out after ${timeoutMs}ms for stage '${opts.stageId}'`));
+        reject(
+          new Error(`Python worker timed out after ${timeoutMs}ms for stage '${opts.stageId}'`),
+        );
       }, timeoutMs);
 
       this.pendingClaims.set(claimKey, { resolve, reject, timer });
 
       const simulatedResult = makeResultMessage({
-        workerId: "in-process-python-worker",
+        workerId: 'in-process-python-worker',
         runId: opts.runId,
         stageId: opts.stageId,
         output: {
           documents: [
             {
-              id: "py-doc-1",
-              content: "[python-worker] Retrieved heavy corpus document (in-process simulation)",
+              id: 'py-doc-1',
+              content: '[python-worker] Retrieved heavy corpus document (in-process simulation)',
               relevanceScore: 0.87,
-              source: "lyte-metrics-store",
-              metadata: { worker: "python", simulated: true },
+              source: 'lyte-metrics-store',
+              metadata: { worker: 'python', simulated: true },
             },
           ],
           retrievedCount: 1,
-          worker: "in-process-simulation",
-          note: "Set SUBSTRATE_PYTHON_WORKER_URL for real Python federation",
+          worker: 'in-process-simulation',
+          note: 'Set SUBSTRATE_PYTHON_WORKER_URL for real Python federation',
         },
         confidence: 0.87,
         durationMs: Date.now() - startMs,
-        metadata: { simulated: true, phase: "1" },
+        metadata: { simulated: true, phase: '1' },
       });
 
       setTimeout(() => this.resolveStage(simulatedResult), 5);
@@ -371,11 +386,11 @@ export const defaultPythonWorkerChannel = new SubstratePythonWorkerChannel();
 // Register the Phase 1 in-process worker so listWorkers() reports it
 defaultPythonWorkerChannel.registerWorker({
   ...makeBase(),
-  type: "worker.register",
-  workerId: "in-process-python-worker-v1",
+  type: 'worker.register',
+  workerId: 'in-process-python-worker-v1',
   workerCapabilities: {
-    stageTypes: ["Retrieve"],
+    stageTypes: ['Retrieve'],
     maxConcurrency: 4,
-    version: "1.0.0-phase1",
+    version: '1.0.0-phase1',
   },
 });

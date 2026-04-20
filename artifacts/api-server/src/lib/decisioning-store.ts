@@ -5,9 +5,10 @@
  * and Policy Engine violations. Replaces the in-memory Map in action-engine/src/index.js
  * for the API server context, enabling cross-session audit trails and history pages.
  */
-import { pool } from "@szl-holdings/db";
-import type { WorkflowRun } from "@szl-holdings/action-engine";
-import { logger } from "./logger";
+
+import type { WorkflowRun } from '@szl-holdings/action-engine';
+import { pool } from '@szl-holdings/db';
+import { logger } from './logger';
 
 export interface StoredRun {
   id?: number;
@@ -98,7 +99,10 @@ export async function dbRecordRun(run: StoredRun): Promise<void> {
       ],
     );
   } catch (err) {
-    logger.warn({ err, runId: run.runId }, "[DecisioningStore] Failed to persist run — falling back silently");
+    logger.warn(
+      { err, runId: run.runId },
+      '[DecisioningStore] Failed to persist run — falling back silently',
+    );
   }
 }
 
@@ -111,7 +115,7 @@ export function workflowRunToStored(run: WorkflowRun): StoredRun {
     runId: run.runId,
     workflowId: run.workflowId,
     workflowName: run.workflowName,
-    domain: (run.metadata?.domain as string | undefined) ?? "unknown",
+    domain: (run.metadata?.domain as string | undefined) ?? 'unknown',
     status: run.status,
     initiatedBy: run.initiatedBy,
     approvedBy: run.approvedBy,
@@ -120,7 +124,7 @@ export function workflowRunToStored(run: WorkflowRun): StoredRun {
     isDryRun: run.isDryRun ?? false,
     isSimulation: run.isSimulation ?? false,
     requiresApproval:
-      run.approvalState === "pending" ||
+      run.approvalState === 'pending' ||
       (run.steps ?? []).some((s: { requiresApproval?: boolean }) => s.requiresApproval),
     durationMs: run.completedAt != null ? run.completedAt - run.startedAt : undefined,
     steps: run.steps ?? [],
@@ -149,12 +153,12 @@ export async function dbRecordWorkflowRun(run: WorkflowRun): Promise<void> {
  * timeline display.
  */
 export function storedToWorkflowRun(stored: StoredRun): WorkflowRun {
-  const startedAt = typeof stored.startedAt === "string"
-    ? new Date(stored.startedAt).getTime()
-    : Number(stored.startedAt);
-  const completedAt = stored.completedAt != null
-    ? new Date(stored.completedAt).getTime()
-    : undefined;
+  const startedAt =
+    typeof stored.startedAt === 'string'
+      ? new Date(stored.startedAt).getTime()
+      : Number(stored.startedAt);
+  const completedAt =
+    stored.completedAt != null ? new Date(stored.completedAt).getTime() : undefined;
   return {
     runId: stored.runId,
     workflowId: stored.workflowId,
@@ -163,22 +167,24 @@ export function storedToWorkflowRun(stored: StoredRun): WorkflowRun {
     initiatedBy: stored.initiatedBy,
     approvedBy: stored.approvedBy,
     recommendationId: stored.recommendationId,
-    executionMode: "manual" as const,
+    executionMode: 'manual' as const,
     isDryRun: stored.isDryRun,
     isSimulation: stored.isSimulation,
-    status: stored.status as WorkflowRun["status"],
+    status: stored.status as WorkflowRun['status'],
     currentStepIndex: 0,
-    steps: (stored.steps ?? []) as WorkflowRun["steps"],
-    approvalState: stored.approvedBy ? ("approved" as const) : ("none" as const),
+    steps: (stored.steps ?? []) as WorkflowRun['steps'],
+    approvalState: stored.approvedBy ? ('approved' as const) : ('none' as const),
     policyEvaluation: stored.policyEvaluation as Record<string, unknown> | undefined,
-    auditTrail: (stored.auditTrail ?? []) as WorkflowRun["auditTrail"],
+    auditTrail: (stored.auditTrail ?? []) as WorkflowRun['auditTrail'],
     startedAt,
     completedAt,
     metadata: stored.metadata as Record<string, unknown> | undefined,
   };
 }
 
-export async function dbListRuns(filter: RunFilter = {}): Promise<{ runs: StoredRun[]; total: number }> {
+export async function dbListRuns(
+  filter: RunFilter = {},
+): Promise<{ runs: StoredRun[]; total: number }> {
   const limit = Math.min(filter.limit ?? 50, 200);
   const offset = filter.offset ?? 0;
 
@@ -186,20 +192,33 @@ export async function dbListRuns(filter: RunFilter = {}): Promise<{ runs: Stored
   const values: unknown[] = [];
   let idx = 1;
 
-  if (filter.workflowId) { conditions.push(`workflow_id = $${idx++}`); values.push(filter.workflowId); }
-  if (filter.status) { conditions.push(`status = $${idx++}`); values.push(filter.status); }
-  if (filter.domain) { conditions.push(`domain = $${idx++}`); values.push(filter.domain); }
-  if (filter.tenantId) { conditions.push(`tenant_id = $${idx++}`); values.push(filter.tenantId); }
-  else if (filter.onlyNullTenant) { conditions.push(`tenant_id IS NULL`); }
+  if (filter.workflowId) {
+    conditions.push(`workflow_id = $${idx++}`);
+    values.push(filter.workflowId);
+  }
+  if (filter.status) {
+    conditions.push(`status = $${idx++}`);
+    values.push(filter.status);
+  }
+  if (filter.domain) {
+    conditions.push(`domain = $${idx++}`);
+    values.push(filter.domain);
+  }
+  if (filter.tenantId) {
+    conditions.push(`tenant_id = $${idx++}`);
+    values.push(filter.tenantId);
+  } else if (filter.onlyNullTenant) {
+    conditions.push(`tenant_id IS NULL`);
+  }
 
-  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   try {
     const countResult = await pool.query<{ count: string }>(
       `SELECT COUNT(*) AS count FROM szl_decisioning_runs ${where}`,
       values,
     );
-    const total = parseInt(countResult.rows[0]?.count ?? "0", 10);
+    const total = parseInt(countResult.rows[0]?.count ?? '0', 10);
 
     const runsResult = await pool.query(
       `SELECT * FROM szl_decisioning_runs ${where} ORDER BY started_at DESC LIMIT $${idx++} OFFSET $${idx++}`,
@@ -209,27 +228,27 @@ export async function dbListRuns(filter: RunFilter = {}): Promise<{ runs: Stored
     const runs: StoredRun[] = runsResult.rows.map(rowToRun);
     return { runs, total };
   } catch (err) {
-    logger.warn({ err }, "[DecisioningStore] Failed to list runs from DB");
+    logger.warn({ err }, '[DecisioningStore] Failed to list runs from DB');
     return { runs: [], total: 0 };
   }
 }
 
 export async function dbGetRunById(runId: string, tenantId?: string): Promise<StoredRun | null> {
   try {
-    const conditions = ["run_id = $1"];
+    const conditions = ['run_id = $1'];
     const values: unknown[] = [runId];
     if (tenantId) {
       conditions.push(`(tenant_id = $2 OR tenant_id IS NULL)`);
       values.push(tenantId);
     }
     const result = await pool.query(
-      `SELECT * FROM szl_decisioning_runs WHERE ${conditions.join(" AND ")} LIMIT 1`,
+      `SELECT * FROM szl_decisioning_runs WHERE ${conditions.join(' AND ')} LIMIT 1`,
       values,
     );
     if (!result.rows[0]) return null;
     return rowToRun(result.rows[0]);
   } catch (err) {
-    logger.warn({ err, runId }, "[DecisioningStore] Failed to fetch run from DB");
+    logger.warn({ err, runId }, '[DecisioningStore] Failed to fetch run from DB');
     return null;
   }
 }
@@ -246,7 +265,13 @@ export async function dbUpdateRunOutcome(
     const tenantClause = tenantId
       ? `AND (tenant_id = $6 OR tenant_id IS NULL)`
       : `AND tenant_id IS NULL`;
-    const params: unknown[] = [outcome, summary ?? null, JSON.stringify(impact ?? {}), recordedBy ?? null, runId];
+    const params: unknown[] = [
+      outcome,
+      summary ?? null,
+      JSON.stringify(impact ?? {}),
+      recordedBy ?? null,
+      runId,
+    ];
     if (tenantId) params.push(tenantId);
     await pool.query(
       `UPDATE szl_decisioning_runs
@@ -256,16 +281,22 @@ export async function dbUpdateRunOutcome(
       params,
     );
   } catch (err) {
-    logger.warn({ err, runId }, "[DecisioningStore] Failed to update run outcome");
+    logger.warn({ err, runId }, '[DecisioningStore] Failed to update run outcome');
   }
 }
 
 const CANCELLABLE_STATUSES = `('pending', 'pending_approval', 'awaiting_approval', 'running', 'started')`;
 
-export async function dbCancelRun(runId: string, tenantId?: string, rejectedBy?: string): Promise<boolean> {
+export async function dbCancelRun(
+  runId: string,
+  tenantId?: string,
+  rejectedBy?: string,
+): Promise<boolean> {
   try {
-    const tenantClause = tenantId ? `AND (tenant_id = $4 OR tenant_id IS NULL)` : `AND tenant_id IS NULL`;
-    const params: unknown[] = ["rejected", rejectedBy ?? "operator", runId];
+    const tenantClause = tenantId
+      ? `AND (tenant_id = $4 OR tenant_id IS NULL)`
+      : `AND tenant_id IS NULL`;
+    const params: unknown[] = ['rejected', rejectedBy ?? 'operator', runId];
     if (tenantId) params.push(tenantId);
     const result = await pool.query(
       `UPDATE szl_decisioning_runs
@@ -277,15 +308,21 @@ export async function dbCancelRun(runId: string, tenantId?: string, rejectedBy?:
     );
     return (result.rowCount ?? 0) > 0;
   } catch (err) {
-    logger.warn({ err, runId }, "[DecisioningStore] Failed to cancel run");
+    logger.warn({ err, runId }, '[DecisioningStore] Failed to cancel run');
     return false;
   }
 }
 
-export async function dbApproveRun(runId: string, tenantId?: string, approvedBy?: string): Promise<boolean> {
+export async function dbApproveRun(
+  runId: string,
+  tenantId?: string,
+  approvedBy?: string,
+): Promise<boolean> {
   try {
-    const tenantClause = tenantId ? `AND (tenant_id = $4 OR tenant_id IS NULL)` : `AND tenant_id IS NULL`;
-    const params: unknown[] = ["approved", approvedBy ?? "operator", runId];
+    const tenantClause = tenantId
+      ? `AND (tenant_id = $4 OR tenant_id IS NULL)`
+      : `AND tenant_id IS NULL`;
+    const params: unknown[] = ['approved', approvedBy ?? 'operator', runId];
     if (tenantId) params.push(tenantId);
     const result = await pool.query(
       `UPDATE szl_decisioning_runs
@@ -297,7 +334,7 @@ export async function dbApproveRun(runId: string, tenantId?: string, approvedBy?
     );
     return (result.rowCount ?? 0) > 0;
   } catch (err) {
-    logger.warn({ err, runId }, "[DecisioningStore] Failed to approve run");
+    logger.warn({ err, runId }, '[DecisioningStore] Failed to approve run');
     return false;
   }
 }
@@ -309,7 +346,12 @@ export async function dbGetHistoryStats(): Promise<{
   lastRunAt: string | null;
 }> {
   try {
-    const result = await pool.query<{ status: string; count: string; avg_duration: string; last_run: string | null }>(
+    const result = await pool.query<{
+      status: string;
+      count: string;
+      avg_duration: string;
+      last_run: string | null;
+    }>(
       `SELECT
          status,
          COUNT(*) AS count,
@@ -345,7 +387,7 @@ export async function dbGetHistoryStats(): Promise<{
       lastRunAt,
     };
   } catch (err) {
-    logger.warn({ err }, "[DecisioningStore] Failed to fetch stats from DB");
+    logger.warn({ err }, '[DecisioningStore] Failed to fetch stats from DB');
     return { totalRuns: 0, byStatus: {}, averageDurationMs: 0, lastRunAt: null };
   }
 }
@@ -369,19 +411,19 @@ export async function dbRecordRecommendations(
         ON CONFLICT DO NOTHING`,
         [
           sessionId,
-          String(rec.id ?? ""),
-          String(rec.title ?? ""),
-          String(rec.description ?? ""),
-          String(rec.domain ?? "general"),
-          String(rec.action ?? ""),
+          String(rec.id ?? ''),
+          String(rec.title ?? ''),
+          String(rec.description ?? ''),
+          String(rec.domain ?? 'general'),
+          String(rec.action ?? ''),
           Number(rec.priorityScore ?? 0),
           Number(rec.confidence ?? 0.5),
-          String(rec.urgency ?? "routine"),
+          String(rec.urgency ?? 'routine'),
           JSON.stringify(rec.businessImpact ?? {}),
           JSON.stringify(rec.signals ?? []),
           JSON.stringify(rec.evidence ?? []),
-          String(rec.reasoning ?? ""),
-          String(rec.policyState ?? "unchecked"),
+          String(rec.reasoning ?? ''),
+          String(rec.policyState ?? 'unchecked'),
           JSON.stringify(rec.policyEvaluation ?? {}),
           JSON.stringify(rec.requiredRoles ?? []),
           rec.estimatedEffortHours != null ? Number(rec.estimatedEffortHours) : null,
@@ -394,7 +436,7 @@ export async function dbRecordRecommendations(
       );
     }
   } catch (err) {
-    logger.warn({ err, sessionId }, "[DecisioningStore] Failed to persist recommendations");
+    logger.warn({ err, sessionId }, '[DecisioningStore] Failed to persist recommendations');
   }
 }
 
@@ -424,10 +466,10 @@ export async function dbRecordPolicyViolations(
           estimated_cost_usd, confidence, run_id, recommendation_id, tenant_id
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
         [
-          String(v.policyId ?? "unknown"),
+          String(v.policyId ?? 'unknown'),
           v.policyName != null ? String(v.policyName) : null,
           v.ruleName != null ? String(v.ruleName) : null,
-          String(v.effect ?? "block"),
+          String(v.effect ?? 'block'),
           context.action,
           context.domain ?? null,
           context.subjectId ?? null,
@@ -444,7 +486,7 @@ export async function dbRecordPolicyViolations(
       );
     }
   } catch (err) {
-    logger.warn({ err }, "[DecisioningStore] Failed to persist policy violations");
+    logger.warn({ err }, '[DecisioningStore] Failed to persist policy violations');
   }
 }
 

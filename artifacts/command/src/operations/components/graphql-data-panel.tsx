@@ -1,5 +1,5 @@
-import { GraphQLDataPanel } from "@szl-holdings/shared-ui/design-system";
-import { useLyteSignals, useLyteActions } from "@szl-holdings/graphql-client/hooks";
+import { useLyteActions, useLyteSignals } from '@szl-holdings/graphql-client/hooks';
+import { GraphQLDataPanel } from '@szl-holdings/shared-ui/design-system';
 
 export function LyteGraphQLPanel() {
   const { data: signalsData, loading: sLoading } = useLyteSignals({ limit: 3 });
@@ -11,9 +11,15 @@ export function LyteGraphQLPanel() {
       loading={sLoading && aLoading}
       sections={[
         {
-          label: "Active Signals",
+          label: 'Active Signals',
           items: signalsData?.lyteSignals ?? [],
-          renderItem: (s: { id: string; title: string; source: string; severity: string; status: string }) => (
+          renderItem: (s: {
+            id: string;
+            title: string;
+            source: string;
+            severity: string;
+            status: string;
+          }) => (
             <div key={s.id} className="flex items-center justify-between text-xs">
               <span className="text-zinc-300 truncate max-w-[200px]">{s.title}</span>
               <span className="text-zinc-500">{s.severity}</span>
@@ -21,12 +27,19 @@ export function LyteGraphQLPanel() {
           ),
         },
         {
-          label: "Pending Actions",
+          label: 'Pending Actions',
           items: actionsData?.lyteActions ?? [],
-          renderItem: (a: { id: string; state: string; priority: string; valueAtRisk: number | null }) => (
+          renderItem: (a: {
+            id: string;
+            state: string;
+            priority: string;
+            valueAtRisk: number | null;
+          }) => (
             <div key={a.id} className="flex items-center justify-between text-xs">
               <span className="text-zinc-300">{a.state}</span>
-              <span className="text-zinc-500">P{a.priority} · VAR: {a.valueAtRisk ?? "—"}</span>
+              <span className="text-zinc-500">
+                P{a.priority} · VAR: {a.valueAtRisk ?? '—'}
+              </span>
             </div>
           ),
         },

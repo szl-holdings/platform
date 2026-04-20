@@ -13,7 +13,7 @@ export interface HeartbeatSignal {
   latencyMs: number;
   errorRate: number;
   throughput: number;
-  status: "alive" | "degraded" | "critical" | "dead";
+  status: 'alive' | 'degraded' | 'critical' | 'dead';
   anomalyDetected: boolean;
   anomalyScore?: number;
 }
@@ -26,7 +26,7 @@ export interface DistributedTraceSpan {
   operation: string;
   startTime: number;
   durationMs: number;
-  status: "ok" | "error" | "timeout";
+  status: 'ok' | 'error' | 'timeout';
   tags?: Record<string, string | number | boolean>;
   db?: { query: string; durationMs: number };
   http?: { url: string; method: string; statusCode: number };
@@ -41,7 +41,7 @@ export interface DistributedTrace {
   totalDurationMs: number;
   startTime: number;
   endTime: number;
-  status: "ok" | "error" | "partial";
+  status: 'ok' | 'error' | 'partial';
   userAction?: string;
   affectedServices: string[];
   criticalPath: string[];
@@ -78,7 +78,12 @@ export interface ModelInferenceMetric {
 export interface BusinessImpactEvent {
   eventId: string;
   timestamp: number;
-  infraEventType: "latency_spike" | "error_surge" | "outage" | "security_incident" | "capacity_limit";
+  infraEventType:
+    | 'latency_spike'
+    | 'error_surge'
+    | 'outage'
+    | 'security_incident'
+    | 'capacity_limit';
   affectedService: string;
   revenueImpactPerHourUsd: number;
   affectedClients: string[];
@@ -91,12 +96,17 @@ export interface BusinessImpactEvent {
 export interface PredictiveSignal {
   signalId: string;
   timestamp: number;
-  type: "capacity_exhaustion" | "threat_trajectory" | "sla_breach" | "business_impact" | "anomaly_convergence";
+  type:
+    | 'capacity_exhaustion'
+    | 'threat_trajectory'
+    | 'sla_breach'
+    | 'business_impact'
+    | 'anomaly_convergence';
   title: string;
   description: string;
   confidenceScore: number;
   predictedAt: number;
-  severity: "info" | "warning" | "critical";
+  severity: 'info' | 'warning' | 'critical';
   timeToEventMs?: number;
   affectedEntities: string[];
   recommendedActions: string[];
@@ -107,18 +117,18 @@ export interface LivingMeshEvent {
   eventId: string;
   timestamp: number;
   type:
-    | "heartbeat"
-    | "anomaly_ripple"
-    | "traffic_surge"
-    | "connection_formed"
-    | "connection_degraded"
-    | "service_recovered"
-    | "threat_detected"
-    | "business_impact"
-    | "predictive_alert";
+    | 'heartbeat'
+    | 'anomaly_ripple'
+    | 'traffic_surge'
+    | 'connection_formed'
+    | 'connection_degraded'
+    | 'service_recovered'
+    | 'threat_detected'
+    | 'business_impact'
+    | 'predictive_alert';
   sourceServiceId: string;
   targetServiceId?: string;
-  severity: "nominal" | "elevated" | "critical";
+  severity: 'nominal' | 'elevated' | 'critical';
   magnitude: number;
   metadata?: Record<string, unknown>;
 }
@@ -150,9 +160,14 @@ export class LivingMeshStream {
     this.heartbeats.set(signal.serviceId, history);
 
     this.emitMeshEvent({
-      type: signal.anomalyDetected ? "anomaly_ripple" : "heartbeat",
+      type: signal.anomalyDetected ? 'anomaly_ripple' : 'heartbeat',
       sourceServiceId: signal.serviceId,
-      severity: signal.status === "critical" ? "critical" : signal.status === "degraded" ? "elevated" : "nominal",
+      severity:
+        signal.status === 'critical'
+          ? 'critical'
+          : signal.status === 'degraded'
+            ? 'elevated'
+            : 'nominal',
       magnitude: signal.anomalyScore ?? signal.healthScore,
     });
   }
@@ -177,9 +192,9 @@ export class LivingMeshStream {
     if (this.businessImpacts.length > MAX_BUSINESS_IMPACTS) this.businessImpacts.pop();
 
     this.emitMeshEvent({
-      type: "business_impact",
+      type: 'business_impact',
       sourceServiceId: impact.affectedService,
-      severity: impact.revenueImpactPerHourUsd > 10000 ? "critical" : "elevated",
+      severity: impact.revenueImpactPerHourUsd > 10000 ? 'critical' : 'elevated',
       magnitude: Math.min(100, impact.revenueImpactPerHourUsd / 1000),
       metadata: { revenueImpact: impact.revenueImpactPerHourUsd },
     });
@@ -190,14 +205,19 @@ export class LivingMeshStream {
     if (this.predictiveSignals.length > MAX_PREDICTIVE_SIGNALS) this.predictiveSignals.pop();
 
     this.emitMeshEvent({
-      type: "predictive_alert",
-      sourceServiceId: signal.affectedEntities[0] ?? "system",
-      severity: signal.severity === "critical" ? "critical" : signal.severity === "warning" ? "elevated" : "nominal",
+      type: 'predictive_alert',
+      sourceServiceId: signal.affectedEntities[0] ?? 'system',
+      severity:
+        signal.severity === 'critical'
+          ? 'critical'
+          : signal.severity === 'warning'
+            ? 'elevated'
+            : 'nominal',
       magnitude: signal.confidenceScore,
     });
   }
 
-  emitMeshEvent(partial: Omit<LivingMeshEvent, "eventId" | "timestamp">): LivingMeshEvent {
+  emitMeshEvent(partial: Omit<LivingMeshEvent, 'eventId' | 'timestamp'>): LivingMeshEvent {
     const event: LivingMeshEvent = {
       ...partial,
       eventId: `me_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -205,7 +225,7 @@ export class LivingMeshStream {
     };
     this.meshEvents.unshift(event);
     if (this.meshEvents.length > MAX_MESH_EVENTS) this.meshEvents.pop();
-    this.listeners.forEach(l => l(event));
+    this.listeners.forEach((l) => l(event));
     return event;
   }
 
@@ -227,12 +247,12 @@ export class LivingMeshStream {
 
   getTraces(windowMs = 300_000): DistributedTrace[] {
     const cutoff = Date.now() - windowMs;
-    return this.traces.filter(t => t.startTime >= cutoff);
+    return this.traces.filter((t) => t.startTime >= cutoff);
   }
 
   getGpuMetrics(windowMs = 60_000): GpuMetric[] {
     const cutoff = Date.now() - windowMs;
-    return this.gpuMetrics.filter(m => m.timestamp >= cutoff);
+    return this.gpuMetrics.filter((m) => m.timestamp >= cutoff);
   }
 
   getLatestGpuByDevice(): Map<string, GpuMetric> {
@@ -245,7 +265,7 @@ export class LivingMeshStream {
 
   getModelMetrics(windowMs = 300_000): ModelInferenceMetric[] {
     const cutoff = Date.now() - windowMs;
-    return this.modelMetrics.filter(m => m.timestamp >= cutoff);
+    return this.modelMetrics.filter((m) => m.timestamp >= cutoff);
   }
 
   getLatestModelMetrics(): Map<string, ModelInferenceMetric> {
@@ -258,7 +278,7 @@ export class LivingMeshStream {
 
   getBusinessImpacts(windowMs = 3_600_000): BusinessImpactEvent[] {
     const cutoff = Date.now() - windowMs;
-    return this.businessImpacts.filter(b => b.timestamp >= cutoff);
+    return this.businessImpacts.filter((b) => b.timestamp >= cutoff);
   }
 
   getTotalRevenueImpact(windowMs = 3_600_000): number {
@@ -267,20 +287,20 @@ export class LivingMeshStream {
 
   getPredictiveSignals(windowMs = 3_600_000): PredictiveSignal[] {
     const cutoff = Date.now() - windowMs;
-    return this.predictiveSignals.filter(s => s.timestamp >= cutoff);
+    return this.predictiveSignals.filter((s) => s.timestamp >= cutoff);
   }
 
   getMeshEvents(windowMs = 300_000): LivingMeshEvent[] {
     const cutoff = Date.now() - windowMs;
-    return this.meshEvents.filter(e => e.timestamp >= cutoff);
+    return this.meshEvents.filter((e) => e.timestamp >= cutoff);
   }
 
   calculateBusinessImpact(service: string, durationMs: number, errorRatePct: number): number {
     const BASE_REVENUE_PER_HOUR: Record<string, number> = {
-      "api-gateway": 50000,
-      "lyte-core": 30000,
-      "alloy-engine": 20000,
-      "firestorm-soc": 25000,
+      'api-gateway': 50000,
+      'lyte-core': 30000,
+      'alloy-engine': 20000,
+      'firestorm-soc': 25000,
       default: 10000,
     };
     const baseRate = (BASE_REVENUE_PER_HOUR[service] ?? BASE_REVENUE_PER_HOUR.default) as number;
@@ -294,14 +314,20 @@ export const livingMesh = new LivingMeshStream();
 
 export function seedLivingMeshData(): void {
   const services = [
-    "api-gateway", "lyte-core", "alloy-engine", "firestorm-soc",
-    "signal-bus", "ml-inference", "terra-beacon", "vessels-intel",
+    'api-gateway',
+    'lyte-core',
+    'alloy-engine',
+    'firestorm-soc',
+    'signal-bus',
+    'ml-inference',
+    'terra-beacon',
+    'vessels-intel',
   ];
   const models = [
-    { id: "alloy-gpt4", name: "Alloy GPT-4o", provider: "openai" },
-    { id: "orchestration-claude", name: "Orchestration Claude-3.5", provider: "anthropic" },
-    { id: "rag-embed", name: "RAG Embedder ada-002", provider: "openai" },
-    { id: "drift-detector", name: "Drift Detector v2", provider: "custom" },
+    { id: 'alloy-gpt4', name: 'Alloy GPT-4o', provider: 'openai' },
+    { id: 'orchestration-claude', name: 'Orchestration Claude-3.5', provider: 'anthropic' },
+    { id: 'rag-embed', name: 'RAG Embedder ada-002', provider: 'openai' },
+    { id: 'drift-detector', name: 'Drift Detector v2', provider: 'custom' },
   ];
 
   const now = Date.now();
@@ -314,14 +340,14 @@ export function seedLivingMeshData(): void {
       const anomaly = Math.random() < 0.05;
       livingMesh.recordHeartbeat({
         serviceId: svc,
-        serviceName: svc.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+        serviceName: svc.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
         timestamp: now - i * 10_000,
         healthScore: score,
         pulse: 60 + Math.random() * 40,
         latencyMs: 20 + Math.random() * 180,
         errorRate: Math.random() * 3,
         throughput: 100 + Math.random() * 900,
-        status: score > 70 ? "alive" : score > 50 ? "degraded" : "critical",
+        status: score > 70 ? 'alive' : score > 50 ? 'degraded' : 'critical',
         anomalyDetected: anomaly,
         ...(anomaly ? { anomalyScore: 60 + Math.random() * 40 } : {}),
       });
@@ -348,7 +374,7 @@ export function seedLivingMeshData(): void {
     }
   }
 
-  const gpus = ["GPU-0 A100", "GPU-1 A100", "GPU-2 H100", "GPU-3 H100"];
+  const gpus = ['GPU-0 A100', 'GPU-1 A100', 'GPU-2 H100', 'GPU-3 H100'];
   for (let i = 0; i < gpus.length; i++) {
     for (let j = 10; j >= 0; j--) {
       livingMesh.recordGpuMetric({
@@ -360,12 +386,18 @@ export function seedLivingMeshData(): void {
         memoryTotalGb: 80,
         temperatureC: 55 + Math.random() * 30,
         powerWatts: 200 + Math.random() * 200,
-        computeWorkload: ["Alloy Inference", "RAG Pipeline", "Embedding", "Drift Detection"][i % 4]!,
+        computeWorkload: ['Alloy Inference', 'RAG Pipeline', 'Embedding', 'Drift Detection'][
+          i % 4
+        ]!,
       });
     }
   }
 
-  const impactTypes: BusinessImpactEvent["infraEventType"][] = ["latency_spike", "error_surge", "security_incident"];
+  const impactTypes: BusinessImpactEvent['infraEventType'][] = [
+    'latency_spike',
+    'error_surge',
+    'security_incident',
+  ];
   for (let i = 0; i < 8; i++) {
     livingMesh.recordBusinessImpact({
       eventId: `bi_${now}_${i}`,
@@ -373,7 +405,10 @@ export function seedLivingMeshData(): void {
       infraEventType: impactTypes[i % impactTypes.length]!,
       affectedService: services[i % services.length]!,
       revenueImpactPerHourUsd: 1000 + Math.random() * 25000,
-      affectedClients: ["Northgate Corp", "Meridian Fund", "Pacific Logistics"].slice(0, 1 + Math.floor(Math.random() * 3)),
+      affectedClients: ['Northgate Corp', 'Meridian Fund', 'Pacific Logistics'].slice(
+        0,
+        1 + Math.floor(Math.random() * 3),
+      ),
       affectedClientCount: 1 + Math.floor(Math.random() * 15),
       slaBreachRisk: 20 + Math.random() * 75,
       operationalCostUsd: 500 + Math.random() * 5000,
@@ -381,30 +416,35 @@ export function seedLivingMeshData(): void {
     });
   }
 
-  const predTypes: PredictiveSignal["type"][] = ["capacity_exhaustion", "threat_trajectory", "sla_breach", "business_impact"];
+  const predTypes: PredictiveSignal['type'][] = [
+    'capacity_exhaustion',
+    'threat_trajectory',
+    'sla_breach',
+    'business_impact',
+  ];
   for (let i = 0; i < 6; i++) {
     livingMesh.recordPredictiveSignal({
       signalId: `ps_${now}_${i}`,
       timestamp: now - i * 300_000,
       type: predTypes[i % predTypes.length]!,
       title: [
-        "API Gateway capacity exhaustion in ~4 hours",
-        "Threat actor TTP progression toward lateral movement",
-        "SLA breach risk: 3 client agreements",
-        "Revenue impact from ML inference bottleneck",
-        "Database query degradation accelerating",
-        "Compliance drift approaching threshold",
+        'API Gateway capacity exhaustion in ~4 hours',
+        'Threat actor TTP progression toward lateral movement',
+        'SLA breach risk: 3 client agreements',
+        'Revenue impact from ML inference bottleneck',
+        'Database query degradation accelerating',
+        'Compliance drift approaching threshold',
       ][i]!,
-      description: "Predictive model confidence based on trend analysis over 72h window",
+      description: 'Predictive model confidence based on trend analysis over 72h window',
       confidenceScore: 70 + Math.random() * 25,
       predictedAt: now - i * 300_000,
-      severity: i < 2 ? "critical" : i < 4 ? "warning" : "info",
+      severity: i < 2 ? 'critical' : i < 4 ? 'warning' : 'info',
       timeToEventMs: (2 + i) * 3_600_000,
       affectedEntities: [services[i % services.length]!],
       recommendedActions: [
-        "Scale compute allocation by 40%",
-        "Activate containment playbook Alpha-3",
-        "Notify account managers and extend SLA window",
+        'Scale compute allocation by 40%',
+        'Activate containment playbook Alpha-3',
+        'Notify account managers and extend SLA window',
       ],
       businessImpactUsd: 5000 + Math.random() * 50000,
     });

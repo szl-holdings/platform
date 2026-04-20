@@ -1,12 +1,12 @@
-import { useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/apiClient";
-import { scheduleLocalAlert } from "@/lib/notifications";
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import {
   getAlertPreferencesSnapshot,
   isQuietHoursActive,
   useAlertPreferences,
-} from "@/hooks/useAlertPreferences";
+} from '@/hooks/useAlertPreferences';
+import { apiFetch } from '@/lib/apiClient';
+import { scheduleLocalAlert } from '@/lib/notifications';
 
 interface Approval {
   id: number;
@@ -30,9 +30,8 @@ export function useEscalatedApprovalNotifier(): void {
   const initializedRef = useRef(false);
 
   const escalationsQuery = useQuery<{ data: Approval[] } | Approval[]>({
-    queryKey: ["app-escalated-approval-notifier"],
-    queryFn: () =>
-      apiFetch<{ data: Approval[] } | Approval[]>("/api/approvals?status=escalated"),
+    queryKey: ['app-escalated-approval-notifier'],
+    queryFn: () => apiFetch<{ data: Approval[] } | Approval[]>('/api/approvals?status=escalated'),
     refetchInterval: 60000,
     staleTime: 30000,
     retry: 1,
@@ -58,20 +57,20 @@ export function useEscalatedApprovalNotifier(): void {
     const quiet = isQuietHoursActive(prefs);
 
     escalations
-      .filter((a) => a.priority === "critical" || a.priority === "high")
+      .filter((a) => a.priority === 'critical' || a.priority === 'high')
       .forEach((a) => {
         if (seenRef.current.has(a.id)) return;
         seenRef.current.add(a.id);
         // Critical approvals always wake the user. Non-critical ones (high)
         // are suppressed during quiet hours.
-        if (quiet && a.priority !== "critical") return;
+        if (quiet && a.priority !== 'critical') return;
         void scheduleLocalAlert({
-          title: "Approval escalated",
+          title: 'Approval escalated',
           body: a.title,
           data: {
-            kind: "approval_escalated",
+            kind: 'approval_escalated',
             approvalId: a.id,
-            deepLink: "/(shell)/intelligence/approval-inbox",
+            deepLink: '/(shell)/intelligence/approval-inbox',
           },
         });
       });

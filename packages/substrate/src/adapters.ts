@@ -8,7 +8,7 @@
  * wrapper, not a refactor. Phase 1 ships in-process adapters only.
  */
 
-import type { AnyStage, StageExecutorContext } from "./types.js";
+import type { AnyStage, StageExecutorContext } from './types.js';
 
 // ─── Model Adapter ────────────────────────────────────────────────────────────
 
@@ -94,7 +94,7 @@ export interface ToolAdapter {
 
 export interface ResourceAdapterInput {
   resourceUri: string;
-  operation: "read" | "write" | "list" | "delete";
+  operation: 'read' | 'write' | 'list' | 'delete';
   body?: unknown;
   filters?: Record<string, unknown>;
 }
@@ -163,7 +163,7 @@ export interface McpToolCall {
 
 export interface McpToolResult {
   toolCallId: string;
-  content: Array<{ type: "text" | "image" | "resource"; text?: string; data?: string }>;
+  content: Array<{ type: 'text' | 'image' | 'resource'; text?: string; data?: string }>;
   isError?: boolean;
 }
 
@@ -210,67 +210,67 @@ export const policyAdapterRegistry = new AdapterRegistry<PolicyAdapter>();
 // ─── Default / No-Op Adapters (for dry-run and testing) ──────────────────────
 
 const noopModelAdapter: ModelAdapter = {
-  id: "default",
-  name: "No-Op Model Adapter",
-  provider: "substrate-noop",
-  mcpCapabilities: { id: "noop", name: "No-Op", version: "1.0.0" },
+  id: 'default',
+  name: 'No-Op Model Adapter',
+  provider: 'substrate-noop',
+  mcpCapabilities: { id: 'noop', name: 'No-Op', version: '1.0.0' },
   async infer(input) {
     return {
       content: `[dry-run] Model output for: ${input.prompt.slice(0, 100)}`,
       confidence: 0.75,
       usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      provider: "substrate-noop",
-      model: "noop",
+      provider: 'substrate-noop',
+      model: 'noop',
       durationMs: 1,
     };
   },
 };
 
 const noopVerifierAdapter: ModelAdapter = {
-  id: "verifier",
-  name: "No-Op Verifier Adapter",
-  provider: "substrate-noop",
-  mcpCapabilities: { id: "noop-verifier", name: "No-Op Verifier", version: "1.0.0" },
+  id: 'verifier',
+  name: 'No-Op Verifier Adapter',
+  provider: 'substrate-noop',
+  mcpCapabilities: { id: 'noop-verifier', name: 'No-Op Verifier', version: '1.0.0' },
   async infer(input) {
     return {
       content: `[dry-run] Verification for: ${input.prompt.slice(0, 80)}`,
       confidence: 0.8,
       usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      provider: "substrate-noop",
-      model: "noop-verifier",
+      provider: 'substrate-noop',
+      model: 'noop-verifier',
       durationMs: 1,
     };
   },
 };
 
 const noopStrongAdapter: ModelAdapter = {
-  id: "strong",
-  name: "No-Op Strong Model Adapter",
-  provider: "substrate-noop",
-  mcpCapabilities: { id: "noop-strong", name: "No-Op Strong", version: "1.0.0" },
+  id: 'strong',
+  name: 'No-Op Strong Model Adapter',
+  provider: 'substrate-noop',
+  mcpCapabilities: { id: 'noop-strong', name: 'No-Op Strong', version: '1.0.0' },
   async infer(input) {
     return {
       content: `[dry-run/escalated] Strong model output for: ${input.prompt.slice(0, 100)}`,
       confidence: 0.88,
       usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      provider: "substrate-noop",
-      model: "noop-strong",
+      provider: 'substrate-noop',
+      model: 'noop-strong',
       durationMs: 1,
     };
   },
 };
 
 const noopRetrieverAdapter: RetrieverAdapter = {
-  id: "default",
-  name: "No-Op Retriever Adapter",
-  mcpCapabilities: { id: "noop-retriever", name: "No-Op Retriever", version: "1.0.0" },
+  id: 'default',
+  name: 'No-Op Retriever Adapter',
+  mcpCapabilities: { id: 'noop-retriever', name: 'No-Op Retriever', version: '1.0.0' },
   async retrieve(input) {
     return [
       {
-        id: "noop-doc-1",
+        id: 'noop-doc-1',
         content: `[dry-run] Retrieved document for query: ${input.query.slice(0, 80)}`,
         relevanceScore: 0.8,
-        source: "noop",
+        source: 'noop',
         metadata: {},
       },
     ];
@@ -278,12 +278,12 @@ const noopRetrieverAdapter: RetrieverAdapter = {
 };
 
 const noopToolAdapter: ToolAdapter = {
-  id: "default",
-  name: "No-Op Tool Adapter",
-  mcpCapabilities: { id: "noop-tool", name: "No-Op Tool", version: "1.0.0" },
+  id: 'default',
+  name: 'No-Op Tool Adapter',
+  mcpCapabilities: { id: 'noop-tool', name: 'No-Op Tool', version: '1.0.0' },
   async execute(input) {
     return {
-      result: { status: "dry-run", toolId: input.toolId, args: input.args },
+      result: { status: 'dry-run', toolId: input.toolId, args: input.args },
       durationMs: 1,
       toolId: input.toolId,
     };
@@ -291,8 +291,8 @@ const noopToolAdapter: ToolAdapter = {
 };
 
 const noopPolicyAdapter: PolicyAdapter = {
-  id: "default",
-  name: "No-Op Policy Adapter",
+  id: 'default',
+  name: 'No-Op Policy Adapter',
   async evaluate(_input) {
     return {
       allowed: true,
@@ -318,12 +318,12 @@ policyAdapterRegistry.register(noopPolicyAdapter);
  * Called lazily on first use to avoid circular imports.
  */
 export async function wireToolMeshAdapter(): Promise<void> {
-  const { defaultToolRegistry } = await import("@workspace/tool-mesh");
+  const { defaultToolRegistry } = await import('@workspace/tool-mesh');
 
   const toolMeshAdapter: ToolAdapter = {
-    id: "tool-mesh",
-    name: "SZL Tool Mesh",
-    mcpCapabilities: { id: "tool-mesh", name: "SZL Tool Mesh", version: "2.0.0" },
+    id: 'tool-mesh',
+    name: 'SZL Tool Mesh',
+    mcpCapabilities: { id: 'tool-mesh', name: 'SZL Tool Mesh', version: '2.0.0' },
     async execute(input, _ctx) {
       const manifest = defaultToolRegistry.get(input.toolId);
       if (!manifest) {
@@ -332,7 +332,12 @@ export async function wireToolMeshAdapter(): Promise<void> {
       const startMs = Date.now();
       // Tool mesh returns the tool manifest — actual execution is done by the executor
       return {
-        result: { manifest, args: input.args, executed: false, reason: "tool-mesh adapter resolved manifest" },
+        result: {
+          manifest,
+          args: input.args,
+          executed: false,
+          reason: 'tool-mesh adapter resolved manifest',
+        },
         durationMs: Date.now() - startMs,
         toolId: input.toolId,
       };
@@ -346,22 +351,22 @@ export async function wireToolMeshAdapter(): Promise<void> {
  * Register the policy-engine as the default PolicyAdapter.
  */
 export async function wirePolicyEngineAdapter(): Promise<void> {
-  const { evaluatePolicies, getRegisteredPolicies } = await import("@szl-holdings/policy-engine");
+  const { evaluatePolicies, getRegisteredPolicies } = await import('@szl-holdings/policy-engine');
 
   const policyEngineAdapter: PolicyAdapter = {
-    id: "policy-engine",
-    name: "SZL Policy Engine",
+    id: 'policy-engine',
+    name: 'SZL Policy Engine',
     async evaluate(input) {
       const policies = getRegisteredPolicies();
       const result = evaluatePolicies(policies, {
         action: input.action,
         subject: {
-          id: input.agentId ?? "substrate-engine",
-          roles: ["substrate-agent"],
+          id: input.agentId ?? 'substrate-engine',
+          roles: ['substrate-agent'],
         },
         resource: {
-          type: "substrate-stage",
-          attributes: { riskLevel: input.riskLevel ?? "low" },
+          type: 'substrate-stage',
+          attributes: { riskLevel: input.riskLevel ?? 'low' },
         },
         context: input.context ?? {},
       });

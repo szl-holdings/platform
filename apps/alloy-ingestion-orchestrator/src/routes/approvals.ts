@@ -5,25 +5,25 @@
  * Resuming an approved run continues from the gate's checkpoint.
  */
 
-import { Router } from "express";
-import type { Request, Response } from "express";
-import { ApprovalDecisionSchema } from "../types.js";
-import { defaultEngine } from "../engine.js";
-import { defaultRunStore } from "../run-store.js";
-import { buildIngestDocumentWorkflow } from "../workflows/ingest-document.js";
-import { buildRebuildIndexWorkflow } from "../workflows/rebuild-index.js";
-import { buildVerifyIndexHealthWorkflow } from "../workflows/verify-index-health.js";
-import { buildRunRetrievalEvalWorkflow } from "../workflows/run-retrieval-eval.js";
-import { buildRotateProfileVersionWorkflow } from "../workflows/rotate-profile-version.js";
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import { defaultEngine } from '../engine.js';
+import { defaultRunStore } from '../run-store.js';
+import { ApprovalDecisionSchema } from '../types.js';
+import { buildIngestDocumentWorkflow } from '../workflows/ingest-document.js';
+import { buildRebuildIndexWorkflow } from '../workflows/rebuild-index.js';
+import { buildRotateProfileVersionWorkflow } from '../workflows/rotate-profile-version.js';
+import { buildRunRetrievalEvalWorkflow } from '../workflows/run-retrieval-eval.js';
+import { buildVerifyIndexHealthWorkflow } from '../workflows/verify-index-health.js';
 
 export function createApprovalsRouter(): Router {
   const router = Router();
 
-  router.post("/runs/:runId/approve", async (req: Request, res: Response) => {
+  router.post('/runs/:runId/approve', async (req: Request, res: Response) => {
     const { runId } = req.params;
     const parse = ApprovalDecisionSchema.safeParse(req.body);
     if (!parse.success) {
-      res.status(400).json({ error: "Validation failed", detail: parse.error.issues });
+      res.status(400).json({ error: 'Validation failed', detail: parse.error.issues });
       return;
     }
 
@@ -33,7 +33,7 @@ export function createApprovalsRouter(): Router {
       return;
     }
 
-    if (run.status !== "pending-approval") {
+    if (run.status !== 'pending-approval') {
       res.status(409).json({
         error: `Run is not pending-approval (status=${run.status})`,
         runId: run.runId,
@@ -44,7 +44,9 @@ export function createApprovalsRouter(): Router {
 
     const definition = resolveWorkflowDefinitionFromRun(run);
     if (!definition) {
-      res.status(422).json({ error: `Cannot resolve workflow definition for workflowId: ${run.workflowId}` });
+      res
+        .status(422)
+        .json({ error: `Cannot resolve workflow definition for workflowId: ${run.workflowId}` });
       return;
     }
 
@@ -80,37 +82,47 @@ export function createApprovalsRouter(): Router {
   return router;
 }
 
-function resolveWorkflowDefinitionFromRun(run: { workflowId: string; tenantId: string; profileId: string; input: unknown }) {
+function resolveWorkflowDefinitionFromRun(run: {
+  workflowId: string;
+  tenantId: string;
+  profileId: string;
+  input: unknown;
+}) {
   const input = (run.input ?? {}) as Record<string, unknown>;
   switch (run.workflowId) {
-    case "ingest_document":
+    case 'ingest_document':
       return buildIngestDocumentWorkflow(
         {
-          sourceId: (input["sourceId"] as string) ?? "unknown",
-          content: (input["content"] as string) ?? "",
-          contentType: (input["contentType"] as string) ?? "text/plain",
-          metadata: (input["metadata"] as Record<string, unknown>) ?? {},
+          sourceId: (input['sourceId'] as string) ?? 'unknown',
+          content: (input['content'] as string) ?? '',
+          contentType: (input['contentType'] as string) ?? 'text/plain',
+          metadata: (input['metadata'] as Record<string, unknown>) ?? {},
         },
         run.tenantId,
         run.profileId,
       );
-    case "rebuild_index":
+    case 'rebuild_index':
       return buildRebuildIndexWorkflow({ tenantId: run.tenantId, profileId: run.profileId });
-    case "verify_index_health":
+    case 'verify_index_health':
       return buildVerifyIndexHealthWorkflow({ tenantId: run.tenantId, profileId: run.profileId });
-    case "run_retrieval_eval":
+    case 'run_retrieval_eval':
       return buildRunRetrievalEvalWorkflow({
         tenantId: run.tenantId,
         profileId: run.profileId,
-        datasetId: (input["datasetId"] as string) ?? "default",
-        queries: (input["queries"] as Array<{ queryId: string; query: string; relevantChunkIds: string[] }>) ?? [],
+        datasetId: (input['datasetId'] as string) ?? 'default',
+        queries:
+          (input['queries'] as Array<{
+            queryId: string;
+            query: string;
+            relevantChunkIds: string[];
+          }>) ?? [],
       });
-    case "rotate_profile_version":
+    case 'rotate_profile_version':
       return buildRotateProfileVersionWorkflow({
         tenantId: run.tenantId,
         currentProfileId: run.profileId,
-        newProfileId: (input["newProfileId"] as string) ?? run.profileId,
-        newProfileVersion: (input["newProfileVersion"] as string) ?? "v2",
+        newProfileId: (input['newProfileId'] as string) ?? run.profileId,
+        newProfileVersion: (input['newProfileVersion'] as string) ?? 'v2',
       });
     default:
       return null;

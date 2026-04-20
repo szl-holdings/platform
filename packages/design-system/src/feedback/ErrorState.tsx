@@ -1,6 +1,6 @@
-import React from "react";
-import { cn } from "../utils.js";
-import { color, semanticColors } from "../tokens/index.js";
+import React from 'react';
+import { color, semanticColors } from '../tokens/index.js';
+import { cn } from '../utils.js';
 
 export interface ErrorStateProps {
   title?: string;
@@ -12,7 +12,7 @@ export interface ErrorStateProps {
 }
 
 export function ErrorState({
-  title = "Something went wrong",
+  title = 'Something went wrong',
   message,
   code,
   traceId,
@@ -21,16 +21,19 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div
-      className={cn("flex flex-col items-center justify-center gap-4 py-12 px-6 text-center", className)}
+      className={cn(
+        'flex flex-col items-center justify-center gap-4 py-12 px-6 text-center',
+        className,
+      )}
     >
       <div
         className="rounded-full flex items-center justify-center"
         style={{
-          width: "40px",
-          height: "40px",
+          width: '40px',
+          height: '40px',
           background: semanticColors.error.bg,
           color: semanticColors.error.text,
-          fontSize: "20px",
+          fontSize: '20px',
         }}
       >
         !
@@ -39,7 +42,7 @@ export function ErrorState({
         <h3 className="font-semibold text-sm" style={{ color: color.text.primary }}>
           {title}
         </h3>
-        <p className="text-sm" style={{ color: color.text.secondary, maxWidth: "360px" }}>
+        <p className="text-sm" style={{ color: color.text.secondary, maxWidth: '360px' }}>
           {message}
         </p>
         {code && (
@@ -59,11 +62,11 @@ export function ErrorState({
           onClick={onRetry}
           className="px-4 rounded-md text-sm font-medium transition-colors"
           style={{
-            height: "34px",
+            height: '34px',
             background: color.bg.overlay,
             border: `1px solid ${color.border.default}`,
             color: color.text.primary,
-            cursor: "pointer",
+            cursor: 'pointer',
           }}
         >
           Try again

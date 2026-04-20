@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-import type { WorkflowCheckpoint } from "./types.js";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import type { WorkflowCheckpoint } from './types.js';
 
 export interface CheckpointStore {
   save(checkpoint: WorkflowCheckpoint): void;
@@ -42,7 +42,7 @@ export class FileCheckpointStore implements CheckpointStore {
   private loadFromDisk(): Map<string, WorkflowCheckpoint> {
     try {
       if (!existsSync(this.filePath)) return new Map();
-      const raw = readFileSync(this.filePath, "utf8");
+      const raw = readFileSync(this.filePath, 'utf8');
       const entries = JSON.parse(raw) as Array<[string, WorkflowCheckpoint]>;
       return new Map(entries);
     } catch {
@@ -57,7 +57,7 @@ export class FileCheckpointStore implements CheckpointStore {
       writeFileSync(
         this.filePath,
         JSON.stringify(Array.from(this.data.entries()), null, 2),
-        "utf8",
+        'utf8',
       );
     } catch {
       // best-effort — do not throw

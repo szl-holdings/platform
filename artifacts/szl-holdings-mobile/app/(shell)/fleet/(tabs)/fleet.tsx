@@ -1,25 +1,31 @@
 // @ts-nocheck
-import React, { useState, useCallback } from "react";
-import { useFuzzySearch } from "@szl-holdings/mobile-shared";
+
+import { useFuzzySearch, useSSEStream } from '@szl-holdings/mobile-shared';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, FlatList,
-  TextInput, RefreshControl, ActivityIndicator, ScrollView,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import * as Haptics from "expo-haptics";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { VesselIcon, featherIcon } from "@/components/VesselIcon";
-import { useColors } from "@/hooks/useColors";
-import { api, type Vessel, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/fleet/api";
-import { useVesselsWebSocket } from "@/hooks/useVesselsWebSocket";
-import { useSSEStream } from "@szl-holdings/mobile-shared";
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { featherIcon, VesselIcon } from '@/components/VesselIcon';
+import { useColors } from '@/hooks/useColors';
+import { useVesselsWebSocket } from '@/hooks/useVesselsWebSocket';
+import { api, CACHE_KEYS, cacheGetStale, cacheSet, type Vessel } from '@/lib/fleet/api';
 
 function getApiBase(): string {
-  const domain =
-    typeof process !== "undefined" && process.env.EXPO_PUBLIC_DOMAIN;
+  const domain = typeof process !== 'undefined' && process.env.EXPO_PUBLIC_DOMAIN;
   if (domain) return `https://${domain}`;
-  return "";
+  return '';
 }
 
 interface AISPositionPayload {
@@ -39,26 +45,76 @@ interface StreamEvent {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  at_sea: "#22c55e",
-  in_port: "#0ea5e9",
-  anchored: "#f59e0b",
-  maintenance: "#ef4444",
-  active: "#22c55e",
+  at_sea: '#22c55e',
+  in_port: '#0ea5e9',
+  anchored: '#f59e0b',
+  maintenance: '#ef4444',
+  active: '#22c55e',
 };
 const STATUS_LABELS: Record<string, string> = {
-  at_sea: "At Sea",
-  in_port: "In Port",
-  anchored: "Anchored",
-  maintenance: "Maintenance",
-  active: "Active",
+  at_sea: 'At Sea',
+  in_port: 'In Port',
+  anchored: 'Anchored',
+  maintenance: 'Maintenance',
+  active: 'Active',
 };
 
 const DEMO_VESSELS: Vessel[] = [
-  { id: 1, name: "SZL Meridian", imo: "IMO9234512", flag: "MH", type: "bulk_carrier", status: "at_sea", dwt: 82400, yearBuilt: 2016, lastPort: "Rotterdam" },
-  { id: 2, name: "SZL Pacific Star", imo: "IMO9145823", flag: "PA", type: "tanker", status: "in_port", dwt: 115200, yearBuilt: 2014, lastPort: "Singapore" },
-  { id: 3, name: "SZL Aurora", imo: "IMO9387461", flag: "BS", type: "container", status: "at_sea", dwt: 68000, yearBuilt: 2018, lastPort: "Hamburg" },
-  { id: 4, name: "SZL Orion", imo: "IMO9512340", flag: "LR", type: "bulk_carrier", status: "anchored", dwt: 92600, yearBuilt: 2019, lastPort: "Port Said" },
-  { id: 5, name: "SZL Reliance", imo: "IMO9198234", flag: "MH", type: "general_cargo", status: "maintenance", dwt: 24800, yearBuilt: 2011, lastPort: "Piraeus" },
+  {
+    id: 1,
+    name: 'SZL Meridian',
+    imo: 'IMO9234512',
+    flag: 'MH',
+    type: 'bulk_carrier',
+    status: 'at_sea',
+    dwt: 82400,
+    yearBuilt: 2016,
+    lastPort: 'Rotterdam',
+  },
+  {
+    id: 2,
+    name: 'SZL Pacific Star',
+    imo: 'IMO9145823',
+    flag: 'PA',
+    type: 'tanker',
+    status: 'in_port',
+    dwt: 115200,
+    yearBuilt: 2014,
+    lastPort: 'Singapore',
+  },
+  {
+    id: 3,
+    name: 'SZL Aurora',
+    imo: 'IMO9387461',
+    flag: 'BS',
+    type: 'container',
+    status: 'at_sea',
+    dwt: 68000,
+    yearBuilt: 2018,
+    lastPort: 'Hamburg',
+  },
+  {
+    id: 4,
+    name: 'SZL Orion',
+    imo: 'IMO9512340',
+    flag: 'LR',
+    type: 'bulk_carrier',
+    status: 'anchored',
+    dwt: 92600,
+    yearBuilt: 2019,
+    lastPort: 'Port Said',
+  },
+  {
+    id: 5,
+    name: 'SZL Reliance',
+    imo: 'IMO9198234',
+    flag: 'MH',
+    type: 'general_cargo',
+    status: 'maintenance',
+    dwt: 24800,
+    yearBuilt: 2011,
+    lastPort: 'Piraeus',
+  },
 ];
 
 interface VoyageMilestone {
@@ -73,36 +129,83 @@ function VoyageTimeline({ vessel }: { vessel: Vessel }) {
   const colors = useColors();
   const milestones: VoyageMilestone[] = vessel.lastPort
     ? [
-        { label: "Departed", port: vessel.lastPort, time: "Mar 29", done: true },
-        { label: "Waypoint", port: "English Channel", time: "Apr 1", done: true, current: vessel.status === "at_sea" },
-        { label: "Arrival", port: vessel.destination || "TBC", time: vessel.eta ? new Date(vessel.eta).toLocaleDateString([], { month: "short", day: "numeric" }) : "TBC", done: false },
+        { label: 'Departed', port: vessel.lastPort, time: 'Mar 29', done: true },
+        {
+          label: 'Waypoint',
+          port: 'English Channel',
+          time: 'Apr 1',
+          done: true,
+          current: vessel.status === 'at_sea',
+        },
+        {
+          label: 'Arrival',
+          port: vessel.destination || 'TBC',
+          time: vessel.eta
+            ? new Date(vessel.eta).toLocaleDateString([], { month: 'short', day: 'numeric' })
+            : 'TBC',
+          done: false,
+        },
       ]
     : [
-        { label: "Origin", port: "Unknown", time: "—", done: true },
-        { label: "En Route", port: "—", time: "—", done: true, current: true },
-        { label: "Destination", port: vessel.destination || "TBC", time: vessel.eta ? new Date(vessel.eta).toLocaleDateString([], { month: "short", day: "numeric" }) : "TBC", done: false },
+        { label: 'Origin', port: 'Unknown', time: '—', done: true },
+        { label: 'En Route', port: '—', time: '—', done: true, current: true },
+        {
+          label: 'Destination',
+          port: vessel.destination || 'TBC',
+          time: vessel.eta
+            ? new Date(vessel.eta).toLocaleDateString([], { month: 'short', day: 'numeric' })
+            : 'TBC',
+          done: false,
+        },
       ];
 
   return (
-    <View style={[vtStyles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <View
+      style={[vtStyles.container, { backgroundColor: colors.card, borderColor: colors.border }]}
+    >
       <Text style={[vtStyles.vesselName, { color: colors.text }]}>{vessel.name}</Text>
       <View style={vtStyles.timeline}>
         {milestones.map((m, i) => (
           <View key={i} style={vtStyles.milestoneWrap}>
-            <View style={[
-              vtStyles.dot,
-              {
-                backgroundColor: m.done ? (m.current ? colors.primary : `${colors.primary}80`) : colors.border,
-                borderColor: m.current ? colors.primary : "transparent",
-              }
-            ]}>
-              {m.current && <View style={[vtStyles.dotInner, { backgroundColor: colors.primary }]} />}
+            <View
+              style={[
+                vtStyles.dot,
+                {
+                  backgroundColor: m.done
+                    ? m.current
+                      ? colors.primary
+                      : `${colors.primary}80`
+                    : colors.border,
+                  borderColor: m.current ? colors.primary : 'transparent',
+                },
+              ]}
+            >
+              {m.current && (
+                <View style={[vtStyles.dotInner, { backgroundColor: colors.primary }]} />
+              )}
             </View>
-            <Text style={[vtStyles.milestoneLabel, { color: m.current ? colors.primary : colors.textFaint }]}>{m.label}</Text>
-            <Text style={[vtStyles.milestonePort, { color: m.done ? colors.text : colors.textDim }]} numberOfLines={1}>{m.port}</Text>
+            <Text
+              style={[
+                vtStyles.milestoneLabel,
+                { color: m.current ? colors.primary : colors.textFaint },
+              ]}
+            >
+              {m.label}
+            </Text>
+            <Text
+              style={[vtStyles.milestonePort, { color: m.done ? colors.text : colors.textDim }]}
+              numberOfLines={1}
+            >
+              {m.port}
+            </Text>
             <Text style={[vtStyles.milestoneTime, { color: colors.textFaint }]}>{m.time}</Text>
             {i < milestones.length - 1 && (
-              <View style={[vtStyles.connector, { backgroundColor: m.done ? `${colors.primary}40` : colors.border }]} />
+              <View
+                style={[
+                  vtStyles.connector,
+                  { backgroundColor: m.done ? `${colors.primary}40` : colors.border },
+                ]}
+              />
             )}
           </View>
         ))}
@@ -115,28 +218,53 @@ interface WatchlistAlert {
   id: string;
   vesselName: string;
   event: string;
-  severity: "critical" | "warning" | "info";
+  severity: 'critical' | 'warning' | 'info';
   time: string;
 }
 
 const DEMO_WATCHLIST_ALERTS: WatchlistAlert[] = [];
 
-const WATCHLIST_COLORS = { critical: "#ef4444", warning: "#f59e0b", info: "#0ea5e9" };
+const WATCHLIST_COLORS = { critical: '#ef4444', warning: '#f59e0b', info: '#0ea5e9' };
 
-function WatchlistAlertBanner({ alerts, colors }: { alerts: WatchlistAlert[]; colors: ReturnType<typeof useColors> }) {
+function WatchlistAlertBanner({
+  alerts,
+  colors,
+}: {
+  alerts: WatchlistAlert[];
+  colors: ReturnType<typeof useColors>;
+}) {
   const [dismissed, setDismissed] = useState<string[]>([]);
-  const active = alerts.filter(a => !dismissed.includes(a.id));
+  const active = alerts.filter((a) => !dismissed.includes(a.id));
   if (active.length === 0) return null;
   return (
     <View style={{ paddingHorizontal: 16, paddingVertical: 8, gap: 6 }}>
-      {active.map(alert => (
-        <View key={alert.id} style={[watchStyles.banner, { backgroundColor: `${WATCHLIST_COLORS[alert.severity]}12`, borderColor: `${WATCHLIST_COLORS[alert.severity]}30` }]}>
-          <View style={[watchStyles.bannerDot, { backgroundColor: WATCHLIST_COLORS[alert.severity] }]} />
+      {active.map((alert) => (
+        <View
+          key={alert.id}
+          style={[
+            watchStyles.banner,
+            {
+              backgroundColor: `${WATCHLIST_COLORS[alert.severity]}12`,
+              borderColor: `${WATCHLIST_COLORS[alert.severity]}30`,
+            },
+          ]}
+        >
+          <View
+            style={[watchStyles.bannerDot, { backgroundColor: WATCHLIST_COLORS[alert.severity] }]}
+          />
           <View style={watchStyles.bannerBody}>
-            <Text style={[watchStyles.bannerVessel, { color: WATCHLIST_COLORS[alert.severity] }]}>{alert.vesselName}</Text>
+            <Text style={[watchStyles.bannerVessel, { color: WATCHLIST_COLORS[alert.severity] }]}>
+              {alert.vesselName}
+            </Text>
             <Text style={[watchStyles.bannerEvent, { color: colors.textDim }]}>{alert.event}</Text>
           </View>
-          <TouchableOpacity onPress={() => { Haptics.selectionAsync(); setDismissed(prev => [...prev, alert.id]); }} style={watchStyles.bannerDismiss}>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.selectionAsync();
+              setDismissed((prev) => [...prev, alert.id]);
+            }}
+            style={watchStyles.bannerDismiss}
+          >
             <VesselIcon name="x" size={12} color={colors.textFaint} />
           </TouchableOpacity>
         </View>
@@ -146,25 +274,57 @@ function WatchlistAlertBanner({ alerts, colors }: { alerts: WatchlistAlert[]; co
 }
 
 const watchStyles = StyleSheet.create({
-  banner: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, borderWidth: 1 },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
   bannerDot: { width: 6, height: 6, borderRadius: 3, flexShrink: 0 },
   bannerBody: { flex: 1 },
-  bannerVessel: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  bannerEvent: { fontSize: 10, fontFamily: "Inter_400Regular", marginTop: 1 },
+  bannerVessel: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
+  bannerEvent: { fontSize: 10, fontFamily: 'Inter_400Regular', marginTop: 1 },
   bannerDismiss: { padding: 4 },
 });
 
 const vtStyles = StyleSheet.create({
   container: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 8 },
-  vesselName: { fontSize: 11, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold", marginBottom: 10 },
-  timeline: { flexDirection: "row", alignItems: "flex-start" },
-  milestoneWrap: { flex: 1, alignItems: "center", position: "relative" },
-  dot: { width: 10, height: 10, borderRadius: 5, borderWidth: 2, marginBottom: 4, alignItems: "center", justifyContent: "center" },
+  vesselName: {
+    fontSize: 11,
+    fontWeight: '600' as const,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 10,
+  },
+  timeline: { flexDirection: 'row', alignItems: 'flex-start' },
+  milestoneWrap: { flex: 1, alignItems: 'center', position: 'relative' },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+    marginBottom: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dotInner: { width: 4, height: 4, borderRadius: 2 },
-  milestoneLabel: { fontSize: 8, fontFamily: "Inter_500Medium", letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 2 },
-  milestonePort: { fontSize: 10, fontFamily: "Inter_600SemiBold", textAlign: "center", marginBottom: 1 },
-  milestoneTime: { fontSize: 9, fontFamily: "Inter_400Regular" },
-  connector: { position: "absolute", top: 4, left: "50%", right: "-50%", height: 2 },
+  milestoneLabel: {
+    fontSize: 8,
+    fontFamily: 'Inter_500Medium',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  milestonePort: {
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    textAlign: 'center',
+    marginBottom: 1,
+  },
+  milestoneTime: { fontSize: 9, fontFamily: 'Inter_400Regular' },
+  connector: { position: 'absolute', top: 4, left: '50%', right: '-50%', height: 2 },
 });
 
 function VesselRow({ vessel, onPress }: { vessel: Vessel; onPress: () => void }) {
@@ -182,9 +342,11 @@ function VesselRow({ vessel, onPress }: { vessel: Vessel; onPress: () => void })
         <VesselIcon name="anchor" size={14} color={sc} />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowName, { color: colors.text }]} numberOfLines={1}>{vessel.name}</Text>
+        <Text style={[styles.rowName, { color: colors.text }]} numberOfLines={1}>
+          {vessel.name}
+        </Text>
         <Text style={[styles.rowMeta, { color: colors.textDim }]}>
-          {vessel.vesselType} · IMO {vessel.imo || "—"} · {vessel.flag || "—"}
+          {vessel.vesselType} · IMO {vessel.imo || '—'} · {vessel.flag || '—'}
         </Text>
         {vessel.destination && (
           <View style={styles.rowDestRow}>
@@ -205,7 +367,9 @@ function VesselRow({ vessel, onPress }: { vessel: Vessel; onPress: () => void })
         )}
         {(vessel.activeExceptions ?? 0) > 0 && (
           <View style={[styles.excBadge, { backgroundColor: colors.redDim }]}>
-            <Text style={[styles.excText, { color: colors.red }]}>{vessel.activeExceptions} exc</Text>
+            <Text style={[styles.excText, { color: colors.red }]}>
+              {vessel.activeExceptions} exc
+            </Text>
           </View>
         )}
       </View>
@@ -216,39 +380,43 @@ function VesselRow({ vessel, onPress }: { vessel: Vessel; onPress: () => void })
 export default function FleetScreen() {
   const colors = useColors();
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
   const { wsStatus } = useVesselsWebSocket();
   const queryClient = useQueryClient();
 
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
-  const [livePositions, setLivePositions] = useState<Record<string, { speed: string; lat: number; lon: number }>>({});
+  const [livePositions, setLivePositions] = useState<
+    Record<string, { speed: string; lat: number; lon: number }>
+  >({});
 
   const { status: sseStatus } = useSSEStream<StreamEvent>({
     url: `${getApiBase()}/api/stream/ais-tracking`,
     onEvent: (type, data) => {
-      if (type === "position_update" && data?.payload) {
+      if (type === 'position_update' && data?.payload) {
         const { vessel, speed, lat, lon } = data.payload;
         if (vessel) {
-          setLivePositions(prev => ({
+          setLivePositions((prev) => ({
             ...prev,
             [vessel]: { speed: String(speed ?? 0), lat, lon },
           }));
           setLastFetchedAt(new Date());
-          queryClient.setQueryData<Vessel[]>(["vessels-roster"], (prev) => {
+          queryClient.setQueryData<Vessel[]>(['vessels-roster'], (prev) => {
             if (!prev) return prev;
-            return prev.map((v) =>
-              v.name === vessel ? { ...v, speed: String(speed ?? 0) } : v
-            );
+            return prev.map((v) => (v.name === vessel ? { ...v, speed: String(speed ?? 0) } : v));
           });
         }
       }
     },
   });
 
-  const { data: vessels = [], isLoading, refetch } = useQuery({
-    queryKey: ["vessels-roster"],
+  const {
+    data: vessels = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['vessels-roster'],
     queryFn: async () => {
       try {
         const data = await api.roster();
@@ -259,7 +427,7 @@ export default function FleetScreen() {
         const cached = await cacheGetStale<Vessel[]>(CACHE_KEYS.fleet);
         if (cached && cached.length > 0) return cached;
         Promise.all(
-          DEMO_VESSELS.map(v =>
+          DEMO_VESSELS.map((v) =>
             cacheSet(`vessel:${v.id}`, {
               vessel: { ...v, vesselType: v.type, port: v.lastPort },
               position: null,
@@ -268,8 +436,8 @@ export default function FleetScreen() {
               portCalls: [],
               exceptions: [],
               sanctions: null,
-            })
-          )
+            }),
+          ),
         ).catch(() => {});
         return DEMO_VESSELS;
       }
@@ -278,14 +446,21 @@ export default function FleetScreen() {
     refetchInterval: 120_000,
   });
 
-  const fuzzyVessels = useFuzzySearch(vessels, search, v => [v.name, v.imo || "", v.flag || "", v.status || ""]);
-  const filtered = fuzzyVessels.filter(v => {
-    const matchStatus = statusFilter === "all" || v.status === statusFilter;
-    return matchStatus;
-  }).map(v => {
-    const livePos = livePositions[v.name];
-    return livePos ? { ...v, speed: livePos.speed } : v;
-  });
+  const fuzzyVessels = useFuzzySearch(vessels, search, (v) => [
+    v.name,
+    v.imo || '',
+    v.flag || '',
+    v.status || '',
+  ]);
+  const filtered = fuzzyVessels
+    .filter((v) => {
+      const matchStatus = statusFilter === 'all' || v.status === statusFilter;
+      return matchStatus;
+    })
+    .map((v) => {
+      const livePos = livePositions[v.name];
+      return livePos ? { ...v, speed: livePos.speed } : v;
+    });
 
   const statusCounts = vessels.reduce<Record<string, number>>((acc, v) => {
     acc[v.status] = (acc[v.status] || 0) + 1;
@@ -303,33 +478,42 @@ export default function FleetScreen() {
   }, [refetch]);
 
   const filterOptions = [
-    { id: "all", label: "All" },
-    { id: "at_sea", label: "At Sea" },
-    { id: "in_port", label: "In Port" },
-    { id: "anchored", label: "Anchored" },
-    { id: "maintenance", label: "Maint." },
+    { id: 'all', label: 'All' },
+    { id: 'at_sea', label: 'At Sea' },
+    { id: 'in_port', label: 'In Port' },
+    { id: 'anchored', label: 'Anchored' },
+    { id: 'maintenance', label: 'Maint.' },
   ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={["top"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View>
           <Text style={[styles.title, { color: colors.text }]}>Fleet</Text>
-          <Text style={[styles.sub, { color: colors.textFaint }]}>{filtered.length} of {vessels.length} vessels</Text>
+          <Text style={[styles.sub, { color: colors.textFaint }]}>
+            {filtered.length} of {vessels.length} vessels
+          </Text>
         </View>
         {(() => {
-          const isConnected = sseStatus === "connected";
-          const isReconnecting = sseStatus === "reconnecting";
-          const label = isConnected ? "AIS LIVE" : isReconnecting ? "RECONNECTING" : "OFFLINE";
-          const badgeColor = isConnected ? colors.primary : isReconnecting ? "#f59e0b" : "#94a3b8";
+          const isConnected = sseStatus === 'connected';
+          const isReconnecting = sseStatus === 'reconnecting';
+          const label = isConnected ? 'AIS LIVE' : isReconnecting ? 'RECONNECTING' : 'OFFLINE';
+          const badgeColor = isConnected ? colors.primary : isReconnecting ? '#f59e0b' : '#94a3b8';
           const badgeBg = isConnected
             ? (colors.greenDim ?? `${colors.primary}15`)
             : isReconnecting
-            ? "rgba(245,158,11,0.1)"
-            : "rgba(148,163,184,0.1)";
+              ? 'rgba(245,158,11,0.1)'
+              : 'rgba(148,163,184,0.1)';
           return (
-            <View style={[styles.offlineBadge, { backgroundColor: badgeBg, borderColor: `${badgeColor}40` }]}>
-              {(isConnected || isReconnecting) && <View style={[styles.offlineDot, { backgroundColor: badgeColor }]} />}
+            <View
+              style={[
+                styles.offlineBadge,
+                { backgroundColor: badgeBg, borderColor: `${badgeColor}40` },
+              ]}
+            >
+              {(isConnected || isReconnecting) && (
+                <View style={[styles.offlineDot, { backgroundColor: badgeColor }]} />
+              )}
               <Text style={[styles.offlineBadgeText, { color: badgeColor }]}>{label}</Text>
             </View>
           );
@@ -348,7 +532,7 @@ export default function FleetScreen() {
           onChangeText={setSearch}
         />
         {search.length > 0 && (
-          <TouchableOpacity onPress={() => setSearch("")}>
+          <TouchableOpacity onPress={() => setSearch('')}>
             <VesselIcon name="x" size={14} color={colors.textFaint} />
           </TouchableOpacity>
         )}
@@ -357,7 +541,7 @@ export default function FleetScreen() {
       <FlatList
         horizontal
         data={filterOptions}
-        keyExtractor={i => i.id}
+        keyExtractor={(i) => i.id}
         showsHorizontalScrollIndicator={false}
         style={styles.filterBar}
         contentContainerStyle={styles.filterContent}
@@ -367,22 +551,32 @@ export default function FleetScreen() {
             style={[
               styles.filterBtn,
               {
-                backgroundColor: statusFilter === item.id ? colors.primaryDim : "transparent",
+                backgroundColor: statusFilter === item.id ? colors.primaryDim : 'transparent',
                 borderColor: statusFilter === item.id ? colors.primaryBorder : colors.border,
               },
             ]}
           >
-            <Text style={[styles.filterText, { color: statusFilter === item.id ? colors.primary : colors.textDim }]}>
+            <Text
+              style={[
+                styles.filterText,
+                { color: statusFilter === item.id ? colors.primary : colors.textDim },
+              ]}
+            >
               {item.label}
-              {item.id !== "all" && statusCounts[item.id] ? ` (${statusCounts[item.id]})` : ""}
+              {item.id !== 'all' && statusCounts[item.id] ? ` (${statusCounts[item.id]})` : ''}
             </Text>
           </TouchableOpacity>
         )}
       />
 
-      {!isLoading && filtered.length > 0 && filtered.some(v => v.status === "at_sea") && (
+      {!isLoading && filtered.length > 0 && filtered.some((v) => v.status === 'at_sea') && (
         <View>
-          <Text style={[styles.sectionLabel, { color: colors.textFaint, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 }]}>
+          <Text
+            style={[
+              styles.sectionLabel,
+              { color: colors.textFaint, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 },
+            ]}
+          >
             VOYAGE TIMELINE
           </Text>
           <ScrollView
@@ -390,11 +584,14 @@ export default function FleetScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
           >
-            {filtered.filter(v => v.status === "at_sea").slice(0, 4).map(v => (
-              <View key={v.id} style={{ width: 260 }}>
-                <VoyageTimeline vessel={v} />
-              </View>
-            ))}
+            {filtered
+              .filter((v) => v.status === 'at_sea')
+              .slice(0, 4)
+              .map((v) => (
+                <View key={v.id} style={{ width: 260 }}>
+                  <VoyageTimeline vessel={v} />
+                </View>
+              ))}
           </ScrollView>
         </View>
       )}
@@ -406,10 +603,16 @@ export default function FleetScreen() {
       ) : (
         <FlatList
           data={filtered}
-          keyExtractor={v => String(v.id)}
+          keyExtractor={(v) => String(v.id)}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+            />
+          }
           renderItem={({ item }) => (
             <VesselRow vessel={item} onPress={() => router.push(`/vessel/${item.id}`)} />
           )}
@@ -428,53 +631,91 @@ export default function FleetScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
-  title: { fontSize: 20, fontWeight: "700" as const, fontFamily: "Inter_700Bold" },
-  sub: { fontSize: 11, marginTop: 2, fontFamily: "Inter_400Regular" },
+  title: { fontSize: 20, fontWeight: '700' as const, fontFamily: 'Inter_700Bold' },
+  sub: { fontSize: 11, marginTop: 2, fontFamily: 'Inter_400Regular' },
   searchRow: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    marginHorizontal: 16, marginTop: 12, paddingHorizontal: 12, paddingVertical: 10,
-    borderRadius: 12, borderWidth: 1,
-    backgroundColor: "rgba(14,165,233,0.04)",
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    backgroundColor: 'rgba(14,165,233,0.04)',
   },
-  searchInput: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
+  searchInput: { flex: 1, fontSize: 13, fontFamily: 'Inter_400Regular' },
   filterBar: { marginTop: 10 },
   filterContent: { paddingHorizontal: 16, gap: 8 },
   filterBtn: {
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
   },
-  filterText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  filterText: { fontSize: 11, fontFamily: 'Inter_500Medium' },
   listContent: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 100 },
   row: {
-    flexDirection: "row", alignItems: "center", padding: 12,
-    borderRadius: 12, borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   rowIcon: {
-    width: 36, height: 36, borderRadius: 10,
-    justifyContent: "center", alignItems: "center", marginRight: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
   },
   rowBody: { flex: 1 },
-  rowName: { fontSize: 13, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
-  rowMeta: { fontSize: 10, marginTop: 2, fontFamily: "Inter_400Regular" },
-  rowDestRow: { flexDirection: "row", alignItems: "center", gap: 3, marginTop: 3 },
-  rowDest: { fontSize: 10, fontFamily: "Inter_400Regular" },
-  rowRight: { alignItems: "flex-end", gap: 4 },
+  rowName: { fontSize: 13, fontWeight: '600' as const, fontFamily: 'Inter_600SemiBold' },
+  rowMeta: { fontSize: 10, marginTop: 2, fontFamily: 'Inter_400Regular' },
+  rowDestRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 3 },
+  rowDest: { fontSize: 10, fontFamily: 'Inter_400Regular' },
+  rowRight: { alignItems: 'flex-end', gap: 4 },
   statusPill: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   statusDot: { width: 5, height: 5, borderRadius: 3 },
-  statusText: { fontSize: 10, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
-  speedText: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  statusText: { fontSize: 10, fontWeight: '600' as const, fontFamily: 'Inter_600SemiBold' },
+  speedText: { fontSize: 10, fontFamily: 'Inter_400Regular' },
   excBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
-  excText: { fontSize: 9, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
-  loadingState: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyState: { alignItems: "center", paddingVertical: 60, gap: 8 },
-  emptyText: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 2, textTransform: "uppercase" as const },
-  offlineBadge: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14, borderWidth: 1 },
+  excText: { fontSize: 9, fontWeight: '600' as const, fontFamily: 'Inter_600SemiBold' },
+  loadingState: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyState: { alignItems: 'center', paddingVertical: 60, gap: 8 },
+  emptyText: { fontSize: 13, fontFamily: 'Inter_400Regular' },
+  sectionLabel: {
+    fontSize: 9,
+    fontFamily: 'Inter_500Medium',
+    letterSpacing: 2,
+    textTransform: 'uppercase' as const,
+  },
+  offlineBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
   offlineDot: { width: 6, height: 6, borderRadius: 3 },
-  offlineBadgeText: { fontSize: 9, fontFamily: "Inter_600SemiBold", letterSpacing: 0.8 },
+  offlineBadgeText: { fontSize: 9, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8 },
 });

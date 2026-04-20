@@ -1,5 +1,5 @@
-import React, { Component, ComponentType, PropsWithChildren } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { Component, type ComponentType, type PropsWithChildren } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type ErrorFallbackProps = {
   error: Error;
@@ -37,8 +37,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   override componentDidCatch(error: Error, info: { componentStack: string }): void {
-    console.error("[ErrorBoundary]", error);
-    if (typeof this.props.onError === "function") {
+    console.error('[ErrorBoundary]', error);
+    if (typeof this.props.onError === 'function') {
       this.props.onError(error, info.componentStack);
     }
   }
@@ -60,32 +60,32 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 24,
-    backgroundColor: "#080B12",
+    backgroundColor: '#080B12',
   },
   title: {
-    color: "#E8EAF0",
+    color: '#E8EAF0',
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 8,
   },
   message: {
-    color: "rgba(232,234,240,0.5)",
+    color: 'rgba(232,234,240,0.5)',
     fontSize: 14,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 24,
   },
   button: {
-    backgroundColor: "#334155",
+    backgroundColor: '#334155',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   buttonText: {
-    color: "#E8EAF0",
+    color: '#E8EAF0',
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });

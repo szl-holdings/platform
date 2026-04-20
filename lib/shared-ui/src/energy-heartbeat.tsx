@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { cn } from "./utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cn } from './utils';
 
 export interface EnergyMetrics {
   apiCallsPerMinute: number;
@@ -67,11 +67,21 @@ export function useEnergyHeartbeat(config: EnergyHeartbeatConfig = {}) {
     return () => clearInterval(interval);
   }, [budgetPerMinute]);
 
-  const recordApiCall = useCallback(() => { countersRef.current.apiCalls++; }, []);
-  const recordWsMessage = useCallback(() => { countersRef.current.wsMessages++; }, []);
-  const recordChartRender = useCallback(() => { countersRef.current.chartRenders++; }, []);
-  const recordDataRefresh = useCallback(() => { countersRef.current.dataRefreshes++; }, []);
-  const recordDeferred = useCallback(() => { countersRef.current.deferred++; }, []);
+  const recordApiCall = useCallback(() => {
+    countersRef.current.apiCalls++;
+  }, []);
+  const recordWsMessage = useCallback(() => {
+    countersRef.current.wsMessages++;
+  }, []);
+  const recordChartRender = useCallback(() => {
+    countersRef.current.chartRenders++;
+  }, []);
+  const recordDataRefresh = useCallback(() => {
+    countersRef.current.dataRefreshes++;
+  }, []);
+  const recordDeferred = useCallback(() => {
+    countersRef.current.deferred++;
+  }, []);
 
   const utilization = useMemo(() => {
     if (metrics.totalBudget === 0) return 0;
@@ -94,24 +104,24 @@ export interface EnergyPulseProps {
   utilization: number;
   accentColor?: string;
   className?: string;
-  size?: "sm" | "md";
+  size?: 'sm' | 'md';
 }
 
 export function EnergyPulse({
   metrics,
   utilization,
-  accentColor = "#10b981",
+  accentColor = '#10b981',
   className,
-  size = "sm",
+  size = 'sm',
 }: EnergyPulseProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const statusColor = utilization > 0.85 ? "#ef4444" : utilization > 0.6 ? "#f59e0b" : accentColor;
-  const pulseSize = size === "sm" ? 8 : 12;
+  const statusColor = utilization > 0.85 ? '#ef4444' : utilization > 0.6 ? '#f59e0b' : accentColor;
+  const pulseSize = size === 'sm' ? 8 : 12;
 
   return (
     <div
-      className={cn("relative inline-flex items-center gap-1.5 cursor-pointer", className)}
+      className={cn('relative inline-flex items-center gap-1.5 cursor-pointer', className)}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
@@ -125,7 +135,7 @@ export function EnergyPulse({
           style={{ width: pulseSize, height: pulseSize, background: statusColor }}
         />
       </div>
-      {size === "md" && (
+      {size === 'md' && (
         <span className="text-[10px] text-white/40 font-mono">
           {Math.round(utilization * 100)}%
         </span>

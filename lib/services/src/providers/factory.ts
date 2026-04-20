@@ -1,4 +1,4 @@
-export type ProviderMode = "mock" | "live" | "seed";
+export type ProviderMode = 'mock' | 'live' | 'seed';
 
 export interface DataProvider<T> {
   mode: ProviderMode;
@@ -9,9 +9,9 @@ export interface DataProvider<T> {
 
 export function resolveProviderMode(domain: string): ProviderMode {
   const envKey = `${domain.toUpperCase()}_PROVIDER_MODE`;
-  const globalKey = "PROVIDER_MODE";
-  const value = process.env[envKey] || process.env[globalKey] || "mock";
-  return value === "live" ? "live" : "mock";
+  const globalKey = 'PROVIDER_MODE';
+  const value = process.env[envKey] || process.env[globalKey] || 'mock';
+  return value === 'live' ? 'live' : 'mock';
 }
 
 export function createProvider<T>(
@@ -20,5 +20,5 @@ export function createProvider<T>(
   liveProvider: DataProvider<T>,
 ): DataProvider<T> {
   const mode = resolveProviderMode(domain);
-  return mode === "live" ? liveProvider : mockProvider;
+  return mode === 'live' ? liveProvider : mockProvider;
 }

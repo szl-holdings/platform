@@ -16,7 +16,7 @@
  *   pnpm run validate-platform-facts
  */
 
-export * from "./schema.js";
-export * from "./registry.js";
-export * from "./helpers.js";
-export * from "./validate.js";
+export * from './helpers.js';
+export * from './registry.js';
+export * from './schema.js';
+export * from './validate.js';

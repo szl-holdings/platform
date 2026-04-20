@@ -8,33 +8,33 @@
  *   node scripts/qa/check-metadata.js
  */
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 const PUBLIC_ROUTES = [
-  "/",
-  "/platform",
-  "/lyte",
-  "/alloy-fabric",
-  "/solutions",
-  "/solutions/aegis",
-  "/solutions/vessels",
-  "/solutions/terra",
-  "/solutions/prism-counsel",
-  "/contact",
-  "/pricing",
-  "/trust-center",
-  "/trust",
-  "/trust/security",
-  "/trust/governance",
-  "/legal/privacy",
-  "/legal/terms",
-  "/accessibility",
+  '/',
+  '/platform',
+  '/lyte',
+  '/alloy-fabric',
+  '/solutions',
+  '/solutions/aegis',
+  '/solutions/vessels',
+  '/solutions/terra',
+  '/solutions/prism-counsel',
+  '/contact',
+  '/pricing',
+  '/trust-center',
+  '/trust',
+  '/trust/security',
+  '/trust/governance',
+  '/legal/privacy',
+  '/legal/terms',
+  '/accessibility',
 ];
 
 async function fetchPage(url) {
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "SZL-QA-MetaCheck/1.0" },
+      headers: { 'User-Agent': 'SZL-QA-MetaCheck/1.0' },
     });
     if (!res.ok) return null;
     return await res.text();
@@ -44,43 +44,19 @@ async function fetchPage(url) {
 }
 
 function extractMeta(html) {
-  const title = (html.match(/<title[^>]*>([^<]+)<\/title>/i) || [])[1] || "";
+  const title = (html.match(/<title[^>]*>([^<]+)<\/title>/i) || [])[1] || '';
   const desc =
-    (
-      html.match(
-        /<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i
-      ) ||
-      html.match(
-        /<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i
-      )
-    )?.[1] || "";
+    (html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i) ||
+      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i))?.[1] || '';
   const ogTitle =
-    (
-      html.match(
-        /<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i
-      ) ||
-      html.match(
-        /<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']/i
-      )
-    )?.[1] || "";
+    (html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i) ||
+      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']/i))?.[1] || '';
   const ogDesc =
-    (
-      html.match(
-        /<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i
-      ) ||
-      html.match(
-        /<meta\s+content=["']([^"']+)["']\s+property=["']og:description["']/i
-      )
-    )?.[1] || "";
+    (html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i) ||
+      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:description["']/i))?.[1] || '';
   const ogImage =
-    (
-      html.match(
-        /<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i
-      ) ||
-      html.match(
-        /<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i
-      )
-    )?.[1] || "";
+    (html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i) ||
+      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i))?.[1] || '';
 
   return { title, desc, ogTitle, ogDesc, ogImage };
 }
@@ -88,10 +64,9 @@ function extractMeta(html) {
 function checkMetadata(meta, route) {
   const issues = [];
 
-  if (!meta.title || meta.title.trim().length < 5)
-    issues.push("Missing or empty <title>");
+  if (!meta.title || meta.title.trim().length < 5) issues.push('Missing or empty <title>');
   if (!meta.desc || meta.desc.trim().length < 20)
-    issues.push("Missing or too short meta description");
+    issues.push('Missing or too short meta description');
   if (meta.desc && meta.desc.length > 160)
     issues.push(`Meta description too long (${meta.desc.length} chars)`);
 

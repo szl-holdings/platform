@@ -1,15 +1,15 @@
-import { useEffect } from "react";
-import S01Cover from "./S01Cover";
-import S02SeriesProblem from "./S02SeriesProblem";
-import S03Category from "./S03Category";
-import S04Product from "./S04Product";
-import S05Demo from "./S05Demo";
-import S08DividerMoat from "./S08DividerMoat";
-import S06Market from "./S06Market";
-import S07SeriesDomains from "./S07SeriesDomains";
-import S13DividerVerdict from "./S13DividerVerdict";
-import S08BusinessModel from "./S08BusinessModel";
-import S09Ask from "./S09Ask";
+import { useEffect } from 'react';
+import S01Cover from './S01Cover';
+import S02SeriesProblem from './S02SeriesProblem';
+import S03Category from './S03Category';
+import S04Product from './S04Product';
+import S05Demo from './S05Demo';
+import S06Market from './S06Market';
+import S07SeriesDomains from './S07SeriesDomains';
+import S08BusinessModel from './S08BusinessModel';
+import S08DividerMoat from './S08DividerMoat';
+import S09Ask from './S09Ask';
+import S13DividerVerdict from './S13DividerVerdict';
 
 const SLIDES = [
   S01Cover,
@@ -28,8 +28,8 @@ const SLIDES = [
 function buildFilename(): string {
   const d = new Date();
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `SZL-Holdings-Investor-Deck-${y}-${m}-${day}`;
 }
 
@@ -59,13 +59,13 @@ export default function AllSlides() {
     const previousTitle = document.title;
     document.title = filename;
 
-    const styleEl = document.createElement("style");
-    styleEl.setAttribute("data-deck-print", "1");
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('data-deck-print', '1');
     styleEl.textContent = PRINT_CSS;
     document.head.appendChild(styleEl);
 
     const params = new URLSearchParams(window.location.search);
-    const auto = params.get("print") === "1";
+    const auto = params.get('print') === '1';
     let timer: number | undefined;
     if (auto) {
       timer = window.setTimeout(() => {
@@ -84,22 +84,22 @@ export default function AllSlides() {
   };
 
   return (
-    <div style={{ background: "#000", width: "1920px" }}>
+    <div style={{ background: '#000', width: '1920px' }}>
       <div className="deck-print-toolbar">
         <button
           type="button"
           onClick={handlePrint}
           style={{
-            background: "#0cc8d9",
-            color: "#0a0f1c",
-            border: "none",
+            background: '#0cc8d9',
+            color: '#0a0f1c',
+            border: 'none',
             borderRadius: 6,
-            padding: "10px 16px",
-            fontFamily: "Inter, sans-serif",
+            padding: '10px 16px',
+            fontFamily: 'Inter, sans-serif',
             fontSize: 13,
             fontWeight: 600,
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
           }}
         >
           Save as PDF
@@ -107,16 +107,16 @@ export default function AllSlides() {
         <a
           href="../1"
           style={{
-            background: "rgba(255,255,255,0.08)",
-            color: "rgba(255,255,255,0.7)",
-            border: "1px solid rgba(255,255,255,0.15)",
+            background: 'rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.7)',
+            border: '1px solid rgba(255,255,255,0.15)',
             borderRadius: 6,
-            padding: "10px 16px",
-            fontFamily: "Inter, sans-serif",
+            padding: '10px 16px',
+            fontFamily: 'Inter, sans-serif',
             fontSize: 13,
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
           }}
         >
           ← Back to deck

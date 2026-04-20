@@ -1,5 +1,5 @@
-import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet, ScrollView } from "react-native";
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export interface Section {
   id: string;
@@ -35,9 +35,13 @@ export function SectionNav({ sections, activeId, onSelect, containerStyle }: Sec
 }
 
 const styles = StyleSheet.create({
-  container: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.1)" },
+  container: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
   tab: { paddingHorizontal: 16, paddingVertical: 10 },
-  activeTab: { borderBottomWidth: 2, borderBottomColor: "#38bdf8" },
-  tabText: { color: "rgba(255,255,255,0.5)", fontSize: 13, fontWeight: "600" },
-  activeTabText: { color: "#38bdf8" },
+  activeTab: { borderBottomWidth: 2, borderBottomColor: '#38bdf8' },
+  tabText: { color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: '600' },
+  activeTabText: { color: '#38bdf8' },
 });
