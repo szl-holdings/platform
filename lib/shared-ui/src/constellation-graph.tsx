@@ -178,6 +178,24 @@ function readFiltersFromUrl(): PersistedFilters {
   };
 }
 
+/**
+ * Read the deep-link origin selection from the URL. `?origin=<entityId>` (with
+ * an optional `?depth=<n>`) tells the Constellation page to auto-trace from
+ * that node once the graph has loaded — used by the "Open in Constellation"
+ * button on attached trace evidence so investigators land on the same anchor
+ * the trace bundle was generated around.
+ */
+function readOriginFromUrl(): { id: string; depth: number } | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("origin");
+  if (!id) return null;
+  const rawDepth = Number(params.get("depth"));
+  const depth =
+    Number.isFinite(rawDepth) && rawDepth >= 1 && rawDepth <= 5 ? Math.floor(rawDepth) : 2;
+  return { id, depth };
+}
+
 function buildFilterSearch(current: URLSearchParams, f: PersistedFilters): string {
   const next = new URLSearchParams(current);
   if (f.entityTypeFilter) next.set("type", f.entityTypeFilter);
@@ -580,6 +598,13 @@ export function ConstellationGraph({
   const [width, setWidth] = useState(640);
   // Initialize filter state from the URL so shared/bookmarked links restore the same view.
   const initialFilters = useMemo(() => readFiltersFromUrl(), []);
+  // `?origin=<id>` deep-link — captured once on mount so we can auto-trace
+  // from that node after the graph fetch resolves. Cleared after the trace
+  // fires so refresh / "Reset" interactions don't keep re-triggering it.
+  const initialOriginRef = useRef<{ id: string; depth: number } | null>(
+    typeof window !== "undefined" ? readOriginFromUrl() : null,
+  );
+  const deepLinkTriggeredRef = useRef(false);
   const [entityTypeFilter, setEntityTypeFilter] = useState<string | null>(initialFilters.entityTypeFilter);
   const [activeOnly, setActiveOnly] = useState(initialFilters.activeOnly);
   const [sinceWindow, setSinceWindow] = useState<SinceWindow>(initialFilters.sinceWindow);
@@ -1686,6 +1711,30 @@ export function ConstellationGraph({
     },
     [expanding],
   );
+
+  // Honour the `?origin=<id>` deep-link once the graph has loaded. Fires the
+  // same trace flow the operator would by clicking a node and hitting "Trace
+  // N hops", so the canvas lights up the bundle's anchor without manual setup.
+  useEffect(() => {
+    if (deepLinkTriggeredRef.current) return;
+    const seed = initialOriginRef.current;
+    if (!seed) return;
+    if (!graph || graph.nodes.length === 0) return;
+    deepLinkTriggeredRef.current = true;
+    const matched = graph.nodes.find((n) => n.id === seed.id || n.canonicalId === seed.id);
+    const target: ConstellationGraphNode = matched ?? {
+      id: seed.id,
+      entityType: "entity",
+      name: seed.id,
+    };
+    // Pre-select with our best-known node (matched or stub) so tracePath's
+    // post-resolve branch replaces it with the canonical origin returned by
+    // the API. Without this, the details panel stays empty when the origin
+    // isn't on the currently loaded page.
+    setSelected(target);
+    setTraceDepth(seed.depth);
+    void tracePath(target, seed.depth);
+  }, [graph, tracePath]);
 
   // "Export path" — package the highlighted chain as a downloadable evidence
   // bundle so investigators can attach it to a case file. Triggers three

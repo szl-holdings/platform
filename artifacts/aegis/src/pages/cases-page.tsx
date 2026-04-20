@@ -8,7 +8,7 @@ import {
 
   Briefcase, Clock, AlertTriangle, CheckCircle, XCircle,
   Search, Filter, ChevronDown, ChevronUp, User, Calendar,
-  FileText, Shield, Activity, Plus, Flame
+  FileText, Shield, Activity, Plus, Flame, ExternalLink
 } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useState, useMemo } from "react";
@@ -24,6 +24,25 @@ import { TradecraftPanel } from "@/components/tradecraft-panel";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface CaseNote { content: string; author: string; at: string }
+interface TraceBundleNode {
+  id: string;
+  name?: string | null;
+  hopDistance?: number | null;
+  domain?: string | null;
+  entityType?: string | null;
+}
+interface TraceBundleEdge {
+  id: string;
+  fromNodeId: string;
+  toNodeId: string;
+  relationshipType?: string;
+}
+interface TraceBundle {
+  origin?: { id: string; name?: string | null };
+  nodes?: TraceBundleNode[];
+  edges?: TraceBundleEdge[];
+  depth?: number;
+}
 interface ConstellationTraceEvidence {
   source?: "constellation_graph";
   origin?: { id: string; name?: string | null; entityType?: string; domain?: string; canonicalId?: string | null };
@@ -33,7 +52,110 @@ interface ConstellationTraceEvidence {
   edgeCount?: number;
   truncated?: boolean;
   generatedAt?: string;
-  bundle?: unknown;
+  bundle?: TraceBundle | unknown;
+}
+
+/**
+ * Renders a small radial preview of a constellation_trace bundle. Origin sits
+ * at the centre and neighbours are placed on concentric rings keyed by
+ * `hopDistance` so operators can recognise the shape of the trace at a glance
+ * without opening the full Constellation canvas.
+ */
+function TraceMiniGraph({ bundle }: { bundle: TraceBundle }) {
+  const width = 240;
+  const height = 120;
+  const cx = width / 2;
+  const cy = height / 2;
+  const ringStep = 22;
+
+  const layout = useMemo(() => {
+    const nodes = (bundle.nodes ?? []).filter((n) => n && n.id);
+    if (nodes.length === 0) return null;
+    const originId = bundle.origin?.id ?? nodes[0]?.id;
+    const byRing = new Map<number, TraceBundleNode[]>();
+    for (const n of nodes) {
+      const hop = n.id === originId ? 0 : Math.max(1, Math.min(4, n.hopDistance ?? 1));
+      const list = byRing.get(hop) ?? [];
+      list.push(n);
+      byRing.set(hop, list);
+    }
+    const positions = new Map<string, { x: number; y: number; hop: number }>();
+    for (const [hop, ringNodes] of byRing.entries()) {
+      if (hop === 0) {
+        for (const n of ringNodes) positions.set(n.id, { x: cx, y: cy, hop });
+        continue;
+      }
+      const r = ringStep * hop;
+      const count = ringNodes.length;
+      ringNodes.forEach((n, i) => {
+        const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+        positions.set(n.id, { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r, hop });
+      });
+    }
+    const edges = (bundle.edges ?? []).filter(
+      (e) => positions.has(e.fromNodeId) && positions.has(e.toNodeId),
+    );
+    const maxHop = Math.max(0, ...Array.from(byRing.keys()));
+    return { positions, edges, maxHop, originId };
+  }, [bundle]);
+
+  if (!layout) return null;
+
+  const ringColors = ["#fbbf24", "#22d3ee", "#a855f7", "#f59e0b", "#ef4444"];
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width="100%"
+      height={height}
+      role="img"
+      aria-label={`Trace preview · ${layout.positions.size} nodes`}
+      data-testid="case-evidence-trace-minigraph"
+      style={{ display: "block" }}
+    >
+      {Array.from({ length: layout.maxHop }, (_, i) => i + 1).map((hop) => (
+        <circle
+          key={`ring-${hop}`}
+          cx={cx}
+          cy={cy}
+          r={ringStep * hop}
+          fill="none"
+          stroke="rgba(251, 191, 36, 0.08)"
+          strokeDasharray="2 3"
+        />
+      ))}
+      {layout.edges.map((e) => {
+        const from = layout.positions.get(e.fromNodeId)!;
+        const to = layout.positions.get(e.toNodeId)!;
+        return (
+          <line
+            key={e.id}
+            x1={from.x}
+            y1={from.y}
+            x2={to.x}
+            y2={to.y}
+            stroke="rgba(251, 191, 36, 0.35)"
+            strokeWidth={0.7}
+          />
+        );
+      })}
+      {Array.from(layout.positions.entries()).map(([id, pos]) => {
+        const isOrigin = id === layout.originId;
+        const color = ringColors[Math.min(pos.hop, ringColors.length - 1)] ?? "#fbbf24";
+        return (
+          <circle
+            key={id}
+            cx={pos.x}
+            cy={pos.y}
+            r={isOrigin ? 4 : 2.4}
+            fill={color}
+            stroke={isOrigin ? "#fff" : "rgba(10,13,20,0.9)"}
+            strokeWidth={isOrigin ? 1.2 : 0.6}
+          />
+        );
+      })}
+    </svg>
+  );
 }
 type EvidenceItem = {
   name: string;
@@ -272,6 +394,13 @@ function CaseDetailPanel({ caseItem, onClose, onUpdate }: { caseItem: Case; onCl
                 {caseItem.evidence?.map((item, i) => {
                   const isTrace = item.type === "constellation_trace" || item.source === "constellation_graph";
                   if (isTrace) {
+                    const bundle = item.bundle as TraceBundle | undefined;
+                    const hasGraph = !!bundle && Array.isArray(bundle.nodes) && bundle.nodes.length > 0;
+                    const originId = bundle?.origin?.id ?? item.origin?.id ?? null;
+                    const depthForLink = bundle?.depth ?? item.hopCount ?? 2;
+                    const constellationHref = originId
+                      ? `/aegis/constellation?origin=${encodeURIComponent(originId)}&depth=${encodeURIComponent(String(depthForLink))}`
+                      : null;
                     const downloadBundle = () => {
                       if (!item.bundle) return;
                       const blob = new Blob([JSON.stringify(item.bundle, null, 2)], { type: "application/json" });
@@ -323,18 +452,37 @@ function CaseDetailPanel({ caseItem, onClose, onUpdate }: { caseItem: Case; onCl
                               </div>
                             </div>
                           </div>
-                          {Boolean(item.bundle) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={downloadBundle}
-                              data-testid="case-evidence-trace-download"
-                              className="h-6 px-2 text-[10px] border-amber-500/30 text-amber-400 hover:bg-amber-500/10 shrink-0"
-                            >
-                              JSON
-                            </Button>
-                          )}
+                          <div className="flex flex-col gap-1.5 shrink-0">
+                            {Boolean(item.bundle) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={downloadBundle}
+                                data-testid="case-evidence-trace-download"
+                                className="h-6 px-2 text-[10px] border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                              >
+                                JSON
+                              </Button>
+                            )}
+                            {constellationHref && (
+                              <a
+                                href={constellationHref}
+                                target="_blank"
+                                rel="noreferrer"
+                                data-testid="case-evidence-trace-open-constellation"
+                                className="inline-flex items-center gap-1 h-6 px-2 rounded-md border border-amber-500/30 bg-amber-500/5 text-amber-400 text-[10px] font-medium hover:bg-amber-500/10 transition-colors"
+                              >
+                                <ExternalLink className="w-2.5 h-2.5" />
+                                Open in Constellation
+                              </a>
+                            )}
+                          </div>
                         </div>
+                        {hasGraph && bundle && (
+                          <div className="mt-2 rounded-md border border-amber-500/15 bg-black/30 px-2 py-1.5">
+                            <TraceMiniGraph bundle={bundle} />
+                          </div>
+                        )}
                       </div>
                     );
                   }
