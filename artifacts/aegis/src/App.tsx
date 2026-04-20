@@ -5,7 +5,7 @@ import {
   Layers, RotateCcw, GitBranch, Shield, Menu, Presentation, Play,
   Home as HomeIcon, AlertTriangle, Bug, Search, Crosshair, Network, Eye, Activity, Zap, Radio,
   Brain, Server, Lock, Users, Database, Settings as SettingsIcon, BarChart3, Target,
-  ClipboardList, FileText, ListChecks, GitMerge, Cpu, Terminal, Workflow, ShieldCheck,
+  ClipboardList, FileText, ListChecks, GitMerge, Cpu, Terminal, Workflow, ShieldCheck, Clock,
   TrendingUp, DollarSign, Globe, Hexagon, Boxes, BookOpen, Briefcase, Scale, Ticket, LifeBuoy,
   PieChart, Map, Wrench, Headphones, Receipt, Compass, Sparkles, MessageSquare, FileCode,
   Telescope, Microscope, Beaker, Bot, Layers3, Gauge, Heart, Atom, Filter, FlaskConical,
@@ -59,6 +59,7 @@ type NavItem = {
   label: string;
   icon: IconComp;
   comp: LazyComp;
+  hideFromSidebar?: boolean;
 };
 
 type NavSection = {
@@ -304,7 +305,11 @@ const NAV_SECTIONS: NavSection[] = [
       { path: "/observability", label: "Observability", icon: Telescope, comp: L(() => import("./pages/observability")) },
       { path: "/reports", label: "Reports", icon: FileText, comp: L(() => import("./pages/reports-page")) },
       { path: "/document-engine", label: "Document Engine", icon: FileCode, comp: L(() => import("./pages/document-engine")) },
-      { path: "/legal", label: "Legal Workspace", icon: Scale, comp: L(() => import("./pages/legal-workspace")) },
+      { path: "/legal/overview", label: "Legal Workspace", icon: Scale, comp: L(() => import("./pages/legal-workspace")) },
+      { path: "/legal/matters", label: "Legal · Matters", icon: FileText, comp: L(() => import("./pages/legal-workspace")) },
+      { path: "/legal/deadlines", label: "Legal · Deadlines", icon: Clock, comp: L(() => import("./pages/legal-workspace")) },
+      { path: "/legal/ai", label: "Legal · AI Recommendations", icon: Sparkles, comp: L(() => import("./pages/legal-workspace")) },
+      { path: "/legal", label: "Legal Workspace", icon: Scale, comp: L(() => import("./pages/legal-workspace")), hideFromSidebar: true },
       { path: "/powerbi", label: "PowerBI Report", icon: BarChart3, comp: L(() => import("./pages/powerbi-report")) },
       { path: "/settings", label: "Settings", icon: SettingsIcon, comp: L(() => import("./pages/settings/unified-settings")) },
       { path: "/aef-search", label: "AEF Knowledge Search", icon: Database, comp: L(() => import("./pages/aef-knowledge-search")) },
@@ -344,12 +349,14 @@ function buildSidebarSections(): SidebarNavSection[] {
   const sections: SidebarNavSection[] = NAV_SECTIONS.map((sec) => ({
     id: sec.id,
     label: sec.label,
-    items: sec.items.map((item) => ({
-      id: item.path,
-      label: item.label,
-      href: item.path,
-      icon: renderIcon(item.icon),
-    })),
+    items: sec.items
+      .filter((item) => !item.hideFromSidebar)
+      .map((item) => ({
+        id: item.path,
+        label: item.label,
+        href: item.path,
+        icon: renderIcon(item.icon),
+      })),
   }));
   return [intro, ...sections];
 }
