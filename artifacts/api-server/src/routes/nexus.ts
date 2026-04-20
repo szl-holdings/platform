@@ -6,8 +6,9 @@ import { sendSuccess, sendError, handleRouteError, sendCreated } from "../lib/ap
 import { logger } from "../lib/logger";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { gatewayInfer } from "../lib/ai-gateway";
-import { db, memoryRecordsTable } from "@szl-holdings/db";
+import { db, nexusMemoryTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
+import type { NexusMemoryRow, NexusMemoryTier, NexusMemoryType } from "@szl-holdings/db";
 
 const router = Router();
 router.use(authMiddleware({ required: false }));
@@ -686,15 +687,24 @@ function seedData() {
     },
   ];
 
+  // Persisted rows always win — only seed items we don't already have, and
+  // push fresh seeds to the DB so they're durable on subsequent boots.
   for (const item of SEED_MEMORY) {
-    memoryStore.set(item.id, item);
+    if (!memoryStore.has(item.id)) {
+      memoryStore.set(item.id, item);
+      void persistMemoryToDB(item);
+    }
   }
 }
 
 const patternStore = new Map<string, PatternFamily>();
 
-// Seed on module load
+// Sync seeds populate the in-memory caches immediately so the API is
+// usable before the DB round-trip completes. Once nexus_memory rows are
+// hydrated from Postgres, re-run seedData() so persisted entries take
+// precedence and only genuinely missing seeds are inserted.
 seedData();
+void loadMemoryFromDB().then(() => seedData());
 
 // ─── SSE utilities ────────────────────────────────────────────────────────────
 
@@ -852,7 +862,7 @@ async function embedMemoryItem(item: MemoryItem): Promise<void> {
 }
 
 async function persistMemoryEmbeddingToDB(
-  externalId: string,
+  id: string,
   vector: number[],
   model: string,
   keywords: string[],
@@ -860,10 +870,11 @@ async function persistMemoryEmbeddingToDB(
   if (!db) return;
   try {
     const existing = await db
-      .select({ metadata: memoryRecordsTable.metadata })
-      .from(memoryRecordsTable)
-      .where(eq(memoryRecordsTable.externalId, externalId))
+      .select({ metadata: nexusMemoryTable.metadata, tags: nexusMemoryTable.tags })
+      .from(nexusMemoryTable)
+      .where(eq(nexusMemoryTable.id, id))
       .limit(1);
+    if (existing.length === 0) return;
     const currentMeta =
       (existing[0]?.metadata as Record<string, unknown> | null | undefined) ?? {};
     const nextMeta = {
@@ -876,12 +887,13 @@ async function persistMemoryEmbeddingToDB(
         generatedAt: new Date().toISOString(),
       },
     };
+    const currentTags = Array.isArray(existing[0]?.tags) ? (existing[0]!.tags as string[]) : [];
     await db
-      .update(memoryRecordsTable)
-      .set({ metadata: nextMeta, lastUpdatedAt: new Date() })
-      .where(eq(memoryRecordsTable.externalId, externalId));
+      .update(nexusMemoryTable)
+      .set({ metadata: nextMeta, tags: currentTags, updatedAt: new Date() })
+      .where(eq(nexusMemoryTable.id, id));
   } catch (dbErr) {
-    logger.warn({ dbErr, externalId }, "Failed to persist memory embedding to DB (non-fatal)");
+    logger.warn({ dbErr, id }, "Failed to persist memory embedding to DB (non-fatal)");
   }
 }
 
@@ -918,54 +930,87 @@ async function summarizeMemoryItem(item: MemoryItem): Promise<void> {
 }
 
 // ─── Memory DB persistence ────────────────────────────────────────────────────
+//
+// NEXUS Memory items live in the dedicated `nexus_memory` table. The
+// in-memory `memoryStore` is a hot read cache hydrated from the DB on
+// startup; every write/update/delete is mirrored to Postgres.
 
-function nexusTierToDbTier(tier: string): "session" | "workflow" | "entity" | "artifact" | "executive" | "domain" | "operator-feedback" | "long-term" {
-  const map: Record<string, "session" | "workflow" | "entity" | "domain" | "long-term"> = {
-    working: "session",
-    session: "session",
-    episodic: "domain",
-    semantic: "long-term",
+function rowToMemoryItem(row: NexusMemoryRow): MemoryItem {
+  return {
+    id: row.id,
+    key: row.key,
+    value: row.value,
+    type: row.type as MemoryItem["type"],
+    tier: row.tier as MemoryItem["tier"],
+    pinned: row.pinned,
+    confidence: Number(row.confidence),
+    source: row.source ?? undefined,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
   };
-  return map[tier] ?? "session";
 }
 
 async function persistMemoryToDB(item: MemoryItem): Promise<void> {
   if (!db) return;
   try {
     await db
-      .insert(memoryRecordsTable)
+      .insert(nexusMemoryTable)
       .values({
-        externalId: item.id,
-        tier: nexusTierToDbTier(item.tier),
+        id: item.id,
         key: item.key,
-        value: { text: item.value, type: item.type, pinned: item.pinned },
+        value: item.value,
+        type: item.type as NexusMemoryType,
+        tier: item.tier as NexusMemoryTier,
+        pinned: item.pinned,
         confidence: String(item.confidence),
-        provenanceSource: item.source ?? "nexus-agent",
-        provenanceMethod: "agent",
+        source: item.source ?? null,
         tags: item.tags,
-        metadata: { updatedAt: item.updatedAt },
       })
       .onConflictDoUpdate({
-        target: memoryRecordsTable.externalId,
+        target: nexusMemoryTable.id,
         set: {
-          value: { text: item.value, type: item.type, pinned: item.pinned },
+          key: item.key,
+          value: item.value,
+          type: item.type as NexusMemoryType,
+          tier: item.tier as NexusMemoryTier,
+          pinned: item.pinned,
           confidence: String(item.confidence),
+          source: item.source ?? null,
           tags: item.tags,
-          metadata: { updatedAt: item.updatedAt },
-          lastUpdatedAt: new Date(),
+          updatedAt: new Date(),
         },
       });
   } catch (dbErr) {
-    logger.warn({ dbErr }, "Failed to persist memory item to DB (non-fatal)");
+    logger.warn({ dbErr }, "Failed to persist memory item to nexus_memory (non-fatal)");
   }
 }
 
 async function deleteMemoryFromDB(id: string): Promise<void> {
   if (!db) return;
   try {
-    await db.delete(memoryRecordsTable).where(eq(memoryRecordsTable.externalId, id));
+    await db.delete(nexusMemoryTable).where(eq(nexusMemoryTable.id, id));
   } catch (dbErr) {
-    logger.warn({ dbErr }, "Failed to delete memory item from DB (non-fatal)");
+    logger.warn({ dbErr }, "Failed to delete memory item from nexus_memory (non-fatal)");
+  }
+}
+
+/**
+ * Hydrate the in-memory cache from nexus_memory on startup. Failures are
+ * non-fatal — the cache simply starts from seed data if the DB is
+ * unreachable.
+ */
+async function loadMemoryFromDB(): Promise<void> {
+  if (!db) return;
+  try {
+    const rows = await db.select().from(nexusMemoryTable);
+    for (const row of rows) {
+      const item = rowToMemoryItem(row);
+      memoryStore.set(item.id, item);
+    }
+    logger.info({ count: rows.length }, "NEXUS memory hydrated from nexus_memory");
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Failed to hydrate NEXUS memory from DB (non-fatal)");
   }
 }
 
@@ -1153,9 +1198,9 @@ async function runResearchSwarm(runId: string, query: string) {
     run.completedAt = new Date().toISOString();
     emitToClients(runId, "update", run);
 
-    // Auto-write entities to memory
+    // Auto-write the research query to persistent memory.
     const memId = `mem_research_${runId}`;
-    memoryStore.set(memId, {
+    const researchItem: MemoryItem = {
       id: memId,
       key: `research.${runId.slice(0, 8)}.query`,
       value: query,
@@ -1167,7 +1212,9 @@ async function runResearchSwarm(runId: string, query: string) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       tags: ["research", "query"],
-    });
+    };
+    memoryStore.set(memId, researchItem);
+    void persistMemoryToDB(researchItem);
 
   } catch (err) {
     logger.error({ err, runId }, "Research swarm failed");
