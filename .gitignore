@@ -73,6 +73,14 @@ temp/
 # Transient runtime output
 nohup.out
 *.out
+*.log
+
+# Large zip archives at repo root (quarantined to archive/phase-a/ — do not re-add to root)
+/01-thursday-intro.zip
+/02-sunday-deep-dive.zip
+/03-monday-operator-lens.zip
+/LINKEDIN-LAUNCH.zip
+/X-LAUNCH-SERIES.zip
 
 # Internal / non-public content
 social-content/
