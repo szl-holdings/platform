@@ -1718,6 +1718,9 @@ importers:
       lucide-react:
         specifier: 'catalog:'
         version: 0.545.0(react@19.1.0)
+      playwright-core:
+        specifier: ^1.58.2
+        version: 1.58.2
       react:
         specifier: 19.1.0
         version: 19.1.0

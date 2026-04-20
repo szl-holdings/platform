@@ -101,8 +101,19 @@ function VideoPlayer({
   );
 }
 
+function getCaptureMode(): SocialCut | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const cut = params.get('capture');
+  if (!cut) return null;
+  if (cut === '1' || cut === 'full') return 'full';
+  if (cut === '60s' || cut === '30s' || cut === '15s') return cut;
+  return 'full';
+}
+
 export default function VideoTemplate() {
-  const [activeCut, setActiveCut] = useState<SocialCut>('full');
+  const captureCut = getCaptureMode();
+  const [activeCut, setActiveCut] = useState<SocialCut>(captureCut ?? 'full');
   const [captionsVisible, setCaptionsVisible] = useState(true);
   const [playerKey, setPlayerKey] = useState(0);
 
@@ -141,8 +152,12 @@ export default function VideoTemplate() {
         transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
       />
 
-      <SocialCutSelector activeCut={activeCut} onSelect={handleCutChange} />
-      <CaptionToggle visible={captionsVisible} onToggle={() => setCaptionsVisible((v) => !v)} />
+      {!captureCut && (
+        <>
+          <SocialCutSelector activeCut={activeCut} onSelect={handleCutChange} />
+          <CaptionToggle visible={captionsVisible} onToggle={() => setCaptionsVisible((v) => !v)} />
+        </>
+      )}
 
       <VideoPlayer key={playerKey} activeCut={activeCut} captionsVisible={captionsVisible} />
     </div>

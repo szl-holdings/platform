@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
-    "format": "biome format --write ./src"
+    "format": "biome format --write ./src",
+    "render": "node scripts/render-video.mjs"
   },
   "devDependencies": {
     "@react-spring/web": "^10.0.3",
@@ -29,6 +30,7 @@
     "gsap": "^3.14.2",
     "lottie-react": "^2.4.1",
     "lucide-react": "catalog:",
+    "playwright-core": "^1.58.2",
     "react": "catalog:",
     "react-dom": "catalog:",
     "tailwind-merge": "catalog:",
