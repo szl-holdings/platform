@@ -90,6 +90,20 @@ Predefined adapter ids: `lyte-metrics-store`, `lyte-retriever`,
 `signal-retriever`. Register more with
 `retriever_adapter_manager.register(RetrieverAdapterConfig(...))`.
 
+The `lyte-metrics-store` and `lyte-retriever` ids resolve to the standalone
+`services/lyte-metrics-store` FastAPI service (see its `README.md` for the
+wire contract, auth model, and corpus). In production set:
+
+```bash
+LYTE_METRICS_STORE_URL=http://lyte-metrics-store.internal:8081
+LYTE_METRICS_STORE_API_KEY=<bearer-token>
+```
+
+The same env vars feed the substrate Python worker fleet (which is the
+client) and the Lyte metrics store service (which validates the bearer).
+Locally the service binds to `PORT` (default `8081`) and accepts unauthenticated
+calls from `127.0.0.1` so dev runs work without a key.
+
 **Live-mode contract:**
 
 - If a `retrieverAdapterId` is configured and the endpoint responds, those
