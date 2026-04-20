@@ -70,6 +70,9 @@ export interface Voyage {
 export interface VoyageEconomics {
   id: number;
   vesselId: number;
+  vesselName?: string | null;
+  vesselClass?: "VLCC" | "Suezmax" | "Aframax" | "Capesize" | "Panamax" | "Supramax" | "Handysize" | "LNG Carrier" | null;
+  vesselType?: string | null;
   voyageRef: string;
   originPort: string;
   destinationPort: string;

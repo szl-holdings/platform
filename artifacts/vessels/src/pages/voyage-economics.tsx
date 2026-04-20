@@ -3,7 +3,7 @@ import { useVoyages, useVoyageEconomicsAnalytics, type VoyageRow } from "@/hooks
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, Fuel, Clock, Ship, BarChart3, Loader2, Anchor, Activity } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { compareVoyageToBenchmark, inferVesselClassFromCargo, useFreightBenchmarks } from "../lib/freight-benchmarks";
+import { compareVoyageToBenchmark, inferVesselClassFromCargo, useFreightBenchmarks, type VesselClassKey } from "../lib/freight-benchmarks";
 
 const charterColors: Record<string, string> = {
   time_charter: "text-sky-400 bg-sky-500/10 border-sky-500/20",
@@ -46,8 +46,11 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
 
   // Freight benchmarking — same live market comparison used on Voyage P&L.
   const { data: benchmarkSnapshot } = useFreightBenchmarks();
-  const inferredClass = inferVesselClassFromCargo(voyage.cargoType);
-  const benchmark = compareVoyageToBenchmark(benchmarkSnapshot, inferredClass, voyage.tce || 0);
+  // Prefer the actual vessel class from the API; only fall back to a
+  // cargo-based heuristic when the class is genuinely unknown.
+  const vesselClass: VesselClassKey | null =
+    (voyage.vesselClass as VesselClassKey | null | undefined) ?? inferVesselClassFromCargo(voyage.cargoType);
+  const benchmark = compareVoyageToBenchmark(benchmarkSnapshot, vesselClass, voyage.tce || 0);
 
   return (
     <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden hover:border-sky-500/20 transition-all">

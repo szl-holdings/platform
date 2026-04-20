@@ -22,6 +22,7 @@ export const vesselsTable = pgTable("vessels", {
   imo: text("imo").unique(),
   mmsi: text("mmsi"),
   vesselType: text("vessel_type", { enum: ["cargo", "tanker", "container", "bulk", "passenger", "fishing", "other"] }).notNull(),
+  vesselClass: text("vessel_class", { enum: ["VLCC", "Suezmax", "Aframax", "Capesize", "Panamax", "Supramax", "Handysize", "LNG Carrier"] }),
   flag: text("flag"),
   yearBuilt: integer("year_built"),
   grossTonnage: numeric("gross_tonnage", { precision: 12, scale: 2 }),

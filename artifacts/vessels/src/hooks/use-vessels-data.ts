@@ -185,6 +185,7 @@ export type VoyageRow = {
   durationDays: number;
   performanceVsBudget?: number;
   voyageRef: string | null;
+  vesselClass: string | null;
 };
 
 export function useVoyages() {
@@ -208,7 +209,6 @@ export function useVoyages() {
     return {
       voyageId: String(v.id),
       vesselId: v.vesselId,
-      vesselName: `Vessel #${v.vesselId}`,
       route: `${v.originPort} → ${v.destinationPort}`,
       origin: v.originPort,
       destination: v.destinationPort,
@@ -227,6 +227,8 @@ export function useVoyages() {
       distanceNm: parseFloat(v.distanceNm ?? "0"),
       durationDays: parseFloat(v.durationDays ?? "0"),
       voyageRef: v.voyageRef,
+      vesselName: v.vesselName ?? `Vessel #${v.vesselId}`,
+      vesselClass: v.vesselClass ?? null,
     };
   });
 

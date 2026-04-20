@@ -468,14 +468,27 @@ router.get("/vessels/voyage-economics", authMiddleware(), tenantScope(), validat
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [rows, [{ count }]] = await Promise.all([
-      db.select().from(vesselVoyageEconomicsTable)
+      db.select({
+        voyage: vesselVoyageEconomicsTable,
+        vesselName: vesselsTable.name,
+        vesselClass: vesselsTable.vesselClass,
+        vesselType: vesselsTable.vesselType,
+      }).from(vesselVoyageEconomicsTable)
+        .leftJoin(vesselsTable, eq(vesselsTable.id, vesselVoyageEconomicsTable.vesselId))
         .where(whereClause)
         .orderBy(desc(vesselVoyageEconomicsTable.createdAt))
         .limit(limit).offset(offset),
       db.select({ count: sql<number>`count(*)::int` }).from(vesselVoyageEconomicsTable).where(whereClause),
     ]);
 
-    sendSuccess(res, rows, 200, { page, limit, total: count });
+    const enriched = rows.map(({ voyage, vesselName, vesselClass, vesselType }) => ({
+      ...voyage,
+      vesselName,
+      vesselClass,
+      vesselType,
+    }));
+
+    sendSuccess(res, enriched, 200, { page, limit, total: count });
   } catch (err) {
     handleRouteError(res, err, "Failed to list voyage economics");
   }

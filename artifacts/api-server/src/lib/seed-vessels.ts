@@ -367,12 +367,29 @@ export async function seedVesselsData(): Promise<void> {
                          15000 + seeded(i, 8, 30000);
     const fleetId = fleetIds[i % fleetIds.length] ?? fallbackFleetId;
 
+    // Assign a real vessel class based on type and tonnage so voyage
+    // economics can compare against the right Baltic benchmark.
+    let vesselClass: typeof vesselsTable.$inferInsert["vesselClass"] = null;
+    if (vtype === "tanker") {
+      // 1 in 6 tankers is an LNG carrier, otherwise size-based crude/product class.
+      if (i % 6 === 0) vesselClass = "LNG Carrier";
+      else if (grossTonnage >= 100000) vesselClass = "VLCC";
+      else if (grossTonnage >= 70000) vesselClass = "Suezmax";
+      else vesselClass = "Aframax";
+    } else if (vtype === "bulk") {
+      if (grossTonnage >= 60000) vesselClass = "Capesize";
+      else if (grossTonnage >= 40000) vesselClass = "Panamax";
+      else if (grossTonnage >= 25000) vesselClass = "Supramax";
+      else vesselClass = "Handysize";
+    }
+
     return {
       fleetId,
       name,
       imo: `IMO${9000000 + i * 127 + 3}`,
       mmsi: `${210000000 + i * 8931 + 7}`,
       vesselType: vtype,
+      vesselClass,
       flag,
       yearBuilt,
       grossTonnage: grossTonnage.toFixed(0),
