@@ -31,7 +31,7 @@ type NavGroup = { section: string; items: NavItemDef[] };
 const ECOSYSTEM_APPS_NAV: NavGroup = {
   section: "Ecosystem Apps",
   items: [
-    { href: "/prism-counsel/", label: "PRISM Counsel", icon: Scale, external: true },
+    { href: "/counsel/", label: "Counsel — Legal", icon: Scale, external: true },
     { href: "/imperium/", label: "IMPERIUM", icon: Crown, external: true },
     { href: "/lyte-command-center/", label: "Lyte Command Center", icon: Zap, external: true },
     { href: "/stephen-site/", label: "Stephen Site", icon: Globe, external: true },
@@ -602,7 +602,7 @@ function UnifiedLayoutInner({ children, mode, onModeChange }: {
               { label: "AEGIS", href: "/aegis/", color: "#ef4444" },
               { label: "TERRA", href: "/terra/", color: "#22c55e" },
               { label: "VESSELS", href: "/vessels/", color: "#0ea5e9" },
-              { label: "PRISM", href: "/prism-counsel/", color: "#8b7ac8" },
+              { label: "COUNSEL", href: "/counsel/", color: "#8b7ac8" },
             ].map((p) => (
               <a key={p.label} href={p.href} className="text-[7px] px-1 py-px rounded font-mono hover:opacity-80" style={{ color: p.color, background: `${p.color}10`, border: `1px solid ${p.color}18` }}>
                 {p.label}

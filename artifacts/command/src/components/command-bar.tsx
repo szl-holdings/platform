@@ -36,7 +36,6 @@ const PLATFORM_APPS: PlatformApp[] = [
   { href: "/counsel/", label: "Counsel — Legal Matter Command", description: "Legal matter command and counsel workflow", icon: Scale, color: "#8b7ac8", external: true, category: "Domain" },
   { href: "/carlota-jo/", label: "Carlota Jo Consulting", description: "Advisory and consulting intelligence surface", icon: BriefcaseBusiness, color: "#8b7ac8", external: true, category: "Domain" },
   // Ecosystem (external standalone apps)
-  { href: "/prism-counsel/", label: "PRISM Counsel", description: "AI-assisted legal intelligence, case analytics, and counsel workflow", icon: Scale, color: "#8b7ac8", external: true, category: "Ecosystem" },
   { href: "/imperium/", label: "IMPERIUM", description: "Infrastructure command — orchestration, governance, perimeter", icon: Crown, color: "#d4a054", external: true, category: "Ecosystem" },
   { href: "/lyte-command-center/", label: "Lyte Command Center", description: "AIOps observability — autonomous NOC, SLOs, self-healing", icon: Zap, color: "#22c55e", external: true, category: "Ecosystem" },
   { href: "/stephen-site/", label: "Stephen Site", description: "Personal portfolio and thought-leadership platform", icon: Globe, color: "#0ea5e9", external: true, category: "Ecosystem" },

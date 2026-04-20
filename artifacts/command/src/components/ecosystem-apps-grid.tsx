@@ -1,13 +1,6 @@
-import { Scale, Crown, Zap, Globe, Cpu, ExternalLink } from "lucide-react";
+import { Crown, Zap, Globe, Cpu, ExternalLink } from "lucide-react";
 
 export const ECOSYSTEM_APPS = [
-  {
-    href: "/prism-counsel/",
-    label: "PRISM Counsel",
-    description: "AI-assisted legal intelligence, case analytics, and counsel workflow management",
-    icon: Scale,
-    color: "#8b7ac8",
-  },
   {
     href: "/imperium/",
     label: "IMPERIUM",
