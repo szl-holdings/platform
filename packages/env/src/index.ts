@@ -64,6 +64,11 @@ export const envSchema = z.object({
   DB_IDLE_TIMEOUT_MS: optionalInt("60000"),
   DB_STATEMENT_TIMEOUT_MS: optionalInt("60000"),
   SLOW_QUERY_THRESHOLD_MS: optionalInt("500"),
+  // OBS-007 follow-on: warn when a single pool checkout (client.connect →
+  // client.release) is held longer than this many ms. Catches leaked
+  // clients and runaway transactions at the per-checkout level instead of
+  // only when aggregate pool saturation has already happened.
+  DB_CHECKOUT_WARN_THRESHOLD_MS: optionalInt("30000"),
 
   // ── Authentication ──────────────────────────────────────────────────────
   SESSION_SECRET: z.string().min(32, "SESSION_SECRET must be at least 32 characters").optional(),

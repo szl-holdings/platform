@@ -1,4 +1,4 @@
-import { db, lyteSignalsTable } from "@szl-holdings/db";
+import { db, lyteSignalsTable, getLongRunningCheckouts, getCheckoutWarnThresholdMs } from "@szl-holdings/db";
 import { lt, sql } from "drizzle-orm";
 import { LRUCache } from "lru-cache";
 import { publish, WS_CHANNELS } from "./websocket";
@@ -570,6 +570,52 @@ async function runMonitoringCycle(): Promise<void> {
     }
   } catch (err) {
     logger.warn({ err }, "Self-monitor: db pool saturation check failed (non-fatal)");
+  }
+
+  // OBS-007 follow-on: per-checkout leak detection.
+  // While the aggregate pool saturation alert (above) tells us that the
+  // pool is under pressure, this alert pinpoints the offending route by
+  // surfacing any single checkout held longer than the configured
+  // threshold. The `lib/db` wrapper records each pool.connect() with a
+  // captured stack trace and removes the entry on client.release(); we
+  // simply read the snapshot here.
+  try {
+    const threshold = getCheckoutWarnThresholdMs();
+    const longCheckouts = getLongRunningCheckouts(threshold);
+    if (longCheckouts.length > 0) {
+      if (shouldEmitSignal("db-checkout-long")) {
+        const oldest = longCheckouts[0];
+        const oldestSec = Math.round(oldest.ageMs / 1000);
+        const severity: "critical" | "high" =
+          oldest.ageMs >= threshold * 4 || longCheckouts.length >= 3 ? "critical" : "high";
+        await createSignal({
+          severity,
+          title: `DB pool checkout held ${oldestSec}s — possible client leak`,
+          body: `${longCheckouts.length} pool checkout(s) have been held longer than the ${Math.round(threshold / 1000)}s threshold. The oldest has been open for ${oldestSec}s. A single un-released client (forgotten client.release()) or a runaway transaction is the most common cause and is the leading symptom of pool saturation. Originating stack: ${oldest.stack.split("\n")[0] ?? "<unavailable>"}`,
+          metadata: {
+            affectedFunction: "Database Infrastructure",
+            owner: "Platform Team",
+            ownerTeam: "SRE",
+            recommendedAction: "Inspect the originating stack trace below to identify the leaking route. Search recent logs for the matching `db.pool.checkout.long` event. Patch the missing client.release() or shorten the transaction; if the client is in active use, raise DB_CHECKOUT_WARN_THRESHOLD_MS only after confirming the workload is legitimate.",
+            anomaly: `Longest checkout: ${oldestSec}s (threshold: ${Math.round(threshold / 1000)}s); ${longCheckouts.length} active over threshold`,
+            sourceData: "lib/db getLongRunningCheckouts()",
+            checkoutCount: longCheckouts.length,
+            longestAgeMs: oldest.ageMs,
+            thresholdMs: threshold,
+            originatingStack: oldest.stack,
+            checkouts: longCheckouts.slice(0, 5).map((c) => ({
+              id: c.id,
+              ageMs: c.ageMs,
+              acquiredAt: c.acquiredAt,
+              stackHead: c.stack.split("\n").slice(0, 4).join("\n"),
+            })),
+            obsRef: "OBS-007",
+          },
+        });
+      }
+    }
+  } catch (err) {
+    logger.warn({ err }, "Self-monitor: per-checkout leak check failed (non-fatal)");
   }
 
   // OBS-006: Auth failure rate alert.
