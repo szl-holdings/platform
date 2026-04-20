@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   RefreshCw,
+  RotateCw,
   Github,
 } from "lucide-react";
 
@@ -181,6 +182,15 @@ export default function Ingest() {
                       job={job}
                       expanded={expanded === job.id}
                       onExpand={() => setExpanded((e) => (e === job.id ? null : job.id))}
+                      onRetry={async (id) => {
+                        setError(null);
+                        try {
+                          await nexusApi.retryIngest(id);
+                          await fetchJobs();
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : "Retry failed");
+                        }
+                      }}
                     />
                   ))}
                 </div>
@@ -199,6 +209,15 @@ export default function Ingest() {
                       job={job}
                       expanded={expanded === job.id}
                       onExpand={() => setExpanded((e) => (e === job.id ? null : job.id))}
+                      onRetry={async (id) => {
+                        setError(null);
+                        try {
+                          await nexusApi.retryIngest(id);
+                          await fetchJobs();
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : "Retry failed");
+                        }
+                      }}
                     />
                   ))}
                 </div>
@@ -223,14 +242,17 @@ function JobCard({
   job,
   expanded,
   onExpand,
+  onRetry,
 }: {
   job: IngestJob;
   expanded: boolean;
   onExpand: () => void;
+  onRetry: (id: string) => Promise<void>;
 }) {
   const meta = STATUS_META[job.status];
   const StatusIcon = meta.icon;
   const isActive = job.status !== "done" && job.status !== "failed";
+  const [retrying, setRetrying] = useState(false);
 
   return (
     <div
@@ -310,10 +332,33 @@ function JobCard({
               <p className="text-xs text-nexus-red font-mono">{job.error}</p>
             </div>
           )}
-          <div className="flex gap-4 text-[10px] font-mono text-muted-foreground/40">
-            <span>Started: {new Date(job.createdAt).toLocaleString()}</span>
-            {job.completedAt && (
-              <span>Completed: {new Date(job.completedAt).toLocaleString()}</span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex gap-4 text-[10px] font-mono text-muted-foreground/40">
+              <span>Started: {new Date(job.createdAt).toLocaleString()}</span>
+              {job.completedAt && (
+                <span>Completed: {new Date(job.completedAt).toLocaleString()}</span>
+              )}
+            </div>
+            {job.status === "failed" && (
+              <button
+                onClick={async () => {
+                  setRetrying(true);
+                  try {
+                    await onRetry(job.id);
+                  } finally {
+                    setRetrying(false);
+                  }
+                }}
+                disabled={retrying}
+                className="text-[10px] font-mono px-2 py-1 rounded bg-[#00d4ff]/10 border border-[#00d4ff]/30 text-nexus-cyan hover:bg-[#00d4ff]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 shrink-0"
+              >
+                {retrying ? (
+                  <Loader className="w-3 h-3 animate-spin" />
+                ) : (
+                  <RotateCw className="w-3 h-3" />
+                )}
+                Retry
+              </button>
             )}
           </div>
         </div>

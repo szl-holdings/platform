@@ -107,6 +107,12 @@ export const nexusApi = {
 
   getIngestJob: (id: string) =>
     req<import("./types").IngestJob>(`/ingest/${id}`),
+
+  retryOrchestration: (id: string) =>
+    req<{ id: string }>(`/orchestrate/${id}/retry`, { method: "POST" }),
+
+  retryIngest: (id: string) =>
+    req<{ id: string }>(`/ingest/${id}/retry`, { method: "POST" }),
 };
 
 export function getApiBase() {

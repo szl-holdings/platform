@@ -15,6 +15,7 @@ import {
   ChevronRight,
   X,
   Gauge,
+  RotateCw,
 } from "lucide-react";
 
 const EXAMPLE_INTENTS = [
@@ -352,6 +353,7 @@ export default function Orchestrator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [explainStep, setExplainStep] = useState<OrchestrationStep | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -394,6 +396,24 @@ export default function Orchestrator() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Orchestration failed");
       setLoading(false);
+    }
+  }
+
+  async function handleRetry(id: string) {
+    setError(null);
+    setRetrying(true);
+    setLoading(true);
+    if (pollRef.current) clearInterval(pollRef.current);
+    try {
+      await nexusApi.retryOrchestration(id);
+      const refreshed = await nexusApi.getOrchestration(id);
+      setPlan(refreshed);
+      startPolling(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Retry failed");
+      setLoading(false);
+    } finally {
+      setRetrying(false);
     }
   }
 
@@ -465,19 +485,35 @@ export default function Orchestrator() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">Orchestration Plan</h2>
-              <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                  plan.status === "completed"
-                    ? "bg-[#00ff88]/10 text-nexus-green"
-                    : plan.status === "running" || plan.status === "planning"
-                    ? "bg-[#00d4ff]/10 text-nexus-cyan"
-                    : plan.status === "failed"
-                    ? "bg-[#ff4455]/10 text-nexus-red"
-                    : "bg-nexus-surface text-muted-foreground"
-                }`}
-              >
-                {plan.status.toUpperCase()}
-              </span>
+              <div className="flex items-center gap-2">
+                {plan.status === "failed" && (
+                  <button
+                    onClick={() => handleRetry(plan.id)}
+                    disabled={retrying}
+                    className="text-[10px] font-mono px-2 py-1 rounded bg-[#ffb700]/10 border border-[#ffb700]/30 text-[#ffb700] hover:bg-[#ffb700]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                  >
+                    {retrying ? (
+                      <Loader className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <RotateCw className="w-3 h-3" />
+                    )}
+                    Retry
+                  </button>
+                )}
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                    plan.status === "completed"
+                      ? "bg-[#00ff88]/10 text-nexus-green"
+                      : plan.status === "running" || plan.status === "planning"
+                      ? "bg-[#00d4ff]/10 text-nexus-cyan"
+                      : plan.status === "failed"
+                      ? "bg-[#ff4455]/10 text-nexus-red"
+                      : "bg-nexus-surface text-muted-foreground"
+                  }`}
+                >
+                  {plan.status.toUpperCase()}
+                </span>
+              </div>
             </div>
 
             <div className="bg-nexus-surface border border-[#ffb700]/20 rounded-lg px-4 py-2 text-sm font-mono text-[#ffb700]">
@@ -511,29 +547,48 @@ export default function Orchestrator() {
             </h2>
             <div className="space-y-2">
               {history.slice(0, 5).map((h) => (
-                <button
+                <div
                   key={h.id}
-                  className="w-full text-left bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-[#ffb700]/20 transition-colors"
-                  onClick={async () => {
-                    const p = await nexusApi.getOrchestration(h.id);
-                    setPlan(p);
-                  }}
+                  className="w-full bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-[#ffb700]/20 transition-colors"
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-mono text-muted-foreground/50">{h.id}</span>
-                    <span
-                      className={`text-[10px] font-mono ${
-                        h.status === "completed" ? "text-nexus-green" : h.status === "failed" ? "text-nexus-red" : "text-nexus-cyan"
-                      }`}
-                    >
-                      {h.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate">{h.intent}</p>
-                  <div className="text-[10px] font-mono text-muted-foreground/40 mt-1">
-                    {h.steps.length} steps
-                  </div>
-                </button>
+                  <button
+                    className="w-full text-left"
+                    onClick={async () => {
+                      const p = await nexusApi.getOrchestration(h.id);
+                      setPlan(p);
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-mono text-muted-foreground/50">{h.id}</span>
+                      <span
+                        className={`text-[10px] font-mono ${
+                          h.status === "completed" ? "text-nexus-green" : h.status === "failed" ? "text-nexus-red" : "text-nexus-cyan"
+                        }`}
+                      >
+                        {h.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{h.intent}</p>
+                    <div className="text-[10px] font-mono text-muted-foreground/40 mt-1">
+                      {h.steps.length} steps
+                    </div>
+                  </button>
+                  {h.status === "failed" && (
+                    <div className="mt-2 pt-2 border-t border-nexus flex justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRetry(h.id);
+                        }}
+                        disabled={retrying}
+                        className="text-[10px] font-mono px-2 py-1 rounded bg-[#ffb700]/10 border border-[#ffb700]/30 text-[#ffb700] hover:bg-[#ffb700]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                      >
+                        <RotateCw className="w-3 h-3" />
+                        Retry
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
