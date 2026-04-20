@@ -232,7 +232,7 @@ export default function ContainmentRules() {
   // gateway events stream come from /api/agent-mesh/gateway, which reads
   // straight from the agent_mesh_gateway_events table. Falls back to seed
   // when the API is unreachable.
-  const { gateway, gatewayEvents, filteredEventCount, source: gatewaySource } = useAgentMeshGateway(gatewayFilters);
+  const { gateway, gatewayEvents, filteredEventCount, source: gatewaySource, streamStatus } = useAgentMeshGateway(gatewayFilters);
   const { breakdown: latencyBreakdown, source: latencySource } = useAgentMeshGatewayLatency();
   const [rules, setRules] = useState(liveRules);
   // Re-sync local rule state whenever the live mesh refreshes.
@@ -606,16 +606,66 @@ export default function ContainmentRules() {
             </div>
             <p className="text-xs text-slate-400 mt-0.5">Live stream of MCP calls evaluated against active Containment Rules.</p>
           </div>
-          <div className={cn(
-            "flex items-center gap-2 text-[10px] font-mono",
-            gatewaySource === "live" ? "text-emerald-400" : "text-amber-400"
-          )}>
-            <span className={cn(
-              "w-1.5 h-1.5 rounded-full",
-              gatewaySource === "live" ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
-            )} />
-            {gatewaySource === "live" ? "STREAMING" : "SEED FALLBACK"}
-          </div>
+          {(() => {
+            // Two independent freshness signals feed this badge:
+            //   - `streamStatus` reflects the SSE push channel
+            //   - `gatewaySource` reflects whether the most recent
+            //     snapshot fetch succeeded or fell back to seed data
+            // The badge prefers the worst of the two so operators see
+            // any drop in freshness immediately.
+            const seed = gatewaySource !== "live";
+            let label: string;
+            let tone: "emerald" | "amber" | "slate";
+            let pulse = false;
+            if (seed) {
+              label = "SEED FALLBACK";
+              tone = "amber";
+            } else if (streamStatus === "live") {
+              label = "STREAMING";
+              tone = "emerald";
+              pulse = true;
+            } else if (streamStatus === "connecting") {
+              label = "CONNECTING…";
+              tone = "amber";
+              pulse = true;
+            } else if (streamStatus === "reconnecting") {
+              label = "RECONNECTING…";
+              tone = "amber";
+              pulse = true;
+            } else {
+              label = "POLLING ONLY";
+              tone = "slate";
+            }
+            const text = tone === "emerald"
+              ? "text-emerald-400"
+              : tone === "amber"
+                ? "text-amber-400"
+                : "text-slate-400";
+            const dot = tone === "emerald"
+              ? "bg-emerald-400"
+              : tone === "amber"
+                ? "bg-amber-400"
+                : "bg-slate-400";
+            return (
+              <div
+                className={cn("flex items-center gap-2 text-[10px] font-mono", text)}
+                title={
+                  seed
+                    ? "Live API unreachable — showing seed snapshot until it returns"
+                    : streamStatus === "live"
+                      ? "Receiving live gateway pushes"
+                      : streamStatus === "connecting"
+                        ? "Opening live push channel…"
+                        : streamStatus === "reconnecting"
+                          ? "Push channel dropped — retrying with backoff (60s safety-net poll still active)"
+                          : "Browser does not support live push — using 60s safety-net poll"
+                }
+              >
+                <span className={cn("w-1.5 h-1.5 rounded-full", dot, pulse && "animate-pulse")} />
+                {label}
+              </div>
+            );
+          })()}
         </div>
 
         <div className="mb-4 space-y-2">

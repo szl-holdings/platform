@@ -833,11 +833,23 @@ export interface GatewayEventFilters {
   ruleId?: string;
 }
 
+export type GatewayStreamStatus =
+  // SSE channel is open and the browser is receiving live pushes.
+  | "live"
+  // We're attempting the first connection, or reconnecting after a drop.
+  | "connecting"
+  // Last connection attempt failed; backoff timer is waiting to retry.
+  | "reconnecting"
+  // EventSource is not available (older browser / SSR) so we're relying
+  // entirely on the safety-net poll.
+  | "unsupported";
+
 export interface UseAgentMeshGatewayResult {
   gateway: McpGatewayConfig;
   gatewayEvents: GatewayEvent[];
   filteredEventCount: number;
   source: "live" | "seed";
+  streamStatus: GatewayStreamStatus;
   loading: boolean;
   refresh: () => Promise<void>;
 }
@@ -903,6 +915,13 @@ async function loadAgentMeshGateway(filters: GatewayEventFilters): Promise<{
 // The push channel below is the primary update path.
 const GATEWAY_REFRESH_INTERVAL_MS = 60_000;
 const GATEWAY_MAX_EVENTS = 200;
+// Reconnect backoff bounds for the gateway SSE channel. EventSource has
+// its own retry, but if the server hard-closes (5xx, proxy timeout) the
+// connection is left in CLOSED and the browser will not retry on its
+// own — we have to recreate it. Backoff caps at 30s so the panel
+// recovers quickly once the server returns.
+const GATEWAY_STREAM_BACKOFF_INITIAL_MS = 1_000;
+const GATEWAY_STREAM_BACKOFF_MAX_MS = 30_000;
 
 function buildGatewayStreamUrl(filters: GatewayEventFilters): string {
   return `/api/agent-mesh/gateway/stream${buildGatewayQuery(filters)}`;
@@ -913,6 +932,7 @@ export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgent
   const [gatewayEvents, setGatewayEvents] = useState<GatewayEvent[]>(agentMesh.gatewayEvents);
   const [filteredEventCount, setFilteredEventCount] = useState<number>(agentMesh.gatewayEvents.length);
   const [source, setSource] = useState<"live" | "seed">("seed");
+  const [streamStatus, setStreamStatus] = useState<GatewayStreamStatus>("connecting");
   const [loading, setLoading] = useState<boolean>(true);
   const mounted = useRef(true);
 
@@ -957,45 +977,118 @@ export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgent
     // Subscribe to the push channel for live gateway events that match
     // the current filter set. The server only emits events that match
     // these filters, so we can prepend whatever arrives without re-checking.
+    //
+    // EventSource will retry transient network drops on its own, but if
+    // the server returns an error response or a proxy hard-closes the
+    // connection it ends up in CLOSED with no further retries. We
+    // explicitly listen for `onerror` and reschedule a fresh connection
+    // with exponential backoff so the panel recovers without a manual
+    // reload, and surface the in-between state to the UI via
+    // `streamStatus`.
     let es: EventSource | null = null;
-    if (typeof window !== "undefined" && typeof window.EventSource !== "undefined") {
-      try {
-        es = new EventSource(buildGatewayStreamUrl(filtersRef.current));
-        es.addEventListener("gateway-event", (ev: MessageEvent) => {
-          if (cancelled || !mounted.current) return;
-          let parsed: GatewayEvent | null = null;
-          try { parsed = JSON.parse(ev.data) as GatewayEvent; } catch { return; }
-          if (!parsed || !parsed.id) return;
-          setSource("live");
-          setGatewayEvents((prev) => {
-            // Skip duplicates that the safety-net poll may have already
-            // brought in just before the push arrived. Only when the
-            // event is actually new do we bump the count + decision
-            // tiles below — otherwise the totals would drift upward
-            // on every reconnect/race.
-            if (prev.some((e) => e.id === parsed!.id)) return prev;
-            setFilteredEventCount((c) => c + 1);
-            setGateway((g) => {
-              const next = { ...g, callsLast24h: g.callsLast24h + 1 };
-              if (parsed!.decision === "blocked") next.blockedLast24h = g.blockedLast24h + 1;
-              else if (parsed!.decision === "quarantined") next.quarantinedLast24h = g.quarantinedLast24h + 1;
-              return next;
-            });
-            return [parsed!, ...prev].slice(0, GATEWAY_MAX_EVENTS);
-          });
-        });
-      } catch {
+    let reconnectTimer: number | null = null;
+    let backoffMs = GATEWAY_STREAM_BACKOFF_INITIAL_MS;
+
+    const safeSetStreamStatus = (status: GatewayStreamStatus) => {
+      if (cancelled || !mounted.current) return;
+      setStreamStatus(status);
+    };
+
+    const closeEs = () => {
+      if (es) {
+        try { es.close(); } catch { /* ignore */ }
         es = null;
       }
-    }
+    };
+
+    const scheduleReconnect = () => {
+      if (cancelled) return;
+      if (reconnectTimer != null) return;
+      const delay = backoffMs;
+      backoffMs = Math.min(backoffMs * 2, GATEWAY_STREAM_BACKOFF_MAX_MS);
+      reconnectTimer = window.setTimeout(() => {
+        reconnectTimer = null;
+        connect();
+      }, delay);
+    };
+
+    const connect = () => {
+      if (cancelled) return;
+      closeEs();
+      if (typeof window === "undefined" || typeof window.EventSource === "undefined") {
+        safeSetStreamStatus("unsupported");
+        return;
+      }
+      safeSetStreamStatus(es == null && backoffMs === GATEWAY_STREAM_BACKOFF_INITIAL_MS
+        ? "connecting"
+        : "reconnecting");
+      try {
+        es = new EventSource(buildGatewayStreamUrl(filtersRef.current));
+      } catch {
+        es = null;
+        safeSetStreamStatus("reconnecting");
+        scheduleReconnect();
+        return;
+      }
+      es.onopen = () => {
+        backoffMs = GATEWAY_STREAM_BACKOFF_INITIAL_MS;
+        safeSetStreamStatus("live");
+      };
+      es.onerror = () => {
+        // The browser has either entered CONNECTING (transient blip,
+        // it'll retry on its own) or CLOSED (terminal — we have to
+        // recreate the EventSource). In either case, surface the
+        // reconnecting state so operators see the freshness drop.
+        const closed = es?.readyState === 2; // EventSource.CLOSED
+        safeSetStreamStatus("reconnecting");
+        if (closed) {
+          closeEs();
+          scheduleReconnect();
+        }
+      };
+      es.addEventListener("gateway-event", (ev: MessageEvent) => {
+        if (cancelled || !mounted.current) return;
+        let parsed: GatewayEvent | null = null;
+        try { parsed = JSON.parse(ev.data) as GatewayEvent; } catch { return; }
+        if (!parsed || !parsed.id) return;
+        // Receiving a message means the channel is healthy even if
+        // `onopen` never fired (e.g. some proxies skip the open event).
+        backoffMs = GATEWAY_STREAM_BACKOFF_INITIAL_MS;
+        safeSetStreamStatus("live");
+        setSource("live");
+        setGatewayEvents((prev) => {
+          // Skip duplicates that the safety-net poll may have already
+          // brought in just before the push arrived. Only when the
+          // event is actually new do we bump the count + decision
+          // tiles below — otherwise the totals would drift upward
+          // on every reconnect/race.
+          if (prev.some((e) => e.id === parsed!.id)) return prev;
+          setFilteredEventCount((c) => c + 1);
+          setGateway((g) => {
+            const next = { ...g, callsLast24h: g.callsLast24h + 1 };
+            if (parsed!.decision === "blocked") next.blockedLast24h = g.blockedLast24h + 1;
+            else if (parsed!.decision === "quarantined") next.quarantinedLast24h = g.quarantinedLast24h + 1;
+            return next;
+          });
+          return [parsed!, ...prev].slice(0, GATEWAY_MAX_EVENTS);
+        });
+      });
+    };
+
+    connect();
+
     return () => {
       cancelled = true;
       window.clearInterval(pollId);
-      if (es) es.close();
+      if (reconnectTimer != null) {
+        window.clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+      closeEs();
     };
   }, [filterKey]);
 
-  return { gateway, gatewayEvents, filteredEventCount, source, loading, refresh };
+  return { gateway, gatewayEvents, filteredEventCount, source, streamStatus, loading, refresh };
 }
 
 export interface GatewayLatencyBucket {
