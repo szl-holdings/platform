@@ -101,7 +101,7 @@ export default function AllSlides() {
           Save as PDF
         </button>
         <a
-          href="../slides/1"
+          href="../1"
           style={{
             background: "rgba(255,255,255,0.08)",
             color: "rgba(255,255,255,0.7)",

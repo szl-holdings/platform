@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import {
   SentientLayer,
   useSentientLayer,
@@ -389,6 +390,8 @@ function DashboardRoutes() {
 export default function App() {
   const base = BASE.replace(/\/$/, "");
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={base}>
         <Switch>
@@ -396,5 +399,6 @@ export default function App() {
         </Switch>
       </WouterRouter>
     </QueryClientProvider>
+    </AppModeProvider>
   );
 }

@@ -13,6 +13,7 @@ import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/desi
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { SentientLayer, useSentientLayer, type SentientUpdate, type SentientAction, type SentientCrossLink } from "@szl-holdings/shared-ui/sentient-layer";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 
 const COUNSEL_ACCENT = "#8b5cf6";
 
@@ -334,6 +335,8 @@ function AppShell() {
 
 export default function App() {
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="counsel">
       <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -341,5 +344,6 @@ export default function App() {
         </WouterRouter>
       </QueryClientProvider>
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }

@@ -15,6 +15,7 @@ import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/desi
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { SentientLayer, useSentientLayer, type SentientUpdate, type SentientAction, type SentientCrossLink } from "@szl-holdings/shared-ui/sentient-layer";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
 const ResilienceScorecardPage = lazy(() => import("@/pages/resilience-scorecard"));
@@ -388,6 +389,8 @@ export default function App() {
   }, [setPreference]);
 
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="sentra">
       <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -402,5 +405,6 @@ export default function App() {
         </WouterRouter>
       </QueryClientProvider>
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }

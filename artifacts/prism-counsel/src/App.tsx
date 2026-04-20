@@ -7,6 +7,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, useSandboxMode } from "@szl-holdings/shared-ui/sandbox-mode";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import { DemoNarrativeSidebar } from "@szl-holdings/shared-ui/demo-narrative-sidebar";
 import { PRISM_DEMO_NARRATIVE } from "@/data/demo-narrative";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
@@ -193,6 +194,8 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(prismCommands);
 
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="prism-counsel">
     <PrismBusProvider domain="prism-counsel">
     <SandboxModeProvider>
@@ -209,6 +212,7 @@ function App() {
     </PrismBusProvider>
     <CookieBanner privacyUrl="/legal/privacy" />
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }
 

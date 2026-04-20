@@ -8,6 +8,7 @@ import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { SandboxModeProvider } from "@szl-holdings/shared-ui/sandbox-mode";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -279,6 +280,8 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(carlotaCommands);
 
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="carlota-jo">
     <PrismBusProvider domain="carlota-jo">
     <SandboxModeProvider>
@@ -300,6 +303,7 @@ function App() {
     </SandboxModeProvider>
     </PrismBusProvider>
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }
 
