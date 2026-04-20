@@ -1162,8 +1162,9 @@ export default function InvestorsDataRoomPage() {
     <div className="min-h-screen bg-[#070a10] text-white flex flex-col">
       <style>{`
         .print-only { display: none; }
+        .print-footer { display: none; }
         @media print {
-          @page { size: Letter; margin: 0.6in; }
+          @page { size: Letter; margin: 0.6in 0.6in 0.9in 0.6in; }
           html, body { background: #ffffff !important; color: #000000 !important; }
           body * { visibility: hidden !important; }
           .print-area, .print-area * { visibility: visible !important; }
@@ -1180,15 +1181,27 @@ export default function InvestorsDataRoomPage() {
           .print-area img, .print-area svg { max-width: 100% !important; }
           .print-only { display: block !important; visibility: visible !important; }
           .no-print { display: none !important; }
-          .print-area::after {
-            content: "Confidential — SZL Holdings Ltd. · Provided under NDA for evaluation only · Do not redistribute.";
-            display: block;
-            margin-top: 32px;
-            padding-top: 12px;
-            border-top: 1px solid #cccccc;
-            font-size: 10px;
-            text-align: center;
+          /* Per-page confidentiality footer.
+             Chromium (Chrome/Edge) repeats position:fixed elements on every
+             printed page, giving us a per-page footer without relying on
+             @page margin boxes (which Chromium support is unreliable).
+             Firefox/Safari may render this only once at the bottom of the
+             first page — that is the graceful fallback. */
+          .print-footer {
+            display: block !important;
+            visibility: visible !important;
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            padding: 6px 0.6in 0 0.6in !important;
+            border-top: 1px solid #cccccc !important;
+            font-size: 9px !important;
             color: #444444 !important;
+            background: #ffffff !important;
+            text-align: center !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
           }
         }
       `}</style>
@@ -1608,6 +1621,13 @@ export default function InvestorsDataRoomPage() {
                 {content && !loading && !error && (
                   <MarkdownRenderer content={content} />
                 )}
+                {/* Per-page confidentiality footer for printed PDFs.
+                    Hidden on screen via .print-footer base style; in @media print
+                    it becomes position:fixed at the bottom and Chromium repeats
+                    it on every printed page. */}
+                <div className="print-footer" aria-hidden="true">
+                  Confidential — SZL Holdings Ltd. · Provided under NDA for evaluation only · Do not redistribute.
+                </div>
               </div>
 
               {/* Doc navigation footer */}
