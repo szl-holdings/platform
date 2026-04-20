@@ -16,18 +16,14 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
-const ROOT = resolve(import.meta.dirname ?? process.cwd(), "..");
-
-interface Violation {
+export interface Violation {
   file: string;
   line: number;
   importPath: string;
   rule: string;
 }
 
-const violations: Violation[] = [];
-
-function getFiles(dir: string, ext = [".ts", ".tsx"]): string[] {
+export function getFiles(dir: string, ext = [".ts", ".tsx"]): string[] {
   const results: string[] = [];
   let entries: string[];
   try {
@@ -59,7 +55,9 @@ function getFiles(dir: string, ext = [".ts", ".tsx"]): string[] {
   return results;
 }
 
-function extractImports(content: string): Array<{ line: number; path: string }> {
+export function extractImports(
+  content: string,
+): Array<{ line: number; path: string }> {
   const imports: Array<{ line: number; path: string }> = [];
   const lines = content.split("\n");
   for (let i = 0; i < lines.length; i++) {
@@ -80,15 +78,18 @@ function extractImports(content: string): Array<{ line: number; path: string }> 
   return imports;
 }
 
-function isArtifactPath(importPath: string, fromArtifact: string): boolean {
-  // Relative imports like ../../artifacts/api-server
-  if (!importPath.startsWith(".")) return false;
-  const normalized = importPath.replace(/\\/g, "/");
-  return /\.\.\/.*artifacts\//.test(normalized) || /^\.\.\/[^/]+\//.test(normalized);
+export function isArtifactImport(importPath: string): boolean {
+  // Matches both relative (../../artifacts/foo) and bare/aliased
+  // (something/artifacts/bar) paths that cross into another artifact tree.
+  return (
+    importPath.includes("/artifacts/") ||
+    (importPath.startsWith("../") && /\/?artifacts\//.test(importPath))
+  );
 }
 
-function checkArtifactFiles(): void {
-  const artifactsDir = join(ROOT, "artifacts");
+export function checkArtifactFiles(root: string): Violation[] {
+  const violations: Violation[] = [];
+  const artifactsDir = join(root, "artifacts");
   let artifactDirs: string[];
   try {
     artifactDirs = readdirSync(artifactsDir).filter((d) => {
@@ -99,7 +100,7 @@ function checkArtifactFiles(): void {
       }
     });
   } catch {
-    return;
+    return violations;
   }
 
   for (const artifactName of artifactDirs) {
@@ -115,14 +116,10 @@ function checkArtifactFiles(): void {
       }
 
       const imports = extractImports(content);
-      const relFile = relative(ROOT, file);
+      const relFile = relative(root, file);
 
       for (const { line, path: importPath } of imports) {
-        // Rule: artifacts must not import from other artifacts via relative path
-        if (
-          importPath.includes("/artifacts/") ||
-          (importPath.startsWith("../") && /\/?artifacts\//.test(importPath))
-        ) {
+        if (isArtifactImport(importPath)) {
           violations.push({
             file: relFile,
             line,
@@ -133,10 +130,16 @@ function checkArtifactFiles(): void {
       }
     }
   }
+  return violations;
 }
 
-function checkPackageFiles(pkgRoot: string, pkgLabel: string): void {
-  const files = getFiles(join(ROOT, pkgRoot));
+export function checkPackageFiles(
+  root: string,
+  pkgRoot: string,
+  pkgLabel: string,
+): Violation[] {
+  const violations: Violation[] = [];
+  const files = getFiles(join(root, pkgRoot));
 
   for (const file of files) {
     let content: string;
@@ -147,14 +150,10 @@ function checkPackageFiles(pkgRoot: string, pkgLabel: string): void {
     }
 
     const imports = extractImports(content);
-    const relFile = relative(ROOT, file);
+    const relFile = relative(root, file);
 
     for (const { line, path: importPath } of imports) {
-      // Rule: lib/* and packages/* must not import from artifacts/*
-      if (
-        importPath.includes("/artifacts/") ||
-        (importPath.startsWith("../") && /\/?artifacts\//.test(importPath))
-      ) {
+      if (isArtifactImport(importPath)) {
         violations.push({
           file: relFile,
           line,
@@ -164,24 +163,40 @@ function checkPackageFiles(pkgRoot: string, pkgLabel: string): void {
       }
     }
   }
+  return violations;
 }
 
-// Run checks
-checkArtifactFiles();
-checkPackageFiles("packages", "packages/*");
-checkPackageFiles("lib", "lib/*");
+export function runChecks(root: string): Violation[] {
+  return [
+    ...checkArtifactFiles(root),
+    ...checkPackageFiles(root, "packages", "packages/*"),
+    ...checkPackageFiles(root, "lib", "lib/*"),
+  ];
+}
 
-// Report
-if (violations.length === 0) {
-  console.log("✓ No package boundary violations found.");
-  process.exit(0);
-} else {
-  console.error(`\n✗ Found ${violations.length} package boundary violation(s):\n`);
-  for (const v of violations) {
-    console.error(`  ${v.file}:${v.line}`);
-    console.error(`    Import: "${v.importPath}"`);
-    console.error(`    Rule:   ${v.rule}`);
-    console.error();
+function isMainModule(): boolean {
+  // True when invoked directly (not imported as a module).
+  if (typeof process === "undefined" || !process.argv[1]) return false;
+  const entry = resolve(process.argv[1]);
+  const here = resolve(import.meta.dirname ?? "", "check-package-boundaries.ts");
+  return entry === here || entry.endsWith("check-package-boundaries.ts");
+}
+
+if (isMainModule()) {
+  const ROOT = resolve(import.meta.dirname ?? process.cwd(), "..");
+  const violations = runChecks(ROOT);
+
+  if (violations.length === 0) {
+    console.log("✓ No package boundary violations found.");
+    process.exit(0);
+  } else {
+    console.error(`\n✗ Found ${violations.length} package boundary violation(s):\n`);
+    for (const v of violations) {
+      console.error(`  ${v.file}:${v.line}`);
+      console.error(`    Import: "${v.importPath}"`);
+      console.error(`    Rule:   ${v.rule}`);
+      console.error();
+    }
+    process.exit(1);
   }
-  process.exit(1);
 }

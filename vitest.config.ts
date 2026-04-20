@@ -171,6 +171,7 @@ export default defineConfig({
       "packages/connectors/src/**/*.test.ts",
       "packages/telemetry-standards/src/**/*.test.ts",
       "scripts/**/*.test.js",
+      "scripts/**/*.test.ts",
       // NOTE: packages/guardian, packages/eval-os, packages/eval-forge have their
       // own per-package vitest.config.ts and are run by turbo via their test scripts.
     ],
