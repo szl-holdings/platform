@@ -46,10 +46,15 @@ emit_status() {
   # Emit a single-line JSON status to stdout for callers to capture.
   local status="$1"; local message="$2"; local url="${3:-}"; local size="${4:-0}"
   local kept_daily="${5:-0}"; local kept_weekly="${6:-0}"; local pruned="${7:-0}"
-  printf '{"status":"%s","backend":"%s","message":"%s","remoteUrl":"%s","remoteSizeBytes":%s,"remoteDailyRetained":%s,"remoteWeeklyRetained":%s,"remotePruned":%s,"dailyRetentionDays":%s,"weeklyRetentionDays":%s}\n' \
+  # Stamp the moment we emitted this status. Callers (backup-db.sh) propagate
+  # `uploadedAt` to the manifest only when status=ok so the health check can
+  # measure remote freshness against the tier RPO.
+  local now; now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  printf '{"status":"%s","backend":"%s","message":"%s","remoteUrl":"%s","remoteSizeBytes":%s,"remoteDailyRetained":%s,"remoteWeeklyRetained":%s,"remotePruned":%s,"dailyRetentionDays":%s,"weeklyRetentionDays":%s,"uploadedAt":"%s"}\n' \
     "$status" "$BACKEND" "$message" "$url" "$size" \
     "$kept_daily" "$kept_weekly" "$pruned" \
-    "$DAILY_RETENTION" "$WEEKLY_RETENTION"
+    "$DAILY_RETENTION" "$WEEKLY_RETENTION" \
+    "$now"
 }
 
 log() { echo "[backup-upload] $*" >&2; }

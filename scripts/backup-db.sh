@@ -131,14 +131,46 @@ fi
 
 # Merge remote status into manifest. If jq is unavailable, fall back to a
 # simpler concatenation (Linux runners always have jq).
+#
+# In addition to the nested `remoteUpload` block we surface two flat fields
+# (`lastRemoteUploadAt`, `lastRemoteUploadStatus`) so the in-process health
+# check can read them cheaply without parsing the nested object on every
+# request, and so external monitoring (e.g. log-based) can grep for them.
 if command -v jq >/dev/null 2>&1; then
   TMP_MANIFEST=$(mktemp)
-  jq --argjson r "$REMOTE_STATUS_JSON" '. + {remoteUpload: $r}' "${MANIFEST_FILE}" > "$TMP_MANIFEST"
+  jq --argjson r "$REMOTE_STATUS_JSON" '
+    . + {
+      remoteUpload: $r,
+      lastRemoteUploadStatus: ($r.status // "unknown"),
+      lastRemoteUploadAt: (if ($r.status // "") == "ok" then ($r.uploadedAt // null) else (.lastRemoteUploadAt // null) end)
+    }
+  ' "${MANIFEST_FILE}" > "$TMP_MANIFEST"
   mv "$TMP_MANIFEST" "${MANIFEST_FILE}"
 else
-  # Strip trailing } and append remoteUpload field
+  # No-jq fallback: extract status + uploadedAt with grep so we can also
+  # surface the flat lastRemoteUploadAt / lastRemoteUploadStatus fields
+  # the health check reads.
+  REMOTE_STATUS=$(echo "$REMOTE_STATUS_JSON" | grep -oE '"status":"[^"]+"' | head -1 | cut -d'"' -f4)
+  REMOTE_UPLOADED_AT=$(echo "$REMOTE_STATUS_JSON" | grep -oE '"uploadedAt":"[^"]*"' | head -1 | cut -d'"' -f4)
+  PRESERVED_LAST_AT=""
+  if [[ "$REMOTE_STATUS" != "ok" ]]; then
+    PRESERVED_LAST_AT=$(grep -oE '"lastRemoteUploadAt":"[^"]*"' "${MANIFEST_FILE}" | head -1 | cut -d'"' -f4 || true)
+    EFFECTIVE_LAST_AT="$PRESERVED_LAST_AT"
+  else
+    EFFECTIVE_LAST_AT="$REMOTE_UPLOADED_AT"
+  fi
+  if [[ -n "$EFFECTIVE_LAST_AT" ]]; then
+    LAST_AT_JSON="\"$EFFECTIVE_LAST_AT\""
+  else
+    LAST_AT_JSON="null"
+  fi
+  # Strip trailing } and append remoteUpload + flat fields
   sed -i.bak 's/}$/,/' "${MANIFEST_FILE}"
-  printf '  "remoteUpload": %s\n}\n' "$REMOTE_STATUS_JSON" >> "${MANIFEST_FILE}"
+  {
+    printf '  "remoteUpload": %s,\n' "$REMOTE_STATUS_JSON"
+    printf '  "lastRemoteUploadStatus": "%s",\n' "${REMOTE_STATUS:-unknown}"
+    printf '  "lastRemoteUploadAt": %s\n}\n' "$LAST_AT_JSON"
+  } >> "${MANIFEST_FILE}"
   rm -f "${MANIFEST_FILE}.bak"
 fi
 

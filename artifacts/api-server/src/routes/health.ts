@@ -130,6 +130,7 @@ router.get("/healthz", async (_req, res) => {
         warning: backupHealth.warning,
         totalBackups: backupHealth.totalBackups,
         details: backupHealth.details,
+        remoteUpload: backupHealth.remoteUpload,
       },
     },
     platform: {
@@ -190,6 +191,7 @@ router.get("/health/detailed", productionAdminGuard, async (_req: Request, res: 
       lastBackupAt: backupHealth.lastBackupAt,
       ageHours: backupHealth.ageHours,
       totalBackups: backupHealth.totalBackups,
+      remoteUpload: backupHealth.remoteUpload,
     },
     memory: {
       heapUsedMb: Math.round(memUsage.heapUsed / 1024 / 1024),

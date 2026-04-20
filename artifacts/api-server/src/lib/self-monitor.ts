@@ -49,6 +49,26 @@ interface DbPoolStats {
   status: "ok" | "elevated" | "saturated";
 }
 
+interface BackupRemoteUploadView {
+  status: "ok" | "warning" | "error" | "disabled" | string;
+  backend: string;
+  lastSuccessfulUploadAt: string | null;
+  ageHours: number | null;
+  rpoHours: number;
+  rpoBreached: boolean;
+  lastAttemptStatus: string | null;
+  lastAttemptMessage: string | null;
+  details: string;
+}
+
+interface BackupHealthView {
+  status: "ok" | "warning" | "error" | string;
+  lastBackupAt: string | null;
+  ageHours: number | null;
+  totalBackups: number;
+  remoteUpload?: BackupRemoteUploadView;
+}
+
 interface HealthDetailedResponse {
   status: string;
   uptime: number;
@@ -59,6 +79,7 @@ interface HealthDetailedResponse {
   };
   checks: Record<string, HealthCheck>;
   dbPool?: DbPoolStats;
+  backup?: BackupHealthView;
 }
 
 let monitorInterval: ReturnType<typeof setInterval> | null = null;
@@ -684,6 +705,49 @@ async function runMonitoringCycle(): Promise<void> {
     }
   } catch (err) {
     logger.warn({ err }, "Self-monitor: tenant isolation violation check failed (non-fatal)");
+  }
+
+  // Backup remote-upload freshness alert.
+  // The local cron writes a manifest after each backup. The remote upload
+  // status (and the last successful uploadedAt) is surfaced under
+  // health.backup.remoteUpload. We page on-call when the upload backend is
+  // configured but the most recent successful remote upload is older than
+  // the tier RPO — including when the upload script never ran (e.g. cron
+  // misfire, GitHub Actions outage). "disabled" means BACKUP_REMOTE_BACKEND
+  // is not set, which is intentional in dev/local-only deploys, so we skip.
+  try {
+    const backup = health.backup;
+    const remote = backup?.remoteUpload;
+    if (remote && remote.status !== "disabled" && (remote.status === "warning" || remote.status === "error")) {
+      const key = `backup-remote-${remote.status}`;
+      if (shouldEmitSignal(key)) {
+        const severity: "critical" | "high" | "medium" =
+          remote.status === "error" ? "critical" : "high";
+        const ageStr = remote.ageHours == null ? "unknown" : `${remote.ageHours}h`;
+        await createSignal({
+          severity,
+          title: `Nightly backup remote upload ${remote.status === "error" ? "stalled" : "behind RPO"} — last success ${ageStr} ago (RPO ${remote.rpoHours}h)`,
+          body: `Backup remote-upload pipeline is not healthy. Backend=${remote.backend}. Last successful upload: ${remote.lastSuccessfulUploadAt ?? "never"}. Last attempt status: ${remote.lastAttemptStatus ?? "n/a"}${remote.lastAttemptMessage ? ` — ${remote.lastAttemptMessage}` : ""}. ${remote.details}`,
+          metadata: {
+            affectedFunction: "Disaster Recovery / Backup Pipeline",
+            owner: "Platform Team",
+            ownerTeam: "SRE",
+            recommendedAction:
+              "Triage per INCIDENT_RESPONSE.md → 'Backup upload stalled' runbook: (1) check the nightly cron / GitHub Actions run, (2) re-run scripts/backup-db.sh manually if the workflow has not fired, (3) verify object-storage credentials and BACKUP_REMOTE_BACKEND, (4) re-run scripts/backup-upload.sh against the latest local dump and confirm manifest.lastRemoteUploadAt advances.",
+            anomaly: `Last remote upload age=${ageStr}; RPO=${remote.rpoHours}h; lastAttemptStatus=${remote.lastAttemptStatus ?? "n/a"}`,
+            sourceData: "/api/health/detailed — backup.remoteUpload",
+            backupRemoteStatus: remote.status,
+            backupRemoteBackend: remote.backend,
+            backupLastSuccessfulUploadAt: remote.lastSuccessfulUploadAt,
+            backupRemoteAgeHours: remote.ageHours,
+            backupRemoteRpoHours: remote.rpoHours,
+            runbookRef: "INCIDENT_RESPONSE.md#backup-upload-stalled",
+          },
+        });
+      }
+    }
+  } catch (err) {
+    logger.warn({ err }, "Self-monitor: backup remote-upload check failed (non-fatal)");
   }
 
   if (overallStatus === "healthy" && dbCheck?.status === "connected") {
