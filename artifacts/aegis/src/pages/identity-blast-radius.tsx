@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearch } from "wouter";
+import { useLocation, useSearch } from "wouter";
 
 import { Users, AlertTriangle, Server, Shield, RefreshCw, ChevronDown, Activity, Lock, Eye, CheckCircle } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { CopyLinkButton } from "../components/CopyLinkButton";
 import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
@@ -36,6 +37,7 @@ const FRESHNESS_COLORS: Record<string, string> = {
 
 export default function IdentityBlastRadius() {
   const search = useSearch();
+  const [, navigate] = useLocation();
   const initialId = useMemo(() => {
     const params = new URLSearchParams(search);
     return params.get("id") ?? "j.smith@corp.com";
@@ -45,6 +47,11 @@ export default function IdentityBlastRadius() {
   useEffect(() => {
     setSelectedIdentity(initialId);
   }, [initialId]);
+
+  const handleSelectIdentity = (id: string) => {
+    setSelectedIdentity(id);
+    navigate(`/identity-blast-radius?id=${encodeURIComponent(id)}`, { replace: true });
+  };
 
   const identityOptions = useMemo(() => {
     const known = IDENTITIES.find(i => i.id === selectedIdentity);
@@ -95,10 +102,13 @@ export default function IdentityBlastRadius() {
             Reachable assets, permissions, and lateral movement paths from any identity with evidence citations.
           </p>
         </div>
-        <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors" style={{ background: "rgba(139,92,246,0.08)", color: "#8b5cf6", border: "1px solid rgba(139,92,246,0.2)" }}>
-          <RefreshCw className="w-3 h-3"/>
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <CopyLinkButton accent="#8b5cf6" />
+          <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors" style={{ background: "rgba(139,92,246,0.08)", color: "#8b5cf6", border: "1px solid rgba(139,92,246,0.2)" }}>
+            <RefreshCw className="w-3 h-3"/>
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
@@ -107,7 +117,7 @@ export default function IdentityBlastRadius() {
         <div className="relative">
           <select
             value={selectedIdentity}
-            onChange={e => setSelectedIdentity(e.target.value)}
+            onChange={e => handleSelectIdentity(e.target.value)}
             className="text-xs font-medium pl-2 pr-6 py-1.5 rounded-lg appearance-none cursor-pointer"
             style={{ background: "rgba(139,92,246,0.1)", color: "#8b5cf6", border: "1px solid rgba(139,92,246,0.25)" }}
           >

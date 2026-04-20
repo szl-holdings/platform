@@ -6,6 +6,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useDrilldown } from "../lib/cognitive-nav";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { CopyLinkButton } from "../components/CopyLinkButton";
 import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
@@ -168,6 +169,7 @@ export default function CognitiveAttackPath() {
               TRACE: {provenance.traceId.slice(-10)}
             </span>
           )}
+          <CopyLinkButton accent="#ef4444" />
           <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
             <RefreshCw className="w-3 h-3"/>
             Refresh

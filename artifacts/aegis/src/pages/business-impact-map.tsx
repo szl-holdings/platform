@@ -6,6 +6,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useDrilldown } from "../lib/cognitive-nav";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { CopyLinkButton } from "../components/CopyLinkButton";
 import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
@@ -100,10 +101,13 @@ export default function BusinessImpactMap() {
             Incidents and risks tied to revenue and operations entities — executive-ready narrative with evidence provenance.
           </p>
         </div>
-        <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors" style={{ background: "rgba(16,185,129,0.08)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}>
-          <RefreshCw className="w-3 h-3"/>
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <CopyLinkButton accent="#10b981" />
+          <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors" style={{ background: "rgba(16,185,129,0.08)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}>
+            <RefreshCw className="w-3 h-3"/>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {denied && (

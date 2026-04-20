@@ -7,6 +7,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { CopyLinkButton } from "../components/CopyLinkButton";
 import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
@@ -113,10 +114,13 @@ export default function IncidentProofChain() {
             Citation-backed timeline per incident through the cognitive trace-graph with verifier approval.
           </p>
         </div>
-        <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors" style={{ background: "rgba(59,130,246,0.08)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.2)" }}>
-          <RefreshCw className="w-3 h-3"/>
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <CopyLinkButton accent="#3b82f6" />
+          <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors" style={{ background: "rgba(59,130,246,0.08)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.2)" }}>
+            <RefreshCw className="w-3 h-3"/>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {denied ? (
