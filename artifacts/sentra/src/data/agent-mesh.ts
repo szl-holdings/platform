@@ -108,6 +108,8 @@ export interface MeshDriftSnapshot {
   changedBy: string;
   policyApproved: boolean;
   approvedBy?: string;
+  rolledBackBy?: string;
+  rolledBackAt?: string;
   diff: { removed: string[]; added: string[] };
   linkedExposureIds: string[];
 }
@@ -696,11 +698,48 @@ export async function loadAgentMesh(): Promise<{ state: AgentMeshState; source: 
     const res = await fetch("/api/agent-mesh/state", { credentials: "include" });
     if (!res.ok) return { state: agentMesh, source: "seed", scannedFiles: [] };
     const data = (await res.json()) as ApiState;
-    if (!isLivePayload(data)) return { state: agentMesh, source: "seed", scannedFiles: data.scannedFiles ?? [] };
+    if (!isLivePayload(data)) {
+      // Even when the live payload is incomplete (no runtimes / index), prefer
+      // the server-returned drift snapshots when present so that operator
+      // actions like Approve / Roll Back persist across reloads instead of
+      // being clobbered by the static seed.
+      const driftSnapshots = Array.isArray(data?.driftSnapshots) && data.driftSnapshots.length > 0
+        ? data.driftSnapshots
+        : agentMesh.driftSnapshots;
+      return {
+        state: { ...agentMesh, driftSnapshots },
+        source: "seed",
+        scannedFiles: data.scannedFiles ?? [],
+      };
+    }
     return { state: mergeWithSeed(data), source: "live", scannedFiles: data.scannedFiles ?? [] };
   } catch {
     return { state: agentMesh, source: "seed", scannedFiles: [] };
   }
+}
+
+function readCsrfCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+async function ensureCsrfToken(): Promise<string | null> {
+  const existing = readCsrfCookie();
+  if (existing) return existing;
+  try {
+    await fetch("/api/csrf-token", { credentials: "include" });
+  } catch {
+    return null;
+  }
+  return readCsrfCookie();
+}
+
+async function csrfHeaders(): Promise<Record<string, string>> {
+  const token = await ensureCsrfToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["X-CSRF-Token"] = token;
+  return headers;
 }
 
 export type ApproveDriftResult =
@@ -711,7 +750,7 @@ export async function approveMeshDrift(driftId: string): Promise<ApproveDriftRes
   try {
     const res = await fetch(`/api/agent-mesh/drift/${encodeURIComponent(driftId)}/approve`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: await csrfHeaders(),
       credentials: "include",
       body: JSON.stringify({}),
     });
@@ -722,6 +761,28 @@ export async function approveMeshDrift(driftId: string): Promise<ApproveDriftRes
     return { ok: true, approvedBy: data.approvedBy ?? null };
   } catch {
     return { ok: false, error: "Approval request failed" };
+  }
+}
+
+export type RollbackDriftResult =
+  | { ok: true; rolledBackBy: string | null; rolledBackAt: string | null }
+  | { ok: false; error: string };
+
+export async function rollbackMeshDrift(driftId: string): Promise<RollbackDriftResult> {
+  try {
+    const res = await fetch(`/api/agent-mesh/drift/${encodeURIComponent(driftId)}/rollback`, {
+      method: "POST",
+      headers: await csrfHeaders(),
+      credentials: "include",
+      body: JSON.stringify({}),
+    });
+    if (res.status === 401) return { ok: false, error: "Sign in required to roll back drift" };
+    if (res.status === 404) return { ok: false, error: "Drift snapshot not found" };
+    if (!res.ok) return { ok: false, error: `Rollback failed (${res.status})` };
+    const data = (await res.json()) as { rolledBackBy: string | null; rolledBackAt: string | null };
+    return { ok: true, rolledBackBy: data.rolledBackBy ?? null, rolledBackAt: data.rolledBackAt ?? null };
+  } catch {
+    return { ok: false, error: "Rollback request failed" };
   }
 }
 

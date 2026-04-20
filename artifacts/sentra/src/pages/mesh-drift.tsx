@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { GitBranch, AlertTriangle, CheckCircle2, Clock, FileText, Shield, Loader2 } from "lucide-react";
-import { approveMeshDrift, useAgentMesh } from "@/data/agent-mesh";
+import { GitBranch, AlertTriangle, CheckCircle2, Clock, FileText, Shield, Loader2, Undo2 } from "lucide-react";
+import { approveMeshDrift, rollbackMeshDrift, useAgentMesh } from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 export default function MeshDrift() {
@@ -9,10 +9,14 @@ export default function MeshDrift() {
   const { driftSnapshots, exposures } = state;
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [approveError, setApproveError] = useState<string | null>(null);
+  const [rollingBackId, setRollingBackId] = useState<string | null>(null);
+  const [rollbackError, setRollbackError] = useState<string | null>(null);
+  const inFlightId = approvingId ?? rollingBackId;
 
   const handleApprove = async (driftId: string) => {
     setApprovingId(driftId);
     setApproveError(null);
+    setRollbackError(null);
     const result = await approveMeshDrift(driftId);
     if (!result.ok) {
       setApproveError(result.error);
@@ -30,10 +34,28 @@ export default function MeshDrift() {
     setApprovingId(null);
   };
 
+  const handleRollback = async (driftId: string) => {
+    setRollingBackId(driftId);
+    setRollbackError(null);
+    setApproveError(null);
+    const result = await rollbackMeshDrift(driftId);
+    if (!result.ok) {
+      setRollbackError(result.error);
+      setRollingBackId(null);
+      return;
+    }
+    patchDriftSnapshot(driftId, {
+      rolledBackBy: result.rolledBackBy ?? undefined,
+      rolledBackAt: result.rolledBackAt ?? undefined,
+    });
+    await reload();
+    setRollingBackId(null);
+  };
+
   const getLinkedExposures = (ids: string[]) =>
     ids.map(id => exposures.find(e => e.id === id)).filter(Boolean);
 
-  const unapproved = driftSnapshots.filter(d => !d.policyApproved);
+  const unapproved = driftSnapshots.filter(d => !d.policyApproved && !d.rolledBackBy);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -81,16 +103,31 @@ export default function MeshDrift() {
                   <div className="flex gap-4 flex-1">
                     <div className={cn(
                       "w-10 h-10 rounded flex items-center justify-center border shrink-0",
-                      !snap.policyApproved ? "bg-red-500/10 border-red-500/20" : "bg-emerald-500/10 border-emerald-500/20"
+                      snap.rolledBackBy
+                        ? "bg-slate-500/10 border-slate-500/30"
+                        : !snap.policyApproved
+                          ? "bg-red-500/10 border-red-500/20"
+                          : "bg-emerald-500/10 border-emerald-500/20"
                     )}>
-                      <GitBranch className={cn("w-5 h-5", !snap.policyApproved ? "text-red-400" : "text-emerald-400")} />
+                      <GitBranch className={cn(
+                        "w-5 h-5",
+                        snap.rolledBackBy
+                          ? "text-slate-400"
+                          : !snap.policyApproved
+                            ? "text-red-400"
+                            : "text-emerald-400"
+                      )} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center flex-wrap gap-2 mb-1">
                         <span className="text-sm font-bold text-slate-100 font-mono">
                           {snap.configFile.split("/").slice(-1)[0]}
                         </span>
-                        {!snap.policyApproved ? (
+                        {snap.rolledBackBy ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold border text-slate-300 border-slate-500/40 bg-slate-500/10">
+                            ROLLED BACK
+                          </span>
+                        ) : !snap.policyApproved ? (
                           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold border text-red-400 border-red-500/30 bg-red-500/10">
                             UNAPPROVED
                           </span>
@@ -107,7 +144,11 @@ export default function MeshDrift() {
                       </div>
                       <div className="text-[10px] text-slate-500 font-mono">
                         {snap.configFile} · Changed by {snap.changedBy}
-                        {snap.approvedBy ? ` · Approved by ${snap.approvedBy}` : ""}
+                        {snap.rolledBackBy
+                          ? ` · Rolled back by ${snap.rolledBackBy}`
+                          : snap.approvedBy
+                            ? ` · Approved by ${snap.approvedBy}`
+                            : ""}
                       </div>
                     </div>
                   </div>
@@ -163,26 +204,31 @@ export default function MeshDrift() {
                     </div>
                   )}
 
-                  {!snap.policyApproved && (
+                  {!snap.policyApproved && !snap.rolledBackBy && (
                     <div className="flex items-center justify-between pt-3 border-t border-slate-800">
                       <div className="flex items-center gap-2 text-[11px] text-slate-400">
                         <Shield className="w-3 h-3 text-amber-400" />
                         This change bypassed the Guardian approval gate
-                        {approveError && approvingId === null && (
+                        {approveError && inFlightId === null && (
                           <span className="ml-3 text-red-400">{approveError}</span>
+                        )}
+                        {rollbackError && inFlightId === null && (
+                          <span className="ml-3 text-red-400">{rollbackError}</span>
                         )}
                       </div>
                       <div className="flex gap-2">
                         <button
-                          className="px-3 py-1.5 rounded border border-slate-700 hover:border-slate-600 text-[11px] text-slate-400 transition-colors disabled:opacity-50"
-                          disabled={approvingId !== null}
+                          onClick={(e) => { e.stopPropagation(); void handleRollback(snap.id); }}
+                          className="px-3 py-1.5 rounded border border-slate-700 hover:border-slate-600 text-[11px] text-slate-400 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
+                          disabled={inFlightId !== null}
                         >
+                          {rollingBackId === snap.id && <Loader2 className="w-3 h-3 animate-spin" />}
                           Roll Back
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); void handleApprove(snap.id); }}
                           className="px-3 py-1.5 rounded bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-[11px] text-amber-400 font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
-                          disabled={approvingId !== null}
+                          disabled={inFlightId !== null}
                         >
                           {approvingId === snap.id && <Loader2 className="w-3 h-3 animate-spin" />}
                           Approve Retroactively
@@ -191,7 +237,15 @@ export default function MeshDrift() {
                     </div>
                   )}
 
-                  {snap.policyApproved && (
+                  {snap.rolledBackBy && (
+                    <div className="flex items-center gap-2 text-[11px] text-slate-300">
+                      <Undo2 className="w-4 h-4 text-slate-400" />
+                      Rolled back by {snap.rolledBackBy}
+                      {snap.rolledBackAt ? ` on ${new Date(snap.rolledBackAt).toLocaleString()}` : ""}
+                    </div>
+                  )}
+
+                  {snap.policyApproved && !snap.rolledBackBy && (
                     <div className="flex items-center gap-2 text-[11px] text-emerald-400">
                       <CheckCircle2 className="w-4 h-4" />
                       Approved by {snap.approvedBy} — proof recorded in Trust Provenance

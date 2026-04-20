@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is a governed decision infrastructure enforcing governance, attribution, and outcome tracking for critical decisions. It integrates signal detection with action execution through a canonical nine-step loop. The platform is a pnpm monorepo encompassing web/mobile applications, an API, a design system, and a development sandbox. Its core capabilities are built around six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. The project aims to provide comprehensive decision-making support with robust governance and observability, driving evidence-backed and traceable autonomy.
+The SZL Holdings Platform is a governed decision infrastructure designed to enforce governance, attribution, and outcome tracking for critical decisions. It integrates signal detection with action execution through a canonical nine-step loop. The platform is a pnpm monorepo encompassing web and mobile applications, an API, a design system, and a development sandbox. Its core capabilities are built around six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. The project aims to provide comprehensive decision-making support with robust governance and observability, driving a vision of evidence-backed and traceable autonomy.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -28,6 +28,8 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **Canonical Artifacts (Active Applications):** The platform supports 15 active applications including `szl-holdings` (corporate dashboard), `api-server` (backend), `command` (unified operations), `vessels` (maritime intelligence), `terra` (real estate), `pulse` (AI executive briefing), `lyte-command-center` (Decision Intelligence), and `aegis` (Cyber Resilience Command).
 
+**Demo Launchpad (`/command/demo`):** A single presenter control surface for investor demos, featuring scripted tracks, audience persona switching, and one-click reset.
+
 **Six Signature Innovations:** Includes Decision Twin, Policy Compiler, Why This Property Now, Adversary Narrative Engine, Voyage Risk Twin, and White-Glove Command.
 
 **Lyte — Decision Intelligence:** A flagship application providing nine surfaces for executive narrative, signal feeds, entity graphs, decision centers, workflow health, agent trace logs, evidence explorers, policy centers, and evaluation studios. It features a dark amber design language and uses the Vantex Acquisition scenario as its central demo narrative.
@@ -52,6 +54,8 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 **One-of-One Platform Shell:** Introduced four canonical shared modules for an intelligence rail, agent run card, incident management, and scenario comparison, unifying the user interface across all surfaces with a DashboardShell, EcosystemNav, and CommandPalette.
 
 **API Layers:** Includes a REST API, a GraphQL API using Apollo Server, and an MCP Gateway for tool integration.
+
+**Key Features:** Reporting & Analytics Engine, Authentication & RBAC, Alloy Execution Fabric, 12 specialized AI Agents, PRISM Bus, Monte Carlo Engine, Multi-Tenant Provisioning, and GCS-backed Object Storage.
 
 **Forge — AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents, including registry, runtime capture, drift evaluation, promotion validation, rollback orchestration, and auditing.
 

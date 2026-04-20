@@ -122,6 +122,8 @@ interface DriftSnapshotRow {
   changedBy: string;
   policyApproved: boolean;
   approvedBy: string | null;
+  rolledBackBy: string | null;
+  rolledBackAt: string | null;
   diff: { removed: string[]; added: string[] };
   linkedExposureIds: string[];
 }
@@ -878,6 +880,8 @@ function computeDriftSnapshots(
       // operator approves them.
       policyApproved: isFirstScan,
       approvedBy: isFirstScan ? "scan-baseline" : null,
+      rolledBackBy: null,
+      rolledBackAt: null,
       diff: { removed, added },
       linkedExposureIds,
     });
@@ -900,6 +904,8 @@ function computeDriftSnapshots(
       changedBy: resolveChangedBy(file, changedByCache),
       policyApproved: false,
       approvedBy: null,
+      rolledBackBy: null,
+      rolledBackAt: null,
       diff: { removed: [], added: ["<instruction-tampering signal detected — see linked exposure>"] },
       linkedExposureIds: [exp.id],
     });
@@ -1669,6 +1675,12 @@ function rowToDriftSnapshot(r: Record<string, unknown>): DriftSnapshotRow {
     changedBy: String(r["changed_by"] ?? "unknown"),
     policyApproved: Boolean(r["policy_approved"]),
     approvedBy: r["approved_by"] == null ? null : String(r["approved_by"]),
+    rolledBackBy: r["rolled_back_by"] == null ? null : String(r["rolled_back_by"]),
+    rolledBackAt: r["rolled_back_at"] == null
+      ? null
+      : r["rolled_back_at"] instanceof Date
+        ? (r["rolled_back_at"] as Date).toISOString()
+        : String(r["rolled_back_at"]),
     diff: { removed: diff.removed ?? [], added: diff.added ?? [] },
     linkedExposureIds: (r["linked_exposure_ids"] as string[]) ?? [],
   };

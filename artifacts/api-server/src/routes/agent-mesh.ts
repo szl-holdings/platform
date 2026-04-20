@@ -316,6 +316,100 @@ router.post(
   },
 );
 
+router.post(
+  "/agent-mesh/drift/:id/rollback",
+  authMiddleware({ required: true }),
+  async (req: Request, res: Response) => {
+    try {
+      const id = String(req.params["id"] ?? "").trim();
+      if (!id) {
+        res.status(400).json({ error: "drift snapshot id required" });
+        return;
+      }
+
+      const orgId = orgIdFromReq(req);
+      const operator = approverLabelFromUser(req.user);
+      const rolledBackAt = new Date();
+      const userId = typeof req.user?.id === "number" ? req.user.id : null;
+
+      // Mirror the approve path: update the snapshot AND write a central
+      // audit_events row in a single transaction so the action shows up in
+      // the audit timeline. If the audit insert fails, the rollback is
+      // rolled back rather than leaving an unaudited rollback behind.
+      const txResult = await db.transaction(async (tx) => {
+        const updated = await tx
+          .update(agentMeshDriftSnapshotsTable)
+          .set({ rolledBackBy: operator, rolledBackAt })
+          .where(
+            and(
+              eq(agentMeshDriftSnapshotsTable.id, id),
+              orgId == null
+                ? sql`${agentMeshDriftSnapshotsTable.orgId} IS NULL`
+                : eq(agentMeshDriftSnapshotsTable.orgId, orgId),
+            ),
+          )
+          .returning({
+            id: agentMeshDriftSnapshotsTable.id,
+            policyApproved: agentMeshDriftSnapshotsTable.policyApproved,
+            approvedBy: agentMeshDriftSnapshotsTable.approvedBy,
+            rolledBackBy: agentMeshDriftSnapshotsTable.rolledBackBy,
+            rolledBackAt: agentMeshDriftSnapshotsTable.rolledBackAt,
+            changedBy: agentMeshDriftSnapshotsTable.changedBy,
+            configFile: agentMeshDriftSnapshotsTable.configFile,
+          });
+
+        const r = updated[0];
+        if (!r) return null;
+
+        await tx.insert(auditEventsTable).values({
+          userId,
+          action: "agent_mesh.drift.rolled_back",
+          entityType: "agent_mesh_drift_snapshot",
+          entityId: r.id,
+          newValues: {
+            driftId: r.id,
+            configFile: r.configFile,
+            operatorName: req.user?.displayName ?? null,
+            operatorEmail: req.user?.email ?? null,
+            operatorLabel: operator,
+            changedBy: r.changedBy,
+            rolledBackAt: rolledBackAt.toISOString(),
+            orgId,
+          },
+          ipAddress: req.ip ?? null,
+          userAgent: req.get("user-agent") ?? null,
+        });
+
+        return r;
+      });
+
+      if (!txResult) {
+        res.status(404).json({ error: "drift snapshot not found" });
+        return;
+      }
+      const row = txResult;
+
+      logger.info(
+        { driftId: id, rolledBackBy: operator, configFile: row.configFile },
+        "[agent-mesh] drift rolled back",
+      );
+
+      res.json({
+        id: row.id,
+        policyApproved: row.policyApproved,
+        approvedBy: row.approvedBy,
+        rolledBackBy: row.rolledBackBy,
+        rolledBackAt: row.rolledBackAt instanceof Date ? row.rolledBackAt.toISOString() : row.rolledBackAt,
+        changedBy: row.changedBy,
+        configFile: row.configFile,
+      });
+    } catch (err) {
+      logger.warn({ err }, "[agent-mesh] drift rollback failed");
+      res.status(500).json({ error: "drift rollback failed" });
+    }
+  },
+);
+
 router.post("/agent-mesh/scan", async (req: Request, res: Response) => {
   try {
     const extraPaths = Array.isArray(req.body?.paths) ? (req.body.paths as string[]) : [];

@@ -142,6 +142,8 @@ export const agentMeshDriftSnapshotsTable = pgTable("agent_mesh_drift_snapshots"
   changedBy: text("changed_by").notNull().default("unknown"),
   policyApproved: boolean("policy_approved").notNull().default(false),
   approvedBy: text("approved_by"),
+  rolledBackBy: text("rolled_back_by"),
+  rolledBackAt: timestamp("rolled_back_at", { withTimezone: true }),
   diff: jsonb("diff").$type<{ removed: string[]; added: string[] }>().notNull().default({ removed: [], added: [] }),
   linkedExposureIds: jsonb("linked_exposure_ids").$type<string[]>().notNull().default([]),
 });
