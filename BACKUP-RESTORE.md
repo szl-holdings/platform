@@ -1,6 +1,6 @@
 # Backup & Restore — SZL Holdings Platform
 
-**Version:** 1.0 · **Last updated:** April 2026
+**Version:** 1.1 · **Last updated:** 2026-04-20 (updated after first DR drill)
 **Audience:** Engineering, DevOps, security reviewers, enterprise evaluators
 **Companion docs:** [DATA-RETENTION.md](DATA-RETENTION.md) · [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) · [TENANCY-MODEL.md](TENANCY-MODEL.md)
 
@@ -141,14 +141,31 @@ The Proof Chain is append-only. Corruption — by definition — implies tamperi
 
 | Test | Frequency | Owner | Last verified |
 |------|-----------|-------|---------------|
-| Database snapshot restore to staging | Weekly automated | DevOps | Continuous |
-| Point-in-time recovery (Pro) | Quarterly | DBA | TBD per cohort |
+| Backup script execution (`backup-db.sh`) | Nightly automated via `.github/workflows/backup.yml` | DevOps | 2026-04-20 (first DR drill) |
+| Database restore to scratch schema | Quarterly (manual drill) | DBA | 2026-04-20 (first DR drill — see `docs/operations/dr-drill-2026-04-20.md`) |
+| Point-in-time recovery (Pro) | Quarterly | DBA | TBD per cohort — requires Azure PostgreSQL Flexible Server |
 | Cross-region failover (Enterprise) | Annually with each Enterprise customer; tabletop quarterly | DevOps + Customer | Per customer onboarding |
 | Object storage soft-delete restore | Quarterly | DevOps | TBD |
-| Audit trail integrity verification | Weekly automated | Security | Continuous |
-| Full DR tabletop | Annually | Founder + DevOps + Security | TBD |
+| Audit trail integrity verification | Weekly automated (append-only Proof Chain check) | Security | Continuous |
+| Full DR tabletop | Quarterly | Founder + DevOps | 2026-04-20 (first drill); next 2026-07-01 |
 
 Untested backups are not real backups. The cadence above is enforced via reminders and reviewed in quarterly DR review.
+
+### Backup Automation
+
+Backup runs automatically via `.github/workflows/backup.yml` on a nightly cron (`0 2 * * *` UTC). The workflow:
+- Installs `pg_dump` and runs `scripts/backup-db.sh` against `DATABASE_URL`
+- Verifies the manifest status is `ok` before completing
+- Uploads the backup artifact to GitHub Actions (7-day retention) and the manifest (30-day retention)
+- Can be triggered manually via `workflow_dispatch` with `--dry-run` support
+
+**Rotation policy (persistent storage / server deployments):** `scripts/backup-db.sh` enforces 7 daily + 4 weekly retention against a persistent `BACKUP_DIR`. This rotation is effective when the script runs on a server or VM with mounted persistent storage where prior backup files accumulate.
+
+**Rotation policy (CI / ephemeral runners):** GitHub Actions runners start with a clean filesystem each run, so script-level rotation across runs is a no-op (there are no prior files to prune). In the CI path, retention is instead governed by artifact `retention-days`: 7 days for backup dumps, 30 days for manifests. For production-grade 30-day or 90-day retention tiers, backup artifacts must be shipped to object storage with a lifecycle policy — this is a documented known gap (see below).
+
+**Security note for CI artifacts:** SQL dump artifacts contain sensitive data. The repository must be private; GitHub access controls gate artifact access. Artifacts are stored unencrypted in CI storage. Before the first production customer, migrate to encrypted object storage with explicit key management.
+
+**Required CI secret:** `DATABASE_URL` must be set as a GitHub Actions secret for automated backups to run against the production database.
 
 ---
 
@@ -180,11 +197,14 @@ Customers can request:
 
 ## Known Gaps
 
-From [KNOWN-GAPS.md](KNOWN-GAPS.md):
+From [KNOWN-GAPS.md](KNOWN-GAPS.md) and updated after 2026-04-20 DR drill:
 
-- **DR tabletop not yet executed in 2026 production environment** — scheduled for Q2 once first Enterprise customer is provisioned
-- **Cross-region failover runbook not yet executed against live load** — planned tabletop scheduled
-- **Customer BYOK for backup encryption** — not yet implemented; FY27 roadmap
+- **DR tabletop executed 2026-04-20** — RESOLVED. First drill completed; restore verified in ~25 seconds. See `docs/operations/dr-drill-2026-04-20.md`. Quarterly cadence scheduled; next drill 2026-07-01.
+- **Backup automation now configured** — RESOLVED. `.github/workflows/backup.yml` runs nightly. Requires `DATABASE_URL` CI secret to be set for production database.
+- **Hourly WAL streaming (Pro tier RPO)** — Replit-managed PostgreSQL does not expose WAL streaming. 4-hour RPO target for Pro tier requires Azure PostgreSQL Flexible Server in production. Not a silent gap; production architecture targets Azure.
+- **Cross-region failover runbook not yet executed against live load** — planned tabletop scheduled per first Enterprise customer provisioning.
+- **Object storage backup target not configured** — backup artifacts are currently stored as unencrypted GitHub Actions CI artifacts (7-day retention). Script-level rotation (7 daily / 4 weekly) functions correctly for persistent-storage deployments but is a no-op on ephemeral CI runners. Object storage with a lifecycle policy and encryption at rest is required before GA to meet stated retention periods and security requirements. See follow-up task #2679.
+- **Customer BYOK for backup encryption** — not yet implemented; FY27 roadmap.
 
 These gaps are documented honestly. They do not represent silent risk.
 
@@ -194,6 +214,10 @@ These gaps are documented honestly. They do not represent silent risk.
 
 | Document | Path |
 |----------|------|
+| DR drill record (2026-04-20) | [docs/operations/dr-drill-2026-04-20.md](docs/operations/dr-drill-2026-04-20.md) |
+| Ops readiness summary | [docs/operations/ops-readiness.md](docs/operations/ops-readiness.md) |
+| Observability audit | [audit/operations/observability-audit.md](audit/operations/observability-audit.md) |
+| Backup CI workflow | [.github/workflows/backup.yml](.github/workflows/backup.yml) |
 | Data retention | [DATA-RETENTION.md](DATA-RETENTION.md) |
 | Incident response | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) |
 | Tenancy model | [TENANCY-MODEL.md](TENANCY-MODEL.md) |

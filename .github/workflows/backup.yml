@@ -1,0 +1,96 @@
+name: Database Backup
+
+# SECURITY NOTE: This workflow runs against a private repository.
+# SQL dump artifacts contain sensitive data and are retained with GitHub's
+# access controls (repository permissions gate artifact access). Before
+# production GA, these artifacts must move to encrypted object storage
+# with explicit key management — see BACKUP-RESTORE.md Known Gaps.
+#
+# ROTATION NOTE: scripts/backup-db.sh enforces 7-daily / 4-weekly rotation
+# against a persistent BACKUP_DIR (suitable for server deployments or
+# mounted persistent storage). On ephemeral GitHub runners, BACKUP_DIR is
+# empty at the start of each run, so script-level rotation across runs is
+# a no-op. Retention in CI is instead enforced by the artifact retention-days
+# settings below. Object storage with a lifecycle policy is required for
+# production-grade rotation — see BACKUP-RESTORE.md Known Gaps.
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (skip actual pg_dump)'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Backup PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install pg_dump
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Run backup script
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_DIR: /tmp/szl-backups
+        run: |
+          chmod +x scripts/backup-db.sh
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ./scripts/backup-db.sh --dry-run
+          else
+            ./scripts/backup-db.sh
+          fi
+
+      - name: Verify backup manifest
+        run: |
+          if [[ -f /tmp/szl-backups/backup_manifest.json ]]; then
+            cat /tmp/szl-backups/backup_manifest.json
+            STATUS=$(jq -r '.status' /tmp/szl-backups/backup_manifest.json)
+            if [[ "$STATUS" != "ok" ]]; then
+              echo "ERROR: Backup manifest status is not ok: $STATUS"
+              exit 1
+            fi
+            SIZE=$(jq '.lastBackupSizeBytes' /tmp/szl-backups/backup_manifest.json)
+            if [[ "${{ inputs.dry_run }}" != "true" && "$SIZE" == "0" ]]; then
+              echo "ERROR: Backup file is empty (0 bytes)"
+              exit 1
+            fi
+            echo "Backup manifest status: ok, size: ${SIZE} bytes"
+          else
+            echo "ERROR: No backup manifest found"
+            exit 1
+          fi
+
+      - name: Upload backup artifact
+        # Retention-days here enforces the rotation policy in the CI path.
+        # 7 days = interim daily rotation. Object storage lifecycle policy
+        # required for 30-day / 90-day retention per BACKUP-RESTORE.md tiers.
+        # LIMITATION: artifacts are stored unencrypted; repo must be private.
+        # Migrate to encrypted object storage before first production customer.
+        if: ${{ inputs.dry_run != 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: /tmp/szl-backups/*.sql.gz
+          retention-days: 7
+
+      - name: Upload backup manifest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: backup-manifest-${{ github.run_id }}
+          path: /tmp/szl-backups/backup_manifest.json
+          retention-days: 30
