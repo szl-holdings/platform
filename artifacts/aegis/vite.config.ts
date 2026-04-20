@@ -130,6 +130,15 @@ export default defineConfig({
         "..",
         "attached_assets"
       ),
+      "@szl-holdings/env": path.resolve(
+        import.meta.dirname,
+        "..",
+        "..",
+        "packages",
+        "env",
+        "src",
+        "index.ts"
+      ),
     },
     dedupe: ["react", "react-dom"],
   },
