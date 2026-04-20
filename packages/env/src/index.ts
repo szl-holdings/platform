@@ -58,11 +58,11 @@ export const envSchema = z.object({
 
   // ── Database ────────────────────────────────────────────────────────────
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required").optional(),
-  DB_POOL_MIN: optionalInt("2"),
-  DB_POOL_MAX: optionalInt("10"),
-  DB_CONNECT_TIMEOUT_MS: optionalInt("5000"),
-  DB_IDLE_TIMEOUT_MS: optionalInt("30000"),
-  DB_STATEMENT_TIMEOUT_MS: optionalInt("10000"),
+  DB_POOL_MIN: optionalInt("1"),
+  DB_POOL_MAX: optionalInt("20"),
+  DB_CONNECT_TIMEOUT_MS: optionalInt("30000"),
+  DB_IDLE_TIMEOUT_MS: optionalInt("60000"),
+  DB_STATEMENT_TIMEOUT_MS: optionalInt("60000"),
   SLOW_QUERY_THRESHOLD_MS: optionalInt("500"),
 
   // ── Authentication ──────────────────────────────────────────────────────
@@ -87,6 +87,8 @@ export const envSchema = z.object({
   CONNECTOR_ENCRYPTION_KEY: optionalStr,
   ADMIN_PIN: optionalStr,
   INTEGRATION_TEST_TOKEN: optionalStr,
+  SZL_API_BASE: optionalStr,
+  SZL_INTERNAL_TOKEN: optionalStr,
 
   // ── Email ────────────────────────────────────────────────────────────────
   EMAIL_PROVIDER: z.enum(["resend", "sendgrid", "smtp"]).optional(),
@@ -159,8 +161,14 @@ export const envSchema = z.object({
   // ── Intelligence Feeds ───────────────────────────────────────────────────
   AIS_FEED_ENABLED: booleanFromString,
   AIS_API_KEY: optionalStr,
-  AIS_BASE_URL: optionalUrl,
+  AIS_BASE_URL: optionalStr,
   AISHUB_USERNAME: optionalStr,
+  MARINETRAFFIC_API_KEY: optionalStr,
+  TAXII_SERVER_URL: optionalStr,
+  TAXII_COLLECTION: optionalStr,
+  TAXII_API_KEY: optionalStr,
+  MISP_URL: optionalStr,
+  OTX_API_KEY: optionalStr,
   LEGAL_FEED_ENABLED: booleanFromString,
   LEGAL_FEED_SEARCH_QUERIES: optionalStr,
   COURT_LISTENER_API_KEY: optionalStr,
@@ -174,6 +182,10 @@ export const envSchema = z.object({
   // ── Observability ────────────────────────────────────────────────────────
   OTEL_SERVICE_NAME: z.string().optional().default("szl-holdings-api"),
   OTEL_EXPORTER_OTLP_ENDPOINT: optionalUrl,
+  OTLP_ENDPOINT: optionalUrl,
+  OTEL_IN_MEMORY: booleanFromString,
+  OTEL_CONSOLE_EXPORT: booleanFromString,
+  NEW_RELIC_LICENSE_KEY: optionalStr,
   SENTRY_DSN: optionalStr,
   SENTRY_TRACES_SAMPLE_RATE: optionalFloat("0.1"),
   SENTRY_PROFILES_SAMPLE_RATE: optionalFloat("0.1"),
@@ -227,6 +239,9 @@ export const envSchema = z.object({
   DOCUSIGN_CONNECT_HMAC_KEY: optionalStr,
   SALESFORCE_CLIENT_ID: optionalStr,
   SALESFORCE_CLIENT_SECRET: optionalStr,
+  SALESFORCE_INSTANCE_URL: optionalStr,
+  SALESFORCE_ACCESS_TOKEN: optionalStr,
+  PAGERDUTY_API_KEY: optionalStr,
 
   // ── Integrations ─────────────────────────────────────────────────────────
   GITHUB_TOKEN: optionalStr,

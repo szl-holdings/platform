@@ -12,6 +12,7 @@
  */
 
 import { BaseFeedAdapter, type FeedAdapterConfig, type NormalizedFeedPayload } from "../feed-adapter.js";
+import { getEnv } from "@szl-holdings/env";
 
 interface STIXObject {
   type: string;
@@ -115,11 +116,12 @@ export class STIXTAXIIFeedAdapter extends BaseFeedAdapter {
 
   constructor(config?: Partial<FeedAdapterConfig>) {
     super(createSTIXConfig(config));
-    this.taxiiServer = process.env.TAXII_SERVER_URL ?? null;
-    this.taxiiCollection = process.env.TAXII_COLLECTION ?? "default";
-    this.apiKey = process.env.TAXII_API_KEY ?? null;
-    this.mispUrl = process.env.MISP_URL ?? null;
-    this.otxApiKey = process.env.OTX_API_KEY ?? null;
+    const _env = getEnv();
+    this.taxiiServer = _env.TAXII_SERVER_URL ?? null;
+    this.taxiiCollection = _env.TAXII_COLLECTION ?? "default";
+    this.apiKey = _env.TAXII_API_KEY ?? null;
+    this.mispUrl = _env.MISP_URL ?? null;
+    this.otxApiKey = _env.OTX_API_KEY ?? null;
   }
 
   async connect(): Promise<void> {

@@ -1,4 +1,5 @@
 import { AGENT_REGISTRY } from "../nuro-mesh.js";
+import { getEnv } from "@szl-holdings/env";
 
 export interface AgentCapability {
   name: string;
@@ -158,7 +159,8 @@ function getAvailability(agentId: string): AgentCard["availability"] {
 }
 
 const BASE_URL = (() => {
-  if (process.env.REPLIT_DEV_DOMAIN) return `https://${process.env.REPLIT_DEV_DOMAIN}/api-server`;
+  const dom = getEnv().REPLIT_DEV_DOMAIN;
+  if (dom) return `https://${dom}/api-server`;
   return "http://localhost:8080";
 })();
 

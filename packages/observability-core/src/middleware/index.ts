@@ -10,6 +10,7 @@ import {
   extractCorrelationId,
 } from "../correlation/index.js";
 import { runWithContext } from "../context/index.js";
+import { getEnv } from "@szl-holdings/env";
 
 export interface OtelMiddlewareOptions {
   recordSpans?: boolean;
@@ -58,7 +59,7 @@ export function createOtelSpanMiddleware(options: OtelMiddlewareOptions = {}) {
     res.on("finish", () => {
       const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
 
-      if (typeof process !== "undefined" && process.env.OTEL_CONSOLE_EXPORT === "true") {
+      if (getEnv().OTEL_CONSOLE_EXPORT) {
         console.info(
           JSON.stringify({
             span: spanName,

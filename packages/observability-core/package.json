@@ -23,6 +23,7 @@
     "@types/express": "^5.0.0"
   },
   "dependencies": {
+    "@szl-holdings/env": "workspace:*",
     "@szl-holdings/observability": "workspace:*"
   },
   "scripts": {

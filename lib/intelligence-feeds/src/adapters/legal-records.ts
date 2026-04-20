@@ -13,6 +13,7 @@
  */
 
 import { BaseFeedAdapter, type FeedAdapterConfig, type NormalizedFeedPayload } from "../feed-adapter.js";
+import { getEnv } from "@szl-holdings/env";
 
 interface CourtListenerCase {
   id: number;
@@ -91,7 +92,7 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
 
   constructor(config?: Partial<FeedAdapterConfig>) {
     super(createLegalRecordsConfig(config));
-    this.apiToken = process.env.COURTLISTENER_API_TOKEN ?? null;
+    this.apiToken = getEnv().COURTLISTENER_API_TOKEN ?? null;
     this.baseUrl = "https://www.courtlistener.com/api/rest/v3";
     this.searchQueries = this.buildSearchQueries();
   }
@@ -374,7 +375,7 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
   }
 
   private buildSearchQueries(): string[] {
-    const envQueries = process.env.LEGAL_FEED_SEARCH_QUERIES;
+    const envQueries = getEnv().LEGAL_FEED_SEARCH_QUERIES;
     if (envQueries) {
       try {
         return JSON.parse(envQueries) as string[];

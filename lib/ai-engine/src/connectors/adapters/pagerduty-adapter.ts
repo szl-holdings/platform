@@ -1,5 +1,6 @@
 import { BaseConnectorAdapter } from "../connector-interface.js";
 import type { ConnectorAuthConfig, ConnectorRateLimitConfig, ConnectorToolDefinition } from "../connector-interface.js";
+import { getEnv } from "@szl-holdings/env";
 
 export class PagerDutyConnectorAdapter extends BaseConnectorAdapter {
   connectorId = "pagerduty";
@@ -70,7 +71,7 @@ export class PagerDutyConnectorAdapter extends BaseConnectorAdapter {
   ];
 
   private get apiKey(): string {
-    return process.env.PAGERDUTY_API_KEY ?? "";
+    return getEnv().PAGERDUTY_API_KEY ?? "";
   }
 
   async execute(toolName: string, input: Record<string, unknown>): Promise<unknown> {

@@ -27,6 +27,7 @@ import {
   PostgresEntityRegistry,
 } from "@szl-holdings/evidence-graph";
 import { defaultEntityRegistry } from "@workspace/ontology";
+import { getEnv } from "@szl-holdings/env";
 
 const startConnectors = !process.argv.includes("--no-connectors");
 
@@ -41,7 +42,7 @@ let recommendationStore: PostgresRecommendationStore | undefined;
 let entityRegistry: PostgresEntityRegistry | undefined;
 let dbReady = false;
 
-if (process.env.DATABASE_URL) {
+if (getEnv().DATABASE_URL) {
   try {
     const { db } = await import("@szl-holdings/db");
     const {

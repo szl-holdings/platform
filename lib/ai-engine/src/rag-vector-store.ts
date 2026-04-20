@@ -1,7 +1,8 @@
 import pino from "pino";
+import { getEnv } from "@szl-holdings/env";
 import type { SensitivityLevel, RagSourceType } from "./types.js";
 
-const logger = pino({ name: "rag-vector-store", level: process.env.LOG_LEVEL ?? "info" });
+const logger = pino({ name: "rag-vector-store", level: getEnv().LOG_LEVEL ?? "info" });
 
 export type { SensitivityLevel, RagSourceType };
 

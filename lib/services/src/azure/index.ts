@@ -1,11 +1,13 @@
+import { getEnv, type Env } from "@szl-holdings/env";
+
 export interface AzureServiceConfig {
   enabled: boolean;
   connectionString?: string;
   endpoint?: string;
 }
 
-function isAzureEnabled(envKey: string): boolean {
-  return !!process.env[envKey];
+function isAzureEnabled(envKey: keyof Env): boolean {
+  return !!getEnv()[envKey];
 }
 
 export const azureKeyVault = {
@@ -15,7 +17,7 @@ export const azureKeyVault = {
   get config(): AzureServiceConfig {
     return {
       enabled: this.enabled,
-      endpoint: process.env.AZURE_KEY_VAULT_URL,
+      endpoint: getEnv().AZURE_KEY_VAULT_URL,
     };
   },
   async getSecret(name: string): Promise<string | null> {
@@ -32,7 +34,7 @@ export const azureBlobStorage = {
   get config(): AzureServiceConfig {
     return {
       enabled: this.enabled,
-      connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
+      connectionString: getEnv().AZURE_STORAGE_CONNECTION_STRING,
     };
   },
   async uploadBlob(_container: string, _blobName: string, _data: Buffer): Promise<string | null> {
@@ -59,7 +61,7 @@ export const azureRedis = {
   get config(): AzureServiceConfig {
     return {
       enabled: this.enabled,
-      connectionString: process.env.AZURE_REDIS_CONNECTION_STRING,
+      connectionString: getEnv().AZURE_REDIS_CONNECTION_STRING,
     };
   },
   async get(_key: string): Promise<string | null> {
@@ -86,7 +88,7 @@ export const azurePostgres = {
   get config(): AzureServiceConfig {
     return {
       enabled: this.enabled,
-      connectionString: process.env.AZURE_PG_CONNECTION_STRING,
+      connectionString: getEnv().AZURE_PG_CONNECTION_STRING,
     };
   },
   async query(_sql: string, _params?: unknown[]): Promise<unknown[] | null> {
@@ -103,7 +105,7 @@ export const azureAppInsights = {
   get config(): AzureServiceConfig {
     return {
       enabled: this.enabled,
-      connectionString: process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
+      connectionString: getEnv().AZURE_APP_INSIGHTS_CONNECTION_STRING,
     };
   },
   trackEvent(_name: string, _properties?: Record<string, string>): void {

@@ -1,4 +1,5 @@
 import { db } from "@szl-holdings/db";
+import { getEnv } from "@szl-holdings/env";
 import { agentMemoryFacts, agentUsageStats, consciousnessSnapshotsTable, consciousnessMonologueTable, consciousnessEmotionalHistoryTable, consciousnessAgentProfilesTable, consciousnessGoalsTable, consciousnessTemporalMetricsTable } from "@szl-holdings/db";
 import { eq, desc, and, gt, sql } from "drizzle-orm";
 import { persistTelemetry } from "./innovation/telemetry-pipeline.js";
@@ -327,9 +328,10 @@ async function checkGovernanceEnforce(
 ): Promise<{ allowed: boolean; hardBlocked?: boolean; requiresApproval?: boolean; approvalLevel?: string; reason?: string }> {
   if (!orgId) return { allowed: true };
   try {
-    const ALLOY_TOKEN = process.env.ALLOY_INTERNAL_TOKEN;
-    const BASE_URL = process.env.REPLIT_DEV_DOMAIN
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}/api-server`
+    const _env = getEnv();
+    const ALLOY_TOKEN = _env.ALLOY_INTERNAL_TOKEN;
+    const BASE_URL = _env.REPLIT_DEV_DOMAIN
+      ? `https://${_env.REPLIT_DEV_DOMAIN}/api-server`
       : "http://localhost:8080";
     const resp = await fetch(`${BASE_URL}/alloy/governance/enforce`, {
       method: "POST",
@@ -619,7 +621,7 @@ export async function callAgent(
   }
 
   const preCheck = metacognitiveMonitor.preFlightCheck(agent.id, agent.domain, query.length);
-  const ENABLE_PREFLIGHT_BLOCKING = process.env.CONSCIOUSNESS_PREFLIGHT_BLOCKING === "true";
+  const ENABLE_PREFLIGHT_BLOCKING = getEnv().CONSCIOUSNESS_PREFLIGHT_BLOCKING;
   if (ENABLE_PREFLIGHT_BLOCKING && !preCheck.proceed) {
     innerMonologue.addThought(
       "doubt",

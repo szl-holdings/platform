@@ -19,7 +19,8 @@
     }
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.19.0"
+    "@google-cloud/storage": "^7.19.0",
+    "@szl-holdings/env": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:"

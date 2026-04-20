@@ -1,5 +1,6 @@
 import type { PrismDomain, ExecutionContext } from "@szl-holdings/prism-bus";
 import { prismBus } from "@szl-holdings/prism-bus";
+import { getEnv } from "@szl-holdings/env";
 import type { ApprovalClass, ForgeSandboxPolicy } from "./sandbox.js";
 import { ForgeSandbox, createDefaultSandboxPolicy } from "./sandbox.js";
 import { forgeEvidenceStore } from "./evidence.js";
@@ -66,7 +67,7 @@ const MAX_EXECUTION_HISTORY = 200;
 
 function buildSpanAttributes(execution: ForgeExecution): Record<string, string | number | boolean> {
   const attrs: Record<string, string | number | boolean> = {
-    "szl.environment": process.env.NODE_ENV ?? "development",
+    "szl.environment": getEnv().NODE_ENV,
     "szl.workflow.id": execution.executionId,
     "szl.workflow.type": execution.task.type,
   };
@@ -185,7 +186,7 @@ export class ForgeRuntime {
         "szl.alloy.is_dry_run": !!(task.isDryRun || tenantRequiresDryRun),
         "szl.alloy.label": task.label,
         "szl.signal.domain": task.domain,
-        "szl.environment": process.env.NODE_ENV ?? "development",
+        "szl.environment": getEnv().NODE_ENV,
         ...(task.tenantId ? { "szl.workspace.id": task.tenantId } : {}),
         ...(task.correlationId ? { "szl.correlation.id": task.correlationId } : {}),
         ...(task.userId ? { "szl.actor.id": task.userId, "szl.actor.type": "human" } : { "szl.actor.type": "agent" }),

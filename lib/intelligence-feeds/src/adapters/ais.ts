@@ -13,6 +13,7 @@
  */
 
 import { BaseFeedAdapter, type FeedAdapterConfig, type NormalizedFeedPayload } from "../feed-adapter.js";
+import { getEnv } from "@szl-holdings/env";
 
 interface AISVesselPosition {
   mmsi: string;
@@ -100,8 +101,9 @@ export class AISFeedAdapter extends BaseFeedAdapter {
 
   constructor(config?: Partial<FeedAdapterConfig>) {
     super(createAISConfig(config));
-    this.apiKey = process.env.MARINETRAFFIC_API_KEY ?? process.env.AIS_API_KEY ?? null;
-    this.baseUrl = process.env.AIS_BASE_URL ?? "https://services.marinetraffic.com/api";
+    const _env = getEnv();
+    this.apiKey = _env.MARINETRAFFIC_API_KEY ?? _env.AIS_API_KEY ?? null;
+    this.baseUrl = _env.AIS_BASE_URL ?? "https://services.marinetraffic.com/api";
   }
 
   async connect(): Promise<void> {
@@ -168,7 +170,7 @@ export class AISFeedAdapter extends BaseFeedAdapter {
     const timeout = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
-      const username = process.env.AISHUB_USERNAME ?? "anonymous";
+      const username = getEnv().AISHUB_USERNAME ?? "anonymous";
       const url = `https://data.aishub.net/vessels.json?username=${username}&format=1&output=json&compress=0`;
       const response = await fetch(url, {
         signal: controller.signal,

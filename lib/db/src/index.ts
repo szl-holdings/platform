@@ -1,28 +1,31 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
+import { getEnv } from "@szl-holdings/env";
 import * as schema from "./schema";
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
+const _env = getEnv();
+
+if (!_env.DATABASE_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-const isDev = process.env.NODE_ENV !== "production";
-const SLOW_QUERY_THRESHOLD_MS = parseInt(process.env.SLOW_QUERY_THRESHOLD_MS ?? "500", 10);
+const isDev = _env.NODE_ENV !== "production";
+const SLOW_QUERY_THRESHOLD_MS = _env.SLOW_QUERY_THRESHOLD_MS;
 
 export const PgPool = Pool;
 export { drizzle as drizzleConnect } from "drizzle-orm/node-postgres";
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  min: parseInt(process.env.DB_POOL_MIN ?? "1", 10),
-  max: parseInt(process.env.DB_POOL_MAX ?? "20", 10),
-  idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT_MS ?? "60000", 10),
-  connectionTimeoutMillis: parseInt(process.env.DB_CONNECT_TIMEOUT_MS ?? "30000", 10),
-  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT_MS ?? "60000", 10),
+  connectionString: _env.DATABASE_URL,
+  min: _env.DB_POOL_MIN,
+  max: _env.DB_POOL_MAX,
+  idleTimeoutMillis: _env.DB_IDLE_TIMEOUT_MS,
+  connectionTimeoutMillis: _env.DB_CONNECT_TIMEOUT_MS,
+  statement_timeout: _env.DB_STATEMENT_TIMEOUT_MS,
 });
 
 const _originalPoolQuery = pool.query.bind(pool);
@@ -57,7 +60,7 @@ pool.query = async function instrumentedQuery(...args: unknown[]) {
 };
 
 pool.on("connect", () => {
-  if (isDev && process.env.LOG_LEVEL === "debug") {
+  if (isDev && _env.LOG_LEVEL === "debug") {
     console.log("[db] New connection established");
   }
 });
@@ -73,12 +76,14 @@ export const db = drizzle(pool, {
   logger: isDev
     ? {
         logQuery(query: string, _params: unknown[]) {
-          if (process.env.LOG_LEVEL === "debug") {
+          if (_env.LOG_LEVEL === "debug") {
             console.log(`[db] Query:`, query.slice(0, 200));
           }
         },
       }
     : false,
 });
+
+void SLOW_QUERY_THRESHOLD_MS;
 
 export * from "./schema";

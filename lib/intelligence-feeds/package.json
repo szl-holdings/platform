@@ -14,8 +14,9 @@
     "./adapters/legal-records": "./src/adapters/legal-records.ts"
   },
   "dependencies": {
-    "@szl-holdings/db": "workspace:*",
     "@szl-holdings/ai-engine": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {

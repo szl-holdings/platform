@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/services": "workspace:*",

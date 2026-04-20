@@ -18,11 +18,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@szl-holdings/connectors": "workspace:*",
     "@szl-holdings/db": "workspace:*",
-    "@workspace/ontology": "workspace:*",
-    "@szl-holdings/signal-mesh": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
     "@szl-holdings/evidence-graph": "workspace:*",
-    "@szl-holdings/connectors": "workspace:*"
+    "@szl-holdings/signal-mesh": "workspace:*",
+    "@workspace/ontology": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

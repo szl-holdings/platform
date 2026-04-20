@@ -45,6 +45,7 @@
     "@anthropic-ai/sdk": "^0.78.0",
     "@google/genai": "^1.44.0",
     "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "drizzle-orm": "catalog:",
     "openai": "^6.27.0",

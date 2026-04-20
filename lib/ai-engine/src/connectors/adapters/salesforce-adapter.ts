@@ -1,5 +1,6 @@
 import { BaseConnectorAdapter } from "../connector-interface.js";
 import type { ConnectorAuthConfig, ConnectorRateLimitConfig, ConnectorToolDefinition } from "../connector-interface.js";
+import { getEnv } from "@szl-holdings/env";
 
 export class SalesforceConnectorAdapter extends BaseConnectorAdapter {
   connectorId = "salesforce";
@@ -66,11 +67,11 @@ export class SalesforceConnectorAdapter extends BaseConnectorAdapter {
   ];
 
   private get instanceUrl(): string {
-    return process.env.SALESFORCE_INSTANCE_URL ?? "";
+    return getEnv().SALESFORCE_INSTANCE_URL ?? "";
   }
 
   async execute(toolName: string, input: Record<string, unknown>): Promise<unknown> {
-    const token = process.env.SALESFORCE_ACCESS_TOKEN ?? "";
+    const token = getEnv().SALESFORCE_ACCESS_TOKEN ?? "";
     const headers = { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
 
     if (toolName === "query_soql") {

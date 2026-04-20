@@ -1,5 +1,6 @@
 import { BaseConnectorAdapter } from "../connector-interface.js";
 import type { ConnectorAuthConfig, ConnectorRateLimitConfig, ConnectorToolDefinition } from "../connector-interface.js";
+import { getEnv } from "@szl-holdings/env";
 
 export class JiraConnectorAdapter extends BaseConnectorAdapter {
   connectorId = "jira";
@@ -73,7 +74,7 @@ export class JiraConnectorAdapter extends BaseConnectorAdapter {
   ];
 
   private get baseUrl(): string {
-    return process.env.JIRA_BASE_URL ?? "";
+    return getEnv().JIRA_BASE_URL ?? "";
   }
 
   async execute(toolName: string, input: Record<string, unknown>): Promise<unknown> {

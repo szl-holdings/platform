@@ -13,6 +13,8 @@
  * external A2A-compatible agents.
  */
 
+import { getEnv } from "@szl-holdings/env";
+
 export interface A2ACapability {
   name: string;
   description: string;
@@ -95,9 +97,10 @@ export interface A2AJsonRpcResponse {
   error?: { code: number; message: string; data?: unknown };
 }
 
-const BASE_URL = process.env.REPLIT_DEV_DOMAIN
-  ? `https://${process.env.REPLIT_DEV_DOMAIN}/api-server`
-  : "http://localhost:8080";
+const BASE_URL = (() => {
+  const dom = getEnv().REPLIT_DEV_DOMAIN;
+  return dom ? `https://${dom}/api-server` : "http://localhost:8080";
+})();
 
 export function buildAgentCard(agentId: string): A2AAgentCard {
   const agentProfiles: Record<string, Partial<A2AAgentCard>> = {

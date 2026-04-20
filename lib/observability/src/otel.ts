@@ -10,6 +10,7 @@ import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-ho
 import { W3CTraceContextPropagator } from "@opentelemetry/core";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
+import { getEnv } from "@szl-holdings/env";
 
 let otelInitialized = false;
 let provider: BasicTracerProvider | null = null;
@@ -115,7 +116,7 @@ export function buildContextAttributes(ctx: SpanContext): Record<string, string 
   if (ctx.workspaceId) attrs["szl.workspace.id"] = ctx.workspaceId;
   if (ctx.workspaceName) attrs["szl.workspace.name"] = ctx.workspaceName;
   if (ctx.organizationId) attrs["szl.organization.id"] = ctx.organizationId;
-  attrs["szl.environment"] = ctx.environment ?? process.env.NODE_ENV ?? "development";
+  attrs["szl.environment"] = ctx.environment ?? getEnv().NODE_ENV;
   if (ctx.workflowId) attrs["szl.workflow.id"] = ctx.workflowId;
   if (ctx.workflowType) attrs["szl.workflow.type"] = ctx.workflowType;
   if (ctx.workflowStep) attrs["szl.workflow.step"] = ctx.workflowStep;
@@ -202,7 +203,7 @@ let globalTracer: OtelTracer | null = null;
 
 export function getTracer(): OtelTracer {
   if (!globalTracer) {
-    globalTracer = new OtelTracer(process.env.OTEL_SERVICE_NAME ?? "szl-api");
+    globalTracer = new OtelTracer(getEnv().OTEL_SERVICE_NAME);
   }
   return globalTracer;
 }
@@ -219,8 +220,9 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
   const activeExporters: string[] = [];
   const spanProcessors: import("@opentelemetry/sdk-trace-base").SpanProcessor[] = [];
 
-  const isDevMode = process.env.NODE_ENV !== "production";
-  const enableInMemory = isDevMode || process.env.OTEL_IN_MEMORY === "true";
+  const _env = getEnv();
+  const isDevMode = _env.NODE_ENV !== "production";
+  const enableInMemory = isDevMode || _env.OTEL_IN_MEMORY;
   if (enableInMemory) {
     inMemoryExporter = new InMemorySpanExporter();
     spanProcessors.push(new SimpleSpanProcessor(inMemoryExporter));
@@ -239,8 +241,8 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
 
   const otlpEndpoint =
     config.otlpEndpoint ??
-    process.env.OTLP_ENDPOINT ??
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+    _env.OTLP_ENDPOINT ??
+    _env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
   if (otlpEndpoint) {
     const normalizedEndpoint = otlpEndpoint.replace(/\/+$/, "");
@@ -251,7 +253,7 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
     activeExporters.push(`otlp:${otlpEndpoint}`);
   }
 
-  if (config.exportToConsole || process.env.OTEL_CONSOLE_EXPORT === "true") {
+  if (config.exportToConsole || _env.OTEL_CONSOLE_EXPORT) {
     spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
     activeExporters.push("console");
   }
@@ -259,7 +261,7 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
   const resource = resourceFromAttributes({
     "service.name": config.serviceName,
     "service.version": config.serviceVersion ?? process.env.npm_package_version ?? "0.0.0",
-    "deployment.environment": process.env.NODE_ENV ?? "development",
+    "deployment.environment": _env.NODE_ENV,
   });
 
   const tracerProvider = new BasicTracerProvider({ spanProcessors, resource });
@@ -285,12 +287,13 @@ export function getOtelConfig(): {
   newRelic: boolean;
   initialized: boolean;
 } {
-  const otlpEndpoint = process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+  const _env = getEnv();
+  const otlpEndpoint = _env.OTLP_ENDPOINT ?? _env.OTEL_EXPORTER_OTLP_ENDPOINT;
   return {
-    serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api",
+    serviceName: _env.OTEL_SERVICE_NAME,
     ...(otlpEndpoint !== undefined ? { otlpEndpoint } : {}),
-    azureMonitor: !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
-    newRelic: !!process.env.NEW_RELIC_LICENSE_KEY,
+    azureMonitor: !!_env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
+    newRelic: !!_env.NEW_RELIC_LICENSE_KEY,
     initialized: otelInitialized,
   };
 }
