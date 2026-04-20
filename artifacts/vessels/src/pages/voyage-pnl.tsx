@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, LineChart, Line, Cell } from "recharts";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { CLASS_BENCHMARKS, type VesselClassKey } from "../lib/freight-benchmarks";
+import { useFreightBenchmarks, formatAsOf, type FreightBenchmark } from "../lib/freight-benchmarks";
+
+type VoyageBenchmark = Pick<FreightBenchmark, "tce" | "changePct" | "fleetAvg" | "topQuartile" | "bottomQuartile">;
 
 const VOYAGES = [
   {
@@ -223,7 +225,7 @@ function fmtMoney(n: number, decimals = 0) {
   return `${sign}$${abs.toFixed(0)}`;
 }
 
-function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
+function VoyagePnLCard({ voyage, benchmark }: { voyage: typeof VOYAGES[0]; benchmark: VoyageBenchmark | undefined }) {
   const [expanded, setExpanded] = useState(false);
   const [scenario, setScenario] = useState<ScenarioKey>("base");
   const [, navigate] = useLocation();
@@ -237,8 +239,6 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
     { name: "Delay", value: Math.round(s.delayCost / 1000) },
   ].filter(d => d.value > 0);
 
-  // Freight benchmarking — compare voyage TCE against Baltic Exchange class benchmark
-  const benchmark = CLASS_BENCHMARKS[voyage.type as VesselClassKey];
   const totalDays = voyage.baseDaysAtSea + (s.weatherDelay || 0);
   const voyageTCE = totalDays > 0 ? s.netRevenue / totalDays : 0;
   const tceDelta = benchmark ? voyageTCE - benchmark.tce : 0;
@@ -248,7 +248,7 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
     ? [
         { name: "Bottom Q", value: Math.round(benchmark.bottomQuartile / 1000) },
         { name: "Fleet Avg", value: Math.round(benchmark.fleetAvg / 1000) },
-        { name: "Baltic", value: Math.round(benchmark.tce / 1000) },
+        { name: "Market", value: Math.round(benchmark.tce / 1000) },
         { name: "Top Q", value: Math.round(benchmark.topQuartile / 1000) },
         { name: "This Voyage", value: Math.round(voyageTCE / 1000) },
       ]
@@ -291,7 +291,7 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
                         ? "text-emerald-300 border-emerald-500/20 bg-emerald-500/5"
                         : "text-red-300 border-red-500/20 bg-red-500/5"
                     )}
-                    title={`Voyage TCE ${fmtMoney(voyageTCE)}/day vs Baltic ${fmtMoney(benchmark.tce)}/day`}
+                    title={`Voyage TCE ${fmtMoney(voyageTCE)}/day vs market ${fmtMoney(benchmark.tce)}/day`}
                   >
                     <Activity className="w-3 h-3" />
                     vs Market: {aboveMarket ? "+" : ""}{tceDeltaPct.toFixed(1)}%
@@ -398,7 +398,7 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
                 <div className="flex items-center gap-2">
                   <Activity className="w-3.5 h-3.5 text-sky-400" />
                   <p className="text-[10px] uppercase tracking-widest text-sky-400/60">Freight Rate Benchmark — {voyage.type}</p>
-                  <Badge variant="outline" className="text-[9px] text-sky-400/60 border-sky-500/15">Baltic Exchange</Badge>
+                  <Badge variant="outline" className="text-[9px] text-sky-400/60 border-sky-500/15">FRED · WPU3012</Badge>
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); navigate("/freight-rates"); }}
@@ -417,7 +417,7 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
                   <p className="text-[9px] text-sky-400/40 mt-0.5">over {totalDays.toFixed(1)} days</p>
                 </div>
                 <div>
-                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">Baltic Benchmark</p>
+                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">Market Benchmark</p>
                   <p className="text-sm font-bold font-mono text-sky-200">
                     {fmtMoney(benchmark.tce)}<span className="text-[9px] text-sky-400/40 font-normal">/day</span>
                   </p>
@@ -456,7 +456,7 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                       {benchmarkChartData.map((d, i) => {
                         const isVoyage = d.name === "This Voyage";
-                        const isBaltic = d.name === "Baltic";
+                        const isBaltic = d.name === "Market";
                         const fill = isVoyage
                           ? (aboveMarket ? "#22c55e" : "#ef4444")
                           : isBaltic ? "#38bdf8" : "#1e3a5f";
@@ -502,15 +502,33 @@ export default function VoyagePnL() {
   const avgMargin = VOYAGES.reduce((s, v) => s + v.scenarios.base.margin, 0) / VOYAGES.length;
   const lossCount = VOYAGES.filter(v => v.scenarios.pessimistic.netRevenue < 0).length;
 
+  const { data: benchmarks, isLoading: benchmarksLoading, isError: benchmarksError } = useFreightBenchmarks();
+  const lookupBenchmark = (type: string): VoyageBenchmark | undefined => {
+    if (!benchmarks) return undefined;
+    return benchmarks.benchmarksByLabel[type];
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Calculator className="w-5 h-5 text-emerald-400" />
-          <h1 className="text-xl font-bold text-sky-50 font-display">Voyage P&L Predictor</h1>
-          <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/20 bg-emerald-500/5">PRE-DEPARTURE ANALYSIS</Badge>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Calculator className="w-5 h-5 text-emerald-400" />
+            <h1 className="text-xl font-bold text-sky-50 font-display">Voyage P&L Predictor</h1>
+            <Badge variant="outline" className="text-[9px] text-emerald-400 border-emerald-500/20 bg-emerald-500/5">PRE-DEPARTURE ANALYSIS</Badge>
+          </div>
+          <p className="text-xs text-sky-400/50">Full voyage economics with scenario modeling for fuel, weather delays, port fees, and rerouting — before ships depart</p>
         </div>
-        <p className="text-xs text-sky-400/50">Full voyage economics with scenario modeling for fuel, weather delays, port fees, and rerouting — before ships depart</p>
+        <div className="flex items-center gap-2 text-[10px] text-sky-400/60 font-mono bg-[#0a1628]/80 border border-sky-500/15 rounded-md px-2.5 py-1.5">
+          <Clock className="w-3 h-3" />
+          <span>
+            {benchmarksLoading
+              ? "Loading market benchmark…"
+              : benchmarksError
+                ? "Market benchmark feed unavailable"
+                : `${benchmarks?.source ?? "Market benchmark"} · as of ${formatAsOf(benchmarks?.asOf)}`}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -544,7 +562,7 @@ export default function VoyagePnL() {
             accentColor="#10b981"
           />
         ) : VOYAGES.map(v => (
-          <VoyagePnLCard key={v.id} voyage={v} />
+          <VoyagePnLCard key={v.id} voyage={v} benchmark={lookupBenchmark(v.type)} />
         ))}
       </div>
     </div>

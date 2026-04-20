@@ -1,69 +1,12 @@
-import { useState } from "react";
-import { TrendingUp, TrendingDown, BarChart3, Activity, DollarSign, Globe } from "lucide-react";
+import { useMemo, useState } from "react";
+import { TrendingUp, TrendingDown, BarChart3, Activity, Globe, Clock } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { CLASS_BENCHMARKS, type VesselClassKey } from "../lib/freight-benchmarks";
+import { useFreightBenchmarks, formatAsOf, type FreightBenchmark } from "../lib/freight-benchmarks";
 
-type VesselClass = "capesize" | "panamax" | "supramax" | "handysize";
-
-// Map this page's lowercase class keys to the shared benchmark keys so
-// the current rate and weekly change come from a single source of truth
-// (lib/freight-benchmarks.ts). Page-specific metadata (DWT range, color,
-// route list, forward curve) stays here.
-const SHARED_KEY: Record<VesselClass, VesselClassKey> = {
-  capesize: "Capesize",
-  panamax: "Panamax",
-  supramax: "Supramax",
-  handysize: "Handysize",
-};
-
-interface ClassMeta {
-  label: string;
-  dwt: string;
-  color: string;
-  routes: string[];
-  forward: number[];
-}
-
-const CLASS_META: Record<VesselClass, ClassMeta> = {
-  capesize: {
-    label: "Capesize", dwt: "100,000–180,000 DWT", color: "#38bdf8",
-    routes: ["C5 (WA→CHN)", "C3 (BRA→CHN)", "Transatlantic"],
-    forward: [28000, 29200, 31000, 30100, 28800, 27500],
-  },
-  panamax: {
-    label: "Panamax", dwt: "60,000–100,000 DWT", color: "#818cf8",
-    routes: ["P1A (Transatlantic)", "P2A (Fronthaul)", "P3A (Backhaul)"],
-    forward: [16500, 17100, 17800, 17400, 16900, 16600],
-  },
-  supramax: {
-    label: "Supramax", dwt: "45,000–65,000 DWT", color: "#34d399",
-    routes: ["S1C (US Gulf/Far East)", "S5 (USG/Cont)", "S4B (USG/SKorea)"],
-    forward: [14000, 14500, 15200, 14800, 14200, 13900],
-  },
-  handysize: {
-    label: "Handysize", dwt: "25,000–45,000 DWT", color: "#fb923c",
-    routes: ["HS1 (Cont-FEast)", "HS2 (FEast-Cont)", "HS3 (USG-FEast)"],
-    forward: [12400, 12800, 13200, 13000, 12700, 12400],
-  },
-};
-
-type ClassConfig = ClassMeta & { currentRate: number; change: number; changePct: number };
-
-const CLASS_CONFIG: Record<VesselClass, ClassConfig> = (Object.keys(CLASS_META) as VesselClass[]).reduce(
-  (acc, key) => {
-    const meta = CLASS_META[key];
-    const bench = CLASS_BENCHMARKS[SHARED_KEY[key]];
-    const currentRate = bench.tce;
-    const changePct = bench.changePct;
-    // Derive absolute weekly change from rate * pct so the two stay consistent.
-    const change = Math.round(currentRate - currentRate / (1 + changePct / 100));
-    acc[key] = { ...meta, currentRate, change, changePct };
-    return acc;
-  },
-  {} as Record<VesselClass, ClassConfig>,
-);
+const VISIBLE_CLASS_KEYS = ["capesize", "panamax", "supramax", "handysize"] as const;
+type VisibleClassKey = (typeof VISIBLE_CLASS_KEYS)[number];
 
 const months = ["May", "Jun", "Jul", "Aug", "Sep", "Oct"];
 
@@ -78,17 +21,6 @@ const generateHistory = (base: number, seed: number) =>
     rate: Math.round(base * (0.75 + Math.sin(i * 0.4 + seed) * 0.15 + (i / 24) * 0.1 + deterministicNoise(i, seed))),
   }));
 
-const ROUTE_RATES = [
-  { route: "C5 — W. Australia → China (Iron Ore)", class: "capesize", rate: 11.2, change: +0.4, unit: "$/MT" },
-  { route: "C3 — Tubarão → Qingdao (Iron Ore)", class: "capesize", rate: 28.1, change: +1.8, unit: "$/MT" },
-  { route: "P1A — Transatlantic Round", class: "panamax", rate: 16280, change: -340, unit: "$/day" },
-  { route: "P2A — Fronthaul (AMS → FEast)", class: "panamax", rate: 22400, change: +820, unit: "$/day" },
-  { route: "S1C — USG → Far East", class: "supramax", rate: 24800, change: +620, unit: "$/day" },
-  { route: "S5 — USG → Cont/Med", class: "supramax", rate: 18200, change: -280, unit: "$/day" },
-  { route: "HS1 — Cont → Far East (MV)", class: "handysize", rate: 13800, change: +540, unit: "$/day" },
-  { route: "HS3 — USG → Far East", class: "handysize", rate: 14900, change: +720, unit: "$/day" },
-];
-
 const classColors: Record<string, string> = {
   capesize: "text-sky-400",
   panamax: "text-indigo-400",
@@ -96,29 +28,68 @@ const classColors: Record<string, string> = {
   handysize: "text-orange-400",
 };
 
+const seedForKey = (k: string) => VISIBLE_CLASS_KEYS.indexOf(k as VisibleClassKey);
+
 export default function FreightRatesPage() {
-  const [selectedClass, setSelectedClass] = useState<VesselClass>("capesize");
-  const cls = CLASS_CONFIG[selectedClass];
-  const history = generateHistory(cls.currentRate, selectedClass === "capesize" ? 0 : selectedClass === "panamax" ? 1 : selectedClass === "supramax" ? 2 : 3);
-  const forwardData = months.map((m, i) => ({ month: `${m} '26`, rate: cls.forward[i] }));
+  const { data, isLoading, isError } = useFreightBenchmarks();
+  const [selectedClass, setSelectedClass] = useState<VisibleClassKey>("capesize");
+
+  const visibleBenchmarks = useMemo<FreightBenchmark[]>(() => {
+    if (!data) return [];
+    return VISIBLE_CLASS_KEYS
+      .map((k) => data.benchmarks.find((b) => b.key === k))
+      .filter((b): b is FreightBenchmark => Boolean(b));
+  }, [data]);
+
+  const cls = visibleBenchmarks.find((b) => b.key === selectedClass) ?? visibleBenchmarks[0];
+
+  const history = useMemo(() => {
+    if (!cls) return [];
+    if (data?.history && data.history.length > 0 && data.upstreamLatestIndex) {
+      const latest = data.upstreamLatestIndex;
+      return data.history.map((p) => ({
+        month: new Date(p.date + "T00:00:00Z").toLocaleString(undefined, { month: "short", year: "2-digit" }),
+        rate: Math.round(cls.tce * (p.index / latest)),
+      }));
+    }
+    return generateHistory(cls.tce, Math.max(0, seedForKey(cls.key)));
+  }, [cls, data]);
+
+  const forwardData = useMemo(() => {
+    if (!cls) return [];
+    return months.map((m, i) => ({ month: `${m} '26`, rate: cls.forward[i] ?? cls.tce }));
+  }, [cls]);
+
+  const routeRates = useMemo(() => {
+    if (!data) return [];
+    return data.routes;
+  }, [data]);
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-sky-400" />
-          Freight Rate Benchmarking
-        </h1>
-        <p className="text-xs text-sky-400/50 mt-0.5">Live market rate panels with historical trends and forward curve estimation — Baltic Exchange methodology</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-sky-400" />
+            Freight Rate Benchmarking
+          </h1>
+          <p className="text-xs text-sky-400/50 mt-0.5">Live market rate panels with historical trends and forward curve estimation — derived from FRED Deep Sea Freight PPI (WPU3012, BLS)</p>
+        </div>
+        <div className="flex items-center gap-2 text-[10px] text-sky-400/60 font-mono bg-[#0a1628]/80 border border-sky-500/15 rounded-md px-2.5 py-1.5">
+          <Clock className="w-3 h-3" />
+          <span>
+            {isLoading ? "Loading benchmark…" : isError ? "Benchmark feed unavailable" : `As of ${formatAsOf(data?.asOf)}`}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {(Object.entries(CLASS_CONFIG) as [VesselClass, typeof CLASS_CONFIG[VesselClass]][]).map(([key, c]) => (
+        {visibleBenchmarks.map((c) => (
           <button
-            key={key}
-            onClick={() => setSelectedClass(key)}
+            key={c.key}
+            onClick={() => setSelectedClass(c.key as VisibleClassKey)}
             className={cn("text-left bg-[#0a1628]/80 border rounded-xl p-4 transition-all",
-              selectedClass === key ? "border-sky-500/30 ring-1 ring-sky-500/20" : "border-sky-500/10 hover:border-sky-500/20")}
+              selectedClass === c.key ? "border-sky-500/30 ring-1 ring-sky-500/20" : "border-sky-500/10 hover:border-sky-500/20")}
           >
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] text-sky-400/40 uppercase tracking-wider">{c.label}</p>
@@ -128,96 +99,109 @@ export default function FreightRatesPage() {
               </Badge>
             </div>
             <p className="text-lg font-bold font-mono" style={{ color: c.color }}>
-              ${c.currentRate.toLocaleString()}
+              ${c.tce.toLocaleString()}
             </p>
             <p className="text-[9px] text-sky-400/40 mt-0.5">USD/day TCE</p>
             <p className="text-[9px] text-sky-400/30 mt-1">{c.dwt}</p>
           </button>
         ))}
+        {!isLoading && visibleBenchmarks.length === 0 && (
+          <div className="col-span-full text-[11px] text-sky-400/50 italic">Benchmark feed offline.</div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-xs font-semibold text-sky-200">{cls.label} — 24-Month Historical TCE</p>
-              <p className="text-[10px] text-sky-400/40">{cls.dwt} · Baltic Exchange spot rates</p>
+      {cls && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-semibold text-sky-200">{cls.label} — 24-Month Historical TCE</p>
+                <p className="text-[10px] text-sky-400/40">{cls.dwt} · scaled to live FRED PPI WPU3012</p>
+              </div>
+              <div className={cn("flex items-center gap-1", cls.changePct > 0 ? "text-emerald-400" : "text-red-400")}>
+                {cls.changePct > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                <span className="text-xs font-mono font-bold">{cls.changePct > 0 ? "+" : ""}{cls.change.toLocaleString()} $/day</span>
+              </div>
             </div>
-            <div className={cn("flex items-center gap-1", cls.changePct > 0 ? "text-emerald-400" : "text-red-400")}>
-              {cls.changePct > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-              <span className="text-xs font-mono font-bold">{cls.changePct > 0 ? "+" : ""}{cls.change.toLocaleString()} $/day</span>
-            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={history} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "#64748b" }} interval={3} />
+                <YAxis tick={{ fontSize: 9, fill: "#64748b" }} tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
+                <Tooltip
+                  contentStyle={{ background: "#0a1628", border: "1px solid rgba(56,189,248,0.2)", borderRadius: 8, fontSize: 11 }}
+                  formatter={(v: number) => [`$${v.toLocaleString()}`, "TCE/day"]}
+                />
+                <Area type="monotone" dataKey="rate" stroke={cls.color} fill={cls.color} fillOpacity={0.08} strokeWidth={1.5} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={history} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="month" tick={{ fontSize: 9, fill: "#64748b" }} interval={3} />
-              <YAxis tick={{ fontSize: 9, fill: "#64748b" }} tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
-              <Tooltip
-                contentStyle={{ background: "#0a1628", border: "1px solid rgba(56,189,248,0.2)", borderRadius: 8, fontSize: 11 }}
-                formatter={(v: number) => [`$${v.toLocaleString()}`, "TCE/day"]}
-              />
-              <Area type="monotone" dataKey="rate" stroke={cls.color} fill={cls.color} fillOpacity={0.08} strokeWidth={1.5} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
 
-        <div className="space-y-3">
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-3">Forward Curve (6M)</p>
-            <div className="space-y-2">
-              {forwardData.map((d, i) => {
-                const maxRate = Math.max(...forwardData.map(x => x.rate));
-                const pct = (d.rate / maxRate) * 100;
-                const isUp = i === 0 ? d.rate > cls.currentRate : d.rate > forwardData[i - 1].rate;
-                return (
-                  <div key={d.month} className="flex items-center gap-2">
-                    <span className="text-[10px] text-sky-400/40 w-12 shrink-0">{d.month}</span>
-                    <div className="flex-1 h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-sky-400/50" style={{ width: `${pct}%` }} />
+          <div className="space-y-3">
+            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-3">Forward Curve (6M)</p>
+              <div className="space-y-2">
+                {forwardData.map((d, i) => {
+                  const maxRate = Math.max(...forwardData.map(x => x.rate));
+                  const pct = (d.rate / maxRate) * 100;
+                  const prev = forwardData[i - 1];
+                  const isUp = i === 0 || !prev ? d.rate > cls.tce : d.rate > prev.rate;
+                  return (
+                    <div key={d.month} className="flex items-center gap-2">
+                      <span className="text-[10px] text-sky-400/40 w-12 shrink-0">{d.month}</span>
+                      <div className="flex-1 h-1.5 bg-sky-500/10 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full bg-sky-400/50" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-[10px] font-mono text-sky-300 w-14 text-right">${(d.rate / 1000).toFixed(1)}K</span>
+                      {isUp ? <TrendingUp className="w-3 h-3 text-emerald-400 shrink-0" /> : <TrendingDown className="w-3 h-3 text-red-400 shrink-0" />}
                     </div>
-                    <span className="text-[10px] font-mono text-sky-300 w-14 text-right">${(d.rate / 1000).toFixed(1)}K</span>
-                    {isUp ? <TrendingUp className="w-3 h-3 text-emerald-400 shrink-0" /> : <TrendingDown className="w-3 h-3 text-red-400 shrink-0" />}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-            <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-2">Key Routes — {cls.label}</p>
-            <div className="space-y-2">
-              {cls.routes.map(r => (
-                <div key={r} className="flex items-center gap-2">
-                  <Globe className="w-3 h-3 text-sky-400/30 shrink-0" />
-                  <span className="text-[11px] text-sky-300">{r}</span>
-                </div>
-              ))}
+            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+              <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-2">Key Routes — {cls.label}</p>
+              <div className="space-y-2">
+                {cls.routes.map(r => (
+                  <div key={r} className="flex items-center gap-2">
+                    <Globe className="w-3 h-3 text-sky-400/30 shrink-0" />
+                    <span className="text-[11px] text-sky-300">{r}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-sky-400" />
           <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Live Route Rates</span>
+          <span className="ml-auto text-[10px] text-sky-400/40 font-mono">{data?.asOf ? `As of ${formatAsOf(data.asOf)}` : ""}</span>
         </div>
         <div className="divide-y divide-sky-500/5">
-          {ROUTE_RATES.map(r => (
-            <div key={r.route} className="px-4 py-3 flex items-center gap-4 hover:bg-sky-500/5 transition-colors">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sky-200">{r.route}</p>
-                <p className={cn("text-[9px] mt-0.5", classColors[r.class])}>{CLASS_CONFIG[r.class as VesselClass].label}</p>
+          {routeRates.map(r => {
+            const benchmark = visibleBenchmarks.find((b) => b.key === r.classKey);
+            return (
+              <div key={r.route} className="px-4 py-3 flex items-center gap-4 hover:bg-sky-500/5 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-sky-200">{r.route}</p>
+                  <p className={cn("text-[9px] mt-0.5", classColors[r.classKey] ?? "text-sky-400/60")}>{benchmark?.label ?? r.classKey}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold font-mono text-sky-100">{r.unit === "$/day" ? `$${r.rate.toLocaleString()}` : r.rate} <span className="text-[9px] text-sky-400/40 font-normal">{r.unit}</span></p>
+                  <p className={cn("text-[10px] font-mono", r.change > 0 ? "text-emerald-400" : "text-red-400")}>
+                    {r.change > 0 ? "+" : ""}{r.change} {r.unit}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-bold font-mono text-sky-100">{typeof r.rate === "number" && r.unit === "$/day" ? `$${r.rate.toLocaleString()}` : r.rate} <span className="text-[9px] text-sky-400/40 font-normal">{r.unit}</span></p>
-                <p className={cn("text-[10px] font-mono", r.change > 0 ? "text-emerald-400" : "text-red-400")}>
-                  {r.change > 0 ? "+" : ""}{r.change} {r.unit}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
+          {routeRates.length === 0 && (
+            <div className="px-4 py-6 text-[11px] text-sky-400/50 italic text-center">Route rates unavailable.</div>
+          )}
         </div>
       </div>
     </div>
