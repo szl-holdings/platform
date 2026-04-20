@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { Play, ShieldCheck, Ship, Building2, BarChart3, Scale, ArrowRight, Eye, Layers, Monitor } from "lucide-react";
+import { Play, ShieldCheck, Ship, Building2, BarChart3, Scale, ArrowRight, Eye, Layers, Monitor, Smartphone } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -65,6 +65,18 @@ const DEMOS = [
     colorBorder: "hsla(38,72%,58%,0.22)",
     href: "/prism-counsel-public",
     cta: "See PRISM Counsel",
+  },
+  {
+    id: "mobile",
+    title: "SZL Mobile Command",
+    subtitle: "The portfolio in your pocket — no install",
+    description: "Tour the SZL Holdings Mobile Command app directly in your browser. Dashboard, portfolio health, and the Lyte command inbox — rendered as faithful in-browser phone previews. No Expo Go required.",
+    icon: Smartphone,
+    color: "hsl(38,72%,58%)",
+    colorMuted: "hsla(38,72%,58%,0.08)",
+    colorBorder: "hsla(38,72%,58%,0.22)",
+    href: "/demos/mobile",
+    cta: "Open Mobile preview",
   },
   {
     id: "alloy",

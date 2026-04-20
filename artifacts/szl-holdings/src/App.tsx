@@ -312,6 +312,7 @@ const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"))
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
+const MobilePreviewPage = lazy(() => import("@/pages/mobile-preview"));
 const ChangelogPage = lazy(() => import("@/pages/changelog"));
 const ChangelogHighlightsPage = lazy(() => import("@/pages/changelog-highlights"));
 const ProductReadinessPage = lazy(() => import("@/pages/product-readiness"));
@@ -749,6 +750,12 @@ function App() {
             </Route>
             <Route path="/demos">
               <Suspense fallback={<PageLoader />}><DemosPage /></Suspense>
+            </Route>
+            <Route path="/demos/mobile">
+              <Suspense fallback={<PageLoader />}><MobilePreviewPage /></Suspense>
+            </Route>
+            <Route path="/mobile-preview">
+              <Suspense fallback={<PageLoader />}><MobilePreviewPage /></Suspense>
             </Route>
             <Route path="/changelog">
               <Suspense fallback={<PageLoader />}><ChangelogPage /></Suspense>
