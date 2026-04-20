@@ -8,11 +8,32 @@
 
 ## Before You Change Anything
 
-1. Understand the migration strategy: **forward-only** (`drizzle-kit push`). There are no rollback migrations.
-   - **Run migrations via `pnpm migrate` from the repo root.** That script invokes `push-non-interactive`, which wraps `drizzle-kit push --force` in a non-TTY-safe runner that auto-answers rename-vs-create prompts (always picks "create new") and enforces a hard wall-clock timeout. See `lib/db/scripts/non-interactive-migrate.mjs`.
-   - **Do NOT run `pnpm --filter @szl-holdings/db push-force` directly** in workflows or CI — it will hang forever on the prompts emitted by our 700+ table schema.
-   - The package-level `pnpm --filter @szl-holdings/db migrate` script is reserved for the future SQL-file-based path (`drizzle-kit migrate`) and is **not** the same as the root `pnpm migrate` today. Use the root command unless you know exactly why you want the package-level one.
-   - In production / CI, set `DB_MIGRATE_FAIL_ON_PROMPT=1` to make the wrapper abort (exit 65) instead of silently auto-answering, so unexpected schema diffs get human review.
+1. Understand the migration strategy: **forward-only**. There are no rollback migrations.
+   - **Preferred path: `pnpm --filter @szl-holdings/db migrate`** — runs the
+     `scripts/backfill-migrations.mjs` backfill (idempotent, see below) and
+     then `drizzle-kit migrate` against the SQL files in `lib/db/drizzle/`.
+     This is fully non-interactive and safe for workflows / CI.
+   - The historical migrations (every entry in `drizzle/meta/_journal.json`)
+     were applied via `drizzle-kit push` long before a tracking table existed.
+     The backfill script seeds `drizzle.__drizzle_migrations` with the
+     `(sha256(sql), folderMillis)` rows drizzle would have written if those
+     migrations had been applied through `drizzle-kit migrate`. Running it
+     again is a no-op — it skips any `created_at` already in the table.
+   - Use `pnpm --filter @szl-holdings/db migrate:apply` if you want to run
+     just `drizzle-kit migrate` (skipping the backfill). Use
+     `pnpm --filter @szl-holdings/db migrate:backfill` to run only the
+     backfill (e.g. when bootstrapping a fresh database that already has the
+     schema from a `pg_dump` restore).
+   - **Legacy path:** `pnpm migrate` from the repo root still wraps
+     `drizzle-kit push --force` via `scripts/non-interactive-migrate.mjs`
+     for emergencies where you need to push a schema diff without first
+     generating a migration. Avoid it for normal changes — push has no
+     tracking table, no review trail, and hangs interactively on the
+     700+ table schema unless wrapped.
+   - In production / CI for the legacy push path, set
+     `DB_MIGRATE_FAIL_ON_PROMPT=1` to make the wrapper abort (exit 65)
+     instead of silently auto-answering rename-vs-create prompts, so
+     unexpected schema diffs get human review.
 2. Understand the naming convention: tables are namespaced by domain (e.g. `vessels_*`, `alloy_*`, `auth_*`).
 3. Check whether your new table concept is already represented in an existing table before creating a new one. 799 tables means there is a high chance something relevant already exists.
 
