@@ -76,6 +76,8 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: "/cognitive/planner", label: "Planner Studio", icon: GitMerge },
       { href: "/cognitive/verifier", label: "Verifier Console", icon: CheckCircle2 },
       { href: "/cognitive/reflection", label: "Reflection Console", icon: Lightbulb },
+      { href: "/cognitive/traces", label: "Trace Replay", icon: Clapperboard },
+      { href: "/cognitive/policy-sim", label: "Policy Simulation", icon: FlaskConical },
     ],
   },
 ];

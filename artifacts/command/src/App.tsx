@@ -123,6 +123,7 @@ const SubstrateCommandCenter = lazy(() => import("./pages/substrate").then(m => 
 const CognitiveTraces = lazy(() => import("./pages/cognitive/traces"));
 const CognitiveEvals = lazy(() => import("./pages/cognitive/evals"));
 const CognitivePolicies = lazy(() => import("./pages/cognitive/policies"));
+const CognitivePolicySim = lazy(() => import("./pages/cognitive/policy-sim"));
 const PolicyApprovalsPage = lazy(() => import("./pages/policy-approvals"));
 const GuardianApprovalsPage = lazy(() => import("./pages/guardian-approvals"));
 const PolicyManagerPage = lazy(() => import("./pages/policy-manager"));
@@ -292,6 +293,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: "/cognitive/traces", label: "Traces", group: "Cognitive" },
   { href: "/cognitive/evals", label: "Evals", group: "Cognitive" },
   { href: "/cognitive/policies", label: "Policies", group: "Cognitive" },
+  { href: "/cognitive/policy-sim", label: "Policy Simulation", group: "Cognitive" },
   { href: "/infrastructure", label: "Legatus Console", group: "Infrastructure" },
   { href: "/infrastructure/imperium-map", label: "Imperium Map", group: "Infrastructure" },
   { href: "/infrastructure/praetorian", label: "Praetorian Guard", group: "Infrastructure" },
@@ -515,6 +517,7 @@ function AppShell() {
               <Route path="/cognitive/traces" component={() => <CognitiveTraces />} />
               <Route path="/cognitive/evals" component={() => <CognitiveEvals />} />
               <Route path="/cognitive/policies" component={() => <CognitivePolicies />} />
+              <Route path="/cognitive/policy-sim" component={() => <CognitivePolicySim />} />
 
               <Route path="/infrastructure" component={() => <LegatusConsole />} />
               <Route path="/infrastructure/legatus" component={() => <LegatusConsole />} />
