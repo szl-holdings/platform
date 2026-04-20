@@ -315,6 +315,10 @@ export default function RunReviewScreen() {
   };
 
   const allRuns = normalizeRuns(runsQuery.data);
+  // Note: failed/stuck-run push alerts are emitted from the app-level
+  // `useRunFailureNotifier` hook mounted in `app/_layout.tsx`, so they fire
+  // regardless of which screen is active.
+
   const filteredRuns = activeFilter === "all"
     ? allRuns
     : allRuns.filter((r) => r.state === activeFilter);

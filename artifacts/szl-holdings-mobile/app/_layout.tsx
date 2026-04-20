@@ -50,6 +50,8 @@ import {
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AppModeBanner } from "@/components/AppModeBanner";
 import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
+import { useRunFailureNotifier } from "@/hooks/operations/useRunFailureNotifier";
+import { useEscalatedApprovalNotifier } from "@/hooks/operations/useEscalatedApprovalNotifier";
 import { WorkspaceProvider } from "@/context/WorkspaceContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { ScreenshotGuardProvider } from "@/context/ScreenshotGuardContext";
@@ -126,10 +128,29 @@ const DOMAIN_TO_WORKSPACE_PATH: Record<string, string> = {
   command: "/(shell)/",
 };
 
+// Maps a notification `kind` (sent by server-side push handlers and local
+// alerts for run failures / approval escalations) to a deep link in the shell.
+const KIND_TO_DEEP_LINK: Record<string, string> = {
+  approval_escalated: "/(shell)/intelligence/approval-inbox",
+  run_failed: "/(shell)/intelligence/run-review",
+  run_stuck: "/(shell)/intelligence/run-review",
+};
+
 function resolveDeepLinkRoute(data: Record<string, unknown> | undefined | null): string | null {
   if (!data) return null;
+  if (typeof data.deepLink === "string" && data.deepLink.length > 0) {
+    const r = data.deepLink;
+    if (r.startsWith("/(shell)") || r.startsWith("/")) return r;
+  }
+  if (typeof data.kind === "string" && KIND_TO_DEEP_LINK[data.kind]) {
+    return KIND_TO_DEEP_LINK[data.kind];
+  }
   if (typeof data.route === "string" && data.route.length > 0) {
     const r = data.route;
+    if (r.startsWith("/(shell)") || r.startsWith("/")) return r;
+  }
+  if (typeof data.screen === "string" && data.screen.length > 0) {
+    const r = data.screen;
     if (r.startsWith("/(shell)") || r.startsWith("/")) return r;
   }
   if (typeof data.domain === "string") {
@@ -169,8 +190,53 @@ persistQueryClient({
   buster: "v1",
 });
 
+// Module-scoped guards so cold-start notification replay only runs once per
+// process, and not again after the user opens the app normally.
+let coldStartHandled = false;
+let lastHandledNotificationId: string | null = null;
+
 function AppShell() {
   const { isLocked, isEnabled } = useBiometric();
+
+  // App-level watchers for new failed/stuck runs and newly escalated
+  // approvals — fire regardless of which screen is active.
+  useRunFailureNotifier();
+  useEscalatedApprovalNotifier();
+
+  // Cold-start: if the app was launched by tapping a notification, replay the
+  // last response once per process. We track the consumed identifier in
+  // module scope and try Expo's clear API when available so later normal
+  // launches don't re-route to a stale notification target.
+  useEffect(() => {
+    if (coldStartHandled) return;
+    coldStartHandled = true;
+    let cancelled = false;
+    (async () => {
+      try {
+        const Notifications = await import("expo-notifications");
+        const last = await Notifications.getLastNotificationResponseAsync();
+        if (cancelled || !last) return;
+        const id = last?.notification?.request?.identifier;
+        if (id && lastHandledNotificationId === id) return;
+        lastHandledNotificationId = id ?? null;
+        try {
+          const maybeClear = (Notifications as unknown as {
+            clearLastNotificationResponseAsync?: () => Promise<void>;
+          }).clearLastNotificationResponseAsync;
+          if (typeof maybeClear === "function") await maybeClear();
+        } catch {}
+        const data = last?.notification?.request?.content?.data as
+          | Record<string, unknown>
+          | undefined;
+        const target = resolveDeepLinkRoute(data);
+        if (!target) return;
+        setTimeout(() => {
+          try { router.navigate(target as never); } catch {}
+        }, 400);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   usePushNotificationsBase({
     onTokenAcquired: async (token) => {

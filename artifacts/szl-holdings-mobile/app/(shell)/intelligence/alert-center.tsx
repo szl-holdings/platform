@@ -270,6 +270,9 @@ export default function AlertCenterScreen() {
   const escalations = normalizeApprovals(escalationsQuery.data);
   const briefing = briefingQuery.data;
   const worldModelAlerts = briefing?.alerts ?? [];
+  // Note: local-push fallback for newly-escalated approvals is emitted by the
+  // app-level `useEscalatedApprovalNotifier` hook in `app/_layout.tsx` so it
+  // fires even when this screen is not mounted.
 
   const handleRefresh = () => {
     signalsQuery.refetch();

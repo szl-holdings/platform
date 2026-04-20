@@ -432,6 +432,29 @@ router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admi
       throw err;
     }
 
+    // Best-effort push to the escalation target. Recipient comes from the
+    // persisted result, not req.body, to avoid mis-targeting.
+    const persistedTarget = (updated as { escalatedToId?: number | null } | null | undefined)?.escalatedToId;
+    if (typeof persistedTarget === "number" && persistedTarget > 0) {
+      const approvalTitle = (updated as { title?: string }).title ?? "An approval";
+      const approvalId = (updated as { id?: number }).id ?? id;
+      void import("../lib/expo-push.js")
+        .then(({ sendPushToUser }) =>
+          sendPushToUser(persistedTarget, {
+            title: "Approval Escalated",
+            body: `${approvalTitle} requires your immediate review.`,
+            data: {
+              kind: "approval_escalated",
+              approvalId,
+              deepLink: "/(shell)/intelligence/approval-inbox",
+            },
+            sound: "default",
+            channelId: "critical-alerts",
+          }, { appId: "cortex" }),
+        )
+        .catch(() => undefined);
+    }
+
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to escalate approval");
