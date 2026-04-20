@@ -12,10 +12,10 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/szl-demo-video/" ]
-localPort = 8765
+localPort = 9090
 
 [services.development]
-run = "bash -c 'cd /home/runner/workspace/artifacts/szl-demo-video && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+run = "bash -c 'cd /home/runner/workspace/artifacts/szl-demo-video && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/szl-demo-video", "run", "build" ]
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "8765"
+VITE_PORT = "8765"
 BASE_PATH = "/szl-demo-video/"

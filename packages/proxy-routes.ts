@@ -25,4 +25,5 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: "/vessels/", port: 8099 },
   { prefix: "/pulse/", port: 5201 },
   { prefix: "/prism-counsel/", port: 7100 },
+  { prefix: "/szl-demo-video/", port: 8765 },
 ];
