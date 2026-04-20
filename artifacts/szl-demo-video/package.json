@@ -11,7 +11,8 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
-    "render": "node scripts/render-video.mjs"
+    "render": "node scripts/render-video.mjs",
+    "render:ci": "node scripts/render-video.mjs --install-browsers"
   },
   "devDependencies": {
     "@react-spring/web": "^10.0.3",

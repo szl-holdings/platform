@@ -87,14 +87,9 @@ export function Scene3() {
             key={i}
             className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2"
             style={{ left: node.x, top: node.y }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={phase >= 3 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
-            transition={{
-              type: 'spring',
-              stiffness: 300,
-              damping: 20,
-              delay: phase >= 3 ? i * 0.2 : 0,
-            }}
+            initial={{ opacity: 0, scale: 0.6, y: 12 }}
+            animate={phase >= 3 ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.6, y: 12 }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: phase >= 3 ? i * 0.18 : 0 }}
           >
             <div className="w-[1vw] h-[1vw] rounded-full bg-[var(--color-lyte-cyan)] mb-[1vh] shadow-[0_0_15px_var(--color-lyte-cyan)]" />
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] px-[1vw] py-[0.5vh] rounded-md backdrop-blur-md text-center shadow-xl">

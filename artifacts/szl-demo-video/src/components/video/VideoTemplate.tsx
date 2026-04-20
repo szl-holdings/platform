@@ -12,6 +12,24 @@ import { Scene3 } from './video_scenes/Scene3';
 import { Scene4 } from './video_scenes/Scene4';
 import { Scene5 } from './video_scenes/Scene5';
 
+// ── Three-act narrative structure ─────────────────────────────────────────
+//
+//  Act I  — The Problem   (open, 12s)
+//    Hook: "The era of AI without receipts is ending."
+//    Establishes the governance gap with a live trace ID reveal.
+//
+//  Act II — The Solution  (reel + fabric + cortex, 53s)
+//    reel   (25s): Tour all 10 product surfaces with animated mock UIs
+//    fabric (18s): Decision Fabric — 6 governed primitives as a live graph
+//    cortex (10s): CORTEX Mobile — cross-domain alert chain, human approval
+//
+//  Act III — The Brand    (close, 12s)
+//    Brand lockup + tagline + founder CTA. Silence is intentional.
+//
+// Total (full cut): 77s. Social cuts share the same source scenes.
+// Audio: none. Captions: burned in (CC toggle) + deliverables/captions.vtt.
+// ─────────────────────────────────────────────────────────────────────────
+
 const FULL_SCENE_DURATIONS = {
   open: 12000,
   reel: 25000,

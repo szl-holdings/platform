@@ -3,21 +3,33 @@
  * Headless renderer for the SZL Holdings — Governed Autonomy demo video.
  *
  * Pipeline:
- *   1. Build the artifact with vite (BASE_PATH=/).
- *   2. Serve dist/public on a local HTTP port.
- *   3. Launch Chromium via Playwright at 1920x1080, record video, navigate
+ *   1. Optionally install Playwright's Chromium (--install-browsers flag, for CI).
+ *   2. Build the artifact with vite (BASE_PATH=/).
+ *   3. Serve dist/public on a local HTTP port.
+ *   4. Launch Chromium via Playwright at 1920x1080, record video, navigate
  *      to the page with ?capture=full so the on-screen UI controls are hidden.
- *   4. Wait for the in-app `window.startRecording` and `window.stopRecording`
+ *   5. Wait for the in-app `window.startRecording` and `window.stopRecording`
  *      lifecycle hooks to fire (these bracket exactly one full pass of the
  *      ~77s "full" cut).
- *   5. Use ffmpeg to trim the raw .webm to the recorded window and re-encode:
- *        deliverables/linkedin-4-17.mp4         — 1920x1080 H.264 (16:9)
- *        deliverables/linkedin-4-17-square.mp4  — 1080x1080 H.264 (1:1, center crop)
- *   6. Re-zip deliverables/szl-demo-video.zip.
+ *   6. Use ffmpeg to trim the raw .webm to the recorded window and re-encode:
+ *        deliverables/linkedin-4-17.mp4              — 1920x1080 H.264 (16:9, full)
+ *        deliverables/linkedin-4-17-square.mp4       — 1080x1080 H.264 (1:1, center crop, full)
+ *        deliverables/social-30s-vertical.mp4        — 1080x1920 H.264 (9:16, first 30s)
+ *        deliverables/social-60s-vertical.mp4        — 1080x1920 H.264 (9:16, first 60s)
+ *   7. Write a WebVTT caption track: deliverables/captions.vtt
+ *   8. Re-zip all deliverables/szl-demo-video.zip.
+ *
+ * Usage:
+ *   node scripts/render-video.mjs                   # normal render
+ *   node scripts/render-video.mjs --install-browsers # CI: installs Playwright Chromium first
+ *
+ * Or via pnpm:
+ *   pnpm --filter @workspace/szl-demo-video render
+ *   pnpm --filter @workspace/szl-demo-video render:ci
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import path from 'node:path';
@@ -31,23 +43,103 @@ const DIST_DIR = path.join(ARTIFACT_DIR, 'dist', 'public');
 const DELIVERABLES_DIR = path.join(ARTIFACT_DIR, 'deliverables');
 const RAW_DIR = path.join(DELIVERABLES_DIR, '.raw');
 
-const CHROMIUM_PATHS = [
+const INSTALL_BROWSERS = process.argv.includes('--install-browsers');
+
+// ── Chromium discovery ─────────────────────────────────────────────────────
+//
+// Search order:
+//   1. PLAYWRIGHT_CHROMIUM_EXECUTABLE env var (explicit override)
+//   2. Playwright's own installed binary  (`npx playwright install chromium`)
+//   3. Known Nix store paths (scanned by glob pattern)
+//   4. System-level chromium / google-chrome
+//   5. `which chromium` fallback
+
+const EXPLICIT_PATHS = [
   process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
-  '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
   '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
   '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
 ].filter(Boolean);
 
-function findChromium() {
-  for (const p of CHROMIUM_PATHS) {
-    if (existsSync(p)) return p;
+function findChromiumInNixStore() {
+  const nixStore = '/nix/store';
+  if (!existsSync(nixStore)) return null;
+  let entries;
+  try {
+    entries = readdirSync(nixStore);
+  } catch {
+    return null;
   }
-  // Fall back to which
-  const out = spawnSync('which', ['chromium']);
-  if (out.status === 0) return out.stdout.toString().trim();
-  throw new Error('No chromium executable found.');
+  for (const entry of entries) {
+    if (!entry.includes('chromium')) continue;
+    const candidate = path.join(nixStore, entry, 'bin', 'chromium');
+    if (existsSync(candidate)) return candidate;
+  }
+  return null;
 }
 
+function findPlaywrightChromium() {
+  // Scan the Playwright browser cache directory for an installed Chromium binary.
+  // Avoids require() (not available in ESM) and internal Playwright registry APIs.
+  const HOME = process.env.HOME ?? '/root';
+  const cacheRoot = path.join(HOME, '.cache', 'ms-playwright');
+  if (!existsSync(cacheRoot)) return null;
+
+  let versions;
+  try {
+    versions = readdirSync(cacheRoot);
+  } catch {
+    return null;
+  }
+
+  const binaryRelPaths = [
+    path.join('chrome-linux', 'chrome'),
+    path.join('chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium'),
+  ];
+
+  for (const version of versions) {
+    if (!version.startsWith('chromium')) continue;
+    for (const rel of binaryRelPaths) {
+      const candidate = path.join(cacheRoot, version, rel);
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
+function findChromium() {
+  for (const p of EXPLICIT_PATHS) {
+    if (existsSync(p)) {
+      console.log(`[render] Chromium found at: ${p}`);
+      return p;
+    }
+  }
+  const nixPath = findChromiumInNixStore();
+  if (nixPath) {
+    console.log(`[render] Chromium found in Nix store: ${nixPath}`);
+    return nixPath;
+  }
+  const pwPath = findPlaywrightChromium();
+  if (pwPath) {
+    console.log(`[render] Playwright Chromium found: ${pwPath}`);
+    return pwPath;
+  }
+  const out = spawnSync('which', ['chromium'], { encoding: 'utf8' });
+  if (out.status === 0 && out.stdout.trim()) {
+    console.log(`[render] Chromium found via which: ${out.stdout.trim()}`);
+    return out.stdout.trim();
+  }
+  throw new Error(
+    'No Chromium executable found.\n' +
+    'Install one of:\n' +
+    '  • npx playwright install chromium   (recommended for CI)\n' +
+    '  • apt-get install chromium-browser\n' +
+    '  • set PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chromium\n'
+  );
+}
+
+// ── Mime types ────────────────────────────────────────────────────────────
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
@@ -93,7 +185,6 @@ function staticServer(root) {
         });
         res.end(data);
       } catch {
-        // SPA fallback
         const data = await readFile(path.join(root, 'index.html'));
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(data);
@@ -124,6 +215,28 @@ function run(cmd, args, opts = {}) {
   });
 }
 
+// ── CI setup ──────────────────────────────────────────────────────────────
+async function installBrowsers() {
+  console.log('[render] Installing Playwright Chromium (--install-browsers)…');
+  // Try --with-deps first (installs OS-level shared libraries).
+  // Some minimal/non-root CI images don't support --with-deps (requires sudo/apt);
+  // in those cases fall back to the plain install which relies on pre-installed libs.
+  try {
+    await run('npx', ['playwright', 'install', 'chromium', '--with-deps'], {
+      cwd: ARTIFACT_DIR,
+      env: { ...process.env },
+    });
+    console.log('[render] Playwright Chromium installed (with system deps).');
+  } catch {
+    console.warn('[render] --with-deps install failed; retrying without system deps…');
+    await run('npx', ['playwright', 'install', 'chromium'], {
+      cwd: ARTIFACT_DIR,
+      env: { ...process.env },
+    });
+    console.log('[render] Playwright Chromium installed (without system deps).');
+  }
+}
+
 async function buildArtifact() {
   console.log('[render] Building artifact (BASE_PATH=/)…');
   await run('npx', ['vite', 'build', '--config', 'vite.config.ts'], {
@@ -132,6 +245,7 @@ async function buildArtifact() {
   });
 }
 
+// ── Browser recording ─────────────────────────────────────────────────────
 async function recordVideo({ port }) {
   console.log('[render] Launching headless Chromium…');
   await rm(RAW_DIR, { recursive: true, force: true });
@@ -173,7 +287,6 @@ async function recordVideo({ port }) {
   });
 
   await page.addInitScript(() => {
-    // Bridge the in-page lifecycle hooks to Playwright via exposed functions.
     let started = false;
     let stoppedFlag = false;
     Object.defineProperty(window, 'startRecording', {
@@ -199,13 +312,11 @@ async function recordVideo({ port }) {
   console.log('[render] Navigating to page (capture=full)…');
   await page.goto(`http://127.0.0.1:${port}/?capture=full`, { waitUntil: 'load' });
 
-  // Safety timeout: full cut is 77s, allow up to 120s.
   const timeout = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('Timed out waiting for stopRecording (>120s)')), 120_000),
   );
 
   await Promise.race([stopped, timeout]);
-  // Add a short tail so the closing scene's last frame is captured.
   await page.waitForTimeout(800);
 
   await context.close();
@@ -218,15 +329,24 @@ async function recordVideo({ port }) {
   return { rawPath, startMs, stopMs };
 }
 
+// ── Encoding helpers ──────────────────────────────────────────────────────
+
+function h264Args(vf, outputPath) {
+  return [
+    '-vf', vf,
+    '-c:v', 'libx264',
+    '-profile:v', 'high',
+    '-level', '4.2',
+    '-preset', 'slow',
+    '-crf', '18',
+    '-pix_fmt', 'yuv420p',
+    '-movflags', '+faststart',
+    '-an',
+    outputPath,
+  ];
+}
+
 async function encode(rawPath, { startMs, stopMs }) {
-  // Compute trim points relative to context start.
-  // Playwright's video begins ~when the page is created; the in-page
-  // startRecording fires on React mount. We use the elapsed window
-  // (stopMs-startMs) as the canonical duration and trim the leading lag
-  // by seeking to the moment startRecording fired (approx).
-  // We don't know the exact context-creation time, so we keep the full
-  // raw video and use ffmpeg to trim the leading 0.4s of any blank frame
-  // and clamp the duration to (stopMs-startMs)+0.8s.
   const recordedSec = Math.max(1, (stopMs - startMs) / 1000);
   const totalSec = recordedSec + 0.8;
 
@@ -238,64 +358,152 @@ async function encode(rawPath, { startMs, stopMs }) {
 
   console.log(`[render] Encoding 1920x1080 MP4 (~${totalSec.toFixed(1)}s)…`);
   await run('ffmpeg', [
-    '-y',
-    '-ss',
-    '0.4',
-    '-i',
-    rawPath,
-    '-t',
-    String(totalSec),
-    '-vf',
-    'scale=1920:1080:flags=lanczos,fps=30,format=yuv420p',
-    '-c:v',
-    'libx264',
-    '-profile:v',
-    'high',
-    '-level',
-    '4.2',
-    '-preset',
-    'slow',
-    '-crf',
-    '18',
-    '-pix_fmt',
-    'yuv420p',
-    '-movflags',
-    '+faststart',
-    '-an',
-    mp4Wide,
+    '-y', '-ss', '0.4', '-i', rawPath, '-t', String(totalSec),
+    ...h264Args('scale=1920:1080:flags=lanczos,fps=30,format=yuv420p', mp4Wide),
   ]);
 
   console.log('[render] Encoding 1080x1080 square MP4 (center crop)…');
   await run('ffmpeg', [
-    '-y',
-    '-ss',
-    '0.4',
-    '-i',
-    rawPath,
-    '-t',
-    String(totalSec),
-    '-vf',
-    'crop=1080:1080:(in_w-1080)/2:(in_h-1080)/2,scale=1080:1080:flags=lanczos,fps=30,format=yuv420p',
-    '-c:v',
-    'libx264',
-    '-profile:v',
-    'high',
-    '-level',
-    '4.2',
-    '-preset',
-    'slow',
-    '-crf',
-    '18',
-    '-pix_fmt',
-    'yuv420p',
-    '-movflags',
-    '+faststart',
-    '-an',
-    mp4Square,
+    '-y', '-ss', '0.4', '-i', rawPath, '-t', String(totalSec),
+    ...h264Args(
+      'crop=1080:1080:(in_w-1080)/2:(in_h-1080)/2,scale=1080:1080:flags=lanczos,fps=30,format=yuv420p',
+      mp4Square,
+    ),
   ]);
 
   return { mp4Wide, mp4Square };
 }
+
+/**
+ * Produce 9:16 vertical social cuts from the full 16:9 recording.
+ *
+ * Strategy: pillarbox the 1920x1080 source to fit 1080px wide (→ 1080x607),
+ * then pad vertically to 1920px with black bars (top/bottom).
+ * This preserves all horizontal content at the expense of top/bottom black bars —
+ * appropriate for product-UI demos where the important content is centered.
+ */
+async function encodeVerticalSocialCuts(rawPath) {
+  const VERTICAL_FILTER =
+    'scale=1080:607:flags=lanczos,pad=1080:1920:0:656:black,fps=30,format=yuv420p';
+
+  const out30s = path.join(DELIVERABLES_DIR, 'social-30s-vertical.mp4');
+  const out60s = path.join(DELIVERABLES_DIR, 'social-60s-vertical.mp4');
+
+  await rm(out30s, { force: true });
+  await rm(out60s, { force: true });
+
+  console.log('[render] Encoding 9:16 vertical social cut — 30s…');
+  await run('ffmpeg', [
+    '-y', '-ss', '0.4', '-i', rawPath, '-t', '30',
+    ...h264Args(VERTICAL_FILTER, out30s),
+  ]);
+
+  console.log('[render] Encoding 9:16 vertical social cut — 60s…');
+  await run('ffmpeg', [
+    '-y', '-ss', '0.4', '-i', rawPath, '-t', '60',
+    ...h264Args(VERTICAL_FILTER, out60s),
+  ]);
+
+  return { out30s, out60s };
+}
+
+// ── WebVTT caption track ──────────────────────────────────────────────────
+//
+// Caption data is duplicated from src/components/video/CaptionTrack.tsx.
+// Scene offsets match FULL_SCENE_DURATIONS in VideoTemplate.tsx:
+//   open: 0–12s, reel: 12–37s, fabric: 37–55s, cortex: 55–65s, close: 65–77s
+
+const SCENE_OFFSETS_MS = {
+  open: 0,
+  reel: 12_000,
+  fabric: 37_000,
+  cortex: 55_000,
+  close: 65_000,
+};
+
+const SCENE_CAPTIONS = {
+  open: [
+    { startMs: 1000,  endMs: 4500,  text: 'The era of AI without receipts is ending.' },
+    { startMs: 4500,  endMs: 9000,  text: 'Every action carries a trace ID, source, freshness, and citation.' },
+    { startMs: 9000,  endMs: 12000, text: 'Provenance is not optional.' },
+  ],
+  reel: [
+    { startMs: 0,     endMs: 2500,  text: 'Pulse — executive briefing, principal eyes only.' },
+    { startMs: 2500,  endMs: 5000,  text: 'Vessels — maritime intelligence with human approval.' },
+    { startMs: 5000,  endMs: 7500,  text: 'Terra — real estate intelligence across $4.2B+ AUM.' },
+    { startMs: 7500,  endMs: 10000, text: 'Aegis — defense and intel, blocked by policy until cleared.' },
+    { startMs: 10000, endMs: 12500, text: 'Carlota Jo — private advisory, judgment-led.' },
+    { startMs: 12500, endMs: 15000, text: 'Sentra — cyber posture under guardian approval.' },
+    { startMs: 15000, endMs: 17500, text: 'Lyte — decision intelligence with confidence scores.' },
+    { startMs: 17500, endMs: 20000, text: 'PRISM Counsel — legal exposure surfaced before crisis.' },
+    { startMs: 20000, endMs: 22500, text: 'Counsel — every obligation tracked, every deadline locked.' },
+    { startMs: 22500, endMs: 25000, text: 'Unified Command — ten surfaces, one governed fabric.' },
+  ],
+  fabric: [
+    { startMs: 500,   endMs: 4000,  text: 'The Decision Fabric — a governed substrate beneath every surface.' },
+    { startMs: 4000,  endMs: 10000, text: 'Constellation, Trace, Guardian, Eval, Memory, Tools.' },
+    { startMs: 10000, endMs: 18000, text: 'Six systems. One explainable runtime.' },
+  ],
+  cortex: [
+    { startMs: 500,   endMs: 2000,  text: 'CORTEX Mobile — the pocket-cockpit.' },
+    { startMs: 2000,  endMs: 3500,  text: 'Maritime risk surfaces in real time.' },
+    { startMs: 3500,  endMs: 5000,  text: 'Cross-domain correlation links exposure across the portfolio.' },
+    { startMs: 5000,  endMs: 10000, text: 'Human approval mandatory before consequential action.' },
+  ],
+  close: [
+    { startMs: 1000,  endMs: 3000,  text: 'SZL Holdings — the Governed Decision Operating System.' },
+    { startMs: 3000,  endMs: 5000,  text: '"The era of AI-without-receipts is ending."' },
+    { startMs: 5000,  endMs: 6500,  text: 'Ten surfaces. One governed fabric.' },
+    { startMs: 6500,  endMs: 12000, text: 'Stephen Lutar, Founder & CEO — szl.com', speaker: 'SZL Holdings' },
+  ],
+};
+
+function msToVttTime(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const msPart = ms % 1000;
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+  return [
+    String(hours).padStart(2, '0'),
+    String(minutes).padStart(2, '0'),
+    String(seconds).padStart(2, '0'),
+  ].join(':') + '.' + String(msPart).padStart(3, '0');
+}
+
+async function generateWebVTT() {
+  const cues = [];
+  for (const [sceneKey, captions] of Object.entries(SCENE_CAPTIONS)) {
+    const offset = SCENE_OFFSETS_MS[sceneKey] ?? 0;
+    for (const caption of captions) {
+      cues.push({
+        start: offset + caption.startMs,
+        end: offset + caption.endMs,
+        speaker: caption.speaker,
+        text: caption.text,
+      });
+    }
+  }
+  cues.sort((a, b) => a.start - b.start);
+
+  let vtt = 'WEBVTT\nKind: captions\nLanguage: en\n\n';
+  for (let i = 0; i < cues.length; i++) {
+    const c = cues[i];
+    vtt += `${i + 1}\n`;
+    vtt += `${msToVttTime(c.start)} --> ${msToVttTime(c.end)}`;
+    if (c.speaker) vtt += ` align:center line:80%`;
+    vtt += '\n';
+    if (c.speaker) vtt += `<v ${c.speaker}>`;
+    vtt += `${c.text}\n\n`;
+  }
+
+  const vttPath = path.join(DELIVERABLES_DIR, 'captions.vtt');
+  await writeFile(vttPath, vtt, 'utf8');
+  console.log(`[render] WebVTT written: ${vttPath}`);
+  return vttPath;
+}
+
+// ── Deliverables packaging ────────────────────────────────────────────────
 
 async function rezipDeliverables() {
   const zipPath = path.join(DELIVERABLES_DIR, 'szl-demo-video.zip');
@@ -303,40 +511,62 @@ async function rezipDeliverables() {
   console.log('[render] Re-zipping deliverables/szl-demo-video.zip…');
   // The `zip` CLI is not installed in this environment, so use python3's
   // built-in zipfile module (always present).
-  await run(
-    'python3',
-    [
-      '-m',
-      'zipfile',
-      '-c',
-      'szl-demo-video.zip',
-      'linkedin-4-17.mp4',
-      'linkedin-4-17-square.mp4',
-      'README.md',
-    ],
-    { cwd: DELIVERABLES_DIR },
-  );
+  await run('python3', [
+    '-m', 'zipfile', '-c', 'szl-demo-video.zip',
+    'linkedin-4-17.mp4',
+    'linkedin-4-17-square.mp4',
+    'social-30s-vertical.mp4',
+    'social-60s-vertical.mp4',
+    'captions.vtt',
+    'README.md',
+  ], { cwd: DELIVERABLES_DIR });
   return zipPath;
 }
 
 async function writeReadme() {
   const readme = `# SZL Demo Video — Deliverables
 
-Generated by \`scripts/render-video.mjs\`.
+Generated by \`scripts/render-video.mjs\` on ${new Date().toISOString().slice(0, 10)}.
 
-| File | Format | Use |
-|------|--------|-----|
-| linkedin-4-17.mp4 | 1920x1080 H.264, 30fps, no audio | LinkedIn feed (16:9) |
-| linkedin-4-17-square.mp4 | 1080x1080 H.264, 30fps, no audio | LinkedIn feed (1:1 mobile) |
-| szl-demo-video.zip | zip of the above | bundle for upload |
+## Files
 
-Re-render with: \`pnpm --filter @workspace/szl-demo-video render\`
+| File | Format | Dimensions | Duration | Use |
+|------|--------|------------|----------|-----|
+| linkedin-4-17.mp4 | H.264, 30fps | 1920×1080 | ~77s | LinkedIn feed (16:9), investor email |
+| linkedin-4-17-square.mp4 | H.264, 30fps | 1080×1080 | ~77s | LinkedIn mobile (1:1) |
+| social-30s-vertical.mp4 | H.264, 30fps | 1080×1920 | 30s | Stories / Reels / TikTok (9:16) |
+| social-60s-vertical.mp4 | H.264, 30fps | 1080×1920 | 60s | Long-form Reels / LinkedIn Stories (9:16) |
+| captions.vtt | WebVTT | — | full | Accessibility captions (English) |
+| szl-demo-video.zip | zip | — | — | Bundle for upload / distribution |
+
+## Re-render
+
+\`\`\`bash
+# Standard (requires Chromium installed on system)
+pnpm --filter @workspace/szl-demo-video render
+
+# CI / fresh environment (installs Playwright Chromium first)
+pnpm --filter @workspace/szl-demo-video render:ci
+\`\`\`
+
+## Notes
+
+- No audio track. Silence is intentional — designed for auto-play LinkedIn contexts.
+- Captions are burned into the in-browser preview (CC button). The \`captions.vtt\` file
+  is for external players / social upload caption import.
+- Vertical (9:16) cuts are pillarboxed from the 16:9 master with black bars top/bottom.
 `;
   await writeFile(path.join(DELIVERABLES_DIR, 'README.md'), readme);
 }
 
+// ── Entry point ───────────────────────────────────────────────────────────
 async function main() {
   await mkdir(DELIVERABLES_DIR, { recursive: true });
+
+  if (INSTALL_BROWSERS) {
+    await installBrowsers();
+  }
+
   await buildArtifact();
 
   const server = staticServer(DIST_DIR);
@@ -345,15 +575,20 @@ async function main() {
 
   try {
     const { rawPath, startMs, stopMs } = await recordVideo({ port });
-    await encode(rawPath, { startMs, stopMs });
+    const { mp4Wide, mp4Square } = await encode(rawPath, { startMs, stopMs });
+    const { out30s, out60s } = await encodeVerticalSocialCuts(rawPath);
+    const vttPath = await generateWebVTT();
     await writeReadme();
     const zipPath = await rezipDeliverables();
     await rm(RAW_DIR, { recursive: true, force: true });
-    console.log('[render] Done.');
-    console.log('[render] Outputs:');
-    console.log('   ', path.join(DELIVERABLES_DIR, 'linkedin-4-17.mp4'));
-    console.log('   ', path.join(DELIVERABLES_DIR, 'linkedin-4-17-square.mp4'));
-    console.log('   ', zipPath);
+
+    console.log('\n[render] ✓ Done. Outputs:');
+    console.log('  16:9  full  →', mp4Wide);
+    console.log('  1:1   full  →', mp4Square);
+    console.log('  9:16  30s   →', out30s);
+    console.log('  9:16  60s   →', out60s);
+    console.log('  VTT         →', vttPath);
+    console.log('  Bundle      →', zipPath);
   } finally {
     server.close();
   }

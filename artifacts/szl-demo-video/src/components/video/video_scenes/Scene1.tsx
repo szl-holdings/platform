@@ -57,14 +57,9 @@ export function Scene1() {
             {traceId.map((char, i) => (
               <motion.span
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 30,
-                  delay: phase >= 3 ? i * 0.02 : 0,
-                }}
+                initial={{ opacity: 0, y: 16 }}
+                animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: phase >= 3 ? i * 0.025 : 0 }}
               >
                 {char}
               </motion.span>
@@ -72,24 +67,17 @@ export function Scene1() {
           </motion.div>
 
           <div className="flex gap-[1vw]">
-            {['SRC: AIS · S&P GLOBAL', 'FRESHNESS: 4m', 'CITATION: OFAC SDN 2026-04-12'].map(
-              (text, i) => (
-                <motion.div
-                  key={i}
-                  className="font-mono text-[0.7vw] uppercase bg-[var(--color-surface)] border border-[var(--color-border)] px-[1vw] py-[0.5vh] rounded-full text-[var(--color-text-muted)]"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={phase >= 4 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 20,
-                    delay: phase >= 4 ? i * 0.1 : 0,
-                  }}
-                >
-                  {text}
-                </motion.div>
-              ),
-            )}
+            {['SRC: AIS · S&P GLOBAL', 'FRESHNESS: 4m', 'CITATION: OFAC SDN 2026-04-12'].map((text, i) => (
+              <motion.div
+                key={i}
+                className="font-mono text-[0.7vw] uppercase bg-[var(--color-surface)] border border-[var(--color-border)] px-[1vw] py-[0.5vh] rounded-full text-[var(--color-text-muted)]"
+                initial={{ opacity: 0, y: 6 }}
+                animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: phase >= 4 ? i * 0.12 : 0 }}
+              >
+                {text}
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
