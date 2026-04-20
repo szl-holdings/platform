@@ -140,6 +140,12 @@ const PUBLIC_PREFIXES = [
   // financing stress, and neighborhood motion from live NYC open data. Public so the
   // demo works without a session; NYC SODA API calls are made server-side.
   "/api/terra/why-this-property/",
+  // Public contact form sub-paths: POST /contact/submit (lead capture from
+  // every marketing surface) and the admin-guarded /contact/requests +
+  // /contact/submissions GETs (those enforce adminGuard internally, so it is
+  // safe to bypass the global enforcer here). Bare /api/contact above is
+  // retained for the legacy fetch in szl-holdings/trust-center.
+  "/api/contact/",
   // Carlota Jo time tracking & invoice persistence — publicly accessible from the
   // time-tracking page (which is unauthenticated like the rest of the marketing
   // demo). Backed by Postgres so the data syncs across devices.
@@ -219,6 +225,43 @@ const PUBLIC_PREFIXES = [
   // etc. enforce auth via requireAuth in the route handler (not here).
   "/api/decisions/cards/",
 ];
+
+/**
+ * Returns true if the given full request path (e.g. "/api/federation/health")
+ * is whitelisted as a public endpoint by this enforcer's PUBLIC_EXACT_PATHS
+ * or PUBLIC_PREFIXES tables.
+ *
+ * Exported so other middlewares mounted further down the router tree can
+ * honor the same allowlist. Historically, group-level guards like
+ * `tenantScope({ required: true })` mounted at a path prefix
+ * (e.g. `router.use("/federation", tenantScope({...}))`) would 401 their
+ * own subset of paths even when the global enforcer would have let them
+ * through, because the allowlist only existed inside this file. Anything
+ * downstream that wants to enforce auth should consult this function
+ * first to avoid that trap.
+ */
+export function isAllowlistedPublicPath(fullPath: string): boolean {
+  if (PUBLIC_EXACT_PATHS.has(fullPath)) return true;
+  for (const prefix of PUBLIC_PREFIXES) {
+    if (fullPath === prefix || fullPath.startsWith(prefix)) return true;
+  }
+  return false;
+}
+
+/**
+ * Resolves the `/api/...` form of the request from inside any nested router.
+ * Express strips the matched prefix from `req.path` as routers are descended,
+ * so `req.path` alone is `/command-feed` for a tenantScope mounted at
+ * `/cortex` under `/api`. Concatenating `req.baseUrl` recovers the original
+ * shape that this file's allowlist is keyed on.
+ */
+export function fullApiPath(req: Request): string {
+  const base = req.baseUrl ?? "";
+  const path = req.path ?? "";
+  if (!base) return path;
+  if (path === "/" || path === "") return base;
+  return base + path;
+}
 
 function isValidInternalToken(req: Request): boolean {
   const header = req.headers["x-internal-token"];
@@ -356,16 +399,9 @@ export function globalAuthEnforcer(
 
   const path = req.path;
 
-  if (PUBLIC_EXACT_PATHS.has(path)) {
+  if (isAllowlistedPublicPath(path)) {
     next();
     return;
-  }
-
-  for (const prefix of PUBLIC_PREFIXES) {
-    if (path === prefix || path.startsWith(prefix)) {
-      next();
-      return;
-    }
   }
 
   // Lyte Decision Replay sub-paths: /api/lyte/decision-replay/:id

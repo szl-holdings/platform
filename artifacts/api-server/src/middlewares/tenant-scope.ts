@@ -30,6 +30,7 @@ import type { Request, Response, NextFunction } from "express";
 import { db, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 import type { AuthenticatedUser } from "./auth";
+import { isAllowlistedPublicPath, fullApiPath } from "./global-auth-enforcer";
 
 declare global {
   namespace Express {
@@ -87,6 +88,17 @@ export function tenantScope(options: { required?: boolean } = {}) {
 
       if (!user) {
         if (required) {
+          // Honor the global public allowlist: if globalAuthEnforcer would
+          // have let this request through unauthenticated, we must not 401
+          // it here. Without this check, any allowlisted endpoint mounted
+          // under a tenantScope-gated prefix (e.g. /federation/health under
+          // `router.use("/federation", tenantScope({...}))`) would return a
+          // misleading 401 even though it is supposed to be public. See
+          // global-auth-enforcer.ts for the rationale.
+          if (isAllowlistedPublicPath(fullApiPath(req))) {
+            next();
+            return;
+          }
           res.status(401).json({ error: "Authentication required" });
           return;
         }
