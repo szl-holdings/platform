@@ -87,6 +87,7 @@ const AdminDesignPartnersPage = lazy(() => import("@/pages/admin-design-partners
 const PipelineCommandPage = lazy(() => import("@/pages/pipeline-command"));
 const AdminGrowthCommandPage = lazy(() => import("@/pages/admin-growth-command"));
 const OpsPage = lazy(() => import("@/pages/ops"));
+const OpsWorkflowsPage = lazy(() => import("@/pages/ops-workflows"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
 const TenantBrandingPage = lazy(() => import("@/pages/tenant-branding"));
@@ -1050,6 +1051,9 @@ function App() {
             </Route>
             <Route path="/ops/dependency-map">
               <RequireAuth><Suspense fallback={<PageLoader />}><OpsDependencyMapPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/ops/workflows">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsWorkflowsPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/ops">
               <RequireAuth><Suspense fallback={<PageLoader />}><OpsPage /></Suspense></RequireAuth>

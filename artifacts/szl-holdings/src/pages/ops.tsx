@@ -20,6 +20,7 @@ import {
   Bell,
   BookOpen,
   GitMerge,
+  Workflow,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +118,14 @@ const OPS_SECTIONS = [
     icon: GitMerge,
     path: "/ops/dependency-map",
     description: "Service dependency visualization",
+    external: true,
+  },
+  {
+    id: "workflows",
+    label: "Workflows",
+    icon: Workflow,
+    path: "/ops/workflows",
+    description: "Live workflow runs, approval gates, and proof envelopes",
     external: true,
   },
   {
