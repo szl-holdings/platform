@@ -143,6 +143,7 @@ The Proof Chain is append-only. Corruption — by definition — implies tamperi
 |------|-----------|-------|---------------|
 | Backup script execution (`backup-db.sh`) | Nightly automated via `.github/workflows/backup.yml` | DevOps | 2026-04-20 (first DR drill) |
 | Database restore to scratch schema | Quarterly (manual drill) | DBA | 2026-04-20 (first DR drill — see `docs/operations/dr-drill-2026-04-20.md`) |
+| **Object-storage restore-from-cloud drill** | **Quarterly** (recurring item; see drill template §3 Step 7) | DevOps | 2026-04-20 (first execution against `local-fs` transport pipeline; **first execution against real Azure Blob scheduled 2026-07-01**) |
 | Point-in-time recovery (Pro) | Quarterly | DBA | TBD per cohort — requires Azure PostgreSQL Flexible Server |
 | Cross-region failover (Enterprise) | Annually with each Enterprise customer; tabletop quarterly | DevOps + Customer | Per customer onboarding |
 | Object storage soft-delete restore | Quarterly | DevOps | TBD |
@@ -187,18 +188,42 @@ If the Azure secrets are absent the workflow logs a warning, falls back to artif
 The end-to-end restore path is exercised by `scripts/backup-restore.sh`:
 
 ```bash
-# Restore the most recent remote backup into a scratch schema
-DATABASE_URL=$DATABASE_URL \
+# 1. Provision a clean scratch DATABASE (not just a schema — see note below)
+#    with the public schema empty and required extensions installed.
+SCRATCH=dr_scratch_$(date +%s)
+psql "$DATABASE_URL" -c "CREATE DATABASE $SCRATCH;"
+PGDATABASE=$SCRATCH psql -c "DROP SCHEMA public CASCADE;
+                              CREATE SCHEMA public;
+                              CREATE EXTENSION IF NOT EXISTS vector;"
+
+# 2. Restore the most recent remote backup into the scratch database.
+PGDATABASE=$SCRATCH \
   BACKUP_REMOTE_BACKEND=azure-blob \
   AZURE_STORAGE_CONNECTION_STRING=... \
   AZURE_STORAGE_CONTAINER=szl-backups \
-  ./scripts/backup-restore.sh --latest --target-schema restore_scratch
+  ./scripts/backup-restore.sh --latest --target-schema public
 
-# Restore a specific filename
-./scripts/backup-restore.sh daily_20260420T020000Z.sql.gz --target-schema restore_scratch
+# 3. Verify integrity (sample row counts vs source) then drop the scratch DB.
+PGDATABASE=$SCRATCH psql -tAc "SELECT COUNT(*) FROM entity_relationships;"
+psql "$DATABASE_URL"  -c   "DROP DATABASE $SCRATCH;"
 ```
 
 The script downloads the blob, verifies gzip integrity, rewrites the dump's `search_path` to the target schema, and pipes it into `psql` with `ON_ERROR_STOP=1`. The transport pipeline (upload, rotation, download, verification) is regression-tested by `tests/scripts/backup-upload-restore.test.sh` using the `local-fs` backend, which runs without cloud credentials in CI.
+
+**Required extensions:** `pgvector` (`CREATE EXTENSION vector`) — must be present in the scratch database before replay; the dump references `public.vector(1024)` columns but does not emit a `CREATE EXTENSION` statement that the restoring role can execute on managed PostgreSQL.
+
+**Note on `--target-schema` (finding from 2026-04-20 DR drill):** Current `pg_dump` output uses `SELECT pg_catalog.set_config('search_path','',false);` and fully-qualified `public.<table>` identifiers, so the search_path rewrite in `scripts/backup-restore.sh` only relocates the dump if the target schema is also named `public`. For scratch restores, **provision a separate database** as shown above rather than a side schema in the live database. (Tracked as a follow-up to either fix or remove the flag.)
+
+**Quarterly drill cadence:** The object-storage restore-from-cloud drill is a recurring quarterly DR item (see `docs/operations/dr-drill-2026-04-20.md` §3 Step 7). Each execution records elapsed time per sub-step and feeds back into the RTO targets below.
+
+#### Measured RTO calibration (from object-storage restore drills)
+
+| Drill date | Backend | Dump size | Tables | Download + gzip verify | psql replay | Total restore wall-clock | Row-count drift |
+|------------|---------|-----------|--------|------------------------|-------------|--------------------------|-----------------|
+| 2026-04-20 | local-fs (transport pipeline) | 63 MB compressed | 724 | 5 sec | 106 sec | ~2 min 23 sec | 0 |
+| 2026-07-01 | azure-blob (planned) | TBD | TBD | TBD | TBD | TBD | TBD |
+
+These measurements confirm that for current dump sizes (≤ ~100 MB compressed), the **Pilot tier RTO target of < 8 hours is met by a wide margin** (observed ~2.5 min restore + < 30 min app reconnect ≪ 8 h). Restore time scales roughly linearly with dump size; at the current growth rate we have headroom to ~200× before approaching the 8-hour Pilot target. Pro and Enterprise tier targets continue to require Azure PostgreSQL Flexible Server with WAL streaming + cross-region replicas (production architecture target; not exercised on Replit-managed PostgreSQL).
 
 ---
 
@@ -237,6 +262,7 @@ From [KNOWN-GAPS.md](known-gaps.md) and updated after 2026-04-20 DR drill:
 - **Hourly WAL streaming (Pro tier RPO)** — Replit-managed PostgreSQL does not expose WAL streaming. 4-hour RPO target for Pro tier requires Azure PostgreSQL Flexible Server in production. Not a silent gap; production architecture targets Azure.
 - **Cross-region failover runbook not yet executed against live load** — planned tabletop scheduled per first Enterprise customer provisioning.
 - **Object storage backup target configured** — RESOLVED (task #2679). Nightly backups are now shipped to Azure Blob via `scripts/backup-upload.sh`, with 30-day daily / 90-day weekly remote rotation enforced after each run. Restore path (`scripts/backup-restore.sh`) downloads from object storage and replays into a scratch schema. Transport plumbing is regression-tested by `tests/scripts/backup-upload-restore.test.sh`. Encryption at rest uses Microsoft-managed keys; CMK/BYOK remains FY27 roadmap.
+- **Quarterly object-storage restore-from-cloud drill** — added to the DR drill template as a recurring item (task #2692). First execution recorded 2026-04-20 against the regression-tested `local-fs` transport pipeline (~2 min 23 sec total restore wall-clock for a 63 MB / 724-table dump, zero row-count drift). First execution against **real Azure Blob** scheduled for the 2026-07-01 drill cycle; blocked only on attaching `AZURE_STORAGE_CONNECTION_STRING` and `AZURE_STORAGE_CONTAINER` workspace secrets. RTO calibration table populated in §"Restoring from Object Storage".
 - **Customer BYOK for backup encryption** — not yet implemented; FY27 roadmap.
 
 These gaps are documented honestly. They do not represent silent risk.
