@@ -927,6 +927,15 @@ function buildGatewayStreamUrl(filters: GatewayEventFilters): string {
   return `/api/agent-mesh/gateway/stream${buildGatewayQuery(filters)}`;
 }
 
+// Browser-side trigger for the CSV export endpoint. The endpoint sets
+// Content-Disposition: attachment, so we just need to navigate to it
+// in a way that doesn't replace the dashboard. We use a hidden anchor
+// click with the same query params the chips already send to
+// /agent-mesh/gateway, so the export honors the active filter set.
+export function buildGatewayExportUrl(filters: GatewayEventFilters = {}): string {
+  return `/api/agent-mesh/gateway/export.csv${buildGatewayQuery(filters)}`;
+}
+
 export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgentMeshGatewayResult {
   const [gateway, setGateway] = useState<McpGatewayConfig>(agentMesh.gateway);
   const [gatewayEvents, setGatewayEvents] = useState<GatewayEvent[]>(agentMesh.gatewayEvents);

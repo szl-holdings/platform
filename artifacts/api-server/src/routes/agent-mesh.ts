@@ -5,7 +5,9 @@ import { runMeshScan, loadMeshState } from "../services/agent-mesh-collector";
 import {
   getGatewayLiveSummary,
   getGatewayLatencyBreakdown,
+  getGatewayEventsForExport,
   type GatewayLiveSummaryFilters,
+  type GatewayExportRow,
 } from "./mcp-gateway";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
@@ -145,6 +147,70 @@ router.get("/agent-mesh/gateway/stream", (req: Request, res: Response) => {
     } else {
       res.end();
     }
+  }
+});
+
+// CSV export of the gateway event stream, scoped by the same filter
+// query params as /agent-mesh/gateway. Returns *every* matching row
+// (capped at GATEWAY_EXPORT_MAX_ROWS in the loader), not just the 50
+// the dashboard renders. Operators trigger this from the "Download CSV"
+// button next to the filter chips.
+const CSV_COLUMNS: Array<keyof GatewayExportRow> = [
+  "occurredAt",
+  "decision",
+  "ruleId",
+  "agentClass",
+  "mcpServerId",
+  "tool",
+  "egressDomain",
+  "reason",
+  "linkedExposureId",
+];
+
+function csvEscape(value: string | null | undefined): string {
+  if (value == null) return "";
+  // Quote any field containing a delimiter, quote, or newline. Inside a
+  // quoted field, double-quotes must be doubled per RFC 4180.
+  const s = String(value);
+  if (/[",\r\n]/.test(s)) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function buildCsv(rows: GatewayExportRow[]): string {
+  const lines: string[] = [CSV_COLUMNS.join(",")];
+  for (const row of rows) {
+    lines.push(CSV_COLUMNS.map((c) => csvEscape(row[c])).join(","));
+  }
+  // Trailing newline — Excel and most CSV parsers expect one.
+  return lines.join("\r\n") + "\r\n";
+}
+
+router.get("/agent-mesh/gateway/export.csv", async (req: Request, res: Response) => {
+  try {
+    const filters: GatewayLiveSummaryFilters = {};
+    const decisionRaw = readQueryString(req, "decision");
+    if (decisionRaw && VALID_GATEWAY_DECISIONS.has(decisionRaw as GatewayDecisionFilter as never)) {
+      filters.decision = decisionRaw as GatewayDecisionFilter;
+    }
+    const agentClass = readQueryString(req, "agentClass");
+    if (agentClass) filters.agentClass = agentClass;
+    const ruleId = readQueryString(req, "ruleId");
+    if (ruleId) filters.ruleId = ruleId;
+
+    const rows = await getGatewayEventsForExport(filters);
+    const csv = buildCsv(rows);
+
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = `gateway-events-${ts}.csv`;
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Cache-Control", "no-store");
+    res.status(200).send(csv);
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh] gateway csv export failed");
+    res.status(500).json({ error: "agent-mesh gateway export unavailable" });
   }
 });
 

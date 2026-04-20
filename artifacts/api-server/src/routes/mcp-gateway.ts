@@ -331,6 +331,63 @@ export async function getGatewayLiveSummary(
   };
 }
 
+// Cap a single export at 50k rows so a runaway query can't blow up
+// memory or hold the response open for minutes. The Containment Rules
+// dashboard surfaces the filter chips, so operators can narrow down
+// further if they need a deeper slice.
+const GATEWAY_EXPORT_MAX_ROWS = 50_000;
+
+export interface GatewayExportRow {
+  occurredAt: string;
+  decision: Decision;
+  ruleId: string;
+  agentClass: string;
+  mcpServerId: string;
+  tool: string;
+  egressDomain: string | null;
+  reason: string;
+  linkedExposureId: string | null;
+}
+
+export async function getGatewayEventsForExport(
+  filters: GatewayLiveSummaryFilters = {},
+): Promise<GatewayExportRow[]> {
+  await ensureSeeded();
+  const filterConditions = [
+    filters.decision ? eq(agentMeshGatewayEventsTable.decision, filters.decision) : undefined,
+    filters.agentClass ? eq(agentMeshGatewayEventsTable.agentClass, filters.agentClass) : undefined,
+    filters.ruleId ? eq(agentMeshGatewayEventsTable.ruleId, filters.ruleId) : undefined,
+  ].filter((c): c is NonNullable<typeof c> => c !== undefined);
+  const whereClause = filterConditions.length > 0 ? and(...filterConditions) : undefined;
+  const baseQuery = db
+    .select({
+      occurredAt: agentMeshGatewayEventsTable.occurredAt,
+      decision: agentMeshGatewayEventsTable.decision,
+      ruleId: agentMeshGatewayEventsTable.ruleId,
+      agentClass: agentMeshGatewayEventsTable.agentClass,
+      mcpServerId: agentMeshGatewayEventsTable.mcpServerId,
+      tool: agentMeshGatewayEventsTable.tool,
+      egressDomain: agentMeshGatewayEventsTable.egressDomain,
+      reason: agentMeshGatewayEventsTable.reason,
+      linkedExposureId: agentMeshGatewayEventsTable.linkedExposureId,
+    })
+    .from(agentMeshGatewayEventsTable)
+    .orderBy(desc(agentMeshGatewayEventsTable.occurredAt))
+    .limit(GATEWAY_EXPORT_MAX_ROWS);
+  const rows = whereClause ? await baseQuery.where(whereClause) : await baseQuery;
+  return rows.map((r) => ({
+    occurredAt: r.occurredAt instanceof Date ? r.occurredAt.toISOString() : String(r.occurredAt),
+    decision: r.decision as Decision,
+    ruleId: r.ruleId,
+    agentClass: r.agentClass,
+    mcpServerId: r.mcpServerId,
+    tool: r.tool,
+    egressDomain: r.egressDomain ?? null,
+    reason: r.reason,
+    linkedExposureId: r.linkedExposureId ?? null,
+  }));
+}
+
 export interface GatewayLatencyBucket {
   mcpServerId: string;
   tool: string | null;

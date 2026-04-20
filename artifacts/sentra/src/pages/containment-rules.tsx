@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Shield, Plus, AlertTriangle, CheckCircle2, Edit2, Server, Globe,
-  Activity, Ban, Lock, Radio, ShieldOff, Clock, X, Gauge,
+  Activity, Ban, Lock, Radio, ShieldOff, Clock, X, Gauge, Download,
 } from "lucide-react";
 import {
   useAgentMesh,
   useAgentMeshGateway,
   useAgentMeshGatewayLatency,
+  buildGatewayExportUrl,
   type EnforcementMode,
   type GatewayDecisionFilter,
   type GatewayLatencyBucket,
@@ -741,6 +742,28 @@ export default function ContainmentRules() {
               )}
             </div>
           )}
+          <div className="flex items-center justify-between gap-2 pt-1">
+            <span className="text-[9px] font-mono uppercase text-slate-600">
+              Export honors active filters · up to 50,000 rows
+            </span>
+            <a
+              href={buildGatewayExportUrl(gatewayFilters)}
+              // download attribute is a hint — the server already sets
+              // Content-Disposition: attachment, so the browser will save
+              // the file regardless. Open in same tab to keep behavior
+              // consistent with other download links in the dashboard.
+              download
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono uppercase border border-slate-700 bg-slate-800/40 text-slate-200 hover:bg-slate-700/60 hover:text-white transition-colors"
+              title={
+                hasActiveFilter
+                  ? "Download every event matching the active filters as CSV"
+                  : "Download every gateway event as CSV"
+              }
+            >
+              <Download className="w-3 h-3" />
+              Download CSV
+            </a>
+          </div>
         </div>
 
         <div className="space-y-1.5">
