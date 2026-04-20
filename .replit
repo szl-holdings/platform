@@ -42,6 +42,10 @@ args = "lyte-metrics-store: service"
 task = "workflow.run"
 args = "lyte-metrics-store-test"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "shared-proxy"
+
 [[workflows.workflow]]
 name = "artifacts/lyte-command-center: web"
 author = "agent"
@@ -95,6 +99,18 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "bash -c 'cd /home/runner/workspace/services/lyte-metrics-store && PYTHONPATH=src python -m pytest -q tests/ && cd /home/runner/workspace/services/substrate-py-workers && PYTHONPATH=src python -m pytest -q tests/test_lyte_metrics_store_e2e.py tests/test_retrieval_adapter.py'"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "shared-proxy"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node /home/runner/workspace/scripts/shared-proxy.mjs"
+waitForPort = 9090
 
 [workflows.workflow.metadata]
 outputType = "console"
