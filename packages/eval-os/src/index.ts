@@ -36,3 +36,20 @@ export {
 } from "@workspace/eval-forge";
 
 export const EVAL_OS_VERSION = "1.0.0" as const;
+
+export {
+  createToolEvalSuite,
+  createPromptEvalSuite,
+  createEndToEndEvalSuite,
+  captureRunForReplay,
+  getReplayManifest,
+  listReplayableRuns,
+  replayRunAsEval,
+  AGENTS_EVALS_VERSION,
+} from "@workspace/agents-evals";
+export type {
+  ToolEvalCase,
+  PromptEvalCase,
+  CapturedStepIO,
+  RunReplayManifest,
+} from "@workspace/agents-evals";

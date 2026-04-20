@@ -45,3 +45,22 @@ export {
   ToolExecutor,
 } from "./executor.js";
 export type { ExecutionRecord, ExecuteOptions } from "./executor.js";
+
+export {
+  defineTool,
+  isTypedTool,
+  registerTypedTool,
+  getTypedTool,
+  listTypedTools,
+  defaultTypedToolRegistry,
+  InMemoryTypedToolRegistry,
+  TypedToolGateway,
+  defaultTypedToolGateway,
+  AGENTS_TOOLS_VERSION,
+} from "@workspace/agents-tools";
+export type {
+  TypedTool,
+  TypedToolRegistry,
+  TypedToolInvocationContext,
+  TypedToolInvocationResult,
+} from "@workspace/agents-tools";

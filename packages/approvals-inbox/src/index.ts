@@ -8,8 +8,13 @@
  * actor, timestamp. Acts as the single source of truth for approval state
  * across surfaces (Decision Center, Run Console, Policy Center).
  *
+ * Phase 4 extension: adds pending approval request lifecycle so agents-core
+ * can write a PendingApprovalRequest on gate entry, and operators can see and
+ * act on pending requests in the same inbox UI.
+ *
  * Usage:
  *   import { submitApprovalAction, getApprovalForRecommendation } from "@workspace/approvals-inbox";
+ *   import { submitPendingApprovalRequest, resolvePendingApprovalRequest } from "@workspace/approvals-inbox";
  */
 
 export type ApprovalVerdict = "approved" | "rejected" | "escalated";
@@ -35,8 +40,48 @@ export interface SubmitApprovalOptions {
   surface?: string;
 }
 
+export type PendingApprovalStatus = "pending" | "approved" | "rejected" | "timed_out" | "escalated";
+
+export interface PendingApprovalRequest {
+  id: string;
+  runId: string;
+  stepId: string;
+  stepName: string;
+  toolId?: string;
+  action: string;
+  justification: string;
+  projectedImpact: string;
+  projectedRisk: string;
+  requestedBy: string;
+  domain: string;
+  surface: string;
+  submittedAt: number;
+  expiresAt: number;
+  status: PendingApprovalStatus;
+  resolvedAt?: number;
+  resolvedBy?: string;
+  resolutionNote?: string;
+}
+
+export interface SubmitPendingApprovalRequestOptions {
+  runId: string;
+  stepId: string;
+  stepName: string;
+  toolId?: string;
+  action: string;
+  justification: string;
+  projectedImpact: string;
+  projectedRisk: string;
+  requestedBy?: string;
+  domain?: string;
+  surface?: string;
+  timeoutMs?: number;
+}
+
 const _inbox: ApprovalAction[] = [];
 let _seq = 1000;
+
+const _pendingRequests = new Map<string, PendingApprovalRequest>();
 
 function makeProofRef(verdict: ApprovalVerdict): string {
   const prefix = verdict === "approved" ? "APP" : verdict === "rejected" ? "REJ" : "ESC";
@@ -61,7 +106,93 @@ export function submitApprovalAction(
     surface: options?.surface ?? "lyte",
   };
   _inbox.push(action);
+
+  const pending = _pendingRequests.get(recommendationId);
+  if (pending && pending.status === "pending") {
+    pending.status = verdict === "approved" ? "approved" : verdict === "rejected" ? "rejected" : "escalated";
+    pending.resolvedAt = Date.now();
+    pending.resolvedBy = options?.actor;
+    pending.resolutionNote = options?.note;
+  }
+
   return action;
+}
+
+export function submitPendingApprovalRequest(options: SubmitPendingApprovalRequestOptions): PendingApprovalRequest {
+  const id = `${options.runId}::${options.stepId}`;
+  const existing = _pendingRequests.get(id);
+  if (existing && existing.status === "pending") {
+    return existing;
+  }
+
+  const now = Date.now();
+  const timeoutMs = options.timeoutMs ?? 5 * 60_000;
+
+  const request: PendingApprovalRequest = {
+    id,
+    runId: options.runId,
+    stepId: options.stepId,
+    stepName: options.stepName,
+    toolId: options.toolId,
+    action: options.action,
+    justification: options.justification,
+    projectedImpact: options.projectedImpact,
+    projectedRisk: options.projectedRisk,
+    requestedBy: options.requestedBy ?? "agents-core",
+    domain: options.domain ?? "agents-core",
+    surface: options.surface ?? "run-console",
+    submittedAt: now,
+    expiresAt: now + timeoutMs,
+    status: "pending",
+  };
+
+  _pendingRequests.set(id, request);
+  return request;
+}
+
+export function resolvePendingApprovalRequest(
+  runId: string,
+  stepId: string,
+  verdict: ApprovalVerdict,
+  options?: { actor?: string; note?: string; simulationId?: string },
+): ApprovalAction | undefined {
+  const id = `${runId}::${stepId}`;
+  const pending = _pendingRequests.get(id);
+  if (!pending || pending.status !== "pending") return undefined;
+
+  return submitApprovalAction(id, verdict, {
+    actor: options?.actor,
+    note: options?.note,
+    simulationId: options?.simulationId,
+    domain: pending.domain,
+    surface: pending.surface,
+  });
+}
+
+export function getPendingApprovalRequests(filter?: {
+  status?: PendingApprovalStatus;
+  domain?: string;
+  runId?: string;
+}): readonly PendingApprovalRequest[] {
+  let results = Array.from(_pendingRequests.values());
+  if (filter?.status) results = results.filter((r) => r.status === filter.status);
+  if (filter?.domain) results = results.filter((r) => r.domain === filter.domain);
+  if (filter?.runId) results = results.filter((r) => r.runId === filter.runId);
+  return results;
+}
+
+export function getPendingApprovalRequest(runId: string, stepId: string): PendingApprovalRequest | undefined {
+  return _pendingRequests.get(`${runId}::${stepId}`);
+}
+
+export function markPendingApprovalTimedOut(runId: string, stepId: string): void {
+  const id = `${runId}::${stepId}`;
+  const pending = _pendingRequests.get(id);
+  if (pending && pending.status === "pending") {
+    pending.status = "timed_out";
+    pending.resolvedAt = Date.now();
+    pending.resolvedBy = "system:timeout";
+  }
 }
 
 export function getApprovalActions(): readonly ApprovalAction[] {
@@ -80,11 +211,18 @@ export function clearApprovalInbox(): void {
   _inbox.length = 0;
 }
 
+export function clearPendingApprovalRequests(): void {
+  _pendingRequests.clear();
+}
+
 export function getInboxStats() {
+  const pending = Array.from(_pendingRequests.values());
   return {
     total: _inbox.length,
     approved: _inbox.filter(a => a.verdict === "approved").length,
     rejected: _inbox.filter(a => a.verdict === "rejected").length,
     escalated: _inbox.filter(a => a.verdict === "escalated").length,
+    pending: pending.filter((r) => r.status === "pending").length,
+    pendingTotal: pending.length,
   };
 }

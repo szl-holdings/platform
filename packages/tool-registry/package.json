@@ -16,6 +16,7 @@
     "./executor": "./src/executor.ts"
   },
   "dependencies": {
+    "@workspace/agents-tools": "workspace:*",
     "pino": "^9"
   },
   "devDependencies": {

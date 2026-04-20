@@ -26,3 +26,6 @@ export {
   type EvalRunReport as ForgeEvalRunReport,
   type EvalSuiteDef as ForgeEvalSuiteDef,
 } from "@workspace/eval-forge";
+
+// Consumers seeking createToolEvalSuite, createPromptEvalSuite, replayRunAsEval, etc.
+// should import directly from @workspace/agents-evals (Phase 4 migration target).

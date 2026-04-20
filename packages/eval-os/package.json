@@ -65,6 +65,7 @@
   "dependencies": {
     "@szl-holdings/evals-core": "workspace:*",
     "@workspace/eval-forge": "workspace:*",
+    "@workspace/agents-evals": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
