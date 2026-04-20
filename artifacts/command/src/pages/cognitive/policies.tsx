@@ -91,20 +91,24 @@ interface ApiPolicy {
   updatedAt?: string;
 }
 
-interface ApiIncident {
+interface ApiRollbackEvent {
   id: number;
-  severity?: string;
-  incidentType?: string;
-  title?: string;
-  description?: string;
+  actionId?: string;
+  requestId?: string;
   agentId?: string;
-  resourceType?: string;
-  resourceId?: string;
-  resolution?: string;
-  resolvedBy?: string;
-  resolvedAt?: string;
+  orgId?: number;
+  tier?: string;
+  triggeredBy?: string;
+  reason?: string;
+  status?: string;
   createdAt?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> & {
+    domain?: string;
+    route?: string;
+    previousTier?: string;
+    revertedTier?: string;
+    incidentRef?: string;
+  };
 }
 
 interface ApiGuardianAction {
@@ -160,21 +164,26 @@ const SEEDED_ROLLBACK_EVENTS: RollbackEvent[] = [
   { id: "rb-003", domain: "cross-domain", route: "/cross-domain/data-export", reason: "Data export tool executed against unvalidated tenant scope — potential cross-tenant data exposure, blocked immediately", rolledBackBy: "System", rolledBackAt: "2025-04-16T07:22:00Z", previousTier: "supervised", revertedTier: "read-only", incidentRef: "SEC-2025-0041" },
 ];
 
-function apiIncidentToRollback(a: ApiIncident, index: number): RollbackEvent {
-  const domain = (a.metadata?.domain as string) ?? (a.resourceType ?? "cross-domain");
-  const route = (a.metadata?.route as string) ?? (a.resourceId ? `/${a.resourceType ?? "agent"}/${a.resourceId}` : "/unknown");
-  const previousTier = (a.metadata?.previousTier as AutonomyTier) ?? "autonomous";
-  const revertedTier = (a.metadata?.revertedTier as AutonomyTier) ?? "supervised";
+function apiRollbackEventToRollback(e: ApiRollbackEvent): RollbackEvent {
+  const md = e.metadata ?? {};
+  const tierFromApi = (GUARDIAN_TIER_TO_AUTONOMY[e.tier ?? ""] as AutonomyTier | undefined);
+  const previousTier = (GUARDIAN_TIER_TO_AUTONOMY[md.previousTier ?? ""] as AutonomyTier | undefined)
+    ?? tierFromApi
+    ?? "autonomous";
+  const revertedTier = (GUARDIAN_TIER_TO_AUTONOMY[md.revertedTier ?? ""] as AutonomyTier | undefined)
+    ?? "supervised";
+  const domain = (md.domain ?? "cross-domain").toLowerCase();
+  const route = md.route ?? (e.actionId ? `/action/${e.actionId}` : `/agent/${e.agentId ?? "unknown"}`);
   return {
-    id: `api-inc-${a.id}`,
-    domain: domain.toLowerCase(),
+    id: `rb-${e.id}`,
+    domain,
     route,
-    reason: a.description ?? a.title ?? `Governance incident #${a.id}`,
-    rolledBackBy: a.resolvedBy ?? `Agent #${a.agentId ?? "?"}`,
-    rolledBackAt: a.resolvedAt ?? a.createdAt ?? new Date().toISOString(),
+    reason: e.reason ?? `Rollback event #${e.id}`,
+    rolledBackBy: e.triggeredBy ?? `Agent #${e.agentId ?? "?"}`,
+    rolledBackAt: e.createdAt ?? new Date().toISOString(),
     previousTier,
     revertedTier,
-    incidentRef: `INC-${String(a.id).padStart(7, "0")}`,
+    incidentRef: md.incidentRef ?? `RB-${String(e.id).padStart(7, "0")}`,
   };
 }
 
@@ -234,9 +243,9 @@ export default function CognitivePolicies() {
     staleTime: 120_000,
   });
 
-  const incidentsQuery = useStandardQuery<{ data: ApiIncident[]; meta?: { count?: number } }>({
-    queryKey: ["cognitive", "incidents"],
-    queryFn: () => fetchJson(apiUrl("/incidents?limit=50")),
+  const rollbackEventsQuery = useStandardQuery<{ data: ApiRollbackEvent[]; meta?: { total?: number } }>({
+    queryKey: ["cognitive", "rollback-events"],
+    queryFn: () => fetchJson(apiUrl("/rollback-events?limit=50")),
     retry: 1,
     staleTime: 60_000,
   });
@@ -331,9 +340,9 @@ export default function CognitivePolicies() {
   const activeAllowlistModel = hasLiveAllowlistData ? liveModelAllowlist : SEEDED_ALLOWLIST.filter(e => e.category === "model");
   const activeAllowlistTool = hasLiveAllowlistData ? liveToolAllowlist : SEEDED_ALLOWLIST.filter(e => e.category === "tool");
 
-  const apiIncidents = (incidentsQuery.data?.data ?? []).map((a, i) => apiIncidentToRollback(a, i));
-  const rollbackEvents: RollbackEvent[] = apiIncidents.length > 0 ? apiIncidents : SEEDED_ROLLBACK_EVENTS;
-  const isLiveIncidents = apiIncidents.length > 0;
+  const apiRollbacks = (rollbackEventsQuery.data?.data ?? []).map(apiRollbackEventToRollback);
+  const rollbackEvents: RollbackEvent[] = apiRollbacks.length > 0 ? apiRollbacks : SEEDED_ROLLBACK_EVENTS;
+  const isLiveIncidents = apiRollbacks.length > 0;
 
   const liveActions: ApiGuardianAction[] = actionsQuery.data?.data ?? [];
   const isLiveActions = liveActions.length > 0;
@@ -692,9 +701,9 @@ export default function CognitivePolicies() {
         {activeTab === "rollbacks" && (
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              {incidentsQuery.isLoading && <span style={{ fontSize: 10, color: "#475569" }}>Loading incidents…</span>}
-              {isLiveIncidents && <span style={{ fontSize: 10, color: "#22c55e", background: "#22c55e15", padding: "2px 8px", borderRadius: 4 }}>● LIVE — /api/incidents</span>}
-              {!isLiveIncidents && !incidentsQuery.isLoading && <span style={{ fontSize: 10, color: "#475569" }}>Showing sample rollback events</span>}
+              {rollbackEventsQuery.isLoading && <span style={{ fontSize: 10, color: "#475569" }}>Loading rollback events…</span>}
+              {isLiveIncidents && <span style={{ fontSize: 10, color: "#22c55e", background: "#22c55e15", padding: "2px 8px", borderRadius: 4 }}>● LIVE — /api/rollback-events</span>}
+              {!isLiveIncidents && !rollbackEventsQuery.isLoading && <span style={{ fontSize: 10, color: "#475569" }}>Showing sample rollback events</span>}
             </div>
             {rollbackEvents.map(rb => {
               const dc = DOMAIN_COLORS[rb.domain] ?? DOMAIN_COLORS.default;

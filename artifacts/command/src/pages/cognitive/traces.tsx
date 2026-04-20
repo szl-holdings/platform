@@ -71,6 +71,25 @@ interface ApiTracesResponse {
   meta?: { total?: number };
 }
 
+interface ApiOperatorComment {
+  commentId: string;
+  operatorId: string;
+  spanId?: string;
+  content: string;
+  createdAt: string;
+  tags?: string[];
+}
+
+interface ApiTraceDetailResponse {
+  data: {
+    trace: ApiTrace & {
+      operatorComments?: ApiOperatorComment[];
+      spans?: { spanId: string; name: string; latencyMs?: number; attributes?: Record<string, unknown> }[];
+    };
+    entityIds?: string[];
+  };
+}
+
 const PAGE_SIZE = 50;
 
 const SEEDED_TRACES: TraceRun[] = [
@@ -385,9 +404,11 @@ function PhaseStep({
 function PhaseDetail({
   snapshot,
   traceId,
+  liveComments = [],
 }: {
   snapshot: PhaseSnapshot;
   traceId: string;
+  liveComments?: ApiOperatorComment[];
 }) {
   const [comment, setComment] = useState("");
   const [savedComment, setSavedComment] = useState<string | null>(null);
@@ -398,10 +419,11 @@ function PhaseDetail({
     mutationFn: (text: string) =>
       fetchJson<unknown>(apiUrl(`/traces/${traceId}/comment`), {
         method: "POST",
-        body: JSON.stringify({ spanId: snapshot.phase, comment: text, author: "operator" }),
+        body: JSON.stringify({ spanId: snapshot.phase, content: text, operatorId: "operator" }),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cognitive", "traces"] });
+      qc.invalidateQueries({ queryKey: ["cognitive", "trace-detail", traceId] });
     },
   });
 
@@ -467,7 +489,17 @@ function PhaseDetail({
       )}
 
       <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 8, padding: "12px 14px" }}>
-        <div style={{ fontSize: 10, color: "#475569", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Operator Comment</div>
+        <div style={{ fontSize: 10, color: "#475569", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Operator Comments</div>
+        {liveComments.filter(lc => !lc.spanId || lc.spanId === snapshot.phase).map(lc => (
+          <div key={lc.commentId} style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 12, color: "#e2e8f0", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, padding: "8px 10px" }}>
+              {lc.content}
+            </div>
+            <div style={{ fontSize: 9, color: "#475569", marginTop: 3 }}>
+              {lc.operatorId} · {new Date(lc.createdAt).toLocaleString()}
+            </div>
+          </div>
+        ))}
         {savedComment ? (
           <div style={{ marginBottom: 8 }}>
             <div style={{ fontSize: 12, color: "#e2e8f0", background: `${ACCENT}12`, border: `1px solid ${ACCENT}30`, borderRadius: 6, padding: "8px 10px", marginBottom: 6 }}>
@@ -540,6 +572,16 @@ export default function CognitiveTraces() {
     staleTime: 30_000,
   });
 
+  const traceDetailQuery = useStandardQuery<ApiTraceDetailResponse>({
+    queryKey: ["cognitive", "trace-detail", selectedTraceId],
+    queryFn: () => fetchJson<ApiTraceDetailResponse>(apiUrl(`/traces/${encodeURIComponent(selectedTraceId)}`)),
+    retry: 0,
+    staleTime: 30_000,
+    enabled: !!selectedTraceId && !selectedTraceId.startsWith("trace-aegis-2025") && !selectedTraceId.startsWith("trace-vessels-2025") && !selectedTraceId.startsWith("trace-terra-2025"),
+  });
+  const traceDetail = traceDetailQuery.data?.data?.trace;
+  const operatorComments = traceDetail?.operatorComments ?? [];
+
   // The traces endpoint returns either a bare array (legacy) or
   // { traces, total, limit, offset } (paginated). Normalize both shapes.
   const apiPayload = tracesQuery.data?.data;
@@ -563,17 +605,55 @@ export default function CognitiveTraces() {
   const hasPrev = page > 0;
   const hasNext = isLiveData && offset + PAGE_SIZE < totalTraces;
 
+  const traceIdsKey = traces.map(t => t.id).join("|");
   useEffect(() => {
     if (traces.length > 0 && !traces.find(t => t.id === selectedTraceId)) {
       setSelectedTraceId(traces[0]!.id);
       setActivePhaseIndex(0);
     }
-  }, [traces.length]);
+  }, [traceIdsKey, selectedTraceId]);
 
   const domains = ["all", ...Array.from(new Set(traces.map(t => t.domain)))];
   const filtered = filterDomain === "all" ? traces : traces.filter(t => t.domain === filterDomain);
 
-  const selectedTrace = traces.find(t => t.id === selectedTraceId) ?? traces[0]!;
+  if (traces.length === 0) {
+    return (
+      <div style={{ background: "#080c14", minHeight: "100vh", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" }}>
+        <EcosystemNav currentAppId="command" currentAppName="Unified Command" accentColor={ACCENT} />
+        <div style={{ maxWidth: 1300, margin: "0 auto", padding: "24px 20px" }}>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+              <span style={{ fontSize: 22, fontWeight: 700, color: "#e2e8f0" }}>Trace Replay</span>
+              <span style={{ fontSize: 11, color: ACCENT, background: `${ACCENT}18`, padding: "2px 10px", borderRadius: 20, border: `1px solid ${ACCENT}40`, fontWeight: 600 }}>COGNITIVE</span>
+              {tracesQuery.isLoading && <span style={{ fontSize: 10, color: "#475569" }}>Loading live traces…</span>}
+              {!tracesQuery.isLoading && !tracesQuery.isError && <span style={{ fontSize: 10, color: "#22c55e", background: "#22c55e15", padding: "2px 8px", borderRadius: 4 }}>● LIVE</span>}
+              {tracesQuery.isError && <span style={{ fontSize: 10, color: "#f59e0b" }}>⚠ API unavailable</span>}
+            </div>
+            <p style={{ color: "#64748b", fontSize: 13, margin: 0 }}>
+              No traces available yet. Once agents start running, their reasoning traces will appear here.
+            </p>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 10, padding: "60px 20px", textAlign: "center", color: "#475569", fontSize: 13 }}>
+            {tracesQuery.isLoading ? "Loading…" : "No traces recorded for this tenant yet."}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const baseTrace = traces.find(t => t.id === selectedTraceId) ?? traces[0]!;
+  // Only overlay live detail when it matches the trace currently rendered —
+  // pagination/filter swaps can leave selectedTraceId stale until the
+  // sync effect runs, so guard against showing telemetry for the wrong run.
+  const detailMatches = traceDetail && traceDetail.traceId === baseTrace.id;
+  const selectedTrace: TraceRun = detailMatches
+    ? {
+        ...baseTrace,
+        totalCostUsd: traceDetail!.costUsd ?? baseTrace.totalCostUsd,
+        totalLatencyMs: traceDetail!.latencyMs ?? baseTrace.totalLatencyMs,
+      }
+    : baseTrace;
+  const liveCommentsForSelected = detailMatches ? operatorComments : [];
   const currentPhase = selectedTrace.phases[activePhaseIndex];
   const outcome = OUTCOME_STYLE[selectedTrace.outcome] ?? OUTCOME_STYLE.partial;
   const regressionCount = selectedTrace.phases.filter(p => p.regressionFlag).length;
@@ -774,7 +854,7 @@ export default function CognitiveTraces() {
                   />
                 ))}
               </div>
-              {currentPhase && <PhaseDetail snapshot={currentPhase} traceId={selectedTrace.id} />}
+              {currentPhase && <PhaseDetail snapshot={currentPhase} traceId={selectedTrace.id} liveComments={liveCommentsForSelected} />}
             </div>
           </div>
         </div>

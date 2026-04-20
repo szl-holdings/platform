@@ -31,8 +31,11 @@ interface ApiRun {
   failed: number;
   hasRegression?: boolean;
   regressionSeverity?: string;
+  regressionNotes?: string;
   runAt: string;
   triggeredBy?: string;
+  avgLatencyMs?: number;
+  totalCostUsd?: number;
 }
 
 interface ApiEvalsResponse {
@@ -285,8 +288,10 @@ function apiRunToRun(r: ApiRun): EvalRun {
   const recall = avgScore * 0.95;
   const policyCompliance = Math.min(1, avgScore + 0.05);
   const overrideRate = Math.max(0, 1 - passRate - 0.10);
-  const avgLatencyMs = r.totalCases > 0 ? Math.floor(300 + (1 - avgScore) * 400) : 300;
-  const avgCostUsd = r.totalCases > 0 ? (r.totalCases * avgScore * 0.00004) : 0.0005;
+  const avgLatencyMs = r.avgLatencyMs ?? (r.totalCases > 0 ? Math.floor(300 + (1 - avgScore) * 400) : 300);
+  const avgCostUsd = r.totalCostUsd !== undefined && r.totalCases > 0
+    ? r.totalCostUsd / r.totalCases
+    : (r.totalCases > 0 ? (r.totalCases * avgScore * 0.00004) : 0.0005);
   return {
     id: r.runId,
     suiteId: r.suiteId,
@@ -306,6 +311,7 @@ function apiRunToRun(r: ApiRun): EvalRun {
     avgLatencyMs,
     avgCostUsd,
     regressionSeverity: (r.regressionSeverity as EvalRun["regressionSeverity"]) ?? (r.hasRegression ? "minor" : "none"),
+    ...(r.regressionNotes ? { regressionDetail: r.regressionNotes } : {}),
   };
 }
 
@@ -352,12 +358,24 @@ export default function CognitiveEvals() {
     staleTime: 60_000,
   });
 
+  const runsQuery = useStandardQuery<{ runs: ApiRun[]; total: number }>({
+    queryKey: ["cognitive", "evals", "runs"],
+    queryFn: () => fetchJson<{ runs: ApiRun[]; total: number }>(apiUrl("/evals/runs?limit=100")),
+    retry: 1,
+    staleTime: 30_000,
+  });
+
   const apiSuites = (evalsQuery.data?.suites ?? []).map(apiSuiteToSuite);
-  const apiRuns = (evalsQuery.data?.recentRuns ?? []).map(apiRunToRun);
+  // Prefer the richer /evals/runs payload (avgLatencyMs, totalCostUsd,
+  // regressionNotes) when available, fall back to the summary recentRuns
+  // returned by /evals.
+  const detailedRuns = (runsQuery.data?.runs ?? []).map(apiRunToRun);
+  const summaryRuns = (evalsQuery.data?.recentRuns ?? []).map(apiRunToRun);
+  const apiRuns = detailedRuns.length > 0 ? detailedRuns : summaryRuns;
 
   const suites: EvalSuite[] = apiSuites.length > 0 ? apiSuites : SEEDED_SUITES;
   const runs: EvalRun[] = apiRuns.length > 0 ? apiRuns : SEEDED_RUNS;
-  const isLiveData = apiSuites.length > 0;
+  const isLiveData = apiSuites.length > 0 || apiRuns.length > 0;
 
   const runEvalMutation = useStandardMutation({
     mutationFn: ({ suiteId, strategy }: { suiteId: string; strategy: string }) =>
@@ -367,6 +385,7 @@ export default function CognitiveEvals() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cognitive", "evals"] });
+      qc.invalidateQueries({ queryKey: ["cognitive", "evals", "runs"] });
       setRunningId(null);
     },
     onError: () => {
