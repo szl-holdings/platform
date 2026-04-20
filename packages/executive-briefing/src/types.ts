@@ -97,6 +97,24 @@ export interface WorldModelEntity {
   attributes: Record<string, unknown>;
   freshness?: Date;
   isActive: boolean;
+  /** Constellation canonical id (stable across re-imports), used for citation links. */
+  canonicalId?: string;
+  /** Human-readable name used as the citation `quote`. */
+  name?: string;
+  /** True when this entity was reached via constellation edge traversal rather than the root domain query. */
+  isNeighbor?: boolean;
+}
+
+export interface WorldModelEdge {
+  id: string;
+  fromNodeId: string;
+  toNodeId: string;
+  relationshipType: string;
+  confidence: number;
+  fromDomain?: string;
+  toDomain?: string;
+  /** True when the edge connects two different domains. */
+  crossDomain?: boolean;
 }
 
 export interface MemoryEntry {
@@ -124,5 +142,7 @@ export interface BriefGenerationContext {
   memories: MemoryEntry[];
   reflections: RecentReflection[];
   crossDomainEdgeCount?: number;
+  /** Concrete edges traversed from the constellation around the brief's entities. */
+  edges?: WorldModelEdge[];
   generatedAt: string;
 }

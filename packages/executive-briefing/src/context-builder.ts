@@ -1,4 +1,10 @@
-import type { BriefGenerationContext, WorldModelEntity, MemoryEntry, RecentReflection } from "./types.js";
+import type {
+  BriefGenerationContext,
+  WorldModelEntity,
+  WorldModelEdge,
+  MemoryEntry,
+  RecentReflection,
+} from "./types.js";
 
 export function buildBriefContext(
   domain: string,
@@ -6,6 +12,7 @@ export function buildBriefContext(
   memories: MemoryEntry[],
   reflections: RecentReflection[],
   crossDomainEdgeCount = 0,
+  edges: WorldModelEdge[] = [],
 ): BriefGenerationContext {
   return {
     domain,
@@ -13,6 +20,7 @@ export function buildBriefContext(
     memories,
     reflections,
     crossDomainEdgeCount,
+    edges,
     generatedAt: new Date().toISOString(),
   };
 }
@@ -45,12 +53,27 @@ export function summarizeContext(ctx: BriefGenerationContext): string {
     .map((r) => r.lesson!)
     .join(" | ");
 
+  const edges = ctx.edges ?? [];
+  const crossDomainEdgeSamples = edges
+    .filter((e) => e.crossDomain)
+    .slice(0, 5)
+    .map(
+      (e) =>
+        `${e.fromDomain ?? "?"}:${e.fromNodeId.slice(0, 8)} —[${e.relationshipType}]→ ${e.toDomain ?? "?"}:${e.toNodeId.slice(0, 8)}`,
+    )
+    .join("\n");
+
+  const neighborhoodSummary = edges.length > 0
+    ? `Constellation traversal: ${edges.length} edges connecting ${activeEntities.length} entities${ctx.crossDomainEdgeCount ? ` (${ctx.crossDomainEdgeCount} cross-domain)` : ""}.`
+    : ctx.crossDomainEdgeCount
+      ? `Cross-domain edges: ${ctx.crossDomainEdgeCount}`
+      : "";
+
   return [
     `Domain: ${ctx.domain} | Generated: ${ctx.generatedAt}`,
     `Entities: ${activeEntities.length} active (${typeList}); avg confidence ${(avgConfidence * 100).toFixed(1)}%`,
-    ctx.crossDomainEdgeCount
-      ? `Cross-domain edges: ${ctx.crossDomainEdgeCount}`
-      : "",
+    neighborhoodSummary,
+    crossDomainEdgeSamples ? `Cross-domain edge samples:\n${crossDomainEdgeSamples}` : "",
     recentMemories ? `Recent memory entries:\n${recentMemories}` : "No recent memory entries.",
     lessonSummary ? `Reflection lessons: ${lessonSummary}` : "No recent reflections.",
   ]
@@ -76,10 +99,13 @@ export function buildCitations(ctx: BriefGenerationContext) {
     domain?: string;
     confidence?: number;
     freshness?: string;
+    quote?: string;
     verified: boolean;
   }> = [];
 
   for (const e of ctx.entities.slice(0, 20)) {
+    // sourceId is the constellation node UUID — clients resolve it back to a
+    // Constellation node via /graph/entities/:id, so the citation chain is live.
     citations.push({
       id: `cit-ent-${e.id}`,
       sourceType: "entity",
@@ -87,6 +113,7 @@ export function buildCitations(ctx: BriefGenerationContext) {
       domain: e.domain,
       confidence: e.confidence,
       freshness: e.freshness?.toISOString(),
+      quote: e.name ? `${e.entityType}: ${e.name}` : undefined,
       verified: true,
     });
   }
@@ -97,6 +124,8 @@ export function buildCitations(ctx: BriefGenerationContext) {
       sourceType: "memory",
       sourceId: m.id,
       confidence: m.confidence,
+      freshness: m.createdAt?.toISOString(),
+      quote: m.content ? m.content.slice(0, 160) : undefined,
       verified: false,
     });
   }
@@ -108,6 +137,8 @@ export function buildCitations(ctx: BriefGenerationContext) {
       sourceId: r.id,
       domain: r.domain,
       confidence: r.qualityScore,
+      freshness: r.createdAt?.toISOString(),
+      quote: r.lesson ?? undefined,
       verified: false,
     });
   }

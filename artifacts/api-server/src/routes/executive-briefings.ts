@@ -16,7 +16,7 @@
 
 import { Router, type Request, type Response } from "express";
 import { randomUUID } from "node:crypto";
-import { desc, eq, and, gte } from "drizzle-orm";
+import { desc, eq, and, gte, or, inArray, ilike } from "drizzle-orm";
 import { db, pulseExecBriefsTable, cstNodes, cstEdges, pulseBriefingsTable } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import {
@@ -28,11 +28,13 @@ import {
   buildCitationManifest,
   parseBriefResponse,
   gateBrief,
+  getAgentId,
   SUPPORTED_DOMAINS,
   type SupportedDomain,
 } from "@workspace/executive-briefing";
 import type {
   WorldModelEntity,
+  WorldModelEdge,
   MemoryEntry,
   RecentReflection,
 } from "@workspace/executive-briefing";
@@ -64,19 +66,30 @@ async function fetchWorldModelEntities(domain: string): Promise<WorldModelEntity
     const rows = await db
       .select({
         id: cstNodes.id,
+        canonicalId: cstNodes.canonicalId,
+        name: cstNodes.name,
         entityType: cstNodes.entityType,
         domain: cstNodes.domain,
         confidence: cstNodes.confidence,
-        attributes: (cstNodes as any).attributes,
+        attributes: cstNodes.extensions,
         freshness: cstNodes.freshness,
         isActive: cstNodes.isActive,
       })
       .from(cstNodes)
-      .where(domainFilter ? eq(cstNodes.domain, domainFilter) : undefined)
+      .where(
+        domainFilter
+          ? and(eq(cstNodes.domain, domainFilter), eq(cstNodes.isActive, true))
+          : eq(cstNodes.isActive, true),
+      )
+      // Highest-confidence, freshest entities first so the brief talks about
+      // the most-trustworthy state of the world model rather than arbitrary rows.
+      .orderBy(desc(cstNodes.confidence), desc(cstNodes.freshness))
       .limit(domain === "consolidated" ? 200 : 100);
 
     return rows.map((r) => ({
       id: String(r.id),
+      canonicalId: r.canonicalId ? String(r.canonicalId) : undefined,
+      name: r.name ?? undefined,
       entityType: r.entityType,
       domain: r.domain,
       confidence: Number(r.confidence ?? 0.8),
@@ -84,19 +97,154 @@ async function fetchWorldModelEntities(domain: string): Promise<WorldModelEntity
       freshness: r.freshness ?? undefined,
       isActive: r.isActive,
     }));
-  } catch {
+  } catch (err) {
+    logger.warn(
+      { err: err instanceof Error ? err.message : String(err), domain },
+      "[exec-briefing] fetchWorldModelEntities failed; brief will run without world-model entities",
+    );
     return [];
   }
 }
 
-async function fetchRecentMemories(domain: string): Promise<MemoryEntry[]> {
+/**
+ * Walk one hop out from the brief's root entities to capture the entity graph
+ * around them. Returns:
+ *   - edges: actual cst_edges rows (with from/to domains so we can flag
+ *     cross-domain connections in the citation chain)
+ *   - neighborEntities: nodes reached via traversal that the root query missed
+ *     (e.g. a vessel's owning shell company, which lives in the aegis domain)
+ *   - crossDomainEdgeCount: count of edges whose endpoints span domains
+ */
+async function fetchEntityNeighborhood(
+  rootEntities: WorldModelEntity[],
+  domain: string,
+): Promise<{ edges: WorldModelEdge[]; neighborEntities: WorldModelEntity[]; crossDomainEdgeCount: number }> {
+  if (rootEntities.length === 0) {
+    return { edges: [], neighborEntities: [], crossDomainEdgeCount: 0 };
+  }
+  try {
+    // Cap traversal seed set so we don't pull every edge in the graph for the
+    // consolidated brief.
+    const seedIds = rootEntities.slice(0, 50).map((e) => e.id);
+    const edgeRows = await db
+      .select()
+      .from(cstEdges)
+      .where(
+        and(
+          eq(cstEdges.active, true),
+          or(inArray(cstEdges.fromNodeId, seedIds), inArray(cstEdges.toNodeId, seedIds)),
+        ),
+      )
+      .orderBy(desc(cstEdges.confidence))
+      .limit(200);
+
+    if (edgeRows.length === 0) {
+      return { edges: [], neighborEntities: [], crossDomainEdgeCount: 0 };
+    }
+
+    const allEndpointIds = Array.from(
+      new Set(edgeRows.flatMap((e) => [e.fromNodeId, e.toNodeId]).filter(Boolean)),
+    );
+    const endpointRows = allEndpointIds.length > 0
+      ? await db
+          .select({
+            id: cstNodes.id,
+            canonicalId: cstNodes.canonicalId,
+            name: cstNodes.name,
+            entityType: cstNodes.entityType,
+            domain: cstNodes.domain,
+            confidence: cstNodes.confidence,
+            attributes: cstNodes.extensions,
+            freshness: cstNodes.freshness,
+            isActive: cstNodes.isActive,
+          })
+          .from(cstNodes)
+          .where(inArray(cstNodes.id, allEndpointIds))
+      : [];
+    const domainById = new Map(endpointRows.map((r) => [String(r.id), r.domain]));
+
+    const rootIds = new Set(rootEntities.map((e) => e.id));
+    const neighborEntities: WorldModelEntity[] = endpointRows
+      .filter((r) => !rootIds.has(String(r.id)))
+      .slice(0, 50)
+      .map((r) => ({
+        id: String(r.id),
+        canonicalId: r.canonicalId ? String(r.canonicalId) : undefined,
+        name: r.name ?? undefined,
+        entityType: r.entityType,
+        domain: r.domain,
+        confidence: Number(r.confidence ?? 0.7),
+        attributes: (r.attributes as Record<string, unknown>) ?? {},
+        freshness: r.freshness ?? undefined,
+        isActive: r.isActive,
+        isNeighbor: true,
+      }));
+
+    let crossDomainEdgeCount = 0;
+    const edges: WorldModelEdge[] = edgeRows.map((e) => {
+      const fromDomain = domainById.get(String(e.fromNodeId));
+      const toDomain = domainById.get(String(e.toNodeId));
+      const crossDomain = !!(fromDomain && toDomain && fromDomain !== toDomain);
+      if (crossDomain) crossDomainEdgeCount += 1;
+      return {
+        id: String(e.id),
+        fromNodeId: String(e.fromNodeId),
+        toNodeId: String(e.toNodeId),
+        relationshipType: e.relationshipType,
+        confidence: Number(e.confidence ?? 0.8),
+        fromDomain,
+        toDomain,
+        crossDomain,
+      };
+    });
+
+    // For domain-scoped briefs, surface only edges that touch the domain (root
+    // nodes are already in the domain, neighbors may span out).
+    const filteredEdges = domain === "consolidated"
+      ? edges
+      : edges.filter((e) => e.fromDomain === domain || e.toDomain === domain);
+
+    return { edges: filteredEdges, neighborEntities, crossDomainEdgeCount };
+  } catch (err) {
+    logger.warn(
+      { err: err instanceof Error ? err.message : String(err), domain, rootCount: rootEntities.length },
+      "[exec-briefing] fetchEntityNeighborhood failed; brief will run without graph traversal",
+    );
+    return { edges: [], neighborEntities: [], crossDomainEdgeCount: 0 };
+  }
+}
+
+async function fetchRecentMemories(domain: string, entityIds: string[] = []): Promise<MemoryEntry[]> {
   try {
     const { memoryRecordsTable } = await import("@szl-holdings/db");
     const since = new Date(Date.now() - 7 * 24 * 3600 * 1000);
 
     const conditions: ReturnType<typeof gte>[] = [gte(memoryRecordsTable.createdAt, since)];
     if (domain !== "consolidated") {
-      conditions.push(sql`${memoryRecordsTable.metadata}->>'domain' = ${domain}`);
+      // Match memory records that are tied to the domain via any of the live
+      // memory-fabric attribution channels:
+      //   - metadata.domain — ad-hoc tag set by some writers
+      //   - scope_id prefixed with `domain:<domain>` (memory-fabric convention)
+      //   - provenance_source naming the domain agent / pack
+      //   - linked_entities containing one of the world-model entity ids we
+      //     already resolved for this domain (so an "entity"-tier memory about
+      //     a vessel surfaces in the vessels brief without needing tag hygiene)
+      // Bind entity ids as a parameterized text[] for the JSONB `?|` operator
+      // (matches when linked_entities contains any of the ids). Drizzle handles
+      // parameterization — no manual interpolation.
+      const linkedClause = entityIds.length > 0
+        ? sql`${memoryRecordsTable.linkedEntities} ?| ${entityIds}::text[]`
+        : undefined;
+
+      const orParts = [
+        sql`${memoryRecordsTable.metadata}->>'domain' = ${domain}`,
+        sql`${memoryRecordsTable.scopeId} = ${`domain:${domain}`}`,
+        sql`${memoryRecordsTable.scopeId} LIKE ${`domain:${domain}:%`}`,
+        sql`${memoryRecordsTable.provenanceSource} ILIKE ${`%${domain}%`}`,
+      ];
+      if (linkedClause) orParts.push(linkedClause);
+      const domainOr = or(...orParts);
+      if (domainOr) conditions.push(domainOr);
     }
 
     const rows = await db
@@ -114,7 +262,11 @@ async function fetchRecentMemories(domain: string): Promise<MemoryEntry[]> {
       provenance: String(r.provenanceSource ?? "system"),
       createdAt: r.createdAt ?? undefined,
     }));
-  } catch {
+  } catch (err) {
+    logger.warn(
+      { err: err instanceof Error ? err.message : String(err), domain, entityCount: entityIds.length },
+      "[exec-briefing] fetchRecentMemories failed; brief will run without memory entries",
+    );
     return [];
   }
 }
@@ -123,9 +275,22 @@ async function fetchRecentReflections(domain: string): Promise<RecentReflection[
   try {
     const { agentSelfReflections } = await import("@szl-holdings/db");
 
+    // Filter to reflections written by agents that operate in the domain.
+    // Agent IDs follow conventions like `terra-agent-02`, `agent:vessels-screening:v3`,
+    // or the canonical pack name (`Terra`, `Helmsman`, ...). We match either
+    // the domain key or the well-known agent label so we surface the right
+    // perspective for the brief.
+    const agentFilter = domain === "consolidated"
+      ? undefined
+      : or(
+          ilike(agentSelfReflections.agentId, `%${domain}%`),
+          ilike(agentSelfReflections.agentId, `%${getAgentId(domain)}%`),
+        );
+
     const rows = await db
       .select()
       .from(agentSelfReflections)
+      .where(agentFilter)
       .orderBy(desc(agentSelfReflections.computedAt))
       .limit(10);
 
@@ -140,7 +305,11 @@ async function fetchRecentReflections(domain: string): Promise<RecentReflection[
       createdAt: r.computedAt ?? undefined,
       domain,
     }));
-  } catch {
+  } catch (err) {
+    logger.warn(
+      { err: err instanceof Error ? err.message : String(err), domain },
+      "[exec-briefing] fetchRecentReflections failed; brief will run without reflection lessons",
+    );
     return [];
   }
 }
@@ -163,20 +332,49 @@ async function fetchCrossDomainEdgeCount(domain: string): Promise<number> {
         sql`(select domain from cst_nodes where id = from_node_id limit 1) = ${domain} and (select domain from cst_nodes where id = to_node_id limit 1) != ${domain}`
       );
     return row?.count ?? 0;
-  } catch {
+  } catch (err) {
+    logger.warn(
+      { err: err instanceof Error ? err.message : String(err), domain },
+      "[exec-briefing] fetchCrossDomainEdgeCount failed; reporting 0",
+    );
     return 0;
   }
 }
 
 async function generateExecBrief(domain: string, scheduled = false): Promise<typeof pulseExecBriefsTable.$inferSelect> {
-  const [entities, memories, reflections, crossDomainEdges] = await Promise.all([
-    fetchWorldModelEntities(domain),
-    fetchRecentMemories(domain),
+  const rootEntities = await fetchWorldModelEntities(domain);
+
+  // Once we know the root entities for the domain, fan out in parallel:
+  //   - traverse the constellation to gather their neighborhood + edges
+  //   - pull memory records linked to those entities (or the domain)
+  //   - pull reflections written by domain-specific agents
+  //   - count truly cross-domain edges (DB-side, accurate even when traversal capped)
+  const [neighborhood, reflections, crossDomainEdgeTotal] = await Promise.all([
+    fetchEntityNeighborhood(rootEntities, domain),
     fetchRecentReflections(domain),
     fetchCrossDomainEdgeCount(domain),
   ]);
 
-  const ctx = buildBriefContext(domain, entities, memories, reflections, crossDomainEdges);
+  // Memories use the resolved entity ids so an "entity"-tier memory about a
+  // specific node surfaces even if the writer didn't tag the domain.
+  const memories = await fetchRecentMemories(
+    domain,
+    rootEntities.map((e) => e.id),
+  );
+
+  // Merge root + traversed neighbors. Cap so the prompt stays bounded.
+  const entities = [...rootEntities, ...neighborhood.neighborEntities].slice(0, 150);
+  // Prefer the DB-wide count when traversal returned a smaller (sampled) figure.
+  const crossDomainEdges = Math.max(crossDomainEdgeTotal, neighborhood.crossDomainEdgeCount);
+
+  const ctx = buildBriefContext(
+    domain,
+    entities,
+    memories,
+    reflections,
+    crossDomainEdges,
+    neighborhood.edges,
+  );
   const rawCitations = buildCitations(ctx);
   const entityProvenance = extractEntityProvenance(entities);
   const citationManifest = buildCitationManifest(rawCitations);
