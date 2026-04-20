@@ -175,11 +175,34 @@ export default function BriefingPage() {
   const scenarios = useMemo(() => (profile ? runAllDecisionTwinScenarios(profile) : []), [profile]);
   const best = useMemo(() => (scenarios.length ? getBestScenario(scenarios) : null), [scenarios]);
 
-  const generatedAt = useMemo(() => new Date().toLocaleString(), [signalId]);
-  const note = useMemo(() => {
+  const queryState = useMemo(() => {
     const params = new URLSearchParams(search);
-    return params.get("note") ?? "";
+    let snapshot: any = null;
+    const sParam = params.get("s");
+    if (sParam) {
+      try {
+        snapshot = JSON.parse(decodeURIComponent(escape(atob(sParam))));
+      } catch { snapshot = null; }
+    }
+    return {
+      pinnedAction: params.get("action") as DecisionTwinAction | null,
+      sharedVersion: params.get("v") ?? "",
+      sharedAt: params.get("ts") ?? "",
+      note: params.get("note") ?? "",
+      snapshot,
+    };
   }, [search]);
+
+  const generatedAt = useMemo(
+    () => (queryState.sharedAt ? new Date(queryState.sharedAt).toLocaleString() : new Date().toLocaleString()),
+    [queryState.sharedAt],
+  );
+  const note = queryState.note;
+  const versionDrift =
+    queryState.sharedVersion && queryState.sharedVersion !== DECISION_TWIN_ENGINE_VERSION;
+  const pinned = queryState.pinnedAction
+    ? scenarios.find((s) => s.action === queryState.pinnedAction) ?? best
+    : best;
 
   useEffect(() => {
     document.title = signal
@@ -319,20 +342,36 @@ export default function BriefingPage() {
           </div>
         </header>
 
-        {best && (
+        {versionDrift && (
+          <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-2.5 text-[11px] font-mono text-amber-800 print:bg-white">
+            <strong>Engine version drift:</strong> shared at v{queryState.sharedVersion}, current
+            v{DECISION_TWIN_ENGINE_VERSION}. Live numbers below may differ from the originally
+            shared briefing — snapshot values shown alongside where available.
+          </div>
+        )}
+
+        {pinned && (
           <section className="mb-6 rounded-lg border border-emerald-300 bg-emerald-50 p-5 print:bg-white print:border-slate-300">
             <p className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 mb-1">
-              Recommended scenario
+              {queryState.pinnedAction ? "Pinned by sender" : "Recommended scenario"}
             </p>
             <h2 className="text-lg font-semibold text-emerald-900 mb-1">
-              {DECISION_TWIN_ACTION_LABELS[best.action]}
+              {DECISION_TWIN_ACTION_LABELS[pinned.action]}
             </h2>
-            <p className="text-sm text-slate-700 leading-relaxed">{best.description}</p>
+            <p className="text-sm text-slate-700 leading-relaxed">{pinned.description}</p>
             <p className="text-[11px] font-mono text-slate-600 mt-2">
-              Time to impact: {best.timeToImpact} · Confidence band{" "}
-              {Math.round(best.overallConfidence.low * 100)}–
-              {Math.round(best.overallConfidence.high * 100)}%
+              Time to impact: {pinned.timeToImpact} · Confidence band{" "}
+              {Math.round(pinned.overallConfidence.low * 100)}–
+              {Math.round(pinned.overallConfidence.high * 100)}%
             </p>
+            {queryState.snapshot && versionDrift && (
+              <p className="text-[10px] font-mono text-amber-700 mt-2 border-t border-emerald-200 pt-2">
+                Snapshot at share time:{" "}
+                {queryState.snapshot.overallRiskBefore} → {queryState.snapshot.overallRiskAfter}{" "}
+                · band {Math.round((queryState.snapshot.overallConfidence?.low ?? 0) * 100)}–
+                {Math.round((queryState.snapshot.overallConfidence?.high ?? 0) * 100)}%
+              </p>
+            )}
           </section>
         )}
 

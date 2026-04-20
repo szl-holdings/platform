@@ -581,7 +581,36 @@ export default function DecisionTwinPage() {
 
   function handleShare() {
     const lyteBase = (import.meta.env.BASE_URL ?? "/lyte/").replace(/\/$/, "");
-    const url = `${window.location.origin}${lyteBase}/briefing/${selectedSignalId}`;
+    const note = window.prompt("Optional note for the briefing recipient (leave blank to skip):", "") ?? "";
+    const params = new URLSearchParams();
+    if (best) params.set("action", best.action);
+    params.set("v", DECISION_TWIN_ENGINE_VERSION);
+    params.set("ts", new Date().toISOString());
+    if (note.trim()) params.set("note", note.trim());
+    if (best) {
+      // Compact snapshot of the recommended scenario at share time so the briefing
+      // can show the original numbers even if engine logic later changes.
+      const snapshot = {
+        action: best.action,
+        overallRiskBefore: best.overallRiskBefore,
+        overallRiskAfter: best.overallRiskAfter,
+        overallDelta: best.overallDelta,
+        overallConfidence: best.overallConfidence,
+        timeToImpact: best.timeToImpact,
+        isDemo: best.isDemo,
+        prism: best.prismImpacts.map((p) => ({
+          d: p.dimension,
+          rb: p.riskBefore,
+          ra: p.riskAfter,
+          dl: p.delta,
+          cb: p.confidenceBand,
+        })),
+      };
+      try {
+        params.set("s", btoa(unescape(encodeURIComponent(JSON.stringify(snapshot)))));
+      } catch { /* ignore encoding failure */ }
+    }
+    const url = `${window.location.origin}${lyteBase}/briefing/${selectedSignalId}?${params.toString()}`;
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(url).then(
         () => {
