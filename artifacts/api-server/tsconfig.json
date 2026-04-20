@@ -82,6 +82,9 @@
     },
     {
       "path": "../../packages/action-engine"
+    },
+    {
+      "path": "../../packages/substrate"
     }
   ]
 }

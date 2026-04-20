@@ -23,6 +23,84 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ---
 
+## Task #2390 — Sovereign Execution Substrate Phase 1 — 2026-04-19
+
+### Added
+
+**`@szl/substrate` — New Core Package**
+
+- `packages/substrate/` — Sovereign Execution Substrate: the single, opinionated execution runtime that all SZL product surfaces call the same way (`defineWorkflow` + `runtime.start`)
+- Five stage primitives: `Reason()`, `Retrieve()`, `ToolCall()`, `Verify()`, `Decide()` + `ApprovalGate()` for policy-shaped graph topology
+- Four execution modes: `live`, `dry-run`, `replay`, `counterfactual`
+- `defineWorkflow()` / `definePolicy()` / `defineBudget()` builder API
+
+**Compiler — Policy-Shaped Graph Enforcement**
+
+- `compiler.ts` — Policy-shaped graph compiler that rejects at build time any workflow where a high-risk side effect (`financial`, `deletion`, `write-external`, `infrastructure`) is reachable without a matching `ApprovalGate` ancestor
+- Topological sort (Kahn's algorithm) with cycle detection and unknown-dependency rejection
+- Compiler warnings for missing `Verify` and `Decide` stages
+
+**Engine — Execution Engine**
+
+- `engine.ts` — Full execution engine with timeouts, exponential-backoff retries, full hook set (15 hooks), OTel telemetry, and approval gate pause/resume
+- Hook set: `before/after_pipeline`, `before/after_stage`, `on_validation_error`, `on_policy_violation`, `on_low_confidence`, `before/after_tool_call`, `before/after_side_effect`, `before/after_finalize`
+
+**Journal — Evidence-Chained Audit Log**
+
+- `journal.ts` — Hash-stable evidence bundles (SHA-256 canonical JSON) linked into proof-chain; the journal IS the audit log
+- `SubstrateJournal.verifyReplayStability()` for hash-identity verification across replays
+
+**Budget Router — Confidence-Budget Routing**
+
+- `budget-router.ts` — Declarative confidence-budget routing: `accept` / `escalate-model` (stronger adapter) / `escalate-human` (approvals inbox)
+- Weighted harmonic mean pipeline confidence aggregation (Decide: 3×, Verify: 2.5×, Reason: 2×)
+
+**Adapters — MCP-Shaped Registries**
+
+- `adapters.ts` — Typed registries for Model, Retriever, Tool, Resource, and Policy adapters with MCP-shaped capability specs
+- No-op defaults for dry-run and testing; `wireToolMeshAdapter()` / `wirePolicyEngineAdapter()` for production wiring
+
+**Telemetry — OpenTelemetry Layer**
+
+- `telemetry.ts` — OTel spans, metrics, and structured logs for every stage and pipeline lifecycle event; bridges to `@workspace/cognitive-observability`
+
+**Python Worker Channel**
+
+- `python-worker.ts` — Typed wire protocol (v1.0) for Python worker federation: `stage.claim`, `stage.heartbeat`, `stage.result`, `stage.error`
+- In-process simulation for Phase 1; real FastAPI worker deferred to Phase 2
+- `workers/substrate-python/` — Phase 1 reference Python worker (FastAPI + Pydantic v2) implementing the full protocol
+
+**Reference Workflow**
+
+- `workflows/opportunity-audit.ts` — Opportunity Audit as the Phase 1 reference workflow: `Retrieve(python-tagged)` → `Reason` → `Verify` → `ApprovalGate` → `Decide`, wired to Lyte domain
+
+**Replay + Counterfactual CLI**
+
+- `cli/replay.ts` — `replay()` + `handleReplayRequest()` typed API endpoint; `formatDiff()` text formatter for CLI output
+- `CounterfactualDiff` builder with per-stage decision diff and final confidence delta
+
+**API Server Integration**
+
+- `artifacts/api-server/src/routes/control-tower/substrate-replay.ts` — Three new endpoints:
+  - `POST /control-tower/substrate/replay` — trigger replay or counterfactual run
+  - `GET /control-tower/substrate/run/:runId` — poll run status
+  - `GET /control-tower/substrate/metrics` — aggregate telemetry metrics
+
+**Documentation**
+
+- `docs/substrate/architecture.md` — Architecture overview with Mermaid sequence diagrams
+- `docs/substrate/policy-model.md` — Policy model, compiler enforcement, approval tier ladder
+- `docs/substrate/evidence-chain.md` — Evidence chain hash stability and proof-chain integration
+- `docs/substrate/replay-counterfactual.md` — Replay modes, counterfactual diff format, Eval Console integration
+- `docs/substrate/python-worker.md` — Python worker protocol, message types, startup guide
+
+**Tests**
+
+- `src/compiler.test.ts` — 9 compiler tests (rejection cases, cycle/unknown-dep/duplicate detection, execution ordering, warnings)
+- `src/engine.test.ts` — 6 engine integration tests (dry-run, live, journal hash stability, compiler rejection, hook firing, Opportunity Audit)
+
+---
+
 ## [0.1.1] — 2026-04-03
 
 ### Workspace Professionalization & Ops Discipline

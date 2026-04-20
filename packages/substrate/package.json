@@ -1,0 +1,73 @@
+{
+  "name": "@szl/substrate",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Sovereign Execution Substrate — policy-shaped graphs, evidence-chained transitions, confidence-budget routing, and counterfactual replay for all SZL workflows.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "import": "./src/engine.ts"
+    },
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "import": "./src/compiler.ts"
+    },
+    "./journal": {
+      "types": "./dist/journal.d.ts",
+      "import": "./src/journal.ts"
+    },
+    "./budget-router": {
+      "types": "./dist/budget-router.d.ts",
+      "import": "./src/budget-router.ts"
+    },
+    "./adapters": {
+      "types": "./dist/adapters.d.ts",
+      "import": "./src/adapters.ts"
+    },
+    "./telemetry": {
+      "types": "./dist/telemetry.d.ts",
+      "import": "./src/telemetry.ts"
+    },
+    "./workflows/opportunity-audit": {
+      "types": "./dist/workflows/opportunity-audit.d.ts",
+      "import": "./src/workflows/opportunity-audit.ts"
+    },
+    "./python-worker": {
+      "types": "./dist/python-worker.d.ts",
+      "import": "./src/python-worker.ts"
+    }
+  },
+  "bin": {
+    "substrate": "./src/cli/bin.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "cli": "tsx src/cli/bin.ts"
+  },
+  "dependencies": {
+    "@szl-holdings/policy-engine": "workspace:*",
+    "@szl-holdings/evidence-graph": "workspace:*",
+    "@szl-holdings/proof-chain": "workspace:*",
+    "@szl-holdings/audit": "workspace:*",
+    "@workspace/approvals-inbox": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
+    "@szl-holdings/prompt-registry": "workspace:*",
+    "@workspace/memory-fabric": "workspace:*",
+    "@workspace/cognitive-observability": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
+  }
+}
