@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { PROXY_ROUTES } from "../../packages/proxy-routes.js";
+import { PROXY_ROUTES, CANONICAL_FALLBACK_PORT } from "../../packages/proxy-routes.js";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
@@ -46,7 +46,7 @@ function sharedProxyPlugin() {
         }
         const normalizedUrl = url.endsWith("/") ? url : url + "/";
         const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
-        const targetPort = route ? route.port : vitePort;
+        const targetPort = route ? route.port : CANONICAL_FALLBACK_PORT;
         const upstream = http.request(
           { hostname: "127.0.0.1", port: targetPort, path: url, method: req.method,
             headers: { ...req.headers, host: "localhost:" + targetPort } },
@@ -78,7 +78,7 @@ function sharedProxyPlugin() {
         const url = req.url || "/";
         const normalizedUrl = url.endsWith("/") ? url : url + "/";
         const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
-        const targetPort = route ? route.port : vitePort;
+        const targetPort = route ? route.port : CANONICAL_FALLBACK_PORT;
         const conn = net.connect(targetPort, "127.0.0.1", () => {
           const rawHeaders = Object.entries(req.headers)
             .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
