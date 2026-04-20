@@ -17,6 +17,7 @@ import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBa
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
+import { PrivateAppGuard } from "@szl-holdings/shared-ui/PrivateAppGuard";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
@@ -302,7 +303,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   const prevAuth = useRef(isAuthenticated);
 
   const params = new URLSearchParams(window.location.search);
-  const demoMode = params.get("view") === "app" || params.get("demo") === "true";
+  const hasDemoParam = params.get("view") === "app" || params.get("demo") === "true";
+  const hasDemoToken =
+    typeof window !== "undefined" && !!window.sessionStorage.getItem("szl-demo-token");
+  const demoMode = hasDemoParam || hasDemoToken;
   const { sandboxActive, enableSandbox } = useSandboxMode();
 
   useEffect(() => {
@@ -340,10 +344,6 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     return <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}><InvestmentReadinessPage /></Suspense>;
   }
 
-  if (demoMode) {
-    return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
-  }
-
   if (isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#0a0c10" }}>
@@ -352,7 +352,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !demoMode) {
     return (
       <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}>
         <TerraMarketingLanding onSignIn={login} />
@@ -360,7 +360,11 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     );
   }
 
-  return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+  return (
+    <PrivateAppGuard appName="Terra" accentColor={TERRA_ACCENT}>
+      <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+    </PrivateAppGuard>
+  );
 }
 
 function App() {
