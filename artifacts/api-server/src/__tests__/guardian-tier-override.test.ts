@@ -47,6 +47,25 @@ const memberUser = {
 
 let activeUser: typeof adminUser | typeof memberUser = adminUser;
 
+// Stub the covenant-policy approval gate so the require-approval branch
+// of guardian-policy can persist a synthetic approval id without
+// depending on production schema. This keeps the assertion focused on
+// "does the override change runtime behavior" rather than approval-row
+// plumbing (covered by the dedicated approvals tests).
+vi.mock("@szl-holdings/covenant-policy", async () => {
+  const actual = await vi.importActual<
+    typeof import("@szl-holdings/covenant-policy")
+  >("@szl-holdings/covenant-policy");
+  let n = 0;
+  return {
+    ...actual,
+    createApprovalRequest: async (params: Record<string, unknown>) => {
+      n += 1;
+      return { id: 7000 + n, status: "pending", ...params };
+    },
+  };
+});
+
 vi.mock("../middlewares/auth.js", () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
     (req as unknown as { user: typeof activeUser }).user = activeUser;

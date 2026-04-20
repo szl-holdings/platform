@@ -280,11 +280,67 @@ export function guardianPolicyCheck(options: GuardianPolicyOptions = {}) {
       return;
     }
 
+    // Route the gated action through the existing covenant-policy
+    // approval system so an operator has something to approve. Surfaced
+    // back to the caller as `approvalRequestId` (distinct from the
+    // Guardian decision `requestId`). Fail-closed: if the approval gate
+    // cannot create a request, the caller gets 503 — never a 202 with
+    // a null id, since "approve later" with no id is unrecoverable.
+    let approvalRequestId: number;
+    try {
+      const { createApprovalRequest } = await import(
+        "@szl-holdings/covenant-policy"
+      );
+      const approval = await createApprovalRequest({
+        orgId: typeof orgId === "number" ? orgId : null,
+        resourceType: "guardian.api.request",
+        resourceId: `${req.method}:${req.path}`,
+        title: `Guardian approval required: ${req.method} ${req.path}`,
+        description: decision.reason,
+        actionClass: category,
+        priority:
+          decision.outcome === "require-dual-approval" ? "critical" : "high",
+        requestedById: typeof user?.id === "number" ? user.id : null,
+        requestedByRole: (user?.roles?.[0] as string | undefined) ?? undefined,
+        requiredApproverRole: decision.requiredApprovers?.[0],
+        correlationId: requestId,
+        serviceAttribution: "guardian.policy-middleware",
+        payload: {
+          requestId,
+          method: req.method,
+          path: req.path,
+          category,
+          tier,
+          matchedRuleId: decision.matchedRuleId ?? null,
+          requiredApprovers: decision.requiredApprovers ?? [],
+        },
+        metadata: { source: "guardian-policy", traceId },
+      });
+      approvalRequestId = approval.id;
+      res.setHeader("X-Guardian-Approval-Id", String(approval.id));
+    } catch (err) {
+      logger.error(
+        { err, requestId, path: req.path, method: req.method, category },
+        "[guardian] approval request creation failed — failing closed",
+      );
+      res.status(503).json({
+        success: false,
+        error: "Approval gate unavailable; action blocked",
+        code: "GUARDIAN_APPROVAL_GATE_UNAVAILABLE",
+        requestId,
+        outcome: decision.outcome,
+        reason: decision.reason,
+        matchedRuleId: decision.matchedRuleId,
+      });
+      return;
+    }
+
     res.status(202).json({
       success: false,
       status: "approval-required",
       code: "GUARDIAN_APPROVAL_REQUIRED",
       requestId,
+      approvalRequestId,
       outcome: decision.outcome,
       reason: decision.reason,
       requiredApprovers: decision.requiredApprovers ?? [],

@@ -119,6 +119,7 @@ NODE_ENV = "production"
 LOG_LEVEL = "info"
 CORS_ORIGINS = "https://*.replit.app,https://*.replit.dev,https://*.repl.co"
 PUBLIC_APP_URL = "https://szlholdings.replit.app"
+GUARDIAN_ENFORCE = "true"
 
 [userenv.shared]
 VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"

@@ -8,5 +8,6 @@ export default defineConfig({
     exclude: ["dist/**"],
     hookTimeout: 30_000,
     testTimeout: 120_000,
+    setupFiles: ["./src/__tests__/helpers/test-env-bootstrap.ts"],
   },
 });
