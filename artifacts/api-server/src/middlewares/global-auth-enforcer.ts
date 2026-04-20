@@ -190,6 +190,12 @@ const PUBLIC_PREFIXES = [
   // facing but unauthenticated like the rest of the Command demo surface; the
   // underlying data is sourced exclusively from public product blogs / RSS feeds.
   "/api/competitive-intel/",
+  // NEXUS unified agentic AI layer — Research Swarm, Memory Fabric, and
+  // Cross-App Orchestrator endpoints power the mockup-sandbox NEXUS demo and
+  // are intended to be reachable without a session, mirroring the rest of the
+  // SZL demo surface. Mutating routes (POST /memory, POST /orchestrate, etc.)
+  // remain protected by CSRF + per-user write rate limiting in the router.
+  "/api/nexus/",
   // Decision Runtime v1 — per-card GET endpoints (GET /api/decisions/cards/:id).
   // Public so the Decision Center demo works without a session; route handlers
   // apply authMiddleware({ required: false }) and scope to ws-demo-001 for
@@ -202,6 +208,58 @@ function isValidInternalToken(req: Request): boolean {
   const header = req.headers["x-internal-token"];
   if (typeof header !== "string") return false;
   return verifyInternalHeader(header, req.originalUrl || req.url) !== null;
+}
+
+/**
+ * NEXUS Cross-App Orchestrator loopback bypass.
+ * The orchestrator (artifacts/api-server/src/routes/nexus.ts) issues GET requests
+ * to other internal SZL routes from the same process so the LLM has real data
+ * to synthesize. We allow these only when ALL of the following are true:
+ *   1. The TCP peer address (req.socket.remoteAddress — NOT req.ip, which is
+ *      X-Forwarded-For-derived under app.set("trust proxy", 1) and therefore
+ *      spoofable) is a loopback interface (127.0.0.1 / ::1).
+ *   2. The request method is GET or HEAD.
+ *   3. The request carries the `x-nexus-orchestrator: 1` header.
+ *   4. The request path is in a hard-coded allowlist of safe, read-only
+ *      orchestrator target endpoints.
+ * Using req.socket.remoteAddress closes the X-Forwarded-For spoof vector: the
+ * value comes from the kernel-reported TCP peer and cannot be set by a remote
+ * client. The path allowlist further constrains the bypass to read-only
+ * informational endpoints already exposed in PUBLIC_PREFIXES or via
+ * authMiddleware({ required: false }).
+ */
+const NEXUS_ORCHESTRATOR_PATH_ALLOWLIST = [
+  "/api/agent-mesh/state",
+  "/api/agent-mesh/index",
+  "/api/narratives/",
+  "/api/infrastructure/status",
+  "/api/core/health",
+  "/api/core/metrics",
+  "/api/fabric/snapshot",
+  "/api/booking/services",
+  "/api/vessels/live/fleet-summary",
+  "/api/vessels/live/ais/combined",
+  "/api/vessels/cognitive/route-anomalies",
+  "/api/terra/live/mortgage-rates",
+  "/api/terra/live/hud-fair-market-rents",
+  "/api/terra/portfolio/overview",
+];
+
+function isNexusOrchestratorLoopback(req: Request): boolean {
+  if (req.method !== "GET" && req.method !== "HEAD") return false;
+  const marker = req.headers["x-nexus-orchestrator"];
+  if (marker !== "1") return false;
+  // Use the kernel-reported TCP peer, not req.ip (which honors X-Forwarded-For
+  // when trust proxy is enabled and is therefore spoofable from outside).
+  const peer = req.socket?.remoteAddress ?? "";
+  const isLoopback =
+    peer === "127.0.0.1" || peer === "::1" || peer === "::ffff:127.0.0.1";
+  if (!isLoopback) return false;
+  const path = req.path;
+  for (const allowed of NEXUS_ORCHESTRATOR_PATH_ALLOWLIST) {
+    if (path === allowed || path.startsWith(allowed + "/")) return true;
+  }
+  return false;
 }
 
 /**
@@ -240,6 +298,11 @@ export function globalAuthEnforcer(
   }
 
   if (isValidInternalToken(req)) {
+    next();
+    return;
+  }
+
+  if (isNexusOrchestratorLoopback(req)) {
     next();
     return;
   }

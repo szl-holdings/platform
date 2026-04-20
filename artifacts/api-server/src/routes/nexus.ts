@@ -715,6 +715,208 @@ function emitToClients(runId: string, event: string, data: unknown) {
   }
 }
 
+// ─── Memory AI embedding ─────────────────────────────────────────────────────
+
+const EMBEDDING_MODEL = "text-embedding-3-small";
+const LOCAL_EMBEDDING_DIM = 256;
+
+/**
+ * Try to fetch a real OpenAI embedding via the Replit AI Integrations proxy.
+ * The proxy may not expose /embeddings in every environment; on failure we
+ * return null and the caller falls back to the local hashed vector.
+ */
+async function fetchOpenAIEmbedding(text: string): Promise<{ vector: number[]; model: string } | null> {
+  const baseUrl = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
+  const apiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  if (!baseUrl || !apiKey) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15_000);
+  try {
+    const response = await fetch(`${baseUrl.replace(/\/$/, "")}/embeddings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ model: EMBEDDING_MODEL, input: text }),
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { data?: Array<{ embedding?: number[] }> };
+    const vector = data.data?.[0]?.embedding;
+    if (!Array.isArray(vector) || vector.length === 0) return null;
+    return { vector, model: EMBEDDING_MODEL };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Deterministic local hashed-token embedding used as a fallback when no
+ * remote embedding service is reachable. Splits the input on word boundaries,
+ * hashes each token via FNV-1a, projects into LOCAL_EMBEDDING_DIM buckets with
+ * sub-linear term frequency weighting, then L2-normalizes. Output vectors are
+ * comparable via cosine similarity for nearest-neighbour search.
+ */
+function localHashedEmbedding(text: string): number[] {
+  const vec = new Array<number>(LOCAL_EMBEDDING_DIM).fill(0);
+  const tokens = text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  const counts = new Map<string, number>();
+  for (const tok of tokens) counts.set(tok, (counts.get(tok) ?? 0) + 1);
+  for (const [tok, count] of counts) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < tok.length; i++) {
+      h ^= tok.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    const idx = h % LOCAL_EMBEDDING_DIM;
+    const sign = (h >>> 16) & 1 ? 1 : -1;
+    vec[idx]! += sign * (1 + Math.log(count));
+  }
+  let norm = 0;
+  for (const v of vec) norm += v * v;
+  norm = Math.sqrt(norm);
+  if (norm > 0) {
+    for (let i = 0; i < vec.length; i++) vec[i] = vec[i]! / norm;
+  }
+  return vec;
+}
+
+/**
+ * Use the LLM (already wired through the live AI Integrations proxy via
+ * gatewayInfer) to extract a small set of semantic keywords from the memory
+ * item. These are persisted alongside the embedding vector as an AI-curated
+ * semantic index that downstream retrieval can boost on, even when the
+ * proxy environment doesn't expose a true embeddings endpoint.
+ */
+async function extractSemanticKeywords(item: MemoryItem): Promise<string[]> {
+  try {
+    const raw = await callLLM(
+      `Extract 3-7 short, lowercase, hyphen-separated semantic keywords (1-3 words each) capturing the topic of this memory item. Return ONLY a JSON array of strings, no prose.\n\nKey: ${item.key}\nType: ${item.type}\nValue:\n${item.value.slice(0, 2000)}`,
+      "You are the NEXUS Memory Fabric semantic indexer. Output a strict JSON array of keyword strings. No commentary, no markdown.",
+      { agentId: "nexus-memory", domain: "memory" },
+    );
+    const trimmed = raw.trim().replace(/^```json\s*|\s*```$/g, "");
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((k): k is string => typeof k === "string")
+      .map((k) => k.trim().toLowerCase())
+      .filter((k) => k.length > 0 && k.length <= 64)
+      .slice(0, 8);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Generate an embedding for a memory item using the AI layer. We try the
+ * remote OpenAI proxy first (real semantic embedding when available), and
+ * fall back to a deterministic local hashed-token vector so EVERY memory
+ * item carries a usable similarity-search vector. We additionally call the
+ * live LLM to derive semantic keywords so the index is enriched by the AI
+ * layer even when the embeddings endpoint is unavailable.
+ */
+async function embedMemoryItem(item: MemoryItem): Promise<void> {
+  const input = `${item.key}\n\n${item.value}`.slice(0, 8000);
+  try {
+    const [remote, keywords] = await Promise.all([
+      fetchOpenAIEmbedding(input),
+      extractSemanticKeywords(item),
+    ]);
+
+    let vector: number[];
+    let model: string;
+    if (remote) {
+      vector = remote.vector;
+      model = remote.model;
+    } else {
+      vector = localHashedEmbedding(input);
+      model = `local-hashed-fnv1a-${LOCAL_EMBEDDING_DIM}`;
+    }
+
+    const stored = memoryStore.get(item.id);
+    if (stored) {
+      const tags = stored.tags ?? [];
+      if (!tags.includes("ai-embedded")) tags.push("ai-embedded");
+      for (const kw of keywords) {
+        const tag = `topic:${kw}`;
+        if (!tags.includes(tag) && tags.length < 24) tags.push(tag);
+      }
+      stored.tags = tags;
+      stored.updatedAt = new Date().toISOString();
+      void persistMemoryEmbeddingToDB(stored.id, vector, model, keywords);
+    }
+  } catch (err) {
+    logger.warn({ err, id: item.id }, "Memory embedding generation failed (non-fatal)");
+  }
+}
+
+async function persistMemoryEmbeddingToDB(
+  externalId: string,
+  vector: number[],
+  model: string,
+  keywords: string[],
+): Promise<void> {
+  if (!db) return;
+  try {
+    const existing = await db
+      .select({ metadata: memoryRecordsTable.metadata })
+      .from(memoryRecordsTable)
+      .where(eq(memoryRecordsTable.externalId, externalId))
+      .limit(1);
+    const currentMeta =
+      (existing[0]?.metadata as Record<string, unknown> | null | undefined) ?? {};
+    const nextMeta = {
+      ...currentMeta,
+      embedding: {
+        model,
+        dim: vector.length,
+        vector,
+        keywords,
+        generatedAt: new Date().toISOString(),
+      },
+    };
+    await db
+      .update(memoryRecordsTable)
+      .set({ metadata: nextMeta, lastUpdatedAt: new Date() })
+      .where(eq(memoryRecordsTable.externalId, externalId));
+  } catch (dbErr) {
+    logger.warn({ dbErr, externalId }, "Failed to persist memory embedding to DB (non-fatal)");
+  }
+}
+
+// ─── Memory AI summarization ─────────────────────────────────────────────────
+
+async function summarizeMemoryItem(item: MemoryItem): Promise<void> {
+  // Only summarize substantive content; cheap heuristic to avoid LLM calls on tiny notes.
+  if (item.value.length < 240) return;
+  try {
+    const summary = await callLLM(
+      `Produce a single-sentence summary (≤220 chars) of this memory item so future agents can quickly recall it.\n\nKey: ${item.key}\nType: ${item.type}\nValue:\n${item.value.slice(0, 4000)}`,
+      "You are the NEXUS Memory Fabric summarizer. Produce one tight sentence capturing the essential fact. No preamble.",
+      { agentId: "nexus-memory", domain: "memory" },
+    );
+    const trimmed = summary.trim().replace(/^"|"$/g, "").slice(0, 240);
+    if (trimmed) {
+      const stored = memoryStore.get(item.id);
+      if (stored) {
+        const existingTags = stored.tags ?? [];
+        stored.tags = existingTags.includes("ai-summarized")
+          ? existingTags
+          : [...existingTags, "ai-summarized"];
+        // Stash summary in source so it surfaces to clients without schema changes.
+        stored.source = stored.source
+          ? `${stored.source} | summary: ${trimmed}`
+          : `summary: ${trimmed}`;
+        stored.updatedAt = new Date().toISOString();
+        void persistMemoryToDB(stored);
+      }
+    }
+  } catch (err) {
+    logger.warn({ err, id: item.id }, "Memory AI summarization failed (non-fatal)");
+  }
+}
+
 // ─── Memory DB persistence ────────────────────────────────────────────────────
 
 function nexusTierToDbTier(tier: string): "session" | "workflow" | "entity" | "artifact" | "executive" | "domain" | "operator-feedback" | "long-term" {
@@ -1114,6 +1316,8 @@ router.post("/memory", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
     };
     memoryStore.set(item.id, item);
     void persistMemoryToDB(item);
+    void summarizeMemoryItem(item);
+    void embedMemoryItem(item);
     sendCreated(res, item);
   } catch (err) {
     handleRouteError(res, err, "POST /api/nexus/memory");
@@ -1128,6 +1332,10 @@ router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBod
     const updated: MemoryItem = { ...item, ...update, id: item.id, updatedAt: new Date().toISOString() };
     memoryStore.set(item.id, updated);
     void persistMemoryToDB(updated);
+    if (update.value && update.value !== item.value) {
+      void summarizeMemoryItem(updated);
+      void embedMemoryItem(updated);
+    }
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "PUT /api/nexus/memory/:id");
@@ -1263,27 +1471,60 @@ router.post("/bridge/invoke", perUserWriteSlidingLimiter, validateBody(jsonObjec
 // ─── Orchestrator Routes ──────────────────────────────────────────────────────
 
 const APP_CAPABILITIES: Record<string, { name: string; endpoints: string[] }> = {
-  aegis: { name: "Aegis — Defense & Intelligence", endpoints: ["/api/firestorm/threats", "/api/firestorm/alerts", "/api/firestorm/intel"] },
-  vessels: { name: "Vessels Maritime Intelligence", endpoints: ["/api/vessels/fleet", "/api/vessels/risk", "/api/vessels/cargo"] },
-  terra: { name: "Terra — Real Estate Intelligence", endpoints: ["/api/terra/properties", "/api/terra/market", "/api/terra/deals"] },
-  pulse: { name: "Pulse — Executive Briefing", endpoints: ["/api/pulse/briefs", "/api/pulse/digest", "/api/pulse/summary"] },
-  command: { name: "Unified Command", endpoints: ["/api/command/overview", "/api/command/kpis", "/api/command/alerts"] },
-  "szl-holdings": { name: "SZL Holdings Dashboard", endpoints: ["/api/holdings/portfolio", "/api/holdings/nav", "/api/holdings/performance"] },
-  "carlota-jo": { name: "Carlota Jo Consulting", endpoints: ["/api/carlota/engagements", "/api/carlota/pipeline", "/api/carlota/outcomes"] },
-  "prism-counsel": { name: "Prism Counsel Legal", endpoints: ["/api/prism/matters", "/api/prism/risk", "/api/prism/compliance"] },
-  lyte: { name: "Lyte Platform", endpoints: ["/api/lyte/metrics", "/api/lyte/usage", "/api/lyte/health"] },
-  imperium: { name: "Imperium Enterprise", endpoints: ["/api/imperium/tenants", "/api/imperium/governance", "/api/imperium/audit"] },
+  aegis: { name: "Aegis — Defense & Intelligence", endpoints: ["/api/agent-mesh/state", "/api/narratives/sentra-ransomware", "/api/infrastructure/status"] },
+  sentra: { name: "Sentra — Cyber Resilience", endpoints: ["/api/agent-mesh/state", "/api/narratives/sentra-ransomware"] },
+  vessels: { name: "Vessels Maritime Intelligence", endpoints: ["/api/vessels/live/fleet-summary", "/api/vessels/live/ais/combined", "/api/vessels/cognitive/route-anomalies"] },
+  terra: { name: "Terra — Real Estate Intelligence", endpoints: ["/api/terra/live/mortgage-rates", "/api/terra/live/hud-fair-market-rents", "/api/terra/portfolio/overview"] },
+  pulse: { name: "Pulse — Executive Briefing", endpoints: ["/api/core/health", "/api/core/metrics"] },
+  command: { name: "Unified Command", endpoints: ["/api/core/health", "/api/core/metrics", "/api/agent-mesh/index"] },
+  "szl-holdings": { name: "SZL Holdings Dashboard", endpoints: ["/api/core/metrics", "/api/fabric/snapshot"] },
+  "carlota-jo": { name: "Carlota Jo Consulting", endpoints: ["/api/core/health", "/api/booking/services"] },
+  "prism-counsel": { name: "Prism Counsel Legal", endpoints: ["/api/narratives/counsel-deadline", "/api/core/health"] },
+  counsel: { name: "Counsel — Legal Matter Command", endpoints: ["/api/narratives/counsel-deadline"] },
+  lyte: { name: "Lyte Platform", endpoints: ["/api/core/health", "/api/core/metrics"] },
+  imperium: { name: "Imperium Enterprise", endpoints: ["/api/core/metrics", "/api/agent-mesh/state"] },
 };
+
+const INTERNAL_API_BASE = `http://127.0.0.1:${process.env["PORT"] ?? "8080"}`;
+
+async function fetchAppEndpoint(endpoint: string, timeoutMs = 5000): Promise<{ ok: boolean; status: number; body?: unknown; error?: string }> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${INTERNAL_API_BASE}${endpoint}`, {
+      method: "GET",
+      headers: { "x-nexus-orchestrator": "1", Accept: "application/json" },
+      signal: controller.signal,
+    });
+    const text = await res.text();
+    let body: unknown = text;
+    try { body = JSON.parse(text); } catch { /* keep text */ }
+    return { ok: res.ok, status: res.status, body };
+  } catch (err) {
+    return { ok: false, status: 0, error: err instanceof Error ? err.message : String(err) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function truncateForPrompt(value: unknown, maxChars = 1200): string {
+  let s: string;
+  try { s = typeof value === "string" ? value : JSON.stringify(value); } catch { s = String(value); }
+  if (s.length <= maxChars) return s;
+  return `${s.slice(0, maxChars)}…[truncated ${s.length - maxChars} chars]`;
+}
 
 async function planOrchestration(intent: string): Promise<OrchestrationStep[]> {
   const intentLower = intent.toLowerCase();
   const steps: OrchestrationStep[] = [];
   let stepNum = 1;
 
-  function addStep(appSlug: string, action: string, endpoint: string) {
+  function addStep(appSlug: string, action: string, endpointOverride?: string) {
+    const cap = APP_CAPABILITIES[appSlug];
+    const endpoint = endpointOverride ?? cap?.endpoints[0] ?? "/api/core/health";
     steps.push({
       id: `step_${stepNum++}`,
-      app: APP_CAPABILITIES[appSlug]?.name ?? appSlug,
+      app: cap?.name ?? appSlug,
       appSlug,
       action,
       endpoint,
@@ -1291,28 +1532,28 @@ async function planOrchestration(intent: string): Promise<OrchestrationStep[]> {
     });
   }
 
-  if (intentLower.includes("threat") || intentLower.includes("risk") || intentLower.includes("aegis")) {
-    addStep("aegis", "Fetch active threat intelligence", "/api/firestorm/threats");
+  if (intentLower.includes("threat") || intentLower.includes("cyber") || intentLower.includes("attack") || intentLower.includes("aegis") || intentLower.includes("sentra")) {
+    addStep("sentra", "Fetch live agent-mesh state and active narratives");
   }
   if (intentLower.includes("vessel") || intentLower.includes("maritime") || intentLower.includes("ship") || intentLower.includes("fleet")) {
-    addStep("vessels", "Pull fleet risk assessment", "/api/vessels/risk");
+    addStep("vessels", "Pull fleet summary and AIS positions");
   }
-  if (intentLower.includes("real estate") || intentLower.includes("property") || intentLower.includes("terra")) {
-    addStep("terra", "Retrieve market KPIs", "/api/terra/market");
+  if (intentLower.includes("real estate") || intentLower.includes("property") || intentLower.includes("terra") || intentLower.includes("housing")) {
+    addStep("terra", "Retrieve mortgage rates and market KPIs");
   }
-  if (intentLower.includes("brief") || intentLower.includes("pulse") || intentLower.includes("executive")) {
-    addStep("pulse", "Draft executive brief", "/api/pulse/briefs");
+  if (intentLower.includes("legal") || intentLower.includes("compliance") || intentLower.includes("counsel") || intentLower.includes("matter")) {
+    addStep("counsel", "Retrieve open legal narratives");
   }
-  if (intentLower.includes("portfolio") || intentLower.includes("holdings")) {
-    addStep("szl-holdings", "Fetch portfolio snapshot", "/api/holdings/portfolio");
+  if (intentLower.includes("portfolio") || intentLower.includes("holdings") || intentLower.includes("fabric")) {
+    addStep("szl-holdings", "Fetch portfolio + global operations fabric snapshot");
   }
-  if (intentLower.includes("legal") || intentLower.includes("compliance") || intentLower.includes("counsel")) {
-    addStep("prism-counsel", "Retrieve open matters", "/api/prism/matters");
+  if (intentLower.includes("brief") || intentLower.includes("pulse") || intentLower.includes("executive") || intentLower.includes("summary") || intentLower.includes("status")) {
+    addStep("pulse", "Compile core platform health metrics");
   }
 
   if (steps.length === 0) {
-    addStep("command", "Fetch cross-domain overview", "/api/command/overview");
-    addStep("pulse", "Compile summary brief", "/api/pulse/summary");
+    addStep("command", "Fetch cross-domain overview");
+    addStep("pulse", "Compile core platform health metrics");
   }
 
   return steps;
@@ -1331,22 +1572,33 @@ async function runOrchestration(planId: string, intent: string) {
 
     for (const step of steps) {
       step.status = "running";
-      await sleep(600 + Math.random() * 800);
+      const stepStart = Date.now();
 
-      const demoOutputs: Record<string, string> = {
-        aegis: "Threat Level: ELEVATED. 3 active advisories in target region. Primary vectors: cyber (state-actor APT), physical supply chain disruption. Recommended posture: MONITOR+.",
-        vessels: "Fleet status: 12 active vessels. 2 flagged for AIS anomaly. Sanctions compliance: GREEN. High-risk port calls: 0 in last 30 days.",
-        terra: "Market KPIs: Cap rate compression -15bps QoQ. Distressed inventory up 8.3%. Office delinquency rate: 4.7% (↑0.9%). Industrial remains structurally undersupplied.",
-        pulse: "Executive brief compiled. Key themes: elevated geopolitical risk, maritime supply chain stress, real estate sector bifurcation. Board-ready format generated.",
-        "szl-holdings": "Portfolio NAV: $2.84B (+1.2% MTD). Top performer: Vessels (+4.1%). Largest drawdown: Terra Office (-2.8%). Liquid reserves: 14.7%.",
-        "prism-counsel": "42 active matters. 3 flagged for regulatory deadline in next 30 days. Cross-reference with Aegis intel: 1 matter intersects with sanctioned entity.",
-        command: "Platform health: GREEN. 10 of 10 services operational. Alert backlog: 7 items. Cross-domain risk score: 72/100 (MODERATE-HIGH).",
-      };
+      const fetchResult = await fetchAppEndpoint(step.endpoint);
+      let summary: string;
+      if (fetchResult.ok) {
+        try {
+          summary = await callLLM(
+            `Summarize this ${step.app} API response into a 2-3 sentence executive insight that addresses the intent: "${intent}".\n\nEndpoint: ${step.endpoint}\nResponse:\n${truncateForPrompt(fetchResult.body)}`,
+            `You are the NEXUS orchestration analyst for ${step.app}. Produce a concise, factual summary of the API response. Cite specific numbers when present. Do not invent data not in the response.`,
+            { agentId: "nexus-orchestrator", domain: step.appSlug },
+          );
+        } catch (llmErr) {
+          logger.warn({ llmErr, endpoint: step.endpoint }, "Orchestrator LLM summary failed, using raw payload");
+          summary = `${step.app} responded (${fetchResult.status}): ${truncateForPrompt(fetchResult.body, 400)}`;
+        }
+        step.status = "done";
+      } else {
+        summary = fetchResult.status === 0
+          ? `${step.app} endpoint ${step.endpoint} unreachable: ${fetchResult.error ?? "unknown error"}.`
+          : `${step.app} endpoint ${step.endpoint} returned HTTP ${fetchResult.status}. Response: ${truncateForPrompt(fetchResult.body, 300)}`;
+        step.status = "error";
+        logger.warn({ endpoint: step.endpoint, status: fetchResult.status, error: fetchResult.error }, "Orchestrator step endpoint failed");
+      }
 
-      step.output = demoOutputs[step.appSlug] ?? `${step.app} data retrieved successfully.`;
-      step.status = "done";
-      step.durationMs = 600 + Math.floor(Math.random() * 800);
-      outputs.push(`[${step.app}] ${step.output}`);
+      step.output = summary;
+      step.durationMs = Date.now() - stepStart;
+      outputs.push(`[${step.app} — ${step.endpoint}] ${summary}`);
     }
 
     const stitched = await callLLM(
