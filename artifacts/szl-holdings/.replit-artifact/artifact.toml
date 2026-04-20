@@ -13,6 +13,7 @@ version = "1.0.0"
 name = "web"
 paths = [ "/" ]
 localPort = 21130
+autoStart = true
 
 [services.development]
 run = "bash -c 'cd /home/runner/workspace/artifacts/szl-holdings && exec node_modules/.bin/vite --config vite.config.ts --host ::'"

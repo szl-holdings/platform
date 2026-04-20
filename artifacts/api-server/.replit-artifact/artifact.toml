@@ -9,6 +9,7 @@ router = "path"
 name = "api"
 paths = [ "/api/", "/nexus/", "/mcp/", "/alloy-embedding-api/" ]
 localPort = 8080
+autoStart = true
 
 [services.development]
 run = "pnpm --filter @workspace/api-server run dev:fast"

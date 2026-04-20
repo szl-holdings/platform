@@ -13,6 +13,7 @@ version = "1.0.0"
 name = "web"
 paths = [ "/pulse/" ]
 localPort = 9090
+autoStart = true
 
 [services.development]
 run = "bash -c 'cd /home/runner/workspace/artifacts/pulse && exec node_modules/.bin/vite --config vite.config.ts --host ::'"

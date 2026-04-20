@@ -13,6 +13,7 @@ kind = "web"
   name = "web"
   paths = [ "/terra/" ]
   localPort = 9090
+  autoStart = true
 
   [services.development]
   run = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
