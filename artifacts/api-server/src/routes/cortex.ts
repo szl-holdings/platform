@@ -17,6 +17,7 @@
  * POST /cortex/action-drafts/generate — Generate drafts from a fusion alert or correlation
  * POST /cortex/action-drafts/:id/approve — Approve an action draft (persisted + governance audit)
  * POST /cortex/action-drafts/:id/dismiss — Dismiss an action draft (persisted)
+ * DELETE /cortex/action-drafts/prune — Purge org-scoped dismissed/approved drafts older than retention window
  * POST /cortex/entity-graph/snapshot      — Capture and persist current graph state
  * GET  /cortex/entity-graph/snapshots     — List org-scoped graph snapshots (paginated)
  * GET  /cortex/entity-graph/snapshot/:id  — Retrieve a single snapshot by UUID
@@ -1392,6 +1393,60 @@ router.post(
       handleRouteError(res, err, "CORTEX action draft dismissal failed");
     }
   }
+);
+
+const DEFAULT_DRAFT_RETENTION_DAYS = Math.min(
+  Math.max(1, parseInt(process.env.CORTEX_DRAFT_RETENTION_DAYS ?? "30", 10) || 30),
+  365,
+);
+
+router.delete(
+  "/cortex/action-drafts/prune",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    try {
+      const orgIds = callerOrgIds(req as unknown as any);
+      const retentionDays = DEFAULT_DRAFT_RETENTION_DAYS;
+      const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+
+      // Deny-by-default: no org membership → nothing to prune (no cross-org delete).
+      if (orgIds.length === 0) {
+        sendSuccess(res, { deleted: 0, retentionDays, cutoff: cutoff.toISOString() });
+        return;
+      }
+
+      // Compare against the terminal-state timestamp (dismissed_at / approved_at)
+      // so retention measures "time since the row reached its terminal state",
+      // not "time since the draft was first generated". Rows missing both
+      // terminal timestamps are skipped (defensive — should never occur).
+      const deleted = await db
+        .delete(cortexActionDraftsTable)
+        .where(
+          and(
+            inArray(cortexActionDraftsTable.orgId, orgIds),
+            inArray(cortexActionDraftsTable.status, ["dismissed", "approved"]),
+            sql`COALESCE(${cortexActionDraftsTable.dismissedAt}, ${cortexActionDraftsTable.approvedAt}) IS NOT NULL`,
+            sql`COALESCE(${cortexActionDraftsTable.dismissedAt}, ${cortexActionDraftsTable.approvedAt}) < ${cutoff}`,
+          ),
+        )
+        .returning({ id: cortexActionDraftsTable.id });
+
+      logger.info(
+        { count: deleted.length, retentionDays, cutoff: cutoff.toISOString(), orgIds },
+        "[CORTEX] Pruned dismissed/approved action drafts",
+      );
+
+      sendSuccess(res, {
+        deleted: deleted.length,
+        retentionDays,
+        cutoff: cutoff.toISOString(),
+        message: `Pruned ${deleted.length} dismissed/approved action draft${deleted.length === 1 ? "" : "s"} older than ${retentionDays} day${retentionDays === 1 ? "" : "s"}`,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX action draft prune failed");
+    }
+  },
 );
 
 
