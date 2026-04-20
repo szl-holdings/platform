@@ -239,7 +239,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 };
 
 export default function ExitModelerPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Exit Scenario Modeler — SZL Holdings Venture Intelligence",
     description: "Probability-weighted exit valuations for each SZL portfolio company across acquisition, IPO, and secondary sale scenarios.",
     canonical: "https://szlholdings.com/venture-intelligence/exit-modeler",
@@ -254,163 +254,166 @@ export default function ExitModelerPage() {
   }));
 
   return (
-    <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-        <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
-              <ArrowLeft size={12} /> Venture Intelligence
-            </Link>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Exit Modeler
-              </p>
-              <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Exit Scenario Modeler
-              </h1>
-              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
-                Probability-weighted exit valuations across acquisition, IPO, and secondary scenarios — with optimal timing recommendations and comparable transaction analysis for each portfolio company.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap", marginBottom: "2rem" }}>
-              {COMPANIES.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelected(c.id)}
-                  style={{
-                    padding: "0.4rem 0.875rem",
-                    borderRadius: "4px",
-                    border: `1px solid ${selected === c.id ? `rgba(${c.rgb},0.5)` : "hsla(0,0%,100%,0.08)"}`,
-                    background: selected === c.id ? `rgba(${c.rgb},0.1)` : "transparent",
-                    color: selected === c.id ? c.color : "hsl(210,5%,52%)",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.15s ease",
-                    fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                  }}
-                >
-                  {c.name}
-                </button>
-              ))}
+    <>
+      {__pageMeta}
+      <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+          <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
+                <ArrowLeft size={12} /> Venture Intelligence
+              </Link>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Exit Modeler
+                </p>
+                <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Exit Scenario Modeler
+                </h1>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
+                  Probability-weighted exit valuations across acquisition, IPO, and secondary scenarios — with optimal timing recommendations and comparable transaction analysis for each portfolio company.
+                </p>
+              </m.div>
             </div>
-
-            <m.div
-              key={company.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1rem", marginBottom: "1.5rem" }}>
-                {[
-                  { label: "Current ARR", value: `$${company.currentArr}`, icon: DollarSign, color: company.color },
-                  { label: "ARR Growth", value: `${company.arrGrowthRate}% MoM`, icon: TrendingUp, color: "#6aaa72" },
-                  { label: "Current Valuation", value: company.currentValuation, icon: BarChart3, color: "#d4a054" },
-                  { label: "Optimal Exit", value: company.optimalTiming.split(" — ")[1] ?? company.optimalTiming, icon: Clock, color: "#a855f7" },
-                ].map(stat => {
-                  const Icon = stat.icon;
-                  return (
-                    <div key={stat.label} style={{ padding: "1.125rem 1.375rem", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "6px", background: "hsl(210,12%,6%)" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
-                        <Icon size={11} style={{ color: stat.color }} />
-                        <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(210,5%,42%)" }}>{stat.label}</p>
-                      </div>
-                      <p style={{ fontSize: "1.25rem", fontWeight: 800, color: stat.color, letterSpacing: "-0.02em", lineHeight: 1, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{stat.value}</p>
-                    </div>
-                  );
-                })}
+          </section>
+  
+          <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+                {COMPANIES.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => setSelected(c.id)}
+                    style={{
+                      padding: "0.4rem 0.875rem",
+                      borderRadius: "4px",
+                      border: `1px solid ${selected === c.id ? `rgba(${c.rgb},0.5)` : "hsla(0,0%,100%,0.08)"}`,
+                      background: selected === c.id ? `rgba(${c.rgb},0.1)` : "transparent",
+                      color: selected === c.id ? c.color : "hsl(210,5%,52%)",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+                    }}
+                  >
+                    {c.name}
+                  </button>
+                ))}
               </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  {company.scenarios.map(s => (
-                    <div key={s.type} style={{ border: `1px solid rgba(${company.rgb},0.14)`, borderRadius: "8px", padding: "1.375rem" }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+  
+              <m.div
+                key={company.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1rem", marginBottom: "1.5rem" }}>
+                  {[
+                    { label: "Current ARR", value: `$${company.currentArr}`, icon: DollarSign, color: company.color },
+                    { label: "ARR Growth", value: `${company.arrGrowthRate}% MoM`, icon: TrendingUp, color: "#6aaa72" },
+                    { label: "Current Valuation", value: company.currentValuation, icon: BarChart3, color: "#d4a054" },
+                    { label: "Optimal Exit", value: company.optimalTiming.split(" — ")[1] ?? company.optimalTiming, icon: Clock, color: "#a855f7" },
+                  ].map(stat => {
+                    const Icon = stat.icon;
+                    return (
+                      <div key={stat.label} style={{ padding: "1.125rem 1.375rem", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "6px", background: "hsl(210,12%,6%)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
+                          <Icon size={11} style={{ color: stat.color }} />
+                          <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(210,5%,42%)" }}>{stat.label}</p>
+                        </div>
+                        <p style={{ fontSize: "1.25rem", fontWeight: 800, color: stat.color, letterSpacing: "-0.02em", lineHeight: 1, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{stat.value}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+  
+                <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    {company.scenarios.map(s => (
+                      <div key={s.type} style={{ border: `1px solid rgba(${company.rgb},0.14)`, borderRadius: "8px", padding: "1.375rem" }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                              <span>{s.icon}</span>
+                              <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{s.type}</h3>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <Clock size={10} style={{ color: "hsl(210,5%,42%)" }} />
+                              <span style={{ fontSize: "10px", color: "hsl(210,5%,45%)" }}>{s.timing}</span>
+                              <span style={{ fontSize: "9px", color: "hsl(210,5%,36%)" }}>·</span>
+                              <span style={{ fontSize: "10px", color: "hsl(210,5%,45%)" }}>{s.multiple}</span>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right", flexShrink: 0 }}>
+                            <div style={{ fontSize: "1.25rem", fontWeight: 800, color: company.color, letterSpacing: "-0.03em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{s.probability}%</div>
+                            <div style={{ fontSize: "9px", color: "hsl(210,5%,40%)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Probability</div>
+                          </div>
+                        </div>
+  
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem", marginBottom: "0.875rem", padding: "0.75rem", background: "hsla(0,0%,100%,0.025)", borderRadius: "4px" }}>
+                          {[
+                            { label: "Bear", value: s.valuation.bear },
+                            { label: "Base", value: s.valuation.base },
+                            { label: "Bull", value: s.valuation.bull },
+                          ].map(v => (
+                            <div key={v.label} style={{ textAlign: "center" }}>
+                              <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,82%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{v.value}</p>
+                              <p style={{ fontSize: "9px", color: "hsl(210,5%,40%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{v.label}</p>
+                            </div>
+                          ))}
+                        </div>
+  
+                        <p style={{ fontSize: "11.5px", color: "hsl(210,5%,52%)", lineHeight: 1.7, marginBottom: "0.75rem" }}>{s.rationale}</p>
+  
                         <div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
-                            <span>{s.icon}</span>
-                            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{s.type}</h3>
-                          </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <Clock size={10} style={{ color: "hsl(210,5%,42%)" }} />
-                            <span style={{ fontSize: "10px", color: "hsl(210,5%,45%)" }}>{s.timing}</span>
-                            <span style={{ fontSize: "9px", color: "hsl(210,5%,36%)" }}>·</span>
-                            <span style={{ fontSize: "10px", color: "hsl(210,5%,45%)" }}>{s.multiple}</span>
-                          </div>
-                        </div>
-                        <div style={{ textAlign: "right", flexShrink: 0 }}>
-                          <div style={{ fontSize: "1.25rem", fontWeight: 800, color: company.color, letterSpacing: "-0.03em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{s.probability}%</div>
-                          <div style={{ fontSize: "9px", color: "hsl(210,5%,40%)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Probability</div>
+                          <p style={{ fontSize: "9px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(210,5%,38%)", marginBottom: "0.375rem" }}>Comparable Transactions</p>
+                          {s.comparables.map((comp, i) => (
+                            <p key={i} style={{ fontSize: "10.5px", color: "hsl(210,5%,46%)", marginBottom: "2px" }}>· {comp}</p>
+                          ))}
                         </div>
                       </div>
-
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem", marginBottom: "0.875rem", padding: "0.75rem", background: "hsla(0,0%,100%,0.025)", borderRadius: "4px" }}>
-                        {[
-                          { label: "Bear", value: s.valuation.bear },
-                          { label: "Base", value: s.valuation.base },
-                          { label: "Bull", value: s.valuation.bull },
-                        ].map(v => (
-                          <div key={v.label} style={{ textAlign: "center" }}>
-                            <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,82%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{v.value}</p>
-                            <p style={{ fontSize: "9px", color: "hsl(210,5%,40%)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{v.label}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <p style={{ fontSize: "11.5px", color: "hsl(210,5%,52%)", lineHeight: 1.7, marginBottom: "0.75rem" }}>{s.rationale}</p>
-
-                      <div>
-                        <p style={{ fontSize: "9px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(210,5%,38%)", marginBottom: "0.375rem" }}>Comparable Transactions</p>
-                        {s.comparables.map((comp, i) => (
-                          <p key={i} style={{ fontSize: "10.5px", color: "hsl(210,5%,46%)", marginBottom: "2px" }}>· {comp}</p>
-                        ))}
+                    ))}
+                  </div>
+  
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem", position: "sticky", top: "1rem" }}>
+                    <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.375rem" }}>
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", marginBottom: "1.125rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Scenario Probability</p>
+                      <div style={{ height: "180px" }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={probData} margin={{ top: 0, right: 10, bottom: 0, left: -24 }}>
+                            <CartesianGrid strokeDasharray="2 4" stroke="hsla(0,0%,100%,0.04)" vertical={false} />
+                            <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(210,5%,44%)" }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fontSize: 9, fill: "hsl(210,5%,36%)" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar dataKey="probability" radius={[3, 3, 0, 0]}>
+                              {probData.map((_, idx) => (
+                                <Cell key={`cell-${idx}`} fill={company.color} fillOpacity={0.75 - idx * 0.15} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", position: "sticky", top: "1rem" }}>
-                  <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.375rem" }}>
-                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", marginBottom: "1.125rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Scenario Probability</p>
-                    <div style={{ height: "180px" }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={probData} margin={{ top: 0, right: 10, bottom: 0, left: -24 }}>
-                          <CartesianGrid strokeDasharray="2 4" stroke="hsla(0,0%,100%,0.04)" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(210,5%,44%)" }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fontSize: 9, fill: "hsl(210,5%,36%)" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Bar dataKey="probability" radius={[3, 3, 0, 0]}>
-                            {probData.map((_, idx) => (
-                              <Cell key={`cell-${idx}`} fill={company.color} fillOpacity={0.75 - idx * 0.15} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+  
+                    <div style={{ border: `1px solid rgba(${company.rgb},0.2)`, borderRadius: "8px", padding: "1.375rem", background: `rgba(${company.rgb},0.03)` }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
+                        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: company.color }} />
+                        <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,80%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Optimal Exit Path</p>
+                      </div>
+                      <p style={{ fontSize: "14px", fontWeight: 700, color: company.color, marginBottom: "0.25rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.optimalTiming}</p>
+                      <p style={{ fontSize: "12px", color: "hsl(38,12%,72%)", fontWeight: 600, marginBottom: "0.875rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.optimalValue}</p>
+                      <p style={{ fontSize: "11.5px", color: "hsl(210,5%,52%)", lineHeight: 1.7 }}>{company.recommendation}</p>
                     </div>
                   </div>
-
-                  <div style={{ border: `1px solid rgba(${company.rgb},0.2)`, borderRadius: "8px", padding: "1.375rem", background: `rgba(${company.rgb},0.03)` }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
-                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: company.color }} />
-                      <p style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,80%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Optimal Exit Path</p>
-                    </div>
-                    <p style={{ fontSize: "14px", fontWeight: 700, color: company.color, marginBottom: "0.25rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.optimalTiming}</p>
-                    <p style={{ fontSize: "12px", color: "hsl(38,12%,72%)", fontWeight: 600, marginBottom: "0.875rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.optimalValue}</p>
-                    <p style={{ fontSize: "11.5px", color: "hsl(210,5%,52%)", lineHeight: 1.7 }}>{company.recommendation}</p>
-                  </div>
                 </div>
-              </div>
-            </m.div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+              </m.div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

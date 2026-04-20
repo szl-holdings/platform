@@ -547,7 +547,7 @@ function PortfolioArchitecture() {
 }
 
 export default function MoatAssessmentPage() {
-  usePageMeta({ title: "Governance Readiness Assessment — SZL Holdings", description: "Assess your organization's readiness for governed AI decision-making. Get an instant score and actionable next steps." });
+  const __pageMeta = usePageMeta({ title: "Governance Readiness Assessment — SZL Holdings", description: "Assess your organization's readiness for governed AI decision-making. Get an instant score and actionable next steps." });
 
   useEffect(() => {
     analytics.pageView("/assessment");
@@ -556,68 +556,71 @@ export default function MoatAssessmentPage() {
   }, []);
 
   return (
-    <div style={{ background: BG, minHeight: "100dvh" }}>
-      <SiteNav />
-
-      <section className="pt-28 pb-16 px-4 text-center" style={{ background: BG }}>
-        <div className="max-w-3xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border mb-6"
-            style={{ background: `${ACCENT}12`, borderColor: `${ACCENT}30`, color: ACCENT }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-            Governance Readiness
-          </motion.div>
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6" style={{ color: TEXT }}>
-            Governed Decision Infrastructure
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.18 }}
-            className="text-lg md:text-xl mb-8" style={{ color: TEXT_SEC }}>
-            The structural layer between signal detection and action execution — enforcing governance, attribution, and outcome tracking on every consequential decision.
-          </motion.p>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.24 }}
-            className="flex flex-wrap gap-3 justify-center">
-            <a href="#assessment">
-              <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold transition-all hover:opacity-90" style={{ background: ACCENT, color: BG }}>
-                Take the Assessment <ChevronRight className="w-4 h-4" />
-              </button>
-            </a>
-            <Link href="/contact">
-              <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-all hover:bg-white/5" style={{ borderColor: `${ACCENT}30`, color: TEXT }}>
-                Request a Demo <ArrowRight className="w-4 h-4" style={{ color: ACCENT }} />
+    <>
+      {__pageMeta}
+      <div style={{ background: BG, minHeight: "100dvh" }}>
+        <SiteNav />
+  
+        <section className="pt-28 pb-16 px-4 text-center" style={{ background: BG }}>
+          <div className="max-w-3xl mx-auto">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border mb-6"
+              style={{ background: `${ACCENT}12`, borderColor: `${ACCENT}30`, color: ACCENT }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
+              Governance Readiness
+            </motion.div>
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6" style={{ color: TEXT }}>
+              Governed Decision Infrastructure
+            </motion.h1>
+            <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.18 }}
+              className="text-lg md:text-xl mb-8" style={{ color: TEXT_SEC }}>
+              The structural layer between signal detection and action execution — enforcing governance, attribution, and outcome tracking on every consequential decision.
+            </motion.p>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.24 }}
+              className="flex flex-wrap gap-3 justify-center">
+              <a href="#assessment">
+                <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold transition-all hover:opacity-90" style={{ background: ACCENT, color: BG }}>
+                  Take the Assessment <ChevronRight className="w-4 h-4" />
+                </button>
+              </a>
+              <Link href="/contact">
+                <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-all hover:bg-white/5" style={{ borderColor: `${ACCENT}30`, color: TEXT }}>
+                  Request a Demo <ArrowRight className="w-4 h-4" style={{ color: ACCENT }} />
+                </button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+  
+        <InteractiveLoop />
+        <PortfolioArchitecture />
+        <RoleSection />
+        <div id="assessment">
+          <AssessmentFunnel />
+        </div>
+  
+        <section style={{ background: BG, borderColor: BORDER }} className="py-16 px-4 text-center border-t">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold mb-4" style={{ color: TEXT }}>Build alongside us.</h2>
+            <p className="text-sm mb-6" style={{ color: TEXT_SEC }}>
+              We are selecting design partners in security, maritime, real estate, and legal. Design partners co-shape the product, receive preferred pricing, and are first to access new domain packs as they launch.
+            </p>
+            <Link href="/design-partners">
+              <button
+                onClick={() => analytics.designPartnerInterest("moat-assessment-cta", "/assessment")}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-all hover:bg-white/5"
+                style={{ borderColor: `${ACCENT}30`, color: TEXT }}
+              >
+                Apply for Design Partner Program <ChevronRight className="w-4 h-4" style={{ color: ACCENT }} />
               </button>
             </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      <InteractiveLoop />
-      <PortfolioArchitecture />
-      <RoleSection />
-      <div id="assessment">
-        <AssessmentFunnel />
+          </div>
+        </section>
+  
+        <SiteFooter />
       </div>
-
-      <section style={{ background: BG, borderColor: BORDER }} className="py-16 px-4 text-center border-t">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold mb-4" style={{ color: TEXT }}>Build alongside us.</h2>
-          <p className="text-sm mb-6" style={{ color: TEXT_SEC }}>
-            We are selecting design partners in security, maritime, real estate, and legal. Design partners co-shape the product, receive preferred pricing, and are first to access new domain packs as they launch.
-          </p>
-          <Link href="/design-partners">
-            <button
-              onClick={() => analytics.designPartnerInterest("moat-assessment-cta", "/assessment")}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-all hover:bg-white/5"
-              style={{ borderColor: `${ACCENT}30`, color: TEXT }}
-            >
-              Apply for Design Partner Program <ChevronRight className="w-4 h-4" style={{ color: ACCENT }} />
-            </button>
-          </Link>
-        </div>
-      </section>
-
-      <SiteFooter />
-    </div>
+        </>
   );
 }
 

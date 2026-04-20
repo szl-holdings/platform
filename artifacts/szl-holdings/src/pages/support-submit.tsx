@@ -28,7 +28,7 @@ const PRIORITIES = [
 ];
 
 export default function SupportSubmitPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Submit a Request — SZL Holdings Support",
     description: "Submit a support request to the SZL Holdings team.",
   });
@@ -92,7 +92,9 @@ export default function SupportSubmitPage() {
 
   if (submitted) {
     return (
-      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+      <>
+        {__pageMeta}
+        <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
         <SiteNav />
         <main style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 200px)", padding: "6rem 1.5rem 4rem" }}>
           <m.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ textAlign: "center", maxWidth: "480px" }}>
@@ -119,6 +121,7 @@ export default function SupportSubmitPage() {
         </main>
         <SiteFooter />
       </div>
+      </>
     );
   }
 
@@ -145,7 +148,9 @@ export default function SupportSubmitPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
       <SiteNav />
       <main style={{ maxWidth: "660px", margin: "0 auto", padding: "7rem 1.5rem 4rem" }}>
         <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
@@ -210,5 +215,6 @@ export default function SupportSubmitPage() {
       </main>
       <SiteFooter />
     </div>
+    </>
   );
 }

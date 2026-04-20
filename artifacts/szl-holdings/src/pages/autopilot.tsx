@@ -1169,7 +1169,7 @@ const TABS = [
 ];
 
 export default function AutopilotPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Ecosystem Autopilot — SZL Holdings",
     description: "Self-diagnosing capability genome, drift detection, feedback loops, and next-best-action prescriptor for the SZL ecosystem.",
     canonical: "https://szlholdings.com/autopilot",
@@ -1206,124 +1206,127 @@ export default function AutopilotPage() {
   const showSignInNotice = !authLoading && !isAuthenticated && (summaryError || driftError);
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main className="pt-24">
-        <section style={{ padding: "3rem 0 2rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(265,60%,62%)", marginBottom: "0.5rem" }}>
-                Ecosystem Autopilot
-              </p>
-              <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "var(--font-display)" }}>
-                Self-diagnosing. Self-prescribing.<br />Always improving.
-              </h1>
-              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,56%)", maxWidth: "42rem" }}>
-                The Autopilot maps every capability across every app, detects when things drift, aggregates user feedback, and tells you exactly what to build next. The ecosystem tells you how it's doing — you just act on it.
-              </p>
-            </m.div>
-
-            {showSignInNotice && (
-              <m.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                role="status"
-                style={{
-                  marginTop: "1.75rem",
-                  padding: "0.75rem 1rem",
-                  background: "hsla(214,72%,14%,0.55)",
-                  border: "1px solid hsla(214,72%,55%,0.25)",
-                  borderRadius: "0.625rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  flexWrap: "wrap",
-                }}
-              >
-                <Lightbulb size={14} style={{ color: "#60a5fa", flexShrink: 0 }} />
-                <span style={{ fontSize: "12.5px", color: "hsl(38,12%,82%)", lineHeight: 1.5 }}>
-                  Sign in to see live ecosystem stats. Anonymous visitors see placeholder values.
-                </span>
-                <button
-                  type="button"
-                  onClick={login}
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main className="pt-24">
+          <section style={{ padding: "3rem 0 2rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(265,60%,62%)", marginBottom: "0.5rem" }}>
+                  Ecosystem Autopilot
+                </p>
+                <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "var(--font-display)" }}>
+                  Self-diagnosing. Self-prescribing.<br />Always improving.
+                </h1>
+                <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,56%)", maxWidth: "42rem" }}>
+                  The Autopilot maps every capability across every app, detects when things drift, aggregates user feedback, and tells you exactly what to build next. The ecosystem tells you how it's doing — you just act on it.
+                </p>
+              </m.div>
+  
+              {showSignInNotice && (
+                <m.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  role="status"
                   style={{
-                    marginLeft: "auto",
-                    fontSize: "11.5px",
-                    fontWeight: 600,
-                    padding: "0.4rem 0.85rem",
-                    borderRadius: "0.375rem",
-                    background: "hsla(214,72%,55%,0.18)",
-                    color: "#93c5fd",
-                    border: "1px solid hsla(214,72%,55%,0.35)",
-                    cursor: "pointer",
-                    display: "inline-flex",
+                    marginTop: "1.75rem",
+                    padding: "0.75rem 1rem",
+                    background: "hsla(214,72%,14%,0.55)",
+                    border: "1px solid hsla(214,72%,55%,0.25)",
+                    borderRadius: "0.625rem",
+                    display: "flex",
                     alignItems: "center",
-                    gap: "0.375rem",
+                    gap: "0.75rem",
+                    flexWrap: "wrap",
                   }}
                 >
-                  Sign in
-                  <ArrowRight size={11} />
-                </button>
+                  <Lightbulb size={14} style={{ color: "#60a5fa", flexShrink: 0 }} />
+                  <span style={{ fontSize: "12.5px", color: "hsl(38,12%,82%)", lineHeight: 1.5 }}>
+                    Sign in to see live ecosystem stats. Anonymous visitors see placeholder values.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={login}
+                    style={{
+                      marginLeft: "auto",
+                      fontSize: "11.5px",
+                      fontWeight: 600,
+                      padding: "0.4rem 0.85rem",
+                      borderRadius: "0.375rem",
+                      background: "hsla(214,72%,55%,0.18)",
+                      color: "#93c5fd",
+                      border: "1px solid hsla(214,72%,55%,0.35)",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.375rem",
+                    }}
+                  >
+                    Sign in
+                    <ArrowRight size={11} />
+                  </button>
+                </m.div>
+              )}
+  
+              <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} style={{ marginTop: "2rem", display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+                <div style={{ padding: "0.5rem 1rem", background: "hsla(265,70%,60%,0.1)", border: "1px solid hsla(265,70%,60%,0.2)", borderRadius: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <Sparkles size={12} style={{ color: "#a78bfa" }} />
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#a78bfa" }}>Autopilot Active</span>
+                </div>
+                <div style={{ padding: "0.5rem 1rem", background: "hsla(160,60%,15%,0.4)", border: "1px solid hsla(160,60%,35%,0.2)", borderRadius: "0.5rem" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#10b981" }}>
+                    Genome score: {summary?.genomeScore ?? "—"}%
+                  </span>
+                </div>
+                <div style={{ padding: "0.5rem 1rem", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "0.5rem" }}>
+                  <span style={{ fontSize: "11px", color: "hsl(210,5%,52%)" }}>
+                    {summary?.scheduledJobsActive ?? "—"} scheduled jobs active · Weekly briefing: Mondays 08:00 UTC
+                  </span>
+                </div>
+                <div style={{ padding: "0.5rem 1rem", background: "hsla(350,80%,15%,0.4)", border: "1px solid hsla(350,80%,35%,0.2)", borderRadius: "0.5rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                  <AlertTriangle size={11} style={{ color: "#f43f5e" }} />
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#f43f5e" }}>
+                    {criticalCount} critical drift alerts
+                  </span>
+                </div>
               </m.div>
-            )}
-
-            <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} style={{ marginTop: "2rem", display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
-              <div style={{ padding: "0.5rem 1rem", background: "hsla(265,70%,60%,0.1)", border: "1px solid hsla(265,70%,60%,0.2)", borderRadius: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Sparkles size={12} style={{ color: "#a78bfa" }} />
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "#a78bfa" }}>Autopilot Active</span>
+  
+              <NextBestActionPanel />
+  
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem", paddingBottom: "1rem", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+                {TABS.map(tab => {
+                  const Icon = tab.icon;
+                  return (
+                    <TabButton key={tab.id} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                        <Icon size={11} />
+                        {tab.label}
+                      </span>
+                    </TabButton>
+                  );
+                })}
               </div>
-              <div style={{ padding: "0.5rem 1rem", background: "hsla(160,60%,15%,0.4)", border: "1px solid hsla(160,60%,35%,0.2)", borderRadius: "0.5rem" }}>
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "#10b981" }}>
-                  Genome score: {summary?.genomeScore ?? "—"}%
-                </span>
-              </div>
-              <div style={{ padding: "0.5rem 1rem", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "0.5rem" }}>
-                <span style={{ fontSize: "11px", color: "hsl(210,5%,52%)" }}>
-                  {summary?.scheduledJobsActive ?? "—"} scheduled jobs active · Weekly briefing: Mondays 08:00 UTC
-                </span>
-              </div>
-              <div style={{ padding: "0.5rem 1rem", background: "hsla(350,80%,15%,0.4)", border: "1px solid hsla(350,80%,35%,0.2)", borderRadius: "0.5rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                <AlertTriangle size={11} style={{ color: "#f43f5e" }} />
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "#f43f5e" }}>
-                  {criticalCount} critical drift alerts
-                </span>
-              </div>
-            </m.div>
-
-            <NextBestActionPanel />
-
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem", paddingBottom: "1rem", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
-              {TABS.map(tab => {
-                const Icon = tab.icon;
-                return (
-                  <TabButton key={tab.id} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
-                    <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <Icon size={11} />
-                      {tab.label}
-                    </span>
-                  </TabButton>
-                );
-              })}
+  
+              <AnimatePresence mode="wait">
+                <m.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  {activeTab === "genome"    && <GenomeTab />}
+                  {activeTab === "drift"     && <DriftTab />}
+                  {activeTab === "usage"     && <UsageTab />}
+                  {activeTab === "feedback"  && <FeedbackTab />}
+                  {activeTab === "budget"    && <BudgetTab />}
+                  {activeTab === "playbooks" && <PlaybooksTab />}
+                  {activeTab === "radar"     && <RadarTab />}
+                  {activeTab === "forge"     && <ForgeTab />}
+                </m.div>
+              </AnimatePresence>
             </div>
-
-            <AnimatePresence mode="wait">
-              <m.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                {activeTab === "genome"    && <GenomeTab />}
-                {activeTab === "drift"     && <DriftTab />}
-                {activeTab === "usage"     && <UsageTab />}
-                {activeTab === "feedback"  && <FeedbackTab />}
-                {activeTab === "budget"    && <BudgetTab />}
-                {activeTab === "playbooks" && <PlaybooksTab />}
-                {activeTab === "radar"     && <RadarTab />}
-                {activeTab === "forge"     && <ForgeTab />}
-              </m.div>
-            </AnimatePresence>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

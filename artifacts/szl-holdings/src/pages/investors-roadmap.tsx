@@ -162,216 +162,219 @@ const statusColor: Record<string, string> = {
 };
 
 export default function InvestorsRoadmapPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Roadmap — Investor Relations — SZL Holdings",
     description: "SZL Holdings 30-day and 90-day product roadmap — pre-commercial hardening to first commercial deployment and design partner activation.",
     canonical: "https://szlholdings.com/investors/roadmap",
   });
 
   return (
-    <div className="min-h-screen bg-[#070a10] text-white">
-      <SiteNav />
-      <main>
-        {/* Hero */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#6aaa72]/20 bg-[#6aaa72]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#6aaa72]">
-              <Map className="h-3.5 w-3.5" />
-              Product Roadmap — April 2026
-            </div>
-            <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              30 days to hardened.
-              <br />
-              90 days to first revenue.
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-              Pre-commercial priorities only — the work required to take the platform from Functional Alpha
-              to first commercial deployment and initial design partner engagement. Every item is scoped,
-              estimated, and dependency-mapped.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/investors/overview" className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]">
-                Company overview
-              </Link>
-              <Link href="/investors/moat" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90">
-                Moat & defensibility <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Status baseline */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Status baseline — April 2026</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">All platforms at Functional Alpha.</h2>
-            <p className="mt-2 text-sm text-white/50">Full feature sets with seeded/demo data. Not yet commercially deployed.</p>
-            <div className="mt-8 space-y-2">
-              {statusBaseline.map((row) => (
-                <div key={row.platform} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-3">
-                  <div>
-                    <span className="text-sm font-semibold text-white">{row.platform}</span>
-                    <span className="ml-3 text-xs text-white/40">{row.note}</span>
-                  </div>
-                  <span
-                    className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]"
-                    style={{
-                      color: statusColor[row.status] ?? "#ffffff80",
-                      background: `${statusColor[row.status] ?? "#ffffff"}18`,
-                      border: `1px solid ${statusColor[row.status] ?? "#ffffff"}30`,
-                    }}
-                  >
-                    {row.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 30-day priorities */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">30-day horizon — April–May 2026</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Pre-commercial hardening.</h2>
-            <p className="mt-2 max-w-2xl text-sm text-white/50">Closing the highest-priority gaps before design partner onboarding begins.</p>
-            <div className="mt-10 space-y-6">
-              {thirtyDayPriorities.map((group) => {
-                const Icon = group.icon;
-                return (
-                  <div key={group.priority} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
-                    <div className="flex flex-wrap items-center gap-3 mb-5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20">
-                        <Icon className="h-4 w-4" style={{ color: group.color }} />
-                      </div>
-                      <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: group.color }}>{group.priority}</span>
-                      <h3 className="text-base font-semibold text-white">{group.label}</h3>
-                    </div>
-                    <div className="space-y-3">
-                      {group.items.map((item) => (
-                        <div key={item.label} className="flex items-start gap-3">
-                          {item.done ? (
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: group.color }} />
-                          ) : (
-                            <Circle className="mt-0.5 h-4 w-4 shrink-0 text-white/20" />
-                          )}
-                          <div>
-                            <p className="text-sm font-medium" style={{ color: item.done ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.60)" }}>
-                              {item.label}
-                            </p>
-                            <p className="text-xs text-white/35 mt-0.5">{item.note}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* 90-day milestones */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">90-day horizon — April–July 2026</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">First commercial deployment and design partner activation.</h2>
-            <p className="mt-2 max-w-2xl text-sm text-white/50">The critical path from Functional Alpha to revenue-generating operations.</p>
-            <div className="mt-10 space-y-6">
-              {ninetyDayMilestones.map((ms) => {
-                const Icon = ms.icon;
-                return (
-                  <div key={ms.milestone} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
-                    <div className="flex flex-wrap items-center gap-4 mb-5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20">
-                        <Icon className="h-4 w-4" style={{ color: ms.color }} />
-                      </div>
-                      <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: ms.color }}>{ms.milestone}</span>
-                      <h3 className="text-base font-semibold text-white">{ms.label}</h3>
-                      <div className="flex items-center gap-2 rounded-full border border-white/[0.08] px-3 py-1 text-xs text-white/45">
-                        <Clock className="h-3 w-3" />
-                        {ms.timeframe}
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      {ms.items.map((item) => (
-                        <div key={item.label} className="flex items-start gap-3">
-                          <Circle className="mt-0.5 h-4 w-4 shrink-0 text-white/20" />
-                          <div>
-                            <p className="text-sm font-medium text-white/60">{item.label}</p>
-                            <p className="text-xs text-white/35 mt-0.5">{item.note}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Success metrics */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Success metrics</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Measurable outcomes at each horizon.</h2>
-            <div className="mt-8 grid gap-6 md:grid-cols-3">
-              {successMetrics.map((group) => (
-                <div key={group.horizon} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
-                  <div className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#d4a054]">{group.horizon}</div>
-                  <div className="space-y-3">
-                    {group.metrics.map((m) => (
-                      <div key={m} className="flex items-start gap-2">
-                        <Target className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d4a054]/60" />
-                        <p className="text-xs leading-5 text-white/60">{m}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Out of scope */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
-            <div className="flex items-start gap-4 rounded-2xl border border-[#c45a4a]/15 bg-[#c45a4a]/[0.04] p-6">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#c45a4a]/70" />
-              <div>
-                <p className="text-sm font-semibold text-white/80">Explicitly out of scope for this roadmap</p>
-                <p className="mt-1.5 text-sm leading-6 text-white/50">
-                  New domain pack feature development · GitHub Actions CI/CD pipeline rebuild · Mobile app store launch ·
-                  Public marketing website refresh · Any roadmap items beyond 90 days.
-                </p>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#070a10] text-white">
+        <SiteNav />
+        <main>
+          {/* Hero */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#6aaa72]/20 bg-[#6aaa72]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#6aaa72]">
+                <Map className="h-3.5 w-3.5" />
+                Product Roadmap — April 2026
+              </div>
+              <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+                30 days to hardened.
+                <br />
+                90 days to first revenue.
+              </h1>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
+                Pre-commercial priorities only — the work required to take the platform from Functional Alpha
+                to first commercial deployment and initial design partner engagement. Every item is scoped,
+                estimated, and dependency-mapped.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/investors/overview" className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]">
+                  Company overview
+                </Link>
+                <Link href="/investors/moat" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90">
+                  Moat & defensibility <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Navigation */}
-        <section>
-          <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                { label: "Overview", href: "/investors/overview", icon: Building2 },
-                { label: "Architecture", href: "/investors/architecture", icon: Layers },
-                { label: "Data Room", href: "/investors/data-room", icon: FileCheck2 },
-              ].map((item) => (
-                <Link key={item.label} href={item.href}>
-                  <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
-                    <item.icon className="h-4 w-4 text-[#d4a054]" />
-                    <span className="text-sm font-medium text-white/80">{item.label}</span>
-                    <ArrowRight className="ml-auto h-3.5 w-3.5 text-white/25" />
+          </section>
+  
+          {/* Status baseline */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Status baseline — April 2026</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">All platforms at Functional Alpha.</h2>
+              <p className="mt-2 text-sm text-white/50">Full feature sets with seeded/demo data. Not yet commercially deployed.</p>
+              <div className="mt-8 space-y-2">
+                {statusBaseline.map((row) => (
+                  <div key={row.platform} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-3">
+                    <div>
+                      <span className="text-sm font-semibold text-white">{row.platform}</span>
+                      <span className="ml-3 text-xs text-white/40">{row.note}</span>
+                    </div>
+                    <span
+                      className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]"
+                      style={{
+                        color: statusColor[row.status] ?? "#ffffff80",
+                        background: `${statusColor[row.status] ?? "#ffffff"}18`,
+                        border: `1px solid ${statusColor[row.status] ?? "#ffffff"}30`,
+                      }}
+                    >
+                      {row.status}
+                    </span>
                   </div>
-                </Link>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          {/* 30-day priorities */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">30-day horizon — April–May 2026</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">Pre-commercial hardening.</h2>
+              <p className="mt-2 max-w-2xl text-sm text-white/50">Closing the highest-priority gaps before design partner onboarding begins.</p>
+              <div className="mt-10 space-y-6">
+                {thirtyDayPriorities.map((group) => {
+                  const Icon = group.icon;
+                  return (
+                    <div key={group.priority} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
+                      <div className="flex flex-wrap items-center gap-3 mb-5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20">
+                          <Icon className="h-4 w-4" style={{ color: group.color }} />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: group.color }}>{group.priority}</span>
+                        <h3 className="text-base font-semibold text-white">{group.label}</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {group.items.map((item) => (
+                          <div key={item.label} className="flex items-start gap-3">
+                            {item.done ? (
+                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: group.color }} />
+                            ) : (
+                              <Circle className="mt-0.5 h-4 w-4 shrink-0 text-white/20" />
+                            )}
+                            <div>
+                              <p className="text-sm font-medium" style={{ color: item.done ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.60)" }}>
+                                {item.label}
+                              </p>
+                              <p className="text-xs text-white/35 mt-0.5">{item.note}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+  
+          {/* 90-day milestones */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">90-day horizon — April–July 2026</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">First commercial deployment and design partner activation.</h2>
+              <p className="mt-2 max-w-2xl text-sm text-white/50">The critical path from Functional Alpha to revenue-generating operations.</p>
+              <div className="mt-10 space-y-6">
+                {ninetyDayMilestones.map((ms) => {
+                  const Icon = ms.icon;
+                  return (
+                    <div key={ms.milestone} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
+                      <div className="flex flex-wrap items-center gap-4 mb-5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20">
+                          <Icon className="h-4 w-4" style={{ color: ms.color }} />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: ms.color }}>{ms.milestone}</span>
+                        <h3 className="text-base font-semibold text-white">{ms.label}</h3>
+                        <div className="flex items-center gap-2 rounded-full border border-white/[0.08] px-3 py-1 text-xs text-white/45">
+                          <Clock className="h-3 w-3" />
+                          {ms.timeframe}
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {ms.items.map((item) => (
+                          <div key={item.label} className="flex items-start gap-3">
+                            <Circle className="mt-0.5 h-4 w-4 shrink-0 text-white/20" />
+                            <div>
+                              <p className="text-sm font-medium text-white/60">{item.label}</p>
+                              <p className="text-xs text-white/35 mt-0.5">{item.note}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+  
+          {/* Success metrics */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Success metrics</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">Measurable outcomes at each horizon.</h2>
+              <div className="mt-8 grid gap-6 md:grid-cols-3">
+                {successMetrics.map((group) => (
+                  <div key={group.horizon} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                    <div className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#d4a054]">{group.horizon}</div>
+                    <div className="space-y-3">
+                      {group.metrics.map((m) => (
+                        <div key={m} className="flex items-start gap-2">
+                          <Target className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d4a054]/60" />
+                          <p className="text-xs leading-5 text-white/60">{m}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Out of scope */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
+              <div className="flex items-start gap-4 rounded-2xl border border-[#c45a4a]/15 bg-[#c45a4a]/[0.04] p-6">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#c45a4a]/70" />
+                <div>
+                  <p className="text-sm font-semibold text-white/80">Explicitly out of scope for this roadmap</p>
+                  <p className="mt-1.5 text-sm leading-6 text-white/50">
+                    New domain pack feature development · GitHub Actions CI/CD pipeline rebuild · Mobile app store launch ·
+                    Public marketing website refresh · Any roadmap items beyond 90 days.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+  
+          {/* Navigation */}
+          <section>
+            <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  { label: "Overview", href: "/investors/overview", icon: Building2 },
+                  { label: "Architecture", href: "/investors/architecture", icon: Layers },
+                  { label: "Data Room", href: "/investors/data-room", icon: FileCheck2 },
+                ].map((item) => (
+                  <Link key={item.label} href={item.href}>
+                    <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
+                      <item.icon className="h-4 w-4 text-[#d4a054]" />
+                      <span className="text-sm font-medium text-white/80">{item.label}</span>
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-white/25" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

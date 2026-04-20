@@ -62,7 +62,7 @@ function ProjectHealthCard({ project, index }: { project: Project; index: number
 }
 
 export default function SpectrumAnalytics() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Spectrum Analytics | SZL Holdings – Platform Health Intelligence",
     description: "Real-time health analytics for the SZL Holdings application portfolio. Monitor performance, security, reliability, and maintainability across all platforms.",
     canonical: "https://szlholdings.com/spectrum",
@@ -95,12 +95,15 @@ export default function SpectrumAnalytics() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <PageDataSkeleton variant="dashboard" showHeader showStats rows={4} />
+    <>
+      {__pageMeta}
+        <div className="min-h-screen bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <PageDataSkeleton variant="dashboard" showHeader showStats rows={4} />
+          </div>
         </div>
-      </div>
-    );
+          </>
+  );
   }
 
   return (

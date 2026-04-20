@@ -205,169 +205,172 @@ function SectionCard({ section, i }: { section: typeof ARCH_SECTIONS[0]; i: numb
 }
 
 export default function ArchitecturePage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "System Architecture — SZL Holdings",
     description: "Why this architecture exists, how Lyte, Alloy, packs, Proof Chain, external intelligence, the governance API, governed inference, and trust infrastructure work together — and why this is hard to copy.",
     canonical: "https://szlholdings.com/architecture",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        {/* Hero */}
-        <section className="szl-grid-texture szl-depth-glow-dual" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid hsla(145,62%,40%,0.22)", background: "hsla(145,62%,40%,0.08)", marginBottom: "1.75rem" }}>
-                <Layers size={13} color="hsl(145,62%,46%)" />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(145,62%,46%)" }}>System Architecture</span>
-              </div>
-              <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
-                Ten layers. One governed pipeline. Built to be defensible.
-              </h1>
-              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "55ch", marginBottom: "2rem" }}>
-                This page explains every architectural layer of Lyte + Alloy — what it does,
-                why it exists, what it means for trust, and what it means for operations.
-                Written for technical buyers, capital partners, and enterprise diligence teams.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                <Link href="/trust" className="szl-btn-secondary">
-                  Trust Center →
-                </Link>
-                <Link href="/contact" className="szl-btn-primary">
-                  Technical diligence conversation <ArrowRight size={14} />
-                </Link>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        {/* Section nav */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "1.5rem 0", background: "hsla(214,12%,5%,0.80)", position: "sticky", top: 0, zIndex: 10 }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)", overflowX: "auto" }}>
-            <div style={{ display: "flex", gap: "0.375rem", flexWrap: "nowrap", minWidth: "max-content" }}>
-              {ARCH_SECTIONS.map((s) => (
-                <a
-                  key={s.id}
-                  href={`#${s.id}`}
-                  style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(214,7%,48%)", textDecoration: "none", padding: "0.3125rem 0.625rem", borderRadius: "0.3125rem", border: "1px solid transparent", whiteSpace: "nowrap", transition: "color 0.15s ease, border-color 0.15s ease" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = s.color; (e.currentTarget as HTMLElement).style.borderColor = s.colorBorder; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "hsl(214,7%,48%)"; (e.currentTarget as HTMLElement).style.borderColor = "transparent"; }}
-                >
-                  {s.number} {s.label}
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Architecture sections */}
-        <section style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-              {ARCH_SECTIONS.map((section, i) => (
-                <SectionCard key={section.id} section={section} i={i} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Diagram: Signal-to-Action */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-lyte-light)", marginBottom: "0.75rem" }}>Signal pipeline</p>
-              <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
-                How every action flows from signal to audit record.
-              </h2>
-            </m.div>
-            <SignalToActionDiagram />
-          </div>
-        </section>
-
-        {/* Diagram: Approval Path */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)", marginBottom: "0.75rem" }}>HITL approval model</p>
-              <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
-                Four-tier human-in-the-loop gate structure.
-              </h2>
-            </m.div>
-            <ApprovalPathDiagram />
-          </div>
-        </section>
-
-        {/* Diagram: GraphQL Control Plane */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(258,55%,68%)", marginBottom: "0.75rem" }}>Governance API</p>
-              <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
-                The single, tenant-scoped data access layer.
-              </h2>
-            </m.div>
-            <ControlPlaneDiagram />
-          </div>
-        </section>
-
-        {/* Diagram: Pack-to-Platform */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)", marginBottom: "0.75rem" }}>Domain packs</p>
-              <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
-                How packs extend the platform without bypassing governance.
-              </h2>
-            </m.div>
-            <PackToPlatformDiagram />
-          </div>
-        </section>
-
-        {/* Diagram: Proof Chain */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "0.75rem" }}>Proof Chain</p>
-              <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
-                Immutable lineage from source to decision to export.
-              </h2>
-            </m.div>
-            <ProofChainDiagram />
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section style={{ borderTop: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <div className="szl-card" style={{ borderRadius: "1rem", padding: "clamp(2rem,4vw,3rem)", display: "grid", gridTemplateColumns: "1fr auto", gap: "2rem", alignItems: "center" }}>
-                <div>
-                  <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, marginBottom: "0.875rem", maxWidth: "32ch" }}>
-                    Ready to go deeper on any layer?
-                  </h2>
-                  <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "50ch" }}>
-                    We run technical diligence conversations for serious buyers and capital partners.
-                    Ask any question about any layer — we will give you a direct, documented answer.
-                  </p>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          {/* Hero */}
+          <section className="szl-grid-texture szl-depth-glow-dual" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid hsla(145,62%,40%,0.22)", background: "hsla(145,62%,40%,0.08)", marginBottom: "1.75rem" }}>
+                  <Layers size={13} color="hsl(145,62%,46%)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(145,62%,46%)" }}>System Architecture</span>
                 </div>
-                <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
+                  Ten layers. One governed pipeline. Built to be defensible.
+                </h1>
+                <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "55ch", marginBottom: "2rem" }}>
+                  This page explains every architectural layer of Lyte + Alloy — what it does,
+                  why it exists, what it means for trust, and what it means for operations.
+                  Written for technical buyers, capital partners, and enterprise diligence teams.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <Link href="/trust" className="szl-btn-secondary">
+                    Trust Center →
+                  </Link>
                   <Link href="/contact" className="szl-btn-primary">
-                    Start a conversation <ArrowRight size={14} />
-                  </Link>
-                  <Link href="/trust" className="szl-btn-ghost">
-                    Trust Center
+                    Technical diligence conversation <ArrowRight size={14} />
                   </Link>
                 </div>
+              </m.div>
+            </div>
+          </section>
+  
+          {/* Section nav */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "1.5rem 0", background: "hsla(214,12%,5%,0.80)", position: "sticky", top: 0, zIndex: 10 }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)", overflowX: "auto" }}>
+              <div style={{ display: "flex", gap: "0.375rem", flexWrap: "nowrap", minWidth: "max-content" }}>
+                {ARCH_SECTIONS.map((s) => (
+                  <a
+                    key={s.id}
+                    href={`#${s.id}`}
+                    style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(214,7%,48%)", textDecoration: "none", padding: "0.3125rem 0.625rem", borderRadius: "0.3125rem", border: "1px solid transparent", whiteSpace: "nowrap", transition: "color 0.15s ease, border-color 0.15s ease" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = s.color; (e.currentTarget as HTMLElement).style.borderColor = s.colorBorder; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "hsl(214,7%,48%)"; (e.currentTarget as HTMLElement).style.borderColor = "transparent"; }}
+                  >
+                    {s.number} {s.label}
+                  </a>
+                ))}
               </div>
-            </m.div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+            </div>
+          </section>
+  
+          {/* Architecture sections */}
+          <section style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+                {ARCH_SECTIONS.map((section, i) => (
+                  <SectionCard key={section.id} section={section} i={i} />
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Diagram: Signal-to-Action */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-lyte-light)", marginBottom: "0.75rem" }}>Signal pipeline</p>
+                <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
+                  How every action flows from signal to audit record.
+                </h2>
+              </m.div>
+              <SignalToActionDiagram />
+            </div>
+          </section>
+  
+          {/* Diagram: Approval Path */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)", marginBottom: "0.75rem" }}>HITL approval model</p>
+                <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
+                  Four-tier human-in-the-loop gate structure.
+                </h2>
+              </m.div>
+              <ApprovalPathDiagram />
+            </div>
+          </section>
+  
+          {/* Diagram: GraphQL Control Plane */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(258,55%,68%)", marginBottom: "0.75rem" }}>Governance API</p>
+                <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
+                  The single, tenant-scoped data access layer.
+                </h2>
+              </m.div>
+              <ControlPlaneDiagram />
+            </div>
+          </section>
+  
+          {/* Diagram: Pack-to-Platform */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)", marginBottom: "0.75rem" }}>Domain packs</p>
+                <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
+                  How packs extend the platform without bypassing governance.
+                </h2>
+              </m.div>
+              <PackToPlatformDiagram />
+            </div>
+          </section>
+  
+          {/* Diagram: Proof Chain */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "0.75rem" }}>Proof Chain</p>
+                <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
+                  Immutable lineage from source to decision to export.
+                </h2>
+              </m.div>
+              <ProofChainDiagram />
+            </div>
+          </section>
+  
+          {/* CTA */}
+          <section style={{ borderTop: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <div className="szl-card" style={{ borderRadius: "1rem", padding: "clamp(2rem,4vw,3rem)", display: "grid", gridTemplateColumns: "1fr auto", gap: "2rem", alignItems: "center" }}>
+                  <div>
+                    <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, marginBottom: "0.875rem", maxWidth: "32ch" }}>
+                      Ready to go deeper on any layer?
+                    </h2>
+                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "50ch" }}>
+                      We run technical diligence conversations for serious buyers and capital partners.
+                      Ask any question about any layer — we will give you a direct, documented answer.
+                    </p>
+                  </div>
+                  <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                    <Link href="/contact" className="szl-btn-primary">
+                      Start a conversation <ArrowRight size={14} />
+                    </Link>
+                    <Link href="/trust" className="szl-btn-ghost">
+                      Trust Center
+                    </Link>
+                  </div>
+                </div>
+              </m.div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

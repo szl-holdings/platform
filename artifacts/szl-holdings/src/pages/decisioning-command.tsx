@@ -689,7 +689,7 @@ function RunHistoryPanel({
 const AUTO_REFRESH_INTERVAL_MS = 90_000;
 
 export default function DecisioningCommandPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Decisioning Command — Lyte",
     description: "SZL unified Decision, Policy & Action Engine surface — turn signals into governed, explainable, executable action.",
   });
@@ -954,204 +954,207 @@ export default function DecisioningCommandPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <SiteNav />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-indigo-400" />
-              <span className="text-xs text-indigo-400 font-semibold uppercase tracking-wider">Decision Engine</span>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-slate-950 text-white">
+        <SiteNav />
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-indigo-400" />
+                <span className="text-xs text-indigo-400 font-semibold uppercase tracking-wider">Decision Engine</span>
+              </div>
+              <span className="text-slate-600">·</span>
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-violet-400" />
+                <span className="text-xs text-violet-400 font-semibold uppercase tracking-wider">Policy Engine</span>
+              </div>
+              <span className="text-slate-600">·</span>
+              <div className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-sky-400" />
+                <span className="text-xs text-sky-400 font-semibold uppercase tracking-wider">Action Engine</span>
+              </div>
             </div>
-            <span className="text-slate-600">·</span>
-            <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-violet-400" />
-              <span className="text-xs text-violet-400 font-semibold uppercase tracking-wider">Policy Engine</span>
-            </div>
-            <span className="text-slate-600">·</span>
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-sky-400" />
-              <span className="text-xs text-sky-400 font-semibold uppercase tracking-wider">Action Engine</span>
-            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Decisioning Command</h1>
+            <p className="text-slate-400 max-w-2xl">
+              Signals ranked by business impact, urgency, and confidence. Every recommendation is policy-checked before
+              it reaches an owner. Every approved action is executed as a governed, replayable workflow.
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Decisioning Command</h1>
-          <p className="text-slate-400 max-w-2xl">
-            Signals ranked by business impact, urgency, and confidence. Every recommendation is policy-checked before
-            it reaches an owner. Every approved action is executed as a governed, replayable workflow.
-          </p>
-        </div>
-
-        {stats && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
-              <div className="text-xs text-slate-500 mb-1">Decision Engine</div>
-              <div className="text-lg font-bold text-white">Active</div>
-              <div className="text-xs text-indigo-400">v{stats.decisionEngine?.version}</div>
+  
+          {stats && (
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+                <div className="text-xs text-slate-500 mb-1">Decision Engine</div>
+                <div className="text-lg font-bold text-white">Active</div>
+                <div className="text-xs text-indigo-400">v{stats.decisionEngine?.version}</div>
+              </div>
+              <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+                <div className="text-xs text-slate-500 mb-1">Active Policies</div>
+                <div className="text-lg font-bold text-white">{stats.policyEngine?.activePolicies ?? "—"}</div>
+                <div className="text-xs text-violet-400">{stats.policyEngine?.registeredPolicies} registered</div>
+              </div>
+              <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+                <div className="text-xs text-slate-500 mb-1">Registered Workflows</div>
+                <div className="text-lg font-bold text-white">{stats.actionEngine?.registeredWorkflows ?? "—"}</div>
+                <div className="text-xs text-sky-400">{stats.actionEngine?.total ?? 0} runs total</div>
+              </div>
             </div>
-            <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
-              <div className="text-xs text-slate-500 mb-1">Active Policies</div>
-              <div className="text-lg font-bold text-white">{stats.policyEngine?.activePolicies ?? "—"}</div>
-              <div className="text-xs text-violet-400">{stats.policyEngine?.registeredPolicies} registered</div>
-            </div>
-            <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
-              <div className="text-xs text-slate-500 mb-1">Registered Workflows</div>
-              <div className="text-lg font-bold text-white">{stats.actionEngine?.registeredWorkflows ?? "—"}</div>
-              <div className="text-xs text-sky-400">{stats.actionEngine?.total ?? 0} runs total</div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <h2 className="text-base font-semibold text-white">Active Recommendations</h2>
-              {dataSource === "live" && (
-                <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium">
-                  <Radio className="w-3 h-3" />
-                  Live Feed
-                </span>
-              )}
-              {dataSource === "fallback" && (
-                <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-700/50 border border-slate-600/50 text-slate-400 font-medium">
-                  <Database className="w-3 h-3" />
-                  Demo Mode
-                </span>
-              )}
-            </div>
-            {lastEvaluated && (
-              <p className="text-xs text-slate-500 mt-0.5">
-                Evaluated {new Date(lastEvaluated).toLocaleTimeString()} · {recommendations.length} ranked recommendations
-                {dataSource === "live" && signalDomains.length > 0 && (
-                  <span className="ml-1">· signals from {signalDomains.join(", ")}</span>
-                )}
-                {dataSource === "live" && <span className="ml-1">· auto-refreshes every 90s</span>}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 mb-6 border-b border-slate-800">
-          <button
-            onClick={() => setActiveTab("recommendations")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === "recommendations"
-                ? "border-indigo-500 text-white"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Brain className="w-4 h-4" />
-            Recommendations
-          </button>
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === "history"
-                ? "border-indigo-500 text-white"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <History className="w-4 h-4" />
-            Run History
-            {historyTotal > 0 && (
-              <span className="text-xs bg-slate-700 text-slate-300 rounded-full px-1.5 py-0.5">{historyTotal}</span>
-            )}
-          </button>
-        </div>
-
-        {activeTab === "recommendations" && (
-          <>
-            <div className="flex items-center justify-between mb-5">
-              <div>
+          )}
+  
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
                 <h2 className="text-base font-semibold text-white">Active Recommendations</h2>
-                {lastEvaluated && (
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Evaluated {new Date(lastEvaluated).toLocaleTimeString()} · {recommendations.length} ranked recommendations
-                  </p>
+                {dataSource === "live" && (
+                  <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium">
+                    <Radio className="w-3 h-3" />
+                    Live Feed
+                  </span>
+                )}
+                {dataSource === "fallback" && (
+                  <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-700/50 border border-slate-600/50 text-slate-400 font-medium">
+                    <Database className="w-3 h-3" />
+                    Demo Mode
+                  </span>
                 )}
               </div>
-              <button
-                onClick={evaluate}
-                disabled={loading}
-                className="text-xs px-3 py-1.5 rounded border border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 transition-all flex items-center gap-1.5 disabled:opacity-50"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-                Re-evaluate
-              </button>
+              {lastEvaluated && (
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Evaluated {new Date(lastEvaluated).toLocaleTimeString()} · {recommendations.length} ranked recommendations
+                  {dataSource === "live" && signalDomains.length > 0 && (
+                    <span className="ml-1">· signals from {signalDomains.join(", ")}</span>
+                  )}
+                  {dataSource === "live" && <span className="ml-1">· auto-refreshes every 90s</span>}
+                </p>
+              )}
             </div>
-
-            {loading && recommendations.length === 0 ? (
-              <div className="text-center py-16 text-slate-500">
-                <Brain className="w-8 h-8 mx-auto mb-3 animate-pulse" />
-                <p className="text-sm">Evaluating signals…</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {recommendations.map(rec => (
-                  <RecommendationCard
-                    key={rec.id}
-                    rec={rec}
-                    onExecute={handleExecute}
-                    onDryRun={handleDryRun}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {activeTab === "history" && (
-          <RunHistoryPanel
-            runs={historyRuns}
-            total={historyTotal}
-            page={historyPage}
-            pageSize={HISTORY_PAGE_SIZE}
-            loading={historyLoading}
-            statusFilter={historyStatusFilter}
-            domainFilter={historyDomainFilter}
-            onStatusChange={(s) => { setHistoryStatusFilter(s); setHistoryPage(0); }}
-            onDomainChange={(d) => { setHistoryDomainFilter(d); setHistoryPage(0); }}
-            onPageChange={setHistoryPage}
-            onRefresh={() => fetchHistory(historyPage, historyStatusFilter, historyDomainFilter)}
-          />
-        )}
-
-        <div className="mt-12 border-t border-slate-800 pt-8">
-          <h2 className="text-base font-semibold text-white mb-4">How the Engines Work Together</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              {
-                icon: <Brain className="w-5 h-5 text-indigo-400" />,
-                title: "Decision Engine",
-                description: "Ranks signals by business impact (financial, reputational, regulatory), urgency, confidence, SLA proximity, and cross-domain blast radius. Outputs explainable recommendations with source attribution.",
-              },
-              {
-                icon: <Shield className="w-5 h-5 text-violet-400" />,
-                title: "Policy Engine",
-                description: "Hierarchical rule evaluation across tenant → domain → action levels. Determines: allow, require approval, escalate, or block. Built-in guardrails fire before AI recommendations.",
-              },
-              {
-                icon: <Zap className="w-5 h-5 text-sky-400" />,
-                title: "Action Engine",
-                description: "Turns approved recommendations into step-by-step workflows. Supports manual, semi-auto, and autonomous modes with dry run, simulation, approval gates, rollback hooks, and immutable audit trail.",
-              },
-            ].map((item) => (
-              <div key={item.title} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  {item.icon}
-                  <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">{item.description}</p>
-              </div>
-            ))}
           </div>
-        </div>
-      </main>
-      <SiteFooter />
-
-      {executionResult && (
-        <ExecutionResultPanel result={executionResult} onClose={() => setExecutionResult(null)} />
-      )}
-    </div>
+  
+          <div className="flex items-center gap-1 mb-6 border-b border-slate-800">
+            <button
+              onClick={() => setActiveTab("recommendations")}
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                activeTab === "recommendations"
+                  ? "border-indigo-500 text-white"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Brain className="w-4 h-4" />
+              Recommendations
+            </button>
+            <button
+              onClick={() => setActiveTab("history")}
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                activeTab === "history"
+                  ? "border-indigo-500 text-white"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <History className="w-4 h-4" />
+              Run History
+              {historyTotal > 0 && (
+                <span className="text-xs bg-slate-700 text-slate-300 rounded-full px-1.5 py-0.5">{historyTotal}</span>
+              )}
+            </button>
+          </div>
+  
+          {activeTab === "recommendations" && (
+            <>
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-base font-semibold text-white">Active Recommendations</h2>
+                  {lastEvaluated && (
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Evaluated {new Date(lastEvaluated).toLocaleTimeString()} · {recommendations.length} ranked recommendations
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={evaluate}
+                  disabled={loading}
+                  className="text-xs px-3 py-1.5 rounded border border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                  Re-evaluate
+                </button>
+              </div>
+  
+              {loading && recommendations.length === 0 ? (
+                <div className="text-center py-16 text-slate-500">
+                  <Brain className="w-8 h-8 mx-auto mb-3 animate-pulse" />
+                  <p className="text-sm">Evaluating signals…</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recommendations.map(rec => (
+                    <RecommendationCard
+                      key={rec.id}
+                      rec={rec}
+                      onExecute={handleExecute}
+                      onDryRun={handleDryRun}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+  
+          {activeTab === "history" && (
+            <RunHistoryPanel
+              runs={historyRuns}
+              total={historyTotal}
+              page={historyPage}
+              pageSize={HISTORY_PAGE_SIZE}
+              loading={historyLoading}
+              statusFilter={historyStatusFilter}
+              domainFilter={historyDomainFilter}
+              onStatusChange={(s) => { setHistoryStatusFilter(s); setHistoryPage(0); }}
+              onDomainChange={(d) => { setHistoryDomainFilter(d); setHistoryPage(0); }}
+              onPageChange={setHistoryPage}
+              onRefresh={() => fetchHistory(historyPage, historyStatusFilter, historyDomainFilter)}
+            />
+          )}
+  
+          <div className="mt-12 border-t border-slate-800 pt-8">
+            <h2 className="text-base font-semibold text-white mb-4">How the Engines Work Together</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                {
+                  icon: <Brain className="w-5 h-5 text-indigo-400" />,
+                  title: "Decision Engine",
+                  description: "Ranks signals by business impact (financial, reputational, regulatory), urgency, confidence, SLA proximity, and cross-domain blast radius. Outputs explainable recommendations with source attribution.",
+                },
+                {
+                  icon: <Shield className="w-5 h-5 text-violet-400" />,
+                  title: "Policy Engine",
+                  description: "Hierarchical rule evaluation across tenant → domain → action levels. Determines: allow, require approval, escalate, or block. Built-in guardrails fire before AI recommendations.",
+                },
+                {
+                  icon: <Zap className="w-5 h-5 text-sky-400" />,
+                  title: "Action Engine",
+                  description: "Turns approved recommendations into step-by-step workflows. Supports manual, semi-auto, and autonomous modes with dry run, simulation, approval gates, rollback hooks, and immutable audit trail.",
+                },
+              ].map((item) => (
+                <div key={item.title} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    {item.icon}
+                    <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+        <SiteFooter />
+  
+        {executionResult && (
+          <ExecutionResultPanel result={executionResult} onClose={() => setExecutionResult(null)} />
+        )}
+      </div>
+        </>
   );
 }
 

@@ -35,7 +35,7 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function PortfolioIntel() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Portfolio Intelligence | SZL Holdings – Company Performance Metrics",
     description: "Deep-dive analytics for the SZL Holdings portfolio. Track ARR growth, valuation metrics, team headcount, and operational performance across all portfolio companies.",
     canonical: "https://szlholdings.com/portfolio",
@@ -43,125 +43,128 @@ export default function PortfolioIntel() {
   const totalARR = companies.reduce((a, c) => a + parseFloat(c.arr.replace(/[$M]/g, "")), 0);
 
   return (
-    <div className="min-h-screen bg-szl-bg text-szl-text p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-szl-text flex items-center gap-3">
-            <BarChart3 className="w-7 h-7 text-szl-accent" />
-            Portfolio Intelligence
-          </h1>
-          <p className="text-szl-text-secondary mt-2">Real-time performance, valuation, and growth metrics across the SZL Holdings venture portfolio.</p>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4">
-          {[
-            { label: "Portfolio Value", value: "$185M", sub: "2026 estimate", color: "text-szl-accent" },
-            { label: "Total ARR", value: `$${totalARR.toFixed(1)}M`, sub: "Across 6 platforms", color: "text-emerald-400" },
-            { label: "Avg Growth Rate", value: "103%", sub: "YoY ARR growth", color: "text-emerald-400" },
-            { label: "Portfolio Employees", value: "155", sub: "+42 this year", color: "text-szl-text" },
-          ].map(({ label, value, sub, color }) => (
-            <Card key={label} className="bg-szl-surface border-szl-border">
-              <CardContent className="p-4">
-                <p className="text-xs text-szl-text-secondary">{label}</p>
-                <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                <p className="text-[10px] text-szl-text-secondary mt-0.5">{sub}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-3 gap-6">
-          <Card className="col-span-2 bg-szl-surface border-szl-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-szl-text">Portfolio Value Growth ($M)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={portfolioValue}>
-                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: "#0a0f1e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 12 }} />
-                  <Area type="monotone" dataKey="value" stroke="#6c63ff" fill="#6c63ff" fillOpacity={0.15} strokeWidth={2} name="Value ($M)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-1 bg-szl-surface border-szl-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-szl-text">Sector Allocation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={120}>
-                <PieChart>
-                  <Pie data={sectorAllocation} cx="50%" cy="50%" innerRadius={35} outerRadius={55} dataKey="value">
-                    {sectorAllocation.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-1 mt-2">
-                {sectorAllocation.map(s => (
-                  <div key={s.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
-                      <span className="text-[11px] text-szl-text-secondary">{s.name}</span>
-                    </div>
-                    <span className="text-[11px] font-medium text-szl-text">{s.value}%</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {companies.map(company => {
-            const Icon = company.icon;
-            return (
-              <Card key={company.name} className="bg-szl-surface border-szl-border hover:border-szl-accent/30 transition-colors">
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-szl-bg text-szl-text p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold text-szl-text flex items-center gap-3">
+              <BarChart3 className="w-7 h-7 text-szl-accent" />
+              Portfolio Intelligence
+            </h1>
+            <p className="text-szl-text-secondary mt-2">Real-time performance, valuation, and growth metrics across the SZL Holdings venture portfolio.</p>
+          </div>
+  
+          <div className="grid grid-cols-4 gap-4">
+            {[
+              { label: "Portfolio Value", value: "$185M", sub: "2026 estimate", color: "text-szl-accent" },
+              { label: "Total ARR", value: `$${totalARR.toFixed(1)}M`, sub: "Across 6 platforms", color: "text-emerald-400" },
+              { label: "Avg Growth Rate", value: "103%", sub: "YoY ARR growth", color: "text-emerald-400" },
+              { label: "Portfolio Employees", value: "155", sub: "+42 this year", color: "text-szl-text" },
+            ].map(({ label, value, sub, color }) => (
+              <Card key={label} className="bg-szl-surface border-szl-border">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${company.color}20` }}>
-                        <Icon className="w-4 h-4" style={{ color: company.color }} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-szl-text">{company.name}</p>
-                        <p className="text-[10px] text-szl-text-secondary">{company.vertical}</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className={`text-[9px] ${statusStyle[company.status]}`}>{company.status}</Badge>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-black/20 rounded-lg p-2">
-                      <p className="text-[9px] text-szl-text-secondary">ARR</p>
-                      <p className="text-sm font-bold text-szl-text">{company.arr}</p>
-                    </div>
-                    <div className="bg-black/20 rounded-lg p-2">
-                      <p className="text-[9px] text-szl-text-secondary">Growth</p>
-                      <p className="text-sm font-bold text-emerald-400">{company.growth}</p>
-                    </div>
-                    <div className="bg-black/20 rounded-lg p-2">
-                      <p className="text-[9px] text-szl-text-secondary">Val.</p>
-                      <p className="text-sm font-bold text-szl-text">{company.valuation}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-szl-border">
-                    <span className="text-[10px] text-szl-text-secondary">{company.stage}</span>
-                    <span className="text-[10px] text-szl-text-secondary">{company.employees} employees</span>
-                  </div>
+                  <p className="text-xs text-szl-text-secondary">{label}</p>
+                  <p className={`text-2xl font-bold ${color}`}>{value}</p>
+                  <p className="text-[10px] text-szl-text-secondary mt-0.5">{sub}</p>
                 </CardContent>
               </Card>
-            );
-          })}
+            ))}
+          </div>
+  
+          <div className="grid grid-cols-3 gap-6">
+            <Card className="col-span-2 bg-szl-surface border-szl-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-szl-text">Portfolio Value Growth ($M)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={portfolioValue}>
+                    <XAxis dataKey="year" tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ background: "#0a0f1e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 12 }} />
+                    <Area type="monotone" dataKey="value" stroke="#6c63ff" fill="#6c63ff" fillOpacity={0.15} strokeWidth={2} name="Value ($M)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+  
+            <Card className="col-span-1 bg-szl-surface border-szl-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-szl-text">Sector Allocation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={120}>
+                  <PieChart>
+                    <Pie data={sectorAllocation} cx="50%" cy="50%" innerRadius={35} outerRadius={55} dataKey="value">
+                      {sectorAllocation.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="space-y-1 mt-2">
+                  {sectorAllocation.map(s => (
+                    <div key={s.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                        <span className="text-[11px] text-szl-text-secondary">{s.name}</span>
+                      </div>
+                      <span className="text-[11px] font-medium text-szl-text">{s.value}%</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+  
+          <div className="grid grid-cols-3 gap-4">
+            {companies.map(company => {
+              const Icon = company.icon;
+              return (
+                <Card key={company.name} className="bg-szl-surface border-szl-border hover:border-szl-accent/30 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${company.color}20` }}>
+                          <Icon className="w-4 h-4" style={{ color: company.color }} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-szl-text">{company.name}</p>
+                          <p className="text-[10px] text-szl-text-secondary">{company.vertical}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className={`text-[9px] ${statusStyle[company.status]}`}>{company.status}</Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-black/20 rounded-lg p-2">
+                        <p className="text-[9px] text-szl-text-secondary">ARR</p>
+                        <p className="text-sm font-bold text-szl-text">{company.arr}</p>
+                      </div>
+                      <div className="bg-black/20 rounded-lg p-2">
+                        <p className="text-[9px] text-szl-text-secondary">Growth</p>
+                        <p className="text-sm font-bold text-emerald-400">{company.growth}</p>
+                      </div>
+                      <div className="bg-black/20 rounded-lg p-2">
+                        <p className="text-[9px] text-szl-text-secondary">Val.</p>
+                        <p className="text-sm font-bold text-szl-text">{company.valuation}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-szl-border">
+                      <span className="text-[10px] text-szl-text-secondary">{company.stage}</span>
+                      <span className="text-[10px] text-szl-text-secondary">{company.employees} employees</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+  
+          <MASignalsPanel />
+          <IRRModelPanel />
         </div>
-
-        <MASignalsPanel />
-        <IRRModelPanel />
       </div>
-    </div>
+        </>
   );
 }
 

@@ -114,7 +114,7 @@ function KpiCard({ label, value, sub, color, trend }: { label: string; value: st
 }
 
 export default function NavDashboardPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Fund Accounting & NAV Dashboard — SZL Holdings Fund",
     description: "Fund-level NAV, mark-to-market valuations, management fee calculations, carried interest accruals, and quarterly LP reporting.",
     canonical: "https://szlholdings.com/fund/nav-dashboard",
@@ -263,324 +263,327 @@ export default function NavDashboardPage() {
   const pieData = companyNavsToRender.map(c => ({ name: c.company, value: c.nav, color: c.color }));
 
   return (
-    <div className="min-h-screen bg-[#080b10] text-white">
-      <SiteNav />
-      <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
-        <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-
-          <div className="flex items-center gap-3 mb-6">
-            <Link href="/fund">
-              <button className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors">
-                <ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence
-              </button>
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-white/20" />
-            <span className="text-xs text-white/60">NAV Dashboard</span>
-          </div>
-
-          <div className="flex items-start justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d4a054]/15">
-                  <BarChart3 className="h-3.5 w-3.5 text-[#d4a054]" />
-                </div>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4a054]">Fund Accounting</span>
-              </div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Fund Accounting & NAV Dashboard</h1>
-              <p className="text-white/50 text-sm max-w-xl">
-                Mark-to-market NAV tracking, management fee calculations, carried interest accruals, and quarterly LP report generation.
-              </p>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#080b10] text-white">
+        <SiteNav />
+        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
+          <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+  
+            <div className="flex items-center gap-3 mb-6">
+              <Link href="/fund">
+                <button className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence
+                </button>
+              </Link>
+              <ChevronRight className="h-3.5 w-3.5 text-white/20" />
+              <span className="text-xs text-white/60">NAV Dashboard</span>
             </div>
-            <div className="flex items-center gap-2">
-              <button className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] px-3 py-2.5 text-xs text-white/60 hover:bg-white/[0.04] transition-colors">
-                <RefreshCw className="h-3.5 w-3.5" /> Refresh NAV
-              </button>
-              <button className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-4 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 transition-colors">
-                <Download className="h-3.5 w-3.5" /> Export LP Report
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            <KpiCard label="Fund NAV" value={fmt(liveNav)} sub={`${navChangePct > 0 ? "+" : ""}${navChangePct.toFixed(1)}% QoQ`} color="#6aaa72" trend="up" />
-            <KpiCard label="Net IRR" value={`${liveNetIrr.toFixed(1)}%`} sub={`Gross: ${liveGrossIrr.toFixed(1)}%`} color="#d4a054" trend="up" />
-            <KpiCard label="TVPI" value={`${liveTvpi.toFixed(2)}×`} sub={`DPI: ${liveDpi.toFixed(2)}× · RVPI: ${CURRENT_FUND.rvpi}×`} color="#4a90b8" trend="up" />
-            <KpiCard label="Called Capital" value={fmt(CURRENT_FUND.calledCapital)} sub={`${((CURRENT_FUND.calledCapital / CURRENT_FUND.totalCommitments) * 100).toFixed(0)}% of ${fmt(CURRENT_FUND.totalCommitments)} committed`} color="#8b7ac8" />
-          </div>
-
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            <KpiCard label="Distributions (DPI)" value={fmt(CURRENT_FUND.distributions)} sub="Returned to LPs" color="#6aaa72" />
-            <KpiCard label="Mgmt Fees (YTD)" value={fmt(totalMgmtFees)} sub={`${CURRENT_FUND.managementFeeRate}% on called cap.`} color="#c45a4a" />
-            <KpiCard label="Carry Accrued" value={fmt(totalCarry)} sub={`${CURRENT_FUND.carryRate}% above ${CURRENT_FUND.prefReturn}% hurdle`} color="#d4a054" />
-            <KpiCard label="NAV / Unit" value={`$${CURRENT_FUND.navPerUnit.toFixed(3)}`} sub="vs $1.000 at close" color="#4a90b8" trend="up" />
-          </div>
-
-          <div className="flex gap-1 mb-6">
-            {(["nav", "companies", "fees", "reports"] as const).map(t => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${tab === t ? "bg-white/[0.08] text-white" : "text-white/35 hover:text-white/60"}`}>
-                {t === "nav" ? "NAV History" : t === "companies" ? "Company Valuations" : t === "fees" ? "Fees & Carry" : "LP Reports"}
-              </button>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait">
-            {tab === "nav" && (
-              <m.div key="nav" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5">
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
-                  <h3 className="text-sm font-semibold text-white mb-1">Fund NAV vs Called Capital</h3>
-                  <p className="text-xs text-white/40 mb-5">Quarterly mark-to-market NAV and capital deployment progression</p>
-                  <ResponsiveContainer width="100%" height={260}>
-                    <AreaChart data={navChartData}>
-                      <defs>
-                        <linearGradient id="navGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#d4a054" stopOpacity={0.25} />
-                          <stop offset="95%" stopColor="#d4a054" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="capGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#4a90b8" stopOpacity={0.15} />
-                          <stop offset="95%" stopColor="#4a90b8" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                      <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}M`} />
-                      <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
-                      <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
-                      <Area type="monotone" dataKey="Fund NAV" stroke="#d4a054" fill="url(#navGrad)" strokeWidth={2} dot={{ fill: "#d4a054", r: 4 }} />
-                      <Area type="monotone" dataKey="Called Capital" stroke="#4a90b8" fill="url(#capGrad)" strokeWidth={2} dot={{ fill: "#4a90b8", r: 4 }} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden">
-                  <div className="px-5 py-4 border-b border-white/[0.06]">
-                    <h3 className="text-sm font-semibold text-white">Quarterly NAV Summary</h3>
+  
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d4a054]/15">
+                    <BarChart3 className="h-3.5 w-3.5 text-[#d4a054]" />
                   </div>
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/[0.06] bg-white/[0.025]">
-                        {["Period", "Fund NAV", "Called Capital", "Distributions", "TVPI", "Change"].map(h => (
-                          <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activeNavHistory.slice().reverse().map((row, i) => {
-                        const prev = activeNavHistory[activeNavHistory.length - i - 2];
-                        const change = prev ? ((row.nav - prev.nav) / prev.nav * 100) : null;
-                        const tvpi = (row.nav + row.distributions) / row.calledCapital;
-                        return (
-                          <tr key={row.period} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
-                            <td className="px-4 py-3 text-sm font-semibold text-white">{row.period}</td>
-                            <td className="px-4 py-3 text-sm text-white">{fmt(row.nav)}</td>
-                            <td className="px-4 py-3 text-sm text-white/70">{fmt(row.calledCapital)}</td>
-                            <td className="px-4 py-3 text-sm text-white/70">{fmt(row.distributions)}</td>
-                            <td className="px-4 py-3 text-sm text-white font-semibold">{tvpi.toFixed(2)}×</td>
-                            <td className="px-4 py-3 text-sm">
-                              {change !== null ? (
-                                <span style={{ color: change >= 0 ? "#6aaa72" : "#c45a4a" }}>
-                                  {change >= 0 ? "+" : ""}{change.toFixed(1)}%
-                                </span>
-                              ) : <span className="text-white/25">—</span>}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4a054]">Fund Accounting</span>
                 </div>
-              </m.div>
-            )}
-
-            {tab === "companies" && (
-              <m.div key="companies" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="grid grid-cols-3 gap-5">
-                  <div className="col-span-2">
-                    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden">
-                      <div className="px-5 py-4 border-b border-white/[0.06]">
-                        <h3 className="text-sm font-semibold text-white">Mark-to-Market Company Valuations</h3>
-                      </div>
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-white/[0.06] bg-white/[0.025]">
-                            {["Company", "Cost Basis", "Current NAV", "MOIC", "IRR", "% of Fund"].map(h => (
-                              <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">{h}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {companyNavsToRender.map((c, i) => (
-                            <m.tr key={c.company} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                              className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
-                                  <span className="text-sm font-semibold text-white">{c.company}</span>
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 text-sm text-white/60">{fmt(c.cost)}</td>
-                              <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(c.nav)}</td>
-                              <td className="px-4 py-3 text-sm font-semibold text-[#6aaa72]">{c.moic.toFixed(2)}×</td>
-                              <td className="px-4 py-3 text-sm text-white">{c.irr.toFixed(1)}%</td>
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex-1 h-1.5 rounded-full bg-white/[0.06]">
-                                    <div className="h-1.5 rounded-full" style={{ width: `${c.pct}%`, background: c.color }} />
-                                  </div>
-                                  <span className="text-xs text-white/50 w-8 text-right">{c.pct.toFixed(1)}%</span>
-                                </div>
-                              </td>
-                            </m.tr>
+                <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Fund Accounting & NAV Dashboard</h1>
+                <p className="text-white/50 text-sm max-w-xl">
+                  Mark-to-market NAV tracking, management fee calculations, carried interest accruals, and quarterly LP report generation.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] px-3 py-2.5 text-xs text-white/60 hover:bg-white/[0.04] transition-colors">
+                  <RefreshCw className="h-3.5 w-3.5" /> Refresh NAV
+                </button>
+                <button className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-4 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 transition-colors">
+                  <Download className="h-3.5 w-3.5" /> Export LP Report
+                </button>
+              </div>
+            </div>
+  
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+              <KpiCard label="Fund NAV" value={fmt(liveNav)} sub={`${navChangePct > 0 ? "+" : ""}${navChangePct.toFixed(1)}% QoQ`} color="#6aaa72" trend="up" />
+              <KpiCard label="Net IRR" value={`${liveNetIrr.toFixed(1)}%`} sub={`Gross: ${liveGrossIrr.toFixed(1)}%`} color="#d4a054" trend="up" />
+              <KpiCard label="TVPI" value={`${liveTvpi.toFixed(2)}×`} sub={`DPI: ${liveDpi.toFixed(2)}× · RVPI: ${CURRENT_FUND.rvpi}×`} color="#4a90b8" trend="up" />
+              <KpiCard label="Called Capital" value={fmt(CURRENT_FUND.calledCapital)} sub={`${((CURRENT_FUND.calledCapital / CURRENT_FUND.totalCommitments) * 100).toFixed(0)}% of ${fmt(CURRENT_FUND.totalCommitments)} committed`} color="#8b7ac8" />
+            </div>
+  
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              <KpiCard label="Distributions (DPI)" value={fmt(CURRENT_FUND.distributions)} sub="Returned to LPs" color="#6aaa72" />
+              <KpiCard label="Mgmt Fees (YTD)" value={fmt(totalMgmtFees)} sub={`${CURRENT_FUND.managementFeeRate}% on called cap.`} color="#c45a4a" />
+              <KpiCard label="Carry Accrued" value={fmt(totalCarry)} sub={`${CURRENT_FUND.carryRate}% above ${CURRENT_FUND.prefReturn}% hurdle`} color="#d4a054" />
+              <KpiCard label="NAV / Unit" value={`$${CURRENT_FUND.navPerUnit.toFixed(3)}`} sub="vs $1.000 at close" color="#4a90b8" trend="up" />
+            </div>
+  
+            <div className="flex gap-1 mb-6">
+              {(["nav", "companies", "fees", "reports"] as const).map(t => (
+                <button key={t} onClick={() => setTab(t)}
+                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${tab === t ? "bg-white/[0.08] text-white" : "text-white/35 hover:text-white/60"}`}>
+                  {t === "nav" ? "NAV History" : t === "companies" ? "Company Valuations" : t === "fees" ? "Fees & Carry" : "LP Reports"}
+                </button>
+              ))}
+            </div>
+  
+            <AnimatePresence mode="wait">
+              {tab === "nav" && (
+                <m.div key="nav" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5">
+                  <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
+                    <h3 className="text-sm font-semibold text-white mb-1">Fund NAV vs Called Capital</h3>
+                    <p className="text-xs text-white/40 mb-5">Quarterly mark-to-market NAV and capital deployment progression</p>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <AreaChart data={navChartData}>
+                        <defs>
+                          <linearGradient id="navGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#d4a054" stopOpacity={0.25} />
+                            <stop offset="95%" stopColor="#d4a054" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="capGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#4a90b8" stopOpacity={0.15} />
+                            <stop offset="95%" stopColor="#4a90b8" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}M`} />
+                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [`$${v.toFixed(1)}M`]} />
+                        <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
+                        <Area type="monotone" dataKey="Fund NAV" stroke="#d4a054" fill="url(#navGrad)" strokeWidth={2} dot={{ fill: "#d4a054", r: 4 }} />
+                        <Area type="monotone" dataKey="Called Capital" stroke="#4a90b8" fill="url(#capGrad)" strokeWidth={2} dot={{ fill: "#4a90b8", r: 4 }} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+  
+                  <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden">
+                    <div className="px-5 py-4 border-b border-white/[0.06]">
+                      <h3 className="text-sm font-semibold text-white">Quarterly NAV Summary</h3>
+                    </div>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-white/[0.06] bg-white/[0.025]">
+                          {["Period", "Fund NAV", "Called Capital", "Distributions", "TVPI", "Change"].map(h => (
+                            <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">{h}</th>
                           ))}
-                          <tr className="bg-white/[0.02]">
-                            <td className="px-4 py-3 text-sm font-semibold text-[#d4a054]">Total Fund</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(companyNavsToRender.reduce((s, c) => s + c.cost, 0))}</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(companyNavsToRender.reduce((s, c) => s + c.nav, 0))}</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-[#6aaa72]">{CURRENT_FUND.tvpi}×</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-white">{CURRENT_FUND.netIrr}%</td>
-                            <td className="px-4 py-3 text-xs text-white/40">100%</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeNavHistory.slice().reverse().map((row, i) => {
+                          const prev = activeNavHistory[activeNavHistory.length - i - 2];
+                          const change = prev ? ((row.nav - prev.nav) / prev.nav * 100) : null;
+                          const tvpi = (row.nav + row.distributions) / row.calledCapital;
+                          return (
+                            <tr key={row.period} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                              <td className="px-4 py-3 text-sm font-semibold text-white">{row.period}</td>
+                              <td className="px-4 py-3 text-sm text-white">{fmt(row.nav)}</td>
+                              <td className="px-4 py-3 text-sm text-white/70">{fmt(row.calledCapital)}</td>
+                              <td className="px-4 py-3 text-sm text-white/70">{fmt(row.distributions)}</td>
+                              <td className="px-4 py-3 text-sm text-white font-semibold">{tvpi.toFixed(2)}×</td>
+                              <td className="px-4 py-3 text-sm">
+                                {change !== null ? (
+                                  <span style={{ color: change >= 0 ? "#6aaa72" : "#c45a4a" }}>
+                                    {change >= 0 ? "+" : ""}{change.toFixed(1)}%
+                                  </span>
+                                ) : <span className="text-white/25">—</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </m.div>
+              )}
+  
+              {tab === "companies" && (
+                <m.div key="companies" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <div className="grid grid-cols-3 gap-5">
+                    <div className="col-span-2">
+                      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden">
+                        <div className="px-5 py-4 border-b border-white/[0.06]">
+                          <h3 className="text-sm font-semibold text-white">Mark-to-Market Company Valuations</h3>
+                        </div>
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-white/[0.06] bg-white/[0.025]">
+                              {["Company", "Cost Basis", "Current NAV", "MOIC", "IRR", "% of Fund"].map(h => (
+                                <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {companyNavsToRender.map((c, i) => (
+                              <m.tr key={c.company} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                                className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
+                                    <span className="text-sm font-semibold text-white">{c.company}</span>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3 text-sm text-white/60">{fmt(c.cost)}</td>
+                                <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(c.nav)}</td>
+                                <td className="px-4 py-3 text-sm font-semibold text-[#6aaa72]">{c.moic.toFixed(2)}×</td>
+                                <td className="px-4 py-3 text-sm text-white">{c.irr.toFixed(1)}%</td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex-1 h-1.5 rounded-full bg-white/[0.06]">
+                                      <div className="h-1.5 rounded-full" style={{ width: `${c.pct}%`, background: c.color }} />
+                                    </div>
+                                    <span className="text-xs text-white/50 w-8 text-right">{c.pct.toFixed(1)}%</span>
+                                  </div>
+                                </td>
+                              </m.tr>
+                            ))}
+                            <tr className="bg-white/[0.02]">
+                              <td className="px-4 py-3 text-sm font-semibold text-[#d4a054]">Total Fund</td>
+                              <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(companyNavsToRender.reduce((s, c) => s + c.cost, 0))}</td>
+                              <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(companyNavsToRender.reduce((s, c) => s + c.nav, 0))}</td>
+                              <td className="px-4 py-3 text-sm font-semibold text-[#6aaa72]">{CURRENT_FUND.tvpi}×</td>
+                              <td className="px-4 py-3 text-sm font-semibold text-white">{CURRENT_FUND.netIrr}%</td>
+                              <td className="px-4 py-3 text-xs text-white/40">100%</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+                      <h3 className="text-sm font-semibold text-white mb-4">NAV by Company</h3>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <RePie>
+                          <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
+                            {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                          </Pie>
+                          <Tooltip formatter={(v: number) => [fmt(v), ""]} contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} />
+                        </RePie>
+                      </ResponsiveContainer>
+                      <div className="space-y-2 mt-4">
+                        {companyNavsToRender.map(c => (
+                          <div key={c.company} className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
+                            <span className="text-xs text-white/60 flex-1">{c.company}</span>
+                            <span className="text-xs font-semibold text-white">{c.pct.toFixed(1)}%</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
-                    <h3 className="text-sm font-semibold text-white mb-4">NAV by Company</h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <RePie>
-                        <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                          {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                        </Pie>
-                        <Tooltip formatter={(v: number) => [fmt(v), ""]} contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} />
-                      </RePie>
-                    </ResponsiveContainer>
-                    <div className="space-y-2 mt-4">
-                      {companyNavsToRender.map(c => (
-                        <div key={c.company} className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
-                          <span className="text-xs text-white/60 flex-1">{c.company}</span>
-                          <span className="text-xs font-semibold text-white">{c.pct.toFixed(1)}%</span>
+                </m.div>
+              )}
+  
+              {tab === "fees" && (
+                <m.div key="fees" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <div className="grid grid-cols-3 gap-4 mb-5">
+                    {[
+                      { label: "Management Fee Rate", value: `${CURRENT_FUND.managementFeeRate}%`, sub: "On called capital, semi-annual", icon: Calculator, color: "#d4a054" },
+                      { label: "Carried Interest Rate", value: `${CURRENT_FUND.carryRate}%`, sub: `Above ${CURRENT_FUND.prefReturn}% preferred return`, icon: TrendingUp, color: "#6aaa72" },
+                      { label: "Total Carry Accrued (YTD)", value: fmt(totalCarry), sub: "Not yet crystallized", icon: DollarSign, color: "#8b7ac8" },
+                    ].map(item => (
+                      <div key={item.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20" style={{ color: item.color }}>
+                            <item.icon className="h-4 w-4" />
+                          </div>
                         </div>
+                        <div className="text-2xl font-semibold text-white">{item.value}</div>
+                        <div className="text-xs text-white/40 mt-1">{item.label}</div>
+                        <div className="text-[10px] text-white/25 mt-0.5">{item.sub}</div>
+                      </div>
+                    ))}
+                  </div>
+  
+                  <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 mb-5">
+                    <h3 className="text-sm font-semibold text-white mb-5">Management Fees & Carry Accruals by Quarter</h3>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={liveFeeSchedule} barSize={18}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
+                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [fmt(v)]} />
+                        <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
+                        <Bar dataKey="managementFee" name="Management Fee" fill="#d4a054" radius={[3, 3, 0, 0]} />
+                        <Bar dataKey="carryAccrual" name="Carry Accrual" fill="#6aaa72" radius={[3, 3, 0, 0]} />
+                        <Bar dataKey="prefReturn" name="Pref. Return" fill="#4a90b8" radius={[3, 3, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+  
+                  <div className="rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/[0.04] p-5">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="h-4 w-4 text-[#d4a054] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-sm font-semibold text-white mb-1">Carry Crystallization Note</div>
+                        <div className="text-xs text-white/50 leading-relaxed">
+                          The {fmt(totalCarry)} carry accrual is not yet crystallized and will only be paid to the GP upon distributions to LPs
+                          exceeding the {CURRENT_FUND.prefReturn}% preferred return hurdle on a whole-fund basis. Current DPI of {CURRENT_FUND.dpi}× 
+                          indicates the fund is in the preferred return waterfall phase.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </m.div>
+              )}
+  
+              {tab === "reports" && (
+                <m.div key="reports" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden">
+                    <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-[#4a90b8]" />
+                      <span className="text-sm font-semibold text-white">Quarterly LP Reports</span>
+                      <span className="ml-auto text-[10px] text-white/30">{liveLpReports.length} reports generated</span>
+                    </div>
+                    <div className="divide-y divide-white/[0.04]">
+                      {liveLpReports.map((report, i) => (
+                        <m.div key={report.period} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                          className="flex items-center gap-5 px-5 py-4 hover:bg-white/[0.02] transition-colors">
+                          <div>
+                            {report.status === "ready" ? (
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6aaa72]/10">
+                                <CheckCircle2 className="h-4 w-4 text-[#6aaa72]" />
+                              </div>
+                            ) : (
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4a90b8]/10">
+                                <FileText className="h-4 w-4 text-[#4a90b8]" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-semibold text-white">{report.period} Investor Report</div>
+                            <div className="text-[10px] text-white/35 mt-0.5">Generated {report.generated}</div>
+                          </div>
+                          <div className="grid grid-cols-4 gap-6 text-center flex-shrink-0">
+                            {[
+                              { label: "NAV/Unit", value: `$${report.navPerUnit.toFixed(3)}` },
+                              { label: "Net IRR", value: `${report.irr}%` },
+                              { label: "TVPI", value: `${report.tvpi}×` },
+                              { label: "DPI", value: `${report.dpi}×` },
+                            ].map(m => (
+                              <div key={m.label}>
+                                <div className="text-xs font-semibold text-white">{m.value}</div>
+                                <div className="text-[9px] text-white/35 mt-0.5">{m.label}</div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full border ${report.status === "ready" ? "text-[#6aaa72] border-[#6aaa72]/30 bg-[#6aaa72]/10" : "text-[#4a90b8] border-[#4a90b8]/30 bg-[#4a90b8]/10"}`}>
+                              {report.status === "ready" ? "Ready" : "Distributed"}
+                            </span>
+                            <button className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors">
+                              <Download className="h-3.5 w-3.5 text-white/40 hover:text-white/70" />
+                            </button>
+                          </div>
+                        </m.div>
                       ))}
                     </div>
                   </div>
-                </div>
-              </m.div>
-            )}
-
-            {tab === "fees" && (
-              <m.div key="fees" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="grid grid-cols-3 gap-4 mb-5">
-                  {[
-                    { label: "Management Fee Rate", value: `${CURRENT_FUND.managementFeeRate}%`, sub: "On called capital, semi-annual", icon: Calculator, color: "#d4a054" },
-                    { label: "Carried Interest Rate", value: `${CURRENT_FUND.carryRate}%`, sub: `Above ${CURRENT_FUND.prefReturn}% preferred return`, icon: TrendingUp, color: "#6aaa72" },
-                    { label: "Total Carry Accrued (YTD)", value: fmt(totalCarry), sub: "Not yet crystallized", icon: DollarSign, color: "#8b7ac8" },
-                  ].map(item => (
-                    <div key={item.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20" style={{ color: item.color }}>
-                          <item.icon className="h-4 w-4" />
-                        </div>
-                      </div>
-                      <div className="text-2xl font-semibold text-white">{item.value}</div>
-                      <div className="text-xs text-white/40 mt-1">{item.label}</div>
-                      <div className="text-[10px] text-white/25 mt-0.5">{item.sub}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 mb-5">
-                  <h3 className="text-sm font-semibold text-white mb-5">Management Fees & Carry Accruals by Quarter</h3>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={liveFeeSchedule} barSize={18}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                      <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
-                      <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [fmt(v)]} />
-                      <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }} />
-                      <Bar dataKey="managementFee" name="Management Fee" fill="#d4a054" radius={[3, 3, 0, 0]} />
-                      <Bar dataKey="carryAccrual" name="Carry Accrual" fill="#6aaa72" radius={[3, 3, 0, 0]} />
-                      <Bar dataKey="prefReturn" name="Pref. Return" fill="#4a90b8" radius={[3, 3, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/[0.04] p-5">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-4 w-4 text-[#d4a054] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <div className="text-sm font-semibold text-white mb-1">Carry Crystallization Note</div>
-                      <div className="text-xs text-white/50 leading-relaxed">
-                        The {fmt(totalCarry)} carry accrual is not yet crystallized and will only be paid to the GP upon distributions to LPs
-                        exceeding the {CURRENT_FUND.prefReturn}% preferred return hurdle on a whole-fund basis. Current DPI of {CURRENT_FUND.dpi}× 
-                        indicates the fund is in the preferred return waterfall phase.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </m.div>
-            )}
-
-            {tab === "reports" && (
-              <m.div key="reports" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] overflow-hidden">
-                  <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-[#4a90b8]" />
-                    <span className="text-sm font-semibold text-white">Quarterly LP Reports</span>
-                    <span className="ml-auto text-[10px] text-white/30">{liveLpReports.length} reports generated</span>
-                  </div>
-                  <div className="divide-y divide-white/[0.04]">
-                    {liveLpReports.map((report, i) => (
-                      <m.div key={report.period} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
-                        className="flex items-center gap-5 px-5 py-4 hover:bg-white/[0.02] transition-colors">
-                        <div>
-                          {report.status === "ready" ? (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6aaa72]/10">
-                              <CheckCircle2 className="h-4 w-4 text-[#6aaa72]" />
-                            </div>
-                          ) : (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4a90b8]/10">
-                              <FileText className="h-4 w-4 text-[#4a90b8]" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm font-semibold text-white">{report.period} Investor Report</div>
-                          <div className="text-[10px] text-white/35 mt-0.5">Generated {report.generated}</div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-6 text-center flex-shrink-0">
-                          {[
-                            { label: "NAV/Unit", value: `$${report.navPerUnit.toFixed(3)}` },
-                            { label: "Net IRR", value: `${report.irr}%` },
-                            { label: "TVPI", value: `${report.tvpi}×` },
-                            { label: "DPI", value: `${report.dpi}×` },
-                          ].map(m => (
-                            <div key={m.label}>
-                              <div className="text-xs font-semibold text-white">{m.value}</div>
-                              <div className="text-[9px] text-white/35 mt-0.5">{m.label}</div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className={`text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full border ${report.status === "ready" ? "text-[#6aaa72] border-[#6aaa72]/30 bg-[#6aaa72]/10" : "text-[#4a90b8] border-[#4a90b8]/30 bg-[#4a90b8]/10"}`}>
-                            {report.status === "ready" ? "Ready" : "Distributed"}
-                          </span>
-                          <button className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors">
-                            <Download className="h-3.5 w-3.5 text-white/40 hover:text-white/70" />
-                          </button>
-                        </div>
-                      </m.div>
-                    ))}
-                  </div>
-                </div>
-              </m.div>
-            )}
-          </AnimatePresence>
-
-        </m.div>
-      </main>
-      <SiteFooter />
-    </div>
+                </m.div>
+              )}
+            </AnimatePresence>
+  
+          </m.div>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

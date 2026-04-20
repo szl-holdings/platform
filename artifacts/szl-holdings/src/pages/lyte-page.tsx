@@ -603,7 +603,7 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
 };
 
 export default function LytePage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Lyte — Operational Nerve Center | SZL Holdings",
     description: "Lyte is the governed command surface where the Governed Decision Loop plays out: Signal Ingestion, Risk Surface, Governed Decision with Covenant Policy, and Proof Chain recording — all in one persistent operator interface.",
     canonical: "https://szlholdings.com/lyte",
@@ -637,7 +637,10 @@ export default function LytePage() {
     queryKey: ["lyte", "signals"],
     queryFn: async () => {
       const res = await apiRequest<{ success: boolean; data: ApiSignal[] }>("GET", "/api/lyte/signals?limit=20");
-      return (res.data ?? []).map((s, i) => mapApiSignal(s, i));
+      return (
+    <>
+      {__pageMeta}res.data ?? []    </>
+  ).map((s, i) => mapApiSignal(s, i));
     },
     refetchInterval: 30000,
     staleTime: 20000,

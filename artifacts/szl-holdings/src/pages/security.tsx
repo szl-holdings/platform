@@ -144,135 +144,138 @@ const COMPLIANCE = [
 ];
 
 export default function SecurityPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Security — SZL Holdings",
     description: "Security overview for Lyte + Alloy: data handling, access control, logging, backup, secure development, vulnerability disclosure, and responsible AI use.",
     canonical: "https://szlholdings.com/security",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)", background: "radial-gradient(ellipse at 50% 0%, hsla(145,62%,40%,0.06) 0%, transparent 60%)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid hsla(145,62%,40%,0.22)", background: "hsla(145,62%,40%,0.08)", marginBottom: "1.75rem" }}>
-                <Shield size={13} color="hsl(145,62%,46%)" />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(145,62%,46%)" }}>Security</span>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)", background: "radial-gradient(ellipse at 50% 0%, hsla(145,62%,40%,0.06) 0%, transparent 60%)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid hsla(145,62%,40%,0.22)", background: "hsla(145,62%,40%,0.08)", marginBottom: "1.75rem" }}>
+                  <Shield size={13} color="hsl(145,62%,46%)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(145,62%,46%)" }}>Security</span>
+                </div>
+                <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
+                  Security as an architectural constraint, not an add-on.
+                </h1>
+                <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "56ch", marginBottom: "2rem" }}>
+                  This page documents the current security controls in place for Lyte + Alloy. It
+                  reflects the honest current state — not aspirational certifications. Planned
+                  certifications are clearly marked.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <Link href="/trust" className="szl-btn-primary">
+                    Trust Center <ArrowRight size={14} />
+                  </Link>
+                  <Link href="/legal/security-disclosure" className="szl-btn-secondary">
+                    Disclosure policy →
+                  </Link>
+                  <Link href="/contact" className="szl-btn-ghost">
+                    Report a vulnerability
+                  </Link>
+                </div>
+              </m.div>
+            </div>
+          </section>
+  
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "1rem" }}>Documentation</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
+                  Nine areas. Full coverage.
+                </h2>
+              </m.div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                {SECTIONS.map((section, i) => {
+                  const Icon = section.icon;
+                  return (
+                    <m.div
+                      key={section.title}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.38, delay: i * 0.04 }}
+                      className="szl-card"
+                      style={{ borderRadius: "0.875rem", padding: "var(--space-card-pad)" }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
+                        <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: section.colorMuted, border: `1px solid ${section.colorBorder}`, borderRadius: "0.4375rem", flexShrink: 0 }}>
+                          <Icon size={16} color={section.color} />
+                        </div>
+                        <h3 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.012em" }}>{section.title}</h3>
+                      </div>
+                      <ul style={{ display: "flex", flexDirection: "column", gap: "0.5rem", listStyle: "none", padding: 0, margin: 0 }}>
+                        {section.items.map((item) => (
+                          <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
+                            <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: section.color, flexShrink: 0, marginTop: "9px" }} />
+                            <span style={{ fontSize: "0.9rem", lineHeight: 1.68, color: "hsl(214,7%,62%)" }}>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </m.div>
+                  );
+                })}
               </div>
-              <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
-                Security as an architectural constraint, not an add-on.
-              </h1>
-              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "56ch", marginBottom: "2rem" }}>
-                This page documents the current security controls in place for Lyte + Alloy. It
-                reflects the honest current state — not aspirational certifications. Planned
-                certifications are clearly marked.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                <Link href="/trust" className="szl-btn-primary">
-                  Trust Center <ArrowRight size={14} />
-                </Link>
-                <Link href="/legal/security-disclosure" className="szl-btn-secondary">
-                  Disclosure policy →
-                </Link>
-                <Link href="/contact" className="szl-btn-ghost">
-                  Report a vulnerability
-                </Link>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "1rem" }}>Documentation</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
-                Nine areas. Full coverage.
-              </h2>
-            </m.div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-              {SECTIONS.map((section, i) => {
-                const Icon = section.icon;
-                return (
+            </div>
+          </section>
+  
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Compliance Frameworks</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "2rem" }}>Current compliance posture.</h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsl(214,7%,60%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                  In Progress and Planned items are clearly marked. We do not present planned certifications as existing ones.
+                </p>
+              </m.div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
+                {COMPLIANCE.map((fw, i) => (
                   <m.div
-                    key={section.title}
-                    initial={{ opacity: 0, y: 10 }}
+                    key={fw.name}
+                    initial={{ opacity: 0, y: 8 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.38, delay: i * 0.04 }}
+                    transition={{ duration: 0.35, delay: i * 0.06 }}
                     className="szl-card"
-                    style={{ borderRadius: "0.875rem", padding: "var(--space-card-pad)" }}
+                    style={{ borderRadius: "0.75rem", padding: "1.25rem" }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
-                      <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: section.colorMuted, border: `1px solid ${section.colorBorder}`, borderRadius: "0.4375rem", flexShrink: 0 }}>
-                        <Icon size={16} color={section.color} />
-                      </div>
-                      <h3 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.012em" }}>{section.title}</h3>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem" }}>
+                      <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "hsl(38,8%,90%)" }}>{fw.name}</span>
+                      <span style={{ fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.1875rem 0.5rem", borderRadius: "4px", color: fw.color, background: `${fw.color}18`, border: `1px solid ${fw.color}30` }}>
+                        {fw.status}
+                      </span>
                     </div>
-                    <ul style={{ display: "flex", flexDirection: "column", gap: "0.5rem", listStyle: "none", padding: 0, margin: 0 }}>
-                      {section.items.map((item) => (
-                        <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
-                          <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: section.color, flexShrink: 0, marginTop: "9px" }} />
-                          <span style={{ fontSize: "0.9rem", lineHeight: 1.68, color: "hsl(214,7%,62%)" }}>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,55%)" }}>{fw.note}</p>
                   </m.div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Compliance Frameworks</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "2rem" }}>Current compliance posture.</h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsl(214,7%,60%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                In Progress and Planned items are clearly marked. We do not present planned certifications as existing ones.
-              </p>
-            </m.div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
-              {COMPLIANCE.map((fw, i) => (
-                <m.div
-                  key={fw.name}
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: i * 0.06 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: "1.25rem" }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem" }}>
-                    <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "hsl(38,8%,90%)" }}>{fw.name}</span>
-                    <span style={{ fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.1875rem 0.5rem", borderRadius: "4px", color: fw.color, background: `${fw.color}18`, border: `1px solid ${fw.color}30` }}>
-                      {fw.status}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,55%)" }}>{fw.note}</p>
-                </m.div>
-              ))}
+          </section>
+  
+          <section style={{ padding: "var(--space-section-sm) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link href="/trust" className="szl-btn-secondary">Trust Center →</Link>
+                <Link href="/trust/governance" className="szl-btn-secondary">AI Governance →</Link>
+                <Link href="/architecture" className="szl-btn-secondary">Architecture →</Link>
+                <Link href="/contact" className="szl-btn-ghost">Report a vulnerability <ArrowRight size={13} /></Link>
+              </div>
             </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "var(--space-section-sm) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-              <Link href="/trust" className="szl-btn-secondary">Trust Center →</Link>
-              <Link href="/trust/governance" className="szl-btn-secondary">AI Governance →</Link>
-              <Link href="/architecture" className="szl-btn-secondary">Architecture →</Link>
-              <Link href="/contact" className="szl-btn-ghost">Report a vulnerability <ArrowRight size={13} /></Link>
-            </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

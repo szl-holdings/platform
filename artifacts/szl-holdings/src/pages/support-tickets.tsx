@@ -44,7 +44,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export default function SupportTicketsPage() {
-  usePageMeta({ title: "My Tickets — SZL Holdings Support", description: "View and manage your support requests." });
+  const __pageMeta = usePageMeta({ title: "My Tickets — SZL Holdings Support", description: "View and manage your support requests." });
 
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState("");
@@ -64,19 +64,22 @@ export default function SupportTicketsPage() {
 
   if (!user) {
     return (
-      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-        <SiteNav />
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 200px)", flexDirection: "column", gap: "1.25rem", textAlign: "center", padding: "6rem 1.5rem 4rem" }}>
-          <AlertCircle size={32} style={{ color: "hsl(210,5%,40%)" }} />
-          <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "hsl(38,12%,88%)" }}>Sign in to view your tickets</h2>
-          <p style={{ fontSize: "14px", color: "hsl(210,5%,50%)" }}>You need to be signed in to view your support history.</p>
-          <a href="/api/auth/login" style={{ display: "inline-flex", alignItems: "center", padding: "0.75rem 1.5rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none" }}>
-            Sign in
-          </a>
+    <>
+      {__pageMeta}
+        <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+          <SiteNav />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 200px)", flexDirection: "column", gap: "1.25rem", textAlign: "center", padding: "6rem 1.5rem 4rem" }}>
+            <AlertCircle size={32} style={{ color: "hsl(210,5%,40%)" }} />
+            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "hsl(38,12%,88%)" }}>Sign in to view your tickets</h2>
+            <p style={{ fontSize: "14px", color: "hsl(210,5%,50%)" }}>You need to be signed in to view your support history.</p>
+            <a href="/api/auth/login" style={{ display: "inline-flex", alignItems: "center", padding: "0.75rem 1.5rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none" }}>
+              Sign in
+            </a>
+          </div>
+          <SiteFooter />
         </div>
-        <SiteFooter />
-      </div>
-    );
+          </>
+  );
   }
 
   return (

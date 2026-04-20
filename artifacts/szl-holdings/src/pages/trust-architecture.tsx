@@ -78,153 +78,156 @@ const TENANT_ARCH = [
 ];
 
 export default function TrustArchitecturePage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Architecture — Trust Center · SZL Holdings",
     description: "Signal → interpretation → recommendation → approval → action → audit pipeline. Tenant-aware architecture, role-scoped action model, domain pack design.",
     canonical: "https://szlholdings.com/trust/architecture",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section className="szl-grid-texture szl-depth-glow-dual" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.75rem" }}>
-                <Link href="/trust" style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", textDecoration: "none" }}>Trust Center</Link>
-                <span style={{ color: "var(--color-szl-text-faint)" }}>/</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-lyte-light)" }}>Architecture</span>
-              </div>
-              <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08, marginBottom: "1.5rem" }}>
-                Platform Architecture
-              </h1>
-              <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                The signal → interpretation → recommendation → approval → action → audit pipeline,
-                tenant-aware architecture, role-scoped action model, and domain pack design — all
-                documented for technical and governance diligence.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        {/* Pipeline diagram */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Pipeline</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2rem" }}>
-                Six stages from signal to audit record.
-              </h2>
-            </m.div>
-            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} style={{ marginBottom: "2.5rem" }}>
-              <SignalToActionDiagram />
-            </m.div>
-
-            {/* Flow diagram */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-              {PIPELINE_STAGES.map((stage, i) => (
-                <m.div
-                  key={stage.id}
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.42, delay: i * 0.07 }}
-                >
-                  <div
-                    className="szl-card szl-grid-3"
-                    style={{
-                      borderRadius: "0.75rem",
-                      padding: "clamp(1.25rem,2.5vw,1.75rem)",
-                      gap: "clamp(1.5rem,3vw,2.5rem)",
-                      alignItems: "start",
-                      borderLeft: `3px solid ${stage.color}`,
-                    }}
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section className="szl-grid-texture szl-depth-glow-dual" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.75rem" }}>
+                  <Link href="/trust" style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", textDecoration: "none" }}>Trust Center</Link>
+                  <span style={{ color: "var(--color-szl-text-faint)" }}>/</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-lyte-light)" }}>Architecture</span>
+                </div>
+                <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08, marginBottom: "1.5rem" }}>
+                  Platform Architecture
+                </h1>
+                <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
+                  The signal → interpretation → recommendation → approval → action → audit pipeline,
+                  tenant-aware architecture, role-scoped action model, and domain pack design — all
+                  documented for technical and governance diligence.
+                </p>
+              </m.div>
+            </div>
+          </section>
+  
+          {/* Pipeline diagram */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Pipeline</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2rem" }}>
+                  Six stages from signal to audit record.
+                </h2>
+              </m.div>
+              <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} style={{ marginBottom: "2.5rem" }}>
+                <SignalToActionDiagram />
+              </m.div>
+  
+              {/* Flow diagram */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+                {PIPELINE_STAGES.map((stage, i) => (
+                  <m.div
+                    key={stage.id}
+                    initial={{ opacity: 0, x: -12 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.42, delay: i * 0.07 }}
                   >
-                    <div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stage.color, marginBottom: "0.25rem", opacity: 0.85 }}>
-                        Stage {i + 1}
+                    <div
+                      className="szl-card szl-grid-3"
+                      style={{
+                        borderRadius: "0.75rem",
+                        padding: "clamp(1.25rem,2.5vw,1.75rem)",
+                        gap: "clamp(1.5rem,3vw,2.5rem)",
+                        alignItems: "start",
+                        borderLeft: `3px solid ${stage.color}`,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stage.color, marginBottom: "0.25rem", opacity: 0.85 }}>
+                          Stage {i + 1}
+                        </div>
+                        <div style={{ fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.015em", color: "hsl(38,8%,92%)", marginBottom: "0.25rem" }}>{stage.label}</div>
+                        <div style={{ fontSize: "0.8125rem", color: "hsl(214,7%,50%)" }}>{stage.sublabel}</div>
                       </div>
-                      <div style={{ fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.015em", color: "hsl(38,8%,92%)", marginBottom: "0.25rem" }}>{stage.label}</div>
-                      <div style={{ fontSize: "0.8125rem", color: "hsl(214,7%,50%)" }}>{stage.sublabel}</div>
+                      <p style={{ fontSize: "0.9rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{stage.desc}</p>
+                      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.4375rem" }}>
+                        {stage.details.map((d) => (
+                          <li key={d} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                            <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: stage.color, flexShrink: 0, marginTop: "8px" }} />
+                            <span style={{ fontSize: "0.8375rem", lineHeight: 1.55, color: "hsl(214,7%,60%)" }}>{d}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <p style={{ fontSize: "0.9rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{stage.desc}</p>
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.4375rem" }}>
-                      {stage.details.map((d) => (
-                        <li key={d} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                          <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: stage.color, flexShrink: 0, marginTop: "8px" }} />
-                          <span style={{ fontSize: "0.8375rem", lineHeight: 1.55, color: "hsl(214,7%,60%)" }}>{d}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  {i < PIPELINE_STAGES.length - 1 && (
-                    <div style={{ display: "flex", justifyContent: "flex-start", padding: "0.5rem 0 0.5rem 1.5rem" }}>
-                      <ArrowDown size={16} color="var(--color-szl-text-faint)" />
-                    </div>
-                  )}
-                </m.div>
-              ))}
+                    {i < PIPELINE_STAGES.length - 1 && (
+                      <div style={{ display: "flex", justifyContent: "flex-start", padding: "0.5rem 0 0.5rem 1.5rem" }}>
+                        <ArrowDown size={16} color="var(--color-szl-text-faint)" />
+                      </div>
+                    )}
+                  </m.div>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-
-        {/* Proof Chain diagram section */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "1rem" }}>Proof Chain</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2rem" }}>
-                Complete, exportable lineage record.
-              </h2>
-            </m.div>
-            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
-              <ProofChainDiagram />
-            </m.div>
-          </div>
-        </section>
-
-        {/* Tenant architecture */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Tenant model</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
-                Isolation, scoping, and domain pack architecture.
-              </h2>
-            </m.div>
-            <div className="szl-grid-2">
-              {TENANT_ARCH.map((item, i) => (
-                <m.div
-                  key={item.label}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.07 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
-                >
-                  <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem", color: "hsl(38,8%,88%)" }}>{item.label}</h3>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
-                </m.div>
-              ))}
+          </section>
+  
+          {/* Proof Chain diagram section */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "1rem" }}>Proof Chain</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2rem" }}>
+                  Complete, exportable lineage record.
+                </h2>
+              </m.div>
+              <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
+                <ProofChainDiagram />
+              </m.div>
             </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "var(--space-section-sm) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-              <Link href="/trust/security" className="szl-btn-secondary">Security posture →</Link>
-              <Link href="/trust/governance" className="szl-btn-secondary">AI Governance →</Link>
-              <Link href="/contact" className="szl-btn-ghost">Technical diligence conversation <ArrowRight size={13} /></Link>
+          </section>
+  
+          {/* Tenant architecture */}
+          <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Tenant model</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
+                  Isolation, scoping, and domain pack architecture.
+                </h2>
+              </m.div>
+              <div className="szl-grid-2">
+                {TENANT_ARCH.map((item, i) => (
+                  <m.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.07 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                  >
+                    <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem", color: "hsl(38,8%,88%)" }}>{item.label}</h3>
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
+                  </m.div>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          <section style={{ padding: "var(--space-section-sm) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link href="/trust/security" className="szl-btn-secondary">Security posture →</Link>
+                <Link href="/trust/governance" className="szl-btn-secondary">AI Governance →</Link>
+                <Link href="/contact" className="szl-btn-ghost">Technical diligence conversation <ArrowRight size={13} /></Link>
+              </div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

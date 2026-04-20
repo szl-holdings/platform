@@ -309,7 +309,7 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
 type SortKey = "substack_opens" | "substack_open_rate" | "medium_views_30d" | "paid_conversions" | "inbound_replies";
 
 export default function CommandNewsletterPage() {
-  usePageMeta({ title: "Newsletter Analytics — SZL Command", description: "Live KPI dashboard for SZL Command newsletter performance across Substack, Medium, LinkedIn, and X." });
+  const __pageMeta = usePageMeta({ title: "Newsletter Analytics — SZL Command", description: "Live KPI dashboard for SZL Command newsletter performance across Substack, Medium, LinkedIn, and X." });
 
   const [posts, setPosts] = useState<TrackingRow[]>(SEED_POSTS);
   const [substackUploaded, setSubstackUploaded] = useState(false);
@@ -375,516 +375,519 @@ export default function CommandNewsletterPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: "'Inter',sans-serif" }}>
-      <SiteNav />
-
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "5.5rem 1.5rem 4rem" }}>
-
-        {/* ── Header ── */}
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{ marginBottom: "2.5rem" }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-            <span style={{ fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: GOLD }}>
-              SZL Command
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: BG, color: TEXT, fontFamily: "'Inter',sans-serif" }}>
+        <SiteNav />
+  
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "5.5rem 1.5rem 4rem" }}>
+  
+          {/* ── Header ── */}
+          <m.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{ marginBottom: "2.5rem" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+              <span style={{ fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: GOLD }}>
+                SZL Command
+              </span>
+              <span style={{ color: TEXT_MUTED, fontSize: "0.6875rem" }}>/</span>
+              <span style={{ fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_MUTED }}>
+                Newsletter Analytics
+              </span>
+            </div>
+            <h1 style={{ fontSize: "clamp(1.75rem,3vw,2.5rem)", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.15 }}>
+              Newsletter Performance
+            </h1>
+            <p style={{ color: TEXT_SEC, marginTop: "0.5rem", fontSize: "0.9375rem", maxWidth: "560px" }}>
+              Per-post and rolled-up KPIs across Substack, Medium, LinkedIn, and X — measured against launch targets.
+            </p>
+          </m.div>
+  
+          {/* ── Demo banner ── */}
+          <m.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            style={{
+              display: "flex", alignItems: "center", gap: "0.75rem",
+              padding: "0.75rem 1rem", borderRadius: "10px", marginBottom: "2rem",
+              background: "hsla(38,52%,58%,0.06)", border: `1px solid ${GOLD_MUTED}`,
+            }}
+          >
+            <AlertCircle size={14} color={GOLD} style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: "0.8125rem", color: TEXT_SEC }}>
+              Showing seed data. Upload your Substack or Medium CSV exports to replace with real figures.
             </span>
-            <span style={{ color: TEXT_MUTED, fontSize: "0.6875rem" }}>/</span>
-            <span style={{ fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_MUTED }}>
-              Newsletter Analytics
-            </span>
-          </div>
-          <h1 style={{ fontSize: "clamp(1.75rem,3vw,2.5rem)", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.15 }}>
-            Newsletter Performance
-          </h1>
-          <p style={{ color: TEXT_SEC, marginTop: "0.5rem", fontSize: "0.9375rem", maxWidth: "560px" }}>
-            Per-post and rolled-up KPIs across Substack, Medium, LinkedIn, and X — measured against launch targets.
-          </p>
-        </m.div>
-
-        {/* ── Demo banner ── */}
-        <m.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          style={{
-            display: "flex", alignItems: "center", gap: "0.75rem",
-            padding: "0.75rem 1rem", borderRadius: "10px", marginBottom: "2rem",
-            background: "hsla(38,52%,58%,0.06)", border: `1px solid ${GOLD_MUTED}`,
-          }}
-        >
-          <AlertCircle size={14} color={GOLD} style={{ flexShrink: 0 }} />
-          <span style={{ fontSize: "0.8125rem", color: TEXT_SEC }}>
-            Showing seed data. Upload your Substack or Medium CSV exports to replace with real figures.
-          </span>
-        </m.div>
-
-        {/* ── CSV Upload ── */}
-        <m.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          style={{
-            display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1rem",
-            marginBottom: "2.5rem",
-          }}
-        >
-          {[
-            { label: "Substack Export", hint: "Analytics CSV export (posts + emails)", key: "substack" as const, ref: substackRef, done: substackUploaded },
-            { label: "Medium Export", hint: "Partner Program stats CSV", key: "medium" as const, ref: mediumRef, done: mediumUploaded },
-          ].map(({ label, hint, key, ref, done }) => (
-            <div
-              key={key}
-              onClick={() => ref.current?.click()}
-              style={{
-                padding: "1rem 1.25rem", borderRadius: "12px", cursor: "pointer",
-                background: done ? "hsla(145,62%,40%,0.06)" : SURFACE,
-                border: `1px dashed ${done ? "#34d399" : BORDER_HOVER}`,
-                display: "flex", alignItems: "center", gap: "0.875rem",
-                transition: "border-color 0.2s",
-              }}
-            >
-              {done ? <CheckCircle2 size={18} color="#34d399" /> : <Upload size={18} color={TEXT_MUTED} />}
-              <div>
-                <div style={{ fontSize: "0.875rem", fontWeight: 600, color: done ? "#34d399" : TEXT }}>{label}</div>
-                <div style={{ fontSize: "0.75rem", color: TEXT_MUTED, marginTop: "2px" }}>{done ? "Uploaded — data merged" : hint}</div>
-              </div>
-              <input ref={ref} type="file" accept=".csv" style={{ display: "none" }} onChange={handleCsvUpload(key)} />
-            </div>
-          ))}
-        </m.div>
-
-        {uploadError && (
-          <div style={{ color: "#f87171", fontSize: "0.8125rem", marginBottom: "1.5rem", padding: "0.75rem 1rem", background: "hsla(2,70%,50%,0.08)", borderRadius: "8px", border: "1px solid hsla(2,70%,50%,0.18)" }}>
-            {uploadError}
-          </div>
-        )}
-
-        {/* ── KPI Cards ── */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <SectionLabel>Rolled-Up KPIs</SectionLabel>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "1rem" }}>
-            <StatCard
-              label="Free Subscribers"
-              value={totalFree.toLocaleString()}
-              sub={`Target: ${TARGETS.month1.free.toLocaleString()} (mo 1)`}
-              accent={GOLD}
-              icon={Users}
-              delta={`${Math.round((totalFree / TARGETS.month1.free) * 100)}% of target`}
-              deltaDir={totalFree >= TARGETS.month1.free ? "up" : "down"}
-              delay={0.1}
-            />
-            <StatCard
-              label="Paid Subscribers"
-              value={totalPaid.toLocaleString()}
-              sub={`Target: ${TARGETS.month1.paid} (mo 1)`}
-              accent="#34d399"
-              icon={TrendingUp}
-              delta={`${Math.round((totalPaid / TARGETS.month1.paid) * 100)}% of target`}
-              deltaDir={totalPaid >= TARGETS.month1.paid ? "up" : "down"}
-              delay={0.15}
-            />
-            <StatCard
-              label="Avg Open Rate"
-              value={`${totalOpenRate.toFixed(1)}%`}
-              sub="Target: 45% essays"
-              accent="#0FB3D4"
-              icon={Mail}
-              delta={totalOpenRate >= 45 ? "above target" : `${(45 - totalOpenRate).toFixed(1)}pp below target`}
-              deltaDir={totalOpenRate >= 45 ? "up" : "down"}
-              delay={0.2}
-            />
-            <StatCard
-              label="Free → Paid Conv."
-              value={`${conversionRate.toFixed(1)}%`}
-              sub="Target: 5–8%"
-              accent="#3A63E0"
-              icon={ArrowUpRight}
-              delta={conversionRate >= 5 ? "on target" : "below target"}
-              deltaDir={conversionRate >= 5 ? "up" : "flat"}
-              delay={0.25}
-            />
-            <StatCard
-              label="Inbound Replies"
-              value={totalInboundReplies.toLocaleString()}
-              sub={`${totalQualified} qualified convos`}
-              accent="#D4A054"
-              icon={MessageSquare}
-              delta={`${totalQualified} qualified`}
-              deltaDir="flat"
-              delay={0.3}
-            />
-            <StatCard
-              label="Paid Conversions"
-              value={totalConversions.toLocaleString()}
-              sub="Total from all posts"
-              accent="#A78BFA"
-              icon={MousePointerClick}
-              delay={0.35}
-            />
-          </div>
-        </div>
-
-        {/* ── Subscriber Growth Chart ── */}
-        <m.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          style={{ marginBottom: "2.5rem", padding: "1.5rem", borderRadius: "16px", background: SURFACE, border: `1px solid ${BORDER}` }}
-        >
-          <SectionLabel>Subscriber Growth vs Target</SectionLabel>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
-            <div>
-              <div style={{ fontSize: "0.8125rem", color: TEXT_SEC, marginBottom: "1rem", fontWeight: 500 }}>Free Subscribers</div>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={SUBSCRIBER_GROWTH} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="freeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={GOLD} stopOpacity={0.18} />
-                      <stop offset="95%" stopColor={GOLD} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="freeTgtGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#34d399" stopOpacity={0.08} />
-                      <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke={BORDER} strokeDasharray="3 3" />
-                  <XAxis dataKey="week" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="freeTarget" name="Target" stroke="#34d399" fill="url(#freeTgtGrad)" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-                  <Area type="monotone" dataKey="free" name="Actual" stroke={GOLD} fill="url(#freeGrad)" strokeWidth={2} dot={{ fill: GOLD, r: 3 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div>
-              <div style={{ fontSize: "0.8125rem", color: TEXT_SEC, marginBottom: "1rem", fontWeight: 500 }}>Paid Subscribers</div>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={SUBSCRIBER_GROWTH} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="paidGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#A78BFA" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#A78BFA" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke={BORDER} strokeDasharray="3 3" />
-                  <XAxis dataKey="week" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="paidTarget" name="Target" stroke="#34d399" strokeDasharray="4 3" fill="none" strokeWidth={1.5} dot={false} />
-                  <Area type="monotone" dataKey="paid" name="Actual" stroke="#A78BFA" fill="url(#paidGrad)" strokeWidth={2} dot={{ fill: "#A78BFA", r: 3 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: "1.5rem", marginTop: "1rem", flexWrap: "wrap" }}>
+          </m.div>
+  
+          {/* ── CSV Upload ── */}
+          <m.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            style={{
+              display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1rem",
+              marginBottom: "2.5rem",
+            }}
+          >
             {[
-              { label: "Month 1 target", free: TARGETS.month1.free, paid: TARGETS.month1.paid },
-              { label: "Month 3 target", free: TARGETS.month3.free, paid: TARGETS.month3.paid },
-            ].map(t => (
-              <div key={t.label} style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED, fontFamily: "'JetBrains Mono',monospace" }}>{t.label}:</span>
-                <span style={{ fontSize: "0.6875rem", color: GOLD, fontFamily: "'JetBrains Mono',monospace" }}>{t.free.toLocaleString()} free</span>
-                <span style={{ fontSize: "0.6875rem", color: "#A78BFA", fontFamily: "'JetBrains Mono',monospace" }}>{t.paid} paid</span>
-              </div>
-            ))}
-          </div>
-        </m.div>
-
-        {/* ── Open Rate Trend ── */}
-        <m.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          style={{ marginBottom: "2.5rem", padding: "1.5rem", borderRadius: "16px", background: SURFACE, border: `1px solid ${BORDER}` }}
-        >
-          <SectionLabel>Open Rate Trend (Substack)</SectionLabel>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={OPEN_RATE_TREND} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <CartesianGrid stroke={BORDER} strokeDasharray="3 3" />
-              <XAxis dataKey="label" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
-              <YAxis domain={[30, 60]} tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
-              <Tooltip
-                content={({ active, payload, label }) => {
-                  if (!active || !payload?.length) return null;
-                  const row = OPEN_RATE_TREND.find(r => r.label === label);
-                  return (
-                    <div style={{ ...TOOLTIP_STYLE, padding: "0.75rem 1rem" }}>
-                      <div style={{ color: TEXT_SEC, fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", marginBottom: "4px" }}>{row?.date}</div>
-                      <div style={{ color: "#0FB3D4", fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>{payload[0].value}% open rate</div>
-                      <div style={{ color: TEXT_MUTED, fontSize: "0.6875rem", marginTop: "2px" }}>{row?.pillar}</div>
-                    </div>
-                  );
-                }}
-              />
-              <ReferenceLine y={45} stroke={GOLD} strokeDasharray="4 3" strokeWidth={1.5} label={{ value: "45% target", fill: GOLD, fontSize: 10, fontFamily: "'JetBrains Mono',monospace", position: "insideTopRight" }} />
-              <ReferenceLine y={35} stroke="#f87171" strokeDasharray="4 3" strokeWidth={1} label={{ value: "35% min", fill: "#f87171", fontSize: 10, fontFamily: "'JetBrains Mono',monospace", position: "insideBottomRight" }} />
-              <Line type="monotone" dataKey="rate" name="Open Rate" stroke="#0FB3D4" strokeWidth={2} dot={{ fill: "#0FB3D4", r: 4 }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </m.div>
-
-        {/* ── Pillar Performance ── */}
-        <m.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          style={{ marginBottom: "2.5rem", padding: "1.5rem", borderRadius: "16px", background: SURFACE, border: `1px solid ${BORDER}` }}
-        >
-          <SectionLabel>Top Posts by Pillar — Medium Views (30d)</SectionLabel>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={pillarData} layout="vertical" margin={{ top: 0, right: 24, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke={BORDER} strokeDasharray="3 3" horizontal={false} />
-              <XAxis type="number" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="pillar" tick={{ fill: TEXT_SEC, fontSize: 10, fontFamily: "'Inter',sans-serif" }} axisLine={false} tickLine={false} width={130} />
-              <Tooltip content={({ active, payload, label }) => {
-                if (!active || !payload?.length) return null;
-                const row = pillarData.find(r => r.pillar === label);
-                return (
-                  <div style={{ ...TOOLTIP_STYLE, padding: "0.75rem 1rem" }}>
-                    <div style={{ color: TEXT_SEC, fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", marginBottom: "4px" }}>{row?.fullPillar}</div>
-                    <div style={{ color: row?.color, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>{payload[0].value?.toLocaleString()} views</div>
-                    <div style={{ color: TEXT_MUTED, fontSize: "0.6875rem", marginTop: "2px" }}>{row?.postCount} post{row?.postCount !== 1 ? "s" : ""}</div>
-                  </div>
-                );
-              }} />
-              <Bar dataKey="totalViews" name="30d Views" radius={[0, 4, 4, 0]}>
-                {pillarData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1rem" }}>
-            {PILLARS.map(p => (
-              <div key={p} style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: PILLAR_COLORS[p], flexShrink: 0 }} />
-                <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED, fontFamily: "'Inter',sans-serif" }}>{p}</span>
-              </div>
-            ))}
-          </div>
-        </m.div>
-
-        {/* ── Post Table ── */}
-        <m.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          style={{ marginBottom: "3rem" }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1rem" }}>
-            <SectionLabel>Per-Post KPIs</SectionLabel>
-            <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED, fontFamily: "'JetBrains Mono',monospace" }}>{posts.length} posts</span>
-          </div>
-
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "720px" }}>
-              <thead>
-                <tr style={{ borderBottom: `1px solid ${BORDER_HOVER}` }}>
-                  {[
-                    { key: null, label: "Post" },
-                    { key: "substack_opens" as SortKey, label: "Opens" },
-                    { key: "substack_open_rate" as SortKey, label: "Open %" },
-                    { key: "medium_views_30d" as SortKey, label: "Med Views" },
-                    { key: "paid_conversions" as SortKey, label: "Paid Conv." },
-                    { key: "inbound_replies" as SortKey, label: "Replies" },
-                    { key: null, label: "" },
-                  ].map(({ key, label }, i) => (
-                    <th
-                      key={i}
-                      onClick={key ? () => toggleSort(key) : undefined}
-                      style={{
-                        padding: "0.625rem 0.75rem", textAlign: "left",
-                        fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace",
-                        textTransform: "uppercase", letterSpacing: "0.06em",
-                        color: key && sortKey === key ? GOLD : TEXT_MUTED,
-                        cursor: key ? "pointer" : "default",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                        {label}
-                        {key && sortKey === key && (sortAsc ? <ChevronUp size={10} /> : <ChevronDown size={10} />)}
-                      </span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sortedPosts.map((post, i) => {
-                  const pillarColor = PILLAR_COLORS[post.pillar] ?? GOLD;
-                  const isExpanded = expandedPost === post.post_id;
-                  return (
-                    <>
-                      <tr
-                        key={post.post_id}
-                        onClick={() => setExpandedPost(isExpanded ? null : post.post_id)}
-                        style={{
-                          borderBottom: `1px solid ${BORDER}`,
-                          background: isExpanded ? "hsla(214,12%,10%,0.5)" : "transparent",
-                          cursor: "pointer",
-                          transition: "background 0.15s",
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "hsla(214,12%,10%,0.5)")}
-                        onMouseLeave={e => (e.currentTarget.style.background = isExpanded ? "hsla(214,12%,10%,0.5)" : "transparent")}
-                      >
-                        <td style={{ padding: "0.875rem 0.75rem", maxWidth: "320px" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <span style={{ width: "3px", height: "28px", borderRadius: "2px", background: pillarColor, flexShrink: 0 }} />
-                            <div>
-                              <div style={{ fontSize: "0.875rem", fontWeight: 500, color: TEXT, lineHeight: 1.3 }}>{post.title}</div>
-                              <div style={{ fontSize: "0.6875rem", color: TEXT_MUTED, marginTop: "2px", fontFamily: "'JetBrains Mono',monospace" }}>
-                                {post.publish_date} · {post.pillar}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: TEXT }}>
-                          {post.substack_opens.toLocaleString()}
-                        </td>
-                        <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem" }}>
-                          <span style={{ color: post.substack_open_rate >= 45 ? "#34d399" : post.substack_open_rate >= 35 ? GOLD : "#f87171" }}>
-                            {post.substack_open_rate.toFixed(1)}%
-                          </span>
-                        </td>
-                        <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: TEXT }}>
-                          {post.medium_views_30d.toLocaleString()}
-                        </td>
-                        <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: "#A78BFA" }}>
-                          {post.paid_conversions}
-                        </td>
-                        <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: GOLD }}>
-                          {post.inbound_replies}
-                        </td>
-                        <td style={{ padding: "0.875rem 0.75rem", textAlign: "right" }}>
-                          <ChevronDown size={14} color={TEXT_MUTED} style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
-                        </td>
-                      </tr>
-                      {isExpanded && (
-                        <tr key={`${post.post_id}-detail`} style={{ background: "hsla(214,10%,8%,0.8)" }}>
-                          <td colSpan={7} style={{ padding: "1rem 1.25rem 1.25rem" }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "1rem" }}>
-                              {[
-                                { group: "Substack", items: [
-                                  { label: "Clicks", val: post.substack_clicks.toLocaleString() },
-                                  { label: "New Subs", val: post.substack_new_subs.toLocaleString() },
-                                ]},
-                                { group: "Medium", items: [
-                                  { label: "Views 7d", val: post.medium_views_7d.toLocaleString() },
-                                  { label: "Reads", val: post.medium_reads.toLocaleString() },
-                                  { label: "Fans", val: post.medium_fans.toLocaleString() },
-                                  { label: "Read Ratio", val: `${(post.medium_read_ratio * 100).toFixed(0)}%` },
-                                ]},
-                                { group: "LinkedIn", items: [
-                                  { label: "Impressions", val: post.linkedin_impressions.toLocaleString() },
-                                  { label: "Clicks", val: post.linkedin_clicks.toLocaleString() },
-                                  { label: "Comments", val: post.linkedin_comments.toString() },
-                                ]},
-                                { group: "X", items: [
-                                  { label: "Impressions", val: post.x_impressions.toLocaleString() },
-                                  { label: "Clicks", val: post.x_clicks.toLocaleString() },
-                                  { label: "Replies", val: post.x_replies.toString() },
-                                ]},
-                                { group: "Outcomes", items: [
-                                  { label: "Paid Conversions", val: post.paid_conversions.toString() },
-                                  { label: "Inbound Replies", val: post.inbound_replies.toString() },
-                                  { label: "Qualified Convos", val: post.qualified_conversations.toString() },
-                                ]},
-                              ].map(({ group, items }) => (
-                                <div key={group}>
-                                  <div style={{ fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_MUTED, marginBottom: "0.5rem" }}>{group}</div>
-                                  {items.map(({ label, val }) => (
-                                    <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
-                                      <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{label}</span>
-                                      <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: TEXT }}>{val}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </m.div>
-
-        {/* ── Pillar Summary Cards ── */}
-        <m.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          style={{ marginBottom: "3rem" }}
-        >
-          <SectionLabel>Pillar Summary</SectionLabel>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "1rem" }}>
-            {pillarData.map((p, i) => (
-              <m.div
-                key={p.pillar}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + i * 0.05 }}
+              { label: "Substack Export", hint: "Analytics CSV export (posts + emails)", key: "substack" as const, ref: substackRef, done: substackUploaded },
+              { label: "Medium Export", hint: "Partner Program stats CSV", key: "medium" as const, ref: mediumRef, done: mediumUploaded },
+            ].map(({ label, hint, key, ref, done }) => (
+              <div
+                key={key}
+                onClick={() => ref.current?.click()}
                 style={{
-                  padding: "1.125rem 1.25rem", borderRadius: "12px",
-                  background: `radial-gradient(ellipse at top left, ${p.color}08 0%, ${SURFACE} 70%)`,
-                  border: `1px solid ${p.color}22`,
+                  padding: "1rem 1.25rem", borderRadius: "12px", cursor: "pointer",
+                  background: done ? "hsla(145,62%,40%,0.06)" : SURFACE,
+                  border: `1px dashed ${done ? "#34d399" : BORDER_HOVER}`,
+                  display: "flex", alignItems: "center", gap: "0.875rem",
+                  transition: "border-color 0.2s",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                  <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: p.color }} />
-                  <span style={{ fontSize: "0.75rem", fontWeight: 600, color: TEXT }}>{p.fullPillar}</span>
+                {done ? <CheckCircle2 size={18} color="#34d399" /> : <Upload size={18} color={TEXT_MUTED} />}
+                <div>
+                  <div style={{ fontSize: "0.875rem", fontWeight: 600, color: done ? "#34d399" : TEXT }}>{label}</div>
+                  <div style={{ fontSize: "0.75rem", color: TEXT_MUTED, marginTop: "2px" }}>{done ? "Uploaded — data merged" : hint}</div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
-                  <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Posts</span>
-                  <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: TEXT }}>{p.postCount}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
-                  <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Med Views</span>
-                  <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: TEXT }}>{p.totalViews.toLocaleString()}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
-                  <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Conversions</span>
-                  <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: p.color }}>{p.totalConversions}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Replies</span>
-                  <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: GOLD }}>{p.totalReplies}</span>
-                </div>
-              </m.div>
+                <input ref={ref} type="file" accept=".csv" style={{ display: "none" }} onChange={handleCsvUpload(key)} />
+              </div>
             ))}
-          </div>
-        </m.div>
-
-        {/* ── Tracking cadence note ── */}
-        <m.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.55 }}
-          style={{
-            display: "flex", alignItems: "flex-start", gap: "0.875rem",
-            padding: "1rem 1.25rem", borderRadius: "10px",
-            background: SURFACE, border: `1px solid ${BORDER}`,
-          }}
-        >
-          <RefreshCw size={14} color={TEXT_MUTED} style={{ marginTop: "2px", flexShrink: 0 }} />
-          <div>
-            <div style={{ fontSize: "0.8125rem", fontWeight: 500, color: TEXT_SEC, marginBottom: "2px" }}>Tracking cadence</div>
-            <div style={{ fontSize: "0.75rem", color: TEXT_MUTED, lineHeight: 1.6 }}>
-              Updated weekly, every Monday morning, from the four platform analytics dashboards. Quarterly roll-up feeds the public investor update.
-              Upload Substack (Analytics → Posts export) and Medium (Partner Program → Earnings → Export) CSVs above to refresh figures.
+          </m.div>
+  
+          {uploadError && (
+            <div style={{ color: "#f87171", fontSize: "0.8125rem", marginBottom: "1.5rem", padding: "0.75rem 1rem", background: "hsla(2,70%,50%,0.08)", borderRadius: "8px", border: "1px solid hsla(2,70%,50%,0.18)" }}>
+              {uploadError}
+            </div>
+          )}
+  
+          {/* ── KPI Cards ── */}
+          <div style={{ marginBottom: "2.5rem" }}>
+            <SectionLabel>Rolled-Up KPIs</SectionLabel>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "1rem" }}>
+              <StatCard
+                label="Free Subscribers"
+                value={totalFree.toLocaleString()}
+                sub={`Target: ${TARGETS.month1.free.toLocaleString()} (mo 1)`}
+                accent={GOLD}
+                icon={Users}
+                delta={`${Math.round((totalFree / TARGETS.month1.free) * 100)}% of target`}
+                deltaDir={totalFree >= TARGETS.month1.free ? "up" : "down"}
+                delay={0.1}
+              />
+              <StatCard
+                label="Paid Subscribers"
+                value={totalPaid.toLocaleString()}
+                sub={`Target: ${TARGETS.month1.paid} (mo 1)`}
+                accent="#34d399"
+                icon={TrendingUp}
+                delta={`${Math.round((totalPaid / TARGETS.month1.paid) * 100)}% of target`}
+                deltaDir={totalPaid >= TARGETS.month1.paid ? "up" : "down"}
+                delay={0.15}
+              />
+              <StatCard
+                label="Avg Open Rate"
+                value={`${totalOpenRate.toFixed(1)}%`}
+                sub="Target: 45% essays"
+                accent="#0FB3D4"
+                icon={Mail}
+                delta={totalOpenRate >= 45 ? "above target" : `${(45 - totalOpenRate).toFixed(1)}pp below target`}
+                deltaDir={totalOpenRate >= 45 ? "up" : "down"}
+                delay={0.2}
+              />
+              <StatCard
+                label="Free → Paid Conv."
+                value={`${conversionRate.toFixed(1)}%`}
+                sub="Target: 5–8%"
+                accent="#3A63E0"
+                icon={ArrowUpRight}
+                delta={conversionRate >= 5 ? "on target" : "below target"}
+                deltaDir={conversionRate >= 5 ? "up" : "flat"}
+                delay={0.25}
+              />
+              <StatCard
+                label="Inbound Replies"
+                value={totalInboundReplies.toLocaleString()}
+                sub={`${totalQualified} qualified convos`}
+                accent="#D4A054"
+                icon={MessageSquare}
+                delta={`${totalQualified} qualified`}
+                deltaDir="flat"
+                delay={0.3}
+              />
+              <StatCard
+                label="Paid Conversions"
+                value={totalConversions.toLocaleString()}
+                sub="Total from all posts"
+                accent="#A78BFA"
+                icon={MousePointerClick}
+                delay={0.35}
+              />
             </div>
           </div>
-        </m.div>
-
+  
+          {/* ── Subscriber Growth Chart ── */}
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            style={{ marginBottom: "2.5rem", padding: "1.5rem", borderRadius: "16px", background: SURFACE, border: `1px solid ${BORDER}` }}
+          >
+            <SectionLabel>Subscriber Growth vs Target</SectionLabel>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+              <div>
+                <div style={{ fontSize: "0.8125rem", color: TEXT_SEC, marginBottom: "1rem", fontWeight: 500 }}>Free Subscribers</div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={SUBSCRIBER_GROWTH} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="freeGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={GOLD} stopOpacity={0.18} />
+                        <stop offset="95%" stopColor={GOLD} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="freeTgtGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#34d399" stopOpacity={0.08} />
+                        <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke={BORDER} strokeDasharray="3 3" />
+                    <XAxis dataKey="week" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="freeTarget" name="Target" stroke="#34d399" fill="url(#freeTgtGrad)" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+                    <Area type="monotone" dataKey="free" name="Actual" stroke={GOLD} fill="url(#freeGrad)" strokeWidth={2} dot={{ fill: GOLD, r: 3 }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div>
+                <div style={{ fontSize: "0.8125rem", color: TEXT_SEC, marginBottom: "1rem", fontWeight: 500 }}>Paid Subscribers</div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={SUBSCRIBER_GROWTH} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="paidGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#A78BFA" stopOpacity={0.18} />
+                        <stop offset="95%" stopColor="#A78BFA" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke={BORDER} strokeDasharray="3 3" />
+                    <XAxis dataKey="week" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="paidTarget" name="Target" stroke="#34d399" strokeDasharray="4 3" fill="none" strokeWidth={1.5} dot={false} />
+                    <Area type="monotone" dataKey="paid" name="Actual" stroke="#A78BFA" fill="url(#paidGrad)" strokeWidth={2} dot={{ fill: "#A78BFA", r: 3 }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "1.5rem", marginTop: "1rem", flexWrap: "wrap" }}>
+              {[
+                { label: "Month 1 target", free: TARGETS.month1.free, paid: TARGETS.month1.paid },
+                { label: "Month 3 target", free: TARGETS.month3.free, paid: TARGETS.month3.paid },
+              ].map(t => (
+                <div key={t.label} style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED, fontFamily: "'JetBrains Mono',monospace" }}>{t.label}:</span>
+                  <span style={{ fontSize: "0.6875rem", color: GOLD, fontFamily: "'JetBrains Mono',monospace" }}>{t.free.toLocaleString()} free</span>
+                  <span style={{ fontSize: "0.6875rem", color: "#A78BFA", fontFamily: "'JetBrains Mono',monospace" }}>{t.paid} paid</span>
+                </div>
+              ))}
+            </div>
+          </m.div>
+  
+          {/* ── Open Rate Trend ── */}
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            style={{ marginBottom: "2.5rem", padding: "1.5rem", borderRadius: "16px", background: SURFACE, border: `1px solid ${BORDER}` }}
+          >
+            <SectionLabel>Open Rate Trend (Substack)</SectionLabel>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={OPEN_RATE_TREND} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <CartesianGrid stroke={BORDER} strokeDasharray="3 3" />
+                <XAxis dataKey="label" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
+                <YAxis domain={[30, 60]} tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    const row = OPEN_RATE_TREND.find(r => r.label === label);
+                    return (
+                      <div style={{ ...TOOLTIP_STYLE, padding: "0.75rem 1rem" }}>
+                        <div style={{ color: TEXT_SEC, fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", marginBottom: "4px" }}>{row?.date}</div>
+                        <div style={{ color: "#0FB3D4", fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>{payload[0].value}% open rate</div>
+                        <div style={{ color: TEXT_MUTED, fontSize: "0.6875rem", marginTop: "2px" }}>{row?.pillar}</div>
+                      </div>
+                    );
+                  }}
+                />
+                <ReferenceLine y={45} stroke={GOLD} strokeDasharray="4 3" strokeWidth={1.5} label={{ value: "45% target", fill: GOLD, fontSize: 10, fontFamily: "'JetBrains Mono',monospace", position: "insideTopRight" }} />
+                <ReferenceLine y={35} stroke="#f87171" strokeDasharray="4 3" strokeWidth={1} label={{ value: "35% min", fill: "#f87171", fontSize: 10, fontFamily: "'JetBrains Mono',monospace", position: "insideBottomRight" }} />
+                <Line type="monotone" dataKey="rate" name="Open Rate" stroke="#0FB3D4" strokeWidth={2} dot={{ fill: "#0FB3D4", r: 4 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </m.div>
+  
+          {/* ── Pillar Performance ── */}
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            style={{ marginBottom: "2.5rem", padding: "1.5rem", borderRadius: "16px", background: SURFACE, border: `1px solid ${BORDER}` }}
+          >
+            <SectionLabel>Top Posts by Pillar — Medium Views (30d)</SectionLabel>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={pillarData} layout="vertical" margin={{ top: 0, right: 24, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke={BORDER} strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" tick={{ fill: TEXT_MUTED, fontSize: 10, fontFamily: "'JetBrains Mono',monospace" }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="pillar" tick={{ fill: TEXT_SEC, fontSize: 10, fontFamily: "'Inter',sans-serif" }} axisLine={false} tickLine={false} width={130} />
+                <Tooltip content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+                  const row = pillarData.find(r => r.pillar === label);
+                  return (
+                    <div style={{ ...TOOLTIP_STYLE, padding: "0.75rem 1rem" }}>
+                      <div style={{ color: TEXT_SEC, fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", marginBottom: "4px" }}>{row?.fullPillar}</div>
+                      <div style={{ color: row?.color, fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>{payload[0].value?.toLocaleString()} views</div>
+                      <div style={{ color: TEXT_MUTED, fontSize: "0.6875rem", marginTop: "2px" }}>{row?.postCount} post{row?.postCount !== 1 ? "s" : ""}</div>
+                    </div>
+                  );
+                }} />
+                <Bar dataKey="totalViews" name="30d Views" radius={[0, 4, 4, 0]}>
+                  {pillarData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1rem" }}>
+              {PILLARS.map(p => (
+                <div key={p} style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: PILLAR_COLORS[p], flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED, fontFamily: "'Inter',sans-serif" }}>{p}</span>
+                </div>
+              ))}
+            </div>
+          </m.div>
+  
+          {/* ── Post Table ── */}
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            style={{ marginBottom: "3rem" }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1rem" }}>
+              <SectionLabel>Per-Post KPIs</SectionLabel>
+              <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED, fontFamily: "'JetBrains Mono',monospace" }}>{posts.length} posts</span>
+            </div>
+  
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "720px" }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${BORDER_HOVER}` }}>
+                    {[
+                      { key: null, label: "Post" },
+                      { key: "substack_opens" as SortKey, label: "Opens" },
+                      { key: "substack_open_rate" as SortKey, label: "Open %" },
+                      { key: "medium_views_30d" as SortKey, label: "Med Views" },
+                      { key: "paid_conversions" as SortKey, label: "Paid Conv." },
+                      { key: "inbound_replies" as SortKey, label: "Replies" },
+                      { key: null, label: "" },
+                    ].map(({ key, label }, i) => (
+                      <th
+                        key={i}
+                        onClick={key ? () => toggleSort(key) : undefined}
+                        style={{
+                          padding: "0.625rem 0.75rem", textAlign: "left",
+                          fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace",
+                          textTransform: "uppercase", letterSpacing: "0.06em",
+                          color: key && sortKey === key ? GOLD : TEXT_MUTED,
+                          cursor: key ? "pointer" : "default",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          {label}
+                          {key && sortKey === key && (sortAsc ? <ChevronUp size={10} /> : <ChevronDown size={10} />)}
+                        </span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedPosts.map((post, i) => {
+                    const pillarColor = PILLAR_COLORS[post.pillar] ?? GOLD;
+                    const isExpanded = expandedPost === post.post_id;
+                    return (
+                      <>
+                        <tr
+                          key={post.post_id}
+                          onClick={() => setExpandedPost(isExpanded ? null : post.post_id)}
+                          style={{
+                            borderBottom: `1px solid ${BORDER}`,
+                            background: isExpanded ? "hsla(214,12%,10%,0.5)" : "transparent",
+                            cursor: "pointer",
+                            transition: "background 0.15s",
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "hsla(214,12%,10%,0.5)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = isExpanded ? "hsla(214,12%,10%,0.5)" : "transparent")}
+                        >
+                          <td style={{ padding: "0.875rem 0.75rem", maxWidth: "320px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <span style={{ width: "3px", height: "28px", borderRadius: "2px", background: pillarColor, flexShrink: 0 }} />
+                              <div>
+                                <div style={{ fontSize: "0.875rem", fontWeight: 500, color: TEXT, lineHeight: 1.3 }}>{post.title}</div>
+                                <div style={{ fontSize: "0.6875rem", color: TEXT_MUTED, marginTop: "2px", fontFamily: "'JetBrains Mono',monospace" }}>
+                                  {post.publish_date} · {post.pillar}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: TEXT }}>
+                            {post.substack_opens.toLocaleString()}
+                          </td>
+                          <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem" }}>
+                            <span style={{ color: post.substack_open_rate >= 45 ? "#34d399" : post.substack_open_rate >= 35 ? GOLD : "#f87171" }}>
+                              {post.substack_open_rate.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: TEXT }}>
+                            {post.medium_views_30d.toLocaleString()}
+                          </td>
+                          <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: "#A78BFA" }}>
+                            {post.paid_conversions}
+                          </td>
+                          <td style={{ padding: "0.875rem 0.75rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "0.875rem", color: GOLD }}>
+                            {post.inbound_replies}
+                          </td>
+                          <td style={{ padding: "0.875rem 0.75rem", textAlign: "right" }}>
+                            <ChevronDown size={14} color={TEXT_MUTED} style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr key={`${post.post_id}-detail`} style={{ background: "hsla(214,10%,8%,0.8)" }}>
+                            <td colSpan={7} style={{ padding: "1rem 1.25rem 1.25rem" }}>
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: "1rem" }}>
+                                {[
+                                  { group: "Substack", items: [
+                                    { label: "Clicks", val: post.substack_clicks.toLocaleString() },
+                                    { label: "New Subs", val: post.substack_new_subs.toLocaleString() },
+                                  ]},
+                                  { group: "Medium", items: [
+                                    { label: "Views 7d", val: post.medium_views_7d.toLocaleString() },
+                                    { label: "Reads", val: post.medium_reads.toLocaleString() },
+                                    { label: "Fans", val: post.medium_fans.toLocaleString() },
+                                    { label: "Read Ratio", val: `${(post.medium_read_ratio * 100).toFixed(0)}%` },
+                                  ]},
+                                  { group: "LinkedIn", items: [
+                                    { label: "Impressions", val: post.linkedin_impressions.toLocaleString() },
+                                    { label: "Clicks", val: post.linkedin_clicks.toLocaleString() },
+                                    { label: "Comments", val: post.linkedin_comments.toString() },
+                                  ]},
+                                  { group: "X", items: [
+                                    { label: "Impressions", val: post.x_impressions.toLocaleString() },
+                                    { label: "Clicks", val: post.x_clicks.toLocaleString() },
+                                    { label: "Replies", val: post.x_replies.toString() },
+                                  ]},
+                                  { group: "Outcomes", items: [
+                                    { label: "Paid Conversions", val: post.paid_conversions.toString() },
+                                    { label: "Inbound Replies", val: post.inbound_replies.toString() },
+                                    { label: "Qualified Convos", val: post.qualified_conversations.toString() },
+                                  ]},
+                                ].map(({ group, items }) => (
+                                  <div key={group}>
+                                    <div style={{ fontSize: "0.6875rem", fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_MUTED, marginBottom: "0.5rem" }}>{group}</div>
+                                    {items.map(({ label, val }) => (
+                                      <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
+                                        <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{label}</span>
+                                        <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: TEXT }}>{val}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </m.div>
+  
+          {/* ── Pillar Summary Cards ── */}
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            style={{ marginBottom: "3rem" }}
+          >
+            <SectionLabel>Pillar Summary</SectionLabel>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "1rem" }}>
+              {pillarData.map((p, i) => (
+                <m.div
+                  key={p.pillar}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + i * 0.05 }}
+                  style={{
+                    padding: "1.125rem 1.25rem", borderRadius: "12px",
+                    background: `radial-gradient(ellipse at top left, ${p.color}08 0%, ${SURFACE} 70%)`,
+                    border: `1px solid ${p.color}22`,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: p.color }} />
+                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: TEXT }}>{p.fullPillar}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
+                    <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Posts</span>
+                    <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: TEXT }}>{p.postCount}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
+                    <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Med Views</span>
+                    <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: TEXT }}>{p.totalViews.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
+                    <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Conversions</span>
+                    <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: p.color }}>{p.totalConversions}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: "0.6875rem", color: TEXT_MUTED }}>Replies</span>
+                    <span style={{ fontSize: "0.75rem", fontFamily: "'JetBrains Mono',monospace", color: GOLD }}>{p.totalReplies}</span>
+                  </div>
+                </m.div>
+              ))}
+            </div>
+          </m.div>
+  
+          {/* ── Tracking cadence note ── */}
+          <m.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.55 }}
+            style={{
+              display: "flex", alignItems: "flex-start", gap: "0.875rem",
+              padding: "1rem 1.25rem", borderRadius: "10px",
+              background: SURFACE, border: `1px solid ${BORDER}`,
+            }}
+          >
+            <RefreshCw size={14} color={TEXT_MUTED} style={{ marginTop: "2px", flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: "0.8125rem", fontWeight: 500, color: TEXT_SEC, marginBottom: "2px" }}>Tracking cadence</div>
+              <div style={{ fontSize: "0.75rem", color: TEXT_MUTED, lineHeight: 1.6 }}>
+                Updated weekly, every Monday morning, from the four platform analytics dashboards. Quarterly roll-up feeds the public investor update.
+                Upload Substack (Analytics → Posts export) and Medium (Partner Program → Earnings → Export) CSVs above to refresh figures.
+              </div>
+            </div>
+          </m.div>
+  
+        </div>
+  
+        <SiteFooter />
       </div>
-
-      <SiteFooter />
-    </div>
+        </>
   );
 }

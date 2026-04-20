@@ -63,7 +63,7 @@ interface HealthResponse {
 }
 
 export default function TrustStatusPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Trust Center Status — SZL Holdings",
     description: "Live platform status: uptime, security posture, dependency health, data residency, and SOC 2 progress.",
     canonical: "https://szlholdings.com/trust-center/status",
@@ -193,134 +193,137 @@ export default function TrustStatusPage() {
         : "unknown";
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section style={{
-          paddingTop: "clamp(7rem,12vw,10rem)",
-          paddingBottom: "clamp(3rem,5vw,4rem)",
-          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-        }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
-                <StatusDot status={overallStatus} />
-                <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,48%)" }}>
-                  Trust Center Status
-                </span>
-              </div>
-              <h1 style={{
-                fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
-                color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
-              }}>
-                {overallStatus === "live" ? "All systems operational." : overallStatus === "degraded" ? "Some systems degraded." : "Checking status…"}
-              </h1>
-              <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,57%)", lineHeight: 1.65, maxWidth: "42ch", marginBottom: "1.5rem" }}>
-                Live status for platform uptime, database, security posture, and compliance progress.
-                API probe data refreshes every 60 seconds. Manifest data reflects last audit.
-              </p>
-              <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
-                <div>
-                  <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "#10b981" }}>{operationalCount}/{cards.length}</span>
-                  <span style={{ fontSize: "12px", color: "hsl(210,5%,46%)", display: "block" }}>systems operational</span>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section style={{
+            paddingTop: "clamp(7rem,12vw,10rem)",
+            paddingBottom: "clamp(3rem,5vw,4rem)",
+            borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+          }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                  <StatusDot status={overallStatus} />
+                  <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,48%)" }}>
+                    Trust Center Status
+                  </span>
                 </div>
-                <div>
-                  <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "#3b82f6" }}>{provenClaims.length}</span>
-                  <span style={{ fontSize: "12px", color: "hsl(210,5%,46%)", display: "block" }}>proven capabilities</span>
-                </div>
-                <div>
-                  <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{totals.live}</span>
-                  <span style={{ fontSize: "12px", color: "hsl(210,5%,46%)", display: "block" }}>live (real data)</span>
-                </div>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ paddingTop: "clamp(3rem,5vw,4.5rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <div style={{ display: "grid", gap: "0.75rem" }}>
-              {cards.map((card, i) => {
-                const Icon = card.icon;
-                return (
-                  <m.div
-                    key={card.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: i * 0.045 }}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "2.5rem 1fr auto",
-                      gap: "1rem",
-                      padding: "1.125rem 1.375rem",
-                      borderRadius: "10px",
-                      background: "hsla(0,0%,100%,0.02)",
-                      border: "1px solid hsla(0,0%,100%,0.06)",
-                      alignItems: "start",
-                    }}
-                  >
-                    <div style={{
-                      width: "36px", height: "36px", borderRadius: "8px",
-                      background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.07)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
-                      <Icon size={16} style={{ color: "hsl(210,5%,55%)" }} />
-                    </div>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.25rem" }}>
-                        <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{card.label}</span>
-                        <StatusIcon status={card.status} />
-                        <StatusLabel status={card.status} />
-                      </div>
-                      <p style={{ fontSize: "12.5px", color: "hsl(210,5%,52%)", marginBottom: "0.375rem" }}>{card.description}</p>
-                      <p style={{ fontSize: "12px", color: "hsl(210,5%,44%)", lineHeight: 1.55 }}>{card.detail}</p>
-                      <p style={{ fontSize: "11px", color: "hsl(210,5%,34%)", marginTop: "0.375rem" }}>
-                        Source: <code style={{ fontFamily: "monospace", color: "hsl(210,55%,55%)" }}>{card.source}</code>
-                        {card.lastChecked && <> · {card.lastChecked === lastChecked ? <><RefreshCw size={9} style={{ display: "inline", marginRight: "0.25rem" }} />Just now</> : `Last checked: ${card.lastChecked}`}</>}
-                      </p>
-                    </div>
-                    <StatusDot status={card.status} />
-                  </m.div>
-                );
-              })}
-            </div>
-
-            <div style={{ marginTop: "2.5rem", padding: "1.25rem 1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.015)", border: "1px solid hsla(0,0%,100%,0.05)" }}>
-              <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,40%)", textTransform: "uppercase" as const, letterSpacing: "0.08em", marginBottom: "0.75rem" }}>Data Sources</p>
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.4rem" }}>
-                {[
-                  ["API probe", "Live HTTP request to GET /api/health every 60 seconds"],
-                  ["Capability manifest", "artifacts/audit/platform-capability-manifest.json — audited 2026-04-19"],
-                  ["Architecture docs", "architecture.md, docs/DEPLOYMENT_MODEL.md"],
-                  ["Trust register", "TRUST_CENTER_INDEX.md, docs/trust/"],
-                ].map(([src, detail]) => (
-                  <div key={src} style={{ display: "flex", gap: "1rem" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,5%,50%)", minWidth: "9rem" }}>{src}</span>
-                    <span style={{ fontSize: "12px", color: "hsl(210,5%,40%)" }}>{detail}</span>
+                <h1 style={{
+                  fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
+                  color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
+                }}>
+                  {overallStatus === "live" ? "All systems operational." : overallStatus === "degraded" ? "Some systems degraded." : "Checking status…"}
+                </h1>
+                <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,57%)", lineHeight: 1.65, maxWidth: "42ch", marginBottom: "1.5rem" }}>
+                  Live status for platform uptime, database, security posture, and compliance progress.
+                  API probe data refreshes every 60 seconds. Manifest data reflects last audit.
+                </p>
+                <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
+                  <div>
+                    <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "#10b981" }}>{operationalCount}/{cards.length}</span>
+                    <span style={{ fontSize: "12px", color: "hsl(210,5%,46%)", display: "block" }}>systems operational</span>
                   </div>
-                ))}
+                  <div>
+                    <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "#3b82f6" }}>{provenClaims.length}</span>
+                    <span style={{ fontSize: "12px", color: "hsl(210,5%,46%)", display: "block" }}>proven capabilities</span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{totals.live}</span>
+                    <span style={{ fontSize: "12px", color: "hsl(210,5%,46%)", display: "block" }}>live (real data)</span>
+                  </div>
+                </div>
+              </m.div>
+            </div>
+          </section>
+  
+          <section style={{ paddingTop: "clamp(3rem,5vw,4.5rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <div style={{ display: "grid", gap: "0.75rem" }}>
+                {cards.map((card, i) => {
+                  const Icon = card.icon;
+                  return (
+                    <m.div
+                      key={card.id}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: i * 0.045 }}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "2.5rem 1fr auto",
+                        gap: "1rem",
+                        padding: "1.125rem 1.375rem",
+                        borderRadius: "10px",
+                        background: "hsla(0,0%,100%,0.02)",
+                        border: "1px solid hsla(0,0%,100%,0.06)",
+                        alignItems: "start",
+                      }}
+                    >
+                      <div style={{
+                        width: "36px", height: "36px", borderRadius: "8px",
+                        background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.07)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <Icon size={16} style={{ color: "hsl(210,5%,55%)" }} />
+                      </div>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.25rem" }}>
+                          <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{card.label}</span>
+                          <StatusIcon status={card.status} />
+                          <StatusLabel status={card.status} />
+                        </div>
+                        <p style={{ fontSize: "12.5px", color: "hsl(210,5%,52%)", marginBottom: "0.375rem" }}>{card.description}</p>
+                        <p style={{ fontSize: "12px", color: "hsl(210,5%,44%)", lineHeight: 1.55 }}>{card.detail}</p>
+                        <p style={{ fontSize: "11px", color: "hsl(210,5%,34%)", marginTop: "0.375rem" }}>
+                          Source: <code style={{ fontFamily: "monospace", color: "hsl(210,55%,55%)" }}>{card.source}</code>
+                          {card.lastChecked && <> · {card.lastChecked === lastChecked ? <><RefreshCw size={9} style={{ display: "inline", marginRight: "0.25rem" }} />Just now</> : `Last checked: ${card.lastChecked}`}</>}
+                        </p>
+                      </div>
+                      <StatusDot status={card.status} />
+                    </m.div>
+                  );
+                })}
+              </div>
+  
+              <div style={{ marginTop: "2.5rem", padding: "1.25rem 1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.015)", border: "1px solid hsla(0,0%,100%,0.05)" }}>
+                <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,40%)", textTransform: "uppercase" as const, letterSpacing: "0.08em", marginBottom: "0.75rem" }}>Data Sources</p>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.4rem" }}>
+                  {[
+                    ["API probe", "Live HTTP request to GET /api/health every 60 seconds"],
+                    ["Capability manifest", "artifacts/audit/platform-capability-manifest.json — audited 2026-04-19"],
+                    ["Architecture docs", "architecture.md, docs/DEPLOYMENT_MODEL.md"],
+                    ["Trust register", "TRUST_CENTER_INDEX.md, docs/trust/"],
+                  ].map(([src, detail]) => (
+                    <div key={src} style={{ display: "flex", gap: "1rem" }}>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(210,5%,50%)", minWidth: "9rem" }}>{src}</span>
+                      <span style={{ fontSize: "12px", color: "hsl(210,5%,40%)" }}>{detail}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+  
+              <div style={{ marginTop: "1.5rem", display: "flex", flexWrap: "wrap" as const, gap: "0.75rem" }}>
+                <Link href="/trust-center" style={{ fontSize: "13px", color: "hsl(210,55%,58%)", textDecoration: "none" }}>
+                  ← Trust Center overview
+                </Link>
+                <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
+                <Link href="/product-readiness" style={{ fontSize: "13px", color: "hsl(210,55%,58%)", textDecoration: "none" }}>
+                  Product Readiness Matrix
+                </Link>
+                <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
+                <a href="mailto:security@szlholdings.com" style={{ fontSize: "13px", color: "hsl(210,5%,40%)", textDecoration: "none" }}>
+                  security@szlholdings.com
+                </a>
               </div>
             </div>
-
-            <div style={{ marginTop: "1.5rem", display: "flex", flexWrap: "wrap" as const, gap: "0.75rem" }}>
-              <Link href="/trust-center" style={{ fontSize: "13px", color: "hsl(210,55%,58%)", textDecoration: "none" }}>
-                ← Trust Center overview
-              </Link>
-              <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
-              <Link href="/product-readiness" style={{ fontSize: "13px", color: "hsl(210,55%,58%)", textDecoration: "none" }}>
-                Product Readiness Matrix
-              </Link>
-              <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
-              <a href="mailto:security@szlholdings.com" style={{ fontSize: "13px", color: "hsl(210,5%,40%)", textDecoration: "none" }}>
-                security@szlholdings.com
-              </a>
-            </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

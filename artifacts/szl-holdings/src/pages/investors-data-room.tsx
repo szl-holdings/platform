@@ -1091,7 +1091,7 @@ export default function InvestorsDataRoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
 
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Data Room — Investor Relations — SZL Holdings",
     description:
       "Technical diligence data room for qualified SZL Holdings investors — executive brief, architecture, data model, security, and operational documentation.",
@@ -1152,10 +1152,13 @@ export default function InvestorsDataRoomPage() {
 
   if (ndaLoading) {
     return (
-      <div className="min-h-screen bg-[#070a10] text-white flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-white/30" />
-      </div>
-    );
+    <>
+      {__pageMeta}
+        <div className="min-h-screen bg-[#070a10] text-white flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-white/30" />
+        </div>
+          </>
+  );
   }
 
   if (!accepted) {

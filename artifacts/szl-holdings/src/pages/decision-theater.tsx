@@ -79,7 +79,7 @@ function CaseSelectorCard({ c, active, onSelect }: { c: DecisionCase; active: bo
 }
 
 export default function DecisionTheaterPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Decision Theater — Lyte",
     description: "Walk a live decision case from signal to learning through the nine-stage governed decision loop.",
   });
@@ -89,107 +89,110 @@ export default function DecisionTheaterPage() {
   const sevColor = SEV_COLOR[activeCase.severity];
 
   return (
-    <div style={{ background: BG, color: TEXT, minHeight: "100vh" }}>
-      <SiteNav />
-
-      <main style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(1.5rem,4vw,3rem) clamp(1rem,3vw,2rem)" }}>
-        {/* Breadcrumb */}
-        <div style={{ marginBottom: "1.5rem" }}>
-          <Link
-            href="/lyte"
-            style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "0.75rem", color: TEXT_FAINT, textDecoration: "none", fontFamily: MONO }}
+    <>
+      {__pageMeta}
+      <div style={{ background: BG, color: TEXT, minHeight: "100vh" }}>
+        <SiteNav />
+  
+        <main style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(1.5rem,4vw,3rem) clamp(1rem,3vw,2rem)" }}>
+          {/* Breadcrumb */}
+          <div style={{ marginBottom: "1.5rem" }}>
+            <Link
+              href="/lyte"
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "0.75rem", color: TEXT_FAINT, textDecoration: "none", fontFamily: MONO }}
+            >
+              <ArrowLeft size={12} />
+              Back to Lyte
+            </Link>
+          </div>
+  
+          {/* Header */}
+          <header style={{ marginBottom: "2rem" }}>
+            <p style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.625rem" }}>
+              Decision Theater · Flagship Governed Flow
+            </p>
+            <h1 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.02em", color: TEXT, margin: "0 0 0.75rem" }}>
+              Walk a live decision through nine governed stages
+            </h1>
+            <p style={{ fontSize: "0.9375rem", lineHeight: 1.6, color: TEXT_SEC, maxWidth: "70ch", margin: 0 }}>
+              Pick an active situation. Step through Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning.
+              Every stage shows the artifact, every approval is logged, and every decision lands in the proof chain.
+            </p>
+          </header>
+  
+          {/* Case selector */}
+          <section style={{ marginBottom: "2rem" }} data-testid="case-selector">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+              <h2 style={{ fontSize: "0.75rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_SEC, margin: 0 }}>
+                Active situations · {DECISION_CASES.length}
+              </h2>
+              <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Click a card to load it into the theater below</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "0.75rem" }}>
+              {DECISION_CASES.map((c) => (
+                <CaseSelectorCard
+                  key={c.id}
+                  c={c}
+                  active={c.id === activeCaseId}
+                  onSelect={() => setActiveCaseId(c.id)}
+                />
+              ))}
+            </div>
+          </section>
+  
+          {/* Active case context bar */}
+          <section
+            data-testid="active-case-context"
+            style={{
+              borderRadius: "12px",
+              border: `1px solid ${sevColor}30`,
+              background: `linear-gradient(180deg, ${sevColor}08, transparent)`,
+              padding: "1.25rem 1.5rem",
+              marginBottom: "1.5rem",
+            }}
           >
-            <ArrowLeft size={12} />
-            Back to Lyte
-          </Link>
-        </div>
-
-        {/* Header */}
-        <header style={{ marginBottom: "2rem" }}>
-          <p style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.625rem" }}>
-            Decision Theater · Flagship Governed Flow
-          </p>
-          <h1 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.02em", color: TEXT, margin: "0 0 0.75rem" }}>
-            Walk a live decision through nine governed stages
-          </h1>
-          <p style={{ fontSize: "0.9375rem", lineHeight: 1.6, color: TEXT_SEC, maxWidth: "70ch", margin: 0 }}>
-            Pick an active situation. Step through Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning.
-            Every stage shows the artifact, every approval is logged, and every decision lands in the proof chain.
-          </p>
-        </header>
-
-        {/* Case selector */}
-        <section style={{ marginBottom: "2rem" }} data-testid="case-selector">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-            <h2 style={{ fontSize: "0.75rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_SEC, margin: 0 }}>
-              Active situations · {DECISION_CASES.length}
-            </h2>
-            <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Click a card to load it into the theater below</span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "0.75rem" }}>
-            {DECISION_CASES.map((c) => (
-              <CaseSelectorCard
-                key={c.id}
-                c={c}
-                active={c.id === activeCaseId}
-                onSelect={() => setActiveCaseId(c.id)}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Active case context bar */}
-        <section
-          data-testid="active-case-context"
-          style={{
-            borderRadius: "12px",
-            border: `1px solid ${sevColor}30`,
-            background: `linear-gradient(180deg, ${sevColor}08, transparent)`,
-            padding: "1.25rem 1.5rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
-            <AlertTriangle size={20} style={{ color: sevColor, flexShrink: 0, marginTop: "0.125rem" }} />
-            <div style={{ flex: 1, minWidth: "260px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: sevColor }}>
-                  {activeCase.severity} · {activeCase.domain}
-                </span>
-                <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>{activeCase.id}</span>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+              <AlertTriangle size={20} style={{ color: sevColor, flexShrink: 0, marginTop: "0.125rem" }} />
+              <div style={{ flex: 1, minWidth: "260px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: sevColor }}>
+                    {activeCase.severity} · {activeCase.domain}
+                  </span>
+                  <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>{activeCase.id}</span>
+                </div>
+                <h3 style={{ fontSize: "1rem", fontWeight: 700, color: TEXT, margin: "0 0 0.375rem" }}>{activeCase.title}</h3>
+                <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, lineHeight: 1.55, margin: 0 }}>{activeCase.summary}</p>
               </div>
-              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: TEXT, margin: "0 0 0.375rem" }}>{activeCase.title}</h3>
-              <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, lineHeight: 1.55, margin: 0 }}>{activeCase.summary}</p>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", minWidth: "180px" }}>
-              <div>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>Owner</p>
-                <p style={{ fontSize: "0.8125rem", color: TEXT, margin: "0.125rem 0 0", fontWeight: 600 }}>{activeCase.owner}</p>
-                <p style={{ fontSize: "0.6875rem", color: TEXT_FAINT, margin: 0 }}>{activeCase.ownerRole}</p>
-              </div>
-              <div>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>Opened</p>
-                <p style={{ fontSize: "0.75rem", fontFamily: MONO, color: TEXT_SEC, margin: "0.125rem 0 0" }}>{activeCase.openedAt}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", minWidth: "180px" }}>
+                <div>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>Owner</p>
+                  <p style={{ fontSize: "0.8125rem", color: TEXT, margin: "0.125rem 0 0", fontWeight: 600 }}>{activeCase.owner}</p>
+                  <p style={{ fontSize: "0.6875rem", color: TEXT_FAINT, margin: 0 }}>{activeCase.ownerRole}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>Opened</p>
+                  <p style={{ fontSize: "0.75rem", fontFamily: MONO, color: TEXT_SEC, margin: "0.125rem 0 0" }}>{activeCase.openedAt}</p>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Theater */}
-        <section
-          data-testid="decision-theater-section"
-          style={{
-            borderRadius: "12px",
-            border: `1px solid ${BORDER}`,
-            background: "hsla(0,0%,100%,0.025)",
-            padding: "clamp(1.25rem, 2vw, 2rem)",
-          }}
-        >
-          <DecisionTheater key={activeCase.id} activeCase={activeCase} />
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
+          </section>
+  
+          {/* Theater */}
+          <section
+            data-testid="decision-theater-section"
+            style={{
+              borderRadius: "12px",
+              border: `1px solid ${BORDER}`,
+              background: "hsla(0,0%,100%,0.025)",
+              padding: "clamp(1.25rem, 2vw, 2rem)",
+            }}
+          >
+            <DecisionTheater key={activeCase.id} activeCase={activeCase} />
+          </section>
+        </main>
+  
+        <SiteFooter />
+      </div>
+        </>
   );
 }

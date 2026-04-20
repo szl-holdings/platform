@@ -55,7 +55,7 @@ const CLASS_COLORS: Record<string, string> = {
 };
 
 export default function CapTablePage() {
-  usePageMeta({ title: "Cap Table & Waterfall — SZL Fund Intelligence", description: "Full cap table management with waterfall and round modeling." });
+  const __pageMeta = usePageMeta({ title: "Cap Table & Waterfall — SZL Fund Intelligence", description: "Full cap table management with waterfall and round modeling." });
   const [exitVal, setExitVal] = useState(50_000_000);
   const [roundSize, setRoundSize] = useState(5_000_000);
   const [preMoney, setPreMoney] = useState(40_000_000);
@@ -112,161 +112,164 @@ export default function CapTablePage() {
   const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${(n / 1_000).toFixed(0)}K`;
 
   return (
-    <div className="min-h-screen bg-[#080b10] text-white">
-      <SiteNav />
-      <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
-        <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-2 mb-6">
-            <Link href="/fund"><button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/70"><ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence</button></Link>
-            <ChevronRight className="h-3 w-3 text-white/20" />
-            <span className="text-[11px] text-white/60">Cap Table & Waterfall</span>
-          </div>
-
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#8b7ac8]/15">
-              <Layers className="h-4.5 w-4.5 text-[#8b7ac8]" style={{ width: 18, height: 18 }} />
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#080b10] text-white">
+        <SiteNav />
+        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
+          <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="flex items-center gap-2 mb-6">
+              <Link href="/fund"><button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/70"><ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence</button></Link>
+              <ChevronRight className="h-3 w-3 text-white/20" />
+              <span className="text-[11px] text-white/60">Cap Table & Waterfall</span>
             </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">Cap Table & Waterfall Engine</h1>
-              <p className="text-xs text-white/40">Full dilution · waterfall distributions · round simulation</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-3 mb-6">
-            {[
-              { label: "Fully Diluted Shares", value: livefdso > 0 ? livefdso.toLocaleString() : fdso.toLocaleString(), color: "#8b7ac8" },
-              { label: "Share Classes", value: String(liveShareClassCount > 0 ? liveShareClassCount : SHARE_CLASSES.length), color: "#d4a054" },
-              { label: "Total Holders", value: String(liveHolderCount > 0 ? liveHolderCount : HOLDERS.length), color: "#4a90b8" },
-              { label: "Option Pool %", value: "14.5%", color: "#6aaa72" },
-            ].map(m => (
-              <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
-                <div className="text-xl font-semibold mb-1" style={{ color: m.color }}>{m.value}</div>
-                <div className="text-xs text-white/40">{m.label}</div>
+  
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#8b7ac8]/15">
+                <Layers className="h-4.5 w-4.5 text-[#8b7ac8]" style={{ width: 18, height: 18 }} />
               </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2 mb-5">
-            {(["captable", "waterfall", "modeling"] as const).map(t => (
-              <button key={t} onClick={() => setActiveTab(t)}
-                className={`rounded-full px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] transition-all ${activeTab === t ? "bg-[#8b7ac8] text-white" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.07]"}`}>
-                {t === "captable" ? "Cap Table" : t === "waterfall" ? "Waterfall" : "Round Modeling"}
-              </button>
-            ))}
-          </div>
-
-          {activeTab === "captable" && (
-            <div className="grid grid-cols-12 gap-5">
-              <div className="col-span-5">
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RePie>
-                      <Pie data={pieData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                        {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                      </Pie>
-                      <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
-                        formatter={(v: number) => [v.toLocaleString() + " shares", ""]} />
-                      <Legend iconType="circle" formatter={(v) => <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>{v}</span>} />
-                    </RePie>
-                  </ResponsiveContainer>
+              <div>
+                <h1 className="text-2xl font-semibold text-white">Cap Table & Waterfall Engine</h1>
+                <p className="text-xs text-white/40">Full dilution · waterfall distributions · round simulation</p>
+              </div>
+            </div>
+  
+            <div className="grid grid-cols-4 gap-3 mb-6">
+              {[
+                { label: "Fully Diluted Shares", value: livefdso > 0 ? livefdso.toLocaleString() : fdso.toLocaleString(), color: "#8b7ac8" },
+                { label: "Share Classes", value: String(liveShareClassCount > 0 ? liveShareClassCount : SHARE_CLASSES.length), color: "#d4a054" },
+                { label: "Total Holders", value: String(liveHolderCount > 0 ? liveHolderCount : HOLDERS.length), color: "#4a90b8" },
+                { label: "Option Pool %", value: "14.5%", color: "#6aaa72" },
+              ].map(m => (
+                <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
+                  <div className="text-xl font-semibold mb-1" style={{ color: m.color }}>{m.value}</div>
+                  <div className="text-xs text-white/40">{m.label}</div>
                 </div>
-              </div>
-              <div className="col-span-7 overflow-x-auto rounded-2xl border border-white/[0.06]">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                      {["Holder", "Type", "Shares", "Ownership %"].map(h => (
-                        <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {holdersWithCalc.sort((a, b) => b.pct - a.pct).map(h => (
-                      <tr key={h.id} className="border-b border-white/[0.04] hover:bg-white/[0.01]">
-                        <td className="px-4 py-2.5 text-sm text-white">{h.name}</td>
-                        <td className="px-4 py-2.5 text-xs text-white/40 capitalize">{h.type}</td>
-                        <td className="px-4 py-2.5 text-sm text-white/70">{h.total.toLocaleString()}</td>
-                        <td className="px-4 py-2.5 text-sm font-semibold text-white">{h.pct.toFixed(2)}%</td>
+              ))}
+            </div>
+  
+            <div className="flex gap-2 mb-5">
+              {(["captable", "waterfall", "modeling"] as const).map(t => (
+                <button key={t} onClick={() => setActiveTab(t)}
+                  className={`rounded-full px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] transition-all ${activeTab === t ? "bg-[#8b7ac8] text-white" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.07]"}`}>
+                  {t === "captable" ? "Cap Table" : t === "waterfall" ? "Waterfall" : "Round Modeling"}
+                </button>
+              ))}
+            </div>
+  
+            {activeTab === "captable" && (
+              <div className="grid grid-cols-12 gap-5">
+                <div className="col-span-5">
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RePie>
+                        <Pie data={pieData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                          {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
+                          formatter={(v: number) => [v.toLocaleString() + " shares", ""]} />
+                        <Legend iconType="circle" formatter={(v) => <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>{v}</span>} />
+                      </RePie>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="col-span-7 overflow-x-auto rounded-2xl border border-white/[0.06]">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                        {["Holder", "Type", "Shares", "Ownership %"].map(h => (
+                          <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "waterfall" && (
-            <div>
-              <div className="flex gap-2 mb-4 items-center">
-                <span className="text-xs text-white/40">Exit Valuation:</span>
-                {[10_000_000, 25_000_000, 50_000_000, 100_000_000, 250_000_000].map(v => (
-                  <button key={v} onClick={() => setExitVal(v)}
-                    className={`rounded-lg px-3 py-1.5 text-[10px] font-semibold transition ${exitVal === v ? "bg-[#8b7ac8] text-white" : "bg-white/[0.04] text-white/50 hover:bg-white/[0.07]"}`}>
-                    {fmt(v)}
-                  </button>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {waterfall.map((w, i) => (
-                  <div key={i} className="flex items-center gap-4 rounded-xl border border-white/[0.05] bg-white/[0.015] px-4 py-3">
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-white">{w.name}</div>
-                      <div className="text-[10px] text-white/40">{w.reason}</div>
-                    </div>
-                    <div className="text-sm font-semibold text-white">{fmt(w.proceeds)}</div>
-                    <div className="w-32">
-                      <div className="h-1.5 rounded-full bg-white/[0.06]">
-                        <div className="h-1.5 rounded-full bg-[#8b7ac8]" style={{ width: `${Math.min((w.proceeds / exitVal) * 100, 100)}%` }} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between px-4 py-3 mt-2 border-t border-white/[0.06]">
-                  <span className="text-xs font-semibold text-white/60">Total Exit Value</span>
-                  <span className="text-lg font-semibold text-[#8b7ac8]">{fmt(exitVal)}</span>
+                    </thead>
+                    <tbody>
+                      {holdersWithCalc.sort((a, b) => b.pct - a.pct).map(h => (
+                        <tr key={h.id} className="border-b border-white/[0.04] hover:bg-white/[0.01]">
+                          <td className="px-4 py-2.5 text-sm text-white">{h.name}</td>
+                          <td className="px-4 py-2.5 text-xs text-white/40 capitalize">{h.type}</td>
+                          <td className="px-4 py-2.5 text-sm text-white/70">{h.total.toLocaleString()}</td>
+                          <td className="px-4 py-2.5 text-sm font-semibold text-white">{h.pct.toFixed(2)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === "modeling" && (
-            <div className="grid grid-cols-2 gap-5">
-              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
-                <h3 className="text-sm font-semibold text-white mb-4">Pro-Forma Round Modeling</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5">Round Size ($)</label>
-                    <input type="number" value={roundSize} onChange={e => setRoundSize(Number(e.target.value))}
-                      className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#8b7ac8]/40" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5">Pre-Money Valuation ($)</label>
-                    <input type="number" value={preMoney} onChange={e => setPreMoney(Number(e.target.value))}
-                      className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#8b7ac8]/40" />
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
-                <h3 className="text-sm font-semibold text-white mb-4">Impact Summary</h3>
-                <div className="space-y-3">
-                  {[
-                    { label: "Post-Money Valuation", value: fmt(postMoney) },
-                    { label: "New Investor Ownership", value: `${newPct.toFixed(2)}%` },
-                    { label: "Existing Shareholders Retain", value: `${(100 - newPct).toFixed(2)}%` },
-                    { label: "Price per Share (est.)", value: `$${(preMoney / fdso).toFixed(2)}` },
-                  ].map(f => (
-                    <div key={f.label} className="flex items-center justify-between py-2 border-b border-white/[0.05]">
-                      <span className="text-xs text-white/50">{f.label}</span>
-                      <span className="text-sm font-semibold text-white">{f.value}</span>
-                    </div>
+            )}
+  
+            {activeTab === "waterfall" && (
+              <div>
+                <div className="flex gap-2 mb-4 items-center">
+                  <span className="text-xs text-white/40">Exit Valuation:</span>
+                  {[10_000_000, 25_000_000, 50_000_000, 100_000_000, 250_000_000].map(v => (
+                    <button key={v} onClick={() => setExitVal(v)}
+                      className={`rounded-lg px-3 py-1.5 text-[10px] font-semibold transition ${exitVal === v ? "bg-[#8b7ac8] text-white" : "bg-white/[0.04] text-white/50 hover:bg-white/[0.07]"}`}>
+                      {fmt(v)}
+                    </button>
                   ))}
                 </div>
+                <div className="space-y-2">
+                  {waterfall.map((w, i) => (
+                    <div key={i} className="flex items-center gap-4 rounded-xl border border-white/[0.05] bg-white/[0.015] px-4 py-3">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-white">{w.name}</div>
+                        <div className="text-[10px] text-white/40">{w.reason}</div>
+                      </div>
+                      <div className="text-sm font-semibold text-white">{fmt(w.proceeds)}</div>
+                      <div className="w-32">
+                        <div className="h-1.5 rounded-full bg-white/[0.06]">
+                          <div className="h-1.5 rounded-full bg-[#8b7ac8]" style={{ width: `${Math.min((w.proceeds / exitVal) * 100, 100)}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between px-4 py-3 mt-2 border-t border-white/[0.06]">
+                    <span className="text-xs font-semibold text-white/60">Total Exit Value</span>
+                    <span className="text-lg font-semibold text-[#8b7ac8]">{fmt(exitVal)}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </m.div>
-      </main>
-      <SiteFooter />
-    </div>
+            )}
+  
+            {activeTab === "modeling" && (
+              <div className="grid grid-cols-2 gap-5">
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+                  <h3 className="text-sm font-semibold text-white mb-4">Pro-Forma Round Modeling</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5">Round Size ($)</label>
+                      <input type="number" value={roundSize} onChange={e => setRoundSize(Number(e.target.value))}
+                        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#8b7ac8]/40" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5">Pre-Money Valuation ($)</label>
+                      <input type="number" value={preMoney} onChange={e => setPreMoney(Number(e.target.value))}
+                        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#8b7ac8]/40" />
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+                  <h3 className="text-sm font-semibold text-white mb-4">Impact Summary</h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: "Post-Money Valuation", value: fmt(postMoney) },
+                      { label: "New Investor Ownership", value: `${newPct.toFixed(2)}%` },
+                      { label: "Existing Shareholders Retain", value: `${(100 - newPct).toFixed(2)}%` },
+                      { label: "Price per Share (est.)", value: `$${(preMoney / fdso).toFixed(2)}` },
+                    ].map(f => (
+                      <div key={f.label} className="flex items-center justify-between py-2 border-b border-white/[0.05]">
+                        <span className="text-xs text-white/50">{f.label}</span>
+                        <span className="text-sm font-semibold text-white">{f.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </m.div>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

@@ -57,7 +57,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export default function SupportTicketDetailPage() {
-  usePageMeta({ title: "Ticket — SZL Holdings Support" });
+  const __pageMeta = usePageMeta({ title: "Ticket — SZL Holdings Support" });
 
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -107,16 +107,19 @@ export default function SupportTicketDetailPage() {
 
   if (!user) {
     return (
-      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-        <SiteNav />
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 200px)", flexDirection: "column", gap: "1rem", padding: "6rem 1.5rem 4rem", textAlign: "center" }}>
-          <AlertCircle size={32} style={{ color: "hsl(210,5%,40%)" }} />
-          <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "hsl(38,12%,88%)" }}>Sign in to view this ticket</h2>
-          <a href="/api/auth/login" style={{ display: "inline-flex", alignItems: "center", padding: "0.75rem 1.5rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none" }}>Sign in</a>
+    <>
+      {__pageMeta}
+        <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+          <SiteNav />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 200px)", flexDirection: "column", gap: "1rem", padding: "6rem 1.5rem 4rem", textAlign: "center" }}>
+            <AlertCircle size={32} style={{ color: "hsl(210,5%,40%)" }} />
+            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "hsl(38,12%,88%)" }}>Sign in to view this ticket</h2>
+            <a href="/api/auth/login" style={{ display: "inline-flex", alignItems: "center", padding: "0.75rem 1.5rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none" }}>Sign in</a>
+          </div>
+          <SiteFooter />
         </div>
-        <SiteFooter />
-      </div>
-    );
+          </>
+  );
   }
 
   const ticket = data?.ticket;

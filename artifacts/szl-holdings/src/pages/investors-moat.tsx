@@ -109,153 +109,156 @@ const moatInteractions = [
 ];
 
 export default function InvestorsMoatPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Moat & Defensibility — Investor Relations — SZL Holdings",
     description: "Eight structural moats of the SZL Holdings governed decision operating system — architectural and network properties that compound in value over time.",
     canonical: "https://szlholdings.com/investors/moat",
   });
 
   return (
-    <div className="min-h-screen bg-[#070a10] text-white">
-      <SiteNav />
-      <main>
-        {/* Hero */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
-              <Shield className="h-3.5 w-3.5" />
-              Moat & Defensibility
-            </div>
-            <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Eight structural moats. All compound with use.
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-              SZL Holdings is not defensible because of a feature advantage. It is defensible because of
-              structural properties that grow stronger with every decision made on the platform. A new
-              entrant would need to replicate all eight simultaneously — without the accumulated context
-              that makes each one valuable.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/investors/overview" className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]">
-                Back to overview
-              </Link>
-              <Link href="/demo" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90">
-                See the live product <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Moat cards */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Eight structural moats</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Each moat is grounded in a specific technical capability.</h2>
-            <div className="mt-10 space-y-6">
-              {moats.map((m) => (
-                <div key={m.number} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-black/30">
-                      <m.icon className="h-5 w-5 text-[#d4a054]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-xs font-bold tracking-[0.2em] text-white/30">{m.number}</span>
-                        <h3 className="text-lg font-semibold text-white">{m.title}</h3>
-                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium uppercase text-white/40">{m.category}</span>
-                      </div>
-                      <p className="mt-1 text-sm font-medium text-[#d4a054]/80">{m.tagline}</p>
-                      <p className="mt-3 text-sm leading-7 text-white/60">{m.body}</p>
-
-                      <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                        {m.evidence.map((e) => (
-                          <div key={e} className="flex items-start gap-2 rounded-lg border border-white/[0.05] bg-black/20 px-3 py-2">
-                            <Database className="mt-0.5 h-3 w-3 shrink-0 text-white/30" />
-                            <span className="font-mono text-[10px] leading-4 text-white/40">{e}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-4 rounded-lg border border-[#d4a054]/10 bg-[#d4a054]/[0.04] px-4 py-3">
-                        <p className="text-xs leading-5 text-white/50"><span className="font-semibold text-[#d4a054]/70">Replication cost: </span>{m.replication}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Moat interaction */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Moat interaction</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">The moats compound each other.</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
-              The eight moats operate independently and reinforce each other. A platform that compounds
-              on five dimensions simultaneously across eight structural advantages is not a feature roadmap
-              — it is an architectural position.
-            </p>
-            <div className="mt-8 space-y-3">
-              {moatInteractions.map((item) => (
-                <div key={item} className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                  <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
-                  <p className="text-sm leading-6 text-white/65">{item}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Decision Fabric extension */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">April 2026 extension</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Decision Fabric — cross-primitive query layer.</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
-              The Decision Fabric exposes every governance primitive as a unified, queryable API under a single
-              correlation ID. Workflow 360 joins signal, recommendation, policy, simulation, execution, proof,
-              and outcome. Entity Investigation shows everything that ever touched an entity across all primitives.
-              Recommendation Trace follows an AI output from generation to outcome, including prediction error.
-            </p>
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              {[
-                { title: "End-to-end traceability as API", body: "Customers who build compliance workflows on these surfaces inherit five primitives' worth of data wiring. Replicating it requires rebuilding the correlation contract from scratch." },
-                { title: "Decision memory with replay", body: "decision_records carry frozen policy_version and simulation_snapshot links. Years after a decision, an auditor can reconstruct the exact policy text and simulation parameters. No competitor freezes both at decision time." },
-                { title: "Deterministic learning loop", body: "runLearningCycle() is a pure function of the decision_records corpus. Same inputs always produce the same calibration report. Customers can audit the learning loop the same way they audit a policy — it is a contract, not a black box." },
-              ].map((item) => (
-                <div key={item.title} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-                  <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                  <p className="mt-2 text-xs leading-5 text-white/55">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Nav */}
-        <section>
-          <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                { label: "Overview", href: "/investors/overview", icon: Shield },
-                { label: "Roadmap", href: "/investors/roadmap", icon: Layers },
-                { label: "Trust Center", href: "/trust-center", icon: Lock },
-              ].map((item) => (
-                <Link key={item.label} href={item.href}>
-                  <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
-                    <item.icon className="h-4 w-4 text-[#d4a054]" />
-                    <span className="text-sm font-medium text-white/80">{item.label}</span>
-                    <ArrowRight className="ml-auto h-3.5 w-3.5 text-white/25" />
-                  </div>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#070a10] text-white">
+        <SiteNav />
+        <main>
+          {/* Hero */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
+                <Shield className="h-3.5 w-3.5" />
+                Moat & Defensibility
+              </div>
+              <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+                Eight structural moats. All compound with use.
+              </h1>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+                SZL Holdings is not defensible because of a feature advantage. It is defensible because of
+                structural properties that grow stronger with every decision made on the platform. A new
+                entrant would need to replicate all eight simultaneously — without the accumulated context
+                that makes each one valuable.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/investors/overview" className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]">
+                  Back to overview
                 </Link>
-              ))}
+                <Link href="/demo" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90">
+                  See the live product <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          {/* Moat cards */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Eight structural moats</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">Each moat is grounded in a specific technical capability.</h2>
+              <div className="mt-10 space-y-6">
+                {moats.map((m) => (
+                  <div key={m.number} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-black/30">
+                        <m.icon className="h-5 w-5 text-[#d4a054]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-xs font-bold tracking-[0.2em] text-white/30">{m.number}</span>
+                          <h3 className="text-lg font-semibold text-white">{m.title}</h3>
+                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium uppercase text-white/40">{m.category}</span>
+                        </div>
+                        <p className="mt-1 text-sm font-medium text-[#d4a054]/80">{m.tagline}</p>
+                        <p className="mt-3 text-sm leading-7 text-white/60">{m.body}</p>
+  
+                        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                          {m.evidence.map((e) => (
+                            <div key={e} className="flex items-start gap-2 rounded-lg border border-white/[0.05] bg-black/20 px-3 py-2">
+                              <Database className="mt-0.5 h-3 w-3 shrink-0 text-white/30" />
+                              <span className="font-mono text-[10px] leading-4 text-white/40">{e}</span>
+                            </div>
+                          ))}
+                        </div>
+  
+                        <div className="mt-4 rounded-lg border border-[#d4a054]/10 bg-[#d4a054]/[0.04] px-4 py-3">
+                          <p className="text-xs leading-5 text-white/50"><span className="font-semibold text-[#d4a054]/70">Replication cost: </span>{m.replication}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Moat interaction */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Moat interaction</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">The moats compound each other.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
+                The eight moats operate independently and reinforce each other. A platform that compounds
+                on five dimensions simultaneously across eight structural advantages is not a feature roadmap
+                — it is an architectural position.
+              </p>
+              <div className="mt-8 space-y-3">
+                {moatInteractions.map((item) => (
+                  <div key={item} className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                    <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
+                    <p className="text-sm leading-6 text-white/65">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Decision Fabric extension */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">April 2026 extension</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">Decision Fabric — cross-primitive query layer.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
+                The Decision Fabric exposes every governance primitive as a unified, queryable API under a single
+                correlation ID. Workflow 360 joins signal, recommendation, policy, simulation, execution, proof,
+                and outcome. Entity Investigation shows everything that ever touched an entity across all primitives.
+                Recommendation Trace follows an AI output from generation to outcome, including prediction error.
+              </p>
+              <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                {[
+                  { title: "End-to-end traceability as API", body: "Customers who build compliance workflows on these surfaces inherit five primitives' worth of data wiring. Replicating it requires rebuilding the correlation contract from scratch." },
+                  { title: "Decision memory with replay", body: "decision_records carry frozen policy_version and simulation_snapshot links. Years after a decision, an auditor can reconstruct the exact policy text and simulation parameters. No competitor freezes both at decision time." },
+                  { title: "Deterministic learning loop", body: "runLearningCycle() is a pure function of the decision_records corpus. Same inputs always produce the same calibration report. Customers can audit the learning loop the same way they audit a policy — it is a contract, not a black box." },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                    <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                    <p className="mt-2 text-xs leading-5 text-white/55">{item.body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Nav */}
+          <section>
+            <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  { label: "Overview", href: "/investors/overview", icon: Shield },
+                  { label: "Roadmap", href: "/investors/roadmap", icon: Layers },
+                  { label: "Trust Center", href: "/trust-center", icon: Lock },
+                ].map((item) => (
+                  <Link key={item.label} href={item.href}>
+                    <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
+                      <item.icon className="h-4 w-4 text-[#d4a054]" />
+                      <span className="text-sm font-medium text-white/80">{item.label}</span>
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-white/25" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

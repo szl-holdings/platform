@@ -167,7 +167,7 @@ function toDeal(s: SubmittedDeal): Deal {
 }
 
 export default function DealScoringPage() {
-  usePageMeta({ title: "AI Deal Scoring — SZL Fund Intelligence", description: "Autonomous deal screening and conviction scoring engine." });
+  const __pageMeta = usePageMeta({ title: "AI Deal Scoring — SZL Fund Intelligence", description: "Autonomous deal screening and conviction scoring engine." });
   const [filter, setFilter] = useState<string>("all");
   const [submissions, setSubmissions] = useState<SubmittedDeal[]>(() => getSubmittedDeals());
 
@@ -197,211 +197,214 @@ export default function DealScoringPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#080b10] text-white">
-      <SiteNav />
-      <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
-        <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-2 mb-6">
-            <Link href="/fund"><button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/70 transition-colors"><ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence</button></Link>
-            <ChevronRight className="h-3 w-3 text-white/20" />
-            <span className="text-[11px] text-white/60">AI Deal Scoring</span>
-          </div>
-
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d4a054]/15">
-              <Brain className="h-4.5 w-4.5 text-[#d4a054]" style={{ width: 18, height: 18 }} />
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#080b10] text-white">
+        <SiteNav />
+        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
+          <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="flex items-center gap-2 mb-6">
+              <Link href="/fund"><button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/70 transition-colors"><ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence</button></Link>
+              <ChevronRight className="h-3 w-3 text-white/20" />
+              <span className="text-[11px] text-white/60">AI Deal Scoring</span>
             </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">AI Deal Flow Scoring Engine</h1>
-              <p className="text-xs text-white/40">Autonomous screening · team evaluation · conviction memos</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-3 mt-6 mb-8">
-            {(() => {
-              const source = inboundDeals ?? allDeals;
-              const totalScored = source.length;
-              const activeCount = source.filter(d => d.status === "active").length;
-              const avg = source.length
-                ? (source.reduce((s, d) => s + (d.convictionScore ?? 0), 0) / source.length).toFixed(1)
-                : "0.0";
-              const investedCount = source.filter(d => d.status === "invested").length;
-              return [
-                { label: "Deals Scored", value: String(totalScored), icon: FileText, color: "#d4a054" },
-                { label: "Active Pipeline", value: String(activeCount), icon: Target, color: "#4a90b8" },
-                { label: "Avg Conviction", value: avg, icon: Star, color: "#6aaa72" },
-                { label: "Portfolio Cos.", value: String(investedCount), icon: CheckCircle2, color: "#8b7ac8" },
-              ];
-            })().map(m => (
-              <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <m.icon className="h-4 w-4" style={{ color: m.color }} />
-                  <span className="text-xs text-white/40">{m.label}</span>
-                </div>
-                <div className="text-2xl font-semibold text-white">{m.value}</div>
+  
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d4a054]/15">
+                <Brain className="h-4.5 w-4.5 text-[#d4a054]" style={{ width: 18, height: 18 }} />
               </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2 mb-4">
-            {["all", "screening", "active", "invested", "passed"].map(f => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] transition-all ${filter === f ? "bg-[#d4a054] text-black" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.07]"}`}>
-                {f}
-              </button>
-            ))}
-            <Link href="/fund/deal-scoring/submit">
-              <button className="ml-auto flex items-center gap-1.5 rounded-full border border-[#d4a054]/30 bg-[#d4a054]/10 px-3 py-1 text-[10px] font-semibold text-[#d4a054] hover:bg-[#d4a054]/20">
-                <Upload className="h-3 w-3" /> Inbound Submission Portal
-              </button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-12 gap-5">
-            <div className="col-span-4 space-y-2">
-              {filtered.map(d => (
-                <DealCard key={d.id} deal={d} selected={selectedId === d.id} onClick={() => setSelectedId(d.id)} />
+              <div>
+                <h1 className="text-2xl font-semibold text-white">AI Deal Flow Scoring Engine</h1>
+                <p className="text-xs text-white/40">Autonomous screening · team evaluation · conviction memos</p>
+              </div>
+            </div>
+  
+            <div className="grid grid-cols-4 gap-3 mt-6 mb-8">
+              {(() => {
+                const source = inboundDeals ?? allDeals;
+                const totalScored = source.length;
+                const activeCount = source.filter(d => d.status === "active").length;
+                const avg = source.length
+                  ? (source.reduce((s, d) => s + (d.convictionScore ?? 0), 0) / source.length).toFixed(1)
+                  : "0.0";
+                const investedCount = source.filter(d => d.status === "invested").length;
+                return [
+                  { label: "Deals Scored", value: String(totalScored), icon: FileText, color: "#d4a054" },
+                  { label: "Active Pipeline", value: String(activeCount), icon: Target, color: "#4a90b8" },
+                  { label: "Avg Conviction", value: avg, icon: Star, color: "#6aaa72" },
+                  { label: "Portfolio Cos.", value: String(investedCount), icon: CheckCircle2, color: "#8b7ac8" },
+                ];
+              })().map(m => (
+                <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <m.icon className="h-4 w-4" style={{ color: m.color }} />
+                    <span className="text-xs text-white/40">{m.label}</span>
+                  </div>
+                  <div className="text-2xl font-semibold text-white">{m.value}</div>
+                </div>
               ))}
             </div>
-
-            <AnimatePresence mode="wait">
-              <m.div key={deal.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
-                className="col-span-8 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-xl font-semibold text-white">{deal.company}</h2>
-                      <span className="rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase"
-                        style={{ color: STATUS_COLORS[deal.status], borderColor: `${STATUS_COLORS[deal.status]}30`, background: `${STATUS_COLORS[deal.status]}12` }}>
-                        {deal.status}
-                      </span>
+  
+            <div className="flex gap-2 mb-4">
+              {["all", "screening", "active", "invested", "passed"].map(f => (
+                <button key={f} onClick={() => setFilter(f)}
+                  className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] transition-all ${filter === f ? "bg-[#d4a054] text-black" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.07]"}`}>
+                  {f}
+                </button>
+              ))}
+              <Link href="/fund/deal-scoring/submit">
+                <button className="ml-auto flex items-center gap-1.5 rounded-full border border-[#d4a054]/30 bg-[#d4a054]/10 px-3 py-1 text-[10px] font-semibold text-[#d4a054] hover:bg-[#d4a054]/20">
+                  <Upload className="h-3 w-3" /> Inbound Submission Portal
+                </button>
+              </Link>
+            </div>
+  
+            <div className="grid grid-cols-12 gap-5">
+              <div className="col-span-4 space-y-2">
+                {filtered.map(d => (
+                  <DealCard key={d.id} deal={d} selected={selectedId === d.id} onClick={() => setSelectedId(d.id)} />
+                ))}
+              </div>
+  
+              <AnimatePresence mode="wait">
+                <m.div key={deal.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
+                  className="col-span-8 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
+                  <div className="flex items-start justify-between mb-5">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h2 className="text-xl font-semibold text-white">{deal.company}</h2>
+                        <span className="rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase"
+                          style={{ color: STATUS_COLORS[deal.status], borderColor: `${STATUS_COLORS[deal.status]}30`, background: `${STATUS_COLORS[deal.status]}12` }}>
+                          {deal.status}
+                        </span>
+                      </div>
+                      <div className="text-xs text-white/40">{deal.sector} · {deal.stage} · {deal.founder}</div>
+                      <div className="text-xs text-white/30 mt-0.5">Received {deal.date} · {deal.askSize} ask @ {deal.valuation}</div>
                     </div>
-                    <div className="text-xs text-white/40">{deal.sector} · {deal.stage} · {deal.founder}</div>
-                    <div className="text-xs text-white/30 mt-0.5">Received {deal.date} · {deal.askSize} ask @ {deal.valuation}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-4xl font-bold ${deal.convictionScore >= 80 ? "text-[#6aaa72]" : deal.convictionScore >= 65 ? "text-[#d4a054]" : "text-[#c45a4a]"}`}>
-                      {deal.convictionScore}
-                    </div>
-                    <div className="text-[10px] text-white/40">Conviction Score</div>
-                  </div>
-                </div>
-
-                <p className="text-sm text-white/60 mb-6 leading-relaxed border-l-2 border-[#d4a054]/30 pl-4">{deal.summary}</p>
-
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <div className="h-52">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart data={radarData}>
-                          <PolarGrid stroke="rgba(255,255,255,0.06)" />
-                          <PolarAngleAxis dataKey="subject" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} />
-                          <Radar name="Score" dataKey="score" stroke="#d4a054" fill="#d4a054" fillOpacity={0.15} strokeWidth={1.5} />
-                          <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
-                        </RadarChart>
-                      </ResponsiveContainer>
+                    <div className="text-center">
+                      <div className={`text-4xl font-bold ${deal.convictionScore >= 80 ? "text-[#6aaa72]" : deal.convictionScore >= 65 ? "text-[#d4a054]" : "text-[#c45a4a]"}`}>
+                        {deal.convictionScore}
+                      </div>
+                      <div className="text-[10px] text-white/40">Conviction Score</div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 content-start">
-                    <ScoreGauge score={deal.scores.team} label="Team" />
-                    <ScoreGauge score={deal.scores.market} label="Market" />
-                    <ScoreGauge score={deal.scores.product} label="Product" />
-                    <ScoreGauge score={deal.scores.traction} label="Traction" />
-                    <ScoreGauge score={deal.scores.competitive} label="Moat" />
-                    <ScoreGauge score={deal.scores.financials} label="Financials" />
-                  </div>
-                </div>
-
-                {(deal.attachments && deal.attachments.length > 0) || deal.deckUrl ? (
-                  <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4 mb-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Paperclip className="h-3.5 w-3.5 text-[#d4a054]" />
-                      <span className="text-xs font-semibold text-white">Founder Materials</span>
-                      <span className="text-[10px] text-white/35">
-                        {(deal.attachments?.length ?? 0)} file{(deal.attachments?.length ?? 0) === 1 ? "" : "s"}
-                        {deal.deckUrl ? " · 1 link" : ""}
-                      </span>
+  
+                  <p className="text-sm text-white/60 mb-6 leading-relaxed border-l-2 border-[#d4a054]/30 pl-4">{deal.summary}</p>
+  
+                  <div className="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <div className="h-52">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RadarChart data={radarData}>
+                            <PolarGrid stroke="rgba(255,255,255,0.06)" />
+                            <PolarAngleAxis dataKey="subject" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }} />
+                            <Radar name="Score" dataKey="score" stroke="#d4a054" fill="#d4a054" fillOpacity={0.15} strokeWidth={1.5} />
+                            <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }} />
+                          </RadarChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {deal.deckUrl ? (
-                        <a
-                          href={deal.deckUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <ExternalLink className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
-                            <span className="truncate">Founder-supplied deck link</span>
-                          </div>
-                        </a>
-                      ) : null}
-                      {(deal.attachments ?? []).map((a, i) => (
-                        <a
-                          key={`${a.downloadUrl}-${i}`}
-                          href={a.downloadUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <FileText className={`h-3 w-3 flex-shrink-0 ${a.kind === "deck" ? "text-[#d4a054]" : "text-[#4a90b8]"}`} />
-                            <span className="truncate">{a.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-[10px] text-white/35">{formatBytes(a.size)}</span>
-                            <Download className="h-3 w-3 text-white/40" />
-                          </div>
-                        </a>
+                    <div className="grid grid-cols-3 gap-2 content-start">
+                      <ScoreGauge score={deal.scores.team} label="Team" />
+                      <ScoreGauge score={deal.scores.market} label="Market" />
+                      <ScoreGauge score={deal.scores.product} label="Product" />
+                      <ScoreGauge score={deal.scores.traction} label="Traction" />
+                      <ScoreGauge score={deal.scores.competitive} label="Moat" />
+                      <ScoreGauge score={deal.scores.financials} label="Financials" />
+                    </div>
+                  </div>
+  
+                  {(deal.attachments && deal.attachments.length > 0) || deal.deckUrl ? (
+                    <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4 mb-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Paperclip className="h-3.5 w-3.5 text-[#d4a054]" />
+                        <span className="text-xs font-semibold text-white">Founder Materials</span>
+                        <span className="text-[10px] text-white/35">
+                          {(deal.attachments?.length ?? 0)} file{(deal.attachments?.length ?? 0) === 1 ? "" : "s"}
+                          {deal.deckUrl ? " · 1 link" : ""}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {deal.deckUrl ? (
+                          <a
+                            href={deal.deckUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <ExternalLink className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
+                              <span className="truncate">Founder-supplied deck link</span>
+                            </div>
+                          </a>
+                        ) : null}
+                        {(deal.attachments ?? []).map((a, i) => (
+                          <a
+                            key={`${a.downloadUrl}-${i}`}
+                            href={a.downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <FileText className={`h-3 w-3 flex-shrink-0 ${a.kind === "deck" ? "text-[#d4a054]" : "text-[#4a90b8]"}`} />
+                              <span className="truncate">{a.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="text-[10px] text-white/35">{formatBytes(a.size)}</span>
+                              <Download className="h-3 w-3 text-white/40" />
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-[#6aaa72]/20 bg-[#6aaa72]/[0.04] p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-[#6aaa72]" />
+                        <span className="text-xs font-semibold text-white">Strengths</span>
+                      </div>
+                      {deal.strengths.map((s, i) => (
+                        <div key={i} className="flex items-start gap-2 py-1 text-xs text-white/60">
+                          <div className="mt-1.5 h-1 w-1 rounded-full bg-[#6aaa72] flex-shrink-0" />
+                          {s}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="rounded-xl border border-[#c45a4a]/20 bg-[#c45a4a]/[0.04] p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle className="h-3.5 w-3.5 text-[#c45a4a]" />
+                        <span className="text-xs font-semibold text-white">Risk Factors</span>
+                      </div>
+                      {deal.risks.map((r, i) => (
+                        <div key={i} className="flex items-start gap-2 py-1 text-xs text-white/60">
+                          <div className="mt-1.5 h-1 w-1 rounded-full bg-[#c45a4a] flex-shrink-0" />
+                          {r}
+                        </div>
                       ))}
                     </div>
                   </div>
-                ) : null}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-[#6aaa72]/20 bg-[#6aaa72]/[0.04] p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-[#6aaa72]" />
-                      <span className="text-xs font-semibold text-white">Strengths</span>
-                    </div>
-                    {deal.strengths.map((s, i) => (
-                      <div key={i} className="flex items-start gap-2 py-1 text-xs text-white/60">
-                        <div className="mt-1.5 h-1 w-1 rounded-full bg-[#6aaa72] flex-shrink-0" />
-                        {s}
-                      </div>
-                    ))}
+  
+                  <div className="mt-4 flex gap-2">
+                    <button className="rounded-xl bg-[#d4a054] px-4 py-2 text-xs font-semibold text-black hover:bg-[#d4a054]/90 flex items-center gap-1.5">
+                      <Zap className="h-3 w-3" /> Generate Full Memo
+                    </button>
+                    <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
+                      Schedule Partner Call
+                    </button>
+                    <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
+                      Pass Deal
+                    </button>
                   </div>
-                  <div className="rounded-xl border border-[#c45a4a]/20 bg-[#c45a4a]/[0.04] p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertCircle className="h-3.5 w-3.5 text-[#c45a4a]" />
-                      <span className="text-xs font-semibold text-white">Risk Factors</span>
-                    </div>
-                    {deal.risks.map((r, i) => (
-                      <div key={i} className="flex items-start gap-2 py-1 text-xs text-white/60">
-                        <div className="mt-1.5 h-1 w-1 rounded-full bg-[#c45a4a] flex-shrink-0" />
-                        {r}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4 flex gap-2">
-                  <button className="rounded-xl bg-[#d4a054] px-4 py-2 text-xs font-semibold text-black hover:bg-[#d4a054]/90 flex items-center gap-1.5">
-                    <Zap className="h-3 w-3" /> Generate Full Memo
-                  </button>
-                  <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
-                    Schedule Partner Call
-                  </button>
-                  <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
-                    Pass Deal
-                  </button>
-                </div>
-              </m.div>
-            </AnimatePresence>
-          </div>
-        </m.div>
-      </main>
-      <SiteFooter />
-    </div>
+                </m.div>
+              </AnimatePresence>
+            </div>
+          </m.div>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

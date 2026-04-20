@@ -217,7 +217,7 @@ interface VentureHealthSignals {
 }
 
 export default function HealthRadarPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Portfolio Health Radar — SZL Holdings Venture Intelligence",
     description: "Real-time health scores for every SZL portfolio company across usage, revenue, CAC, burn rate, and market sentiment.",
     canonical: "https://szlholdings.com/venture-intelligence/health-radar",
@@ -261,154 +261,157 @@ export default function HealthRadarPage() {
   }));
 
   return (
-    <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-        <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
-              <ArrowLeft size={12} /> Venture Intelligence
-            </Link>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Health Radar
-              </p>
-              <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Portfolio Company Health Radar
-              </h1>
-              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
-                Composite health scores across revenue trajectory, customer acquisition efficiency, burn discipline, market position, platform adoption, and cross-portfolio synergy potential.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
-              {COMPANIES.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelected(c.id)}
-                  style={{
-                    padding: "0.4rem 0.875rem",
-                    borderRadius: "4px",
-                    border: `1px solid ${selected === c.id ? `rgba(${c.rgb},0.5)` : "hsla(0,0%,100%,0.08)"}`,
-                    background: selected === c.id ? `rgba(${c.rgb},0.1)` : "transparent",
-                    color: selected === c.id ? c.color : "hsl(210,5%,52%)",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.15s ease",
-                    fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                  }}
-                >
-                  {c.name}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", alignItems: "start" }}>
-              <m.div
-                key={company.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                style={{ border: `1px solid rgba(${company.rgb},0.16)`, background: `rgba(${company.rgb},0.03)`, borderRadius: "8px", padding: "1.75rem" }}
-              >
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
-                      <Activity size={14} style={{ color: company.color }} />
-                      <h2 style={{ fontSize: "20px", fontWeight: 700, color: "hsl(38,12%,92%)", letterSpacing: "-0.015em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.name}</h2>
-                      <TrendIcon trend={company.trend} />
-                    </div>
-                    <p style={{ fontSize: "11px", color: "hsl(210,5%,50%)" }}>{company.tagline}</p>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: "2.5rem", fontWeight: 800, color: company.color, letterSpacing: "-0.04em", lineHeight: 1, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.healthScore}</div>
-                    <div style={{ fontSize: "9px", color: "hsl(210,5%,42%)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.375rem" }}>Health Score</div>
-                    <HealthBadge score={company.healthScore} />
-                  </div>
-                </div>
-
-                <div style={{ height: "280px", marginBottom: "1.5rem" }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart data={radarData}>
-                      <PolarGrid stroke="hsla(0,0%,100%,0.06)" />
-                      <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: "hsl(210,5%,48%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }} />
-                      <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 9, fill: "hsl(210,5%,32%)" }} tickCount={4} />
-                      <Radar name="Benchmark" dataKey="Benchmark" stroke="hsla(0,0%,100%,0.12)" fill="hsla(0,0%,100%,0.03)" strokeDasharray="3 3" />
-                      <Radar name={company.name} dataKey={company.name} stroke={company.color} fill={company.color} fillOpacity={0.12} strokeWidth={2} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend wrapperStyle={{ fontSize: "10px", color: "hsl(210,5%,48%)" }} />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <p style={{ fontSize: "12px", lineHeight: 1.7, color: "hsl(210,5%,52%)", borderTop: `1px solid rgba(${company.rgb},0.1)`, paddingTop: "1rem" }}>
-                  {company.sentiment}
+    <>
+      {__pageMeta}
+      <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+          <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
+                <ArrowLeft size={12} /> Venture Intelligence
+              </Link>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Health Radar
+                </p>
+                <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Portfolio Company Health Radar
+                </h1>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
+                  Composite health scores across revenue trajectory, customer acquisition efficiency, burn discipline, market position, platform adoption, and cross-portfolio synergy potential.
                 </p>
               </m.div>
-
-              <m.div
-                key={`kpis-${company.id}`}
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-              >
-                <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
-                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Key Performance Indicators</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                    {companyKpis.map(kpi => (
-                      <div key={kpi.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 0.75rem", background: "hsla(0,0%,100%,0.02)", borderRadius: "4px" }}>
-                        <span style={{ fontSize: "12px", color: "hsl(210,5%,55%)" }}>{kpi.label}</span>
-                        <span style={{ fontSize: "13px", fontWeight: 700, color: kpi.good ? "hsl(38,12%,88%)" : "#e07070", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{kpi.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
-                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Dimension Scores</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                    {RADAR_AXES.map(axis => {
-                      const val = company.metrics[axis.key as keyof typeof company.metrics];
-                      return (
-                        <div key={axis.key}>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                            <span style={{ fontSize: "11px", color: "hsl(210,5%,52%)" }}>{axis.label}</span>
-                            <span style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,82%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{val}</span>
-                          </div>
-                          <div style={{ height: "3px", background: "hsla(0,0%,100%,0.06)", borderRadius: "2px" }}>
-                            <div style={{ height: "100%", width: `${val}%`, background: company.color, borderRadius: "2px", transition: "width 0.6s ease" }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
-                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.875rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Portfolio Rank</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                    {[...COMPANIES].sort((a, b) => b.healthScore - a.healthScore).map((c, i) => (
-                      <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.375rem 0.5rem", borderRadius: "4px", background: c.id === selected ? `rgba(${c.rgb},0.06)` : "transparent" }}>
-                        <span style={{ fontSize: "10px", color: "hsl(210,5%,40%)", width: "14px", textAlign: "right", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>#{i + 1}</span>
-                        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: c.color, flexShrink: 0 }} />
-                        <span style={{ fontSize: "12px", color: c.id === selected ? "hsl(38,12%,88%)" : "hsl(210,5%,52%)", flex: 1 }}>{c.name}</span>
-                        <span style={{ fontSize: "12px", fontWeight: 700, color: c.color, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{c.healthScore}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </m.div>
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
+                {COMPANIES.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => setSelected(c.id)}
+                    style={{
+                      padding: "0.4rem 0.875rem",
+                      borderRadius: "4px",
+                      border: `1px solid ${selected === c.id ? `rgba(${c.rgb},0.5)` : "hsla(0,0%,100%,0.08)"}`,
+                      background: selected === c.id ? `rgba(${c.rgb},0.1)` : "transparent",
+                      color: selected === c.id ? c.color : "hsl(210,5%,52%)",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+                    }}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+  
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", alignItems: "start" }}>
+                <m.div
+                  key={company.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ border: `1px solid rgba(${company.rgb},0.16)`, background: `rgba(${company.rgb},0.03)`, borderRadius: "8px", padding: "1.75rem" }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+                        <Activity size={14} style={{ color: company.color }} />
+                        <h2 style={{ fontSize: "20px", fontWeight: 700, color: "hsl(38,12%,92%)", letterSpacing: "-0.015em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.name}</h2>
+                        <TrendIcon trend={company.trend} />
+                      </div>
+                      <p style={{ fontSize: "11px", color: "hsl(210,5%,50%)" }}>{company.tagline}</p>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: "2.5rem", fontWeight: 800, color: company.color, letterSpacing: "-0.04em", lineHeight: 1, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{company.healthScore}</div>
+                      <div style={{ fontSize: "9px", color: "hsl(210,5%,42%)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.375rem" }}>Health Score</div>
+                      <HealthBadge score={company.healthScore} />
+                    </div>
+                  </div>
+  
+                  <div style={{ height: "280px", marginBottom: "1.5rem" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={radarData}>
+                        <PolarGrid stroke="hsla(0,0%,100%,0.06)" />
+                        <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: "hsl(210,5%,48%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }} />
+                        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 9, fill: "hsl(210,5%,32%)" }} tickCount={4} />
+                        <Radar name="Benchmark" dataKey="Benchmark" stroke="hsla(0,0%,100%,0.12)" fill="hsla(0,0%,100%,0.03)" strokeDasharray="3 3" />
+                        <Radar name={company.name} dataKey={company.name} stroke={company.color} fill={company.color} fillOpacity={0.12} strokeWidth={2} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend wrapperStyle={{ fontSize: "10px", color: "hsl(210,5%,48%)" }} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+  
+                  <p style={{ fontSize: "12px", lineHeight: 1.7, color: "hsl(210,5%,52%)", borderTop: `1px solid rgba(${company.rgb},0.1)`, paddingTop: "1rem" }}>
+                    {company.sentiment}
+                  </p>
+                </m.div>
+  
+                <m.div
+                  key={`kpis-${company.id}`}
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+                >
+                  <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
+                    <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Key Performance Indicators</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                      {companyKpis.map(kpi => (
+                        <div key={kpi.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 0.75rem", background: "hsla(0,0%,100%,0.02)", borderRadius: "4px" }}>
+                          <span style={{ fontSize: "12px", color: "hsl(210,5%,55%)" }}>{kpi.label}</span>
+                          <span style={{ fontSize: "13px", fontWeight: 700, color: kpi.good ? "hsl(38,12%,88%)" : "#e07070", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{kpi.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+  
+                  <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
+                    <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Dimension Scores</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                      {RADAR_AXES.map(axis => {
+                        const val = company.metrics[axis.key as keyof typeof company.metrics];
+                        return (
+                          <div key={axis.key}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                              <span style={{ fontSize: "11px", color: "hsl(210,5%,52%)" }}>{axis.label}</span>
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,82%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{val}</span>
+                            </div>
+                            <div style={{ height: "3px", background: "hsla(0,0%,100%,0.06)", borderRadius: "2px" }}>
+                              <div style={{ height: "100%", width: `${val}%`, background: company.color, borderRadius: "2px", transition: "width 0.6s ease" }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+  
+                  <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
+                    <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.875rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Portfolio Rank</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                      {[...COMPANIES].sort((a, b) => b.healthScore - a.healthScore).map((c, i) => (
+                        <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.375rem 0.5rem", borderRadius: "4px", background: c.id === selected ? `rgba(${c.rgb},0.06)` : "transparent" }}>
+                          <span style={{ fontSize: "10px", color: "hsl(210,5%,40%)", width: "14px", textAlign: "right", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>#{i + 1}</span>
+                          <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: c.color, flexShrink: 0 }} />
+                          <span style={{ fontSize: "12px", color: c.id === selected ? "hsl(38,12%,88%)" : "hsl(210,5%,52%)", flex: 1 }}>{c.name}</span>
+                          <span style={{ fontSize: "12px", fontWeight: 700, color: c.color, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{c.healthScore}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </m.div>
+              </div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

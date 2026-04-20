@@ -155,7 +155,7 @@ const EMPTY: SubmissionForm = {
 };
 
 export default function DealScoringSubmitPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Submit a Deal — SZL Fund",
     description: "Inbound founder portal: submit your pitch and receive AI-driven triage and comparable analysis.",
   });
@@ -302,201 +302,204 @@ export default function DealScoringSubmitPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080b10] text-white">
-      <SiteNav />
-      <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
-        <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-2 mb-6">
-            <Link href="/fund/deal-scoring">
-              <button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/70 transition-colors">
-                <ArrowLeft className="h-3.5 w-3.5" /> Deal Flow Pipeline
-              </button>
-            </Link>
-            <ChevronRight className="h-3 w-3 text-white/20" />
-            <span className="text-[11px] text-white/60">Submit a Deal</span>
-          </div>
-
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d4a054]/15">
-              <Send className="h-[18px] w-[18px] text-[#d4a054]" />
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#080b10] text-white">
+        <SiteNav />
+        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
+          <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="flex items-center gap-2 mb-6">
+              <Link href="/fund/deal-scoring">
+                <button className="flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/70 transition-colors">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Deal Flow Pipeline
+                </button>
+              </Link>
+              <ChevronRight className="h-3 w-3 text-white/20" />
+              <span className="text-[11px] text-white/60">Submit a Deal</span>
             </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">Inbound Deal Submission Portal</h1>
-              <p className="text-xs text-white/40">
-                Founders · operators · scouts — submit a company. AI triage and comparable analysis run in real time.
-              </p>
+  
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d4a054]/15">
+                <Send className="h-[18px] w-[18px] text-[#d4a054]" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold text-white">Inbound Deal Submission Portal</h1>
+                <p className="text-xs text-white/40">
+                  Founders · operators · scouts — submit a company. AI triage and comparable analysis run in real time.
+                </p>
+              </div>
             </div>
-          </div>
-
-          {submitted ? (
-            <SuccessPanel
-              form={form}
-              composite={compositeScore}
-              recommendation={recommendation}
-              pipelineId={pipelineId}
-              attachmentCount={(deck ? 1 : 0) + dataRoom.length}
-              onReset={() => { setForm(EMPTY); setSubmitted(false); setPipelineId(""); setSubmitError(""); setDeck(null); setDataRoom([]); setUploadError(""); }}
-            />
-          ) : (
-            <div className="grid grid-cols-12 gap-5 mt-8">
-              <form onSubmit={handleSubmit} className="col-span-7 space-y-5">
-                <Section icon={Building2} title="Company">
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Company name *" value={form.company} onChange={v => update("company", v)} placeholder="Acme AI, Inc." />
-                    <Field label="Website" value={form.website} onChange={v => update("website", v)} placeholder="acme.ai" />
-                    <SelectField label="Sector *" value={form.sector} onChange={v => update("sector", v)} options={SECTORS} />
-                    <SelectField label="Stage *" value={form.stage} onChange={v => update("stage", v)} options={STAGES} />
-                    <Field label="Round size" value={form.askSize} onChange={v => update("askSize", v)} placeholder="$5M" />
-                    <Field label="Pre-money valuation" value={form.valuation} onChange={v => update("valuation", v)} placeholder="$25M" />
-                    <Field label="Current ARR ($M)" value={form.arr} onChange={v => update("arr", v)} placeholder="1.2" />
-                    <Field label="MoM growth (%)" value={form.growth} onChange={v => update("growth", v)} placeholder="18" />
-                  </div>
-                </Section>
-
-                <Section icon={User} title="Founder">
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Lead founder name *" value={form.founderName} onChange={v => update("founderName", v)} placeholder="Jane Doe" />
-                    <Field label="Email *" value={form.founderEmail} onChange={v => update("founderEmail", v)} placeholder="jane@acme.ai" />
-                    <Field label="Education" value={form.founderEducation} onChange={v => update("founderEducation", v)} placeholder="Stanford MS CS" />
-                    <Field label="Prior exits" value={form.founderPriorExits} onChange={v => update("founderPriorExits", v)} placeholder="1" />
-                  </div>
-                  <Field
-                    label="Background (prior roles, domain expertise)"
-                    value={form.founderBackground}
-                    onChange={v => update("founderBackground", v)}
-                    placeholder="ex-Palantir Forward Deployed Eng (5y), shipped data platform used by 30+ Fortune 500..."
-                    multiline
-                  />
-                </Section>
-
-                <Section icon={Target} title="Thesis & Materials">
-                  <Field
-                    label="One-paragraph summary *"
-                    value={form.summary}
-                    onChange={v => update("summary", v)}
-                    placeholder="What you build, who you sell to, what's working, why now. Aim for 2–4 sentences."
-                    multiline
-                  />
-                  <Field label="Deck URL (optional, e.g. DocSend)" value={form.deckUrl} onChange={v => update("deckUrl", v)} placeholder="https://docsend.com/..." />
-
-                  <input
-                    ref={deckInputRef}
-                    type="file"
-                    accept={ACCEPT_ATTR}
-                    className="hidden"
-                    onChange={handleDeckPick}
-                  />
-                  <input
-                    ref={dataRoomInputRef}
-                    type="file"
-                    accept={ACCEPT_ATTR}
-                    multiple
-                    className="hidden"
-                    onChange={handleDataRoomPick}
-                  />
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/20 p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">Pitch deck (PDF)</span>
-                        <button
-                          type="button"
-                          onClick={() => deckInputRef.current?.click()}
-                          disabled={uploadingDeck}
-                          className="flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-white/70 hover:bg-white/[0.08] disabled:opacity-50"
-                        >
-                          {uploadingDeck ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                          {deck ? "Replace" : "Upload"}
-                        </button>
-                      </div>
-                      {deck ? (
-                        <div className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <FileText className="h-3 w-3 text-[#d4a054] flex-shrink-0" />
-                            <span className="truncate text-[11px] text-white/80">{deck.name}</span>
-                            <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(deck.size)}</span>
-                          </div>
-                          <button type="button" onClick={() => setDeck(null)} className="text-white/40 hover:text-[#c45a4a]">
-                            <X className="h-3 w-3" />
+  
+            {submitted ? (
+              <SuccessPanel
+                form={form}
+                composite={compositeScore}
+                recommendation={recommendation}
+                pipelineId={pipelineId}
+                attachmentCount={(deck ? 1 : 0) + dataRoom.length}
+                onReset={() => { setForm(EMPTY); setSubmitted(false); setPipelineId(""); setSubmitError(""); setDeck(null); setDataRoom([]); setUploadError(""); }}
+              />
+            ) : (
+              <div className="grid grid-cols-12 gap-5 mt-8">
+                <form onSubmit={handleSubmit} className="col-span-7 space-y-5">
+                  <Section icon={Building2} title="Company">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Company name *" value={form.company} onChange={v => update("company", v)} placeholder="Acme AI, Inc." />
+                      <Field label="Website" value={form.website} onChange={v => update("website", v)} placeholder="acme.ai" />
+                      <SelectField label="Sector *" value={form.sector} onChange={v => update("sector", v)} options={SECTORS} />
+                      <SelectField label="Stage *" value={form.stage} onChange={v => update("stage", v)} options={STAGES} />
+                      <Field label="Round size" value={form.askSize} onChange={v => update("askSize", v)} placeholder="$5M" />
+                      <Field label="Pre-money valuation" value={form.valuation} onChange={v => update("valuation", v)} placeholder="$25M" />
+                      <Field label="Current ARR ($M)" value={form.arr} onChange={v => update("arr", v)} placeholder="1.2" />
+                      <Field label="MoM growth (%)" value={form.growth} onChange={v => update("growth", v)} placeholder="18" />
+                    </div>
+                  </Section>
+  
+                  <Section icon={User} title="Founder">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Lead founder name *" value={form.founderName} onChange={v => update("founderName", v)} placeholder="Jane Doe" />
+                      <Field label="Email *" value={form.founderEmail} onChange={v => update("founderEmail", v)} placeholder="jane@acme.ai" />
+                      <Field label="Education" value={form.founderEducation} onChange={v => update("founderEducation", v)} placeholder="Stanford MS CS" />
+                      <Field label="Prior exits" value={form.founderPriorExits} onChange={v => update("founderPriorExits", v)} placeholder="1" />
+                    </div>
+                    <Field
+                      label="Background (prior roles, domain expertise)"
+                      value={form.founderBackground}
+                      onChange={v => update("founderBackground", v)}
+                      placeholder="ex-Palantir Forward Deployed Eng (5y), shipped data platform used by 30+ Fortune 500..."
+                      multiline
+                    />
+                  </Section>
+  
+                  <Section icon={Target} title="Thesis & Materials">
+                    <Field
+                      label="One-paragraph summary *"
+                      value={form.summary}
+                      onChange={v => update("summary", v)}
+                      placeholder="What you build, who you sell to, what's working, why now. Aim for 2–4 sentences."
+                      multiline
+                    />
+                    <Field label="Deck URL (optional, e.g. DocSend)" value={form.deckUrl} onChange={v => update("deckUrl", v)} placeholder="https://docsend.com/..." />
+  
+                    <input
+                      ref={deckInputRef}
+                      type="file"
+                      accept={ACCEPT_ATTR}
+                      className="hidden"
+                      onChange={handleDeckPick}
+                    />
+                    <input
+                      ref={dataRoomInputRef}
+                      type="file"
+                      accept={ACCEPT_ATTR}
+                      multiple
+                      className="hidden"
+                      onChange={handleDataRoomPick}
+                    />
+  
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/20 p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">Pitch deck (PDF)</span>
+                          <button
+                            type="button"
+                            onClick={() => deckInputRef.current?.click()}
+                            disabled={uploadingDeck}
+                            className="flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-white/70 hover:bg-white/[0.08] disabled:opacity-50"
+                          >
+                            {uploadingDeck ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                            {deck ? "Replace" : "Upload"}
                           </button>
                         </div>
-                      ) : (
-                        <p className="text-[10px] text-white/35">PDF, PPT, or Keynote export. 25 MB max.</p>
-                      )}
-                    </div>
-
-                    <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/20 p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">Data room files</span>
-                        <button
-                          type="button"
-                          onClick={() => dataRoomInputRef.current?.click()}
-                          disabled={uploadingDataRoom || dataRoom.length + (deck ? 1 : 0) >= MAX_ATTACHMENTS}
-                          className="flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-white/70 hover:bg-white/[0.08] disabled:opacity-50"
-                        >
-                          {uploadingDataRoom ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                          Add files
-                        </button>
-                      </div>
-                      {dataRoom.length === 0 ? (
-                        <p className="text-[10px] text-white/35">Financials, cap table, customer references. 25 MB / file.</p>
-                      ) : (
-                        <div className="space-y-1">
-                          {dataRoom.map((f, i) => (
-                            <div key={`${f.objectPath}-${i}`} className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <FileText className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
-                                <span className="truncate text-[11px] text-white/80">{f.name}</span>
-                                <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(f.size)}</span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setDataRoom(prev => prev.filter((_, idx) => idx !== i))}
-                                className="text-white/40 hover:text-[#c45a4a]"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
+                        {deck ? (
+                          <div className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <FileText className="h-3 w-3 text-[#d4a054] flex-shrink-0" />
+                              <span className="truncate text-[11px] text-white/80">{deck.name}</span>
+                              <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(deck.size)}</span>
                             </div>
-                          ))}
+                            <button type="button" onClick={() => setDeck(null)} className="text-white/40 hover:text-[#c45a4a]">
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-white/35">PDF, PPT, or Keynote export. 25 MB max.</p>
+                        )}
+                      </div>
+  
+                      <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/20 p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">Data room files</span>
+                          <button
+                            type="button"
+                            onClick={() => dataRoomInputRef.current?.click()}
+                            disabled={uploadingDataRoom || dataRoom.length + (deck ? 1 : 0) >= MAX_ATTACHMENTS}
+                            className="flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-white/70 hover:bg-white/[0.08] disabled:opacity-50"
+                          >
+                            {uploadingDataRoom ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                            Add files
+                          </button>
                         </div>
-                      )}
+                        {dataRoom.length === 0 ? (
+                          <p className="text-[10px] text-white/35">Financials, cap table, customer references. 25 MB / file.</p>
+                        ) : (
+                          <div className="space-y-1">
+                            {dataRoom.map((f, i) => (
+                              <div key={`${f.objectPath}-${i}`} className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <FileText className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
+                                  <span className="truncate text-[11px] text-white/80">{f.name}</span>
+                                  <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(f.size)}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setDataRoom(prev => prev.filter((_, idx) => idx !== i))}
+                                  className="text-white/40 hover:text-[#c45a4a]"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
+                    {uploadError ? (
+                      <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.08] px-3 py-1.5 text-[11px] text-[#c45a4a]">
+                        {uploadError}
+                      </div>
+                    ) : null}
+                  </Section>
+  
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={!canSubmit || submitting || uploadingDeck || uploadingDataRoom}
+                      className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-5 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Send className="h-3.5 w-3.5" /> {submitting ? "Submitting…" : "Submit to SZL Pipeline"}
+                    </button>
+                    <span className="text-[10px] text-white/35">All submissions trigger autonomous triage within 60 seconds.</span>
                   </div>
-                  {uploadError ? (
-                    <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.08] px-3 py-1.5 text-[11px] text-[#c45a4a]">
-                      {uploadError}
+                  {submitError ? (
+                    <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.08] px-4 py-2 text-[11px] text-[#c45a4a]">
+                      {submitError}
                     </div>
                   ) : null}
-                </Section>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="submit"
-                    disabled={!canSubmit || submitting || uploadingDeck || uploadingDataRoom}
-                    className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-5 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <Send className="h-3.5 w-3.5" /> {submitting ? "Submitting…" : "Submit to SZL Pipeline"}
-                  </button>
-                  <span className="text-[10px] text-white/35">All submissions trigger autonomous triage within 60 seconds.</span>
-                </div>
-                {submitError ? (
-                  <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.08] px-4 py-2 text-[11px] text-[#c45a4a]">
-                    {submitError}
-                  </div>
-                ) : null}
-              </form>
-
-              <aside className="col-span-5 space-y-4">
-                <TriagePanel triage={triage} composite={compositeScore} recommendation={recommendation} />
-                <FounderPanel founder={founder} name={form.founderName} />
-                <ComparablesPanel sector={form.sector} comps={comps} />
-              </aside>
-            </div>
-          )}
-        </m.div>
-      </main>
-      <SiteFooter />
-    </div>
+                </form>
+  
+                <aside className="col-span-5 space-y-4">
+                  <TriagePanel triage={triage} composite={compositeScore} recommendation={recommendation} />
+                  <FounderPanel founder={founder} name={form.founderName} />
+                  <ComparablesPanel sector={form.sector} comps={comps} />
+                </aside>
+              </div>
+            )}
+          </m.div>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }
 

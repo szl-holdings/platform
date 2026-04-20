@@ -555,7 +555,7 @@ function ScreenContent({ id }: { id: ScreenId }) {
 }
 
 export default function MobilePreviewPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Mobile Command — Browser Preview · SZL Holdings",
     description:
       "See the SZL Holdings Mobile Command app in your browser — no install required. Dashboard, portfolio, and operations command screens.",
@@ -564,193 +564,196 @@ export default function MobilePreviewPage() {
   const [active, setActive] = useState<ScreenId>("dashboard");
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
-      <SiteNav />
-
-      <main style={{ maxWidth: 1240, margin: "0 auto", padding: "6rem 1.5rem 4rem" }}>
-        <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-            <Smartphone size={26} style={{ color: ACCENT }} />
-            <span style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: ACCENT }}>
-              Mobile Command — Browser Preview
-            </span>
-          </div>
-          <h1
-            style={{
-              fontSize: "clamp(2rem, 4vw, 3rem)",
-              fontWeight: 700,
-              lineHeight: 1.15,
-              marginBottom: "1rem",
-              color: "hsl(38,8%,94%)",
-            }}
-          >
-            Tour the mobile app. No install.
-          </h1>
-          <p style={{ fontSize: "1.125rem", color: MUTED, maxWidth: 680, lineHeight: 1.6 }}>
-            The SZL Holdings Mobile Command app puts the entire portfolio — defense, fleet, real estate, operations,
-            advisory — in your pocket. Below is a faithful in-browser preview of the three primary screens. No Expo
-            Go, no TestFlight, no install.
-          </p>
-        </m.div>
-
-        {/* Screen selector */}
-        <section style={{ marginTop: "2.5rem" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {SCREENS.map((s) => {
-              const Icon = s.icon;
-              const isActive = s.id === active;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setActive(s.id)}
-                  style={{
-                    background: isActive ? `${ACCENT}1a` : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${isActive ? `${ACCENT}66` : BORDER}`,
-                    borderRadius: 10,
-                    padding: "10px 14px",
-                    color: isActive ? ACCENT : TEXT,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    cursor: "pointer",
-                  }}
-                >
-                  <Icon size={16} />
-                  <div style={{ textAlign: "left" }}>
-                    <div>{s.label}</div>
-                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 500, marginTop: 1 }}>{s.sublabel}</div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Phone gallery */}
-        <section style={{ marginTop: "2.5rem" }}>
-          <div
-            style={{
-              display: "flex",
-              gap: 28,
-              overflowX: "auto",
-              padding: "20px 4px 36px",
-              justifyContent: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            {SCREENS.map((s) => (
-              <div key={s.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-                <PhoneFrame active={s.id === active}>
-                  <ScreenContent id={s.id} />
-                </PhoneFrame>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 13, color: TEXT, fontWeight: 600 }}>{s.label}</div>
-                  <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{s.sublabel}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Feature highlights */}
-        <section style={{ marginTop: "2rem" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "1rem",
-            }}
-          >
-            {[
-              {
-                icon: Activity,
-                title: "Cross-domain signal feed",
-                body: "Critical events from every portfolio company surface in one ranked feed, with severity, source, and recommended action.",
-              },
-              {
-                icon: Briefcase,
-                title: "Live portfolio health",
-                body: "Real-time KPIs and ecosystem status across Aegis, Vessels, Terra, Lyte, PRISM Counsel, and Cortex.",
-              },
-              {
-                icon: Radio,
-                title: "Lyte command inbox",
-                body: "Approvals, action drafts, and decision-ready cards governed end-to-end through the Alloy execution fabric.",
-              },
-              {
-                icon: Mic,
-                title: "Voice-first command",
-                body: "Hold-to-ask voice queries route through the same governed agents available on web and desktop.",
-              },
-            ].map((f) => {
-              const Icon = f.icon;
-              return (
-                <div
-                  key={f.title}
-                  style={{
-                    background: PANEL,
-                    border: `1px solid ${BORDER}`,
-                    borderRadius: 12,
-                    padding: "1.25rem",
-                  }}
-                >
-                  <Icon size={20} color={ACCENT} />
-                  <div style={{ fontSize: 14, color: TEXT, fontWeight: 600, marginTop: 10 }}>{f.title}</div>
-                  <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.55, marginTop: 6 }}>{f.body}</div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section
-          style={{
-            marginTop: "3rem",
-            padding: "1.75rem 2rem",
-            background: "hsla(0,0%,100%,0.025)",
-            border: `1px solid ${BORDER}`,
-            borderRadius: 12,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 16,
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ maxWidth: 520 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: TEXT, marginBottom: 6 }}>Want it on a real device?</div>
-            <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, margin: 0 }}>
-              The mobile app ships through TestFlight and Google Play internal testing for design partners and LPs.
-              Browser preview gives you the full UX flow today; production builds add native push, biometrics, and
-              offline-ready proof envelopes.
-            </p>
-          </div>
-          <Link href="/contact">
-            <span
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
+        <SiteNav />
+  
+        <main style={{ maxWidth: 1240, margin: "0 auto", padding: "6rem 1.5rem 4rem" }}>
+          <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+              <Smartphone size={26} style={{ color: ACCENT }} />
+              <span style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: ACCENT }}>
+                Mobile Command — Browser Preview
+              </span>
+            </div>
+            <h1
               style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: ACCENT,
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "10px 16px",
-                background: `${ACCENT}1a`,
-                border: `1px solid ${ACCENT}55`,
-                borderRadius: 9,
+                fontSize: "clamp(2rem, 4vw, 3rem)",
+                fontWeight: 700,
+                lineHeight: 1.15,
+                marginBottom: "1rem",
+                color: "hsl(38,8%,94%)",
               }}
             >
-              Request a build <ArrowRight size={14} />
-            </span>
-          </Link>
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
+              Tour the mobile app. No install.
+            </h1>
+            <p style={{ fontSize: "1.125rem", color: MUTED, maxWidth: 680, lineHeight: 1.6 }}>
+              The SZL Holdings Mobile Command app puts the entire portfolio — defense, fleet, real estate, operations,
+              advisory — in your pocket. Below is a faithful in-browser preview of the three primary screens. No Expo
+              Go, no TestFlight, no install.
+            </p>
+          </m.div>
+  
+          {/* Screen selector */}
+          <section style={{ marginTop: "2.5rem" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {SCREENS.map((s) => {
+                const Icon = s.icon;
+                const isActive = s.id === active;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setActive(s.id)}
+                    style={{
+                      background: isActive ? `${ACCENT}1a` : "rgba(255,255,255,0.03)",
+                      border: `1px solid ${isActive ? `${ACCENT}66` : BORDER}`,
+                      borderRadius: 10,
+                      padding: "10px 14px",
+                      color: isActive ? ACCENT : TEXT,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Icon size={16} />
+                    <div style={{ textAlign: "left" }}>
+                      <div>{s.label}</div>
+                      <div style={{ fontSize: 10, color: MUTED, fontWeight: 500, marginTop: 1 }}>{s.sublabel}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+  
+          {/* Phone gallery */}
+          <section style={{ marginTop: "2.5rem" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 28,
+                overflowX: "auto",
+                padding: "20px 4px 36px",
+                justifyContent: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              {SCREENS.map((s) => (
+                <div key={s.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+                  <PhoneFrame active={s.id === active}>
+                    <ScreenContent id={s.id} />
+                  </PhoneFrame>
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 13, color: TEXT, fontWeight: 600 }}>{s.label}</div>
+                    <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{s.sublabel}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+  
+          {/* Feature highlights */}
+          <section style={{ marginTop: "2rem" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                gap: "1rem",
+              }}
+            >
+              {[
+                {
+                  icon: Activity,
+                  title: "Cross-domain signal feed",
+                  body: "Critical events from every portfolio company surface in one ranked feed, with severity, source, and recommended action.",
+                },
+                {
+                  icon: Briefcase,
+                  title: "Live portfolio health",
+                  body: "Real-time KPIs and ecosystem status across Aegis, Vessels, Terra, Lyte, PRISM Counsel, and Cortex.",
+                },
+                {
+                  icon: Radio,
+                  title: "Lyte command inbox",
+                  body: "Approvals, action drafts, and decision-ready cards governed end-to-end through the Alloy execution fabric.",
+                },
+                {
+                  icon: Mic,
+                  title: "Voice-first command",
+                  body: "Hold-to-ask voice queries route through the same governed agents available on web and desktop.",
+                },
+              ].map((f) => {
+                const Icon = f.icon;
+                return (
+                  <div
+                    key={f.title}
+                    style={{
+                      background: PANEL,
+                      border: `1px solid ${BORDER}`,
+                      borderRadius: 12,
+                      padding: "1.25rem",
+                    }}
+                  >
+                    <Icon size={20} color={ACCENT} />
+                    <div style={{ fontSize: 14, color: TEXT, fontWeight: 600, marginTop: 10 }}>{f.title}</div>
+                    <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.55, marginTop: 6 }}>{f.body}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+  
+          {/* CTA */}
+          <section
+            style={{
+              marginTop: "3rem",
+              padding: "1.75rem 2rem",
+              background: "hsla(0,0%,100%,0.025)",
+              border: `1px solid ${BORDER}`,
+              borderRadius: 12,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 16,
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ maxWidth: 520 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: TEXT, marginBottom: 6 }}>Want it on a real device?</div>
+              <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, margin: 0 }}>
+                The mobile app ships through TestFlight and Google Play internal testing for design partners and LPs.
+                Browser preview gives you the full UX flow today; production builds add native push, biometrics, and
+                offline-ready proof envelopes.
+              </p>
+            </div>
+            <Link href="/contact">
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: ACCENT,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "10px 16px",
+                  background: `${ACCENT}1a`,
+                  border: `1px solid ${ACCENT}55`,
+                  borderRadius: 9,
+                }}
+              >
+                Request a build <ArrowRight size={14} />
+              </span>
+            </Link>
+          </section>
+        </main>
+  
+        <SiteFooter />
+      </div>
+        </>
   );
 }

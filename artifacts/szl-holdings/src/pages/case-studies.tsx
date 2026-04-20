@@ -32,7 +32,7 @@ const CASE_STUDIES_LD = {
 };
 
 export default function CaseStudiesPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Case Studies — Design Partner Scenarios | SZL Holdings",
     description: "Documented design partner scenarios from Lyte, Vessels, Alloy, Terra, and Aegis — structured case studies with documented problems, constraints, systems built, and proof.",
     canonical: "https://szlholdings.com/case-studies",
@@ -52,60 +52,63 @@ export default function CaseStudiesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-
-      <main id="main-content">
-        <div className="max-w-5xl mx-auto px-6 pt-28 pb-20">
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-14"
-          >
-            <nav aria-label="Breadcrumb">
-              <div className="flex items-center gap-2 mb-4">
-                <Link href="/" className="text-xs text-white/30 hover:text-white/60 transition-colors">SZL Holdings</Link>
-                <ChevronRight className="w-3 h-3 text-white/20" aria-hidden="true" />
-                <span className="text-xs text-white/50" aria-current="page">Case Studies</span>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+  
+        <main id="main-content">
+          <div className="max-w-5xl mx-auto px-6 pt-28 pb-20">
+            <m.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-14"
+            >
+              <nav aria-label="Breadcrumb">
+                <div className="flex items-center gap-2 mb-4">
+                  <Link href="/" className="text-xs text-white/30 hover:text-white/60 transition-colors">SZL Holdings</Link>
+                  <ChevronRight className="w-3 h-3 text-white/20" aria-hidden="true" />
+                  <span className="text-xs text-white/50" aria-current="page">Case Studies</span>
+                </div>
+              </nav>
+  
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-1" style={{ background: "rgba(201,169,110,0.12)", border: "1px solid rgba(201,169,110,0.2)" }}>
+                  <BookOpen className="w-5 h-5" style={{ color: "#c9a96e" }} aria-hidden="true" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-white leading-tight">Case Studies</h1>
+                  <p className="text-base text-white/45 mt-2 max-w-2xl leading-relaxed">
+                    Documented design partner scenarios from Lyte, Vessels, Alloy, and Terra. Each case follows the same structure: problem, context, constraints, system built, how it worked, outcome, and why it matters.
+                  </p>
+                </div>
               </div>
-            </nav>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-1" style={{ background: "rgba(201,169,110,0.12)", border: "1px solid rgba(201,169,110,0.2)" }}>
-                <BookOpen className="w-5 h-5" style={{ color: "#c9a96e" }} aria-hidden="true" />
+  
+              <div className="mt-8 flex flex-wrap gap-3" role="list" aria-label="Filter by product">
+                {[
+                  { label: "All", count: caseStudies.length },
+                  ...["Lyte", "Vessels", "Alloy", "Terra", "Aegis", "Carlota Jo"].map(p => ({ label: p, count: caseStudies.filter(c => c.product === p).length })),
+                ].filter(({ count }) => count > 0).map(({ label, count }) => (
+                  <span key={label} role="listitem" className="text-xs px-3 py-1.5 rounded-full border text-white/50 border-white/10 bg-white/3">
+                    {label} <span className="text-white/25 ml-1">{count}</span>
+                  </span>
+                ))}
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white leading-tight">Case Studies</h1>
-                <p className="text-base text-white/45 mt-2 max-w-2xl leading-relaxed">
-                  Documented design partner scenarios from Lyte, Vessels, Alloy, and Terra. Each case follows the same structure: problem, context, constraints, system built, how it worked, outcome, and why it matters.
-                </p>
+            </m.div>
+  
+            <Suspense fallback={<PageLoader />}>
+              <div className="space-y-8">
+                {caseStudies.map((study, i) => (
+                  <CaseStudyCard key={study.id} study={study} index={i} />
+                ))}
               </div>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3" role="list" aria-label="Filter by product">
-              {[
-                { label: "All", count: caseStudies.length },
-                ...["Lyte", "Vessels", "Alloy", "Terra", "Aegis", "Carlota Jo"].map(p => ({ label: p, count: caseStudies.filter(c => c.product === p).length })),
-              ].filter(({ count }) => count > 0).map(({ label, count }) => (
-                <span key={label} role="listitem" className="text-xs px-3 py-1.5 rounded-full border text-white/50 border-white/10 bg-white/3">
-                  {label} <span className="text-white/25 ml-1">{count}</span>
-                </span>
-              ))}
-            </div>
-          </m.div>
-
-          <Suspense fallback={<PageLoader />}>
-            <div className="space-y-8">
-              {caseStudies.map((study, i) => (
-                <CaseStudyCard key={study.id} study={study} index={i} />
-              ))}
-            </div>
-          </Suspense>
-        </div>
-      </main>
-
-      <SiteFooter />
-    </div>
+            </Suspense>
+          </div>
+        </main>
+  
+        <SiteFooter />
+      </div>
+        </>
   );
 }

@@ -269,7 +269,7 @@ export default function DemoPage() {
 
   const pack = PACKS[selectedPack];
 
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Demo — SZL Holdings",
     description: "See how Lyte and Alloy work across every vertical pack. Choose a product, explore the flagship workflow, and request controlled access.",
     canonical: "https://szlholdings.com/demo",
@@ -338,341 +338,344 @@ export default function DemoPage() {
   const PackIcon = pack.icon;
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main className="pt-24">
-
-        {/* Hero */}
-        <section style={{ padding: "3rem 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <DemoResetToolbar />
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-              <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.875rem" }}>
-                Product Demo
-              </p>
-              <h1 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.875rem" }}>
-                Choose a product. See how it works.
-              </h1>
-              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "44rem", marginBottom: "1.5rem" }}>
-                Each SZL Holdings product has a twin at its core, a signal layer feeding it, and a governed workflow above it. Select a pack to see the flagship workflow, the data sources powering it, and the trust controls governing it.
-              </p>
-
-              {/* Data handling notice */}
-              <div style={{
-                display: "inline-flex", alignItems: "flex-start", gap: "0.625rem",
-                padding: "0.75rem 1rem",
-                borderRadius: "0.5rem",
-                background: "hsla(192,72%,48%,0.06)",
-                border: "1px solid hsla(192,72%,48%,0.18)",
-                maxWidth: "44rem",
-              }}>
-                <Info size={13} style={{ color: "hsl(192,72%,55%)", marginTop: "2px", flexShrink: 0 }} />
-                <p style={{ fontSize: "0.8125rem", lineHeight: 1.58, color: "hsl(192,72%,72%)" }}>
-                  <strong style={{ fontWeight: 600 }}>Demo data notice:</strong> All data shown in this demo is staged and synthetic — constructed to represent real workflow patterns without using any real organization data, personal information, or live signals. No production data is involved.
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main className="pt-24">
+  
+          {/* Hero */}
+          <section style={{ padding: "3rem 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <DemoResetToolbar />
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+                <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.875rem" }}>
+                  Product Demo
                 </p>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        {/* What the demo covers */}
-        <section style={{ padding: "2rem 0", borderBottom: "1px solid hsla(0,0%,100%,0.05)", background: "hsla(0,0%,100%,0.01)" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-3">
-              {[
-                { icon: Eye, label: "Live vs staged", body: "This is a staged demo environment, not a live connection to your data. Requesting controlled access starts a conversation about a tailored live session." },
-                { icon: FileText, label: "What's covered", body: "The flagship workflow, signal layer, digital twin model, governance controls, and trust architecture for the selected product." },
-                { icon: Lock, label: "Request flow", body: "Submit the access request form below to start a conversation. All requests go directly to the founder. No automated sales sequence." },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.label} style={{ padding: "1.25rem", borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                      <Icon size={13} style={{ color: "hsl(192,72%,48%)" }} />
-                      <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(38,12%,88%)" }}>{item.label}</p>
-                    </div>
-                    <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(210,5%,55%)" }}>{item.body}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Pack selector */}
-        <section style={{ padding: "2rem 0 1.5rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2rem" }}>
-              {PACKS.map((p, i) => {
-                const Icon = p.icon;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => { setSelectedPack(i); analytics.ctaClick(p.id, "demo", "pack_selector"); }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      padding: "0.5rem 1rem",
-                      borderRadius: "8px",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      background: i === selectedPack ? `rgba(${p.accentRgb}, 0.10)` : "hsla(0,0%,100%,0.03)",
-                      border: i === selectedPack ? `1px solid rgba(${p.accentRgb}, 0.35)` : "1px solid hsla(0,0%,100%,0.07)",
-                      color: i === selectedPack ? p.accentColor : "hsl(210,5%,52%)",
-                      transition: "all 0.2s",
-                    }}
-                  >
-                    <Icon size={13} />
-                    {p.name}
-                  </button>
-                );
-              })}
-            </div>
-
-            <AnimatePresence mode="wait">
-              <m.div
-                key={pack.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {/* Pack header */}
-                <div style={{ marginBottom: "1.5rem", padding: "1.5rem 2rem", borderRadius: "12px", background: `rgba(${pack.accentRgb}, 0.04)`, border: `1px solid rgba(${pack.accentRgb}, 0.14)`, position: "relative" }}>
-                  <DataStateBadge state="DEMO DATA" position="top-right" />
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <div style={{ width: "40px", height: "40px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(${pack.accentRgb}, 0.12)`, border: `1px solid rgba(${pack.accentRgb}, 0.25)`, flexShrink: 0 }}>
-                      <PackIcon size={18} style={{ color: pack.accentColor }} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.375rem" }}>
-                        <h2 style={{ fontSize: "1.25rem", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)" }}>{pack.name}</h2>
-                        <span style={{ fontSize: "11px", color: pack.accentColor, fontWeight: 600, letterSpacing: "0.05em" }}>{pack.tagline}</span>
-                      </div>
-                      <p style={{ fontSize: "14px", lineHeight: 1.65, color: "hsl(210,5%,58%)", maxWidth: "56rem" }}>{pack.description}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Main content grid */}
-                <div className="grid lg:grid-cols-2 gap-6 mb-6">
-                  {/* Left: Workflow */}
-                  <div style={{ padding: "1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
-                    <WorkflowVisualizer pack={pack} />
-                  </div>
-
-                  {/* Right: Twin + Signals + Trust */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-                    <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
-                        <Database size={12} style={{ color: pack.accentColor }} />
-                        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: pack.accentColor }}>
-                          {pack.twin}
-                        </p>
-                      </div>
-                      <p style={{ fontSize: "13px", lineHeight: 1.6, color: "hsl(210,5%,58%)" }}>{pack.twinDescription}</p>
-                    </div>
-
-                    <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
-                        <Zap size={12} style={{ color: pack.accentColor }} />
-                        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: pack.accentColor }}>Signal Sources</p>
-                      </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
-                        {pack.signals.map((s) => (
-                          <span key={s} style={{ fontSize: "11px", padding: "2px 7px", borderRadius: "4px", background: `rgba(${pack.accentRgb},0.08)`, border: `1px solid rgba(${pack.accentRgb},0.18)`, color: pack.accentColor, fontWeight: 500 }}>{s}</span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
-                        <Shield size={12} style={{ color: "hsl(145,55%,46%)" }} />
-                        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(145,55%,46%)" }}>Trust Controls</p>
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                        {pack.trust.map((t) => (
-                          <div key={t} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                            <CheckCircle size={11} style={{ color: "hsl(145,55%,46%)", flexShrink: 0, marginTop: "2px" }} />
-                            <span style={{ fontSize: "12px", lineHeight: 1.5, color: "hsl(210,5%,55%)" }}>{t}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
-                        <Clock size={12} style={{ color: pack.accentColor }} />
-                        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: pack.accentColor }}>Outputs</p>
-                      </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
-                        {pack.outputs.map((o) => (
-                          <span key={o} style={{ fontSize: "11px", padding: "2px 7px", borderRadius: "4px", background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.08)", color: "hsl(210,5%,52%)" }}>{o}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CTA strip */}
-                <div style={{ padding: "1.25rem 1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
-                  <div>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,86%)", marginBottom: "0.25rem" }}>Want a live session instead?</p>
-                    <p style={{ fontSize: "12px", color: "hsl(210,5%,50%)" }}>Request a controlled access demo — live workflow on your data, with the founder.</p>
-                  </div>
-                  <div style={{ display: "flex", gap: "0.625rem" }}>
-                    <Link
-                      href={pack.ctaHref}
-                      style={{ padding: "0.5rem 1rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, background: `rgba(${pack.accentRgb},0.10)`, border: `1px solid rgba(${pack.accentRgb},0.25)`, color: pack.accentColor, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.375rem", transition: "all 0.18s" }}
-                    >
-                      {pack.ctaLabel} <ChevronRight size={12} />
-                    </Link>
-                  </div>
+                <h1 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.875rem" }}>
+                  Choose a product. See how it works.
+                </h1>
+                <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "44rem", marginBottom: "1.5rem" }}>
+                  Each SZL Holdings product has a twin at its core, a signal layer feeding it, and a governed workflow above it. Select a pack to see the flagship workflow, the data sources powering it, and the trust controls governing it.
+                </p>
+  
+                {/* Data handling notice */}
+                <div style={{
+                  display: "inline-flex", alignItems: "flex-start", gap: "0.625rem",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  background: "hsla(192,72%,48%,0.06)",
+                  border: "1px solid hsla(192,72%,48%,0.18)",
+                  maxWidth: "44rem",
+                }}>
+                  <Info size={13} style={{ color: "hsl(192,72%,55%)", marginTop: "2px", flexShrink: 0 }} />
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.58, color: "hsl(192,72%,72%)" }}>
+                    <strong style={{ fontWeight: 600 }}>Demo data notice:</strong> All data shown in this demo is staged and synthetic — constructed to represent real workflow patterns without using any real organization data, personal information, or live signals. No production data is involved.
+                  </p>
                 </div>
               </m.div>
-            </AnimatePresence>
-          </div>
-        </section>
-
-        {/* Access request form */}
-        <section style={{ padding: "3rem 0", background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.06)" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div className="grid lg:grid-cols-2 gap-10">
-              <div>
-                <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.875rem" }}>
-                  Request controlled access
-                </p>
-                <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,94%)", lineHeight: 1.15, marginBottom: "1rem" }}>
-                  See it on your workflow. With the founder.
-                </h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(210,5%,55%)", marginBottom: "1.5rem" }}>
-                  The staged demo shows the architecture. A controlled access session instruments one of your actual workflows — with staged or anonymized data if you prefer — so you can see the real signal-to-action arc in your context.
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                  {[
-                    { icon: Eye, label: "Live or staged data — your choice", desc: "We can work with anonymized or synthetic data if preferred. You control what's instrumented." },
-                    { icon: Lock, label: "Data handling transparency", desc: "No data is retained after the demo session unless you explicitly agree to an ongoing engagement." },
-                    { icon: Clock, label: "One focused workflow", desc: "Each session covers one painful workflow, end to end, with measurable before/after." },
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.label} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.875rem", borderRadius: "0.625rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
-                        <Icon size={14} style={{ color: "hsl(192,72%,48%)", marginTop: "2px", flexShrink: 0 }} />
-                        <div>
-                          <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,12%,88%)", marginBottom: "0.25rem" }}>{item.label}</p>
-                          <p style={{ fontSize: "0.75rem", lineHeight: 1.55, color: "hsl(210,5%,52%)" }}>{item.desc}</p>
-                        </div>
+            </div>
+          </section>
+  
+          {/* What the demo covers */}
+          <section style={{ padding: "2rem 0", borderBottom: "1px solid hsla(0,0%,100%,0.05)", background: "hsla(0,0%,100%,0.01)" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-3">
+                {[
+                  { icon: Eye, label: "Live vs staged", body: "This is a staged demo environment, not a live connection to your data. Requesting controlled access starts a conversation about a tailored live session." },
+                  { icon: FileText, label: "What's covered", body: "The flagship workflow, signal layer, digital twin model, governance controls, and trust architecture for the selected product." },
+                  { icon: Lock, label: "Request flow", body: "Submit the access request form below to start a conversation. All requests go directly to the founder. No automated sales sequence." },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.label} style={{ padding: "1.25rem", borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                        <Icon size={13} style={{ color: "hsl(192,72%,48%)" }} />
+                        <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(38,12%,88%)" }}>{item.label}</p>
                       </div>
-                    );
-                  })}
-                </div>
+                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(210,5%,55%)" }}>{item.body}</p>
+                    </div>
+                  );
+                })}
               </div>
-
-              <div>
-                {accessSent ? (
-                  <div style={{ padding: "2rem", borderRadius: "12px", background: "hsla(145,62%,46%,0.06)", border: "1px solid hsla(145,62%,46%,0.18)", textAlign: "center" }}>
-                    <CheckCircle size={28} style={{ color: "hsl(145,62%,46%)", margin: "0 auto 1rem" }} />
-                    <h3 style={{ fontSize: "1.125rem", fontWeight: 600, color: "hsl(38,12%,92%)", marginBottom: "0.5rem" }}>Request received.</h3>
-                    <p style={{ fontSize: "14px", color: "hsl(210,5%,55%)", lineHeight: 1.65, marginBottom: "1.25rem" }}>
-                      We'll follow up within one business day. All sessions are run directly by the founder.
-                    </p>
-                    <div style={{ display: "flex", gap: "0.625rem", justifyContent: "center", flexWrap: "wrap" }}>
-                      <Link href="/trust" style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210,5%,55%)", textDecoration: "none" }}>
-                        View Trust Center
-                      </Link>
-                      <Link href="/contact" style={{ fontSize: "13px", fontWeight: 500, color: "hsl(192,72%,55%)", textDecoration: "none" }}>
-                        Other inquiries
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <form onSubmit={handleAccessRequest} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Full name *</label>
-                        <input type="text" required value={accessForm.name} onChange={e => setAccessForm({ ...accessForm, name: e.target.value })} placeholder="Your name" style={inputStyle(!!accessErrors.name)} />
-                        {accessErrors.name && <p style={{ fontSize: "11px", color: "hsl(0,72%,60%)", marginTop: "3px" }}>{accessErrors.name}</p>}
-                      </div>
-                      <div>
-                        <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Work email *</label>
-                        <input type="email" required value={accessForm.email} onChange={e => setAccessForm({ ...accessForm, email: e.target.value })} placeholder="you@company.com" style={inputStyle(!!accessErrors.email)} />
-                        {accessErrors.email && <p style={{ fontSize: "11px", color: "hsl(0,72%,60%)", marginTop: "3px" }}>{accessErrors.email}</p>}
-                      </div>
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Company *</label>
-                      <input type="text" required value={accessForm.company} onChange={e => setAccessForm({ ...accessForm, company: e.target.value })} placeholder="Company name" style={inputStyle(!!accessErrors.company)} />
-                      {accessErrors.company && <p style={{ fontSize: "11px", color: "hsl(0,72%,60%)", marginTop: "3px" }}>{accessErrors.company}</p>}
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Which product interests you most?</label>
-                      <select value={accessForm.pack} onChange={e => setAccessForm({ ...accessForm, pack: e.target.value })} style={{ ...inputStyle(), appearance: "none" }}>
-                        <option value="">— Select a product (optional)</option>
-                        {PACKS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                      </select>
-                    </div>
-                    {accessErrors.general && (
-                      <p style={{ fontSize: "12px", color: "hsl(0,72%,60%)", padding: "0.5rem 0.75rem", borderRadius: "6px", background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.18)" }}>
-                        {accessErrors.general}
-                      </p>
-                    )}
+            </div>
+          </section>
+  
+          {/* Pack selector */}
+          <section style={{ padding: "2rem 0 1.5rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2rem" }}>
+                {PACKS.map((p, i) => {
+                  const Icon = p.icon;
+                  return (
                     <button
-                      type="submit"
-                      disabled={accessSubmitting}
+                      key={p.id}
+                      onClick={() => { setSelectedPack(i); analytics.ctaClick(p.id, "demo", "pack_selector"); }}
                       style={{
-                        padding: "0.625rem 1.25rem",
-                        borderRadius: "6px",
-                        fontSize: "13.5px",
-                        fontWeight: 600,
-                        cursor: accessSubmitting ? "wait" : "pointer",
-                        background: "hsl(192,72%,48%)",
-                        color: "hsl(214,18%,4%)",
-                        border: "none",
                         display: "flex",
                         alignItems: "center",
                         gap: "0.5rem",
-                        opacity: accessSubmitting ? 0.7 : 1,
-                        transition: "background 0.2s ease",
+                        padding: "0.5rem 1rem",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        background: i === selectedPack ? `rgba(${p.accentRgb}, 0.10)` : "hsla(0,0%,100%,0.03)",
+                        border: i === selectedPack ? `1px solid rgba(${p.accentRgb}, 0.35)` : "1px solid hsla(0,0%,100%,0.07)",
+                        color: i === selectedPack ? p.accentColor : "hsl(210,5%,52%)",
+                        transition: "all 0.2s",
                       }}
                     >
-                      {accessSubmitting ? "Sending…" : "Request access"}
-                      {!accessSubmitting && <ArrowRight size={14} />}
+                      <Icon size={13} />
+                      {p.name}
                     </button>
-                    <p style={{ fontSize: "11px", color: "hsl(210,5%,40%)", lineHeight: 1.5 }}>
-                      All requests go directly to the founder. No automated sequences. We'll respond within one business day.
-                    </p>
-                  </form>
-                )}
+                  );
+                })}
+              </div>
+  
+              <AnimatePresence mode="wait">
+                <m.div
+                  key={pack.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {/* Pack header */}
+                  <div style={{ marginBottom: "1.5rem", padding: "1.5rem 2rem", borderRadius: "12px", background: `rgba(${pack.accentRgb}, 0.04)`, border: `1px solid rgba(${pack.accentRgb}, 0.14)`, position: "relative" }}>
+                    <DataStateBadge state="DEMO DATA" position="top-right" />
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+                      <div style={{ width: "40px", height: "40px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(${pack.accentRgb}, 0.12)`, border: `1px solid rgba(${pack.accentRgb}, 0.25)`, flexShrink: 0 }}>
+                        <PackIcon size={18} style={{ color: pack.accentColor }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.375rem" }}>
+                          <h2 style={{ fontSize: "1.25rem", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)" }}>{pack.name}</h2>
+                          <span style={{ fontSize: "11px", color: pack.accentColor, fontWeight: 600, letterSpacing: "0.05em" }}>{pack.tagline}</span>
+                        </div>
+                        <p style={{ fontSize: "14px", lineHeight: 1.65, color: "hsl(210,5%,58%)", maxWidth: "56rem" }}>{pack.description}</p>
+                      </div>
+                    </div>
+                  </div>
+  
+                  {/* Main content grid */}
+                  <div className="grid lg:grid-cols-2 gap-6 mb-6">
+                    {/* Left: Workflow */}
+                    <div style={{ padding: "1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                      <WorkflowVisualizer pack={pack} />
+                    </div>
+  
+                    {/* Right: Twin + Signals + Trust */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                      <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                          <Database size={12} style={{ color: pack.accentColor }} />
+                          <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: pack.accentColor }}>
+                            {pack.twin}
+                          </p>
+                        </div>
+                        <p style={{ fontSize: "13px", lineHeight: 1.6, color: "hsl(210,5%,58%)" }}>{pack.twinDescription}</p>
+                      </div>
+  
+                      <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                          <Zap size={12} style={{ color: pack.accentColor }} />
+                          <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: pack.accentColor }}>Signal Sources</p>
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
+                          {pack.signals.map((s) => (
+                            <span key={s} style={{ fontSize: "11px", padding: "2px 7px", borderRadius: "4px", background: `rgba(${pack.accentRgb},0.08)`, border: `1px solid rgba(${pack.accentRgb},0.18)`, color: pack.accentColor, fontWeight: 500 }}>{s}</span>
+                          ))}
+                        </div>
+                      </div>
+  
+                      <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                          <Shield size={12} style={{ color: "hsl(145,55%,46%)" }} />
+                          <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(145,55%,46%)" }}>Trust Controls</p>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                          {pack.trust.map((t) => (
+                            <div key={t} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                              <CheckCircle size={11} style={{ color: "hsl(145,55%,46%)", flexShrink: 0, marginTop: "2px" }} />
+                              <span style={{ fontSize: "12px", lineHeight: 1.5, color: "hsl(210,5%,55%)" }}>{t}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+  
+                      <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                          <Clock size={12} style={{ color: pack.accentColor }} />
+                          <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: pack.accentColor }}>Outputs</p>
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
+                          {pack.outputs.map((o) => (
+                            <span key={o} style={{ fontSize: "11px", padding: "2px 7px", borderRadius: "4px", background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.08)", color: "hsl(210,5%,52%)" }}>{o}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+  
+                  {/* CTA strip */}
+                  <div style={{ padding: "1.25rem 1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
+                    <div>
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,86%)", marginBottom: "0.25rem" }}>Want a live session instead?</p>
+                      <p style={{ fontSize: "12px", color: "hsl(210,5%,50%)" }}>Request a controlled access demo — live workflow on your data, with the founder.</p>
+                    </div>
+                    <div style={{ display: "flex", gap: "0.625rem" }}>
+                      <Link
+                        href={pack.ctaHref}
+                        style={{ padding: "0.5rem 1rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, background: `rgba(${pack.accentRgb},0.10)`, border: `1px solid rgba(${pack.accentRgb},0.25)`, color: pack.accentColor, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.375rem", transition: "all 0.18s" }}
+                      >
+                        {pack.ctaLabel} <ChevronRight size={12} />
+                      </Link>
+                    </div>
+                  </div>
+                </m.div>
+              </AnimatePresence>
+            </div>
+          </section>
+  
+          {/* Access request form */}
+          <section style={{ padding: "3rem 0", background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.06)" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div className="grid lg:grid-cols-2 gap-10">
+                <div>
+                  <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.875rem" }}>
+                    Request controlled access
+                  </p>
+                  <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,94%)", lineHeight: 1.15, marginBottom: "1rem" }}>
+                    See it on your workflow. With the founder.
+                  </h2>
+                  <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(210,5%,55%)", marginBottom: "1.5rem" }}>
+                    The staged demo shows the architecture. A controlled access session instruments one of your actual workflows — with staged or anonymized data if you prefer — so you can see the real signal-to-action arc in your context.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                    {[
+                      { icon: Eye, label: "Live or staged data — your choice", desc: "We can work with anonymized or synthetic data if preferred. You control what's instrumented." },
+                      { icon: Lock, label: "Data handling transparency", desc: "No data is retained after the demo session unless you explicitly agree to an ongoing engagement." },
+                      { icon: Clock, label: "One focused workflow", desc: "Each session covers one painful workflow, end to end, with measurable before/after." },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.label} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.875rem", borderRadius: "0.625rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+                          <Icon size={14} style={{ color: "hsl(192,72%,48%)", marginTop: "2px", flexShrink: 0 }} />
+                          <div>
+                            <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,12%,88%)", marginBottom: "0.25rem" }}>{item.label}</p>
+                            <p style={{ fontSize: "0.75rem", lineHeight: 1.55, color: "hsl(210,5%,52%)" }}>{item.desc}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+  
+                <div>
+                  {accessSent ? (
+                    <div style={{ padding: "2rem", borderRadius: "12px", background: "hsla(145,62%,46%,0.06)", border: "1px solid hsla(145,62%,46%,0.18)", textAlign: "center" }}>
+                      <CheckCircle size={28} style={{ color: "hsl(145,62%,46%)", margin: "0 auto 1rem" }} />
+                      <h3 style={{ fontSize: "1.125rem", fontWeight: 600, color: "hsl(38,12%,92%)", marginBottom: "0.5rem" }}>Request received.</h3>
+                      <p style={{ fontSize: "14px", color: "hsl(210,5%,55%)", lineHeight: 1.65, marginBottom: "1.25rem" }}>
+                        We'll follow up within one business day. All sessions are run directly by the founder.
+                      </p>
+                      <div style={{ display: "flex", gap: "0.625rem", justifyContent: "center", flexWrap: "wrap" }}>
+                        <Link href="/trust" style={{ fontSize: "13px", fontWeight: 500, color: "hsl(210,5%,55%)", textDecoration: "none" }}>
+                          View Trust Center
+                        </Link>
+                        <Link href="/contact" style={{ fontSize: "13px", fontWeight: 500, color: "hsl(192,72%,55%)", textDecoration: "none" }}>
+                          Other inquiries
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleAccessRequest} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Full name *</label>
+                          <input type="text" required value={accessForm.name} onChange={e => setAccessForm({ ...accessForm, name: e.target.value })} placeholder="Your name" style={inputStyle(!!accessErrors.name)} />
+                          {accessErrors.name && <p style={{ fontSize: "11px", color: "hsl(0,72%,60%)", marginTop: "3px" }}>{accessErrors.name}</p>}
+                        </div>
+                        <div>
+                          <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Work email *</label>
+                          <input type="email" required value={accessForm.email} onChange={e => setAccessForm({ ...accessForm, email: e.target.value })} placeholder="you@company.com" style={inputStyle(!!accessErrors.email)} />
+                          {accessErrors.email && <p style={{ fontSize: "11px", color: "hsl(0,72%,60%)", marginTop: "3px" }}>{accessErrors.email}</p>}
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Company *</label>
+                        <input type="text" required value={accessForm.company} onChange={e => setAccessForm({ ...accessForm, company: e.target.value })} placeholder="Company name" style={inputStyle(!!accessErrors.company)} />
+                        {accessErrors.company && <p style={{ fontSize: "11px", color: "hsl(0,72%,60%)", marginTop: "3px" }}>{accessErrors.company}</p>}
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,50%)", marginBottom: "0.375rem" }}>Which product interests you most?</label>
+                        <select value={accessForm.pack} onChange={e => setAccessForm({ ...accessForm, pack: e.target.value })} style={{ ...inputStyle(), appearance: "none" }}>
+                          <option value="">— Select a product (optional)</option>
+                          {PACKS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                      </div>
+                      {accessErrors.general && (
+                        <p style={{ fontSize: "12px", color: "hsl(0,72%,60%)", padding: "0.5rem 0.75rem", borderRadius: "6px", background: "hsla(0,72%,55%,0.08)", border: "1px solid hsla(0,72%,55%,0.18)" }}>
+                          {accessErrors.general}
+                        </p>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={accessSubmitting}
+                        style={{
+                          padding: "0.625rem 1.25rem",
+                          borderRadius: "6px",
+                          fontSize: "13.5px",
+                          fontWeight: 600,
+                          cursor: accessSubmitting ? "wait" : "pointer",
+                          background: "hsl(192,72%,48%)",
+                          color: "hsl(214,18%,4%)",
+                          border: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          opacity: accessSubmitting ? 0.7 : 1,
+                          transition: "background 0.2s ease",
+                        }}
+                      >
+                        {accessSubmitting ? "Sending…" : "Request access"}
+                        {!accessSubmitting && <ArrowRight size={14} />}
+                      </button>
+                      <p style={{ fontSize: "11px", color: "hsl(210,5%,40%)", lineHeight: 1.5 }}>
+                        All requests go directly to the founder. No automated sequences. We'll respond within one business day.
+                      </p>
+                    </form>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Trust references */}
-        <section style={{ padding: "2rem 0", borderTop: "1px solid hsla(0,0%,100%,0.05)" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "2rem" }}>
-              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,35%)", fontFamily: "var(--font-mono)", flexShrink: 0 }}>
-                Trust &amp; compliance
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                {["Human-in-the-loop required", "Source attribution on all AI outputs", "Proof chain audit trail", "No autonomous execution", "SOC 2 Type II (in progress)", "ISO 27001 aligned"].map((item) => (
-                  <span key={item} style={{ fontSize: "11px", padding: "3px 8px", borderRadius: "4px", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.07)", color: "hsl(210,5%,48%)" }}>
-                    {item}
-                  </span>
-                ))}
+          </section>
+  
+          {/* Trust references */}
+          <section style={{ padding: "2rem 0", borderTop: "1px solid hsla(0,0%,100%,0.05)" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "2rem" }}>
+                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,35%)", fontFamily: "var(--font-mono)", flexShrink: 0 }}>
+                  Trust &amp; compliance
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                  {["Human-in-the-loop required", "Source attribution on all AI outputs", "Proof chain audit trail", "No autonomous execution", "SOC 2 Type II (in progress)", "ISO 27001 aligned"].map((item) => (
+                    <span key={item} style={{ fontSize: "11px", padding: "3px 8px", borderRadius: "4px", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.07)", color: "hsl(210,5%,48%)" }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                <Link href="/trust" style={{ fontSize: "12px", fontWeight: 500, color: "hsl(192,72%,48%)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.25rem", marginLeft: "auto", flexShrink: 0 }}>
+                  Trust Center <ChevronRight size={11} />
+                </Link>
               </div>
-              <Link href="/trust" style={{ fontSize: "12px", fontWeight: 500, color: "hsl(192,72%,48%)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.25rem", marginLeft: "auto", flexShrink: 0 }}>
-                Trust Center <ChevronRight size={11} />
-              </Link>
             </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

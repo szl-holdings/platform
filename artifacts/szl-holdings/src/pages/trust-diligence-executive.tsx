@@ -50,7 +50,7 @@ const KEY_QUESTIONS = [
 ];
 
 export default function DiligenceExecutivePage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Executive Diligence Brief — SZL Holdings",
     description: "One-page governance, risk, and audit readiness brief for executive buyers evaluating the SZL Holdings platform.",
     canonical: "https://szlholdings.com/trust/diligence/executive",
@@ -73,111 +73,114 @@ export default function DiligenceExecutivePage() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      {/* Top bar — hidden on print */}
-      <div className="no-print" style={{ borderBottom: "1px solid hsla(214,12%,18%,0.8)", padding: "1rem var(--space-content-x, 1.5rem)", display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "1280px", margin: "0 auto" }}>
-        <Link href="/trust#evaluators" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8125rem", color: "hsl(192,72%,48%)", textDecoration: "none" }}>
-          <ArrowLeft size={13} /> Back to Trust Center
-        </Link>
-        <button
-          onClick={() => window.print()}
-          style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1rem", borderRadius: "0.5rem", background: "hsl(192,72%,48%)", color: "#fff", border: "none", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
-        >
-          <Download size={13} /> Save as PDF
-        </button>
-      </div>
-
-      <main style={{ maxWidth: "860px", margin: "0 auto", padding: "2.5rem var(--space-content-x, 1.5rem) 4rem" }}>
-
-        {/* Brief header */}
-        <div className="brief-header" style={{ borderRadius: "0.875rem", background: "hsla(192,72%,48%,0.07)", border: "1px solid hsla(192,72%,48%,0.22)", padding: "2rem 2.25rem", marginBottom: "2rem" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1.5rem", flexWrap: "wrap" }}>
-            <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.25rem 0.75rem", borderRadius: "99px", background: "hsla(192,72%,48%,0.12)", border: "1px solid hsla(192,72%,48%,0.25)", marginBottom: "1rem" }}>
-                <Briefcase size={12} color="hsl(192,72%,48%)" />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(192,72%,48%)" }}>Executive Buyer Brief</span>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+        {/* Top bar — hidden on print */}
+        <div className="no-print" style={{ borderBottom: "1px solid hsla(214,12%,18%,0.8)", padding: "1rem var(--space-content-x, 1.5rem)", display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "1280px", margin: "0 auto" }}>
+          <Link href="/trust#evaluators" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8125rem", color: "hsl(192,72%,48%)", textDecoration: "none" }}>
+            <ArrowLeft size={13} /> Back to Trust Center
+          </Link>
+          <button
+            onClick={() => window.print()}
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1rem", borderRadius: "0.5rem", background: "hsl(192,72%,48%)", color: "#fff", border: "none", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
+          >
+            <Download size={13} /> Save as PDF
+          </button>
+        </div>
+  
+        <main style={{ maxWidth: "860px", margin: "0 auto", padding: "2.5rem var(--space-content-x, 1.5rem) 4rem" }}>
+  
+          {/* Brief header */}
+          <div className="brief-header" style={{ borderRadius: "0.875rem", background: "hsla(192,72%,48%,0.07)", border: "1px solid hsla(192,72%,48%,0.22)", padding: "2rem 2.25rem", marginBottom: "2rem" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1.5rem", flexWrap: "wrap" }}>
+              <div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.25rem 0.75rem", borderRadius: "99px", background: "hsla(192,72%,48%,0.12)", border: "1px solid hsla(192,72%,48%,0.25)", marginBottom: "1rem" }}>
+                  <Briefcase size={12} color="hsl(192,72%,48%)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(192,72%,48%)" }}>Executive Buyer Brief</span>
+                </div>
+                <h1 style={{ fontSize: "clamp(1.5rem,4vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1.1, marginBottom: "0.625rem" }}>
+                  Is this safe to operate at scale?
+                </h1>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsl(214,7%,62%)", maxWidth: "52ch" }}>
+                  Governance model, risk surface, audit readiness, and operational accountability — the four things an executive buyer needs to evaluate before committing to a pilot.
+                </p>
               </div>
-              <h1 style={{ fontSize: "clamp(1.5rem,4vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1.1, marginBottom: "0.625rem" }}>
-                Is this safe to operate at scale?
-              </h1>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsl(214,7%,62%)", maxWidth: "52ch" }}>
-                Governance model, risk surface, audit readiness, and operational accountability — the four things an executive buyer needs to evaluate before committing to a pilot.
-              </p>
-            </div>
-            <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", color: "hsl(214,7%,50%)", marginBottom: "0.25rem" }}>SZL Holdings</p>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", color: "hsl(214,7%,50%)" }}>szlholdings.com/trust</p>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", color: "hsl(214,7%,50%)", marginBottom: "0.25rem" }}>SZL Holdings</p>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", color: "hsl(214,7%,50%)" }}>szlholdings.com/trust</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Key Q&A */}
-        <div style={{ marginBottom: "2rem" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", marginBottom: "1rem" }}>Key Questions Answered</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "0.75rem" }}>
-            {KEY_QUESTIONS.map((kq, i) => (
-              <div key={i} className="brief-card" style={{ borderRadius: "0.625rem", padding: "1rem 1.25rem", background: "hsla(214,12%,8%,0.7)", border: "1px solid hsla(214,12%,18%,0.7)" }}>
-                <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,88%)", marginBottom: "0.375rem" }}>{kq.q}</p>
-                <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,56%)" }}>{kq.a}</p>
+  
+          {/* Key Q&A */}
+          <div style={{ marginBottom: "2rem" }}>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", marginBottom: "1rem" }}>Key Questions Answered</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "0.75rem" }}>
+              {KEY_QUESTIONS.map((kq, i) => (
+                <div key={i} className="brief-card" style={{ borderRadius: "0.625rem", padding: "1rem 1.25rem", background: "hsla(214,12%,8%,0.7)", border: "1px solid hsla(214,12%,18%,0.7)" }}>
+                  <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,88%)", marginBottom: "0.375rem" }}>{kq.q}</p>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,56%)" }}>{kq.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+  
+          {/* Main sections */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
+            {SECTIONS.map((section, i) => (
+              <div key={i} className="brief-card" style={{ borderRadius: "0.75rem", padding: "1.375rem 1.5rem", background: "hsla(214,12%,6%,0.6)", border: "1px solid hsla(214,12%,18%,0.6)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                  <ShieldCheck size={14} color="hsl(192,72%,48%)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(192,72%,48%)" }}>{section.title}</span>
+                </div>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  {section.items.map((item, j) => (
+                    <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                      <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "hsl(192,72%,48%)", flexShrink: 0, marginTop: "7px", opacity: 0.7 }} />
+                      <span style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)" }}>{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Main sections */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
-          {SECTIONS.map((section, i) => (
-            <div key={i} className="brief-card" style={{ borderRadius: "0.75rem", padding: "1.375rem 1.5rem", background: "hsla(214,12%,6%,0.6)", border: "1px solid hsla(214,12%,18%,0.6)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                <ShieldCheck size={14} color="hsl(192,72%,48%)" />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(192,72%,48%)" }}>{section.title}</span>
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {section.items.map((item, j) => (
-                  <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                    <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "hsl(192,72%,48%)", flexShrink: 0, marginTop: "7px", opacity: 0.7 }} />
-                    <span style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)" }}>{item}</span>
-                  </li>
+  
+          {/* Footer links */}
+          <div style={{ borderTop: "1px solid hsla(214,12%,18%,0.6)", paddingTop: "1.5rem", display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <p style={{ fontSize: "0.8125rem", color: "hsl(214,7%,48%)", marginBottom: "0.5rem" }}>Explore the full documentation:</p>
+              <div className="no-print" style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {[
+                  { label: "AI Governance", href: "/trust/governance" },
+                  { label: "Approval & HITL Gates", href: "/trust/approvals" },
+                  { label: "System Architecture", href: "/architecture" },
+                  { label: "Operating Doctrine", href: "/operating-doctrine" },
+                  { label: "Security Controls", href: "/trust/security" },
+                ].map((l) => (
+                  <Link key={l.href} href={l.href} style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", fontSize: "0.75rem", color: "hsl(192,72%,48%)", textDecoration: "none", padding: "0.25rem 0.625rem", borderRadius: "0.375rem", border: "1px solid hsla(192,72%,48%,0.2)", background: "hsla(192,72%,48%,0.05)" }}>
+                    <ArrowRight size={10} />{l.label}
+                  </Link>
                 ))}
-              </ul>
+              </div>
+              <p className="no-print" style={{ display: "none" }}>szlholdings.com/trust/governance · /trust/approvals · /architecture · /operating-doctrine · /trust/security</p>
             </div>
-          ))}
-        </div>
-
-        {/* Footer links */}
-        <div style={{ borderTop: "1px solid hsla(214,12%,18%,0.6)", paddingTop: "1.5rem", display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <p style={{ fontSize: "0.8125rem", color: "hsl(214,7%,48%)", marginBottom: "0.5rem" }}>Explore the full documentation:</p>
-            <div className="no-print" style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              {[
-                { label: "AI Governance", href: "/trust/governance" },
-                { label: "Approval & HITL Gates", href: "/trust/approvals" },
-                { label: "System Architecture", href: "/architecture" },
-                { label: "Operating Doctrine", href: "/operating-doctrine" },
-                { label: "Security Controls", href: "/trust/security" },
-              ].map((l) => (
-                <Link key={l.href} href={l.href} style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", fontSize: "0.75rem", color: "hsl(192,72%,48%)", textDecoration: "none", padding: "0.25rem 0.625rem", borderRadius: "0.375rem", border: "1px solid hsla(192,72%,48%,0.2)", background: "hsla(192,72%,48%,0.05)" }}>
-                  <ArrowRight size={10} />{l.label}
-                </Link>
-              ))}
+            <div className="no-print" style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 1rem", borderRadius: "0.5rem", background: "hsl(192,72%,48%)", color: "#fff", textDecoration: "none", fontSize: "0.8125rem", fontWeight: 600 }}>
+                Start a diligence conversation <ArrowRight size={12} />
+              </Link>
             </div>
-            <p className="no-print" style={{ display: "none" }}>szlholdings.com/trust/governance · /trust/approvals · /architecture · /operating-doctrine · /trust/security</p>
           </div>
-          <div className="no-print" style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 1rem", borderRadius: "0.5rem", background: "hsl(192,72%,48%)", color: "#fff", textDecoration: "none", fontSize: "0.8125rem", fontWeight: 600 }}>
-              Start a diligence conversation <ArrowRight size={12} />
-            </Link>
+  
+          {/* Print footer */}
+          <div style={{ marginTop: "1.5rem", display: "none" }} className="print-only">
+            <p style={{ fontSize: "0.75rem", color: "#64748b" }}>SZL Holdings — szlholdings.com/trust — Contact: inquiries@szlholdings.com</p>
           </div>
-        </div>
-
-        {/* Print footer */}
-        <div style={{ marginTop: "1.5rem", display: "none" }} className="print-only">
-          <p style={{ fontSize: "0.75rem", color: "#64748b" }}>SZL Holdings — szlholdings.com/trust — Contact: inquiries@szlholdings.com</p>
-        </div>
-      </main>
-
-      {/* Print show/hide utility */}
-      <style>{`.print-only { display: none; } @media print { .print-only { display: block !important; } }`}</style>
-    </div>
+        </main>
+  
+        {/* Print show/hide utility */}
+        <style>{`.print-only { display: none; } @media print { .print-only { display: block !important; } }`}</style>
+      </div>
+        </>
   );
 }

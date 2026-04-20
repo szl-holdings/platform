@@ -72,78 +72,81 @@ const quarterBadge = {
 };
 
 export default function Roadmap() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Roadmap | SZL Holdings – Platform Development Roadmap",
     description: "The SZL Holdings platform roadmap: upcoming features, quarterly milestones, and product priorities across Alloy, Lyte, Vessels, Aegis, Terra, SZL Cortex, and Carlota Jo.",
     canonical: "https://szlholdings.com/roadmap",
   });
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
-        <div>
-          <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-            <Map className="w-5 h-5 text-primary" />
-            Platform Roadmap
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">Feature roadmap for 2026 across the SZL ecosystem. Updated weekly.</p>
-        </div>
-
-        <div className="space-y-10">
-          {quarters.map(q => (
-            <div key={q.quarter}>
-              <div className="flex items-center gap-3 mb-4">
-                <h2 className="text-base font-bold text-foreground">{q.quarter}</h2>
-                <Badge variant="outline" className={`text-[10px] ${quarterBadge[q.status as keyof typeof quarterBadge]}`}>
-                  {q.status === "completed" ? "Completed" : q.status === "in_progress" ? "In Progress" : "Planned"}
-                </Badge>
-                <span className="text-xs text-muted-foreground">·</span>
-                <span className="text-xs text-muted-foreground">{q.theme}</span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                {q.items.map(item => {
-                  const AppIcon = item.icon;
-                  const sts = statusConfig[item.status as keyof typeof statusConfig];
-                  const StIcon = sts.icon;
-                  return (
-                    <div
-                      key={item.title}
-                      className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
-                        item.status === "done" ? "bg-emerald-500/5 border-emerald-500/15" :
-                        item.status === "in_progress" ? "bg-amber-500/5 border-amber-500/15" :
-                        "bg-card border-border"
-                      }`}
-                    >
-                      <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: `${item.color}20` }}>
-                        <AppIcon className="w-3.5 h-3.5" style={{ color: item.color }} />
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-background">
+        <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+          <div>
+            <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+              <Map className="w-5 h-5 text-primary" />
+              Platform Roadmap
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Feature roadmap for 2026 across the SZL ecosystem. Updated weekly.</p>
+          </div>
+  
+          <div className="space-y-10">
+            {quarters.map(q => (
+              <div key={q.quarter}>
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="text-base font-bold text-foreground">{q.quarter}</h2>
+                  <Badge variant="outline" className={`text-[10px] ${quarterBadge[q.status as keyof typeof quarterBadge]}`}>
+                    {q.status === "completed" ? "Completed" : q.status === "in_progress" ? "In Progress" : "Planned"}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">·</span>
+                  <span className="text-xs text-muted-foreground">{q.theme}</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+  
+                <div className="grid grid-cols-2 gap-2">
+                  {q.items.map(item => {
+                    const AppIcon = item.icon;
+                    const sts = statusConfig[item.status as keyof typeof statusConfig];
+                    const StIcon = sts.icon;
+                    return (
+                      <div
+                        key={item.title}
+                        className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
+                          item.status === "done" ? "bg-emerald-500/5 border-emerald-500/15" :
+                          item.status === "in_progress" ? "bg-amber-500/5 border-amber-500/15" :
+                          "bg-card border-border"
+                        }`}
+                      >
+                        <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: `${item.color}20` }}>
+                          <AppIcon className="w-3.5 h-3.5" style={{ color: item.color }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{item.app}</p>
+                          <p className="text-xs text-foreground leading-snug mt-0.5">{item.title}</p>
+                        </div>
+                        <StIcon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${sts.color}`} />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{item.app}</p>
-                        <p className="text-xs text-foreground leading-snug mt-0.5">{item.title}</p>
-                      </div>
-                      <StIcon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${sts.color}`} />
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="pt-4 border-t border-border flex items-center gap-6">
-          {Object.entries(statusConfig).map(([key, cfg]) => {
-            const Icon = cfg.icon;
-            return (
-              <div key={key} className="flex items-center gap-1.5">
-                <Icon className={`w-3.5 h-3.5 ${cfg.color}`} />
-                <span className="text-xs text-muted-foreground">{cfg.label}</span>
-              </div>
-            );
-          })}
-          <p className="text-[11px] text-muted-foreground ml-auto">Roadmap is subject to change based on user feedback and technical priorities.</p>
+            ))}
+          </div>
+  
+          <div className="pt-4 border-t border-border flex items-center gap-6">
+            {Object.entries(statusConfig).map(([key, cfg]) => {
+              const Icon = cfg.icon;
+              return (
+                <div key={key} className="flex items-center gap-1.5">
+                  <Icon className={`w-3.5 h-3.5 ${cfg.color}`} />
+                  <span className="text-xs text-muted-foreground">{cfg.label}</span>
+                </div>
+              );
+            })}
+            <p className="text-[11px] text-muted-foreground ml-auto">Roadmap is subject to change based on user feedback and technical priorities.</p>
+          </div>
         </div>
       </div>
-    </div>
+        </>
   );
 }

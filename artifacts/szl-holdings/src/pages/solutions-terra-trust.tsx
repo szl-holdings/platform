@@ -37,93 +37,96 @@ const DATA_SOURCES = [
 ];
 
 export default function SolutionsTerraTrustPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Terra Trust & Data Governance · SZL Holdings",
     description: "How Terra sources, processes, and governs real estate intelligence data with full provenance, public-data-only sourcing, and audit-ready pipelines.",
     canonical: "https://szlholdings.com/solutions/terra/trust",
   });
 
   return (
-    <div className="min-h-screen" style={{ background: "#080c14" }}>
-      <SiteNav />
-
-      <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">
-        <div className="flex items-center gap-2 mb-4">
-          <Building2 className="w-5 h-5" style={{ color: "hsl(140,50%,38%)" }} />
-          <span className="text-[11px] font-medium uppercase tracking-widest" style={{ color: "hsl(140,50%,38%)" }}>Terra · Trust</span>
-        </div>
-        <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
-          Transparent data. Traceable intelligence.
-        </h1>
-        <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-8">
-          Terra provides real estate intelligence built entirely on public government data sources with full provenance tracking. Every signal, score, and recommendation traces back to its source — no proprietary black boxes.
-        </p>
-        <div className="flex items-center gap-3">
-          <Link href="/solutions/terra">
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-white/[0.04] text-slate-300 border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer" style={{ borderColor: "hsla(140,50%,38%,0.2)", color: "hsl(140,50%,38%)", background: "hsla(140,50%,38%,0.08)" }}>
-              Product Overview <ArrowRight className="w-4 h-4" />
-            </span>
-          </Link>
-          <Link href="/trust">
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-white/[0.04] text-slate-300 border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer">
-              Platform Trust Center
-            </span>
-          </Link>
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
-        <h2 className="text-xl font-semibold text-slate-100 mb-2">Governance Controls</h2>
-        <p className="text-sm text-slate-400 max-w-2xl mb-8">
-          How Terra ensures data integrity, access isolation, and auditability across the real estate intelligence pipeline.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {GOVERNANCE_CONTROLS.map((c) => (
-            <div key={c.title} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <c.icon className="w-5 h-5" style={{ color: "hsla(140,50%,38%,0.7)" }} />
-                <h3 className="text-sm font-semibold text-slate-200">{c.title}</h3>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed">{c.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
-        <h2 className="text-xl font-semibold text-slate-100 mb-2">Verified Data Sources</h2>
-        <p className="text-sm text-slate-400 max-w-2xl mb-8">
-          Terra ingests exclusively from authoritative public data sources. Every record includes source attribution and retrieval metadata.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {DATA_SOURCES.map((s) => (
-            <div key={s.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-4 h-4" style={{ color: "hsla(140,50%,38%,0.6)" }} />
-                <span className="text-sm font-semibold text-slate-200">{s.name}</span>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 text-center">
-          <Shield className="w-8 h-8 mx-auto mb-4" style={{ color: "hsl(140,50%,38%)" }} />
-          <h2 className="text-lg font-semibold text-slate-100 mb-2">LP-ready audit trails</h2>
-          <p className="text-sm text-slate-400 max-w-xl mx-auto mb-6">
-            Every acquisition decision, market signal, and diligence checkpoint is logged with full attribution. Generate compliance-ready reports for LP review at any time.
+    <>
+      {__pageMeta}
+      <div className="min-h-screen" style={{ background: "#080c14" }}>
+        <SiteNav />
+  
+        <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">
+          <div className="flex items-center gap-2 mb-4">
+            <Building2 className="w-5 h-5" style={{ color: "hsl(140,50%,38%)" }} />
+            <span className="text-[11px] font-medium uppercase tracking-widest" style={{ color: "hsl(140,50%,38%)" }}>Terra · Trust</span>
+          </div>
+          <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
+            Transparent data. Traceable intelligence.
+          </h1>
+          <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-8">
+            Terra provides real estate intelligence built entirely on public government data sources with full provenance tracking. Every signal, score, and recommendation traces back to its source — no proprietary black boxes.
           </p>
-          <Link href="/solutions/terra">
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer" style={{ borderColor: "hsla(140,50%,38%,0.2)", color: "hsl(140,50%,38%)", background: "hsla(140,50%,38%,0.08)", border: "1px solid hsla(140,50%,38%,0.2)" }}>
-              Explore Terra <ArrowRight className="w-4 h-4" />
-            </span>
-          </Link>
-        </div>
-      </section>
-
-      <SiteFooter />
-    </div>
+          <div className="flex items-center gap-3">
+            <Link href="/solutions/terra">
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-white/[0.04] text-slate-300 border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer" style={{ borderColor: "hsla(140,50%,38%,0.2)", color: "hsl(140,50%,38%)", background: "hsla(140,50%,38%,0.08)" }}>
+                Product Overview <ArrowRight className="w-4 h-4" />
+              </span>
+            </Link>
+            <Link href="/trust">
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-white/[0.04] text-slate-300 border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer">
+                Platform Trust Center
+              </span>
+            </Link>
+          </div>
+        </section>
+  
+        <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
+          <h2 className="text-xl font-semibold text-slate-100 mb-2">Governance Controls</h2>
+          <p className="text-sm text-slate-400 max-w-2xl mb-8">
+            How Terra ensures data integrity, access isolation, and auditability across the real estate intelligence pipeline.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {GOVERNANCE_CONTROLS.map((c) => (
+              <div key={c.title} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <c.icon className="w-5 h-5" style={{ color: "hsla(140,50%,38%,0.7)" }} />
+                  <h3 className="text-sm font-semibold text-slate-200">{c.title}</h3>
+                </div>
+                <p className="text-sm text-slate-400 leading-relaxed">{c.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+  
+        <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
+          <h2 className="text-xl font-semibold text-slate-100 mb-2">Verified Data Sources</h2>
+          <p className="text-sm text-slate-400 max-w-2xl mb-8">
+            Terra ingests exclusively from authoritative public data sources. Every record includes source attribution and retrieval metadata.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {DATA_SOURCES.map((s) => (
+              <div key={s.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-4 h-4" style={{ color: "hsla(140,50%,38%,0.6)" }} />
+                  <span className="text-sm font-semibold text-slate-200">{s.name}</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+  
+        <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 text-center">
+            <Shield className="w-8 h-8 mx-auto mb-4" style={{ color: "hsl(140,50%,38%)" }} />
+            <h2 className="text-lg font-semibold text-slate-100 mb-2">LP-ready audit trails</h2>
+            <p className="text-sm text-slate-400 max-w-xl mx-auto mb-6">
+              Every acquisition decision, market signal, and diligence checkpoint is logged with full attribution. Generate compliance-ready reports for LP review at any time.
+            </p>
+            <Link href="/solutions/terra">
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer" style={{ borderColor: "hsla(140,50%,38%,0.2)", color: "hsl(140,50%,38%)", background: "hsla(140,50%,38%,0.08)", border: "1px solid hsla(140,50%,38%,0.2)" }}>
+                Explore Terra <ArrowRight className="w-4 h-4" />
+              </span>
+            </Link>
+          </div>
+        </section>
+  
+        <SiteFooter />
+      </div>
+        </>
   );
 }

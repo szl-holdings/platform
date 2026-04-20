@@ -54,96 +54,99 @@ const stages = [
 ];
 
 export default function VenturesThesis() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Investment Thesis | SZL Holdings – Ventures & Capital Strategy",
     description: "SZL Holdings investment thesis: six frontier technology pillars, capital deployment strategy, and the frameworks guiding our portfolio construction.",
     canonical: "https://szlholdings.com/thesis",
   });
   return (
-    <div className="min-h-screen bg-szl-bg text-szl-text p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-szl-text flex items-center gap-3">
-            <Lightbulb className="w-7 h-7 text-szl-accent" />
-            Investment Thesis
-          </h1>
-          <p className="text-szl-text-secondary mt-2">SZL Holdings invests in vertical AI, intelligence infrastructure, and security platforms that become critical operating systems for their industries.</p>
-        </div>
-
-        <Card className="bg-szl-surface border-szl-accent/30">
-          <CardContent className="p-6">
-            <p className="text-lg font-medium text-szl-text leading-relaxed">
-              "We back founders building the <span className="text-szl-accent">intelligence layer</span> of enterprise operations — AI-native platforms that make complex industries faster, safer, and more competitive. Our portfolio companies don't improve workflows. They replace them."
-            </p>
-            <p className="text-xs text-szl-text-secondary mt-3">— SZL Holdings Investment Committee</p>
-          </CardContent>
-        </Card>
-
-        <div>
-          <p className="text-xs font-medium text-szl-text-secondary uppercase tracking-wider mb-4">Investment Pillars</p>
-          <div className="grid grid-cols-2 gap-4">
-            {thesis.map(t => (
-              <Card key={t.pillar} className="bg-szl-surface border-szl-border">
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-base font-bold text-szl-text">{t.pillar}</h3>
-                    <Badge variant="outline" className="text-[10px] text-szl-text-secondary">{t.stage}</Badge>
-                  </div>
-                  <p className="text-sm text-szl-text-secondary mb-3">{t.description}</p>
-                  <div className="space-y-1 mb-3">
-                    {t.examples.map(e => (
-                      <div key={e} className="flex items-center gap-2 text-xs">
-                        <ArrowRight className="w-3 h-3 shrink-0" style={{ color: t.color }} />
-                        <span className="text-szl-text-secondary">{e}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="border-t border-szl-border pt-3">
-                    <p className="text-xs text-szl-text-secondary italic">{t.rationale}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-szl-bg text-szl-text p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
           <div>
-            <p className="text-xs font-medium text-szl-text-secondary uppercase tracking-wider mb-3">Investment Criteria</p>
-            <Card className="bg-szl-surface border-szl-border">
-              <CardContent className="p-4 space-y-3">
-                {investmentCriteria.map(ic => (
-                  <div key={ic.criterion} className="flex items-start gap-3">
-                    <CheckCircle className="w-4 h-4 text-szl-accent shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-szl-text">{ic.criterion}</p>
-                      <p className="text-xs text-szl-text-secondary">{ic.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <h1 className="text-3xl font-bold text-szl-text flex items-center gap-3">
+              <Lightbulb className="w-7 h-7 text-szl-accent" />
+              Investment Thesis
+            </h1>
+            <p className="text-szl-text-secondary mt-2">SZL Holdings invests in vertical AI, intelligence infrastructure, and security platforms that become critical operating systems for their industries.</p>
           </div>
-
+  
+          <Card className="bg-szl-surface border-szl-accent/30">
+            <CardContent className="p-6">
+              <p className="text-lg font-medium text-szl-text leading-relaxed">
+                "We back founders building the <span className="text-szl-accent">intelligence layer</span> of enterprise operations — AI-native platforms that make complex industries faster, safer, and more competitive. Our portfolio companies don't improve workflows. They replace them."
+              </p>
+              <p className="text-xs text-szl-text-secondary mt-3">— SZL Holdings Investment Committee</p>
+            </CardContent>
+          </Card>
+  
           <div>
-            <p className="text-xs font-medium text-szl-text-secondary uppercase tracking-wider mb-3">Check Sizes by Stage</p>
-            <div className="space-y-3">
-              {stages.map(s => (
-                <Card key={s.stage} className="bg-szl-surface border-szl-border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-bold text-szl-text">{s.stage}</p>
-                      <p className="text-sm font-bold text-szl-accent">{s.ticket}</p>
+            <p className="text-xs font-medium text-szl-text-secondary uppercase tracking-wider mb-4">Investment Pillars</p>
+            <div className="grid grid-cols-2 gap-4">
+              {thesis.map(t => (
+                <Card key={t.pillar} className="bg-szl-surface border-szl-border">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-base font-bold text-szl-text">{t.pillar}</h3>
+                      <Badge variant="outline" className="text-[10px] text-szl-text-secondary">{t.stage}</Badge>
                     </div>
-                    <p className="text-xs text-szl-text-secondary">{s.focus}</p>
-                    <p className="text-[10px] text-szl-text-secondary mt-1 opacity-60">{s.checkSize}</p>
+                    <p className="text-sm text-szl-text-secondary mb-3">{t.description}</p>
+                    <div className="space-y-1 mb-3">
+                      {t.examples.map(e => (
+                        <div key={e} className="flex items-center gap-2 text-xs">
+                          <ArrowRight className="w-3 h-3 shrink-0" style={{ color: t.color }} />
+                          <span className="text-szl-text-secondary">{e}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="border-t border-szl-border pt-3">
+                      <p className="text-xs text-szl-text-secondary italic">{t.rationale}</p>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </div>
+  
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <p className="text-xs font-medium text-szl-text-secondary uppercase tracking-wider mb-3">Investment Criteria</p>
+              <Card className="bg-szl-surface border-szl-border">
+                <CardContent className="p-4 space-y-3">
+                  {investmentCriteria.map(ic => (
+                    <div key={ic.criterion} className="flex items-start gap-3">
+                      <CheckCircle className="w-4 h-4 text-szl-accent shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-szl-text">{ic.criterion}</p>
+                        <p className="text-xs text-szl-text-secondary">{ic.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+  
+            <div>
+              <p className="text-xs font-medium text-szl-text-secondary uppercase tracking-wider mb-3">Check Sizes by Stage</p>
+              <div className="space-y-3">
+                {stages.map(s => (
+                  <Card key={s.stage} className="bg-szl-surface border-szl-border">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm font-bold text-szl-text">{s.stage}</p>
+                        <p className="text-sm font-bold text-szl-accent">{s.ticket}</p>
+                      </div>
+                      <p className="text-xs text-szl-text-secondary">{s.focus}</p>
+                      <p className="text-[10px] text-szl-text-secondary mt-1 opacity-60">{s.checkSize}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+        </>
   );
 }

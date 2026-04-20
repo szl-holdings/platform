@@ -134,7 +134,7 @@ const SIGNALS = [
 const URGENCY_ORDER: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 
 export default function MarketSignalsPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Market Timing Signals — SZL Holdings Venture Intelligence",
     description: "AI monitoring of macro trends, regulatory shifts, and competitive changes affecting SZL portfolio companies — with recommended strategic responses.",
     canonical: "https://szlholdings.com/venture-intelligence/market-signals",
@@ -148,117 +148,120 @@ export default function MarketSignalsPage() {
     .sort((a, b) => URGENCY_ORDER[a.urgency]! - URGENCY_ORDER[b.urgency]!);
 
   return (
-    <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-        <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
-              <ArrowLeft size={12} /> Venture Intelligence
-            </Link>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Market Signals
-              </p>
-              <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Market Timing Signals
-              </h1>
-              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
-                AI monitoring of macro trends, regulatory shifts, and competitive landscape changes — with recommended strategic responses and timing guidance for each portfolio company.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
-              {SIGNAL_CATEGORIES.map(c => (
-                <button
-                  key={c}
-                  onClick={() => setFilter(c)}
-                  style={{
-                    padding: "0.375rem 0.875rem",
-                    borderRadius: "4px",
-                    border: `1px solid ${filter === c ? "hsla(0,0%,100%,0.2)" : "hsla(0,0%,100%,0.07)"}`,
-                    background: filter === c ? "hsla(0,0%,100%,0.06)" : "transparent",
-                    color: filter === c ? "hsl(38,12%,88%)" : "hsl(210,5%,50%)",
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.15s ease",
-                    fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                  }}
-                >
-                  {c}
-                </button>
-              ))}
-              <span style={{ marginLeft: "auto", fontSize: "11px", color: "hsl(210,5%,42%)", display: "flex", alignItems: "center", gap: "5px" }}>
-                <Radio size={11} />
-                {filtered.length} signals active
-              </span>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+          <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
+                <ArrowLeft size={12} /> Venture Intelligence
+              </Link>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Market Signals
+                </p>
+                <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Market Timing Signals
+                </h1>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
+                  AI monitoring of macro trends, regulatory shifts, and competitive landscape changes — with recommended strategic responses and timing guidance for each portfolio company.
+                </p>
+              </m.div>
             </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {filtered.map((signal, i) => {
-                const Icon = signal.icon;
-                const isExpanded = expanded === signal.id;
-                return (
-                  <m.div
-                    key={signal.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.35, delay: i * 0.04 }}
-                    style={{ border: `1px solid ${isExpanded ? "hsla(0,0%,100%,0.1)" : "hsla(0,0%,100%,0.05)"}`, borderRadius: "8px", overflow: "hidden", transition: "border-color 0.2s ease" }}
+          </section>
+  
+          <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+                {SIGNAL_CATEGORIES.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => setFilter(c)}
+                    style={{
+                      padding: "0.375rem 0.875rem",
+                      borderRadius: "4px",
+                      border: `1px solid ${filter === c ? "hsla(0,0%,100%,0.2)" : "hsla(0,0%,100%,0.07)"}`,
+                      background: filter === c ? "hsla(0,0%,100%,0.06)" : "transparent",
+                      color: filter === c ? "hsl(38,12%,88%)" : "hsl(210,5%,50%)",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+                    }}
                   >
-                    <button
-                      onClick={() => setExpanded(isExpanded ? null : signal.id)}
-                      style={{ width: "100%", padding: "1.125rem 1.5rem", textAlign: "left", background: isExpanded ? "hsl(210,12%,7%)" : "transparent", border: "none", cursor: "pointer" }}
+                    {c}
+                  </button>
+                ))}
+                <span style={{ marginLeft: "auto", fontSize: "11px", color: "hsl(210,5%,42%)", display: "flex", alignItems: "center", gap: "5px" }}>
+                  <Radio size={11} />
+                  {filtered.length} signals active
+                </span>
+              </div>
+  
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {filtered.map((signal, i) => {
+                  const Icon = signal.icon;
+                  const isExpanded = expanded === signal.id;
+                  return (
+                    <m.div
+                      key={signal.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.35, delay: i * 0.04 }}
+                      style={{ border: `1px solid ${isExpanded ? "hsla(0,0%,100%,0.1)" : "hsla(0,0%,100%,0.05)"}`, borderRadius: "8px", overflow: "hidden", transition: "border-color 0.2s ease" }}
                     >
-                      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: "0.875rem", alignItems: "center" }}>
-                        <Icon size={14} style={{ color: signal.urgencyColor }} />
-                        <div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.25rem" }}>
-                            <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 6px", borderRadius: "2px", background: `${signal.urgencyColor}18`, color: signal.urgencyColor, letterSpacing: "0.06em" }}>{signal.urgency}</span>
-                            <span style={{ fontSize: "9px", fontWeight: 600, padding: "2px 6px", borderRadius: "2px", background: "hsla(0,0%,100%,0.04)", color: "hsl(210,5%,48%)" }}>{signal.category}</span>
-                            {signal.affectedCompanies.map((c, idx) => (
-                              <span key={c} style={{ fontSize: "9px", fontWeight: 700, color: signal.companyColors[idx], padding: "2px 6px", border: `1px solid ${signal.companyColors[idx]}30`, borderRadius: "2px" }}>{c}</span>
-                            ))}
-                            <span style={{ fontSize: "9px", color: "hsl(210,5%,36%)", marginLeft: "auto" }}>{signal.date}</span>
-                          </div>
-                          <p style={{ fontSize: "13.5px", fontWeight: 700, color: "hsl(38,12%,88%)", letterSpacing: "-0.01em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{signal.title}</p>
-                        </div>
-                        <div style={{ textAlign: "right", flexShrink: 0 }}>
-                          <div style={{ fontSize: "9px", color: "hsl(210,5%,40%)", marginBottom: "2px" }}>Confidence</div>
-                          <div style={{ fontSize: "14px", fontWeight: 800, color: signal.impactColor, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{signal.confidence}%</div>
-                        </div>
-                      </div>
-                    </button>
-                    {isExpanded && (
-                      <m.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        style={{ padding: "0 1.5rem 1.5rem", borderTop: "1px solid hsla(0,0%,100%,0.05)" }}
+                      <button
+                        onClick={() => setExpanded(isExpanded ? null : signal.id)}
+                        style={{ width: "100%", padding: "1.125rem 1.5rem", textAlign: "left", background: isExpanded ? "hsl(210,12%,7%)" : "transparent", border: "none", cursor: "pointer" }}
                       >
-                        <p style={{ fontSize: "12.5px", color: "hsl(210,5%,55%)", lineHeight: 1.75, marginTop: "1.125rem", marginBottom: "1.125rem" }}>{signal.summary}</p>
-                        <div style={{ padding: "1rem 1.125rem", background: "hsla(0,0%,100%,0.025)", borderRadius: "6px", borderLeft: `3px solid ${signal.impactColor}` }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                            <Zap size={11} style={{ color: signal.impactColor }} />
-                            <span style={{ fontSize: "10px", fontWeight: 700, color: signal.impactColor, textTransform: "uppercase", letterSpacing: "0.08em" }}>Strategic Recommendation · {signal.responseWindow} window</span>
+                        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: "0.875rem", alignItems: "center" }}>
+                          <Icon size={14} style={{ color: signal.urgencyColor }} />
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.25rem" }}>
+                              <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 6px", borderRadius: "2px", background: `${signal.urgencyColor}18`, color: signal.urgencyColor, letterSpacing: "0.06em" }}>{signal.urgency}</span>
+                              <span style={{ fontSize: "9px", fontWeight: 600, padding: "2px 6px", borderRadius: "2px", background: "hsla(0,0%,100%,0.04)", color: "hsl(210,5%,48%)" }}>{signal.category}</span>
+                              {signal.affectedCompanies.map((c, idx) => (
+                                <span key={c} style={{ fontSize: "9px", fontWeight: 700, color: signal.companyColors[idx], padding: "2px 6px", border: `1px solid ${signal.companyColors[idx]}30`, borderRadius: "2px" }}>{c}</span>
+                              ))}
+                              <span style={{ fontSize: "9px", color: "hsl(210,5%,36%)", marginLeft: "auto" }}>{signal.date}</span>
+                            </div>
+                            <p style={{ fontSize: "13.5px", fontWeight: 700, color: "hsl(38,12%,88%)", letterSpacing: "-0.01em", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{signal.title}</p>
                           </div>
-                          <p style={{ fontSize: "12px", color: "hsl(210,5%,60%)", lineHeight: 1.7 }}>{signal.recommendation}</p>
+                          <div style={{ textAlign: "right", flexShrink: 0 }}>
+                            <div style={{ fontSize: "9px", color: "hsl(210,5%,40%)", marginBottom: "2px" }}>Confidence</div>
+                            <div style={{ fontSize: "14px", fontWeight: 800, color: signal.impactColor, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{signal.confidence}%</div>
+                          </div>
                         </div>
-                      </m.div>
-                    )}
-                  </m.div>
-                );
-              })}
+                      </button>
+                      {isExpanded && (
+                        <m.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          style={{ padding: "0 1.5rem 1.5rem", borderTop: "1px solid hsla(0,0%,100%,0.05)" }}
+                        >
+                          <p style={{ fontSize: "12.5px", color: "hsl(210,5%,55%)", lineHeight: 1.75, marginTop: "1.125rem", marginBottom: "1.125rem" }}>{signal.summary}</p>
+                          <div style={{ padding: "1rem 1.125rem", background: "hsla(0,0%,100%,0.025)", borderRadius: "6px", borderLeft: `3px solid ${signal.impactColor}` }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                              <Zap size={11} style={{ color: signal.impactColor }} />
+                              <span style={{ fontSize: "10px", fontWeight: 700, color: signal.impactColor, textTransform: "uppercase", letterSpacing: "0.08em" }}>Strategic Recommendation · {signal.responseWindow} window</span>
+                            </div>
+                            <p style={{ fontSize: "12px", color: "hsl(210,5%,60%)", lineHeight: 1.7 }}>{signal.recommendation}</p>
+                          </div>
+                        </m.div>
+                      )}
+                    </m.div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

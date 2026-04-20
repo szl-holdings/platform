@@ -93,97 +93,100 @@ const DEMOS = [
 ];
 
 export default function DemosPage() {
-  usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. Lyte, Aegis, Vessels, Terra, PRISM Counsel, and Alloy." });
+  const __pageMeta = usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. Lyte, Aegis, Vessels, Terra, PRISM Counsel, and Alloy." });
 
   return (
-    <div style={{ minHeight: "100vh", background: "#080c14", color: "hsl(38,8%,88%)" }}>
-      <SiteNav />
-
-      <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "6rem 1.5rem 4rem" }}>
-        <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-            <Monitor size={28} style={{ color: "hsl(38,72%,58%)" }} />
-            <span style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(38,72%,58%)" }}>Live Demos</span>
-          </div>
-          <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, lineHeight: 1.15, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
-            See every product. Live.
-          </h1>
-          <p style={{ fontSize: "1.125rem", color: "hsl(214,7%,55%)", maxWidth: "640px", lineHeight: 1.6 }}>
-            Each product below is a live, running application. Explore the interfaces, examine the data models, 
-            and understand how signal-to-action works across every domain.
-          </p>
-        </m.div>
-
-        <section style={{ marginTop: "3.5rem" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "1.5rem" }}>
-            {DEMOS.map((demo, i) => (
-              <m.div
-                key={demo.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, duration: 0.4 }}
-                style={{
-                  background: demo.colorMuted,
-                  border: `1px solid ${demo.colorBorder}`,
-                  borderRadius: "14px",
-                  padding: "1.75rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.5rem" }}>
-                    <demo.icon size={22} style={{ color: demo.color }} />
-                    <span style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(38,8%,94%)" }}>{demo.title}</span>
-                  </div>
-                  <div style={{ fontSize: "0.8125rem", fontWeight: 500, color: demo.color, marginBottom: "0.75rem" }}>{demo.subtitle}</div>
-                  <p style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)", lineHeight: 1.6, marginBottom: "1.25rem" }}>{demo.description}</p>
-                </div>
-                <a
-                  href={demo.href}
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "#080c14", color: "hsl(38,8%,88%)" }}>
+        <SiteNav />
+  
+        <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "6rem 1.5rem 4rem" }}>
+          <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+              <Monitor size={28} style={{ color: "hsl(38,72%,58%)" }} />
+              <span style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(38,72%,58%)" }}>Live Demos</span>
+            </div>
+            <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, lineHeight: 1.15, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
+              See every product. Live.
+            </h1>
+            <p style={{ fontSize: "1.125rem", color: "hsl(214,7%,55%)", maxWidth: "640px", lineHeight: 1.6 }}>
+              Each product below is a live, running application. Explore the interfaces, examine the data models, 
+              and understand how signal-to-action works across every domain.
+            </p>
+          </m.div>
+  
+          <section style={{ marginTop: "3.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "1.5rem" }}>
+              {DEMOS.map((demo, i) => (
+                <m.div
+                  key={demo.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08, duration: 0.4 }}
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.375rem",
-                    padding: "0.5rem 1rem",
-                    background: `${demo.color}18`,
-                    border: `1px solid ${demo.color}40`,
-                    borderRadius: "8px",
-                    color: demo.color,
-                    fontSize: "0.8125rem",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    cursor: "pointer",
-                    width: "fit-content",
-                    transition: "background 0.2s",
+                    background: demo.colorMuted,
+                    border: `1px solid ${demo.colorBorder}`,
+                    borderRadius: "14px",
+                    padding: "1.75rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Play size={14} /> {demo.cta}
-                </a>
-              </m.div>
-            ))}
-          </div>
-        </section>
-
-        <section style={{ marginTop: "4rem", padding: "2rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.75rem" }}>
-            <Eye size={20} style={{ color: "hsl(38,72%,58%)" }} />
-            <span style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(38,8%,92%)" }}>Want a guided walkthrough?</span>
-          </div>
-          <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,55%)", lineHeight: 1.6, marginBottom: "1rem" }}>
-            Schedule a live session with our team. We'll walk through any domain pack, show the signal-to-action pipeline,
-            and demonstrate how Alloy governs every step.
-          </p>
-          <Link href="/contact">
-            <span style={{ fontSize: "0.8125rem", fontWeight: 500, color: "hsl(38,72%,58%)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
-              Schedule a walkthrough <ArrowRight size={14} />
-            </span>
-          </Link>
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.5rem" }}>
+                      <demo.icon size={22} style={{ color: demo.color }} />
+                      <span style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(38,8%,94%)" }}>{demo.title}</span>
+                    </div>
+                    <div style={{ fontSize: "0.8125rem", fontWeight: 500, color: demo.color, marginBottom: "0.75rem" }}>{demo.subtitle}</div>
+                    <p style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)", lineHeight: 1.6, marginBottom: "1.25rem" }}>{demo.description}</p>
+                  </div>
+                  <a
+                    href={demo.href}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.375rem",
+                      padding: "0.5rem 1rem",
+                      background: `${demo.color}18`,
+                      border: `1px solid ${demo.color}40`,
+                      borderRadius: "8px",
+                      color: demo.color,
+                      fontSize: "0.8125rem",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                      cursor: "pointer",
+                      width: "fit-content",
+                      transition: "background 0.2s",
+                    }}
+                  >
+                    <Play size={14} /> {demo.cta}
+                  </a>
+                </m.div>
+              ))}
+            </div>
+          </section>
+  
+          <section style={{ marginTop: "4rem", padding: "2rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.75rem" }}>
+              <Eye size={20} style={{ color: "hsl(38,72%,58%)" }} />
+              <span style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(38,8%,92%)" }}>Want a guided walkthrough?</span>
+            </div>
+            <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,55%)", lineHeight: 1.6, marginBottom: "1rem" }}>
+              Schedule a live session with our team. We'll walk through any domain pack, show the signal-to-action pipeline,
+              and demonstrate how Alloy governs every step.
+            </p>
+            <Link href="/contact">
+              <span style={{ fontSize: "0.8125rem", fontWeight: 500, color: "hsl(38,72%,58%)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+                Schedule a walkthrough <ArrowRight size={14} />
+              </span>
+            </Link>
+          </section>
+        </main>
+  
+        <SiteFooter />
+      </div>
+        </>
   );
 }

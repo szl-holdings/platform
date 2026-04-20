@@ -146,70 +146,73 @@ const SECTIONS = [
 ];
 
 export default function LegalTermsPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Terms of Service — SZL Holdings",
     description: "SZL Holdings Terms of Service. The terms that govern your use of our platforms and services.",
     canonical: "https://szlholdings.com/legal/terms",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <Navbar />
-      <div className="max-w-3xl mx-auto px-6 pt-32 pb-24">
-        <div className="mb-10">
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-            <Link href="/trust" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", textDecoration: "none" }}>Trust Center</Link>
-            <span style={{ color: "hsl(210,5%,30%)" }}>/</span>
-            <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,55%)" }}>Legal · Terms</span>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <Navbar />
+        <div className="max-w-3xl mx-auto px-6 pt-32 pb-24">
+          <div className="mb-10">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <Link href="/trust" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", textDecoration: "none" }}>Trust Center</Link>
+              <span style={{ color: "hsl(210,5%,30%)" }}>/</span>
+              <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,55%)" }}>Legal · Terms</span>
+            </div>
+            <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.022em", color: "hsl(38,12%,94%)", marginBottom: "0.75rem" }}>Terms of Service</h1>
+            <p style={{ fontSize: "13px", color: "hsl(210,5%,44%)" }}>Last updated: April 2026 · Effective date: 1 April 2026</p>
           </div>
-          <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.022em", color: "hsl(38,12%,94%)", marginBottom: "0.75rem" }}>Terms of Service</h1>
-          <p style={{ fontSize: "13px", color: "hsl(210,5%,44%)" }}>Last updated: April 2026 · Effective date: 1 April 2026</p>
-        </div>
-
-        <nav style={{ marginBottom: "2.5rem", padding: "1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
-          <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.75rem" }}>Contents</p>
-          <ol style={{ listStyle: "none", padding: 0, margin: 0, columns: 2, gap: "1rem" }}>
+  
+          <nav style={{ marginBottom: "2.5rem", padding: "1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+            <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.75rem" }}>Contents</p>
+            <ol style={{ listStyle: "none", padding: 0, margin: 0, columns: 2, gap: "1rem" }}>
+              {SECTIONS.map((s) => (
+                <li key={s.id} style={{ marginBottom: "0.375rem" }}>
+                  <a href={`#${s.id}`} style={{ fontSize: "13px", color: "hsl(210,5%,55%)", textDecoration: "none" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,82%)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,55%)"; }}>
+                    {s.heading}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+  
+          <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
             {SECTIONS.map((s) => (
-              <li key={s.id} style={{ marginBottom: "0.375rem" }}>
-                <a href={`#${s.id}`} style={{ fontSize: "13px", color: "hsl(210,5%,55%)", textDecoration: "none" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,82%)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,55%)"; }}>
-                  {s.heading}
-                </a>
-              </li>
+              <section key={s.id} id={s.id} style={{ scrollMarginTop: "6rem" }}>
+                <h2 style={{ fontSize: "15px", fontWeight: "700", color: "hsl(38,12%,88%)", marginBottom: "0.875rem" }}>{s.heading}</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                  {s.lines.map((line, i) => (
+                    <p key={i} style={{ fontSize: "14px", lineHeight: "1.75", color: "hsl(210,5%,56%)", margin: 0 }}>{line}</p>
+                  ))}
+                </div>
+              </section>
             ))}
-          </ol>
-        </nav>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
-          {SECTIONS.map((s) => (
-            <section key={s.id} id={s.id} style={{ scrollMarginTop: "6rem" }}>
-              <h2 style={{ fontSize: "15px", fontWeight: "700", color: "hsl(38,12%,88%)", marginBottom: "0.875rem" }}>{s.heading}</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-                {s.lines.map((line, i) => (
-                  <p key={i} style={{ fontSize: "14px", lineHeight: "1.75", color: "hsl(210,5%,56%)", margin: 0 }}>{line}</p>
-                ))}
-              </div>
-            </section>
-          ))}
+          </div>
+  
+          <div style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid hsla(0,0%,100%,0.07)", display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+            {[
+              { href: "/legal/privacy", label: "Privacy Policy" },
+              { href: "/legal/cookies", label: "Cookie Policy" },
+              { href: "/legal/acceptable-use", label: "Acceptable Use Policy" },
+              { href: "/legal/security-disclosure", label: "Security Disclosure" },
+            ].map(({ href, label }) => (
+              <a key={href} href={href} style={{ fontSize: "13px", color: "hsl(210,5%,48%)", textDecoration: "none" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,78%)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,48%)"; }}>
+                {label} →
+              </a>
+            ))}
+          </div>
         </div>
-
-        <div style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid hsla(0,0%,100%,0.07)", display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-          {[
-            { href: "/legal/privacy", label: "Privacy Policy" },
-            { href: "/legal/cookies", label: "Cookie Policy" },
-            { href: "/legal/acceptable-use", label: "Acceptable Use Policy" },
-            { href: "/legal/security-disclosure", label: "Security Disclosure" },
-          ].map(({ href, label }) => (
-            <a key={href} href={href} style={{ fontSize: "13px", color: "hsl(210,5%,48%)", textDecoration: "none" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,78%)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,48%)"; }}>
-              {label} →
-            </a>
-          ))}
-        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+        </>
   );
 }

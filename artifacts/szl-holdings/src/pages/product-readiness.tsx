@@ -212,7 +212,7 @@ const FOCUSED_PRODUCTS = [
 ];
 
 export default function ProductReadinessPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Product Readiness Matrix — SZL Holdings",
     description: "Live product readiness status for every SZL Holdings capability, driven by the platform capability manifest. No hand-edited claims.",
     canonical: "https://szlholdings.com/product-readiness",
@@ -229,138 +229,141 @@ export default function ProductReadinessPage() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section style={{
-          paddingTop: "clamp(7rem,12vw,10rem)",
-          paddingBottom: "clamp(3rem,5vw,4rem)",
-          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-        }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-              <span style={{
-                display: "inline-block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
-                textTransform: "uppercase", color: "hsl(210,5%,48%)", marginBottom: "1.25rem",
-              }}>
-                Product Readiness
-              </span>
-              <h1 style={{
-                fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
-                color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
-              }}>
-                Manifest-driven readiness matrix.
-              </h1>
-              <p style={{
-                fontSize: "1rem", color: "hsl(210,5%,57%)", lineHeight: 1.68, maxWidth: "44ch", marginBottom: "1.5rem",
-              }}>
-                Every capability status here is derived directly from{" "}
-                <code style={{ fontSize: "12px", color: "hsl(210,55%,65%)", background: "hsla(210,55%,52%,0.1)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
-                  artifacts/audit/platform-capability-manifest.json
-                </code>
-                . This page is never hand-edited. Last audited: {meta.generated}.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "1.5rem" }}>
-                {[
-                  { label: "Total capabilities", value: totals.total },
-                  { label: "Live", value: totals.live, color: "#10b981" },
-                  { label: "Working demo", value: totals.working_demo, color: "#3b82f6" },
-                  { label: "Partial", value: totals.partial, color: "#f59e0b" },
-                  { label: "Stub / Broken", value: totals.stub + totals.broken, color: "#ef4444" },
-                ].map(stat => (
-                  <div key={stat.label} style={{ display: "flex", flexDirection: "column" as const, gap: "0.2rem" }}>
-                    <span style={{ fontSize: "1.5rem", fontWeight: 700, color: stat.color ?? "hsl(38,12%,92%)" }}>{stat.value}</span>
-                    <span style={{ fontSize: "11px", color: "hsl(210,5%,46%)", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{stat.label}</span>
-                  </div>
-                ))}
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{
-          paddingTop: "clamp(3rem,5vw,4rem)", paddingBottom: "clamp(4rem,7vw,6rem)",
-        }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-              <div>
-                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)", marginBottom: "0.5rem" }}>Platform Readiness Score</p>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-                  <span style={{ fontSize: "2.25rem", fontWeight: 700, color: "hsl(38,12%,92%)" }}>{platformScore}%</span>
-                  <span style={{ fontSize: "13px", color: "hsl(210,5%,48%)" }}>weighted proven</span>
-                </div>
-              </div>
-              {flaggedClaims.length > 0 && (
-                <div style={{
-                  padding: "0.625rem 1rem", borderRadius: "8px",
-                  background: "hsla(38,85%,50%,0.08)", border: "1px solid hsla(38,85%,50%,0.18)",
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section style={{
+            paddingTop: "clamp(7rem,12vw,10rem)",
+            paddingBottom: "clamp(3rem,5vw,4rem)",
+            borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+          }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+                <span style={{
+                  display: "inline-block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
+                  textTransform: "uppercase", color: "hsl(210,5%,48%)", marginBottom: "1.25rem",
                 }}>
-                  <p style={{ fontSize: "11px", fontWeight: 600, color: "#f59e0b" }}>{flaggedClaims.length} capabilities below demo threshold</p>
-                  <p style={{ fontSize: "11px", color: "hsl(210,5%,46%)", marginTop: "0.2rem" }}>Stub, broken, or undocumented — not investor-presentable</p>
+                  Product Readiness
+                </span>
+                <h1 style={{
+                  fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
+                  color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
+                }}>
+                  Manifest-driven readiness matrix.
+                </h1>
+                <p style={{
+                  fontSize: "1rem", color: "hsl(210,5%,57%)", lineHeight: 1.68, maxWidth: "44ch", marginBottom: "1.5rem",
+                }}>
+                  Every capability status here is derived directly from{" "}
+                  <code style={{ fontSize: "12px", color: "hsl(210,55%,65%)", background: "hsla(210,55%,52%,0.1)", padding: "0.1rem 0.4rem", borderRadius: "4px" }}>
+                    artifacts/audit/platform-capability-manifest.json
+                  </code>
+                  . This page is never hand-edited. Last audited: {meta.generated}.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "1.5rem" }}>
+                  {[
+                    { label: "Total capabilities", value: totals.total },
+                    { label: "Live", value: totals.live, color: "#10b981" },
+                    { label: "Working demo", value: totals.working_demo, color: "#3b82f6" },
+                    { label: "Partial", value: totals.partial, color: "#f59e0b" },
+                    { label: "Stub / Broken", value: totals.stub + totals.broken, color: "#ef4444" },
+                  ].map(stat => (
+                    <div key={stat.label} style={{ display: "flex", flexDirection: "column" as const, gap: "0.2rem" }}>
+                      <span style={{ fontSize: "1.5rem", fontWeight: 700, color: stat.color ?? "hsl(38,12%,92%)" }}>{stat.value}</span>
+                      <span style={{ fontSize: "11px", color: "hsl(210,5%,46%)", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{stat.label}</span>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </m.div>
             </div>
-
-            <div style={{
-              borderRadius: "12px", overflow: "hidden",
-              border: "1px solid hsla(0,0%,100%,0.07)",
-              background: "hsla(0,0%,100%,0.015)",
-            }}>
+          </section>
+  
+          <section style={{
+            paddingTop: "clamp(3rem,5vw,4rem)", paddingBottom: "clamp(4rem,7vw,6rem)",
+          }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+  
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+                <div>
+                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)", marginBottom: "0.5rem" }}>Platform Readiness Score</p>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "2.25rem", fontWeight: 700, color: "hsl(38,12%,92%)" }}>{platformScore}%</span>
+                    <span style={{ fontSize: "13px", color: "hsl(210,5%,48%)" }}>weighted proven</span>
+                  </div>
+                </div>
+                {flaggedClaims.length > 0 && (
+                  <div style={{
+                    padding: "0.625rem 1rem", borderRadius: "8px",
+                    background: "hsla(38,85%,50%,0.08)", border: "1px solid hsla(38,85%,50%,0.18)",
+                  }}>
+                    <p style={{ fontSize: "11px", fontWeight: 600, color: "#f59e0b" }}>{flaggedClaims.length} capabilities below demo threshold</p>
+                    <p style={{ fontSize: "11px", color: "hsl(210,5%,46%)", marginTop: "0.2rem" }}>Stub, broken, or undocumented — not investor-presentable</p>
+                  </div>
+                )}
+              </div>
+  
               <div style={{
-                display: "grid", gridTemplateColumns: "1fr auto auto auto auto",
-                gap: "1rem", padding: "0.625rem 1.25rem",
-                background: "hsla(0,0%,100%,0.03)",
-                borderBottom: "1px solid hsla(0,0%,100%,0.06)",
+                borderRadius: "12px", overflow: "hidden",
+                border: "1px solid hsla(0,0%,100%,0.07)",
+                background: "hsla(0,0%,100%,0.015)",
               }}>
-                {["Product", "Proven", "Issues", "Score", ""].map(h => (
-                  <span key={h} style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "hsl(210,5%,38%)" }}>{h}</span>
+                <div style={{
+                  display: "grid", gridTemplateColumns: "1fr auto auto auto auto",
+                  gap: "1rem", padding: "0.625rem 1.25rem",
+                  background: "hsla(0,0%,100%,0.03)",
+                  borderBottom: "1px solid hsla(0,0%,100%,0.06)",
+                }}>
+                  {["Product", "Proven", "Issues", "Score", ""].map(h => (
+                    <span key={h} style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "hsl(210,5%,38%)" }}>{h}</span>
+                  ))}
+                </div>
+                {focusedProducts.map((product, i) => (
+                  <m.div
+                    key={product.product}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.035 }}
+                  >
+                    <ProductRow product={product} />
+                  </m.div>
                 ))}
               </div>
-              {focusedProducts.map((product, i) => (
-                <m.div
-                  key={product.product}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.035 }}
+  
+              <SolutionBriefDownloads products={products} />
+  
+              <div style={{ marginTop: "2.5rem", display: "flex", flexWrap: "wrap" as const, gap: "1rem", alignItems: "center" }}>
+                <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "1rem" }}>
+                  {(["live", "working_demo", "partial", "stub", "broken"] as CapabilityStatus[]).map(status => {
+                    const meta = STATUS_META[status];
+                    const Icon = meta.Icon;
+                    return (
+                      <span key={status} style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "12px", color: meta.color }}>
+                        <Icon size={11} style={{ color: meta.color }} />
+                        {meta.label}
+                      </span>
+                    );
+                  })}
+                </div>
+                <span style={{ flex: 1 }} />
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "12px", color: "hsl(210,5%,40%)", textDecoration: "none" }}
                 >
-                  <ProductRow product={product} />
-                </m.div>
-              ))}
-            </div>
-
-            <SolutionBriefDownloads products={products} />
-
-            <div style={{ marginTop: "2.5rem", display: "flex", flexWrap: "wrap" as const, gap: "1rem", alignItems: "center" }}>
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "1rem" }}>
-                {(["live", "working_demo", "partial", "stub", "broken"] as CapabilityStatus[]).map(status => {
-                  const meta = STATUS_META[status];
-                  const Icon = meta.Icon;
-                  return (
-                    <span key={status} style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "12px", color: meta.color }}>
-                      <Icon size={11} style={{ color: meta.color }} />
-                      {meta.label}
-                    </span>
-                  );
-                })}
+                  <BookOpen size={12} />
+                  Source: platform-capability-manifest.json
+                </a>
               </div>
-              <span style={{ flex: 1 }} />
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "12px", color: "hsl(210,5%,40%)", textDecoration: "none" }}
-              >
-                <BookOpen size={12} />
-                Source: platform-capability-manifest.json
-              </a>
             </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

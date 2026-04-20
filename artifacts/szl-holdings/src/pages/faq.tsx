@@ -151,7 +151,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FaqPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "FAQ — SZL Holdings",
     description: "Frequently asked questions about SZL Holdings, Lyte + Alloy, platform architecture, security, investment, and legal topics.",
     canonical: "https://szlholdings.com/faq",
@@ -180,66 +180,69 @@ export default function FaqPage() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid var(--color-szl-border-hover)", background: "hsla(0,0%,100%,0.04)", marginBottom: "1.75rem" }}>
-                <HelpCircle size={13} color="var(--color-szl-text-muted)" />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-szl-text-secondary)" }}>FAQ</span>
-              </div>
-              <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
-                Frequently asked questions.
-              </h1>
-              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                Questions about the company, platform, architecture, security, investment, and legal
-                topics — answered directly. If your question isn't here, reach out.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "860px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            {FAQ_GROUPS.map((group, gi) => (
-              <m.div
-                key={group.group}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: gi * 0.08 }}
-                style={{ marginBottom: "3.5rem" }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.5rem" }}>
-                  <div style={{ width: "4px", height: "16px", borderRadius: "2px", background: group.color }} />
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: group.color }}>{group.group}</p>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid var(--color-szl-border-hover)", background: "hsla(0,0%,100%,0.04)", marginBottom: "1.75rem" }}>
+                  <HelpCircle size={13} color="var(--color-szl-text-muted)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-szl-text-secondary)" }}>FAQ</span>
                 </div>
-                {group.questions.map((item) => (
-                  <FaqItem key={item.q} q={item.q} a={item.a} />
-                ))}
+                <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
+                  Frequently asked questions.
+                </h1>
+                <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
+                  Questions about the company, platform, architecture, security, investment, and legal
+                  topics — answered directly. If your question isn't here, reach out.
+                </p>
               </m.div>
-            ))}
-
-            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", marginTop: "2rem" }}>
-              <h2 style={{ fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.015em", marginBottom: "0.625rem" }}>Still have questions?</h2>
-              <p style={{ fontSize: "0.9rem", lineHeight: 1.65, color: "hsl(214,7%,60%)", marginBottom: "1.25rem" }}>
-                For anything not covered here — demos, diligence conversations, partnership inquiries, or technical questions — reach out directly.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                <Link href="/contact" className="szl-btn-primary">
-                  Get in touch <ArrowRight size={14} />
-                </Link>
-                <Link href="/docs" className="szl-btn-secondary">Documentation →</Link>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+            </div>
+          </section>
+  
+          <section style={{ padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "860px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              {FAQ_GROUPS.map((group, gi) => (
+                <m.div
+                  key={group.group}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: gi * 0.08 }}
+                  style={{ marginBottom: "3.5rem" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.5rem" }}>
+                    <div style={{ width: "4px", height: "16px", borderRadius: "2px", background: group.color }} />
+                    <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: group.color }}>{group.group}</p>
+                  </div>
+                  {group.questions.map((item) => (
+                    <FaqItem key={item.q} q={item.q} a={item.a} />
+                  ))}
+                </m.div>
+              ))}
+  
+              <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", marginTop: "2rem" }}>
+                <h2 style={{ fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.015em", marginBottom: "0.625rem" }}>Still have questions?</h2>
+                <p style={{ fontSize: "0.9rem", lineHeight: 1.65, color: "hsl(214,7%,60%)", marginBottom: "1.25rem" }}>
+                  For anything not covered here — demos, diligence conversations, partnership inquiries, or technical questions — reach out directly.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <Link href="/contact" className="szl-btn-primary">
+                    Get in touch <ArrowRight size={14} />
+                  </Link>
+                  <Link href="/docs" className="szl-btn-secondary">Documentation →</Link>
+                </div>
+              </m.div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

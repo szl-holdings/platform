@@ -126,7 +126,7 @@ function unwrap<T>(payload: T | { data: T }): T {
 }
 
 export default function FundLpPortalPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "LP Portal — SZL Holdings Fund",
     description: "Self-service LP portal: capital account, permissioned data room access, quarterly reports, activity log, and GP messaging.",
     canonical: "https://szlholdings.com/fund/lp-portal",
@@ -276,16 +276,19 @@ export default function FundLpPortalPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#080b10] text-white">
-        <SiteNav />
-        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24 flex items-center justify-center">
-          <div className="flex items-center gap-3 text-white/50 text-sm">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading LP portal…
-          </div>
-        </main>
-        <SiteFooter />
-      </div>
-    );
+    <>
+      {__pageMeta}
+        <div className="min-h-screen bg-[#080b10] text-white">
+          <SiteNav />
+          <main className="mx-auto max-w-7xl px-6 pt-28 pb-24 flex items-center justify-center">
+            <div className="flex items-center gap-3 text-white/50 text-sm">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading LP portal…
+            </div>
+          </main>
+          <SiteFooter />
+        </div>
+          </>
+  );
   }
 
   if (error && lps.length === 0) {

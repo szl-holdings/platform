@@ -139,88 +139,91 @@ function RoadmapLane({ area, color, items, phase }: { area: string; color: strin
 }
 
 export default function PublicRoadmapPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Roadmap — SZL Holdings",
     description: "SZL Holdings public roadmap — Now, Next, Later. Lyte proof, Alloy maturity, trust posture, docs, and staged expansion.",
     canonical: "https://szlholdings.com/roadmap",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid var(--color-szl-border-hover)", background: "hsla(0,0%,100%,0.04)", marginBottom: "1.75rem" }}>
-                <Map size={13} color="var(--color-szl-text-muted)" />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-szl-text-secondary)" }}>Roadmap</span>
-              </div>
-              <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
-                Now, Next, Later.
-              </h1>
-              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "54ch", marginBottom: "2rem" }}>
-                A public view of where SZL Holdings is, where it's going, and what comes after.
-                No fake completion dates. Honest about what's done and what's not.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem", alignItems: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                  <CheckCircle2 size={14} color="hsl(145,62%,46%)" />
-                  <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)" }}>Done</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                  <Clock size={14} color="hsl(40,90%,54%)" />
-                  <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)" }}>In progress</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                  <Circle size={14} color="hsl(214,7%,40%)" />
-                  <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)" }}>Planned</span>
-                </div>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        {[
-          { label: "Now", subtitle: "Current focus", color: "hsl(145,62%,46%)", lanes: NOW },
-          { label: "Next", subtitle: "Active preparation", color: "hsl(38,52%,58%)", lanes: NEXT },
-          { label: "Later", subtitle: "Staged expansion", color: "hsl(210,80%,60%)", lanes: LATER },
-        ].map((phase, pi) => (
-          <section key={phase.label} style={{ borderBottom: pi < 2 ? "1px solid var(--color-szl-border)" : "none", padding: "var(--space-section-md) 0" }}>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: "2.5rem" }}>
-                  <span style={{ fontSize: "clamp(1.75rem,3.5vw,2.5rem)", fontWeight: 700, letterSpacing: "-0.03em", color: phase.color }}>{phase.label}</span>
-                  <span style={{ fontSize: "1rem", color: "hsl(214,7%,48%)", marginTop: "4px" }}>— {phase.subtitle}</span>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid var(--color-szl-border-hover)", background: "hsla(0,0%,100%,0.04)", marginBottom: "1.75rem" }}>
+                  <Map size={13} color="var(--color-szl-text-muted)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-szl-text-secondary)" }}>Roadmap</span>
+                </div>
+                <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
+                  Now, Next, Later.
+                </h1>
+                <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "54ch", marginBottom: "2rem" }}>
+                  A public view of where SZL Holdings is, where it's going, and what comes after.
+                  No fake completion dates. Honest about what's done and what's not.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    <CheckCircle2 size={14} color="hsl(145,62%,46%)" />
+                    <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)" }}>Done</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    <Clock size={14} color="hsl(40,90%,54%)" />
+                    <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)" }}>In progress</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    <Circle size={14} color="hsl(214,7%,40%)" />
+                    <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)" }}>Planned</span>
+                  </div>
                 </div>
               </m.div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                {phase.lanes.map((lane, li) => (
-                  <m.div key={lane.area} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: li * 0.07 }}>
-                    <RoadmapLane area={lane.area} color={lane.color} items={lane.items} phase={phase.label} />
-                  </m.div>
-                ))}
+            </div>
+          </section>
+  
+          {[
+            { label: "Now", subtitle: "Current focus", color: "hsl(145,62%,46%)", lanes: NOW },
+            { label: "Next", subtitle: "Active preparation", color: "hsl(38,52%,58%)", lanes: NEXT },
+            { label: "Later", subtitle: "Staged expansion", color: "hsl(210,80%,60%)", lanes: LATER },
+          ].map((phase, pi) => (
+            <section key={phase.label} style={{ borderBottom: pi < 2 ? "1px solid var(--color-szl-border)" : "none", padding: "var(--space-section-md) 0" }}>
+              <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+                <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: "2.5rem" }}>
+                    <span style={{ fontSize: "clamp(1.75rem,3.5vw,2.5rem)", fontWeight: 700, letterSpacing: "-0.03em", color: phase.color }}>{phase.label}</span>
+                    <span style={{ fontSize: "1rem", color: "hsl(214,7%,48%)", marginTop: "4px" }}>— {phase.subtitle}</span>
+                  </div>
+                </m.div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                  {phase.lanes.map((lane, li) => (
+                    <m.div key={lane.area} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: li * 0.07 }}>
+                      <RoadmapLane area={lane.area} color={lane.color} items={lane.items} phase={phase.label} />
+                    </m.div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ))}
+  
+          <section style={{ padding: "var(--space-section-sm) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link href="/investor" className="szl-btn-primary">
+                  Investor overview <ArrowRight size={14} />
+                </Link>
+                <Link href="/architecture" className="szl-btn-secondary">Architecture →</Link>
+                <Link href="/trust" className="szl-btn-secondary">Trust Center →</Link>
+                <Link href="/contact" className="szl-btn-ghost">Get in touch</Link>
               </div>
             </div>
           </section>
-        ))}
-
-        <section style={{ padding: "var(--space-section-sm) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-              <Link href="/investor" className="szl-btn-primary">
-                Investor overview <ArrowRight size={14} />
-              </Link>
-              <Link href="/architecture" className="szl-btn-secondary">Architecture →</Link>
-              <Link href="/trust" className="szl-btn-secondary">Trust Center →</Link>
-              <Link href="/contact" className="szl-btn-ghost">Get in touch</Link>
-            </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

@@ -138,7 +138,7 @@ export default function InsightsArticlePage() {
 
   const canonicalUrl = article ? `https://szlholdings.com/insights/${article.slug}` : "https://szlholdings.com/insights";
 
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: article ? `${article.title} | SZL Holdings Insights` : "Article Not Found | SZL Holdings",
     description: article?.excerpt,
     canonical: canonicalUrl,
@@ -189,21 +189,24 @@ export default function InsightsArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-white">
-        <SiteNav />
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 pt-24">
-          <p className="text-szl-text-secondary text-lg">Article not found.</p>
-          <button
-            onClick={() => navigate("/insights")}
-            className="flex items-center gap-2 text-sm font-semibold text-szl-primary"
-          >
-            <ArrowLeft size={14} />
-            Back to Insights
-          </button>
+    <>
+      {__pageMeta}
+        <div className="min-h-screen bg-white">
+          <SiteNav />
+          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 pt-24">
+            <p className="text-szl-text-secondary text-lg">Article not found.</p>
+            <button
+              onClick={() => navigate("/insights")}
+              className="flex items-center gap-2 text-sm font-semibold text-szl-primary"
+            >
+              <ArrowLeft size={14} />
+              Back to Insights
+            </button>
+          </div>
+          <SiteFooter />
         </div>
-        <SiteFooter />
-      </div>
-    );
+          </>
+  );
   }
 
   const handleCopy = () => {

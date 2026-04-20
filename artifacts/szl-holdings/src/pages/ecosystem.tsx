@@ -166,148 +166,151 @@ function SectionHeader({ label, title, description }: { label: string; title: st
 }
 
 export default function EcosystemPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Ecosystem — SZL Holdings",
     description: "The SZL Holdings ecosystem: one governed operational intelligence platform, one shared execution backbone, and purpose-built domain packs across observability, maritime command, cybersecurity, AI research, and premium services.",
     canonical: "https://szlholdings.com/ecosystem",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main className="pt-24">
-        <section style={{ padding: "4rem 0 3rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
-              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "0.75rem" }}>
-                Product Registry
-              </p>
-              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1rem", fontFamily: "var(--font-display)" }}>
-                One governed platform.<br />One architecture. Six domain packs.
-              </h1>
-              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "40rem" }}>
-                Every entity in the SZL ecosystem has a defined role, a defined audience, and a defined relationship to the whole. Nothing competes. Everything compounds.
-              </p>
-            </m.div>
-
-            <m.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              style={{ marginTop: "2rem", display: "flex", gap: "0.25rem", flexWrap: "wrap" }}
-            >
-              {[
-                { label: "SZL Holdings", desc: "Governed Platform", accent: "hsl(38,55%,60%)" },
-                { label: "Lyte", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
-                { label: "6 Domain Packs", desc: "Vertical intelligence", accent: "hsl(210,5%,54%)" },
-                { label: "Alloy", desc: "Execution Fabric", accent: "hsl(222,68%,67%)" },
-                { label: "2 Brands", desc: "Carlota Jo · Stephen Lutar", accent: "hsl(36,52%,54%)" },
-              ].map((item, i) => (
-                <div key={item.label} style={{
-                  padding: "0.625rem 1rem",
-                  background: "hsla(0,0%,100%,0.025)",
-                  border: "1px solid hsla(0,0%,100%,0.06)",
-                  borderRadius: "0.5rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                }}>
-                  <div style={{ width: "4px", height: "20px", borderRadius: "2px", background: item.accent, opacity: 0.7 }} />
-                  <div>
-                    <p style={{ fontSize: "11.5px", fontWeight: 600, color: "hsl(38,12%,88%)" }}>{item.label}</p>
-                    <p style={{ fontSize: "10px", color: "hsl(210,5%,57%)" }}>{item.desc}</p>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main className="pt-24">
+          <section style={{ padding: "4rem 0 3rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "0.75rem" }}>
+                  Product Registry
+                </p>
+                <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1rem", fontFamily: "var(--font-display)" }}>
+                  One governed platform.<br />One architecture. Six domain packs.
+                </h1>
+                <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "40rem" }}>
+                  Every entity in the SZL ecosystem has a defined role, a defined audience, and a defined relationship to the whole. Nothing competes. Everything compounds.
+                </p>
+              </m.div>
+  
+              <m.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{ marginTop: "2rem", display: "flex", gap: "0.25rem", flexWrap: "wrap" }}
+              >
+                {[
+                  { label: "SZL Holdings", desc: "Governed Platform", accent: "hsl(38,55%,60%)" },
+                  { label: "Lyte", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
+                  { label: "6 Domain Packs", desc: "Vertical intelligence", accent: "hsl(210,5%,54%)" },
+                  { label: "Alloy", desc: "Execution Fabric", accent: "hsl(222,68%,67%)" },
+                  { label: "2 Brands", desc: "Carlota Jo · Stephen Lutar", accent: "hsl(36,52%,54%)" },
+                ].map((item, i) => (
+                  <div key={item.label} style={{
+                    padding: "0.625rem 1rem",
+                    background: "hsla(0,0%,100%,0.025)",
+                    border: "1px solid hsla(0,0%,100%,0.06)",
+                    borderRadius: "0.5rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}>
+                    <div style={{ width: "4px", height: "20px", borderRadius: "2px", background: item.accent, opacity: 0.7 }} />
+                    <div>
+                      <p style={{ fontSize: "11.5px", fontWeight: 600, color: "hsl(38,12%,88%)" }}>{item.label}</p>
+                      <p style={{ fontSize: "10px", color: "hsl(210,5%,57%)" }}>{item.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 3rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <SectionHeader
-              label="Platform Command — Core Layer"
-              title="Flagship command surface and execution fabric"
-              description="Lyte is the flagship governed command surface — signal stream, situation board, governed action panel. Alloy is the execution fabric underneath every domain pack. Vessels is the first commercial domain pack, shown here alongside the core platform."
-            />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              {FLAGSHIP.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
+                ))}
+              </m.div>
             </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 3rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <SectionHeader
-              label="Tier 2 — Operations Platforms"
-              title="Domain-specific command surfaces"
-              description="Specialized platforms built on the Alloy backbone, each serving a distinct operational domain with its own data model, workflows, and audience."
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {OPERATIONS.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
+          </section>
+  
+          <section style={{ padding: "2rem 0 3rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <SectionHeader
+                label="Platform Command — Core Layer"
+                title="Flagship command surface and execution fabric"
+                description="Lyte is the flagship governed command surface — signal stream, situation board, governed action panel. Alloy is the execution fabric underneath every domain pack. Vessels is the first commercial domain pack, shown here alongside the core platform."
+              />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                {FLAGSHIP.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
+              </div>
             </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 3rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <SectionHeader
-              label="Service & Identity Brands"
-              title="Advisory services and founder identity"
-              description="Independent brands that operate alongside the platform ecosystem, each with its own audience and positioning."
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {SERVICES.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
+          </section>
+  
+          <section style={{ padding: "2rem 0 3rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <SectionHeader
+                label="Tier 2 — Operations Platforms"
+                title="Domain-specific command surfaces"
+                description="Specialized platforms built on the Alloy backbone, each serving a distinct operational domain with its own data model, workflows, and audience."
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {OPERATIONS.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
+              </div>
             </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 4rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <SectionHeader
-              label="Internal Surfaces"
-              title="Operational infrastructure"
-              description="Internal tools for platform governance, readiness assessment, and trust documentation. Not public-facing products."
-            />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {INTERNAL.map((item, i) => (
-                <m.a
-                  key={item.name}
-                  href={item.href}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    display: "block",
-                    padding: "1.25rem",
-                    borderRadius: "0.75rem",
-                    background: "hsla(0,0%,100%,0.015)",
-                    border: "1px solid hsla(0,0%,100%,0.04)",
-                    textDecoration: "none",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.03)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.015)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.04)";
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                    <div style={{ width: "3px", height: "16px", borderRadius: "2px", background: item.accent, opacity: 0.5 }} />
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,78%)" }}>{item.name}</p>
-                  </div>
-                  <p style={{ fontSize: "10.5px", fontWeight: 500, color: "hsl(210,5%,57%)", marginBottom: "0.375rem", letterSpacing: "0.02em" }}>{item.role}</p>
-                  <p style={{ fontSize: "12px", lineHeight: 1.55, color: "hsl(210,5%,57%)" }}>{item.description}</p>
-                </m.a>
-              ))}
+          </section>
+  
+          <section style={{ padding: "2rem 0 3rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <SectionHeader
+                label="Service & Identity Brands"
+                title="Advisory services and founder identity"
+                description="Independent brands that operate alongside the platform ecosystem, each with its own audience and positioning."
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {SERVICES.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
+              </div>
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          <section style={{ padding: "2rem 0 4rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <SectionHeader
+                label="Internal Surfaces"
+                title="Operational infrastructure"
+                description="Internal tools for platform governance, readiness assessment, and trust documentation. Not public-facing products."
+              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {INTERNAL.map((item, i) => (
+                  <m.a
+                    key={item.name}
+                    href={item.href}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                    style={{
+                      display: "block",
+                      padding: "1.25rem",
+                      borderRadius: "0.75rem",
+                      background: "hsla(0,0%,100%,0.015)",
+                      border: "1px solid hsla(0,0%,100%,0.04)",
+                      textDecoration: "none",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.03)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.015)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.04)";
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                      <div style={{ width: "3px", height: "16px", borderRadius: "2px", background: item.accent, opacity: 0.5 }} />
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,78%)" }}>{item.name}</p>
+                    </div>
+                    <p style={{ fontSize: "10.5px", fontWeight: 500, color: "hsl(210,5%,57%)", marginBottom: "0.375rem", letterSpacing: "0.02em" }}>{item.role}</p>
+                    <p style={{ fontSize: "12px", lineHeight: 1.55, color: "hsl(210,5%,57%)" }}>{item.description}</p>
+                  </m.a>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

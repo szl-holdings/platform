@@ -113,7 +113,7 @@ const proofObjects = [
 ];
 
 export default function InvestorsFounderPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Founder — Stephen Lutar — SZL Holdings",
     description:
       "Stephen Lutar — Founder & CEO of SZL Holdings. Builder, operator, systems thinker. Founder-market fit, operating thesis, and proof objects.",
@@ -121,241 +121,244 @@ export default function InvestorsFounderPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#070a10] text-white">
-      <SiteNav />
-      <main>
-        {/* Hero */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="flex items-start gap-5 mb-4">
-              <div
-                className="shrink-0"
-                style={{
-                  width: 64, height: 64, borderRadius: "0.875rem",
-                  background: "linear-gradient(135deg, #d4a054 0%, #c8953c 50%, #b8862c 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: "0 0 0 1px rgba(212,160,84,0.2), 0 8px 32px rgba(0,0,0,0.4)",
-                }}
-              >
-                <span style={{ color: "#070a10", fontWeight: 800, fontSize: "0.9375rem", letterSpacing: "-0.02em" }}>SZL</span>
-              </div>
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054] mb-2">
-                  Founder & CEO
-                </div>
-                <h1 className="max-w-2xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-                  Stephen Lutar
-                </h1>
-              </div>
-            </div>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-              Builder, operator, systems thinker. Designing the infrastructure layer for how
-              governed organizations make and audit operational decisions — starting with business
-              observability, and extending through maritime, security, real estate, and advisory.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/investors/data-room"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-              >
-                Request data room access
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]"
-              >
-                Start a conversation
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Founder-market fit */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Founder-market fit
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              Why this founder for this problem at this time.
-            </h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
-              {founderMarketFit.map((item) => (
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#070a10] text-white">
+        <SiteNav />
+        <main>
+          {/* Hero */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+              <div className="flex items-start gap-5 mb-4">
                 <div
-                  key={item.label}
-                  className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-6"
+                  className="shrink-0"
+                  style={{
+                    width: 64, height: 64, borderRadius: "0.875rem",
+                    background: "linear-gradient(135deg, #d4a054 0%, #c8953c 50%, #b8862c 100%)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 0 0 1px rgba(212,160,84,0.2), 0 8px 32px rgba(0,0,0,0.4)",
+                  }}
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#d4a054]">
-                    {item.label}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-white/65">{item.body}</p>
+                  <span style={{ color: "#070a10", fontWeight: 800, fontSize: "0.9375rem", letterSpacing: "-0.02em" }}>SZL</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Operating principles */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Operating principles
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              Six principles that govern every product decision.
-            </h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {operatingPrinciples.map((principle) => {
-                const Icon = principle.icon;
-                return (
-                  <div
-                    key={principle.title}
-                    className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6"
-                  >
-                    <div
-                      className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20"
-                      style={{ color: principle.color }}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-white">{principle.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-white/55">{principle.body}</p>
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054] mb-2">
+                    Founder & CEO
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Operating thesis */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-                  Operating thesis
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-                  Five beliefs that drive the company.
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-white/55">
-                  The operating thesis is not a vision document. It is a set of bets that are either
-                  right or wrong — and that can be tested with evidence. Every product decision maps
-                  back to one of these.
-                </p>
+                  <h1 className="max-w-2xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+                    Stephen Lutar
+                  </h1>
+                </div>
               </div>
-              <div className="space-y-3">
-                {operatingThesis.map((item, i) => (
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
+                Builder, operator, systems thinker. Designing the infrastructure layer for how
+                governed organizations make and audit operational decisions — starting with business
+                observability, and extending through maritime, security, real estate, and advisory.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/investors/data-room"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                >
+                  Request data room access
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]"
+                >
+                  Start a conversation
+                </Link>
+              </div>
+            </div>
+          </section>
+  
+          {/* Founder-market fit */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+                Founder-market fit
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                Why this founder for this problem at this time.
+              </h2>
+              <div className="mt-10 grid gap-5 md:grid-cols-2">
+                {founderMarketFit.map((item) => (
                   <div
-                    key={i}
-                    className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                    key={item.label}
+                    className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-6"
                   >
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
-                    <p className="text-sm leading-6 text-white/65">{item}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#d4a054]">
+                      {item.label}
+                    </p>
+                    <p className="mt-3 text-sm leading-7 text-white/65">{item.body}</p>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Proof objects */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Proof objects
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              Built systems. Produced outcomes.
-            </h2>
-            <div className="mt-10 space-y-4">
-              {proofObjects.map((proof) => (
-                <div
-                  key={proof.title}
-                  className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6"
-                  style={{ borderLeft: `3px solid ${proof.color}50` }}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span
-                      className="text-xs font-semibold uppercase tracking-[0.14em]"
-                      style={{ color: proof.color }}
-                    >
-                      {proof.platform}
-                    </span>
-                    <h3 className="text-sm font-semibold text-white">{proof.title}</h3>
-                  </div>
-                  <p className="text-sm leading-7 text-white/60">{proof.outcome}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Why this stage matters */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.02] p-8 lg:p-10">
+          </section>
+  
+          {/* Operating principles */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-                Why this stage
+                Operating principles
               </p>
-              <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-tight text-white">
-                The founder is the asset at this stage. Not the team deck.
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                Six principles that govern every product decision.
               </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/60">
-                SZL Holdings is at the stage where the founder's judgment, technical depth, and
-                operating instinct are the primary risk and the primary asset. The company is raising
-                on the strength of the architecture, the operating philosophy, and the proof that the
-                platform can deliver outcomes in real environments — not on a team chart or a market
-                size calculation.
-              </p>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/60">
-                The right investor at this stage understands that a founder who can build the full
-                stack, run the operation, and generate real proof objects is the foundation of a
-                scalable company — not a gap to be filled by hiring. The team grows around the
-                architecture, not the other way around.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-                >
-                  Start the conversation
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/investors/data-room"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]"
-                >
-                  Request data room access
-                </Link>
+              <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {operatingPrinciples.map((principle) => {
+                  const Icon = principle.icon;
+                  return (
+                    <div
+                      key={principle.title}
+                      className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6"
+                    >
+                      <div
+                        className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20"
+                        style={{ color: principle.color }}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-white">{principle.title}</h3>
+                      <p className="mt-3 text-sm leading-6 text-white/55">{principle.body}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Navigation */}
-        <section>
-          <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                { label: "Investor overview", href: "/investors/overview", icon: Building2 },
-                { label: "Roadmap", href: "/investors/roadmap", icon: Map },
-                { label: "Data room", href: "/investors/data-room", icon: FileText },
-              ].map((item) => (
-                <Link key={item.label} href={item.href}>
-                  <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
-                    <item.icon className="h-4 w-4 text-[#d4a054]" />
-                    <span className="text-sm font-medium text-white/80">{item.label}</span>
-                    <ArrowRight className="ml-auto h-3.5 w-3.5 text-white/25" />
-                  </div>
-                </Link>
-              ))}
+          </section>
+  
+          {/* Operating thesis */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+                    Operating thesis
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                    Five beliefs that drive the company.
+                  </h2>
+                  <p className="mt-4 text-sm leading-7 text-white/55">
+                    The operating thesis is not a vision document. It is a set of bets that are either
+                    right or wrong — and that can be tested with evidence. Every product decision maps
+                    back to one of these.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {operatingThesis.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                    >
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
+                      <p className="text-sm leading-6 text-white/65">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          {/* Proof objects */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+                Proof objects
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                Built systems. Produced outcomes.
+              </h2>
+              <div className="mt-10 space-y-4">
+                {proofObjects.map((proof) => (
+                  <div
+                    key={proof.title}
+                    className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6"
+                    style={{ borderLeft: `3px solid ${proof.color}50` }}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <span
+                        className="text-xs font-semibold uppercase tracking-[0.14em]"
+                        style={{ color: proof.color }}
+                      >
+                        {proof.platform}
+                      </span>
+                      <h3 className="text-sm font-semibold text-white">{proof.title}</h3>
+                    </div>
+                    <p className="text-sm leading-7 text-white/60">{proof.outcome}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Why this stage matters */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.02] p-8 lg:p-10">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+                  Why this stage
+                </p>
+                <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-tight text-white">
+                  The founder is the asset at this stage. Not the team deck.
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/60">
+                  SZL Holdings is at the stage where the founder's judgment, technical depth, and
+                  operating instinct are the primary risk and the primary asset. The company is raising
+                  on the strength of the architecture, the operating philosophy, and the proof that the
+                  platform can deliver outcomes in real environments — not on a team chart or a market
+                  size calculation.
+                </p>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/60">
+                  The right investor at this stage understands that a founder who can build the full
+                  stack, run the operation, and generate real proof objects is the foundation of a
+                  scalable company — not a gap to be filled by hiring. The team grows around the
+                  architecture, not the other way around.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                  >
+                    Start the conversation
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/investors/data-room"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]"
+                  >
+                    Request data room access
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+  
+          {/* Navigation */}
+          <section>
+            <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  { label: "Investor overview", href: "/investors/overview", icon: Building2 },
+                  { label: "Roadmap", href: "/investors/roadmap", icon: Map },
+                  { label: "Data room", href: "/investors/data-room", icon: FileText },
+                ].map((item) => (
+                  <Link key={item.label} href={item.href}>
+                    <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
+                      <item.icon className="h-4 w-4 text-[#d4a054]" />
+                      <span className="text-sm font-medium text-white/80">{item.label}</span>
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-white/25" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

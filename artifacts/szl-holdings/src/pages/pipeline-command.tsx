@@ -275,7 +275,7 @@ function DealAuditTrail({ dealId }: { dealId: number }) {
 }
 
 export default function PipelineCommandPage() {
-  usePageMeta({ title: "Pipeline Command — Sales Execution" });
+  const __pageMeta = usePageMeta({ title: "Pipeline Command — Sales Execution" });
   const queryClient = useQueryClient();
 
   const [verticalFilter, setVerticalFilter] = useState<Vertical | "All">("All");
@@ -417,393 +417,396 @@ export default function PipelineCommandPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.bg, color: COLORS.text, padding: "32px 24px" }}>
-      <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-
-        <header style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: COLORS.textDim, margin: "0 0 8px" }}>
-            Founder · Outbound Sales Execution
-          </p>
-          <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.015em", margin: 0 }}>
-            Pipeline Command
-          </h1>
-          <p style={{ marginTop: 8, color: COLORS.textMuted, fontSize: 13.5, maxWidth: 760, lineHeight: 1.55 }}>
-            Operational console for activating the design-partner motion. Researched ICP-fit accounts (not contacted),
-            an honest pipeline shared across the team, and the outreach, DPA, and kickoff kits to move a deal from cold to signed.
-            Pipeline state is persisted server-side and visible to every admin in your organization, with an audit trail of stage transitions.
-          </p>
-          <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center" }}>
-            <button
-              onClick={() => dealsQuery.refetch()}
-              disabled={dealsQuery.isFetching}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "5px 10px", background: "transparent",
-                border: `1px solid ${COLORS.border}`, borderRadius: 5,
-                color: COLORS.textMuted, fontSize: 11.5, cursor: dealsQuery.isFetching ? "wait" : "pointer",
-              }}
-            >
-              <RefreshCw size={11} className={dealsQuery.isFetching ? "animate-spin" : undefined} /> Refresh
-            </button>
-            {dealsQuery.isError && (
-              <span style={{ fontSize: 11.5, color: "hsl(0,72%,68%)" }}>
-                Failed to load: {dealsQuery.error instanceof Error ? dealsQuery.error.message : "unknown error"}
-              </span>
-            )}
-          </div>
-        </header>
-
-        {/* Honest scoreboard */}
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 10, marginBottom: 8,
-        }}>
-          {[
-            { label: "Signed Design Partners", value: signed, accent: signed > 0 ? "hsl(142,60%,55%)" : COLORS.textMuted },
-            { label: "Active Pipeline (contacted)", value: activePipeline, accent: activePipeline > 0 ? COLORS.accent : COLORS.textMuted },
-            { label: "In Research Queue", value: researchedDealCount, accent: COLORS.textMuted },
-            { label: "Researched Target Bank", value: TARGETS.length, accent: COLORS.text },
-            { label: "Cohort 1 Slots Open", value: Math.max(0, 6 - signed), accent: COLORS.text },
-          ].map((s) => (
-            <div key={s.label} style={{
-              background: COLORS.surface, border: `1px solid ${COLORS.border}`,
-              borderRadius: 8, padding: "14px 16px",
-            }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: COLORS.textDim }}>
-                {s.label}
-              </div>
-              <div style={{ fontSize: 26, fontWeight: 700, color: s.accent, marginTop: 4 }}>
-                {s.value}
-              </div>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: COLORS.bg, color: COLORS.text, padding: "32px 24px" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+  
+          <header style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: COLORS.textDim, margin: "0 0 8px" }}>
+              Founder · Outbound Sales Execution
+            </p>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.015em", margin: 0 }}>
+              Pipeline Command
+            </h1>
+            <p style={{ marginTop: 8, color: COLORS.textMuted, fontSize: 13.5, maxWidth: 760, lineHeight: 1.55 }}>
+              Operational console for activating the design-partner motion. Researched ICP-fit accounts (not contacted),
+              an honest pipeline shared across the team, and the outreach, DPA, and kickoff kits to move a deal from cold to signed.
+              Pipeline state is persisted server-side and visible to every admin in your organization, with an audit trail of stage transitions.
+            </p>
+            <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center" }}>
+              <button
+                onClick={() => dealsQuery.refetch()}
+                disabled={dealsQuery.isFetching}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  padding: "5px 10px", background: "transparent",
+                  border: `1px solid ${COLORS.border}`, borderRadius: 5,
+                  color: COLORS.textMuted, fontSize: 11.5, cursor: dealsQuery.isFetching ? "wait" : "pointer",
+                }}
+              >
+                <RefreshCw size={11} className={dealsQuery.isFetching ? "animate-spin" : undefined} /> Refresh
+              </button>
+              {dealsQuery.isError && (
+                <span style={{ fontSize: 11.5, color: "hsl(0,72%,68%)" }}>
+                  Failed to load: {dealsQuery.error instanceof Error ? dealsQuery.error.message : "unknown error"}
+                </span>
+              )}
             </div>
-          ))}
-        </div>
-        {!dealsQuery.isLoading && signed === 0 && (
+          </header>
+  
+          {/* Honest scoreboard */}
           <div style={{
-            display: "flex", alignItems: "flex-start", gap: 8,
-            padding: "10px 14px", marginTop: 6,
-            background: "hsla(45,80%,52%,0.07)", border: "1px solid hsla(45,80%,55%,0.18)", borderRadius: 6,
-            color: "hsl(45,80%,80%)", fontSize: 12.5, lineHeight: 1.5,
+            display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: 10, marginBottom: 8,
           }}>
-            <AlertCircle size={14} style={{ marginTop: 2, flexShrink: 0 }} />
-            <span>
-              <strong>Honest status:</strong> zero design partners signed. Zero deals in pipeline.
-              The platform, the program, the kit, and the targets are ready — execution (real outreach to real humans) is the gating step.
-              Until a human signs a real DPA, do not log fabricated entries here.
-            </span>
-          </div>
-        )}
-
-        {/* Pipeline */}
-        <Section title="Live Pipeline" eyebrow="Real deals only · Shared across team">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {STAGES.map((s) => (
-                <div key={s} style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  padding: "4px 10px",
-                  background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 999,
-                  fontSize: 11, color: COLORS.textMuted,
-                }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 999, background: STAGE_COLOR[s] }} />
-                  {s} <span style={{ color: COLORS.text, fontWeight: 600 }}>{counts[s]}</span>
+            {[
+              { label: "Signed Design Partners", value: signed, accent: signed > 0 ? "hsl(142,60%,55%)" : COLORS.textMuted },
+              { label: "Active Pipeline (contacted)", value: activePipeline, accent: activePipeline > 0 ? COLORS.accent : COLORS.textMuted },
+              { label: "In Research Queue", value: researchedDealCount, accent: COLORS.textMuted },
+              { label: "Researched Target Bank", value: TARGETS.length, accent: COLORS.text },
+              { label: "Cohort 1 Slots Open", value: Math.max(0, 6 - signed), accent: COLORS.text },
+            ].map((s) => (
+              <div key={s.label} style={{
+                background: COLORS.surface, border: `1px solid ${COLORS.border}`,
+                borderRadius: 8, padding: "14px 16px",
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: COLORS.textDim }}>
+                  {s.label}
                 </div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: s.accent, marginTop: 4 }}>
+                  {s.value}
+                </div>
+              </div>
+            ))}
+          </div>
+          {!dealsQuery.isLoading && signed === 0 && (
+            <div style={{
+              display: "flex", alignItems: "flex-start", gap: 8,
+              padding: "10px 14px", marginTop: 6,
+              background: "hsla(45,80%,52%,0.07)", border: "1px solid hsla(45,80%,55%,0.18)", borderRadius: 6,
+              color: "hsl(45,80%,80%)", fontSize: 12.5, lineHeight: 1.5,
+            }}>
+              <AlertCircle size={14} style={{ marginTop: 2, flexShrink: 0 }} />
+              <span>
+                <strong>Honest status:</strong> zero design partners signed. Zero deals in pipeline.
+                The platform, the program, the kit, and the targets are ready — execution (real outreach to real humans) is the gating step.
+                Until a human signs a real DPA, do not log fabricated entries here.
+              </span>
+            </div>
+          )}
+  
+          {/* Pipeline */}
+          <Section title="Live Pipeline" eyebrow="Real deals only · Shared across team">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {STAGES.map((s) => (
+                  <div key={s} style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "4px 10px",
+                    background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 999,
+                    fontSize: 11, color: COLORS.textMuted,
+                  }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 999, background: STAGE_COLOR[s] }} />
+                    {s} <span style={{ color: COLORS.text, fontWeight: 600 }}>{counts[s]}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowAdd(!showAdd)}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  padding: "7px 14px", background: COLORS.accent, color: "#1a1206",
+                  border: "none", borderRadius: 6, fontSize: 12.5, fontWeight: 600, cursor: "pointer",
+                }}
+              >
+                <Plus size={13} /> Log a real deal
+              </button>
+            </div>
+  
+            {showAdd && (
+              <div style={{
+                background: COLORS.surfaceAlt, border: `1px solid ${COLORS.borderStrong}`,
+                borderRadius: 8, padding: 14, marginBottom: 12,
+              }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+                  <input placeholder="Account name" value={draft.account ?? ""} onChange={(e) => setDraft({ ...draft, account: e.target.value })} style={inputStyle} />
+                  <select value={draft.vertical ?? ""} onChange={(e) => setDraft({ ...draft, vertical: e.target.value as Vertical })} style={inputStyle}>
+                    <option value="">Vertical…</option>
+                    {(["Security", "Maritime", "Real Estate", "Legal"] as Vertical[]).map((v) => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                  <input placeholder="Champion name" value={draft.champion ?? ""} onChange={(e) => setDraft({ ...draft, champion: e.target.value })} style={inputStyle} />
+                  <input placeholder="Champion title" value={draft.championTitle ?? ""} onChange={(e) => setDraft({ ...draft, championTitle: e.target.value })} style={inputStyle} />
+                  <select value={draft.stage ?? "Researched"} onChange={(e) => setDraft({ ...draft, stage: e.target.value as Stage })} style={inputStyle}>
+                    {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <input type="number" min={1} max={10} placeholder="Fit score 1–10" value={draft.fitScore ?? ""} onChange={(e) => setDraft({ ...draft, fitScore: Number(e.target.value) })} style={inputStyle} />
+                  <input placeholder="Next step" value={draft.nextStep ?? ""} onChange={(e) => setDraft({ ...draft, nextStep: e.target.value })} style={{ ...inputStyle, gridColumn: "1 / -1" }} />
+                  <textarea placeholder="Notes" value={draft.notes ?? ""} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} style={{ ...inputStyle, gridColumn: "1 / -1", minHeight: 60, fontFamily: "inherit" }} />
+                </div>
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <button onClick={addDeal} disabled={!draft.account || !draft.vertical || createMutation.isPending} style={{ ...primaryBtn, opacity: (!draft.account || !draft.vertical) ? 0.5 : 1 }}>
+                    {createMutation.isPending ? "Adding…" : "Add deal"}
+                  </button>
+                  <button onClick={() => { setShowAdd(false); setDraft({}); }} style={ghostBtn}>Cancel</button>
+                </div>
+              </div>
+            )}
+  
+            {dealsQuery.isLoading && (
+              <div style={{ padding: 36, textAlign: "center", color: COLORS.textMuted, fontSize: 13, border: `1px dashed ${COLORS.border}`, borderRadius: 8 }}>
+                Loading shared pipeline…
+              </div>
+            )}
+  
+            {!dealsQuery.isLoading && deals.length === 0 && (
+              <div style={{ padding: 36, textAlign: "center", color: COLORS.textMuted, fontSize: 13, border: `1px dashed ${COLORS.border}`, borderRadius: 8 }}>
+                No deals logged yet. When you actually contact a target, log it here. Until then, the scoreboard stays honest.
+              </div>
+            )}
+  
+            {deals.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {deals.map((d) => {
+                  const VIcon = VERTICAL_ICON[d.vertical];
+                  const isPending = pendingId === d.id;
+                  const auditOpen = auditOpenFor === d.id;
+                  return (
+                    <div key={d.id} style={{
+                      background: COLORS.surface, border: `1px solid ${COLORS.border}`,
+                      borderRadius: 8, padding: 14,
+                      display: "grid", gridTemplateColumns: "1fr auto", gap: 10, alignItems: "start",
+                      opacity: d.id < 0 ? 0.6 : 1,
+                    }}>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                          <VIcon size={14} color={COLORS.textMuted} />
+                          <strong style={{ fontSize: 14.5 }}>{d.account}</strong>
+                          <span style={{ fontSize: 10.5, color: COLORS.textDim, letterSpacing: "0.06em", textTransform: "uppercase" }}>{d.vertical}</span>
+                          <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "hsla(0,0%,100%,0.04)", color: COLORS.textMuted, border: `1px solid ${COLORS.border}` }}>
+                            fit {d.fitScore}/10
+                          </span>
+                        </div>
+                        {(d.champion || d.championTitle) && (
+                          <div style={{ marginTop: 4, fontSize: 12.5, color: COLORS.textMuted }}>
+                            {d.champion}{d.champion && d.championTitle ? " · " : ""}{d.championTitle}
+                          </div>
+                        )}
+                        {d.nextStep && (
+                          <div style={{ marginTop: 6, fontSize: 12.5, color: COLORS.text }}>
+                            <span style={{ color: COLORS.textDim }}>Next: </span>{d.nextStep}
+                          </div>
+                        )}
+                        {d.notes && (
+                          <div style={{ marginTop: 6, fontSize: 12, color: COLORS.textMuted, whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+                            {d.notes}
+                          </div>
+                        )}
+                        <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {STAGES.map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => updateStage(d.id, s)}
+                              disabled={isPending || d.id < 0}
+                              style={{
+                                padding: "3px 9px", borderRadius: 999, fontSize: 10.5, cursor: isPending ? "wait" : "pointer",
+                                border: `1px solid ${d.stage === s ? STAGE_COLOR[s] : COLORS.border}`,
+                                background: d.stage === s ? `${STAGE_COLOR[s]}22` : "transparent",
+                                color: d.stage === s ? STAGE_COLOR[s] : COLORS.textMuted,
+                                fontWeight: d.stage === s ? 600 : 400,
+                              }}
+                            >{s}</button>
+                          ))}
+                        </div>
+                        {d.id > 0 && (
+                          <div style={{ marginTop: 8 }}>
+                            <button
+                              onClick={() => setAuditOpenFor(auditOpen ? null : d.id)}
+                              style={{
+                                display: "inline-flex", alignItems: "center", gap: 5,
+                                padding: "3px 8px", background: "transparent",
+                                border: `1px solid ${COLORS.border}`, borderRadius: 5,
+                                color: COLORS.textMuted, fontSize: 11, cursor: "pointer",
+                              }}
+                            >
+                              <History size={11} /> {auditOpen ? "Hide" : "Show"} audit trail
+                            </button>
+                            {auditOpen && <DealAuditTrail dealId={d.id} />}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => removeDeal(d.id)}
+                        title="Remove"
+                        disabled={d.id < 0}
+                        style={{ background: "transparent", border: "none", color: COLORS.textDim, cursor: "pointer", padding: 4 }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Section>
+  
+          {/* Researched Targets */}
+          <Section title="Researched Target Accounts" eyebrow="ICP-fit · Not contacted">
+            <p style={{ fontSize: 12.5, color: COLORS.textMuted, marginTop: -8, marginBottom: 14, lineHeight: 1.55, maxWidth: 800 }}>
+              {TARGETS.length} public companies that match the firmographic, regulatory, and persona profile in the Sales Handoff Guide.
+              Research starting points — validate, enrich (recent news, intros, exec changes) before contacting. Promote to pipeline when you decide to actually pursue.
+            </p>
+            <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+              {(["All", "Security", "Maritime", "Real Estate", "Legal"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setVerticalFilter(v)}
+                  style={{
+                    padding: "5px 12px", borderRadius: 999, fontSize: 11.5, cursor: "pointer",
+                    border: `1px solid ${verticalFilter === v ? COLORS.borderStrong : COLORS.border}`,
+                    background: verticalFilter === v ? "hsla(0,0%,100%,0.08)" : "transparent",
+                    color: verticalFilter === v ? COLORS.text : COLORS.textMuted,
+                    fontWeight: verticalFilter === v ? 600 : 400,
+                  }}
+                >{v}</button>
               ))}
             </div>
-            <button
-              onClick={() => setShowAdd(!showAdd)}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "7px 14px", background: COLORS.accent, color: "#1a1206",
-                border: "none", borderRadius: 6, fontSize: 12.5, fontWeight: 600, cursor: "pointer",
-              }}
-            >
-              <Plus size={13} /> Log a real deal
-            </button>
-          </div>
-
-          {showAdd && (
-            <div style={{
-              background: COLORS.surfaceAlt, border: `1px solid ${COLORS.borderStrong}`,
-              borderRadius: 8, padding: 14, marginBottom: 12,
-            }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-                <input placeholder="Account name" value={draft.account ?? ""} onChange={(e) => setDraft({ ...draft, account: e.target.value })} style={inputStyle} />
-                <select value={draft.vertical ?? ""} onChange={(e) => setDraft({ ...draft, vertical: e.target.value as Vertical })} style={inputStyle}>
-                  <option value="">Vertical…</option>
-                  {(["Security", "Maritime", "Real Estate", "Legal"] as Vertical[]).map((v) => <option key={v} value={v}>{v}</option>)}
-                </select>
-                <input placeholder="Champion name" value={draft.champion ?? ""} onChange={(e) => setDraft({ ...draft, champion: e.target.value })} style={inputStyle} />
-                <input placeholder="Champion title" value={draft.championTitle ?? ""} onChange={(e) => setDraft({ ...draft, championTitle: e.target.value })} style={inputStyle} />
-                <select value={draft.stage ?? "Researched"} onChange={(e) => setDraft({ ...draft, stage: e.target.value as Stage })} style={inputStyle}>
-                  {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-                <input type="number" min={1} max={10} placeholder="Fit score 1–10" value={draft.fitScore ?? ""} onChange={(e) => setDraft({ ...draft, fitScore: Number(e.target.value) })} style={inputStyle} />
-                <input placeholder="Next step" value={draft.nextStep ?? ""} onChange={(e) => setDraft({ ...draft, nextStep: e.target.value })} style={{ ...inputStyle, gridColumn: "1 / -1" }} />
-                <textarea placeholder="Notes" value={draft.notes ?? ""} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} style={{ ...inputStyle, gridColumn: "1 / -1", minHeight: 60, fontFamily: "inherit" }} />
-              </div>
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                <button onClick={addDeal} disabled={!draft.account || !draft.vertical || createMutation.isPending} style={{ ...primaryBtn, opacity: (!draft.account || !draft.vertical) ? 0.5 : 1 }}>
-                  {createMutation.isPending ? "Adding…" : "Add deal"}
-                </button>
-                <button onClick={() => { setShowAdd(false); setDraft({}); }} style={ghostBtn}>Cancel</button>
-              </div>
-            </div>
-          )}
-
-          {dealsQuery.isLoading && (
-            <div style={{ padding: 36, textAlign: "center", color: COLORS.textMuted, fontSize: 13, border: `1px dashed ${COLORS.border}`, borderRadius: 8 }}>
-              Loading shared pipeline…
-            </div>
-          )}
-
-          {!dealsQuery.isLoading && deals.length === 0 && (
-            <div style={{ padding: 36, textAlign: "center", color: COLORS.textMuted, fontSize: 13, border: `1px dashed ${COLORS.border}`, borderRadius: 8 }}>
-              No deals logged yet. When you actually contact a target, log it here. Until then, the scoreboard stays honest.
-            </div>
-          )}
-
-          {deals.length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {deals.map((d) => {
-                const VIcon = VERTICAL_ICON[d.vertical];
-                const isPending = pendingId === d.id;
-                const auditOpen = auditOpenFor === d.id;
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 10 }}>
+              {visibleTargets.map((t) => {
+                const VIcon = VERTICAL_ICON[t.vertical];
+                const inPipeline = deals.some((d) => d.account.toLowerCase() === t.account.toLowerCase());
                 return (
-                  <div key={d.id} style={{
+                  <div key={t.account} style={{
                     background: COLORS.surface, border: `1px solid ${COLORS.border}`,
-                    borderRadius: 8, padding: 14,
-                    display: "grid", gridTemplateColumns: "1fr auto", gap: 10, alignItems: "start",
-                    opacity: d.id < 0 ? 0.6 : 1,
+                    borderRadius: 8, padding: 14, display: "flex", flexDirection: "column",
                   }}>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                        <VIcon size={14} color={COLORS.textMuted} />
-                        <strong style={{ fontSize: 14.5 }}>{d.account}</strong>
-                        <span style={{ fontSize: 10.5, color: COLORS.textDim, letterSpacing: "0.06em", textTransform: "uppercase" }}>{d.vertical}</span>
-                        <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "hsla(0,0%,100%,0.04)", color: COLORS.textMuted, border: `1px solid ${COLORS.border}` }}>
-                          fit {d.fitScore}/10
-                        </span>
-                      </div>
-                      {(d.champion || d.championTitle) && (
-                        <div style={{ marginTop: 4, fontSize: 12.5, color: COLORS.textMuted }}>
-                          {d.champion}{d.champion && d.championTitle ? " · " : ""}{d.championTitle}
-                        </div>
-                      )}
-                      {d.nextStep && (
-                        <div style={{ marginTop: 6, fontSize: 12.5, color: COLORS.text }}>
-                          <span style={{ color: COLORS.textDim }}>Next: </span>{d.nextStep}
-                        </div>
-                      )}
-                      {d.notes && (
-                        <div style={{ marginTop: 6, fontSize: 12, color: COLORS.textMuted, whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
-                          {d.notes}
-                        </div>
-                      )}
-                      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                        {STAGES.map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => updateStage(d.id, s)}
-                            disabled={isPending || d.id < 0}
-                            style={{
-                              padding: "3px 9px", borderRadius: 999, fontSize: 10.5, cursor: isPending ? "wait" : "pointer",
-                              border: `1px solid ${d.stage === s ? STAGE_COLOR[s] : COLORS.border}`,
-                              background: d.stage === s ? `${STAGE_COLOR[s]}22` : "transparent",
-                              color: d.stage === s ? STAGE_COLOR[s] : COLORS.textMuted,
-                              fontWeight: d.stage === s ? 600 : 400,
-                            }}
-                          >{s}</button>
-                        ))}
-                      </div>
-                      {d.id > 0 && (
-                        <div style={{ marginTop: 8 }}>
-                          <button
-                            onClick={() => setAuditOpenFor(auditOpen ? null : d.id)}
-                            style={{
-                              display: "inline-flex", alignItems: "center", gap: 5,
-                              padding: "3px 8px", background: "transparent",
-                              border: `1px solid ${COLORS.border}`, borderRadius: 5,
-                              color: COLORS.textMuted, fontSize: 11, cursor: "pointer",
-                            }}
-                          >
-                            <History size={11} /> {auditOpen ? "Hide" : "Show"} audit trail
-                          </button>
-                          {auditOpen && <DealAuditTrail dealId={d.id} />}
-                        </div>
-                      )}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <VIcon size={13} color={COLORS.textMuted} />
+                      <strong style={{ fontSize: 13.5 }}>{t.account}</strong>
+                      <span style={{ marginLeft: "auto", fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "hsla(0,0%,100%,0.04)", color: COLORS.textMuted, border: `1px solid ${COLORS.border}` }}>
+                        {t.product} · fit {t.fitScore}/10
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, color: COLORS.textMuted, lineHeight: 1.55, marginTop: 4 }}>
+                      {t.why}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: COLORS.text, marginTop: 8, lineHeight: 1.5 }}>
+                      <span style={{ color: COLORS.textDim }}>Find: </span>{t.whoToFind}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: COLORS.text, marginTop: 4, lineHeight: 1.5 }}>
+                      <span style={{ color: COLORS.textDim }}>Hook: </span>{t.hook}
                     </div>
                     <button
-                      onClick={() => removeDeal(d.id)}
-                      title="Remove"
-                      disabled={d.id < 0}
-                      style={{ background: "transparent", border: "none", color: COLORS.textDim, cursor: "pointer", padding: 4 }}
+                      onClick={() => promoteTarget(t)}
+                      disabled={inPipeline || createMutation.isPending}
+                      style={{
+                        marginTop: 12,
+                        padding: "6px 12px",
+                        background: inPipeline ? "hsla(142,60%,45%,0.10)" : "hsla(0,0%,100%,0.05)",
+                        color: inPipeline ? "hsl(142,60%,68%)" : COLORS.text,
+                        border: `1px solid ${inPipeline ? "hsla(142,60%,55%,0.25)" : COLORS.border}`,
+                        borderRadius: 5, fontSize: 11.5, fontWeight: 600,
+                        cursor: inPipeline ? "default" : "pointer",
+                        display: "inline-flex", alignItems: "center", gap: 5, justifyContent: "center",
+                      }}
                     >
-                      <Trash2 size={14} />
+                      {inPipeline ? <><CheckCircle2 size={12} /> In pipeline</> : <><Target size={12} /> Promote to pipeline</>}
                     </button>
                   </div>
                 );
               })}
             </div>
-          )}
-        </Section>
-
-        {/* Researched Targets */}
-        <Section title="Researched Target Accounts" eyebrow="ICP-fit · Not contacted">
-          <p style={{ fontSize: 12.5, color: COLORS.textMuted, marginTop: -8, marginBottom: 14, lineHeight: 1.55, maxWidth: 800 }}>
-            {TARGETS.length} public companies that match the firmographic, regulatory, and persona profile in the Sales Handoff Guide.
-            Research starting points — validate, enrich (recent news, intros, exec changes) before contacting. Promote to pipeline when you decide to actually pursue.
-          </p>
-          <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
-            {(["All", "Security", "Maritime", "Real Estate", "Legal"] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setVerticalFilter(v)}
-                style={{
-                  padding: "5px 12px", borderRadius: 999, fontSize: 11.5, cursor: "pointer",
-                  border: `1px solid ${verticalFilter === v ? COLORS.borderStrong : COLORS.border}`,
-                  background: verticalFilter === v ? "hsla(0,0%,100%,0.08)" : "transparent",
-                  color: verticalFilter === v ? COLORS.text : COLORS.textMuted,
-                  fontWeight: verticalFilter === v ? 600 : 400,
-                }}
-              >{v}</button>
-            ))}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 10 }}>
-            {visibleTargets.map((t) => {
+          </Section>
+  
+          {/* Outreach Kit */}
+          <Section title="Outreach Kit" eyebrow="Copy, personalize, send">
+            {EMAIL_TEMPLATES.map((t) => {
               const VIcon = VERTICAL_ICON[t.vertical];
-              const inPipeline = deals.some((d) => d.account.toLowerCase() === t.account.toLowerCase());
               return (
-                <div key={t.account} style={{
-                  background: COLORS.surface, border: `1px solid ${COLORS.border}`,
-                  borderRadius: 8, padding: 14, display: "flex", flexDirection: "column",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <VIcon size={13} color={COLORS.textMuted} />
-                    <strong style={{ fontSize: 13.5 }}>{t.account}</strong>
-                    <span style={{ marginLeft: "auto", fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "hsla(0,0%,100%,0.04)", color: COLORS.textMuted, border: `1px solid ${COLORS.border}` }}>
-                      {t.product} · fit {t.fitScore}/10
-                    </span>
+                <CollapsibleCard key={t.vertical} icon={Mail} title={`Email · ${t.vertical}`} subtitle={t.subject}>
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                      <VIcon size={12} color={COLORS.textMuted} />
+                      <span style={{ fontSize: 11, color: COLORS.textDim }}>Subject:</span>
+                      <span style={{ fontSize: 12.5, color: COLORS.text }}>{t.subject}</span>
+                      <div style={{ marginLeft: "auto" }}><CopyButton text={`Subject: ${t.subject}\n\n${t.body}`} label="Copy email" /></div>
+                    </div>
+                    <pre style={preStyle}>{t.body}</pre>
                   </div>
-                  <div style={{ fontSize: 12, color: COLORS.textMuted, lineHeight: 1.55, marginTop: 4 }}>
-                    {t.why}
-                  </div>
-                  <div style={{ fontSize: 11.5, color: COLORS.text, marginTop: 8, lineHeight: 1.5 }}>
-                    <span style={{ color: COLORS.textDim }}>Find: </span>{t.whoToFind}
-                  </div>
-                  <div style={{ fontSize: 11.5, color: COLORS.text, marginTop: 4, lineHeight: 1.5 }}>
-                    <span style={{ color: COLORS.textDim }}>Hook: </span>{t.hook}
-                  </div>
-                  <button
-                    onClick={() => promoteTarget(t)}
-                    disabled={inPipeline || createMutation.isPending}
-                    style={{
-                      marginTop: 12,
-                      padding: "6px 12px",
-                      background: inPipeline ? "hsla(142,60%,45%,0.10)" : "hsla(0,0%,100%,0.05)",
-                      color: inPipeline ? "hsl(142,60%,68%)" : COLORS.text,
-                      border: `1px solid ${inPipeline ? "hsla(142,60%,55%,0.25)" : COLORS.border}`,
-                      borderRadius: 5, fontSize: 11.5, fontWeight: 600,
-                      cursor: inPipeline ? "default" : "pointer",
-                      display: "inline-flex", alignItems: "center", gap: 5, justifyContent: "center",
-                    }}
-                  >
-                    {inPipeline ? <><CheckCircle2 size={12} /> In pipeline</> : <><Target size={12} /> Promote to pipeline</>}
-                  </button>
-                </div>
+                </CollapsibleCard>
               );
             })}
-          </div>
-        </Section>
-
-        {/* Outreach Kit */}
-        <Section title="Outreach Kit" eyebrow="Copy, personalize, send">
-          {EMAIL_TEMPLATES.map((t) => {
-            const VIcon = VERTICAL_ICON[t.vertical];
-            return (
-              <CollapsibleCard key={t.vertical} icon={Mail} title={`Email · ${t.vertical}`} subtitle={t.subject}>
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                    <VIcon size={12} color={COLORS.textMuted} />
-                    <span style={{ fontSize: 11, color: COLORS.textDim }}>Subject:</span>
-                    <span style={{ fontSize: 12.5, color: COLORS.text }}>{t.subject}</span>
-                    <div style={{ marginLeft: "auto" }}><CopyButton text={`Subject: ${t.subject}\n\n${t.body}`} label="Copy email" /></div>
-                  </div>
-                  <pre style={preStyle}>{t.body}</pre>
-                </div>
-              </CollapsibleCard>
-            );
-          })}
-          <CollapsibleCard icon={Linkedin} title="LinkedIn DM (universal)" subtitle="120-word warm intro">
-            <div style={{ marginTop: 12 }}>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={LINKEDIN_DM} /></div>
-              <pre style={preStyle}>{LINKEDIN_DM}</pre>
-            </div>
-          </CollapsibleCard>
-          <CollapsibleCard icon={Mail} title="Follow-up #2 (T+5 days)" subtitle="Permission to bow out gracefully">
-            <div style={{ marginTop: 12 }}>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={FOLLOWUP_2} /></div>
-              <pre style={preStyle}>{FOLLOWUP_2}</pre>
-            </div>
-          </CollapsibleCard>
-          <CollapsibleCard icon={Mail} title="Follow-up #3 / Break-up (T+12 days)" subtitle="Last note — re-surface request">
-            <div style={{ marginTop: 12 }}>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={FOLLOWUP_3} /></div>
-              <pre style={preStyle}>{FOLLOWUP_3}</pre>
-            </div>
-          </CollapsibleCard>
-        </Section>
-
-        {/* Discovery + Demo + DPA + Kickoff */}
-        <Section title="Deal Execution Kit" eyebrow="From first reply to signed DPA">
-          <CollapsibleCard icon={ClipboardCheck} title="Discovery Call Script (25 min)" subtitle="The 6 questions, in order">
-            <div style={{ marginTop: 12 }}>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={DISCOVERY_SCRIPT} /></div>
-              <pre style={preStyle}>{DISCOVERY_SCRIPT}</pre>
-            </div>
-          </CollapsibleCard>
-          <CollapsibleCard icon={FileText} title="Design Partner Agreement (preview)" subtitle="Full template at DESIGN_PARTNER_AGREEMENT.md">
-            <div style={{ marginTop: 12 }}>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={DPA_PREVIEW} label="Copy template" /></div>
-              <pre style={preStyle}>{DPA_PREVIEW}</pre>
-            </div>
-          </CollapsibleCard>
-          <CollapsibleCard icon={Handshake} title="Kickoff Agenda (60 min)" subtitle="Use within 14 days of DPA signature">
-            <div style={{ marginTop: 12 }}>
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={KICKOFF_AGENDA} /></div>
-              <pre style={preStyle}>{KICKOFF_AGENDA}</pre>
-            </div>
-          </CollapsibleCard>
-        </Section>
-
-        {/* Companion docs */}
-        <Section title="Companion Docs" eyebrow="Read before scaling outreach">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 10 }}>
-            {[
-              { title: "TARGET_ACCOUNTS.md", desc: "Full researched account list with rationale and hooks." },
-              { title: "OUTREACH_SEQUENCES.md", desc: "Email + LinkedIn sequences per vertical and persona." },
-              { title: "DESIGN_PARTNER_AGREEMENT.md", desc: "Fillable DPA — all clauses, ready to send." },
-              { title: "FIRST_MEETING_KIT.md", desc: "Discovery script, demo flow, follow-up library." },
-              { title: "SALES_EXECUTION_STATUS.md", desc: "Honest current state and what only a human can do." },
-              { title: "SALES_HANDOFF_GUIDE.md", desc: "Existing motion + qualification (already in repo)." },
-              { title: "DESIGN_PARTNER_PROGRAM.md", desc: "Existing program structure + pricing (already in repo)." },
-              { title: "DEMO_STRATEGY.md", desc: "Existing demo scripts by audience (already in repo)." },
-            ].map((d) => (
-              <div key={d.title} style={{
-                background: COLORS.surface, border: `1px solid ${COLORS.border}`,
-                borderRadius: 8, padding: 12,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Briefcase size={12} color={COLORS.textMuted} />
-                  <code style={{ fontSize: 12, color: COLORS.text }}>{d.title}</code>
-                </div>
-                <div style={{ fontSize: 11.5, color: COLORS.textMuted, marginTop: 6, lineHeight: 1.5 }}>{d.desc}</div>
+            <CollapsibleCard icon={Linkedin} title="LinkedIn DM (universal)" subtitle="120-word warm intro">
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={LINKEDIN_DM} /></div>
+                <pre style={preStyle}>{LINKEDIN_DM}</pre>
               </div>
-            ))}
-          </div>
-        </Section>
+            </CollapsibleCard>
+            <CollapsibleCard icon={Mail} title="Follow-up #2 (T+5 days)" subtitle="Permission to bow out gracefully">
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={FOLLOWUP_2} /></div>
+                <pre style={preStyle}>{FOLLOWUP_2}</pre>
+              </div>
+            </CollapsibleCard>
+            <CollapsibleCard icon={Mail} title="Follow-up #3 / Break-up (T+12 days)" subtitle="Last note — re-surface request">
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={FOLLOWUP_3} /></div>
+                <pre style={preStyle}>{FOLLOWUP_3}</pre>
+              </div>
+            </CollapsibleCard>
+          </Section>
+  
+          {/* Discovery + Demo + DPA + Kickoff */}
+          <Section title="Deal Execution Kit" eyebrow="From first reply to signed DPA">
+            <CollapsibleCard icon={ClipboardCheck} title="Discovery Call Script (25 min)" subtitle="The 6 questions, in order">
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={DISCOVERY_SCRIPT} /></div>
+                <pre style={preStyle}>{DISCOVERY_SCRIPT}</pre>
+              </div>
+            </CollapsibleCard>
+            <CollapsibleCard icon={FileText} title="Design Partner Agreement (preview)" subtitle="Full template at DESIGN_PARTNER_AGREEMENT.md">
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={DPA_PREVIEW} label="Copy template" /></div>
+                <pre style={preStyle}>{DPA_PREVIEW}</pre>
+              </div>
+            </CollapsibleCard>
+            <CollapsibleCard icon={Handshake} title="Kickoff Agenda (60 min)" subtitle="Use within 14 days of DPA signature">
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}><CopyButton text={KICKOFF_AGENDA} /></div>
+                <pre style={preStyle}>{KICKOFF_AGENDA}</pre>
+              </div>
+            </CollapsibleCard>
+          </Section>
+  
+          {/* Companion docs */}
+          <Section title="Companion Docs" eyebrow="Read before scaling outreach">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 10 }}>
+              {[
+                { title: "TARGET_ACCOUNTS.md", desc: "Full researched account list with rationale and hooks." },
+                { title: "OUTREACH_SEQUENCES.md", desc: "Email + LinkedIn sequences per vertical and persona." },
+                { title: "DESIGN_PARTNER_AGREEMENT.md", desc: "Fillable DPA — all clauses, ready to send." },
+                { title: "FIRST_MEETING_KIT.md", desc: "Discovery script, demo flow, follow-up library." },
+                { title: "SALES_EXECUTION_STATUS.md", desc: "Honest current state and what only a human can do." },
+                { title: "SALES_HANDOFF_GUIDE.md", desc: "Existing motion + qualification (already in repo)." },
+                { title: "DESIGN_PARTNER_PROGRAM.md", desc: "Existing program structure + pricing (already in repo)." },
+                { title: "DEMO_STRATEGY.md", desc: "Existing demo scripts by audience (already in repo)." },
+              ].map((d) => (
+                <div key={d.title} style={{
+                  background: COLORS.surface, border: `1px solid ${COLORS.border}`,
+                  borderRadius: 8, padding: 12,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Briefcase size={12} color={COLORS.textMuted} />
+                    <code style={{ fontSize: 12, color: COLORS.text }}>{d.title}</code>
+                  </div>
+                  <div style={{ fontSize: 11.5, color: COLORS.textMuted, marginTop: 6, lineHeight: 1.5 }}>{d.desc}</div>
+                </div>
+              ))}
+            </div>
+          </Section>
+        </div>
       </div>
-    </div>
+        </>
   );
 }
 

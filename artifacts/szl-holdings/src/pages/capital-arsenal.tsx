@@ -512,7 +512,7 @@ export default function CapitalArsenalPage() {
   const [selectedDoc, setSelectedDoc] = useState<CapitalDocument | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Capital Management — SZL Holdings",
     description: "Complete capital readiness document set: investor materials, bank/SBA package, angel package, NY state programs, and federal programs.",
     canonical: "https://szlholdings.com/admin/capital-arsenal",
@@ -540,234 +540,237 @@ export default function CapitalArsenalPage() {
   const printableDocs = CAPITAL_DOCUMENTS.filter(d => d.printable).length;
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main style={{ paddingTop: "5rem" }}>
-
-        <style>{`
-          .print-branded-header,
-          .print-branded-footer { display: none; }
-          @media print {
-            body * { visibility: hidden !important; }
-            .document-print-content,
-            .document-print-content * { visibility: visible !important; }
-            .document-print-content {
-              position: absolute !important;
-              top: 0 !important;
-              left: 0 !important;
-              width: 100% !important;
-              background: white !important;
-              color: #111 !important;
-              padding: 0.75in 1in !important;
-              overflow: visible !important;
-              max-height: none !important;
-              height: auto !important;
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main style={{ paddingTop: "5rem" }}>
+  
+          <style>{`
+            .print-branded-header,
+            .print-branded-footer { display: none; }
+            @media print {
+              body * { visibility: hidden !important; }
+              .document-print-content,
+              .document-print-content * { visibility: visible !important; }
+              .document-print-content {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                background: white !important;
+                color: #111 !important;
+                padding: 0.75in 1in !important;
+                overflow: visible !important;
+                max-height: none !important;
+                height: auto !important;
+              }
+              .document-print-content p,
+              .document-print-content span,
+              .document-print-content div {
+                color: #111 !important;
+                background: transparent !important;
+                border-color: #ccc !important;
+              }
+              .document-print-content h3 {
+                color: #111 !important;
+                font-size: 13pt !important;
+                margin-top: 1.5em !important;
+                padding-bottom: 0.25em !important;
+                border-bottom: 1pt solid #ccc !important;
+              }
+              .document-print-content button { display: none !important; }
+              nav, header, footer, [class*="SiteNav"] { display: none !important; }
+              .print-branded-header {
+                display: block !important;
+                visibility: visible !important;
+                border-bottom: 2pt solid #111;
+                padding-bottom: 10pt;
+                margin-bottom: 18pt;
+                font-family: system-ui, -apple-system, sans-serif;
+              }
+              .print-branded-header .print-logo-line {
+                font-size: 14pt;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                color: #111;
+              }
+              .print-branded-header .print-subtitle {
+                font-size: 9pt;
+                color: #666;
+                margin-top: 2pt;
+              }
+              .print-branded-header .print-doc-title {
+                font-size: 18pt;
+                font-weight: 700;
+                color: #111;
+                margin-top: 12pt;
+              }
+              .print-branded-header .print-doc-meta {
+                font-size: 9pt;
+                color: #666;
+                margin-top: 4pt;
+              }
+              .print-branded-footer {
+                display: block !important;
+                visibility: visible !important;
+                border-top: 1pt solid #ccc;
+                padding-top: 8pt;
+                margin-top: 24pt;
+                font-family: system-ui, -apple-system, sans-serif;
+                font-size: 8pt;
+                color: #999;
+              }
+              @page {
+                margin: 0.5in;
+                size: letter;
+              }
             }
-            .document-print-content p,
-            .document-print-content span,
-            .document-print-content div {
-              color: #111 !important;
-              background: transparent !important;
-              border-color: #ccc !important;
-            }
-            .document-print-content h3 {
-              color: #111 !important;
-              font-size: 13pt !important;
-              margin-top: 1.5em !important;
-              padding-bottom: 0.25em !important;
-              border-bottom: 1pt solid #ccc !important;
-            }
-            .document-print-content button { display: none !important; }
-            nav, header, footer, [class*="SiteNav"] { display: none !important; }
-            .print-branded-header {
-              display: block !important;
-              visibility: visible !important;
-              border-bottom: 2pt solid #111;
-              padding-bottom: 10pt;
-              margin-bottom: 18pt;
-              font-family: system-ui, -apple-system, sans-serif;
-            }
-            .print-branded-header .print-logo-line {
-              font-size: 14pt;
-              font-weight: 700;
-              letter-spacing: 0.05em;
-              text-transform: uppercase;
-              color: #111;
-            }
-            .print-branded-header .print-subtitle {
-              font-size: 9pt;
-              color: #666;
-              margin-top: 2pt;
-            }
-            .print-branded-header .print-doc-title {
-              font-size: 18pt;
-              font-weight: 700;
-              color: #111;
-              margin-top: 12pt;
-            }
-            .print-branded-header .print-doc-meta {
-              font-size: 9pt;
-              color: #666;
-              margin-top: 4pt;
-            }
-            .print-branded-footer {
-              display: block !important;
-              visibility: visible !important;
-              border-top: 1pt solid #ccc;
-              padding-top: 8pt;
-              margin-top: 24pt;
-              font-family: system-ui, -apple-system, sans-serif;
-              font-size: 8pt;
-              color: #999;
-            }
-            @page {
-              margin: 0.5in;
-              size: letter;
-            }
-          }
-        `}</style>
-
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.5rem 4rem" }}>
-
-          {/* Header */}
-          <m.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            style={{ marginBottom: "2rem", paddingTop: "1rem" }}
-          >
-            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.5rem" }}>
-              Capital Readiness OS
-            </p>
-            <h1 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.875rem" }}>
-              Capital Management
-            </h1>
-            <p style={{ fontSize: "14px", lineHeight: 1.65, color: "hsl(210,5%,55%)", maxWidth: "36rem" }}>
-              Professional, investor-grade documents for every capital channel — bank, angel, grants, and certifications. Internal use only.
-            </p>
-
-            {/* Stats */}
-            <div style={{ display: "flex", gap: "1.5rem", marginTop: "1.25rem", flexWrap: "wrap" }}>
-              {[
-                { label: "Total Documents", value: totalDocs, color: "#3b82f6" },
-                { label: "Ready / Final", value: readyDocs, color: "#10b981" },
-                { label: "Printable", value: printableDocs, color: "#f59e0b" },
-                { label: "Capital Channels", value: CHANNELS.length, color: "#8b5cf6" },
-              ].map(stat => (
-                <div key={stat.label}>
-                  <p style={{ fontSize: "22px", fontWeight: 700, color: stat.color, letterSpacing: "-0.02em", lineHeight: 1 }}>{stat.value}</p>
-                  <p style={{ fontSize: "11px", color: "hsl(210,5%,45%)", marginTop: "2px" }}>{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </m.div>
-
-          {/* Disclaimer */}
-          <div style={{ marginBottom: "1.5rem", padding: "0.875rem 1rem", borderRadius: "8px", background: "hsla(38,95%,58%,0.05)", border: "1px solid hsla(38,95%,58%,0.18)", display: "flex", gap: "0.625rem", alignItems: "flex-start" }}>
-            <CheckSquare size={13} style={{ color: "#f59e0b", flexShrink: 0, marginTop: "2px" }} />
-            <p style={{ fontSize: "12px", color: "hsl(38,10%,60%)", lineHeight: 1.6 }}>
-              <strong style={{ color: "#f59e0b" }}>Internal Use Only.</strong> All financial figures are projections and assumptions. These documents do not constitute financial, legal, or investment advice. Materials must be reviewed by qualified counsel (attorney, CPA) before external distribution or use.
-            </p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: selectedDoc ? "1fr 1fr" : "1fr", gap: "1.25rem" }}>
-
-            {/* Left: Document List */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-
-              {/* Search */}
-              <div style={{ position: "relative" }}>
-                <Search size={13} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "hsl(210,5%,42%)" }} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search documents..."
-                  style={{
-                    width: "100%", padding: "0.625rem 0.875rem 0.625rem 2.25rem",
-                    background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.08)",
-                    borderRadius: "8px", color: "hsl(38,12%,88%)", fontSize: "13px",
-                    outline: "none",
-                  }}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}
-                  >
-                    <X size={13} style={{ color: "hsl(210,5%,42%)" }} />
-                  </button>
-                )}
+          `}</style>
+  
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.5rem 4rem" }}>
+  
+            {/* Header */}
+            <m.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              style={{ marginBottom: "2rem", paddingTop: "1rem" }}
+            >
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.5rem" }}>
+                Capital Readiness OS
+              </p>
+              <h1 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.875rem" }}>
+                Capital Management
+              </h1>
+              <p style={{ fontSize: "14px", lineHeight: 1.65, color: "hsl(210,5%,55%)", maxWidth: "36rem" }}>
+                Professional, investor-grade documents for every capital channel — bank, angel, grants, and certifications. Internal use only.
+              </p>
+  
+              {/* Stats */}
+              <div style={{ display: "flex", gap: "1.5rem", marginTop: "1.25rem", flexWrap: "wrap" }}>
+                {[
+                  { label: "Total Documents", value: totalDocs, color: "#3b82f6" },
+                  { label: "Ready / Final", value: readyDocs, color: "#10b981" },
+                  { label: "Printable", value: printableDocs, color: "#f59e0b" },
+                  { label: "Capital Channels", value: CHANNELS.length, color: "#8b5cf6" },
+                ].map(stat => (
+                  <div key={stat.label}>
+                    <p style={{ fontSize: "22px", fontWeight: 700, color: stat.color, letterSpacing: "-0.02em", lineHeight: 1 }}>{stat.value}</p>
+                    <p style={{ fontSize: "11px", color: "hsl(210,5%,45%)", marginTop: "2px" }}>{stat.label}</p>
+                  </div>
+                ))}
               </div>
-
-              {/* Search Results */}
-              {filteredDocs !== null ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  <p style={{ fontSize: "11px", color: "hsl(210,5%,42%)", paddingLeft: "0.25rem" }}>
-                    {filteredDocs.length} result{filteredDocs.length !== 1 ? "s" : ""} for "{searchQuery}"
-                  </p>
-                  {filteredDocs.length === 0 ? (
-                    <p style={{ fontSize: "13px", color: "hsl(210,5%,50%)", textAlign: "center", padding: "2rem" }}>
-                      No documents found.
-                    </p>
-                  ) : (
-                    filteredDocs.map(doc => {
-                      const color = CHANNEL_COLORS[doc.channel];
-                      return <DocumentCard key={doc.id} doc={doc} onOpen={setSelectedDoc} color={color} />;
-                    })
+            </m.div>
+  
+            {/* Disclaimer */}
+            <div style={{ marginBottom: "1.5rem", padding: "0.875rem 1rem", borderRadius: "8px", background: "hsla(38,95%,58%,0.05)", border: "1px solid hsla(38,95%,58%,0.18)", display: "flex", gap: "0.625rem", alignItems: "flex-start" }}>
+              <CheckSquare size={13} style={{ color: "#f59e0b", flexShrink: 0, marginTop: "2px" }} />
+              <p style={{ fontSize: "12px", color: "hsl(38,10%,60%)", lineHeight: 1.6 }}>
+                <strong style={{ color: "#f59e0b" }}>Internal Use Only.</strong> All financial figures are projections and assumptions. These documents do not constitute financial, legal, or investment advice. Materials must be reviewed by qualified counsel (attorney, CPA) before external distribution or use.
+              </p>
+            </div>
+  
+            <div style={{ display: "grid", gridTemplateColumns: selectedDoc ? "1fr 1fr" : "1fr", gap: "1.25rem" }}>
+  
+              {/* Left: Document List */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+  
+                {/* Search */}
+                <div style={{ position: "relative" }}>
+                  <Search size={13} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "hsl(210,5%,42%)" }} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search documents..."
+                    style={{
+                      width: "100%", padding: "0.625rem 0.875rem 0.625rem 2.25rem",
+                      background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.08)",
+                      borderRadius: "8px", color: "hsl(38,12%,88%)", fontSize: "13px",
+                      outline: "none",
+                    }}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      <X size={13} style={{ color: "hsl(210,5%,42%)" }} />
+                    </button>
                   )}
                 </div>
-              ) : (
-                /* Channel Sections */
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                  {CHANNELS.map(channel => {
-                    const color = CHANNEL_COLORS[channel];
-                    const Icon = CHANNEL_ICONS[channel];
-                    return (
-                      <ChannelSection
-                        key={channel}
-                        channel={channel}
-                        isActive={activeChannels.has(channel)}
-                        onToggle={() => toggleChannel(channel)}
-                        color={color}
-                        icon={Icon}
-                        onOpenDoc={(doc) => {
-                          setSelectedDoc(doc);
-                        }}
-                      />
-                    );
-                  })}
-                </div>
+  
+                {/* Search Results */}
+                {filteredDocs !== null ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <p style={{ fontSize: "11px", color: "hsl(210,5%,42%)", paddingLeft: "0.25rem" }}>
+                      {filteredDocs.length} result{filteredDocs.length !== 1 ? "s" : ""} for "{searchQuery}"
+                    </p>
+                    {filteredDocs.length === 0 ? (
+                      <p style={{ fontSize: "13px", color: "hsl(210,5%,50%)", textAlign: "center", padding: "2rem" }}>
+                        No documents found.
+                      </p>
+                    ) : (
+                      filteredDocs.map(doc => {
+                        const color = CHANNEL_COLORS[doc.channel];
+                        return <DocumentCard key={doc.id} doc={doc} onOpen={setSelectedDoc} color={color} />;
+                      })
+                    )}
+                  </div>
+                ) : (
+                  /* Channel Sections */
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                    {CHANNELS.map(channel => {
+                      const color = CHANNEL_COLORS[channel];
+                      const Icon = CHANNEL_ICONS[channel];
+                      return (
+                        <ChannelSection
+                          key={channel}
+                          channel={channel}
+                          isActive={activeChannels.has(channel)}
+                          onToggle={() => toggleChannel(channel)}
+                          color={color}
+                          icon={Icon}
+                          onOpenDoc={(doc) => {
+                            setSelectedDoc(doc);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+  
+              {/* Right: Document Viewer */}
+              {selectedDoc && (
+                <m.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{
+                    borderRadius: "12px",
+                    border: `1px solid ${CHANNEL_COLORS[selectedDoc.channel]}22`,
+                    background: "hsl(210,12%,6%)",
+                    height: "calc(100vh - 8rem)",
+                    position: "sticky",
+                    top: "5.5rem",
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <DocumentViewer
+                    doc={selectedDoc}
+                    onClose={() => setSelectedDoc(null)}
+                    color={CHANNEL_COLORS[selectedDoc.channel]}
+                  />
+                </m.div>
               )}
             </div>
-
-            {/* Right: Document Viewer */}
-            {selectedDoc && (
-              <m.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                style={{
-                  borderRadius: "12px",
-                  border: `1px solid ${CHANNEL_COLORS[selectedDoc.channel]}22`,
-                  background: "hsl(210,12%,6%)",
-                  height: "calc(100vh - 8rem)",
-                  position: "sticky",
-                  top: "5.5rem",
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <DocumentViewer
-                  doc={selectedDoc}
-                  onClose={() => setSelectedDoc(null)}
-                  color={CHANNEL_COLORS[selectedDoc.channel]}
-                />
-              </m.div>
-            )}
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+        </>
   );
 }

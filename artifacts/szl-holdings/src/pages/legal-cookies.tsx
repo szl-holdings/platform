@@ -44,56 +44,59 @@ const SECTIONS = [
 ];
 
 export default function LegalCookiesPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Cookie Policy — Legal · SZL Holdings",
     description: "SZL Holdings cookie policy — what cookies we use, why, and how to control them.",
     canonical: "https://szlholdings.com/legal/cookies",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-        <section style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(3rem,6vw,5rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "860px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.75rem" }}>
-                <Link href="/trust" style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", textDecoration: "none" }}>Legal</Link>
-                <span style={{ color: "var(--color-szl-text-faint)" }}>/</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-secondary)" }}>Cookies</span>
-              </div>
-              <h1 style={{ fontSize: "clamp(2rem,4.5vw,3rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.1, marginBottom: "1rem" }}>Cookie Policy</h1>
-              <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,48%)" }}>Last updated: April 2026</p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "860px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-              {SECTIONS.map((section, i) => (
-                <m.div
-                  key={section.title}
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: i * 0.04 }}
-                >
-                  <h2 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.01em", color: "hsl(38,8%,90%)", marginBottom: "0.625rem" }}>{section.title}</h2>
-                  <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,60%)" }}>{section.body}</p>
-                </m.div>
-              ))}
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+          <section style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(3rem,6vw,5rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
+            <div style={{ maxWidth: "860px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.75rem" }}>
+                  <Link href="/trust" style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", textDecoration: "none" }}>Legal</Link>
+                  <span style={{ color: "var(--color-szl-text-faint)" }}>/</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-secondary)" }}>Cookies</span>
+                </div>
+                <h1 style={{ fontSize: "clamp(2rem,4.5vw,3rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.1, marginBottom: "1rem" }}>Cookie Policy</h1>
+                <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,48%)" }}>Last updated: April 2026</p>
+              </m.div>
             </div>
-
-            <m.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }} style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid var(--color-szl-border)", display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-              <Link href="/legal/privacy" className="szl-btn-secondary">Privacy Policy</Link>
-              <Link href="/legal/terms" className="szl-btn-secondary">Terms of Service</Link>
-              <Link href="/trust" className="szl-btn-ghost">Trust Center</Link>
-            </m.div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          <section style={{ padding: "var(--space-section-md) 0" }}>
+            <div style={{ maxWidth: "860px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+                {SECTIONS.map((section, i) => (
+                  <m.div
+                    key={section.title}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.35, delay: i * 0.04 }}
+                  >
+                    <h2 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.01em", color: "hsl(38,8%,90%)", marginBottom: "0.625rem" }}>{section.title}</h2>
+                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,60%)" }}>{section.body}</p>
+                  </m.div>
+                ))}
+              </div>
+  
+              <m.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }} style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid var(--color-szl-border)", display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link href="/legal/privacy" className="szl-btn-secondary">Privacy Policy</Link>
+                <Link href="/legal/terms" className="szl-btn-secondary">Terms of Service</Link>
+                <Link href="/trust" className="szl-btn-ghost">Trust Center</Link>
+              </m.div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

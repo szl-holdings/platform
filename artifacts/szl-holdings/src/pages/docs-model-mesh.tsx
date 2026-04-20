@@ -47,136 +47,139 @@ const ROUTING_FACTORS = [
 ];
 
 export default function DocsModelMeshPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Governed Inference — Docs — SZL Holdings",
     description: "Governed inference documentation: AI model routing, versioning, cost tracking, quality signals, and governance integration in the Lyte + Alloy platform.",
     canonical: "https://szlholdings.com/docs/model-mesh",
   });
 
   return (
-    <div className="min-h-screen bg-[#070a10] text-white">
-      <SiteNav />
-      <main>
-
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="flex items-center gap-2 text-sm text-white/40">
-              <Link href="/docs" className="hover:text-white/70 transition">Docs</Link>
-              <span>/</span>
-              <span className="text-white/60">Governed Inference</span>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#070a10] text-white">
+        <SiteNav />
+        <main>
+  
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+              <div className="flex items-center gap-2 text-sm text-white/40">
+                <Link href="/docs" className="hover:text-white/70 transition">Docs</Link>
+                <span>/</span>
+                <span className="text-white/60">Governed Inference</span>
+              </div>
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
+                <Cpu className="h-3 w-3" />
+                Platform infrastructure
+              </div>
+              <h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+                Governed Inference.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
+                Governed inference is the AI model management layer of the Lyte + Alloy platform. It handles
+                model routing, versioning, cost tracking, quality signal collection, and governance integration.
+                No model in the platform operates outside this layer — all inference is tracked, governed, and
+                accountable.
+              </p>
             </div>
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
-              <Cpu className="h-3 w-3" />
-              Platform infrastructure
-            </div>
-            <h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Governed Inference.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-              Governed inference is the AI model management layer of the Lyte + Alloy platform. It handles
-              model routing, versioning, cost tracking, quality signal collection, and governance integration.
-              No model in the platform operates outside this layer — all inference is tracked, governed, and
-              accountable.
-            </p>
-          </div>
-        </section>
-
-        {/* Properties */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">System properties</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">What governed inference provides</h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {MESH_PROPERTIES.map((prop) => {
-                const Icon = prop.icon;
-                return (
-                  <div key={prop.name} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
-                    <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-white/[0.04] p-2.5">
-                      <Icon className="h-4 w-4 text-white/50" />
+          </section>
+  
+          {/* Properties */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">System properties</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">What governed inference provides</h2>
+              <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {MESH_PROPERTIES.map((prop) => {
+                  const Icon = prop.icon;
+                  return (
+                    <div key={prop.name} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
+                      <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-white/[0.04] p-2.5">
+                        <Icon className="h-4 w-4 text-white/50" />
+                      </div>
+                      <h3 className="text-base font-semibold text-white">{prop.name}</h3>
+                      <p className="mt-2 text-sm leading-6 text-white/58">{prop.desc}</p>
                     </div>
-                    <h3 className="text-base font-semibold text-white">{prop.name}</h3>
-                    <p className="mt-2 text-sm leading-6 text-white/58">{prop.desc}</p>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+  
+          {/* Routing factors */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Routing logic</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">Factors that determine model routing</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
+                Routing decisions are made at invocation time based on the following factors, evaluated in priority order.
+              </p>
+              <div className="mt-8 space-y-2">
+                {ROUTING_FACTORS.map((rf) => (
+                  <div key={rf.factor} className="flex gap-5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
+                    <div className="w-40 flex-shrink-0 text-xs font-semibold text-white/55">{rf.factor}</div>
+                    <span className="text-sm text-white/65">{rf.desc}</span>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-
-        {/* Routing factors */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Routing logic</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Factors that determine model routing</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
-              Routing decisions are made at invocation time based on the following factors, evaluated in priority order.
-            </p>
-            <div className="mt-8 space-y-2">
-              {ROUTING_FACTORS.map((rf) => (
-                <div key={rf.factor} className="flex gap-5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
-                  <div className="w-40 flex-shrink-0 text-xs font-semibold text-white/55">{rf.factor}</div>
-                  <span className="text-sm text-white/65">{rf.desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Governance position */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Governance position</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">The governed inference layer is not the decision maker</h2>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65">
-              The governed inference layer produces candidate outputs — classification results, summaries,
-              recommendations, and extracted facts. Every output flows into the governance layer before any
-              operator sees it. Governed inference does not approve actions. It does not execute workflows.
-              It does not make consequential decisions. Its role is to produce well-attributed, version-tracked,
-              cost-monitored candidates that humans review and approve.
-            </p>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65">
-              This is a structural property of the platform, not a policy configuration. The governance
-              layer cannot be bypassed by an inference routing decision.
-            </p>
-            <div className="mt-6">
-              <Link href="/docs/proof-chain" className="inline-flex items-center gap-2 text-sm text-white/58 transition hover:text-white/85">
-                How model invocations appear in the proof chain <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Related docs */}
-        <section>
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Related documentation</p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                { label: "Proof chain", href: "/docs/proof-chain", detail: "How model invocations are recorded in output provenance" },
-                { label: "Architecture", href: "/docs/architecture", detail: "Where governed inference fits in the platform pipeline" },
-                { label: "Trust", href: "/docs/trust", detail: "Governance model and AI accountability" },
-                { label: "Covenant Policy", href: "/docs/control-plane", detail: "API access to model cost and quality data" },
-                { label: "Audit Timeline", href: "/docs/worldline", detail: "Model invocation events in the chronological record" },
-                { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-white/12 hover:bg-white/[0.04]"
-                >
-                  <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/30" />
-                  <div>
-                    <div className="text-sm font-semibold text-white">{link.label}</div>
-                    <div className="mt-0.5 text-xs text-white/45">{link.detail}</div>
-                  </div>
+          </section>
+  
+          {/* Governance position */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Governance position</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">The governed inference layer is not the decision maker</h2>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65">
+                The governed inference layer produces candidate outputs — classification results, summaries,
+                recommendations, and extracted facts. Every output flows into the governance layer before any
+                operator sees it. Governed inference does not approve actions. It does not execute workflows.
+                It does not make consequential decisions. Its role is to produce well-attributed, version-tracked,
+                cost-monitored candidates that humans review and approve.
+              </p>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65">
+                This is a structural property of the platform, not a policy configuration. The governance
+                layer cannot be bypassed by an inference routing decision.
+              </p>
+              <div className="mt-6">
+                <Link href="/docs/proof-chain" className="inline-flex items-center gap-2 text-sm text-white/58 transition hover:text-white/85">
+                  How model invocations appear in the proof chain <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
-              ))}
+              </div>
             </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          {/* Related docs */}
+          <section>
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Related documentation</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  { label: "Proof chain", href: "/docs/proof-chain", detail: "How model invocations are recorded in output provenance" },
+                  { label: "Architecture", href: "/docs/architecture", detail: "Where governed inference fits in the platform pipeline" },
+                  { label: "Trust", href: "/docs/trust", detail: "Governance model and AI accountability" },
+                  { label: "Covenant Policy", href: "/docs/control-plane", detail: "API access to model cost and quality data" },
+                  { label: "Audit Timeline", href: "/docs/worldline", detail: "Model invocation events in the chronological record" },
+                  { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
+                ].map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-white/12 hover:bg-white/[0.04]"
+                  >
+                    <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/30" />
+                    <div>
+                      <div className="text-sm font-semibold text-white">{link.label}</div>
+                      <div className="mt-0.5 text-xs text-white/45">{link.detail}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

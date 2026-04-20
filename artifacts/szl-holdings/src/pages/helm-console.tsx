@@ -204,7 +204,7 @@ const TABS: Array<{ id: TabId; label: string; group: "cross-app" | "platform" }>
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function HelmConsolePage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "HELM CONSOLE — SZL Family Command | SZL Holdings",
     description: "Unified family-level dashboard showing cross-app signal flow, handoff contracts, platform health and governance across the entire SZL intelligence platform.",
     canonical: "https://szlholdings.com/helm",
@@ -280,488 +280,491 @@ export default function HelmConsolePage() {
   const platformTabs = TABS.filter(t => t.group === "platform");
 
   return (
-    <div style={{ minHeight: "100vh", background: BG.surface }}>
-      <SiteNav />
-      <main className="pt-24">
-
-        {/* ── Header ── */}
-        <section style={{ padding: "4rem 0 2rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                <Server size={14} style={{ color: ACCENT.amber }} />
-                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: ACCENT.amber }}>
-                  HELM CONSOLE
-                </p>
-              </div>
-              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: TEXT.primary, lineHeight: 1.08, marginBottom: "1rem" }}>
-                Family Command View
-              </h1>
-              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: TEXT.secondary, maxWidth: "48rem" }}>
-                Cross-app signal flow, handoff contracts, platform health and governed infrastructure — unified visibility across every SZL intelligence application.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        {/* ── KPI Strip (cross-app summary) ── */}
-        <section style={{ padding: "1rem 0 0" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
-              {[
-                { label: "Cross-App Handoffs", value: totalHandoffs.toLocaleString(), icon: Link2, color: "hsl(192,72%,48%)" },
-                { label: "Handoff Success Rate", value: `${successRate}%`, icon: CheckCircle2, color: "hsl(142,52%,48%)" },
-                { label: "Active Contracts", value: String(activeContracts), icon: GitBranch, color: ACCENT.amber },
-                { label: "PRISM BUS Events", value: prismEvents.toLocaleString(), icon: Zap, color: "hsl(280,52%,62%)" },
-              ].map((stat, i) => (
-                <m.div
-                  key={stat.label}
-                  custom={i}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate="show"
-                  style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px", padding: "1.25rem" }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                    <stat.icon size={16} style={{ color: stat.color }} />
-                    <span style={{ fontSize: "11px", fontWeight: 600, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: "0.06em" }}>{stat.label}</span>
-                  </div>
-                  <div style={{ fontSize: "2rem", fontWeight: 700, color: TEXT.primary, letterSpacing: "-0.02em" }}>{stat.value}</div>
-                </m.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Tab Navigation ── */}
-        <section style={{ padding: "1rem 0 2rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div style={{ marginBottom: "2rem", borderBottom: `1px solid ${BORDER.muted}`, paddingBottom: "0" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", marginBottom: "0.25rem" }}>
-                <span style={{ fontSize: "10px", fontWeight: 700, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: "0.08em", marginRight: "0.5rem" }}>Cross-App</span>
-                {crossAppTabs.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    style={{
-                      padding: "0.4rem 0.875rem",
-                      borderRadius: "6px 6px 0 0",
-                      border: "none",
-                      borderBottom: activeTab === tab.id ? `2px solid ${ACCENT.amber}` : "2px solid transparent",
-                      background: activeTab === tab.id ? `${ACCENT.amber}12` : "transparent",
-                      color: activeTab === tab.id ? TEXT.primary : TEXT.secondary,
-                      fontWeight: 600,
-                      fontSize: "12px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-                <span style={{ fontSize: "10px", fontWeight: 700, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: "0.08em", marginLeft: "1rem", marginRight: "0.5rem" }}>Platform</span>
-                {platformTabs.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    style={{
-                      padding: "0.4rem 0.875rem",
-                      borderRadius: "6px 6px 0 0",
-                      border: "none",
-                      borderBottom: activeTab === tab.id ? `2px solid ${ACCENT.blue}` : "2px solid transparent",
-                      background: activeTab === tab.id ? `${ACCENT.blue}12` : "transparent",
-                      color: activeTab === tab.id ? TEXT.primary : TEXT.secondary,
-                      fontWeight: 600,
-                      fontSize: "12px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* ─── Cross-App: App Overview ─── */}
-            {activeTab === "apps" && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
-                {APPS.map((app, i) => (
-                  <m.div
-                    key={app.key}
-                    custom={i}
-                    variants={fadeUp}
-                    initial="hidden"
-                    animate="show"
-                    style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px", padding: "1.5rem" }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-                      <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: `${app.color}22`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <app.icon size={18} style={{ color: app.color }} />
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: "15px", color: TEXT.primary }}>{app.name}</div>
-                        <div style={{ fontSize: "11px", color: TEXT.tertiary }}>{app.desc}</div>
-                      </div>
-                      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                        <Circle size={7} fill="hsl(142,52%,48%)" style={{ color: "hsl(142,52%,48%)" }} />
-                        <span style={{ fontSize: "11px", color: "hsl(142,52%,48%)", fontWeight: 600 }}>Active</span>
-                      </div>
-                    </div>
-                    {app.handoffTo ? (
-                      <div style={{ background: BG.surface, borderRadius: "8px", padding: "0.75rem", border: `1px solid ${app.color}22` }}>
-                        <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Handoff Target</div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                          <ArrowRight size={12} style={{ color: app.color }} />
-                          <span style={{ fontSize: "13px", fontWeight: 600, color: app.color }}>{app.handoffTo}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ background: BG.surface, borderRadius: "8px", padding: "0.75rem", border: `1px solid ${BORDER.muted}` }}>
-                        <div style={{ fontSize: "11px", color: TEXT.tertiary }}>Receives signals from Terra</div>
-                      </div>
-                    )}
-                  </m.div>
-                ))}
-              </div>
-            )}
-
-            {/* ─── Cross-App: Handoff Contracts ─── */}
-            {activeTab === "contracts" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {HANDOFF_CONTRACTS.map((contract, i) => (
-                  <m.div
-                    key={`${contract.from}-${contract.to}`}
-                    custom={i}
-                    variants={fadeUp}
-                    initial="hidden"
-                    animate="show"
-                    style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px", padding: "1.5rem", display: "grid", gridTemplateColumns: "1fr auto 1fr 2fr", alignItems: "center", gap: "1.5rem" }}
-                  >
-                    <div>
-                      <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Source</div>
-                      <div style={{ fontWeight: 700, fontSize: "16px", color: contract.color }}>{contract.from}</div>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
-                      <ArrowRight size={20} style={{ color: contract.color }} />
-                      <span style={{ fontSize: "10px", color: TEXT.tertiary, fontWeight: 600, textTransform: "uppercase" }}>PRISM BUS</span>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Target</div>
-                      <div style={{ fontWeight: 700, fontSize: "16px", color: TEXT.primary }}>{contract.to}</div>
-                    </div>
-                    <div style={{ background: BG.surface, borderRadius: "8px", padding: "0.75rem 1rem", border: `1px solid ${contract.color}22` }}>
-                      <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem" }}>
-                        <span style={{ fontWeight: 600 }}>Trigger:</span> {contract.trigger}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "hsl(38,12%,80%)" }}>
-                        <span style={{ fontWeight: 600, color: contract.color }}>Action:</span> {contract.action}
-                      </div>
-                    </div>
-                  </m.div>
-                ))}
-              </div>
-            )}
-
-            {/* ─── Cross-App: Signal Feed ─── */}
-            {activeTab === "signals" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 1rem", gap: "0.75rem", background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px" }}>
-                  <Activity size={28} style={{ color: TEXT.tertiary }} />
-                  <div style={{ fontSize: "13px", color: TEXT.secondary, fontWeight: 600 }}>No signals yet</div>
-                  <div style={{ fontSize: "11px", color: TEXT.tertiary, textAlign: "center", maxWidth: "320px" }}>
-                    Cross-app signals will appear here as the PRISM BUS routes events between domain apps. Connect domain apps to begin receiving live signals.
-                  </div>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: BG.surface }}>
+        <SiteNav />
+        <main className="pt-24">
+  
+          {/* ── Header ── */}
+          <section style={{ padding: "4rem 0 2rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                  <Server size={14} style={{ color: ACCENT.amber }} />
+                  <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: ACCENT.amber }}>
+                    HELM CONSOLE
+                  </p>
                 </div>
-              </div>
-            )}
-
-            {/* ─── Cross-App: Platform Systems ─── */}
-            {activeTab === "systems" && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
-                {SYSTEMS.map((sys, i) => (
+                <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: TEXT.primary, lineHeight: 1.08, marginBottom: "1rem" }}>
+                  Family Command View
+                </h1>
+                <p style={{ fontSize: "1rem", lineHeight: 1.7, color: TEXT.secondary, maxWidth: "48rem" }}>
+                  Cross-app signal flow, handoff contracts, platform health and governed infrastructure — unified visibility across every SZL intelligence application.
+                </p>
+              </m.div>
+            </div>
+          </section>
+  
+          {/* ── KPI Strip (cross-app summary) ── */}
+          <section style={{ padding: "1rem 0 0" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
+                {[
+                  { label: "Cross-App Handoffs", value: totalHandoffs.toLocaleString(), icon: Link2, color: "hsl(192,72%,48%)" },
+                  { label: "Handoff Success Rate", value: `${successRate}%`, icon: CheckCircle2, color: "hsl(142,52%,48%)" },
+                  { label: "Active Contracts", value: String(activeContracts), icon: GitBranch, color: ACCENT.amber },
+                  { label: "PRISM BUS Events", value: prismEvents.toLocaleString(), icon: Zap, color: "hsl(280,52%,62%)" },
+                ].map((stat, i) => (
                   <m.div
-                    key={sys.name}
+                    key={stat.label}
                     custom={i}
                     variants={fadeUp}
                     initial="hidden"
                     animate="show"
                     style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px", padding: "1.25rem" }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                      <span style={{ fontSize: "11px", fontWeight: 700, color: ACCENT.amber, textTransform: "uppercase", letterSpacing: "0.08em" }}>{sys.name}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                        <Circle size={6} fill="hsl(142,52%,48%)" style={{ color: "hsl(142,52%,48%)" }} />
-                        <span style={{ fontSize: "10px", color: "hsl(142,52%,48%)", fontWeight: 600 }}>Active</span>
-                      </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                      <stat.icon size={16} style={{ color: stat.color }} />
+                      <span style={{ fontSize: "11px", fontWeight: 600, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: "0.06em" }}>{stat.label}</span>
                     </div>
-                    <div style={{ fontSize: "12px", color: TEXT.secondary, lineHeight: 1.5 }}>{sys.desc}</div>
+                    <div style={{ fontSize: "2rem", fontWeight: 700, color: TEXT.primary, letterSpacing: "-0.02em" }}>{stat.value}</div>
                   </m.div>
                 ))}
               </div>
-            )}
-
-            {/* ─── Platform: Health Overview ─── */}
-            {activeTab === "health" && (
-              <div>
-                {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
-                {!platformLoading && overview && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
-                      <MetricCard label="Agent Runs (24h)" value={Number(overview.agentRuns?.total ?? 0)} sub={overview.agentRuns ? `${Math.round(Number(overview.agentRuns.avgLatency ?? 0))}ms avg latency` : undefined} color={ACCENT.blue} />
-                      <MetricCard label="Atlas Artifacts (7d)" value={overview.artifactStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.artifactStats.find(a => a.status === "failed")?.total ?? 0} failed`} color={ACCENT.gold} />
-                      <MetricCard label="Outcome Decisions (7d)" value={overview.outcomeStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.outcomeStats.find(o => o.status === "overridden")?.total ?? 0} overrides`} color={ACCENT.purple} />
-                      <MetricCard label="Ext. Data Sources" value={overview.worldlineHealth.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.worldlineHealth.find(w => w.status === "degraded")?.total ?? 0} degraded`} color={overview.worldlineHealth.find(w => w.status === "degraded")?.total !== "0" ? ACCENT.red : ACCENT.green} />
-                      <MetricCard label="Proof Anomalies (7d)" value={overview.proofChainStats.filter(p => p.reviewState === "flagged").reduce((s, r) => s + Number(r.total), 0)} sub="flagged for review" color={ACCENT.red} />
-                      <MetricCard label="Export Jobs (7d)" value={overview.exportJobStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.exportJobStats.find(e => e.status === "failed")?.total ?? 0} failed`} color={ACCENT.amber} />
-                    </div>
-                    {overview.worldlineHealth.some(w => w.status === "degraded" && Number(w.total) > 0) && (
-                      <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, padding: "12px 16px" }}>
-                        <span style={{ fontSize: 12, color: ACCENT.red }}>⚠ Degraded data sources detected — check Audit Timeline tab for details.</span>
-                      </div>
-                    )}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                      <div>
-                        <SectionHeader title="Artifact Status Breakdown" />
-                        <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
-                          {overview.artifactStats.length === 0
-                            ? <div style={{ padding: "16px", fontSize: 12, color: TEXT.tertiary }}>No artifact activity in the last 7 days.</div>
-                            : overview.artifactStats.map(r => (
-                              <div key={r.status} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}` }}>
-                                <StatusPip status={r.status} />
-                                <span style={{ fontSize: 12, color: TEXT.secondary, textTransform: "capitalize", flex: 1 }}>{r.status}</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: TEXT.primary }}>{r.total}</span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                      <div>
-                        <SectionHeader title="Outcome Decisions" />
-                        <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
-                          {overview.outcomeStats.length === 0
-                            ? <div style={{ padding: "16px", fontSize: 12, color: TEXT.tertiary }}>No outcome decisions in the last 7 days.</div>
-                            : overview.outcomeStats.map(r => (
-                              <div key={r.status} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}` }}>
-                                <StatusPip status={r.status} />
-                                <span style={{ fontSize: 12, color: TEXT.secondary, textTransform: "capitalize", flex: 1 }}>{r.status}</span>
-                                <span style={{ fontSize: 11, color: TEXT.tertiary, marginRight: 8 }}>{Math.round(Number(r.avgConfidence) * 100)}% conf</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: TEXT.primary }}>{r.total}</span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+            </div>
+          </section>
+  
+          {/* ── Tab Navigation ── */}
+          <section style={{ padding: "1rem 0 2rem" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div style={{ marginBottom: "2rem", borderBottom: `1px solid ${BORDER.muted}`, paddingBottom: "0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", marginBottom: "0.25rem" }}>
+                  <span style={{ fontSize: "10px", fontWeight: 700, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: "0.08em", marginRight: "0.5rem" }}>Cross-App</span>
+                  {crossAppTabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      style={{
+                        padding: "0.4rem 0.875rem",
+                        borderRadius: "6px 6px 0 0",
+                        border: "none",
+                        borderBottom: activeTab === tab.id ? `2px solid ${ACCENT.amber}` : "2px solid transparent",
+                        background: activeTab === tab.id ? `${ACCENT.amber}12` : "transparent",
+                        color: activeTab === tab.id ? TEXT.primary : TEXT.secondary,
+                        fontWeight: 600,
+                        fontSize: "12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                  <span style={{ fontSize: "10px", fontWeight: 700, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: "0.08em", marginLeft: "1rem", marginRight: "0.5rem" }}>Platform</span>
+                  {platformTabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      style={{
+                        padding: "0.4rem 0.875rem",
+                        borderRadius: "6px 6px 0 0",
+                        border: "none",
+                        borderBottom: activeTab === tab.id ? `2px solid ${ACCENT.blue}` : "2px solid transparent",
+                        background: activeTab === tab.id ? `${ACCENT.blue}12` : "transparent",
+                        color: activeTab === tab.id ? TEXT.primary : TEXT.secondary,
+                        fontWeight: 600,
+                        fontSize: "12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
-
-            {/* ─── Platform: Agent Runs ─── */}
-            {activeTab === "agents" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
-                {!platformLoading && (
-                  <>
-                    <SectionHeader title="Agent Run Performance (Last 24h)" badge={agentRuns.length} />
-                    {agentRuns.length === 0
-                      ? <div style={{ color: TEXT.tertiary, textAlign: "center", padding: 60 }}>No agent runs in the last 24 hours.</div>
-                      : (
-                        <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 100px 100px 80px", padding: "8px 14px", borderBottom: `1px solid ${BORDER.muted}` }}>
-                            {["Agent", "Domain", "Runs", "Avg Latency", "Avg Tokens"].map(h => (
-                              <span key={h} style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: 0.8 }}>{h}</span>
-                            ))}
+  
+              {/* ─── Cross-App: App Overview ─── */}
+              {activeTab === "apps" && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
+                  {APPS.map((app, i) => (
+                    <m.div
+                      key={app.key}
+                      custom={i}
+                      variants={fadeUp}
+                      initial="hidden"
+                      animate="show"
+                      style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px", padding: "1.5rem" }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+                        <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: `${app.color}22`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <app.icon size={18} style={{ color: app.color }} />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: "15px", color: TEXT.primary }}>{app.name}</div>
+                          <div style={{ fontSize: "11px", color: TEXT.tertiary }}>{app.desc}</div>
+                        </div>
+                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                          <Circle size={7} fill="hsl(142,52%,48%)" style={{ color: "hsl(142,52%,48%)" }} />
+                          <span style={{ fontSize: "11px", color: "hsl(142,52%,48%)", fontWeight: 600 }}>Active</span>
+                        </div>
+                      </div>
+                      {app.handoffTo ? (
+                        <div style={{ background: BG.surface, borderRadius: "8px", padding: "0.75rem", border: `1px solid ${app.color}22` }}>
+                          <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Handoff Target</div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <ArrowRight size={12} style={{ color: app.color }} />
+                            <span style={{ fontSize: "13px", fontWeight: 600, color: app.color }}>{app.handoffTo}</span>
                           </div>
-                          {agentRuns.map(r => (
-                            <div key={r.agentId} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 100px 100px 80px", padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}`, alignItems: "center" }}>
-                              <div>
-                                <div style={{ fontSize: 12, color: TEXT.primary }}>{r.agentName}</div>
-                                <div style={{ fontSize: 10, color: TEXT.tertiary, fontFamily: "monospace" }}>{r.agentId}</div>
-                              </div>
-                              <span style={{ fontSize: 11, color: TEXT.secondary }}>{r.domain}</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: TEXT.primary }}>{r.totalRuns}</span>
-                              <span style={{ fontSize: 12, color: Number(r.avgLatencyMs) > 5000 ? ACCENT.red : Number(r.avgLatencyMs) > 2000 ? ACCENT.amber : TEXT.secondary }}>
-                                {Math.round(Number(r.avgLatencyMs))}ms
-                              </span>
-                              <span style={{ fontSize: 12, color: TEXT.secondary }}>{Math.round(Number(r.avgTokens))}</span>
-                            </div>
-                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ background: BG.surface, borderRadius: "8px", padding: "0.75rem", border: `1px solid ${BORDER.muted}` }}>
+                          <div style={{ fontSize: "11px", color: TEXT.tertiary }}>Receives signals from Terra</div>
                         </div>
                       )}
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* ─── Platform: Outcome Graph ─── */}
-            {activeTab === "outcomes" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
-                {!platformLoading && outcomes && (
-                  <>
-                    <div>
-                      <SectionHeader title="Outcome Graph — By Domain" />
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
-                        {outcomes.byDomain.map(d => (
-                          <div key={d.domain} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "12px 14px" }}>
-                            <div style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase" }}>{d.domain}</div>
-                            <div style={{ fontSize: 22, fontWeight: 700, color: TEXT.primary }}>{d.total}</div>
-                            <div style={{ fontSize: 11, color: TEXT.secondary }}>{Math.round(Number(d.avgConfidence) * 100)}% avg confidence</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {outcomes.topOverrideAgents.length > 0 && (
+                    </m.div>
+                  ))}
+                </div>
+              )}
+  
+              {/* ─── Cross-App: Handoff Contracts ─── */}
+              {activeTab === "contracts" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {HANDOFF_CONTRACTS.map((contract, i) => (
+                    <m.div
+                      key={`${contract.from}-${contract.to}`}
+                      custom={i}
+                      variants={fadeUp}
+                      initial="hidden"
+                      animate="show"
+                      style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px", padding: "1.5rem", display: "grid", gridTemplateColumns: "1fr auto 1fr 2fr", alignItems: "center", gap: "1.5rem" }}
+                    >
                       <div>
-                        <SectionHeader title="Top Override Agents" />
-                        <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
-                          {outcomes.topOverrideAgents.map((a, i) => (
-                            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}` }}>
-                              <span style={{ fontSize: 12, color: ACCENT.purple, fontFamily: "monospace", flex: 1 }}>{a.agentId ?? "unknown"}</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: ACCENT.amber }}>{a.overrideCount} overrides</span>
-                            </div>
-                          ))}
+                        <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Source</div>
+                        <div style={{ fontWeight: 700, fontSize: "16px", color: contract.color }}>{contract.from}</div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
+                        <ArrowRight size={20} style={{ color: contract.color }} />
+                        <span style={{ fontSize: "10px", color: TEXT.tertiary, fontWeight: 600, textTransform: "uppercase" }}>PRISM BUS</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Target</div>
+                        <div style={{ fontWeight: 700, fontSize: "16px", color: TEXT.primary }}>{contract.to}</div>
+                      </div>
+                      <div style={{ background: BG.surface, borderRadius: "8px", padding: "0.75rem 1rem", border: `1px solid ${contract.color}22` }}>
+                        <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem" }}>
+                          <span style={{ fontWeight: 600 }}>Trigger:</span> {contract.trigger}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "hsl(38,12%,80%)" }}>
+                          <span style={{ fontWeight: 600, color: contract.color }}>Action:</span> {contract.action}
                         </div>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* ─── Platform: Atlas Artifacts ─── */}
-            {activeTab === "artifacts" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
-                {!platformLoading && atlasData && (
-                  <>
-                    <div>
-                      <SectionHeader title="Atlas Artifacts — By Template" />
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
-                        {atlasData.byTemplate.map((t, i) => (
-                          <div key={i} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "12px 14px" }}>
-                            <div style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: 0.8 }}>{t.templateType.replace(/_/g, " ")}</div>
-                            <div style={{ fontSize: 10, color: TEXT.tertiary, marginTop: 2 }}>{t.domain}</div>
-                            <div style={{ fontSize: 22, fontWeight: 700, color: TEXT.primary, marginTop: 4 }}>{t.total}</div>
-                          </div>
-                        ))}
-                      </div>
+                    </m.div>
+                  ))}
+                </div>
+              )}
+  
+              {/* ─── Cross-App: Signal Feed ─── */}
+              {activeTab === "signals" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 1rem", gap: "0.75rem", background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px" }}>
+                    <Activity size={28} style={{ color: TEXT.tertiary }} />
+                    <div style={{ fontSize: "13px", color: TEXT.secondary, fontWeight: 600 }}>No signals yet</div>
+                    <div style={{ fontSize: "11px", color: TEXT.tertiary, textAlign: "center", maxWidth: "320px" }}>
+                      Cross-app signals will appear here as the PRISM BUS routes events between domain apps. Connect domain apps to begin receiving live signals.
                     </div>
-                    <div>
-                      <SectionHeader title="Export Jobs by Format" />
-                      <div style={{ display: "flex", gap: 8 }}>
-                        {atlasData.exportsByFormat.map(f => (
-                          <div key={f.format} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "10px 14px", textAlign: "center" }}>
-                            <div style={{ fontSize: 11, color: TEXT.tertiary, textTransform: "uppercase" }}>{f.format}</div>
-                            <div style={{ fontSize: 18, fontWeight: 700, color: TEXT.primary }}>{f.total}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {atlasData.failedExports.length > 0 && (
-                      <div>
-                        <SectionHeader title="Failed Export Jobs" badge={atlasData.failedExports.length} />
-                        <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, overflow: "hidden" }}>
-                          {atlasData.failedExports.map(j => (
-                            <div key={j.id} style={{ padding: "10px 14px", borderBottom: `1px solid ${ACCENT.red}15` }}>
-                              <div style={{ fontSize: 12, color: TEXT.primary }}>Job #{j.id} — {j.format.toUpperCase()}</div>
-                              <div style={{ fontSize: 11, color: ACCENT.red }}>{j.errorMessage ?? "Unknown error"}</div>
-                            </div>
-                          ))}
+                  </div>
+                </div>
+              )}
+  
+              {/* ─── Cross-App: Platform Systems ─── */}
+              {activeTab === "systems" && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+                  {SYSTEMS.map((sys, i) => (
+                    <m.div
+                      key={sys.name}
+                      custom={i}
+                      variants={fadeUp}
+                      initial="hidden"
+                      animate="show"
+                      style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px", padding: "1.25rem" }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                        <span style={{ fontSize: "11px", fontWeight: 700, color: ACCENT.amber, textTransform: "uppercase", letterSpacing: "0.08em" }}>{sys.name}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                          <Circle size={6} fill="hsl(142,52%,48%)" style={{ color: "hsl(142,52%,48%)" }} />
+                          <span style={{ fontSize: "10px", color: "hsl(142,52%,48%)", fontWeight: 600 }}>Active</span>
                         </div>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* ─── Platform: Worldline ─── */}
-            {activeTab === "worldline" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
-                {!platformLoading && worldline && (
-                  <>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-                      <MetricCard label="Total Sources" value={worldline.total} color={TEXT.primary} />
-                      <MetricCard label="Active" value={worldline.active} color={ACCENT.green} />
-                      <MetricCard label="Degraded" value={worldline.degraded} color={worldline.degraded > 0 ? ACCENT.red : ACCENT.green} />
-                      <MetricCard label="Inactive / Paused" value={worldline.inactive} color={TEXT.tertiary} />
+                      <div style={{ fontSize: "12px", color: TEXT.secondary, lineHeight: 1.5 }}>{sys.desc}</div>
+                    </m.div>
+                  ))}
+                </div>
+              )}
+  
+              {/* ─── Platform: Health Overview ─── */}
+              {activeTab === "health" && (
+                <div>
+                  {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
+                  {!platformLoading && overview && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
+                        <MetricCard label="Agent Runs (24h)" value={Number(overview.agentRuns?.total ?? 0)} sub={overview.agentRuns ? `${Math.round(Number(overview.agentRuns.avgLatency ?? 0))}ms avg latency` : undefined} color={ACCENT.blue} />
+                        <MetricCard label="Atlas Artifacts (7d)" value={overview.artifactStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.artifactStats.find(a => a.status === "failed")?.total ?? 0} failed`} color={ACCENT.gold} />
+                        <MetricCard label="Outcome Decisions (7d)" value={overview.outcomeStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.outcomeStats.find(o => o.status === "overridden")?.total ?? 0} overrides`} color={ACCENT.purple} />
+                        <MetricCard label="Ext. Data Sources" value={overview.worldlineHealth.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.worldlineHealth.find(w => w.status === "degraded")?.total ?? 0} degraded`} color={overview.worldlineHealth.find(w => w.status === "degraded")?.total !== "0" ? ACCENT.red : ACCENT.green} />
+                        <MetricCard label="Proof Anomalies (7d)" value={overview.proofChainStats.filter(p => p.reviewState === "flagged").reduce((s, r) => s + Number(r.total), 0)} sub="flagged for review" color={ACCENT.red} />
+                        <MetricCard label="Export Jobs (7d)" value={overview.exportJobStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.exportJobStats.find(e => e.status === "failed")?.total ?? 0} failed`} color={ACCENT.amber} />
+                      </div>
+                      {overview.worldlineHealth.some(w => w.status === "degraded" && Number(w.total) > 0) && (
+                        <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, padding: "12px 16px" }}>
+                          <span style={{ fontSize: 12, color: ACCENT.red }}>⚠ Degraded data sources detected — check Audit Timeline tab for details.</span>
+                        </div>
+                      )}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                        <div>
+                          <SectionHeader title="Artifact Status Breakdown" />
+                          <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
+                            {overview.artifactStats.length === 0
+                              ? <div style={{ padding: "16px", fontSize: 12, color: TEXT.tertiary }}>No artifact activity in the last 7 days.</div>
+                              : overview.artifactStats.map(r => (
+                                <div key={r.status} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}` }}>
+                                  <StatusPip status={r.status} />
+                                  <span style={{ fontSize: 12, color: TEXT.secondary, textTransform: "capitalize", flex: 1 }}>{r.status}</span>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT.primary }}>{r.total}</span>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                        <div>
+                          <SectionHeader title="Outcome Decisions" />
+                          <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
+                            {overview.outcomeStats.length === 0
+                              ? <div style={{ padding: "16px", fontSize: 12, color: TEXT.tertiary }}>No outcome decisions in the last 7 days.</div>
+                              : overview.outcomeStats.map(r => (
+                                <div key={r.status} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}` }}>
+                                  <StatusPip status={r.status} />
+                                  <span style={{ fontSize: 12, color: TEXT.secondary, textTransform: "capitalize", flex: 1 }}>{r.status}</span>
+                                  <span style={{ fontSize: 11, color: TEXT.tertiary, marginRight: 8 }}>{Math.round(Number(r.avgConfidence) * 100)}% conf</span>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT.primary }}>{r.total}</span>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    {worldline.degradedSources.length > 0 && (
-                      <div>
-                        <SectionHeader title="Degraded Sources" badge={worldline.degradedSources.length} />
-                        <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, overflow: "hidden" }}>
-                          {worldline.degradedSources.map(s => (
-                            <div key={s.slug} style={{ padding: "12px 14px", borderBottom: `1px solid ${ACCENT.red}15` }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                                <span style={{ fontSize: 12, fontWeight: 600, color: TEXT.primary }}>{s.name}</span>
-                                <span style={{ fontSize: 10, color: TEXT.tertiary, fontFamily: "monospace" }}>{s.slug}</span>
-                                <span style={{ fontSize: 10, color: TEXT.tertiary }}>{s.domain}</span>
+                  )}
+                </div>
+              )}
+  
+              {/* ─── Platform: Agent Runs ─── */}
+              {activeTab === "agents" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
+                  {!platformLoading && (
+                    <>
+                      <SectionHeader title="Agent Run Performance (Last 24h)" badge={agentRuns.length} />
+                      {agentRuns.length === 0
+                        ? <div style={{ color: TEXT.tertiary, textAlign: "center", padding: 60 }}>No agent runs in the last 24 hours.</div>
+                        : (
+                          <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 100px 100px 80px", padding: "8px 14px", borderBottom: `1px solid ${BORDER.muted}` }}>
+                              {["Agent", "Domain", "Runs", "Avg Latency", "Avg Tokens"].map(h => (
+                                <span key={h} style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: 0.8 }}>{h}</span>
+                              ))}
+                            </div>
+                            {agentRuns.map(r => (
+                              <div key={r.agentId} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 100px 100px 80px", padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}`, alignItems: "center" }}>
+                                <div>
+                                  <div style={{ fontSize: 12, color: TEXT.primary }}>{r.agentName}</div>
+                                  <div style={{ fontSize: 10, color: TEXT.tertiary, fontFamily: "monospace" }}>{r.agentId}</div>
+                                </div>
+                                <span style={{ fontSize: 11, color: TEXT.secondary }}>{r.domain}</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: TEXT.primary }}>{r.totalRuns}</span>
+                                <span style={{ fontSize: 12, color: Number(r.avgLatencyMs) > 5000 ? ACCENT.red : Number(r.avgLatencyMs) > 2000 ? ACCENT.amber : TEXT.secondary }}>
+                                  {Math.round(Number(r.avgLatencyMs))}ms
+                                </span>
+                                <span style={{ fontSize: 12, color: TEXT.secondary }}>{Math.round(Number(r.avgTokens))}</span>
                               </div>
-                              <div style={{ fontSize: 11, color: ACCENT.red }}>{s.consecutiveFailures} consecutive failures</div>
-                              {s.lastErrorMessage && (
-                                <div style={{ fontSize: 11, color: TEXT.secondary, marginTop: 2 }}>{s.lastErrorMessage.slice(0, 120)}</div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {worldline.degradedSources.length === 0 && (
-                      <div style={{ background: `${ACCENT.green}08`, border: `1px solid ${ACCENT.green}30`, borderRadius: 10, padding: "16px 20px" }}>
-                        <span style={{ fontSize: 13, color: ACCENT.green }}>✓ All data sources are operating normally.</span>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* ─── Platform: Proof Chain ─── */}
-            {activeTab === "proofchain" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
-                {!platformLoading && proofData && (
-                  <>
-                    <div>
-                      <SectionHeader title="Review State Distribution" />
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
-                        {proofData.byState.map((s, i) => (
-                          <div key={i} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "12px 14px" }}>
-                            <div style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: 0.8 }}>{s.reviewState} / {s.exportSafetyState}</div>
-                            <div style={{ fontSize: 22, fontWeight: 700, color: s.reviewState === "flagged" ? ACCENT.red : s.reviewState === "approved" ? ACCENT.green : TEXT.primary }}>{s.total}</div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                    {proofData.anomalies.length > 0 && (
+                        )}
+                    </>
+                  )}
+                </div>
+              )}
+  
+              {/* ─── Platform: Outcome Graph ─── */}
+              {activeTab === "outcomes" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                  {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
+                  {!platformLoading && outcomes && (
+                    <>
                       <div>
-                        <SectionHeader title="Trust Receipt Anomalies" badge={proofData.anomalies.length} />
-                        <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, overflow: "hidden" }}>
-                          {proofData.anomalies.map(a => (
-                            <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: `1px solid ${ACCENT.red}15` }}>
-                              <span style={{ fontSize: 12, color: TEXT.primary }}>{a.contentType}</span>
-                              <span style={{ fontSize: 11, color: TEXT.tertiary, fontFamily: "monospace" }}>{a.contentId}</span>
-                              <span style={{ fontSize: 10, color: ACCENT.red, marginLeft: "auto" }}>{a.reviewState} / {a.exportSafetyState}</span>
+                        <SectionHeader title="Outcome Graph — By Domain" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
+                          {outcomes.byDomain.map(d => (
+                            <div key={d.domain} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "12px 14px" }}>
+                              <div style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase" }}>{d.domain}</div>
+                              <div style={{ fontSize: 22, fontWeight: 700, color: TEXT.primary }}>{d.total}</div>
+                              <div style={{ fontSize: 11, color: TEXT.secondary }}>{Math.round(Number(d.avgConfidence) * 100)}% avg confidence</div>
                             </div>
                           ))}
                         </div>
                       </div>
-                    )}
-                    {proofData.anomalies.length === 0 && (
-                      <div style={{ background: `${ACCENT.green}08`, border: `1px solid ${ACCENT.green}30`, borderRadius: 10, padding: "16px 20px" }}>
-                        <span style={{ fontSize: 13, color: ACCENT.green }}>✓ No proof chain anomalies detected in the last 7 days.</span>
+                      {outcomes.topOverrideAgents.length > 0 && (
+                        <div>
+                          <SectionHeader title="Top Override Agents" />
+                          <div style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 10, overflow: "hidden" }}>
+                            {outcomes.topOverrideAgents.map((a, i) => (
+                              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: `1px solid ${BORDER.subtle}` }}>
+                                <span style={{ fontSize: 12, color: ACCENT.purple, fontFamily: "monospace", flex: 1 }}>{a.agentId ?? "unknown"}</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: ACCENT.amber }}>{a.overrideCount} overrides</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+  
+              {/* ─── Platform: Atlas Artifacts ─── */}
+              {activeTab === "artifacts" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                  {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
+                  {!platformLoading && atlasData && (
+                    <>
+                      <div>
+                        <SectionHeader title="Atlas Artifacts — By Template" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+                          {atlasData.byTemplate.map((t, i) => (
+                            <div key={i} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "12px 14px" }}>
+                              <div style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: 0.8 }}>{t.templateType.replace(/_/g, " ")}</div>
+                              <div style={{ fontSize: 10, color: TEXT.tertiary, marginTop: 2 }}>{t.domain}</div>
+                              <div style={{ fontSize: 22, fontWeight: 700, color: TEXT.primary, marginTop: 4 }}>{t.total}</div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+                      <div>
+                        <SectionHeader title="Export Jobs by Format" />
+                        <div style={{ display: "flex", gap: 8 }}>
+                          {atlasData.exportsByFormat.map(f => (
+                            <div key={f.format} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "10px 14px", textAlign: "center" }}>
+                              <div style={{ fontSize: 11, color: TEXT.tertiary, textTransform: "uppercase" }}>{f.format}</div>
+                              <div style={{ fontSize: 18, fontWeight: 700, color: TEXT.primary }}>{f.total}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {atlasData.failedExports.length > 0 && (
+                        <div>
+                          <SectionHeader title="Failed Export Jobs" badge={atlasData.failedExports.length} />
+                          <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, overflow: "hidden" }}>
+                            {atlasData.failedExports.map(j => (
+                              <div key={j.id} style={{ padding: "10px 14px", borderBottom: `1px solid ${ACCENT.red}15` }}>
+                                <div style={{ fontSize: 12, color: TEXT.primary }}>Job #{j.id} — {j.format.toUpperCase()}</div>
+                                <div style={{ fontSize: 11, color: ACCENT.red }}>{j.errorMessage ?? "Unknown error"}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+  
+              {/* ─── Platform: Worldline ─── */}
+              {activeTab === "worldline" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                  {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
+                  {!platformLoading && worldline && (
+                    <>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                        <MetricCard label="Total Sources" value={worldline.total} color={TEXT.primary} />
+                        <MetricCard label="Active" value={worldline.active} color={ACCENT.green} />
+                        <MetricCard label="Degraded" value={worldline.degraded} color={worldline.degraded > 0 ? ACCENT.red : ACCENT.green} />
+                        <MetricCard label="Inactive / Paused" value={worldline.inactive} color={TEXT.tertiary} />
+                      </div>
+                      {worldline.degradedSources.length > 0 && (
+                        <div>
+                          <SectionHeader title="Degraded Sources" badge={worldline.degradedSources.length} />
+                          <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, overflow: "hidden" }}>
+                            {worldline.degradedSources.map(s => (
+                              <div key={s.slug} style={{ padding: "12px 14px", borderBottom: `1px solid ${ACCENT.red}15` }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                                  <span style={{ fontSize: 12, fontWeight: 600, color: TEXT.primary }}>{s.name}</span>
+                                  <span style={{ fontSize: 10, color: TEXT.tertiary, fontFamily: "monospace" }}>{s.slug}</span>
+                                  <span style={{ fontSize: 10, color: TEXT.tertiary }}>{s.domain}</span>
+                                </div>
+                                <div style={{ fontSize: 11, color: ACCENT.red }}>{s.consecutiveFailures} consecutive failures</div>
+                                {s.lastErrorMessage && (
+                                  <div style={{ fontSize: 11, color: TEXT.secondary, marginTop: 2 }}>{s.lastErrorMessage.slice(0, 120)}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {worldline.degradedSources.length === 0 && (
+                        <div style={{ background: `${ACCENT.green}08`, border: `1px solid ${ACCENT.green}30`, borderRadius: 10, padding: "16px 20px" }}>
+                          <span style={{ fontSize: 13, color: ACCENT.green }}>✓ All data sources are operating normally.</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+  
+              {/* ─── Platform: Proof Chain ─── */}
+              {activeTab === "proofchain" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                  {platformLoading && <div style={{ color: TEXT.secondary, textAlign: "center", padding: 60 }}>Loading…</div>}
+                  {!platformLoading && proofData && (
+                    <>
+                      <div>
+                        <SectionHeader title="Review State Distribution" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+                          {proofData.byState.map((s, i) => (
+                            <div key={i} style={{ background: BG.card, border: `1px solid ${BORDER.muted}`, borderRadius: 8, padding: "12px 14px" }}>
+                              <div style={{ fontSize: 10, color: TEXT.tertiary, textTransform: "uppercase", letterSpacing: 0.8 }}>{s.reviewState} / {s.exportSafetyState}</div>
+                              <div style={{ fontSize: 22, fontWeight: 700, color: s.reviewState === "flagged" ? ACCENT.red : s.reviewState === "approved" ? ACCENT.green : TEXT.primary }}>{s.total}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {proofData.anomalies.length > 0 && (
+                        <div>
+                          <SectionHeader title="Trust Receipt Anomalies" badge={proofData.anomalies.length} />
+                          <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, overflow: "hidden" }}>
+                            {proofData.anomalies.map(a => (
+                              <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: `1px solid ${ACCENT.red}15` }}>
+                                <span style={{ fontSize: 12, color: TEXT.primary }}>{a.contentType}</span>
+                                <span style={{ fontSize: 11, color: TEXT.tertiary, fontFamily: "monospace" }}>{a.contentId}</span>
+                                <span style={{ fontSize: 10, color: ACCENT.red, marginLeft: "auto" }}>{a.reviewState} / {a.exportSafetyState}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {proofData.anomalies.length === 0 && (
+                        <div style={{ background: `${ACCENT.green}08`, border: `1px solid ${ACCENT.green}30`, borderRadius: 10, padding: "16px 20px" }}>
+                          <span style={{ fontSize: 13, color: ACCENT.green }}>✓ No proof chain anomalies detected in the last 7 days.</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+  
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

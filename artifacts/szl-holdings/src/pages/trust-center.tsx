@@ -332,469 +332,472 @@ function DisclosureForm() {
 }
 
 export default function TrustCenter() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Trust — SZL Holdings",
     description: "Security and control are part of the product. Platform architecture, access control, auditability, AI governance, and security posture.",
     canonical: "https://szlholdings.com/trust",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-      <section style={{
-        paddingTop: "clamp(7rem,12vw,10rem)",
-        paddingBottom: "clamp(4rem,7vw,6rem)",
-        borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-      }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <m.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span style={{
-              display: "inline-block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
-              textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "1.5rem",
-            }}>
-              Trust
-            </span>
-            <h1 style={{
-              fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, letterSpacing: "-0.025em",
-              lineHeight: 1.1, color: "hsl(38,12%,94%)", marginBottom: "1.25rem", maxWidth: "32rem",
-            }}>
-              Trust is part of the product.
-            </h1>
-            <p style={{
-              fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65, maxWidth: "36rem", marginBottom: "1.5rem",
-            }}>
-              The enterprise diligence hub for SZL Holdings — security architecture, AI governance, access control, compliance posture, and operational commitments. Start here for procurement reviews.
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.75rem" }}>
-              <Link href="/trust" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,55%,58%)", textDecoration: "none" }}>
-                Choose diligence path <ArrowRight size={13} />
-              </Link>
-              <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
-              <a href="mailto:security@szlholdings.com" style={{ fontSize: "0.875rem", color: "hsl(210,5%,48%)", textDecoration: "none" }}>security@szlholdings.com</a>
-              <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
-              <span style={{ fontSize: "0.875rem", color: "hsl(210,5%,36%)" }}>Last reviewed: 2026-04-16</span>
-            </div>
-          </m.div>
-        </div>
-      </section>
-
-      {/* Trust Summary */}
-      <section style={{
-        paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
-        borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-        background: "hsla(0,0%,100%,0.012)",
-      }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <m.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)", marginBottom: "1.5rem" }}>Trust Summary</p>
-          </m.div>
-          <div style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid hsla(0,0%,100%,0.06)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "minmax(10rem,18rem) 1fr", padding: "0.75rem 1.25rem", background: "hsla(0,0%,100%,0.03)", borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
-              <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)" }}>Concern</span>
-              <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)" }}>How it is addressed</span>
-            </div>
-            {TRUST_SUMMARY.map((row, i) => (
-              <m.div
-                key={row.concern}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.04 }}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(10rem,18rem) 1fr",
-                  padding: "0.875rem 1.25rem",
-                  borderBottom: i < TRUST_SUMMARY.length - 1 ? "1px solid hsla(0,0%,100%,0.04)" : "none",
-                  gap: "1.5rem",
-                  alignItems: "start",
-                }}
-              >
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,80%)" }}>{row.concern}</span>
-                <span style={{ fontSize: "13px", lineHeight: 1.62, color: "hsl(210,5%,56%)" }}>{row.how}</span>
-              </m.div>
-            ))}
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+        <section style={{
+          paddingTop: "clamp(7rem,12vw,10rem)",
+          paddingBottom: "clamp(4rem,7vw,6rem)",
+          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+        }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <m.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span style={{
+                display: "inline-block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
+                textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "1.5rem",
+              }}>
+                Trust
+              </span>
+              <h1 style={{
+                fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, letterSpacing: "-0.025em",
+                lineHeight: 1.1, color: "hsl(38,12%,94%)", marginBottom: "1.25rem", maxWidth: "32rem",
+              }}>
+                Trust is part of the product.
+              </h1>
+              <p style={{
+                fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65, maxWidth: "36rem", marginBottom: "1.5rem",
+              }}>
+                The enterprise diligence hub for SZL Holdings — security architecture, AI governance, access control, compliance posture, and operational commitments. Start here for procurement reviews.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.75rem" }}>
+                <Link href="/trust" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,55%,58%)", textDecoration: "none" }}>
+                  Choose diligence path <ArrowRight size={13} />
+                </Link>
+                <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
+                <a href="mailto:security@szlholdings.com" style={{ fontSize: "0.875rem", color: "hsl(210,5%,48%)", textDecoration: "none" }}>security@szlholdings.com</a>
+                <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
+                <span style={{ fontSize: "0.875rem", color: "hsl(210,5%,36%)" }}>Last reviewed: 2026-04-16</span>
+              </div>
+            </m.div>
           </div>
-        </div>
-      </section>
-
-      {/* Enterprise Diligence Packet */}
-      <section style={{
-        paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
-        borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-      }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <m.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            style={{ marginBottom: "2rem" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
-              <FileText size={14} style={{ color: "hsl(210,55%,58%)" }} />
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>Enterprise Diligence Packet</p>
-            </div>
-            <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.875rem", maxWidth: "32rem" }}>
-              Audience-specific diligence briefs
-            </h2>
-            <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,56%)", lineHeight: 1.65, maxWidth: "52ch" }}>
-              Each brief packages the relevant architecture, security, governance, and compliance content for a specific reviewer type. Select the path that matches your role in the evaluation.
-            </p>
-          </m.div>
-          <div className="grid sm:grid-cols-2 gap-3" style={{ marginBottom: "1.5rem" }}>
-            {DILIGENCE_BRIEFS.map((brief, i) => (
-              <m.div
-                key={brief.label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Link
-                  href={brief.href}
+        </section>
+  
+        {/* Trust Summary */}
+        <section style={{
+          paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+          background: "hsla(0,0%,100%,0.012)",
+        }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)", marginBottom: "1.5rem" }}>Trust Summary</p>
+            </m.div>
+            <div style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "minmax(10rem,18rem) 1fr", padding: "0.75rem 1.25rem", background: "hsla(0,0%,100%,0.03)", borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
+                <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)" }}>Concern</span>
+                <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)" }}>How it is addressed</span>
+              </div>
+              {TRUST_SUMMARY.map((row, i) => (
+                <m.div
+                  key={row.concern}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
                   style={{
-                    display: "block",
-                    padding: "1.25rem 1.5rem",
-                    borderRadius: "10px",
-                    background: "hsla(0,0%,100%,0.02)",
-                    border: `1px solid hsla(0,0%,100%,0.07)`,
-                    borderTop: `2px solid ${brief.accent}`,
-                    textDecoration: "none",
-                    transition: "background 0.18s",
+                    display: "grid",
+                    gridTemplateColumns: "minmax(10rem,18rem) 1fr",
+                    padding: "0.875rem 1.25rem",
+                    borderBottom: i < TRUST_SUMMARY.length - 1 ? "1px solid hsla(0,0%,100%,0.04)" : "none",
+                    gap: "1.5rem",
+                    alignItems: "start",
+                  }}
+                >
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,80%)" }}>{row.concern}</span>
+                  <span style={{ fontSize: "13px", lineHeight: 1.62, color: "hsl(210,5%,56%)" }}>{row.how}</span>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+  
+        {/* Enterprise Diligence Packet */}
+        <section style={{
+          paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+        }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              style={{ marginBottom: "2rem" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+                <FileText size={14} style={{ color: "hsl(210,55%,58%)" }} />
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>Enterprise Diligence Packet</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.875rem", maxWidth: "32rem" }}>
+                Audience-specific diligence briefs
+              </h2>
+              <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,56%)", lineHeight: 1.65, maxWidth: "52ch" }}>
+                Each brief packages the relevant architecture, security, governance, and compliance content for a specific reviewer type. Select the path that matches your role in the evaluation.
+              </p>
+            </m.div>
+            <div className="grid sm:grid-cols-2 gap-3" style={{ marginBottom: "1.5rem" }}>
+              {DILIGENCE_BRIEFS.map((brief, i) => (
+                <m.div
+                  key={brief.label}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Link
+                    href={brief.href}
+                    style={{
+                      display: "block",
+                      padding: "1.25rem 1.5rem",
+                      borderRadius: "10px",
+                      background: "hsla(0,0%,100%,0.02)",
+                      border: `1px solid hsla(0,0%,100%,0.07)`,
+                      borderTop: `2px solid ${brief.accent}`,
+                      textDecoration: "none",
+                      transition: "background 0.18s",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em" }}>{brief.label}</span>
+                      <ArrowRight size={13} style={{ color: brief.accent }} />
+                    </div>
+                    <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{brief.description}</p>
+                  </Link>
+                </m.div>
+              ))}
+            </div>
+            <m.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              style={{ fontSize: "12px", color: "hsl(210,5%,38%)" }}
+            >
+              Full technical diligence packet available on request — contact{" "}
+              <a href="mailto:security@szlholdings.com" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@szlholdings.com</a>.
+            </m.p>
+  
+            <SolutionBriefDownloadGrid />
+          </div>
+        </section>
+  
+        <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)" }}>
+              {sections.map((section) => {
+                const Icon = section.icon;
+                return (
+                  <m.div
+                    key={section.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.58, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", marginBottom: "2rem" }}>
+                      <div style={{
+                        width: "36px", height: "36px", borderRadius: "8px",
+                        background: `${section.accent}14`, border: `1px solid ${section.accent}28`,
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                      }}>
+                        <Icon size={16} style={{ color: section.accent }} />
+                      </div>
+                      <h2 style={{
+                        fontSize: "1.1875rem", fontWeight: 700, letterSpacing: "-0.015em",
+                        color: "hsl(38,12%,94%)", paddingTop: "8px",
+                      }}>{section.title}</h2>
+                    </div>
+  
+                    <div style={{
+                      background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)",
+                      borderRadius: "12px", overflow: "hidden",
+                    }}>
+                      {section.content.map((item, i) => (
+                        <div
+                          key={item.label}
+                          style={{
+                            padding: "1.375rem 1.75rem",
+                            borderBottom: i < section.content.length - 1 ? "1px solid hsla(0,0%,100%,0.04)" : "none",
+                            display: "grid", gridTemplateColumns: "10rem 1fr", gap: "2rem", alignItems: "start",
+                          }}
+                          className="sm:grid block"
+                        >
+                          <p style={{
+                            fontSize: "12px", fontWeight: 600, letterSpacing: "0.04em",
+                            textTransform: "uppercase", color: section.accent, paddingTop: "2px", flexShrink: 0,
+                          }}>{item.label}</p>
+                          <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,62%)", lineHeight: 1.65 }}>{item.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+  
+        <section style={{
+          paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)",
+          background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.05)",
+          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+        }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <m.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1.75rem" }}
+            >
+              Compliance Frameworks
+            </m.p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {COMPLIANCE_FRAMEWORKS.map((fw, i) => (
+                <m.div
+                  key={fw.name}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    padding: "1.125rem 1.375rem", borderRadius: "8px",
+                    background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                    <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em" }}>{brief.label}</span>
-                    <ArrowRight size={13} style={{ color: brief.accent }} />
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,88%)", letterSpacing: "-0.005em" }}>{fw.name}</span>
+                    <span style={{
+                      fontSize: "9.5px", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase",
+                      padding: "2px 8px", borderRadius: "4px", color: fw.color,
+                      background: `${fw.color}18`, border: `1px solid ${fw.color}30`,
+                    }}>{fw.status}</span>
                   </div>
-                  <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{brief.description}</p>
-                </Link>
-              </m.div>
-            ))}
-          </div>
-          <m.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            style={{ fontSize: "12px", color: "hsl(210,5%,38%)" }}
-          >
-            Full technical diligence packet available on request — contact{" "}
-            <a href="mailto:security@szlholdings.com" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@szlholdings.com</a>.
-          </m.p>
-
-          <SolutionBriefDownloadGrid />
-        </div>
-      </section>
-
-      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)" }}>
-            {sections.map((section) => {
-              const Icon = section.icon;
-              return (
-                <m.div
-                  key={section.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={{ duration: 0.58, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", marginBottom: "2rem" }}>
-                    <div style={{
-                      width: "36px", height: "36px", borderRadius: "8px",
-                      background: `${section.accent}14`, border: `1px solid ${section.accent}28`,
-                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                    }}>
-                      <Icon size={16} style={{ color: section.accent }} />
-                    </div>
-                    <h2 style={{
-                      fontSize: "1.1875rem", fontWeight: 700, letterSpacing: "-0.015em",
-                      color: "hsl(38,12%,94%)", paddingTop: "8px",
-                    }}>{section.title}</h2>
-                  </div>
-
-                  <div style={{
-                    background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)",
-                    borderRadius: "12px", overflow: "hidden",
-                  }}>
-                    {section.content.map((item, i) => (
-                      <div
-                        key={item.label}
-                        style={{
-                          padding: "1.375rem 1.75rem",
-                          borderBottom: i < section.content.length - 1 ? "1px solid hsla(0,0%,100%,0.04)" : "none",
-                          display: "grid", gridTemplateColumns: "10rem 1fr", gap: "2rem", alignItems: "start",
-                        }}
-                        className="sm:grid block"
-                      >
-                        <p style={{
-                          fontSize: "12px", fontWeight: 600, letterSpacing: "0.04em",
-                          textTransform: "uppercase", color: section.accent, paddingTop: "2px", flexShrink: 0,
-                        }}>{item.label}</p>
-                        <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,62%)", lineHeight: 1.65 }}>{item.body}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <p style={{ fontSize: "12px", lineHeight: 1.6, color: "hsl(210,5%,50%)" }}>{fw.detail}</p>
                 </m.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section style={{
-        paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)",
-        background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.05)",
-        borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-      }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <m.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1.75rem" }}
-          >
-            Compliance Frameworks
-          </m.p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {COMPLIANCE_FRAMEWORKS.map((fw, i) => (
-              <m.div
-                key={fw.name}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                style={{
-                  padding: "1.125rem 1.375rem", borderRadius: "8px",
-                  background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,88%)", letterSpacing: "-0.005em" }}>{fw.name}</span>
-                  <span style={{
-                    fontSize: "9.5px", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase",
-                    padding: "2px 8px", borderRadius: "4px", color: fw.color,
-                    background: `${fw.color}18`, border: `1px solid ${fw.color}30`,
-                  }}>{fw.status}</span>
-                </div>
-                <p style={{ fontSize: "12px", lineHeight: 1.6, color: "hsl(210,5%,50%)" }}>{fw.detail}</p>
-              </m.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Legal & Compliance Pages */}
-      <section style={{
-        paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
-        borderTop: "1px solid hsla(0,0%,100%,0.05)", borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-        background: "hsla(0,0%,100%,0.012)",
-      }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <m.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            style={{ marginBottom: "2rem" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
-              <FileText size={14} style={{ color: "hsl(210,55%,58%)" }} />
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>Legal & Compliance</p>
+              ))}
             </div>
-            <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.875rem", maxWidth: "32rem" }}>
-              Legal documentation for compliance reviewers
-            </h2>
-            <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,56%)", lineHeight: 1.65, maxWidth: "52ch" }}>
-              All legal agreements, privacy policies, and compliance documents in one place. For enterprise procurement teams and legal reviewers.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "0.75rem" }}>
-            {[
-              { label: "Privacy Policy", desc: "Data collection, processing, and user rights under GDPR/CCPA", href: "/legal/privacy", accent: "#3b82f6" },
-              { label: "Terms of Service", desc: "Platform usage terms, acceptable conduct, and service boundaries", href: "/legal/terms", accent: "#8b5cf6" },
-              { label: "Cookie Policy", desc: "Cookie types, consent management, and opt-out instructions", href: "/legal/cookies", accent: "#10b981" },
-              { label: "Acceptable Use Policy", desc: "Permitted use cases, prohibited activity, and enforcement", href: "/legal/acceptable-use", accent: "#f59e0b" },
-              { label: "Security Disclosure", desc: "Responsible disclosure program, scope, and contact", href: "/legal/security-disclosure", accent: "#ef4444" },
-              { label: "Data Processing Agreement", desc: "DPA template for enterprise customers. Request via security@szlholdings.com", href: "mailto:security@szlholdings.com?subject=DPA%20Request", accent: "#6366f1" },
-            ].map((doc, i) => (
-              <m.div
-                key={doc.label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <a
-                  href={doc.href}
-                  style={{
-                    display: "block",
-                    padding: "1.125rem 1.375rem",
-                    borderRadius: "8px",
-                    background: "hsla(0,0%,100%,0.02)",
-                    border: `1px solid hsla(0,0%,100%,0.07)`,
-                    borderLeft: `3px solid ${doc.accent}`,
-                    textDecoration: "none",
-                    transition: "background 0.18s",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.375rem" }}>
-                    <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em" }}>{doc.label}</span>
-                    <ExternalLink size={11} style={{ color: doc.accent, opacity: 0.7 }} />
-                  </div>
-                  <p style={{ fontSize: "12px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{doc.desc}</p>
-                </a>
-              </m.div>
-            ))}
           </div>
-        </div>
-      </section>
-
-      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-            <div>
-              <m.p
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1.25rem" }}
-              >
-                Reliability Principles
-              </m.p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {[
-                  { title: "Graceful degradation", body: "When external data sources are unavailable, the platform indicates the gap explicitly rather than silently serving stale or incomplete data." },
-                  { title: "Transparent simulation", body: "Demo and simulation modes are explicitly labelled. Users always know whether they are looking at live data or simulated state." },
-                  { title: "Performance as reliability", body: "Dashboard load times, query latency, and data freshness are monitored and treated as reliability metrics." },
-                  { title: "Operator-built", body: "The platform is built by the people who operate it. There is no gap between the engineering team and the operating responsibility." },
-                ].map((item, i) => (
-                  <m.div
-                    key={item.title}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+        </section>
+  
+        {/* Legal & Compliance Pages */}
+        <section style={{
+          paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+          borderTop: "1px solid hsla(0,0%,100%,0.05)", borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+          background: "hsla(0,0%,100%,0.012)",
+        }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              style={{ marginBottom: "2rem" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+                <FileText size={14} style={{ color: "hsl(210,55%,58%)" }} />
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>Legal & Compliance</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.875rem", maxWidth: "32rem" }}>
+                Legal documentation for compliance reviewers
+              </h2>
+              <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,56%)", lineHeight: 1.65, maxWidth: "52ch" }}>
+                All legal agreements, privacy policies, and compliance documents in one place. For enterprise procurement teams and legal reviewers.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "0.75rem" }}>
+              {[
+                { label: "Privacy Policy", desc: "Data collection, processing, and user rights under GDPR/CCPA", href: "/legal/privacy", accent: "#3b82f6" },
+                { label: "Terms of Service", desc: "Platform usage terms, acceptable conduct, and service boundaries", href: "/legal/terms", accent: "#8b5cf6" },
+                { label: "Cookie Policy", desc: "Cookie types, consent management, and opt-out instructions", href: "/legal/cookies", accent: "#10b981" },
+                { label: "Acceptable Use Policy", desc: "Permitted use cases, prohibited activity, and enforcement", href: "/legal/acceptable-use", accent: "#f59e0b" },
+                { label: "Security Disclosure", desc: "Responsible disclosure program, scope, and contact", href: "/legal/security-disclosure", accent: "#ef4444" },
+                { label: "Data Processing Agreement", desc: "DPA template for enterprise customers. Request via security@szlholdings.com", href: "mailto:security@szlholdings.com?subject=DPA%20Request", accent: "#6366f1" },
+              ].map((doc, i) => (
+                <m.div
+                  key={doc.label}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <a
+                    href={doc.href}
                     style={{
-                      padding: "1.125rem 1.25rem", borderRadius: "8px",
-                      background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)",
+                      display: "block",
+                      padding: "1.125rem 1.375rem",
+                      borderRadius: "8px",
+                      background: "hsla(0,0%,100%,0.02)",
+                      border: `1px solid hsla(0,0%,100%,0.07)`,
+                      borderLeft: `3px solid ${doc.accent}`,
+                      textDecoration: "none",
+                      transition: "background 0.18s",
                     }}
                   >
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,86%)", marginBottom: "0.35rem" }}>{item.title}</p>
-                    <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{item.body}</p>
-                  </m.div>
-                ))}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.375rem" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em" }}>{doc.label}</span>
+                      <ExternalLink size={11} style={{ color: doc.accent, opacity: 0.7 }} />
+                    </div>
+                    <p style={{ fontSize: "12px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{doc.desc}</p>
+                  </a>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+  
+        <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+              <div>
+                <m.p
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1.25rem" }}
+                >
+                  Reliability Principles
+                </m.p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {[
+                    { title: "Graceful degradation", body: "When external data sources are unavailable, the platform indicates the gap explicitly rather than silently serving stale or incomplete data." },
+                    { title: "Transparent simulation", body: "Demo and simulation modes are explicitly labelled. Users always know whether they are looking at live data or simulated state." },
+                    { title: "Performance as reliability", body: "Dashboard load times, query latency, and data freshness are monitored and treated as reliability metrics." },
+                    { title: "Operator-built", body: "The platform is built by the people who operate it. There is no gap between the engineering team and the operating responsibility." },
+                  ].map((item, i) => (
+                    <m.div
+                      key={item.title}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                      style={{
+                        padding: "1.125rem 1.25rem", borderRadius: "8px",
+                        background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)",
+                      }}
+                    >
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,86%)", marginBottom: "0.35rem" }}>{item.title}</p>
+                      <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{item.body}</p>
+                    </m.div>
+                  ))}
+                </div>
+              </div>
+  
+              <div>
+                <m.p
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1.25rem" }}
+                >
+                  Responsible Disclosure
+                </m.p>
+                <DisclosureForm />
               </div>
             </div>
-
-            <div>
-              <m.p
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1.25rem" }}
-              >
-                Responsible Disclosure
-              </m.p>
-              <DisclosureForm />
+          </div>
+        </section>
+  
+        {/* Proof & Evidence Navigation */}
+        <section style={{
+          paddingTop: "clamp(3rem,5vw,4rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+          borderTop: "1px solid hsla(0,0%,100%,0.05)",
+          background: "hsla(0,0%,100%,0.01)",
+        }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,38%)", marginBottom: "1.25rem" }}>
+                Proof &amp; Evidence
+              </p>
+            </m.div>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {[
+                {
+                  label: "Product Readiness Matrix",
+                  description: "Every capability status derived from the platform manifest — no hand-edited claims.",
+                  href: "/product-readiness",
+                  Icon: BarChart2,
+                  accent: "#3b82f6",
+                },
+                {
+                  label: "Live Status",
+                  description: "Uptime probe, database health, security posture, and SOC 2 progress — live data.",
+                  href: "/trust-center/status",
+                  Icon: Activity,
+                  accent: "#10b981",
+                },
+                {
+                  label: "Technical Proof",
+                  description: "Architecture layers, real API shapes, and audit-trail record samples. Citation-linked.",
+                  href: "/technical-proof",
+                  Icon: Code2,
+                  accent: "#8b5cf6",
+                },
+                {
+                  label: "Changelog",
+                  description: "Material capabilities shipped, derived from real git commit history.",
+                  href: "/changelog-highlights",
+                  Icon: GitBranch,
+                  accent: "#f59e0b",
+                },
+              ].map((item, i) => (
+                <m.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 8 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.35, delay: i * 0.06 }}
+                >
+                  <Link
+                    href={item.href}
+                    style={{
+                      display: "flex", flexDirection: "column" as const, gap: "0.5rem",
+                      padding: "1.125rem 1.375rem",
+                      borderRadius: "10px",
+                      background: "hsla(0,0%,100%,0.02)",
+                      border: "1px solid hsla(0,0%,100%,0.06)",
+                      borderTop: `2px solid ${item.accent}`,
+                      textDecoration: "none",
+                      transition: "background 0.15s",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <item.Icon size={14} style={{ color: item.accent }} />
+                      <ArrowRight size={12} style={{ color: "hsl(210,5%,38%)" }} />
+                    </div>
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{item.label}</span>
+                    <span style={{ fontSize: "12px", lineHeight: 1.55, color: "hsl(210,5%,48%)" }}>{item.description}</span>
+                  </Link>
+                </m.div>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Proof & Evidence Navigation */}
-      <section style={{
-        paddingTop: "clamp(3rem,5vw,4rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
-        borderTop: "1px solid hsla(0,0%,100%,0.05)",
-        background: "hsla(0,0%,100%,0.01)",
-      }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,38%)", marginBottom: "1.25rem" }}>
-              Proof &amp; Evidence
-            </p>
-          </m.div>
-          <div className="grid sm:grid-cols-3 gap-3">
-            {[
-              {
-                label: "Product Readiness Matrix",
-                description: "Every capability status derived from the platform manifest — no hand-edited claims.",
-                href: "/product-readiness",
-                Icon: BarChart2,
-                accent: "#3b82f6",
-              },
-              {
-                label: "Live Status",
-                description: "Uptime probe, database health, security posture, and SOC 2 progress — live data.",
-                href: "/trust-center/status",
-                Icon: Activity,
-                accent: "#10b981",
-              },
-              {
-                label: "Technical Proof",
-                description: "Architecture layers, real API shapes, and audit-trail record samples. Citation-linked.",
-                href: "/technical-proof",
-                Icon: Code2,
-                accent: "#8b5cf6",
-              },
-              {
-                label: "Changelog",
-                description: "Material capabilities shipped, derived from real git commit history.",
-                href: "/changelog-highlights",
-                Icon: GitBranch,
-                accent: "#f59e0b",
-              },
-            ].map((item, i) => (
-              <m.div
-                key={item.label}
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.35, delay: i * 0.06 }}
-              >
-                <Link
-                  href={item.href}
-                  style={{
-                    display: "flex", flexDirection: "column" as const, gap: "0.5rem",
-                    padding: "1.125rem 1.375rem",
-                    borderRadius: "10px",
-                    background: "hsla(0,0%,100%,0.02)",
-                    border: "1px solid hsla(0,0%,100%,0.06)",
-                    borderTop: `2px solid ${item.accent}`,
-                    textDecoration: "none",
-                    transition: "background 0.15s",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <item.Icon size={14} style={{ color: item.accent }} />
-                    <ArrowRight size={12} style={{ color: "hsl(210,5%,38%)" }} />
-                  </div>
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{item.label}</span>
-                  <span style={{ fontSize: "12px", lineHeight: 1.55, color: "hsl(210,5%,48%)" }}>{item.description}</span>
-                </Link>
-              </m.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+        </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

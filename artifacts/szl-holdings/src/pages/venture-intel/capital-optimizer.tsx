@@ -91,7 +91,7 @@ const PieCustomTooltip = ({ active, payload }: { active?: boolean; payload?: Arr
 };
 
 export default function CapitalOptimizerPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Capital Allocation Optimizer — SZL Holdings Venture Intelligence",
     description: "AI-recommended capital deployment strategies across SZL portfolio companies with scenario modeling.",
     canonical: "https://szlholdings.com/venture-intelligence/capital-optimizer",
@@ -109,140 +109,143 @@ export default function CapitalOptimizerPage() {
   }));
 
   return (
-    <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-        <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
-              <ArrowLeft size={12} /> Venture Intelligence
-            </Link>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Capital Optimizer
-              </p>
-              <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Capital Allocation Optimizer
-              </h1>
-              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
-                Model capital deployment strategies across the portfolio. Each scenario optimizes for a different objective — growth velocity, balanced risk, or synergy compounding.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <div style={{ display: "flex", gap: "0.875rem", flexWrap: "wrap", marginBottom: "2rem" }}>
-              {SCENARIOS.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => setActiveScenario(s.id)}
-                  style={{
-                    padding: "0.625rem 1.125rem",
-                    borderRadius: "4px",
-                    border: `1px solid ${activeScenario === s.id ? "hsla(212,100%,70%,0.4)" : "hsla(0,0%,100%,0.08)"}`,
-                    background: activeScenario === s.id ? "hsla(212,100%,70%,0.08)" : "transparent",
-                    color: activeScenario === s.id ? "hsl(212,80%,72%)" : "hsl(210,5%,52%)",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.15s ease",
-                    fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                  }}
-                >
-                  {s.label}
-                </button>
-              ))}
+    <>
+      {__pageMeta}
+      <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+          <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>
+                <ArrowLeft size={12} /> Venture Intelligence
+              </Link>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Capital Optimizer
+                </p>
+                <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
+                  Capital Allocation Optimizer
+                </h1>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "38rem" }}>
+                  Model capital deployment strategies across the portfolio. Each scenario optimizes for a different objective — growth velocity, balanced risk, or synergy compounding.
+                </p>
+              </m.div>
             </div>
-
-            <m.div
-              key={activeScenario}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
-                {[
-                  { label: "Total Capital Pool", value: `$${TOTAL_CAPITAL}M`, icon: "💰", sub: "Current deployment round" },
-                  { label: "Projected IRR", value: scenario.projectedIrr, icon: "📈", sub: "36-month horizon" },
-                  { label: "Projected MOIC", value: scenario.projectedMoic, icon: "✕", sub: "On invested capital" },
-                ].map(stat => (
-                  <div key={stat.label} style={{ padding: "1.25rem 1.5rem", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "6px", background: "hsl(210,12%,6%)" }}>
-                    <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(210,5%,42%)", marginBottom: "0.5rem" }}>{stat.label}</p>
-                    <p style={{ fontSize: "1.875rem", fontWeight: 800, color: "hsl(38,12%,92%)", letterSpacing: "-0.03em", lineHeight: 1, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{stat.value}</p>
-                    <p style={{ fontSize: "10px", color: "hsl(210,5%,40%)", marginTop: "0.3rem" }}>{stat.sub}</p>
-                  </div>
+          </section>
+  
+          <section style={{ padding: "2rem 0 clamp(4rem,7vw,6rem)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <div style={{ display: "flex", gap: "0.875rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+                {SCENARIOS.map(s => (
+                  <button
+                    key={s.id}
+                    onClick={() => setActiveScenario(s.id)}
+                    style={{
+                      padding: "0.625rem 1.125rem",
+                      borderRadius: "4px",
+                      border: `1px solid ${activeScenario === s.id ? "hsla(212,100%,70%,0.4)" : "hsla(0,0%,100%,0.08)"}`,
+                      background: activeScenario === s.id ? "hsla(212,100%,70%,0.08)" : "transparent",
+                      color: activeScenario === s.id ? "hsl(212,80%,72%)" : "hsl(210,5%,52%)",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+                    }}
+                  >
+                    {s.label}
+                  </button>
                 ))}
               </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem" }}>
-                <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.75rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
-                    <TrendingUp size={14} style={{ color: "hsl(212,80%,65%)" }} />
-                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Allocation by Company ($M)</p>
-                  </div>
-                  <div style={{ height: "240px" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={barData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(210,5%,48%)" }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 9, fill: "hsl(210,5%,36%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${((v / 100) * TOTAL_CAPITAL).toFixed(0)}M`} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="allocation" radius={[3, 3, 0, 0]}>
-                          {barData.map((entry) => (
-                            <Cell key={`cell-${entry.name}`} fill={entry.color} fillOpacity={0.8} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.75rem" }}>
-                  <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", marginBottom: "1rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Portfolio Split</p>
-                  <div style={{ height: "200px" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={scenario.allocations} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} strokeWidth={0}>
-                          {scenario.allocations.map((entry) => (
-                            <Cell key={entry.name} fill={entry.color} fillOpacity={0.85} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<PieCustomTooltip />} />
-                        <Legend wrapperStyle={{ fontSize: "10px", color: "hsl(210,5%,48%)" }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: "1.5rem", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                  <Zap size={13} style={{ color: "#d4a054" }} />
-                  <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>AI Rationale — {scenario.label}</p>
-                  <span style={{ marginLeft: "auto", fontSize: "10px", padding: "2px 8px", borderRadius: "3px", background: `${scenario.riskColor}15`, color: scenario.riskColor, border: `1px solid ${scenario.riskColor}30`, fontWeight: 600 }}>
-                    Risk: {scenario.riskLevel}
-                  </span>
-                </div>
-                <p style={{ fontSize: "12.5px", color: "hsl(210,5%,55%)", lineHeight: 1.7, marginBottom: "1rem" }}>{scenario.description}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px),1fr))", gap: "0.5rem" }}>
-                  {scenario.allocations.map(a => (
-                    <div key={a.name} style={{ display: "flex", gap: "0.625rem", alignItems: "flex-start", padding: "0.5rem 0.75rem", background: "hsla(0,0%,100%,0.02)", borderRadius: "4px" }}>
-                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: a.color, marginTop: "5px", flexShrink: 0 }} />
-                      <div>
-                        <span style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,82%)" }}>{a.name}</span>
-                        <span style={{ fontSize: "10px", color: "hsl(210,5%,48%)", marginLeft: "6px" }}>{a.value}% · ${((a.value / 100) * TOTAL_CAPITAL).toFixed(1)}M</span>
-                        <p style={{ fontSize: "10px", color: "hsl(210,5%,48%)", marginTop: "2px" }}>{a.rationale}</p>
-                      </div>
+  
+              <m.div
+                key={activeScenario}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+                  {[
+                    { label: "Total Capital Pool", value: `$${TOTAL_CAPITAL}M`, icon: "💰", sub: "Current deployment round" },
+                    { label: "Projected IRR", value: scenario.projectedIrr, icon: "📈", sub: "36-month horizon" },
+                    { label: "Projected MOIC", value: scenario.projectedMoic, icon: "✕", sub: "On invested capital" },
+                  ].map(stat => (
+                    <div key={stat.label} style={{ padding: "1.25rem 1.5rem", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "6px", background: "hsl(210,12%,6%)" }}>
+                      <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(210,5%,42%)", marginBottom: "0.5rem" }}>{stat.label}</p>
+                      <p style={{ fontSize: "1.875rem", fontWeight: 800, color: "hsl(38,12%,92%)", letterSpacing: "-0.03em", lineHeight: 1, fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{stat.value}</p>
+                      <p style={{ fontSize: "10px", color: "hsl(210,5%,40%)", marginTop: "0.3rem" }}>{stat.sub}</p>
                     </div>
                   ))}
                 </div>
-              </div>
-            </m.div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+  
+                <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem" }}>
+                  <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.75rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
+                      <TrendingUp size={14} style={{ color: "hsl(212,80%,65%)" }} />
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Allocation by Company ($M)</p>
+                    </div>
+                    <div style={{ height: "240px" }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={barData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(210,5%,48%)" }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 9, fill: "hsl(210,5%,36%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${((v / 100) * TOTAL_CAPITAL).toFixed(0)}M`} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar dataKey="allocation" radius={[3, 3, 0, 0]}>
+                            {barData.map((entry) => (
+                              <Cell key={`cell-${entry.name}`} fill={entry.color} fillOpacity={0.8} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+  
+                  <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.75rem" }}>
+                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", marginBottom: "1rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Portfolio Split</p>
+                    <div style={{ height: "200px" }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={scenario.allocations} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} strokeWidth={0}>
+                            {scenario.allocations.map((entry) => (
+                              <Cell key={entry.name} fill={entry.color} fillOpacity={0.85} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<PieCustomTooltip />} />
+                          <Legend wrapperStyle={{ fontSize: "10px", color: "hsl(210,5%,48%)" }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+  
+                <div style={{ marginTop: "1.5rem", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                    <Zap size={13} style={{ color: "#d4a054" }} />
+                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,80%)", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>AI Rationale — {scenario.label}</p>
+                    <span style={{ marginLeft: "auto", fontSize: "10px", padding: "2px 8px", borderRadius: "3px", background: `${scenario.riskColor}15`, color: scenario.riskColor, border: `1px solid ${scenario.riskColor}30`, fontWeight: 600 }}>
+                      Risk: {scenario.riskLevel}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "12.5px", color: "hsl(210,5%,55%)", lineHeight: 1.7, marginBottom: "1rem" }}>{scenario.description}</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px),1fr))", gap: "0.5rem" }}>
+                    {scenario.allocations.map(a => (
+                      <div key={a.name} style={{ display: "flex", gap: "0.625rem", alignItems: "flex-start", padding: "0.5rem 0.75rem", background: "hsla(0,0%,100%,0.02)", borderRadius: "4px" }}>
+                        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: a.color, marginTop: "5px", flexShrink: 0 }} />
+                        <div>
+                          <span style={{ fontSize: "11px", fontWeight: 700, color: "hsl(38,12%,82%)" }}>{a.name}</span>
+                          <span style={{ fontSize: "10px", color: "hsl(210,5%,48%)", marginLeft: "6px" }}>{a.value}% · ${((a.value / 100) * TOTAL_CAPITAL).toFixed(1)}M</span>
+                          <p style={{ fontSize: "10px", color: "hsl(210,5%,48%)", marginTop: "2px" }}>{a.rationale}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </m.div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

@@ -166,187 +166,190 @@ const ARCHITECTURE_LAYERS = [
 ];
 
 export default function TechnicalProofPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Technical Proof — SZL Holdings",
     description: "Architecture diagrams, real API examples, and audit-trail samples. Evidence-backed technical documentation for evaluators.",
     canonical: "https://szlholdings.com/technical-proof",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section style={{
-          paddingTop: "clamp(7rem,12vw,10rem)",
-          paddingBottom: "clamp(3rem,5vw,4rem)",
-          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-        }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-              <span style={{
-                display: "inline-block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
-                textTransform: "uppercase", color: "hsl(210,5%,48%)", marginBottom: "1.25rem",
-              }}>
-                Technical Proof
-              </span>
-              <h1 style={{
-                fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
-                color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
-              }}>
-                Architecture, API, and audit — not claims.
-              </h1>
-              <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,57%)", lineHeight: 1.68, maxWidth: "48ch" }}>
-                Real architecture diagrams, actual API request/response shapes, and live audit-trail record samples.
-                Every item here is citation-linked to source code or docs.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
-                <Layers size={14} style={{ color: "hsl(210,55%,58%)" }} />
-                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>
-                  Architecture — Observe → Infer → Govern → Confirm → Record
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section style={{
+            paddingTop: "clamp(7rem,12vw,10rem)",
+            paddingBottom: "clamp(3rem,5vw,4rem)",
+            borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+          }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+                <span style={{
+                  display: "inline-block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
+                  textTransform: "uppercase", color: "hsl(210,5%,48%)", marginBottom: "1.25rem",
+                }}>
+                  Technical Proof
+                </span>
+                <h1 style={{
+                  fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
+                  color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
+                }}>
+                  Architecture, API, and audit — not claims.
+                </h1>
+                <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,57%)", lineHeight: 1.68, maxWidth: "48ch" }}>
+                  Real architecture diagrams, actual API request/response shapes, and live audit-trail record samples.
+                  Every item here is citation-linked to source code or docs.
                 </p>
-              </div>
-              <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.625rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.75rem" }}>
-                The governed intelligence loop
-              </h2>
-              <p style={{ fontSize: "0.9rem", color: "hsl(210,5%,55%)", marginBottom: "2rem", maxWidth: "52ch", lineHeight: 1.65 }}>
-                Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>architecture.md</code>,{" "}
-                <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>policy-model.md</code>,{" "}
-                <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/alloy/</code>
-              </p>
-            </m.div>
-
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.625rem" }}>
-              {ARCHITECTURE_LAYERS.map((layer, i) => (
-                <m.div
-                  key={layer.name}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.07 }}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "5rem 1fr auto",
-                    gap: "1.5rem",
-                    padding: "1.125rem 1.375rem",
-                    borderRadius: "10px",
-                    background: "hsla(0,0%,100%,0.02)",
-                    border: "1px solid hsla(0,0%,100%,0.06)",
-                    borderLeft: `3px solid ${layer.color}`,
-                    alignItems: "start",
-                  }}
-                >
-                  <div>
-                    <span style={{
-                      fontSize: "13px", fontWeight: 800, color: layer.color,
-                      letterSpacing: "-0.01em", textTransform: "uppercase" as const,
-                    }}>
-                      {layer.name}
-                    </span>
-                    <span style={{
-                      display: "block", fontSize: "10px", fontWeight: 600,
-                      color: "hsl(210,5%,38%)", marginTop: "0.2rem",
-                    }}>
-                      Layer {i + 1}
-                    </span>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: "13px", color: "hsl(210,5%,60%)", lineHeight: 1.6, marginBottom: "0.5rem" }}>
-                      {layer.description}
-                    </p>
-                    <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.375rem" }}>
-                      {layer.examples.map(ex => (
-                        <span key={ex} style={{
-                          fontSize: "11px", color: "hsl(210,5%,46%)",
-                          background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.06)",
-                          padding: "0.15rem 0.5rem", borderRadius: "4px",
-                        }}>
-                          {ex}
-                        </span>
-                      ))}
+              </m.div>
+            </div>
+          </section>
+  
+          <section style={{ paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+                  <Layers size={14} style={{ color: "hsl(210,55%,58%)" }} />
+                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>
+                    Architecture — Observe → Infer → Govern → Confirm → Record
+                  </p>
+                </div>
+                <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.625rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.75rem" }}>
+                  The governed intelligence loop
+                </h2>
+                <p style={{ fontSize: "0.9rem", color: "hsl(210,5%,55%)", marginBottom: "2rem", maxWidth: "52ch", lineHeight: 1.65 }}>
+                  Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>architecture.md</code>,{" "}
+                  <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>policy-model.md</code>,{" "}
+                  <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/alloy/</code>
+                </p>
+              </m.div>
+  
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.625rem" }}>
+                {ARCHITECTURE_LAYERS.map((layer, i) => (
+                  <m.div
+                    key={layer.name}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.07 }}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "5rem 1fr auto",
+                      gap: "1.5rem",
+                      padding: "1.125rem 1.375rem",
+                      borderRadius: "10px",
+                      background: "hsla(0,0%,100%,0.02)",
+                      border: "1px solid hsla(0,0%,100%,0.06)",
+                      borderLeft: `3px solid ${layer.color}`,
+                      alignItems: "start",
+                    }}
+                  >
+                    <div>
+                      <span style={{
+                        fontSize: "13px", fontWeight: 800, color: layer.color,
+                        letterSpacing: "-0.01em", textTransform: "uppercase" as const,
+                      }}>
+                        {layer.name}
+                      </span>
+                      <span style={{
+                        display: "block", fontSize: "10px", fontWeight: 600,
+                        color: "hsl(210,5%,38%)", marginTop: "0.2rem",
+                      }}>
+                        Layer {i + 1}
+                      </span>
                     </div>
-                  </div>
-                </m.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section style={{ paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: "1.75rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
-                <Code2 size={14} style={{ color: "hsl(210,55%,58%)" }} />
-                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>
-                  Real API — request and response
-                </p>
+                    <div>
+                      <p style={{ fontSize: "13px", color: "hsl(210,5%,60%)", lineHeight: 1.6, marginBottom: "0.5rem" }}>
+                        {layer.description}
+                      </p>
+                      <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.375rem" }}>
+                        {layer.examples.map(ex => (
+                          <span key={ex} style={{
+                            fontSize: "11px", color: "hsl(210,5%,46%)",
+                            background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.06)",
+                            padding: "0.15rem 0.5rem", borderRadius: "4px",
+                          }}>
+                            {ex}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </m.div>
+                ))}
               </div>
-              <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.625rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.5rem" }}>
-                Health endpoint — live data, no mocks
-              </h2>
-              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.6, maxWidth: "52ch" }}>
-                Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>artifacts/api-server/src/routes/health.ts</code> (CAP-001, status: live)
-              </p>
-            </m.div>
-            <CodeBlock code={API_REQUEST_SAMPLE} language="http" />
-            <div style={{ marginTop: "1.5rem" }}>
-              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(38,12%,86%)", marginBottom: "0.5rem" }}>Covenant Policy — plain-English compiled to executable governance</h3>
-              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", marginBottom: "1rem", lineHeight: 1.6 }}>
-                Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/policy-engine/</code>, Task #1954 (Policy Compiler, status: live)
-              </p>
-              <CodeBlock code={POLICY_SAMPLE} language="policy" />
             </div>
-          </div>
-        </section>
-
-        <section style={{ paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: "1.75rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
-                <Shield size={14} style={{ color: "hsl(210,55%,58%)" }} />
-                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>
-                  Audit Trail — sample record
+          </section>
+  
+          <section style={{ paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: "1.75rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+                  <Code2 size={14} style={{ color: "hsl(210,55%,58%)" }} />
+                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>
+                    Real API — request and response
+                  </p>
+                </div>
+                <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.625rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.5rem" }}>
+                  Health endpoint — live data, no mocks
+                </h2>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.6, maxWidth: "52ch" }}>
+                  Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>artifacts/api-server/src/routes/health.ts</code> (CAP-001, status: live)
                 </p>
+              </m.div>
+              <CodeBlock code={API_REQUEST_SAMPLE} language="http" />
+              <div style={{ marginTop: "1.5rem" }}>
+                <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "hsl(38,12%,86%)", marginBottom: "0.5rem" }}>Covenant Policy — plain-English compiled to executable governance</h3>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", marginBottom: "1rem", lineHeight: 1.6 }}>
+                  Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/policy-engine/</code>, Task #1954 (Policy Compiler, status: live)
+                </p>
+                <CodeBlock code={POLICY_SAMPLE} language="policy" />
               </div>
-              <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.625rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.5rem" }}>
-                Decision Ledger record
-              </h2>
-              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", marginBottom: "1.25rem", lineHeight: 1.6 }}>
-                Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>artifacts/api-server/src/db/schema.ts</code> → auditTrailTable,{" "}
-                <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/alloy/</code> (CAP-010, working_demo → proof chain).
-                Every confirmed decision generates an event of this shape. SHA256 hash chain links signal → inference → confirmation → outcome.
-              </p>
-            </m.div>
-            <CodeBlock code={AUDIT_TRAIL_SAMPLE} language="json" />
-
-            <div style={{ marginTop: "2.5rem", display: "flex", flexWrap: "wrap" as const, gap: "0.75rem" }}>
-              {[
-                { label: "Product Readiness Matrix", href: "/product-readiness" },
-                { label: "Trust Center Status", href: "/trust-center/status" },
-                { label: "Trust Center", href: "/trust-center" },
-                { label: "Changelog", href: "/changelog-highlights" },
-              ].map(link => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  style={{ fontSize: "13px", color: "hsl(210,55%,58%)", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.3rem" }}
-                >
-                  {link.label} <ExternalLink size={11} />
-                </Link>
-              ))}
             </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          <section style={{ paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} style={{ marginBottom: "1.75rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+                  <Shield size={14} style={{ color: "hsl(210,55%,58%)" }} />
+                  <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>
+                    Audit Trail — sample record
+                  </p>
+                </div>
+                <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.625rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.5rem" }}>
+                  Decision Ledger record
+                </h2>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", marginBottom: "1.25rem", lineHeight: 1.6 }}>
+                  Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>artifacts/api-server/src/db/schema.ts</code> → auditTrailTable,{" "}
+                  <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/alloy/</code> (CAP-010, working_demo → proof chain).
+                  Every confirmed decision generates an event of this shape. SHA256 hash chain links signal → inference → confirmation → outcome.
+                </p>
+              </m.div>
+              <CodeBlock code={AUDIT_TRAIL_SAMPLE} language="json" />
+  
+              <div style={{ marginTop: "2.5rem", display: "flex", flexWrap: "wrap" as const, gap: "0.75rem" }}>
+                {[
+                  { label: "Product Readiness Matrix", href: "/product-readiness" },
+                  { label: "Trust Center Status", href: "/trust-center/status" },
+                  { label: "Trust Center", href: "/trust-center" },
+                  { label: "Changelog", href: "/changelog-highlights" },
+                ].map(link => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    style={{ fontSize: "13px", color: "hsl(210,55%,58%)", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.3rem" }}
+                  >
+                    {link.label} <ExternalLink size={11} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

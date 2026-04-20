@@ -205,7 +205,7 @@ const PRODUCT_COLORS: Record<string, string> = {
 };
 
 export default function ChangelogHighlightsPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Changelog — SZL Holdings",
     description: "Real changelog derived from git history — material capabilities shipped across the SZL Holdings platform.",
     canonical: "https://szlholdings.com/changelog-highlights",
@@ -226,127 +226,130 @@ export default function ChangelogHighlightsPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <SiteNav />
-      <main id="main-content" role="main">
-
-        <section style={{
-          paddingTop: "clamp(7rem,12vw,10rem)",
-          paddingBottom: "clamp(3rem,5vw,4rem)",
-          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-        }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem" }}>
-                <GitBranch size={14} style={{ color: "hsl(210,5%,48%)" }} />
-                <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,48%)" }}>
-                  Changelog
-                </span>
-              </div>
-              <h1 style={{
-                fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
-                color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
-              }}>
-                Material capabilities, shipped.
-              </h1>
-              <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,57%)", lineHeight: 1.68, maxWidth: "48ch" }}>
-                Derived from real git commit history — filtered to customer-visible capability changes.
-                Internal refactors, test coverage, and documentation commits are excluded.
-                SHA links trace to the actual commit.
-              </p>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ paddingTop: "clamp(3rem,5vw,4.5rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: "3rem" }}>
-              {Object.entries(byMonth).sort(([a], [b]) => b.localeCompare(a)).map(([month, commits]) => (
-                <div key={month}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(38,12%,70%)", letterSpacing: "0.04em" }}>
-                      {monthLabels[month] ?? month}
-                    </span>
-                    <div style={{ flex: 1, height: "1px", background: "hsla(0,0%,100%,0.06)" }} />
-                    <span style={{ fontSize: "11px", color: "hsl(210,5%,38%)" }}>{commits.length} changes</span>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.75rem" }}>
-                    {commits.map((commit, i) => (
-                      <m.div
-                        key={commit.sha}
-                        initial={{ opacity: 0, y: 8 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.35, delay: i * 0.04 }}
-                        style={{
-                          padding: "1.125rem 1.375rem",
-                          borderRadius: "10px",
-                          background: "hsla(0,0%,100%,0.02)",
-                          border: "1px solid hsla(0,0%,100%,0.06)",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "0.5rem" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" as const }}>
-                            <TypeBadge type={commit.type} />
-                            <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,88%)", letterSpacing: "-0.01em" }}>
-                              {commit.title}
-                            </span>
-                            {commit.taskRef && (
-                              <span style={{ fontSize: "11px", color: "hsl(210,5%,40%)", fontFamily: "monospace" }}>{commit.taskRef}</span>
-                            )}
-                          </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
-                            <span style={{ fontSize: "11px", color: "hsl(210,5%,36%)" }}>{commit.date}</span>
-                            <code style={{
-                              fontSize: "11px", fontFamily: "monospace", color: "hsl(210,55%,60%)",
-                              background: "hsla(210,55%,52%,0.1)", padding: "0.15rem 0.45rem", borderRadius: "4px",
-                            }}>
-                              {commit.sha}
-                            </code>
-                          </div>
-                        </div>
-                        {commit.body && (
-                          <p style={{ fontSize: "13px", color: "hsl(210,5%,52%)", lineHeight: 1.65, marginBottom: "0.625rem" }}>
-                            {commit.body}
-                          </p>
-                        )}
-                        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.375rem" }}>
-                          {commit.products.map(p => (
-                            <span key={p} style={{
-                              fontSize: "11px", fontWeight: 600,
-                              color: PRODUCT_COLORS[p] ?? "hsl(210,5%,50%)",
-                              padding: "0.1rem 0.5rem", borderRadius: "4px",
-                              background: "hsla(0,0%,100%,0.04)",
-                            }}>
-                              {p}
-                            </span>
-                          ))}
-                        </div>
-                      </m.div>
-                    ))}
-                  </div>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+        <SiteNav />
+        <main id="main-content" role="main">
+  
+          <section style={{
+            paddingTop: "clamp(7rem,12vw,10rem)",
+            paddingBottom: "clamp(3rem,5vw,4rem)",
+            borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+          }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem" }}>
+                  <GitBranch size={14} style={{ color: "hsl(210,5%,48%)" }} />
+                  <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,48%)" }}>
+                    Changelog
+                  </span>
                 </div>
-              ))}
+                <h1 style={{
+                  fontSize: "clamp(1.875rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.025em",
+                  color: "hsl(38,12%,94%)", marginBottom: "1rem", maxWidth: "36rem", lineHeight: 1.12,
+                }}>
+                  Material capabilities, shipped.
+                </h1>
+                <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,57%)", lineHeight: 1.68, maxWidth: "48ch" }}>
+                  Derived from real git commit history — filtered to customer-visible capability changes.
+                  Internal refactors, test coverage, and documentation commits are excluded.
+                  SHA links trace to the actual commit.
+                </p>
+              </m.div>
             </div>
-
-            <div style={{ marginTop: "3rem", padding: "1.25rem 1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.015)", border: "1px solid hsla(0,0%,100%,0.05)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.5rem" }}>
-                <GitCommit size={13} style={{ color: "hsl(210,5%,48%)" }} />
-                <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,42%)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
-                  Source
-                </span>
+          </section>
+  
+          <section style={{ paddingTop: "clamp(3rem,5vw,4.5rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: "3rem" }}>
+                {Object.entries(byMonth).sort(([a], [b]) => b.localeCompare(a)).map(([month, commits]) => (
+                  <div key={month}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(38,12%,70%)", letterSpacing: "0.04em" }}>
+                        {monthLabels[month] ?? month}
+                      </span>
+                      <div style={{ flex: 1, height: "1px", background: "hsla(0,0%,100%,0.06)" }} />
+                      <span style={{ fontSize: "11px", color: "hsl(210,5%,38%)" }}>{commits.length} changes</span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.75rem" }}>
+                      {commits.map((commit, i) => (
+                        <m.div
+                          key={commit.sha}
+                          initial={{ opacity: 0, y: 8 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.35, delay: i * 0.04 }}
+                          style={{
+                            padding: "1.125rem 1.375rem",
+                            borderRadius: "10px",
+                            background: "hsla(0,0%,100%,0.02)",
+                            border: "1px solid hsla(0,0%,100%,0.06)",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "0.5rem" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" as const }}>
+                              <TypeBadge type={commit.type} />
+                              <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,88%)", letterSpacing: "-0.01em" }}>
+                                {commit.title}
+                              </span>
+                              {commit.taskRef && (
+                                <span style={{ fontSize: "11px", color: "hsl(210,5%,40%)", fontFamily: "monospace" }}>{commit.taskRef}</span>
+                              )}
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
+                              <span style={{ fontSize: "11px", color: "hsl(210,5%,36%)" }}>{commit.date}</span>
+                              <code style={{
+                                fontSize: "11px", fontFamily: "monospace", color: "hsl(210,55%,60%)",
+                                background: "hsla(210,55%,52%,0.1)", padding: "0.15rem 0.45rem", borderRadius: "4px",
+                              }}>
+                                {commit.sha}
+                              </code>
+                            </div>
+                          </div>
+                          {commit.body && (
+                            <p style={{ fontSize: "13px", color: "hsl(210,5%,52%)", lineHeight: 1.65, marginBottom: "0.625rem" }}>
+                              {commit.body}
+                            </p>
+                          )}
+                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.375rem" }}>
+                            {commit.products.map(p => (
+                              <span key={p} style={{
+                                fontSize: "11px", fontWeight: 600,
+                                color: PRODUCT_COLORS[p] ?? "hsl(210,5%,50%)",
+                                padding: "0.1rem 0.5rem", borderRadius: "4px",
+                                background: "hsla(0,0%,100%,0.04)",
+                              }}>
+                                {p}
+                              </span>
+                            ))}
+                          </div>
+                        </m.div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <p style={{ fontSize: "12.5px", color: "hsl(210,5%,44%)", lineHeight: 1.6 }}>
-                This changelog is derived from git log entries filtered to material customer-visible changes — features, security improvements, significant fixes, and infrastructure changes that affect operator experience.
-                Internal refactors, documentation updates, and test-only commits are excluded.
-                SHA hashes trace to commits in the platform repository.
-              </p>
+  
+              <div style={{ marginTop: "3rem", padding: "1.25rem 1.5rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.015)", border: "1px solid hsla(0,0%,100%,0.05)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.5rem" }}>
+                  <GitCommit size={13} style={{ color: "hsl(210,5%,48%)" }} />
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,42%)", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                    Source
+                  </span>
+                </div>
+                <p style={{ fontSize: "12.5px", color: "hsl(210,5%,44%)", lineHeight: 1.6 }}>
+                  This changelog is derived from git log entries filtered to material customer-visible changes — features, security improvements, significant fixes, and infrastructure changes that affect operator experience.
+                  Internal refactors, documentation updates, and test-only commits are excluded.
+                  SHA hashes trace to commits in the platform repository.
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

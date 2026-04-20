@@ -148,7 +148,7 @@ function FileTypeIcon({ type }: { type: string }) {
 }
 
 export default function DataRoomPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Virtual Data Room — SZL Holdings Fund",
     description: "Secure, permission-controlled document repository for fund due diligence, LP reporting, and co-investment materials.",
     canonical: "https://szlholdings.com/fund/data-room",
@@ -170,218 +170,221 @@ export default function DataRoomPage() {
   const totalDownloads = FOLDERS.flatMap(f => f.docs).reduce((s, d) => s + d.downloads, 0);
 
   return (
-    <div className="min-h-screen bg-[#080b10] text-white">
-      <SiteNav />
-      <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
-        <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-
-          <div className="flex items-center gap-3 mb-6">
-            <Link href="/fund">
-              <button className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors">
-                <ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence
-              </button>
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-white/20" />
-            <span className="text-xs text-white/60">Virtual Data Room</span>
-          </div>
-
-          <div className="flex items-start justify-between mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d4a054]/15">
-                  <FolderOpen className="h-3.5 w-3.5 text-[#d4a054]" />
-                </div>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4a054]">Secure Repository</span>
-              </div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Virtual Data Room</h1>
-              <p className="text-white/50 text-sm max-w-xl">
-                Permission-controlled document repository with watermarked viewing, download tracking, and full activity audit logs.
-              </p>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#080b10] text-white">
+        <SiteNav />
+        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
+          <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+  
+            <div className="flex items-center gap-3 mb-6">
+              <Link href="/fund">
+                <button className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Fund Intelligence
+                </button>
+              </Link>
+              <ChevronRight className="h-3.5 w-3.5 text-white/20" />
+              <span className="text-xs text-white/60">Virtual Data Room</span>
             </div>
-            <button className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-4 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 transition-colors">
-              <Plus className="h-3.5 w-3.5" /> Upload Document
-            </button>
-          </div>
-
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            {[
-              { label: "Total Documents", value: String(totalDocs), icon: FileText, color: "#d4a054" },
-              { label: "Total Folders", value: String(FOLDERS.length), icon: Folder, color: "#4a90b8" },
-              { label: "Views (30d)", value: String(totalViews), icon: Eye, color: "#6aaa72" },
-              { label: "Downloads (30d)", value: String(totalDownloads), icon: Download, color: "#8b7ac8" },
-            ].map(m => (
-              <div key={m.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20" style={{ color: m.color }}>
-                    <m.icon className="h-4 w-4" />
+  
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d4a054]/15">
+                    <FolderOpen className="h-3.5 w-3.5 text-[#d4a054]" />
                   </div>
-                  <Shield className="h-3.5 w-3.5 text-white/20" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#d4a054]">Secure Repository</span>
                 </div>
-                <div className="text-2xl font-semibold text-white">{m.value}</div>
-                <div className="text-xs text-white/40 mt-1">{m.label}</div>
+                <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Virtual Data Room</h1>
+                <p className="text-white/50 text-sm max-w-xl">
+                  Permission-controlled document repository with watermarked viewing, download tracking, and full activity audit logs.
+                </p>
               </div>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3 mb-6">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search folders..."
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-9 pr-4 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#d4a054]/40"
-              />
+              <button className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-4 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 transition-colors">
+                <Plus className="h-3.5 w-3.5" /> Upload Document
+              </button>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Filter className="h-3.5 w-3.5 text-white/40" />
-              {(["all", "gp_only", "qualified_lp", "all_lp", "co_investor"] as const).map(p => (
-                <button key={p} onClick={() => setPermFilter(p)}
-                  className={`rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition ${permFilter === p ? "bg-[#d4a054] text-black" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.07]"}`}>
-                  {p === "all" ? "All" : PERM_LABELS[p].label}
-                </button>
+  
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              {[
+                { label: "Total Documents", value: String(totalDocs), icon: FileText, color: "#d4a054" },
+                { label: "Total Folders", value: String(FOLDERS.length), icon: Folder, color: "#4a90b8" },
+                { label: "Views (30d)", value: String(totalViews), icon: Eye, color: "#6aaa72" },
+                { label: "Downloads (30d)", value: String(totalDownloads), icon: Download, color: "#8b7ac8" },
+              ].map(m => (
+                <div key={m.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20" style={{ color: m.color }}>
+                      <m.icon className="h-4 w-4" />
+                    </div>
+                    <Shield className="h-3.5 w-3.5 text-white/20" />
+                  </div>
+                  <div className="text-2xl font-semibold text-white">{m.value}</div>
+                  <div className="text-xs text-white/40 mt-1">{m.label}</div>
+                </div>
               ))}
             </div>
-            <div className="flex gap-1 ml-auto">
-              {(["folders", "audit"] as const).map(t => (
-                <button key={t} onClick={() => setActiveTab(t)}
-                  className={`rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition ${activeTab === t ? "bg-white/[0.08] text-white" : "text-white/35 hover:text-white/60"}`}>
-                  {t === "folders" ? "Folders" : "Audit Log"}
-                </button>
-              ))}
+  
+            <div className="flex items-center gap-3 mb-6">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search folders..."
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-9 pr-4 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#d4a054]/40"
+                />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Filter className="h-3.5 w-3.5 text-white/40" />
+                {(["all", "gp_only", "qualified_lp", "all_lp", "co_investor"] as const).map(p => (
+                  <button key={p} onClick={() => setPermFilter(p)}
+                    className={`rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition ${permFilter === p ? "bg-[#d4a054] text-black" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.07]"}`}>
+                    {p === "all" ? "All" : PERM_LABELS[p].label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-1 ml-auto">
+                {(["folders", "audit"] as const).map(t => (
+                  <button key={t} onClick={() => setActiveTab(t)}
+                    className={`rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition ${activeTab === t ? "bg-white/[0.08] text-white" : "text-white/35 hover:text-white/60"}`}>
+                    {t === "folders" ? "Folders" : "Audit Log"}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-
-          <AnimatePresence mode="wait">
-            {activeTab === "folders" ? (
-              <m.div key="folders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                {selectedFolder ? (
-                  <div>
-                    <button onClick={() => setSelectedFolder(null)} className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 mb-5 transition-colors">
-                      <ArrowLeft className="h-3.5 w-3.5" /> Back to Folders
-                    </button>
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-black/20" style={{ color: selectedFolder.color }}>
-                        <FolderOpen className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-semibold text-white">{selectedFolder.name}</h2>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <PermBadge permission={selectedFolder.permission} />
-                          <span className="text-[10px] text-white/35">{selectedFolder.docs.length} documents</span>
+  
+            <AnimatePresence mode="wait">
+              {activeTab === "folders" ? (
+                <m.div key="folders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  {selectedFolder ? (
+                    <div>
+                      <button onClick={() => setSelectedFolder(null)} className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 mb-5 transition-colors">
+                        <ArrowLeft className="h-3.5 w-3.5" /> Back to Folders
+                      </button>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-black/20" style={{ color: selectedFolder.color }}>
+                          <FolderOpen className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h2 className="text-lg font-semibold text-white">{selectedFolder.name}</h2>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <PermBadge permission={selectedFolder.permission} />
+                            <span className="text-[10px] text-white/35">{selectedFolder.docs.length} documents</span>
+                          </div>
                         </div>
                       </div>
+                      <div className="space-y-2">
+                        {selectedFolder.docs.map((doc, i) => (
+                          <m.div key={doc.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                            className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:bg-white/[0.04] transition-colors">
+                            <FileTypeIcon type={doc.type} />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-white truncate">{doc.name}</div>
+                              <div className="flex items-center gap-3 mt-0.5">
+                                <span className="text-[10px] text-white/35">{doc.size}</span>
+                                <span className="text-[10px] text-white/35">{doc.uploaded}</span>
+                                <span className="text-[10px] text-white/35">by {doc.uploadedBy}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              {doc.watermarked && (
+                                <span className="text-[9px] text-[#d4a054] border border-[#d4a054]/30 rounded px-1.5 py-0.5 font-semibold uppercase tracking-wider">Watermarked</span>
+                              )}
+                              <PermBadge permission={doc.permission} />
+                              <div className="flex items-center gap-3 text-[11px] text-white/40">
+                                <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{doc.views}</span>
+                                <span className="flex items-center gap-1"><Download className="h-3 w-3" />{doc.downloads}</span>
+                              </div>
+                              <button className="rounded-lg px-3 py-1.5 bg-white/[0.04] text-xs text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors">
+                                View
+                              </button>
+                            </div>
+                          </m.div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      {selectedFolder.docs.map((doc, i) => (
-                        <m.div key={doc.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
-                          className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:bg-white/[0.04] transition-colors">
-                          <FileTypeIcon type={doc.type} />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-white truncate">{doc.name}</div>
-                            <div className="flex items-center gap-3 mt-0.5">
-                              <span className="text-[10px] text-white/35">{doc.size}</span>
-                              <span className="text-[10px] text-white/35">{doc.uploaded}</span>
-                              <span className="text-[10px] text-white/35">by {doc.uploadedBy}</span>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {filteredFolders.map((folder, i) => (
+                        <m.div key={folder.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                          <button onClick={() => setSelectedFolder(folder)} className="w-full text-left">
+                            <div className="group rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5 hover:border-white/[0.14] hover:bg-white/[0.04] transition-all">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-black/20" style={{ color: folder.color }}>
+                                  <FolderOpen className="h-5 w-5" />
+                                </div>
+                                <PermBadge permission={folder.permission} />
+                              </div>
+                              <h3 className="text-sm font-semibold text-white mb-1">{folder.name}</h3>
+                              <p className="text-xs text-white/40 mb-4 leading-relaxed">{folder.description}</p>
+                              <div className="flex items-center justify-between text-[11px] text-white/35">
+                                <span>{folder.docCount} documents</span>
+                                <span>Updated {folder.lastUpdated}</span>
+                              </div>
+                              <div className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-white/40 group-hover:text-white/70 transition-colors">
+                                Open Folder <ChevronRight className="h-3 w-3" />
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            {doc.watermarked && (
-                              <span className="text-[9px] text-[#d4a054] border border-[#d4a054]/30 rounded px-1.5 py-0.5 font-semibold uppercase tracking-wider">Watermarked</span>
-                            )}
-                            <PermBadge permission={doc.permission} />
-                            <div className="flex items-center gap-3 text-[11px] text-white/40">
-                              <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{doc.views}</span>
-                              <span className="flex items-center gap-1"><Download className="h-3 w-3" />{doc.downloads}</span>
-                            </div>
-                            <button className="rounded-lg px-3 py-1.5 bg-white/[0.04] text-xs text-white/60 hover:bg-white/[0.08] hover:text-white transition-colors">
-                              View
-                            </button>
-                          </div>
+                          </button>
                         </m.div>
                       ))}
                     </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredFolders.map((folder, i) => (
-                      <m.div key={folder.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                        <button onClick={() => setSelectedFolder(folder)} className="w-full text-left">
-                          <div className="group rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5 hover:border-white/[0.14] hover:bg-white/[0.04] transition-all">
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-black/20" style={{ color: folder.color }}>
-                                <FolderOpen className="h-5 w-5" />
+                  )}
+                </m.div>
+              ) : (
+                <m.div key="audit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
+                    <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-[#4a90b8]" />
+                      <span className="text-sm font-semibold text-white">Activity Audit Log</span>
+                      <span className="ml-auto text-[10px] text-white/30">{AUDIT_LOG.length} recent events</span>
+                    </div>
+                    <div className="divide-y divide-white/[0.04]">
+                      {AUDIT_LOG.map((entry) => (
+                        <div key={entry.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition-colors">
+                          <div className="flex-shrink-0">
+                            {entry.action === "Downloaded" ? (
+                              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#c45a4a]/10">
+                                <Download className="h-3.5 w-3.5 text-[#c45a4a]" />
                               </div>
-                              <PermBadge permission={folder.permission} />
-                            </div>
-                            <h3 className="text-sm font-semibold text-white mb-1">{folder.name}</h3>
-                            <p className="text-xs text-white/40 mb-4 leading-relaxed">{folder.description}</p>
-                            <div className="flex items-center justify-between text-[11px] text-white/35">
-                              <span>{folder.docCount} documents</span>
-                              <span>Updated {folder.lastUpdated}</span>
-                            </div>
-                            <div className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-white/40 group-hover:text-white/70 transition-colors">
-                              Open Folder <ChevronRight className="h-3 w-3" />
-                            </div>
+                            ) : entry.action === "Viewed" ? (
+                              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#4a90b8]/10">
+                                <Eye className="h-3.5 w-3.5 text-[#4a90b8]" />
+                              </div>
+                            ) : (
+                              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6aaa72]/10">
+                                <CheckCircle2 className="h-3.5 w-3.5 text-[#6aaa72]" />
+                              </div>
+                            )}
                           </div>
-                        </button>
-                      </m.div>
-                    ))}
-                  </div>
-                )}
-              </m.div>
-            ) : (
-              <m.div key="audit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
-                  <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-[#4a90b8]" />
-                    <span className="text-sm font-semibold text-white">Activity Audit Log</span>
-                    <span className="ml-auto text-[10px] text-white/30">{AUDIT_LOG.length} recent events</span>
-                  </div>
-                  <div className="divide-y divide-white/[0.04]">
-                    {AUDIT_LOG.map((entry) => (
-                      <div key={entry.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition-colors">
-                        <div className="flex-shrink-0">
-                          {entry.action === "Downloaded" ? (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#c45a4a]/10">
-                              <Download className="h-3.5 w-3.5 text-[#c45a4a]" />
-                            </div>
-                          ) : entry.action === "Viewed" ? (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#4a90b8]/10">
-                              <Eye className="h-3.5 w-3.5 text-[#4a90b8]" />
-                            </div>
-                          ) : (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6aaa72]/10">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-[#6aaa72]" />
-                            </div>
-                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm text-white font-medium">{entry.user}</div>
+                            <div className="text-xs text-white/40 truncate">{entry.action}: {entry.doc}</div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-xs text-white/50">{entry.time}</div>
+                            <div className="text-[10px] text-white/25">{entry.ip}</div>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm text-white font-medium">{entry.user}</div>
-                          <div className="text-xs text-white/40 truncate">{entry.action}: {entry.doc}</div>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="text-xs text-white/50">{entry.time}</div>
-                          <div className="text-[10px] text-white/25">{entry.ip}</div>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4 rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/[0.04] p-4 flex items-start gap-3">
-                  <AlertTriangle className="h-4 w-4 text-[#d4a054] flex-shrink-0 mt-0.5" />
-                  <div>
-                    <div className="text-sm font-semibold text-white mb-1">Audit Log Retention</div>
-                    <div className="text-xs text-white/50">All access events are immutably logged for 7 years. Includes IP address, timestamp, and document fingerprint for each view and download event.</div>
+                  <div className="mt-4 rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/[0.04] p-4 flex items-start gap-3">
+                    <AlertTriangle className="h-4 w-4 text-[#d4a054] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-sm font-semibold text-white mb-1">Audit Log Retention</div>
+                      <div className="text-xs text-white/50">All access events are immutably logged for 7 years. Includes IP address, timestamp, and document fingerprint for each view and download event.</div>
+                    </div>
                   </div>
-                </div>
-              </m.div>
-            )}
-          </AnimatePresence>
-
-        </m.div>
-      </main>
-      <SiteFooter />
-    </div>
+                </m.div>
+              )}
+            </AnimatePresence>
+  
+          </m.div>
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

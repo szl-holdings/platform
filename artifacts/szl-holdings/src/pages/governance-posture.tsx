@@ -595,7 +595,7 @@ function LiveActivityTab(props: {
 }
 
 export default function GovernancePosturePage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Governance Posture Dashboard — Lyte | SZL Holdings",
     description: "CISO-grade governance dashboard: policy coverage, approval throughput, override rates, trust health by domain, and governance maturity scores. Inspired by BSI IT-Grundschutz and Romania CYBERINT.",
     canonical: "https://szlholdings.com/lyte/governance-posture",
@@ -638,469 +638,472 @@ export default function GovernancePosturePage() {
   const DIcon = domain.icon;
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
-      <SiteNav />
-      <main id="main-content">
-
-        {/* Header */}
-        <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(5.5rem,10vw,7rem) 0 2rem" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
-                <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
-                <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
-                <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Governance Posture</span>
-                <HelpTip
-                  tipId="szl.governance-posture.overview"
-                  platform="szl"
-                  title="Governance Posture Score"
-                  content="A continuous, weighted score across policy coverage, approval throughput, override rate, and trust health for every domain pack. Updated as decisions and overrides flow through the platform — not assembled on demand."
-                />
-              </div>
-              <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "26ch", marginBottom: "1rem", color: TEXT }}>
-                Governance posture across every domain pack. Continuously.
-              </h1>
-              <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
-                Policy coverage, approval throughput, override rates, trust health per domain pack, and governance maturity scores — visible as a continuous operational feed, not assembled on demand. Inspired by BSI IT-Grundschutz and Romania CYBERINT's operational posture model.
-              </p>
-            </m.div>
-
-            {/* Platform-wide stat bar */}
-            <m.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              style={{ display: "flex", gap: "1px", background: BORDER, borderRadius: "8px", overflow: "hidden", border: `1px solid ${BORDER}` }}
-            >
-              {[
-                { label: "Active policies", value: `${PLATFORM_METRICS.activePolicies}/${PLATFORM_METRICS.totalPolicies}`, color: GREEN },
-                { label: "Pending approvals", value: PLATFORM_METRICS.pendingApprovals.toString(), color: PLATFORM_METRICS.pendingApprovals > 10 ? RED : YELLOW },
-                { label: "Approval throughput", value: `${PLATFORM_METRICS.avgApprovalThroughput.toFixed(0)}%`, color: GREEN },
-                { label: "Override rate (7d)", value: `${PLATFORM_METRICS.avgOverrideRate.toFixed(1)}%`, color: PLATFORM_METRICS.avgOverrideRate > 10 ? RED : YELLOW },
-                { label: "Proof coverage", value: `${PLATFORM_METRICS.avgProofCoverage.toFixed(1)}%`, color: GREEN },
-                { label: "SLA breaches (24h)", value: PLATFORM_METRICS.totalSlaBreaches.toString(), color: PLATFORM_METRICS.totalSlaBreaches > 0 ? RED : GREEN },
-                { label: "Avg maturity", value: `${PLATFORM_METRICS.avgMaturity.toFixed(0)}/100`, color: PLATFORM_METRICS.avgMaturity >= 80 ? GREEN : YELLOW },
-              ].map((stat, i) => (
-                <div key={i} style={{ flex: 1, background: BG, padding: "0.875rem 1rem", textAlign: "center" }}>
-                  <p style={{ fontSize: "1.0625rem", fontWeight: 700, fontFamily: MONO, color: stat.color, margin: 0 }}>{stat.value}</p>
-                  <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: 0 }}>{stat.label}</p>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
+        <SiteNav />
+        <main id="main-content">
+  
+          {/* Header */}
+          <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(5.5rem,10vw,7rem) 0 2rem" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
+                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
+                  <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Governance Posture</span>
+                  <HelpTip
+                    tipId="szl.governance-posture.overview"
+                    platform="szl"
+                    title="Governance Posture Score"
+                    content="A continuous, weighted score across policy coverage, approval throughput, override rate, and trust health for every domain pack. Updated as decisions and overrides flow through the platform — not assembled on demand."
+                  />
                 </div>
-              ))}
-            </m.div>
-          </div>
-        </section>
-
-        {/* Tabs */}
-        <div style={{ borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)", display: "flex", gap: 0 }}>
-            {(["overview", "domains", "approvals", "violations", "live-activity"] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                style={{
-                  padding: "0.875rem 1.25rem",
-                  border: "none",
-                  borderBottom: `2px solid ${activeTab === tab ? LYTE : "transparent"}`,
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: "0.8125rem",
-                  fontWeight: activeTab === tab ? 700 : 500,
-                  color: activeTab === tab ? LYTE : TEXT_FAINT,
-                  textTransform: "capitalize",
-                  transition: "all 0.15s ease",
-                }}
+                <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "26ch", marginBottom: "1rem", color: TEXT }}>
+                  Governance posture across every domain pack. Continuously.
+                </h1>
+                <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
+                  Policy coverage, approval throughput, override rates, trust health per domain pack, and governance maturity scores — visible as a continuous operational feed, not assembled on demand. Inspired by BSI IT-Grundschutz and Romania CYBERINT's operational posture model.
+                </p>
+              </m.div>
+  
+              {/* Platform-wide stat bar */}
+              <m.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                style={{ display: "flex", gap: "1px", background: BORDER, borderRadius: "8px", overflow: "hidden", border: `1px solid ${BORDER}` }}
               >
-                {tab === "live-activity" ? "Live activity" : tab}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2rem var(--space-content-x)" }}>
-          <AnimatePresence mode="wait">
-
-            {activeTab === "overview" && (
-              <m.div key="overview" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                {/* Heat map */}
-                <div style={{ marginBottom: "2rem" }}>
-                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
-                    Policy Coverage Heat Map — All Domains
-                  </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
-                    {DOMAIN_HEALTH.map((d, i) => {
-                      const Icon = d.icon;
-                      return (
-                        <m.button
-                          key={d.domain}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: i * 0.05 }}
-                          onClick={() => { setActiveDomain(d.domain); setActiveTab("domains"); }}
-                          style={{
-                            padding: "1.25rem",
-                            borderRadius: "9px",
-                            background: SURFACE,
-                            border: `1px solid ${d.maturityScore >= 90 ? d.color + "25" : d.maturityScore >= 75 ? "hsla(48,90%,52%,0.15)" : "hsla(0,72%,54%,0.15)"}`,
-                            cursor: "pointer",
-                            textAlign: "left",
-                          }}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
-                            <div style={{ width: 26, height: 26, borderRadius: 5, background: `${d.color}18`, border: `1px solid ${d.color}22`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <Icon size={12} style={{ color: d.color }} />
-                            </div>
-                            <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: TEXT }}>{d.domain}</span>
-                            <div style={{ marginLeft: "auto", display: "flex", gap: "0.375rem", alignItems: "center" }}>
-                              <TrendIcon trend={d.trend} />
-                              <MaturityBadge score={d.maturityScore} />
-                            </div>
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                            <div>
-                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
-                                <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>Maturity</span>
-                              </div>
-                              <ScoreBar value={d.maturityScore} color={d.maturityScore >= 90 ? GREEN : d.maturityScore >= 75 ? YELLOW : RED} />
-                            </div>
-                            <div>
-                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
-                                <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>Proof coverage</span>
-                              </div>
-                              <ScoreBar value={d.proofCoverage} color={d.proofCoverage >= 98 ? GREEN : YELLOW} />
-                            </div>
-                            <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
-                              <div>
-                                <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: d.pendingApprovals > 3 ? ORANGE : TEXT_SEC, margin: 0 }}>{d.pendingApprovals}</p>
-                                <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>Pending</p>
-                              </div>
-                              <div>
-                                <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: d.overrideRate > 10 ? RED : d.overrideRate > 5 ? YELLOW : GREEN, margin: 0 }}>{d.overrideRate}%</p>
-                                <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>Override</p>
-                              </div>
-                              <div>
-                                <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: d.slaBreaches > 0 ? RED : GREEN, margin: 0 }}>{d.slaBreaches}</p>
-                                <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>SLA breach</p>
-                              </div>
-                              <div>
-                                <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{d.approvalThroughputPct}%</p>
-                                <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>Throughput</p>
-                              </div>
-                            </div>
-                          </div>
-                        </m.button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Summary stats */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-                  <div style={{ padding: "1.5rem", borderRadius: "9px", background: SURFACE, border: `1px solid ${BORDER}` }}>
-                    <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1.25rem" }}>
-                      Approval Throughput by Domain
-                    </p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                      {DOMAIN_HEALTH.sort((a, b) => b.approvalThroughputPct - a.approvalThroughputPct).map(d => (
-                        <div key={d.domain} style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "0.75rem", alignItems: "center" }}>
-                          <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{d.domain}</span>
-                          <ScoreBar value={d.approvalThroughputPct} color={d.approvalThroughputPct >= 90 ? GREEN : d.approvalThroughputPct >= 80 ? YELLOW : RED} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div style={{ padding: "1.5rem", borderRadius: "9px", background: SURFACE, border: `1px solid ${BORDER}` }}>
-                    <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1.25rem" }}>
-                      Override Rate by Domain (7d) — lower is better
-                    </p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                      {DOMAIN_HEALTH.sort((a, b) => b.overrideRate - a.overrideRate).map(d => (
-                        <div key={d.domain} style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "0.75rem", alignItems: "center" }}>
-                          <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{d.domain}</span>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <div style={{ flex: 1, height: 4, borderRadius: 2, background: "hsla(0,0%,100%,0.08)", overflow: "hidden" }}>
-                              <div style={{ height: "100%", width: `${Math.min(100, d.overrideRate * 5)}%`, background: d.overrideRate > 10 ? RED : d.overrideRate > 5 ? YELLOW : GREEN, borderRadius: 2 }} />
-                            </div>
-                            <span style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, color: d.overrideRate > 10 ? RED : d.overrideRate > 5 ? YELLOW : GREEN, minWidth: "2.5rem", textAlign: "right" }}>
-                              {d.overrideRate}%
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </m.div>
-            )}
-
-            {activeTab === "domains" && (
-              <m.div key="domains" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: "1.25rem" }}>
-                  {/* Domain nav */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                    {DOMAIN_HEALTH.map(d => {
-                      const Icon = d.icon;
-                      return (
-                        <button key={d.domain} onClick={() => setActiveDomain(d.domain)} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 0.875rem", borderRadius: 6, background: activeDomain === d.domain ? `${d.color}10` : "transparent", border: `1px solid ${activeDomain === d.domain ? d.color + "28" : "transparent"}`, cursor: "pointer", textAlign: "left" }}>
-                          <div style={{ width: 20, height: 20, borderRadius: 4, background: `${d.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Icon size={10} style={{ color: d.color }} />
-                          </div>
-                          <span style={{ fontSize: "0.8125rem", fontWeight: activeDomain === d.domain ? 700 : 500, color: activeDomain === d.domain ? TEXT : TEXT_SEC }}>{d.domain}</span>
-                          <div style={{ marginLeft: "auto", width: 8, height: 8, borderRadius: "50%", background: d.maturityScore >= 90 ? GREEN : d.maturityScore >= 75 ? YELLOW : RED }} />
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Domain detail */}
-                  <AnimatePresence mode="wait">
-                    <m.div
-                      key={domain.domain}
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -4 }}
-                      transition={{ duration: 0.2 }}
-                      style={{ display: "flex", flexDirection: "column", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden", border: `1px solid ${BORDER}` }}
-                    >
-                      <div style={{ background: BG, padding: "1.5rem" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: "1.25rem" }}>
-                          <div style={{ width: 36, height: 36, borderRadius: 8, background: `${domain.color}18`, border: `1px solid ${domain.color}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <DIcon size={16} style={{ color: domain.color }} />
-                          </div>
-                          <div>
-                            <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: domain.color, margin: 0 }}>{domain.domain}</p>
-                            <p style={{ fontSize: "1rem", fontWeight: 700, color: TEXT, margin: 0, letterSpacing: "-0.014em" }}>Governance Health</p>
-                          </div>
-                          <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                            <TrendIcon trend={domain.trend} />
-                            <MaturityBadge score={domain.maturityScore} />
-                          </div>
-                        </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
-                          {[
-                            { label: "Policy coverage", value: `${domain.activePolicies}/${domain.policyCount}`, color: domain.activePolicies === domain.policyCount ? GREEN : YELLOW },
-                            { label: "Approval throughput", value: `${domain.approvalThroughputPct}%`, color: domain.approvalThroughputPct >= 90 ? GREEN : YELLOW },
-                            { label: "Override rate (7d)", value: `${domain.overrideRate}%`, color: domain.overrideRate > 10 ? RED : domain.overrideRate > 5 ? YELLOW : GREEN },
-                            { label: "Proof coverage", value: `${domain.proofCoverage}%`, color: GREEN },
-                          ].map((m, i) => (
-                            <div key={i} style={{ padding: "0.875rem", borderRadius: 6, background: SURFACE, border: `1px solid ${BORDER}` }}>
-                              <p style={{ fontSize: "1.125rem", fontWeight: 700, fontFamily: MONO, color: m.color, margin: 0 }}>{m.value}</p>
-                              <p style={{ fontSize: "0.625rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>{m.label}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div style={{ background: BG, padding: "1.25rem 1.5rem" }}>
-                        <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
-                          Maturity Score Breakdown
-                        </p>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                          {[
-                            { label: "Policy completeness", value: domain.activePolicies / domain.policyCount * 100, weight: "25%" },
-                            { label: "Approval throughput", value: domain.approvalThroughputPct, weight: "25%" },
-                            { label: "Proof coverage", value: domain.proofCoverage, weight: "20%" },
-                            { label: "Override compliance", value: Math.max(0, 100 - domain.overrideRate * 5), weight: "15%" },
-                            { label: "SLA adherence", value: Math.max(0, 100 - domain.slaBreaches * 15), weight: "15%" },
-                          ].map((row, i) => (
-                            <div key={i} style={{ display: "grid", gridTemplateColumns: "180px 1fr 50px", gap: "0.75rem", alignItems: "center" }}>
-                              <div>
-                                <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{row.label}</span>
-                                <span style={{ fontSize: "0.575rem", fontFamily: MONO, color: TEXT_FAINT, marginLeft: "0.375rem" }}>wt: {row.weight}</span>
-                              </div>
-                              <ScoreBar value={row.value} color={row.value >= 90 ? GREEN : row.value >= 70 ? YELLOW : RED} />
-                            </div>
-                          ))}
-                        </div>
-                        <div style={{ marginTop: "1.25rem", padding: "0.875rem", borderRadius: 6, background: `${domain.maturityScore >= 90 ? GREEN : domain.maturityScore >= 75 ? YELLOW : RED}10`, border: `1px solid ${domain.maturityScore >= 90 ? GREEN : domain.maturityScore >= 75 ? YELLOW : RED}25` }}>
-                          <p style={{ fontSize: "0.875rem", fontWeight: 700, color: domain.maturityScore >= 90 ? GREEN : domain.maturityScore >= 75 ? YELLOW : RED, margin: "0 0 0.25rem" }}>
-                            Governance Maturity Score: {domain.maturityScore}/100
-                          </p>
-                          <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>
-                            {domain.maturityScore >= 90 ? "Advanced maturity. Policy coverage complete, approval throughput high, minimal overrides. Audit-ready posture." : domain.maturityScore >= 75 ? "Developing maturity. Core policies active, approval throughput adequate. Override rate warrants review." : "Foundational maturity. Policy gaps or throughput issues require immediate attention."}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div style={{ background: BG, padding: "1rem 1.5rem", display: "flex", gap: "0.5rem" }}>
-                        <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}30`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: LYTE }}>
-                          Export compliance report
-                        </button>
-                        <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC }}>
-                          Review policies
-                        </button>
-                        <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC }}>
-                          View audit trail
-                        </button>
-                      </div>
-                    </m.div>
-                  </AnimatePresence>
-                </div>
-              </m.div>
-            )}
-
-            {activeTab === "approvals" && (
-              <m.div key="approvals" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
-                  Approval Queue — {APPROVAL_QUEUE.length} pending · Sorted by urgency
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                  {APPROVAL_QUEUE.map((a, i) => (
-                    <m.div
-                      key={a.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: i * 0.05 }}
-                      style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${a.status === "escalated" ? RED + "25" : BORDER}` }}
-                    >
-                      <div>
-                        <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: TEXT, margin: "0 0 0.25rem", lineHeight: 1.3 }}>{a.title}</p>
-                        <p style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0 }}>Requested by: {a.requestedBy}</p>
-                      </div>
-                      <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-                        <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === a.domain)?.color ?? LYTE }}>
-                          {a.domain}
-                        </span>
-                        <PriorityBadge priority={a.priority} />
-                        <StatusBadge status={a.status} />
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Age</p>
-                        <p style={{ fontSize: "0.8125rem", fontWeight: 600, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{a.age}</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Due</p>
-                        <p style={{ fontSize: "0.8125rem", fontWeight: 700, fontFamily: MONO, color: a.dueIn.startsWith("T-2") ? RED : ORANGE, margin: 0 }}>{a.dueIn}</p>
-                      </div>
-                      <div style={{ display: "flex", gap: "0.375rem" }}>
-                        <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${GREEN}15`, border: `1px solid ${GREEN}25`, cursor: "pointer", fontSize: "0.6875rem", fontWeight: 600, color: GREEN }}>
-                          Approve
-                        </button>
-                        <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.6875rem", color: TEXT_FAINT }}>
-                          Review
-                        </button>
-                      </div>
-                    </m.div>
-                  ))}
-                </div>
-              </m.div>
-            )}
-
-            {activeTab === "violations" && (
-              <m.div key="violations" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
-                  Active Policy Violations — {VIOLATION_LOG.filter(v => v.status === "open").length} open
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                  {VIOLATION_LOG.map((v, i) => (
-                    <m.div
-                      key={v.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: i * 0.05 }}
-                      style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${v.status === "open" ? (v.severity === "high" ? RED + "20" : YELLOW + "15") : GREEN + "12"}` }}
-                    >
-                      <div>
-                        <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === v.domain)?.color ?? LYTE }}>
-                            {v.domain}
-                          </span>
-                          <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.06em", color: TEXT_FAINT, background: "hsla(0,0%,100%,0.05)", border: `1px solid ${BORDER}`, padding: "1px 5px", borderRadius: 3 }}>
-                            {v.type}
-                          </span>
-                          <StatusBadge status={v.status} />
-                        </div>
-                        <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.4 }}>{v.detail}</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.625rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Detected</p>
-                        <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0 }}>{v.timestamp}</p>
-                      </div>
-                      <div style={{ display: "flex", gap: "0.375rem" }}>
-                        {v.status === "open" && (
-                          <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}25`, cursor: "pointer", fontSize: "0.6875rem", fontWeight: 600, color: LYTE }}>
-                            Remediate
-                          </button>
-                        )}
-                        <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.6875rem", color: TEXT_FAINT }}>
-                          Details
-                        </button>
-                      </div>
-                    </m.div>
-                  ))}
-                </div>
-              </m.div>
-            )}
-
-            {activeTab === "live-activity" && (
-              <LiveActivityTab
-                ledgerDecision={ledgerDecision}
-                setLedgerDecision={setLedgerDecision}
-                ledgerDomain={ledgerDomain}
-                setLedgerDomain={setLedgerDomain}
-                ledgerWindow={ledgerWindow}
-                setLedgerWindow={setLedgerWindow}
-              />
-            )}
-
-          </AnimatePresence>
-        </div>
-
-        {/* Architecture note */}
-        <section style={{ borderTop: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5rem) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45 }}
-              style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
-            >
-              <div>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
-                  Architectural Inspiration
-                </p>
-                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem" }}>
-                  Governance posture modeled on the world's highest-assurance frameworks.
-                </h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, marginBottom: "1.5rem" }}>
-                  The Governance Posture Dashboard draws from Germany's BSI IT-Grundschutz baseline protection model, Romania's CYBERINT 24/7 operational posture, and the IC's security posture reporting architecture — and applies these patterns to enterprise-grade governance visibility.
-                </p>
-                <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
-                  <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
-                    Back to Lyte <ArrowRight size={13} />
-                  </Link>
-                  <Link href="/trust/governance" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
-                    Trust & Governance <ArrowUpRight size={13} />
-                  </Link>
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
                 {[
-                  { src: "Germany BSI IT-Grundschutz", map: "Baseline protection catalog → Maturity scoring per domain pack with exportable compliance artifacts" },
-                  { src: "Romania CYBERINT", map: "24/7 operational posture → Continuous governance feed, not on-demand assembly" },
-                  { src: "IC ITE data tagging", map: "Need-to-know access control + data provenance → Proof Chain coverage metric" },
-                  { src: "GCHQ NCSC active defense", map: "Proactive posture reporting → Violation detection before escalation" },
-                ].map((item, i) => (
-                  <m.div
-                    key={i}
-                    initial={{ opacity: 0, x: 12 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.35, delay: i * 0.07 }}
-                    style={{ padding: "0.875rem 1.125rem", borderRadius: "7px", background: SURFACE, border: `1px solid ${BORDER}` }}
-                  >
-                    <p style={{ fontSize: "0.6875rem", fontWeight: 700, color: LYTE, marginBottom: "0.25rem" }}>{item.src}</p>
-                    <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>{item.map}</p>
-                  </m.div>
+                  { label: "Active policies", value: `${PLATFORM_METRICS.activePolicies}/${PLATFORM_METRICS.totalPolicies}`, color: GREEN },
+                  { label: "Pending approvals", value: PLATFORM_METRICS.pendingApprovals.toString(), color: PLATFORM_METRICS.pendingApprovals > 10 ? RED : YELLOW },
+                  { label: "Approval throughput", value: `${PLATFORM_METRICS.avgApprovalThroughput.toFixed(0)}%`, color: GREEN },
+                  { label: "Override rate (7d)", value: `${PLATFORM_METRICS.avgOverrideRate.toFixed(1)}%`, color: PLATFORM_METRICS.avgOverrideRate > 10 ? RED : YELLOW },
+                  { label: "Proof coverage", value: `${PLATFORM_METRICS.avgProofCoverage.toFixed(1)}%`, color: GREEN },
+                  { label: "SLA breaches (24h)", value: PLATFORM_METRICS.totalSlaBreaches.toString(), color: PLATFORM_METRICS.totalSlaBreaches > 0 ? RED : GREEN },
+                  { label: "Avg maturity", value: `${PLATFORM_METRICS.avgMaturity.toFixed(0)}/100`, color: PLATFORM_METRICS.avgMaturity >= 80 ? GREEN : YELLOW },
+                ].map((stat, i) => (
+                  <div key={i} style={{ flex: 1, background: BG, padding: "0.875rem 1rem", textAlign: "center" }}>
+                    <p style={{ fontSize: "1.0625rem", fontWeight: 700, fontFamily: MONO, color: stat.color, margin: 0 }}>{stat.value}</p>
+                    <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: 0 }}>{stat.label}</p>
+                  </div>
                 ))}
-              </div>
-            </m.div>
+              </m.div>
+            </div>
+          </section>
+  
+          {/* Tabs */}
+          <div style={{ borderBottom: `1px solid ${BORDER}` }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)", display: "flex", gap: 0 }}>
+              {(["overview", "domains", "approvals", "violations", "live-activity"] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    padding: "0.875rem 1.25rem",
+                    border: "none",
+                    borderBottom: `2px solid ${activeTab === tab ? LYTE : "transparent"}`,
+                    background: "transparent",
+                    cursor: "pointer",
+                    fontSize: "0.8125rem",
+                    fontWeight: activeTab === tab ? 700 : 500,
+                    color: activeTab === tab ? LYTE : TEXT_FAINT,
+                    textTransform: "capitalize",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {tab === "live-activity" ? "Live activity" : tab}
+                </button>
+              ))}
+            </div>
           </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+  
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2rem var(--space-content-x)" }}>
+            <AnimatePresence mode="wait">
+  
+              {activeTab === "overview" && (
+                <m.div key="overview" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  {/* Heat map */}
+                  <div style={{ marginBottom: "2rem" }}>
+                    <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
+                      Policy Coverage Heat Map — All Domains
+                    </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
+                      {DOMAIN_HEALTH.map((d, i) => {
+                        const Icon = d.icon;
+                        return (
+                          <m.button
+                            key={d.domain}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: i * 0.05 }}
+                            onClick={() => { setActiveDomain(d.domain); setActiveTab("domains"); }}
+                            style={{
+                              padding: "1.25rem",
+                              borderRadius: "9px",
+                              background: SURFACE,
+                              border: `1px solid ${d.maturityScore >= 90 ? d.color + "25" : d.maturityScore >= 75 ? "hsla(48,90%,52%,0.15)" : "hsla(0,72%,54%,0.15)"}`,
+                              cursor: "pointer",
+                              textAlign: "left",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
+                              <div style={{ width: 26, height: 26, borderRadius: 5, background: `${d.color}18`, border: `1px solid ${d.color}22`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Icon size={12} style={{ color: d.color }} />
+                              </div>
+                              <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: TEXT }}>{d.domain}</span>
+                              <div style={{ marginLeft: "auto", display: "flex", gap: "0.375rem", alignItems: "center" }}>
+                                <TrendIcon trend={d.trend} />
+                                <MaturityBadge score={d.maturityScore} />
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                              <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+                                  <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>Maturity</span>
+                                </div>
+                                <ScoreBar value={d.maturityScore} color={d.maturityScore >= 90 ? GREEN : d.maturityScore >= 75 ? YELLOW : RED} />
+                              </div>
+                              <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+                                  <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>Proof coverage</span>
+                                </div>
+                                <ScoreBar value={d.proofCoverage} color={d.proofCoverage >= 98 ? GREEN : YELLOW} />
+                              </div>
+                              <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
+                                <div>
+                                  <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: d.pendingApprovals > 3 ? ORANGE : TEXT_SEC, margin: 0 }}>{d.pendingApprovals}</p>
+                                  <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>Pending</p>
+                                </div>
+                                <div>
+                                  <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: d.overrideRate > 10 ? RED : d.overrideRate > 5 ? YELLOW : GREEN, margin: 0 }}>{d.overrideRate}%</p>
+                                  <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>Override</p>
+                                </div>
+                                <div>
+                                  <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: d.slaBreaches > 0 ? RED : GREEN, margin: 0 }}>{d.slaBreaches}</p>
+                                  <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>SLA breach</p>
+                                </div>
+                                <div>
+                                  <p style={{ fontSize: "0.875rem", fontWeight: 700, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{d.approvalThroughputPct}%</p>
+                                  <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>Throughput</p>
+                                </div>
+                              </div>
+                            </div>
+                          </m.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+  
+                  {/* Summary stats */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+                    <div style={{ padding: "1.5rem", borderRadius: "9px", background: SURFACE, border: `1px solid ${BORDER}` }}>
+                      <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1.25rem" }}>
+                        Approval Throughput by Domain
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                        {DOMAIN_HEALTH.sort((a, b) => b.approvalThroughputPct - a.approvalThroughputPct).map(d => (
+                          <div key={d.domain} style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "0.75rem", alignItems: "center" }}>
+                            <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{d.domain}</span>
+                            <ScoreBar value={d.approvalThroughputPct} color={d.approvalThroughputPct >= 90 ? GREEN : d.approvalThroughputPct >= 80 ? YELLOW : RED} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+  
+                    <div style={{ padding: "1.5rem", borderRadius: "9px", background: SURFACE, border: `1px solid ${BORDER}` }}>
+                      <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1.25rem" }}>
+                        Override Rate by Domain (7d) — lower is better
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                        {DOMAIN_HEALTH.sort((a, b) => b.overrideRate - a.overrideRate).map(d => (
+                          <div key={d.domain} style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "0.75rem", alignItems: "center" }}>
+                            <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{d.domain}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <div style={{ flex: 1, height: 4, borderRadius: 2, background: "hsla(0,0%,100%,0.08)", overflow: "hidden" }}>
+                                <div style={{ height: "100%", width: `${Math.min(100, d.overrideRate * 5)}%`, background: d.overrideRate > 10 ? RED : d.overrideRate > 5 ? YELLOW : GREEN, borderRadius: 2 }} />
+                              </div>
+                              <span style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, color: d.overrideRate > 10 ? RED : d.overrideRate > 5 ? YELLOW : GREEN, minWidth: "2.5rem", textAlign: "right" }}>
+                                {d.overrideRate}%
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </m.div>
+              )}
+  
+              {activeTab === "domains" && (
+                <m.div key="domains" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: "1.25rem" }}>
+                    {/* Domain nav */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                      {DOMAIN_HEALTH.map(d => {
+                        const Icon = d.icon;
+                        return (
+                          <button key={d.domain} onClick={() => setActiveDomain(d.domain)} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 0.875rem", borderRadius: 6, background: activeDomain === d.domain ? `${d.color}10` : "transparent", border: `1px solid ${activeDomain === d.domain ? d.color + "28" : "transparent"}`, cursor: "pointer", textAlign: "left" }}>
+                            <div style={{ width: 20, height: 20, borderRadius: 4, background: `${d.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <Icon size={10} style={{ color: d.color }} />
+                            </div>
+                            <span style={{ fontSize: "0.8125rem", fontWeight: activeDomain === d.domain ? 700 : 500, color: activeDomain === d.domain ? TEXT : TEXT_SEC }}>{d.domain}</span>
+                            <div style={{ marginLeft: "auto", width: 8, height: 8, borderRadius: "50%", background: d.maturityScore >= 90 ? GREEN : d.maturityScore >= 75 ? YELLOW : RED }} />
+                          </button>
+                        );
+                      })}
+                    </div>
+  
+                    {/* Domain detail */}
+                    <AnimatePresence mode="wait">
+                      <m.div
+                        key={domain.domain}
+                        initial={{ opacity: 0, x: 8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -4 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ display: "flex", flexDirection: "column", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden", border: `1px solid ${BORDER}` }}
+                      >
+                        <div style={{ background: BG, padding: "1.5rem" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: "1.25rem" }}>
+                            <div style={{ width: 36, height: 36, borderRadius: 8, background: `${domain.color}18`, border: `1px solid ${domain.color}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <DIcon size={16} style={{ color: domain.color }} />
+                            </div>
+                            <div>
+                              <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: domain.color, margin: 0 }}>{domain.domain}</p>
+                              <p style={{ fontSize: "1rem", fontWeight: 700, color: TEXT, margin: 0, letterSpacing: "-0.014em" }}>Governance Health</p>
+                            </div>
+                            <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                              <TrendIcon trend={domain.trend} />
+                              <MaturityBadge score={domain.maturityScore} />
+                            </div>
+                          </div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+                            {[
+                              { label: "Policy coverage", value: `${domain.activePolicies}/${domain.policyCount}`, color: domain.activePolicies === domain.policyCount ? GREEN : YELLOW },
+                              { label: "Approval throughput", value: `${domain.approvalThroughputPct}%`, color: domain.approvalThroughputPct >= 90 ? GREEN : YELLOW },
+                              { label: "Override rate (7d)", value: `${domain.overrideRate}%`, color: domain.overrideRate > 10 ? RED : domain.overrideRate > 5 ? YELLOW : GREEN },
+                              { label: "Proof coverage", value: `${domain.proofCoverage}%`, color: GREEN },
+                            ].map((m, i) => (
+                              <div key={i} style={{ padding: "0.875rem", borderRadius: 6, background: SURFACE, border: `1px solid ${BORDER}` }}>
+                                <p style={{ fontSize: "1.125rem", fontWeight: 700, fontFamily: MONO, color: m.color, margin: 0 }}>{m.value}</p>
+                                <p style={{ fontSize: "0.625rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>{m.label}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+  
+                        <div style={{ background: BG, padding: "1.25rem 1.5rem" }}>
+                          <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
+                            Maturity Score Breakdown
+                          </p>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            {[
+                              { label: "Policy completeness", value: domain.activePolicies / domain.policyCount * 100, weight: "25%" },
+                              { label: "Approval throughput", value: domain.approvalThroughputPct, weight: "25%" },
+                              { label: "Proof coverage", value: domain.proofCoverage, weight: "20%" },
+                              { label: "Override compliance", value: Math.max(0, 100 - domain.overrideRate * 5), weight: "15%" },
+                              { label: "SLA adherence", value: Math.max(0, 100 - domain.slaBreaches * 15), weight: "15%" },
+                            ].map((row, i) => (
+                              <div key={i} style={{ display: "grid", gridTemplateColumns: "180px 1fr 50px", gap: "0.75rem", alignItems: "center" }}>
+                                <div>
+                                  <span style={{ fontSize: "0.75rem", color: TEXT_SEC }}>{row.label}</span>
+                                  <span style={{ fontSize: "0.575rem", fontFamily: MONO, color: TEXT_FAINT, marginLeft: "0.375rem" }}>wt: {row.weight}</span>
+                                </div>
+                                <ScoreBar value={row.value} color={row.value >= 90 ? GREEN : row.value >= 70 ? YELLOW : RED} />
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{ marginTop: "1.25rem", padding: "0.875rem", borderRadius: 6, background: `${domain.maturityScore >= 90 ? GREEN : domain.maturityScore >= 75 ? YELLOW : RED}10`, border: `1px solid ${domain.maturityScore >= 90 ? GREEN : domain.maturityScore >= 75 ? YELLOW : RED}25` }}>
+                            <p style={{ fontSize: "0.875rem", fontWeight: 700, color: domain.maturityScore >= 90 ? GREEN : domain.maturityScore >= 75 ? YELLOW : RED, margin: "0 0 0.25rem" }}>
+                              Governance Maturity Score: {domain.maturityScore}/100
+                            </p>
+                            <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>
+                              {domain.maturityScore >= 90 ? "Advanced maturity. Policy coverage complete, approval throughput high, minimal overrides. Audit-ready posture." : domain.maturityScore >= 75 ? "Developing maturity. Core policies active, approval throughput adequate. Override rate warrants review." : "Foundational maturity. Policy gaps or throughput issues require immediate attention."}
+                            </p>
+                          </div>
+                        </div>
+  
+                        <div style={{ background: BG, padding: "1rem 1.5rem", display: "flex", gap: "0.5rem" }}>
+                          <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}30`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: LYTE }}>
+                            Export compliance report
+                          </button>
+                          <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC }}>
+                            Review policies
+                          </button>
+                          <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC }}>
+                            View audit trail
+                          </button>
+                        </div>
+                      </m.div>
+                    </AnimatePresence>
+                  </div>
+                </m.div>
+              )}
+  
+              {activeTab === "approvals" && (
+                <m.div key="approvals" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
+                    Approval Queue — {APPROVAL_QUEUE.length} pending · Sorted by urgency
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                    {APPROVAL_QUEUE.map((a, i) => (
+                      <m.div
+                        key={a.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: i * 0.05 }}
+                        style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${a.status === "escalated" ? RED + "25" : BORDER}` }}
+                      >
+                        <div>
+                          <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: TEXT, margin: "0 0 0.25rem", lineHeight: 1.3 }}>{a.title}</p>
+                          <p style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0 }}>Requested by: {a.requestedBy}</p>
+                        </div>
+                        <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === a.domain)?.color ?? LYTE }}>
+                            {a.domain}
+                          </span>
+                          <PriorityBadge priority={a.priority} />
+                          <StatusBadge status={a.status} />
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Age</p>
+                          <p style={{ fontSize: "0.8125rem", fontWeight: 600, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{a.age}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Due</p>
+                          <p style={{ fontSize: "0.8125rem", fontWeight: 700, fontFamily: MONO, color: a.dueIn.startsWith("T-2") ? RED : ORANGE, margin: 0 }}>{a.dueIn}</p>
+                        </div>
+                        <div style={{ display: "flex", gap: "0.375rem" }}>
+                          <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${GREEN}15`, border: `1px solid ${GREEN}25`, cursor: "pointer", fontSize: "0.6875rem", fontWeight: 600, color: GREEN }}>
+                            Approve
+                          </button>
+                          <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.6875rem", color: TEXT_FAINT }}>
+                            Review
+                          </button>
+                        </div>
+                      </m.div>
+                    ))}
+                  </div>
+                </m.div>
+              )}
+  
+              {activeTab === "violations" && (
+                <m.div key="violations" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
+                    Active Policy Violations — {VIOLATION_LOG.filter(v => v.status === "open").length} open
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                    {VIOLATION_LOG.map((v, i) => (
+                      <m.div
+                        key={v.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: i * 0.05 }}
+                        style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${v.status === "open" ? (v.severity === "high" ? RED + "20" : YELLOW + "15") : GREEN + "12"}` }}
+                      >
+                        <div>
+                          <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === v.domain)?.color ?? LYTE }}>
+                              {v.domain}
+                            </span>
+                            <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.06em", color: TEXT_FAINT, background: "hsla(0,0%,100%,0.05)", border: `1px solid ${BORDER}`, padding: "1px 5px", borderRadius: 3 }}>
+                              {v.type}
+                            </span>
+                            <StatusBadge status={v.status} />
+                          </div>
+                          <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.4 }}>{v.detail}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.625rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Detected</p>
+                          <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0 }}>{v.timestamp}</p>
+                        </div>
+                        <div style={{ display: "flex", gap: "0.375rem" }}>
+                          {v.status === "open" && (
+                            <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}25`, cursor: "pointer", fontSize: "0.6875rem", fontWeight: 600, color: LYTE }}>
+                              Remediate
+                            </button>
+                          )}
+                          <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.6875rem", color: TEXT_FAINT }}>
+                            Details
+                          </button>
+                        </div>
+                      </m.div>
+                    ))}
+                  </div>
+                </m.div>
+              )}
+  
+              {activeTab === "live-activity" && (
+                <LiveActivityTab
+                  ledgerDecision={ledgerDecision}
+                  setLedgerDecision={setLedgerDecision}
+                  ledgerDomain={ledgerDomain}
+                  setLedgerDomain={setLedgerDomain}
+                  ledgerWindow={ledgerWindow}
+                  setLedgerWindow={setLedgerWindow}
+                />
+              )}
+  
+            </AnimatePresence>
+          </div>
+  
+          {/* Architecture note */}
+          <section style={{ borderTop: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5rem) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45 }}
+                style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
+              >
+                <div>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
+                    Architectural Inspiration
+                  </p>
+                  <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem" }}>
+                    Governance posture modeled on the world's highest-assurance frameworks.
+                  </h2>
+                  <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, marginBottom: "1.5rem" }}>
+                    The Governance Posture Dashboard draws from Germany's BSI IT-Grundschutz baseline protection model, Romania's CYBERINT 24/7 operational posture, and the IC's security posture reporting architecture — and applies these patterns to enterprise-grade governance visibility.
+                  </p>
+                  <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
+                    <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
+                      Back to Lyte <ArrowRight size={13} />
+                    </Link>
+                    <Link href="/trust/governance" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
+                      Trust & Governance <ArrowUpRight size={13} />
+                    </Link>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                  {[
+                    { src: "Germany BSI IT-Grundschutz", map: "Baseline protection catalog → Maturity scoring per domain pack with exportable compliance artifacts" },
+                    { src: "Romania CYBERINT", map: "24/7 operational posture → Continuous governance feed, not on-demand assembly" },
+                    { src: "IC ITE data tagging", map: "Need-to-know access control + data provenance → Proof Chain coverage metric" },
+                    { src: "GCHQ NCSC active defense", map: "Proactive posture reporting → Violation detection before escalation" },
+                  ].map((item, i) => (
+                    <m.div
+                      key={i}
+                      initial={{ opacity: 0, x: 12 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.35, delay: i * 0.07 }}
+                      style={{ padding: "0.875rem 1.125rem", borderRadius: "7px", background: SURFACE, border: `1px solid ${BORDER}` }}
+                    >
+                      <p style={{ fontSize: "0.6875rem", fontWeight: 700, color: LYTE, marginBottom: "0.25rem" }}>{item.src}</p>
+                      <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>{item.map}</p>
+                    </m.div>
+                  ))}
+                </div>
+              </m.div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

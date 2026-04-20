@@ -74,7 +74,7 @@ const NOT_FIT = [
 ];
 
 export default function DesignPartnersPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Design Partners — SZL Holdings",
     description:
       "Work directly with SZL to instrument one high-friction workflow, prove measurable improvement, and expand from a proven foundation.",
@@ -83,227 +83,230 @@ export default function DesignPartnersPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#070a10] text-white">
-      <SiteNav />
-      <main>
-
-        {/* Hero */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#4a90b8]/20 bg-[#4a90b8]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]">
-              <Users className="h-3.5 w-3.5" />
-              Design Partner Program
-            </div>
-            <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Instrument one workflow. Build proof you can expand from.
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-              SZL is taking on a limited number of design partners to instrument real workflows under governed
-              decision infrastructure — not generic trials. We pick one high-friction process, run it through
-              the full Signal → Recommendation → Policy → Execution → Proof loop, and produce a defensible 90-day
-              record of measurable improvement. The pilot is the foundation everything else expands from.
-            </p>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-white/55">
-              Founder-led. Capped intake. Selected on workflow fit, not company size.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/contact?type=design-partner&source=design-partner-page"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-              >
-                Start a conversation
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/platform"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
-              >
-                See the platform
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* What you get */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">What a design partner receives</p>
-            <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-white">
-              Engagement, not onboarding.
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/58">
-              Design partners don't get handed a login and a support ticket queue. They get direct engagement
-              with the founder throughout the proof workflow, with governance built in from the start.
-            </p>
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {WHAT_YOU_GET.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.title} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
-                    <div className="mb-4 inline-flex rounded-xl border border-[#4a90b8]/20 bg-[#4a90b8]/10 p-2.5 text-[#4a90b8]">
-                      <Icon className="h-4.5 w-4.5" />
-                    </div>
-                    <h3 className="text-base font-semibold text-white">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-white/60">{item.body}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Timeline */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Timeline expectations</p>
-            <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-white">
-              A 90-day proof window. Structured, not open-ended.
-            </h2>
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {TIMELINE.map((phase, i) => (
-                <div key={phase.week} className="relative rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
-                  <div className="mb-3 flex items-center gap-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d4a054]/15 text-[10px] font-bold text-[#d4a054]">
-                      {i + 1}
-                    </div>
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d4a054]">
-                      {phase.week}
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-white">{phase.label}</h3>
-                  <p className="mt-2 text-xs leading-5 text-white/55">{phase.detail}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Qualification criteria */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Qualification criteria</p>
-            <h2 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-white">
-              The bar we hold ourselves — and partners — to.
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/58">
-              We accept design partners against five concrete qualifications. The bar is structural, not commercial.
-              We are not optimizing for logo collection; we are optimizing for workflows where governed decision
-              infrastructure produces a measurable, defensible record of improvement.
-            </p>
-            <div className="mt-10 grid gap-5 lg:grid-cols-2">
-              {[
-                { n: "01", t: "One named workflow with real operating pain", d: "There is one process — procurement approval, voyage routing, matter triage, threat escalation, deal underwriting — that costs measurable time, money, or risk today, and the operator owning it can articulate why." },
-                { n: "02", t: "A named operator who will commit time", d: "A specific person on your side runs the instrumentation with us — not a steering committee. Two to four hours per week for the first 60 days, then weekly thereafter." },
-                { n: "03", t: "Access to the systems that hold the signal", d: "We need to read from the systems where the workflow already lives — CRM, GRC, comms, ITSM, ERP, scheduling, ticketing, AIS, market data — under a scoped, audited integration with a clear data agreement." },
-                { n: "04", t: "Willingness to commit to a baseline measurement", d: "Before we instrument, we measure. Cycle time, error rate, follow-through rate, cost per decision, audit prep hours — whichever metrics matter for this workflow. No baseline, no defensible proof." },
-                { n: "05", t: "An expansion thesis if the proof lands", d: "If the 90-day pilot produces the proof we expect, what does the next 12 months look like? Adjacent workflows, additional teams, additional domains. Design partners are the start of a multi-year relationship — not a single procurement event." },
-              ].map((q) => (
-                <div key={q.n} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
-                  <div className="flex items-start gap-4">
-                    <span className="font-mono text-xs font-semibold text-[#d4a054]">{q.n}</span>
-                    <div>
-                      <h3 className="text-base font-semibold text-white">{q.t}</h3>
-                      <p className="mt-2 text-sm leading-6 text-white/60">{q.d}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Persona shortcuts */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">If you are reviewing on behalf of someone</p>
-            <h2 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight text-white">
-              Continue reading by your role.
-            </h2>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { l: "Executive sponsor", h: "/platform", d: "Value frame, ROI surface, expansion arc." },
-                { l: "Technical evaluator", h: "/architecture", d: "Architecture, integrations, deployment surface." },
-                { l: "Security reviewer", h: "/trust", d: "Controls, AI governance, audit trail." },
-                { l: "Investor / advisor", h: "/investor", d: "Market thesis, moat, data room." },
-              ].map((p) => (
-                <Link key={p.l} href={p.h} className="block rounded-xl border border-white/[0.07] bg-white/[0.02] p-4 transition hover:border-white/20 hover:bg-white/[0.04]">
-                  <p className="text-sm font-semibold text-white">{p.l}</p>
-                  <p className="mt-1 text-xs leading-5 text-white/55">{p.d}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Who it's for / who it's not */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="grid gap-8 lg:grid-cols-2">
-              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6">
-                <div className="mb-4 flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Good fit</p>
-                </div>
-                <ul className="space-y-3">
-                  {FIT.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-white/68">
-                      <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400/60" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+    <>
+      {__pageMeta}
+      <div className="min-h-screen bg-[#070a10] text-white">
+        <SiteNav />
+        <main>
+  
+          {/* Hero */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#4a90b8]/20 bg-[#4a90b8]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]">
+                <Users className="h-3.5 w-3.5" />
+                Design Partner Program
               </div>
-              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6">
-                <div className="mb-4 flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-white/35" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Not a fit right now</p>
-                </div>
-                <ul className="space-y-3">
-                  {NOT_FIT.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-white/58">
-                      <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-white/20" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section>
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8">
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-10 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Limited availability</p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">
-                Ready to instrument something real?
-              </h2>
-              <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-white/60">
-                Design partner slots are limited and selected carefully. If you have a workflow that has real
-                operating pain and genuine interest in proving improvement, the conversation starts here.
+              <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+                Instrument one workflow. Build proof you can expand from.
+              </h1>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+                SZL is taking on a limited number of design partners to instrument real workflows under governed
+                decision infrastructure — not generic trials. We pick one high-friction process, run it through
+                the full Signal → Recommendation → Policy → Execution → Proof loop, and produce a defensible 90-day
+                record of measurable improvement. The pilot is the foundation everything else expands from.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <p className="mt-4 max-w-3xl text-sm leading-6 text-white/55">
+                Founder-led. Capped intake. Selected on workflow fit, not company size.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/contact?type=design-partner&source=design-partner-page"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
                 >
                   Start a conversation
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="/docs"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:bg-white/5"
+                  href="/platform"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
                 >
-                  Technical documentation
+                  See the platform
                 </Link>
               </div>
             </div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+  
+          {/* What you get */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">What a design partner receives</p>
+              <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-white">
+                Engagement, not onboarding.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/58">
+                Design partners don't get handed a login and a support ticket queue. They get direct engagement
+                with the founder throughout the proof workflow, with governance built in from the start.
+              </p>
+              <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {WHAT_YOU_GET.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.title} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
+                      <div className="mb-4 inline-flex rounded-xl border border-[#4a90b8]/20 bg-[#4a90b8]/10 p-2.5 text-[#4a90b8]">
+                        <Icon className="h-4.5 w-4.5" />
+                      </div>
+                      <h3 className="text-base font-semibold text-white">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-white/60">{item.body}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+  
+          {/* Timeline */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Timeline expectations</p>
+              <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-white">
+                A 90-day proof window. Structured, not open-ended.
+              </h2>
+              <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {TIMELINE.map((phase, i) => (
+                  <div key={phase.week} className="relative rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
+                    <div className="mb-3 flex items-center gap-2">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d4a054]/15 text-[10px] font-bold text-[#d4a054]">
+                        {i + 1}
+                      </div>
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d4a054]">
+                        {phase.week}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">{phase.label}</h3>
+                    <p className="mt-2 text-xs leading-5 text-white/55">{phase.detail}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Qualification criteria */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Qualification criteria</p>
+              <h2 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-white">
+                The bar we hold ourselves — and partners — to.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/58">
+                We accept design partners against five concrete qualifications. The bar is structural, not commercial.
+                We are not optimizing for logo collection; we are optimizing for workflows where governed decision
+                infrastructure produces a measurable, defensible record of improvement.
+              </p>
+              <div className="mt-10 grid gap-5 lg:grid-cols-2">
+                {[
+                  { n: "01", t: "One named workflow with real operating pain", d: "There is one process — procurement approval, voyage routing, matter triage, threat escalation, deal underwriting — that costs measurable time, money, or risk today, and the operator owning it can articulate why." },
+                  { n: "02", t: "A named operator who will commit time", d: "A specific person on your side runs the instrumentation with us — not a steering committee. Two to four hours per week for the first 60 days, then weekly thereafter." },
+                  { n: "03", t: "Access to the systems that hold the signal", d: "We need to read from the systems where the workflow already lives — CRM, GRC, comms, ITSM, ERP, scheduling, ticketing, AIS, market data — under a scoped, audited integration with a clear data agreement." },
+                  { n: "04", t: "Willingness to commit to a baseline measurement", d: "Before we instrument, we measure. Cycle time, error rate, follow-through rate, cost per decision, audit prep hours — whichever metrics matter for this workflow. No baseline, no defensible proof." },
+                  { n: "05", t: "An expansion thesis if the proof lands", d: "If the 90-day pilot produces the proof we expect, what does the next 12 months look like? Adjacent workflows, additional teams, additional domains. Design partners are the start of a multi-year relationship — not a single procurement event." },
+                ].map((q) => (
+                  <div key={q.n} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
+                    <div className="flex items-start gap-4">
+                      <span className="font-mono text-xs font-semibold text-[#d4a054]">{q.n}</span>
+                      <div>
+                        <h3 className="text-base font-semibold text-white">{q.t}</h3>
+                        <p className="mt-2 text-sm leading-6 text-white/60">{q.d}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Persona shortcuts */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">If you are reviewing on behalf of someone</p>
+              <h2 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight text-white">
+                Continue reading by your role.
+              </h2>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { l: "Executive sponsor", h: "/platform", d: "Value frame, ROI surface, expansion arc." },
+                  { l: "Technical evaluator", h: "/architecture", d: "Architecture, integrations, deployment surface." },
+                  { l: "Security reviewer", h: "/trust", d: "Controls, AI governance, audit trail." },
+                  { l: "Investor / advisor", h: "/investor", d: "Market thesis, moat, data room." },
+                ].map((p) => (
+                  <Link key={p.l} href={p.h} className="block rounded-xl border border-white/[0.07] bg-white/[0.02] p-4 transition hover:border-white/20 hover:bg-white/[0.04]">
+                    <p className="text-sm font-semibold text-white">{p.l}</p>
+                    <p className="mt-1 text-xs leading-5 text-white/55">{p.d}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+  
+          {/* Who it's for / who it's not */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <div className="grid gap-8 lg:grid-cols-2">
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6">
+                  <div className="mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Good fit</p>
+                  </div>
+                  <ul className="space-y-3">
+                    {FIT.map((item) => (
+                      <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-white/68">
+                        <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-400/60" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6">
+                  <div className="mb-4 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-white/35" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Not a fit right now</p>
+                  </div>
+                  <ul className="space-y-3">
+                    {NOT_FIT.map((item) => (
+                      <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-white/58">
+                        <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-white/20" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+  
+          {/* CTA */}
+          <section>
+            <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8">
+              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-10 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Limited availability</p>
+                <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+                  Ready to instrument something real?
+                </h2>
+                <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-white/60">
+                  Design partner slots are limited and selected carefully. If you have a workflow that has real
+                  operating pain and genuine interest in proving improvement, the conversation starts here.
+                </p>
+                <div className="mt-8 flex flex-wrap justify-center gap-3">
+                  <Link
+                    href="/contact?type=design-partner&source=design-partner-page"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                  >
+                    Start a conversation
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/docs"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:bg-white/5"
+                  >
+                    Technical documentation
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }

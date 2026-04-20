@@ -307,7 +307,7 @@ function StepRow({ step, index }: { step: SchemaStep; index: number }) {
 }
 
 export default function DecisionSchemaLibraryPage() {
-  usePageMeta({
+  const __pageMeta = usePageMeta({
     title: "Decision Schema Library — Lyte | SZL Holdings",
     description: "Reusable decision templates that encode institutional knowledge — trigger patterns, action sequences, policy gates, and expected outcomes. Inspired by DARPA KAIROS schema-based event reasoning.",
     canonical: "https://szlholdings.com/lyte/decision-schemas",
@@ -349,298 +349,301 @@ export default function DecisionSchemaLibraryPage() {
   const avgSuccess = SCHEMAS.length > 0 ? SCHEMAS.reduce((a, s) => a + s.successRate, 0) / SCHEMAS.length : 0;
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
-      <SiteNav />
-      <main id="main-content">
-
-        {/* Header */}
-        <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(5.5rem,10vw,7rem) 0 2rem" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-                <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
-                <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
-                <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Decision Schema Library</span>
-              </div>
-              <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "28ch", marginBottom: "1rem", color: TEXT }}>
-                Institutional knowledge encoded as executable decision schemas.
-              </h1>
-              <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: LYTE, marginBottom: "0.875rem" }}>
-                Trigger patterns → Action sequence → Policy gates → Expected outcome
-              </p>
-              <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
-                Reusable decision templates that recognize when a known situation is developing, activate the right action sequence, and enforce governance gates at every step. Inspired by DARPA KAIROS's schema-based event reasoning and temporal pattern matching.
-              </p>
-
-              {/* Stats */}
-              <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
-                {[
-                  { label: "Schemas", value: SCHEMAS.length.toString(), color: LYTE },
-                  { label: "Total executions", value: totalUses.toString(), color: "hsl(260,60%,65%)" },
-                  { label: "Avg success rate", value: `${(avgSuccess * 100).toFixed(0)}%`, color: "hsl(142,60%,48%)" },
-                  { label: "Domains covered", value: [...new Set(SCHEMAS.map(s => s.domain))].length.toString(), color: "hsl(206,72%,54%)" },
-                ].map((stat, i) => (
-                  <div key={i}>
-                    <p style={{ fontSize: "1.5rem", fontWeight: 700, fontFamily: MONO, color: stat.color, margin: 0 }}>{stat.value}</p>
-                    <p style={{ fontSize: "0.6875rem", color: TEXT_FAINT, margin: 0 }}>{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        {/* Main */}
-        <section style={{ padding: "2rem 0" }}>
-          <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-
-            {/* Filters */}
-            <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
-              <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
-                <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Category:</span>
-                {["all", ...CATEGORIES].map(c => (
-                  <button key={c} onClick={() => setFilterCat(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterCat === c ? LYTE + "40" : BORDER}`, background: filterCat === c ? `${LYTE}12` : "transparent", color: filterCat === c ? LYTE : TEXT_FAINT, cursor: "pointer" }}>
-                    {c === "all" ? "All" : c}
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
-                <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Complexity:</span>
-                {["all", "low", "medium", "high"].map(c => {
-                  const colors: Record<string, string> = { low: "hsl(142,60%,48%)", medium: "hsl(48,90%,52%)", high: "hsl(0,72%,54%)" };
-                  const cc = filterComp === c ? (colors[c] ?? LYTE) : TEXT_FAINT;
-                  return (
-                    <button key={c} onClick={() => setFilterComp(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterComp === c ? cc + "40" : BORDER}`, background: filterComp === c ? `${cc}12` : "transparent", color: cc, cursor: "pointer" }}>
+    <>
+      {__pageMeta}
+      <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
+        <SiteNav />
+        <main id="main-content">
+  
+          {/* Header */}
+          <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(5.5rem,10vw,7rem) 0 2rem" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
+                  <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Decision Schema Library</span>
+                </div>
+                <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "28ch", marginBottom: "1rem", color: TEXT }}>
+                  Institutional knowledge encoded as executable decision schemas.
+                </h1>
+                <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: LYTE, marginBottom: "0.875rem" }}>
+                  Trigger patterns → Action sequence → Policy gates → Expected outcome
+                </p>
+                <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
+                  Reusable decision templates that recognize when a known situation is developing, activate the right action sequence, and enforce governance gates at every step. Inspired by DARPA KAIROS's schema-based event reasoning and temporal pattern matching.
+                </p>
+  
+                {/* Stats */}
+                <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+                  {[
+                    { label: "Schemas", value: SCHEMAS.length.toString(), color: LYTE },
+                    { label: "Total executions", value: totalUses.toString(), color: "hsl(260,60%,65%)" },
+                    { label: "Avg success rate", value: `${(avgSuccess * 100).toFixed(0)}%`, color: "hsl(142,60%,48%)" },
+                    { label: "Domains covered", value: [...new Set(SCHEMAS.map(s => s.domain))].length.toString(), color: "hsl(206,72%,54%)" },
+                  ].map((stat, i) => (
+                    <div key={i}>
+                      <p style={{ fontSize: "1.5rem", fontWeight: 700, fontFamily: MONO, color: stat.color, margin: 0 }}>{stat.value}</p>
+                      <p style={{ fontSize: "0.6875rem", color: TEXT_FAINT, margin: 0 }}>{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </m.div>
+            </div>
+          </section>
+  
+          {/* Main */}
+          <section style={{ padding: "2rem 0" }}>
+            <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+  
+              {/* Filters */}
+              <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Category:</span>
+                  {["all", ...CATEGORIES].map(c => (
+                    <button key={c} onClick={() => setFilterCat(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterCat === c ? LYTE + "40" : BORDER}`, background: filterCat === c ? `${LYTE}12` : "transparent", color: filterCat === c ? LYTE : TEXT_FAINT, cursor: "pointer" }}>
                       {c === "all" ? "All" : c}
                     </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "1.25rem" }}>
-
-              {/* Schema list */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {filteredSchemas.map(s => {
-                  const SIcon = s.icon;
-                  return (
-                    <m.button
-                      key={s.id}
-                      layout
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      onClick={() => setActiveSchema(s.id)}
-                      style={{
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "1rem 1.125rem",
-                        borderRadius: "8px",
-                        background: activeSchema === s.id ? `${s.color}08` : SURFACE,
-                        border: `1px solid ${activeSchema === s.id ? s.color + "30" : BORDER}`,
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 6, background: `${s.color}18`, border: `1px solid ${s.color}22`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>
-                          <SIcon size={13} style={{ color: s.color }} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.3rem", flexWrap: "wrap", alignItems: "center" }}>
-                            <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: s.color }}>{s.domain}</span>
-                            <ComplexityBadge complexity={s.complexity} />
-                          </div>
-                          <p style={{ fontSize: "0.8rem", fontWeight: 700, color: TEXT, lineHeight: 1.3, margin: "0 0 0.375rem" }}>{s.name}</p>
-                          <div style={{ display: "flex", gap: "1rem", fontSize: "0.6875rem", color: TEXT_FAINT }}>
-                            <span>Used {s.timesUsed}×</span>
-                            <span style={{ color: "hsl(142,60%,48%)" }}>{(s.successRate * 100).toFixed(0)}% success</span>
-                            <span>{s.avgDurationH}h avg</span>
-                          </div>
-                        </div>
-                      </div>
-                    </m.button>
-                  );
-                })}
-              </div>
-
-              {/* Schema detail */}
-              <AnimatePresence mode="wait">
-                <m.div
-                  key={schema.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
-                  style={{ display: "flex", flexDirection: "column", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden", border: `1px solid ${BORDER}` }}
-                >
-                  {/* Schema header */}
-                  <div style={{ background: BG, padding: "1.5rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 8, background: `${schema.color}18`, border: `1px solid ${schema.color}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <Icon size={16} style={{ color: schema.color }} />
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: schema.color, margin: 0 }}>{schema.domain} · {schema.category}</p>
-                        <h3 style={{ fontSize: "1.125rem", fontWeight: 700, color: TEXT, letterSpacing: "-0.016em", margin: 0 }}>{schema.name}</h3>
-                      </div>
-                      <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem" }}>
-                        <ComplexityBadge complexity={schema.complexity} />
-                      </div>
-                    </div>
-                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: TEXT_SEC, margin: "0 0 1rem" }}>{schema.description}</p>
-                    <div style={{ display: "flex", gap: "2rem" }}>
-                      <div>
-                        <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Used</p>
-                        <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: LYTE, margin: 0 }}>{schema.timesUsed}×</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Success rate</p>
-                        <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: "hsl(142,60%,48%)", margin: 0 }}>{(schema.successRate * 100).toFixed(0)}%</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Avg duration</p>
-                        <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{schema.avgDurationH}h</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Last used</p>
-                        <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{schema.lastUsed}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Trigger patterns */}
-                  <div style={{ background: BG, padding: "1.25rem 1.5rem" }}>
-                    <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
-                      Trigger Patterns — KAIROS-inspired temporal signal detection
-                    </p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                      {schema.triggerPatterns.map((p, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: 5, background: `${schema.color}08`, border: `1px solid ${schema.color}15` }}>
-                          <Radio size={10} style={{ color: schema.color, flexShrink: 0, marginTop: "2px" }} />
-                          <span style={{ fontSize: "0.8125rem", color: TEXT_SEC, lineHeight: 1.4 }}>{p}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Action sequence */}
-                  <div style={{ background: BG, padding: "1.25rem 1.5rem" }}>
-                    <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
-                      Action Sequence — {schema.actionSequence.length} stages · Alloy-orchestrated
-                    </p>
-                    <div>
-                      {schema.actionSequence.map((step, i) => (
-                        <StepRow key={i} step={step} index={i} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Policy gates + outcome */}
-                  <div style={{ background: BG, padding: "1.25rem 1.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
-                    <div>
-                      <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
-                        Policy Gates — Covenant Policy enforced
-                      </p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                        {schema.policyGates.map((g, i) => (
-                          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                            <Lock size={10} style={{ color: "hsl(142,60%,48%)", flexShrink: 0, marginTop: "2px" }} />
-                            <span style={{ fontSize: "0.8125rem", color: TEXT_SEC, lineHeight: 1.4 }}>{g}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
-                        Expected Outcome — Outcome Graph tracking
-                      </p>
-                      <p style={{ fontSize: "0.875rem", lineHeight: 1.65, color: TEXT_SEC }}>{schema.expectedOutcome}</p>
-                      <div style={{ marginTop: "1rem", display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-                        {schema.tags.map(tag => (
-                          <span key={tag} style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 600, color: TEXT_FAINT, background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, padding: "2px 6px", borderRadius: 3 }}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{ background: BG, padding: "1rem 1.5rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                    <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: `${LYTE}15`, border: `1px solid ${LYTE}30`, cursor: "pointer", fontSize: "0.8125rem", fontWeight: 600, color: LYTE, display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <Play size={12} /> Activate schema
-                    </button>
-                    <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.8125rem", color: TEXT_SEC, display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <GitBranch size={12} /> Clone & customize
-                    </button>
-                    <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.8125rem", color: TEXT_SEC, display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <BarChart3 size={12} /> View execution history
-                    </button>
-                  </div>
-                </m.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </section>
-
-        {/* KAIROS lineage */}
-        <section style={{ borderTop: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5rem) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45 }}
-              style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
-            >
-              <div>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
-                  Architectural Inspiration
-                </p>
-                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem" }}>
-                  Decision schemas grounded in DARPA KAIROS.
-                </h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, marginBottom: "1.5rem" }}>
-                  DARPA KAIROS developed schema-based AI for recognizing complex events from disparate signals — matching temporal patterns to institutional schemas. The SZL Decision Schema Library applies this to enterprise operations: recognizing when a known situation is developing, activating the matching governance-aware response, and measuring whether the outcome matched the prediction.
-                </p>
-                <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
-                  <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
-                    Back to Lyte <ArrowRight size={13} />
-                  </Link>
-                  <Link href="/lyte/governance-posture" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
-                    Governance Posture <ArrowUpRight size={13} />
-                  </Link>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Complexity:</span>
+                  {["all", "low", "medium", "high"].map(c => {
+                    const colors: Record<string, string> = { low: "hsl(142,60%,48%)", medium: "hsl(48,90%,52%)", high: "hsl(0,72%,54%)" };
+                    const cc = filterComp === c ? (colors[c] ?? LYTE) : TEXT_FAINT;
+                    return (
+                      <button key={c} onClick={() => setFilterComp(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterComp === c ? cc + "40" : BORDER}`, background: filterComp === c ? `${cc}12` : "transparent", color: cc, cursor: "pointer" }}>
+                        {c === "all" ? "All" : c}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {[
-                  { src: "DARPA KAIROS", principle: "Schema-based event identification", map: "Decision schemas that recognize when a known situation is developing" },
-                  { src: "KAIROS temporal reasoning", principle: "Timeline-aware event memory", map: "Trigger patterns track evolving signal sequences, not single events" },
-                  { src: "KAIROS narrative extraction", principle: "Event chain citation", map: "AI recommendations cite the trigger pattern sequence, not just the conclusion" },
-                  { src: "Shield AI Hivemind", principle: "Mission vs platform autonomy", map: "Schema activations route through policy gates, not autonomous execution" },
-                ].map((item, i) => (
+  
+              <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "1.25rem" }}>
+  
+                {/* Schema list */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  {filteredSchemas.map(s => {
+                    const SIcon = s.icon;
+                    return (
+                      <m.button
+                        key={s.id}
+                        layout
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        onClick={() => setActiveSchema(s.id)}
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          padding: "1rem 1.125rem",
+                          borderRadius: "8px",
+                          background: activeSchema === s.id ? `${s.color}08` : SURFACE,
+                          border: `1px solid ${activeSchema === s.id ? s.color + "30" : BORDER}`,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
+                          <div style={{ width: 28, height: 28, borderRadius: 6, background: `${s.color}18`, border: `1px solid ${s.color}22`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>
+                            <SIcon size={13} style={{ color: s.color }} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.3rem", flexWrap: "wrap", alignItems: "center" }}>
+                              <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: s.color }}>{s.domain}</span>
+                              <ComplexityBadge complexity={s.complexity} />
+                            </div>
+                            <p style={{ fontSize: "0.8rem", fontWeight: 700, color: TEXT, lineHeight: 1.3, margin: "0 0 0.375rem" }}>{s.name}</p>
+                            <div style={{ display: "flex", gap: "1rem", fontSize: "0.6875rem", color: TEXT_FAINT }}>
+                              <span>Used {s.timesUsed}×</span>
+                              <span style={{ color: "hsl(142,60%,48%)" }}>{(s.successRate * 100).toFixed(0)}% success</span>
+                              <span>{s.avgDurationH}h avg</span>
+                            </div>
+                          </div>
+                        </div>
+                      </m.button>
+                    );
+                  })}
+                </div>
+  
+                {/* Schema detail */}
+                <AnimatePresence mode="wait">
                   <m.div
-                    key={i}
-                    initial={{ opacity: 0, x: 12 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.35, delay: i * 0.07 }}
-                    style={{ padding: "0.875rem 1.125rem", borderRadius: "7px", background: SURFACE, border: `1px solid ${BORDER}` }}
+                    key={schema.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.25 }}
+                    style={{ display: "flex", flexDirection: "column", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden", border: `1px solid ${BORDER}` }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
-                      <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: LYTE }}>{item.src}</span>
-                      <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>{item.principle}</span>
+                    {/* Schema header */}
+                    <div style={{ background: BG, padding: "1.5rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 8, background: `${schema.color}18`, border: `1px solid ${schema.color}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Icon size={16} style={{ color: schema.color }} />
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: schema.color, margin: 0 }}>{schema.domain} · {schema.category}</p>
+                          <h3 style={{ fontSize: "1.125rem", fontWeight: 700, color: TEXT, letterSpacing: "-0.016em", margin: 0 }}>{schema.name}</h3>
+                        </div>
+                        <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem" }}>
+                          <ComplexityBadge complexity={schema.complexity} />
+                        </div>
+                      </div>
+                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: TEXT_SEC, margin: "0 0 1rem" }}>{schema.description}</p>
+                      <div style={{ display: "flex", gap: "2rem" }}>
+                        <div>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Used</p>
+                          <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: LYTE, margin: 0 }}>{schema.timesUsed}×</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Success rate</p>
+                          <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: "hsl(142,60%,48%)", margin: 0 }}>{(schema.successRate * 100).toFixed(0)}%</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Avg duration</p>
+                          <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{schema.avgDurationH}h</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Last used</p>
+                          <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: TEXT_SEC, margin: 0 }}>{schema.lastUsed}</p>
+                        </div>
+                      </div>
                     </div>
-                    <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>{item.map}</p>
+  
+                    {/* Trigger patterns */}
+                    <div style={{ background: BG, padding: "1.25rem 1.5rem" }}>
+                      <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
+                        Trigger Patterns — KAIROS-inspired temporal signal detection
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                        {schema.triggerPatterns.map((p, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: 5, background: `${schema.color}08`, border: `1px solid ${schema.color}15` }}>
+                            <Radio size={10} style={{ color: schema.color, flexShrink: 0, marginTop: "2px" }} />
+                            <span style={{ fontSize: "0.8125rem", color: TEXT_SEC, lineHeight: 1.4 }}>{p}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+  
+                    {/* Action sequence */}
+                    <div style={{ background: BG, padding: "1.25rem 1.5rem" }}>
+                      <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
+                        Action Sequence — {schema.actionSequence.length} stages · Alloy-orchestrated
+                      </p>
+                      <div>
+                        {schema.actionSequence.map((step, i) => (
+                          <StepRow key={i} step={step} index={i} />
+                        ))}
+                      </div>
+                    </div>
+  
+                    {/* Policy gates + outcome */}
+                    <div style={{ background: BG, padding: "1.25rem 1.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+                      <div>
+                        <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
+                          Policy Gates — Covenant Policy enforced
+                        </p>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                          {schema.policyGates.map((g, i) => (
+                            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                              <Lock size={10} style={{ color: "hsl(142,60%,48%)", flexShrink: 0, marginTop: "2px" }} />
+                              <span style={{ fontSize: "0.8125rem", color: TEXT_SEC, lineHeight: 1.4 }}>{g}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
+                          Expected Outcome — Outcome Graph tracking
+                        </p>
+                        <p style={{ fontSize: "0.875rem", lineHeight: 1.65, color: TEXT_SEC }}>{schema.expectedOutcome}</p>
+                        <div style={{ marginTop: "1rem", display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
+                          {schema.tags.map(tag => (
+                            <span key={tag} style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 600, color: TEXT_FAINT, background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, padding: "2px 6px", borderRadius: 3 }}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+  
+                    {/* Actions */}
+                    <div style={{ background: BG, padding: "1rem 1.5rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                      <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: `${LYTE}15`, border: `1px solid ${LYTE}30`, cursor: "pointer", fontSize: "0.8125rem", fontWeight: 600, color: LYTE, display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                        <Play size={12} /> Activate schema
+                      </button>
+                      <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.8125rem", color: TEXT_SEC, display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                        <GitBranch size={12} /> Clone & customize
+                      </button>
+                      <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.8125rem", color: TEXT_SEC, display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                        <BarChart3 size={12} /> View execution history
+                      </button>
+                    </div>
                   </m.div>
-                ))}
+                </AnimatePresence>
               </div>
-            </m.div>
-          </div>
-        </section>
-
-      </main>
-      <SiteFooter />
-    </div>
+            </div>
+          </section>
+  
+          {/* KAIROS lineage */}
+          <section style={{ borderTop: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5rem) 0" }}>
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+              <m.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45 }}
+                style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
+              >
+                <div>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
+                    Architectural Inspiration
+                  </p>
+                  <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem" }}>
+                    Decision schemas grounded in DARPA KAIROS.
+                  </h2>
+                  <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, marginBottom: "1.5rem" }}>
+                    DARPA KAIROS developed schema-based AI for recognizing complex events from disparate signals — matching temporal patterns to institutional schemas. The SZL Decision Schema Library applies this to enterprise operations: recognizing when a known situation is developing, activating the matching governance-aware response, and measuring whether the outcome matched the prediction.
+                  </p>
+                  <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
+                    <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
+                      Back to Lyte <ArrowRight size={13} />
+                    </Link>
+                    <Link href="/lyte/governance-posture" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
+                      Governance Posture <ArrowUpRight size={13} />
+                    </Link>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {[
+                    { src: "DARPA KAIROS", principle: "Schema-based event identification", map: "Decision schemas that recognize when a known situation is developing" },
+                    { src: "KAIROS temporal reasoning", principle: "Timeline-aware event memory", map: "Trigger patterns track evolving signal sequences, not single events" },
+                    { src: "KAIROS narrative extraction", principle: "Event chain citation", map: "AI recommendations cite the trigger pattern sequence, not just the conclusion" },
+                    { src: "Shield AI Hivemind", principle: "Mission vs platform autonomy", map: "Schema activations route through policy gates, not autonomous execution" },
+                  ].map((item, i) => (
+                    <m.div
+                      key={i}
+                      initial={{ opacity: 0, x: 12 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.35, delay: i * 0.07 }}
+                      style={{ padding: "0.875rem 1.125rem", borderRadius: "7px", background: SURFACE, border: `1px solid ${BORDER}` }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
+                        <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: LYTE }}>{item.src}</span>
+                        <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>{item.principle}</span>
+                      </div>
+                      <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>{item.map}</p>
+                    </m.div>
+                  ))}
+                </div>
+              </m.div>
+            </div>
+          </section>
+  
+        </main>
+        <SiteFooter />
+      </div>
+        </>
   );
 }
