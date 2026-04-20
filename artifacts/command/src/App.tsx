@@ -101,6 +101,7 @@ const AlloyIntegrationHealth = lazy(() => import("@lyte/pages/alloy-integration-
 const AlloyGraphCompiler = lazy(() => import("@lyte/pages/alloy-graph-compiler"));
 const AlloyPolicyCompiler = lazy(() => import("@lyte/pages/alloy-policy-compiler"));
 const CognitiveCommandCenter = lazy(() => import("./pages/cognitive/index"));
+const CognitiveLoopPage = lazy(() => import("./pages/cognitive/loop"));
 const AlloyProofPage = lazy(() => import("./pages/alloy-proof").then(m => ({ default: m.AlloyProofPage })));
 const GovernedCockpitPage = lazy(() => import("./pages/governed-cockpit"));
 const DemoLaunchpadPage = lazy(() => import("./pages/demo-launchpad").then(m => ({ default: m.DemoLaunchpad })));
@@ -281,6 +282,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: "/governed-cockpit", label: "Governed Cockpit", group: "Operations" },
   { href: "/demo", label: "Demo Launchpad", group: "Operations" },
   { href: "/cognitive", label: "Cognitive Command Center", group: "Cognitive" },
+  { href: "/cognitive/loop", label: "Live Cognitive Loop", group: "Cognitive" },
   { href: "/cognitive/self-model", label: "Self-Model Console", group: "Cognitive" },
   { href: "/cognitive/world-model", label: "World-Model Explorer", group: "Cognitive" },
   { href: "/cognitive/memory", label: "Memory", group: "Cognitive" },
@@ -411,6 +413,7 @@ function AppShell() {
               <Route path="/strategy/cross-platform/pilots" component={() => <PilotIntelligencePage />} />
 
               <Route path="/cognitive" component={() => <CognitiveCommandCenter />} />
+              <Route path="/cognitive/loop" component={() => <CognitiveLoopPage />} />
               <Route path="/cognitive/self-model" component={() => <SelfModelConsole />} />
               <Route path="/cognitive/world-model" component={() => <WorldModelExplorer />} />
               <Route path="/command/atlas-runtime" component={() => <AtlasRuntimePage />} />

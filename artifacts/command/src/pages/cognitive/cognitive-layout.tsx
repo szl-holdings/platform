@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Brain, Cpu, Globe, Archive, GitMerge, CheckCircle2, Lightbulb } from "lucide-react";
+import { Brain, Cpu, Globe, Archive, GitMerge, CheckCircle2, Lightbulb, Activity } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -11,6 +11,7 @@ const BORDER = "rgba(139,122,200,0.12)";
 
 const NAV_ITEMS = [
   { href: "/cognitive", label: "Command Center", icon: Brain },
+  { href: "/cognitive/loop", label: "Live Loop", icon: Activity },
   { href: "/cognitive/self-model", label: "Self Model", icon: Cpu },
   { href: "/cognitive/world-model", label: "World Model", icon: Globe },
   { href: "/cognitive/memory", label: "Memory Explorer", icon: Archive },
