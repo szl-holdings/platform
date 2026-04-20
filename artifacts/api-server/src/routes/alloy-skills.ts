@@ -31,7 +31,11 @@ import { listQuerySchema, validateBody, validateQuery, alloySkillMutationSchema,
 
 const router: IRouter = Router();
 
-router.use(tenantScope({ required: false }));
+// Defense-in-depth: this router is mounted under /alloy in
+// routes/groups/alloy.ts which already applies tenantScope({ required: true }),
+// but we keep an explicit gate here so the file cannot silently regress to
+// no-org access if it is ever re-mounted under a different prefix.
+router.use(tenantScope({ required: true }));
 
 function isGlobalAdmin(user?: AuthenticatedUser): boolean {
   if (!user) return false;

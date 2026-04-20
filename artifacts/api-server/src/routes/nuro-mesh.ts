@@ -12,7 +12,11 @@ import { tenantScope } from "../middlewares/tenant-scope";
 const nueroMeshRouter: IRouter = Router();
 
 nueroMeshRouter.use(authMiddleware());
-nueroMeshRouter.use(tenantScope({ required: false }));
+// Defense-in-depth: even though the parent /nuro-mesh prefix in
+// routes/groups/ai.ts already applies tenantScope({ required: true }),
+// keep an explicit gate here so the file is safe to mount under any
+// future prefix without silently regressing to no-org access.
+nueroMeshRouter.use(tenantScope({ required: true }));
 
 const meshRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
