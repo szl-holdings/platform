@@ -15,7 +15,7 @@ export const IndexRebuildResponseSchema = z.object({
   requestId: z.string(),
   tenantId: TenantIdSchema,
   jobId: z.string(),
-  status: z.enum(["queued", "running", "completed", "failed"]),
+  status: z.enum(["queued", "running", "completed", "failed", "waiting_approval"]),
   startedAt: z.string().datetime().optional(),
 });
 export type IndexRebuildResponse = z.infer<typeof IndexRebuildResponseSchema>;

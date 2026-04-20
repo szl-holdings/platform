@@ -1,0 +1,42 @@
+{
+  "name": "@workspace/aef-storage-adapters",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Alloy Embedding Fabric — unified storage adapter interface with working local-filesystem and SQLite implementations for development, plus interface stubs for pgvector, Azure AI Search, and object storage for production scale.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./interfaces": {
+      "types": "./dist/interfaces.d.ts",
+      "import": "./src/interfaces.ts"
+    },
+    "./local-fs": {
+      "types": "./dist/local-fs.d.ts",
+      "import": "./src/local-fs.ts"
+    },
+    "./sqlite": {
+      "types": "./dist/sqlite.d.ts",
+      "import": "./src/sqlite.ts"
+    },
+    "./stubs": {
+      "types": "./dist/stubs.d.ts",
+      "import": "./src/stubs.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/aef-contracts": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

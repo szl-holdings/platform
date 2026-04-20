@@ -8,7 +8,7 @@ export const CognitiveMetricSchema = z.object({
   unit: z.string().optional(),
   description: z.string(),
   value: z.number(),
-  labels: z.record(z.string()).default({}),
+  labels: z.record(z.union([z.string(), z.number(), z.boolean()]).transform(String)).default({}),
   timestamp: z.string().datetime(),
 });
 
@@ -40,7 +40,7 @@ export function makeMetric(
   value: number,
   labels: Record<string, string> = {}
 ): CognitiveMetric {
-  const def = METRIC_DEFINITIONS[name];
+  const def = METRIC_DEFINITIONS[name] ?? { type: "gauge" as const, unit: "", description: String(name) };
   return CognitiveMetricSchema.parse({
     name,
     type: def.type,

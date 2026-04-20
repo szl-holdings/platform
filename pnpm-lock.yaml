@@ -3185,6 +3185,41 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/aef-domain-profiles:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../aef-contracts
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/aef-evals:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../aef-contracts
+      '@workspace/aef-retrieval-core':
+        specifier: workspace:*
+        version: link:../aef-retrieval-core
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/aef-evidence-ledger:
     dependencies:
       '@workspace/aef-contracts':
@@ -3222,6 +3257,38 @@ importers:
       '@workspace/aef-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/aef-storage-adapters:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../aef-contracts
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/aef-workflow-runtime:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../aef-contracts
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -4271,6 +4338,98 @@ importers:
         specifier: 'catalog:'
         version: 4.21.0
 
+  services/alloy-fabric-api:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
+      '@workspace/aef-domain-profiles':
+        specifier: workspace:*
+        version: link:../../packages/aef-domain-profiles
+      '@workspace/aef-evals':
+        specifier: workspace:*
+        version: link:../../packages/aef-evals
+      '@workspace/aef-evidence-ledger':
+        specifier: workspace:*
+        version: link:../../packages/aef-evidence-ledger
+      '@workspace/aef-policy-guard':
+        specifier: workspace:*
+        version: link:../../packages/aef-policy-guard
+      '@workspace/aef-retrieval-core':
+        specifier: workspace:*
+        version: link:../../packages/aef-retrieval-core
+      '@workspace/aef-storage-adapters':
+        specifier: workspace:*
+        version: link:../../packages/aef-storage-adapters
+      '@workspace/aef-workflow-runtime':
+        specifier: workspace:*
+        version: link:../../packages/aef-workflow-runtime
+      '@workspace/alloy-rank-worker':
+        specifier: workspace:*
+        version: link:../../workers/alloy-rank-worker
+      '@workspace/alloy-vector-worker':
+        specifier: workspace:*
+        version: link:../../workers/alloy-vector-worker
+      express:
+        specifier: ^5.0.0
+        version: 5.2.1
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  services/alloy-fabric-ingest-control:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
+      '@workspace/aef-domain-profiles':
+        specifier: workspace:*
+        version: link:../../packages/aef-domain-profiles
+      '@workspace/aef-evidence-ledger':
+        specifier: workspace:*
+        version: link:../../packages/aef-evidence-ledger
+      '@workspace/aef-policy-guard':
+        specifier: workspace:*
+        version: link:../../packages/aef-policy-guard
+      '@workspace/aef-storage-adapters':
+        specifier: workspace:*
+        version: link:../../packages/aef-storage-adapters
+      '@workspace/aef-workflow-runtime':
+        specifier: workspace:*
+        version: link:../../packages/aef-workflow-runtime
+      express:
+        specifier: ^5.0.0
+        version: 5.2.1
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   services/substrate-mcp-gateway:
     dependencies:
       '@szl-holdings/evidence-graph':
@@ -4333,6 +4492,31 @@ importers:
         specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  workers/alloy-rank-worker:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
+      express:
+        specifier: ^5.0.0
+        version: 5.2.1
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   workers/alloy-rerank-worker:
     dependencies:
       '@workspace/aef-contracts':
@@ -4354,6 +4538,34 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  workers/alloy-vector-worker:
+    dependencies:
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
+      '@workspace/aef-storage-adapters':
+        specifier: workspace:*
+        version: link:../../packages/aef-storage-adapters
+      express:
+        specifier: ^5.0.0
+        version: 5.2.1
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
 packages:
 

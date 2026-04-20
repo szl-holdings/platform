@@ -121,6 +121,7 @@ function makeMemoryEntry(id: string): MemoryEntry {
   const now = new Date().toISOString();
   return {
     id,
+    domain: "MEMORY_DOMAIN_UNKNOWN",
     tier: "semantic",
     key: `key-${id}`,
     value: { v: id },

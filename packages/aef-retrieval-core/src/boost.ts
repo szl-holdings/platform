@@ -1,3 +1,4 @@
+import type { DenseHit } from "./adapters.js";
 import type { FusedHit } from "./fusion.js";
 
 export type BoostRuleKind =
@@ -117,6 +118,65 @@ function hitContainsTerm(
     }
   }
   return false;
+}
+
+/**
+ * Pre-fusion boost: adjusts DenseHit.score BEFORE reciprocal rank fusion.
+ * This ensures exact-match signals influence the fusion ranking rather than
+ * only post-fusion re-scoring. Returns the same DenseHit array with scores
+ * multiplied by the best matching boost rule.
+ */
+export function applyPreFusionBoosts(
+  hits: DenseHit[],
+  query: string,
+  customRules: BoostRule[] = [],
+): DenseHit[] {
+  const rules = [...DEFAULT_RULES, ...customRules];
+
+  const matchedRulesToTerms: Array<{ rule: BoostRule; term: string }> = [];
+  for (const rule of rules) {
+    const term = extractMatchedTerm(query, rule);
+    if (term !== null) {
+      matchedRulesToTerms.push({ rule, term });
+    }
+  }
+
+  if (matchedRulesToTerms.length === 0) return hits;
+
+  return hits.map((hit): DenseHit => {
+    let bestMultiplier = 0;
+
+    for (const { rule, term } of matchedRulesToTerms) {
+      if (rule.scoreMultiplier > bestMultiplier) {
+        const needle = term.toLowerCase();
+        for (const val of Object.values(hit.metadata)) {
+          if (typeof val === "string" && val.toLowerCase().includes(needle)) {
+            bestMultiplier = rule.scoreMultiplier;
+            break;
+          }
+        }
+      }
+    }
+
+    return bestMultiplier > 0
+      ? { ...hit, score: hit.score * bestMultiplier }
+      : hit;
+  });
+}
+
+/**
+ * wrapAsBoosted — type-level adaptor only.
+ * Converts FusedHit[] → BoostedHit[] without re-applying any boost rules.
+ * Use when exact-match boost was already incorporated into dense scores before fusion
+ * (via applyPreFusionBoosts), so the boost signal is already reflected in fusedScore.
+ * boostedScore is set to fusedScore as the downstream canonical score.
+ */
+export function wrapAsBoosted(hits: FusedHit[]): BoostedHit[] {
+  return hits.map((hit): BoostedHit => ({
+    ...hit,
+    boostApplied: false, // exact-match boost was applied pre-fusion; not re-applied here
+    boostedScore: hit.fusedScore,
+  }));
 }
 
 export function applyExactMatchBoosts(

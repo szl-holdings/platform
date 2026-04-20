@@ -53,6 +53,7 @@ vi.mock("drizzle-orm", () => {
     and: tag("and"), or: tag("or"),
     eq: (col: { _colName?: string }, val: unknown) => ({ _kind: "eq", col: col?._colName, val }),
     gte: (col: { _colName?: string }, val: unknown) => ({ _kind: "gte", col: col?._colName, val }),
+    lte: (col: { _colName?: string }, val: unknown) => ({ _kind: "lte", col: col?._colName, val }),
     asc: tag("asc"), desc: tag("desc"),
     inArray: (col: { _colName?: string }, vals: unknown[]) => ({ _kind: "inArray", col: col?._colName, vals }),
     sql: tag("sql"),
@@ -70,6 +71,9 @@ vi.mock("@szl-holdings/db", () => {
   const notificationsTable = makeTable("notifications");
   const notificationPreferencesTable = makeTable("notification_preferences");
   const teamPagesTable = makeTable("team_pages");
+  const onCallSchedulesTable = makeTable("on_call_schedules");
+  const onCallShiftsTable = makeTable("on_call_shifts");
+  const auditLogsTable = makeTable("audit_logs");
   const tableName = (t: unknown): string | null => {
     if (t && typeof t === "object") {
       const tn = (t as { _tableName?: unknown })._tableName;
@@ -95,6 +99,14 @@ vi.mock("@szl-holdings/db", () => {
       const a = rv instanceof Date ? rv.getTime() : Number(rv);
       const b = val instanceof Date ? val.getTime() : Number(val);
       return a >= b;
+    }
+    if (k === "lte") {
+      const { col: cn, val } = c as { col: { _colName: string } | string; val: unknown };
+      const name = typeof cn === "string" ? cn : cn._colName;
+      const rv = row[name];
+      const a = rv instanceof Date ? rv.getTime() : Number(rv);
+      const b = val instanceof Date ? val.getTime() : Number(val);
+      return a <= b;
     }
     if (k === "inArray") {
       const { col: cn, vals } = c as { col: { _colName: string } | string; vals: unknown[] };
@@ -191,6 +203,9 @@ vi.mock("@szl-holdings/db", () => {
     notificationsTable,
     notificationPreferencesTable,
     teamPagesTable,
+    onCallSchedulesTable,
+    onCallShiftsTable,
+    auditLogsTable,
     PLATFORM_ROLE_HIERARCHY: {
       anonymous_visitor: 0, executive_viewer: 2, analyst: 3, operator: 5,
       ops_manager: 6, platform_admin: 8, founder_admin: 10,
@@ -233,6 +248,15 @@ vi.mock("../../middlewares/auth", () => ({
     const u = (req as Request & { user?: { isReadOnly?: boolean } }).user;
     if (u?.isReadOnly) { res.status(403).json({ error: "ReadOnly" }); return; }
     next();
+  },
+  requireRole: (..._roles: string[]) => (_req: Request, _res: Response, next: NextFunction): void => { next(); },
+  parseIdParam: (raw: string | string[]): number => {
+    const id = Number(Array.isArray(raw) ? raw[0] : raw);
+    if (isNaN(id) || id < 1) throw new Error("InvalidIdError");
+    return id;
+  },
+  InvalidIdError: class InvalidIdError extends Error {
+    constructor() { super("Invalid ID"); this.name = "InvalidIdError"; }
   },
 }));
 

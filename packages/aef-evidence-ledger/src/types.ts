@@ -26,6 +26,11 @@ export const EvidenceEntrySchema = z.object({
   requestedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
   operatorAnnotation: z.string().optional(),
+  // Governance-depth extensions: per-stage timings, backend attribution, score decomposition, approval artifacts
+  stageTimings: z.record(z.number().nonnegative()).optional(),
+  backendId: z.string().optional(),
+  approvalDecision: z.object({ approvalRequestId: z.string(), verdict: z.string(), decidedAt: z.string() }).optional(),
+  scoreBreakdown: z.record(z.number()).optional(),
 });
 
 export type EvidenceEntry = z.infer<typeof EvidenceEntrySchema>;

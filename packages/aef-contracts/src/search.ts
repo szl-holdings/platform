@@ -22,7 +22,26 @@ export const HybridSearchRequestSchema = z.object({
 });
 export type HybridSearchRequest = z.infer<typeof HybridSearchRequestSchema>;
 
+// Canonical 13-stage retrieval pipeline — documented native shape.
+export const RETRIEVAL_PATH = [
+  "normalize_query",
+  "load_profile",
+  "policy_check",
+  "query_shaping",
+  "dense_ann",
+  "keyword_bm25",
+  "exact_match_boost",
+  "rrf_fusion",
+  "metadata_filter",
+  "rerank",
+  "evidence_assemble",
+  "ledger_write",
+  "response_normalization",
+] as const;
+export type RetrievalStage = (typeof RETRIEVAL_PATH)[number];
+
 export const SearchHitSchema = z.object({
+  // Core retrieval fields
   chunkId: z.string(),
   sourceId: z.string(),
   sourceUri: z.string().optional(),
@@ -37,6 +56,19 @@ export const SearchHitSchema = z.object({
   finalScore: z.number(),
   boostApplied: z.boolean().default(false),
   metadata: z.record(z.unknown()).default({}),
+
+  // Governance / evidence-first extension fields
+  traceId: z.string().optional(),
+  evidenceId: z.string().optional(),
+  retrievalPath: z.array(z.string()).optional(),
+  rationale: z.string().optional(),
+  selectedRationale: z.string().optional(),
+  profileVersion: z.string().optional(),
+  sourceType: z.string().optional(),
+  documentTitle: z.string().optional(),
+  exactMatchBoosts: z.array(z.string()).optional(),
+  fusionScore: z.number().optional(),
+  rerankScore: z.number().optional(),
 });
 export type SearchHit = z.infer<typeof SearchHitSchema>;
 
@@ -44,6 +76,21 @@ export const HybridSearchResponseSchema = z.object({
   requestId: z.string(),
   tenantId: TenantIdSchema,
   profileId: z.string().optional(),
+  profileVersion: z.string().optional(),
+
+  // Evidence / governance envelope
+  traceId: z.string(),
+  retrievalPath: z.array(z.string()),
+  stageTimings: z.record(z.number()).optional(),
+  policyDecision: z
+    .object({
+      allow: z.boolean(),
+      redactions: z.array(z.string()),
+      appliedRuleIds: z.array(z.string()),
+    })
+    .optional(),
+  ledgerFailures: z.number().int().nonnegative().optional(),
+
   hits: z.array(SearchHitSchema),
   totalCandidates: z.number().int().nonnegative(),
   processingMs: z.number().nonnegative().optional(),
