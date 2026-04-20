@@ -13,6 +13,7 @@ import { indexOpsRouter } from "./routes/index-ops.js";
 import { evalsRouter } from "./routes/evals.js";
 import { openaiCompatRouter } from "./routes/openai-compat.js";
 import { openApiSpec } from "./openapi/spec.js";
+import { createOrchestratorRouter } from "@workspace/alloy-ingestion-orchestrator";
 
 export function createAefRouter(): Router {
   const router = Router();
@@ -47,6 +48,8 @@ export function createAefRouter(): Router {
   router.use("/", indexOpsRouter);
   router.use("/", evalsRouter);
   router.use("/", openaiCompatRouter);
+
+  router.use("/orchestrator", createOrchestratorRouter());
 
   return router;
 }
