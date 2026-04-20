@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { m } from "framer-motion";
 import { ArrowRight, CheckCircle, Building2, Users, Zap, BarChart3, GitBranch, Shield } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { analytics } from "@/lib/analytics";
 
 const PILOT_DELIVERABLES = [
   { icon: BarChart3, label: "Lyte instrumented against your data", desc: "PRISM signal detection running on your actual operational surface — approval queues, workflow health, risk signals — within the first two weeks." },
@@ -34,6 +36,11 @@ export default function PricingPage() {
     ogImage: "https://szlholdings.com/og/og-pricing.jpg",
   });
 
+  useEffect(() => {
+    // Session recording is started by PageViewTracker at the router level.
+    analytics.pricingView("/pricing");
+  }, []);
+
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
       <SiteNav />
@@ -54,6 +61,7 @@ export default function PricingPage() {
               <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                 <Link
                   href="/contact"
+                  onClick={() => analytics.ctaClick("start-a-conversation", "pricing", "hero")}
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.375rem", borderRadius: "6px", fontSize: "13.5px", fontWeight: 700, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
@@ -62,6 +70,7 @@ export default function PricingPage() {
                 </Link>
                 <Link
                   href="/demo"
+                  onClick={() => analytics.ctaClick("see-the-demo-first", "pricing", "hero")}
                   style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 500, color: "hsl(210,5%,56%)", border: "1px solid hsla(0,0%,100%,0.09)", textDecoration: "none", background: "transparent", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.18)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,56%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.09)"; }}
@@ -211,13 +220,13 @@ export default function PricingPage() {
                 </div>
 
                 <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
-                  <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 700, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none", transition: "all 0.2s" }}
+                  <Link href="/contact" onClick={() => analytics.ctaClick("start-the-conversation", "pricing", "qualification")} style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 700, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none", transition: "all 0.2s" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
                   >
                     Start the Conversation <ArrowRight size={13} strokeWidth={2.5} />
                   </Link>
-                  <Link href="/demo" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1rem", borderRadius: "6px", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,56%)", border: "1px solid hsla(0,0%,100%,0.09)", textDecoration: "none", background: "transparent", transition: "all 0.2s" }}
+                  <Link href="/demo" onClick={() => analytics.ctaClick("watch-the-demo", "pricing", "qualification")} style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1rem", borderRadius: "6px", fontSize: "12px", fontWeight: 500, color: "hsl(210,5%,56%)", border: "1px solid hsla(0,0%,100%,0.09)", textDecoration: "none", background: "transparent", transition: "all 0.2s" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,56%)"; }}
                   >

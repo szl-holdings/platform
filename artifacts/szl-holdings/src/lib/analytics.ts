@@ -43,6 +43,9 @@ const SAFE_PROPERTY_KEYS = new Set([
   "filter_value",
   "title",
   "inquiry_type",
+  "funnel",
+  "funnel_step",
+  "referrer",
 ]);
 
 function sanitizeProperties(
@@ -97,6 +100,9 @@ function sendToFunnelStore(event: string, properties?: EventProperties): void {
 
 type EventName =
   | "page_view"
+  | "landing_view"
+  | "pricing_view"
+  | "contact_view"
   | "cta_click"
   | "form_submit"
   | "demo_request"
@@ -188,9 +194,52 @@ export function initScrollDepthTracking(pageSlug: string): () => void {
   return () => window.removeEventListener("scroll", handler);
 }
 
+// Pages that participate in the acquisition funnel and should have PostHog
+// session recordings enabled to surface UX friction. Recording is started
+// programmatically (init keeps it off by default) so we do not record
+// authenticated dashboards.
+const MARKETING_FUNNEL_PAGES = new Set(["/", "/landing", "/contact", "/pricing"]);
+
+export function startMarketingSessionRecording(page: string): void {
+  if (typeof window === "undefined") return;
+  if (!MARKETING_FUNNEL_PAGES.has(page)) return;
+  try {
+    if (typeof posthog.startSessionRecording === "function") {
+      posthog.startSessionRecording();
+    }
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[analytics] startSessionRecording failed:", err);
+    }
+  }
+}
+
+export function stopMarketingSessionRecording(): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (typeof posthog.stopSessionRecording === "function") {
+      posthog.stopSessionRecording();
+    }
+  } catch {
+    /* noop */
+  }
+}
+
 export const analytics = {
   pageView: (page: string, site = "szl-holdings") =>
     track("page_view", { site, page }),
+
+  // Acquisition funnel step 1: marketing landing page viewed.
+  landingView: (page = "/") =>
+    track("landing_view", { site: "szl-holdings", page, funnel: "acquisition", funnel_step: 1 }),
+
+  // Acquisition funnel: pricing page viewed (intermediate intent signal).
+  pricingView: (page = "/pricing") =>
+    track("pricing_view", { site: "szl-holdings", page, funnel: "acquisition" }),
+
+  // Acquisition funnel step 3 entry: contact page viewed.
+  contactView: (page = "/contact") =>
+    track("contact_view", { site: "szl-holdings", page, funnel: "acquisition", funnel_step: 3 }),
 
   ctaClick: (label: string, page: string, section?: string, site = "szl-holdings") =>
     track("cta_click", { cta_label: label, page, section, site }),
@@ -228,8 +277,16 @@ export const analytics = {
   caseStudyView: (contentSlug: string, site = "szl-holdings") =>
     track("case_study_view", { content_slug: contentSlug, site }),
 
-  heroCTAClick: (ctaLabel: string, section = "hero") =>
-    track("hero_cta_click", { cta_label: ctaLabel, section, site: "szl-holdings" }),
+  heroCTAClick: (ctaLabel: string, section = "hero") => {
+    const page =
+      typeof window !== "undefined" ? window.location.pathname || "/" : "/";
+    track("hero_cta_click", { cta_label: ctaLabel, section, site: "szl-holdings" });
+    // Also emit the canonical funnel-step-2 event so the acquisition funnel
+    // (landing_view -> cta_click -> contact_form_submit -> demo_request)
+    // captures landing-origin sessions. Page is derived dynamically so the
+    // helper attributes correctly if reused outside the landing page.
+    track("cta_click", { cta_label: ctaLabel, section, page, site: "szl-holdings" });
+  },
 
   ventureCardClick: (ventureId: string, ventureName: string) =>
     track("venture_card_click", { venture_id: ventureId, venture_name: ventureName }),

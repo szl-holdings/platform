@@ -313,6 +313,14 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    // Acquisition funnel step 1: landing page viewed. Use the actual
+    // pathname so / vs /landing is measurable in the funnel.
+    // Session recording is started by PageViewTracker at the router level.
+    const path = typeof window !== "undefined" ? window.location.pathname : "/";
+    analytics.landingView(path);
+  }, []);
+
+  useEffect(() => {
     if (!loopInView || hasAutoAdvanced) return;
     setHasAutoAdvanced(true);
     let step = 0;

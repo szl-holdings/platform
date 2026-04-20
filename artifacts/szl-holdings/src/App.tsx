@@ -8,7 +8,7 @@ import { apiRequest, registerProductionConfirmFn } from "@/lib/api";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { navigatorConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
-import { analytics as szlAnalytics } from "@/lib/analytics";
+import { analytics as szlAnalytics, startMarketingSessionRecording, stopMarketingSessionRecording } from "@/lib/analytics";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider, useDemoMode } from "@szl-holdings/shared-ui/demo-mode";
@@ -452,7 +452,17 @@ function ProductionConfirmRegistrar() {
 function PageViewTracker() {
   const [location] = useLocation();
   useEffect(() => {
-    szlAnalytics.pageView(location || "/");
+    const path = location || "/";
+    szlAnalytics.pageView(path);
+    // Enforce session-recording boundaries at the router level: only
+    // marketing/funnel pages may be recorded. Navigating to anything else
+    // (dashboards, admin, authenticated surfaces) explicitly stops capture.
+    const MARKETING_PAGES = new Set(["/", "/landing", "/contact", "/pricing"]);
+    if (MARKETING_PAGES.has(path)) {
+      startMarketingSessionRecording(path);
+    } else {
+      stopMarketingSessionRecording();
+    }
   }, [location]);
   return null;
 }

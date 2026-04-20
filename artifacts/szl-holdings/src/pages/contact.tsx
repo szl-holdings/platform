@@ -53,6 +53,12 @@ export default function ContactPage() {
   const funnelStarted = useRef(false);
 
   useEffect(() => {
+    // Acquisition funnel step 3: contact page viewed.
+    // Session recording is started by PageViewTracker at the router level.
+    analytics.contactView("/contact");
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const t = params.get("type");
