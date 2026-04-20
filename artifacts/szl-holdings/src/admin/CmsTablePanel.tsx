@@ -5,7 +5,7 @@ import { m, AnimatePresence } from "framer-motion";
 import {
   Plus, Edit3, Trash2, Save, Loader2, X, Mail, BarChart3, RefreshCw,
   Globe, TrendingUp, Users, Activity, ChevronDown, ChevronUp,
-  Building2, FileText, Tag,
+  Building2, FileText, Tag, AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "./api";
@@ -107,7 +107,68 @@ function DashboardPanel() {
 
 // ─── Generic CMS Table Panel ──────────────────────────────────────────────────
 
-interface FieldDef { key: string; label: string; type?: "text" | "textarea" | "select" | "boolean"; options?: string[]; }
+interface FieldDef {
+  key: string;
+  label: string;
+  type?: "text" | "textarea" | "select" | "boolean" | "number";
+  options?: string[];
+  required?: boolean;
+  format?: "slug" | "url" | "email";
+  maxLength?: number;
+}
+
+const SLUG_RE = /^[a-z0-9-_]+$/;
+const URL_RE = /^https?:\/\/.+/i;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function inferFormat(fd: FieldDef): FieldDef["format"] | undefined {
+  if (fd.format) return fd.format;
+  const k = fd.key.toLowerCase();
+  if (k === "slug") return "slug";
+  if (k === "email") return "email";
+  if (k.endsWith("url")) return "url";
+  return undefined;
+}
+
+function validateField(fd: FieldDef, raw: unknown): string | undefined {
+  const required = fd.required;
+  const format = inferFormat(fd);
+  if (fd.type === "boolean") return undefined;
+  const val = raw === undefined || raw === null
+    ? ""
+    : typeof raw === "string"
+      ? raw.trim()
+      : String(raw).trim();
+  if (!val) {
+    if (required) return `${fd.label} is required`;
+    return undefined;
+  }
+  if (fd.maxLength && val.length > fd.maxLength) {
+    return `${fd.label} must be ${fd.maxLength} characters or fewer`;
+  }
+  if (fd.type === "number" && !/^-?\d+(\.\d+)?$/.test(val)) {
+    return `${fd.label} must be a number`;
+  }
+  if (format === "slug" && !SLUG_RE.test(val)) {
+    return "Use lowercase letters, numbers, hyphens or underscores only";
+  }
+  if (format === "url" && !URL_RE.test(val)) {
+    return "Must be a valid URL starting with http:// or https://";
+  }
+  if (format === "email" && !EMAIL_RE.test(val)) {
+    return "Must be a valid email address";
+  }
+  return undefined;
+}
+
+function FieldError({ msg }: { msg?: string | undefined }) {
+  if (!msg) return null;
+  return (
+    <p className="flex items-center gap-1 mt-1 text-[11px] text-red-500">
+      <AlertCircle className="w-3 h-3 shrink-0" /> {msg}
+    </p>
+  );
+}
 
 function CmsTablePanel({
   title, icon: Icon, queryKey, endpoint, fields, renderRow, emptyMessage,
@@ -123,7 +184,9 @@ function CmsTablePanel({
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [form, setForm] = useState<Record<string, string | boolean>>({});
+  const [form, setForm] = useState<Record<string, string | number | boolean>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const { data, isLoading } = useStandardQuery({
     queryKey,
@@ -151,20 +214,52 @@ function CmsTablePanel({
   const openEdit = (item: Record<string, unknown>) => {
     setIsNew(false);
     setEditing(item);
-    const f: Record<string, string | boolean> = {};
-    fields.forEach(fd => { f[fd.key] = (item[fd.key] as string | boolean) ?? ""; });
+    const f: Record<string, string | number | boolean> = {};
+    fields.forEach(fd => {
+      const v = item[fd.key];
+      if (v === null || v === undefined) {
+        f[fd.key] = fd.type === "boolean" ? false : "";
+      } else if (fd.type === "boolean") {
+        f[fd.key] = Boolean(v);
+      } else if (typeof v === "number" || typeof v === "boolean") {
+        f[fd.key] = String(v);
+      } else {
+        f[fd.key] = v as string;
+      }
+    });
     setForm(f);
+    setTouched({});
+    setSubmitAttempted(false);
   };
 
   const openNew = () => {
     setIsNew(true);
     setEditing({});
-    const f: Record<string, string | boolean> = {};
+    const f: Record<string, string | number | boolean> = {};
     fields.forEach(fd => { f[fd.key] = fd.type === "boolean" ? false : ""; });
     setForm(f);
+    setTouched({});
+    setSubmitAttempted(false);
   };
 
+  const closeModal = () => {
+    setEditing(null);
+    setIsNew(false);
+    setTouched({});
+    setSubmitAttempted(false);
+  };
+
+  const fieldErrors: Record<string, string> = {};
+  fields.forEach(fd => {
+    const err = validateField(fd, form[fd.key]);
+    if (err) fieldErrors[fd.key] = err;
+  });
+  const hasErrors = Object.keys(fieldErrors).length > 0;
+  const showErr = (key: string) => (touched[key] || submitAttempted) && fieldErrors[key];
+
   const handleSave = () => {
+    setSubmitAttempted(true);
+    if (hasErrors) return;
     saveMutation.mutate(form as Record<string, unknown>);
   };
 
@@ -215,36 +310,67 @@ function CmsTablePanel({
             <m.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
               <div className="flex items-center justify-between p-5 border-b border-border/50">
                 <h3 className="text-sm font-semibold text-foreground">{isNew ? `New ${title.replace(/s$/, "")}` : `Edit ${title.replace(/s$/, "")}`}</h3>
-                <button onClick={() => { setEditing(null); setIsNew(false); }} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                <button onClick={closeModal} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               <div className="p-5 space-y-4">
-                {fields.map(fd => (
-                  <div key={fd.key}>
-                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">{fd.label}</label>
-                    {fd.type === "textarea" ? (
-                      <textarea value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} rows={4} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none" />
-                    ) : fd.type === "select" ? (
-                      <select value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50">
-                        {fd.options?.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
-                    ) : fd.type === "boolean" ? (
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked={!!form[fd.key]} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.checked }))} className="rounded border-border" />
-                        <span className="text-sm text-foreground">Enabled</span>
-                      </label>
-                    ) : (
-                      <input value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
-                    )}
+                {submitAttempted && hasErrors && (
+                  <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" /> Please fix the errors below before saving.
                   </div>
-                ))}
+                )}
+                {fields.map(fd => {
+                  const errMsg = showErr(fd.key) ? fieldErrors[fd.key] : undefined;
+                  const inputCls = cn(
+                    "w-full bg-background border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 transition-colors",
+                    errMsg ? "border-red-500/60 focus:ring-red-500/30" : "border-border focus:ring-primary/50"
+                  );
+                  const onBlur = () => setTouched(t => ({ ...t, [fd.key]: true }));
+                  return (
+                    <div key={fd.key}>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                        {fd.label}{fd.required && <span className="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      {fd.type === "textarea" ? (
+                        <textarea value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} onBlur={onBlur} rows={4} className={cn(inputCls, "resize-none")} />
+                      ) : fd.type === "select" ? (
+                        <select value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} onBlur={onBlur} className={inputCls}>
+                          {fd.options?.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
+                      ) : fd.type === "boolean" ? (
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={!!form[fd.key]} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.checked }))} className="rounded border-border" />
+                          <span className="text-sm text-foreground">Enabled</span>
+                        </label>
+                      ) : (
+                        <input
+                          type={fd.type === "number" ? "number" : "text"}
+                          value={form[fd.key] === undefined || form[fd.key] === null ? "" : String(form[fd.key])}
+                          onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))}
+                          onBlur={onBlur}
+                          className={inputCls}
+                        />
+                      )}
+                      {errMsg && <FieldError msg={errMsg} />}
+                    </div>
+                  );
+                })}
               </div>
               <div className="flex items-center justify-end gap-2 p-5 border-t border-border/50">
-                <button onClick={() => { setEditing(null); setIsNew(false); }} className="px-4 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">Cancel</button>
-                <button onClick={handleSave} disabled={saveMutation.isPending} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                <button onClick={closeModal} className="px-4 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">Cancel</button>
+                <button
+                  onClick={handleSave}
+                  disabled={saveMutation.isPending}
+                  className={cn(
+                    "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50",
+                    submitAttempted && hasErrors && !saveMutation.isPending
+                      ? "bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20"
+                      : "bg-primary text-white hover:bg-primary/90"
+                  )}
+                >
                   {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  Save
+                  {submitAttempted && hasErrors && !saveMutation.isPending ? "Fix errors above" : "Save"}
                 </button>
               </div>
             </m.div>

@@ -16,18 +16,18 @@ function VenturesPanel() {
       queryKey={["cms-ventures"]}
       endpoint="/cms/ventures"
       fields={[
-        { key: "slug", label: "Slug" },
-        { key: "name", label: "Name" },
+        { key: "slug", label: "Slug", required: true, format: "slug" },
+        { key: "name", label: "Name", required: true },
         { key: "shortDescription", label: "Short Description", type: "textarea" },
         { key: "longDescription", label: "Long Description", type: "textarea" },
         { key: "statusBadge", label: "Status Badge" },
         { key: "stage", label: "Stage" },
         { key: "category", label: "Category" },
         { key: "primaryCtaLabel", label: "Primary CTA Label" },
-        { key: "primaryCtaUrl", label: "Primary CTA URL" },
+        { key: "primaryCtaUrl", label: "Primary CTA URL", format: "url" },
         { key: "accentToken", label: "Accent Color" },
         { key: "isFeatured", label: "Featured", type: "boolean" },
-        { key: "sortOrder", label: "Sort Order" },
+        { key: "sortOrder", label: "Sort Order", type: "number" },
       ]}
       renderRow={item => (
         <div>
@@ -55,9 +55,9 @@ function PagesPanel() {
       queryKey={["cms-pages"]}
       endpoint="/cms/pages"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "title", label: "Title" },
-        { key: "slug", label: "Slug" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "title", label: "Title", required: true },
+        { key: "slug", label: "Slug", required: true, format: "slug" },
         { key: "pageType", label: "Page Type" },
         { key: "status", label: "Status", type: "select", options: ["draft", "published"] },
         { key: "templateKey", label: "Template Key" },
@@ -65,7 +65,7 @@ function PagesPanel() {
         { key: "metaDescription", label: "Meta Description", type: "textarea" },
         { key: "ogTitle", label: "OG Title" },
         { key: "ogDescription", label: "OG Description", type: "textarea" },
-        { key: "canonicalUrl", label: "Canonical URL" },
+        { key: "canonicalUrl", label: "Canonical URL", format: "url" },
         { key: "noindex", label: "No-index", type: "boolean" },
       ]}
       renderRow={item => (
@@ -94,9 +94,9 @@ function ArticlesPanel() {
       queryKey={["cms-articles"]}
       endpoint="/cms/articles"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "slug", label: "Slug" },
-        { key: "title", label: "Title" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "slug", label: "Slug", required: true, format: "slug" },
+        { key: "title", label: "Title", required: true },
         { key: "excerpt", label: "Excerpt", type: "textarea" },
         { key: "bodyRichtextOrMdx", label: "Body", type: "textarea" },
         { key: "authorName", label: "Author Name" },
@@ -129,9 +129,9 @@ function CaseStudiesPanel() {
       queryKey={["cms-case-studies"]}
       endpoint="/cms/case-studies"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "slug", label: "Slug" },
-        { key: "title", label: "Title" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "slug", label: "Slug", required: true, format: "slug" },
+        { key: "title", label: "Title", required: true },
         { key: "summary", label: "Summary", type: "textarea" },
         { key: "challenge", label: "Challenge", type: "textarea" },
         { key: "approach", label: "Approach", type: "textarea" },
@@ -162,13 +162,13 @@ function RoadmapPanel() {
       queryKey={["cms-roadmap"]}
       endpoint="/cms/roadmap-items"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "title", label: "Title" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "title", label: "Title", required: true },
         { key: "description", label: "Description", type: "textarea" },
         { key: "phaseLabel", label: "Phase Label" },
         { key: "status", label: "Status", type: "select", options: ["planned", "in_progress", "completed", "cancelled"] },
         { key: "targetQuarter", label: "Target Quarter" },
-        { key: "sortOrder", label: "Sort Order" },
+        { key: "sortOrder", label: "Sort Order", type: "number" },
       ]}
       renderRow={item => (
         <div>
@@ -195,9 +195,9 @@ function UpdatesPanel() {
       queryKey={["cms-updates"]}
       endpoint="/cms/updates"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "slug", label: "Slug" },
-        { key: "title", label: "Title" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "slug", label: "Slug", required: true, format: "slug" },
+        { key: "title", label: "Title", required: true },
         { key: "summary", label: "Summary", type: "textarea" },
         { key: "bodyRichtext", label: "Body", type: "textarea" },
         { key: "status", label: "Status", type: "select", options: ["draft", "published"] },
@@ -227,9 +227,9 @@ function CtasPanel() {
       queryKey={["cms-ctas"]}
       endpoint="/cms/ctas"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "label", label: "Label" },
-        { key: "url", label: "URL" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "label", label: "Label", required: true },
+        { key: "url", label: "URL", required: true, format: "url" },
         { key: "variant", label: "Variant", type: "select", options: ["primary", "secondary", "ghost"] },
         { key: "helperText", label: "Helper Text", type: "textarea" },
       ]}
@@ -256,11 +256,11 @@ function NavigationPanel() {
       queryKey={["cms-navigation"]}
       endpoint="/cms/navigation-items"
       fields={[
-        { key: "siteId", label: "Site ID" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
         { key: "navGroup", label: "Nav Group", type: "select", options: ["primary", "footer", "utility", "dashboard"] },
-        { key: "label", label: "Label" },
-        { key: "url", label: "URL" },
-        { key: "sortOrder", label: "Sort Order" },
+        { key: "label", label: "Label", required: true },
+        { key: "url", label: "URL", required: true, format: "url" },
+        { key: "sortOrder", label: "Sort Order", type: "number" },
         { key: "isEnabled", label: "Enabled", type: "boolean" },
         { key: "isExternal", label: "External Link", type: "boolean" },
         { key: "requiresAuth", label: "Requires Auth", type: "boolean" },
@@ -291,13 +291,13 @@ function TestimonialsPanel() {
       queryKey={["cms-testimonials"]}
       endpoint="/cms/testimonials"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "quote", label: "Quote", type: "textarea" },
-        { key: "attributionName", label: "Name" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "quote", label: "Quote", type: "textarea", required: true },
+        { key: "attributionName", label: "Name", required: true },
         { key: "attributionTitle", label: "Title" },
         { key: "attributionCompany", label: "Company" },
         { key: "isPublic", label: "Public", type: "boolean" },
-        { key: "sortOrder", label: "Sort Order" },
+        { key: "sortOrder", label: "Sort Order", type: "number" },
       ]}
       renderRow={item => (
         <div>
@@ -321,11 +321,11 @@ function FaqsPanel() {
       queryKey={["cms-faqs"]}
       endpoint="/cms/faqs"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "question", label: "Question" },
-        { key: "answerRichtext", label: "Answer", type: "textarea" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "question", label: "Question", required: true },
+        { key: "answerRichtext", label: "Answer", type: "textarea", required: true },
         { key: "category", label: "Category" },
-        { key: "sortOrder", label: "Sort Order" },
+        { key: "sortOrder", label: "Sort Order", type: "number" },
       ]}
       renderRow={item => (
         <div>
@@ -347,15 +347,15 @@ function ServicesPanel() {
       queryKey={["cms-services"]}
       endpoint="/cms/services-items"
       fields={[
-        { key: "siteId", label: "Site ID" },
-        { key: "slug", label: "Slug" },
-        { key: "title", label: "Title" },
+        { key: "siteId", label: "Site ID", type: "number", required: true },
+        { key: "slug", label: "Slug", required: true, format: "slug" },
+        { key: "title", label: "Title", required: true },
         { key: "shortDescription", label: "Short Description", type: "textarea" },
         { key: "fullDescription", label: "Full Description", type: "textarea" },
         { key: "category", label: "Category" },
         { key: "iconKey", label: "Icon Key" },
         { key: "isFeatured", label: "Featured", type: "boolean" },
-        { key: "sortOrder", label: "Sort Order" },
+        { key: "sortOrder", label: "Sort Order", type: "number" },
       ]}
       renderRow={item => (
         <div>
