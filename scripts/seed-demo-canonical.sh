@@ -67,4 +67,7 @@ pnpm --filter @workspace/scripts run seed:forge || echo "[demo-seed] Forge seed 
 echo "[demo-seed] Step 14: Deployment registry — historical + active versions per platform app"
 pnpm --filter @workspace/scripts run seed:deployments || echo "[demo-seed] Deployments seed skipped (already seeded)"
 
+echo "[demo-seed] Step 15: Live signal tables (firestorm incidents, vessel alerts, vessel delay events)"
+pnpm --filter @workspace/scripts run seed:live-signals || echo "[demo-seed] Live signals seed skipped"
+
 echo "[demo-seed] All demo seed packs complete."

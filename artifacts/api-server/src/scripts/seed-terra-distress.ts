@@ -318,7 +318,7 @@ const SEED_ALERTS: InsertTerraDistressAlert[] = [
   },
 ];
 
-async function main() {
+export async function seedTerraDistress() {
   console.log("Seeding Terra distress engine database...");
 
   const runId = await startIngestionRun("seed", { description: "Initial demo data seed" });
@@ -362,10 +362,11 @@ async function main() {
   });
 
   console.log(`\nSeed complete: ${inserted} inserted, ${skipped} skipped, ${alertsGenerated + SEED_ALERTS.length} alerts`);
-  process.exit(0);
+  return { inserted, skipped, alertsGenerated: alertsGenerated + SEED_ALERTS.length };
 }
 
-main().catch(err => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  seedTerraDistress()
+    .then(() => process.exit(0))
+    .catch(err => { console.error("Seed failed:", err); process.exit(1); });
+}

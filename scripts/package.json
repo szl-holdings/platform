@@ -16,6 +16,7 @@
     "seed:carlota-clients": "tsx ./seed-carlota-clients.ts",
     "seed:governance": "tsx ./seed-governance.ts",
     "seed:marine-extended": "tsx ./seed-marine-extended.ts",
+    "seed:live-signals": "tsx ./seed-live-signals.ts",
     "seed:agent-os": "tsx ./seed-agent-os.ts",
     "seed:forge": "tsx ./seed-forge.ts",
     "smoke:forge": "tsx ./smoke-forge.ts",
@@ -36,6 +37,7 @@
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
     "@workspace/aef-domain-profiles": "workspace:*",
     "@workspace/aef-evals": "workspace:*",
     "@workspace/memory-fabric": "workspace:*"
