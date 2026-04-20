@@ -1,9 +1,21 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { db, agentMeshDriftSnapshotsTable } from "@szl-holdings/db";
+import { and, eq, sql } from "drizzle-orm";
 import { runMeshScan, loadMeshState } from "../services/agent-mesh-collector";
 import { getGatewayLiveSummary } from "./mcp-gateway";
+import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+function approverLabelFromUser(
+  user: { displayName?: string | null; email?: string | null } | undefined,
+): string {
+  const name = user?.displayName?.trim();
+  const email = user?.email?.trim();
+  if (name && email && name !== email) return `${name} (${email})`;
+  return name || email || "operator";
+}
 
 function orgIdFromReq(req: Request): number | null {
   const u = req.user as { orgId?: number | string } | undefined;
@@ -47,6 +59,64 @@ router.get("/agent-mesh/gateway", async (req: Request, res: Response) => {
     res.status(500).json({ error: "agent-mesh gateway unavailable" });
   }
 });
+
+router.post(
+  "/agent-mesh/drift/:id/approve",
+  authMiddleware({ required: true }),
+  async (req: Request, res: Response) => {
+    try {
+      const id = String(req.params["id"] ?? "").trim();
+      if (!id) {
+        res.status(400).json({ error: "drift snapshot id required" });
+        return;
+      }
+
+      const orgId = orgIdFromReq(req);
+      const approver = approverLabelFromUser(req.user);
+
+      const result = await db
+        .update(agentMeshDriftSnapshotsTable)
+        .set({ policyApproved: true, approvedBy: approver })
+        .where(
+          and(
+            eq(agentMeshDriftSnapshotsTable.id, id),
+            orgId == null
+              ? sql`${agentMeshDriftSnapshotsTable.orgId} IS NULL`
+              : eq(agentMeshDriftSnapshotsTable.orgId, orgId),
+          ),
+        )
+        .returning({
+          id: agentMeshDriftSnapshotsTable.id,
+          policyApproved: agentMeshDriftSnapshotsTable.policyApproved,
+          approvedBy: agentMeshDriftSnapshotsTable.approvedBy,
+          changedBy: agentMeshDriftSnapshotsTable.changedBy,
+          configFile: agentMeshDriftSnapshotsTable.configFile,
+        });
+
+      const row = result[0];
+      if (!row) {
+        res.status(404).json({ error: "drift snapshot not found" });
+        return;
+      }
+
+      logger.info(
+        { driftId: id, approvedBy: approver, configFile: row.configFile },
+        "[agent-mesh] drift approved",
+      );
+
+      res.json({
+        id: row.id,
+        policyApproved: row.policyApproved,
+        approvedBy: row.approvedBy,
+        changedBy: row.changedBy,
+        configFile: row.configFile,
+      });
+    } catch (err) {
+      logger.warn({ err }, "[agent-mesh] drift approve failed");
+      res.status(500).json({ error: "drift approval failed" });
+    }
+  },
+);
 
 router.post("/agent-mesh/scan", async (req: Request, res: Response) => {
   try {

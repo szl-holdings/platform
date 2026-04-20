@@ -1,12 +1,34 @@
 import { useState } from "react";
-import { GitBranch, AlertTriangle, CheckCircle2, Clock, FileText, Shield } from "lucide-react";
-import { useAgentMesh } from "@/data/agent-mesh";
+import { GitBranch, AlertTriangle, CheckCircle2, Clock, FileText, Shield, Loader2 } from "lucide-react";
+import { approveMeshDrift, useAgentMesh } from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 export default function MeshDrift() {
   const [expandedId, setExpandedId] = useState<string | null>("drift-004");
-  const { state } = useAgentMesh();
+  const { state, reload, patchDriftSnapshot } = useAgentMesh();
   const { driftSnapshots, exposures } = state;
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [approveError, setApproveError] = useState<string | null>(null);
+
+  const handleApprove = async (driftId: string) => {
+    setApprovingId(driftId);
+    setApproveError(null);
+    const result = await approveMeshDrift(driftId);
+    if (!result.ok) {
+      setApproveError(result.error);
+      setApprovingId(null);
+      return;
+    }
+    // Optimistically update so the operator immediately sees the new
+    // "Approved by <name>" attribution, then reload from /state to pick
+    // up any other server-side changes.
+    patchDriftSnapshot(driftId, {
+      policyApproved: true,
+      approvedBy: result.approvedBy ?? undefined,
+    });
+    await reload();
+    setApprovingId(null);
+  };
 
   const getLinkedExposures = (ids: string[]) =>
     ids.map(id => exposures.find(e => e.id === id)).filter(Boolean);
@@ -146,12 +168,23 @@ export default function MeshDrift() {
                       <div className="flex items-center gap-2 text-[11px] text-slate-400">
                         <Shield className="w-3 h-3 text-amber-400" />
                         This change bypassed the Guardian approval gate
+                        {approveError && approvingId === null && (
+                          <span className="ml-3 text-red-400">{approveError}</span>
+                        )}
                       </div>
                       <div className="flex gap-2">
-                        <button className="px-3 py-1.5 rounded border border-slate-700 hover:border-slate-600 text-[11px] text-slate-400 transition-colors">
+                        <button
+                          className="px-3 py-1.5 rounded border border-slate-700 hover:border-slate-600 text-[11px] text-slate-400 transition-colors disabled:opacity-50"
+                          disabled={approvingId !== null}
+                        >
                           Roll Back
                         </button>
-                        <button className="px-3 py-1.5 rounded bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-[11px] text-amber-400 font-bold transition-colors">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); void handleApprove(snap.id); }}
+                          className="px-3 py-1.5 rounded bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-[11px] text-amber-400 font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
+                          disabled={approvingId !== null}
+                        >
+                          {approvingId === snap.id && <Loader2 className="w-3 h-3 animate-spin" />}
                           Approve Retroactively
                         </button>
                       </div>

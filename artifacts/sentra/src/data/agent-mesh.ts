@@ -645,6 +645,8 @@ export interface UseAgentMeshResult {
   source: "live" | "seed";
   loading: boolean;
   refresh: () => Promise<void>;
+  reload: () => Promise<void>;
+  patchDriftSnapshot: (id: string, patch: Partial<MeshDriftSnapshot>) => void;
   scannedFiles: string[];
 }
 
@@ -670,8 +672,11 @@ function isLivePayload(p: ApiState | null | undefined): boolean {
 function mergeWithSeed(api: ApiState): AgentMeshState {
   // The collector populates runtimes / mcps / secrets / edges / exposures and
   // the resilience index from the live config files. Containment rules and
-  // historical drift snapshots are operator-defined and remain seeded until
-  // the operator console writes them — so we keep the seed values for those.
+  // historical drift snapshots are operator-defined and remain seeded only
+  // when the live payload doesn't carry them at all. When the live state
+  // *does* include drift snapshots (the live array exists, even if empty
+  // after operator action), we trust it — falling back to the seed would
+  // erase real persisted approvals.
   return {
     runtimes: api.runtimes,
     mcpServers: api.mcpServers,
@@ -679,7 +684,7 @@ function mergeWithSeed(api: ApiState): AgentMeshState {
     edges: api.edges,
     exposures: api.exposures,
     containmentRules: api.containmentRules?.length ? api.containmentRules : agentMesh.containmentRules,
-    driftSnapshots: api.driftSnapshots?.length ? api.driftSnapshots : agentMesh.driftSnapshots,
+    driftSnapshots: Array.isArray(api.driftSnapshots) ? api.driftSnapshots : agentMesh.driftSnapshots,
     resilienceIndex: api.resilienceIndex ?? agentMesh.resilienceIndex,
     gateway: agentMesh.gateway,
     gatewayEvents: agentMesh.gatewayEvents,
@@ -695,6 +700,28 @@ export async function loadAgentMesh(): Promise<{ state: AgentMeshState; source: 
     return { state: mergeWithSeed(data), source: "live", scannedFiles: data.scannedFiles ?? [] };
   } catch {
     return { state: agentMesh, source: "seed", scannedFiles: [] };
+  }
+}
+
+export type ApproveDriftResult =
+  | { ok: true; approvedBy: string | null }
+  | { ok: false; error: string };
+
+export async function approveMeshDrift(driftId: string): Promise<ApproveDriftResult> {
+  try {
+    const res = await fetch(`/api/agent-mesh/drift/${encodeURIComponent(driftId)}/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({}),
+    });
+    if (res.status === 401) return { ok: false, error: "Sign in required to approve drift" };
+    if (res.status === 404) return { ok: false, error: "Drift snapshot not found" };
+    if (!res.ok) return { ok: false, error: `Approval failed (${res.status})` };
+    const data = (await res.json()) as { approvedBy: string | null };
+    return { ok: true, approvedBy: data.approvedBy ?? null };
+  } catch {
+    return { ok: false, error: "Approval request failed" };
   }
 }
 
@@ -742,6 +769,22 @@ export function useAgentMesh(): UseAgentMeshResult {
     setLoading(false);
   }, []);
 
+  const reload = useCallback(async () => {
+    const next = await loadAgentMesh();
+    if (!mounted.current) return;
+    setState(next.state);
+    setSource(next.source);
+    setScannedFiles(next.scannedFiles);
+  }, []);
+
+  const patchDriftSnapshot = useCallback((id: string, patch: Partial<MeshDriftSnapshot>) => {
+    if (!mounted.current) return;
+    setState((prev) => ({
+      ...prev,
+      driftSnapshots: prev.driftSnapshots.map((d) => (d.id === id ? { ...d, ...patch } : d)),
+    }));
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     const tick = async () => {
@@ -760,7 +803,7 @@ export function useAgentMesh(): UseAgentMeshResult {
     };
   }, []);
 
-  return { state, source, loading, refresh, scannedFiles };
+  return { state, source, loading, refresh, reload, patchDriftSnapshot, scannedFiles };
 }
 
 // Live MCP gateway summary loader — talks to /api/agent-mesh/gateway and
