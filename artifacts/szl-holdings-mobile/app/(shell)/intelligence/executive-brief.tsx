@@ -9,6 +9,15 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch, getApiBase } from "@/lib/apiClient";
+import {
+  ENDPOINTS as BRIEF_ENDPOINTS,
+  filterAlertsBySeverity,
+  buildPulseWebUrl,
+  healthColor,
+  riskColor,
+  confidenceColor,
+  confidenceLabel,
+} from "./executive-brief.logic";
 
 const ACCENT = "#c9a84c";
 
@@ -72,33 +81,6 @@ const DOMAIN_META: Record<string, { label: string; icon: string; color: string }
   "carlota-jo": { label: "Carlota", icon: "◇", color: "#ec4899" },
   platform: { label: "Platform", icon: "◈", color: "#6b7280" },
 };
-
-function healthColor(score: number): string {
-  if (score >= 0.8) return "#22c55e";
-  if (score >= 0.5) return "#f59e0b";
-  return "#ef4444";
-}
-
-function riskColor(risk: string): string {
-  switch (risk) {
-    case "CRITICAL": return "#ef4444";
-    case "HIGH": return "#f97316";
-    case "MEDIUM": return "#f59e0b";
-    default: return "#22c55e";
-  }
-}
-
-function confidenceColor(score: number): string {
-  if (score >= 0.75) return "#22c55e";
-  if (score >= 0.5) return ACCENT;
-  return "#ef4444";
-}
-
-function confidenceLabel(score: number): string {
-  if (score >= 0.75) return "HC";
-  if (score >= 0.5) return "MC";
-  return "LC";
-}
 
 function DomainCard({ domain, colors }: { domain: DomainSnapshot; colors: ReturnType<typeof useColors> }) {
   const [expanded, setExpanded] = useState(false);
@@ -175,14 +157,14 @@ export default function ExecutiveBriefScreen() {
 
   const briefingQuery = useQuery<ExecutiveBrief>({
     queryKey: ["exec-brief-cross-domain"],
-    queryFn: () => apiFetch<ExecutiveBrief>("/api/briefings"),
+    queryFn: () => apiFetch<ExecutiveBrief>(BRIEF_ENDPOINTS.briefing),
     refetchInterval: 5 * 60 * 1000,
     staleTime: 2 * 60 * 1000,
   });
 
   const pulseQuery = useQuery<{ briefing: PulseBrief }>({
     queryKey: ["exec-brief-pulse"],
-    queryFn: () => apiFetch<{ briefing: PulseBrief }>("/api/pulse/today"),
+    queryFn: () => apiFetch<{ briefing: PulseBrief }>(BRIEF_ENDPOINTS.pulseToday),
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
@@ -199,8 +181,9 @@ export default function ExecutiveBriefScreen() {
   const isLoading = briefingQuery.isLoading && pulseQuery.isLoading;
 
   const alertsByLevel = brief?.alerts ?? [];
-  const criticalAlerts = alertsByLevel.filter((a) => a.severity === "critical");
-  const warningAlerts = alertsByLevel.filter((a) => a.severity === "warning");
+  const criticalAlerts = filterAlertsBySeverity(alertsByLevel, "critical");
+  const warningAlerts = filterAlertsBySeverity(alertsByLevel, "warning");
+  const pulseWebUrl = buildPulseWebUrl(getApiBase());
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -240,11 +223,7 @@ export default function ExecutiveBriefScreen() {
           </TouchableOpacity>
         ))}
         <TouchableOpacity
-          onPress={() => {
-            const base = getApiBase();
-            const target = base ? `${base.replace(/\/api\/?$/, "")}/pulse/` : "/pulse/";
-            Linking.openURL(target);
-          }}
+          onPress={() => { Linking.openURL(pulseWebUrl); }}
           style={[styles.openWebBtn, { borderColor: colors.border }]}
         >
           <Feather name="external-link" size={11} color={colors.mutedForeground} />

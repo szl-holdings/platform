@@ -9,6 +9,15 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch, getApiBase } from "@/lib/apiClient";
+import {
+  RUNS_LIST_PATH,
+  normalizeRuns,
+  filterByState,
+  computeRunStats,
+  loadRunDetail,
+  buildReplayUrl,
+  type FilterState,
+} from "./run-review.logic";
 
 const ACCENT = "#c9a84c";
 
@@ -186,10 +195,7 @@ function RunDetailPanel({
   const stateIcon = STATE_ICONS[run.state] ?? "circle";
 
   const openReplay = () => {
-    const base = getApiBase();
-    const target = base
-      ? `${base.replace(/\/api\/?$/, "")}/command/#run/${run.id}`
-      : `/command/#run/${run.id}`;
+    const target = buildReplayUrl(getApiBase(), run.id);
     Linking.openURL(target);
   };
 
@@ -292,8 +298,6 @@ function RunDetailPanel({
   );
 }
 
-type FilterState = "all" | "completed" | "failed" | "running";
-
 export default function RunReviewScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -303,54 +307,23 @@ export default function RunReviewScreen() {
   const runsQuery = useQuery<{ data: WorkflowRun[] } | WorkflowRun[]>({
     queryKey: ["run-review-list"],
     queryFn: () =>
-      apiFetch<{ data: WorkflowRun[] } | WorkflowRun[]>("/api/alloy/runs?limit=30"),
+      apiFetch<{ data: WorkflowRun[] } | WorkflowRun[]>(RUNS_LIST_PATH),
     refetchInterval: 30000,
     staleTime: 15000,
   });
 
-  const normalizeRuns = (raw: { data: WorkflowRun[] } | WorkflowRun[] | undefined): WorkflowRun[] => {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
-    return (raw as { data: WorkflowRun[] }).data ?? [];
-  };
-
-  const allRuns = normalizeRuns(runsQuery.data);
+  const allRuns = normalizeRuns<WorkflowRun>(runsQuery.data);
   // Note: failed/stuck-run push alerts are emitted from the app-level
   // `useRunFailureNotifier` hook mounted in `app/_layout.tsx`, so they fire
   // regardless of which screen is active.
 
-  const filteredRuns = activeFilter === "all"
-    ? allRuns
-    : allRuns.filter((r) => r.state === activeFilter);
-
-  const stats = {
-    total: allRuns.length,
-    running: allRuns.filter((r) => r.state === "running").length,
-    failed: allRuns.filter((r) => r.state === "failed").length,
-    completed: allRuns.filter((r) => r.state === "completed").length,
-  };
+  const filteredRuns = filterByState(allRuns, activeFilter);
+  const stats = computeRunStats(allRuns);
 
   const handleRunPress = async (run: WorkflowRun) => {
     try {
-      const [detailRaw, stepsRaw] = await Promise.allSettled([
-        apiFetch<{ data: RunDetail } | RunDetail>(`/api/alloy/runs/${run.id}`),
-        apiFetch<{ data: RunStepsResponse } | RunStepsResponse>(`/api/alloy/runs/${run.id}/steps`),
-      ]);
-
-      const baseRun: RunDetail =
-        detailRaw.status === "fulfilled"
-          ? ((detailRaw.value as { data: RunDetail })?.data ?? (detailRaw.value as RunDetail))
-          : { ...run };
-
-      let steps: RunStep[] | undefined;
-      let workflowName: string | undefined;
-      if (stepsRaw.status === "fulfilled") {
-        const stepsData = (stepsRaw.value as { data: RunStepsResponse })?.data ?? (stepsRaw.value as RunStepsResponse);
-        steps = Array.isArray(stepsData?.steps) ? stepsData.steps : undefined;
-        workflowName = stepsData?.workflow?.name;
-      }
-
-      setSelectedRun({ ...baseRun, steps, workflowName: workflowName ?? baseRun.workflowName });
+      const detail = await loadRunDetail(run, (path) => apiFetch(path));
+      setSelectedRun(detail as RunDetail);
     } catch {
       setSelectedRun({ ...run });
     }

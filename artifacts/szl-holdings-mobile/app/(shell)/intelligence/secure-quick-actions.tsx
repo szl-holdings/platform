@@ -10,21 +10,16 @@ import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch } from "@/lib/apiClient";
 import { promptBiometric } from "@/context/BiometricLockContext";
+import {
+  ACTION_TEMPLATES as LOGIC_ACTION_TEMPLATES,
+  RECENT_ACTIVITY_PATH,
+  executeSecureActionFlow,
+  type ActionTemplate,
+} from "./secure-quick-actions.logic";
 
 const ACCENT = "#c9a84c";
 
-interface ActionTemplate {
-  id: string;
-  title: string;
-  description: string;
-  actionClass: string;
-  resourceType: string;
-  priority: "low" | "medium" | "high" | "critical";
-  icon: React.ComponentProps<typeof Feather>["name"];
-  accentColor: string;
-  requiresBiometric: boolean;
-  domain: string;
-}
+type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
 
 interface ActionRecord {
   id: number;
@@ -37,80 +32,7 @@ interface ActionRecord {
   expiresAt?: string;
 }
 
-const ACTION_TEMPLATES: ActionTemplate[] = [
-  {
-    id: "escalate-approval",
-    title: "Escalate Approval",
-    description: "Escalate a pending approval to senior decision-maker with reason",
-    actionClass: "compliance",
-    resourceType: "approval",
-    priority: "high",
-    icon: "arrow-up-circle",
-    accentColor: "#f97316",
-    requiresBiometric: true,
-    domain: "guardian",
-  },
-  {
-    id: "suspend-agent",
-    title: "Suspend Agent Run",
-    description: "Pause an active cognitive agent run pending human review",
-    actionClass: "deployment",
-    resourceType: "agent_run",
-    priority: "critical",
-    icon: "pause-circle",
-    accentColor: "#ef4444",
-    requiresBiometric: true,
-    domain: "alloy",
-  },
-  {
-    id: "freeze-action",
-    title: "Freeze Pending Action",
-    description: "Block a guardian-queued action from executing",
-    actionClass: "compliance",
-    resourceType: "action_draft",
-    priority: "high",
-    icon: "lock",
-    accentColor: "#6366f1",
-    requiresBiometric: true,
-    domain: "guardian",
-  },
-  {
-    id: "request-brief",
-    title: "Request Priority Brief",
-    description: "Trigger an on-demand cross-domain executive briefing",
-    actionClass: "general",
-    resourceType: "briefing",
-    priority: "medium",
-    icon: "file-text",
-    accentColor: ACCENT,
-    requiresBiometric: false,
-    domain: "pulse",
-  },
-  {
-    id: "flag-entity",
-    title: "Flag World-Model Entity",
-    description: "Flag a Constellation entity for manual review",
-    actionClass: "compliance",
-    resourceType: "cst_entity",
-    priority: "medium",
-    icon: "flag",
-    accentColor: "#ec4899",
-    requiresBiometric: false,
-    domain: "cortex",
-  },
-  {
-    id: "rollback-request",
-    title: "Request Rollback",
-    description: "Request a rollback for a recently recorded action",
-    actionClass: "deployment",
-    resourceType: "action",
-    priority: "critical",
-    icon: "rotate-ccw",
-    accentColor: "#ef4444",
-    requiresBiometric: true,
-    domain: "guardian",
-  },
-];
+const ACTION_TEMPLATES: ActionTemplate[] = LOGIC_ACTION_TEMPLATES;
 
 const PRIORITY_COLORS: Record<string, string> = {
   critical: "#ef4444",
@@ -148,7 +70,7 @@ function ActionTemplateCard({
       activeOpacity={0.85}
     >
       <View style={[styles.templateIcon, { backgroundColor: template.accentColor + "18", borderColor: template.accentColor + "35" }]}>
-        <Feather name={template.icon} size={18} color={template.accentColor} />
+        <Feather name={template.icon as FeatherIconName} size={18} color={template.accentColor} />
       </View>
       <View style={{ flex: 1, marginLeft: 12 }}>
         <View style={styles.templateMeta}>
@@ -240,7 +162,7 @@ function ActionModal({
             <>
               <View style={styles.modalHeader}>
                 <View style={[styles.templateIcon, { backgroundColor: template.accentColor + "18", borderColor: template.accentColor + "35" }]}>
-                  <Feather name={template.icon} size={16} color={template.accentColor} />
+                  <Feather name={template.icon as FeatherIconName} size={16} color={template.accentColor} />
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={styles.modalTitle}>{template.title}</Text>
@@ -322,7 +244,7 @@ export default function SecureQuickActionsScreen() {
   const recentActionsQuery = useQuery<{ data: ActionRecord[] } | ActionRecord[]>({
     queryKey: ["secure-quick-actions-recent"],
     queryFn: () =>
-      apiFetch<{ data: ActionRecord[] } | ActionRecord[]>("/api/approvals?status=all&limit=10"),
+      apiFetch<{ data: ActionRecord[] } | ActionRecord[]>(RECENT_ACTIVITY_PATH),
     staleTime: 30000,
     refetchInterval: 60000,
   });
@@ -345,29 +267,13 @@ export default function SecureQuickActionsScreen() {
       resourceId: string;
       description: string;
     }) => {
-      if (template.requiresBiometric) {
-        const ok = await promptBiometric("Confirm guardian-scoped action");
-        if (!ok) throw new Error("Biometric authentication cancelled");
-      }
-
-      return apiFetch("/api/approvals", {
-        method: "POST",
-        body: JSON.stringify({
-          resourceType: template.resourceType,
-          resourceId,
-          title: template.title,
-          description: description || template.description,
-          actionClass: template.actionClass,
-          priority: template.priority,
-          payload: {
-            templateId: template.id,
-            domain: template.domain,
-            requiresBiometric: template.requiresBiometric,
-            rollbackPoint: new Date().toISOString(),
-            initiatedFrom: "mobile:secure-quick-actions",
-          },
-        }),
-      });
+      return executeSecureActionFlow(
+        template,
+        resourceId,
+        description,
+        promptBiometric,
+        (path, init) => apiFetch(path, init),
+      );
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["secure-quick-actions-recent"] });

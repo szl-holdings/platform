@@ -9,10 +9,17 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch } from "@/lib/apiClient";
+import {
+  ENDPOINTS as ALERT_ENDPOINTS,
+  SEV_COLORS,
+  filterCriticalSignals,
+  normalizeApprovals,
+  synthesizeStaleDomainAlerts,
+  computeTabBadges,
+  type Severity,
+} from "./alert-center.logic";
 
 const ACCENT = "#c9a84c";
-
-type Severity = "critical" | "high" | "medium" | "low" | "info";
 
 interface FusionSignal {
   id: string;
@@ -55,14 +62,6 @@ interface BriefingResponse {
   domains: DomainSnapshot[];
   alerts: Array<{ domain: string; message: string; severity: "info" | "warning" | "critical" }>;
 }
-
-const SEV_COLORS: Record<Severity, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "#3b82f6",
-  info: "#6b7280",
-};
 
 const BRIEF_SEV_COLORS: Record<string, string> = {
   critical: "#ef4444",
@@ -240,7 +239,7 @@ export default function AlertCenterScreen() {
   const signalsQuery = useQuery<{ signals: FusionSignal[]; stats: Record<string, number> }>({
     queryKey: ["alert-center-signals"],
     queryFn: () =>
-      apiFetch<{ signals: FusionSignal[]; stats: Record<string, number> }>("/api/cortex/intelligence-feed"),
+      apiFetch<{ signals: FusionSignal[]; stats: Record<string, number> }>(ALERT_ENDPOINTS.signals),
     refetchInterval: 60000,
     staleTime: 30000,
   });
@@ -248,28 +247,23 @@ export default function AlertCenterScreen() {
   const escalationsQuery = useQuery<{ data: Approval[] } | Approval[]>({
     queryKey: ["alert-center-escalations"],
     queryFn: () =>
-      apiFetch<{ data: Approval[] } | Approval[]>("/api/approvals?status=escalated"),
+      apiFetch<{ data: Approval[] } | Approval[]>(ALERT_ENDPOINTS.escalations),
     refetchInterval: 30000,
   });
 
   const briefingQuery = useQuery<BriefingResponse>({
     queryKey: ["alert-center-briefing"],
-    queryFn: () => apiFetch<BriefingResponse>("/api/briefings"),
+    queryFn: () => apiFetch<BriefingResponse>(ALERT_ENDPOINTS.briefing),
     refetchInterval: 120000,
     staleTime: 60000,
   });
 
-  const normalizeApprovals = (raw: { data: Approval[] } | Approval[] | undefined): Approval[] => {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
-    return (raw as { data: Approval[] }).data ?? [];
-  };
-
   const signals = signalsQuery.data?.signals ?? [];
-  const criticalSignals = signals.filter((s) => s.severity === "critical" || s.severity === "high");
-  const escalations = normalizeApprovals(escalationsQuery.data);
+  const criticalSignals = filterCriticalSignals(signals);
+  const escalations = normalizeApprovals<Approval>(escalationsQuery.data);
   const briefing = briefingQuery.data;
   const worldModelAlerts = briefing?.alerts ?? [];
+  const staleDomainAlerts = synthesizeStaleDomainAlerts(briefing);
   // Note: local-push fallback for newly-escalated approvals is emitted by the
   // app-level `useEscalatedApprovalNotifier` hook in `app/_layout.tsx` so it
   // fires even when this screen is not mounted.
@@ -280,10 +274,11 @@ export default function AlertCenterScreen() {
     briefingQuery.refetch();
   };
 
+  const badges = computeTabBadges(criticalSignals, escalations, worldModelAlerts);
   const TABS: Array<{ key: TabKey; label: string; badge?: number }> = [
-    { key: "signals", label: "Signals", badge: criticalSignals.length },
-    { key: "escalations", label: "Escalations", badge: escalations.length },
-    { key: "world-model", label: "World Model", badge: worldModelAlerts.filter((a) => a.severity === "critical").length },
+    { key: "signals", label: "Signals", badge: badges.signals },
+    { key: "escalations", label: "Escalations", badge: badges.escalations },
+    { key: "world-model", label: "World Model", badge: badges.worldModel },
   ];
 
   const isLoading = signalsQuery.isLoading && escalationsQuery.isLoading && briefingQuery.isLoading;
@@ -412,14 +407,10 @@ export default function AlertCenterScreen() {
               {worldModelAlerts.map((a, i) => (
                 <WorldModelAlert key={i} alert={a} colors={colors} />
               ))}
-              {briefing && briefing.domains.filter((d) => d.staleFraction > 0.3).map((d) => (
+              {staleDomainAlerts.map((a) => (
                 <WorldModelAlert
-                  key={`stale-${d.domain}`}
-                  alert={{
-                    domain: d.domain,
-                    message: `${Math.round(d.staleFraction * 100)}% of ${d.domain} entities are stale. Health score: ${Math.round(d.healthScore * 100)}%`,
-                    severity: d.staleFraction > 0.7 ? "critical" : "warning",
-                  }}
+                  key={`stale-${a.domain}`}
+                  alert={a}
                   colors={colors}
                 />
               ))}

@@ -12,11 +12,20 @@ import { apiFetch } from "@/lib/apiClient";
 import { useSyncEngine } from "@szl-holdings/mobile-shared";
 import { cacheSet, cacheGetStale, CACHE_KEYS } from "@/lib/cache";
 import { OfflineQueuePanel } from "@/components/OfflineQueuePanel";
+import {
+  PRIORITY_COLORS,
+  buildReviewRequest,
+  buildEscalateRequest,
+  buildPostCommentRequest,
+  auditTrailPath,
+  commentsListPath,
+  approvalsListPath,
+  normalizeApprovals,
+  type Priority,
+  type Decision,
+} from "./approval-inbox.logic";
 
 const ACCENT = "#c9a84c";
-
-type Priority = "low" | "medium" | "high" | "critical";
-type Decision = "approved" | "rejected" | "revised";
 
 interface Approval {
   id: number;
@@ -73,13 +82,6 @@ interface QueuedDecision {
   queuedAt: string;
 }
 
-const PRIORITY_COLORS: Record<Priority, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "#6b7280",
-};
-
 const ACTION_CLASS_ICONS: Record<string, string> = {
   financial: "dollar-sign",
   compliance: "shield",
@@ -123,9 +125,9 @@ function AuditTrailSection({
     queryKey: ["approval-audit-trail", approvalId],
     queryFn: async () => {
       const raw = await apiFetch<{ data: AuditEntry[] } | AuditEntry[]>(
-        `/api/approvals/${approvalId}/audit-trail`
+        auditTrailPath(approvalId)
       );
-      return Array.isArray(raw) ? raw : ((raw as { data: AuditEntry[] }).data ?? []);
+      return normalizeApprovals<AuditEntry>(raw);
     },
     enabled,
     staleTime: 15000,
@@ -197,9 +199,9 @@ function CommentThreadSection({
     queryKey: ["approval-comments", approvalId],
     queryFn: async () => {
       const raw = await apiFetch<{ data: ApprovalComment[] } | ApprovalComment[]>(
-        `/api/approvals/${approvalId}/comments`
+        commentsListPath(approvalId)
       );
-      return Array.isArray(raw) ? raw : ((raw as { data: ApprovalComment[] }).data ?? []);
+      return normalizeApprovals<ApprovalComment>(raw);
     },
     enabled: enabled && !isOffline,
     staleTime: 15000,
@@ -207,9 +209,10 @@ function CommentThreadSection({
 
   const postMutation = useMutation({
     mutationFn: async (body: string) => {
-      return apiFetch(`/api/approvals/${approvalId}/comment`, {
-        method: "POST",
-        body: JSON.stringify({ body }),
+      const req = buildPostCommentRequest(approvalId, body);
+      return apiFetch(req.path, {
+        method: req.method,
+        body: JSON.stringify(req.body),
       });
     },
     onSuccess: () => {
@@ -878,9 +881,9 @@ export default function ApprovalInboxScreen() {
     queryFn: async () => {
       try {
         const raw = await apiFetch<{ data: Approval[] } | Approval[]>(
-          `/api/approvals?status=${statusFilter === "pending" ? "pending" : statusFilter}`
+          approvalsListPath(statusFilter === "pending" ? "pending" : statusFilter)
         );
-        const arr = Array.isArray(raw) ? raw : ((raw as { data: Approval[] }).data ?? []);
+        const arr = normalizeApprovals<Approval>(raw);
         if (statusFilter === "pending") {
           await cacheSet(CACHE_KEYS.APPROVALS, arr);
         }
@@ -901,9 +904,10 @@ export default function ApprovalInboxScreen() {
 
   const reviewMutation = useMutation({
     mutationFn: async ({ id, decision, note }: { id: number; decision: Decision; note: string }) => {
-      return apiFetch(`/api/approvals/${id}/review`, {
-        method: "POST",
-        body: JSON.stringify({ decision, note: note || undefined }),
+      const req = buildReviewRequest(id, decision, note || "");
+      return apiFetch(req.path, {
+        method: req.method,
+        body: JSON.stringify({ ...req.body, note: req.body.note || undefined }),
       });
     },
     onSuccess: (_data, variables) => {
@@ -920,9 +924,10 @@ export default function ApprovalInboxScreen() {
 
   const escalateMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
-      return apiFetch(`/api/approvals/${id}/escalate`, {
-        method: "POST",
-        body: JSON.stringify({ reason }),
+      const req = buildEscalateRequest(id, reason);
+      return apiFetch(req.path, {
+        method: req.method,
+        body: JSON.stringify(req.body),
       });
     },
     onSuccess: (_data, variables) => {
