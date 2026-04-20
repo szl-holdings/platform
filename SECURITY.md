@@ -52,15 +52,15 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 
 ### In Scope
 
-- All platform web applications (Lyte, Aegis, Terra, Vessels, Carlota Jo, PRISM Counsel, IMPERIUM, Command Portal, SZL Holdings, Stephen Site)
+- All active platform web applications (Lyte, Aegis, Terra, Vessels, Carlota Jo, Command Portal, SZL Holdings)
 - CORTEX unified mobile application (iOS/Android) (Expo / React Native)
 - The centralized API server
 - Authentication and session management (OIDC/PKCE, RBAC, SCIM 2.0)
 - WebSocket and SSE connection security
 - AI agent execution boundaries and human-in-the-loop enforcement
-- Data access control (11-role RBAC implementation)
+- Data access control (role-based RBAC implementation)
 - Multi-tenant isolation (org_id scoping)
-- Exposed API endpoints (2,816 routes)
+- All exposed API endpoints
 
 ### Out of Scope
 
@@ -77,7 +77,7 @@ The SZL Holdings platform is built with security as a structural concern, not a 
 
 **Authentication:** OpenID Connect (PKCE) — no password storage in our systems.
 
-**Authorization:** Role-based access control with organization scoping. Every route and API endpoint is access-controlled. 11-role hierarchy: `anonymous_visitor`, `founder_admin`, `platform_admin`, `operator`, `analyst`, `executive_viewer`, `ops_manager`, `sales_delivery_user`, `maritime_ops_user`, `service_coordinator`, `pilot_customer_user`. See [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) for the full role-permission mapping.
+**Authorization:** Role-based access control with organization scoping. Every route and API endpoint is access-controlled. 11-role hierarchy: `anonymous_visitor`, `founder_admin`, `platform_admin`, `operator`, `analyst`, `executive_viewer`, `ops_manager`, `sales_delivery_user`, `maritime_ops_user`, `service_coordinator`, `pilot_customer_user`. See [access-control-matrix.md](docs/security/access-control-matrix.md) for the full role-permission mapping.
 
 **Data in Transit:** TLS 1.3 for all connections. WebSocket connections use HMAC-signed tickets with 5-minute TTL.
 
