@@ -71,6 +71,9 @@ These items are populated via idempotent seed scripts and are by design for pre-
 | ST-010 | Notion API | aegis | `NOTION_API_KEY` | `polish` | Notion integration inactive |
 | ST-011 | SendGrid | `lib/services` | `SENDGRID_API_KEY` | `acceptable` | Resend is canonical; SendGrid is backup |
 | ST-012 | HuggingFace Inference API | `lib/ai-engine` | `HF_TOKEN` | `polish` | Falls back to OpenAI/Anthropic |
+| ST-013 | HubSpot CRM adapter | `lib/services/src/adapters/hubspot.ts` | `HUBSPOT_ACCESS_TOKEN` | `polish` | `testConnection()` calls real API when token set; `listContacts()`/`listDeals()` always return mock data — live API call stubs still TODO. See file header for activation steps. |
+| ST-014 | Salesforce CRM adapter | `lib/services/src/adapters/salesforce.ts` | `SALESFORCE_CLIENT_ID`, `SALESFORCE_CLIENT_SECRET`, `SALESFORCE_REFRESH_TOKEN`, `SALESFORCE_INSTANCE_URL` | `polish` | OAuth token refresh implemented; mock fallback active until secrets provisioned. See file header for activation steps. |
+| ST-015 | Power BI embed component | `lib/shared-ui/src/powerbi-embed.tsx` | Per-tenant Power BI workspace + embed token (see ST-006) | `ship-blocker` | Shows locked/configure state when no embed token provided; backend provisioning routes in `api-server/routes/tenant-provisioning/powerbi.ts` use real Zod schemas but require Azure AD App Registration. |
 
 ---
 

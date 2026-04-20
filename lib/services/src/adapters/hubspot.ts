@@ -1,3 +1,20 @@
+/**
+ * [STUB] HubSpot CRM Adapter
+ *
+ * Status: Hybrid stub — returns hard-coded mock data until HUBSPOT_ACCESS_TOKEN
+ * is set in the environment.  When live, `testConnection()` calls the real
+ * HubSpot API, but `listContacts()` and `listDeals()` always return mock data
+ * regardless of the `isLive` flag (TODO: replace the mock returns with real
+ * HubSpot API calls once the prod token is provisioned).
+ *
+ * Activation:
+ *   1. Create a Private App in your HubSpot portal.
+ *   2. Set HUBSPOT_ACCESS_TOKEN=<token> in the environment / Replit secrets.
+ *   3. Replace the `return [...MOCK_CONTACTS]` / `return [...MOCK_DEALS]` lines
+ *      in `listContacts()` and `listDeals()` with real `hsRequest()` calls.
+ *
+ * Tracking: docs/audit/2026-04/mock-and-gap-report.md § HubSpot
+ */
 import { ServiceAdapter } from '../base.js';
 
 export interface HubSpotContact {

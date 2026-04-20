@@ -10,7 +10,7 @@
 import { describe, it, expect, afterAll, afterEach, vi } from "vitest";
 import request from "supertest";
 import { createTestApp } from "../utils/test-app";
-import { registerCleanup, flushCleanup } from "../utils/cleanup-registry";
+import { registerCleanup, registerTextCleanup, flushCleanup, flushAllCleanup } from "../utils/cleanup-registry";
 
 // ── Module mocks (external side-effects only — DB is real) ────────────────────
 
@@ -204,6 +204,36 @@ describe("Domain: Vessels", () => {
     }
   });
 
+  it("POST /vessels/alert-rules returns 201 with rule object", async () => {
+    const app = buildAuthApp(["ops", "exec", "admin", "editor"]);
+    const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
+    app.use(router);
+    const res = await request(app)
+      .post("/vessels/alert-rules")
+      .send({
+        name: "Smoke Test Alert Rule — safe to delete",
+        ruleType: "speed",
+        conditions: { maxKnots: 25 },
+        severity: "medium",
+      });
+    expect([201, 200]).toContain(res.status);
+    const id: number | undefined = res.body?.id ?? res.body?.data?.id;
+    if (id) {
+      registerCleanup({ table: "vesselsAlertRulesTable", id });
+    }
+    expect(typeof id).toBe("number");
+  });
+
+  it("POST /vessels/alert-rules returns 400 when required fields are missing", async () => {
+    const app = buildAuthApp(["ops", "exec", "admin"]);
+    const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
+    app.use(router);
+    const res = await request(app)
+      .post("/vessels/alert-rules")
+      .send({ severity: "high" });
+    expect(res.status).toBe(400);
+  });
+
   it("GET /vessels/fleets/:id returns a valid HTTP response (200 or 404, not 500)", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
@@ -278,6 +308,10 @@ describe("Domain: Terra", () => {
 // ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
 
 describe("Domain: Aegis / Firestorm", () => {
+  afterEach(async () => {
+    await flushCleanup();
+  });
+
   it("GET /firestorm/scenarios returns 200 with array", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/firestorm")).default;
@@ -321,6 +355,35 @@ describe("Domain: Aegis / Firestorm", () => {
     const res = await request(app).get("/firestorm/findings");
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it("POST /firestorm/assessments returns 201 with assessment object", async () => {
+    const app = buildAuthApp(["ops", "exec", "admin"]);
+    const router = (await import("../../artifacts/api-server/src/routes/firestorm")).default;
+    app.use(router);
+    const res = await request(app)
+      .post("/firestorm/assessments")
+      .send({
+        name: "Smoke Test Assessment — safe to delete",
+        assessmentType: "penetration_test",
+        status: "draft",
+      });
+    expect([201, 200]).toContain(res.status);
+    const id: number | undefined = res.body?.id ?? res.body?.data?.id;
+    if (id) {
+      registerCleanup({ table: "firestormAssessmentsTable", id });
+    }
+    expect(typeof id).toBe("number");
+  });
+
+  it("POST /firestorm/assessments returns 400 when required fields are missing", async () => {
+    const app = buildAuthApp(["ops", "exec", "admin"]);
+    const router = (await import("../../artifacts/api-server/src/routes/firestorm")).default;
+    app.use(router);
+    const res = await request(app)
+      .post("/firestorm/assessments")
+      .send({ status: "draft" });
+    expect(res.status).toBe(400);
   });
 });
 
@@ -445,6 +508,10 @@ describe("Domain: Carlota Jo", () => {
 // ── Domain: SZL Holdings ─────────────────────────────────────────────────────
 
 describe("Domain: SZL Holdings", () => {
+  afterEach(async () => {
+    await flushCleanup();
+  });
+
   it("GET /holdings/health returns 200 with status ok", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/holdings")).default;
@@ -503,6 +570,32 @@ describe("Domain: SZL Holdings", () => {
     app.use(router);
     const res = await request(app).get("/holdings/kpis");
     expect(res.status).toBe(200);
+  });
+
+  it("POST /holdings/ventures returns 201 with venture object", async () => {
+    const app = buildAuthApp(["ops", "exec", "admin"]);
+    const router = (await import("../../artifacts/api-server/src/routes/holdings")).default;
+    app.use(router);
+    const slug = `smoke-test-venture-${Date.now()}`;
+    const res = await request(app)
+      .post("/holdings/ventures")
+      .send({ name: "Smoke Test Venture — safe to delete", slug, status: "stealth" });
+    expect([200, 201]).toContain(res.status);
+    const id: number | undefined = res.body?.id ?? res.body?.data?.id;
+    if (id) {
+      registerCleanup({ table: "holdingsVenturesTable", id });
+    }
+    expect(typeof id).toBe("number");
+  });
+
+  it("POST /holdings/ventures returns 400 when required fields are missing", async () => {
+    const app = buildAuthApp(["ops", "exec", "admin"]);
+    const router = (await import("../../artifacts/api-server/src/routes/holdings")).default;
+    app.use(router);
+    const res = await request(app)
+      .post("/holdings/ventures")
+      .send({ status: "active" });
+    expect(res.status).toBe(400);
   });
 });
 
@@ -579,5 +672,77 @@ describe("Cross-Domain: Response shape contracts", () => {
     for (const res of results) {
       expect(res.status).toBe(200);
     }
+  });
+});
+
+// ── Domain: PRISM Counsel — POST round-trip coverage ─────────────────────────
+
+describe("Domain: PRISM Counsel", () => {
+  afterEach(async () => {
+    await flushAllCleanup();
+  });
+
+  it("GET /counsel/matters returns 200 with matters array", async () => {
+    const app = buildAuthApp();
+    const router = (await import("../../artifacts/api-server/src/routes/counsel")).default;
+    app.use(router);
+    const res = await request(app).get("/counsel/matters");
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("matters");
+    expect(Array.isArray(res.body.matters)).toBe(true);
+  });
+
+  it("POST /counsel/matters returns 200 with created matter object", async () => {
+    const app = buildAuthApp(["admin", "ops", "exec"]);
+    const router = (await import("../../artifacts/api-server/src/routes/counsel")).default;
+    app.use(router);
+
+    const today = new Date().toISOString().split("T")[0] as string;
+    const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0] as string;
+
+    const res = await request(app)
+      .post("/counsel/matters")
+      .send({
+        name: "Smoke Test Matter — safe to delete",
+        clientName: "Smoke Test Client",
+        matterNumber: `SMOKE-${Date.now()}`,
+        type: "contract",
+        status: "active",
+        privilegeLevel: "confidential",
+        pressureScore: 10,
+        complexityScore: 10,
+        openedDate: today,
+        nextDeadline: nextWeek,
+        nextDeadlineLabel: "Smoke Test Deadline",
+        leadCounsel: "Test Counsel",
+        jurisdiction: "Test Jurisdiction",
+        summary: "Integration smoke-test matter — safe to delete automatically.",
+        tags: ["smoke-test"],
+        wall: {
+          enabled: false,
+          reason: "",
+          blockedRoles: [],
+          approvedUsers: [],
+          createdAt: "",
+          createdBy: "",
+        },
+        parties: [],
+      });
+    expect([200, 201]).toContain(res.status);
+    const id: string | undefined = res.body?.id ?? res.body?.data?.id;
+    if (id) {
+      registerTextCleanup({ table: "pcGcMattersTable", id });
+    }
+    expect(typeof id).toBe("string");
+  });
+
+  it("POST /counsel/matters returns 400 when required fields are missing", async () => {
+    const app = buildAuthApp(["admin", "ops"]);
+    const router = (await import("../../artifacts/api-server/src/routes/counsel")).default;
+    app.use(router);
+    const res = await request(app)
+      .post("/counsel/matters")
+      .send({ name: "Incomplete Matter" });
+    expect(res.status).toBe(400);
   });
 });

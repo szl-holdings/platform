@@ -239,6 +239,12 @@ export const featureFlagOverrideSchema = z.object({
 
 // ─── Job scheduling schemas ───────────────────────────────────────────────────
 
+export const agentChatSchema = z.object({
+  message: z.string().min(1, "message is required").max(50000, "Message too long (max 50,000 characters)").trim(),
+  conversationId: z.string().max(256).optional(),
+  stream: z.boolean().optional().default(false),
+});
+
 export const jobEnqueueSchema = z.object({
   type: z.string().min(1, "type is required").max(200),
   payload: z.record(z.unknown()).optional(),

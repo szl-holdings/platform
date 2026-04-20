@@ -5,6 +5,7 @@ import { sendError, sendSuccess } from '../../lib/api-response';
 import { logger } from '../../lib/logger';
 import { getModelConfig } from '../../lib/model-registry';
 import { authMiddleware } from '../../middlewares/auth';
+import { agentChatSchema, validateBody } from '../../lib/validation';
 import a2aRouter from './a2a';
 import { AGENT_CONFIGS, type AgentType, isValidAgentType } from './configs';
 import { runDomainAgentChat, streamDomainAgentChat } from './runner';
@@ -85,6 +86,7 @@ router.post(
   '/domain-agents/:agentType/chat',
   agentChatLimit,
   authMiddleware(),
+  validateBody(agentChatSchema),
   async (req: Request, res: Response) => {
     const agentType = req.params.agentType as string;
     if (!agentType || !isValidAgentType(agentType)) {
@@ -93,20 +95,10 @@ router.post(
     }
 
     const { message, conversationId, stream } = req.body as {
-      message?: string;
+      message: string;
       conversationId?: string;
       stream?: boolean;
     };
-
-    if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      sendError(res, 'Message is required', 400);
-      return;
-    }
-
-    if (message.length > 50000) {
-      sendError(res, 'Message too long (max 50,000 characters)', 400);
-      return;
-    }
 
     const userId = req.user?.id ? String(req.user.id) : `anon_${req.ip || 'unknown'}`;
     const convId = conversationId

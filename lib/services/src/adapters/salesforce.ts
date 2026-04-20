@@ -1,3 +1,19 @@
+/**
+ * [STUB] Salesforce CRM Adapter
+ *
+ * Status: Hybrid stub — uses hard-coded/demo data when no OAuth token is
+ * configured.  OAuth token refresh is implemented but a production
+ * SALESFORCE_CLIENT_ID + SALESFORCE_CLIENT_SECRET + SALESFORCE_REFRESH_TOKEN
+ * must be provisioned before live data flows.
+ *
+ * Activation:
+ *   1. Create a Connected App in your Salesforce org (Settings → Apps → App Manager).
+ *   2. Set SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET, SALESFORCE_INSTANCE_URL,
+ *      and SALESFORCE_REFRESH_TOKEN in the environment / Replit secrets.
+ *   3. Remove the mock-data fallback branches in `queryRecords()` and similar methods.
+ *
+ * Tracking: docs/audit/2026-04/mock-and-gap-report.md § Salesforce
+ */
 import { ServiceAdapter } from '../base.js';
 import { globalTokenStore, refreshAccessToken } from '../integrations/oauth.js';
 
