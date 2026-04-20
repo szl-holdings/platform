@@ -6,6 +6,7 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -52,16 +53,18 @@ export default function IdentityBlastRadius() {
 
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
-  const { data, isLoading, refetch, dataUpdatedAt } = useStandardQuery({
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useStandardQuery({
     queryKey: ["identity-blast-radius", selectedIdentity],
     queryFn: async () => {
       const r = await fetch(`${API}/firestorm/cognitive/identity-blast-radius?identityId=${encodeURIComponent(selectedIdentity)}`, { credentials: "include" });
-      if (!r.ok) throw new Error("Failed to load identity blast radius");
+      if (!r.ok) throw new HttpError(r.status, "Failed to load identity blast radius");
       return r.json();
     },
     staleTime: 30_000,
-    retry: 1,
+    retry: (failureCount, err) => !isAccessDenied(err) && failureCount < 1,
   });
+
+  const denied = isAccessDenied(error);
 
   const result = data?.data ?? {};
   const identity = result.identity ?? {};
@@ -114,7 +117,11 @@ export default function IdentityBlastRadius() {
         </div>
       </div>
 
-      {!isLoading && identity.displayName && (
+      {denied && (
+        <AccessDeniedNotice status={(error as HttpError).status} accent="#8b5cf6" resourceLabel="identity blast radius" />
+      )}
+
+      {!denied && !isLoading && identity.displayName && (
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)" }}>
             <div className="flex items-center gap-3">
@@ -157,13 +164,13 @@ export default function IdentityBlastRadius() {
         </div>
       )}
 
-      {isLoading && (
+      {!denied && isLoading && (
         <div className="flex items-center justify-center py-16">
           <div className="w-6 h-6 border-2 border-purple-500/40 border-t-purple-400 rounded-full animate-spin"/>
         </div>
       )}
 
-      {!isLoading && (
+      {!denied && !isLoading && (
         <>
           <div className="rounded-xl p-4 space-y-3" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
             <div className="flex items-center justify-between">

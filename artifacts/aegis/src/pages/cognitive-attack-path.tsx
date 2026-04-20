@@ -6,6 +6,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useDrilldown } from "../lib/cognitive-nav";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -115,16 +116,18 @@ function AttackGraphCanvas({ nodes, edges, onNodeClick }: { nodes: GraphNode[]; 
 export default function CognitiveAttackPath() {
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
-  const { data, isLoading, refetch, dataUpdatedAt } = useStandardQuery({
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useStandardQuery({
     queryKey: ["cognitive-attack-path-graph"],
     queryFn: async () => {
       const r = await fetch(`${API}/firestorm/cognitive/attack-path-graph`, { credentials: "include" });
-      if (!r.ok) throw new Error("Failed to load attack path graph");
+      if (!r.ok) throw new HttpError(r.status, "Failed to load attack path graph");
       return r.json();
     },
     staleTime: 30_000,
-    retry: 1,
+    retry: (failureCount, err) => !isAccessDenied(err) && failureCount < 1,
   });
+
+  const denied = isAccessDenied(error);
 
   const graph = data?.data?.graph ?? { nodes: [], edges: [] };
   const summary = data?.data?.summary ?? {};
@@ -189,7 +192,9 @@ export default function CognitiveAttackPath() {
         ))}
       </div>
 
-      {isLoading ? (
+      {denied ? (
+        <AccessDeniedNotice status={(error as HttpError).status} accent="#ef4444" resourceLabel="the attack path graph" />
+      ) : isLoading ? (
         <div className="flex items-center justify-center" style={{ height: 440, background: DS.surface, borderRadius: 12, border: `1px solid ${DS.border}` }}>
           <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin"/>
         </div>

@@ -6,6 +6,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useDrilldown } from "../lib/cognitive-nav";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -53,16 +54,18 @@ export default function BusinessImpactMap() {
 
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
-  const { data, isLoading, refetch, dataUpdatedAt } = useStandardQuery({
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useStandardQuery({
     queryKey: ["business-impact-map"],
     queryFn: async () => {
       const r = await fetch(`${API}/firestorm/cognitive/business-impact-map`, { credentials: "include" });
-      if (!r.ok) throw new Error("Failed to load business impact map");
+      if (!r.ok) throw new HttpError(r.status, "Failed to load business impact map");
       return r.json();
     },
     staleTime: 60_000,
-    retry: 1,
+    retry: (failureCount, err) => !isAccessDenied(err) && failureCount < 1,
   });
+
+  const denied = isAccessDenied(error);
 
   const result = data?.data ?? {};
   const execNarrative = result.execNarrative ?? {};
@@ -103,7 +106,11 @@ export default function BusinessImpactMap() {
         </button>
       </div>
 
-      {!isLoading && execNarrative.executiveSummary && (
+      {denied && (
+        <AccessDeniedNotice status={(error as HttpError).status} accent="#10b981" resourceLabel="the business impact map" />
+      )}
+
+      {!denied && !isLoading && execNarrative.executiveSummary && (
         <div className="rounded-xl p-5 space-y-4" style={{ background: "rgba(16,185,129,0.04)", border: "1px solid rgba(16,185,129,0.15)" }}>
           <div className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-emerald-400"/>
@@ -128,13 +135,13 @@ export default function BusinessImpactMap() {
         </div>
       )}
 
-      {isLoading && (
+      {!denied && isLoading && (
         <div className="flex items-center justify-center py-16">
           <div className="w-6 h-6 border-2 border-emerald-500/40 border-t-emerald-400 rounded-full animate-spin"/>
         </div>
       )}
 
-      {!isLoading && (
+      {!denied && !isLoading && (
         <>
           <div className="rounded-xl p-4 space-y-3" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
             <h3 className="text-xs font-semibold uppercase tracking-widest" style={{ color: DS.text.muted }}>Business Entities at Risk</h3>

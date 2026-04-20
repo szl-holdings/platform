@@ -7,6 +7,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
+import { AccessDeniedNotice, HttpError, isAccessDenied } from "../components/AccessDeniedNotice";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -64,17 +65,19 @@ export default function IncidentProofChain() {
 
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
-  const { data, isLoading, refetch, dataUpdatedAt } = useStandardQuery({
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useStandardQuery({
     queryKey: ["incident-proof-chain", selectedIncidentId],
     queryFn: async () => {
       const qs = selectedIncidentId ? `?incidentId=${selectedIncidentId}` : "";
       const r = await fetch(`${API}/firestorm/cognitive/incident-proof-chain${qs}`, { credentials: "include" });
-      if (!r.ok) throw new Error("Failed to load incident proof chain");
+      if (!r.ok) throw new HttpError(r.status, "Failed to load incident proof chain");
       return r.json();
     },
     staleTime: 30_000,
-    retry: 1,
+    retry: (failureCount, err) => !isAccessDenied(err) && failureCount < 1,
   });
+
+  const denied = isAccessDenied(error);
 
   const result = data?.data ?? {};
   const incident = result.incident ?? null;
@@ -116,7 +119,9 @@ export default function IncidentProofChain() {
         </button>
       </div>
 
-      {isLoading ? (
+      {denied ? (
+        <AccessDeniedNotice status={(error as HttpError).status} accent="#3b82f6" resourceLabel="this incident proof chain" />
+      ) : isLoading ? (
         <div className="flex items-center justify-center py-16">
           <div className="w-6 h-6 border-2 border-blue-500/40 border-t-blue-400 rounded-full animate-spin"/>
         </div>
