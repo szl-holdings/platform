@@ -144,7 +144,7 @@ export default function AegisHomePage() {
             {[{ label: "Architecture", href: "#architecture" }, { label: "Convergence", href: "#convergence" }, { label: "Operating Model", href: "#model" }].map(l => (
               <a key={l.label} href={l.href} className="text-[11px] text-white/30 hover:text-white/60 transition-colors tracking-[0.08em] uppercase font-medium">{l.label}</a>
             ))}
-            <Link href="/soc">
+            <Link href="/soc?demo=true">
               <span className="text-[12px] font-semibold text-white bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded-lg px-5 py-1.5 transition-all cursor-pointer">Enter Platform</span>
             </Link>
           </div>
@@ -159,7 +159,7 @@ export default function AegisHomePage() {
           {[{ label: "Architecture", href: "#architecture" }, { label: "Convergence", href: "#convergence" }, { label: "Operating Model", href: "#model" }].map(l => (
             <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/50 hover:text-white tracking-wide transition-colors">{l.label}</a>
           ))}
-          <Link href="/soc">
+          <Link href="/soc?demo=true">
             <span className="mt-4 text-sm font-semibold text-white bg-white/[0.08] rounded-lg px-8 py-3 cursor-pointer" onClick={() => setMobileNav(false)}>Enter Platform</span>
           </Link>
         </div>
@@ -196,7 +196,7 @@ export default function AegisHomePage() {
 
         <Reveal delay={400}>
           <div className="flex flex-wrap gap-3 mb-20">
-            <Link href="/soc">
+            <Link href="/soc?demo=true">
               <span className="text-[13px] font-semibold bg-white/[0.07] hover:bg-white/[0.12] text-white border border-white/[0.08] rounded-lg px-7 py-3 flex items-center gap-2 transition-all cursor-pointer">
                 Enter SOC Command <ArrowRight size={14} />
               </span>
@@ -419,7 +419,7 @@ export default function AegisHomePage() {
               See what unified defense, operations, and intelligence looks like in one console.
             </p>
             <div className="flex justify-center flex-wrap gap-3">
-              <Link href="/soc">
+              <Link href="/soc?demo=true">
                 <span className="text-[14px] font-semibold bg-white/[0.07] hover:bg-white/[0.12] text-white border border-white/[0.08] rounded-lg px-8 py-3.5 flex items-center gap-2 transition-all cursor-pointer">
                   Enter SOC Command <ArrowRight size={15} />
                 </span>

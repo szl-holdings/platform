@@ -24,6 +24,7 @@ import {
   type CommandItem,
 } from "@szl-holdings/shared-ui/command-palette";
 import { DemoPersonaProvider, DemoPersonaSwitcher } from "@szl-holdings/shared-ui/demo-persona-switcher";
+import { PrivateAppGuard } from "@szl-holdings/shared-ui";
 
 import S01Cover from "./pages/slides/S01Cover";
 import S02SeriesProblem from "./pages/slides/S02SeriesProblem";
@@ -631,6 +632,7 @@ function AppShell({
   }
 
   return (
+    <PrivateAppGuard appName="Aegis" accentColor={AEGIS_BRAND_ACCENT}>
     <div className="flex flex-col h-screen" style={{ background: "#080510" }}>
       <EcosystemNav
         currentAppId="aegis"
@@ -682,6 +684,7 @@ function AppShell({
         placeholder="Search Aegis — pages, entities, actions..."
       />
     </div>
+    </PrivateAppGuard>
   );
 }
 
