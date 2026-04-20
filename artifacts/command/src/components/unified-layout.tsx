@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { EvidenceDrawer } from "@szl-holdings/design-system/cockpit/evidence-drawer";
 import { FabricShellProvider, useFabricShell } from "../lib/fabric-shell-context";
 import {
-  LayoutDashboard, Globe2, Activity, Zap, Shield, Network, Cpu, BookOpen, Radio, Brain, Heart, AlertTriangle, Workflow, Inbox, Settings, Users, Flag, FileText, Database, Play, CheckSquare, Download, GitBranch, Send, TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building, BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight, Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma, FlaskConical, ShieldCheck, Globe, Archive, GitMerge, CheckCircle2, Lightbulb, Satellite
+  LayoutDashboard, Globe2, Activity, Zap, Shield, Network, Cpu, BookOpen, Radio, Brain, Heart, AlertTriangle, Workflow, Inbox, Settings, Users, Flag, FileText, Database, Play, CheckSquare, Download, GitBranch, Send, TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building, BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight, Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma, FlaskConical, ShieldCheck, Globe, Archive, GitMerge, CheckCircle2, Lightbulb, Satellite, Scale
 } from "lucide-react";
 import { MultiplayerSessionBanner } from "@szl-holdings/shared-ui/multiplayer-session";
 import { useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui/demo-mode";
@@ -27,6 +27,17 @@ const WORKSPACE_TABS: { mode: WorkspaceMode; label: string; icon: typeof LayoutD
 
 type NavItemDef = { href: string; label: string; icon: typeof LayoutDashboard; external?: boolean };
 type NavGroup = { section: string; items: NavItemDef[] };
+
+const ECOSYSTEM_APPS_NAV: NavGroup = {
+  section: "Ecosystem Apps",
+  items: [
+    { href: "/prism-counsel/", label: "PRISM Counsel", icon: Scale, external: true },
+    { href: "/imperium/", label: "IMPERIUM", icon: Crown, external: true },
+    { href: "/lyte-command-center/", label: "Lyte Command Center", icon: Zap, external: true },
+    { href: "/stephen-site/", label: "Stephen Site", icon: Globe, external: true },
+    { href: "/cortex-mobile/", label: "CORTEX Mobile", icon: Cpu, external: true },
+  ],
+};
 
 const STRATEGY_NAV: NavGroup[] = [
   {
@@ -80,6 +91,7 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: "/cognitive/policy-sim", label: "Policy Simulation", icon: FlaskConical },
     ],
   },
+  ECOSYSTEM_APPS_NAV,
 ];
 
 const OPERATIONS_NAV: NavGroup[] = [
@@ -151,6 +163,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/cognitive/policies", label: "Policy Console", icon: ShieldCheck },
     ],
   },
+  ECOSYSTEM_APPS_NAV,
 ];
 
 const INFRASTRUCTURE_NAV: NavGroup[] = [
