@@ -85,6 +85,9 @@ export interface Skill {
   nexusAdaptation: string;
   originalSummary: string;
   tags: string[];
+  isCustom: boolean;
+  lastModifiedAt?: string;
+  lastModifiedBy?: string;
 }
 
 export interface PatternFamily {
@@ -105,6 +108,17 @@ export interface ProtocolTool {
   inputSchema: Record<string, unknown>;
   domain: string;
   tags: string[];
+  isCustom: boolean;
+  lastModifiedAt?: string;
+  lastModifiedBy?: string;
+}
+
+export interface CustomizationsResetResult {
+  ok: boolean;
+  removedSkills: number;
+  resetSkills: number;
+  removedTools: number;
+  resetTools: number;
 }
 
 export interface ToolCallResult {

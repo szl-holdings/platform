@@ -113,6 +113,12 @@ export const nexusApi = {
 
   retryIngest: (id: string) =>
     req<{ id: string }>(`/ingest/${id}/retry`, { method: "POST" }),
+
+  resetCustomizations: () =>
+    req<import("./types").CustomizationsResetResult>("/customizations/reset", {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
 };
 
 export function getApiBase() {

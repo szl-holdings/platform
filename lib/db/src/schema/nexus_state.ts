@@ -53,6 +53,9 @@ export const nexusSkillsTable = pgTable(
     nexusAdaptation: text("nexus_adaptation").notNull().default(""),
     originalSummary: text("original_summary").notNull().default(""),
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    isCustom: boolean("is_custom").notNull().default(false),
+    lastModifiedAt: timestamp("last_modified_at"),
+    lastModifiedBy: text("last_modified_by"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
@@ -60,6 +63,7 @@ export const nexusSkillsTable = pgTable(
     index("nexus_skills_enabled_idx").on(t.enabled),
     index("nexus_skills_pattern_idx").on(t.pattern),
     index("nexus_skills_primitive_idx").on(t.primitiveType),
+    index("nexus_skills_custom_idx").on(t.isCustom),
   ],
 );
 
@@ -84,12 +88,16 @@ export const nexusProtocolToolsTable = pgTable(
       .notNull()
       .default({}),
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    isCustom: boolean("is_custom").notNull().default(false),
+    lastModifiedAt: timestamp("last_modified_at"),
+    lastModifiedBy: text("last_modified_by"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (t) => [
     index("nexus_protocol_tools_protocol_idx").on(t.protocol),
     index("nexus_protocol_tools_domain_idx").on(t.domain),
+    index("nexus_protocol_tools_custom_idx").on(t.isCustom),
   ],
 );
 

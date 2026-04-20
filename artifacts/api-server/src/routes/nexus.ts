@@ -99,6 +99,9 @@ interface Skill {
   nexusAdaptation: string;
   originalSummary: string;
   tags: string[];
+  isCustom: boolean;
+  lastModifiedAt?: string;
+  lastModifiedBy?: string;
 }
 
 interface PatternFamily {
@@ -119,6 +122,9 @@ interface ProtocolTool {
   inputSchema: Record<string, unknown>;
   domain: string;
   tags: string[];
+  isCustom: boolean;
+  lastModifiedAt?: string;
+  lastModifiedBy?: string;
 }
 
 interface OrchestrationPlan {
@@ -170,8 +176,8 @@ let orchestrationsToday = 0;
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
 function seedData(persist = false) {
-  // Seed skills
-  const SEED_SKILLS: Skill[] = [
+  // Seed skills (isCustom defaults to false for all seeds — added below)
+  const SEED_SKILLS: Array<Omit<Skill, "isCustom">> = [
     {
       id: "sk_claude_mem_001",
       name: "Persistent Entity Graph",
@@ -355,8 +361,9 @@ function seedData(persist = false) {
   ];
 
   // Only seed skills we don't already have (DB-hydrated state wins).
-  for (const skill of SEED_SKILLS) {
-    if (!skillStore.has(skill.id)) {
+  for (const seed of SEED_SKILLS) {
+    if (!skillStore.has(seed.id)) {
+      const skill: Skill = { ...seed, isCustom: false };
       skillStore.set(skill.id, skill);
       if (persist) void persistSkillToDB(skill);
     }
@@ -466,8 +473,8 @@ function seedData(persist = false) {
     patternStore.set(pf.id, pf);
   }
 
-  // Seed protocol bridge tools
-  const TOOLS: ProtocolTool[] = [
+  // Seed protocol bridge tools (isCustom defaults to false for all seeds — added below)
+  const TOOLS: Array<Omit<ProtocolTool, "isCustom">> = [
     // MCP tools
     {
       id: "mcp_web_search",
@@ -672,8 +679,9 @@ function seedData(persist = false) {
     },
   ];
 
-  for (const tool of TOOLS) {
-    if (!toolStore.has(tool.id)) {
+  for (const seed of TOOLS) {
+    if (!toolStore.has(seed.id)) {
+      const tool: ProtocolTool = { ...seed, isCustom: false };
       toolStore.set(tool.id, tool);
       if (persist) void persistToolToDB(tool);
     }
@@ -1058,7 +1066,7 @@ async function loadMemoryFromDB(): Promise<void> {
 // ─── Skills DB persistence ────────────────────────────────────────────────────
 
 function rowToSkill(row: NexusSkillRow): Skill {
-  return {
+  const skill: Skill = {
     id: row.id,
     name: row.name,
     description: row.description,
@@ -1072,12 +1080,17 @@ function rowToSkill(row: NexusSkillRow): Skill {
     nexusAdaptation: row.nexusAdaptation,
     originalSummary: row.originalSummary,
     tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+    isCustom: row.isCustom,
   };
+  if (row.lastModifiedAt) skill.lastModifiedAt = row.lastModifiedAt.toISOString();
+  if (row.lastModifiedBy) skill.lastModifiedBy = row.lastModifiedBy;
+  return skill;
 }
 
 async function persistSkillToDB(skill: Skill): Promise<void> {
   if (!db) return;
   try {
+    const lastModifiedAt = skill.lastModifiedAt ? new Date(skill.lastModifiedAt) : null;
     await db
       .insert(nexusSkillsTable)
       .values({
@@ -1094,6 +1107,9 @@ async function persistSkillToDB(skill: Skill): Promise<void> {
         nexusAdaptation: skill.nexusAdaptation,
         originalSummary: skill.originalSummary,
         tags: skill.tags,
+        isCustom: skill.isCustom,
+        lastModifiedAt,
+        lastModifiedBy: skill.lastModifiedBy ?? null,
       })
       .onConflictDoUpdate({
         target: nexusSkillsTable.id,
@@ -1110,6 +1126,9 @@ async function persistSkillToDB(skill: Skill): Promise<void> {
           nexusAdaptation: skill.nexusAdaptation,
           originalSummary: skill.originalSummary,
           tags: skill.tags,
+          isCustom: skill.isCustom,
+          lastModifiedAt,
+          lastModifiedBy: skill.lastModifiedBy ?? null,
           updatedAt: new Date(),
         },
       });
@@ -1134,7 +1153,7 @@ async function loadSkillsFromDB(): Promise<void> {
 // ─── Protocol tools DB persistence ────────────────────────────────────────────
 
 function rowToTool(row: NexusProtocolToolRow): ProtocolTool {
-  return {
+  const tool: ProtocolTool = {
     id: row.id,
     name: row.name,
     description: row.description,
@@ -1142,12 +1161,17 @@ function rowToTool(row: NexusProtocolToolRow): ProtocolTool {
     domain: row.domain,
     inputSchema: (row.inputSchema as Record<string, unknown>) ?? {},
     tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+    isCustom: row.isCustom,
   };
+  if (row.lastModifiedAt) tool.lastModifiedAt = row.lastModifiedAt.toISOString();
+  if (row.lastModifiedBy) tool.lastModifiedBy = row.lastModifiedBy;
+  return tool;
 }
 
 async function persistToolToDB(tool: ProtocolTool): Promise<void> {
   if (!db) return;
   try {
+    const lastModifiedAt = tool.lastModifiedAt ? new Date(tool.lastModifiedAt) : null;
     await db
       .insert(nexusProtocolToolsTable)
       .values({
@@ -1158,6 +1182,9 @@ async function persistToolToDB(tool: ProtocolTool): Promise<void> {
         domain: tool.domain,
         inputSchema: tool.inputSchema,
         tags: tool.tags,
+        isCustom: tool.isCustom,
+        lastModifiedAt,
+        lastModifiedBy: tool.lastModifiedBy ?? null,
       })
       .onConflictDoUpdate({
         target: nexusProtocolToolsTable.id,
@@ -1168,6 +1195,9 @@ async function persistToolToDB(tool: ProtocolTool): Promise<void> {
           domain: tool.domain,
           inputSchema: tool.inputSchema,
           tags: tool.tags,
+          isCustom: tool.isCustom,
+          lastModifiedAt,
+          lastModifiedBy: tool.lastModifiedBy ?? null,
           updatedAt: new Date(),
         },
       });
@@ -1815,6 +1845,8 @@ router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, validateBody(bodyS
     if (!skill) { sendError(res, "Skill not found", 404); return; }
     const { enabled } = req.body as { enabled?: boolean };
     skill.enabled = enabled ?? !skill.enabled;
+    skill.lastModifiedAt = new Date().toISOString();
+    skill.lastModifiedBy = req.user?.email ?? req.user?.displayName ?? "anonymous";
     void persistSkillToDB(skill);
     sendSuccess(res, skill);
   } catch (err) {
@@ -1840,6 +1872,8 @@ router.post("/skills", perUserWriteSlidingLimiter, validateBody(bodyShape({
   try {
     const body = req.body as Partial<Skill>;
     if (!body.name?.trim()) { sendError(res, "name is required", 400); return; }
+    const now = new Date().toISOString();
+    const actor = req.user?.email ?? req.user?.displayName ?? "anonymous";
     const skill: Skill = {
       id: body.id?.trim() || `sk_custom_${randomUUID().slice(0, 8)}`,
       name: body.name.trim(),
@@ -1854,6 +1888,9 @@ router.post("/skills", perUserWriteSlidingLimiter, validateBody(bodyShape({
       nexusAdaptation: body.nexusAdaptation ?? "",
       originalSummary: body.originalSummary ?? "",
       tags: body.tags ?? [],
+      isCustom: true,
+      lastModifiedAt: now,
+      lastModifiedBy: actor,
     };
     skillStore.set(skill.id, skill);
     void persistSkillToDB(skill);
@@ -1868,7 +1905,14 @@ router.put("/skills/:id", perUserWriteSlidingLimiter, validateBody(bodyShape({})
     const skill = skillStore.get(req.params.id as string);
     if (!skill) { sendError(res, "Skill not found", 404); return; }
     const update = req.body as Partial<Skill>;
-    const updated: Skill = { ...skill, ...update, id: skill.id };
+    const updated: Skill = {
+      ...skill,
+      ...update,
+      id: skill.id,
+      isCustom: skill.isCustom,
+      lastModifiedAt: new Date().toISOString(),
+      lastModifiedBy: req.user?.email ?? req.user?.displayName ?? "anonymous",
+    };
     skillStore.set(skill.id, updated);
     void persistSkillToDB(updated);
     sendSuccess(res, updated);
@@ -1920,6 +1964,8 @@ router.post("/bridge/tools", perUserWriteSlidingLimiter, validateBody(bodyShape(
       sendError(res, "protocol must be one of MCP, A2A, ACP, ANP", 400);
       return;
     }
+    const now = new Date().toISOString();
+    const actor = req.user?.email ?? req.user?.displayName ?? "anonymous";
     const tool: ProtocolTool = {
       id: body.id?.trim() || `${body.protocol.toLowerCase()}_custom_${randomUUID().slice(0, 8)}`,
       name: body.name.trim(),
@@ -1928,6 +1974,9 @@ router.post("/bridge/tools", perUserWriteSlidingLimiter, validateBody(bodyShape(
       domain: body.domain ?? "custom",
       inputSchema: body.inputSchema ?? { type: "object", properties: {} },
       tags: body.tags ?? [],
+      isCustom: true,
+      lastModifiedAt: now,
+      lastModifiedBy: actor,
     };
     toolStore.set(tool.id, tool);
     void persistToolToDB(tool);
@@ -1942,7 +1991,14 @@ router.put("/bridge/tools/:id", perUserWriteSlidingLimiter, validateBody(bodySha
     const tool = toolStore.get(req.params.id as string);
     if (!tool) { sendError(res, "Tool not found", 404); return; }
     const update = req.body as Partial<ProtocolTool>;
-    const updated: ProtocolTool = { ...tool, ...update, id: tool.id };
+    const updated: ProtocolTool = {
+      ...tool,
+      ...update,
+      id: tool.id,
+      isCustom: tool.isCustom,
+      lastModifiedAt: new Date().toISOString(),
+      lastModifiedBy: req.user?.email ?? req.user?.displayName ?? "anonymous",
+    };
     toolStore.set(tool.id, updated);
     void persistToolToDB(updated);
     sendSuccess(res, updated);
@@ -1960,6 +2016,64 @@ router.delete("/bridge/tools/:id", perUserWriteSlidingLimiter, async (req: Reque
     sendSuccess(res, { ok: true });
   } catch (err) {
     handleRouteError(res, err, "DELETE /api/nexus/bridge/tools/:id");
+  }
+});
+
+// ─── Reset to defaults ────────────────────────────────────────────────────────
+// Removes user-added skills/tools and clears modification metadata on seeded
+// entries, then re-runs seedData() so the canonical seed set is restored.
+router.post("/customizations/reset", perUserWriteSlidingLimiter, async (_req: Request, res: Response) => {
+  try {
+    let removedSkills = 0;
+    let resetSkills = 0;
+    let removedTools = 0;
+    let resetTools = 0;
+
+    for (const [id, skill] of skillStore) {
+      if (skill.isCustom) {
+        skillStore.delete(id);
+        removedSkills++;
+        if (db) {
+          try {
+            await db.delete(nexusSkillsTable).where(eq(nexusSkillsTable.id, id));
+          } catch (dbErr) {
+            logger.warn({ dbErr, id }, "Failed to delete custom skill from DB during reset");
+          }
+        }
+      } else if (skill.lastModifiedAt || skill.lastModifiedBy) {
+        delete skill.lastModifiedAt;
+        delete skill.lastModifiedBy;
+        resetSkills++;
+        void persistSkillToDB(skill);
+      }
+    }
+
+    for (const [id, tool] of toolStore) {
+      if (tool.isCustom) {
+        toolStore.delete(id);
+        removedTools++;
+        void deleteToolFromDB(id);
+      } else if (tool.lastModifiedAt || tool.lastModifiedBy) {
+        delete tool.lastModifiedAt;
+        delete tool.lastModifiedBy;
+        resetTools++;
+        void persistToolToDB(tool);
+      }
+    }
+
+    // Re-seed any seed entries that were missing (e.g. previously deleted) and
+    // mirror them back to the database so the canonical set is restored.
+    seedData(true);
+
+    sendSuccess(res, {
+      ok: true,
+      removedSkills,
+      resetSkills,
+      removedTools,
+      resetTools,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "POST /api/nexus/customizations/reset");
   }
 });
 

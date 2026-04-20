@@ -11,7 +11,22 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Sparkles,
 } from "lucide-react";
+
+function formatRelative(iso?: string): string {
+  if (!iso) return "";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(ms) || ms < 0) return "";
+  const sec = Math.floor(ms / 1000);
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  return `${day}d ago`;
+}
 
 const PROTOCOLS = ["MCP", "A2A", "ACP", "ANP"] as const;
 
@@ -102,6 +117,10 @@ export default function Bridge() {
             <h1 className="text-lg font-semibold">Universal Protocol Bridge</h1>
             <p className="text-xs text-muted-foreground">
               MCP · A2A · ACP · ANP — one façade, any tool
+              {(() => {
+                const customCount = tools.filter((t) => t.isCustom).length;
+                return customCount > 0 ? ` · ${customCount} custom` : "";
+              })()}
             </p>
           </div>
         </div>
@@ -247,7 +266,7 @@ function ToolCard({
             <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
+            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
               <span className="text-sm font-semibold">{tool.name}</span>
               <span
                 className="text-[9px] font-mono px-1.5 py-0.5 rounded"
@@ -256,8 +275,37 @@ function ToolCard({
                 {tool.protocol}
               </span>
               <span className="text-[9px] text-muted-foreground/40 font-mono">{tool.domain}</span>
+              {tool.isCustom && (
+                <span
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-[#a855f7] bg-[#a855f7]/10 border border-[#a855f7]/30"
+                  title="You added this tool"
+                >
+                  <Sparkles className="w-2.5 h-2.5" />
+                  custom
+                </span>
+              )}
+              {!tool.isCustom && tool.lastModifiedAt && (
+                <span
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded text-[#ffb700] bg-[#ffb700]/10 border border-[#ffb700]/30"
+                  title={`Last modified ${new Date(tool.lastModifiedAt).toLocaleString()}` + (tool.lastModifiedBy ? ` by ${tool.lastModifiedBy}` : "")}
+                >
+                  modified
+                </span>
+              )}
             </div>
-            <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+            <div className="flex items-center gap-3">
+              <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+              {tool.lastModifiedAt && (
+                <span
+                  className="text-[9px] font-mono text-muted-foreground/40 shrink-0 flex items-center gap-1"
+                  title={`Last modified ${new Date(tool.lastModifiedAt).toLocaleString()}` + (tool.lastModifiedBy ? ` by ${tool.lastModifiedBy}` : "")}
+                >
+                  <Clock className="w-2.5 h-2.5" />
+                  {formatRelative(tool.lastModifiedAt)}
+                  {tool.lastModifiedBy && ` · ${tool.lastModifiedBy}`}
+                </span>
+              )}
+            </div>
           </div>
         </button>
 
