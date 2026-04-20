@@ -245,6 +245,50 @@ interface PageResponse {
   inAppDelivered?: boolean;
 }
 
+interface TeamPageActor {
+  id: number;
+  displayName: string;
+  email: string | null;
+  avatarUrl: string | null;
+}
+interface TeamPageHistoryEntryDto {
+  id: number;
+  team: string;
+  urgency: "info" | "warning" | "critical";
+  message: string | null;
+  inAppDelivered: boolean;
+  createdAt: string;
+  actor: TeamPageActor | null;
+  recipient: TeamPageActor | null;
+}
+interface TeamPagesResponse {
+  team: string;
+  count: number;
+  pages: TeamPageHistoryEntryDto[];
+}
+
+const URGENCY_COLOR: Record<TeamPageHistoryEntryDto["urgency"], string> = {
+  info: "#7dd3fc",
+  warning: "#f59e0b",
+  critical: "#ef4444",
+};
+
+function formatPageTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const now = Date.now();
+  const diffSec = Math.round((now - d.getTime()) / 1000);
+  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffSec < 3600) return `${Math.round(diffSec / 60)}m ago`;
+  if (diffSec < 86_400) return `${Math.round(diffSec / 3600)}h ago`;
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function MemberRow({ m, badge }: { m: TeamMemberDto; badge?: { label: string; color: string } }) {
   return (
     <div
@@ -332,6 +376,11 @@ function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void 
     queryFn: () => apiFetch<TeamDetailDto>(`/teams/${encodeURIComponent(team)}`),
   });
 
+  const pagesQuery = useStandardQuery<TeamPagesResponse>({
+    queryKey: ["team", team, "pages"],
+    queryFn: () => apiFetch<TeamPagesResponse>(`/teams/${encodeURIComponent(team)}/pages`),
+  });
+
   const pageMutation = useStandardMutation({
     mutationFn: () =>
       apiFetch<PageResponse>(`/teams/${encodeURIComponent(team)}/page`, {
@@ -347,6 +396,8 @@ function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void 
           `Paged ${data.onCall?.displayName ?? "on-call"} (${urgency})${data.inAppDelivered === false ? " — in-app opt-out, external channels still attempted" : ""}.`,
         );
         setPageMessage("");
+        // Real paging history just changed — pull the new entry into view.
+        void pagesQuery.refetch();
       } else {
         setPageStatus("Page request acknowledged.");
       }
@@ -488,6 +539,89 @@ function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void 
                   </div>
                 </section>
               )}
+
+              <section>
+                <div
+                  className="text-[10px] font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5"
+                  style={{ color: "var(--color-fg-muted)" }}
+                >
+                  <History className="w-3 h-3" /> Recent pages
+                  {pagesQuery.data?.count ? (
+                    <span className="opacity-60">({pagesQuery.data.count})</span>
+                  ) : null}
+                </div>
+                {pagesQuery.isLoading ? (
+                  <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+                    <Loader2 className="w-3 h-3 animate-spin inline mr-1" /> Loading history…
+                  </div>
+                ) : pagesQuery.isError ? (
+                  <div className="text-[11px]" style={{ color: "#fca5a5" }}>
+                    Failed to load page history.
+                  </div>
+                ) : !pagesQuery.data || pagesQuery.data.pages.length === 0 ? (
+                  <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+                    No pages recorded for this team yet.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    {pagesQuery.data.pages.map((p) => {
+                      const color = URGENCY_COLOR[p.urgency];
+                      const actorName = p.actor?.displayName ?? "unknown actor";
+                      const recipientName = p.recipient?.displayName ?? "unknown recipient";
+                      return (
+                        <div
+                          key={p.id}
+                          className="px-2.5 py-2 rounded-md text-[11px]"
+                          style={{
+                            backgroundColor: "var(--color-bg-elevated)",
+                            border: "1px solid var(--color-surface-border)",
+                            borderLeft: `3px solid ${color}`,
+                          }}
+                          title={new Date(p.createdAt).toLocaleString()}
+                        >
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+                              style={{
+                                color,
+                                backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+                                border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`,
+                              }}
+                            >
+                              {p.urgency}
+                            </span>
+                            <span className="font-semibold">{actorName}</span>
+                            <span style={{ color: "var(--color-fg-muted)" }}>→</span>
+                            <span className="font-semibold">{recipientName}</span>
+                            <span
+                              className="font-mono ml-auto"
+                              style={{ color: "var(--color-fg-muted)" }}
+                            >
+                              {formatPageTime(p.createdAt)}
+                            </span>
+                          </div>
+                          {p.message && (
+                            <div
+                              className="mt-1 italic"
+                              style={{ color: "var(--color-fg-secondary, var(--color-fg-primary))" }}
+                            >
+                              “{p.message}”
+                            </div>
+                          )}
+                          {!p.inAppDelivered && (
+                            <div
+                              className="mt-1 text-[10px] font-mono"
+                              style={{ color: "var(--color-fg-muted)" }}
+                            >
+                              in-app opt-out — external channels attempted
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
             </>
           )}
         </div>

@@ -19,10 +19,11 @@ import {
   notificationsTable,
   notificationPreferencesTable,
   appsRegistryTable,
+  teamPagesTable,
   PLATFORM_ROLE_HIERARCHY,
   type PlatformRole,
 } from "@szl-holdings/db";
-import { and, asc, eq } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import {
   sendSuccess,
   sendBadRequest,
@@ -256,6 +257,27 @@ router.post(
         actionUrl,
       });
 
+      // Append to the audit history so a third-party operator can see the
+      // page later in the team detail modal. Self-paged no-ops (handled
+      // above) never reach this point so they never pollute the history.
+      try {
+        await db.insert(teamPagesTable).values({
+          team,
+          actorId: actor.id,
+          recipientId: detail.onCall.id,
+          urgency,
+          message: note ? note : null,
+          inAppDelivered: inAppOn,
+        });
+      } catch (auditErr) {
+        // The page itself succeeded — do not fail the request because the
+        // audit insert blew up. Log loudly so it gets noticed.
+        logger.error(
+          { err: auditErr, team, onCallUserId: detail.onCall.id, actorId: actor.id },
+          "Failed to record team_pages audit row",
+        );
+      }
+
       logger.info(
         { team, onCallUserId: detail.onCall.id, actorId: actor.id, urgency, inAppDelivered: inAppOn },
         "Team paged",
@@ -270,6 +292,86 @@ router.post(
       });
     } catch (err) {
       return handleRouteError(res, err, `POST /teams/${req.params.team}/page`);
+    }
+  },
+);
+
+export interface TeamPageHistoryEntry {
+  id: number;
+  team: string;
+  urgency: "info" | "warning" | "critical";
+  message: string | null;
+  inAppDelivered: boolean;
+  createdAt: string;
+  actor: { id: number; displayName: string; email: string | null; avatarUrl: string | null } | null;
+  recipient: { id: number; displayName: string; email: string | null; avatarUrl: string | null } | null;
+}
+
+/**
+ * Recent paging history for a team — powers the audit timeline in the team
+ * detail modal so on-call can spot noisy alerts and confirm reach.
+ *
+ * Capped at the last 10 events (newest first). Self-paged no-ops are
+ * never written to the audit table so they never appear here.
+ */
+router.get(
+  "/teams/:team/pages",
+  authMiddleware({ required: false }),
+  perUserApiSlidingLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const team = decodeURIComponent((req.params as { team: string }).team).trim();
+      if (!team) return sendBadRequest(res, "team is required");
+
+      // Hand-rolled join: select the page rows then resolve actor/recipient
+      // user summaries in two batched lookups. Keeps drizzle types simple
+      // and avoids accidentally returning sensitive user columns.
+      const pageRows = await db
+        .select({
+          id: teamPagesTable.id,
+          team: teamPagesTable.team,
+          actorId: teamPagesTable.actorId,
+          recipientId: teamPagesTable.recipientId,
+          urgency: teamPagesTable.urgency,
+          message: teamPagesTable.message,
+          inAppDelivered: teamPagesTable.inAppDelivered,
+          createdAt: teamPagesTable.createdAt,
+        })
+        .from(teamPagesTable)
+        .where(eq(teamPagesTable.team, team))
+        .orderBy(desc(teamPagesTable.createdAt))
+        .limit(10);
+
+      const userIds = Array.from(
+        new Set(pageRows.flatMap((r) => [r.actorId, r.recipientId]).filter((n): n is number => n != null)),
+      );
+      const userRows = userIds.length
+        ? await db
+            .select({
+              id: usersTable.id,
+              displayName: usersTable.displayName,
+              email: usersTable.email,
+              avatarUrl: usersTable.avatarUrl,
+            })
+            .from(usersTable)
+            .where(inArray(usersTable.id, userIds))
+        : [];
+      const userById = new Map(userRows.map((u) => [u.id, u]));
+
+      const entries: TeamPageHistoryEntry[] = pageRows.map((r) => ({
+        id: r.id,
+        team: r.team,
+        urgency: r.urgency as "info" | "warning" | "critical",
+        message: r.message,
+        inAppDelivered: r.inAppDelivered,
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+        actor: userById.get(r.actorId) ?? null,
+        recipient: userById.get(r.recipientId) ?? null,
+      }));
+
+      return sendSuccess(res, { team, count: entries.length, pages: entries });
+    } catch (err) {
+      return handleRouteError(res, err, `GET /teams/${req.params.team}/pages`);
     }
   },
 );

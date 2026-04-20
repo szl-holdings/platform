@@ -30,14 +30,21 @@ interface NotifRow {
   title: string; message: string; actionUrl: string | null;
 }
 interface PrefRow { userId: number; inAppEnabled: boolean }
+interface TeamPageRow {
+  id: number; team: string; actorId: number; recipientId: number;
+  urgency: string; message: string | null; inAppDelivered: boolean;
+  createdAt: Date;
+}
 
 const store: {
   users: UserRow[];
   apps: AppRow[];
   notifs: NotifRow[];
   prefs: PrefRow[];
+  teamPages: TeamPageRow[];
   nextNotifId: number;
-} = { users: [], apps: [], notifs: [], prefs: [], nextNotifId: 1 };
+  nextTeamPageId: number;
+} = { users: [], apps: [], notifs: [], prefs: [], teamPages: [], nextNotifId: 1, nextTeamPageId: 1 };
 
 vi.mock("drizzle-orm", () => {
   const tag = (kind: string) => (..._args: unknown[]) => ({ _kind: kind, _args });
@@ -60,6 +67,7 @@ vi.mock("@szl-holdings/db", () => {
   const appsRegistryTable = makeTable("apps_registry");
   const notificationsTable = makeTable("notifications");
   const notificationPreferencesTable = makeTable("notification_preferences");
+  const teamPagesTable = makeTable("team_pages");
   const tableName = (t: unknown): string | null => {
     if (t && typeof t === "object") {
       const tn = (t as { _tableName?: unknown })._tableName;
@@ -92,6 +100,7 @@ vi.mock("@szl-holdings/db", () => {
     if (n === "apps_registry") return store.apps as unknown as Record<string, unknown>[];
     if (n === "notification_preferences") return store.prefs as unknown as Record<string, unknown>[];
     if (n === "notifications") return store.notifs as unknown as Record<string, unknown>[];
+    if (n === "team_pages") return store.teamPages as unknown as Record<string, unknown>[];
     return [];
   }
 
@@ -115,24 +124,44 @@ vi.mock("@szl-holdings/db", () => {
   }
 
   function makeInsertChain(table: unknown) {
-    let inserted: NotifRow | null = null;
+    let inserted: NotifRow | TeamPageRow | null = null;
     const chain: Record<string, unknown> = {
-      values(v: Partial<NotifRow>) {
+      values(v: Record<string, unknown>) {
         if (table === notificationsTable) {
-          inserted = {
+          const nv = v as Partial<NotifRow>;
+          const row: NotifRow = {
             id: store.nextNotifId++,
-            userId: v.userId!,
-            type: v.type ?? "info",
-            channel: v.channel ?? "in_app",
-            title: v.title ?? "",
-            message: v.message ?? "",
-            actionUrl: v.actionUrl ?? null,
+            userId: nv.userId!,
+            type: nv.type ?? "info",
+            channel: nv.channel ?? "in_app",
+            title: nv.title ?? "",
+            message: nv.message ?? "",
+            actionUrl: nv.actionUrl ?? null,
           };
-          store.notifs.push(inserted);
+          store.notifs.push(row);
+          inserted = row;
+        } else if (table === teamPagesTable) {
+          const pv = v as Partial<TeamPageRow>;
+          const row: TeamPageRow = {
+            id: store.nextTeamPageId++,
+            team: pv.team!,
+            actorId: pv.actorId!,
+            recipientId: pv.recipientId!,
+            urgency: pv.urgency ?? "warning",
+            message: pv.message ?? null,
+            inAppDelivered: pv.inAppDelivered ?? true,
+            createdAt: new Date(),
+          };
+          store.teamPages.push(row);
+          inserted = row;
         }
         return chain;
       },
       returning() { return Promise.resolve(inserted ? [inserted] : []); },
+      then(resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) {
+        // Allow `await db.insert(...).values(...)` without `.returning()`.
+        return Promise.resolve(inserted ? [inserted] : []).then(resolve, reject);
+      },
     };
     return chain;
   }
@@ -149,6 +178,7 @@ vi.mock("@szl-holdings/db", () => {
     appsRegistryTable,
     notificationsTable,
     notificationPreferencesTable,
+    teamPagesTable,
     PLATFORM_ROLE_HIERARCHY: {
       anonymous_visitor: 0, executive_viewer: 2, analyst: 3, operator: 5,
       ops_manager: 6, platform_admin: 8, founder_admin: 10,
@@ -207,7 +237,9 @@ beforeEach(() => {
   store.apps = [];
   store.notifs = [];
   store.prefs = [];
+  store.teamPages = [];
   store.nextNotifId = 1;
+  store.nextTeamPageId = 1;
   authUser = null;
 });
 
@@ -296,6 +328,53 @@ describe("POST /teams/:team/page", () => {
     expect(store.notifs).toHaveLength(0);
   });
 
+  it("appends a team_pages audit row capturing actor, recipient, urgency, and message", async () => {
+    authUser = { id: 9, email: "ops@x", displayName: "Ops Caller" };
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+    ];
+    const app = await makeApp();
+    const r = await request(app)
+      .post("/teams/Platform/page")
+      .send({ message: "Pulse is on fire", urgency: "critical" });
+    expect(r.status).toBe(200);
+    expect(store.teamPages).toHaveLength(1);
+    const page = store.teamPages[0]!;
+    expect(page.team).toBe("Platform");
+    expect(page.actorId).toBe(9);
+    expect(page.recipientId).toBe(1);
+    expect(page.urgency).toBe("critical");
+    expect(page.message).toBe("Pulse is on fire");
+    expect(page.inAppDelivered).toBe(true);
+  });
+
+  it("does NOT write an audit row when actor IS the on-call (self-paged no-op)", async () => {
+    authUser = { id: 1, email: "a@x", displayName: "Alice" };
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+    ];
+    const app = await makeApp();
+    const r = await request(app).post("/teams/Platform/page").send({ message: "self" });
+    expect(r.status).toBe(200);
+    expect(r.body.paged).toBe(false);
+    expect(store.teamPages).toHaveLength(0);
+  });
+
+  it("records inAppDelivered=false on the audit row when recipient opted out", async () => {
+    authUser = { id: 9, email: "ops@x", displayName: "Ops Caller" };
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+    ];
+    store.prefs = [{ userId: 1, inAppEnabled: false }];
+    const app = await makeApp();
+    const r = await request(app).post("/teams/Platform/page").send({ urgency: "info" });
+    expect(r.status).toBe(200);
+    expect(store.teamPages).toHaveLength(1);
+    expect(store.teamPages[0]!.inAppDelivered).toBe(false);
+    expect(store.teamPages[0]!.urgency).toBe("info");
+    expect(store.teamPages[0]!.message).toBeNull();
+  });
+
   it("skips in-app insert when recipient has opted out, but still returns paged=true", async () => {
     authUser = { id: 9, email: "ops@x", displayName: "Ops Caller" };
     store.users = [
@@ -308,5 +387,58 @@ describe("POST /teams/:team/page", () => {
     expect(r.body.paged).toBe(true);
     expect(r.body.inAppDelivered).toBe(false);
     expect(store.notifs).toHaveLength(0);
+  });
+});
+
+describe("GET /teams/:team/pages", () => {
+  it("returns the team's recent pages with actor and recipient summaries", async () => {
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+      { id: 9, displayName: "Ops Caller", email: "ops@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Other" },
+    ];
+    store.teamPages = [
+      {
+        id: 1, team: "Platform", actorId: 9, recipientId: 1,
+        urgency: "critical", message: "Pulse down", inAppDelivered: true,
+        createdAt: new Date("2026-04-19T10:00:00Z"),
+      },
+      {
+        id: 2, team: "Platform", actorId: 9, recipientId: 1,
+        urgency: "warning", message: null, inAppDelivered: false,
+        createdAt: new Date("2026-04-20T11:00:00Z"),
+      },
+      {
+        id: 3, team: "Other", actorId: 1, recipientId: 9,
+        urgency: "info", message: "fyi", inAppDelivered: true,
+        createdAt: new Date("2026-04-20T12:00:00Z"),
+      },
+    ];
+    store.nextTeamPageId = 4;
+    const app = await makeApp();
+    const r = await request(app).get("/teams/Platform/pages");
+    expect(r.status).toBe(200);
+    expect(r.body.team).toBe("Platform");
+    expect(r.body.count).toBe(2);
+    const ids = r.body.pages.map((p: { id: number }) => p.id).sort();
+    expect(ids).toEqual([1, 2]);
+    const byId = new Map<number, { actor: { displayName: string }; recipient: { displayName: string }; message: string | null; urgency: string; inAppDelivered: boolean }>(
+      r.body.pages.map((p: { id: number }) => [p.id, p]),
+    );
+    const p1 = byId.get(1)!;
+    expect(p1.actor.displayName).toBe("Ops Caller");
+    expect(p1.recipient.displayName).toBe("Alice");
+    expect(p1.urgency).toBe("critical");
+    expect(p1.message).toBe("Pulse down");
+    const p2 = byId.get(2)!;
+    expect(p2.message).toBeNull();
+    expect(p2.inAppDelivered).toBe(false);
+  });
+
+  it("returns an empty list for a team with no recorded pages", async () => {
+    const app = await makeApp();
+    const r = await request(app).get("/teams/Phantom/pages");
+    expect(r.status).toBe(200);
+    expect(r.body.count).toBe(0);
+    expect(r.body.pages).toEqual([]);
   });
 });
