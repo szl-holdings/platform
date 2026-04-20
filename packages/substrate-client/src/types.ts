@@ -42,6 +42,7 @@ export interface StageResultSummary {
   status: StageResultStatus;
   confidence?: number;
   error?: string;
+  output?: unknown;
 }
 
 export interface PipelineRunSummary {

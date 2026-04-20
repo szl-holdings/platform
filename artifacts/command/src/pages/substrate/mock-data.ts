@@ -20,6 +20,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
     policyProfile: "vessels-standard-v2",
     agentId: "vessels-agent-01",
     objectiveText: "Optimize voyage routing to reduce fuel consumption by 12% while maintaining ETA within 6-hour window for Q2 contracts.",
+    retriever: { source: "synthetic", adapterId: null },
     stages: [
       { id: "s1", name: "Signal Ingestion", kind: "signal", status: "completed", startedAt: new Date(now - 18 * 60_000).toISOString(), completedAt: new Date(now - 17 * 60_000).toISOString(), durationMs: 1200, confidence: 0.97, input: { aisData: "12 vessels", weather: "live" }, output: { signals: 47, anomalies: 3 }, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "span-001" },
       { id: "s2", name: "Context Assembly", kind: "context", status: "completed", startedAt: new Date(now - 17 * 60_000).toISOString(), completedAt: new Date(now - 15 * 60_000).toISOString(), durationMs: 2100, confidence: 0.93, input: null, output: { contextTokens: 8200, entitiesResolved: 12 }, redacted: false, policyResult: null, evidenceRefs: [{ refId: "ev-001", source: "AIS Feed", sourceType: "sensor", content: "Vessel PACIFIC DAWN at 28.4°N 142.1°E, speed 14.2kn, heading 087°, ETA deviation +3.2h", relevanceScore: 0.94, timestamp: new Date(now - 16 * 60_000).toISOString(), citations: [{ id: "c1", text: "Route efficiency index dropped 8.4% versus Q1 benchmark", confidence: 0.91 }] }], traceSpanId: "span-002" },
@@ -61,6 +62,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
     policyProfile: "terra-conservative-v1",
     agentId: "terra-agent-02",
     objectiveText: "Evaluate and recommend acquisition strategy for 3 distressed commercial properties in Phoenix metro, targeting 18% IRR.",
+    retriever: { source: "synthetic", adapterId: null },
     stages: [
       { id: "ts1", name: "Signal Ingestion", kind: "signal", status: "completed", startedAt: new Date(now - 7 * 60_000).toISOString(), completedAt: new Date(now - 6.5 * 60_000).toISOString(), durationMs: 900, confidence: 0.99, input: null, output: { properties: 3, signals: 28 }, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "tspan-001" },
       { id: "ts2", name: "Context Assembly", kind: "context", status: "completed", startedAt: new Date(now - 6.5 * 60_000).toISOString(), completedAt: new Date(now - 5 * 60_000).toISOString(), durationMs: 1800, confidence: 0.95, input: null, output: { contextTokens: 6100 }, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "tspan-002" },
@@ -93,6 +95,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
     policyProfile: "alloy-orchestrator-v3",
     agentId: "alloy-orchestrator",
     objectiveText: "Correlate cross-domain risk signals from Vessels, Terra, and PRISM to produce unified executive risk posture report.",
+    retriever: { source: "synthetic", adapterId: null },
     stages: [
       { id: "as1", name: "Signal Ingestion", kind: "signal", status: "completed", startedAt: new Date(now - 45 * 60_000).toISOString(), completedAt: new Date(now - 44 * 60_000).toISOString(), durationMs: 820, confidence: 0.99, input: null, output: { domains: 3, signals: 84 }, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "aspan-001" },
       { id: "as2", name: "Context Assembly", kind: "context", status: "completed", startedAt: new Date(now - 44 * 60_000).toISOString(), completedAt: new Date(now - 42 * 60_000).toISOString(), durationMs: 1600, confidence: 0.97, input: null, output: null, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "aspan-002" },
@@ -125,6 +128,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
     policyProfile: "prism-standard-v1",
     agentId: "prism-agent-01",
     objectiveText: "Review 47 vendor contracts for GDPR compliance gaps and generate remediation notices where material violations are identified.",
+    retriever: { source: "synthetic", adapterId: null },
     stages: [
       { id: "ps1", name: "Signal Ingestion", kind: "signal", status: "completed", startedAt: new Date(now - 2 * 3600_000).toISOString(), completedAt: new Date(now - 2 * 3600_000 + 900).toISOString(), durationMs: 900, confidence: 0.99, input: null, output: { contracts: 47 }, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "pspan-001" },
       { id: "ps2", name: "Context Assembly", kind: "context", status: "completed", startedAt: new Date(now - 2 * 3600_000 + 900).toISOString(), completedAt: new Date(now - 2 * 3600_000 + 3100).toISOString(), durationMs: 2200, confidence: 0.92, input: null, output: null, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "pspan-002" },
@@ -159,6 +163,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
     policyProfile: "lyte-standard-v1",
     agentId: "lyte-agent-03",
     objectiveText: "Predict and surface SLA breach risks across 24 active service contracts for Q2 review.",
+    retriever: { source: "synthetic", adapterId: null },
     stages: [
       { id: "ls1", name: "Signal Ingestion", kind: "signal", status: "completed", startedAt: new Date(now - 3 * 60_000).toISOString(), completedAt: new Date(now - 2.5 * 60_000).toISOString(), durationMs: 780, confidence: 0.99, input: null, output: { contracts: 24 }, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "lspan-001" },
       { id: "ls2", name: "Context Assembly", kind: "context", status: "running", startedAt: new Date(now - 2.5 * 60_000).toISOString(), completedAt: null, durationMs: null, confidence: null, input: null, output: null, redacted: false, policyResult: null, evidenceRefs: [], traceSpanId: "lspan-002" },

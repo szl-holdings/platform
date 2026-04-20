@@ -20,6 +20,7 @@ interface RunResult {
   finalConfidence: number;
   stageCount: number;
   stages: StageTrace[];
+  retriever: RetrieverSourceMeta | null;
 }
 
 type PipelineStageResult = {
@@ -28,6 +29,7 @@ type PipelineStageResult = {
   stageType?: string;
   status: string;
   confidence?: number;
+  output?: unknown;
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -37,8 +39,27 @@ const STATUS_COLOR: Record<string, string> = {
   "pending-approval": "text-amber-400",
 };
 
+type RetrieverSource = "adapter" | "synthetic" | "inline" | "dry-run";
+interface RetrieverSourceMeta { source: RetrieverSource; adapterId: string | null }
+
+const RETRIEVER_SOURCE_STYLE: Record<RetrieverSource, { label: string; cls: string; tip: string }> = {
+  adapter:    { label: "LIVE INDEX",    cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300", tip: "Backed by the configured live retriever adapter." },
+  synthetic:  { label: "SYNTHETIC",     cls: "border-amber-400/50 bg-amber-400/10 text-amber-200",       tip: "Demo-only synthetic corpus — not real evidence." },
+  inline:     { label: "INLINE CORPUS", cls: "border-sky-500/40 bg-sky-500/10 text-sky-300",             tip: "Caller supplied an inline corpus instead of querying an index." },
+  "dry-run":  { label: "DRY-RUN",       cls: "border-sky-500/40 bg-sky-500/10 text-sky-300",             tip: "Dry-run — no retrieval was performed." },
+};
+
+function extractRetrieverSource(stages: PipelineStageResult[]): RetrieverSourceMeta | null {
+  const r = stages.find((s) => s.stageType === "Retrieve");
+  if (!r || typeof r.output !== "object" || r.output === null) return null;
+  const out = r.output as { retrieverSource?: string; retrieverAdapterId?: string | null };
+  if (!out.retrieverSource || !(out.retrieverSource in RETRIEVER_SOURCE_STYLE)) return null;
+  return { source: out.retrieverSource as RetrieverSource, adapterId: out.retrieverAdapterId ?? null };
+}
+
 function parsePipelineRun(run: Record<string, unknown>): RunResult {
-  const stages: StageTrace[] = ((run["stageResults"] as PipelineStageResult[]) ?? []).map((sr) => ({
+  const rawStages = (run["stageResults"] as PipelineStageResult[]) ?? [];
+  const stages: StageTrace[] = rawStages.map((sr) => ({
     stageId: sr.stageId,
     stageName: sr.stageName ?? sr.stageId,
     stageType: sr.stageType ?? "Stage",
@@ -52,6 +73,7 @@ function parsePipelineRun(run: Record<string, unknown>): RunResult {
     finalConfidence: typeof run["finalConfidence"] === "number" ? run["finalConfidence"] : 0.87,
     stageCount: stages.length,
     stages,
+    retriever: extractRetrieverSource(rawStages),
   };
 }
 
@@ -180,6 +202,17 @@ export function SubstrateWorkflowPanel() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {result.retriever && (
+            <div className="flex items-center gap-2">
+              <span title={RETRIEVER_SOURCE_STYLE[result.retriever.source].tip}
+                className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[9px] font-mono font-bold ${RETRIEVER_SOURCE_STYLE[result.retriever.source].cls}`}>
+                RETRIEVAL · {RETRIEVER_SOURCE_STYLE[result.retriever.source].label}
+              </span>
+              {result.retriever.adapterId && (
+                <span className="text-[9px] font-mono text-slate-500">adapter:{result.retriever.adapterId}</span>
+              )}
             </div>
           )}
           <div className="flex items-center justify-between">

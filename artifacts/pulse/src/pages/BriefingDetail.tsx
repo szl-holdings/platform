@@ -6,6 +6,14 @@ import AgentBadge from "../components/AgentBadge";
 import ConfidenceChip from "../components/ConfidenceChip";
 import { PULSE_SYNTHESIZED_LABEL } from "../lib/claims";
 
+type RetrievalSource = "adapter" | "synthetic" | "inline" | "dry-run";
+const RETRIEVAL_STYLE: Record<RetrievalSource, { label: string; color: string; bg: string; border: string; tip: string }> = {
+  adapter:    { label: "RETRIEVAL · LIVE INDEX",    color: "#34d399", bg: "rgba(16,185,129,0.10)", border: "rgba(16,185,129,0.40)", tip: "This briefing was assembled from a live retriever adapter." },
+  synthetic:  { label: "RETRIEVAL · SYNTHETIC",     color: "#c8a84b", bg: "rgba(200,168,75,0.10)", border: "rgba(200,168,75,0.45)", tip: "This briefing was assembled from a synthesized fixture corpus, not live evidence." },
+  inline:     { label: "RETRIEVAL · INLINE CORPUS", color: "#7dd3fc", bg: "rgba(125,211,252,0.10)", border: "rgba(125,211,252,0.40)", tip: "This briefing was assembled from a caller-supplied inline corpus." },
+  "dry-run":  { label: "RETRIEVAL · DRY-RUN",       color: "#7dd3fc", bg: "rgba(125,211,252,0.10)", border: "rgba(125,211,252,0.40)", tip: "Dry-run brief — no retrieval was performed." },
+};
+
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/pulse";
 
 export default function BriefingDetail() {
@@ -68,6 +76,33 @@ export default function BriefingDetail() {
               {PULSE_SYNTHESIZED_LABEL}
             </span>
           )}
+          {(() => {
+            const src: RetrievalSource | null =
+              brief.retrievalSource ?? (isDemoMode() ? "synthetic" : null);
+            if (!src) return null;
+            const s = RETRIEVAL_STYLE[src];
+            return (
+              <span
+                className="font-mono"
+                title={s.tip}
+                style={{
+                  fontSize: "0.62rem",
+                  color: s.color,
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  padding: "1px 6px",
+                  background: s.bg,
+                  border: `1px solid ${s.border}`,
+                  borderRadius: 3,
+                }}
+              >
+                {s.label}
+                {brief.retrievalAdapterId && (
+                  <span style={{ marginLeft: 6, opacity: 0.7 }}>· {brief.retrievalAdapterId}</span>
+                )}
+              </span>
+            );
+          })()}
         </div>
         <h1 className="font-serif" style={{ fontSize: "1.5rem", fontWeight: 500, color: "var(--pulse-text)", lineHeight: 1.35, marginBottom: 10 }}>{brief.headline}</h1>
         <p className="font-serif" style={{ fontSize: "0.95rem", color: "var(--pulse-text-dim)", lineHeight: 1.6 }}>{brief.leadSentence}</p>

@@ -34,7 +34,12 @@ const syntheticExecutor: StageExecutorFn = async (stage: AnyStage, _input: unkno
         },
         confidence: 0.84,
       };
-    case "Retrieve":
+    case "Retrieve": {
+      // Surface the same retrieverSource shape the Python retrieval stage emits,
+      // so the operator UI can label dry-run / replay results as non-live evidence.
+      const retrieverAdapterId =
+        (stage as { retrieverAdapterId?: string }).retrieverAdapterId ?? null;
+      const retrieverSource = ctx.mode === "dry-run" ? "dry-run" : "synthetic";
       return {
         output: {
           synthetic: true,
@@ -43,9 +48,12 @@ const syntheticExecutor: StageExecutorFn = async (stage: AnyStage, _input: unkno
             { id: `doc-${stage.id}-2`, content: "Synthetic document B", relevanceScore: 0.77 },
           ],
           totalRetrieved: 2,
+          retrieverSource,
+          retrieverAdapterId,
         },
         confidence: 0.9,
       };
+    }
     case "ToolCall":
       return {
         output: { synthetic: true, stageId: stage.id, toolResult: "dry-run suppressed" },

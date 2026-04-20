@@ -34,7 +34,19 @@ import type {
   ApprovalVerdict,
   RunStage,
   Vertical,
+  RetrieverSource,
+  RetrieverSourceMeta,
 } from "./types";
+
+const RETRIEVER_SOURCES: RetrieverSource[] = ["adapter", "synthetic", "inline", "dry-run"];
+
+function extractRetrieverSource(stages: StageResultSummary[]): RetrieverSourceMeta | null {
+  const retrieve = stages.find((s) => s.stageType === "Retrieve");
+  if (!retrieve || typeof retrieve.output !== "object" || retrieve.output === null) return null;
+  const out = retrieve.output as { retrieverSource?: string; retrieverAdapterId?: string | null };
+  if (!out.retrieverSource || !RETRIEVER_SOURCES.includes(out.retrieverSource as RetrieverSource)) return null;
+  return { source: out.retrieverSource as RetrieverSource, adapterId: out.retrieverAdapterId ?? null };
+}
 
 export const GATEWAY_URL =
   (import.meta.env.VITE_SUBSTRATE_GATEWAY_URL as string | undefined) ??
@@ -80,7 +92,9 @@ function sdkStageToLocal(sr: StageResultSummary): RunStage {
     durationMs: null,
     confidence: sr.confidence ?? null,
     input: null,
-    output: null,
+    output: (sr.output && typeof sr.output === "object")
+      ? (sr.output as Record<string, unknown>)
+      : null,
     redacted: false,
     policyResult: null,
     evidenceRefs: [],
@@ -138,6 +152,8 @@ export function mapPipelineSummaryToRun(
     objectiveText:
       base?.objectiveText ??
       (typeof meta?.objective === "string" ? meta.objective : ""),
+    retriever:
+      extractRetrieverSource(summary.stageResults) ?? base?.retriever ?? null,
   };
 }
 

@@ -6,6 +6,13 @@ export type Perspective = "executive" | "operator" | "analyst" | "approver";
 export type ApprovalVerdict = "approved" | "rejected" | "escalated";
 export type StageStatus = "pending" | "running" | "completed" | "failed" | "skipped";
 
+export type RetrieverSource = "adapter" | "synthetic" | "inline" | "dry-run";
+
+export interface RetrieverSourceMeta {
+  source: RetrieverSource;
+  adapterId: string | null;
+}
+
 export interface RunStage {
   id: string;
   name: string;
@@ -104,6 +111,7 @@ export interface SubstrateRun {
   policyProfile: string;
   agentId: string;
   objectiveText: string;
+  retriever: RetrieverSourceMeta | null;
 }
 
 export interface CounterfactualInput {

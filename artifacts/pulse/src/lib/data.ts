@@ -56,6 +56,8 @@ export interface Briefing {
     dueBy: string;
   }>;
   generatedAt: string;
+  retrievalSource?: "adapter" | "synthetic" | "inline" | "dry-run";
+  retrievalAdapterId?: string | null;
 }
 
 export interface DissentRecord {

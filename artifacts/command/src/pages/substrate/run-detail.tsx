@@ -6,7 +6,7 @@ import {
   ChevronDown, ChevronRight, Activity, Layers, RotateCcw, Database,
 } from "lucide-react";
 import { formatAge } from "./layout";
-import type { RunStage, EvidenceRef, TraceSpan, RollbackCheckpoint, ApprovalEvent } from "./types";
+import type { RunStage, EvidenceRef, TraceSpan, RollbackCheckpoint, ApprovalEvent, RetrieverSource, RetrieverSourceMeta } from "./types";
 import { useRunDetail } from "./use-substrate";
 
 const ACCENT = "#22d3ee";
@@ -17,6 +17,29 @@ const STAGE_ICONS: Record<string, React.ElementType> = {
   simulation: GitBranch, policy: Shield, execution: Layers,
   proof: CheckCircle2, outcome: Activity, learning: RotateCcw,
 };
+
+const RETRIEVER_SOURCE_STYLE: Record<RetrieverSource, { label: string; color: string; bg: string; border: string; tip: string }> = {
+  adapter:    { label: "LIVE INDEX",    color: "#34d399", bg: "rgba(16,185,129,0.10)", border: "rgba(16,185,129,0.40)", tip: "Backed by the configured live retriever adapter." },
+  synthetic:  { label: "SYNTHETIC",     color: "#fbbf24", bg: "rgba(251,191,36,0.10)", border: "rgba(251,191,36,0.45)", tip: "Demo-only synthetic corpus — not real evidence." },
+  inline:     { label: "INLINE CORPUS", color: "#38bdf8", bg: "rgba(56,189,248,0.10)", border: "rgba(56,189,248,0.40)", tip: "Caller supplied an inline corpus instead of querying an index." },
+  "dry-run":  { label: "DRY-RUN",       color: "#38bdf8", bg: "rgba(56,189,248,0.10)", border: "rgba(56,189,248,0.40)", tip: "Dry-run — no retrieval was performed." },
+};
+
+function RetrievalBadge({ retriever }: { retriever: RetrieverSourceMeta }) {
+  const s = RETRIEVER_SOURCE_STYLE[retriever.source];
+  return (
+    <span
+      title={s.tip}
+      className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-mono font-bold"
+      style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
+    >
+      RETRIEVAL · {s.label}
+      {retriever.adapterId && (
+        <span className="ml-1 opacity-70">· {retriever.adapterId}</span>
+      )}
+    </span>
+  );
+}
 
 const STATUS_CONFIG: Record<string, { color: string; icon: React.ElementType }> = {
   completed: { color: "#22c55e", icon: CheckCircle2 },
@@ -85,6 +108,13 @@ function StageTimeline({ stages, selectedStage, onSelect }: { stages: RunStage[]
                 </div>
                 {isSelected && (
                   <div className="mt-2 space-y-2">
+                    {(() => {
+                      const out = stage.output as { retrieverSource?: string; retrieverAdapterId?: string | null } | null;
+                      if (!out || !out.retrieverSource) return null;
+                      const src = out.retrieverSource as RetrieverSource;
+                      if (!RETRIEVER_SOURCE_STYLE[src]) return null;
+                      return <RetrievalBadge retriever={{ source: src, adapterId: out.retrieverAdapterId ?? null }} />;
+                    })()}
                     {stage.policyResult && (
                       <div className="rounded p-2 text-[11px]" style={{ background: stage.policyResult.result === "pass" ? "#22c55e10" : "#ef444410", border: `1px solid ${stage.policyResult.result === "pass" ? "#22c55e30" : "#ef444430"}` }}>
                         <p className="font-medium mb-0.5" style={{ color: stage.policyResult.result === "pass" ? "#22c55e" : "#ef4444" }}>
@@ -296,6 +326,9 @@ export function RunDetail() {
         <div>
           <h1 className="text-xl font-semibold" style={{ color: "hsl(38,8%,92%)" }}>{run.workflow}</h1>
           <p className="text-xs font-mono mt-0.5" style={{ color: "hsl(214,7%,35%)" }}>{run.id} · {run.tenant}</p>
+          {run.retriever && (
+            <div className="mt-2"><RetrievalBadge retriever={run.retriever} /></div>
+          )}
           <p className="text-sm mt-2 max-w-2xl" style={{ color: "hsl(214,7%,55%)" }}>{run.objectiveText}</p>
         </div>
         <Link href={`${SUB}/counterfactual?runId=${run.id}`}>
