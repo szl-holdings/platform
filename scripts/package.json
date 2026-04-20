@@ -35,6 +35,8 @@
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",
+    "@workspace/aef-domain-profiles": "workspace:*",
+    "@workspace/aef-evals": "workspace:*",
     "@workspace/memory-fabric": "workspace:*"
   },
   "devDependencies": {

@@ -626,6 +626,12 @@ importers:
       '@types/pdfkit':
         specifier: ^0.17.5
         version: 0.17.5
+      '@workspace/aef-domain-profiles':
+        specifier: workspace:*
+        version: link:../../packages/aef-domain-profiles
+      '@workspace/aef-evals':
+        specifier: workspace:*
+        version: link:../../packages/aef-evals
       '@workspace/agents-core':
         specifier: workspace:*
         version: link:../../packages/agents-core
@@ -3249,6 +3255,9 @@ importers:
       '@workspace/aef-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
+      '@workspace/aef-domain-profiles':
+        specifier: workspace:*
+        version: link:../aef-domain-profiles
       '@workspace/aef-retrieval-core':
         specifier: workspace:*
         version: link:../aef-retrieval-core
@@ -4471,6 +4480,12 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../lib/db
+      '@workspace/aef-domain-profiles':
+        specifier: workspace:*
+        version: link:../packages/aef-domain-profiles
+      '@workspace/aef-evals':
+        specifier: workspace:*
+        version: link:../packages/aef-evals
       '@workspace/memory-fabric':
         specifier: workspace:*
         version: link:../packages/memory-fabric

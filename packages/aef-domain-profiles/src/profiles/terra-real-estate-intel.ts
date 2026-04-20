@@ -1,81 +1,92 @@
-import type { DomainProfile } from "../types.js";
+import type { DomainProfile } from "../schema.js";
 
 export const terraRealEstateIntel: DomainProfile = {
   profileId: "terra_real_estate_intel",
   version: "1.0.0",
-  domain: "real-estate",
-  displayName: "Terra — Real Estate Intelligence",
+  domain: "terra_real_estate_intel",
+  displayName: "Terra — NYC Real Estate Intelligence",
   description:
-    "Retrieval profile for the Terra Real Estate Intelligence platform. Optimized for property record search, parcel ID lookup, comparable transaction retrieval, zoning code search, and portfolio document analysis. Priority entity classes include parcel identifiers, assessor parcel numbers (APN), property addresses, and contract reference numbers.",
-  priorityTerms: [
-    "parcel",
-    "APN",
-    "property",
-    "address",
-    "zoning",
-    "title",
-    "deed",
-    "appraisal",
-    "comps",
-    "comparable",
-    "lease",
-    "mortgage",
-    "encumbrance",
-    "easement",
-    "cap rate",
-    "NOI",
-    "assessment",
-    "tax",
-    "permit",
-    "occupancy",
+    "Retrieval profile for Terra, the property intelligence platform focused on New York City distressed-asset markets. Optimised for property ownership records, tax lien filings, distress signal reports, deal pipeline entries, market comps, and borough-level analysis. NYC parcel IDs (BBL format: borough-block-lot) receive a 1.9× exact-match boost, guaranteeing that structured parcel identifiers surface the primary property record at position one. Property address matching is additionally boosted to recover documents written in vernacular address formats.",
+  status: "active",
+
+  chunkingStrategy: {
+    method: "semantic",
+    targetTokens: 448,
+    overlapTokens: 72,
+    respectBoundaries: true,
+    splitOnHeadings: true,
+    minChunkTokens: 80,
+  },
+
+  queryPromptTemplate: {
+    templateId: "terra_rei_query_v1",
+    version: "1.0.0",
+    template:
+      "You are a retrieval query encoder for Terra, a New York City property intelligence platform. " +
+      "Encode the following user question to retrieve property ownership records, distress signal reports, " +
+      "deal pipeline entries, tax lien documents, and market analysis. " +
+      "Preserve NYC parcel IDs (BBL), property addresses, owner names, and borough references exactly.\n\nQuery: {{query}}",
+    variables: ["query"],
+    description: "Query-side prompt for Terra real estate intelligence documents",
+  },
+
+  documentPromptTemplate: {
+    templateId: "terra_rei_doc_v1",
+    version: "1.0.0",
+    template:
+      "You are a document encoder for Terra's real estate intelligence corpus. " +
+      "Encode the following document so it can be retrieved by queries about property distress, ownership structures, " +
+      "deal stages, tax liens, market comps, and borough-level risk. " +
+      "Preserve all NYC parcel IDs, property addresses, and ownership entity names exactly.\n\nDocument: {{document}}",
+    variables: ["document"],
+    description: "Document-side prompt for Terra real estate corpus",
+  },
+
+  defaultMetadataFilters: {
+    domain: "terra",
+    entityTypes: ["property", "deal", "signal", "recommendation"],
+  },
+
+  exactMatchBoostTerms: [
+    "parcel ID",
+    "BBL",
+    "borough-block-lot",
+    "property address",
+    "tax lien",
+    "distress",
+    "lis pendens",
+    "deed in lieu",
+    "foreclosure",
+    "owner of record",
+    "co-op",
+    "condo board",
   ],
-  boostTerms: [
-    { term: "parcel ID", pattern: "\\d{3}-\\d{3}-\\d{3,}", multiplier: 2.0, fieldHint: "parcelId" },
-    { term: "APN", pattern: "apn\\s*[:#]?\\s*[\\d-]+", multiplier: 1.9, fieldHint: "apn" },
-    { term: "address", pattern: "\\d+\\s+[a-z]+\\s+(?:st|ave|blvd|dr|ln|rd|ct|pl|way)", multiplier: 1.6, fieldHint: "streetAddress" },
-    { term: "contract ID", pattern: "contract\\s*(?:id|#)?\\s*[a-z0-9\\-]+", multiplier: 1.7, fieldHint: "contractId" },
-    { term: "lease ID", pattern: "lease\\s*(?:id|#)?\\s*[a-z0-9\\-]+", multiplier: 1.6, fieldHint: "leaseId" },
-  ],
-  exactMatchFieldClasses: [
-    {
-      classId: "parcel-id",
-      description: "Assessor parcel number or parcel identifier (county recorder format)",
-      examplePatterns: ["123-456-789", "APN 123-456-789-0"],
-      metadataField: "parcelId",
-      boostMultiplier: 2.0,
-    },
-    {
-      classId: "property-address",
-      description: "Full street address of the property",
-      examplePatterns: ["1234 Oak Street, Dallas TX 75201"],
-      metadataField: "streetAddress",
-      boostMultiplier: 1.7,
-    },
-    {
-      classId: "contract-id",
-      description: "Purchase agreement or lease contract identifier",
-      examplePatterns: ["CONTRACT-2024-0781"],
-      metadataField: "contractId",
-      boostMultiplier: 1.7,
-    },
-    {
-      classId: "residence-vendor-id",
-      description: "Property management or vendor system identifier",
-      examplePatterns: ["RES-00441", "VEND-0012"],
-      metadataField: "vendorId",
-      boostMultiplier: 1.4,
-    },
-  ],
-  defaultMetadataFilters: {},
-  rerankEnabled: false,
+  boostRuleIds: ["parcel-id", "property-address"],
+
+  rerankEnabled: true,
+  topK: 12,
   maxCandidates: 100,
-  maxResults: 10,
-  denseWeight: 0.55,
-  keywordWeight: 0.45,
-  truncationPolicy: { strategy: "truncate", maxTokens: 512 },
-  promptContextPrefix:
-    "You are reviewing real estate intelligence. The following evidence contains property records, transaction data, and portfolio analysis:",
-  retentionDays: 1825,
-  provenanceRequired: false,
-  metadata: { vertical: "terra" },
+
+  scoreThresholds: {
+    minimumRelevanceScore: 0.38,
+    rerankDropBelowScore: 0.42,
+    exactMatchBoostFloor: 0.28,
+    highConfidenceThreshold: 0.77,
+  },
+
+  privacyLevel: "internal",
+  retentionRules: {
+    defaultRetentionDays: 365,
+    requestLogRetentionDays: 90,
+    evidenceRetentionDays: 730,
+    deletionRequired: false,
+    auditTrailRetentionDays: 1825,
+    encryptAtRest: true,
+    encryptInTransit: true,
+    allowCrossRegionReplication: false,
+  },
+
+  createdAt: "2026-04-20T00:00:00.000Z",
+  updatedAt: "2026-04-20T00:00:00.000Z",
+};
 };

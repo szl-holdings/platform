@@ -1,81 +1,89 @@
-import type { DomainProfile } from "../types.js";
+import type { DomainProfile } from "../schema.js";
 
 export const lyteGovernanceOps: DomainProfile = {
   profileId: "lyte_governance_ops",
   version: "1.0.0",
-  domain: "compliance",
-  displayName: "Lyte — Governance Operations",
+  domain: "lyte_governance_ops",
+  displayName: "Lyte — Governance & Operations Intelligence",
   description:
-    "Retrieval profile for the Lyte Decision Intelligence platform. Optimized for regulatory compliance retrieval, policy term search, control framework mapping, and audit evidence lookup. Priority entity classes include regulation codes, compliance control identifiers, framework designations (NIST, ISO 27001, SOC 2, PCI-DSS, GDPR), and sanction entities.",
-  priorityTerms: [
-    "compliance",
-    "regulation",
-    "control",
-    "framework",
-    "policy",
-    "audit",
-    "risk",
+    "Retrieval profile for Lyte's governed decision-intelligence surfaces. Optimised for documents describing approval chains, operational risk signals, ownership gaps, stalled workflows, and stakeholder engagement records. Exact-match boost is applied to opportunity IDs, project codes, approval chain IDs, and deliverable references so that structured identifiers always surface their primary document at the top of the result set.",
+  status: "active",
+
+  chunkingStrategy: {
+    method: "hybrid",
+    targetTokens: 480,
+    overlapTokens: 80,
+    respectBoundaries: true,
+    splitOnHeadings: true,
+    minChunkTokens: 96,
+  },
+
+  queryPromptTemplate: {
+    templateId: "lyte_gov_query_v1",
+    version: "1.0.0",
+    template:
+      "You are a retrieval query encoder for Lyte, a governed decision-intelligence platform. " +
+      "Encode the following user question to retrieve operational governance documents, approval chain records, " +
+      "risk signals, and stakeholder briefings. Preserve any identifiers such as opportunity codes, " +
+      "project references, or approval chain IDs verbatim.\n\nQuery: {{query}}",
+    variables: ["query"],
+    description: "Query-side prompt for Lyte governance and operations documents",
+  },
+
+  documentPromptTemplate: {
+    templateId: "lyte_gov_doc_v1",
+    version: "1.0.0",
+    template:
+      "You are a document encoder for Lyte's operational knowledge base. " +
+      "Encode the following document so it can be retrieved by queries about operational risk, " +
+      "governance events, approval chain status, stakeholder actions, and business outcomes. " +
+      "Preserve all identifiers and structured references exactly.\n\nDocument: {{document}}",
+    variables: ["document"],
+    description: "Document-side prompt for Lyte governance corpus",
+  },
+
+  defaultMetadataFilters: {
+    domain: "lyte",
+    entityTypes: ["opportunity", "project", "approval_chain", "stakeholder", "deliverable", "recommendation"],
+  },
+
+  exactMatchBoostTerms: [
+    "opportunity",
+    "approval chain",
+    "stakeholder",
+    "deliverable",
+    "project code",
+    "risk signal",
+    "ownership gap",
+    "stalled",
+    "escalation",
     "governance",
-    "NIST",
-    "ISO 27001",
-    "SOC 2",
-    "PCI-DSS",
-    "GDPR",
-    "CCPA",
-    "HIPAA",
-    "control objective",
-    "evidence",
-    "finding",
-    "remediation",
-    "attestation",
   ],
-  boostTerms: [
-    { term: "NIST", pattern: "nist\\s+(?:sp\\s+)?\\d{3}(?:-\\d+)?", multiplier: 1.7, fieldHint: "regulationCode" },
-    { term: "ISO 27001", pattern: "iso\\s*27001(?:\\s+clause\\s+\\d+)?", multiplier: 1.7, fieldHint: "regulationCode" },
-    { term: "SOC 2", pattern: "soc\\s*2(?:\\s+type\\s+[12])?", multiplier: 1.6, fieldHint: "regulationCode" },
-    { term: "control ID", pattern: "ctrl[-_]\\w+|control\\s+id\\s+\\w+", multiplier: 1.8, fieldHint: "controlId" },
-    { term: "finding", pattern: "finding\\s+(?:id\\s+)?\\w+", multiplier: 1.5, fieldHint: "findingId" },
-  ],
-  exactMatchFieldClasses: [
-    {
-      classId: "regulation-code",
-      description: "Regulatory framework or standard identifier",
-      examplePatterns: ["NIST SP 800-53", "ISO 27001", "SOC 2 Type II"],
-      metadataField: "regulationCode",
-      boostMultiplier: 1.7,
-    },
-    {
-      classId: "control-id",
-      description: "Compliance control unique identifier",
-      examplePatterns: ["AC-2", "CC6.1", "PCI Req 8.2"],
-      metadataField: "controlId",
-      boostMultiplier: 1.8,
-    },
-    {
-      classId: "finding-id",
-      description: "Audit finding or gap identifier",
-      examplePatterns: ["FINDING-2024-001"],
-      metadataField: "findingId",
-      boostMultiplier: 1.6,
-    },
-    {
-      classId: "sanctions-name",
-      description: "Sanctions list entity name",
-      examplePatterns: ["OFAC SDN entity"],
-      metadataField: "sdnEntity",
-      boostMultiplier: 2.0,
-    },
-  ],
-  defaultMetadataFilters: {},
+  boostRuleIds: ["entity-id", "custom"],
+
   rerankEnabled: true,
-  maxCandidates: 100,
-  maxResults: 12,
-  denseWeight: 0.6,
-  keywordWeight: 0.4,
-  truncationPolicy: { strategy: "truncate", maxTokens: 512, warnAtTokens: 480 },
-  promptContextPrefix:
-    "You are reviewing governance and compliance evidence. The following sources contain regulatory guidance, control documentation, and audit findings:",
-  retentionDays: 730,
-  provenanceRequired: true,
-  metadata: { vertical: "lyte" },
+  topK: 12,
+  maxCandidates: 80,
+
+  scoreThresholds: {
+    minimumRelevanceScore: 0.35,
+    rerankDropBelowScore: 0.40,
+    exactMatchBoostFloor: 0.25,
+    highConfidenceThreshold: 0.78,
+  },
+
+  privacyLevel: "internal",
+  retentionRules: {
+    defaultRetentionDays: 365,
+    requestLogRetentionDays: 90,
+    evidenceRetentionDays: 730,
+    deletionRequired: false,
+    auditTrailRetentionDays: 1825,
+    encryptAtRest: true,
+    encryptInTransit: true,
+    allowCrossRegionReplication: false,
+  },
+
+  createdAt: "2026-04-20T00:00:00.000Z",
+  updatedAt: "2026-04-20T00:00:00.000Z",
 };

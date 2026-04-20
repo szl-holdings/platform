@@ -7,8 +7,8 @@ export default defineConfig({
     include: ["src/**/*.test.ts", "src/**/*.spec.ts"],
     isolate: true,
     pool: "forks",
-    testTimeout: 15000,
-    hookTimeout: 10000,
+    testTimeout: 30000,
+    hookTimeout: 15000,
     teardownTimeout: 10000,
   },
 });

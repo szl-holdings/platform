@@ -1,4 +1,15 @@
-import type { DomainProfile, ProfileVersionRecord, RolloutState } from "./types.js";
+import type {
+  DomainProfile as LegacyDomainProfile,
+  ProfileVersionRecord,
+  RolloutState,
+} from "./types.js";
+import type { DomainProfile, AEFDomain } from "./schema.js";
+import { ALL_DOMAIN_PROFILES } from "./profiles/index.js";
+
+// ---------------------------------------------------------------------------
+// Legacy ProfileRegistry (HEAD API)
+// Supports activate / stageForTenants / rollback / resolve patterns.
+// ---------------------------------------------------------------------------
 
 export interface ProfileRegistryOptions {
   allowOverwrite?: boolean;
@@ -9,7 +20,7 @@ export class ProfileRegistry {
   private readonly rollout = new Map<string, RolloutState>();
 
   register(
-    profile: DomainProfile,
+    profile: LegacyDomainProfile,
     options: ProfileRegistryOptions = {},
   ): void {
     const { allowOverwrite = false } = options;
@@ -135,7 +146,7 @@ export class ProfileRegistry {
     return previousVersion;
   }
 
-  resolve(profileId: string, tenantId?: string): DomainProfile {
+  resolve(profileId: string, tenantId?: string): LegacyDomainProfile {
     const state = this.rollout.get(profileId);
     if (!state) {
       throw new Error(`Profile not found: ${profileId}`);
@@ -218,3 +229,225 @@ function compareVersions(a: string, b: string): number {
 }
 
 export const globalProfileRegistry = new ProfileRegistry();
+
+// ---------------------------------------------------------------------------
+// Phase 5 DomainProfileRegistry
+// Tenant-aware pointer model with rotate_profile_version + rollback.
+// ---------------------------------------------------------------------------
+
+export interface ProfileVersion {
+  profile: DomainProfile;
+  activatedAt: string;
+  activatedBy: string;
+  rotationReason?: string;
+}
+
+export interface TenantProfilePointer {
+  tenantId: string;
+  domain: AEFDomain;
+  activeProfileId: string;
+  activeVersion: string;
+  history: ProfileVersion[];
+  rollbackAvailable: boolean;
+}
+
+export interface RotateProfileOptions {
+  tenantId: string;
+  domain: AEFDomain;
+  targetProfileId: string;
+  targetVersion: string;
+  activatedBy: string;
+  rotationReason?: string;
+}
+
+export interface ProfileRegistrySnapshot {
+  profileCount: number;
+  domains: AEFDomain[];
+  profiles: Array<{
+    profileId: string;
+    domain: AEFDomain;
+    version: string;
+    status: DomainProfile["status"];
+  }>;
+  generatedAt: string;
+}
+
+/**
+ * AEF Domain Profile Registry.
+ *
+ * Maintains the versioned catalog of all six SZL domain profiles, tracks the
+ * active-profile pointer per tenant per domain, and supports deterministic
+ * rollback to the previous version. All mutations go through
+ * `rotate_profile_version` — direct pointer assignment is not permitted.
+ *
+ * This is the in-process registry; production deployments should front this
+ * with a durable store and publish rotation events to the orchestrator.
+ */
+export class DomainProfileRegistry {
+  private readonly profiles = new Map<string, DomainProfile>();
+  private readonly tenantPointers = new Map<string, TenantProfilePointer>();
+
+  constructor(initialProfiles: DomainProfile[] = ALL_DOMAIN_PROFILES) {
+    for (const profile of initialProfiles) {
+      this.registerProfile(profile);
+    }
+  }
+
+  registerProfile(profile: DomainProfile): void {
+    const key = this.profileKey(profile.profileId, profile.version);
+    this.profiles.set(key, Object.freeze({ ...profile }));
+  }
+
+  getProfile(profileId: string, version?: string): DomainProfile | undefined {
+    if (version) {
+      return this.profiles.get(this.profileKey(profileId, version));
+    }
+    const candidates = Array.from(this.profiles.values()).filter(
+      (p) => p.profileId === profileId && p.status !== "deprecated",
+    );
+    if (candidates.length === 0) return undefined;
+    candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
+    return candidates[0];
+  }
+
+  getProfileForDomain(domain: AEFDomain): DomainProfile | undefined {
+    const candidates = Array.from(this.profiles.values()).filter(
+      (p) => p.domain === domain && p.status === "active",
+    );
+    if (candidates.length === 0) return undefined;
+    candidates.sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
+    return candidates[0];
+  }
+
+  getActiveProfileForTenant(tenantId: string, domain: AEFDomain): DomainProfile | undefined {
+    const pointer = this.tenantPointers.get(this.tenantDomainKey(tenantId, domain));
+    if (!pointer) {
+      return this.getProfileForDomain(domain);
+    }
+    return this.getProfile(pointer.activeProfileId, pointer.activeVersion);
+  }
+
+  rotate_profile_version(opts: RotateProfileOptions): TenantProfilePointer {
+    const { tenantId, domain, targetProfileId, targetVersion, activatedBy, rotationReason } = opts;
+
+    const targetProfile = this.getProfile(targetProfileId, targetVersion);
+    if (!targetProfile) {
+      throw new Error(
+        `[DomainProfileRegistry] Profile not found: ${targetProfileId}@${targetVersion}`,
+      );
+    }
+    if (targetProfile.status === "deprecated") {
+      throw new Error(
+        `[DomainProfileRegistry] Cannot rotate to deprecated profile: ${targetProfileId}@${targetVersion}`,
+      );
+    }
+    if (targetProfile.domain !== domain) {
+      throw new Error(
+        `[DomainProfileRegistry] Domain mismatch: profile ${targetProfileId} belongs to domain '${targetProfile.domain}', cannot be rotated into pointer for domain '${domain}'`,
+      );
+    }
+
+    if (targetProfile.domain !== domain) {
+      throw new Error(
+        `[DomainProfileRegistry] Domain mismatch: profile '${targetProfileId}' belongs to '${targetProfile.domain}', not '${domain}'`,
+      );
+    }
+
+    const pointerKey = this.tenantDomainKey(tenantId, domain);
+    const existing = this.tenantPointers.get(pointerKey);
+
+    const historyEntry: ProfileVersion = {
+      profile: targetProfile,
+      activatedAt: new Date().toISOString(),
+      activatedBy,
+      rotationReason,
+    };
+
+    const newPointer: TenantProfilePointer = {
+      tenantId,
+      domain,
+      activeProfileId: targetProfileId,
+      activeVersion: targetVersion,
+      history: existing ? [...existing.history, historyEntry] : [historyEntry],
+      rollbackAvailable: existing != null,
+    };
+
+    this.tenantPointers.set(pointerKey, newPointer);
+    return newPointer;
+  }
+
+  rollback(tenantId: string, domain: AEFDomain, rolledBackBy: string): TenantProfilePointer {
+    const pointerKey = this.tenantDomainKey(tenantId, domain);
+    const existing = this.tenantPointers.get(pointerKey);
+
+    if (!existing || existing.history.length < 2) {
+      throw new Error(
+        `[DomainProfileRegistry] No previous version available for rollback: tenant=${tenantId} domain=${domain}`,
+      );
+    }
+
+    const history = [...existing.history];
+    history.pop();
+    const previous = history[history.length - 1]!;
+
+    const newPointer: TenantProfilePointer = {
+      tenantId,
+      domain,
+      activeProfileId: previous.profile.profileId,
+      activeVersion: previous.profile.version,
+      history,
+      rollbackAvailable: history.length >= 2,
+    };
+
+    this.tenantPointers.set(pointerKey, newPointer);
+    void rolledBackBy;
+    return newPointer;
+  }
+
+  deprecateProfile(profileId: string, version: string, successorProfileId?: string): void {
+    const key = this.profileKey(profileId, version);
+    const profile = this.profiles.get(key);
+    if (!profile) {
+      throw new Error(`[DomainProfileRegistry] Cannot deprecate unknown profile: ${key}`);
+    }
+    this.profiles.set(key, {
+      ...profile,
+      status: "deprecated",
+      deprecatedAt: new Date().toISOString(),
+      deprecationMessage: successorProfileId
+        ? `Superseded by ${successorProfileId}`
+        : "Deprecated",
+      successorProfileId,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  listProfiles(): DomainProfile[] {
+    return Array.from(this.profiles.values());
+  }
+
+  snapshot(): ProfileRegistrySnapshot {
+    const profiles = this.listProfiles();
+    return {
+      profileCount: profiles.length,
+      domains: [...new Set(profiles.map((p) => p.domain))] as AEFDomain[],
+      profiles: profiles.map((p) => ({
+        profileId: p.profileId,
+        domain: p.domain,
+        version: p.version,
+        status: p.status,
+      })),
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  private profileKey(profileId: string, version: string): string {
+    return `${profileId}@${version}`;
+  }
+
+  private tenantDomainKey(tenantId: string, domain: AEFDomain): string {
+    return `${tenantId}::${domain}`;
+  }
+}
+
+export const defaultProfileRegistry = new DomainProfileRegistry();

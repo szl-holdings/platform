@@ -1,91 +1,91 @@
-import type { DomainProfile } from "../types.js";
+import type { DomainProfile } from "../schema.js";
 
 export const prismLegalMatter: DomainProfile = {
   profileId: "prism_legal_matter",
   version: "1.0.0",
-  domain: "legal",
-  displayName: "PRISM Counsel — Legal Matter Intelligence",
+  domain: "prism_legal_matter",
+  displayName: "PRISM Counsel — Legal Matter Command",
   description:
-    "Retrieval profile for the PRISM Counsel Legal Matter Command platform. Optimized for legal document retrieval, docket search, case law lookup, contract analysis, and regulatory filing retrieval. Priority entity classes include docket numbers, case numbers, matter IDs, statute citations, and contract reference identifiers.",
-  priorityTerms: [
-    "matter",
-    "case",
+    "Retrieval profile for PRISM Counsel, the governed legal matter management platform. Optimised for matter briefs, filing obligation timelines, discovery logs, contract clauses, regulatory compliance filings, and court docket entries. Docket IDs and case numbers receive a 1.9× exact-match boost. Citation codes and regulation references receive a 1.7× boost, guaranteeing that every structured legal identifier surfaces its authoritative matter record at the head of the result set. All retrieval operations are subject to attorney-client privilege handling and must not cross matter boundaries.",
+  status: "active",
+
+  chunkingStrategy: {
+    method: "hybrid",
+    targetTokens: 512,
+    overlapTokens: 96,
+    respectBoundaries: true,
+    splitOnHeadings: true,
+    minChunkTokens: 128,
+  },
+
+  queryPromptTemplate: {
+    templateId: "prism_legal_query_v1",
+    version: "1.0.0",
+    template:
+      "You are a retrieval query encoder for PRISM Counsel, a governed legal matter management platform. " +
+      "Encode the following question to retrieve matter briefs, filing obligation records, discovery documents, " +
+      "contract clauses, and regulatory compliance filings. " +
+      "Preserve docket IDs, case numbers, citation codes, court names, and regulation identifiers exactly as written.\n\nQuery: {{query}}",
+    variables: ["query"],
+    description: "Query-side prompt for PRISM Counsel legal matter corpus",
+  },
+
+  documentPromptTemplate: {
+    templateId: "prism_legal_doc_v1",
+    version: "1.0.0",
+    template:
+      "You are a document encoder for PRISM Counsel's legal matter knowledge base. " +
+      "Encode the following document so it can be retrieved by queries about legal obligations, matter status, " +
+      "filing deadlines, contract risk, discovery timelines, regulatory requirements, and counsel coordination. " +
+      "Preserve all docket IDs, case numbers, citation codes, and court references exactly.\n\nDocument: {{document}}",
+    variables: ["document"],
+    description: "Document-side prompt for PRISM Counsel legal corpus",
+  },
+
+  defaultMetadataFilters: {
+    domain: "counsel",
+    entityTypes: ["matter", "obligation", "signal", "recommendation", "evidence"],
+  },
+
+  exactMatchBoostTerms: [
     "docket",
-    "court",
-    "filing",
-    "motion",
-    "pleading",
-    "brief",
-    "opinion",
-    "statute",
-    "regulation",
-    "contract",
-    "clause",
-    "exhibit",
-    "deposition",
-    "discovery",
-    "jurisdiction",
-    "defendant",
-    "plaintiff",
-    "counsel",
-    "precedent",
-    "holding",
+    "case number",
     "citation",
+    "filing deadline",
+    "discovery",
+    "obligation",
+    "regulatory",
+    "court of record",
+    "statute",
+    "summons",
+    "complaint",
+    "deposition",
   ],
-  boostTerms: [
-    { term: "docket ID", pattern: "\\d{1,2}[-:]\\d{2,5}[-:][a-z]{2,4}", multiplier: 1.9, fieldHint: "docketId" },
-    { term: "case number", pattern: "case\\s*(?:no\\.?|number)?\\s*[a-z0-9\\-]+", multiplier: 1.8, fieldHint: "caseNumber" },
-    { term: "matter ID", pattern: "matter[-_]\\w+|mtr[-_]\\w+", multiplier: 1.8, fieldHint: "matterId" },
-    { term: "statute citation", pattern: "\\d+\\s+u\\.s\\.c\\.\\s+§\\s*\\d+|\\d+\\s+cfr\\s+§\\s*\\d+", multiplier: 1.7, fieldHint: "statuteCitation" },
-    { term: "contract ID", pattern: "contract\\s*(?:id|#)?\\s*[a-z0-9\\-]+", multiplier: 1.6, fieldHint: "contractId" },
-  ],
-  exactMatchFieldClasses: [
-    {
-      classId: "docket-id",
-      description: "Federal or state court docket number",
-      examplePatterns: ["24-1234-CV", "3:24-cv-00123"],
-      metadataField: "docketId",
-      boostMultiplier: 1.9,
-    },
-    {
-      classId: "matter-id",
-      description: "Internal legal matter management identifier",
-      examplePatterns: ["MTR-2024-0041", "MATTER-CORP-001"],
-      metadataField: "matterId",
-      boostMultiplier: 1.8,
-    },
-    {
-      classId: "case-number",
-      description: "Court case reference number",
-      examplePatterns: ["Case No. 24-CV-01234"],
-      metadataField: "caseNumber",
-      boostMultiplier: 1.8,
-    },
-    {
-      classId: "statute-citation",
-      description: "Statutory or regulatory code citation",
-      examplePatterns: ["15 U.S.C. § 78j", "17 CFR § 240.10b-5"],
-      metadataField: "statuteCitation",
-      boostMultiplier: 1.7,
-    },
-    {
-      classId: "contract-id",
-      description: "Contract or agreement reference identifier",
-      examplePatterns: ["CONTRACT-2024-A001"],
-      metadataField: "contractId",
-      boostMultiplier: 1.6,
-    },
-  ],
-  defaultMetadataFilters: {},
+  boostRuleIds: ["docket-id", "case-number", "citation-code", "regulation-code"],
+
   rerankEnabled: true,
-  maxCandidates: 100,
-  maxResults: 12,
-  denseWeight: 0.6,
-  keywordWeight: 0.4,
-  truncationPolicy: { strategy: "truncate", maxTokens: 512, warnAtTokens: 480 },
-  promptContextPrefix:
-    "You are reviewing legal matter intelligence. The following evidence contains case documents, docket records, and regulatory filings:",
-  retentionDays: 2555,
-  provenanceRequired: true,
-  metadata: { vertical: "prism-counsel" },
+  topK: 10,
+  maxCandidates: 80,
+
+  scoreThresholds: {
+    minimumRelevanceScore: 0.45,
+    rerankDropBelowScore: 0.50,
+    exactMatchBoostFloor: 0.35,
+    highConfidenceThreshold: 0.85,
+  },
+
+  privacyLevel: "privileged",
+  retentionRules: {
+    defaultRetentionDays: 2555,
+    requestLogRetentionDays: 365,
+    evidenceRetentionDays: 3650,
+    deletionRequired: true,
+    auditTrailRetentionDays: 3650,
+    encryptAtRest: true,
+    encryptInTransit: true,
+    allowCrossRegionReplication: false,
+  },
+
+  createdAt: "2026-04-20T00:00:00.000Z",
+  updatedAt: "2026-04-20T00:00:00.000Z",
 };

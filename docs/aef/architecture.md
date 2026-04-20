@@ -1,251 +1,142 @@
-# Alloy Embedding Fabric (AEF) — Architecture
+# AEF Architecture
 
-## Overview
+> Updated in Phase 5 with finalised domain profiles, eval layer, and model registry.
 
-Alloy Embedding Fabric (AEF) is the evidence-first retrieval backbone for the SZL Holdings platform. It provides structured, auditable, policy-governed retrieval of dense-vector and keyword evidence across all SZL product surfaces (Lyte, Vessels, Terra, PRISM Counsel, Sentra, Pulse, Command).
+## System Overview
 
-AEF is composed of independently deployable, framework-agnostic packages. Each package has a single responsibility and communicates via typed contracts.
-
----
-
-## Module Map
-
-```
-packages/
-  aef-contracts          — Zod schemas + TypeScript types for all AEF API shapes
-  aef-retrieval-core     — Pure retrieval functions: fusion, boost, filter, citations
-  aef-evidence-ledger    — Append-only audit ledger (in-memory + filesystem dev adapters)
-  aef-policy-guard       — Rule evaluation, tenant boundary, retention, redaction
-
-services/
-  aef-gateway            — (Phase 3) HTTP API gateway: /embed, /rerank, /search, /ingest
-  aef-embed-worker       — (Phase 4) Dense embed worker; pluggable model backend
-  aef-rerank-worker      — (Phase 4) Cross-encoder rerank worker
-  aef-ingest-worker      — (Phase 4) Document ingest, chunking, indexing orchestrator
-
-packages/
-  aef-domain-profiles    — (Phase 5) Domain-specific retrieval profiles (maritime, legal, real-estate, cyber)
-  aef-evals              — (Phase 6) Retrieval eval harness; nDCG, recall, citation precision metrics
-```
-
----
-
-## Request Lifecycle
+The Alloy Embedding Fabric is structured as a layered retrieval pipeline. Requests enter through the API gateway, pass through the profile resolution and policy layers, proceed to the retrieval adapters, and return results with full provenance metadata.
 
 ```mermaid
-sequenceDiagram
-    participant Caller as SZL App (Lyte / Vessels / Terra / PRISM)
-    participant Gateway as aef-gateway
-    participant Guard as aef-policy-guard
-    participant Core as aef-retrieval-core
-    participant Dense as DenseAdapter (embed-worker)
-    participant KW as KeywordAdapter (pg-tsvector / Elasticsearch)
-    participant Reranker as RerankAdapter (rerank-worker)
-    participant Ledger as aef-evidence-ledger
-    participant Contracts as aef-contracts (type validation)
+graph TD
+    Client["Client / Agent"] -->|"Retrieval request + tenantId"| Gateway["API Gateway\n/v1/aef/*"]
+    Gateway --> ProfileResolver["Profile Resolver\naef-domain-profiles"]
+    ProfileResolver --> PolicyGuard["Policy Guard\naef-policy-guard"]
+    PolicyGuard --> Orchestrator["Retrieval Orchestrator\naef-retrieval-core"]
 
-    Caller->>Gateway: HybridSearchRequest (zod-validated)
-    Gateway->>Guard: enforce tenant boundary + policy rules
-    Guard-->>Gateway: PolicyDecision { allow, redactions }
-    Gateway->>Core: normalizeQuery(raw)
-    Core->>Dense: DenseAdapter.query(embedding)
-    Core->>KW: KeywordAdapter.query(terms)
-    Core->>Core: reciprocalRankFusion(denseHits, kwHits)
-    Core->>Core: applyExactMatchBoosts(fused, boostRules)
-    Core->>Core: applyMetadataFilter(boosted, filter)
-    Core->>Core: normalizeScores(filtered)
-    Core->>Reranker: RerankAdapter.rerank(query, candidates)
-    Core->>Core: assembleCitations(reranked)
-    Core-->>Gateway: HybridSearchResponse (ranked citations)
-    Gateway->>Ledger: append EvidenceEntry (full audit trail)
-    Gateway-->>Caller: HybridSearchResponse
+    Orchestrator --> DenseAdapter["Dense Adapter\n(embedding model)"]
+    Orchestrator --> KeywordAdapter["Keyword Adapter\n(BM25 / sparse)"]
+
+    DenseAdapter --> Fusion["Reciprocal Rank Fusion"]
+    KeywordAdapter --> Fusion
+
+    Fusion --> BoostEngine["Exact-Match Boost Engine"]
+    BoostEngine --> Reranker["Cross-Encoder Reranker\n(optional, per profile)"]
+    Reranker --> ScoreFilter["Score Filter\n(threshold enforcement)"]
+    ScoreFilter --> CitationAssembler["Citation Assembler"]
+    CitationAssembler --> EvidenceLedger["Evidence Ledger\n(append-only)"]
+    EvidenceLedger --> Response["Retrieval Response"]
+
+    ProfileResolver -.->|"active profile version"| ModelRegistry["Model Registry\nactive-profile pointer\nrotation / rollback"]
 ```
 
----
+## Data Flow
 
-## Evidence Model
+### 1. Request Ingestion
 
-Every retrieval operation appended to the ledger records:
+A retrieval request carries a tenant ID, a query string, and an optional profile override. If no override is provided, the profile resolver looks up the active profile for the tenant's domain using the model registry. The model registry returns the profile descriptor frozen at the active version — callers cannot bypass the version pointer.
 
-| Field | Description |
-|---|---|
-| `requestId` | Unique request identifier |
-| `tenantId` | Tenant scope |
-| `profileId` | Domain profile version used |
-| `chunkId` | Retrieved chunk identifier |
-| `sourceId` | Source document identifier |
-| `sourceUri` | Canonical URI of the source |
-| `title` | Document or section title |
-| `page` | Page number (if applicable) |
-| `section` | Section heading (if applicable) |
-| `denseScore` | Raw dense retrieval score |
-| `keywordScore` | Raw keyword retrieval score |
-| `fusedScore` | Reciprocal rank fusion score |
-| `boostApplied` | Whether an exact-match boost was applied |
-| `rerankerScore` | Cross-encoder rerank score (if reranked) |
-| `finalScore` | Score used for final ordering |
-| `policyDecision` | Structured allow/deny/redact from policy-guard |
-| `profileVersion` | Profile descriptor version |
-| `requestedAt` | ISO-8601 timestamp of request |
-| `completedAt` | ISO-8601 timestamp of response |
-| `operatorAnnotation` | Optional human annotation |
+### 2. Profile Application
 
----
+The resolved profile instructs the orchestrator on:
+- Which prompt templates to use for query and document encoding
+- Which exact-match boost rules apply
+- Which metadata filters to apply automatically
+- Whether the reranker should run
+- What `topK` and `maxCandidates` to request from each adapter
 
-## Multi-Backend Strategy
+### 3. Policy Evaluation
 
-AEF uses pluggable adapter interfaces defined in `aef-retrieval-core`:
+Before retrieval begins, the policy guard evaluates the request against:
+- Tenant boundary rules (allowedDomains, allowedProfiles in tenant identity)
+- Privacy level requirements
+- Redaction field configuration
 
-- **DenseAdapter** — wraps any vector store (pgvector, Qdrant, Weaviate, Pinecone). The embed-worker (Phase 4) handles model execution and exposes a consistent HTTP interface.
-- **KeywordAdapter** — wraps any inverted-index backend (PostgreSQL tsvector, Elasticsearch, OpenSearch). Swappable per-deployment.
-- **RerankAdapter** — wraps any cross-encoder service. Optional; retrieval-core proceeds without it if not configured.
+If the request fails any rule, the guard returns a `PolicyDecision` with `allow: false`. The orchestrator treats this as an unrecoverable error rather than a silent fallback.
 
-No adapter implementation is bundled in `aef-retrieval-core` — the package is pure functions only.
+### 4. Hybrid Retrieval
 
----
+The orchestrator dispatches the encoded query in parallel to the dense adapter and the keyword adapter. Dense results carry cosine similarity scores; keyword results carry BM25 scores. Both sets are normalised to [0, 1] before fusion.
 
-## Domain Profiles (Phase 5 preview)
+### 5. Reciprocal Rank Fusion
 
-Profiles customize retrieval behavior per SZL product domain:
+RRF combines the ranked lists from the dense and keyword adapters using a smoothed rank formula. The fusion weight is configured per profile — maritime and security domains weight keyword matching more heavily; advisory and legal domains weight dense embeddings more heavily.
 
-| Profile | Boost rules | Metadata filters | Prompt transform |
-|---|---|---|---|
-| `maritime` | IMO numbers, MMSI, vessel names | fleet, flag state, port | Vessels context prefix |
-| `legal` | Docket IDs, case numbers, citation codes | jurisdiction, court, date | PRISM Counsel context prefix |
-| `real-estate` | Parcel IDs, property addresses, APN | county, zip, asset class | Terra context prefix |
-| `cyber` | CVE IDs, incident IDs, actor names | severity, MITRE ATT&CK | Sentra context prefix |
-| `compliance` | Regulation codes, sanctions names, control IDs | framework, effective date | Lyte context prefix |
+### 6. Exact-Match Boost
 
----
+The boost engine scans each fused result against the profile's boost rule set. A query containing `IMO 9234567` will trigger the `imo-number` boost rule, applying a 2× score multiplier to the chunk that references that specific IMO number. Boost multipliers are deterministic — the same query always produces the same boost result for the same profile version.
 
-## Deployment Posture
+### 7. Reranking
 
-| Environment | Component | Hosting |
-|---|---|---|
-| Dev / Replit | All packages, in-memory adapters | Replit container (Reserved VM) |
-| Staging | aef-gateway, aef-ingest-worker | Replit Autoscale |
-| Staging | embed-worker (light model) | Replit Reserved VM |
-| Production control plane | aef-gateway, aef-policy-guard, aef-evidence-ledger | Replit Reserved VM |
-| Production embed/rerank | aef-embed-worker, aef-rerank-worker | External GPU container (fly.io / Modal) |
-| Production vector store | pgvector (Neon) or managed Qdrant | External managed service |
+When `rerankEnabled` is true in the profile, the top `maxCandidates` results are passed to a cross-encoder reranker. Results falling below `scoreThresholds.rerankDropBelowScore` are suppressed before the final set is assembled. Carlota Jo (private advisory) disables reranking by default due to the small corpus size and high precision requirements.
 
-The gateway and policy-guard run inside Replit's network boundary. Heavy model inference is offloaded to external GPU containers that communicate with the gateway over mTLS.
+### 8. Score Filtering
 
----
+The score filter applies `minimumRelevanceScore` as a final gate. Results below this threshold are dropped entirely — they do not appear in the citation assembler output.
 
-## Security and Privacy
+### 9. Citation Assembly
 
-- All retrieval requests pass through `aef-policy-guard` before results are returned. There are no silent fallbacks — policy violations produce structured `PolicyDecision` objects with explicit `allow: false`.
-- Tenant boundaries are enforced at both the gateway (request routing) and the retrieval-core (metadata filtering). Cross-tenant reads are rejected explicitly.
-- Redaction hooks allow PII fields to be stripped before evidence entries are returned to the caller or written to the ledger.
-- Retention controls are enforced by `aef-policy-guard` and applied per-tenant. The ledger's filesystem adapter respects retention overrides.
-- No model weights, embedding vectors, or raw document content are stored in the evidence ledger — only scored metadata and provenance.
+The citation assembler attaches provenance metadata to each retained result: chunk ID, source document reference, profile version, boost rules applied, policy decisions, and processing timestamp.
 
----
+### 10. Evidence Ledger
 
-## Integration Points into SZL Apps
+Before the response is returned to the client, the complete retrieval event is appended to the evidence ledger. The ledger record includes every chunk considered, every score, and every policy decision. This record is immutable.
 
-Each SZL app calls the AEF gateway's typed HTTP API (Phase 3). During Phase 2, apps may import `aef-contracts` directly for type-checking local retrieval stubs.
+## Domain Profiles
 
-| App | Primary AEF usage |
-|---|---|
-| Lyte | Compliance term search, regulation retrieval, policy Q&A |
-| Vessels | Maritime intelligence, fleet document search, sanctions screening |
-| Terra | Property document search, parcel ID lookup, comp retrieval |
-| PRISM Counsel | Legal document retrieval, docket search, case law |
-| Sentra | Threat intelligence, CVE lookup, incident correlation |
-| Pulse | Executive briefing source attribution |
-| Command | Cross-domain unified search |
+Six versioned profiles cover the entire SZL portfolio. Each is declared in `packages/aef-domain-profiles`.
 
----
-
-## Phase File Additions Plan
-
-### Phase 3 — REST API Gateway + Embed/Rerank Workers
-
-```
-services/aef-gateway/
-  package.json
-  tsconfig.json
-  src/
-    server.ts              — Hono/Express HTTP server, binds PORT
-    routes/
-      embed.ts             — POST /embed
-      rerank.ts            — POST /rerank
-      search.ts            — POST /search
-      ingest.ts            — POST /ingest
-      index-ops.ts         — POST /index/rebuild, POST /index/verify
-      evals.ts             — POST /evals/run
-      openai-compat.ts     — POST /v1/embeddings (OpenAI-compatible)
-    middleware/
-      auth.ts              — Tenant auth (API key / JWT)
-      request-id.ts        — Assigns requestId per request
-      policy.ts            — Injects aef-policy-guard
-    adapters/
-      dense-http.ts        — DenseAdapter wrapping embed-worker HTTP
-      keyword-pg.ts        — KeywordAdapter wrapping PostgreSQL tsvector
-      rerank-http.ts       — RerankAdapter wrapping rerank-worker HTTP
-
-services/aef-embed-worker/
-  package.json
-  src/
-    server.ts              — HTTP server for embed requests
-    model.ts               — Model loader (pluggable; stub in dev)
-
-services/aef-rerank-worker/
-  package.json
-  src/
-    server.ts              — HTTP server for rerank requests
-    model.ts               — Cross-encoder loader (pluggable; stub in dev)
+```mermaid
+graph LR
+    Profiles["Domain Profiles\naef-domain-profiles"] --> Lyte["lyte_governance_ops\nv1.0.0"]
+    Profiles --> Vessels["vessels_maritime_risk\nv1.0.0"]
+    Profiles --> Terra["terra_real_estate_intel\nv1.0.0"]
+    Profiles --> Aegis["aegis_security_incident\nv1.0.0"]
+    Profiles --> Prism["prism_legal_matter\nv1.0.0"]
+    Profiles --> Carlota["carlota_private_advisory\nv1.0.0"]
 ```
 
-### Phase 4 — Ingestion Orchestrator
+| Profile | Privacy Level | Rerank | Top-K | Exact-Match Anchors |
+|---|---|---|---|---|
+| lyte_governance_ops | internal | yes | 12 | approval chain IDs, opportunity codes |
+| vessels_maritime_risk | confidential | yes | 10 | IMO numbers, MMSI codes |
+| terra_real_estate_intel | internal | yes | 12 | NYC parcel IDs (BBL), property addresses |
+| aegis_security_incident | restricted | yes | 10 | CVE IDs, incident IDs, control IDs |
+| prism_legal_matter | privileged | yes | 10 | docket IDs, case numbers, citation codes |
+| carlota_private_advisory | privileged | no | 8 | engagement IDs, client reference codes |
 
-```
-services/aef-ingest-worker/
-  package.json
-  src/
-    server.ts              — HTTP server for ingest jobs
-    pipeline/
-      chunker.ts           — Document chunking strategies
-      embedder.ts          — Calls embed-worker for batch embedding
-      indexer.ts           — Writes vectors to vector store adapter
-      extractor.ts         — Metadata extraction per domain profile
-    adapters/
-      pgvector.ts          — pgvector upsert adapter
-      qdrant.ts            — Qdrant upsert adapter
-```
+## Model Registry
 
-### Phase 5 — Domain Profiles
-
-```
-packages/aef-domain-profiles/
-  package.json
-  src/
-    index.ts
-    maritime.ts            — Vessels domain profile
-    legal.ts               — PRISM Counsel domain profile
-    real-estate.ts         — Terra domain profile
-    cyber.ts               — Sentra domain profile
-    compliance.ts          — Lyte domain profile
-    registry.ts            — Profile registry and version management
+```mermaid
+stateDiagram-v2
+    [*] --> active: registerProfile
+    active --> active: rotate_profile_version
+    active --> deprecated: deprecateProfile
+    active --> active: rollback (restores previous)
+    deprecated --> [*]
 ```
 
-### Phase 6 — Evals
+The model registry tracks:
+- The active profile version per tenant per domain
+- The full rotation history (enabling rollback)
+- Deprecation flags with successor profile references
 
+## Eval and Benchmark Layer
+
+```mermaid
+graph LR
+    EvalHarness["Eval Harness\naef-evals"] --> GoldenFixtures["Golden Query Sets\n6 domains × 6 queries each"]
+    EvalHarness --> MockAdapter["Mock Corpus Adapter\n(CPU-only, no GPU)"]
+    EvalHarness --> MetricsEngine["Metrics\nrecall@k · nDCG · MRR · exact-match recovery"]
+    EvalHarness --> BenchScript["Bench Script\nscripts/aef-bench.ts"]
+    EvalHarness --> PostRoute["POST /v1/evals/run"]
 ```
-packages/aef-evals/
-  package.json
-  src/
-    index.ts
-    runner.ts              — Eval run orchestrator
-    metrics/
-      ndcg.ts              — nDCG@k
-      recall.ts            — Recall@k
-      citation-precision.ts — Citation precision scoring
-    datasets/
-      loader.ts            — Dataset loader (JSONL format)
-    reporters/
-      json.ts              — JSON report output
-      console.ts           — Human-readable console output
-```
+
+## Privacy and Tenant Isolation
+
+Tenant isolation is enforced at two layers:
+
+1. **Profile resolver** — the active profile for a tenant is resolved from the model registry using the tenant's registered `allowedProfiles`. If the requested profile is not in the allowed list, the resolver rejects the request before retrieval begins.
+
+2. **Policy guard** — the guard checks `allowedDomains` in the tenant identity and applies redaction rules before any result is returned to the caller.
+
+Cross-tenant chunk leakage is structurally impossible: the retrieval adapters receive the tenant ID as a mandatory filter parameter, and results containing metadata from other tenants are suppressed by the score filter's metadata validation step.

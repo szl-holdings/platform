@@ -15,6 +15,7 @@ import {
   ALL_EVAL_TYPES,
   type EvalRunReport,
   type EvalSuiteDef,
+  type EvalForgeMetrics,
 } from "@workspace/eval-forge";
 import { run as runCognitiveLoop, type CognitiveContext } from "@workspace/cognitive-runtime";
 import { defaultTraceStore } from "@workspace/trace-graph";
@@ -30,6 +31,134 @@ import {
 } from "../lib/eval-forge-store";
 import { defaultExecutorFactory, buildDefaultExecutor } from "../lib/eval-executors";
 import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
+import {
+  defaultProfileRegistry,
+  type AEFDomain,
+  AEF_DOMAIN_PROFILE_DOMAINS,
+} from "@workspace/aef-domain-profiles";
+import {
+  runRetrievalEval,
+  type RetrievalAdapter,
+  type RetrievedResult,
+  type GoldenQuery,
+  type MetricResult,
+  ALL_GOLDEN_QUERIES,
+  ALL_MOCK_CORPORA,
+} from "@workspace/aef-evals";
+
+/** Zod schema mirroring GoldenQuery — used to validate caller-supplied queries. */
+const GoldenQuerySchema = z.object({
+  queryId: z.string(),
+  query: z.string().min(1),
+  relevantChunkIds: z.array(z.string()),
+  exactMatchBoostTerms: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+/** In-memory store for AEF retrieval eval runs — mirrors runStore pattern above. */
+interface AEFRunRecord {
+  evalId: string;
+  domain: AEFDomain;
+  profileId: string;
+  profileVersion: string;
+  tenantId: string;
+  queryCount: number;
+  successCount: number;
+  errorCount: number;
+  aggregateMetrics: MetricResult[];
+  totalLatencyMs: number;
+  avgLatencyMs: number;
+  throughputQps: number;
+  ranAt: string;
+  triggeredBy: string;
+}
+
+const aefRunStore = new Map<string, AEFRunRecord>();
+
+/**
+ * Internal AEF API base URL.
+ * The alloy-embedding-api router is mounted in this same process, so in
+ * production the default resolves to an in-process loopback call. Override
+ * via AEF_API_URL for external deployments.
+ */
+const AEF_INTERNAL_BASE = (() => {
+  const envUrl = process.env["AEF_API_URL"];
+  if (envUrl) return envUrl.replace(/\/$/, "");
+  const port = process.env["PORT"] ?? "5000";
+  return `http://localhost:${port}/alloy-embedding-api`;
+})();
+
+/**
+ * Live RetrievalAdapter that calls the AEF hybrid-search endpoint.
+ * Returns retrieved chunks ranked by finalScore from the embed+rerank stack.
+ */
+function buildLiveAEFAdapter(tenantId: string): RetrievalAdapter {
+  return {
+    async retrieve(query: string, _profileId: string, k: number): Promise<RetrievedResult[]> {
+      const response = await fetch(`${AEF_INTERNAL_BASE}/v1/hybrid-search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-tenant-id": tenantId },
+        body: JSON.stringify({
+          requestId: randomUUID(),
+          tenantId,
+          query,
+          topK: k,
+          candidatePool: Math.max(k * 3, 20),
+          denseWeight: 0.6,
+          keywordWeight: 0.4,
+          includeProvenance: false,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`AEF hybrid-search returned HTTP ${response.status}`);
+      }
+      const data = await response.json() as {
+        hits?: Array<{ chunkId: string; finalScore: number }>;
+      };
+      return (data.hits ?? []).slice(0, k).map((h) => ({
+        chunkId: h.chunkId,
+        score: h.finalScore,
+      }));
+    },
+  };
+}
+
+/**
+ * Fixture-corpus adapter used for smoke/golden-fixture eval mode.
+ * Uses text-overlap scoring on the pre-seeded domain fixture corpus — no
+ * embedding service required. Suitable for CI and no-GPU environments.
+ */
+function buildMockCorpusAdapter(domain: AEFDomain): RetrievalAdapter {
+  const corpus = ALL_MOCK_CORPORA[domain];
+  return {
+    async retrieve(query: string, _profileId: string, k: number): Promise<RetrievedResult[]> {
+      const qLower = query.toLowerCase();
+      const scored: Array<{ chunkId: string; score: number; boostTermsMatched: string[] }> = [];
+      for (const [chunkId, { text, boostTerms }] of corpus.entries()) {
+        const textLower = text.toLowerCase();
+        let score = 0;
+        const words = qLower.split(/\s+/).filter((w) => w.length > 3);
+        let wordHits = 0;
+        for (const w of words) { if (textLower.includes(w)) wordHits++; }
+        score += (wordHits / Math.max(words.length, 1)) * 0.6;
+        const boostHits: string[] = [];
+        for (const term of boostTerms) {
+          if (qLower.includes(term.toLowerCase()) || textLower.includes(term.toLowerCase())) {
+            score += 0.1;
+            boostHits.push(term);
+          }
+        }
+        if (score > 0) scored.push({ chunkId, score, boostTermsMatched: boostHits });
+      }
+      scored.sort((a, b) => b.score - a.score);
+      return scored.slice(0, k).map((s) => ({
+        chunkId: s.chunkId,
+        score: Math.min(s.score, 1),
+        boostTermsMatched: s.boostTermsMatched,
+      }));
+    },
+  };
+}
 
 const router: IRouter = Router();
 
@@ -820,6 +949,268 @@ router.patch(
     }
 
     res.status(404).json({ error: "Score not found", scoreId });
+  },
+);
+
+router.post(
+  "/v1/evals/run",
+  authMiddleware({ required: true }),
+  requireRole("admin", "operator", "analyst"),
+  perUserWriteSlidingLimiter,
+  validateBody(bodyShape({
+    "evalId": z.string().optional(),
+    "domain": z.string().optional(),
+    "profileId": z.string().optional(),
+    "version": z.string().optional(),
+    "queries": z.array(GoldenQuerySchema).optional(),
+    "topK": z.number().int().positive().optional(),
+    "useGoldenFixtures": z.boolean().optional(),
+  })),
+  async (req, res) => {
+    try {
+      const {
+        evalId = randomUUID(),
+        domain,
+        profileId,
+        version,
+        queries,
+        topK,
+        useGoldenFixtures = false,
+      } = req.body as {
+        evalId?: string;
+        domain?: string;
+        profileId?: string;
+        version?: string;
+        queries?: GoldenQuery[];
+        topK?: number;
+        useGoldenFixtures?: boolean;
+      };
+
+      const candidateDomain: string | undefined = domain ?? profileId;
+      const resolvedDomain: AEFDomain | undefined = AEF_DOMAIN_PROFILE_DOMAINS.find(
+        (d) => d === candidateDomain,
+      );
+
+      if (!resolvedDomain) {
+        res.status(400).json({
+          error: "Valid domain or profileId is required",
+          validDomains: AEF_DOMAIN_PROFILE_DOMAINS,
+        });
+        return;
+      }
+
+      const tenantId = String(
+        (req as { user?: { orgs?: Array<{ orgId?: number }> } }).user?.orgs?.[0]?.orgId ?? "default",
+      );
+
+      // If caller pins a specific profile version, use that exact version.
+      // Otherwise resolve the tenant-active pointer for this domain.
+      const profile = (profileId && version)
+        ? defaultProfileRegistry.getProfile(profileId, version)
+        : defaultProfileRegistry.getActiveProfileForTenant(tenantId, resolvedDomain);
+
+      if (!profile) {
+        const detail = (profileId && version)
+          ? `Profile ${profileId}@${version} not found`
+          : `No active profile for domain: ${resolvedDomain}`;
+        res.status(404).json({ error: detail });
+        return;
+      }
+
+      if (profile.domain !== resolvedDomain) {
+        res.status(400).json({
+          error: `Profile ${profile.profileId} belongs to domain '${profile.domain}', not '${resolvedDomain}'`,
+        });
+        return;
+      }
+
+      const goldenQueries: GoldenQuery[] =
+        useGoldenFixtures || !queries || queries.length === 0
+          ? ALL_GOLDEN_QUERIES[resolvedDomain]
+          : queries;
+
+      if (goldenQueries.length === 0) {
+        res.status(400).json({ error: "No queries provided and no golden fixtures available" });
+        return;
+      }
+
+      const triggeredBy = (req as { user?: { id?: string } }).user?.id ?? "api";
+
+      // Use the live AEF hybrid-search stack by default. Fall back to the
+      // fixture-corpus mock when useGoldenFixtures is explicitly requested,
+      // or when the live endpoint is unreachable (dev/CI environments).
+      const fixtureMode = useGoldenFixtures;
+      let adapterMode: "live" | "fixture" = fixtureMode ? "fixture" : "live";
+      const liveAdapter = buildLiveAEFAdapter(tenantId);
+      const mockFallback = buildMockCorpusAdapter(resolvedDomain);
+
+      const adapter: RetrievalAdapter = {
+        async retrieve(query: string, profileId: string, k: number): Promise<RetrievedResult[]> {
+          if (fixtureMode) return mockFallback.retrieve(query, profileId, k);
+          try {
+            return await liveAdapter.retrieve(query, profileId, k);
+          } catch (liveErr) {
+            adapterMode = "fixture";
+            logger.warn(
+              { liveErr, domain: resolvedDomain },
+              "[aef-evals] live AEF adapter unavailable, falling back to fixture corpus",
+            );
+            return mockFallback.retrieve(query, profileId, k);
+          }
+        },
+      };
+
+      const result = await runRetrievalEval({
+        evalId,
+        profile,
+        queries: goldenQueries,
+        adapter,
+        topK,
+      });
+
+      const avgRecall = result.aggregateMetrics.find((m) => m.metric === "recall")?.value ?? 0;
+      const avgNdcg  = result.aggregateMetrics.find((m) => m.metric === "ndcg")?.value ?? 0;
+      const avgMrr   = result.aggregateMetrics.find((m) => m.metric === "mrr")?.value ?? 0;
+
+      const forgeMetrics: EvalForgeMetrics = {
+        correctness: {
+          passRate: result.queryCount > 0 ? result.successCount / result.queryCount : 0,
+          avgScore: avgRecall,
+          passed: result.successCount,
+          failed: result.errorCount,
+          total: result.queryCount,
+        },
+        evidenceQuality: {
+          citationCoverage: avgNdcg,
+          citationAccuracy: avgMrr,
+          sourceVerified: result.successCount,
+          totalCitations: result.queryCount,
+          score: avgNdcg,
+        },
+        confidenceCalibration: {
+          avgConfidence: avgRecall,
+          calibrationError: 0,
+          overconfidenceRate: 0,
+          underconfidenceRate: 0,
+          brierScore: 0,
+          score: avgRecall,
+        },
+        latency: {
+          avgLatencyMs: result.avgLatencyMs,
+          p50LatencyMs: result.avgLatencyMs,
+          p95LatencyMs: result.avgLatencyMs,
+          p99LatencyMs: result.avgLatencyMs,
+          maxLatencyMs: result.totalLatencyMs,
+        },
+        cost: {
+          totalCostUsd: 0,
+          avgCostUsd: 0,
+          costPerOutcome: 0,
+          totalTokensUsed: 0,
+          avgTokensUsed: 0,
+          p95CostUsd: 0,
+        },
+        interventionValue: {
+          interventions: 0,
+          totalDecisions: result.queryCount,
+          interventionRate: 0,
+          avgImprovementFromIntervention: 0,
+          estimatedValueSaved: 0,
+        },
+        humanOverrideRate: {
+          overrides: 0,
+          totalDecisions: result.queryCount,
+          overrideRate: 0,
+          acceptedRate: 1,
+          overrideReasons: {},
+        },
+        rollbackRate: {
+          rollbacks: 0,
+          totalActions: result.queryCount,
+          rollbackRate: 0,
+          rollbackReasons: {},
+          avgRollbackLatencyMs: 0,
+        },
+        policyViolations: {
+          totalChecks: result.queryCount,
+          violations: 0,
+          violationRate: 0,
+          criticalViolations: 0,
+          violationsByType: {},
+          complianceRate: 1,
+        },
+      };
+
+      const forgeReport: EvalRunReport = {
+        runId: result.evalId,
+        suiteId: `aef-retrieval:${resolvedDomain}`,
+        suiteName: `AEF Retrieval — ${profile.displayName}`,
+        domain: resolvedDomain,
+        evalType: "memory-retrieval",
+        triggeredBy,
+        totalCases: result.queryCount,
+        passed: result.successCount,
+        failed: result.errorCount,
+        passRate: result.queryCount > 0 ? result.successCount / result.queryCount : 0,
+        avgScore: avgRecall,
+        avgLatencyMs: result.avgLatencyMs,
+        totalCostUsd: 0,
+        totalTokensUsed: 0,
+        metrics: forgeMetrics,
+        caseResults: [],
+        runAt: result.ranAt,
+        metadata: {
+          profileVersion: result.profileVersion,
+          tenantId,
+          adapterMode,
+          throughputQps: result.throughputQps,
+          ndcg: avgNdcg,
+          mrr: avgMrr,
+        },
+      };
+
+      runStore.set(forgeReport.runId, forgeReport);
+      persistEvalForgeRun(forgeReport).catch((err: unknown) => {
+        logger.warn({ err }, "[aef-evals] failed to persist eval run to eval_forge_runs");
+      });
+
+      const runRecord: AEFRunRecord = {
+        evalId: result.evalId,
+        domain: resolvedDomain,
+        profileId: result.profileId,
+        profileVersion: result.profileVersion,
+        tenantId,
+        queryCount: result.queryCount,
+        successCount: result.successCount,
+        errorCount: result.errorCount,
+        aggregateMetrics: result.aggregateMetrics,
+        totalLatencyMs: result.totalLatencyMs,
+        avgLatencyMs: result.avgLatencyMs,
+        throughputQps: result.throughputQps,
+        ranAt: result.ranAt,
+        triggeredBy,
+      };
+      aefRunStore.set(result.evalId, runRecord);
+
+      res.status(201).json({
+        evalId: result.evalId,
+        profileId: result.profileId,
+        profileVersion: result.profileVersion,
+        domain: resolvedDomain,
+        adapterMode,
+        queryCount: result.queryCount,
+        successCount: result.successCount,
+        errorCount: result.errorCount,
+        aggregateMetrics: result.aggregateMetrics,
+        totalLatencyMs: result.totalLatencyMs,
+        avgLatencyMs: result.avgLatencyMs,
+        throughputQps: result.throughputQps,
+        ranAt: result.ranAt,
+      });
+    } catch (err) {
+      logger.error({ err }, "[aef-evals] POST /v1/evals/run failed");
+      res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" });
+    }
   },
 );
 

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — retrieval evaluation harness. Ships golden fixture sets for all six AEF verticals, metric implementations (nDCG@k, Recall@k, Precision@k, MRR), evidence-completeness checks, latency and throughput benchmarking, and JSON/console reporters.",
+  "description": "Alloy Embedding Fabric — retrieval evaluation harness with recall@k, nDCG, MRR, exact-match recovery, latency/throughput benchmarks, smoke tests, and hand-curated golden fixtures for the six SZL domain profiles.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,16 +14,25 @@
       "import": "./src/runner.ts"
     },
     "./metrics": {
-      "types": "./dist/metrics/index.d.ts",
-      "import": "./src/metrics/index.ts"
+      "types": "./dist/metrics.d.ts",
+      "import": "./src/metrics.ts"
+    },
+    "./harness": {
+      "types": "./dist/harness.d.ts",
+      "import": "./src/harness.ts"
     },
     "./fixtures": {
       "types": "./dist/fixtures/index.d.ts",
       "import": "./src/fixtures/index.ts"
+    },
+    "./smoke": {
+      "types": "./dist/smoke.d.ts",
+      "import": "./src/smoke.ts"
     }
   },
   "dependencies": {
     "@workspace/aef-contracts": "workspace:*",
+    "@workspace/aef-domain-profiles": "workspace:*",
     "@workspace/aef-retrieval-core": "workspace:*",
     "zod": "catalog:"
   },

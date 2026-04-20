@@ -1,87 +1,90 @@
-import type { DomainProfile } from "../types.js";
+import type { DomainProfile } from "../schema.js";
 
 export const carlotaPrivateAdvisory: DomainProfile = {
   profileId: "carlota_private_advisory",
   version: "1.0.0",
-  domain: "advisory",
+  domain: "carlota_private_advisory",
   displayName: "Carlota Jo — Private Advisory Intelligence",
   description:
-    "Retrieval profile for the Carlota Jo Consulting advisory platform. Optimized for private advisory document retrieval, engagement record search, client correspondence analysis, and strategic briefing lookup. Priority entity classes include engagement IDs, vendor identifiers, residency reference numbers, and compliance control designators relevant to advisory workflows.",
-  priorityTerms: [
+    "Retrieval profile for Carlota Jo, the private advisory brand delivering tailored support to principals who value discretion, precision, and calm execution. Optimised for client engagement records, strategy briefs, brand positioning documents, operational planning notes, and invoice histories. Privacy level is set to 'privileged' — the highest tier — and cross-region replication is explicitly prohibited. Engagement IDs and client reference codes receive exact-match boost. No document retrieved under this profile may be surfaced outside the requesting principal's own tenant boundary.",
+  status: "active",
+
+  chunkingStrategy: {
+    method: "semantic",
+    targetTokens: 400,
+    overlapTokens: 64,
+    respectBoundaries: true,
+    splitOnHeadings: false,
+    minChunkTokens: 80,
+  },
+
+  queryPromptTemplate: {
+    templateId: "carlota_advisory_query_v1",
+    version: "1.0.0",
+    template:
+      "You are a retrieval query encoder for Carlota Jo, a private advisory practice. " +
+      "Encode the following client question to retrieve engagement records, strategy documents, " +
+      "brand positioning briefs, and operational planning notes with full discretion. " +
+      "Preserve engagement IDs, client reference codes, and project names exactly as written.\n\nQuery: {{query}}",
+    variables: ["query"],
+    description: "Query-side prompt for Carlota Jo private advisory corpus",
+  },
+
+  documentPromptTemplate: {
+    templateId: "carlota_advisory_doc_v1",
+    version: "1.0.0",
+    template:
+      "You are a document encoder for Carlota Jo's private advisory knowledge base. " +
+      "Encode the following document so it can be retrieved by queries about client engagements, strategy outcomes, " +
+      "brand advisory deliverables, and operational planning records. " +
+      "Maintain complete discretion. Preserve all engagement IDs and client reference codes exactly.\n\nDocument: {{document}}",
+    variables: ["document"],
+    description: "Document-side prompt for Carlota Jo advisory corpus",
+  },
+
+  defaultMetadataFilters: {
+    domain: "carlota",
+    entityTypes: ["engagement", "signal", "recommendation", "evidence"],
+  },
+
+  exactMatchBoostTerms: [
     "engagement",
-    "advisory",
-    "client",
-    "recommendation",
-    "briefing",
-    "strategic",
+    "advisory brief",
+    "client reference",
+    "strategy",
+    "brand positioning",
+    "retainer",
+    "principal",
     "deliverable",
-    "scope",
-    "workstream",
-    "vendor",
-    "due diligence",
-    "assessment",
-    "roadmap",
-    "milestone",
-    "stakeholder",
-    "governance",
-    "risk",
-    "compliance",
-    "reporting",
+    "invoice",
+    "project milestone",
   ],
-  boostTerms: [
-    { term: "engagement ID", pattern: "eng[-_]\\w+|engagement[-_]\\w+", multiplier: 1.8, fieldHint: "engagementId" },
-    { term: "vendor ID", pattern: "vendor[-_]\\w+|vend[-_]\\d+", multiplier: 1.6, fieldHint: "vendorId" },
-    { term: "residence ID", pattern: "res[-_]\\d{4,}", multiplier: 1.5, fieldHint: "residenceId" },
-    { term: "control ID", pattern: "ctrl[-_]\\w+|control\\s+\\w+", multiplier: 1.6, fieldHint: "controlId" },
-    { term: "deliverable ID", pattern: "dlv[-_]\\w+|deliverable[-_]\\w+", multiplier: 1.5, fieldHint: "deliverableId" },
-  ],
-  exactMatchFieldClasses: [
-    {
-      classId: "engagement-id",
-      description: "Advisory engagement or project tracking identifier",
-      examplePatterns: ["ENG-2024-001", "ENGAGEMENT-Q1-2024"],
-      metadataField: "engagementId",
-      boostMultiplier: 1.8,
-    },
-    {
-      classId: "vendor-id",
-      description: "Vendor or supplier system identifier",
-      examplePatterns: ["VEND-0042", "VENDOR-CORP-007"],
-      metadataField: "vendorId",
-      boostMultiplier: 1.6,
-    },
-    {
-      classId: "residence-id",
-      description: "Residency or facility reference identifier",
-      examplePatterns: ["RES-10041"],
-      metadataField: "residenceId",
-      boostMultiplier: 1.5,
-    },
-    {
-      classId: "compliance-control-id",
-      description: "Compliance control identifier used in advisory engagements",
-      examplePatterns: ["CTRL-ACC-001", "CONTROL-GOV-044"],
-      metadataField: "controlId",
-      boostMultiplier: 1.6,
-    },
-    {
-      classId: "deliverable-id",
-      description: "Engagement deliverable or work product identifier",
-      examplePatterns: ["DLV-2024-0012"],
-      metadataField: "deliverableId",
-      boostMultiplier: 1.5,
-    },
-  ],
-  defaultMetadataFilters: {},
+  boostRuleIds: ["entity-id", "custom"],
+
   rerankEnabled: false,
-  maxCandidates: 80,
-  maxResults: 10,
-  denseWeight: 0.65,
-  keywordWeight: 0.35,
-  truncationPolicy: { strategy: "truncate", maxTokens: 512 },
-  promptContextPrefix:
-    "You are reviewing private advisory intelligence. The following evidence contains engagement documents, client briefs, and strategic recommendations:",
-  retentionDays: 1825,
-  provenanceRequired: false,
-  metadata: { vertical: "carlota-jo" },
+  topK: 8,
+  maxCandidates: 40,
+
+  scoreThresholds: {
+    minimumRelevanceScore: 0.50,
+    rerankDropBelowScore: 0.55,
+    exactMatchBoostFloor: 0.40,
+    highConfidenceThreshold: 0.88,
+  },
+
+  privacyLevel: "privileged",
+  retentionRules: {
+    defaultRetentionDays: 1095,
+    requestLogRetentionDays: 180,
+    evidenceRetentionDays: 2190,
+    deletionRequired: true,
+    auditTrailRetentionDays: 2555,
+    encryptAtRest: true,
+    encryptInTransit: true,
+    allowCrossRegionReplication: false,
+  },
+
+  createdAt: "2026-04-20T00:00:00.000Z",
+  updatedAt: "2026-04-20T00:00:00.000Z",
+};
 };

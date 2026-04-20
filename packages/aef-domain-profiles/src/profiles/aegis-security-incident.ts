@@ -1,92 +1,92 @@
-import type { DomainProfile } from "../types.js";
+import type { DomainProfile } from "../schema.js";
 
 export const aegisSecurityIncident: DomainProfile = {
   profileId: "aegis_security_incident",
   version: "1.0.0",
-  domain: "cyber",
-  displayName: "Aegis — Security Incident Intelligence",
+  domain: "aegis_security_incident",
+  displayName: "Aegis — Security Incident & Threat Intelligence",
   description:
-    "Retrieval profile for the Aegis Cyber Resilience Command platform. Optimized for threat intelligence retrieval, CVE lookup, incident correlation, MITRE ATT&CK technique search, and vulnerability assessment. Priority entity classes include CVE identifiers, incident IDs, hostname patterns, endpoint IDs, and threat-actor names.",
-  priorityTerms: [
+    "Retrieval profile for Aegis, the unified defense and intelligence command platform. Optimised for incident investigation timelines, threat indicator records, CVE advisories, MITRE ATT&CK technique mappings, MSP operational alerts, and cyber-asset exposure reports. CVE identifiers and incident IDs receive a 2× exact-match boost. Control IDs and compliance regulation codes receive a 1.8× boost, ensuring that structured security references surface their authoritative record without ambiguity.",
+  status: "active",
+
+  chunkingStrategy: {
+    method: "paragraph",
+    targetTokens: 384,
+    overlapTokens: 48,
+    respectBoundaries: true,
+    splitOnHeadings: true,
+    minChunkTokens: 64,
+  },
+
+  queryPromptTemplate: {
+    templateId: "aegis_sec_query_v1",
+    version: "1.0.0",
+    template:
+      "You are a retrieval query encoder for Aegis, a unified security operations and threat intelligence platform. " +
+      "Encode the following question to retrieve incident reports, threat indicator records, CVE advisories, " +
+      "MITRE ATT&CK mappings, control gap findings, and compliance audit results. " +
+      "Preserve CVE IDs, incident IDs, control IDs, MITRE technique IDs (e.g. T1078), and regulation codes exactly.\n\nQuery: {{query}}",
+    variables: ["query"],
+    description: "Query-side prompt for Aegis security incident and threat intelligence corpus",
+  },
+
+  documentPromptTemplate: {
+    templateId: "aegis_sec_doc_v1",
+    version: "1.0.0",
+    template:
+      "You are a document encoder for Aegis's security and threat intelligence knowledge base. " +
+      "Encode the following document so it can be retrieved by queries about threat actors, incident timelines, " +
+      "CVE exploitability, control effectiveness, compliance posture, and cyber-asset criticality. " +
+      "Preserve all CVE IDs, MITRE technique references, incident IDs, and regulation codes exactly.\n\nDocument: {{document}}",
+    variables: ["document"],
+    description: "Document-side prompt for Aegis security corpus",
+  },
+
+  defaultMetadataFilters: {
+    domain: "security",
+    entityTypes: ["incident", "threat", "cyber_asset", "control", "signal", "recommendation"],
+    tlpLevels: ["white", "green", "amber"],
+  },
+
+  exactMatchBoostTerms: [
     "CVE",
-    "vulnerability",
-    "incident",
-    "threat",
-    "actor",
-    "malware",
-    "ransomware",
-    "phishing",
-    "intrusion",
-    "lateral movement",
-    "C2",
-    "exfiltration",
+    "incident ID",
     "MITRE",
     "ATT&CK",
-    "IOC",
-    "indicator",
-    "TTP",
-    "CVSS",
-    "patch",
-    "exploit",
-    "zero-day",
-    "endpoint",
-    "hostname",
-    "IP address",
+    "control ID",
+    "regulation",
+    "CMMC",
+    "FedRAMP",
+    "critical severity",
+    "attack vector",
+    "lateral movement",
+    "ransomware",
   ],
-  boostTerms: [
-    { term: "CVE ID", pattern: "cve-\\d{4}-\\d{4,}", multiplier: 2.0, fieldHint: "cveId" },
-    { term: "incident ID", pattern: "inc[-_]\\d{4,}", multiplier: 1.8, fieldHint: "incidentId" },
-    { term: "MITRE technique", pattern: "t\\d{4}(?:\\.\\d{3})?", multiplier: 1.7, fieldHint: "mitreId" },
-    { term: "hostname", pattern: "[a-z0-9\\-]+\\.[a-z]{2,}", multiplier: 1.5, fieldHint: "hostname" },
-    { term: "endpoint ID", pattern: "ep[-_]\\d{4,}|endpoint[-_]\\w+", multiplier: 1.6, fieldHint: "endpointId" },
-  ],
-  exactMatchFieldClasses: [
-    {
-      classId: "cve-id",
-      description: "Common Vulnerabilities and Exposures identifier",
-      examplePatterns: ["CVE-2024-12345", "CVE-2023-44487"],
-      metadataField: "cveId",
-      boostMultiplier: 2.0,
-    },
-    {
-      classId: "incident-id",
-      description: "Security incident tracking identifier",
-      examplePatterns: ["INC-20240101", "INC_4521"],
-      metadataField: "incidentId",
-      boostMultiplier: 1.9,
-    },
-    {
-      classId: "mitre-technique",
-      description: "MITRE ATT&CK technique or sub-technique identifier",
-      examplePatterns: ["T1566", "T1566.001"],
-      metadataField: "mitreId",
-      boostMultiplier: 1.7,
-    },
-    {
-      classId: "hostname",
-      description: "Network hostname or FQDN",
-      examplePatterns: ["server01.corp.example.com"],
-      metadataField: "hostname",
-      boostMultiplier: 1.5,
-    },
-    {
-      classId: "endpoint-id",
-      description: "Endpoint management system device identifier",
-      examplePatterns: ["EP-00441", "ENDPOINT-LAPTOP-007"],
-      metadataField: "endpointId",
-      boostMultiplier: 1.6,
-    },
-  ],
-  defaultMetadataFilters: {},
+  boostRuleIds: ["cve-id", "incident-id", "control-id", "compliance-term", "regulation-code"],
+
   rerankEnabled: true,
-  maxCandidates: 200,
-  maxResults: 20,
-  denseWeight: 0.7,
-  keywordWeight: 0.3,
-  truncationPolicy: { strategy: "truncate", maxTokens: 512, warnAtTokens: 480 },
-  promptContextPrefix:
-    "You are reviewing cybersecurity intelligence. The following evidence contains threat indicators, vulnerability disclosures, and incident records:",
-  retentionDays: 365,
-  provenanceRequired: true,
-  metadata: { vertical: "aegis" },
+  topK: 10,
+  maxCandidates: 120,
+
+  scoreThresholds: {
+    minimumRelevanceScore: 0.42,
+    rerankDropBelowScore: 0.48,
+    exactMatchBoostFloor: 0.32,
+    highConfidenceThreshold: 0.82,
+  },
+
+  privacyLevel: "restricted",
+  retentionRules: {
+    defaultRetentionDays: 730,
+    requestLogRetentionDays: 365,
+    evidenceRetentionDays: 1825,
+    deletionRequired: false,
+    auditTrailRetentionDays: 2555,
+    encryptAtRest: true,
+    encryptInTransit: true,
+    allowCrossRegionReplication: false,
+  },
+
+  createdAt: "2026-04-20T00:00:00.000Z",
+  updatedAt: "2026-04-20T00:00:00.000Z",
 };
