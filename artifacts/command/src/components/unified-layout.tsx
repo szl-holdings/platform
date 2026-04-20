@@ -247,6 +247,74 @@ function NavItem({ href, label, icon: Icon, isActive, accent, badge, external }:
   );
 }
 
+function ConsolesOverviewBadge({ accent }: { accent: string }) {
+  const base = (import.meta.env.BASE_URL ?? "/command/").replace(/\/$/, "");
+  const apiUrl = (path: string) => `${base}/api${path}`;
+
+  const fetchJson = <T,>(url: string): Promise<T> =>
+    fetch(url, { credentials: "include" }).then((r) =>
+      r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
+    );
+
+  const evalsQuery = useQuery<{ recentRuns?: Array<{ regressionSeverity?: string }> }>({
+    queryKey: ["cognitive-overview-badge", "evals-summary"],
+    queryFn: () => fetchJson(apiUrl("/cognitive/evals/summary")),
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+    retry: 0,
+  });
+
+  const approvalsQuery = useQuery<{ data?: unknown[]; meta?: { total?: number } }>({
+    queryKey: ["cognitive-overview-badge", "approvals-pending"],
+    queryFn: () => fetchJson(apiUrl("/approvals?status=pending&limit=10")),
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+    retry: 0,
+  });
+
+  const tracesQuery = useQuery<{ data?: Array<{ status?: string; errors?: unknown[] }> }>({
+    queryKey: ["cognitive-overview-badge", "traces-recent"],
+    queryFn: () => fetchJson(apiUrl("/cognitive/traces?limit=10")),
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+    retry: 0,
+  });
+
+  const regressions = (evalsQuery.data?.recentRuns ?? []).filter(
+    (r) => r.regressionSeverity && r.regressionSeverity !== "none",
+  ).length;
+  const approvals = approvalsQuery.data?.meta?.total ?? approvalsQuery.data?.data?.length ?? 0;
+  const flagged = (tracesQuery.data?.data ?? []).filter(
+    (t) => t.status === "flagged" || (t.errors && t.errors.length > 0),
+  ).length;
+
+  const total = regressions + approvals + flagged;
+  if (!total) return null;
+
+  const titleParts: string[] = [];
+  if (approvals) titleParts.push(`${approvals} pending policy approval${approvals === 1 ? "" : "s"}`);
+  if (regressions) titleParts.push(`${regressions} active regression${regressions === 1 ? "" : "s"}`);
+  if (flagged) titleParts.push(`${flagged} flagged trace${flagged === 1 ? "" : "s"}`);
+
+  return (
+    <span
+      className="text-[8px] font-mono font-bold px-1 rounded shrink-0"
+      style={{
+        color: accent,
+        background: `${accent}1a`,
+        border: `1px solid ${accent}40`,
+        minWidth: 14,
+        textAlign: "center",
+        lineHeight: "13px",
+      }}
+      data-testid="consoles-overview-badge"
+      title={titleParts.join(" · ")}
+    >
+      {total > 99 ? "99+" : total}
+    </span>
+  );
+}
+
 function PendingApprovalsBadge({ accent }: { accent: string }) {
   const { data } = useQuery<{ data?: unknown[]; meta?: { total?: number } }>({
     queryKey: ["guardian", "actions-pending-count"],
@@ -577,7 +645,9 @@ function UnifiedLayoutInner({ children, mode, onModeChange }: {
                     : location === item.href;
                 const badge = item.href === "/operations/policy-approvals"
                   ? <PendingApprovalsBadge accent={accent} />
-                  : undefined;
+                  : item.href === "/cognitive/overview"
+                    ? <ConsolesOverviewBadge accent={accent} />
+                    : undefined;
                 return (
                   <NavItem
                     key={item.href}
