@@ -96,7 +96,11 @@ class TestRetrievalReplay:
         assert result["documents"] == []
 
     @pytest.mark.asyncio
-    async def test_counterfactual_runs_like_live(self):
+    async def test_counterfactual_runs_like_live(self, monkeypatch):
+        # Live mode requires either a configured retrieverAdapterId or the
+        # explicit dev opt-in; this test exercises the synthetic determinism
+        # path so we enable the opt-in for the duration of the test.
+        monkeypatch.setenv("SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC", "1")
         live_claim = _claim("retrieval", {"query": self.QUERY, "topK": 3}, mode="live")
         cf_claim = _claim("retrieval", {"query": self.QUERY, "topK": 3}, mode="counterfactual")
         live_res = await retrieval_execute(live_claim)

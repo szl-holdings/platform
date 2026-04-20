@@ -69,6 +69,38 @@ const heavyRetrieval = Retrieve({
 The `stageKind` OTel tag (or the stageType itself) is used by the worker to
 select the correct handler from `STAGE_REGISTRY`.
 
+### Retriever adapters (real index)
+
+`retrieverAdapterId` resolves to a registered backend in
+`worker/adapters/retriever.py` (mirrors the
+`packages/nvidia-adapters/src/nim-endpoint.ts` pattern). Each adapter has
+a `baseUrl` (overridable via `baseUrlEnvVar`), an `apiKeyEnvVar`, and a
+`queryPath`. The retrieval stage POSTs:
+
+```http
+POST {baseUrl}{queryPath}
+Authorization: Bearer ${apiKey}
+
+{ "query": "...", "topK": 20, "minRelevanceScore": 0.4, "filters": {} }
+```
+
+and expects `{ "documents": [{ "id", "content", "relevanceScore", "source", "metadata" }, ...] }`.
+
+Predefined adapter ids: `lyte-metrics-store`, `lyte-retriever`,
+`signal-retriever`. Register more with
+`retriever_adapter_manager.register(RetrieverAdapterConfig(...))`.
+
+**Live-mode contract:**
+
+- If a `retrieverAdapterId` is configured and the endpoint responds, those
+  documents become the corpus.
+- If the adapter is unavailable (unknown id, missing API key, HTTP error)
+  the stage **fails closed** — it does not silently fabricate synthetic
+  documents into Opportunity Audit / Executive Brief evidence chains.
+- Synthetic-corpus fallback runs only in `dry-run` / `replay` /
+  `counterfactual` modes, or when an operator sets
+  `SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC=1` for local development.
+
 ### Stage kinds → handlers
 
 | `stageKind` (or `stageType`)        | Handler module          | Used by             |
