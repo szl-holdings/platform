@@ -67,6 +67,13 @@ import {
 import { providerCircuitBreaker } from "../lib/ai-gateway";
 import { logger } from "../lib/logger";
 import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import {
+  traceListQuerySchema,
+  traceStatusPatchSchema,
+  reviewDecisionBodySchema,
+  reviewQueueListQuerySchema,
+  traceCapturBodySchema,
+} from "@szl-holdings/contracts/ai";
 
 const router: IRouter = Router();
 
@@ -180,7 +187,7 @@ router.get(
   "/ai/ops/traces",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  validateQuery(listQuerySchema),
+  validateQuery(traceListQuerySchema),
   async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
@@ -241,7 +248,7 @@ router.post(
   "/ai/ops/traces/capture",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(traceCapturBodySchema),
   (req, res) => {
     try {
       const input = req.body as Record<string, unknown>;
@@ -296,7 +303,7 @@ router.patch(
   "/ai/ops/traces/:traceId/status",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(traceStatusPatchSchema),
   async (req, res) => {
     try {
       const body = req.body as { status?: TraceStatus; evalScore?: number; evalPassed?: boolean };
@@ -360,7 +367,7 @@ router.get(
   "/ai/ops/review-queue",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  validateQuery(listQuerySchema),
+  validateQuery(reviewQueueListQuerySchema),
   async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
@@ -457,7 +464,7 @@ router.patch(
   "/ai/ops/review-queue/:reviewId/decision",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(reviewDecisionBodySchema),
   async (req, res) => {
     try {
       const user = req.user;

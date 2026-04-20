@@ -11,6 +11,7 @@ import { register as registerGrowth } from "./growth.js";
 import { register as registerFunnel } from "./funnel.js";
 import { register as registerPipelineDeals } from "./pipeline-deals.js";
 import { register as registerAppsRegistry } from "./apps-registry.js";
+import { register as registerObservability } from "./observability.js";
 
 const adminRouter: IRouter = Router();
 
@@ -28,6 +29,7 @@ registerGrowth(adminRouter);
 registerFunnel(adminRouter);
 registerPipelineDeals(adminRouter);
 registerAppsRegistry(adminRouter);
+registerObservability(adminRouter);
 
 export { integrationActivityLog, type IntegrationActivity };
 export default adminRouter;

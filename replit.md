@@ -23,6 +23,18 @@ Do not make changes to the file `Y`.
 - **Duplicate package names resolved:** `lib/action-engine`, `lib/decision-engine`, `lib/policy-engine`, `lib/domain-claims` renamed to `@szl-holdings/lib-*` variants so turbo's package graph is valid
 - **Script normalization:** All 97 workspace packages (packages/*, lib/*, artifacts/*) now expose `lint`, `lint:ci`, `format`, `typecheck`, `test:watch` scripts where applicable
 
+## Platform Modernization Phase 2 (Task #2382)
+- **`packages/env`** (`@szl-holdings/env`): Single typed env loader — `parseEnv()`, `getEnv()`, typed `Env`. ~150 env vars validated with Zod. `artifacts/api-server/src/lib/env-config.ts` now delegates to `getEnv()`.
+- **`packages/contracts`** (`@szl-holdings/contracts`): Zod-validated request/response schemas for all API boundaries (auth, alloy, ai, webhooks, admin, common). TS types inferred from schemas — never written in parallel.
+- **`packages/schemas`** (`@szl-holdings/schemas`): Domain entity schemas (entities, alloy, vessels, terra, firestorm, ai) for queue payloads, DB-adjacent parsing, and LLM structured output.
+- **`packages/otel`** (`@szl-holdings/otel`): Wraps `@szl-holdings/observability` with `startSpan`, `toolCallSpan`, `dbSpan`, `httpOutboundSpan`, `jobSpan`, correlation helpers, and Drizzle instrumentation.
+- **`packages/db-schema`** / **`packages/db-repository`** / **`packages/db-migrations`**: Facade layer over `@szl-holdings/db`. Domain-namespaced re-exports, typed repository classes (auth/alloy/audit/vessels/terra/firestorm), and migration status helper.
+- **Contract wiring in api-server:** 5 routes in `ai-ops-dashboard.ts` replaced `jsonObjectBodySchema`/`listQuerySchema` with typed schemas from `@szl-holdings/contracts/ai` (`traceListQuerySchema`, `traceCapturBodySchema`, `traceStatusPatchSchema`, `reviewQueueListQuerySchema`, `reviewDecisionBodySchema`).
+- **Observability admin panel** (`GET /api/admin/observability`): New route `artifacts/api-server/src/routes/admin/observability.ts`. Accepts `?window=1h|6h|24h|7d`. Returns HTTP p50/p95 latency, job stats (pending/running/failed/completed/retryCount), agent tool success rate, top error hotspots.
+- **Biome boundary rules** (`biome.json`): `style.noRestrictedImports` added — enforces cross-artifact import prohibition.
+- **`scripts/check-package-boundaries.ts`**: Standalone boundary check script; exits non-zero on violations. Run via `pnpm check-boundaries`. Checks: artifact→artifact cross-imports, lib/packages→artifacts imports.
+- **pnpm `.npmrc`:** Added `public-hoist-pattern[]=zod` to ensure zod is resolvable from source-only workspace packages.
+
 ## System Architecture
 The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy on port 9090.
 

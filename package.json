@@ -90,7 +90,9 @@
     "validate": "pnpm run brand:check && pnpm run typecheck && pnpm run test",
     "audit:full": "node --experimental-vm-modules scripts/audit-full.js",
     "audit:full:fast": "node --experimental-vm-modules scripts/audit-full.js --skip-install --skip-e2e",
-    "audit:full:ci": "node --experimental-vm-modules scripts/audit-full.js --skip-install --skip-e2e"
+    "audit:full:ci": "node --experimental-vm-modules scripts/audit-full.js --skip-install --skip-e2e",
+    "check-boundaries": "tsx scripts/check-package-boundaries.ts",
+    "lint:boundaries": "tsx scripts/check-package-boundaries.ts"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",
