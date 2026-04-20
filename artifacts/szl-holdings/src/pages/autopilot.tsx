@@ -7,6 +7,7 @@ import {
   Globe, Layers, Lightbulb, Radio, RefreshCw, Shield, Ship, Sparkles, Target,
   ThumbsDown, ThumbsUp, TrendingDown, TrendingUp, Users, Zap, X,
 } from "lucide-react";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -1175,23 +1176,34 @@ export default function AutopilotPage() {
   });
 
   const [activeTab, setActiveTab] = useState("genome");
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
 
-  const { data: summary } = useStandardQuery({
+  const retryUnlessAuth = (failureCount: number, error: unknown) => {
+    const msg = error instanceof Error ? error.message : "";
+    if (/^4\d\d\s/.test(msg)) return false;
+    return failureCount < 2;
+  };
+
+  const { data: summary, isError: summaryError } = useStandardQuery({
     queryKey: ["autopilot", "summary"],
     queryFn: () => apiFetch<{ genomeScore: number; gaps: number; bestInClass: number; capabilities: number; scheduledJobsActive: number }>("/autopilot/summary"),
     staleTime: 60_000,
     refetchInterval: 120_000,
+    retry: retryUnlessAuth,
   });
 
-  const { data: driftSummary } = useStandardQuery({
+  const { data: driftSummary, isError: driftError } = useStandardQuery({
     queryKey: ["autopilot", "drift-alerts"],
     queryFn: () => apiFetch<{ alerts: Array<{ severity: string }> }>("/autopilot/drift-alerts"),
     staleTime: 30_000,
     refetchInterval: 60_000,
+    retry: retryUnlessAuth,
   });
 
   const criticalCount = driftSummary?.alerts.filter(a => a.severity === "critical").length
     ?? DRIFT_ALERTS.filter(a => a.severity === "critical").length;
+
+  const showSignInNotice = !authLoading && !isAuthenticated && (summaryError || driftError);
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
@@ -1210,6 +1222,52 @@ export default function AutopilotPage() {
                 The Autopilot maps every capability across every app, detects when things drift, aggregates user feedback, and tells you exactly what to build next. The ecosystem tells you how it's doing — you just act on it.
               </p>
             </m.div>
+
+            {showSignInNotice && (
+              <m.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                role="status"
+                style={{
+                  marginTop: "1.75rem",
+                  padding: "0.75rem 1rem",
+                  background: "hsla(214,72%,14%,0.55)",
+                  border: "1px solid hsla(214,72%,55%,0.25)",
+                  borderRadius: "0.625rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  flexWrap: "wrap",
+                }}
+              >
+                <Lightbulb size={14} style={{ color: "#60a5fa", flexShrink: 0 }} />
+                <span style={{ fontSize: "12.5px", color: "hsl(38,12%,82%)", lineHeight: 1.5 }}>
+                  Sign in to see live ecosystem stats. Anonymous visitors see placeholder values.
+                </span>
+                <button
+                  type="button"
+                  onClick={login}
+                  style={{
+                    marginLeft: "auto",
+                    fontSize: "11.5px",
+                    fontWeight: 600,
+                    padding: "0.4rem 0.85rem",
+                    borderRadius: "0.375rem",
+                    background: "hsla(214,72%,55%,0.18)",
+                    color: "#93c5fd",
+                    border: "1px solid hsla(214,72%,55%,0.35)",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.375rem",
+                  }}
+                >
+                  Sign in
+                  <ArrowRight size={11} />
+                </button>
+              </m.div>
+            )}
 
             <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} style={{ marginTop: "2rem", display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
               <div style={{ padding: "0.5rem 1rem", background: "hsla(265,70%,60%,0.1)", border: "1px solid hsla(265,70%,60%,0.2)", borderRadius: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
