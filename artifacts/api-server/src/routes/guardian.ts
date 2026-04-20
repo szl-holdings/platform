@@ -1442,6 +1442,177 @@ router.get(
   },
 );
 
+// ============================================================
+// GUARDIAN DECISIONS SUMMARY
+// Compact rolling-window summary used by the Command/Pulse
+// "Guardian decisions" tile. Returns:
+//   - counts: { allow, requireApproval, requireDualApproval, block, total }
+//     bucketed over the requested window (default 60 minutes)
+//   - recent: most recent denied + pending-approval decisions joined to
+//     the approvals queue and the originating trace span so each row can
+//     deep-link back to the trace graph.
+// Query params: windowMinutes (1-1440, default 60), limit (1-50, default 10)
+// ============================================================
+router.get(
+  "/decisions/summary",
+  authMiddleware(),
+  requireRole("super_admin", "admin", "ops", "analyst", "compliance", "exec"),
+  async (req: Request, res: Response) => {
+    try {
+      const rawWindow = parseInt((req.query["windowMinutes"] as string) ?? "60", 10);
+      const windowMinutes = isNaN(rawWindow) ? 60 : Math.min(1440, Math.max(1, rawWindow));
+      const rawLimit = parseInt((req.query["limit"] as string) ?? "10", 10);
+      const limit = isNaN(rawLimit) ? 10 : Math.min(50, Math.max(1, rawLimit));
+      const since = new Date(Date.now() - windowMinutes * 60_000);
+
+      const user = req.user;
+      const orgScoped = !isAdminUser(user);
+      let orgId: number | null = null;
+      if (orgScoped) {
+        orgId = userOrgId(user);
+        if (orgId === null) {
+          sendForbidden(res, "No organization membership — cannot access governance records");
+          return;
+        }
+      }
+
+      const baseConditions: Parameters<typeof and>[0][] = [
+        sql`${guardianActionsTable.decidedAt} >= ${since}`,
+      ];
+      if (orgScoped) baseConditions.push(eq(guardianActionsTable.orgId, orgId!));
+      const baseWhere = and(...baseConditions);
+
+      // Counts grouped by outcome over the rolling window.
+      const countRows = await db
+        .select({
+          outcome: guardianActionsTable.outcome,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(guardianActionsTable)
+        .where(baseWhere as ReturnType<typeof and>)
+        .groupBy(guardianActionsTable.outcome);
+
+      const counts = {
+        allow: 0,
+        requireApproval: 0,
+        requireDualApproval: 0,
+        block: 0,
+        total: 0,
+      };
+      for (const r of countRows) {
+        const n = Number(r.count) || 0;
+        counts.total += n;
+        switch (r.outcome) {
+          case "allow":
+            counts.allow += n;
+            break;
+          case "require-approval":
+            counts.requireApproval += n;
+            break;
+          case "require-dual-approval":
+            counts.requireDualApproval += n;
+            break;
+          case "block":
+            counts.block += n;
+            break;
+        }
+      }
+
+      // Recent denied + still-pending-approval decisions, joined with the
+      // approvals queue (when one was created) and the originating trace span
+      // so the UI can deep-link back to the trace graph. We deliberately
+      // exclude approval-required rows whose approval has already been
+      // resolved (approved/rejected/expired) — those belong in the History
+      // tab of the Guardian Console, not on the operator's "needs attention"
+      // tile. Blocks always surface (no approvals row exists for them).
+      const recentConditions: Parameters<typeof and>[0][] = [
+        sql`${guardianActionsTable.decidedAt} >= ${since}`,
+        or(
+          eq(guardianActionsTable.outcome, "block"),
+          and(
+            sql`${guardianActionsTable.outcome} IN ('require-approval', 'require-dual-approval')`,
+            or(
+              isNull(guardianApprovalRequestsTable.status),
+              eq(guardianApprovalRequestsTable.status, "pending"),
+            ),
+          ),
+        ) as ReturnType<typeof and>,
+      ];
+      if (orgScoped) recentConditions.push(eq(guardianActionsTable.orgId, orgId!));
+
+      const recentRows = await db
+        .select({
+          id: guardianActionsTable.id,
+          requestId: guardianActionsTable.requestId,
+          agentId: guardianActionsTable.agentId,
+          tier: guardianActionsTable.tier,
+          action: guardianActionsTable.action,
+          toolId: guardianActionsTable.toolId,
+          outcome: guardianActionsTable.outcome,
+          reason: guardianActionsTable.reason,
+          decidedAt: guardianActionsTable.decidedAt,
+          traceId: tracesTable.traceId,
+          traceDomain: tracesTable.domain,
+          approvalStatus: guardianApprovalRequestsTable.status,
+          approvalType: guardianApprovalRequestsTable.approvalType,
+          approvalExpiresAt: guardianApprovalRequestsTable.expiresAt,
+        })
+        .from(guardianActionsTable)
+        .leftJoin(tracesTable, eq(tracesTable.requestId, guardianActionsTable.requestId))
+        .leftJoin(
+          guardianApprovalRequestsTable,
+          eq(guardianApprovalRequestsTable.requestId, guardianActionsTable.requestId),
+        )
+        .where(and(...recentConditions) as ReturnType<typeof and>)
+        .orderBy(desc(guardianActionsTable.decidedAt))
+        .limit(limit);
+
+      const recent = recentRows.map((r) => ({
+        id: r.id,
+        requestId: r.requestId,
+        agentId: r.agentId,
+        tier: r.tier,
+        action: r.action,
+        toolId: r.toolId,
+        decision: r.outcome,
+        reason: r.reason,
+        decidedAt: r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt),
+        traceId: r.traceId ?? null,
+        traceDomain: r.traceDomain ?? null,
+        approvalStatus: r.approvalStatus ?? null,
+        approvalType: r.approvalType ?? null,
+        approvalExpiresAt:
+          r.approvalExpiresAt instanceof Date
+            ? r.approvalExpiresAt.toISOString()
+            : (r.approvalExpiresAt ?? null),
+      }));
+
+      // Pending-approval count sourced from the approvals queue itself so the
+      // tile shows "N approvals waiting on you" even for items whose ledger
+      // row may have aged out of the window.
+      const pendingConditions: Parameters<typeof and>[0][] = [
+        eq(guardianApprovalRequestsTable.status, "pending"),
+      ];
+      if (orgScoped) pendingConditions.push(eq(guardianApprovalRequestsTable.orgId, orgId!));
+      const [pendingRow] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(guardianApprovalRequestsTable)
+        .where(and(...pendingConditions) as ReturnType<typeof and>);
+      const pendingApprovals = Number(pendingRow?.count ?? 0);
+
+      sendSuccess(res, {
+        windowMinutes,
+        since: since.toISOString(),
+        counts,
+        pendingApprovals,
+        recent,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to compute guardian decisions summary");
+    }
+  },
+);
+
 router.get("/actions/:id", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);

@@ -21,6 +21,7 @@ import { GitBranch, Zap, Map, TrendingUp } from "lucide-react";
 import { EcosystemAppsGrid } from "../components/ecosystem-apps-grid";
 import { AtlasKpiSection } from "../components/atlas-kpi-section";
 import { DemoLaunchpadPanel } from "../components/demo-launchpad-panel";
+import { GuardianDecisionsTile } from "../components/guardian-decisions-tile";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -154,6 +155,8 @@ export function Dashboard() {
         />
 
         <DomainGrid domains={data.domains} />
+
+        <GuardianDecisionsTile />
 
         <OpsCenterGrid />
 
