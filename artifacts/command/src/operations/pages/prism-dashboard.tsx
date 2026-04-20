@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { TrendingUp, TrendingDown, Minus, BarChart3, ChevronRight, Zap, AlertTriangle, RefreshCw, ArrowRight, CheckCircle2, Clock, Target, UserCheck, Shield } from "lucide-react";
+import { DbPoolTile } from "@/operations/components/db-pool-tile";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 
@@ -488,6 +489,8 @@ export default function PrismDashboard() {
           ))}
         </div>
       </div>
+
+      <DbPoolTile />
 
       {isLoading && !usingDemo && (
         <div className="flex items-center justify-center py-16">
