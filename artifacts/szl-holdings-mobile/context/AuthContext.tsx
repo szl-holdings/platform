@@ -223,10 +223,25 @@ function tokenIsNearExpiry(expiresAt: string | null, now = Date.now()): boolean 
   return t - now <= REFRESH_LEAD_MS;
 }
 
+const DEMO_MODE =
+  process.env.EXPO_PUBLIC_DEMO_MODE === "1" ||
+  process.env.EXPO_PUBLIC_DEMO_MODE === "true";
+
+const DEMO_USER: AuthUser = {
+  id: "demo-compliance-officer",
+  displayName: "Avery Chen",
+  username: "avery.chen",
+  email: "avery.chen@szlholdings.example",
+  avatarUrl: null,
+  roles: ["compliance_officer", "approver", "operator"],
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(DEMO_MODE ? DEMO_USER : null);
+  const [accessToken, setAccessToken] = useState<string | null>(
+    DEMO_MODE ? "demo-access-token" : null,
+  );
+  const [isLoading, setIsLoading] = useState(!DEMO_MODE);
   const [sessionRevocation, setSessionRevocation] = useState<SessionRevocationInfo | null>(
     () => getSessionRevocation(),
   );
@@ -323,6 +338,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [wipeAuth]);
 
   const fetchUser = useCallback(async () => {
+    if (DEMO_MODE) {
+      setUser(DEMO_USER);
+      setAccessToken("demo-access-token");
+      setIsLoading(false);
+      return;
+    }
     try {
       let stored = tokensRef.current ?? (await readStoredTokens());
       if (!stored) {

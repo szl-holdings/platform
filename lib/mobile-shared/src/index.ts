@@ -10,7 +10,6 @@ export {
 export {
   formatDate,
   resolveTimeZone,
-  getUserTimeZone,
   setMobileUserTimeZone,
   type FormatDateOptions,
 } from "./utils";
