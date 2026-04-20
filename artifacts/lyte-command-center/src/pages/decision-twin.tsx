@@ -3,7 +3,7 @@ import { useSearch } from "wouter";
 import {
   Shield, Brain, ChevronDown, ChevronUp, GitBranch, CheckCircle2,
   XCircle, AlertTriangle, Printer, Clock, BarChart2, Info, ArrowRight,
-  Activity, Lock, Users, TrendingDown, TrendingUp, Minus,
+  Activity, Lock, Users, TrendingDown, TrendingUp, Minus, Link2,
 } from "lucide-react";
 import {
   runAllDecisionTwinScenarios,
@@ -577,6 +577,23 @@ export default function DecisionTwinPage() {
 
   const [selectedSignalId, setSelectedSignalId] = useState(resolveInitialSignalId);
   const [activeTab, setActiveTab] = useState<"cards" | "compare" | "audit">("cards");
+  const [shareCopied, setShareCopied] = useState(false);
+
+  function handleShare() {
+    const lyteBase = (import.meta.env.BASE_URL ?? "/lyte/").replace(/\/$/, "");
+    const url = `${window.location.origin}${lyteBase}/briefing/${selectedSignalId}`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(
+        () => {
+          setShareCopied(true);
+          window.setTimeout(() => setShareCopied(false), 2000);
+        },
+        () => window.prompt("Copy this briefing link:", url),
+      );
+    } else {
+      window.prompt("Copy this briefing link:", url);
+    }
+  }
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -618,13 +635,23 @@ export default function DecisionTwinPage() {
             Causal what-if simulation — preview downstream impact across PRISM dimensions before acting
           </p>
         </div>
-        <button
-          onClick={() => exportBriefing(selectedSignal, scenarios, best!)}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-amber-500/8 border border-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/12 transition-colors shrink-0"
-        >
-          <Printer className="w-3.5 h-3.5" />
-          Export Briefing
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-sky-500/8 border border-sky-500/25 text-sky-300 text-xs font-medium hover:bg-sky-500/12 transition-colors"
+            title="Copy a shareable read-only briefing URL"
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            {shareCopied ? "Link copied" : "Share Briefing"}
+          </button>
+          <button
+            onClick={() => exportBriefing(selectedSignal, scenarios, best!)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-amber-500/8 border border-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/12 transition-colors"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            Export Briefing
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-[280px_1fr] gap-5">

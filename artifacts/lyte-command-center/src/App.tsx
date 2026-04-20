@@ -39,6 +39,7 @@ const PolicyCenterPage = lazy(() => import("@/pages/policy-center"));
 const EvalStudioPage = lazy(() => import("@/pages/eval-studio"));
 
 const BriefPage = lazy(() => import("@/pages/brief"));
+const BriefingPage = lazy(() => import("@/pages/briefing"));
 
 // Legacy surfaces (kept for historical nav)
 const OwnershipDriftPage = lazy(() => import("@/pages/ownership-drift"));
@@ -395,6 +396,11 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={base}>
         <Switch>
+          <Route path="/briefing/:id">
+            <Suspense fallback={<PageLoader />}>
+              <BriefingPage />
+            </Suspense>
+          </Route>
           <Route path="/*" component={DashboardRoutes} />
         </Switch>
       </WouterRouter>
