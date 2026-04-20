@@ -33,6 +33,9 @@
     "@workspace/guardian": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
     "@workspace/cognitive-observability": "workspace:*",
+    "@workspace/approvals-inbox": "workspace:*",
+    "@workspace/run-ledger": "workspace:*",
+    "@szl-holdings/contracts": "workspace:*",
     "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },

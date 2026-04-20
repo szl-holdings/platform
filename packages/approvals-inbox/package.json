@@ -15,7 +15,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./src/index.ts"
+    },
+    "./governed": {
+      "types": "./dist/governed-store.d.ts",
+      "import": "./src/governed-store.ts"
     }
+  },
+  "dependencies": {
+    "@szl-holdings/contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:"

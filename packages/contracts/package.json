@@ -11,7 +11,8 @@
     "./ai": "./src/ai.ts",
     "./webhooks": "./src/webhooks.ts",
     "./admin": "./src/admin.ts",
-    "./common": "./src/common.ts"
+    "./common": "./src/common.ts",
+    "./governance": "./src/governance.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

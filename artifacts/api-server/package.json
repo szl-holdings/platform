@@ -102,6 +102,7 @@
     "@workspace/alloy": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",
     "@workspace/cognitive-runtime": "workspace:*",
+    "@workspace/run-ledger": "workspace:*",
     "@workspace/demo-seed": "workspace:*",
     "@workspace/eval-forge": "workspace:*",
     "@workspace/executive-briefing": "workspace:*",

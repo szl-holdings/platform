@@ -8,6 +8,9 @@ import type { SelfModelStore } from "@workspace/self-model";
 import { globalCollector } from "@workspace/cognitive-observability";
 import { AgentRun, type RunStatus as AgentRunStatus } from "@workspace/agents-core/run";
 import { emitStepLog } from "@workspace/agents-core/step-log";
+import { extractApprovalInterrupt, raiseApprovalInterrupt } from "./approval-interrupt.js";
+import { RunLedgerBuilder, defaultRunLedgerStore } from "@workspace/run-ledger";
+import { evaluateQualityGate, type QualityGateProfile } from "@workspace/run-ledger/quality-gate";
 
 import {
   CognitiveContextSchema,
@@ -19,6 +22,7 @@ import {
 import {
   defaultCheckpointStore,
   loadCheckpoint,
+  saveCheckpoint,
   type CheckpointStore,
 } from "./checkpoint.js";
 
@@ -332,6 +336,26 @@ export async function run(
       throw new CognitiveLoopError("No plan available — cannot execute", "plan", runId);
     }
 
+    // ─── Enforce incoming approval decision BEFORE any execution ─────────────
+    // If this run was resumed after an operator decision and the verdict is
+    // deny or escalate, terminate immediately — no further steps may execute.
+    // This check MUST occur before the execute-phase loop to prevent side
+    // effects leaking past a governed denial.
+    const incomingDecision = ctx.metadata?.approvalDecision as
+      | { verdict: string; actor?: string; reason?: string; decisionId?: string }
+      | undefined;
+    if (incomingDecision && (incomingDecision.verdict === "deny" || incomingDecision.verdict === "escalate")) {
+      loopRun.status = "failed";
+      loopRun.currentPhase = "failed";
+      loopRun.error =
+        `Approval ${incomingDecision.verdict}ed by ${incomingDecision.actor ?? "operator"}: ` +
+        (incomingDecision.reason ?? "no reason given");
+      tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+      syncRunStatus();
+      await finalize(lastExecuteOutput, undefined, undefined);
+      return terminalResult(loopRun, globalStartedAt, false, loopRun.error);
+    }
+
     // ─── PHASES 4→6 LOOP: EXECUTE → VERIFY → REFLECT → REPLAN ───────────────
     // Bounded by maxVerifyRevisions + 1 total attempts (spec requirement).
     const maxIterations = ctx.maxVerifyRevisions + 1;
@@ -353,8 +377,40 @@ export async function run(
       lastExecuteOutput = executeResult.output;
       loopRun.stepResults = [...loopRun.stepResults, ...executeResult.output.stepResults];
 
+      // ─── GOVERNED APPROVAL INTERRUPT detection ────────────────────────────
+      // Scan newly completed step outputs for an __approvalInterrupt spec.
+      // First interrupt found takes precedence — persist a real checkpoint
+      // via saveCheckpoint() (not a fabricated ref) so resume is deterministic.
+      for (const stepResult of executeResult.output.stepResults) {
+        const interruptSpec = extractApprovalInterrupt(stepResult.output);
+        if (interruptSpec) {
+          // stepResults already updated above — the interrupted step is last
+          const interruptedStepIndex = loopRun.stepResults.length - 1;
+          const checkpointRef = saveCheckpoint(loopRun, interruptedStepIndex, checkpointStore);
+          const approvalRequest = raiseApprovalInterrupt({
+            runId,
+            traceId,
+            stepId: stepResult.stepId,
+            stepName: stepResult.stepId,
+            checkpointRef,
+            interrupt: interruptSpec,
+          });
+          loopRun.metadata = {
+            ...(loopRun.metadata ?? {}),
+            pendingApproval: true,
+            approvalRequestId: approvalRequest.id,
+            checkpointRef,
+          };
+          break;
+        }
+      }
+
       // Pending approval — hard gate, must not progress (security requirement)
-      const isPendingApproval = executeResult.metadata?.pendingApproval === true;
+      // (deny/escalate decisions are enforced before the loop; this path handles
+      //  newly detected interrupts and the existing guardian pending_approval.)
+      const isPendingApproval =
+        loopRun.metadata?.pendingApproval === true ||
+        executeResult.metadata?.pendingApproval === true;
       if (isPendingApproval) {
         loopRun.status = "pending_approval";
         loopRun.currentPhase = "guardian_blocked";
@@ -529,6 +585,92 @@ export async function run(
     const completedAt = Date.now();
     loopRun.completedAt = completedAt;
     loopRun.durationMs = completedAt - globalStartedAt;
+
+    // ─── QUALITY GATE + RUN LEDGER ────────────────────────────────────────────
+    // Build a ledger entry from the completed run data and evaluate quality gates.
+    // If the gate is "blocked" the run is demoted to "failed" so downstream
+    // consumers know not to act on the output. The ledger entry is written to
+    // the process-local store (swappable to Postgres via setBackend).
+    //
+    // Gate profile is derived from agentTier + domain to ensure autonomous
+    // agents are held to stricter completion/latency standards.
+    const gateProfileOverride: Partial<QualityGateProfile> = (() => {
+      switch (ctx.agentTier) {
+        case "autonomous":
+          return { completionThreshold: 0.8, toolFailureRateThreshold: 0.2 };
+        case "operator":
+          return { completionThreshold: 0.7, toolFailureRateThreshold: 0.3 };
+        case "analyst":
+          return { completionThreshold: 0.6, toolFailureRateThreshold: 0.4 };
+        default:
+          return {};
+      }
+    })();
+    try {
+      const ledgerBuilder = new RunLedgerBuilder({
+        runId,
+        traceId,
+        ...(ctx.tenantId !== undefined && { tenantId: ctx.tenantId }),
+        ...(ctx.agentId !== undefined && { actor: ctx.agentId }),
+        objective,
+      });
+
+      ledgerBuilder.setPlan(objective.slice(0, 200), lastExecuteOutput?.stepResults.length ?? 0);
+
+      for (const phase of loopRun.phases) {
+        ledgerBuilder.addStageTiming({
+          phase: phase.phase,
+          startedAt: phase.startedAt,
+          durationMs: phase.durationMs ?? 0,
+        });
+      }
+
+      for (const stepResult of (lastExecuteOutput?.stepResults ?? [])) {
+        ledgerBuilder.addToolCall({
+          toolId: stepResult.toolId ?? "default",
+          stepId: stepResult.stepId,
+          latencyMs: stepResult.durationMs ?? 0,
+          outcome:
+            stepResult.status === "completed" ? "success" :
+            stepResult.status === "skipped" ? "skipped" : "failure",
+          ...(stepResult.error !== undefined && { error: stepResult.error }),
+        });
+      }
+
+      // Evaluate quality gate against partial ledger using the tier/domain profile
+      const partialEntry = ledgerBuilder.build();
+      const gateResult = evaluateQualityGate(partialEntry, gateProfileOverride);
+
+      // Persist the final ledger entry with gate result
+      const finalEntry = ledgerBuilder.build(gateResult);
+      defaultRunLedgerStore.save(finalEntry);
+
+      // Surface gate status in run metadata
+      loopRun.metadata = {
+        ...(loopRun.metadata ?? {}),
+        gateStatus: gateResult.status,
+        ledgerId: finalEntry.ledgerId,
+      };
+
+      // A run is only marked "completed" when ALL quality gates pass.
+      // Both "blocked" and "degraded" outcomes are terminal failures — the
+      // caller must not treat the output as consumable in either case.
+      if (gateResult.status === "blocked") {
+        loopRun.status = "failed";
+        loopRun.error =
+          `Quality gate blocked: ${gateResult.failingGates.map((g) => g.gate).join(", ")}. ` +
+          gateResult.recommendedNextAction;
+      } else if (gateResult.status === "degraded") {
+        loopRun.status = "failed";
+        loopRun.error =
+          `Quality gate degraded — run did not meet completion criteria: ` +
+          `${gateResult.failingGates.map((g) => g.gate).join(", ")}. ` +
+          gateResult.recommendedNextAction;
+      }
+    } catch {
+      // Quality gate + ledger must not fail the run — swallow errors
+    }
+
     syncRunStatus();
 
     globalCollector.recordKnown(
@@ -537,13 +679,15 @@ export async function run(
       { agentId: ctx.agentId, runId },
     );
 
+    const gateStatus = (loopRun.metadata?.gateStatus as string | undefined) ?? "pending";
     return {
       run: loopRun,
-      success: true,
+      success: loopRun.status === "completed",
       summary:
-        `Cognitive loop completed in ${loopRun.durationMs}ms. ` +
+        `Cognitive loop ${loopRun.status} in ${loopRun.durationMs}ms. ` +
         `Phases: ${loopRun.phases.map((p) => p.phase).join(" → ")}. ` +
-        `Plan revisions: ${loopRun.planRevisions}. Verify revisions: ${loopRun.verifyRevisions}.`,
+        `Plan revisions: ${loopRun.planRevisions}. Verify revisions: ${loopRun.verifyRevisions}. ` +
+        `Gate: ${gateStatus}.`,
     };
   } catch (err) {
     const completedAt = Date.now();

@@ -7,6 +7,9 @@ const TrajectoryMap = lazy(() => import("./trajectory-map").then(m => ({ default
 const RunDetail = lazy(() => import("./run-detail").then(m => ({ default: m.RunDetail })));
 const CounterfactualViewer = lazy(() => import("./counterfactual").then(m => ({ default: m.CounterfactualViewer })));
 const ApprovalQueue = lazy(() => import("./approval-queue").then(m => ({ default: m.ApprovalQueue })));
+const GovernedApprovals = lazy(() => import("./governed-approvals").then(m => ({ default: m.GovernedApprovals })));
+const RunLedgerPage = lazy(() => import("./run-ledger").then(m => ({ default: m.RunLedgerPage })));
+const RunLedgerList = lazy(() => import("./run-ledger").then(m => ({ default: m.RunLedgerList })));
 
 function PageLoader() {
   return (
@@ -26,6 +29,11 @@ export function SubstrateCommandCenter() {
           <Route path="/substrate/runs/:id" component={RunDetail} />
           <Route path="/substrate/counterfactual" component={CounterfactualViewer} />
           <Route path="/substrate/approvals" component={ApprovalQueue} />
+          {/* ACR governed approval interrupts — backed by /api/v1/approvals */}
+          <Route path="/substrate/governed-approvals" component={GovernedApprovals} />
+          {/* ACR Run Ledger — backed by /api/v1/runs */}
+          <Route path="/substrate/ledger" component={RunLedgerList} />
+          <Route path="/substrate/ledger/:runId" component={RunLedgerPage} />
           <Route component={TrajectoryMap} />
         </Switch>
       </Suspense>

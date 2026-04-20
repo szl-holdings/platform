@@ -111,8 +111,8 @@ export function submitApprovalAction(
   if (pending && pending.status === "pending") {
     pending.status = verdict === "approved" ? "approved" : verdict === "rejected" ? "rejected" : "escalated";
     pending.resolvedAt = Date.now();
-    pending.resolvedBy = options?.actor;
-    pending.resolutionNote = options?.note;
+    if (options?.actor !== undefined) pending.resolvedBy = options.actor;
+    if (options?.note !== undefined) pending.resolutionNote = options.note;
   }
 
   return action;
@@ -133,7 +133,6 @@ export function submitPendingApprovalRequest(options: SubmitPendingApprovalReque
     runId: options.runId,
     stepId: options.stepId,
     stepName: options.stepName,
-    toolId: options.toolId,
     action: options.action,
     justification: options.justification,
     projectedImpact: options.projectedImpact,
@@ -145,6 +144,7 @@ export function submitPendingApprovalRequest(options: SubmitPendingApprovalReque
     expiresAt: now + timeoutMs,
     status: "pending",
   };
+  if (options.toolId !== undefined) request.toolId = options.toolId;
 
   _pendingRequests.set(id, request);
   return request;
@@ -160,13 +160,14 @@ export function resolvePendingApprovalRequest(
   const pending = _pendingRequests.get(id);
   if (!pending || pending.status !== "pending") return undefined;
 
-  return submitApprovalAction(id, verdict, {
-    actor: options?.actor,
-    note: options?.note,
-    simulationId: options?.simulationId,
+  const submitOpts: SubmitApprovalOptions = {
     domain: pending.domain,
     surface: pending.surface,
-  });
+  };
+  if (options?.actor !== undefined) submitOpts.actor = options.actor;
+  if (options?.note !== undefined) submitOpts.note = options.note;
+  if (options?.simulationId !== undefined) submitOpts.simulationId = options.simulationId;
+  return submitApprovalAction(id, verdict, submitOpts);
 }
 
 export function getPendingApprovalRequests(filter?: {
@@ -226,3 +227,21 @@ export function getInboxStats() {
     pendingTotal: pending.length,
   };
 }
+
+// ─── Governed approval-interrupt store (ACR) ──────────────────────────────────
+// Re-exported for convenience so consumers can import from @workspace/approvals-inbox
+// instead of @workspace/approvals-inbox/governed.
+export {
+  createApprovalRequest,
+  decideApproval,
+  getApprovalRequestById,
+  listApprovalRequests,
+  defaultGovernedApprovalStore,
+  InMemoryGovernedApprovalStore,
+  MutableGovernedApprovalStore,
+  type GovernedApprovalStoreBackend,
+  type CreateApprovalRequestOptions,
+  type DecideApprovalOptions,
+  type DecideApprovalResult,
+  type GovernanceMemoryRecord,
+} from "./governed-store.js";

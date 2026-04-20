@@ -15,3 +15,4 @@ export * from "./alloy";
 export * from "./ai";
 export * from "./webhooks";
 export * from "./admin";
+export * from "./governance";

@@ -151,6 +151,10 @@ router.use(decisionsRuntimeRouter);
 // unauthenticated requests before they reach these handlers. Note traces.ts
 // also serves /runs* paths.
 router.use(lazyMatch(["/traces", "/runs"], () => import("./traces"), "traces"));
+
+// ACR Governance — v1 approval interrupts and run ledger (auth-gated)
+router.use(lazyMatch("/v1/approvals", () => import("./v1-approvals"), "v1-approvals"));
+router.use(lazyMatch("/v1/runs", () => import("./v1-runs"), "v1-runs"));
 router.use(lazyMatch("/reflections", () => import("./reflections"), "reflections"));
 router.use(lazyMatch("/plans", () => import("./plans"), "plans"));
 router.use(lazyMatch("/replay", () => import("./replay"), "replay"));

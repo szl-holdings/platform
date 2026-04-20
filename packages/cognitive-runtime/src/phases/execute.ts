@@ -6,6 +6,7 @@ import { GuardianBlockError } from "../types.js";
 import { saveCheckpoint } from "../checkpoint.js";
 import type { CheckpointStore } from "../checkpoint.js";
 import type { CognitiveLoopRun } from "../types.js";
+import { extractApprovalInterrupt } from "../approval-interrupt.js";
 
 export type StepExecutorFn = (
   step: PlanStep,
@@ -193,6 +194,16 @@ export async function executePhase(
     // pending_approval is a hard gate — execution must not continue
     // until a human approver grants access (like a block but resumable)
     if (result.status === "pending_approval") {
+      pendingApproval = true;
+      break;
+    }
+
+    // ─── GOVERNED APPROVAL INTERRUPT ──────────────────────────────────────────
+    // Detect __approvalInterrupt in a completed step's output and short-circuit
+    // execution immediately — exactly as pending_approval does. This guarantees
+    // that no subsequent steps run after a governed interrupt node, preventing
+    // side effects past the interrupt point.
+    if (result.status === "completed" && extractApprovalInterrupt(result.output)) {
       pendingApproval = true;
       break;
     }

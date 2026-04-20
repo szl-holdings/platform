@@ -35,4 +35,16 @@ export {
   type ExecutiveBrief,
 } from "./brief.js";
 
+export {
+  extractApprovalInterrupt,
+  raiseApprovalInterrupt,
+  resolveApprovalInterrupt,
+  buildResumeContext,
+  type ApprovalInterruptSpec,
+  type ApprovalRequest,
+  type ApprovalDecision,
+  type RaiseApprovalInterruptOptions,
+  type ResolveApprovalInterruptOptions,
+} from "./approval-interrupt.js";
+
 export const COGNITIVE_RUNTIME_VERSION = "1.0.0" as const;

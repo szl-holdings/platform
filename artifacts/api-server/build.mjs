@@ -97,6 +97,11 @@ async function buildAll() {
     outExtension: { ".js": ".mjs" },
     logLevel: "info",
     nodePaths: [path.join(artifactDir, "node_modules")],
+    alias: {
+      // prom-client is listed as a dependency of alloy-embedding-api but not installed in this workspace.
+      // Bundle a local no-op stub so the build and runtime both work without the real package.
+      "prom-client": path.join(workspaceRoot, "apps/alloy-embedding-api/src/middleware/prom-client-stub.ts"),
+    },
     // Some packages may not be bundleable, so we externalize them, we can add more here as needed.
     // Some of the packages below may not be imported or installed, but we're adding them in case they are in the future.
     // Examples of unbundleable packages:
