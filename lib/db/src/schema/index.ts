@@ -113,6 +113,7 @@ export * from "./ml_pipeline";
 export * from "./analytics";
 export * from "./memory_fabric";
 export * from "./nexus_memory";
+export * from "./nexus_state";
 export * from "./alloy_runtime";
 export * from "./push_infra";
 export * from "./job_queue";

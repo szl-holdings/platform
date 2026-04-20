@@ -6,9 +6,28 @@ import { sendSuccess, sendError, handleRouteError, sendCreated } from "../lib/ap
 import { logger } from "../lib/logger";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { gatewayInfer } from "../lib/ai-gateway";
-import { db, nexusMemoryTable } from "@szl-holdings/db";
+import {
+  db,
+  nexusMemoryTable,
+  nexusSkillsTable,
+  nexusProtocolToolsTable,
+  nexusOrchestrationPlansTable,
+  nexusIngestJobsTable,
+} from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
-import type { NexusMemoryRow, NexusMemoryTier, NexusMemoryType } from "@szl-holdings/db";
+import type {
+  NexusMemoryRow,
+  NexusMemoryTier,
+  NexusMemoryType,
+  NexusSkillRow,
+  NexusSkillPrimitiveType,
+  NexusProtocolToolRow,
+  NexusToolProtocol,
+  NexusOrchestrationPlanRow,
+  NexusOrchestrationStatus,
+  NexusIngestJobRow,
+  NexusIngestStatus,
+} from "@szl-holdings/db";
 
 const router = Router();
 router.use(authMiddleware({ required: false }));
@@ -141,7 +160,7 @@ let orchestrationsToday = 0;
 
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
-function seedData() {
+function seedData(persist = false) {
   // Seed skills
   const SEED_SKILLS: Skill[] = [
     {
@@ -326,8 +345,12 @@ function seedData() {
     },
   ];
 
+  // Only seed skills we don't already have (DB-hydrated state wins).
   for (const skill of SEED_SKILLS) {
-    skillStore.set(skill.id, skill);
+    if (!skillStore.has(skill.id)) {
+      skillStore.set(skill.id, skill);
+      if (persist) void persistSkillToDB(skill);
+    }
   }
 
   // Seed pattern families
@@ -641,7 +664,10 @@ function seedData() {
   ];
 
   for (const tool of TOOLS) {
-    toolStore.set(tool.id, tool);
+    if (!toolStore.has(tool.id)) {
+      toolStore.set(tool.id, tool);
+      if (persist) void persistToolToDB(tool);
+    }
   }
 
   // Seed memory with a few items
@@ -692,7 +718,7 @@ function seedData() {
   for (const item of SEED_MEMORY) {
     if (!memoryStore.has(item.id)) {
       memoryStore.set(item.id, item);
-      void persistMemoryToDB(item);
+      if (persist) void persistMemoryToDB(item);
     }
   }
 }
@@ -704,7 +730,13 @@ const patternStore = new Map<string, PatternFamily>();
 // hydrated from Postgres, re-run seedData() so persisted entries take
 // precedence and only genuinely missing seeds are inserted.
 seedData();
-void loadMemoryFromDB().then(() => seedData());
+void Promise.all([
+  loadMemoryFromDB(),
+  loadSkillsFromDB(),
+  loadToolsFromDB(),
+  loadOrchestrationsFromDB(),
+  loadIngestJobsFromDB(),
+]).then(() => seedData(true));
 
 // ─── SSE utilities ────────────────────────────────────────────────────────────
 
@@ -1011,6 +1043,302 @@ async function loadMemoryFromDB(): Promise<void> {
     logger.info({ count: rows.length }, "NEXUS memory hydrated from nexus_memory");
   } catch (dbErr) {
     logger.warn({ dbErr }, "Failed to hydrate NEXUS memory from DB (non-fatal)");
+  }
+}
+
+// ─── Skills DB persistence ────────────────────────────────────────────────────
+
+function rowToSkill(row: NexusSkillRow): Skill {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    sourceRepo: row.sourceRepo,
+    sourceUrl: row.sourceUrl,
+    license: row.license,
+    pattern: row.pattern,
+    primitiveType: row.primitiveType as Skill["primitiveType"],
+    enabled: row.enabled,
+    usageCount: row.usageCount,
+    nexusAdaptation: row.nexusAdaptation,
+    originalSummary: row.originalSummary,
+    tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+  };
+}
+
+async function persistSkillToDB(skill: Skill): Promise<void> {
+  if (!db) return;
+  try {
+    await db
+      .insert(nexusSkillsTable)
+      .values({
+        id: skill.id,
+        name: skill.name,
+        description: skill.description,
+        sourceRepo: skill.sourceRepo,
+        sourceUrl: skill.sourceUrl,
+        license: skill.license,
+        pattern: skill.pattern,
+        primitiveType: skill.primitiveType as NexusSkillPrimitiveType,
+        enabled: skill.enabled,
+        usageCount: skill.usageCount,
+        nexusAdaptation: skill.nexusAdaptation,
+        originalSummary: skill.originalSummary,
+        tags: skill.tags,
+      })
+      .onConflictDoUpdate({
+        target: nexusSkillsTable.id,
+        set: {
+          name: skill.name,
+          description: skill.description,
+          sourceRepo: skill.sourceRepo,
+          sourceUrl: skill.sourceUrl,
+          license: skill.license,
+          pattern: skill.pattern,
+          primitiveType: skill.primitiveType as NexusSkillPrimitiveType,
+          enabled: skill.enabled,
+          usageCount: skill.usageCount,
+          nexusAdaptation: skill.nexusAdaptation,
+          originalSummary: skill.originalSummary,
+          tags: skill.tags,
+          updatedAt: new Date(),
+        },
+      });
+  } catch (dbErr) {
+    logger.warn({ dbErr, id: skill.id }, "Failed to persist skill to nexus_skills (non-fatal)");
+  }
+}
+
+async function loadSkillsFromDB(): Promise<void> {
+  if (!db) return;
+  try {
+    const rows = await db.select().from(nexusSkillsTable);
+    for (const row of rows) {
+      skillStore.set(row.id, rowToSkill(row));
+    }
+    logger.info({ count: rows.length }, "NEXUS skills hydrated from nexus_skills");
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Failed to hydrate NEXUS skills from DB (non-fatal)");
+  }
+}
+
+// ─── Protocol tools DB persistence ────────────────────────────────────────────
+
+function rowToTool(row: NexusProtocolToolRow): ProtocolTool {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    protocol: row.protocol as ProtocolTool["protocol"],
+    domain: row.domain,
+    inputSchema: (row.inputSchema as Record<string, unknown>) ?? {},
+    tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+  };
+}
+
+async function persistToolToDB(tool: ProtocolTool): Promise<void> {
+  if (!db) return;
+  try {
+    await db
+      .insert(nexusProtocolToolsTable)
+      .values({
+        id: tool.id,
+        name: tool.name,
+        description: tool.description,
+        protocol: tool.protocol as NexusToolProtocol,
+        domain: tool.domain,
+        inputSchema: tool.inputSchema,
+        tags: tool.tags,
+      })
+      .onConflictDoUpdate({
+        target: nexusProtocolToolsTable.id,
+        set: {
+          name: tool.name,
+          description: tool.description,
+          protocol: tool.protocol as NexusToolProtocol,
+          domain: tool.domain,
+          inputSchema: tool.inputSchema,
+          tags: tool.tags,
+          updatedAt: new Date(),
+        },
+      });
+  } catch (dbErr) {
+    logger.warn({ dbErr, id: tool.id }, "Failed to persist protocol tool (non-fatal)");
+  }
+}
+
+async function deleteToolFromDB(id: string): Promise<void> {
+  if (!db) return;
+  try {
+    await db.delete(nexusProtocolToolsTable).where(eq(nexusProtocolToolsTable.id, id));
+  } catch (dbErr) {
+    logger.warn({ dbErr, id }, "Failed to delete protocol tool from DB (non-fatal)");
+  }
+}
+
+async function loadToolsFromDB(): Promise<void> {
+  if (!db) return;
+  try {
+    const rows = await db.select().from(nexusProtocolToolsTable);
+    for (const row of rows) {
+      toolStore.set(row.id, rowToTool(row));
+    }
+    logger.info({ count: rows.length }, "NEXUS protocol tools hydrated from nexus_protocol_tools");
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Failed to hydrate NEXUS tools from DB (non-fatal)");
+  }
+}
+
+// ─── Orchestration plan DB persistence ────────────────────────────────────────
+
+function rowToOrchestrationPlan(row: NexusOrchestrationPlanRow): OrchestrationPlan {
+  const plan: OrchestrationPlan = {
+    id: row.id,
+    intent: row.intent,
+    status: row.status as OrchestrationPlan["status"],
+    steps: (row.steps as OrchestrationStep[]) ?? [],
+    createdAt: row.createdAt.toISOString(),
+  };
+  if (row.stitchedOutput) plan.stitchedOutput = row.stitchedOutput;
+  if (row.completedAt) plan.completedAt = row.completedAt.toISOString();
+  return plan;
+}
+
+async function persistOrchestrationPlanToDB(plan: OrchestrationPlan): Promise<void> {
+  if (!db) return;
+  try {
+    await db
+      .insert(nexusOrchestrationPlansTable)
+      .values({
+        id: plan.id,
+        intent: plan.intent,
+        status: plan.status as NexusOrchestrationStatus,
+        steps: plan.steps,
+        stitchedOutput: plan.stitchedOutput ?? null,
+        createdAt: new Date(plan.createdAt),
+        completedAt: plan.completedAt ? new Date(plan.completedAt) : null,
+      })
+      .onConflictDoUpdate({
+        target: nexusOrchestrationPlansTable.id,
+        set: {
+          intent: plan.intent,
+          status: plan.status as NexusOrchestrationStatus,
+          steps: plan.steps,
+          stitchedOutput: plan.stitchedOutput ?? null,
+          completedAt: plan.completedAt ? new Date(plan.completedAt) : null,
+        },
+      });
+  } catch (dbErr) {
+    logger.warn({ dbErr, id: plan.id }, "Failed to persist orchestration plan (non-fatal)");
+  }
+}
+
+async function loadOrchestrationsFromDB(): Promise<void> {
+  if (!db) return;
+  try {
+    const rows = await db.select().from(nexusOrchestrationPlansTable);
+    let recovered = 0;
+    for (const row of rows) {
+      const plan = rowToOrchestrationPlan(row);
+      // In-flight plans were interrupted by the restart — mark as failed
+      // so the UI doesn't show them as eternally "running".
+      if (plan.status === "planning" || plan.status === "running") {
+        plan.status = "failed";
+        plan.completedAt = new Date().toISOString();
+        for (const step of plan.steps) {
+          if (step.status === "pending" || step.status === "running") {
+            step.status = "error";
+            step.output = step.output ?? "Interrupted by api-server restart.";
+          }
+        }
+        recovered++;
+        void persistOrchestrationPlanToDB(plan);
+      }
+      orchestrationStore.set(plan.id, plan);
+    }
+    logger.info({ count: rows.length, recovered }, "NEXUS orchestration plans hydrated");
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Failed to hydrate NEXUS orchestrations from DB (non-fatal)");
+  }
+}
+
+// ─── Ingest jobs DB persistence ───────────────────────────────────────────────
+
+function rowToIngestJob(row: NexusIngestJobRow): IngestJob {
+  const job: IngestJob = {
+    id: row.id,
+    repoUrl: row.repoUrl,
+    repoName: row.repoName,
+    status: row.status as IngestJob["status"],
+    skillsGenerated: row.skillsGenerated,
+    patternsFound: Array.isArray(row.patternsFound) ? (row.patternsFound as string[]) : [],
+    log: Array.isArray(row.log) ? (row.log as string[]) : [],
+    createdAt: row.createdAt.toISOString(),
+  };
+  if (row.error) job.error = row.error;
+  if (row.completedAt) job.completedAt = row.completedAt.toISOString();
+  return job;
+}
+
+async function persistIngestJobToDB(job: IngestJob): Promise<void> {
+  if (!db) return;
+  try {
+    await db
+      .insert(nexusIngestJobsTable)
+      .values({
+        id: job.id,
+        repoUrl: job.repoUrl,
+        repoName: job.repoName,
+        status: job.status as NexusIngestStatus,
+        skillsGenerated: job.skillsGenerated,
+        patternsFound: job.patternsFound,
+        log: job.log,
+        error: job.error ?? null,
+        createdAt: new Date(job.createdAt),
+        completedAt: job.completedAt ? new Date(job.completedAt) : null,
+      })
+      .onConflictDoUpdate({
+        target: nexusIngestJobsTable.id,
+        set: {
+          repoUrl: job.repoUrl,
+          repoName: job.repoName,
+          status: job.status as NexusIngestStatus,
+          skillsGenerated: job.skillsGenerated,
+          patternsFound: job.patternsFound,
+          log: job.log,
+          error: job.error ?? null,
+          completedAt: job.completedAt ? new Date(job.completedAt) : null,
+        },
+      });
+  } catch (dbErr) {
+    logger.warn({ dbErr, id: job.id }, "Failed to persist ingest job (non-fatal)");
+  }
+}
+
+async function loadIngestJobsFromDB(): Promise<void> {
+  if (!db) return;
+  try {
+    const rows = await db.select().from(nexusIngestJobsTable);
+    let recovered = 0;
+    for (const row of rows) {
+      const job = rowToIngestJob(row);
+      if (
+        job.status === "queued" ||
+        job.status === "fetching" ||
+        job.status === "adapting" ||
+        job.status === "publishing"
+      ) {
+        job.status = "failed";
+        job.error = job.error ?? "Interrupted by api-server restart.";
+        job.completedAt = new Date().toISOString();
+        recovered++;
+        void persistIngestJobToDB(job);
+      }
+      ingestStore.set(job.id, job);
+    }
+    logger.info({ count: rows.length, recovered }, "NEXUS ingest jobs hydrated");
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Failed to hydrate NEXUS ingest jobs from DB (non-fatal)");
   }
 }
 
@@ -1429,9 +1757,51 @@ router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, validateBody(jsonO
     if (!skill) { sendError(res, "Skill not found", 404); return; }
     const { enabled } = req.body as { enabled?: boolean };
     skill.enabled = enabled ?? !skill.enabled;
+    void persistSkillToDB(skill);
     sendSuccess(res, skill);
   } catch (err) {
     handleRouteError(res, err, "POST /api/nexus/skills/:id/toggle");
+  }
+});
+
+router.post("/skills", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Partial<Skill>;
+    if (!body.name?.trim()) { sendError(res, "name is required", 400); return; }
+    const skill: Skill = {
+      id: body.id?.trim() || `sk_custom_${randomUUID().slice(0, 8)}`,
+      name: body.name.trim(),
+      description: body.description ?? "",
+      sourceRepo: body.sourceRepo ?? "custom",
+      sourceUrl: body.sourceUrl ?? "",
+      license: body.license ?? "MIT",
+      pattern: body.pattern ?? "Skill Packs",
+      primitiveType: body.primitiveType ?? "Skill",
+      enabled: body.enabled ?? false,
+      usageCount: body.usageCount ?? 0,
+      nexusAdaptation: body.nexusAdaptation ?? "",
+      originalSummary: body.originalSummary ?? "",
+      tags: body.tags ?? [],
+    };
+    skillStore.set(skill.id, skill);
+    void persistSkillToDB(skill);
+    sendCreated(res, skill);
+  } catch (err) {
+    handleRouteError(res, err, "POST /api/nexus/skills");
+  }
+});
+
+router.put("/skills/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  try {
+    const skill = skillStore.get(req.params.id as string);
+    if (!skill) { sendError(res, "Skill not found", 404); return; }
+    const update = req.body as Partial<Skill>;
+    const updated: Skill = { ...skill, ...update, id: skill.id };
+    skillStore.set(skill.id, updated);
+    void persistSkillToDB(updated);
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "PUT /api/nexus/skills/:id");
   }
 });
 
@@ -1456,6 +1826,60 @@ router.get("/bridge/tools", validateQuery(listQuerySchema), async (req: Request,
     sendSuccess(res, tools);
   } catch (err) {
     handleRouteError(res, err, "GET /api/nexus/bridge/tools");
+  }
+});
+
+router.post("/bridge/tools", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Partial<ProtocolTool>;
+    if (!body.name?.trim() || !body.protocol) {
+      sendError(res, "name and protocol are required", 400);
+      return;
+    }
+    if (!["MCP", "A2A", "ACP", "ANP"].includes(body.protocol)) {
+      sendError(res, "protocol must be one of MCP, A2A, ACP, ANP", 400);
+      return;
+    }
+    const tool: ProtocolTool = {
+      id: body.id?.trim() || `${body.protocol.toLowerCase()}_custom_${randomUUID().slice(0, 8)}`,
+      name: body.name.trim(),
+      description: body.description ?? "",
+      protocol: body.protocol,
+      domain: body.domain ?? "custom",
+      inputSchema: body.inputSchema ?? { type: "object", properties: {} },
+      tags: body.tags ?? [],
+    };
+    toolStore.set(tool.id, tool);
+    void persistToolToDB(tool);
+    sendCreated(res, tool);
+  } catch (err) {
+    handleRouteError(res, err, "POST /api/nexus/bridge/tools");
+  }
+});
+
+router.put("/bridge/tools/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  try {
+    const tool = toolStore.get(req.params.id as string);
+    if (!tool) { sendError(res, "Tool not found", 404); return; }
+    const update = req.body as Partial<ProtocolTool>;
+    const updated: ProtocolTool = { ...tool, ...update, id: tool.id };
+    toolStore.set(tool.id, updated);
+    void persistToolToDB(updated);
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "PUT /api/nexus/bridge/tools/:id");
+  }
+});
+
+router.delete("/bridge/tools/:id", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    if (!toolStore.has(id)) { sendError(res, "Tool not found", 404); return; }
+    toolStore.delete(id);
+    void deleteToolFromDB(id);
+    sendSuccess(res, { ok: true });
+  } catch (err) {
+    handleRouteError(res, err, "DELETE /api/nexus/bridge/tools/:id");
   }
 });
 
@@ -1614,11 +2038,13 @@ async function runOrchestration(planId: string, intent: string) {
     const steps = await planOrchestration(intent);
     plan.steps = steps;
     plan.status = "running";
+    void persistOrchestrationPlanToDB(plan);
 
     const outputs: string[] = [];
 
     for (const step of steps) {
       step.status = "running";
+      void persistOrchestrationPlanToDB(plan);
       const stepStart = Date.now();
 
       const fetchResult = await fetchAppEndpoint(step.endpoint);
@@ -1657,11 +2083,13 @@ async function runOrchestration(planId: string, intent: string) {
     plan.status = "completed";
     plan.completedAt = new Date().toISOString();
     orchestrationsToday++;
+    void persistOrchestrationPlanToDB(plan);
 
   } catch (err) {
     logger.error({ err, planId }, "Orchestration failed");
     plan.status = "failed";
     plan.completedAt = new Date().toISOString();
+    void persistOrchestrationPlanToDB(plan);
   }
 }
 
@@ -1679,6 +2107,7 @@ router.post("/orchestrate", perUserWriteSlidingLimiter, validateBody(jsonObjectB
       createdAt: new Date().toISOString(),
     };
     orchestrationStore.set(id, plan);
+    void persistOrchestrationPlanToDB(plan);
     void runOrchestration(id, intent.trim());
     sendSuccess(res, { id });
   } catch (err) {
@@ -1713,9 +2142,14 @@ async function runIngest(jobId: string, repoUrl: string) {
   const job = ingestStore.get(jobId);
   if (!job) return;
 
+  const persist = () => {
+    void persistIngestJobToDB(job);
+  };
+
   try {
     // Phase 1: Fetch
     job.status = "fetching";
+    persist();
     job.log.push(`Connecting to GitHub: ${repoUrl}`);
     await sleep(800);
     job.log.push("Fetching README.md, SKILL.md, skill.json…");
@@ -1726,6 +2160,7 @@ async function runIngest(jobId: string, repoUrl: string) {
 
     // Phase 2: Adapt
     job.status = "adapting";
+    persist();
     job.log.push("Running LLM-powered pattern analysis…");
     await sleep(1000);
 
@@ -1744,6 +2179,7 @@ async function runIngest(jobId: string, repoUrl: string) {
 
     // Phase 3: Publish
     job.status = "publishing";
+    persist();
     job.log.push("Validating Zod schemas…");
     await sleep(300);
     job.log.push("Writing skills to store…");
@@ -1753,7 +2189,7 @@ async function runIngest(jobId: string, repoUrl: string) {
     for (let i = 0; i < skillCount; i++) {
       const skillId = `sk_ingested_${jobId.slice(0, 8)}_${i}`;
       const repoName = repoUrl.split("/").pop() ?? "unknown";
-      skillStore.set(skillId, {
+      const ingested: Skill = {
         id: skillId,
         name: `${repoName} Skill ${i + 1}`,
         description: `Adapted skill from ${repoName} — pattern: ${selected[0]}`,
@@ -1767,7 +2203,9 @@ async function runIngest(jobId: string, repoUrl: string) {
         nexusAdaptation: `Adapted from ${repoName} into NEXUS native Skill primitive. Wired into memory fabric and Protocol Bridge.`,
         originalSummary: `Source skill from ${repoUrl} — see original README for full context.`,
         tags: [repoName, "ingested", ...selected.map((p) => p.toLowerCase().replace(/ /g, "-"))],
-      });
+      };
+      skillStore.set(skillId, ingested);
+      void persistSkillToDB(ingested);
     }
 
     // Update pattern counts
@@ -1781,12 +2219,14 @@ async function runIngest(jobId: string, repoUrl: string) {
     job.status = "done";
     job.completedAt = new Date().toISOString();
     job.log.push(`✓ Ingest complete. ${skillCount} skills published to Skills Library.`);
+    persist();
 
   } catch (err) {
     job.status = "failed";
     job.error = err instanceof Error ? err.message : "Unknown error";
     job.completedAt = new Date().toISOString();
     job.log.push(`✗ Ingest failed: ${job.error}`);
+    persist();
   }
 }
 
@@ -1818,6 +2258,7 @@ router.post("/ingest", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
       createdAt: new Date().toISOString(),
     };
     ingestStore.set(id, job);
+    void persistIngestJobToDB(job);
     void runIngest(id, repoUrl.trim());
     sendCreated(res, { id });
   } catch (err) {
