@@ -12,6 +12,8 @@ This document addresses the question every informed investor asks: *"How is this
 
 The honest answer requires understanding what ATLAS actually does and why the combination of capabilities is architecturally novel.
 
+![ATLAS Spatial Runtime — threat mesh with worldline drift, scene state, and approval-gated incident theater](../../assets/readme/products/atlas-spatial-runtime.jpg)
+
 ---
 
 ## The Category Distinction
@@ -48,6 +50,8 @@ ATLAS is productized, multi-domain, and embedded in vertical SaaS surfaces that 
 
 ## The Four Moat Components
 
+![ATLAS worldline correlation — cross-domain cluster timeline linking Aegis, Vessels, and Terra signals](../../assets/readme/products/atlas-spatial-runtime-correlation.jpg)
+
 ### 1. Digital Twins + Worldline Branching
 
 A digital twin is a maintained representation of the current state of an operational entity. This is table stakes in industrial IoT (Siemens, GE, Honeywell). What is not table stakes is **worldline branching** — the ability to fork the twin's future state under different assumptions and compute probability-weighted outcomes for each branch.
@@ -82,6 +86,8 @@ The trust implication: operators who use ATLAS know that when they are looking a
 This is qualitatively different from a dashboard that shows "alert count: 14" — a number that operators have no baseline for. Drift control gives operators a **calibrated sense of normality** that accumulates over time as the platform learns each organization's operational rhythm.
 
 ### 4. Approval Execution as the Governance Moat
+
+![ATLAS Execute — workflow execution console with evidence chain, dry-run mode, and approval-gated outcomes](../../assets/readme/products/atlas-spatial-runtime-execute.jpg)
 
 The final component is the most important for enterprise procurement: ATLAS branches are not suggestions — they are executable plans. The execution path goes through the Alloy approval gate, which:
 
