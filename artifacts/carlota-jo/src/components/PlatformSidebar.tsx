@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Cpu, FileText, Network, Radar, Activity, Heart, TrendingUp,
   GraduationCap, Users, FolderOpen, Clock, BookOpen, BarChart3,
   CheckCircle, ChevronDown, Sparkles, Lightbulb, Zap, Shield,
-  Crown, Star, MessageSquare, BookMarked,
+  Crown, Star, MessageSquare, BookMarked, Menu, X,
 } from "lucide-react";
 import { PolicyModeBadge } from "@/components/policy-mode-badge";
 
@@ -90,36 +90,26 @@ export function isPlatformRoute(pathname: string): boolean {
 }
 
 export const PLATFORM_SIDEBAR_WIDTH = 248;
+const MOBILE_DRAWER_WIDTH = 288;
 
-export default function PlatformSidebar() {
-  const [location] = useLocation();
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    concierge: true,
-    advisory: true,
-    operations: false,
-    atlas: false,
-  });
-  const carlotaActionType = pathToCarlotaActionType(location);
-
+function NavContent({
+  location,
+  openGroups,
+  setOpenGroups,
+  carlotaActionType,
+  onNavigate,
+}: {
+  location: string;
+  openGroups: Record<string, boolean>;
+  setOpenGroups: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  carlotaActionType: string | undefined;
+  onNavigate?: () => void;
+}) {
   return (
-    <aside
-      aria-label="Platform navigation"
-      style={{
-        position: "fixed",
-        top: 60,
-        bottom: 0,
-        left: 0,
-        width: PLATFORM_SIDEBAR_WIDTH,
-        background: CREAM,
-        borderRight: `1px solid ${BORDER}`,
-        overflowY: "auto",
-        padding: "24px 14px 32px",
-        zIndex: 30,
-        fontFamily: "Inter, system-ui, sans-serif",
-      }}
-    >
+    <>
       <Link
         href="/consulting-os"
+        onClick={onNavigate}
         style={{
           display: "flex",
           alignItems: "center",
@@ -132,43 +122,43 @@ export default function PlatformSidebar() {
           marginBottom: 18,
         }}
       >
-          <div
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 7,
+            background: "var(--color-gold-dim)",
+            border: `1px solid ${BORDER}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Cpu size={14} color={GOLD} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
+          <span
             style={{
-              width: 28,
-              height: 28,
-              borderRadius: 7,
-              background: "var(--color-gold-dim)",
-              border: `1px solid ${BORDER}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 17,
+              color: INK,
+              fontWeight: 500,
             }}
           >
-            <Cpu size={14} color={GOLD} />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
-            <span
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: 17,
-                color: INK,
-                fontWeight: 500,
-              }}
-            >
-              Consulting OS
-            </span>
-            <span
-              style={{
-                fontSize: 9,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: GOLD,
-                marginTop: 2,
-              }}
-            >
-              Platform Home
-            </span>
-          </div>
+            Consulting OS
+          </span>
+          <span
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: GOLD,
+              marginTop: 2,
+            }}
+          >
+            Platform Home
+          </span>
+        </div>
       </Link>
 
       <div style={{ marginBottom: 18, padding: "0 4px" }}>
@@ -219,6 +209,7 @@ export default function PlatformSidebar() {
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={onNavigate}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -281,6 +272,177 @@ export default function PlatformSidebar() {
           Press <kbd style={{ fontFamily: "inherit", fontSize: 11, padding: "1px 5px", border: `1px solid ${BORDER}`, borderRadius: 4, background: "#fff" }}>⌘K</kbd> to open the command palette.
         </div>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export default function PlatformSidebar() {
+  const [location] = useLocation();
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    concierge: true,
+    advisory: true,
+    operations: false,
+    atlas: false,
+  });
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const carlotaActionType = pathToCarlotaActionType(location);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [mobileOpen]);
+
+  const navProps = { location, openGroups, setOpenGroups, carlotaActionType };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="platform-sidebar-trigger"
+        aria-label="Open platform navigation"
+        aria-expanded={mobileOpen}
+        onClick={() => setMobileOpen(true)}
+        style={{
+          position: "fixed",
+          top: 70,
+          left: 12,
+          zIndex: 35,
+          width: 40,
+          height: 40,
+          borderRadius: 10,
+          background: CREAM,
+          border: `1px solid ${BORDER}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        }}
+      >
+        <Menu size={18} color={INK} />
+      </button>
+
+      <aside
+        aria-label="Platform navigation"
+        className="platform-sidebar-desktop"
+        style={{
+          position: "fixed",
+          top: 60,
+          bottom: 0,
+          left: 0,
+          width: PLATFORM_SIDEBAR_WIDTH,
+          background: CREAM,
+          borderRight: `1px solid ${BORDER}`,
+          overflowY: "auto",
+          padding: "24px 14px 32px",
+          zIndex: 30,
+          fontFamily: "Inter, system-ui, sans-serif",
+        }}
+      >
+        <NavContent {...navProps} />
+      </aside>
+
+      {mobileOpen && (
+        <div
+          className="platform-sidebar-backdrop"
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(20, 16, 10, 0.45)",
+            zIndex: 40,
+          }}
+        />
+      )}
+
+      <aside
+        aria-label="Platform navigation"
+        aria-hidden={!mobileOpen}
+        className="platform-sidebar-drawer"
+        style={{
+          position: "fixed",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: MOBILE_DRAWER_WIDTH,
+          maxWidth: "85vw",
+          background: CREAM,
+          borderRight: `1px solid ${BORDER}`,
+          overflowY: "auto",
+          padding: "20px 14px 32px",
+          zIndex: 50,
+          fontFamily: "Inter, system-ui, sans-serif",
+          transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.25s ease",
+          boxShadow: mobileOpen ? "2px 0 18px rgba(0,0,0,0.18)" : "none",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 14,
+            padding: "0 4px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: GOLD,
+              fontWeight: 600,
+            }}
+          >
+            Platform
+          </span>
+          <button
+            type="button"
+            aria-label="Close platform navigation"
+            onClick={() => setMobileOpen(false)}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: "transparent",
+              border: `1px solid ${BORDER}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: INK,
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <NavContent {...navProps} onNavigate={() => setMobileOpen(false)} />
+      </aside>
+
+      <style>{`
+        @media (min-width: 1024px) {
+          .platform-sidebar-trigger,
+          .platform-sidebar-backdrop,
+          .platform-sidebar-drawer { display: none !important; }
+        }
+        @media (max-width: 1023px) {
+          .platform-sidebar-desktop { display: none !important; }
+        }
+      `}</style>
+    </>
   );
 }

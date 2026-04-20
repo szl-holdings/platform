@@ -255,11 +255,7 @@ function AppShell() {
   return (
     <div style={{ minHeight: "100vh" }}>
       <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo" accentColor={CARLOTA_ACCENT} />
-      {showSidebar && (
-        <div className="hidden lg:block">
-          <PlatformSidebar />
-        </div>
-      )}
+      {showSidebar && <PlatformSidebar />}
       <div
         style={{
           marginLeft: showSidebar ? PLATFORM_SIDEBAR_WIDTH : 0,
