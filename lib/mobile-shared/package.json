@@ -67,7 +67,7 @@
     "expo": "~54.0.27",
     "expo-blur": "~14.1.5",
     "expo-device": "~8.0.10",
-    "expo-file-system": "~19.0.0",
+    "expo-file-system": "~55.0.16",
     "expo-notifications": "~0.30.6",
     "react": "catalog:",
     "react-native": "0.81.5",
